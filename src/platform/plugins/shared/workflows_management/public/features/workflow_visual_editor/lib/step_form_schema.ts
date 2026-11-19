@@ -776,7 +776,6 @@ const getStepCondition = (configSchema: z.ZodType | undefined): StepFormField | 
 const STEP_TYPES_WITHOUT_TIMEOUT: ReadonlySet<string> = new Set([
   'if',
   'switch',
-  'merge',
   'wait',
   'data.set',
   'loop.break',
@@ -1096,13 +1095,12 @@ export const getStepConfigWarningReason = (
   let misconfigured = false;
   for (const field of fields) {
     const value = readPath(step, field.path);
-    if (!isFieldValueRepresentable(field, value)) continue;
-    if (isEmptyFieldValue(value)) {
-      if (field.required) incomplete = true;
-      continue;
-    }
-    if (validateStepField(field, value) !== undefined) {
-      misconfigured = true;
+    if (isFieldValueRepresentable(field, value)) {
+      if (isEmptyFieldValue(value)) {
+        if (field.required) incomplete = true;
+      } else if (validateStepField(field, value) !== undefined) {
+        misconfigured = true;
+      }
     }
   }
 

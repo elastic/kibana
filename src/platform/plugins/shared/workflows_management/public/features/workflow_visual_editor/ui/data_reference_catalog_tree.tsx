@@ -356,7 +356,7 @@ export function DataReferenceCatalogTree({
         window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       dragPointerRef.current = { x: event.clientX, y: event.clientY };
       dragGhostRef.current = startCompactDragGhost(source, event.clientX, event.clientY, {
-        background: euiTheme.colors.backgroundBaseElevated,
+        background: euiTheme.colors.backgroundBasePlain,
         border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
         color: euiTheme.colors.textParagraph,
         reduceMotion,
@@ -658,7 +658,7 @@ export function DataReferenceCatalogTree({
                       ? [
                           <EuiContextMenuItem
                             key="full-workflow"
-                            icon="playFilled"
+                            icon="play"
                             data-test-subj={`workflowDataReferenceTreeRunFull-${item.path}`}
                             onClick={() => {
                               closeRunMenu();

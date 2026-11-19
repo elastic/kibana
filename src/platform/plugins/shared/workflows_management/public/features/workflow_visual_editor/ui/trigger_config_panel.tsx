@@ -94,7 +94,7 @@ const writeManualInputs = (
     doc.contents.delete('inputs');
   } else {
     // TODO: confirm inputs schema shape
-    doc.contents.set('inputs', doc.createNode(schemaPropertiesToJsonSchema(named)));
+    doc.set('inputs', doc.createNode(schemaPropertiesToJsonSchema(named)));
   }
   return doc.toString({ indent, lineWidth: 0 });
 };
@@ -102,16 +102,12 @@ const writeManualInputs = (
 const writeScheduledEvery = (fragment: string, every: string, indent: number): string => {
   const doc = parseDocument(fragment);
   if (!isMap(doc.contents)) return fragment;
-  doc.contents.set('with', doc.createNode({ every }));
+  doc.set('with', doc.createNode({ every }));
   return doc.toString({ indent, lineWidth: 0 });
 };
 
 const readScheduledEvery = (fragment: string): string => {
-  const doc = parseDocument(fragment);
-  if (!isMap(doc.contents)) return '5m';
-  const withNode = doc.contents.get('with');
-  if (!isMap(withNode)) return '5m';
-  const every = withNode.get('every');
+  const every = parseDocument(fragment).getIn(['with', 'every']);
   return typeof every === 'string' && every.trim() ? every : '5m';
 };
 
@@ -228,7 +224,7 @@ export function TriggerConfigPanel({
       if (doc.errors.length > 0) return;
       const root = parseDocument(fragment);
       if (!isMap(root.contents)) return;
-      root.contents.set('inputs', doc.contents);
+      root.set('inputs', doc.contents);
       setFragment(root.toString({ indent, lineWidth: 0 }));
     },
     [fragment, indent]
@@ -248,9 +244,9 @@ export function TriggerConfigPanel({
   );
 
   const setParametersModeAndHydrate = useCallback(
-    (mode: ParametersMode) => {
-      setParametersMode(mode);
-      if (mode !== 'form' || triggerType !== 'manual') return;
+    (nextMode: ParametersMode) => {
+      setParametersMode(nextMode);
+      if (nextMode !== 'form' || triggerType !== 'manual') return;
       // Re-read inputs from YAML when returning from the YAML tab so form
       // state picks up external edits — without doing this on every form
       // keystroke (that remounted accordions and collapsed them).
@@ -297,40 +293,34 @@ export function TriggerConfigPanel({
 
   return (
     <div
-      role="dialog"
-      aria-modal="false"
-      aria-labelledby={titleId}
-      data-test-subj="workflowTriggerConfigPanel"
+      role="presentation"
       onKeyDown={(e) => {
         if (e.key === 'Escape') {
           e.stopPropagation();
           handleClose();
         }
       }}
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        minHeight: 0,
-        position: 'relative',
-        background: euiTheme.colors.backgroundBasePlain,
-      }}
+      css={{ display: 'contents' }}
     >
       <div
+        role="dialog"
+        aria-modal="false"
+        aria-labelledby={titleId}
+        data-test-subj="workflowTriggerConfigPanel"
         css={{
-          flex: '0 0 auto',
-          borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-          paddingBottom: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          minHeight: 0,
+          position: 'relative',
+          background: euiTheme.colors.backgroundBasePlain,
         }}
       >
         <div
           css={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: euiTheme.size.m,
-            // Leave room on the right for the absolutely positioned ✕.
-            // No bottom padding — tabs sit flush under the title row.
-            padding: `${euiTheme.size.base} ${euiTheme.size.xl} 0 ${euiTheme.size.base}`,
+            flex: '0 0 auto',
+            borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+            paddingBottom: 0,
           }}
         >
           <div
@@ -338,344 +328,357 @@ export function TriggerConfigPanel({
               display: 'flex',
               alignItems: 'center',
               gap: euiTheme.size.m,
-              minWidth: 0,
-              flex: '1 1 auto',
+              // Leave room on the right for the absolutely positioned ✕.
+              // No bottom padding — tabs sit flush under the title row.
+              padding: `${euiTheme.size.base} ${euiTheme.size.xl} 0 ${euiTheme.size.base}`,
             }}
           >
-            <span
+            <div
               css={{
-                display: 'inline-flex',
+                display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                width: euiTheme.size.xxl,
-                height: euiTheme.size.xxl,
-                flex: '0 0 auto',
-                borderRadius: euiTheme.border.radius.small,
-                border: `1px solid ${chip.border}`,
-                background: chip.background,
+                gap: euiTheme.size.m,
+                minWidth: 0,
+                flex: '1 1 auto',
               }}
             >
-              {/*
+              <span
+                css={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: euiTheme.size.xxl,
+                  height: euiTheme.size.xxl,
+                  flex: '0 0 auto',
+                  borderRadius: euiTheme.border.radius.small,
+                  border: `1px solid ${chip.border}`,
+                  background: chip.background,
+                }}
+              >
+                {/*
                 Match canvas / Actions menu glyph tinting: mask-based StepIcons
                 honor `iconColor`, but EUI glyphs need the SVG fill wrapper used
                 by NodeStepIcon.
               */}
-              <span
-                css={[
-                  { color: chip.iconColor, display: 'inline-flex', lineHeight: 0 },
-                  chip.iconColor ? { '& svg, & svg *': { fill: chip.iconColor } } : undefined,
-                ]}
-              >
-                <StepIcon
-                  stepType={triggerType}
-                  executionStatus={undefined}
-                  size="m"
-                  iconColor={chip.iconColor}
-                  color={chip.iconColor}
-                />
+                <span
+                  css={[
+                    { color: chip.iconColor, display: 'inline-flex', lineHeight: 0 },
+                    chip.iconColor ? { '& svg, & svg *': { fill: chip.iconColor } } : undefined,
+                  ]}
+                >
+                  <StepIcon
+                    stepType={triggerType}
+                    executionStatus={undefined}
+                    size="m"
+                    iconColor={chip.iconColor}
+                    color={chip.iconColor}
+                  />
+                </span>
               </span>
-            </span>
-            <EuiTitle size="xxs">
-              <h2
-                id={titleId}
-                css={{
-                  margin: 0,
-                  minWidth: 0,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-                data-test-subj="workflowTriggerConfigPanelTitle"
-              >
-                {triggerLabel}
-              </h2>
-            </EuiTitle>
+              <EuiTitle size="xxs">
+                <h2
+                  id={titleId}
+                  css={{
+                    margin: 0,
+                    minWidth: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                  data-test-subj="workflowTriggerConfigPanelTitle"
+                >
+                  {triggerLabel}
+                </h2>
+              </EuiTitle>
+            </div>
           </div>
-        </div>
-        <EuiToolTip content={closeLabel} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="cross"
-            color="text"
-            aria-label={closeLabel}
-            onClick={handleClose}
-            data-test-subj="workflowTriggerConfigPanelClose"
+          <EuiToolTip content={closeLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="cross"
+              color="text"
+              aria-label={closeLabel}
+              onClick={handleClose}
+              data-test-subj="workflowTriggerConfigPanelClose"
+              css={{
+                position: 'absolute',
+                top: euiTheme.size.s,
+                right: euiTheme.size.s,
+                zIndex: 1,
+              }}
+            />
+          </EuiToolTip>
+          <EuiTabs
+            size="s"
+            bottomBorder={false}
+            data-test-subj="workflowTriggerConfigPanelTabs"
+            aria-label={i18n.translate('workflows.triggerConfigPanel.editorModeLegend', {
+              defaultMessage: 'Trigger editor mode',
+            })}
             css={{
-              position: 'absolute',
-              top: euiTheme.size.s,
-              right: euiTheme.size.s,
-              zIndex: 1,
+              paddingInline: euiTheme.size.base,
+              marginBlockStart: 0,
             }}
-          />
-        </EuiToolTip>
-        <EuiTabs
-          size="s"
-          bottomBorder={false}
-          data-test-subj="workflowTriggerConfigPanelTabs"
-          aria-label={i18n.translate('workflows.triggerConfigPanel.editorModeLegend', {
-            defaultMessage: 'Trigger editor mode',
-          })}
-          css={{
-            paddingInline: euiTheme.size.base,
-            marginBlockStart: 0,
-          }}
-        >
-          {editorModeOptions.map((option) => (
-            <EuiTab
-              key={option.id}
-              isSelected={parametersMode === option.id}
-              onClick={() => setParametersModeAndHydrate(option.id)}
-              prepend={<EuiIcon type={option.iconType} aria-hidden />}
-              data-test-subj={`workflowTriggerConfigPanelView-${option.id}`}
-            >
-              {option.label}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-      </div>
+          >
+            {editorModeOptions.map((option) => (
+              <EuiTab
+                key={option.id}
+                isSelected={parametersMode === option.id}
+                onClick={() => setParametersModeAndHydrate(option.id)}
+                prepend={<EuiIcon type={option.iconType} aria-hidden />}
+                data-test-subj={`workflowTriggerConfigPanelView-${option.id}`}
+              >
+                {option.label}
+              </EuiTab>
+            ))}
+          </EuiTabs>
+        </div>
 
-      <div
-        css={{
-          flex: '1 1 auto',
-          minHeight: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-        }}
-      >
         <div
           css={{
-            display: 'flex',
-            flexDirection: 'column',
             flex: '1 1 auto',
             minHeight: 0,
-            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
           }}
         >
-          {!isBuilderMode ? (
-            <FlyoutMonacoFrame minHeight={200}>
-              <CodeEditor
-                languageId={YAML_LANG_ID}
-                chromeOverrides={workflowsEditorChromeOverrides}
-                value={fragment}
-                onChange={setFragment}
-                height="100%"
-                aria-label={i18n.translate('workflows.triggerConfigPanel.yamlAriaLabel', {
-                  defaultMessage: 'Trigger YAML',
-                })}
-                options={{
-                  ...getFlyoutMonacoEditorOptions(euiTheme, { tabSize: indent }),
-                  readOnly,
-                }}
-                dataTestSubj="workflowTriggerConfigPanelYaml"
-              />
-            </FlyoutMonacoFrame>
-          ) : (
-            <div
-              css={{
-                flex: '1 1 auto',
-                minHeight: 0,
-                width: '100%',
-                overflow: 'auto',
-              }}
-            >
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              flex: '1 1 auto',
+              minHeight: 0,
+              width: '100%',
+            }}
+          >
+            {!isBuilderMode ? (
+              <FlyoutMonacoFrame minHeight={200}>
+                <CodeEditor
+                  languageId={YAML_LANG_ID}
+                  chromeOverrides={workflowsEditorChromeOverrides}
+                  value={fragment}
+                  onChange={setFragment}
+                  height="100%"
+                  aria-label={i18n.translate('workflows.triggerConfigPanel.yamlAriaLabel', {
+                    defaultMessage: 'Trigger YAML',
+                  })}
+                  options={{
+                    ...getFlyoutMonacoEditorOptions(euiTheme, { tabSize: indent }),
+                    readOnly,
+                  }}
+                  dataTestSubj="workflowTriggerConfigPanelYaml"
+                />
+              </FlyoutMonacoFrame>
+            ) : (
               <div
                 css={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  padding: euiTheme.size.base,
-                  boxSizing: 'border-box',
+                  flex: '1 1 auto',
+                  minHeight: 0,
+                  width: '100%',
+                  overflow: 'auto',
                 }}
               >
-                {!parsed.valid ? (
-                  <EuiText
-                    size="s"
-                    color="danger"
-                    data-test-subj="workflowTriggerConfigPanelInvalid"
-                  >
-                    {i18n.translate('workflows.triggerConfigPanel.invalidYaml', {
-                      defaultMessage: 'Fix the YAML to edit this trigger as a form. {error}',
-                      values: { error: parsed.error ?? '' },
-                    })}
-                  </EuiText>
-                ) : showManualInputs ? (
-                  <div data-test-subj="workflowTriggerConfigPanelInputs">
-                    {isUnsupportedInputs ? (
-                      <FlyoutMonacoFrame height={280} variant="inset">
-                        <CodeEditor
-                          languageId={YAML_LANG_ID}
-                          chromeOverrides={workflowsEditorChromeOverrides}
-                          value={inputsJsonDraft}
-                          onChange={handleInputsJsonChange}
-                          height="100%"
-                          aria-label={i18n.translate(
-                            'workflows.triggerConfigPanel.inputsSchemaAriaLabel',
-                            { defaultMessage: 'Inputs JSON Schema' }
-                          )}
-                          options={{
-                            ...getFlyoutMonacoEditorOptions(euiTheme, { tabSize: indent }),
-                            readOnly,
-                          }}
-                          dataTestSubj="workflowTriggerConfigPanelInputsSchema"
+                <div
+                  css={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    padding: euiTheme.size.base,
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  {!parsed.valid ? (
+                    <EuiText
+                      size="s"
+                      color="danger"
+                      data-test-subj="workflowTriggerConfigPanelInvalid"
+                    >
+                      {i18n.translate('workflows.triggerConfigPanel.invalidYaml', {
+                        defaultMessage: 'Fix the YAML to edit this trigger as a form. {error}',
+                        values: { error: parsed.error ?? '' },
+                      })}
+                    </EuiText>
+                  ) : showManualInputs ? (
+                    <div data-test-subj="workflowTriggerConfigPanelInputs">
+                      {isUnsupportedInputs ? (
+                        <FlyoutMonacoFrame height={280} variant="inset">
+                          <CodeEditor
+                            languageId={YAML_LANG_ID}
+                            chromeOverrides={workflowsEditorChromeOverrides}
+                            value={inputsJsonDraft}
+                            onChange={handleInputsJsonChange}
+                            height="100%"
+                            aria-label={i18n.translate(
+                              'workflows.triggerConfigPanel.inputsSchemaAriaLabel',
+                              { defaultMessage: 'Inputs JSON Schema' }
+                            )}
+                            options={{
+                              ...getFlyoutMonacoEditorOptions(euiTheme, { tabSize: indent }),
+                              readOnly,
+                            }}
+                            dataTestSubj="workflowTriggerConfigPanelInputsSchema"
+                          />
+                        </FlyoutMonacoFrame>
+                      ) : (
+                        <SchemaPropertyList
+                          properties={manualFields}
+                          onChange={syncManualFieldsToFragment}
+                          findReferencingSteps={findReferencingSteps}
+                          dataTestSubjPrefix="workflowTriggerConfigInput"
+                          readOnly={readOnly}
                         />
-                      </FlyoutMonacoFrame>
-                    ) : (
-                      <SchemaPropertyList
-                        properties={manualFields}
-                        onChange={syncManualFieldsToFragment}
-                        findReferencingSteps={findReferencingSteps}
-                        dataTestSubjPrefix="workflowTriggerConfigInput"
-                        readOnly={readOnly}
-                      />
-                    )}
-                  </div>
-                ) : showScheduledSettings ? (
-                  <EuiAccordion
-                    id={settingsAccordionId}
-                    initialIsOpen
-                    paddingSize="none"
-                    buttonContent={
-                      <EuiTitle size="xxs">
-                        <h4>
-                          {i18n.translate('workflows.triggerConfigPanel.settingsAccordion', {
-                            defaultMessage: 'Settings',
-                          })}
-                        </h4>
-                      </EuiTitle>
-                    }
-                    data-test-subj="workflowTriggerConfigPanelAccordion-settings"
-                  >
-                    <div css={{ paddingTop: euiTheme.size.m }}>
-                      <EuiFormRow
-                        label={i18n.translate('workflows.triggerConfigPanel.everyLabel', {
-                          defaultMessage: 'Run every',
-                        })}
-                        helpText={i18n.translate('workflows.triggerConfigPanel.everyHelp', {
-                          defaultMessage: 'Minimum 1 minute. Examples: 1m, 90s, 2h, 1d.',
-                        })}
-                        fullWidth
-                        compressed
-                      >
-                        <EuiFieldText
-                          compressed
-                          fullWidth
-                          value={everyDraft}
-                          disabled={readOnly}
-                          onChange={(e) => handleEveryChange(e.target.value)}
-                          data-test-subj="workflowTriggerConfigPanelEvery"
-                        />
-                      </EuiFormRow>
+                      )}
                     </div>
-                  </EuiAccordion>
-                ) : (
-                  <EuiEmptyPrompt
-                    paddingSize="m"
-                    titleSize="xs"
-                    iconType="checkCircleFill"
-                    title={
-                      <h3>
-                        {i18n.translate('workflows.triggerConfigPanel.alertEmptyTitle', {
-                          defaultMessage: 'No configuration needed',
-                        })}
-                      </h3>
-                    }
-                    body={
-                      <EuiText size="s" color="subdued">
-                        {i18n.translate('workflows.triggerConfigPanel.alertInfo', {
-                          defaultMessage:
-                            'Alert triggers run when a matching detection rule fires. Event fields come from the detection rule — they are not defined here.',
-                        })}
-                      </EuiText>
-                    }
-                    data-test-subj="workflowTriggerConfigPanelAlertInfo"
-                  />
-                )}
+                  ) : showScheduledSettings ? (
+                    <EuiAccordion
+                      id={settingsAccordionId}
+                      initialIsOpen
+                      paddingSize="none"
+                      buttonContent={
+                        <EuiTitle size="xxs">
+                          <h4>
+                            {i18n.translate('workflows.triggerConfigPanel.settingsAccordion', {
+                              defaultMessage: 'Settings',
+                            })}
+                          </h4>
+                        </EuiTitle>
+                      }
+                      data-test-subj="workflowTriggerConfigPanelAccordion-settings"
+                    >
+                      <div css={{ paddingTop: euiTheme.size.m }}>
+                        <EuiFormRow
+                          label={i18n.translate('workflows.triggerConfigPanel.everyLabel', {
+                            defaultMessage: 'Run every',
+                          })}
+                          helpText={i18n.translate('workflows.triggerConfigPanel.everyHelp', {
+                            defaultMessage: 'Minimum 1 minute. Examples: 1m, 90s, 2h, 1d.',
+                          })}
+                          fullWidth
+                        >
+                          <EuiFieldText
+                            compressed
+                            fullWidth
+                            value={everyDraft}
+                            disabled={readOnly}
+                            onChange={(e) => handleEveryChange(e.target.value)}
+                            data-test-subj="workflowTriggerConfigPanelEvery"
+                          />
+                        </EuiFormRow>
+                      </div>
+                    </EuiAccordion>
+                  ) : (
+                    <EuiEmptyPrompt
+                      paddingSize="m"
+                      titleSize="xs"
+                      iconType="checkCircleFill"
+                      title={
+                        <h3>
+                          {i18n.translate('workflows.triggerConfigPanel.alertEmptyTitle', {
+                            defaultMessage: 'No configuration needed',
+                          })}
+                        </h3>
+                      }
+                      body={
+                        <EuiText size="s" color="subdued">
+                          {i18n.translate('workflows.triggerConfigPanel.alertInfo', {
+                            defaultMessage:
+                              'Alert triggers run when a matching detection rule fires. Event fields come from the detection rule — they are not defined here.',
+                          })}
+                        </EuiText>
+                      }
+                      data-test-subj="workflowTriggerConfigPanelAlertInfo"
+                    />
+                  )}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div
-        css={{
-          flex: '0 0 auto',
-          borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-          paddingBlock: euiTheme.size.base,
-          paddingInline: euiTheme.size.base,
-        }}
-      >
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
-          {readOnly && onOpenInYaml ? (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="code"
-                onClick={onOpenInYaml}
-                data-test-subj="workflowTriggerConfigPanelOpenInYaml"
-              >
-                {i18n.translate('workflows.triggerConfigPanel.openInYaml', {
-                  defaultMessage: 'Open in YAML',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem grow={false}>
-            {readOnly ? (
-              <EuiButtonEmpty onClick={onClose} data-test-subj="workflowTriggerConfigPanelFooterClose">
-                {closeLabel}
-              </EuiButtonEmpty>
-            ) : mode === 'insert' ? (
-              <EuiButtonEmpty
-                color="danger"
-                iconType="trash"
-                onClick={onRevert}
-                data-test-subj="workflowTriggerConfigPanelRemoveTrigger"
-              >
-                {i18n.translate('workflows.triggerConfigPanel.removeTrigger', {
-                  defaultMessage: 'Remove trigger',
-                })}
-              </EuiButtonEmpty>
-            ) : (
-              <EuiButtonEmpty
-                iconType="undo"
-                onClick={onRevert}
-                isDisabled={!isDirty}
-                data-test-subj="workflowTriggerConfigPanelResetTrigger"
-              >
-                {i18n.translate('workflows.triggerConfigPanel.resetTrigger', {
-                  defaultMessage: 'Reset trigger',
-                })}
-              </EuiButtonEmpty>
             )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+          </div>
+        </div>
 
-      {showDiscardConfirm ? (
-        <EuiConfirmModal
-          title={discardTitle}
-          aria-label={discardTitle}
-          onCancel={() => setShowDiscardConfirm(false)}
-          onConfirm={() => {
-            setShowDiscardConfirm(false);
-            onClose();
+        <div
+          css={{
+            flex: '0 0 auto',
+            borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+            paddingBlock: euiTheme.size.base,
+            paddingInline: euiTheme.size.base,
           }}
-          cancelButtonText={i18n.translate('workflows.triggerConfigPanel.keepEditing', {
-            defaultMessage: 'Keep editing',
-          })}
-          confirmButtonText={i18n.translate('workflows.triggerConfigPanel.discard', {
-            defaultMessage: 'Discard',
-          })}
-          buttonColor="danger"
-          defaultFocusedButton="cancel"
-          data-test-subj="workflowTriggerConfigPanelDiscardModal"
         >
-          <EuiText size="s">
-            {i18n.translate('workflows.triggerConfigPanel.discardInvalidBody', {
-              defaultMessage:
-                "This draft has errors and wasn't applied to the trigger. Closing now will discard it.",
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
+            {readOnly && onOpenInYaml ? (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="code"
+                  onClick={onOpenInYaml}
+                  data-test-subj="workflowTriggerConfigPanelOpenInYaml"
+                >
+                  {i18n.translate('workflows.triggerConfigPanel.openInYaml', {
+                    defaultMessage: 'Open in YAML',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              {readOnly ? (
+                <EuiButtonEmpty
+                  onClick={onClose}
+                  data-test-subj="workflowTriggerConfigPanelFooterClose"
+                >
+                  {closeLabel}
+                </EuiButtonEmpty>
+              ) : mode === 'insert' ? (
+                <EuiButtonEmpty
+                  color="danger"
+                  iconType="trash"
+                  onClick={onRevert}
+                  data-test-subj="workflowTriggerConfigPanelRemoveTrigger"
+                >
+                  {i18n.translate('workflows.triggerConfigPanel.removeTrigger', {
+                    defaultMessage: 'Remove trigger',
+                  })}
+                </EuiButtonEmpty>
+              ) : (
+                <EuiButtonEmpty
+                  iconType="undo"
+                  onClick={onRevert}
+                  isDisabled={!isDirty}
+                  data-test-subj="workflowTriggerConfigPanelResetTrigger"
+                >
+                  {i18n.translate('workflows.triggerConfigPanel.resetTrigger', {
+                    defaultMessage: 'Reset trigger',
+                  })}
+                </EuiButtonEmpty>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+
+        {showDiscardConfirm ? (
+          <EuiConfirmModal
+            title={discardTitle}
+            aria-label={discardTitle}
+            onCancel={() => setShowDiscardConfirm(false)}
+            onConfirm={() => {
+              setShowDiscardConfirm(false);
+              onClose();
+            }}
+            cancelButtonText={i18n.translate('workflows.triggerConfigPanel.keepEditing', {
+              defaultMessage: 'Keep editing',
             })}
-          </EuiText>
-        </EuiConfirmModal>
-      ) : null}
+            confirmButtonText={i18n.translate('workflows.triggerConfigPanel.discard', {
+              defaultMessage: 'Discard',
+            })}
+            buttonColor="danger"
+            defaultFocusedButton="cancel"
+            data-test-subj="workflowTriggerConfigPanelDiscardModal"
+          >
+            <EuiText size="s">
+              {i18n.translate('workflows.triggerConfigPanel.discardInvalidBody', {
+                defaultMessage:
+                  "This draft has errors and wasn't applied to the trigger. Closing now will discard it.",
+              })}
+            </EuiText>
+          </EuiConfirmModal>
+        ) : null}
+      </div>
     </div>
   );
 }

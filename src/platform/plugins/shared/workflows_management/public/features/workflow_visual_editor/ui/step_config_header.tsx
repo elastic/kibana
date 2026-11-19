@@ -273,15 +273,17 @@ export function StepConfigHeader({
                       </span>
                     </button>
                   </EuiToolTip>
-                  <EuiButtonIcon
-                    iconType="pencil"
-                    size="xs"
-                    color="text"
-                    aria-label={editNameLabel}
-                    onClick={nameEditor.begin}
-                    data-test-subj="workflowStepConfigPanelEditName"
-                    css={{ flex: '0 0 auto' }}
-                  />
+                  <EuiToolTip content={editNameLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="pencil"
+                      size="xs"
+                      color="text"
+                      aria-label={editNameLabel}
+                      onClick={nameEditor.begin}
+                      data-test-subj="workflowStepConfigPanelEditName"
+                      css={{ flex: '0 0 auto' }}
+                    />
+                  </EuiToolTip>
                 </h2>
               </EuiTitle>
             )}

@@ -614,7 +614,7 @@ describe('WorkflowGraphCanvas creation-state chrome', () => {
   });
 
   it('renders a custom emptyState when the workflow has no structure', () => {
-    const edit = {
+    const emptyStateEdit = {
       onInsert: jest.fn(),
       onEditStep: jest.fn(),
       onDeleteNode: jest.fn(),
@@ -623,7 +623,7 @@ describe('WorkflowGraphCanvas creation-state chrome', () => {
       <WorkflowGraphCanvasWithoutProvider
         {...baseProps}
         workflow={emptyWorkflow}
-        edit={edit}
+        edit={emptyStateEdit}
         emptyState={<div data-test-subj="customEmptyState">Create me</div>}
       />
     );
@@ -632,7 +632,7 @@ describe('WorkflowGraphCanvas creation-state chrome', () => {
   });
 
   it('hides the empty state while a pending insert draft is on the canvas', () => {
-    const edit = {
+    const emptyStateEdit = {
       onInsert: jest.fn(),
       onEditStep: jest.fn(),
       onDeleteNode: jest.fn(),
@@ -642,7 +642,7 @@ describe('WorkflowGraphCanvas creation-state chrome', () => {
       <WorkflowGraphCanvasWithoutProvider
         {...baseProps}
         workflow={emptyWorkflow}
-        edit={edit}
+        edit={emptyStateEdit}
         emptyState={<div data-test-subj="customEmptyState">Create me</div>}
         pendingInsert={{ phase: 'choosing', context: { mode: 'step' } }}
       />

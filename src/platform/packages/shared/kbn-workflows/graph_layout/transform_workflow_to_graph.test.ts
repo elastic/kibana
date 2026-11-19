@@ -92,7 +92,7 @@ describe('transformWorkflowToGraph', () => {
         'valid-default',
       ])
     );
-    expect(stepIds).toHaveLength(10);
+    expect(stepIds).toHaveLength(8);
   });
 
   it('does not throw for a step name longer than the slug input limit', () => {

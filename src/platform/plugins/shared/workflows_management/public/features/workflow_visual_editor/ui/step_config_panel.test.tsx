@@ -63,7 +63,7 @@ jest.mock('../../actions_menu_popover', () => ({
     <div data-test-subj="actionsMenuCompact">
       <span>{rootTitle}</span>
       <button type="button" onClick={onClose}>
-        close
+        {'close'}
       </button>
     </div>
   ),
@@ -1283,7 +1283,7 @@ with:
   });
 
   it('resolves createCaseDefaultSpace alias fields in the form', () => {
-    const connectors: ConnectorContractUnion[] = [
+    const kibanaConnectors: ConnectorContractUnion[] = [
       {
         type: 'kibana.createCase',
         hasConnectorId: false,
@@ -1298,7 +1298,7 @@ with:
     ];
     renderPanel({
       stepType: 'kibana.createCaseDefaultSpace',
-      connectors,
+      connectors: kibanaConnectors,
       initialFragment: 'name: createCase\ntype: kibana.createCaseDefaultSpace\nwith:\n  title: t\n',
     });
     expect(screen.getByTestId('workflowStepConfigField-with.title')).toBeInTheDocument();

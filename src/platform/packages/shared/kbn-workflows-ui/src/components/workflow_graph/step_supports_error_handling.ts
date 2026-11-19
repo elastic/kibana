@@ -23,7 +23,6 @@ export function stepSupportsErrorHandling(stepType: string | undefined): boolean
     stepType === 'foreach' ||
     stepType === 'parallel' ||
     stepType === 'while' ||
-    stepType === 'merge' ||
     stepType === 'atomic'
   ) {
     return false;

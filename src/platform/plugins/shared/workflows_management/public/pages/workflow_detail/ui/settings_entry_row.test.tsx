@@ -16,6 +16,7 @@ import type { ConstantField } from './workflow_settings_fields_model';
 jest.mock('../../../features/workflow_visual_editor/ui/reference_capable_field', () => ({
   ReferenceCapableField: ({
     children,
+    value,
     onChange,
   }: {
     children: (bind: {
@@ -44,11 +45,8 @@ const committedField: ConstantField = {
   value: 'us-east-1',
 };
 
-const renderConstantRow = (
-  props: Partial<React.ComponentProps<typeof SettingsEntryRow>> & {
-    mode: 'committed' | 'draft';
-  }
-) => {
+const renderConstantRow = (props: { mode: 'committed' | 'draft'; field?: ConstantField }) => {
+  const field = props.field ?? committedField;
   const onChange = jest.fn();
   const onCommit = jest.fn();
   const onDiscard = jest.fn();
@@ -59,7 +57,7 @@ const renderConstantRow = (
       ? {
           kind: 'constant' as const,
           mode: 'draft' as const,
-          field: committedField,
+          field,
           siblings: [] as ConstantField[],
           onCommit,
           onDiscard,
@@ -67,15 +65,15 @@ const renderConstantRow = (
       : {
           kind: 'constant' as const,
           mode: 'committed' as const,
-          field: committedField,
-          siblings: [committedField],
+          field,
+          siblings: [field],
           onChange,
           onRequestDelete,
         };
 
   const result = render(
     <I18nProvider>
-      <SettingsEntryRow {...base} {...props} />
+      <SettingsEntryRow {...base} />
     </I18nProvider>
   );
 

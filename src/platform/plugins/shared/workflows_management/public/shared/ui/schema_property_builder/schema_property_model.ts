@@ -128,11 +128,11 @@ const parseProperty = (
     const items = Array.isArray(schema.items) ? schema.items[0] : schema.items;
     if (items && typeof items === 'object') {
       itemType = readType(items as JsonSchema);
-      if (itemType === 'object' && (items as JsonSchema).properties) {
+      const nestedProperties = (items as JsonSchema).properties;
+      if (itemType === 'object' && nestedProperties) {
         const nestedRequired = new Set((items as JsonSchema).required ?? []);
-        itemProperties = Object.entries((items as JsonSchema).properties!).map(
-          ([childName, childSchema]) =>
-            parseProperty(childName, childSchema as JsonSchema, nestedRequired)
+        itemProperties = Object.entries(nestedProperties).map(([childName, childSchema]) =>
+          parseProperty(childName, childSchema as JsonSchema, nestedRequired)
         );
       }
     } else {
@@ -282,9 +282,10 @@ export const schemaPropertiesToJsonSchema = (
 
   for (const field of fields) {
     const name = field.name.trim();
-    if (!name) continue;
-    properties[name] = propertyToJsonSchema(field);
-    if (field.mode === 'required') required.push(name);
+    if (name) {
+      properties[name] = propertyToJsonSchema(field);
+      if (field.mode === 'required') required.push(name);
+    }
   }
 
   return {
@@ -348,15 +349,15 @@ export const findStepsReferencingPath = (
     const nameMatch = line.match(/^\s*-\s*name:\s*['"]?([A-Za-z0-9_]+)['"]?\s*$/);
     if (nameMatch) {
       currentStep = nameMatch[1];
-      continue;
-    }
-    const bareName = line.match(/^\s+name:\s*['"]?([A-Za-z0-9_]+)['"]?\s*$/);
-    if (bareName && currentStep === null) {
-      currentStep = bareName[1];
-    }
-    if (currentStep && refRe.test(line) && !seen.has(currentStep)) {
-      seen.add(currentStep);
-      steps.push(currentStep);
+    } else {
+      const bareName = line.match(/^\s+name:\s*['"]?([A-Za-z0-9_]+)['"]?\s*$/);
+      if (bareName && currentStep === null) {
+        currentStep = bareName[1];
+      }
+      if (currentStep && refRe.test(line) && !seen.has(currentStep)) {
+        seen.add(currentStep);
+        steps.push(currentStep);
+      }
     }
   }
   if (steps.length === 0 && refRe.test(workflowYaml)) {

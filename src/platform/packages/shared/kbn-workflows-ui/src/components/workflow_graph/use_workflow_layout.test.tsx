@@ -694,9 +694,11 @@ describe('useWorkflowLayout', () => {
     });
 
     it('reports a failed layout through onLayoutFailed and layoutError', () => {
-      const layoutSpy = jest.spyOn(layoutPipeline, 'computeWorkflowLayout').mockImplementation(() => {
-        throw new Error('cyclic compound graph');
-      });
+      const layoutSpy = jest
+        .spyOn(layoutPipeline, 'computeWorkflowLayout')
+        .mockImplementation(() => {
+          throw new Error('cyclic compound graph');
+        });
       try {
         const onLayoutFailed = jest.fn();
         const { result } = renderHook(() =>

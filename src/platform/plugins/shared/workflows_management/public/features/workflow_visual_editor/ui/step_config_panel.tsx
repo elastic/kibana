@@ -235,6 +235,7 @@ export function StepConfigPanel({
   const titleId = useGeneratedHtmlId({ prefix: 'workflowStepConfigTitle' });
   const typeSubtitleId = useGeneratedHtmlId({ prefix: 'workflowStepConfigTypeSubtitle' });
   const settingsAccordionId = useGeneratedHtmlId({ prefix: 'workflowStepConfigSettings' });
+  const discardModalTitleId = useGeneratedHtmlId({ prefix: 'workflowStepConfigDiscardTitle' });
   // The fragment is parsed once here; every read below goes through it.
   const parsed = useStepFragment(fragment);
   const initialParsed = useStepFragment(initialFragment);
@@ -519,11 +520,7 @@ export function StepConfigPanel({
   return (
     <StepFormReadOnlyContext.Provider value={readOnly}>
       <div
-        role="dialog"
-        aria-modal="false"
-        aria-labelledby={titleId}
-        aria-describedby={typeSubtitleId}
-        data-test-subj="workflowStepConfigPanel"
+        role="presentation"
         onKeyDown={(e) => {
           if (e.key === 'Escape') {
             e.stopPropagation();
@@ -531,339 +528,353 @@ export function StepConfigPanel({
             attemptClose();
           }
         }}
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-          minHeight: 0,
-          position: 'relative',
-          background: euiTheme.colors.backgroundBasePlain,
-        }}
+        css={{ display: 'contents' }}
       >
-        <StepConfigHeader
-          stepType={stepType}
-          headerTitle={headerTitle}
-          titleId={titleId}
-          typeSubtitleId={typeSubtitleId}
-          nameEditor={nameEditor}
-          onClose={attemptClose}
-          readOnly={readOnly}
-        >
-          <EuiTabs
-            size="s"
-            bottomBorder={false}
-            data-test-subj="workflowStepConfigPanelTabs"
-            aria-label={i18n.translate('workflows.stepConfigPanel.editorModeLegend', {
-              defaultMessage: 'Step editor mode',
-            })}
-            css={{
-              paddingInline: euiTheme.size.base,
-              marginBlockStart: 0,
-            }}
-          >
-            {editorModeOptions.map((option) => (
-              <EuiTab
-                key={option.id}
-                isSelected={parametersMode === option.id}
-                onClick={() => setParametersMode(option.id)}
-                prepend={<EuiIcon type={option.iconType} aria-hidden />}
-                data-test-subj={`workflowStepConfigPanelView-${option.id}`}
-              >
-                {option.label}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-        </StepConfigHeader>
-
         <div
+          role="dialog"
+          aria-modal="false"
+          aria-labelledby={titleId}
+          aria-describedby={typeSubtitleId}
+          data-test-subj="workflowStepConfigPanel"
           css={{
-            flex: '1 1 auto',
-            minHeight: 0,
             display: 'flex',
             flexDirection: 'column',
-            overflow: 'hidden',
+            height: '100%',
+            minHeight: 0,
+            position: 'relative',
+            background: euiTheme.colors.backgroundBasePlain,
           }}
         >
+          <StepConfigHeader
+            stepType={stepType}
+            headerTitle={headerTitle}
+            titleId={titleId}
+            typeSubtitleId={typeSubtitleId}
+            nameEditor={nameEditor}
+            onClose={attemptClose}
+            readOnly={readOnly}
+          >
+            <EuiTabs
+              size="s"
+              bottomBorder={false}
+              data-test-subj="workflowStepConfigPanelTabs"
+              aria-label={i18n.translate('workflows.stepConfigPanel.editorModeLegend', {
+                defaultMessage: 'Step editor mode',
+              })}
+              css={{
+                paddingInline: euiTheme.size.base,
+                marginBlockStart: 0,
+              }}
+            >
+              {editorModeOptions.map((option) => (
+                <EuiTab
+                  key={option.id}
+                  isSelected={parametersMode === option.id}
+                  onClick={() => setParametersMode(option.id)}
+                  prepend={<EuiIcon type={option.iconType} aria-hidden />}
+                  data-test-subj={`workflowStepConfigPanelView-${option.id}`}
+                >
+                  {option.label}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+          </StepConfigHeader>
+
           <div
             css={{
               flex: '1 1 auto',
               minHeight: 0,
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column' as const,
-              boxSizing: 'border-box' as const,
-              height: '100%',
-            }}
-          >
-            {!isBuilderMode ? (
-              <FlyoutMonacoFrame>
-                <CodeEditor
-                  languageId={YAML_LANG_ID}
-                  chromeOverrides={workflowsEditorChromeOverrides}
-                  value={fragment}
-                  onChange={setFragment}
-                  editorDidMount={onYamlEditorMount}
-                  height="100%"
-                  aria-label={i18n.translate('workflows.stepConfigPanel.yamlAriaLabel', {
-                    defaultMessage: 'Step YAML',
-                  })}
-                  options={{
-                    ...getFlyoutMonacoEditorOptions(euiTheme, { tabSize: indent }),
-                    readOnly,
-                  }}
-                  dataTestSubj="workflowStepConfigPanelYaml"
-                />
-              </FlyoutMonacoFrame>
-            ) : (
-              <div
-                css={{
-                  flex: '1 1 auto',
-                  minHeight: 0,
-                  width: '100%',
-                  overflow: 'auto',
-                }}
-              >
-                <div
-                  css={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    padding: euiTheme.size.base,
-                    boxSizing: 'border-box' as const,
-                  }}
-                >
-                  {parsed.valid ? (
-                    // A disabled fieldset makes every native control inside inert when read-only;
-                    // the context covers the fields that are not (see `StepFormReadOnlyContext`).
-                    <fieldset disabled={readOnly} css={FIELDSET_RESET_CSS}>
-                      <StepForm
-                        key={initialFragment}
-                        stepType={stepType}
-                        fields={fields}
-                        hasSchema={schema !== undefined}
-                        step={parsed}
-                        showValidation={showValidation}
-                        referenceCatalog={referenceCatalog}
-                        onChange={handleFieldChange}
-                        onDraftErrorChange={handleDraftErrorChange}
-                        onExpandField={handleExpandField}
-                        readOnly={readOnly}
-                      />
-                    </fieldset>
-                  ) : (
-                    <EuiText
-                      size="s"
-                      color="danger"
-                      data-test-subj="workflowStepConfigPanelFormBlocked"
-                    >
-                      {i18n.translate('workflows.stepConfigPanel.invalidYamlForForm', {
-                        defaultMessage: 'Fix the YAML to edit this step as a form. {error}',
-                        values: { error: parsed.error ?? '' },
-                      })}
-                    </EuiText>
-                  )}
-
-                  {parsed.valid ? (
-                    <>
-                      <EuiHorizontalRule margin="m" />
-
-                      <EuiAccordion
-                        id={settingsAccordionId}
-                        forceState={settingsOpen ? 'open' : 'closed'}
-                        onToggle={handleSettingsToggle}
-                        paddingSize="none"
-                        buttonContent={
-                          <EuiTitle size="xxs">
-                            <h4>
-                              {i18n.translate('workflows.stepConfigPanel.settingsAccordion', {
-                                defaultMessage: 'Advanced',
-                              })}
-                            </h4>
-                          </EuiTitle>
-                        }
-                        data-test-subj="workflowStepConfigPanelAccordion-settings"
-                      >
-                        <fieldset
-                          disabled={readOnly}
-                          data-test-subj="workflowStepConfigPanelSettings"
-                          css={[FIELDSET_RESET_CSS, { paddingTop: euiTheme.size.m }]}
-                        >
-                          {stepCondition
-                            ? renderStepSetting(
-                                'workflowStepConfigConditionSection',
-                                i18n.translate('workflows.stepConfigPanel.conditionTitle', {
-                                  defaultMessage: 'Conditional execution',
-                                }),
-                                stepCondition
-                              )
-                            : null}
-                          {stepTimeout
-                            ? renderStepSetting(
-                                'workflowStepConfigTimeoutSection',
-                                i18n.translate('workflows.stepConfigPanel.timeoutTitle', {
-                                  defaultMessage: 'Timeout',
-                                }),
-                                stepTimeout
-                              )
-                            : null}
-                          {showSettings ? (
-                            <div data-test-subj="workflowStepConfigErrorHandlingSection">
-                              <EuiTitle size="xxs" css={{ marginBlockEnd: euiTheme.size.s }}>
-                                <h5>
-                                  {i18n.translate('workflows.stepConfigPanel.errorHandlingTitle', {
-                                    defaultMessage: 'Error handling',
-                                  })}
-                                </h5>
-                              </EuiTitle>
-                              <StepErrorHandlingSection
-                                fragment={fragment}
-                                onFailureValue={parsed.read(['on-failure'])}
-                                indent={indent}
-                                onFragmentChange={setFragment}
-                                isLoop={LoopStepTypes.some((type) => type === stepType)}
-                              />
-                            </div>
-                          ) : (
-                            <EuiText size="s" color="subdued">
-                              {i18n.translate('workflows.stepConfigPanel.settingsUnavailable', {
-                                defaultMessage: 'Error handling is not available for this step.',
-                              })}
-                            </EuiText>
-                          )}
-                        </fieldset>
-                      </EuiAccordion>
-                    </>
-                  ) : null}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div
-          css={{
-            flex: '0 0 auto',
-            borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-            paddingBlock: euiTheme.size.base,
-            paddingInline: euiTheme.size.base,
-          }}
-        >
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
-            {readOnly ? (
-              <>
-                {onOpenInYaml ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      iconType="code"
-                      onClick={onOpenInYaml}
-                      data-test-subj="workflowStepConfigPanelOpenInYaml"
-                    >
-                      {i18n.translate('workflows.stepConfigPanel.openInYaml', {
-                        defaultMessage: 'Open in YAML',
-                      })}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                ) : null}
-                {onRunStep ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      fill
-                      iconType="play"
-                      onClick={onRunStep}
-                      data-test-subj="workflowStepConfigPanelRunStep"
-                    >
-                      {i18n.translate('workflows.stepConfigPanel.runStep', {
-                        defaultMessage: 'Run step',
-                      })}
-                    </EuiButton>
-                  </EuiFlexItem>
-                ) : null}
-              </>
-            ) : (
-              <EuiFlexItem grow={false}>
-                {mode === 'insert' ? (
-                  <EuiButtonEmpty
-                    color="danger"
-                    iconType="trash"
-                    onClick={onRevert}
-                    data-test-subj="workflowStepConfigPanelRemoveNode"
-                  >
-                    {i18n.translate('workflows.stepConfigPanel.removeNode', {
-                      defaultMessage: 'Remove node',
-                    })}
-                  </EuiButtonEmpty>
-                ) : (
-                  <EuiButtonEmpty
-                    iconType="undo"
-                    onClick={onRevert}
-                    isDisabled={!isDirty}
-                    data-test-subj="workflowStepConfigPanelResetNode"
-                  >
-                    {i18n.translate('workflows.stepConfigPanel.resetNode', {
-                      defaultMessage: 'Reset node',
-                    })}
-                  </EuiButtonEmpty>
-                )}
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </div>
-
-        {expandedField ? (
-          <div
-            css={{
-              position: 'absolute',
-              inset: 0,
-              zIndex: 3,
-              background: euiTheme.colors.backgroundBasePlain,
               display: 'flex',
               flexDirection: 'column',
-              minHeight: 0,
+              overflow: 'hidden',
             }}
           >
-            <FieldEditorSubFlyout
-              fieldLabel={expandedField.label}
-              value={expandedFieldValue}
-              onChange={handleExpandedFieldChange}
-              catalog={referenceCatalog}
-              runControls={runControls}
-              language={expandedField.kind === 'code' ? expandedField.language : undefined}
-              // Numbers and yes/no keep their type, so a whole pick is written as a value.
-              valueFormWhenWhole={
-                expandedField.valueFormWhenWhole === true ||
-                expandedField.kind === 'boolean' ||
-                expandedField.kind === 'number'
-              }
-              onBack={handleFieldEditorBack}
-              onCloseStack={attemptClose}
-            />
-          </div>
-        ) : null}
+            <div
+              css={{
+                flex: '1 1 auto',
+                minHeight: 0,
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column' as const,
+                boxSizing: 'border-box' as const,
+                height: '100%',
+              }}
+            >
+              {!isBuilderMode ? (
+                <FlyoutMonacoFrame>
+                  <CodeEditor
+                    languageId={YAML_LANG_ID}
+                    chromeOverrides={workflowsEditorChromeOverrides}
+                    value={fragment}
+                    onChange={setFragment}
+                    editorDidMount={onYamlEditorMount}
+                    height="100%"
+                    aria-label={i18n.translate('workflows.stepConfigPanel.yamlAriaLabel', {
+                      defaultMessage: 'Step YAML',
+                    })}
+                    options={{
+                      ...getFlyoutMonacoEditorOptions(euiTheme, { tabSize: indent }),
+                      readOnly,
+                    }}
+                    dataTestSubj="workflowStepConfigPanelYaml"
+                  />
+                </FlyoutMonacoFrame>
+              ) : (
+                <div
+                  css={{
+                    flex: '1 1 auto',
+                    minHeight: 0,
+                    width: '100%',
+                    overflow: 'auto',
+                  }}
+                >
+                  <div
+                    css={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      padding: euiTheme.size.base,
+                      boxSizing: 'border-box' as const,
+                    }}
+                  >
+                    {parsed.valid ? (
+                      // A disabled fieldset makes every native control inside inert when read-only;
+                      // the context covers the fields that are not (see `StepFormReadOnlyContext`).
+                      <fieldset disabled={readOnly} css={FIELDSET_RESET_CSS}>
+                        <StepForm
+                          key={initialFragment}
+                          stepType={stepType}
+                          fields={fields}
+                          hasSchema={schema !== undefined}
+                          step={parsed}
+                          showValidation={showValidation}
+                          referenceCatalog={referenceCatalog}
+                          onChange={handleFieldChange}
+                          onDraftErrorChange={handleDraftErrorChange}
+                          onExpandField={handleExpandField}
+                          readOnly={readOnly}
+                        />
+                      </fieldset>
+                    ) : (
+                      <EuiText
+                        size="s"
+                        color="danger"
+                        data-test-subj="workflowStepConfigPanelFormBlocked"
+                      >
+                        {i18n.translate('workflows.stepConfigPanel.invalidYamlForForm', {
+                          defaultMessage: 'Fix the YAML to edit this step as a form. {error}',
+                          values: { error: parsed.error ?? '' },
+                        })}
+                      </EuiText>
+                    )}
 
-        {showDiscardConfirm ? (
-          <EuiConfirmModal
-            title={i18n.translate('workflows.stepConfigPanel.discardTitle', {
-              defaultMessage: 'Discard changes to this step?',
-            })}
-            onCancel={handleKeepEditing}
-            onConfirm={handleDiscardInvalidDraft}
-            cancelButtonText={i18n.translate('workflows.stepConfigPanel.keepEditing', {
-              defaultMessage: 'Keep editing',
-            })}
-            confirmButtonText={i18n.translate('workflows.stepConfigPanel.discard', {
-              defaultMessage: 'Discard',
-            })}
-            buttonColor="danger"
-            defaultFocusedButton="cancel"
-            data-test-subj="workflowStepConfigPanelDiscardModal"
+                    {parsed.valid ? (
+                      <>
+                        <EuiHorizontalRule margin="m" />
+
+                        <EuiAccordion
+                          id={settingsAccordionId}
+                          forceState={settingsOpen ? 'open' : 'closed'}
+                          onToggle={handleSettingsToggle}
+                          paddingSize="none"
+                          buttonContent={
+                            <EuiTitle size="xxs">
+                              <h4>
+                                {i18n.translate('workflows.stepConfigPanel.settingsAccordion', {
+                                  defaultMessage: 'Advanced',
+                                })}
+                              </h4>
+                            </EuiTitle>
+                          }
+                          data-test-subj="workflowStepConfigPanelAccordion-settings"
+                        >
+                          <fieldset
+                            disabled={readOnly}
+                            data-test-subj="workflowStepConfigPanelSettings"
+                            css={[FIELDSET_RESET_CSS, { paddingTop: euiTheme.size.m }]}
+                          >
+                            {stepCondition
+                              ? renderStepSetting(
+                                  'workflowStepConfigConditionSection',
+                                  i18n.translate('workflows.stepConfigPanel.conditionTitle', {
+                                    defaultMessage: 'Conditional execution',
+                                  }),
+                                  stepCondition
+                                )
+                              : null}
+                            {stepTimeout
+                              ? renderStepSetting(
+                                  'workflowStepConfigTimeoutSection',
+                                  i18n.translate('workflows.stepConfigPanel.timeoutTitle', {
+                                    defaultMessage: 'Timeout',
+                                  }),
+                                  stepTimeout
+                                )
+                              : null}
+                            {showSettings ? (
+                              <div data-test-subj="workflowStepConfigErrorHandlingSection">
+                                <EuiTitle size="xxs" css={{ marginBlockEnd: euiTheme.size.s }}>
+                                  <h5>
+                                    {i18n.translate(
+                                      'workflows.stepConfigPanel.errorHandlingTitle',
+                                      {
+                                        defaultMessage: 'Error handling',
+                                      }
+                                    )}
+                                  </h5>
+                                </EuiTitle>
+                                <StepErrorHandlingSection
+                                  fragment={fragment}
+                                  onFailureValue={parsed.read(['on-failure'])}
+                                  indent={indent}
+                                  onFragmentChange={setFragment}
+                                  isLoop={LoopStepTypes.some((type) => type === stepType)}
+                                />
+                              </div>
+                            ) : (
+                              <EuiText size="s" color="subdued">
+                                {i18n.translate('workflows.stepConfigPanel.settingsUnavailable', {
+                                  defaultMessage: 'Error handling is not available for this step.',
+                                })}
+                              </EuiText>
+                            )}
+                          </fieldset>
+                        </EuiAccordion>
+                      </>
+                    ) : null}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div
+            css={{
+              flex: '0 0 auto',
+              borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+              paddingBlock: euiTheme.size.base,
+              paddingInline: euiTheme.size.base,
+            }}
           >
-            <EuiText size="s">
-              {i18n.translate('workflows.stepConfigPanel.discardInvalidBody', {
-                defaultMessage:
-                  "This draft has errors and wasn't applied to the step. Closing now will discard it.",
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
+              {readOnly ? (
+                <>
+                  {onOpenInYaml ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        iconType="code"
+                        onClick={onOpenInYaml}
+                        data-test-subj="workflowStepConfigPanelOpenInYaml"
+                      >
+                        {i18n.translate('workflows.stepConfigPanel.openInYaml', {
+                          defaultMessage: 'Open in YAML',
+                        })}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  ) : null}
+                  {onRunStep ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        fill
+                        iconType="play"
+                        onClick={onRunStep}
+                        data-test-subj="workflowStepConfigPanelRunStep"
+                      >
+                        {i18n.translate('workflows.stepConfigPanel.runStep', {
+                          defaultMessage: 'Run step',
+                        })}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  ) : null}
+                </>
+              ) : (
+                <EuiFlexItem grow={false}>
+                  {mode === 'insert' ? (
+                    <EuiButtonEmpty
+                      color="danger"
+                      iconType="trash"
+                      onClick={onRevert}
+                      data-test-subj="workflowStepConfigPanelRemoveNode"
+                    >
+                      {i18n.translate('workflows.stepConfigPanel.removeNode', {
+                        defaultMessage: 'Remove node',
+                      })}
+                    </EuiButtonEmpty>
+                  ) : (
+                    <EuiButtonEmpty
+                      iconType="undo"
+                      onClick={onRevert}
+                      isDisabled={!isDirty}
+                      data-test-subj="workflowStepConfigPanelResetNode"
+                    >
+                      {i18n.translate('workflows.stepConfigPanel.resetNode', {
+                        defaultMessage: 'Reset node',
+                      })}
+                    </EuiButtonEmpty>
+                  )}
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </div>
+
+          {expandedField ? (
+            <div
+              css={{
+                position: 'absolute',
+                inset: 0,
+                zIndex: 3,
+                background: euiTheme.colors.backgroundBasePlain,
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: 0,
+              }}
+            >
+              <FieldEditorSubFlyout
+                fieldLabel={expandedField.label}
+                value={expandedFieldValue}
+                onChange={handleExpandedFieldChange}
+                catalog={referenceCatalog}
+                runControls={runControls}
+                language={expandedField.kind === 'code' ? expandedField.language : undefined}
+                // Numbers and yes/no keep their type, so a whole pick is written as a value.
+                valueFormWhenWhole={
+                  expandedField.valueFormWhenWhole === true ||
+                  expandedField.kind === 'boolean' ||
+                  expandedField.kind === 'number'
+                }
+                onBack={handleFieldEditorBack}
+                onCloseStack={attemptClose}
+              />
+            </div>
+          ) : null}
+
+          {showDiscardConfirm ? (
+            <EuiConfirmModal
+              aria-labelledby={discardModalTitleId}
+              titleProps={{ id: discardModalTitleId }}
+              title={i18n.translate('workflows.stepConfigPanel.discardTitle', {
+                defaultMessage: 'Discard changes to this step?',
               })}
-            </EuiText>
-          </EuiConfirmModal>
-        ) : null}
+              onCancel={handleKeepEditing}
+              onConfirm={handleDiscardInvalidDraft}
+              cancelButtonText={i18n.translate('workflows.stepConfigPanel.keepEditing', {
+                defaultMessage: 'Keep editing',
+              })}
+              confirmButtonText={i18n.translate('workflows.stepConfigPanel.discard', {
+                defaultMessage: 'Discard',
+              })}
+              buttonColor="danger"
+              defaultFocusedButton="cancel"
+              data-test-subj="workflowStepConfigPanelDiscardModal"
+            >
+              <EuiText size="s">
+                {i18n.translate('workflows.stepConfigPanel.discardInvalidBody', {
+                  defaultMessage:
+                    "This draft has errors and wasn't applied to the step. Closing now will discard it.",
+                })}
+              </EuiText>
+            </EuiConfirmModal>
+          ) : null}
+        </div>
       </div>
     </StepFormReadOnlyContext.Provider>
   );

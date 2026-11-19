@@ -89,13 +89,7 @@ describe('getDocumentOrderPredecessors', () => {
     // The other arm of the current step's `if` never runs before it.
     expect(names('else_step')).toEqual(['start', 'gate']);
     // Both arms of an earlier `if` may have run; the sibling arm of the current one never does.
-    expect(names('case_b')).toEqual([
-      'start',
-      'gate',
-      'then_step',
-      'else_step',
-      'pick',
-    ]);
+    expect(names('case_b')).toEqual(['start', 'gate', 'then_step', 'else_step', 'pick']);
     expect(names('fallback_case')).toEqual(['start', 'gate', 'then_step', 'else_step', 'pick']);
     expect(names('right_step')).toEqual([
       'start',

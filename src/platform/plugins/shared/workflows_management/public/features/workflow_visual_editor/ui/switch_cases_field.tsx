@@ -17,7 +17,9 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -62,10 +64,11 @@ export const findDuplicateCaseIds = (rows: readonly SwitchCaseRow[]): ReadonlySe
   const counts = new Map<string, string[]>();
   for (const row of rows) {
     const key = switchCaseDuplicateKey(row.match);
-    if (!key) continue;
-    const list = counts.get(key) ?? [];
-    list.push(row.id);
-    counts.set(key, list);
+    if (key) {
+      const list = counts.get(key) ?? [];
+      list.push(row.id);
+      counts.set(key, list);
+    }
   }
   const dupes = new Set<string>();
   for (const ids of counts.values()) {
@@ -80,10 +83,11 @@ export const findDuplicateCaseIds = (rows: readonly SwitchCaseRow[]): ReadonlySe
 export const countConfiguredSteps = (steps: unknown): number => {
   if (!Array.isArray(steps)) return 0;
   let total = 0;
-  for (const step of steps) {
-    if (!step || typeof step !== 'object') continue;
+  const configuredSteps = steps.filter(
+    (step): step is Record<string, unknown> => Boolean(step) && typeof step === 'object'
+  );
+  for (const rec of configuredSteps) {
     total += 1;
-    const rec = step as Record<string, unknown>;
     total += countConfiguredSteps(rec.steps);
     total += countConfiguredSteps(rec.else);
     total += countConfiguredSteps(rec.fallback);
@@ -113,6 +117,7 @@ export interface SwitchCasesFieldProps {
 
 export function SwitchCasesField({ value, onChange }: SwitchCasesFieldProps) {
   const { euiTheme } = useEuiTheme();
+  const deleteModalTitleId = useGeneratedHtmlId({ prefix: 'workflowSwitchCaseDeleteTitle' });
   const [rows, setRows] = useState<SwitchCaseRow[]>(() => toSwitchCaseRows(value));
   const [focusRowId, setFocusRowId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<SwitchCaseRow | null>(null);
@@ -203,7 +208,6 @@ export function SwitchCasesField({ value, onChange }: SwitchCasesFieldProps) {
           defaultMessage: 'Cases',
         })}
         fullWidth
-        compressed
       >
         <div
           data-test-subj="workflowSwitchCasesField"
@@ -215,13 +219,17 @@ export function SwitchCasesField({ value, onChange }: SwitchCasesFieldProps) {
         >
           {rows.map((row, index) => {
             const isDuplicate = duplicateIds.has(row.id);
+            const deleteCaseLabel = i18n.translate('workflows.switchCasesField.deleteAriaLabel', {
+              defaultMessage: 'Delete case {index}',
+              values: { index: index + 1 },
+            });
+
             return (
               <div key={row.id} data-test-subj={`workflowSwitchCaseRow-${index}`}>
                 <EuiFlexGroup gutterSize="none" alignItems="flexStart" responsive={false}>
                   <EuiFlexItem grow>
                     <EuiFormRow
                       fullWidth
-                      compressed
                       isInvalid={isDuplicate}
                       error={
                         isDuplicate
@@ -253,20 +261,19 @@ export function SwitchCasesField({ value, onChange }: SwitchCasesFieldProps) {
                     </EuiFormRow>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="trash"
-                      color="danger"
-                      aria-label={i18n.translate('workflows.switchCasesField.deleteAriaLabel', {
-                        defaultMessage: 'Delete case {index}',
-                        values: { index: index + 1 },
-                      })}
-                      onClick={() => requestDelete(row)}
-                      data-test-subj={`workflowSwitchCaseDelete-${index}`}
-                      css={{
-                        marginTop: 4,
-                        marginInlineStart: euiTheme.size.s,
-                      }}
-                    />
+                    <EuiToolTip content={deleteCaseLabel} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        iconType="trash"
+                        color="danger"
+                        aria-label={deleteCaseLabel}
+                        onClick={() => requestDelete(row)}
+                        data-test-subj={`workflowSwitchCaseDelete-${index}`}
+                        css={{
+                          marginTop: 4,
+                          marginInlineStart: euiTheme.size.s,
+                        }}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </div>
@@ -303,6 +310,8 @@ export function SwitchCasesField({ value, onChange }: SwitchCasesFieldProps) {
 
       {pendingDelete ? (
         <EuiConfirmModal
+          aria-labelledby={deleteModalTitleId}
+          titleProps={{ id: deleteModalTitleId }}
           title={i18n.translate('workflows.switchCasesField.deleteTitle', {
             defaultMessage: 'Delete case "{value}"?',
             values: { value: pendingLabel },

@@ -365,7 +365,6 @@ export function ReferenceCapableField({
         iconType="fullScreen"
         color="text"
         size="xs"
-        title={expandLabel}
         aria-label={expandLabel}
         onClick={onExpand}
         data-test-subj={`${dataTestSubj}Expand`}

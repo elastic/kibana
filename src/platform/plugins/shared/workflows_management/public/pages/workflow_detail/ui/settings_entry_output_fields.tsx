@@ -68,7 +68,6 @@ export const SettingsEntryOutputFields = ({
             isInvalid={nameError != null && field.name.length > 0}
             error={settingsEntryNameErrorMessage(nameError)}
             fullWidth
-            compressed
           >
             <EuiFieldText
               isInvalid={nameError != null && field.name.length > 0}
@@ -87,7 +86,6 @@ export const SettingsEntryOutputFields = ({
               defaultMessage: 'Type',
             })}
             fullWidth
-            compressed
           >
             <EuiSelect
               compressed
@@ -123,7 +121,6 @@ export const SettingsEntryOutputFields = ({
             'Used when the expression resolves to nothing — for example a branch that did not run. Keeps the declared contract intact for callers.',
         })}
         fullWidth
-        compressed
       >
         <EuiFieldText
           compressed
@@ -167,7 +164,6 @@ export const SettingsEntryOutputFields = ({
               defaultMessage: 'Item type',
             })}
             fullWidth
-            compressed
           >
             <EuiSelect
               compressed

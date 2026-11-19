@@ -196,6 +196,8 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
           return (
             <div
               draggable
+              role="button"
+              tabIndex={0}
               data-test-subj={`workflowExecutionOutputField-${field}${testSubjSuffix}`}
               title={referenceToken}
               onDragStart={(e) => {
@@ -203,6 +205,12 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
                 e.dataTransfer.effectAllowed = 'copy';
               }}
               onClick={() => {
+                insertIntoActiveDataReferenceTarget(referenceToken);
+              }}
+              onKeyDown={(e) => {
+                // Only the wrapper's own Enter / Space: keys pressed inside a nested control are its own.
+                if (e.target !== e.currentTarget || (e.key !== 'Enter' && e.key !== ' ')) return;
+                e.preventDefault();
                 insertIntoActiveDataReferenceTarget(referenceToken);
               }}
               css={{ cursor: 'grab', width: '100%', minWidth: 0 }}

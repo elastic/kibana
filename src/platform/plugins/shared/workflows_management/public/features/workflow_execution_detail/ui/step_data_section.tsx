@@ -155,6 +155,8 @@ export const StepDataSection = ({
       return (
         <div
           draggable
+          role="button"
+          tabIndex={0}
           data-test-subj={`workflowExecutionOutputField-${field}${testSubjSuffix}`}
           title={token}
           onDragStart={(e) => {
@@ -162,6 +164,12 @@ export const StepDataSection = ({
             e.dataTransfer.effectAllowed = 'copy';
           }}
           onClick={() => {
+            insertIntoActiveDataReferenceTarget(token);
+          }}
+          onKeyDown={(e) => {
+            // Only the wrapper's own Enter / Space: keys pressed inside a nested control are its own.
+            if (e.target !== e.currentTarget || (e.key !== 'Enter' && e.key !== ' ')) return;
+            e.preventDefault();
             insertIntoActiveDataReferenceTarget(token);
           }}
           css={{ cursor: 'grab', width: '100%', minWidth: 0 }}

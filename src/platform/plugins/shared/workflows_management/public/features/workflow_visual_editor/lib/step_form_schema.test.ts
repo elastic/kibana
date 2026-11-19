@@ -15,7 +15,6 @@ import {
   IfStepSchema,
   LoopBreakStepSchema,
   LoopContinueStepSchema,
-  MergeStepSchema,
   ParallelStepObjectSchema,
   WaitStepSchema,
   WhileStepSchema,
@@ -202,7 +201,6 @@ describe('step_form_schema', () => {
       it.each([
         'if',
         'switch',
-        'merge',
         'wait',
         'data.set',
         'loop.break',
@@ -219,7 +217,6 @@ describe('step_form_schema', () => {
         [
           WaitStepSchema,
           DataSetStepSchema,
-          MergeStepSchema,
           IfStepSchema,
           LoopBreakStepSchema,
           LoopContinueStepSchema,
@@ -618,7 +615,7 @@ describe('step_form_schema', () => {
     });
 
     it('resolves Kibana aliases and deprecations to a connector schema', () => {
-      const connectors: ConnectorContractUnion[] = [
+      const kibanaConnectors: ConnectorContractUnion[] = [
         {
           type: 'kibana.createCase',
           hasConnectorId: false,
@@ -631,7 +628,7 @@ describe('step_form_schema', () => {
           description: null,
         } as unknown as ConnectorContractUnion,
       ];
-      const schema = getStepFormSchema('kibana.createCaseDefaultSpace', connectors)!;
+      const schema = getStepFormSchema('kibana.createCaseDefaultSpace', kibanaConnectors)!;
       expect(schema).toBeDefined();
       const byKey = Object.fromEntries(schema.fields.map((f) => [f.key, f]));
       expect(byKey.title).toMatchObject({
@@ -643,7 +640,7 @@ describe('step_form_schema', () => {
     });
 
     it('follows deprecation replacements when only the new type is registered', () => {
-      const connectors: ConnectorContractUnion[] = [
+      const casesConnectors: ConnectorContractUnion[] = [
         {
           type: 'cases.createCase',
           hasConnectorId: false,
@@ -655,7 +652,7 @@ describe('step_form_schema', () => {
           description: null,
         } as unknown as ConnectorContractUnion,
       ];
-      const schema = getStepFormSchema('kibana.createCaseDefaultSpace', connectors)!;
+      const schema = getStepFormSchema('kibana.createCaseDefaultSpace', casesConnectors)!;
       expect(schema.fields.find((f) => f.key === 'title')).toMatchObject({
         path: ['with', 'title'],
         required: true,

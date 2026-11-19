@@ -29,7 +29,7 @@ describe('step error handling support', () => {
     }
   );
 
-  it.each(['if', 'parallel', 'merge', 'atomic', undefined])('%s: neither', (type) => {
+  it.each(['if', 'parallel', 'atomic', undefined])('%s: neither', (type) => {
     expect(stepSupportsErrorHandling(type)).toBe(false);
     expect(stepSupportsErrorHandlingSettings(type)).toBe(false);
   });

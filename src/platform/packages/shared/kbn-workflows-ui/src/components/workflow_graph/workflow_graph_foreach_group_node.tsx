@@ -142,6 +142,11 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
     </EuiToolTip>
   );
 
+  const addFirstStepLabel = i18n.translate('workflowsUi.foreachGroupNode.addFirstStep', {
+    defaultMessage: 'Add first step in {label}',
+    values: { label: displayLabel },
+  });
+
   return (
     <>
       <Handle type="target" position={targetHandlePos} style={{ opacity: 0 }} />
@@ -258,18 +263,17 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
             }}
           >
             {actions.edit && (
-              <EuiButtonIcon
-                iconType="plusCircle"
-                aria-label={i18n.translate('workflowsUi.foreachGroupNode.addFirstStep', {
-                  defaultMessage: 'Add first step in {label}',
-                  values: { label: displayLabel },
-                })}
-                onClick={handleAddFirstStep}
-                size="m"
-                color="text"
-                css={{ opacity: 0.5 }}
-                data-test-subj="workflowGraphForeachGroupAddFirstStep"
-              />
+              <EuiToolTip content={addFirstStepLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="plusCircle"
+                  aria-label={addFirstStepLabel}
+                  onClick={handleAddFirstStep}
+                  size="m"
+                  color="text"
+                  css={{ opacity: 0.5 }}
+                  data-test-subj="workflowGraphForeachGroupAddFirstStep"
+                />
+              </EuiToolTip>
             )}
           </div>
         )}

@@ -29,5 +29,5 @@ export const createWorkflowsUiModuleMock = () => ({
   }),
   // Loops take the panel section, though their canvas node has no fallback port.
   stepSupportsErrorHandlingSettings: (stepType: string | undefined) =>
-    Boolean(stepType && !['if', 'parallel', 'merge', 'atomic'].includes(stepType)),
+    Boolean(stepType && !['if', 'parallel', 'atomic'].includes(stepType)),
 });

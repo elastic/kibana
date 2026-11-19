@@ -13,7 +13,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { TriggerConfigPanel } from './trigger_config_panel';
 
 jest.mock('@kbn/code-editor', () => {
-  const MockReact = jest.requireActual('react');
   return {
     CodeEditor: (props: {
       value: string;
@@ -152,7 +151,9 @@ describe('TriggerConfigPanel', () => {
 
       expect(screen.queryByTestId('workflowTriggerConfigPanelSave')).not.toBeInTheDocument();
       expect(screen.queryByTestId('workflowTriggerConfigPanelCancel')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('workflowTriggerConfigPanelResetTrigger')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('workflowTriggerConfigPanelResetTrigger')
+      ).not.toBeInTheDocument();
       fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelRemoveTrigger'));
 
       expect(screen.getByTestId('workflowTriggerConfigPanelRemoveTrigger')).toHaveTextContent(
@@ -172,7 +173,9 @@ describe('TriggerConfigPanel', () => {
 
       expect(screen.queryByTestId('workflowTriggerConfigPanelSave')).not.toBeInTheDocument();
       expect(screen.queryByTestId('workflowTriggerConfigPanelCancel')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('workflowTriggerConfigPanelRemoveTrigger')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('workflowTriggerConfigPanelRemoveTrigger')
+      ).not.toBeInTheDocument();
       expect(reset).toHaveTextContent('Reset trigger');
       expect(reset).toBeDisabled();
 
@@ -208,7 +211,9 @@ describe('TriggerConfigPanel', () => {
       expect(onClose).not.toHaveBeenCalled();
 
       fireEvent.click(screen.getByText('Keep editing'));
-      expect(screen.queryByTestId('workflowTriggerConfigPanelDiscardModal')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('workflowTriggerConfigPanelDiscardModal')
+      ).not.toBeInTheDocument();
       expect(onClose).not.toHaveBeenCalled();
 
       fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelClose'));
@@ -251,11 +256,17 @@ describe('TriggerConfigPanel', () => {
     it('offers only Close in the footer and never applies anything', () => {
       const { onClose, onRevert, onFragmentChange } = renderPanel({ readOnly: true });
 
-      expect(screen.queryByTestId('workflowTriggerConfigPanelResetTrigger')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('workflowTriggerConfigPanelRemoveTrigger')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('workflowTriggerConfigPanelResetTrigger')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('workflowTriggerConfigPanelRemoveTrigger')
+      ).not.toBeInTheDocument();
       fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelFooterClose'));
 
-      expect(screen.getByTestId('workflowTriggerConfigPanelFooterClose')).toHaveTextContent('Close');
+      expect(screen.getByTestId('workflowTriggerConfigPanelFooterClose')).toHaveTextContent(
+        'Close'
+      );
       expect(onClose).toHaveBeenCalledTimes(1);
       expect(onRevert).not.toHaveBeenCalled();
       expect(onFragmentChange).not.toHaveBeenCalled();

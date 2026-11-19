@@ -42,11 +42,15 @@ describe('rewriteStepReferences', () => {
     expect(rewriteStepReferences(yaml, 'Fetch user', 'Load user')).toContain(
       '{{ steps["Load user"].output.id }}'
     );
-    expect(rewriteStepReferences(yaml, 'a', 'New name')).toContain('{{ steps["New name"].output }}');
+    expect(rewriteStepReferences(yaml, 'a', 'New name')).toContain(
+      '{{ steps["New name"].output }}'
+    );
   });
 
   it('keeps comments and returns the very same text when nothing refers to the step', () => {
-    const yaml = workflow('  # note\n  - name: b\n    type: console\n    with:\n      message: hi\n');
+    const yaml = workflow(
+      '  # note\n  - name: b\n    type: console\n    with:\n      message: hi\n'
+    );
 
     expect(rewriteStepReferences(yaml, 'a', 'c')).toBe(yaml);
   });

@@ -75,7 +75,7 @@ export function SchemaListDragClone({
           </code>
         </EuiText>
         <EuiText size="s" color="subdued" css={{ flexShrink: 0 }}>
-          · {typeLabel}
+          {`· ${typeLabel}`}
         </EuiText>
       </div>
     </div>

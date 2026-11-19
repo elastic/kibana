@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiIconTip,
   EuiText,
+  EuiToolTip,
   transparentize,
   useEuiTheme,
 } from '@elastic/eui';
@@ -134,6 +135,10 @@ export function PickerHeader({
   readonly onNavigate: (depth: number) => void;
 }) {
   const { euiTheme } = useEuiTheme();
+  const backLabel = i18n.translate('workflows.dataReferencePicker.back', {
+    defaultMessage: 'Back',
+  });
+
   return (
     <EuiFlexGroup
       gutterSize="s"
@@ -143,15 +148,15 @@ export function PickerHeader({
     >
       {isDrilled ? (
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="chevronSingleLeft"
-            size="xs"
-            aria-label={i18n.translate('workflows.dataReferencePicker.back', {
-              defaultMessage: 'Back',
-            })}
-            onClick={onBack}
-            data-test-subj="workflowDataReferenceBack"
-          />
+          <EuiToolTip content={backLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="chevronSingleLeft"
+              size="xs"
+              aria-label={backLabel}
+              onClick={onBack}
+              data-test-subj="workflowDataReferenceBack"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow>
@@ -428,7 +433,8 @@ export function ReferenceList({
               />
             ))}
       </div>
-      {visibleRows.totalMatches !== undefined && visibleRows.totalMatches > visibleRows.items.length ? (
+      {visibleRows.totalMatches !== undefined &&
+      visibleRows.totalMatches > visibleRows.items.length ? (
         <EuiText
           size="xs"
           color="subdued"

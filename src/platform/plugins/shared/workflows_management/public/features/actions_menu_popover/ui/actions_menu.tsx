@@ -798,7 +798,7 @@ export function ActionsMenu({
                   {showCompactBack ? (
                     <EuiToolTip content={compactBackLabel} disableScreenReaderOutput>
                       <EuiButtonIcon
-                        iconType="arrowLeft"
+                        iconType="chevronSingleLeft"
                         color="text"
                         size="xs"
                         onClick={goBack}

@@ -119,6 +119,7 @@ export function WorkflowExecuteManualFieldsForm({
         } else if (enumValues && enumValues.length > 0) {
           control = (
             <EuiSelect
+              aria-label={label}
               compressed
               fullWidth
               hasNoInitialSelection={!isRequired && fieldValue == null}
@@ -134,6 +135,7 @@ export function WorkflowExecuteManualFieldsForm({
           const options = examples.map((v) => ({ label: v }));
           control = (
             <EuiComboBox
+              aria-label={label}
               compressed
               fullWidth
               singleSelection={{ asPlainText: true }}

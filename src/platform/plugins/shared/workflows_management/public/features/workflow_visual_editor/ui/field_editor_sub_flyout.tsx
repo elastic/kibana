@@ -15,6 +15,7 @@ import {
   EuiFormLabel,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   transparentize,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -244,278 +245,289 @@ export function FieldEditorSubFlyout({
   } as const;
   const editorPaddingPx = parseInt(String(euiTheme.size.m), 10) || 12;
 
-  return (
-    <div
-      role="dialog"
-      aria-modal="false"
-      aria-labelledby={titleId}
-      aria-label={fieldLabel}
-      data-test-subj="workflowFieldEditorSubFlyout"
-      onKeyDown={handleKeyDown}
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        minHeight: 0,
-        background: euiTheme.colors.backgroundBasePlain,
-      }}
-    >
-      <div
-        css={{
-          flex: '0 0 auto',
-          borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-          padding: euiTheme.size.m,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: euiTheme.size.s,
-        }}
-      >
-        <EuiFlexGroup
-          gutterSize="s"
-          alignItems="center"
-          justifyContent="spaceBetween"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              flush="left"
-              color="text"
-              iconType="undo"
-              onClick={onBack}
-              data-test-subj="workflowFieldEditorSubFlyoutBack"
-            >
-              {i18n.translate('workflows.fieldEditorSubFlyout.back', {
-                defaultMessage: 'Back',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              color="text"
-              aria-label={i18n.translate('workflows.fieldEditorSubFlyout.closeStack', {
-                defaultMessage: 'Close',
-              })}
-              onClick={onCloseStack}
-              data-test-subj="workflowFieldEditorSubFlyoutClose"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiTitle size="xs">
-          <h4 id={titleId} data-test-subj="workflowFieldEditorSubFlyoutTitle">
-            {fieldLabel}
-          </h4>
-        </EuiTitle>
-      </div>
+  const closeStackLabel = i18n.translate('workflows.fieldEditorSubFlyout.closeStack', {
+    defaultMessage: 'Close',
+  });
 
+  return (
+    <div role="presentation" onKeyDown={handleKeyDown} css={{ display: 'contents' }}>
       <div
+        role="dialog"
+        aria-modal="false"
+        aria-labelledby={titleId}
+        aria-label={fieldLabel}
+        data-test-subj="workflowFieldEditorSubFlyout"
         css={{
-          flex: '1 1 auto',
-          minHeight: 0,
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden',
+          height: '100%',
+          minHeight: 0,
+          background: euiTheme.colors.backgroundBasePlain,
         }}
       >
+        <div
+          css={{
+            flex: '0 0 auto',
+            borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+            padding: euiTheme.size.m,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: euiTheme.size.s,
+          }}
+        >
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            justifyContent="spaceBetween"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                flush="left"
+                color="text"
+                iconType="undo"
+                onClick={onBack}
+                data-test-subj="workflowFieldEditorSubFlyoutBack"
+              >
+                {i18n.translate('workflows.fieldEditorSubFlyout.back', {
+                  defaultMessage: 'Back',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={closeStackLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="cross"
+                  color="text"
+                  aria-label={closeStackLabel}
+                  onClick={onCloseStack}
+                  data-test-subj="workflowFieldEditorSubFlyoutClose"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiTitle size="xs">
+            <h4 id={titleId} data-test-subj="workflowFieldEditorSubFlyoutTitle">
+              {fieldLabel}
+            </h4>
+          </EuiTitle>
+        </div>
+
         <div
           css={{
             flex: '1 1 auto',
             minHeight: 0,
             display: 'flex',
-            flexDirection: 'row',
-            height: '100%',
+            flexDirection: 'column',
+            overflow: 'hidden',
           }}
         >
-          <DataReferenceCatalogTree catalog={catalog} onInsert={insertAtCaret} {...runControls} />
-
           <div
-            data-test-subj="workflowFieldEditorSubFlyoutEditorPane"
-            onDragOver={(e) => {
-              e.preventDefault();
-              e.dataTransfer.dropEffect = 'copy';
-              // Avoid setState on every dragover — continuous re-renders make
-              // the custom drag ghost stutter while crossing into the editor.
-              if (!isDragOverRef.current) {
-                isDragOverRef.current = true;
-                setIsDragOver(true);
-              }
-              if (!editor) return;
-              dragOverPointerRef.current = { x: e.clientX, y: e.clientY };
-              if (dragOverCaretRafRef.current != null) return;
-              dragOverCaretRafRef.current = window.requestAnimationFrame(() => {
-                dragOverCaretRafRef.current = null;
-                const { x, y } = dragOverPointerRef.current;
-                const offset = offsetAtPointer(x, y);
-                if (offset === undefined) return;
-                if (!editorFocusedForDragRef.current) {
-                  editorFocusedForDragRef.current = true;
-                  editor.focus();
-                }
-                bridgeRef.current?.setCaret(offset);
-              });
-            }}
-            onDragLeave={(e) => {
-              // Ignore leave events that stay within the pane.
-              if (e.currentTarget.contains(e.relatedTarget as Node)) return;
-              isDragOverRef.current = false;
-              editorFocusedForDragRef.current = false;
-              cancelDragFrame();
-              setIsDragOver(false);
-            }}
-            onDrop={(e) => {
-              e.preventDefault();
-              isDragOverRef.current = false;
-              editorFocusedForDragRef.current = false;
-              cancelDragFrame();
-              setIsDragOver(false);
-              const token = e.dataTransfer.getData('text/plain');
-              if (!token) return;
-              const offset = offsetAtPointer(e.clientX, e.clientY);
-              if (offset === undefined) {
-                insertAtCaret(token);
-                return;
-              }
-              bridgeRef.current?.replaceText?.(
-                offset,
-                offset,
-                tokenForInsert(token, draftRef.current, offset, offset, valueFormWhenWhole)
-              );
-            }}
             css={{
               flex: '1 1 auto',
-              minWidth: 0,
               minHeight: 0,
               display: 'flex',
-              flexDirection: 'column',
-              gap: euiTheme.size.s,
-              padding: euiTheme.size.m,
-              // Prefer a text caret over the default DnD pointer while hovering
-              // the editor — reinforces the insertion-point affordance.
-              cursor: isDragOver ? 'text' : undefined,
-              // TODO: needs last-run execution data — reserve a third
-              // pane here later without reflowing the tree + editor.
+              flexDirection: 'row',
+              height: '100%',
             }}
           >
-            <div
-              css={{
-                flex: '0 0 auto',
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: euiTheme.size.s,
-                flexWrap: 'wrap',
-              }}
-            >
-              <EuiFormLabel
-                id={valueLabelId}
-                data-test-subj="workflowFieldEditorSubFlyoutValueLabel"
-              >
-                {VALUE_LABEL}
-              </EuiFormLabel>
-              <EuiText
-                size="xs"
-                color="subdued"
-                data-test-subj="workflowFieldEditorSubFlyoutValueDescription"
-                css={{ '& kbd': keyChipCss }}
-              >
-                {isFreeText ? (
-                  <FormattedMessage
-                    id="workflows.fieldEditorSubFlyout.valueDescription"
-                    defaultMessage="Drag a reference in, or type {brace} / {braces}"
-                    values={{
-                      brace: <kbd>{'{'}</kbd>,
-                      braces: <kbd>{'{{'}</kbd>,
-                    }}
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="workflows.fieldEditorSubFlyout.valueDescriptionBraces"
-                    defaultMessage="Drag a reference in, or type {braces}"
-                    values={{ braces: <kbd>{'{{'}</kbd> }}
-                  />
-                )}
-              </EuiText>
-            </div>
+            <DataReferenceCatalogTree catalog={catalog} onInsert={insertAtCaret} {...runControls} />
 
             <div
+              data-test-subj="workflowFieldEditorSubFlyoutEditorPane"
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+                // Avoid setState on every dragover — continuous re-renders make
+                // the custom drag ghost stutter while crossing into the editor.
+                if (!isDragOverRef.current) {
+                  isDragOverRef.current = true;
+                  setIsDragOver(true);
+                }
+                if (!editor) return;
+                dragOverPointerRef.current = { x: e.clientX, y: e.clientY };
+                if (dragOverCaretRafRef.current != null) return;
+                dragOverCaretRafRef.current = window.requestAnimationFrame(() => {
+                  dragOverCaretRafRef.current = null;
+                  const { x, y } = dragOverPointerRef.current;
+                  const offset = offsetAtPointer(x, y);
+                  if (offset === undefined) return;
+                  if (!editorFocusedForDragRef.current) {
+                    editorFocusedForDragRef.current = true;
+                    editor.focus();
+                  }
+                  bridgeRef.current?.setCaret(offset);
+                });
+              }}
+              onDragLeave={(e) => {
+                // Ignore leave events that stay within the pane.
+                if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+                isDragOverRef.current = false;
+                editorFocusedForDragRef.current = false;
+                cancelDragFrame();
+                setIsDragOver(false);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                isDragOverRef.current = false;
+                editorFocusedForDragRef.current = false;
+                cancelDragFrame();
+                setIsDragOver(false);
+                const token = e.dataTransfer.getData('text/plain');
+                if (!token) return;
+                const offset = offsetAtPointer(e.clientX, e.clientY);
+                if (offset === undefined) {
+                  insertAtCaret(token);
+                  return;
+                }
+                bridgeRef.current?.replaceText?.(
+                  offset,
+                  offset,
+                  tokenForInsert(token, draftRef.current, offset, offset, valueFormWhenWhole)
+                );
+              }}
               css={{
                 flex: '1 1 auto',
+                minWidth: 0,
                 minHeight: 0,
                 display: 'flex',
                 flexDirection: 'column',
-                // Stretch ReferenceCapableField / DataReferencePicker fill wrapper.
-                '& > *': {
-                  flex: '1 1 auto',
-                  minHeight: 0,
-                  height: '100%',
-                },
+                gap: euiTheme.size.s,
+                padding: euiTheme.size.m,
+                // Prefer a text caret over the default DnD pointer while hovering
+                // the editor — reinforces the insertion-point affordance.
+                cursor: isDragOver ? 'text' : undefined,
+                // TODO: needs last-run execution data — reserve a third
+                // pane here later without reflowing the tree + editor.
               }}
             >
-              <ReferenceCapableField
-                catalog={catalog}
-                value={draft}
-                onChange={applyDraft}
-                fillHeight
-                anchorAtCaret
-                openOnBrace={isFreeText}
-                valueFormWhenWhole={valueFormWhenWhole}
+              <div
+                css={{
+                  flex: '0 0 auto',
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: euiTheme.size.s,
+                  flexWrap: 'wrap',
+                }}
               >
-                {({ appendControls, reportChange, registerSelection, teachingPlaceholder }) => (
-                  <div
-                    css={{
-                      flex: '1 1 auto',
-                      minHeight: 0,
-                      height: '100%',
-                      width: '100%',
-                      position: 'relative',
-                    }}
-                  >
+                <EuiFormLabel
+                  id={valueLabelId}
+                  data-test-subj="workflowFieldEditorSubFlyoutValueLabel"
+                >
+                  {VALUE_LABEL}
+                </EuiFormLabel>
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  data-test-subj="workflowFieldEditorSubFlyoutValueDescription"
+                  css={{ '& kbd': keyChipCss }}
+                >
+                  {isFreeText ? (
+                    <FormattedMessage
+                      id="workflows.fieldEditorSubFlyout.valueDescription"
+                      defaultMessage="Drag a reference in, or type {brace} / {braces}"
+                      values={{
+                        brace: <kbd>{'{'}</kbd>,
+                        braces: <kbd>{'{{'}</kbd>,
+                      }}
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="workflows.fieldEditorSubFlyout.valueDescriptionBraces"
+                      defaultMessage="Drag a reference in, or type {braces}"
+                      values={{ braces: <kbd>{'{{'}</kbd> }}
+                    />
+                  )}
+                </EuiText>
+              </div>
+
+              <div
+                css={{
+                  flex: '1 1 auto',
+                  minHeight: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  // Stretch ReferenceCapableField / DataReferencePicker fill wrapper.
+                  '& > *': {
+                    flex: '1 1 auto',
+                    minHeight: 0,
+                    height: '100%',
+                  },
+                }}
+              >
+                <ReferenceCapableField
+                  catalog={catalog}
+                  value={draft}
+                  onChange={applyDraft}
+                  fillHeight
+                  anchorAtCaret
+                  openOnBrace={isFreeText}
+                  valueFormWhenWhole={valueFormWhenWhole}
+                >
+                  {({ appendControls, reportChange, registerSelection, teachingPlaceholder }) => (
                     <div
                       css={{
-                        position: 'absolute',
-                        top: euiTheme.size.s,
-                        right: euiTheme.size.s,
-                        zIndex: 2,
+                        flex: '1 1 auto',
+                        minHeight: 0,
+                        height: '100%',
+                        width: '100%',
+                        position: 'relative',
                       }}
                     >
-                      {appendControls}
-                    </div>
-                    <div css={editorBoxCss}>
-                      <CodeEditor
-                        languageId={monacoLanguageFor(language)}
-                        chromeOverrides={workflowsEditorChromeOverrides}
-                        // Transparent so the box (border, background) shows through.
-                        transparentBackground
-                        value={draft}
-                        onChange={(text, event) => {
-                          reportChange(text, caretAfterChange(text, event), typedCharacter(event));
+                      <div
+                        css={{
+                          position: 'absolute',
+                          top: euiTheme.size.s,
+                          right: euiTheme.size.s,
+                          zIndex: 2,
                         }}
-                        height="100%"
-                        aria-label={fieldLabel}
-                        dataTestSubj="workflowFieldEditorSubFlyoutTextarea"
-                        placeholder={draft.length === 0 ? teachingPlaceholder : undefined}
-                        editorDidMount={(mounted) => handleEditorMount(mounted, registerSelection)}
-                        options={{
-                          ...EDITOR_OPTIONS,
-                          padding: { top: editorPaddingPx, bottom: editorPaddingPx },
-                          lineDecorationsWidth: editorPaddingPx,
-                        }}
-                      />
+                      >
+                        {appendControls}
+                      </div>
+                      <div css={editorBoxCss}>
+                        <CodeEditor
+                          languageId={monacoLanguageFor(language)}
+                          chromeOverrides={workflowsEditorChromeOverrides}
+                          // Transparent so the box (border, background) shows through.
+                          transparentBackground
+                          value={draft}
+                          onChange={(text, event) => {
+                            reportChange(
+                              text,
+                              caretAfterChange(text, event),
+                              typedCharacter(event)
+                            );
+                          }}
+                          height="100%"
+                          aria-label={fieldLabel}
+                          dataTestSubj="workflowFieldEditorSubFlyoutTextarea"
+                          placeholder={draft.length === 0 ? teachingPlaceholder : undefined}
+                          editorDidMount={(mounted) =>
+                            handleEditorMount(mounted, registerSelection)
+                          }
+                          options={{
+                            ...EDITOR_OPTIONS,
+                            padding: { top: editorPaddingPx, bottom: editorPaddingPx },
+                            lineDecorationsWidth: editorPaddingPx,
+                          }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                )}
-              </ReferenceCapableField>
-            </div>
-            {warning ? (
-              <div css={{ flex: '0 0 auto' }}>
-                <ContainerInSentenceCallout
-                  token={warning}
-                  onFix={() => applyDraft(insertTokenAsJsonText(draft, warning))}
-                  onDismiss={dismissWarning}
-                  testSubj="workflowFieldEditorSubFlyout"
-                />
+                  )}
+                </ReferenceCapableField>
               </div>
-            ) : null}
+              {warning ? (
+                <div css={{ flex: '0 0 auto' }}>
+                  <ContainerInSentenceCallout
+                    token={warning}
+                    onFix={() => applyDraft(insertTokenAsJsonText(draft, warning))}
+                    onDismiss={dismissWarning}
+                    testSubj="workflowFieldEditorSubFlyout"
+                  />
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       </div>

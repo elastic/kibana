@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextArea,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -69,21 +70,20 @@ export type OutputSettingsEntryRowProps = SettingsEntryRowSharedProps & {
   readonly siblings: readonly OutputField[];
 };
 
+// Each callback takes the field type of its `kind`, so a caller handles only what it renders.
 export type CommittedSettingsEntryRowProps = (
-  | ConstantSettingsEntryRowProps
-  | OutputSettingsEntryRowProps
+  | (ConstantSettingsEntryRowProps & { readonly onChange: (next: ConstantField) => void })
+  | (OutputSettingsEntryRowProps & { readonly onChange: (next: OutputField) => void })
 ) & {
   readonly mode: 'committed';
-  readonly onChange: (next: ConstantField | OutputField) => void;
   readonly onRequestDelete: () => void;
 };
 
 export type DraftSettingsEntryRowProps = (
-  | ConstantSettingsEntryRowProps
-  | OutputSettingsEntryRowProps
+  | (ConstantSettingsEntryRowProps & { readonly onCommit: (next: ConstantField) => void })
+  | (OutputSettingsEntryRowProps & { readonly onCommit: (next: OutputField) => void })
 ) & {
   readonly mode: 'draft';
-  readonly onCommit: (next: ConstantField | OutputField) => void;
   readonly onDiscard: () => void;
 };
 
@@ -104,7 +104,7 @@ const SummaryLine = ({
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiText size="s" color="subdued">
-        · {typeLabel}
+        {`· ${typeLabel}`}
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -160,7 +160,6 @@ const ConstantFields = ({
             isInvalid={nameError != null && field.name.length > 0}
             error={settingsEntryNameErrorMessage(nameError)}
             fullWidth
-            compressed
           >
             <EuiFieldText
               isInvalid={nameError != null && field.name.length > 0}
@@ -179,7 +178,6 @@ const ConstantFields = ({
               defaultMessage: 'Type',
             })}
             fullWidth
-            compressed
           >
             <EuiSelect
               compressed
@@ -212,7 +210,6 @@ const ConstantFields = ({
         isInvalid={Boolean(valueError)}
         error={valueError}
         fullWidth
-        compressed
       >
         {field.type === 'object' || field.type === 'array' ? (
           <EuiTextArea
@@ -261,14 +258,14 @@ const DraftActions = ({
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiButton size="xs" onClick={onDiscard} data-test-subj={`${prefix}Discard-${fieldId}`}>
+        <EuiButton size="s" onClick={onDiscard} data-test-subj={`${prefix}Discard-${fieldId}`}>
           {i18n.translate('workflows.workflowSettingsFlyout.settingsEntryCancel', {
             defaultMessage: 'Cancel',
           })}
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton size="xs" fill onClick={onCommit} data-test-subj={`${prefix}Done-${fieldId}`}>
+        <EuiButton size="s" fill onClick={onCommit} data-test-subj={`${prefix}Done-${fieldId}`}>
           {i18n.translate('workflows.workflowSettingsFlyout.settingsEntryDone', {
             defaultMessage: 'Done',
           })}
@@ -301,7 +298,11 @@ export function SettingsEntryRow(props: SettingsEntryRowProps) {
         setDraftField(next as typeof props.field);
         return;
       }
-      props.onChange(next);
+      if (props.kind === 'constant') {
+        props.onChange(next as ConstantField);
+      } else {
+        props.onChange(next as OutputField);
+      }
     },
     [props]
   );
@@ -341,12 +342,25 @@ export function SettingsEntryRow(props: SettingsEntryRowProps) {
           kind={props.kind}
           fieldId={props.field.id}
           readOnly={props.readOnly}
-          onCommit={() => props.onCommit(draftField)}
+          onCommit={() =>
+            props.kind === 'constant'
+              ? props.onCommit(draftField as ConstantField)
+              : props.onCommit(draftField as OutputField)
+          }
           onDiscard={props.onDiscard}
         />
       </EuiPanel>
     );
   }
+
+  const removeLabel =
+    props.kind === 'constant'
+      ? i18n.translate('workflows.workflowSettingsFlyout.removeConstant', {
+          defaultMessage: 'Remove constant',
+        })
+      : i18n.translate('workflows.workflowSettingsFlyout.removeOutput', {
+          defaultMessage: 'Remove output',
+        });
 
   return (
     <EuiPanel hasBorder paddingSize="none" css={{ marginBottom: euiTheme.size.s }}>
@@ -357,24 +371,18 @@ export function SettingsEntryRow(props: SettingsEntryRowProps) {
         buttonContent={<SummaryLine displayName={displayName} typeLabel={typeLabel} />}
         extraAction={
           props.readOnly ? undefined : (
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              aria-label={
-                props.kind === 'constant'
-                  ? i18n.translate('workflows.workflowSettingsFlyout.removeConstant', {
-                      defaultMessage: 'Remove constant',
-                    })
-                  : i18n.translate('workflows.workflowSettingsFlyout.removeOutput', {
-                      defaultMessage: 'Remove output',
-                    })
-              }
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                props.onRequestDelete();
-              }}
-              data-test-subj={`${testSubjPrefix}Remove-${props.field.id}`}
-            />
+            <EuiToolTip content={removeLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="trash"
+                color="danger"
+                aria-label={removeLabel}
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  props.onRequestDelete();
+                }}
+                data-test-subj={`${testSubjPrefix}Remove-${props.field.id}`}
+              />
+            </EuiToolTip>
           )
         }
         css={{

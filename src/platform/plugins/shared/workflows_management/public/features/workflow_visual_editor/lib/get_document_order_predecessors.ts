@@ -60,20 +60,21 @@ export const getDocumentOrderPredecessors = (
   const visit = (list: ReadonlyArray<unknown>): void => {
     for (const item of list) {
       if (found) return;
-      if (!isStepLike(item)) continue;
-      if (item.name === currentStepName) {
-        found = true;
-        return;
+      if (isStepLike(item)) {
+        if (item.name === currentStepName) {
+          found = true;
+          return;
+        }
+        predecessors.push({ name: item.name, type: item.type });
+        const ownEnd = predecessors.length;
+        visitChildLists(item, (children) => {
+          if (found) return;
+          const listStart = predecessors.length;
+          visit(children);
+          // The current step is in this list, so the lists before it did not run.
+          if (found) predecessors.splice(ownEnd, listStart - ownEnd);
+        });
       }
-      predecessors.push({ name: item.name, type: item.type });
-      const ownEnd = predecessors.length;
-      visitChildLists(item, (children) => {
-        if (found) return;
-        const listStart = predecessors.length;
-        visit(children);
-        // The current step is in this list, so the lists before it did not run.
-        if (found) predecessors.splice(ownEnd, listStart - ownEnd);
-      });
     }
   };
 
@@ -93,9 +94,10 @@ export const getAllDocumentOrderSteps = (
 
   const visit = (list: ReadonlyArray<unknown>): void => {
     for (const item of list) {
-      if (!isStepLike(item)) continue;
-      all.push({ name: item.name, type: item.type });
-      visitChildLists(item, visit);
+      if (isStepLike(item)) {
+        all.push({ name: item.name, type: item.type });
+        visitChildLists(item, visit);
+      }
     }
   };
 

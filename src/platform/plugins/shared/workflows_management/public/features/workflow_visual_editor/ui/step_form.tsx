@@ -93,10 +93,10 @@ export function StepForm({
       let next: string[] | undefined;
       for (const field of optionalFields) {
         const id = fieldId(field);
-        if (prev.includes(id)) continue;
-        if (isEmptyFieldValue(step.read(field.path))) continue;
-        if (!next) next = [...prev];
-        next.push(id);
+        if (!prev.includes(id) && !isEmptyFieldValue(step.read(field.path))) {
+          if (!next) next = [...prev];
+          next.push(id);
+        }
       }
       return next ?? prev;
     });
@@ -185,6 +185,9 @@ export function StepForm({
   const addOptionalButton =
     !readOnly && availableOptionalFields.length > 0 ? (
       <EuiPopover
+        aria-label={i18n.translate('workflows.stepConfigPanel.optionalFieldsPopover', {
+          defaultMessage: 'Optional fields',
+        })}
         isOpen={optionalPickerOpen}
         closePopover={() => setOptionalPickerOpen(false)}
         panelPaddingSize="none"
@@ -195,7 +198,7 @@ export function StepForm({
             flush="both"
             color="primary"
             iconType="plusCircle"
-            onClick={(e) => {
+            onClick={(e: React.MouseEvent) => {
               e.stopPropagation();
               setOptionalPickerOpen((open) => !open);
             }}
@@ -208,7 +211,6 @@ export function StepForm({
         }
       >
         <EuiContextMenuPanel
-          size="s"
           items={optionalPickerItems}
           data-test-subj="workflowStepConfigOptionalFieldMenu"
         />

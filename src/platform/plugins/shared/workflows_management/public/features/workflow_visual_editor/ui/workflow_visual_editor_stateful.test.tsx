@@ -297,7 +297,11 @@ describe('WorkflowVisualEditorStateful', () => {
   });
 
   describe('a trigger panel', () => {
-    const scheduledAction: ActionOption = { id: 'scheduled', label: 'Scheduled', iconType: 'clock' };
+    const scheduledAction: ActionOption = {
+      id: 'scheduled',
+      label: 'Scheduled',
+      iconType: 'clock',
+    };
     const triggerPanel = () => screen.queryByTestId('mockTriggerConfigPanel');
     const manualTriggerNodeId = () =>
       Object.entries(mockCanvas.props?.transformed?.nodeRefs ?? {}).find(

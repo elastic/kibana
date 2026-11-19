@@ -373,6 +373,9 @@ export function DataReferencePicker({
 
   const popover = (
     <EuiPopover
+      aria-label={i18n.translate('workflows.dataReferencePicker.popoverLabel', {
+        defaultMessage: 'Data references',
+      })}
       isOpen={isOpen && (!isTypeahead || flatNavigable.length > 0)}
       closePopover={onClose}
       button={

@@ -291,64 +291,6 @@ describe('computeWireInsertionControls', () => {
     expect(controls.some((c) => c.kind === 'terminal' && c.id.includes(':a:'))).toBe(false);
   });
 
-  it('treats branchIndex 0 on a merge step as a branch edge, not a merge body edge', () => {
-    const mergeStepNodes: Node[] = [
-      {
-        id: 'm',
-        type: 'step',
-        position: { x: 0, y: 0 },
-        width: 200,
-        height: 48,
-        data: { stepType: 'merge', label: 'm' },
-      },
-      {
-        id: 'child',
-        type: 'step',
-        position: { x: 0, y: 200 },
-        width: 200,
-        height: 48,
-        data: { stepType: 'slack', label: 'child' },
-      },
-    ];
-    const mergeStepInsertion: InsertionPoints = {
-      byNodeId: new Map([
-        [
-          'm',
-          {
-            branches: new Map([
-              [
-                'steps',
-                { slot: { kind: 'steps' as const }, ownerStepName: 'm', isTerminal: false },
-              ],
-              [
-                'branch:0',
-                {
-                  slot: { kind: 'branch' as const, index: 0 },
-                  ownerStepName: 'm',
-                  isTerminal: false,
-                },
-              ],
-            ]),
-          },
-        ],
-      ]),
-      topLevelStepNodeIds: ['m', 'child'],
-    };
-    const controls = computeWireInsertionControls({
-      nodes: mergeStepNodes,
-      edges: [{ id: 'm-child', source: 'm', target: 'child', data: { branchIndex: 0 } }],
-      insertionPoints: mergeStepInsertion,
-      direction: 'TB',
-    });
-    const fork = controls.find((c) => c.id === 'terminal:fork:m-child');
-    expect(fork?.insertContext).toEqual({
-      mode: 'branch',
-      stepName: 'm',
-      branch: { kind: 'branch', index: 0 },
-      position: 'start',
-    });
-  });
-
   it('LR: places the fork-head + past the chip with a non-empty stub', () => {
     const lrNodes: Node[] = [
       {

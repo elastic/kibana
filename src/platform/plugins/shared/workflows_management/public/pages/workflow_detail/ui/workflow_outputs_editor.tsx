@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -50,6 +51,8 @@ export function WorkflowOutputsEditor({
   hideInlineAddButton = false,
   onAddControlsChange,
 }: WorkflowOutputsEditorProps) {
+  const deleteModalTitleId = useGeneratedHtmlId({ prefix: 'workflowSettingsOutputDeleteTitle' });
+  const renameModalTitleId = useGeneratedHtmlId({ prefix: 'workflowSettingsOutputRenameTitle' });
   const [draftField, setDraftField] = useState<OutputField | null>(null);
 
   useEffect(() => {
@@ -218,6 +221,8 @@ export function WorkflowOutputsEditor({
 
       {pendingDelete ? (
         <EuiConfirmModal
+          aria-labelledby={deleteModalTitleId}
+          titleProps={{ id: deleteModalTitleId }}
           title={i18n.translate('workflows.workflowSettingsFlyout.deleteOutputTitle', {
             defaultMessage: 'Delete output “{name}”?',
             values: { name: pendingDelete.field.name },
@@ -250,6 +255,8 @@ export function WorkflowOutputsEditor({
 
       {pendingRename ? (
         <EuiConfirmModal
+          aria-labelledby={renameModalTitleId}
+          titleProps={{ id: renameModalTitleId }}
           title={i18n.translate('workflows.workflowSettingsFlyout.renameOutputTitle', {
             defaultMessage: 'Rename output?',
           })}

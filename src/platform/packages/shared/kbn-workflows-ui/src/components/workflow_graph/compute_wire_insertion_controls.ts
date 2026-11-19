@@ -243,25 +243,16 @@ export function computeWireInsertionControls(args: {
       const edgeData = edge.data as
         | { branchType?: EdgeBranchType; branchIndex?: number; label?: string }
         | undefined;
-      // `merge` step body edges have no branchType (they are plain sequential in
-      // the transform), but the merge node has a `steps` branch port (keyed 'then').
-      // Map the handle to 'then' so the body edge is recorded as wired for that
-      // branch, preventing a spurious branch-tail terminal on top of the body card.
-      const isMergeBodyEdge =
-        !edgeData?.branchType &&
-        edgeData?.branchIndex === undefined &&
-        nodeStepType(byId.get(edge.source)) === 'merge';
-      const handleKey = isMergeBodyEdge
-        ? 'then'
-        : edgeData?.branchType === 'switch'
-        ? edgeData.label === 'default'
-          ? 'default'
+      const handleKey =
+        edgeData?.branchType === 'switch'
+          ? edgeData.label === 'default'
+            ? 'default'
+            : typeof edgeData?.branchIndex === 'number'
+            ? `case:${edgeData.branchIndex}`
+            : `case:${edgeData.label}`
           : typeof edgeData?.branchIndex === 'number'
-          ? `case:${edgeData.branchIndex}`
-          : `case:${edgeData.label}`
-        : typeof edgeData?.branchIndex === 'number'
-        ? `branch:${edgeData.branchIndex}`
-        : edge.sourceHandle ?? 'step';
+          ? `branch:${edgeData.branchIndex}`
+          : edge.sourceHandle ?? 'step';
 
       const insertContext = resolveInsertContext(ports, handleKey);
       if (!insertContext) return;

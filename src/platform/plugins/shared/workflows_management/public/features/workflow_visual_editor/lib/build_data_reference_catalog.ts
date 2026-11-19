@@ -693,20 +693,18 @@ export const flattenDataReferenceLeaves = (
     for (const item of list) {
       if (item.children?.length && (item.isEntity || item.drillable)) {
         walk(item.children);
-        continue;
-      }
-      if (isDataReferenceInsertable(item)) {
+      } else if (isDataReferenceInsertable(item)) {
         leaves.push(item);
       }
     }
   };
 
-  if (Array.isArray(catalogOrItems)) {
-    walk(catalogOrItems);
-  } else {
+  if ('groups' in catalogOrItems) {
     for (const group of catalogOrItems.groups) {
       walk(group.items);
     }
+  } else {
+    walk(catalogOrItems);
   }
   return leaves;
 };

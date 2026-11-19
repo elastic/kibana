@@ -18,6 +18,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTextArea,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -349,17 +350,18 @@ export function StepFieldRow({
         },
       }}
     >
-      <EuiButtonIcon
-        iconType="cross"
-        size="xs"
-        color="text"
-        title={removeLabel}
-        aria-label={removeLabel}
-        onClick={onRemove}
-        data-remove-field=""
-        data-test-subj={`workflowStepConfigRemoveOptional-${fieldId(field)}`}
-        css={removeExpandCss}
-      />
+      <EuiToolTip content={removeLabel} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="cross"
+          size="xs"
+          color="text"
+          aria-label={removeLabel}
+          onClick={onRemove}
+          data-remove-field=""
+          data-test-subj={`workflowStepConfigRemoveOptional-${fieldId(field)}`}
+          css={removeExpandCss}
+        />
+      </EuiToolTip>
     </span>
   ) : undefined;
 
@@ -745,14 +747,16 @@ export function StepFieldRow({
                   onBlur={accuseIfInvalid}
                   data-test-subj={`${testSubj}-branch-${idx}`}
                 />
-                <EuiButtonIcon
-                  iconType="trash"
-                  color="danger"
-                  size="xs"
-                  aria-label={deleteBranchLabel}
-                  onClick={() => onChange(branchesArray.filter((_, i) => i !== idx))}
-                  data-test-subj={`${testSubj}-branch-${idx}-delete`}
-                />
+                <EuiToolTip content={deleteBranchLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="trash"
+                    color="danger"
+                    size="xs"
+                    aria-label={deleteBranchLabel}
+                    onClick={() => onChange(branchesArray.filter((_, i) => i !== idx))}
+                    data-test-subj={`${testSubj}-branch-${idx}-delete`}
+                  />
+                </EuiToolTip>
               </div>
             ))}
             <div>

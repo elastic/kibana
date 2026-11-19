@@ -31,6 +31,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -146,7 +147,7 @@ const PropertyEditor = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued">
-          · {field.type}
+          {`· ${field.type}`}
         </EuiText>
       </EuiFlexItem>
       {field.mode === 'required' ? (
@@ -164,9 +165,13 @@ const PropertyEditor = ({
   const typeOptions =
     depth >= SCHEMA_PROPERTY_MAX_DEPTH
       ? SCHEMA_PROPERTY_TYPE_OPTIONS.filter((o) => o.value !== 'object' && o.value !== 'array')
-      : SCHEMA_PROPERTY_TYPE_OPTIONS;
+      : [...SCHEMA_PROPERTY_TYPE_OPTIONS];
 
   const itemTypeOptions = SCHEMA_PROPERTY_TYPE_OPTIONS.filter((o) => o.value !== 'array');
+
+  const removeLabel = i18n.translate('workflows.schemaPropertyBuilder.remove', {
+    defaultMessage: 'Remove',
+  });
 
   return (
     <EuiPanel hasBorder paddingSize="none" css={{ marginBottom: euiTheme.size.s }}>
@@ -177,18 +182,18 @@ const PropertyEditor = ({
         buttonContent={buttonContent}
         extraAction={
           readOnly ? undefined : (
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              aria-label={i18n.translate('workflows.schemaPropertyBuilder.remove', {
-                defaultMessage: 'Remove',
-              })}
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                onRequestDelete();
-              }}
-              data-test-subj={`${dataTestSubjPrefix}-remove-${field.id}`}
-            />
+            <EuiToolTip content={removeLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="trash"
+                color="danger"
+                aria-label={removeLabel}
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  onRequestDelete();
+                }}
+                data-test-subj={`${dataTestSubjPrefix}-remove-${field.id}`}
+              />
+            </EuiToolTip>
           )
         }
         css={{
@@ -230,7 +235,6 @@ const PropertyEditor = ({
                 isInvalid={nameError != null && field.name.length > 0}
                 error={nameErrorMessage(nameError)}
                 fullWidth
-                compressed
               >
                 <EuiFieldText
                   compressed
@@ -248,7 +252,6 @@ const PropertyEditor = ({
                   defaultMessage: 'Type',
                 })}
                 fullWidth
-                compressed
               >
                 <EuiSelect
                   compressed
@@ -269,7 +272,6 @@ const PropertyEditor = ({
               defaultMessage: 'Description',
             })}
             fullWidth
-            compressed
           >
             <EuiFieldText
               compressed
@@ -291,7 +293,6 @@ const PropertyEditor = ({
                   defaultMessage: 'Comma-separated. Leave empty for free-form input.',
                 })}
                 fullWidth
-                compressed
               >
                 <EuiFieldText
                   compressed
@@ -424,7 +425,6 @@ const PropertyEditor = ({
                   defaultMessage: 'Item type',
                 })}
                 fullWidth
-                compressed
               >
                 <EuiSelect
                   compressed
@@ -540,6 +540,8 @@ export function SchemaPropertyList({
 }: SchemaPropertyListProps) {
   const { euiTheme } = useEuiTheme();
   const droppableId = useGeneratedHtmlId({ prefix: `${dataTestSubjPrefix}-drop` });
+  const deleteModalTitleId = useGeneratedHtmlId({ prefix: `${dataTestSubjPrefix}-delete-title` });
+  const renameModalTitleId = useGeneratedHtmlId({ prefix: `${dataTestSubjPrefix}-rename-title` });
   const [pendingDelete, setPendingDelete] = useState<{
     field: SchemaPropertyField;
     steps: string[];
@@ -723,6 +725,8 @@ export function SchemaPropertyList({
 
       {pendingDelete ? (
         <EuiConfirmModal
+          aria-labelledby={deleteModalTitleId}
+          titleProps={{ id: deleteModalTitleId }}
           title={i18n.translate('workflows.schemaPropertyBuilder.deleteTitle', {
             defaultMessage: 'Delete input “{name}”?',
             values: { name: pendingDelete.field.name },
@@ -750,6 +754,8 @@ export function SchemaPropertyList({
 
       {pendingRename ? (
         <EuiConfirmModal
+          aria-labelledby={renameModalTitleId}
+          titleProps={{ id: renameModalTitleId }}
           title={i18n.translate('workflows.schemaPropertyBuilder.renameTitle', {
             defaultMessage: 'Rename input?',
           })}
