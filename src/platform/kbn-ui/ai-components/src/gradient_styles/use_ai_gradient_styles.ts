@@ -219,7 +219,8 @@ const resolveVariantStyles = (
         buttonBackground: 'transparent',
         hoverBackground: hoverGradient,
         labelColor: defaultLabelColor,
-        labelCss: plainLabelCss(euiTheme, defaultLabelColor),
+        // Match Figma AiButton empty: gradient clipped to the label (icon uses SVG fill).
+        labelCss: gradientLabelCss(euiTheme, labelGradient),
       };
 
     case 'outlined':

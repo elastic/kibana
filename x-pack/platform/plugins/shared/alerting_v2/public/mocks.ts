@@ -9,6 +9,11 @@ import type { AlertingV2PublicStart } from './types';
 
 const createStartContract = (): AlertingV2PublicStart => ({
   CreateRuleOptionsFlyout: jest.fn(() => null),
+  DefaultCreateRuleOptionsFlyout: jest.fn(() => null),
+  registerCreateRuleOptionsFlyout: jest.fn(),
+  registerRulesListEmptyState: jest.fn(),
+  ClassicRuleSummaryFlyout: jest.fn(() => null),
+  RuleSummaryFlyout: jest.fn(() => null),
   RulesPage: jest.fn(() => null),
   RuleLibraryPage: jest.fn(() => null),
   EpisodesPage: jest.fn(() => null),

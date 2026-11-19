@@ -36,8 +36,9 @@ import { useHostTabs } from '../../application/tabs_context';
 import { RulesListHeader } from './rules_list_header';
 import { RulesListTableContainer } from './rules_list_table_container';
 import { useRulesDataSource } from './rules_data_source';
-import { EsqlRulesIntroBanner } from './esql_rules_intro_banner';
+import { UniversalAlertingIntroBanner } from './universal_alerting_intro_banner';
 import { EsqlRulesEmptyState } from './esql_rules_empty_state';
+import { getRegisteredRulesListEmptyState } from './rules_list_empty_state_registry';
 import { AlertingOnboardingModal } from './alerting_onboarding_modal';
 
 export const RulesListPage = () => {
@@ -130,7 +131,7 @@ export const RulesListPage = () => {
         path: AGENT_BUILDER_NEW_CONVERSATION_PATH,
         state: {
           initialMessage: trimmed
-            ? `Load the rule-management skill and help me create an alerting rule for: ${trimmed}`
+            ? `Load the rule-authoring skill and help me create an alerting rule for: ${trimmed}`
             : CREATE_WITH_AGENT_INITIAL_PROMPT,
         },
       });
@@ -163,12 +164,17 @@ export const RulesListPage = () => {
     [classicRulesHref, closeOnboardingModal, navigateToUrl]
   );
 
+  const RegisteredEmptyState = getRegisteredRulesListEmptyState();
   const emptyState = canWrite ? (
-    <EsqlRulesEmptyState
-      onCreateRule={openCreateOptionsFlyout}
-      onHelpMeOnboard={openOnboardingModal}
-      documentationHref={documentationHref}
-    />
+    RegisteredEmptyState ? (
+      <RegisteredEmptyState />
+    ) : (
+      <EsqlRulesEmptyState
+        onCreateRule={openCreateOptionsFlyout}
+        onHelpMeOnboard={openOnboardingModal}
+        documentationHref={documentationHref}
+      />
+    )
   ) : (
     <EuiEmptyPrompt
       iconType="bell"
@@ -246,7 +252,7 @@ export const RulesListPage = () => {
           onCreateRule={openCreateOptionsFlyout}
           onHelpMeOnboard={openOnboardingModal}
         />
-        <EsqlRulesIntroBanner />
+        <UniversalAlertingIntroBanner />
         <ContentList emptyState={emptyState} data-test-subj="rulesList">
           <ContentListToolbar>
             <ContentListToolbar.Filters>

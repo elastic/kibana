@@ -72,6 +72,7 @@ export const RuleCreateOptionsFlyout = ({
           ? {
               title: flyoutTitle,
               titleId: FLYOUT_TITLE_ID,
+              showMaximizeButton: true,
             }
           : undefined
       }

@@ -106,8 +106,12 @@ const mockAlertingVTwo = {
     />
   ),
   CreateRuleOptionsFlyout: () => null,
+  DefaultCreateRuleOptionsFlyout: () => null,
+  registerCreateRuleOptionsFlyout: jest.fn(),
+  registerRulesListEmptyState: jest.fn(),
   ClassicRuleSummaryFlyout: () => null,
   RuleSummaryFlyout: () => null,
+  AlertsProvider: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
   createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) => ({
     rules: { app: appId, pathPrefix: paths.rules },
     ruleLibrary: { app: appId, pathPrefix: paths.ruleLibrary },
@@ -221,6 +225,7 @@ describe('ObservabilityAlertingApp', () => {
           app: OBSERVABILITY_ALERTING_APP_ID,
           pathPrefix: OBSERVABILITY_ALERTING_RULES_V1_PATH,
         },
+        emptyState: expect.anything(),
       })
     );
   });

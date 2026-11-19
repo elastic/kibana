@@ -1211,7 +1211,7 @@ export function ComposeDiscoverFlyout({
             type="overlay"
             session={session}
             historyKey={historyKey}
-            flyoutMenuProps={{ title }}
+            flyoutMenuProps={{ title, showMaximizeButton: true }}
             onClose={handleRequestClose}
             aria-labelledby={FLYOUT_TITLE_ID}
             size={540}

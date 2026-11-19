@@ -27,6 +27,18 @@ describe('RulesListPrompts', () => {
     expect(prompt).not.toHaveTextContent('No permissions to read rules and alerts');
   });
 
+  it('renders a host emptyState when creating the first rule', () => {
+    renderWithI18n(
+      <RulesListPrompts
+        {...defaultProps}
+        showCreateFirstRulePrompt
+        emptyState={<div data-test-subj="customEmptyState">Custom empty</div>}
+      />
+    );
+
+    expect(screen.getByTestId('customEmptyState')).toBeInTheDocument();
+  });
+
   it('does not render the no-permission prompt when authorized', () => {
     renderWithI18n(<RulesListPrompts {...defaultProps} showNoAuthPrompt={false} />);
     expect(screen.queryByTestId('noPermissionPrompt')).not.toBeInTheDocument();

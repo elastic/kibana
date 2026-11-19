@@ -794,6 +794,7 @@ export const RulesList = ({
         showSpinner={showSpinner}
         onCreateRulesClick={openRuleTypeModal}
         documentationHref={docLinks?.links.alerting.guide}
+        emptyState={kibanaServices.emptyState}
       />
       <EuiPageTemplate.Section data-test-subj="rulesListSection" grow={false} paddingSize="none">
         {isDeleteModalFlyoutVisible && (

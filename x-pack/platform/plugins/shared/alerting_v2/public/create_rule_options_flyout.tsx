@@ -35,7 +35,7 @@ import {
 } from './constants';
 import { useCreateActionPolicyDisabledReason } from './hooks/use_create_action_policy_disabled_reason';
 import { getAlertingV2Locators } from './application/bind_locators_to_host';
-import { OBSERVABILITY_ALERTING_HOST } from './observability_alerting_host';
+import { OBSERVABILITY_ALERTING_HOST } from '../common/locators';
 
 export interface CreateRuleOptionsFlyoutLegacyItem {
   id: string;

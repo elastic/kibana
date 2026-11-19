@@ -11,24 +11,24 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBoolean } from '@kbn/react-hooks';
-import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { getCreateRuleFromTemplateRoute, getCreateRuleRoute } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import {
+  OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../../constants';
-import { buildRuleManagementAgentMessage } from './build_rule_management_agent_message';
 import {
   MixedClassicRuleTypesFlyout,
   MixedCreateRuleFlyout,
 } from './mixed_create_rule_flyout';
+import { useMixedCreatePrototypeSettings } from './mixed_create_prototype_settings';
+import { openRuleAuthoringAgentChat } from './open_rule_authoring_agent_chat';
+import { setMixedCreateSessionApi } from './mixed_create_session_api';
 
 /** Header Create rule + Classic empty-state Create (createFirstRuleButton). */
 const CREATE_BUTTON_SELECTOR =
   '[data-test-subj="createRuleButton"], [data-test-subj="createFirstRuleButton"]';
-
-const ELASTIC_AI_AGENT_ID = 'elastic-ai-agent';
 
 export const MixedCreateRuleSession = ({
   coreStart,
@@ -53,26 +53,36 @@ export const MixedCreateRuleSession = ({
   const [isEsqlOptionsOpen, { on: openEsqlOptions, off: closeEsqlOptions }] = useBoolean(false);
   const [v2InitialStep, setV2InitialStep] = useState<'esql' | 'threshold' | undefined>();
   const [classicInitialSearch, setClassicInitialSearch] = useState('');
+  const [isFlyoutMaximized, setIsFlyoutMaximized] = useState(false);
+  const { settings: prototypeSettings } = useMixedCreatePrototypeSettings();
 
   const closeCreateSession = useCallback(() => {
     closeEsqlOptions();
     closeClassicChooser();
     closeChooser();
     setClassicInitialSearch('');
+    setIsFlyoutMaximized(false);
   }, [closeChooser, closeClassicChooser, closeEsqlOptions]);
 
   const browseClassic = useCallback(
     (search?: string) => {
+      setCreateHistoryKey(Symbol('mixedCreateRule'));
       setClassicInitialSearch(typeof search === 'string' ? search.trim() : '');
       openClassicChooser();
     },
     [openClassicChooser]
   );
 
+  const exploreLibrary = useCallback(() => {
+    closeCreateSession();
+    history.push(OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH);
+  }, [closeCreateSession, history]);
+
   const startCreate = useCallback(() => {
     setCreateHistoryKey(Symbol('mixedCreateRule'));
     setV2InitialStep(undefined);
     setClassicInitialSearch('');
+    setIsFlyoutMaximized(false);
     closeEsqlOptions();
     closeClassicChooser();
     if (includeEsql) {
@@ -108,6 +118,7 @@ export const MixedCreateRuleSession = ({
 
   const openV2Authoring = useCallback(
     (step: 'esql' | 'threshold') => {
+      setCreateHistoryKey(Symbol('mixedCreateRule'));
       setV2InitialStep(step);
       openEsqlOptions();
     },
@@ -115,22 +126,13 @@ export const MixedCreateRuleSession = ({
   );
 
   const onChooseAgent = useCallback(
-    (userInput?: string) => {
+    (userInput?: string, esqlQuery?: string) => {
       closeCreateSession();
-      const initialMessage = buildRuleManagementAgentMessage(userInput);
-      if (agentBuilder?.openChat) {
-        agentBuilder.openChat({
-          newConversation: true,
-          agentId: ELASTIC_AI_AGENT_ID,
-          sessionTag: 'observability-alerting',
-          initialMessage,
-          autoSendInitialMessage: true,
-        });
-        return;
-      }
-      coreStart.application.navigateToApp(AGENT_BUILDER_APP_ID, {
-        path: `/agents/${ELASTIC_AI_AGENT_ID}/conversations/new`,
-        state: { initialMessage },
+      openRuleAuthoringAgentChat({
+        agentBuilder,
+        application: coreStart.application,
+        userInput,
+        esqlQuery,
       });
     },
     [agentBuilder, closeCreateSession, coreStart.application]
@@ -161,6 +163,28 @@ export const MixedCreateRuleSession = ({
     [closeCreateSession, history]
   );
 
+  useEffect(() => {
+    setMixedCreateSessionApi({
+      openChooser: startCreate,
+      openEsql: () => openV2Authoring('esql'),
+      openThreshold: () => openV2Authoring('threshold'),
+      openAgent: onChooseAgent,
+      openSequence: onChooseSequence,
+      browseClassic,
+      exploreLibrary,
+      selectClassicRuleType: onSelectRuleType,
+    });
+    return () => setMixedCreateSessionApi(undefined);
+  }, [
+    browseClassic,
+    exploreLibrary,
+    onChooseAgent,
+    onChooseSequence,
+    onSelectRuleType,
+    openV2Authoring,
+    startCreate,
+  ]);
+
   return (
     <>
       {isChooserOpen ? (
@@ -171,8 +195,12 @@ export const MixedCreateRuleSession = ({
           onChooseAgent={onChooseAgent}
           onChooseSequence={onChooseSequence}
           onBrowseClassic={browseClassic}
+          onExploreLibrary={exploreLibrary}
           onSelectClassicRuleType={onSelectRuleType}
+          onMaximizeChange={setIsFlyoutMaximized}
           showClassic={includeClassic}
+          compactAskAnything={prototypeSettings.compactAskAnything}
+          idleBuilderPresentation={prototypeSettings.idleBuilderPresentation}
           http={coreStart.http}
           toasts={coreStart.notifications.toasts}
           registeredRuleTypes={triggersActionsUi.ruleTypeRegistry.list()}
@@ -189,10 +217,12 @@ export const MixedCreateRuleSession = ({
           registeredRuleTypes={triggersActionsUi.ruleTypeRegistry.list()}
           historyKey={createHistoryKey}
           initialSearch={classicInitialSearch}
+          initialIsMaximized={isFlyoutMaximized}
+          onMaximizeChange={setIsFlyoutMaximized}
         />
       ) : null}
       {isEsqlOptionsOpen ? (
-        <alertingVTwo.CreateRuleOptionsFlyout
+        <alertingVTwo.DefaultCreateRuleOptionsFlyout
           key={v2InitialStep}
           onClose={closeEsqlOptions}
           onCreated={closeCreateSession}

@@ -29,6 +29,7 @@ const FULL_V2_CAPABILITIES = {
 };
 
 const enableV2 = (core: CoreStart) => {
+  core.settings.globalClient.isDeclared = () => true;
   core.settings.globalClient.get = <T>(_key: string) => true as T;
   core.settings.client.get = <T>(_key: string) => false as T;
 };
@@ -77,6 +78,7 @@ describe('getAlertsNavPanel', () => {
 
   beforeEach(() => {
     core = coreMock.createStart();
+    core.settings.globalClient.isDeclared = () => true;
     core.settings.globalClient.get = <T>(_key: string) => false as T;
     core.settings.client.get = <T>(_key: string) => false as T;
   });
@@ -136,6 +138,10 @@ describe('getAlertsNavPanel', () => {
             link: 'observabilityAlerting:rules',
             title: 'Rules',
             badgeType: 'new',
+          }),
+          expect.objectContaining({
+            link: 'observabilityAlerting:rule-library',
+            title: 'Rule Library',
           }),
         ],
       }),
@@ -268,19 +274,21 @@ describe('getAlertsNavPanel', () => {
       enableV2(core);
     });
 
-    it('shows the Rules link when the user has v2 rules read', () => {
+    it('shows Rules and Rule Library when the user has v2 rules read', () => {
       setCapabilities(core, { alerting_v2_rules: { read: true } });
 
       expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
         { link: 'observabilityAlerting:rules', title: 'Rules', badgeType: 'new' },
+        { link: 'observabilityAlerting:rule-library', title: 'Rule Library' },
       ]);
     });
 
-    it('shows the Rules link when the user has v2 rules write', () => {
+    it('shows Rules and Rule Library when the user has v2 rules write', () => {
       setCapabilities(core, { alerting_v2_rules: { all: true } });
 
       expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
         { link: 'observabilityAlerting:rules', title: 'Rules', badgeType: 'new' },
+        { link: 'observabilityAlerting:rule-library', title: 'Rule Library' },
       ]);
     });
 
@@ -294,7 +302,7 @@ describe('getAlertsNavPanel', () => {
       ]);
     });
 
-    it('shows the Rules link when the user has both v1 and v2 rules read', () => {
+    it('shows Rules and Rule Library when the user has both v1 and v2 rules read', () => {
       setCapabilities(core, {
         alerting_v2_rules: { read: true },
         management: { insightsAndAlerting: { triggersActionsRules: true } },
@@ -302,6 +310,7 @@ describe('getAlertsNavPanel', () => {
 
       expect(getSectionByTitle(core, 'Rule Management')?.children).toEqual([
         { link: 'observabilityAlerting:rules', title: 'Rules', badgeType: 'new' },
+        { link: 'observabilityAlerting:rule-library', title: 'Rule Library' },
       ]);
     });
   });

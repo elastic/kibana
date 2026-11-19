@@ -68,6 +68,7 @@ describe('MixedCreateRuleFlyout', () => {
           onChooseAgent={jest.fn()}
           onChooseSequence={jest.fn()}
           onBrowseClassic={jest.fn()}
+          onExploreLibrary={jest.fn()}
           onSelectClassicRuleType={jest.fn()}
           showClassic={true}
           http={coreStart.http}
@@ -80,176 +81,274 @@ describe('MixedCreateRuleFlyout', () => {
     );
   };
 
-  const openMeasureSuggestions = async (user: ReturnType<typeof userEvent.setup>) => {
-    await user.clear(screen.getByTestId('mixedRulesMeasureSearch'));
-    await user.click(screen.getByTestId('mixedRulesMeasureSearch'));
-    await screen.findByTestId('mixedRulesDomain-infra');
-  };
+  it('shows the Discover ES|QL query as a pill in ask-anything', async () => {
+    const user = userEvent.setup();
+    const onChooseAgent = jest.fn();
+    renderFlyout({
+      onChooseAgent,
+      discoverQuery: 'FROM logs-* | WHERE status >= 500',
+    });
 
-  it('shows Start with a builder and Build your own paths, and routes APM to Classic', async () => {
+    expect(screen.getByTestId('mixedRulesDiscoverQueryPill')).toBeInTheDocument();
+    expect(screen.getByText('ES|QL query')).toBeInTheDocument();
+    expect(screen.queryByTestId('mixedRulesOpenDiscoverQueryAsEsql')).not.toBeInTheDocument();
+
+    fireEvent.mouseEnter(screen.getByTestId('mixedRulesDiscoverQueryPill'));
+    await user.click(screen.getByTestId('mixedRulesDiscoverQueryPillRemove'));
+    expect(screen.queryByTestId('mixedRulesDiscoverQueryPill')).not.toBeInTheDocument();
+
+    await user.type(
+      screen.getByTestId('mixedRulesMeasureSearch'),
+      'I want to create based on this prompt'
+    );
+    await user.click(screen.getByTestId('mixedRulesEnterAiModeButton'));
+    expect(onChooseAgent).toHaveBeenCalledWith(
+      'I want to create based on this prompt',
+      undefined
+    );
+  });
+
+  it('sends the Discover query with the agent when the pill is attached', async () => {
+    const user = userEvent.setup();
+    const onChooseAgent = jest.fn();
+    renderFlyout({
+      onChooseAgent,
+      discoverQuery: 'FROM logs-* | WHERE status >= 500',
+    });
+
+    await user.type(
+      screen.getByTestId('mixedRulesMeasureSearch'),
+      'I want to create based on this prompt'
+    );
+    await user.click(screen.getByTestId('mixedRulesEnterAiModeButton'));
+    expect(onChooseAgent).toHaveBeenCalledWith(
+      'I want to create based on this prompt',
+      'FROM logs-* | WHERE status >= 500'
+    );
+  });
+
+  it('shows agent-first start screen with library examples, ES|QL, and Classic link', async () => {
     const user = userEvent.setup();
     const onChooseEsql = jest.fn();
     const onBrowseClassic = jest.fn();
-    renderFlyout({ onChooseEsql, onBrowseClassic });
+    const onExploreLibrary = jest.fn();
+    renderFlyout({ onChooseEsql, onBrowseClassic, onExploreLibrary });
 
     expect(screen.getByText('Create rule')).toBeInTheDocument();
     expect(screen.getByText('What do you want to measure?')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesAgentChatInput')).toBeInTheDocument();
     expect(screen.getByTestId('mixedRulesMeasureSearch')).toBeInTheDocument();
-    expect(screen.queryByText('Or start from a common intent')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesMeasureSearch')).toHaveFocus();
+    expect(screen.queryByTestId('mixedRulesMeasureSubmit')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mixedRulesModeToggle')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mixedRulesMeasureSuggestions')).not.toBeInTheDocument();
 
-    await openMeasureSuggestions(user);
-    expect(screen.getByTestId('mixedRulesDomain-infra')).toBeInTheDocument();
-    expect(screen.getByTestId('mixedRulesDomain-apm')).toBeInTheDocument();
-
-    expect(screen.getByText('Start with a builder')).toBeInTheDocument();
-    expect(screen.queryByText(/^Create$/)).not.toBeInTheDocument();
-    expect(screen.queryByText('Advanced')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('mixedRulesSuggestedTemplates')).not.toBeInTheDocument();
-    expect(screen.getByTestId('mixedRulesChooseThreshold')).toBeInTheDocument();
-    expect(screen.getByTestId('mixedRulesChooseSequence')).toBeInTheDocument();
-    // Sequence sits with builders (after Threshold), not under Build your own.
-    const threshold = screen.getByTestId('mixedRulesChooseThreshold');
-    const sequence = screen.getByTestId('mixedRulesChooseSequence');
-    expect(
-      Boolean(threshold.compareDocumentPosition(sequence) & Node.DOCUMENT_POSITION_FOLLOWING)
-    ).toBe(true);
-    expect(screen.getByTestId('mixedRulesChooseEsql')).toBeInTheDocument();
-    expect(screen.queryByTestId('mixedRulesChooseAgent')).not.toBeInTheDocument();
-    expect(screen.getByText('Build your own')).toBeInTheDocument();
-
-    await user.click(screen.getByTestId('mixedRulesDomain-infra'));
-    expect(screen.getByText('Suggested builders')).toBeInTheDocument();
-    expect(screen.queryByText('Start with a builder')).not.toBeInTheDocument();
-    expect(screen.queryByText(/^Create$/)).not.toBeInTheDocument();
-    expect(screen.getByText('Build your own')).toBeInTheDocument();
-    expect(screen.getByTestId('mixedRulesChooseEsql')).toBeInTheDocument();
-    expect(screen.queryByTestId('mixedRulesChooseSequence')).not.toBeInTheDocument();
+    expect(screen.getByText('Start from a template')).toBeInTheDocument();
     expect(screen.getByTestId('mixedRulesSuggestedTemplates')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesSuggestedTemplates')).toHaveAttribute(
+      'data-maximized',
+      'false'
+    );
     expect(screen.getByTestId('mixedRulesSuggestedTemplate-demo-high-cpu')).toBeInTheDocument();
     expect(
       screen.getByTestId('mixedRulesSuggestedTemplate-demo-memory-pressure')
     ).toBeInTheDocument();
-    expect(screen.getByTestId('mixedRulesSuggestedTemplate-demo-disk-low')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('mixedRulesSuggestedTemplate-demo-error-log-spike')
+    ).toBeInTheDocument();
 
-    await openMeasureSuggestions(user);
-    await user.click(screen.getByTestId('mixedRulesDomain-custom'));
-    expect(screen.queryByTestId('mixedRulesSuggestedTemplates')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('mixedRulesChooseSequence')).not.toBeInTheDocument();
+    expect(screen.queryByText('Guided builders')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesHelpMeBuild')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesChooseThreshold')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesChooseSequence')).toBeInTheDocument();
+
     expect(screen.getByTestId('mixedRulesChooseEsql')).toBeInTheDocument();
+    expect(screen.getByText('Looking for Classic rule types?')).toBeInTheDocument();
+    expect(screen.getByText('Browse all')).toBeInTheDocument();
+    expect(screen.queryByTestId('mixedRulesContinueClassic')).not.toBeInTheDocument();
+
     await user.click(screen.getByTestId('mixedRulesChooseEsql'));
     expect(onChooseEsql).toHaveBeenCalled();
 
-    await openMeasureSuggestions(user);
-    expect(screen.getByText('CPU, memory, disk, network on hosts or containers')).toBeInTheDocument();
-    expect(
-      screen.getByText('Error rates, latency, throughput for services')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Error counts, patterns, or spikes in log data')
-    ).toBeInTheDocument();
-    expect(screen.getByTestId('mixedRulesDomain-ml')).toBeInTheDocument();
-    expect(screen.getByTestId('mixedRulesDomain-synthetics')).toBeInTheDocument();
-    expect(screen.getByTestId('mixedRulesDomain-slo')).toBeInTheDocument();
+    await user.click(screen.getByTestId('mixedRulesExploreLibrary'));
+    expect(onExploreLibrary).toHaveBeenCalled();
 
-    await user.click(screen.getByTestId('mixedRulesDomain-apm'));
-    expect(screen.getByTestId('mixedRulesMeasureSearch')).toHaveValue('APM');
-    expect(screen.queryByTestId('mixedRulesSuggestedTemplates')).not.toBeInTheDocument();
-    expect(screen.getByTestId('mixedRulesContinueClassic')).toBeInTheDocument();
-    expect(screen.getByTestId('mixedRulesContinueClassic-suggestions')).toBeInTheDocument();
-    expect(
-      screen.getByTestId('mixedRulesContinueClassic-suggestion-apm.error_rate')
-    ).toBeInTheDocument();
-    expect(screen.queryByText(/^Create$/)).not.toBeInTheDocument();
-    expect(screen.queryByText('Build your own')).not.toBeInTheDocument();
-    await user.click(screen.getByTestId('mixedRulesContinueClassic-browseAll'));
-    expect(onBrowseClassic).toHaveBeenCalledWith('APM');
+    await user.click(screen.getByTestId('mixedRulesBrowseClassic'));
+    expect(onBrowseClassic).toHaveBeenCalled();
   });
 
-  it('selects a Classic rule type suggestion from the continue card', async () => {
-    const user = userEvent.setup();
-    const onSelectClassicRuleType = jest.fn();
-    renderFlyout({ onSelectClassicRuleType });
-
-    await openMeasureSuggestions(user);
-    await user.click(screen.getByTestId('mixedRulesDomain-apm'));
-    await user.click(screen.getByTestId('mixedRulesContinueClassic-suggestion-apm.error_rate'));
-    expect(onSelectClassicRuleType).toHaveBeenCalledWith('apm.error_rate');
-  });
-
-  it('routes Machine Learning free text to Classic separately from APM', async () => {
-    const user = userEvent.setup();
-    const onBrowseClassic = jest.fn();
-    renderFlyout({ onBrowseClassic });
-
-    await user.type(screen.getByTestId('mixedRulesMeasureSearch'), 'Anomaly');
-    expect(screen.getByTestId('mixedRulesContinueClassic')).toBeInTheDocument();
-    expect(
-      screen.getByText('Anomaly detection and ML rules are only supported in Classic alerting.')
-    ).toBeInTheDocument();
-    await user.click(screen.getByTestId('mixedRulesContinueClassic-browseAll'));
-    expect(onBrowseClassic).toHaveBeenCalledWith('Anomaly');
-
-    await user.clear(screen.getByTestId('mixedRulesMeasureSearch'));
-    await openMeasureSuggestions(user);
-    await user.click(screen.getByTestId('mixedRulesDomain-ml'));
-    expect(screen.getByTestId('mixedRulesMeasureSearch')).toHaveValue('Anomaly');
-    expect(screen.getByTestId('mixedRulesContinueClassic')).toBeInTheDocument();
-  });
-
-  it('closes suggestions on Enter so free-text results are visible', async () => {
+  it('does not open suggestions on focus until the user starts typing', async () => {
     const user = userEvent.setup();
     renderFlyout();
 
     const search = screen.getByTestId('mixedRulesMeasureSearch');
-    await user.type(search, 'Anomaly');
+    expect(search).toHaveFocus();
+    expect(screen.queryByTestId('mixedRulesMeasureSuggestions')).not.toBeInTheDocument();
+
+    await user.click(search);
+    expect(screen.queryByTestId('mixedRulesMeasureSuggestions')).not.toBeInTheDocument();
+
+    await user.type(search, 'threshold');
     expect(await screen.findByTestId('mixedRulesMeasureSuggestions')).toBeInTheDocument();
-    expect(screen.getByTestId('mixedRulesDomain-ml')).toBeInTheDocument();
-    expect(search).toHaveAttribute('aria-expanded', 'true');
-
-    fireEvent.keyDown(search, { key: 'Enter', code: 'Enter' });
-
-    await waitFor(() => {
-      expect(search).toHaveAttribute('aria-expanded', 'false');
-    });
-    expect(screen.getByTestId('mixedRulesContinueClassic')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesSuggestionGroup-universal')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesPathSuggestion-threshold')).toBeInTheDocument();
   });
 
-  it('filters domain suggestions by the typed query', async () => {
+  it('keeps builders, templates, and Classic footer stable while searching', async () => {
+    const user = userEvent.setup();
+    const onBrowseClassic = jest.fn();
+    renderFlyout({ onBrowseClassic });
+
+    expect(screen.getByTestId('mixedRulesHelpMeBuild')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesSuggestedTemplates')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesSuggestedTemplate-demo-high-cpu')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesBrowseClassic')).toBeInTheDocument();
+
+    await user.type(screen.getByTestId('mixedRulesMeasureSearch'), 'APM error');
+    expect(await screen.findByTestId('mixedRulesClassicSuggestion-apm.error_rate')).toBeInTheDocument();
+
+    // Body stays the same — search only drives the typeahead.
+    expect(screen.getByTestId('mixedRulesHelpMeBuild')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesSuggestedTemplates')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesSuggestedTemplate-demo-high-cpu')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesChooseEsql')).toBeInTheDocument();
+    expect(screen.queryByText('APM rules are only supported in Classic alerting.')).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId('mixedRulesBrowseClassic'));
+    expect(onBrowseClassic).toHaveBeenCalledWith('APM error');
+  });
+
+  it('groups Universal builders, templates, then Classic — with ES|QL fallback when no builder matches', async () => {
     const user = userEvent.setup();
     renderFlyout();
 
-    await user.type(screen.getByTestId('mixedRulesMeasureSearch'), 'SLO');
+    await user.type(screen.getByTestId('mixedRulesMeasureSearch'), 'threshold');
+    expect(await screen.findByTestId('mixedRulesSuggestionGroup-universal')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesPathSuggestion-threshold')).toBeInTheDocument();
 
-    expect(await screen.findByTestId('mixedRulesDomain-slo')).toBeInTheDocument();
-    expect(screen.queryByTestId('mixedRulesDomain-infra')).not.toBeInTheDocument();
+    await user.clear(screen.getByTestId('mixedRulesMeasureSearch'));
+    await user.type(screen.getByTestId('mixedRulesMeasureSearch'), 'APM error');
+    // No builder keyword hit → promote Write ES|QL under Universal.
+    expect(await screen.findByTestId('mixedRulesSuggestionGroup-universal')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesPathSuggestion-esql')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesSuggestionGroup-classic')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesClassicSuggestion-apm.error_rate')).toBeInTheDocument();
     expect(screen.queryByTestId('mixedRulesDomain-apm')).not.toBeInTheDocument();
-    expect(screen.getByTestId('mixedRulesContinueClassic')).toBeInTheDocument();
   });
 
-  it('starts the AI agent from AI mode search submit with user input', async () => {
+  it('starts a guided builder from ask-anything path suggestions', async () => {
+    const user = userEvent.setup();
+    const onChooseThreshold = jest.fn();
+    renderFlyout({ onChooseThreshold });
+
+    await user.type(screen.getByTestId('mixedRulesMeasureSearch'), 'threshold');
+    await user.click(await screen.findByTestId('mixedRulesPathSuggestion-threshold'));
+    expect(onChooseThreshold).toHaveBeenCalled();
+  });
+
+  it('selects a Classic rule type from ask-anything suggestions', async () => {
+    const user = userEvent.setup();
+    const onSelectClassicRuleType = jest.fn();
+    renderFlyout({ onSelectClassicRuleType });
+
+    await user.type(screen.getByTestId('mixedRulesMeasureSearch'), 'APM error');
+    await user.click(
+      await screen.findByTestId('mixedRulesClassicSuggestion-apm.error_rate')
+    );
+    expect(onSelectClassicRuleType).toHaveBeenCalledWith('apm.error_rate');
+  });
+
+  it('keeps suggestions open for Escape and submits free text to the agent on Enter', async () => {
     const user = userEvent.setup();
     const onChooseAgent = jest.fn();
     renderFlyout({ onChooseAgent });
 
-    expect(screen.getByTestId('mixedRulesAiMode')).toHaveAttribute('aria-pressed', 'false');
-    expect(screen.queryByTestId('mixedRulesMeasureSubmit')).not.toBeInTheDocument();
-    await user.click(screen.getByTestId('mixedRulesAiMode'));
-    expect(screen.getByTestId('mixedRulesAiMode')).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByTestId('mixedRulesMeasureSubmit')).toBeInTheDocument();
-    expect(screen.queryByTestId('mixedRulesMeasureSuggestions')).not.toBeInTheDocument();
+    const search = screen.getByTestId('mixedRulesMeasureSearch');
+    await user.type(search, 'APM error');
+    expect(await screen.findByTestId('mixedRulesMeasureSuggestions')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesSuggestionGroup-classic')).toBeInTheDocument();
+    expect(search).toHaveAttribute('aria-expanded', 'true');
+
+    fireEvent.keyDown(search, { key: 'Escape', code: 'Escape' });
+
+    await waitFor(() => {
+      expect(search).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    await user.clear(search);
+    await user.type(search, 'latency over 500ms');
+    fireEvent.keyDown(search, { key: 'Enter', code: 'Enter' });
+    expect(onChooseAgent).toHaveBeenCalledWith('latency over 500ms', undefined);
+  });
+
+  it('lists Universal (ES|QL fallback), all matching templates, then Classic — not domain buckets', async () => {
+    const user = userEvent.setup();
+    renderFlyout();
+
+    await user.type(screen.getByTestId('mixedRulesMeasureSearch'), 'CPU');
+
+    expect(await screen.findByTestId('mixedRulesSuggestionGroup-universal')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesPathSuggestion-esql')).toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesSuggestionGroup-templates')).toBeInTheDocument();
     expect(
-      screen.getByPlaceholderText('Describe the rule you want in natural language')
+      screen.getByTestId('mixedRulesTemplateSuggestion-demo-high-cpu')
     ).toBeInTheDocument();
+    expect(screen.queryByTestId('mixedRulesDomain-infra')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mixedRulesDomain-apm')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mixedRulesDomain-slo')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesBrowseClassic')).toBeInTheDocument();
+  });
 
-    await user.type(screen.getByTestId('mixedRulesMeasureSearch'), 'latency over 500ms');
-    await user.click(screen.getByTestId('mixedRulesMeasureSubmit'));
-    expect(onChooseAgent).toHaveBeenCalledWith('latency over 500ms');
+  it('starts the AI agent from Send to Agent for descriptive natural language', async () => {
+    const user = userEvent.setup();
+    const onChooseAgent = jest.fn();
+    renderFlyout({ onChooseAgent });
 
-    await user.click(screen.getByTestId('mixedRulesSearchMode'));
-    expect(screen.getByTestId('mixedRulesAiMode')).toHaveAttribute('aria-pressed', 'false');
+    expect(
+      screen.getByPlaceholderText(
+        'Pick a suggestion, or describe what you want and send to the agent.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('mixedRulesEnterAiMode')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mixedRulesMeasureSubmit')).not.toBeInTheDocument();
-    await openMeasureSuggestions(user);
-    expect(await screen.findByTestId('mixedRulesDomain-infra')).toBeInTheDocument();
+
+    await user.type(screen.getByTestId('mixedRulesMeasureSearch'), 'I want to');
+
+    expect(await screen.findByTestId('mixedRulesEnterAiMode')).toBeInTheDocument();
+    expect(
+      screen.getByText('Send this description to the agent to create the rule.')
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Send to Agent' })).toBeInTheDocument();
+    expect(screen.queryByText('No options available')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mixedRulesMeasureSearch')).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByTestId('mixedRulesMeasureSubmit')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mixedRulesPathSuggestion-esql')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mixedRulesDomain-custom')).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId('mixedRulesEnterAiModeButton'));
+    expect(onChooseAgent).toHaveBeenCalledWith('I want to', undefined);
+  });
+
+  it('hides the send control during normal keyword search', async () => {
+    const user = userEvent.setup();
+    renderFlyout();
+
+    await user.type(screen.getByTestId('mixedRulesMeasureSearch'), 'threshold');
+    expect(await screen.findByTestId('mixedRulesPathSuggestion-threshold')).toBeInTheDocument();
+    expect(screen.queryByTestId('mixedRulesMeasureSubmit')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mixedRulesEnterAiMode')).not.toBeInTheDocument();
+  });
+
+  it('does not offer AI mode for short keyword search', async () => {
+    const user = userEvent.setup();
+    renderFlyout();
+
+    await user.type(screen.getByTestId('mixedRulesMeasureSearch'), 'CPU');
+    expect(
+      await screen.findByTestId('mixedRulesTemplateSuggestion-demo-high-cpu')
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('mixedRulesEnterAiMode')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mixedRulesMeasureSubmit')).not.toBeInTheDocument();
   });
 });
 

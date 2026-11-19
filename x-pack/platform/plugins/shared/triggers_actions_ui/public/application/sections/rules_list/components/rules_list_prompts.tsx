@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
@@ -19,6 +19,7 @@ interface RulesListPromptsProps {
   showCreateRuleButtonInPrompt: boolean;
   onCreateRulesClick: () => void;
   documentationHref?: string;
+  emptyState?: ReactNode;
 }
 
 export const RulesListPrompts = (props: RulesListPromptsProps) => {
@@ -29,6 +30,7 @@ export const RulesListPrompts = (props: RulesListPromptsProps) => {
     showCreateFirstRulePrompt,
     onCreateRulesClick,
     documentationHref,
+    emptyState,
   } = props;
   if (showNoAuthPrompt)
     return (
@@ -43,6 +45,9 @@ export const RulesListPrompts = (props: RulesListPromptsProps) => {
     );
 
   if (showCreateFirstRulePrompt) {
+    if (emptyState) {
+      return <>{emptyState}</>;
+    }
     return (
       <EmptyPrompt
         showCreateRule={showCreateRuleButtonInPrompt}

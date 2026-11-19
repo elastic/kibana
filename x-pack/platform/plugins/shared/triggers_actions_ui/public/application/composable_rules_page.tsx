@@ -23,6 +23,7 @@ export const ComposableClassicRulesPage = ({
   host = STACK_MANAGEMENT_RULES_HOST,
   tabs,
   showClassicBadge,
+  emptyState,
   internalDeps,
 }: ClassicRulesPageProps & { internalDeps: ClassicRulesPageInternalDeps }) => {
   const { pluginsStart } = internalDeps;
@@ -89,6 +90,7 @@ export const ComposableClassicRulesPage = ({
       host,
       tabs,
       showClassicBadge,
+      emptyState,
     }),
     [
       coreStart,
@@ -101,6 +103,7 @@ export const ComposableClassicRulesPage = ({
       host,
       tabs,
       showClassicBadge,
+      emptyState,
     ]
   );
 

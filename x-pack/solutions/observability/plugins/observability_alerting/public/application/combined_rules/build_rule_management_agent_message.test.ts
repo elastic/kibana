@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { RULE_MANAGEMENT_SKILL_ID } from '@kbn/alerting-v2-constants';
+import { RULE_AUTHORING_SKILL_ID } from '@kbn/alerting-v2-constants';
 import { buildRuleManagementAgentMessage } from './build_rule_management_agent_message';
 
 describe('buildRuleManagementAgentMessage', () => {
-  it('includes the rule-management skill badge and default prompt', () => {
+  it('includes the rule-authoring skill badge and default prompt', () => {
     const message = buildRuleManagementAgentMessage();
-    expect(message).toContain(`[/${RULE_MANAGEMENT_SKILL_ID}](skill://${RULE_MANAGEMENT_SKILL_ID})`);
+    expect(message).toContain(`[/${RULE_AUTHORING_SKILL_ID}](skill://${RULE_AUTHORING_SKILL_ID})`);
     expect(message).toContain('Help me create a new alerting v2 rule');
   });
 
   it('appends the user description when provided', () => {
     const message = buildRuleManagementAgentMessage('  CPU above 90%  ');
-    expect(message).toContain(`[/${RULE_MANAGEMENT_SKILL_ID}](skill://${RULE_MANAGEMENT_SKILL_ID})`);
+    expect(message).toContain(`[/${RULE_AUTHORING_SKILL_ID}](skill://${RULE_AUTHORING_SKILL_ID})`);
     expect(message).toContain('Help me create an alerting rule for: CPU above 90%');
   });
 });

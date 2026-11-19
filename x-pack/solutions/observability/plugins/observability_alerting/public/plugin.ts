@@ -19,9 +19,11 @@ import {
   OBSERVABILITY_ALERTING_APP_ID,
   OBSERVABILITY_ALERTING_BASE_PATH,
 } from '@kbn/deeplinks-observability';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { from, map, switchMap } from 'rxjs';
 import { getObservabilityAlertingDeepLinks } from './get_observability_alerting_deep_links';
+import { createMixedCreateRuleOptionsFlyout } from './application/combined_rules/mixed_create_rule_options_flyout';
+import { createMixedCreateRulesEmptyState } from './application/combined_rules/create_mixed_create_rules_empty_state';
+import { registerMixedCreatePrototypeSettingsUserMenu } from './application/combined_rules/register_mixed_create_prototype_settings_user_menu';
 import type {
   ObservabilityAlertingPublicSetup,
   ObservabilityAlertingPublicStart,
@@ -38,6 +40,8 @@ export class ObservabilityAlertingPlugin
       ObservabilityAlertingStartDependencies
     >
 {
+  private stopPrototypeSettingsUserMenu?: () => void;
+
   public setup(
     coreSetup: CoreSetup<ObservabilityAlertingStartDependencies, ObservabilityAlertingPublicStart>
   ): ObservabilityAlertingPublicSetup {
@@ -82,11 +86,6 @@ export class ObservabilityAlertingPlugin
           coreStart,
           alertingVTwo: depsStart.alertingVTwo,
           triggersActionsUi: depsStart.triggersActionsUi,
-          cases: depsStart.cases && {
-            service: depsStart.cases,
-            kibanaServices: { ...coreStart, ...depsStart, storage: new Storage(localStorage) },
-          },
-          observabilityShared: depsStart.observabilityShared,
           agentBuilder: depsStart.agentBuilder,
           params,
         });
@@ -96,9 +95,35 @@ export class ObservabilityAlertingPlugin
     return {};
   }
 
-  public start(_coreStart: CoreStart): ObservabilityAlertingPublicStart {
+  public start(
+    coreStart: CoreStart,
+    depsStart: ObservabilityAlertingStartDependencies
+  ): ObservabilityAlertingPublicStart {
+    // Discover (and other hosts) open alertingVTwo.CreateRuleOptionsFlyout — register MixedCreate
+    // so they share the Rule management chooser while keeping Discover query prefill.
+    depsStart.alertingVTwo.registerCreateRuleOptionsFlyout(
+      createMixedCreateRuleOptionsFlyout({
+        DefaultCreateRuleOptionsFlyout: depsStart.alertingVTwo.DefaultCreateRuleOptionsFlyout,
+        coreStart,
+        triggersActionsUi: depsStart.triggersActionsUi,
+        agentBuilder: depsStart.agentBuilder,
+      })
+    );
+    depsStart.alertingVTwo.registerRulesListEmptyState(
+      createMixedCreateRulesEmptyState({
+        coreStart,
+        triggersActionsUi: depsStart.triggersActionsUi,
+      })
+    );
+    this.stopPrototypeSettingsUserMenu = registerMixedCreatePrototypeSettingsUserMenu({
+      coreStart,
+      security: depsStart.security,
+    });
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.stopPrototypeSettingsUserMenu?.();
+    this.stopPrototypeSettingsUserMenu = undefined;
+  }
 }

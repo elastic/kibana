@@ -76,8 +76,13 @@ describe('ObservabilityAlertingPlugin', () => {
           ActionPoliciesPage: () => null,
           ExecutionHistoryPage: () => null,
           CreateRuleOptionsFlyout: () => null,
+          DefaultCreateRuleOptionsFlyout: () => null,
+          registerCreateRuleOptionsFlyout: jest.fn(),
+          registerRulesListEmptyState: jest.fn(),
           ClassicRuleSummaryFlyout: () => null,
           RuleSummaryFlyout: () => null,
+          AlertsProvider: ({ children }: { children?: React.ReactNode }) =>
+            React.createElement(React.Fragment, null, children),
           createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) =>
             Object.fromEntries(
               Object.entries(paths).map(([k, v]) => [k, { app: appId, pathPrefix: v }])

@@ -275,12 +275,12 @@ describe('RulesListPage', () => {
     expect(screen.queryByTestId('alertingV2ExperimentalBadge')).not.toBeInTheDocument();
   });
 
-  describe('ES|QL rules intro banner', () => {
+  describe('Universal Alerting intro banner', () => {
     it('renders the banner above the search bar when rules exist', async () => {
       renderPage();
       await waitForRules();
 
-      const banner = screen.getByTestId('esqlRulesIntroBanner');
+      const banner = screen.getByTestId('universalAlertingIntroBanner');
       const searchBar = screen.getByPlaceholderText('Search rules');
       expect(banner).toBeInTheDocument();
       expect(banner.compareDocumentPosition(searchBar)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
@@ -291,7 +291,7 @@ describe('RulesListPage', () => {
       renderPage();
 
       await waitFor(() => {
-        expect(screen.getByTestId('esqlRulesIntroBanner')).toBeInTheDocument();
+        expect(screen.getByTestId('universalAlertingIntroBanner')).toBeInTheDocument();
       });
     });
 
@@ -299,10 +299,10 @@ describe('RulesListPage', () => {
       renderPage();
       await waitForRules();
 
-      const dismissBtn = screen.getByTestId('esqlRulesIntroBannerDismiss');
+      const dismissBtn = screen.getByTestId('universalAlertingIntroBannerDismiss');
       fireEvent.click(dismissBtn);
 
-      expect(screen.queryByTestId('esqlRulesIntroBanner')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('universalAlertingIntroBanner')).not.toBeInTheDocument();
     });
 
     it('does not show the banner when hideAnnouncements is enabled', async () => {
@@ -310,7 +310,7 @@ describe('RulesListPage', () => {
       renderPage();
       await waitForRules();
 
-      expect(screen.queryByTestId('esqlRulesIntroBanner')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('universalAlertingIntroBanner')).not.toBeInTheDocument();
     });
   });
 
@@ -940,11 +940,11 @@ describe('RulesListPage', () => {
       mockCanWriteRules = false;
     });
 
-    it('still shows the ES|QL rules intro banner for read-only users', async () => {
+    it('still shows the Universal Alerting intro banner for read-only users', async () => {
       renderPage();
       await waitForRules();
 
-      expect(screen.getByTestId('esqlRulesIntroBanner')).toBeInTheDocument();
+      expect(screen.getByTestId('universalAlertingIntroBanner')).toBeInTheDocument();
     });
 
     it('hides the header create controls even when rules exist', async () => {

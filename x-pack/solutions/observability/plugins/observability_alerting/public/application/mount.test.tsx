@@ -32,8 +32,12 @@ describe('mountObservabilityAlertingApp', () => {
       ActionPoliciesPage: () => null,
       ExecutionHistoryPage: () => null,
       CreateRuleOptionsFlyout: () => null,
+      DefaultCreateRuleOptionsFlyout: () => null,
+      registerCreateRuleOptionsFlyout: jest.fn(),
+      registerRulesListEmptyState: jest.fn(),
       ClassicRuleSummaryFlyout: () => null,
       RuleSummaryFlyout: () => null,
+      AlertsProvider: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
       createAlertingV2HostApp: mockCreateAlertingV2HostApp,
     };
     const triggersActionsUi = {

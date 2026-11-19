@@ -17,7 +17,7 @@ import { bindLocatorsToHost, getAlertingV2Locators } from './application/bind_lo
 import { LocatorProvider } from './application/locator_context';
 import { RuleSummaryFlyoutContainer } from './components/rule/flyouts/rule_summary/rule_summary_flyout_container';
 import { untilPluginStartServicesReady } from './kibana_services';
-import type { AlertingV2HostApp } from './locators';
+import type { AlertingV2HostApp } from '../common/locators';
 import type { RuleApiResponse } from './services/rules_api';
 
 export interface RuleSummaryFlyoutEntryProps {

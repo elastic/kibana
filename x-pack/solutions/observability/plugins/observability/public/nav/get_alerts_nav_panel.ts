@@ -111,6 +111,15 @@ const getRuleManagementSection = (core: CoreStart): PanelOpenerChildDefinition[]
     },
   ];
 
+  if (canReadV2Rules) {
+    rulesChildren.push({
+      link: obsAlertingLink('rule-library'),
+      title: i18n.translate('xpack.observability.nav.ruleLibrary', {
+        defaultMessage: 'Rule Library',
+      }),
+    });
+  }
+
   return maybeSection(rulesChildren, {
     title: i18n.translate('xpack.observability.nav.ruleManagement', {
       defaultMessage: 'Rule Management',

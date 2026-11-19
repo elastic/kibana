@@ -105,6 +105,8 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   hideListBackButton?: boolean;
   host?: LocatorHost;
   showClassicBadge?: boolean;
+  /** Host override for the Classic rules-list empty state. */
+  emptyState?: React.ReactNode;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {

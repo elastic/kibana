@@ -5,53 +5,152 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiBetaBadge,
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiCard,
   EuiFieldSearch,
+  EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiIcon,
   EuiInputPopover,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSelectable,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   euiFontSizeFromScale,
   euiLineHeightFromBaseline,
   keys,
+  useEuiShadow,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ConversationInputShell } from '@kbn/agent-builder-browser';
+import {
+  ConversationInputShell,
+  CONVERSATION_INPUT_SHELL_RADIUS,
+} from '@kbn/agent-builder-browser';
+import { AiButton } from '@kbn/ui-ai-components';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { useFindTemplatesQuery } from '@kbn/response-ops-rules-apis/hooks/use_find_templates_query';
 import type { CoreStart } from '@kbn/core/public';
-import { SvgAiGradientDefs, useSvgAiGradient } from '@kbn/ui-ai-components';
+import type { IdleBuilderPresentation } from './mixed_create_prototype_settings';
 
 const TITLE_ID = 'mixedCreateRuleFlyoutTitle';
 const CLASSIC_TITLE_ID = 'mixedClassicRuleTypesFlyoutTitle';
 const MEASURE_SUGGESTIONS_LIST_ID = 'mixedRulesMeasureSuggestionsList';
 const SEARCH_DEBOUNCE = { wait: 300 };
+
+const DISCOVER_QUERY_PILL_REMOVE_LABEL = i18n.translate(
+  'xpack.observabilityAlerting.mixedCreate.discoverQueryPillRemove',
+  { defaultMessage: 'Remove Discover query' }
+);
+
+/** Lightweight ES|QL attachment chip for the ask-anything shell (Agent Builder–style). */
+const DiscoverEsqlQueryPill = ({
+  query,
+  onRemove,
+}: {
+  query: string;
+  onRemove: () => void;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const [isHovered, setIsHovered] = useState(false);
+  const truncatedQuery =
+    query.length > 72 ? `${query.slice(0, 69).trimEnd()}…` : query;
+
+  return (
+    <EuiPanel
+      hasShadow={false}
+      hasBorder
+      color="subdued"
+      paddingSize="s"
+      css={css`
+        max-width: 100%;
+        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+      `}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      title={query}
+      data-test-subj="mixedRulesDiscoverQueryPill"
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <div
+            css={css`
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: ${euiTheme.size.xl};
+              height: ${euiTheme.size.xl};
+              border-radius: ${euiTheme.border.radius.small};
+              background-color: ${euiTheme.colors.backgroundBasePrimary};
+            `}
+          >
+            <EuiIcon type="code" size="m" color="primary" aria-hidden />
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem style={{ minWidth: 0 }}>
+          <EuiText size="xs">
+            <strong>
+              <FormattedMessage
+                id="xpack.observabilityAlerting.mixedCreate.discoverQueryPillLabel"
+                defaultMessage="ES|QL query"
+              />
+            </strong>
+          </EuiText>
+          <EuiText
+            size="xs"
+            color="subdued"
+            css={css`
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            `}
+          >
+            {truncatedQuery}
+          </EuiText>
+        </EuiFlexItem>
+        {isHovered ? (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={DISCOVER_QUERY_PILL_REMOVE_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="cross"
+                size="xs"
+                color="text"
+                aria-label={DISCOVER_QUERY_PILL_REMOVE_LABEL}
+                onClick={onRemove}
+                data-test-subj="mixedRulesDiscoverQueryPillRemove"
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
+
+/** Match Workflows agentic-first landing: keep content readable when the flyout is maximized. */
+const maximizedFlyoutContentCss = css`
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
+`;
 
 type ClassicChooserMode = 'ruleType' | 'template';
 
@@ -70,263 +169,362 @@ const PRODUCER_DISPLAY_NAMES: Record<string, string> = {
 
 const producerLabel = (producer: string): string => PRODUCER_DISPLAY_NAMES[producer] ?? producer;
 
-const optionCardStyles = {
-  panel: ({ euiTheme }: UseEuiTheme) =>
-    euiTheme
-      ? css({
-          width: '100%',
-          minWidth: 0,
-          boxSizing: 'border-box',
-          padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
-          textAlign: 'left',
-          cursor: 'pointer',
-        })
-      : // required for unit tests to pass
-        undefined,
-  textColumn: css({
-    minWidth: 0,
-  }),
-  title: ({ euiTheme }: UseEuiTheme) =>
-    euiTheme
-      ? css({
-          color: euiTheme.colors.textParagraph,
-        })
-      : // required for unit tests to pass
-        undefined,
-  description: ({ euiTheme }: UseEuiTheme) =>
-    euiTheme
-      ? css({
-          marginTop: euiTheme.size.xs,
-        })
-      : // required for unit tests to pass
-        undefined,
-  stack: ({ euiTheme }: UseEuiTheme) =>
-    euiTheme
-      ? css({
-          display: 'flex',
-          flexDirection: 'column',
-          gap: euiTheme.size.s,
-        })
-      : // required for unit tests to pass
-        undefined,
+type RuleBuilderType = 'threshold' | 'sequence' | 'esql';
+
+const RULE_BUILDER_BADGE: Record<
+  RuleBuilderType,
+  { label: string; iconType: string }
+> = {
+  threshold: {
+    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.builderBadge.threshold', {
+      defaultMessage: 'Threshold',
+    }),
+    iconType: 'puzzlePiece',
+  },
+  sequence: {
+    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.builderBadge.sequence', {
+      defaultMessage: 'Sequence',
+    }),
+    iconType: 'puzzlePiece',
+  },
+  esql: {
+    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.builderBadge.esql', {
+      defaultMessage: 'ES|QL',
+    }),
+    iconType: 'code',
+  },
 };
 
-const FeaturedOptionCard = ({
+const IDLE_BUILDER_STARTERS: Array<{
+  id: 'threshold' | 'sequence';
+  title: string;
+  iconType: string;
+  testSubj: string;
+}> = [
+  {
+    id: 'threshold',
+    title: i18n.translate('xpack.observabilityAlerting.mixedCreate.idleBuilder.threshold', {
+      defaultMessage: 'Monitor a threshold',
+    }),
+    iconType: RULE_BUILDER_BADGE.threshold.iconType,
+    testSubj: 'mixedRulesChooseThreshold',
+  },
+  {
+    id: 'sequence',
+    title: i18n.translate('xpack.observabilityAlerting.mixedCreate.idleBuilder.sequence', {
+      defaultMessage: 'Build a sequence',
+    }),
+    iconType: RULE_BUILDER_BADGE.sequence.iconType,
+    testSubj: 'mixedRulesChooseSequence',
+  },
+];
+
+const IdleBuilderStarters = ({
+  presentation,
+  onChooseThreshold,
+  onChooseSequence,
+  onChooseEsql,
+}: {
+  presentation: IdleBuilderPresentation;
+  onChooseThreshold: () => void;
+  onChooseSequence: () => void;
+  onChooseEsql: () => void;
+}) => {
+  const onChooseById = (id: 'threshold' | 'sequence') => {
+    if (id === 'threshold') {
+      onChooseThreshold();
+      return;
+    }
+    onChooseSequence();
+  };
+
+  const writeEsqlButton = (
+    <EuiButtonEmpty
+      size="s"
+      color="primary"
+      flush="both"
+      iconType="code"
+      iconSide="left"
+      onClick={onChooseEsql}
+      data-test-subj="mixedRulesChooseEsql"
+      aria-label={i18n.translate(
+        'xpack.observabilityAlerting.mixedCreate.writeYourOwnQueryAria',
+        { defaultMessage: 'Write your own ES|QL query' }
+      )}
+    >
+      <FormattedMessage
+        id="xpack.observabilityAlerting.mixedCreate.writeEsqlLink"
+        defaultMessage="Write ES|QL query"
+      />
+    </EuiButtonEmpty>
+  );
+
+  if (presentation === 'badge') {
+    return (
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        justifyContent="spaceBetween"
+        responsive={false}
+        wrap
+        data-test-subj="mixedRulesHelpMeBuild"
+        data-builder-presentation="badge"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+            {IDLE_BUILDER_STARTERS.map((starter) => (
+              <EuiFlexItem grow={false} key={starter.id}>
+                <EuiBadge
+                  color="hollow"
+                  iconType={starter.iconType}
+                  onClick={() => onChooseById(starter.id)}
+                  onClickAriaLabel={starter.title}
+                  data-test-subj={starter.testSubj}
+                >
+                  {starter.title}
+                </EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{writeEsqlButton}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      justifyContent="spaceBetween"
+      responsive={false}
+      wrap
+      data-test-subj="mixedRulesHelpMeBuild"
+      data-builder-presentation="panel"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+          {IDLE_BUILDER_STARTERS.map((starter) => (
+            <EuiFlexItem grow={false} key={starter.id}>
+              <EuiPanel
+                element="button"
+                paddingSize="s"
+                hasBorder
+                hasShadow={false}
+                onClick={() => onChooseById(starter.id)}
+                data-test-subj={starter.testSubj}
+                aria-label={starter.title}
+                css={css`
+                  min-width: 180px;
+                `}
+              >
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type={starter.iconType} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <strong>{starter.title}</strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{writeEsqlButton}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const RuleLibraryCardTags = ({
+  tags,
+  builderType,
+}: {
+  tags: string[];
+  builderType: RuleBuilderType;
+}) => {
+  const visibleTags = tags.slice(0, 1);
+  const overflowCount = tags.length - visibleTags.length;
+  const builderBadge = RULE_BUILDER_BADGE[builderType];
+
+  return (
+    <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
+      {visibleTags.map((tag) => (
+        <EuiFlexItem grow={false} key={tag}>
+          <EuiBadge color="hollow">{tag}</EuiBadge>
+        </EuiFlexItem>
+      ))}
+      {overflowCount > 0 ? (
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">+{overflowCount}</EuiBadge>
+        </EuiFlexItem>
+      ) : null}
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="primary" iconType={builderBadge.iconType}>
+          {builderBadge.label}
+        </EuiBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const RuleLibraryCard = ({
   iconType,
   title,
   description,
+  tags,
+  builderType,
   onClick,
-  badge,
+  compact,
   'data-test-subj': dataTestSubj,
 }: {
   iconType: string;
   title: string;
   description: string;
+  tags: string[];
+  builderType: RuleBuilderType;
   onClick: () => void;
-  badge?: React.ReactNode;
+  /** Compact horizontal row for the stacked flyout; vertical Workflows-style when maximized. */
+  compact: boolean;
   'data-test-subj': string;
-}) => (
-  <EuiPanel
-    element="button"
-    hasBorder
-    paddingSize="none"
-    onClick={onClick}
-    data-test-subj={dataTestSubj}
-    css={optionCardStyles.panel}
-  >
-    <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type={iconType} size="m" aria-hidden={true} />
-      </EuiFlexItem>
-      <EuiFlexItem css={optionCardStyles.textColumn}>
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const hoverShadow = useEuiShadow('s');
+
+  const cardCss = useMemo(
+    () => css`
+      transition: box-shadow ${euiTheme.animation.fast} ease-in;
+      &:hover,
+      &:focus-within {
+        ${hoverShadow}
+      }
+      [class*='euiCard__footer'] {
+        margin-top: ${euiTheme.size.s};
+      }
+    `,
+    [hoverShadow, euiTheme.animation.fast, euiTheme.size.s]
+  );
+
+  const tagsRow = <RuleLibraryCardTags tags={tags} builderType={builderType} />;
+
+  if (compact) {
+    return (
+      <EuiPanel
+        element="button"
+        hasBorder
+        paddingSize="s"
+        onClick={onClick}
+        data-test-subj={dataTestSubj}
+        css={css`
+          width: 100%;
+          text-align: left;
+          cursor: pointer;
+          background: ${euiTheme.colors.emptyShade};
+          border-color: ${euiTheme.colors.lightShade};
+          box-shadow: none;
+          transition: box-shadow ${euiTheme.animation.fast} ease-in;
+          &:hover,
+          &:focus {
+            ${hoverShadow}
+          }
+        `}
+      >
+        <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiText size="s" textAlign="left" css={optionCardStyles.title}>
+            <EuiIcon type={iconType} size="m" color="text" aria-hidden={true} />
+          </EuiFlexItem>
+          <EuiFlexItem
+            css={css`
+              min-width: 0;
+            `}
+          >
+            <EuiText size="s">
               <strong>{title}</strong>
             </EuiText>
+            <EuiText
+              size="xs"
+              color="subdued"
+              css={css`
+                margin-top: ${euiTheme.size.xs};
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+              `}
+            >
+              {description}
+            </EuiText>
+            <EuiSpacer size="xs" />
+            {tagsRow}
           </EuiFlexItem>
-          {badge ? <EuiFlexItem grow={false}>{badge}</EuiFlexItem> : null}
         </EuiFlexGroup>
-        <EuiText size="xs" color="subdued" textAlign="left" css={optionCardStyles.description}>
-          {description}
+      </EuiPanel>
+    );
+  }
+
+  const cardTitle = (
+    <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={iconType} size="l" color="text" aria-hidden={true} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText
+          size="m"
+          css={css`
+            font-weight: ${euiTheme.font.weight.semiBold};
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          `}
+        >
+          {title}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
-  </EuiPanel>
-);
+  );
 
-const LargeOptionCard = ({
-  iconType,
-  title,
-  description,
-  onClick,
-  badge,
-  'data-test-subj': dataTestSubj,
-}: {
-  iconType: string;
-  title: string;
-  description: string;
-  onClick: () => void;
-  badge?: React.ReactNode;
-  'data-test-subj': string;
-}) => (
-  <EuiCard
-    layout="horizontal"
-    display="plain"
-    titleElement="h3"
-    titleSize="xs"
-    hasBorder
-    title={
-      badge ? (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>{title}</EuiFlexItem>
-          <EuiFlexItem grow={false}>{badge}</EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        title
-      )
-    }
-    description={description}
-    onClick={onClick}
-    icon={<EuiIcon type={iconType} color="text" size="l" aria-hidden={true} />}
-    data-test-subj={dataTestSubj}
-  />
-);
-
-const CLASSIC_SUGGESTION_LIMIT = 3;
-
-type ClassicRuleTypeSuggestion = {
-  id: string;
-  name: string;
-};
-
-const classicContinueCardStyles = {
-  panel: ({ euiTheme }: UseEuiTheme) =>
-    euiTheme
-      ? css({
-          width: '100%',
-          minWidth: 0,
-          boxSizing: 'border-box',
-          padding: 0,
-          overflow: 'hidden',
-          // Match EuiFlyoutFooter background
-          backgroundColor: euiTheme.components.flyoutFooterBackground,
-          borderColor: euiTheme.colors.borderBasePlain,
-        })
-      : // required for unit tests to pass
-        undefined,
-  browseButton: ({ euiTheme }: UseEuiTheme) =>
-    euiTheme
-      ? css({
-          width: '100%',
-          padding: `${euiTheme.size.m} ${euiTheme.size.base}`,
-          textAlign: 'left',
-          cursor: 'pointer',
-          background: 'transparent',
-          border: 'none',
-          '&:hover, &:focus': {
-            backgroundColor: euiTheme.components.buttons.backgroundEmptyTextHover,
-          },
-        })
-      : undefined,
-  textColumn: css({
-    minWidth: 0,
-  }),
-  suggestionList: ({ euiTheme }: UseEuiTheme) =>
-    euiTheme
-      ? css({
-          borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-          margin: 0,
-          padding: `${euiTheme.size.xs} 0`,
-          listStyle: 'none',
-        })
-      : undefined,
-  suggestionButton: ({ euiTheme }: UseEuiTheme) =>
-    euiTheme
-      ? css({
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          gap: euiTheme.size.s,
-          padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
-          textAlign: 'left',
-          cursor: 'pointer',
-          background: 'transparent',
-          border: 'none',
-          '&:hover, &:focus': {
-            backgroundColor: euiTheme.components.buttons.backgroundEmptyTextHover,
-          },
-        })
-      : undefined,
-};
-
-const ClassicContinueCard = ({
-  title,
-  description,
-  suggestions,
-  onBrowseAll,
-  onSelectRuleType,
-  'data-test-subj': dataTestSubj,
-}: {
-  title: string;
-  description: string;
-  suggestions: ClassicRuleTypeSuggestion[];
-  onBrowseAll: () => void;
-  onSelectRuleType: (ruleTypeId: string) => void;
-  'data-test-subj': string;
-}) => (
-  <EuiPanel hasBorder paddingSize="none" data-test-subj={dataTestSubj} css={classicContinueCardStyles.panel}>
-    <button
-      type="button"
-      onClick={onBrowseAll}
-      css={classicContinueCardStyles.browseButton}
-      data-test-subj={`${dataTestSubj}-browseAll`}
-      aria-label={title}
+  const cardDescription = (
+    <span
+      css={css`
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      `}
     >
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-        <EuiFlexItem css={classicContinueCardStyles.textColumn}>
-          <EuiText size="s" textAlign="left">
-            <strong>{title}</strong>
-          </EuiText>
-          <EuiText size="xs" color="subdued" textAlign="left">
-            {description}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="chevronSingleRight" color="subdued" aria-hidden={true} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </button>
-    {suggestions.length > 0 ? (
-      <ul css={classicContinueCardStyles.suggestionList} data-test-subj={`${dataTestSubj}-suggestions`}>
-        {suggestions.map((suggestion) => (
-          <li key={suggestion.id}>
-            <button
-              type="button"
-              onClick={() => onSelectRuleType(suggestion.id)}
-              css={classicContinueCardStyles.suggestionButton}
-              data-test-subj={`${dataTestSubj}-suggestion-${suggestion.id}`}
-            >
-              <EuiIcon type="bell" size="s" color="subdued" aria-hidden={true} />
-              <EuiText size="s" textAlign="left">
-                {suggestion.name}
-              </EuiText>
-            </button>
-          </li>
-        ))}
-      </ul>
-    ) : null}
-  </EuiPanel>
-);
+      {description}
+    </span>
+  );
 
-const ExperimentalBadge = () => (
-  <EuiBetaBadge
-    size="s"
-    label={i18n.translate('xpack.observabilityAlerting.mixedCreate.experimental', {
-      defaultMessage: 'Experimental',
-    })}
-  />
-);
+  return (
+    <EuiCard
+      layout="vertical"
+      textAlign="left"
+      paddingSize="m"
+      hasBorder
+      onClick={onClick}
+      title={cardTitle}
+      description={cardDescription}
+      footer={tagsRow}
+      data-test-subj={dataTestSubj}
+      css={[
+        css({
+          background: euiTheme.colors.emptyShade,
+          borderColor: euiTheme.colors.lightShade,
+          boxShadow: 'none',
+          gap: euiTheme.size.s,
+          minHeight: 168,
+          width: '100%',
+          height: '100%',
+        }),
+        cardCss,
+      ]}
+    />
+  );
+};
 
 export const MixedCreateRuleFlyout = ({
   onClose,
@@ -335,8 +533,13 @@ export const MixedCreateRuleFlyout = ({
   onChooseAgent,
   onChooseSequence,
   onBrowseClassic,
+  onExploreLibrary,
   onSelectClassicRuleType,
+  onMaximizeChange,
   showClassic,
+  discoverQuery,
+  compactAskAnything = false,
+  idleBuilderPresentation = 'panel',
   http,
   toasts,
   registeredRuleTypes,
@@ -345,11 +548,19 @@ export const MixedCreateRuleFlyout = ({
   onClose: () => void;
   onChooseThreshold: () => void;
   onChooseEsql: () => void;
-  onChooseAgent: (userInput?: string) => void;
+  onChooseAgent: (userInput?: string, esqlQuery?: string) => void;
   onChooseSequence: () => void;
   onBrowseClassic: (search?: string) => void;
+  onExploreLibrary: () => void;
   onSelectClassicRuleType: (ruleTypeId: string) => void;
+  onMaximizeChange?: (isMaximized: boolean) => void;
   showClassic: boolean;
+  /** Live ES|QL from Discover when create-rule was opened from Discover. */
+  discoverQuery?: string;
+  /** Prototype: compact idle field that grows with typed content. */
+  compactAskAnything?: boolean;
+  /** Prototype: how Threshold / Sequence starters render. */
+  idleBuilderPresentation?: IdleBuilderPresentation;
   http: CoreStart['http'];
   toasts: CoreStart['notifications']['toasts'];
   registeredRuleTypes: Array<{ id: string; description: string }>;
@@ -366,8 +577,13 @@ export const MixedCreateRuleFlyout = ({
         onChooseAgent={onChooseAgent}
         onChooseSequence={onChooseSequence}
         onBrowseClassic={onBrowseClassic}
+        onExploreLibrary={onExploreLibrary}
         onSelectClassicRuleType={onSelectClassicRuleType}
+        onMaximizeChange={onMaximizeChange}
         showClassic={showClassic}
+        discoverQuery={discoverQuery}
+        compactAskAnything={compactAskAnything}
+        idleBuilderPresentation={idleBuilderPresentation}
         http={http}
         toasts={toasts}
         registeredRuleTypes={registeredRuleTypes}
@@ -384,8 +600,13 @@ const MixedCreateRuleFlyoutInner = ({
   onChooseAgent,
   onChooseSequence,
   onBrowseClassic,
+  onExploreLibrary,
   onSelectClassicRuleType,
+  onMaximizeChange,
   showClassic,
+  discoverQuery,
+  compactAskAnything,
+  idleBuilderPresentation,
   http,
   toasts,
   registeredRuleTypes,
@@ -394,11 +615,16 @@ const MixedCreateRuleFlyoutInner = ({
   onClose: () => void;
   onChooseThreshold: () => void;
   onChooseEsql: () => void;
-  onChooseAgent: (userInput?: string) => void;
+  onChooseAgent: (userInput?: string, esqlQuery?: string) => void;
   onChooseSequence: () => void;
   onBrowseClassic: (search?: string) => void;
+  onExploreLibrary: () => void;
   onSelectClassicRuleType: (ruleTypeId: string) => void;
+  onMaximizeChange?: (isMaximized: boolean) => void;
   showClassic: boolean;
+  discoverQuery?: string;
+  compactAskAnything: boolean;
+  idleBuilderPresentation: IdleBuilderPresentation;
   http: CoreStart['http'];
   toasts: CoreStart['notifications']['toasts'];
   registeredRuleTypes: Array<{ id: string; description: string }>;
@@ -412,8 +638,15 @@ const MixedCreateRuleFlyoutInner = ({
     registeredRuleTypes,
     enabled: showClassic,
   });
+  const [isMaximized, setIsMaximized] = useState(false);
 
-  const classicCount = ruleTypeIndex.size;
+  const handleMaximizeChange = useCallback(
+    (maximized: boolean) => {
+      setIsMaximized(maximized);
+      onMaximizeChange?.(maximized);
+    },
+    [onMaximizeChange]
+  );
 
   return (
     <EuiFlyout
@@ -431,46 +664,29 @@ const MixedCreateRuleFlyoutInner = ({
         title: i18n.translate('xpack.observabilityAlerting.mixedRules.createFlyoutHistoryTitle', {
           defaultMessage: 'Create rule',
         }),
+        showMaximizeButton: true,
+        onMaximizeChange: handleMaximizeChange,
       }}
       data-test-subj="mixedRulesExperienceChooser"
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" responsive={false}>
-          <EuiFlexItem>
-            <EuiTitle size="s" id={TITLE_ID}>
-              <h2>
-                <FormattedMessage
-                  id="xpack.observabilityAlerting.mixedCreate.title"
-                  defaultMessage="Create rule"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={i18n.translate('xpack.observabilityAlerting.mixedCreate.close', {
-                defaultMessage: 'Close',
-              })}
-            >
-              <EuiButtonIcon
-                iconType="cross"
-                color="text"
-                onClick={onClose}
-                aria-label={i18n.translate('xpack.observabilityAlerting.mixedCreate.close', {
-                  defaultMessage: 'Close',
-                })}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <EuiFlyoutHeader>
+        <EuiTitle size="s" id={TITLE_ID}>
+          <h2>
+            <FormattedMessage
+              id="xpack.observabilityAlerting.mixedCreate.title"
+              defaultMessage="Create rule"
+            />
+          </h2>
+        </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <V2OptionsBody
+        <MixedCreateChooserBody
           onChooseThreshold={onChooseThreshold}
           onChooseEsql={onChooseEsql}
           onChooseAgent={onChooseAgent}
           onChooseSequence={onChooseSequence}
           onBrowseClassic={onBrowseClassic}
+          onExploreLibrary={onExploreLibrary}
           onSelectClassicRuleType={onSelectClassicRuleType}
           classicRuleTypes={[...ruleTypeIndex.values()].map((ruleType) => ({
             id: ruleType.id,
@@ -478,45 +694,12 @@ const MixedCreateRuleFlyoutInner = ({
             description: ruleType.description,
           }))}
           showClassic={showClassic}
+          discoverQuery={discoverQuery}
+          isMaximized={isMaximized}
+          compactAskAnything={compactAskAnything}
+          idleBuilderPresentation={idleBuilderPresentation}
         />
       </EuiFlyoutBody>
-      {showClassic ? (
-        <EuiFlyoutFooter>
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
-            <EuiFlexItem>
-              <EuiText size="s">
-                <strong>
-                  <FormattedMessage
-                    id="xpack.observabilityAlerting.mixedCreate.classicPrompt"
-                    defaultMessage="Looking for a Classic rule type?"
-                  />
-                </strong>
-              </EuiText>
-              <EuiText size="xs" color="subdued">
-                <FormattedMessage
-                  id="xpack.observabilityAlerting.mixedCreate.classicPromptHint"
-                  defaultMessage="Browse {count} Classic rule types and templates."
-                  values={{ count: classicCount || '—' }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                color="text"
-                iconType="sortRight"
-                iconSide="right"
-                onClick={() => onBrowseClassic()}
-                data-test-subj="mixedRulesBrowseClassic"
-              >
-                <FormattedMessage
-                  id="xpack.observabilityAlerting.mixedCreate.browseClassic"
-                  defaultMessage="Browse Classic rules"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      ) : null}
     </EuiFlyout>
   );
 };
@@ -545,6 +728,8 @@ export const MixedClassicRuleTypesFlyout = ({
   registeredRuleTypes,
   historyKey,
   initialSearch = '',
+  initialIsMaximized = false,
+  onMaximizeChange,
 }: {
   onClose: () => void;
   onSelectClassicRuleType: (ruleTypeId: string) => void;
@@ -554,6 +739,9 @@ export const MixedClassicRuleTypesFlyout = ({
   registeredRuleTypes: Array<{ id: string; description: string }>;
   historyKey: symbol;
   initialSearch?: string;
+  /** Match the Create rule flyout size when stacking Classic on top. */
+  initialIsMaximized?: boolean;
+  onMaximizeChange?: (isMaximized: boolean) => void;
 }) => {
   const [queryClient] = useState(() => new QueryClient());
 
@@ -568,6 +756,8 @@ export const MixedClassicRuleTypesFlyout = ({
         registeredRuleTypes={registeredRuleTypes}
         historyKey={historyKey}
         initialSearch={initialSearch}
+        initialIsMaximized={initialIsMaximized}
+        onMaximizeChange={onMaximizeChange}
       />
     </QueryClientProvider>
   );
@@ -582,6 +772,8 @@ const MixedClassicRuleTypesFlyoutInner = ({
   registeredRuleTypes,
   historyKey,
   initialSearch,
+  initialIsMaximized,
+  onMaximizeChange,
 }: {
   onClose: () => void;
   onSelectClassicRuleType: (ruleTypeId: string) => void;
@@ -591,11 +783,53 @@ const MixedClassicRuleTypesFlyoutInner = ({
   registeredRuleTypes: Array<{ id: string; description: string }>;
   historyKey: symbol;
   initialSearch: string;
+  initialIsMaximized: boolean;
+  onMaximizeChange?: (isMaximized: boolean) => void;
 }) => {
   const [search, setSearch] = useState(initialSearch);
   const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
   const [selectedMode, setSelectedMode] = useState<ClassicChooserMode>('ruleType');
+  const [isMaximized, setIsMaximized] = useState(initialIsMaximized);
+  const didApplyInitialMaximize = useRef(false);
   const { run: updateDebouncedSearch } = useDebounceFn(setDebouncedSearch, SEARCH_DEBOUNCE);
+
+  const handleMaximizeChange = useCallback(
+    (maximized: boolean) => {
+      setIsMaximized(maximized);
+      onMaximizeChange?.(maximized);
+    },
+    [onMaximizeChange]
+  );
+
+  // EUI has no public initialIsMaximized; apply Create's size by clicking Maximize once.
+  useLayoutEffect(() => {
+    if (!initialIsMaximized || didApplyInitialMaximize.current) {
+      return;
+    }
+    let cancelled = false;
+    let attempts = 0;
+    const tryMaximize = () => {
+      if (cancelled || didApplyInitialMaximize.current) {
+        return;
+      }
+      const maximizeButton = document.querySelector<HTMLElement>(
+        '[data-test-subj="mixedRulesClassicChooser"] [data-test-subj="euiFlyoutMenuMaximizeButton"]'
+      );
+      if (maximizeButton) {
+        didApplyInitialMaximize.current = true;
+        maximizeButton.click();
+        return;
+      }
+      attempts += 1;
+      if (attempts < 10) {
+        window.requestAnimationFrame(tryMaximize);
+      }
+    };
+    tryMaximize();
+    return () => {
+      cancelled = true;
+    };
+  }, [initialIsMaximized]);
 
   const onChangeSearch = useCallback(
     (value: string) => {
@@ -672,231 +906,216 @@ const MixedClassicRuleTypesFlyoutInner = ({
         title: i18n.translate('xpack.observabilityAlerting.mixedCreate.classicTitle', {
           defaultMessage: 'Classic rule types',
         }),
+        showMaximizeButton: true,
+        onMaximizeChange: handleMaximizeChange,
       }}
       data-test-subj="mixedRulesClassicChooser"
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s" id={CLASSIC_TITLE_ID}>
-          <h2>
-            <FormattedMessage
-              id="xpack.observabilityAlerting.mixedCreate.classicTitle"
-              defaultMessage="Classic rule types"
-            />
-          </h2>
-        </EuiTitle>
-        <EuiText size="s" color="subdued">
-          <p>
-            {isTemplateMode ? (
+        <div css={isMaximized ? maximizedFlyoutContentCss : undefined}>
+          <EuiTitle size="s" id={CLASSIC_TITLE_ID}>
+            <h2>
               <FormattedMessage
-                id="xpack.observabilityAlerting.mixedCreate.classicTemplateSubtitle"
-                defaultMessage="Start from a saved Classic template."
+                id="xpack.observabilityAlerting.mixedCreate.classicTitle"
+                defaultMessage="Classic rule types"
               />
-            ) : (
-              <FormattedMessage
-                id="xpack.observabilityAlerting.mixedCreate.classicSubtitle"
-                defaultMessage="Choose from {count} solution-specific rule types."
-                values={{ count: ruleTypeIndex.size }}
-              />
-            )}
-          </p>
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiButtonGroup
-          legend={i18n.translate('xpack.observabilityAlerting.mixedCreate.classicModeLegend', {
-            defaultMessage: 'Select creation mode',
-          })}
-          options={CLASSIC_MODE_OPTIONS}
-          idSelected={selectedMode}
-          onChange={(id) => setSelectedMode(id as ClassicChooserMode)}
-          buttonSize="compressed"
-          isFullWidth
-          data-test-subj="mixedRulesClassicMode"
-        />
-        <EuiSpacer size="s" />
-        <EuiFieldSearch
-          fullWidth
-          placeholder={
-            isTemplateMode
-              ? i18n.translate('xpack.observabilityAlerting.mixedCreate.searchTemplates', {
-                  defaultMessage: 'Search templates...',
-                })
-              : i18n.translate('xpack.observabilityAlerting.mixedCreate.searchClassic', {
-                  defaultMessage: 'Search classic rule types',
-                })
-          }
-          value={search}
-          onChange={(event) => onChangeSearch(event.target.value)}
-          data-test-subj="mixedRulesClassicSearch"
-        />
-        <EuiSpacer size="s" />
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
+            </h2>
+          </EuiTitle>
+          <EuiText size="s" color="subdued">
+            <p>
               {isTemplateMode ? (
                 <FormattedMessage
-                  id="xpack.observabilityAlerting.mixedCreate.classicTemplateCount"
-                  defaultMessage="{count} templates"
-                  values={{ count: templates.length }}
+                  id="xpack.observabilityAlerting.mixedCreate.classicTemplateSubtitle"
+                  defaultMessage="Start from a saved Classic template."
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.observabilityAlerting.mixedCreate.classicCount"
-                  defaultMessage="{count} rule types"
-                  values={{ count: classicTypes.length }}
+                  id="xpack.observabilityAlerting.mixedCreate.classicSubtitle"
+                  defaultMessage="Choose from {count} solution-specific rule types."
+                  values={{ count: ruleTypeIndex.size }}
                 />
               )}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="xpack.observabilityAlerting.mixedCreate.classicAuthoring"
-                defaultMessage="Classic authoring"
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiButtonGroup
+            legend={i18n.translate('xpack.observabilityAlerting.mixedCreate.classicModeLegend', {
+              defaultMessage: 'Select creation mode',
+            })}
+            options={CLASSIC_MODE_OPTIONS}
+            idSelected={selectedMode}
+            onChange={(id) => setSelectedMode(id as ClassicChooserMode)}
+            buttonSize="compressed"
+            isFullWidth
+            data-test-subj="mixedRulesClassicMode"
+          />
+          <EuiSpacer size="s" />
+          <EuiFieldSearch
+            fullWidth
+            placeholder={
+              isTemplateMode
+                ? i18n.translate('xpack.observabilityAlerting.mixedCreate.searchTemplates', {
+                    defaultMessage: 'Search templates...',
+                  })
+                : i18n.translate('xpack.observabilityAlerting.mixedCreate.searchClassic', {
+                    defaultMessage: 'Search classic rule types',
+                  })
+            }
+            value={search}
+            onChange={(event) => onChangeSearch(event.target.value)}
+            data-test-subj="mixedRulesClassicSearch"
+          />
+          <EuiSpacer size="s" />
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {isTemplateMode ? (
+                  <FormattedMessage
+                    id="xpack.observabilityAlerting.mixedCreate.classicTemplateCount"
+                    defaultMessage="{count} templates"
+                    values={{ count: templates.length }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.observabilityAlerting.mixedCreate.classicCount"
+                    defaultMessage="{count} rule types"
+                    values={{ count: classicTypes.length }}
+                  />
+                )}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="xpack.observabilityAlerting.mixedCreate.classicAuthoring"
+                  defaultMessage="Classic authoring"
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {isTemplateMode ? (
-          templatesLoading ? (
+        <div
+          css={isMaximized ? maximizedFlyoutContentCss : undefined}
+          data-test-subj="mixedRulesClassicBody"
+          data-maximized={isMaximized ? 'true' : 'false'}
+        >
+          {isTemplateMode ? (
+            templatesLoading ? (
+              <EuiLoadingSpinner size="l" />
+            ) : templates.length === 0 ? (
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.observabilityAlerting.mixedCreate.noTemplates"
+                  defaultMessage="No templates found"
+                />
+              </EuiText>
+            ) : (
+              <>
+                {templates.map((template) => (
+                  <React.Fragment key={template.id}>
+                    <EuiPanel
+                      element="button"
+                      paddingSize="s"
+                      hasBorder={false}
+                      hasShadow={false}
+                      onClick={() => onSelectTemplate(template.id)}
+                      data-test-subj={`${template.id}-SelectOption`}
+                    >
+                      <EuiText size="s">
+                        <strong>{template.name}</strong>
+                      </EuiText>
+                      {template.tags?.length ? (
+                        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+                          {template.tags.map((tag) => (
+                            <EuiFlexItem key={tag} grow={false}>
+                              <EuiBadge color="hollow">{tag}</EuiBadge>
+                            </EuiFlexItem>
+                          ))}
+                        </EuiFlexGroup>
+                      ) : null}
+                    </EuiPanel>
+                    <EuiSpacer size="xs" />
+                  </React.Fragment>
+                ))}
+                {hasMoreTemplates ? (
+                  <EuiButtonEmpty
+                    onClick={() => loadMoreTemplates()}
+                    isLoading={templatesLoadingMore}
+                    data-test-subj="mixedRulesClassicLoadMoreTemplates"
+                  >
+                    <FormattedMessage
+                      id="xpack.observabilityAlerting.mixedCreate.loadMoreTemplates"
+                      defaultMessage="Load more"
+                    />
+                  </EuiButtonEmpty>
+                ) : null}
+              </>
+            )
+          ) : isLoading ? (
             <EuiLoadingSpinner size="l" />
-          ) : templates.length === 0 ? (
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.observabilityAlerting.mixedCreate.noTemplates"
-                defaultMessage="No templates found"
-              />
-            </EuiText>
           ) : (
-            <>
-              {templates.map((template) => (
-                <React.Fragment key={template.id}>
-                  <EuiPanel
-                    element="button"
-                    paddingSize="s"
-                    hasBorder={false}
-                    hasShadow={false}
-                    onClick={() => onSelectTemplate(template.id)}
-                    data-test-subj={`${template.id}-SelectOption`}
-                  >
-                    <EuiText size="s">
-                      <strong>{template.name}</strong>
+            groupedTypes.map(([group, types]) => (
+              <div key={group}>
+                <EuiFlexGroup justifyContent="spaceBetween">
+                  <EuiFlexItem>
+                    <EuiText size="xs">
+                      <strong>{group.toUpperCase()}</strong>
                     </EuiText>
-                    {template.tags?.length ? (
-                      <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-                        {template.tags.map((tag) => (
-                          <EuiFlexItem key={tag} grow={false}>
-                            <EuiBadge color="hollow">{tag}</EuiBadge>
-                          </EuiFlexItem>
-                        ))}
-                      </EuiFlexGroup>
-                    ) : null}
-                  </EuiPanel>
-                  <EuiSpacer size="xs" />
-                </React.Fragment>
-              ))}
-              {hasMoreTemplates ? (
-                <EuiButtonEmpty
-                  onClick={() => loadMoreTemplates()}
-                  isLoading={templatesLoadingMore}
-                  data-test-subj="mixedRulesClassicLoadMoreTemplates"
-                >
-                  <FormattedMessage
-                    id="xpack.observabilityAlerting.mixedCreate.loadMoreTemplates"
-                    defaultMessage="Load more"
-                  />
-                </EuiButtonEmpty>
-              ) : null}
-            </>
-          )
-        ) : isLoading ? (
-          <EuiLoadingSpinner size="l" />
-        ) : (
-          groupedTypes.map(([group, types]) => (
-            <div key={group}>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiText size="xs">
-                    <strong>{group.toUpperCase()}</strong>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {types.length}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-              {types.map((ruleType) => (
-                <React.Fragment key={ruleType.id}>
-                  <EuiPanel
-                    element="button"
-                    paddingSize="s"
-                    hasBorder={false}
-                    hasShadow={false}
-                    onClick={() => onSelectClassicRuleType(ruleType.id)}
-                    data-test-subj={`${ruleType.id}-SelectOption`}
-                  >
-                    <EuiText size="s">
-                      <strong>{ruleType.name}</strong>
-                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
                     <EuiText size="xs" color="subdued">
-                      <FormattedMessage
-                        id="xpack.observabilityAlerting.mixedCreate.opensClassic"
-                        defaultMessage="Opens in the classic rule editor"
-                      />
+                      {types.length}
                     </EuiText>
-                  </EuiPanel>
-                  <EuiSpacer size="xs" />
-                </React.Fragment>
-              ))}
-              <EuiSpacer size="m" />
-            </div>
-          ))
-        )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+                {types.map((ruleType) => (
+                  <React.Fragment key={ruleType.id}>
+                    <EuiPanel
+                      element="button"
+                      paddingSize="s"
+                      hasBorder={false}
+                      hasShadow={false}
+                      onClick={() => onSelectClassicRuleType(ruleType.id)}
+                      data-test-subj={`${ruleType.id}-SelectOption`}
+                    >
+                      <EuiText size="s">
+                        <strong>{ruleType.name}</strong>
+                      </EuiText>
+                      <EuiText size="xs" color="subdued">
+                        <FormattedMessage
+                          id="xpack.observabilityAlerting.mixedCreate.opensClassic"
+                          defaultMessage="Opens in the classic rule editor"
+                        />
+                      </EuiText>
+                    </EuiPanel>
+                    <EuiSpacer size="xs" />
+                  </React.Fragment>
+                ))}
+                <EuiSpacer size="m" />
+              </div>
+            ))
+          )}
+        </div>
       </EuiFlyoutBody>
     </EuiFlyout>
   );
 };
 
-type DataDomain = 'infra' | 'apm' | 'ml' | 'logs' | 'synthetics' | 'slo' | 'custom' | 'specific';
-type CreatePath = 'threshold' | 'esql';
-
-const DEFAULT_CREATE_PATHS: CreatePath[] = ['threshold', 'esql'];
-
-type DataDomainOption = {
-  id: DataDomain;
-  label: string;
-  /** Short subtitle shown under the label in search suggestions. */
-  description: string;
-  /** When true, Universal can’t cover this well yet — route to Classic. */
-  prefersClassic?: boolean;
-  /**
-   * Term passed to the Classic rule-type search. Must match rule type names
-   * (e.g. "APM", "SLOs") — full suggestion descriptions return no results.
-   */
-  classicSearch?: string;
-  /** Ordered Create-section paths (Threshold, ES|QL). */
-  createPaths: CreatePath[];
-  /** When true, show Sequence under Build your own for this domain. */
-  showSequence?: boolean;
-  hint: string;
-  examplePrompt: string;
-};
-
 /**
- * Demo-only v2 rule-library templates. Only domains with Universal (v2) create
- * paths get templates — Classic-only domains (APM, ML, Synthetics, SLOs) fall
- * back cleanly with no library suggestions. Real templates will come from the API later.
+ * Demo-only v2 rule-library templates. Real templates will come from the API later.
  */
 type DemoRuleTemplate = {
   id: string;
   title: string;
   description: string;
   iconType: string;
-  createPath: CreatePath;
-  domains: DataDomain[];
+  /** Builder the template opens (shown as the accent badge). */
+  createPath: RuleBuilderType;
+  /** Topic tags only — builder type is rendered separately. */
+  tags: string[];
 };
 
 const DEMO_RULE_TEMPLATES: DemoRuleTemplate[] = [
@@ -913,7 +1132,7 @@ const DEMO_RULE_TEMPLATES: DemoRuleTemplate[] = [
     ),
     iconType: 'visGauge',
     createPath: 'threshold',
-    domains: ['infra'],
+    tags: ['infrastructure'],
   },
   {
     id: 'demo-memory-pressure',
@@ -927,8 +1146,8 @@ const DEMO_RULE_TEMPLATES: DemoRuleTemplate[] = [
       }
     ),
     iconType: 'visGauge',
-    createPath: 'threshold',
-    domains: ['infra'],
+    createPath: 'sequence',
+    tags: ['infrastructure'],
   },
   {
     id: 'demo-disk-low',
@@ -943,7 +1162,7 @@ const DEMO_RULE_TEMPLATES: DemoRuleTemplate[] = [
     ),
     iconType: 'visGauge',
     createPath: 'threshold',
-    domains: ['infra'],
+    tags: ['infrastructure', 'capacity'],
   },
   {
     id: 'demo-error-log-spike',
@@ -958,7 +1177,7 @@ const DEMO_RULE_TEMPLATES: DemoRuleTemplate[] = [
     ),
     iconType: 'code',
     createPath: 'esql',
-    domains: ['logs'],
+    tags: ['logs'],
   },
   {
     id: 'demo-auth-failures',
@@ -973,186 +1192,73 @@ const DEMO_RULE_TEMPLATES: DemoRuleTemplate[] = [
     ),
     iconType: 'code',
     createPath: 'esql',
-    domains: ['logs'],
+    tags: ['logs', 'security'],
   },
 ];
 
-/** Templates only for Universal-supported domains; Classic fallback domains get none. */
-const getSuggestedTemplatesForDomain = (
-  domain: DataDomainOption | null
-): DemoRuleTemplate[] => {
-  if (!domain || domain.prefersClassic || domain.createPaths.length === 0) {
-    return [];
-  }
-  return DEMO_RULE_TEMPLATES.filter((template) => template.domains.includes(domain.id)).slice(
-    0,
-    3
-  );
-};
+const IDLE_SUGGESTED_TEMPLATE_IDS = [
+  'demo-high-cpu',
+  'demo-memory-pressure',
+  'demo-error-log-spike',
+] as const;
+
+/** Fixed starter templates — body stays stable while search only drives the typeahead. */
+const getIdleSuggestedTemplates = (): DemoRuleTemplate[] =>
+  IDLE_SUGGESTED_TEMPLATE_IDS.flatMap((id) => {
+    const template = DEMO_RULE_TEMPLATES.find((item) => item.id === id);
+    return template ? [template] : [];
+  });
 
 type DomainSuggestionOption = EuiSelectableOption & {
   description?: string;
 };
 
-/** Same options as the Agent Builder ask-user question — offered as search suggestions. */
-const DATA_DOMAIN_OPTIONS: DataDomainOption[] = [
-  {
-    id: 'infra',
-    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainInfra', {
-      defaultMessage: 'Infrastructure metrics',
-    }),
-    description: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainInfraDescription', {
-      defaultMessage: 'CPU, memory, disk, network on hosts or containers',
-    }),
-    createPaths: ['threshold', 'esql'],
-    hint: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainInfraHint', {
-      defaultMessage: 'Start with a Threshold rule, or turn on AI mode to describe the condition.',
-    }),
-    examplePrompt: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainInfraExample', {
-      defaultMessage: 'CPU, memory, disk, network on hosts or containers',
-    }),
-  },
-  {
-    id: 'apm',
-    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainApm', {
-      defaultMessage: 'Application / APM',
-    }),
-    description: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainApmDescription', {
-      defaultMessage: 'Error rates, latency, throughput for services',
-    }),
-    prefersClassic: true,
-    classicSearch: 'APM',
-    createPaths: [],
-    hint: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainApmHint', {
-      defaultMessage: 'APM rules are only supported in Classic alerting.',
-    }),
-    examplePrompt: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainApmExample', {
-      defaultMessage: 'APM',
-    }),
-  },
-  {
-    id: 'ml',
-    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainMl', {
-      defaultMessage: 'Machine Learning',
-    }),
-    description: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainMlDescription', {
-      defaultMessage: 'Anomaly detection jobs and ML-based alerts',
-    }),
-    prefersClassic: true,
-    classicSearch: 'Anomaly',
-    createPaths: [],
-    hint: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainMlHint', {
-      defaultMessage: 'Anomaly detection and ML rules are only supported in Classic alerting.',
-    }),
-    examplePrompt: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainMlExample', {
-      defaultMessage: 'Anomaly',
-    }),
-  },
-  {
-    id: 'logs',
-    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainLogs', {
-      defaultMessage: 'Logs',
-    }),
-    description: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainLogsDescription', {
-      defaultMessage: 'Error counts, patterns, or spikes in log data',
-    }),
-    createPaths: ['threshold', 'esql'],
-    hint: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainLogsHint', {
-      defaultMessage:
-        'Use Threshold for counts, ES|QL for custom queries, or AI mode to describe what you want.',
-    }),
-    examplePrompt: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainLogsExample', {
-      defaultMessage: 'Error counts, patterns, or spikes in log data',
-    }),
-  },
-  {
-    id: 'synthetics',
-    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainSynthetics', {
-      defaultMessage: 'Synthetics / Uptime',
-    }),
-    description: i18n.translate(
-      'xpack.observabilityAlerting.mixedCreate.domainSyntheticsDescription',
-      {
-        defaultMessage: 'Availability and response times for endpoints and journeys',
-      }
-    ),
-    prefersClassic: true,
-    classicSearch: 'Synthetics',
-    createPaths: [],
-    hint: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainSyntheticsHint', {
-      defaultMessage: 'Synthetics and Uptime rules are only supported in Classic alerting.',
-    }),
-    examplePrompt: i18n.translate(
-      'xpack.observabilityAlerting.mixedCreate.domainSyntheticsExample',
-      {
-        defaultMessage: 'Synthetics',
-      }
-    ),
-  },
-  {
-    id: 'slo',
-    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainSlo', {
-      defaultMessage: 'SLOs',
-    }),
-    description: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainSloDescription', {
-      defaultMessage: 'Burn rate and error budget for service level objectives',
-    }),
-    prefersClassic: true,
-    classicSearch: 'SLOs',
-    createPaths: [],
-    hint: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainSloHint', {
-      defaultMessage: 'SLO burn-rate rules are only supported in Classic alerting.',
-    }),
-    examplePrompt: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainSloExample', {
-      defaultMessage: 'SLOs',
-    }),
-  },
-  {
-    id: 'custom',
-    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainCustom', {
-      defaultMessage: 'Custom index',
-    }),
-    description: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainCustomDescription', {
-      defaultMessage: 'Query a specific index with ES|QL or a threshold',
-    }),
-    createPaths: ['esql', 'threshold'],
-    hint: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainCustomHint', {
-      defaultMessage: 'ES|QL is the best fit when you already know the index and query shape.',
-    }),
-    examplePrompt: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainCustomExample', {
-      defaultMessage: 'I have a specific index I want to query',
-    }),
-  },
-];
-
-const SPECIFIC_DOMAIN_FALLBACK: DataDomainOption = {
-  id: 'specific',
-  label: '',
-  description: '',
-  createPaths: ['threshold', 'esql'],
-  // Free-text / unclear intent — Sequence can still be a fit.
-  showSequence: true,
-  hint: i18n.translate('xpack.observabilityAlerting.mixedCreate.domainSpecificHint', {
-    defaultMessage: 'Turn on AI mode to describe it, or start from a Threshold builder.',
-  }),
-  examplePrompt: '',
+const looksLikeEsqlOrStructuredQuery = (text: string): boolean => {
+  const value = text.trim().toLowerCase();
+  return (
+    /\b(from |stats |where |esql)\b/.test(value) ||
+    value.includes('|') ||
+    value.includes('*')
+  );
 };
 
 /**
- * Prototype-only keyword matching to reshape recommendations from free text.
- * Classic-only domains (APM, ML, Synthetics, SLOs) are inferred separately.
- * Threshold-style intents stay on the Universal Threshold builder.
+ * Prototype heuristic: descriptive natural language → offer Enter AI mode.
+ * Suggest only — never auto-switch. Short keywords and ES|QL stay on search.
  */
-const inferDataDomain = (text: string): DataDomain | null => {
+const looksLikeDescriptiveNaturalLanguage = (text: string): boolean => {
+  const value = text.trim();
+  if (!value || looksLikeEsqlOrStructuredQuery(value)) {
+    return false;
+  }
+
+  const words = value.split(/\s+/).filter(Boolean);
+  if (words.length < 3 && value.length < 20) {
+    return false;
+  }
+
+  const hasIntentLanguage =
+    /\b(i|we|my|our|want|need|like|looking|try|trying|help|please|alert|notify|detect|create|make|set\s*up|when|whenever|if|why|how|should|describe|something|someone)\b/i.test(
+      value
+    ) || /\?$/.test(value);
+
+  // Sentence-like free text without a clear keyword-only shape.
+  return hasIntentLanguage || words.length >= 4 || value.length >= 28;
+};
+
+/**
+ * Keyword domain inference from typing. Reserved for future domain-aware template
+ * filtering — not shown as typeahead rows and does not reshape the idle body.
+ */
+type InferredDataDomain = 'infra' | 'apm' | 'logs' | 'synthetics' | 'slo' | 'specific';
+
+const inferDataDomain = (text: string): InferredDataDomain | null => {
   const value = text.trim().toLowerCase();
   if (!value) {
     return null;
   }
   if (/\b(apm|transaction|span|trace|latency|throughput)\b/.test(value)) {
     return 'apm';
-  }
-  if (/\b(ml|anomaly|anomalies|machine learning)\b/.test(value)) {
-    return 'ml';
   }
   if (/\b(sequence|multi-?step|chain rules|rules on rules)\b/.test(value)) {
     return 'specific';
@@ -1163,15 +1269,11 @@ const inferDataDomain = (text: string): DataDomain | null => {
   if (/\b(slo|slis?|error budget|burn rate)\b/.test(value)) {
     return 'slo';
   }
-  // Classic threshold-style rule types → Universal Threshold (not Classic).
   if (/\b(metric threshold|log threshold|index threshold)\b/.test(value)) {
     return /\blog threshold\b/.test(value) ? 'logs' : 'infra';
   }
   if (/\bthreshold\b/.test(value)) {
     return /\blog\b/.test(value) ? 'logs' : 'infra';
-  }
-  if (/\b(from |stats |where |esql)\b/.test(value) || value.includes('|') || value.includes('*')) {
-    return 'custom';
   }
   if (/\b(log|logs|error message|stacktrace)\b/.test(value)) {
     return 'logs';
@@ -1179,211 +1281,149 @@ const inferDataDomain = (text: string): DataDomain | null => {
   if (/\b(cpu|memory|disk|host|container|pod|infra|metric)\b/.test(value)) {
     return 'infra';
   }
-  if (value.length >= 12) {
+  if (looksLikeDescriptiveNaturalLanguage(text) || value.length >= 12) {
     return 'specific';
   }
   return null;
 };
 
-/** Matches Discover QuickSearchVisor mode toggle (magnify + sparkles). */
-const measureModeToggleStyles = ({ euiTheme }: UseEuiTheme) => ({
-  modeToggle: css`
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    flex-shrink: 0;
-    box-sizing: border-box;
-    gap: ${euiTheme.size.xs};
-    block-size: ${euiTheme.size.xl};
-    max-block-size: ${euiTheme.size.xl};
-    padding: ${euiTheme.size.xs};
-    border-radius: ${euiTheme.border.radius.control};
+const ASK_ANYTHING_COMPACT_MIN_ROWS = 1;
+const ASK_ANYTHING_COMPACT_MAX_ROWS = 6;
+const ASK_ANYTHING_GROW_TRANSITION = '180ms ease';
 
-    &::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border: ${euiTheme.border.width.thin} solid ${euiTheme.components.forms.border};
-      border-radius: inherit;
-      pointer-events: none;
-    }
+const agentChatInputStyles = ({ euiTheme }: UseEuiTheme, compactAskAnything: boolean) => {
+  const lineHeight = euiLineHeightFromBaseline('s', euiTheme);
+  return {
+    textarea: css`
+      cursor: text;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: none;
+      box-sizing: border-box;
+      width: 100%;
+      font-size: ${euiFontSizeFromScale('s', euiTheme)};
+      line-height: ${lineHeight};
+      color: ${euiTheme.colors.textParagraph};
+      font-family: inherit;
+      ${compactAskAnything
+        ? `
+        /* flex:1 was locking height to the shell — grow from content instead. */
+        flex: none;
+        overflow-y: auto;
+        min-height: calc(${lineHeight} * ${ASK_ANYTHING_COMPACT_MIN_ROWS});
+        max-height: calc(${lineHeight} * ${ASK_ANYTHING_COMPACT_MAX_ROWS});
+        transition: height ${ASK_ANYTHING_GROW_TRANSITION};
+      `
+        : `
+        flex: 1;
+      `}
 
-    .euiButtonIcon {
-      border-radius: calc(${euiTheme.border.radius.control} - ${euiTheme.size.xxs});
-    }
-  `,
-  modeIconButton: css`
-    &.euiButtonIcon {
-      inline-size: ${euiTheme.size.l};
-      block-size: ${euiTheme.size.l};
-      border-radius: calc(${euiTheme.border.radius.control} - ${euiTheme.size.xxs});
-      background-color: transparent;
-
-      &:hover,
-      &:focus,
-      &:focus-visible {
-        background-color: ${euiTheme.components.buttons.backgroundEmptyTextHover};
+      &::placeholder {
+        color: ${euiTheme.colors.textDisabled};
       }
-    }
-  `,
-  modeIconButtonActive: css`
-    &.euiButtonIcon,
-    &.euiButtonIcon:hover,
-    &.euiButtonIcon:focus,
-    &.euiButtonIcon:focus-visible {
-      background-color: ${euiTheme.colors.backgroundLightText};
-    }
-  `,
-  aiButtonSelected: css`
-    background: linear-gradient(
-      180deg,
-      ${euiTheme.components.buttons.backgroundPrimaryHover} 18%,
-      ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
-    ) !important;
-  `,
-});
 
-const agentChatInputStyles = ({ euiTheme }: UseEuiTheme) => ({
-  textarea: css`
-    flex: 1;
-    cursor: text;
-    background: transparent;
-    border: none;
-    outline: none;
-    resize: none;
-    font-size: ${euiFontSizeFromScale('m', euiTheme)};
-    line-height: ${euiLineHeightFromBaseline('m', euiTheme)};
-    color: ${euiTheme.colors.textParagraph};
-    font-family: inherit;
-
-    &::placeholder {
-      color: ${euiTheme.colors.textDisabled};
-    }
-
-    :focus:focus-visible {
-      outline-style: none;
-    }
-  `,
-  sendRow: css`
-    display: flex;
-    justify-content: flex-end;
-  `,
-});
-
-const SEARCH_MODE_LABEL = i18n.translate(
-  'xpack.observabilityAlerting.mixedCreate.searchModeLabel',
-  {
-    defaultMessage: 'Search suggestions',
-  }
-);
-
-const AI_MODE_LABEL = i18n.translate('xpack.observabilityAlerting.mixedCreate.aiModeTooltip', {
-  defaultMessage: 'Describe a rule in natural language with the AI agent',
-});
-
-const MODE_TOGGLE_LEGEND = i18n.translate(
-  'xpack.observabilityAlerting.mixedCreate.modeToggleLegend',
-  {
-    defaultMessage: 'Switch between search and AI',
-  }
-);
-
-const MeasureModeToggle = ({
-  isAiMode,
-  onModeChange,
-}: {
-  isAiMode: boolean;
-  onModeChange: (nextIsAiMode: boolean) => void;
-}): JSX.Element => {
-  const euiThemeContext = useEuiTheme();
-  const styles = useMemo(() => measureModeToggleStyles(euiThemeContext), [euiThemeContext]);
-  const { gradientId, iconGradientCss, colors } = useSvgAiGradient({ variant: 'outlined' });
-  // productAgent is an app icon: paths inherit fill and use .euiIcon__fillSecondary, so the
-  // shared iconGradientCss ([fill] + svg root) is not enough — paint every path like sparkles.
-  const agentIconGradientCss = useMemo(
-    () => css`
-      & .euiIcon,
-      & .euiIcon path,
-      & .euiIcon .euiIcon__fillSecondary {
-        fill: url(#${gradientId}) !important;
+      :focus:focus-visible {
+        outline-style: none;
       }
     `,
-    [gradientId]
-  );
-
-  return (
-    <div
-      role="group"
-      aria-label={MODE_TOGGLE_LEGEND}
-      css={styles.modeToggle}
-      data-test-subj="mixedRulesModeToggle"
-    >
-      <EuiToolTip content={SEARCH_MODE_LABEL} disableScreenReaderOutput>
-        <EuiButtonIcon
-          iconType="magnify"
-          size="xs"
-          iconSize="m"
-          color="text"
-          display="empty"
-          aria-label={SEARCH_MODE_LABEL}
-          aria-pressed={!isAiMode}
-          isSelected={!isAiMode}
-          onClick={() => onModeChange(false)}
-          data-test-subj="mixedRulesSearchMode"
-          css={[styles.modeIconButton, !isAiMode && styles.modeIconButtonActive]}
-        />
-      </EuiToolTip>
-      {isAiMode ? <SvgAiGradientDefs gradientId={gradientId} colors={colors} /> : null}
-      <EuiToolTip content={AI_MODE_LABEL} disableScreenReaderOutput>
-        <EuiButtonIcon
-          iconType="productAgent"
-          size="xs"
-          iconSize="m"
-          color="text"
-          display="empty"
-          aria-label={AI_MODE_LABEL}
-          aria-pressed={isAiMode}
-          isSelected={isAiMode}
-          onClick={() => onModeChange(true)}
-          data-test-subj="mixedRulesAiMode"
-          css={[
-            styles.modeIconButton,
-            isAiMode && styles.aiButtonSelected,
-            isAiMode && iconGradientCss,
-            isAiMode && agentIconGradientCss,
-          ]}
-        />
-      </EuiToolTip>
-    </div>
-  );
+  };
 };
 
-const V2OptionsBody = ({
+const CLASSIC_SUGGESTION_KEY_PREFIX = 'classic:';
+const PATH_SUGGESTION_KEY_PREFIX = 'path:';
+const TEMPLATE_SUGGESTION_KEY_PREFIX = 'template:';
+const UNIVERSAL_GROUP_KEY = 'group:universal';
+const TEMPLATE_GROUP_KEY = 'group:templates';
+const CLASSIC_GROUP_KEY = 'group:classic';
+
+type CreatePathSuggestionId = 'threshold' | 'sequence' | 'esql';
+
+type AskAnythingSuggestionOption = DomainSuggestionOption & {
+  suggestionKind?: 'classic' | 'path' | 'template' | 'group';
+  isGroupLabel?: boolean;
+};
+
+const CREATE_PATH_SUGGESTIONS: Array<{
+  id: CreatePathSuggestionId;
+  label: string;
+  description: string;
+  keywords: string[];
+}> = [
+  {
+    id: 'threshold',
+    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.thresholdTitle', {
+      defaultMessage: 'Threshold',
+    }),
+    description: i18n.translate('xpack.observabilityAlerting.mixedCreate.thresholdPathHint', {
+      defaultMessage: 'Guided builder for counts and metric thresholds',
+    }),
+    keywords: ['threshold', 'count', 'metric', 'builder'],
+  },
+  {
+    id: 'sequence',
+    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.sequenceTitle', {
+      defaultMessage: 'Sequence',
+    }),
+    description: i18n.translate('xpack.observabilityAlerting.mixedCreate.sequencePathHint', {
+      defaultMessage: 'Guided builder for multi-step patterns',
+    }),
+    keywords: ['sequence', 'chain', 'multi-step', 'builder'],
+  },
+  {
+    id: 'esql',
+    label: i18n.translate('xpack.observabilityAlerting.mixedCreate.esqlTitle', {
+      defaultMessage: 'ES|QL rule',
+    }),
+    description: i18n.translate('xpack.observabilityAlerting.mixedCreate.esqlPathHint', {
+      defaultMessage: 'Write your own ES|QL query',
+    }),
+    keywords: ['esql', 'query', 'sql', 'manual'],
+  },
+];
+
+export type MixedCreateChooserBodyProps = {
+  onChooseThreshold: () => void;
+  onChooseEsql: () => void;
+  onChooseAgent: (userInput?: string, esqlQuery?: string) => void;
+  onChooseSequence: () => void;
+  onBrowseClassic: (search?: string) => void;
+  onExploreLibrary: () => void;
+  onSelectClassicRuleType: (ruleTypeId: string) => void;
+  classicRuleTypes: Array<{ id: string; name: string; description?: string }>;
+  showClassic: boolean;
+  discoverQuery?: string;
+  isMaximized: boolean;
+  compactAskAnything: boolean;
+  idleBuilderPresentation: IdleBuilderPresentation;
+};
+
+/** Shared create-rule chooser body (flyout + rules-list empty state). */
+export const MixedCreateChooserBody = ({
   onChooseThreshold,
   onChooseEsql,
   onChooseAgent,
   onChooseSequence,
   onBrowseClassic,
+  onExploreLibrary,
   onSelectClassicRuleType,
   classicRuleTypes,
   showClassic,
-}: {
-  onChooseThreshold: () => void;
-  onChooseEsql: () => void;
-  onChooseAgent: (userInput?: string) => void;
-  onChooseSequence: () => void;
-  onBrowseClassic: (search?: string) => void;
-  onSelectClassicRuleType: (ruleTypeId: string) => void;
-  classicRuleTypes: Array<{ id: string; name: string; description?: string }>;
-  showClassic: boolean;
-}) => {
+  discoverQuery,
+  isMaximized,
+  compactAskAnything,
+  idleBuilderPresentation,
+}: MixedCreateChooserBodyProps) => {
   const euiThemeContext = useEuiTheme();
-  const chatStyles = useMemo(() => agentChatInputStyles(euiThemeContext), [euiThemeContext]);
+  const { euiTheme } = euiThemeContext;
+  const chatStyles = useMemo(
+    () => agentChatInputStyles(euiThemeContext, compactAskAnything),
+    [compactAskAnything, euiThemeContext]
+  );
   const [measureText, setMeasureText] = useState('');
-  const [isAiMode, setIsAiMode] = useState(false);
-  const [selectedDomain, setSelectedDomain] = useState<DataDomain | null>(null);
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
-  // Popover close refocuses the search field; ignore that one focus so Enter/Escape stay closed.
+  const askAnythingTextareaRef = useRef<HTMLTextAreaElement>(null);
+  // Popover close refocuses the input; ignore that one focus so Escape stay closed.
   const suppressSuggestionsFocusOpenRef = useRef(false);
 
   const closeSuggestions = ({ suppressFocusReopen = false }: { suppressFocusReopen?: boolean } = {}) => {
@@ -1398,140 +1438,161 @@ const V2OptionsBody = ({
     setIsSuggestionsOpen(true);
   };
 
-  const inferredDomain = useMemo(() => inferDataDomain(measureText), [measureText]);
-  const activeDomainId = selectedDomain ?? inferredDomain;
-  const activeDomain =
-    activeDomainId === 'specific'
-      ? SPECIFIC_DOMAIN_FALLBACK
-      : DATA_DOMAIN_OPTIONS.find((option) => option.id === activeDomainId) ?? null;
-
-  const prefersClassic = Boolean(activeDomain?.prefersClassic && showClassic);
-  const createPathIds = activeDomain?.createPaths ?? DEFAULT_CREATE_PATHS;
-  // Idle (no domain): show Sequence. Domain match: only when that domain opts in.
-  const showSequence = !activeDomain || Boolean(activeDomain.showSequence);
-  const createSectionTitle = activeDomain
-    ? i18n.translate('xpack.observabilityAlerting.mixedCreate.suggestedBuildersSection', {
-        defaultMessage: 'Suggested builders',
-      })
-    : i18n.translate('xpack.observabilityAlerting.mixedCreate.recommendedSection', {
-        defaultMessage: 'Start with a builder',
-      });
-
-  const measureQuery = measureText.trim().toLowerCase();
-
-  const matchingDomainOptions = useMemo(() => {
-    if (!measureQuery) {
-      return DATA_DOMAIN_OPTIONS;
-    }
-    return DATA_DOMAIN_OPTIONS.filter((option) => {
-      const haystacks = [
-        option.label,
-        option.description,
-        option.classicSearch ?? '',
-        option.examplePrompt,
-      ].map((value) => value.toLowerCase());
-      return haystacks.some((value) => value.includes(measureQuery));
-    });
-  }, [measureQuery]);
-
-  const domainSuggestionOptions = useMemo<DomainSuggestionOption[]>(
-    () =>
-      matchingDomainOptions.map((option) => ({
-        label: option.label,
-        key: option.id,
-        description: option.description,
-        checked: selectedDomain === option.id ? ('on' as const) : undefined,
-        'data-test-subj': `mixedRulesDomain-${option.id}`,
-      })),
-    [matchingDomainOptions, selectedDomain]
+  const isDescriptiveNaturalLanguage = useMemo(
+    () => looksLikeDescriptiveNaturalLanguage(measureText),
+    [measureText]
   );
 
-  const selectDomainSuggestion = (domain: DataDomain) => {
-    const option = DATA_DOMAIN_OPTIONS.find((item) => item.id === domain);
-    setSelectedDomain(domain);
-    // Main title goes in the search field — Classic rule-type filter needs it
-    // (e.g. "SLOs", "APM"), not the longer description.
-    setMeasureText(option?.classicSearch ?? option?.label ?? '');
-    closeSuggestions({ suppressFocusReopen: true });
-  };
+  // Offer AI mode when free text reads like a description — body below stays unchanged.
+  const showAiModeOffer = isDescriptiveNaturalLanguage;
 
-  const classicBrowseSearch = useMemo(() => {
-    const trimmed = measureText.trim();
-    if (!trimmed) {
-      return undefined;
-    }
-    // Only substitute the Classic search term when the field still holds the
-    // selected suggestion title — keep free-text (e.g. "Anomaly") as typed.
-    if (
-      activeDomain?.classicSearch &&
-      (trimmed === activeDomain.classicSearch ||
-        trimmed === activeDomain.label ||
-        trimmed === activeDomain.description)
-    ) {
-      return activeDomain.classicSearch;
-    }
-    return trimmed;
-  }, [activeDomain, measureText]);
+  const measureQuery = measureText.trim().toLowerCase();
+  const hasSearchQuery = measureQuery.length > 0;
+  const classicBrowseSearch = measureText.trim() || undefined;
 
-  const classicSuggestions = useMemo((): ClassicRuleTypeSuggestion[] => {
-    if (!prefersClassic) {
+  // Kept for future domain-aware template filtering; not used to reshape the idle body.
+  const inferredDomain = useMemo(() => inferDataDomain(measureText), [measureText]);
+
+  const suggestionOptions = useMemo<AskAnythingSuggestionOption[]>(() => {
+    // AI mode owns the CTA — don't compete with typeahead options.
+    if (!hasSearchQuery || showAiModeOffer) {
       return [];
     }
-    const query = (classicBrowseSearch ?? '').trim().toLowerCase();
-    return classicRuleTypes
-      .filter((ruleType) => {
-        if (!query) {
-          return true;
-        }
-        const name = ruleType.name.toLowerCase();
-        const description = (ruleType.description ?? '').toLowerCase();
-        return name.includes(query) || description.includes(query);
-      })
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .slice(0, CLASSIC_SUGGESTION_LIMIT)
-      .map(({ id, name }) => ({ id, name }));
-  }, [classicBrowseSearch, classicRuleTypes, prefersClassic]);
 
-  const resolveDomainFromMeasureText = (value: string): DataDomain | null => {
-    const normalized = value.trim().toLowerCase();
-    if (!normalized) {
-      return null;
-    }
-
-    const exactMatch = DATA_DOMAIN_OPTIONS.find(
-      (option) =>
-        option.classicSearch?.toLowerCase() === normalized ||
-        option.label.toLowerCase() === normalized ||
-        option.examplePrompt.toLowerCase() === normalized ||
-        option.description.toLowerCase() === normalized
-    );
-    if (exactMatch) {
-      return exactMatch.id;
-    }
-
-    const partialMatches = DATA_DOMAIN_OPTIONS.filter((option) => {
-      const haystacks = [
-        option.label,
-        option.description,
-        option.classicSearch ?? '',
-        option.examplePrompt,
-      ].map((text) => text.toLowerCase());
-      return haystacks.some((text) => text.includes(normalized));
+    // Promote Universal builders first; never hide templates or Classic matches.
+    const matchingBuilders = CREATE_PATH_SUGGESTIONS.filter((path) => {
+      return (
+        path.label.toLowerCase().includes(measureQuery) ||
+        path.description.toLowerCase().includes(measureQuery) ||
+        path.keywords.some(
+          (keyword) => keyword.includes(measureQuery) || measureQuery.includes(keyword)
+        )
+      );
     });
-    if (partialMatches.length === 1) {
-      return partialMatches[0].id;
+
+    // No builder hit → keep Universal useful with Write ES|QL as the fallback path.
+    const universalPaths =
+      matchingBuilders.length > 0
+        ? matchingBuilders
+        : CREATE_PATH_SUGGESTIONS.filter((path) => path.id === 'esql');
+
+    const pathOptions: AskAnythingSuggestionOption[] = universalPaths.map((path) => ({
+      label: path.label,
+      key: `${PATH_SUGGESTION_KEY_PREFIX}${path.id}`,
+      description: path.description,
+      suggestionKind: 'path' as const,
+      'data-test-subj': `mixedRulesPathSuggestion-${path.id}`,
+    }));
+
+    const templateOptions: AskAnythingSuggestionOption[] = DEMO_RULE_TEMPLATES.filter(
+      (template) => {
+        const haystack =
+          `${template.title} ${template.description} ${template.tags.join(' ')}`.toLowerCase();
+        return haystack.includes(measureQuery);
+      }
+    ).map((template) => ({
+      label: template.title,
+      key: `${TEMPLATE_SUGGESTION_KEY_PREFIX}${template.id}`,
+      description: template.description,
+      suggestionKind: 'template' as const,
+      'data-test-subj': `mixedRulesTemplateSuggestion-${template.id}`,
+    }));
+
+    const classicRuleOptions: AskAnythingSuggestionOption[] =
+      showClassic && measureQuery.length >= 2
+        ? classicRuleTypes
+            .filter((ruleType) => {
+              const name = ruleType.name.toLowerCase();
+              const description = (ruleType.description ?? '').toLowerCase();
+              return name.includes(measureQuery) || description.includes(measureQuery);
+            })
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((ruleType) => ({
+              label: ruleType.name,
+              key: `${CLASSIC_SUGGESTION_KEY_PREFIX}${ruleType.id}`,
+              description: ruleType.description,
+              suggestionKind: 'classic' as const,
+              'data-test-subj': `mixedRulesClassicSuggestion-${ruleType.id}`,
+            }))
+        : [];
+
+    const options: AskAnythingSuggestionOption[] = [];
+
+    if (pathOptions.length > 0) {
+      options.push({
+        label: i18n.translate('xpack.observabilityAlerting.mixedCreate.universalGroupLabel', {
+          defaultMessage: 'Universal',
+        }),
+        key: UNIVERSAL_GROUP_KEY,
+        suggestionKind: 'group',
+        isGroupLabel: true,
+        'data-test-subj': 'mixedRulesSuggestionGroup-universal',
+      });
+      options.push(...pathOptions);
     }
 
-    return null;
-  };
+    if (templateOptions.length > 0) {
+      options.push({
+        label: i18n.translate('xpack.observabilityAlerting.mixedCreate.templateGroupLabel', {
+          defaultMessage: 'Start from a template',
+        }),
+        key: TEMPLATE_GROUP_KEY,
+        suggestionKind: 'group',
+        isGroupLabel: true,
+        'data-test-subj': 'mixedRulesSuggestionGroup-templates',
+      });
+      options.push(...templateOptions);
+    }
+
+    if (classicRuleOptions.length > 0) {
+      options.push({
+        label: i18n.translate('xpack.observabilityAlerting.mixedCreate.classicGroupLabel', {
+          defaultMessage: 'Classic rule types',
+        }),
+        key: CLASSIC_GROUP_KEY,
+        suggestionKind: 'group',
+        isGroupLabel: true,
+        'data-test-subj': 'mixedRulesSuggestionGroup-classic',
+      });
+      options.push(...classicRuleOptions);
+    }
+
+    return options;
+  }, [classicRuleTypes, hasSearchQuery, measureQuery, showAiModeOffer, showClassic]);
+
+  const syncAskAnythingHeight = useCallback(() => {
+    const textarea = askAnythingTextareaRef.current;
+    if (!textarea) {
+      return;
+    }
+    if (!compactAskAnything) {
+      textarea.style.height = '';
+      return;
+    }
+    const computed = window.getComputedStyle(textarea);
+    const lineHeight = Number.parseFloat(computed.lineHeight);
+    const resolvedLineHeight =
+      Number.isFinite(lineHeight) && lineHeight > 0
+        ? lineHeight
+        : Number.parseFloat(euiLineHeightFromBaseline('s', euiTheme)) || 20;
+    const minHeight = resolvedLineHeight * ASK_ANYTHING_COMPACT_MIN_ROWS;
+    const maxHeight = resolvedLineHeight * ASK_ANYTHING_COMPACT_MAX_ROWS;
+    // Reset so scrollHeight reflects content (including shrink).
+    textarea.style.height = '0px';
+    const nextHeight = Math.min(Math.max(textarea.scrollHeight, minHeight), maxHeight);
+    textarea.style.height = `${nextHeight}px`;
+  }, [compactAskAnything, euiTheme]);
 
   const onMeasureTextChange = (value: string) => {
     setMeasureText(value);
-    setSelectedDomain(resolveDomainFromMeasureText(value));
   };
 
-  // Panel is portaled outside the input tree; listen on window so Enter/Escape
-  // still dismisses before EuiSelectable swallows the key with no active option.
+  // Keep height in sync when content, mode, or chrome (AI footer) changes.
+  useLayoutEffect(() => {
+    syncAskAnythingHeight();
+  }, [measureText, showAiModeOffer, syncAskAnythingHeight]);
+
+  // Escape closes the portaled suggestion panel; Enter submits to the agent via the textarea handler.
   useEffect(() => {
     if (!isSuggestionsOpen) {
       return undefined;
@@ -1540,7 +1601,7 @@ const V2OptionsBody = ({
       if (event.isComposing) {
         return;
       }
-      if (event.key !== 'Enter' && event.key !== 'Escape') {
+      if (event.key !== 'Escape') {
         return;
       }
       event.preventDefault();
@@ -1551,239 +1612,319 @@ const V2OptionsBody = ({
     return () => window.removeEventListener('keydown', onKeyDown, true);
   }, [isSuggestionsOpen]);
 
-  const createOptionById: Record<CreatePath, React.ReactNode> = {
-    threshold: (
-      <LargeOptionCard
-        key="threshold"
-        iconType="visGauge"
-        title={i18n.translate('xpack.observabilityAlerting.mixedCreate.thresholdTitle', {
-          defaultMessage: 'Threshold',
-        })}
-        description={i18n.translate(
-          'xpack.observabilityAlerting.mixedCreate.thresholdDescription',
-          {
-            defaultMessage:
-              'Alert when metrics or counts cross a threshold. Covers metric, log, and index threshold-style rules. No query required.',
-          }
-        )}
-        onClick={onChooseThreshold}
-        data-test-subj="mixedRulesChooseThreshold"
-      />
-    ),
-    esql: (
-      <FeaturedOptionCard
-        key="esql"
-        iconType="code"
-        title={i18n.translate('xpack.observabilityAlerting.mixedCreate.esqlTitle', {
-          defaultMessage: 'ES|QL rule',
-        })}
-        description={i18n.translate('xpack.observabilityAlerting.mixedCreate.esqlDescription', {
-          defaultMessage: 'Write your own ES|QL query and preview the results live.',
-        })}
-        onClick={onChooseEsql}
-        data-test-subj="mixedRulesChooseEsql"
-      />
-    ),
-  };
+  const suggestedTemplates = useMemo(() => getIdleSuggestedTemplates(), []);
 
-  const sequenceBuilderCard = showSequence ? (
-    <LargeOptionCard
-      key="sequence"
-      iconType="branch"
-      title={i18n.translate('xpack.observabilityAlerting.mixedCreate.sequenceTitle', {
-        defaultMessage: 'Sequence',
-      })}
-      description={i18n.translate('xpack.observabilityAlerting.mixedCreate.sequenceDescription', {
-        defaultMessage: 'Chain rules for multi-step patterns.',
-      })}
-      onClick={onChooseSequence}
-      badge={<ExperimentalBadge />}
-      data-test-subj="mixedRulesChooseSequence"
-    />
-  ) : null;
-
-  const builderCards = [
-    ...createPathIds.filter((id) => id === 'threshold').map((id) => createOptionById[id]),
-    ...(sequenceBuilderCard ? [sequenceBuilderCard] : []),
-  ];
-  const showEsqlCard = createPathIds.includes('esql');
-  const showBuildYourOwnSection = showEsqlCard;
-
-  // Universal path only — Classic domains never surface library templates.
-  const suggestedTemplates = useMemo(
-    () => (isAiMode || prefersClassic ? [] : getSuggestedTemplatesForDomain(activeDomain)),
-    [activeDomain, isAiMode, prefersClassic]
-  );
-
-  const onSelectDemoTemplate = (template: DemoRuleTemplate) => {
-    if (template.createPath === 'esql') {
-      onChooseEsql();
+  const chooseCreatePath = (pathId: CreatePathSuggestionId) => {
+    closeSuggestions({ suppressFocusReopen: true });
+    if (pathId === 'threshold') {
+      onChooseThreshold();
       return;
     }
-    onChooseThreshold();
+    if (pathId === 'sequence') {
+      onChooseSequence();
+      return;
+    }
+    onChooseEsql();
   };
 
-  const onMeasureSearch = (value: string) => {
-    if (isAiMode) {
-      onChooseAgent(value.trim() || undefined);
+  const onSelectDemoTemplate = (template: DemoRuleTemplate) => {
+    chooseCreatePath(template.createPath);
+  };
+
+  const selectTemplateSuggestion = (templateId: string) => {
+    const template = DEMO_RULE_TEMPLATES.find((item) => item.id === templateId);
+    if (!template) {
+      return;
     }
+    onSelectDemoTemplate(template);
+  };
+
+  const trimmedDiscoverQuery = discoverQuery?.trim();
+  const [isDiscoverQueryAttached, setIsDiscoverQueryAttached] = useState(
+    () => Boolean(trimmedDiscoverQuery)
+  );
+
+  // Keep the pill in sync when Discover's live query appears/changes; don't re-attach after dismiss.
+  const dismissedDiscoverQueryRef = useRef(false);
+  useEffect(() => {
+    if (!trimmedDiscoverQuery) {
+      setIsDiscoverQueryAttached(false);
+      return;
+    }
+    if (!dismissedDiscoverQueryRef.current) {
+      setIsDiscoverQueryAttached(true);
+    }
+  }, [trimmedDiscoverQuery]);
+
+  const attachedDiscoverQuery =
+    isDiscoverQueryAttached && trimmedDiscoverQuery ? trimmedDiscoverQuery : undefined;
+
+  const onSubmitToAgent = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return;
+    }
+    closeSuggestions({ suppressFocusReopen: true });
+    onChooseAgent(trimmed, attachedDiscoverQuery);
   };
 
   const onAgentInputKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === keys.ESCAPE) {
+      event.preventDefault();
+      closeSuggestions({ suppressFocusReopen: true });
+      return;
+    }
     if (event.key === keys.ENTER && !event.shiftKey) {
       event.preventDefault();
-      onMeasureSearch(measureText);
+      onSubmitToAgent(measureText);
     }
   };
 
+  const hasSelectableSuggestions = suggestionOptions.some((option) => !option.isGroupLabel);
+  // AI mode replaces the empty/noisy suggestion panel — don't show "No options available".
+  const areSuggestionsVisible =
+    isSuggestionsOpen && hasSearchQuery && !showAiModeOffer && hasSelectableSuggestions;
+
+  const askAnythingWrapperCss = css`
+    border-radius: ${CONVERSATION_INPUT_SHELL_RADIUS}px;
+    ${showAiModeOffer
+      ? `
+      border: ${euiTheme.border.thin};
+      border-color: ${euiTheme.colors.borderBaseSubdued};
+      overflow: hidden;
+    `
+      : ''}
+  `;
+
+  const askAnythingShellCss = css`
+    ${compactAskAnything
+      ? `
+      /* Tighter chrome so one-line idle reads as a search field, not a chat box. */
+      padding: ${euiTheme.size.s} ${euiTheme.size.m};
+      min-height: 0;
+    `
+      : ''}
+    ${showAiModeOffer
+      ? `
+      border-color: transparent !important;
+      box-shadow: none !important;
+      border-bottom-left-radius: 0 !important;
+      border-bottom-right-radius: 0 !important;
+      &:hover,
+      &:focus-within[aria-disabled='false'] {
+        border-color: transparent !important;
+        box-shadow: none !important;
+      }
+    `
+      : ''}
+  `;
+
   return (
-    <>
-      <EuiFlexGroup
-        gutterSize="s"
-        alignItems="center"
-        justifyContent="spaceBetween"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiText size="m">
-            <strong>
-              <FormattedMessage
-                id="xpack.observabilityAlerting.mixedCreate.measureQuestion"
-                defaultMessage="What do you want to measure?"
-              />
-            </strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <MeasureModeToggle
-            isAiMode={isAiMode}
-            onModeChange={(nextIsAiMode) => {
-              setIsAiMode(nextIsAiMode);
-              if (!nextIsAiMode) {
-                setSelectedDomain(null);
-                setMeasureText('');
-                closeSuggestions();
-              }
-            }}
+    <div
+      css={isMaximized ? maximizedFlyoutContentCss : undefined}
+      data-test-subj="mixedRulesCreateBody"
+      data-inferred-domain={inferredDomain ?? undefined}
+    >
+      <EuiText size="m">
+        <strong>
+          <FormattedMessage
+            id="xpack.observabilityAlerting.mixedCreate.measureQuestion"
+            defaultMessage="What do you want to measure?"
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </strong>
+      </EuiText>
       <EuiSpacer size="s" />
-      {isAiMode ? (
-        <ConversationInputShell data-test-subj="mixedRulesAgentChatInput">
-          <textarea
-            css={chatStyles.textarea}
-            rows={3}
-            value={measureText}
-            onChange={(event) => onMeasureTextChange(event.currentTarget.value)}
-            onKeyDown={onAgentInputKeyDown}
-            placeholder={i18n.translate(
-              'xpack.observabilityAlerting.mixedCreate.aiModePlaceholder',
-              {
-                defaultMessage: 'Describe the rule you want in natural language',
-              }
-            )}
-            aria-label={i18n.translate(
-              'xpack.observabilityAlerting.mixedCreate.aiModeSearchAriaLabel',
-              {
-                defaultMessage: 'Describe the rule you want in natural language',
-              }
-            )}
-            data-test-subj="mixedRulesMeasureSearch"
-          />
-          <div css={chatStyles.sendRow}>
-            <EuiToolTip
-              content={i18n.translate('xpack.observabilityAlerting.mixedCreate.submitTooltip', {
-                defaultMessage: 'Submit',
-              })}
-              disableScreenReaderOutput
+      <EuiInputPopover
+        fullWidth
+        disableFocusTrap
+        panelPaddingSize="none"
+        isOpen={areSuggestionsVisible}
+        closePopover={closeSuggestions}
+        input={
+          <div css={askAnythingWrapperCss}>
+            <ConversationInputShell
+              data-test-subj="mixedRulesAgentChatInput"
+              // Compact mode drops the Agent Builder 150px min-height so idle starts at one line.
+              isCollapsed={compactAskAnything}
+              suppressShadow={showAiModeOffer}
+              css={askAnythingShellCss}
             >
-              <EuiButtonIcon
-                iconType="sortUp"
-                display="fill"
-                size="s"
-                disabled={!measureText.trim()}
-                onClick={() => onMeasureSearch(measureText)}
-                aria-label={i18n.translate('xpack.observabilityAlerting.mixedCreate.submitLabel', {
-                  defaultMessage: 'Submit',
-                })}
-                data-test-subj="mixedRulesMeasureSubmit"
+              {attachedDiscoverQuery ? (
+                <DiscoverEsqlQueryPill
+                  query={attachedDiscoverQuery}
+                  onRemove={() => {
+                    dismissedDiscoverQueryRef.current = true;
+                    setIsDiscoverQueryAttached(false);
+                  }}
+                />
+              ) : null}
+              <textarea
+                ref={askAnythingTextareaRef}
+                css={chatStyles.textarea}
+                rows={compactAskAnything ? ASK_ANYTHING_COMPACT_MIN_ROWS : 3}
+                value={measureText}
+                autoFocus={true}
+                onChange={(event) => {
+                  const nextValue = event.currentTarget.value;
+                  onMeasureTextChange(nextValue);
+                  // Resize before paint so growth tracks each keystroke.
+                  if (compactAskAnything) {
+                    syncAskAnythingHeight();
+                  }
+                  if (nextValue.trim()) {
+                    openSuggestions();
+                  } else {
+                    closeSuggestions({ suppressFocusReopen: true });
+                  }
+                }}
+                onFocus={() => {
+                  if (suppressSuggestionsFocusOpenRef.current) {
+                    suppressSuggestionsFocusOpenRef.current = false;
+                    return;
+                  }
+                  // Only open the list once the user has started searching.
+                  if (measureText.trim()) {
+                    openSuggestions();
+                  }
+                }}
+                onKeyDown={onAgentInputKeyDown}
+                placeholder={i18n.translate(
+                  'xpack.observabilityAlerting.mixedCreate.askAnythingPlaceholder',
+                  {
+                    defaultMessage:
+                      'Pick a suggestion, or describe what you want and send to the agent.',
+                  }
+                )}
+                role="combobox"
+                aria-expanded={areSuggestionsVisible}
+                aria-controls={MEASURE_SUGGESTIONS_LIST_ID}
+                aria-autocomplete="list"
+                aria-haspopup="listbox"
+                aria-label={i18n.translate(
+                  'xpack.observabilityAlerting.mixedCreate.askAnythingAriaLabel',
+                  {
+                    defaultMessage: 'Ask anything about the rule you want to create',
+                  }
+                )}
+                data-test-subj="mixedRulesMeasureSearch"
+                data-compact={compactAskAnything ? 'true' : 'false'}
               />
-            </EuiToolTip>
+            </ConversationInputShell>
+            <div
+              data-test-subj={showAiModeOffer ? 'mixedRulesEnterAiMode' : undefined}
+              aria-hidden={!showAiModeOffer}
+              css={css`
+                display: grid;
+                grid-template-rows: ${showAiModeOffer ? '1fr' : '0fr'};
+                transition: grid-template-rows ${ASK_ANYTHING_GROW_TRANSITION};
+                background: ${euiTheme.colors.backgroundBaseSubdued};
+                border-top: ${showAiModeOffer ? euiTheme.border.thin : '0'};
+                border-top-color: ${euiTheme.colors.borderBaseSubdued};
+                overflow: hidden;
+              `}
+            >
+              <div
+                css={css`
+                  min-height: 0;
+                  opacity: ${showAiModeOffer ? 1 : 0};
+                  transition: opacity ${ASK_ANYTHING_GROW_TRANSITION};
+                  padding: ${showAiModeOffer ? `${euiTheme.size.s} ${euiTheme.size.base}` : '0'};
+                `}
+              >
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem
+                    css={css`
+                      min-width: 0;
+                    `}
+                  >
+                    <EuiText size="s" color="subdued">
+                      <FormattedMessage
+                        id="xpack.observabilityAlerting.mixedCreate.aiModeDetectedHint"
+                        defaultMessage="Send this description to the agent to create the rule."
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <AiButton
+                      variant="empty"
+                      size="s"
+                      // Figma: AI Button empty + productAgent (left) + gradient label.
+                      iconType="productAgent"
+                      onClick={() => onSubmitToAgent(measureText)}
+                      data-test-subj="mixedRulesEnterAiModeButton"
+                      disabled={!showAiModeOffer}
+                      tabIndex={showAiModeOffer ? 0 : -1}
+                    >
+                      <FormattedMessage
+                        id="xpack.observabilityAlerting.mixedCreate.sendToAgent"
+                        defaultMessage="Send to Agent"
+                      />
+                    </AiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
+            </div>
           </div>
-        </ConversationInputShell>
-      ) : (
-        <EuiInputPopover
-          fullWidth
-          disableFocusTrap
-          panelPaddingSize="none"
-          isOpen={isSuggestionsOpen}
-          closePopover={closeSuggestions}
-          input={
-            <EuiFieldSearch
-              fullWidth
-              compressed
-              value={measureText}
-              onChange={(event) => {
-                onMeasureTextChange(event.target.value);
-                openSuggestions();
-              }}
-              onFocus={() => {
-                if (suppressSuggestionsFocusOpenRef.current) {
-                  suppressSuggestionsFocusOpenRef.current = false;
-                  return;
+        }
+      >
+        <EuiSelectable<AskAnythingSuggestionOption>
+          singleSelection
+          isPreFiltered
+          options={suggestionOptions}
+          emptyMessage={<span />}
+          noMatchesMessage={<span />}
+          css={css`
+            .euiSelectableList__groupLabel {
+              color: ${euiTheme.colors.textSubdued};
+              font-weight: ${euiTheme.font.weight.medium};
+              font-size: ${euiFontSizeFromScale('xs', euiTheme)};
+              line-height: ${euiLineHeightFromBaseline('xs', euiTheme)};
+              min-height: 0;
+              padding-block: ${euiTheme.size.xxs};
+              padding-inline: ${euiTheme.size.m};
+              &:not(:first-child) {
+                padding-top: ${euiTheme.size.xs};
+                &::before {
+                  inset-block-start: ${euiTheme.size.xxs};
                 }
-                openSuggestions();
-              }}
-              onKeyDown={(event) => {
-                if (event.nativeEvent.isComposing) {
-                  return;
-                }
-                if (event.key !== keys.ENTER && event.key !== keys.ESCAPE) {
-                  return;
-                }
-                event.preventDefault();
-                closeSuggestions({ suppressFocusReopen: true });
-              }}
-              placeholder={i18n.translate(
-                'xpack.observabilityAlerting.mixedCreate.measurePlaceholder',
-                {
-                  defaultMessage:
-                    'Search or pick a suggestion — metrics, APM, logs, synthetics, SLOs…',
-                }
-              )}
-              data-test-subj="mixedRulesMeasureSearch"
-              role="combobox"
-              aria-expanded={isSuggestionsOpen}
-              aria-controls={MEASURE_SUGGESTIONS_LIST_ID}
-              aria-autocomplete="list"
-              aria-haspopup="listbox"
-              aria-label={i18n.translate(
-                'xpack.observabilityAlerting.mixedCreate.measureSearchAriaLabel',
-                {
-                  defaultMessage: 'What do you want to measure?',
-                }
-              )}
-            />
-          }
-        >
-          <EuiSelectable<DomainSuggestionOption>
-            singleSelection
-            isPreFiltered
-            options={domainSuggestionOptions}
-            noMatchesMessage={i18n.translate(
-              'xpack.observabilityAlerting.mixedCreate.noMatchingCategories',
-              {
-                defaultMessage: 'No matching categories. Press Enter to search with this text.',
               }
-            )}
-            onChange={(options) => {
-              const selected = options.find((option) => option.checked === 'on');
-              if (selected?.key) {
-                selectDomainSuggestion(selected.key as DataDomain);
-              }
-            }}
-            renderOption={(option) => (
+            }
+          `}
+          onChange={(options) => {
+            const selected = options.find(
+              (option) => option.checked === 'on' && !option.isGroupLabel
+            );
+            if (!selected?.key || selected.isGroupLabel || selected.suggestionKind === 'group') {
+              return;
+            }
+            if (
+              selected.suggestionKind === 'classic' ||
+              selected.key.startsWith(CLASSIC_SUGGESTION_KEY_PREFIX)
+            ) {
+              onSelectClassicRuleType(selected.key.slice(CLASSIC_SUGGESTION_KEY_PREFIX.length));
+              closeSuggestions({ suppressFocusReopen: true });
+              return;
+            }
+            if (
+              selected.suggestionKind === 'template' ||
+              selected.key.startsWith(TEMPLATE_SUGGESTION_KEY_PREFIX)
+            ) {
+              selectTemplateSuggestion(selected.key.slice(TEMPLATE_SUGGESTION_KEY_PREFIX.length));
+              return;
+            }
+            if (
+              selected.suggestionKind === 'path' ||
+              selected.key.startsWith(PATH_SUGGESTION_KEY_PREFIX)
+            ) {
+              chooseCreatePath(
+                selected.key.slice(PATH_SUGGESTION_KEY_PREFIX.length) as CreatePathSuggestionId
+              );
+            }
+          }}
+          renderOption={(option) =>
+            option.isGroupLabel ? (
+              option.label
+            ) : (
               <div>
                 <EuiText size="s">
                   <strong>{option.label}</strong>
@@ -1794,129 +1935,140 @@ const V2OptionsBody = ({
                   </EuiText>
                 ) : null}
               </div>
-            )}
-            listProps={{
-              rowHeight: 56,
-              showIcons: true,
-              id: MEASURE_SUGGESTIONS_LIST_ID,
-            }}
-            data-test-subj="mixedRulesMeasureSuggestions"
-          >
-            {(list) => list}
-          </EuiSelectable>
-        </EuiInputPopover>
-      )}
-      <EuiSpacer size="m" />
-      <EuiText size="s" color="subdued">
-        <p>
-          {isAiMode ? (
-            <FormattedMessage
-              id="xpack.observabilityAlerting.mixedCreate.aiModeHint"
-              defaultMessage="Submit to start the AI agent with the rule-management skill and your description."
-            />
-          ) : activeDomain ? (
-            activeDomain.hint
-          ) : (
-            <FormattedMessage
-              id="xpack.observabilityAlerting.mixedCreate.createHint"
-              defaultMessage="Start with a guided builder, write an ES|QL query, or turn on AI mode to describe what you want."
-            />
-          )}
-        </p>
-      </EuiText>
-      <EuiSpacer size="s" />
-
-      {prefersClassic && !isAiMode ? (
-        <ClassicContinueCard
-          title={i18n.translate('xpack.observabilityAlerting.mixedCreate.continueClassicTitle', {
-            defaultMessage: 'Continue in Classic',
-          })}
-          description={
-            classicSuggestions.length > 0
-              ? i18n.translate(
-                  'xpack.observabilityAlerting.mixedCreate.continueClassicDescriptionWithSuggestions',
-                  {
-                    defaultMessage:
-                      'Pick a matching rule type below, or open the full Classic list.',
-                  }
-                )
-              : i18n.translate(
-                  'xpack.observabilityAlerting.mixedCreate.continueClassicDescription',
-                  {
-                    defaultMessage:
-                      'Browse Classic rule types and templates for this data domain.',
-                  }
-                )
+            )
           }
-          suggestions={classicSuggestions}
-          onBrowseAll={() => onBrowseClassic(classicBrowseSearch)}
-          onSelectRuleType={onSelectClassicRuleType}
-          data-test-subj="mixedRulesContinueClassic"
-        />
-      ) : (
+          listProps={{
+            // Option rows stay 48px; group headings are shorter than EUI's default
+            // rowHeight+16 so section labels don't dominate the typeahead.
+            rowHeight: 48,
+            showIcons: true,
+            id: MEASURE_SUGGESTIONS_LIST_ID,
+            windowProps: {
+              itemSize: (index: number) => {
+                const option = suggestionOptions[index];
+                if (option?.isGroupLabel) {
+                  return index === 0 ? 28 : 36;
+                }
+                return 48;
+              },
+            },
+          }}
+          data-test-subj="mixedRulesMeasureSuggestions"
+        >
+          {(list) => list}
+        </EuiSelectable>
+      </EuiInputPopover>
+      <EuiSpacer size="m" />
+
+      {/*
+        Universal starters — presentation is prototype-toggleable (panel default / badge).
+        Body stays fixed while searching; typeahead owns filtered results.
+      */}
+      <IdleBuilderStarters
+        presentation={idleBuilderPresentation}
+        onChooseThreshold={onChooseThreshold}
+        onChooseSequence={onChooseSequence}
+        onChooseEsql={onChooseEsql}
+      />
+
+      {suggestedTemplates.length > 0 ? (
         <>
-          <EuiHorizontalRule margin="s" />
-          {suggestedTemplates.length > 0 ? (
-            <>
-              <EuiText size="xs">
-                <strong>
-                  <FormattedMessage
-                    id="xpack.observabilityAlerting.mixedCreate.suggestedTemplatesSection"
-                    defaultMessage="Suggested templates"
-                  />
-                </strong>
-              </EuiText>
-              <EuiSpacer size="xs" />
-              <EuiText size="xs" color="subdued">
+          <EuiSpacer size="m" />
+          <EuiHorizontalRule margin="none" />
+          <EuiSpacer size="l" />
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
                 <FormattedMessage
-                  id="xpack.observabilityAlerting.mixedCreate.suggestedTemplatesHint"
-                  defaultMessage="Pre-configured templates from our rule library"
+                  id="xpack.observabilityAlerting.mixedCreate.fromTheLibrarySection"
+                  defaultMessage="Start from a template"
                 />
               </EuiText>
-              <EuiSpacer size="s" />
-              <div css={optionCardStyles.stack} data-test-subj="mixedRulesSuggestedTemplates">
-                {suggestedTemplates.map((template) => (
-                  <FeaturedOptionCard
-                    key={template.id}
-                    iconType={template.iconType}
-                    title={template.title}
-                    description={template.description}
-                    onClick={() => onSelectDemoTemplate(template)}
-                    data-test-subj={`mixedRulesSuggestedTemplate-${template.id}`}
-                  />
-                ))}
-              </div>
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
-          {builderCards.length > 0 ? (
-            <>
-              <EuiText size="xs">
-                <strong>{createSectionTitle}</strong>
-              </EuiText>
-              <EuiSpacer size="s" />
-              <div css={optionCardStyles.stack}>{builderCards}</div>
-            </>
-          ) : null}
-          {showBuildYourOwnSection ? (
-            <>
-              {builderCards.length > 0 ? <EuiSpacer size="m" /> : null}
-              <EuiText size="xs">
-                <strong>
-                  <FormattedMessage
-                    id="xpack.observabilityAlerting.mixedCreate.buildYourOwnSection"
-                    defaultMessage="Build your own"
-                  />
-                </strong>
-              </EuiText>
-              <EuiSpacer size="s" />
-              <div css={optionCardStyles.stack}>
-                {showEsqlCard ? createOptionById.esql : null}
-              </div>
-            </>
-          ) : null}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiLink onClick={onExploreLibrary} data-test-subj="mixedRulesExploreLibrary">
+                <FormattedMessage
+                  id="xpack.observabilityAlerting.mixedCreate.exploreLibrary"
+                  defaultMessage="Explore library"
+                />
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup
+            gutterSize="m"
+            direction={isMaximized ? 'row' : 'column'}
+            responsive={false}
+            data-test-subj="mixedRulesSuggestedTemplates"
+            data-maximized={isMaximized ? 'true' : 'false'}
+          >
+            {suggestedTemplates.map((template) => (
+              <EuiFlexItem
+                key={template.id}
+                grow={isMaximized ? 1 : false}
+                css={
+                  isMaximized
+                    ? css`
+                        flex-basis: 0;
+                        min-width: 0;
+                        & > * {
+                          height: 100%;
+                        }
+                      `
+                    : undefined
+                }
+              >
+                <RuleLibraryCard
+                  iconType={template.iconType}
+                  title={template.title}
+                  description={template.description}
+                  tags={template.tags}
+                  builderType={template.createPath}
+                  compact={!isMaximized}
+                  onClick={() => onSelectDemoTemplate(template)}
+                  data-test-subj={`mixedRulesSuggestedTemplate-${template.id}`}
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
         </>
-      )}
-    </>
+      ) : null}
+
+      {showClassic ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiPanel
+            color="subdued"
+            hasBorder={false}
+            hasShadow={false}
+            paddingSize="m"
+            data-test-subj="mixedRulesClassicFooter"
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem>
+                <EuiText size="s" color="subdued">
+                  <FormattedMessage
+                    id="xpack.observabilityAlerting.mixedCreate.lookingForClassic"
+                    defaultMessage="Looking for Classic rule types?"
+                  />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  onClick={() => onBrowseClassic(classicBrowseSearch)}
+                  data-test-subj="mixedRulesBrowseClassic"
+                >
+                  <FormattedMessage
+                    id="xpack.observabilityAlerting.mixedCreate.exploreRuleTypesList"
+                    defaultMessage="Browse all"
+                  />
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </>
+      ) : null}
+    </div>
   );
 };

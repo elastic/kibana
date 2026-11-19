@@ -22,6 +22,24 @@ export type { RuleSummaryFlyoutEntryProps } from './rule_summary_flyout_entry';
 
 export interface AlertingV2PublicStart {
   CreateRuleOptionsFlyout: ComponentType<CreateRuleOptionsFlyoutProps>;
+  /**
+   * Default Discover/host create-rule flyout (selector + authoring). Hosts that register a
+   * chooser override (e.g. MixedCreate) use this for ES|QL/threshold authoring so registration
+   * does not recurse.
+   */
+  DefaultCreateRuleOptionsFlyout: ComponentType<CreateRuleOptionsFlyoutProps>;
+  /**
+   * Replaces `CreateRuleOptionsFlyout` for hosts that open create-rule without `initialStep`
+   * (e.g. Discover). Prefer stacking authoring via `DefaultCreateRuleOptionsFlyout`.
+   */
+  registerCreateRuleOptionsFlyout: (
+    component: ComponentType<CreateRuleOptionsFlyoutProps>
+  ) => void;
+  /**
+   * Replaces the Universal rules-list empty state. Hosts (e.g. Observability MixedCreate)
+   * can render the same create chooser inline when there are no rules.
+   */
+  registerRulesListEmptyState: (component: ComponentType) => void;
   ClassicRuleSummaryFlyout: ComponentType<ClassicRuleSummaryFlyoutProps>;
   /** Host-facing Universal (v2) rule summary flyout (list expand). */
   RuleSummaryFlyout: ComponentType<RuleSummaryFlyoutEntryProps>;

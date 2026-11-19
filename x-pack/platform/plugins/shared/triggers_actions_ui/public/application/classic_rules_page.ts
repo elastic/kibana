@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import type { ChromeBreadcrumb, CoreStart, ScopedHistory } from '@kbn/core/public';
 import type { AppHeaderTab } from '@kbn/app-header';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
@@ -27,6 +28,8 @@ export interface ClassicRulesPageProps {
   tabs?: AppHeaderTab[];
   /** When true, Classic surfaces render the Classic badge. */
   showClassicBadge?: boolean;
+  /** Replaces the default create-first-rule empty prompt when the list has no rules. */
+  emptyState?: ReactNode;
 }
 
 export type ClassicRulesPagePluginsStart = Pick<

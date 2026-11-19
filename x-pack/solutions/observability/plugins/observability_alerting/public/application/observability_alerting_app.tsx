@@ -14,11 +14,13 @@ import type {
 } from '@kbn/alerting-v2-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { AppHeaderTab } from '@kbn/app-header';
+import type { EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
 import {
   OBSERVABILITY_ALERTING_APP_ID,
   OBSERVABILITY_ALERTING_BASE_PATH,
   createObservabilityAlertingV2Host,
 } from '@kbn/deeplinks-observability';
+import { createObservabilityEpisodeActions } from '@kbn/observability-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useCallback, useMemo } from 'react';
@@ -33,11 +35,9 @@ import {
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
-import { createInvestigateEpisodeAction } from '../actions/investigate_episode_action';
 import { hasObservabilityAlertingCapabilities } from './has_observability_alerting_privilege';
 import { MixedCreateRuleSession } from './combined_rules/mixed_create_rule_session';
-
-const createObservabilityEpisodeActions = () => [createInvestigateEpisodeAction()];
+import { createMixedCreateRulesEmptyState } from './combined_rules/create_mixed_create_rules_empty_state';
 
 interface ObservabilityAlertingAppProps {
   coreStart: CoreStart;
@@ -102,12 +102,14 @@ const useObservabilityRulesTabs = (
 const ClassicRulesV1Route = ({
   coreStart,
   getClassicRulesPage,
+  triggersActionsUi,
   history,
   setBreadcrumbs,
   tabs,
 }: {
   coreStart: CoreStart;
   getClassicRulesPage: TriggersAndActionsUIPublicPluginStart['getClassicRulesPage'];
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   history: ScopedHistory;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   tabs: AppHeaderTab[];
@@ -115,6 +117,15 @@ const ClassicRulesV1Route = ({
   const classicRulesHistory = useMemo(
     () => history.createSubHistory(OBSERVABILITY_ALERTING_RULES_V1_PATH),
     [history]
+  );
+
+  const EmptyState = useMemo(
+    () =>
+      createMixedCreateRulesEmptyState({
+        coreStart,
+        triggersActionsUi,
+      }),
+    [coreStart, triggersActionsUi]
   );
 
   return getClassicRulesPage({
@@ -127,6 +138,7 @@ const ClassicRulesV1Route = ({
       pathPrefix: OBSERVABILITY_ALERTING_RULES_V1_PATH,
     },
     tabs,
+    emptyState: <EmptyState />,
   });
 };
 
@@ -165,6 +177,13 @@ export const ObservabilityAlertingApp = ({
   const rulesV1Tabs = useObservabilityRulesTabs(prepend, 'v1', rulesTabVisibility);
   const rulesV2Tabs = useObservabilityRulesTabs(prepend, 'v2', rulesTabVisibility);
 
+  const { getAlertFormatter } = triggersActionsUi;
+  const createActions = useCallback(
+    (deps: EpisodeActionsDeps) =>
+      createObservabilityEpisodeActions({ cases: undefined, getAlertFormatter }, deps),
+    [getAlertFormatter]
+  );
+
   const privilegeCheck: PrivilegeCheck = useCallback(
     (features, _capability) => {
       const { v1, v2 } = hasObservabilityAlertingCapabilities(
@@ -202,7 +221,7 @@ export const ObservabilityAlertingApp = ({
             setBreadcrumbs={setBreadcrumbs}
             hostApp={hostApp}
             privilegeCheck={privilegeCheck}
-            createActions={createObservabilityEpisodeActions}
+            createActions={createActions}
             manageRulesHref={manageRulesHref}
           />
         </EuiPageSection>
@@ -212,6 +231,7 @@ export const ObservabilityAlertingApp = ({
           <ClassicRulesV1Route
             coreStart={coreStart}
             getClassicRulesPage={triggersActionsUi.getClassicRulesPage}
+            triggersActionsUi={triggersActionsUi}
             history={history}
             setBreadcrumbs={setBreadcrumbs}
             tabs={rulesV1Tabs}

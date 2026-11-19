@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { RULE_MANAGEMENT_SKILL_ID } from '@kbn/alerting-v2-constants';
+import { RULE_AUTHORING_SKILL_ID } from '@kbn/alerting-v2-constants';
 
-/** Builds an Agent Builder initial message that loads the rule-management skill. */
+/** Builds an Agent Builder initial message that loads the rule-authoring skill. */
 export const buildRuleManagementAgentMessage = (userInput?: string): string => {
-  const skillBadge = `[/${RULE_MANAGEMENT_SKILL_ID}](skill://${RULE_MANAGEMENT_SKILL_ID})`;
+  const skillBadge = `[/${RULE_AUTHORING_SKILL_ID}](skill://${RULE_AUTHORING_SKILL_ID})`;
   const trimmed = userInput?.trim();
   if (trimmed) {
     return `${skillBadge} Help me create an alerting rule for: ${trimmed}`;
