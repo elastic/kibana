@@ -5538,9 +5538,6 @@ importers:
       '@kbn/dev-validation-runner':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-dev-validation-runner
-      '@kbn/developer-toolbar':
-        specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-developer-toolbar
       '@kbn/developer-toolbar-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/developer_toolbar
@@ -8180,8 +8177,6 @@ importers:
   src/platform/packages/shared/kbn-dev-utils: {}
 
   src/platform/packages/shared/kbn-dev-validation-runner: {}
-
-  src/platform/packages/shared/kbn-developer-toolbar: {}
 
   src/platform/packages/shared/kbn-discover-contextual-components: {}
 

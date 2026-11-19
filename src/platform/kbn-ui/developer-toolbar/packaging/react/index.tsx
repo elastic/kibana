@@ -10,4 +10,11 @@
 // Build-time type validation — causes build failure if types diverge.
 import './type_validation';
 
-export {};
+export { DeveloperToolbar, DeveloperToolbarItem, useToolbarState } from '../../src';
+export type {
+  DeveloperToolbarProps,
+  DeveloperToolbarItemProps,
+  DeveloperToolbarState,
+  DeveloperToolbarRegisteredItem,
+  EnvironmentInfo,
+} from '../../src';

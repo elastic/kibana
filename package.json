@@ -1872,7 +1872,6 @@
     "@kbn/dev-proc-runner": "workspace:*",
     "@kbn/dev-utils": "workspace:*",
     "@kbn/dev-validation-runner": "workspace:*",
-    "@kbn/developer-toolbar": "workspace:*",
     "@kbn/developer-toolbar-plugin": "workspace:*",
     "@kbn/developer-toolbar-profilers-plugin": "workspace:*",
     "@kbn/docs-utils": "workspace:*",

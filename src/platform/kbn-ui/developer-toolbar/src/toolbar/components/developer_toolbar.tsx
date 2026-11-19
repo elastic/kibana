@@ -21,7 +21,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
-import { isMac } from '@kbn/shared-ux-utility';
+import { isMac } from '../../lib/platform';
 import { ConsoleErrorIndicator } from '../toolbar_items/console_error/console_error_indicator';
 import type { ConsoleErrorInfo } from '../toolbar_items/console_error/console_monitor';
 import { useConsoleErrorMonitor } from '../toolbar_items/console_error/use_console_error_monitor';
@@ -33,27 +33,37 @@ import {
 } from '../toolbar_items/console_error/constants';
 import { MemoryUsageIndicator } from '../toolbar_items/memory/memory_usage_indicator';
 import { FrameJankIndicator } from '../toolbar_items/frame_jank/frame_jank_indicator';
-import {
-  EnvironmentIndicator,
-  type EnvironmentInfo,
-} from '../toolbar_items/environment/environment_indicator';
+import { EnvironmentIndicator } from '../toolbar_items/environment/environment_indicator';
 import { useMinimized } from '../hooks/use_minimized';
 import { SettingsModal } from './settings_modal';
 import { useToolbarState } from '../hooks/use_toolbar_state';
+import type { EnvironmentInfo } from '../types';
 
 export interface DeveloperToolbarProps {
   envInfo?: EnvironmentInfo;
+  /** Called with the height the host should reserve (0 when minimized). Not called when hidden. */
   onHeightChange?: (height: number) => void;
+  /** Hint shown in the toggle tooltip explaining how to disable the toolbar permanently. */
+  disableHint?: string;
+  /** Environment badge icon used in production mode. Defaults to `logoKibana`. */
+  iconType?: string;
+  /**
+   * When `true`, the expanded toolbar is portaled to `document.body` and fixed to the bottom of
+   * the viewport, for hosts without a footer slot. Defaults to `false` (rendered in place).
+   */
+  portal?: boolean;
 }
 
 const HEIGHT = 32;
 const TOOLBAR_BACKGROUND_COLOR = 'rgb(11, 100, 221)'; // punchy blue
+const DEFAULT_DISABLE_HINT = 'Disable the developer toolbar in your app configuration';
 
 const ToolbarToggleTooltipContent: React.FC<{
   action: 'Expand' | 'Minimize';
   keyboardShortcutLabel: string;
+  disableHint: string;
   consoleError?: ConsoleErrorInfo | null;
-}> = ({ action, keyboardShortcutLabel, consoleError }) => {
+}> = ({ action, keyboardShortcutLabel, disableHint, consoleError }) => {
   return (
     <>
       {action} {keyboardShortcutLabel}
@@ -67,8 +77,12 @@ const ToolbarToggleTooltipContent: React.FC<{
       )}
       <br />
       Right click to hide
-      <br />
-      <em>developer_toolbar.enabled: false in kibana.dev.yml to disable</em>
+      {disableHint && (
+        <>
+          <br />
+          <em>{disableHint}</em>
+        </>
+      )}
     </>
   );
 };
@@ -146,6 +160,7 @@ const getMinimizedToolbarAttentionKey = (
 
 interface MinimizedDeveloperToolbarButtonProps {
   keyboardShortcutLabel: string;
+  disableHint: string;
   isErrorsMonitorEnabled: boolean;
   consoleError: ConsoleErrorInfo | null;
   onExpand: () => void;
@@ -154,7 +169,7 @@ interface MinimizedDeveloperToolbarButtonProps {
 
 const MinimizedDeveloperToolbarButtonInner: React.FC<
   MinimizedDeveloperToolbarButtonProps & { hasConsoleIssue: boolean }
-> = ({ keyboardShortcutLabel, hasConsoleIssue, consoleError, onExpand, onHide }) => {
+> = ({ keyboardShortcutLabel, disableHint, hasConsoleIssue, consoleError, onExpand, onHide }) => {
   const { euiTheme } = useEuiTheme();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -182,6 +197,7 @@ const MinimizedDeveloperToolbarButtonInner: React.FC<
           <ToolbarToggleTooltipContent
             action="Expand"
             keyboardShortcutLabel={keyboardShortcutLabel}
+            disableHint={disableHint}
             consoleError={consoleError}
           />
         }
@@ -219,13 +235,22 @@ const getToolbarPanelStyles = (euiTheme: EuiThemeComputed) => css`
   padding: ${euiTheme.size.xs} ${euiTheme.size.s};
 `;
 
-const getToolbarContainerStyles = () => [
+const getToolbarContainerStyles = (euiTheme: EuiThemeComputed, portal: boolean) => [
   css`
     height: ${HEIGHT}px;
     font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
   `,
+  portal &&
+    css`
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: ${euiTheme.levels.toast};
+    `,
 ];
 
+/** Developer toolbar shell with the built-in monitors; render once per page. */
 export const DeveloperToolbar: React.FC<DeveloperToolbarProps> = (props) => {
   return (
     <EuiThemeProvider colorMode={'dark'}>
@@ -234,7 +259,13 @@ export const DeveloperToolbar: React.FC<DeveloperToolbarProps> = (props) => {
   );
 };
 
-const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, onHeightChange }) => {
+const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({
+  envInfo,
+  onHeightChange,
+  disableHint = DEFAULT_DISABLE_HINT,
+  iconType,
+  portal = false,
+}) => {
   const { euiTheme } = useEuiTheme();
   const { isMinimized, toggleMinimized } = useMinimized();
   const [isHidden, setIsHidden] = useState(false);
@@ -250,6 +281,7 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
     dismiss: dismissConsoleError,
   } = useConsoleErrorMonitor(isErrorsMonitorEnabled);
 
+  // TODO: hidden intentionally does not report 0 (open POC decision, see elastic/kibana#287841).
   useEffect(() => {
     if (onHeightChange) {
       onHeightChange(
@@ -280,6 +312,7 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
         {handleShortcut}
         <MinimizedDeveloperToolbarButton
           keyboardShortcutLabel={keyboardShortcutLabel}
+          disableHint={disableHint}
           isErrorsMonitorEnabled={isErrorsMonitorEnabled}
           consoleError={consoleError}
           onExpand={toggleMinimized}
@@ -290,8 +323,8 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
     );
   }
 
-  return (
-    <div id="developerToolbar" css={getToolbarContainerStyles()}>
+  const toolbar = (
+    <div id="developerToolbar" css={getToolbarContainerStyles(euiTheme, portal)}>
       <>{handleShortcut}</>
       {state.isEnabled('errorsMonitor') && (
         <EuiThemeProvider colorMode="light">
@@ -312,6 +345,7 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
                     <ToolbarToggleTooltipContent
                       action="Minimize"
                       keyboardShortcutLabel={keyboardShortcutLabel}
+                      disableHint={disableHint}
                     />
                   }
                 >
@@ -331,7 +365,7 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
 
               {envInfo && state.isEnabled('environmentInfo') && (
                 <EuiFlexItem grow={false}>
-                  <EnvironmentIndicator env={envInfo} />
+                  <EnvironmentIndicator env={envInfo} iconType={iconType} />
                 </EuiFlexItem>
               )}
 
@@ -402,6 +436,17 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
       </EuiPanel>
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </div>
+  );
+
+  if (!portal) {
+    return toolbar;
+  }
+
+  // The portal target sits outside the outer EuiThemeProvider's DOM wrapper, so the
+  // dark color mode must be re-applied inside the portal (as the minimized button does).
+  return ReactDOM.createPortal(
+    <EuiThemeProvider colorMode="dark">{toolbar}</EuiThemeProvider>,
+    document.body
   );
 };
 

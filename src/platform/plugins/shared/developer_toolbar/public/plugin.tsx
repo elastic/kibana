@@ -15,7 +15,7 @@ import type { InternalFeatureFlagsStart } from '@kbn/core-feature-flags-browser'
 import type { InternalThemeServiceStart } from '@kbn/core-theme-browser-internal-types';
 
 import { BehaviorSubject } from 'rxjs';
-import { type DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
+import { type DeveloperToolbarItemProps } from '@kbn/ui-developer-toolbar';
 
 const FEATURE_FLAGS_HELPER_ITEM_ID = 'Feature flags helper';
 
@@ -28,7 +28,7 @@ export type DeveloperToolbarSetup = DeveloperToolbarItemRegistry;
 export type DeveloperToolbarStart = DeveloperToolbarItemRegistry;
 
 const LazyColorThemeToggle = lazy(() =>
-  import('@kbn/developer-toolbar').then(({ LiveColorThemeToggle }) => ({
+  import('./toolbar_items/color_theme_toggle').then(({ LiveColorThemeToggle }) => ({
     default: LiveColorThemeToggle,
   }))
 );

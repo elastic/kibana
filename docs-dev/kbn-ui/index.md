@@ -77,7 +77,7 @@ Packages use the `@kbn/ui-<component>` naming convention and are owned by `@elas
 
 ## Component guides
 
-- [Developer toolbar](developer-toolbar.md) — dev-only toolbar. Not a supported app dependency; app code uses the `developerToolbar` plugin API.
+- [Developer toolbar](developer-toolbar.md) — dev-only toolbar shell with built-in monitors. Not a supported app dependency; app code uses the `developerToolbar` plugin API.
 - [Feedback](feedback.md) — One Feedback trigger, form, and success toast
 - [Side navigation](side-navigation.md) — adaptive side navigation. Not a supported app dependency; app code uses chrome navigation APIs.
 

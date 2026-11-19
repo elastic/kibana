@@ -8,7 +8,8 @@
  */
 
 import React, { useState } from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta } from '@storybook/react';
+import type { EmbeddableStoryObj } from '@kbn/storybook';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -22,13 +23,11 @@ import {
 
 import { DeveloperToolbar, type DeveloperToolbarProps } from '../components/developer_toolbar';
 import { DeveloperToolbarItem } from '../components/developer_toolbar_item';
-import type { EnvironmentInfo } from '../toolbar_items/environment/environment_indicator';
+import type { EnvironmentInfo } from '../types';
 
 const mockEnvInfo: EnvironmentInfo = {
   mode: {
     name: 'development',
-    dev: true,
-    prod: false,
   },
   packageInfo: {
     version: '8.15.0',
@@ -171,7 +170,7 @@ const DeveloperToolbarWrapper = (props: DeveloperToolbarProps) => {
 };
 
 export default {
-  title: 'Platform/Developer Toolbar',
+  title: 'Developer Toolbar',
   component: DeveloperToolbarWrapper,
   parameters: {
     layout: 'fullscreen',
@@ -179,7 +178,9 @@ export default {
   argTypes: {},
 } as Meta<DeveloperToolbarProps>;
 
-export const Default: StoryObj<DeveloperToolbarProps> = {
+export const Default: EmbeddableStoryObj<DeveloperToolbarProps> = {
+  tags: ['embeddable'],
+  parameters: { embeddable: { height: 360 } },
   args: {
     envInfo: mockEnvInfo,
   },
@@ -358,9 +359,44 @@ const ExtensibleDemoApp = (props: DeveloperToolbarProps) => {
   );
 };
 
-export const Extensible: StoryObj<DeveloperToolbarProps> = {
+export const Extensible: EmbeddableStoryObj<DeveloperToolbarProps> = {
+  tags: ['embeddable'],
+  parameters: { embeddable: { height: 360 } },
   render: (args) => <ExtensibleDemoApp {...args} />,
   args: {
     envInfo: mockEnvInfo,
+  },
+};
+
+export const Portal: EmbeddableStoryObj<DeveloperToolbarProps> = {
+  tags: ['embeddable'],
+  parameters: { embeddable: { height: 360 } },
+  render: (args) => (
+    <>
+      <EuiPanel paddingSize="l" style={{ height: '250px', marginBottom: '40px' }}>
+        <EuiText>
+          <h3>Portal mode</h3>
+          <p>
+            With <code>portal</code> the toolbar renders itself fixed to the bottom of{' '}
+            <code>document.body</code>, for hosts without a footer slot.
+          </p>
+        </EuiText>
+      </EuiPanel>
+      <DeveloperToolbar {...args} />
+    </>
+  ),
+  args: {
+    envInfo: mockEnvInfo,
+    portal: true,
+  },
+};
+
+export const WithLabels: EmbeddableStoryObj<DeveloperToolbarProps> = {
+  tags: ['embeddable'],
+  parameters: { embeddable: { height: 360 } },
+  args: {
+    envInfo: { mode: { name: 'development' }, labels: { App: 'cloud-ui', Env: 'local' } },
+    iconType: 'logoElastic',
+    disableHint: 'Remove the toolbar from your host app to disable it',
   },
 };

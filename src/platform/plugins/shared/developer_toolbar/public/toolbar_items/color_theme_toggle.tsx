@@ -10,7 +10,12 @@
 import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import type { InternalThemeServiceStart } from '@kbn/core-theme-browser-internal-types';
+import type { ThemeServiceStart } from '@kbn/core/public';
+
+// Structural on purpose: only `plugin.tsx` is allowed to import the Core-private theme types.
+interface ToggleableTheme extends Pick<ThemeServiceStart, 'theme$' | 'getTheme'> {
+  setDarkMode: (darkMode: boolean) => void;
+}
 
 interface Props {
   isDarkMode: boolean;
@@ -37,7 +42,7 @@ const ColorThemeToggle = ({ isDarkMode, onToggle }: Props) => (
  * the internal `setDarkMode` to switch without a page reload. The change is
  * session-only: a reload restores the server-resolved theme.
  */
-export const LiveColorThemeToggle = ({ theme }: { theme: InternalThemeServiceStart }) => {
+export const LiveColorThemeToggle = ({ theme }: { theme: ToggleableTheme }) => {
   const currentTheme = useObservable(theme.theme$, theme.getTheme());
   const isDarkMode = currentTheme.darkMode;
   return (

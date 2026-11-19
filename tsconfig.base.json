@@ -1199,8 +1199,6 @@
       "@kbn/dev-validation-runner/*": ["./src/platform/packages/shared/kbn-dev-validation-runner/*"],
       "@kbn/developer-examples-plugin": ["./examples/developer_examples"],
       "@kbn/developer-examples-plugin/*": ["./examples/developer_examples/*"],
-      "@kbn/developer-toolbar": ["./src/platform/packages/shared/kbn-developer-toolbar"],
-      "@kbn/developer-toolbar/*": ["./src/platform/packages/shared/kbn-developer-toolbar/*"],
       "@kbn/developer-toolbar-plugin": ["./src/platform/plugins/shared/developer_toolbar"],
       "@kbn/developer-toolbar-plugin/*": ["./src/platform/plugins/shared/developer_toolbar/*"],
       "@kbn/developer-toolbar-profilers-plugin": ["./src/platform/plugins/private/developer_toolbar_profilers"],

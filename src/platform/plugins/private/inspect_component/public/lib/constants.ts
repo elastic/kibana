@@ -9,7 +9,7 @@
 
 export const EUI_DATA_ICON_TYPE = 'data-icon-type';
 export const INSPECT_OVERLAY_ID = 'inspectOverlay';
-/** Root container id rendered by `@kbn/developer-toolbar`. */
+/** Root container id rendered by `@kbn/ui-developer-toolbar`. */
 export const DEVELOPER_TOOLBAR_ID = 'developerToolbar';
 export const INSPECT_FLYOUT_ID = 'inspectComponentFlyout';
 export const EUI_PORTAL_ATTRIBUTE = '[data-euiportal="true"]';

@@ -7,4 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {};
+export { DeveloperToolbar, DeveloperToolbarItem, useToolbarState } from './src';
+
+export type {
+  DeveloperToolbarProps,
+  DeveloperToolbarItemProps,
+  DeveloperToolbarState,
+  DeveloperToolbarRegisteredItem,
+  EnvironmentInfo,
+} from './src';

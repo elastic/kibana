@@ -817,7 +817,6 @@ packages:
   - 'src/platform/packages/shared/kbn-dev-proc-runner'
   - 'src/platform/packages/shared/kbn-dev-utils'
   - 'src/platform/packages/shared/kbn-dev-validation-runner'
-  - 'src/platform/packages/shared/kbn-developer-toolbar'
   - 'src/platform/packages/shared/kbn-discover-contextual-components'
   - 'src/platform/packages/shared/kbn-discover-data-grid'
   - 'src/platform/packages/shared/kbn-discover-utils'

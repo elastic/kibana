@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  DeveloperToolbarItem,
-  type DeveloperToolbarItemProps,
-} from './src/components/developer_toolbar_item';
-export { DeveloperToolbar, type DeveloperToolbarProps } from './src/components/developer_toolbar';
-export { LiveColorThemeToggle } from './src/toolbar_items/color_theme/color_theme_toggle';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { App } from './app';
+
+const container = document.getElementById('root');
+
+if (!container) {
+  throw new Error('Root element not found');
+}
+
+createRoot(container).render(<App />);

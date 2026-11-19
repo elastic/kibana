@@ -10,12 +10,7 @@
 import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { EnvironmentMode, PackageInfo } from '@kbn/config';
-
-export interface EnvironmentInfo {
-  mode: EnvironmentMode;
-  packageInfo: PackageInfo;
-}
+import type { EnvironmentInfo } from '../../types';
 
 const badgeStyles = css`
   cursor: default;
@@ -24,49 +19,76 @@ const badgeStyles = css`
 export interface EnvironmentIndicatorProps {
   env: EnvironmentInfo;
   customLabel?: string;
+  /** Badge icon used in production mode. */
+  iconType?: string;
 }
 
+const formatBuildDate = (buildDate: Date | string | number | undefined): string | undefined => {
+  if (buildDate === undefined || buildDate === '') return undefined;
+  const date = new Date(buildDate);
+  return Number.isNaN(date.getTime()) ? undefined : date.toLocaleDateString();
+};
+
 export const EnvironmentIndicator: React.FC<EnvironmentIndicatorProps> = ({
-  env: { mode, packageInfo },
+  env: { mode, packageInfo = {}, labels },
   customLabel,
+  iconType: productionIconType = 'logoKibana',
 }) => {
   const isProduction = mode.name === 'production';
   const badgeColor = isProduction ? 'warning' : '#0B1628';
-  const iconType = isProduction ? 'logoKibana' : 'wrench';
+  const iconType = isProduction ? productionIconType : 'wrench';
+  const buildDate = formatBuildDate(packageInfo.buildDate);
 
   const tooltipContent = (
     <div>
       <div>
         <strong>Environment:</strong> {mode.name}
       </div>
-      <div>
-        <strong>Version:</strong> {packageInfo.version}
-      </div>
-      <div>
-        <strong>Build:</strong> {packageInfo.buildNum}
-      </div>
-      <div>
-        <strong>Branch:</strong> {packageInfo.branch}
-      </div>
-      <div>
-        <strong>Flavor:</strong> {packageInfo.buildFlavor}
-      </div>
+      {packageInfo.version && (
+        <div>
+          <strong>Version:</strong> {packageInfo.version}
+        </div>
+      )}
+      {packageInfo.buildNum !== undefined && (
+        <div>
+          <strong>Build:</strong> {packageInfo.buildNum}
+        </div>
+      )}
+      {packageInfo.branch && (
+        <div>
+          <strong>Branch:</strong> {packageInfo.branch}
+        </div>
+      )}
+      {packageInfo.buildFlavor && (
+        <div>
+          <strong>Flavor:</strong> {packageInfo.buildFlavor}
+        </div>
+      )}
       {packageInfo.dist && (
         <div>
           <strong>Distribution:</strong> Yes
         </div>
       )}
-      <div>
-        <strong>Build Date:</strong> {new Date(packageInfo.buildDate).toLocaleDateString()}
-      </div>
+      {buildDate && (
+        <div>
+          <strong>Build Date:</strong> {buildDate}
+        </div>
+      )}
+      {labels &&
+        Object.entries(labels).map(([label, value]) => (
+          <div key={label}>
+            <strong>{label}:</strong> {value}
+          </div>
+        ))}
     </div>
   );
 
   const envName = mode.name.charAt(0).toUpperCase() + mode.name.slice(1);
   const isServerless = packageInfo.buildFlavor === 'serverless';
+  const versionSuffix = packageInfo.version ? ` v${packageInfo.version}` : '';
   const defaultDisplayText = isServerless
     ? `${envName} (serverless)`
-    : `${envName} v${packageInfo.version}`;
+    : `${envName}${versionSuffix}`;
 
   const displayText = customLabel?.trim() || defaultDisplayText;
 

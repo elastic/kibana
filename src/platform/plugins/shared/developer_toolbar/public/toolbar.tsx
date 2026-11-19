@@ -10,8 +10,8 @@
 import { useLayoutUpdate } from '@kbn/core-chrome-layout';
 import React, { useCallback } from 'react';
 import type { Observable } from 'rxjs';
-import type { DeveloperToolbarItemProps, DeveloperToolbarProps } from '@kbn/developer-toolbar';
-import { DeveloperToolbar, DeveloperToolbarItem } from '@kbn/developer-toolbar';
+import type { DeveloperToolbarItemProps, DeveloperToolbarProps } from '@kbn/ui-developer-toolbar';
+import { DeveloperToolbar, DeveloperToolbarItem } from '@kbn/ui-developer-toolbar';
 import useObservable from 'react-use/lib/useObservable';
 
 export const Toolbar = ({
@@ -35,7 +35,11 @@ export const Toolbar = ({
 
   return (
     <>
-      <DeveloperToolbar envInfo={envInfo} onHeightChange={onHeightChange} />
+      <DeveloperToolbar
+        envInfo={envInfo}
+        onHeightChange={onHeightChange}
+        disableHint="developer_toolbar.enabled: false in kibana.dev.yml to disable"
+      />
       {registeredItems.map((item: DeveloperToolbarItemProps) => (
         <DeveloperToolbarItem key={item.id} id={item.id} priority={item.priority}>
           {item.children}

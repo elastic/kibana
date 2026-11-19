@@ -2,7 +2,7 @@
 
 Plugin that enables the developer toolbar in Kibana **development mode only**. Other plugins can register custom items in the toolbar using the plugin contract.
 
-For detailed information about the toolbar itself, features, and capabilities, see [`@kbn/developer-toolbar`](../../../packages/shared/kbn-developer-toolbar/README.md).
+For detailed information about the toolbar itself, features, and capabilities, see [`@kbn/ui-developer-toolbar`](../../../kbn-ui/developer-toolbar/README.md).
 
 ## Usage
 

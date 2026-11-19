@@ -14,6 +14,21 @@ export interface ConsoleErrorInfo {
   type: 'error' | 'warn';
 }
 
+type ConsoleMethod = 'error' | 'warn';
+
+type ErrorWithCaptureStackTrace = ErrorConstructor & {
+  captureStackTrace?: (target: object, constructorOpt?: (...args: unknown[]) => void) => void;
+};
+
+// Mirrors the original `reason?.message` lookup: any object with a string `message`, not just Errors.
+const getRejectionMessage = (reason: unknown): string | undefined => {
+  if (typeof reason !== 'object' || reason === null || !('message' in reason)) {
+    return undefined;
+  }
+  const { message } = reason;
+  return typeof message === 'string' ? message : undefined;
+};
+
 /**
  * Console monitor - tracks console errors and warnings
  * Note: Unlike other monitors, this can emit null values when errors are dismissed
@@ -37,11 +52,13 @@ export class ConsoleMonitor implements Monitor<ConsoleErrorInfo | null> {
 
   private static readonly DEBOUNCE_DELAY = 100 as const; // ms
 
-  private readonly originalMethods = {
-    // eslint-disable-next-line no-console
-    error: console.error.bind(console),
-    // eslint-disable-next-line no-console
-    warn: console.warn.bind(console),
+  private readonly target: Console = globalThis.console;
+
+  // Exact references captured at construction so interception chains to whatever the host installed
+  // (e.g. APM RUM wrappers) and restoration puts back the identical functions.
+  private readonly originalMethods: Record<ConsoleMethod, Console[ConsoleMethod]> = {
+    error: this.target.error,
+    warn: this.target.warn,
   };
 
   private callbacks = new Set<(error: ConsoleErrorInfo | null) => void>();
@@ -64,17 +81,16 @@ export class ConsoleMonitor implements Monitor<ConsoleErrorInfo | null> {
     this.notifyCallbacks(null);
   }
 
-  private createStackFromCaller(wrapperFn: Function): Error {
+  private createStackFromCaller(wrapperFn: (...args: unknown[]) => void): Error {
     const err = new Error();
     // V8/Chromium: start stack from *caller of* wrapperFn (skips wrapper)
-    if ((Error as any).captureStackTrace) {
-      (Error as any).captureStackTrace(err, wrapperFn);
-    }
+    (Error as ErrorWithCaptureStackTrace).captureStackTrace?.(err, wrapperFn);
     return err;
   }
 
-  private createConsoleInterceptor(method: 'error' | 'warn') {
-    const original = this.originalMethods[method];
+  private createConsoleInterceptor(method: ConsoleMethod) {
+    const originalMethod = this.originalMethods[method];
+    const original = (...args: unknown[]) => originalMethod.apply(this.target, args);
     // Use a named function so we can pass it to captureStackTrace
     const intercept = (...args: unknown[]) => {
       // Avoid infinite loops if our subscribers log again
@@ -109,10 +125,8 @@ export class ConsoleMonitor implements Monitor<ConsoleErrorInfo | null> {
     const interceptWarn = this.createConsoleInterceptor('warn');
 
     // Override console methods
-    // eslint-disable-next-line no-console
-    console.error = interceptError;
-    // eslint-disable-next-line no-console
-    console.warn = interceptWarn;
+    this.target.error = interceptError;
+    this.target.warn = interceptWarn;
 
     // Global error handler for unhandled errors (including React errors)
     const handleGlobalError = (event: ErrorEvent) => {
@@ -124,11 +138,9 @@ export class ConsoleMonitor implements Monitor<ConsoleErrorInfo | null> {
 
     // Global unhandled promise rejection handler
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      const reason: unknown = event.reason;
       this.showError({
-        message:
-          (event as any)?.reason?.message ||
-          String((event as any)?.reason) ||
-          'Unhandled promise rejection',
+        message: getRejectionMessage(reason) || String(reason) || 'Unhandled promise rejection',
         type: 'error',
       });
     };
@@ -138,10 +150,8 @@ export class ConsoleMonitor implements Monitor<ConsoleErrorInfo | null> {
 
     this.cleanupHandlers = () => {
       // Restore original console methods only if we still own them
-      // eslint-disable-next-line no-console
-      if (console.error === interceptError) console.error = this.originalMethods.error;
-      // eslint-disable-next-line no-console
-      if (console.warn === interceptWarn) console.warn = this.originalMethods.warn;
+      if (this.target.error === interceptError) this.target.error = this.originalMethods.error;
+      if (this.target.warn === interceptWarn) this.target.warn = this.originalMethods.warn;
 
       // Remove global error handlers
       window.removeEventListener('error', handleGlobalError);
@@ -257,8 +267,8 @@ export class ConsoleMonitor implements Monitor<ConsoleErrorInfo | null> {
     }
 
     // React elements: show component name if possible
-    if (t === 'object' && (arg as any)?.type) {
-      const comp = (arg as any).type;
+    if (typeof arg === 'object' && 'type' in arg) {
+      const comp = (arg as { type?: { displayName?: string; name?: string } }).type;
       const name = comp?.displayName || comp?.name;
       if (name) return `<${name}>`;
     }
