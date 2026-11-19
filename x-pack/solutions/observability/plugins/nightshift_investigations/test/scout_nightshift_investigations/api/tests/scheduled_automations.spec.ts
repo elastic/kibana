@@ -75,7 +75,7 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
   });
 
   apiTest(
-    'an edited schedule starts a scoped investigation and stops it at the configured timeout',
+    'an edited schedule starts an investigation and stops it at the configured timeout',
     async ({ apiClient, kbnClient }) => {
       apiTest.setTimeout(240_000);
       const name = uniqueId('scout-scheduled');
@@ -85,7 +85,6 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
         schedulePreset: 'daily',
         timezone: 'UTC',
         time: due.toISOString().slice(11, 16),
-        scopeQuery: 'service.name:checkout',
       };
       const body = {
         name,
@@ -181,7 +180,7 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
         inputs: {
           message: `Instructions:\n${body.execution.promptTemplate}`,
           timeout_seconds: body.runtime.timeoutSeconds,
-          context: { scope_query: schedule.scopeQuery, source: 'manual' },
+          context: { source: 'manual' },
         },
       });
       // The entry point caps its investigation step with the automation's timeout, so the run it
@@ -227,7 +226,6 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
                 schedulePreset: 'daily',
                 time: due.toISOString().slice(11, 16),
                 timezone: 'UTC',
-                scopeQuery: 'service.name:checkout',
               },
             ],
           },

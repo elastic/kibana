@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/packages/private/ml/cancellable_search
 dependsOn:
   - '@kbn/data-plugin'
+  - '@kbn/kibana-utils-plugin'
   - '@kbn/search-types'
 tags:
   - shared-common

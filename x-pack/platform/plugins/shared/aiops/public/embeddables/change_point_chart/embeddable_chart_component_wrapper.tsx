@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { CHANGE_POINT_DETECTION_VIEW_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import { getEsQueryConfig } from '@kbn/data-service';
@@ -53,6 +53,8 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
   onRenderComplete,
   onChange,
   emptyState,
+  onLoading,
+  requestCancellationManager,
   parentApi,
 }) => {
   const { filters, query, searchBounds, interval } = useFilterQueryUpdates();
@@ -101,8 +103,15 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
     fieldConfig,
     requestParams,
     combinedQuery,
-    10000
+    10000,
+    requestCancellationManager
   );
+
+  useEffect(() => {
+    if (isLoading) {
+      onLoading?.(true);
+    }
+  }, [isLoading, onLoading]);
 
   const changePoints = useMemo<ChangePointAnnotation[]>(() => {
     let resultChangePoints: ChangePointAnnotation[] = results.sort((a, b) => {

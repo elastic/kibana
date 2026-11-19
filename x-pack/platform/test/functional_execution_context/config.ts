@@ -37,7 +37,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        ...findTestPluginPaths(Path.resolve(__dirname, 'plugins')),
+        ...findTestPluginPaths(
+          Path.resolve(__dirname, '../../test_plugins/functional_execution_context')
+        ),
         `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
 

@@ -40,6 +40,7 @@ interface HarnessOptions {
   serviceAccountsEnabled?: boolean;
   /** Whether the Nightshift assistant agent is registered. */
   assistantEnabled?: boolean;
+  relayRoleExists?: boolean;
 }
 
 function createHarness({
@@ -49,6 +50,7 @@ function createHarness({
   isServerless = false,
   serviceAccountsEnabled = false,
   assistantEnabled = false,
+  relayRoleExists = true,
 }: HarnessOptions = {}) {
   const soClient = {
     get: jest
@@ -75,6 +77,9 @@ function createHarness({
   const createServiceAccount = jest.fn();
   const deleteServiceAccount = jest.fn().mockResolvedValue({ deleted: true, warnings: [] });
   const serviceAccountsIsEnabled = jest.fn().mockReturnValue(serviceAccountsEnabled);
+  const queryRole = jest
+    .fn()
+    .mockResolvedValue({ roles: relayRoleExists ? [{ name: '_nightshift_agent' }] : [] });
 
   // Mutated in place like the actions plugin's own array, so `getRegisteredTenantKey` sees what the
   // service just did. The `isDynamic` handling mirrors the plugin: registration is refused for any
@@ -116,6 +121,9 @@ function createHarness({
     core: {
       savedObjects: { getScopedClient: jest.fn().mockReturnValue(soClient) },
       featureFlags: { getBooleanValue$ },
+      elasticsearch: {
+        client: { asScoped: jest.fn(() => ({ asCurrentUser: { security: { queryRole } } })) },
+      },
       http: { basePath: { publicBaseUrl: 'https://kibana.test' }, getServerInfo: jest.fn() },
       security: {
         serviceAccounts: {
@@ -142,6 +150,7 @@ function createHarness({
     invalidateAsInternalUser,
     createServiceAccount,
     deleteServiceAccount,
+    queryRole,
     getBooleanValue$,
     inMemoryConnectors,
     registerDynamicConnector,
@@ -582,6 +591,28 @@ describe('SlackAppService', () => {
       expect(grantAsInternalUser).not.toHaveBeenCalled();
       expect(createServiceAccount).not.toHaveBeenCalled();
       expect(startInstall).not.toHaveBeenCalled();
+    });
+
+    it('fails closed without creating anything when the _nightshift_agent role is missing', async () => {
+      const { server, soClient, createServiceAccount, queryRole } = createHarness({
+        uiamEnabled: true,
+        isServerless: true,
+        serviceAccountsEnabled: true,
+        relayRoleExists: false,
+      });
+
+      await expect(new SlackAppService(server).connect(request)).rejects.toThrow(
+        new SlackAppUnavailableError(
+          'The role [_nightshift_agent] required by the Elastic Slack app does not exist on this deployment.'
+        )
+      );
+      expect(queryRole).toHaveBeenCalledWith({
+        query: { term: { name: '_nightshift_agent' } },
+        size: 1,
+      });
+      expect(createServiceAccount).not.toHaveBeenCalled();
+      expect(startInstall).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
     });
 
     it('fails closed when UIAM service-account creation is unavailable', async () => {

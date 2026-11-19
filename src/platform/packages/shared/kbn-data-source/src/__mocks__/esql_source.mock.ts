@@ -36,6 +36,7 @@ export const createMockEsqlSource = (
     resultColumns,
     getColumns: () => columns as Column[],
     getColumn: (name: string) => columns.find((c) => c.name === name) as Column | undefined,
+    getEmptyColumnNames: () => resultColumns.filter(({ isNull }) => isNull).map(({ name }) => name),
     getFilterableFields: async () => columns as Column[],
     toFilterableSource: async () => ({
       id: `esql-mock-${timeFieldName ?? ''}`,

@@ -64,6 +64,32 @@ describe('AlertStatusChangedEventPublisher', () => {
     expect(isEnabled).toHaveBeenCalledWith(request);
   });
 
+  it('notifies each enabled opt-in without duplicating event bus publication', async () => {
+    const { publisher, eventBus, optIns } = createAlertStatusChangedEventPublisher();
+    const firstCallback = jest.fn().mockResolvedValue(undefined);
+    const secondCallback = jest.fn().mockResolvedValue(undefined);
+    const disabledCallback = jest.fn().mockResolvedValue(undefined);
+    optIns.register({
+      isEnabled: jest.fn().mockResolvedValue(true),
+      onStatusChanges: firstCallback,
+    });
+    optIns.register({
+      isEnabled: jest.fn().mockResolvedValue(false),
+      onStatusChanges: disabledCallback,
+    });
+    optIns.register({
+      isEnabled: jest.fn().mockResolvedValue(true),
+      onStatusChanges: secondCallback,
+    });
+
+    await publisher.publishAlertStatusChanges([firstPayload]);
+
+    expect(eventBus.publish).toHaveBeenCalledTimes(1);
+    expect(firstCallback).toHaveBeenCalledWith([firstPayload]);
+    expect(secondCallback).toHaveBeenCalledWith([firstPayload]);
+    expect(disabledCallback).not.toHaveBeenCalled();
+  });
+
   it('publishes nothing when nobody has opted in', async () => {
     const { publisher, eventBus } = createAlertStatusChangedEventPublisher();
 

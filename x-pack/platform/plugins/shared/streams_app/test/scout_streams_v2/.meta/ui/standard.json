@@ -1,5 +1,5 @@
 {
-  "sha1": "aa5a64c846ddd7a655f11a0d6086310dba8370ef",
+  "sha1": "bc4399ac882dc430759ba2a28a85e7be56e8e46c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_search.spec.ts",
-        "line": 120,
+        "line": 124,
         "column": 9
       }
     },
@@ -95,7 +95,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_search.spec.ts",
-        "line": 144,
+        "line": 148,
         "column": 5
       }
     },
@@ -109,7 +109,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_search.spec.ts",
-        "line": 153,
+        "line": 157,
         "column": 11
       }
     },
@@ -123,7 +123,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_search.spec.ts",
-        "line": 160,
+        "line": 164,
         "column": 8
       }
     },
@@ -240,6 +240,20 @@
       }
     },
     {
+      "id": "a570088069a2c16-b1ca2e5ba67df21",
+      "title": "Stream map warns before leaving the map with unsaved changes, but not for a flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas.spec.ts",
+        "line": 190,
+        "column": 11
+      }
+    },
+    {
       "id": "d88e0be806f054e-da0f348f5b47639",
       "title": "Streams layout renders every tab and lands on classic",
       "expectedStatus": "passed",
@@ -249,8 +263,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
-        "line": 60,
-        "column": 26
+        "line": 27,
+        "column": 21
       }
     },
     {
@@ -263,8 +277,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
-        "line": 66,
-        "column": 72
+        "line": 32,
+        "column": 82
       }
     },
     {
@@ -277,8 +291,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
-        "line": 67,
-        "column": 19
+        "line": 36,
+        "column": 13
       }
     },
     {
@@ -291,8 +305,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
-        "line": 79,
-        "column": 11
+        "line": 48,
+        "column": 8
       }
     },
     {
@@ -305,8 +319,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
-        "line": 84,
-        "column": 28
+        "line": 52,
+        "column": 19
       }
     },
     {
