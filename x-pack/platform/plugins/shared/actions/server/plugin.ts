@@ -22,6 +22,7 @@ import type {
   ISavedObjectsRepository,
 } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import type { Subscription } from 'rxjs';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
@@ -342,6 +343,7 @@ export class ActionsPlugin
   private readonly clientLeasePool: LeasePool<unknown>;
   private relayClient?: RelayClientContract;
   private setupContract?: PluginSetupContract;
+  private connectorCatalogFeatureFlagSubscription?: Subscription;
   private connectorCatalog?: ConnectorCatalogHandle;
   private resolveCatalogReady: () => void = () => {};
   private readonly catalogReady: Promise<void> = new Promise<void>((resolve) => {
@@ -653,6 +655,12 @@ export class ActionsPlugin
     }
 
     const connectorCatalog = this.startConnectorCatalog(core);
+    this.connectorCatalogFeatureFlagSubscription = core.featureFlags
+      .getBooleanValue$(ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG, false)
+      .subscribe((isCatalogEnabled: boolean) => {
+        return isCatalogEnabled;
+        // TODO: implement the connector catalog logic
+      });
 
     const {
       logger,
@@ -1215,16 +1223,17 @@ export class ActionsPlugin
     };
   };
 
-  /** Starts the first catalog load, driven by the catalog flag. */
+  /** Starts the first catalog load, driven by the `xpack.actions.catalog.enabled` config. */
   private startConnectorCatalog(core: CoreStart): ConnectorCatalogHandle {
     const { setupContract, actionTypeRegistry } = this;
     // 1 context for the whole catalog start, so `plugins.actions.connectorCatalog` filters it.
     const logger = this.logger.get('connectorCatalog');
+    const isEnabled = this.actionsConfig.catalog.enabled;
     logger.debug(
-      `Connector catalog start requested. Reading flag "${ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG}" and index "${CONNECTOR_TYPE_CATALOG_INDEX}".`
+      `Connector catalog start requested. Config "xpack.actions.catalog.enabled": ${isEnabled}. Index: "${CONNECTOR_TYPE_CATALOG_INDEX}".`
     );
     const handle = startConnectorCatalog({
-      isEnabled$: core.featureFlags.getBooleanValue$(ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG, false),
+      isEnabled,
       storage: createConnectorCatalogStorage({
         esClient: core.elasticsearch.client.asInternalUser,
         logger,
@@ -1343,6 +1352,8 @@ export class ActionsPlugin
   };
 
   public stop() {
+    this.connectorCatalogFeatureFlagSubscription?.unsubscribe();
+    this.connectorCatalogFeatureFlagSubscription = undefined;
     this.connectorCatalog?.stop();
     if (this.licenseState) {
       this.licenseState.clean();

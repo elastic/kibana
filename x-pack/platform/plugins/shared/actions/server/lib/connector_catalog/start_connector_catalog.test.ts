@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import { Subject, of, throwError } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getConnectorType } from '../../fixtures';
 import { CATALOG_FIRST_LOAD_TIMEOUT_MS } from './constants';
@@ -34,9 +32,9 @@ describe('startConnectorCatalog', () => {
   const actionTypeRegistry = { has: jest.fn(), register: jest.fn() };
   const buildType = jest.fn();
 
-  const startWithHandle = (timeoutMs?: number, isEnabled$: Observable<boolean> = of(true)) =>
+  const startWithHandle = (timeoutMs?: number, isEnabled: boolean = true) =>
     startConnectorCatalog({
-      isEnabled$,
+      isEnabled,
       storage,
       actionTypeRegistry,
       buildType,
@@ -66,8 +64,10 @@ describe('startConnectorCatalog', () => {
     jest.useRealTimers();
   });
 
-  it('calls no storage method when the flag is off', async () => {
-    await startWithHandle(undefined, of(false)).ready;
+  it('calls no storage method and registers nothing when the config is off', async () => {
+    const { ready } = startWithHandle(undefined, false);
+
+    await expect(ready).resolves.toBeUndefined();
 
     expect(storage.getManifest).not.toHaveBeenCalled();
     expect(storage.getDefinitions).not.toHaveBeenCalled();
@@ -92,7 +92,7 @@ describe('startConnectorCatalog', () => {
     };
     storage.getManifest.mockResolvedValue(undefined);
     const handle = startConnectorCatalog({
-      isEnabled$: of(true),
+      isEnabled: true,
       storage: writableStorage,
       actionTypeRegistry,
       buildType,
@@ -114,132 +114,6 @@ describe('startConnectorCatalog', () => {
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('read failed'));
     expect(logger.info).not.toHaveBeenCalled();
-  });
-
-  it('logs at warn and resolves when the flag read is rejected', async () => {
-    const { ready } = startWithHandle(
-      undefined,
-      throwError(() => new Error('flag failed'))
-    );
-
-    await expect(ready).resolves.toBeUndefined();
-
-    expect(storage.getManifest).not.toHaveBeenCalled();
-    expect(storage.getDefinitions).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('flag failed'));
-  });
-
-  describe('flag changes', () => {
-    it('does not load when the flag turns on after a first value of off', async () => {
-      const flag$ = new Subject<boolean>();
-      const { ready } = startWithHandle(undefined, flag$);
-      flag$.next(false);
-      await ready;
-
-      flag$.next(true);
-      await new Promise(process.nextTick);
-
-      expect(storage.getManifest).not.toHaveBeenCalled();
-      expect(storage.getDefinitions).not.toHaveBeenCalled();
-      expect(actionTypeRegistry.register).not.toHaveBeenCalled();
-    });
-
-    it('loads only once when the flag value repeats', async () => {
-      const flag$ = new Subject<boolean>();
-      const { ready } = startWithHandle(undefined, flag$);
-      flag$.next(true);
-      flag$.next(false);
-      flag$.next(true);
-
-      await ready;
-
-      expect(storage.getManifest).toHaveBeenCalledTimes(1);
-      expect(actionTypeRegistry.register).toHaveBeenCalledTimes(1);
-    });
-
-    it('ignores a flag error after the first value', async () => {
-      const flag$ = new Subject<boolean>();
-      const { ready } = startWithHandle(undefined, flag$);
-      flag$.next(true);
-      flag$.error(new Error('late flag failure'));
-      await ready;
-
-      expect(logger.warn).not.toHaveBeenCalled();
-      expect(actionTypeRegistry.register).toHaveBeenCalledTimes(1);
-    });
-
-    it('does not load after stop', async () => {
-      const flag$ = new Subject<boolean>();
-      const { ready, stop } = startWithHandle(undefined, flag$);
-      stop();
-      flag$.next(true);
-      await new Promise(process.nextTick);
-
-      await expect(ready).resolves.toBeUndefined();
-      expect(storage.getManifest).not.toHaveBeenCalled();
-      expect(storage.getDefinitions).not.toHaveBeenCalled();
-    });
-
-    it('resolves ready at the timeout when the flag never emits', async () => {
-      jest.useFakeTimers();
-      const onResolved = jest.fn();
-
-      const promise = startWithHandle(
-        CATALOG_FIRST_LOAD_TIMEOUT_MS,
-        new Subject<boolean>()
-      ).ready.then(onResolved);
-      await jest.advanceTimersByTimeAsync(CATALOG_FIRST_LOAD_TIMEOUT_MS - 1);
-      expect(onResolved).not.toHaveBeenCalled();
-
-      await jest.advanceTimersByTimeAsync(1);
-      await promise;
-
-      expect(onResolved).toHaveBeenCalledTimes(1);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('flag'));
-      expect(storage.getManifest).not.toHaveBeenCalled();
-      expect(storage.getDefinitions).not.toHaveBeenCalled();
-    });
-
-    it('gives the load only the rest of the budget when the flag arrives late', async () => {
-      jest.useFakeTimers();
-      storage.getManifest.mockReturnValue(new Promise(() => {}));
-      const onResolved = jest.fn();
-      const flag$ = new Subject<boolean>();
-      const { ready } = startWithHandle(CATALOG_FIRST_LOAD_TIMEOUT_MS, flag$);
-      void ready.then(onResolved);
-
-      await jest.advanceTimersByTimeAsync(20_000);
-      flag$.next(true);
-      await jest.advanceTimersByTimeAsync(0);
-      expect(storage.getManifest).toHaveBeenCalledTimes(1);
-
-      await jest.advanceTimersByTimeAsync(9_999);
-      expect(onResolved).not.toHaveBeenCalled();
-
-      await jest.advanceTimersByTimeAsync(1);
-      await ready;
-
-      expect(onResolved).toHaveBeenCalledTimes(1);
-      const [{ signal }] = storage.getManifest.mock.calls[0] as [{ signal: AbortSignal }];
-      expect(signal.aborted).toBe(true);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('timed out'));
-      expect(jest.getTimerCount()).toBe(0);
-    });
-
-    it('ignores a flag value that arrives after the flag timeout', async () => {
-      jest.useFakeTimers();
-      const flag$ = new Subject<boolean>();
-      const { ready } = startWithHandle(1000, flag$);
-
-      await jest.advanceTimersByTimeAsync(1000);
-      await ready;
-      flag$.next(true);
-      await jest.advanceTimersByTimeAsync(0);
-
-      expect(storage.getManifest).not.toHaveBeenCalled();
-      expect(storage.getDefinitions).not.toHaveBeenCalled();
-      expect(actionTypeRegistry.register).not.toHaveBeenCalled();
-    });
   });
 
   describe('timeout', () => {

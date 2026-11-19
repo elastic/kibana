@@ -18,7 +18,6 @@ import {
   createConnectorCatalogStorage,
 } from '../lib/connector_catalog';
 import { loadFixture } from '../lib/declarative_connectors/__fixtures__/load_fixture';
-import { ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG } from '../../common';
 import { setupTestServers } from './lib';
 
 const mockCaptured: { start?: PluginStartContract } = {};
@@ -115,9 +114,9 @@ describe('Connector catalog at start', () => {
 
     const setupResult = await setupTestServers(
       {
-        feature_flags: { overrides: { [ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG]: true } },
         xpack: {
           actions: {
+            catalog: { enabled: true },
             preconfigured: {
               [CONNECTOR_ID]: {
                 name: 'Catalog spec connector',
@@ -130,6 +129,7 @@ describe('Connector catalog at start', () => {
         },
       },
       {
+        dev: true,
         beforeKibanaStart: async (esClient) => {
           const storage = createConnectorCatalogStorage({
             esClient,
