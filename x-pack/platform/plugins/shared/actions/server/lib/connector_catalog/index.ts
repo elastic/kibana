@@ -14,6 +14,7 @@ export type { BuildTypeFromStoredSpec } from './build_type_from_stored_spec';
 export {
   CATALOG_FIRST_LOAD_TIMEOUT_MS,
   CATALOG_MANIFEST_DOC_ID,
+  CATALOG_REQUEST_WAIT_MS,
   CONNECTOR_TYPE_CATALOG_INDEX,
   getCatalogAssetDocId,
   getCatalogDefinitionDocId,

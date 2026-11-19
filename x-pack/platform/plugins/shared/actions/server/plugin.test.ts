@@ -49,7 +49,11 @@ import { LeasePool } from './lib';
 import { defaultInboundEventsLimitConfigs } from './config';
 import { loadFixture } from './lib/declarative_connectors/__fixtures__/load_fixture';
 import { errors } from '@elastic/elasticsearch';
-import { CONNECTOR_TYPE_CATALOG_INDEX } from './lib/connector_catalog';
+import {
+  CATALOG_FIRST_LOAD_TIMEOUT_MS,
+  CATALOG_REQUEST_WAIT_MS,
+  CONNECTOR_TYPE_CATALOG_INDEX,
+} from './lib/connector_catalog';
 
 function getConfig(overrides = {}) {
   return {
@@ -930,6 +934,114 @@ describe('Actions Plugin', () => {
           await expect(routeContext).resolves.toBeDefined();
           await expect(clientPromise).resolves.toBeDefined();
           expect(pluginStart.listTypes().map(({ id }) => id)).toContain(SPEC_TYPE_ID);
+        });
+      });
+
+      describe('request wait cap', () => {
+        beforeEach(() => {
+          jest.useFakeTimers();
+          coreStart.featureFlags.getBooleanValue$.mockReturnValue(of(true));
+        });
+
+        afterEach(() => {
+          jest.useRealTimers();
+        });
+
+        const trackSettled = (promise: Promise<unknown>) => {
+          const state = { settled: false };
+          void promise.then(() => {
+            state.settled = true;
+          });
+          return state;
+        };
+
+        const requestClient = (pluginStart: PluginStartContract) =>
+          trackSettled(
+            pluginStart.getActionsClientWithRequest(httpServerMock.createKibanaRequest())
+          );
+
+        it('lets a request at boot continue at 10 s with in-tree types only when the load hangs', async () => {
+          getEsClient().get.mockReturnValue(new Promise(() => {}));
+          await setupPlugin();
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+
+          const request = requestClient(pluginStart);
+          const ready = trackSettled(pluginStart.whenCatalogReady());
+
+          await jest.advanceTimersByTimeAsync(CATALOG_REQUEST_WAIT_MS - 1);
+          expect(request.settled).toBe(false);
+
+          await jest.advanceTimersByTimeAsync(1);
+          expect(request.settled).toBe(true);
+          expect(ready.settled).toBe(false);
+          expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
+        });
+
+        it('does not make a request made after 10 s wait', async () => {
+          getEsClient().get.mockReturnValue(new Promise(() => {}));
+          await setupPlugin();
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+
+          await jest.advanceTimersByTimeAsync(CATALOG_REQUEST_WAIT_MS);
+          const request = requestClient(pluginStart);
+          await jest.advanceTimersByTimeAsync(0);
+
+          expect(request.settled).toBe(true);
+        });
+
+        it('ends the load at 30 s and resolves whenCatalogReady() then', async () => {
+          getEsClient().get.mockReturnValue(new Promise(() => {}));
+          await setupPlugin();
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+          const ready = trackSettled(pluginStart.whenCatalogReady());
+
+          await jest.advanceTimersByTimeAsync(CATALOG_FIRST_LOAD_TIMEOUT_MS - 1);
+          expect(ready.settled).toBe(false);
+
+          await jest.advanceTimersByTimeAsync(1);
+          expect(ready.settled).toBe(true);
+          expect(jest.getTimerCount()).toBe(0);
+        });
+
+        it('does not wait and creates no timer when the catalog config is off', async () => {
+          await setupPlugin(undefined, { catalogEnabled: false });
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+
+          expect(jest.getTimerCount()).toBe(0);
+          const request = requestClient(pluginStart);
+          await jest.advanceTimersByTimeAsync(0);
+
+          expect(request.settled).toBe(true);
+        });
+
+        it('waits only until the load is ready on a normal load, and leaves no timer', async () => {
+          seedCatalog();
+          const catalogRead = defer<object>();
+          getEsClient().get.mockReturnValue(catalogRead.promise);
+          await setupPlugin();
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+
+          const request = requestClient(pluginStart);
+          await jest.advanceTimersByTimeAsync(2_000);
+          expect(request.settled).toBe(false);
+
+          catalogRead.resolve(manifestDoc);
+          await jest.advanceTimersByTimeAsync(0);
+
+          expect(request.settled).toBe(true);
+          expect(getTypeIds(pluginStart)).toContain(SPEC_TYPE_ID);
+          expect(jest.getTimerCount()).toBe(0);
+        });
+
+        it('clears the timer on stop()', async () => {
+          getEsClient().get.mockReturnValue(new Promise(() => {}));
+          await setupPlugin();
+          plugin.start(coreStart, pluginsStart);
+
+          plugin.stop();
+          await jest.advanceTimersByTimeAsync(0);
+
+          expect(jest.getTimerCount()).toBe(0);
         });
       });
 

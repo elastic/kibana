@@ -141,6 +141,7 @@ import { getAxiosInstanceWithAuth, getCredentialWithAuth } from './lib/get_axios
 import { RelayClient, type RelayClientContract } from './lib/relay';
 import {
   buildTypeFromStoredSpec,
+  CATALOG_REQUEST_WAIT_MS,
   createConnectorCatalogStorage,
   startConnectorCatalog,
   type ConnectorCatalogHandle,
@@ -348,6 +349,9 @@ export class ActionsPlugin
   private readonly catalogReady: Promise<void> = new Promise<void>((resolve) => {
     this.resolveCatalogReady = resolve;
   });
+  // Request paths wait on this instead of catalogReady. It resolves at ready or after CATALOG_REQUEST_WAIT_MS.
+  private catalogRequestWait: Promise<void> = Promise.resolve();
+  private catalogRequestWaitTimer?: ReturnType<typeof setTimeout>;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -704,7 +708,7 @@ export class ActionsPlugin
       unsecuredSavedObjectsClient: SavedObjectsClientContract;
       spaceId?: SpaceId;
     }) => {
-      await this.catalogReady;
+      await this.catalogRequestWait;
       return new ActionsClient({
         publicBaseUrl: core.http.basePath.publicBaseUrl,
         connectorSigningKeysEnabled: this.actionsConfig.connectorSigningKeys.enabled,
@@ -800,7 +804,7 @@ export class ActionsPlugin
         kibanaIndices: core.savedObjects.getAllIndices(),
         logger: this.logger,
         connectorTypeRegistry: actionTypeRegistry!,
-        whenCatalogReady: () => this.catalogReady,
+        whenCatalogReady: () => this.catalogRequestWait,
       });
     };
 
@@ -1149,11 +1153,11 @@ export class ActionsPlugin
     const evictClientPool = async (connectorId: string): Promise<void> => {
       await this.clientLeasePool.evict(connectorId);
     };
-    const whenCatalogReady = () => this.catalogReady;
+    const whenCatalogReady = () => this.catalogRequestWait;
 
     return async function actionsRouteHandlerContext(context, request) {
       const [coreStart, pluginsStart] = await core.getStartServices();
-      // Requests that arrive before the first catalog load ends wait for it.
+      // Requests that arrive before the first catalog load ends wait for it, up to a cap.
       await whenCatalogReady();
       const { taskManager, encryptedSavedObjects, eventLog } = pluginsStart;
       const { savedObjects } = coreStart;
@@ -1248,7 +1252,26 @@ export class ActionsPlugin
     });
     this.connectorCatalog = handle;
     void handle.ready.then(this.resolveCatalogReady);
+    this.catalogRequestWait = this.createCatalogRequestWait(isEnabled, handle.ready);
     return handle;
+  }
+
+  private createCatalogRequestWait(isEnabled: boolean, ready: Promise<void>): Promise<void> {
+    if (!isEnabled) {
+      return Promise.resolve();
+    }
+    return new Promise<void>((resolve) => {
+      this.catalogRequestWaitTimer = setTimeout(resolve, CATALOG_REQUEST_WAIT_MS);
+      void ready.then(() => {
+        this.clearCatalogRequestWaitTimer();
+        resolve();
+      });
+    });
+  }
+
+  private clearCatalogRequestWaitTimer(): void {
+    clearTimeout(this.catalogRequestWaitTimer);
+    this.catalogRequestWaitTimer = undefined;
   }
 
   /** Warns about allowlisted connector types that are still not registered after the first catalog load. */
@@ -1345,6 +1368,7 @@ export class ActionsPlugin
     this.connectorCatalogFeatureFlagSubscription?.unsubscribe();
     this.connectorCatalogFeatureFlagSubscription = undefined;
     this.connectorCatalog?.stop();
+    this.clearCatalogRequestWaitTimer();
     if (this.licenseState) {
       this.licenseState.clean();
     }
