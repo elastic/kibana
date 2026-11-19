@@ -364,6 +364,20 @@ describe('RelayClient', () => {
     });
   });
 
+  it('cancelInstall posts the claim id to the cancel endpoint', async () => {
+    requestMock.mockResolvedValue({ status: 200, data: { status: 'cancelled' } } as never);
+
+    await createClient().cancelInstall('claim-1');
+
+    expect(requestMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: 'https://relay.test/v1/slack/install/cancel',
+        method: 'post',
+        data: { claim_id: 'claim-1' },
+      })
+    );
+  });
+
   it('unbind posts the tenant key to the uninstall endpoint', async () => {
     requestMock.mockResolvedValue({ status: 200, data: {} } as never);
 

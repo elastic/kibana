@@ -352,6 +352,13 @@ export class SlackAppService {
     if (!pendingInstall) {
       return;
     }
+    if (relayClient && pendingInstall.claimId && !pendingInstall.tenantKey) {
+      await relayClient.cancelInstall(pendingInstall.claimId).catch((error) => {
+        this.logger.debug(
+          `Could not cancel the Relay install claim ${context}: ${this.toErrorMessage(error)}`
+        );
+      });
+    }
     if (relayClient && pendingInstall.tenantKey) {
       await this.unbindBestEffort(relayClient, pendingInstall.tenantKey, context);
     }
@@ -951,13 +958,30 @@ export class SlackAppService {
       );
     }
 
-    await this.dropPendingInstall(
-      request,
-      soClient,
-      relayClient,
-      connection,
-      'on reconnect cancel'
-    );
+    const { pendingInstall } = connection;
+    let current = connection;
+    if (relayClient && pendingInstall.claimId && !pendingInstall.tenantKey) {
+      try {
+        await relayClient.cancelInstall(pendingInstall.claimId);
+        current = { ...connection, pendingInstall: { ...pendingInstall, claimId: undefined } };
+      } catch (error) {
+        if (!(error instanceof RelayRequestError && error.statusCode === 409)) {
+          throw error;
+        }
+        current = await this.advanceReconnect(
+          request,
+          soClient,
+          relayClient,
+          connection,
+          pendingInstall.claimId
+        );
+        if (!current.pendingInstall?.tenantKey) {
+          return { status: 'cancelled' };
+        }
+      }
+    }
+
+    await this.dropPendingInstall(request, soClient, relayClient, current, 'on reconnect cancel');
     return { status: 'cancelled' };
   }
 

@@ -23,6 +23,7 @@ const request = {} as unknown as KibanaRequest;
 const startInstall = jest.fn();
 const fetchClaim = jest.fn();
 const unbind = jest.fn();
+const cancelInstall = jest.fn().mockResolvedValue(undefined);
 const getAgent = jest.fn();
 const getRegistry = jest.fn();
 
@@ -117,7 +118,9 @@ function createHarness({
     kibanaVersion: '9.2.0',
     isServerless,
     actions: { registerDynamicConnector, unregisterDynamicConnector, inMemoryConnectors },
-    relayClient: hasRelayClient ? { startInstall, fetchClaim, unbind, uiamEnabled } : undefined,
+    relayClient: hasRelayClient
+      ? { startInstall, fetchClaim, cancelInstall, unbind, uiamEnabled }
+      : undefined,
     core: {
       savedObjects: { getScopedClient: jest.fn().mockReturnValue(soClient) },
       featureFlags: { getBooleanValue$ },
@@ -1596,6 +1599,68 @@ describe('SlackAppService', () => {
           new SlackAppService(server).cancelReconnect(request, 'tenant-C')
         ).rejects.toMatchObject({ statusCode: 409 });
         expect(soClient.create).not.toHaveBeenCalled();
+      });
+
+      describe('while the install is still waiting for authorization', () => {
+        const waiting = { ...liveConnection, pendingInstall };
+
+        it('cancels the claim so a late OAuth completion is refused, then discards the new credential', async () => {
+          const { server, soClient, invalidateAsInternalUser } = createHarness();
+          soClient.get.mockResolvedValue({ attributes: waiting });
+
+          await new SlackAppService(server).cancelReconnect(request);
+
+          expect(cancelInstall).toHaveBeenCalledTimes(1);
+          expect(cancelInstall).toHaveBeenCalledWith('claim-2');
+          expect(invalidateAsInternalUser).toHaveBeenCalledTimes(1);
+          expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['new-key'] });
+          expect(soClient.create.mock.calls[0][1]).not.toHaveProperty('pendingInstall');
+        });
+
+        it('keeps the new credential when the claim already completed on the same workspace', async () => {
+          const { server, soClient, invalidateAsInternalUser } = createHarness();
+          soClient.get.mockResolvedValue({ attributes: waiting });
+          cancelInstall.mockRejectedValueOnce(
+            new RelayRequestError('/v1/slack/install/cancel', 409, 'not cancellable')
+          );
+          fetchClaim.mockResolvedValue({ status: 'complete', tenant_key: 'tenant-A' });
+
+          await new SlackAppService(server).cancelReconnect(request);
+
+          expect(soClient.create.mock.calls[0][1]).toMatchObject({ apiKeyId: 'new-key' });
+          expect(invalidateAsInternalUser).toHaveBeenCalledTimes(1);
+          expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['old-key'] });
+        });
+
+        it('discards the other workspace when the claim already completed on it', async () => {
+          const { server, soClient, invalidateAsInternalUser } = createHarness();
+          soClient.get.mockResolvedValue({ attributes: waiting });
+          cancelInstall.mockRejectedValueOnce(
+            new RelayRequestError('/v1/slack/install/cancel', 409, 'not cancellable')
+          );
+          fetchClaim.mockResolvedValue({ status: 'complete', tenant_key: 'tenant-B' });
+          unbind.mockResolvedValue(undefined);
+
+          await new SlackAppService(server).cancelReconnect(request);
+
+          expect(unbind).toHaveBeenCalledWith('tenant-B');
+          expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['new-key'] });
+          expect(invalidateAsInternalUser).not.toHaveBeenCalledWith({ ids: ['old-key'] });
+        });
+
+        it('leaves the pending install in place when the Relay cannot be reached', async () => {
+          const { server, soClient, invalidateAsInternalUser } = createHarness();
+          soClient.get.mockResolvedValue({ attributes: waiting });
+          cancelInstall.mockRejectedValueOnce(
+            new RelayRequestError('/v1/slack/install/cancel', 502)
+          );
+
+          await expect(new SlackAppService(server).cancelReconnect(request)).rejects.toBeInstanceOf(
+            RelayRequestError
+          );
+          expect(invalidateAsInternalUser).not.toHaveBeenCalled();
+          expect(soClient.create).not.toHaveBeenCalled();
+        });
       });
     });
   });

@@ -141,7 +141,12 @@ const cancelReconnectSlackAppRoute = createServerRoute({
     })
   ),
   handler: async ({ params, request, server }): Promise<SlackAppCancelReconnectResponse> => {
-    return new SlackAppService(server).cancelReconnect(request, params?.body?.tenantKey);
+    try {
+      return await new SlackAppService(server).cancelReconnect(request, params?.body?.tenantKey);
+    } catch (error) {
+      if (error instanceof RelayRequestError) throwRelayError(error);
+      throw error;
+    }
   },
 });
 

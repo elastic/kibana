@@ -179,6 +179,8 @@ export interface RelayClientContract {
   readonly uiamEnabled: boolean;
   startInstall(body: RelayInstallRequest): Promise<RelayInstallResponse>;
   fetchClaim(claimId: string): Promise<RelayClaimResponse>;
+  /** Cancel a pending install claim so a later OAuth completion is refused. 409 if it already completed, expired, or is unknown. */
+  cancelInstall(claimId: string): Promise<void>;
   /** Unbind a single workspace binding identified by its tenant key. */
   unbind(tenantKey: string): Promise<void>;
   /**
