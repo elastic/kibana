@@ -76,10 +76,13 @@ const ASSET_LINK_DEFINITION = new RegExp(
   String.raw`^[ \t]*\[[^\]]+\]:[ \t]*${CONTENTSTACK_ASSET_HOST}.*$`,
   'gm'
 );
-const HTML_EMBED = /<(iframe|video)\b[\s\S]*?<\/\1>|<img\b[^>]*>/gi;
+const HTML_EMBED = /<(iframe|video)\b(?:(?!\n[ \t]*\n)[\s\S])*?<\/\1>|<img\b[^>]*>/gi;
 const HTML_LINE_BREAK = /<br\s*\/?>/gi;
 const HTML_FORMATTING_TAG = /<\/?(?:b|center|code|div|em|i|span|strong|sub|sup|u)\b[^>]*>/gi;
-const CODE_FENCE = /(^[ \t]*```[^`\n]*\n[\s\S]*?^[ \t]*```[ \t]*$)/m;
+const FENCED_CODE = String.raw`^[ \t]*\`\`\`[^\`\n]*\n[\s\S]*?^[ \t]*\`\`\`[ \t]*$|^[ \t]*~~~[^\n]*\n[\s\S]*?^[ \t]*~~~[ \t]*$`;
+const INLINE_CODE = String.raw`(?<!\`)(\`+)(?!\`)(?:(?!\n[ \t]*\n)[\s\S])*?(?<!\`)\1(?!\`)`;
+const FENCED_CODE_BLOCK = new RegExp(FENCED_CODE, 'gm');
+const FENCED_OR_INLINE_CODE = new RegExp(`${FENCED_CODE}|${INLINE_CODE}`, 'gm');
 const NON_BREAKING_SPACE = /\u00a0|&nbsp;/g;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}/;
 const JSON_RTE_INLINE_TYPES = new Set(['a', 'span', 'inlineCode']);
@@ -106,26 +109,43 @@ const htmlToText = (html: string): string => {
   return collapseBlankLines($.root().text());
 };
 
+/** Applies `transform` to the text between matches of `code`, leaving the matches untouched. */
+const transformOutsideCode = (
+  markdown: string,
+  code: RegExp,
+  transform: (prose: string) => string
+): string => {
+  let result = '';
+  let proseStart = 0;
+  for (const { 0: match, index } of markdown.matchAll(code)) {
+    result += transform(markdown.slice(proseStart, index)) + match;
+    proseStart = index + match.length;
+  }
+  return result + transform(markdown.slice(proseStart));
+};
+
+const removeMediaMarkup = (prose: string): string =>
+  prose
+    .replace(MARKDOWN_IMAGE, (_match, alt: string) => alt.trim())
+    .replace(ASSET_LINK, (_match, text: string) => text.trim())
+    .replace(ASSET_LINK_DEFINITION, '');
+
+const removeHtmlMarkup = (prose: string): string =>
+  prose.replace(HTML_EMBED, '').replace(HTML_LINE_BREAK, ' ').replace(HTML_FORMATTING_TAG, '');
+
 /**
  * Removes image, asset, and embed markup from markdown prose (keeping image alt and link text)
- * while leaving fenced code untouched. Asset URLs only add noise to the embedded text.
+ * while leaving code untouched. Asset URLs only add noise to the embedded text. Image alt text
+ * can itself contain inline code, so images are only kept out of fenced code, while HTML is
+ * also kept out of inline code, where articles quote HTML payloads.
  */
 export const cleanMarkdown = (markdown: string): string =>
   collapseBlankLines(
-    markdown
-      .split(CODE_FENCE)
-      .map((part, index) =>
-        index % 2 === 1
-          ? part
-          : part
-              .replace(MARKDOWN_IMAGE, (_match, alt: string) => alt.trim())
-              .replace(ASSET_LINK, (_match, text: string) => text.trim())
-              .replace(ASSET_LINK_DEFINITION, '')
-              .replace(HTML_EMBED, '')
-              .replace(HTML_LINE_BREAK, ' ')
-              .replace(HTML_FORMATTING_TAG, '')
-      )
-      .join('')
+    transformOutsideCode(
+      transformOutsideCode(markdown, FENCED_CODE_BLOCK, removeMediaMarkup),
+      FENCED_OR_INLINE_CODE,
+      removeHtmlMarkup
+    )
   );
 
 const renderInline = (node: JsonRteNode): string =>
@@ -222,13 +242,18 @@ function renderNode(node: JsonRteNode): string {
  */
 export const jsonRteToMarkdown = (doc: JsonRteNode): string => collapseBlankLines(renderNode(doc));
 
+/**
+ * Prefers the Rich Text body: Markdown bodies come from the migration, Rich Text is the current
+ * authoring format, and converting an entry may leave the old Markdown in place.
+ */
 const getBodyText = ({ main_content: mainContent }: ContentstackEntry): string | undefined => {
-  const markdown = getString(mainContent?.markdown_l10n);
-  if (markdown) {
-    return getString(cleanMarkdown(markdown));
-  }
   const richText = mainContent?.body?.content_l10n;
-  return richText ? getString(jsonRteToMarkdown(richText)) : undefined;
+  const richTextBody = richText ? getString(jsonRteToMarkdown(richText)) : undefined;
+  if (richTextBody) {
+    return richTextBody;
+  }
+  const markdown = getString(mainContent?.markdown_l10n);
+  return markdown ? getString(cleanMarkdown(markdown)) : undefined;
 };
 
 const getSlug = ({ url }: ContentstackEntry): string | undefined => {

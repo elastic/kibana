@@ -90,6 +90,7 @@ describe('fetchContent', () => {
     expect(url.searchParams.get('environment')).toBe('production');
     expect(url.searchParams.get('locale')).toBe('en-us');
     expect(url.searchParams.get('include_count')).toBe('true');
+    expect(url.searchParams.get('asc')).toBe('created_at');
     expect(url.searchParams.getAll('include[]')).toEqual(['author', 'categories']);
     expect(url.searchParams.has('query')).toBe(false);
     expect(init.headers).toEqual({ api_key: 'blt-stack-key', access_token: 'cs-delivery-token' });
@@ -173,6 +174,18 @@ describe('fetchContent', () => {
 
     await expect(fetchContent({ config: createConfig(), log })).rejects.toThrow(
       'Contentstack request for content type [threat_command] failed with HTTP 412: The Delivery Token is invalid.'
+    );
+  });
+
+  it('fails instead of building from a page without an entry count', async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        entries: Array.from({ length: CONTENTSTACK_PAGE_SIZE }, (_, i) => createEntry(i)),
+      })
+    );
+
+    await expect(fetchContent({ config: createConfig(), log })).rejects.toThrow(
+      'Contentstack response for content type [threat_command] has no entry count'
     );
   });
 

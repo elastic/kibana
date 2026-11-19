@@ -38,6 +38,7 @@ fetch_content_type() {
       --data-urlencode "limit=${CONTENTSTACK_PAGE_SIZE}" \
       --data-urlencode "skip=${skip}" \
       --data-urlencode "include_count=true" \
+      --data-urlencode "asc=created_at" \
       --data-urlencode "query=${query}" \
       --data-urlencode "include[]=author" \
       --data-urlencode "include[]=categories")" || return 1

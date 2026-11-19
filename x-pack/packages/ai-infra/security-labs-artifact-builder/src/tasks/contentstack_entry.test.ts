@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ContentstackEntry } from './contentstack_entry';
+import type { ContentstackEntry, JsonRteNode } from './contentstack_entry';
 import {
   cleanMarkdown,
   contentstackEntryToDocument,
@@ -47,8 +47,26 @@ describe('cleanMarkdown', () => {
   });
 
   it('leaves fenced code untouched', () => {
-    const markdown = '```html\n<div><img src="x"></div>\n```\n\nText with ```inline``` code.';
+    const markdown =
+      '```html\n<div><img src="x"></div>\n```\n\n~~~html\n<div><img src="x"></div>\n~~~\n\nText with ```inline``` code.';
     expect(cleanMarkdown(markdown)).toBe(markdown);
+  });
+
+  it('leaves HTML in inline code untouched', () => {
+    const markdown =
+      'The payload `<b onmouseover=alert(1)>x</b>` uses ``<img src=`x`>`` and a `<br>` tag.';
+    expect(cleanMarkdown(markdown)).toBe(markdown);
+  });
+
+  it('does not remove prose between quoted embed tags', () => {
+    expect(
+      cleanMarkdown(
+        'The `<iframe>` tag loads the page.\n\nAttackers then close it with `</iframe>`.'
+      )
+    ).toBe('The `<iframe>` tag loads the page.\n\nAttackers then close it with `</iframe>`.');
+    expect(cleanMarkdown('An unquoted <iframe> mention.\n\nLater, </iframe> again.')).toBe(
+      'An unquoted <iframe> mention.\n\nLater, </iframe> again.'
+    );
   });
 
   it('normalizes non-breaking spaces', () => {
@@ -175,7 +193,7 @@ describe('contentstackEntryToDocument', () => {
     });
   });
 
-  it('falls back to the rich text body and the internal title', () => {
+  it('uses the rich text body and the internal title', () => {
     expect(
       contentstackEntryToDocument({
         uid: 'blt2',
@@ -203,6 +221,32 @@ describe('contentstackEntryToDocument', () => {
         content: 'Rich text',
       })
     );
+  });
+
+  it('prefers the rich text body over leftover markdown', () => {
+    const richText: JsonRteNode = {
+      type: 'doc',
+      children: [{ type: 'p', children: [{ text: 'Converted body' }] }],
+    };
+    expect(
+      contentstackEntryToDocument({
+        ...entry,
+        main_content: { markdown_l10n: 'Stale body', body: { content_l10n: richText } },
+      })?.content
+    ).toBe('Converted body');
+  });
+
+  it('uses the markdown body when the rich text body has no text', () => {
+    const emptyRichText: JsonRteNode = {
+      type: 'doc',
+      children: [{ type: 'p', children: [{ text: '' }] }],
+    };
+    expect(
+      contentstackEntryToDocument({
+        ...entry,
+        main_content: { markdown_l10n: 'Article body', body: { content_l10n: emptyRichText } },
+      })?.content
+    ).toBe('Article body');
   });
 
   it.each([

@@ -66,6 +66,8 @@ const fetchEntriesPage = async ({
   url.searchParams.set('limit', String(CONTENTSTACK_PAGE_SIZE));
   url.searchParams.set('skip', String(skip));
   url.searchParams.set('include_count', 'true');
+  // The default order is updated_at descending, so a republish mid-fetch would shift the pages.
+  url.searchParams.set('asc', 'created_at');
   const query = CONTENTSTACK_CONTENT_TYPE_QUERIES[contentType];
   if (query && Object.keys(query).length > 0) {
     url.searchParams.set('query', JSON.stringify(query));
@@ -93,7 +95,14 @@ const fetchEntriesPage = async ({
     );
   }
 
-  return { entries: body.entries ?? [], count: body.count ?? 0 };
+  if (typeof body.count !== 'number') {
+    throw new Error(
+      `Contentstack response for content type [${contentType}] has no entry count; ` +
+        `refusing to build from a possibly partial set of entries.`
+    );
+  }
+
+  return { entries: body.entries ?? [], count: body.count };
 };
 
 const fetchContentTypeEntries = async ({

@@ -32,9 +32,9 @@ SECURITY_LABS_CONTENTSTACK_DELIVERY_TOKEN=cs_xxx \
   node scripts/build_security_labs_artifact.js
 ```
 
-The fetch pages through the [Content Delivery API](https://www.contentstack.com/docs/developers/apis/content-delivery-api) for each content type (`blog_v3`, `threat_command`, and `reports` by default), reading the published `--contentstackEnvironment` entries in `--contentstackLocale`. `blog_v3` is shared with Search Labs and Observability Labs, so it is scoped to entries whose `blog_sources` reference is `Security Labs`.
+The fetch pages through the [Content Delivery API](https://www.contentstack.com/docs/developers/apis/content-delivery-api) for each content type (`blog_v3`, `threat_command`, and `reports` by default), reading the published `--contentstackEnvironment` entries in `--contentstackLocale`, oldest first by `created_at` so republishing an entry mid-fetch can't shift the pages. `blog_v3` is shared with Search Labs and Observability Labs, so it is scoped to entries whose `blog_sources` reference is `Security Labs`.
 
-Older entries keep their body as Markdown (`main_content.markdown_l10n`) and newer ones as JSON Rich Text (`main_content.body.content_l10n`). Markdown is cleaned (images are replaced by their alt text, and Contentstack asset links and video embeds are removed, outside fenced code) and JSON Rich Text is rendered to the same Markdown-flavored text, so both embed alike.
+Entries migrated from the old repository keep their body as Markdown (`main_content.markdown_l10n`) and newer ones as JSON Rich Text (`main_content.body.content_l10n`). The Rich Text body wins when it has text, since it's the current authoring format. Markdown is cleaned (images are replaced by their alt text, and Contentstack asset links and video embeds are removed, outside fenced code; HTML is also left alone inside inline code) and JSON Rich Text is rendered to the same Markdown-flavored text, so both embed alike.
 
 To build a Jina v5 variant (requires an EIS-backed `.jina-embeddings-v5-text-small` endpoint on the embedding cluster):
 
