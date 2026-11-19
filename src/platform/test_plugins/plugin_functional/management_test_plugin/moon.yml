@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/management-test-plugin
   channel: ''
   owner: '@elastic/kibana-management'
-  sourceRoot: src/platform/test/plugin_functional/plugins/management_test_plugin
+  sourceRoot: src/platform/test_plugins/plugin_functional/management_test_plugin
 dependsOn:
   - '@kbn/core'
   - '@kbn/management-plugin'

@@ -7,7 +7,7 @@
     "index.ts",
     "server/**/*.ts",
     "server/**/*.tsx",
-    "../../../../../../typings/**/*",
+    "../../../../../typings/**/*",
   ],
   "exclude": [
     "target/**/*",

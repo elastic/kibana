@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/index-patterns-test-plugin
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  sourceRoot: src/platform/test/plugin_functional/plugins/index_patterns
+  sourceRoot: src/platform/test_plugins/plugin_functional/index_patterns
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'

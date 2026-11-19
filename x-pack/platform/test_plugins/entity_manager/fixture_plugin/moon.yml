@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/entity-manager-fixture-plugin
   channel: ''
   owner: '@elastic/core-analysis'
-  sourceRoot: x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin
+  sourceRoot: x-pack/platform/test_plugins/entity_manager/fixture_plugin
 dependsOn:
   - '@kbn/core'
   - '@kbn/encrypted-saved-objects-plugin'
