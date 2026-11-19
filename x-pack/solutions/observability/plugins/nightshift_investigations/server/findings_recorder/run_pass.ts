@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { getEventActorDisplayName, type ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MessageRole, type Message, type ToolCall } from '@kbn/inference-common';
-import type { ActionCatalogEntry } from '@kbn/proposals-common';
+import type { ActionCatalogEntry, ProposalDecision, ProposalStatus } from '@kbn/proposals-common';
 import {
   INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE,
   INVESTIGATION_TEMPLATE_ID,
@@ -33,6 +33,7 @@ import {
 import {
   FINDINGS_JSON_SCHEMA,
   LIVE_FINDINGS_JSON_SCHEMA,
+  MAX_OPEN_PROPOSALS,
   entityIdFor,
   findingsOutputSchema,
   limitFindings,
@@ -47,13 +48,34 @@ import {
   type RecorderWorkspace,
 } from './workspace_tools';
 
+export interface ExistingRecorderProposal {
+  id: string;
+  title: string;
+  comment: string;
+  status: ProposalStatus;
+  decision?: ProposalDecision;
+  impact?: string;
+  confidence?: string;
+  actionWorkflowId?: string;
+  actionInput?: Record<string, unknown>;
+  expiresAt?: string;
+  /** Set once a person approved or declined a gated proposal and its gate is being resumed. */
+  gateReleasedAt?: string;
+}
+
 /**
  * What the final pass needs from the proposals plugin: what is already proposed, the workflows a
- * proposal can carry, and to propose.
+ * proposal can carry, and to propose or revise.
  */
 export interface RecorderProposals {
-  /** The titles of the proposals the investigation already has, so a later round does not repeat them. */
-  listTitles: (args: { request: KibanaRequest; conversationId: string }) => Promise<string[]>;
+  /**
+   * The non-superseded proposals the investigation already has, oldest first: every pending one,
+   * and the most recent closed ones.
+   */
+  list: (args: {
+    request: KibanaRequest;
+    conversationId: string;
+  }) => Promise<ExistingRecorderProposal[]>;
   /** The action workflows the space's users wrote, which a proposal can run once approved. */
   listActions: (args: { request: KibanaRequest }) => Promise<ActionCatalogEntry[]>;
   propose: (args: {
@@ -61,6 +83,15 @@ export interface RecorderProposals {
     conversationId: string;
     proposal: RecordedProposal;
   }) => Promise<void>;
+  /**
+   * Revises exactly `proposalId`, never a later revision of it. Resolves false, writing nothing,
+   * when a person decided or revised it first.
+   */
+  revise: (args: {
+    request: KibanaRequest;
+    proposalId: string;
+    proposal: RecordedProposal;
+  }) => Promise<boolean>;
 }
 
 export interface FindingsPassDeps {
@@ -199,6 +230,301 @@ const severityNotices = ({ events = [] }: ConversationLike): string[] =>
         }to "${data?.severity}". Do not set the severity.`
     );
 
+const OPEN_PROPOSAL_COMMENT_NOTICE_CHARS = 1_000;
+const OPEN_PROPOSAL_INPUT_NOTICE_CHARS = 1_000;
+const CLOSED_PROPOSAL_COMMENT_NOTICE_CHARS = 240;
+
+const clipNoticeText = (text: string, max: number): string =>
+  text.length > max ? `${text.slice(0, max)}…` : text;
+
+const collapseSpace = (text: string): string => text.trim().replace(/\s+/g, ' ');
+const titleKey = (title: string): string => collapseSpace(title).toLowerCase();
+
+/**
+ * Whether the recorder may still change a proposal. A gated proposal reads `pending` while its
+ * approval is being resumed, and after its deadline until the gate settles it: nobody can decide
+ * it then, and a revision would inherit the passed deadline.
+ */
+const isOpenProposal = (proposal: ExistingRecorderProposal, now: number): boolean =>
+  proposal.status === 'pending' &&
+  proposal.decision === undefined &&
+  proposal.gateReleasedAt === undefined &&
+  !(proposal.expiresAt !== undefined && Date.parse(proposal.expiresAt) <= now);
+
+const closedOutcomeLabel = ({ decision, status, gateReleasedAt }: ExistingRecorderProposal) => {
+  if (status === 'failed') return 'failed';
+  if (status === 'executing' || (decision === 'approved' && status === 'pending')) return 'running';
+  if (decision === 'approved') return 'applied';
+  if (decision === 'dismissed') return 'declined';
+  if (status === 'pending') return gateReleasedAt ? 'being decided' : 'expired';
+  return status;
+};
+
+/** A revision changes nothing a person would see. `revise()` merges the input over the stored one. */
+const isSameProposal = (existing: ExistingRecorderProposal, next: RecordedProposal): boolean =>
+  titleKey(existing.title) === titleKey(next.title) &&
+  collapseSpace(existing.comment) === collapseSpace(next.comment) &&
+  (next.impact === undefined || next.impact === existing.impact) &&
+  (next.confidence === undefined || next.confidence === existing.confidence) &&
+  (next.action_input === undefined ||
+    isEqual({ ...existing.actionInput, ...next.action_input }, existing.actionInput ?? {}));
+
+/** Why `next` cannot revise `existing` in place: a revision chain keeps the workflow it started with. */
+const workflowMismatch = (
+  existing: ExistingRecorderProposal,
+  { action_workflow_id: wanted }: RecordedProposal
+): string | undefined => {
+  if (wanted === undefined || wanted === existing.actionWorkflowId) return undefined;
+  return existing.actionWorkflowId
+    ? `it runs action workflow [${existing.actionWorkflowId}], not [${wanted}]`
+    : `a to-do cannot gain action workflow [${wanted}]`;
+};
+
+/**
+ * Indexes open proposals as `P1`, `P2`, ... and builds a final-pass notice showing both open and
+ * already-closed proposals, so the recorder updates open ones in place and never repeats closed ones.
+ */
+const buildProposalsContext = (
+  existing: readonly ExistingRecorderProposal[],
+  now: number
+): { byHandle: Map<string, ExistingRecorderProposal>; notice?: string } => {
+  const byHandle = new Map<string, ExistingRecorderProposal>();
+  if (existing.length === 0) return { byHandle };
+
+  const open = existing.filter((proposal) => isOpenProposal(proposal, now));
+  const closed = existing.filter((proposal) => !isOpenProposal(proposal, now));
+  const sections: string[] = ['Existing proposed actions on this investigation:'];
+
+  if (open.length > 0) {
+    const lines = open.map((proposal, index) => {
+      const handle = `P${index + 1}`;
+      byHandle.set(handle.toLowerCase(), proposal);
+      const ratings = [
+        proposal.impact ? `impact: ${proposal.impact}` : undefined,
+        proposal.confidence ? `confidence: ${proposal.confidence}` : undefined,
+        proposal.actionWorkflowId ? `action_workflow_id: ${proposal.actionWorkflowId}` : undefined,
+      ]
+        .filter(Boolean)
+        .join(', ');
+      const body = clipNoticeText(proposal.comment.trim(), OPEN_PROPOSAL_COMMENT_NOTICE_CHARS)
+        .split('\n')
+        .map((line) => `  ${line}`)
+        .join('\n');
+      const input = proposal.actionWorkflowId
+        ? `\n  action_input: ${clipNoticeText(
+            JSON.stringify(proposal.actionInput ?? {}),
+            OPEN_PROPOSAL_INPUT_NOTICE_CHARS
+          )}`
+        : '';
+      return `- ${handle}: ${proposal.title.trim()}${
+        ratings ? ` [${ratings}]` : ''
+      }\n${body}${input}`;
+    });
+    const full = open.length >= MAX_OPEN_PROPOSALS;
+    sections.push(
+      `Open (${open.length} of ${MAX_OPEN_PROPOSALS} open slots used${
+        full
+          ? ', so no new action can be added: supersede one only to refine that same action, and leave a different action out'
+          : ''
+      } — leave unchanged ones out; set supersedes to an ID such as P1 to refine or replace in place):\n${lines.join(
+        '\n'
+      )}`
+    );
+  }
+
+  if (closed.length > 0) {
+    const lines = closed.map((proposal) => {
+      const summary = clipNoticeText(
+        collapseSpace(proposal.comment),
+        CLOSED_PROPOSAL_COMMENT_NOTICE_CHARS
+      );
+      return `- [${closedOutcomeLabel(proposal)}] ${proposal.title.trim()}${
+        summary ? ` — ${summary}` : ''
+      }`;
+    });
+    sections.push(`Already closed (do not re-propose or supersede):\n${lines.join('\n')}`);
+  }
+
+  return { byHandle, notice: sections.join('\n\n') };
+};
+
+/**
+ * Writes the final pass's proposals: a revision in place for each that supersedes an open one or
+ * repeats its title, and a new proposal for the rest while fewer than {@link MAX_OPEN_PROPOSALS}
+ * are open. What it does not write is logged, so a dropped action is never silent.
+ */
+const writeRecorderProposals = async ({
+  proposals,
+  request,
+  conversationId,
+  openByHandle,
+  wanted,
+  listedActions,
+  logger,
+}: {
+  proposals: RecorderProposals;
+  request: KibanaRequest;
+  conversationId: string;
+  /** The open proposals as the model was shown them, by lower-cased handle. */
+  openByHandle: ReadonlyMap<string, ExistingRecorderProposal>;
+  wanted: readonly RecordedProposal[];
+  /** Only workflows the catalog listed may run. */
+  listedActions: ReadonlySet<string>;
+  logger: Logger;
+}): Promise<void> => {
+  // Re-read right before writing: a human or another round may have acted while the model ran.
+  const latest = await proposals.list({ request, conversationId });
+  const now = Date.now();
+  const latestById = new Map(latest.map((proposal) => [proposal.id, proposal]));
+  const openLatest = latest.filter((proposal) => isOpenProposal(proposal, now));
+  const openByTitle = new Map<string, ExistingRecorderProposal>();
+  for (const proposal of openLatest) {
+    const key = titleKey(proposal.title);
+    if (!openByTitle.has(key)) openByTitle.set(key, proposal);
+  }
+  // A title with an open proposal belongs to it, whatever an older closed one was called: a to-do
+  // marked as not applied comes back open under the title it was closed with.
+  const closedTitles = new Set(
+    latest
+      .filter((proposal) => !isOpenProposal(proposal, now))
+      .map(({ title }) => titleKey(title))
+      .filter((key) => !openByTitle.has(key))
+  );
+
+  // The model refers to the proposals it was shown: by handle, or failing that by id or title.
+  const shown = [...openByHandle.values()];
+  const resolveShown = (rawRef: string): ExistingRecorderProposal | undefined => {
+    const ref = rawRef.trim();
+    return (
+      openByHandle.get(ref.toLowerCase()) ??
+      shown.find(({ id }) => id === ref) ??
+      shown.find(({ title }) => titleKey(title) === titleKey(ref))
+    );
+  };
+
+  const stillOpen = (id: string): ExistingRecorderProposal | undefined => {
+    const current = latestById.get(id);
+    return current && isOpenProposal(current, now) ? current : undefined;
+  };
+
+  let openCount = openLatest.length;
+  const touchedIds = new Set<string>();
+  const emittedTitles = new Set<string>();
+  const skipped: string[] = [];
+  const changedByPerson: string[] = [];
+  const failures: string[] = [];
+
+  // One proposal that cannot be written does not stop the ones after it.
+  const write = async <T>(title: string, fn: () => Promise<T>): Promise<T | undefined> => {
+    try {
+      return await fn();
+    } catch (error) {
+      failures.push(`"${title}": ${error instanceof Error ? error.message : String(error)}`);
+      return undefined;
+    }
+  };
+  const revise = async (target: ExistingRecorderProposal, proposal: RecordedProposal) => {
+    touchedIds.add(target.id);
+    emittedTitles.add(titleKey(proposal.title));
+    if (isSameProposal(target, proposal)) return;
+    const revised = await write(proposal.title, () =>
+      proposals.revise({ request, proposalId: target.id, proposal })
+    );
+    if (revised === false) changedByPerson.push(`"${target.title}"`);
+  };
+
+  for (const proposal of wanted) {
+    const { supersedes, title, action_workflow_id: workflowId } = proposal;
+    const key = titleKey(title);
+    if (workflowId && !listedActions.has(workflowId)) {
+      skipped.push(`"${title}": action workflow [${workflowId}] is not offered`);
+      continue;
+    }
+
+    if (supersedes) {
+      const target = resolveShown(supersedes);
+      if (!target) {
+        skipped.push(`"${title}": supersedes [${supersedes}], which is not an open proposal`);
+        continue;
+      }
+      const current = stillOpen(target.id);
+      // Gone from the list or no longer open: a person revised or decided it while the model ran,
+      // and the model's text was written from the version they replaced.
+      if (!current) {
+        changedByPerson.push(`"${target.title}"`);
+        continue;
+      }
+      if (touchedIds.has(current.id)) {
+        skipped.push(`"${title}": [${supersedes}] was already updated in this pass`);
+        continue;
+      }
+      if (
+        key !== titleKey(current.title) &&
+        (emittedTitles.has(key) || closedTitles.has(key) || openByTitle.has(key))
+      ) {
+        skipped.push(`"${title}": another proposal already has this title`);
+        continue;
+      }
+      const mismatch = workflowMismatch(current, proposal);
+      if (mismatch) {
+        skipped.push(`"${title}": ${mismatch}`);
+        continue;
+      }
+      await revise(current, proposal);
+      continue;
+    }
+
+    if (emittedTitles.has(key)) continue;
+    const shownSame = shown.find((shownProposal) => titleKey(shownProposal.title) === key);
+    if (shownSame && !stillOpen(shownSame.id)) {
+      emittedTitles.add(key);
+      changedByPerson.push(`"${shownSame.title}"`);
+      continue;
+    }
+    if (closedTitles.has(key)) continue;
+
+    const sameOpen = openByTitle.get(key);
+    if (sameOpen) {
+      if (touchedIds.has(sameOpen.id)) continue;
+      const mismatch = workflowMismatch(sameOpen, proposal);
+      if (mismatch) {
+        skipped.push(`"${title}": ${mismatch}`);
+        continue;
+      }
+      await revise(sameOpen, proposal);
+      continue;
+    }
+
+    if (openCount >= MAX_OPEN_PROPOSALS) {
+      skipped.push(
+        `"${title}": ${openCount} proposals are already open, the most an investigation holds is ${MAX_OPEN_PROPOSALS}`
+      );
+      continue;
+    }
+    emittedTitles.add(key);
+    openCount++;
+    await write(title, () => proposals.propose({ request, conversationId, proposal }));
+  }
+
+  if (changedByPerson.length > 0) {
+    logger.info(
+      `Findings recorder left ${changedByPerson.join(
+        ', '
+      )} for ${conversationId} unchanged: a person revised or decided it during the pass`
+    );
+  }
+  if (skipped.length > 0) {
+    logger.warn(
+      `Findings recorder did not write ${
+        skipped.length
+      } proposal(s) for ${conversationId}: ${skipped.join('; ')}`
+    );
+  }
+  if (failures.length > 0) {
+    throw new Error(failures.join('; '));
+  }
+};
+
 /**
  * The record already stored for the investigation, as an earlier answer of the recorder's own.
  * A follow-up round starts with none of the recorder's memory, and without this it would replace
@@ -209,8 +535,7 @@ const storedRecord = async (
   agenticInvestigations: AgenticInvestigationsPluginStart,
   request: KibanaRequest,
   conversationId: string,
-  conversation: ConversationLike,
-  proposedTitles: readonly string[]
+  conversation: ConversationLike
 ): Promise<Record<string, unknown> | undefined> => {
   try {
     const { hypotheses, impactSummary, impactEvidence, impactEntities } =
@@ -223,12 +548,6 @@ const storedRecord = async (
       ...(typeof severity === 'string' && severity ? { severity } : {}),
       ...(impactSummary ? { impact_summary: impactSummary } : {}),
       ...(impactEvidence ? { impact_evidence: impactEvidence } : {}),
-      // What is already proposed, so a follow-up does not propose it again.
-      ...(proposedTitles.length
-        ? {
-            proposals: proposedTitles.map((title) => ({ title, comment: 'Already proposed.' })),
-          }
-        : {}),
       ...(impactEntities.length
         ? {
             impact_entities: impactEntities.map(({ id, name, type, evidence }) => ({
@@ -302,6 +621,7 @@ const runTrackedFindingsPass = async (
 
   let output: FindingsRecord | undefined;
   let actions: ActionCatalogEntry[] = [];
+  let openByHandle = new Map<string, ExistingRecorderProposal>();
   try {
     const model = await createOptimizeModel({
       request,
@@ -317,20 +637,30 @@ const runTrackedFindingsPass = async (
     if (!model) return false;
 
     if (memory.turns().length === 0) {
-      const proposedTitles = await deps
-        .getProposals?.()
-        ?.listTitles({ request, conversationId })
-        .catch(() => []);
       const stored = await storedRecord(
         agenticInvestigations,
         request,
         conversationId,
-        conversation,
-        proposedTitles ?? []
+        conversation
       );
       if (stored) memory.remember({ atGroups: 0, final: false, answer: stored });
     }
-    const notices = severityNotices(conversation);
+    // Only the final pass proposes, so only it is shown what is already proposed.
+    const existingProposals = final
+      ? (await deps
+          .getProposals?.()
+          ?.list({ request, conversationId })
+          .catch(() => [])) ?? []
+      : [];
+    const { byHandle, notice: proposalsNotice } = buildProposalsContext(
+      existingProposals,
+      Date.now()
+    );
+    openByHandle = byHandle;
+    const notices = [
+      ...severityNotices(conversation),
+      ...(proposalsNotice ? [proposalsNotice] : []),
+    ];
     // Only the final pass proposes, so only it is told which workflows a proposal can run.
     actions = final
       ? (await deps
@@ -658,37 +988,20 @@ const runTrackedFindingsPass = async (
     if (final && proposals && record.proposals?.length) {
       // Only workflows the catalog listed may run: the model may name one that does not exist,
       // or one that is not an always-gate action of this space. Such a proposal is not written.
-      const listed = new Set(actions.map(({ workflowId }) => workflowId));
+      const listedActions = new Set(actions.map(({ workflowId }) => workflowId));
       const wanted = record.proposals;
       writes.push([
         'proposals',
-        async () => {
-          // Read again here: another round may have proposed since the pass started. A title
-          // already proposed is not proposed again, whichever way the model worded the rest.
-          const key = (title: string) => title.trim().toLowerCase();
-          const proposed = new Set(
-            (await proposals.listTitles({ request, conversationId })).map(key)
-          );
-          const failures: string[] = [];
-          for (const proposal of wanted) {
-            if (proposed.has(key(proposal.title))) continue;
-            const { action_workflow_id: workflowId } = proposal;
-            if (workflowId && !listed.has(workflowId)) {
-              failures.push(`"${proposal.title}": action workflow [${workflowId}] is not offered`);
-              continue;
-            }
-            proposed.add(key(proposal.title));
-            // One proposal that cannot be written does not stop the ones after it.
-            await proposals.propose({ request, conversationId, proposal }).catch((error) => {
-              failures.push(
-                `"${proposal.title}": ${error instanceof Error ? error.message : String(error)}`
-              );
-            });
-          }
-          if (failures.length > 0) {
-            throw new Error(failures.join('; '));
-          }
-        },
+        () =>
+          writeRecorderProposals({
+            proposals,
+            request,
+            conversationId,
+            openByHandle,
+            wanted,
+            listedActions,
+            logger,
+          }),
       ]);
     }
   }
