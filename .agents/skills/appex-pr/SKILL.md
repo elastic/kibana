@@ -78,7 +78,7 @@ Everything else is source material to rewrite. List what you dropped and why in 
 - Restate the issue's problem in user terms in one to three sentences, using names from the UI (panel, control, legend, setting), not code names.
 - Describe the solution at a high level. At most one sentence of root cause, and only when it helps the reviewer.
 - For any UI change or fix, add Before and After screenshots or videos, in a two-column table when there's one of each. With no media from the user or the old body, insert HTML-comment placeholders that describe the shot to take (view, data, zoom or state), and ask for the media. Never invent evidence. With no UI change, a Before/After table of a small input or output shape can stand in when it makes the change clearer.
-- Add a visible `## Release note` section only when the title isn't enough.
+- Add a visible `## Release note` section for new user-facing features and enhancements, describing in one paragraph what users can now do; the release-notes tooling keeps only the first paragraph. For other changes, add one only when the title isn't enough, since release notes use the title by default.
 - Keep the visible body (everything outside collapsed blocks) to roughly 150 words of prose.
 - Write plain sentences whose subject is the thing the user sees ("The legend keeps...", "When a map uses..."), prose paragraphs, and only the headings from the references/conventions.md body order. Opening with "This PR introduces...", bold-labelled bullet lists, and file trees or `diff` blocks in the summary are the tells to rewrite.
 - CI already reports type checks, Jest and lint, so leave their results out. Checks CI doesn't run (manual evals, manual browser testing) get one line in Review notes.

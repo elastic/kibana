@@ -18,7 +18,7 @@
 3. Problem, then solution, then Before and After
 4. `## How to test` (reproduction link or steps, then verification steps)
 5. `## Impact` and `## Action`: add them for breaking changes and deprecations (see "Breaking changes and deprecations"), and keep any the existing body already has
-6. Optional `## Release note`
+6. Optional `## Release note`, preferred in particular for new user-facing features and enhancements
 7. `## Review notes`, content collapsed
 8. `## Checklist`, content collapsed
 9. `## Identify risks`, content collapsed
