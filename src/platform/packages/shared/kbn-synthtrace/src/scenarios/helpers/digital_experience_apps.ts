@@ -18,6 +18,7 @@ import {
   type EdotBrowserExceptionTemplate,
   type EdotBrowserReplayVisit,
   type EdotBrowserSite,
+  type EdotBrowserUser,
   type Fields,
   type HealthProfileName,
   type ReplaySize,
@@ -45,6 +46,10 @@ export interface DigitalExperienceApp {
   serviceVersion: string;
   health: HealthProfileName;
   sessionsPerMinute: number;
+  /** Share of sessions (0 to 1) with a signed-in user; the others are anonymous. */
+  signedInRate: number;
+  /** The organizations of a B2B app's users, written as `elastic.user.account`. */
+  accounts?: readonly string[];
   /** Omits `deployment.environment.name`, for lists that group apps by environment. */
   withoutEnvironment?: boolean;
   /**
@@ -117,6 +122,16 @@ export interface DigitalExperienceScenarioOpts {
    * {@link getDefaultSeed}.
    */
   seed: string;
+  /**
+   * Share of sessions (0 to 1) with a signed-in user in every app, instead of each app's own share.
+   * Users need sessions: with `withSessionId` off, every session is anonymous.
+   */
+  signedInRate?: number;
+  /**
+   * Report rage, dead and error clicks, like EDOT Browser's frustration detection, which is on by
+   * default. Like users, they need sessions: with `withSessionId` off, there are none.
+   */
+  frustration: boolean;
 }
 
 const DEFAULT_SCENARIO_OPTS: Omit<DigitalExperienceScenarioOpts, 'seed'> = {
@@ -130,6 +145,8 @@ const DEFAULT_SCENARIO_OPTS: Omit<DigitalExperienceScenarioOpts, 'seed'> = {
   sessionLength: 'typical',
   ongoingSessions: false,
   scale: 1,
+  signedInRate: undefined,
+  frustration: true,
 };
 
 export const PRODUCTION_ENVIRONMENT = 'production';
@@ -141,6 +158,9 @@ const CHECKOUT_ORIGIN = 'https://checkout.example-store.com';
 const MEDIA_ORIGIN = 'https://www.example-news.com';
 const SUPPORT_ORIGIN = 'https://support.example-saas.com';
 const DOCS_ORIGIN = 'https://docs.example-saas.com';
+
+// The organizations that use the SaaS apps
+const SAAS_ACCOUNTS = ['acme', 'globex', 'initech', 'umbrella', 'hooli', 'stark-industries'];
 
 // Third parties that several apps embed
 const ANALYTICS_SCRIPT = 'https://www.example-analytics.com/collect.js';
@@ -170,6 +190,8 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
     serviceVersion: '4.12.0',
     health: 'healthy',
     sessionsPerMinute: 6,
+    // Most shoppers browse without signing in
+    signedInRate: 0.35,
     environments: [
       { name: PRODUCTION_ENVIRONMENT, weight: 70, exceptions: PRODUCTION_EXCEPTIONS },
       {
@@ -357,6 +379,8 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
     serviceVersion: '2.3.1',
     health: 'erroring',
     sessionsPerMinute: 4,
+    // Guest checkout aside, buyers sign in
+    signedInRate: 0.8,
     environments: [
       { name: PRODUCTION_ENVIRONMENT, weight: 70, exceptions: PRODUCTION_EXCEPTIONS },
       {
@@ -550,6 +574,8 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
     serviceVersion: '7.0.4',
     health: 'slow',
     sessionsPerMinute: 4,
+    // Subscribers only
+    signedInRate: 0.2,
     environments: [
       { name: PRODUCTION_ENVIRONMENT, weight: 85, exceptions: PRODUCTION_EXCEPTIONS },
       {
@@ -745,6 +771,9 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
     serviceVersion: '0.9.3',
     health: 'critical',
     sessionsPerMinute: 2,
+    // A B2B help desk, used by the customers' agents
+    signedInRate: 0.75,
+    accounts: SAAS_ACCOUNTS,
     environments: [
       { name: PRODUCTION_ENVIRONMENT, weight: 60, exceptions: PRODUCTION_EXCEPTIONS },
       {
@@ -876,6 +905,9 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
     serviceVersion: '1.0.0',
     health: 'healthy',
     sessionsPerMinute: 1,
+    // Public docs, read signed in by a few of the SaaS customers
+    signedInRate: 0.1,
+    accounts: SAAS_ACCOUNTS,
     withoutEnvironment: true,
     // Some deployments of the docs report no environment, which is how it shows without any
     environments: [{ name: PRODUCTION_ENVIRONMENT, weight: 70 }, { weight: 30 }],
@@ -937,7 +969,8 @@ type BooleanOptKey =
   | 'includeRawAttribution'
   | 'environments'
   | 'edgeCases'
-  | 'ongoingSessions';
+  | 'ongoingSessions'
+  | 'frustration';
 
 /** Parses a boolean scenario option given as a boolean or a `true`/`false` string. */
 export const parseBooleanOption = (key: string, value: unknown, defaultValue: boolean): boolean => {
@@ -1080,6 +1113,11 @@ export const parseDigitalExperienceScenarioOpts = (
     ongoingSessions: parseBooleanOpt(opts, 'ongoingSessions'),
     scale: parseScale(opts?.scale, DEFAULT_SCENARIO_OPTS.scale),
     seed: parseSeed(opts?.seed, getDefaultSeed(from)),
+    signedInRate:
+      opts?.signedInRate === undefined
+        ? undefined
+        : parseRate('signedInRate', opts.signedInRate, 0),
+    frustration: parseBooleanOpt(opts, 'frustration'),
   };
 };
 
@@ -1243,6 +1281,47 @@ const PACKED_SESSION_RATE = 0.15;
 // Shares of the recorded sessions that get each replay edge case, with `edgeCases`
 const MISSING_CHUNK_SESSION_RATE = 0.15;
 const LATE_REPLAY_SESSION_RATE = 0.15;
+// An app has this many users per session a minute: at about 6 sessions a day each, users come back
+const USERS_PER_SESSION_PER_MINUTE = 240;
+const MIN_USERS = 10;
+// Share of the signed-in sessions that start anonymous and sign in after their first page load
+const SIGN_IN_DURING_SESSION_RATE = 0.25;
+// Shares of the users whose app passes their email and their name to `setUser()`
+const USER_EMAIL_RATE = 0.7;
+const USER_FULL_NAME_RATE = 0.5;
+const FIRST_NAMES = ['ada', 'alan', 'grace', 'linus', 'margaret', 'ken', 'barbara', 'dennis'];
+const LAST_NAMES = ['lovelace', 'turing', 'hopper', 'torvalds', 'hamilton', 'thompson', 'liskov'];
+
+const capitalize = (name: string) => `${name[0].toUpperCase()}${name.slice(1)}`;
+const pickFrom = <T>(random: () => number, values: readonly T[]): T =>
+  values[Math.floor(random() * values.length)];
+
+/**
+ * The user numbered `number` of an app, the same in every session and environment of the app. Only
+ * `id` is required by `setUser()`, so some users have no email or name.
+ */
+const appUser = (
+  {
+    seed,
+    serviceName,
+    accounts,
+  }: { seed: string; serviceName: string; accounts?: readonly string[] },
+  number: number
+): EdotBrowserUser => {
+  const random = createSeededRandom(`${seed}:${serviceName}:user:${number}`);
+  const [first, last] = [pickFrom(random, FIRST_NAMES), pickFrom(random, LAST_NAMES)];
+  const [emailDraw, nameDraw] = [random(), random()];
+  return {
+    id: `usr_${Math.floor(random() * 0x100000000)
+      .toString(16)
+      .padStart(8, '0')}`,
+    ...(emailDraw < USER_EMAIL_RATE ? { email: `${first}.${last}.${number}@example.com` } : {}),
+    ...(nameDraw < USER_FULL_NAME_RATE
+      ? { fullName: `${capitalize(first)} ${capitalize(last)}` }
+      : {}),
+    ...(accounts ? { account: pickFrom(random, accounts) } : {}),
+  };
+};
 
 /**
  * How a session records, decided once per session as EDOT Browser does: a value from 0 to 1 taken
@@ -1297,6 +1376,8 @@ export const generateEdotBrowserSessions = (
     ongoingSessions,
     scale,
     seed,
+    signedInRate,
+    frustration,
   } = opts;
   const { minPageViews, maxPageViews, dwell, maxDuration } = SESSION_LENGTHS[sessionLength];
   // Every option changes the sessions, so ongoing sessions are kept apart for each set of them
@@ -1311,7 +1392,13 @@ export const generateEdotBrowserSessions = (
       environments: appEnvironments,
       site: appSite,
       browserWeights,
+      signedInRate: appSignedInRate,
+      accounts,
     }) => {
+      const userCount = Math.max(
+        MIN_USERS,
+        Math.round(sessionsPerMinute * scale * USERS_PER_SESSION_PER_MINUTE)
+      );
       const deployments: readonly DigitalExperienceEnvironment[] =
         withEnvironments && appEnvironments
           ? appEnvironments
@@ -1374,17 +1461,41 @@ export const generateEdotBrowserSessions = (
           const followsOtherSession = random() < FOLLOW_UP_SESSION_RATE;
           const sameTab = random() < SAME_TAB_RATE;
           const gap = random();
+          // Drawn apart from the session, like the browser above. Users need EDOT Browser's
+          // sessions, and a few users have most of the sessions.
+          const userRandom = createSeededRandom(`${seed}:${sessionKey}:${index}:user`);
+          const [signedInDraw, userDraw, signInDraw] = [userRandom(), userRandom(), userRandom()];
+          const user =
+            withSessionId && signedInDraw < (signedInRate ?? appSignedInRate)
+              ? appUser({ seed, serviceName, accounts }, Math.floor(userCount * userDraw ** 2))
+              : undefined;
+          const expired =
+            visitKind >= RESUMED_SESSION_RATE &&
+            visitKind < RESUMED_SESSION_RATE + EXPIRED_SESSION_RATE;
+          // A user doesn't sign in on return to a session that expired: the expired session is one
+          // of its own, which would be left anonymous, while the tab keeps the user across expiry.
+          const signIn =
+            user && !expired && signInDraw < SIGN_IN_DURING_SESSION_RATE
+              ? { user, atDocument: 1 }
+              : undefined;
+          // Drawn apart from the session too, which then stays as it was without the option
+          const frustrationRandom =
+            withSessionId && frustration
+              ? createSeededRandom(`${seed}:${sessionKey}:${index}:frustration`)
+              : undefined;
 
+          // A user who signs in during the session is anonymous until then, in every visit before
           const client = (options: EdotBrowserClientOptions = {}) =>
-            app.client(profile, { includeRawAttribution, ...options });
+            app.client(profile, { includeRawAttribution, ...(signIn ? {} : { user }), ...options });
           // The visits of every session, in the tab each happened in: what replay records. A session
           // that expired has its own ID, so it records, or not, on its own.
           const visitsBySession = new Map<string, EdotBrowserReplayVisit[]>();
+          // `last` is the visit that ends at the session's time, where a user who signs in does
           const simulate = (
             options: EdotBrowserClientOptions,
             anchor: { end: number },
             views: number,
-            resumed: boolean = false
+            { resumed = false, last = false }: { resumed?: boolean; last?: boolean } = {}
           ) => {
             const visitClient = client(options);
             const { events, documents } = edotBrowser.sessionWithDocuments({
@@ -1395,6 +1506,8 @@ export const generateEdotBrowserSessions = (
               pageViews: views,
               dwell,
               resumed,
+              ...(last && signIn ? { signIn } : {}),
+              frustrationRandom,
               ...reporting,
               ...anchor,
             });
@@ -1456,7 +1569,7 @@ export const generateEdotBrowserSessions = (
               { sessionId, previousSessionId: previous, tabId: sameTab ? tabId : otherTabId },
               { end },
               pageViews,
-              true
+              { resumed: true, last: true }
             );
             const firstVisitEnd =
               Math.min(...visit.map(getTimestamp)) -
@@ -1469,10 +1582,12 @@ export const generateEdotBrowserSessions = (
             return withReplay(keep([...firstVisit, ...visit]));
           }
 
-          if (visitKind < RESUMED_SESSION_RATE + EXPIRED_SESSION_RATE) {
+          if (expired) {
             // The session expired while the tab stayed open, sending background requests with no
             // session ID. The user's return starts a new session that points to the expired one.
-            const visit = simulate({ sessionId, previousSessionId, tabId }, { end }, pageViews);
+            const visit = simulate({ sessionId, previousSessionId, tabId }, { end }, pageViews, {
+              last: true,
+            });
             const returnedAt = Math.min(...visit.map(getTimestamp));
             const expiredFor = Math.round(SESSION_IDLE_TIMEOUT_MS * (1.05 + 2 * gap));
             const expiredVisit = simulate(
@@ -1497,7 +1612,11 @@ export const generateEdotBrowserSessions = (
           }
 
           return withReplay(
-            keep(simulate({ sessionId, previousSessionId: previous, tabId }, { end }, pageViews))
+            keep(
+              simulate({ sessionId, previousSessionId: previous, tabId }, { end }, pageViews, {
+                last: true,
+              })
+            )
           );
         };
 
