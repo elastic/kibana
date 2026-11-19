@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { isComputedFeature, type Feature } from '@kbn/significant-events-schema';
-import type { QueryFunctionContext } from '@kbn/react-query';
-import { useQuery } from '@kbn/react-query';
+import type { QueryClient, QueryFunctionContext } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useFetchErrorToast } from '../../hooks/use_fetch_error_toast';
 import { useKibana } from '../../hooks/use_kibana';
 import { FEATURES_QUERY_KEY } from '../query_keys';
 
 const ERROR_REFETCH_INTERVAL_MS = 60_000;
+// Report one outage until every failing polling observer recovers or unmounts.
+const failedPollingObservers = new WeakMap<QueryClient, Set<symbol>>();
 
 export const useStreamFeatures = (
   sourceId: string,
@@ -25,7 +27,16 @@ export const useStreamFeatures = (
 ) => {
   const { significantEventsRepositoryClient } = useKibana().services.significantEvents;
   const showFetchErrorToast = useFetchErrorToast();
-  const reportedErrorSourceId = useRef<string>();
+  const queryClient = useQueryClient();
+  const [pollingObserverId] = useState(() => Symbol());
+  const isPollingEnabled = enabled && !!refetchInterval;
+
+  useEffect(
+    () => () => {
+      failedPollingObservers.get(queryClient)?.delete(pollingObserverId);
+    },
+    [queryClient, pollingObserverId, sourceId, isPollingEnabled]
+  );
 
   const fetchFeatures = async ({ signal: querySignal }: QueryFunctionContext) => {
     return significantEventsRepositoryClient.fetch('GET /internal/streams/{sourceId}/features', {
@@ -45,13 +56,22 @@ export const useStreamFeatures = (
     queryKey: [...FEATURES_QUERY_KEY, sourceId, ...deps],
     queryFn: fetchFeatures,
     onError: (fetchError) => {
-      if (!refetchInterval || reportedErrorSourceId.current !== sourceId) {
-        reportedErrorSourceId.current = sourceId;
+      if (!isPollingEnabled) {
+        showFetchErrorToast(fetchError);
+        return;
+      }
+
+      const failures = failedPollingObservers.get(queryClient) ?? new Set<symbol>();
+      const shouldShowErrorToast = failures.size === 0;
+      failures.add(pollingObserverId);
+      failedPollingObservers.set(queryClient, failures);
+
+      if (shouldShowErrorToast) {
         showFetchErrorToast(fetchError);
       }
     },
     onSuccess: () => {
-      reportedErrorSourceId.current = undefined;
+      failedPollingObservers.get(queryClient)?.delete(pollingObserverId);
     },
     enabled,
     refetchInterval: (_data, query) => {

@@ -40,17 +40,20 @@ const initialFeatures = [createFeature('checkout'), createFeature('payments')];
 describe('KnowledgeIndicatorsColumn polling', () => {
   let queryClient: QueryClient;
 
-  const renderColumn = () =>
+  const renderColumns = (sourceIds = ['source-1']) =>
     render(
       <QueryClientProvider client={queryClient}>
-        <KnowledgeIndicatorsColumn
-          sourceId="source-1"
-          streamOnboardingResult={{
-            status: SignificantEventsWorkflowStatus.Canceled,
-            executionId: 'stopped-run',
-          }}
-          isAwaitingRun={false}
-        />
+        {sourceIds.map((sourceId) => (
+          <KnowledgeIndicatorsColumn
+            key={sourceId}
+            sourceId={sourceId}
+            streamOnboardingResult={{
+              status: SignificantEventsWorkflowStatus.Canceled,
+              executionId: 'stopped-run',
+            }}
+            isAwaitingRun={false}
+          />
+        ))}
       </QueryClientProvider>
     );
 
@@ -77,7 +80,7 @@ describe('KnowledgeIndicatorsColumn polling', () => {
 
   it('refreshes a stopped source after cleanup and keeps watching for new knowledge', async () => {
     mockFetch.mockResolvedValue({ features: initialFeatures });
-    renderColumn();
+    renderColumns();
     await screen.findByText('2');
 
     mockFetch.mockResolvedValue({ features: [] });
@@ -89,15 +92,18 @@ describe('KnowledgeIndicatorsColumn polling', () => {
     await screen.findByText('1');
   });
 
-  it('retains the count and retries failures slowly without repeated toasts, then resumes polling', async () => {
+  it('shares one outage notification across sources and resumes polling after recovery', async () => {
+    const sourceIds = ['source-1', 'source-2', 'source-3', 'source-4', 'source-5', 'source-6'];
     mockFetch.mockResolvedValue({ features: initialFeatures });
-    renderColumn();
-    await screen.findByText('2');
+    const { unmount } = renderColumns(sourceIds);
+    expect(await screen.findAllByText('2')).toHaveLength(sourceIds.length);
 
-    mockFetch.mockRejectedValue(new Error('Feature fetch failed'));
+    mockFetch.mockImplementation(async () => {
+      throw new Error('Feature fetch failed');
+    });
     await advanceTime(10_000);
     await waitFor(() => expect(mockAddError).toHaveBeenCalledTimes(1));
-    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(screen.getAllByText('2')).toHaveLength(sourceIds.length);
 
     const requestsAfterFailure = mockFetch.mock.calls.length;
     await advanceTime(59_000);
@@ -105,20 +111,32 @@ describe('KnowledgeIndicatorsColumn polling', () => {
     expect(mockAddError).toHaveBeenCalledTimes(1);
 
     await advanceTime(1_000);
-    expect(mockFetch).toHaveBeenCalledTimes(requestsAfterFailure + 1);
+    expect(mockFetch).toHaveBeenCalledTimes(requestsAfterFailure + sourceIds.length);
     expect(mockAddError).toHaveBeenCalledTimes(1);
-    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(screen.getAllByText('2')).toHaveLength(sourceIds.length);
+
+    mockFetch.mockResolvedValueOnce({ features: [createFeature('orders')] });
+    await advanceTime(60_000);
+    await screen.findByText('1');
+    expect(screen.getAllByText('2')).toHaveLength(sourceIds.length - 1);
+
+    await advanceTime(10_000);
+    expect(mockAddError).toHaveBeenCalledTimes(1);
 
     mockFetch.mockResolvedValue({ features: [createFeature('orders')] });
     await advanceTime(60_000);
-    await screen.findByText('1');
+    expect(await screen.findAllByText('1')).toHaveLength(sourceIds.length);
 
     mockFetch.mockResolvedValue({ features: [] });
     await advanceTime(10_000);
-    await screen.findByText('—');
+    expect(await screen.findAllByText('—')).toHaveLength(sourceIds.length);
 
     mockFetch.mockRejectedValue(new Error('Another feature fetch failure'));
     await advanceTime(10_000);
     await waitFor(() => expect(mockAddError).toHaveBeenCalledTimes(2));
+
+    unmount();
+    renderColumns(sourceIds);
+    await waitFor(() => expect(mockAddError).toHaveBeenCalledTimes(3));
   });
 });
