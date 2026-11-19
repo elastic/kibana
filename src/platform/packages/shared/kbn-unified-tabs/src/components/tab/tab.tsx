@@ -38,6 +38,8 @@ import { useTabLabelWidth } from './use_tab_label_width';
 export interface TabProps {
   item: TabItem;
   isSelected: boolean;
+  /** Looks selected without being the selected tab, e.g. when it is part of the selected tab's split view */
+  isGrouped?: boolean;
   selectedItemId?: string;
   isUnsaved?: boolean;
   isDragging?: boolean;
@@ -70,6 +72,7 @@ export const Tab: React.FC<TabProps> = (props) => {
   const {
     item,
     isSelected,
+    isGrouped = false,
     selectedItemId,
     isUnsaved,
     isDragging,
@@ -184,7 +187,8 @@ export const Tab: React.FC<TabProps> = (props) => {
     [isSelected, isDragging, onSelectEvent, setActionPopover, onSelectedTabKeyDown]
   );
 
-  const fontWeight = isSelected ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular;
+  const isHighlighted = isSelected || isGrouped;
+  const fontWeight = isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular;
 
   const { tabLabelRef, tabLabelWidth, tabLabelTextWidth } = useTabLabelWidth({
     item,
@@ -210,7 +214,7 @@ export const Tab: React.FC<TabProps> = (props) => {
   const isLoading = previewData?.status === TabStatus.RUNNING;
 
   const mainTabContent = (
-    <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, fontWeight, isDragging)}>
+    <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isHighlighted, fontWeight, isDragging)}>
       <div
         ref={tabInteractiveElementRef}
         {...(!disableDragAndDrop ? dragHandleProps : {})}
@@ -335,6 +339,7 @@ export const Tab: React.FC<TabProps> = (props) => {
     <TabWithBackground
       data-test-subj={`unifiedTabs_tab_${item.id}`}
       isSelected={isSelected}
+      isGrouped={isGrouped}
       isDragging={isDragging}
       isLoading={isLoading}
       hideRightSeparator={hideRightSeparator}

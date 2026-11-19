@@ -15,6 +15,8 @@ import type { TabsServices } from '../../types';
 
 export interface TabWithBackgroundProps extends HTMLAttributes<HTMLElement> {
   isSelected: boolean;
+  /** Same look as the selected tab, with a subdued top border since it is not the focused one */
+  isGrouped?: boolean;
   isDragging?: boolean;
   isLoading?: boolean;
   hideRightSeparator?: boolean;
@@ -24,11 +26,21 @@ export interface TabWithBackgroundProps extends HTMLAttributes<HTMLElement> {
 
 export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgroundProps>(
   (
-    { isSelected, isDragging, isLoading, hideRightSeparator, services, children, ...otherProps },
+    {
+      isSelected,
+      isGrouped = false,
+      isDragging,
+      isLoading,
+      hideRightSeparator,
+      services,
+      children,
+      ...otherProps
+    },
     ref
   ) => {
     const euiThemeContext = useEuiTheme();
     const { euiTheme } = euiThemeContext;
+    const isHighlighted = isSelected || isGrouped;
 
     return (
       <div
@@ -36,13 +48,14 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
         ref={ref}
         className={classNames('unifiedTabs__tabWithBackground', {
           'unifiedTabs__tabWithBackground--selected': isSelected,
+          'unifiedTabs__tabWithBackground--grouped': isGrouped && !isSelected,
         })}
         // tab main background and another background color on hover
         css={css`
           position: relative;
           display: inline-block;
           border-radius: ${euiTheme.border.radius.small};
-          background: ${isSelected || isDragging
+          background: ${isHighlighted || isDragging
             ? euiTheme.colors.backgroundBasePlain
             : 'transparent'};
           transition: background ${euiTheme.animation.fast};
@@ -55,10 +68,12 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
           border-left: ${euiTheme.border.width.thin} solid transparent;
           border-right: ${euiTheme.border.width.thin} solid transparent;
 
-          ${isSelected
+          ${isHighlighted
             ? `
               border-top-color: ${
-                isLoading ? euiTheme.colors.borderBaseSubdued : euiTheme.colors.primary
+                isLoading || !isSelected
+                  ? euiTheme.colors.borderBaseSubdued
+                  : euiTheme.colors.primary
               };
               border-left-color: ${euiTheme.colors.borderBaseSubdued};
               border-right-color: ${euiTheme.colors.borderBaseSubdued};
@@ -94,7 +109,7 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
       >
         <div
           css={css`
-            ${!isSelected
+            ${!isHighlighted
               ? `
               &:hover {
                 background-color: ${euiTheme.colors.backgroundLightPrimary};
@@ -107,7 +122,7 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
         >
           {children}
         </div>
-        {isSelected && !isDragging && (
+        {isHighlighted && !isDragging && (
           <>
             <Accent direction="left" euiTheme={euiTheme} />
             <Accent direction="right" euiTheme={euiTheme} />

@@ -22,6 +22,7 @@ import {
   selectAllTabs,
   selectRecentlyClosedTabs,
   selectIsTabsBarHidden,
+  selectSplitGroup,
   useInternalStateDispatch,
   useInternalStateSelector,
   getDataViewOfSource,
@@ -30,6 +31,7 @@ import {
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
 import { useAppMenuData } from './use_app_menu_data';
+import { SplitTabsView } from './split_tabs_view';
 
 export const TabsView = (props: SingleTabViewProps) => {
   const services = useDiscoverServices();
@@ -39,6 +41,7 @@ export const TabsView = (props: SingleTabViewProps) => {
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
+  const splitGroup = useInternalStateSelector(selectSplitGroup);
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
   const currentDataSource = useCurrentTabRuntimeState((tab) => tab.currentDataSource$);
   const currentDataView = useMemo(
@@ -76,10 +79,13 @@ export const TabsView = (props: SingleTabViewProps) => {
     [items]
   );
 
-  const renderContent: UnifiedTabsProps['renderContent'] = useCallback(
-    () => <SingleTabView key={currentTabId} {...props} />,
-    [currentTabId, props]
-  );
+  const renderContent: UnifiedTabsProps['renderContent'] = useCallback(() => {
+    if (splitGroup?.tabIds.includes(currentTabId)) {
+      return <SplitTabsView tabIds={splitGroup.tabIds} {...props} />;
+    }
+
+    return <SingleTabView key={currentTabId} {...props} />;
+  }, [currentTabId, props, splitGroup]);
 
   const wrapTabsBar = useMemo((): UnifiedTabsProps['wrapTabsBar'] => {
     if (isProjectChromeStyle) {
@@ -143,6 +149,7 @@ export const TabsView = (props: SingleTabViewProps) => {
         selectedItemId={currentTabId}
         recentlyClosedItems={recentlyClosedItems}
         unsavedItemIds={unsavedTabIds}
+        groupedItemIds={splitGroup?.tabIds}
         maxItemsCount={MAX_DISCOVER_SESSION_TABS}
         hideTabsBar={hideTabsBar}
         createItem={createItem}

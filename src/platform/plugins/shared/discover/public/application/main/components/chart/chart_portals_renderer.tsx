@@ -9,6 +9,8 @@
 
 import React, {
   type PropsWithChildren,
+  createContext,
+  useContext,
   type ReactElement,
   useEffect,
   useRef,
@@ -48,6 +50,12 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;
 
+const chartPortalNodesContext = createContext<ChartPortalNodes>({});
+
+/** The chart portal node of any tab, not only the current one, e.g. to render tabs side by side */
+export const useChartPortalNode = (tabId: string): ChartPortalNode | undefined =>
+  useContext(chartPortalNodesContext)[tabId];
+
 export const ChartPortalsRenderer = ({
   runtimeStateManager,
   children,
@@ -69,12 +77,14 @@ export const ChartPortalsRenderer = ({
           </InPortal>
         );
       })}
-      <CurrentTabProvider
-        currentTabId={currentTabId}
-        currentChartPortalNode={chartPortalNodes.current[currentTabId]}
-      >
-        {children}
-      </CurrentTabProvider>
+      <chartPortalNodesContext.Provider value={chartPortalNodes.current}>
+        <CurrentTabProvider
+          currentTabId={currentTabId}
+          currentChartPortalNode={chartPortalNodes.current[currentTabId]}
+        >
+          {children}
+        </CurrentTabProvider>
+      </chartPortalNodesContext.Provider>
     </>
   );
 };
