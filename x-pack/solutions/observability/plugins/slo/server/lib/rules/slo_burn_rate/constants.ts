@@ -11,4 +11,8 @@ export const BURN_RATE_EXECUTOR_SPAN_NAMES = {
   EVAL_DEPENDENCIES: 'slo_burn_rate_executor:eval_dependencies',
   ACTION_DISPATCH: 'slo_burn_rate_executor:action_dispatch',
   ES_QUERY: 'slo_burn_rate_executor:es_query',
+  GROUPINGS_QUERY: 'slo_burn_rate_executor:groupings_query',
 } as const;
+
+// ES|QL truncates results above `esql.query.result_truncation_max_size`, 10,000 rows by default.
+export const MAX_EVALUATION_RESULTS = 10_000;

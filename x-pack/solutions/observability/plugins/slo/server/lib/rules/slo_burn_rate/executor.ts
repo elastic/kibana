@@ -147,8 +147,13 @@ export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = fal
     // We only need the end timestamp to base all of queries on. The length of the time range
     // doesn't matter for our use case since we allow the user to customize the window sizes,
     const { dateEnd } = getTimeRange('1m');
+    const alertLimit = alertsClient.getAlertLimitValue();
+    // One extra result tells whether the alert limit has been reached
     const results = await withSpan({ name: BURN_RATE_EXECUTOR_SPAN_NAMES.EVAL, type: 'rule' }, () =>
-      evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd), projectRouting)
+      evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd), {
+        projectRouting,
+        limit: alertLimit + 1,
+      })
     );
 
     const dependencies = params.dependencies;
@@ -174,7 +179,6 @@ export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = fal
       { name: BURN_RATE_EXECUTOR_SPAN_NAMES.ACTION_DISPATCH, type: 'rule' },
       async () => {
         if (results.length > 0) {
-          const alertLimit = alertsClient.getAlertLimitValue();
           let hasReachedLimit = false;
           let scheduledActionsCount = 0;
           for (const result of results) {

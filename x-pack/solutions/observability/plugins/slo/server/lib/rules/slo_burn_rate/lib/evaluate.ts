@@ -7,169 +7,169 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { get } from 'lodash';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { BURN_RATE_EXECUTOR_SPAN_NAMES } from '../constants';
+import { BURN_RATE_EXECUTOR_SPAN_NAMES, MAX_EVALUATION_RESULTS } from '../constants';
 import type { SLODefinition } from '../../../../domain/models';
 import { Duration, toDurationUnit } from '../../../../domain/models';
-import type { BurnRateRuleParams } from '../types';
+import type { BurnRateRuleParams, WindowSchema } from '../types';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../../../../common/constants';
-import type { EvaluationAfterKey } from './build_query';
-import {
-  buildQuery,
-  generateAboveThresholdKey,
-  generateBurnRateKey,
-  generateWindowId,
-  LONG_WINDOW,
-  SHORT_WINDOW,
-} from './build_query';
+import { buildEvaluationFilter, buildEvaluationQuery, EVALUATION_COLUMNS } from './build_query';
 
-export interface EvaluationWindowStats {
-  doc_count: number;
-  good: { value: number };
-  total: { value: number };
+export interface BreachingInstance {
+  instanceId: string;
+  shouldAlert: boolean;
+  longWindowBurnRate: number;
+  shortWindowBurnRate: number;
+  shortWindowDuration: Duration;
+  longWindowDuration: Duration;
+  window: WindowSchema;
 }
 
-export interface TopHitsAggResults {
-  slo: {
-    groupings: Record<string, unknown>;
+export interface EvaluationResult extends BreachingInstance {
+  groupings?: Record<string, unknown>;
+}
+
+export interface EvaluateOptions {
+  projectRouting?: string;
+  limit?: number;
+}
+
+interface GroupingsDocument {
+  slo?: {
+    instanceId?: string;
+    groupings?: Record<string, unknown>;
   };
 }
 
-export interface EvaluationBucket {
-  key: EvaluationAfterKey;
-  groupings: SearchResponse<TopHitsAggResults>;
-  doc_count: number;
-  WINDOW_0_SHORT?: EvaluationWindowStats;
-  WINDOW_1_SHORT?: EvaluationWindowStats;
-  WINDOW_2_SHORT?: EvaluationWindowStats;
-  WINDOW_3_SHORT?: EvaluationWindowStats;
-  WINDOW_0_LONG?: EvaluationWindowStats;
-  WINDOW_1_LONG?: EvaluationWindowStats;
-  WINDOW_2_LONG?: EvaluationWindowStats;
-  WINDOW_3_LONG?: EvaluationWindowStats;
-  WINDOW_0_SHORT_BURN_RATE?: { value: number };
-  WINDOW_1_SHORT_BURN_RATE?: { value: number };
-  WINDOW_2_SHORT_BURN_RATE?: { value: number };
-  WINDOW_3_SHORT_BURN_RATE?: { value: number };
-  WINDOW_0_LONG_BURN_RATE?: { value: number };
-  WINDOW_1_LONG_BURN_RATE?: { value: number };
-  WINDOW_2_LONG_BURN_RATE?: { value: number };
-  WINDOW_3_LONG_BURN_RATE?: { value: number };
-  WINDOW_0_SHORT_ABOVE_THRESHOLD?: { value: number };
-  WINDOW_1_SHORT_ABOVE_THRESHOLD?: { value: number };
-  WINDOW_2_SHORT_ABOVE_THRESHOLD?: { value: number };
-  WINDOW_3_SHORT_ABOVE_THRESHOLD?: { value: number };
-  WINDOW_0_LONG_ABOVE_THRESHOLD?: { value: number };
-  WINDOW_1_LONG_ABOVE_THRESHOLD?: { value: number };
-  WINDOW_2_LONG_ABOVE_THRESHOLD?: { value: number };
-  WINDOW_3_LONG_ABOVE_THRESHOLD?: { value: number };
-}
-
-export interface EvalutionAggResults {
-  instances: {
-    after_key?: EvaluationAfterKey;
-    buckets: EvaluationBucket[];
-  };
-}
-
-async function queryAllResults(
+/**
+ * Returns the instances breaching at least one burn rate window, highest priority window first.
+ */
+export async function findBreachingInstances(
   esClient: ElasticsearchClient,
   slo: SLODefinition,
   params: BurnRateRuleParams,
   startedAt: Date,
-  projectRouting?: string,
-  buckets: EvaluationBucket[] = [],
-  lastAfterKey?: { instanceId: string }
-): Promise<EvaluationBucket[]> {
-  const queryAndAggs = buildQuery(startedAt, slo, params, lastAfterKey);
-  const results = await withSpan(
+  { projectRouting, limit = MAX_EVALUATION_RESULTS }: EvaluateOptions = {}
+): Promise<BreachingInstance[]> {
+  if (params.windows.length === 0) {
+    return [];
+  }
+
+  const boundedLimit = Math.max(1, Math.min(Math.floor(limit), MAX_EVALUATION_RESULTS));
+  const {
+    query,
+    params: queryParams,
+    filter,
+  } = buildEvaluationQuery(startedAt, slo, params, boundedLimit);
+  const response = await withSpan(
     { name: BURN_RATE_EXECUTOR_SPAN_NAMES.ES_QUERY, type: 'rule' },
     () =>
-      esClient.search<undefined, EvalutionAggResults>({
-        index: SLI_DESTINATION_INDEX_PATTERN,
+      esClient.esql.query({
+        query,
+        params: queryParams,
+        filter,
         ...(projectRouting ? { project_routing: projectRouting } : {}),
-        ...queryAndAggs,
       })
   );
 
-  if (!results.aggregations) {
-    throw new Error('Elasticsearch query failed to return a valid aggregation');
-  }
-  if (results.aggregations.instances.buckets.length === 0) {
-    return buckets;
-  }
+  const columnIndex = (name: string) =>
+    response.columns.findIndex((column) => column.name === name);
+  const instanceIdIndex = columnIndex(EVALUATION_COLUMNS.instanceId);
+  const windowIndexIndex = columnIndex(EVALUATION_COLUMNS.windowIndex);
+  const shortWindowBurnRateIndex = columnIndex(EVALUATION_COLUMNS.shortWindowBurnRate);
+  const longWindowBurnRateIndex = columnIndex(EVALUATION_COLUMNS.longWindowBurnRate);
 
-  return queryAllResults(
-    esClient,
-    slo,
-    params,
-    startedAt,
-    projectRouting,
-    [...buckets, ...results.aggregations.instances.buckets],
-    results.aggregations.instances.after_key
-  );
+  return response.values.map((row) => {
+    const instanceId = String(row[instanceIdIndex]);
+    const window = params.windows[Number(row[windowIndexIndex])];
+    if (!window) {
+      throw new Error(`Evaluation query for ${instanceId} failed.`);
+    }
+
+    return {
+      instanceId,
+      shouldAlert: true,
+      shortWindowBurnRate: Number(row[shortWindowBurnRateIndex] ?? 0),
+      longWindowBurnRate: Number(row[longWindowBurnRateIndex] ?? 0),
+      shortWindowDuration: new Duration(
+        window.shortWindow.value,
+        toDurationUnit(window.shortWindow.unit)
+      ),
+      longWindowDuration: new Duration(
+        window.longWindow.value,
+        toDurationUnit(window.longWindow.unit)
+      ),
+      window,
+    };
+  });
 }
 
+/**
+ * Returns the breaching instances with their groupings, highest priority window first.
+ */
 export async function evaluate(
   esClient: ElasticsearchClient,
   slo: SLODefinition,
   params: BurnRateRuleParams,
   startedAt: Date,
-  projectRouting?: string
-) {
-  const buckets = await queryAllResults(esClient, slo, params, startedAt, projectRouting);
-  return transformBucketToResults(buckets, params);
-}
-
-function transformBucketToResults(buckets: EvaluationBucket[], params: BurnRateRuleParams) {
-  return buckets.map((bucket) => {
-    for (const index in params.windows) {
-      if (params.windows[index]) {
-        const winDef = params.windows[index];
-        const windowId = generateWindowId(index);
-        const shortWindowThresholdKey = generateAboveThresholdKey(windowId, SHORT_WINDOW);
-        const longWindowThresholdKey = generateAboveThresholdKey(windowId, LONG_WINDOW);
-        const isShortWindowTriggering = get(bucket, [shortWindowThresholdKey, 'value'], 0);
-        const isLongWindowTriggering = get(bucket, [longWindowThresholdKey, 'value'], 0);
-
-        if (isShortWindowTriggering && isLongWindowTriggering) {
-          return {
-            instanceId: bucket.key.instanceId,
-            groupings: transformGroupings(bucket.groupings),
-            shouldAlert: true,
-            longWindowBurnRate: get(
-              bucket,
-              [generateBurnRateKey(windowId, LONG_WINDOW), 'value'],
-              0
-            ) as number,
-            shortWindowBurnRate: get(
-              bucket,
-              [generateBurnRateKey(windowId, SHORT_WINDOW), 'value'],
-              0
-            ) as number,
-            shortWindowDuration: new Duration(
-              winDef.shortWindow.value,
-              toDurationUnit(winDef.shortWindow.unit)
-            ),
-            longWindowDuration: new Duration(
-              winDef.longWindow.value,
-              toDurationUnit(winDef.longWindow.unit)
-            ),
-            window: winDef,
-          };
-        }
-      }
-    }
-    throw new Error(`Evaluation query for ${bucket.key.instanceId} failed.`);
-  });
-}
-
-function transformGroupings(
-  groupings: SearchResponse<TopHitsAggResults>
-): Record<string, unknown> | undefined {
-  if (groupings && groupings.hits && groupings.hits.hits && groupings.hits.hits.length > 0) {
-    const topHit = groupings.hits.hits[0];
-    return topHit._source?.slo?.groupings;
+  options: EvaluateOptions = {}
+): Promise<EvaluationResult[]> {
+  const breachingInstances = await findBreachingInstances(
+    esClient,
+    slo,
+    params,
+    startedAt,
+    options
+  );
+  if (breachingInstances.length === 0) {
+    return [];
   }
+
+  const groupingsByInstanceId = await findGroupings(
+    esClient,
+    slo,
+    params,
+    startedAt,
+    breachingInstances.map(({ instanceId }) => instanceId),
+    options.projectRouting
+  );
+
+  return breachingInstances.map((instance) => ({
+    ...instance,
+    groupings: groupingsByInstanceId.get(instance.instanceId),
+  }));
+}
+
+async function findGroupings(
+  esClient: ElasticsearchClient,
+  slo: SLODefinition,
+  params: BurnRateRuleParams,
+  startedAt: Date,
+  instanceIds: string[],
+  projectRouting?: string
+): Promise<Map<string, Record<string, unknown> | undefined>> {
+  const filter = buildEvaluationFilter(startedAt, slo, params);
+  const response = await withSpan(
+    { name: BURN_RATE_EXECUTOR_SPAN_NAMES.GROUPINGS_QUERY, type: 'rule' },
+    () =>
+      esClient.search<GroupingsDocument>({
+        index: SLI_DESTINATION_INDEX_PATTERN,
+        ...(projectRouting ? { project_routing: projectRouting } : {}),
+        size: instanceIds.length,
+        _source: ['slo.instanceId', 'slo.groupings'],
+        query: {
+          bool: {
+            filter: [filter, { terms: { 'slo.instanceId': instanceIds } }],
+          },
+        },
+        collapse: { field: 'slo.instanceId' },
+      })
+  );
+
+  const groupingsByInstanceId = new Map<string, Record<string, unknown> | undefined>();
+  for (const { _source } of response.hits.hits) {
+    if (_source?.slo?.instanceId) {
+      groupingsByInstanceId.set(_source.slo.instanceId, _source.slo.groupings);
+    }
+  }
+  return groupingsByInstanceId;
 }
