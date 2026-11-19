@@ -122,6 +122,10 @@ export const useQueryExecution = ({
     const { rawResponse } = await data.search.esql({
       query: queryWithTime,
       dropNullColumns: true,
+      // The rule executor sends no `time_zone`, so scheduled runs evaluate in UTC. Pin the preview
+      // to UTC as well; `search.esql` would otherwise apply Kibana's `dateFormat:tz`, and a
+      // time-zone-sensitive query could preview differently from how the saved rule runs.
+      timeZone: 'UTC',
       kibanaQueryContext: { timeRange: executionTimeRange },
       projectRouting: executionProjectRouting,
     });

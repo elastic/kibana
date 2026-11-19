@@ -61,6 +61,28 @@ describe('useQueryExecution', () => {
     );
   });
 
+  it('runs the query in UTC to match scheduled rule execution', async () => {
+    mockEsql.mockResolvedValue({ rawResponse: { columns: [], values: [] } });
+
+    const { result } = renderHook(
+      () =>
+        useQueryExecution({
+          query: 'FROM logs-*',
+          timeField: '@timestamp',
+          timeRange,
+          data,
+          cps: cpsPluginMock.createStartContract(),
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    act(() => result.current.run());
+
+    await waitFor(() =>
+      expect(mockEsql).toHaveBeenCalledWith(expect.objectContaining({ timeZone: 'UTC' }))
+    );
+  });
+
   it('uses the latest space default routing when run again', async () => {
     mockEsql.mockResolvedValue({ rawResponse: { columns: [], values: [] } });
     const mockCps = cpsPluginMock.createStartContract();
