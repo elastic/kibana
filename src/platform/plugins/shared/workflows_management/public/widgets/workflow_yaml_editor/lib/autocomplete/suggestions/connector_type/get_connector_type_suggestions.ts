@@ -15,7 +15,6 @@ import {
   IfStepSchema,
   LoopBreakStepSchema,
   LoopContinueStepSchema,
-  MergeStepSchema,
   ParallelStepSchema,
   SwitchStepSchema,
   WaitForApprovalStepSchema,
@@ -262,11 +261,6 @@ function getBuiltInStepTypesFromSchema(): Array<{
       schema: ParallelStepSchema,
       description: 'Run a branch body once per item in a list, concurrently',
       icon: monaco.languages.CompletionItemKind.Class,
-    },
-    {
-      schema: MergeStepSchema,
-      description: 'Merge results from multiple sources',
-      icon: monaco.languages.CompletionItemKind.Interface,
     },
     {
       schema: DataSetStepSchema,

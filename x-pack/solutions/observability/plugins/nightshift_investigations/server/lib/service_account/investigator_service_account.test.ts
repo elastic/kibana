@@ -141,6 +141,8 @@ const setup = ({
   const listInstalledWorkflowStates = jest.fn().mockResolvedValue([]);
   const scheduleSourceVolumeTask = jest.fn().mockResolvedValue(undefined);
   const removeSourceVolumeTask = jest.fn().mockResolvedValue(undefined);
+  const scheduleDetectionSnapshotTask = jest.fn().mockResolvedValue(undefined);
+  const removeDetectionSnapshotTask = jest.fn().mockResolvedValue(undefined);
   const lock = { held: false };
   const withLock = jest.fn(async (_lockId: string, callback: () => Promise<unknown>) => {
     lock.held = true;
@@ -151,6 +153,7 @@ const setup = ({
     }
   });
   const lockManager = { withLock } as unknown as LockManagerService;
+  const logger = loggingSystemMock.createLogger();
   const service = createInvestigatorServiceAccountService({
     core,
     workflowsExtensions,
@@ -165,9 +168,11 @@ const setup = ({
     listInstalledWorkflowStates,
     scheduleSourceVolumeTask,
     removeSourceVolumeTask,
+    scheduleDetectionSnapshotTask,
+    removeDetectionSnapshotTask,
     isUniversalAlertingAvailable: () => true,
     isServerless,
-    logger: loggingSystemMock.createLogger(),
+    logger,
   });
   return {
     service,
@@ -183,14 +188,23 @@ const setup = ({
     listInstalledWorkflowStates,
     scheduleSourceVolumeTask,
     removeSourceVolumeTask,
+    scheduleDetectionSnapshotTask,
+    removeDetectionSnapshotTask,
     lock,
     withLock,
+    logger,
   };
 };
 
 describe('createInvestigatorServiceAccountService', () => {
   it('binds the workflows to the accounts it is given, and keeps the automations account on the entry point', async () => {
-    const { service, serviceAccounts, managedWorkflows, scheduleSourceVolumeTask } = setup();
+    const {
+      service,
+      serviceAccounts,
+      managedWorkflows,
+      scheduleSourceVolumeTask,
+      scheduleDetectionSnapshotTask,
+    } = setup();
 
     const status = await service.enable(request, SPACE_ID, IDS);
 
@@ -200,6 +214,7 @@ describe('createInvestigatorServiceAccountService', () => {
       ...BOUND_WORKFLOW_IDS,
     ]);
     expect(scheduleSourceVolumeTask).toHaveBeenCalledWith(request);
+    expect(scheduleDetectionSnapshotTask).toHaveBeenCalledWith(request);
     for (const [, id, options] of managedWorkflows.install.mock.calls) {
       expect(options).toEqual({
         spaceId: SPACE_ID,
@@ -515,13 +530,14 @@ describe('createInvestigatorServiceAccountService', () => {
     );
   });
 
-  it('removes the source volume task once the last space is disabled', async () => {
+  it('removes the telemetry tasks once the last space is disabled', async () => {
     const {
       service,
       managedWorkflows,
       listInstalledWorkflowStates,
       scheduleSourceVolumeTask,
       removeSourceVolumeTask,
+      removeDetectionSnapshotTask,
     } = setup();
     listInstalledWorkflowStates.mockResolvedValue([
       { workflowId: 'other-workflow-marketing', spaceId: 'marketing' },
@@ -530,6 +546,7 @@ describe('createInvestigatorServiceAccountService', () => {
     await service.disable(request, SPACE_ID);
 
     expect(removeSourceVolumeTask).toHaveBeenCalledTimes(1);
+    expect(removeDetectionSnapshotTask).toHaveBeenCalledTimes(1);
     expect(scheduleSourceVolumeTask).not.toHaveBeenCalled();
     expect(removeSourceVolumeTask.mock.invocationCallOrder[0]).toBeGreaterThan(
       Math.max(...managedWorkflows.uninstall.mock.invocationCallOrder)
@@ -584,6 +601,40 @@ describe('createInvestigatorServiceAccountService', () => {
       check: true,
       remove: true,
     });
+  });
+
+  it('holds the lifecycle lock until every telemetry task removal settles', async () => {
+    const {
+      service,
+      lock,
+      listInstalledWorkflowStates,
+      removeSourceVolumeTask,
+      removeDetectionSnapshotTask,
+    } = setup();
+    listInstalledWorkflowStates.mockResolvedValue([]);
+    removeSourceVolumeTask.mockRejectedValue(new Error('task index unavailable'));
+    let heldWhenRemovalSettled: boolean | undefined;
+    const slowRemoval = new Promise<void>((resolve) => setImmediate(resolve)).then(() => {
+      heldWhenRemovalSettled = lock.held;
+    });
+    removeDetectionSnapshotTask.mockReturnValue(slowRemoval);
+
+    await service.disable(request, SPACE_ID);
+    await slowRemoval;
+
+    expect(heldWhenRemovalSettled).toBe(true);
+  });
+
+  it('logs every telemetry task change that fails', async () => {
+    const { service, logger, scheduleSourceVolumeTask, scheduleDetectionSnapshotTask } = setup();
+    scheduleSourceVolumeTask.mockRejectedValue(new Error('source volume failure'));
+    scheduleDetectionSnapshotTask.mockRejectedValue(new Error('detection snapshot failure'));
+
+    await service.enable(request, SPACE_ID, IDS);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'Failed to schedule the telemetry tasks: source volume failure; detection snapshot failure'
+    );
   });
 
   it('continues setup and teardown when the telemetry task cannot be changed', async () => {

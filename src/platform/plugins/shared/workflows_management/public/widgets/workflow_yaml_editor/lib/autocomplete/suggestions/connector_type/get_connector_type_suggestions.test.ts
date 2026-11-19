@@ -96,10 +96,6 @@ describe('getConnectorTypeSuggestions', () => {
             kind: monaco.languages.CompletionItemKind.Class,
           }),
           expect.objectContaining({
-            label: 'merge',
-            kind: monaco.languages.CompletionItemKind.Interface,
-          }),
-          expect.objectContaining({
             label: 'wait',
             kind: monaco.languages.CompletionItemKind.Constant,
           }),
@@ -116,13 +112,13 @@ describe('getConnectorTypeSuggestions', () => {
 
       // Check for built-in steps
       const builtInSteps = result.filter((s) =>
-        ['foreach', 'if', 'parallel', 'merge', 'wait'].includes(s.label as string)
+        ['foreach', 'if', 'parallel', 'wait'].includes(s.label as string)
       );
-      expect(builtInSteps).toHaveLength(5);
+      expect(builtInSteps).toHaveLength(4);
 
       // Check for connectors
       const connectorSuggestions = result.filter(
-        (s) => !['foreach', 'if', 'parallel', 'merge', 'wait'].includes(s.label as string)
+        (s) => !['foreach', 'if', 'parallel', 'wait'].includes(s.label as string)
       );
       expect(connectorSuggestions.length).toBeGreaterThan(0);
     });
