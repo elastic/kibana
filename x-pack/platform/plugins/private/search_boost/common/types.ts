@@ -20,7 +20,7 @@ export interface BoostAgedPeriod extends BoostPeriod {
   max_age: string;
 }
 
-interface BoostProfileBase {
+export interface BoostProfileBase {
   name: string;
   is_builtin: boolean;
 }

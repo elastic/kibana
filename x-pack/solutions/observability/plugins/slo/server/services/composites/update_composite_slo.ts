@@ -7,6 +7,12 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { CompositeSLODefinitionResponse, UpdateCompositeSLOInput } from '@kbn/slo-schema';
+import type { SloTelemetryReporter } from '../../lib/telemetry';
+import {
+  COMPOSITE_SLO_UPDATED_EBT_EVENT_TYPE,
+  getCompositeChangedFields,
+  toCompositeSloDefinitionEbtData,
+} from '../../lib/telemetry';
 import type { SLODefinitionRepository } from '../slo_definition_repository';
 import type { SummaryClient } from '../summary_client';
 import type { CompositeSLORepository } from './composite_slo_repository';
@@ -18,11 +24,12 @@ interface Dependencies {
   repository: SLODefinitionRepository;
   summaryClient: SummaryClient;
   logger: Logger;
+  telemetry: SloTelemetryReporter;
 }
 
 export async function updateCompositeSlo(
   params: UpdateCompositeSLOInput,
-  { esClient, compositeRepository, repository, summaryClient, logger }: Dependencies
+  { esClient, compositeRepository, repository, summaryClient, logger, telemetry }: Dependencies
 ): Promise<CompositeSLODefinitionResponse> {
   const { id, spaceId, userId, ...body } = params;
   const existing = await compositeRepository.findById(id);
@@ -33,6 +40,11 @@ export async function updateCompositeSlo(
     updatedAt: new Date().toISOString(),
     updatedBy: userId,
   });
+
+  telemetry.report(COMPOSITE_SLO_UPDATED_EBT_EVENT_TYPE, () => ({
+    ...toCompositeSloDefinitionEbtData(updated),
+    changed_fields: getCompositeChangedFields(existing, updated),
+  }));
 
   await computeAndPersistCompositeSummaryDoc(updated, {
     esClient,
