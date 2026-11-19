@@ -77,16 +77,21 @@ const withInProgress =
     matchTotal,
     isPreviousData,
     refetchCritical,
+    refetchClosed = jest.fn(),
   }: {
     ids: string[];
     total?: number;
     matchTotal?: number;
     isPreviousData?: boolean;
     refetchCritical: jest.Mock;
+    refetchClosed?: jest.Mock;
   }) =>
   (params: FetchInvestigationsParams) => {
     if (params.inProgress) {
       return sectionResult({ ids, total, matchTotal, isPreviousData });
+    }
+    if (params.status === 'closed') {
+      return sectionResult({ refetch: refetchClosed });
     }
     if (isCritical(params)) {
       return sectionResult({ total: 3, refetch: refetchCritical });
@@ -142,6 +147,7 @@ describe('useInvestigationSections', () => {
       'medium',
       'low',
       'not-rated',
+      'closed',
     ]);
   });
 
@@ -292,19 +298,21 @@ describe('useInvestigationSections', () => {
 
   it('refetches the other sections when work leaves the in-progress section', () => {
     const refetchCritical = jest.fn();
+    const refetchClosed = jest.fn();
     mockUseFetchInvestigations.mockImplementation(
-      withInProgress({ ids: ['running-a', 'running-b'], refetchCritical })
+      withInProgress({ ids: ['running-a', 'running-b'], refetchCritical, refetchClosed })
     );
     const { rerender } = renderSections();
     expect(refetchCritical).not.toHaveBeenCalled();
 
     // One finished as another started: the total stays flat, but an id left.
     mockUseFetchInvestigations.mockImplementation(
-      withInProgress({ ids: ['running-b', 'running-c'], refetchCritical })
+      withInProgress({ ids: ['running-b', 'running-c'], refetchCritical, refetchClosed })
     );
     rerender({ query: undefined });
 
     expect(refetchCritical).toHaveBeenCalledTimes(1);
+    expect(refetchClosed).toHaveBeenCalledTimes(1);
   });
 
   it('refetches when the API total drops even if the capped loaded rows stay the same', () => {
