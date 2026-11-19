@@ -82,8 +82,9 @@
  *   and docs-web 10%
  * - users come back: an app has about 240 users per session a minute, a few of them with most of
  *   the sessions
- * - a quarter of the signed-in sessions start anonymous and sign in on their second page load
- * - the tab keeps the user once its session expires
+ * - about a fifth of the signed-in sessions start anonymous and sign in on their second page load
+ * - the tab keeps the user once its session expires, so the session that follows is signed in
+ *   from the start
  *
  * Scenario options:
  * - withSessionId (boolean, default: true): write `attributes.session.id`, with the tab ID

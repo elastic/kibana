@@ -1460,8 +1460,15 @@ export const generateEdotBrowserSessions = (
             withSessionId && signedInDraw < (signedInRate ?? appSignedInRate)
               ? appUser({ seed, serviceName, accounts }, Math.floor(userCount * userDraw ** 2))
               : undefined;
+          const expired =
+            visitKind >= RESUMED_SESSION_RATE &&
+            visitKind < RESUMED_SESSION_RATE + EXPIRED_SESSION_RATE;
+          // A user doesn't sign in on return to a session that expired: the expired session is one
+          // of its own, which would be left anonymous, while the tab keeps the user across expiry.
           const signIn =
-            user && signInDraw < SIGN_IN_DURING_SESSION_RATE ? { user, atDocument: 1 } : undefined;
+            user && !expired && signInDraw < SIGN_IN_DURING_SESSION_RATE
+              ? { user, atDocument: 1 }
+              : undefined;
 
           // A user who signs in during the session is anonymous until then, in every visit before
           const client = (options: EdotBrowserClientOptions = {}) =>
@@ -1560,7 +1567,7 @@ export const generateEdotBrowserSessions = (
             return withReplay(keep([...firstVisit, ...visit]));
           }
 
-          if (visitKind < RESUMED_SESSION_RATE + EXPIRED_SESSION_RATE) {
+          if (expired) {
             // The session expired while the tab stayed open, sending background requests with no
             // session ID. The user's return starts a new session that points to the expired one.
             const visit = simulate({ sessionId, previousSessionId, tabId }, { end }, pageViews, {

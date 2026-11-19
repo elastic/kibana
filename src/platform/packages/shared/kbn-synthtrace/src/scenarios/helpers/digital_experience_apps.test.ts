@@ -236,8 +236,11 @@ describe('digital experience apps', () => {
     });
 
     describe('users', () => {
-      const generate = (opts: { withSessionId?: boolean; signedInRate?: number } = {}) =>
-        generateEdotBrowserSessions(timerange(at(0), at(1800)), {
+      const generate = (
+        opts: { withSessionId?: boolean; signedInRate?: number } = {},
+        to = at(1800)
+      ) =>
+        generateEdotBrowserSessions(timerange(at(0), to), {
           ...parseDigitalExperienceScenarioOpts({ seed: 'users', ...opts }, FROM),
           environment: 'test',
           from: FROM,
@@ -335,7 +338,12 @@ describe('digital experience apps', () => {
 
       it('signs in the share of sessions of every app that signedInRate sets', () => {
         expect(generate({ signedInRate: 0 }).some(userOf)).toBe(false);
-        const allSignedIn = generate({ signedInRate: 1 });
+        // Long enough for the sessions that expired before a return to be in range too
+        const allSignedIn = generate({ signedInRate: 1 }, at(5400));
+        const sessionIds = new Set(allSignedIn.map((doc) => doc.attributes?.['session.id']));
+        expect(
+          allSignedIn.some((doc) => sessionIds.has(doc.attributes?.['session.previous_id']))
+        ).toBe(true);
         DIGITAL_EXPERIENCE_APPS.forEach(({ serviceName }) =>
           sessionUsers(allSignedIn, serviceName).forEach((users) => expect(users.size).toBe(1))
         );
