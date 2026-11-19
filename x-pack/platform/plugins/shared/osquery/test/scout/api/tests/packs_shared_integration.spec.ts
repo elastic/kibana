@@ -159,7 +159,8 @@ apiTest.describe(
 
     apiTest('exposes the owning package policy on shared agent policies', async ({ apiClient }) => {
       const response = await apiClient.get(AGENT_POLICIES_ROUTE, {
-        headers: headers(),
+        // Internal route: versioned as '1', not the public OSQUERY_API_VERSION from COMMON_HEADERS.
+        headers: { ...headers(), 'elastic-api-version': '1' },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
