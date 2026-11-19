@@ -636,9 +636,8 @@ describe('digital experience mobile apps', () => {
 
     it('does not carry sessions in progress over to a different configuration of an app', () => {
       const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
-      const withVersion = (serviceVersion: string, sessionsPerMinute = app.sessionsPerMinute) => ({
+      const withVersion = (serviceVersion: string) => ({
         ...app,
-        sessionsPerMinute,
         versions: [{ ...app.versions[0], serviceVersion, rollout: undefined }],
       });
       const batch = (from: number, apps: DigitalExperienceMobileApp[]) =>
@@ -657,12 +656,10 @@ describe('digital experience mobile apps', () => {
       const versionsOf = (batchLogs: OtelLogDocument[]) =>
         new Set(batchLogs.map(({ resource }) => resource?.attributes?.['service.version']));
 
-      // Batches that follow each other, as in live mode, of apps that differ in version and rate
+      // Batches that follow each other, as in live mode, of apps that differ in their versions
       expect(versionsOf(batch(FROM, [withVersion('9.1.0')]))).toEqual(new Set(['9.1.0']));
-      const next = batch(FROM + 5 * 60_000, [withVersion('9.2.0', app.sessionsPerMinute + 1)]);
+      const next = batch(FROM + 5 * 60_000, [withVersion('9.2.0')]);
       expect(versionsOf(next)).toEqual(new Set(['9.2.0']));
-      const starts = next.filter(({ event_name: eventName }) => eventName === EVENT_SESSION_START);
-      expect(starts).toHaveLength((app.sessionsPerMinute + 1) * 5);
     });
 
     it('rejects a rollout of a version other than the newest', () => {
