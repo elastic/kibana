@@ -1735,6 +1735,31 @@ describe('RulesClient', () => {
         expect(res.created).toBe(false);
       });
 
+      it.each([
+        ['clears the stored reason when the body omits it', undefined, undefined],
+        ['replaces the stored reason with the one in the body', 'new reason', 'new reason'],
+      ])('%s', async (_name, bodyReason, expectedReason) => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-1',
+          attributes: { ...baseSoAttrs, reason: 'old reason {{host.name}}' },
+          version: 'WzEsMV0=',
+        };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-1' });
+
+        const res = await client.upsertRule({
+          id: 'rule-id-1',
+          data: { ...baseCreateData, ...(bodyReason ? { reason: bodyReason } : {}) },
+        });
+
+        const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
+        expect(attrs.reason).toBe(expectedReason);
+        expect(res.rule.reason).toBe(expectedReason);
+      });
+
       it('keeps the existing template', async () => {
         const client = createClient();
         const existingDoc = {
