@@ -270,7 +270,7 @@ columns: [
 
 The accessor receives the displayed column names, data source, and saved grid settings. Profiles can use response column types to supply default widths while preserving user settings and leaving a column flexible to fill the table.
 
-The Patterns profile uses compact numeric widths while a flexible pattern is displayed. Resetting a resized numeric column restores that profile default.
+The Patterns profile uses compact numeric widths while a flexible pattern is displayed. Explicitly resetting a numeric column's width opts it out of the compact default and restores automatic sizing.
 
 **Screenshot:**
 ![Columns configuration example](./docs/extension_points/get_columns_configuration.png)
