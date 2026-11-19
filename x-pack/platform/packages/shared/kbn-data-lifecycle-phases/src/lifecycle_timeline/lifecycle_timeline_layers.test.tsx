@@ -64,13 +64,21 @@ describe('LifecycleTimeline layers', () => {
   it('leaves the end of the ticks empty when no end label is passed', () => {
     renderWithTheme(
       <LifecycleTimelineTicks
-        grid={{ gridTemplateColumns: '1fr' }}
-        ticks={[{ id: 'hot', label: '0' }]}
+        grid={{ gridTemplateColumns: '1fr 1fr' }}
+        ticks={[
+          { id: 'hot', label: '0' },
+          { id: 'warm', label: '7d' },
+        ]}
       />
     );
+    const [firstLine, lastLine] = Array.from(
+      screen.getByTestId('lifecycleTimeline-tick-hot').closest('[aria-hidden]')!.children
+    ).map((column) => column.firstElementChild);
 
     expect(screen.getByTestId('lifecycleTimeline-tick-hot')).toHaveTextContent('0');
     expect(screen.queryByTestId('lifecycleTimeline-retention')).toBeNull();
+    expect(firstLine).toHaveStyle({ borderRightStyle: 'solid' });
+    expect(lastLine).not.toHaveStyle({ borderRightStyle: 'solid' });
   });
 
   it('uses the test subjects passed in instead of the default ones', () => {

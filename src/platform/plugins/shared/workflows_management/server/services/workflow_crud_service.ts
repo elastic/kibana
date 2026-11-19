@@ -26,7 +26,9 @@ import {
 import {
   type CreateWorkflowCommand,
   type EsWorkflow,
+  getPageTriggerId,
   getWorkflowAccessDecisions,
+  isPageTrigger,
   NonTerminalExecutionStatuses,
   storedWorkflowAccessControlSchema,
   toCustomTriggerSchemaConfigs,
@@ -115,6 +117,18 @@ import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_trigger
 import { syncSchedulerAfterSave } from '../task_defs/sync_scheduler_after_save';
 import { unscheduleWorkflowTasks } from '../task_defs/unschedule_workflow_tasks';
 
+interface DeleteWorkflowsOptions {
+  force?: boolean;
+  acknowledgeAclLoss?: boolean;
+}
+
+interface WorkflowDeletionOptions extends DeleteWorkflowsOptions {
+  purgeExecutions?: boolean;
+  profileId?: string;
+  request?: KibanaRequest;
+  isAdmin?: boolean;
+}
+
 // How many times to re-resolve a server-generated ID after losing a TOCTOU race
 // against `op_type: 'create'`. The id resolver itself walks up to MAX_COLLISION_RETRIES
 // candidates per call, so the practical ceiling is far higher than this number;
@@ -168,6 +182,12 @@ export interface BulkCreateWorkflowsResult {
 type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
   workflowData: WorkflowProperties;
 };
+
+const hasPageTrigger = (definition: WorkflowYaml | null | undefined): boolean =>
+  Boolean(definition?.triggers.some(isPageTrigger));
+
+const getPageIds = (definition: WorkflowYaml | null | undefined): Set<string> =>
+  new Set(definition?.triggers.filter(isPageTrigger).map(getPageTriggerId));
 
 export class WorkflowCrudService {
   constructor(private readonly deps: WorkflowCrudDeps) {}
@@ -488,13 +508,14 @@ export class WorkflowCrudService {
     const accountId = document.definition?.settings?.run_as;
     const previous =
       options?.previousDocument ??
-      (bindings && !options?.create
+      ((bindings || this.deps.pagesSystemClient) && !options?.create
         ? await this.getWorkflowDocumentSource(id, document.spaceId, {
             includeDeleted: true,
             includeGlobal: true,
           })
         : null);
     const write = async () => {
+      await this.updatePagesBeforeWrite(id, previous, document, options?.request);
       const response = await this.deps.workflowStorage.getClient().index({
         id,
         document,
@@ -943,6 +964,12 @@ export class WorkflowCrudService {
       logger: this.deps.logger,
     });
 
+    await this.syncWorkflowPages(
+      [{ id, definition: workflowData.definition }],
+      workflowData.spaceId,
+      request
+    );
+
     return transformStorageDocumentToWorkflowDto(id, workflowData);
   }
 
@@ -1143,6 +1170,15 @@ export class WorkflowCrudService {
       );
     }
 
+    await this.syncWorkflowPages(
+      successfullyWritten.map(({ id, workflowData }) => ({
+        id,
+        definition: workflowData.definition,
+      })),
+      spaceId,
+      request
+    );
+
     return { created, failed };
   }
 
@@ -1236,6 +1272,12 @@ export class WorkflowCrudService {
       finalData,
       shouldUpdateScheduler,
     });
+
+    await this.syncWorkflowPages(
+      [{ id, definition: finalData.definition }],
+      finalData.spaceId,
+      request
+    );
 
     return {
       response: {
@@ -1371,7 +1413,7 @@ export class WorkflowCrudService {
   async deleteWorkflows(
     ids: string[],
     spaceId: string,
-    options?: { force?: boolean; acknowledgeAclLoss?: boolean },
+    options?: DeleteWorkflowsOptions,
     request?: KibanaRequest
   ): Promise<DeleteWorkflowsResponse> {
     const profileId = request
@@ -1381,6 +1423,17 @@ export class WorkflowCrudService {
       options?.force === true &&
       (await isEntityAccessControlAdmin(this.deps.getCoreStart(), request, this.deps.authz));
     const deletionOptions = { ...options, profileId, request, isAdmin };
+    const result = await this.deleteWorkflowsWithBindings(ids, spaceId, deletionOptions);
+    await this.retireWorkflowPages(result.successfulIds ?? [], spaceId, request);
+    return result;
+  }
+
+  private async deleteWorkflowsWithBindings(
+    ids: string[],
+    spaceId: string,
+    deletionOptions: WorkflowDeletionOptions
+  ): Promise<DeleteWorkflowsResponse> {
+    const { profileId, request, isAdmin, force } = deletionOptions;
     const bindings = this.deps.getServiceAccountBindings?.();
     if (!bindings) return this.deleteWorkflowDocuments(ids, spaceId, deletionOptions);
     const result: DeleteWorkflowsResponse = {
@@ -1430,13 +1483,13 @@ export class WorkflowCrudService {
         }
         assertWorkflowOperation(
           versioned.source,
-          getWorkflowDeleteOperation(versioned.source, options?.force),
+          getWorkflowDeleteOperation(versioned.source, force),
           profileId,
           this.accessAuditContext(request, id, spaceId),
           isAdmin
         );
         const accountId = versioned.source.definition?.settings?.run_as;
-        if (batch && !accountId && !options?.force) {
+        if (batch && !accountId && !force) {
           unboundSoftDeletes.push({
             _id: id,
             _source: versioned.source,
@@ -1455,9 +1508,7 @@ export class WorkflowCrudService {
           );
           if (executions.total > 0) {
             throw new WorkflowConflictError(
-              `Cannot ${
-                options?.force ? 'force-delete' : 'delete'
-              } workflow with running executions: ${id}`,
+              `Cannot ${force ? 'force-delete' : 'delete'} workflow with running executions: ${id}`,
               id
             );
           }
@@ -1518,7 +1569,7 @@ export class WorkflowCrudService {
     }
     if (batch)
       await cleanupDeletedWorkflows(result.successfulIds ?? [], {
-        force: options?.force ?? false,
+        force: force ?? false,
         spaceId,
         taskScheduler: this.deps.getTaskScheduler(),
         workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
@@ -1526,6 +1577,127 @@ export class WorkflowCrudService {
         logger: this.deps.logger,
       });
     return result;
+  }
+
+  /**
+   * Creates and retires pages after a write, for the written workflows with a page trigger. The
+   * others have no pages: a save retires the pages it drops before its write. A failure only logs:
+   * the workflow write already happened, and the resolver checks that the trigger is still there.
+   * Syncs from the stored workflow, not the written one, so a slow sync cannot retire the page
+   * of a newer save.
+   * shortcut: a save that lands between this read and the sync can still lose its page until its
+   * next save; a version guard on the sync closes that if it shows up.
+   */
+  private async syncWorkflowPages(
+    written: Array<{ id: string; definition: WorkflowProperties['definition'] }>,
+    spaceId: string,
+    request: KibanaRequest | undefined
+  ): Promise<void> {
+    const { pagesSystemClient } = this.deps;
+    const ids = written.filter(({ definition }) => hasPageTrigger(definition)).map(({ id }) => id);
+    if (!pagesSystemClient || ids.length === 0) return;
+    let workflows: WorkflowDetailDto[];
+    try {
+      // A workflow deleted or moved since the write is missing: the delete or the move handles it.
+      workflows = await this.getWorkflowsByIds(ids, spaceId);
+    } catch (error) {
+      this.deps.logger.error(`Failed to read workflows [${ids.join(', ')}] for the page sync`, {
+        error,
+      });
+      return;
+    }
+    await pMap(
+      workflows,
+      async ({ id, createdAt, definition, valid }) => {
+        try {
+          await pagesSystemClient.syncWorkflowPages({
+            workflowId: id,
+            workflowCreatedAt: createdAt,
+            spaceId,
+            definition,
+            valid,
+            request,
+          });
+        } catch (error) {
+          this.deps.logger.error(`Failed to sync the pages of workflow [${id}]`, { error });
+        }
+      },
+      { concurrency: 10 }
+    );
+  }
+
+  /**
+   * Retires the pages a write drops, and unpublishes them on an invalid save, right before the
+   * write and after every write gate passed. A failure fails the write, so a page never stays
+   * live by mistake.
+   */
+  private async updatePagesBeforeWrite(
+    id: string,
+    previous: WorkflowProperties | null | undefined,
+    next: WorkflowProperties,
+    request: KibanaRequest | undefined
+  ): Promise<void> {
+    const { pagesSystemClient } = this.deps;
+    if (!pagesSystemClient || !previous) return;
+    // A move or a revive starts without the old pages.
+    if (previous.deleted_at || previous.spaceId !== next.spaceId) {
+      await pagesSystemClient.retireWorkflowPages({
+        workflowIds: [id],
+        spaceId: previous.spaceId,
+        reason: previous.deleted_at ? 'workflow_revived' : 'workflow_moved',
+        request,
+      });
+      return;
+    }
+    if (!next.valid) {
+      // An invalid workflow cannot serve a page. Unpublishing keeps the secret, so an admin can
+      // publish the same link again after a fix.
+      if (previous.valid && hasPageTrigger(previous.definition)) {
+        await pagesSystemClient.unpublishWorkflowPages({
+          workflowId: id,
+          spaceId: next.spaceId,
+          request,
+        });
+      }
+      return;
+    }
+    // A save that keeps every page of a valid stored definition has nothing to retire. Disables
+    // and field updates skip the page store this way, so it can never block them.
+    const kept = getPageIds(next.definition);
+    if (
+      previous.valid &&
+      [...getPageIds(previous.definition)].every((pageId) => kept.has(pageId))
+    ) {
+      return;
+    }
+    await pagesSystemClient.retireRemovedPages({
+      workflowId: id,
+      spaceId: next.spaceId,
+      definition: next.definition,
+      request,
+    });
+  }
+
+  private async retireWorkflowPages(
+    workflowIds: string[],
+    spaceId: string,
+    request: KibanaRequest | undefined
+  ): Promise<void> {
+    const { pagesSystemClient } = this.deps;
+    if (!pagesSystemClient || workflowIds.length === 0) return;
+    try {
+      await pagesSystemClient.retireWorkflowPages({
+        workflowIds,
+        spaceId,
+        reason: 'workflow_deleted',
+        request,
+      });
+    } catch (error) {
+      this.deps.logger.error(
+        `Failed to retire the pages of deleted workflows [${workflowIds.join(', ')}]`,
+        { error }
+      );
+    }
   }
 
   private accessAuditContext(
@@ -1565,14 +1737,7 @@ export class WorkflowCrudService {
   private async deleteWorkflowDocuments(
     ids: string[],
     spaceId: string,
-    options?: {
-      force?: boolean;
-      acknowledgeAclLoss?: boolean;
-      purgeExecutions?: boolean;
-      profileId?: string;
-      request?: KibanaRequest;
-      isAdmin?: boolean;
-    },
+    options?: WorkflowDeletionOptions,
     versionedWorkflow?: VersionedWorkflowDocument,
     guardedBatch?: OccWorkflowHit[],
     deferCleanup = false
