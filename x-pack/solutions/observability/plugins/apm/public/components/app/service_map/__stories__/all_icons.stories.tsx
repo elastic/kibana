@@ -10,27 +10,28 @@ import type { StoryObj } from '@storybook/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { useEuiTheme, EuiTitle } from '@elastic/eui';
 import type { ElasticAgentName, OpenTelemetryAgentName } from '@kbn/apm-types';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
-import { DependencyNode } from '../dependency_node';
-import { ServiceNode } from '../service_node';
-import { GroupedResourcesNode } from '../grouped_resources_node';
-import type { DependencyNodeData, ServiceNodeData, GroupedNodeData } from '../../../../../common/service_map';
-import { ServiceHealthStatus } from '../../../../../common/service_health_status';
+import { DependencyNode } from '../../../shared/service_map/dependency_node';
+import { ServiceNode } from '../../../shared/service_map/service_node';
+import { GroupedResourcesNode } from '../../../shared/service_map/grouped_resources_node';
+import type {
+  DependencyNodeData,
+  ServiceNodeData,
+  GroupedNodeData,
+} from '../../../../../common/service_map';
 
 export default {
   title: 'app/ServiceMap/AllIcons',
   decorators: [
     (Story: React.ComponentType) => (
-      <MockApmPluginStorybook routePath="/service-map?rangeFrom=now-15m&rangeTo=now">
-        <ReactFlowProvider>
-          <div style={{ padding: 40 }}>
-            <Story />
-          </div>
-        </ReactFlowProvider>
-      </MockApmPluginStorybook>
+      <ReactFlowProvider>
+        <div style={{ padding: 40 }}>
+          <Story />
+        </div>
+      </ReactFlowProvider>
     ),
   ],
   parameters: {
+    routePath: '/service-map?rangeFrom=now-15m&rangeTo=now',
     layout: 'fullscreen',
   },
 };
@@ -38,7 +39,14 @@ export default {
 const LabelText = ({ children }: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
   return (
-    <div style={{ marginTop: 8, fontSize: 12, color: euiTheme.colors.textSubdued, textAlign: 'center' }}>
+    <div
+      style={{
+        marginTop: 8,
+        fontSize: 12,
+        color: euiTheme.colors.textSubdued,
+        textAlign: 'center',
+      }}
+    >
       {children}
     </div>
   );
@@ -245,12 +253,12 @@ export const AllIcons: StoryObj = {
                   isService: true,
                   agentName: 'nodejs',
                   serviceAnomalyStats: {
-                    healthStatus: ServiceHealthStatus.healthy,
                     transactionType: 'request',
+                    anomalyScore: 1,
                   },
                 })}
               />
-              <LabelText>Healthy</LabelText>
+              <LabelText>Low severity</LabelText>
             </div>
             <div style={{ textAlign: 'center' }}>
               <ServiceNode
@@ -260,13 +268,12 @@ export const AllIcons: StoryObj = {
                   isService: true,
                   agentName: 'python',
                   serviceAnomalyStats: {
-                    healthStatus: ServiceHealthStatus.warning,
                     transactionType: 'request',
-                    anomalyScore: 50,
+                    anomalyScore: 10,
                   },
                 })}
               />
-              <LabelText>Warning</LabelText>
+              <LabelText>Warning severity</LabelText>
             </div>
             <div style={{ textAlign: 'center' }}>
               <ServiceNode
@@ -276,13 +283,12 @@ export const AllIcons: StoryObj = {
                   isService: true,
                   agentName: 'ruby',
                   serviceAnomalyStats: {
-                    healthStatus: ServiceHealthStatus.critical,
                     transactionType: 'request',
                     anomalyScore: 85,
                   },
                 })}
               />
-              <LabelText>Critical</LabelText>
+              <LabelText>Critical severity</LabelText>
             </div>
           </IconRow>
         </Section>
