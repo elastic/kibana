@@ -18,8 +18,9 @@ import {
   getApiUrl,
   getCloudConsistencyError,
   isActionConflict,
+  isBaseApiUrl,
   isResourceNotFound,
-  isSecureApiUrl,
+  isSecureUrl,
   mdeList,
   mdeRequest,
   parseConflictingActionRef,
@@ -201,6 +202,45 @@ describe('Microsoft Defender for Endpoint client', () => {
       expect(request).not.toHaveBeenCalled();
     });
 
+    it('refuses a saved API URL with a query string or fragment before any request', async () => {
+      for (const apiUrl of [
+        'https://proxy.example.com/api?tenant=a',
+        'https://proxy.example.com/api#x',
+      ]) {
+        const { ctx, request } = createContext({ apiUrl });
+
+        await expect(
+          mdeRequest(ctx, { method: 'GET', path: '/machines', permission: 'Machine.Read.All' })
+        ).rejects.toThrow(/query string or fragment/);
+        expect(request).not.toHaveBeenCalled();
+      }
+    });
+
+    it('refuses a plain http token URL to a non-loopback host before requesting a token', async () => {
+      for (const tokenUrl of [
+        'http://login.microsoftonline.com/t/oauth2/v2.0/token',
+        'http://proxy.example.com/t/oauth2/v2.0/token',
+      ]) {
+        const { ctx, request } = createContext(undefined, { tokenUrl });
+
+        await expect(
+          mdeRequest(ctx, { method: 'GET', path: '/machines', permission: 'Machine.Read.All' })
+        ).rejects.toThrow(/token URL must use https/);
+        expect(request).not.toHaveBeenCalled();
+      }
+    });
+
+    it('accepts a plain http token URL to a loopback host', async () => {
+      const { ctx, request } = createContext(undefined, {
+        tokenUrl: 'http://localhost:18080/t/oauth2/v2.0/token',
+      });
+      request.mockResolvedValue({ data: { value: [] } });
+
+      await expect(
+        mdeRequest(ctx, { method: 'GET', path: '/machines', permission: 'Machine.Read.All' })
+      ).resolves.toEqual({ value: [] });
+    });
+
     it('does not follow a redirect and reports it as a failure', async () => {
       const { ctx, request } = createContext();
       request.mockRejectedValueOnce(httpError(302, {}));
@@ -327,19 +367,6 @@ describe('Microsoft Defender for Endpoint client', () => {
       ).rejects.toThrow(
         'Microsoft Defender for Endpoint request failed: maxContentLength size of 1048576 exceeded. The response is larger than the Kibana response size limit (xpack.actions.maxResponseContentLength): request fewer records with top.'
       );
-    });
-
-    it('passes a per-request timeout when set', async () => {
-      const { ctx, request } = createContext();
-      request.mockResolvedValue({ data: {} });
-
-      await mdeRequest(ctx, {
-        method: 'POST',
-        path: '/advancedqueries/run',
-        permission: 'AdvancedQuery.Read.All',
-        timeout: 210_000,
-      });
-      expect(request.mock.calls[0][0].timeout).toBe(210_000);
     });
   });
 
@@ -505,15 +532,23 @@ describe('Microsoft Defender for Endpoint client', () => {
   });
 
   describe('helpers', () => {
-    it('accepts https API URLs and plain http only to a loopback host', () => {
-      expect(isSecureApiUrl('https://api.security.microsoft.com/api')).toBe(true);
-      expect(isSecureApiUrl('https://proxy.example.com:8443/api')).toBe(true);
-      expect(isSecureApiUrl('http://localhost:18080')).toBe(true);
-      expect(isSecureApiUrl('http://127.0.0.1:18080/api')).toBe(true);
-      expect(isSecureApiUrl('http://[::1]:18080/api')).toBe(true);
-      expect(isSecureApiUrl('http://api.security.microsoft.com/api')).toBe(false);
-      expect(isSecureApiUrl('http://localhost.example.com/api')).toBe(false);
-      expect(isSecureApiUrl('ftp://api.security.microsoft.com/api')).toBe(false);
+    it('accepts https URLs and plain http only to a loopback host', () => {
+      expect(isSecureUrl('https://api.security.microsoft.com/api')).toBe(true);
+      expect(isSecureUrl('https://proxy.example.com:8443/api')).toBe(true);
+      expect(isSecureUrl('http://localhost:18080')).toBe(true);
+      expect(isSecureUrl('http://127.0.0.1:18080/api')).toBe(true);
+      expect(isSecureUrl('http://[::1]:18080/api')).toBe(true);
+      expect(isSecureUrl('http://api.security.microsoft.com/api')).toBe(false);
+      expect(isSecureUrl('http://localhost.example.com/api')).toBe(false);
+      expect(isSecureUrl('ftp://api.security.microsoft.com/api')).toBe(false);
+    });
+
+    it('accepts a custom API URL only without a query string or fragment', () => {
+      expect(isBaseApiUrl('https://proxy.example.com/api')).toBe(true);
+      expect(isBaseApiUrl('https://proxy.example.com/api/')).toBe(true);
+      expect(isBaseApiUrl('https://proxy.example.com/api?tenant=a')).toBe(false);
+      expect(isBaseApiUrl('https://proxy.example.com/api?')).toBe(false);
+      expect(isBaseApiUrl('https://proxy.example.com/api#x')).toBe(false);
     });
 
     it('parses Retry-After seconds and HTTP dates', () => {

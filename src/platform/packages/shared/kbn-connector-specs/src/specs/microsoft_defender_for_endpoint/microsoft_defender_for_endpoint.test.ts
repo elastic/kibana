@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod/v4';
 import type { ActionContext } from '../../connector_spec';
 import { MicrosoftDefenderForEndpoint } from './microsoft_defender_for_endpoint';
 
@@ -74,6 +75,32 @@ describe('MicrosoftDefenderForEndpoint', () => {
         'listVulnerabilities',
       ].sort()
     );
+  });
+
+  it('never points agents at an action that is not an agent tool', () => {
+    const { actions, skill } = MicrosoftDefenderForEndpoint;
+    const nonTools = Object.entries(actions)
+      .filter(([, action]) => !action.isTool)
+      .map(([name]) => name);
+    expect(nonTools.sort()).toEqual(
+      ['batchDeleteIndicators', 'batchSubmitIndicators', 'deleteIndicator', 'runScript'].sort()
+    );
+
+    const agentVisibleTexts: Array<[string, string]> = [
+      ['skill', skill ?? ''],
+      ...Object.entries(actions)
+        .filter(([, action]) => action.isTool)
+        .map(([name, action]): [string, string] => [
+          name,
+          `${action.description ?? ''} ${JSON.stringify(z.toJSONSchema(action.input))}`,
+        ]),
+    ];
+    const mentions = agentVisibleTexts.flatMap(([where, text]) =>
+      nonTools
+        .filter((name) => new RegExp(`\\b${name}\\b`).test(text))
+        .map((name) => `${where} mentions ${name}`)
+    );
+    expect(mentions).toEqual([]);
   });
 
   describe('test handler', () => {

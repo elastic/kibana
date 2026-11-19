@@ -213,6 +213,25 @@ describe('Microsoft Defender for Endpoint machine actions', () => {
       ).rejects.toThrow(/No Pending or InProgress machine action was found/);
     });
 
+    it('never names a pending action of a type that does not block the operation', async () => {
+      const { ctx, request } = createContext();
+      request.mockRejectedValueOnce(inProgress).mockResolvedValueOnce({
+        data: { value: [{ ...pendingAction, type: 'RunAntiVirusScan' }] },
+      });
+
+      const error = await run('isolateHost', ctx, {
+        machineId: MACHINE_ID,
+        comment: 'test',
+      }).catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(MdeApiError);
+      expect((error as MdeApiError).conflictingAction).toBeUndefined();
+      expect((error as Error).message).not.toContain(pendingAction.id);
+      expect((error as Error).message).toMatch(
+        /No Pending or InProgress machine action of a type that blocks isolate \(Isolate, Unisolate\) was found on the device, only 1 of other types/
+      );
+    });
+
     it('does not look anything up for other errors', async () => {
       const { ctx, request } = createContext();
       request.mockRejectedValueOnce(

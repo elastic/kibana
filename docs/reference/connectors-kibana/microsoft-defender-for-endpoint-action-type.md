@@ -198,7 +198,7 @@ Indicators that the connector creates appear in the Microsoft Defender portal un
 
 ## Differences from the Microsoft Defender for Endpoint connector [microsoft-defender-for-endpoint-v1-differences]
 
-This connector (`.microsoftDefenderEndpointv2`) sits next to the earlier [Microsoft Defender for Endpoint connector](defender-action-type.md) (`.microsoft_defender_endpoint`), referred to here as V1, which keeps working. You can reuse the Microsoft Entra app registration of a V1 connector. Add the permissions of any new actions you use, as listed in [Permissions by action](#microsoft-defender-for-endpoint-permissions).
+This connector (`.microsoft_defender_endpoint2`) sits next to the earlier [Microsoft Defender for Endpoint connector](defender-action-type.md) (`.microsoft_defender_endpoint`), referred to here as V1, which keeps working. You can reuse the Microsoft Entra app registration of a V1 connector. Add the permissions of any new actions you use, as listed in [Permissions by action](#microsoft-defender-for-endpoint-permissions).
 
 The nine V1 actions keep their names: `getAgentList`, `getAgentDetails`, `isolateHost`, `releaseHost`, `runScript`, `getLibraryFiles`, `getActions`, `getActionResults`, and `cancelAction`. Their inputs and outputs differ as follows.
 

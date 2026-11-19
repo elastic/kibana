@@ -14,12 +14,21 @@ import { UISchemas } from '../../connector_spec_ui';
 import {
   COMMERCIAL_SCOPE,
   DEFAULT_CLOUD,
+  API_URL_QUERY_MESSAGE,
   INSECURE_API_URL_MESSAGE,
-  isSecureApiUrl,
+  INSECURE_TOKEN_URL_MESSAGE,
+  isBaseApiUrl,
+  isSecureUrl,
   MDE_CLOUD_IDS,
 } from './client';
 
 const TOKEN_URL_PLACEHOLDER = 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token';
+
+/**
+ * The inherited token URL schema accepts http, and the cloud check compares hostnames only, so
+ * both auth types require https here: the token request carries the client secret or assertion.
+ */
+const secureTokenUrl = () => z.url().refine(isSecureUrl, INSECURE_TOKEN_URL_MESSAGE);
 
 const scopeMeta = () => ({
   label: i18n.translate('connectorSpecs.microsoftDefenderForEndpoint.auth.scope.label', {
@@ -45,7 +54,10 @@ export const mdeAuth: NonNullable<ConnectorSpec['auth']> = {
       // secret field would overwrite the stored value when the connector is edited.
       defaults: { tokenEndpointAuthMethod: 'client_secret_post' },
       overrides: {
-        fields: { scope: z.string().trim().min(1) },
+        fields: {
+          tokenUrl: secureTokenUrl(),
+          scope: lazySchema(() => z.string().trim().min(1)),
+        },
         meta: {
           tokenUrl: {
             placeholder: TOKEN_URL_PLACEHOLDER,
@@ -75,7 +87,10 @@ export const mdeAuth: NonNullable<ConnectorSpec['auth']> = {
       // Microsoft Entra expects a PS256 client assertion bound to the certificate by x5t#S256.
       defaults: { algorithm: 'PS256', certificateBinding: 'x5t#S256' },
       overrides: {
-        fields: { scope: z.string().trim().min(1) },
+        fields: {
+          tokenUrl: secureTokenUrl(),
+          scope: lazySchema(() => z.string().trim().min(1)),
+        },
         meta: {
           algorithm: { hidden: true },
           certificateBinding: { hidden: true },
@@ -119,7 +134,8 @@ export const MdeConfigSchema = lazySchema(() =>
       }),
     apiUrl: UISchemas.url('https://api.security.microsoft.com/api')
       .max(2048)
-      .refine(isSecureApiUrl, INSECURE_API_URL_MESSAGE)
+      .refine(isSecureUrl, INSECURE_API_URL_MESSAGE)
+      .refine(isBaseApiUrl, API_URL_QUERY_MESSAGE)
       .optional()
       .describe('Custom Defender for Endpoint API base URL, including /api')
       .meta({
@@ -130,7 +146,7 @@ export const MdeConfigSchema = lazySchema(() =>
           'connectorSpecs.microsoftDefenderForEndpoint.config.apiUrl.helpText',
           {
             defaultMessage:
-              "Optional. Leave empty to use the Defender cloud's API host. Set it only to reach the API through a proxy; include /api and use https.",
+              "Optional. Leave empty to use the Defender cloud's API host. Set it only to reach the API through a proxy; include /api, use https, and leave out any query string or fragment.",
           }
         ),
       }),

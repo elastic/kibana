@@ -68,7 +68,7 @@ export const MachineActionIdSchema = lazySchema(() =>
     )
     .max(36)
     .describe(
-      'Machine action ID (GUID) returned by isolateHost, releaseHost, runScript, getFile, runAntivirusScan, collectInvestigationPackage, or getActions, e.g. "5382f7ea-7557-4ab7-9782-d50480024a4e".'
+      'Machine action ID (GUID) returned by isolateHost, releaseHost, getFile, runAntivirusScan, collectInvestigationPackage, or getActions, e.g. "5382f7ea-7557-4ab7-9782-d50480024a4e".'
     )
 );
 

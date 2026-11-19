@@ -65,7 +65,7 @@ const definedFields = (fields: Record<string, unknown>) =>
 
 export const MicrosoftDefenderForEndpoint: ConnectorSpec = {
   metadata: {
-    id: '.microsoftDefenderEndpointv2',
+    id: '.microsoft_defender_endpoint2',
     displayName: 'Microsoft Defender for Endpoint',
     description: i18n.translate(
       'connectorSpecs.microsoftDefenderForEndpoint.metadata.description',
@@ -261,7 +261,7 @@ export const MicrosoftDefenderForEndpoint: ConnectorSpec = {
       isTool: true,
       scope: 'destroy',
       description:
-        'Create or update a custom indicator for a file hash, certificate, IP address, domain, or URL. It applies to every device in the tenant (or the given device groups) at once: Block and BlockAndRemediate stop it everywhere, Allowed exempts it. IP indicators take a single public IPv4 address: Microsoft rejects private ranges such as 10.x. Submitting the same value, type, and action again updates that indicator; a different action creates a second indicator for the same value. Returns the indicator with its id; remove it with deleteIndicator. Prefer Audit (with generateAlert true) unless blocking was requested.',
+        'Create or update a custom indicator for a file hash, certificate, IP address, domain, or URL. It applies to every device in the tenant (or the given device groups) at once: Block and BlockAndRemediate stop it everywhere, Allowed exempts it. IP indicators take a single public IPv4 address: Microsoft rejects private ranges such as 10.x. Submitting the same value, type, and action again updates that indicator; a different action creates a second indicator for the same value. Returns the indicator with its id. Agents cannot delete indicators: removing one needs a person in the Microsoft Defender portal (Settings > Endpoints > Indicators), so say what you submitted and where to remove it. Prefer Audit (with generateAlert true) unless blocking was requested.',
       input: SubmitIndicatorInputSchema,
       handler: async (ctx, input: SubmitIndicatorInput) =>
         withoutODataContext(
@@ -347,7 +347,7 @@ export const MicrosoftDefenderForEndpoint: ConnectorSpec = {
     '### Finding IDs',
     '- Device IDs are 40 hex characters. Find one with `getAgentList` (by `hostname`, `ipAddress`, `deviceId`, or an OData `filter`), or from the `machineId` field of an alert. `getAgentDetails` also accepts a computer name.',
     '- For an IP at a given time (the device may have changed IP since), pass `ipAddress` and `ipSeenAt` to `getAgentList`.',
-    '- Indicator IDs come from `submitIndicator`, `batchSubmitIndicators`, or `listIndicators`.',
+    '- Indicator IDs come from `submitIndicator` or `listIndicators`.',
     '',
     '### Scoping an incident',
     '1. `getAgentDetails` for the device, then `getMachineUsers` for the accounts on it.',
@@ -356,16 +356,16 @@ export const MicrosoftDefenderForEndpoint: ConnectorSpec = {
     '4. `getDeviceAvHealth` shows whether antivirus is active and up to date; `listVulnerabilities` lists CVEs.',
     '',
     '### Response actions',
-    '- `isolateHost`, `releaseHost`, `runAntivirusScan`, `collectInvestigationPackage`, `restrictAppExecution`, `removeAppRestriction`, `stopAndQuarantineFile`, `runScript`, and `getFile` return a machine action with status Pending. Poll `getActions` with `actionId` set to its `id` until status is Succeeded, Failed, TimeOut, or Cancelled; `cancelAction` stops a Pending or InProgress one.',
+    '- `isolateHost`, `releaseHost`, `runAntivirusScan`, `collectInvestigationPackage`, `restrictAppExecution`, `removeAppRestriction`, `stopAndQuarantineFile`, and `getFile` return a machine action with status Pending. Poll `getActions` with `actionId` set to its `id` until status is Succeeded, Failed, TimeOut, or Cancelled; `cancelAction` stops a Pending or InProgress one.',
     '- An isolated device stays isolated until `releaseHost` succeeds; a restricted one until `removeAppRestriction` succeeds.',
     '- `updateMachineTag` returns the updated device. Automated investigation (AIR) cannot be started on demand: Microsoft retired manual triggering in September 2026; run a Full `runAntivirusScan` instead.',
-    '- `runScript` runs a script named by `getLibraryFiles`; `getFile` pulls a file off the device. After either succeeds, `getActionResults` returns a download link valid 30 minutes.',
+    '- `getFile` pulls a file off the device; after it succeeds, `getActionResults` returns a download link valid 30 minutes. You cannot run live response scripts: `getLibraryFiles` only lists them, and a person runs one from the Defender portal.',
     '- After `collectInvestigationPackage` succeeds, `getInvestigationUri` returns a short-lived download URL in `value`.',
     '- Only one action of a kind can be pending per device. The error then names the pending one (Conflicting machine action: id=..., type=..., status=...): wait for it with `getActions` or cancel it with `cancelAction`. `runAntivirusScan` always returns the pending scan instead of failing, and other actions such as `restrictAppExecution` and `collectInvestigationPackage` sometimes do too: if the returned id is an older pending action, wait for it.',
     '- Isolation and indicators affect production: act only on a confirmed threat or an explicit request, and say what you are about to do.',
     '',
     '### Indicators',
-    '- `submitIndicator` applies tenant-wide. Prefer action Audit (with generateAlert true); use Block only when asked. Alert and AlertAndBlock are retired legacy actions and are not accepted: use Audit or Block with generateAlert true. IP indicators take a single public IPv4 address: private ranges, IPv6, and CIDR ranges are not supported. Resubmitting a value with a different action creates a second indicator, so delete the old one when changing the action. Check existing indicators with `listIndicators` first.',
+    '- `submitIndicator` applies tenant-wide. Prefer action Audit (with generateAlert true); use Block only when asked. Alert and AlertAndBlock are retired legacy actions and are not accepted: use Audit or Block with generateAlert true. IP indicators take a single public IPv4 address: private ranges, IPv6, and CIDR ranges are not supported. You cannot delete indicators: removing one needs a person in the Microsoft Defender portal (Settings > Endpoints > Indicators). Resubmitting a value with a different action creates a second indicator instead of changing the first, so do not change the action of an indicator; ask a person to remove the old one. Check existing indicators with `listIndicators` first, and after submitting, say what you submitted and where to remove it.',
     '',
     '### Paging and limits',
     '- List actions return one page (`top`, default 100). The API sends no next-page link: `hasMore` is true when the page is full, then call again with `skip` set to `nextSkip` (the last page can be empty).',

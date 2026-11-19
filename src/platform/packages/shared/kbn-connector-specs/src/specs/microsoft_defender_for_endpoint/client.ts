@@ -150,14 +150,15 @@ const hostOf = (url: unknown): string | undefined => {
   }
 };
 
-/** Hosts a custom API URL may reach over plain http: a proxy on the same host only. */
+/** Hosts the API URL or token URL may reach over plain http: a proxy on the same host only. */
 const LOOPBACK_HOSTS: ReadonlySet<string> = new Set(['localhost', '127.0.0.1', '[::1]']);
 
 /**
- * Whether a custom API URL is safe to send the bearer token to: https, or http to a loopback host.
- * Unparseable values pass here; the config schema rejects them as URLs.
+ * Whether a URL is safe to send credentials to (the bearer token for the API URL, the client
+ * secret or signed assertion for the token URL): https, or http to a loopback host. Unparseable
+ * values pass here; the schemas reject them as URLs.
  */
-export const isSecureApiUrl = (url: string): boolean => {
+export const isSecureUrl = (url: string): boolean => {
   try {
     const { protocol, hostname } = new URL(url);
     return protocol === 'https:' || (protocol === 'http:' && LOOPBACK_HOSTS.has(hostname));
@@ -168,6 +169,18 @@ export const isSecureApiUrl = (url: string): boolean => {
 
 export const INSECURE_API_URL_MESSAGE =
   'The custom API URL must use https (http is accepted only for localhost), because every request carries the access token.';
+
+/**
+ * Whether a custom API URL can take an action path appended: it has no query string or fragment,
+ * which would put the path outside the pathname. A bare trailing `?` or `#` counts too.
+ */
+export const isBaseApiUrl = (url: string): boolean => !/[?#]/.test(url);
+
+export const API_URL_QUERY_MESSAGE =
+  'The custom API URL must not contain a query string or fragment (? or #), because the action path is appended to it.';
+
+export const INSECURE_TOKEN_URL_MESSAGE =
+  'The token URL must use https (http is accepted only for localhost), because the token request carries the client secret or the signed client assertion.';
 
 type ConnectorFields = Record<string, unknown> | undefined;
 
@@ -234,13 +247,24 @@ export const assertCloudConsistency = (ctx: ActionContext): void => {
 };
 
 /**
- * Throws before any request when the custom API URL would send the access token over plain http,
- * which also covers connectors saved before the config schema enforced https.
+ * Throws before any request when the custom API URL would send the access token, or the token URL
+ * the client secret or assertion, over plain http, or when the custom API URL has a query string or
+ * fragment. This also covers connectors saved before the schemas enforced these rules. It runs
+ * before the auth type requests a token.
  */
-const assertSecureApiUrl = (ctx: ActionContext): void => {
+const assertSecureUrls = (ctx: ActionContext): void => {
   const configured = ctx.config?.apiUrl;
-  if (typeof configured === 'string' && configured.trim() && !isSecureApiUrl(configured.trim())) {
-    throw new MdeApiError(INSECURE_API_URL_MESSAGE);
+  if (typeof configured === 'string' && configured.trim()) {
+    if (!isSecureUrl(configured.trim())) {
+      throw new MdeApiError(INSECURE_API_URL_MESSAGE);
+    }
+    if (!isBaseApiUrl(configured.trim())) {
+      throw new MdeApiError(API_URL_QUERY_MESSAGE);
+    }
+  }
+  const tokenUrl = ctx.secrets?.tokenUrl;
+  if (typeof tokenUrl === 'string' && tokenUrl.trim() && !isSecureUrl(tokenUrl.trim())) {
+    throw new MdeApiError(INSECURE_TOKEN_URL_MESSAGE);
   }
 };
 
@@ -249,8 +273,8 @@ export const MAX_ATTEMPTS = 4;
 /**
  * Longest total time one call spends waiting between attempts (a single Retry-After included). A
  * wait that would go past it fails the call at once with the rate-limit error instead. 30 s keeps
- * a rate-limited action short enough for an agent turn or a workflow step, and well under the
- * 210 s advanced hunting request timeout; the 5xx back-off (1 + 2 + 4 s) always fits.
+ * a rate-limited action short enough for an agent turn or a workflow step; the 5xx back-off
+ * (1 + 2 + 4 s) always fits.
  */
 export const MAX_TOTAL_RETRY_WAIT_MS = 30_000;
 const INITIAL_BACKOFF_MS = 1_000;
@@ -274,7 +298,6 @@ export interface MdeRequestOptions {
    * runs live response or submits an indicator must not be: a retry could run it twice.
    */
   idempotent?: boolean;
-  timeout?: number;
 }
 
 interface MdeErrorBody {
@@ -420,7 +443,7 @@ const retryDelay = (status: number, retryAfterHeader: unknown, attempt: number) 
  */
 export const mdeRequest = async <T>(ctx: ActionContext, options: MdeRequestOptions): Promise<T> => {
   assertCloudConsistency(ctx);
-  assertSecureApiUrl(ctx);
+  assertSecureUrls(ctx);
   const url = `${getApiUrl(ctx)}${options.path}`;
   const idempotent = options.idempotent ?? options.method.toUpperCase() === 'GET';
   let waitedMs = 0;
@@ -435,7 +458,6 @@ export const mdeRequest = async <T>(ctx: ActionContext, options: MdeRequestOptio
         // Never follow a redirect: the API does not send one, and following it would send the
         // request (and, depending on the HTTP stack, the bearer token) to another host.
         maxRedirects: 0,
-        ...(options.timeout ? { timeout: options.timeout } : {}),
       });
       return response.data;
     } catch (error) {

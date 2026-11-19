@@ -447,7 +447,7 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
-    '.microsoftDefenderEndpointv2',
+    '.microsoft_defender_endpoint2',
     lazy(
       () =>
         import(

@@ -136,6 +136,7 @@ const toConflictError = async (
   const blockingTypes = CONFLICTING_TYPES[operation] ?? [];
   const named = parseConflictingActionRef(error.message);
   let conflicting: ConflictingMachineAction | undefined;
+  let otherPendingCount = 0;
   const lookupFailures: string[] = [];
 
   if (named) {
@@ -165,10 +166,12 @@ const toConflictError = async (
         },
         { permission: 'Machine.ReadWrite.All' }
       );
+      // Only an action the API named, or one of a type that blocks this operation, is reported:
+      // any other pending action (a scan blocking nothing here) would point at the wrong one.
       conflicting =
         (named && page.value.find((action) => action.id?.toLowerCase() === named.id)) ||
-        page.value.find((action) => action.type && blockingTypes.includes(action.type)) ||
-        page.value[0];
+        page.value.find((action) => action.type && blockingTypes.includes(action.type));
+      otherPendingCount = page.value.length;
     } catch (listError) {
       lookupFailures.push(`pending machine actions: ${errorReason(listError)}`);
     }
@@ -187,6 +190,10 @@ const toConflictError = async (
     lookupNote = `The conflicting machine action could not be looked up (${lookupFailures.join(
       '; '
     )}); find it with getActions filtered on machineId and status.`;
+  } else if (otherPendingCount > 0) {
+    lookupNote = `No Pending or InProgress machine action of a type that blocks ${operation} (${blockingTypes.join(
+      ', '
+    )}) was found on the device, only ${otherPendingCount} of other types; the blocking one may have just finished, so retry, or list them with getActions filtered on machineId and status.`;
   } else {
     lookupNote =
       'No Pending or InProgress machine action was found on the device; it may have just finished, so retry.';
@@ -400,7 +407,7 @@ export const machineActions: ConnectorSpec['actions'] = {
     isTool: true,
     scope: 'read',
     description:
-      'List the scripts and files in the live response library (fileName, description, creationTime, createdBy, hasParameters, parametersDescription). Use it to pick a scriptName for runScript. Returns value and count.',
+      'List the scripts and files in the live response library (fileName, description, creationTime, createdBy, hasParameters, parametersDescription). Agents can only list them: running a script needs a person in the Defender portal. Returns value and count.',
     input: EmptyInputSchema,
     handler: async (ctx) =>
       valueOf(
@@ -539,7 +546,7 @@ export const machineActions: ConnectorSpec['actions'] = {
     isTool: true,
     scope: 'read',
     description:
-      'Get a download link for the output of a completed runScript or getFile action: the script output, or the collected file. Call it after the action has Succeeded. Returns value: a URL valid for 30 minutes; download it outside the agent.',
+      'Get a download link for the output of a completed live response action: the file collected by getFile, or the output of a script a person ran. Call it after the action has Succeeded. Returns value: a URL valid for 30 minutes; download it outside the agent.',
     input: MachineActionInputSchema,
     handler: async (ctx, input: MachineActionInput) =>
       withoutODataContext(
