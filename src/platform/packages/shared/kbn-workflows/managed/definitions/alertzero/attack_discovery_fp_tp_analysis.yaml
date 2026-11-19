@@ -238,7 +238,9 @@ steps:
       # nested path such as `_source.host.id` finds nothing and both lookups would
       # silently match no documents. `size` covers one value per cited alert, but a
       # multivalued field can have more distinct values than that, so `count_alerts`
-      # records whether any list is incomplete (`sum_other_doc_count`) and
+      # records whether a list a lookup uses is incomplete (`sum_other_doc_count`; the
+      # host names count only when there are no host ids and the events are matched on
+      # names) and
       # `block_truncated_clear` then stops the run from clearing the attack.
       aggregations:
         earliest_original_time:
@@ -268,7 +270,7 @@ steps:
       host_ids: "${{ steps.load_alerts.output.aggregations.host_ids.buckets | map: 'key' }}"
       host_names: "${{ steps.load_alerts.output.aggregations.host_names.buckets | map: 'key' }}"
       user_names: "${{ steps.load_alerts.output.aggregations.user_names.buckets | map: 'key' }}"
-      keys_truncated: "${{ steps.load_alerts.output.aggregations.host_ids.sum_other_doc_count > 0 or steps.load_alerts.output.aggregations.host_names.sum_other_doc_count > 0 or steps.load_alerts.output.aggregations.user_names.sum_other_doc_count > 0 }}"
+      keys_truncated: "${{ steps.load_alerts.output.aggregations.host_ids.sum_other_doc_count > 0 or steps.load_alerts.output.aggregations.user_names.sum_other_doc_count > 0 or ((steps.load_alerts.output.aggregations.host_ids.buckets | size) == 0 and steps.load_alerts.output.aggregations.host_names.sum_other_doc_count > 0) }}"
       # ±2h is applied by the raw-event range as Elasticsearch date math. The
       # discovery timestamp is only the fallback when the alerts have no
       # `kibana.alert.original_time`.

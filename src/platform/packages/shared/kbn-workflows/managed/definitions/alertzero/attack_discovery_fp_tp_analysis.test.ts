@@ -872,13 +872,16 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     });
 
     describe('detecting an incomplete key list', () => {
-      const keysTruncated = (otherDocCount: Record<KeyField, number>): unknown => {
+      const keysTruncated = (
+        otherDocCount: Record<KeyField, number>,
+        hostIdKeys: string[] = ['host-1']
+      ): unknown => {
         const expression = String(stepIn('count_alerts')?.with?.keys_truncated)
           .replace(/^\$\{\{/, '')
           .replace(/\}\}$/, '')
           .trim();
         const aggregation = (field: KeyField) => ({
-          buckets: [],
+          buckets: field === 'host_ids' ? hostIdKeys.map((key) => ({ key })) : [],
           sum_other_doc_count: otherDocCount[field],
         });
 
@@ -896,13 +899,25 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
           },
         });
       };
+      const complete = { host_ids: 0, host_names: 0, user_names: 0 };
 
       it('is false when every bucket list is complete', () => {
-        expect(keysTruncated({ host_ids: 0, host_names: 0, user_names: 0 })).toBe(false);
+        expect(keysTruncated(complete)).toBe(false);
       });
 
-      it.each(KEY_FIELDS)('is true when %s has values beyond its buckets', (field) => {
-        expect(keysTruncated({ host_ids: 0, host_names: 0, user_names: 0, [field]: 3 })).toBe(true);
+      it.each(['host_ids', 'user_names'] as const)(
+        'is true when %s has values beyond its buckets',
+        (field) => {
+          expect(keysTruncated({ ...complete, [field]: 3 })).toBe(true);
+        }
+      );
+
+      it('ignores incomplete host names while host ids are present', () => {
+        expect(keysTruncated({ ...complete, host_names: 3 })).toBe(false);
+      });
+
+      it('counts incomplete host names when there are no host ids and events match on names', () => {
+        expect(keysTruncated({ ...complete, host_names: 3 }, [])).toBe(true);
       });
     });
   });
