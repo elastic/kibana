@@ -11,10 +11,7 @@ import { ADMISSION_LIMITS, ROLLING_HOUR_MS } from './constants';
 import type { AdmissionOutcome, Phase } from './types';
 
 interface PhaseState {
-  /**
-   * Newest admission times, up to `perHour`; stale timestamps are filtered before the
-   * rolling-hour check.
-   */
+  /** Newest admission times, at most `perHour`. */
   admittedTimes: number[];
   longestAdmittedMs: number;
   admitted: number;

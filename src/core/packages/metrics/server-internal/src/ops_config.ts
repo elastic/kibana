@@ -17,6 +17,13 @@ export const OPS_CONFIG_PATH = 'ops' as const;
 /** @internal */
 const OPS_METRICS_INTERVAL = '5s';
 
+/**
+ * Maximum length of `profiling.dir`, in characters. Each character consumes bytes in the log line.
+ * The limit is to keep the log line within the allowed size.
+ * @internal
+ */
+export const PROFILING_DIR_MAX_LENGTH = 64;
+
 /** @internal */
 interface OpsConfigCGroupOverridesOps {
   cpuPath?: string;
@@ -56,9 +63,6 @@ const startAfterBounds = { min: '2s', max: '4m' } as const;
 // end before the profiler's ~1.5s cold start on Serverless, leaving it empty.
 const maxDurationBounds = { min: '2s', max: '10s' } as const;
 const cooldownBounds = { min: '10s', max: '24h' } as const;
-// Keeps the worst-case capture log line within the worker logger's 4,094-byte limit.
-/** @internal */
-export const PROFILING_DIR_MAX_LENGTH = 64;
 
 const configSchema = schema.object({
   interval: schema.duration({ defaultValue: OPS_METRICS_INTERVAL }),
@@ -82,8 +86,9 @@ const configSchema = schema.object({
       maxDuration: schema.duration({ defaultValue: '10s', ...maxDurationBounds }),
       // Minimum wait after a capture before another can start.
       cooldown: schema.duration({ defaultValue: '1m', ...cooldownBounds }),
-      // Directory for profile files. Defaults to Node's `--diagnostic-dir`; without either, no
-      // files are written.
+      // Directory for profile files. Use an absolute path; a relative one resolves against the
+      // directory Kibana was started from. Defaults to Node's `--diagnostic-dir`; without either,
+      // no files are written.
       dir: schema.maybe(schema.string({ minLength: 1, maxLength: PROFILING_DIR_MAX_LENGTH })),
     }),
     startup: schema.object({

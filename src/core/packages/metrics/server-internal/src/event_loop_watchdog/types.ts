@@ -111,7 +111,8 @@ export interface ProfilingStats {
   /**
    * Blocks that ended at or past `startAfter`, whether profiling was on or not. With profiling on,
    * more of these than captures means some long blocks weren't profiled. A capture is counted when
-   * its profile arrives, just after its block ends, so the two can land in different periods.
+   * its profile arrives, which can be before or after its block ends, so a block's `pastStartAfter`
+   * count and its capture's `profiled` or `emptyTooLate` count can be on different stats lines.
    */
   pastStartAfter: number;
   /** Captures with at least one busy (non-idle) sample within the block. */
@@ -121,7 +122,7 @@ export interface ProfilingStats {
    * while the profiler was starting.
    */
   emptyTooLate: number;
-  /** Captures that failed to start, to stop, or to summarise. */
+  /** Captures that failed to start, stop, or to summarise. */
   captureFailed: number;
   /** Blocks past `startAfter` that ended without a capture because of the cooldown. */
   skippedCooldown: number;
@@ -132,13 +133,27 @@ export interface ProfilingStats {
   profilingActiveMs: number;
   /** Largest `stopHeartbeatGapMs` of the captures that ended in the period. */
   maxStopHeartbeatGapMs: number;
+  /**
+   * Profile file outcomes per phase. Captures without samples or without a directory aren't
+   * counted.
+   */
   files: Record<Phase, FileCounts>;
 }
 
+/** Profile file outcomes for one phase. */
 export interface FileCounts {
+  /** Files written in full, counted when the write finishes. */
   written: number;
+  /**
+   * Captures refused because the rolling hour was full and the block didn't beat the phase's
+   * record.
+   */
   inWindow: number;
+  /**
+   * Captures refused because the phase already admitted `maxFiles` files since the worker started.
+   */
   fileLimit: number;
+  /** Admitted captures whose write failed, counted when the write fails. */
   writeFailed: number;
 }
 

@@ -20,9 +20,8 @@ import {
   monotonicUs,
 } from './constants';
 
-// A 10-minute dev run used 20-24 MB of worker heap with the require hook loaded. A large profile
-// and its JSON serialization coexist during a write, so the former 32 MB limit left too little
-// headroom.
+// The worker needs enough memory to hold at least a large profile and its JSON string during a
+// write; the former 32 MB limit left too little headroom.
 const WORKER_MAX_OLD_GENERATION_SIZE_MB = 64;
 const WORKER_MAX_YOUNG_GENERATION_SIZE_MB = 16;
 

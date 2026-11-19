@@ -350,8 +350,8 @@ export const runWatchdogWorker = (
     if (file === 'file_limit') counts.files[phase].fileLimit++;
     captureNumber++;
     const frameLists = formatFrameLists(summary);
-    // Highlight captures selected for file output; keep other captures at info so their frame
-    // diagnostics remain available.
+    // Log levels chosen specifically to indicate if a profile was admitted for file output: warn if
+    // admitted for file output, otherwise use info.
     logger[file === 'admitted' ? 'warn' : 'info']<ProfileLogMeta>(
       `Event loop block profile #${captureNumber}: block ~${blockedMs}ms${
         stopReason === 'block_ended' ? '' : ' so far'
