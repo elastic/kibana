@@ -40,13 +40,77 @@ const findStep = (node: unknown, name: string): PrevalenceStep | undefined => {
 const NESTED_INDEX = 'prevalence-nested';
 const FLAT_INDEX = 'prevalence-flat';
 
-// The same three alerts in the shape a `logsdb` source event gives them (nested) and in the shape
-// a `logsdb_columnar` source event gives them (flat dotted keys).
-const ALERTS = [
-  { host: 'srv-1', user: 'alice' },
-  { host: 'srv-2', user: 'alice' },
-  { host: 'srv-3', user: 'bob' },
+type FieldPairs = Array<[string, string]>;
+
+const AZURE_ACTOR = 'azure.auditlogs.properties.initiated_by.user.user_principal_name';
+const GCP_ACTOR = 'gcp.audit.authentication_info.principal_email';
+
+// Each row is one alert and uses a different branch of the source and actor fallback lists.
+const ALERTS: FieldPairs[] = [
+  [
+    ['host.name', 'srv-1'],
+    ['user.name', 'alice'],
+  ],
+  [
+    ['host.name', 'srv-2'],
+    ['user.name', 'alice'],
+  ],
+  [
+    ['host.name', 'srv-3'],
+    ['user.name', 'bob'],
+  ],
+  [
+    ['host.id', 'hid-1'],
+    ['user.id', 'uid-1'],
+  ],
+  [
+    ['cloud.account.id', 'acct-1'],
+    ['aws.cloudtrail.user_identity.arn', 'arn-1'],
+  ],
+  [
+    ['source.ip', '10.0.0.1'],
+    [AZURE_ACTOR, 'az@x'],
+  ],
+  [
+    ['host.name', 'srv-9'],
+    [GCP_ACTOR, 'gcp@x'],
+  ],
+  // Precedence: `host.name` must win over `host.id`, and `user.name` over `user.id`.
+  [
+    ['host.name', 'wins-host'],
+    ['host.id', 'loses-host'],
+    ['user.name', 'wins-user'],
+    ['user.id', 'loses-user'],
+  ],
 ];
+
+const EXPECTED_SOURCES = [
+  '10.0.0.1',
+  'acct-1',
+  'hid-1',
+  'srv-1',
+  'srv-2',
+  'srv-3',
+  'srv-9',
+  'wins-host',
+];
+const EXPECTED_ACTORS = ['alice', 'arn-1', 'az@x', 'bob', 'gcp@x', 'uid-1', 'wins-user'];
+
+// The shape a `logsdb` source event gives an alert: nested objects.
+const toNested = (pairs: FieldPairs) =>
+  pairs.reduce<Record<string, unknown>>((doc, [path, value]) => {
+    const parts = path.split('.');
+    const leaf = parts.pop() as string;
+    const parent = parts.reduce<Record<string, unknown>>((node, part) => {
+      node[part] = node[part] ?? {};
+      return node[part] as Record<string, unknown>;
+    }, doc);
+    parent[leaf] = value;
+    return doc;
+  }, {});
+
+// The shape a `logsdb_columnar` source event gives an alert: flat dotted keys.
+const toFlat = (pairs: FieldPairs) => Object.fromEntries(pairs);
 
 describe('Alert Analysis prevalence steps against flat and nested alert _source', () => {
   let esServer: EsTestCluster;
@@ -64,11 +128,11 @@ describe('Alert Analysis prevalence steps against flat and nested alert _source'
 
     await client.bulk({
       refresh: 'wait_for',
-      operations: ALERTS.flatMap(({ host, user }) => [
+      operations: ALERTS.flatMap((pairs) => [
         { index: { _index: NESTED_INDEX } },
-        { host: { name: host }, user: { name: user } },
+        toNested(pairs),
         { index: { _index: FLAT_INDEX } },
-        { 'host.name': host, 'user.name': user },
+        toFlat(pairs),
       ]),
     });
   });
@@ -77,7 +141,7 @@ describe('Alert Analysis prevalence steps against flat and nested alert _source'
     await esServer?.stop();
   });
 
-  /** Runs a prevalence step's runtime mappings and cardinality aggregations on one index. */
+  /** Runs a prevalence step's runtime mappings and aggregations on one index and returns the values. */
   const runStep = async (stepName: string, index: string) => {
     const step = findStep(workflow, stepName);
     if (!step?.with?.runtime_mappings || !step.with.aggs) {
@@ -87,23 +151,40 @@ describe('Alert Analysis prevalence steps against flat and nested alert _source'
       index,
       size: 0,
       runtime_mappings: step.with.runtime_mappings as never,
-      aggs: step.with.aggs as never,
+      aggs: {
+        ...(step.with.aggs as Record<string, never>),
+        source_values: { terms: { field: 'effective_source', size: 50 } },
+        actor_values: { terms: { field: 'effective_actor', size: 50 } },
+      },
     });
-    const aggregations = response.aggregations as Record<string, { value: number }>;
+    const aggregations = response.aggregations as unknown as {
+      unique_sources: { value: number };
+      unique_actors: { value: number };
+      source_values: { buckets: Array<{ key: string }> };
+      actor_values: { buckets: Array<{ key: string }> };
+    };
 
     return {
       sources: aggregations.unique_sources.value,
       actors: aggregations.unique_actors.value,
+      sourceValues: aggregations.source_values.buckets.map(({ key }) => key).sort(),
+      actorValues: aggregations.actor_values.buckets.map(({ key }) => key).sort(),
     };
   };
 
   it.each(['get_global_prevalence_stats', 'get_noise_signal_stats'])(
-    '%s counts the same sources and actors on flat and nested alerts',
+    '%s finds the same sources and actors on flat and nested alerts',
     async (stepName) => {
       const nested = await runStep(stepName, NESTED_INDEX);
       const flat = await runStep(stepName, FLAT_INDEX);
 
-      expect(nested).toEqual({ sources: 3, actors: 2 });
+      // Exact values, not only counts: counts cannot see a swapped fallback precedence.
+      expect(nested).toEqual({
+        sources: EXPECTED_SOURCES.length,
+        actors: EXPECTED_ACTORS.length,
+        sourceValues: EXPECTED_SOURCES,
+        actorValues: EXPECTED_ACTORS,
+      });
       expect(flat).toEqual(nested);
     }
   );

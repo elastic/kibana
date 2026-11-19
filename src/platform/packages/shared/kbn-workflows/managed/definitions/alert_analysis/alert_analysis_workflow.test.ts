@@ -293,8 +293,6 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
 
       for (const { script } of [sourceField, actorField]) {
         expect(script.source).not.toContain('params._source?.');
-        expect(script.source).toContain('src.get(path)');
-        expect(script.source).toContain("path.splitOnToken('.')");
       }
       expect(sourceField.script.source).toContain(
         "['host.name', 'host.id', 'cloud.account.id', 'source.ip']"
