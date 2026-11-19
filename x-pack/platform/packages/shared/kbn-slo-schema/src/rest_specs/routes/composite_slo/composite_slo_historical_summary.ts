@@ -37,7 +37,7 @@ const fetchCompositeHistoricalSummaryResponseSchema = lazySchema(() =>
 type FetchCompositeHistoricalSummaryParams = z.infer<
   typeof fetchCompositeHistoricalSummaryParamsSchema.shape.body
 >;
-type FetchCompositeHistoricalSummaryResponse = z.infer<
+type FetchCompositeHistoricalSummaryResponse = z.input<
   typeof fetchCompositeHistoricalSummaryResponseSchema
 >;
 

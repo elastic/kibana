@@ -42,7 +42,7 @@ const findCompositeSLOResponseSchema = z.object({
 });
 
 type FindCompositeSLOParams = z.infer<typeof findCompositeSLOQuerySchema>;
-type FindCompositeSLOResponse = z.output<typeof findCompositeSLOResponseSchema>;
+type FindCompositeSLOResponse = z.input<typeof findCompositeSLOResponseSchema>;
 
 export { findCompositeSLOParamsSchema, findCompositeSLOResponseSchema };
 export type { FindCompositeSLOParams, FindCompositeSLOResponse };

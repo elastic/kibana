@@ -6,9 +6,10 @@
  */
 
 import { z, lazySchema } from '@kbn/zod';
-import { errorBudgetSchema, statusSchema } from './common';
-import { MAX_DURATION_STRING_LENGTH } from './limits';
+import { dateType, errorBudgetSchema, statusSchema } from './common';
+import { durationType } from './duration';
 import { occurrencesBudgetingMethodSchema, sloIdSchema, targetSchema } from './slo';
+import { rollingTimeWindowTypeSchema } from './time_window';
 
 const COMPOSITE_SLO_MIN_MEMBERS = 2;
 const COMPOSITE_SLO_MAX_MEMBERS = 25;
@@ -17,8 +18,10 @@ const compositeTagsSchema = z.array(z.string()).max(30);
 
 const compositeRollingTimeWindowSchema = lazySchema(() =>
   z.object({
-    duration: z.string().max(MAX_DURATION_STRING_LENGTH),
-    type: z.literal('rolling'),
+    duration: durationType.describe(
+      'The rolling duration formatted as {duration}{unit}, for example 30d'
+    ),
+    type: rollingTimeWindowTypeSchema,
   })
 );
 
@@ -55,8 +58,8 @@ const compositeSloBaseDefinitionSchema = lazySchema(() =>
     objective: targetSchema,
     tags: compositeTagsSchema,
     enabled: z.boolean(),
-    createdAt: z.string(),
-    updatedAt: z.string(),
+    createdAt: dateType,
+    updatedAt: dateType,
     createdBy: z.string(),
     updatedBy: z.string(),
     version: z.number(),
@@ -110,8 +113,8 @@ const compositeSloWithSummaryResponseSchema = compositeSloDefinitionSchema.exten
 
 type CompositeSLOMemberWithSummary = z.infer<typeof compositeSloMemberWithSummarySchema>;
 type CompositeSLOSummary = z.infer<typeof compositeSloSummarySchema>;
-type CompositeSLODefinitionResponse = z.infer<typeof compositeSloDefinitionResponseSchema>;
-type CompositeSLOWithSummaryResponse = z.infer<typeof compositeSloWithSummaryResponseSchema>;
+type CompositeSLODefinitionResponse = z.input<typeof compositeSloDefinitionResponseSchema>;
+type CompositeSLOWithSummaryResponse = z.input<typeof compositeSloWithSummaryResponseSchema>;
 
 export type {
   CompositeSLOMemberWithSummary,

@@ -25,8 +25,8 @@ const getCompositeSLOParamsSchema = getCompositeSLODefinitionParamsSchema;
 
 const getCompositeSLODefinitionResponseSchema = compositeSloDefinitionResponseSchema;
 
-type GetCompositeSLOResponse = z.output<typeof getCompositeSLOResponseSchema>;
-type GetCompositeSLODefinitionResponse = z.output<typeof getCompositeSLODefinitionResponseSchema>;
+type GetCompositeSLOResponse = z.input<typeof getCompositeSLOResponseSchema>;
+type GetCompositeSLODefinitionResponse = z.input<typeof getCompositeSLODefinitionResponseSchema>;
 
 export {
   getCompositeSLOParamsSchema,

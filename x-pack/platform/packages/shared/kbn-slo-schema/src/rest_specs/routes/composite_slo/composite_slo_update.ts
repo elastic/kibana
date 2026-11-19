@@ -8,6 +8,7 @@ import { z, displayName, description, lazySchema } from '@kbn/zod';
 import {
   compositeTagsSchema,
   compositeRollingTimeWindowSchema,
+  compositeSloDefinitionResponseSchema,
   compositeSloMembersSchema,
   compositeMethodSchema,
 } from '../../../schema/composite_slo';
@@ -36,15 +37,11 @@ const updateCompositeSLOParamsSchema = lazySchema(() =>
   })
 );
 
-const updateCompositeSLOInputSchema = lazySchema(() =>
-  updateCompositeSLOBodySchema.extend({
-    id: sloIdSchema,
-    spaceId: z.string(),
-    userId: z.string(),
-  })
-);
+const updateCompositeSLOResponseSchema = compositeSloDefinitionResponseSchema;
 
-type UpdateCompositeSLOInput = z.input<typeof updateCompositeSLOInputSchema>;
+type UpdateCompositeSLOInput = z.input<typeof updateCompositeSLOBodySchema>;
+type UpdateCompositeSLOParams = z.output<typeof updateCompositeSLOBodySchema>;
+type UpdateCompositeSLOResponse = z.input<typeof updateCompositeSLOResponseSchema>;
 
-export type { UpdateCompositeSLOInput };
-export { updateCompositeSLOParamsSchema };
+export type { UpdateCompositeSLOInput, UpdateCompositeSLOParams, UpdateCompositeSLOResponse };
+export { updateCompositeSLOParamsSchema, updateCompositeSLOResponseSchema };
