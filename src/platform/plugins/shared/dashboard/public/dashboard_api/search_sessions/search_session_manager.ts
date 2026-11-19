@@ -25,7 +25,8 @@ export function initializeSearchSessionManager(
   searchSessionSettings: DashboardCreationOptions['searchSessionSettings'],
   incomingEmbeddables: EmbeddablePackageState[] | undefined,
   dashboardApi: Omit<DashboardApi, 'searchSessionId$' | 'replayCacheLastFetched$'>,
-  dashboardInternalApi: DashboardInternalApi
+  dashboardInternalApi: DashboardInternalApi,
+  skipReplay = false
 ) {
   const searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
   const replayCacheLastFetched$ = new BehaviorSubject<string | undefined>(undefined);
@@ -72,8 +73,8 @@ export function initializeSearchSessionManager(
     replayCacheLastFetched$.next(undefined);
   };
 
-  // First match wins: background restore, the session an editor returns, a compatible
-  // cached session, otherwise a new one.
+  // First match wins: background restore, the session an editor returns, a new session when
+  // navigation changed the search, a compatible cached session, otherwise a new one.
   const getInitialSearchSessionId = (sessionIdToRestore?: string) => {
     if (sessionIdToRestore) {
       restoreSearchSession(sessionIdToRestore);
@@ -88,6 +89,10 @@ export function initializeSearchSessionManager(
     }
 
     const continuedSessionId = incomingEmbeddables?.length ? session.getSessionId() : undefined;
+    if (skipReplay && !continuedSessionId) {
+      return startSearchSession();
+    }
+
     // Every draft shares the unsaved id: a brand-new dashboard must not replay an earlier draft.
     const isNewDraft =
       dashboardApi.savedObjectId$.value === undefined &&

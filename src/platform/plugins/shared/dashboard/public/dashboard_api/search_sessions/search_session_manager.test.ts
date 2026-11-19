@@ -44,6 +44,7 @@ const setup = (
     sessionIdToRestore?: string;
     initialState?: Partial<DashboardState>;
     creationOptions?: DashboardCreationOptions;
+    skipReplay?: boolean;
   } = {}
 ) => {
   const { savedObjectId, incomingEmbeddables, sessionIdToRestore, initialState, creationOptions } =
@@ -59,6 +60,7 @@ const setup = (
   };
   const dashboard = getDashboardApi({
     savedObjectId,
+    skipReplay: overrides.skipReplay,
     incomingEmbeddables,
     initialState: getSampleDashboardState({ time_range: timeRange, ...initialState }),
     creationOptions: { searchSessionSettings: settings, ...creationOptions },
@@ -120,6 +122,19 @@ describe('Dashboard search sessions', () => {
     expect(getStorageAvailability()?.disabled).toBe(true);
     cleanup();
     expect(replayCache.delete).not.toHaveBeenCalled();
+  });
+
+  test('starts and registers a new session when navigation skips replay', () => {
+    jest.mocked(replayCache.get).mockReturnValue(replay);
+    const { api } = setup({ skipReplay: true });
+
+    expect(replayCache.get).not.toHaveBeenCalled();
+    expect(api.searchSessionId$.value).toBe('fresh-session');
+    expect(api.replayCacheLastFetched$.value).toBeUndefined();
+    expect(replayCache.set).toHaveBeenCalledWith(
+      'dashboard:dashboard-id',
+      expect.objectContaining({ sessionId: 'fresh-session' })
+    );
   });
 
   test('Refresh replaces a replay with one newly registered session', () => {
@@ -235,6 +250,7 @@ describe('Dashboard search sessions', () => {
     jest.mocked(replayCache.get).mockReturnValue(replay);
     jest.mocked(session.getSessionId).mockReturnValue(replay.sessionId);
     const { api } = setup({
+      skipReplay: true,
       incomingEmbeddables: [
         { type: 'lens', serializedState: {}, searchSessionId: replay.sessionId },
       ],

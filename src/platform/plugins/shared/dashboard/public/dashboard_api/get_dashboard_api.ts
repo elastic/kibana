@@ -58,6 +58,7 @@ import { initializeViewModeManager } from './view_mode_manager';
 
 export function getDashboardApi({
   creationOptions,
+  skipReplay = false,
   panelFlyoutType,
   incomingEmbeddables,
   initialState,
@@ -69,6 +70,8 @@ export function getDashboardApi({
   viewMode,
 }: {
   creationOptions?: DashboardCreationOptions;
+  /** Skip replay when navigation changes the restored dashboard search. */
+  skipReplay?: boolean;
   panelFlyoutType?: EuiFlyoutProps['type'];
   incomingEmbeddables: EmbeddablePackageState[] | undefined;
   initialState: DashboardState;
@@ -448,7 +451,8 @@ export function getDashboardApi({
     creationOptions?.searchSessionSettings,
     incomingEmbeddables,
     dashboardApi,
-    internalApi
+    internalApi,
+    skipReplay
   );
 
   return {

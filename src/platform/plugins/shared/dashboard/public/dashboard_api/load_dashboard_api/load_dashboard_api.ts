@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
+
 import type { EuiFlyoutProps } from '@elastic/eui';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
+import { dedupFilters, isFilterPinned } from '@kbn/es-query';
 import { asyncForEach } from '@kbn/std';
 
 import { getLastSavedState } from '../../../common/default_dashboard_state';
@@ -105,6 +110,10 @@ export async function loadDashboardApi({
 
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
+    skipReplay: haveSearchOverridesChanged(
+      { ...getLastSavedState(readResult), ...unsavedChanges },
+      overrideState
+    ),
     panelFlyoutType,
     incomingEmbeddables,
     initialState,
@@ -153,3 +162,38 @@ export async function loadDashboardApi({
     useControlsIntegration: creationOptions?.useControlsIntegration,
   };
 }
+
+/** Skip replay when a link changes the restored query, local filters or pinned panels. */
+const haveSearchOverridesChanged = (
+  restoredState: DashboardState,
+  overrideState: Partial<DashboardState>
+) => {
+  if (overrideState.query !== undefined && !deepEqual(restoredState.query, overrideState.query)) {
+    return true;
+  }
+
+  if (
+    overrideState.pinned_panels !== undefined &&
+    !deepEqual(restoredState.pinned_panels ?? [], overrideState.pinned_panels)
+  ) {
+    return true;
+  }
+
+  if (overrideState.filters === undefined) {
+    return false;
+  }
+
+  const restoredFilters = getLocalFilters(restoredState.filters);
+  const incomingFilters = getLocalFilters(overrideState.filters);
+  const compareOptions = { index: true, negate: true, group: true };
+
+  return (
+    dedupFilters(restoredFilters, incomingFilters, compareOptions).length > 0 ||
+    dedupFilters(incomingFilters, restoredFilters, compareOptions).length > 0
+  );
+};
+
+const getLocalFilters = (filters: DashboardState['filters']) =>
+  (toStoredFilters(filters, logger) ?? []).filter(
+    (filter) => !isFilterPinned(filter) && !filter.meta.disabled
+  );
