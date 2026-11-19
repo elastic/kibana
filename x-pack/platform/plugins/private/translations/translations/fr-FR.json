@@ -61049,7 +61049,6 @@
     "xpack.securitySolution.headerPage.pageSubtitle": "Dernier événement : {beat}",
     "xpack.securitySolution.hooks.useAddToTimeline.addedFieldMessage": "{fieldOrValue} ajouté à la chronologie",
     "xpack.securitySolution.hooks.useAddToTimeline.template.addedFieldMessage": "{fieldOrValue} ajouté au modèle de chronologie",
-    "xpack.securitySolution.hooks.useGetAIConnectors.fetchError": "Erreur lors de la récupération des connecteurs d'IA",
     "xpack.securitySolution.hooks.useGetSavedQuery.errorToastMessage": "Impossible de charger la requête enregistrée",
     "xpack.securitySolution.host.details.architectureLabel": "Architecture",
     "xpack.securitySolution.host.details.endpoint.endpointPolicy": "Politique d'intégration du point de terminaison",
