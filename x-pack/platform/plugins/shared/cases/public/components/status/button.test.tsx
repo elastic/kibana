@@ -46,11 +46,9 @@ describe('StatusActionButton', () => {
       renderComponent({ ...defaultProps, status });
 
       // EUI icons expose no accessible role/name, so the icon type is read from the DOM attribute
-      // eslint-disable-next-line testing-library/no-node-access
-      const icon = screen
-        .getByTestId('case-view-status-action-button')
-        .querySelector('[data-euiicon-type]');
-      expect(icon).toHaveAttribute('data-euiicon-type', iconType);
+      expect(screen.getByTestId('case-view-status-action-button')).toContainHTML(
+        `data-euiicon-type="${iconType}"`
+      );
     });
   });
 
