@@ -424,53 +424,40 @@ export const isTimeseriesSourceQuery = (esqlQuery: EsqlQuery) =>
   getESQLQueryDataSourceCommand(esqlQuery)?.name === 'ts';
 
 /**
- * The shapes of a TS (timeseries) query whose cascade rows cannot be resolved back to documents.
+ * Returns true when the query declares a FORK command.
+ *
+ * A FORK splits the query into branches and then interleaves their rows, so a row of the result
+ * does not describe one pipeline the leaf query could be rebuilt from: the branches may select
+ * different columns, aggregate differently, or not aggregate at all, and nothing in the row says
+ * which branch produced it. The cascade has no way to resolve such a row back to its documents,
+ * so these queries are opted out of the experience in the same way subquery sources are.
+ *
+ * The walker is what finds a FORK nested inside another command's branches, rather than only the
+ * ones declared at the top level of the pipeline.
  */
-export type UnsupportedTimeseriesCascadeShape = 'multiple-stats' | 'stats-in-fork';
+export const hasForkCommand = (esqlQuery: EsqlQuery): boolean => {
+  let containsFork = false;
 
-const forkContainsStatsCommand = (forkCommand: ESQLCommand): boolean => {
-  let containsStats = false;
-
-  // a FORK holds its branches as parenthesised sub-commands rather than command arguments,
-  // so the walker is what reaches the commands inside them
-  Walker.walk(forkCommand, {
+  Walker.walk(esqlQuery.ast, {
     visitCommand: (cmd) => {
-      containsStats ||= cmd.name === 'stats';
+      containsFork ||= cmd.name === 'fork';
     },
   });
 
-  return containsStats;
+  return containsFork;
 };
 
 /**
- * Returns the shape that disqualifies a TS (timeseries) query from the cascade experience, or
- * undefined when the query can be served.
+ * Returns true when a TS (timeseries) query declares a shape whose cascade rows cannot be
+ * resolved back to documents.
  *
  * Leaf (document fetch) queries for the cascade experience are always rewritten to read from FROM,
  * because INLINE STATS is not supported for TS queries. Any STATS command other than the one
  * driving the cascade has to be carried over verbatim, and when it applies an aggregate function
  * exclusive to TS queries (the `*_OVER_TIME` family) the resulting FROM query is not valid ES|QL,
- * so there is no way to resolve the documents behind such a row. That applies to a STATS preceding
- * the operating one, and equally to a STATS inside a FORK branch, which is copied into the leaf
- * query along with the rest of the FORK. Rather than emit a query that silently returns nothing,
- * these queries are opted out of the cascade experience entirely.
+ * so there is no way to resolve the documents behind such a row. Rather than emit a query that
+ * silently returns nothing, these queries are opted out of the cascade experience entirely.
  */
-export const getUnsupportedTimeseriesCascadeShape = (
-  esqlQuery: EsqlQuery
-): UnsupportedTimeseriesCascadeShape | undefined => {
-  if (!isTimeseriesSourceQuery(esqlQuery)) {
-    return;
-  }
-
-  const { commands } = esqlQuery.ast;
-
-  if (commands.filter((cmd) => cmd.name === 'stats').length > 1) {
-    return 'multiple-stats';
-  }
-
-  if (commands.some((cmd) => cmd.name === 'fork' && forkContainsStatsCommand(cmd))) {
-    return 'stats-in-fork';
-  }
-
-  return;
-};
+export const isUnsupportedTimeseriesCascadeQuery = (esqlQuery: EsqlQuery): boolean =>
+  isTimeseriesSourceQuery(esqlQuery) &&
+  esqlQuery.ast.commands.filter((cmd) => cmd.name === 'stats').length > 1;

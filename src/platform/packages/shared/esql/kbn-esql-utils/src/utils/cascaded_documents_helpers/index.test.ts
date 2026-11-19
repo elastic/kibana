@@ -367,46 +367,52 @@ describe('cascaded documents helpers utils', () => {
         expect(result.exclusionReason).toBe('timeseries_multiple_stats');
       });
 
-      it('withholds the cascade experience from TS queries whose FORK holds a STATS command', () => {
-        // the FORK and everything inside it is copied into the FROM query built for a leaf node,
-        // so a TS only aggregate in one of its branches makes that query unservable
-        const queryString = `
+      it.each([
+        [
+          'a TS source, with a STATS inside a branch',
+          `
           TS kibana_sample_data_logstsdb
           | FORK (WHERE bytes_gauge > 1000 | STATS peak = MAX(AVG_OVER_TIME(bytes_gauge)) BY host.name)
                  (WHERE bytes_gauge <= 1000)
           | STATS count = COUNT(*) BY host.name
-        `;
-
-        const result = getESQLStatsQueryMeta(queryString);
-        expect(result.groupByFields).toEqual([]);
-        expect(result.appliedFunctions).toEqual([]);
-        expect(result.exclusionReason).toBe('timeseries_stats_in_fork');
-      });
-
-      it('leaves TS queries whose FORK holds no STATS command alone', () => {
-        const queryString = `
+        `,
+        ],
+        [
+          'a TS source, with no STATS inside a branch',
+          `
           TS kibana_sample_data_logstsdb
           | FORK (WHERE bytes_gauge > 1000) (WHERE bytes_gauge <= 1000)
           | STATS count = COUNT(*) BY host.name
-        `;
-
-        const result = getESQLStatsQueryMeta(queryString);
-        expect(result.groupByFields).toEqual([{ field: 'host.name', type: 'column' }]);
-        expect(result.exclusionReason).toBeUndefined();
-      });
-
-      it('leaves a FROM query whose FORK holds a STATS command alone', () => {
-        const queryString = `
+        `,
+        ],
+        [
+          'a FROM source, with a STATS inside a branch',
+          `
           FROM kibana_sample_data_logs
           | FORK (WHERE bytes > 1000 | STATS peak = MAX(bytes) BY host.name)
                  (WHERE bytes <= 1000)
           | STATS count = COUNT(*) BY host.name
-        `;
-
-        const result = getESQLStatsQueryMeta(queryString);
-        expect(result.groupByFields).toEqual([{ field: 'host.name', type: 'column' }]);
-        expect(result.exclusionReason).toBeUndefined();
-      });
+        `,
+        ],
+        [
+          'a FROM source, with no STATS inside a branch',
+          `
+          FROM kibana_sample_data_logs
+          | FORK (WHERE bytes > 1000) (WHERE bytes <= 1000)
+          | STATS count = COUNT(*) BY host.name
+        `,
+        ],
+      ])(
+        'withholds the cascade experience from a query declaring a FORK command: %s',
+        (_, queryString) => {
+          // the branches interleave into one result without the rows saying which branch produced
+          // them, so no row can be resolved back to the documents behind it
+          const result = getESQLStatsQueryMeta(queryString);
+          expect(result.groupByFields).toEqual([]);
+          expect(result.appliedFunctions).toEqual([]);
+          expect(result.exclusionReason).toBe('fork_command');
+        }
+      );
 
       it('leaves TS queries with a single STATS command alone', () => {
         const queryString = `
@@ -831,7 +837,7 @@ describe('cascaded documents helpers utils', () => {
           );
         });
 
-        it('refuses to build a leaf query for a TS query whose FORK holds a STATS command', () => {
+        it('refuses to build a leaf query for a query declaring a FORK command', () => {
           const editorQuery: AggregateQuery = {
             esql: `
               TS kibana_sample_data_logstsdb
@@ -852,7 +858,7 @@ describe('cascaded documents helpers utils', () => {
               nodePath: ['host.name'],
               nodePathMap: { 'host.name': 'www.elastic.co' },
             })
-          ).toThrow('TS source queries with a STATS command inside a FORK are not supported');
+          ).toThrow('Queries declaring a FORK command are not supported');
         });
 
         it('refuses to build a leaf query for a TS query that declares multiple STATS commands', () => {

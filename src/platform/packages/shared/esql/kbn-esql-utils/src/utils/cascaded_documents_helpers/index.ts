@@ -59,8 +59,8 @@ import {
   removeBackticks,
   isSupportedFieldType,
   isTimeseriesSourceQuery,
-  getUnsupportedTimeseriesCascadeShape,
-  type UnsupportedTimeseriesCascadeShape,
+  hasForkCommand,
+  isUnsupportedTimeseriesCascadeQuery,
   requiresMatchPhrase,
   isCategorizeFunctionWithFunctionArgument,
 } from './utils';
@@ -90,7 +90,7 @@ export interface AppliedStatsFunction {
 }
 
 /**
- * Why a query yields no cascade metadata.
+ * Reasons why a query might not yield cascade metadata.
  *
  * {@link getESQLStatsQueryMeta} returns empty `groupByFields` both for queries that simply don't
  * describe a grouping and for queries that do but use a shape the cascade experience cannot serve.
@@ -102,8 +102,18 @@ export const ESQL_STATS_QUERY_META_EXCLUSION_REASON = {
   PARSE_FAILURE: 'parse_failure',
   /** TS_INFO/METRICS_INFO rows are synthetic metric metadata, there are no documents behind them. */
   TIMESERIES_INFO_SOURCE: 'timeseries_info_source',
+  /**
+   * A TS source query declaring more than one STATS command,
+   * see {@link isUnsupportedTimeseriesCascadeQuery} for why this cannot be resolved.
+   */
+  TIMESERIES_MULTIPLE_STATS: 'timeseries_multiple_stats',
   /** The source command wraps a subquery, whose documents we cannot resolve back to. */
   SUBQUERY_SOURCE: 'subquery_source',
+  /**
+   * The query declares a FORK command, whose branches interleave into one result without the rows
+   * saying which branch produced them, so a row cannot be resolved back to its documents.
+   */
+  FORK_COMMAND: 'fork_command',
   /** The query declares no STATS command to drive the cascade from. */
   NO_STATS_COMMAND: 'no_stats_command',
   /** The STATS command driving the cascade declares no grouping options. */
@@ -117,26 +127,7 @@ export const ESQL_STATS_QUERY_META_EXCLUSION_REASON = {
   UNSUPPORTED_GROUPING_FUNCTION: 'unsupported_grouping_function',
   /** A KEEP command strips the grouping option from the resulting records. */
   GROUP_FIELD_STRIPPED_BY_KEEP: 'group_field_stripped_by_keep',
-  /**
-   * A TS source query declaring more than one STATS command,
-   * see {@link getUnsupportedTimeseriesCascadeShape} for why this cannot be resolved.
-   */
-  TIMESERIES_MULTIPLE_STATS: 'timeseries_multiple_stats',
-  /**
-   * A TS source query whose FORK holds a STATS command, which carries the same problem as
-   * {@link ESQL_STATS_QUERY_META_EXCLUSION_REASON.TIMESERIES_MULTIPLE_STATS}, since the FORK and
-   * everything in it is copied into the FROM query built for a leaf node.
-   */
-  TIMESERIES_STATS_IN_FORK: 'timeseries_stats_in_fork',
 } as const;
-
-const TIMESERIES_SHAPE_EXCLUSION_REASON: Record<
-  UnsupportedTimeseriesCascadeShape,
-  ESQLStatsQueryMetaExclusionReason
-> = {
-  'multiple-stats': 'timeseries_multiple_stats',
-  'stats-in-fork': 'timeseries_stats_in_fork',
-};
 
 export type ESQLStatsQueryMetaExclusionReason =
   (typeof ESQL_STATS_QUERY_META_EXCLUSION_REASON)[keyof typeof ESQL_STATS_QUERY_META_EXCLUSION_REASON];
@@ -184,14 +175,6 @@ const computeESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
   const groupByFields: ESQLStatsQueryMeta['groupByFields'] = [];
   const appliedFunctions: ESQLStatsQueryMeta['appliedFunctions'] = [];
 
-  if (hasTimeseriesInfoCommand(queryString)) {
-    // TS_INFO/METRICS_INFO rows are synthetic metric metadata rather than documents,
-    // so there's no underlying document to drive a cascade experience from
-    return excludedESQLStatsQueryMeta(
-      ESQL_STATS_QUERY_META_EXCLUSION_REASON.TIMESERIES_INFO_SOURCE
-    );
-  }
-
   const esqlQuery = EsqlQuery.fromSrc(queryString);
 
   if (esqlQuery.errors.length) {
@@ -202,15 +185,38 @@ const computeESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
   }
 
   const dataSourceCommand = getESQLQueryDataSourceCommand(esqlQuery);
+
+  // Run quick checks for TS queries as it has limited support in the cascade experience
+  if (dataSourceCommand?.name === 'ts') {
+    if (hasTimeseriesInfoCommand(queryString)) {
+      // TS_INFO/METRICS_INFO rows are synthetic metric metadata rather than documents,
+      // so there's no underlying document to drive a cascade experience from
+      return excludedESQLStatsQueryMeta(
+        ESQL_STATS_QUERY_META_EXCLUSION_REASON.TIMESERIES_INFO_SOURCE
+      );
+    } else if (isUnsupportedTimeseriesCascadeQuery(esqlQuery)) {
+      // the query possibly declares valid grouping options, but we cannot build leaf queries for its rows,
+      // because it won't be safe to apply our treatment of the operation stats command only,
+      // it's other STATS commands might define aggregate functions that are exclusive to TS queries
+      return excludedESQLStatsQueryMeta(
+        ESQL_STATS_QUERY_META_EXCLUSION_REASON.TIMESERIES_MULTIPLE_STATS
+      );
+    }
+  }
+
+  if (dataSourceCommand?.args.some(isSubQuery)) {
+    return excludedESQLStatsQueryMeta(ESQL_STATS_QUERY_META_EXCLUSION_REASON.SUBQUERY_SOURCE);
+  }
+
+  if (hasForkCommand(esqlQuery)) {
+    return excludedESQLStatsQueryMeta(ESQL_STATS_QUERY_META_EXCLUSION_REASON.FORK_COMMAND);
+  }
+
   const summarizedStatsCommand = getStatsCommandToOperateOn(esqlQuery);
 
   const operatingStatsCommandIndex = esqlQuery.ast.commands.findIndex(
     (cmd) => cmd.text === summarizedStatsCommand?.command.text
   );
-
-  if (dataSourceCommand?.args.some(isSubQuery)) {
-    return excludedESQLStatsQueryMeta(ESQL_STATS_QUERY_META_EXCLUSION_REASON.SUBQUERY_SOURCE);
-  }
 
   if (!summarizedStatsCommand) {
     return excludedESQLStatsQueryMeta(ESQL_STATS_QUERY_META_EXCLUSION_REASON.NO_STATS_COMMAND);
@@ -230,6 +236,7 @@ const computeESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
     const group = grouping[j];
 
     const groupDefinition = getFieldDefinitionFromArg(group.arg);
+
     if (!groupDefinition) {
       // query received is malformed without complete grouping definition, there's no need to proceed further
       return excludedESQLStatsQueryMeta(ESQL_STATS_QUERY_META_EXCLUSION_REASON.MALFORMED_GROUPING);
@@ -335,16 +342,6 @@ const computeESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
     );
   }
 
-  const unsupportedTimeseriesShape = getUnsupportedTimeseriesCascadeShape(esqlQuery);
-
-  if (unsupportedTimeseriesShape) {
-    // the query declares valid grouping options, but we cannot build leaf queries for its rows,
-    // so we withhold the cascade experience from it entirely
-    return excludedESQLStatsQueryMeta(
-      TIMESERIES_SHAPE_EXCLUSION_REASON[unsupportedTimeseriesShape]
-    );
-  }
-
   Object.values(summarizedStatsCommand.aggregates).forEach((aggregate) => {
     const aggregateFieldDefinition = getFieldDefinitionFromArg(aggregate.arg);
     const aggregationName =
@@ -408,22 +405,20 @@ export const constructCascadeQuery = ({
     throw new Error('Query is malformed');
   }
 
+  // `getESQLStatsQueryMeta` already withholds the grouping options for the queries below so the
+  // cascade is never offered for them, these guard against a stale cascade state reaching here
+  if (hasForkCommand(EditorESQLQuery)) {
+    throw new Error('Queries declaring a FORK command are not supported');
+  }
+
+  if (isUnsupportedTimeseriesCascadeQuery(EditorESQLQuery)) {
+    throw new Error('TS source queries with multiple STATS commands are not supported');
+  }
+
   const summarizedStatsCommand = getStatsCommandToOperateOn(EditorESQLQuery);
 
   if (!summarizedStatsCommand || Object.keys(summarizedStatsCommand?.grouping ?? {}).length === 0) {
     throw new Error('Query does not have a valid stats command with grouping options');
-  }
-
-  const unsupportedTimeseriesShape = getUnsupportedTimeseriesCascadeShape(EditorESQLQuery);
-
-  if (unsupportedTimeseriesShape) {
-    // `getESQLStatsQueryMeta` already withholds the grouping options for these queries so the
-    // cascade is never offered for them, this guards against a stale cascade state reaching here
-    throw new Error(
-      unsupportedTimeseriesShape === 'stats-in-fork'
-        ? 'TS source queries with a STATS command inside a FORK are not supported'
-        : 'TS source queries with multiple STATS commands are not supported'
-    );
   }
 
   if (nodeType === 'leaf') {

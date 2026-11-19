@@ -1496,9 +1496,9 @@ describe('test getDataStateContainer', () => {
       expect(trackCascadeEvent).toHaveBeenCalledTimes(1);
     });
 
-    it('should offer no cascade groups for a TS query whose FORK holds a STATS command, and report why', async () => {
+    it('should offer no cascade groups for a query declaring a FORK command, and report why', async () => {
       const { toolkit } = await setup({
-        esql: 'TS test | FORK (WHERE bytes > 1000 | STATS peak = MAX(AVG_OVER_TIME(bytes)) BY colA) (WHERE bytes <= 1000) | STATS count = COUNT(*) BY colA',
+        esql: 'FROM test | FORK (WHERE bytes > 1000) (WHERE bytes <= 1000) | STATS count = COUNT(*) BY colA',
       });
 
       await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
@@ -1507,7 +1507,7 @@ describe('test getDataStateContainer', () => {
       expect(trackCascadeEvent).toHaveBeenCalledWith({
         eventName: 'cascaded_documents_unsupported_query',
         tabId: toolkit.getCurrentTab().id,
-        exclusionReason: 'timeseries_stats_in_fork',
+        exclusionReason: 'fork_command',
       });
     });
 

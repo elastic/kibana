@@ -37,7 +37,7 @@ export enum CascadeEventName {
  */
 export const TRACKED_CASCADE_EXCLUSION_REASONS = new Set<ESQLStatsQueryMetaExclusionReason>([
   'timeseries_multiple_stats',
-  'timeseries_stats_in_fork',
+  'fork_command',
 ]);
 
 export enum CascadeEventDataKeys {
