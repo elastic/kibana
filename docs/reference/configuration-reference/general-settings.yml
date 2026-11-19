@@ -203,7 +203,7 @@ groups:
           stack: ga
           ech: unavailable
           self: ga
-        note: "From 9.6.1, Kibana enforces `img-src`, `font-src` and `media-src` directives by default, so images, fonts and media no longer fall back to `csp.default_src`."
+        note: "From 9.6.1, Kibana enforces `img-src`, `font-src` and `media-src` directives by default, so fonts and media no longer fall back to `csp.default_src`. Images still fall back to `csp.default_src` when it is set, unless you also set `csp.img_src`."
 
       - setting: csp.font_src
         description: |
@@ -232,7 +232,7 @@ groups:
           stack: ga
           ech: ga
           self: ga
-        note: "From 9.6.1, Kibana allows images from `'self'`, `data:`, `blob:`, `https:` and `http:` by default. If you set `csp.img_src`, those defaults are not applied and only `'self'` and the sources you list are allowed. Include `data:` and `blob:` in your list if you need them."
+        note: "From 9.6.1, Kibana allows images from `'self'`, `data:`, `blob:`, `https:` and `http:` by default. If you set `csp.img_src`, those defaults are not applied and only `'self'` and the sources you list are allowed. Include `data:` and `blob:` in your list if you need them. If you set `csp.default_src` without `csp.img_src`, no `img-src` directive is added and images follow `csp.default_src`."
 
       - setting: csp.object_src
         description: |

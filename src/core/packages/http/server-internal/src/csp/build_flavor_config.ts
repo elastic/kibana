@@ -20,7 +20,8 @@ import type { CspAdditionalConfig, CspConfigType } from './config';
  * - `img-src`: image sources are mostly deployment specific (custom logos, authentication provider
  *   icons, tile servers), so any network origin is allowed rather than requiring every deployment
  *   to configure its own list. `blob:` covers the Maps legend icons. These defaults only apply
- *   when `csp.img_src` is not set, so an administrator's allowlist is never widened.
+ *   when neither `csp.img_src` nor `csp.default_src` is set, so an administrator's allowlist is
+ *   never widened. With only `csp.default_src` set, images keep falling back to it.
  * - `font-src`: Kibana ships its own fonts and inlines the small ones as data URIs.
  * - `media-src`: Kibana has no media source other than itself and the Elastic CDN.
  *
@@ -28,15 +29,18 @@ import type { CspAdditionalConfig, CspConfigType } from './config';
  */
 export const getBuildFlavorCspConfig = (
   buildFlavor: BuildFlavor,
-  { img_src: configuredImgSrc = [] }: Partial<Pick<CspConfigType, 'img_src'>>
+  {
+    img_src: configuredImgSrc = [],
+    default_src: configuredDefaultSrc = [],
+  }: Partial<Pick<CspConfigType, 'img_src' | 'default_src'>>
 ): CspAdditionalConfig => {
   if (buildFlavor === 'serverless') {
     return {};
   }
-  const hasConfiguredImgSrc = configuredImgSrc.length > 0;
+  const hasImageAllowlist = configuredImgSrc.length > 0 || configuredDefaultSrc.length > 0;
   return {
     font_src: [`'self'`, 'data:'],
-    img_src: hasConfiguredImgSrc ? [] : ['data:', 'blob:', 'https:', 'http:'],
+    img_src: hasImageAllowlist ? [] : ['data:', 'blob:', 'https:', 'http:'],
     media_src: [`'self'`, 'kibana.estccdn.com'],
   };
 };

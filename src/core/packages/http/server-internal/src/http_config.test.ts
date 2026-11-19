@@ -1010,6 +1010,19 @@ describe('HttpConfig', () => {
       expect(csp.header).not.toContain('https: http:');
     });
 
+    it('does not add an img-src directive on traditional when csp.default_src is configured', () => {
+      const { csp } = new HttpConfig(
+        config.schema.validate({}, {}),
+        cspConfig.schema.validate({ default_src: ['assets.example.test'] }),
+        ExternalUrlConfig.DEFAULT,
+        permissionsPolicyConfig.schema.validate({}),
+        'traditional'
+      );
+
+      expect(csp.header).toContain(`default-src 'self' assets.example.test`);
+      expect(csp.header).not.toContain('img-src');
+    });
+
     it('defaults to the traditional flavor when none is given', () => {
       expect(build().csp.header).toEqual(build('traditional').csp.header);
     });
