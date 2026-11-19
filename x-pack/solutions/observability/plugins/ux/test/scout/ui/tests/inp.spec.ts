@@ -18,7 +18,6 @@ test.describe('INP', { tag: tags.stateful.classic }, () => {
         rangeFrom: 'now-1y',
         rangeTo: 'now',
       });
-      await pageObjects.uxDashboard.waitForLoadingToFinish();
     });
 
     await test.step('Check INP Values', async () => {
