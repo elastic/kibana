@@ -16,16 +16,14 @@ import { CANCELLATION_DEADLINE_MS } from '../constants';
  * `AbortMonitor`) and is stamped on the error meta so every reader of the error — stream,
  * execution document, follower, callback, conversation — sees where the abort came from.
  */
-export const createAbortedErrorFromReason = (reason?: ExecutionAbortReason) =>
-  createRequestAbortedError(
-    'Converse request was aborted',
-    reason ? { abort_reason: reason } : undefined
-  );
+export const createAbortedError = (source?: AbortSignal | ExecutionAbortReason) => {
+  const reason = source instanceof AbortSignal ? source.reason : source;
 
-export const createAbortedError = (abortSignal: AbortSignal) =>
-  createAbortedErrorFromReason(
-    isExecutionAbortReason(abortSignal.reason) ? abortSignal.reason : undefined
+  return createRequestAbortedError(
+    'Converse request was aborted',
+    isExecutionAbortReason(reason) ? { abort_reason: reason } : undefined
   );
+};
 
 /**
  * Graceful cancellation with abort normalisation.

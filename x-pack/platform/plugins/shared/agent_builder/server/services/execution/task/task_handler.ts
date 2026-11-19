@@ -33,7 +33,7 @@ import {
   deliverFailureCallback,
   type CallbackDeliveryService,
 } from '../callback';
-import { createAbortedErrorFromReason } from '../utils/handle_cancellation';
+import { createAbortedError } from '../utils/handle_cancellation';
 
 type TaskRunAsContext = NonNullable<RunContext['runAs']>;
 
@@ -121,7 +121,7 @@ class TaskHandlerImpl implements TaskHandler {
       await this.releaseAbortedExecution({ execution, fakeRequest, runAs });
       await deliverFailureCallback({
         execution,
-        error: createAbortedErrorFromReason(execution.abortReason),
+        error: createAbortedError(execution.abortReason),
         callbackDeliveryService: this.deps.callbackDeliveryService,
         logger: this.logger,
       });
