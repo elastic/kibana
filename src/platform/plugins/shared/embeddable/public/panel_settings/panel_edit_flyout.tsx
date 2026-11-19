@@ -100,6 +100,20 @@ export const PanelEditFlyout = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        {/* with a preview, the title and description come first and the panel options after it */}
+        {preview && panelSettings.state ? (
+          <>
+            <PanelSettingsFlyoutSections
+              section="titleAndDescription"
+              api={api}
+              state={panelSettings.state}
+              updateState={panelSettings.updateState}
+              fallbackTimeRange={fallbackTimeRange}
+              isFirstInFlyoutBody
+            />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
         {preview ? (
           <>
             <EuiPanel
@@ -133,6 +147,7 @@ export const PanelEditFlyout = ({
         ) : null}
         {panelSettings.state ? (
           <PanelSettingsFlyoutSections
+            section={preview ? 'panelOptions' : undefined}
             api={api}
             state={panelSettings.state}
             updateState={panelSettings.updateState}
