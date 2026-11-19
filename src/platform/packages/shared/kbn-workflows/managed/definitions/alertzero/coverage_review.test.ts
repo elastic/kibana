@@ -878,6 +878,27 @@ describe('Detection Coverage review', () => {
       expect(String(inputs.comment)).toContain('steps.gap.output.evidence');
     });
 
+    it('keeps the indicator evidence inside a code fence', () => {
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
+        String(inputsOf(stepByName(ENTRY_STEP)).comment),
+        {
+          steps: {
+            gap: {
+              output: {
+                description: 'Cron reverse shell',
+                evidence: 'Data sources: logs-*, winlogbeat-*\n~~~\n# Report',
+              },
+            },
+            create_investigation: { output: { conversation_id: 'c1' } },
+          },
+          workflow: { spaceId: 'default' },
+        }
+      );
+      expect(rendered).toContain(
+        '**Evidence**\n~~~text\nData sources: logs-*, winlogbeat-*\n~ ~ ~\n# Report\n~~~'
+      );
+    });
+
     // A declined gap must leave the queue, or every sweep asks about it again.
     it('marks a declined gap processed and closes its investigation', () => {
       const mark = stepByName('mark_declined');
@@ -1013,6 +1034,32 @@ describe('Detection Coverage review', () => {
       expect(rendered.includes('(does not match the content, so the check ignored it)')).toBe(
         noted
       );
+    });
+
+    // The gap block reaches every proposal comment, the rule creation one through
+    // `review_context`. Unfenced, `*` in index patterns reads as emphasis and the
+    // report excerpt's headings outrank the proposal's own sections.
+    it('keeps the indicator evidence inside a code fence in the gap evidence', () => {
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
+        String(withOf('compose_evidence')?.gap_block),
+        {
+          steps: {
+            gap: {
+              output: {
+                technique: 'T1110',
+                description: 'Brute force',
+                evidence:
+                  'Data sources: logs-*, winlogbeat-*\n\nReport excerpt:\n# Hunt report\n## Findings\n~~~\n**Do this now**',
+              },
+            },
+            coverage_check: { output: { structured_output: { technique_matches: true } } },
+          },
+        }
+      );
+      expect(rendered).toContain(
+        '**Evidence**\n~~~text\nData sources: logs-*, winlogbeat-*\n\nReport excerpt:\n# Hunt report\n## Findings\n~ ~ ~\n**Do this now**\n~~~'
+      );
+      expect(rendered.trimEnd().endsWith('~~~')).toBe(true);
     });
 
     // A step that dies takes the run with it, so the human never learns what happened.
