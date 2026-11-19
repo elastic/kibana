@@ -758,6 +758,18 @@ describe('SearchMethodsService', () => {
         });
       });
 
+      it('passes inspector id to inspector.adapter.start', async () => {
+        mockSearch.mockReturnValue(createMockResponse({ hits: { hits: [], total: 0 } }));
+        const inspector = { ...createMockInspector(createMockRequestResponder()), id: 'request-1' };
+
+        await service.dsl({ index: 'logs-*', query: { match_all: {} } }, { inspector });
+
+        expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
+          id: 'request-1',
+          description: 'Test description',
+        });
+      });
+
       it('calls requestResponder.json with DSL request body', async () => {
         const mockResponse = { hits: { hits: [], total: 0 } };
         mockSearch.mockReturnValue(createMockResponse(mockResponse));

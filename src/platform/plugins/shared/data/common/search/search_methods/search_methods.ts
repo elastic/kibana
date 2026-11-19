@@ -295,6 +295,7 @@ export class SearchMethodsService implements ISearchMethods {
     searchSessionId?: string
   ): Promise<any> {
     const requestResponder = inspector?.adapter.start(inspector.title, {
+      id: inspector.id,
       description: inspector.description,
       searchSessionId,
     });
