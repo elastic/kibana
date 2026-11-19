@@ -54,7 +54,7 @@ Before drafting, say which issue you picked and where it came from, e.g. "Using 
    - the files touched, for the title area and labels.
 
    Done when you can state the user-visible problem, the user-visible change, and how to observe it. Ask for whatever is missing instead of guessing.
-4. **Draft.** Read [kibana.md](kibana.md) and [examples.md](examples.md), then write the title, the body and the suggested labels following them and the rules below. In Update mode, carry over from the existing body (see "Carry over in Update mode").
+4. **Draft.** Read [references/conventions.md](references/conventions.md) and [references/examples.md](references/examples.md), then write the title, the body and the suggested labels following them and the rules below. In Update mode, carry over from the existing body (see "Carry over in Update mode").
 5. **Self-check** the draft against "Before showing the draft" and fix every miss.
 6. **Write** the body to a new file, `/tmp/pr-body-<branch>-<YYYYMMDD-HHMMSS>.md` (replace `/` in the branch name with `-`), and the title alone to the matching `/tmp/pr-title-<branch>-<YYYYMMDD-HHMMSS>.txt`. Never reuse a file from another session. Inside an editor (Cursor, VS Code), open the body there with `cursor <path>` or `code <path>` and keep it out of chat; in a terminal-only session, or if the command fails, show the body in chat. Either way, show in chat: the file paths, the title (and the old title in Update mode), the labels, the checklist ticks you inferred, any test steps you inferred but didn't verify, and what you dropped from the old body.
 7. **Revise** on feedback by editing the same files, then summarize what changed. The user may also edit the files directly: re-read them before asking for approval.
@@ -73,7 +73,7 @@ The old body often holds material the diff can't recreate. Keep:
 - `## Release note`, `## Impact` and `## Action` sections, tightened but not dropped;
 - any concrete setup detail in the old test steps (data, settings, flags, license).
 
-Everything else is source material to rewrite. List what you dropped and why in chat, the way examples.md does.
+Everything else is source material to rewrite. List what you dropped and why in chat, the way references/examples.md does.
 
 ## Creating the PR
 
@@ -106,7 +106,7 @@ Leave the PR in draft with no reviewers and no comments; the author takes it fro
 - For any UI change or fix, add Before and After screenshots or videos, in a two-column table when there's one of each. With no media from the user or the old body, insert HTML-comment placeholders that describe the shot to take (view, data, zoom or state), and ask for the media. Never invent evidence.
 - Add a visible `## Release note` section only when the title isn't enough.
 - Keep the visible body (everything outside collapsed blocks) to roughly 150 words of prose.
-- Write like the team PRs in examples.md: plain sentences whose subject is the thing the user sees ("The legend keeps...", "When a map uses..."), prose paragraphs, and only the headings from the kibana.md body order. Opening with "This PR introduces...", bold-labelled bullet lists, and file trees or `diff` blocks in the summary are the tells to rewrite.
+- Write like the team PRs in references/examples.md: plain sentences whose subject is the thing the user sees ("The legend keeps...", "When a map uses..."), prose paragraphs, and only the headings from the references/conventions.md body order. Opening with "This PR introduces...", bold-labelled bullet lists, and file trees or `diff` blocks in the summary are the tells to rewrite.
 - CI already reports type checks, Jest and lint, so leave their results out. Checks CI doesn't run (manual evals, manual browser testing) get one line in Review notes.
 
 ## How to test
@@ -159,7 +159,7 @@ Formatting:
 
 ## Checklist and risks
 
-- Build `## Checklist` and `## Identify risks` from the template as described in kibana.md ("Checklist source"), collapsed as above.
+- Build `## Checklist` and `## Identify risks` from the template as described in references/conventions.md ("Checklist source"), collapsed as above.
 - Tick only what's verified in the session, confirmed by the user, carried over from the author's ticks, or evident from the diff and labels.
 - Fill in risks honestly: level, what could go wrong, and why it's acceptable or how it's mitigated.
 
@@ -167,7 +167,7 @@ Formatting:
 
 Check each item and fix any miss before step 6:
 
-- Title follows kibana.md: `[Area]` prefix, present-tense verb, sentence case, at most about 70 characters, no issue number or code names.
+- Title follows references/conventions.md: `[Area]` prefix, present-tense verb, sentence case, at most about 70 characters, no issue number or code names.
 - The `Fixes` / `Closes` / `Part of` line uses a full issue URL and the right keyword.
 - Visible prose is about 150 words or less; count it.
 - The problem and the solution use UI names; code names appear only in Review notes.
