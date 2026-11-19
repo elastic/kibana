@@ -68,7 +68,11 @@ import {
   type WorkerSettingsDefaults,
 } from './definitions/alertzero/worker_settings_defaults';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
-import { WorkflowSchemaBase } from '../spec/schema';
+import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../common/utils';
+import { visitNestedSteps } from '../definition/definition_utils';
+import type { VisitNestedStepEntry, WorkflowStep } from '../definition/definition_utils';
+import { getElasticsearchConnectors } from '../spec/elasticsearch';
+import { ElasticsearchRequestStepInputSchema, WorkflowSchemaBase } from '../spec/schema';
 
 const ManagedWorkflowSchema = WorkflowSchemaBase.extend({
   triggers: z.array(z.object({ type: z.string().min(1) }).passthrough()).min(1),
@@ -188,6 +192,13 @@ function hasYaml(
 ): definition is ManagedWorkflowDefinition & { yaml: string } {
   return typeof definition.yaml === 'string';
 }
+
+const elasticsearchConnectorsByType = new Map(
+  getElasticsearchConnectors().map((connector) => [connector.type, connector])
+);
+
+const OBJECT_FORM_HINT =
+  'Hint: the editor schema rejects some shorthand that Elasticsearch accepts. If this is one, use the object form, for example `term: { field: { value: false } }`, `prefix: { field: { value: "a" } }` or `_source: { includes: [...] }`.';
 
 function renderWorkflowYaml(definition: ManagedWorkflowDefinition): string {
   const { id } = definition;
@@ -445,6 +456,84 @@ describe('managedWorkflowDefinitions', () => {
     (id, definition) => {
       const renderedYaml = renderWorkflowYaml(definition);
       assertWorkflowYamlIsValid(id, renderedYaml);
+    }
+  );
+
+  // Mirrors the editor's Run validation (POST /api/workflows/test): every elasticsearch.* step's
+  // `with` must satisfy the connector paramsSchema from spec/elasticsearch; a stored `valid: true`
+  // does not cover it. Values that are whole-string {{ }} / ${{ }} templates or contain {% %} tags
+  // are skipped, as parseWorkflowYamlToJSON does. elasticsearch.request has no package connector,
+  // so it is checked against the input schema its editor contract uses.
+  it.each(managedDefinitionsById)(
+    '%s elasticsearch steps satisfy the connector params schema',
+    (_id, definition) => {
+      // The raw parse is walked (not ManagedWorkflowSchema.parse) so zod stripping cannot hide a
+      // `with` key, and because the schema types settings.on-failure.fallback as BaseStep[], which
+      // visitNestedSteps does not accept.
+      const parsed = parse(renderWorkflowYaml(definition)) as {
+        steps: WorkflowStep[];
+        settings?: { 'on-failure'?: { fallback?: WorkflowStep[] } };
+      };
+      const failures: Array<{ path: string; issuePaths: string[]; error: string }> = [];
+
+      const visitor = ({ step, path }: VisitNestedStepEntry) => {
+        if (!step.type.startsWith('elasticsearch.')) {
+          return;
+        }
+        const paramsSchema =
+          step.type === 'elasticsearch.request'
+            ? ElasticsearchRequestStepInputSchema
+            : elasticsearchConnectorsByType.get(step.type)?.paramsSchema;
+        if (!paramsSchema) {
+          failures.push({
+            path,
+            issuePaths: [],
+            error: `Unknown elasticsearch step type '${step.type}': add a package connector`,
+          });
+          return;
+        }
+
+        const params = (step as { with?: unknown }).with;
+        const result = paramsSchema.safeParse(params ?? {});
+        if (result.success) {
+          return;
+        }
+
+        const survivingIssues = result.error.issues.filter((issue) => {
+          // An empty path is `with` itself, which Run also skips when it is a whole-value template.
+          let current: unknown = params;
+          for (const segment of issue.path) {
+            if (current === null || typeof current !== 'object') {
+              return true;
+            }
+            current = (current as Record<string, unknown>)[String(segment)];
+          }
+          if (current === undefined) {
+            return true;
+          }
+          return !(
+            isDynamicValue(current) ||
+            isVariableValue(current) ||
+            isLiquidTagValue(current)
+          );
+        });
+
+        if (survivingIssues.length > 0) {
+          failures.push({
+            path,
+            issuePaths: survivingIssues.map((issue) => issue.path.map(String).join('.')),
+            error: `${z.prettifyError(new z.ZodError(survivingIssues))}\n${OBJECT_FORM_HINT}`,
+          });
+        }
+      };
+
+      visitNestedSteps(parsed.steps, visitor);
+      const fallback = parsed.settings?.['on-failure']?.fallback;
+      if (Array.isArray(fallback)) {
+        visitNestedSteps(fallback, visitor);
+      }
+
+      expect(failures).toEqual([]);
     }
   );
 
