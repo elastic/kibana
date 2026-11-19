@@ -196,6 +196,9 @@ export async function reconcileSourceRevision({
   request: KibanaRequest;
 }): Promise<(() => Promise<void>) | undefined> {
   let latestExecutionPromise: Promise<WorkflowExecutionListItemDto | undefined> | undefined;
+  // A reset cancels the runs of the previous query, and a run cancelled this way stays listed as
+  // going until it winds down, so it must not pass for a run onboarding the new query.
+  let cancelledRunsOfPreviousRevision = false;
   const loadLatestExecution = ({
     id: sourceId,
     slug: sourceSlug,
@@ -218,6 +221,7 @@ export async function reconcileSourceRevision({
         // Every writer establishes the checkpoint before persisting knowledge, so an absent
         // checkpoint means there is no previous revision to clean up.
         if (state.revision !== undefined) {
+          cancelledRunsOfPreviousRevision = true;
           await resetSourceKnowledge({ source: current, kiClient, onboardingClient, request });
         }
         await checkpoint({
@@ -242,9 +246,17 @@ export async function reconcileSourceRevision({
   return async () => {
     // Before waiting: a run of this revision that is still going would otherwise fail this step
     // until it ends, then leave a second run to be scheduled for the same query.
-    if (
-      isRunOfRevision(await loadLatestExecution(sourceToSchedule), sourceToSchedule.esql_updated_at)
-    ) {
+    const latestRun = cancelledRunsOfPreviousRevision
+      ? undefined
+      : await loadLatestExecution(sourceToSchedule);
+    if (latestRun && isRunOfRevision(latestRun, sourceToSchedule.esql_updated_at)) {
+      // Recorded as the reservation, so later runs (a denied one, say) cannot make the source
+      // look unscheduled again, and the next sweeps skip this lookup.
+      await recordRunOfRevision({
+        source: sourceToSchedule,
+        sourceKnowledgeState,
+        startedAt: Date.parse(latestRun.startedAt),
+      });
       return;
     }
     const runningSources = await loadRunningSources(onboardingClient, request);
@@ -288,6 +300,27 @@ export async function reconcileSourceRevision({
     });
   };
 }
+
+const recordRunOfRevision = async ({
+  source,
+  sourceKnowledgeState,
+  startedAt,
+}: {
+  source: NightshiftSource;
+  sourceKnowledgeState: SourceKnowledgeStateClient;
+  startedAt: number;
+}): Promise<void> => {
+  await sourceKnowledgeState.runExclusive({
+    sourceId: source.id,
+    run: async (state, checkpoint) => {
+      const hasReservation =
+        state.onboardingReservedAt !== undefined && state.onboardingReservedAt !== null;
+      if (state.revision === source.esql_updated_at && !hasReservation) {
+        await checkpoint({ onboardingReservedAt: startedAt });
+      }
+    },
+  });
+};
 
 const clearOnboardingReservation = async ({
   source,

@@ -778,7 +778,8 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
     const cancelWithRuns = async (
       stepExecutionsByRun: Record<string, unknown[]>,
-      releaseExtractionQuota: jest.Mock
+      releaseExtractionQuota: jest.Mock,
+      status?: ExecutionStatus
     ) => {
       const { client, managementApi } = createClient(
         {
@@ -793,6 +794,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
           })),
           getWorkflowExecution: jest.fn(async (id: string) => ({
             id,
+            status,
             stepExecutions: stepExecutionsByRun[id],
           })),
         },
@@ -825,6 +827,22 @@ describe('SignificantEventsKIsOnboardingClient', () => {
         { date: '2026-11-17' },
         { date: '2026-11-18' },
       ]);
+    });
+
+    it('gives back nothing for a run that completed before the cancel landed', async () => {
+      const release = jest.fn().mockResolvedValue(undefined);
+
+      await cancelWithRuns(
+        {
+          logs: [
+            budgetStep('check_budget', { allowed: true, limit: 3 }, '2026-11-17T12:00:00.000Z'),
+          ],
+        },
+        release,
+        ExecutionStatus.COMPLETED
+      );
+
+      expect(release).not.toHaveBeenCalled();
     });
 
     it('gives back nothing for a denied run or a run cancelled before its budget step', async () => {

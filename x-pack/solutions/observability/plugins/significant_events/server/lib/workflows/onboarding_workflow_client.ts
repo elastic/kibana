@@ -7,7 +7,7 @@
 
 import { setTimeout as delay } from 'timers/promises';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { ExecutionStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowExecutionListItemDto } from '@kbn/workflows';
 import {
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
@@ -259,8 +259,18 @@ const EXECUTED_STATUSES = Object.values(ExecutionStatus).filter(
   (status) => status !== ExecutionStatus.SKIPPED
 );
 
+/** Runs wind down within minutes, so this far back covers every run a repeat cancel can list. */
+const MAX_REMEMBERED_RELEASED_RUNS = 1_000;
+
 /** The steps of the onboarding workflow that consume one `ki_extraction` unit when they are allowed. */
 const BUDGET_STEP_IDS = ['check_budget', 'check_fallback_budget'];
+
+/**
+ * A run that finished on its own before the cancel landed (the cancel skips a terminal run) used
+ * its unit for real. Only a run that is going or ended `cancelled` gives it back.
+ */
+const isCancelledOrGoing = (execution: WorkflowExecutionDto): boolean =>
+  execution.status === ExecutionStatus.CANCELLED || !isTerminalStatus(execution.status);
 
 /** The UTC days on which a run consumed a `ki_extraction` unit. */
 const getConsumedExtractionDays = (execution: WorkflowExecutionDto | null): string[] =>
@@ -268,7 +278,7 @@ const getConsumedExtractionDays = (execution: WorkflowExecutionDto | null): stri
     .filter(({ stepId, output }) => BUDGET_STEP_IDS.includes(stepId) && isBudgetAllowed(output))
     .map(({ startedAt }) => dayKey(resolveDailyWindow(new Date(startedAt))));
 
-const isBudgetAllowed = (output: unknown): boolean =>
+const isBudgetAllowed = (output: unknown): output is { allowed: true } =>
   typeof output === 'object' && output !== null && 'allowed' in output && output.allowed === true;
 
 /** How long a cancel waits for the source's runs to stop. */
@@ -562,6 +572,20 @@ export class SignificantEventsKIsOnboardingClient {
    * before reaching that step, took nothing. A failed release is logged and not thrown, because the
    * cancel already happened and the cost is a source waiting for the next day's limit.
    */
+  /** Remembers a released run, and returns false when it was already released. */
+  private markExtractionReleased(executionId: string): boolean {
+    if (this.releasedExtractionRunIds.has(executionId)) {
+      return false;
+    }
+    this.releasedExtractionRunIds.add(executionId);
+    if (this.releasedExtractionRunIds.size > MAX_REMEMBERED_RELEASED_RUNS) {
+      // A set iterates in insertion order, so this drops the oldest run.
+      const [oldest] = this.releasedExtractionRunIds;
+      this.releasedExtractionRunIds.delete(oldest);
+    }
+    return true;
+  }
+
   private async releaseConsumedExtractions({
     executions,
     request,
@@ -573,10 +597,8 @@ export class SignificantEventsKIsOnboardingClient {
     if (!releaseExtractionQuota) {
       return;
     }
-    const unreleased = executions.filter(({ id }) => !this.releasedExtractionRunIds.has(id));
-    unreleased.forEach(({ id }) => this.releasedExtractionRunIds.add(id));
     await Promise.all(
-      unreleased.map(async ({ id }) => {
+      executions.map(async ({ id }) => {
         try {
           const execution = await this.workflowExecutionService.getExecution({
             request,
@@ -584,9 +606,14 @@ export class SignificantEventsKIsOnboardingClient {
             spaceId: request.spaceId,
             options: { includeOutput: true },
           });
-          await Promise.all(
-            getConsumedExtractionDays(execution).map((date) => releaseExtractionQuota({ date }))
-          );
+          const days =
+            execution && isCancelledOrGoing(execution) ? getConsumedExtractionDays(execution) : [];
+          // Checked and marked with no await in between, so two calls cannot both release a run.
+          // A run with nothing to release stays unmarked: a repeat cancel may find its step done.
+          if (days.length === 0 || !this.markExtractionReleased(id)) {
+            return;
+          }
+          await Promise.all(days.map((date) => releaseExtractionQuota({ date })));
         } catch (error) {
           this.releasedExtractionRunIds.delete(id);
           this.logger.warn(
