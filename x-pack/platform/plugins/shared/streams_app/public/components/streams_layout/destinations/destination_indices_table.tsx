@@ -52,10 +52,6 @@ import {
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUnitId } from '../../../hooks/use_unit_id';
-import {
-  useCanvasSearchHref,
-  useNavigateToCanvasSearch,
-} from '../../stream_management/data_management/stream_detail_canvas/use_navigate_to_canvas_search';
 import { SourceFilter, type SourceFilterOption } from '../sources/source_filter';
 import {
   buildDestinationIndexRows,
@@ -152,8 +148,7 @@ interface DestinationIndicesTableProps {
   indicesStatus: ResolvedIndicesStatus;
   indicesError?: ResolvedIndicesError;
   hasConnectedSource: boolean;
-  /** When set, the empty state links to the Map searched for this query. */
-  mapSearchQuery?: string;
+  showMapLink?: boolean;
   destinationDetailRef?: DestinationDetailActorRef;
   /** Called on mount; the details then follow the page time range and the indices. */
   onShowDestinationDetail: (destinationId: string, viewerId: string) => void;
@@ -165,21 +160,23 @@ interface DestinationIndicesTableProps {
   showToolbar?: boolean;
 }
 
-const MapSearchLink = ({ query }: { query: string }) => {
-  const href = useCanvasSearchHref(query);
-  const navigateToCanvasSearch = useNavigateToCanvasSearch();
+const MapLink = () => {
+  const router = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
+  const unitId = useUnitId();
+  const mapParams = { path: { unitId, tab: 'map' }, query: { rangeFrom, rangeTo } } as const;
 
   return (
     <EuiLink
-      href={href}
+      href={router.link('/v2/unit/{unitId}/{tab}', mapParams)}
       onClick={(event: React.MouseEvent) => {
         if (isModifiedClick(event)) {
           return;
         }
         event.preventDefault();
-        navigateToCanvasSearch(query);
+        router.push('/v2/unit/{unitId}/{tab}', mapParams);
       }}
-      data-test-subj="streamsDestinationIndicesShowOnMapLink"
+      data-test-subj="streamsDestinationIndicesMapLink"
     >
       <FormattedMessage
         id="xpack.streams.destinations.indices.mapLinkLabel"
@@ -191,8 +188,8 @@ const MapSearchLink = ({ query }: { query: string }) => {
 
 const EmptyIndicesMessage = ({
   hasConnectedSource,
-  mapSearchQuery,
-}: Pick<DestinationIndicesTableProps, 'hasConnectedSource' | 'mapSearchQuery'>) => {
+  showMapLink,
+}: Pick<DestinationIndicesTableProps, 'hasConnectedSource' | 'showMapLink'>) => {
   if (hasConnectedSource) {
     return (
       <FormattedMessage
@@ -201,12 +198,12 @@ const EmptyIndicesMessage = ({
       />
     );
   }
-  if (mapSearchQuery) {
+  if (showMapLink) {
     return (
       <FormattedMessage
         id="xpack.streams.destinations.indices.noConnectedSourcesWithMapLinkDescription"
         defaultMessage="No sources are connected to this destination yet. Connect one on {mapLink} to start sending data."
-        values={{ mapLink: <MapSearchLink query={mapSearchQuery} /> }}
+        values={{ mapLink: <MapLink /> }}
       />
     );
   }
@@ -225,7 +222,7 @@ export const DestinationIndicesTable = ({
   indicesStatus,
   indicesError,
   hasConnectedSource,
-  mapSearchQuery,
+  showMapLink,
   destinationDetailRef,
   onShowDestinationDetail,
   onHideDestinationDetail,
@@ -532,10 +529,7 @@ export const DestinationIndicesTable = ({
     return (
       <EuiText size="s" color="subdued" data-test-subj="streamsDestinationIndicesEmpty">
         <p>
-          <EmptyIndicesMessage
-            hasConnectedSource={hasConnectedSource}
-            mapSearchQuery={mapSearchQuery}
-          />
+          <EmptyIndicesMessage hasConnectedSource={hasConnectedSource} showMapLink={showMapLink} />
         </p>
       </EuiText>
     );

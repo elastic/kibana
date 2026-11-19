@@ -9,7 +9,6 @@ import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { CANVAS_URL_STATE_KEY } from '../../../../../common/url_schema';
-import { useKibana } from '../../../../hooks/use_kibana';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useUnitId } from '../../../../hooks/use_unit_id';
 import { streamsAppRouter } from '../../../../routes/config';
@@ -45,18 +44,5 @@ export const useNavigateToCanvasSearch = (): ((query: string) => void) => {
       history.push(getCanvasSearchPath(query, { unitId, rangeFrom, rangeTo }));
     },
     [history, unitId, rangeFrom, rangeTo]
-  );
-};
-
-/** Full URL of the Map searched for `query`, for links that also open in a new tab. */
-export const useCanvasSearchHref = (query: string): string => {
-  const {
-    core: { http },
-  } = useKibana();
-  const { rangeFrom, rangeTo } = useTimeRange();
-  const unitId = useUnitId();
-
-  return http.basePath.prepend(
-    `/app/streams${getCanvasSearchPath(query, { unitId, rangeFrom, rangeTo })}`
   );
 };

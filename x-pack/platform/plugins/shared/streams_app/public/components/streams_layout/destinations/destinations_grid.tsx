@@ -309,7 +309,7 @@ const DestinationsGridBody = ({
                     indicesStatus={resolvedIndicesStatus}
                     indicesError={resolvedIndicesError}
                     hasConnectedSource={sourceConnectedDestinationIds.has(destination.id)}
-                    mapSearchQuery={destination.name}
+                    showMapLink
                     destinationDetailRef={destinationDetailRefs.get(destination.id)}
                     onShowDestinationDetail={onShowDestinationDetail}
                     onHideDestinationDetail={onHideDestinationDetail}
