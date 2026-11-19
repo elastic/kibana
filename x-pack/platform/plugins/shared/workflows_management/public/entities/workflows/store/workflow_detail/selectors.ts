@@ -38,6 +38,18 @@ export const selectHasChanges = createSelector(
 
 export const selectIsYamlSynced = createSelector(selectDetail, (detail) => detail.isYamlSynced);
 
+/**
+ * True when `computed` was derived from the YAML currently in the editor, i.e. the editor's
+ * debounced `onChange` and the computation middleware's own debounce have both settled.
+ *
+ * Everything derived from the document — the graph, the step lookup, the trigger-aware
+ * autocomplete schema — answers from the previous document until this flips back to true.
+ */
+export const selectIsYamlComputationSettled = createSelector(
+  selectDetail,
+  (detail) => detail.isYamlSynced && detail.computed?.yamlString === detail.yamlString
+);
+
 export const selectYamlDocument = createSelector(
   selectYamlComputed,
   (computed) => computed?.yamlDocument
