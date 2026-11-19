@@ -117,7 +117,10 @@ const filterUsesDataViewOnlyField = (
       ) ?? true
     );
   }
-  // No Lucene field extractor is available; a substring match errs on the side of not converting.
+  // No Lucene field extractor is available, so match field names as plain substrings of the query
+  // text. This errs on the side of not converting: a data view only field with a short name such as
+  // `a` or `host` also blocks queries that merely contain it inside another token (for example
+  // `hostname:web-1`). KQL filters are parsed and do not have this limitation.
   return dataViewOnlyFieldNames.some((fieldName) => queryText.includes(fieldName));
 };
 

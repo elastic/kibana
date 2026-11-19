@@ -147,6 +147,47 @@ describe('convertQueryAnnotationsToEsql', () => {
 // Same index the Scout API layer binds, so unit and API layers pin the exact same queries.
 const MATRIX_INDEX = 'logstash-*';
 
+describe('convertQueryAnnotationsToEsql Lucene filters on data view only fields', () => {
+  const runtimeHostPatterns = {
+    logs: createIndexPattern({
+      id: 'logs',
+      title: 'logs-*',
+      timeFieldName: '@timestamp',
+      fields: [{ name: 'host', runtime: true } as IndexPatternField],
+    }),
+  } as IndexPatternMap;
+  const convertLuceneFilter = (query: string) =>
+    convertQueryAnnotationsToEsql(
+      {
+        layers: [
+          annotationLayer([
+            {
+              ...queryAnnotation,
+              timeField: '@timestamp',
+              textField: undefined,
+              extraFields: [],
+              filter: { type: 'kibana_query', query, language: 'lucene' },
+            },
+          ]),
+        ],
+      },
+      runtimeHostPatterns
+    );
+
+  it('does not convert when the filter references the field', () => {
+    expect(convertLuceneFilter('host:web-1')).toBeUndefined();
+  });
+
+  it('also does not convert when the field name only appears inside another token', () => {
+    // Known limitation: substring matching is conservative without a Lucene field extractor.
+    expect(convertLuceneFilter('hostname:web-1')).toBeUndefined();
+  });
+
+  it('converts when the filter does not contain the field name', () => {
+    expect(convertLuceneFilter('service.name:web-1')).not.toBeUndefined();
+  });
+});
+
 describe('annotation conversion case matrix (query assertions)', () => {
   const matrixIndexPatterns = {
     logstash: createIndexPattern({
