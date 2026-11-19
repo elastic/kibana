@@ -253,6 +253,32 @@ describe('ProcessorEditor', () => {
     expect(onChange).toHaveBeenCalled();
   });
 
+  it('counts JSON that does not parse yet as a change, so cancelling asks first', async () => {
+    mockOpenConfirm.mockResolvedValue(false);
+    const { onChange, onCancel } = renderEditor({
+      catalogue: {
+        ...catalogue,
+        definitions: catalogue.definitions.map((definition) =>
+          definition.type === 'add_fields'
+            ? {
+                ...definition,
+                fields: [{ name: 'payload', type: 'literal', literal_kinds: ['object'] }],
+              }
+            : definition
+        ),
+      },
+    });
+
+    fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-payload'), {
+      target: { value: '{"team":' },
+    });
+    expect(onChange).toHaveBeenCalled();
+
+    await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorCancel'));
+    expect(mockOpenConfirm).toHaveBeenCalled();
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
   it('does not offer delete while creating a processor', () => {
     renderEditor();
     expect(screen.queryByTestId('streamsProcessingFlyoutEditorDelete')).toBeNull();
