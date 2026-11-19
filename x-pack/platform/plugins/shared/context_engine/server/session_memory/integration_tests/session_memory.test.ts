@@ -73,7 +73,9 @@ describe('session memory', () => {
   });
 
   it('finds nothing before Elasticsearch creates the stream', async () => {
-    await expect(service.forget(jdoe, ['missing'])).resolves.toEqual({ missing: 'not_found' });
+    await expect(service.forget(jdoe, ['missing'])).resolves.toEqual([
+      { id: 'missing', outcome: 'not_found' },
+    ]);
   });
 
   it('hides a memory from other users and other spaces', async () => {
@@ -81,16 +83,16 @@ describe('session memory', () => {
 
     const otherUser = { space: 'default', userId: 'asmith' };
     const otherSpace = { space: 'marketing', userId: 'jdoe' };
-    await expect(service.forget(otherUser, ['isolated'])).resolves.toEqual({
-      isolated: 'not_found',
-    });
-    await expect(service.forget(otherSpace, ['isolated'])).resolves.toEqual({
-      isolated: 'not_found',
-    });
+    await expect(service.forget(otherUser, ['isolated'])).resolves.toEqual([
+      { id: 'isolated', outcome: 'not_found' },
+    ]);
+    await expect(service.forget(otherSpace, ['isolated'])).resolves.toEqual([
+      { id: 'isolated', outcome: 'not_found' },
+    ]);
 
-    await expect(service.forget(jdoe, ['isolated'])).resolves.toEqual({
-      isolated: 'forgotten',
-    });
+    await expect(service.forget(jdoe, ['isolated'])).resolves.toEqual([
+      { id: 'isolated', outcome: 'forgotten' },
+    ]);
   });
 
   it('forgets each memory by its latest revision and reports every id', async () => {
@@ -104,15 +106,17 @@ describe('session memory', () => {
       }
     );
 
-    await expect(service.forget(jdoe, ['live', 'forgotten', 'unknown'])).resolves.toEqual({
-      live: 'forgotten',
-      forgotten: 'already_forgotten',
-      unknown: 'not_found',
-    });
+    await expect(service.forget(jdoe, ['live', 'forgotten', 'unknown'])).resolves.toEqual([
+      { id: 'live', outcome: 'forgotten' },
+      { id: 'forgotten', outcome: 'already_forgotten' },
+      { id: 'unknown', outcome: 'not_found' },
+    ]);
     await refresh();
 
     expect(await countRevisions('live')).toBe(3);
     expect(await countRevisions('forgotten')).toBe(2);
-    await expect(service.forget(jdoe, ['live'])).resolves.toEqual({ live: 'already_forgotten' });
+    await expect(service.forget(jdoe, ['live'])).resolves.toEqual([
+      { id: 'live', outcome: 'already_forgotten' },
+    ]);
   });
 });

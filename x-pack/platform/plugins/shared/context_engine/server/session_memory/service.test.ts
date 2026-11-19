@@ -165,11 +165,11 @@ describe('createSessionMemoryService', () => {
 
       await expect(
         service.forget(scope, ['memory-1', 'memory-2', 'memory-3', 'memory-1'])
-      ).resolves.toEqual({
-        'memory-1': 'forgotten',
-        'memory-2': 'already_forgotten',
-        'memory-3': 'not_found',
-      });
+      ).resolves.toEqual([
+        { id: 'memory-1', outcome: 'forgotten' },
+        { id: 'memory-2', outcome: 'already_forgotten' },
+        { id: 'memory-3', outcome: 'not_found' },
+      ]);
       expect(esClient.bulk).toHaveBeenCalledWith({
         operations: [
           { create: { _index: SESSION_MEMORY_DATA_STREAM } },
@@ -186,23 +186,43 @@ describe('createSessionMemoryService', () => {
       });
     });
 
-    it('throws when Elasticsearch rejects a tombstone', async () => {
-      esClient.search.mockResolvedValue(searchResponse([storedMemory]));
+    it('reports a rejected tombstone with its cause and keeps every other outcome', async () => {
+      const otherMemory = { ...storedMemory, id: 'memory-4' };
+      esClient.search.mockResolvedValue(
+        searchResponse([storedMemory, otherMemory, forgottenMemory])
+      );
       esClient.bulk.mockResolvedValue(
         bulkResponse([
+          { create: { _index: '.ds-memory', status: 201 } },
           {
             create: {
               _index: '.ds-memory',
-              status: 400,
-              error: { type: 'document_parsing_exception', reason: 'failed to parse' },
+              status: 429,
+              error: {
+                type: 'es_rejected_execution_exception',
+                reason: 'rejected execution',
+                caused_by: { type: 'queue_full', reason: 'write queue full' },
+              },
             },
           },
         ])
       );
 
-      await expect(service.forget(scope, ['memory-1'])).rejects.toThrow(
-        'Failed to write to session memory: failed to parse'
-      );
+      await expect(
+        service.forget(scope, ['memory-1', 'memory-2', 'memory-3', 'memory-4'])
+      ).resolves.toEqual([
+        { id: 'memory-1', outcome: 'forgotten' },
+        { id: 'memory-2', outcome: 'already_forgotten' },
+        { id: 'memory-3', outcome: 'not_found' },
+        { id: 'memory-4', outcome: 'failed', error: 'rejected execution: write queue full' },
+      ]);
+    });
+
+    it('throws when the read fails', async () => {
+      esClient.search.mockRejectedValue(new Error('connection refused'));
+
+      await expect(service.forget(scope, ['memory-1'])).rejects.toThrow('connection refused');
+      expect(esClient.bulk).not.toHaveBeenCalled();
     });
 
     it('throws before reading when given more ids than one call takes', async () => {
@@ -226,14 +246,14 @@ describe('createSessionMemoryService', () => {
 
       const result = await service.forget(scope, [...ids, 'memory-0']);
 
-      expect(Object.keys(result)).toHaveLength(MAX_SESSION_MEMORY_FORGET_IDS);
+      expect(result).toHaveLength(MAX_SESSION_MEMORY_FORGET_IDS);
       expect(esClient.search).toHaveBeenCalledWith(
         expect.objectContaining({ size: MAX_SESSION_MEMORY_FORGET_IDS })
       );
     });
 
     it('does nothing for an empty list', async () => {
-      await expect(service.forget(scope, [])).resolves.toEqual({});
+      await expect(service.forget(scope, [])).resolves.toEqual([]);
       expect(esClient.search).not.toHaveBeenCalled();
     });
   });

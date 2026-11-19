@@ -6,12 +6,12 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { BulkResponse, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ErrorCause, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { MAX_SESSION_MEMORY_FORGET_IDS } from '../../common/constants';
 import { SESSION_MEMORY_DATA_STREAM } from './data_streams';
 import type {
-  ForgetOutcome,
+  ForgetResult,
   SessionMemoryScope,
   SessionMemoryService,
   StoredSessionMemory,
@@ -26,12 +26,9 @@ const scopeFilter = ({ space, userId }: SessionMemoryScope): QueryDslQueryContai
 
 const ignoreMissingStream = { ignore_unavailable: true };
 
-// The bulk API reports rejected documents in the response instead of throwing.
-const throwOnBulkErrors = (response: BulkResponse): void => {
-  const error = response.items.find((item) => item.create?.error)?.create?.error;
-  if (error) {
-    throw new Error(`Failed to write to session memory: ${error.reason ?? error.type}`);
-  }
+const toErrorMessage = ({ type, reason, caused_by: cause }: ErrorCause): string => {
+  const message = reason ?? type;
+  return cause?.reason ? `${message}: ${cause.reason}` : message;
 };
 
 const toTombstone = (latest: StoredSessionMemory, timestamp: string): StoredSessionMemory => ({
@@ -44,11 +41,18 @@ const toTombstone = (latest: StoredSessionMemory, timestamp: string): StoredSess
   deleted_at: timestamp,
 });
 
-const getForgetOutcome = (latest: StoredSessionMemory | undefined): ForgetOutcome => {
-  if (!latest) {
-    return 'not_found';
+const toForgetResult = (
+  id: string,
+  latest: StoredSessionMemory | undefined,
+  error: string | undefined
+): ForgetResult => {
+  if (error !== undefined) {
+    return { id, outcome: 'failed', error };
   }
-  return latest.deleted_at === undefined ? 'forgotten' : 'already_forgotten';
+  if (!latest) {
+    return { id, outcome: 'not_found' };
+  }
+  return { id, outcome: latest.deleted_at === undefined ? 'forgotten' : 'already_forgotten' };
 };
 
 /**
@@ -103,7 +107,7 @@ export const createSessionMemoryService = (
   forget: async (scope, ids) => {
     const uniqueIds = [...new Set(ids)];
     if (uniqueIds.length === 0) {
-      return {};
+      return [];
     }
     if (uniqueIds.length > MAX_SESSION_MEMORY_FORGET_IDS) {
       throw new Error(`Cannot forget more than ${MAX_SESSION_MEMORY_FORGET_IDS} memories at once`);
@@ -126,17 +130,22 @@ export const createSessionMemoryService = (
     const tombstones = latestRevisions
       .filter((latest) => latest.deleted_at === undefined)
       .map((latest) => toTombstone(latest, timestamp));
+    // The bulk API reports a rejected tombstone in its item instead of throwing, and keeps the order.
+    const errorsById = new Map<string, string>();
     if (tombstones.length > 0) {
-      throwOnBulkErrors(
-        await esClient.bulk<StoredSessionMemory>({
-          operations: tombstones.flatMap((tombstone) => [
-            { create: { _index: SESSION_MEMORY_DATA_STREAM } },
-            tombstone,
-          ]),
-        })
-      );
+      const { items } = await esClient.bulk<StoredSessionMemory>({
+        operations: tombstones.flatMap((tombstone) => [
+          { create: { _index: SESSION_MEMORY_DATA_STREAM } },
+          tombstone,
+        ]),
+      });
+      items.forEach(({ create }, index) => {
+        if (create?.error) {
+          errorsById.set(tombstones[index].id, toErrorMessage(create.error));
+        }
+      });
     }
 
-    return Object.fromEntries(uniqueIds.map((id) => [id, getForgetOutcome(latestById.get(id))]));
+    return uniqueIds.map((id) => toForgetResult(id, latestById.get(id), errorsById.get(id)));
   },
 });

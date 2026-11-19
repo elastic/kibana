@@ -44,7 +44,10 @@ export interface RememberInput {
   attributes?: Readonly<Record<string, string>>;
 }
 
-export type ForgetOutcome = 'forgotten' | 'already_forgotten' | 'not_found';
+/** What forget did to one memory. `failed` means Elasticsearch rejected its tombstone. */
+export type ForgetResult =
+  | { id: string; outcome: 'forgotten' | 'already_forgotten' | 'not_found' }
+  | { id: string; outcome: 'failed'; error: string };
 
 export interface SessionMemoryService {
   /** Writes a new memory, or a revision of `input.id`, and returns the memory's id. */
@@ -52,8 +55,9 @@ export interface SessionMemoryService {
   /** Returns the latest revision, or undefined when the memory is missing, forgotten, or out of scope. */
   get(scope: SessionMemoryScope, id: string): Promise<SessionMemory | undefined>;
   /**
-   * Tombstones each memory, keeping its revisions until retention removes them. Throws for more
-   * than `MAX_SESSION_MEMORY_FORGET_IDS` unique ids.
+   * Tombstones each memory, keeping its revisions until retention removes them, and returns one
+   * result per unique id in request order. Throws for more than `MAX_SESSION_MEMORY_FORGET_IDS`
+   * unique ids.
    */
-  forget(scope: SessionMemoryScope, ids: readonly string[]): Promise<Record<string, ForgetOutcome>>;
+  forget(scope: SessionMemoryScope, ids: readonly string[]): Promise<ForgetResult[]>;
 }
