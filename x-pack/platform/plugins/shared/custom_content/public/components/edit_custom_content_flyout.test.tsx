@@ -53,7 +53,8 @@ const drafts = (...texts: string[]) =>
   }));
 
 const baseFlyoutState = {
-  draftQueries: drafts(),
+  // A panel with no saved query still has one blank draft to type into.
+  draftQueries: drafts(''),
   canAddQuery: false,
   addQuery: jest.fn(),
   removeQuery: jest.fn(),

@@ -40,6 +40,8 @@ import { getTelemetry } from '../telemetry';
 import { getServices } from '../services';
 
 const EDITOR_DEFAULT_HEIGHT = 400;
+// The floor when the ES|QL section is open and the viewport is short. The editor stays resizable.
+const EDITOR_MIN_HEIGHT = 160;
 // Intentionally overestimated (header + footer + body padding + template label row + spacers + help text)
 // so the computed max-height always prevents a scrollbar regardless of minor layout changes.
 const FLYOUT_FIXED_CHROME_HEIGHT = 380;
@@ -153,7 +155,7 @@ export const EditCustomContentFlyout = ({
 
   const onEsqlSectionResize = useCallback(({ height }: { width: number; height: number }) => {
     setMaxEditorHeight(
-      Math.max(EDITOR_DEFAULT_HEIGHT, window.innerHeight - FLYOUT_FIXED_CHROME_HEIGHT - height)
+      Math.max(EDITOR_MIN_HEIGHT, window.innerHeight - FLYOUT_FIXED_CHROME_HEIGHT - height)
     );
   }, []);
 
@@ -167,7 +169,7 @@ export const EditCustomContentFlyout = ({
   const editorContainerCss = css({
     position: 'relative',
     resize: 'vertical',
-    minHeight: EDITOR_DEFAULT_HEIGHT,
+    minHeight: EDITOR_MIN_HEIGHT,
     height: EDITOR_DEFAULT_HEIGHT,
     ...(maxEditorHeight !== undefined && { maxHeight: maxEditorHeight }),
     border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
