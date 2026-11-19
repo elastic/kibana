@@ -21,10 +21,10 @@ import {
   MAX_RECALL_USER_ID_LENGTH,
   MEMORY_RECALL_PATH,
   MIN_RECALL_MAX_TOKENS,
+  RECALL_ALL_AI_INDICES,
 } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { RecallResponse } from '../../common/http_api/memory_recall';
-import { RECALL_SOURCES } from '../../common/http_api/memory_recall';
 import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
 import { createAiIndexRecallStore } from '../memory_recall/ai_index_store';
 import { recall } from '../memory_recall/service';
@@ -38,32 +38,39 @@ const READ_SECURITY: RouteSecurity = {
 
 const recallBodySchema = schema.object({
   query: schema.string({ minLength: 1, maxLength: MAX_RECALL_QUERY_LENGTH }),
-  ai_index_ids: schema.maybe(
-    schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_AI_INDEX_ID_LENGTH }), {
-      maxSize: MAX_AI_INDICES,
-    })
-  ),
   user_id: schema.maybe(schema.string({ minLength: 1, maxLength: MAX_RECALL_USER_ID_LENGTH })),
   session_ids: schema.maybe(
     schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_RECALL_SESSION_ID_LENGTH }), {
       maxSize: MAX_RECALL_SESSION_IDS,
     })
   ),
-  sources: schema.arrayOf(
-    schema.oneOf([
-      schema.literal('session_events'),
-      schema.literal('session_memory'),
-      schema.literal('ai_index'),
-    ]),
-    { minSize: 1, maxSize: RECALL_SOURCES.length, defaultValue: [...RECALL_SOURCES] }
+  include: schema.object(
+    {
+      session_events: schema.boolean({ defaultValue: false }),
+      session_memory: schema.boolean({ defaultValue: false }),
+      ai_index_ids: schema.arrayOf(
+        schema.string({
+          minLength: 1,
+          maxLength: MAX_AI_INDEX_ID_LENGTH,
+          meta: {
+            description: `An AI index id, or \`${RECALL_ALL_AI_INDICES}\` for every AI index the caller can read.`,
+          },
+        }),
+        { maxSize: MAX_AI_INDICES, defaultValue: [] }
+      ),
+    },
+    {
+      validate: ({ session_events: events, session_memory: memory, ai_index_ids: aiIndexIds }) =>
+        events || memory || aiIndexIds.length > 0 ? undefined : 'at least one store is required',
+    }
   ),
   max_tokens: schema.number({
     min: MIN_RECALL_MAX_TOKENS,
     max: MAX_RECALL_MAX_TOKENS,
     defaultValue: DEFAULT_RECALL_MAX_TOKENS,
   }),
-  format: schema.oneOf([schema.literal('list'), schema.literal('text')], {
-    defaultValue: 'list',
+  format: schema.oneOf([schema.literal('json'), schema.literal('text')], {
+    defaultValue: 'text',
   }),
 });
 

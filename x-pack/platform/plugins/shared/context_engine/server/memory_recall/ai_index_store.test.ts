@@ -23,11 +23,16 @@ describe('createAiIndexRecallStore', () => {
 
   beforeEach(() => {
     list = jest.fn();
-    query = jest.fn();
+    query = jest.fn().mockResolvedValue({ columns, values: [] });
   });
 
-  const search = (aiIndexIds?: string[]) =>
-    createAiIndexRecallStore({ list, query }).search({ query: 'checkout', aiIndexIds });
+  const search = (aiIndexIds: string[], userId?: string) =>
+    createAiIndexRecallStore({ list, query }).search({
+      query: 'checkout',
+      limit: 67,
+      aiIndexIds,
+      userId,
+    });
 
   it('returns nothing when no AI index is readable', async () => {
     list.mockResolvedValue([]);
@@ -37,7 +42,15 @@ describe('createAiIndexRecallStore', () => {
     expect(query).not.toHaveBeenCalled();
   });
 
-  it('maps rows to candidates with their AI index id', async () => {
+  it('searches every readable AI index for *', async () => {
+    list.mockResolvedValue([]);
+
+    await search(['*']);
+
+    expect(list).toHaveBeenCalledWith(undefined);
+  });
+
+  it('maps rows to results with their AI index', async () => {
     list.mockResolvedValue([
       aiIndex('ops-memory', 'index', 'ai-index-idx-ops-memory'),
       aiIndex('ops-stream', 'data_stream', 'ai-index-ds-ops-stream'),
@@ -51,31 +64,50 @@ describe('createAiIndexRecallStore', () => {
       ],
     });
 
-    expect(await search()).toEqual([
+    expect(await search(['ops-memory', 'ops-stream'])).toEqual([
       {
         id: 'ki-1',
-        source: 'ai_index',
+        source: 'ai_index:ops-memory',
         content: 'pool limit',
         date: '2026-11-07T02:00:41Z',
-        ai_index_id: 'ops-memory',
       },
-      { id: 'doc-2', source: 'ai_index', content: 'rolled back', ai_index_id: 'ops-stream' },
+      { id: 'doc-2', source: 'ai_index:ops-stream', content: 'rolled back' },
     ]);
     expect(query).toHaveBeenCalledWith({
-      query: buildAiIndexRecallQuery(['ai-index-idx-ops-memory', 'ai-index-ds-ops-stream']),
+      query: buildAiIndexRecallQuery({
+        dests: ['ai-index-idx-ops-memory', 'ai-index-ds-ops-stream'],
+        limit: 67,
+        filterByUser: false,
+      }),
       params: { query: 'checkout' },
-      limit: 50,
+      limit: 67,
     });
+  });
+
+  it('filters by user_id when one is sent', async () => {
+    list.mockResolvedValue([aiIndex('ops-memory', 'index', 'ai-index-idx-ops-memory')]);
+
+    await search(['ops-memory'], 'jdoe');
+
+    const [request] = query.mock.calls[0];
+    expect(request.query).toContain('WHERE user_id IS NULL OR user_id == ?user_id');
+    expect(request.params).toEqual({ query: 'checkout', user_id: 'jdoe' });
   });
 });
 
 describe('buildAiIndexRecallQuery', () => {
-  it('builds a query the lifecycle pipeline accepts', () => {
-    const dest = { type: 'data_stream' as const, value: 'ai-index-ds-ops-stream' };
-    const query = applyKiLifecycle(buildAiIndexRecallQuery([dest.value]), [dest]);
+  const dest = { type: 'data_stream' as const, value: 'ai-index-ds-ops-stream' };
+  const query = buildAiIndexRecallQuery({ dests: [dest.value], limit: 100, filterByUser: false });
 
-    expect(query).toContain('governance.lifecycle.status');
-    expect(query).toContain('FORK');
-    expect(query).toContain('FUSE');
+  it('reads dreamed KIs only', () => {
+    expect(query).toContain('WHERE STARTS_WITH(type, "fact.") OR STARTS_WITH(type, "entity.")');
+  });
+
+  it('builds a query the lifecycle pipeline accepts', () => {
+    const withLifecycle = applyKiLifecycle(query, [dest]);
+
+    expect(withLifecycle).toContain('governance.lifecycle.status');
+    expect(withLifecycle).toContain('FORK');
+    expect(withLifecycle).toContain('FUSE');
   });
 });

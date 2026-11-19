@@ -91,30 +91,51 @@ describe('memory recall routes', () => {
   it('returns 404 when the context engine is disabled', async () => {
     featureFlagEnabled = false;
 
-    await callRoute({ query: 'why was checkout slow?' });
+    await callRoute({ query: 'why was checkout slow?', include: { session_events: true } });
 
     expect(response.notFound).toHaveBeenCalledTimes(1);
   });
 
-  it('defaults sources, max_tokens and format', () => {
-    expect(route.validate.request.body.validate({ query: 'why was checkout slow?' })).toEqual({
+  it('defaults include flags, max_tokens and format', () => {
+    expect(
+      route.validate.request.body.validate({
+        query: 'why was checkout slow?',
+        include: { session_events: true },
+      })
+    ).toEqual({
       query: 'why was checkout slow?',
-      sources: ['session_events', 'session_memory', 'ai_index'],
+      include: { session_events: true, session_memory: false, ai_index_ids: [] },
       max_tokens: 6000,
-      format: 'list',
+      format: 'text',
     });
   });
 
+  it('rejects a request that includes no store', () => {
+    expect(() => route.validate.request.body.validate({ query: 'q', include: {} })).toThrow(
+      'at least one store is required'
+    );
+  });
+
   it('rejects max_tokens outside its bounds', () => {
-    expect(() => route.validate.request.body.validate({ query: 'q', max_tokens: 500 })).toThrow();
+    expect(() =>
+      route.validate.request.body.validate({
+        query: 'q',
+        include: { session_events: true },
+        max_tokens: 500,
+      })
+    ).toThrow();
   });
 
   it('returns the recall response', async () => {
-    await callRoute({ query: 'why was checkout slow?', ai_index_ids: ['ops-memory'] });
+    await callRoute({
+      query: 'why was checkout slow?',
+      include: { ai_index_ids: ['ops-memory'] },
+      format: 'json',
+    });
 
     expect(list).toHaveBeenCalledWith(['ops-memory']);
     expect(response.ok).toHaveBeenCalledWith({
-      body: { results: [], took_ms: expect.any(Number), tokens: 0 },
+      body: { results: [], took_ms: expect.any(Number) },
     });
   });
 });

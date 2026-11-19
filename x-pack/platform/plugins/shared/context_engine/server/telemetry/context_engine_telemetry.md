@@ -31,7 +31,7 @@ The usage collector runs regardless of the setting.
 | `context_engine_ki_delete` | The `context-engine.deleteKi` workflow step or the internal DELETE KI route soft-deletes a KI document, or fails to. |
 | `context_engine_ki_restore` | The internal POST KI restore route restores a soft-deleted KI document, or fails to. |
 | `context_engine_ki_verification` | The `context-engine.verifyKi` step, or `context-engine.createKi` given `verifiers`, completes a verifier run, or fails to. |
-| `context_engine_memory_recall` | The public Recall route returns a response, or fails to. |
+| `context_engine_recall` | The public Recall route returns a response, or fails to. |
 
 KI write HTTP routes (PATCH update, DELETE soft-delete, POST restore) report through `withKiWriteTelemetry` like the workflow steps. ECS audit events in `server/audit/audit_events.ts` still record AI index and KI operations for security auditing; other AI index HTTP routes (reads, index management) are not covered by these EBT events.
 
@@ -61,7 +61,7 @@ A cancelled workflow run reports `outcome: aborted` instead of `failure`, keyed 
 | `ai_index_id` | The AI index the KI belongs to, when provided by the caller. |
 | `error_type` | As in KI write events. Present only on `failure`. |
 
-### Memory recall event
+### Recall event
 
 | Field | Description |
 |---|---|

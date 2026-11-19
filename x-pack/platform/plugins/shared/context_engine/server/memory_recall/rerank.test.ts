@@ -8,9 +8,9 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { RECALL_RERANK_INFERENCE_ID } from '../../common/constants';
 import { rerankCandidates } from './rerank';
-import type { RecallCandidate } from './types';
+import type { RecallResult } from '../../common/http_api/memory_recall';
 
-const candidate = (id: string, content: string): RecallCandidate => ({
+const candidate = (id: string, content: string): RecallResult => ({
   id,
   source: 'ai_index',
   content,

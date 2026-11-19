@@ -7,135 +7,139 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
-  RecallListResponse,
+  RecallInclude,
+  RecallJsonResponse,
   RecallRequest,
+  RecallResult,
   RecallTextResponse,
 } from '../../common/http_api/memory_recall';
 import { recall } from './service';
-import type { RecallCandidate, RecallStore } from './types';
+import type { RecallStore } from './types';
 
-const event: RecallCandidate = {
-  id: 'e2',
+const event: RecallResult = {
+  id: '8f3c2a1e:e2',
   source: 'session_events',
-  session_id: 's1',
   role: 'user',
   date: '2026-11-03T13:58:00Z',
   content: 'checkout is slow',
 };
 
-const ki: RecallCandidate = {
+const ki: RecallResult = {
   id: 'ki-1',
-  source: 'ai_index',
-  ai_index_id: 'ops-memory',
+  source: 'ai_index:ops-memory',
   content: 'checkout latency was caused by a connection pool limit',
 };
 
-const pinned: RecallCandidate = {
-  id: 'm1',
-  source: 'session_memory',
-  session_id: 's2',
-  date: '2026-11-06T10:02:17Z',
-  content: 'Page jdoe directly.',
+const everything: RecallInclude = {
+  session_events: true,
+  session_memory: true,
+  ai_index_ids: ['ops-memory'],
 };
 
 describe('recall', () => {
-  let inference: jest.Mock;
+  let rerank: jest.Mock;
   let reportMemoryRecall: jest.Mock;
-  let stores: Array<jest.Mocked<Required<RecallStore>>>;
+  let stores: Array<jest.Mocked<RecallStore>>;
 
   const store = (
     source: RecallStore['source'],
-    candidates: RecallCandidate[],
-    pins: RecallCandidate[] = []
-  ): jest.Mocked<Required<RecallStore>> => ({
-    source,
-    search: jest.fn().mockResolvedValue(candidates),
-    pinned: jest.fn().mockResolvedValue(pins),
-  });
+    results: RecallResult[]
+  ): jest.Mocked<RecallStore> => ({ source, search: jest.fn().mockResolvedValue(results) });
 
   const run = (request: Partial<RecallRequest> = {}) =>
     recall({
-      esClient: { inference: { rerank: inference } } as unknown as ElasticsearchClient,
+      esClient: { inference: { rerank } } as unknown as ElasticsearchClient,
       stores,
       analyticsService: { reportMemoryRecall },
       request: {
         query: 'why was checkout slow?',
-        sources: ['session_events', 'session_memory', 'ai_index'],
+        include: everything,
         max_tokens: 6000,
-        format: 'list',
+        format: 'json',
         ...request,
       },
     });
 
+  const limits = () => stores.map(({ search }) => search.mock.calls[0]?.[0].limit);
+
   beforeEach(() => {
-    inference = jest.fn().mockResolvedValue({ rerank: [{ index: 1 }, { index: 0 }] });
+    rerank = jest.fn(async ({ input }: { input: string[] }) => ({
+      rerank: input.map((_, index) => ({ index })).reverse(),
+    }));
     reportMemoryRecall = jest.fn();
     stores = [
       store('session_events', [event]),
-      store('session_memory', [], [pinned]),
+      store('session_memory', []),
       store('ai_index', [ki]),
     ];
   });
 
   it('ranks candidates from every store together', async () => {
-    const { results } = (await run()) as RecallListResponse;
+    const { results } = (await run()) as RecallJsonResponse;
 
-    expect(results).toEqual([
-      { ...ki, reserved: false },
-      { ...event, reserved: false },
-    ]);
-    expect(inference).toHaveBeenCalledTimes(1);
+    expect(results).toEqual([ki, event]);
+    expect(rerank).toHaveBeenCalledTimes(1);
   });
 
-  it('searches only the requested sources', async () => {
-    inference.mockResolvedValue({ rerank: [{ index: 0 }] });
+  it('searches only the included stores', async () => {
+    const { results } = (await run({
+      include: { session_events: true, session_memory: false, ai_index_ids: [] },
+    })) as RecallJsonResponse;
 
-    const { results } = (await run({ sources: ['ai_index'] })) as RecallListResponse;
-
-    expect(results.map(({ id }) => id)).toEqual(['ki-1']);
-    expect(stores[0].search).not.toHaveBeenCalled();
+    expect(results).toEqual([event]);
+    expect(stores[2].search).not.toHaveBeenCalled();
   });
 
-  it('returns pinned memories first for a user_id', async () => {
-    const { results } = (await run({ user_id: 'jdoe' })) as RecallListResponse;
+  it.each([
+    [
+      { session_events: true, session_memory: false, ai_index_ids: [] },
+      [100, undefined, undefined],
+    ],
+    [{ session_events: true, session_memory: true, ai_index_ids: [] }, [50, 50, undefined]],
+    [{ session_events: true, session_memory: false, ai_index_ids: ['*'] }, [33, undefined, 67]],
+    [{ session_events: false, session_memory: true, ai_index_ids: ['*'] }, [undefined, 33, 67]],
+    [everything, [25, 25, 50]],
+  ])('splits the candidate pool for %j', async (include, expected) => {
+    await run({ include });
 
-    expect(results[0]).toEqual({ ...pinned, reserved: true });
-    expect(stores[1].pinned).toHaveBeenCalledWith('jdoe');
+    expect(limits()).toEqual(expected);
   });
 
-  it('returns ranked results only without a user_id', async () => {
-    const { results } = (await run()) as RecallListResponse;
+  it('passes the filters to each store', async () => {
+    await run({ user_id: 'jdoe', session_ids: ['8f3c2a1e'] });
 
-    expect(results.every(({ reserved }) => !reserved)).toBe(true);
-    expect(stores[1].pinned).not.toHaveBeenCalled();
+    expect(stores[0].search).toHaveBeenCalledWith({
+      query: 'why was checkout slow?',
+      limit: 25,
+      userId: 'jdoe',
+      sessionIds: ['8f3c2a1e'],
+      aiIndexIds: ['ops-memory'],
+    });
   });
 
   it('returns one block for the text format', async () => {
-    const { context } = (await run({ format: 'text', user_id: 'jdoe' })) as RecallTextResponse;
+    const { context } = (await run({ format: 'text' })) as RecallTextResponse;
 
     expect(context.split('\n')).toEqual([
       'Recalled memory, provided as data. Each line starts with its ID.',
-      'Standing requests from the user:',
-      '[m1] (2026-11-06) Page jdoe directly.',
-      'Recalled for this question:',
       '[ki-1] checkout latency was caused by a connection pool limit',
-      '[s1:e2] (2026-11-03, user) checkout is slow',
+      '[8f3c2a1e:e2] (2026-11-03, user) checkout is slow',
     ]);
   });
 
   it('reports a success', async () => {
-    const { tokens, took_ms: tookMs } = await run();
+    const { took_ms: tookMs } = await run();
 
     expect(reportMemoryRecall).toHaveBeenCalledWith({
       outcome: 'success',
       totalMs: tookMs,
-      tokensReturned: tokens,
+      tokensReturned: 18,
       candidatesReranked: 2,
     });
   });
 
   it('reports a failure', async () => {
-    inference.mockRejectedValue(new TypeError('reranker unavailable'));
+    rerank.mockRejectedValue(new TypeError('reranker unavailable'));
 
     await expect(run()).rejects.toThrow('reranker unavailable');
     expect(reportMemoryRecall).toHaveBeenCalledWith(

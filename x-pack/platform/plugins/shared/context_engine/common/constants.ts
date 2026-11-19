@@ -174,7 +174,7 @@ export const buildAgentBuilderTracesIndexName = (spaceId: string): string =>
   `${AGENT_BUILDER_TRACES_INDEX_PREFIX}${spaceId}`;
 
 /** Recall API (public): one ranked result over session events, session memory and AI indices. */
-export const MEMORY_RECALL_PATH = `${PUBLIC_API_PATH}/memory/_recall`;
+export const MEMORY_RECALL_PATH = `${PUBLIC_API_PATH}/_recall`;
 export const MAX_RECALL_QUERY_LENGTH = 4096;
 export const MAX_RECALL_USER_ID_LENGTH = 512;
 export const MAX_RECALL_SESSION_ID_LENGTH = 512;
@@ -182,8 +182,9 @@ export const MAX_RECALL_SESSION_IDS = 100;
 export const MIN_RECALL_MAX_TOKENS = 1000;
 export const MAX_RECALL_MAX_TOKENS = 25000;
 export const DEFAULT_RECALL_MAX_TOKENS = 6000;
-/** Share of `max_tokens` held for the user's pinned session memories. */
-export const RECALL_RESERVED_TOKENS = 400;
-/** Candidates each store sends to the reranker. */
-export const RECALL_CANDIDATES = { session_events: 20, session_memory: 20, ai_index: 50 } as const;
+/** Candidates sent to the reranker, split across the included stores by weight. */
+export const RECALL_CANDIDATE_POOL = 100;
+export const RECALL_STORE_WEIGHTS = { session_events: 1, session_memory: 1, ai_index: 2 } as const;
+/** In `include.ai_index_ids`, every AI index the caller can read. */
+export const RECALL_ALL_AI_INDICES = '*';
 export const RECALL_RERANK_INFERENCE_ID = '.jina-reranker-v3';

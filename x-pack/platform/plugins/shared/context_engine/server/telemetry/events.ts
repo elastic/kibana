@@ -15,7 +15,7 @@ export const CONTEXT_ENGINE_EVENT_TYPES = {
   KiDelete: `${TELEMETRY_PREFIX}_ki_delete`,
   KiRestore: `${TELEMETRY_PREFIX}_ki_restore`,
   KiVerification: `${TELEMETRY_PREFIX}_ki_verification`,
-  MemoryRecall: `${TELEMETRY_PREFIX}_memory_recall`,
+  MemoryRecall: `${TELEMETRY_PREFIX}_recall`,
 } as const;
 
 export type ContextEngineOutcome = 'success' | 'failure' | 'aborted';

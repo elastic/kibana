@@ -7,18 +7,16 @@
 
 import type { RecallResult, RecallSource } from '../../common/http_api/memory_recall';
 
-export type RecallCandidate = Omit<RecallResult, 'reserved'>;
-
 export interface RecallSearchParams {
   query: string;
+  limit: number;
   userId?: string;
   sessionIds?: string[];
   aiIndexIds?: string[];
 }
 
-/** One store Recall searches. A session store also supplies the user's pinned memories. */
+/** One store Recall searches. */
 export interface RecallStore {
   source: RecallSource;
-  search(params: RecallSearchParams): Promise<RecallCandidate[]>;
-  pinned?(userId: string): Promise<RecallCandidate[]>;
+  search(params: RecallSearchParams): Promise<RecallResult[]>;
 }

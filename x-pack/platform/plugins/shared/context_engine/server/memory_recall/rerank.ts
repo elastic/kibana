@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { RECALL_RERANK_INFERENCE_ID } from '../../common/constants';
-import type { RecallCandidate } from './types';
+import type { RecallResult } from '../../common/http_api/memory_recall';
 
 const RERANK_INPUT_CHARS = 1000;
 
@@ -19,8 +19,8 @@ export const rerankCandidates = async ({
 }: {
   esClient: ElasticsearchClient;
   query: string;
-  candidates: RecallCandidate[];
-}): Promise<RecallCandidate[]> => {
+  candidates: RecallResult[];
+}): Promise<RecallResult[]> => {
   if (candidates.length === 0) {
     return [];
   }
