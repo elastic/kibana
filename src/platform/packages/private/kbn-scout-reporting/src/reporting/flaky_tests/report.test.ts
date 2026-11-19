@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import type { SetupBuilds } from './breakages';
+import type { BuildOutcome, SetupBuilds } from './breakages';
 import {
   checkFlakyTest,
   classifyTest,
@@ -122,6 +122,12 @@ describe('flakiestQualifyingBranch', () => {
 const FIRST_BUILD_AT = Date.UTC(2026, 9, 1);
 const HOUR_MS = 60 * 60 * 1000;
 
+const OUTCOMES: Readonly<Record<string, BuildOutcome>> = {
+  x: 'failed',
+  r: 'recovered',
+  '.': 'passed',
+};
+
 /**
  * Builds of one setup numbered from `first` on, oldest first: `x` failed every attempt, `r` failed
  * then passed on a retry, `.` passed.
@@ -129,15 +135,14 @@ const HOUR_MS = 60 * 60 * 1000;
 const setupBuilds = (pattern: string, first = 1, branch = 'main'): SetupBuilds => ({
   branch,
   setup: 'kibana-on-merge a.config.ts stateful-classic local',
-  builds: [...pattern].map((outcome, index) => {
+  builds: [...pattern].map((mark, index) => {
     const ranAt = new Date(FIRST_BUILD_AT + (first + index) * HOUR_MS);
     return {
       buildId: `build-${first + index}`,
       buildNumber: first + index,
-      failed: outcome !== '.',
-      passed: outcome !== 'x',
+      outcome: OUTCOMES[mark],
       ranAt,
-      failedAt: outcome !== '.' ? ranAt : undefined,
+      failedAt: mark !== '.' ? ranAt : undefined,
     };
   }),
 });

@@ -637,15 +637,13 @@ describe('fetchSetupBuilds', () => {
           {
             buildId: 'build-11',
             buildNumber: 11,
-            failed: false,
-            passed: true,
+            outcome: 'passed',
             ranAt: new Date('2026-10-01T11:00:00.000Z'),
           },
           {
             buildId: 'build-12',
             buildNumber: 12,
-            failed: true,
-            passed: false,
+            outcome: 'failed',
             ranAt: new Date('2026-10-01T12:00:00.000Z'),
             failedAt: new Date('2026-10-01T12:30:00.000Z'),
           },
@@ -658,8 +656,7 @@ describe('fetchSetupBuilds', () => {
           {
             buildId: 'build-11',
             buildNumber: 11,
-            failed: true,
-            passed: true,
+            outcome: 'recovered',
             ranAt: new Date('2026-10-01T11:00:00.000Z'),
             failedAt: new Date('2026-10-01T11:30:00.000Z'),
           },
@@ -674,8 +671,7 @@ describe('fetchSetupBuilds', () => {
           {
             buildId: 'build-11',
             buildNumber: 11,
-            failed: false,
-            passed: true,
+            outcome: 'passed',
             ranAt: new Date('2026-10-01T11:00:00.000Z'),
           },
         ],

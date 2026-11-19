@@ -9,15 +9,18 @@
 
 import { scopeKey, type JudgedScope } from './judged_scope';
 
+/**
+ * How the test did in a build across its attempts: `recovered` when it failed, then passed on a
+ * retry, and `failed` when it failed every attempt.
+ */
+export type BuildOutcome = 'passed' | 'recovered' | 'failed';
+
 /** One build of a test in one setup. */
 export interface SetupBuild {
   /** Unique across pipelines, unlike the build number. */
   buildId: string;
   buildNumber: number;
-  /** Whether the test failed in the build, a failure that passed on a retry included. */
-  failed: boolean;
-  /** Whether the test passed in the build, a pass on a retry included. */
-  passed: boolean;
+  outcome: BuildOutcome;
   /** When the build first ran the test in the setup. */
   ranAt: Date;
   /** When the test last failed in the build in the setup: a later retry can be well after `ranAt`. */
@@ -51,7 +54,7 @@ export const MIN_BREAKAGE_BUILDS = 3;
 export const MAX_BREAKAGE_CHANCE = 0.01;
 
 /** Whether the test failed every attempt of the build: no retry passed. */
-const failedEveryAttempt = ({ failed, passed }: SetupBuild): boolean => failed && !passed;
+const failedEveryAttempt = ({ outcome }: SetupBuild): boolean => outcome === 'failed';
 
 /**
  * The chance that a test failing a share `rate` of its `builds` builds at random, each build

@@ -9,7 +9,7 @@
 
 import type { Client as ESClient } from '@elastic/elasticsearch';
 import { SCOUT_TEST_EVENTS_INDEX_PATTERN } from '@kbn/scout-info';
-import type { SetupBuilds } from './breakages';
+import type { BuildOutcome, SetupBuilds } from './breakages';
 import { ESQL_ROW_LIMIT, inList, quoteEsqlString } from './esql';
 import { buildExecutionModels } from './execution_model';
 import { scopeKey, type JudgedScope } from './judged_scope';
@@ -591,9 +591,8 @@ export const fetchBranchCounts = async (
 
 /**
  * One row per build of the given tests of one execution model, per branch and setup (pipeline,
- * config file and Scout target): whether the test failed in the build, a failure that passed on
- * a retry included, and whether it passed in it, on a retry included. Over the same executions as
- * the per-branch counts. Only setups where the test failed at least once: the others have no
+ * config file and Scout target): whether the test failed and whether it passed in the build, on a
+ * retry included, which tell its outcome. Over the same executions as the per-branch counts. Only setups where the test failed at least once: the others have no
  * breakage, and they are most of the rows.
  */
 export const buildSetupBuildsQuery = (
@@ -641,6 +640,14 @@ const chunk = <T>(values: readonly T[], size: number): T[][] =>
   Array.from({ length: Math.ceil(values.length / size) }, (_, index) =>
     values.slice(index * size, (index + 1) * size)
   );
+
+/** A build's outcome, from whether the test failed and passed in it, on a retry included. */
+const buildOutcome = ({ failed, passed }: { failed: number; passed: number }): BuildOutcome => {
+  if (failed === 1) {
+    return passed === 1 ? 'recovered' : 'failed';
+  }
+  return 'passed';
+};
 
 export interface SetupBuildsResult {
   /** Per test, its builds in each branch and setup where it failed, oldest first. */
@@ -706,8 +713,7 @@ export const fetchSetupBuilds = async (
       setupBuilds.builds.push({
         buildId: record.build_id,
         buildNumber: record.build_number,
-        failed: record.failed === 1,
-        passed: record.passed === 1,
+        outcome: buildOutcome(record),
         ranAt: new Date(record.ran_at),
         failedAt: record.failed_at === null ? undefined : new Date(record.failed_at),
       });
