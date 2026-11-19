@@ -26,11 +26,12 @@ import {
   noveltyValuesOfAlert,
 } from '../../alert_triage/novelty_guard';
 import { tagInChunks } from '../../alert_triage/plan_sweep';
-import { buildPatternKeys } from '../../alert_triage/pattern_key';
+import { buildPatternKeys, describePatternKey } from '../../alert_triage/pattern_key';
 import {
   TRIAGE_CACHE_AUDIT_TAG_PREFIX,
   TRIAGE_CACHE_REUSE_TAG_PREFIX,
   TRIAGE_WOULD_REUSE_TAG_PREFIX,
+  VERDICT_CACHE_NO_REUSE_KINDS,
   isAuditSample,
   matchReusableRecords,
   type VerdictCacheMode,
@@ -236,10 +237,20 @@ export const getTriageMatchVerdictCacheStepDefinition = ({
               try {
                 if (mode === 'on') {
                   const fired = await tagGuardHits(alertIds);
-                  const audit = alertIds.filter((id) => !fired.has(id) && isAuditSample(id));
+                  const strictKey = recordsByHash.get(hashes.get(alertIds[0]) ?? '')?.strictKey;
+                  const noReuse =
+                    strictKey !== undefined &&
+                    VERDICT_CACHE_NO_REUSE_KINDS.includes(describePatternKey(strictKey).kind);
+                  const audit = alertIds.filter(
+                    (id) => !noReuse && !fired.has(id) && isAuditSample(id)
+                  );
                   const auditIds = new Set(audit);
-                  const held = alertIds.filter((id) => fired.has(id) || auditIds.has(id));
-                  const reuse = alertIds.filter((id) => !fired.has(id) && !auditIds.has(id));
+                  const held = alertIds.filter(
+                    (id) => noReuse || fired.has(id) || auditIds.has(id)
+                  );
+                  const reuse = alertIds.filter(
+                    (id) => !noReuse && !fired.has(id) && !auditIds.has(id)
+                  );
                   // Held alerts are analyzed. They carry the would-reuse tag, and the audit ones a tag of their own.
                   await tagInChunks(write, {
                     alertIds: held,

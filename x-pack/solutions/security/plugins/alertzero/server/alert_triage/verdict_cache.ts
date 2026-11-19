@@ -45,6 +45,13 @@ export const TRIAGE_CACHE_AUDIT_TAG_PREFIX = 'az:cache_audit:';
 export const VERDICT_CACHE_AUDIT_SHARE = 0.05;
 
 /**
+ * The kinds of strict key whose records are never reused in `on` mode. A cloud key is account plus action, so one key can cover
+ * alerts with different truths (PoC run `poc-full-variants`: 17 of 451 reused verdicts were wrong, all cloud). Their records are
+ * still written, and their alerts still carry the would-reuse tag, but they are analyzed.
+ */
+export const VERDICT_CACHE_NO_REUSE_KINDS: readonly string[] = ['cloud'];
+
+/**
  * Whether an alert with a cache hit is part of the audit sample. The choice is a hash of the alert id, so it is the same on every
  * sweep and needs no state. The share is the fraction of alerts that are chosen.
  */

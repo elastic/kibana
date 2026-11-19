@@ -494,6 +494,38 @@ describe('triage match verdict cache step', () => {
       expect(verdictIds).toEqual([plainIds[0]]);
     });
 
+    it('never reuses the record of a cloud key: its alerts are analyzed and keep the would-reuse tag, because a cloud key can cover alerts with different truths', async () => {
+      const cloudAlert = {
+        'kibana.alert.rule.uuid': 'cloud-rule',
+        'kibana.alert.rule.revision': 1,
+        'kibana.alert.severity': 'low',
+        event: { action: 'ListBuckets' },
+        cloud: { account: { id: '1234' } },
+      };
+      const { strict } = buildPatternKeys(cloudAlert);
+      if (strict === undefined) throw new Error('no strict key');
+      const keyHash = hashKey('default', strict);
+      const base = { keyHash, strictKey: strict, floor: 0.85, now: new Date() };
+      const run1 = written(
+        nextCacheAction({ existing: undefined, fresh: fresh('first'), noveltyValues: {}, ...base })
+      );
+      const active = written(
+        nextCacheAction({ existing: run1, fresh: fresh('second'), noveltyValues: {}, ...base })
+      );
+      const { run, tagCalls } = setup({
+        mode: 'on',
+        alerts: [[plainIds[0], cloudAlert]],
+        records: [active],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ would_reuse: 1, reused: 0, audit_sampled: 0 });
+      expect(tagsOf(tagCalls())).toEqual([
+        { ids: [plainIds[0]], add: [`az:would_reuse:${verdictCacheId(keyHash)}`] },
+      ]);
+    });
+
     it('leaves an alert pending, so that it is analyzed, when the verdict cannot be applied, and counts the failure', async () => {
       const { run, warn } = setup({
         mode: 'on',
