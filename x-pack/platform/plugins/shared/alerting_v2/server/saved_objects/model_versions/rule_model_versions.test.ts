@@ -10,10 +10,8 @@ import type { SavedObject, SavedObjectsType } from '@kbn/core-saved-objects-serv
 import { createModelVersionTestMigrator } from '@kbn/core-test-helpers-model-versions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
 import { ruleMappings } from '../rule_mappings';
-import {
-  ruleSavedObjectAttributesSchemaV8,
-  ruleSavedObjectAttributesSchemaV9,
-} from '../schemas/rule_saved_object_attributes';
+import type { ruleSavedObjectAttributesSchemaV8 } from '../schemas/rule_saved_object_attributes';
+import { ruleSavedObjectAttributesSchemaV9 } from '../schemas/rule_saved_object_attributes';
 import { ruleModelVersions } from './rule_model_versions';
 
 const ruleType: SavedObjectsType = {
