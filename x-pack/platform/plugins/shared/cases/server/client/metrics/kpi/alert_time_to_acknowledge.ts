@@ -8,7 +8,10 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { MAX_KPI_ACKNOWLEDGE_EVENTS, MAX_KPI_ALERTS } from '../../../../common/constants';
 import type { KpiMetricResult } from '../../../../common/types/api';
-import type { PredefinedKpiMetricConfiguration } from '../../../../common/types/domain';
+import type {
+  KpiAcknowledgeTrigger,
+  PredefinedKpiMetricConfiguration,
+} from '../../../../common/types/domain';
 import { AttachmentType } from '../../../../common/types/domain';
 import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../../common/utils/attachments';
 import type { CasesAnalyticsV2ReaderContract } from '../../../cases_analytics_v2/reader';
@@ -39,7 +42,21 @@ const INCOMPLETE_MESSAGE = 'The metric search returned incomplete results.';
 interface AcknowledgeEventSource {
   '@timestamp'?: string;
   case?: { id?: string };
+  action?: { type?: string };
 }
+
+export interface AcknowledgeEvent {
+  time: string;
+  type: 'status' | 'assignees';
+}
+
+const DEFAULT_TRIGGER: KpiAcknowledgeTrigger = 'assigned_or_in_progress';
+
+const EVENT_TYPES_BY_TRIGGER: Record<KpiAcknowledgeTrigger, readonly AcknowledgeEvent['type'][]> = {
+  assigned: ['assignees'],
+  in_progress: ['status'],
+  assigned_or_in_progress: ['status', 'assignees'],
+};
 
 interface AlertAttachmentSource {
   '@timestamp'?: string;
@@ -59,8 +76,13 @@ export interface AlertCasePair {
   attachedAt: string;
 }
 
-type PeriodDurations =
-  | { type: 'durations'; durations: number[] }
+type PeriodData =
+  | {
+      type: 'data';
+      pairs: AlertCasePair[];
+      alerts: Map<string, AlertGeneratedTimes>;
+      events: Map<string, AcknowledgeEvent[]>;
+    }
   | { type: 'error'; message: string };
 
 /**
@@ -185,38 +207,47 @@ export const getAlertGeneratedAt = ({
 }: AlertGeneratedTimes): string | undefined => start ?? timestamp;
 
 /**
- * Groups the event times by case id, in ascending order.
+ * Groups the events by case id, in ascending order of time. The event type is the action type of the document.
  */
 export const extractAcknowledgeEvents = (
   hits: ReadonlyArray<estypes.SearchHit<AcknowledgeEventSource>>
-): Map<string, string[]> => {
-  const events = new Map<string, string[]>();
+): Map<string, AcknowledgeEvent[]> => {
+  const events = new Map<string, AcknowledgeEvent[]>();
 
   for (const { _source: source } of hits) {
     const caseId = source?.case?.id;
     const time = source?.['@timestamp'];
+    const type = source?.action?.type;
 
-    if (caseId != null && time != null) {
-      events.set(caseId, [...(events.get(caseId) ?? []), time]);
+    if (caseId != null && time != null && (type === 'status' || type === 'assignees')) {
+      events.set(caseId, [...(events.get(caseId) ?? []), { time, type }]);
     }
   }
 
-  events.forEach((times) => times.sort((first, second) => Date.parse(first) - Date.parse(second)));
+  events.forEach((list) =>
+    list.sort((first, second) => Date.parse(first.time) - Date.parse(second.time))
+  );
 
   return events;
 };
 
 /**
- * Returns the time when the alert was acknowledged in the case: the first event at or after the attach time.
- * Returns undefined when no such event exists.
+ * Returns the time when the alert was acknowledged in the case: the first event of the trigger at or after
+ * the attach time. Returns undefined when no such event exists.
  */
 export const getAlertAcknowledgedAt = ({
   attachedAt,
-  eventTimes,
-}: Pick<AlertCasePair, 'attachedAt'> & { eventTimes: readonly string[] }): string | undefined => {
+  events,
+  trigger = DEFAULT_TRIGGER,
+}: Pick<AlertCasePair, 'attachedAt'> & {
+  events: readonly AcknowledgeEvent[];
+  trigger?: KpiAcknowledgeTrigger;
+}): string | undefined => {
   const attached = Date.parse(attachedAt);
+  const types = EVENT_TYPES_BY_TRIGGER[trigger];
 
-  return eventTimes.find((time) => Date.parse(time) >= attached);
+  return events.find(({ time, type }) => types.includes(type) && Date.parse(time) >= attached)
+    ?.time;
 };
 
 /**
@@ -226,10 +257,11 @@ export const getAlertAcknowledgedAt = ({
 export const getAlertDurationSeconds = (
   pair: AlertCasePair,
   alert: AlertGeneratedTimes | undefined,
-  eventTimes: readonly string[]
+  events: readonly AcknowledgeEvent[],
+  trigger?: KpiAcknowledgeTrigger
 ): number | undefined => {
   const generatedAt = alert != null ? getAlertGeneratedAt(alert) : undefined;
-  const acknowledgedAt = getAlertAcknowledgedAt({ attachedAt: pair.attachedAt, eventTimes });
+  const acknowledgedAt = getAlertAcknowledgedAt({ attachedAt: pair.attachedAt, events, trigger });
 
   if (generatedAt == null || acknowledgedAt == null) {
     return;
@@ -268,7 +300,7 @@ const readAcknowledgeEvents = async (
   pairs: readonly AlertCasePair[],
   context: KpiQueryContext,
   reader: CasesAnalyticsV2ReaderContract
-): Promise<{ events: Map<string, string[]> } | { message: string }> => {
+): Promise<{ events: Map<string, AcknowledgeEvent[]> } | { message: string }> => {
   if (pairs.length === 0) {
     return { events: new Map() };
   }
@@ -310,12 +342,27 @@ const readAcknowledgeEvents = async (
   }
 };
 
-const readPeriodDurations = async (
+const getPeriodDurations = (
+  { pairs, alerts, events }: Extract<PeriodData, { type: 'data' }>,
+  trigger?: KpiAcknowledgeTrigger
+): number[] =>
+  pairs.flatMap((pair) => {
+    const duration = getAlertDurationSeconds(
+      pair,
+      alerts.get(pair.alertId),
+      events.get(pair.caseId) ?? [],
+      trigger
+    );
+
+    return duration != null ? [duration] : [];
+  });
+
+const readPeriodData = async (
   response: estypes.MsearchResponseItem | undefined,
   context: KpiQueryContext,
   reader: CasesAnalyticsV2ReaderContract,
   alertsService: AlertService
-): Promise<PeriodDurations> => {
+): Promise<PeriodData> => {
   if (response == null || 'error' in response) {
     return { type: 'error', message: FAILED_MESSAGE };
   }
@@ -351,16 +398,7 @@ const readPeriodDurations = async (
       return { type: 'error', message: acknowledge.message };
     }
 
-    const durations = pairs.flatMap((pair) => {
-      const duration = getAlertDurationSeconds(
-        pair,
-        result.alerts.get(pair.alertId),
-        acknowledge.events.get(pair.caseId) ?? []
-      );
-      return duration != null ? [duration] : [];
-    });
-
-    return { type: 'durations', durations };
+    return { type: 'data', pairs, alerts: result.alerts, events: acknowledge.events };
   } catch (error) {
     return { type: 'error', message: FAILED_MESSAGE };
   }
@@ -401,13 +439,13 @@ export const runAlertTimeToAcknowledgeMetrics = async ({
   }
 
   const [current, previous] = await Promise.all([
-    readPeriodDurations(responses[0], context, reader, alertsService),
+    readPeriodData(responses[0], context, reader, alertsService),
     previousPeriod != null
-      ? readPeriodDurations(responses[1], { ...context, ...previousPeriod }, reader, alertsService)
+      ? readPeriodData(responses[1], { ...context, ...previousPeriod }, reader, alertsService)
       : undefined,
   ]);
 
-  return metrics.map(({ id, predefinedId }) => {
+  return metrics.map(({ id, predefinedId, acknowledgeTrigger }) => {
     if (current.type === 'error') {
       return toKpiMetricError(id, current.message);
     }
@@ -418,11 +456,11 @@ export const runAlertTimeToAcknowledgeMetrics = async ({
       id,
       type: 'value',
       format: 'duration',
-      value: aggregateAlertDurations(current.durations, aggregation),
+      value: aggregateAlertDurations(getPeriodDurations(current, acknowledgeTrigger), aggregation),
       ...(previous != null && {
         previousValue:
-          previous.type === 'durations'
-            ? aggregateAlertDurations(previous.durations, aggregation)
+          previous.type === 'data'
+            ? aggregateAlertDurations(getPeriodDurations(previous, acknowledgeTrigger), aggregation)
             : null,
       }),
     };

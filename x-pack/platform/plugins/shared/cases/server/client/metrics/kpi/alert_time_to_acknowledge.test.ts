@@ -72,39 +72,62 @@ const medianMetric: PredefinedKpiMetricConfiguration = {
 describe('alert time to acknowledge', () => {
   describe('getAlertAcknowledgedAt', () => {
     const attachedAt = '2026-11-04T10:00:00.000Z';
+    const status = (time: string) => ({ time, type: 'status' as const });
+    const assignees = (time: string) => ({ time, type: 'assignees' as const });
 
     it('takes the first event after the attach time', () => {
       expect(
         getAlertAcknowledgedAt({
           attachedAt,
-          eventTimes: [
-            '2026-11-04T09:00:00.000Z',
-            '2026-11-04T10:30:00.000Z',
-            '2026-11-04T11:00:00.000Z',
+          events: [
+            status('2026-11-04T09:00:00.000Z'),
+            status('2026-11-04T10:30:00.000Z'),
+            assignees('2026-11-04T11:00:00.000Z'),
           ],
         })
       ).toBe('2026-11-04T10:30:00.000Z');
     });
 
     it('counts an event at the same millisecond as the attach', () => {
-      expect(getAlertAcknowledgedAt({ attachedAt, eventTimes: [attachedAt] })).toBe(attachedAt);
+      expect(getAlertAcknowledgedAt({ attachedAt, events: [status(attachedAt)] })).toBe(attachedAt);
     });
 
     it('returns undefined when no event is at or after the attach time', () => {
       expect(
-        getAlertAcknowledgedAt({ attachedAt, eventTimes: ['2026-11-04T09:59:59.999Z'] })
+        getAlertAcknowledgedAt({ attachedAt, events: [status('2026-11-04T09:59:59.999Z')] })
       ).toBeUndefined();
-      expect(getAlertAcknowledgedAt({ attachedAt, eventTimes: [] })).toBeUndefined();
+      expect(getAlertAcknowledgedAt({ attachedAt, events: [] })).toBeUndefined();
+    });
+
+    describe('trigger', () => {
+      const events = [status('2026-11-04T10:10:00.000Z'), assignees('2026-11-04T10:30:00.000Z')];
+
+      it.each([
+        ['assigned', '2026-11-04T10:30:00.000Z'],
+        ['in_progress', '2026-11-04T10:10:00.000Z'],
+        ['assigned_or_in_progress', '2026-11-04T10:10:00.000Z'],
+        [undefined, '2026-11-04T10:10:00.000Z'],
+      ] as const)('with the trigger %s gives %s', (trigger, expected) => {
+        expect(getAlertAcknowledgedAt({ attachedAt, events, trigger })).toBe(expected);
+      });
+
+      it('gives undefined when no event has the type of the trigger', () => {
+        expect(
+          getAlertAcknowledgedAt({ attachedAt, events: [status(attachedAt)], trigger: 'assigned' })
+        ).toBeUndefined();
+      });
     });
   });
 
   describe('getAlertDurationSeconds', () => {
+    const event = (time: string) => ({ time, type: 'status' as const });
+
     it('ends at the first event after the attach, from the alert start', () => {
       expect(
         getAlertDurationSeconds(
           { alertId: 'a1', caseId: 'c1', attachedAt: '2026-11-04T10:00:00.000Z' },
           { start: '2026-11-04T09:50:00.000Z', timestamp: '2026-11-04T10:00:00.000Z' },
-          ['2026-11-04T11:00:00.000Z']
+          [event('2026-11-04T11:00:00.000Z')]
         )
       ).toBe(4200);
     });
@@ -114,14 +137,14 @@ describe('alert time to acknowledge', () => {
         getAlertDurationSeconds(
           { alertId: 'a1', caseId: 'c1', attachedAt: '2026-11-04T10:00:00.000Z' },
           { timestamp: '2026-11-04T10:00:00.000Z' },
-          ['2026-11-04T10:00:30.000Z']
+          [event('2026-11-04T10:00:30.000Z')]
         )
       ).toBe(30);
     });
 
     it('drops a missing alert, a pair with no event, and a negative duration', () => {
       const pair = { alertId: 'a1', caseId: 'c1', attachedAt: '2026-11-04T10:00:00.000Z' };
-      const events = ['2026-11-04T10:30:00.000Z'];
+      const events = [event('2026-11-04T10:30:00.000Z')];
 
       expect(getAlertDurationSeconds(pair, undefined, events)).toBeUndefined();
       expect(
@@ -135,15 +158,24 @@ describe('alert time to acknowledge', () => {
   });
 
   describe('extractAcknowledgeEvents', () => {
-    it('groups the event times of each case in ascending order', () => {
+    it('groups the events of each case in ascending order, with the action type', () => {
       const events = extractAcknowledgeEvents([
         eventHit('c1', '2026-11-04T12:00:00.000Z'),
         eventHit('c2', '2026-11-04T10:00:00.000Z', 'assignees'),
         eventHit('c1', '2026-11-04T11:00:00.000Z'),
       ]);
 
-      expect(events.get('c1')).toEqual(['2026-11-04T11:00:00.000Z', '2026-11-04T12:00:00.000Z']);
-      expect(events.get('c2')).toEqual(['2026-11-04T10:00:00.000Z']);
+      expect(events.get('c1')).toEqual([
+        { time: '2026-11-04T11:00:00.000Z', type: 'status' },
+        { time: '2026-11-04T12:00:00.000Z', type: 'status' },
+      ]);
+      expect(events.get('c2')).toEqual([{ time: '2026-11-04T10:00:00.000Z', type: 'assignees' }]);
+    });
+
+    it('ignores an event with an action type that is not status or assignees', () => {
+      expect(
+        extractAcknowledgeEvents([eventHit('c1', '2026-11-04T11:00:00.000Z', 'comment')]).size
+      ).toBe(0);
     });
   });
 
@@ -608,6 +640,38 @@ describe('alert time to acknowledge', () => {
         type: 'error',
         message: 'The metric search returned incomplete results.',
       });
+    });
+
+    it('gives each metric its own trigger from one search for each period', async () => {
+      mockSearches({
+        attachments: [searchResponse([attachmentHit('c1', '2026-11-04T10:00:00.000Z', ['a1'])])],
+        events: [
+          searchResponse([
+            eventHit('c1', '2026-11-04T10:10:00.000Z'),
+            eventHit('c1', '2026-11-04T10:30:00.000Z', 'assignees'),
+          ]),
+        ],
+      });
+      alertsService.getAlertGeneratedTimes.mockResolvedValue(
+        alerts({ a1: { start: '2026-11-04T10:00:00.000Z' } })
+      );
+
+      const results = await runAlertTimeToAcknowledgeMetrics({
+        metrics: [
+          { ...avgMetric, id: 'assigned', acknowledgeTrigger: 'assigned' },
+          { ...avgMetric, id: 'in-progress', acknowledgeTrigger: 'in_progress' },
+          { ...avgMetric, id: 'first', acknowledgeTrigger: 'assigned_or_in_progress' },
+          { ...avgMetric, id: 'none' },
+        ],
+        context,
+        reader,
+        alertsService,
+      });
+
+      expect(results.map((result) => ('value' in result ? result.value : undefined))).toEqual([
+        1800, 600, 600, 600,
+      ]);
+      expect(reader.msearch).toHaveBeenCalledTimes(2);
     });
 
     it('runs no search with no metric', async () => {
