@@ -1233,7 +1233,7 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
     },
     logging: { file: 'info' },
     advanced: {
-      capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
+      capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH,LD_AUDIT',
     },
   },
 });

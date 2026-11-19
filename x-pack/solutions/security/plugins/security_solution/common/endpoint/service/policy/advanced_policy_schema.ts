@@ -200,7 +200,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.capture_env_vars',
       {
         defaultMessage:
-          'Provide a comma-separated list of up to five environment variables to capture in process creation events. Default: none.',
+          'Provide a comma-separated list of up to five environment variables to capture in process creation events. New policies capture LD_PRELOAD, LD_LIBRARY_PATH, and LD_AUDIT by default. If unset, no environment variables are captured.',
       }
     ),
   },
