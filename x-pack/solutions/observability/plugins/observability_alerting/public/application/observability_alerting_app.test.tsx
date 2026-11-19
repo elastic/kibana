@@ -308,16 +308,25 @@ describe('ObservabilityAlertingApp', () => {
     expect(mockTriggersActionsUi.getClassicRulesPage.mock.calls[0][0].showClassicBadge).toBe(false);
   });
 
-  it('shows a privileges prompt instead of the classic rules list without classic rules read', async () => {
-    const { getByTestId, queryByTestId } = renderAt(OBSERVABILITY_ALERTING_RULES_V1_PATH, {
+  it('renders the classic rules page without classic rules read so its no-access prompt can show', async () => {
+    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_RULES_V1_PATH, {
       securitySolutionRulesV4: { read_rules: true },
     } as unknown as Capabilities);
 
     await waitFor(() => {
-      expect(getByTestId('classicRulesPrivilegesPrompt')).toBeInTheDocument();
+      expect(getByTestId('classicRulesPage')).toBeInTheDocument();
     });
-    expect(queryByTestId('classicRulesPage')).not.toBeInTheDocument();
-    expect(mockTriggersActionsUi.getClassicRulesPage).not.toHaveBeenCalled();
+    expect(mockTriggersActionsUi.getClassicRulesPage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        hideListBackButton: true,
+        host: {
+          app: OBSERVABILITY_ALERTING_APP_ID,
+          pathPrefix: OBSERVABILITY_ALERTING_RULES_V1_PATH,
+        },
+        showClassicBadge: false,
+        tabs: [],
+      })
+    );
   });
 
   it('redirects a v2-only user from the classic rules path to universal rules', async () => {
