@@ -34,6 +34,10 @@ export const useStreamFeatures = (
   const showFetchErrorToast = useFetchErrorToast();
   const queryClient = useQueryClient();
   const [pollingObserverId] = useState(() => Symbol());
+  const [lastPollingFailure, setLastPollingFailure] = useState<{
+    sourceId: string;
+    error: Error;
+  }>();
   const isPollingEnabled = enabled && !!refetchInterval;
 
   useEffect(
@@ -66,6 +70,7 @@ export const useStreamFeatures = (
         return;
       }
 
+      setLastPollingFailure({ sourceId, error: fetchError });
       const failures = failedPollingObservers.get(queryClient) ?? new Set<symbol>();
       const shouldShowErrorToast = failures.size === 0;
       failures.add(pollingObserverId);
@@ -87,6 +92,7 @@ export const useStreamFeatures = (
       }
     },
     onSuccess: () => {
+      setLastPollingFailure(undefined);
       failedPollingObservers.get(queryClient)?.delete(pollingObserverId);
     },
     enabled,
@@ -111,12 +117,14 @@ export const useStreamFeatures = (
     () => allFeatures.filter((feature) => !!feature.excluded),
     [allFeatures]
   );
+  const pollingError =
+    isPollingEnabled && lastPollingFailure?.sourceId === sourceId ? lastPollingFailure.error : null;
 
   return {
     features,
     excludedFeatures,
     featuresLoading: isLoading,
     refreshFeatures: refetch,
-    error,
+    error: error ?? pollingError,
   };
 };

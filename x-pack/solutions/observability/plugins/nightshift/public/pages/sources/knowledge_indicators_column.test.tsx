@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { SignificantEventsWorkflowStatus, type Feature } from '@kbn/significant-events-schema';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
@@ -64,6 +64,13 @@ describe('KnowledgeIndicatorsColumn polling', () => {
     await act(async () => {
       await jest.advanceTimersByTimeAsync(milliseconds);
     });
+  };
+
+  const expectWarningTooltip = async (trigger: HTMLElement, message: string) => {
+    fireEvent.mouseOver(trigger);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(message);
+    fireEvent.mouseOut(trigger);
+    await waitFor(() => expect(screen.queryByRole('tooltip')).not.toBeInTheDocument());
   };
 
   beforeEach(() => {
@@ -145,7 +152,8 @@ describe('KnowledgeIndicatorsColumn polling', () => {
 
   it('shows each source failure and recovery while another source remains forbidden', async () => {
     const forbiddenError = Object.assign(new Error('Forbidden'), {
-      body: { statusCode: 403, message: 'Access to this source is forbidden' },
+      body: { statusCode: 403, message: 'Cannot read source source-1' },
+      response: { status: 403 },
       request: { url: '/internal/streams/source-1/features' },
     });
     const unavailableError = Object.assign(new Error('Service unavailable'), {
@@ -177,14 +185,15 @@ describe('KnowledgeIndicatorsColumn polling', () => {
     renderColumns(['source-1', 'source-2']);
     await screen.findByText('2');
     const forbiddenLabel =
-      'Could not refresh the KI feature count: Access to this source is forbidden';
+      'You do not have permission to read knowledge indicators for this source.';
     const unavailableLabel =
       'Could not refresh the KI feature count: KI features are temporarily unavailable';
 
-    expect(await screen.findByText(forbiddenLabel)).toBeInTheDocument();
+    await expectWarningTooltip(await screen.findByText(forbiddenLabel), forbiddenLabel);
     expect(screen.getByText('—')).toBeInTheDocument();
     expect(screen.queryByText(unavailableLabel)).not.toBeInTheDocument();
     expect(mockAddError).toHaveBeenCalledTimes(1);
+    expect(mockAddError.mock.calls[0][0]).toHaveProperty('message', 'Cannot read source source-1');
     expect(mockAddError.mock.calls[0][1]).toEqual({
       title: 'Could not refresh KI feature counts',
       toastMessage:
@@ -193,7 +202,7 @@ describe('KnowledgeIndicatorsColumn polling', () => {
 
     isSecondSourceFailing = true;
     await advanceTime(10_000);
-    expect(await screen.findByText(unavailableLabel)).toBeInTheDocument();
+    await expectWarningTooltip(await screen.findByText(unavailableLabel), unavailableLabel);
     expect(screen.getByText(forbiddenLabel)).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
     expect(mockAddError).toHaveBeenCalledTimes(1);
@@ -204,6 +213,34 @@ describe('KnowledgeIndicatorsColumn polling', () => {
     await screen.findByText('1');
     expect(screen.queryByText(unavailableLabel)).not.toBeInTheDocument();
     expect(screen.getByText(forbiddenLabel)).toBeInTheDocument();
+    expect(mockAddError).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the warning and keyboard focus during a retry without cached features', async () => {
+    mockFetch.mockRejectedValue(new Error('Feature fetch failed'));
+    renderColumns();
+    const warningLabel = 'Could not refresh the KI feature count: Feature fetch failed';
+    const warning = await screen.findByText(warningLabel);
+    act(() => warning.focus());
+    expect(warning).toHaveFocus();
+    fireEvent.keyDown(warning, { key: 'Escape' });
+
+    let completeRetry: ((response: { features: Feature[] }) => void) | undefined;
+    mockFetch.mockReturnValueOnce(
+      new Promise((resolve) => {
+        completeRetry = resolve;
+      })
+    );
+    await advanceTime(60_000);
+    expect(warning).toBeInTheDocument();
+    expect(warning).toHaveFocus();
+    expect(mockAddError).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      completeRetry?.({ features: [] });
+    });
+    await waitFor(() => expect(warning).not.toBeInTheDocument());
+    expect(screen.getByText('—')).toBeInTheDocument();
     expect(mockAddError).toHaveBeenCalledTimes(1);
   });
 });

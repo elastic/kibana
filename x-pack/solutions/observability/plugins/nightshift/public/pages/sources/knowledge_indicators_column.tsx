@@ -12,8 +12,25 @@ import type { SignificantEventsWorkflowStatusResult } from '@kbn/significant-eve
 import React from 'react';
 import { useStreamFeatures } from '../../data/knowledge_indicators/use_stream_features';
 import { getFormattedError } from '../../common/errors';
+import { getHttpErrorStatus } from '../../common/http_error';
 
 const KI_COUNT_POLL_INTERVAL_MS = 10_000;
+
+const getFetchErrorMessage = (error: Error): string => {
+  if (getHttpErrorStatus(error) === 403) {
+    return i18n.translate(
+      'xpack.nightshift.sources.knowledgeIndicatorsColumn.readPermissionErrorTooltip',
+      {
+        defaultMessage: 'You do not have permission to read knowledge indicators for this source.',
+      }
+    );
+  }
+
+  return i18n.translate('xpack.nightshift.sources.knowledgeIndicatorsColumn.refreshErrorTooltip', {
+    defaultMessage: 'Could not refresh the KI feature count: {message}',
+    values: { message: getFormattedError(error).message },
+  });
+};
 
 interface KnowledgeIndicatorsColumnProps {
   sourceId: string;
@@ -30,12 +47,7 @@ export function KnowledgeIndicatorsColumn({
   const { features, error } = useStreamFeatures(sourceId, [streamOnboardingResult], {
     refetchInterval: KI_COUNT_POLL_INTERVAL_MS,
   });
-  const errorMessage = error
-    ? i18n.translate('xpack.nightshift.sources.knowledgeIndicatorsColumn.refreshErrorTooltip', {
-        defaultMessage: 'Could not refresh the KI feature count: {message}',
-        values: { message: getFormattedError(error).message },
-      })
-    : undefined;
+  const errorMessage = error ? getFetchErrorMessage(error) : undefined;
 
   return (
     <EuiText
