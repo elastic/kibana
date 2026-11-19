@@ -22,6 +22,11 @@ import {
   useStartServices,
 } from '../../../../hooks';
 import { useEmbeddedContext } from '../../../../../../hooks/use_embedded_context';
+import { ONBOARDING_ENABLED_FLAG } from '../../../../../../services/aws_onboarding_override';
+import {
+  getOnboardingPocPath,
+  ONBOARDING_POC_PACKAGE,
+} from '../../../../../../ingest_hub/onboarding_poc/route';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 import type { IntegrationCardItem } from '../home';
@@ -62,7 +67,9 @@ export const BrowseIntegrationsPage: React.FC<BrowseIntegrationsPageProps> = ({
   const embedded = embeddedProp ?? isEmbedded;
   useBreadcrumbs('integrations_all', {}, { enabled: !embedded });
 
-  const { automaticImport, cloud } = useStartServices();
+  const { automaticImport, cloud, featureFlags } = useStartServices();
+  // PoC (ingest-dev#10467): behind the onboarding flag, picking Nginx in the modal opens the generic wizard form.
+  const isOnboardingPocEnabled = featureFlags.useBooleanValue(ONBOARDING_ENABLED_FLAG, false);
   const { pathname, search } = useLocation();
   const history = useHistory();
 
@@ -141,6 +148,14 @@ export const BrowseIntegrationsPage: React.FC<BrowseIntegrationsPageProps> = ({
     () =>
       rawFilteredCards.map((card) => {
         if (card.isCollectionCard) {
+          // PoC (ingest-dev#10467): embedded, behind the flag, the Nginx tile opens the generic form
+          // directly. The variant chooser flyout renders under the modal, so it can't be used here.
+          if (embedded && isOnboardingPocEnabled && card.name === ONBOARDING_POC_PACKAGE) {
+            return {
+              ...card,
+              onCardClick: () => history.push(getOnboardingPocPath(ONBOARDING_POC_PACKAGE)),
+            };
+          }
           return { ...card, onCardClick: () => openCollection(card.name) };
         }
         // Embedded hosts handle the selection themselves; the default click navigates to Fleet.
@@ -149,7 +164,14 @@ export const BrowseIntegrationsPage: React.FC<BrowseIntegrationsPageProps> = ({
         }
         return card;
       }),
-    [rawFilteredCards, openCollection, onIntegrationSelected]
+    [
+      rawFilteredCards,
+      openCollection,
+      onIntegrationSelected,
+      embedded,
+      isOnboardingPocEnabled,
+      history,
+    ]
   );
 
   // Resolve the open collection card from rawFilteredCards so the flyout variants

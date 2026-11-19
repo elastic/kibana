@@ -23,6 +23,8 @@ import { EmbeddedIntegrationsProvider } from '../../applications/integrations/em
 import { EPMApp } from '../../applications/integrations/sections/epm';
 import { EmbeddedOnboarding } from '../onboarding/core/embedded_onboarding';
 import { EMBEDDED_ONBOARDING_ROUTE } from '../onboarding/core/embedded_onboarding_route';
+import { OnboardingPocView } from '../onboarding_poc/onboarding_poc_view';
+import { ONBOARDING_POC_ROUTE } from '../onboarding_poc/route';
 
 export interface AddIntegrationModalProps {
   onClose: () => void;
@@ -82,6 +84,10 @@ export function AddIntegrationModal({
                 the add-integration page. */}
             <Route path={EMBEDDED_ONBOARDING_ROUTE}>
               <EmbeddedOnboarding />
+            </Route>
+            {/* PoC (ingest-dev#10467): the generic "Configure data streams" form, built from the manifest. */}
+            <Route path={ONBOARDING_POC_ROUTE}>
+              <OnboardingPocView />
             </Route>
             <Route>
               <EPMApp />
