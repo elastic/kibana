@@ -37,3 +37,27 @@ export const DetonationSubmittedToastContent = memo(
   )
 );
 DetonationSubmittedToastContent.displayName = 'DetonationSubmittedToastContent';
+
+export const DETONATION_COMPLETE_TITLE = t('completeTitle', 'Detonation complete');
+export const DETONATION_COMPLETE_SUBTITLE = t('completeSubtitle', 'The behavior report is ready');
+export const SEE_DETAILS = t('seeDetails', 'See details');
+
+interface DetonationCompleteToastContentProps {
+  onView: () => void;
+}
+
+/** Body of the "Detonation complete" toast: a sub header and a button that opens the report. */
+export const DetonationCompleteToastContent = memo(
+  ({ onView }: DetonationCompleteToastContentProps) => (
+    <>
+      <EuiText size="s">
+        <p>{DETONATION_COMPLETE_SUBTITLE}</p>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiButton size="s" onClick={onView} data-test-subj="detonationToastSeeDetails">
+        {SEE_DETAILS}
+      </EuiButton>
+    </>
+  )
+);
+DetonationCompleteToastContent.displayName = 'DetonationCompleteToastContent';

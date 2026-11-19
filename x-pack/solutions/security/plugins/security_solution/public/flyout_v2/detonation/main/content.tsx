@@ -25,7 +25,9 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { ExpandablePanel } from '../../shared/components/expandable_panel';
+import { ExpandableSection } from '../../shared/components/expandable_section';
+import { AiSummary } from './ai_summary';
+import { HighlightedFields } from './highlighted_fields';
 import type { ActivityAction, ActivityKind, NetworkFlag, Severity } from '../report_data';
 import {
   ACTIVITY_COUNTS,
@@ -58,6 +60,44 @@ const ACTION_COLOR: Record<ActivityAction, string> = {
 };
 
 const CountBadge = ({ count }: { count: number }) => <EuiBadge color="hollow">{count}</EuiBadge>;
+
+interface SectionProps {
+  title: string;
+  /** Optional element shown after the title, e.g. a count. */
+  badge?: React.ReactNode;
+  expanded: boolean;
+  children: React.ReactNode;
+  ['data-test-subj']: string;
+}
+
+/**
+ * Collapsible report section, styled like the plain accordion sections of the alert flyout
+ * (chevron and bold title, no panel), with a rule underneath.
+ */
+const Section = ({
+  title,
+  badge,
+  expanded,
+  children,
+  'data-test-subj': dataTestSubj,
+}: SectionProps) => (
+  <>
+    <ExpandableSection
+      data-test-subj={dataTestSubj}
+      expanded={expanded}
+      gutterSize="s"
+      title={
+        <>
+          {title}
+          {badge ? <> {badge}</> : null}
+        </>
+      }
+    >
+      {children}
+    </ExpandableSection>
+    <EuiHorizontalRule margin="m" />
+  </>
+);
 
 const Eyebrow = ({ children }: { children: string }) => (
   <EuiTitle size="xxxs">
@@ -160,14 +200,18 @@ const NetworkActivity = memo(() => {
       field: 'host',
       name: i18n.DOMAIN_OR_IP,
       render: (host: string, row) => (
-        <>
-          <EuiText size="s" color={row.isMalicious ? 'danger' : 'default'}>
+        <div>
+          <EuiText
+            size="s"
+            color={row.isMalicious ? 'danger' : 'default'}
+            css={{ wordBreak: 'break-all' }}
+          >
             {row.isMalicious ? <strong>{host}</strong> : host}
           </EuiText>
-          <EuiText size="xs" color="subdued">
+          <EuiText size="xs" color="subdued" css={{ wordBreak: 'break-all' }}>
             {row.detail}
           </EuiText>
-        </>
+        </div>
       ),
     },
     { field: 'port', name: i18n.PORT, width: '70px' },
@@ -179,13 +223,10 @@ const NetworkActivity = memo(() => {
     },
   ];
   return (
-    <ExpandablePanel
-      header={{
-        title: i18n.NETWORK_ACTIVITY,
-        iconType: 'arrowStart',
-        headerContent: <CountBadge count={NETWORK_ROWS.length} />,
-      }}
-      expand={{ expandable: true, expandedOnFirstRender: true }}
+    <Section
+      title={i18n.NETWORK_ACTIVITY}
+      badge={<CountBadge count={NETWORK_ROWS.length} />}
+      expanded={false}
       data-test-subj="detonationNetworkActivity"
     >
       <EuiBasicTable
@@ -194,7 +235,7 @@ const NetworkActivity = memo(() => {
         columns={columns}
         itemId="id"
       />
-    </ExpandablePanel>
+    </Section>
   );
 });
 NetworkActivity.displayName = 'NetworkActivity';
@@ -230,13 +271,10 @@ const FileAndSystemActivity = memo(() => {
     },
   ];
   return (
-    <ExpandablePanel
-      header={{
-        title: i18n.FILE_AND_SYSTEM_ACTIVITY,
-        iconType: 'arrowStart',
-        headerContent: <CountBadge count={ACTIVITY_COUNTS.all} />,
-      }}
-      expand={{ expandable: true, expandedOnFirstRender: true }}
+    <Section
+      title={i18n.FILE_AND_SYSTEM_ACTIVITY}
+      badge={<CountBadge count={ACTIVITY_COUNTS.all} />}
+      expanded={false}
       data-test-subj="detonationFileAndSystemActivity"
     >
       <EuiTabs size="s" bottomBorder={false}>
@@ -257,19 +295,16 @@ const FileAndSystemActivity = memo(() => {
         columns={columns}
         itemId="id"
       />
-    </ExpandablePanel>
+    </Section>
   );
 });
 FileAndSystemActivity.displayName = 'FileAndSystemActivity';
 
 const SuricataAndYara = memo(() => (
-  <ExpandablePanel
-    header={{
-      title: i18n.SURICATA_AND_YARA,
-      iconType: 'arrowStart',
-      headerContent: <CountBadge count={SURICATA_MATCHES.length + YARA_MATCHES.length} />,
-    }}
-    expand={{ expandable: true, expandedOnFirstRender: true }}
+  <Section
+    title={i18n.SURICATA_AND_YARA}
+    badge={<CountBadge count={SURICATA_MATCHES.length + YARA_MATCHES.length} />}
+    expanded={true}
     data-test-subj="detonationSuricataAndYara"
   >
     <Eyebrow>{`${i18n.SURICATA} (${SURICATA_MATCHES.length})`}</Eyebrow>
@@ -312,7 +347,7 @@ const SuricataAndYara = memo(() => (
         </EuiText>
       </div>
     ))}
-  </ExpandablePanel>
+  </Section>
 ));
 SuricataAndYara.displayName = 'SuricataAndYara';
 
@@ -333,11 +368,7 @@ const FileContext = memo(() => {
     },
   ];
   return (
-    <ExpandablePanel
-      header={{ title: i18n.FILE_CONTEXT, iconType: 'arrowStart' }}
-      expand={{ expandable: true, expandedOnFirstRender: true }}
-      data-test-subj="detonationFileContext"
-    >
+    <Section title={i18n.FILE_CONTEXT} expanded={true} data-test-subj="detonationFileContext">
       <EuiCallOut
         size="s"
         color="warning"
@@ -360,25 +391,22 @@ const FileContext = memo(() => {
         columns={columns}
         itemId="id"
       />
-    </ExpandablePanel>
+    </Section>
   );
 });
 FileContext.displayName = 'FileContext';
 
 const Enrichment = memo(() => (
-  <ExpandablePanel
-    header={{
-      title: i18n.ENRICHMENT,
-      iconType: 'arrowStart',
-      headerContent: <EuiBadge color="hollow">{i18n.OPTIONAL}</EuiBadge>,
-    }}
-    expand={{ expandable: true, expandedOnFirstRender: false }}
+  <Section
+    title={i18n.ENRICHMENT}
+    badge={<EuiBadge color="hollow">{i18n.OPTIONAL}</EuiBadge>}
+    expanded={false}
     data-test-subj="detonationEnrichment"
   >
     <EuiText size="s" color="subdued">
       {'—'}
     </EuiText>
-  </ExpandablePanel>
+  </Section>
 ));
 Enrichment.displayName = 'Enrichment';
 
@@ -393,7 +421,13 @@ export const Content = memo(() => (
     data-test-subj={DETONATION_CONTENT_TEST_ID}
   >
     <EuiFlexItem>
+      <AiSummary />
+    </EuiFlexItem>
+    <EuiFlexItem>
       <VerdictPanel />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <HighlightedFields />
     </EuiFlexItem>
     <EuiFlexItem>
       <NetworkActivity />

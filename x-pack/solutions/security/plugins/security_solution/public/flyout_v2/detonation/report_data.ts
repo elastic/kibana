@@ -183,3 +183,72 @@ export const RELATED_FILES: Array<{
   { id: 'f2', name: 'a41f09…77c2', relation: 'Same C2', verdict: 'Malicious' },
   { id: 'f3', name: 'e0c7bb…1d90', relation: 'Same YARA', verdict: 'Suspicious' },
 ];
+
+/** Plain-language AI summary of the report (fake). */
+export const AI_SUMMARY_HIGHLIGHTS: Array<{ title: string; text: string }> = [
+  {
+    title: 'What this file does',
+    text: 'invoice_Q3_final.exe pretends to be an invoice, but it is really malware (a loader known as NukeBot). When it ran, it copied itself into a hidden folder, slipped code into another running program to hide, and then phoned home to a server at 185.220.101.47 that attackers are known to use.',
+  },
+  {
+    title: 'Why it was marked malicious',
+    text: 'It matched two security rules for NukeBot, it contacted known attacker infrastructure, and its digital signature is invalid. Together this gives a threat score of 92 out of 100 with high confidence.',
+  },
+];
+
+export const AI_SUMMARY_RECOMMENDED_ACTIONS = [
+  'Isolate dev-laptop-ej from the network.',
+  'Reset the password for bob.jones.',
+  'Block 185.220.101.47 and update-cdn-sync.top.',
+  'Check other hosts that contacted the same server.',
+];
+
+export const AI_SUMMARY_GENERATED_AT = 'Nov 11, 2026 at 09:44';
+
+export type EntityRiskLevel = 'Critical' | 'High' | 'Medium';
+
+/** Fake entities involved in the detonation. */
+export const AFFECTED_ENTITIES: Array<{
+  id: string;
+  type: 'host' | 'user';
+  name: string;
+  note: string;
+  risk: EntityRiskLevel;
+  riskScore: number;
+}> = [
+  {
+    id: 'host:dev-laptop-ej',
+    type: 'host',
+    name: 'dev-laptop-ej',
+    note: 'Ran the file',
+    risk: 'Critical',
+    riskScore: 91,
+  },
+  {
+    id: 'user:bob.jones@example.com@unknown',
+    type: 'user',
+    name: 'bob.jones',
+    note: 'Downloaded the file',
+    risk: 'High',
+    riskScore: 78,
+  },
+  {
+    id: 'host:build-server-ci-01',
+    type: 'host',
+    name: 'build-server-ci-01',
+    note: 'Contacted the same server',
+    risk: 'Medium',
+    riskScore: 54,
+  },
+];
+
+/**
+ * Highlighted fields of the detonation, shown like the alert flyout's highlighted fields: the
+ * primary indicators (main domain, IP, key temp file and key process). Fake data.
+ */
+export const HIGHLIGHTED_FIELDS: Array<{ field: string; values: string[] }> = [
+  { field: 'dns.question.name', values: ['update-cdn-sync.top'] },
+  { field: 'destination.ip', values: ['185.220.101.47'] },
+  { field: 'file.path', values: ['%TEMP%\\~df3a21.tmp'] },
+  { field: 'process.name', values: ['svchost32.exe'] },
+];

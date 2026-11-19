@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import React, { lazy, useCallback, useMemo } from 'react';
+import React, { lazy, useCallback, useMemo, useRef } from 'react';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FLYOUT_SESSION_KIND } from '../../common/lib/telemetry';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
 import { useFlyoutSessionContext } from '../session_context';
+import { useKibana } from '../../common/lib/kibana';
+import { startDetonationJob } from './detonation_jobs';
+import { DETONATION_COMPLETE_TITLE, DetonationCompleteToastContent } from './submitted_toast';
 import { DETONATION_REPORT_TITLE } from './translations';
 
 // Lazy-loaded so the report only loads when the flyout is opened.
@@ -45,6 +49,35 @@ export const useDetonationFlyoutApi = (): DetonationFlyoutApi => {
   const { historyKey, session: sessionMode } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const openFlyout = useOpenFlyout();
+  const kibanaServices = useKibana().services;
+  const openDetonationFlyoutRef = useRef<(params?: OpenDetonationFlyoutParams) => void>();
+
+  // When a detonation finishes, tell the user with a toast whose button opens the report. This
+  // runs even if the flyout that started the detonation was closed in the meantime.
+  const startJob = useCallback(
+    (skipDetonation: boolean): string | undefined => {
+      if (skipDetonation) {
+        return undefined;
+      }
+      return startDetonationJob(() => {
+        const { notifications } = kibanaServices;
+        const toast = notifications.toasts.addSuccess({
+          title: DETONATION_COMPLETE_TITLE,
+          text: toMountPoint(
+            <DetonationCompleteToastContent
+              onView={() => {
+                notifications.toasts.remove(toast);
+                openDetonationFlyoutRef.current?.({ skipDetonation: true });
+              }}
+            />,
+            kibanaServices
+          ),
+          toastLifeTimeMs: 30000,
+        });
+      });
+    },
+    [kibanaServices]
+  );
 
   const openDetonationFlyoutAsChild = useCallback(
     ({ skipDetonation = false }: OpenDetonationFlyoutParams = {}) => {
@@ -55,13 +88,13 @@ export const useDetonationFlyoutApi = (): DetonationFlyoutApi => {
         title: buildFlyoutNavTitle(DETONATION_REPORT_TITLE),
       };
       openFlyout(
-        <DetonationReport skipDetonation={skipDetonation} />,
+        <DetonationReport skipDetonation={skipDetonation} jobId={startJob(skipDetonation)} />,
         properties,
         undefined,
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [openFlyout, defaultDocumentFlyoutProperties, historyKey]
+    [openFlyout, defaultDocumentFlyoutProperties, historyKey, startJob]
   );
 
   const openDetonationFlyout = useCallback(
@@ -73,14 +106,15 @@ export const useDetonationFlyoutApi = (): DetonationFlyoutApi => {
         title: DETONATION_REPORT_TITLE,
       };
       openFlyout(
-        <DetonationReport skipDetonation={skipDetonation} />,
+        <DetonationReport skipDetonation={skipDetonation} jobId={startJob(skipDetonation)} />,
         properties,
         undefined,
         sessionMode
       );
     },
-    [openFlyout, defaultDocumentFlyoutProperties, historyKey, sessionMode]
+    [openFlyout, defaultDocumentFlyoutProperties, historyKey, sessionMode, startJob]
   );
+  openDetonationFlyoutRef.current = openDetonationFlyout;
 
   return useMemo(
     () => ({ openDetonationFlyout, openDetonationFlyoutAsChild }),
