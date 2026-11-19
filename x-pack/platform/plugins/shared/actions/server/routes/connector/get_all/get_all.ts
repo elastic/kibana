@@ -34,11 +34,12 @@ export const getAllConnectorsRoute = (
       },
       validate: () => {
         const includeInboundEventsField = actionsConfigUtils.isInboundEventsEnabled();
+        const includeSpecVersionField = actionsConfigUtils.isCatalogEnabled();
         return {
           request: {},
           response: {
             200: {
-              body: () => getGetAllConnectorsResponseSchemaV1(includeInboundEventsField),
+              body: () => getGetAllConnectorsResponseSchemaV1(includeInboundEventsField, includeSpecVersionField),
               description: 'Indicates a successful call.',
             },
             403: {

@@ -60,7 +60,8 @@ export const getConnectorRoute = (
         return res.ok({
           body: transformConnectorResponseV1(connector, {
             includeInboundEventsField: actionsConfigUtils.isInboundEventsEnabled(),
-            includeSpecVersionField: actionsConfigUtils.isCatalogEnabled(),
+            includeSpecVersionField:
+              actionsConfigUtils.isCatalogEnabled() && actions.isCatalogFeatureFlagEnabled(),
           }),
         });
       })
