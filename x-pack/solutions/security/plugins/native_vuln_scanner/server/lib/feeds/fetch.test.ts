@@ -608,6 +608,49 @@ describe('RHEL 10+ via CSAF', () => {
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('404'));
   });
 
+  it('stops the other delta workers when one fails, rejecting with the original error', async () => {
+    const stalledPath = '2026/stalled.json';
+    const brokenPath = '2026/broken.json';
+    let cancelled = false;
+    let markPulled: () => void = () => undefined;
+    const pulled = new Promise<void>((resolve) => {
+      markPulled = resolve;
+    });
+    const stalledBody = new ReadableStream<Uint8Array>({
+      pull() {
+        // The first chunk never arrives: the read stays pending until it is cancelled.
+        markPulled();
+        return new Promise<void>(() => {});
+      },
+      cancel() {
+        cancelled = true;
+      },
+    });
+    const site = csafServer([{ path: '2026/in-archive.json', data: el10Doc }], {
+      changes: changesCsv([
+        [stalledPath, '2026-11-18T10:00:00Z'],
+        [brokenPath, '2026-11-18T11:00:00Z'],
+      ]),
+    });
+    const fetchImpl = jest.fn(async (url: string, init?: RequestInit) => {
+      if (url === `${base}${stalledPath}`) return fakeResponse(stalledBody);
+      if (url === `${base}${brokenPath}`) {
+        // Fail only once the stalled worker is blocked in its body read.
+        await pulled;
+        return fakeResponse('boom', { status: 500 });
+      }
+      return site(url, init);
+    }) as unknown as jest.MockedFunction<typeof fetch>;
+
+    const error = await downloadFeed(rhel10, { fetchImpl }).catch((e: Error) => e);
+
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).message).toContain('returned HTTP 500');
+    expect((error as Error).name).not.toBe('AbortError');
+    // The stalled worker's read was aborted and its reader cancelled, not left hanging.
+    expect(cancelled).toBe(true);
+  });
+
   it('reports a missing archive_latest.txt as unavailable', async () => {
     const result = await downloadFeed(rhel10, {
       fetchImpl: respond('Not Found', { status: 404 }),
