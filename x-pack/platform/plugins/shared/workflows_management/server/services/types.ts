@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ConnectorSpecSummary } from '@kbn/actions-plugin/common';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type {
   CoreStart,
@@ -76,6 +77,8 @@ export interface WorkflowValidationDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   getActionsClient: () => Promise<IUnsecuredActionsClient>;
   getActionsClientWithRequest: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
+  /** Summaries of the spec-backed connector types registered in the actions plugin. */
+  getConnectorSpecSummaries: () => ConnectorSpecSummary[];
   getCoreStart: () => CoreStart;
   licensing: LicensingPluginStart;
   logger: Logger;

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { ConnectorSpecSummary } from '@kbn/actions-plugin/common';
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
-import { connectorSpecHasEvents, connectorsSpecs } from '@kbn/connector-specs';
 import type { KibanaRequest } from '@kbn/core/server';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -18,18 +18,23 @@ import type {
   GetAvailableConnectorsResponse,
 } from '@kbn/workflows/types/v1';
 
-import { CONNECTOR_SUB_ACTIONS_MAP } from '../../../common/connector_sub_actions_map';
-
-const eventConnectorTypeIds = new Set(
-  Object.values(connectorsSpecs)
-    .filter(connectorSpecHasEvents)
-    .map((spec) => spec.metadata.id)
-);
+import {
+  CONNECTOR_SUB_ACTIONS_MAP,
+  formatSubActionName,
+} from '../../../common/connector_sub_actions_map';
 
 type ListedActionType = Awaited<ReturnType<PublicMethodsOf<ActionsClient>['listTypes']>>[number];
 
-const toConnectorTypeInfo = (actionType: ListedActionType): ConnectorTypeInfo => {
-  const subActions = CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
+const toConnectorTypeInfo = (
+  actionType: ListedActionType,
+  specSummary: ConnectorSpecSummary | undefined
+): ConnectorTypeInfo => {
+  const subActions = specSummary
+    ? specSummary.actions.map(({ name }) => ({
+        name,
+        displayName: formatSubActionName(name),
+      }))
+    : CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
   return {
     actionTypeId: actionType.id,
     displayName: actionType.name,
@@ -71,10 +76,23 @@ const getConnectorInstanceConfig = (
 export const getAvailableConnectors = async (params: {
   getActionsClient: () => Promise<IUnsecuredActionsClient>;
   getActionsClientWithRequest: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
+  getConnectorSpecSummaries: () => ConnectorSpecSummary[];
   spaceId: string;
   request: KibanaRequest;
 }): Promise<GetAvailableConnectorsResponse> => {
-  const { getActionsClient, getActionsClientWithRequest, spaceId, request } = params;
+  const {
+    getActionsClient,
+    getActionsClientWithRequest,
+    getConnectorSpecSummaries,
+    spaceId,
+    request,
+  } = params;
+  const specSummaries = new Map(
+    getConnectorSpecSummaries().map((summary) => [summary.id, summary])
+  );
+  const eventConnectorTypeIds = [...specSummaries.values()]
+    .filter(({ hasInboundEvents }) => hasInboundEvents)
+    .map(({ id }) => id);
   const actionsClient = await getActionsClient();
   const actionsClientWithRequest = await getActionsClientWithRequest(request);
 
@@ -89,17 +107,23 @@ export const getAvailableConnectors = async (params: {
   const connectorTypes: Record<string, ConnectorTypeInfo> = {};
 
   actionTypes.forEach((actionType) => {
-    connectorTypes[actionType.id] = toConnectorTypeInfo(actionType);
+    connectorTypes[actionType.id] = toConnectorTypeInfo(
+      actionType,
+      specSummaries.get(actionType.id)
+    );
   });
 
-  const missingEventTypeIds = [...eventConnectorTypeIds].filter((id) => !connectorTypes[id]);
+  const missingEventTypeIds = eventConnectorTypeIds.filter((id) => !connectorTypes[id]);
   if (missingEventTypeIds.length > 0) {
     const allActionTypes = await actionsClientWithRequest.listTypes({
       includeSystemActionTypes: false,
     });
     for (const actionType of allActionTypes) {
       if (missingEventTypeIds.includes(actionType.id)) {
-        connectorTypes[actionType.id] = toConnectorTypeInfo(actionType);
+        connectorTypes[actionType.id] = toConnectorTypeInfo(
+          actionType,
+          specSummaries.get(actionType.id)
+        );
       }
     }
   }

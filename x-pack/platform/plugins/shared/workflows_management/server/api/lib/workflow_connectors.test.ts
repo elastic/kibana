@@ -5,7 +5,18 @@
  * 2.0.
  */
 
+import type { ConnectorSpecSummary } from '@kbn/actions-plugin/common';
 import { getAvailableConnectors } from './workflow_connectors';
+
+const mockSpecSummary = (overrides: Partial<ConnectorSpecSummary> = {}): ConnectorSpecSummary =>
+  ({
+    id: '.spec_connector',
+    displayName: 'Spec connector',
+    description: '',
+    actions: [],
+    hasInboundEvents: false,
+    ...overrides,
+  } as ConnectorSpecSummary);
 
 const mockActionType = (overrides: Record<string, unknown> = {}) => ({
   id: '.slack',
@@ -39,6 +50,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getConnectorSpecSummaries: () => [],
       spaceId: 'default',
       request,
     });
@@ -61,6 +73,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getConnectorSpecSummaries: () => [],
       spaceId: 'default',
       request,
     });
@@ -85,6 +98,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getConnectorSpecSummaries: () => [],
       spaceId: 'default',
       request,
     });
@@ -109,6 +123,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getConnectorSpecSummaries: () => [],
       spaceId: 'default',
       request,
     });
@@ -139,6 +154,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getConnectorSpecSummaries: () => [],
       spaceId: 'default',
       request,
     });
@@ -169,6 +185,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getConnectorSpecSummaries: () => [],
       spaceId: 'default',
       request,
     });
@@ -192,6 +209,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getConnectorSpecSummaries: () => [],
       spaceId: 'default',
       request,
     });
@@ -218,6 +236,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getConnectorSpecSummaries: () => [],
       spaceId: 'default',
       request,
     });
@@ -253,6 +272,9 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getConnectorSpecSummaries: () => [
+        mockSpecSummary({ id: '.inboundWebhook', hasInboundEvents: true }),
+      ],
       spaceId: 'default',
       request,
     });
@@ -272,6 +294,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getConnectorSpecSummaries: () => [],
       spaceId: 'default',
       request,
     });
@@ -297,6 +320,7 @@ describe('getAvailableConnectors', () => {
     await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue({ getAll }),
       getActionsClientWithRequest: jest.fn().mockResolvedValue({ listTypes }),
+      getConnectorSpecSummaries: () => [],
       spaceId: 'default',
       request,
     });
@@ -304,5 +328,73 @@ describe('getAvailableConnectors', () => {
     // Both starts precede both ends — proves parallel, not sequential.
     expect(order.indexOf('getAll:start')).toBeLessThan(order.indexOf('listTypes:end'));
     expect(order.indexOf('listTypes:start')).toBeLessThan(order.indexOf('getAll:end'));
+  });
+
+  it('takes the sub-actions of a spec-backed type from its spec summary', async () => {
+    const actionsClientWithRequest = {
+      listTypes: jest
+        .fn()
+        .mockResolvedValue([mockActionType({ id: '.catalog_only', name: 'Catalog only' })]),
+    };
+
+    const result = await getAvailableConnectors({
+      getActionsClient: jest.fn().mockResolvedValue({ getAll: jest.fn().mockResolvedValue([]) }),
+      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getConnectorSpecSummaries: () => [
+        mockSpecSummary({
+          id: '.catalog_only',
+          actions: [
+            { name: 'list_items', isTool: true, scope: 'read' },
+            { name: 'createItem', isTool: false, scope: 'write' },
+          ],
+        }),
+      ],
+      spaceId: 'default',
+      request,
+    });
+
+    expect(result.connectorTypes['.catalog_only'].subActions).toEqual([
+      { name: 'list_items', displayName: 'List Items' },
+      { name: 'createItem', displayName: 'Create Item' },
+    ]);
+  });
+
+  it('keeps the built-in sub-actions of a type that has no spec', async () => {
+    const actionsClientWithRequest = {
+      listTypes: jest
+        .fn()
+        .mockResolvedValue([mockActionType({ id: '.swimlane', name: 'Swimlane' })]),
+    };
+
+    const result = await getAvailableConnectors({
+      getActionsClient: jest.fn().mockResolvedValue({ getAll: jest.fn().mockResolvedValue([]) }),
+      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      getConnectorSpecSummaries: () => [],
+      spaceId: 'default',
+      request,
+    });
+
+    expect(result.connectorTypes['.swimlane'].subActions).toEqual([
+      { name: 'pushToService', displayName: 'Push To Service' },
+    ]);
+  });
+
+  it('lists a spec type with inbound events that is outside the workflows feature', async () => {
+    const listTypes = jest
+      .fn()
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([mockActionType({ id: '.events_only', name: 'Events only' })]);
+
+    const result = await getAvailableConnectors({
+      getActionsClient: jest.fn().mockResolvedValue({ getAll: jest.fn().mockResolvedValue([]) }),
+      getActionsClientWithRequest: jest.fn().mockResolvedValue({ listTypes }),
+      getConnectorSpecSummaries: () => [
+        mockSpecSummary({ id: '.events_only', hasInboundEvents: true }),
+      ],
+      spaceId: 'default',
+      request,
+    });
+
+    expect(Object.keys(result.connectorTypes)).toEqual(['.events_only']);
   });
 });
