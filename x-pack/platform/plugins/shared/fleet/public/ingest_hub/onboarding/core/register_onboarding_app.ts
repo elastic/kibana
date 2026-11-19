@@ -1,0 +1,54 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { AppMountParameters, AppUpdater, CoreSetup } from '@kbn/core/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { firstValueFrom, from, map, switchMap } from 'rxjs';
+import type { FleetStart, FleetStartDeps } from '../../../plugin';
+import type { IngestHubStartServices } from '../../register';
+import { INGEST_HUB_ONBOARDING_ENABLED_FLAG } from '../../../../common/ingest_hub/core/constants';
+
+export function registerOnboardingApp(
+  coreSetup: CoreSetup<FleetStartDeps, FleetStart>,
+  startServicesPromise: Promise<IngestHubStartServices>,
+  kibanaVersion: string,
+  cloudSetup?: CloudSetup
+) {
+  coreSetup.application.register({
+    id: 'onboarding',
+    title: i18n.translate('xpack.fleet.ingestHub.onboardingAppTitle', {
+      defaultMessage: 'Onboarding',
+    }),
+    appRoute: '/app/onboarding',
+    visibleIn: [],
+    updater$: from(startServicesPromise).pipe(
+      switchMap(([coreStart]) =>
+        coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ONBOARDING_ENABLED_FLAG, false).pipe(
+          map(
+            (enabled): AppUpdater =>
+              () => ({ visibleIn: enabled ? ['globalSearch'] : [] })
+          )
+        )
+      )
+    ),
+    mount: async (params: AppMountParameters) => {
+      const [coreStart, deps] = await startServicesPromise;
+      const isEnabled = await firstValueFrom(
+        coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ONBOARDING_ENABLED_FLAG, false)
+      );
+
+      if (!isEnabled) {
+        coreStart.application.navigateToApp('discover');
+        return () => {};
+      }
+
+      const { renderOnboardingApp } = await import('./onboarding_app');
+      return renderOnboardingApp(coreStart, params, deps, kibanaVersion, cloudSetup);
+    },
+  });
+}

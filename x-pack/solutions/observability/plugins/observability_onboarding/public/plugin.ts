@@ -32,7 +32,6 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
-import type { IngestHubStart } from '@kbn/ingest-hub-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
 import {
@@ -78,7 +77,6 @@ export interface ObservabilityOnboardingPluginStartDeps {
   fleet: FleetStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
-  ingestHub?: IngestHubStart;
 }
 
 export type ObservabilityOnboardingContextValue = CoreStart &
@@ -161,7 +159,7 @@ export class ObservabilityOnboardingPlugin
       .pipe(map((enabled): AddDataExperience => (enabled ? 'v2' : 'v1')))
       .subscribe(this.addDataExperience$);
 
-    if (plugins.ingestHub) {
+    if (plugins.fleet?.ingestHub) {
       const { registerIngestFlows } = await import('./ingest_hub/register_ingest_flows');
       registerIngestFlows(core, plugins);
     }

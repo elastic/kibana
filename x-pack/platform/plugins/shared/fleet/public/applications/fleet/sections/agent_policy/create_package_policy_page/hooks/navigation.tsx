@@ -17,6 +17,7 @@ import {
 } from '../../../../constants';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import { useStartServices, useLink, useIntraAppState } from '../../../../hooks';
+import { useEmbeddedContext } from '../../../../../../hooks/use_embedded_context';
 import type { CreatePackagePolicyRouteState, OnSaveQueryParamKeys } from '../../../../types';
 import type { EditPackagePolicyFrom, SavedPolicyResult } from '../types';
 
@@ -42,15 +43,22 @@ export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
   const { getHref } = useLink();
   const { search } = useLocation();
+  const { isEmbedded, onClose } = useEmbeddedContext();
 
   const cancelClickHandler = useCallback(
     (ev: React.SyntheticEvent) => {
+      // Embedded, Cancel closes the embedding surface rather than navigating out of the host app.
+      if (isEmbedded) {
+        ev.preventDefault();
+        onClose?.();
+        return;
+      }
       if (routeState?.onCancelNavigateTo) {
         ev.preventDefault();
         navigateToApp(...routeState.onCancelNavigateTo);
       }
     },
-    [routeState, navigateToApp]
+    [isEmbedded, onClose, routeState, navigateToApp]
   );
 
   const cancelUrl = useMemo(() => {
@@ -95,6 +103,7 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
   const doOnSaveNavigation = useRef<boolean>(true);
   const { getPath } = useLink();
+  const { isEmbedded, onClose } = useEmbeddedContext();
 
   const {
     application: { navigateToApp },
@@ -110,6 +119,11 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
   const onSaveNavigate = useCallback(
     (savedPolicyResult: SavedPolicyResult, paramsToApply: OnSaveQueryParamKeys[] = []) => {
       if (!doOnSaveNavigation.current) {
+        return;
+      }
+      // Embedded, there is nowhere to navigate: hand control back to the host.
+      if (isEmbedded) {
+        onClose?.();
         return;
       }
       const isAgentless = savedPolicyResult.type === 'agentless';
@@ -183,6 +197,8 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
       routeState?.onSaveQueryParams,
       queryParamsPolicyId,
       navigateToApp,
+      isEmbedded,
+      onClose,
     ]
   );
 

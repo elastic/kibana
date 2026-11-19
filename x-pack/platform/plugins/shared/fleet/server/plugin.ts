@@ -100,6 +100,7 @@ import {
 } from './constants';
 import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_objects';
 import { registerRoutes } from './routes';
+import { registerRoutes as registerIngestHubRoutes } from './ingest_hub/core/register_routes';
 
 import type { ExternalCallback, FleetRequestHandlerContext } from './types';
 import type {
@@ -709,6 +710,9 @@ export class FleetPlugin
 
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
     registerRoutes(fleetAuthzRouter, config, isServerless, router);
+
+    // Ingest Hub routes (moved from the ingest_hub plugin).
+    registerIngestHubRoutes(router, this.initializerContext.logger.get('ingest_hub'));
 
     this.telemetryEventsSender.setup(deps.telemetry);
     // Register tasks

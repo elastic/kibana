@@ -163,7 +163,6 @@
     "@kbn/cps",
     "@kbn/cps-utils",
     "@kbn/expressions-plugin",
-    "@kbn/ingest-hub-plugin",
     "@kbn/core-spaces-common",
     "@kbn/app-header",
     "@kbn/core-chrome-app-menu-components",

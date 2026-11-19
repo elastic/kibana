@@ -40,7 +40,7 @@ const getStackManagementSectionLinks = async (
 
   const definition = createDefinition(coreStart, {
     streams: { navigationStatus$: of({ status: 'disabled' as const }) },
-    ingestHub: { navigationAvailable$: of(false) },
+    fleet: { ingestHub: { navigationAvailable$: of(false) } },
     cloud: { isCloudEnabled: false },
   } as unknown as ObservabilityPublicPluginsStart);
 

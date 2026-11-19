@@ -15,7 +15,7 @@ import {
   INGEST_HUB_ONBOARDING_ENABLED_FLAG,
   AWS_ONBOARDING_TITLE,
   AWS_ONBOARDING_DESCRIPTION,
-} from '@kbn/ingest-hub-plugin/common';
+} from '@kbn/fleet-plugin/common/ingest_hub';
 import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { LogoIcon } from '../shared/logo_icon';

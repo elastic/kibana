@@ -48,3 +48,4 @@ export * from './use_restart_agent_action';
 export * from './use_kafka_auth_methods';
 export * from './use_otlp_output_enabled';
 export * from './use_onboarding_instance_url';
+export * from './use_embedded_context';

@@ -30,7 +30,7 @@ export const registerIngestFlows = (
     return { default: createIngestFlowComponent(deps, KubernetesOtelPage) };
   });
 
-  plugins.ingestHub?.registerIngestFlow({
+  plugins.fleet?.ingestHub.registerIngestFlow({
     id: 'kubernetes',
     title: i18n.translate('xpack.observability_onboarding.ingestHub.kubernetes.title', {
       defaultMessage: 'Kubernetes',

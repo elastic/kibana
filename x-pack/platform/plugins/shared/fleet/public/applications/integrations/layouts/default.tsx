@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiNotificationBadge } f
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useLink } from '../../../hooks';
+import { useEmbeddedContext } from '../../../hooks/use_embedded_context';
 import type { Section } from '../sections';
 import { BackLink } from '../sections/epm/components/back_link';
 import { appendReturnParams, readReturnParams } from '../sections/epm/components/return_params';
@@ -26,6 +27,7 @@ interface Props {
 export const DefaultLayout: React.FC<Props> = memo(
   ({ section, children, notificationsBySection, noSpacerInContent }) => {
     const { getHref } = useLink();
+    const { isEmbedded } = useEmbeddedContext();
     const { search } = useLocation();
     const returnParams = readReturnParams(search);
     const queryParams = useMemo(() => new URLSearchParams(search), [search]);
@@ -53,6 +55,12 @@ export const DefaultLayout: React.FC<Props> = memo(
         href: installedHref,
       },
     ];
+
+    // Embedded, the host supplies the title and the surrounding chrome; the app header and its
+    // Browse/Installed tabs would be a second, conflicting navigation inside the host's UI.
+    if (isEmbedded) {
+      return <>{children}</>;
+    }
 
     return (
       <WithHeaderLayout

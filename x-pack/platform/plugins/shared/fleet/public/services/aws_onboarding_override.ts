@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 
 import { AWS_ONBOARDING_PACKAGE_NAMES } from '../../common/constants';
 
-// Keep in sync with @kbn/ingest-hub-plugin/common/core/constants
-export const ONBOARDING_ENABLED_FLAG = 'ingestHub.onboardingEnabled';
+// Re-exported from the Ingest Hub constants, now that Ingest Hub lives in Fleet.
+export { INGEST_HUB_ONBOARDING_ENABLED_FLAG as ONBOARDING_ENABLED_FLAG } from '../../common/ingest_hub/core/constants';
 export const ONBOARDING_APP_ID = 'onboarding';
 export const ONBOARDING_AWS_PATH = '/aws';
 

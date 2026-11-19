@@ -91,7 +91,7 @@ pageLoadAssetSize:
   files: 3954
   filesManagement: 940
   fileUpload: 480
-  fleet: 8999
+  fleet: 17500
   genAiSettings: 1795
   globalSearch: 5447
   globalSearchBar: 21704
@@ -106,7 +106,6 @@ pageLoadAssetSize:
   inference: 5940
   inferenceWorkflows: 1139
   infra: 45553
-  ingestHub: 8059
   ingestPipelines: 534
   inputControlVis: 3213
   inspector: 586

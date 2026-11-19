@@ -58,6 +58,7 @@ dependsOn:
   - '@kbn/failure-store-modal'
   - '@kbn/field-formats-plugin'
   - '@kbn/fields-metadata-plugin'
+  - '@kbn/fleet-plugin'
   - '@kbn/grok-ui'
   - '@kbn/i18n'
   - '@kbn/i18n-react'

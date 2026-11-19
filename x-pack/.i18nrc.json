@@ -235,7 +235,6 @@
     "xpack.elasticConsole": "platform/plugins/shared/elastic_console",
     "xpack.genAiSettings": "platform/plugins/private/gen_ai_settings",
     "xpack.inbox": "platform/plugins/shared/inbox",
-    "xpack.ingestHub": "platform/plugins/shared/ingest_hub",
     "xpack.maintenanceWindows": "platform/plugins/shared/maintenance_windows",
     "xpack.responseOps": [
       "platform/packages/shared/response-ops/detections-close-reason",
