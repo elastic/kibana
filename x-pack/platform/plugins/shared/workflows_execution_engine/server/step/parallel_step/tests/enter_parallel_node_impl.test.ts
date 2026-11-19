@@ -40,11 +40,6 @@ describe('EnterParallelNodeImpl', () => {
   let branchOutcome: (index: number) => ExecutionStatus;
   let branchRunCalls: number[];
 
-  // Step execution ids the impl asked to rehydrate before reading the branch
-  // results. Branch runtimes whose id is absent stand in for a branch whose
-  // output was deferred by a resume-time `load()` and never brought back.
-  let rehydratedIds: string[];
-
   const makeNode = (
     overrides: Partial<EnterParallelNode['configuration']> = {}
   ): EnterParallelNode =>
@@ -67,7 +62,6 @@ describe('EnterParallelNodeImpl', () => {
   beforeEach(() => {
     persistedState = undefined;
     branchRunCalls = [];
-    rehydratedIds = [];
     branchOutcome = () => ExecutionStatus.COMPLETED;
 
     workflowRuntime = {
@@ -86,20 +80,6 @@ describe('EnterParallelNodeImpl', () => {
       getCurrentStepState: jest.fn(() => persistedState),
       setCurrentStepState: jest.fn((s: ParallelStepState) => {
         persistedState = s;
-      }),
-      readBatch: jest.fn(async (ids: readonly string[], type: 'input' | 'output' | 'error') => {
-        const values = new Map<string, unknown>();
-        for (const id of ids) {
-          rehydratedIds.push(id);
-          const match = /^exec_branch_(\d+)$/.exec(id);
-          if (type === 'output' && match) {
-            values.set(id, { branch: Number(match[1]) });
-          }
-          if (type === 'error') {
-            values.set(id, null);
-          }
-        }
-        return values;
       }),
       contextManager: {
         evaluateExpressionInContext: jest.fn((x) => x),
@@ -130,6 +110,8 @@ describe('EnterParallelNodeImpl', () => {
             return { status: branchOutcome(index), state: {} };
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
+          getCurrentStepOutput: jest.fn(async () => ({ branch: index })),
+          getCurrentStepError: jest.fn(async () => undefined),
           timeoutStep: jest.fn(),
         } as unknown as StepExecutionRuntime;
       }),
@@ -301,6 +283,8 @@ describe('EnterParallelNodeImpl', () => {
           return { status: ExecutionStatus.COMPLETED, state: {} };
         },
         getCurrentStepResult: () => ({ output: { node: nodeId, branch: index }, error: undefined }),
+        getCurrentStepOutput: jest.fn(async () => ({ node: nodeId, branch: index })),
+        getCurrentStepError: jest.fn(async () => undefined),
         timeoutStep: jest.fn(),
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
@@ -385,6 +369,8 @@ describe('EnterParallelNodeImpl', () => {
           return { status: ExecutionStatus.RUNNING, state: {} };
         },
         getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
+        getCurrentStepOutput: jest.fn(async () => ({ branch: index })),
+        getCurrentStepError: jest.fn(async () => undefined),
         timeoutStep,
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
@@ -442,19 +428,16 @@ describe('EnterParallelNodeImpl', () => {
   });
 
   // Regression: `finish` reads each branch's terminal output directly rather
-  // than through a template, so context preparation — which targets outputs by
-  // static template analysis — never pre-warms it. A parallel step advances at
-  // most `concurrency` branches per tick, so the aggregate must read every
-  // branch output in one batch or earlier waves come back empty.
-  it('reads every branch output in one batch, so earlier waves are not lost', async () => {
+  // than through a template, so context preparation never pre-warms it. A
+  // parallel step advances at most `concurrency` branches per tick, so the
+  // aggregate must read every branch runtime, including ones from earlier waves.
+  it('reads every branch runtime, so earlier waves are not lost', async () => {
     node = makeNode({
       foreach: JSON.stringify(['a', 'b', 'c']),
       concurrency: { max: 2 },
       mode: 'settled',
     });
 
-    // Finish reads these execution ids in one batch. The parent runtime's
-    // readBatch mock returns each branch output from that id.
     factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
       const lastFrame = stackFrames[stackFrames.length - 1];
       const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
@@ -471,9 +454,11 @@ describe('EnterParallelNodeImpl', () => {
           return { status: branchOutcome(index), state: {} };
         },
         getCurrentStepResult: () => ({
-          output: rehydratedIds.includes(stepExecutionId) ? { branch: index } : {},
+          output: { branch: index },
           error: undefined,
         }),
+        getCurrentStepOutput: jest.fn(async () => ({ branch: index })),
+        getCurrentStepError: jest.fn(async () => undefined),
         timeoutStep: jest.fn(),
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
@@ -494,10 +479,6 @@ describe('EnterParallelNodeImpl', () => {
       { branch: 1 },
       { branch: 2 },
     ]);
-    const outputReads = (stepRuntime.readBatch as jest.Mock).mock.calls.filter(
-      (call) => call[1] === 'output'
-    );
-    expect(outputReads).toEqual([[['exec_branch_0', 'exec_branch_1', 'exec_branch_2'], 'output']]);
   });
 
   it('count-waiting:true keeps a parked branch holding its slot so `max` still binds', async () => {
@@ -563,9 +544,11 @@ describe('EnterParallelNodeImpl', () => {
           return { status: branchOutcome(index), state: {} };
         },
         getCurrentStepResult: () => ({
-          output: rehydratedIds.includes(stepExecutionId) ? { branch: index } : {},
+          output: { branch: index },
           error: undefined,
         }),
+        getCurrentStepOutput: jest.fn(async () => ({ branch: index })),
+        getCurrentStepError: jest.fn(async () => undefined),
         timeoutStep: jest.fn(),
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
@@ -729,6 +712,8 @@ describe('EnterParallelNodeImpl', () => {
               };
             },
             getCurrentStepResult: () => ({ output: { branch: 0 }, error: undefined }),
+            getCurrentStepOutput: jest.fn(async () => ({ branch: 0 })),
+            getCurrentStepError: jest.fn(async () => undefined),
             timeoutStep: jest.fn(),
           } as unknown as StepExecutionRuntime)
       );
@@ -768,6 +753,8 @@ describe('EnterParallelNodeImpl', () => {
               };
             },
             getCurrentStepResult: () => ({ output: { branch: 0 }, error: undefined }),
+            getCurrentStepOutput: jest.fn(async () => ({ branch: 0 })),
+            getCurrentStepError: jest.fn(async () => undefined),
             timeoutStep: jest.fn(),
           } as unknown as StepExecutionRuntime)
       );
@@ -839,6 +826,8 @@ describe('EnterParallelNodeImpl', () => {
             return { status: ExecutionStatus.WAITING, state: {} };
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
+          getCurrentStepOutput: jest.fn(async () => ({ branch: index })),
+          getCurrentStepError: jest.fn(async () => undefined),
           timeoutStep,
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
@@ -888,6 +877,8 @@ describe('EnterParallelNodeImpl', () => {
             return { status: ExecutionStatus.WAITING, state: {} };
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
+          getCurrentStepOutput: jest.fn(async () => ({ branch: index })),
+          getCurrentStepError: jest.fn(async () => undefined),
           timeoutStep,
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
@@ -928,6 +919,8 @@ describe('EnterParallelNodeImpl', () => {
             return { status: ExecutionStatus.WAITING, state: {} };
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
+          getCurrentStepOutput: jest.fn(async () => ({ branch: index })),
+          getCurrentStepError: jest.fn(async () => undefined),
           timeoutStep: jest.fn(),
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
@@ -1027,6 +1020,8 @@ describe('EnterParallelNodeImpl', () => {
             return { status: ExecutionStatus.COMPLETED, state: {} };
           },
           getCurrentStepResult: () => ({ output: { node: nodeId }, error: undefined }),
+          getCurrentStepOutput: jest.fn(async () => ({ node: nodeId })),
+          getCurrentStepError: jest.fn(async () => undefined),
           timeoutStep: jest.fn(),
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
@@ -1084,6 +1079,8 @@ describe('EnterParallelNodeImpl', () => {
             output: failed ? undefined : { node: nodeId },
             error: failed ? { message: 'boom' } : undefined,
           }),
+          getCurrentStepOutput: jest.fn(async () => (failed ? undefined : { node: nodeId })),
+          getCurrentStepError: jest.fn(async () => (failed ? { message: 'boom' } : undefined)),
           timeoutStep: jest.fn(),
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
@@ -1137,6 +1134,8 @@ describe('EnterParallelNodeImpl', () => {
             return { status: branchStatus(index), state: {} };
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
+          getCurrentStepOutput: jest.fn(async () => ({ branch: index })),
+          getCurrentStepError: jest.fn(async () => undefined),
           timeoutStep: jest.fn(),
         } as unknown as StepExecutionRuntime;
         createdRuntimes.push(runtime as unknown as CapturedRuntime);

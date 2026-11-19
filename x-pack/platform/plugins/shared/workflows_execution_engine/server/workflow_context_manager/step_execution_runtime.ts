@@ -168,17 +168,6 @@ export class StepExecutionRuntime {
     return new ExecutionError(error as SerializedError);
   }
 
-  /**
-   * Fetches many step values in one round trip. Parallel finish uses this for
-   * every branch output and every branch error instead of the single-id methods.
-   */
-  public readBatch(
-    ids: readonly string[],
-    type: 'input' | 'output' | 'error'
-  ): Promise<ReadonlyMap<string, StepIoBatchValue>> {
-    return this.stepIoService.readBatch(ids, type);
-  }
-
   private async readCurrent(
     type: 'input' | 'output' | 'error'
   ): Promise<StepIoBatchValue | undefined> {

@@ -6,7 +6,7 @@
  */
 
 import { withTimeout } from '@kbn/std';
-import type { ParallelConcurrencyObject, SerializedError, StackFrame } from '@kbn/workflows';
+import type { ParallelConcurrencyObject, StackFrame } from '@kbn/workflows';
 import {
   DEFAULT_PARALLEL_CONCURRENCY,
   DEFAULT_PARALLEL_MAX_CONCURRENCY,
@@ -14,7 +14,6 @@ import {
   ExecutionStatus,
 } from '@kbn/workflows';
 import type { EnterParallelNode } from '@kbn/workflows/graph';
-import { ExecutionError } from '@kbn/workflows/server';
 import type {
   ParallelBranchResult,
   ParallelBranchState,
@@ -25,7 +24,6 @@ import type {
 import { isTemplateExpression, parseDuration } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
-import type { StepIoBatchValue } from '../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from '../../workflow_context_manager/workflow_execution_state';
 import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
@@ -874,8 +872,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
    *
    * A branch's output is read directly (not via a template), so context
    * preparation — which targets outputs by static template analysis — never
-   * pre-warms it. One `readBatch` for every branch output and one for every
-   * branch error; neither hits Elasticsearch when the values are resident.
+   * pre-warms it. Each branch runtime reads its own output and error.
    */
   private async aggregateBranchResults(branches: ParallelBranchState[]): Promise<void> {
     // Only branches that actually ran carry a step result to read.
@@ -891,14 +888,16 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
           }),
         ])
     );
-    const branchExecutionIds = Array.from(
-      branchRuntimes.values(),
-      (runtime) => runtime.stepExecutionId
+    const branchIo = new Map<number, { output: unknown; error: unknown }>();
+    await Promise.all(
+      [...branchRuntimes.entries()].map(async ([index, runtime]) => {
+        const [output, error] = await Promise.all([
+          runtime.getCurrentStepOutput(),
+          runtime.getCurrentStepError(),
+        ]);
+        branchIo.set(index, { output, error });
+      })
     );
-    const [outputs, errors] = await Promise.all([
-      this.stepExecutionRuntime.readBatch(branchExecutionIds, 'output'),
-      this.stepExecutionRuntime.readBatch(branchExecutionIds, 'error'),
-    ]);
 
     const results: ParallelBranchResult[] = branches.map((branch) => {
       const timing = {
@@ -931,13 +930,13 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
           },
         };
       }
-      const branchRuntime = branchRuntimes.get(branch.index);
+      const io = branchIo.get(branch.index);
       return {
         ...correlation,
         ...timing,
         status: branch.status === 'failed' ? 'failed' : 'completed',
-        output: branchRuntime ? outputs.get(branchRuntime.stepExecutionId) : undefined,
-        error: branchRuntime ? toBranchError(errors.get(branchRuntime.stepExecutionId)) : undefined,
+        output: io?.output,
+        error: io?.error,
       };
     });
 
@@ -1115,11 +1114,4 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
 
     return resolved;
   }
-}
-
-function toBranchError(value: StepIoBatchValue | undefined): ExecutionError | undefined {
-  if (value == null || typeof value !== 'object' || Array.isArray(value)) {
-    return undefined;
-  }
-  return new ExecutionError(value as SerializedError);
 }

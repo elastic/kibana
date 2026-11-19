@@ -986,14 +986,4 @@ describe('StepExecutionRuntime', () => {
       expect(createRuntime().getStepTimeoutMs()).toBeUndefined();
     });
   });
-
-  describe('readBatch', () => {
-    it('forwards the ids and type to the IO service', async () => {
-      const readBatch = jest.spyOn(stepIoService, 'readBatch').mockResolvedValue(new Map());
-
-      await underTest.readBatch(['a', 'b'], 'output');
-
-      expect(readBatch).toHaveBeenCalledWith(['a', 'b'], 'output');
-    });
-  });
 });
