@@ -6,24 +6,24 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIllustration,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { aerospace } from '@elastic/eui-illustrations';
 
-import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useCurrentUser } from '../../../common/lib/kibana/hooks';
-import { OnboardingHeaderTopicSelector } from './onboarding_header_topic_selector';
 import { useOnboardingHeaderStyles } from './onboarding_header.styles';
-import rocketImage from './images/header_rocket.png';
-import rocketDarkImage from './images/header_rocket_dark.png';
-import { TeammatesCard } from './cards/teammates_card';
-import { VideoCard } from './cards/video_card';
-import { DemoCard } from './cards/demo_card';
 import { defaultHeaderConfig, headerConfig } from './onboarding_header_configs';
 import { hasCapabilities } from '../../../common/lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
 
 export const OnboardingHeader = React.memo(() => {
   const currentUser = useCurrentUser();
-  const isDarkMode = useKibanaIsDarkMode();
 
   const styles = useOnboardingHeaderStyles();
 
@@ -45,11 +45,7 @@ export const OnboardingHeader = React.memo(() => {
     <>
       <EuiFlexGroup justifyContent="center" alignItems="center" className={styles}>
         <EuiFlexItem grow={false}>
-          <EuiImage
-            src={isDarkMode ? rocketDarkImage : rocketImage}
-            size={128}
-            alt={filteredHeaderConfig.subTitle}
-          />
+          <EuiIllustration type={aerospace} alt="" fullWidth={false} css={{ maxInlineSize: 120 }} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="onboardingHeaderTitleWrapper">
           {currentUserName && (
@@ -66,21 +62,9 @@ export const OnboardingHeader = React.memo(() => {
             <span>{filteredHeaderConfig.description}</span>
           </EuiText>
           <EuiSpacer size="m" />
-          <OnboardingHeaderTopicSelector />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xxl" />
-      <EuiFlexGroup justifyContent="center" alignItems="center" wrap>
-        <EuiFlexItem>
-          <VideoCard isDarkMode={isDarkMode} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <TeammatesCard isDarkMode={isDarkMode} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <DemoCard isDarkMode={isDarkMode} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
     </>
   );
 });

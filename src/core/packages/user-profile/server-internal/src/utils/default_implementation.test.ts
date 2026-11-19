@@ -25,6 +25,9 @@ describe('getDefaultUserProfileImplementation', () => {
   it('getCurrent resolves to null', async () => {
     expect(await implementation.getCurrent({ request: mockRequest() })).toBeNull();
   });
+  it('getCurrentProfileId resolves to null', async () => {
+    expect(await implementation.getCurrentProfileId({ request: mockRequest() })).toBeNull();
+  });
   it('bulkGet resolves to empty list', async () => {
     expect(await implementation.bulkGet({ uids: new Set() })).toEqual([]);
   });

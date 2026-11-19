@@ -18,6 +18,15 @@ import {
   getEntityAnalyticsApiService,
   getCloudConnectorApiService,
   getTimelineApiService,
+  getAttackDiscoveryApiService,
+  getCorrelationsApiService,
+  getPrevalenceApiService,
+  getThreatIntelligenceApiService,
+  getAnalyzerApiService,
+  getNetworkApiService,
+  getHostApiService,
+  getUserApiService,
+  getEndpointArtifactsApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
@@ -77,6 +86,7 @@ export const spaceTest = securityParallelFixtures.extend<
         kbnClient,
         log,
         scoutSpace,
+        esClient,
       });
       extendedApiServices.cloudConnectorApi = getCloudConnectorApiService({
         kbnClient,
@@ -84,6 +94,46 @@ export const spaceTest = securityParallelFixtures.extend<
       });
       extendedApiServices.timeline = getTimelineApiService({
         kbnClient,
+        log,
+        scoutSpace,
+      });
+      extendedApiServices.attackDiscovery = getAttackDiscoveryApiService({
+        kbnClient,
+        log,
+        scoutSpace,
+        esClient,
+      });
+      extendedApiServices.correlations = getCorrelationsApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.prevalence = getPrevalenceApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.threatIntelligence = getThreatIntelligenceApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.analyzer = getAnalyzerApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.network = getNetworkApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.host = getHostApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.user = getUserApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.endpointArtifacts = getEndpointArtifactsApiService({
+        kbnClient,
+        esClient,
         log,
         scoutSpace,
       });

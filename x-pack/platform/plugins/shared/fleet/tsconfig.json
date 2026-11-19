@@ -15,7 +15,11 @@
     "scripts/**/*",
     "package.json",
     "../../../../../typings/**/*",
-    "test/scout/**/*"
+    "test/scout/**/*",
+    "test/scout_automatic_import/**/*",
+    "test/scout_fi_agentless/**/*",
+    "test/scout_iac_provisioner/**/*",
+    "test/scout_fleet_real_agent/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -47,6 +51,8 @@
     "@kbn/custom-integrations-plugin",
 
     // packages
+    "@kbn/ui-callout",
+    "@kbn/deeplinks-management",
     "@kbn/core-application-common",
     "@kbn/core-capabilities-common",
     "@kbn/i18n",
@@ -62,6 +68,7 @@
     "@kbn/es-query",
     "@kbn/ui-theme",
     "@kbn/config-schema",
+    "@kbn/schema-string-helpers",
     "@kbn/telemetry-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/saved-objects-tagging-plugin",
@@ -75,6 +82,7 @@
     "@kbn/test",
     "@kbn/stdio-dev-helpers",
     "@kbn/tooling-log",
+    "@kbn/apm-types",
     "@kbn/apm-utils",
     "@kbn/core-saved-objects-common",
     "@kbn/core-http-server",
@@ -107,7 +115,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/automatic-import-plugin",
-    "@kbn/automatic-import-v2-plugin",
     "@kbn/core-security-server-mocks",
     "@kbn/server-http-tools",
     "@kbn/zod",
@@ -122,17 +129,29 @@
     "@kbn/core-di",
     "@kbn/licensing-types",
     "@kbn/alerting-plugin",
-    "@kbn/spaces-utils",
+    "@kbn/alerting-v2-utils",
+    "@kbn/deeplinks-observability",
+    "@kbn/core-spaces-common",
     "@kbn/setup-node-env",
     "@kbn/react-query",
-    "@kbn/fs",
+    "@kbn/content-sanitization",
     "@kbn/kql",
     "@kbn/scout",
+    "@kbn/es",
     "@kbn/reporting-common",
     "@kbn/reporting-plugin",
     "@kbn/user-profile-components",
     "@kbn/css-utils",
     "@kbn/rison",
-    "@kbn/rule-data-utils"
+    "@kbn/rule-data-utils",
+    "@kbn/doc-links",
+    "@kbn/yaml-loader",
+    "@kbn/charts-theme",
+    "@kbn/search-types",
+    "@kbn/human-readable-id",
+    "@kbn/elastic-agent-condition-language",
+    "@kbn/app-header",
+    "@kbn/core-http-browser",
+    "@kbn/core-feature-flags-server"
   ]
 }

@@ -56,7 +56,7 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
         disabled={!isObservablesEnabled}
         title={isObservablesEnabled ? undefined : i18n.PLATINUM_NOTICE}
         data-test-subj="cases-observables-add"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={showModal}
       >
         {i18n.ADD_OBSERVABLE}

@@ -19,12 +19,18 @@ export const translations = {
       ),
       maxAlerts: i18n.translate('xpack.alerting.taskRunner.warning.maxAlerts', {
         defaultMessage:
-          'Rule reported more than the maximum number of alerts in a single run. Alerts may be missed and recovery notifications may be delayed',
+          "Rule reported more than the maximum number of alerts in a single run. This limit helps prevent actions being triggered excessively. Consider narrowing your rule's query results or adjusting the alert limit configuration. Alerts may be missed and recovery notifications may be delayed",
       }),
       maxQueuedActions: i18n.translate('xpack.alerting.taskRunner.warning.maxQueuedActions', {
         defaultMessage:
           'The maximum number of queued actions was reached; excess actions were not triggered.',
       }),
+      updatePersistedAlerts: (errorMessage: string) =>
+        i18n.translate('xpack.alerting.taskRunner.warning.updatePersistedAlerts', {
+          defaultMessage:
+            'Failed to update alerts with their last scheduled actions and maintenance windows: {errorMessage}',
+          values: { errorMessage },
+        }),
     },
   },
 };

@@ -11,6 +11,8 @@ applies_to:
 
 The Firecrawl connector uses the [Firecrawl REST API v2](https://docs.firecrawl.dev/api-reference/v2-introduction) to scrape web pages, search the web, map site URLs, and crawl websites. It supports Bearer token (API key) authentication.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-firecrawl-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

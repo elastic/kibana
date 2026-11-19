@@ -10,11 +10,11 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { FrameType } from '@kbn/profiling-utils';
-import { getLanguageType } from '@kbn/profiling-utils';
-import { PROFILING_FEEDBACK_LINK } from '../profiling_app_page_template';
+import { getLanguageType, ProfilingSchema } from '@kbn/profiling-utils';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
-import { AddDataTabs } from '../../views/add_data_view';
+import { useSchemaQueryParam } from '../../hooks/use_schema_query_param';
+import { UniversalProfilingAddDataTabs } from '../../views/add_data_view/universal_profiling/types';
 
 interface Props {
   frameType: FrameType;
@@ -23,8 +23,8 @@ interface Props {
 export function MissingSymbolsCallout({ frameType }: Props) {
   const languageType = getLanguageType({ frameType });
   const router = useProfilingRouter();
-  const { docLinks, notifications } = useProfilingDependencies().start.core;
-  const isFeedbackEnabled = notifications.feedback.isEnabled();
+  const schema = useSchemaQueryParam();
+  const { docLinks } = useProfilingDependencies().start.core;
 
   if (languageType === 'NATIVE') {
     return (
@@ -59,8 +59,12 @@ export function MissingSymbolsCallout({ frameType }: Props) {
         </p>
         <EuiButton
           data-test-subj="profilingMissingSymbolsCalloutUploadSymbolsButton"
+          // Only the Universal Profiling instructions explain how to upload symbols
           href={router.link('/add-data-instructions', {
-            query: { selectedTab: AddDataTabs.Symbols },
+            query:
+              schema === ProfilingSchema.ECS
+                ? { selectedTab: UniversalProfilingAddDataTabs.Symbols }
+                : {},
           })}
           color="warning"
         >
@@ -88,19 +92,6 @@ export function MissingSymbolsCallout({ frameType }: Props) {
             'Symbols are not available because of an error in the unwinder for this language or an unknown error with the interpreter.',
         })}
       </p>
-      {isFeedbackEnabled && (
-        <EuiButton
-          data-test-subj="profilingMissingSymbolsCalloutReportAProblemButton"
-          href={PROFILING_FEEDBACK_LINK}
-          target="_blank"
-          color="warning"
-        >
-          {i18n.translate(
-            'xpack.profiling.frameInformationWindow.missingSymbols.interpreted.reportProblem',
-            { defaultMessage: 'Report a problem' }
-          )}
-        </EuiButton>
-      )}
     </EuiCallOut>
   );
 }

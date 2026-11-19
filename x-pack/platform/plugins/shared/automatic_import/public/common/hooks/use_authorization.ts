@@ -8,28 +8,39 @@
 import { useKibana } from './use_kibana';
 
 export interface Authorization {
-  canCreateIntegrations: boolean;
-  canExecuteConnectors: boolean;
+  /** Kibana Management > Connectors: All (create/update connectors). */
   canCreateConnectors: boolean;
+  /** Automatic Import: Read or All. */
+  canViewIntegrations: boolean;
+  /** Automatic Import: All. */
+  canCreateIntegration: boolean;
+  /** Automatic Import: All. */
+  canEditIntegration: boolean;
+  /** Automatic Import: All. */
+  canDeleteIntegration: boolean;
+  /** Automatic Import: All. */
+  canApproveIntegration: boolean;
 }
+
+interface AutomaticImportCapabilities {
+  view?: boolean;
+  create?: boolean;
+  edit?: boolean;
+  delete?: boolean;
+  approve?: boolean;
+}
+
+/** Resolves what the current user may do from the `actions` and `automatic_import` feature UI capabilities. */
 export const useAuthorization = (): Authorization => {
   const { capabilities } = useKibana().services.application;
-  const { fleet: integrations, fleetv2: fleet, actions } = capabilities;
+  const { actions } = capabilities;
+  const automaticImport = capabilities.automatic_import as AutomaticImportCapabilities | undefined;
   return {
-    canCreateIntegrations: Boolean(fleet?.all && integrations?.all),
-    canExecuteConnectors: Boolean(actions?.show && actions?.execute),
     canCreateConnectors: Boolean(actions?.save),
-  };
-};
-
-export interface RoutesAuthorization {
-  canUseAutomaticImport: boolean;
-  canUseIntegrationUpload: boolean;
-}
-export const useRoutesAuthorization = (): RoutesAuthorization => {
-  const { canCreateIntegrations, canExecuteConnectors } = useAuthorization();
-  return {
-    canUseAutomaticImport: canCreateIntegrations && canExecuteConnectors,
-    canUseIntegrationUpload: canCreateIntegrations,
+    canViewIntegrations: automaticImport?.view === true,
+    canCreateIntegration: automaticImport?.create === true,
+    canEditIntegration: automaticImport?.edit === true,
+    canDeleteIntegration: automaticImport?.delete === true,
+    canApproveIntegration: automaticImport?.approve === true,
   };
 };

@@ -22,6 +22,7 @@ const create = () => {
     bulkGet: jest.fn(),
     find: jest.fn(),
     search: jest.fn(),
+    esql: jest.fn(),
     get: jest.fn(),
     closePointInTime: jest.fn(),
     createPointInTimeFinder: jest.fn(),

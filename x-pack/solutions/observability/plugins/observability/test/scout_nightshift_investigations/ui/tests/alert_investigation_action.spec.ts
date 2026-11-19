@@ -1,0 +1,176 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { randomUUID } from 'crypto';
+import { tags } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
+import { test } from '../../../scout/ui/fixtures';
+import { INVESTIGATE_ALERT_ROLE } from '../../../scout/ui/fixtures/roles';
+import { mockInvestigationApi } from '../fixtures/mocks';
+
+const suffix = randomUUID();
+const alertId = `nightshift-investigation-alert-${suffix}`;
+const ruleId = `nightshift-investigation-rule-${suffix}`;
+const ruleName = `Nightshift investigation test rule ${suffix}`;
+const alertIndex = '.alerts-observability.apm.alerts-default';
+
+test.describe(
+  'Observability alert investigation action',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeAll(async ({ esClient }) => {
+      const timestamp = new Date().toISOString();
+      await esClient.create({
+        index: alertIndex,
+        id: alertId,
+        refresh: 'wait_for',
+        document: {
+          '@timestamp': timestamp,
+          'event.kind': 'signal',
+          'kibana.alert.uuid': alertId,
+          'kibana.alert.flapping': false,
+          'kibana.alert.reason': 'Failed transaction rate exceeded the threshold',
+          'kibana.alert.status': 'active',
+          'kibana.alert.start': timestamp,
+          'kibana.alert.time_range': { gte: timestamp },
+          'kibana.alert.workflow_status': 'open',
+          'kibana.alert.rule.category': 'Failed transaction rate threshold',
+          'kibana.alert.rule.consumer': 'alerts',
+          'kibana.alert.rule.name': ruleName,
+          'kibana.alert.rule.producer': 'apm',
+          'kibana.alert.rule.rule_type_id': 'apm.transaction_error_rate',
+          'kibana.alert.rule.uuid': ruleId,
+          'kibana.space_ids': ['default'],
+          'kibana.version': '8.0.0',
+        },
+      });
+    });
+
+    test.beforeEach(async ({ browserAuth, page }) => {
+      await mockInvestigationApi(page);
+      await browserAuth.loginWithCustomRole(INVESTIGATE_ALERT_ROLE);
+    });
+
+    test.afterAll(async ({ esClient }) => {
+      await esClient.deleteByQuery({
+        index: alertIndex,
+        query: { ids: { values: [alertId] } },
+        refresh: true,
+        conflicts: 'proceed',
+        ignore_unavailable: true,
+      });
+    });
+
+    test('starts and views an investigation from an alert row action', async ({
+      page,
+      pageObjects,
+    }) => {
+      await pageObjects.alertsTablePage.gotoWithAppState({
+        kuery: `kibana.alert.rule.uuid: "${ruleId}"`,
+        rangeFrom: 'now-1h',
+        rangeTo: 'now',
+      });
+      await expect
+        .poll(() => pageObjects.alertsTablePage.getRowCount(), { timeout: 30_000 })
+        .toBe(1);
+
+      const requestPromise = page.waitForRequest(
+        (request) =>
+          request.method() === 'POST' &&
+          request.url().endsWith('/internal/nightshift/investigations')
+      );
+      await pageObjects.alertsTablePage.openActionsMenuForRow(0);
+      await pageObjects.alertsTablePage.clickInvestigate();
+
+      expect((await requestPromise).postDataJSON()).toMatchObject({
+        subject: { type: 'alert', ids: [alertId] },
+      });
+
+      await pageObjects.toasts.waitForToastWithText('Investigation started');
+      expect(await pageObjects.toasts.getMessageText()).toContain('You will find it in Nightshift');
+      await pageObjects.alertPage.viewStartedInvestigation();
+      await expect(page).toHaveURL(/\/app\/nightshift\?investigationId=investigation-1$/);
+    });
+
+    test('starts from the alert details header and immediately links to the investigation', async ({
+      page,
+      pageObjects,
+    }, testInfo) => {
+      await pageObjects.alertPage.goto(alertId);
+      await expect(page.testSubj.locator('alertDetailsInvestigate')).toBeVisible();
+      await testInfo.attach('investigation-header-desktop', {
+        body: await page.screenshot(),
+        contentType: 'image/png',
+      });
+
+      const requestPromise = page.waitForRequest(
+        (request) =>
+          request.method() === 'POST' &&
+          request.url().endsWith('/internal/nightshift/investigations')
+      );
+      await pageObjects.alertPage.clickInvestigate();
+
+      expect((await requestPromise).postDataJSON()).toMatchObject({
+        subject: { type: 'alert', ids: [alertId] },
+      });
+      await pageObjects.toasts.waitForToastWithText('Investigation started');
+      expect(await pageObjects.toasts.getMessageText()).toContain('You will find it in Nightshift');
+      await expect(page.testSubj.locator('alertDetailsViewInvestigation')).toBeVisible();
+      await expect(page.testSubj.locator('alertDetailsInvestigate')).toBeHidden();
+      expect(new URL(page.url()).pathname).toContain(`/observability/alerts/${alertId}`);
+      await pageObjects.alertPage.clickViewInvestigation();
+      await expect
+        .poll(() => page.url())
+        .toContain('/app/nightshift?investigationId=investigation-1');
+    });
+
+    test('views a completed investigation from an alert row action', async ({
+      page,
+      pageObjects,
+    }) => {
+      await mockInvestigationApi(page, { includeCompletedInvestigation: true });
+      await pageObjects.alertsTablePage.gotoWithAppState({
+        kuery: `kibana.alert.rule.uuid: "${ruleId}"`,
+        rangeFrom: 'now-1h',
+        rangeTo: 'now',
+      });
+      await expect
+        .poll(() => pageObjects.alertsTablePage.getRowCount(), { timeout: 30_000 })
+        .toBe(1);
+
+      await pageObjects.alertsTablePage.openActionsMenuForRow(0);
+      await pageObjects.alertsTablePage.clickViewInvestigation();
+
+      // The Nightshift app opens the investigation's Agent Builder conversation details flyout for
+      // this link (covered by its unit tests); the serverless config set has no agentic
+      // investigations, which that flyout needs.
+      await expect
+        .poll(() => page.url())
+        .toContain(`/app/nightshift?investigationId=investigation-1`);
+    });
+
+    for (const inProgress of [false, true]) {
+      test(`views a ${
+        inProgress ? 'running' : 'completed'
+      } investigation from the alert details header`, async ({ page, pageObjects }) => {
+        await mockInvestigationApi(page, {
+          includeCompletedInvestigation: !inProgress,
+          includeRunningInvestigation: inProgress,
+        });
+        await pageObjects.alertPage.goto(alertId);
+        await expect(page.testSubj.locator('alertDetailsViewInvestigation')).toBeVisible();
+        await expect(page.testSubj.locator('alertDetailsInvestigate')).toBeHidden();
+        await pageObjects.alertPage.clickViewInvestigation();
+
+        // The URL is verified here; the Nightshift flyout has its own unit coverage.
+        await expect
+          .poll(() => page.url())
+          .toContain('/app/nightshift?investigationId=investigation-1');
+      });
+    }
+  }
+);

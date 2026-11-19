@@ -42,6 +42,14 @@ const configSchema = schema.object({
    * internal purposes.
    */
   forceEnableAllPlugins: schema.maybe(schema.boolean({ defaultValue: false })),
+
+  /**
+   * Internal config, not intended to be used by end users. When enabled, the
+   * browser exposes an inert `window.__kbnNavDependencies__()` bridge that
+   * reports cross-plugin navigation dependencies. Only consumed by the
+   * navigation dependency enforcement test.
+   */
+  exposeNavDependencies: schema.maybe(schema.boolean({ defaultValue: false })),
 });
 
 type InternalPluginsConfigType = TypeOf<typeof configSchema>;

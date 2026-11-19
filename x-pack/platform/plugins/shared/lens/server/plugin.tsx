@@ -21,6 +21,7 @@ import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import type {
   TaskManagerSetupContract,
@@ -29,7 +30,7 @@ import type {
 import type { EmbeddableRegistryDefinition, EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import {
   LENS_CONTENT_TYPE,
   LENS_ITEM_LATEST_VERSION,
@@ -53,6 +54,7 @@ export interface PluginSetupContract {
   data: DataPluginSetup;
   share?: SharePluginSetup;
   contentManagement: ContentManagementServerSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface PluginStartContract {
@@ -127,6 +129,7 @@ export class LensServerPlugin
       contentManagement: plugins.contentManagement,
       builder,
       logger: this.logger,
+      usageCounter: plugins.usageCollection?.createUsageCounter('lens_visualizations_api'),
     });
 
     core

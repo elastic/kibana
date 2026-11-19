@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash';
 import type { PropsWithChildren, FC } from 'react';
-import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
+import React, { memo, useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import type { DataViewBase, Filter, Query, AggregateQuery, TimeRange } from '@kbn/es-query';
@@ -91,7 +91,10 @@ export const QueryBar = memo<QueryBarComponentProps>(
     preventCacheClearOnUnmount = false,
   }) => {
     const { data } = useKibana().services;
+    const isEsql = filterQuery?.language === 'esql';
     const [dataView, setDataView] = useState<DataView>();
+    const needsAsyncCreate = !isDataView(indexPattern) && !isEsql && !isEmpty(indexPattern.title);
+    const [isCreatingDataView, setIsCreatingDataView] = useState(needsAsyncCreate);
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
         if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
@@ -141,7 +144,6 @@ export const QueryBar = memo<QueryBarComponentProps>(
       [filterManager]
     );
 
-    const isEsql = filterQuery?.language === 'esql';
     const query = useMemo(() => {
       if (isEsql && typeof filterQuery.query === 'string') {
         return { esql: filterQuery.query };
@@ -149,24 +151,44 @@ export const QueryBar = memo<QueryBarComponentProps>(
       return filterQuery;
     }, [filterQuery, isEsql]);
 
+    const indexPatternRef = useRef(indexPattern);
+    indexPatternRef.current = indexPattern;
+
     useEffect(() => {
       let dv: DataView;
-      if (isDataView(indexPattern)) {
-        setDataView(indexPattern);
-      } else if (!isEsql && !isEmpty(indexPattern.title)) {
+      let cancelled = false;
+      if (isDataView(indexPatternRef.current)) {
+        setDataView(indexPatternRef.current);
+        setIsCreatingDataView(false);
+      } else if (!isEsql && !isEmpty(indexPatternRef.current.title)) {
         const createDataView = async () => {
-          dv = await data.dataViews.create({ id: indexPattern.title, title: indexPattern.title });
-          setDataView(dv);
+          setIsCreatingDataView(true);
+          try {
+            dv = await data.dataViews.create({
+              id: indexPatternRef.current.title,
+              title: indexPatternRef.current.title,
+            });
+            if (!cancelled) {
+              setDataView(dv);
+            }
+          } finally {
+            if (!cancelled) {
+              setIsCreatingDataView(false);
+            }
+          }
         };
         createDataView();
+      } else {
+        setIsCreatingDataView(false);
       }
       return () => {
+        cancelled = true;
         // Cache needs to be cleared in certain instances where ad-hoc dataviews are created, like rule creation
         if (dv?.id && !preventCacheClearOnUnmount) {
           data.dataViews.clearInstanceCache(dv?.id);
         }
       };
-    }, [data.dataViews, indexPattern, isEsql, preventCacheClearOnUnmount]);
+    }, [data.dataViews, indexPattern.title, isEsql, preventCacheClearOnUnmount]);
 
     const searchBarFilters = useMemo(() => {
       if (!dataView?.id || isEsql) {
@@ -186,7 +208,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
           dateRangeTo={dateRangeTo}
           filters={searchBarFilters}
           indexPatterns={arrDataView}
-          isLoading={isLoading}
+          isLoading={isLoading || isCreatingDataView}
           isRefreshPaused={isRefreshPaused}
           query={query}
           onClearSavedQuery={onClearSavedQuery}
@@ -205,7 +227,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
           dataTestSubj={dataTestSubj}
           savedQuery={savedQuery}
           displayStyle={isEsql ? 'withBorders' : displayStyle}
-          isDisabled={isDisabled}
+          isDisabled={isDisabled || isCreatingDataView}
           bubbleSubmitEvent={bubbleSubmitEvent}
         />
       </CustomStylesWrapper>

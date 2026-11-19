@@ -53,7 +53,9 @@ describe(
     });
 
     describe('for role: threat_intelligence_analyst', () => {
-      const deniedPages = allPages.filter(({ id }) => id !== 'blocklist' && id !== 'endpointList');
+      const deniedPages = allPages.filter(
+        ({ id }) => id !== 'blocklist' && id !== 'endpointList' && id !== 'endpointExceptions'
+      );
 
       beforeEach(() => {
         login(ROLE.threat_intelligence_analyst);
@@ -68,6 +70,13 @@ describe(
         getArtifactListEmptyStateAddButton(pageById.blocklist.id as EndpointArtifactPageId).should(
           'exist'
         );
+      });
+
+      it(`should have CRUD access to: Endpoint exceptions`, () => {
+        cy.visit(pageById.endpointExceptions.url);
+        getArtifactListEmptyStateAddButton(
+          pageById.endpointExceptions.id as EndpointArtifactPageId
+        ).should('exist');
       });
 
       for (const { url, title } of deniedPages) {

@@ -18,6 +18,8 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-storage-adapter
 dependsOn:
   - '@kbn/core'
+  - '@kbn/core-elasticsearch-server-utils'
+  - '@kbn/logging'
   - '@kbn/es-types'
   - '@kbn/es-errors'
   - '@kbn/core-test-helpers-kbn-server'
@@ -29,31 +31,10 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+tasks: {}

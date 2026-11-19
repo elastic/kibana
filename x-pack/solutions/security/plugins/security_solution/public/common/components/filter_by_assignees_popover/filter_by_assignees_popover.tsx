@@ -69,7 +69,7 @@ export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
         >
           <EuiFilterButton
             data-test-subj={FILTER_BY_ASSIGNEES_BUTTON}
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             badgeColor="subdued"
             disabled={!isPlatinumPlus}
             onClick={togglePopover}
@@ -89,6 +89,10 @@ export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
     return (
       <EuiFilterGroup compressed={compressed}>
         <EuiPopover
+          aria-label={i18n.translate(
+            'xpack.securitySolution.filtersGroup.assignees.popoverAriaLabel',
+            { defaultMessage: 'Filter by assignees' }
+          )}
           panelPaddingSize="none"
           initialFocus={`[id="${searchInputId}"]`}
           button={button}

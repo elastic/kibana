@@ -8,12 +8,15 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { schema } from '@kbn/config-schema';
+import type { CustomHttpResponseOptions, ResponseError } from '@kbn/core/server';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
+import { i18n } from '@kbn/i18n';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { ElasticCuratedModelName, ElserVersion } from '@kbn/ml-trained-models-utils';
 import { TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
+import { type TrainedModelConfigResponse } from '@kbn/ml-common-types/trained_models';
 import { ML_INTERNAL_BASE_PATH, type MlFeatures } from '../../common/constants/app';
 import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../common/constants/trained_models';
-import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { wrapError } from '../client/error_wrapper';
 import { modelsProvider } from '../models/model_management';
 import type { RouteInitialization } from '../types';
@@ -50,6 +53,23 @@ export function filterForEnabledFeatureModels<
     );
   }
   return filteredModels;
+}
+
+export function wrapPipelineSimulateError(
+  error: unknown
+): CustomHttpResponseOptions<ResponseError> {
+  if (isMaximumResponseSizeExceededError(error)) {
+    return {
+      statusCode: 413,
+      body: {
+        message: i18n.translate('xpack.ml.trainedModels.pipelineSimulate.responseTooLargeError', {
+          defaultMessage:
+            'Pipeline simulation response exceeded the maximum allowed size. Reduce the size or number of sample documents.',
+        }),
+      },
+    };
+  }
+  return wrapError(error);
 }
 
 export function trainedModelsRoutes(
@@ -568,18 +588,20 @@ export function trainedModelsRoutes(
           },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { pipeline, docs } = request.body;
-          const body = await client.asInternalUser.ingest.simulate({
-            pipeline,
-            docs,
-          });
+          const body = await modelsProvider(
+            client,
+            mlClient,
+            cloud,
+            getEnabledFeatures()
+          ).simulatePipeline(docs, pipeline);
           return response.ok({
             body,
           });
         } catch (e) {
-          return response.customError(wrapError(e));
+          return response.customError(wrapPipelineSimulateError(e));
         }
       })
     );

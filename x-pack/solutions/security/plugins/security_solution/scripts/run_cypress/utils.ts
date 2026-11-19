@@ -217,17 +217,6 @@ export const isSkipped = (filePath: string, lbConfig?: LoadBalancerConfig): bool
     plugins: ['typescript'],
   });
 
-  const expressionStatement = _.find(ast.program.body, ['type', 'ExpressionStatement']) as
-    | ExpressionStatement
-    | undefined;
-
-  const callExpression = expressionStatement?.expression;
-
-  // @ts-expect-error
-  if (callExpression?.callee?.property?.name === 'skip') {
-    return true;
-  }
-
   const dynamicRunnerNames = lbConfig
     ? new Set(Object.keys(lbConfig.dynamicRunnerWeights))
     : undefined;

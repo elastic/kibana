@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import type { ItemSet } from '@kbn/ml-agg-utils';
+export function getValuesDescendingFromValueCounts(valueCounts: Record<string, number>): string[] {
+  const values = Object.keys(valueCounts);
 
-import { getValueCounts } from './get_value_counts';
-
-export function getValuesDescending(df: ItemSet[], field: string): string[] {
-  const valueCounts = getValueCounts(df, field);
-  const keys = Object.keys(valueCounts);
-
-  return keys.sort((a, b) => {
-    return valueCounts[b] - valueCounts[a];
+  return values.sort((leftValue, rightValue) => {
+    return valueCounts[rightValue] - valueCounts[leftValue];
   });
 }

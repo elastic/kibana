@@ -7,6 +7,7 @@
 
 import React, { memo, useState, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 
 import type { AgentPolicy } from '../../../types';
@@ -30,6 +31,7 @@ import { AgentPolicyYamlFlyout } from '../../../components';
 
 import { AgentPolicyCopyProvider } from './agent_policy_copy_provider';
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../../../../common/services/version_specific_policies_utils';
 
 export const AgentPolicyActionMenu = memo<{
   agentPolicy: AgentPolicy;
@@ -59,17 +61,26 @@ export const AgentPolicyActionMenu = memo<{
     const refreshAgentPolicy = useAgentPolicyRefresh();
     const canEnableAutomaticAgentUpgrades = useCanEnableAutomaticAgentUpgrades();
 
+    // The list page only has a summary of the package policies, other pages have them all
     const isFleetServerPolicy = useMemo(
       () =>
         agentPolicy.package_policies?.some(
           (packagePolicy) => packagePolicy.package?.name === FLEET_SERVER_PACKAGE
-        ) ?? false,
+        ) ??
+        agentPolicy.package_policies_summary?.has_fleet_server ??
+        !!agentPolicy.has_fleet_server,
       [agentPolicy]
     );
 
+    // Neither the package policies nor their summary are available, e.g. the summary is still
+    // loading or failed to load on the list page. The actions that depend on them are disabled.
+    const arePackagePoliciesUnavailable =
+      !agentPolicy.package_policies && !agentPolicy.package_policies_summary;
+
     const hasManagedPackagePolicy =
-      'package_policies' in agentPolicy &&
-      agentPolicy?.package_policies?.some((packagePolicy) => packagePolicy.is_managed);
+      agentPolicy.package_policies?.some((packagePolicy) => packagePolicy.is_managed) ??
+      agentPolicy.package_policies_summary?.has_managed ??
+      false;
 
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
@@ -88,12 +99,29 @@ export const AgentPolicyActionMenu = memo<{
       }
     }, [onCancelEnrollment, setIsEnrollmentFlyoutOpen]);
 
+    const actionsAriaLabel = fullButton
+      ? undefined
+      : i18n.translate('xpack.fleet.agentPolicyActionMenu.actionsAriaLabel', {
+          defaultMessage: 'Actions for {policyName}',
+          values: { policyName: agentPolicy.name },
+        });
+
     return (
       <AgentPolicyCopyProvider>
         {(copyAgentPolicyPrompt) => {
           const viewPolicyItem = (
             <EuiContextMenuItem
               icon="inspect"
+              data-test-subj="agentPolicyActionMenuViewPolicyButton"
+              disabled={!authz.integrations.readIntegrationPolicies}
+              toolTipContent={
+                !authz.integrations.readIntegrationPolicies && (
+                  <FormattedMessage
+                    id="xpack.fleet.agentPolicyActionMenu.viewPolicyDisabledTooltip"
+                    defaultMessage="Agent policies and Integrations 'Read' privileges are required to view the policy."
+                  />
+                )
+              }
               onClick={() => {
                 setIsContextMenuOpen(false);
                 setIsYamlFlyoutOpen(!isYamlFlyoutOpen);
@@ -135,17 +163,30 @@ export const AgentPolicyActionMenu = memo<{
             </EuiContextMenuItem>
           );
 
+          const packagePoliciesUnavailableTooltip = (
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyActionMenu.packagePoliciesUnavailableTooltip"
+              defaultMessage="Integration policy details are not available yet. Reload the page if this persists."
+              data-test-subj="agentPolicyActionMenuPackagePoliciesUnavailableTooltip"
+            />
+          );
+
           const deletePolicyItem = (
             <AgentPolicyDeleteProvider
-              hasFleetServer={policyHasFleetServer(agentPolicy as AgentPolicy)}
+              hasFleetServer={policyHasFleetServer(agentPolicy)}
               key="deletePolicy"
               agentPolicy={agentPolicy}
               packagePolicies={agentPolicy.package_policies}
+              packagePoliciesSummary={agentPolicy.package_policies_summary}
             >
               {(deleteAgentPolicyPrompt) => (
                 <EuiContextMenuItem
                   data-test-subj="agentPolicyActionMenuDeleteButton"
-                  disabled={!authz.fleet.allAgentPolicies || hasManagedPackagePolicy}
+                  disabled={
+                    !authz.fleet.allAgentPolicies ||
+                    hasManagedPackagePolicy ||
+                    arePackagePoliciesUnavailable
+                  }
                   toolTipContent={
                     hasManagedPackagePolicy ? (
                       <FormattedMessage
@@ -153,6 +194,8 @@ export const AgentPolicyActionMenu = memo<{
                         defaultMessage="Agent policy with managed package policies cannot be deleted."
                         data-test-subj="agentPolicyActionMenuDeleteButtonDisabledTooltip"
                       />
+                    ) : arePackagePoliciesUnavailable ? (
+                      packagePoliciesUnavailableTooltip
                     ) : undefined
                   }
                   icon="trash"
@@ -172,7 +215,11 @@ export const AgentPolicyActionMenu = memo<{
           const copyPolicyItem = (
             <EuiContextMenuItem
               data-test-subj="agentPolicyActionMenuCopyButton"
-              disabled={!authz.integrations.writeIntegrationPolicies || hasManagedPackagePolicy}
+              disabled={
+                !authz.integrations.writeIntegrationPolicies ||
+                hasManagedPackagePolicy ||
+                arePackagePoliciesUnavailable
+              }
               icon="copy"
               onClick={() => {
                 setIsContextMenuOpen(false);
@@ -186,6 +233,8 @@ export const AgentPolicyActionMenu = memo<{
                     defaultMessage="Agent policy with managed package policies cannot be copied."
                     data-test-subj="agentPolicyActionMenuCopyButtonDisabledTooltip"
                   />
+                ) : arePackagePoliciesUnavailable ? (
+                  packagePoliciesUnavailableTooltip
                 ) : undefined
               }
             >
@@ -241,7 +290,7 @@ export const AgentPolicyActionMenu = memo<{
             copyPolicyItem,
             deletePolicyItem,
           ];
-          const agentlessMenuItems = [viewPolicyItem, deletePolicyItem];
+          const agentlessMenuItems = [viewPolicyItem];
 
           let menuItems;
 
@@ -318,7 +367,7 @@ export const AgentPolicyActionMenu = memo<{
               {isUpgradeAgentsModalOpen && (
                 <EuiPortal>
                   <AgentUpgradeAgentModal
-                    agents={`policy_id:"${agentPolicy.id}"`}
+                    agents={buildPolicyBaseIdWithFallbackKuery(agentPolicy.id)}
                     agentCount={agentPolicy.agents || 0}
                     onClose={() => {
                       setIsUpgradeAgentsModalOpen(false);
@@ -350,6 +399,7 @@ export const AgentPolicyActionMenu = memo<{
               <ContextMenuActions
                 isOpen={isContextMenuOpen}
                 onChange={onContextMenuChange}
+                aria-label={actionsAriaLabel}
                 button={
                   fullButton
                     ? {

@@ -23,8 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const authorizationIndex = '.kibana-test-authorization';
 
-  // Failing: See https://github.com/elastic/kibana/issues/258921
-  describe.skip('execute', () => {
+  describe('execute', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
@@ -32,10 +31,12 @@ export default function ({ getService }: FtrProviderContext) {
       await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
     });
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
-      await objectRemover.removeAll();
     });
 
     for (const scenario of [...UserAtSpaceScenarios, systemActionScenario]) {
@@ -514,7 +515,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           /**
            * The test are using a test endpoint that calls the actions client.
-           * The route is defined here x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts.
+           * The route is defined here x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/routes.ts.
            * The public execute API does not allows the execution of system actions. We use the
            * test route to test the execution of system actions
            */

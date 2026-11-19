@@ -6,6 +6,7 @@
  */
 
 import type { RepositoryStrategy } from './types';
+import { DEFAULT_REPOSITORY_REGISTER_REQUEST_TIMEOUT_MS } from './constants';
 
 export interface FsRepositoryConfig {
   location: string;
@@ -20,17 +21,23 @@ export function createFsRepository(config: FsRepositoryConfig): RepositoryStrate
         throw new Error('FS repository location is required');
       }
     },
-    async register({ esClient, repoName }) {
-      await esClient.snapshot.createRepository({
-        name: repoName,
-        body: {
-          type: 'fs',
-          settings: {
-            location: config.location,
-            ...(config.compress !== undefined ? { compress: config.compress } : {}),
+    async register({ esClient, repoName, verify }) {
+      await esClient.snapshot.createRepository(
+        {
+          name: repoName,
+          master_timeout: '2m',
+          timeout: '2m',
+          verify: verify ?? false,
+          body: {
+            type: 'fs',
+            settings: {
+              location: config.location,
+              ...(config.compress !== undefined ? { compress: config.compress } : {}),
+            },
           },
         },
-      });
+        { requestTimeout: DEFAULT_REPOSITORY_REGISTER_REQUEST_TIMEOUT_MS }
+      );
     },
   };
 }

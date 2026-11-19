@@ -8,31 +8,23 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useEuiTheme, useGeneratedHtmlId, useMutationObserver } from '@elastic/eui';
+import { useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import fs from 'fs';
 import path from 'path';
 import {
+  FULLSCREEN_BODY_STYLES_CLASS,
   useMetricsGridFullScreen,
-  toggleMetricsGridFullScreen,
 } from './use_metrics_grid_fullscreen';
-import {
-  METRICS_GRID_FULL_SCREEN_CLASS,
-  METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
-} from '../../../../common/constants';
 
 // Mock only what's needed for the hook test
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   useEuiTheme: jest.fn(),
   useGeneratedHtmlId: jest.fn(),
-  useMutationObserver: jest.fn(),
 }));
 
 const mockUseEuiTheme = useEuiTheme as jest.MockedFunction<typeof useEuiTheme>;
 const mockUseGeneratedHtmlId = useGeneratedHtmlId as jest.MockedFunction<typeof useGeneratedHtmlId>;
-const mockUseMutationObserver = useMutationObserver as jest.MockedFunction<
-  typeof useMutationObserver
->;
 
 describe('useMetricsGridFullScreen', () => {
   beforeEach(() => {
@@ -44,52 +36,33 @@ describe('useMetricsGridFullScreen', () => {
     } as any);
 
     mockUseGeneratedHtmlId.mockReturnValue('test-metrics-grid-id');
-    mockUseMutationObserver.mockImplementation(() => {});
-
-    Object.defineProperty(document.body, 'classList', {
-      writable: true,
-      value: {
-        add: jest.fn(),
-        remove: jest.fn(),
-        contains: jest.fn(),
-      },
-    });
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('calls useMutationObserver with correct parameters two times', () => {
-    renderHook(() => useMetricsGridFullScreen({ prefix: 'test-metrics-grid-id' }));
-
-    expect(mockUseMutationObserver).toHaveBeenCalledTimes(2);
-    expect(mockUseMutationObserver).toHaveBeenNthCalledWith(1, null, expect.any(Function), {
-      childList: true,
-      subtree: true,
-    });
-    expect(mockUseMutationObserver).toHaveBeenNthCalledWith(2, null, expect.any(Function), {
-      attributes: true,
-      attributeFilter: ['class'],
-    });
-  });
-
-  it('toggleMetricsGridFullScreen adds classes when element has fullscreen class', () => {
-    const metricsGrid = document.createElement('div');
-    metricsGrid.classList.add(METRICS_GRID_FULL_SCREEN_CLASS);
-    toggleMetricsGridFullScreen(metricsGrid);
-    expect(document.body.classList.add).toHaveBeenCalledWith(
-      expect.any(String),
-      METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS
+  it('returns the generated metrics grid id and styles', () => {
+    const { result } = renderHook(() =>
+      useMetricsGridFullScreen({ prefix: 'test-metrics-grid-id' })
     );
+
+    expect(result.current.metricsGridId).toBe('test-metrics-grid-id');
+    expect(result.current.styles).toHaveProperty('metricsGrid--fullScreen');
+    expect(result.current.styles).toHaveProperty('metricsGrid--restrictBody');
   });
 
-  it('toggleMetricsGridFullScreen removes classes when element does not have fullscreen class', () => {
-    const metricsGrid = document.createElement('div');
-    toggleMetricsGridFullScreen(metricsGrid);
-    expect(document.body.classList.remove).toHaveBeenCalledWith(
-      expect.any(String),
-      METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS
+  it('exports the fullscreen body styles helper class bound to the z-index reset block', () => {
+    expect(FULLSCREEN_BODY_STYLES_CLASS).toEqual(expect.any(String));
+    expect(FULLSCREEN_BODY_STYLES_CLASS).not.toHaveLength(0);
+
+    const sourceCode = fs.readFileSync(
+      path.join(__dirname, 'use_metrics_grid_fullscreen.ts'),
+      'utf-8'
+    );
+
+    expect(sourceCode).toMatch(
+      /export const FULLSCREEN_BODY_STYLES_CLASS\s*=\s*css`[^`]*z-index:\s*unset/
     );
   });
 
@@ -110,6 +83,47 @@ describe('useMetricsGridFullScreen', () => {
 
     expect(sourceCode).toMatch(
       /logicalCSS\s*\(\s*['"]right['"]\s*,\s*['"]var\(--euiPushFlyoutOffsetInlineEnd,\s*0px\)['"]\s*\)/
+    );
+  });
+
+  it('fullscreen styles reset embPanel z-index to prevent stacking above overlay', () => {
+    // Embeddable panels (.embPanel) set high z-index values that can stack above
+    // the fullscreen overlay and interfere with flyouts (e.g. chart tooltips or
+    // action menus rendering behind panels). Resetting z-index to auto ensures
+    // panels participate in normal stacking context while in fullscreen mode.
+    // See https://github.com/elastic/kibana/issues/260087
+
+    const sourceCode = fs.readFileSync(
+      path.join(__dirname, 'use_metrics_grid_fullscreen.ts'),
+      'utf-8'
+    );
+
+    expect(sourceCode).toMatch(/\.embPanel\s*\{\s*z-index:\s*auto\s*!important;/);
+  });
+
+  it('fullscreen styles constrain flyout height to prevent clipping', () => {
+    // The .euiFlyout CSS in fullscreen mode must set both top: 0 and bottom: 0
+    // to anchor the flyout to the full viewport height. Without bottom: 0,
+    // EUI's default flyout positioning can clip the flyout content (dimensions
+    // list, pagination) at the bottom of the screen.
+    // See: https://github.com/elastic/kibana/issues/259956
+
+    const sourceCode = fs.readFileSync(
+      path.join(__dirname, 'use_metrics_grid_fullscreen.ts'),
+      'utf-8'
+    );
+
+    // Verify --euiFixedHeadersOffset is reset to 0 to remove header offset in fullscreen
+    expect(sourceCode).toMatch(/--euiFixedHeadersOffset:\s*0px/);
+
+    // Verify the .euiFlyout block sets bottom: 0 to prevent clipping in fullscreen
+    expect(sourceCode).toMatch(
+      /logicalCSS\s*\(\s*['"]bottom['"]\s*,\s*['"]0\s*!important['"]\s*\)/
+    );
+
+    // Verify max-height is set to override any EUI-applied max-height constraint
+    expect(sourceCode).toMatch(
+      /logicalCSS\s*\(\s*['"]max-height['"]\s*,\s*['"]100vh\s*!important['"]\s*\)/
     );
   });
 });

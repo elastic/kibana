@@ -41,15 +41,18 @@ import { useAbortableAsync, useBoolean } from '@kbn/react-hooks';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { useKibana } from '../../hooks/use_kibana';
-import type { SchemaEditorField, SchemaField } from '../data_management/schema_editor/types';
+import type {
+  SchemaEditorField,
+  SchemaField,
+} from '../stream_management/data_management/schema_editor/types';
 import { getFormattedError } from '../../util/errors';
 import {
   EMPTY_CONTENT,
   FIELD_TYPE_MAP,
   TABLE_COLUMNS,
-} from '../data_management/schema_editor/constants';
-import { FieldType } from '../data_management/schema_editor/field_type';
-import type { TableColumnName } from '../data_management/schema_editor/constants';
+} from '../stream_management/data_management/schema_editor/constants';
+import { FieldType } from '../stream_management/data_management/schema_editor/field_type';
+import type { TableColumnName } from '../stream_management/data_management/schema_editor/constants';
 
 interface QueryStreamSchemaEditorProps {
   definition: Streams.QueryStream.GetResponse;
@@ -509,19 +512,24 @@ const QueryStreamFieldActionsCell = ({
     ];
   }, [closePopover, field, onClearDescription, onFieldClick]);
 
+  const openActionsMenuLabel = i18n.translate(
+    'xpack.streams.queryStreamSchemaEditor.openActionsMenuAriaLabel',
+    { defaultMessage: 'Open actions menu' }
+  );
+
   return (
     <EuiPopover
+      aria-label={openActionsMenuLabel}
       id={contextMenuPopoverId}
       button={
-        <EuiButtonIcon
-          aria-label={i18n.translate(
-            'xpack.streams.queryStreamSchemaEditor.openActionsMenuAriaLabel',
-            { defaultMessage: 'Open actions menu' }
-          )}
-          data-test-subj="streamsAppQueryStreamFieldActionsButton"
-          iconType="boxesVertical"
-          onClick={toggle}
-        />
+        <EuiToolTip content={openActionsMenuLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            aria-label={openActionsMenuLabel}
+            data-test-subj="streamsAppQueryStreamFieldActionsButton"
+            iconType="boxesVertical"
+            onClick={toggle}
+          />
+        </EuiToolTip>
       }
       isOpen={popoverIsOpen}
       closePopover={closePopover}

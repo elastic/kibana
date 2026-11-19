@@ -87,7 +87,7 @@ export class DataViewsPublicPlugin
     const config = this.initializerContext.config.get<ClientConfigType>();
 
     return new DataViewsServicePublic({
-      hasData: this.hasData.start(core, this.callResolveCluster),
+      hasData: this.hasData.start(core, this.callResolveCluster, cps?.cpsManager),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new ContentMagementWrapper(contentManagement.client),
       apiClient: new DataViewsApiClient(

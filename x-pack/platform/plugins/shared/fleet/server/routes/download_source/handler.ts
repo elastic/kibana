@@ -11,6 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 
 import type {
+  FleetRequestHandler,
   GetOneDownloadSourcesRequestSchema,
   PutDownloadSourcesRequestSchema,
   PostDownloadSourcesRequestSchema,
@@ -25,6 +26,8 @@ import type {
 } from '../../../common/types';
 import { downloadSourceService } from '../../services/download_source';
 import { agentPolicyService } from '../../services';
+import { throwIfSslPathInvalid } from '../utils/ssl_utils';
+import { sanitizeDownloadSource } from '../utils/sanitize_settings_objects';
 
 // Support clearing auth via PUT requests
 export type DownloadSourceWithNullableAuth = Partial<DownloadSource> & {
@@ -42,6 +45,13 @@ export type DownloadSourceWithNullableAuth = Partial<DownloadSource> & {
  * - auth: undefined (no changes to auth)
  */
 export function validateDownloadSource(downloadSource: DownloadSourceWithNullableAuth) {
+  throwIfSslPathInvalid([
+    ...(downloadSource.ssl?.certificate_authorities ?? []),
+    downloadSource.ssl?.certificate,
+    downloadSource.ssl?.key,
+    downloadSource.secrets?.ssl?.key,
+  ]);
+
   // For settings that can be stored as secrets, only allow either plain text or secret reference.
   if (downloadSource.ssl?.key && downloadSource.secrets?.ssl?.key) {
     throw Boom.badRequest('Cannot specify both ssl.key and secrets.ssl.key');
@@ -86,11 +96,18 @@ export function validateDownloadSource(downloadSource: DownloadSourceWithNullabl
   }
 }
 
-export const getDownloadSourcesHandler: RequestHandler = async (context, request, response) => {
+export const getDownloadSourcesHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
+  const fleetContext = await context.fleet;
   const downloadSources = await downloadSourceService.list();
 
   const body: GetDownloadSourceResponse = {
-    items: downloadSources.items,
+    items: fleetContext.authz.fleet.readSettings
+      ? downloadSources.items
+      : downloadSources.items.map(sanitizeDownloadSource),
     page: downloadSources.page,
     perPage: downloadSources.perPage,
     total: downloadSources.total,
@@ -99,14 +116,17 @@ export const getDownloadSourcesHandler: RequestHandler = async (context, request
   return response.ok({ body });
 };
 
-export const getOneDownloadSourcesHandler: RequestHandler<
+export const getOneDownloadSourcesHandler: FleetRequestHandler<
   TypeOf<typeof GetOneDownloadSourcesRequestSchema.params>
 > = async (context, request, response) => {
   try {
+    const fleetContext = await context.fleet;
     const downloadSource = await downloadSourceService.get(request.params.sourceId);
 
     const body: GetOneDownloadSourceResponse = {
-      item: downloadSource,
+      item: fleetContext.authz.fleet.readSettings
+        ? downloadSource
+        : sanitizeDownloadSource(downloadSource),
     };
 
     return response.ok({ body });
@@ -129,17 +149,27 @@ export const putDownloadSourcesHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const data = request.body as DownloadSourceWithNullableAuth;
+  const { id: bodyId, ...restBody } = request.body as DownloadSourceWithNullableAuth & {
+    id?: string;
+  };
+
+  if (bodyId !== undefined && bodyId !== request.params.sourceId) {
+    return response.badRequest({
+      body: {
+        message: `Cannot change download source ID: body id does not match path sourceId "${request.params.sourceId}"`,
+      },
+    });
+  }
+
+  const data = restBody as DownloadSourceWithNullableAuth;
   validateDownloadSource(data);
 
   try {
     await downloadSourceService.update(soClient, esClient, request.params.sourceId, data);
     const downloadSource = await downloadSourceService.get(request.params.sourceId);
-    if (downloadSource.is_default) {
-      await agentPolicyService.bumpAllAgentPolicies(esClient);
-    } else {
-      await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, downloadSource.id);
-    }
+    await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, downloadSource.id, {
+      isDefault: downloadSource.is_default,
+    });
     const body: PutDownloadSourceResponse = {
       item: downloadSource,
     };
@@ -170,9 +200,9 @@ export const postDownloadSourcesHandler: RequestHandler<
   validateDownloadSource(data);
 
   const downloadSource = await downloadSourceService.create(soClient, esClient, data, { id });
-  if (downloadSource.is_default) {
-    await agentPolicyService.bumpAllAgentPolicies(esClient);
-  }
+  await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, downloadSource.id, {
+    isDefault: downloadSource.is_default,
+  });
   const body: GetOneDownloadSourceResponse = {
     item: downloadSource,
   };
@@ -184,7 +214,7 @@ export const deleteDownloadSourcesHandler: RequestHandler<
   TypeOf<typeof DeleteDownloadSourcesRequestSchema.params>
 > = async (context, request, response) => {
   try {
-    await downloadSourceService.delete(request.params.sourceId);
+    await downloadSourceService.delete(request.params.sourceId, { request });
 
     const body: DeleteDownloadSourceResponse = {
       id: request.params.sourceId,

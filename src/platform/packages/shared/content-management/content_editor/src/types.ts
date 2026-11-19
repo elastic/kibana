@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsReference } from './services';
-
 export interface Item {
   id: string;
   title: string;
   description?: string;
-  tags: SavedObjectsReference[];
+  tags: string[];
 
   createdAt?: string;
   createdBy?: string;

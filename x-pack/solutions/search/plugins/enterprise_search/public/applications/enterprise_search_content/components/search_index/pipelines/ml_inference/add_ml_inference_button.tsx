@@ -81,7 +81,7 @@ const AddButton: React.FC<{
     data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addInferencePipeline`}
     color={disabled ? undefined : 'primary'}
     disabled={disabled}
-    iconType={disabled ? 'lock' : 'plusInCircle'}
+    iconType={disabled ? 'lock' : 'plusCircle'}
     onClick={onClick}
   >
     {i18n.translate('xpack.enterpriseSearch.content.indices.pipelines.mlInference.addButtonLabel', {

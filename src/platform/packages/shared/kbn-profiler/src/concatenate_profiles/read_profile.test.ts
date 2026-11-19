@@ -84,7 +84,7 @@ describe('read_profile', () => {
         totalTimeoutMs: 1500,
         inactivityTimeoutMs: 200, // small inactivity window
       })
-    ).rejects.toThrowError('Inactivity timeout exceeded');
+    ).rejects.toThrow('Inactivity timeout exceeded');
   });
 
   it('aborts immediately with advice when JSON.parse throws RangeError (profile too large)', async () => {

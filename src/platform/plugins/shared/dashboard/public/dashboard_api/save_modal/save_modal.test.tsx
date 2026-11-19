@@ -17,17 +17,12 @@ jest.mock('@kbn/content-management-access-control-public', () => ({
 }));
 
 jest.mock('@kbn/saved-objects-plugin/public', () => ({
-  SavedObjectSaveModal: () => null,
-  SavedObjectSaveModalWithSaveResult: ({
-    options,
-  }: {
-    children: React.ReactNode;
-    options: React.ReactNode;
-  }) => (
+  SavedObjectSaveModal: ({ options }: { children: React.ReactNode; options: React.ReactNode }) => (
     <div data-test-subj="save-modal">
       <div data-test-subj="save-modal-options">{options}</div>
     </div>
   ),
+  SavedObjectSaveModalWithSaveResult: () => null,
 }));
 
 jest.mock('../../services/kibana_services', () => ({
@@ -72,11 +67,13 @@ const renderDashboardSaveModal = (
     <DashboardSaveModal
       onSave={mockSave}
       onClose={mockClose}
+      lastSavedTitle="dash title"
       title="dash title"
       description="dash description"
       timeRestore={false}
       projectRoutingRestore={false}
       showCopyOnSave={false}
+      modalTitleId="test-modal-title"
       {...props}
     />
   );

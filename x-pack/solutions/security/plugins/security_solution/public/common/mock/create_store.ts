@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch, Middleware } from 'redux';
+import type { Dispatch, Middleware } from 'redux-v4';
 import { SUB_PLUGINS_REDUCER } from './utils';
 import type { State } from '../store';
 import { createStore } from '../store';

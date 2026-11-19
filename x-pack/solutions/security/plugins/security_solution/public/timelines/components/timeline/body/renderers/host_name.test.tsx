@@ -13,23 +13,23 @@ import { TestProviders } from '../../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-
-const mockOpenFlyout = jest.fn();
-
-jest.mock('@kbn/expandable-flyout');
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { createEntityFlyoutApiMock } from '../../../../../flyout_v2/entity/use_entity_flyout_api.mock';
 
 jest.mock('../../../../../common/components/draggables', () => ({
   DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
 }));
 
+jest.mock('../../../../../flyout_v2/use_flyout_api');
+
 describe('HostName', () => {
+  let flyoutApi: ReturnType<typeof createEntityFlyoutApiMock>;
+
   beforeEach(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
-      ...createExpandableFlyoutApiMock(),
-      openFlyout: mockOpenFlyout,
-    });
+    flyoutApi = createEntityFlyoutApiMock();
+    jest
+      .mocked(useFlyoutApi)
+      .mockReturnValue(flyoutApi as unknown as ReturnType<typeof useFlyoutApi>);
   });
 
   afterEach(() => {
@@ -38,7 +38,6 @@ describe('HostName', () => {
 
   const props = {
     fieldName: 'host.name',
-    contextId: 'test-context-id',
     eventId: 'test-event-id',
     fieldType: 'keyword',
     isAggregatable: true,
@@ -66,7 +65,7 @@ describe('HostName', () => {
 
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenFlyout).not.toHaveBeenCalled();
+      expect(flyoutApi.openHostFlyout).not.toHaveBeenCalled();
     });
   });
 
@@ -88,7 +87,7 @@ describe('HostName', () => {
 
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenFlyout).not.toHaveBeenCalled();
+      expect(flyoutApi.openHostFlyout).not.toHaveBeenCalled();
     });
   });
 
@@ -110,11 +109,11 @@ describe('HostName', () => {
 
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenFlyout).not.toHaveBeenCalled();
+      expect(flyoutApi.openHostFlyout).not.toHaveBeenCalled();
     });
   });
 
-  test('should open expandable flyout on table', async () => {
+  test('should open the host flyout on table', async () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
@@ -131,20 +130,14 @@ describe('HostName', () => {
 
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenFlyout).toHaveBeenCalledWith({
-        right: {
-          id: 'host-panel',
-          params: {
-            hostName: props.value,
-            contextID: props.contextId,
-            scopeId: TableId.alertsOnAlertsPage,
-          },
-        },
+      expect(flyoutApi.openHostFlyout).toHaveBeenCalledWith({
+        hostName: props.value,
+        entityId: undefined,
       });
     });
   });
 
-  test('should open expandable flyout in timeline', async () => {
+  test('should open the host flyout in timeline', async () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
@@ -161,16 +154,11 @@ describe('HostName', () => {
 
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenFlyout).toHaveBeenCalledWith({
-        right: {
-          id: 'host-panel',
-          params: {
-            hostName: props.value,
-            contextID: props.contextId,
-            scopeId: 'timeline-1',
-          },
-        },
-      });
+      expect(flyoutApi.openHostFlyout).toHaveBeenCalledTimes(1);
+    });
+    expect(flyoutApi.openHostFlyout).toHaveBeenCalledWith({
+      hostName: props.value,
+      entityId: undefined,
     });
   });
 });

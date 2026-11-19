@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiLink, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useStartServices } from '../../../../hooks';
 
@@ -19,42 +20,45 @@ export const FleetServerOnPremUnhealthyCallout: React.FunctionComponent<
 > = ({ onClickAddFleetServer }) => {
   const { docLinks } = useStartServices();
   return (
-    <EuiCallOut
-      iconType="warning"
-      color="warning"
+    <KbnWarningCallout
       title={
         <FormattedMessage
           id="xpack.fleet.fleetServerOnPremUnhealthyCallout.calloutTitle"
           defaultMessage="Fleet Server is not Healthy"
         />
       }
-    >
-      <FormattedMessage
-        id="xpack.fleet.fleetServerOnPremUnhealthyCallout.calloutDescription"
-        defaultMessage="A healthy Fleet server is required before you can enroll agents with Fleet.  For more information see the {guideLink}."
-        values={{
-          guideLink: (
-            <EuiLink href={docLinks.links.fleet.fleetServerAddFleetServer} target="_blank" external>
-              <FormattedMessage
-                id="xpack.fleet.fleetServerOnPremUnhealthyCallout.guideLink"
-                defaultMessage="Fleet and Elastic Agent Guide"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-      <EuiSpacer size="m" />
-      <EuiButton
-        onClick={onClickAddFleetServer}
-        color="warning"
-        fill
-        data-test-subj="addFleetServerBtn"
-      >
+      text={
         <FormattedMessage
-          id="xpack.fleet.fleetServerOnPremUnhealthyCallout.addFleetServerButtonLabel"
-          defaultMessage="Add Fleet Server"
+          id="xpack.fleet.fleetServerOnPremUnhealthyCallout.calloutDescription"
+          defaultMessage="A healthy Fleet server is required before you can enroll agents with Fleet.  For more information see the {guideLink}."
+          values={{
+            guideLink: (
+              <EuiLink
+                href={docLinks.links.fleet.fleetServerAddFleetServer}
+                target="_blank"
+                external
+              >
+                <FormattedMessage
+                  id="xpack.fleet.fleetServerOnPremUnhealthyCallout.guideLink"
+                  defaultMessage="Fleet and Elastic Agent Guide"
+                />
+              </EuiLink>
+            ),
+          }}
         />
-      </EuiButton>
-    </EuiCallOut>
+      }
+      actionProps={{
+        primary: {
+          onClick: onClickAddFleetServer,
+          'data-test-subj': 'addFleetServerBtn',
+          children: (
+            <FormattedMessage
+              id="xpack.fleet.fleetServerOnPremUnhealthyCallout.addFleetServerButtonLabel"
+              defaultMessage="Add Fleet Server"
+            />
+          ),
+        },
+      }}
+    />
   );
 };

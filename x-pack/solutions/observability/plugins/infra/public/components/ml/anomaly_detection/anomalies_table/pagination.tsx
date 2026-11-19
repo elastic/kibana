@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -35,23 +35,27 @@ export const PaginationControls = ({
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup>
-          <EuiButtonIcon
-            data-test-subj="infraPaginationControlsButton"
-            iconType="arrowLeft"
-            isDisabled={!fetchPreviousPage || isLoading}
-            onClick={fetchPreviousPage}
-            aria-label={previousPageLabel}
-          />
+          <EuiToolTip content={previousPageLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="infraPaginationControlsButton"
+              iconType="chevronSingleLeft"
+              isDisabled={!fetchPreviousPage || isLoading}
+              onClick={fetchPreviousPage}
+              aria-label={previousPageLabel}
+            />
+          </EuiToolTip>
           <span>
             <strong>{page}</strong>
           </span>
-          <EuiButtonIcon
-            data-test-subj="infraPaginationControlsButton"
-            iconType="arrowRight"
-            isDisabled={!fetchNextPage || isLoading}
-            onClick={fetchNextPage}
-            aria-label={nextPageLabel}
-          />
+          <EuiToolTip content={nextPageLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="infraPaginationControlsButton"
+              iconType="chevronSingleRight"
+              isDisabled={!fetchNextPage || isLoading}
+              onClick={fetchNextPage}
+              aria-label={nextPageLabel}
+            />
+          </EuiToolTip>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

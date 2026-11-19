@@ -6,3 +6,4 @@
  */
 
 export { useGetCloudConnectors } from './use_get_cloud_connectors';
+export { useCloudConnectorTemplate } from './use_cloud_connector_template';

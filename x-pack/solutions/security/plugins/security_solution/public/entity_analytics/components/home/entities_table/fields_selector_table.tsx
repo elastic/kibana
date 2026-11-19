@@ -61,6 +61,13 @@ const VIEW_VALUE_ALL = i18n.translate(
   }
 );
 
+const VIEW_SELECTOR_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entitiesTable.fieldsModal.viewSelectorAriaLabel',
+  {
+    defaultMessage: 'View options',
+  }
+);
+
 export interface FieldsSelectorTableProps {
   dataView: DataView;
   columns: string[];
@@ -75,8 +82,9 @@ export const filterFieldsBySearch = (
   searchQuery?: string,
   isFilterSelectedEnabled: boolean = false
 ) => {
+  // Metadata fields (_index, _ignored, _id, ...) can't be read by the ES|QL queries behind the grid.
   const allowedFields = fields
-    .filter((field) => field.name !== '_index' && field.visualizable)
+    .filter((field) => !field.name.startsWith('_') && field.visualizable)
     .map((field) => ({
       id: field.name,
       name: field.name,
@@ -159,6 +167,13 @@ export const FieldsSelectorTable = ({
           checked={columns.includes(id)}
           id={`entity-analytics-fields-selector-item-${id}`}
           data-test-subj={`entity-analytics-fields-selector-item-${id}`}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.entitiesTable.fieldsModal.toggleFieldColumnAriaLabel',
+            {
+              defaultMessage: 'Toggle {fieldName} column',
+              values: { fieldName: id },
+            }
+          )}
           onChange={(e) => {
             const isChecked = e.target.checked;
             return isChecked ? onAddColumn(id) : onRemoveColumn(id);
@@ -224,6 +239,7 @@ export const FieldsSelectorTable = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-label={VIEW_SELECTOR_ARIA_LABEL}
             panelPaddingSize="none"
             anchorPosition="downRight"
             isOpen={isPopoverOpen}
@@ -232,7 +248,7 @@ export const FieldsSelectorTable = ({
               <EuiButtonEmpty
                 data-test-subj="viewSelectorButton"
                 size="xs"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 iconSide="right"
                 onClick={togglePopover}
               >
@@ -242,7 +258,6 @@ export const FieldsSelectorTable = ({
           >
             <EuiContextMenuPanel
               data-test-subj="viewSelectorMenu"
-              size="s"
               items={[
                 <EuiContextMenuItem
                   data-test-subj="viewSelectorOption-all"

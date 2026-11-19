@@ -7,12 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
+
+export const VIEW_TYPE_KEY = 'view';
+
+const VIEW_LABEL = i18n.translate('esqlEditor.indicesBrowser.sourceType.view', {
+  defaultMessage: 'View',
+});
+
 const SOURCE_TYPE_PATTERNS = [
   { patterns: ['lookup'], label: 'Lookup Index', key: 'lookup_index' },
   { patterns: ['integration'], label: 'Integration', key: 'integration' },
   { patterns: ['timeseries', 'time series'], label: 'Timeseries', key: 'timeseries' },
   { patterns: ['stream', 'data stream'], label: 'Stream', key: 'stream' },
   { patterns: ['alias'], label: 'Alias', key: 'alias' },
+  { patterns: ['external'], label: 'External data', key: 'external' },
+  { patterns: ['view'], label: VIEW_LABEL, key: VIEW_TYPE_KEY },
   { patterns: ['index'], label: 'Index', key: 'index' },
 ] as const;
 

@@ -16,8 +16,8 @@ export const getStyles = (euiTheme: EuiThemeComputed) => css`
     margin: ${euiTheme.size.m} 0;
     border-radius: ${euiTheme.border.radius.medium};
     height: ${euiTheme.size.xxl};
-    color: ${euiTheme.colors.link};
     weight: ${euiTheme.font.weight.medium};
+    container-type: inline-size;
   }
 
   [class*='cssTreeNode-']:hover {

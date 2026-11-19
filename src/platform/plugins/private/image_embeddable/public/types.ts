@@ -9,10 +9,15 @@
 
 import type { HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasEditCapabilities, HasSupportedTriggers } from '@kbn/presentation-publishing';
+import type {
+  HasEditCapabilities,
+  HasSupportedTriggers,
+  PublishesWritableTitle,
+} from '@kbn/presentation-publishing';
 import type { ImageEmbeddableState } from '../server';
 
 export type ImageEmbeddableApi = DefaultEmbeddableApi<ImageEmbeddableState> &
+  PublishesWritableTitle &
   HasEditCapabilities &
   HasSupportedTriggers &
   HasDrilldowns;

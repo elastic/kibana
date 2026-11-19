@@ -94,48 +94,48 @@ describe('groupItemsByKeys', () => {
     { status: 'open', priority: 'high' },
   ];
 
-  it('should group by a single key', () => {
-    const groups = groupItemsByKeys(items, ['status']);
+  it('should group by a single key', async () => {
+    const groups = await groupItemsByKeys(items, ['status']);
     expect(groups.size).toBe(2);
     expect(groups.get('"open"')?.length).toBe(3);
     expect(groups.get('"closed"')?.length).toBe(1);
   });
 
-  it('should group by multiple keys', () => {
-    const groups = groupItemsByKeys(items, ['status', 'priority']);
+  it('should group by multiple keys', async () => {
+    const groups = await groupItemsByKeys(items, ['status', 'priority']);
     expect(groups.size).toBe(3);
     expect(groups.get(`"open"${KEY_DELIMITER}"high"`)?.length).toBe(2);
     expect(groups.get(`"open"${KEY_DELIMITER}"low"`)?.length).toBe(1);
     expect(groups.get(`"closed"${KEY_DELIMITER}"low"`)?.length).toBe(1);
   });
 
-  it('should handle field values containing the old :: delimiter', () => {
+  it('should handle field values containing the old :: delimiter', async () => {
     const itemsWithDelimiter = [
       { status: 'open::urgent', priority: 'high' },
       { status: 'open::urgent', priority: 'high' },
       { status: 'closed', priority: 'low' },
     ];
-    const groups = groupItemsByKeys(itemsWithDelimiter, ['status', 'priority']);
+    const groups = await groupItemsByKeys(itemsWithDelimiter, ['status', 'priority']);
     expect(groups.size).toBe(2);
     const urgentGroup = groups.get(`"open::urgent"${KEY_DELIMITER}"high"`);
     expect(urgentGroup?.length).toBe(2);
   });
 
-  it('should handle missing keys as undefined', () => {
-    const groups = groupItemsByKeys([{ a: 1 }, { a: 1, b: 2 }], ['a', 'b']);
+  it('should handle missing keys as undefined', async () => {
+    const groups = await groupItemsByKeys([{ a: 1 }, { a: 1, b: 2 }], ['a', 'b']);
     expect(groups.size).toBe(2);
   });
 
-  it('should handle empty items', () => {
-    const groups = groupItemsByKeys([], ['key']);
+  it('should handle empty items', async () => {
+    const groups = await groupItemsByKeys([], ['key']);
     expect(groups.size).toBe(0);
   });
 
-  it('should stop early when abort signal is fired', () => {
+  it('should stop early when abort signal is fired', async () => {
     const controller = new AbortController();
     controller.abort();
     const largeItems = Array.from({ length: 5000 }, (_, i) => ({ key: i }));
-    const groups = groupItemsByKeys(largeItems, ['key'], controller.signal);
+    const groups = await groupItemsByKeys(largeItems, ['key'], controller.signal);
     expect(groups.size).toBe(0);
   });
 });
@@ -182,6 +182,26 @@ describe('assignBucket', () => {
     expect(assignBucket({ score: 75 }, unlabeledConfig)).toBe('50-100');
     expect(assignBucket({ score: 150 }, unlabeledConfig)).toBe('100+');
   });
+
+  it('returns null when value matches no range', () => {
+    const noMatchConfig = {
+      field: 'age',
+      ranges: [
+        { from: 0, to: 10 },
+        { from: 10, to: 20 },
+      ],
+    };
+    expect(assignBucket({ age: 999 }, noMatchConfig)).toBeNull();
+  });
+
+  it('generates wildcard label when range has no from, to, or label', () => {
+    const wildcardConfig = {
+      field: 'val',
+      ranges: [{}],
+    };
+    // A range with no from and no to matches everything
+    expect(assignBucket({ val: 42 }, wildcardConfig)).toBe('*');
+  });
 });
 
 describe('parseGroupKeyValues', () => {
@@ -208,5 +228,9 @@ describe('parseGroupKeyValues', () => {
     expect(parseGroupKeyValues('"open::urgent"', ['status'])).toEqual({
       status: 'open::urgent',
     });
+  });
+
+  it('falls back to raw string when JSON.parse fails', () => {
+    expect(parseGroupKeyValues('not-valid-json', ['key'])).toEqual({ key: 'not-valid-json' });
   });
 });

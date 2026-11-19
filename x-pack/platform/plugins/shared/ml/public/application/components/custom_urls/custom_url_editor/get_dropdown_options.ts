@@ -10,8 +10,8 @@ import {
   isDataFrameAnalyticsConfigs,
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
-import type { Job } from '../../../../../common/types/anomaly_detection_jobs';
-import { isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import { isAnomalyDetectionJob } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { getQueryEntityFieldNames, getSupportedFieldNames } from './utils';
 
 export function getDropDownOptions(

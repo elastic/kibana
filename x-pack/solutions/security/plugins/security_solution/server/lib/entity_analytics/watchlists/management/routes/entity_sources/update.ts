@@ -16,10 +16,14 @@ import { WatchlistDataSources } from '../../../../../../../common/api/entity_ana
 
 import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
+import { WatchlistEntitySourceClient } from '../../../entity_sources/infra';
+import { getWatchlistSavedObjectClient } from '../../../shared/utils';
 
 export const updateEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
 ) => {
   router.versioned
     .put({
@@ -51,8 +55,17 @@ export const updateEntitySourceRoute = (
 
           try {
             const secSol = await context.securitySolution;
-            const client = secSol.getMonitoringEntitySourceDataClient();
-            const body = await client.update({ ...request.body, id: request.params.id });
+            const core = await context.core;
+            const client = new WatchlistEntitySourceClient({
+              soClient: getWatchlistSavedObjectClient(core),
+              namespace: secSol.getSpaceId(),
+              esClient: core.elasticsearch.client.asCurrentUser,
+              getStartServices,
+              logger,
+              hasEncryptionKey,
+            });
+
+            const body = await client.update({ ...request.body, id: request.params.id }, request);
 
             return response.ok({ body });
           } catch (e) {

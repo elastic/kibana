@@ -148,6 +148,9 @@ export class AttributionPopover extends Component<Props, State> {
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
         ownFocus
+        aria-label={i18n.translate('xpack.maps.layerSettings.attributionPopoverAriaLabel', {
+          defaultMessage: 'Attribution',
+        })}
       >
         {this._renderContent()}
       </EuiPopover>

@@ -1,0 +1,188 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useEffect, useMemo } from 'react';
+import { EuiPanel } from '@elastic/eui';
+import {
+  ActionButtonType,
+  type AttachmentRenderProps,
+  type CanvasRenderCallbacks,
+} from '@kbn/agent-builder-browser/attachments';
+import { PluginStart } from '@kbn/core-di';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { CoreStart, useService } from '@kbn/core-di-browser';
+import { i18n } from '@kbn/i18n';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { buildRulePayload } from '@kbn/alerting-v2-utils';
+import { bindLocatorsToHost, getAlertingV2Locators } from '../../application/bind_locators_to_host';
+import { LocatorProvider } from '../../application/locator_context';
+import {
+  RuleSummaryAboutSection,
+  RuleSummaryArtifactsSection,
+  RuleSummaryBody,
+  RuleSummaryInvestigationSection,
+} from '../../components/rule/rule_summary';
+import { RuleSummaryQueryPreviewSection } from '../../components/rule/rule_summary/rule_summary_query_preview_section';
+import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
+import { RulesApi } from '../../services/rules_api';
+import {
+  recordAttachmentSync,
+  syncAttachmentOrigin,
+  useRecordedAttachmentSync,
+} from './attachment_save_state';
+import type { RuleAttachment } from './rule_attachment_definition';
+
+export interface RuleCanvasContentProps
+  extends AttachmentRenderProps<RuleAttachment>,
+    CanvasRenderCallbacks {}
+
+export const RuleCanvasContent = ({
+  attachment,
+  registerActionButtons,
+  updateOrigin,
+}: RuleCanvasContentProps) => {
+  const rulesApi = useService(RulesApi);
+  const share = useService(PluginStart('share')) as SharePluginStart;
+  const notifications = useService(CoreStart('notifications'));
+  const [queryClient] = React.useState(() => new QueryClient());
+  const locators = useMemo(
+    () => bindLocatorsToHost(getAlertingV2Locators(share), OBSERVABILITY_ALERTING_HOST),
+    [share]
+  );
+
+  const { data, origin: savedObjectId } = attachment;
+  const isPersisted = isPersistedSavedObject(savedObjectId);
+  const summaryRule = useMemo(() => ({ ...data, id: undefined }), [data]);
+  const recordedSyncedAt = useRecordedAttachmentSync(attachment.id);
+
+  const [mounted, setMounted] = React.useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) {
+      registerActionButtons([]);
+      return;
+    }
+
+    if (!isPersisted) {
+      registerActionButtons([
+        {
+          label: i18n.translate('xpack.alertingV2.ruleAttachment.createRule', {
+            defaultMessage: 'Create rule',
+          }),
+          icon: 'save',
+          type: ActionButtonType.PRIMARY,
+          handler: async () => {
+            try {
+              const savedRule = data.id
+                ? await rulesApi.upsertRule(data.id, buildRulePayload(data))
+                : await rulesApi.createRule(buildRulePayload(data));
+              // Linking the origin is what turns the draft into a saved rule, so a failure here is surfaced.
+              recordAttachmentSync(attachment.id, await updateOrigin(savedRule.id));
+              notifications.toasts.addSuccess(
+                i18n.translate('xpack.alertingV2.ruleAttachment.createdSuccess', {
+                  defaultMessage: 'Rule "{name}" created',
+                  values: { name: data.metadata.name },
+                })
+              );
+            } catch (e) {
+              notifications.toasts.addDanger(
+                i18n.translate('xpack.alertingV2.ruleAttachment.createError', {
+                  defaultMessage: 'Failed to create rule: {error}',
+                  values: { error: e.body?.message ?? e.message },
+                })
+              );
+            }
+          },
+        },
+      ]);
+      return;
+    }
+
+    const ruleId = savedObjectId;
+
+    registerActionButtons([
+      {
+        label: i18n.translate('xpack.alertingV2.ruleAttachment.updateRule', {
+          defaultMessage: 'Update Rule',
+        }),
+        icon: 'save',
+        type: ActionButtonType.PRIMARY,
+        handler: async () => {
+          try {
+            await rulesApi.upsertRule(ruleId, buildRulePayload(data));
+          } catch (e) {
+            notifications.toasts.addDanger(
+              i18n.translate('xpack.alertingV2.ruleAttachment.updateError', {
+                defaultMessage: 'Failed to update rule: {error}',
+                values: { error: e.body?.message ?? e.message },
+              })
+            );
+            return;
+          }
+          // The origin is unchanged; this refreshes origin_snapshot_at so the save counts as synced.
+          await syncAttachmentOrigin(attachment.id, () => updateOrigin(ruleId));
+          notifications.toasts.addSuccess(
+            i18n.translate('xpack.alertingV2.ruleAttachment.updatedSuccess', {
+              defaultMessage: 'Rule "{name}" updated',
+              values: { name: data.metadata.name },
+            })
+          );
+        },
+      },
+      {
+        label: i18n.translate('xpack.alertingV2.ruleAttachment.viewInRules', {
+          defaultMessage: 'View in Rules',
+        }),
+        icon: 'external',
+        type: ActionButtonType.SECONDARY,
+        handler: () => {
+          getAlertingV2Locators(share).rulesLocators.navigateSync({
+            ruleId,
+            host: OBSERVABILITY_ALERTING_HOST.rules,
+          });
+        },
+      },
+    ]);
+  }, [
+    mounted,
+    isPersisted,
+    savedObjectId,
+    registerActionButtons,
+    updateOrigin,
+    rulesApi,
+    share,
+    notifications,
+    data,
+    attachment.id,
+    // Re-registering the buttons after a recorded sync redraws the canvas header, so getHeader
+    // re-evaluates the unsaved changes badge against the new sync date.
+    recordedSyncedAt,
+  ]);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <LocatorProvider locators={locators}>
+        <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
+          <RuleSummaryBody rule={summaryRule}>
+            <RuleSummaryAboutSection />
+            <RuleSummaryQueryPreviewSection />
+            <RuleSummaryInvestigationSection />
+            <RuleSummaryArtifactsSection />
+          </RuleSummaryBody>
+        </EuiPanel>
+      </LocatorProvider>
+    </QueryClientProvider>
+  );
+};
+
+const isPersistedSavedObject = (savedObjectId: string | undefined): savedObjectId is string => {
+  return Boolean(savedObjectId);
+};

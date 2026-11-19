@@ -22,10 +22,12 @@ import React, { Component, type FC, memo, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '@kbn/spaces-plugin/common';
-import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
+import type { SpacesApiUi } from '@kbn/spaces-plugin/public';
+
+import type { DisplaySpace } from '../privileges/kibana/display_space';
 
 interface Props {
-  spaces: Space[];
+  spaces: DisplaySpace[];
   buttonText: string;
   spacesApiUi: SpacesApiUi;
 }
@@ -75,6 +77,12 @@ export class SpacesPopoverList extends Component<Props, State> {
         panelPaddingSize="none"
         anchorPosition="downLeft"
         ownFocus={false}
+        aria-label={i18n.translate(
+          'xpack.security.management.editRole.spacesPopoverList.popoverAriaLabel',
+          {
+            defaultMessage: 'Spaces',
+          }
+        )}
       >
         <EuiFocusTrap>{this.getMenuPanel()}</EuiFocusTrap>
       </EuiPopover>
@@ -122,6 +130,7 @@ export class SpacesPopoverList extends Component<Props, State> {
           rowHeight: 40,
           showIcons: false,
           onFocusBadge: false,
+          paddingSize: 's',
         }}
       >
         {(list, search) => (

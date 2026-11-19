@@ -344,7 +344,7 @@ export const createFilebeatCloudInstructions = () => ({
         },
       }),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
+      textPost: cloudPasswordAndResetLink(),
     },
     DEB: {
       title: i18n.translate('home.tutorials.common.filebeatCloudInstructions.config.debTitle', {
@@ -357,7 +357,7 @@ export const createFilebeatCloudInstructions = () => ({
         },
       }),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
+      textPost: cloudPasswordAndResetLink(),
     },
     RPM: {
       title: i18n.translate('home.tutorials.common.filebeatCloudInstructions.config.rpmTitle', {
@@ -370,7 +370,7 @@ export const createFilebeatCloudInstructions = () => ({
         },
       }),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
+      textPost: cloudPasswordAndResetLink(),
     },
     WINDOWS: {
       title: i18n.translate('home.tutorials.common.filebeatCloudInstructions.config.windowsTitle', {
@@ -386,7 +386,7 @@ export const createFilebeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: cloudPasswordAndResetLink,
+      textPost: cloudPasswordAndResetLink(),
     },
   },
 });
@@ -415,7 +415,7 @@ export const createFilebeatCloudInstructionsServerless = () => ({
         '  hosts: ["<elasticsearch_endpoint_url>"]',
         '  api_key: "<your_api_key>"',
       ],
-      textPost: cloudServerlessApiKeyNote,
+      textPost: cloudServerlessApiKeyNote(),
     },
     DEB: {
       title: i18n.translate(
@@ -439,7 +439,7 @@ export const createFilebeatCloudInstructionsServerless = () => ({
         '  hosts: ["<elasticsearch_endpoint_url>"]',
         '  api_key: "<your_api_key>"',
       ],
-      textPost: cloudServerlessApiKeyNote,
+      textPost: cloudServerlessApiKeyNote(),
     },
     RPM: {
       title: i18n.translate(
@@ -463,7 +463,7 @@ export const createFilebeatCloudInstructionsServerless = () => ({
         '  hosts: ["<elasticsearch_endpoint_url>"]',
         '  api_key: "<your_api_key>"',
       ],
-      textPost: cloudServerlessApiKeyNote,
+      textPost: cloudServerlessApiKeyNote(),
     },
     WINDOWS: {
       title: i18n.translate(
@@ -487,7 +487,7 @@ export const createFilebeatCloudInstructionsServerless = () => ({
         '  hosts: ["<elasticsearch_endpoint_url>"]',
         '  api_key: "<your_api_key>"',
       ],
-      textPost: cloudServerlessApiKeyNote,
+      textPost: cloudServerlessApiKeyNote(),
     },
   },
 });

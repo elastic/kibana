@@ -37,6 +37,17 @@ describe('mappings', () => {
         "type": "keyword",
       }
     `);
+    expect(mappings.wildcard()).toMatchInlineSnapshot(`
+      Object {
+        "type": "wildcard",
+      }
+    `);
+    expect(mappings.wildcard({ ignore_above: 1024 })).toMatchInlineSnapshot(`
+      Object {
+        "ignore_above": 1024,
+        "type": "wildcard",
+      }
+    `);
     expect(mappings.text()).toMatchInlineSnapshot(`
       Object {
         "fields": Object {
@@ -63,8 +74,16 @@ describe('mappings', () => {
         "type": "flattened",
       }
     `);
+    expect(mappings.object({ dynamic: 'strict', properties: {} })).toMatchInlineSnapshot(`
+      Object {
+        "dynamic": "strict",
+        "properties": Object {},
+        "type": "object",
+      }
+    `);
     expect(mappings.object({ properties: {} })).toMatchInlineSnapshot(`
       Object {
+        "dynamic": false,
         "properties": Object {},
         "type": "object",
       }
@@ -77,8 +96,9 @@ describe('mappings', () => {
       age: mappings.integer(),
     };
 
-    expect(mappings.object({ properties })).toMatchInlineSnapshot(`
+    expect(mappings.object({ dynamic: false, properties })).toMatchInlineSnapshot(`
       Object {
+        "dynamic": false,
         "properties": Object {
           "age": Object {
             "type": "integer",

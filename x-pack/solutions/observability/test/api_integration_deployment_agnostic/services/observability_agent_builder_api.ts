@@ -71,8 +71,18 @@ function createObservabilityAgentBuilderApiClient({
       res = await supertestWithoutAuth[method](url).set(headers);
     }
 
-    if (endpoint.includes('ai_insights') && Buffer.isBuffer(res.body)) {
-      res.body = parseSseResponse(res.body);
+    // SSE responses from the ai_insights routes need to be parsed into the AiInsightResponse
+    // shape the tests assert on. With `Content-Type: text/event-stream`, superagent exposes the
+    // body as text (`res.text`) rather than a buffered `res.body`, so parse whichever is
+    // populated. Guard on the content type so genuine non-SSE responses (e.g. 4xx error bodies)
+    // are left untouched.
+    const contentType = res.headers['content-type'] ?? '';
+    const isSseResponse = contentType.includes('text/event-stream') || Buffer.isBuffer(res.body);
+    if (endpoint.includes('ai_insights') && isSseResponse) {
+      const rawBody = Buffer.isBuffer(res.body) ? res.body : res.text;
+      if (rawBody) {
+        res.body = parseSseResponse(rawBody);
+      }
     }
 
     return res;

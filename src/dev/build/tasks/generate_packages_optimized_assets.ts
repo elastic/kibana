@@ -19,13 +19,12 @@ import { transform as lightningTransform, browserslistToTargets } from 'lightnin
 import browserslist from 'browserslist';
 import { asyncForEachWithLimit } from '@kbn/std';
 import type { ToolingLog } from '@kbn/tooling-log';
-import globby from 'globby';
+import { globby, globbySync } from 'globby';
 import del from 'del';
 
 import type { Task } from '../lib';
 import { write } from '../lib';
 
-const EUI_THEME_RE = /\.v\d\.(light|dark)\.css$/;
 const ASYNC_CHUNK_RE = /\.chunk\.\d+\.js$/;
 
 const getSize = (paths: string[]) => paths.reduce((acc, path) => acc + fs.statSync(path).size, 0);
@@ -87,10 +86,6 @@ async function optimizeAssets(log: ToolingLog, assetDir: string, brotliQuality: 
 
 type Category = ReturnType<typeof getCategory>;
 const getCategory = (relative: string) => {
-  if (EUI_THEME_RE.test(relative)) {
-    return 'euiTheme';
-  }
-
   if (relative.endsWith('.css')) {
     return 'css';
   }
@@ -116,16 +111,14 @@ const getCategory = (relative: string) => {
 
 function categorizeAssets(assetDirs: string[]) {
   const assets = assetDirs.flatMap((assetDir) =>
-    globby
-      .sync(['**/*'], {
-        cwd: assetDir,
-        ignore: ['*-manifest.json', '*.gz', '*.br'],
-        absolute: true,
-      })
-      .map((path): { path: string; category: Category } => ({
-        path,
-        category: getCategory(Path.relative(assetDir, path)),
-      }))
+    globbySync(['**/*'], {
+      cwd: assetDir,
+      ignore: ['*-manifest.json', '*.gz', '*.br'],
+      absolute: true,
+    }).map((path): { path: string; category: Category } => ({
+      path,
+      category: getCategory(Path.relative(assetDir, path)),
+    }))
   );
 
   const groups = new Map<Category, string[]>();
@@ -136,14 +129,6 @@ function categorizeAssets(assetDirs: string[]) {
   };
 
   for (const { path, category } of assets) {
-    if (category === 'euiTheme') {
-      // only track borealis.light theme
-      if (path.includes('borealis.light')) {
-        add('css', path);
-      }
-      continue;
-    }
-
     add(category, path);
   }
 

@@ -7,318 +7,318 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { FieldFormatInstanceType } from '@kbn/field-formats-plugin/common';
-import { findTestSubject } from '@elastic/eui/lib/test';
-
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import type { FieldEdiorProps } from './field_editor';
-import { FieldEditor } from './field_editor';
+import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
+import React from 'react';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public/context';
+import { render, screen, waitFor, within } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 
-import { mockManagementPlugin } from '../../mocks';
-import { createComponentWithContext } from '../test_utils';
+const monacoModuleName = '@kbn/monaco';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiBasicTable: 'eui-basic-table',
-  EuiButton: 'eui-button',
-  EuiButtonEmpty: 'eui-button-empty',
-  EuiCallOut: 'eui-call-out',
-  EuiCode: 'eui-code',
-  EuiConfirmModal: 'eui-confirm-modal',
-  EuiFieldNumber: 'eui-field-number',
-  EuiFieldText: 'eui-field-text',
-  EuiFlexGroup: 'eui-flex-group',
-  EuiFlexItem: 'eui-flex-item',
-  EuiForm: 'eui-form',
-  EuiFormRow: 'eui-form-row',
-  EuiIcon: 'eui-icon',
-  EuiLink: 'eui-link',
-  EuiOverlayMask: 'eui-overlay-mask',
-  EuiSelect: 'eui-select',
-  EuiSpacer: 'eui-spacer',
-  EuiText: 'eui-text',
-  EuiTextArea: 'eui-textArea',
-  htmlIdGenerator: () => () => 42,
-  euiPaletteColorBlind: () => ['red'],
+jest.doMock('@kbn/code-editor', () => ({
+  CodeEditor: ({
+    height: _height,
+    languageId: _languageId,
+    onChange,
+    value,
+    width: _width,
+    ...props
+  }: {
+    height: string;
+    languageId: string;
+    onChange: (value: string) => void;
+    value: string;
+    width: string;
+  }) => (
+    <textarea {...props} onChange={(event) => onChange(event.currentTarget.value)} value={value} />
+  ),
 }));
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
+jest.doMock(monacoModuleName, () => ({
+  PainlessLang: {
+    ID: 'painless',
+  },
+}));
 
-  return {
-    ...original,
-    CodeEditor: `code-editor`,
-  };
-});
+jest.mock('./components/scripting_help', () => ({
+  ScriptingHelpFlyout: () => null,
+}));
 
 jest.mock('../../scripting_languages', () => ({
+  getDeprecatedScriptingLanguages: () => ['testlang'],
   getEnabledScriptingLanguages: () => ['painless', 'testlang'],
   getSupportedScriptingLanguages: () => ['painless'],
-  getDeprecatedScriptingLanguages: () => ['testlang'],
 }));
 
-jest.mock('./components/scripting_call_outs', () => ({
-  ScriptingDisabledCallOut: 'scripting-disabled-callOut',
-  ScriptingWarningCallOut: 'scripting-warning-callOut',
-  ScriptingHelpFlyout: 'scripting-help-flyout',
-}));
+const DefaultFormat = FieldFormat.from((value: unknown) => String(value));
+DefaultFormat.fieldType = '*';
+DefaultFormat.id = 'default';
+DefaultFormat.title = 'Default format';
 
-jest.mock('./components/field_format_editor', () => ({
-  FieldFormatEditor: 'field-format-editor',
-}));
-
-const fieldList = [
-  {
-    name: 'foobar',
-  } as DataViewField,
-];
-
-const fields = {
-  getAll: () => fieldList,
+const renderWithContext = <Props extends object>(
+  Component: React.ComponentType<Props>,
+  props: Props,
+  mockedContext: Record<string, unknown>
+) => {
+  return render(
+    <KibanaContextProvider services={mockedContext}>
+      <Component {...props} />
+    </KibanaContextProvider>
+  );
 };
 
-// @ts-ignore
-fields.getByName = (name: string) => {
-  return fields.getAll().find((field) => field.name === name);
-};
-
-class Format {
-  static id = 'test_format';
-  static title = 'Test format';
-  params() {}
-}
-
-// FIXME: which interface is this?
-const field = {
+const createFieldSpec = (overrides: Partial<FieldSpec> = {}): FieldSpec => ({
+  aggregatable: true,
+  name: '',
+  readFromDocValues: false,
   scripted: true,
+  searchable: true,
   type: 'number',
-  lang: 'painless',
-  format: new Format(),
+  ...overrides,
+});
+
+const existingField = createFieldSpec({
+  name: 'foobar',
+  scripted: false,
+  type: 'string',
+});
+
+const createIndexPattern = (fields: FieldSpec[] = [existingField]): DataView => {
+  const indexPattern = createStubDataView({
+    spec: {
+      fields: Object.fromEntries(fields.map((field) => [field.name, field])),
+      title: 'test-data-view',
+    },
+  });
+
+  jest.spyOn(indexPattern, 'getFormatterForField').mockReturnValue(new DefaultFormat());
+  jest.spyOn(indexPattern, 'setFieldCustomLabel');
+
+  return indexPattern;
 };
 
-const services = {
-  redirectAway: () => {},
-  saveIndexPattern: async () => {},
-  indexPatternService: {} as DataViewsContract,
+const createServices = () => {
+  const updateSavedObject = jest.fn(() => Promise.resolve());
+  const redirectAway = jest.fn();
+
+  return {
+    redirectAway,
+    services: {
+      indexPatternService: {
+        updateSavedObject,
+      },
+      redirectAway,
+    },
+    updateSavedObject,
+  };
 };
+
+const createMockedContext = () => ({
+  docLinks: {
+    links: {
+      runtimeFields: {
+        overview: 'https://docs.test/runtime-fields',
+      },
+      scriptedFields: {
+        painless: 'https://docs.test/painless',
+        scriptAggs: 'https://docs.test/script-aggs',
+        scriptFields: 'https://docs.test/script-fields',
+      },
+    },
+  },
+  fieldFormats: {
+    getByFieldType: jest.fn(() => []),
+    getDefaultType: jest.fn(() => DefaultFormat),
+  },
+  notifications: {
+    toasts: {
+      addSuccess: jest.fn(),
+    },
+  },
+});
+
+type TestServices = ReturnType<typeof createServices>['services'];
+type TestFieldEditorProps = Omit<FieldEdiorProps, 'services'> & {
+  services: TestServices;
+};
+
+const FieldEditor = jest.requireActual<{
+  FieldEditor: React.ComponentType<TestFieldEditorProps>;
+}>('./field_editor').FieldEditor;
 
 describe('FieldEditor', () => {
-  let indexPattern: DataView;
-
-  const mockContext = mockManagementPlugin.createIndexPatternManagmentContext();
-  mockContext.fieldFormats.getDefaultType = jest.fn(
-    () => ({} as unknown as FieldFormatInstanceType)
-  );
-  mockContext.fieldFormats.getByFieldType = jest.fn((fieldType) => {
-    if (fieldType === 'number') {
-      return [{} as unknown as FieldFormatInstanceType];
-    } else {
-      return [];
-    }
-  });
+  let mockedContext: ReturnType<typeof createMockedContext>;
 
   beforeEach(() => {
-    indexPattern = {
-      fields,
-      getFormatterForField: () => ({ params: () => ({}) }),
-      getFormatterForFieldNoDefault: () => ({ params: () => ({}) }),
-      upsertScriptedField: () => undefined,
-      setFieldCustomLabel: (name: string, label: string) => {
-        indexPattern.fields.getByName(name)!.customLabel = label;
-      },
-    } as unknown as DataView;
+    mockedContext = createMockedContext();
   });
 
-  it('should render create new scripted field correctly', async () => {
-    const component = createComponentWithContext<FieldEdiorProps>(
+  const renderFieldEditor = async ({
+    indexPattern = createIndexPattern(),
+    services = createServices().services,
+    spec = createFieldSpec(),
+  }: {
+    indexPattern?: DataView;
+    services?: TestServices;
+    spec?: FieldSpec;
+  } = {}) => {
+    renderWithContext<TestFieldEditorProps>(
       FieldEditor,
       {
         indexPattern,
-        spec: field as unknown as DataViewField,
         services,
+        spec,
       },
-      mockContext
+      mockedContext
     );
 
-    await new Promise((resolve) => process.nextTick(resolve));
-    component.update();
-    expect(component).toMatchSnapshot();
+    await screen.findByTestId('fieldSaveButton');
+  };
+
+  it('should render create new scripted field correctly', async () => {
+    await renderFieldEditor();
+
+    expect(screen.getByText('Create scripted field')).toBeVisible();
+    expect(screen.getByText('Scripted fields are deprecated')).toBeVisible();
+    expect(screen.getByText('runtime fields')).toHaveAttribute(
+      'href',
+      'https://docs.test/runtime-fields'
+    );
+    expect(screen.getByTestId('editorFieldName')).toHaveValue('');
+    expect(screen.getByTestId('editorFieldLang')).toHaveValue('painless');
+    expect(screen.getByTestId('editorFieldType')).toHaveValue('number');
+    expect(screen.getByTestId('editorSelectedFormatId')).toHaveValue('');
+    expect(screen.getByText('Name is required')).toBeVisible();
+    expect(screen.getByText('Script is required')).toBeVisible();
+    expect(screen.getByTestId('fieldSaveButton')).toBeDisabled();
   });
 
   it('should render edit scripted field correctly', async () => {
-    const testField = {
-      ...field,
+    const testField = createFieldSpec({
+      lang: 'painless',
       name: 'test',
       script: 'doc.test.value',
-    };
-    fieldList.push(testField as unknown as DataViewField);
-    indexPattern.fields.getByName = (name) => {
-      const flds = {
-        [testField.name]: testField,
-      };
-      return flds[name] as unknown as DataViewField;
-    };
+    });
 
-    const component = createComponentWithContext<FieldEdiorProps>(
-      FieldEditor,
-      {
-        indexPattern,
-        spec: testField as unknown as DataViewField,
-        services,
-      },
-      mockContext
-    );
+    await renderFieldEditor({
+      indexPattern: createIndexPattern([existingField, testField]),
+      spec: testField,
+    });
 
-    await new Promise((resolve) => process.nextTick(resolve));
-    component.update();
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText('Edit test')).toBeVisible();
+    expect(screen.queryByTestId('editorFieldName')).not.toBeInTheDocument();
+    expect(screen.getByTestId('editorFieldCustomLabel')).toHaveValue('');
+    expect(screen.getByTestId('editorFieldScript')).toHaveValue('doc.test.value');
+    expect(screen.getByTestId('fieldSaveButton')).toHaveTextContent('Save field');
+    expect(screen.getByText('Delete')).toBeVisible();
   });
 
   it('should display and update a custom label correctly', async () => {
-    let testField = {
-      name: 'test',
-      format: new Format(),
-      lang: undefined,
-      type: 'string',
+    const user = userEvent.setup();
+    const testField = createFieldSpec({
       customLabel: 'Test',
-    } as unknown as DataViewField;
-    fieldList.push(testField);
-    indexPattern.fields.getByName = (name) => {
-      const flds = {
-        [testField.name]: testField,
-      };
-      return flds[name];
-    };
-    indexPattern.fields = {
-      ...indexPattern.fields,
-      ...{
-        update: (fld) => {
-          testField = fld as unknown as DataViewField;
-        },
-        add: jest.fn(),
-      },
-    };
-    indexPattern.fieldFormatMap = { test: field } as {};
-    (indexPattern.deleteFieldFormat as any) = jest.fn();
+      name: 'test',
+      scripted: false,
+      type: 'string',
+    });
+    const indexPattern = createIndexPattern([testField]);
+    const { services, updateSavedObject, redirectAway } = createServices();
 
-    const component = createComponentWithContext<FieldEdiorProps>(
-      FieldEditor,
-      {
-        indexPattern,
-        spec: testField as unknown as DataViewField,
-        services: {
-          redirectAway: () => {},
-          indexPatternService: {
-            updateSavedObject: jest.fn(() => Promise.resolve()),
-          } as unknown as DataViewsContract,
-        },
-      },
-      mockContext
-    );
+    await renderFieldEditor({
+      indexPattern,
+      services,
+      spec: testField,
+    });
 
-    await new Promise((resolve) => process.nextTick(resolve));
-    component.update();
-    const input = findTestSubject(component, 'editorFieldCustomLabel');
-    expect(input.props().value).toBe('Test');
-    input.simulate('change', { target: { value: 'new Test' } });
-    const saveBtn = findTestSubject(component, 'fieldSaveButton');
+    const customLabelInput = screen.getByTestId('editorFieldCustomLabel');
+    expect(customLabelInput).toHaveValue('Test');
 
-    await saveBtn.simulate('click');
-    await new Promise((resolve) => process.nextTick(resolve));
-    expect(testField.customLabel).toEqual('new Test');
+    await user.clear(customLabelInput);
+    await user.type(customLabelInput, 'new Test');
+    await user.click(screen.getByTestId('fieldSaveButton'));
+
+    await waitFor(() => {
+      expect(indexPattern.setFieldCustomLabel).toHaveBeenCalledWith('test', 'new Test');
+    });
+    expect(updateSavedObject).toHaveBeenCalledWith(indexPattern);
+    expect(redirectAway).toHaveBeenCalled();
+    expect(indexPattern.fields.getByName('test')?.customLabel).toBe('new Test');
   });
 
   it('should show deprecated lang warning', async () => {
-    const testField = {
-      ...field,
+    const testField = createFieldSpec({
+      lang: 'testlang',
       name: 'test',
       script: 'doc.test.value',
-      lang: 'testlang',
-    };
-    fieldList.push(testField as unknown as DataViewField);
-    indexPattern.fields.getByName = (name) => {
-      const flds = {
-        [testField.name]: testField,
-      };
-      return flds[name] as unknown as DataViewField;
-    };
+    });
 
-    const component = createComponentWithContext<FieldEdiorProps>(
-      FieldEditor,
-      {
-        indexPattern,
-        spec: testField as unknown as DataViewField,
-        services,
-      },
-      mockContext
-    );
+    await renderFieldEditor({
+      indexPattern: createIndexPattern([existingField, testField]),
+      spec: testField,
+    });
 
-    await new Promise((resolve) => process.nextTick(resolve));
-    component.update();
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText('Deprecation Warning:')).toBeVisible();
+    const deprecationWarning = screen.getByText('Deprecation Warning:').closest('span');
+    expect(deprecationWarning).not.toBeNull();
+    expect(within(deprecationWarning!).getByText('testlang')).toBeVisible();
+    expect(screen.getByText('Painless')).toHaveAttribute('href', 'https://docs.test/painless');
   });
 
   it('should show conflict field warning', async () => {
-    const testField = { ...field };
-    const component = createComponentWithContext<FieldEdiorProps>(
-      FieldEditor,
-      {
-        indexPattern,
-        spec: testField as unknown as DataViewField,
-        services,
-      },
-      mockContext
-    );
+    const user = userEvent.setup();
 
-    await new Promise((resolve) => process.nextTick(resolve));
-    (component.instance() as FieldEditor).onFieldChange('name', 'foobar');
-    component.update();
-    expect(component).toMatchSnapshot();
+    await renderFieldEditor();
+
+    await user.type(screen.getByTestId('editorFieldName'), 'foobar');
+
+    expect(screen.getByText('Mapping Conflict:')).toBeVisible();
+    expect(screen.getByText('foobar')).toBeVisible();
+    expect(
+      screen.getByText('You already have a field with the name', { exact: false })
+    ).toBeVisible();
   });
 
   it('should show multiple type field warning with a table containing indices', async () => {
-    const testField = {
-      ...field,
-      name: 'test-conflict',
+    const testField = createFieldSpec({
       conflictDescriptions: {
         long: ['index_name_1', 'index_name_2'],
         text: ['index_name_3'],
       },
-    };
-    const component = createComponentWithContext<FieldEdiorProps>(
-      FieldEditor,
-      {
-        indexPattern,
-        spec: testField as unknown as DataViewField,
-        services,
-      },
-      mockContext
-    );
+      name: 'test-conflict',
+    });
 
-    await new Promise((resolve) => process.nextTick(resolve));
-    (component.instance() as FieldEditor).onFieldChange('name', 'foobar');
-    component.update();
-    expect(component).toMatchSnapshot();
+    await renderFieldEditor({
+      spec: testField,
+    });
+
+    expect(screen.getByText('Field type conflict')).toBeVisible();
+    expect(
+      screen.getByText('The type of this field changes across indices.', { exact: false })
+    ).toBeVisible();
+    expect(screen.getByText('long')).toBeVisible();
+    expect(screen.getByText('index_name_1, index_name_2')).toBeVisible();
+    expect(screen.getByText('text')).toBeVisible();
+    expect(screen.getByText('index_name_3')).toBeVisible();
   });
 
   it('should not allow field to have * in the name', async () => {
-    const testField = {
-      ...field,
+    const user = userEvent.setup();
+    const testField = createFieldSpec({
       name: 'test-field',
-    };
-    const component = createComponentWithContext<FieldEdiorProps>(
-      FieldEditor,
-      {
-        indexPattern,
-        spec: testField as unknown as DataViewField,
-        services,
-      },
-      mockContext
-    );
+      script: 'doc.test.value',
+    });
 
-    await new Promise((resolve) => process.nextTick(resolve));
-    (component.instance() as FieldEditor).onFieldChange('name', 'test*123');
-    component.update();
-    expect(component.html().includes('The field cannot have * in the name.')).toBe(true);
+    await renderFieldEditor({
+      spec: testField,
+    });
+
+    const nameInput = screen.getByTestId('editorFieldName');
+    await user.clear(nameInput);
+    await user.type(nameInput, 'test*123');
+
+    expect(screen.getByText('The field cannot have * in the name.')).toBeVisible();
   });
 });

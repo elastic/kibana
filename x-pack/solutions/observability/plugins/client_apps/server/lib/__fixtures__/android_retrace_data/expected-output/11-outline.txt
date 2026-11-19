@@ -1,0 +1,3 @@
+java.lang.RuntimeException: Outline test
+	at com.example.synthetic.OutlineCaller.caller(OutlineCaller.kt:98)
+	at com.example.synthetic.OutlineCaller.normalMethod(OutlineCaller.kt:200)

@@ -7,9 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiComboBoxObject, ObjectScope } from '@elastic/eui-test-helpers';
 import type { Page } from '@playwright/test';
+import type {
+  EuiBasicTableObject,
+  EuiCallOutObject,
+  EuiColorPickerObject,
+  EuiDataGridObject,
+  EuiDraggableObject,
+  EuiFieldSearchObject,
+  EuiGlobalToastListObject,
+  EuiPaginationObject,
+  EuiSearchBarObject,
+  EuiSelectableObject,
+  EuiSideNavObject,
+  EuiSuperSelectObject,
+  EuiTableObject,
+} from '../../../../eui_components';
 import type { RunA11yScanOptions } from '../../../../utils';
-import type { PathOptions } from '../../../../../common/services/kibana_url';
+import type { GotoAppOptions } from './goto_app';
+
+export type { GotoAppOptions } from './goto_app';
 
 /**
  * Extends the Playwright 'Page' interface with methods specific to Kibana.
@@ -23,16 +41,11 @@ export type ScoutPage = Page & {
   /**
    * Navigates to the specified Kibana application.
    * @param appName - The name of the Kibana app (e.g., 'discover', 'dashboard').
-   * @param options - Additional navigation options, passed directly to Playwright's `goto` method.
+   * @param options - URL `params` and `hash`, Playwright `goto` options, and `readyWhen` / `readyTimeout`.
+   * With `readyWhen`, navigation resolves on `commit` and waits for that locator to be visible.
    * @returns A Promise resolving to a Playwright `Response` or `null`.
    */
-  gotoApp: (appName: string, pathOptions?: PathOptions) => ReturnType<Page['goto']>;
-  /**
-   * Waits for the Kibana loading spinner indicator to disappear.
-   * @deprecated This method is flaky on CI. We strongly recommend waiting for specific elements instead: page.testSubj.waitForSelector('table-is-ready', { state: 'visible' })
-   * @returns A Promise resolving when the indicator is hidden.
-   */
-  waitForLoadingIndicatorHidden: () => ReturnType<Page['waitForSelector']>;
+  gotoApp: (appName: string, options?: GotoAppOptions) => ReturnType<Page['goto']>;
   /**
    * Presses a key until the element with the css selector is in focus. If multiple elements match it will
    * press the key until the first occurrence of the element is focused.
@@ -138,6 +151,40 @@ export type ScoutPage = Page & {
      * @returns A Promise that resolves once the drag operation is complete.
      */
     dragTo: (sourceSelector: string, targetSelector: string) => Promise<void>;
+  };
+
+  /**
+   * Factory accessors for EUI Component Objects from `@elastic/eui-test-helpers`,
+   * pre-bound to this page. By default a Component Object is scoped to the whole
+   * page; pass an optional `scope` (a `Locator` or another Component Object) to
+   * target an instance inside a specific subtree — e.g. one combo box in a flyout
+   * when several share the same `data-test-subj`.
+   *
+   * @example
+   * await page.components.comboBox('dataViewSelector').setSelectedOptions(['logs-*']);
+   * await page.components.comboBox('roleComboBox', flyout).clear();
+   */
+  components: {
+    comboBox: (testSubj: string, scope?: ObjectScope) => EuiComboBoxObject;
+    dataGrid: (testSubj: string, scope?: ObjectScope) => EuiDataGridObject;
+    superSelect: (testSubj: string, scope?: ObjectScope) => EuiSuperSelectObject;
+    selectable: (testSubj: string, scope?: ObjectScope) => EuiSelectableObject;
+    basicTable: (testSubj: string, scope?: ObjectScope) => EuiBasicTableObject;
+    /** Plain `EuiTable`, positional rows and cells. Use `basicTable` for field based columns. */
+    table: (testSubj: string, scope?: ObjectScope) => EuiTableObject;
+    draggable: (testSubj: string, scope?: ObjectScope) => EuiDraggableObject;
+    callOut: (testSubj: string, scope?: ObjectScope) => EuiCallOutObject;
+    colorPicker: (testSubj: string, scope?: ObjectScope) => EuiColorPickerObject;
+    fieldSearch: (testSubj: string, scope?: ObjectScope) => EuiFieldSearchObject;
+    pagination: (testSubj: string, scope?: ObjectScope) => EuiPaginationObject;
+    /** The search bar's `box['data-test-subj']`, same API as `fieldSearch`. */
+    searchBar: (testSubj: string, scope?: ObjectScope) => EuiSearchBarObject;
+    sideNav: (testSubj: string, scope?: ObjectScope) => EuiSideNavObject;
+    /**
+     * Drives the global toast list (`EuiGlobalToastListObject`); `testSubj`
+     * defaults to `globalToastList`, the subj Kibana core sets on the list.
+     */
+    toast: (testSubj?: string, scope?: ObjectScope) => EuiGlobalToastListObject;
   };
 };
 

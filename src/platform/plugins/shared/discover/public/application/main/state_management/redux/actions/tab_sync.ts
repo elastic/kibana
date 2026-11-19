@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, merge, startWith } from 'rxjs';
+import { combineLatest, merge, skip, startWith } from 'rxjs';
 import {
   connectToQueryState,
   noSearchSessionStorageCapabilityMessage,
@@ -16,17 +16,22 @@ import { syncState } from '@kbn/kibana-utils-plugin/public';
 import { FilterStateStore, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TabActionPayload, InternalStateThunkActionCreator } from '../internal_state';
 import { selectTab, selectTabAppState } from '../selectors';
-import { selectTabRuntimeState } from '../runtime_state';
+import { getDataViewIdOfSource, selectTabRuntimeState } from '../runtime_state';
 import { addLog } from '../../../../../utils/add_log';
 import { internalStateActions } from '..';
 import { type DiscoverAppState } from '../types';
-import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
+import {
+  APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
+  PROFILE_STATE_URL_KEY,
+} from '../../../../../../common/constants';
 import { getCurrentUrlState } from '../../utils/cleanup_url_state';
 import { buildStateSubscribe } from '../../utils/build_state_subscribe';
 import { createUrlSyncObservables } from '../../utils/create_url_sync_observables';
 import { createTabPersistableStateObservable } from '../../utils/create_tab_persistable_state_observable';
 import { createSearchSessionRestorationDataProvider } from '../../utils/create_search_session_restoration_data_provider';
-import { getFieldsToReset } from '../../utils/default_profile_state';
+import { getFieldsToReset } from '../../utils/profile_app_state_defaults';
+import { isReplayedLoad } from '../../utils/is_replayed_load';
 import {
   createDataViewDataSource,
   DataSourceType,
@@ -50,12 +55,15 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     }
 
     dispatch(stopSyncing({ tabId }));
-    const { appState$, createAppStateContainer, globalStateContainer } = createUrlSyncObservables({
-      tabId,
-      dispatch,
-      getState,
-      internalState$: getInternalState$(),
-    });
+    const { appState$, createAppStateContainer, globalStateContainer, profileStateContainer } =
+      createUrlSyncObservables({
+        tabId,
+        dispatch,
+        getState,
+        internalState$: getInternalState$(),
+        runtimeStateManager,
+        services,
+      });
 
     const getCurrentTab = () => selectTab(getState(), tabId);
     const getAppState = (): DiscoverAppState => {
@@ -63,21 +71,23 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     };
 
     const initializeUrlTracking = () => {
-      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+      const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
 
       const subscription = combineLatest([
-        currentDataView$,
+        currentDataSource$,
         appState$.pipe(startWith(getAppState())),
-      ]).subscribe(([dataView, appState]) => {
-        if (!dataView?.id) {
+      ]).subscribe(([dataSource, appState]) => {
+        if (!dataSource) {
           return;
         }
 
+        const dataViewId = getDataViewIdOfSource(dataSource);
+
         const dataViewSupportsTracking =
           // Disable for ad hoc data views, since they can't be restored after a page refresh
-          dataView.isPersisted() ||
+          dataSource.isPersisted() ||
           // Unless it's a default profile data view, which can be restored on refresh
-          getState().defaultProfileAdHocDataViewIds.includes(dataView.id) ||
+          getState().defaultProfileAdHocDataViewIds.includes(dataViewId) ||
           // Or we're in ES|QL mode, in which case we don't care about the data view
           isOfAggregateQueryType(appState.query);
 
@@ -94,39 +104,42 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
 
     const initializeAndSyncUrlState = () => {
       const { persistedDiscoverSession } = getState();
+      const hasPersistedTab = Boolean(
+        persistedDiscoverSession?.tabs.some((tab) => tab.id === tabId)
+      );
 
       addLog('[tab_sync] initialize state and sync with URL', { persistedDiscoverSession });
 
-      // Set the profile state fields to reset only if not loading a saved search,
-      // to avoid overwriting saved search state
-      if (!persistedDiscoverSession?.id) {
-        const { breakdownField, columns, rowHeight, hideChart } = getCurrentUrlState(
-          urlStateStorage,
-          services
-        );
+      const { breakdownField, columns, rowHeight, hideChart, hideTable, hideSidebar } =
+        getCurrentUrlState(urlStateStorage, services);
 
-        // Only set default state which is not already set in the URL
-        dispatch(
-          internalStateActions.setProfileStateFieldsToReset({
-            tabId,
-            fieldsToReset: getFieldsToReset({
-              columns: columns === undefined,
-              rowHeight: rowHeight === undefined,
-              breakdownField: breakdownField === undefined,
-              hideChart: hideChart === undefined,
-            }),
-          })
-        );
-      }
+      // Only reset profile defaults that are not already set in the URL.
+      // Persisted tabs own their saved state, so only non-persisted fields can be reset.
+      dispatch(
+        internalStateActions.setProfileAppStateDefaultFieldsToReset({
+          tabId,
+          fieldsToReset: getFieldsToReset({
+            columns: columns === undefined && !hasPersistedTab,
+            rowHeight: rowHeight === undefined && !hasPersistedTab,
+            breakdownField: breakdownField === undefined && !hasPersistedTab,
+            hideChart: hideChart === undefined && !hasPersistedTab,
+            hideTable: hideTable === undefined && !hasPersistedTab,
+            hideSidebar: hideSidebar === undefined,
+          }),
+        })
+      );
 
       const { data } = services;
-      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-      const currentDataView = currentDataView$.getValue();
+      const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+      const currentDataSource = currentDataSource$.getValue();
+      const currentDataViewId = currentDataSource
+        ? getDataViewIdOfSource(currentDataSource)
+        : undefined;
       const appState = getAppState();
       const setDataViewFromSavedSearch =
         !appState.dataSource ||
         (isDataSourceType(appState.dataSource, DataSourceType.DataView) &&
-          appState.dataSource.dataViewId !== currentDataView?.id);
+          appState.dataSource.dataViewId !== currentDataViewId);
 
       if (setDataViewFromSavedSearch) {
         // used data view is different from the given by url/state which is invalid
@@ -134,8 +147,8 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
           internalStateActions.updateAppState({
             tabId,
             appState: {
-              dataSource: currentDataView?.id
-                ? createDataViewDataSource({ dataViewId: currentDataView.id })
+              dataSource: currentDataViewId
+                ? createDataViewDataSource({ dataViewId: currentDataViewId })
                 : undefined,
             },
           })
@@ -173,6 +186,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       // When projectRouting changes, mark non-active tabs for refetch and trigger data fetch
       const cpsProjectRoutingSubscription = services.cps?.cpsManager
         ?.getProjectRouting$()
+        .pipe(skip(1)) // It's a BehaviorSubject, so skip the initial emit to avoid extra fetch
         .subscribe(() => {
           dispatch(internalStateActions.markNonActiveTabsForRefetch());
           addLog('[tab_sync] projectRouting changes triggers data fetching');
@@ -186,10 +200,18 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
           stateStorage: urlStateStorage,
         });
 
+      const { start: startSyncingProfileStateWithUrl, stop: stopSyncingProfileStateWithUrl } =
+        syncState({
+          storageKey: PROFILE_STATE_URL_KEY,
+          stateContainer: profileStateContainer,
+          stateStorage: urlStateStorage,
+        });
+
       // current state needs to be pushed to url
       dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId })).then(() => {
         startSyncingAppStateWithUrl();
         startSyncingGlobalStateWithUrl();
+        startSyncingProfileStateWithUrl();
       });
 
       return () => {
@@ -197,6 +219,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
         stopSyncingQueryGlobalStateWithStateContainer();
         stopSyncingAppStateWithUrl();
         stopSyncingGlobalStateWithUrl();
+        stopSyncingProfileStateWithUrl();
         cpsProjectRoutingSubscription?.unsubscribe();
       };
     };
@@ -250,15 +273,25 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
         getPersistedDiscoverSession: () => getState().persistedDiscoverSession,
         getCurrentTab,
         getCurrentTabRuntimeState: () => selectTabRuntimeState(runtimeStateManager, tabId),
+        profileStateRegistry: services.profileStateRegistry,
+        runtimeStateManager,
       }),
       {
-        isDisabled: () =>
-          services.capabilities.discover_v2.storeSearchSession
+        isDisabled: () => {
+          // The config outlives the tab until the next tab enables storage, e.g. after "New"
+          const dataRequestParams = getCurrentTab()?.dataRequestParams;
+
+          if (dataRequestParams && isReplayedLoad(dataRequestParams)) {
+            return { disabled: true, reasonText: '' };
+          }
+
+          return services.capabilities.discover_v2.storeSearchSession
             ? { disabled: false }
             : {
                 disabled: true,
                 reasonText: noSearchSessionStorageCapabilityMessage,
-              },
+              };
+        },
       }
     );
 

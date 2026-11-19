@@ -8,13 +8,14 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
-  EuiButtonIcon,
   EuiBasicTable,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiPanel,
   EuiSpacer,
+  EuiToolTip,
   useCurrentEuiBreakpoint,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -206,12 +207,16 @@ export const MonitorListComponent: ({
             width: '40px',
             render: (id: string) => {
               return (
-                <EuiButtonIcon
-                  aria-label={labels.getExpandDrawerLabel(id)}
-                  data-test-subj={`xpack.synthetics.monitorList.${id}.expandMonitorDetail`}
-                  iconType={expandedDrawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
-                  onClick={() => toggleDrawer(id)}
-                />
+                <EuiToolTip content={labels.getExpandDrawerLabel(id)} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    aria-label={labels.getExpandDrawerLabel(id)}
+                    data-test-subj={`xpack.synthetics.monitorList.${id}.expandMonitorDetail`}
+                    iconType={
+                      expandedDrawerIds.includes(id) ? 'chevronSingleUp' : 'chevronSingleDown'
+                    }
+                    onClick={() => toggleDrawer(id)}
+                  />
+                </EuiToolTip>
               );
             },
           },

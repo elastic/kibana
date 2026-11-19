@@ -15,10 +15,10 @@ import type { IExecutionContextContainer } from '@kbn/core-execution-context-ser
 export const BAGGAGE_HEADER = 'x-kbn-context';
 
 export function getParentContextFrom(
-  headers: Record<string, string>
+  headers: Record<string, string | string[] | undefined>
 ): KibanaExecutionContext | undefined {
   const header = headers[BAGGAGE_HEADER];
-  return parseHeader(header);
+  return parseHeader(Array.isArray(header) ? header[0] : header);
 }
 
 function parseHeader(header?: string): KibanaExecutionContext | undefined {

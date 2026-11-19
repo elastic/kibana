@@ -131,12 +131,82 @@ describe('getIndexTemplate', () => {
 });
 
 describe('createOrUpdateIndexTemplate', () => {
+  // The template is stamped with a content hash in `_meta` before it is installed.
+  const stampedIndexTemplate = (namespace = 'default', useDataStream = false) => {
+    const indexTemplate = IndexTemplate(namespace, useDataStream);
+    return {
+      ...indexTemplate,
+      _meta: {
+        ...indexTemplate._meta,
+        content_hash: expect.stringMatching(/^[0-9a-f]{16}$/),
+      },
+    };
+  };
+
+  const templateWithLimit = (limit: number) => {
+    const indexTemplate = IndexTemplate();
+    return {
+      ...indexTemplate,
+      template: {
+        ...indexTemplate.template,
+        settings: {
+          ...indexTemplate.template.settings,
+          'index.mapping.total_fields.limit': limit,
+        },
+      },
+    };
+  };
+
+  // An already-installed template, as ES returns it: a stamp plus settings that satisfy
+  // the configured limit, which is what the skip requires.
+  const installedTemplate = ({
+    contentHash,
+    limit = 2500,
+  }: {
+    contentHash: string;
+    limit?: number;
+  }) =>
+    ({
+      index_templates: [
+        {
+          name: '.alerts-test.alerts-default-index-template',
+          index_template: {
+            _meta: { content_hash: contentHash },
+            template: {
+              settings: {
+                'index.mapping.total_fields.limit': limit,
+                'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+              },
+            },
+          },
+        },
+      ],
+    } as unknown as Awaited<ReturnType<typeof clusterClient.indices.getIndexTemplate>>);
+
+  // Installs once against an empty cluster to capture the hash this template stamps.
+  const captureInstalledHash = async (): Promise<string> => {
+    clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
+    await createOrUpdateIndexTemplate({
+      logger,
+      esClient: clusterClient,
+      template: IndexTemplate(),
+    });
+    const installedHash = (
+      clusterClient.indices.putIndexTemplate.mock.calls[0][0] as unknown as {
+        _meta: { content_hash: string };
+      }
+    )._meta.content_hash;
+    clusterClient.indices.putIndexTemplate.mockClear();
+    clusterClient.indices.simulateTemplate.mockClear();
+    return installedHash;
+  };
+
   beforeEach(() => {
     jest.resetAllMocks();
     jest.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
   });
 
-  it(`should call esClient to put index template`, async () => {
+  it(`should call esClient to put index template, stamped with a content hash`, async () => {
     clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
     await createOrUpdateIndexTemplate({
       logger,
@@ -144,8 +214,225 @@ describe('createOrUpdateIndexTemplate', () => {
       template: IndexTemplate(),
     });
 
-    expect(clusterClient.indices.simulateTemplate).toHaveBeenCalledWith(IndexTemplate());
-    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(IndexTemplate());
+    expect(clusterClient.indices.simulateTemplate).toHaveBeenCalledWith(stampedIndexTemplate());
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(stampedIndexTemplate());
+    // Logged at info so a resurgence of template writes is visible without debug logging.
+    expect(logger.info).toHaveBeenCalledWith(
+      `Installing index template .alerts-test.alerts-default-index-template: not installed`
+    );
+  });
+
+  it(`should skip the PUT when the installed content hash matches`, async () => {
+    const installedHash = await captureInstalledHash();
+    clusterClient.indices.getIndexTemplate.mockResolvedValue(
+      installedTemplate({ contentHash: installedHash })
+    );
+
+    await createOrUpdateIndexTemplate({
+      logger,
+      esClient: clusterClient,
+      template: IndexTemplate(),
+    });
+
+    expect(clusterClient.indices.simulateTemplate).not.toHaveBeenCalled();
+    expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+  });
+
+  it(`should skip when the total_fields.limit was raised out of band but the content is unchanged`, async () => {
+    const installedHash = await captureInstalledHash();
+
+    // A field-limit crawl (or a DevTools edit) raises the limit while leaving `_meta`
+    // alone. That is not a template change, so it must not trigger an install.
+    clusterClient.indices.getIndexTemplate.mockResolvedValue(
+      installedTemplate({ contentHash: installedHash, limit: 5000 })
+    );
+
+    await createOrUpdateIndexTemplate({
+      logger,
+      esClient: clusterClient,
+      template: IndexTemplate(),
+    });
+
+    expect(clusterClient.indices.simulateTemplate).not.toHaveBeenCalled();
+    expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+  });
+
+  it(`should PUT when the configured total_fields.limit is raised above the installed one`, async () => {
+    const installedHash = await captureInstalledHash();
+    clusterClient.indices.getIndexTemplate.mockResolvedValue(
+      installedTemplate({ contentHash: installedHash, limit: 2500 })
+    );
+
+    // Only the limit changed, which the content hash deliberately does not cover, so the
+    // numeric check is the only thing that can catch it.
+    await createOrUpdateIndexTemplate({
+      logger,
+      esClient: clusterClient,
+      template: templateWithLimit(3000),
+    });
+
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.objectContaining({
+          settings: expect.objectContaining({ 'index.mapping.total_fields.limit': 3000 }),
+        }),
+      })
+    );
+    expect(logger.info).toHaveBeenCalledWith(
+      `Installing index template .alerts-test.alerts-default-index-template: installed total_fields.limit of 2500 does not satisfy the configured 3000`
+    );
+  });
+
+  it(`should PUT when the installed template has no ignore_dynamic_beyond_limit`, async () => {
+    const installedHash = await captureInstalledHash();
+    clusterClient.indices.getIndexTemplate.mockResolvedValue({
+      index_templates: [
+        {
+          name: '.alerts-test.alerts-default-index-template',
+          index_template: {
+            _meta: { content_hash: installedHash },
+            template: { settings: { 'index.mapping.total_fields.limit': 2500 } },
+          },
+        },
+      ],
+    } as unknown as Awaited<ReturnType<typeof clusterClient.indices.getIndexTemplate>>);
+
+    await createOrUpdateIndexTemplate({
+      logger,
+      esClient: clusterClient,
+      template: IndexTemplate(),
+    });
+
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(stampedIndexTemplate());
+  });
+
+  it(`should PUT when the installed content hash differs`, async () => {
+    clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
+    clusterClient.indices.getIndexTemplate.mockResolvedValue({
+      index_templates: [
+        {
+          name: '.alerts-test.alerts-default-index-template',
+          index_template: { _meta: { content_hash: 'stale-hash' } },
+        },
+      ],
+    } as unknown as Awaited<ReturnType<typeof clusterClient.indices.getIndexTemplate>>);
+
+    await createOrUpdateIndexTemplate({
+      logger,
+      esClient: clusterClient,
+      template: IndexTemplate(),
+    });
+
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(stampedIndexTemplate());
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringContaining(`content changed (stale-hash -> `)
+    );
+  });
+
+  it(`should PUT when the installed template carries no content hash`, async () => {
+    clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
+    clusterClient.indices.getIndexTemplate.mockResolvedValue({
+      index_templates: [
+        {
+          name: '.alerts-test.alerts-default-index-template',
+          index_template: { _meta: { managed: true } },
+        },
+      ],
+    } as unknown as Awaited<ReturnType<typeof clusterClient.indices.getIndexTemplate>>);
+
+    await createOrUpdateIndexTemplate({
+      logger,
+      esClient: clusterClient,
+      template: IndexTemplate(),
+    });
+
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(stampedIndexTemplate());
+  });
+
+  it(`should preserve a higher total_fields.limit from the existing template`, async () => {
+    clusterClient.indices.getIndexTemplate.mockResolvedValue({
+      index_templates: [
+        {
+          name: '.alerts-test.alerts-default-index-template',
+          index_template: {
+            index_patterns: ['.internal.alerts-test.alerts-default-*'],
+            composed_of: ['mappings1', 'framework-mappings'],
+            template: { settings: { 'index.mapping.total_fields.limit': 5000 } },
+          },
+        },
+      ],
+    });
+    clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
+
+    await createOrUpdateIndexTemplate({
+      logger,
+      esClient: clusterClient,
+      template: IndexTemplate(),
+    });
+
+    const expectedTemplate = expect.objectContaining({
+      template: expect.objectContaining({
+        settings: expect.objectContaining({ 'index.mapping.total_fields.limit': 5000 }),
+      }),
+    });
+    expect(clusterClient.indices.simulateTemplate).toHaveBeenCalledWith(expectedTemplate);
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(expectedTemplate);
+  });
+
+  it(`should keep the configured total_fields.limit when the existing template limit is lower`, async () => {
+    clusterClient.indices.getIndexTemplate.mockResolvedValue({
+      index_templates: [
+        {
+          name: '.alerts-test.alerts-default-index-template',
+          index_template: {
+            index_patterns: ['.internal.alerts-test.alerts-default-*'],
+            composed_of: ['mappings1', 'framework-mappings'],
+            template: { settings: { 'index.mapping.total_fields.limit': 1000 } },
+          },
+        },
+      ],
+    });
+    clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
+
+    await createOrUpdateIndexTemplate({
+      logger,
+      esClient: clusterClient,
+      template: IndexTemplate(),
+    });
+
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(stampedIndexTemplate());
+  });
+
+  it(`should install the configured total_fields.limit when the template does not exist`, async () => {
+    clusterClient.indices.getIndexTemplate.mockRejectedValue(
+      Object.assign(new Error('not found'), { statusCode: 404 })
+    );
+    clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
+
+    await createOrUpdateIndexTemplate({
+      logger,
+      esClient: clusterClient,
+      template: IndexTemplate(),
+    });
+
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(stampedIndexTemplate());
+  });
+
+  it(`should PUT when the installed template cannot be read`, async () => {
+    clusterClient.indices.getIndexTemplate.mockRejectedValue(new Error('security_exception'));
+    clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
+
+    await createOrUpdateIndexTemplate({
+      logger,
+      esClient: clusterClient,
+      template: IndexTemplate(),
+    });
+
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(stampedIndexTemplate());
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Could not read installed index template .alerts-test.alerts-default-index-template; will install (security_exception)`
+    );
   });
 
   it(`should retry on transient ES errors`, async () => {

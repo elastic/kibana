@@ -30,7 +30,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ source_ip: '128.232.110.120', destination_ip: '192.168.1.1' }];
       await testBed.ingest(indexName, docs, processors);
@@ -54,7 +54,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         {
@@ -85,7 +85,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ source_ip: '128.232.110.120', destination_ip: '192.168.1.1' }];
       await testBed.ingest(indexName, docs, processors);
@@ -115,7 +115,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           { source_ip: '128.232.110.120', destination_ip: '192.168.1.1', event: { kind: 'test' } },
@@ -151,7 +151,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           { source_ip: '128.232.110.120', destination_ip: '192.168.1.1' },

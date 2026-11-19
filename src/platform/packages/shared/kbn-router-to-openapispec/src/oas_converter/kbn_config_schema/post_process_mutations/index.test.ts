@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { OpenAPIV3 } from 'openapi-types';
 import { schema } from '@kbn/config-schema';
 import { postProcessMutations } from '.';
 import { joi2JsonInternal } from '../parse';
@@ -35,6 +36,25 @@ describe('postProcessMutations', () => {
         },
       },
       required: ['foo'],
+    });
+  });
+
+  test('adds null to typed nullable enums that bypass processEnum', () => {
+    const parsed = {
+      type: 'integer',
+      enum: [1, 2, 3],
+      nullable: true,
+    } as OpenAPIV3.SchemaObject;
+
+    postProcessMutations({
+      ctx: createCtx(),
+      schema: parsed,
+    });
+
+    expect(parsed).toEqual({
+      type: 'integer',
+      enum: [1, 2, 3, null],
+      nullable: true,
     });
   });
 });

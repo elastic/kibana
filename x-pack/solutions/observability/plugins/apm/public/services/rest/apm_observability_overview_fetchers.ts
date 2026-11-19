@@ -6,7 +6,7 @@
  */
 
 import type { ApmFetchDataResponse, FetchDataParams } from '@kbn/observability-plugin/public';
-import { callApmApi } from './create_call_apm_api';
+import { getApmInternalServices } from '../../plugin';
 
 export const fetchObservabilityOverviewPageData = async ({
   absoluteTime,
@@ -14,6 +14,7 @@ export const fetchObservabilityOverviewPageData = async ({
   bucketSize,
   intervalString,
 }: FetchDataParams): Promise<ApmFetchDataResponse> => {
+  const { callApmApi } = getApmInternalServices();
   const data = await callApmApi('GET /internal/apm/observability_overview', {
     signal: null,
     params: {
@@ -49,6 +50,7 @@ export const fetchObservabilityOverviewPageData = async ({
 };
 
 export async function getHasData() {
+  const { callApmApi } = getApmInternalServices();
   return await callApmApi('GET /internal/apm/observability_overview/has_data', {
     signal: null,
   });

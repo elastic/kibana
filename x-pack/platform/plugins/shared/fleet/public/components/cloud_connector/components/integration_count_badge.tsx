@@ -116,7 +116,6 @@ export const IntegrationCountBadge: React.FC<IntegrationCountBadgeProps> = ({
   return (
     <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       <EuiToolTip
-        delay="long"
         position="top"
         content={
           isHovered ? <TooltipContent cloudConnectorId={cloudConnectorId} count={count} /> : null

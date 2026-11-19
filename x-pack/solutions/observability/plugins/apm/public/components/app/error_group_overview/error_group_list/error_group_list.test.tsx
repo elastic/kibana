@@ -11,7 +11,7 @@ import React from 'react';
 import * as stories from './error_group_list.stories';
 
 // Mock the usePerformanceContext hook
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   usePerformanceContext: () => ({
     onPageReady: jest.fn(),
   }),
@@ -21,6 +21,6 @@ const { Example } = composeStories(stories);
 
 describe('ErrorGroupList', () => {
   it('renders', () => {
-    expect(() => render(<Example />)).not.toThrowError();
+    expect(() => render(<Example />)).not.toThrow();
   });
 });

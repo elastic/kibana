@@ -50,18 +50,23 @@ export const getCasesFeatureV2 = (
         update: [observabilityFeatureId],
         push: [observabilityFeatureId],
         assign: [observabilityFeatureId],
+        manageTemplates: [observabilityFeatureId],
       },
       savedObject: {
         all: [...filesSavedObjectTypes],
         read: [...filesSavedObjectTypes],
       },
-      ui: [...casesCapabilities.all, ...casesCapabilities.assignCase],
+      ui: [
+        ...casesCapabilities.all,
+        ...casesCapabilities.assignCase,
+        ...casesCapabilities.manageTemplates,
+      ],
       replacedBy: {
         default: [{ feature: casesFeatureIdV3, privileges: ['all'] }],
         minimal: [
           {
             feature: casesFeatureIdV3,
-            privileges: ['minimal_all', 'cases_assign'],
+            privileges: ['minimal_all', 'cases_assign', 'cases_manage_templates'],
           },
         ],
       },
@@ -203,6 +208,37 @@ export const getCasesFeatureV2 = (
               },
               ui: casesCapabilities.reopenCase,
               replacedBy: [{ feature: casesFeatureIdV3, privileges: ['case_reopen'] }],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: i18n.translate('xpack.observability.features.manageTemplatesSubFeatureName', {
+        defaultMessage: 'Manage templates',
+      }),
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              id: 'cases_manage_templates',
+              name: i18n.translate(
+                'xpack.observability.features.manageTemplatesSubFeatureDetails',
+                {
+                  defaultMessage: 'Manage case templates',
+                }
+              ),
+              includeIn: 'all',
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              cases: {
+                manageTemplates: [observabilityFeatureId],
+              },
+              ui: casesCapabilities.manageTemplates,
+              replacedBy: [{ feature: casesFeatureIdV3, privileges: ['cases_manage_templates'] }],
             },
           ],
         },

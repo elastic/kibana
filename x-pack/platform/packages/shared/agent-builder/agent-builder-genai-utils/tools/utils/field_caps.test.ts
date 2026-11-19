@@ -9,7 +9,12 @@ import type {
   FieldCapsResponse,
   FieldCapsFieldCapability,
 } from '@elastic/elasticsearch/lib/api/types';
-import { processFieldCapsResponse, processFieldCapsResponsePerIndex } from './field_caps';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import {
+  fetchFieldCaps,
+  processFieldCapsResponse,
+  processFieldCapsResponsePerIndex,
+} from './field_caps';
 
 const caps = (
   source: { type: string } & Partial<FieldCapsFieldCapability>
@@ -20,6 +25,39 @@ const caps = (
     ...source,
   };
 };
+
+describe('fetchFieldCaps', () => {
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+
+  beforeEach(() => {
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.fieldCaps.mockResolvedValue({ indices: ['index_1'], fields: {} });
+  });
+
+  it('requests all fields for the given index', async () => {
+    await fetchFieldCaps({ index: 'index_1', esClient });
+
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'index_1', fields: ['*'] })
+    );
+  });
+
+  it('excludes frozen tier indices via index_filter by default', async () => {
+    await fetchFieldCaps({ index: 'index_1', esClient });
+
+    expect(esClient.fieldCaps.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        index_filter: { bool: { must_not: [{ term: { _tier: 'data_frozen' } }] } },
+      })
+    );
+  });
+
+  it('omits index_filter when frozen tier indices are included', async () => {
+    await fetchFieldCaps({ index: 'index_1', esClient, includeFrozen: true });
+
+    expect(esClient.fieldCaps.mock.calls[0][0]).not.toHaveProperty('index_filter');
+  });
+});
 
 describe('processFieldCapsResponse', () => {
   it('returns the corresponding index list', () => {
@@ -306,5 +344,102 @@ describe('processFieldCapsResponsePerIndex', () => {
 
     expect(result.index_a).toEqual([{ path: 'only_a', type: 'text', meta: {}, searchable: true }]);
     expect(result.index_b).toEqual([]);
+  });
+});
+
+describe('TSDB markers', () => {
+  it('processFieldCapsResponse extracts tsDimension', () => {
+    const response: FieldCapsResponse = {
+      indices: ['index_1'],
+      fields: {
+        'host.name': {
+          keyword: caps({ type: 'keyword', time_series_dimension: true }),
+        },
+      },
+    };
+
+    const processed = processFieldCapsResponse(response);
+
+    expect(processed.fields).toEqual([
+      {
+        path: 'host.name',
+        type: 'keyword',
+        meta: {},
+        searchable: true,
+        tsDimension: true,
+      },
+    ]);
+  });
+
+  it('processFieldCapsResponse extracts tsMetric', () => {
+    const response: FieldCapsResponse = {
+      indices: ['index_1'],
+      fields: {
+        'system.cpu.pct': {
+          float: caps({ type: 'float', time_series_metric: 'gauge' }),
+        },
+      },
+    };
+
+    const processed = processFieldCapsResponse(response);
+
+    expect(processed.fields).toEqual([
+      {
+        path: 'system.cpu.pct',
+        type: 'float',
+        meta: {},
+        searchable: true,
+        tsMetric: 'gauge',
+      },
+    ]);
+  });
+
+  it('processFieldCapsResponse drops tsMetric when it is null/undefined', () => {
+    const response: FieldCapsResponse = {
+      indices: ['index_1', 'index_2'],
+      fields: {
+        'mixed.metric': {
+          long: caps({
+            type: 'long',
+            // simulate a conflict — ES omits time_series_metric when indices disagree
+            metric_conflicts_indices: ['index_2'],
+          } as any),
+        },
+      },
+    };
+
+    const processed = processFieldCapsResponse(response);
+
+    expect(processed.fields[0]).not.toHaveProperty('tsMetric');
+  });
+
+  it('processFieldCapsResponsePerIndex extracts tsDimension and tsMetric per index', () => {
+    const response: FieldCapsResponse = {
+      indices: ['index_1', 'index_2'],
+      fields: {
+        'host.name': {
+          keyword: caps({
+            type: 'keyword',
+            time_series_dimension: true,
+            indices: ['index_1'],
+          }),
+        },
+        'system.cpu.pct': {
+          float: caps({
+            type: 'float',
+            time_series_metric: 'gauge',
+            indices: ['index_1'],
+          }),
+        },
+      },
+    };
+
+    const processed = processFieldCapsResponsePerIndex(response);
+
+    expect(processed.index_1).toEqual([
+      expect.objectContaining({ path: 'host.name', tsDimension: true }),
+      expect.objectContaining({ path: 'system.cpu.pct', tsMetric: 'gauge' }),
+    ]);
+    expect(processed.index_2).toEqual([]);
   });
 });

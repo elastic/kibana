@@ -27,7 +27,7 @@ export const isDataViewSelection = (dataView: string) => {
       .get('li')
       // @ts-ignore
       .filter((_, element) => element.textContent.includes(dataView))
-      .should('have.attr', 'aria-checked', 'true')
+      .should('have.attr', 'aria-selected', 'true')
   );
 };
 
@@ -43,7 +43,7 @@ export const selectDataView = (dataView: string) => {
 
   // wait for the main button to be updated, and wait for the popover to be closed
   cy.get(DATA_VIEW_PICKER).within(() => {
-    cy.get('button').should('have.text', dataView);
+    cy.get('button').find('[data-test-subj="fullText"]').should('have.text', dataView);
   });
   cy.get(DATA_VIEW_PICKER_POPOVER).should('not.exist');
 };

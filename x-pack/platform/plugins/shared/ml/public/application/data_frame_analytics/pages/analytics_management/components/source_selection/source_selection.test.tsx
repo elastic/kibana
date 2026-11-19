@@ -149,8 +149,9 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     await waitFor(() => screen.getByTestId('analyticsCreateSourceIndexModalCcsErrorCallOut'));
 
     // assert
+    // `announceOnMount` renders a duplicate SR-only copy of the title, so select the first (visible) match.
     expect(
-      screen.queryByText('Data views using cross-cluster search are not supported.')
+      screen.getAllByText('Data views using cross-cluster search are not supported.')[0]
     ).toBeInTheDocument();
     expect(mockNavigateToPath).toHaveBeenCalledTimes(0);
     expect(mockGetDataViewAndSavedSearchCallback).toHaveBeenCalledTimes(0);
@@ -203,13 +204,14 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     await waitFor(() => screen.getByTestId('analyticsCreateSourceIndexModalCcsErrorCallOut'));
 
     // assert
+    // `announceOnMount` renders duplicate SR-only copies of the title and body, so select the first (visible) match.
     expect(
-      screen.queryByText('Data views using cross-cluster search are not supported.')
+      screen.getAllByText('Data views using cross-cluster search are not supported.')[0]
     ).toBeInTheDocument();
     expect(
-      screen.queryByText(
+      screen.getAllByText(
         `The saved Discover session 'the-remote-saved-search-title' uses the data view 'my_remote_cluster:index-pattern-title'.`
-      )
+      )[0]
     ).toBeInTheDocument();
     expect(mockNavigateToPath).toHaveBeenCalledTimes(0);
   });

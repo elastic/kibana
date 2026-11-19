@@ -98,13 +98,13 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
       ).then(
         ({
           datasourceStates: newDatasourceStates,
-          visualizationState: newVizState,
+          visualizationState: newVisState,
           indexPatterns,
           indexPatternRefs,
         }) => {
           dispatchLens(
             setState({
-              visualization: { ...visualizationState, state: newVizState },
+              visualization: { ...visualizationState, state: newVisState },
               datasourceStates: Object.entries(newDatasourceStates).reduce(
                 (state, [datasourceId, datasourceState]) => ({
                   ...state,

@@ -6,6 +6,8 @@
  */
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { TextBasedDimensionEditorProps } from './dimension_editor';
 import { TextBasedDimensionEditor } from './dimension_editor';
 import type { FieldSelectProps } from './field_select';
@@ -23,10 +25,12 @@ jest.mock('./fetch_fields_from_esql_expression', () => ({
 }));
 
 let capturedOnChoose: FieldSelectProps['onChoose'] | undefined;
+let capturedSelectedField: FieldSelectProps['selectedField'];
 
 jest.mock('./field_select', () => ({
   FieldSelect: (props: FieldSelectProps) => {
     capturedOnChoose = props.onChoose;
+    capturedSelectedField = props.selectedField;
     return <div data-test-subj="text-based-dimension-field" />;
   },
 }));
@@ -43,7 +47,7 @@ const waitToLoad = async () =>
   });
 
 describe('TextBasedDimensionEditor', () => {
-  const defaultProps = {
+  const defaultProps: TextBasedDimensionEditorProps = {
     isFullscreen: false,
     columnId: 'dim1',
     layerId: 'layer1',
@@ -52,7 +56,6 @@ describe('TextBasedDimensionEditor', () => {
         layer1: {
           query: { esql: 'FROM my_data' },
           columns: [],
-          indexPatternRefs: [],
         },
       },
       indexPatternRefs: [],
@@ -60,19 +63,24 @@ describe('TextBasedDimensionEditor', () => {
     setState: jest.fn(),
     indexPatterns: {},
     dateRange: { fromDate: '2023-01-01', toDate: '2023-01-31' },
-    expressions: {},
+    expressions: {} as ExpressionsStart,
     esqlVariables: [
       {
         key: 'agent_keyword',
         value: 'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',
-        type: 'values',
+        type: ESQLVariableType.VALUES,
       },
     ],
     isMetricDimension: false,
     filterOperations: jest.fn(() => true),
-    core: { docLinks: {} },
+    core: {} as TextBasedDimensionEditorProps['core'],
     groupId: 'rows',
-  } as unknown as TextBasedDimensionEditorProps;
+    dimensionGroups: [],
+    toggleFullscreen: jest.fn(),
+    layerType: undefined,
+    supportStaticValue: false,
+    enableFormatSelector: true,
+  };
 
   const stateWithColumn = (overrides: Record<string, unknown> = {}) =>
     ({
@@ -97,6 +105,7 @@ describe('TextBasedDimensionEditor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedOnChoose = undefined;
+    capturedSelectedField = undefined;
 
     fetchFieldsFromESQLExpression.mockResolvedValue({
       columns: [
@@ -104,6 +113,39 @@ describe('TextBasedDimensionEditor', () => {
         { id: 'field2', name: 'Field Two', meta: { type: 'number' } },
       ],
     });
+  });
+
+  const StatefulEditor = (props: TextBasedDimensionEditorProps) => {
+    const [state, setState] = React.useState(props.state);
+    return <TextBasedDimensionEditor {...props} state={state} setState={setState} />;
+  };
+
+  it('starts reference dimensions with query field selection and no method switch', async () => {
+    render(<StatefulEditor {...defaultProps} enableFormatSelector={false} supportStaticValue />);
+    await waitToLoad();
+    expect(screen.getByTestId('text-based-dimension-field')).toBeInTheDocument();
+    expect(screen.queryByTestId('lns-indexPattern-static_value-input')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lens-dimensionTabs-esql')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lens-dimensionTabs-static_value')).not.toBeInTheDocument();
+  });
+
+  it('keeps query dimensions field-based even when static values are supported', async () => {
+    const setState = jest.fn();
+    render(
+      <TextBasedDimensionEditor
+        {...defaultProps}
+        state={stateWithColumn()}
+        enableFormatSelector={false}
+        supportStaticValue
+        setState={setState}
+        activeData={{ layer1: { type: 'datatable', columns: [], rows: [{ dim1: 42 }] } }}
+      />
+    );
+    await waitToLoad();
+    expect(capturedSelectedField?.fieldName).toBe('bytes');
+    expect(screen.queryByTestId('lns-indexPattern-static_value-input')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lens-dimensionTabs-static_value')).not.toBeInTheDocument();
+    expect(setState).not.toHaveBeenCalled();
   });
 
   it('renders correctly and fetches columns on mount', async () => {
@@ -115,13 +157,53 @@ describe('TextBasedDimensionEditor', () => {
         { esql: 'FROM my_data | limit 0' },
         {},
         { from: defaultProps.dateRange.fromDate, to: defaultProps.dateRange.toDate },
+        expect.any(AbortController),
         undefined,
-        undefined, // No index patterns
-        defaultProps.esqlVariables
+        defaultProps.esqlVariables,
+        undefined
       );
     });
 
     expect(screen.getByTestId('text-based-dimension-field')).toBeInTheDocument();
+  });
+
+  it('passes isApproximate to fetchFieldsFromESQLExpression', async () => {
+    render(<TextBasedDimensionEditor {...defaultProps} isApproximate={true} />);
+    await waitToLoad();
+
+    await waitFor(() => {
+      expect(fetchFieldsFromESQLExpression).toHaveBeenCalledWith(
+        { esql: 'FROM my_data | limit 0' },
+        {},
+        { from: defaultProps.dateRange.fromDate, to: defaultProps.dateRange.toDate },
+        expect.any(AbortController),
+        undefined,
+        defaultProps.esqlVariables,
+        true
+      );
+    });
+  });
+
+  it('does not refetch when the parent re-renders with a new indexPatterns reference for the same query', async () => {
+    const { rerender } = render(<TextBasedDimensionEditor {...defaultProps} />);
+    await waitToLoad();
+
+    // Simulate the parent rebuilding `indexPatterns` with the same content; only the
+    // extracted time field name is a dependency of the fetch, so no refetch should happen.
+    rerender(
+      <TextBasedDimensionEditor
+        {...defaultProps}
+        indexPatterns={{ ...defaultProps.indexPatterns }}
+      />
+    );
+    rerender(
+      <TextBasedDimensionEditor
+        {...defaultProps}
+        indexPatterns={{ ...defaultProps.indexPatterns }}
+      />
+    );
+
+    expect(fetchFieldsFromESQLExpression).toHaveBeenCalledTimes(1);
   });
 
   it('should set inMetricDimension when selecting a field in a metric dimension', async () => {
@@ -291,6 +373,19 @@ describe('TextBasedDimensionEditor', () => {
         <TextBasedDimensionEditor
           {...defaultProps}
           state={stateWithColumn({ meta: { type: 'string' } })}
+        />
+      );
+      await waitToLoad();
+
+      expect(screen.queryByTestId('format-selector')).not.toBeInTheDocument();
+    });
+
+    it('should hide FormatSelector when enableFormatSelector is set to false', async () => {
+      render(
+        <TextBasedDimensionEditor
+          {...defaultProps}
+          state={stateWithColumn({ meta: { type: 'number' } })}
+          enableFormatSelector={false}
         />
       );
       await waitToLoad();

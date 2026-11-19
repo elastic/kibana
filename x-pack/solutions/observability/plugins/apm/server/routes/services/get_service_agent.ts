@@ -8,6 +8,8 @@
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { ServiceAgentResponse } from '@kbn/apm-api-shared';
+import { getAgentName, isOpenTelemetryAgentName } from '@kbn/elastic-agent-utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   AGENT_NAME,
@@ -21,26 +23,19 @@ import {
   TELEMETRY_SDK_LANGUAGE,
 } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import type { ServerlessType } from '../../../common/serverless';
 import { getServerlessTypeFromCloudData } from '../../../common/serverless';
 import { maybe } from '../../../common/utils/maybe';
-
-export interface ServiceAgentResponse {
-  agentName?: string;
-  runtimeName?: string;
-  runtimeVersion?: string;
-  telemetrySdkName?: string;
-  telemetrySdkLanguage?: string;
-  serverlessType?: ServerlessType;
-}
+import { environmentQuery } from '../../../common/utils/environment_query';
 
 export async function getServiceAgent({
   serviceName,
+  environment,
   apmEventClient,
   start,
   end,
 }: {
   serviceName: string;
+  environment: string;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
@@ -57,7 +52,6 @@ export async function getServiceAgent({
   ] as const);
 
   const params = {
-    terminate_after: 1,
     apm: {
       events: [ProcessorEvent.error, ProcessorEvent.transaction, ProcessorEvent.metric],
     },
@@ -75,9 +69,15 @@ export async function getServiceAgent({
         filter: [
           { term: { [SERVICE_NAME]: serviceName } },
           ...rangeQuery(start, end),
+          ...environmentQuery(environment),
           {
-            exists: {
-              field: AGENT_NAME,
+            bool: {
+              should: [
+                { exists: { field: AGENT_NAME } },
+                { exists: { field: TELEMETRY_SDK_NAME } },
+                { exists: { field: TELEMETRY_SDK_LANGUAGE } },
+              ],
+              minimum_should_match: 1,
             },
           },
         ],
@@ -100,10 +100,13 @@ export async function getServiceAgent({
         ],
       },
     },
-    fields,
-    sort: {
-      _score: { order: 'desc' as const },
+    aggs: {
+      // The single sampled hit above is not guaranteed to expose `telemetry.sdk.*`, which select the ingestion path.
+      telemetrySdkName: { terms: { field: TELEMETRY_SDK_NAME } },
+      telemetrySdkLanguage: { terms: { field: TELEMETRY_SDK_LANGUAGE } },
     },
+    fields,
+    sort: { '@timestamp': { order: 'desc' as const }, _score: { order: 'desc' as const } },
   };
 
   const response = await apmEventClient.search('get_service_agent_name', params);
@@ -114,6 +117,24 @@ export async function getServiceAgent({
 
   const event = accessKnownApmEventFields(hit.fields);
 
+  // The aggregations may surface `telemetry.sdk.*` from other documents in the range. Combining them
+  // with a classic agent name would describe an ingestion path that doesn't exist (e.g. a native OTel
+  // dashboard key for a classic Java agent), so only fall back to them when the sampled document is
+  // not from a classic APM agent.
+  const hitAgentName = event[AGENT_NAME];
+  const canUseRangeAggregations = !hitAgentName || isOpenTelemetryAgentName(hitAgentName);
+
+  const telemetrySdkName =
+    event[TELEMETRY_SDK_NAME] ??
+    (canUseRangeAggregations
+      ? (response.aggregations?.telemetrySdkName.buckets[0]?.key as string | undefined)
+      : undefined);
+  const telemetrySdkLanguage =
+    event[TELEMETRY_SDK_LANGUAGE] ??
+    (canUseRangeAggregations
+      ? (response.aggregations?.telemetrySdkLanguage.buckets[0]?.key as string | undefined)
+      : undefined);
+
   const serverlessType = getServerlessTypeFromCloudData(
     event[CLOUD_PROVIDER],
     event[CLOUD_SERVICE_NAME]
@@ -123,10 +144,17 @@ export async function getServiceAgent({
     event[SERVICE_RUNTIME_VERSION] ??
     (hit.fields?.[PROCESS_RUNTIME_VERSION]?.[0] as string | undefined);
 
+  const agentName =
+    getAgentName(
+      event[AGENT_NAME] ?? null,
+      telemetrySdkLanguage ?? null,
+      telemetrySdkName ?? null
+    ) ?? undefined;
+
   return {
-    agentName: event[AGENT_NAME],
-    telemetrySdkName: event[TELEMETRY_SDK_NAME],
-    telemetrySdkLanguage: event[TELEMETRY_SDK_LANGUAGE],
+    agentName,
+    telemetrySdkName,
+    telemetrySdkLanguage,
     runtimeName: event[SERVICE_RUNTIME_NAME],
     runtimeVersion,
     serverlessType,

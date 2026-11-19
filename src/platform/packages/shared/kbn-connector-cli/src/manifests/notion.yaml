@@ -1,0 +1,14 @@
+spec_id: .notion
+name: "Notion (testing)"
+auth_type: oauth_authorization_code
+secrets:
+  authorizationUrl:
+    value: "https://api.notion.com/v1/oauth/authorize"
+  tokenUrl:
+    value: "https://api.notion.com/v1/oauth/token"
+  clientId:
+    vault: secret/ent-search-team/connectors-sources/notion
+    field: client_id
+  clientSecret:
+    vault: secret/ent-search-team/connectors-sources/notion
+    field: client_secret

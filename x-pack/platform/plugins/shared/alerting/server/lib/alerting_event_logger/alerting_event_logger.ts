@@ -19,10 +19,14 @@ import type {
   ConsumerExecutionMetrics,
   RuleExecutionStatus,
 } from '../../types';
-import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
+import {
+  createAlertEventLogRecordObject,
+  type Event,
+} from '../create_alert_event_log_record_object';
 import type { RuleRunMetrics } from '../rule_run_metrics_store';
 import { Gap } from '../rule_gaps/gap';
 import type { GapBase } from '../../application/gaps/types';
+import type { GapReason } from '../../../common/constants';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -34,6 +38,7 @@ export interface RuleContext {
   consumer?: string;
   name?: string;
   revision?: number;
+  tags?: string[];
 }
 export interface ContextOpts {
   savedObjectId: string;
@@ -225,6 +230,7 @@ export class AlertingEventLogger {
     consumer,
     type,
     revision,
+    tags,
   }: {
     name?: string;
     id?: string;
@@ -232,6 +238,7 @@ export class AlertingEventLogger {
     consumer?: string;
     revision?: number;
     type?: UntypedNormalizedRuleType;
+    tags?: string[];
   }) {
     if (!this.isInitialized) {
       throw new Error(`AlertingEventLogger not initialized`);
@@ -261,6 +268,10 @@ export class AlertingEventLogger {
       this.ruleData.revision = revision;
     }
 
+    if (tags) {
+      this.ruleData.tags = tags;
+    }
+
     let updatedRelatedSavedObjects = false;
     if (id && type) {
       // add this to saved objects array if it doesn't already exists
@@ -281,6 +292,7 @@ export class AlertingEventLogger {
       ruleId: id,
       ruleUuid,
       ruleType: type,
+      ruleTags: tags,
       consumer,
       revision,
       savedObjects: updatedRelatedSavedObjects ? this.relatedSavedObjects : undefined,
@@ -416,11 +428,13 @@ export class AlertingEventLogger {
 
   public reportGap({
     gap,
+    reason,
   }: {
     gap: {
       lte: string;
       gte: string;
     };
+    reason?: GapReason;
   }): void {
     if (!this.isInitialized || !this.context || !this.ruleData) {
       throw new Error('AlertingEventLogger not initialized');
@@ -429,6 +443,7 @@ export class AlertingEventLogger {
     const gapToReport = new Gap({
       ruleId: this.ruleData.id,
       range: gap,
+      reason,
     });
 
     this.logEventWithFixedUuid(
@@ -468,7 +483,7 @@ export function createAlertRecord(
   ruleData: RuleContext,
   savedObjects: SavedObjects[],
   alert: AlertOpts
-) {
+): Event {
   return createAlertEventLogRecordObject({
     ruleId: ruleData.id,
     ruleType: ruleData.type,
@@ -487,6 +502,7 @@ export function createAlertRecord(
     flapping: alert.flapping,
     maintenanceWindowIds: alert.maintenanceWindowIds,
     ruleRevision: ruleData.revision,
+    ruleTags: ruleData.tags,
   });
 }
 
@@ -495,7 +511,7 @@ export function createActionExecuteRecord(
   ruleData: RuleContext,
   savedObjects: SavedObjects[],
   action: ActionOpts
-) {
+): Event {
   return createAlertEventLogRecordObject({
     ruleId: ruleData.id,
     ruleType: ruleData.type,
@@ -518,6 +534,7 @@ export function createActionExecuteRecord(
     ruleName: ruleData.name,
     alertSummary: action.alertSummary,
     ruleRevision: ruleData.revision,
+    ruleTags: ruleData.tags,
   });
 }
 
@@ -526,7 +543,7 @@ export function createExecuteTimeoutRecord(
   savedObjects: SavedObjects[],
   type: ExecutionType,
   ruleData?: RuleContext
-) {
+): Event {
   let message = '';
   switch (type) {
     case executionType.BACKFILL:
@@ -551,6 +568,7 @@ export function createExecuteTimeoutRecord(
     savedObjects,
     ruleName: ruleData?.name,
     ruleRevision: ruleData?.revision,
+    ruleTags: ruleData?.tags,
   });
 }
 
@@ -564,8 +582,9 @@ export function createGapRecord(
       gte: string;
       lte: string;
     };
+    reason?: GapReason;
   }
-) {
+): Event {
   return createAlertEventLogRecordObject({
     ruleId: ruleData?.id,
     ruleType: ruleData?.type,
@@ -577,6 +596,7 @@ export function createGapRecord(
     savedObjects,
     ruleName: ruleData?.name,
     ruleRevision: ruleData?.revision,
+    ruleTags: ruleData?.tags,
     gap,
   });
 }
@@ -585,12 +605,13 @@ export function initializeExecuteRecord(
   context: Context,
   ruleData: RuleContext,
   so: SavedObjects[]
-) {
+): Event {
   return createAlertEventLogRecordObject({
     ruleId: ruleData.id,
     ruleType: ruleData.type,
     consumer: ruleData.consumer,
     ruleRevision: ruleData.revision,
+    ruleTags: ruleData.tags,
     namespace: context.namespace,
     spaceId: context.spaceId,
     executionId: context.executionId,
@@ -603,7 +624,7 @@ export function initializeExecuteRecord(
   });
 }
 
-export function initializeExecuteBackfillRecord(context: Context, so: SavedObjects[]) {
+export function initializeExecuteBackfillRecord(context: Context, so: SavedObjects[]): Event {
   return createAlertEventLogRecordObject({
     namespace: context.namespace,
     spaceId: context.spaceId,
@@ -635,6 +656,7 @@ interface UpdateRuleOpts {
   ruleName?: string;
   ruleId?: string;
   ruleUuid?: string;
+  ruleTags?: string[];
   consumer?: string;
   ruleType?: UntypedNormalizedRuleType;
   revision?: number;
@@ -642,7 +664,7 @@ interface UpdateRuleOpts {
 }
 
 export function updateEventWithRuleData(event: IEvent, opts: UpdateRuleOpts) {
-  const { ruleName, ruleId, ruleUuid, consumer, ruleType, revision, savedObjects } = opts;
+  const { ruleName, ruleId, ruleUuid, consumer, ruleType, revision, ruleTags, savedObjects } = opts;
   if (!event) {
     throw new Error('Cannot update event because it is not initialized.');
   }
@@ -666,6 +688,10 @@ export function updateEventWithRuleData(event: IEvent, opts: UpdateRuleOpts) {
       ...event.rule,
       uuid: ruleUuid,
     };
+  }
+
+  if (ruleTags && ruleTags.length > 0) {
+    event.tags = ruleTags;
   }
 
   if (consumer) {
@@ -796,6 +822,7 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
   if (consumerMetrics) {
     set(event, 'kibana.alert.rule.execution.metrics', {
       ...event.kibana?.alert?.rule?.execution?.metrics,
+      matched_indices_count: consumerMetrics.matched_indices_count,
       alerts_candidate_count: consumerMetrics.alerts_candidate_count,
       alerts_suppressed_count: consumerMetrics.alerts_suppressed_count,
       frozen_indices_queried_count: consumerMetrics.frozen_indices_queried_count,

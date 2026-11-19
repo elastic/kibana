@@ -8,16 +8,16 @@
 import React, { useState } from 'react';
 import {
   type CommonProps,
+  EuiBeacon,
+  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiToolTip,
-  useEuiTheme,
   EuiNotificationBadge,
-  EuiButton,
+  EuiToolTip,
   EuiTourStep,
-  EuiBeacon,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -54,7 +54,7 @@ const toggleSearchBarTooltip = i18n.translate(
 const investigateInTimelineTooltip = i18n.translate(
   'securitySolutionPackages.csp.graph.controls.investigateInTimeline.tooltip',
   {
-    defaultMessage: 'Investigate in timeline',
+    defaultMessage: 'Investigate in Timeline',
   }
 );
 
@@ -84,6 +84,9 @@ export interface ActionsProps extends CommonProps {
    */
   onInvestigateInTimeline?: () => void;
 
+  /** Whether the origin event filters are unavailable. */
+  investigateInTimelineDisabled?: boolean;
+
   /**
    * Whether search is toggled or not. Defaults value is false.
    */
@@ -100,6 +103,7 @@ export const Actions = ({
   showToggleSearch = true,
   showInvestigateInTimeline = true,
   onInvestigateInTimeline,
+  investigateInTimelineDisabled = false,
   onSearchToggle,
   searchFilterCounter = 0,
   searchToggled,
@@ -232,6 +236,7 @@ export const Actions = ({
           >
             <EuiButtonIcon
               iconType="timeline"
+              isDisabled={investigateInTimelineDisabled}
               display="base"
               size="m"
               aria-label={investigateInTimelineTooltip}

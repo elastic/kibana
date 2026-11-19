@@ -25,6 +25,7 @@ import {
 import { login } from '../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { openAppMenuOverflow } from '../../../../tasks/app_menu';
 
 // TODO: https://github.com/elastic/kibana/issues/164451 We should find a way to make this spec work in Serverless
 // TODO: https://github.com/elastic/kibana/issues/161540
@@ -41,18 +42,17 @@ describe('All rules - read only', { tags: ['@ess', '@serverless', '@skipInServer
     cy.get(RULE_NAME).should('have.text', getCustomQueryRuleParams().name);
   });
 
-  it('Does not display select boxes for rules', () => {
-    cy.get(RULE_CHECKBOX).should('not.exist');
+  it('Does display select boxes for rules', () => {
+    cy.get(RULE_CHECKBOX).should('exist');
   });
 
   it('Disables value lists upload', () => {
+    openAppMenuOverflow();
     cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('be.disabled');
   });
 
   it('Does not display action options', () => {
-    // These are the 3 dots at the end of the row that opens up
-    // options to take action on the rule
-    cy.get(COLLAPSED_ACTION_BTN).should('not.exist');
+    cy.get(COLLAPSED_ACTION_BTN).should('exist');
   });
 
   it('Displays missing privileges primary callout', () => {

@@ -7,98 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { VISUALIZATION_COLORS } from '@elastic/eui';
 import chroma from 'chroma-js';
 
-import type { UserProfileAvatarData, UserProfileData } from './types';
+import type { UserProfileData, UserProfileUserInfo } from '@kbn/core-user-profile-common';
 
-/**
- * IMPORTANT:
- *
- * The types in this file have been imported from
- * `x-pack/platform/plugins/shared/security/common/model/user_profile.ts`
- *
- * When making changes please ensure to keep both files in sync.
- */
-
-/**
- * Describes basic properties stored in user profile.
- */
-export interface UserProfile<D extends UserProfileData = UserProfileData> {
-  /**
-   * Unique ID for of the user profile.
-   */
-  uid: string;
-
-  /**
-   * Indicates whether user profile is enabled or not.
-   */
-  enabled: boolean;
-
-  /**
-   * Information about the user that owns profile.
-   */
-  user: UserProfileUserInfo;
-
-  /**
-   * User specific data associated with the profile.
-   */
-  data: Partial<D>;
-}
-
-/**
- * Basic user information returned in user profile.
- */
-export interface UserProfileUserInfo {
-  /**
-   * Username of the user.
-   */
-  username: string;
-  /**
-   * Optional email of the user.
-   */
-  email?: string;
-  /**
-   * Optional full name of the user.
-   */
-  full_name?: string;
-}
+import type { UserProfileAvatarData } from './types';
 
 export const USER_AVATAR_FALLBACK_CODE_POINT = 97; // code point for lowercase "a"
 export const USER_AVATAR_MAX_INITIALS = 2;
+
+/**
+ * Size cap for avatar initials in UTF-16 code units. A single grapheme can carry any number of combining
+ * marks, so the grapheme limit alone does not bound the input.
+ */
+export const USER_AVATAR_MAX_INITIALS_CODE_UNITS = 64;
+
+const graphemeSegmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+
+const getGraphemes = (value: string): string[] =>
+  Array.from(graphemeSegmenter.segment(value), ({ segment }) => segment);
+
+/**
+ * Checks that avatar initials are at most {@link USER_AVATAR_MAX_INITIALS} graphemes (user-perceived characters).
+ */
+export function isValidUserProfileAvatarInitials(initials: string): boolean {
+  return (
+    initials.length <= USER_AVATAR_MAX_INITIALS_CODE_UNITS &&
+    getGraphemes(initials).length <= USER_AVATAR_MAX_INITIALS
+  );
+}
 
 /**
  * Validates if the provided color string is a valid hex color.
  * @param color - The color to validate.
  * @returns True if the color is a valid hex color, false otherwise.
  */
-export function isValidUserProfileAvatarColor(color?: string) {
+export function isValidUserProfileAvatarColor(
+  color?: NonNullable<UserProfileData['avatar']>['color']
+): color is string {
   if (!color || typeof color !== 'string') {
     return false;
   }
   return color != null && color !== '' && /^#/.test(color) && chroma.valid(color);
-}
-
-/**
- * Determines the color for the provided user profile.
- * If a color is present on the user profile itself, then that is used.
- * Otherwise, a color is provided from EUI's Visualization Colors based on the display name.
- *
- * @param {UserProfileUserInfo} user User info
- * @param {UserProfileAvatarData} avatar User avatar
- */
-export function getUserAvatarColor(
-  user: Pick<UserProfileUserInfo, 'username' | 'full_name'>,
-  avatar?: UserProfileAvatarData
-) {
-  const firstCodePoint = getUserDisplayName(user).codePointAt(0) || USER_AVATAR_FALLBACK_CODE_POINT;
-  const avatarColor = avatar?.color;
-  const isValidColor = isValidUserProfileAvatarColor(avatarColor);
-  if (isValidColor) {
-    return avatarColor;
-  }
-
-  return VISUALIZATION_COLORS[firstCodePoint % VISUALIZATION_COLORS.length];
 }
 
 /**
@@ -122,7 +72,7 @@ export function getUserAvatarInitials(
 
   words.splice(numInitials, words.length);
 
-  return words.map((word) => word.substring(0, 1)).join('');
+  return words.map((word) => graphemeSegmenter.segment(word).containing(0)?.segment ?? '').join('');
 }
 
 /**

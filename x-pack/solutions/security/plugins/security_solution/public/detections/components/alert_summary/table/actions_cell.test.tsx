@@ -10,7 +10,6 @@ import { render } from '@testing-library/react';
 import type { Alert } from '@kbn/alerting-types';
 import { ActionsCell } from './actions_cell';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { MORE_ACTIONS_BUTTON_TEST_ID } from './more_actions_row_control_column';
 import { useAddToCaseActions } from '../../alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertTagsActions } from '../../alerts_table/timeline_actions/use_alert_tags_actions';
@@ -37,12 +36,8 @@ describe('ActionsCell', () => {
       _id: '_id',
       _index: '_index',
     };
-    const ecsAlert: Ecs = {
-      _id: '_id',
-      _index: '_index',
-    };
 
-    const { getByTestId } = render(<ActionsCell alert={alert} ecsAlert={ecsAlert} />);
+    const { getByTestId } = render(<ActionsCell alert={alert} />);
 
     expect(getByTestId(ROW_ACTION_FLYOUT_ICON_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(MORE_ACTIONS_BUTTON_TEST_ID)).toBeInTheDocument();

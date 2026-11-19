@@ -24,13 +24,19 @@ interface RunInvalidateOpts {
   invalidateApiKeyFn?: ApiKeyInvalidationFn;
   invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
   logger: Logger;
+  missingApiKeyRetries?: Record<string, number>;
   removalDelay: string;
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectType: string;
   savedObjectTypesToQuery: SavedObjectTypesToQuery[];
 }
 
-export async function runInvalidate(opts: RunInvalidateOpts) {
+export interface RunInvalidateResult {
+  totalInvalidated: number;
+  missingApiKeyRetries: Record<string, number>;
+}
+
+export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalidateResult> {
   const {
     encryptedSavedObjectsClient,
     invalidateApiKeyFn,
@@ -42,12 +48,12 @@ export async function runInvalidate(opts: RunInvalidateOpts) {
   } = opts;
 
   let hasMoreApiKeysPendingInvalidation = true;
+  let missingApiKeyRetries = opts.missingApiKeyRetries ?? {};
   let totalInvalidated = 0;
+
   const excludedSOIds = new Set<string>();
 
   do {
-    // Query for PAGE_SIZE api keys to invalidate at a time. At the end of each iteration,
-    // we should have deleted the deletable keys and added keys still in use to the excluded list
     const filter = getFindFilter({
       removalDelay,
       excludedSOIds: [...excludedSOIds],
@@ -73,19 +79,22 @@ export async function runInvalidate(opts: RunInvalidateOpts) {
         });
       apiKeyIdsToExclude.forEach(({ id }) => excludedSOIds.add(id));
 
-      totalInvalidated += await invalidateApiKeysAndDeletePendingApiKeySavedObject({
+      const result = await invalidateApiKeysAndDeletePendingApiKeySavedObject({
         apiKeyIdsToInvalidate,
         uiamApiKeysToInvalidate,
         invalidateApiKeyFn,
         invalidateUiamApiKeyFn,
         logger,
+        missingApiKeyRetries,
         savedObjectsClient,
         savedObjectType,
       });
+      totalInvalidated += result.totalInvalidated;
+      missingApiKeyRetries = result.missingApiKeyRetries;
     }
 
     hasMoreApiKeysPendingInvalidation = apiKeysToInvalidate.total > PAGE_SIZE;
   } while (hasMoreApiKeysPendingInvalidation);
 
-  return totalInvalidated;
+  return { totalInvalidated, missingApiKeyRetries };
 }

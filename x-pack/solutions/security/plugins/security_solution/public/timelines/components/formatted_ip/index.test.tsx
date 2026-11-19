@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -12,43 +13,52 @@ import { FormattedIp } from '.';
 import { TestProviders } from '../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
-import { NetworkPanelKey } from '../../../flyout/network_details';
-import { createExpandableFlyoutApiMock } from '../../../common/mock/expandable_flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../flyout_v2/use_flyout_api.mock';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 
-jest.mock('react-redux', () => {
-  const origin = jest.requireActual('react-redux');
+jest.mock('../../../flyout_v2/use_flyout_api');
+
+jest.mock('react-redux-v7', () => {
+  const origin = jest.requireActual('react-redux-v7');
   return {
     ...origin,
     useDispatch: jest.fn().mockReturnValue(jest.fn()),
   };
 });
 
-jest.mock('../../../common/lib/kibana/kibana_react', () => {
-  return {
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        application: {
-          getUrlForApp: jest.fn(),
-          navigateToApp: jest.fn(),
-        },
+jest.mock('../../../common/lib/kibana/kibana_react', () => ({
+  ...jest.requireActual('../../../common/lib/kibana/kibana_react'),
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      application: {
+        getUrlForApp: jest.fn(),
+        navigateToApp: jest.fn(),
       },
-    }),
-  };
-});
+    },
+  }),
+}));
 
 jest.mock('../../store');
 
-const mockOpenFlyout = jest.fn();
-jest.mock('@kbn/expandable-flyout');
+const mockOpenFlyoutLink = jest.fn();
+jest.mock('../../../flyout_v2/shared/components/open_flyout_link', () => ({
+  OpenFlyoutLink: (props: { value: string; 'data-test-subj'?: string }) => {
+    mockOpenFlyoutLink(props);
+    return <span data-test-subj={props['data-test-subj']}>{props.value}</span>;
+  },
+}));
 
 describe('FormattedIp', () => {
+  let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
+
   beforeEach(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
-      ...createExpandableFlyoutApiMock(),
-      openFlyout: mockOpenFlyout,
-    });
+    jest.clearAllMocks();
+    flyoutApi = createFlyoutApiMock();
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
   });
+
   const props = {
     value: '192.168.1.1',
     contextId: 'test-context-id',
@@ -66,33 +76,35 @@ describe('FormattedIp', () => {
     );
 
     expect(screen.getByText(props.value)).toBeInTheDocument();
+    expect(mockOpenFlyoutLink).toHaveBeenCalledWith(
+      expect.objectContaining({ field: props.fieldName, value: props.value, asParent: true })
+    );
   });
 
-  test('if enableIpDetailsFlyout, should open NetworkDetails expandable flyout', async () => {
+  describe('button variant (Component prop set)', () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
       timelineID: TimelineId.active,
       tabType: TimelineTabs.query,
     };
-    render(
-      <TestProviders>
-        <StatefulEventContext.Provider value={context}>
-          <FormattedIp {...props} />
-        </StatefulEventContext.Provider>
-      </TestProviders>
-    );
 
-    await userEvent.click(screen.getByTestId('network-details'));
-    expect(mockOpenFlyout).toHaveBeenCalledWith({
-      right: {
-        id: NetworkPanelKey,
-        params: {
-          ip: props.value,
-          flowTarget: 'source',
-          scopeId: TimelineId.active,
-        },
-      },
+    test('should open the network flyout', async () => {
+      render(
+        <TestProviders>
+          <StatefulEventContext.Provider value={context}>
+            <FormattedIp {...props} Component={EuiButtonEmpty} isButton />
+          </StatefulEventContext.Provider>
+        </TestProviders>
+      );
+
+      await userEvent.click(screen.getByTestId('data-grid-network-details'));
+
+      expect(flyoutApi.openNetworkFlyout).toHaveBeenCalledWith({
+        ip: props.value,
+        flowTarget: FlowTargetSourceDest.source,
+        origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
+      });
     });
   });
 });

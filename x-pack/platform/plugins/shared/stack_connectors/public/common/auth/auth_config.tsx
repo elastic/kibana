@@ -38,11 +38,14 @@ import { SSLCertFields } from './ssl_cert_fields';
 import { BasicAuthFields } from './basic_auth_fields';
 import { HeaderFields } from './header_fields';
 import { OAuth2Fields } from './oauth2_fields';
+import { OAuth2PasswordFields } from './oauth2_password_fields';
 import * as i18n from './translations';
 
 interface Props {
   readOnly: boolean;
+  isEdit?: boolean;
   isOAuth2Enabled?: boolean;
+  isOAuth2PasswordEnabled?: boolean;
   isPfxEnabled?: boolean;
 }
 
@@ -58,8 +61,10 @@ const VERIFICATION_MODE_DEFAULT = 'full';
 
 export const AuthConfig: FunctionComponent<Props> = ({
   readOnly,
+  isEdit = false,
   isPfxEnabled = true,
   isOAuth2Enabled = false,
+  isOAuth2PasswordEnabled = false,
 }) => {
   const isModified = useFormIsModified();
   const { setFieldValue, getFieldDefaultValue, getFormData, updateFieldValues } = useFormContext();
@@ -78,7 +83,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
     data: secretHeaderKeys = [],
     isLoading: isLoadingHeaders,
     isFetching: isFetchingHeaders,
-  } = useSecretHeaders(connectorId);
+  } = useSecretHeaders(connectorId, isEdit);
 
   const loadingHeaders = isLoadingHeaders || isFetchingHeaders;
   const authType = config == null ? AuthType.Basic : config.authType;
@@ -182,6 +187,14 @@ export const AuthConfig: FunctionComponent<Props> = ({
         <OAuth2Fields readOnly={readOnly} />
       ),
       'data-test-subj': 'authOAuth2',
+    },
+    (isOAuth2PasswordEnabled || authType === AuthType.OAuth2Password) && {
+      value: AuthType.OAuth2Password,
+      label: i18n.AUTHENTICATION_OAUTH2_PASSWORD,
+      children: authType === AuthType.OAuth2Password && (
+        <OAuth2PasswordFields readOnly={readOnly} />
+      ),
+      'data-test-subj': 'authOAuth2Password',
     },
   ].filter(Boolean);
 

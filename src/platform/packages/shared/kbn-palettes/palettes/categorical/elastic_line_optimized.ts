@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@elastic/eui-theme-common';
 import { KbnPalette } from '../../constants';
 import { KbnColorFnPalette } from '../../classes/color_fn_palette';
 
@@ -64,9 +64,10 @@ export const elasticLineOptimizedPalette = new KbnColorFnPalette({
   name: i18n.translate('palettes.elasticLineOptimized.name', {
     defaultMessage: 'Elastic (line optimized)',
   }),
-  colorFn: (n) =>
-    reorderDarkFirst(swapColorPairs(euiPaletteColorBlind({ rotations: Math.ceil(n / 10) }))).slice(
-      0,
-      n
-    ),
+  colorFn: (n) => {
+    const base = reorderDarkFirst(swapColorPairs(euiPaletteColorBlind()));
+    // Repeat the base 10 colors without lightening on each rotation. In lines, lighter tones contrast is too low
+    // + differences between rotations are hard to perceive.
+    return Array.from({ length: n }, (_, i) => base[i % base.length]);
+  },
 });

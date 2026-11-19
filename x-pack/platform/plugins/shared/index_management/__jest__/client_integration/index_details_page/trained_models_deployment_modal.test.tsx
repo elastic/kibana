@@ -21,12 +21,6 @@ import {
   setErrorsInTrainedModelDeployment,
 } from './trained_models_deployment_modal.helpers';
 
-jest.mock('../../../public/hooks/use_ml_model_status_toasts', () => ({
-  useMLModelNotificationToasts: jest.fn().mockReturnValue({
-    showErrorToasts: jest.fn(),
-  }),
-}));
-
 jest.mock('../../../public/application/app_context', () => ({
   useAppContext: jest.fn().mockReturnValue({
     url: undefined,

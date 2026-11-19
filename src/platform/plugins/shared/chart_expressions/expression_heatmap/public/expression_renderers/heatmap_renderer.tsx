@@ -140,6 +140,7 @@ export const heatmapRenderer: (
             syncTooltips={config.syncTooltips}
             syncCursor={config.syncCursor}
             onClickMultiValue={onClickMultiValue}
+            uiSettings={getUISettings()}
           />
         </div>
       </KibanaRenderContextProvider>,

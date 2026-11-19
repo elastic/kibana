@@ -5,10 +5,14 @@
  * 2.0.
  */
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import {
+  getViewModeSubject,
+  initializeStateApi,
+  type ViewMode,
+} from '@kbn/presentation-publishing';
 import {
   fetch$,
   initializeStateManager,
@@ -29,6 +33,7 @@ import {
 import { SloErrorBudget } from './error_budget_burn_down';
 import type { ErrorBudgetApi, ErrorBudgetEmbeddableState } from './types';
 import type { ErrorBudgetCustomState } from '../../../../common/embeddables/error_budget/types';
+import { ensureLicense } from '../ensure_license';
 
 const getErrorBudgetPanelTitle = () =>
   i18n.translate('xpack.slo.errorBudgetEmbeddable.title', {
@@ -44,7 +49,7 @@ export const getErrorBudgetEmbeddableFactory = ({
   pluginsStart: SLOPublicPluginsStart;
   sloClient: SLORepositoryClient;
 }) => {
-  const factory: EmbeddableFactory<ErrorBudgetEmbeddableState, ErrorBudgetApi> = {
+  const factory: EmbeddablePublicDefinition<ErrorBudgetEmbeddableState, ErrorBudgetApi> = {
     type: SLO_ERROR_BUDGET_ID,
     buildEmbeddable: async ({
       initializeDrilldownsManager,
@@ -53,8 +58,9 @@ export const getErrorBudgetEmbeddableFactory = ({
       uuid,
       parentApi,
     }) => {
+      await ensureLicense(pluginsStart.licensing);
       const deps = { ...coreStart, ...pluginsStart };
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
       const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getErrorBudgetPanelTitle());
       const sloErrorBudgetManager = initializeStateManager<ErrorBudgetCustomState>(initialState, {
@@ -63,18 +69,14 @@ export const getErrorBudgetEmbeddableFactory = ({
       });
       const reload$ = new Subject<boolean>();
 
-      function serializeState() {
-        return {
+      const stateApi = initializeStateApi<ErrorBudgetEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           ...drilldownsManager.getLatestState(),
           ...sloErrorBudgetManager.getLatestState(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           drilldownsManager.anyStateChange$,
           titleManager.anyStateChange$,
@@ -86,20 +88,19 @@ export const getErrorBudgetEmbeddableFactory = ({
           slo_id: 'referenceEquality',
           slo_instance_id: 'referenceEquality',
         }),
-        onReset: (lastState) => {
-          drilldownsManager.reinitializeState(lastState ?? {});
-          sloErrorBudgetManager.reinitializeState(lastState);
-          titleManager.reinitializeState(lastState);
+        applySerializedState: (nextState) => {
+          drilldownsManager.reinitializeState(nextState);
+          sloErrorBudgetManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...unsavedChangesApi,
+        ...stateApi,
         ...drilldownsManager.api,
         defaultTitle$,
         supportedTriggers: () => SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS,
-        serializeState,
       });
 
       const fetchSubscription = fetch$(api)
@@ -108,12 +109,15 @@ export const getErrorBudgetEmbeddableFactory = ({
           reload$.next(next.isReload);
         });
 
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
       return {
         api,
         Component: () => {
-          const [sloId, sloInstanceId] = useBatchedPublishingSubjects(
+          const [sloId, sloInstanceId, viewMode] = useBatchedPublishingSubjects(
             sloErrorBudgetManager.api.sloId$,
-            sloErrorBudgetManager.api.sloInstanceId$
+            sloErrorBudgetManager.api.sloInstanceId$,
+            viewMode$
           );
 
           useEffect(() => {
@@ -141,6 +145,7 @@ export const getErrorBudgetEmbeddableFactory = ({
                     sloId={sloId}
                     sloInstanceId={sloInstanceId}
                     reloadSubject={reload$}
+                    isInteractive={viewMode !== 'non-interactive'}
                   />
                 </QueryClientProvider>
               </PluginContext.Provider>

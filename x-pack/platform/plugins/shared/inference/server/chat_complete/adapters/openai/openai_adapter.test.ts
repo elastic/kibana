@@ -17,7 +17,9 @@ import {
   ChatCompletionEventType,
   isChatCompletionChunkEvent,
   MessageRole,
+  InferenceConnectorType,
 } from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { openAIAdapter } from './openai_adapter';
@@ -83,9 +85,19 @@ describe('openAIAdapter', () => {
   };
 
   const logger = loggerMock.create();
+  const connector: InferenceConnector = {
+    type: InferenceConnectorType.OpenAI,
+    name: 'OpenAI connector',
+    connectorId: 'test-connector-id',
+    config: {},
+    capabilities: {},
+    isInferenceEndpoint: false,
+    isPreconfigured: false,
+  };
 
   beforeEach(() => {
     executorMock.invoke.mockReset();
+    executorMock.getConnector.mockReset().mockReturnValue(connector);
     isNativeFunctionCallingSupportedMock.mockReset().mockReturnValue(true);
 
     executorMock.invoke.mockImplementation(async () => {
@@ -106,6 +118,10 @@ describe('openAIAdapter', () => {
     const params = executorMock.invoke.mock.calls[0][0].subActionParams as Record<string, any>;
 
     return { stream: params.stream, body: JSON.parse(params.body) };
+  }
+
+  function getSubActionParams() {
+    return executorMock.invoke.mock.calls[0][0].subActionParams as Record<string, unknown>;
   }
 
   describe('when creating the request', () => {
@@ -149,6 +165,68 @@ describe('openAIAdapter', () => {
           role: 'user',
         },
       ]);
+    });
+
+    it('passes maxContentLength for buffered requests', () => {
+      openAIAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: false,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(getSubActionParams()).toEqual(
+        expect.objectContaining({
+          stream: false,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+      );
+    });
+
+    it('passes maxContentLength for streaming requests', () => {
+      // Streaming responses are still subject to the connector's axios `maxContentLength`
+      // (enforced while the response stream is consumed), so the override must be forwarded
+      // for streaming requests too — otherwise large streamed completions fail at the 1MB default.
+      openAIAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: true,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(getSubActionParams()).toEqual(
+        expect.objectContaining({
+          stream: true,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+      );
+    });
+
+    it('forwards only connector-supported telemetry metadata', () => {
+      openAIAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          metadata: {
+            connectorTelemetry: {
+              pluginId: 'feature',
+              aggregateBy: 'parent',
+              productSolution: 'solution',
+              productFeature: 'product-feature',
+              interactionId: 'interaction-1',
+            },
+          },
+        })
+        .subscribe(noop);
+
+      expect(getSubActionParams().telemetryMetadata).toEqual({
+        pluginId: 'feature',
+        aggregateBy: 'parent',
+      });
     });
 
     it('correctly formats messages with content parts', () => {
@@ -218,19 +296,72 @@ describe('openAIAdapter', () => {
             {
               type: 'image_url',
               image_url: {
-                url: 'aaaaaa',
+                url: 'data:image/png;base64,aaaaaa',
               },
             },
             {
               type: 'image_url',
               image_url: {
-                url: 'bbbbbb',
+                url: 'data:image/png;base64,bbbbbb',
               },
             },
           ],
           role: 'user',
         },
       ]);
+    });
+
+    it('injects a dummy tool when history has tool use and tools are omitted', () => {
+      openAIAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: 'answer',
+              toolCalls: [
+                {
+                  function: {
+                    name: 'my_function',
+                    arguments: {
+                      foo: 'bar',
+                    },
+                  },
+                  toolCallId: '0',
+                },
+              ],
+            },
+            {
+              name: 'my_function',
+              role: MessageRole.Tool,
+              toolCallId: '0',
+              response: {
+                bar: 'foo',
+              },
+            },
+          ],
+        })
+        .subscribe(noop);
+
+      expect(pick(getRequest().body, 'tools')).toEqual({
+        tools: [
+          {
+            type: 'function',
+            function: {
+              name: 'doNotCallThisTool',
+              description: 'Do not call this tool, it is strictly forbidden',
+              parameters: {
+                type: 'object',
+                properties: {},
+              },
+            },
+          },
+        ],
+      });
     });
 
     it('correctly formats tools and tool choice', () => {
@@ -923,6 +1054,71 @@ describe('openAIAdapter', () => {
             total: expect.any(Number),
           },
         });
+      });
+    });
+  });
+
+  describe('forced tool choice', () => {
+    const tools = { set_title: { description: 'set the title' } };
+
+    const mockConnectorModel = (defaultModel: string) => {
+      executorMock.getConnector.mockReturnValue({
+        ...connector,
+        config: { defaultModel },
+      });
+    };
+
+    it('sends `auto` instead of a named function for a Claude model that rejects forced tool choice', () => {
+      mockConnectorModel('claude-sonnet-5-5');
+
+      openAIAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getRequest().body.tool_choice).toBe('auto');
+    });
+
+    it('keeps the named function for a Claude model that accepts forced tool choice', () => {
+      mockConnectorModel('claude-sonnet-4-6');
+
+      openAIAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getRequest().body.tool_choice).toEqual({
+        type: 'function',
+        function: { name: 'set_title' },
+      });
+    });
+
+    it('keeps the named function for a non-Claude model', () => {
+      mockConnectorModel('gpt-5');
+
+      openAIAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getRequest().body.tool_choice).toEqual({
+        type: 'function',
+        function: { name: 'set_title' },
       });
     });
   });

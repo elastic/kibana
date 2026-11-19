@@ -14,8 +14,8 @@ import type {
   DependencyNodeData,
   GroupedNodeData,
 } from '../../../../../common/service_map';
-import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import type { ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
+import type { SloStatus } from '../../../../../common/service_inventory';
 
 const AGENT_NAMES: AgentName[] = [
   'dotnet',
@@ -65,13 +65,6 @@ const DEPENDENCY_TYPES = [
   { spanType: 'external', spanSubtype: 'grpc', label: 'grpc-service' },
 ];
 
-const HEALTH_STATUSES = [
-  undefined,
-  ServiceHealthStatus.healthy,
-  ServiceHealthStatus.warning,
-  ServiceHealthStatus.critical,
-];
-
 function range(n: number): number[] {
   return Array(n)
     .fill(0)
@@ -100,35 +93,46 @@ function getRandomDependency(): (typeof DEPENDENCY_TYPES)[0] {
   return DEPENDENCY_TYPES[randn(DEPENDENCY_TYPES.length)];
 }
 
-function getRandomHealthStatus(): ServiceHealthStatus | undefined {
-  return HEALTH_STATUSES[randn(HEALTH_STATUSES.length)];
-}
+const SLO_STATUSES: Array<SloStatus | 'noSLOs'> = [
+  'violated',
+  'degrading',
+  'healthy',
+  'noData',
+  'noSLOs',
+];
 
-function createAnomalyStats(
-  healthStatus: ServiceHealthStatus | undefined
-): ServiceAnomalyStats | undefined {
-  if (!healthStatus) return undefined;
-
-  let anomalyScore: number | undefined;
-  switch (healthStatus) {
-    case ServiceHealthStatus.healthy:
-      anomalyScore = randn(25);
-      break;
-    case ServiceHealthStatus.warning:
-      anomalyScore = 25 + randn(50);
-      break;
-    case ServiceHealthStatus.critical:
-      anomalyScore = 75 + randn(25);
-      break;
+function createAnomalyStats(hasAnomalyData: boolean): ServiceAnomalyStats | undefined {
+  if (!hasAnomalyData) {
+    return undefined;
   }
 
+  const anomalyScore = randn(100);
+
   return {
-    healthStatus,
     transactionType: 'request',
     anomalyScore,
     actualValue: Math.random() * 2000000,
     jobId: `job-${Date.now()}`,
   };
+}
+
+function createAlertData(hasAlerts: boolean): { alertsCount?: number } {
+  if (!hasAlerts || !probability(0.4)) {
+    return {};
+  }
+  return { alertsCount: 1 + randn(10) };
+}
+
+function createSloData(hasSlos: boolean): {
+  sloStatus?: SloStatus | 'noSLOs';
+  sloCount?: number;
+} {
+  if (!hasSlos || !probability(0.5)) {
+    return {};
+  }
+  const sloStatus = SLO_STATUSES[randn(SLO_STATUSES.length)];
+  const sloCount = sloStatus === 'noSLOs' ? 0 : 1 + randn(5);
+  return { sloStatus, sloCount };
 }
 
 function createDefaultEdgeStyle(color: string = '#c8c8c8') {
@@ -154,6 +158,8 @@ export interface GenerateOptions {
   groupedResourceCount: number;
   hasAnomalies: boolean;
   includeBidirectional: boolean;
+  hasAlerts?: boolean;
+  hasSlos?: boolean;
 }
 
 export function generateServiceMapElements(options: GenerateOptions): {
@@ -167,6 +173,8 @@ export function generateServiceMapElements(options: GenerateOptions): {
     groupedResourceCount,
     hasAnomalies,
     includeBidirectional,
+    hasAlerts = false,
+    hasSlos = false,
   } = options;
 
   const nodes: ServiceMapNode[] = [];
@@ -174,13 +182,14 @@ export function generateServiceMapElements(options: GenerateOptions): {
 
   range(serviceCount).forEach((i) => {
     const id = getRandomServiceName(i);
-    const healthStatus = hasAnomalies ? getRandomHealthStatus() : undefined;
     const data: ServiceNodeData = {
       id,
       label: id,
       isService: true,
       agentName: getRandomAgent(),
-      serviceAnomalyStats: createAnomalyStats(healthStatus),
+      serviceAnomalyStats: createAnomalyStats(hasAnomalies),
+      ...createAlertData(hasAlerts),
+      ...createSloData(hasSlos),
     };
     nodes.push({
       id,
@@ -327,7 +336,7 @@ export function createSimpleServiceMap(): { nodes: ServiceMapNode[]; edges: Serv
         isService: true,
         agentName: 'java',
         serviceAnomalyStats: {
-          healthStatus: ServiceHealthStatus.healthy,
+          anomalyScore: 10,
           transactionType: 'request',
         },
       },
@@ -342,7 +351,6 @@ export function createSimpleServiceMap(): { nodes: ServiceMapNode[]; edges: Serv
         isService: true,
         agentName: 'python',
         serviceAnomalyStats: {
-          healthStatus: ServiceHealthStatus.warning,
           transactionType: 'request',
           anomalyScore: 55,
         },

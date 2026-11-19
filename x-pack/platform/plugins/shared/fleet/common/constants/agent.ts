@@ -11,6 +11,8 @@ export const AGENT_TYPE_PERMANENT = 'PERMANENT';
 export const AGENT_TYPE_EPHEMERAL = 'EPHEMERAL';
 export const AGENT_TYPE_TEMPORARY = 'TEMPORARY';
 export const AGENT_TYPE_OPAMP = 'OPAMP';
+// Excludes OpAMP collectors from a kuery on the agents
+export const NOT_OPAMP_AGENT_KUERY = `not type:${AGENT_TYPE_OPAMP}`;
 
 export const AGENT_POLLING_REQUEST_TIMEOUT_MS = 300000; // 5 minutes
 export const AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS = 20000; // 20s
@@ -60,6 +62,18 @@ export const ActiveAgentStatuses = [
   'error',
   'orphaned',
 ]; // excluded: unenrolling, unenrolled, inactive, uninstalled
+
+// OTel (OpAMP) collectors in these states are not actively reporting telemetry.
+// Used in metric queries to prevent a newly enrolled collector on the same host from
+// leaking its live metrics to a stale/offline agent entry (same service.instance.id).
+// Must stay in sync across the server (agent_metrics.ts) and client (CollectorContext).
+// See https://github.com/elastic/kibana/issues/274843
+export const OPAMP_NON_REPORTING_STATUSES: ReadonlyArray<(typeof AgentStatuses)[number]> = [
+  'offline',
+  'inactive',
+  'unenrolled',
+  'uninstalled',
+];
 
 // Kueries for finding unprivileged and privileged agents
 // Privileged is `not` because the metadata field can be undefined

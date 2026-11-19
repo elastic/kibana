@@ -13,8 +13,8 @@ import { TestProviders } from '../../../../common/mock';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import {
   autonomousSystemRenderer,
-  hostIdRenderer,
-  hostNameRenderer,
+  HostIdRenderer,
+  HostNameRenderer,
   locationRenderer,
   reputationRenderer,
   whoisRenderer,
@@ -25,20 +25,49 @@ import { FlowTarget } from '../../../../../common/search_strategy';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
 import { mockGetUrlForApp } from '@kbn/security-solution-navigation/mocks/context';
 import { PageScope } from '../../../../data_view_manager/constants';
+import { FLYOUT_LINK_TEST_ID } from '../../../../flyout/shared/components/test_ids';
+import type { OpenFlyoutLinkProps } from '../../../../flyout_v2/shared/components/open_flyout_link';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/security-solution-navigation/src/context');
+const mockOpenFlyoutLink = jest.fn();
+jest.mock('../../../../flyout_v2/shared/components/open_flyout_link', () => {
+  const actual = jest.requireActual('../../../../flyout_v2/shared/components/open_flyout_link');
+  return {
+    ...actual,
+    OpenFlyoutLink: (props: OpenFlyoutLinkProps) => {
+      mockOpenFlyoutLink(props);
+      return <actual.OpenFlyoutLink {...props} />;
+    },
+  };
+});
 mockGetUrlForApp.mockImplementation(
   (appId: string, options?: { path?: string; deepLinkId?: boolean }) =>
     `${appId}/${options?.deepLinkId ?? ''}${options?.path ?? ''}`
 );
 
-jest.mock('../../../../common/hooks/use_get_field_spec');
-
 const mockHost: HostEcs = mockData.complete.host as HostEcs;
 
 describe('Field Renderers', () => {
   const scopeId = PageScope.default;
+
+  beforeEach(() => {
+    mockOpenFlyoutLink.mockClear();
+  });
+
+  const expectHostFlyoutLink = () =>
+    expect(mockOpenFlyoutLink).toHaveBeenCalledWith(
+      expect.objectContaining({
+        field: 'host.name',
+        value: 'raspberrypi',
+        hit: expect.objectContaining({
+          flattened: expect.objectContaining({
+            'host.id': 'b19a781f683541a7a25ee345133aa399',
+            'host.name': 'raspberrypi',
+          }),
+        }),
+      })
+    );
 
   describe('#locationRenderer', () => {
     test('it renders correctly against snapshot', () => {
@@ -121,16 +150,11 @@ describe('Field Renderers', () => {
     ip: ['10.10.10.10'],
   };
 
-  describe('#hostIdRenderer', () => {
+  describe('#HostIdRenderer', () => {
     test('it renders correctly against snapshot', () => {
       const { asFragment } = render(
         <TestProviders>
-          {hostIdRenderer({
-            scopeId,
-            host: mockHost,
-            ipFilter: '10.10.10.10',
-            isFlyoutOpen: false,
-          })}
+          <HostIdRenderer scopeId={scopeId} host={mockHost} ipFilter="10.10.10.10" />
         </TestProviders>
       );
       expect(asFragment()).toMatchSnapshot();
@@ -139,12 +163,7 @@ describe('Field Renderers', () => {
     test('it renders emptyTagValue when non-matching IP is provided', () => {
       render(
         <TestProviders>
-          {hostIdRenderer({
-            scopeId,
-            host: mockHost,
-            ipFilter: '10.10.10.11',
-            isFlyoutOpen: false,
-          })}
+          <HostIdRenderer scopeId={scopeId} host={mockHost} ipFilter="10.10.10.11" />
         </TestProviders>
       );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
@@ -153,11 +172,7 @@ describe('Field Renderers', () => {
     test('it renders emptyTagValue when no host.id is provided', () => {
       render(
         <TestProviders>
-          {hostIdRenderer({
-            scopeId,
-            host: emptyIdHost,
-            isFlyoutOpen: false,
-          })}
+          <HostIdRenderer scopeId={scopeId} host={emptyIdHost} />
         </TestProviders>
       );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
@@ -165,11 +180,7 @@ describe('Field Renderers', () => {
     test('it renders emptyTagValue when no host.ip is provided', () => {
       render(
         <TestProviders>
-          {hostIdRenderer({
-            scopeId,
-            host: emptyIpHost,
-            isFlyoutOpen: false,
-          })}
+          <HostIdRenderer scopeId={scopeId} host={emptyIpHost} />
         </TestProviders>
       );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
@@ -178,28 +189,29 @@ describe('Field Renderers', () => {
     test('it renders multiple host ids', () => {
       render(
         <TestProviders>
-          {hostIdRenderer({
-            scopeId,
-            host: { ...emptyIdHost, id: ['test1', 'test2'] },
-            isFlyoutOpen: false,
-          })}
+          <HostIdRenderer scopeId={scopeId} host={{ ...emptyIdHost, id: ['test1', 'test2'] }} />
         </TestProviders>
       );
       expect(screen.getByText('test1')).toBeInTheDocument();
       expect(screen.getByText('+1 More')).toBeInTheDocument();
     });
+
+    test('it links the host id to the host flyout with the host identity fields', () => {
+      render(
+        <TestProviders>
+          <HostIdRenderer scopeId={scopeId} host={mockHost} ipFilter="10.10.10.10" />
+        </TestProviders>
+      );
+      expect(screen.getByTestId(FLYOUT_LINK_TEST_ID)).toBeInTheDocument();
+      expectHostFlyoutLink();
+    });
   });
 
-  describe('#hostNameRenderer', () => {
+  describe('#HostNameRenderer', () => {
     test('it renders correctly against snapshot', () => {
       const { asFragment } = render(
         <TestProviders>
-          {hostNameRenderer({
-            scopeId,
-            host: mockHost,
-            ipFilter: '10.10.10.10',
-            isFlyoutOpen: false,
-          })}
+          <HostNameRenderer scopeId={scopeId} host={mockHost} ipFilter="10.10.10.10" />
         </TestProviders>
       );
 
@@ -209,12 +221,7 @@ describe('Field Renderers', () => {
     test('it renders emptyTagValue when non-matching IP is provided', () => {
       render(
         <TestProviders>
-          {hostNameRenderer({
-            scopeId,
-            host: mockHost,
-            ipFilter: '10.10.10.11',
-            isFlyoutOpen: false,
-          })}
+          <HostNameRenderer scopeId={scopeId} host={mockHost} ipFilter="10.10.10.11" />
         </TestProviders>
       );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
@@ -223,11 +230,7 @@ describe('Field Renderers', () => {
     test('it renders emptyTagValue when no host.ip is provided', () => {
       render(
         <TestProviders>
-          {hostNameRenderer({
-            scopeId,
-            host: emptyIpHost,
-            isFlyoutOpen: false,
-          })}
+          <HostNameRenderer scopeId={scopeId} host={emptyIpHost} />
         </TestProviders>
       );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
@@ -235,14 +238,31 @@ describe('Field Renderers', () => {
     test('it renders emptyTagValue when no host.name is provided', () => {
       render(
         <TestProviders>
-          {hostNameRenderer({
-            scopeId,
-            host: emptyNameHost,
-            isFlyoutOpen: false,
-          })}
+          <HostNameRenderer scopeId={scopeId} host={emptyNameHost} />
         </TestProviders>
       );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
+    });
+
+    test('it links by host name only when the host has no host.id', () => {
+      render(
+        <TestProviders>
+          <HostNameRenderer scopeId={scopeId} host={emptyIdHost} ipFilter="10.10.10.10" />
+        </TestProviders>
+      );
+      expect(mockOpenFlyoutLink).toHaveBeenCalledWith(
+        expect.objectContaining({ field: 'host.name', value: 'test', hit: undefined })
+      );
+    });
+
+    test('it links the host name to the host flyout with the host identity fields', () => {
+      render(
+        <TestProviders>
+          <HostNameRenderer scopeId={scopeId} host={mockHost} ipFilter="10.10.10.10" />
+        </TestProviders>
+      );
+      expect(screen.getByTestId(FLYOUT_LINK_TEST_ID)).toBeInTheDocument();
+      expectHostFlyoutLink();
     });
   });
 

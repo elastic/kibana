@@ -77,7 +77,7 @@ You can see a working example of this in the `x-pack/examples/embedded_lens_exam
 The `attributes` variable contains the configuration for the Lens visualization. The details are explained in the section below. It's difficult to set up this object manually, in order to quickly get to a functioning starting point, start your Kibana server with example plugins via
 
 ```
-yarn start --run-examples
+pnpm start --run-examples
 ```
 
 This will add an `Open in Playground` action to the menu bar in the Lens editor. With this option, try to configure the chart configuration directly in the editor, then open it in the playground to see the attributes object to copy. This works for any possible Lens visualization.
@@ -241,13 +241,11 @@ The following sections are concerned with developing the Lens plugin itself.
 
 Run all tests from the `x-pack` root directory
 
-- Unit tests: `yarn test:jest x-pack/platform/plugins/shared/lens`
+- Unit tests: `pnpm test:jest x-pack/platform/plugins/shared/lens`
 - Functional tests:
   - Run `node scripts/functional_tests_server`
-  - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group1/config.ts`
   - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group2/config.ts`
   - ...
-  - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group6/config.ts`
 - API Functional tests:
   - Run `node scripts/functional_tests_server`
   - Run `node ../scripts/functional_test_runner.js --config ./test/api_integration/config.ts --grep=Lens`

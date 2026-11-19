@@ -50,6 +50,7 @@ import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { APPLICATION_PREFIX } from '../../common/constants';
 import { canRedirectRequest } from '../authentication';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
+import { createOnlineStatusTaskRunner } from '../elasticsearch';
 import { createRedirectHtmlPage } from '../lib/html_page_utils';
 import type { SpacesService } from '../plugin';
 
@@ -183,13 +184,6 @@ export class AuthorizationService {
 
     http.registerOnPreResponse(async (request, preResponse, toolkit) => {
       if (preResponse.statusCode === 403) {
-        const user = getCurrentUser(request);
-        if (user?.roles.length === 0) {
-          this.logger.warn(
-            `A user authenticated with the "${user.authentication_realm.name}" (${user.authentication_realm.type}) realm doesn't have any roles and isn't authorized to perform request.`
-          );
-        }
-
         if (canRedirectRequest(request)) {
           const next = `${http.basePath.get(request)}${request.url.pathname}${request.url.search}`;
 
@@ -227,18 +221,16 @@ export class AuthorizationService {
 
     this.statusSubscription = online$
       .pipe(
-        switchMap(async ({ scheduleRetry }) => {
-          try {
-            await registerPrivilegesWithCluster(
+        switchMap(
+          createOnlineStatusTaskRunner(() =>
+            registerPrivilegesWithCluster(
               this.logger,
               this.privileges,
               this.applicationName,
               clusterClient
-            );
-          } catch (err) {
-            scheduleRetry();
-          }
-        })
+            )
+          )
+        )
       )
       .subscribe();
   }

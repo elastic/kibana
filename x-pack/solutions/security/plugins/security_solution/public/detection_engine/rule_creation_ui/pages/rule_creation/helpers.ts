@@ -53,6 +53,8 @@ import type {
 import { DataSourceType, AlertSuppressionDurationType } from '../../../common/types';
 import type {
   RuleCreateProps,
+  RuleResponse,
+  ThreatMatchRuleUpdateProps,
   AlertSuppression,
   RequiredFieldInput,
   SeverityMapping,
@@ -60,6 +62,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
+import { MITRE_ATTACK_FRAMEWORK } from '../../../../../common/detection_engine/mitre/iterate_mitre_threat_entities';
 import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
@@ -630,7 +633,8 @@ export const formatAboutStepData = (
       : [],
     threat: filterEmptyThreats(threat).map((singleThreat) => ({
       ...singleThreat,
-      framework: 'MITRE ATT&CK',
+      // Fallback covers older saved form state and direct API values with no framework (undefined or empty string).
+      framework: singleThreat.framework || MITRE_ATTACK_FRAMEWORK,
     })),
     threat_indicator_path: threatIndicatorPath,
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
@@ -693,6 +697,20 @@ export const formatRule = <T>(
     formatScheduleStepData(scheduleData),
     formatActionsStepData(actionsData, actionTypeRegistry),
   ]) as unknown as T;
+
+/**
+ * concurrent_searches/items_per_search are API-only fields with no UI controls
+ * (see #276203), so they never round-trip through the define step form. On
+ * rule edit, merge them back in directly from the previously loaded rule
+ * rather than routing them through form state, since the edit form saves via
+ * a full-replace PUT.
+ */
+export const getApiOnlyThreatMatchFields = (
+  rule: RuleResponse
+): Pick<ThreatMatchRuleUpdateProps, 'concurrent_searches' | 'items_per_search'> =>
+  rule.type === 'threat_match'
+    ? { concurrent_searches: rule.concurrent_searches, items_per_search: rule.items_per_search }
+    : {};
 
 export const formatPreviewRule = ({
   defineRuleData,

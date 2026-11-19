@@ -9,11 +9,15 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { EcsError } from '@elastic/ecs';
 import moment from 'moment/moment';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { keyBy } from 'lodash';
+import { keyBy, uniq } from 'lodash';
+import { escapeQuotes } from '@kbn/es-query';
 import { set } from '@kbn/safer-lodash-set';
 import { doesActionHaveFileAccess } from '../../../routes/actions/utils';
 import { catchAndWrapError } from '../../../utils';
-import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../../endpoint_app_context_services';
 import type { FetchActionResponsesResult } from '../..';
 import type {
   ResponseActionAgentType,
@@ -162,7 +166,13 @@ export const mapResponsesByActionId = (
 
 type ActionCompletionInfo = Pick<
   Required<ActionDetails>,
-  'isCompleted' | 'completedAt' | 'wasSuccessful' | 'errors' | 'outputs' | 'agentState'
+  | 'isCompleted'
+  | 'completedAt'
+  | 'wasSuccessful'
+  | 'wasCanceled'
+  | 'errors'
+  | 'outputs'
+  | 'agentState'
 >;
 
 export const getActionCompletionInfo = <
@@ -182,6 +192,7 @@ export const getActionCompletionInfo = <
     agentState: {},
     isCompleted: Boolean(agentIds.length),
     wasSuccessful: Boolean(agentIds.length),
+    wasCanceled: false,
   };
 
   const responsesByAgentId: ActionResponseByAgentId = mapActionResponsesByAgentId(actionResponses);
@@ -200,6 +211,7 @@ export const getActionCompletionInfo = <
     completedInfo.agentState[agentId] = {
       isCompleted: false,
       wasSuccessful: false,
+      wasCanceled: false,
       errors: undefined,
       completedAt: undefined,
     };
@@ -208,6 +220,7 @@ export const getActionCompletionInfo = <
     if (agentResponse) {
       completedInfo.agentState[agentId].isCompleted = agentResponse.isCompleted;
       completedInfo.agentState[agentId].wasSuccessful = agentResponse.wasSuccessful;
+      completedInfo.agentState[agentId].wasCanceled = agentResponse.wasCanceled;
       completedInfo.agentState[agentId].completedAt = agentResponse.completedAt;
       completedInfo.agentState[agentId].errors = agentResponse.errors;
 
@@ -253,6 +266,11 @@ export const getActionCompletionInfo = <
           ...(normalizedAgentResponse.errors ? normalizedAgentResponse.errors : [])
         );
       }
+
+      if (normalizedAgentResponse.wasCanceled) {
+        completedInfo.wasSuccessful = false;
+        completedInfo.wasCanceled = true;
+      }
     }
 
     if (responseErrors.length) {
@@ -286,19 +304,27 @@ export const getActionStatus = ({
   expirationDate,
   isCompleted,
   wasSuccessful,
+  wasCanceled,
 }: {
   expirationDate: string;
   isCompleted: boolean;
   wasSuccessful: boolean;
+  wasCanceled: boolean;
 }): { status: ActionDetails['status']; isExpired: boolean } => {
   const isExpired = !isCompleted && expirationDate < new Date().toISOString();
-  const status = isExpired
-    ? 'failed'
-    : isCompleted
-    ? wasSuccessful
-      ? 'successful'
-      : 'failed'
-    : 'pending';
+  let status: ActionDetails['status'] = 'pending';
+
+  if (isExpired) {
+    status = 'failed';
+  } else if (isCompleted) {
+    if (wasCanceled) {
+      status = 'canceled';
+    } else if (wasSuccessful) {
+      status = 'successful';
+    } else {
+      status = 'failed';
+    }
+  }
 
   return { isExpired, status };
 };
@@ -310,6 +336,7 @@ interface NormalizedAgentActionResponse<
   isCompleted: boolean;
   completedAt: undefined | string;
   wasSuccessful: boolean;
+  wasCanceled: boolean;
   errors: undefined | string[];
   fleetResponse: undefined | EndpointActionResponse;
   endpointResponse: undefined | LogsEndpointActionResponse<TOutputContent, TResponseMeta>;
@@ -339,6 +366,7 @@ const mapActionResponsesByAgentId = <
         isCompleted: false,
         completedAt: undefined,
         wasSuccessful: false,
+        wasCanceled: false,
         errors: undefined,
         fleetResponse: undefined,
         endpointResponse: undefined,
@@ -398,6 +426,14 @@ const mapActionResponsesByAgentId = <
       if (errors.length) {
         agentNormalizedResponse.wasSuccessful = false;
         agentNormalizedResponse.errors = errors;
+      }
+
+      if (
+        agentNormalizedResponse.endpointResponse?.EndpointActions?.data?.output?.content
+          ?.canceled_by
+      ) {
+        agentNormalizedResponse.wasSuccessful = false;
+        agentNormalizedResponse.wasCanceled = true;
       }
     }
   }
@@ -560,38 +596,105 @@ export const formatEndpointActionResults = (
 };
 
 /**
+ * Linked-project agents per metadata lookup. One search for a whole fan-out
+ * exceeds Elasticsearch's 10,000-result window for large actions; the search
+ * is then rejected and every linked-project hostname is dropped.
+ */
+const HOSTNAME_LOOKUP_BATCH_SIZE = 500;
+
+/**
  * Retrieves the hosts name for each agent ID provided on input.
  * Note that if any ID provided is not a fleet agent ID (ex. 3rd party EDR agent id),
  * then no host name will be returned for agent.
+ *
+ * Fleet is read on the origin cluster only. When `scoped` is a CPS read, ids
+ * Fleet could not resolve (agents enrolled in a linked project) fall back to the
+ * request-scoped Defend metadata index; origin-resolved names are kept as-is.
+ * Without `scoped`, linked-project agents keep an empty name.
  * @param agentIds
- * @param metadataService
+ * @param endpointService
+ * @param spaceId
+ * @param scoped
  */
 export const getAgentHostNamesWithIds = async ({
   agentIds,
   endpointService,
   spaceId,
+  scoped,
 }: {
   spaceId: string;
   endpointService: EndpointAppContextService;
   agentIds: string[];
+  scoped?: ScopedEndpointServices;
 }): Promise<{ [agentId: string]: string }> => {
   if (agentIds.length === 0) {
     return {};
   }
 
   const fleetServices = endpointService.getInternalFleetServices(spaceId);
-  const agentFound = await fleetServices.agent
-    .getByIds(agentIds, { ignoreMissing: true })
+  const agentFound = await fleetServices
+    .fetchAgentsById(agentIds, { ignoreMissing: true })
     .catch(catchAndWrapError);
   const agentDocById = keyBy(agentFound, 'id');
 
-  return agentIds.reduce((acc, id) => {
+  const hostNames = agentIds.reduce((acc, id) => {
     const agentHostInfo = agentDocById[id]?.local_metadata?.host;
 
     acc[id] = agentHostInfo?.name || agentHostInfo?.hostname || '';
 
     return acc;
   }, {} as { [agentId: string]: string });
+
+  if (!scoped?.isCpsRead()) {
+    return hostNames;
+  }
+
+  // `agentIds` repeats an agent once per action in its history; look each one up once
+  // (order preserved) so a long history does not fan out into identical batches.
+  const unresolvedAgentIds = uniq(agentIds.filter((id) => !hostNames[id]));
+  const hostnameByAgentId = new Map<string, string>();
+
+  for (let offset = 0; offset < unresolvedAgentIds.length; offset += HOSTNAME_LOOKUP_BATCH_SIZE) {
+    const batch = unresolvedAgentIds.slice(offset, offset + HOSTNAME_LOOKUP_BATCH_SIZE);
+    const kuery = `united.agent.agent.id: (${batch
+      .map((id) => `"${escapeQuotes(id)}"`)
+      .join(' OR ')})`;
+    // Best-effort: a failed batch leaves names empty rather than failing the whole read
+    const metadata = await endpointService
+      .getEndpointMetadataService(spaceId)
+      .getHostMetadataList({ page: 0, pageSize: batch.length, kuery }, scoped)
+      .catch((error) => {
+        endpointService
+          .createLogger('getAgentHostNamesWithIds')
+          .warn(`Failed to resolve linked-project hostnames: ${error.message}`);
+        return undefined;
+      });
+
+    // Index the metadata rows by agent id once: a `.find()` per unresolved
+    // agent is quadratic in the fan-out size. Match on the Fleet agent id (the
+    // id the action and the kuery key on), falling back to the endpoint's own
+    // `agent.id` only when it is missing, mirroring
+    // `EndpointMetadataService.getEnrichedHostMetadata()`.
+    for (const entry of metadata?.data ?? []) {
+      const agentId = entry.metadata?.elastic?.agent?.id || entry.metadata?.agent?.id;
+      const hostname = entry.metadata?.host?.hostname;
+
+      // First row wins when a backend returns more than one row for an agent id.
+      if (agentId && hostname && !hostnameByAgentId.has(agentId)) {
+        hostnameByAgentId.set(agentId, hostname);
+      }
+    }
+  }
+
+  for (const id of unresolvedAgentIds) {
+    const hostname = hostnameByAgentId.get(id);
+
+    if (hostname) {
+      hostNames[id] = hostname;
+    }
+  }
+
+  return hostNames;
 };
 
 export const createActionDetailsRecord = <T extends ActionDetails = ActionDetails>(
@@ -599,13 +702,14 @@ export const createActionDetailsRecord = <T extends ActionDetails = ActionDetail
   actionResponses: FetchActionResponsesResult,
   agentHostInfo: Record<string, string>
 ): T => {
-  const { isCompleted, completedAt, wasSuccessful, errors, outputs, agentState } =
+  const { isCompleted, completedAt, wasSuccessful, wasCanceled, errors, outputs, agentState } =
     getActionCompletionInfo(actionRequest, actionResponses);
 
   const { isExpired, status } = getActionStatus({
     expirationDate: actionRequest.expiration,
     isCompleted,
     wasSuccessful,
+    wasCanceled,
   });
 
   const actionDetails: WithAllKeys<ActionDetails> = {
@@ -622,6 +726,7 @@ export const createActionDetailsRecord = <T extends ActionDetails = ActionDetail
     isCompleted,
     completedAt,
     wasSuccessful,
+    wasCanceled,
     errors,
     isExpired,
     status,

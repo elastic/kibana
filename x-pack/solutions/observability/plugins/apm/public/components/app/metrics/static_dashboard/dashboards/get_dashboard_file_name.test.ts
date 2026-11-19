@@ -48,11 +48,29 @@ const edotSdk = [
     telemetrySdkLanguage: 'nodejs',
     fileName: 'otel_native-edot-nodejs',
   },
+  {
+    agentName: 'opentelemetry/php/elastic',
+    telemetrySdkName: 'opentelemetry',
+    telemetrySdkLanguage: 'php',
+    fileName: 'otel_native-edot-php',
+  },
 ];
 const vanillaOtelSdk = [
   {
     agentName: 'opentelemetry/java',
     fileName: 'classic_apm-otel_other-java',
+  },
+  {
+    agentName: 'opentelemetry/php/opentelemetry-php-instrumentation',
+    telemetrySdkName: 'opentelemetry',
+    telemetrySdkLanguage: 'php',
+    fileName: 'otel_native-otel_other-php',
+  },
+  {
+    agentName: 'opentelemetry/php/opentelemetry-php-distro',
+    telemetrySdkName: 'opentelemetry',
+    telemetrySdkLanguage: 'php',
+    fileName: 'otel_native-otel_other-php',
   },
   {
     agentName: 'opentelemetry/nodejs/test/nodejs-agent',

@@ -8,6 +8,7 @@
  */
 
 import type { InternalConnectorContract } from '../../types/latest';
+import { getStepDeprecationInfo } from '../deprecated_step_metadata';
 
 export function getKibanaConnectors(): InternalConnectorContract[] {
   // TODO: bring the kibana connectors back, with the new approach to schemas generation
@@ -15,12 +16,12 @@ export function getKibanaConnectors(): InternalConnectorContract[] {
   // FIX: this is not really a lazy load, we should use a dynamic import instead
   const {
     GENERATED_KIBANA_CONNECTORS,
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   } = require('./generated');
 
   const {
     KIBANA_OVERRIDES,
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   } = require('./overrides');
 
   const mergedConnectors: InternalConnectorContract[] = [];
@@ -32,5 +33,8 @@ export function getKibanaConnectors(): InternalConnectorContract[] {
     }
   }
 
-  return mergedConnectors;
+  return mergedConnectors.map((connector) => ({
+    ...connector,
+    deprecation: connector.deprecation ?? getStepDeprecationInfo(connector.type),
+  }));
 }

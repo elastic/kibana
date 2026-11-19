@@ -6,18 +6,19 @@
  */
 
 import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { Redirect, useLocation, useParams } from 'react-router-dom';
 
 import moment from 'moment';
 import { encode } from '@kbn/rison';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
+import { formatPageFilterSearchParam } from '@kbn/securitysolution-alerts-page-url';
 import { ALERTS_PATH, DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { inputsSelectors } from '../../../common/store';
-import { formatPageFilterSearchParam } from '../../../../common/utils/format_page_filter_search_param';
-import { resolveFlyoutParams } from './utils';
+import { FLYOUT_V2_URL_PARAM } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
+import { resolveFlyoutV2Params } from './utils';
 
 export const AlertDetailsRedirect = () => {
   const { alertId } = useParams<{ alertId: string }>();
@@ -66,13 +67,13 @@ export const AlertDetailsRedirect = () => {
 
   const pageFiltersQuery = encode(formatPageFilterSearchParam([statusPageFilter]));
 
-  const currentFlyoutParams = searchParams.get(URL_PARAM_KEY.flyout);
+  const currentFlyoutV2Params = searchParams.get(FLYOUT_V2_URL_PARAM);
 
   const urlParams = new URLSearchParams({
     [URL_PARAM_KEY.appQuery]: kqlAppQuery,
     [URL_PARAM_KEY.timerange]: timerange,
     [URL_PARAM_KEY.pageFilter]: pageFiltersQuery,
-    [URL_PARAM_KEY.flyout]: resolveFlyoutParams({ index, alertId }, currentFlyoutParams),
+    [FLYOUT_V2_URL_PARAM]: resolveFlyoutV2Params({ index, alertId }, currentFlyoutV2Params),
   });
 
   const url = `${ALERTS_PATH}?${urlParams.toString()}`;

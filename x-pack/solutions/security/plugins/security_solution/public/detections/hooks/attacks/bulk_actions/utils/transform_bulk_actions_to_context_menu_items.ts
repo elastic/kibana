@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 
@@ -47,15 +47,21 @@ export const transformBulkActionsToContextMenuItems = ({
       panel: item.panel,
       'data-test-subj': item['data-test-subj'],
       key: item.key,
+      // Items that navigate to a sub-panel (panel != null) must NOT close the popover —
+      // EuiContextMenu navigates within the same popover. Direct-action items (those
+      // exposing an `onClick`) close the popover before running, mirroring the legacy
+      // bulk-actions behavior in `useBulkActionItems`.
       onClick: item.onClick
-        ? () =>
+        ? () => {
+            closePopover?.();
             item.onClick?.(
               alertItems,
               false,
               (loading) => setIsLoading?.(loading),
               () => clearSelection?.(),
               () => refresh?.()
-            )
+            );
+          }
         : undefined,
     };
   });

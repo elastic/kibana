@@ -7,6 +7,7 @@
 
 import { screen, fireEvent, within, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { setupEnvironment } from './helpers';
@@ -57,7 +58,7 @@ describe('<ComponentTemplateEdit />', () => {
       });
 
       renderComponentTemplateEdit(httpSetup, coreStart);
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
     });
 
     test('updates the breadcrumbs to component templates', () => {
@@ -67,9 +68,9 @@ describe('<ComponentTemplateEdit />', () => {
     });
 
     test('should set the correct page title', () => {
-      expect(screen.getByTestId('pageTitle')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeInTheDocument();
       expect(screen.getByTestId('deprecatedTemplateCallout')).toBeInTheDocument();
-      expect(screen.getByTestId('pageTitle')).toHaveTextContent(
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
         `Edit component template '${COMPONENT_TEMPLATE_NAME}'`
       );
     });
@@ -98,7 +99,7 @@ describe('<ComponentTemplateEdit />', () => {
       });
 
       renderComponentTemplateEdit(httpSetup, coreStart);
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
     });
 
     it('should send the correct payload with changed values', async () => {
@@ -125,9 +126,6 @@ describe('<ComponentTemplateEdit />', () => {
           expect.objectContaining({
             body: JSON.stringify({
               ...COMPONENT_TEMPLATE_TO_EDIT,
-              template: {
-                ...COMPONENT_TEMPLATE_TO_EDIT.template,
-              },
               version: 1,
             }),
           })
@@ -136,6 +134,60 @@ describe('<ComponentTemplateEdit />', () => {
 
       // Mapping rollout modal should not be opened if the component template is not managed
       expect(coreStart.overlays.openModal).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('form payload with an existing hot-only lifecycle', () => {
+    const COMPONENT_TEMPLATE_WITH_LIFECYCLE = {
+      ...COMPONENT_TEMPLATE_TO_EDIT,
+      template: {
+        ...COMPONENT_TEMPLATE_TO_EDIT.template,
+        lifecycle: { enabled: true },
+      },
+    };
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        COMPONENT_TEMPLATE_WITH_LIFECYCLE.name,
+        COMPONENT_TEMPLATE_WITH_LIFECYCLE
+      );
+      httpRequestsMockHelpers.setGetComponentTemplateDatastream(
+        COMPONENT_TEMPLATE_WITH_LIFECYCLE.name,
+        { data_streams: [] }
+      );
+
+      renderComponentTemplateEdit(httpSetup, coreStart);
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
+    });
+
+    it('should preserve the lifecycle when only the version changes', async () => {
+      fireEvent.change(getVersionSpinButton(), { target: { value: '2' } });
+
+      const enabledNextButton = getEnabledNextButton();
+      await waitFor(() => expect(enabledNextButton).toBeEnabled());
+      fireEvent.click(enabledNextButton);
+
+      await screen.findByTestId('stepSettings');
+
+      await completeStep.settings();
+      await completeStep.mappings();
+      await completeStep.aliases();
+
+      const submitButton = getEnabledNextButton();
+      await waitFor(() => expect(submitButton).toBeEnabled());
+      fireEvent.click(submitButton);
+
+      await waitFor(() => {
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/component_templates/${COMPONENT_TEMPLATE_WITH_LIFECYCLE.name}`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              ...COMPONENT_TEMPLATE_WITH_LIFECYCLE,
+              version: 2,
+            }),
+          })
+        );
+      });
     });
   });
 
@@ -157,7 +209,7 @@ describe('<ComponentTemplateEdit />', () => {
       });
 
       renderComponentTemplateEdit(httpSetup, coreStart, '@custom');
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
     });
 
     it('should show mappings rollover modal on save if apply mappings call failed', async () => {
@@ -264,7 +316,7 @@ describe('<ComponentTemplateEdit />', () => {
       );
 
       renderComponentTemplateEdit(httpSetup, coreStart);
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
 
       httpRequestsMockHelpers.setPostDatastreamMappingsFromTemplate(
         DATASTREAM_NAME,

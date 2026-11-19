@@ -7,53 +7,59 @@
 
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useGenAIConnectors } from './use_genai_connectors';
-import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { InferenceConnectorType } from '@kbn/inference-common';
-import {
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-} from '@kbn/management-settings-ids';
+
+jest.mock('@kbn/inference-connectors', () => {
+  const actual = jest.requireActual('@kbn/inference-connectors');
+  return {
+    ...actual,
+    useLoadConnectors: jest.fn(),
+  };
+});
+
+import { useLoadConnectors } from '@kbn/inference-connectors';
+
+const mockUseLoadConnectors = useLoadConnectors as jest.MockedFunction<typeof useLoadConnectors>;
 
 const STREAMS_CONNECTOR_STORAGE_KEY = 'xpack.streamsApp.lastUsedConnector';
 const OLD_STORAGE_KEY = 'xpack.observabilityAiAssistant.lastUsedConnector';
 
-const createMockConnector = (connectorId: string, name: string) => ({
-  connectorId,
+const createMockAIConnector = (id: string, name: string) => ({
+  id,
   name,
-  type: InferenceConnectorType.OpenAI,
+  actionTypeId: InferenceConnectorType.OpenAI,
   config: {},
-  capabilities: {},
+  secrets: {},
   isPreconfigured: false,
-  isInferenceEndpoint: false,
+  isSystemAction: false,
+  isDeprecated: false,
+  isConnectorTypeDeprecated: false,
+  isMissingSecrets: false,
 });
 
+const createLoadConnectorsResult = (
+  connectors: ReturnType<typeof createMockAIConnector>[],
+  overrides: Partial<ReturnType<typeof useLoadConnectors>> = {}
+) =>
+  ({
+    data: connectors,
+    isLoading: false,
+    error: null,
+    refetch: jest.fn(),
+    soEntryFound: false,
+    ...overrides,
+  } as unknown as ReturnType<typeof useLoadConnectors>);
+
 describe('useGenAIConnectors', () => {
-  let mockStreamsRepositoryClient: jest.Mocked<StreamsRepositoryClient>;
-  let mockUiSettings: jest.Mocked<IUiSettingsClient>;
+  const mockHttp = {} as HttpSetup;
+  const mockSettings = {} as SettingsStart;
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Clear localStorage
     localStorage.removeItem(STREAMS_CONNECTOR_STORAGE_KEY);
     localStorage.removeItem(OLD_STORAGE_KEY);
-
-    mockStreamsRepositoryClient = {
-      fetch: jest.fn(),
-    } as unknown as jest.Mocked<StreamsRepositoryClient>;
-
-    mockUiSettings = {
-      get: jest.fn((key: string, defaultValue?: unknown) => {
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
-          return 'NO_DEFAULT_CONNECTOR';
-        }
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) {
-          return defaultValue ?? false;
-        }
-        return defaultValue;
-      }),
-    } as unknown as jest.Mocked<IUiSettingsClient>;
   });
 
   afterEach(() => {
@@ -63,132 +69,62 @@ describe('useGenAIConnectors', () => {
 
   describe('connector fallback behavior', () => {
     it('selects the first available connector when selected connector is no longer available', async () => {
-      // Setup: user has a connector in localStorage that no longer exists
       localStorage.setItem(STREAMS_CONNECTOR_STORAGE_KEY, JSON.stringify('deleted-connector'));
 
-      mockStreamsRepositoryClient.fetch.mockResolvedValue({
-        connectors: [
-          createMockConnector('connector-1', 'Connector 1'),
-          createMockConnector('connector-2', 'Connector 2'),
-        ],
-      });
-
-      const { result } = renderHook(() =>
-        useGenAIConnectors({
-          streamsRepositoryClient: mockStreamsRepositoryClient,
-          uiSettings: mockUiSettings,
-        })
+      mockUseLoadConnectors.mockReturnValue(
+        createLoadConnectorsResult([
+          createMockAIConnector('connector-1', 'Connector 1'),
+          createMockAIConnector('connector-2', 'Connector 2'),
+        ])
       );
 
-      // Wait for connectors to load and fallback to trigger
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
+      const { result } = renderHook(() =>
+        useGenAIConnectors({ http: mockHttp, settings: mockSettings })
+      );
 
       await waitFor(() => {
         expect(result.current.selectedConnector).toBe('connector-1');
       });
     });
 
-    it('does not change connector when selected connector is still available', async () => {
+    it('does not change connector when selected connector is still available', () => {
       localStorage.setItem(STREAMS_CONNECTOR_STORAGE_KEY, JSON.stringify('connector-2'));
 
-      mockStreamsRepositoryClient.fetch.mockResolvedValue({
-        connectors: [
-          createMockConnector('connector-1', 'Connector 1'),
-          createMockConnector('connector-2', 'Connector 2'),
-        ],
-      });
-
-      const { result } = renderHook(() =>
-        useGenAIConnectors({
-          streamsRepositoryClient: mockStreamsRepositoryClient,
-          uiSettings: mockUiSettings,
-        })
+      mockUseLoadConnectors.mockReturnValue(
+        createLoadConnectorsResult([
+          createMockAIConnector('connector-1', 'Connector 1'),
+          createMockAIConnector('connector-2', 'Connector 2'),
+        ])
       );
 
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
+      const { result } = renderHook(() =>
+        useGenAIConnectors({ http: mockHttp, settings: mockSettings })
+      );
 
       expect(result.current.selectedConnector).toBe('connector-2');
     });
 
-    it('falls back to first connector when default connector setting points to non-existent connector', async () => {
-      // No localStorage value, but default connector doesn't exist
-      mockUiSettings.get.mockImplementation((key: string, defaultValue?: unknown) => {
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
-          return 'non-existent-default';
-        }
-        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) {
-          return false;
-        }
-        return defaultValue;
-      });
-
-      mockStreamsRepositoryClient.fetch.mockResolvedValue({
-        connectors: [
-          createMockConnector('connector-1', 'Connector 1'),
-          createMockConnector('connector-2', 'Connector 2'),
-        ],
-      });
-
-      const { result } = renderHook(() =>
-        useGenAIConnectors({
-          streamsRepositoryClient: mockStreamsRepositoryClient,
-          uiSettings: mockUiSettings,
-        })
+    it('returns first connector as selectedConnector when no connector is explicitly selected', () => {
+      mockUseLoadConnectors.mockReturnValue(
+        createLoadConnectorsResult([
+          createMockAIConnector('connector-1', 'Connector 1'),
+          createMockAIConnector('connector-2', 'Connector 2'),
+        ])
       );
 
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
-
-      await waitFor(() => {
-        expect(result.current.selectedConnector).toBe('connector-1');
-      });
-    });
-
-    it('returns first connector as selectedConnector when no connector is explicitly selected', async () => {
-      // No localStorage value, no default connector
-      mockStreamsRepositoryClient.fetch.mockResolvedValue({
-        connectors: [
-          createMockConnector('connector-1', 'Connector 1'),
-          createMockConnector('connector-2', 'Connector 2'),
-        ],
-      });
-
       const { result } = renderHook(() =>
-        useGenAIConnectors({
-          streamsRepositoryClient: mockStreamsRepositoryClient,
-          uiSettings: mockUiSettings,
-        })
+        useGenAIConnectors({ http: mockHttp, settings: mockSettings })
       );
 
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
-
-      // The hook returns `selectedConnector || connectors?.[0]?.id`
       expect(result.current.selectedConnector).toBe('connector-1');
     });
 
-    it('returns undefined selectedConnector when no connectors exist', async () => {
-      // No localStorage value, no connectors available
-      mockStreamsRepositoryClient.fetch.mockResolvedValue({
-        connectors: [],
-      });
+    it('returns undefined selectedConnector when no connectors exist', () => {
+      mockUseLoadConnectors.mockReturnValue(createLoadConnectorsResult([]));
 
       const { result } = renderHook(() =>
-        useGenAIConnectors({
-          streamsRepositoryClient: mockStreamsRepositoryClient,
-          uiSettings: mockUiSettings,
-        })
+        useGenAIConnectors({ http: mockHttp, settings: mockSettings })
       );
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
 
       expect(result.current.selectedConnector).toBeUndefined();
       expect(result.current.connectors).toEqual([]);
@@ -196,24 +132,17 @@ describe('useGenAIConnectors', () => {
   });
 
   describe('selectConnector', () => {
-    it('updates the selected connector', async () => {
-      mockStreamsRepositoryClient.fetch.mockResolvedValue({
-        connectors: [
-          createMockConnector('connector-1', 'Connector 1'),
-          createMockConnector('connector-2', 'Connector 2'),
-        ],
-      });
-
-      const { result } = renderHook(() =>
-        useGenAIConnectors({
-          streamsRepositoryClient: mockStreamsRepositoryClient,
-          uiSettings: mockUiSettings,
-        })
+    it('updates the selected connector', () => {
+      mockUseLoadConnectors.mockReturnValue(
+        createLoadConnectorsResult([
+          createMockAIConnector('connector-1', 'Connector 1'),
+          createMockAIConnector('connector-2', 'Connector 2'),
+        ])
       );
 
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
+      const { result } = renderHook(() =>
+        useGenAIConnectors({ http: mockHttp, settings: mockSettings })
+      );
 
       act(() => {
         result.current.selectConnector('connector-2');
@@ -224,55 +153,64 @@ describe('useGenAIConnectors', () => {
   });
 
   describe('loading state', () => {
-    it('starts with loading true', () => {
-      mockStreamsRepositoryClient.fetch.mockReturnValue(new Promise(() => {})); // Never resolves
+    it('reports loading when useLoadConnectors is loading', () => {
+      mockUseLoadConnectors.mockReturnValue(
+        createLoadConnectorsResult([], { isLoading: true, data: undefined })
+      );
 
       const { result } = renderHook(() =>
-        useGenAIConnectors({
-          streamsRepositoryClient: mockStreamsRepositoryClient,
-          uiSettings: mockUiSettings,
-        })
+        useGenAIConnectors({ http: mockHttp, settings: mockSettings })
       );
 
       expect(result.current.loading).toBe(true);
     });
 
-    it('sets loading to false after fetch completes', async () => {
-      mockStreamsRepositoryClient.fetch.mockResolvedValue({
-        connectors: [createMockConnector('connector-1', 'Connector 1')],
-      });
-
-      const { result } = renderHook(() =>
-        useGenAIConnectors({
-          streamsRepositoryClient: mockStreamsRepositoryClient,
-          uiSettings: mockUiSettings,
-        })
+    it('reports not loading when useLoadConnectors finishes', () => {
+      mockUseLoadConnectors.mockReturnValue(
+        createLoadConnectorsResult([createMockAIConnector('connector-1', 'Connector 1')])
       );
 
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
+      const { result } = renderHook(() =>
+        useGenAIConnectors({ http: mockHttp, settings: mockSettings })
+      );
+
+      expect(result.current.loading).toBe(false);
     });
   });
 
   describe('error handling', () => {
-    it('sets error when fetch fails', async () => {
-      const error = new Error('Failed to fetch connectors');
-      mockStreamsRepositoryClient.fetch.mockRejectedValue(error);
-
-      const { result } = renderHook(() =>
-        useGenAIConnectors({
-          streamsRepositoryClient: mockStreamsRepositoryClient,
-          uiSettings: mockUiSettings,
-        })
+    it('exposes the error from useLoadConnectors', () => {
+      const error = new Error('Failed to fetch connectors') as unknown as IHttpFetchError;
+      mockUseLoadConnectors.mockReturnValue(
+        createLoadConnectorsResult([], { error, data: undefined })
       );
 
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
+      const { result } = renderHook(() =>
+        useGenAIConnectors({ http: mockHttp, settings: mockSettings })
+      );
 
       expect(result.current.error).toBe(error);
       expect(result.current.connectors).toBeUndefined();
+    });
+  });
+
+  describe('connector mapping', () => {
+    it('maps AIConnector to InferenceConnector shape', () => {
+      mockUseLoadConnectors.mockReturnValue(
+        createLoadConnectorsResult([createMockAIConnector('c-1', 'My Connector')])
+      );
+
+      const { result } = renderHook(() =>
+        useGenAIConnectors({ http: mockHttp, settings: mockSettings })
+      );
+
+      expect(result.current.connectors).toEqual([
+        expect.objectContaining({
+          connectorId: 'c-1',
+          name: 'My Connector',
+          type: InferenceConnectorType.OpenAI,
+        }),
+      ]);
     });
   });
 });

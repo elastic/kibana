@@ -13,23 +13,23 @@ import { TimelineId, TimelineTabs } from '../../../../../../common/types/timelin
 import { UserName } from './user_name';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
-
-const mockOpenFlyout = jest.fn();
-
-jest.mock('@kbn/expandable-flyout');
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { createEntityFlyoutApiMock } from '../../../../../flyout_v2/entity/use_entity_flyout_api.mock';
 
 jest.mock('../../../../../common/components/draggables', () => ({
   DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
 }));
 
+jest.mock('../../../../../flyout_v2/use_flyout_api');
+
 describe('UserName', () => {
+  let flyoutApi: ReturnType<typeof createEntityFlyoutApiMock>;
+
   beforeEach(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
-      ...createExpandableFlyoutApiMock(),
-      openFlyout: mockOpenFlyout,
-    });
+    flyoutApi = createEntityFlyoutApiMock();
+    jest
+      .mocked(useFlyoutApi)
+      .mockReturnValue(flyoutApi as unknown as ReturnType<typeof useFlyoutApi>);
   });
   afterEach(() => {
     jest.clearAllMocks();
@@ -39,7 +39,6 @@ describe('UserName', () => {
     fieldName: 'user.name',
     fieldType: 'keyword',
     isAggregatable: true,
-    contextId: 'test-context-id',
     eventId: 'test-event-id',
     value: 'Mock User',
   };
@@ -63,7 +62,7 @@ describe('UserName', () => {
 
     wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenFlyout).not.toHaveBeenCalled();
+      expect(flyoutApi.openUserFlyout).not.toHaveBeenCalled();
     });
   });
 
@@ -85,11 +84,11 @@ describe('UserName', () => {
 
     wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenFlyout).not.toHaveBeenCalled();
+      expect(flyoutApi.openUserFlyout).not.toHaveBeenCalled();
     });
   });
 
-  test('should open expandable flyout on table', async () => {
+  test('should open the user flyout on table', async () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
@@ -106,20 +105,14 @@ describe('UserName', () => {
 
     wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenFlyout).toHaveBeenCalledWith({
-        right: {
-          id: 'user-panel',
-          params: {
-            userName: props.value,
-            contextID: props.contextId,
-            scopeId: TableId.alertsOnAlertsPage,
-          },
-        },
+      expect(flyoutApi.openUserFlyout).toHaveBeenCalledWith({
+        userName: props.value,
+        entityId: undefined,
       });
     });
   });
 
-  test('should open expandable flyout in timeline', async () => {
+  test('should open the user flyout in timeline', async () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
@@ -136,15 +129,9 @@ describe('UserName', () => {
 
     wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenFlyout).toHaveBeenCalledWith({
-        right: {
-          id: 'user-panel',
-          params: {
-            userName: props.value,
-            contextID: props.contextId,
-            scopeId: 'timeline-1',
-          },
-        },
+      expect(flyoutApi.openUserFlyout).toHaveBeenCalledWith({
+        userName: props.value,
+        entityId: undefined,
       });
     });
   });

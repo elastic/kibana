@@ -14,6 +14,7 @@ import type {
   VisualizeEditorContext,
   DataViewsState,
   TypedLensByValueInput,
+  DefaultVisualizationOverrides,
 } from '@kbn/lens-common';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import { createSuggestionWithAttributes, selectAndApplyChartSuggestion } from './helpers';
@@ -26,6 +27,7 @@ interface SuggestionsApiProps {
   excludedVisualizations?: string[];
   preferredChartType?: ChartType;
   preferredVisAttributes?: TypedLensByValueInput['attributes'];
+  defaultVisualizationOverrides?: DefaultVisualizationOverrides;
 }
 
 export const suggestionsApi = ({
@@ -36,8 +38,17 @@ export const suggestionsApi = ({
   excludedVisualizations,
   preferredChartType,
   preferredVisAttributes,
+  defaultVisualizationOverrides,
 }: SuggestionsApiProps) => {
-  const initialContext = context;
+  const initialContext =
+    'textBasedColumns' in context && context.textBasedColumns
+      ? {
+          ...context,
+          textBasedColumns: context.textBasedColumns.filter(
+            (col) => !col.meta?.esMeta?.approximation
+          ),
+        }
+      : context;
   if (!datasourceMap || !visualizationMap || !dataView.id) return undefined;
   const datasourceStates = {
     formBased: {
@@ -70,21 +81,37 @@ export const suggestionsApi = ({
 
   const query = 'query' in context ? context.query : undefined;
 
+  // When preferred visualization attributes are provided, pass the prior visualization state
+  // so that each visualization's suggestion logic can preserve its own settings (e.g. XY chart
+  // preserves legend, axis titles, etc. via its buildSuggestion when it receives currentState).
+  const preferredVisualization = preferredVisAttributes
+    ? visualizationMap[preferredVisAttributes.visualizationType] ?? initialVisualization
+    : initialVisualization;
+  const previousVisualizationState = preferredVisAttributes
+    ? preferredVisAttributes.state.visualization
+    : undefined;
+
   // find the active visualizations from the context
   const suggestions = getSuggestions({
     datasourceMap,
     datasourceStates,
     visualizationMap,
-    activeVisualization: initialVisualization,
-    visualizationState: undefined,
+    activeVisualization: preferredVisualization,
+    visualizationState: previousVisualizationState,
     visualizeTriggerFieldContext: context,
     subVisualizationId: isInitialSubTypeSupported ? preferredChartType?.toLowerCase() : undefined,
     dataViews,
     query,
+    defaultVisualizationOverrides,
   });
   if (!suggestions.length) return [];
 
-  const primarySuggestion = suggestions[0];
+  const primarySuggestion =
+    preferredVisAttributes && preferredVisualization
+      ? suggestions.find(
+          (suggestion) => suggestion.visualizationId === preferredVisualization.id
+        ) ?? suggestions[0]
+      : suggestions[0];
   const activeVisualization = visualizationMap[primarySuggestion.visualizationId];
   if (
     primarySuggestion.incomplete ||
@@ -109,6 +136,7 @@ export const suggestionsApi = ({
     visualizationState: primarySuggestion.visualizationState,
     dataViews,
     query,
+    defaultVisualizationOverrides,
   }).filter(
     (sug) =>
       // Datatables are always return as hidden suggestions

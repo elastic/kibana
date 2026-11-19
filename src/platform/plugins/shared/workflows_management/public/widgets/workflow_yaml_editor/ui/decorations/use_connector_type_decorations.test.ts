@@ -13,7 +13,6 @@ const mockBuiltInStepTypes = new Set([
   'foreach',
   'if',
   'parallel',
-  'merge',
   'data.set',
   'wait',
   'workflow.execute',
@@ -30,6 +29,7 @@ const mockRegisteredStepDefinitions = new Map<string, { id: string }>([
 ]);
 
 jest.mock('@kbn/workflows', () => ({
+  ...jest.requireActual('@kbn/workflows'),
   isBuiltInStepType: (type: string) => mockBuiltInStepTypes.has(type),
   getBuiltInStepStability: jest.fn().mockReturnValue(undefined),
 }));
@@ -46,7 +46,7 @@ jest.mock('../../../../../common/schema', () => ({
 
 describe('resolveBaseConnectorType', () => {
   describe('built-in step types preserve full type', () => {
-    it.each(['foreach', 'if', 'parallel', 'merge', 'data.set', 'wait', 'workflow.execute'])(
+    it.each(['foreach', 'if', 'parallel', 'data.set', 'wait', 'workflow.execute'])(
       'keeps "%s" as-is',
       (type) => {
         expect(resolveBaseConnectorType(type)).toBe(type);

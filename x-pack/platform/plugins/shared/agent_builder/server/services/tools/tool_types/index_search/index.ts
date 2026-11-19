@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getIndexSearchToolType } from './tool_type';
+export { getIndexSearchToolType, type IndexSearchToolTypeDeps } from './tool_type';

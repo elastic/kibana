@@ -5,60 +5,55 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z, lazySchema } from '@kbn/zod';
 import { LAYER_STYLE_TYPE } from '../../../../../common/constants';
 import { vectorStyleSchema } from './vector_style_schemas/vector_style_schemas';
 
-export const EMSVectorTileStyleSchema = schema.object(
-  {
-    color: schema.string(),
-    type: schema.literal(LAYER_STYLE_TYPE.EMS_VECTOR_TILE),
-  },
-  {
-    meta: {
+export const EMSVectorTileStyleSchema = lazySchema(() =>
+  z
+    .object({
+      color: z.string(),
+      type: z.literal(LAYER_STYLE_TYPE.EMS_VECTOR_TILE),
+    })
+    .strict()
+    .meta({
       description: 'Elastic Maps Service (EMS) Vector Tile style configuration.',
-    },
-  }
+    })
 );
 
-export const heatmapStyleSchema = schema.object(
-  {
-    colorRampName: schema.maybe(
-      schema.oneOf(
-        [
-          schema.literal('Blues'),
-          schema.literal('Greens'),
-          schema.literal('Greys'),
-          schema.literal('Reds'),
-          schema.literal('Yellow to Red'),
-          schema.literal('Green to Red'),
-          schema.literal('Blue to Red'),
-          schema.literal('theclassic'),
-        ],
-        {
-          defaultValue: 'theclassic',
-        }
-      )
-    ),
-    type: schema.literal(LAYER_STYLE_TYPE.HEATMAP),
-  },
-  {
-    meta: {
+export const heatmapStyleSchema = lazySchema(() =>
+  z
+    .object({
+      color_ramp_name: z
+        .union([
+          z.literal('Blues'),
+          z.literal('Greens'),
+          z.literal('Greys'),
+          z.literal('Reds'),
+          z.literal('Yellow to Red'),
+          z.literal('Green to Red'),
+          z.literal('Blue to Red'),
+          z.literal('theclassic'),
+        ])
+        .default('theclassic')
+        .optional(),
+      type: z.literal(LAYER_STYLE_TYPE.HEATMAP),
+    })
+    .strict()
+    .meta({
       description: 'Heatmap style configuration.',
-    },
-  }
+    })
 );
 
-export const styleSchema = schema.oneOf([
-  schema.object(
-    {
-      type: schema.string(),
-    },
-    {
-      unknowns: 'allow',
-    }
-  ),
-  EMSVectorTileStyleSchema,
-  heatmapStyleSchema,
-  vectorStyleSchema,
-]);
+export const styleSchema = lazySchema(() =>
+  z.union([
+    z
+      .object({
+        type: z.string(),
+      })
+      .loose(),
+    EMSVectorTileStyleSchema,
+    heatmapStyleSchema,
+    vectorStyleSchema,
+  ])
+);

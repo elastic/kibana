@@ -57,7 +57,7 @@ describe('CategoryAxisPanel component', () => {
     comp.find({ paramName: 'position' }).prop('setValue')('position', value);
 
     expect(setCategoryAxis).toHaveBeenLastCalledWith({ ...axis, position: value });
-    expect(onPositionChanged).toBeCalledWith(value);
+    expect(onPositionChanged).toHaveBeenCalledWith(value);
   });
 
   it('should disable label options with disableAxisControls prop', () => {

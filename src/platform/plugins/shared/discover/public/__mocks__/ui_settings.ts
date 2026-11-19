@@ -34,3 +34,10 @@ export const uiSettingsMock = {
     }
   },
 } as unknown as IUiSettingsClient;
+
+export const mockParticularUiSettings = (
+  settings: Record<string, unknown>,
+  uiSettings: Partial<IUiSettingsClient>
+) => {
+  uiSettings.get = jest.fn((key: string) => settings[key]) as IUiSettingsClient['get'];
+};

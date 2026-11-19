@@ -9,7 +9,6 @@ import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { useParams } from 'react-router-dom';
 
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { TestProviders } from '../../../../common/mock';
 import { NetworkDetails } from '.';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
@@ -59,7 +58,6 @@ jest.mock('react-router-dom', () => {
 jest.mock('../../containers/details', () => ({
   useNetworkDetails: jest.fn().mockReturnValue([true, { networkDetails: {} }]),
 }));
-jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
     from: '2020-07-07T08:20:18.966Z',
@@ -68,15 +66,6 @@ jest.mock('../../../../common/containers/use_global_time', () => ({
     setQuery: jest.fn(),
   }),
 }));
-
-const useAddToTimeline = () => ({
-  beginDrag: jest.fn(),
-  cancelDrag: jest.fn(),
-  dragToLocation: jest.fn(),
-  endDrag: jest.fn(),
-  hasDraggableLock: jest.fn(),
-  startDragToTimeline: jest.fn(),
-});
 
 jest.mock('../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../common/lib/kibana');
@@ -88,9 +77,6 @@ jest.mock('../../../../common/lib/kibana', () => {
     useKibana: () => ({
       services: {
         ...original.useKibana().services,
-        timelines: {
-          getUseAddToTimeline: () => useAddToTimeline,
-        },
       },
     }),
   };
@@ -127,11 +113,6 @@ const getMockHistory = (ip: string) => ({
 
 describe('Network Details', () => {
   beforeAll(() => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      indicesExist: false,
-      indexPattern: {},
-      sourcererDataView: {},
-    });
     global.fetch = jest.fn().mockImplementationOnce(() =>
       Promise.resolve({
         ok: true,
@@ -148,11 +129,6 @@ describe('Network Details', () => {
 
   test('it renders', () => {
     const ip = '123.456.78.90';
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      indicesExist: true,
-      indexPattern: {},
-      sourcererDataView: {},
-    });
     (useParams as jest.Mock).mockReturnValue({
       detailName: ip,
       flowTarget: FlowTargetSourceDest.source,
@@ -171,11 +147,6 @@ describe('Network Details', () => {
     jest.mocked(useDataView).mockReturnValue(withIndices(['test-index']));
 
     const ip = 'fe80--24ce-f7ff-fede-a571';
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      indicesExist: true,
-      indexPattern: {},
-      sourcererDataView: {},
-    });
     (useParams as jest.Mock).mockReturnValue({
       detailName: ip,
       flowTarget: FlowTargetSourceDest.source,
@@ -196,11 +167,6 @@ describe('Network Details', () => {
     jest.mocked(useDataView).mockReturnValue(defaultImplementation());
 
     const ip = '123.456.78.90';
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      indicesExist: false,
-      indexPattern: {},
-      sourcererDataView: {},
-    });
     (useParams as jest.Mock).mockReturnValue({
       detailName: ip,
       flowTarget: FlowTargetSourceDest.source,

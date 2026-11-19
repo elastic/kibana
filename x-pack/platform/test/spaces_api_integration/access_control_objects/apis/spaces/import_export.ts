@@ -15,8 +15,14 @@ import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 
 import type { FtrProviderContext } from '../../../../functional/ftr_provider_context';
+import {
+  ACCESS_CONTROL_EDITOR_PASSWORD,
+  ACCESS_CONTROL_EDITOR_USERNAME,
+  createAccessControlEditorUser,
+} from '../access_control_apis/utils/helpers';
 
 export default function ({ getService }: FtrProviderContext) {
+  const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
 
@@ -88,6 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('read only saved objects', () => {
     before(async () => {
       await security.testUser.setRoles(['kibana_savedobjects_editor']);
+      await createAccessControlEditorUser(es);
     });
 
     after(async () => {
@@ -367,8 +374,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('overwriting objects', () => {
         describe('negative tests', function () {
-          this.tags('skipFIPS');
-
           it('should disallow overwrite of owned objects if not owned by the current user', async () => {
             const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
 
@@ -388,7 +393,10 @@ export default function ({ getService }: FtrProviderContext) {
             const adminObjId = createResponse.body.id;
 
             const { cookie: testUserCookie, profileUid: testProfileId } =
-              await loginAsNotObjectOwner('test_user', 'changeme');
+              await loginAsNotObjectOwner(
+                ACCESS_CONTROL_EDITOR_USERNAME,
+                ACCESS_CONTROL_EDITOR_PASSWORD
+              );
 
             createResponse = await supertestWithoutAuth
               .post('/access_control_objects/create')
@@ -519,7 +527,10 @@ export default function ({ getService }: FtrProviderContext) {
             expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
             const secondObjId = createResponse.body.id;
 
-            const { cookie: testUserCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
+            const { cookie: testUserCookie } = await loginAsNotObjectOwner(
+              ACCESS_CONTROL_EDITOR_USERNAME,
+              ACCESS_CONTROL_EDITOR_PASSWORD
+            );
 
             const toImport = [
               {
@@ -1008,8 +1019,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('should disallow', function () {
-        this.tags('skipFIPS');
-
         it('overwrite retry for write-restricted objects not owned by the current user', async () => {
           const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
 
@@ -1029,8 +1038,8 @@ export default function ({ getService }: FtrProviderContext) {
           const adminObjId = createResponse.body.id;
 
           const { cookie: testUserCookie, profileUid: testProfileId } = await loginAsNotObjectOwner(
-            'test_user',
-            'changeme'
+            ACCESS_CONTROL_EDITOR_USERNAME,
+            ACCESS_CONTROL_EDITOR_PASSWORD
           );
 
           createResponse = await supertestWithoutAuth

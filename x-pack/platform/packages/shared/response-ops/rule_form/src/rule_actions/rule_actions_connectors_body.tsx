@@ -31,6 +31,7 @@ import {
 import { css } from '@emotion/react';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { type ActionTypeModel, checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
+import { i18n } from '@kbn/i18n';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { RuleFormParamsErrors } from '../common/types';
@@ -43,7 +44,11 @@ import {
   ACTION_TYPE_MODAL_FILTER_LIST_TITLE,
   MODAL_SEARCH_CLEAR_FILTERS_TEXT,
   MODAL_SEARCH_PLACEHOLDER,
+  DEPRECATED_LABEL,
+  DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
+  DEPRECATED_LLM_CONNECTOR_INFO,
 } from '../translations';
+import { isLLMConnectorTypeId } from '../constants';
 import { getDefaultParams } from '../utils';
 
 type ConnectorsMap = Record<string, { actionTypeId: string; name: string; total: number }>;
@@ -165,6 +170,10 @@ export const RuleActionsConnectorsBody = ({
       }
 
       if (!actionTypeModel?.actionParamsFields) {
+        return false;
+      }
+
+      if (actionTypeModel.getHideInUi?.(connectorTypes) && !actionTypeModel.subtype?.length) {
         return false;
       }
 
@@ -303,7 +312,7 @@ export const RuleActionsConnectorsBody = ({
   const connectorFilterButton = useMemo(() => {
     const button = (
       <EuiFilterButton
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         badgeColor="accent"
         hasActiveFilters={selectedConnectorType !== 'all'}
         numActiveFilters={selectedConnectorType !== 'all' ? 1 : undefined}
@@ -325,10 +334,14 @@ export const RuleActionsConnectorsBody = ({
     return (
       <EuiFilterGroup style={{ width: '100%' }}>
         <EuiPopover
+          aria-label={i18n.translate(
+            'responseOpsRuleForm.ruleForm.connectorTypeFilterPopoverAriaLabel',
+            { defaultMessage: 'Filter by connector type' }
+          )}
           button={button}
           closePopover={closeFilterPopover}
           isOpen={isConenctorFilterPopoverOpen}
-          panelPaddingSize="none"
+          panelPaddingSize="s"
         >
           <EuiSelectable singleSelection options={options}>
             {(list) => <div style={{ width: 400 }}>{list}</div>}
@@ -351,7 +364,7 @@ export const RuleActionsConnectorsBody = ({
         <EuiEmptyPrompt
           data-test-subj="ruleActionsConnectorsModalEmpty"
           color="subdued"
-          iconType="search"
+          iconType="magnify"
           title={<h2>{ACTION_TYPE_MODAL_EMPTY_TITLE}</h2>}
           body={
             <EuiText>
@@ -412,10 +425,27 @@ export const RuleActionsConnectorsBody = ({
               isDisabled={isDisabled}
               titleSize="xs"
               layout="horizontal"
+              betaBadgeProps={
+                actionType.isDeprecated
+                  ? {
+                      color: 'warning',
+                      label: DEPRECATED_LABEL,
+                      size: 's',
+                      tooltipContent: isLLMConnectorTypeId(actionType.id) ? (
+                        <>
+                          <p>{DEPRECATED_CONNECTOR_TOOLTIP_CONTENT}</p>
+                          <p>{DEPRECATED_LLM_CONNECTOR_INFO}</p>
+                        </>
+                      ) : (
+                        DEPRECATED_CONNECTOR_TOOLTIP_CONTENT
+                      ),
+                    }
+                  : undefined
+              }
               icon={
                 <div style={{ marginInlineEnd: `16px` }}>
                   <Suspense fallback={<EuiLoadingSpinner />}>
-                    <EuiIcon size="l" type={actionTypeModel.iconClass} />
+                    <EuiIcon size="l" type={actionTypeModel.iconClass} aria-hidden={true} />
                   </Suspense>
                 </div>
               }
@@ -424,9 +454,11 @@ export const RuleActionsConnectorsBody = ({
                 <>
                   <EuiText size="xs">{actionTypeModel.selectMessage}</EuiText>
                   <EuiSpacer size="s" />
-                  <EuiText color="subdued" size="xs" style={{ textTransform: 'uppercase' }}>
-                    <strong>{actionType?.name}</strong>
-                  </EuiText>
+                  <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+                    <EuiText color="subdued" size="xs" style={{ textTransform: 'uppercase' }}>
+                      <strong>{actionType?.name}</strong>
+                    </EuiText>
+                  </EuiFlexGroup>
                 </>
               }
               onClick={() => onSelectConnectorInternal(connector)}

@@ -55,7 +55,7 @@ describe('Endpoint package policies stats', () => {
       );
       expect(
         endpointAppContextService.getInternalFleetServices().packagePolicy.list
-      ).toBeCalledTimes(1);
+      ).toHaveBeenCalledTimes(1);
       expect(response).toEqual({
         isPartial: false,
         isRunning: false,
@@ -94,6 +94,31 @@ describe('Endpoint package policies stats', () => {
           moment.utc().subtract(1, 'week').format('YYYY-MM-DD'),
           moment.utc().subtract(2, 'week').format('YYYY-MM-DD'),
         ])
+      );
+      const response = await requestEndpointPackagePoliciesStatsSearch(
+        endpointAppContextService,
+        deps
+      );
+      expect(response).toEqual({
+        isPartial: false,
+        isRunning: false,
+        rawResponse: { outdatedManifestsCount: 2 },
+      });
+    });
+
+    it('when versions match the policy list ages', async () => {
+      const listMock = endpointAppContextService.getInternalFleetServices().packagePolicy
+        .list as jest.Mock;
+      const monthAgo = moment.utc().subtract(1, 'months').format('YYYY-MM-DD');
+      const threeDaysAgo = moment.utc().subtract(3, 'days').format('YYYY-MM-DD');
+      const eighteenMonthsAgo = moment
+        .utc()
+        .subtract(18, 'months')
+        .add(1, 'day')
+        .format('YYYY-MM-DD');
+
+      listMock.mockResolvedValueOnce(
+        mockPackagePolicyResponse([monthAgo, threeDaysAgo, eighteenMonthsAgo, 'latest'])
       );
       const response = await requestEndpointPackagePoliciesStatsSearch(
         endpointAppContextService,

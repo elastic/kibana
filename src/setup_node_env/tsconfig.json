@@ -10,7 +10,8 @@
     "*.ts",
   ],
   "kbn_references": [
-    "@kbn/babel-register",
+    "@kbn/repo-info",
+    "@kbn/swc-register",
     "@kbn/security-hardening",
   ],
   "exclude": [

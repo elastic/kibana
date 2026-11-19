@@ -9,7 +9,7 @@
 
 import type { ComponentType } from 'react';
 import React from 'react';
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 

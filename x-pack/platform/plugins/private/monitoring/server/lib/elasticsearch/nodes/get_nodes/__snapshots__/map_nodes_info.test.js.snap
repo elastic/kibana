@@ -5,7 +5,7 @@ Object {
   "ENVgDIKRSdCVJo-YqY4kUQ": Object {
     "isOnline": true,
     "name": "node01",
-    "nodeTypeClass": "starFilled",
+    "nodeTypeClass": "starFill",
     "nodeTypeLabel": "Master Node",
     "roles": undefined,
     "shardCount": 57,

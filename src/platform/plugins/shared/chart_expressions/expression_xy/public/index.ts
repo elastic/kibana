@@ -15,6 +15,12 @@ export function plugin() {
   return new ExpressionXyPlugin();
 }
 
-export { LayerTypes, XYCurveTypes, FittingFunctions, PointVisibilityOptions } from '../common';
+export {
+  LayerTypes,
+  XYCurveTypes,
+  FittingFunctions,
+  PointVisibilityOptions,
+  AreaFillOptions,
+} from '../common';
 
 export type { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';

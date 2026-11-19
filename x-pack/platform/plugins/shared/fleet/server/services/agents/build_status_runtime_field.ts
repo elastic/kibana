@@ -14,7 +14,10 @@ import { DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT } from '../../../com
 import { AGENT_POLLING_THRESHOLD_MS } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
-const MISSED_INTERVALS_BEFORE_OFFLINE = 10;
+
+const escapePainlessString = (s: string) => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+const MISSED_INTERVALS_BEFORE_OFFLINE = 12;
 const MS_BEFORE_OFFLINE = MISSED_INTERVALS_BEFORE_OFFLINE * AGENT_POLLING_THRESHOLD_MS;
 export type InactivityTimeouts = Awaited<
   ReturnType<(typeof agentPolicyService)['getInactivityTimeouts']>
@@ -30,23 +33,34 @@ type StatusRuntimeMapping = NonNullable<estypes.MappingRuntimeFields> & {
   };
 };
 
+// Painless equivalent of `buildPolicyBaseIdWithFallbackEsFilter`: `getInactivityTimeouts()` only ever
+// returns base policy ids, so an agent moved to a version-specific variant (`<id>#sentinel`) has to be
+// matched on `policy_base_id`, falling back to `policy_id` for documents that pre-date that field.
+const _buildPolicyBaseIdDeclaration = (opts: {
+  field: (path: string) => string;
+  fieldPath: (path: string) => string;
+}): string => {
+  const { field, fieldPath } = opts;
+
+  return `String agentPolicyBaseId = doc.containsKey(${fieldPath('policy_base_id')}) && ${field(
+    'policy_base_id'
+  )}.size() > 0
+      ? ${field('policy_base_id')}.value
+      : (
+          doc.containsKey(${fieldPath('policy_id')}) && ${field('policy_id')}.size() > 0
+          ? ${field('policy_id')}.value
+          : ''
+        );`;
+};
+
 let inactivityTimeoutsDisabled = false;
 const _buildInactiveCondition = (opts: {
   now: number;
   inactivityTimeouts: InactivityTimeouts;
   maxAgentPoliciesWithInactivityTimeout: number;
-  field: (path: string) => string;
-  fieldPath: (path: string) => string;
   logger?: Logger;
 }): string | null => {
-  const {
-    now,
-    inactivityTimeouts,
-    maxAgentPoliciesWithInactivityTimeout,
-    field,
-    fieldPath,
-    logger,
-  } = opts;
+  const { now, inactivityTimeouts, maxAgentPoliciesWithInactivityTimeout, logger } = opts;
   // if there are no policies with inactivity timeouts, then no agents are inactive
   if (inactivityTimeouts.length === 0) {
     return null;
@@ -80,17 +94,15 @@ const _buildInactiveCondition = (opts: {
   const policyClauses = inactivityTimeouts
     .map(({ inactivityTimeout, policyIds }) => {
       const inactivityTimeoutMs = inactivityTimeout * 1000;
-      const policyIdMatches = `[${policyIds.map((id) => `'${id}'`).join(',')}].contains(${field(
-        'policy_id'
-      )}.value)`;
+      const policyIdMatches = `[${policyIds
+        .map((id) => `'${escapePainlessString(id)}'`)
+        .join(',')}].contains(agentPolicyBaseId)`;
 
       return `${policyIdMatches} && lastCheckinMillis < ${now - inactivityTimeoutMs}L`;
     })
     .join(' || ');
 
-  return `lastCheckinMillis > 0 && doc.containsKey(${fieldPath('policy_id')}) && ${field(
-    'policy_id'
-  )}.size() > 0 && (${policyClauses})`;
+  return `lastCheckinMillis > 0 && agentPolicyBaseId.length() > 0 && (${policyClauses})`;
 };
 
 function _buildSource(
@@ -107,8 +119,6 @@ function _buildSource(
     now,
     inactivityTimeouts,
     maxAgentPoliciesWithInactivityTimeout,
-    field,
-    fieldPath,
     logger,
   });
 
@@ -122,6 +132,7 @@ function _buildSource(
           ? ${field('enrolled_at')}.value.toInstant().toEpochMilli()
           : -1
         );
+    ${agentIsInactiveCondition ? _buildPolicyBaseIdDeclaration({ field, fieldPath }) : ''}
     if (!doc.containsKey(${fieldPath('active')}) || (${field('active')}.size() > 0 && ${field(
     'active'
   )}.value == false)) {
@@ -138,6 +149,11 @@ function _buildSource(
         lastCheckinMillis > 0
         && lastCheckinMillis
         < ${now - MS_BEFORE_OFFLINE}L
+    ) {
+      emit('offline');
+    } else if (
+      ${field('last_checkin_status')}.size() > 0 &&
+      ${field('last_checkin_status')}.value.toLowerCase() == 'disconnected'
     ) {
       emit('offline');
     } else if (

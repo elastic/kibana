@@ -182,14 +182,6 @@ export const topNavStrings = {
       defaultMessage: 'Full Screen Mode',
     }),
   },
-  labs: {
-    label: i18n.translate('dashboard.topNav.labsButtonAriaLabel', {
-      defaultMessage: 'labs',
-    }),
-    description: i18n.translate('dashboard.topNav.labsConfigDescription', {
-      defaultMessage: 'Labs',
-    }),
-  },
   edit: {
     label: i18n.translate('dashboard.topNave.editButtonAriaLabel', {
       defaultMessage: 'edit',
@@ -211,6 +203,11 @@ export const topNavStrings = {
     }),
     description: i18n.translate('dashboard.topNave.saveConfigDescription', {
       defaultMessage: 'Quick save your dashboard without any prompts',
+    }),
+  },
+  resetChangesError: {
+    title: i18n.translate('dashboard.topNave.resetChangesErrorTitle', {
+      defaultMessage: 'Unable to reset dashboard changes',
     }),
   },
   editModeInteractiveSave: {
@@ -243,6 +240,9 @@ export const topNavStrings = {
     }),
     description: i18n.translate('dashboard.topNave.exportConfigDescription', {
       defaultMessage: 'Export dashboard',
+    }),
+    jsonLabel: i18n.translate('dashboard.topNave.exportJsonButtonAriaLabel', {
+      defaultMessage: 'Export JSON',
     }),
     pngLabel: i18n.translate('dashboard.topNave.exportPngButtonAriaLabel', {
       defaultMessage: 'PNG reports',
@@ -295,7 +295,7 @@ export const topNavStrings = {
   },
   add: {
     label: i18n.translate('dashboard.topNave.addButtonAriaLabel', {
-      defaultMessage: 'add',
+      defaultMessage: 'Add',
     }),
     description: i18n.translate('dashboard.topNave.addConfigDescription', {
       defaultMessage: 'Add content to your dashboard',
@@ -315,6 +315,11 @@ export const topNavStrings = {
     }),
     description: i18n.translate('dashboard.topNave.saveMenuDescription', {
       defaultMessage: 'Additional save options',
+    }),
+  },
+  history: {
+    label: i18n.translate('dashboard.topNav.historyLabel', {
+      defaultMessage: 'History',
     }),
   },
   unsavedChangesTooltip: i18n.translate('dashboard.topNav.unsavedChangesTooltip', {

@@ -33,6 +33,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { Controller, FormProvider, useForm, type Control } from 'react-hook-form';
@@ -140,11 +142,13 @@ const getParameters = (tool?: ToolDefinitionWithSchema): Array<ToolParameter> =>
       }
     }
 
+    const title = schema && 'title' in schema ? schema.title : undefined;
+    const description = schema && 'description' in schema ? schema.description : undefined;
     return {
       name: paramName,
-      label: schema?.title || paramName,
+      label: title || paramName,
       value: '',
-      description: schema?.description || '',
+      description: description || '',
       type,
       format: (schema && 'format' in schema && schema.format) || undefined,
       optional: !requiredParams.has(paramName),
@@ -409,7 +413,15 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose 
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiLink href={`${docLinksService.tools}#testing-your-tools`} target="_blank">
+            <EuiLink
+              href={`${docLinksService.agentBuilderTools}#testing-your-tools`}
+              target="_blank"
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.flyout,
+                action: AGENT_BUILDER_UI_EBT.action.globalManagement.TOOL_TEST_DOCS,
+                detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+              })}
+            >
               {i18n.translate('xpack.agentBuilder.tools.testFlyout.documentationLink', {
                 defaultMessage: 'Documentation - Testing tools',
               })}
@@ -482,6 +494,11 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose 
                         isLoading={isExecuting}
                         disabled={!tool || hasErrors}
                         data-test-subj="agentBuilderToolTestSubmitButton"
+                        {...getEbtProps({
+                          element: AGENT_BUILDER_UI_EBT.element.flyout,
+                          action: AGENT_BUILDER_UI_EBT.action.globalManagement.TOOL_TEST_SUBMIT,
+                          detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+                        })}
                       >
                         {i18nMessages.executeButton}
                       </EuiButton>

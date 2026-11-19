@@ -36,7 +36,7 @@ export const SuggestionItem: React.FC<Props> = ({
       onMouseEnter={onMouseEnter}
     >
       <div css={suggestionItemIconFieldStyle(suggestion.type)}>
-        <EuiIcon type={getEuiIconType(suggestion.type)} />
+        <EuiIcon type={getEuiIconType(suggestion.type)} aria-hidden={true} />
       </div>
       <div css={suggestionItemTextFieldStyle}>{suggestion.text}</div>
       <div css={suggestionItemDescriptionFieldStyle}>{suggestion.description}</div>
@@ -96,15 +96,15 @@ const suggestionItemDescriptionFieldStyle = (theme: UseEuiTheme) => css`
 const getEuiIconType = (suggestionType: QuerySuggestionTypes) => {
   switch (suggestionType) {
     case QuerySuggestionTypes.Field:
-      return 'kqlField';
+      return 'queryField';
     case QuerySuggestionTypes.Value:
-      return 'kqlValue';
+      return 'queryValue';
     case QuerySuggestionTypes.RecentSearch:
       return 'search';
     case QuerySuggestionTypes.Conjunction:
-      return 'kqlSelector';
+      return 'querySelector';
     case QuerySuggestionTypes.Operator:
-      return 'kqlOperand';
+      return 'queryOperand';
     default:
       return 'empty';
   }

@@ -15,11 +15,12 @@ import type { DefaultClientOptions } from '@kbn/server-route-repository-client';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { render as testLibRender } from '@testing-library/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiProvider } from '@elastic/eui';
-import type { SLORouteRepository } from '../../server/routes/get_slo_server_route_repository';
+import type { SLORouteRepository } from '../../server/routes/utils/get_slo_server_route_repository';
 import { PluginContext } from '../context/plugin_context';
 
 const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;
@@ -45,6 +46,13 @@ const queryClient = new QueryClient({
 
 const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 
+export const pluginContextDefaultValue = {
+  appMountParameters,
+  observabilityRuleTypeRegistry,
+  ObservabilityPageTemplate: KibanaPageTemplate,
+  sloClient,
+};
+
 export const render = (component: React.ReactNode) => {
   return testLibRender(
     // @ts-ignore
@@ -68,15 +76,10 @@ export const render = (component: React.ReactNode) => {
             },
           }}
         >
-          <PluginContext.Provider
-            value={{
-              appMountParameters,
-              observabilityRuleTypeRegistry,
-              ObservabilityPageTemplate: KibanaPageTemplate,
-              sloClient,
-            }}
-          >
-            <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>
+          <PluginContext.Provider value={pluginContextDefaultValue}>
+            <MockAppHeaderProvider>
+              <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>
+            </MockAppHeaderProvider>
           </PluginContext.Provider>
         </KibanaContextProvider>
       </EuiProvider>

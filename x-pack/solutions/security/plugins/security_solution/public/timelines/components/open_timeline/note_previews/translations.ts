@@ -52,6 +52,6 @@ export const CANCEL_DELETE_NOTE = i18n.translate(
 export const DELETE_NOTE_CONFIRM = i18n.translate(
   'xpack.securitySolution.timeline.promptDeleteNoteLabel',
   {
-    defaultMessage: 'Delete timeline note?',
+    defaultMessage: 'Delete Timeline note?',
   }
 );

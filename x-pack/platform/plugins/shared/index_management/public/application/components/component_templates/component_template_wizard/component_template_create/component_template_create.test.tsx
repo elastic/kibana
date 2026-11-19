@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { setupEnvironment } from '../../__jest__/client_integration/helpers';
@@ -16,6 +17,8 @@ import { runPendingTimersUntil } from '../../../../../../__jest__/helpers/fake_t
 import type { ComponentTemplateDeserialized } from '../../../../../../common';
 import { serializeAsESLifecycle } from '../../../../../../common/lib';
 import { StepReview } from '../component_template_form/steps/step_review';
+import type { AppDependencies } from '../../../../app_context';
+import { AppContextProvider } from '../../../../app_context';
 
 jest.mock('@kbn/code-editor');
 
@@ -35,7 +38,7 @@ describe('<ComponentTemplateCreate />', () => {
   describe('On component mount', () => {
     beforeEach(async () => {
       renderComponentTemplateCreate(httpSetup);
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
     });
 
     test('updates the breadcrumbs to component templates', () => {
@@ -46,8 +49,10 @@ describe('<ComponentTemplateCreate />', () => {
 
     test('should set the correct page header', async () => {
       // Verify page title
-      expect(screen.getByTestId('pageTitle')).toBeInTheDocument();
-      expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create component template');
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Create component template'
+      );
 
       // Verify documentation link
       expect(screen.getByTestId('documentationLink')).toBeInTheDocument();
@@ -68,15 +73,14 @@ describe('<ComponentTemplateCreate />', () => {
         expect(screen.getByTestId('metaEditor')).toBeInTheDocument();
       });
 
-      test('should toggle the data retention field', async () => {
-        expect(screen.queryByTestId('valueDataRetentionField')).not.toBeInTheDocument();
+      test('should toggle the delete phase of the data lifecycle field', async () => {
+        expect(screen.queryByTestId('deleteDurationValue')).not.toBeInTheDocument();
 
-        const lifecycleSwitchRow = screen.getByTestId('dataRetentionToggle');
-        const lifecycleSwitch = within(lifecycleSwitchRow).getByRole('switch');
-        fireEvent.click(lifecycleSwitch);
+        const deleteCheckbox = screen.getByTestId('dlmPhasesSelectorDeletePhaseCard');
+        fireEvent.click(deleteCheckbox);
 
-        await runPendingTimersUntil(() => screen.queryByTestId('valueDataRetentionField') !== null);
-        expect(screen.getByTestId('valueDataRetentionField')).toBeInTheDocument();
+        await runPendingTimersUntil(() => screen.queryByTestId('deleteDurationValue') !== null);
+        expect(screen.getByTestId('deleteDurationValue')).toBeInTheDocument();
       });
 
       describe('Validation', () => {
@@ -87,11 +91,75 @@ describe('<ComponentTemplateCreate />', () => {
           await screen.findByText('A component template name is required.');
           expect(screen.getByTestId('nextButton')).toBeDisabled();
         });
+
+        test('should prevent proceeding when the name has invalid characters', async () => {
+          const nameRow = screen.getByTestId('nameField');
+          const nameInput = within(nameRow).getByRole('textbox');
+
+          fireEvent.change(nameInput, { target: { value: 'Invalid#Name' } });
+          fireEvent.click(screen.getByTestId('nextButton'));
+
+          await screen.findByText("Name must not contain a '#'.");
+          expect(screen.getByTestId('nextButton')).toBeDisabled();
+        });
+
+        test('should prevent proceeding when data lifecycle configuration is invalid', async () => {
+          const nameRow = screen.getByTestId('nameField');
+          const nameInput = within(nameRow).getByRole('textbox');
+          fireEvent.change(nameInput, { target: { value: 'my-component-template' } });
+
+          fireEvent.click(screen.getByTestId('dlmPhasesSelectorDeletePhaseCard'));
+
+          await runPendingTimersUntil(() => screen.queryByTestId('deleteDurationValue') !== null);
+          fireEvent.change(screen.getByTestId('deleteDurationValue'), { target: { value: '0' } });
+
+          await screen.findByText('Enter a whole number greater than 0.');
+
+          fireEvent.click(screen.getByTestId('nextButton'));
+
+          await waitFor(() => {
+            expect(screen.getByTestId('nextButton')).toBeDisabled();
+          });
+        });
       });
     });
   });
 
   describe('Step: Review and submit', () => {
+    const renderStepReview = (componentTemplate: ComponentTemplateDeserialized) =>
+      render(
+        <I18nProvider>
+          <AppContextProvider
+            value={
+              {
+                config: { isServerless: false },
+              } as unknown as AppDependencies
+            }
+          >
+            <StepReview componentTemplate={componentTemplate} />
+          </AppContextProvider>
+        </I18nProvider>
+      );
+
+    test('should only summarize the data lifecycle when the request includes one', () => {
+      const { unmount } = renderStepReview({
+        name: 'comp-1',
+        template: {},
+        _kbnMeta: { usedBy: [], isManaged: false },
+      });
+
+      expect(screen.queryByTestId('dataLifecycleTitle')).not.toBeInTheDocument();
+      unmount();
+
+      renderStepReview({
+        name: 'comp-1',
+        template: { lifecycle: { enabled: true, data_retention: '2d' } },
+        _kbnMeta: { usedBy: [], isManaged: false },
+      });
+
+      expect(screen.getByTestId('dataLifecycleTitle')).toBeInTheDocument();
+    });
+
     test('should render the review content', async () => {
       const componentTemplate: ComponentTemplateDeserialized = {
         name: 'comp-1',
@@ -104,11 +172,7 @@ describe('<ComponentTemplateCreate />', () => {
         _kbnMeta: { usedBy: [], isManaged: false },
       };
 
-      render(
-        <I18nProvider>
-          <StepReview componentTemplate={componentTemplate} />
-        </I18nProvider>
-      );
+      renderStepReview(componentTemplate);
 
       expect(screen.getByTestId('stepReview')).toBeInTheDocument();
       expect(screen.getByTestId('stepReview')).toHaveTextContent(`Review details for 'comp-1'`);

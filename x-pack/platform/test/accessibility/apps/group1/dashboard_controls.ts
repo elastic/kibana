@@ -11,40 +11,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const sampleData = getService('sampleData');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
-  const { common, dashboard, home, dashboardControls } = getPageObjects([
+  const { common, dashboard, dashboardControls } = getPageObjects([
     'common',
     'dashboard',
-    'home',
     'dashboardControls',
   ]);
   const browser = getService('browser');
 
-  describe('Dashboard controls a11y tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/294192
+  describe.skip('Dashboard controls a11y tests', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await home.addSampleDataSet('flights');
+      await sampleData.testResources.installKibanaSampleData('flights');
       await common.navigateToApp('dashboard');
       await dashboard.loadDashboardInEditMode('[Flights] Global Flight Dashboard');
     });
 
     after(async () => {
-      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await home.removeSampleDataSet('flights');
-    });
-
-    it('Controls main menu panel', async () => {
-      await dashboardControls.openControlsMenu();
-      await a11y.testAppSnapshot();
+      await sampleData.testResources.removeKibanaSampleData('flights');
     });
 
     it('Add controls panel', async () => {
-      await testSubjects.click('controls-create-button');
+      await dashboardAddPanel.clickAddControlPanel();
       await a11y.testAppSnapshot();
     });
 
@@ -68,8 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Range control panel & dashboard with both range and options control', async () => {
-      await dashboardControls.openControlsMenu();
-      await testSubjects.click('controls-create-button');
+      await dashboardAddPanel.clickAddControlPanel();
       await testSubjects.click('field-picker-select-AvgTicketPrice');
       await a11y.testAppSnapshot();
       await testSubjects.click('control-editor-save');

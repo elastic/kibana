@@ -41,16 +41,18 @@ import type {
 import { i18n } from '@kbn/i18n';
 import type { ChartType } from '@kbn/visualization-utils';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import type {
-  VisualizationType,
-  LensAppLocator,
-  DatasourceMap,
-  VisualizationMap,
-  LensTopNavMenuEntryGenerator,
-  VisualizeEditorContext,
-  EditorFrameSetup,
-  LensDocument,
-  LensByRefSerializedState,
+import {
+  type VisualizationType,
+  type LensAppLocator,
+  type DatasourceMap,
+  type VisualizationMap,
+  type LensTopNavMenuEntryGenerator,
+  type VisualizeEditorContext,
+  type EditorFrameSetup,
+  type LensDocument,
+  type LensByRefSerializedState,
+  type DefaultVisualizationOverrides,
+  LENS_EMBEDDABLE_TYPE,
 } from '@kbn/lens-common';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -60,7 +62,6 @@ import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/pu
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -73,13 +74,13 @@ import {
 } from '@kbn/lens-common/content_management/constants';
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
-  ADD_PANEL_TRIGGER,
   AGG_BASED_VISUALIZATION_TRIGGER,
   ON_OPEN_PANEL_MENU,
   DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
   VISUALIZE_EDITOR_TRIGGER,
   VISUALIZE_FIELD_TRIGGER,
+  FEATURED_ADD_PANEL_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
@@ -114,7 +115,6 @@ import {
   APP_ID,
   DISCOVER_DRILLDOWN_TYPE,
   getEditPath,
-  LENS_EMBEDDABLE_TYPE,
   LENS_ICON,
   NOT_INTERNATIONALIZED_PRODUCT_NAME,
 } from '../common/constants';
@@ -172,7 +172,6 @@ export interface LensPluginStartDependencies {
   charts: ChartsPluginStart;
   eventAnnotation: EventAnnotationPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-  presentationUtil: PresentationUtilPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViewEditor: DataViewEditorStart;
   inspector: InspectorStartContract;
@@ -286,7 +285,8 @@ export type LensSuggestionsApi = (
   dataViews: DataView,
   excludedVisualizations?: string[],
   preferredChartType?: ChartType,
-  preferredVisAttributes?: TypedLensByValueInput['attributes']
+  preferredVisAttributes?: TypedLensByValueInput['attributes'],
+  defaultVisualizationOverrides?: DefaultVisualizationOverrides
 ) => Suggestion[] | undefined;
 
 export class LensPlugin {
@@ -385,7 +385,7 @@ export class LensPlugin {
 
     if (embeddable) {
       // Let Kibana know about the Lens embeddable
-      embeddable.registerReactEmbeddableFactory(LENS_EMBEDDABLE_TYPE, async () => {
+      embeddable.registerEmbeddablePublicDefinition(LENS_EMBEDDABLE_TYPE, async () => {
         const [deps, { createLensEmbeddableFactory }] = await Promise.all([
           getStartServicesForEmbeddable(),
           import('./async_services'),
@@ -719,7 +719,7 @@ export class LensPlugin {
     );
 
     startDependencies.uiActions.addTriggerActionAsync(
-      ADD_PANEL_TRIGGER,
+      FEATURED_ADD_PANEL_TRIGGER,
       ACTION_CREATE_ESQL_CHART,
       async () => {
         const { AddESQLPanelAction } = await import('./async_services');
@@ -730,7 +730,7 @@ export class LensPlugin {
       const { getAddLensPanelAction } = await import('./async_services');
       return getAddLensPanelAction(startDependencies);
     });
-    startDependencies.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addLensPanelAction');
+    startDependencies.uiActions.attachAction(FEATURED_ADD_PANEL_TRIGGER, 'addLensPanelAction');
 
     startDependencies.uiActions.attachAction(ADD_CANVAS_ELEMENT_TRIGGER, 'addLensPanelAction');
 
@@ -799,7 +799,8 @@ export class LensPlugin {
             dataView,
             excludedVisualizations,
             preferredChartType,
-            preferredVisAttributes
+            preferredVisAttributes,
+            defaultVisualizationOverrides
           ) => {
             return suggestionsApi({
               datasourceMap,
@@ -809,6 +810,7 @@ export class LensPlugin {
               excludedVisualizations,
               preferredChartType,
               preferredVisAttributes,
+              defaultVisualizationOverrides,
             });
           },
         };

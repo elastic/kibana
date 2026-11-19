@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { pick } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import {
   buildConsumersFilter,
   buildRuleTypeIdsFilter,
@@ -20,7 +21,6 @@ import type { SanitizedRule, Rule as DeprecatedRule, RawRule } from '../../../..
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   mapSortField,
-  validateOperationOnAttributes,
   buildKueryNodeFilter,
   includeFieldsRequiredForAuthentication,
 } from '../../../../rules_client/common';
@@ -39,18 +39,29 @@ import { findRulesParamsSchema } from './schemas';
 import type { Rule, RuleParams } from '../../types';
 import { findRulesSo } from '../../../../data/rule';
 
+export interface FindRuleError {
+  message: string;
+  rule: {
+    id: string;
+    name?: string;
+  };
+}
+
 export interface FindResult<Params extends RuleParams> {
   page: number;
   perPage: number;
   total: number;
+  searchAfter?: SortResults;
   data: Array<SanitizedRule<Params>>;
+  errors?: FindRuleError[];
+  aggregations?: Record<string, unknown>;
 }
 
 export async function findRules<Params extends RuleParams = never>(
   context: RulesClientContext,
   params?: FindRulesParams
 ): Promise<FindResult<Params>> {
-  const { options, excludeFromPublicApi = false, includeSnoozeData = false } = params || {};
+  const { options, allowPartialResults = false } = params || {};
 
   const { fields, ruleTypeIds, consumers, ...restOptions } = options || {};
 
@@ -81,19 +92,6 @@ export async function findRules<Params extends RuleParams = never>(
   const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
   const filterKueryNode = buildKueryNodeFilter(restOptions.filter as string | KueryNode);
   let sortField = mapSortField(restOptions.sortField);
-
-  if (excludeFromPublicApi) {
-    try {
-      validateOperationOnAttributes(
-        filterKueryNode,
-        sortField,
-        restOptions.searchFields,
-        context.fieldsToExcludeFromPublicApi
-      );
-    } catch (error) {
-      throw Boom.badRequest(`Error find rules: ${error.message}`);
-    }
-  }
 
   sortField = mapSortField(getModifiedField(restOptions.sortField));
 
@@ -134,6 +132,7 @@ export async function findRules<Params extends RuleParams = never>(
     per_page: perPage,
     total,
     saved_objects: data,
+    aggregations,
   } = await findRulesSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     savedObjectsFindOptions: {
@@ -144,9 +143,12 @@ export async function findRules<Params extends RuleParams = never>(
     },
   });
 
-  const siemRules: Rule[] = [];
+  const searchAfter = data.length > 0 ? data[data.length - 1]?.sort : undefined;
 
-  const authorizedData = data.map(({ id, attributes, references }) => {
+  const siemRules: Rule[] = [];
+  const errors: FindRuleError[] = [];
+
+  const authorizedData = data.flatMap(({ id, attributes, references }) => {
     try {
       ensureRuleTypeIsAuthorized(
         attributes.alertTypeId,
@@ -164,25 +166,37 @@ export async function findRules<Params extends RuleParams = never>(
       throw error;
     }
 
-    const rule = getAlertFromRaw<Params>({
-      excludeFromPublicApi,
-      id,
-      includeLegacyId: false,
-      includeSnoozeData,
-      isSystemAction: context.isSystemAction,
-      logger: context.logger,
-      rawRule: (fields ? pick(attributes, fields) : attributes) as RawRule,
-      references,
-      ruleTypeId: attributes.alertTypeId,
-      ruleTypeRegistry: context.ruleTypeRegistry,
-    });
+    let rule;
+    try {
+      rule = getAlertFromRaw<Params>({
+        id,
+        isSystemAction: context.isSystemAction,
+        logger: context.logger,
+        rawRule: (fields ? pick(attributes, fields) : attributes) as RawRule,
+        references,
+        ruleTypeId: attributes.alertTypeId,
+        ruleTypeRegistry: context.ruleTypeRegistry,
+      });
+    } catch (error) {
+      context.logger.warn(`Error transforming rule with id ${id}: ${error.message}`);
+      if (!allowPartialResults) {
+        throw error;
+      }
+
+      // A rule that cannot be transformed at all is omitted rather than failing the whole find
+      errors.push({
+        message: error.message,
+        rule: { id, ...(attributes.name && { name: attributes.name }) },
+      });
+      return [];
+    }
 
     // collect SIEM rule for further formatting legacy actions
     if (attributes.consumer === AlertConsumers.SIEM) {
       siemRules.push(rule as Rule);
     }
 
-    return rule;
+    return [rule];
   });
 
   authorizedData.forEach(({ id, name }) =>
@@ -210,6 +224,9 @@ export async function findRules<Params extends RuleParams = never>(
       page,
       perPage,
       total,
+      ...(searchAfter !== undefined ? { searchAfter } : {}),
+      ...(aggregations !== undefined ? { aggregations } : {}),
+      ...(errors.length > 0 ? { errors } : {}),
       // replace siem formatted rules
       data: authorizedData.map((rule) => formattedRulesMap[rule.id] ?? rule),
     };
@@ -219,6 +236,9 @@ export async function findRules<Params extends RuleParams = never>(
     page,
     perPage,
     total,
+    ...(searchAfter !== undefined ? { searchAfter } : {}),
+    ...(aggregations !== undefined ? { aggregations } : {}),
+    ...(errors.length > 0 ? { errors } : {}),
     data: authorizedData as Array<SanitizedRule<Params>>,
   };
 }

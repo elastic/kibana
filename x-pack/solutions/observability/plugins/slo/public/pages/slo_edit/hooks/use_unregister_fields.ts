@@ -9,8 +9,8 @@ import type { IndicatorType } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import deepmerge from 'deepmerge';
 import { useEffect, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
-import { useFetchApmIndex } from '../../../hooks/use_fetch_apm_indices';
+import { useFormContext, useWatch } from 'react-hook-form';
+import { useFetchApmIndices } from '../../../hooks/use_fetch_apm_indices';
 import {
   APM_AVAILABILITY_DEFAULT_VALUES,
   APM_LATENCY_DEFAULT_VALUES,
@@ -30,13 +30,13 @@ import type { CreateSLOForm } from '../types';
  * which was unmounting the components and therefore unregistering the associated values.
  */
 export function useUnregisterFields({ isEditMode }: { isEditMode: boolean }) {
-  const { data: apmIndex } = useFetchApmIndex();
-  const { watch, unregister, reset, resetField } = useFormContext<CreateSLOForm>();
-  const [indicatorTypeState, setIndicatorTypeState] = useState<IndicatorType>(
-    watch('indicator.type')
-  );
+  const {
+    data: { metric: apmIndex },
+  } = useFetchApmIndices();
+  const { control, unregister, reset } = useFormContext<CreateSLOForm>();
+  const indicatorType = useWatch({ control, name: 'indicator.type' });
+  const [indicatorTypeState, setIndicatorTypeState] = useState<IndicatorType>(indicatorType);
 
-  const indicatorType = watch('indicator.type');
   useEffect(() => {
     if (indicatorType !== indicatorTypeState && !isEditMode) {
       setIndicatorTypeState(indicatorType);
@@ -119,5 +119,5 @@ export function useUnregisterFields({ isEditMode }: { isEditMode: boolean }) {
           assertNever(indicatorType);
       }
     }
-  }, [isEditMode, indicatorType, indicatorTypeState, unregister, reset, resetField, apmIndex]);
+  }, [isEditMode, indicatorType, indicatorTypeState, unregister, reset, apmIndex]);
 }

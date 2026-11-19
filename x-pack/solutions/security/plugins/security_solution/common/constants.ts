@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
   RULES_FEATURE_LATEST,
@@ -14,8 +13,8 @@ import {
 import * as i18n from './translations';
 
 export {
+  ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
   SecurityPageName,
-  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
 } from '@kbn/security-solution-navigation';
 
 /**
@@ -56,11 +55,13 @@ export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults
 export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults' as const;
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults' as const;
 export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
+export const ALERTS_BATCH_MAX_SIZE = 20 as const;
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals' as const;
 export const DEFAULT_PREVIEW_INDEX = '.preview.alerts-security.alerts' as const;
 export const DEFAULT_LISTS_INDEX = '.lists' as const;
 export const DEFAULT_ITEMS_INDEX = '.items' as const;
-export const DEFAULT_RISK_SCORE_PAGE_SIZE = 1000 as const;
+export const DEFAULT_RISK_SCORE_PAGE_SIZE = 10_000 as const;
+export const MAX_RISK_SCORE_PAGE_SIZE = 10_000 as const;
 // The DEFAULT_MAX_SIGNALS value exists also in `x-pack/platform/plugins/shared/cases/common/constants.ts`
 // If either changes, engineer should ensure both values are updated
 export const DEFAULT_MAX_SIGNALS = 100 as const;
@@ -115,13 +116,15 @@ export const ATTACKS_PATH = '/attacks' as const;
 export const ALERT_DETECTIONS = '/alert_detections' as const;
 
 export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
+export const ATTACK_DETAILS_REDIRECT_PATH = `${ATTACKS_PATH}/redirect` as const;
 export const ALERT_SUMMARY_PATH = `/alert_summary` as const;
 export const RULES_PATH = '/rules' as const;
 export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
 export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
 export const RULES_UPDATES = `${RULES_PATH}/updates` as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
-export const AI_RULE_CREATION_PATH = `${RULES_PATH}/ai_rule_creation` as const;
+export const RULES_CHANGES_HISTORY_PATH = `${RULES_PATH}/id/:ruleId/changes-history` as const;
+export const ALERT_ANALYSIS_WORKFLOW_PATH = `${RULES_PATH}/alert_analysis_workflow` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
 export const HOSTS_PATH = '/hosts' as const;
@@ -143,20 +146,24 @@ export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
 export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
+export const CUSTOM_YARA_SIGNATURES_PATH = `${MANAGEMENT_PATH}/custom_yara_signatures` as const;
 export const RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/response_actions_history` as const;
 export const SCRIPT_LIBRARY_PATH = `${MANAGEMENT_PATH}/script_library` as const;
 export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
+/** @deprecated Bookmark-only; redirects to {@link ENTITY_ANALYTICS_HOME_PAGE_PATH}. */
+export const ENTITY_ANALYTICS_LANDING_PATH = '/entity_analytics_landing' as const;
+/** @deprecated Bookmark-only; redirects to {@link ENTITY_ANALYTICS_HOME_PAGE_PATH}. */
+export const ENTITY_ANALYTICS_OVERVIEW_PATH = '/entity_analytics_overview' as const;
 export const ENTITY_ANALYTICS_MANAGEMENT_PATH = `/entity_analytics_management` as const;
 export const ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH =
   `/entity_analytics_asset_criticality` as const;
 export const ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH =
   `/entity_analytics_entity_store` as const;
-export const ENTITY_ANALYTICS_LANDING_PATH = '/entity_analytics_landing' as const;
 export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
   '/entity_analytics_privileged_user_monitoring' as const;
-export const ENTITY_ANALYTICS_OVERVIEW_PATH = `/entity_analytics_overview` as const;
 export const ENTITY_ANALYTICS_HOME_PAGE_PATH = '/entity_analytics_home_page' as const;
-export const ENTITY_ANALYTICS_WATCHLISTS_PATH = '/entity_analytics_watchlists' as const;
+export const USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG =
+  'securitySolution.useNewEntityAnalyticsPage' as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
@@ -169,11 +176,13 @@ export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as cons
 export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
+export const APP_CUSTOM_YARA_SIGNATURES_PATH = `${APP_PATH}${CUSTOM_YARA_SIGNATURES_PATH}` as const;
 export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
   `${APP_PATH}${RESPONSE_ACTIONS_HISTORY_PATH}` as const;
 export const APP_SCRIPT_LIBRARY_PATH = `${APP_PATH}${SCRIPT_LIBRARY_PATH}` as const;
 export const NOTES_PATH = `${MANAGEMENT_PATH}/notes` as const;
 export const SIEM_MIGRATIONS_PATH = '/siem_migrations' as const;
+export const SIEM_MIGRATIONS_MANAGE_PATH = `${SIEM_MIGRATIONS_PATH}/manage` as const;
 export const SIEM_MIGRATIONS_LANDING_PATH = `${SIEM_MIGRATIONS_PATH}/landing` as const;
 export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as const;
 export const SIEM_MIGRATIONS_DASHBOARDS_PATH = `${SIEM_MIGRATIONS_PATH}/dashboards` as const;
@@ -264,17 +273,27 @@ export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
 export const INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION =
   'securitySolution:includedDataStreamNamespacesForRuleExecution' as const;
 
+/** This hidden Kibana Advanced Setting stores gap reason types to exclude from gap monitoring and auto-fill */
+export const EXCLUDED_GAP_REASONS_KEY = 'securitySolution:excludedGapReasons' as const;
+
 /** The default value for the included data stream namespaces setting (empty = no filter) */
 export const DATA_STREAM_NAMESPACES_DEFAULT_SETTING: string[] = [];
 
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Inventory feature */
 export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInventory' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable the SIEM Readiness feature */
+export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadiness' as const;
+
 /** This Kibana Advanced Setting allows users to enable/disable the Cloud Connector Feature */
 export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConnector' as const;
 
-/** This Kibana Advanced Setting allows users to enable/disable the SIEM Readiness Feature */
-export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadiness' as const;
+export const DEFEND_CONFIGURATION_TROUBLESHOOTING_UNIVERSAL_SKILL_SETTING =
+  'securitySolution:defendConfigurationTroubleshootingUniversalSkill' as const;
+
+/** This Kibana Advanced Setting allows users to enable/disable the rule changes history feature */
+export const ENABLE_RULE_CHANGES_HISTORY_SETTING =
+  'securitySolution:enableRuleChangesHistory' as const;
 
 /**
  * Id for the notifications alerting type
@@ -336,6 +355,18 @@ export const DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL =
   `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/assignees` as const;
 
 /**
+ * Detection Engine attacks routes (public)
+ */
+export const DETECTION_ENGINE_ATTACKS_URL = `${DETECTION_ENGINE_URL}/attacks` as const;
+export const DETECTION_ENGINE_ATTACKS_SEARCH_URL =
+  `${DETECTION_ENGINE_ATTACKS_URL}/search` as const;
+export const DETECTION_ENGINE_ATTACKS_STATUS_URL =
+  `${DETECTION_ENGINE_ATTACKS_URL}/status` as const;
+export const DETECTION_ENGINE_ATTACKS_TAGS_URL = `${DETECTION_ENGINE_ATTACKS_URL}/tags` as const;
+export const DETECTION_ENGINE_ATTACKS_ASSIGNEES_URL =
+  `${DETECTION_ENGINE_ATTACKS_URL}/assignees` as const;
+
+/**
  * Telemetry detection endpoint for any previews requested of what data we are
  * providing through UI/UX and for e2e tests.
  *   curl http//localhost:5601/internal/security_solution/telemetry
@@ -346,6 +377,7 @@ export const SECURITY_TELEMETRY_URL = `/internal/security_solution/telemetry` as
 export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve' as const;
 export const TIMELINE_URL = '/api/timeline' as const;
 export const TIMELINES_URL = '/api/timelines' as const;
+export const INTERNAL_TIMELINES_BY_IDS_URL = '/internal/timelines/_by_ids' as const;
 export const TIMELINE_FAVORITE_URL = '/api/timeline/_favorite' as const;
 export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft` as const;
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export` as const;
@@ -472,11 +504,7 @@ export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 20;
 export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrency`;
 
 /**
- * Max number of rules to display on UI in table, max number of rules that can be edited in a single bulk edit API request
- * We limit number of rules in bulk edit API, because rulesClient doesn't support bulkGet of rules by ids.
- * Given this limitation, current implementation fetches each rule separately through rulesClient.resolve method.
- * As max number of rules displayed on a page is 100, max 100 rules can be bulk edited by passing their ids to API.
- * We decided add this limit(number of ids less than 100) in bulk edit API as well, to prevent a huge number of single rule fetches
+ * Max number of rules to display on UI in table (one page of results).
  */
 export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 
@@ -490,7 +518,12 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v9.2',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
-  AGENT_BUILDER_TOUR: 'elasticAssistant.agentBuilderTour.v9.3.default',
+  ATTACKS_PAGE: 'securitySolution.attacksPage.newFeaturesTour.v9.5',
+  ATTACKS_PAGE_CALLOUT: 'securitySolution.attacksPage.tourCalloutDismissed.v9.5',
+  ATTACKS_PAGE_WORKFLOWS_PROMOTION_CALLOUT:
+    'securitySolution.attacksPage.workflowsPromotionCalloutDismissed.v9.5',
+  ENTITY_ANALYTICS_HOME_PAGE_BANNER:
+    'securitySolution.entityAnalyticsHomePage.productTourBannerDismissed.v9.6',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -526,8 +559,9 @@ export const DEFAULT_ALERT_TAGS_VALUE = [
   i18n.FURTHER_INVESTIGATION_REQUIRED,
 ] as const;
 
-export const DEFAULT_ALERT_CLOSE_REASONS_KEY = 'securitySolution:alertCloseReasons' as const;
-export const DEFAULT_ALERT_CLOSE_REASONS_VALUE = [] as const;
+export const DEFAULT_DETECTIONS_CLOSE_REASONS_KEY =
+  'securitySolution:detectionsCloseReasons' as const;
+export const DEFAULT_DETECTIONS_CLOSE_REASONS_VALUE = [] as const;
 
 /**
  * Max length for the comments within security solution
@@ -538,12 +572,6 @@ export const MAX_COMMENT_LENGTH = 30000 as const;
  * Max notes count per document in security solution
  */
 export const MAX_NOTES_PER_DOCUMENT = 100;
-
-/**
- * Cases attachment IDs
- */
-export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
-export const CASE_ATTACHMENT_INDICATOR_TYPE_ID = 'indicator' as const;
 
 /**
  * Rule gaps
@@ -684,6 +712,8 @@ export const ESSENTIAL_ALERT_FIELDS: string[] = [
   'kibana.alert.severity',
   'kibana.alert.start',
   'kibana.alert.workflow_status',
+  'kibana.alert.workflow_reason',
+  'kibana.alert.workflow_user',
   'kibana.alert.reason',
   'kibana.alert.risk_score',
   'kibana.alert.rule.name',
@@ -717,8 +747,20 @@ export const ESSENTIAL_ALERT_FIELDS: string[] = [
 
 export enum SecurityAgentBuilderAttachments {
   alert = 'security.alert',
+  alerts = 'security.alerts',
+  attackDiscovery = 'security.attack_discovery',
+  attackDiscoveryVerdict = 'security.attack_discovery.verdict',
   entity = 'security.entity',
+  entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
+  entityGraph = 'security.entity_graph',
+  entityAnalyticsAiBrief = 'security.entity_analytics_ai_brief',
+  entityRiskScoreHistory = 'security.entity_risk_score_history',
+  exception = 'security.exception',
+  investigationIocs = 'security.investigation.iocs',
+  investigationTimeline = 'security.investigation.timeline',
   rule = 'security.rule',
+  rulePreview = 'security.rule.preview',
+  ruleMigrationItems = 'security.siem_migration.rule_migration_items',
 }
 
-export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;
+export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';

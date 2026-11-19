@@ -14,11 +14,13 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const RunEntityAnalyticsMigrationsResponse = lazySchema(() =>
+  z.object({
+    success: z.boolean().optional(),
+  })
+);
 export type RunEntityAnalyticsMigrationsResponse = z.infer<
   typeof RunEntityAnalyticsMigrationsResponse
 >;
-export const RunEntityAnalyticsMigrationsResponse = z.object({
-  success: z.boolean().optional(),
-});

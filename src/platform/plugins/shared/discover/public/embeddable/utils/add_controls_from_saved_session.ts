@@ -8,19 +8,16 @@
  */
 import type { CanAddNewPanel } from '@kbn/presentation-publishing';
 import type { PublishesESQLVariables } from '@kbn/esql-types';
-import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { omit } from 'lodash';
+import { parseControlGroupJson } from '../../application/main/state_management/redux/utils';
 
 export const addControlsFromSavedSession = async (
   container: CanAddNewPanel & Partial<PublishesESQLVariables>,
   controlGroupJson: string,
   uuid?: string | undefined
 ): Promise<void> => {
-  const controlsState = controlGroupJson.length
-    ? (JSON.parse(controlGroupJson) as ControlPanelsState<OptionsListESQLControlState>)
-    : {};
+  const controlsState = parseControlGroupJson(controlGroupJson);
   const esqlVariables$ = container.esqlVariables$;
   const esqlVariables = esqlVariables$?.getValue();
 

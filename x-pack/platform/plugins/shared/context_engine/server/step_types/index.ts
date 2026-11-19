@@ -1,0 +1,47 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type {
+  DreamingKiStepDependencies,
+  DreamingStepDependencies,
+  FeedbackAnalysisStepDependencies,
+} from './helpers';
+import type { VerifyKi } from './verify_ki';
+import { getCreateKiStepDefinition } from './create_ki';
+import { getUpdateKiStepDefinition } from './update_ki';
+import { getDeleteKiStepDefinition } from './delete_ki';
+import { getFeedbackContextStepDefinition } from './feedback_context';
+import { getRecordImprovementsStepDefinition } from './record_improvements';
+import { getApplyDreamChangesStepDefinition } from './apply_dream_changes';
+import { getApplyDreamRelationshipsStepDefinition } from './apply_dream_relationships';
+import { getDreamingStatusStepDefinition } from './get_dreaming_status';
+import { getReadTraceTranscriptsStepDefinition } from './read_trace_transcripts';
+
+/** Registers the KI, feedback analysis and dreaming workflow steps. */
+export const registerStepDefinitions = ({
+  workflowsExtensions,
+  feedbackAnalysis,
+  dreaming,
+  verifyKi,
+  ...deps
+}: DreamingKiStepDependencies & {
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  feedbackAnalysis: FeedbackAnalysisStepDependencies;
+  dreaming: DreamingStepDependencies;
+  verifyKi: VerifyKi;
+}): void => {
+  workflowsExtensions.registerStepDefinition(getCreateKiStepDefinition({ ...deps, verifyKi }));
+  workflowsExtensions.registerStepDefinition(getUpdateKiStepDefinition(deps));
+  workflowsExtensions.registerStepDefinition(getDeleteKiStepDefinition(deps));
+  workflowsExtensions.registerStepDefinition(getFeedbackContextStepDefinition(feedbackAnalysis));
+  workflowsExtensions.registerStepDefinition(getRecordImprovementsStepDefinition(feedbackAnalysis));
+  workflowsExtensions.registerStepDefinition(getDreamingStatusStepDefinition(dreaming));
+  workflowsExtensions.registerStepDefinition(getReadTraceTranscriptsStepDefinition(dreaming));
+  workflowsExtensions.registerStepDefinition(getApplyDreamChangesStepDefinition(deps));
+  workflowsExtensions.registerStepDefinition(getApplyDreamRelationshipsStepDefinition(deps));
+};

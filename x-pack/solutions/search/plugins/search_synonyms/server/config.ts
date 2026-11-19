@@ -13,8 +13,8 @@ const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
 });
 
-export type SearchPlaygroundConfig = TypeOf<typeof configSchema>;
+export type SearchSynonymsConfig = TypeOf<typeof configSchema>;
 
-export const config: PluginConfigDescriptor<SearchPlaygroundConfig> = {
+export const config: PluginConfigDescriptor<SearchSynonymsConfig> = {
   schema: configSchema,
 };

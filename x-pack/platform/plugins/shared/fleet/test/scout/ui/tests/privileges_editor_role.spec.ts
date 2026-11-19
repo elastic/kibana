@@ -42,6 +42,9 @@ test.describe('When the user has Editor built-in role', { tag: tags.stateful.cla
     await fleetHome.navigateTo();
     await fleetHome.waitForPageToLoad();
 
+    // When enableOpAMP is on, addAgentButton lives inside a popover — open it first.
+    await fleetHome.openAddAgentMenu();
+
     // Verify Add Agent button exists
     await expect(fleetHome.getAddAgentButton()).toBeVisible();
   });
@@ -85,12 +88,9 @@ test.describe('When the user has Editor built-in role', { tag: tags.stateful.cla
     await browserAuth.loginAsPrivilegedUser();
     const { integrationHome } = pageObjects;
 
-    await integrationHome.navigateTo();
-    await integrationHome.waitForPageToLoad();
-
-    // Scroll to and click the Apache integration
-    await integrationHome.scrollToIntegration('apache');
-    await integrationHome.clickIntegrationCard('apache');
+    // Apache is now grouped into a collection tile, so navigate directly to its detail
+    // page instead of browsing and clicking through the collection.
+    await integrationHome.navigateToDetailPage('apache');
 
     // Verify the Add Integration button is NOT disabled (enabled)
     await expect(integrationHome.getAddIntegrationPolicyButton()).toBeEnabled();

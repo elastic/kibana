@@ -6,7 +6,8 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared/src/alert_lifecycle_status_badge';
 import type { Cases } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -20,7 +21,7 @@ import { LEGACY_COMPARATORS } from '../../../common/utils/convert_legacy_outside
 import type { NavigateToCaseView } from '../../hooks/use_case_view_navigation';
 import { formatCase } from './helpers/format_cases';
 import type { FlyoutThresholdData } from './helpers/map_rules_params_with_flyout';
-import { Groups } from '../alert_sources/groups';
+import { ALERT_SOURCES_ELEMENT, Groups } from '../alert_sources/groups';
 import type { Group } from '../../../common/typings';
 
 /**
@@ -29,8 +30,13 @@ import type { Group } from '../../../common/typings';
  */
 const formatComparator = (comparator: string): string => {
   if (comparator === COMPARATORS.NOT_BETWEEN || comparator === LEGACY_COMPARATORS.OUTSIDE_RANGE) {
-    // No need for i18n as we are using the enum value, we only need a space.
     return 'NOT BETWEEN';
+  }
+  if (comparator === COMPARATORS.BETWEEN_INCLUSIVE) {
+    return 'BETWEEN (INCLUSIVE)';
+  }
+  if (comparator === COMPARATORS.NOT_BETWEEN_INCLUSIVE) {
+    return 'NOT BETWEEN (INCLUSIVE)';
   }
   return comparator.toUpperCase();
 };
@@ -133,11 +139,14 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
           if (!groups.length) return <>{'-'}</>;
           const alertEnd = meta?.alertEnd;
           const timeRange = meta?.timeRange;
+          const alertRuleTypeId = meta?.alertRuleTypeId;
           return (
             <div>
               <Groups
                 groups={groups}
                 timeRange={alertEnd ? timeRange : { ...timeRange, to: 'now' }}
+                alertRuleTypeId={alertRuleTypeId}
+                element={ALERT_SOURCES_ELEMENT.ALERT_FLYOUT}
               />
             </div>
           );
@@ -155,10 +164,14 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
         case ColumnIDs.RULE_NAME:
           const ruleName = value as string;
           const ruleLink = meta?.ruleLink as string;
-          return (
-            <EuiLink data-test-subj="alertFlyoutOverview" href={ruleLink ? ruleLink : '#'}>
+          return ruleLink ? (
+            <EuiLink data-test-subj="alertFlyoutOverview" href={ruleLink}>
               {ruleName}
             </EuiLink>
+          ) : (
+            <EuiText size="s" data-test-subj="alertFlyoutOverviewRuleName">
+              {ruleName}
+            </EuiText>
           );
         case ColumnIDs.OBSERVED_VALUE:
           if (!ruleCriteria) return <>{'-'}</>;
@@ -175,14 +188,13 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
                 );
               })}
               {ruleCriteria.length > 1 && (
-                <EuiCallOut
+                <KbnInfoCallout
                   announceOnMount
                   size="s"
                   title={i18n.translate(
                     'xpack.observability.columns.euiCallOut.multipleConditionsLabel',
                     { defaultMessage: 'Multiple conditions' }
                   )}
-                  iconType="alert"
                 />
               )}
             </div>

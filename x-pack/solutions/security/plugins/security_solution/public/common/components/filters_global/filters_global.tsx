@@ -7,23 +7,44 @@
 
 import React from 'react';
 import { InPortal } from 'react-reverse-portal';
+import { css } from '@emotion/react';
+import type { EuiPanelProps } from '@elastic/eui';
 import { EuiPanel } from '@elastic/eui';
 import { useGlobalHeaderPortal } from '../../hooks/use_global_header_portal';
 
 export interface FiltersGlobalProps {
   children: React.ReactNode;
+  color?: EuiPanelProps['color'];
+  hasBorder?: EuiPanelProps['hasBorder'];
+  panelCss?: EuiPanelProps['css'];
 }
 
-export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children }) => {
-  const { globalKQLHeaderPortalNode } = useGlobalHeaderPortal();
+const headerStyles = css`
+  @media (max-width: 767px) {
+    overflow-x: auto;
+  }
+`;
 
-  return (
-    <InPortal node={globalKQLHeaderPortalNode}>
-      <EuiPanel borderRadius="none" color="subdued" paddingSize="none">
-        <header data-test-subj="filters-global-container">{children}</header>
-      </EuiPanel>
-    </InPortal>
-  );
-});
+export const FiltersGlobal = React.memo<FiltersGlobalProps>(
+  ({ children, color = 'subdued', hasBorder, panelCss }) => {
+    const { globalKQLHeaderPortalNode } = useGlobalHeaderPortal();
+
+    return (
+      <InPortal node={globalKQLHeaderPortalNode}>
+        <EuiPanel
+          borderRadius="none"
+          color={color}
+          hasBorder={hasBorder}
+          paddingSize="none"
+          css={panelCss}
+        >
+          <header data-test-subj="filters-global-container" css={headerStyles}>
+            {children}
+          </header>
+        </EuiPanel>
+      </InPortal>
+    );
+  }
+);
 
 FiltersGlobal.displayName = 'FiltersGlobal';

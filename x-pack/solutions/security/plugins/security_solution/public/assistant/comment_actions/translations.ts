@@ -10,28 +10,21 @@ import { i18n } from '@kbn/i18n';
 export const ADDED_NOTE_TO_TIMELINE = i18n.translate(
   'xpack.securitySolution.assistant.commentActions.addedNoteToTimelineToast',
   {
-    defaultMessage: 'Added note to timeline',
-  }
-);
-
-export const VIEW_APM_TRACE = i18n.translate(
-  'xpack.securitySolution.assistant.commentActions.viewAPMTraceLabel',
-  {
-    defaultMessage: 'View APM Trace for this message',
+    defaultMessage: 'Added note to Timeline',
   }
 );
 
 export const ADD_MESSAGE_CONTENT_AS_TIMELINE_NOTE = i18n.translate(
   'xpack.securitySolution.assistant.commentActions.addMessageContentAsTimelineNoteAriaLabel',
   {
-    defaultMessage: 'Add message content as a timeline note',
+    defaultMessage: 'Add message content as a Timeline note',
   }
 );
 
 export const ADD_NOTE_TO_TIMELINE = i18n.translate(
   'xpack.securitySolution.assistant.commentActions.addNoteToTimelineTooltip',
   {
-    defaultMessage: 'Add note to timeline',
+    defaultMessage: 'Add note to Timeline',
   }
 );
 

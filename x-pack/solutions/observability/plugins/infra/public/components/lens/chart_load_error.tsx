@@ -22,7 +22,7 @@ export const ChartLoadError = ({ error }: { error: Error }) => {
       direction="column"
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon type="warning" />
+        <EuiIcon type="warning" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" textAlign="center">

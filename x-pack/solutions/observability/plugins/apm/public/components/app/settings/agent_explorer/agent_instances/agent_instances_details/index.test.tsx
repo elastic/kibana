@@ -57,11 +57,19 @@ jest.mock('../../../../../shared/popover_tooltip', () => ({
   ),
 }));
 
-jest.mock('../../../../../shared/truncate_with_tooltip', () => ({
-  TruncateWithTooltip: ({ text, content, 'data-test-subj': testSubj }: any) => (
-    <div data-test-subj={testSubj}>{content || text}</div>
-  ),
-}));
+jest.mock('@kbn/apm-ui-shared', () => {
+  const original = jest.requireActual('@kbn/apm-ui-shared');
+
+  return {
+    ...original,
+    TruncateWithTooltip: ({ text, content, 'data-test-subj': testSubj }: any) => (
+      <div data-test-subj={testSubj}>{content || text}</div>
+    ),
+    Timestamp: ({ timestamp }: { timestamp: number }) => (
+      <span data-test-subj="timestamp">{new Date(timestamp).toISOString()}</span>
+    ),
+  };
+});
 
 jest.mock('../../../../../shared/links/apm/metric_overview_link', () => ({
   MetricOverviewLink: ({ children, serviceName, query }: any) => (
@@ -71,12 +79,6 @@ jest.mock('../../../../../shared/links/apm/metric_overview_link', () => ({
     >
       {children}
     </a>
-  ),
-}));
-
-jest.mock('@kbn/apm-ui-shared', () => ({
-  Timestamp: ({ timestamp }: { timestamp: number }) => (
-    <span data-test-subj="timestamp">{new Date(timestamp).toISOString()}</span>
   ),
 }));
 

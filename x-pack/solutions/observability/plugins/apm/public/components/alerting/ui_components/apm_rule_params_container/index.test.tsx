@@ -29,6 +29,6 @@ describe('ApmRuleParamsContainer', () => {
           wrapper: Wrapper,
         }
       )
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 });

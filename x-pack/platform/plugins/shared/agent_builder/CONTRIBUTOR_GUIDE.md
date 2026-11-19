@@ -220,6 +220,25 @@ agentBuilderSetup.tools.register({
 });
 ```
 
+### Marking a tool as experimental
+
+Individual built-in tools (and other static tool registrations) can be flagged as experimental by setting `experimental: true` on the registration.
+Experimental tools are only visible and usable when the `agentBuilder:experimentalFeatures` uiSetting is enabled.
+
+**Example:**
+
+```ts
+agentBuilder.tools.register({
+  id: 'platform.experimental.my-tool',
+  type: ToolType.builtin,
+  description: 'An experimental tool only visible when experimental features are on',
+  tags: [],
+  schema: z.object({}),
+  experimental: true,
+  handler: async () => ({ results: [] }),
+});
+```
+
 ## Registering built-in agents
 
 ### Registering the agent
@@ -273,38 +292,92 @@ agentBuilder.agents.register({
 });
 ```
 
-### Specific research and answer instructions
+Refer to [`AgentConfiguration`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts)
+for the full list of available configuration options.
 
-It is possible to specify specific research and answer instructions for an agent, to avoid
-mixing instructions, which can sometimes be confusing for the agent. It also allows to specify
-different instructions for each step of the agent's flow..
+### Choosing the agent's model
+
+By default, agents run on the model selected by the user in the Chat UI, or on the first model of the
+Agent Builder inference feature. A built-in agent can instead run on a model of its own, by declaring an
+inference feature in its configuration.
+
+First, register a `chat_completion` inference feature with the `searchInferenceEndpoints` plugin, during setup.
+Admins can then pick the models of that feature from the model settings page, and `recommendedEndpoints`
+is used until they do:
+
+```ts
+const result = searchInferenceEndpoints.features.register({
+  featureId: 'my_solution_agent',
+  parentFeatureId: 'my_solution', // optional, groups the feature under a parent in the UI
+  featureName: 'My solution agent',
+  featureDescription: 'Models used by the My solution agent',
+  taskType: 'chat_completion',
+  recommendedEndpoints: ['.anthropic-claude-5-sonnet-chat_completion'],
+});
+if (!result.ok) {
+  logger.warn(`Failed to register the inference feature: ${result.error}`);
+}
+```
+
+Then reference the feature from the agent's configuration:
 
 ```ts
 agentBuilder.agents.register({
-  id: 'platform.core.dashboard',
-  name: 'Dashboard agent',
-  description: 'Agent specialized in dashboard related tasks',
-  avatar_icon: 'dashboardApp',
+  id: 'platform.my_solution.agent',
+  name: 'My solution agent',
+  description: 'Agent specialized in my solution',
   configuration: {
-    research: {
-      instructions:
-        'You are a dashboard builder specialist assistant. Always uses the XXX tool when the user wants to YYY...',
-    },
-    answer: {
-      instructions:
-        'When answering, if a dashboard configuration is present in the results, always render it using [...]',
-    },
-    tools: [
-      {
-        tool_ids: [someListOfToolIds],
-      },
-    ],
+    instructions: 'You are a specialist [...]',
+    tools: [{ tool_ids: ['[...]'] }],
+    inference_feature_id: 'my_solution_agent',
   },
 });
 ```
 
-Refer to [`AgentConfiguration`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts)
-for the full list of available configuration options.
+`inference_feature_id` is only supported for built-in agents, and cannot be set by agent types.
+
+### Turning off built-in agent features (`capabilities`)
+
+Every agent gets some built-in Agent Builder features, such as the generic attachment tools. An agent that has no use for one can turn it off with `capabilities`:
+
+- **Who can set it:** agent types and built-in agents. Unlike `inference_feature_id`, it also works from an agent type's base configuration. It cannot be set through the HTTP API, the agent form, `configuration_overrides` or the `ai.agent` workflow step.
+- **Defaults:** a missing `capabilities`, a missing key or a missing `enabled` all mean on. Only `enabled: false` turns a feature off.
+- **Merge:** when both an agent type and its agent set `capabilities`, they are merged per key, and the agent's value wins.
+
+For example, an agent type whose agents do not need the generic attachment tools:
+
+```ts
+agentBuilder.agents.registerType({
+  id: 'my_solution.background',
+  name: 'My background agent',
+  description: 'Runs from workflows; never reads attachments',
+  baseConfiguration: {
+    tools: [{ tool_ids: ['[...]'] }],
+    capabilities: { attachment_tools: { enabled: false } },
+  },
+});
+```
+
+#### `attachment_tools`
+
+With `attachment_tools: { enabled: false }`, the agent gets none of the five generic attachment tools (`attachments.read`, `attachments.add`, `attachments.update`, `attachments.list` and `attachments.diff`). The ATTACHMENTS section of its system prompt is replaced by a one-line notice that it cannot read attachment content, and it is not taught inline attachment rendering. This saves about 2K input tokens per model call in a default Kibana, and more when more attachment types are registered, because `attachments.add` lists every registered type.
+
+What the agent loses:
+
+- **Attachment content:** it cannot read any attachment's content. That includes pasted images, content sent with a message, items from `#` references and the automatic page context. It sees each attachment's notice (id, type, version) and says it cannot open the attachment when asked.
+- **Type descriptions:** some attachment types' descriptions still tell the agent to read the attachment. The notice tells it that it cannot.
+- **Skills:** skills that use the attachment tools, such as proposal management, do not work.
+- **Rendering:** it is not taught to render attachments inline in its replies.
+- **Follow-ups in the UI:** a follow-up typed into a conversation of such an agent in the Agent Builder UI runs that agent, with the same limits.
+
+What keeps working:
+
+- **Attachments themselves:** attachments can still be added through the API, workflow steps, the attachment client and the agent's own tools.
+- **Type and bound tools:** tools that an attachment type declares, and tools tied to one attachment, are still added.
+
+#### Adding a new key
+
+Add a field to `AgentCapabilities` (`@kbn/agent-builder-common`) and to `ResolvedCapabilities` (`run_agent/types.ts`), set its default in `resolveConfiguration` (`run_agent/utils/configuration.ts`), gate the feature on the resolved value, and add tests. A feature that should start off for everyone does not belong here.
 
 ## Registering attachment types
 
@@ -359,6 +432,16 @@ const textAttachmentType: AttachmentTypeDefinition = {
 Refer to [`AttachmentTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/attachments/type_definition.ts)
 for the full list of available configuration options.
 
+#### Adding the attachment type to the allow list
+
+Similar to tools and agents, we keep a hardcoded list of registered attachment types to trigger a code review from the team when
+attachment types are added.
+
+To add an attachment type to the allow list, simply add the attachment type's id to the `AGENT_BUILDER_BUILTIN_ATTACHMENTS` array,
+in `x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.ts`
+
+(Kibana will fail to start otherwise, with an explicit error message explaining what to do)
+
 #### `getAgentDescription` — describing inline rendering to the agent
 
 When your attachment type supports inline rendering, `getAgentDescription` should tell
@@ -380,6 +463,45 @@ const myAttachmentType: AttachmentTypeDefinition = {
 
 Do **not** include guidance on *when* to render inline — that is the responsibility of the
 skill that owns the relevant task. See [Inline rendering guidance in skills](#inline-rendering-guidance-in-skills).
+
+#### `toSurfaceComposition` — rendering outside Kibana
+
+Response messages of rounds from external systems, such as Slack, are rendered in code from the message: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toSurfaceComposition`, which maps one attachment version to a surface composition: an [Isomer](https://github.com/elastic/isomer) composition built from the primitives of `@kbn/isomer-components` (`ComponentsNode`), rendered by the `isomer` plugin's runtime to every surface. Without it, the attachment is left out there.
+
+It gets the attachment at the rendered version and `{ request, spaceId }`, and may be async.
+
+```ts
+const myAttachmentType: AttachmentTypeDefinition<'my_type', MyData> = {
+  id: 'my_type',
+  validate: ...,
+  format: ...,
+  toSurfaceComposition: ({ data, origin }) => ({
+    type: 'view',
+    title: data.name,
+    subtitle: data.kind,
+    body: [
+      { type: 'markdown', text: data.summary },
+      { type: 'fields', items: [{ label: 'Status', value: data.status }] },
+      ...(origin
+        ? [{ type: 'link', label: 'Open in Kibana', app: 'my_app', path: `/items/${origin}` }]
+        : []),
+    ],
+  }),
+};
+```
+
+- **Heading.** `title` becomes a `header` and `subtitle` a `context` line, above the body.
+- **Nodes.** `markdown` for prose (GitHub-flavored markdown is converted per surface), `fields` for labeled values, `code` for source shown as written, `table` for rows, `context`, `section`, `quote`, `divider`, `link` and `actions`. Each primitive's schema describes it.
+- **Links back to Kibana.** Use an `actions` button, or a `link`, with an app route and a path, not a URL. Slack resolves it against the Kibana URL of the conversation's space, and leaves it out when there's none. A relative `/app/…` URL would lose the base path and the space.
+- **Limits.** Each primitive has limits, such as 12,000 characters of `code` or 10 items in a `fields` node, and plain text can't be blank. A composition that fails validation, or a mapping that throws, leaves the whole attachment out.
+
+See the `agentBuilderPlatform` types, such as `esql`, `skill` and `connector_setup`, for examples.
+
+#### Real example: the built-in image attachment
+
+Agent Builder already ships a built-in `image` attachment type, so agents can see images pasted into the chat input. It's a real, file-backed attachment type and a good reference to copy from — the placeholder above just reuses the same `id` to illustrate `getAgentDescription`. See `x-pack/platform/plugins/shared/agent_builder_platform/server/attachment_types/image.ts`.
+
+It validates by looking up the file through a request-scoped Files client, which checks that the file exists in the user's space, not who uploaded it. `format` downloads and base64-encodes the file lazily, only when the agent actually reads the attachment, so the bytes never end up in a tool result. The binary itself lives in the Files plugin under the `chat-attachment-images` file kind (registered in `agent_builder/server/plugin.ts` with only the `create`, which also registers upload, and `download` HTTP routes, both requiring `agentBuilder:read`); the attachment only carries a `file_id` pointer. Limits — PNG/JPEG only, 3.5 MB max, 10 images per message — are defined in `agent-builder-common/attachments/attachment_types.ts`; the count limit is enforced client-side only.
 
 ### Browser-side registration
 
@@ -422,6 +544,12 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
     );
   },
 
+  // Optional: preferred width of the canvas flyout in full-screen context.
+  // Accepts any valid CSS width value (e.g. '600px', '40vw').
+  // Defaults to '50vw' when not specified and is capped at '50vw'. Has no effect
+  // in sidebar context or on narrow viewports.
+  canvasWidth: '600px',
+
   // Expanded view rendered in the canvas flyout
   renderCanvasContent: ({ attachment }) => (
     <EuiCodeBlock fontSize="m" lineNumbers isCopyable>
@@ -430,7 +558,7 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
   ),
 
   // Customize buttons based on viewport context
-  getActionButtons: ({ attachment, isCanvas, isSidebar, openCanvas, setPreviewBadgeState, openSidebarConversation }) => {
+  getActionButtons: ({ attachment, isCanvas, isSidebar, openCanvas, openSidebarConversation }) => {
     const buttons = [];
 
     if (isSidebar) {
@@ -458,29 +586,41 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
       });
     }
 
-    // openSidebarConversation is {undefined} when already in the sidebar
-    if (openSidebarConversation) {
+    // Offer this only outside the sidebar, where the conversation is not already open
+    if (openSidebarConversation && !isSidebar) {
       buttons.push({
         label: 'Continue in sidebar',
-        icon: 'discuss',
+        icon: 'comment',
         type: ActionButtonType.SECONDARY,
         handler: openSidebarConversation,
       });
     }
-    // Optional: if preview happens outside canvas, keep inline badge state in sync
-    buttons.push({
-      label: 'Preview',
-      icon: 'eye',
-      type: ActionButtonType.SECONDARY,
-      handler: () => {
-        setPreviewBadgeState?.('previewing');
-      },
-    });
 
     return buttons;
   },
 };
 ```
+
+#### Conversation details flyout
+
+Register `renderConversationDetailsContent` to render your attachment in a conversation details tab:
+
+```tsx
+const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
+  getLabel: (attachment) => attachment.description ?? 'My attachment',
+  renderConversationDetailsContent: ({ attachment }) => (
+    <MyAttachmentDetails attachment={attachment} />
+  ),
+};
+
+agentBuilder.attachments.addAttachmentType('my.attachment', myAttachmentDefinition);
+```
+
+The renderer receives `ConversationDetailsRenderProps<TAttachment>`, containing `attachment`.
+The consuming tab selects which attachment version data to pass to the renderer; the registry
+neither selects versions nor filters attachments. Consumers may render the current version or a historical version. This renderer is optional and independent of
+inline and canvas rendering. Capture any plugin services your component needs at registration
+and mount its providers explicitly, since the flyout can open outside the Agent Builder application.
 
 #### Viewport
 
@@ -489,7 +629,23 @@ The `getActionButtons` params include flags to customize behavior per viewport:
 - **`isSidebar`** - `true` when rendered in the sidebar (constrained width)
 - **`isCanvas`** - `true` when rendered in the canvas flyout (expanded view)
 - **`openCanvas`** - Callback to open canvas mode; `undefined` when already in canvas
-- **`openSidebarConversation`** - Callback to open the agent builder sidebar with the current conversation loaded; `undefined` when already in the sidebar
+- **`closeCanvas`** - Callback to dismiss the canvas; `undefined` when not in canvas
+- **`openSidebarConversation`** - Callback to open the agent builder sidebar with the current conversation loaded
+
+#### Canvas flyout width
+
+By default the canvas flyout opens at `50vw` in full-screen context. You can override this per attachment type using the optional `canvasWidth` property on `AttachmentUIDefinition`:
+
+```ts
+export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
+  // ...
+  canvasWidth: '600px', // any valid CSS width value
+};
+```
+
+- Accepts any valid CSS width string: `'600px'`, `'40vw'`, etc.
+- Is capped at `50vw`. Users can resize the canvas between `300px` and `50vw`.
+- Has no effect in sidebar context or on narrow viewports (below the `l` EUI breakpoint, ~992px). There the canvas opens as an overlay at `50vw`, or 90% of the space beside the sidebar when that is narrower, and cannot be resized.
 
 #### Opening the sidebar from attachments
 
@@ -516,9 +672,23 @@ getActionButtons: ({ attachment, openSidebarConversation }) => {
 ```
 
 The callback handles setting the correct conversation context in localStorage before opening the sidebar, ensuring the sidebar loads the same conversation. It is `undefined` when already in the sidebar context.
-- **`setPreviewBadgeState`** - Optional callback to control inline preview badge state when preview is driven outside the canvas
 
-`setPreviewBadgeState` accepts:
+#### Previewing outside the canvas
+
+When the attachment is previewed outside the canvas, for example in the app the user is on, return `previewing` from `getPreviewState$`. The inline card then shows a "You're previewing this" badge instead of its action buttons.
+
+```tsx
+getPreviewState$: (attachment) =>
+  previewedAttachment$.pipe(
+    map((previewed) =>
+      previewed?.id === attachment.id && previewed.version === attachment.versionData?.version
+        ? 'previewing'
+        : 'none'
+    )
+  ),
+```
+
+`getPreviewState$` emits:
 
 - **`none`** - regular inline state
 - **`preview_available`** - show "Preview Only" badge
@@ -647,7 +817,7 @@ getActionButtons: ({ attachment, updateOrigin, isCanvas }) => {
   if (attachment.origin) {
     buttons.push({
       label: 'Open in App',
-      icon: 'popout',
+      icon: 'external',
       type: ActionButtonType.SECONDARY,
       handler: () => {
         window.open(`/app/myApp/${attachment.origin}`, '_blank');
@@ -753,63 +923,607 @@ const myAttachmentType: AttachmentTypeDefinition<'my_type', MyContent> = {
 4. The UI shows a panel listing stale attachments, letting the user add the refreshed version or dismiss
 
 Refer to [`AttachmentStaleCheckResult`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/stale_check.ts) for the result types returned by the stale check API.
+****
+## Registering renderers
 
-#### Attachment lifecycle hook: onAttachmentMount
+Renderers let the agent display rich, typed objects inline in a chat reply — dashboards, tables, or any
+plugin-owned visualization. This is not generative UI: the agent produces a typed data payload, and a
+predefined renderer registered by your plugin draws it. Attachments (above) are an *input-to-LLM*
+abstraction; renderers are an *output* abstraction, and the two are independent.
 
-The `onAttachmentMount` lifecycle hook allows you to run side effects when an attachment is mounted to a conversation, and clean them up when the attachment is removed.
+**How it works end-to-end:**
 
-**When to use `onAttachmentMount`:**
+1. When the bash tool is enabled (`agentBuilder:bashSupport` advanced setting) and at least one renderer
+   is registered, the agent's prompt advertises every registered render type and its payload JSON schema.
+2. The agent writes the payload to a file in its `/workspace` virtual filesystem using bash. The file
+   content is the raw payload matching your schema (no wrapper). The recommended location is
+   `/workspace/renders/{type}/{id}.json`, with a new file per create/edit so earlier replies keep their
+   original render.
+3. The agent emits a directive in its reply: `<render path="/workspace/renders/{type}/{id}.json" type="{type}" />`.
+   The `type` attribute selects the renderer.
+4. When the round completes, the browser fetches the file (via a conversation-scoped internal API),
+   validates it against your renderer's `payloadSchema`, and mounts your `render` function. Any failure
+   (missing file, invalid payload, unknown type) shows a structured error callout instead. Renders resolve
+   on round completion and on reload — the workspace is only persisted at the end of a round, so a
+   skeleton is shown while the round is streaming.
 
-- Setting up subscriptions that should live for the duration of the attachment's presence in the conversation
-- Syncing attachment state with external systems
-- Any side effect that needs cleanup when the attachment is removed
+Renderer output is wrapped in an error boundary, so a throwing renderer degrades to an error callout
+rather than taking down the chat.
 
-**Important:** This hook is called once per attachment (not per version). The framework tracks attachment presence at the conversation level, so you don't need to handle deduplication.
+### Server-side registration
 
-**Parameters:**
+Register the renderer type using the `renderers.register` API of the `agentBuilder` plugin's setup contract.
+This is what advertises the type (and its payload schema) to the agent:
 
 ```ts
-interface AttachmentLifecycleParams<TAttachment> {
-  /** The attachment instance */
-  attachment: TAttachment;
-  /** The conversation ID containing this attachment */
-  conversationId: string;
-  /** Whether the attachment is rendered in the sidebar context */
-  isSidebar: boolean;
+class MyPlugin {
+  setup(core: CoreSetup, { agentBuilder }: { agentBuilder: AgentBuilderPluginSetup }) {
+    agentBuilder.renderers.register(myRendererDefinition);
+  }
 }
 ```
 
-**Example: Syncing attachment origin when a dashboard is saved**
+```ts
+import { z } from '@kbn/zod/v4';
+import type { RendererTypeDefinition } from '@kbn/agent-builder-server/renderers';
 
-```tsx
-export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
-  getLabel: () => 'My attachment',
-  getIcon: () => 'document',
+// Define the payload schema once in your plugin's common/ folder and import it
+// on both the server and browser sides, so what the agent is told to produce is
+// exactly what the browser validates.
+const tablePayloadSchema = z.object({
+  columns: z.array(z.string()),
+  rows: z.array(z.record(z.string(), z.unknown())),
+});
 
-  onAttachmentMount: ({ attachment, conversationId }) => {
-    // Set up a subscription when the attachment is added
-    const subscription = someObservable$.subscribe((newValue) => {
-      if (newValue !== attachment.origin) {
-        // Update the attachment's origin using the plugin API
-        agentBuilder.updateAttachmentOrigin(conversationId, attachment.id, newValue);
-      }
-    });
-
-    // Return cleanup function - called when the attachment is removed from the conversation
-    return () => {
-      subscription.unsubscribe();
-    };
-  },
-
-  // ... other definition properties
+const tableRendererDefinition: RendererTypeDefinition = {
+  // unique renderer type; correlates the server and browser registrations and the <render> directive
+  type: 'table',
+  // zod schema the payload is validated against before mounting
+  payloadSchema: tablePayloadSchema,
+  // optional description injected into the agent prompt alongside the schema
+  getAgentDescription: () => 'Renders a dataset as an interactive table.',
 };
 ```
 
-**Cleanup behavior:**
+### Browser-side registration
 
-- The cleanup function is called when the attachment is removed from the conversation
-- It's also called when the conversation component unmounts (e.g., navigating away)
-- If `onAttachmentMount` returns `undefined` or `void`, no cleanup is performed
+Register the matching UI definition using the `renderers.register` API of the `agentBuilder` plugin's
+start contract. **A renderer type must be registered on both sides with the same `type`** — a
+server-only registration means the agent is told it can render the type, but directives for it will
+fail to resolve in the UI.
+
+```ts
+import React from 'react';
+import { EuiBasicTable } from '@elastic/eui';
+import type { RendererUIDefinition } from '@kbn/agent-builder-browser';
+
+const tableRendererUIDefinition: RendererUIDefinition<typeof tablePayloadSchema> = {
+  type: 'table',
+  payloadSchema: tablePayloadSchema,
+  // renders the validated payload inline in the conversation
+  render: (payload) => (
+    <EuiBasicTable
+      columns={payload.columns.map((column) => ({ field: column, name: column }))}
+      items={payload.rows}
+    />
+  ),
+};
+
+class MyPlugin {
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    agentBuilder.renderers.register(tableRendererUIDefinition);
+  }
+}
+```
+
+`RendererUIDefinition` also accepts optional members reserved for the canvas (expanded flyout) surface:
+`getHeader`, `getActionButtons`, `renderCanvas`, and `canvasWidth`. Refer to
+[`RendererUIDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-browser/renderers/contract.ts)
+and [`RendererTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/renderers/type_definition.ts)
+for the full contracts.
+
+## Registering conversation template UI
+
+Conversation templates give a conversation a type: a `template_id` plus typed `metadata` fields, validated server-side. The conversation template UI registry controls what renders in the conversation metadata flyout for a given template: your plugin registers reusable tabs, and per-template definitions that reference those tabs by id.
+
+The model mirrors the attachment registry: Agent Builder owns the flyout shell, and your plugin owns the tab content. The registry is browser-only — nothing UI-related is persisted.
+
+### Browser-side registration
+
+Register tabs and template UI definitions using the `conversationTemplates` API of the `agentBuilder` plugin's start contract:
+
+```ts
+class MyPlugin {
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    // Register a reusable tab
+    agentBuilder.conversationTemplates.registerTab('security.entities', () => entitiesTabDefinition);
+
+    // Assign a display name, icon, and tabs (in render order) to a template
+    agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', () => ({
+      name: i18n.translate('xpack.securitySolution.conversationTemplates.phishingName', {
+        defaultMessage: 'Phishing Investigation',
+      }),
+      icon: 'mail',
+      tabs: ['security.entities', 'security.overview'],
+    }));
+  }
+}
+```
+
+Tabs and templates register separately, so the same tab can be reused across templates. Agent Builder registers its built-in `timeline` tab through this same API (from the `agentBuilderPlatform` plugin).
+
+### Complete example
+
+```tsx
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import type { CoreStart } from '@kbn/core/public';
+import type { ConversationTemplateTabDefinition, ConversationTemplateUIContext } from '@kbn/agent-builder-browser';
+
+// Tab content must be self-contained: capture the services you need in a closure at
+// registration and mount your own providers inside `content`. The flyout can render
+// outside any KibanaContextProvider, so ambient context (useKibana() etc.) is not available OOTB.
+const createOverviewTab = (
+  core: CoreStart,
+  { attachmentsService }: ConversationTemplateUIContext
+): ConversationTemplateTabDefinition => ({
+  label: i18n.translate('xpack.securitySolution.conversationTabs.overviewLabel', {
+    defaultMessage: 'Overview',
+  }),
+  // Conversation data arrives at render time; the attachments service is captured at registration.
+  content: ({ conversation }) => (
+    <SecurityProviders core={core}>
+      <OverviewView conversation={conversation} attachmentsService={attachmentsService} />
+    </SecurityProviders>
+  ),
+});
+
+class SecurityPlugin {
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    agentBuilder.conversationTemplates.registerTab('security.overview', (context) => createOverviewTab(core, context));
+    agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', () => ({
+      name: i18n.translate('xpack.securitySolution.conversationTemplates.phishingName', {
+        defaultMessage: 'Phishing Investigation',
+      }),
+      icon: 'mail',
+      tabs: ['security.overview'],
+    }));
+  }
+}
+```
+
+The `content` component receives `conversation` as a prop and captures `attachmentsService`
+from the registration context. This works in both the
+live chat flyout and the snapshot opened with `agentBuilder.openConversationDetails({ conversationId })`. The snapshot loads the conversation
+when opened; the live flyout follows conversation updates.
+
+Inside your tab, select the attachments and versions to display, then look up their renderer.
+This example uses `getLatestVersion` from `@kbn/agent-builder-common/attachments` to render the
+current version; use `getVersion` when displaying a specific historical version:
+
+```tsx
+const latestVersion = getLatestVersion(versionedAttachment);
+const definition = attachmentsService.getAttachmentUiDefinition(versionedAttachment.type);
+
+return latestVersion && definition?.renderConversationDetailsContent
+  ? definition.renderConversationDetailsContent({
+      attachment: {
+        id: versionedAttachment.id,
+        type: versionedAttachment.type,
+        description: versionedAttachment.description,
+        origin: versionedAttachment.origin,
+        data: latestVersion.data,
+      },
+    })
+  : null;
+```
+
+### Shared registration context
+
+Both `registerTab` and `registerTemplateUIDefinition` accept a callback that Agent Builder
+invokes once with the same `ConversationTemplateUIContext`. This shared interface is the
+extension point for additional capabilities. It exposes navigation methods and the public
+`attachmentsService`; consumers only use the capabilities they need.
+Callbacks that do not need any capabilities can ignore the argument.
+
+```tsx
+agentBuilder.conversationTemplates.registerTab('security.overview', (context) => ({
+  label: overviewTabLabel,
+  content: ({ conversation }) => (
+    <OverviewTab
+      conversation={conversation}
+      attachmentsService={context.attachmentsService}
+      onOpenSidebar={() => context.openSidebarConversation(conversation.id)}
+      onOpenFullscreen={() => context.openFullscreenConversation({
+        conversationId: conversation.id,
+        agentId: conversation.agent_id,
+      })}
+    />
+  ),
+}));
+```
+
+The registry stores the returned definitions directly. Components capture capabilities at
+registration; hosts only supply conversation data at render time. Attachment lookups remain
+live, so types registered after the callback runs are also available. No context provider or component wrapper is required.
+
+### Brief cards
+
+A template UI definition can include an optional `briefCard` React component receiving
+`{ conversation }`, where `conversation` is a list endpoint result without rounds.
+Agent Builder calls the registration callback once with its navigation methods. The returned card can capture those methods when needed:
+
+```tsx
+agentBuilder.conversationTemplates.registerTemplateUIDefinition('phishing', (context) => ({
+  name: phishingTemplateName,
+  tabs: ['security.overview'],
+  briefCard: ({ conversation }) => (
+    <PhishingBriefCard
+      conversation={conversation}
+      onOpenSidebar={() => context.openSidebarConversation(conversation.id)}
+      onOpenFullscreen={() => context.openFullscreenConversation({
+        conversationId: conversation.id,
+        agentId: conversation.agent_id,
+      })}
+    />
+  ),
+}));
+```
+
+Sidebar navigation accepts a conversation ID and delegates to the existing sidebar opening behavior.
+Fullscreen navigation accepts `{ conversationId, agentId }`, closes the sidebar, and opens the
+canonical conversation route in the Agent Builder app without fetching the conversation.
+Callers should apply the same access checks as other programmatic chat entry points.
+Consumers pass an inline registration callback; they do not construct the navigation methods.
+Callbacks that do not need navigation can ignore the context argument.
+Cards may use hooks and, like tabs, must supply any solution-specific providers they need.
+
+The registry stores the returned definition directly. The host retrieves the original component
+and supplies only the conversation; no context prop, wrapper, or provider is needed:
+
+```tsx
+const BriefCard = conversation.template_id
+  ? conversationTemplates.getTemplateUIDefinition(conversation.template_id)?.briefCard
+  : undefined;
+return BriefCard ? (
+  <BriefCard conversation={conversation} />
+) : null;
+```
+
+The registry does not fetch card data or provide a default card when none is registered.
+
+### Conversation details header and footer
+
+Tabs, headers, and footers share `ConversationTemplateDetailsFlyoutRenderProps`.
+`isOpenedFromChat` is `true` in the live chat details flyout and `false` when opened through
+`openConversationDetails`. It is supplied at render time, not through registration context.
+
+Template UI definitions can provide optional `detailsFlyout.header` and
+`detailsFlyout.footer` React components. Both receive `{ conversation, isOpenedFromChat }` and can use
+hooks. Agent Builder owns the EUI header/footer wrappers and tab navigation; return
+only the content for each slot. Without a custom header, the default title remains.
+Without a custom footer, no footer is rendered.
+
+Capture Agent Builder capabilities from the existing registration context, and
+provide any solution-specific React providers inside your components:
+
+```tsx
+agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation', (context) => ({
+  name: investigationTemplateName,
+  tabs: ['investigation.details'],
+  detailsFlyout: {
+    header: InvestigationHeader,
+    footer: ({ conversation }) => (
+      <InvestigationFooter
+        conversation={conversation}
+        onOpenChat={() => context.openSidebarConversation(conversation.id)}
+      />
+    ),
+  },
+}));
+```
+
+### Conversation details flyout width
+
+Every conversation details flyout — the in-chat one and the ones opened with
+`openConversationDetails` — is resizable and uses the same width rules, so it opens at the same
+width in every consuming app:
+
+- Default width 480px, minimum 400px, maximum 640px.
+- When the user drags the flyout, that width is remembered (in `localStorage`) and used on the
+  next open, wherever the flyout is opened from. The flyout menu's reset action returns it to the
+  default.
+
+The width is not configurable per template or per caller: all surfaces share one setting.
+
+### Conversation details menu actions
+
+Menu actions are icon buttons rendered in the flyout menu bar before the close button. Each entry
+is an `EuiFlyoutMenuAction` (`iconType`, `aria-label`, and `onClick` or `href`, plus optional
+`toolTipContent`, `isDisabled` and `isLoading`). Each flyout takes them from a different place:
+
+- The in-chat flyout (opened from the chat's "Chat info" button) uses the template's
+  `detailsFlyout.trailingActions`, re-evaluated when the conversation updates.
+- Flyouts opened with `openConversationDetails` use only its `trailingActions` option, fixed when
+  the flyout opens. They don't read the template's `trailingActions`, because the template isn't
+  known until the conversation has loaded.
+
+Define the actions once and pass the same function to both:
+
+```tsx
+const getTrailingActions = (conversationId: string): EuiFlyoutMenuAction[] => [
+  {
+    iconType: 'link',
+    'aria-label': copyLinkLabel,
+    toolTipContent: copyLinkLabel,
+    onClick: () => copyToClipboard(getShareUrl(conversationId)),
+  },
+];
+
+agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation', () => ({
+  name: investigationTemplateName,
+  tabs: ['investigation.details'],
+  detailsFlyout: {
+    trailingActions: ({ conversation }) => getTrailingActions(conversation.id),
+  },
+}));
+
+agentBuilder.openConversationDetails({
+  conversationId,
+  trailingActions: getTrailingActions(conversationId),
+});
+```
+
+### Opening flyouts from conversation details content
+
+Both conversation details flyouts are managed EUI flyouts in the
+`CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY` history group. To open your own flyout from a tab, header,
+footer, or attachment renderer and have it stack on top with a Back button, open it as a main flyout
+in the same group by passing these options when you open it:
+
+```tsx
+import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
+
+const options = {
+  session: 'start',
+  historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
+};
+```
+
+Back returns to the conversation details flyout. Closing any flyout in the group closes all of them.
+A flyout opened with a different `historyKey` hides the conversation details flyout until it closes,
+with no Back button.
+
+In the full-screen conversation, Agent Builder's own flyouts (canvas, trace, execution JSON, tool
+response, sub-agent execution, clarification questions) join the same group, so they stack on top of
+the conversation details flyout and of each other. Outside-click doesn't close them; use Back, the
+close button or Escape. In the embeddable sidebar these flyouts are not managed and don't stack.
+
+### Rules
+
+- **Display name and icon**: `name` is the template's localized display name, shown in the conversation UI (title badge, conversation lists). `icon` is optional; the UI falls back to a default icon without it, and to the raw template id when no UI definition is registered at all.
+- **Naming**: Tab ids are a global keyspace. Always prefix them with your plugin name (`security.overview`). `timeline` is reserved for Agent Builder's built-in tab.
+- **Duplicates**: Registering a duplicate tab id or template id throws.
+- **Resolution**: Tab ids resolve when the flyout opens, so registration order across plugins does not matter. Ids with no registered tab are skipped. Templates with no registered UI definition fall back to the built-in tabs.
+- **Ordering**: Template tabs render in array order. The built-in tabs always render after them.
+
+Refer to [`ConversationTemplateServiceStartContract`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-browser/templates/contract.ts) for the full contract.
+
+## Chat integration and pending attachments
+
+Plugins can integrate with the active chat surface (the embeddable sidebar and the full-page routed chat) through the `agentBuilder` start contract.
+
+This is useful when the surrounding application wants to attach page context only under specific conditions, and react when the active chat binds to a new or existing conversation.
+
+A **pending attachment** is a client-only attachment attached to the active conversation that has not yet been persisted to a round; it lives in the chat UI until the user submits the next message, at which point it is sent with that round and persisted.
+
+### `setChatConfig(...)`
+
+> **Scope:** sidebar only.
+
+`setChatConfig(...)` configures the next sidebar open, or updates the active sidebar if it is already open.
+
+It supports the regular embeddable conversation props, including:
+
+- `newConversation` - force the sidebar to start a fresh conversation instead of restoring the persisted one
+- `attachments` - pre-populate the pending attachment list for the active sidebar conversation
+
+Use `clearChatConfig()` to remove that runtime configuration.
+
+#### `newConversation`
+
+Set `newConversation: true` when the sidebar must always bind to a fresh conversation:
+
+```ts
+agentBuilder.setChatConfig({
+  newConversation: true,
+});
+```
+
+#### `attachments`
+
+Set `attachments` when you want the sidebar to open with one or more pending attachments already present:
+
+```ts
+agentBuilder.setChatConfig({
+  attachments: [
+    {
+      id: 'my-context',
+      type: 'my_type',
+      data: { ... },
+    },
+  ],
+});
+```
+
+### `addAttachment(...)`
+
+> **Scope:** sidebar only. If no sidebar is open, the call is silently ignored.
+
+`addAttachment(...)` adds or updates a pending attachment in the active sidebar conversation.
+
+```ts
+agentBuilder.addAttachment({
+  id: 'my-pending-context',
+  type: 'my_type',
+  data: { ... },
+  origin: 'saved-object-id',
+});
+```
+
+Pending attachments added through `agentBuilder.addAttachment(...)` can include an `origin` string, just like other attachment inputs sent to the Agent Builder APIs. Use this when your pending attachment already corresponds to a persistent resource (for example, a saved object-backed dashboard or visualization), and your attachment type expects `origin` to be present.
+
+## Events
+
+The `agentBuilder` start contract exposes observables on the `events` namespace that let plugins react to the chat surface lifecycle through `events.ui` (currently the active conversation binding), follow per-conversation chat event streams, and react to the API state changes the agent makes.
+
+### Observing sidebar open state
+
+If you need to know whether the Agent Builder sidebar is currently open, subscribe to the core chrome sidebar primitive and match on the `agentBuilder` app id:
+
+```ts
+useEffect(() => {
+  const sub = chrome.sidebar.getCurrentAppId$().subscribe((appId) => {
+    const isOpen = appId === 'agentBuilder';
+    // react to the {isOpen} value
+  });
+
+  return () => sub.unsubscribe();
+}, [chrome.sidebar]);
+```
+
+### `events.ui.activeConversation$`
+
+Use `events.ui.activeConversation$` when you need to react to the conversation currently bound to the active chat surface.
+
+The non-null payload is:
+
+- `id?: string` - the currently bound conversation id, or `undefined` when the chat is currently bound to a new conversation
+- `conversation?: Conversation` - the fully loaded conversation when it has been successfully fetched (undefined for new conversations, while loading, or on fetch errors)
+
+```ts
+class MyPlugin {
+  private conversationSubscription?: Subscription;
+
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    this.conversationSubscription = agentBuilder.events.ui.activeConversation$.subscribe((change) => {
+      if (!change) {
+        // No chat surface currently bound — tear down local state.
+        return;
+      }
+
+      const { id, conversation } = change;
+
+      if (!id) {
+        agentBuilder.addAttachment({
+          id: 'my-pending-context',
+          type: 'my_type',
+          data: { ... },
+        });
+        return;
+      }
+
+      const hasMyAttachment = conversation?.attachments?.some(
+        (attachment) => attachment.id === 'my-pending-context'
+      );
+
+      if (!hasMyAttachment) {
+        // Handle the switch away from the pending attachment in your plugin state.
+      }
+    });
+  }
+
+  stop() {
+    this.conversationSubscription?.unsubscribe();
+  }
+}
+```
+
+### Chat events: per-conversation streams
+
+`events.chat$` exposes a hot observable of every chat event from every in-flight
+conversation. Concurrent per-conversation streams are now supported, so this stream
+interleaves events across conversations, and most event payloads do not carry a
+`conversation_id` you can filter on directly. **`chat$` is deprecated.**
+
+Use `events.getChatEvents$(conversationId)` instead. It returns a hot observable
+scoped to a single conversation — every event is tagged with the conversation that
+produced it, and the returned stream filters to the matching tag.
+
+```ts
+// Before — works only when a single conversation streams at a time.
+agentBuilder.events.chat$
+  .pipe(filter(isRoundCompleteEvent))
+  .subscribe((event) => { ... });
+
+// After — scope to a known conversation id.
+agentBuilder.events
+  .getChatEvents$(conversationId)
+  .pipe(filter(isRoundCompleteEvent))
+  .subscribe((event) => { ... });
+
+// After — scope to whichever conversation the chat surface is currently focused on.
+agentBuilder.events.ui.activeConversation$
+  .pipe(
+    filter((c): c is ActiveConversation => c?.id != null),
+    switchMap((c) => agentBuilder.events.getChatEvents$(c.id!))
+  )
+  .subscribe((event) => { ... });
+```
+
+`switchMap` cancels the previous per-conversation subscription whenever the active
+conversation changes — e.g. when a consumer follows the user's focus.
+
+All chat in Kibana is initiated through the agent_builder UI (sidebar, embeddable,
+or full-page chat), and the UI generates a client-side conversation UUID before
+each request. Plugins consuming this contract have access to that id via
+`events.ui.activeConversation$` and can pass it straight to `getChatEvents$`.
+
+### Reacting to `execute_api` state changes
+
+The agent can create, update and delete resources through the `execute_api` tool. To keep a page
+in sync with those changes without parsing the tool's result, pipe a chat event stream through the
+`filterApiStateChanges({ apis })` operator from `@kbn/agent-builder-browser`.
+
+After each successful call to an API that is not read-only, `execute_api` emits a `tool_ui` event
+whose `custom_event` is `API_STATE_CHANGED_UI_EVENT` (`'api_state_changed'`). The read-only flag
+comes from the API registry in `@elastic/schemas`, so creates, updates, deletes and side-effecting
+`GET`s are reported, while read-only `POST`s such as `esql.query` are not. Only conversation runs
+report changes, while standalone executions (such as workflow steps) that run an agent outside a
+conversation don't emit the event, and sub-agent and background runs don't forward their tool
+events to the browser. The payload is `ApiStateChangedEventData`:
+
+- `target` - `'kibana'` or `'elasticsearch'`
+- `api` - the operation id, e.g. `cases.create-case`
+- `method` - the HTTP method the call was dispatched with
+- `path` - the request path, with path parameters resolved
+
+The operator only filters, so the source stream decides which conversations you hear from. Pipe
+`getChatEvents$(conversationId)` for a known conversation, or the `ui.activeConversation$` and
+`switchMap` pattern above to follow the conversation the user is focused on. Events are live and not
+replayed to late subscribers, so keep fetching fresh data when your view mounts. The `apis` option
+selects operations per target with `*`, a namespace wildcard such as `cases.*`, or an exact
+operation id.
+
+```ts
+import { filterApiStateChanges } from '@kbn/agent-builder-browser';
+
+useEffect(() => {
+  const subscription = agentBuilder.events.ui.activeConversation$
+    .pipe(
+      map((activeConversation) => activeConversation?.id),
+      filter((conversationId): conversationId is string => conversationId != null),
+      distinctUntilChanged(),
+      switchMap((conversationId) => agentBuilder.events.getChatEvents$(conversationId)),
+      filterApiStateChanges({ apis: [{ target: 'kibana', api: 'cases.*' }] })
+    )
+    .subscribe(() => {
+      queryClient.invalidateQueries({ queryKey: ['cases', 'list'], exact: true });
+    });
+
+  return () => subscription.unsubscribe();
+}, [agentBuilder.events, queryClient]);
+```
 
 ## Registering skills
 
@@ -903,7 +1617,7 @@ does; the skill tells it *when* to do it.
 
 ### Marking a skill as experimental
 
-Individual built-in skills can be flagged as experimental by setting `experimental: true` on their definition. 
+Individual built-in skills can be flagged as experimental by setting `experimental: true` on their definition.
 Experimental skills are only visible and usable when the `agentBuilder:experimentalFeatures` uiSetting is enabled.
 
 **Example:**
@@ -937,7 +1651,7 @@ attach them to a conversation.
 │  │  SmlTypeDefinition         │ ← you provide this           │
 │  │  • id                      │                              │
 │  │  • list()                  │                              │
-│  │  • getSmlData()            │                              │
+│  │  • getSmlEntry()           │                              │
 │  │  • toAttachment()          │                              │
 │  └────────────────────────────┘                              │
 └──────────────────────────────────────────────────────────────┘
@@ -965,34 +1679,33 @@ attach them to a conversation.
 | Concept | Description |
 |---|---|
 | **SML Type** | A category of content you expose (e.g. `visualization`, `dashboard`). You implement `SmlTypeDefinition`. |
-| **Crawler** | A Task Manager background task that periodically calls your `list()` and `getSmlData()` hooks, indexing content into system indices. Uses mark-and-sweep with `last_crawled_at` timestamps for efficient change detection. |
-| **SML Document** | A single indexed chunk stored in the `.chat-sml-data` system index, containing title, content, permissions, and space information. |
+| **Crawler** | A Task Manager background task that periodically calls your `list()` and `getSmlEntry()` hooks, indexing content into system indices. Uses mark-and-sweep with `last_crawled_at` timestamps for efficient change detection. |
+| **SML Document** | A single indexed entry stored in the `.ai-index-idx-elastic-index` system index (the Elastic AI index), containing title, content, permissions, and space information. |
 | **`sml_search` tool** | A built-in Agent Builder tool the AI uses to keyword-search SML documents. Results are filtered by the requesting user's space and permissions. |
-| **`sml_attach` tool** | A built-in Agent Builder tool the AI uses to convert an SML search result into a conversation attachment (e.g. a rendered Lens visualization). |
+| **`sml_attach` tool** | A built-in Agent Builder tool the AI uses to convert SML search hits into conversation attachments. It accepts `entry_ids` from `sml_search`;  `entry_id` format is `attachment_type:origin_id:uuid`. |
 | **Origin ID** | The unique identifier for the source asset (typically a saved object ID). Used to link SML documents back to their source. |
 
 #### Data flow
 
 1. **Crawl**: The crawler runs on a configurable interval (default 10 min).
    For each registered SML type it calls `list()` to enumerate items, detects
-   changes via timestamps, and calls `getSmlData()` for new/updated items.
-2. **Index**: Results are written to the `.chat-sml-data` system index.
+   changes via timestamps, and calls `getSmlEntry()` for new/updated items.
+2. **Index**: Results are written to the `.ai-index-idx-elastic-index` system index.
    Crawler state (which items have been seen) is stored in a separate
    `.chat-sml-crawler-state` index.
 3. **Search**: When the AI agent calls `sml_search`, the SML service queries
-   the data index, filtering by the user's current space and checking Kibana
-   privileges against each result's `permissions` array.
-4. **Attach**: When the AI agent calls `sml_attach`, the service resolves
-   the saved object via your `toAttachment()` hook and adds the result as a
-   conversation attachment.
+   the data index with an authorization filter that binds space and action
+   together — a user must hold every action one of the entry's space groups
+   requires, within that single space.
+4. **Attach**: When the AI agent calls `sml_attach` with `entry_ids`, the service loads each entry, resolves the saved object via your `toAttachment()` hook, and adds the result as a conversation attachment (with `origin` when applicable).
 
 #### Security model
 
 - The crawler runs with **internal credentials** (`asInternalUser`) — it indexes
   content from all spaces.
-- Access control is enforced at **query time**: results are filtered by space
-  and by Kibana feature privileges (the `permissions` array you set in
-  `getSmlData`).
+- Access control is enforced at **query time**: results are filtered by the
+  Kibana actions your optional `getPermissions` hook returns, scoped to the
+  space the entry lives in.
 
 ---
 
@@ -1004,7 +1717,8 @@ Create a file in your plugin (e.g.
 `server/sml_types/my_asset.ts`). You need to implement four things:
 
 ```typescript
-import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 
 export const myAssetSmlType: SmlTypeDefinition = {
   // Unique identifier — lowercase, alphanumeric, hyphens, underscores.
@@ -1039,29 +1753,30 @@ export const myAssetSmlType: SmlTypeDefinition = {
     }
   },
 
-  // Fetch the full data for a single item to index.
-  // Return undefined to skip the item (e.g. if it was deleted).
-  getSmlData: async (originId, context) => {
+  // Fetch the data to index for a single origin. Every SML type produces
+  // exactly one entry per originId — return undefined to skip the item
+  // (e.g. if it was deleted).
+  getSmlEntry: async (originId, context) => {
     try {
       const so = await context.savedObjectsClient.get('my-saved-object-type', originId);
       const attrs = so.attributes as { title?: string; description?: string };
 
       return {
-        chunks: [
-          {
-            type: 'my-asset',
-            title: attrs.title ?? originId,
-            content: [attrs.title, attrs.description].filter(Boolean).join('\n'),
-            // Kibana feature privileges required to access this item.
-            // Users without these privileges won't see the item in search results.
-            permissions: ['saved_object:my-saved-object-type/get'],
-          },
-        ],
+        type: 'my-asset',
+        title: attrs.title ?? originId,
+        content: [attrs.title, attrs.description].filter(Boolean).join('\n'),
       };
     } catch {
       return undefined;
     }
   },
+
+  // Optional: compute the actions that gate access to the entry.
+  // Omit for resources that are intentionally public within the space.
+  // Prefer `kibanaPermissions` instead of hand-writing the action string. The
+  // `kiType` is your SML type id, and it MUST match the KI type your feature
+  // declares in `aiIndex: { read: [...] }`.
+  getPermissions: () => kibanaPermissions({ kiType: 'my-sml-type' }),
 
   // Convert an SML document back into a conversation attachment.
   // Called when the AI agent wants to "attach" a search result.
@@ -1113,19 +1828,32 @@ memory, so even types with millions of items won't cause OOM.
 Use `createPointInTimeFinder` with `namespaces: ['*']` to enumerate across
 all spaces. The crawler indexes everything; access control happens at query time.
 
-##### `getSmlData()` — Chunks and permissions
+##### `getSmlEntry()` and `getPermissions()` — One entry, explicit permissions
 
-You can return multiple chunks per item (e.g. if a dashboard has multiple
-panels). Each chunk gets its own document in the SML index.
+`getSmlEntry` returns exactly one entry per originId (e.g. a dashboard with
+many panels is still a single entry — its panel titles just become part of
+`content`, as in the example above).
 
-The `permissions` array should list the Kibana saved object privileges
-required to access the underlying asset. Common patterns:
+The optional `getPermissions` hook returns the Kibana actions required to access the
+underlying asset. Every SML type uses the same helper, whatever backs it:
 
-- `['saved_object:lens/get']` for Lens visualizations
-- `['saved_object:dashboard/get']` for dashboards
-- `['saved_object:search/get']` for saved searches
+- `kibanaPermissions({ kiType: 'visualization' })` for Lens visualizations
+- `kibanaPermissions({ kiType: 'dashboard' })` for dashboards
+- `kibanaPermissions({ kiType: 'workflow' })` for workflows
 
-Users without the listed privileges won't see the item in `sml_search` results.
+Each call produces one action, `ai_index:<kiType>/read`. Two things to get right:
+
+- **`kiType` is your SML type id**, not the saved object type or index name backing it.
+- **Your feature must grant that action**, by declaring `aiIndex: { read: ['<kiType>'] }` on
+  the privilege that should confer read access (see `FeatureKibanaPrivileges`). If the two
+  disagree, the action you stamp is one no privilege ever grants, and every entry of your type
+  silently disappears from every user's results.
+
+Users without the action won't see the item in `sml_search` results. Omit
+`getPermissions` only when the resource is intentionally public within the space.
+
+You return actions only. The indexer groups them per space into the stored
+`{ space, name[], count }` shape — never construct that yourself.
 
 ##### `toAttachment()` — Resolving saved objects
 
@@ -1135,6 +1863,12 @@ handles saved object aliasing (e.g. after a space migration).
 Return `undefined` if the item can no longer be resolved. The `sml_attach`
 tool will report a per-item error to the AI agent without failing the entire
 call.
+
+You may include an optional `description` string on the object returned from
+`toAttachment`. It is stored on the conversation
+attachment and shown in the Agent Builder UI (for example, the “Attachment
+added: …” line). If you omit it, a default label is derived from the SML
+document’s type and title.
 
 ##### `fetchFrequency` — Choose an appropriate interval
 
@@ -1152,7 +1886,7 @@ The visualization SML type is registered in
 It:
 - Lists all `lens` saved objects across all spaces
 - Extracts title, description, chart type, and ES|QL query as searchable content
-- Sets `permissions: ['saved_object:lens/get']`
+- Gates access on the `ai_index:visualization/read` action, via `kibanaPermissions({ kiType: VISUALIZATION_SML_TYPE })`
 - Converts results back to Lens API format for the attachment renderer
 - Uses a 1-hour crawl interval
 
@@ -1163,3 +1897,163 @@ setupDeps.agentBuilder.sml.registerType(visualizationSmlType);
 
 The full implementation is ~130 lines and serves as the reference for new types.
 
+## Streams lifecycle (frontend)
+
+The chat streaming layer lives across two folders:
+
+- `public/application/context/streaming/` — the lifted provider, its context hook, the
+  send, resume, and attach mutation hooks, the chat-events subscriber, and shared types.
+- `public/application/hooks/` — the per-conversation convenience hook
+  (`use_conversation_stream.ts`), the "any stream active?" derived hook
+  (`use_is_any_conversation_streaming.ts`), and the attach decision
+  (`use_attach_to_active_execution.ts`). They live here because they compose
+  `useConversation` (a sibling in `hooks/`) with the streaming context.
+
+This section documents how mutations, lifted state, and the React Query cache fit
+together. Read this before touching any of: `streaming_context.tsx`,
+`use_send_message_mutation.ts`, `use_resume_round_mutation.ts`,
+`use_attach_execution_mutation.ts`, `use_attach_to_active_execution.ts`,
+`use_subscribe_to_chat_events.ts`, `use_conversation_stream.ts`,
+`use_is_any_conversation_streaming.ts`.
+
+### The lift
+
+`<StreamingProvider>` is mounted **once** above the routes/sidebar:
+
+- Routed app: in `mount.tsx`, above `<AgentBuilderRoutes>`. The sidebar is part of the
+  routes, so it can read streaming state directly.
+- Embeddable: in `embeddable_conversations_provider.tsx`, one provider per embeddable
+  instance because each instance has its own `QueryClient`.
+
+The sidebar uses `useStreamingContext()` directly. `useIsAnyConversationStreaming()`
+is derived from the same context and is used by the embeddable welcome-message
+dismiss. Anything inside the conversation tree should use the per-conversation
+scoped hook, `useConversationStream()` (in `hooks/use_conversation_stream.ts`).
+
+### Lifted state
+
+`StreamingProvider` owns two slices with split lifecycles:
+
+- `activeStreams: Map<conversationId, ActiveStream>` — one entry per
+  in-flight stream. Set synchronously when each mutation kicks off; deleted in the
+  mutation's `finally`. Multiple entries can coexist — concurrent streams are
+  supported, one per conversation. Each entry has a `type` (`send`, `resume`, or
+  `attach`), a `started` flag once `execution_started` arrives, and a `cancelling`
+  flag after Stop.
+- `byConversationId: Record<string, StreamRecord>` — per-conversation
+  `pendingMessage` and `pendingAttachments`, retained until completion handling
+  releases them.
+
+The provider also keeps an `attemptedExecutionIds` ref. `mutateAttach` records an
+execution before attaching, and `cancelStream` records executions stopped here.
+Repeated fetches of the same pointer cannot start another attach during this mount.
+
+### Mutations: single-scope `mutationFn`
+
+`useSendMessageMutation`, `useResumeRoundMutation`, and `useAttachExecutionMutation`
+keep the stream lifecycle inside `mutationFn`, including error handling and a
+`finally` block for cleanup. The shape is:
+
+```ts
+mutationFn: async (vars) => {
+  // The provider registers the active stream before calling the mutation.
+  const streamActions = createConversationActions({ conversationId: vars.conversationId, ... });
+
+  try {
+    await subscribeToChatEvents({ events$, conversationActions: streamActions, ... });
+    if (isDetached(handle)) return;
+    await releaseLocalContent({ refetch: streamActions.refetchConversation, ... });
+  } finally {
+    // Clear this conversation's active-stream entry and remove this mutation's handle.
+  }
+}
+```
+
+Each mutation hook holds a `Map<conversationId, StreamHandle>` ref with a controller,
+the execution id used by the abort endpoint, and an `abortRequested` flag. The map
+is keyed by `vars.conversationId`, the cancel helper takes the same key, and the
+`finally` block deletes only the entry it installed (compared by reference so a
+re-mutate's controller isn't clobbered).
+
+**Why not lifecycle methods?** Streams aren't typical mutations — the bulk of the work
+happens *during* `mutationFn`, with state mutations flowing for many seconds. Splitting
+the work across lifecycle callbacks forces you to bridge state between scopes via refs
+or React Query's `context` return — neither is clean for streaming. With single-scope,
+`streamActions` and `vars` are visible throughout. No refs to bridge phases. Reads
+top-to-bottom.
+
+### Each conversation owns its streaming lifecycle
+
+Every `mutationFn` invocation builds its **own** `streamActions` instance via
+`createConversationActions({ conversationId: vars.conversationId, ... })`. That instance
+is closure-bound to the mutation's conversation id. **Stream events target the
+conversation the mutation was started for, regardless of where the user has navigated.**
+
+If the user submits on conversation A and immediately switches to B, the stream events
+keep updating A's live timeline. B loads cleanly from the server.
+
+Each view has its own `ConversationStreamService`. Mutations feed their events into
+its `trackStream` operator; saved events take precedence over live copies with the
+same id. After a run ends, `releaseLocalContent` refetches the conversation and
+clears local execution events once their saved terminal event is present.
+
+### Per-conversation `useConversation` gate
+
+`useConversation` is disabled while this provider has an active stream for the
+conversation. The saved document lags behind the live events during a run. Other
+conversations remain free to fetch, and shared conversations poll every five seconds
+while they have no local stream. Completion handling explicitly refetches the saved
+conversation even when the query is disabled.
+
+### Attach and detach
+
+`useAttachToActiveExecution` runs in `Conversation`, covering both the full app and
+the embeddable. When a conversation GET carries `active_execution.execution_id`
+and this provider has no stream for that conversation, it calls `mutateAttach`.
+The provider's attempted-id guard permits one attach per execution per mount.
+
+`ChatService.attachToExecution` replays from `/reattach?offset=0` and follows the
+live tail using the existing reconnect helper. Attach events feed the local
+timeline but are not published to `EventsService`, because replaying them could
+repeat other plugins' side effects. A resumed execution gets a synthetic local
+`prompt_response` to link it to the paused turn; the saved response replaces it
+after the completion refetch. Only a send creates a scroll anchor.
+
+Unmounting the provider calls `detachAllStreams`, which aborts local fetch
+controllers without requesting a server abort. Detached mutations skip completion
+refetches and composer cleanup. The server run continues, and a newly mounted view
+can attach through the saved execution pointer. Switching conversations within the
+same provider leaves its streams running.
+
+Attach failures are handled without a toast and followed by a conversation refetch.
+The attempted-id guard prevents another attach to that execution in this mount,
+including after the reconnect helper exhausts its recovery attempt. Reloading or
+remounting the view permits a fresh attempt.
+
+**Browser tools:** attached streams do not execute browser-tool calls, from either
+the replay or the live tail. The view that sent or resumed the run executes them
+while it stays connected. Closing it and reopening the conversation restores the
+timeline, but does not restore browser-tool execution. The server does not wait for browser
+acknowledgement, so the run can finish without applying a browser action. Recovering
+these actions safely requires execution ownership and deduplication across views;
+user-facing handling of missed actions is a follow-up.
+
+### Concurrent streams
+
+The app supports concurrent per-conversation streams. Submitting on conversation B
+while A is mid-stream starts a second stream alongside A. Each updates its own live
+timeline. Cancelling one doesn't affect the other.
+
+What this means in practice:
+
+- **Submit gate** (`conversation_input.tsx`) is per-conversation: `isResponseLoading`
+  from `useConversationStream()`. The new-conversation route (`/conversations/new`) has
+  no `conversationId`, so `isResponseLoading` is `false` and submit is always
+  allowed there even while other conversations stream.
+- **Per-conversation cancel** is wired through `cancelStream(id)` on the context.
+  It asks the mutation holding the handle to abort the server execution and records
+  the returned execution id so a lingering pointer cannot cause reattachment.
+  Stop keeps the connection open for the terminal event unless the abort request
+  fails or reports that no terminal event was persisted.
+- **Provider unmount** detaches all of its streams locally. It does not stop the
+  server executions.

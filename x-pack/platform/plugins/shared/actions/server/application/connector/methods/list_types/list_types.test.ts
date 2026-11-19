@@ -105,8 +105,21 @@ describe('listTypes()', () => {
         isSystemActionType: false,
         isDeprecated: false,
         source: 'stack',
+        isTestable: false,
       },
     ]);
+  });
+
+  it('returns only sandbox-capable connector types when asked', async () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+    actionTypeRegistry.register(getConnectorType());
+    actionTypeRegistry.register(
+      getConnectorType({ id: 'sandbox-type', sandboxSupportedAuthTypes: ['bearer'] })
+    );
+
+    const types = await actionsClient.listTypes({ sandboxCapableOnly: true });
+
+    expect(types.map(({ id }) => id)).toEqual(['sandbox-type']);
   });
 
   it('filters out system action types when not defining options', async () => {
@@ -143,6 +156,7 @@ describe('listTypes()', () => {
         isSystemActionType: false,
         isDeprecated: false,
         source: 'stack',
+        isTestable: false,
       },
       {
         id: 'my-connector-type-2',
@@ -155,6 +169,7 @@ describe('listTypes()', () => {
         enabledInLicense: true,
         isDeprecated: false,
         source: 'stack',
+        isTestable: false,
       },
     ]);
   });
@@ -186,6 +201,7 @@ describe('listTypes()', () => {
         isSystemActionType: false,
         isDeprecated: false,
         source: 'stack',
+        isTestable: false,
       },
       {
         id: '.cases',
@@ -198,6 +214,7 @@ describe('listTypes()', () => {
         enabledInLicense: true,
         isDeprecated: false,
         source: 'stack',
+        isTestable: false,
       },
     ]);
   });

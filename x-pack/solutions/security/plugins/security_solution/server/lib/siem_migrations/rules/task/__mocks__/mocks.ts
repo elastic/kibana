@@ -29,6 +29,7 @@ export const createSiemMigrationTelemetryClientMock = () => {
   };
 
   return {
+    reportSourceQueryKeywords: jest.fn(),
     reportIntegrationsMatch: jest.fn(),
     reportPrebuiltRulesMatch: jest.fn(),
     startSiemMigrationTask: jest.fn().mockReturnValue(mockStartSiemMigrationTaskReturn),
@@ -113,7 +114,7 @@ export class SiemMigrationFakeLLM extends FakeLLM {
     return this.defaultResponse;
   }
 
-  async bindTools(): Promise<typeof this> {
+  bindTools(): typeof this {
     return this;
   }
 

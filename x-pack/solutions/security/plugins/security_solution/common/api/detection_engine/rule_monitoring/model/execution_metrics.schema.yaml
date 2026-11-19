@@ -42,4 +42,16 @@ components:
             lte:
               description: End date of the execution gap
               type: string
+        gap_reason:
+          description: Detected reason for the execution gap
+          type: object
+          required:
+            - type
+          properties:
+            type:
+              description: The type of reason for the gap (rule_disabled or rule_did_not_run)
+              type: string
+              enum:
+                - rule_disabled
+                - rule_did_not_run
 

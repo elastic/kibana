@@ -8,7 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedPrincipal, AuthenticatedUser } from '@kbn/core-security-common';
 import type { APIKeysType } from './authentication';
 
 /**
@@ -25,6 +25,19 @@ export interface CoreAuthenticationService {
    */
   getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
   /**
+   * Classify the principal bound to the provided request: a user, an anonymous user, an API key
+   * or a service account, each Elasticsearch-issued (`stack`) or UIAM-issued (`uiam`) where that
+   * applies. Performs no I/O. Anonymous access resolves to `anonymous` even when the anonymous
+   * provider authenticates with an API key.
+   *
+   * `null` means no authenticated principal is known: unauthenticated requests, and fake requests
+   * that were not minted for a service account (or when service accounts are disabled). That
+   * includes Task Manager requests. Use {@link getCurrentUser} for the user such a request acts for.
+   *
+   * @param request The request to classify the authenticated principal for.
+   */
+  getPrincipal(request: KibanaRequest): AuthenticatedPrincipal | null;
+  /**
    * Retrieve the redacted session ID for the provided request.
    * Returns a redacted form of the session ID (e.g. last N characters).
    * Returns undefined if no session exists for the request.
@@ -34,3 +47,30 @@ export interface CoreAuthenticationService {
   getRedactedSessionId(request: KibanaRequest): Promise<string | undefined>;
   apiKeys: APIKeysType;
 }
+
+/**
+ * Identity fields that can be bound to a fake request by a
+ * {@link FakeRequestEnricher}. At least one field should be provided.
+ *
+ * @internal
+ */
+export interface FakeRequestUserFields {
+  /** The originating user's profile ID, exposed as `profile_uid`. */
+  profileId?: string;
+  /** The originating user's username, exposed as `username`. */
+  username?: string;
+}
+
+/**
+ * Binds originating-user identity fields to a fake request so
+ * `security.authc.getCurrentUser(request)` resolves to a synthetic
+ * {@link AuthenticatedUser} exposing only those fields (currently
+ * `profile_uid` and `username`). Obtained via
+ * {@link SecurityServiceSetup.acquireFakeRequestEnricher}; see that method
+ * for the security boundary. Throws on non-fake requests; calling twice on
+ * the same fake request is a no-op (first-wins) and emits a warning.
+ *
+ * @internal Intended for trusted orchestrators that own the fake request
+ *   lifecycle (e.g. Task Manager).
+ */
+export type FakeRequestEnricher = (request: KibanaRequest, user: FakeRequestUserFields) => void;

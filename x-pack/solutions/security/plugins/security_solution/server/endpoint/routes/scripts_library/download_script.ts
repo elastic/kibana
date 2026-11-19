@@ -40,17 +40,16 @@ export const getDownloadScriptRequestHandler = (
         user?.username || 'unknown'
       );
 
-      const { fileName, stream } = await scriptsClient.download(scriptId);
+      const { fileName, mimeType, stream } = await scriptsClient.download(scriptId);
 
-      return res.ok({
+      logger.debug(
+        () => `Download script: ${scriptId} - returning content stream: fileName: [${fileName}]`
+      );
+
+      return res.file({
         body: stream,
-        headers: {
-          'content-type': 'application/octet-stream',
-          'cache-control': 'max-age=31536000, immutable',
-          'content-disposition': `attachment; filename="${fileName ?? `script_${scriptId}.zip`}"`,
-          // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
-          'x-content-type-options': 'nosniff',
-        },
+        filename: fileName ?? `script_${scriptId}`,
+        fileContentType: mimeType,
       });
     } catch (err) {
       return errorHandler(logger, res, err);

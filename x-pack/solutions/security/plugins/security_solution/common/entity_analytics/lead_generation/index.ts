@@ -7,3 +7,4 @@
 
 export * from './constants';
 export * from './types';
+export * from './format_related_entity';

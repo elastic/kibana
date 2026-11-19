@@ -9,9 +9,13 @@ import { merge, omit, chunk, isEmpty } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import moment from 'moment';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { IEvent } from '@kbn/event-log-plugin/server';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server/types';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import EVENT_LOG_INDEX_MAPPINGS from './fixtures/event_log_index_mappings.json';
+import MULTI_INDEX_DOCS from './fixtures/event_log_multi_index_docs.json';
+import LEGACY_IDS_DOCS from './fixtures/event_log_legacy_ids_docs.json';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -20,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const spacesService = getService('spaces');
-  const esArchiver = getService('esArchiver');
+  const es = getService('es');
   const kibanaServer = getService('kibanaServer');
 
   describe('Event Log public API', () => {
@@ -163,11 +167,38 @@ export default function ({ getService }: FtrProviderContext) {
     }
 
     describe(`Index Lifecycle`, () => {
-      it('should query across indices matching the Event Log data view', async () => {
-        await esArchiver.load(
-          'x-pack/platform/test/fixtures/es_archives/event_log_multiple_indicies'
-        );
+      const indices = ['.kibana-event-log-7.9.0-000001', '.kibana-event-log-8.0.0-000001'];
+      const savedObjectId = '421f2511-5cd1-44fd-95df-e0df83e354d5';
 
+      before(async () => {
+        // The event log client verifies SO access before searching, so the referenced SO must exist.
+        await kibanaServer.savedObjects.create({
+          type: 'event_log_test',
+          id: savedObjectId,
+          overwrite: true,
+          attributes: {},
+        });
+        await es.indices.delete({ index: indices, ignore_unavailable: true });
+        for (const index of indices) {
+          await es.indices.create({
+            index,
+            mappings: EVENT_LOG_INDEX_MAPPINGS as MappingTypeMapping,
+          });
+        }
+        await es.bulk({
+          operations: MULTI_INDEX_DOCS.flatMap(({ index, id, doc }) => [
+            { index: { _index: index, _id: id } },
+            doc,
+          ]),
+          refresh: true,
+        });
+      });
+
+      after(async () => {
+        await es.indices.delete({ index: indices, ignore_unavailable: true });
+      });
+
+      it('should query across indices matching the Event Log data view', async () => {
         const id = `421f2511-5cd1-44fd-95df-e0df83e354d5`;
 
         const {
@@ -185,19 +216,32 @@ export default function ({ getService }: FtrProviderContext) {
           'test 2020-10-28T15:19:55.938Z',
           'test 2020-10-28T15:19:55.962Z',
         ]);
-
-        await esArchiver.unload(
-          'x-pack/platform/test/fixtures/es_archives/event_log_multiple_indicies'
-        );
       });
     });
 
     describe(`Legacy Ids`, () => {
       before(async () => {
-        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/event_log_legacy_ids');
+        await es.indices.delete({
+          index: '.kibana-event-log-8.0.0-000001',
+          ignore_unavailable: true,
+        });
+        await es.indices.create({
+          index: '.kibana-event-log-8.0.0-000001',
+          mappings: EVENT_LOG_INDEX_MAPPINGS as MappingTypeMapping,
+        });
+        await es.bulk({
+          operations: LEGACY_IDS_DOCS.flatMap(({ id, doc }) => [
+            { index: { _index: '.kibana-event-log-8.0.0-000001', _id: id } },
+            doc,
+          ]),
+          refresh: true,
+        });
       });
       after(async () => {
-        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/event_log_legacy_ids');
+        await es.indices.delete({
+          index: '.kibana-event-log-8.0.0-000001',
+          ignore_unavailable: true,
+        });
       });
       it('should support search event by ids and legacyIds', async () => {
         const legacyId = `521f2511-5cd1-44fd-95df-e0df83e354d5`;

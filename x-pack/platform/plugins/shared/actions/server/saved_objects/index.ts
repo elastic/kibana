@@ -9,11 +9,15 @@ import type {
   SavedObject,
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
+  ISavedObjectsRepository,
 } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getOldestIdleActionTask } from '@kbn/task-manager-plugin/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { connectorTypePublishesKeys } from '@kbn/connector-specs';
 import {
+  connectorIngressCredentialMappings,
+  connectorSigningKeyMappings,
   actionMappings,
   actionTaskParamsMappings,
   connectorTokenMappings,
@@ -23,10 +27,17 @@ import {
 import { getActionsMigrations } from './actions_migrations';
 import { getActionTaskParamsMigrations } from './action_task_params_migrations';
 import type { InMemoryConnector, RawAction } from '../types';
-import { getImportWarnings } from './get_import_warnings';
+import {
+  getImportWarnings,
+  getPreconfiguredConflictWarnings,
+  getInvalidConnectorIdWarnings,
+  getConnectorsWithInvalidIds,
+} from './get_import_warnings';
 import { transformConnectorsForExport } from './transform_connectors_for_export';
 import type { ActionTypeRegistry } from '../action_type_registry';
 import {
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+  CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE,
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
@@ -34,19 +45,27 @@ import {
   USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
 import {
+  connectorIngressCredentialModelVersions,
+  connectorSigningKeyModelVersions,
   actionTaskParamsModelVersions,
   connectorTokenModelVersions,
   oauthStateModelVersions,
   userConnectorTokenModelVersions,
 } from './model_versions';
 import { connectorModelVersions } from './model_versions/connector_model_versions';
+import { actionEncryptedRegistrationV4 } from './action_encryption';
+import { userConnectorTokenEncryptedRegistrationV2 } from './user_connector_token_encryption';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   actionTypeRegistry: ActionTypeRegistry,
   taskManagerIndex: string,
-  inMemoryConnectors: InMemoryConnector[]
+  inMemoryConnectors: InMemoryConnector[],
+  getSoRepository: () =>
+    | Promise<ISavedObjectsRepository | undefined>
+    | ISavedObjectsRepository
+    | undefined
 ) {
   savedObjects.registerType({
     name: ACTION_SAVED_OBJECT_TYPE,
@@ -60,6 +79,9 @@ export function setupSavedObjects(
       displayName: 'connector',
       defaultSearchField: 'name',
       importableAndExportable: true,
+      // An import cannot create the signing key, so these connectors must be created again.
+      isExportable: (savedObject: SavedObject<RawAction>) =>
+        !connectorTypePublishesKeys(savedObject.attributes.actionTypeId),
       getTitle(savedObject: SavedObject<RawAction>) {
         return `Connector: [${savedObject.attributes.name}]`;
       },
@@ -69,23 +91,93 @@ export function setupSavedObjects(
       ) {
         return transformConnectorsForExport(objects, actionTypeRegistry);
       },
-      onImport(connectors) {
+      async onImport(connectors) {
+        const typedConnectors = connectors as Array<
+          SavedObject<RawAction> & { destinationId?: string }
+        >;
+
+        const preconfiguredIds = new Set(
+          inMemoryConnectors.filter((c) => c.isPreconfigured).map((c) => c.id)
+        );
+
+        const preconfiguredConflicts = typedConnectors.filter(
+          (c) => preconfiguredIds.has(c.id) && !c.destinationId
+        );
+        const invalidIdConnectors = getConnectorsWithInvalidIds(typedConnectors);
+
+        const toDelete = [
+          ...preconfiguredConflicts,
+          ...invalidIdConnectors.filter((c) => !preconfiguredConflicts.some((p) => p.id === c.id)),
+        ];
+
+        if (toDelete.length > 0) {
+          // All connectors in a single import operation target the same space,
+          // so using the namespace from the first connector applies correctly to
+          // the entire batch. bulkDelete does not support per-object namespaces.
+          const namespace = toDelete[0]?.namespaces?.[0];
+          const repo = await getSoRepository();
+          if (repo) {
+            await repo.bulkDelete(
+              toDelete.map((c) => ({ type: ACTION_SAVED_OBJECT_TYPE, id: c.id })),
+              { namespace }
+            );
+          }
+        }
+
         return {
-          warnings: getImportWarnings(connectors as Array<SavedObject<RawAction>>),
+          warnings: [
+            ...getImportWarnings(typedConnectors),
+            ...getPreconfiguredConflictWarnings(typedConnectors, inMemoryConnectors),
+            ...getInvalidConnectorIdWarnings(typedConnectors),
+          ],
         };
       },
     },
-    modelVersions: connectorModelVersions,
+    modelVersions: connectorModelVersions(encryptedSavedObjects),
   });
 
   // Encrypted attributes
-  // - `secrets` properties will be encrypted
-  // - `config` will be included in AAD
+  // - `secrets` and inbound last-saver `apiKey` / `uiamApiKey` are encrypted
+  // - `actionTypeId`, `isMissingSecrets`, `config`, and optional `specVersion` are included in AAD
   // - everything else excluded from AAD
+  encryptedSavedObjects.registerType(actionEncryptedRegistrationV4);
+
+  savedObjects.registerType({
+    name: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'multiple-isolated',
+    mappings: connectorIngressCredentialMappings,
+    management: {
+      importableAndExportable: false,
+    },
+    modelVersions: connectorIngressCredentialModelVersions,
+  });
+
+  savedObjects.registerType({
+    name: CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: connectorSigningKeyMappings,
+    management: {
+      importableAndExportable: false,
+    },
+    modelVersions: connectorSigningKeyModelVersions,
+  });
+
   encryptedSavedObjects.registerType({
-    type: ACTION_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['secrets']),
-    attributesToIncludeInAAD: new Set(['actionTypeId', 'isMissingSecrets', 'config']),
+    type: CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['privateKey']),
+    attributesToIncludeInAAD: new Set([
+      'connectorId',
+      'spaceId',
+      'issuer',
+      'publicKey',
+      'createdAt',
+    ]),
+    // The key record ID is the connector ID, which can be a custom value.
+    enforceRandomId: false,
   });
 
   savedObjects.registerType({
@@ -162,19 +254,7 @@ export function setupSavedObjects(
     modelVersions: userConnectorTokenModelVersions,
   });
 
-  encryptedSavedObjects.registerType({
-    type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['credentials']),
-    attributesToIncludeInAAD: new Set([
-      'profileUid',
-      'connectorId',
-      'credentialType',
-      'expiresAt',
-      'refreshTokenExpiresAt',
-      'createdAt',
-      'updatedAt',
-    ]),
-  });
+  encryptedSavedObjects.registerType(userConnectorTokenEncryptedRegistrationV2);
 
   savedObjects.registerType({
     name: OAUTH_STATE_SAVED_OBJECT_TYPE,

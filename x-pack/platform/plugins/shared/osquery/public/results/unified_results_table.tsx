@@ -22,6 +22,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
   UnifiedDataTableSettings,
   UnifiedDataTableRestorableState,
+  SortOrder,
 } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState, DataGridDensity } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -49,6 +50,7 @@ import {
   PaginationLimitToastContent,
   euiProgressCss,
 } from './results_table_shared';
+import { useExportFiltersContext } from './export_filters_context';
 
 const ITEMS_PER_PAGE_OPTIONS = [...PAGE_SIZE_OPTIONS];
 
@@ -67,7 +69,9 @@ const resultsTableContainerCss = {
 
 const unifiedTableWrapperCss = {
   flex: '1 1 auto',
-  minHeight: 200,
+  '.euiDataGrid__controls': {
+    paddingLeft: '8px',
+  },
 };
 
 const gridStyleOverride = {
@@ -98,7 +102,11 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [euiTheme.size.m, euiTheme.colors.body]
   );
 
-  const { data: actionResultsData } = useActionResults({
+  const {
+    data: actionResultsData,
+    isFetched: actionResultsFetched,
+    isError: actionResultsErrored,
+  } = useActionResults({
     actionId,
     startDate,
     activePage: 0,
@@ -175,6 +183,10 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const [sortingColumns, setSortingColumns] = useState<
     Array<{ id: string; direction: 'asc' | 'desc' }>
   >([{ id: 'agent.name', direction: Direction.asc }]);
+  const gridSort = useMemo<SortOrder[]>(
+    () => sortingColumns.map((col) => [col.id, col.direction]),
+    [sortingColumns]
+  );
 
   const ecsMappingColumns = useMemo(() => keys(ecsMapping || {}), [ecsMapping]);
 
@@ -234,6 +246,27 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     scheduleId,
     executionCount,
   });
+
+  const exportFiltersStore = useExportFiltersContext();
+  const unfilteredTotal =
+    actionResultsFetched && !actionResultsErrored
+      ? actionResultsData?.aggregations?.totalRowCount
+      : undefined;
+  useEffect(() => {
+    exportFiltersStore?.setFilters(actionId, {
+      kuery: userKuery,
+      activeFilters,
+      filteredTotal: allResultsData?.total,
+      total: unfilteredTotal,
+    });
+  }, [
+    exportFiltersStore,
+    actionId,
+    userKuery,
+    activeFilters,
+    allResultsData?.total,
+    unfilteredTotal,
+  ]);
 
   // Register missing columns as runtime fields on the data view so that
   // UnifiedDataTable can resolve their field type tokens (icons in column headers).
@@ -324,6 +357,14 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     },
     []
   );
+
+  // Remount the grid on fullscreen exit to reset internal EuiDataGrid column widths that persist from the wider viewport.
+  const [gridKey, setGridKey] = useState(0);
+  const handleFullScreenChange = useCallback((isFullScreen: boolean) => {
+    if (!isFullScreen) {
+      setGridKey((k) => k + 1);
+    }
+  }, []);
 
   // Auto-compute visible columns from result data when user hasn't set them manually.
   // Deduplicates osquery.* fields by their short name (second segment) — e.g.
@@ -579,6 +620,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                 getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
               >
                 <UnifiedDataTable
+                  key={gridKey}
                   ariaLabelledBy="osquery-results"
                   dataView={dataView}
                   columns={visibleColumns}
@@ -588,13 +630,14 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                   setExpandedDoc={setExpandedDoc}
                   renderDocumentView={renderDocumentView}
                   externalCustomRenderers={externalCustomRenderers}
-                  sort={sortingColumns.map((col) => [col.id, col.direction])}
+                  sort={gridSort}
                   onSort={handleSort}
                   onSetColumns={handleSetColumns}
                   onResize={handleResize}
                   settings={mergedGridSettings}
                   showTimeCol={false}
                   showFullScreenButton={appName === OSQUERY_PLUGIN_NAME}
+                  onFullScreenChange={handleFullScreenChange}
                   canDragAndDropColumns
                   isSortEnabled
                   isPaginationEnabled={false}

@@ -8,10 +8,13 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { isString } from 'lodash/fp';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
+import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { EntityType } from '../../../../../../common/search_strategy';
 import { EntityDetailsLink } from '../../../../../common/components/links';
-import { ServicePanelKey } from '../../../../../flyout/entity_details/shared/constants';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
@@ -24,6 +27,7 @@ interface Props {
   onClick?: () => void;
   value: string | number | undefined | null;
   title?: string;
+  entityId?: string;
 }
 
 const ServiceNameComponent: React.FC<Props> = ({
@@ -33,13 +37,24 @@ const ServiceNameComponent: React.FC<Props> = ({
   onClick,
   title,
   value,
+  entityId,
 }) => {
   const eventContext = useContext(StatefulEventContext);
   const serviceName = `${value}`;
   const isInTimelineContext = serviceName && eventContext?.timelineID;
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openServiceFlyout } = useFlyoutApi();
 
   const isInSecurityApp = useIsInSecurityApp();
+
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
+
+  const { entityRecord } = useEntityFromStore({
+    entityId,
+    entityType: 'service',
+    skip: !entityStoreV2Enabled,
+  });
+
+  const resolvedEntityId = entityRecord?.entity?.id;
 
   const openServiceDetailsSidePanel = useCallback(
     (e: React.SyntheticEvent) => {
@@ -55,18 +70,23 @@ const ServiceNameComponent: React.FC<Props> = ({
 
       const { timelineID } = eventContext;
 
-      openFlyout({
-        right: {
-          id: ServicePanelKey,
-          params: {
-            serviceName,
-            contextID: contextId,
-            scopeId: timelineID,
-          },
-        },
+      openServiceFlyout({
+        serviceName,
+        entityId: resolvedEntityId,
+        contextID: contextId,
+        scopeId: timelineID,
+        origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
       });
     },
-    [contextId, eventContext, isInTimelineContext, onClick, openFlyout, serviceName]
+    [
+      onClick,
+      eventContext,
+      isInTimelineContext,
+      openServiceFlyout,
+      serviceName,
+      resolvedEntityId,
+      contextId,
+    ]
   );
 
   const content = useMemo(
@@ -78,6 +98,7 @@ const ServiceNameComponent: React.FC<Props> = ({
         onClick={isInTimelineContext || !isInSecurityApp ? openServiceDetailsSidePanel : undefined}
         title={title}
         entityType={EntityType.service}
+        entityId={entityId}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">
           {serviceName}
@@ -85,13 +106,14 @@ const ServiceNameComponent: React.FC<Props> = ({
       </EntityDetailsLink>
     ),
     [
+      Component,
       serviceName,
       isButton,
       isInTimelineContext,
-      openServiceDetailsSidePanel,
-      Component,
-      title,
       isInSecurityApp,
+      openServiceDetailsSidePanel,
+      title,
+      entityId,
     ]
   );
 

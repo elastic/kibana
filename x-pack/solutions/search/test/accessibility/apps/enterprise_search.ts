@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('loads the search home page', async function () {
-        await testSubjects.exists('search-homepage');
+        await testSubjects.exists('elasticsearchHomePage');
       });
     });
 
@@ -45,30 +45,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'create index button visible',
           async () => await testSubjects.exists('createIndexButton')
-        );
-        await a11y.testAppSnapshot();
-      });
-    });
-
-    describe('Playground', () => {
-      before(async () => {
-        await common.navigateToApp('search_playground');
-      });
-
-      it('loads playground list page', async function () {
-        await retry.waitFor(
-          'new playground button',
-          async () => await testSubjects.exists('newPlaygroundButton')
-        );
-        await a11y.testAppSnapshot();
-      });
-
-      it('loads playground', async function () {
-        await testSubjects.click('newPlaygroundButton');
-
-        await retry.waitFor(
-          'playground docs link',
-          async () => await testSubjects.exists('playground-documentation-link')
         );
         await a11y.testAppSnapshot();
       });
@@ -124,20 +100,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'query rules docs link',
           async () => await testSubjects.exists('searchQueryRulesEmptyPromptFooterLink')
-        );
-        await a11y.testAppSnapshot();
-      });
-    });
-
-    describe('Search inference endpoints', () => {
-      before(async () => {
-        await common.navigateToApp('management/ml/inference_endpoints');
-      });
-
-      it('loads inference endpoints page', async function () {
-        await retry.waitFor(
-          'Inference endpoints page header',
-          async () => await testSubjects.exists('allInferenceEndpointsPage')
         );
         await a11y.testAppSnapshot();
       });

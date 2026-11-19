@@ -7,13 +7,18 @@
 
 export const ADD_COMMENT_INPUT = '[data-test-subj="add-comment"] textarea';
 
-export const BACK_TO_CASES_BTN = 'a[title="Cases"]';
+export const BACK_TO_CASES_BTN = '[data-test-subj="appHeaderBack"]';
+
+// Rendered by the unified attachments flow (feature flag on) when attaching a timeline.
+export const CREATE_CASE_FLYOUT = '[data-test-subj="create-case-flyout"]';
+
+export const VIEW_CASE_TOASTER_LINK = '[data-test-subj="toaster-content-case-view-link"]';
 
 export const DESCRIPTION_INPUT = '[data-test-subj="caseDescription"] textarea';
 
 export const EMPTY_TIMELINE = '[data-test-subj="euiSelectableMessage"]';
 
-export const INSERT_TIMELINE_BTN = '.euiMarkdownEditorToolbar [aria-label="Insert timeline link"]';
+export const INSERT_TIMELINE_BTN = '.euiMarkdownEditorToolbar [aria-label="Insert Timeline link"]';
 
 export const LOADING_SPINNER = '[data-test-subj="create-case-loading-spinner"]';
 

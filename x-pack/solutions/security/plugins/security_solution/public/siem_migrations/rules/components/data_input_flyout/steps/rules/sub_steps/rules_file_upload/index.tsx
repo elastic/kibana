@@ -16,6 +16,7 @@ import {
 } from '../../../../../../service/hooks/use_create_migration';
 import * as i18n from './translations';
 import { RulesXMLFileUpload } from './rules_xml_file_upload';
+import { SentinelRulesJsonFileUpload } from './rules_json_file_upload';
 import { MigrationSource } from '../../../../../../../common/types';
 
 export interface RulesFileUploadStepProps {
@@ -56,7 +57,11 @@ export const useRulesFileUploadStep = ({
   }, [isLoading, error, status]);
 
   const Component =
-    migrationSource === MigrationSource.QRADAR ? RulesXMLFileUpload : RulesFileUpload;
+    migrationSource === MigrationSource.QRADAR
+      ? RulesXMLFileUpload
+      : migrationSource === MigrationSource.SENTINEL
+      ? SentinelRulesJsonFileUpload
+      : RulesFileUpload;
 
   return {
     title: i18n.RULES_DATA_INPUT_FILE_UPLOAD_TITLE,

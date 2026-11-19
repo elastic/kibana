@@ -18,6 +18,7 @@ import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 } from '../../constants';
 
 import { getAgentActions } from './actions';
 import type { AgentClient } from './agent_service';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services/version_specific_policies_utils';
 
 export async function getAutoUpgradeAgentsStatus(
   agentClient: AgentClient,
@@ -32,7 +33,11 @@ export async function getAutoUpgradeAgentsStatus(
     .listAgents({
       showInactive: false,
       perPage: 0,
-      kuery: `${AgentStatusKueryHelper.buildKueryForActiveAgents()} AND ${AGENTS_PREFIX}.policy_id:"${agentPolicyId}"`,
+      kuery: `${AgentStatusKueryHelper.buildKueryForActiveAgents()} AND ${buildPolicyBaseIdWithFallbackKuery(
+        agentPolicyId,
+        `${AGENTS_PREFIX}.policy_base_id`,
+        `${AGENTS_PREFIX}.policy_id`
+      )}`,
       aggregations: {
         versions: {
           terms: {
@@ -59,7 +64,11 @@ export async function getAutoUpgradeAgentsStatus(
     .listAgents({
       showInactive: false,
       perPage: 0,
-      kuery: `${AgentStatusKueryHelper.buildKueryForActiveAgents()} AND ${AGENTS_PREFIX}.policy_id:"${agentPolicyId}" AND ${AGENTS_PREFIX}.upgrade_details.state:"UPG_FAILED"`,
+      kuery: `${AgentStatusKueryHelper.buildKueryForActiveAgents()} AND ${buildPolicyBaseIdWithFallbackKuery(
+        agentPolicyId,
+        `${AGENTS_PREFIX}.policy_base_id`,
+        `${AGENTS_PREFIX}.policy_id`
+      )} AND ${AGENTS_PREFIX}.upgrade_details.state:"UPG_FAILED"`,
       aggregations: {
         action_id_versions: {
           multi_terms: {
@@ -124,7 +133,11 @@ export async function getAutoUpgradeAgentsStatus(
     .listAgents({
       showInactive: false,
       perPage: 0,
-      kuery: `${AgentStatusKueryHelper.buildKueryForActiveAgents()} AND ${AGENTS_PREFIX}.policy_id:"${agentPolicyId}" AND ${AGENTS_PREFIX}.upgrade_details.state:* AND not ${AGENTS_PREFIX}.upgrade_details.state:"UPG_FAILED"`,
+      kuery: `${AgentStatusKueryHelper.buildKueryForActiveAgents()} AND ${buildPolicyBaseIdWithFallbackKuery(
+        agentPolicyId,
+        `${AGENTS_PREFIX}.policy_base_id`,
+        `${AGENTS_PREFIX}.policy_id`
+      )} AND ${AGENTS_PREFIX}.upgrade_details.state:* AND not ${AGENTS_PREFIX}.upgrade_details.state:"UPG_FAILED"`,
       aggregations: {
         action_id_versions: {
           multi_terms: {

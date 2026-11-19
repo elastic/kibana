@@ -7,18 +7,27 @@
 
 import type { ConnectorResponseV1 } from '../../../../../common/routes/connector/response';
 import type { Connector } from '../../../../application/connector/types';
+import { omitIngestTokenHashFromConfig } from '../omit_ingest_token_hash';
 
-export const transformConnectorResponse = ({
-  actionTypeId,
-  isPreconfigured,
-  isMissingSecrets,
-  isDeprecated,
-  isSystemAction,
-  isConnectorTypeDeprecated,
-  authMode,
-  ...res
-}: Connector): ConnectorResponseV1 => ({
-  ...res,
+export const transformConnectorResponse = (
+  {
+    id,
+    name,
+    config,
+    actionTypeId,
+    isPreconfigured,
+    isMissingSecrets,
+    isDeprecated,
+    isSystemAction,
+    isConnectorTypeDeprecated,
+    authMode,
+    isInboundEventsEnabled,
+  }: Connector,
+  { includeInboundEventsField }: { includeInboundEventsField: boolean }
+): ConnectorResponseV1 => ({
+  id,
+  name,
+  config: omitIngestTokenHashFromConfig(config),
   connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,
   is_deprecated: isDeprecated,
@@ -26,4 +35,7 @@ export const transformConnectorResponse = ({
   is_system_action: isSystemAction,
   is_connector_type_deprecated: isConnectorTypeDeprecated,
   ...(authMode !== undefined ? { auth_mode: authMode } : {}),
+  ...(includeInboundEventsField && isInboundEventsEnabled !== undefined
+    ? { is_inbound_events_enabled: isInboundEventsEnabled }
+    : {}),
 });

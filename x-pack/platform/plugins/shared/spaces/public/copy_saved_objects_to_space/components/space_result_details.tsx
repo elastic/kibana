@@ -13,6 +13,7 @@ import {
   EuiSuperSelect,
   EuiSwitch,
   EuiText,
+  EuiTextTruncate,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -45,7 +46,7 @@ function getSavedObjectLabel(type: string) {
     case 'index-pattern':
     case 'index-patterns':
     case 'indexPatterns':
-      return 'index patterns';
+      return 'data views';
     default:
       return type;
   }
@@ -172,9 +173,7 @@ export const SpaceCopyResultDetails = (props: Props) => {
                 `}
               >
                 <EuiText size="s">
-                  <p className="eui-textTruncate" title={name}>
-                    {name}
-                  </p>
+                  <EuiTextTruncate text={name} />
                 </EuiText>
               </EuiFlexItem>
               {switchProps.show && (
@@ -213,7 +212,6 @@ export const SpaceCopyResultDetails = (props: Props) => {
                   onChange={selectProps.onChange}
                   prepend={objectIdLabel}
                   aria-label={objectIdLabel}
-                  hasDividers
                   fullWidth
                   compressed
                 />

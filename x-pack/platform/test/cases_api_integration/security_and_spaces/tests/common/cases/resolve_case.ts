@@ -8,11 +8,13 @@
 import expect from '@kbn/expect';
 
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { COMMENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { postCaseResp, getPostCaseRequest } from '../../../../common/lib/mock';
+import { postCaseResp, getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   createCase,
+  createComment,
   resolveCase,
   removeServerGeneratedPropertiesFromCase,
 } from '../../../../common/lib/api';
@@ -48,6 +50,24 @@ export default ({ getService }: FtrProviderContext): void => {
       const data = removeServerGeneratedPropertiesFromCase(resolvedCase.case);
       expect(data).to.eql(postCaseResp());
       expect(data.comments?.length).to.eql(0);
+    });
+
+    it('returns comments in unified shape (resolveCaseRoute is internal and intentionally unprojected)', async () => {
+      const postedCase = await createCase(supertest, getPostCaseRequest());
+      await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+      });
+
+      const resolvedCase = await resolveCase({ supertest, caseId: postedCase.id });
+
+      expect(resolvedCase.case.comments?.length).to.eql(1);
+      const comment = resolvedCase.case.comments![0] as Record<string, unknown>;
+      // The resolve route is `access: 'internal'` and intentionally skips legacy projection.
+      // A regression here would mean unified comments silently revert to the legacy `user` shape.
+      expect(comment.type).to.eql(COMMENT_ATTACHMENT_TYPE);
+      expect((comment.data as { content: string }).content).to.eql(postCommentUserReq.comment);
     });
 
     it('unhappy path - 404s when case is not there', async () => {

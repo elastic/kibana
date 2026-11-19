@@ -13,9 +13,13 @@ import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import {
   extractAlertRuleId,
   extractCompositionContext,
+  extractEventChainDepthFromExecution,
+  extractEventChainVisitedWorkflowIdsFromExecution,
   extractExecutionMetadata,
   extractQueueDelayMs,
+  extractRunAs,
   extractTimeToFirstStep,
+  mergeEmitterWorkflowIntoEventChainVisited,
 } from './extract_execution_metadata';
 
 const createMockWorkflowExecution = (
@@ -207,16 +211,71 @@ describe('extractExecutionMetadata', () => {
     expect(meta.stepAvgDurationsByType).toEqual({ elasticsearch_search: 200 });
   });
 
+  it('includes emitToStartMs for event-driven executions with dispatch metadata', () => {
+    const wfExec = createMockWorkflowExecution({
+      triggeredBy: 'cases.caseCreated',
+      startedAt: '2024-01-01T00:00:05.000Z',
+      context: {
+        metadata: { eventDispatchTimestamp: '2024-01-01T00:00:01.000Z' },
+      },
+    });
+
+    const meta = extractExecutionMetadata(wfExec, []);
+    expect(meta.emitToStartMs).toBe(4000);
+  });
+
+  it('includes emitToStartMs when dispatch metadata is only on top-level execution.metadata', () => {
+    const wfExec = createMockWorkflowExecution({
+      triggeredBy: 'cases.caseCreated',
+      startedAt: '2024-01-01T00:00:05.000Z',
+      context: {},
+      metadata: { eventDispatchTimestamp: '2024-01-01T00:00:01.000Z' },
+    });
+
+    expect(extractExecutionMetadata(wfExec, []).emitToStartMs).toBe(4000);
+  });
+
+  it('prefers top-level metadata eventDispatchTimestamp over context.metadata when both exist', () => {
+    const wfExec = createMockWorkflowExecution({
+      triggeredBy: 'cases.caseCreated',
+      startedAt: '2024-01-01T00:00:10.000Z',
+      context: {
+        metadata: { eventDispatchTimestamp: '2024-01-01T00:00:08.000Z' },
+      },
+      metadata: { eventDispatchTimestamp: '2024-01-01T00:00:01.000Z' },
+    });
+
+    expect(extractExecutionMetadata(wfExec, []).emitToStartMs).toBe(9000);
+  });
+
   it('omits optional execution fields when there is nothing to report', () => {
     const wfExec = createMockWorkflowExecution();
     const meta = extractExecutionMetadata(wfExec, []);
     expect(meta.ruleId).toBeUndefined();
     expect(meta.queueDelayMs).toBeUndefined();
+    expect(meta.emitToStartMs).toBeUndefined();
     expect(meta.timeToFirstStep).toBeUndefined();
     expect(meta.stepDurations).toBeUndefined();
     expect(meta.stepAvgDurationsByType).toBeUndefined();
     expect(meta.timeoutMs).toBeUndefined();
     expect(meta.timeoutExceededByMs).toBeUndefined();
+  });
+
+  it('omits emitToStartMs when dispatch timestamp is invalid or after startedAt', () => {
+    const wfExecInvalid = createMockWorkflowExecution({
+      context: {
+        metadata: { eventDispatchTimestamp: 'not-a-date' },
+      },
+    });
+    const wfExecFuture = createMockWorkflowExecution({
+      startedAt: '2024-01-01T00:00:00.000Z',
+      context: {
+        metadata: { eventDispatchTimestamp: '2024-01-01T00:00:05.000Z' },
+      },
+    });
+
+    expect(extractExecutionMetadata(wfExecInvalid, []).emitToStartMs).toBeUndefined();
+    expect(extractExecutionMetadata(wfExecFuture, []).emitToStartMs).toBeUndefined();
   });
 });
 
@@ -368,6 +427,79 @@ describe('extractQueueDelayMs', () => {
   });
 });
 
+describe('extractRunAs', () => {
+  const definitionWithRunAs = (runAs?: string): WorkflowYaml =>
+    ({
+      steps: [],
+      ...(runAs && { settings: { run_as: runAs } }),
+    } as Partial<WorkflowYaml> as WorkflowYaml);
+
+  it('reports user for an execution with no service account', () => {
+    expect(extractRunAs(createMockWorkflowExecution())).toEqual({ runAs: 'user' });
+  });
+
+  it("reports a service account set by the workflow's own settings.run_as", () => {
+    expect(
+      extractRunAs(
+        createMockWorkflowExecution({
+          workflowDefinition: definitionWithRunAs('sa-1'),
+          effectiveIdentity: { type: 'service_account', id: 'sa-1' },
+        })
+      )
+    ).toEqual({ runAs: 'service_account', runAsInherited: false });
+  });
+
+  it('reports a service account inherited from the parent workflow', () => {
+    expect(
+      extractRunAs(
+        createMockWorkflowExecution({
+          workflowDefinition: definitionWithRunAs(),
+          effectiveIdentity: {
+            type: 'service_account',
+            id: 'sa-parent',
+            inheritedFrom: { workloadId: 'parent-wf' },
+          },
+        })
+      )
+    ).toEqual({ runAs: 'service_account', runAsInherited: true });
+  });
+
+  it("reports an inherited service account that overrides the child's own settings.run_as", () => {
+    expect(
+      extractRunAs(
+        createMockWorkflowExecution({
+          workflowDefinition: definitionWithRunAs('sa-child'),
+          effectiveIdentity: {
+            type: 'service_account',
+            id: 'sa-parent',
+            inheritedFrom: { workloadId: 'parent-wf' },
+          },
+        })
+      )
+    ).toEqual({ runAs: 'service_account', runAsInherited: true });
+  });
+
+  it('reports user when a non-inherited identity has no settings.run_as, as the runner does', () => {
+    expect(
+      extractRunAs(
+        createMockWorkflowExecution({
+          workflowDefinition: definitionWithRunAs(),
+          effectiveIdentity: { type: 'service_account', id: 'sa-1' },
+        })
+      )
+    ).toEqual({ runAs: 'user' });
+  });
+
+  it('is included in the execution metadata', () => {
+    expect(
+      extractExecutionMetadata(
+        createMockWorkflowExecution({ workflowDefinition: definitionWithRunAs('sa-1') }),
+        []
+      )
+    ).toMatchObject({ runAs: 'service_account', runAsInherited: false });
+  });
+});
+
 describe('extractCompositionContext', () => {
   it('returns empty object when not triggered by workflow-step', () => {
     expect(extractCompositionContext(compositionFixture('manual', {}))).toEqual({});
@@ -431,5 +563,206 @@ describe('extractCompositionContext', () => {
         })
       )
     ).toEqual({ compositionDepth: 1 });
+  });
+
+  it('returns empty object for a top-level execution even when the context carries lineage keys', () => {
+    expect(
+      extractCompositionContext(
+        compositionFixture('manual', {
+          executionChain: [
+            { executionId: 'parent-exec-id', invocation: 'sync', workflowId: 'parent-wf-id' },
+          ],
+          parentWorkflowExecutionId: 'parent-exec-id',
+          parentWorkflowId: 'parent-wf-id',
+        })
+      )
+    ).toEqual({});
+  });
+
+  describe('executionChain', () => {
+    const ROOT_HOP = { executionId: 'root-exec-id', invocation: 'sync', workflowId: 'root-wf-id' };
+    const PARENT_HOP = {
+      executionId: 'parent-exec-id',
+      invocation: 'async',
+      workflowId: 'parent-wf-id',
+    };
+    const grandchildContext = {
+      executionChain: [ROOT_HOP, PARENT_HOP],
+      parentDepth: 1,
+      parentWorkflowExecutionId: 'parent-exec-id',
+      parentWorkflowId: 'parent-wf-id',
+      parentWorkflowInvocation: 'async',
+    };
+
+    it('returns the stored chain, root first and direct parent last, next to the composition fields', () => {
+      expect(
+        extractCompositionContext(compositionFixture('workflow-step', grandchildContext))
+      ).toEqual({
+        compositionDepth: 2,
+        executionChain: [ROOT_HOP, PARENT_HOP],
+        parentWorkflowId: 'parent-wf-id',
+        parentWorkflowInvocation: 'async',
+      });
+    });
+
+    it('ends with the stored parent keys as its last hop, and its length is the depth', () => {
+      const { compositionDepth, executionChain = [] } = extractCompositionContext(
+        compositionFixture('workflow-step', grandchildContext)
+      );
+      const { parentWorkflowExecutionId, parentWorkflowId, parentWorkflowInvocation } =
+        grandchildContext;
+
+      expect({
+        depth: executionChain.length,
+        last: executionChain[executionChain.length - 1],
+      }).toEqual({
+        depth: compositionDepth,
+        last: {
+          executionId: parentWorkflowExecutionId,
+          invocation: parentWorkflowInvocation,
+          workflowId: parentWorkflowId,
+        },
+      });
+    });
+
+    it("copies only each hop's own fields", () => {
+      expect(
+        extractCompositionContext(
+          compositionFixture('workflow-step', {
+            ...grandchildContext,
+            executionChain: [{ ...ROOT_HOP, extra: 'not reported' }, PARENT_HOP],
+          })
+        ).executionChain
+      ).toEqual([ROOT_HOP, PARENT_HOP]);
+    });
+
+    it.each([
+      ['no chain (a pre-upgrade chain)', undefined],
+      ['an empty chain', []],
+      ['a malformed hop', [ROOT_HOP, { executionId: 'parent-exec-id' }]],
+    ])('omits executionChain for a child with %s', (_label, executionChain) => {
+      expect(
+        extractCompositionContext(
+          compositionFixture('workflow-step', { ...grandchildContext, executionChain })
+        )
+      ).not.toHaveProperty('executionChain');
+    });
+
+    it('never returns a chain for a top-level execution, even when its context carries one', () => {
+      expect(extractCompositionContext(compositionFixture('manual', grandchildContext))).toEqual(
+        {}
+      );
+    });
+  });
+});
+
+describe('extractEventChainDepthFromExecution', () => {
+  it('returns depth from context.event.eventChainDepth', () => {
+    expect(
+      extractEventChainDepthFromExecution(
+        createMockWorkflowExecution({
+          context: { event: { eventChainDepth: 2 } },
+        })
+      )
+    ).toBe(2);
+  });
+
+  it('returns undefined when eventChainDepth is missing or invalid', () => {
+    expect(extractEventChainDepthFromExecution(createMockWorkflowExecution())).toBeUndefined();
+    expect(
+      extractEventChainDepthFromExecution(
+        createMockWorkflowExecution({ context: { event: { eventChainDepth: -1 } } })
+      )
+    ).toBeUndefined();
+  });
+
+  it('prefers root eventChainDepth over context.event', () => {
+    expect(
+      extractEventChainDepthFromExecution(
+        createMockWorkflowExecution({
+          eventChainDepth: 5,
+          context: { event: { eventChainDepth: 2 } },
+        })
+      )
+    ).toBe(5);
+  });
+
+  it('includes eventChainDepth in extractExecutionMetadata when set', () => {
+    const meta = extractExecutionMetadata(
+      createMockWorkflowExecution({
+        context: { event: { eventChainDepth: 1, timestamp: '2025-01-01T00:00:00Z', spaceId: 'd' } },
+      }),
+      []
+    );
+    expect(meta.eventChainDepth).toBe(1);
+  });
+});
+
+describe('extractEventChainVisitedWorkflowIdsFromExecution', () => {
+  it('returns ids from context.event.eventChainVisitedWorkflowIds', () => {
+    expect(
+      extractEventChainVisitedWorkflowIdsFromExecution(
+        createMockWorkflowExecution({
+          context: { event: { eventChainVisitedWorkflowIds: ['wf-a', 'wf-b'] } },
+        }),
+        10
+      )
+    ).toEqual(['wf-a', 'wf-b']);
+  });
+
+  it('prefers root eventChainVisitedWorkflowIds over context.event', () => {
+    expect(
+      extractEventChainVisitedWorkflowIdsFromExecution(
+        createMockWorkflowExecution({
+          eventChainVisitedWorkflowIds: ['root-a'],
+          context: { event: { eventChainVisitedWorkflowIds: ['ctx-b'] } },
+        }),
+        10
+      )
+    ).toEqual(['root-a']);
+  });
+
+  it('returns empty array when missing', () => {
+    expect(
+      extractEventChainVisitedWorkflowIdsFromExecution(createMockWorkflowExecution(), 10)
+    ).toEqual([]);
+  });
+
+  it('truncates visited ids to maxCount (matches maxEventChainDepth cap)', () => {
+    expect(
+      extractEventChainVisitedWorkflowIdsFromExecution(
+        createMockWorkflowExecution({
+          eventChainVisitedWorkflowIds: ['wf-a', 'wf-b', 'wf-c', 'wf-d'],
+        }),
+        2
+      )
+    ).toEqual(['wf-a', 'wf-b']);
+  });
+});
+
+describe('mergeEmitterWorkflowIntoEventChainVisited', () => {
+  it('appends emitter workflow id when not already trailing', () => {
+    expect(mergeEmitterWorkflowIntoEventChainVisited(['wf-a'], 'wf-b', 10)).toEqual([
+      'wf-a',
+      'wf-b',
+    ]);
+  });
+
+  it('does not duplicate when emitter is already trailing', () => {
+    expect(mergeEmitterWorkflowIntoEventChainVisited(['wf-a', 'wf-b'], 'wf-b', 10)).toEqual([
+      'wf-a',
+      'wf-b',
+    ]);
+  });
+
+  it('returns base list when emitter is omitted', () => {
+    expect(mergeEmitterWorkflowIntoEventChainVisited(['wf-a'], undefined, 10)).toEqual(['wf-a']);
+  });
+
+  it('respects maxCount', () => {
+    expect(mergeEmitterWorkflowIntoEventChainVisited(['wf-a', 'wf-b'], 'wf-c', 2)).toEqual([
+      'wf-a',
+      'wf-b',
+    ]);
   });
 });

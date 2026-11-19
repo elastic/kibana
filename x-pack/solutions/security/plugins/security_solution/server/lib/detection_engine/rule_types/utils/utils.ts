@@ -7,12 +7,13 @@
 
 import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
-import { get, invert, isArray, isEmpty, merge } from 'lodash';
+import { get, invert, isArray, isEmpty, isEqual, merge, sum } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
 import type { estypes, TransportResult } from '@elastic/elasticsearch';
+import { addSpanLabels } from '@kbn/apm-utils';
 import {
   ALERT_UUID,
   ALERT_RULE_UUID,
@@ -35,7 +36,8 @@ import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import type { SanitizedRuleAction, GapReason } from '@kbn/alerting-plugin/common';
+import { gapReasonType } from '@kbn/alerting-plugin/common';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Privilege } from '../../../../../common/api/detection_engine';
@@ -305,9 +307,58 @@ export const getGapBetweenRuns = ({
     return moment.duration(0);
   }
   const driftTolerance = moment.duration(originalTo.diff(originalFrom));
-  agent.addLabels({ [SECURITY_QUERY_SPAN_S]: driftTolerance.asSeconds() }, false);
+  addSpanLabels({ [SECURITY_QUERY_SPAN_S]: driftTolerance.asSeconds() }, { isString: false });
   const currentDuration = moment.duration(moment(startedAt).diff(previousStartedAt));
   return currentDuration.subtract(driftTolerance);
+};
+
+export { type GapReason } from '@kbn/alerting-plugin/common';
+
+/**
+ * Determines why a gap occurred between rule executions.
+ *
+ * Returns `rule_disabled` only when the rule was re-enabled during the gap
+ * and fired promptly after (within the lookback window). Defaults to
+ * `rule_did_not_run` in all other cases (outages, missing data, etc).
+ *
+ * Known limitation: a brief toggle during an unrelated outage can be
+ * misclassified as rule_disabled.
+ */
+export const getGapReason = ({
+  previousStartedAt,
+  startedAt,
+  lastEnabledAt,
+  originalFrom,
+  originalTo,
+}: {
+  previousStartedAt: Date | null | undefined;
+  startedAt: Date;
+  lastEnabledAt: Date | null | undefined;
+  originalFrom: moment.Moment;
+  originalTo: moment.Moment;
+}): GapReason => {
+  if (previousStartedAt == null || lastEnabledAt == null) {
+    return { type: gapReasonType.RULE_DID_NOT_RUN };
+  }
+
+  const lastEnabledAtMs = lastEnabledAt.getTime();
+  const previousStartedAtMs = previousStartedAt.getTime();
+  const startedAtMs = startedAt.getTime();
+
+  const isInGapWindow = lastEnabledAtMs > previousStartedAtMs && lastEnabledAtMs <= startedAtMs;
+
+  if (!isInGapWindow) {
+    return { type: gapReasonType.RULE_DID_NOT_RUN };
+  }
+
+  const driftToleranceMs = originalTo.diff(originalFrom);
+  const postEnableDelayMs = startedAtMs - lastEnabledAtMs;
+
+  if (postEnableDelayMs <= driftToleranceMs) {
+    return { type: gapReasonType.RULE_DISABLED };
+  }
+
+  return { type: gapReasonType.RULE_DID_NOT_RUN };
 };
 
 export const makeFloatString = (num: number): string => Number(num).toFixed(2);
@@ -321,6 +372,7 @@ export const getRuleRangeTuples = async ({
   maxSignals,
   ruleExecutionLogger,
   alerting,
+  lastEnabledAt,
 }: {
   startedAt: Date;
   previousStartedAt: Date | null | undefined;
@@ -330,6 +382,7 @@ export const getRuleRangeTuples = async ({
   maxSignals: number;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   alerting: AlertingServerSetup;
+  lastEnabledAt: Date | null | undefined;
 }) => {
   const originalFrom = dateMath.parse(from, { forceNow: startedAt });
   const originalTo = dateMath.parse(to, { forceNow: startedAt });
@@ -397,11 +450,19 @@ export const getRuleRangeTuples = async ({
   );
 
   let gapRange;
+  let detectedGapReason: GapReason | undefined;
   if (remainingGapMilliseconds > 0 && previousStartedAt != null) {
     gapRange = {
       gte: previousStartedAt.toISOString(),
       lte: moment(previousStartedAt).add(remainingGapMilliseconds).toDate().toISOString(),
     };
+    detectedGapReason = getGapReason({
+      previousStartedAt,
+      startedAt,
+      lastEnabledAt,
+      originalFrom,
+      originalTo,
+    });
   }
 
   return {
@@ -409,6 +470,7 @@ export const getRuleRangeTuples = async ({
     remainingGap: moment.duration(remainingGapMilliseconds),
     warningStatusMessage,
     gap: gapRange,
+    gapReason: detectedGapReason,
     originalFrom,
     originalTo,
   };
@@ -501,6 +563,41 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
 };
 
 /**
+ * Given the `_clusters` section of a cross-cluster or cross-project search response this will return
+ * an array of warning strings for conditions that are only reported per cluster, e.g. a remote cluster
+ * with `skip_unavailable: true` being unreachable or a linked project rejecting the search. These are
+ * warnings rather than errors because Elasticsearch still returns the data of the reachable clusters.
+ * Failures already present in `_shards.failures` are omitted.
+ */
+export const createWarningsFromClusters = ({
+  clusters,
+  shardErrors,
+}: {
+  clusters: estypes.ClusterStatistics | undefined;
+  shardErrors: string[];
+}): string[] => {
+  const details = clusters?.details ?? {};
+  const knownShardErrors = new Set(shardErrors);
+
+  return Object.entries(details).flatMap(([alias, detail]) => {
+    const failures = createErrorsFromShard({ errors: detail.failures ?? [] })
+      .filter((failure) => !knownShardErrors.has(failure))
+      .map(
+        (failure) =>
+          `Cluster "${alias}" is "${detail.status}" and its data may be missing from this rule run: ${failure}`
+      );
+
+    if (failures.length === 0 && (detail.status === 'skipped' || detail.status === 'failed')) {
+      return [
+        `Cluster "${alias}" is "${detail.status}" and its data is missing from this rule run (indices: "${detail.indices}").`,
+      ];
+    }
+
+    return failures;
+  });
+};
+
+/**
  * Given a search hit this will return a valid last date if it can find one, otherwise it
  * will return undefined. This tries the "fields" first to get a formatted date time if it can, but if
  * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
@@ -566,6 +663,7 @@ export const createSearchAfterReturnTypeFromResponse = <
           )
         );
       }),
+    alertsCandidateCount: searchResult.hits.hits.length,
   });
 };
 
@@ -575,6 +673,7 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes,
   enrichmentTimes,
   bulkCreateTimes,
+  alertsCandidateCount,
   createdSignalsCount,
   createdSignals,
   errors,
@@ -587,6 +686,7 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes?: string[] | undefined;
   enrichmentTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
+  alertsCandidateCount?: number | undefined;
   createdSignalsCount?: number | undefined;
   createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
@@ -600,6 +700,7 @@ export const createSearchAfterReturnType = ({
     searchAfterTimes: searchAfterTimes ?? [],
     enrichmentTimes: enrichmentTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
+    alertsCandidateCount,
     createdSignalsCount: createdSignalsCount ?? 0,
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
@@ -640,6 +741,7 @@ export const mergeReturns = (
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
       enrichmentTimes: existingEnrichmentTimes,
+      alertsCandidateCount: existingAlertsCandidateCount,
       createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
@@ -654,6 +756,7 @@ export const mergeReturns = (
       searchAfterTimes: newSearchAfterTimes,
       enrichmentTimes: newEnrichmentTimes,
       bulkCreateTimes: newBulkCreateTimes,
+      alertsCandidateCount: newAlertsCandidateCount,
       createdSignalsCount: newCreatedSignalsCount,
       createdSignals: newCreatedSignals,
       errors: newErrors,
@@ -668,6 +771,7 @@ export const mergeReturns = (
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
       enrichmentTimes: [...existingEnrichmentTimes, ...newEnrichmentTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
+      alertsCandidateCount: sum([existingAlertsCandidateCount, newAlertsCandidateCount]),
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],
@@ -720,15 +824,53 @@ export const isMachineLearningParams = (params: RuleParams): params is MachineLe
  * @param sortIds estypes.SortResults | undefined
  * @returns SortResults
  */
+// stringified Java Long.MAX_VALUE, used as a sentinel sort value when Elasticsearch expects one
+const LONG_MAX_VALUE = '9223372036854775807';
+
 export const getSafeSortIds = (sortIds: estypes.SortResults | undefined) => {
   return sortIds?.map((sortId) => {
     // haven't determined when we would receive a null value for a sort id
     // but in case we do, default to sending the stringified Java max_int
     if (sortId == null || sortId === '' || Number(sortId) >= Number.MAX_SAFE_INTEGER) {
-      return '9223372036854775807';
+      return LONG_MAX_VALUE;
     }
     return sortId;
   });
+};
+
+/**
+ * Same Long.MAX_VALUE clamping as {@link getSafeSortIds}, for cursors that mix formatted
+ * date_nanos values with plain date ones. Null and empty values are left as they are so callers
+ * can stop paging via {@link getUnusableCursorWarning}: replacing them with the sentinel would
+ * put the cursor outside the range a date_nanos field accepts.
+ */
+export const getSafeNanosSortIds = (sortIds: estypes.SortResults | undefined) => {
+  return sortIds?.map((sortId) => {
+    if (sortId != null && sortId !== '' && Number(sortId) >= Number.MAX_SAFE_INTEGER) {
+      return LONG_MAX_VALUE;
+    }
+    return sortId;
+  });
+};
+
+// in mixed date/date_nanos patterns, timestamps missing or outside the nanos range
+// on date-mapped shards yield cursors that either format to null or never advance
+// (the same docs match again every page); callers stop paging instead of failing or looping
+export const getUnusableCursorWarning = (
+  sortIds: estypes.SortResults | undefined,
+  prevSortIds: estypes.SortResults | undefined
+): string | undefined => {
+  if (sortIds == null) {
+    return undefined;
+  }
+  const unusable =
+    sortIds.some((val) => val == null || val === '') || isEqual(sortIds, prevSortIds);
+  if (!unusable) {
+    return undefined;
+  }
+  return `Pagination stopped: the last document's sort values ${JSON.stringify(
+    sortIds
+  )} cannot be used as a search_after cursor, because a timestamp is missing or outside the date_nanos supported range on an index where it is not mapped as date_nanos. Remaining documents were not evaluated.`;
 };
 
 export const isWrappedEventHit = (event: SimpleHit): event is WrappedEventHit => {
@@ -822,6 +964,11 @@ export const getMissingIdFieldWarning = (): string => {
 
 export const getMetadataIdInjectionFailedWarning = (reason: string): string => {
   return `Failed to automatically inject METADATA _id into ES|QL query: ${reason}. This may result in duplicate alerts. Try manually adding "METADATA _id" to the FROM command and ensure _id is returned in the query results.`;
+};
+
+export const getReservedMetadataColumnsWarning = (columns: string[]): string => {
+  const columnNames = columns.join(', ');
+  return `ES|QL query returns the metadata column(s) ${columnNames}, which cannot be stored in alerts. Alerts were created without it. Remove it from the "METADATA" clause or the query to stop this warning.`;
 };
 
 export const getDisabledActionsWarningText = ({

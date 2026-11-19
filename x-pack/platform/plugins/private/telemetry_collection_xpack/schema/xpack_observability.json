@@ -250,6 +250,18 @@
                 "description": "Total number of services utilizing the opentelemetry/java/elastic agent within the last day"
               }
             },
+            "opentelemetry/java/opentelemetry-java-instrumentation": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the opentelemetry/java/opentelemetry-java-instrumentation agent within the last day"
+              }
+            },
+            "opentelemetry/java/opentelemetry-javaagent": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the opentelemetry/java/opentelemetry-javaagent agent within the last day"
+              }
+            },
             "opentelemetry/dotnet/elastic": {
               "type": "long",
               "_meta": {
@@ -5321,6 +5333,252 @@
                 }
               }
             },
+            "opentelemetry/java/opentelemetry-java-instrumentation": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "opentelemetry/java/opentelemetry-javaagent": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent versions within the last day"
+                        }
+                      }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "An array of the top 3 agent activation methods within the last day"
+                        }
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework name  within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service framework version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service framework and version sorted by doc count"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service language version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service language name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime name within the last day"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "An array of the top 3 service runtime version within the last day"
+                            }
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword",
+                            "_meta": {
+                              "description": "Composite field containing service runtime name and version sorted by doc count."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
             "opentelemetry/dotnet/elastic": {
               "properties": {
                 "agent": {
@@ -7908,6 +8166,84 @@
                   "type": "long",
                   "_meta": {
                     "description": "The number of SLOs by occurrences budgeting method in the cluster"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "composite": {
+          "properties": {
+            "definitions": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The total number of composite SLO definitions in the cluster"
+                  }
+                }
+              }
+            },
+            "by_status": {
+              "properties": {
+                "enabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of enabled composite SLOs in the cluster"
+                  }
+                },
+                "disabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of disabled composite SLOs in the cluster"
+                  }
+                }
+              }
+            },
+            "by_budgeting_method": {
+              "properties": {
+                "occurrences": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of composite SLOs using the occurrences budgeting method in the cluster"
+                  }
+                }
+              }
+            },
+            "by_composite_method": {
+              "properties": {
+                "weightedAverage": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of composite SLOs using the weighted average composite method in the cluster"
+                  }
+                }
+              }
+            },
+            "members": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of members in a composite SLO in the cluster"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "The average number of members per composite SLO in the cluster"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of members in a composite SLO in the cluster"
+                  }
+                },
+                "at_max_count": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of composite SLOs in the cluster that have reached the maximum number of members"
                   }
                 }
               }

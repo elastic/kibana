@@ -7,53 +7,77 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ActionConnector, ActionConnectorWithoutId } from '../../types';
+import type { UserConfiguredActionConnector } from '@kbn/alerts-ui-shared/src/common/types/action_types';
+import type { ActionConnector } from '../../types';
 import { createActionConnector } from '../lib/action_connector_api';
 import { useKibana } from '../../common/lib/kibana';
 
 type CreateConnectorSchema = Pick<
-  ActionConnectorWithoutId,
-  'actionTypeId' | 'name' | 'config' | 'secrets'
+  UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>,
+  'actionTypeId' | 'name' | 'config' | 'secrets' | 'id' | 'isInboundEventsEnabled'
 >;
+
+export interface CreateConnectorError {
+  title: string;
+  message: string;
+}
 
 interface UseCreateConnectorReturnValue {
   isLoading: boolean;
+  createConnectorError: CreateConnectorError | null;
   createConnector: (connector: CreateConnectorSchema) => Promise<ActionConnector | undefined>;
 }
 
-export const useCreateConnector = (): UseCreateConnectorReturnValue => {
+export interface UseCreateConnectorParams {
+  /**
+   * Skips the "Created '<name>'" success toast, for hosts that confirm the create with their own
+   * toast. Errors are still toasted.
+   */
+  hideSuccessToast?: boolean;
+}
+
+export const useCreateConnector = ({
+  hideSuccessToast = false,
+}: UseCreateConnectorParams = {}): UseCreateConnectorReturnValue => {
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
 
   const [isLoading, setIsLoading] = useState(false);
+  const [createConnectorError, setCreateConnectorError] = useState<CreateConnectorError | null>(
+    null
+  );
   const abortCtrlRef = useRef(new AbortController());
   const isMounted = useRef(false);
 
   async function createConnector(connector: CreateConnectorSchema) {
+    setCreateConnectorError(null);
     setIsLoading(true);
     isMounted.current = true;
     abortCtrlRef.current.abort();
     abortCtrlRef.current = new AbortController();
 
     try {
-      const res = await createActionConnector({ http, connector });
+      const { id, ...connectorData } = connector;
+      const res = await createActionConnector({ http, connector: connectorData, id });
 
       if (isMounted.current) {
         setIsLoading(false);
 
-        toasts.addSuccess(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText',
-            {
-              defaultMessage: "Created ''{connectorName}''",
-              values: {
-                connectorName: res.name,
-              },
-            }
-          )
-        );
+        if (!hideSuccessToast) {
+          toasts.addSuccess(
+            i18n.translate(
+              'xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText',
+              {
+                defaultMessage: "Created ''{connectorName}''",
+                values: {
+                  connectorName: res.name,
+                },
+              }
+            )
+          );
+        }
       }
 
       return res;
@@ -62,17 +86,21 @@ export const useCreateConnector = (): UseCreateConnectorReturnValue => {
         setIsLoading(false);
 
         if (error.name !== 'AbortError') {
+          const title = i18n.translate(
+            'xpack.triggersActionsUI.sections.useCreateConnector.updateErrorNotificationTitle',
+            { defaultMessage: 'Unable to create a connector.' }
+          );
+          const message =
+            error.body?.message ??
+            i18n.translate(
+              'xpack.triggersActionsUI.sections.useCreateConnector.updateErrorNotificationText',
+              { defaultMessage: 'Check the Kibana logs for more information.' }
+            );
+
+          setCreateConnectorError({ title, message });
           toasts.addError(error, {
-            title: i18n.translate(
-              'xpack.triggersActionsUI.sections.useCreateConnector.updateErrorNotificationTitle',
-              { defaultMessage: 'Unable to create a connector.' }
-            ),
-            toastMessage:
-              error.body?.message ??
-              i18n.translate(
-                'xpack.triggersActionsUI.sections.useCreateConnector.updateErrorNotificationText',
-                { defaultMessage: 'Check the Kibana logs for more information.' }
-              ),
+            title,
+            toastMessage: message,
           });
         }
       }
@@ -87,5 +115,5 @@ export const useCreateConnector = (): UseCreateConnectorReturnValue => {
     };
   }, []);
 
-  return { isLoading, createConnector };
+  return { isLoading, createConnectorError, createConnector };
 };

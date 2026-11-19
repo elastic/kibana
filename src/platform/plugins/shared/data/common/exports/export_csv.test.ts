@@ -8,18 +8,23 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { datatableToCSV } from './export_csv';
 
 function getDefaultOptions() {
   const formatFactory = jest.fn();
-  formatFactory.mockReturnValue({ convert: (v: unknown) => `Formatted_${v}` } as FieldFormat);
+  formatFactory.mockReturnValue({ convertToText: (v: unknown) => `Formatted_${v}` } as FieldFormat);
   return {
     csvSeparator: ',',
     quoteValues: true,
     formatFactory,
     escapeFormulaValues: false,
   };
+}
+
+function getTableModeOptions() {
+  return { ...getDefaultOptions(), missingValueDisplay: 'table' as const };
 }
 
 function getDataTable({ multipleColumns }: { multipleColumns?: boolean } = {}): Datatable {
@@ -81,9 +86,67 @@ describe('CSV exporter', () => {
       datatableToCSV(datatable, {
         ...getDefaultOptions(),
         escapeFormulaValues: true,
-        formatFactory: () => ({ convert: (v: unknown) => v } as FieldFormat),
+        formatFactory: () => ({ convertToText: (v: unknown) => v } as FieldFormat),
       })
     ).toMatch('columnOne\r\n"\'=1"\r\n');
+  });
+
+  test.each([
+    ['null', null],
+    ['undefined', undefined],
+    ['a missing bucket', MISSING_TOKEN],
+  ])('should export %s as the dash the table renders in table mode', (_name, value) => {
+    const datatable = getDataTable();
+    datatable.rows[0].col1 = value;
+
+    expect(datatableToCSV(datatable, getTableModeOptions())).toMatch('columnOne\r\n"-"\r\n');
+  });
+
+  test.each([
+    ['null', null],
+    ['undefined', undefined],
+    ['a missing bucket', MISSING_TOKEN],
+  ])(
+    'should export %s through the formatter by default (charts keep the label)',
+    (_name, value) => {
+      const datatable = getDataTable();
+      datatable.rows[0].col1 = value;
+
+      expect(datatableToCSV(datatable, getDefaultOptions())).toMatch(
+        `columnOne\r\n"Formatted_${value}"\r\n`
+      );
+      expect(
+        datatableToCSV(datatable, { ...getDefaultOptions(), missingValueDisplay: 'text' })
+      ).toMatch(`columnOne\r\n"Formatted_${value}"\r\n`);
+    }
+  );
+
+  test('should not let the formula guard turn the dash into an escaped value', () => {
+    const datatable = getDataTable();
+    datatable.rows[0].col1 = null;
+
+    // "-" starts a formula, but the dash is our own constant rather than document content.
+    expect(
+      datatableToCSV(datatable, { ...getTableModeOptions(), escapeFormulaValues: true })
+    ).toMatch('columnOne\r\n"-"\r\n');
+  });
+
+  test('should leave the dash unquoted when quoteValues is false', () => {
+    const datatable = getDataTable();
+    datatable.rows[0].col1 = null;
+
+    expect(datatableToCSV(datatable, { ...getTableModeOptions(), quoteValues: false })).toMatch(
+      'columnOne\r\n-\r\n'
+    );
+  });
+
+  test('should keep raw exports untouched for missing values', () => {
+    const datatable = getDataTable();
+    datatable.rows[0].col1 = null;
+
+    expect(datatableToCSV(datatable, { ...getTableModeOptions(), raw: true })).toMatch(
+      'columnOne\r\n\r\n'
+    );
   });
 
   test('should escape text with csvSeparator char in it', () => {
@@ -93,8 +156,17 @@ describe('CSV exporter', () => {
       datatableToCSV(datatable, {
         ...getDefaultOptions(),
         escapeFormulaValues: true,
-        formatFactory: () => ({ convert: (v: unknown) => v } as FieldFormat),
+        formatFactory: () => ({ convertToText: (v: unknown) => v } as FieldFormat),
       })
     ).toMatch('columnOne\r\n"a,b"\r\n');
+  });
+
+  test('should quote the dash when csvSeparator is -', () => {
+    const datatable = getDataTable({ multipleColumns: true });
+    datatable.rows[0].col1 = null;
+
+    expect(datatableToCSV(datatable, { ...getTableModeOptions(), csvSeparator: '-' })).toBe(
+      'columnOne-columnTwo\r\n"-"-"Formatted_5"\r\n'
+    );
   });
 });

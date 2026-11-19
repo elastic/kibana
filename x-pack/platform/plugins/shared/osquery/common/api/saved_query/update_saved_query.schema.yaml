@@ -29,7 +29,69 @@ components:
         removed:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RemovedOrUndefined'
     UpdateSavedQueryResponse:
+        description: 'The response for updating a saved query.'
         type: object
-        properties: { }
+        required:
+          - data
+        properties:
+          data:
+            type: object
+            required:
+              - saved_object_id
+              - id
+            properties:
+              saved_object_id:
+                type: string
+              id:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
+              description:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryDescriptionOrUndefined'
+              query:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Query'
+              interval:
+                oneOf:
+                  - type: integer
+                  - type: string
+              timeout:
+                type: integer
+              snapshot:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SnapshotOrUndefined'
+              removed:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RemovedOrUndefined'
+              platform:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PlatformOrUndefined'
+              ecs_mapping:
+                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ECSMappingOrUndefined'
+              created_at:
+                type: string
+                format: date-time
+              created_by:
+                type: string
+                nullable: true
+              created_by_profile_uid:
+                type: string
+              updated_at:
+                type: string
+                format: date-time
+              updated_by:
+                type: string
+                nullable: true
+              updated_by_profile_uid:
+                type: string
+              prebuilt:
+                type: boolean
+              version:
+                description: 'The saved query version.'
+                type: string
         example:
-            data: { }
+          data:
+            saved_object_id: "42ba1280-2172-11ee-8523-5765fca79a3c"
+            id: "updated_my_saved_query_name"
+            query: "select * from uptime;"
+            description: "Saved query description"
+            interval: "60"
+            created_at: "2025-02-26T13:37:30.452Z"
+            created_by: "elastic"
+            updated_at: "2025-02-26T13:40:16.297Z"
+            updated_by: "elastic"
+            version: "WzQzMTcsMV0="

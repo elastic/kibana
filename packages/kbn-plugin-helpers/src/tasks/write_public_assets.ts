@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fs from 'fs';
+import Path from 'path';
+
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
@@ -22,6 +25,9 @@ export async function writePublicAssets({ log, plugin, sourceDir, buildDir }: Ta
   }
 
   log.info('copying assets from `public/assets` to build');
+  if (!Fs.existsSync(Path.join(sourceDir, 'public/assets'))) {
+    return;
+  }
 
   await asyncPipeline(
     vfs.src(['public/assets/**/*'], {

@@ -28,6 +28,7 @@ import { Writable, type Readable } from 'stream';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import pRetry from 'p-retry';
 import { v4 as uuidv4 } from 'uuid';
+import { isResponseActionCancelable } from '../../../../../../../../common/endpoint/service/response_actions/is_response_action_cancelable';
 import { buildIndexNameWithNamespace } from '../../../../../../../../common/endpoint/utils/index_name_utilities';
 import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import type {
@@ -626,10 +627,13 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         }
 
         // Check if we're trying to cancel a cancel action (business rule validation)
-        if (originalAction.command === 'cancel') {
+        if (!isResponseActionCancelable(originalAction.command, this.agentType)) {
           return {
             isValid: false,
-            error: new ResponseActionsClientError(`Cannot cancel a cancel action.`, 400),
+            error: new ResponseActionsClientError(
+              `[${originalAction.command}] response action cannot be canceled.`,
+              400
+            ),
           };
         }
       } catch (error) {
@@ -1046,23 +1050,31 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
             const isCancelledAction = machineAction.status === 'Cancelled' && command === 'cancel';
             // Special handling for cancelled actions:
             // Cancel actions that successfully cancel something should show as success
-            // Actions that were cancelled by another action should show as failed
+            // Actions that were cancelled by another action should have an `error.message` set
             const shouldUpdateErrorMessage = !isCancelledAction && isError;
 
             const isRunscriptAction = mdeCommand === 'LiveResponse' && command === 'runscript';
             let output: ActionResponseOutput<EndpointActionResponseDataOutput> | undefined;
             let meta: {} | undefined;
 
+            // If not a `cancel` response action and the MS Defender action status is `Canceled`, then
+            // set the `canceled_by` and `canceled_id` fields in the output content so that we show the
+            // action with a status of cancel in kibana
+            if (machineAction.status === 'Cancelled' && command !== `cancel`) {
+              output = output ?? { type: 'json', content: {} };
+              output.content.canceled_by = 'action';
+              output.content.canceled_id = '';
+            }
+
             if (isRunscriptAction) {
               const outputFile = await this.fetchMachineLiveResponseFile(machineActionId);
-              output = {
-                type: 'json' as const,
-                content: {
-                  stdout: outputFile?.stdout || '',
-                  stderr: outputFile?.stderr || '',
-                  code: outputFile?.code || '0',
-                },
-              };
+
+              output = output ?? { type: 'json', content: {} };
+              Object.assign(output.content, {
+                stdout: outputFile?.stdout || '',
+                stderr: outputFile?.stderr || '',
+                code: outputFile?.code || '0',
+              });
               meta = {
                 machineActionId,
                 filename: `runscript_output_${machineActionId}_0.json`,

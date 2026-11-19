@@ -11,10 +11,10 @@ import qs from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { parse } from 'query-string';
 
 import type {
   EuiInMemoryTableProps,
+  EuiTableActionsColumnType,
   EuiTableFieldDataColumnType,
   EuiSelectableOption,
 } from '@elastic/eui';
@@ -36,7 +36,6 @@ import {
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import type { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
-
 export interface Props {
   pipelines: Pipeline[];
   onReloadClick: () => void;
@@ -117,10 +116,25 @@ export const PipelineTable: FunctionComponent<Props> = ({
   onDeletePipelineClick,
   openFlyout,
 }) => {
+  const editActionText = i18n.translate('xpack.ingestPipelines.list.table.editActionDescription', {
+    defaultMessage: 'Edit this pipeline',
+  });
+  const duplicateActionText = i18n.translate(
+    'xpack.ingestPipelines.list.table.cloneActionDescription',
+    { defaultMessage: 'Duplicate this pipeline' }
+  );
+  const deleteActionText = i18n.translate(
+    'xpack.ingestPipelines.list.table.deleteActionDescription',
+    { defaultMessage: 'Delete this pipeline' }
+  );
+
   const [queryText, setQueryText] = useState<string>('');
   const [filterOptions, setFilterOptions] = useState<EuiSelectableOption[]>(defaultFilterOptions);
 
-  const { history } = useKibana().services;
+  const {
+    history,
+    config: { canManage },
+  } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
 
   const filterButtonRef = useRef<HTMLButtonElement>(null);
@@ -178,7 +192,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
     const isDefaultFilterConfiguration = isQueryEmpty && isDefaultFilters;
 
     if (!isDefaultFilterConfiguration) {
-      const { pipeline } = parse(location.search.substring(1));
+      const { pipeline } = qs.parse(location.search.substring(1));
       history.push({
         pathname: '',
         search:
@@ -225,16 +239,60 @@ export const PipelineTable: FunctionComponent<Props> = ({
     </EuiFilterButton>
   );
 
+  const reloadButtonLabel = i18n.translate(
+    'xpack.ingestPipelines.list.table.reloadButtonAriaLabel',
+    { defaultMessage: 'Refresh' }
+  );
+
+  const actionsColumn: EuiTableActionsColumnType<Pipeline> = {
+    width: '120px',
+    name: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.list.table.actionColumnTitle"
+        defaultMessage="Actions"
+      />
+    ),
+    actions: [
+      {
+        isPrimary: true,
+        name: editActionText,
+        description: editActionText,
+        type: 'icon',
+        icon: 'pencil',
+        onClick: ({ name }) => onEditPipelineClick(name),
+      },
+      {
+        name: duplicateActionText,
+        description: duplicateActionText,
+        type: 'icon',
+        icon: 'copy',
+        onClick: ({ name }) => onClonePipelineClick(name),
+      },
+      {
+        isPrimary: true,
+        name: deleteActionText,
+        description: deleteActionText,
+        type: 'icon',
+        icon: 'trash',
+        color: 'danger',
+        onClick: (pipeline) => onDeletePipelineClick([pipeline]),
+      },
+    ],
+  };
+
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
-    itemId: 'name',
     'data-test-subj': 'pipelinesTable',
-    tableCaption: i18n.translate('xpack.ingestPipelines.list.table.tableCaption', {
-      defaultMessage: 'List of ingest pipelines',
-    }),
+    itemId: 'name',
     sorting,
-    selection: {
-      onSelectionChange: setSelection,
-    },
+    selection: canManage
+      ? {
+          onSelectionChange: setSelection,
+          selectableMessage: () =>
+            i18n.translate('xpack.ingestPipelines.list.table.selection.selectRowAriaLabel', {
+              defaultMessage: 'Select this row',
+            }),
+        }
+      : undefined,
     rowProps: () => ({
       'data-test-subj': 'pipelineTableRow',
     }),
@@ -253,7 +311,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
         }
       },
       toolsLeft:
-        selection.length > 0 ? (
+        canManage && selection.length > 0 ? (
           <EuiButton
             data-test-subj="deletePipelinesButton"
             onClick={() => onDeletePipelineClick(selection)}
@@ -267,18 +325,17 @@ export const PipelineTable: FunctionComponent<Props> = ({
           </EuiButton>
         ) : undefined,
       toolsRight: [
-        <EuiButtonIcon
-          key="reloadButton"
-          iconType="refresh"
-          color="success"
-          aria-label={i18n.translate('xpack.ingestPipelines.list.table.reloadButtonAriaLabel', {
-            defaultMessage: 'refresh',
-          })}
-          data-test-subj="reloadButton"
-          size="m"
-          display="base"
-          onClick={onReloadClick}
-        />,
+        <EuiToolTip content={reloadButtonLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            key="reloadButton"
+            iconType="refresh"
+            aria-label={reloadButtonLabel}
+            data-test-subj="reloadButton"
+            size="m"
+            display="base"
+            onClick={onReloadClick}
+          />
+        </EuiToolTip>,
       ],
       box: {
         incremental: true,
@@ -292,10 +349,14 @@ export const PipelineTable: FunctionComponent<Props> = ({
               <EuiFilterGroup>
                 <EuiPopover
                   id="popoverID"
+                  aria-label={i18n.translate(
+                    'xpack.ingestPipelines.list.table.filtersPopoverAriaLabel',
+                    { defaultMessage: 'Filters' }
+                  )}
                   button={button}
                   isOpen={isPopoverOpen}
                   closePopover={closePopover}
-                  panelPaddingSize="none"
+                  panelPaddingSize="s"
                 >
                   <EuiSelectable
                     allowExclusions
@@ -389,58 +450,18 @@ export const PipelineTable: FunctionComponent<Props> = ({
         sortable: ({ processors }: Pipeline) => processors.length,
         render: ({ processors }: Pipeline) => processors.length,
       },
-      {
-        width: '120px',
-        name: (
-          <FormattedMessage
-            id="xpack.ingestPipelines.list.table.actionColumnTitle"
-            defaultMessage="Actions"
-          />
-        ),
-        actions: [
-          {
-            isPrimary: true,
-            name: i18n.translate('xpack.ingestPipelines.list.table.editActionLabel', {
-              defaultMessage: 'Edit',
-            }),
-            description: i18n.translate('xpack.ingestPipelines.list.table.editActionDescription', {
-              defaultMessage: 'Edit this pipeline',
-            }),
-            type: 'icon',
-            icon: 'pencil',
-            onClick: ({ name }) => onEditPipelineClick(name),
-          },
-          {
-            name: i18n.translate('xpack.ingestPipelines.list.table.cloneActionLabel', {
-              defaultMessage: 'Duplicate',
-            }),
-            description: i18n.translate('xpack.ingestPipelines.list.table.cloneActionDescription', {
-              defaultMessage: 'Duplicate this pipeline',
-            }),
-            type: 'icon',
-            icon: 'copy',
-            onClick: ({ name }) => onClonePipelineClick(name),
-          },
-          {
-            isPrimary: true,
-            name: i18n.translate('xpack.ingestPipelines.list.table.deleteActionLabel', {
-              defaultMessage: 'Delete',
-            }),
-            description: i18n.translate(
-              'xpack.ingestPipelines.list.table.deleteActionDescription',
-              { defaultMessage: 'Delete this pipeline' }
-            ),
-            type: 'icon',
-            icon: 'trash',
-            color: 'danger',
-            onClick: (pipeline) => onDeletePipelineClick([pipeline]),
-          },
-        ],
-      },
+      ...(canManage ? [actionsColumn] : []),
     ],
     items: filteredPipelines,
     loading: isLoading,
   };
 
-  return <EuiInMemoryTable {...tableProps} />;
+  return (
+    <EuiInMemoryTable
+      {...tableProps}
+      tableCaption={i18n.translate('xpack.ingestPipelines.list.table.tableCaption', {
+        defaultMessage: 'List of ingest pipelines',
+      })}
+    />
+  );
 };

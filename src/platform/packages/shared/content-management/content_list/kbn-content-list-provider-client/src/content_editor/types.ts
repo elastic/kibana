@@ -1,0 +1,60 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ReactNode } from 'react';
+import type { ContentEditorCustomValidators } from '@kbn/content-management-content-editor';
+import type { ContentListItem } from '@kbn/content-list-provider';
+
+/**
+ * Content editor configuration for `ContentListClientProvider`.
+ *
+ * This is the Kibana-specific content editor integration. The base
+ * `ContentListProvider` exposes a list-level `features.contentEditor.open`
+ * callback; this config produces that callback by wiring it to the Kibana
+ * content editor flyout, which the provider opens internally via
+ * `useOpenContentEditor` from `@kbn/content-management-content-editor`.
+ */
+export interface ContentEditorConfig {
+  /**
+   * Whether the content editor is read-only for every item.
+   *
+   * Defaults to read-only: the flyout is only editable when this is explicitly
+   * `false` and `onSave` is provided.
+   */
+  isReadonly?: boolean;
+
+  /**
+   * Message shown in the flyout when the whole list is read-only.
+   *
+   * If an item also has an edit restriction, this list-wide message is shown
+   * instead of the item's restriction reason.
+   */
+  readonlyReason?: string;
+
+  /** Custom validators for title/description fields. */
+  customValidators?: ContentEditorCustomValidators;
+
+  /**
+   * Called when the user saves metadata edits.
+   * Receives the updated metadata fields. The callback should persist changes
+   * and return a resolved promise on success.
+   */
+  onSave?: (args: {
+    id: string;
+    title: string;
+    description?: string;
+    tags: string[];
+  }) => Promise<void>;
+
+  /**
+   * Optional render prop for additional rows in the content editor flyout.
+   * Used by Dashboard to show content insights (panel counts, activity, etc.).
+   */
+  appendRows?: (item: ContentListItem) => ReactNode;
+}

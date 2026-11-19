@@ -160,9 +160,7 @@ describe('Trial companion NBA detectors', () => {
     );
     it('propagates error from package service', async () => {
       packageClient.getPackages.mockRejectedValueOnce(new Error('test error'));
-      await expect(
-        installedPackagesM1(deps.logger, packageService, esClient)()
-      ).rejects.toThrowError();
+      await expect(installedPackagesM1(deps.logger, packageService, esClient)()).rejects.toThrow();
     });
   });
 

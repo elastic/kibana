@@ -52,6 +52,7 @@ import type {
   UserProfileService,
 } from '@kbn/core/public';
 
+import { buildPath } from '@kbn/core-http-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
@@ -65,6 +66,7 @@ import type {
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import { AbortReason, defaultFreeze } from '@kbn/kibana-utils-plugin/common';
 import type { ICPSManager } from '@kbn/cps-utils';
+import moment from 'moment';
 import {
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -95,6 +97,7 @@ import {
   createRequestHashForBackgroundSearches,
   createRequestHashForClientCache,
 } from './create_request_hash';
+import { getFallbackPartialResponse } from './get_fallback_partial_response';
 
 export interface SearchInterceptorDeps {
   http: HttpSetup;
@@ -108,16 +111,18 @@ export interface SearchInterceptorDeps {
   getCPSManager?: () => ICPSManager | undefined;
 }
 
-const MAX_CACHE_ITEMS = 50;
 const MAX_CACHE_SIZE_MB = 10;
+
+const DEFAULT_MULTIPLEXING_POLL_LENGTH = '30s';
 
 export class SearchInterceptor {
   private uiSettingsSubs: Subscription[] = [];
   private searchTimeout: number;
-  private readonly responseCache: SearchResponseCache = new SearchResponseCache(
-    MAX_CACHE_ITEMS,
-    MAX_CACHE_SIZE_MB
-  );
+  private readonly responseCache: SearchResponseCache = new SearchResponseCache(MAX_CACHE_SIZE_MB);
+  private protocolSupportsMultiplexing: boolean = false;
+  private performanceObserver?: PerformanceObserver;
+  private readonly activeAsyncSearches = new Map<string, string>(); // id -> strategy
+  private boundPageHideHandler: ((event: PageTransitionEvent) => void) | null = null;
 
   /**
    * Observable that emits when the number of pending requests changes.
@@ -163,11 +168,56 @@ export class SearchInterceptor {
         this.searchTimeout = timeout;
       })
     );
+
+    this.boundPageHideHandler = this.handlePageHide.bind(this);
+    window.addEventListener('pagehide', this.boundPageHideHandler);
+
+    // Set up PerformanceObserver to capture search requests as they happen
+    try {
+      this.performanceObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries() as PerformanceResourceTiming[];
+        const entry = entries.find(({ name }) => name.includes('/internal/search/'));
+        if (entry) {
+          this.protocolSupportsMultiplexing = ['h2', 'h3'].includes(entry.nextHopProtocol);
+          this.performanceObserver?.disconnect(); // We only need to detect this once, so we can disconnect the observer after the first match
+        }
+      });
+      this.performanceObserver.observe({ entryTypes: ['resource'] });
+    } catch (e) {
+      // Silently fail - protocol detection is not critical
+    }
   }
 
   public stop() {
+    this.cancelAllActiveSearches();
+    if (this.boundPageHideHandler) {
+      window.removeEventListener('pagehide', this.boundPageHideHandler);
+      this.boundPageHideHandler = null;
+    }
+
     this.responseCache.clear();
     this.uiSettingsSubs.forEach((s) => s.unsubscribe());
+    if (this.performanceObserver) {
+      this.performanceObserver.disconnect();
+    }
+  }
+
+  private sendCancelRequest(searchId: string, strategy: string) {
+    return this.deps.http.delete(
+      buildPath('/internal/search/{strategy}/{id}', { strategy, id: searchId }),
+      { version: '1', keepalive: true }
+    );
+  }
+
+  private cancelAllActiveSearches(): void {
+    for (const [searchId, strategy] of this.activeAsyncSearches) {
+      this.sendCancelRequest(searchId, strategy).catch(() => {}); // Fire-and-forget
+    }
+    this.activeAsyncSearches.clear();
+  }
+
+  private handlePageHide(event: PageTransitionEvent): void {
+    this.cancelAllActiveSearches();
   }
 
   /*
@@ -184,11 +234,12 @@ export class SearchInterceptor {
     request: IKibanaSearchRequest,
     options: IAsyncSearchOptions
   ): Observable<string | undefined> {
-    const { sessionId, projectRouting } = options;
+    const { sessionId, projectRouting, approximation } = options;
     const hashOptions = {
       ...request.params,
       sessionId,
       projectRouting,
+      approximation,
     };
 
     if (!sessionId) return of(undefined); // don't use cache if doesn't belong to a session
@@ -274,8 +325,8 @@ export class SearchInterceptor {
 
     if (combined.sessionId !== undefined) serializableOptions.sessionId = combined.sessionId;
     if (combined.isRestore !== undefined) serializableOptions.isRestore = combined.isRestore;
-    if (combined.retrieveResults !== undefined)
-      serializableOptions.retrieveResults = combined.retrieveResults;
+    if (combined.returnIntermediateResults !== undefined)
+      serializableOptions.returnIntermediateResults = combined.returnIntermediateResults;
     if (combined.legacyHitsTotal !== undefined)
       serializableOptions.legacyHitsTotal = combined.legacyHitsTotal;
     if (combined.strategy !== undefined) serializableOptions.strategy = combined.strategy;
@@ -287,6 +338,9 @@ export class SearchInterceptor {
     }
     if (combined.projectRouting !== undefined) {
       serializableOptions.projectRouting = combined.projectRouting;
+    }
+    if (combined.approximation !== undefined) {
+      serializableOptions.approximation = combined.approximation;
     }
 
     return serializableOptions;
@@ -305,7 +359,8 @@ export class SearchInterceptor {
 
     const search = ({
       abortSignal = searchAbortController.getSignal(),
-    }: Pick<ISearchOptions, 'abortSignal'> = {}) => {
+      pollLength,
+    }: Pick<ISearchOptions, 'abortSignal' | 'pollLength'> = {}) => {
       const [{ isSearchStored }, afterPoll] = searchTracker?.beforePoll() ?? [
         { isSearchStored: false },
         () => {},
@@ -319,6 +374,7 @@ export class SearchInterceptor {
           ...this.deps.session.getSearchOptions(sessionId),
           abortSignal,
           isSearchStored,
+          pollLength,
         }
       )
         .then((result) => {
@@ -336,7 +392,12 @@ export class SearchInterceptor {
           abort: (reason?: AbortReason) => searchAbortController.abort(reason),
           poll: async (abortSignal) => {
             if (id) {
-              await search({ abortSignal });
+              await search({
+                abortSignal,
+                // pollLength should be 0 because this poll is not for results, but just to signal to the server to
+                // record the search in the background search saved object. we want it to finish quickly
+                pollLength: '0',
+              });
             }
           },
         })
@@ -364,12 +425,13 @@ export class SearchInterceptor {
         .subscribe(() => {
           searchAbortController.cleanup();
           isSavedToBackground = true;
+          if (id) {
+            this.activeAsyncSearches.delete(id);
+          }
         });
 
     const sendCancelRequest = once(() =>
-      this.deps.http.delete(`/internal/search/${strategyToString(strategy)}/${id}`, {
-        version: '1',
-      })
+      this.sendCancelRequest(id as string, strategyToString(strategy))
     );
 
     const cancel = async () => {
@@ -397,8 +459,17 @@ export class SearchInterceptor {
     // Preserve and project first request params into responses.
     let firstRequestParams: SanitizedConnectionRequestParams;
 
+    const pollInterval = this.deps.searchConfig.asyncSearch.pollInterval
+      ? // the types incorrectly report asyncSearch.pollInterval as a duration already, but it
+        // is actually a duration string that needs to be initialized with moment.duration
+        // TODO — can we fix this?
+        moment.duration(this.deps.searchConfig.asyncSearch.pollInterval).asMilliseconds()
+      : this.protocolSupportsMultiplexing
+      ? 0
+      : undefined;
+
     return pollSearch(search, cancel, {
-      pollInterval: this.deps.searchConfig.asyncSearch.pollInterval,
+      pollInterval,
       ...options,
       abortSignal: searchAbortController.getSignal(),
     }).pipe(
@@ -409,8 +480,15 @@ export class SearchInterceptor {
 
         id = response.id;
 
+        if (response.id && isRunningResponse(response) && !isSavedToBackground) {
+          this.activeAsyncSearches.set(response.id, strategyToString(strategy));
+        }
+
         if (!isRunningResponse(response)) {
           searchTracker?.complete(response);
+          if (response.id) {
+            this.activeAsyncSearches.delete(response.id);
+          }
         }
       }),
       map((response) => {
@@ -423,7 +501,8 @@ export class SearchInterceptor {
       }),
       catchError((e: Error) => {
         // If we aborted (search:timeout advanced setting) or the user canceled and there was a partial response, return it instead of just erroring out
-        if (searchAbortController.isTimeout() || searchAbortController.isCanceled()) {
+        // Only attempt to fetch partial results if we have a valid async search ID
+        if (id && (searchAbortController.isTimeout() || searchAbortController.isCanceled())) {
           if (searchAbortController.isTimeout()) {
             this.startRenderServices.analytics.reportEvent(EVENT_TYPE_DATA_SEARCH_TIMEOUT, {
               [EVENT_PROPERTY_SEARCH_TIMEOUT_MS]: this.searchTimeout,
@@ -433,9 +512,14 @@ export class SearchInterceptor {
           return from(
             this.runSearch(
               { id, ...request },
-              { ...options, abortSignal: new AbortController().signal, retrieveResults: true }
+              {
+                ...options,
+                abortSignal: new AbortController().signal,
+                returnIntermediateResults: true,
+              }
             )
           ).pipe(
+            catchError(() => of(getFallbackPartialResponse(id))),
             map((response) =>
               options.strategy === ENHANCED_ES_SEARCH_STRATEGY
                 ? toPartialResponseAfterTimeout(response)
@@ -463,6 +547,9 @@ export class SearchInterceptor {
         if (savedToBackgroundSub) {
           savedToBackgroundSub.unsubscribe();
         }
+        if (id) {
+          this.activeAsyncSearches.delete(id);
+        }
       }),
       // This observable is cached in the responseCache.
       // Using shareReplay makes sure that future subscribers will get the final response
@@ -484,14 +571,28 @@ export class SearchInterceptor {
     const requestHash = params ? createRequestHashForBackgroundSearches(params) : undefined;
 
     const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
-
-    // FIXME: the dropNullColumns param shouldn't be needed during polling
-    // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
-    // at that point, exclude all params when request.id is defined (polling phase)
-    const paramsToUse = request.id ? { dropNullColumns: params?.dropNullColumns } : params || {};
+    const pollLength = request.id
+      ? options?.pollLength
+        ? options.pollLength
+        : // don't set or override user-configured pollLength, it will be applied server-side
+        !this.deps.searchConfig.asyncSearch.pollLength && this.protocolSupportsMultiplexing
+        ? DEFAULT_MULTIPLEXING_POLL_LENGTH
+        : undefined
+      : undefined;
+    const paramsToUse = request.id
+      ? {
+          // FIXME: the dropNullColumns param shouldn't be needed during polling
+          // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
+          // at that point, exclude all params when request.id is defined (polling phase)
+          dropNullColumns: params?.dropNullColumns,
+        }
+      : params || {};
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
-        `/internal/search/${strategyToString(strategy)}${request.id ? `/${request.id}` : ''}`,
+        buildPath('/internal/search/{strategy}/{id?}', {
+          strategy: strategyToString(strategy),
+          id: request.id,
+        }),
         {
           version: '1',
           signal: abortSignal,
@@ -499,6 +600,8 @@ export class SearchInterceptor {
           body: JSON.stringify({
             ...{ ...request, params: paramsToUse },
             ...searchOptions,
+            // also sent as an option, because strategies wrapping others (e.g. Security's) rebuild `params`
+            pollLength,
             requestHash,
             stream:
               strategy === ESQL_ASYNC_SEARCH_STRATEGY ||
@@ -578,8 +681,8 @@ export class SearchInterceptor {
    * If requestHash is defined, tries to return them first from cache.
    */
   private getSearchResponse$(request: IKibanaSearchRequest, options: IAsyncSearchOptions) {
-    const { requestHash } = options;
-    const sessionOptions = this.deps.session.getSearchOptions(options.sessionId);
+    const { requestHash, sessionId } = options;
+    const sessionOptions = this.deps.session.getSearchOptions(sessionId);
     const cached =
       requestHash && !sessionOptions?.isRestore ? this.responseCache.get(requestHash) : undefined; // don't use cache if restoring a session
 
@@ -591,10 +694,11 @@ export class SearchInterceptor {
     searchAbortController.addAbortSignal(options.abortSignal ?? new AbortController().signal);
     const response$ = cached?.response$ || this.runSearch$(request, options, searchAbortController);
 
-    if (requestHash && !this.responseCache.has(requestHash)) {
+    if (requestHash && sessionId && !this.responseCache.has(requestHash)) {
       this.responseCache.set(requestHash, {
         response$,
         searchAbortController,
+        groupId: sessionId,
       });
     }
 
@@ -602,6 +706,16 @@ export class SearchInterceptor {
       response$,
       searchAbortController,
     };
+  }
+
+  /** Checks whether the session has completed responses available for replay. */
+  public hasResponseCacheForSession(sessionId: string): boolean {
+    return this.responseCache.hasCompletedResponses(sessionId);
+  }
+
+  /** Evicts a session's cached responses without canceling active searches. */
+  public evictResponseCacheForSession(sessionId: string): void {
+    this.responseCache.evictGroup(sessionId);
   }
 
   /**

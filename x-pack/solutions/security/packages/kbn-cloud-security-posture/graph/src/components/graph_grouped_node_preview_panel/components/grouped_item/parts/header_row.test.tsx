@@ -13,17 +13,20 @@ import {
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
   GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID,
 } from '../../../test_ids';
-import { HeaderRow } from './header_row';
+import { HeaderRow as BaseHeaderRow } from './header_row';
 import type { EntityItem } from '../types';
 import { getOrCreateFilterStore, destroyFilterStore } from '../../../../filters/filter_store';
 
-const mockOpenPreviewPanel = jest.fn();
+const mockOnShowDocument = jest.fn();
+const mockOnShowEntity = jest.fn();
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({
-    openPreviewPanel: mockOpenPreviewPanel,
-  }),
-}));
+// HeaderRow delegates both event/alert and entity previews to the consumer via props, so the test
+// wrapper supplies default handlers and cases assert against these mocks.
+const HeaderRow = (
+  props: Omit<React.ComponentProps<typeof BaseHeaderRow>, 'onShowDocument' | 'onShowEntity'>
+) => (
+  <BaseHeaderRow {...props} onShowDocument={mockOnShowDocument} onShowEntity={mockOnShowEntity} />
+);
 
 const flushMicrotasks = () => new Promise((r) => setTimeout(r, 0));
 
@@ -35,7 +38,8 @@ describe('<HeaderRow />', () => {
     // Generate unique scopeId for each test
     TEST_SCOPE_ID = `test-scope-${Math.random().toString(36).substring(7)}`;
     getOrCreateFilterStore(TEST_SCOPE_ID);
-    mockOpenPreviewPanel.mockClear();
+    mockOnShowDocument.mockClear();
+    mockOnShowEntity.mockClear();
   });
 
   afterEach(() => {
@@ -48,7 +52,7 @@ describe('<HeaderRow />', () => {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-1',
         label: 'Entity One',
-        availableInEntityStore: true,
+        entity: { availableInEntityStore: true },
       };
 
       const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
@@ -56,12 +60,12 @@ describe('<HeaderRow />', () => {
       expect(element).toBeInTheDocument();
     });
 
-    it('calls openPreviewPanel for a single click on enriched entity', async () => {
+    it('calls onShowEntity for a single click on enriched entity', async () => {
       const item: EntityItem = {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-1',
         label: 'Entity One',
-        availableInEntityStore: true,
+        entity: { availableInEntityStore: true },
       };
 
       const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
@@ -69,20 +73,18 @@ describe('<HeaderRow />', () => {
       fireEvent.click(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK));
       await flushMicrotasks();
 
-      expect(mockOpenPreviewPanel).toHaveBeenCalledTimes(1);
-      expect(mockOpenPreviewPanel).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({ entityId: 'entity-1' }),
-        })
+      expect(mockOnShowEntity).toHaveBeenCalledTimes(1);
+      expect(mockOnShowEntity).toHaveBeenCalledWith(
+        expect.objectContaining({ entityId: 'entity-1' })
       );
     });
 
-    it('calls openPreviewPanel for each click on enriched entity', async () => {
+    it('calls onShowEntity for each click on enriched entity', async () => {
       const item: EntityItem = {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-dup',
         label: 'Dup',
-        availableInEntityStore: true,
+        entity: { availableInEntityStore: true },
       };
 
       const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
@@ -91,7 +93,7 @@ describe('<HeaderRow />', () => {
       Array.from({ length: 3 }).forEach(() => fireEvent.click(link));
       await flushMicrotasks();
 
-      expect(mockOpenPreviewPanel).toHaveBeenCalledTimes(3);
+      expect(mockOnShowEntity).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -101,7 +103,7 @@ describe('<HeaderRow />', () => {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-2',
         label: 'Entity Two',
-        availableInEntityStore: false,
+        entity: { availableInEntityStore: false },
       };
 
       const { getByTestId, queryByTestId } = render(
@@ -121,12 +123,12 @@ describe('<HeaderRow />', () => {
       });
     });
 
-    it('does not call openPreviewPanel for non-enriched entity', async () => {
+    it('does not call onShowEntity for non-enriched entity', async () => {
       const item: EntityItem = {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-2',
         label: 'Entity Two',
-        availableInEntityStore: false,
+        entity: { availableInEntityStore: false },
       };
 
       const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
@@ -134,7 +136,7 @@ describe('<HeaderRow />', () => {
       fireEvent.click(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT));
       await flushMicrotasks();
 
-      expect(mockOpenPreviewPanel).not.toHaveBeenCalled();
+      expect(mockOnShowEntity).not.toHaveBeenCalled();
     });
 
     it('renders EuiText when availableInEntityStore is undefined', () => {
@@ -142,6 +144,7 @@ describe('<HeaderRow />', () => {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-3',
         label: 'Entity Three',
+        entity: {},
       };
 
       const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);

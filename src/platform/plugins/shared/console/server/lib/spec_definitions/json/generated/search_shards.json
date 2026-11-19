@@ -21,7 +21,8 @@
         "0"
       ],
       "preference": "",
-      "routing": []
+      "routing": [],
+      "_slice": ""
     },
     "methods": [
       "GET",

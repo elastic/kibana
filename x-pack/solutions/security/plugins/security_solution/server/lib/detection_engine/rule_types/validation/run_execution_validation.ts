@@ -34,6 +34,8 @@ export interface RunExecutionValidationResult {
   skipExecution: boolean;
   warnings: string[];
   frozenIndicesQueriedCount: number;
+  dateNanosTimestampFields: string[];
+  mixedTimestampFields: string[];
 }
 
 /**
@@ -59,17 +61,33 @@ export const runExecutionValidation = async (
   const warnings: string[] = [];
   let skipExecution = false;
   let frozenIndicesQueriedCount = 0;
+  let dateNanosTimestampFields: string[] = [];
+  let mixedTimestampFields: string[] = [];
 
   if (isMachineLearningParams(params)) {
-    return { skipExecution: false, warnings: [], frozenIndicesQueriedCount: 0 };
+    return {
+      skipExecution: false,
+      warnings: [],
+      frozenIndicesQueriedCount: 0,
+      dateNanosTimestampFields: [],
+      mixedTimestampFields: [],
+    };
   }
 
+  const timestampFields = secondaryTimestamp
+    ? [primaryTimestamp, secondaryTimestamp]
+    : [primaryTimestamp];
   const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asCurrentUser);
 
   try {
-    const indexPatternsWithMatches = await indexPatterns.getIndexPatternsWithMatches(inputIndex);
+    const { matchedIndexPatterns, matchedIndices } = await indexPatterns.getIndexPatternMatches(
+      inputIndex
+    );
 
-    if (indexPatternsWithMatches.length === 0) {
+    // Collect rule execution metrics
+    ruleExecutionLogger.logMetric('matched_indices_count', matchedIndices?.length);
+
+    if (matchedIndexPatterns.length === 0) {
       warnings.push(
         `Unable to find matching indices for rule ${ruleName}. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.`
       );
@@ -81,11 +99,10 @@ export const runExecutionValidation = async (
 
   if (isThreatParams(params)) {
     try {
-      const threatIndexPatternsWithMatches = await indexPatterns.getIndexPatternsWithMatches(
-        params.threatIndex
-      );
+      const { matchedIndexPatterns: matchedThreatIndexPatterns } =
+        await indexPatterns.getIndexPatternMatches(params.threatIndex);
 
-      if (threatIndexPatternsWithMatches.length === 0) {
+      if (matchedThreatIndexPatterns.length === 0) {
         warnings.push(
           `Unable to find matching threat indicator indices for rule ${ruleName}. This warning will persist until one of the following occurs: a matching threat index is created or the rule is disabled.`
         );
@@ -101,9 +118,7 @@ export const runExecutionValidation = async (
           scopedClusterClient.asCurrentUser.fieldCaps(
             {
               index: params.threatIndex,
-              fields: secondaryTimestamp
-                ? [primaryTimestamp, secondaryTimestamp]
-                : [primaryTimestamp],
+              fields: timestampFields,
               include_unmapped: true,
               ignore_unavailable: true,
             },
@@ -126,7 +141,13 @@ export const runExecutionValidation = async (
   }
 
   if (skipExecution) {
-    return { skipExecution, warnings, frozenIndicesQueriedCount };
+    return {
+      skipExecution,
+      warnings,
+      frozenIndicesQueriedCount,
+      dateNanosTimestampFields,
+      mixedTimestampFields,
+    };
   }
 
   try {
@@ -134,7 +155,7 @@ export const runExecutionValidation = async (
       scopedClusterClient.asCurrentUser.fieldCaps(
         {
           index: inputIndex,
-          fields: secondaryTimestamp ? [primaryTimestamp, secondaryTimestamp] : [primaryTimestamp],
+          fields: timestampFields,
           include_unmapped: true,
           runtime_mappings: runtimeMappings,
           ignore_unavailable: true,
@@ -151,6 +172,15 @@ export const runExecutionValidation = async (
     if (missingTimestampWarning) {
       warnings.push(missingTimestampWarning);
     }
+
+    // date_nanos sort values need special handling in search_after pagination
+    dateNanosTimestampFields = timestampFields.filter(
+      (field) => 'date_nanos' in (fieldCapsResponse.body.fields[field] ?? {})
+    );
+    mixedTimestampFields = timestampFields.filter((field) => {
+      const types = fieldCapsResponse.body.fields[field];
+      return types != null && 'date' in types && 'date_nanos' in types;
+    });
   } catch (exc) {
     warnings.push(`Timestamp fields check failed to execute ${exc}`);
   }
@@ -175,5 +205,11 @@ export const runExecutionValidation = async (
     }
   }
 
-  return { skipExecution, warnings, frozenIndicesQueriedCount };
+  return {
+    skipExecution,
+    warnings,
+    frozenIndicesQueriedCount,
+    dateNanosTimestampFields,
+    mixedTimestampFields,
+  };
 };

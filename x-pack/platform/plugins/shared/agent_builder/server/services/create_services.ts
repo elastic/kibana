@@ -6,6 +6,7 @@
  */
 
 import type { Runner } from '@kbn/agent-builder-server';
+import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { AgentBuilderConfig } from '../config';
 import type {
   InternalSetupServices,
@@ -13,14 +14,20 @@ import type {
   ServicesStartDeps,
   ServiceSetupDeps,
 } from './types';
+import type { ConversationEventBus } from '../workflows/triggers/conversation_event_bus';
 import { ToolsService } from './tools';
 import { AgentsService } from './agents';
-import { RunnerFactoryImpl } from './runner';
+import { RunnerFactoryImpl } from './execution/runner';
 import { ConversationServiceImpl } from './conversation';
+import { createWorkspaceService } from './workspaces';
 import { type AttachmentService, createAttachmentService } from './attachments';
+import { type RendererService, createRendererService } from './renderers';
+import {
+  type ConversationEventsService,
+  createConversationEventsService,
+} from './conversation_events';
 import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
-import { createSmlService, type SmlServiceInstance } from './sml';
 import { AuditLogService } from '../audit';
 import { createAgentExecutionService, createTaskHandler } from './execution';
 import {
@@ -30,17 +37,24 @@ import {
   type ConsumptionService,
 } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
+import { CallbackDeliveryService } from './execution/callback';
+import { createSpaceSettingsService } from './space_settings';
+import { SurfacesServiceImpl } from './surfaces';
+import { ConversationTemplatesService } from './conversation/templates';
 
 interface ServiceInstances {
   tools: ToolsService;
   agents: AgentsService;
   attachments: AttachmentService;
+  renderers: RendererService;
+  conversationEvents: ConversationEventsService;
   hooks: HooksService;
   skills: SkillService;
   plugins: PluginsService;
   metering: MeteringService;
-  sml: SmlServiceInstance;
   consumption: ConsumptionService;
+  callbackDelivery: CallbackDeliveryService;
+  conversationTemplates: ConversationTemplatesService;
 }
 
 export class ServiceManager {
@@ -58,28 +72,48 @@ export class ServiceManager {
     workflowsManagement,
     cloud,
     usageApi,
+    actions,
   }: ServiceSetupDeps): InternalSetupServices {
     this.services = {
       tools: new ToolsService(),
       agents: new AgentsService(),
       attachments: createAttachmentService(),
+      renderers: createRendererService(),
+      conversationEvents: createConversationEventsService(),
       hooks: new HooksService(),
       skills: createSkillService(),
       plugins: createPluginsService(),
-      metering: createMeteringService({ cloud, usageApi, logger: logger.get('metering') }),
-      sml: createSmlService(),
+      metering: createMeteringService({
+        cloud,
+        usageApi,
+        logger: logger.get('metering'),
+      }),
       consumption: createConsumptionService(),
+      callbackDelivery: new CallbackDeliveryService({
+        actions,
+        logger: logger.get('callbacks'),
+      }),
+      conversationTemplates: new ConversationTemplatesService(),
     };
 
+    const skillsSetup = this.services.skills.setup();
+
     this.internalSetup = {
-      tools: this.services.tools.setup({ logger: logger.get('tools'), workflowsManagement }),
+      tools: this.services.tools.setup({
+        logger: logger.get('tools'),
+        workflowsManagement,
+        config: this.config,
+      }),
       agents: this.services.agents.setup({ logger: logger.get('agents') }),
       attachments: this.services.attachments.setup(),
+      renderers: this.services.renderers.setup(),
+      conversationEvents: this.services.conversationEvents.setup(),
       hooks: this.services.hooks.setup({ logger: logger.get('hooks') }),
-      skills: this.services.skills.setup(),
-      plugins: this.services.plugins.setup(),
+      skills: skillsSetup,
+      plugins: this.services.plugins.setup({ skillsSetup }),
       metering: this.services.metering,
-      sml: this.services.sml.setup({ logger: logger.get('sml') }),
+      conversationTemplates: this.services.conversationTemplates.setup(),
+      callbacks: this.services.callbackDelivery.setup(),
     };
 
     return this.internalSetup;
@@ -90,6 +124,7 @@ export class ServiceManager {
     security,
     spaces,
     elasticsearch,
+    http,
     inference,
     uiSettings,
     savedObjects,
@@ -99,7 +134,15 @@ export class ServiceManager {
     securityPlugin,
     trackingService,
     analyticsService,
-  }: ServicesStartDeps): InternalStartServices {
+    searchInferenceEndpoints,
+    licensing,
+    deploymentInfo,
+    deductiveRegister,
+    isomer,
+    getSmlTypeDefinition,
+    cloud,
+    conversationEventBus,
+  }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
     }
@@ -113,11 +156,25 @@ export class ServiceManager {
       return runner;
     };
 
-    const attachments = this.services.attachments.start();
-    const sml = this.services.sml.start({
-      logger: logger.get('sml'),
-      securityAuthz: securityPlugin?.authz,
+    // eslint-disable-next-line prefer-const
+    let executionService: AgentExecutionService | undefined;
+    const getExecutionService = () => {
+      if (!executionService) {
+        throw new Error('Execution service not yet initialized');
+      }
+      return executionService;
+    };
+
+    const conversationTemplatesStart = this.services.conversationTemplates.start();
+
+    const attachments = this.services.attachments.start({
+      spaces,
+      savedObjects,
     });
+
+    const renderers = this.services.renderers.start();
+
+    const conversationEvents = this.services.conversationEvents.start();
 
     const tools = this.services.tools.start({
       getRunner,
@@ -126,6 +183,7 @@ export class ServiceManager {
       uiSettings,
       savedObjects,
       actions,
+      securityPlugin,
     });
 
     const skillsServiceStart = this.services.skills.start({
@@ -146,40 +204,16 @@ export class ServiceManager {
       toolsService: tools,
     });
 
-    const hooks = this.services.hooks.start();
+    const hooks = this.services.hooks.start({ security, spaces });
 
     const plugins = this.services.plugins.start({
       logger: logger.get('plugins'),
       elasticsearch,
       spaces,
       config: this.config,
-    });
-
-    const runnerFactory = new RunnerFactoryImpl({
-      logger: logger.get('runnerFactory'),
-      security,
-      elasticsearch,
-      uiSettings,
-      savedObjects,
-      inference,
-      spaces,
-      actions,
-      toolsService: tools,
-      agentsService: agents,
-      attachmentsService: attachments,
-      skillServiceStart: skillsServiceStart,
-      pluginsServiceStart: plugins,
-      trackingService,
+      getToolRegistry: tools.getRegistry,
       analyticsService,
-      hooks,
-    });
-    runner = runnerFactory.getRunner();
-
-    const conversations = new ConversationServiceImpl({
-      logger: logger.get('conversations'),
-      security,
-      elasticsearch,
-      spaces,
+      trackingService,
     });
 
     const auditLogService = new AuditLogService({
@@ -187,9 +221,67 @@ export class ServiceManager {
       logger: logger.get('audit'),
     });
 
+    const conversations = new ConversationServiceImpl({
+      logger: logger.get('conversations'),
+      security,
+      elasticsearch,
+      spaces,
+      agents,
+      eventBus: conversationEventBus,
+      conversationEvents,
+      auditLogService,
+      analyticsService,
+    });
+
+    const runnerFactory = new RunnerFactoryImpl({
+      logger: logger.get('runnerFactory'),
+      security,
+      elasticsearch,
+      http,
+      uiSettings,
+      savedObjects,
+      inference,
+      spaces,
+      actions,
+      toolsService: tools,
+      agentsService: agents,
+      conversationService: conversations,
+      attachmentsService: attachments,
+      renderersService: renderers,
+      conversationEventsService: conversationEvents,
+      skillServiceStart: skillsServiceStart,
+      pluginsServiceStart: plugins,
+      trackingService,
+      analyticsService,
+      hooks,
+      getExecutionService,
+      searchInferenceEndpoints,
+      conversationTemplates: conversationTemplatesStart,
+      licensing,
+      deploymentInfo,
+      deductiveRegister,
+    });
+    runner = runnerFactory.getRunner();
+
+    const workspaces = createWorkspaceService({
+      logger: logger.get('workspaces'),
+      elasticsearch,
+      spaces,
+      conversations,
+    });
+
+    const surfaces = new SurfacesServiceImpl({
+      attachmentsService: attachments,
+      isomer,
+      basePath: http.basePath,
+      cloud,
+      logger: logger.get('surfaces'),
+    });
+
     const taskHandler = createTaskHandler({
       logger: logger.get('task-handler'),
       elasticsearch,
+      security,
       inference,
       conversationService: conversations,
       agentService: agents,
@@ -200,11 +292,17 @@ export class ServiceManager {
       trackingService,
       analyticsService,
       meteringService: this.services.metering,
+      searchInferenceEndpoints,
+      callbackDeliveryService: this.services.callbackDelivery,
+      surfacesService: surfaces,
+      taskManager,
+      getExecutionService,
     });
 
-    const execution = createAgentExecutionService({
+    executionService = createAgentExecutionService({
       logger: logger.get('execution'),
       elasticsearch,
+      security,
       taskManager,
       spaces,
       inference,
@@ -212,33 +310,46 @@ export class ServiceManager {
       agentService: agents,
       runAgent: runner.runAgent,
       attachmentsService: attachments,
+      getSmlTypeDefinition,
       uiSettings,
       savedObjects,
       trackingService,
       analyticsService,
       meteringService: this.services.metering,
+      searchInferenceEndpoints,
+      callbackDeliveryService: this.services.callbackDelivery,
+      securityPlugin,
     });
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
+
+    const spaceSettings = createSpaceSettingsService({ savedObjects });
 
     this.internalStart = {
       tools,
       agents,
       attachments,
+      renderers,
+      conversationEvents,
       skills: skillsServiceStart,
       conversations,
+      workspaces,
       runnerFactory,
       auditLogService,
-      execution,
+      execution: executionService,
       taskHandler,
       hooks,
       spaces,
       featureFlags,
       uiSettings,
       savedObjects,
-      sml,
       plugins,
       consumption,
+      searchInferenceEndpoints,
+      inference,
+      callbackDeliveryService: this.services.callbackDelivery,
+      spaceSettings,
+      conversationTemplates: conversationTemplatesStart,
     };
 
     return this.internalStart;

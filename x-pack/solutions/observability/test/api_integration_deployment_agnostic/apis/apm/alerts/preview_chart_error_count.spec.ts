@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PreviewChartResponseItem } from '@kbn/apm-plugin/server/routes/alerts/route';
+import type { PreviewChartResponseItem } from '@kbn/apm-api-shared';
 import expect from '@kbn/expect';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import {

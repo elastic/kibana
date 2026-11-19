@@ -1,0 +1,59 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+
+import { getEbtProps } from '@kbn/ebt-click';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { appPaths } from '../../../../../utils/app_paths';
+import { useNavigation } from '../../../../../hooks/use_navigation';
+import { SidebarLink } from './sidebar_link';
+
+const ruleInsetStyles = ({ euiTheme }: UseEuiTheme) => css`
+  padding-inline: ${euiTheme.size.m};
+`;
+
+export const ConversationFooter: React.FC = () => {
+  const { navigateToAgentBuilderUrl } = useNavigation();
+
+  return (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      css={css`
+        flex-grow: 0;
+      `}
+    >
+      <EuiFlexItem grow={false} css={ruleInsetStyles}>
+        <EuiHorizontalRule margin="none" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <SidebarLink
+          label={i18n.translate('xpack.agentBuilder.sidebar.conversation.manageComponents', {
+            defaultMessage: 'Manage components',
+          })}
+          href={appPaths.manage.agents}
+          hideIcon={true}
+          onClick={(e) => {
+            e.preventDefault();
+            navigateToAgentBuilderUrl(appPaths.manage.agents);
+          }}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.sidebar,
+            action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_LAYER_TRANSITION,
+            detail: AGENT_BUILDER_UI_EBT.detail.layerTransition.MANAGE_CLICK,
+          })}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

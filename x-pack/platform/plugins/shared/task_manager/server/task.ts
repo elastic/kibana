@@ -11,6 +11,12 @@ import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { ServiceAccountWorkloadRequestParams } from '@kbn/core-security-server';
+import {
+  SERVICE_ACCOUNT_WORKLOAD_TYPE_MAX_LENGTH,
+  SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX,
+} from '@kbn/core-security-server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 import { isErr, tryAsResult } from './lib/result_type';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
@@ -18,17 +24,106 @@ import type { DecoratedError } from './task_running';
 
 export const DEFAULT_TIMEOUT = '5m';
 
+/**
+ * Task claim ordering tier, named after what the task is for. Tasks are sorted by
+ * priority descending before claiming, so a higher value is claimed first.
+ *
+ * The numeric values of the pre-existing tiers are unchanged; only the names describe
+ * intent now. Pick the tier from the name — see the task-registration guidance in the
+ * Task Manager README for when each one applies.
+ */
 export enum TaskPriority {
+  /**
+   * Background bookkeeping and housekeeping that may be deferred under load —
+   * cleanup, telemetry rollups, backfills.
+   */
+  Maintenance = 1,
+  /**
+   * Long-running work that should yield to `Standard` tasks rather than hold the
+   * regular pool while it grinds through a large workload.
+   */
+  Deferrable = 40,
+  /**
+   * The default tier, applied when a task type or instance does not set a priority.
+   * Correct for almost every task.
+   */
+  Standard = 50,
+  /**
+   * Work a user is directly waiting on, or work with a tight latency budget. Claimed
+   * ahead of every other tier, so reserve it for tasks where the delay is user-visible.
+   */
+  UserInteractive = 100,
+
+  /** @deprecated Use {@link TaskPriority.Maintenance} instead. */
   Low = 1,
+  /** @deprecated Use {@link TaskPriority.Deferrable} instead. */
   NormalLongRunning = 40,
+  /** @deprecated Use {@link TaskPriority.Standard} instead. */
   Normal = 50,
+}
+
+/**
+ * The non-deprecated `TaskPriority` members, ascending. Kept explicit because the
+ * deprecated aliases share numeric values with their replacements, so the enum's
+ * reverse mapping cannot distinguish them.
+ */
+const CANONICAL_TASK_PRIORITY_NAMES: ReadonlyArray<keyof typeof TaskPriority> = [
+  'Maintenance',
+  'Deferrable',
+  'Standard',
+  'UserInteractive',
+];
+
+export enum TaskTypeGroup {
+  Alerting = 'alerting',
+  Actions = 'actions',
 }
 
 export enum TaskCost {
   Tiny = 1,
   Normal = 2,
+  Large = 4,
   ExtraLarge = 10,
 }
+
+/**
+ * String values for task cost as stored on the task saved object. Internal to Task Manager:
+ * consumers only see TaskCost, and the task store converts at the saved object boundary.
+ */
+export enum InstanceTaskCost {
+  Tiny = 'tiny',
+  Normal = 'normal',
+  Large = 'large',
+  ExtraLarge = 'extralarge',
+}
+
+const INSTANCE_TASK_COST_TO_TASK_COST: ReadonlyMap<string, TaskCost> = new Map([
+  [InstanceTaskCost.Tiny, TaskCost.Tiny],
+  [InstanceTaskCost.Normal, TaskCost.Normal],
+  [InstanceTaskCost.Large, TaskCost.Large],
+  [InstanceTaskCost.ExtraLarge, TaskCost.ExtraLarge],
+]);
+
+const TASK_COST_TO_INSTANCE_TASK_COST: Record<TaskCost, InstanceTaskCost> = {
+  [TaskCost.Tiny]: InstanceTaskCost.Tiny,
+  [TaskCost.Normal]: InstanceTaskCost.Normal,
+  [TaskCost.Large]: InstanceTaskCost.Large,
+  [TaskCost.ExtraLarge]: InstanceTaskCost.ExtraLarge,
+};
+
+/**
+ * Translates a stored cost string (e.g. 'extralarge') to its TaskCost. Returns undefined when
+ * the string is missing or unknown, e.g. a cost tier added by a newer version of Kibana.
+ */
+export const getTaskCostFromInstance = (cost?: string): TaskCost | undefined =>
+  cost ? INSTANCE_TASK_COST_TO_TASK_COST.get(cost) : undefined;
+
+/**
+ * Translates a TaskCost to the string stored on the task saved object. Returns undefined when
+ * the cost is missing or not a TaskCost value.
+ */
+export const getInstanceCostFromTaskCost = (cost?: TaskCost): InstanceTaskCost | undefined =>
+  cost === undefined ? undefined : TASK_COST_TO_INSTANCE_TASK_COST[cost];
 
 /*
  * Type definitions and validations for tasks.
@@ -62,7 +157,42 @@ export interface RunContext {
    * is generated using the API key and passed as part of the run context.
    */
   fakeRequest?: KibanaRequest;
-  abortController: AbortController;
+
+  /**
+   * Set instead of `fakeRequest` when the task was scheduled with `runAs`. Do all the work that
+   * needs the service account inside `runAs.withScopedRequest`.
+   */
+  runAs?: TaskRunAsContext;
+  signal: AbortSignal;
+
+  /**
+   * If the task has a known `profile_uid`, binds it to a child fake request
+   * so `security.authc.getCurrentUser(request)` resolves to the originating
+   * user. Intended for tasks that construct child fake requests to invoke
+   * profile-keyed APIs. Throws on non-fake requests; calling twice on the
+   * same fake request is a no-op (first-wins) and emits a warning.
+   */
+  enrichRequest?: (request: KibanaRequest) => void;
+  /**
+   * A UUID generated by Task Manager for this specific execution of the task.
+   * Downstream task runners (Alerting, Actions) should reuse this value instead
+   * of generating their own, so that `kibana.alert.rule.execution.uuid` and
+   * `kibana.action.execution.uuid` align with `kibana.task.execution.uuid`.
+   */
+  executionUuid: string;
+
+  /**
+   * Attach custom data to this run's `task-run` event log document.
+   *
+   * The provided fields are written to the task-manager-owned `kibana.task.data`
+   * field, which is mapped as `flattened`.
+   *
+   * Notes:
+   *  - Calling this more than once replaces any previously set fields.
+   *  - The serialized fields must not exceed 4 KB. Larger payloads are
+   *  dropped with a warning to protect the shared event log index.
+   */
+  setCustomTaskRunEventFields: (fields: Record<string, unknown>) => void;
 }
 
 /**
@@ -70,6 +200,8 @@ export interface RunContext {
  */
 
 export type SuccessfulRunResult = {
+  /** Overrides the task priority when rescheduling after a successful run. */
+  priority?: TaskPriority;
   /**
    * The state which will be passed to the next run of this task (if this is a
    * recurring task). See the RunContext type definition for more details.
@@ -136,6 +268,11 @@ export type TaskRunCreatorFunction = (
   context: RunContext
 ) => CancellableTask<RunContext['taskInstance']>;
 
+/**
+ * Reserved for tasks that run as the service account that scheduled them.
+ */
+const TASK_IDENTITY_WORKLOAD_TYPE = 'task_identity';
+
 export const taskDefinitionSchema = schema.object(
   {
     /**
@@ -150,6 +287,10 @@ export const taskDefinitionSchema = schema.object(
      * Priority of this task type. Defaults to "NORMAL" if not defined
      */
     priority: schema.maybe(schema.number()),
+    /**
+     * Allows `runSoon({ priority })` and a successful run result to change the stored priority.
+     */
+    allowPriorityOverride: schema.maybe(schema.boolean()),
     /**
      * Cost to run this task type. Defaults to "Normal".
      */
@@ -197,6 +338,42 @@ export const taskDefinitionSchema = schema.object(
     ),
 
     paramsSchema: schema.maybe(schema.any()),
+
+    /**
+     * Used to group tasks for metrics calculated within task_manager.
+     * If value is defined, metrics will be included in the alerting/actions grouping metrics.
+     * If not set, metrics will only be calculated for the specific task type.
+     */
+    taskTypeGroup: schema.maybe(
+      schema.oneOf([schema.literal('alerting'), schema.literal('actions')])
+    ),
+
+    runAs: schema.maybe(
+      schema.object({
+        // codeql[js/kibana/unbounded-array-in-schema] Task type registration at plugin setup, not HTTP input
+        workloadTypes: schema.arrayOf(
+          schema.string({
+            maxLength: SERVICE_ACCOUNT_WORKLOAD_TYPE_MAX_LENGTH,
+            validate(workloadType) {
+              if (!SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX.test(workloadType)) {
+                return `Invalid workload type "${workloadType}". Workload types must match ${SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX}.`;
+              }
+              if (workloadType === TASK_IDENTITY_WORKLOAD_TYPE) {
+                return `The workload type "${TASK_IDENTITY_WORKLOAD_TYPE}" is reserved for Task Manager.`;
+              }
+            },
+          }),
+          { minSize: 1 }
+        ),
+        withScopedRequest: schema.any({
+          validate(withScopedRequest) {
+            if (typeof withScopedRequest !== 'function') {
+              return 'withScopedRequest must be a function.';
+            }
+          },
+        }),
+      })
+    ),
   },
   {
     validate({ timeout, priority, cost }) {
@@ -205,9 +382,9 @@ export const taskDefinitionSchema = schema.object(
       }
 
       if (priority && (!isNumber(priority) || !(priority in TaskPriority))) {
-        return `Invalid priority "${priority}". Priority must be one of ${Object.keys(TaskPriority)
-          .filter((key) => isNaN(Number(key)))
-          .map((key) => `${key} => ${TaskPriority[key as keyof typeof TaskPriority]}`)}`;
+        return `Invalid priority "${priority}". Priority must be one of ${CANONICAL_TASK_PRIORITY_NAMES.map(
+          (key) => `${key} => ${TaskPriority[key]}`
+        )}`;
       }
 
       if (cost && (!isNumber(cost) || !(cost in TaskCost))) {
@@ -223,7 +400,10 @@ export const taskDefinitionSchema = schema.object(
  * Defines a task which can be scheduled and run by the Kibana
  * task manager.
  */
-export type TaskDefinition = Omit<TypeOf<typeof taskDefinitionSchema>, 'paramsSchema'> & {
+export type TaskDefinition = Omit<
+  TypeOf<typeof taskDefinitionSchema>,
+  'paramsSchema' | 'taskTypeGroup' | 'runAs'
+> & {
   /**
    * Creates an object that has a run function which performs the task's work,
    * and an optional cancel function which cancels the task.
@@ -237,7 +417,42 @@ export type TaskDefinition = Omit<TypeOf<typeof taskDefinitionSchema>, 'paramsSc
     }
   >;
   paramsSchema?: ObjectType;
+  taskTypeGroup?: TaskTypeGroup;
+  runAs?: TaskRunAsDefinition;
 };
+
+/**
+ * Lets tasks of a type run as the registering plugin's bound service accounts.
+ */
+export interface TaskRunAsDefinition {
+  /**
+   * The workload types an instance of this task type may name in `runAs`.
+   */
+  workloadTypes: readonly string[];
+  /**
+   * Wraps the plugin's own `core.security.serviceAccounts.withScopedRequestForWorkload`.
+   */
+  withScopedRequest<T>(
+    params: ServiceAccountWorkloadRequestParams,
+    fn: (request: KibanaRequest) => Promise<T>
+  ): Promise<T>;
+}
+
+/**
+ * Runs work as the service account bound to the workload a task was scheduled to run as.
+ */
+export interface TaskRunAsContext {
+  /**
+   * Runs `fn` with a request authenticated as the workload's service account. The request stops
+   * working once `fn` settles. Pass `expectedServiceAccountId` to reject before minting when the
+   * workload is bound to another account; `null` is the same as omitting it. A task scheduled with
+   * a non-null `expectedServiceAccountId` always uses that one, and rejects a different one.
+   */
+  withScopedRequest<T>(
+    fn: (request: KibanaRequest) => Promise<T>,
+    options?: { expectedServiceAccountId?: string | null }
+  ): Promise<T>;
+}
 
 export enum TaskStatus {
   Idle = 'idle',
@@ -259,8 +474,49 @@ export type { IntervalSchedule, Rrule, RruleSchedule } from '@kbn/response-ops-s
 
 export interface TaskUserScope {
   apiKeyId: string;
-  spaceId?: string;
+  uiamApiKeyId?: string;
+  spaceId?: SpaceId;
+  /**
+   * True when the credentials were supplied by the caller (a scheduling request already
+   * authenticated with an ES or UIAM API key — not necessarily a human, e.g. a service account)
+   * rather than minted by Task Manager. Task Manager does not own such keys and must never revoke
+   * them: this single flag gates invalidation of BOTH the ES and UIAM credentials at every
+   * grant/invalidate call site. Persisted on the task saved object, so renaming it requires a
+   * model version migration.
+   */
   apiKeyCreatedByUser: boolean;
+  /**
+   * UIAM's verdict on whether `uiamApiKey` is an external (user-created Cloud) API key,
+   * captured from `AuthenticatedUser.api_key.internal === false` when the task was scheduled.
+   * External keys must not be presented to Elasticsearch with the UIAM shared secret, so task
+   * runs mark their fake request accordingly. Absent means internal-key treatment.
+   */
+  uiamApiKeyExternal?: boolean;
+  userProfileId?: string;
+  userName?: string;
+}
+
+/**
+ * How a task authenticates when it runs. The fields other than `type` depend on the type: a
+ * `service_account` credential names the workload the task runs as.
+ */
+export interface TaskCredential {
+  type: string;
+  workloadType?: string;
+  workloadId?: string;
+  spaceId?: string;
+  expectedServiceAccountId?: string | null;
+}
+
+/**
+ * The service account workload a task runs as.
+ */
+export interface TaskRunAs {
+  workloadType: string;
+  workloadId: string;
+  spaceId: string;
+  /** Reject before minting if the binding points elsewhere. `null` runs as whatever is bound. */
+  expectedServiceAccountId: string | null;
 }
 
 /*
@@ -370,9 +626,14 @@ export interface TaskInstance {
   partition?: number;
 
   /**
-   * Used to allow tasks to be scoped to a user via their API key
+   * Used to allow tasks to be scoped to a user via their ES API key
    */
   apiKey?: string;
+
+  /**
+   * Used to allow tasks to be scoped to a user via their UIAM API key
+   */
+  uiamApiKey?: string;
 
   /**
    * Meta data related to the API key associated with this task
@@ -383,6 +644,19 @@ export interface TaskInstance {
    * Optionally override the priority defined in the task type for this specific task instance
    */
   priority?: TaskPriority;
+
+  /**
+   * Optional cost for this task instance, overriding the task type's default cost.
+   * Used by the task selector and capacity logic to limit concurrent work.
+   */
+  cost?: TaskCost;
+
+  /**
+   * Runs the task as the service account bound to this workload, instead of with an API key. The
+   * task type's `runAs` definition must list `workloadType`. Only read when the task is created,
+   * where it is stored as the task's `credential`; the batch `request` doesn't apply to it.
+   */
+  runAs?: TaskRunAs;
 }
 
 /**
@@ -409,7 +683,7 @@ export type TaskInstanceWithId = Require<TaskInstance, 'id'>;
 /**
  * A task instance that has an id and is ready for storage.
  */
-export interface ConcreteTaskInstance extends TaskInstance {
+export interface ConcreteTaskInstance extends Omit<TaskInstance, 'runAs'> {
   /**
    * The id of the Elastic document that stores this instance's data. This can
    * be passed by the caller when scheduling the task.
@@ -486,11 +760,38 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * Used to break up tasks so each Kibana node can claim tasks on a subset of the partitions
    */
   partition?: number;
+
+  /**
+   * How the task authenticates when it runs. Part of the AAD, so it is only written when the task is created.
+   */
+  credential?: TaskCredential;
+
+  /**
+   * Encrypted secret material for `credential`. For a service account it holds no secret, only a
+   * value whose decryption fails if `credential` was changed. Only written when the task is created.
+   */
+  encryptedCredential?: string;
+
+  /**
+   * The stored cost when it isn't a tier this version of Kibana knows, e.g. one added by a newer
+   * version. `cost` is unset in that case; a full replace writes this back so the tier is kept.
+   */
+  unrecognizedCost?: string;
 }
 
 export type PartialConcreteTaskInstance = Partial<ConcreteTaskInstance> & {
   id: ConcreteTaskInstance['id'];
 };
+
+/**
+ * A task as returned by the claim candidate search, carrying only the metadata the claim
+ * phase needs. The omitted fields are loaded for the winners of the claim instead, so the
+ * missing type members keep a candidate from being mistaken for a runnable task.
+ */
+export type TaskClaimCandidate = Omit<
+  ConcreteTaskInstance,
+  'state' | 'params' | 'apiKey' | 'uiamApiKey'
+>;
 
 export interface ConcreteTaskInstanceVersion {
   /** The _id of the the document (not the SO id) */
@@ -505,7 +806,14 @@ export interface ConcreteTaskInstanceVersion {
 
 export type SerializedConcreteTaskInstance = Omit<
   ConcreteTaskInstance,
-  'state' | 'params' | 'scheduledAt' | 'startedAt' | 'retryAt' | 'runAt'
+  | 'state'
+  | 'params'
+  | 'scheduledAt'
+  | 'startedAt'
+  | 'retryAt'
+  | 'runAt'
+  | 'cost'
+  | 'unrecognizedCost'
 > & {
   state: string;
   params: string;
@@ -516,7 +824,10 @@ export type SerializedConcreteTaskInstance = Omit<
   runAt: string;
   partition?: number;
   apiKey?: string;
+  uiamApiKey?: string;
   userScope?: TaskUserScope;
+  /** Not limited to InstanceTaskCost: a newer version of Kibana may store a tier this one doesn't know. */
+  cost?: string;
 };
 
 export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTaskInstance> & {
@@ -525,7 +836,37 @@ export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTa
 
 export interface ApiKeyOptions {
   request?: KibanaRequest;
+  /**
+   * When true with a request, replace the API key of tasks that already exist with one granted (or
+   * cloned, see `cloneApiKey`) from this request, and queue the previous key for invalidation.
+   * Honored by `bulkUpdateSchedules` and by `ensureScheduled` when the task is already scheduled;
+   * `ensureScheduled` only replaces the key of an idle task and rejects with a conflict error when
+   * concurrent updates prevented the replacement.
+   */
   regenerateApiKey?: boolean;
+  /**
+   * When true with a request that includes an API key, clone the caller's credentials into a
+   * new managed key for the scheduled task(s) instead of reusing the caller's key directly.
+   * Intended for long-lived tasks (e.g. alerting rule executors) created from ephemeral callers
+   * such as workflows.
+   */
+  cloneApiKey?: boolean;
+  /**
+   * Defaults to true, so Elasticsearch refreshes after granting or cloning the task's API key and a
+   * search-based lookup of the new key (e.g. `GET _security/api_key`) finds it when the task runs.
+   * Set to false to skip the refresh: scheduling is faster, but that lookup may briefly miss the key.
+   */
+  refreshApiKey?: boolean;
+  /**
+   * When true with a request, grant only the Elasticsearch API key (skip UIAM). Intended for
+   * tests and narrow internal flows that need tasks with ES credentials only.
+   */
+  onEsKey?: boolean;
 }
 
 export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;
+
+// Local event log interface to avoid a circular dependency with @kbn/event-log-plugin in .tsconfig
+export interface TaskEventLogger {
+  logEvent(properties: object, id?: string): void;
+}

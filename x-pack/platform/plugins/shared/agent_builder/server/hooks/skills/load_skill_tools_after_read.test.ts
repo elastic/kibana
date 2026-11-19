@@ -5,25 +5,39 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import type { AfterToolCallHookContext } from '@kbn/agent-builder-server';
-import { filestoreTools } from '@kbn/agent-builder-common/tools';
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import type {
   SkillFileEntry,
   SkillReferencedContentFileEntry,
-} from '../../services/runner/store/volumes/skills/types';
+} from '../../services/execution/runner/store/volumes/skills/types';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { ToolType } from '@kbn/agent-builder-common';
+import { ToolOrigin, ToolType } from '@kbn/agent-builder-common';
+import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { createToolHandlerContextMock, type ToolHandlerContextMock } from '../../test_utils/runner';
-import { loadSkillToolsAfterRead } from './load_skill_tools_after_read';
+import { createLoadSkillToolsAfterRead } from './load_skill_tools_after_read';
+
+const createAnalyticsServiceMock = (): jest.Mocked<
+  Pick<AnalyticsService, 'reportSkillInvoked'>
+> => ({
+  reportSkillInvoked: jest.fn(),
+});
+
+const createTrackingServiceMock = (): jest.Mocked<
+  Pick<TrackingService, 'trackSkillInvocation'>
+> => ({
+  trackSkillInvocation: jest.fn(),
+});
 
 const createSkillFileEntry = (
   overrides: Partial<{ path: string; skillId: string }> = {}
 ): SkillFileEntry => ({
-  path: overrides.path ?? 'skills/platform/my-skill/SKILL.md',
+  path: overrides.path ?? '/platform/my-skill/SKILL.md',
   type: 'file',
   metadata: {
     type: FileEntryType.skill,
@@ -72,8 +86,8 @@ const createMockSkill = (
 });
 
 const createHookContext = ({
-  toolId = filestoreTools.read,
-  toolParams = { path: 'skills/platform/my-skill/SKILL.md' },
+  toolId = internalTools.readFile,
+  toolParams = { path: '/skills/platform/my-skill/SKILL.md' },
   toolHandlerContext,
 }: {
   toolId?: string;
@@ -89,8 +103,9 @@ const createHookContext = ({
   toolHandlerContext,
 });
 
-describe('loadSkillToolsAfterRead', () => {
+describe('createLoadSkillToolsAfterRead', () => {
   let toolHandlerContext: ToolHandlerContextMock;
+  const loadSkillToolsAfterRead = createLoadSkillToolsAfterRead();
 
   beforeEach(() => {
     toolHandlerContext = createToolHandlerContextMock();
@@ -105,7 +120,7 @@ describe('loadSkillToolsAfterRead', () => {
 
       await loadSkillToolsAfterRead(context);
 
-      expect(toolHandlerContext.filestore.read).not.toHaveBeenCalled();
+      expect(toolHandlerContext.skillsStore.getEntry).not.toHaveBeenCalled();
       expect(toolHandlerContext.toolManager.addTools).not.toHaveBeenCalled();
     });
 
@@ -117,25 +132,25 @@ describe('loadSkillToolsAfterRead', () => {
 
       await loadSkillToolsAfterRead(context);
 
-      expect(toolHandlerContext.filestore.read).not.toHaveBeenCalled();
+      expect(toolHandlerContext.skillsStore.getEntry).not.toHaveBeenCalled();
       expect(toolHandlerContext.toolManager.addTools).not.toHaveBeenCalled();
     });
 
     it('does nothing when filestore returns no entry for the path', async () => {
-      toolHandlerContext.filestore.read.mockResolvedValue(undefined);
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(undefined);
 
       const context = createHookContext({ toolHandlerContext });
 
       await loadSkillToolsAfterRead(context);
 
-      expect(toolHandlerContext.filestore.read).toHaveBeenCalledWith(
-        'skills/platform/my-skill/SKILL.md'
+      expect(toolHandlerContext.skillsStore.getEntry).toHaveBeenCalledWith(
+        '/platform/my-skill/SKILL.md'
       );
       expect(toolHandlerContext.toolManager.addTools).not.toHaveBeenCalled();
     });
 
     it('does nothing when the file entry is not a skill file', async () => {
-      toolHandlerContext.filestore.read.mockResolvedValue(createNonSkillFileEntry());
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createNonSkillFileEntry());
 
       const context = createHookContext({ toolHandlerContext });
 
@@ -145,7 +160,7 @@ describe('loadSkillToolsAfterRead', () => {
     });
 
     it('logs a warning and does not add tools when skill is not found in registry', async () => {
-      toolHandlerContext.filestore.read.mockResolvedValue(createSkillFileEntry());
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
       toolHandlerContext.skills.get.mockResolvedValue(undefined);
 
       const context = createHookContext({ toolHandlerContext });
@@ -170,7 +185,7 @@ describe('loadSkillToolsAfterRead', () => {
         getRegistryTools: jest.fn().mockReturnValue([]),
       });
 
-      toolHandlerContext.filestore.read.mockResolvedValue(createSkillFileEntry());
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
       toolHandlerContext.skills.get.mockResolvedValue(skill);
       toolHandlerContext.skills.convertSkillTool.mockReturnValue(convertedTool);
 
@@ -183,7 +198,7 @@ describe('loadSkillToolsAfterRead', () => {
       expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith(
         {
           type: ToolManagerToolType.executable,
-          tools: [convertedTool],
+          tools: [{ ...convertedTool, origin: ToolOrigin.inline }],
           logger: toolHandlerContext.logger,
         },
         { dynamic: true }
@@ -197,7 +212,7 @@ describe('loadSkillToolsAfterRead', () => {
         getRegistryTools: jest.fn().mockReturnValue(['registry-tool-1']),
       });
 
-      toolHandlerContext.filestore.read.mockResolvedValue(createSkillFileEntry());
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
       toolHandlerContext.skills.get.mockResolvedValue(skill);
       toolHandlerContext.toolProvider.list.mockResolvedValue([registryTool]);
 
@@ -209,7 +224,7 @@ describe('loadSkillToolsAfterRead', () => {
       expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith(
         expect.objectContaining({
           type: ToolManagerToolType.executable,
-          tools: expect.arrayContaining([registryTool]),
+          tools: expect.arrayContaining([{ ...registryTool, origin: ToolOrigin.registry }]),
         }),
         { dynamic: true }
       );
@@ -225,7 +240,7 @@ describe('loadSkillToolsAfterRead', () => {
         getRegistryTools: jest.fn().mockReturnValue(['registry-1']),
       });
 
-      toolHandlerContext.filestore.read.mockResolvedValue(createSkillFileEntry());
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
       toolHandlerContext.skills.get.mockResolvedValue(skill);
       toolHandlerContext.skills.convertSkillTool.mockReturnValue(convertedInline);
       toolHandlerContext.toolProvider.list.mockResolvedValue([registryTool]);
@@ -237,7 +252,10 @@ describe('loadSkillToolsAfterRead', () => {
       expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith(
         {
           type: ToolManagerToolType.executable,
-          tools: [convertedInline, registryTool],
+          tools: [
+            { ...convertedInline, origin: ToolOrigin.inline },
+            { ...registryTool, origin: ToolOrigin.registry },
+          ],
           logger: toolHandlerContext.logger,
         },
         { dynamic: true }
@@ -250,7 +268,7 @@ describe('loadSkillToolsAfterRead', () => {
         getRegistryTools: jest.fn().mockReturnValue([]),
       });
 
-      toolHandlerContext.filestore.read.mockResolvedValue(createSkillFileEntry());
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
       toolHandlerContext.skills.get.mockResolvedValue(skill);
 
       const context = createHookContext({ toolHandlerContext });
@@ -270,7 +288,7 @@ describe('loadSkillToolsAfterRead', () => {
     it('adds tools as dynamic (not static)', async () => {
       const skill = createMockSkill();
 
-      toolHandlerContext.filestore.read.mockResolvedValue(createSkillFileEntry());
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
       toolHandlerContext.skills.get.mockResolvedValue(skill);
 
       const context = createHookContext({ toolHandlerContext });
@@ -285,7 +303,7 @@ describe('loadSkillToolsAfterRead', () => {
     it('uses the skill_id from file entry metadata to look up the skill', async () => {
       const skill = createMockSkill({ id: 'custom-skill-id' });
 
-      toolHandlerContext.filestore.read.mockResolvedValue(
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(
         createSkillFileEntry({ skillId: 'custom-skill-id' })
       );
       toolHandlerContext.skills.get.mockResolvedValue(skill);
@@ -305,7 +323,7 @@ describe('loadSkillToolsAfterRead', () => {
         getRegistryTools: jest.fn().mockReturnValue(tooManyToolIds),
       });
 
-      toolHandlerContext.filestore.read.mockResolvedValue(createSkillFileEntry());
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
       toolHandlerContext.skills.get.mockResolvedValue(skill);
 
       const context = createHookContext({ toolHandlerContext });
@@ -322,7 +340,7 @@ describe('loadSkillToolsAfterRead', () => {
         getRegistryTools: jest.fn().mockReturnValue(toolIds),
       });
 
-      toolHandlerContext.filestore.read.mockResolvedValue(createSkillFileEntry());
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
       toolHandlerContext.skills.get.mockResolvedValue(skill);
       toolHandlerContext.toolProvider.list.mockResolvedValue(toolIds.map((id) => ({ id } as any)));
 
@@ -330,6 +348,188 @@ describe('loadSkillToolsAfterRead', () => {
 
       await expect(loadSkillToolsAfterRead(context)).resolves.not.toThrow();
       expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalled();
+    });
+  });
+
+  describe('telemetry', () => {
+    let analyticsService: jest.Mocked<Pick<AnalyticsService, 'reportSkillInvoked'>>;
+    let trackingService: jest.Mocked<Pick<TrackingService, 'trackSkillInvocation'>>;
+    let loadSkillToolsAfterReadWithTelemetry: ReturnType<typeof createLoadSkillToolsAfterRead>;
+
+    beforeEach(() => {
+      analyticsService = createAnalyticsServiceMock();
+      trackingService = createTrackingServiceMock();
+      loadSkillToolsAfterReadWithTelemetry = createLoadSkillToolsAfterRead({
+        analyticsService: analyticsService as unknown as AnalyticsService,
+        trackingService: trackingService as unknown as TrackingService,
+      });
+    });
+
+    it('reports SkillInvoked with classification and the agent context from the run stack', async () => {
+      const skill = createMockSkill({
+        id: 'security-skill',
+        readonly: true,
+        basePath: 'skills/security/foo',
+        getInlineTools: jest.fn().mockReturnValue([]),
+        getRegistryTools: jest.fn().mockReturnValue([]),
+      });
+
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(
+        createSkillFileEntry({ skillId: 'security-skill' })
+      );
+      toolHandlerContext.skills.get.mockResolvedValue(skill);
+      toolHandlerContext.runContext = {
+        runId: 'run-1',
+        stack: [
+          { type: 'agent', agentId: 'my_agent', conversationId: 'conv-1', executionId: 'exec-1' },
+          { type: 'tool', toolId: 'some-tool' },
+        ],
+      };
+
+      const context = createHookContext({ toolHandlerContext });
+
+      await loadSkillToolsAfterReadWithTelemetry(context);
+
+      expect(analyticsService.reportSkillInvoked).toHaveBeenCalledWith({
+        skillId: 'security-skill',
+        origin: 'builtin',
+        solutionArea: 'security',
+        pluginId: undefined,
+        agentId: 'my_agent',
+        conversationId: 'conv-1',
+        executionId: 'exec-1',
+        toolCount: 0,
+      });
+    });
+
+    it('passes the actual tool count (inline + registry) to reportSkillInvoked', async () => {
+      const inlineTool = { id: 'inline-1', type: ToolType.builtin } as SkillBoundedTool;
+      const convertedInline = { id: 'inline-1-converted' } as any;
+      const registryTool = { id: 'registry-1' } as any;
+
+      const skill = createMockSkill({
+        getInlineTools: jest.fn().mockReturnValue([inlineTool]),
+        getRegistryTools: jest.fn().mockReturnValue(['registry-1']),
+      });
+
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
+      toolHandlerContext.skills.get.mockResolvedValue(skill);
+      toolHandlerContext.skills.convertSkillTool.mockReturnValue(convertedInline);
+      toolHandlerContext.toolProvider.list.mockResolvedValue([registryTool]);
+
+      const context = createHookContext({ toolHandlerContext });
+
+      await loadSkillToolsAfterReadWithTelemetry(context);
+
+      expect(analyticsService.reportSkillInvoked).toHaveBeenCalledWith(
+        expect.objectContaining({ toolCount: 2 })
+      );
+    });
+
+    it('passes pluginId for plugin-backed skills', async () => {
+      const skill = createMockSkill({
+        id: 'my-plugin-skill',
+        readonly: false,
+        plugin_id: 'plugin-uuid-1',
+        basePath: '/skills/my-plugin',
+      });
+
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(
+        createSkillFileEntry({ skillId: 'my-plugin-skill' })
+      );
+      toolHandlerContext.skills.get.mockResolvedValue(skill);
+
+      const context = createHookContext({ toolHandlerContext });
+
+      await loadSkillToolsAfterReadWithTelemetry(context);
+
+      expect(analyticsService.reportSkillInvoked).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skillId: 'my-plugin-skill',
+          origin: 'plugin',
+          solutionArea: 'plugin',
+          pluginId: 'plugin-uuid-1',
+        })
+      );
+      expect(trackingService.trackSkillInvocation).toHaveBeenCalledWith('plugin');
+    });
+
+    it('calls trackSkillInvocation with the correct origin when a skill is invoked', async () => {
+      const skill = createMockSkill({
+        id: 'security-skill',
+        readonly: true,
+        basePath: 'skills/security/foo',
+        getInlineTools: jest.fn().mockReturnValue([]),
+        getRegistryTools: jest.fn().mockReturnValue([]),
+      });
+
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(
+        createSkillFileEntry({ skillId: 'security-skill' })
+      );
+      toolHandlerContext.skills.get.mockResolvedValue(skill);
+      toolHandlerContext.runContext = {
+        runId: 'run-1',
+        stack: [
+          { type: 'agent', agentId: 'my_agent', conversationId: 'conv-1', executionId: 'exec-1' },
+        ],
+      };
+
+      const context = createHookContext({ toolHandlerContext });
+
+      await loadSkillToolsAfterReadWithTelemetry(context);
+
+      expect(trackingService.trackSkillInvocation).toHaveBeenCalledTimes(1);
+      expect(trackingService.trackSkillInvocation).toHaveBeenCalledWith('builtin');
+    });
+
+    it('does not call trackSkillInvocation when no tracking service is provided', async () => {
+      const loadSkillToolsAfterReadAnalyticsOnly = createLoadSkillToolsAfterRead({
+        analyticsService: analyticsService as unknown as AnalyticsService,
+      });
+
+      const skill = createMockSkill();
+
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
+      toolHandlerContext.skills.get.mockResolvedValue(skill);
+
+      const context = createHookContext({ toolHandlerContext });
+
+      await loadSkillToolsAfterReadAnalyticsOnly(context);
+
+      expect(trackingService.trackSkillInvocation).not.toHaveBeenCalled();
+    });
+
+    it('does not report telemetry when no analytics service is provided', async () => {
+      const skill = createMockSkill();
+
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
+      toolHandlerContext.skills.get.mockResolvedValue(skill);
+
+      const context = createHookContext({ toolHandlerContext });
+
+      await loadSkillToolsAfterRead(context);
+
+      expect(analyticsService.reportSkillInvoked).not.toHaveBeenCalled();
+    });
+
+    it('does not throw and warns when reportSkillInvoked throws', async () => {
+      const skill = createMockSkill();
+
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
+      toolHandlerContext.skills.get.mockResolvedValue(skill);
+      analyticsService.reportSkillInvoked.mockImplementation(() => {
+        throw new Error('boom');
+      });
+
+      const context = createHookContext({ toolHandlerContext });
+
+      await expect(loadSkillToolsAfterReadWithTelemetry(context)).resolves.not.toThrow();
+      expect(toolHandlerContext.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to report SkillInvoked telemetry')
+      );
+      // Tools were still added even though telemetry failed.
+      expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalled();
+      expect(trackingService.trackSkillInvocation).not.toHaveBeenCalled();
     });
   });
 
@@ -351,7 +551,7 @@ describe('loadSkillToolsAfterRead', () => {
         },
       };
 
-      toolHandlerContext.filestore.read.mockResolvedValue(refContentEntry);
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(refContentEntry);
 
       const context = createHookContext({ toolHandlerContext });
 
@@ -359,6 +559,72 @@ describe('loadSkillToolsAfterRead', () => {
 
       expect(toolHandlerContext.skills.get).not.toHaveBeenCalled();
       expect(toolHandlerContext.toolManager.addTools).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('with dynamic tools enabled', () => {
+    const inlineTool = { id: 'inline-1', type: ToolType.builtin } as SkillBoundedTool;
+    const convertedInline = {
+      id: 'inline-1',
+      description: 'Inline tool',
+      getSchema: () => z.object({ query: z.string() }),
+    } as any;
+    const fileResult = { tool_result_id: 'r-1', type: 'other' as const, data: { body: 'skill' } };
+
+    beforeEach(() => {
+      toolHandlerContext.experimentalFeatures.dynamicTools = true;
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
+      toolHandlerContext.skills.get.mockResolvedValue(
+        createMockSkill({ getInlineTools: jest.fn().mockReturnValue([inlineTool]) })
+      );
+      toolHandlerContext.skills.convertSkillTool.mockReturnValue(convertedInline);
+    });
+
+    it('registers the tools as dynamic tools and appends their definitions to the result', async () => {
+      const context = createHookContext({ toolHandlerContext });
+      context.toolReturn = { results: [fileResult] };
+
+      const hookResult = await loadSkillToolsAfterRead(context);
+
+      expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledTimes(1);
+      expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith({
+        type: ToolManagerToolType.dynamic,
+        tools: [{ ...convertedInline, origin: ToolOrigin.inline }],
+      });
+      expect(hookResult).toEqual({
+        toolReturn: {
+          results: [
+            fileResult,
+            expect.objectContaining({
+              type: 'other',
+              data: {
+                dynamic_tools: [
+                  {
+                    tool_id: 'inline-1',
+                    description: 'Inline tool',
+                    parameters: expect.objectContaining({ required: ['query'] }),
+                  },
+                ],
+              },
+            }),
+          ],
+        },
+      });
+    });
+
+    it('leaves the result alone when the skill has no tools', async () => {
+      toolHandlerContext.skills.get.mockResolvedValue(createMockSkill());
+      const context = createHookContext({ toolHandlerContext });
+      context.toolReturn = { results: [fileResult] };
+
+      await expect(loadSkillToolsAfterRead(context)).resolves.toBeUndefined();
+    });
+
+    it('leaves a prompt return alone', async () => {
+      const context = createHookContext({ toolHandlerContext });
+      context.toolReturn = { prompt: {} as any };
+
+      await expect(loadSkillToolsAfterRead(context)).resolves.toBeUndefined();
     });
   });
 });

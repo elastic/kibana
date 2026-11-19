@@ -109,7 +109,7 @@ describe('useUpdateCloudConnector', () => {
     });
 
     expect(mockToasts.addSuccess).toHaveBeenCalledWith({
-      title: 'Cloud connector updated successfully',
+      title: 'Federated identity updated successfully',
     });
   });
 
@@ -157,7 +157,7 @@ describe('useUpdateCloudConnector', () => {
     expect(mockToasts.addError).toHaveBeenCalledTimes(1);
     const [errorArg, optionsArg] = mockToasts.addError.mock.calls[0];
     expect(errorArg.message).toBe(serverErrorMessage);
-    expect(optionsArg.title).toBe('Failed to update cloud connector');
+    expect(optionsArg.title).toBe('Failed to update federated identity');
   });
 
   it('should fallback to original error when body.message is not available', async () => {
@@ -177,7 +177,7 @@ describe('useUpdateCloudConnector', () => {
     expect(mockToasts.addError).toHaveBeenCalledTimes(1);
     const [errorArg, optionsArg] = mockToasts.addError.mock.calls[0];
     expect(errorArg.message).toBe('Network error');
-    expect(optionsArg.title).toBe('Failed to update cloud connector');
+    expect(optionsArg.title).toBe('Failed to update federated identity');
   });
 
   it('should call onError callback on failure', async () => {

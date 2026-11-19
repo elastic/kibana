@@ -14,6 +14,8 @@ import type { TimelineProps } from './types';
 import * as i18n from './translations';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useUserPrivileges } from '../../../user_privileges';
+import { useIsInSecurityApp } from '../../../../hooks/is_in_security_app';
+import { useOpenTimelineInNewTab } from '../../../../hooks/timeline/use_open_timeline_in_new_tab';
 
 export const TimelineMarkDownRendererComponent: React.FC<TimelineProps> = ({ id, title }) => {
   const { addError } = useAppToasts();
@@ -24,7 +26,9 @@ export const TimelineMarkDownRendererComponent: React.FC<TimelineProps> = ({ id,
   } = useUserPrivileges();
   const isDisabled = !!interactionsUpsellingMessage || !canReadTimelines;
 
+  const isInSecurityApp = useIsInSecurityApp();
   const handleTimelineClick = useTimelineClick();
+  const { openSavedTimelineInNewTab } = useOpenTimelineInNewTab();
 
   const onError = useCallback(
     (error: Error, timelineId: string) => {
@@ -36,10 +40,15 @@ export const TimelineMarkDownRendererComponent: React.FC<TimelineProps> = ({ id,
     [addError]
   );
 
-  const onClickTimeline = useCallback(
-    () => handleTimelineClick(id ?? '', onError),
-    [id, handleTimelineClick, onError]
-  );
+  const onClickTimeline = useCallback(() => {
+    // Outside of the Security Solution app (e.g. in Discover) the in-app timeline is not mounted, so
+    // open the timeline in a new Security Solution tab instead.
+    if (!isInSecurityApp) {
+      openSavedTimelineInNewTab(id ?? '');
+      return;
+    }
+    handleTimelineClick(id ?? '', onError);
+  }, [isInSecurityApp, openSavedTimelineInNewTab, handleTimelineClick, id, onError]);
   return (
     <EuiToolTip content={interactionsUpsellingMessage ?? i18n.TIMELINE_ID(id ?? '')}>
       <EuiLink

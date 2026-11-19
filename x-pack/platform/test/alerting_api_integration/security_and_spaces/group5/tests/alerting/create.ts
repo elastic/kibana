@@ -445,7 +445,8 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: '[request body.name]: expected value of type [string] but got [undefined]',
+                message:
+                  '[request body]: types that failed validation:\n- [request body.0]: "rule_type_id" property is required\n- [request body.1.name]: expected value of type [string] but got [undefined]',
               });
               break;
             default:
@@ -510,11 +511,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'space_1_all_with_restricted_fixture at space1':
             case 'system_actions at space1':
               expect(response.statusCode).to.eql(400);
-              expect(response.body).to.eql({
-                error: 'Bad Request',
-                message: '[request body.schedule.interval]: string is not a valid duration: 10x',
-                statusCode: 400,
-              });
+              expect(response.body.statusCode).to.eql(400);
+              expect(response.body.error).to.eql('Bad Request');
+              expect(response.body.message).to.contain('string is not a valid duration: 10x');
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -538,11 +537,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'space_1_all_with_restricted_fixture at space1':
             case 'system_actions at space1':
               expect(response.statusCode).to.eql(400);
-              expect(response.body).to.eql({
-                error: 'Bad Request',
-                message: '[request body.schedule.interval]: string is not a valid duration: 0s',
-                statusCode: 400,
-              });
+              expect(response.body.statusCode).to.eql(400);
+              expect(response.body.error).to.eql('Bad Request');
+              expect(response.body.message).to.contain('string is not a valid duration: 0s');
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -736,6 +733,41 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         const response = await alertUtils.createInternallyManagedRule(objectRemover);
 
         expect(response.statusCode).to.eql(400);
+      });
+    });
+
+    describe('rule type params authorization', () => {
+      const { user, space } = SuperuserAtSpace1;
+
+      it('creates the rule when the rule type params authorization passes', async () => {
+        const response = await supertestWithoutAuth
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send(getTestRuleData({ rule_type_id: 'test.validation', params: { param1: 'test' } }));
+
+        expect(response.statusCode).to.eql(200);
+        objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
+      });
+
+      it('rejects the rule when the rule type params authorization throws', async () => {
+        const response = await supertestWithoutAuth
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.validation',
+              params: { param1: 'test', param2: true },
+            })
+          );
+
+        expect(response.statusCode).to.eql(403);
+        expect(response.body).to.eql({
+          error: 'Forbidden',
+          message: 'Not authorized to set param2',
+          statusCode: 403,
+        });
       });
     });
   });

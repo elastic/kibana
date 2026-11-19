@@ -11,7 +11,8 @@
           "id": "serviceaccount@example.com"
         },
         "email": "serviceaccount@example.com",
-        "name": "Service Account"
+        "name": "Service Account",
+        "id": "serviceaccount@example.com"
       },
       "client": {
         "user": {
@@ -285,7 +286,14 @@
         ]
       },
       "service": {
-        "name": "iam.googleapis.com"
+        "name": "iam.googleapis.com",
+        "target": {
+          "name": [
+            "TargetService1",
+            "TargetService2",
+            "TargetService3"
+          ]
+        }
       },
       "entity": {
         "target": {
@@ -325,7 +333,7 @@
         "entity": {
           "id": "api-service@your-project-id.iam.gserviceaccount.com"
         },
-        "name": "iam.googleapis.com"
+        "name": "ApiServiceAccount"
       },
       "client": {
         "user": {
@@ -384,7 +392,8 @@
         "target": {
           "entity": {
             "id": ["host-instance-1", "host-instance-2"]
-          }
+          },
+          "id": ["host-instance-1", "host-instance-2"]
         }
       },
       "kibana.alert.ancestors": [

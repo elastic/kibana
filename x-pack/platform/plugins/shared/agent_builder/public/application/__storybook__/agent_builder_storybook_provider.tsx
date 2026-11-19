@@ -1,0 +1,74 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState } from 'react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
+import { AgentBuilderServicesContext } from '../context/agent_builder_services_context';
+import { StreamingProvider } from '../context/streaming/streaming_context';
+import { CanvasProvider } from '../components/conversations/timeline/response/attachments/canvas_context';
+import { ConversationStreamService } from '../../services/events';
+import { FakeConversationProvider } from './fake_conversation_provider';
+import { createStorybookKibanaServices } from './kibana_services';
+import { createStorybookAgentBuilderServices } from './agent_builder_services';
+import type { AgentBuilderInternalService } from '../../services/types';
+import type { StartServices } from '../hooks/use_kibana';
+
+const createQueryClient = () =>
+  new QueryClient({
+    defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false } },
+  });
+
+const defaultKibanaServices = createStorybookKibanaServices();
+const defaultAgentBuilderServices = createStorybookAgentBuilderServices();
+const storybookStreamService = new ConversationStreamService();
+
+export interface AgentBuilderStorybookProviderProps {
+  children: React.ReactNode;
+  conversationId?: string;
+  agentId?: string;
+  initialAttachments?: ConversationAttachment[];
+  services?: Partial<AgentBuilderInternalService>;
+  kibanaServices?: Partial<StartServices>;
+}
+
+export const AgentBuilderStorybookProvider: React.FC<AgentBuilderStorybookProviderProps> = ({
+  children,
+  conversationId,
+  agentId,
+  initialAttachments,
+  services,
+  kibanaServices,
+}) => {
+  const mergedServices = services
+    ? createStorybookAgentBuilderServices(services)
+    : defaultAgentBuilderServices;
+  const mergedKibanaServices = kibanaServices
+    ? { ...defaultKibanaServices, ...kibanaServices }
+    : defaultKibanaServices;
+  // One cache per story, so data does not leak between stories
+  const [queryClient] = useState(createQueryClient);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <KibanaContextProvider services={mergedKibanaServices}>
+        <AgentBuilderServicesContext.Provider value={mergedServices}>
+          <StreamingProvider conversationStreamService={storybookStreamService}>
+            <FakeConversationProvider
+              conversationId={conversationId}
+              agentId={agentId}
+              initialAttachments={initialAttachments}
+            >
+              <CanvasProvider>{children}</CanvasProvider>
+            </FakeConversationProvider>
+          </StreamingProvider>
+        </AgentBuilderServicesContext.Provider>
+      </KibanaContextProvider>
+    </QueryClientProvider>
+  );
+};

@@ -7,7 +7,11 @@
 
 import { TOASTER } from '../screens/alerts_detection_rules';
 import { KQL_INPUT, openNavigationPanelFor, REFRESH_BUTTON } from '../screens/security_header';
-import { openNavigationPanelFor as openServerlessNavigationPanelFor } from '../screens/serverless_security_header';
+import { GLOBAL_SEARCH_BAR_QUERY_INPUT } from '../screens/search_bar';
+import {
+  clickServerlessChromeNavControl,
+  openNavigationPanelFor as openServerlessNavigationPanelFor,
+} from '../screens/serverless_security_header';
 
 export const clearSearchBar = () => {
   cy.get(KQL_INPUT()).clear();
@@ -18,13 +22,28 @@ export const kqlSearch = (search: string, dataTestSubj?: string) => {
   cy.get(KQL_INPUT(dataTestSubj)).type(search, { force: true });
 };
 
+export const clearGlobalSearchBar = () => {
+  cy.get(GLOBAL_SEARCH_BAR_QUERY_INPUT).clear();
+  cy.get(GLOBAL_SEARCH_BAR_QUERY_INPUT).realPress('Enter');
+};
+
+export const kqlSearchGlobalBar = (search: string) => {
+  cy.get(GLOBAL_SEARCH_BAR_QUERY_INPUT).type(search, { force: true });
+};
+
 export const navigateFromHeaderTo = (page: string, isServerless: boolean = false) => {
   if (isServerless) {
     openServerlessNavigationPanelFor(page);
+    clickServerlessChromeNavControl(page);
   } else {
     openNavigationPanelFor(page);
+    cy.get(page).click();
   }
-  cy.get(page).click();
+};
+
+export const verifyNavigatesFromDashboardLandingTo = (dashboardId: string, URL: string) => {
+  cy.get(`[data-test-subj="LandingImageCard-item-${dashboardId}"]`).click();
+  cy.url().should('include', URL);
 };
 
 export const refreshPage = () => {

@@ -15,12 +15,18 @@ import type { XYVisualizationState, XYAnnotationLayerConfig, XYDataLayerConfig }
 import { visualizationSubtypes } from './types';
 import { generateId } from '../../id_generator';
 import { type PaletteOutput, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import { KbnPalette } from '@kbn/palettes';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { getVisualizationSubtypeId } from './visualization_helpers';
 
 jest.mock('../../id_generator');
 
 describe('xy_suggestions', () => {
+  const DEFAULT_LINE_COLOR_MAPPING_CONFIG = {
+    ...DEFAULT_COLOR_MAPPING_CONFIG,
+    paletteId: KbnPalette.ElasticLineOptimized,
+  };
+
   function numCol(columnId: string): TableSuggestionColumn {
     return {
       columnId,
@@ -77,6 +83,18 @@ describe('xy_suggestions', () => {
         isBucketed: true,
         label: `${columnId} histogram`,
         scale: 'interval',
+      },
+    };
+  }
+
+  function numberRangeCol(columnId: string): TableSuggestionColumn {
+    return {
+      columnId,
+      operation: {
+        dataType: 'number_range',
+        label: `${columnId} range`,
+        isBucketed: true,
+        scale: 'ordinal',
       },
     };
   }
@@ -631,6 +649,76 @@ describe('xy_suggestions', () => {
     `);
   });
 
+  test.each(['textBased', 'formBased'])(
+    'defaults a new %s XY chart legend to bottom list',
+    (datasourceId) => {
+      const [suggestion] = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('price'), dateCol('date')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+        keptLayerIds: [],
+        datasourceId,
+      });
+
+      expect(suggestion.state.legend).toEqual({
+        isVisible: true,
+        position: 'bottom',
+        layout: 'list',
+      });
+    }
+  );
+
+  test('uses the default legend for a new XY chart', () => {
+    const [suggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+      datasourceId: 'textBased',
+      defaultOverrides: { legend: { isVisible: true, position: 'right' } },
+    });
+
+    expect(suggestion.state.legend).toEqual({ isVisible: true, position: 'right' });
+  });
+
+  test('keeps the current legend over the default legend', () => {
+    const currentState: XYVisualizationState = {
+      legend: { isVisible: false, position: 'left' },
+      valueLabels: 'hide',
+      preferredSeriesType: 'bar',
+      layers: [
+        {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          seriesType: 'bar',
+          xAccessor: 'date',
+          accessors: ['price'],
+        },
+      ],
+    };
+
+    const [suggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      state: currentState,
+      keptLayerIds: ['first'],
+      datasourceId: 'textBased',
+      defaultOverrides: { legend: { isVisible: true, position: 'right' } },
+    });
+
+    expect(suggestion.state.legend).toEqual({ isVisible: false, position: 'left' });
+  });
+
   test('suggests a split x y chart with date on x', () => {
     const [suggestion, ...rest] = getSuggestions({
       table: {
@@ -1137,7 +1225,7 @@ describe('xy_suggestions', () => {
         {
           ...currentState.layers[0],
           seriesType: 'line',
-          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+          colorMapping: DEFAULT_LINE_COLOR_MAPPING_CONFIG,
         },
       ],
     });
@@ -1184,7 +1272,7 @@ describe('xy_suggestions', () => {
         {
           ...currentState.layers[0],
           seriesType: 'line',
-          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+          colorMapping: DEFAULT_LINE_COLOR_MAPPING_CONFIG,
         },
       ],
     });
@@ -1680,6 +1768,317 @@ describe('xy_suggestions', () => {
 
       expect(suggestions).toHaveLength(1);
       expect(suggestions[0].state.preferredSeriesType).toBe('bar_stacked');
+    });
+  });
+
+  describe('areaFill', () => {
+    const bytesOverTimeTable: TableSuggestion = {
+      isMultiRow: true,
+      columns: [numCol('bytes'), dateCol('date')],
+      layerId: 'first',
+      changeType: 'unchanged',
+    };
+
+    const getAreaSuggestion = (areaFill?: XYVisualizationState['areaFill']) =>
+      getSuggestions({
+        table: bytesOverTimeTable,
+        keptLayerIds: ['first'],
+        subVisualizationId: 'area',
+        state: {
+          legend: { isVisible: true, position: 'bottom' },
+          valueLabels: 'hide',
+          preferredSeriesType: 'bar',
+          areaFill,
+          layers: [
+            {
+              layerId: 'first',
+              layerType: LayerTypes.DATA,
+              seriesType: 'bar',
+              xAccessor: 'date',
+              accessors: ['bytes'],
+            },
+          ],
+        },
+      }).find(({ state }) => getVisualizationSubtypeId(state) === 'area');
+
+    test('applies the default areaFill when suggesting area from a chart without one', () => {
+      expect(getAreaSuggestion()?.state.areaFill).toBe('gradient');
+    });
+
+    test('keeps the current chart areaFill when suggesting area', () => {
+      expect(getAreaSuggestion('solid')?.state.areaFill).toBe('solid');
+    });
+
+    test('does not add an areaFill to non-area suggestions', () => {
+      const [suggestion] = getSuggestions({
+        table: bytesOverTimeTable,
+        keptLayerIds: [],
+      });
+
+      expect(getVisualizationSubtypeId(suggestion.state)).toBe('bar_stacked');
+      expect(suggestion.state.areaFill).toBeUndefined();
+    });
+  });
+
+  describe('preserves chart-level config when columns change', () => {
+    test('preserves legend, axis titles, fitting function, and other chart-level settings', () => {
+      const currentState: XYVisualizationState = {
+        legend: { isVisible: false, position: 'bottom' },
+        valueLabels: 'show',
+        preferredSeriesType: 'line',
+        fittingFunction: 'Carry',
+        curveType: 'CURVE_MONOTONE_X',
+        fillOpacity: 0.3,
+        areaFill: 'solid',
+        xTitle: 'Custom X',
+        yTitle: 'Custom Y',
+        yRightTitle: 'Custom Y Right',
+        hideEndzones: true,
+        showCurrentTimeMarker: true,
+        yLeftExtent: { mode: 'custom', lowerBound: 0, upperBound: 100 },
+        yRightExtent: { mode: 'full' },
+        yLeftScale: 'log',
+        yRightScale: 'sqrt',
+        axisTitlesVisibilitySettings: { x: false, yLeft: false, yRight: false },
+        tickLabelsVisibilitySettings: { x: false, yLeft: true, yRight: false },
+        labelsOrientation: { x: -90, yLeft: -45, yRight: 0 },
+        gridlinesVisibilitySettings: { x: false, yLeft: false, yRight: true },
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'line',
+            xAccessor: 'date',
+            accessors: ['avgBytes'],
+            splitAccessors: undefined,
+          },
+        ],
+      };
+
+      // Simulate a column change: table now has different accessor IDs
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('maxBytes'), dateCol('timestamp')],
+          layerId: 'first',
+          changeType: 'extended',
+        },
+        keptLayerIds: ['first'],
+        state: currentState,
+      });
+
+      expect(suggestions.length).toBeGreaterThan(0);
+      const suggestion = suggestions[0];
+
+      // Chart-level settings should be preserved from currentState
+      expect(suggestion.state.legend).toEqual({ isVisible: false, position: 'bottom' });
+      expect(suggestion.state.valueLabels).toBe('show');
+      expect(suggestion.state.fittingFunction).toBe('Carry');
+      expect(suggestion.state.curveType).toBe('CURVE_MONOTONE_X');
+      expect(suggestion.state.fillOpacity).toBe(0.3);
+      expect(suggestion.state.areaFill).toBe('solid');
+      expect(suggestion.state.xTitle).toBe('Custom X');
+      expect(suggestion.state.yTitle).toBe('Custom Y');
+      expect(suggestion.state.yRightTitle).toBe('Custom Y Right');
+      expect(suggestion.state.hideEndzones).toBe(true);
+      expect(suggestion.state.showCurrentTimeMarker).toBe(true);
+      expect(suggestion.state.yLeftExtent).toEqual({
+        mode: 'custom',
+        lowerBound: 0,
+        upperBound: 100,
+      });
+      expect(suggestion.state.yRightExtent).toEqual({ mode: 'full' });
+      expect(suggestion.state.yLeftScale).toBe('log');
+      expect(suggestion.state.yRightScale).toBe('sqrt');
+      expect(suggestion.state.axisTitlesVisibilitySettings).toEqual({
+        x: false,
+        yLeft: false,
+        yRight: false,
+      });
+      expect(suggestion.state.tickLabelsVisibilitySettings).toEqual({
+        x: false,
+        yLeft: true,
+        yRight: false,
+      });
+      expect(suggestion.state.labelsOrientation).toEqual({ x: -90, yLeft: -45, yRight: 0 });
+      expect(suggestion.state.gridlinesVisibilitySettings).toEqual({
+        x: false,
+        yLeft: false,
+        yRight: true,
+      });
+
+      // Column-dependent layer config should use the new columns, not the old ones
+      const dataLayer = suggestion.state.layers[0] as XYDataLayerConfig;
+      expect(dataLayer.accessors).toContain('maxBytes');
+      expect(dataLayer.xAccessor).toBe('timestamp');
+    });
+
+    test('preserves chart-level settings when columns are added', () => {
+      const currentState: XYVisualizationState = {
+        legend: { isVisible: false, position: 'left' },
+        valueLabels: 'show',
+        preferredSeriesType: 'area',
+        axisTitlesVisibilitySettings: { x: false, yLeft: false, yRight: true },
+        tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: true },
+        labelsOrientation: { x: 0, yLeft: -90, yRight: 0 },
+        gridlinesVisibilitySettings: { x: true, yLeft: false, yRight: false },
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'area',
+            xAccessor: 'date',
+            accessors: ['bytes'],
+            splitAccessors: undefined,
+          },
+        ],
+      };
+
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('bytes'), numCol('memory'), dateCol('date')],
+          layerId: 'first',
+          changeType: 'extended',
+        },
+        keptLayerIds: ['first'],
+        state: currentState,
+      });
+
+      expect(suggestions.length).toBeGreaterThan(0);
+      const suggestion = suggestions[0];
+
+      expect(suggestion.state.legend).toEqual({ isVisible: false, position: 'left' });
+      expect(suggestion.state.axisTitlesVisibilitySettings).toEqual({
+        x: false,
+        yLeft: false,
+        yRight: true,
+      });
+      expect(suggestion.state.tickLabelsVisibilitySettings).toEqual({
+        x: true,
+        yLeft: false,
+        yRight: true,
+      });
+
+      const dataLayer = suggestion.state.layers[0] as XYDataLayerConfig;
+      expect(dataLayer.accessors).toEqual(expect.arrayContaining(['bytes', 'memory']));
+    });
+
+    test('preserves chart-level settings for textBased datasource with isMultiRow: false', () => {
+      const currentState: XYVisualizationState = {
+        legend: { isVisible: false, position: 'bottom' },
+        valueLabels: 'show',
+        preferredSeriesType: 'line',
+        fittingFunction: 'Carry',
+        xTitle: 'Custom X',
+        yTitle: 'Custom Y',
+        yRightTitle: 'Custom Y Right',
+        axisTitlesVisibilitySettings: { x: false, yLeft: false, yRight: true },
+        tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: true },
+        labelsOrientation: { x: 0, yLeft: -90, yRight: 0 },
+        gridlinesVisibilitySettings: { x: true, yLeft: false, yRight: false },
+        layers: [
+          {
+            layerId: 'oldLayer',
+            layerType: LayerTypes.DATA,
+            seriesType: 'line',
+            xAccessor: 'timestamp',
+            accessors: ['avgBytes'],
+            splitAccessors: undefined,
+          },
+        ],
+      };
+
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: false,
+          columns: [numCol('maxBytes'), dateCol('date')],
+          layerId: 'newLayer',
+          changeType: 'initial',
+        },
+        keptLayerIds: ['newLayer'],
+        state: currentState,
+        datasourceId: 'textBased',
+      });
+
+      expect(suggestions.length).toBeGreaterThan(0);
+      const suggestion = suggestions[0];
+
+      expect(suggestion.state.legend).toEqual({ isVisible: false, position: 'bottom' });
+      expect(suggestion.state.valueLabels).toBe('show');
+      expect(suggestion.state.fittingFunction).toBe('Carry');
+      expect(suggestion.state.xTitle).toBe('Custom X');
+      expect(suggestion.state.yTitle).toBe('Custom Y');
+      expect(suggestion.state.yRightTitle).toBe('Custom Y Right');
+      expect(suggestion.state.preferredSeriesType).toBe('line');
+
+      const dataLayer = suggestion.state.layers[0] as XYDataLayerConfig;
+      expect(dataLayer.accessors).toContain('maxBytes');
+      expect(dataLayer.xAccessor).toBe('date');
+    });
+
+    test('preserves seriesType from existing data layers when layerId changes', () => {
+      const currentState: XYVisualizationState = {
+        legend: { isVisible: true, position: 'right' },
+        valueLabels: 'hide',
+        // Simulate a state where seriesType is stored on the layer (horizontal bars),
+        // but the preferredSeriesType doesn't include the horizontal orientation.
+        preferredSeriesType: 'bar_stacked',
+        layers: [
+          {
+            layerId: 'oldLayer',
+            layerType: LayerTypes.DATA,
+            seriesType: 'bar_horizontal_stacked',
+            xAccessor: 'date',
+            accessors: ['metric'],
+            splitAccessors: undefined,
+          },
+        ],
+      };
+
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('newMetric'), dateCol('newDate')],
+          layerId: 'newLayer',
+          changeType: 'extended',
+        },
+        keptLayerIds: ['newLayer'],
+        state: currentState,
+      });
+
+      expect(suggestions.length).toBeGreaterThan(0);
+      const suggestion = suggestions[0];
+
+      expect(suggestion.state.preferredSeriesType).toBe('bar_horizontal_stacked');
+      const dataLayer = suggestion.state.layers[0] as XYDataLayerConfig;
+      expect(dataLayer.seriesType).toBe('bar_horizontal_stacked');
+    });
+  });
+
+  describe('number_range buckets', () => {
+    const getVisibleSuggestions = (columns: TableSuggestionColumn[]) =>
+      getSuggestions({
+        table: { isMultiRow: true, columns, layerId: 'first', changeType: 'unchanged' },
+        keptLayerIds: [],
+        datasourceId: 'textBased',
+      }).filter((suggestion) => !suggestion.hide);
+
+    test('hides suggestions for a range over time, a heatmap fits better', () => {
+      expect(
+        getVisibleSuggestions([numCol('count'), numberRangeCol('bucket'), dateCol('date')])
+      ).toHaveLength(0);
+    });
+
+    test('shows suggestions for a range over time with another bucket', () => {
+      expect(
+        getVisibleSuggestions([
+          numCol('count'),
+          numberRangeCol('bucket'),
+          dateCol('date'),
+          strCol('host'),
+        ]).length
+      ).toBeGreaterThan(0);
     });
   });
 });

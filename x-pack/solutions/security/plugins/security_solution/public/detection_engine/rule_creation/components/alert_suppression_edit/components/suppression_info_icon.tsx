@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiLink, EuiPopover, EuiText, EuiToolTip } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -22,15 +22,25 @@ export function SuppressionInfoIcon(): JSX.Element {
   const { docLinks } = useKibana().services;
 
   const button = (
-    <EuiButtonIcon
-      iconType="question"
-      onClick={togglePopover}
-      aria-label={ALERT_SUPPRESSION_MISSING_FIELDS_HELP_ARIA_LABEL}
-    />
+    <EuiToolTip
+      content={ALERT_SUPPRESSION_MISSING_FIELDS_HELP_ARIA_LABEL}
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="question"
+        onClick={togglePopover}
+        aria-label={ALERT_SUPPRESSION_MISSING_FIELDS_HELP_ARIA_LABEL}
+      />
+    </EuiToolTip>
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      aria-label={ALERT_SUPPRESSION_MISSING_FIELDS_HELP_ARIA_LABEL}
+    >
       <EuiText css={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsTooltipContent"

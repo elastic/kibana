@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, {
+  useState,
+  useMemo,
+  isValidElement,
+  Children,
+  type ReactNode,
+  type ReactElement,
+} from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -30,6 +37,31 @@ import type { PreviewState } from '../types';
 import { useStateSelector } from '../../../state_utils';
 import { ITEM_HEIGHT } from './constants';
 
+/**
+ * Recursively checks if a ReactNode tree contains an img element.
+ */
+const containsImgElement = (node: ReactNode): boolean => {
+  if (Array.isArray(node)) {
+    return node.some(containsImgElement);
+  }
+
+  if (!isValidElement(node)) {
+    return false;
+  }
+
+  const element = node as ReactElement;
+  if (element.type === 'img') {
+    return true;
+  }
+
+  const { children } = element.props;
+  if (children) {
+    return Children.toArray(children).some(containsImgElement);
+  }
+
+  return false;
+};
+
 export interface PreviewListItemProps {
   field: DocumentField;
   toggleIsPinned?: (
@@ -39,6 +71,8 @@ export interface PreviewListItemProps {
   hasScriptError?: boolean;
   /** Indicates whether the field list item comes from the Painless script */
   isFromScript?: boolean;
+  /** Display label of the field, falls back to the field key when not set */
+  label?: string;
 }
 
 const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
@@ -48,6 +82,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
   toggleIsPinned,
   hasScriptError,
   isFromScript = false,
+  label,
 }) => {
   const styles = useMemoCss(componentStyles);
 
@@ -63,7 +98,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
   const showPinIcon = isPinHovered || isPinFocused || isPinned;
 
-  const doesContainImage = formattedValue?.includes('<img');
+  const doesContainImage = useMemo(() => containsImgElement(formattedValue), [formattedValue]);
 
   const renderName = () => {
     if (isFromScript && !Boolean(key)) {
@@ -78,7 +113,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
       );
     }
 
-    return key;
+    return label ?? key;
   };
 
   const withTooltip = (content: JSX.Element) => (
@@ -135,13 +170,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
     }
 
     if (formattedValue !== undefined) {
-      return withTooltip(
-        <span
-          css={styles.keyAndValueWrapper}
-          // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
-          dangerouslySetInnerHTML={{ __html: formattedValue! }} // eslint-disable-line react/no-danger
-        />
-      );
+      return withTooltip(<span css={styles.keyAndValueWrapper}>{formattedValue}</span>);
     }
 
     return withTooltip(<span css={styles.keyAndValueWrapper}>{JSON.stringify(value)}</span>);
@@ -167,30 +196,37 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
         <EuiFlexItem css={styles.actions} grow={false}>
           {toggleIsPinned && (
-            <EuiButtonIcon
-              onClick={(e: { detail: number }) => {
-                const isKeyboardEvent = e.detail === 0; // Mouse = non-zero, Keyboard = 0
-                toggleIsPinned(key, { isKeyboardEvent, buttonId: pinButtonId });
-              }}
-              id={pinButtonId}
-              onFocus={() => setIsPinFocused(true)}
-              onBlur={() => setIsPinFocused(false)}
-              color="text"
-              iconType={showPinIcon ? 'pinFilled' : 'empty'}
-              data-test-subj="pinFieldButton"
-              aria-label={i18n.translate(
-                'indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel',
-                {
-                  defaultMessage: 'Pin field',
-                }
-              )}
-            />
+            <EuiToolTip
+              content={i18n.translate('indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel', {
+                defaultMessage: 'Pin field',
+              })}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                onClick={(e: { detail: number }) => {
+                  const isKeyboardEvent = e.detail === 0; // Mouse = non-zero, Keyboard = 0
+                  toggleIsPinned(key, { isKeyboardEvent, buttonId: pinButtonId });
+                }}
+                id={pinButtonId}
+                onFocus={() => setIsPinFocused(true)}
+                onBlur={() => setIsPinFocused(false)}
+                color="text"
+                iconType={showPinIcon ? 'pinFill' : 'empty'}
+                data-test-subj="pinFieldButton"
+                aria-label={i18n.translate(
+                  'indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel',
+                  {
+                    defaultMessage: 'Pin field',
+                  }
+                )}
+              />
+            </EuiToolTip>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
       {isPreviewImageModalVisible && (
         <ImagePreviewModal
-          imgHTML={formattedValue!}
+          imgElement={formattedValue}
           closeModal={() => setIsPreviewImageModalVisible(false)}
         />
       )}

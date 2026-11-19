@@ -19,6 +19,7 @@ import { EventOutcome } from '../../../../common/event_outcome';
 import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import type { Coordinate } from '../../../../typings/timeseries';
+import { nullifyEmptyRedMetricPoints } from '../../../../common/utils/red_metric_value_for_histogram_bucket';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getBackwardCompatibleDocumentTypeFilter,
@@ -168,21 +169,33 @@ export async function getServiceInstancesTransactionStatistics<T extends true | 
         const { timeseries } = serviceNodeBucket;
         return {
           serviceNodeName,
-          errorRate: timeseries.buckets.map((dateBucket) => ({
-            x: dateBucket.key,
-            y: dateBucket.failures.doc_count / dateBucket.doc_count,
-          })),
-          throughput: timeseries.buckets.map((dateBucket) => ({
-            x: dateBucket.key,
-            y: dateBucket.doc_count / bucketSizeInMinutes,
-          })),
-          latency: timeseries.buckets.map((dateBucket) => ({
-            x: dateBucket.key,
-            y: getLatencyValue({
-              aggregation: dateBucket.latency,
-              latencyAggregationType,
-            }),
-          })),
+          errorRate: nullifyEmptyRedMetricPoints(
+            timeseries.buckets.map((dateBucket) => ({
+              x: dateBucket.key,
+              docCount: dateBucket.doc_count,
+              y:
+                dateBucket.doc_count > 0
+                  ? dateBucket.failures.doc_count / dateBucket.doc_count
+                  : null,
+            }))
+          ),
+          throughput: nullifyEmptyRedMetricPoints(
+            timeseries.buckets.map((dateBucket) => ({
+              x: dateBucket.key,
+              docCount: dateBucket.doc_count,
+              y: dateBucket.doc_count / bucketSizeInMinutes,
+            }))
+          ),
+          latency: nullifyEmptyRedMetricPoints(
+            timeseries.buckets.map((dateBucket) => ({
+              x: dateBucket.key,
+              docCount: dateBucket.doc_count,
+              y: getLatencyValue({
+                aggregation: dateBucket.latency,
+                latencyAggregationType,
+              }),
+            }))
+          ),
         };
       } else {
         const { failures, latency } = serviceNodeBucket;

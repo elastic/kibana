@@ -8,6 +8,7 @@
 import type { IEvent } from '@kbn/event-log-plugin/server';
 import type { AlertInstanceState } from '../types';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { GapReason } from '../../common/constants';
 
 export type Event = Exclude<IEvent, undefined>;
 
@@ -19,6 +20,7 @@ interface CreateAlertEventLogRecordParams {
   spaceId?: string;
   consumer?: string;
   ruleName?: string;
+  ruleTags?: string[];
   instanceId?: string;
   message?: string;
   state?: AlertInstanceState;
@@ -50,6 +52,7 @@ interface CreateAlertEventLogRecordParams {
       gte: string;
       lte: string;
     };
+    reason?: GapReason;
   };
 }
 
@@ -71,6 +74,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     alertSummary,
     maintenanceWindowIds,
     ruleRevision,
+    ruleTags,
     gap,
   } = params;
   const alerting =
@@ -93,6 +97,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
       : undefined;
   const event: Event = {
     ...(params.timestamp ? { '@timestamp': params.timestamp } : {}),
+    ...(ruleTags && ruleTags.length > 0 ? { tags: ruleTags } : {}),
     event: {
       action,
       kind: 'alert',

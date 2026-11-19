@@ -10,9 +10,14 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { ReplayConfig, LoadResult } from '../types';
 import { extractDataStreamName, getMissingDataStreams, getErrorMessage } from '../utils';
 import { getSnapshotMetadata, deleteRepository, generateRepoName } from '../repository';
-import { filterIndicesToRestore, restoreIndices } from '../restore/restore';
+import {
+  filterIndicesToRestore,
+  restoreIndices,
+  waitForRestoredIndicesToBeActive,
+} from '../restore/restore';
 import { createTimestampPipeline, deletePipeline } from './pipeline';
-import { reindexAllIndices } from './reindex';
+import { copySourceMappings } from './mappings';
+import { getDestinationInfo, reindexAllIndices } from './reindex';
 
 export const TEMP_INDEX_PREFIX = 'snapshot-loader-temp-';
 
@@ -52,7 +57,17 @@ export async function getMaxTimestampFromData({
 }
 
 export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> {
-  const { esClient, log, repository, snapshotName, patterns, concurrency } = config;
+  const {
+    esClient,
+    log,
+    repository,
+    snapshotName,
+    patterns,
+    concurrency,
+    shouldUseInlineScript,
+    beforeReindex,
+    indexSettings,
+  } = config;
 
   const result: LoadResult = {
     success: false,
@@ -102,20 +117,52 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       indices: indicesToRestore,
       renamePattern: '(.+)',
       renameReplacement: `${TEMP_INDEX_PREFIX}$1`,
+      indexSettings,
     });
     result.restoredIndices = restoredIndices;
 
-    result.maxTimestamp = await getMaxTimestampFromData({
+    if (indexSettings !== undefined) {
+      await waitForRestoredIndicesToBeActive({ esClient, restoredIndices });
+    }
+
+    const destinationIndices = [
+      ...new Set(indicesToRestore.map((idx) => getDestinationInfo(idx).destIndex)),
+    ];
+
+    if (beforeReindex) {
+      await beforeReindex({
+        esClient,
+        log,
+        originalIndices: indicesToRestore,
+        restoredIndices,
+        destinationIndices,
+      });
+    }
+
+    const maxTimestamp = await getMaxTimestampFromData({
       esClient,
       log,
       tempIndices: restoredIndices,
     });
+    if (!maxTimestamp) {
+      throw new Error('Failed to derive max timestamp from restored data');
+    }
+    result.maxTimestamp = maxTimestamp;
+    const nowMs = Date.now();
 
     await createTimestampPipeline({
       esClient,
       log,
       pipelineName,
-      maxTimestamp: result.maxTimestamp!,
+      maxTimestamp,
+      nowMs,
+    });
+
+    await copySourceMappings({
+      esClient,
+      log,
+      restoredIndices,
+      originalIndices: indicesToRestore,
     });
 
     log.info('Step 4/4: Reindexing with timestamp transformation...');
@@ -126,6 +173,9 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       originalIndices: indicesToRestore,
       concurrency,
       pipelineName,
+      maxTimestamp,
+      nowMs,
+      shouldUseInlineScript,
     });
     result.reindexedIndices = reindexedIndices;
 

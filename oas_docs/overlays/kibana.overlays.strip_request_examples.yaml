@@ -1,0 +1,18 @@
+overlay: 1.0.0
+info:
+  title: Strip requestBody.examples from Dashboards and Visualizations operations
+  version: 0.0.1
+  # ⚠️  TEMPORARY — applied only in the external pipeline (make api-docs-overlay-external)
+  # to avoid rendering issues with the current external renderer, which relies on
+  # x-codeSamples exclusively.  Remove when the external renderer handles
+  # requestBody.examples natively.
+  # See https://github.com/elastic/kibana/issues/266195 for the full revert checklist.
+actions:
+  - target: "$.paths['/api/dashboards']['post'].requestBody.content['application/json'].examples"
+    remove: true
+  - target: "$.paths['/api/dashboards/{id}']['put'].requestBody.content['application/json'].examples"
+    remove: true
+  - target: "$.paths['/api/visualizations']['post'].requestBody.content['application/json'].examples"
+    remove: true
+  - target: "$.paths['/api/visualizations/{id}']['put'].requestBody.content['application/json'].examples"
+    remove: true

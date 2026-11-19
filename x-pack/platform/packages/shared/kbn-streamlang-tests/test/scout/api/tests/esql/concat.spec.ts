@@ -34,7 +34,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ first_name: 'john', last_name: 'doe', email_domain: 'example.com' }];
       await testBed.ingest(indexName, docs);
@@ -69,7 +69,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [
           { first_name: 'john', last_name: 'doe', email_domain: 'example.com', has_email: true },
@@ -78,9 +78,9 @@ apiTest.describe(
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
-        expect(esqlResult.documents).toHaveLength(2);
-        expect(esqlResult.documents[0]?.full_email).toBe('john.doe@example.com');
-        expect(esqlResult.documents[1]?.full_email).toBeNull();
+        expect(esqlResult.documentsOrdered).toHaveLength(2);
+        expect(esqlResult.documentsOrdered[0]?.full_email).toBe('john.doe@example.com');
+        expect(esqlResult.documentsOrdered[1]?.full_email).toBeNull();
       }
     );
 
@@ -106,7 +106,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [
           { first_name: 'john', last_name: 'doe', email_domain: 'example.com' },
@@ -115,9 +115,9 @@ apiTest.describe(
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
-        expect(esqlResult.documents).toHaveLength(2);
-        expect(esqlResult.documents[0]?.full_email).toBe('john.doe@example.com');
-        expect(esqlResult.documents[1]?.full_email).toBe('jane.smith@');
+        expect(esqlResult.documentsOrdered).toHaveLength(2);
+        expect(esqlResult.documentsOrdered[0]?.full_email).toBe('john.doe@example.com');
+        expect(esqlResult.documentsOrdered[1]?.full_email).toBe('jane.smith@');
       }
     );
 
@@ -143,7 +143,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [
           { first_name: 'john', last_name: 'doe', email_domain: 'example.com' },
@@ -152,9 +152,9 @@ apiTest.describe(
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
-        expect(esqlResult.documents).toHaveLength(2);
-        expect(esqlResult.documents[0]?.full_email).toBe('john.doe@example.com');
-        expect(esqlResult.documents[1]?.full_email).toBeNull();
+        expect(esqlResult.documentsOrdered).toHaveLength(2);
+        expect(esqlResult.documentsOrdered[0]?.full_email).toBe('john.doe@example.com');
+        expect(esqlResult.documentsOrdered[1]?.full_email).toBeNull();
       }
     );
   }

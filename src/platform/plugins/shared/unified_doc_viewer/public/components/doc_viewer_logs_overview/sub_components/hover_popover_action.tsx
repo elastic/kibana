@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useTruncateText } from '@kbn/react-hooks';
-import { useUIFieldActions } from '../../../hooks/use_field_actions';
+import { useUIFieldActions } from '@kbn/unified-doc-viewer';
 
 interface HoverPopoverActionProps {
   children: React.ReactChild;

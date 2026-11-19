@@ -1,0 +1,16 @@
+spec_id: .slack2
+name: "Slack (testing)"
+auth_type: oauth_authorization_code
+secrets:
+  authorizationUrl:
+    value: "https://slack.com/oauth/v2/authorize"
+  tokenUrl:
+    value: "https://slack.com/api/oauth.v2.access"
+  scope:
+    value: "channels:read chat:write files:read groups:read im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read"
+  clientId:
+    vault: secret/ent-search-team/workplace-ai-oauth/dev/slack
+    field: client_id
+  clientSecret:
+    vault: secret/ent-search-team/workplace-ai-oauth/dev/slack
+    field: client_secret

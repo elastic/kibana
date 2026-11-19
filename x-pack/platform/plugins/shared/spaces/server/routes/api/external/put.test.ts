@@ -8,7 +8,7 @@
 import * as Rx from 'rxjs';
 
 import type { ObjectType } from '@kbn/config-schema';
-import type { RouteValidatorConfig } from '@kbn/core/server';
+import type { RouteValidatorConfig, SavedObject } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import {
   coreMock,
@@ -17,6 +17,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
+import { asSpaceId, brandSpaceId } from '@kbn/core-spaces-common';
 import type { INpreClient } from '@kbn/cps/server/npre';
 import type { CPSServerStart } from '@kbn/cps/server/types';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
@@ -26,6 +27,7 @@ import { API_VERSIONS } from '../../../../common';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
+import type { SpaceSavedObjectAttributes } from '../../../types';
 import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
 import {
   createMockSavedObjectsRepository,
@@ -37,14 +39,19 @@ import {
 describe('PUT /api/spaces/space', () => {
   const spacesSavedObjects = createSpaces();
 
-  const setup = async (options?: { cpsStart?: CPSServerStart }) => {
+  const setup = async (options?: {
+    cpsStart?: CPSServerStart;
+    spacesSavedObjects?: Pick<SavedObject<SpaceSavedObjectAttributes>, 'id' | 'attributes'>[];
+  }) => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpService.createRouter();
     const versionedRouterMock = router.versioned as MockedVersionedRouter;
 
     const coreStart = coreMock.createStart();
 
-    const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
+    const savedObjectsRepositoryMock = createMockSavedObjectsRepository(
+      options?.spacesSavedObjects ?? spacesSavedObjects
+    );
 
     const log = loggingSystemMock.create().get('spaces');
 
@@ -54,9 +61,7 @@ describe('PUT /api/spaces/space', () => {
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
 
     const service = new SpacesService();
-    service.setup({
-      basePath: httpService.basePath,
-    });
+    service.setup();
 
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
@@ -67,7 +72,6 @@ describe('PUT /api/spaces/space', () => {
     );
 
     const spacesServiceStart = service.start({
-      basePath: coreStart.http.basePath,
       spacesClientService: clientServiceStart,
     });
 
@@ -107,6 +111,8 @@ describe('PUT /api/spaces/space', () => {
     const mockCpsStart = options.cpsEnabled
       ? {
           createNpreClient: jest.fn().mockReturnValue(npreClient),
+          getLinkedProjects: jest.fn().mockResolvedValue([]),
+          isCpsActive: jest.fn().mockResolvedValue(false),
         }
       : undefined;
 
@@ -120,7 +126,7 @@ describe('PUT /api/spaces/space', () => {
 
   it('should update an existing space with the provided ID', async () => {
     const payload = {
-      id: 'a-space',
+      id: asSpaceId('a-space'),
       name: 'my updated space',
       description: 'with a description',
       disabledFeatures: [],
@@ -151,7 +157,7 @@ describe('PUT /api/spaces/space', () => {
 
   it('should allow an empty description', async () => {
     const payload = {
-      id: 'a-space',
+      id: asSpaceId('a-space'),
       name: 'my updated space',
       description: '',
       disabledFeatures: ['foo'],
@@ -182,7 +188,7 @@ describe('PUT /api/spaces/space', () => {
 
   it('should not require disabledFeatures', async () => {
     const payload = {
-      id: 'a-space',
+      id: asSpaceId('a-space'),
       name: 'my updated space',
       description: '',
     };
@@ -210,9 +216,87 @@ describe('PUT /api/spaces/space', () => {
     });
   });
 
+  it('should persist disabledFeatures when switching from classic to non-classic solution', async () => {
+    const storedDisabledFeatures = ['feature_1'];
+    const { routeHandler, savedObjectsRepositoryMock } = await setup({
+      spacesSavedObjects: [
+        {
+          id: brandSpaceId('mySpace'),
+          attributes: {
+            name: 'mySpace',
+            solution: 'classic',
+            disabledFeatures: storedDisabledFeatures,
+          },
+        },
+      ],
+    });
+    const payload = {
+      id: brandSpaceId('mySpace'),
+      name: 'mySpace',
+      disabledFeatures: [],
+      solution: 'oblt' as const,
+    };
+    const request = httpServerMock.createKibanaRequest({
+      params: { id: payload.id },
+      body: payload,
+      method: 'post',
+    });
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(savedObjectsRepositoryMock.update).toHaveBeenCalledTimes(1);
+    expect(savedObjectsRepositoryMock.update).toHaveBeenCalledWith('space', 'mySpace', {
+      name: 'mySpace',
+      description: undefined,
+      color: undefined,
+      initials: undefined,
+      imageUrl: undefined,
+      disabledFeatures: storedDisabledFeatures,
+      solution: 'oblt',
+    });
+  });
+
+  it('should preserve stored disabledFeatures when switching from non-classic to classic solution', async () => {
+    const storedDisabledFeatures = ['feature_1'];
+    const { routeHandler, savedObjectsRepositoryMock } = await setup({
+      spacesSavedObjects: [
+        {
+          id: brandSpaceId('mySpace'),
+          attributes: {
+            name: 'mySpace',
+            solution: 'oblt',
+            disabledFeatures: storedDisabledFeatures,
+          },
+        },
+      ],
+    });
+    const payload = {
+      id: brandSpaceId('mySpace'),
+      name: 'mySpace',
+      disabledFeatures: [],
+      solution: 'classic' as const,
+    };
+    const request = httpServerMock.createKibanaRequest({
+      params: { id: payload.id },
+      body: payload,
+      method: 'post',
+    });
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(savedObjectsRepositoryMock.update).toHaveBeenCalledTimes(1);
+    expect(savedObjectsRepositoryMock.update).toHaveBeenCalledWith('space', 'mySpace', {
+      name: 'mySpace',
+      description: undefined,
+      color: undefined,
+      initials: undefined,
+      imageUrl: undefined,
+      disabledFeatures: storedDisabledFeatures,
+      solution: 'classic',
+    });
+  });
+
   it('should not allow a new space to be created', async () => {
     const payload = {
-      id: 'a-new-space',
+      id: asSpaceId('a-new-space'),
       name: 'my new space',
       description: 'with a description',
       disabledFeatures: [],
@@ -257,7 +341,7 @@ describe('PUT /api/spaces/space', () => {
   describe('Cross-project search', () => {
     it('updates the space with projectRouting when CPS is enabled and user has permission', async () => {
       const payload = {
-        id: 'a-space',
+        id: asSpaceId('a-space'),
         name: 'my updated space',
         description: 'with a description',
         disabledFeatures: ['foo'],
@@ -293,7 +377,7 @@ describe('PUT /api/spaces/space', () => {
 
     it('does not update NPRE when CPS is enabled and user does not have permission to update NPRE', async () => {
       const payload = {
-        id: 'a-space',
+        id: asSpaceId('a-space'),
         name: 'my updated space',
         description: 'with a description',
         disabledFeatures: ['foo'],
@@ -326,7 +410,7 @@ describe('PUT /api/spaces/space', () => {
 
     it('updates the space without projectRouting when CPS is enabled and user does not submit projectRouting', async () => {
       const payload = {
-        id: 'a-space',
+        id: asSpaceId('a-space'),
         name: 'my updated space',
         description: 'with a description',
         disabledFeatures: ['foo'],
@@ -358,7 +442,7 @@ describe('PUT /api/spaces/space', () => {
 
     it('updates the space without projectRouting when CPS is disabled', async () => {
       const payload = {
-        id: 'a-space',
+        id: asSpaceId('a-space'),
         name: 'my updated space',
         description: 'with a description',
         disabledFeatures: ['foo'],

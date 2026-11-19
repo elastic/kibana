@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 import type { OnboardingFlowEventContext } from '../../../../common/telemetry_events';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -58,11 +58,11 @@ const OPTIONS = [
 ];
 
 export function FirehosePanel() {
-  useFlowBreadcrumb({
-    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.firehose', {
+  useFlowBreadcrumb(
+    i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.firehose', {
       defaultMessage: 'AWS Firehose',
-    }),
-  });
+    })
+  );
 
   const [selectedOptionId, setSelectedOptionId] = useState<CreateStackOption>(
     CreateStackOption.AWS_CONSOLE_UI

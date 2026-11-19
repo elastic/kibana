@@ -47,7 +47,6 @@ export interface CreateThreatSignalsOptions {
 
 export interface CreateThreatSignalOptions {
   sharedParams: SecuritySharedParams<ThreatRuleParams>;
-  currentResult: SearchAfterAndBulkCreateReturnType;
   currentThreatList: ThreatListItem[];
   eventsTelemetry: ITelemetryEventsSender | undefined;
   filters: unknown[];
@@ -66,7 +65,6 @@ export interface CreateThreatSignalOptions {
 
 export interface CreateEventSignalOptions {
   sharedParams: SecuritySharedParams<ThreatRuleParams>;
-  currentResult: SearchAfterAndBulkCreateReturnType;
   currentEventList: EventItem[];
   eventsTelemetry: ITelemetryEventsSender | undefined;
   filters: unknown[];
@@ -239,11 +237,6 @@ export type GetDocumentListInterface = (params: {
 export type CreateSignalInterface = (
   params: EventItem[] | ThreatListItem[]
 ) => Promise<SearchAfterAndBulkCreateReturnType>;
-
-export interface GetSortForThreatList {
-  index: string[];
-  listItemIndex: string;
-}
 
 export enum ThreatMatchQueryType {
   match = 'mq',

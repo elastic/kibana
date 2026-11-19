@@ -33,7 +33,7 @@ export const Layer: FC<Props> = ({ layer, layerIndex, embeddable }) => (
       <EuiSplitPanel.Inner>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type={'tokenGeo'} />
+            <EuiIcon aria-hidden={true} type={'tokenGeo'} />
           </EuiFlexItem>
           <EuiFlexItem grow>
             <EuiText color={layer.dataView?.timeFieldName ? '' : 'subdued'}>

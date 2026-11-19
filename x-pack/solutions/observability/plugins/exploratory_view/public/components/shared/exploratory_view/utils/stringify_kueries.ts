@@ -27,7 +27,7 @@ function addSlashes(str: string | number) {
 export const urlFiltersToKueryString = (urlFilters: UrlFilter[]): string => {
   let kueryString = '';
 
-  urlFilters.forEach(({ field, values, notValues, wildcards, notWildcards }) => {
+  urlFilters.forEach(({ field, values, notValues, wildcards, notWildcards, notExists }) => {
     const valuesT = values?.map((val) => `"${addSlashes(val)}"`);
     const notValuesT = notValues?.map((val) => `"${addSlashes(val)}"`);
     const wildcardsT = wildcards?.map((val) => `*${val}*`);
@@ -57,6 +57,12 @@ export const urlFiltersToKueryString = (urlFilters: UrlFilter[]): string => {
         kueryString += ' and ';
       }
       kueryString += `(${field}: ${buildOrCondition(notWildcardsT)})`;
+    }
+    if (notExists) {
+      if (kueryString.length > 0) {
+        kueryString += ' and ';
+      }
+      kueryString += `not (${field}: *)`;
     }
   });
 

@@ -9,14 +9,30 @@
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import { BehaviorSubject, of } from 'rxjs';
 
 import { dataViewAdHoc } from '../__mocks__/data_view_complex';
+import { mockControlState } from '../__mocks__/esql_controls';
 import { discoverServiceMock } from '../__mocks__/services';
 import { getAppTarget, initializeEditApi } from './initialize_edit_api';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
 import { getMockedSearchApi } from './__mocks__/get_mocked_api';
+import { fromSavedSearchToSavedObjectTab } from '../application/main/state_management/redux';
+import * as getDiscoverLocatorParamsModule from './utils/get_discover_locator_params';
+
+const createEsqlControlApi = (uuid: string, state: OptionsListESQLControlState) => ({
+  uuid,
+  type: ESQL_CONTROL,
+  anyStateChange$: of(),
+  latestState$: of(state),
+  serializeState: () => state,
+  applySerializedState: () => undefined,
+});
 
 describe('initialize edit api', () => {
   const searchSource = createSearchSourceMock({ index: dataViewMock });
@@ -76,7 +92,7 @@ describe('initialize edit api', () => {
           .mockResolvedValueOnce({ app: 'discover', path: '/mock-url', state: {} });
       }
 
-      mockedApi.dataViews$.next([currentDataView]);
+      mockedApi.dataSources$.next([currentDataView]);
       mockedApi.savedObjectId$.next(currentSavedObjectId);
 
       await waitOneTick();
@@ -153,6 +169,8 @@ describe('initialize edit api', () => {
 
   describe('on edit', () => {
     const mockedParentApi = {
+      ...getMockPresentationContainer(),
+      children$: new BehaviorSubject<Record<string, unknown>>({}),
       getAppContext: jest.fn().mockReturnValue({
         getCurrentPath: jest.fn().mockReturnValue('/current-parent-path'),
         currentAppId: 'dashboard',
@@ -167,7 +185,7 @@ describe('initialize edit api', () => {
       discoverServiceMock.embeddable.getStateTransfer = jest.fn().mockReturnValue({
         navigateToEditor: mockedNavigate,
       });
-      mockedApi.dataViews$.next([dataViewMock]);
+      mockedApi.dataSources$.next([dataViewMock]);
       mockedApi.savedObjectId$.next('test-id');
 
       getLocationMock = jest.mocked(discoverServiceMock.locator.getLocation);
@@ -177,6 +195,8 @@ describe('initialize edit api', () => {
         path: '/mock-url-for-onedit',
         state: {},
       });
+
+      mockedParentApi.children$.next({});
     });
 
     it('should call navigateToEditor', async () => {
@@ -194,12 +214,53 @@ describe('initialize edit api', () => {
       expect(mockedNavigate).toHaveBeenCalledTimes(1);
       expect(mockedNavigate).toHaveBeenCalledWith('discover', {
         path: '/mock-url-for-onedit',
-        state: expect.objectContaining({
+        state: {
           embeddableId: 'test',
+          valueInput: {
+            discoverSessionTab: undefined,
+            dashboardControlGroupState: {},
+          },
+          searchSessionId: undefined,
           originatingApp: 'dashboard',
           originatingPath: '/current-parent-path',
-        }),
+        },
       });
+    });
+
+    it('should pass the dashboard controls to Discover for by-reference embeddables', async () => {
+      const { type: _type, ...controlState } = mockControlState.panel1;
+      const dashboardControlState = {
+        ...controlState,
+        variable_name: 'host.name',
+        title: 'Host name',
+      };
+      mockedParentApi.children$.next({
+        panel1: createEsqlControlApi('panel1', dashboardControlState),
+      });
+      const editApi = initializeEditApi({
+        uuid: 'test',
+        parentApi: mockedParentApi,
+        partialApi: { ...mockedApi, getSelectedTabId: () => undefined },
+        isEditable: () => true,
+        discoverServices: discoverServiceMock,
+        getTitle: () => 'test-title',
+      });
+
+      await editApi?.onEdit();
+
+      expect(mockedNavigate).toHaveBeenCalledWith(
+        'discover',
+        expect.objectContaining({
+          state: expect.objectContaining({
+            valueInput: {
+              discoverSessionTab: undefined,
+              dashboardControlGroupState: {
+                panel1: { ...dashboardControlState, type: ESQL_CONTROL },
+              },
+            },
+          }),
+        })
+      );
     });
 
     it('should pass the selected tab id to the locator for by-reference embeddables', async () => {
@@ -214,12 +275,10 @@ describe('initialize edit api', () => {
 
       await editApi?.onEdit();
 
-      expect(discoverServiceMock.locator.getLocation).toHaveBeenCalledWith(
-        expect.objectContaining({
-          savedSearchId: 'test-id',
-          tab: { id: 'tab-1' },
-        })
-      );
+      expect(discoverServiceMock.locator.getLocation).toHaveBeenCalledWith({
+        savedSearchId: 'test-id',
+        tab: { id: 'tab-1' },
+      });
     });
 
     it('should not pass a tab param when getSelectedTabId returns undefined', async () => {
@@ -253,6 +312,77 @@ describe('initialize edit api', () => {
       await editApi?.onEdit();
 
       expect(discoverServiceMock.locator.getLocation).toHaveBeenCalledWith({});
+    });
+
+    it('should pass controls to Discover for by-value embeddables', async () => {
+      mockedApi.savedObjectId$.next(undefined);
+      const { type: _type, ...controlState } = mockControlState.panel1;
+
+      const partialApi = {
+        ...mockedApi,
+        parentApi: mockedParentApi,
+        getSelectedTabId: () => 'tab-2',
+      };
+      const controlsState = {
+        panel1: {
+          ...controlState,
+          type: ESQL_CONTROL,
+          variable_name: 'host.name',
+          title: 'Host name',
+        },
+      };
+      const locatorParams = getDiscoverLocatorParams(partialApi);
+      const getDiscoverLocatorParamsSpy = jest
+        .spyOn(getDiscoverLocatorParamsModule, 'getDiscoverLocatorParams')
+        .mockReturnValue({
+          ...locatorParams,
+          esqlControls: controlsState,
+        });
+      mockedParentApi.children$.next({
+        panel1: createEsqlControlApi('panel1', {
+          ...controlState,
+          variable_name: 'host.name',
+          title: 'Host name',
+        }),
+      });
+      const editApi = initializeEditApi({
+        uuid: 'test',
+        parentApi: mockedParentApi,
+        partialApi,
+        isEditable: () => true,
+        discoverServices: discoverServiceMock,
+        getTitle: () => 'test-title',
+      });
+
+      await editApi?.onEdit();
+
+      const expectedValueInput = fromSavedSearchToSavedObjectTab({
+        tab: {
+          id: 'test',
+          label: 'test-title',
+        },
+        savedSearch: {
+          ...savedSearch,
+          controlGroupJson: JSON.stringify(controlsState),
+        },
+        services: discoverServiceMock,
+      });
+
+      expect(getDiscoverLocatorParamsSpy).toHaveBeenCalledWith(partialApi);
+      expect(discoverServiceMock.locator.getLocation).toHaveBeenCalledWith({});
+      expect(mockedNavigate).toHaveBeenCalledWith('discover', {
+        path: '/mock-url-for-onedit',
+        state: {
+          embeddableId: 'test',
+          valueInput: {
+            discoverSessionTab: expectedValueInput,
+            dashboardControlGroupState: controlsState,
+          },
+          searchSessionId: undefined,
+          originatingApp: 'dashboard',
+          originatingPath: '/current-parent-path',
+        },
+      });
     });
   });
 });

@@ -6,15 +6,17 @@
  */
 
 import { LinkCategoryType, type SeparatorLinkCategory } from '@kbn/security-solution-navigation';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { SecurityPageName } from '../../../../../common';
 
 export const getNavCategories = (
+  chatExperience: AIChatExperience,
   enableAlertsAndAttacksAlignment?: boolean
 ): SeparatorLinkCategory[] => {
-  return [
+  const categories: SeparatorLinkCategory[] = [
     {
       type: LinkCategoryType.separator,
-      linkIds: [SecurityPageName.dashboards],
+      linkIds: [SecurityPageName.externalLinkDiscover, SecurityPageName.dashboards],
     },
     {
       type: LinkCategoryType.separator,
@@ -23,7 +25,12 @@ export const getNavCategories = (
         enableAlertsAndAttacksAlignment
           ? SecurityPageName.alertDetections
           : SecurityPageName.alerts,
-        SecurityPageName.attackDiscovery,
+        // Agent builder for AI agent chat and not classic AI experience
+        ...(chatExperience === AIChatExperience.Agent
+          ? [SecurityPageName.externalLinkAgentBuilder]
+          : []),
+        SecurityPageName.externalLinkWorkflows,
+        ...(enableAlertsAndAttacksAlignment ? [] : [SecurityPageName.attackDiscovery]),
         SecurityPageName.cloudSecurityPostureFindings,
         SecurityPageName.case,
       ],
@@ -31,20 +38,14 @@ export const getNavCategories = (
     {
       type: LinkCategoryType.separator,
       linkIds: [
-        SecurityPageName.entityAnalyticsLanding,
+        SecurityPageName.entityAnalyticsHomePage,
         SecurityPageName.exploreLanding,
         SecurityPageName.timelines,
         SecurityPageName.threatIntelligence,
         SecurityPageName.assetInventory,
       ],
     },
-    {
-      type: LinkCategoryType.separator,
-      linkIds: [
-        SecurityPageName.siemReadiness,
-        SecurityPageName.aiValue,
-        SecurityPageName.siemMigrationsLanding,
-      ],
-    },
   ];
+
+  return categories;
 };

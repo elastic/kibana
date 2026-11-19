@@ -5,12 +5,24 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
-export function useFlowBreadcrumb(breadcrumb: ChromeBreadcrumb | null) {
-  useBreadcrumbs(breadcrumb !== null ? [breadcrumb] : [], {
+// Accept primitives instead of a ChromeBreadcrumb object so the memoized
+// crumb array stays referentially stable across renders. With an object
+// argument, callers create a fresh one each render and the underlying
+// setBreadcrumbs effect re-fires every render, which makes the parent's
+// empty-default call briefly clobber the child's crumb during URL changes
+// (e.g. the ingestion mode toggle).
+export function useFlowBreadcrumb(text: string | null, href?: string) {
+  const extraCrumbs = useMemo<ChromeBreadcrumb[]>(
+    () => (text !== null ? [{ text, href }] : []),
+    [text, href]
+  );
+
+  useBreadcrumbs(extraCrumbs, {
     app: {
       id: 'observabilityOnboarding',
       label: i18n.translate(

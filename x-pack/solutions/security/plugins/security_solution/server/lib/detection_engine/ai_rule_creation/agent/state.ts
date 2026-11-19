@@ -9,6 +9,16 @@ import { Annotation } from '@langchain/langgraph';
 import type { EsqlRuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleSchedule } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
 
+// INCOHERENT and NOT_SECURITY_RELEVANT are reserved for a future pre-flight classifier node.
+// They are defined here so the type is stable, but no node emits them yet.
+export type RejectionCode = 'NO_DATA' | 'INCOHERENT' | 'NOT_SECURITY_RELEVANT' | 'INVALID_OUTPUT';
+
+export interface RejectionReason {
+  code: RejectionCode;
+  message: string;
+  details?: string;
+}
+
 export const defaultSchedule: RuleSchedule = {
   interval: '5m',
   from: 'now-6m',
@@ -53,6 +63,14 @@ export const RuleCreationAnnotation = Annotation.Root({
     reducer: (current, update) => {
       return [...current, ...update];
     },
+  }),
+  rejectionReason: Annotation<RejectionReason | undefined>({
+    default: () => undefined,
+    reducer: (current, update) => update ?? current,
+  }),
+  rejectionMessage: Annotation<string | undefined>({
+    default: () => undefined,
+    reducer: (current, update) => update ?? current,
   }),
 });
 

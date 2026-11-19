@@ -7,56 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { EuiListGroupItemProps } from '@elastic/eui';
-import { EuiListGroupItem } from '@elastic/eui';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { servicesMock } from '../../__mocks__/services';
+import userEvent from '@testing-library/user-event';
 import { buildEditFieldButton } from './build_edit_field_button';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { EuiListGroupItem } from '@elastic/eui';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import { servicesMock } from '../../__mocks__/services';
 
-const dataView = buildDataViewMock({
-  name: 'test-index-view',
-  fields: [
-    {
-      name: '_source',
-      type: '_source',
-    },
-    {
-      name: 'unknown_field',
-      type: 'unknown',
-    },
-    {
-      name: 'unknown_selected_field',
-      type: 'unknown',
-    },
-    {
-      name: 'bytes',
-      type: 'number',
-    },
-    {
-      name: 'runtime_field',
-      type: 'unknown',
-      runtimeField: {
-        type: 'unknown',
-        script: {
-          source: "emit('hello world')",
-        },
-      },
-    },
-  ] as DataView['fields'],
+const getField = (name: string) => dataViewMock.getFieldByName(name) as DataViewField;
+
+const unknownField = dataViewMock.fields.create({
+  aggregatable: false,
+  name: 'unknown_field',
+  searchable: false,
+  type: 'unknown',
 });
 
 describe('buildEditFieldButton', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should return null if the field is not editable', () => {
-    const field = dataView.getFieldByName('unknown_field') as DataViewField;
     const button = buildEditFieldButton({
-      hasEditDataViewPermission: () => servicesMock.dataViewEditor.userPermissions.editDataView(),
-      dataView,
-      field,
+      dataView: dataViewMock,
       editField: jest.fn(),
+      field: unknownField,
+      hasEditDataViewPermission: () => servicesMock.dataViewEditor.userPermissions.editDataView(),
     });
+
     expect(button).toBeNull();
   });
 
@@ -64,64 +47,66 @@ describe('buildEditFieldButton', () => {
     jest
       .spyOn(servicesMock.dataViewEditor.userPermissions, 'editDataView')
       .mockReturnValueOnce(false);
-    const field = dataView.getFieldByName('bytes') as DataViewField;
+
+    const field = getField('bytes');
     const button = buildEditFieldButton({
-      hasEditDataViewPermission: () => servicesMock.dataViewEditor.userPermissions.editDataView(),
-      dataView,
-      field,
+      dataView: dataViewMock,
       editField: jest.fn(),
+      field,
+      hasEditDataViewPermission: () => servicesMock.dataViewEditor.userPermissions.editDataView(),
     });
+
     expect(button).toBeNull();
   });
 
   it('should return null if passed the _source field', () => {
-    const field = dataView.getFieldByName('_source') as DataViewField;
+    const field = getField('_source');
     const button = buildEditFieldButton({
-      hasEditDataViewPermission: () => servicesMock.dataViewEditor.userPermissions.editDataView(),
-      dataView,
-      field,
+      dataView: dataViewMock,
       editField: jest.fn(),
+      field,
+      hasEditDataViewPermission: () => servicesMock.dataViewEditor.userPermissions.editDataView(),
     });
+
     expect(button).toBeNull();
   });
 
   it('should return EuiListGroupItemProps if the field and data view are editable', () => {
-    const field = dataView.getFieldByName('bytes') as DataViewField;
+    const field = getField('bytes');
     const button = buildEditFieldButton({
-      hasEditDataViewPermission: () => servicesMock.dataViewEditor.userPermissions.editDataView(),
-      dataView,
-      field,
+      dataView: dataViewMock,
       editField: jest.fn(),
-    });
+      field,
+      hasEditDataViewPermission: () => servicesMock.dataViewEditor.userPermissions.editDataView(),
+    }) as EuiListGroupItemProps;
+
     expect(button).not.toBeNull();
-    expect(button).toMatchInlineSnapshot(`
-      Object {
-        "data-test-subj": "gridEditFieldButton",
-        "iconProps": Object {
-          "size": "m",
-        },
-        "iconType": "pencil",
-        "label": <Memo(MemoizedFormattedMessage)
-          defaultMessage="Edit data view field"
-          id="unifiedDataTable.grid.editFieldButton"
-        />,
-        "onClick": [Function],
-        "size": "xs",
-      }
-    `);
+    expect(button).toMatchObject({
+      'data-test-subj': 'gridEditFieldButton',
+      iconProps: { size: 'm' },
+      iconType: 'pencil',
+    });
+    expect(button.onClick).toEqual(expect.any(Function));
+
+    renderWithI18n(<EuiListGroupItem {...button} />);
+
+    expect(screen.getByText('Edit data view field')).toBeVisible();
   });
 
-  it('should call editField when onClick is triggered', () => {
-    const field = dataView.getFieldByName('bytes') as DataViewField;
+  it('should call editField when onClick is triggered', async () => {
     const editField = jest.fn();
+    const field = getField('bytes');
     const buttonProps = buildEditFieldButton({
-      hasEditDataViewPermission: () => servicesMock.dataViewEditor.userPermissions.editDataView(),
-      dataView,
-      field,
+      dataView: dataViewMock,
       editField,
+      field,
+      hasEditDataViewPermission: () => servicesMock.dataViewEditor.userPermissions.editDataView(),
     }) as EuiListGroupItemProps;
-    const listItem = mountWithIntl(<EuiListGroupItem {...buttonProps} />);
-    listItem.find('button').simulate('click');
+
+    renderWithI18n(<EuiListGroupItem {...buttonProps} />);
+
+    await userEvent.click(screen.getByText('Edit data view field'));
+
     expect(editField).toHaveBeenCalledTimes(1);
     expect(editField).toHaveBeenCalledWith('bytes');
   });

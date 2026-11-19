@@ -8,7 +8,6 @@
 import { EuiBadge, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
 import { SLOS_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import moment from 'moment';
 import type { MouseEvent } from 'react';
@@ -34,7 +33,7 @@ export function SloTimeWindowBadge({ slo }: Props) {
   }, [isSloPage, onStateChange, slo.timeWindow.duration]);
 
   const unit = slo.timeWindow.duration.slice(-1);
-  if (rollingTimeWindowTypeSchema.is(slo.timeWindow.type)) {
+  if (slo.timeWindow.type === 'rolling') {
     return (
       <EuiFlexItem grow={false}>
         <EuiBadge
@@ -43,7 +42,7 @@ export function SloTimeWindowBadge({ slo }: Props) {
             defaultMessage: 'Click to filter by {timeWindow} SLOs',
             values: { timeWindow: toDurationLabel(slo.timeWindow.duration) },
           })}
-          iconType="editorItemAlignRight"
+          iconType="alignRight"
           iconSide="left"
           onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
             if (isSloPage) e.stopPropagation(); // stops propagation of metric onElementClick

@@ -9,15 +9,9 @@ import { i18n } from '@kbn/i18n';
 
 export const timeUnits = [
   {
-    value: 'd',
-    text: i18n.translate('xpack.idxMgmt.dataStream.retention.timeUnits.daysLabel', {
-      defaultMessage: 'days',
-    }),
-  },
-  {
-    value: 'h',
-    text: i18n.translate('xpack.idxMgmt.dataStream.retention.timeUnits.hoursLabel', {
-      defaultMessage: 'hours',
+    value: 's',
+    text: i18n.translate('xpack.idxMgmt.dataStream.retention.timeUnits.secondsLabel', {
+      defaultMessage: 'seconds',
     }),
   },
   {
@@ -27,9 +21,15 @@ export const timeUnits = [
     }),
   },
   {
-    value: 's',
-    text: i18n.translate('xpack.idxMgmt.dataStream.retention.timeUnits.secondsLabel', {
-      defaultMessage: 'seconds',
+    value: 'h',
+    text: i18n.translate('xpack.idxMgmt.dataStream.retention.timeUnits.hoursLabel', {
+      defaultMessage: 'hours',
+    }),
+  },
+  {
+    value: 'd',
+    text: i18n.translate('xpack.idxMgmt.dataStream.retention.timeUnits.daysLabel', {
+      defaultMessage: 'days',
     }),
   },
 ];

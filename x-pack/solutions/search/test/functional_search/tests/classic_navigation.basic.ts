@@ -42,7 +42,6 @@ export default function searchClassicNavigationTests({
         { id: 'GettingStarted', label: 'Getting started' },
         { id: 'Build', label: 'Build' },
         { id: 'Indices', label: 'Index Management' },
-        { id: 'Playground', label: 'Playground' },
         { id: 'SearchApplications', label: 'Search applications' },
         { id: 'Agents', label: 'Agents' },
         { id: 'Relevance', label: 'Relevance' },
@@ -63,12 +62,7 @@ export default function searchClassicNavigationTests({
         {
           navItem: 'Indices',
           breadcrumbs: ['Build', 'Index Management'],
-          pageTestSubject: 'indexManagementHeaderContent',
-        },
-        {
-          navItem: 'Playground',
-          breadcrumbs: ['Build', 'Playground'],
-          pageTestSubject: 'playgroundsUnlicensed',
+          pageTestSubject: 'indicesList',
         },
         {
           navItem: 'SearchApplications',

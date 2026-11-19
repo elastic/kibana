@@ -28,7 +28,7 @@ export const EXPORT_TIMELINE = '[data-test-subj="export-timeline"]';
 
 export const TIMELINE_NAME = '[data-test-subj^=timeline-title-]';
 
-export const TIMELINES_FAVORITE = '[data-test-subj="favorite-starFilled-star"]';
+export const TIMELINES_FAVORITE = '[data-test-subj="favorite-starFill-star"]';
 
 export const TIMELINES_DESCRIPTION = '[data-test-subj="description"]';
 

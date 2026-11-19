@@ -6,9 +6,9 @@
  */
 
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { generateFilters, type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { generateFilters } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasExecutionContext,
@@ -19,8 +19,10 @@ import {
   useFetchContext,
   titleComparators,
   timeRangeComparators,
+  getViewModeSubject,
+  type ViewMode,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
@@ -32,12 +34,14 @@ import {
   switchMap,
   distinctUntilChanged,
   merge,
+  filter as filterObservable,
 } from 'rxjs';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { isDefined } from '@kbn/ml-is-defined';
-import { EuiCallOut, EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { Filter } from '@kbn/es-query';
@@ -46,20 +50,20 @@ import { ENABLE_ESQL, getESQLAdHocDataview } from '@kbn/esql-utils';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { FieldStatsTableEmbeddableState } from '@kbn/data-visualizer-server-schemas/embeddables/field_stats';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerPluginStart } from '../../../../plugin';
-import type { FieldStatisticsTableEmbeddableState } from '../grid_embeddable/types';
-import { FieldStatsInitializerViewType } from '../grid_embeddable/types';
+import { FieldStatsInitializerViewType } from '../../../../../common/embeddables/types';
 import { initializeFieldStatsControls } from './initialize_field_stats_controls';
 import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
 import type { FieldStatisticsTableEmbeddableApi } from './types';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { FieldStatsComponentType } from '../../constants/field_stats_component_type';
 import { FIELD_STATS_EMBEDDABLE_TYPE } from '../../../../../common/embeddables/constants';
-
-export interface EmbeddableFieldStatsChartStartServices {
-  data: DataPublicPluginStart;
-}
+import {
+  fieldStatsSkipsDataFetch,
+  isUnsupportedFieldStatsEsqlQuery,
+} from './field_stats_skips_data_fetch';
 
 const FieldStatisticsWrapper = dynamic(() => import('../grid_embeddable/field_stats_wrapper'));
 
@@ -75,37 +79,14 @@ const ERROR_MSG = {
   ),
 };
 
-export const getDependencies = async (
-  getStartServices: StartServicesAccessor<
-    DataVisualizerStartDependencies,
-    DataVisualizerPluginStart
-  >
-) => {
-  const [
-    { http, uiSettings, notifications, ...startServices },
-    { lens, data, usageCollection, fieldFormats },
-  ] = await getStartServices();
-
-  return {
-    http,
-    uiSettings,
-    data,
-    notifications,
-    lens,
-    usageCollection,
-    fieldFormats,
-    ...startServices,
-  };
-};
-
 export const getFieldStatsChartEmbeddableFactory = (
   getStartServices: StartServicesAccessor<
     DataVisualizerStartDependencies,
     DataVisualizerPluginStart
   >
 ) => {
-  const factory: EmbeddableFactory<
-    FieldStatisticsTableEmbeddableState,
+  const factory: EmbeddablePublicDefinition<
+    FieldStatsTableEmbeddableState,
     FieldStatisticsTableEmbeddableApi
   > = {
     type: FIELD_STATS_EMBEDDABLE_TYPE,
@@ -125,6 +106,9 @@ export const getFieldStatsChartEmbeddableFactory = (
         fieldFormats,
         ...startServices,
       };
+
+      const viewMode$ = getViewModeSubject(parentApi) ?? new BehaviorSubject<ViewMode>('view');
+
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const titleManager = initializeTitleManager(initialState);
 
@@ -139,32 +123,64 @@ export const getFieldStatsChartEmbeddableFactory = (
         resetData$,
         fieldStatsStateManager,
       } = initializeFieldStatsControls(state, deps.uiSettings);
-      const { onError, dataLoading$, blockingError$ } = dataLoadingApi;
+      const {
+        onError,
+        onRenderComplete,
+        dataLoading$,
+        blockingError$,
+        cancelRequests,
+        requestCancellationManager,
+      } = dataLoadingApi;
 
       const validDataViewId: string | undefined =
-        isDefined(state.dataViewId) && state.dataViewId !== '' ? state.dataViewId : undefined;
+        state.view_type === FieldStatsInitializerViewType.DATA_VIEW &&
+        isDefined(state.data_view_id) &&
+        state.data_view_id !== ''
+          ? state.data_view_id
+          : undefined;
+      const query =
+        state.view_type === FieldStatsInitializerViewType.ESQL ? state.query : undefined;
+      // ES|QL field stats render an empty message and must not resolve a data view or run searches.
+      const esqlUnsupported = isUnsupportedFieldStatsEsqlQuery(query);
       let initialDataView: DataView | undefined;
       try {
-        const dataView = isESQLQuery(state.query)
-          ? await getESQLAdHocDataview({
-              dataViewsService: deps.data.dataViews,
-              query: state.query.esql,
-              http: deps.http,
-            })
-          : validDataViewId
-          ? await deps.data.dataViews.get(validDataViewId)
-          : undefined;
-        initialDataView = dataView;
+        if (esqlUnsupported) {
+          initialDataView = undefined;
+        } else if (isESQLQuery(query)) {
+          initialDataView = await getESQLAdHocDataview({
+            dataViewsService: deps.data.dataViews,
+            query: query.esql,
+            http: deps.http,
+          });
+        } else if (validDataViewId) {
+          initialDataView = await deps.data.dataViews.get(validDataViewId);
+        }
       } catch (error) {
         // Only need to publish blocking error if viewtype is data view, and no data view found
-        if (state.viewType === FieldStatsInitializerViewType.DATA_VIEW) {
+        if (state.view_type === FieldStatsInitializerViewType.DATA_VIEW) {
           onError(error);
         }
       }
 
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
+      const dataSources$ = new BehaviorSubject<DataView[] | undefined>(
         initialDataView ? [initialDataView] : undefined
       );
+
+      const publishIdleWhenNothingToFetch = () => {
+        const latest = serializeFieldStatsChartState();
+        const skipsFetch = fieldStatsSkipsDataFetch({
+          viewType: latest.view_type,
+          isEsqlEnabled: deps.uiSettings.get(ENABLE_ESQL),
+          query: latest.query,
+          hasDataView: Boolean(dataSources$.getValue()?.length),
+        });
+        if (skipsFetch) {
+          // No stats request will run. Clear loading or dashboard Refresh stays on Cancel.
+          dataLoading$.next(false);
+        }
+      };
+
+      publishIdleWhenNothingToFetch();
 
       const subscriptions = new Subscription();
       if (fieldStatsControlsApi.dataViewId$) {
@@ -172,7 +188,9 @@ export const getFieldStatsChartEmbeddableFactory = (
           fieldStatsControlsApi.dataViewId$
             .pipe(
               skip(1),
-              skipWhile((dataViewId) => !dataViewId),
+              filterObservable(
+                (dataViewId): dataViewId is string => isDefined(dataViewId) && dataViewId !== ''
+              ),
               switchMap(async (dataViewId) => {
                 try {
                   return await deps.data.dataViews.get(dataViewId);
@@ -183,7 +201,7 @@ export const getFieldStatsChartEmbeddableFactory = (
             )
             .subscribe((nextSelectedDataView) => {
               if (nextSelectedDataView) {
-                dataViews$.next([nextSelectedDataView]);
+                dataSources$.next([nextSelectedDataView]);
               }
             })
         );
@@ -191,18 +209,15 @@ export const getFieldStatsChartEmbeddableFactory = (
 
       const { toasts } = deps.notifications;
 
-      const serializeState = () => {
-        return {
-          ...titleManager.getLatestState(),
-          ...timeRangeManager.getLatestState(),
-          ...serializeFieldStatsChartState(),
-        };
-      };
-
-      const unsavedChangesApi = initializeUnsavedChanges({
+      const stateApi = initializeStateApi<FieldStatsTableEmbeddableState>({
         uuid,
         parentApi,
-        serializeState,
+        serializeState: () =>
+          ({
+            ...titleManager.getLatestState(),
+            ...timeRangeManager.getLatestState(),
+            ...serializeFieldStatsChartState(),
+          } as FieldStatsTableEmbeddableState),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
@@ -213,10 +228,10 @@ export const getFieldStatsChartEmbeddableFactory = (
           ...fieldStatsControlsComparators,
           ...timeRangeComparators,
         }),
-        onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
-          timeRangeManager.reinitializeState(lastSaved);
-          fieldStatsStateManager.reinitializeState(lastSaved);
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
+          timeRangeManager.reinitializeState(nextState);
+          fieldStatsStateManager.reinitializeState(nextState);
         },
       });
 
@@ -224,11 +239,12 @@ export const getFieldStatsChartEmbeddableFactory = (
         ...timeRangeManager.api,
         ...titleManager.api,
         ...fieldStatsControlsApi,
-        ...unsavedChangesApi,
+        ...stateApi,
         // PublishesDataLoading
         dataLoading$,
         // PublishesBlockingError
         blockingError$,
+        cancelRequests,
         getTypeDisplayName: () =>
           i18n.translate('xpack.dataVisualizer.fieldStats.typeDisplayName', {
             defaultMessage: 'field statistics',
@@ -261,8 +277,7 @@ export const getFieldStatsChartEmbeddableFactory = (
             },
           });
         },
-        dataViews$,
-        serializeState,
+        dataSources$,
       });
 
       const reload$ = fetch$(api).pipe(
@@ -270,6 +285,15 @@ export const getFieldStatsChartEmbeddableFactory = (
         map(() => Date.now())
       );
       const reset$ = resetData$.pipe(skip(1), distinctUntilChanged());
+
+      // Starting a new load lifts a previous cancellation. When the panel will not fetch,
+      // clear loading again so a refresh cannot leave the dashboard on Cancel.
+      subscriptions.add(
+        merge(fetch$(api), reset$).subscribe(() => {
+          requestCancellationManager.startLoad();
+          publishIdleWhenNothingToFetch();
+        })
+      );
 
       const onTableUpdate = (changes: Partial<DataVisualizerTableState>) => {
         if (isDefined(changes?.showDistributions)) {
@@ -321,9 +345,10 @@ export const getFieldStatsChartEmbeddableFactory = (
           }
 
           const { filters: globalFilters, query: globalQuery, timeRange } = useFetchContext(api);
-          const [dataViews, esqlQuery, viewType, showPreviewByDefault] =
+          const [viewMode, dataViews, esqlQuery, viewType, showPreviewByDefault] =
             useBatchedPublishingSubjects(
-              api.dataViews$,
+              viewMode$,
+              api.dataSources$,
               api.query$,
               api.viewType$,
               api.showDistributions$
@@ -336,6 +361,22 @@ export const getFieldStatsChartEmbeddableFactory = (
 
           const dataView =
             Array.isArray(dataViews) && dataViews.length > 0 ? dataViews[0] : undefined;
+
+          const skipsDataFetch = fieldStatsSkipsDataFetch({
+            viewType,
+            isEsqlEnabled,
+            query: esqlQuery,
+            hasDataView: Boolean(dataView),
+          });
+
+          useEffect(() => {
+            if (!skipsDataFetch) {
+              return;
+            }
+            // Stop a stats request that started before the panel switched to a state with nothing to fetch.
+            requestCancellationManager.startLoad();
+            onRenderComplete();
+          }, [skipsDataFetch]);
           const onAddFilter = (
             field: string | DataViewField,
             value: string,
@@ -395,18 +436,14 @@ export const getFieldStatsChartEmbeddableFactory = (
           if (isEsqlMode && !isEsqlEnabled) {
             return (
               <EuiFlexItem css={statsTableCss} data-test-subj="dashboardFieldStatsEmbeddedContent">
-                <EuiCallOut
+                <KbnWarningCallout
                   announceOnMount
                   title={
-                    <h3>
-                      <FormattedMessage
-                        id="xpack.dataVisualizer.fieldStats.noDataViewSelected"
-                        defaultMessage="ES|QL is disabled"
-                      />
-                    </h3>
+                    <FormattedMessage
+                      id="xpack.dataVisualizer.fieldStats.noDataViewSelected"
+                      defaultMessage="ES|QL is disabled"
+                    />
                   }
-                  color="warning"
-                  iconType="warning"
                 />
               </EuiFlexItem>
             );
@@ -428,7 +465,9 @@ export const getFieldStatsChartEmbeddableFactory = (
                 onAddFilter={onAddFilter}
                 resetData$={reset$}
                 timeRange={timeRange}
-                onRenderComplete={dataLoadingApi.onRenderComplete}
+                onRenderComplete={onRenderComplete}
+                requestCancellationManager={requestCancellationManager}
+                isInteractive={viewMode !== 'non-interactive'}
               />
             </EuiFlexItem>
           );

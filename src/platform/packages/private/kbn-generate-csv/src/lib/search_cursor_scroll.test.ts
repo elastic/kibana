@@ -76,8 +76,8 @@ describe('CSV Export Search Cursor', () => {
       const searchSource = createSearchSourceMock();
       await cursor.getPage(searchSource);
 
-      expect(dataSearchSpy).toBeCalledTimes(1);
-      expect(dataSearchSpy).toBeCalledWith(
+      expect(dataSearchSpy).toHaveBeenCalledTimes(1);
+      expect(dataSearchSpy).toHaveBeenCalledWith(
         {
           params: {
             fields: [],
@@ -129,8 +129,8 @@ describe('CSV Export Search Cursor', () => {
       const searchSource = createSearchSourceMock();
       await cursor.getPage(searchSource);
 
-      expect(dataSearchSpy).toBeCalledTimes(1);
-      expect(dataSearchSpy).toBeCalledWith(
+      expect(dataSearchSpy).toHaveBeenCalledTimes(1);
+      expect(dataSearchSpy).toHaveBeenCalledWith(
         {
           params: {
             fields: [],

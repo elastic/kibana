@@ -7,19 +7,24 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { EuiTitle, EuiText, EuiSpacer, EuiSteps } from '@elastic/eui';
+import type { LoadedProjectScopeProjects } from '../initial_configuration_step';
 import { createInitialConfigurationStep } from '../initial_configuration_step';
 import { createProcessStep } from '../process_step';
-import { useLogEntryRateSetup } from '../../../../containers/logs/log_analysis/modules/log_entry_rate';
+import { useLogEntryRateSetupContext } from '../../../../containers/logs/log_analysis/modules/log_entry_rate';
 
 export const LogEntryRateSetupView: React.FC<{
   onClose: () => void;
-}> = ({ onClose }) => {
+  onOpenProjectScope: (projects: LoadedProjectScopeProjects) => void;
+}> = ({ onClose, onOpenProjectScope }) => {
   const {
     cleanUpAndSetUp,
     endTime,
+    isCpsEnabled,
+    isCpsManagerReady,
     isValidating,
     lastSetupErrorMessages,
     moduleDescriptor,
+    projectRouting,
     setEndTime,
     setStartTime,
     setValidatedIndices,
@@ -29,7 +34,7 @@ export const LogEntryRateSetupView: React.FC<{
     validatedIndices,
     validationErrors,
     viewResults,
-  } = useLogEntryRateSetup();
+  } = useLogEntryRateSetupContext();
 
   const viewResultsAndClose = useCallback(() => {
     viewResults();
@@ -48,6 +53,12 @@ export const LogEntryRateSetupView: React.FC<{
         setupStatus,
         setValidatedIndices,
         validationErrors,
+        projectScope: {
+          isCpsEnabled,
+          isCpsManagerReady,
+          projectRouting,
+          onOpenProjectScope,
+        },
       }),
       createProcessStep({
         cleanUpAndSetUp,
@@ -61,8 +72,12 @@ export const LogEntryRateSetupView: React.FC<{
     [
       cleanUpAndSetUp,
       endTime,
+      isCpsEnabled,
+      isCpsManagerReady,
       isValidating,
       lastSetupErrorMessages,
+      onOpenProjectScope,
+      projectRouting,
       setEndTime,
       setStartTime,
       setUp,

@@ -9,7 +9,6 @@
 
 import type { Filter, FilterMeta } from '@kbn/es-query';
 import { isCombinedFilter } from '@kbn/es-query';
-import type { DashboardFilter } from '../../server';
 
 const removeUndefinedProperty = (obj: Record<string, any>, key: string): void => {
   if (obj[key] === undefined) {
@@ -22,9 +21,9 @@ const removeUndefinedProperty = (obj: Record<string, any>, key: string): void =>
  * This is necessary because the `value` property is not serializable and should not be persisted.
  *
  * @param filters - The array of {@link Filter} objects to clean.
- * @returns The cleaned array of {@link DashboardFilter} objects, or `undefined` if no filters are provided.
+ * @returns The cleaned array of {@link Filter} objects, or `undefined` if no filters are provided.
  */
-export function cleanFiltersForSerialize(filters?: Filter[]): DashboardFilter[] | undefined {
+export function cleanFiltersForSerialize(filters?: Filter[]): Filter[] | undefined {
   if (!filters) return;
   return filters.map((filter) => {
     if (!filter.meta) {

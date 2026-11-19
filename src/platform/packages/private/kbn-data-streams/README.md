@@ -106,10 +106,84 @@ This approach works across all backing indices in the data stream, unlike Elasti
 
 All CRUD operations (`create`, `search`) accept an optional `space` parameter:
 
-* **When provided**: Documents are space-bound. IDs are prefixed as `{space}::{id}` (e.g. `myspace::abc123`). Documents are decorated with `kibana.space_ids: [space]`. Searches are filtered to that space. The system property `kibana.space_ids` is stripped from responses.
-* **When undefined**: Documents are space-agnostic. No ID prefixing or `kibana.space_ids` decoration. Searches return only space-agnostic documents. IDs containing the `::` separator are rejected (reserved for system use).
+* **When provided** (including `'default'`): Documents are space-bound. IDs are prefixed as `{space}::{id}` (e.g. `myspace::abc123`, `default::abc123`). Documents are decorated with `kibana.space_ids: [space]`. Searches are filtered strictly to documents belonging to that space. The system property `kibana.space_ids` is stripped from `_source` in all responses.
+* **When undefined**: Documents are space-agnostic. No ID prefixing or `kibana.space_ids` decoration. Searches return only space-agnostic documents (those without `kibana.space_ids`). IDs containing the `::` separator are rejected (reserved for system use).
+
+**Important distinctions:**
+* `space: undefined` and `space: 'default'` are **not** equivalent. Space-agnostic documents (created without a space) are **not** returned when searching with `space: 'default'`, and vice versa. Teams that need both during a migration from space-agnostic to space-aware mode should issue two separate queries.
+* `kibana.space_ids` is a system-managed field. It is stored in Elasticsearch but stripped from all `search` responses — callers do not need to account for it in their document types.
 
 Data streams can contain both space-bound and space-agnostic documents. The package does not handle RBAC; higher-level repositories should wrap these APIs for access control.
+
+## System data streams
+
+`@kbn/data-streams` (and Core `registerDataStream`) can create **hidden** data streams (`hidden` defaults to `true`). That is **not** the same as an Elasticsearch **system** data stream.
+
+| Flag | Who sets it | What it means |
+|------|-------------|----------------|
+| `hidden: true` | Kibana definition / index template | Stream and backing indices are hidden from normal listings |
+| `system: true` | Elasticsearch only | Stream is registered as a system data stream (security / restricted-index semantics, product origin, DLM treatment, etc.) |
+
+Kibana **cannot** mark a stream as system. That requires a matching [`SystemDataStreamDescriptor`](https://javadoc.io/doc/org.elasticsearch/elasticsearch/latest/org/elasticsearch/indices/SystemDataStreamDescriptor.html) in the Elasticsearch Kibana plugin (or equivalent ES registration). If you only call `registerDataStream` / `DataStreamClient.initialize` without that ES registration, `GET _data_stream/<name>` typically reports `system: false` even when the stream is hidden and named `.kibana_*` / `.workflows-*`.
+
+### Why this matters
+
+`@kbn/data-streams` are **not** system data streams by default. This means data is readable across spaces by default (leading to the class of bug behind [security-team#18291](https://github.com/elastic/security-team/issues/18291)). Treat any stream that holds privileged or cross-space-sensitive data as needing ES `system: true` — `hidden` alone is not enough.
+
+Set `system: true` on the data stream definition to opt into a dev-mode check. When Kibana runs in dev mode and Elasticsearch reports `system: false` for that stream, initialization throws. The check only runs for streams initialized through Core (`registerDataStream` / `initializeClient`). It does not run in production, and it does not run for `DataStreamClient.initializeTemplate`, where Elasticsearch auto-creates the stream on first write. A stream registered with lazy creation is verified when `initializeClient` creates it, or at the next boot if it already exists. There is no rollback. Core is tracking stronger platform guidance / checks in [kibana-team#3797](https://github.com/elastic/kibana-team/issues/3797).
+
+### Landing order
+
+Ship the Elasticsearch `SystemDataStreamDescriptor` **with or before** enabling Kibana writes for that stream. Examples:
+
+| Stream | ES registration |
+|--------|-----------------|
+| `.workflows-events`, `.workflows-execution-data-stream-logs` | [elastic/elasticsearch#145822](https://github.com/elastic/elasticsearch/pull/145822) |
+| `.kibana_change_history` | [elastic/elasticsearch#154113](https://github.com/elastic/elasticsearch/pull/154113) |
+
+### How to verify
+
+After Kibana has created the stream (local `pnpm es snapshot` + Kibana boot, or a stack that includes the descriptor):
+
+```http
+GET _data_stream/<name>
+```
+
+Confirm `system: true` and `hidden: true` for privileged streams. There is no Elasticsearch API that lists all registered `SystemIndexDescriptor` / `SystemDataStreamDescriptor` patterns — those live in ES plugin code.
+
+When writing integration tests that touch system streams, use a client that sends `x-elastic-product-origin: kibana` (see [kibana#279803](https://github.com/elastic/kibana/pull/279803)).
+
+### Known Elasticsearch limitations
+
+The three issues below are partially or fully owned by Elasticsearch. They are documented here so Kibana developers understand the current security boundary and do not accidentally rely on protections that do not yet exist. Alignment with the ES team is tracked in [kibana-team#3902](https://github.com/elastic/kibana-team/issues/3902).
+
+#### 1. Backing index protection depends on descriptor landing order
+
+When a stream is created with a `SystemDataStreamDescriptor` already registered in ES, its backing indices do receive the system flag and are protected against direct access the same way the stream itself is. The gap is an **ordering risk**: if Kibana creates the stream before the ES descriptor exists — because it has not shipped in that ES version yet — the initial backing indices are stamped without the system flag. A cluster-level upgrade service corrects this retroactively once the master sees the descriptor, but there is a window.
+
+This race is a downstream effect of Gap 3 below (the descriptor cannot be registered without a template body). Resolving Gap 3 removes the ordering dependency and closes this gap with it.
+
+Until then, do not ship Kibana code that writes to a system stream before the matching `SystemDataStreamDescriptor` is present in the ES version you are targeting. See [Landing order](#landing-order) for examples.
+
+#### 2. The `.kibana_*` wildcard must be narrowed for each new data stream
+
+Elasticsearch has a `SystemIndexDescriptor` that historically matched `.kibana_*`. When a stream name matches that pattern but has no matching `SystemDataStreamDescriptor`, ES logs a warning at creation time and proceeds — the stream is created without system protection, even though its name suggests otherwise.
+
+The ES Kibana plugin has already worked around this for all currently registered streams by using complement-syntax patterns (e.g. `.kibana_~(change_history*)` instead of `.kibana_*`). This excludes known data streams from the index-descriptor wildcard. Any future Kibana data stream under `.kibana_*` or `.workflows-*` must:
+
+1. Register a `SystemDataStreamDescriptor` in the ES Kibana plugin, **and**
+2. Update the complement pattern in the `SystemIndexDescriptor` to exclude the new stream name, **and**
+3. Do both before or alongside the Kibana code that first writes to the stream.
+
+Failing any of these steps produces a warning-only, not an error, so the problem is easy to miss. Until ES tightens this to a hard rejection (a behavior change the ES team would need to own), every new `.kibana_*` or `.workflows-*` data stream requires explicit coordination across both repos.
+
+#### 3. `SystemDataStreamDescriptor` requires index templates to be defined in Elasticsearch at startup
+
+`SystemDataStreamDescriptor` requires the matching index template to exist in Elasticsearch at the time the descriptor is instantiated. Kibana currently owns those templates (they are defined in `@kbn/data-streams` and applied at boot), but ES needs them present before it can register the descriptor — creating a cross-repo ordering dependency.
+
+This is especially painful on serverless, where deployment ordering between the Kibana and ES plugins is not always controllable. The upstream ES issue tracking this is [elastic/elasticsearch#149309](https://github.com/elastic/elasticsearch/issues/149309).
+
+Until resolved, the practical requirement is: ship the `SystemDataStreamDescriptor` in ES (with any required template stubs) **before or alongside** the Kibana code that first writes to the stream. See [Landing order](#landing-order) above for worked examples.
 
 ## Mapping Validation
 

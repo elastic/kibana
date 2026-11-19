@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
-import type { MlSummaryJob } from '@kbn/ml-plugin/common';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import styled from 'styled-components';
 import { rgba } from 'polished';
 import * as i18n from './translations';

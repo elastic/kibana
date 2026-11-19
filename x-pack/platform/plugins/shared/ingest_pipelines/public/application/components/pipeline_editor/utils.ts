@@ -156,6 +156,7 @@ export const collapseEscapedStrings = (data: string): string => {
 const fieldToConvertToJson = [
   'inference_config',
   'field_map',
+  'input_output',
   'params',
   'pattern_definitions',
   'processor',

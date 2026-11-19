@@ -14,11 +14,13 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const InstallPrivilegedAccessDetectionPackageResponse = lazySchema(() =>
+  z.object({
+    message: z.string(),
+  })
+);
 export type InstallPrivilegedAccessDetectionPackageResponse = z.infer<
   typeof InstallPrivilegedAccessDetectionPackageResponse
 >;
-export const InstallPrivilegedAccessDetectionPackageResponse = z.object({
-  message: z.string(),
-});

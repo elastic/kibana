@@ -30,6 +30,7 @@ const selectedTab: Tab = {
 };
 
 describe('useIntegrationCardList', () => {
+  const mockOnCardClick = jest.fn();
   const mockIntegrationsList = [
     {
       id: 'epr:endpoint',
@@ -39,7 +40,7 @@ describe('useIntegrationCardList', () => {
       icons: [{ src: 'icon_url', type: 'image' }],
       integration: 'security',
       maxCardHeight: 127,
-      onCardClick: expect.any(Function),
+      onCardClick: mockOnCardClick,
       showInstallStatus: true,
       titleLineClamp: 1,
       descriptionLineClamp: 3,
@@ -56,7 +57,7 @@ describe('useIntegrationCardList', () => {
       icons: [{ src: 'icon_url', type: 'image' }],
       integration: 'security',
       maxCardHeight: 127,
-      onCardClick: expect.any(Function),
+      onCardClick: mockOnCardClick,
       showInstallStatus: true,
       titleLineClamp: 1,
       descriptionLineClamp: 3,
@@ -77,18 +78,6 @@ describe('useIntegrationCardList', () => {
     },
   ];
 
-  const mockFeaturedCards = [{ ...mockIntegrationsList[0], hasDataStreams: true }];
-  const mockIntegrationCards = [
-    {
-      ...mockIntegrationsList[0],
-      hasDataStreams: true,
-    },
-    {
-      ...mockIntegrationsList[1],
-      hasDataStreams: false,
-    },
-  ];
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -102,7 +91,12 @@ describe('useIntegrationCardList', () => {
       })
     );
 
-    expect(result.current).toEqual(mockIntegrationCards);
+    expect(result.current).toEqual([
+      expect.objectContaining({ id: 'epr:endpoint', hasDataStreams: true }),
+      expect.objectContaining({ id: 'epr:auditbeat', hasDataStreams: false }),
+    ]);
+    expect(result.current[0].onCardClick).toBeInstanceOf(Function);
+    expect(result.current[1].onCardClick).toBeInstanceOf(Function);
   });
 
   it('returns featured cards when featuredCardIds are provided', () => {
@@ -114,7 +108,37 @@ describe('useIntegrationCardList', () => {
       })
     );
 
-    expect(result.current).toEqual(mockFeaturedCards);
+    expect(result.current).toEqual([
+      expect.objectContaining({ id: 'epr:endpoint', hasDataStreams: true }),
+    ]);
+    expect(result.current[0].onCardClick).toBeInstanceOf(Function);
+  });
+
+  it('keeps a collection card when one of its members is featured', () => {
+    const [endpoint, auditbeat] = mockIntegrationsList;
+    const collection = {
+      ...endpoint,
+      id: 'collection:security',
+      name: 'security',
+      isCollectionCard: true,
+      groupMembers: [endpoint, auditbeat],
+    };
+    const otherCollection = {
+      ...collection,
+      id: 'collection:other',
+      name: 'other',
+      groupMembers: [auditbeat],
+    };
+
+    const { result } = renderHook(() =>
+      useIntegrationCardList({
+        integrationsList: [collection, otherCollection, auditbeat],
+        activeIntegrations: mockActiveIntegrations,
+        selectedTab: { ...selectedTab, featuredCardIds: ['epr:endpoint'] },
+      })
+    );
+
+    expect(result.current.map(({ id }) => id)).toEqual(['collection:security']);
   });
 
   it('tracks integration card click', () => {
@@ -130,5 +154,40 @@ describe('useIntegrationCardList', () => {
     card.onCardClick?.();
 
     expect(mockReportLinkClick).toHaveBeenCalledWith('card_epr:endpoint');
+  });
+
+  it('marks a collection card as active when one of its members is active', () => {
+    const [endpoint, auditbeat] = mockIntegrationsList;
+    const collection = {
+      ...endpoint,
+      id: 'collection:security',
+      name: 'security',
+      isCollectionCard: true,
+      groupMembers: [endpoint, auditbeat],
+    };
+    const inactiveCollection = {
+      ...collection,
+      id: 'collection:other',
+      name: 'other',
+      groupMembers: [auditbeat],
+    };
+
+    const { result } = renderHook(() =>
+      useIntegrationCardList({
+        integrationsList: [collection, inactiveCollection],
+        activeIntegrations: mockActiveIntegrations,
+        selectedTab,
+      })
+    );
+
+    expect(result.current).toEqual([
+      // 2 lines, so the variant-count badge stays inside the max card height
+      expect.objectContaining({
+        id: 'collection:security',
+        hasDataStreams: true,
+        descriptionLineClamp: 2,
+      }),
+      expect.objectContaining({ id: 'collection:other', hasDataStreams: false }),
+    ]);
   });
 });

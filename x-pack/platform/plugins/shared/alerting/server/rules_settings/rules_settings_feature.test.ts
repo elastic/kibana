@@ -18,15 +18,15 @@ test('returns rule settings feature with query delay subfeature if serverless', 
     },
     id: 'rulesSettings',
     management: {
-      insightsAndAlerting: ['triggersActions'],
+      insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
     },
-    name: 'Rules Settings',
+    name: 'Classic Rules Settings',
     privileges: {
       all: {
         api: [],
         app: [],
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         savedObject: {
           all: ['rules-settings'],
@@ -38,7 +38,7 @@ test('returns rule settings feature with query delay subfeature if serverless', 
         api: [],
         app: [],
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         savedObject: {
           all: [],
@@ -159,15 +159,15 @@ test('returns rule settings feature without query delay subfeature if not server
     },
     id: 'rulesSettings',
     management: {
-      insightsAndAlerting: ['triggersActions'],
+      insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
     },
-    name: 'Rules Settings',
+    name: 'Classic Rules Settings',
     privileges: {
       all: {
         api: [],
         app: [],
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         savedObject: {
           all: ['rules-settings'],
@@ -179,7 +179,7 @@ test('returns rule settings feature without query delay subfeature if not server
         api: [],
         app: [],
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         savedObject: {
           all: [],

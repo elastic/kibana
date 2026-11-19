@@ -12,9 +12,10 @@ import type { MutableRefObject } from 'react';
 import type { Document, Pair, Scalar } from 'yaml';
 import { isPair, isScalar, parseDocument } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import { isTriggerType } from '@kbn/workflows';
+import { getBuiltInTriggerDefinitions } from '@kbn/workflows';
 import { getTriggerNodesWithType } from '../../../../../common/lib/yaml';
 import { triggerSchemas } from '../../../../trigger_schemas';
+import { getExtensionStability } from '../../lib/get_stability_note';
 
 /** Marker class for custom (registered) triggers */
 export const CUSTOM_TRIGGER_INLINE_CLASS = 'custom-trigger-inline';
@@ -23,12 +24,14 @@ export const CUSTOM_TRIGGER_INLINE_CLASS = 'custom-trigger-inline';
 export const triggerTypeToCssClass = (triggerType: string): string =>
   triggerType.replace(/\./g, '-');
 
-const getTriggerIcon = (triggerType: string): { className: string } => {
-  if (isTriggerType(triggerType)) {
-    return { className: triggerType };
-  }
-  return { className: `ct-${triggerTypeToCssClass(triggerType)}` };
-};
+/** Respects `workflowsManagement.pages.enabled`, so a disabled `page` trigger gets no badge. */
+const isBuiltInTrigger = (triggerType: string): boolean =>
+  getBuiltInTriggerDefinitions(triggerSchemas.getTriggerSchemaOptions()).some(
+    ({ id }) => id === triggerType
+  );
+
+const getTriggerClassName = (triggerType: string, isCustomTrigger: boolean): string =>
+  isCustomTrigger ? `ct-${triggerTypeToCssClass(triggerType)}` : triggerType;
 
 function resolveDocument(
   model: monaco.editor.ITextModel,
@@ -65,13 +68,17 @@ function tryCreateTriggerDecoration(
   const typeRange = valueScalar.range;
   if (!typeRange || !Array.isArray(typeRange) || typeRange.length < 3) return null;
 
-  const { className } = getTriggerIcon(triggerType);
-  if (!className) return null;
-
-  const isCustomTrigger = !isTriggerType(triggerType);
+  const isCustomTrigger = !isBuiltInTrigger(triggerType);
   if (isCustomTrigger && !isRegisteredCustomTrigger(triggerType)) return null;
+  const className = getTriggerClassName(triggerType, isCustomTrigger);
 
-  const techPreviewClass = isCustomTrigger ? ' type-tech-preview' : '';
+  const triggerDefinition = isCustomTrigger
+    ? triggerSchemas.getTriggerDefinition(triggerType)
+    : undefined;
+  const techPreviewClass =
+    isCustomTrigger && getExtensionStability(triggerDefinition ?? {}) === 'tech_preview'
+      ? ' type-tech-preview'
+      : '';
   const inlineClasses = isCustomTrigger
     ? `type-inline-highlight ${CUSTOM_TRIGGER_INLINE_CLASS} type-${className}${techPreviewClass}`
     : `type-inline-highlight type-${className}`;

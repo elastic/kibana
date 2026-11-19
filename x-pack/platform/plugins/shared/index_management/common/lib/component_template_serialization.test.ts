@@ -7,6 +7,7 @@
 
 import {
   deserializeComponentTemplate,
+  deserializeComponentTemplateList,
   serializeComponentTemplate,
 } from './component_template_serialization';
 
@@ -346,6 +347,46 @@ describe('Component template serialization', () => {
           },
         },
       });
+    });
+  });
+  describe('deserializeComponentTemplateList()', () => {
+    const buildComponentTemplateEs = (name: string, lifecycle?: Record<string, unknown>) => ({
+      name,
+      component_template: {
+        template: {
+          ...(lifecycle ? { lifecycle } : {}),
+        },
+      },
+    });
+
+    test('flags a component template with a delete phase (data_retention)', () => {
+      const [item] = deserializeComponentTemplateList(
+        [buildComponentTemplateEs('with_delete', { enabled: true, data_retention: '30d' })],
+        []
+      );
+      expect(item.hasFrozenOrDeletePhase).toBe(true);
+    });
+
+    test('flags a component template with a frozen phase (frozen_after)', () => {
+      const [item] = deserializeComponentTemplateList(
+        [buildComponentTemplateEs('with_frozen', { enabled: true, frozen_after: '7d' })],
+        []
+      );
+      expect(item.hasFrozenOrDeletePhase).toBe(true);
+    });
+
+    test('does not flag a component template without frozen/delete phase', () => {
+      const [enabledOnly] = deserializeComponentTemplateList(
+        [buildComponentTemplateEs('enabled_only', { enabled: true })],
+        []
+      );
+      expect(enabledOnly.hasFrozenOrDeletePhase).toBe(false);
+
+      const [noLifecycle] = deserializeComponentTemplateList(
+        [buildComponentTemplateEs('no_lifecycle')],
+        []
+      );
+      expect(noLifecycle.hasFrozenOrDeletePhase).toBe(false);
     });
   });
 });

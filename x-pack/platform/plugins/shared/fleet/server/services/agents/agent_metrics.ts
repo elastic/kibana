@@ -9,34 +9,79 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 import { appContextService } from '../app_context';
-import { DATA_TIERS } from '../../../common/constants';
+import { DATA_TIERS, OPAMP_NON_REPORTING_STATUSES } from '../../../common/constants';
 
 const AGGREGATION_MAX_SIZE = 1000;
 
 export async function fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents: Agent[]) {
-  try {
-    const fleetAgents = agents.filter((agent) => agent.type !== 'OPAMP');
-    const opampAgents = agents.filter((agent) => agent.type === 'OPAMP');
-    const fleetAgentsMetrics = await _fetchAndAssignAgentMetrics(esClient, fleetAgents);
-    const opampAgentsMetrics = await _fetchAndAssignOtelMetrics(esClient, opampAgents);
-    const metricsMap = [...fleetAgentsMetrics, ...opampAgentsMetrics].reduce((acc, agent) => {
-      acc[agent.id] = agent.metrics;
-      return acc;
-    }, {} as Record<string, Agent['metrics']>);
+  const logger = appContextService.getLogger();
+  const fleetAgents = agents.filter((agent) => agent.type !== 'OPAMP');
+  const opampAgents = agents.filter((agent) => agent.type === 'OPAMP');
 
-    return agents.map((agent) => ({
-      ...agent,
-      metrics: metricsMap[agent.id],
-    }));
-  } catch (err) {
-    //  Do not throw if we are not able to fetch metrics, as it could occur if the user is missing some permissions
-    appContextService.getLogger().warn(err);
+  // Fetch fleet and OTel metrics independently so a failure in one doesn't suppress the other.
+  const [fleetAgentsMetrics, opampAgentsMetrics] = await Promise.all([
+    _fetchAndAssignAgentMetrics(esClient, fleetAgents).catch((err) => {
+      logger.warn(err);
+      return fleetAgents.map(({ id }) => ({ id, metrics: undefined }));
+    }),
+    _fetchAndAssignOtelMetrics(esClient, opampAgents).catch((err) => {
+      logger.warn(err);
+      return opampAgents.map(({ id }) => ({ id, metrics: undefined }));
+    }),
+  ]);
 
-    return agents;
-  }
+  const metricsMap = [...fleetAgentsMetrics, ...opampAgentsMetrics].reduce((acc, agent) => {
+    acc[agent.id] = agent.metrics;
+    return acc;
+  }, {} as Record<string, Agent['metrics']>);
+
+  return agents.map((agent) => ({
+    ...agent,
+    metrics: metricsMap[agent.id],
+  }));
 }
 
 async function _fetchAndAssignOtelMetrics(esClient: ElasticsearchClient, agents: Agent[]) {
+  // Map service.instance.id (hostname from elastic.display.name) → the single active agent that
+  // should receive metrics for that host. Collectors report service.instance.id as their hostname,
+  // not their Fleet agent ID, so multiple agent entries can share the same key.
+  //
+  // Two rules keep stale/re-enrolled collectors from receiving a live collector's metrics:
+  //
+  // 1. Offline/inactive/unenrolled agents are excluded entirely (they have already timed out).
+  //
+  // 2. When multiple *online* agents share a hostname — the ~5-minute transition window after
+  //    a collector is stopped but before Fleet marks it offline — only the most recently enrolled
+  //    agent wins the hostname. Its telemetry supersedes the older agent's because re-enrollment
+  //    always produces a newer enrolled_at timestamp.
+  //
+  // See https://github.com/elastic/kibana/issues/274843
+  const agentById = new Map(agents.map((a) => [a.id, a]));
+  const instanceIdToAgentId = new Map<string, string>();
+  for (const agent of agents) {
+    if (agent.status && OPAMP_NON_REPORTING_STATUSES.includes(agent.status)) {
+      continue;
+    }
+    const instanceId =
+      (agent.non_identifying_attributes?.['elastic.display.name'] as string | undefined) ??
+      agent.id;
+    const existingId = instanceIdToAgentId.get(instanceId);
+    if (!existingId) {
+      instanceIdToAgentId.set(instanceId, agent.id);
+    } else {
+      const existing = agentById.get(existingId);
+      if ((agent.enrolled_at ?? '') > (existing?.enrolled_at ?? '')) {
+        instanceIdToAgentId.set(instanceId, agent.id);
+      }
+    }
+  }
+  const instanceIds = Array.from(instanceIdToAgentId.keys());
+
+  // If no agents are actively reporting, skip the ES query entirely.
+  if (instanceIds.length === 0) {
+    return agents.map(({ id }) => ({ id, metrics: undefined }));
+  }
+
   const res = await esClient.search<
     unknown,
     Record<
@@ -44,22 +89,25 @@ async function _fetchAndAssignOtelMetrics(esClient: ElasticsearchClient, agents:
       {
         buckets: Array<{
           key: string;
-          avg_memory_size: { value: number };
+          max_memory_size: { value: number };
           avg_cpu: { value: number };
         }>;
       }
     >
   >({
-    ...(aggregationQueryBuilderOtel(agents.map(({ id }) => id)) as any),
+    ...(aggregationQueryBuilderOtel(instanceIds) as any),
     index: 'metrics-collectortelemetry.otel-*',
   });
 
   const formattedResults =
     res.aggregations?.agents.buckets.reduce((acc, bucket) => {
-      acc[bucket.key] = {
-        avg_memory_size: bucket.avg_memory_size.value,
-        avg_cpu: bucket.avg_cpu.value,
-      };
+      const agentId = instanceIdToAgentId.get(bucket.key);
+      if (agentId) {
+        acc[agentId] = {
+          avg_memory_size: bucket.max_memory_size.value,
+          avg_cpu: bucket.avg_cpu.value,
+        };
+      }
       return acc;
     }, {} as Record<string, { avg_memory_size: number; avg_cpu: number }>) ?? {};
 
@@ -127,27 +175,31 @@ const aggregationQueryBuilderOtel = (agentIds: string[]) => ({
         size: AGGREGATION_MAX_SIZE,
       },
       aggs: {
-        avg_memory_size: {
-          avg: {
+        // Use max (most recent for monotonically non-decreasing RSS) to match
+        // the dashboard's LAST_OVER_TIME(otelcol_process_memory_rss).
+        max_memory_size: {
+          max: {
             field: 'otelcol_process_memory_rss',
           },
         },
 
         cpu_seconds_max: { max: { field: 'otelcol_process_cpu_seconds' } },
         cpu_seconds_min: { min: { field: 'otelcol_process_cpu_seconds' } },
-        uptime_max: { max: { field: 'otelcol_process_uptime' } },
-        uptime_min: { min: { field: 'otelcol_process_uptime' } },
+        // Use @timestamp delta (ms → s) as the time denominator to match
+        // the dashboard's RATE(), which divides by wall-clock elapsed time.
+        timestamp_max: { max: { field: '@timestamp' } },
+        timestamp_min: { min: { field: '@timestamp' } },
 
         avg_cpu: {
           bucket_script: {
             buckets_path: {
               cpuMax: 'cpu_seconds_max',
               cpuMin: 'cpu_seconds_min',
-              upMax: 'uptime_max',
-              upMin: 'uptime_min',
+              tsMax: 'timestamp_max',
+              tsMin: 'timestamp_min',
             },
             script:
-              'double cpuDelta = params.cpuMax - params.cpuMin; double upDelta = params.upMax - params.upMin; return upDelta > 0 ? (cpuDelta / upDelta) : null;',
+              'double cpuDelta = params.cpuMax - params.cpuMin; double timeDelta = (params.tsMax - params.tsMin) / 1000.0; return timeDelta > 0 ? (cpuDelta / timeDelta) : null;',
           },
         },
       },

@@ -16,6 +16,8 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import {
   extractMigrationInfo,
+  hashStoredSchema,
+  normalizeForHash,
   type SavedObjectTypeMigrationInfo,
   type ModelVersionSummary,
 } from './extract_migration_info';
@@ -63,7 +65,7 @@ export const getTypeHashes = (soType: SavedObjectsType): SavedObjectTypeMigratio
 };
 
 const getTypeGlobalHash = (migInfo: SavedObjectTypeMigrationInfo): string => {
-  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+  const hash = createHash('sha1');
   const globalData = [
     migInfo.name,
     migInfo.namespaceType,
@@ -77,13 +79,13 @@ const getTypeGlobalHash = (migInfo: SavedObjectTypeMigrationInfo): string => {
 };
 
 const getTypeMappingsHash = (migInfo: SavedObjectTypeMigrationInfo): string => {
-  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+  const hash = createHash('sha1');
   const mappingData = JSON.stringify(migInfo.mappings, Object.keys(migInfo.mappings).sort());
   return hash.update(mappingData).digest('hex');
 };
 
 const getTypeSchemasHash = (migInfo: SavedObjectTypeMigrationInfo): string => {
-  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+  const hash = createHash('sha1');
   const schemaData = migInfo.schemaVersions.join('|');
   return hash.update(schemaData).digest('hex');
 };
@@ -93,7 +95,7 @@ const getMigrationsHashes = (soType: SavedObjectsType): string[] => {
     typeof soType.migrations === 'function' ? soType.migrations() : soType.migrations!;
 
   return Object.entries(migrations).map(([version, migration]) => {
-    const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+    const hash = createHash('sha1');
     const migrationData =
       typeof migration === 'function'
         ? migration.toString()
@@ -122,7 +124,7 @@ const getModelVersionHash = (
   modelVersion: SavedObjectsModelVersion | SavedObjectsFullModelVersion
 ) => {
   const hash = createHash('sha256');
-  const modelVersionData = JSON.stringify(modelVersion);
+  const modelVersionData = JSON.stringify(normalizeForHash(modelVersion));
   return `${hash.update(modelVersionData).digest('hex')}`;
 };
 
@@ -149,13 +151,18 @@ export const getMigrationHash = (soType: SavedObjectsType): SavedObjectTypeMigra
 };
 
 const serializeModelVersion = (modelVersion: ModelVersionSummary): string => {
-  const schemas = [modelVersion.schemas.forwardCompatibility, modelVersion.schemas.create];
+  // Schemas are stored as objects (Joi describe() output) since the format change.
+  // We hash them back to strings so getMigrationHash stays stable across the transition.
+  const schemasHash = [
+    hashStoredSchema(modelVersion.schemas.forwardCompatibility),
+    hashStoredSchema(modelVersion.schemas.create),
+  ].join(',');
   return [
     modelVersion.version,
     modelVersion.modelVersionHash,
     modelVersion.changeTypes.join(','),
     modelVersion.hasTransformation,
-    schemas.join(','),
+    schemasHash,
     ...modelVersion.newMappings,
   ].join('|');
 };

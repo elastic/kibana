@@ -11,6 +11,5 @@ export default function alertingApiIntegrationTests({ loadTestFile }: FtrProvide
   describe('alerting api integration security and spaces enabled - Group 2', function () {
     loadTestFile(require.resolve('./telemetry'));
     loadTestFile(require.resolve('./actions'));
-    loadTestFile(require.resolve('./alerting'));
   });
 }

@@ -13,7 +13,8 @@ import { UsersTable } from '.';
 import { usersModel } from '../../store';
 import { Direction, RiskSeverity } from '../../../../../common/search_strategy';
 import { UsersFields } from '../../../../../common/search_strategy/security_solution/users/common';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 const mockUseMlCapabilities = jest.fn().mockReturnValue({ isPlatinumOrTrialLicense: false });
 
@@ -21,13 +22,28 @@ jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => ({
   useMlCapabilities: () => mockUseMlCapabilities(),
 }));
 
+const mockOpenUserFlyout = jest.fn();
+
+jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
+  useFlyoutApi: () => ({
+    openUserFlyout: mockOpenUserFlyout,
+    openHostFlyout: jest.fn(),
+    openServiceFlyout: jest.fn(),
+    openGenericEntityFlyout: jest.fn(),
+  }),
+}));
+
 describe('Users Table Component', () => {
   const loadPage = jest.fn();
+
+  beforeEach(() => {
+    mockOpenUserFlyout.mockClear();
+  });
 
   describe('rendering', () => {
     test('it renders the users table', () => {
       const userName = 'testUser';
-      const { getByTestId, getAllByRole, getByText } = render(
+      const { getByTestId, getAllByTestId, getByText } = render(
         <TestProviders>
           <UsersTable
             users={[
@@ -50,7 +66,7 @@ describe('Users Table Component', () => {
       );
 
       expect(getByTestId('table-allUsers-loading-false')).toBeInTheDocument();
-      expect(getAllByRole('columnheader').length).toBe(4);
+      expect(getAllByTestId(/tableHeaderCell_/).length).toBe(4);
       expect(getByText(userName)).toBeInTheDocument();
     });
 
@@ -78,10 +94,10 @@ describe('Users Table Component', () => {
       expect(getByTestId('table-allUsers-loading-false')).toHaveTextContent('(Empty string)');
     });
 
-    test('it renders "Host Risk classfication" column when "isPlatinumOrTrialLicense" is truthy', () => {
+    test('it renders "Host Risk classification" column when "isPlatinumOrTrialLicense" is truthy', () => {
       mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
 
-      const { getAllByRole, getByText } = render(
+      const { getAllByTestId, getByText } = render(
         <TestProviders>
           <UsersTable
             users={[
@@ -108,14 +124,14 @@ describe('Users Table Component', () => {
         </TestProviders>
       );
 
-      expect(getAllByRole('columnheader').length).toBe(5);
+      expect(getAllByTestId(/tableHeaderCell_/).length).toBe(5);
       expect(getByText('Critical')).toBeInTheDocument();
     });
 
     test("it doesn't renders 'Host Risk classfication' column when 'isPlatinumOrTrialLicense' is falsy", () => {
       mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: false });
 
-      const { getAllByRole, queryByText } = render(
+      const { getAllByTestId, queryByText } = render(
         <TestProviders>
           <UsersTable
             users={[
@@ -142,8 +158,82 @@ describe('Users Table Component', () => {
         </TestProviders>
       );
 
-      expect(getAllByRole('columnheader').length).toBe(4);
+      expect(getAllByTestId(/tableHeaderCell_/).length).toBe(4);
       expect(queryByText('Critical')).not.toBeInTheDocument();
+    });
+
+    test('opens the user flyout when clicking a user name that has an entityId', () => {
+      const userName = 'testUser';
+      const entityId = 'test-entity-id';
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <UsersTable
+            users={[
+              {
+                name: userName,
+                lastSeen: '2019-04-08T18:35:45.064Z',
+                domain: 'test domain',
+                entityId,
+              },
+            ]}
+            fakeTotalCount={50}
+            id="users"
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={false}
+            totalCount={0}
+            type={usersModel.UsersType.page}
+            sort={{
+              field: UsersFields.name,
+              direction: Direction.asc,
+            }}
+            setQuerySkip={() => {}}
+          />
+        </TestProviders>
+      );
+
+      fireEvent.click(getByTestId('users-link-anchor'));
+
+      expect(mockOpenUserFlyout).toHaveBeenCalledWith({
+        userName,
+        entityId,
+        contextID: 'allUsers',
+        scopeId: 'allUsers',
+        origin: FLYOUT_ORIGIN.USERS_TABLE,
+      });
+    });
+
+    test('does not open the flyout when clicking a user name without an entityId', () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <UsersTable
+            users={[
+              {
+                name: 'testUser',
+                lastSeen: '2019-04-08T18:35:45.064Z',
+                domain: 'test domain',
+              },
+            ]}
+            fakeTotalCount={50}
+            id="users"
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={false}
+            totalCount={0}
+            type={usersModel.UsersType.page}
+            sort={{
+              field: UsersFields.name,
+              direction: Direction.asc,
+            }}
+            setQuerySkip={() => {}}
+          />
+        </TestProviders>
+      );
+
+      fireEvent.click(getByTestId('users-link-anchor'));
+
+      expect(mockOpenUserFlyout).not.toHaveBeenCalled();
     });
   });
 });

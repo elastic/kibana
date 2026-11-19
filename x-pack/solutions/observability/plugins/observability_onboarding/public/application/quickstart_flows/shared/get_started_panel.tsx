@@ -22,6 +22,14 @@ import type { OnboardingFlowEventContext } from '../../../../common/telemetry_ev
 import { OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
 import type { ObservabilityOnboardingContextValue } from '../../../plugin';
 
+export interface ActionLink {
+  id: string;
+  title: string;
+  label: string;
+  href: string;
+  requires?: 'any' | 'logs' | 'metrics' | 'traces';
+}
+
 export function GetStartedPanel({
   onboardingFlowType,
   dataset,
@@ -37,12 +45,7 @@ export function GetStartedPanel({
   dataset: string;
   integration?: string;
   newTab: boolean;
-  actionLinks: Array<{
-    id: string;
-    title: string;
-    label: string;
-    href: string;
-  }>;
+  actionLinks: ActionLink[];
   previewImage?: string;
   isLoading: boolean;
   onboardingId?: string;

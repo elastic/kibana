@@ -7,16 +7,21 @@
 
 /* eslint-disable max-classes-per-file */
 
+import Boom from '@hapi/boom';
+
 import type { BuildFlavor } from '@kbn/config';
-import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type {
   ClientAuthentication,
+  CloneAPIKeyParams,
+  CloneAPIKeyResult,
   CreateAPIKeyParams,
   CreateAPIKeyResult,
   CreateRestAPIKeyParams,
   CreateRestAPIKeyWithKibanaPrivilegesParams,
+  GrantAPIKeyOptions,
   GrantAPIKeyResult,
   InvalidateAPIKeyResult,
   InvalidateAPIKeysParams,
@@ -26,9 +31,12 @@ import type {
 import { isCreateRestAPIKeyParams } from '@kbn/security-plugin-types-server';
 
 import { getFakeKibanaRequest } from './fake_kibana_request';
+import { toServiceAccountGrantError } from './service_account_grant_error';
 import type { SecurityLicense } from '../../../common';
+import { getErrorStatusCode } from '../../errors';
 import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
 import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../routes/api_keys';
+import { isEsServiceAccountToken } from '../../service_accounts/es_service_account_token';
 import { type UiamServicePublic } from '../../uiam';
 import { BasicHTTPAuthorizationHeaderCredentials } from '../http_authentication';
 
@@ -48,9 +56,11 @@ export interface ConstructorOptions {
   kibanaFeatures: KibanaFeature[];
   buildFlavor?: BuildFlavor;
   uiam?: UiamServicePublic;
+  serviceAccountsEnabled?: boolean;
+  getCurrentUser?: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 
-type GrantAPIKeyParams =
+type GrantAPIKeyParams = (
   | {
       api_key: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams;
       grant_type: 'password';
@@ -61,7 +71,13 @@ type GrantAPIKeyParams =
       api_key: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams;
       grant_type: 'access_token';
       access_token: string;
-    };
+    }
+  | {
+      api_key: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams;
+      grant_type: '_user_managed_service_account';
+      service_account_token: string;
+    }
+) & { refresh?: boolean | 'wait_for' };
 
 /**
  * Class responsible for managing Elasticsearch API keys.
@@ -74,6 +90,8 @@ export class APIKeys implements NativeAPIKeysType {
   private readonly kibanaFeatures: KibanaFeature[];
   private readonly buildFlavor?: BuildFlavor;
   private readonly uiam?: UiamServicePublic;
+  private readonly serviceAccountsEnabled: boolean;
+  private readonly getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 
   constructor({
     logger,
@@ -83,6 +101,8 @@ export class APIKeys implements NativeAPIKeysType {
     kibanaFeatures,
     buildFlavor,
     uiam,
+    serviceAccountsEnabled = false,
+    getCurrentUser = () => null,
   }: ConstructorOptions) {
     this.logger = logger;
     this.clusterClient = clusterClient;
@@ -91,6 +111,8 @@ export class APIKeys implements NativeAPIKeysType {
     this.kibanaFeatures = kibanaFeatures;
     this.buildFlavor = buildFlavor;
     this.uiam = uiam;
+    this.serviceAccountsEnabled = serviceAccountsEnabled;
+    this.getCurrentUser = getCurrentUser;
   }
 
   /**
@@ -171,7 +193,13 @@ export class APIKeys implements NativeAPIKeysType {
         result = await scopedClusterClient.asCurrentUser.transport.request<CreateAPIKeyResult>({
           method: 'POST',
           path: '/_security/cross_cluster/api_key',
-          body: { name, expiration, metadata, access: createParams.access },
+          body: {
+            name,
+            expiration,
+            metadata,
+            access: createParams.access,
+            certificate_identity: createParams.certificate_identity,
+          },
         });
       } else {
         result = await scopedClusterClient.asCurrentUser.security.createApiKey({
@@ -225,7 +253,11 @@ export class APIKeys implements NativeAPIKeysType {
         result = await scopedClusterClient.asCurrentUser.transport.request<UpdateAPIKeyResult>({
           method: 'PUT',
           path: `/_security/cross_cluster/api_key/${id}`,
-          body: { metadata, access: updateParams.access },
+          body: {
+            metadata,
+            access: updateParams.access,
+            certificate_identity: updateParams.certificate_identity,
+          },
         });
       } else {
         result = await scopedClusterClient.asCurrentUser.security.updateApiKey({
@@ -261,7 +293,8 @@ export class APIKeys implements NativeAPIKeysType {
    */
   async grantAsInternalUser(
     request: KibanaRequest,
-    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams
+    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams,
+    options?: GrantAPIKeyOptions
   ) {
     if (!this.license.isEnabled()) {
       return null;
@@ -275,13 +308,12 @@ export class APIKeys implements NativeAPIKeysType {
       );
     }
 
-    // If API key is granted for UIAM credentials, we need to pass UIAM client authentication and ignore any other
-    // client credentials that might have been provided. Otherwise, try to extract optional Elasticsearch client
-    // credentials from `es-client-authentication` HTTP header (currently only used by JWT).
+    // Preserve UIAM client authentication paired with the granting credential. Other credentials
+    // use `es-client-authentication` (currently only used by JWT).
     let clientAuthentication: ClientAuthentication | undefined;
 
     if (this.uiam && isUiamCredential(authorizationHeader)) {
-      clientAuthentication = this.uiam.getClientAuthentication();
+      clientAuthentication = this.uiam.getClientAuthentication(request);
     } else {
       const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(
         request,
@@ -311,17 +343,89 @@ export class APIKeys implements NativeAPIKeysType {
       authorizationHeader,
       clientAuthentication
     );
+    if (options?.refresh !== undefined) {
+      params.refresh = options.refresh;
+    }
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
     try {
+      this.logger.debug(`Granting an API key with grant type [${params.grant_type}]`);
+      // @ts-expect-error Elasticsearch client types do not yet include the `_user_managed_service_account` grant
       result = await this.clusterClient.asInternalUser.security.grantApiKey(params);
       this.logger.debug('API key was granted successfully');
     } catch (e) {
-      this.logger.error(`Failed to grant API key: ${e.message}`);
+      const serviceAccountError = toServiceAccountGrantError(e, this.getCurrentUser(request), {
+        reason: this.getServiceAccountGrantRefusalReason(authorizationHeader),
+      });
+      // A refused service account is the caller's to fix, not a Kibana failure.
+      this.logger[serviceAccountError ? 'warn' : 'error'](`Failed to grant API key: ${e.message}`);
+      if (serviceAccountError) {
+        throw serviceAccountError;
+      }
+      // The original error's request metadata carries the service account token, so it must not
+      // leave this method.
+      if (params.grant_type === '_user_managed_service_account') {
+        throw Boom.boomify(new Error(e.message), { statusCode: getErrorStatusCode(e) || 500 });
+      }
       throw e;
     }
 
     return result;
+  }
+
+  /**
+   * Clones an existing API key using the internal user. Extracts the source key credential
+   * from the request's Authorization header and calls the ES clone endpoint to create a new
+   * independent key with the same role descriptors and no expiration.
+   */
+  async cloneAsInternalUser(
+    request: KibanaRequest,
+    cloneParams: CloneAPIKeyParams
+  ): Promise<CloneAPIKeyResult | null> {
+    if (!this.license.isEnabled()) {
+      return null;
+    }
+
+    this.logger.debug('Trying to clone an API key');
+
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (authorizationHeader == null) {
+      throw new Error(
+        'Unable to clone an API key, request does not contain an authorization header'
+      );
+    }
+
+    if (authorizationHeader.scheme.toLowerCase() !== 'apikey') {
+      throw new Error(
+        `Unable to clone an API key, expected ApiKey authorization scheme but got "${authorizationHeader.scheme}"`
+      );
+    }
+
+    try {
+      const result = await this.clusterClient.asInternalUser.transport.request<CloneAPIKeyResult>({
+        method: 'POST',
+        path: '/_security/api_key/clone',
+        body: {
+          api_key: authorizationHeader.credentials,
+          name: cloneParams.name,
+          // `metadata` MUST come before `expiration`. ES's RestCloneApiKeyAction
+          // over-advances the parser on `expiration: null`, silently dropping the next field.
+          // Remove this ordering constraint once the ES fix ships: https://github.com/elastic/elasticsearch/pull/152874
+          ...(cloneParams.metadata ? { metadata: cloneParams.metadata } : {}),
+          expiration: null,
+        },
+        ...(cloneParams.refresh !== undefined
+          ? { querystring: { refresh: cloneParams.refresh } }
+          : {}),
+      });
+
+      this.logger.debug('API key was cloned successfully');
+      return result;
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      this.logger.debug(`Failed to clone API key: ${message}`);
+      throw e;
+    }
   }
 
   /**
@@ -419,12 +523,37 @@ export class APIKeys implements NativeAPIKeysType {
     );
   }
 
+  /**
+   * Explains a refused grant that Kibana itself caused: a service account token presented while
+   * service accounts are disabled is sent as an access token, which Elasticsearch never accepts.
+   */
+  private getServiceAccountGrantRefusalReason(
+    authorizationHeader: HTTPAuthorizationHeader
+  ): string | undefined {
+    return !this.serviceAccountsEnabled &&
+      authorizationHeader.scheme.toLowerCase() === 'bearer' &&
+      isEsServiceAccountToken(authorizationHeader.credentials)
+      ? 'Kibana grants API keys from service account tokens only when ' +
+          '`xpack.security.serviceAccounts.enabled` is `true`'
+      : undefined;
+  }
+
   private getGrantParams(
     createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams,
     authorizationHeader: HTTPAuthorizationHeader,
     clientAuthentication?: ClientAuthentication
   ): GrantAPIKeyParams {
     if (authorizationHeader.scheme.toLowerCase() === 'bearer') {
+      // A raw service account token can't be granted as an access token. Elasticsearch rejects
+      // client authentication for this grant type, so none is sent.
+      if (this.serviceAccountsEnabled && isEsServiceAccountToken(authorizationHeader.credentials)) {
+        return {
+          api_key: createParams,
+          grant_type: '_user_managed_service_account',
+          service_account_token: authorizationHeader.credentials,
+        };
+      }
+
       return {
         api_key: createParams,
         grant_type: 'access_token',

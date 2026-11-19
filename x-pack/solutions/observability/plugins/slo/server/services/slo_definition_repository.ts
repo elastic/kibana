@@ -13,7 +13,6 @@ import type {
 import type { Logger } from '@kbn/core/server';
 import type { Paginated, Pagination } from '@kbn/slo-schema';
 import { ALL_VALUE, sloDefinitionSchema, storedSloDefinitionSchema } from '@kbn/slo-schema';
-import { isLeft } from 'fp-ts/Either';
 import { merge } from 'lodash';
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import type { SLODefinition, StoredSLODefinition } from '../domain/models';
@@ -29,7 +28,7 @@ interface SearchParams {
 export interface SLODefinitionRepository {
   create(slo: SLODefinition): Promise<SLODefinition>;
   update(slo: SLODefinition): Promise<SLODefinition>;
-  findAllByIds(ids: string[]): Promise<SLODefinition[]>;
+  findAllByIds(ids: string[], options?: { namespace?: string }): Promise<SLODefinition[]>;
   findById(id: string): Promise<SLODefinition>;
   deleteById(id: string, options?: { ignoreNotFound?: boolean }): Promise<void>;
   search({ search, pagination, filters }: SearchParams): Promise<Paginated<SLODefinition>>;
@@ -104,7 +103,10 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
     await this.soClient.delete(SO_SLO_TYPE, response.saved_objects[0].id);
   }
 
-  async findAllByIds(ids: string[]): Promise<SLODefinition[]> {
+  async findAllByIds(
+    ids: string[],
+    { namespace }: { namespace?: string } = {}
+  ): Promise<SLODefinition[]> {
     if (ids.length === 0) return [];
 
     const response = await this.soClient.find<StoredSLODefinition>({
@@ -112,6 +114,7 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
       page: 1,
       perPage: ids.length,
       filter: `slo.attributes.id:(${ids.join(' or ')})`,
+      ...(namespace && { namespaces: [namespace] }),
     });
 
     return response.saved_objects.map((so) => this.toSLO(so)).filter(this.isSLO);
@@ -159,7 +162,7 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
       references: storedSLOObject.references,
     });
 
-    const result = sloDefinitionSchema.decode({
+    const result = sloDefinitionSchema.safeParse({
       ...storedSLO,
       // groupBy was added in 8.10.0
       groupBy: storedSLO.groupBy ?? ALL_VALUE,
@@ -168,8 +171,13 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
       // We would need to call the _reset api on this SLO.
       version: storedSLO.version ?? 1,
       // settings.preventInitialBackfill was added in 8.15.0
+      // never backfill preventCrossProjectSearch or projectRoutings — absence must stay absence
       settings: merge(
-        { preventInitialBackfill: false, syncDelay: '1m', frequency: '1m' },
+        {
+          preventInitialBackfill: false,
+          syncDelay: '1m',
+          frequency: '1m',
+        },
         storedSLO.settings
       ),
       createdBy: storedSLO.createdBy ?? storedSLOObject.created_by,
@@ -177,12 +185,12 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
       artifacts: { dashboards: dashboardsIds },
     });
 
-    if (isLeft(result)) {
-      this.logger.debug(`Invalid stored SLO with id [${storedSLO.id}]`);
+    if (!result.success) {
+      this.logger.debug(`Invalid stored SLO with ID [${storedSLO.id}]`);
       return undefined;
     }
 
-    return result.right;
+    return result.data;
   }
 
   private getDashboardsIds({

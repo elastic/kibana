@@ -13,7 +13,9 @@ import { findRelationships } from './find_relationships';
 import { managementMock } from '../services/management.mock';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-const createObj = (parts: Partial<SavedObject<any>>): SavedObject<any> => ({
+const createObj = (
+  parts: Partial<SavedObject<any>> & { error?: SavedObjectError }
+): SavedObject<any> => ({
   id: 'id',
   type: 'type',
   attributes: {},

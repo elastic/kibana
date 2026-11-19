@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getApmIndicesCombined } from './indices_stats_helpers';
 
 export function isCrossClusterSearch(apmEventClient: APMEventClient) {
   // Check if a remote cluster is set in APM indices
   const index = getApmIndicesCombined(apmEventClient);
-  return isCCSRemoteIndexName(index);
+  return isNonLocalIndexName(index);
 }

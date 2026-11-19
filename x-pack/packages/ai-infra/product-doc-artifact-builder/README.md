@@ -4,7 +4,7 @@ Script to build the knowledge base artifacts.
 
 ## How to run
 
-yarn es snapshot --license trial
+pnpm es snapshot --license trial
 
 node scripts/kibana --dev --no-base-path
 
@@ -67,6 +67,18 @@ Defaults to `{REPO_ROOT}/build/temp-kb-artifacts`
 - params for the inference endpoint:
 `inferenceId`
 
+## Run tests
+
+Unit tests for the document processing pipeline (no Kibana or Elasticsearch required):
+
+```
+node scripts/jest x-pack/packages/ai-infra/product-doc-artifact-builder/src/tasks/process_documents.test.ts
+```
+
+The tests cover:
+- Document count consistency (deduplication, sparse-doc filtering)
+- `content_title` trimming (site-name suffixes stripped, product-name pipes like `ES|QL` preserved, titles cut at that pipe restored from the page heading)
+
 ## Building OpenAPI Artifacts
 
 The `build_openapi_artifacts.js` script builds knowledge base artifacts from OpenAPI specifications for Elasticsearch and Kibana.
@@ -81,6 +93,8 @@ Example:
 
 ```
 node scripts/build_openapi_artifacts.js --stack-version=9.4 --embedding-cluster-url=http://localhost:9200 --embedding-cluster-username=elastic --embedding-cluster-password=changeme
+--inference-id=.multilingual-e5-small-elasticsearch
+
 ```
 
 For multilingual, add

@@ -13,6 +13,7 @@ import * as i18n from '../translations';
 import { useBulkDeleteTemplates } from '../hooks/use_bulk_delete_templates';
 import { useBulkExportTemplates } from '../hooks/use_bulk_export_templates';
 import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmation_modal';
+import { useTemplateDeletedEBT } from '../../../analytics/templates';
 
 export interface TemplatesBulkActionsProps {
   selectedTemplates: Template[];
@@ -28,8 +29,16 @@ const TemplatesBulkActionsComponent: React.FC<TemplatesBulkActionsProps> = ({
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
+  const reportTemplateDeleted = useTemplateDeletedEBT();
+
   const { mutate: bulkDeleteTemplates, isLoading: isBulkDeleting } = useBulkDeleteTemplates({
-    onSuccess: onActionSuccess,
+    onSuccess: () => {
+      // One event for the confirmed action, whatever the number of selected templates. Reported from
+      // the hook-level callback, which React Query awaits even once this component has unsubscribed,
+      // unlike a per-call callback.
+      reportTemplateDeleted({ entryPoint: 'templates_list', deleteScope: 'bulk' });
+      onActionSuccess?.();
+    },
   });
   const { mutate: bulkExportTemplates, isLoading: isBulkExporting } = useBulkExportTemplates();
 
@@ -66,7 +75,7 @@ const TemplatesBulkActionsComponent: React.FC<TemplatesBulkActionsProps> = ({
         items: [
           {
             name: i18n.BULK_EXPORT_TEMPLATES,
-            icon: 'exportAction',
+            icon: 'upload',
             onClick: handleBulkExport,
             disabled: isLoading,
             'data-test-subj': 'templates-bulk-action-export',
@@ -97,6 +106,7 @@ const TemplatesBulkActionsComponent: React.FC<TemplatesBulkActionsProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPopover
+          aria-label={i18n.BULK_ACTIONS}
           isOpen={isPopoverOpen}
           closePopover={closePopover}
           panelPaddingSize="none"
@@ -106,7 +116,7 @@ const TemplatesBulkActionsComponent: React.FC<TemplatesBulkActionsProps> = ({
               onClick={togglePopover}
               size="xs"
               iconSide="right"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               flush="left"
               data-test-subj="templates-bulk-actions-link-icon"
             >

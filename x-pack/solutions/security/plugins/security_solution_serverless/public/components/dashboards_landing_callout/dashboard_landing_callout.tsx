@@ -19,7 +19,7 @@ export const DashboardsLandingCalloutComponent: React.FC = () => {
   return (
     <EuiCallOut
       size="s"
-      iconType="visArea"
+      iconType="chartArea"
       title={
         <>
           <FormattedMessage

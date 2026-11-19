@@ -17,7 +17,10 @@ import {
   EuiButton,
   EuiPageSection,
 } from '@elastic/eui';
-import type { ArtifactEntryCardDecoratorProps } from '../../../../../components/artifact_entry_card';
+import type {
+  ArtifactEntryCardDecoratorProps,
+  ArtifactEntryCardProps,
+} from '../../../../../components/artifact_entry_card';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
@@ -46,8 +49,18 @@ export interface PolicyArtifactsLayoutProps {
   getPolicyArtifactsPath: (policyId: string) => string;
   /** A boolean to check if has write artifact privilege or not */
   canWriteArtifact?: boolean;
+  disableArtifactsByPolicy?: boolean;
   // Artifact specific decorations to display in the cards
   CardDecorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
+  /**
+   * Replaces the default field, operator, and value block inside policy artifact cards.
+   */
+  CriteriaComponent?: ArtifactEntryCardProps['CriteriaComponent'];
+  /**
+   * When true, policy cards show a read-only Enabled column.
+   * Only artifact types that support the `disabled` tag should set this.
+   */
+  showEnabledColumn?: boolean;
 }
 export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
   ({
@@ -59,6 +72,9 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     getPolicyArtifactsPath,
     canWriteArtifact = false,
     CardDecorator,
+    CriteriaComponent,
+    showEnabledColumn = false,
+    disableArtifactsByPolicy,
   }) => {
     const exceptionsListApiClient = useMemo(
       () => getExceptionsListApiClient(),
@@ -74,6 +90,9 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     const [exceptionItemToDelete, setExceptionItemToDelete] = useState<
       ExceptionListItemSchema | undefined
     >();
+
+    const showPolicyAssignment =
+      canCreateArtifactsByPolicy && !disableArtifactsByPolicy && canWriteArtifact;
 
     const labels = useMemo<typeof policyArtifactsPageLabels>(() => {
       return {
@@ -120,7 +139,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
       () => (
         <EuiButton
           fill
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="artifacts-assign-button"
           onClick={handleOnClickAssignButton}
         >
@@ -154,7 +173,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     if (isEmptyState) {
       return (
         <>
-          {canCreateArtifactsByPolicy && urlParams.show === 'list' && (
+          {showPolicyAssignment && urlParams.show === 'list' && (
             <PolicyArtifactsFlyout
               policyItem={policyItem}
               apiClient={exceptionsListApiClient}
@@ -162,6 +181,8 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
               onClose={handleOnCloseFlyout}
               labels={labels}
               CardDecorator={CardDecorator}
+              CriteriaComponent={CriteriaComponent}
+              showEnabledColumn={showEnabledColumn}
             />
           )}
           {allArtifacts && allArtifacts.total !== 0 ? (
@@ -170,7 +191,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
               policyName={policyItem.name}
               listId={exceptionsListApiClient.listId}
               labels={labels}
-              canWriteArtifact={canWriteArtifact}
+              canWriteArtifact={showPolicyAssignment}
               getPolicyArtifactsPath={getPolicyArtifactsPath}
               getArtifactPath={getArtifactPath}
             />
@@ -203,10 +224,10 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             </EuiText>
           </EuiPageHeaderSection>
           <EuiPageHeaderSection>
-            {canCreateArtifactsByPolicy && canWriteArtifact && assignToPolicyButton}
+            {showPolicyAssignment && assignToPolicyButton}
           </EuiPageHeaderSection>
         </EuiPageHeader>
-        {canCreateArtifactsByPolicy && canWriteArtifact && urlParams.show === 'list' && (
+        {showPolicyAssignment && urlParams.show === 'list' && (
           <PolicyArtifactsFlyout
             policyItem={policyItem}
             apiClient={exceptionsListApiClient}
@@ -214,6 +235,8 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             onClose={handleOnCloseFlyout}
             labels={labels}
             CardDecorator={CardDecorator}
+            CriteriaComponent={CriteriaComponent}
+            showEnabledColumn={showEnabledColumn}
           />
         )}
         {exceptionItemToDelete && (
@@ -238,6 +261,8 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             getPolicyArtifactsPath={getPolicyArtifactsPath}
             getArtifactPath={getArtifactPath}
             CardDecorator={CardDecorator}
+            CriteriaComponent={CriteriaComponent}
+            showEnabledColumn={showEnabledColumn}
           />
         </EuiPageSection>
       </div>

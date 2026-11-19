@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, type ReactNode } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
-import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import { EuiSpacer, EuiText, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
@@ -18,17 +17,19 @@ import useWindowSize from 'react-use/lib/useWindowSize';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 import { FieldRow } from '../../doc_viewer_table/field_row';
 import { TableGrid } from '../../doc_viewer_table/table_grid';
+import type {
+  TableGridAppearance,
+  TableGridCellContext,
+} from '../../doc_viewer_table/table_grid/model';
 import { FormattedValue } from './components/formatted_value';
 import { NamePopoverContent } from './components/name_popover_content';
 import { ValuePopoverContent } from './components/value_popover_content';
-
-const DEFAULT_INITIAL_PAGE_SIZE = 25;
 
 export type FieldConfigValue = string | number | undefined;
 
 export interface FieldConfiguration {
   title: string;
-  formatter?: (value: FieldConfigValue, formattedValue: string) => React.ReactNode;
+  formatter?: (value: FieldConfigValue, formattedValue: ReactNode) => ReactNode;
   description?: string;
 }
 
@@ -43,20 +44,19 @@ export interface TableFieldConfiguration {
 export interface ContentFrameworkTableProps
   extends Pick<
     DocViewRenderProps,
-    | 'hit'
-    | 'dataView'
-    | 'columnsMeta'
-    | 'textBasedHits'
-    | 'filter'
-    | 'onAddColumn'
-    | 'onRemoveColumn'
-    | 'columns'
+    'hit' | 'dataView' | 'textBasedHits' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
   > {
   fieldNames: string[];
   fieldConfigurations?: Record<string, FieldConfiguration>;
   id: string;
   'data-test-subj'?: string;
 }
+
+const CONTENT_FRAMEWORK_TABLE_APPEARANCE = {
+  stripes: false,
+  rowHover: 'none',
+  header: 'shade',
+} satisfies Partial<TableGridAppearance>;
 
 export function ContentFrameworkTable({
   hit,
@@ -101,17 +101,14 @@ export function ContentFrameworkTable({
         (acc, fieldName) => {
           const value = flattenedHit[fieldName];
           const fieldConfiguration = fieldConfigurations?.[fieldName];
-          const fieldDescription =
-            fieldConfiguration?.description || fieldsMetadata[fieldName]?.short;
           const formattedValue = formattedHit[fieldName];
 
-          if (!value) return acc;
+          if (value == null || value === '') return acc;
 
           acc.fields[fieldName] = {
             name: fieldConfiguration?.title || fieldName,
             value,
-            description: fieldDescription,
-            type: fieldsMetadata[fieldName]?.type,
+            description: fieldConfiguration?.description,
             valueCellContent: ({ truncate }: { truncate?: boolean } = { truncate: true }) => {
               return fieldConfiguration?.formatter ? (
                 <>{fieldConfiguration.formatter(value, formattedValue)}</>
@@ -130,7 +127,7 @@ export function ContentFrameworkTable({
               dataView,
               fieldFormats,
               isPinned: false,
-              columnsMeta: {},
+              dataSource: undefined,
             })
           );
 
@@ -138,21 +135,27 @@ export function ContentFrameworkTable({
         },
         { fields: {} as Record<string, TableFieldConfiguration>, rows: [] as FieldRow[] }
       ),
-    [
-      dataView,
-      fieldConfigurations,
-      fieldFormats,
-      fieldNames,
-      fieldsMetadata,
-      flattenedHit,
-      formattedHit,
-      hit,
-    ]
+    [dataView, fieldConfigurations, fieldFormats, fieldNames, flattenedHit, formattedHit, hit]
+  );
+
+  const enrichedFields = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(fields).map(([fieldName, field]) => [
+          fieldName,
+          {
+            ...field,
+            description: field.description || fieldsMetadata[fieldName]?.short,
+            type: fieldsMetadata[fieldName]?.type,
+          },
+        ])
+      ),
+    [fields, fieldsMetadata]
   );
 
   const cellValueRenderer = useCallback(
-    ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-      const fieldName = rows[rowIndex]?.name;
+    ({ row, columnId }: TableGridCellContext<FieldRow>) => {
+      const fieldName = row.name;
       const fieldConfig = fields[fieldName];
 
       if (!fieldConfig) return null;
@@ -176,27 +179,20 @@ export function ContentFrameworkTable({
       }
       return fieldConfig.valueCellContent();
     },
-    [rows, fields, dataTestSubj, euiTheme.font.weight.bold]
+    [fields, dataTestSubj, euiTheme.font.weight.bold]
   );
 
   const cellPopoverRenderer = useCallback(
-    (props: EuiDataGridCellPopoverElementProps) => {
-      const { columnId, cellActions, rowIndex } = props;
-      const fieldName = rows[rowIndex]?.name;
-      const fieldConfig = fields[fieldName];
+    ({ row, columnId }: TableGridCellContext<FieldRow>) => {
+      const fieldName = row.name;
+      const fieldConfig = enrichedFields[fieldName];
       if (!fieldConfig) return null;
       if (columnId === 'name') {
-        return (
-          <NamePopoverContent
-            fieldName={fieldName}
-            fieldConfig={fieldConfig}
-            cellActions={cellActions}
-          />
-        );
+        return <NamePopoverContent fieldName={fieldName} fieldConfig={fieldConfig} />;
       }
-      return <ValuePopoverContent fieldConfig={fieldConfig} cellActions={cellActions} />;
+      return <ValuePopoverContent fieldConfig={fieldConfig} />;
     },
-    [rows, fields]
+    [enrichedFields]
   );
 
   if (Object.keys(hit.flattened).length === 0) {
@@ -227,10 +223,10 @@ export function ContentFrameworkTable({
         onAddColumn={onAddColumn}
         onRemoveColumn={onRemoveColumn}
         columns={columns}
-        initialPageSize={DEFAULT_INITIAL_PAGE_SIZE}
-        customRenderCellValue={cellValueRenderer}
-        customRenderCellPopover={cellPopoverRenderer}
-        gridStyle={{ stripes: false, rowHover: 'none', header: 'shade' }}
+        renderCell={cellValueRenderer}
+        renderCellDetails={cellPopoverRenderer}
+        appearance={CONTENT_FRAMEWORK_TABLE_APPEARANCE}
+        headerVisibility={false}
       />
     </div>
   );

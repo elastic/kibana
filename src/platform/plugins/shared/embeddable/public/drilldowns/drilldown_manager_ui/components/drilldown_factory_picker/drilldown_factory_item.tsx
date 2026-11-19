@@ -34,7 +34,7 @@ export const DrilldownFactoryItem: React.FC<Props> = ({ factory, onSelect }) => 
       onClick={() => onSelect(factory.type)}
       disabled={!factory.isLicenseCompatible}
     >
-      {factory.euiIcon && <EuiIcon type={factory.euiIcon} size="m" />}
+      {factory.euiIcon && <EuiIcon type={factory.euiIcon} size="m" aria-hidden={true} />}
     </EuiKeyPadMenuItem>
   );
 

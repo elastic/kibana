@@ -123,6 +123,26 @@ describe('ExpressionRow', () => {
     expect(valueMatch).toBeTruthy();
   });
 
+  it('should expose the expanded state on the expand row button', async () => {
+    const expression = {
+      metric: 'system.load.1',
+      comparator: COMPARATORS.GREATER_THAN,
+      threshold: [0.5],
+      timeSize: 1,
+      timeUnit: 'm',
+      aggType: 'avg',
+    };
+    const { wrapper, update } = await setup(expression as MetricExpression);
+    const button = () => wrapper.find('button[data-test-subj="expandRow"]');
+
+    expect(button().prop('aria-expanded')).toBe(true);
+
+    button().simulate('click');
+    await update();
+
+    expect(button().prop('aria-expanded')).toBe(false);
+  });
+
   it('should render a helpText for the of expression', async () => {
     const expression = {
       metric: 'system.load.1',
@@ -138,5 +158,41 @@ describe('ExpressionRow', () => {
     const helpText = wrapper.find('[data-test-subj="ofExpression"]').at(0).prop('helpText');
 
     expect(helpText).toMatchSnapshot();
+  });
+
+  it('should display "(severity: critical)" on the alert threshold when a warning threshold is set', async () => {
+    const expression = {
+      metric: 'system.load.1',
+      comparator: COMPARATORS.GREATER_THAN,
+      threshold: [0.5],
+      timeSize: 1,
+      timeUnit: 'm',
+      aggType: 'avg',
+      warningComparator: COMPARATORS.GREATER_THAN,
+      warningThreshold: [0.25],
+    };
+    const { wrapper } = await setup(expression as MetricExpression);
+    expect(wrapper.text()).toContain('(severity: critical)');
+  });
+
+  it('should include inclusive range comparators in threshold options', async () => {
+    const expression = {
+      metric: 'system.load.1',
+      comparator: COMPARATORS.GREATER_THAN,
+      threshold: [0.5],
+      timeSize: 1,
+      timeUnit: 'm',
+      aggType: 'avg',
+    };
+    const { wrapper, update } = await setup(expression as MetricExpression);
+    wrapper.find('button[data-test-subj="thresholdPopover"]').simulate('click');
+    await update();
+
+    const comparatorOptionValues = wrapper
+      .find('select[data-test-subj="comparatorOptionsComboBox"] option')
+      .map((option) => option.prop('value'));
+
+    expect(comparatorOptionValues).toContain(COMPARATORS.BETWEEN_INCLUSIVE);
+    expect(comparatorOptionValues).toContain(COMPARATORS.NOT_BETWEEN_INCLUSIVE);
   });
 });

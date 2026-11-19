@@ -10,11 +10,11 @@
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useRef } from 'react';
-import { CodeEditor, monaco } from '@kbn/code-editor';
+import { CodeEditor, jsonDefaults, type monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
+import { workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
 import { InputValidationCallout } from './input_validation_callout';
-import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
 const SCHEMA_URI = `inmemory://schemas/test-step-json-manual-editor-schema`;
 
@@ -38,7 +38,7 @@ export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
         try {
           // First, configure the JSON language service with schema validation
           const currentModel = editor.getModel();
-          monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+          jsonDefaults.setDiagnosticsOptions({
             validate: true,
             allowComments: false,
             enableSchemaRequest: false,
@@ -58,19 +58,39 @@ export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
     );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        css={css`
+          min-height: 0;
+        `}
+      >
         {(errors || warnings) && (
           <EuiFlexItem grow={false}>
             <InputValidationCallout errors={errors} warnings={warnings} />
           </EuiFlexItem>
         )}
-        <EuiFlexItem>
+        <EuiFlexItem
+          css={css`
+            overflow: hidden;
+          `}
+        >
           <EuiFormRow
             label={i18n.translate('workflows.testStepModal.inputDataLabel', {
               defaultMessage: 'Input Data',
             })}
             fullWidth
             css={css`
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+              min-height: 0;
+              .euiFormRow__fieldWrapper {
+                flex: 1;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+              }
               .euiFormRow__labelWrapper {
                 padding-left: 0;
               }
@@ -78,13 +98,12 @@ export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
           >
             <CodeEditor
               languageId="json"
+              chromeOverrides={workflowsEditorChromeOverrides}
               value={value}
+              width="100%"
+              height="100%"
               editorDidMount={handleMount}
               onChange={setValue}
-              fitToContent={{
-                minLines: 5,
-                maxLines: 15,
-              }}
               dataTestSubj="workflow-event-manual-json-editor"
               overflowWidgetsContainerZIndexOverride={6001}
               options={{
@@ -102,11 +121,10 @@ export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
                 renderWhitespace: 'all',
                 wordWrapColumn: 80,
                 wrappingIndent: 'indent',
-                theme: WORKFLOWS_MONACO_EDITOR_THEME,
                 formatOnType: true,
                 quickSuggestions: false,
                 suggestOnTriggerCharacters: false,
-                wordBasedSuggestions: false,
+                wordBasedSuggestions: 'off',
                 parameterHints: {
                   enabled: false,
                 },

@@ -7,15 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import path from 'path';
+import { schema } from '@kbn/config-schema';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_DELETE_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerDeleteWorkflowRoute({ router, api, spaces }: RouteDependencies) {
+export function registerDeleteWorkflowRoute(deps: RouteDependencies) {
+  const { router, api, spaces, audit } = deps;
   router.versioned
     .delete({
       path: '/api/workflows/workflow/{id}',
@@ -37,16 +41,47 @@ export function registerDeleteWorkflowRoute({ router, api, spaces }: RouteDepend
         validate: {
           request: {
             params: idParamSchema,
+            query: schema.object({
+              acknowledgeAclLoss: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description: 'Confirm that permanent deletion removes workflow access controls.',
+                },
+              }),
+              force: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'When true, permanently deletes the workflow (hard delete) instead of soft-deleting it. The workflow ID becomes available for reuse.',
+                },
+              }),
+            }),
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
+        const { force, acknowledgeAclLoss } = request.query;
         try {
           const { id } = request.params;
           const spaceId = spaces.getSpaceId(request);
-          await api.deleteWorkflows([id], spaceId, request);
+          const result = await api.deleteWorkflows([id], spaceId, request, {
+            force,
+            acknowledgeAclLoss,
+          });
+          if (result.failures.length > 0) {
+            throw Boom.internal(result.failures[0].error);
+          }
+          if (result.deleted === 0) {
+            throw new WorkflowNotFoundError(id);
+          }
+          audit.logWorkflowDeleted(request, { id, force });
           return response.ok();
         } catch (error) {
+          audit.logWorkflowDeleted(request, {
+            id: request.params.id,
+            force,
+            error,
+          });
           return handleRouteError(response, error);
         }
       })

@@ -7,9 +7,9 @@
 
 import type { IndexSearchToolDefinition } from '@kbn/agent-builder-common/tools';
 import { ToolType } from '@kbn/agent-builder-common';
-import { omit } from 'lodash';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../common/http_api/tools';
 import type { IndexSearchToolFormData } from '../components/tools/form/types/tool_form_types';
+import { toCreatePayload, toUpdatePayload } from './tool_payload';
 
 export const transformIndexSearchToolToFormData = (
   tool: IndexSearchToolDefinition
@@ -20,6 +20,7 @@ export const transformIndexSearchToolToFormData = (
     pattern: tool.configuration.pattern,
     rowLimit: tool.configuration.row_limit,
     customInstructions: tool.configuration.custom_instructions,
+    includeFrozen: tool.configuration.include_frozen ?? false,
     labels: tool.tags,
     type: ToolType.index_search,
   };
@@ -32,10 +33,12 @@ export const transformFormDataToIndexSearchTool = (
     id: data.toolId,
     description: data.description,
     readonly: false,
+    experimental: false,
     configuration: {
       pattern: data.pattern,
       row_limit: data.rowLimit,
       custom_instructions: data.customInstructions,
+      include_frozen: data.includeFrozen,
     },
     type: ToolType.index_search,
     tags: data.labels,
@@ -45,11 +48,11 @@ export const transformFormDataToIndexSearchTool = (
 export const transformIndexSearchFormDataForCreate = (
   data: IndexSearchToolFormData
 ): CreateToolPayload => {
-  return omit(transformFormDataToIndexSearchTool(data), ['readonly']);
+  return toCreatePayload(transformFormDataToIndexSearchTool(data));
 };
 
 export const transformIndexSearchFormDataForUpdate = (
   data: IndexSearchToolFormData
 ): UpdateToolPayload => {
-  return omit(transformFormDataToIndexSearchTool(data), ['id', 'type', 'readonly']);
+  return toUpdatePayload(transformFormDataToIndexSearchTool(data));
 };

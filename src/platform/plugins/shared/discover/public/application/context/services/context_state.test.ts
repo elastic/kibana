@@ -32,7 +32,7 @@ describe('Test Discover Context State', () => {
       defaultSize: 4,
       history,
       uiSettings: {
-        get: <T>(key: string) => ['_source'] as unknown as T,
+        get: <T>(key: string) => [] as unknown as T,
       } as IUiSettingsClient,
       data: discoverServiceMock.data,
       dataView: dataViewMock,

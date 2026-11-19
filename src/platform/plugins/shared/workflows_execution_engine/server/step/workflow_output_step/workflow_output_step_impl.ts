@@ -10,6 +10,7 @@
 import type { WorkflowOutputStep } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowOutputGraphNode } from '@kbn/workflows/graph';
+import { ExecutionError } from '@kbn/workflows/server';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
@@ -58,7 +59,6 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
 
   async run(): Promise<void> {
     this.stepExecutionRuntime.startStep();
-    await this.stepExecutionRuntime.flushEventLogs();
 
     const step = this.node.configuration as WorkflowOutputStep;
     // Render template variables in the output values (with: may be omitted for workflow.fail)
@@ -96,7 +96,6 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
 
           // Fail the step with validation error (failStep also sets workflow-level error via updateWorkflowExecution)
           this.stepExecutionRuntime.failStep(validationError);
-          await this.stepExecutionRuntime.flushEventLogs();
 
           this.workflowExecutionRuntime.setWorkflowStatus(ExecutionStatus.FAILED);
           return;
@@ -145,14 +144,19 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
             (typeof outputValues.reason === 'string' && outputValues.reason) ||
             'Workflow terminated with failed status';
 
-          const failureError = new Error(errorMessage);
+          // A caller-chosen type reaches a parent's `steps.<name>.error.type`, so it can
+          // tell this failure apart from others (for example, one a retry cannot fix).
+          const failureError = new ExecutionError({
+            type: (typeof outputValues.type === 'string' && outputValues.type) || 'Error',
+            message: errorMessage,
+          });
 
           this.workflowLogger.logInfo(`Workflow failed with message: ${errorMessage}`, {
             event: { action: 'workflow-output-error-set', outcome: 'failure' },
             tags: ['workflow-output', 'error'],
             error: {
               message: errorMessage,
-              type: failureError.name,
+              type: failureError.type,
             },
           });
 
@@ -167,8 +171,6 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
           outcome = 'success';
           this.stepExecutionRuntime.finishStep(outputValues);
       }
-
-      await this.stepExecutionRuntime.flushEventLogs();
 
       this.workflowLogger.logInfo(`Workflow terminated with status: ${stepStatus}`, {
         event: {
@@ -195,7 +197,6 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
 
       // failStep() sets workflow-level error via updateWorkflowExecution({ error })
       this.stepExecutionRuntime.failStep(errorObj);
-      await this.stepExecutionRuntime.flushEventLogs();
 
       this.workflowExecutionRuntime.setWorkflowStatus(ExecutionStatus.FAILED);
     }

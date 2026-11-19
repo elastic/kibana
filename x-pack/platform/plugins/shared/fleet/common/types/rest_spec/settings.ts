@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Settings, AgentPolicy, FleetServerHost, DownloadSource, Output } from '../models';
+import type { Settings, AgentPolicy, FleetServerHost, DownloadSource, EsOutput } from '../models';
 
 export interface GetSettingsResponse {
   item: Settings;
@@ -48,7 +48,7 @@ export interface GetEnrollmentSettingsResponse {
   fleet_server: {
     policies: EnrollmentSettingsFleetServerPolicy[];
     has_active: boolean;
-    es_output?: Output;
+    es_output?: EsOutput;
     es_output_proxy?: EnrollmentSettingsProxy;
     host?: FleetServerHost;
     host_proxy?: EnrollmentSettingsProxy;

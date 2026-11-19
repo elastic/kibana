@@ -24,7 +24,7 @@ jest.mock('./amazon_s3_api', () => ({
 }));
 
 // Load the module under test after mocks are in place
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { AmazonS3 } = require('./amazon_s3');
 
 describe('AmazonS3', () => {
@@ -43,7 +43,7 @@ describe('AmazonS3', () => {
       accessKeyId: 'example_access_key',
       secretAccessKey: 'example_secret_key',
     },
-    log: {},
+    log: { debug: jest.fn() },
   } as unknown as ActionContext;
 
   beforeEach(() => {
@@ -326,6 +326,29 @@ describe('AmazonS3', () => {
       contentUrl: 'https://presigned-url',
       hasContent: false,
       message: `File size (987654 bytes) exceeds maximum downloadable size (131072 bytes). Access the file using the provided link.`,
+    });
+  });
+
+  // ===========================================================================
+  // test handler
+  // ===========================================================================
+
+  describe('test handler', () => {
+    const testSpec = AmazonS3.test;
+
+    it('should return {} when buckets are listed successfully', async () => {
+      mockListAmazonS3Buckets.mockResolvedValue({ buckets: [{ name: 'my-bucket' }] });
+
+      const result = await testSpec.handler(mockContext);
+
+      expect(mockListAmazonS3Buckets).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({});
+    });
+
+    it('should throw when the API call fails', async () => {
+      mockListAmazonS3Buckets.mockRejectedValue(new Error('AccessDenied'));
+
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('AccessDenied');
     });
   });
 });

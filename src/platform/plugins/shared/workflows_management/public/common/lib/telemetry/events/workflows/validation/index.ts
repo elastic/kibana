@@ -59,6 +59,21 @@ const workflowValidationErrorSchema: RootSchema<ReportWorkflowValidationErrorAct
       optional: false,
     },
   },
+  ruleIds: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A validation rule ID',
+        optional: false,
+      },
+    },
+    _meta: {
+      description:
+        'Unique rule IDs of the errors (e.g., ["duplicateStepName", "connectorNotFound"]). See WORKFLOW_VALIDATION_RULES.',
+      optional: false,
+    },
+  },
   errorCount: {
     type: 'integer',
     _meta: {

@@ -6,29 +6,84 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ColumnState } from '@kbn/lens-common';
-import type { DatatableState } from '../../../../schema';
+import type { CellDecorationValueRange, ColumnState } from '@kbn/lens-common';
+import { LENS_DATATABLE_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
+import type { DatatableConfig } from '../../../../schema';
 import {
   fromColorMappingAPIToLensState,
   fromColorByValueAPIToLensState,
+  isAutoColor,
   isColorMappingColor,
   isColorByValueColor,
   isLegacyColorPalette,
 } from '../../../coloring';
-import { getAccessorName } from '../helpers';
+import type { PaletteFillColor, ProgressBarProps } from '../helpers';
+import { getAccessorName, applyColorToToColorMode } from '../helpers';
 import {
   METRIC_ACCESSOR_PREFIX,
   ROW_ACCESSOR_PREFIX,
   SPLIT_METRIC_BY_ACCESSOR_PREFIX,
 } from '../constants';
 
+type APIColumnConfig =
+  | NonNullable<DatatableConfig['metrics']>[number]
+  | NonNullable<DatatableConfig['rows']>[number];
+
+function buildValueRangeState(
+  valueRange: ProgressBarProps['value_range']
+): CellDecorationValueRange {
+  return valueRange.type === 'custom'
+    ? { mode: 'custom', min: valueRange.min, max: valueRange.max }
+    : { mode: 'auto' };
+}
+
+function buildPaletteFillState(color: PaletteFillColor): Pick<ColumnState, 'palette'> {
+  // `auto` defers the palette to the editor and renderer defaults
+  if (isAutoColor(color)) {
+    return {};
+  }
+  return {
+    palette: fromColorByValueAPIToLensState(color, LENS_DATATABLE_DEFAULT_COLOR_STEPS),
+  };
+}
+
+/**
+ * `color` writes either `fillStyle.color` (single fill) or `palette` (solid and gradient fills),
+ * so no value from another fill mode is stored.
+ */
+function buildProgressBarState(
+  config: ProgressBarProps
+): Pick<ColumnState, 'colorMode' | 'fillStyle' | 'palette'> {
+  const colorMode = applyColorToToColorMode(config.apply_color_to);
+  const valueRange = buildValueRangeState(config.value_range);
+
+  if (config.fill_mode === 'single') {
+    const { fill_mode: fillMode, color } = config;
+    // `auto` defers the color to the editor and renderer defaults
+    return {
+      colorMode,
+      fillStyle: isAutoColor(color)
+        ? { fillMode, valueRange }
+        : { fillMode, color: color.color, valueRange },
+    };
+  }
+
+  return {
+    colorMode,
+    fillStyle: { fillMode: config.fill_mode, valueRange },
+    ...buildPaletteFillState(config.color),
+  };
+}
+
 function buildColorProps(
-  config:
-    | NonNullable<DatatableState['metrics']>[number]
-    | NonNullable<DatatableState['rows']>[number]
-): Partial<Pick<ColumnState, 'palette' | 'colorMapping' | 'colorMode'>> {
+  config: APIColumnConfig
+): Partial<Pick<ColumnState, 'palette' | 'colorMapping' | 'colorMode' | 'fillStyle'>> {
   if (!config.apply_color_to) return {};
-  const colorMode = config.apply_color_to === 'value' ? 'text' : 'cell';
+  // Before the generic color branches, which would store a palette without `fillStyle`
+  if (config.apply_color_to === 'progress_bar') {
+    return buildProgressBarState(config);
+  }
+  const colorMode = applyColorToToColorMode(config.apply_color_to);
 
   if (isColorMappingColor(config.color)) {
     const color = fromColorMappingAPIToLensState(config.color);
@@ -39,16 +94,20 @@ function buildColorProps(
   }
 
   if (isColorByValueColor(config.color)) {
-    return { colorMode, palette: fromColorByValueAPIToLensState(config.color) };
+    return {
+      colorMode,
+      palette: fromColorByValueAPIToLensState(config.color, LENS_DATATABLE_DEFAULT_COLOR_STEPS),
+    };
   }
 
+  // defer resolution of default color configuration (mapping/palette) to runtime
   return { colorMode };
 }
 
 function buildCommonMetricRowState(
   config:
-    | NonNullable<DatatableState['metrics']>[number]
-    | NonNullable<DatatableState['rows']>[number]
+    | NonNullable<DatatableConfig['metrics']>[number]
+    | NonNullable<DatatableConfig['rows']>[number]
 ): Pick<
   ColumnState,
   'hidden' | 'alignment' | 'colorMode' | 'isTransposed' | 'palette' | 'colorMapping' | 'width'
@@ -62,7 +121,7 @@ function buildCommonMetricRowState(
   };
 }
 
-export function buildMetricsState(metrics: DatatableState['metrics']): ColumnState[] {
+export function buildMetricsState(metrics: DatatableConfig['metrics']): ColumnState[] {
   if (!metrics) return [];
 
   return metrics.map((metric, index) => {
@@ -82,7 +141,7 @@ export function buildMetricsState(metrics: DatatableState['metrics']): ColumnSta
   });
 }
 
-export function buildRowsState(rows: DatatableState['rows']): ColumnState[] {
+export function buildRowsState(rows: DatatableConfig['rows']): ColumnState[] {
   if (!rows) return [];
 
   return rows.map((row, index) => {
@@ -98,7 +157,7 @@ export function buildRowsState(rows: DatatableState['rows']): ColumnState[] {
 }
 
 export function buildSplitMetricsByState(
-  splitMetrics: DatatableState['split_metrics_by']
+  splitMetrics: DatatableConfig['split_metrics_by']
 ): ColumnState[] {
   if (!splitMetrics) return [];
 

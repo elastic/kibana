@@ -6,25 +6,25 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import React, { useState } from 'react';
 import moment from 'moment-timezone';
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiBadge, EuiCodeBlock, EuiPopover, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 
-import { mapEsHealthStatus2TransformHealthStatus } from '../../../../../../common/constants';
 import { isTransformStats } from '../../../../../../common/types/transform_stats';
 import type { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
 import type { TransformListRow } from '../../../../common';
-import { useEnabledFeatures } from '../../../../serverless_context';
+import { useAppDependencies } from '../../../../app_dependencies';
 import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { useGetTransformStats } from '../../../../hooks';
+import { useEnabledFeatures } from '../../../../serverless_context';
+import { useTransformHasLinkedProjects } from '../../../../hooks/use_transform_has_linked_projects';
 
-import { TransformHealthColoredDot } from './transform_health_colored_dot';
 import type { SectionConfig, SectionItem } from './expanded_row_column_view';
 import { ExpandedRowColumnView } from './expanded_row_column_view';
 
@@ -40,8 +40,71 @@ interface ExpandedRowDetailsPaneProps {
   onAlertEdit: (alertRule: TransformHealthAlertRule) => void;
 }
 
+export const SourceIndexDescription: FC<{ index: string | string[] }> = ({ index }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  if (!Array.isArray(index)) {
+    return index;
+  }
+  if (Array.isArray(index) && index.length === 1) {
+    return index[0];
+  }
+
+  return (
+    <>
+      {index[0]}{' '}
+      <EuiPopover
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+        aria-label={i18n.translate(
+          'xpack.transform.transformList.transformDetails.sourceIndex.popoverLabel',
+          { defaultMessage: 'Source indices' }
+        )}
+        anchorPosition="downLeft"
+        panelPaddingSize="s"
+        button={
+          <EuiBadge
+            data-test-subj="transformSourceIndexBadge"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            onClickAriaLabel={i18n.translate(
+              'xpack.transform.transformList.transformDetails.sourceIndex.showAllLabel',
+              { defaultMessage: 'Show all source indices' }
+            )}
+            css={{
+              verticalAlign: 'top',
+            }}
+          >
+            +{index.length - 1}
+          </EuiBadge>
+        }
+      >
+        <EuiText
+          size="s"
+          data-test-subj="transformSourceIndexPopover"
+          css={{ overflowY: 'scroll' }}
+        >
+          <ul
+            css={{
+              maxWidth: '600px',
+              maxHeight: '600px',
+              overflowWrap: 'break-word',
+            }}
+          >
+            {index.map((sourceIndex) => (
+              <li key={sourceIndex}>{sourceIndex}</li>
+            ))}
+          </ul>
+        </EuiText>
+      </EuiPopover>
+    </>
+  );
+};
+
 export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, onAlertEdit }) => {
   const { data: fullStats, isError, isLoading } = useGetTransformStats(item.id, false, true);
+  const { cps } = useAppDependencies();
+  const { hasLinkedProjects } = useTransformHasLinkedProjects(cps?.cpsManager);
+  const { showNodeInfo } = useEnabledFeatures();
 
   let displayStats = {};
 
@@ -51,86 +114,113 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
     displayStats = item.stats;
   }
 
-  const { showNodeInfo } = useEnabledFeatures();
-
-  const stateItems: SectionItem[] = [
+  const configItems: SectionItem[] = [
     {
-      title: 'ID',
-      description: item.id,
+      title: i18n.translate(
+        'xpack.transform.transformList.transformDetails.transformVersionLabel',
+        {
+          defaultMessage: 'Transform version',
+        }
+      ),
+      description: item.config.version ?? '',
     },
+    ...(item.config.create_time !== undefined
+      ? [
+          {
+            title: i18n.translate(
+              'xpack.transform.transformList.transformDetails.createTimeLabel',
+              {
+                defaultMessage: 'Create time',
+              }
+            ),
+            description:
+              formatHumanReadableDateTimeSeconds(moment(item.config.create_time).unix() * 1000) ??
+              '',
+          },
+        ]
+      : []),
+    ...(hasLinkedProjects !== false && isDefined(item.config.source.project_routing)
+      ? [
+          {
+            title: i18n.translate(
+              'xpack.transform.transformList.transformDetails.projectRoutingLabel',
+              {
+                defaultMessage: 'Project routing',
+              }
+            ),
+            description: item.config.source.project_routing,
+          },
+        ]
+      : []),
+    {
+      title: i18n.translate('xpack.transform.transformList.transformDetails.sourceIndexLabel', {
+        defaultMessage: 'Source index',
+      }),
+      description: <SourceIndexDescription index={item.config.source.index} />,
+    },
+    {
+      title: i18n.translate(
+        'xpack.transform.transformList.transformDetails.destinationIndexLabel',
+        {
+          defaultMessage: 'Destination index',
+        }
+      ),
+      description: item.config.dest.index,
+    },
+    ...(item.config.authorization
+      ? [
+          {
+            title: i18n.translate(
+              'xpack.transform.transformList.transformDetails.authorizationLabel',
+              {
+                defaultMessage: 'Authorization',
+              }
+            ),
+            description: (
+              <EuiCodeBlock
+                data-test-subj="transformAuthorization"
+                fontSize="s"
+                language="json"
+                paddingSize="none"
+                transparentBackground
+              >
+                {JSON.stringify(item.config.authorization, null, 2)}
+              </EuiCodeBlock>
+            ),
+          },
+        ]
+      : []),
   ];
-
-  const configItems = useMemo(() => {
-    const configs: SectionItem[] = [
-      {
-        title: 'transform_id',
-        description: item.id,
-      },
-      {
-        title: 'transform_version',
-        description: item.config.version ?? '',
-      },
-      {
-        title: 'description',
-        description: item.config.description ?? '',
-      },
-      {
-        title: 'create_time',
-        description:
-          formatHumanReadableDateTimeSeconds(moment(item.config.create_time).unix() * 1000) ?? '',
-      },
-      {
-        title: 'source_index',
-        description: Array.isArray(item.config.source.index)
-          ? item.config.source.index[0]
-          : item.config.source.index,
-      },
-      {
-        title: 'destination_index',
-        description: item.config.dest.index,
-      },
-      {
-        title: 'authorization',
-        description: item.config.authorization ? JSON.stringify(item.config.authorization) : '',
-      },
-    ];
-    if (isDefined(item.config.settings?.num_failure_retries)) {
-      configs.push({
-        title: 'num_failure_retries',
-        description: item.config.settings?.num_failure_retries ?? '',
-      });
-    }
-    return configs;
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item?.config]);
+  if (isDefined(item.config.settings?.num_failure_retries)) {
+    configItems.push({
+      title: i18n.translate(
+        'xpack.transform.transformList.transformDetails.numberOfFailureRetriesLabel',
+        {
+          defaultMessage: 'Number of failure retries',
+        }
+      ),
+      description: item.config.settings.num_failure_retries,
+    });
+  }
+  if (showNodeInfo && isTransformStats(displayStats) && displayStats.node !== undefined) {
+    configItems.push({
+      title: i18n.translate('xpack.transform.transformList.transformDetails.nodeNameLabel', {
+        defaultMessage: 'Node name',
+      }),
+      description: displayStats.node.name,
+    });
+  }
 
   const checkpointingItems: SectionItem[] = [];
   if (isTransformStats(displayStats)) {
-    stateItems.push({
-      title: 'state',
-      description: displayStats.state,
-    });
-    if (showNodeInfo && displayStats.node !== undefined) {
-      stateItems.push({
-        title: 'node.name',
-        description: displayStats.node.name,
-      });
-    }
-    if (displayStats.health !== undefined) {
-      stateItems.push({
-        title: 'health',
-        description: (
-          <TransformHealthColoredDot
-            healthStatus={mapEsHealthStatus2TransformHealthStatus(displayStats.health.status)}
-          />
-        ),
-      });
-    }
-
     if (displayStats.checkpointing.changes_last_detected_at !== undefined) {
       checkpointingItems.push({
-        title: 'changes_last_detected_at',
+        title: i18n.translate(
+          'xpack.transform.transformList.transformDetails.changesLastDetectedAtLabel',
+          {
+            defaultMessage: 'Changes last detected at',
+          }
+        ),
         description: formatHumanReadableDateTimeSeconds(
           displayStats.checkpointing.changes_last_detected_at
         ),
@@ -139,18 +229,33 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
 
     if (displayStats.checkpointing.last !== undefined) {
       checkpointingItems.push({
-        title: 'last.checkpoint',
+        title: i18n.translate(
+          'xpack.transform.transformList.transformDetails.lastCheckpointLabel',
+          {
+            defaultMessage: 'Last checkpoint',
+          }
+        ),
         description: displayStats.checkpointing.last.checkpoint,
       });
       if (displayStats.checkpointing.last.timestamp_millis !== undefined) {
         checkpointingItems.push({
-          title: 'last.timestamp',
+          title: i18n.translate(
+            'xpack.transform.transformList.transformDetails.lastTimestampLabel',
+            {
+              defaultMessage: 'Last timestamp',
+            }
+          ),
           description: formatHumanReadableDateTimeSeconds(
             displayStats.checkpointing.last.timestamp_millis
           ),
         });
         checkpointingItems.push({
-          title: 'last.timestamp_millis',
+          title: i18n.translate(
+            'xpack.transform.transformList.transformDetails.lastTimestampMillisLabel',
+            {
+              defaultMessage: 'Last timestamp (milliseconds)',
+            }
+          ),
           description: displayStats.checkpointing.last.timestamp_millis,
         });
       }
@@ -158,7 +263,12 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
 
     if (displayStats.checkpointing.last_search_time !== undefined) {
       checkpointingItems.push({
-        title: 'last_search_time',
+        title: i18n.translate(
+          'xpack.transform.transformList.transformDetails.lastSearchTimeLabel',
+          {
+            defaultMessage: 'Last search time',
+          }
+        ),
         description: formatHumanReadableDateTimeSeconds(
           displayStats.checkpointing.last_search_time
         ),
@@ -167,23 +277,40 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
 
     if (displayStats.checkpointing.next !== undefined) {
       checkpointingItems.push({
-        title: 'next.checkpoint',
+        title: i18n.translate(
+          'xpack.transform.transformList.transformDetails.nextCheckpointLabel',
+          {
+            defaultMessage: 'Next checkpoint',
+          }
+        ),
         description: displayStats.checkpointing.next.checkpoint,
       });
       if (displayStats.checkpointing.next.checkpoint_progress !== undefined) {
         checkpointingItems.push({
-          title: 'next.checkpoint_progress.total_docs',
+          title: i18n.translate(
+            'xpack.transform.transformList.transformDetails.totalDocumentsLabel',
+            {
+              defaultMessage: 'Total documents',
+            }
+          ),
           description:
             displayStats.checkpointing.next.checkpoint_progress.total_docs ?? notAvailableMessage,
         });
         checkpointingItems.push({
-          title: 'next.checkpoint_progress.docs_remaining',
+          title: i18n.translate(
+            'xpack.transform.transformList.transformDetails.documentsRemainingLabel',
+            {
+              defaultMessage: 'Documents remaining',
+            }
+          ),
           description:
             displayStats.checkpointing.next.checkpoint_progress.docs_remaining ??
             notAvailableMessage,
         });
         checkpointingItems.push({
-          title: 'next.checkpoint_progress.percent_complete',
+          title: i18n.translate('xpack.transform.transformList.transformDetails.progressLabel', {
+            defaultMessage: 'Progress',
+          }),
           description:
             typeof displayStats.checkpointing.next.checkpoint_progress.percent_complete === 'number'
               ? `${Math.round(
@@ -196,19 +323,16 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
 
     if (displayStats.checkpointing.operations_behind !== undefined) {
       checkpointingItems.push({
-        title: 'operations_behind',
+        title: i18n.translate(
+          'xpack.transform.transformList.transformDetails.operationsBehindLabel',
+          {
+            defaultMessage: 'Operations behind',
+          }
+        ),
         description: displayStats.checkpointing.operations_behind,
       });
     }
   }
-
-  const state: SectionConfig = {
-    title: i18n.translate('xpack.transform.transformList.transformDetails.stateTitle', {
-      defaultMessage: 'State',
-    }),
-    items: stateItems,
-    position: 'right',
-  };
 
   const general: SectionConfig = {
     title: i18n.translate('xpack.transform.transformList.transformDetails.generalTitle', {
@@ -256,7 +380,7 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
 
   return (
     <ExpandedRowColumnView
-      sections={[general, state, checkpointing, ...(alertingRules.items ? [alertingRules] : [])]}
+      sections={[general, checkpointing, ...(alertingRules.items ? [alertingRules] : [])]}
       showErrorCallout={isError}
       dataTestSubj={'transformDetailsTabContent'}
     />

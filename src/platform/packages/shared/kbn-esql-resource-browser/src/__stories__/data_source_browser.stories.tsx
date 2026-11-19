@@ -10,7 +10,9 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import type { ESQLSourceResult } from '@kbn/esql-types';
+import type { ESQLSourceResult, EsqlView } from '@kbn/esql-types';
+import { VIEWS_ROUTE } from '@kbn/esql-types';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DataSourceBrowser } from '../data_source_browser';
 
 const mockDataSources: ESQLSourceResult[] = [
@@ -22,6 +24,11 @@ const mockDataSources: ESQLSourceResult[] = [
   { name: '.ds-logs-nginx-2024.01.01', type: 'integration', title: 'Nginx Logs', hidden: false },
   { name: 'users_lookup', type: 'lookup index', title: 'Users Lookup', hidden: false },
   { name: 'tsdb-metrics', type: 'timeseries', title: 'TSDB Metrics', hidden: false },
+];
+
+const mockViews: EsqlView[] = [
+  { name: 'errors_view', query: 'FROM logs-* | WHERE log.level == "error"' },
+  { name: 'checkout_funnel_view', query: 'FROM kibana_sample_data_ecommerce' },
 ];
 
 const meta: Meta<typeof DataSourceBrowser> = {
@@ -40,22 +47,34 @@ type Story = StoryObj<typeof DataSourceBrowser>;
 
 const InteractiveWrapper = ({ selectedSources = [] }: { selectedSources?: string[] }) => {
   const [isOpen, setIsOpen] = useState(true);
+  const services = {
+    core: {
+      // Views and datasets are not part of the preloaded sources, so they are still fetched.
+      http: {
+        get: async (path: string) =>
+          path === VIEWS_ROUTE ? { views: mockViews } : { datasets: [] },
+      } as any,
+      application: { capabilities: { esqlViews: { read: true } } } as any,
+    },
+  };
 
   return (
-    <DataSourceBrowser
-      isOpen={isOpen}
-      isLoading={false}
-      onClose={() => {
-        setIsOpen(false);
-        action('onClose')();
-      }}
-      onSelect={(sourceName, change) => {
-        action('onSelect')({ sourceName, change });
-      }}
-      allSources={mockDataSources}
-      selectedSources={selectedSources}
-      position={{ top: 100, left: 100 }}
-    />
+    <KibanaContextProvider services={services as any}>
+      <DataSourceBrowser
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+          action('onClose')();
+        }}
+        onSelect={(sourceName, change) => {
+          action('onSelect')({ sourceName, change });
+        }}
+        preloadedSources={mockDataSources}
+        selectedSources={selectedSources}
+        position={{ top: 100, left: 100 }}
+        isTimeseries={false}
+      />
+    </KibanaContextProvider>
   );
 };
 
@@ -64,5 +83,7 @@ export const Default: Story = {
 };
 
 export const WithInitialSelection: Story = {
-  render: () => <InteractiveWrapper selectedSources={['logs-*', 'kibana_sample_data_logs']} />,
+  render: () => (
+    <InteractiveWrapper selectedSources={['logs-*', 'kibana_sample_data_logs', 'errors_view']} />
+  ),
 };

@@ -5,26 +5,53 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { queryBoolean } from '../../zod_query';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { resetSyncPrivateCleanUpState } from '../../../tasks/sync_private_locations_monitors_task';
+import {
+  runCleanUpTaskNow,
+  setLeftoverCleanUpDisabled,
+} from '../../../tasks/clean_up_package_policies_task';
 
 export const cleanupPrivateLocationRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_CLEANUP,
   validate: {
-    query: schema.object({
-      hasAlreadyDoneCleanup: schema.maybe(schema.boolean()),
+    query: z.strictObject({
+      // Stops the daily leftover scan, so neither removal nor re-creation of missing policies, until a call without it.
+      disable: queryBoolean.optional(),
     }),
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const { server, request } = routeContext;
-    const { hasAlreadyDoneCleanup } = request.query;
+    const { server, request, response } = routeContext;
+    const { disable } = request.query;
 
-    await resetSyncPrivateCleanUpState({ server, hasAlreadyDoneCleanup });
+    try {
+      if (disable) {
+        await setLeftoverCleanUpDisabled(server, true);
+        return {
+          success: true,
+          message: 'Daily clean up of leftover private location package policies is disabled.',
+        };
+      }
+      await setLeftoverCleanUpDisabled(server, false);
+      await runCleanUpTaskNow(server);
+    } catch (error) {
+      // Reporting success here would claim cleanup was scheduled when it was not,
+      // leaving the caller to wait on work that only happens whenever the periodic
+      // task next runs.
+      return response.customError({
+        statusCode: 500,
+        body: {
+          message: `Failed to ${disable ? 'disable' : 'schedule'} private location cleanup: ${
+            error.message
+          }`,
+        },
+      });
+    }
 
     return {
       success: true,

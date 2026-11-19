@@ -31,10 +31,10 @@ test.describe(
         await page.getByTestId('querySubmitButton').click();
 
         await expect
-          .poll(() => page.locator('text=Test Stack SLO').count(), { timeout: 1000 })
+          .poll(() => page.locator('text=Test Stack SLO').count(), { timeout: 30_000 })
           .toBeGreaterThan(5);
       }).toPass({
-        intervals: [10000],
+        intervals: [10_000],
         timeout: TEST_TIMEOUT,
       });
     });

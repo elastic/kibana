@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { CaseStatusRt } from '../../case/v1';
+import { z } from '@kbn/zod/v4';
+import { CaseCloseReasonSchema, CaseStatusSchema } from '../../case/v1';
 import { UserActionTypes } from '../action/v1';
 
-export const StatusUserActionPayloadRt = rt.strict({ status: CaseStatusRt });
+export const StatusUserActionPayloadSchema = z.object({
+  status: CaseStatusSchema,
+  closeReason: CaseCloseReasonSchema.optional(),
+  syncedAlertCount: z.number().optional(),
+});
 
-export const StatusUserActionRt = rt.strict({
-  type: rt.literal(UserActionTypes.status),
-  payload: StatusUserActionPayloadRt,
+export const StatusUserActionSchema = z.object({
+  type: z.literal(UserActionTypes.status),
+  payload: StatusUserActionPayloadSchema,
 });

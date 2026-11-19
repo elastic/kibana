@@ -8,8 +8,9 @@
 import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import {
   apiHasExecutionContext,
   apiPublishesFilters,
@@ -20,29 +21,45 @@ import {
   timeRangeComparators,
   titleComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, distinctUntilChanged, map, merge, skipWhile } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, merge, skip, skipWhile } from 'rxjs';
+import type { PatternAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/pattern_analysis';
 import { getPatternAnalysisComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import { initializePatternAnalysisControls } from './initialize_pattern_analysis_controls';
 import type { PatternAnalysisEmbeddableApi } from './types';
-import type { PatternAnalysisEmbeddableState } from '../../../common/embeddables/pattern_analysis/types';
+import { canUseAiops } from '../../capabilities';
+import { toUiMinimumTimeRange } from '../../../common/embeddables/pattern_analysis/normalize_legacy_state';
+import { normalizeStoredPanelTitle } from '../normalize_stored_panel_title';
+import { getPatternAnalysisDefaultTitle } from './default_title';
 
 export type EmbeddablePatternAnalysisType = typeof EMBEDDABLE_PATTERN_ANALYSIS_TYPE;
 
 export const getPatternAnalysisEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {
-  const factory: EmbeddableFactory<PatternAnalysisEmbeddableState, PatternAnalysisEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<
+    PatternAnalysisEmbeddableState,
+    PatternAnalysisEmbeddableApi
+  > = {
     type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
+      canUseAiops(coreStart, true);
       const runtimeState = initialState;
       const timeRangeManager = initializeTimeRangeManager(initialState);
-      const titleManager = initializeTitleManager(initialState);
+      const titleManager = initializeTitleManager({
+        ...initialState,
+        title: normalizeStoredPanelTitle(initialState.title),
+      });
+      const defaultTitle$ = new BehaviorSubject<string | undefined>(
+        getPatternAnalysisDefaultTitle(runtimeState.field_name)
+      );
 
       const {
         patternAnalysisControlsApi,
@@ -50,56 +67,78 @@ export const getPatternAnalysisEmbeddableFactory = (
         patternAnalysisControlsComparators,
       } = initializePatternAnalysisControls(runtimeState);
 
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const updatePatternAnalysisUserInput = patternAnalysisControlsApi.updateUserInput;
+      patternAnalysisControlsApi.updateUserInput = (update) => {
+        updatePatternAnalysisUserInput(update);
+        defaultTitle$.next(getPatternAnalysisDefaultTitle(update.field_name));
+      };
+
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
       const initialDataViewId =
-        runtimeState.dataViewId ?? (await pluginStart.data.dataViews.getDefaultId());
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
+        runtimeState.data_view_id ?? (await pluginStart.data.dataViews.getDefaultId());
+      const dataSources$ = new BehaviorSubject<DataView[] | undefined>(
         initialDataViewId ? [await pluginStart.data.dataViews.get(initialDataViewId)] : []
       );
 
       const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
 
-      function serializeState() {
-        return {
+      const stateApi = initializeStateApi<PatternAnalysisEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           ...timeRangeManager.getLatestState(),
           ...serializePatternAnalysisChartState(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<PatternAnalysisEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           timeRangeManager.anyStateChange$,
           titleManager.anyStateChange$,
-          patternAnalysisControlsApi.dataViewId,
-          patternAnalysisControlsApi.fieldName,
-          patternAnalysisControlsApi.minimumTimeRangeOption,
-          patternAnalysisControlsApi.randomSamplerMode,
-          patternAnalysisControlsApi.randomSamplerProbability
-        ).pipe(map(() => undefined)),
+          patternAnalysisControlsApi.dataViewId.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          patternAnalysisControlsApi.fieldName.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          patternAnalysisControlsApi.minimumTimeRangeOption.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          patternAnalysisControlsApi.randomSamplerMode.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          patternAnalysisControlsApi.randomSamplerProbability.pipe(
+            skip(1),
+            map(() => undefined)
+          )
+        ),
         getComparators: () => ({
           ...timeRangeComparators,
           ...titleComparators,
           ...patternAnalysisControlsComparators,
         }),
-        onReset: (lastSaved) => {
-          timeRangeManager.reinitializeState(lastSaved);
-          titleManager.reinitializeState(lastSaved);
-          if (lastSaved) {
-            patternAnalysisControlsApi.updateUserInput(lastSaved);
-          }
+        applySerializedState: (nextState) => {
+          const normalizedState = {
+            ...nextState,
+            title: normalizeStoredPanelTitle(nextState.title),
+          };
+          timeRangeManager.reinitializeState(normalizedState);
+          titleManager.reinitializeState(normalizedState);
+          patternAnalysisControlsApi.updateUserInput(normalizedState);
         },
       });
+
+      const requestCancellationManager = new RequestCancellationManager();
 
       const api = finalizeApi({
         ...timeRangeManager.api,
         ...titleManager.api,
-        ...unsavedChangesApi,
+        defaultTitle$,
+        ...stateApi,
         ...patternAnalysisControlsApi,
         getTypeDisplayName: () =>
           i18n.translate('xpack.aiops.patternAnalysis.typeDisplayName', {
@@ -130,15 +169,39 @@ export const getPatternAnalysisEmbeddableFactory = (
         },
         dataLoading$,
         blockingError$,
-        dataViews$,
-        serializeState,
+        dataSources$,
+        cancelRequests: (reason?: AbortReason) => {
+          requestCancellationManager.cancel(reason);
+          // Without this the dashboard keeps showing the panel as loading, which keeps the
+          // cancel button visible and blocks `waitForPanelsToLoad$`.
+          dataLoading$.next(false);
+        },
       });
+
+      // Starting a new load lifts a previous cancellation. Besides `fetch$`, the panel
+      // refetches whenever one of its configuration subjects changes.
+      const fetchSubscription = merge(
+        fetch$(api),
+        ...[
+          patternAnalysisControlsApi.dataViewId,
+          patternAnalysisControlsApi.fieldName,
+          patternAnalysisControlsApi.minimumTimeRangeOption,
+          patternAnalysisControlsApi.randomSamplerMode,
+          patternAnalysisControlsApi.randomSamplerProbability,
+        ].map((subject: Observable<unknown>) => subject.pipe(skip(1)))
+      ).subscribe(() => requestCancellationManager.startLoad());
 
       const PatternAnalysisComponent = getPatternAnalysisComponent(coreStart, pluginStart);
 
       const onLoading = (v: boolean) => dataLoading$.next(v);
-      const onRenderComplete = () => dataLoading$.next(false);
-      const onError = (error: Error) => blockingError$.next(error);
+      const onRenderComplete = () => {
+        dataLoading$.next(false);
+      };
+      const onError = (error: Error) => {
+        // A cancellation is not a panel error
+        if (error?.name === 'AbortError') return;
+        blockingError$.next(error);
+      };
 
       return {
         api,
@@ -146,6 +209,10 @@ export const getPatternAnalysisEmbeddableFactory = (
           if (!apiHasExecutionContext(parentApi)) {
             throw new Error('Parent API does not have execution context');
           }
+
+          useEffect(() => {
+            return () => fetchSubscription.unsubscribe();
+          }, []);
 
           const [
             dataViewId,
@@ -185,13 +252,13 @@ export const getPatternAnalysisEmbeddableFactory = (
           const embeddingOrigin = apiHasExecutionContext(parentApi)
             ? parentApi.executionContext.type
             : undefined;
-
           return (
             <PatternAnalysisComponent
+              parentApi={parentApi}
               filtersApi={filtersApi}
               dataViewId={dataViewId ?? ''}
               fieldName={fieldName}
-              minimumTimeRangeOption={minimumTimeRangeOption}
+              minimumTimeRangeOption={toUiMinimumTimeRange(minimumTimeRangeOption)}
               randomSamplerMode={randomSamplerMode}
               randomSamplerProbability={randomSamplerProbability}
               timeRange={timeRange}
@@ -200,6 +267,7 @@ export const getPatternAnalysisEmbeddableFactory = (
               onError={onError}
               embeddingOrigin={embeddingOrigin}
               lastReloadRequestTime={lastReloadRequestTime}
+              requestCancellationManager={requestCancellationManager}
             />
           );
         },

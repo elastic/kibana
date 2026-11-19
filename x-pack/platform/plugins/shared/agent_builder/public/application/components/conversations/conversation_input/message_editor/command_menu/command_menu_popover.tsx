@@ -20,6 +20,8 @@ interface CommandMenuPopoverProps {
   commandMatch: CommandMatchResult;
   anchorPosition: AnchorPosition | null;
   onSelect: (selection: CommandBadgeData) => void;
+  onReplaceText?: (text: string) => void;
+  onContentChange: (hasVisibleContent: boolean, forQuery: string) => void;
   commandMenuRef: React.RefObject<CommandMenuHandle>;
   'data-test-subj'?: string;
 }
@@ -37,17 +39,28 @@ const anchorStyles = css`
   height: 0;
 `;
 
+const hiddenContentStyles = css`
+  display: none;
+`;
+
 export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
   commandMatch,
   anchorPosition,
   onSelect,
+  onReplaceText,
+  onContentChange,
   commandMenuRef,
   'data-test-subj': dataTestSubj = 'commandMenuPopover',
 }) => {
-  const { activeCommand, isActive } = commandMatch;
-  const isOpen = isActive && activeCommand !== null && anchorPosition !== null;
+  const { activeCommand, isActive, hasVisibleContent } = commandMatch;
+
+  const isMounted = isActive && activeCommand !== null && anchorPosition !== null;
+  const isOpen = isMounted && hasVisibleContent;
   let announcementText = '';
-  let panelAriaLabel = '';
+  let panelAriaLabel = i18n.translate(
+    'xpack.agentBuilder.conversationInput.commandMenuPopover.defaultPanelLabel',
+    { defaultMessage: 'Command suggestions' }
+  );
   if (activeCommand) {
     const { name } = activeCommand.command;
     announcementText = i18n.translate(
@@ -72,7 +85,7 @@ export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
       <EuiPopover
         aria-labelledby={panelId}
         button={<span css={anchorStyles} />}
-        isOpen={isOpen}
+        isOpen={isMounted}
         closePopover={() => {
           // Do nothing
           // The popover does not control its own visibility state.
@@ -86,11 +99,16 @@ export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
         display="block"
       >
         {activeCommand && (
-          <div data-test-subj={`${dataTestSubj}-content`}>
+          <div
+            data-test-subj={`${dataTestSubj}-content`}
+            css={hasVisibleContent ? undefined : hiddenContentStyles}
+          >
             <activeCommand.command.menuComponent
               ref={commandMenuRef}
               query={activeCommand.query}
               onSelect={onSelect}
+              onReplaceText={onReplaceText}
+              onContentChange={onContentChange}
             />
           </div>
         )}

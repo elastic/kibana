@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react';
-import { mount } from 'enzyme';
+import { act, render, renderHook, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 
-import { UserProfile, useUserProfileForm } from './user_profile';
+import { UserProfile, useUserProfileForm, validateAvatarInitials } from './user_profile';
 import { UserProfileAPIClient } from '..';
 import type { UserProfileData } from '../../../common';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
@@ -38,6 +38,15 @@ const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
     {children}
   </Providers>
 );
+const profileUpdateBody = () => {
+  const calls = coreStart.http.post.mock.calls as unknown as Array<[string, { body: string }]>;
+  const profileCall = calls.find(([path]) => path === '/internal/security/user_profile/_data');
+  if (!profileCall) {
+    throw new Error('Profile update was not posted');
+  }
+  return JSON.parse(profileCall[1].body);
+};
+
 describe('useUserProfileForm', () => {
   beforeEach(() => {
     history = scopedHistoryMock.create();
@@ -57,6 +66,7 @@ describe('useUserProfileForm', () => {
     coreStart.notifications.toasts.addSuccess.mockReset();
     coreStart.settings.client.get.mockReset();
     coreStart.settings.client.isOverridden.mockReset();
+    coreStart.analytics.reportEvent.mockReset();
   });
 
   it('should initialise form with values from user profile', () => {
@@ -76,7 +86,9 @@ describe('useUserProfileForm', () => {
           },
           "userSettings": Object {
             "contrastMode": "system",
-            "darkMode": "space_default",
+            "darkMode": "system",
+            "locale": "en",
+            "rememberSelectedSpace": true,
           },
         },
         "user": Object {
@@ -85,6 +97,18 @@ describe('useUserProfileForm', () => {
         },
       }
     `);
+  });
+
+  it('should initialise rememberSelectedSpace from user profile data', () => {
+    const data: UserProfileData = {
+      avatar: {},
+      userSettings: {
+        rememberSelectedSpace: true,
+      },
+    };
+    const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+    expect(result.current.values.data?.userSettings?.rememberSelectedSpace).toBe(true);
   });
 
   it('should initialise form with values from user avatar if present', () => {
@@ -117,6 +141,57 @@ describe('useUserProfileForm', () => {
 
     expect(result.current.values.user.full_name).toEqual('Another Name');
     expect(result.current.values.data?.avatar.initials).toEqual('AN');
+  });
+
+  describe('validateAvatarInitials', () => {
+    it('requires initials', () => {
+      expect(validateAvatarInitials('')).toEqual('Add initials');
+    });
+
+    it.each(['AB', '\u{1F44D}\u{1F3FD}\u{1F44D}\u{1F3FD}', 'A\u{1F44D}', '\u0915\u094D\u0937'])(
+      'accepts %s',
+      (initials) => {
+        expect(validateAvatarInitials(initials)).toBeUndefined();
+      }
+    );
+
+    it('rejects more than 2 characters', () => {
+      expect(validateAvatarInitials('ABC')).toEqual('Enter no more than 2 characters.');
+    });
+  });
+
+  it('should not send invalid stored initials when saving with an image avatar', async () => {
+    const data: UserProfileData = {
+      avatar: { imageUrl: 'avatar.png', initials: 'ABC' },
+    };
+    const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+    await act(async () => {
+      await result.current.setFieldValue('data.userSettings.darkMode', 'dark');
+    });
+    await act(async () => {
+      await result.current.submitForm();
+    });
+
+    const { avatar, userSettings } = profileUpdateBody();
+    expect(avatar).toEqual(expect.objectContaining({ imageUrl: 'avatar.png' }));
+    expect(avatar).not.toHaveProperty('initials');
+    expect(userSettings.darkMode).toBe('dark');
+  });
+
+  it('should send valid stored initials when saving with an image avatar', async () => {
+    const data: UserProfileData = {
+      avatar: { imageUrl: 'avatar.png', initials: 'AB' },
+    };
+    const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+    await act(async () => {
+      await result.current.submitForm();
+    });
+
+    expect(profileUpdateBody().avatar).toEqual(
+      expect.objectContaining({ imageUrl: 'avatar.png', initials: 'AB' })
+    );
   });
 
   it('should save user and user profile when submitting form', async () => {
@@ -194,7 +269,7 @@ describe('useUserProfileForm', () => {
 
       const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
 
-      const testWrapper = mount(
+      const { container } = render(
         coreStart.rendering.addContext(
           <Providers
             services={coreStart}
@@ -210,7 +285,7 @@ describe('useUserProfileForm', () => {
         )
       );
 
-      expect(testWrapper.exists('UserAvatar')).toBeTruthy();
+      expect(container.querySelector('.euiAvatar')).toBeInTheDocument();
     });
 
     it('should not display if the User is a cloud user', () => {
@@ -218,7 +293,7 @@ describe('useUserProfileForm', () => {
 
       const cloudUser = mockAuthenticatedUser({ elastic_cloud_user: true });
 
-      const testWrapper = mount(
+      const { container } = render(
         coreStart.rendering.addContext(
           <Providers
             services={coreStart}
@@ -234,7 +309,44 @@ describe('useUserProfileForm', () => {
         )
       );
 
-      expect(testWrapper.exists('UserAvatar')).toBeFalsy();
+      expect(container.querySelector('.euiAvatar')).not.toBeInTheDocument();
+    });
+
+    it('should submit initials with a modifier emoji entered in the form', async () => {
+      const userActions = userEvent.setup();
+      const data: UserProfileData = {};
+      const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
+      const initials = '\u{1F44D}\u{1F3FD}\u{1F44D}\u{1F3FD}';
+
+      const { container } = render(
+        coreStart.rendering.addContext(
+          <Providers
+            services={coreStart}
+            history={history}
+            authc={authc}
+            securityApiClients={{
+              userProfiles: new UserProfileAPIClient(coreStart.http),
+              users: new UserAPIClient(coreStart.http),
+            }}
+          >
+            <UserProfile user={nonCloudUser} data={data} />
+          </Providers>
+        )
+      );
+
+      const initialsInput = container.querySelector<HTMLInputElement>(
+        'input[name="data.avatar.initials"]'
+      );
+      if (!initialsInput) {
+        throw new Error('Initials input was not rendered');
+      }
+      await userActions.clear(initialsInput);
+      await userActions.type(initialsInput, initials);
+      expect(initialsInput).toHaveValue(initials);
+
+      await userActions.click(screen.getByTestId('saveProfileChangesButton'));
+
+      expect(profileUpdateBody().avatar.initials).toBe(initials);
     });
   });
 
@@ -244,7 +356,7 @@ describe('useUserProfileForm', () => {
 
       const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
 
-      const testWrapper = mount(
+      render(
         coreStart.rendering.addContext(
           <Providers
             services={coreStart}
@@ -260,17 +372,14 @@ describe('useUserProfileForm', () => {
         )
       );
 
-      const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
-      expect(overrideMsg).toHaveLength(0);
+      const themeMenu = screen.getByTestId('themeMenu');
+      expect(themeMenu).toBeInTheDocument();
+      expect(themeMenu.closest('.euiToolTipAnchor')).toBeNull();
 
-      const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
-      expect(themeMenu).toHaveLength(1);
-
-      const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
-      expect(themeOptions).toHaveLength(4);
-      themeOptions.forEach((option) => {
-        const menuItemEl = (option.getDOMNode() as unknown as Element[])[1];
-        expect(menuItemEl.className).not.toContain('disabled');
+      const themeItems = within(themeMenu).getAllByRole('radio');
+      expect(themeItems).toHaveLength(4);
+      themeItems.forEach((item) => {
+        expect(item).not.toBeDisabled();
       });
     });
 
@@ -279,7 +388,7 @@ describe('useUserProfileForm', () => {
 
       const cloudUser = mockAuthenticatedUser({ elastic_cloud_user: true });
 
-      const testWrapper = mount(
+      render(
         coreStart.rendering.addContext(
           <Providers
             services={coreStart}
@@ -295,10 +404,10 @@ describe('useUserProfileForm', () => {
         )
       );
 
-      expect(testWrapper.exists('EuiKeyPadMenu[data-test-subj="themeMenu"]')).toBeFalsy();
+      expect(screen.queryByTestId('themeMenu')).not.toBeInTheDocument();
     });
 
-    it('should add special toast after submitting form successfully since darkMode requires a refresh', async () => {
+    it('should not ask for a page reload after changing darkMode', async () => {
       const data: UserProfileData = {};
       const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
 
@@ -322,8 +431,8 @@ describe('useUserProfileForm', () => {
 
       expect(coreStart.notifications.toasts.addSuccess).toHaveBeenNthCalledWith(
         2,
-        expect.objectContaining({ title: 'Profile updated' }),
-        expect.objectContaining({ toastLifeTimeMs: 300000 })
+        { title: 'Profile updated' },
+        {}
       );
     });
 
@@ -334,7 +443,7 @@ describe('useUserProfileForm', () => {
       coreStart.theme.getTheme.mockReturnValue({ darkMode: true, name: 'borealis' });
       coreStart.settings.client.isOverridden.mockReturnValue(true);
 
-      const testWrapper = mount(
+      render(
         coreStart.rendering.addContext(
           <Providers
             services={coreStart}
@@ -350,18 +459,14 @@ describe('useUserProfileForm', () => {
         )
       );
 
-      const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
-      expect(overrideMsg).toHaveLength(1);
-      expect(overrideMsg.getElement().props.content).not.toEqual('');
+      const themeMenu = screen.getByTestId('themeMenu');
+      expect(themeMenu).toBeInTheDocument();
+      expect(themeMenu.closest('.euiToolTipAnchor')).not.toBeNull();
 
-      const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
-      expect(themeMenu).toHaveLength(1);
-
-      const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
-      expect(themeOptions).toHaveLength(4);
-      themeOptions.forEach((option) => {
-        const menuItemEl = (option.getDOMNode() as unknown as Element[])[1];
-        expect(menuItemEl.className).toContain('disabled');
+      const themeItems = within(themeMenu).getAllByRole('radio');
+      expect(themeItems).toHaveLength(4);
+      themeItems.forEach((item) => {
+        expect(item).toBeDisabled();
       });
     });
 
@@ -372,7 +477,7 @@ describe('useUserProfileForm', () => {
       coreStart.theme.getTheme.mockReturnValue({ darkMode: false, name: 'borealis' });
       coreStart.settings.client.isOverridden.mockReturnValue(true);
 
-      const testWrapper = mount(
+      render(
         coreStart.rendering.addContext(
           <Providers
             services={coreStart}
@@ -388,24 +493,20 @@ describe('useUserProfileForm', () => {
         )
       );
 
-      const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
-      expect(overrideMsg).toHaveLength(1);
-      expect(overrideMsg.getElement().props.content).not.toEqual('');
+      const themeMenu = screen.getByTestId('themeMenu');
+      expect(themeMenu).toBeInTheDocument();
+      expect(themeMenu.closest('.euiToolTipAnchor')).not.toBeNull();
 
-      const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
-      expect(themeMenu).toHaveLength(1);
-
-      const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
-      expect(themeOptions).toHaveLength(4);
-      themeOptions.forEach((option) => {
-        const menuItemEl = (option.getDOMNode() as unknown as Element[])[1];
-        expect(menuItemEl.className).toContain('disabled');
+      const themeItems = within(themeMenu).getAllByRole('radio');
+      expect(themeItems).toHaveLength(4);
+      themeItems.forEach((item) => {
+        expect(item).toBeDisabled();
       });
     });
   });
 
   describe('Contrast Mode Form', () => {
-    it('should add special toast after submitting form successfully since contrast mode change requires a refresh', async () => {
+    it('should not ask for a page reload after changing contrast mode', async () => {
       const data: UserProfileData = {};
       const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
 
@@ -429,9 +530,122 @@ describe('useUserProfileForm', () => {
 
       expect(coreStart.notifications.toasts.addSuccess).toHaveBeenNthCalledWith(
         2,
-        expect.objectContaining({ title: 'Profile updated' }),
-        expect.objectContaining({ toastLifeTimeMs: 300000 })
+        { title: 'Profile updated' },
+        {}
       );
+    });
+  });
+
+  describe('Display Language Form', () => {
+    const renderWithLoadedProfile = async (data: UserProfileData) => {
+      coreStart.http.get.mockResolvedValue({ data });
+      const userProfiles = new UserProfileAPIClient(coreStart.http);
+      await userProfiles.getCurrent({ dataPath: 'userSettings' });
+
+      const loadedWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
+        <Providers
+          services={coreStart}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles,
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          {children}
+        </Providers>
+      );
+
+      return renderHook(() => useUserProfileForm({ user, data }), { wrapper: loadedWrapper });
+    };
+
+    it('should report display_language_changed event when locale is changed on submit', async () => {
+      const data: UserProfileData = {
+        userSettings: { darkMode: 'light', contrastMode: 'standard', locale: 'en' },
+      };
+
+      const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+      await act(async () => {
+        await result.current.setFieldValue('data.userSettings.locale', 'fr-FR');
+      });
+
+      await act(async () => {
+        await result.current.submitForm();
+      });
+
+      expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith('display_language_changed', {
+        from: 'en',
+        to: 'fr-FR',
+      });
+    });
+
+    it('should not report event when locale is unchanged on submit', async () => {
+      const data: UserProfileData = {
+        userSettings: { darkMode: 'light', contrastMode: 'standard', locale: 'en' },
+      };
+
+      const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+      await act(async () => {
+        await result.current.submitForm();
+      });
+
+      expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+    });
+
+    it('should not send the fallback locale when no locale is stored', async () => {
+      const data: UserProfileData = {
+        userSettings: { darkMode: 'light', contrastMode: 'standard' },
+      };
+      const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+      expect(result.current.values.data?.userSettings.locale).toBe('en');
+
+      await act(async () => {
+        await result.current.setFieldValue('data.userSettings.darkMode', 'dark');
+      });
+      await act(async () => {
+        await result.current.submitForm();
+      });
+
+      const { userSettings } = profileUpdateBody();
+      expect(userSettings.darkMode).toBe('dark');
+      expect(userSettings).not.toHaveProperty('locale');
+    });
+
+    it('should not send a stored locale when another setting changes', async () => {
+      const data: UserProfileData = {
+        userSettings: { darkMode: 'light', contrastMode: 'standard', locale: 'de-DE' },
+      };
+      const { result } = await renderWithLoadedProfile(data);
+
+      await act(async () => {
+        await result.current.setFieldValue('data.userSettings.darkMode', 'dark');
+      });
+      await act(async () => {
+        await result.current.submitForm();
+      });
+
+      const { userSettings } = profileUpdateBody();
+      expect(userSettings.darkMode).toBe('dark');
+      expect(userSettings).not.toHaveProperty('locale');
+    });
+
+    it('should send the locale when it is changed on submit', async () => {
+      const data: UserProfileData = {
+        userSettings: { darkMode: 'light', contrastMode: 'standard', locale: 'de-DE' },
+      };
+      const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+      await act(async () => {
+        await result.current.setFieldValue('data.userSettings.locale', 'fr-FR');
+      });
+      await act(async () => {
+        await result.current.submitForm();
+      });
+
+      expect(profileUpdateBody().userSettings.locale).toBe('fr-FR');
     });
   });
 
@@ -443,7 +657,7 @@ describe('useUserProfileForm', () => {
       coreStart.settings.client.get.mockReturnValue(false);
       coreStart.settings.client.isOverridden.mockReturnValue(true);
 
-      const testWrapper = mount(
+      render(
         coreStart.rendering.addContext(
           <Providers
             services={coreStart}
@@ -458,10 +672,10 @@ describe('useUserProfileForm', () => {
           </Providers>
         )
       );
-      expect(testWrapper.exists('dl[data-test-subj="userRoles"]')).toBeTruthy();
+      expect(screen.getByTestId('userRoles')).toBeInTheDocument();
 
-      expect(testWrapper.exists('button[data-test-subj="userRolesExpand"]')).toBeFalsy();
-      expect(testWrapper.exists('EuiBadgeGroup[data-test-subj="remainingRoles"]')).toBeFalsy();
+      expect(screen.queryByTestId('userRolesExpand')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('remainingRoles')).not.toBeInTheDocument();
     });
 
     it('should display a popover for users with more than three roles', () => {
@@ -472,7 +686,7 @@ describe('useUserProfileForm', () => {
       coreStart.settings.client.isOverridden.mockReturnValue(true);
 
       nonCloudUser.roles = [...nonCloudUser.roles, 'user-role-1', 'user-role-2', 'user-role-3'];
-      const testWrapper = mount(
+      render(
         coreStart.rendering.addContext(
           <Providers
             services={coreStart}
@@ -490,10 +704,10 @@ describe('useUserProfileForm', () => {
 
       const extraRoles = nonCloudUser.roles.splice(3);
 
-      const userRolesExpandButton = testWrapper.find('button[data-test-subj="userRolesExpand"]');
+      const userRolesExpandButton = screen.getByTestId('userRolesExpand');
 
-      expect(userRolesExpandButton).toBeTruthy();
-      expect(userRolesExpandButton.text()).toEqual(`+${extraRoles.length}`);
+      expect(userRolesExpandButton).toBeInTheDocument();
+      expect(userRolesExpandButton).toHaveTextContent(`+${extraRoles.length}`);
     });
   });
 });

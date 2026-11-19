@@ -13,6 +13,7 @@ import ReactDOM from 'react-dom';
 import { EuiContextMenu, EuiThemeProvider, EuiWrappingPopover } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
+import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { DashboardApi } from '../../../dashboard_api/types';
@@ -75,7 +76,7 @@ export const SaveMenu = ({
         },
         {
           name: topNavStrings.resetChanges.label,
-          icon: 'editorUndo',
+          icon: 'undo',
           'data-test-subj': 'dashboardDiscardChangesMenuItem',
           isLoading: isResetting,
           disabled:
@@ -100,6 +101,9 @@ export const SaveMenu = ({
       panelStyle={{ maxWidth: 100 }}
       buffer={0}
       repositionOnScroll
+      aria-label={i18n.translate('dashboard.saveMenu.popover.ariaLabel', {
+        defaultMessage: 'Save options',
+      })}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiWrappingPopover>

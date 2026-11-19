@@ -7,7 +7,7 @@
 
 import mockAnnotations from '../components/annotations/annotations_table/__mocks__/mock_annotations.json';
 
-import type { Annotation } from '../../../common/types/annotations';
+import type { Annotation } from '@kbn/ml-common-types/annotations';
 import {
   annotationsRefresh$,
   annotationsRefreshed,

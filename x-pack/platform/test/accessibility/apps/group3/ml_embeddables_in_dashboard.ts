@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 // @ts-expect-error not full interface
@@ -91,6 +92,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         after(async () => {
+          // Leave the unsaved new dashboard via in-app navigation to unmount the editor and remove its `beforeunload` handler before the next suite navigates (discard and view-mode are disabled on a never-saved dashboard).
+          await PageObjects.dashboard.gotoDashboardLandingPage();
           await ml.api.cleanMlIndices();
         });
 

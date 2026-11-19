@@ -15,6 +15,7 @@ import type { DateHistogramIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiDateHistogramOperation } from '../../schema/bucket_ops';
 import { bucketDateHistogramOperationSchema } from '../../schema/bucket_ops';
 import {
+  LENS_DATE_HISTOGRAM_DROP_PARTIALS_DEFAULT,
   LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
   LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
   LENS_DATE_HISTOGRAM_INTERVAL_DEFAULT,
@@ -29,6 +30,7 @@ describe('Date Histogram Transforms', () => {
         suggested_interval: '1d',
         include_empty_rows: LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
         use_original_time_range: LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
+        drop_partial_intervals: LENS_DATE_HISTOGRAM_DROP_PARTIALS_DEFAULT,
       };
 
       const expected: DateHistogramIndexPatternColumn = {
@@ -56,7 +58,7 @@ describe('Date Histogram Transforms', () => {
       };
 
       const input: LensApiDateHistogramOperation =
-        bucketDateHistogramOperationSchema.validate(partialInput);
+        bucketDateHistogramOperationSchema.parse(partialInput);
 
       const result = fromDateHistogramLensApiToLensState(input);
 
@@ -132,6 +134,34 @@ describe('Date Histogram Transforms', () => {
       };
 
       expect(fromDateHistogramLensStateToAPI(input)).toEqual(expected);
+    });
+
+    it('should export a missing `includeEmptyRows` as false, as the runtime renders it', () => {
+      const input: DateHistogramIndexPatternColumn = {
+        operationType: 'date_histogram',
+        sourceField: '@timestamp',
+        customLabel: false,
+        label: '',
+        isBucketed: true,
+        dataType: 'date',
+        params: { interval: '1d', dropPartials: false },
+      };
+
+      expect(fromDateHistogramLensStateToAPI(input).include_empty_rows).toBe(false);
+    });
+
+    it('should keep an explicit `includeEmptyRows: true`', () => {
+      const input: DateHistogramIndexPatternColumn = {
+        operationType: 'date_histogram',
+        sourceField: '@timestamp',
+        customLabel: false,
+        label: '',
+        isBucketed: true,
+        dataType: 'date',
+        params: { interval: '1d', dropPartials: false, includeEmptyRows: true },
+      };
+
+      expect(fromDateHistogramLensStateToAPI(input).include_empty_rows).toBe(true);
     });
 
     it('should handle custom label', () => {

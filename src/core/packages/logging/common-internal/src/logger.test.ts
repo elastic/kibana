@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Appender, LogMeta, LogRecord } from '@kbn/logging';
+import type { Appender, LogMeta, LogRecord, MetaFilterConfig } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { getLoggerContext } from '..';
 import type { CreateLogRecordFn } from './logger';
@@ -37,7 +37,7 @@ describe('AbstractLogger', () => {
 
   beforeEach(() => {
     appenderMocks = [{ append: jest.fn() }, { append: jest.fn() }];
-    logger = new TestLogger(context, LogLevel.All, appenderMocks, factory);
+    logger = new TestLogger(context, LogLevel.All, appenderMocks, factory, []);
 
     createLogRecordSpy.mockImplementation((level, message, meta) => {
       return {
@@ -288,5 +288,206 @@ describe('AbstractLogger', () => {
         expect(logFn).not.toHaveBeenCalled();
       });
     }
+  });
+
+  describe('meta filters', () => {
+    // Uses ECS `labels` for custom key-value metadata (dot-notation path).
+    const matchingMeta: LogMeta = { labels: { ruleType: 'esql' } };
+    const nonMatchingMeta: LogMeta = { labels: { ruleType: 'kql' } };
+
+    const filter: MetaFilterConfig = {
+      type: 'meta',
+      match: { 'labels.ruleType': 'esql' },
+      level: 'debug',
+    };
+
+    beforeEach(() => {
+      createLogRecordSpy.mockImplementation((level, message, meta) => {
+        return { level, message, meta } as LogRecord;
+      });
+    });
+
+    it('allows records at the filter level when meta matches', () => {
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+      logger.debug('debug message', matchingMeta);
+
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).toHaveBeenCalledTimes(1);
+        expect(appenderMock.append).toHaveBeenCalledWith(
+          expect.objectContaining({ level: LogLevel.Debug })
+        );
+      }
+    });
+
+    it('matches flat top-level meta keys as well as nested objects', () => {
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+      // @ts-expect-error ECS custom meta may use flat dot-notation keys
+      logger.debug('debug message', { 'labels.ruleType': 'esql' });
+
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).toHaveBeenCalledTimes(1);
+      }
+    });
+
+    it('does not match when config and meta value types differ under strict equality', () => {
+      const numericFilter: MetaFilterConfig = {
+        type: 'meta',
+        match: { retryCount: 3 },
+        level: 'debug',
+      };
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [numericFilter]);
+
+      // @ts-expect-error intentional type mismatch to verify strict equality
+      logger.debug('debug message', { retryCount: '3' });
+
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).not.toHaveBeenCalled();
+      }
+    });
+
+    it('drops records at the filter level when meta does not match', () => {
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+      logger.debug('debug message', nonMatchingMeta);
+
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).not.toHaveBeenCalled();
+      }
+    });
+
+    it('does not evaluate a closure message when meta does not match the filter', () => {
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+      const messageFn = jest.fn(() => 'expensive message');
+
+      logger.debug(messageFn, nonMatchingMeta);
+
+      expect(messageFn).not.toHaveBeenCalled();
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).not.toHaveBeenCalled();
+      }
+    });
+
+    it('evaluates a closure message when meta matches the filter', () => {
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+      const messageFn = jest.fn(() => 'expensive message');
+
+      logger.debug(messageFn, matchingMeta);
+
+      expect(messageFn).toHaveBeenCalledTimes(1);
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).toHaveBeenCalledTimes(1);
+      }
+    });
+
+    it('drops records at the filter level when meta is absent', () => {
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+      logger.debug('debug message');
+
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).not.toHaveBeenCalled();
+      }
+    });
+
+    it('still passes records at the nominal level regardless of meta', () => {
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+      logger.warn('warn message', nonMatchingMeta);
+      logger.error('error message');
+
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).toHaveBeenCalledTimes(2);
+      }
+    });
+
+    it('short-circuits nested meta matching when the root key is absent', () => {
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+      // @ts-expect-error ECS custom meta
+      logger.debug('debug message', { unrelated: 'value' });
+
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).not.toHaveBeenCalled();
+      }
+    });
+
+    it('takes the most permissive matching filter when multiple filters are configured', () => {
+      const traceFilter: MetaFilterConfig = {
+        type: 'meta',
+        match: { 'labels.ruleType': 'esql' },
+        level: 'trace',
+      };
+      const debugFilter: MetaFilterConfig = {
+        type: 'meta',
+        match: { 'labels.ruleType': 'esql' },
+        level: 'debug',
+      };
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [
+        debugFilter,
+        traceFilter,
+      ]);
+
+      logger.trace('trace message', matchingMeta);
+
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).toHaveBeenCalledTimes(1);
+        expect(appenderMock.append).toHaveBeenCalledWith(
+          expect.objectContaining({ level: LogLevel.Trace })
+        );
+      }
+    });
+
+    it('requires ALL match predicates to be satisfied', () => {
+      const strictFilter: MetaFilterConfig = {
+        type: 'meta',
+        match: { 'labels.ruleType': 'esql', 'labels.scope': 'background' },
+        level: 'debug',
+      };
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [strictFilter]);
+
+      logger.debug('debug message', { labels: { ruleType: 'esql' } });
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).not.toHaveBeenCalled();
+      }
+
+      jest.clearAllMocks();
+
+      logger.debug('debug message', { labels: { ruleType: 'esql', scope: 'background' } });
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).toHaveBeenCalledTimes(1);
+      }
+    });
+
+    describe('isLevelEnabled', () => {
+      it('always reflects the nominal level, never the filter level', () => {
+        logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+
+        // The filter allows debug for matching meta, but isLevelEnabled is conservative:
+        // it answers "will this logger pass this level?" without knowing meta in advance.
+        expect(logger.isLevelEnabled('debug')).toBe(false);
+        expect(logger.isLevelEnabled('trace')).toBe(false);
+        expect(logger.isLevelEnabled('warn')).toBe(true);
+      });
+
+      it('reflects the nominal level when no filters are configured', () => {
+        logger = new TestLogger(context, LogLevel.Info, appenderMocks, factory);
+
+        expect(logger.isLevelEnabled('debug')).toBe(false);
+        expect(logger.isLevelEnabled('info')).toBe(true);
+      });
+    });
+
+    it('forwards records passed via log() through filter evaluation', () => {
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+
+      const baseRecord = { context, timestamp: new Date(), pid: 1, message: 'direct log' };
+      logger.log({ ...baseRecord, level: LogLevel.Debug, meta: matchingMeta });
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).toHaveBeenCalledTimes(1);
+      }
+
+      jest.clearAllMocks();
+
+      logger.log({ ...baseRecord, level: LogLevel.Debug, meta: nonMatchingMeta });
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).not.toHaveBeenCalled();
+      }
+    });
   });
 });

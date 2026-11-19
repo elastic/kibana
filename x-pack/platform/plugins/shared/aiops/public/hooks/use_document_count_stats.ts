@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
 
@@ -12,11 +13,12 @@ import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from '@kbn/core/public';
 import { stringHash } from '@kbn/ml-string-hash';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
-import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { extractErrorMessage, extractErrorProperties } from '@kbn/ml-error-utils';
 import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 import type { DocumentCountStats } from '@kbn/aiops-log-rate-analysis/types';
 
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
+import { getEsqlDocumentCountStats } from '../get_esql_document_stats';
 import { getDocumentCountStatsRequest, processDocumentCountStats } from '../get_document_stats';
 
 import { useAiopsAppContext } from './use_aiops_app_context';
@@ -26,6 +28,8 @@ export interface DocumentStats {
   totalCount: number;
   documentCountStats?: DocumentCountStats;
   documentCountStatsCompare?: DocumentCountStats;
+  /** Set when loading the document counts failed. */
+  errorMessage?: string;
 }
 
 function displayError(toastNotifications: ToastsStart, index: string, err: any) {
@@ -58,7 +62,11 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   searchParams: TParams | undefined,
   searchParamsCompare: TParams | undefined,
   lastRefresh: number,
-  changePointsByDefault = true
+  changePointsByDefault = true,
+  requestCancellationManager?: RequestCancellationManager,
+  projectRoutingOverride?: string,
+  onLoadingChange?: (isLoading: boolean) => void,
+  esqlQuery?: string
 ): DocumentStats {
   const {
     data,
@@ -67,6 +75,9 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   } = useAiopsAppContext();
 
   const abortCtrl = useRef(new AbortController());
+  // Only the latest request may report that loading finished, a superseded request
+  // finishing late must not clear the loading state of the one that replaced it.
+  const latestRequestId = useRef(0);
 
   const [documentStats, setDocumentStats] = useState<DocumentStats>({
     sampleProbability: 1,
@@ -76,21 +87,60 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   const [documentStatsCache, setDocumentStatsCache] = useState<Record<string, DocumentStats>>({});
 
   const cacheKey = stringHash(
-    `${JSON.stringify(searchParams)}_${JSON.stringify(searchParamsCompare)}`
+    `${JSON.stringify(searchParams)}_${JSON.stringify(searchParamsCompare)}_${esqlQuery ?? ''}`
   );
 
   const fetchDocumentCountData = useCallback(async () => {
+    const requestId = ++latestRequestId.current;
+
     if (!searchParams) return;
 
     if (documentStatsCache[cacheKey]) {
       setDocumentStats(documentStatsCache[cacheKey]);
+      onLoadingChange?.(false);
       return;
     }
 
+    // The panel was cancelled and no new load has started yet, don't start requests.
+    if (requestCancellationManager?.signal.aborted) {
+      onLoadingChange?.(false);
+      return;
+    }
+
+    onLoadingChange?.(true);
+
+    let signal = abortCtrl.current.signal;
     try {
       abortCtrl.current = new AbortController();
+      signal = requestCancellationManager
+        ? AbortSignal.any([abortCtrl.current.signal, requestCancellationManager.signal])
+        : abortCtrl.current.signal;
 
-      const projectRouting = cps?.cpsManager?.getDefaultProjectRouting();
+      if (
+        esqlQuery !== undefined &&
+        searchParams.timeFieldName !== undefined &&
+        searchParams.earliest !== undefined &&
+        searchParams.latest !== undefined &&
+        searchParams.intervalMs !== undefined &&
+        searchParams.intervalMs > 0
+      ) {
+        const { totalCount, documentCountStats } = await getEsqlDocumentCountStats({
+          esql: esqlQuery,
+          search: data.search.search,
+          timeFieldName: searchParams.timeFieldName,
+          earliest: searchParams.earliest,
+          latest: searchParams.latest,
+          intervalMs: searchParams.intervalMs,
+          searchQuery: searchParams.searchQuery,
+          signal,
+        });
+        const esqlStats: DocumentStats = { sampleProbability: 1, documentCountStats, totalCount };
+        setDocumentStats(esqlStats);
+        setDocumentStatsCache({ ...documentStatsCache, [cacheKey]: esqlStats });
+        return;
+      }
+
+      const projectRouting = projectRoutingOverride ?? cps?.cpsManager?.getDefaultProjectRouting();
       if (projectRouting) {
         if (searchParams) {
           searchParams.projectRouting = projectRouting;
@@ -111,7 +161,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
           {
             params: getDocumentCountStatsRequest(totalHitsParams, undefined, changePointsByDefault),
           },
-          { abortSignal: abortCtrl.current.signal }
+          { abortSignal: signal }
         )
       );
       const totalHitsStats = processDocumentCountStats(totalHitsResp?.rawResponse, searchParams);
@@ -132,7 +182,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
               searchParamsCompare === undefined && changePointsByDefault
             ),
           },
-          { abortSignal: abortCtrl.current.signal }
+          { abortSignal: signal }
         )
       );
 
@@ -157,7 +207,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
                 randomSamplerWrapper
               ),
             },
-            { abortSignal: abortCtrl.current.signal }
+            { abortSignal: signal }
           )
         );
 
@@ -178,13 +228,30 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
       });
     } catch (error) {
       // An `AbortError` gets triggered when a user cancels a request by navigating away, we need to ignore these errors.
-      if (error.name !== 'AbortError') {
-        displayError(toasts, searchParams!.index, extractErrorProperties(error));
+      // Aborting with `AbortReason.REPLACED` does not surface as `AbortError`; the composed signal is aborted instead.
+      if (signal.aborted || error.name === 'AbortError') {
+        return;
+      }
+      displayError(toasts, searchParams!.index, extractErrorProperties(error));
+      setDocumentStats((previous) => ({
+        ...previous,
+        errorMessage: extractErrorMessage(error),
+      }));
+    } finally {
+      if (requestId === latestRequestId.current) {
+        onLoadingChange?.(false);
       }
     }
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.search, documentStatsCache, cacheKey]);
+  }, [
+    data?.search,
+    documentStatsCache,
+    cacheKey,
+    requestCancellationManager,
+    projectRoutingOverride,
+    onLoadingChange,
+  ]);
 
   useEffect(
     function getDocumentCountData() {

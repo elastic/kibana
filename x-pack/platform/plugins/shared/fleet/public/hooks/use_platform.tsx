@@ -14,6 +14,7 @@ export type PLATFORM_TYPE =
   | 'mac_aarch64'
   | 'mac_x86_64'
   | 'windows'
+  | 'windows_arm64'
   | 'rpm_aarch64'
   | 'rpm_x86_64'
   | 'deb_aarch64'
@@ -27,6 +28,7 @@ export type EXTENDED_PLATFORM_TYPE =
   | 'mac_aarch64'
   | 'mac_x86_64'
   | 'windows'
+  | 'windows_arm64'
   | 'rpm_aarch64'
   | 'rpm_x86_64'
   | 'deb_aarch64'
@@ -48,6 +50,7 @@ export const PLATFORM_WITH_INSTALL_SERVERS = [
   'mac_aarch64',
   'mac_x86_64',
   'windows',
+  'windows_arm64',
   'windows_msi',
 ];
 
@@ -87,6 +90,12 @@ export const EXTENDED_PLATFORM_OPTIONS: PLATFORM_OPTION[] = [
     id: 'windows',
     label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.windows', {
       defaultMessage: 'Windows x86_64',
+    }),
+  },
+  {
+    id: 'windows_arm64',
+    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.windowsArm64', {
+      defaultMessage: 'Windows ARM64',
     }),
   },
   {

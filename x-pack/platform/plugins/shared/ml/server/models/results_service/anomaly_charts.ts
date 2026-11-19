@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type { ErrorType } from 'eventsource-parser';
+import { each, find, get, keyBy, map, reduce, sortBy } from 'lodash';
+import { extent, max, min } from 'd3';
+
+import type { estypes } from '@elastic/elasticsearch';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { each, find, get, keyBy, map, reduce, sortBy } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
-import { extent, max, min } from 'd3';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import {
@@ -27,11 +30,8 @@ import {
 } from '@kbn/ml-anomaly-utils';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
-
+import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import type { CriteriaField } from '@kbn/ml-anomaly-utils/types';
-import type { ErrorType } from 'eventsource-parser';
-import type { SeverityThreshold } from '../../../common/types/anomalies';
-import type { MlClient } from '../../lib/ml_client';
 import type {
   MetricData,
   ModelPlotOutput,
@@ -42,7 +42,12 @@ import type {
   ChartPoint,
   SeriesConfig,
   ExplorerChartsData,
-} from '../../../common/types/results';
+} from '@kbn/ml-common-types/results';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import { getProjectRoutingFromDatafeed } from '@kbn/ml-cps-common';
+import { getSeverityThresholdMax } from '../../../common/util/severity_threshold';
+
 import {
   isMappableJob,
   isModelPlotChartableForDetector,
@@ -51,14 +56,15 @@ import {
   ML_MEDIAN_PERCENTS,
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
-import type { CombinedJob, Datafeed } from '../../shared';
-
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { findAggField } from '../../../common/util/validation_utils';
 import type { ChartType } from '../../../common/constants/charts';
 import { CHART_TYPE, SCHEDULE_EVENT_MARKER_ENTITY } from '../../../common/constants/charts';
 import { getChartType } from '../../../common/util/chart_utils';
+
+import type { MlClient } from '../../lib/ml_client';
 import type { MlJob } from '../..';
+import { getIsMlCpsEnabled } from '../../lib/cps_utils';
 
 export function chartLimits(data: ChartPoint[] = []) {
   const domain = extent(data, (d) => {
@@ -151,6 +157,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     const scriptFields = datafeedConfig?.script_fields;
     const aggFields = getDatafeedAggregations(datafeedConfig);
 
+    const isMlCpsEnabled = await getIsMlCpsEnabled(client);
+
     // Build the criteria to use in the bool filter part of the request.
     // Add criteria for the time range, entity fields,
     // plus any additional supplied query.
@@ -202,6 +210,9 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       }
     });
 
+    const projectRouting =
+      isMlCpsEnabled && datafeedConfig ? getProjectRoutingFromDatafeed(datafeedConfig) : null;
+
     const esSearchRequest: estypes.SearchRequest = {
       index,
       query: {
@@ -221,6 +232,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       ...(isRuntimeMappings(datafeedConfig?.runtime_mappings)
         ? { runtime_mappings: datafeedConfig?.runtime_mappings }
         : {}),
+      ...(projectRouting !== null ? { project_routing: projectRouting } : {}),
       size: 0,
       _source: false,
     };
@@ -955,9 +967,11 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
     const filteredRecords = anomalyRecords.filter((record) => {
       return severity.some((threshold) => {
+        const thresholdMax = getSeverityThresholdMax(threshold);
+
         return (
           Number(record.record_score) >= threshold.min &&
-          (threshold.max === undefined || Number(record.record_score) <= threshold.max)
+          (thresholdMax === undefined || Number(record.record_score) <= thresholdMax)
         );
       });
     });
@@ -1014,7 +1028,6 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         }
       }
     }
-
     const { chartRange, tooManyBuckets } = calculateChartRange(
       seriesConfigs as SeriesConfigWithMetadata[],
       selectedEarliestMs,
@@ -1236,13 +1249,16 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         };
       });
 
-    if (mapData.length) {
-      // push map data in if it's available
-      // @ts-ignore
-      seriesToPlot.push(...mapData);
-    }
-
-    data.seriesToPlot = seriesToPlot;
+    data.seriesToPlot = mapData.length
+      ? [
+          ...seriesToPlot,
+          ...mapData.map((series) => ({
+            ...series,
+            plotEarliest: chartRange.min,
+            plotLatest: chartRange.max,
+          })),
+        ]
+      : seriesToPlot;
 
     data.errorMessages = errorMessages
       ? Object.entries(errorMessages!).reduce((acc, [errorMessage, jobs]) => {
@@ -1506,7 +1522,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    intervalMs: number
+    intervalMs: number,
+    projectRouting?: string
   ): Promise<any> {
     if (splitField === undefined) {
       return [];
@@ -1589,6 +1606,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           },
         },
       },
+      ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
     };
 
     if (
@@ -1677,6 +1695,11 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     }
 
     const datafeedQuery = get(config, 'datafeedConfig.query', null);
+    const isMlCpsEnabled = await getIsMlCpsEnabled(client);
+    const projectRouting =
+      isMlCpsEnabled && config.datafeedConfig
+        ? getProjectRoutingFromDatafeed(config.datafeedConfig) ?? undefined
+        : undefined;
 
     try {
       return await getEventDistributionData(
@@ -1691,7 +1714,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         config.timeField,
         range.min,
         range.max,
-        config.bucketSpanSeconds * 1000
+        config.bucketSpanSeconds * 1000,
+        projectRouting
       );
     } catch (e) {
       handleError(
@@ -1704,9 +1728,14 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
   }
 
   async function getRecordsForCriteriaChart(config: SeriesConfigWithMetadata, range: ChartRange) {
-    let criteria: MlEntityField[] = [];
-    criteria.push({ fieldName: 'detector_index', fieldValue: config.detectorIndex });
-    criteria = criteria.concat(config.entityFields);
+    const criteria: CriteriaField[] = [
+      { fieldName: 'detector_index', fieldValue: config.detectorIndex },
+      ...config.entityFields.map(({ fieldName, fieldValue, fieldType }) => ({
+        fieldName,
+        fieldValue,
+        fieldType,
+      })),
+    ];
 
     try {
       return await getRecordsForCriteria(
@@ -1946,14 +1975,18 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       });
     }
 
-    const thresholdCriteria = threshold.map((t) => ({
-      range: {
-        record_score: {
-          gte: t.min,
-          ...(t.max !== undefined && { lte: t.max }),
+    const thresholdCriteria = threshold.map((t) => {
+      const thresholdMax = getSeverityThresholdMax(t);
+
+      return {
+        range: {
+          record_score: {
+            gte: t.min,
+            ...(thresholdMax !== undefined && { lte: thresholdMax }),
+          },
         },
-      },
-    }));
+      };
+    });
 
     boolCriteria.push({
       bool: {

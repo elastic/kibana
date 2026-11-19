@@ -55,6 +55,7 @@ const attacksSubLink: LinkItem = {
     }),
   ],
   id: SecurityPageName.attacks,
+  licenseType: 'enterprise',
   path: ATTACKS_PATH,
   title: ATTACKS,
   description: i18n.translate('xpack.securitySolution.appLinks.attacks.description', {
@@ -80,14 +81,14 @@ export const alertDetectionsLinks: LinkItem = {
       defaultMessage: 'Detections',
     }),
   ],
-  links: [alertsSubLink, attacksSubLink],
+  links: [attacksSubLink, alertsSubLink],
   skipUrlState: true,
   categories: [
     {
       label: i18n.translate('xpack.securitySolution.appLinks.category.views', {
         defaultMessage: 'Views',
       }),
-      linkIds: [SecurityPageName.alerts, SecurityPageName.attacks],
+      linkIds: [SecurityPageName.attacks, SecurityPageName.alerts],
     },
   ],
 };

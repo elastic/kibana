@@ -41,16 +41,9 @@ const baseNavItems = [
       {
         'data-test-subj': 'searchSideNav-Indices',
         href: '/app/elasticsearch/index_management',
-        id: 'search_indices',
+        id: 'index_management',
         items: undefined,
         name: 'Index Management',
-      },
-      {
-        'data-test-subj': 'searchSideNav-Playground',
-        href: '/app/search_playground',
-        id: 'playground',
-        items: undefined,
-        name: 'Playground',
       },
       {
         'data-test-subj': 'searchSideNav-SearchApplications',
@@ -94,11 +87,6 @@ const mockNavLinks = [
     id: 'elasticsearchIndexManagement',
     title: 'Index Management',
     url: '/app/elasticsearch/index_management',
-  },
-  {
-    id: 'searchPlayground',
-    title: 'Playground',
-    url: '/app/search_playground',
   },
   {
     id: 'enterpriseSearchApplications:searchApplications',

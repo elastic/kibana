@@ -5,14 +5,45 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { Mentions } from './menus/mentions';
 import { Skills } from './menus/skills';
+import { Sml } from './menus/sml';
 import type { CommandDefinition } from './types';
 import { CommandId } from './types';
+import { useExperimentalFeatures } from '../../../../../hooks/use_experimental_features';
+import { useCanMention } from '../../mentions/use_can_mention';
+
+const mentionCommandName = i18n.translate(
+  'xpack.agentBuilder.conversationInput.commandMenu.mentionCommandName',
+  { defaultMessage: 'Mention' }
+);
+
+const semanticKnowledgeCommandName = i18n.translate(
+  'xpack.agentBuilder.conversationInput.commandMenu.semanticKnowledgeCommandName',
+  { defaultMessage: 'Semantic knowledge' }
+);
 
 // When adding a new command, also add its data prefetch hook to use_command_menu_prefetch.ts
 const COMMAND_DEFINITIONS: readonly CommandDefinition[] = [
-  // { id: CommandId.Attachment, sequence: '@', name: 'Attachment', menuComponent: Attachments },
   { id: CommandId.Skill, scheme: 'skill', sequence: '/', name: 'Skill', menuComponent: Skills },
+  {
+    id: CommandId.Sml,
+    scheme: 'sml',
+    sequence: '#',
+    legacySequences: ['@'],
+    name: semanticKnowledgeCommandName,
+    menuComponent: Sml,
+  },
+  {
+    id: CommandId.Mention,
+    scheme: 'mention',
+    sequence: '@',
+    name: mentionCommandName,
+    menuComponent: Mentions,
+    experimental: true,
+  },
 ];
 
 // Sorted once at module load — longest sequence first for greedy matching
@@ -28,4 +59,23 @@ export const getCommandDefinition = (commandId: string) => {
 export const getCommandDefinitionByScheme = (scheme: string) => {
   const commandDefinition = sortedCommandDefinitions.find((c) => c.scheme === scheme);
   return commandDefinition;
+};
+
+/**
+ * Returns the list of command definitions available based on feature flags.
+ * The `/` skill command is always available (GA).
+ * The `#` command is currently available without the experimental flag. The `@` mention
+ * command also needs a shared chat.
+ */
+export const useAvailableCommandDefinitions = (): readonly CommandDefinition[] => {
+  const isExperimentalEnabled = useExperimentalFeatures();
+  const canMention = useCanMention();
+
+  return useMemo(
+    () =>
+      sortedCommandDefinitions.filter(({ id, experimental }) =>
+        id === CommandId.Mention ? canMention : !experimental || isExperimentalEnabled
+      ),
+    [isExperimentalEnabled, canMention]
+  );
 };

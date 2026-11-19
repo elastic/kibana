@@ -25,6 +25,8 @@ import {
 } from '../../../../common/field_maps/field_names';
 import {
   AGENT_STATUS_FIELD_NAME,
+  CUSTOM_YARA_SIGNATURE_ENTRY_NAME_FIELD_NAME,
+  CUSTOM_YARA_SIGNATURE_RULE_IDENTIFIER_FIELD_NAME,
   EVENT_SOURCE_FIELD_NAME,
   QUARANTINED_PATH_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
@@ -49,13 +51,19 @@ const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleT
   defaultMessage: 'Rule type',
 });
 
+/** Host EUID fields (entity store priority: host.entity.id > host.id > host.name > host.hostname) */
+const HOST_EUID_FIELDS: EventSummaryField[] = [{ id: 'host.name' }];
+
+/** Shown in highlighted fields; other user identity fields stay on the document for EUID / entity resolution. */
+const USER_EUID_FIELDS: EventSummaryField[] = [{ id: 'user.name' }];
+
 /** Always show these fields */
 export const alwaysDisplayedFields: EventSummaryField[] = [
   {
     id: EVENT_SOURCE_FIELD_NAME,
     overrideField: EVENT_SOURCE_FIELD_DESCRIPTOR,
   },
-  { id: 'host.name' },
+  ...HOST_EUID_FIELDS,
 
   // Add all fields used to identify the agent ID in alert events and override them to
   // show the `agent.status` field name/value
@@ -69,8 +77,10 @@ export const alwaysDisplayedFields: EventSummaryField[] = [
 
   // ** //
   { id: 'Endpoint.policy.applied.artifacts.global.channel' },
-  { id: 'user.name' },
+  ...USER_EUID_FIELDS,
   { id: 'rule.name' },
+  { id: CUSTOM_YARA_SIGNATURE_ENTRY_NAME_FIELD_NAME },
+  { id: CUSTOM_YARA_SIGNATURE_RULE_IDENTIFIER_FIELD_NAME },
   { id: 'cloud.provider' },
   { id: 'cloud.region' },
   { id: 'orchestrator.cluster.id' },

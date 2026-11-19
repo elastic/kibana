@@ -26,10 +26,10 @@ import type {
 } from '@kbn/coloring';
 import {
   DEFAULT_COLOR_MAPPING_CONFIG,
-  CategoricalColorMapping,
   SPECIAL_TOKENS_STRING_CONVERSION,
   getConfigFromPalette,
 } from '@kbn/coloring';
+import { CategoricalColorMapping } from '@kbn/coloring-components';
 import { i18n } from '@kbn/i18n';
 import type { KbnPaletteId, KbnPalettes } from '@kbn/palettes';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
@@ -159,7 +159,18 @@ export function ColorMappingByTerms({
                     : { ...DEFAULT_COLOR_MAPPING_CONFIG };
 
                   trackUiCounterEvents(`color_mapping_switch_${isLegacy ? 'disabled' : 'enabled'}`);
-                  setColorMapping(newColorMapping);
+
+                  if (isLegacy) {
+                    if (!palette) {
+                      // `setPalette` (in the table dimension editor) also clears `colorMapping`,
+                      // so this must be a single state update to avoid debounced update races.
+                      setPalette({ type: 'palette', name: 'default' });
+                    } else {
+                      setColorMapping(undefined);
+                    }
+                  } else {
+                    setColorMapping(newColorMapping);
+                  }
                   setUseLegacyPalettes(isLegacy);
                   onModeChange?.(isLegacy);
                 }}

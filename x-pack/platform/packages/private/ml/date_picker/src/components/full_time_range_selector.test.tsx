@@ -127,4 +127,72 @@ describe('FullTimeRangeSelector', () => {
       success: true,
     });
   });
+
+  it('passes the explicit project routing to setFullTimeRange', async () => {
+    const projectRouting = '_id:linked-project';
+    const getProjectRouting = jest.fn(() => '_id:global-project');
+    const cps = {
+      isTierEligible: true,
+      cpsManager: { getProjectRouting },
+    } as unknown as DatePickerDependencies['cps'];
+    (setFullTimeRange as jest.MockedFunction<any>).mockImplementationOnce(() => undefined);
+
+    const { getByText } = render(
+      <IntlProvider locale="en">
+        <DatePickerContextProvider {...mockDependencies} cps={cps}>
+          <FullTimeRangeSelector {...props} projectRouting={projectRouting} />
+        </DatePickerContextProvider>
+      </IntlProvider>
+    );
+
+    await act(async () => {
+      fireEvent.click(getByText(/use full data/i));
+    });
+
+    expect(setFullTimeRange).toHaveBeenCalledWith(
+      props.timefilter,
+      dataView,
+      undefined,
+      undefined,
+      query,
+      true,
+      undefined,
+      projectRouting
+    );
+    expect(getProjectRouting).not.toHaveBeenCalled();
+  });
+
+  it('falls back to the CPS context project routing', async () => {
+    const projectRouting = '_id:context-project';
+    const getProjectRouting = jest.fn(() => projectRouting);
+    const cps = {
+      isTierEligible: true,
+      cpsManager: { getProjectRouting },
+    } as unknown as DatePickerDependencies['cps'];
+    (setFullTimeRange as jest.MockedFunction<any>).mockImplementationOnce(() => undefined);
+
+    const { getByText } = render(
+      <IntlProvider locale="en">
+        <DatePickerContextProvider {...mockDependencies} cps={cps}>
+          <FullTimeRangeSelector {...props} />
+        </DatePickerContextProvider>
+      </IntlProvider>
+    );
+
+    await act(async () => {
+      fireEvent.click(getByText(/use full data/i));
+    });
+
+    expect(setFullTimeRange).toHaveBeenCalledWith(
+      props.timefilter,
+      dataView,
+      undefined,
+      undefined,
+      query,
+      true,
+      undefined,
+      projectRouting
+    );
+    expect(getProjectRouting).toHaveBeenCalledTimes(1);
+  });
 });

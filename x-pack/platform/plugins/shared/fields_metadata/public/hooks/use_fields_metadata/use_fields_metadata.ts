@@ -21,6 +21,7 @@ export type UseFieldsMetadataParams = FindFieldsMetadataRequestQuery;
 
 export interface UseFieldsMetadataReturnType {
   fieldsMetadata: FindFieldsMetadataResponsePayload['fields'] | undefined;
+  streamFieldsMetadata: FindFieldsMetadataResponsePayload['streamFields'] | undefined;
   loading: boolean;
   error: Error | undefined;
   reload: ReturnType<typeof useAsyncFn>[1];
@@ -44,6 +45,12 @@ export const createUseFieldsMetadataHook = ({
       load();
     }, [load]);
 
-    return { fieldsMetadata: value?.fields, loading, error, reload: load };
+    return {
+      fieldsMetadata: value?.fields,
+      streamFieldsMetadata: value?.streamFields,
+      loading,
+      error,
+      reload: load,
+    };
   };
 };

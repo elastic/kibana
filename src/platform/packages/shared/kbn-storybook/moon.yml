@@ -21,19 +21,23 @@ dependsOn:
   - '@kbn/ui-shared-deps-src'
   - '@kbn/repo-info'
   - '@kbn/dev-cli-runner'
+  - '@kbn/tooling-log'
   - '@kbn/core-theme-browser'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/core-i18n-browser'
   - '@kbn/react-kibana-context-root'
   - '@kbn/core-analytics-browser'
+  - '@kbn/core-user-profile-browser'
   - '@kbn/node-libs-browser-webpack-plugin'
+  - '@kbn/rspack-optimizer'
 tags:
   - shared-common
   - package
   - dev
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'

@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
@@ -116,7 +117,7 @@ export function AddDataPanel({
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     data-test-subj="AddDataPanelTryItNowButton"
-                    iconType="launch"
+                    iconType="rocket"
                     iconSide="right"
                     href={actions.secondary.href}
                     onClick={onTryIt}
@@ -155,20 +156,28 @@ export function AddDataPanel({
           )}
 
           {onDismiss && (
-            <EuiButtonIcon
-              style={{
-                position: 'absolute',
-                top: `${euiTheme.size.s}`,
-                right: `${euiTheme.size.s}`,
-              }}
-              data-test-subj="AddDataPanelDismissButton"
-              iconType="cross"
-              onClick={onDismiss}
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.observabilityShared.addDataPabel.dismissButtonAriaLabel',
                 { defaultMessage: 'Dismiss panel' }
               )}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                style={{
+                  position: 'absolute',
+                  top: `${euiTheme.size.s}`,
+                  right: `${euiTheme.size.s}`,
+                }}
+                data-test-subj="AddDataPanelDismissButton"
+                iconType="cross"
+                onClick={onDismiss}
+                aria-label={i18n.translate(
+                  'xpack.observabilityShared.addDataPabel.dismissButtonAriaLabel',
+                  { defaultMessage: 'Dismiss panel' }
+                )}
+              />
+            </EuiToolTip>
           )}
         </EuiFlexGroup>
       </EuiPanel>

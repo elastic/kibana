@@ -34,6 +34,7 @@ export class EuiContextMenuTestHarness {
    */
   public getMenuItem(label: string | RegExp): HTMLElement | null {
     return (
+      (within(this.#panelEl).queryByRole('menuitem', { name: label }) as HTMLElement | null) ??
       (within(this.#panelEl).queryByRole('button', { name: label }) as HTMLElement | null) ??
       (within(this.#panelEl).queryByRole('link', { name: label }) as HTMLElement | null) ??
       null

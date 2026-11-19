@@ -165,6 +165,7 @@ export const AssetInventoryDataTable = ({
       openDynamicFlyout({
         entityDocId: doc.raw._id,
         entityType: source.entity?.EngineMetadata?.Type,
+        entityId: source.entity?.id,
         entityName: source.entity?.name,
         scopeId: ASSET_INVENTORY_TABLE_ID,
         contextId: ASSET_INVENTORY_TABLE_ID,

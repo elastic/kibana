@@ -15,17 +15,30 @@ source .buildkite/scripts/common/util.sh
   BUILDKITE_TOKEN="$(vault_get buildkite-ci buildkite_token_all_jobs)"
   export BUILDKITE_TOKEN
 
-  GITHUB_TOKEN=$(vault_get kibanamachine github_token)
+  case "$BUILDKITE_PIPELINE_SLUG" in
+    kibana-deploy-cloud-from-pr | \
+    kibana-deploy-project-from-pr | \
+    kibana-chromium-linux-build | \
+    kibana-console-definitions-sync | \
+    kibana-emergency-release | \
+    kibana-es-ql-grammar-sync | \
+    kibana-opentelemetry-semantic-conventions-sync | \
+    kibana-purge-cloud-deployments | \
+    kibana-renovate-helper | \
+    kibana-report-flaky-tests | \
+    kibana-scout-update-metadata | \
+    kibana-serverless-release-readiness | \
+    kibana-tests | \
+    kibana-tests-emergency)
+      GITHUB_TOKEN="$VAULT_GITHUB_TOKEN"
+      ;;
+    *)
+      GITHUB_TOKEN=$(vault_get kibanamachine github_token)
+      ;;
+  esac
   export GITHUB_TOKEN
 
-  KIBANA_DOCKER_USERNAME="$(vault_get container-registry username)"
-  KIBANA_DOCKER_PASSWORD="$(vault_get container-registry password)"
-  function docker_login() {
-      if (command -v docker && docker version) &> /dev/null; then
-        echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-      fi
-  }
-  retry 5 15 docker_login
+  retry 5 15 docker_login_for_pipeline
 }
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
@@ -89,36 +102,6 @@ EOF
 
 # Set up misc keys
 {
-  KIBANA_CI_REPORTER_KEY=$(vault_get kibanamachine-reporter value)
-  export KIBANA_CI_REPORTER_KEY
-
-  EC_API_KEY="$(vault_get kibana-ci-cloud-deploy pr_deploy_api_key)"
-  export EC_API_KEY
-
-  PROJECT_API_KEY="$(vault_get kibana-ci-project-deploy pr_deploy_api_key)"
-  export PROJECT_API_KEY
-
-  PROJECT_API_DOMAIN="$(vault_get kibana-ci-project-deploy pr_deploy_domain)"
-  export PROJECT_API_DOMAIN
-
-  SYNTHETICS_SERVICE_USERNAME="$(vault_get kibana-ci-synthetics-credentials username)"
-  export SYNTHETICS_SERVICE_USERNAME
-
-  SYNTHETICS_SERVICE_PASSWORD="$(vault_get kibana-ci-synthetics-credentials password)"
-  export SYNTHETICS_SERVICE_PASSWORD
-
-  SYNTHETICS_SERVICE_MANIFEST="$(vault_get kibana-ci-synthetics-credentials manifest)"
-  export SYNTHETICS_SERVICE_MANIFEST
-
-  SYNTHETICS_REMOTE_KIBANA_USERNAME="$(vault_get kibana-ci-synthetics-remote-credentials username)"
-  export SYNTHETICS_REMOTE_KIBANA_USERNAME
-
-  SYNTHETICS_REMOTE_KIBANA_PASSWORD="$(vault_get kibana-ci-synthetics-remote-credentials password)"
-  export SYNTHETICS_REMOTE_KIBANA_PASSWORD
-
-  SYNTHETICS_REMOTE_KIBANA_URL=${SYNTHETICS_REMOTE_KIBANA_URL-"$(vault_get kibana-ci-synthetics-remote-credentials url)"}
-  export SYNTHETICS_REMOTE_KIBANA_URL
-
   DEPLOY_TAGGER_SLACK_WEBHOOK_URL=${DEPLOY_TAGGER_SLACK_WEBHOOK_URL:-"$(vault_get kibana-serverless-release-tools DEPLOY_TAGGER_SLACK_WEBHOOK_URL)"}
   export DEPLOY_TAGGER_SLACK_WEBHOOK_URL
 
@@ -151,24 +134,25 @@ EOF
 # Set up Kibana Evals secrets
 {
   if [[ "${KBN_EVALS:-}" =~ ^(1|true)$ ]]; then
-    echo "KBN_EVALS was set - exposing evals connectors and ES export credentials"
+    echo "KBN_EVALS was set - exposing evals connectors and export credentials"
 
-    KBN_EVALS_CONFIG_JSON="$(vault_get kbn-evals config | base64 -d)"
-    # Validate config shape (safe; does not print secrets)
-    node x-pack/platform/packages/shared/kbn-evals/scripts/vault/validate_config.js --stdin <<<"$KBN_EVALS_CONFIG_JSON" >/dev/null
+    KBN_EVALS_CONFIG_JSON="$(retry 5 5 vault kv get -field=config kv/ci-shared/kbn-evals/golden | base64 -d)"
+    # Validate config shape. Guarded because lightweight sparse-checkout steps (pipeline upload, Post-Build)
+    # don't fetch the validator, and orchestration steps on the minimal image have no node yet (this runs
+    # before setup_node.sh); eval steps run on a full checkout with node available.
+    kbn_evals_validator="x-pack/platform/packages/shared/kbn-evals/scripts/vault/validate_config.js"
+    if [[ -f "$kbn_evals_validator" ]] && command -v node >/dev/null; then
+      node "$kbn_evals_validator" --stdin <<<"$KBN_EVALS_CONFIG_JSON" >/dev/null
+    fi
 
     # Eval suites require this for the LLM-as-a-judge connector selection
-    export EVALUATION_CONNECTOR_ID="${EVALUATION_CONNECTOR_ID:-"$(jq -r '.evaluationConnectorId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"}"
+    export EVAL_CONNECTOR_ID="${EVAL_CONNECTOR_ID:-"$(jq -r '.evaluationConnectorId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"}"
 
-    # Export the vault config so eval-owned scripts can extract LiteLLM / connector
+    # Export the vault config so eval-owned scripts can extract OpenRouter / connector
     # settings without needing vault access themselves.
     # Connector generation happens in .buildkite/scripts/steps/evals/setup_connectors.sh.
     export KBN_EVALS_CONFIG_B64
     KBN_EVALS_CONFIG_B64="$(printf '%s' "$KBN_EVALS_CONFIG_JSON" | base64)"
-
-    # Elasticsearch cluster for evaluation results export
-    export EVALUATIONS_ES_URL="$(jq -r '.evaluationsEs.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
-    export EVALUATIONS_ES_API_KEY="$(jq -r '.evaluationsEs.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
 
     # Optional: separate cluster for trace-based evaluators
     export TRACING_ES_URL="$(jq -r '.tracingEs.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
@@ -180,24 +164,29 @@ EOF
       export TRACING_EXPORTERS="$TRACING_EXPORTERS_JSON"
     fi
 
+    # Optional: Remote Kibana for managed dataset operations (golden cluster)
+    EVAL_KBN_URL="$(jq -r '.evaluationsKbn.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    if [[ -n "$EVAL_KBN_URL" ]]; then
+      export EVAL_KBN_URL
+      export EVAL_KBN_API_KEY="$(jq -r '.evaluationsKbn.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    fi
+
     # Optional: GCS service account credentials for snapshot restoration (e.g. AI Insights)
     export GCS_CREDENTIALS="$(jq -c '.gcsDatasetAccessCredentials // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
   fi
 }
 
-# Set up GCS Service Account for CDN
+# Set up the workflow step-schema CDN publisher key.
 {
-  GCS_SA_CDN_KEY="$(vault_get gcs-sa-cdn-prod key)"
-  export GCS_SA_CDN_KEY
-
-  GCS_SA_CDN_EMAIL="$(vault_get gcs-sa-cdn-prod email)"
-  export GCS_SA_CDN_EMAIL
-
-  GCS_SA_CDN_BUCKET="$(vault_get gcs-sa-cdn-prod bucket)"
-  export GCS_SA_CDN_BUCKET
-
-  GCS_SA_CDN_URL="$(vault_get gcs-sa-cdn-prod cdn)"
-  export GCS_SA_CDN_URL
+  if [[ "$BUILDKITE_PIPELINE_SLUG" == "kibana-artifacts-container-image" && "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
+    WORKFLOWS_SCHEMA_GCS_SA_KEY="$(retry 5 5 vault kv get -field=credentials kv/ci-shared/workflows-library/gcs-publish || true)"
+    if [[ -n "$WORKFLOWS_SCHEMA_GCS_SA_KEY" ]]; then
+      buildkite-agent redactor add <<<"$WORKFLOWS_SCHEMA_GCS_SA_KEY" 2>/dev/null || true
+      export WORKFLOWS_SCHEMA_GCS_SA_KEY
+    else
+      echo "Could not read the workflow step schema publisher key from Vault; the schema CDN publish will fail" >&2
+    fi
+  fi
 }
 
 # Setup Failed Test Reporter Elasticsearch credentials
@@ -225,37 +214,25 @@ EOF
 
 # Setup GCS Service Account Proxy for CI
 {
-  KIBANA_SERVICE_ACCOUNT_PROXY_KEY="$(mktemp -d)/kibana-gcloud-service-account.json"
-  export KIBANA_SERVICE_ACCOUNT_PROXY_KEY
-  vault_get kibana-ci-sa-proxy-key key | base64 -d > "$KIBANA_SERVICE_ACCOUNT_PROXY_KEY"
-}
-
-# Acquire credentials for legacy vault if needed
-{
-  VAULT_ROLE_ID="$(vault_get kibana-buildkite-vault-credentials role-id)"
-  export VAULT_ROLE_ID
-  VAULT_SECRET_ID="$(vault_get kibana-buildkite-vault-credentials secret-id)"
-  export VAULT_SECRET_ID
+  KIBANA_WIF_CREDENTIALS_DIR="$(mktemp -d)"
+  export KIBANA_WIF_CREDENTIALS_DIR
+  export GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1
 }
 
 # Set up EIS Cloud Connected Mode (CCM) API key
-# Note: This secret is in the legacy vault, requires approle authentication
 {
   if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
     echo "FTR_EIS_CCM was set - exposing EIS CCM API key"
-    VAULT_TOKEN_COPY="${VAULT_TOKEN:-}"
-    VAULT_TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-    VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$VAULT_TOKEN"
-    export KIBANA_EIS_CCM_API_KEY="$(vault read -address=$LEGACY_VAULT_ADDR -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"
-    VAULT_TOKEN="$VAULT_TOKEN_COPY"
+    KIBANA_EIS_CCM_API_KEY="$(vault_get kibana-eis-ccm key)"
+    export KIBANA_EIS_CCM_API_KEY
   fi
 }
 
-# Inject moon remote-cache credentials on CI
-if [[ "${CI:-}" =~ ^(1|true)$ ]]; then
-  MOON_REMOTE_CACHE_TOKEN=$(vault_get moon-remote-cache token)
-  export MOON_REMOTE_CACHE_TOKEN
-fi
+# Moon remote cache is disabled (see .moon/workspace.yml)
+# if [[ "${CI:-}" =~ ^(1|true)$ ]]; then
+#   MOON_REMOTE_CACHE_TOKEN=$(vault_get moon-remote-cache token)
+#   export MOON_REMOTE_CACHE_TOKEN
+# fi
 
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then

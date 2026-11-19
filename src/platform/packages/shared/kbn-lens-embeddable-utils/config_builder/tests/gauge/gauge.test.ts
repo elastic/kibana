@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { gaugeStateSchema } from '../../schema/charts/gauge';
-import { validateAPIConverter, validateConverter } from '../validate';
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+
+import { validator } from '../utils/validator';
+import { gaugeConfigSchema, type GaugeConfig } from '../../schema/charts/gauge';
+import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
+import { LensConfigBuilder } from '../../config_builder';
+import type { LensAttributes } from '../../types';
 import {
   basicGaugeWithAdHocDataView,
   basicGaugeWithDataView,
@@ -26,50 +31,151 @@ import {
 } from './lens_state_config.mock';
 
 describe('Gauge', () => {
-  describe('validateConverter', () => {
+  describe('state transform validation', () => {
     it('should convert a gauge chart with full config and absolute color mode', () => {
-      validateConverter(gaugeAttributes, gaugeStateSchema);
+      validator.gauge.fromState(gaugeAttributes);
     });
 
     it('should convert a gauge chart with full config and percentage color mode', () => {
-      validateConverter(gaugeAttributesWithPercentageColorMode, gaugeStateSchema);
+      validator.gauge.fromState(gaugeAttributesWithPercentageColorMode);
     });
 
     it('should convert a gauge chart with ESQL dataset', () => {
-      validateConverter(gaugeESQLAttributes, gaugeStateSchema);
+      validator.gauge.fromState(gaugeESQLAttributes);
     });
 
     it('should convert a default color by value palette', () => {
-      validateConverter(defaultColorByValueAttributes, gaugeStateSchema);
+      validator.gauge.fromState(defaultColorByValueAttributes);
     });
 
     it('should convert a selector color by value palette', () => {
-      validateConverter(selectorColorByValueAttributes, gaugeStateSchema);
+      validator.gauge.fromState(selectorColorByValueAttributes);
     });
   });
-  describe('validateAPIConverter', () => {
+
+  describe('api transform validation', () => {
     it('should convert a basic gauge chart with ad hoc dataView', () => {
-      validateAPIConverter(basicGaugeWithAdHocDataView, gaugeStateSchema);
+      validator.gauge.fromApi(basicGaugeWithAdHocDataView);
     });
 
     it('should convert a basic gauge chart with dataView', () => {
-      validateAPIConverter(basicGaugeWithDataView, gaugeStateSchema);
+      validator.gauge.fromApi(basicGaugeWithDataView);
     });
 
     it('should convert a ESQL-based gauge chart', () => {
-      validateAPIConverter(esqlGauge, gaugeStateSchema);
+      validator.gauge.fromApi(esqlGauge);
     });
 
     it('should convert a comprehensive gauge chart with ad hoc data view', () => {
-      validateAPIConverter(comprehensiveGaugeWithAdHocDataView, gaugeStateSchema);
+      validator.gauge.fromApi(comprehensiveGaugeWithAdHocDataView);
     });
 
     it('should convert a comprehensive gauge chart with data view', () => {
-      validateAPIConverter(comprehensiveGaugeWithDataView, gaugeStateSchema);
+      validator.gauge.fromApi(comprehensiveGaugeWithDataView);
     });
 
     it('should convert a comprehensive ESQL-based gauge chart', () => {
-      validateAPIConverter(comprehensiveEsqlGauge, gaugeStateSchema);
+      validator.gauge.fromApi(comprehensiveEsqlGauge);
+    });
+  });
+
+  describe('shape default application', () => {
+    it('should default a missing shape to a horizontal bullet', () => {
+      const { shape, ...visualizationWithoutShape } = gaugeAttributes.state.visualization as {
+        shape?: string;
+      };
+      const attributes = {
+        ...gaugeAttributes,
+        state: { ...gaugeAttributes.state, visualization: visualizationWithoutShape },
+      } as LensAttributes;
+
+      const builder = new LensConfigBuilder();
+      const apiOutput = builder.toAPIFormat(attributes) as GaugeConfig;
+
+      expect(shape).toBeDefined();
+      expect(apiOutput.styling?.shape).toEqual({ type: 'bullet', orientation: 'horizontal' });
+    });
+  });
+
+  describe('color default application', () => {
+    const baseGauge = {
+      type: 'gauge',
+      title: 'Color default test',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+        index_pattern: 'test-index',
+        time_field: '@timestamp',
+      },
+      metric: {
+        operation: 'count',
+        empty_as_null: false,
+      },
+      sampling: 1,
+      ignore_global_filters: false,
+    } satisfies GaugeConfig;
+
+    it('should emit AUTO_COLOR when no color is specified', () => {
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(baseGauge);
+      const apiOutput = builder.toAPIFormat(lensState) as GaugeConfig;
+
+      expect(apiOutput.metric.color).toEqual(AUTO_COLOR);
+    });
+
+    it('should emit NO_COLOR when color is explicitly set to `none`', () => {
+      const config = {
+        ...baseGauge,
+        metric: { ...baseGauge.metric, color: NO_COLOR },
+      } satisfies GaugeConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as GaugeConfig;
+
+      expect(apiOutput.metric.color).toEqual(NO_COLOR);
+    });
+  });
+
+  describe('ticks default application', () => {
+    const baseGauge = {
+      type: 'gauge',
+      title: 'Ticks default test',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+        index_pattern: 'test-index',
+        time_field: '@timestamp',
+      },
+      metric: {
+        operation: 'count',
+        empty_as_null: false,
+      },
+      sampling: 1,
+      ignore_global_filters: false,
+    } satisfies GaugeConfig;
+
+    it('should emit the bands tick mode when no ticks are specified and keep it after schema parse', () => {
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(baseGauge);
+      const apiOutput = builder.toAPIFormat(lensState) as GaugeConfig;
+      const parsed = gaugeConfigSchema.parse(apiOutput);
+
+      expect(apiOutput.metric.ticks).toEqual({ visible: true, mode: 'bands' });
+      expect(parsed.metric.ticks).toEqual({ visible: true, mode: 'bands' });
+    });
+
+    it('should not add a tick mode after schema parse when ticks are hidden', () => {
+      const config = {
+        ...baseGauge,
+        metric: { ...baseGauge.metric, ticks: { visible: false, mode: 'auto' } },
+      } satisfies GaugeConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as GaugeConfig;
+      const parsed = gaugeConfigSchema.parse(apiOutput);
+
+      expect(apiOutput.metric.ticks).toEqual({ visible: false });
+      expect(parsed.metric.ticks).toEqual({ visible: false });
     });
   });
 });

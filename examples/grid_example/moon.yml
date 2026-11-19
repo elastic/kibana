@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/grid-example-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-presentation'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/grid-example-plugin'
   description: Moon project for @kbn/grid-example-plugin
   channel: ''
-  owner: '@elastic/kibana-presentation'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: examples/grid_example
 dependsOn:
   - '@kbn/grid-layout'
@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/ui-actions-plugin'
   - '@kbn/embeddable-examples-plugin'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

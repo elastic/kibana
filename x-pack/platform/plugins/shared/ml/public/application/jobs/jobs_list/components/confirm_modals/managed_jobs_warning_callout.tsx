@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 export const ManagedJobsWarningCallout = ({
   jobsCount,
@@ -21,18 +22,20 @@ export const ManagedJobsWarningCallout = ({
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiCallOut color="warning">
-        {message ?? (
-          <FormattedMessage
-            id="xpack.ml.managedJobsWarningCallout"
-            defaultMessage="{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; {action} {jobsCount, plural, one {it} other {them}} might impact other parts of the product."
-            values={{
-              jobsCount,
-              action,
-            }}
-          />
-        )}
-      </EuiCallOut>
+      <KbnWarningCallout
+        title={
+          message ?? (
+            <FormattedMessage
+              id="xpack.ml.managedJobsWarningCallout"
+              defaultMessage="{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; {action} {jobsCount, plural, one {it} other {them}} might impact other parts of the product."
+              values={{
+                jobsCount,
+                action,
+              }}
+            />
+          )
+        }
+      />
     </>
   );
 };

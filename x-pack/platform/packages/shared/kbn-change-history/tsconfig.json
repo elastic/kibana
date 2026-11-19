@@ -8,12 +8,14 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-user-profile-server",
     "@kbn/data-streams",
     "@kbn/es-mappings",
     "@kbn/logging",
     "@kbn/core-logging-server-mocks",
     "@kbn/tooling-log",
     "@kbn/test",
-    "@kbn/object-utils",
+    "@kbn/apm-utils",
+    "@kbn/core-user-activity-server",
   ]
 }

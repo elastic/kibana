@@ -12,13 +12,13 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
-import { map } from 'rxjs';
+import { map, type Subscription } from 'rxjs';
 import { OpenFeature } from '@openfeature/server-sdk';
 import { LaunchDarklyProvider } from '@launchdarkly/openfeature-node-server';
 import type { LogLevelId } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server/types';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { initializeMetadata, MetadataService } from '../common/metadata_service';
 import { getAllFlags, registerUsageCollector } from './usage';
 import type { CloudExperimentsConfigType } from './config';
@@ -28,15 +28,12 @@ interface CloudExperimentsPluginSetupDeps {
   usageCollection: UsageCollectionSetup;
 }
 
-interface CloudExperimentsPluginStartDeps {
-  dataViews: DataViewsServerPluginStart;
-}
+const ROLLOUT_EVALUATION_PROBE_FLAGS = ['cloudExperiments.rolloutEvaluationProbe'] as const;
 
-export class CloudExperimentsPlugin
-  implements Plugin<void, void, CloudExperimentsPluginSetupDeps, CloudExperimentsPluginStartDeps>
-{
+export class CloudExperimentsPlugin implements Plugin<void, void, CloudExperimentsPluginSetupDeps> {
   private readonly logger: Logger;
   private readonly metadataService: MetadataService;
+  private readonly rolloutEvaluationProbeSubscriptions: Subscription[] = [];
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -93,14 +90,25 @@ export class CloudExperimentsPlugin
     }));
   }
 
-  public start(core: CoreStart, deps: CloudExperimentsPluginStartDeps) {
+  public start(core: CoreStart) {
+    this.subscribeToRolloutEvaluationProbes(core);
+
     this.metadataService.start({
-      hasDataFetcher: async () => await this.addHasDataMetadata(core, deps.dataViews),
+      hasDataFetcher: async () => await this.addHasDataMetadata(core),
     });
   }
 
   public stop() {
+    this.rolloutEvaluationProbeSubscriptions.forEach((subscription) => subscription.unsubscribe());
     this.metadataService.stop();
+  }
+
+  private subscribeToRolloutEvaluationProbes(core: CoreStart): void {
+    ROLLOUT_EVALUATION_PROBE_FLAGS.forEach((flagName) => {
+      this.rolloutEvaluationProbeSubscriptions.push(
+        core.featureFlags.getBooleanValue$(flagName, false).subscribe()
+      );
+    });
   }
 
   private createOpenFeatureProvider() {
@@ -121,18 +129,9 @@ export class CloudExperimentsPlugin
     });
   }
 
-  private async addHasDataMetadata(
-    core: CoreStart,
-    dataViews: DataViewsServerPluginStart
-  ): Promise<{ has_data: boolean }> {
-    const dataViewsService = await dataViews.dataViewsServiceFactory(
-      core.savedObjects.createInternalRepository(),
-      core.elasticsearch.client.asInternalUser,
-      void 0, // No Kibana Request to scope the check
-      true // Ignore capabilities checks
-    );
-    return {
-      has_data: await dataViewsService.hasUserDataView(),
-    };
+  private async addHasDataMetadata(core: CoreStart): Promise<{ has_data: boolean }> {
+    const repo = core.savedObjects.createInternalRepository();
+    const { total } = await repo.find({ type: DATA_VIEW_SAVED_OBJECT_TYPE, perPage: 0 });
+    return { has_data: total > 0 };
   }
 }

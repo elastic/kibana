@@ -212,7 +212,7 @@ describe('NumberList utils', () => {
     });
 
     test('should throw an error', () => {
-      expect(() => getRange('test')).toThrowError();
+      expect(() => getRange('test')).toThrow();
     });
   });
 });

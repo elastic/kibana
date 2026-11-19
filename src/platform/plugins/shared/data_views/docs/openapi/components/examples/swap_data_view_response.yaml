@@ -1,4 +1,5 @@
 summary: The swap references API returns a list of the affected saved objects.
+description: The list of saved objects whose references were updated, along with the delete status of the source.
 value:
   {
     result: [{ id: "123", type: "visualization" }],

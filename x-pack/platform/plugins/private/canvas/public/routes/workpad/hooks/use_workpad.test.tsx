@@ -27,7 +27,7 @@ const workpadResponse = {
 };
 
 // Mock the hooks, actions, and services used by the UseWorkpad hook
-jest.mock('react-redux', () => ({
+jest.mock('react-redux-v7', () => ({
   useDispatch: () => mockDispatch,
   useSelector: () => mockSelector,
 }));
@@ -121,7 +121,7 @@ describe('useWorkpad', () => {
     const { unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
     try {
       await waitFor(() => expect(mockRedirectLegacyUrl).toHaveBeenCalled());
-      expect(mockRedirectLegacyUrl).toBeCalledWith({
+      expect(mockRedirectLegacyUrl).toHaveBeenCalledWith({
         path: `#${aliasId}`,
         aliasPurpose: 'savedObjectConversion',
         objectNoun: 'Workpad',

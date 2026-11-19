@@ -10,6 +10,7 @@ import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
+import { LegendLayout } from '@kbn/chart-expressions-common';
 import { FittingFunctions, LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { Parser } from '@elastic/esql';
 
@@ -22,9 +23,14 @@ import type {
 } from '@kbn/lens-common';
 import { getColorMappingDefaults } from '../../utils';
 import type { XYVisualizationState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
-import { visualizationSubtypes, defaultSeriesType } from './types';
-import { flipSeriesType, getIconForSeries } from './state_helpers';
+import { visualizationSubtypes, defaultSeriesType, defaultAreaFill } from './types';
+import { flipSeriesType, getIconForSeries, hasAreaSeries } from './state_helpers';
+import { getDefaultPalette } from './default_palette';
 import { getDataLayers, isDataLayer, isDateHistogramOperation } from './visualization_helpers';
+
+const XY_SUGGESTION_DEFAULTS: Pick<XYVisualizationState, 'legend'> = {
+  legend: { isVisible: true, position: Position.Bottom, layout: LegendLayout.List },
+};
 
 const COLUMN_SORT_ORDER = {
   document: 0,
@@ -39,6 +45,7 @@ const COLUMN_SORT_ORDER = {
   geo_point: 9,
   geo_shape: 10,
   murmur3: 11,
+  number_range: 12,
 };
 
 /**
@@ -79,9 +86,13 @@ export function getSuggestions({
   allowMixed,
   datasourceId,
   query,
+  defaultOverrides,
 }: SuggestionRequest<XYVisualizationState>): Array<VisualizationSuggestion<XYVisualizationState>> {
+  // Text-based datasource always sets isMultiRow: false regardless of actual data shape,
+  // so skip that check for textBased to avoid incorrectly rejecting valid suggestions
+  const isTextBased = datasourceId === LENS_DATASOURCE_ID.TEXT_BASED;
   const incompleteTable =
-    !table.isMultiRow ||
+    (!isTextBased && !table.isMultiRow) ||
     table.columns.length <= 1 ||
     table.columns.every((col) => col.operation.dataType !== 'number') ||
     table.columns.some((col) => !Object.hasOwn(COLUMN_SORT_ORDER, col.operation.dataType));
@@ -106,7 +117,8 @@ export function getSuggestions({
     mainPalette,
     allowMixed,
     datasourceId,
-    query
+    query,
+    defaultOverrides
   );
 
   if (Array.isArray(suggestions)) {
@@ -124,7 +136,8 @@ function getSuggestionForColumns(
   mainPalette?: SuggestionRequest['mainPalette'],
   allowMixed?: boolean,
   datasourceId?: string,
-  query?: SuggestionRequest['query']
+  query?: SuggestionRequest['query'],
+  defaultOverrides?: SuggestionRequest<XYVisualizationState>['defaultOverrides']
 ):
   | VisualizationSuggestion<XYVisualizationState>
   | Array<VisualizationSuggestion<XYVisualizationState>>
@@ -141,6 +154,7 @@ function getSuggestionForColumns(
     allowMixed,
     datasourceId,
     query,
+    defaultOverrides,
   };
 
   const isEsql = datasourceId === LENS_DATASOURCE_ID.TEXT_BASED;
@@ -246,6 +260,7 @@ function getSuggestionsForLayer({
   allowMixed,
   datasourceId,
   query,
+  defaultOverrides,
 }: {
   layerId: string;
   changeType: TableChangeType;
@@ -260,6 +275,7 @@ function getSuggestionsForLayer({
   allowMixed?: boolean;
   datasourceId?: string;
   query?: SuggestionRequest['query'];
+  defaultOverrides?: SuggestionRequest<XYVisualizationState>['defaultOverrides'];
 }):
   | VisualizationSuggestion<XYVisualizationState>
   | Array<VisualizationSuggestion<XYVisualizationState>> {
@@ -284,6 +300,7 @@ function getSuggestionsForLayer({
     // only use palette if there is a breakdown by dimension
     mainPalette: splitBy ? mainPalette : undefined,
     allowMixed,
+    defaultOverrides,
   };
 
   if (
@@ -498,8 +515,14 @@ function getSeriesType(
   const oldLayer = getExistingLayer(currentState, layerId);
   const oldLayerSeriesType = oldLayer && isDataLayer(oldLayer) ? oldLayer.seriesType : false;
 
+  const firstSeriesTypeInDataLayer = currentState
+    ? getDataLayers(currentState.layers)[0]?.seriesType
+    : undefined;
   const closestSeriesType =
-    oldLayerSeriesType || (currentState && currentState.preferredSeriesType) || defaultSeriesType;
+    oldLayerSeriesType ||
+    firstSeriesTypeInDataLayer ||
+    (currentState && currentState.preferredSeriesType) ||
+    defaultSeriesType;
 
   // Attempt to keep the seriesType consistent on initial add of a layer
   // Ordinal scales should always use a bar because there is no interpolation between buckets
@@ -560,6 +583,7 @@ function buildSuggestion({
   hide,
   mainPalette,
   allowMixed,
+  defaultOverrides,
 }: {
   currentState: XYVisualizationState | undefined;
   seriesType: SeriesType;
@@ -573,6 +597,7 @@ function buildSuggestion({
   hide?: boolean;
   mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
+  defaultOverrides?: SuggestionRequest<XYVisualizationState>['defaultOverrides'];
 }) {
   let splitBy = splitByColumns && splitByColumns.length > 0 ? splitByColumns : undefined;
 
@@ -601,7 +626,7 @@ function buildSuggestion({
         : undefined,
     layerType: LayerTypes.DATA,
     colorMapping: !mainPalette
-      ? getColorMappingDefaults()
+      ? getColorMappingDefaults({ defaultPaletteId: getDefaultPalette(seriesType) })
       : mainPalette?.type === 'colorMapping'
       ? mainPalette.value
       : undefined,
@@ -631,12 +656,18 @@ function buildSuggestion({
         )
     : [];
 
+  const layers =
+    existingLayer && Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer];
+
+  const defaults = { ...XY_SUGGESTION_DEFAULTS, ...defaultOverrides };
+
   const state: XYVisualizationState = {
-    legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
+    legend: currentState?.legend ?? defaults.legend,
     valueLabels: currentState?.valueLabels || 'hide',
     fittingFunction: currentState?.fittingFunction ?? FittingFunctions.LINEAR,
     curveType: currentState?.curveType,
     fillOpacity: currentState?.fillOpacity,
+    areaFill: currentState?.areaFill ?? (hasAreaSeries(layers) ? defaultAreaFill : undefined),
     pointVisibility: currentState?.pointVisibility,
     xTitle: currentState?.xTitle,
     yTitle: currentState?.yTitle,
@@ -669,11 +700,17 @@ function buildSuggestion({
       yRight: true,
     },
     preferredSeriesType: seriesType,
-    layers:
-      existingLayer && Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer],
+    layers,
   };
 
   const isIncomplete = yValues.length === 0;
+  const bucketTypes = [xValue, ...(splitBy ?? [])].map((col) => col?.operation.dataType);
+  // the heatmap suggestion takes tables with one metric and two buckets
+  const isRangeOverTime =
+    yValues.length === 1 &&
+    bucketTypes.length === 2 &&
+    bucketTypes.includes('date') &&
+    bucketTypes.includes('number_range');
 
   return {
     title,
@@ -687,7 +724,9 @@ function buildSuggestion({
         // Don't advertise charts without y axis
         isIncomplete ||
         // Don't advertise charts without at least one split
-        (!xValue && !splitBy)),
+        (!xValue && !splitBy) ||
+        // Don't advertise a range bucket over time, a heatmap fits better
+        isRangeOverTime),
     state,
     incomplete: isIncomplete,
     previewIcon: getIconForSeries(seriesType),

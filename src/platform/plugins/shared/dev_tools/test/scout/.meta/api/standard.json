@@ -1,0 +1,78 @@
+{
+  "sha1": "11e1f02bd08d3d5d5641fae0eb68a02c6c838dba",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "1d44fdaf82ec788-de3841a730c3abc",
+      "title": "Dev Tools feature controls all privileges expose Dev Tools with save capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dev_tools/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 26,
+        "column": 29
+      }
+    },
+    {
+      "id": "1d44fdaf82ec788-05cc47607887f8e",
+      "title": "Dev Tools feature controls read privileges expose Dev Tools without save capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dev_tools/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 36,
+        "column": 42
+      }
+    },
+    {
+      "id": "1d44fdaf82ec788-2c0ad8e80340e90",
+      "title": "Dev Tools feature controls users without Dev Tools privileges cannot access Dev Tools",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dev_tools/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 49,
+        "column": 15
+      }
+    },
+    {
+      "id": "1d44fdaf82ec788-9f07846fc6579f8",
+      "title": "Dev Tools feature controls space with Dev Tools enabled exposes Dev Tools",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dev_tools/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 62,
+        "column": 5
+      }
+    },
+    {
+      "id": "1d44fdaf82ec788-e57b08dacd6eb06",
+      "title": "Dev Tools feature controls space with Dev Tools disabled hides Dev Tools",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dev_tools/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 70,
+        "column": 14
+      }
+    }
+  ]
+}

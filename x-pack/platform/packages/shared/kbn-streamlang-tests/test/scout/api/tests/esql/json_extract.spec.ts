@@ -40,7 +40,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docWithField = { message: '{"user_id": "abc123"}', status: 'doc1' };
         const docWithoutField = { status: 'doc2' };
@@ -71,7 +71,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docWithField = { message: '{"user_id": "abc123"}', status: 'doc1' };
         const docWithoutField = { status: 'doc2' };

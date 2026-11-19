@@ -10,6 +10,7 @@ import type {
   ChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
 import { AIMessageChunk } from '@langchain/core/messages';
+import { tokenCountToUsageMetadata } from './messages';
 
 // type is not exported from @langchain/core...
 // import { ToolCallChunk } from '@langchain/core/messages/tools';
@@ -26,7 +27,10 @@ export const completionChunkToLangchain = (chunk: ChatCompletionChunkEvent): AIM
     };
   });
 
-  const additionalKwargs = chunk.refusal ? { refusal: chunk.refusal } : {};
+  const additionalKwargs = {
+    ...(chunk.refusal ? { refusal: chunk.refusal } : {}),
+    ...(chunk.reasoning ? { reasoning_content: chunk.reasoning } : {}),
+  };
 
   return new AIMessageChunk({
     content: chunk.content,
@@ -44,10 +48,6 @@ export const tokenCountChunkToLangchain = (
     response_metadata: {
       usage: { ...chunk.tokens },
     },
-    usage_metadata: {
-      input_tokens: chunk.tokens.prompt,
-      output_tokens: chunk.tokens.completion,
-      total_tokens: chunk.tokens.total,
-    },
+    usage_metadata: tokenCountToUsageMetadata(chunk.tokens),
   });
 };

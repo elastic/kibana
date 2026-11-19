@@ -19,7 +19,7 @@ import {
   EuiText,
   useEuiPaddingSize,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type {
   ExceptionListType,
   ListSchema,
@@ -75,6 +75,8 @@ const FieldFlexItem = styled(EuiFlexItem)`
   overflow: hidden;
 `;
 
+const EMPTY_VALUES: string[] = [];
+
 export interface EntryItemProps {
   allowLargeValueLists?: boolean;
   autocompleteService: AutocompleteStart;
@@ -117,6 +119,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   showValueListModal,
 }): JSX.Element => {
   const sPaddingSize = useEuiPaddingSize('s');
+  const warningIconCss = useMemo(() => ({ marginRight: `${sPaddingSize}` }), [sPaddingSize]);
 
   const handleError = useCallback(
     (err: boolean): void => {
@@ -236,7 +239,6 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         />
       );
 
-      const warningIconCss = { marginRight: `${sPaddingSize}` };
       const getMappingConflictsWarning = (): React.ReactNode | null => {
         if (!extendedField) {
           return null;
@@ -254,10 +256,10 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
                 <>
                   <EuiIcon
                     data-test-subj="mappingConflictsAccordionIcon"
-                    tabIndex={0}
                     type="warning"
                     size="s"
                     css={warningIconCss}
+                    aria-hidden={true}
                   />
                   {i18n.FIELD_CONFLICT_INDICES_WARNING_DESCRIPTION}
                 </>
@@ -322,7 +324,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       isDisabled,
       handleFieldChange,
       allowCustomOptions,
-      sPaddingSize,
+      warningIconCss,
       extendedField,
     ]
   );
@@ -450,7 +452,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           />
         );
       case OperatorTypeEnum.MATCH_ANY:
-        const values: string[] = Array.isArray(entry.value) ? entry.value : [];
+        const values: string[] = Array.isArray(entry.value) ? entry.value : EMPTY_VALUES;
         return (
           <AutocompleteFieldMatchAnyComponent
             autocompleteService={autocompleteService}

@@ -20,7 +20,7 @@ import {
   waitFor,
   renderHook as reactRenderHook,
 } from '@testing-library/react';
-import type { Action, Reducer, Store } from 'redux';
+import type { Action, Reducer, Store } from 'redux-v4';
 import { QueryClient } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from '@kbn/fleet-plugin/common';
@@ -39,6 +39,7 @@ import type { MiddlewareActionSpyHelper } from '../../store/test_utils';
 import { createSpyMiddleware } from '../../store/test_utils';
 import type { State } from '../../store';
 import { AppRootProvider } from './app_root_provider';
+import { resetConsoleManagerStateForTesting } from '../../../management/components/console/components/console_manager/console_manager';
 import { managementMiddlewareFactory } from '../../../management/store/middleware';
 import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
 import { SUB_PLUGINS_REDUCER, mockGlobalState, createMockStore } from '..';
@@ -252,6 +253,11 @@ const experimentalFeaturesReducer: Reducer<State['app'], UpdateExperimentalFeatu
  * for further customization.
  */
 export const createAppRootMockRenderer = (): AppContextTestRender => {
+  // The console manager keeps its running consoles in a module-level store that intentionally
+  // outlives `<ConsoleManager>` unmounts (so console state survives navigation/flyouts in the app).
+  // Reset it per renderer creation so console state does not leak between test cases.
+  resetConsoleManagerStateForTesting();
+
   const history = createMemoryHistory<never>();
   const coreStart = createCoreStartMock(history);
   const middlewareSpy = createSpyMiddleware();
@@ -317,6 +323,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
 
   const render: UiRender = (ui, options) => {
     applyIntersectionObserverMock();
+    suppressKnownConsoleLogMessages();
 
     return reactRender(ui, {
       wrapper: AppWrapper,
@@ -490,4 +497,32 @@ const applyDefaultCoreHttpMocks = (http: AppContextTestRender['coreStart']['http
   // as the store middleware for Endpoint list is initialized, thus mocking it here would avoid
   // unnecessary errors being output to the console
   fleetGetPackageHttpMock(http, { ignoreUnMockedApiRouteErrors: true });
+};
+
+/** @private */
+let CONSOLE_WARN_WRAPPER: typeof window.console.warn | undefined;
+
+const CONSOLE_WARNING_SURPRESS_MESSAGES = [
+  // Detected not recommended unit (%, vw, cqw, cqi) in cell width settings. Adjust the `width`, `minWidth` and
+  // `maxWidth` values to use absolute length units like `em` for text cells or `px` for static elements like
+  // icons or plots.
+  'Detected not recommended unit',
+];
+
+const suppressKnownConsoleLogMessages = () => {
+  if (CONSOLE_WARN_WRAPPER && window.console.warn === CONSOLE_WARN_WRAPPER) {
+    return;
+  }
+
+  const realWarn = window.console.warn.bind(window.console);
+
+  CONSOLE_WARN_WRAPPER = (...props) => {
+    const consoleWarnMessage = props[0] ?? '';
+
+    if (CONSOLE_WARNING_SURPRESS_MESSAGES.every((msg) => !consoleWarnMessage.includes(msg))) {
+      return realWarn(...props);
+    }
+  };
+
+  window.console.warn = CONSOLE_WARN_WRAPPER;
 };

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatCompleteOptions, AnonymizationRule, Model } from '@kbn/inference-common';
+import type { ChatCompleteOptions, Model } from '@kbn/inference-common';
+import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import {
+  createInferenceInternalError,
   createInferenceRequestError,
+  InferenceTaskErrorCode,
   getConnectorFamily,
   getConnectorProvider,
+  getConnectorPlatform,
   getConnectorDefaultModel,
   type ChatCompleteCompositeResponse,
   MessageRole,
@@ -22,6 +25,16 @@ import { defer, forkJoin, from, identity, share, switchMap, catchError, throwErr
 import { withChatCompleteSpan } from '@kbn/inference-tracing';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { omit } from 'lodash';
+import { addAnonymizationInstruction, deanonymizeMessage } from '@kbn/ai-anonymization-server';
+import type {
+  InferenceAnonymizationOptions,
+  RegexWorkerService,
+} from '@kbn/ai-anonymization-server';
+import type {
+  ActionsClientProvider,
+  InferenceModelTarget,
+  ScopedFeatureEndpointResolver,
+} from '../types';
 import type {
   InferenceAdapterChatCompleteOptions,
   InferenceConnectorAdapterChatCompleteEvent,
@@ -35,22 +48,25 @@ import {
   resolveInferenceEndpoint,
   handleCancellation,
   handleLifecycleCallbacks,
+  retryHoldingTokenCountEvents,
   streamToResponse,
 } from './utils';
 import type { InferenceCallbackManager } from '../inference_client/callback_manager';
-import { retryWithExponentialBackoff } from '../../common/utils/retry_with_exponential_backoff';
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
-import { deanonymizeMessage } from './anonymization/deanonymize_message';
-import { addAnonymizationInstruction } from './anonymization/add_anonymization_instruction';
-import type { RegexWorkerService } from './anonymization/regex_worker_service';
-import type { InferenceAnonymizationOptions } from '../inference_client/anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
+import {
+  resolveFeatureEndpointOrThrow,
+  type ResolvedFeatureEndpoint,
+} from '../util/resolve_feature_endpoint';
+import { anonymizeChatTemplate } from './anonymize_chat_template';
 import { prepareAnonymization } from './prepare_anonymization';
+import type { TokenUsageLogger } from '../token_usage';
+import { handleTokenUsageLogging, buildTokenUsageContext } from '../token_usage';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
   namespace: string;
-  actions: ActionsPluginStart;
+  actions: ActionsClientProvider;
   logger: Logger;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
@@ -58,6 +74,14 @@ interface CreateChatCompleteApiOptions {
   anonymization?: InferenceAnonymizationOptions;
   endpointIdCache: InferenceEndpointIdCache;
   callbackManager?: InferenceCallbackManager;
+  tokenUsageLogger?: TokenUsageLogger;
+  isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+  isDefaultConnectorOnly?: () => Promise<boolean>;
+  getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
+  /** Decides whether an inference endpoint of the given service is called with `_stream`. */
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
+  resolveFeatureEndpoint?: ScopedFeatureEndpointResolver;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -69,7 +93,8 @@ type CreateChatCompleteApiOptionsKey =
 type ChatCompleteApiWithCallbackInitOptions = Pick<
   ChatCompleteOptions,
   CreateChatCompleteApiOptionsKey
-> & { connectorId: string };
+> &
+  InferenceModelTarget;
 
 export interface ChatCompleteCallbackContext {
   model?: Partial<Model>;
@@ -91,6 +116,8 @@ type SpanModel = Parameters<typeof withChatCompleteSpan>[0]['model'];
 interface ResolvedPipelineContext {
   callbackContext: ChatCompleteCallbackContext;
   getSpanModel: (modelName?: string) => SpanModel | undefined;
+  /** Inference endpoints can send `{ template }` instead of messages. */
+  supportsTemplates: boolean;
   chatComplete: (
     options: ChatCompletePipelineAdapterOptions
   ) => Observable<InferenceConnectorAdapterChatCompleteEvent>;
@@ -111,40 +138,60 @@ export function createChatCompleteCallbackApi({
   anonymization,
   endpointIdCache,
   callbackManager,
+  tokenUsageLogger,
+  isTokenUsageTrackingEnabled,
+  isDefaultConnectorOnly,
+  getDefaultConnectorId,
+  resolveConnectorId,
+  shouldStreamInferenceEndpoint,
+  resolveFeatureEndpoint,
 }: CreateChatCompleteApiOptions) {
   return (
     {
-      connectorId,
       abortSignal,
       stream,
       maxRetries = 3,
       retryConfiguration = {},
+      ...target
     }: ChatCompleteApiWithCallbackInitOptions,
     callback: ChatCompleteApiWithCallbackCallback
   ) => {
     const inference$ = defer(() =>
-      resolveAndCreatePipeline({
-        connectorId,
-        endpointIdCache,
-        request,
-        actions,
-        esClient,
-        logger,
-        anonymizationRulesPromise,
-        regexWorker,
-        callback,
-        abortSignal,
-        stream,
-        namespace,
-        anonymization,
-      })
+      resolveEndpoint({ target, resolveFeatureEndpoint, abortSignal })
     ).pipe(
-      retryWithExponentialBackoff({
-        maxRetry: maxRetries,
-        backoffMultiplier: retryConfiguration.backoffMultiplier,
-        initialDelay: retryConfiguration.initialDelay,
-        errorFilter: getRetryFilter(retryConfiguration.retryOn),
-      }),
+      switchMap(({ connectorId, ...parameters }) =>
+        defer(() =>
+          resolveAndCreatePipeline({
+            connectorId,
+            featureId: target.featureId,
+            endpointIdCache,
+            request,
+            actions,
+            esClient,
+            logger,
+            anonymizationRulesPromise,
+            regexWorker,
+            callback: (context) => ({ ...callback(context), ...parameters }),
+            abortSignal,
+            stream,
+            namespace,
+            anonymization,
+            tokenUsageLogger,
+            isTokenUsageTrackingEnabled,
+            isDefaultConnectorOnly,
+            getDefaultConnectorId,
+            resolveConnectorId,
+            shouldStreamInferenceEndpoint,
+          })
+        ).pipe(
+          retryHoldingTokenCountEvents({
+            maxRetry: maxRetries,
+            backoffMultiplier: retryConfiguration.backoffMultiplier,
+            initialDelay: retryConfiguration.initialDelay,
+            errorFilter: getRetryFilter(retryConfiguration.retryOn),
+          })
+        )
+      ),
       callbackManager ? handleLifecycleCallbacks({ callbackManager }) : identity,
       abortSignal ? handleCancellation(abortSignal) : identity
     );
@@ -155,6 +202,26 @@ export function createChatCompleteCallbackApi({
       return streamToResponse(inference$);
     }
   };
+}
+
+async function resolveEndpoint({
+  target,
+  resolveFeatureEndpoint,
+  abortSignal,
+}: {
+  target: InferenceModelTarget;
+  resolveFeatureEndpoint?: ScopedFeatureEndpointResolver;
+  abortSignal?: AbortSignal;
+}): Promise<ResolvedFeatureEndpoint> {
+  if (target.featureId === undefined) {
+    return { connectorId: target.connectorId };
+  }
+  // Later aborts are covered by `handleCancellation`.
+  return resolveFeatureEndpointOrThrow({
+    featureId: target.featureId,
+    resolveFeatureEndpoint,
+    abortSignal,
+  });
 }
 
 function createChatCompletePipeline({
@@ -168,6 +235,10 @@ function createChatCompletePipeline({
   stream,
   namespace,
   anonymization,
+  connectorId,
+  featureId,
+  tokenUsageLogger,
+  isTokenUsageTrackingEnabled,
 }: {
   resolve: () => Promise<ResolvedPipelineContext>;
   esClient: ElasticsearchClient;
@@ -179,13 +250,17 @@ function createChatCompletePipeline({
   stream?: boolean;
   namespace: string;
   anonymization?: InferenceAnonymizationOptions;
+  connectorId: string;
+  featureId?: string;
+  tokenUsageLogger?: TokenUsageLogger;
+  isTokenUsageTrackingEnabled?: () => Promise<boolean>;
 }) {
   return forkJoin({
     context: from(resolve()),
     anonymizationRules: from(anonymizationRulesPromise),
   }).pipe(
     switchMap(({ context, anonymizationRules }) => {
-      const { callbackContext, getSpanModel, chatComplete } = context;
+      const { callbackContext, getSpanModel, chatComplete, supportsTemplates } = context;
 
       const {
         system,
@@ -194,10 +269,86 @@ function createChatCompletePipeline({
         metadata,
         modelName,
         temperature,
+        reasoning,
         toolChoice,
         tools,
         timeout,
+        maxContentLength,
+        cacheControl,
+        sessionId,
+        template,
       } = callback(callbackContext);
+
+      const logTokenUsage = tokenUsageLogger
+        ? handleTokenUsageLogging({
+            tokenUsageLogger,
+            getContext: () =>
+              buildTokenUsageContext({
+                connectorId,
+                spaceId: namespace,
+                model: callbackContext.model,
+                modelName,
+                featureId: featureId ?? metadata?.connectorTelemetry?.pluginId,
+                parentFeatureId: metadata?.connectorTelemetry?.aggregateBy,
+              }),
+            logger,
+            isEnabled: isTokenUsageTrackingEnabled,
+          })
+        : identity;
+
+      if (template) {
+        if (!supportsTemplates) {
+          throw createInferenceRequestError(
+            'Chat completion templates are only supported for inference endpoints',
+            400
+          );
+        }
+
+        // The endpoint renders the template and rejects caller messages, so the
+        // anonymization instruction cannot be attached. Masks echoed in the
+        // response are still restored.
+        return from(
+          anonymizeChatTemplate({
+            template,
+            namespace,
+            logger,
+            anonymizationRules,
+            regexWorker,
+            esClient,
+            replacementsEsClient: anonymization?.replacements?.esClient,
+            replacementsEncryptionKeyPromise: anonymization?.replacements?.encryptionKeyPromise,
+            usePersistentReplacements: anonymization?.replacements?.usePersistentReplacements,
+            requireReplacementsEncryptionKey: anonymization?.replacements?.requireEncryptionKey,
+            saltPromise: anonymization?.saltPromise,
+            onFailurePromise: anonymization?.onFailurePromise,
+            metadata,
+          })
+        ).pipe(
+          switchMap(({ template: maskedTemplate, anonymization: preparedAnonymization }) =>
+            chatComplete({
+              system,
+              messages: [],
+              template: maskedTemplate,
+              temperature,
+              reasoning,
+              logger,
+              functionCalling,
+              modelName,
+              abortSignal,
+              metadata,
+              timeout,
+              maxContentLength,
+              cacheControl,
+              sessionId,
+              stream,
+            }).pipe(
+              chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }),
+              deanonymizeMessage(preparedAnonymization, logger)
+            )
+          ),
+          logTokenUsage
+        );
+      }
 
       const messages = sanitizeMessages(givenMessages);
 
@@ -213,20 +364,21 @@ function createChatCompletePipeline({
           usePersistentReplacements: anonymization?.replacements?.usePersistentReplacements,
           requireReplacementsEncryptionKey: anonymization?.replacements?.requireEncryptionKey,
           saltPromise: anonymization?.saltPromise,
-          resolveEffectivePolicy: anonymization?.resolveEffectivePolicy,
+          onFailurePromise: anonymization?.onFailurePromise,
           metadata,
           system,
           messages,
         })
       ).pipe(
-        switchMap(({ anonymization: preparedAnonymization, replacementsId, effectivePolicy }) => {
-          const systemWithAnonymizationInstructions = preparedAnonymization.system
-            ? addAnonymizationInstruction(
-                preparedAnonymization.system,
-                anonymizationRules,
-                effectivePolicy
-              )
-            : system;
+        switchMap(({ anonymization: preparedAnonymization, replacementsId }) => {
+          // Gate on whether anything was actually masked this turn, not on whether a system
+          // prompt happens to exist — a request with no system prompt can still anonymize
+          // entities in its messages, and the model still needs to be told what the
+          // placeholder tokens mean.
+          const baseSystem = preparedAnonymization.system ?? system;
+          const systemWithAnonymizationInstructions = preparedAnonymization.anonymizations.length
+            ? addAnonymizationInstruction(baseSystem ?? '', anonymizationRules)
+            : baseSystem;
 
           const spanModel = getSpanModel(modelName);
 
@@ -236,6 +388,9 @@ function createChatCompletePipeline({
               messages: preparedAnonymization.messages,
               tools,
               toolChoice,
+              cacheControl,
+              sessionId,
+              reasoning,
               ...(spanModel ? { model: spanModel } : {}),
               ...metadata?.attributes,
             },
@@ -246,17 +401,22 @@ function createChatCompletePipeline({
                 toolChoice,
                 tools,
                 temperature,
+                reasoning,
                 logger,
                 functionCalling,
                 modelName,
                 abortSignal,
                 metadata,
                 timeout,
+                maxContentLength,
+                cacheControl,
+                sessionId,
                 stream,
               }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }));
             }
-          ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }));
-        })
+          ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }, logger));
+        }),
+        logTokenUsage
       );
     })
   );
@@ -264,6 +424,7 @@ function createChatCompletePipeline({
 
 function resolveAndCreatePipeline({
   connectorId,
+  featureId,
   endpointIdCache,
   request,
   actions,
@@ -276,11 +437,18 @@ function resolveAndCreatePipeline({
   stream,
   namespace,
   anonymization,
+  tokenUsageLogger,
+  isTokenUsageTrackingEnabled,
+  isDefaultConnectorOnly,
+  getDefaultConnectorId,
+  resolveConnectorId,
+  shouldStreamInferenceEndpoint,
 }: {
   connectorId: string;
+  featureId?: string;
   endpointIdCache: InferenceEndpointIdCache;
   request: KibanaRequest;
-  actions: ActionsPluginStart;
+  actions: ActionsClientProvider;
   esClient: ElasticsearchClient;
   logger: Logger;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
@@ -290,35 +458,32 @@ function resolveAndCreatePipeline({
   stream?: boolean;
   namespace: string;
   anonymization?: InferenceAnonymizationOptions;
+  tokenUsageLogger?: TokenUsageLogger;
+  isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+  isDefaultConnectorOnly?: () => Promise<boolean>;
+  getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
 }) {
-  return from(endpointIdCache.has(connectorId)).pipe(
+  return from(
+    throwIfConnectorNotAllowed({
+      connectorId,
+      isDefaultConnectorOnly,
+      getDefaultConnectorId,
+      resolveConnectorId,
+      logger,
+    }).then(() => endpointIdCache.has(connectorId))
+  ).pipe(
     switchMap((isInferenceEndpoint) => {
-      const resolve: () => Promise<ResolvedPipelineContext> = isInferenceEndpoint
-        ? async () => {
-            const endpointMeta = await resolveInferenceEndpoint({
-              inferenceId: connectorId,
-              esClient,
-            });
-            const executor = createInferenceEndpointExecutor({
-              inferenceId: connectorId,
-              esClient,
-            });
+      let resolvedAsInferenceEndpoint = isInferenceEndpoint;
 
-            return {
-              callbackContext: {
-                model: endpointMeta.modelId ? { id: endpointMeta.modelId } : undefined,
-              },
-              getSpanModel: (modelName) =>
-                endpointMeta.provider
-                  ? ({
-                      id: modelName ?? endpointMeta.modelId,
-                      provider: endpointMeta.provider,
-                    } as SpanModel)
-                  : undefined,
-              chatComplete: (options) =>
-                inferenceEndpointAdapter.chatComplete({ ...options, executor }),
-            };
-          }
+      const resolve: () => Promise<ResolvedPipelineContext> = isInferenceEndpoint
+        ? () =>
+            resolveInferenceEndpointContext({
+              inferenceId: connectorId,
+              esClient,
+              shouldStreamInferenceEndpoint,
+            })
         : async () => {
             const executor = await getInferenceExecutor({
               connectorId,
@@ -328,6 +493,16 @@ function resolveAndCreatePipeline({
               logger,
             });
             const connector = executor.getConnector();
+
+            if (connector.isInferenceEndpoint) {
+              resolvedAsInferenceEndpoint = true;
+              return resolveInferenceEndpointContext({
+                inferenceId: connector.connectorId,
+                esClient,
+                shouldStreamInferenceEndpoint,
+              });
+            }
+
             const connectorType = connector.type;
             const inferenceAdapter = getInferenceAdapter(connectorType);
 
@@ -344,6 +519,7 @@ function resolveAndCreatePipeline({
                   family: getConnectorFamily(connector),
                   provider: getConnectorProvider(connector),
                   id: getConnectorDefaultModel(connector),
+                  platform: getConnectorPlatform(connector),
                 },
               },
               getSpanModel: (modelName) => ({
@@ -351,6 +527,7 @@ function resolveAndCreatePipeline({
                 family: getConnectorFamily(connector),
                 provider: getConnectorProvider(connector),
               }),
+              supportsTemplates: false,
               chatComplete: (options) => inferenceAdapter.chatComplete({ ...options, executor }),
             };
           };
@@ -366,10 +543,16 @@ function resolveAndCreatePipeline({
         stream,
         namespace,
         anonymization,
+        connectorId,
+        featureId,
+        tokenUsageLogger,
+        isTokenUsageTrackingEnabled,
       }).pipe(
         catchError((error) => {
-          if (error?.meta?.status === 404 || error?.statusCode === 404) {
-            if (isInferenceEndpoint) {
+          const is404 = error?.meta?.status === 404 || error?.statusCode === 404;
+          const isUpstreamProviderError = error?.code === InferenceTaskErrorCode.providerError;
+          if (is404 && !isUpstreamProviderError) {
+            if (resolvedAsInferenceEndpoint) {
               endpointIdCache.invalidate();
               return throwError(() => error);
             }
@@ -384,6 +567,89 @@ function resolveAndCreatePipeline({
         })
       );
     })
+  );
+}
+
+async function resolveInferenceEndpointContext({
+  inferenceId,
+  esClient,
+  shouldStreamInferenceEndpoint,
+}: {
+  inferenceId: string;
+  esClient: ElasticsearchClient;
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
+}): Promise<ResolvedPipelineContext> {
+  const endpointMeta = await resolveInferenceEndpoint({ inferenceId, esClient });
+  const stream = shouldStreamInferenceEndpoint
+    ? await shouldStreamInferenceEndpoint(endpointMeta.provider)
+    : true;
+  const executor = createInferenceEndpointExecutor({ inferenceId, esClient, stream });
+
+  return {
+    callbackContext: {
+      model: endpointMeta.modelId ? { id: endpointMeta.modelId } : undefined,
+    },
+    getSpanModel: (modelName) =>
+      endpointMeta.provider
+        ? ({
+            id: modelName ?? endpointMeta.modelId,
+            provider: endpointMeta.provider,
+          } as SpanModel)
+        : undefined,
+    supportsTemplates: true,
+    chatComplete: (options) =>
+      inferenceEndpointAdapter.chatComplete({
+        ...options,
+        executor,
+        endpointModelId: endpointMeta.modelId,
+        provider: endpointMeta.provider,
+      }),
+  };
+}
+
+async function throwIfConnectorNotAllowed({
+  connectorId,
+  isDefaultConnectorOnly,
+  getDefaultConnectorId,
+  resolveConnectorId,
+  logger,
+}: {
+  connectorId: string;
+  isDefaultConnectorOnly?: () => Promise<boolean>;
+  getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
+  logger: Logger;
+}): Promise<void> {
+  if (!isDefaultConnectorOnly || !getDefaultConnectorId) {
+    return;
+  }
+  let defaultConnectorId: string | undefined;
+  try {
+    if (!(await isDefaultConnectorOnly())) {
+      return;
+    }
+    defaultConnectorId = await getDefaultConnectorId();
+  } catch (error) {
+    // fail closed: block the call when the restriction cannot be verified
+    logger.error(`Failed to verify the default AI connector restriction: ${error.message}`);
+    throw createInferenceInternalError('Failed to verify the default AI connector restriction');
+  }
+  if (connectorId === defaultConnectorId) {
+    return;
+  }
+  // a `.inference` stack connector id resolves to its underlying inference endpoint,
+  // which is what the default connector id refers to
+  if (defaultConnectorId && resolveConnectorId) {
+    const resolvedConnectorId = await resolveConnectorId(connectorId).catch(() => undefined);
+    if (resolvedConnectorId === defaultConnectorId) {
+      return;
+    }
+  }
+  throw createInferenceRequestError(
+    `Connector "${connectorId}" is not allowed: Kibana is configured to only allow the default AI connector${
+      defaultConnectorId ? ` "${defaultConnectorId}"` : ''
+    }`,
+    400
   );
 }
 

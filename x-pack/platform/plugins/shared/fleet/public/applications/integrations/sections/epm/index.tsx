@@ -11,9 +11,16 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiSkeletonText } from '@elastic/eui';
 
 import { INTEGRATIONS_ROUTING_PATHS } from '../../constants';
-import { IntegrationsStateContextProvider, useBreadcrumbs, useStartServices } from '../../hooks';
+import {
+  IntegrationsStateContextProvider,
+  useAuthz,
+  useAutomaticImportAuthz,
+  useBreadcrumbs,
+  useStartServices,
+} from '../../hooks';
 
 import { CopyPackagePolicyPage } from '../../../fleet/sections/agent_policy/copy_package_policy_page';
+import { CreatePackagePolicyPage } from '../../../fleet/sections/agent_policy/create_package_policy_page';
 
 import { EPMHomePage } from './screens/home';
 import { Detail } from './screens/detail';
@@ -22,13 +29,20 @@ import { CreateIntegration } from './screens/create';
 import { CustomLanguagesOverview } from './screens/detail/custom_languages_overview';
 
 export const EPMApp: React.FunctionComponent = () => {
-  const { automaticImport, automaticImportVTwo } = useStartServices();
+  const { automaticImport } = useStartServices();
+  const { canView, canCreate } = useAutomaticImportAuthz();
+  const canUploadPackages = useAuthz().integrations.uploadPackages;
   useBreadcrumbs('integrations');
 
-  const hasCreateIntegration = !!(automaticImportVTwo || automaticImport);
+  const hasCreateIntegration = Boolean(automaticImport) && canCreate;
+  // Upload checks the package name against Automatic Import integrations, which needs read access.
+  const hasUploadIntegration = Boolean(automaticImport) && canView && canUploadPackages;
 
   return (
     <Routes>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.add_integration_to_policy}>
+        <CreatePackagePolicyPage />
+      </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integration_policy_edit}>
         <Policy />
       </Route>
@@ -52,7 +66,7 @@ export const EPMApp: React.FunctionComponent = () => {
           <CreateIntegration />
         </Route>
       )}
-      {hasCreateIntegration && (
+      {hasUploadIntegration && (
         <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_upload}>
           <CreateIntegration />
         </Route>

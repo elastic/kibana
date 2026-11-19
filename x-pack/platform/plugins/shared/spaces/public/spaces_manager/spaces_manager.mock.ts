@@ -29,6 +29,8 @@ function createSpacesManagerMock() {
     getContentForSpace: jest.fn().mockResolvedValue({ summary: [], total: 0 }),
     getRolesForSpace: jest.fn().mockResolvedValue([]),
     redirectToSpaceSelector: jest.fn().mockResolvedValue(undefined),
+    getInitialSolutionSetup: jest.fn().mockResolvedValue({ required: false }),
+    completeInitialSolutionSetup: jest.fn().mockResolvedValue(undefined),
   } as unknown as jest.Mocked<SpacesManager>;
 }
 

@@ -27,6 +27,7 @@ const onClickValue = jest.fn();
 const onClickMultiValue = jest.fn();
 const layerCellValueActions: LayerCellValueActions = [];
 const onSelectRange = jest.fn();
+const onAnnotationClick = jest.fn();
 
 const dataWithoutFormats: Datatable = {
   type: 'datatable',
@@ -57,7 +58,8 @@ const dataWithFormats: Datatable = {
 };
 const getFormatSpy: jest.Mock = jest.fn();
 const convertSpy: jest.Mock = jest.fn((x) => x);
-getFormatSpy.mockReturnValue({ convert: convertSpy });
+const paramsSpy: jest.Mock = jest.fn(() => ({}));
+getFormatSpy.mockReturnValue({ convertToText: convertSpy, params: paramsSpy });
 
 const defaultProps: Omit<XYChartRenderProps, 'args'> = {
   data: dataPluginMock.createStartContract(),
@@ -72,6 +74,7 @@ const defaultProps: Omit<XYChartRenderProps, 'args'> = {
   onClickMultiValue,
   layerCellValueActions,
   onSelectRange,
+  onAnnotationClick,
   syncColors: false,
   syncTooltips: false,
   syncCursor: true,
@@ -97,7 +100,7 @@ describe('provides correct series naming', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     convertSpy.mockImplementation((d) => d);
-    getFormatSpy.mockReturnValue({ convert: convertSpy });
+    getFormatSpy.mockReturnValue({ convertToText: convertSpy, params: paramsSpy });
   });
 
   test('simplest xy chart without human-readable name', async () => {

@@ -65,7 +65,9 @@ describe('useCreateMaintenanceWindow', () => {
     await act(async () => {
       await result.current.mutate(maintenanceWindow);
     });
-    await waitFor(() => expect(mockAddSuccess).toBeCalledWith("Created maintenance window 'test'"));
+    await waitFor(() =>
+      expect(mockAddSuccess).toHaveBeenCalledWith("Created maintenance window 'test'")
+    );
   });
 
   it('should call onError if api fails', async () => {
@@ -80,7 +82,7 @@ describe('useCreateMaintenanceWindow', () => {
     });
 
     await waitFor(() =>
-      expect(mockAddDanger).toBeCalledWith('Failed to create maintenance window')
+      expect(mockAddDanger).toHaveBeenCalledWith('Failed to create maintenance window')
     );
   });
 
@@ -98,7 +100,7 @@ describe('useCreateMaintenanceWindow', () => {
     });
 
     await waitFor(() =>
-      expect(mockAddDanger).toBeCalledWith('Failed to create maintenance window: Bad request')
+      expect(mockAddDanger).toHaveBeenCalledWith('Failed to create maintenance window: Bad request')
     );
   });
 });

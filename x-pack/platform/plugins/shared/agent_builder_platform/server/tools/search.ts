@@ -5,19 +5,28 @@
  * 2.0.
  */
 
+import { memoize, once } from 'lodash';
 import { z } from '@kbn/zod/v4';
+import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import type { TopSnippetsConfig } from '@kbn/agent-builder-genai-utils/tools';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { resolveTimeRange } from './screen_context_utils';
+import {
+  createIncludeFrozenSchema,
+  getIncludeFrozenByDefault,
+  getIncludeFrozenParam,
+} from './include_frozen_schema';
 
-const searchSchema = z.object({
+const createSearchSchemaShape = () => ({
   query: z.string().describe('A natural language query expressing the search request'),
   index: z
     .string()
     .optional()
     .describe(
-      '(optional) Index to search against. If not provided, will automatically select the best index to use based on the query.'
+      '(optional) Index or index-pattern to search against. If not provided, will automatically select the best index to use based on the query.'
     ),
   time_range: z
     .object({
@@ -32,7 +41,37 @@ const searchSchema = z.object({
     ),
 });
 
-export const searchTool = (): BuiltinToolDefinition<typeof searchSchema> => {
+const createSearchSchema = memoize((includeFrozenByDefault: boolean) =>
+  z.object({
+    ...createSearchSchemaShape(),
+    include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
+  })
+);
+
+const createServerlessSearchSchema = once(() => z.object(createSearchSchemaShape()));
+
+type SearchSchema =
+  | ReturnType<typeof createSearchSchema>
+  | ReturnType<typeof createServerlessSearchSchema>;
+
+export const searchTool = ({
+  coreSetup,
+  topSnippetsDefaults,
+  isServerless = false,
+}: {
+  coreSetup: CoreSetup;
+  topSnippetsDefaults: TopSnippetsConfig;
+  isServerless?: boolean;
+}): DynamicSchemaBuiltinToolDefinition<SearchSchema> => {
+  // Cache the start services promise so it is resolved at most once.
+  let startServicesPromise: ReturnType<CoreSetup['getStartServices']> | undefined;
+  const getStartServices = () => {
+    if (!startServicesPromise) {
+      startServicesPromise = coreSetup.getStartServices();
+    }
+    return startServicesPromise;
+  };
+
   return {
     id: platformCoreTools.search,
     type: ToolType.builtin,
@@ -55,21 +94,58 @@ Note:
 - It is perfectly fine not to specify the 'index' parameter. It should only be specified when you already
  know about the index and fields you want to search on, e.g. if the user explicitly specified it.
     `,
-    schema: searchSchema,
+    annotations: {
+      title: 'Search for Elasticsearch Documents',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+    getSchema: async (schemaContext) =>
+      isServerless
+        ? createServerlessSearchSchema()
+        : createSearchSchema(await getIncludeFrozenByDefault(schemaContext)),
     handler: async (
-      { query: nlQuery, index = '*', time_range: explicitTimeRange },
-      { esClient, modelProvider, logger, events, attachments }
+      params,
+      { esClient, modelProvider, logger, events, attachments, savedObjectsClient }
     ) => {
+      const { query: nlQuery, index, time_range: explicitTimeRange } = params;
       logger.debug(`search tool called with query: ${nlQuery}, index: ${index}`);
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
+
+      // Resolve top snippets config from UI setting + server config defaults
+      let topSnippetsConfig: TopSnippetsConfig | undefined;
+      try {
+        const [coreStart] = await getStartServices();
+        const uiSettingsClient = coreStart.uiSettings.asScopedToClient(savedObjectsClient);
+        const isEnabled = await uiSettingsClient.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
+        if (isEnabled) {
+          topSnippetsConfig = topSnippetsDefaults;
+        }
+      } catch (error) {
+        logger.debug(
+          `Failed to read experimentalFeatures setting, falling back to highlighting: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+
       const results = await runSearchTool({
         nlQuery,
         index,
+        allowPatternTarget: true,
         timeRange,
         esClient: esClient.asCurrentUser,
-        model: await modelProvider.getDefaultModel(),
+        internalEsClient: esClient.asInternalUser,
+        modelProvider,
         events,
         logger,
+        topSnippetsConfig,
+        includeDatasets: true,
+        includeFrozen: getIncludeFrozenParam(params),
+        rowLimit: 100,
       });
       return { results };
     },

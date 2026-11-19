@@ -8,52 +8,86 @@
  */
 
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import {
+  FIELD_FORMAT_IDS,
+  type TextContextTypeOptions,
+} from '@kbn/field-formats-plugin/common/types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type {
-  FieldFormatsContentType,
-  HtmlContextTypeOptions,
-  TextContextTypeOptions,
-} from '@kbn/field-formats-plugin/common/types';
-import type { EsHitRecord } from '../types';
+
+/** Base parameters for field value formatting functions */
+export interface FormatFieldValueBaseParams {
+  value: unknown;
+  fieldFormats: FieldFormatsStart;
+  dataView?: DataView;
+  field?: DataViewField;
+}
+
+export interface FormatFieldValueTextParams extends FormatFieldValueBaseParams {
+  options?: TextContextTypeOptions;
+}
 
 /**
- * Formats the value of a specific field using the appropriate field formatter if available
- * or the default string field formatter otherwise.
- *
- * @param value The value to format
- * @param hit The actual search hit (required to get highlight information from)
- * @param fieldFormats Field formatters
- * @param dataView The data view if available
- * @param field The field that value was from if available
- * @param contentType Type of a converter
- * @param options Options for the converter
- * @returns An sanitized HTML string, that is safe to be applied via dangerouslySetInnerHTML
+ * Returns the appropriate field formatter for the given field and data view,
+ * or the default string formatter if no field/data view is available.
  */
-export function formatFieldValue(
-  value: unknown,
-  hit: EsHitRecord,
+export const getFieldFormatter = (
   fieldFormats: FieldFormatsStart,
   dataView?: DataView,
-  field?: DataViewField,
-  contentType?: FieldFormatsContentType,
-  options?: HtmlContextTypeOptions | TextContextTypeOptions
-): string {
-  const usedContentType = contentType ?? 'html';
-  const converterOptions: HtmlContextTypeOptions | TextContextTypeOptions = {
-    hit,
-    field,
-    ...options,
-  };
+  field?: DataViewField
+): FieldFormat => {
+  return !dataView || !field
+    ? fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
+    : dataView.getFormatterForField(field);
+};
 
-  if (!dataView || !field) {
-    // If either no field is available or no data view, we'll use the default
-    // string formatter to format that field.
-    return fieldFormats
-      .getDefaultInstance(KBN_FIELD_TYPES.STRING)
-      .convert(value, usedContentType, converterOptions);
+const CASE_TRANSFORMS = ['lower', 'upper', 'title'];
+
+// Cutting a value before formatting is only safe for formatters that leave its text as it is. The URL, Color and
+// Static Lookup formatters, the Short Dots, Base64 and URL Param Decode transforms of the String formatter, and
+// formatters registered by other plugins need the whole value to render correctly, so they are given the full value.
+export const canTruncateValue = (formatter: FieldFormat): boolean => {
+  // tests often mock formatters as plain objects without a type
+  const formatterId = formatter.type?.id;
+
+  if (formatterId === FIELD_FORMAT_IDS.TRUNCATE) {
+    return true;
   }
 
-  // If we have a data view and field we use that fields field formatter
-  return dataView.getFormatterForField(field).convert(value, usedContentType, converterOptions);
-}
+  if (formatterId === FIELD_FORMAT_IDS.STRING) {
+    const transform = formatter.param('transform');
+    return !transform || CASE_TRANSFORMS.includes(transform);
+  }
+
+  return false;
+};
+
+/**
+ * Returns whether a value of the given field can be truncated before formatting without changing its formatted output.
+ */
+export const canTruncateFieldValue = ({
+  fieldFormats,
+  dataView,
+  field,
+}: Omit<FormatFieldValueBaseParams, 'value'>): boolean =>
+  canTruncateValue(getFieldFormatter(fieldFormats, dataView, field));
+
+/**
+ * Text equivalent of formatFieldValueReact. Returns a plain text string without HTML tags.
+ * Use this when you need string values for further processing (e.g., in LogDocumentOverview).
+ *
+ * Note: Unlike formatFieldValueReact, this does not accept `hit` because text formatters
+ * do not apply highlighting (highlighting requires HTML/React markup).
+ *
+ * @returns A plain text string
+ */
+export const formatFieldValueText = ({
+  value,
+  fieldFormats,
+  dataView,
+  field,
+  options,
+}: FormatFieldValueTextParams): string => {
+  return getFieldFormatter(fieldFormats, dataView, field).convertToText(value, options);
+};

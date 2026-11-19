@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { uniqBy } from 'lodash';
+
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 
@@ -30,7 +32,7 @@ export const createDashboardSavedObjectType = ({
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
-    icon: 'dashboardApp',
+    icon: 'productDashboard',
     defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle(obj) {
@@ -41,6 +43,23 @@ export const createDashboardSavedObjectType = ({
         path: `/app/dashboards#/view/${encodeURIComponent(obj.id)}`,
         uiCapabilitiesPath: 'dashboard_v2.show',
       };
+    },
+    onExport: (ctx, objects) => {
+      // deduplicate references by name
+      return objects.map(
+        ({
+          attributes: {
+            // drop the history sequence since it belongs to this cluster's change history and exporting it causes version number conflicts on re-import
+            historySequence,
+            ...attributes
+          },
+          ...obj
+        }) => ({
+          ...obj,
+          attributes,
+          references: uniqBy(obj.references, 'name'),
+        })
+      );
     },
   },
   modelVersions: {

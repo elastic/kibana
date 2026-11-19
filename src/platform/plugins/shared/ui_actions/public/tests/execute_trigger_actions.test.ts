@@ -46,7 +46,7 @@ test('executes a single action mapped to a trigger', async () => {
   const { setup, doStart } = uiActions;
   const action = createTestAction('test1', () => true);
 
-  setup.addTriggerAction(ON_OPEN_PANEL_MENU, action);
+  setup.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'test1', async () => action);
 
   const context = {};
   const start = doStart();
@@ -54,8 +54,8 @@ test('executes a single action mapped to a trigger', async () => {
 
   jest.runAllTimers();
 
-  expect(executeFn).toBeCalledTimes(1);
-  expect(executeFn).toBeCalledWith(expect.objectContaining(context));
+  expect(executeFn).toHaveBeenCalledTimes(1);
+  expect(executeFn).toHaveBeenCalledWith(expect.objectContaining(context));
 });
 
 test("doesn't throw an error if there are no compatible actions to execute", async () => {
@@ -74,7 +74,7 @@ test('does not execute an incompatible action', async () => {
     ({ name }: { name: string }) => name === 'executeme'
   );
 
-  setup.addTriggerAction(ON_OPEN_PANEL_MENU, action);
+  setup.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'test1', async () => action);
 
   const start = doStart();
   const context = {
@@ -84,7 +84,7 @@ test('does not execute an incompatible action', async () => {
 
   jest.runAllTimers();
 
-  expect(executeFn).toBeCalledTimes(1);
+  expect(executeFn).toHaveBeenCalledTimes(1);
 });
 
 test('shows a context menu when more than one action is mapped to a trigger', async () => {
@@ -93,8 +93,8 @@ test('shows a context menu when more than one action is mapped to a trigger', as
   const action1 = createTestAction('test1', () => true);
   const action2 = createTestAction('test2', () => true);
 
-  setup.addTriggerAction(ON_OPEN_PANEL_MENU, action1);
-  setup.addTriggerAction(ON_OPEN_PANEL_MENU, action2);
+  setup.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'test1', async () => action1);
+  setup.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'test2', async () => action2);
 
   expect(openContextMenu).toHaveBeenCalledTimes(0);
 
@@ -105,7 +105,7 @@ test('shows a context menu when more than one action is mapped to a trigger', as
   jest.runAllTimers();
 
   await waitFor(() => {
-    expect(executeFn).toBeCalledTimes(0);
+    expect(executeFn).toHaveBeenCalledTimes(0);
     expect(openContextMenu).toHaveBeenCalledTimes(1);
   });
 });
@@ -115,7 +115,7 @@ test('shows a context menu when there is only one action mapped to a trigger and
 
   const action1 = createTestAction('test1', () => true);
 
-  setup.addTriggerAction(ON_OPEN_PANEL_MENU, action1);
+  setup.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'test1', async () => action1);
 
   expect(openContextMenu).toHaveBeenCalledTimes(0);
 
@@ -126,7 +126,7 @@ test('shows a context menu when there is only one action mapped to a trigger and
   jest.runAllTimers();
 
   await waitFor(() => {
-    expect(executeFn).toBeCalledTimes(0);
+    expect(executeFn).toHaveBeenCalledTimes(0);
     expect(openContextMenu).toHaveBeenCalledTimes(1);
   });
 });
@@ -139,7 +139,7 @@ test('passes whole action context to isCompatible()', async () => {
     return true;
   });
 
-  setup.addTriggerAction(ON_OPEN_PANEL_MENU, action);
+  setup.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'test', async () => action);
 
   const start = doStart();
 
@@ -154,8 +154,8 @@ test("doesn't show a context menu for auto executable actions", async () => {
   const action1 = createTestAction('test1', () => true, true);
   const action2 = createTestAction('test2', () => true, false);
 
-  setup.addTriggerAction(ON_OPEN_PANEL_MENU, action1);
-  setup.addTriggerAction(ON_OPEN_PANEL_MENU, action2);
+  setup.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'test1', async () => action1);
+  setup.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'test2', async () => action2);
 
   expect(openContextMenu).toHaveBeenCalledTimes(0);
 
@@ -166,7 +166,7 @@ test("doesn't show a context menu for auto executable actions", async () => {
   jest.runAllTimers();
 
   await waitFor(() => {
-    expect(executeFn).toBeCalledTimes(2);
+    expect(executeFn).toHaveBeenCalledTimes(2);
     expect(openContextMenu).toHaveBeenCalledTimes(0);
   });
 });
@@ -176,14 +176,14 @@ test('passes trigger into execute', async () => {
 
   const action = createTestAction<{ foo: string }>('test', () => true);
 
-  setup.addTriggerAction(ON_OPEN_PANEL_MENU, action);
+  setup.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'test', async () => action);
 
   const start = doStart();
 
   const context = { foo: 'bar' };
   await start.executeTriggerActions(ON_OPEN_PANEL_MENU, context);
   jest.runAllTimers();
-  expect(executeFn).toBeCalledWith({
+  expect(executeFn).toHaveBeenCalledWith({
     ...context,
     trigger: start.getTrigger(ON_OPEN_PANEL_MENU),
   });

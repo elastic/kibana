@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { useEventDetails } from './hooks/use_event_details';
-import { FlyoutError } from '../../shared/components/flyout_error';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import { FlyoutMissingAlertsPrivilege } from '../../shared/components/flyout_missing_alerts_privilege';
+import { FlyoutError } from '../../../flyout_v2/shared/components/flyout_error';
+import { FlyoutLoading } from '../../../flyout_v2/shared/components/flyout_loading';
+import { FlyoutMissingAlertsPrivilege } from '../../../flyout_v2/document/main/components/flyout_missing_alerts_privilege';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { useBasicDataFromDetailsData } from './hooks/use_basic_data_from_details_data';
 import type { DocumentDetailsProps } from './types';

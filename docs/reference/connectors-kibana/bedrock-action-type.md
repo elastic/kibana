@@ -1,23 +1,27 @@
 ---
 navigation_title: "{{bedrock}}"
+description: "Documentation for the deprecated Amazon Bedrock connector, used to send requests to Amazon Bedrock models from Kibana."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/bedrock-action-type.html
 applies_to:
-  stack: all
-  serverless: all
+  stack: deprecated 9.5
+  serverless: deprecated
 ---
 # {{bedrock}} connector and action [bedrock-action-type]
+
+:::{include} _snippets/deprecated-llm-connector-note.md
+:::
 
 The {{bedrock}} connector uses [axios](https://github.com/axios/axios) to send a POST request to {{bedrock}}.
 
 ## Create connectors in {{kib}} [define-bedrock-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
+```{applies_to}
+stack: deprecated =9.5, removed 9.6+
+serverless: unavailable
+```
 
-:::{image} ../images/bedrock-connector.png
-:alt: {{bedrock}} connector
-:screenshot:
-:::
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [bedrock-connector-configuration]
 
@@ -43,12 +47,7 @@ Secret
 
 ## Test connectors [bedrock-action-configuration]
 
-You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
-
-:::{image} ../images/bedrock-params.png
-:alt: {{bedrock}} params test
-:screenshot:
-:::
+You can test connectors as you’re creating or editing the connector in {{kib}}.
 
 The {{bedrock}} actions have the following configuration properties.
 

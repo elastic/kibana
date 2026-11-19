@@ -8,4 +8,10 @@
 export const searchParamNames = {
   agentId: 'agent_id',
   sourceId: 'source_id',
+  skillId: 'skillId',
+  toolId: 'toolId',
+  pluginId: 'pluginId',
+  connectorId: 'connectorId',
+  openConversationDetails: 'openConversationDetails',
+  sidebarCollapsed: 'sidebarCollapsed',
 } as const;

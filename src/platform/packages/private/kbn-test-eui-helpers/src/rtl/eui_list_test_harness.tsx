@@ -73,7 +73,7 @@ export class EuiListTestHarness {
    *
    * @example
    * const list = new EuiListTestHarness('componentTemplatesList');
-   * list.clickAction('test_component_template_1', 'action-plusInCircle');
+   * list.clickAction('test_component_template_1', 'action-plusCircle');
    */
   public clickAction(itemLabel: string, actionTestId: string) {
     const containerEl = this.getElement();

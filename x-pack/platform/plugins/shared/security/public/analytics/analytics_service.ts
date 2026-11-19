@@ -49,6 +49,27 @@ export class AnalyticsService {
     if (http.anonymousPaths.isAnonymous(window.location.pathname) === false) {
       registerUserContext(analytics, authc, cloudId);
     }
+    analytics.registerEventType({
+      eventType: 'display_language_changed',
+      schema: {
+        from: {
+          type: 'keyword',
+          _meta: { description: 'The previous display language locale code.' },
+        },
+        to: {
+          type: 'keyword',
+          _meta: { description: 'The new display language locale code.' },
+        },
+        preferred_language_kibana_locale: {
+          type: 'keyword',
+          _meta: {
+            optional: true,
+            description:
+              'Deprecated and no longer sent. Superseded by the `display_language_browser_preference` context field, which is present on every browser event rather than only on picker interactions, and which uses the same Accept-Language matching the server uses. Retained here to document rows written before that change.',
+          },
+        },
+      },
+    });
   }
 
   public start({ http }: AnalyticsServiceStartParams) {

@@ -10,13 +10,14 @@
 import type { ExportShare, RegisterShareIntegrationArgs } from '@kbn/share-plugin/public';
 import type { ExportModalShareOpts } from '../../share_context_menu';
 import { checkLicense } from '../../..';
+import type { ReportingCSVSharingData } from '../../../types';
 
 export const reportingCsvExportShareIntegration = ({
   apiClient,
   startServices$,
   csvConfig,
   isServerless,
-}: ExportModalShareOpts): RegisterShareIntegrationArgs<ExportShare> => {
+}: ExportModalShareOpts): RegisterShareIntegrationArgs<ExportShare<ReportingCSVSharingData>> => {
   return {
     id: 'csvReports',
     groupId: 'export',

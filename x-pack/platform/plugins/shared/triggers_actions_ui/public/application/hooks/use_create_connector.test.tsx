@@ -24,6 +24,7 @@ describe('useCreateConnector', () => {
 
     expect(result.current).toEqual({
       isLoading: false,
+      createConnectorError: null,
       createConnector: expect.anything(),
     });
   });
@@ -37,13 +38,88 @@ describe('useCreateConnector', () => {
         name: 'test',
         config: {},
         secrets: {},
+        id: 'test-id',
       });
     });
 
     await waitFor(() =>
-      expect(useKibanaMock().services.http.post).toHaveBeenCalledWith('/api/actions/connector', {
-        body: '{"name":"test","config":{},"secrets":{},"connector_type_id":".test"}',
-      })
+      expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
+        '/api/actions/connector/test-id',
+        {
+          body: '{"name":"test","config":{},"secrets":{},"connector_type_id":".test"}',
+        }
+      )
     );
+  });
+
+  const connector = {
+    actionTypeId: '.test',
+    name: 'test',
+    config: {},
+    secrets: {},
+    id: 'test-id',
+  };
+
+  it('shows a success toast once the connector is created', async () => {
+    useKibanaMock().services.http.post = jest
+      .fn()
+      .mockResolvedValue({ id: 'test-id', name: 'My connector' });
+    const addSuccessMock = useKibanaMock().services.notifications.toasts.addSuccess as jest.Mock;
+
+    const { result } = renderHook(() => useCreateConnector());
+
+    await act(async () => {
+      await result.current.createConnector(connector);
+    });
+
+    expect(addSuccessMock).toHaveBeenCalledWith("Created 'My connector'");
+  });
+
+  it('skips the success toast with hideSuccessToast', async () => {
+    const addSuccessMock = useKibanaMock().services.notifications.toasts.addSuccess as jest.Mock;
+
+    const { result } = renderHook(() => useCreateConnector({ hideSuccessToast: true }));
+
+    await act(async () => {
+      await result.current.createConnector(connector);
+    });
+
+    expect(useKibanaMock().services.http.post).toHaveBeenCalled();
+    expect(addSuccessMock).not.toHaveBeenCalled();
+  });
+
+  it('shows an error toast on error', async () => {
+    const error = {
+      name: 'Error',
+      body: {
+        statusCode: 500,
+        message: 'Internal server error',
+      },
+    };
+    useKibanaMock().services.http.post = jest.fn().mockRejectedValue(error);
+    const addErrorMock = useKibanaMock().services.notifications.toasts.addError as jest.Mock;
+
+    const { result } = renderHook(() => useCreateConnector());
+
+    act(() => {
+      result.current.createConnector({
+        actionTypeId: '.test',
+        name: 'test',
+        config: {},
+        secrets: {},
+        id: 'test-id',
+      });
+    });
+
+    await waitFor(() => {
+      expect(addErrorMock).toHaveBeenCalledWith(error, {
+        title: 'Unable to create a connector.',
+        toastMessage: 'Internal server error',
+      });
+      expect(result.current.createConnectorError).toEqual({
+        title: 'Unable to create a connector.',
+        message: 'Internal server error',
+      });
+    });
   });
 });

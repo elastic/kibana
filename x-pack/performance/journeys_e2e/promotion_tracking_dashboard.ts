@@ -40,13 +40,26 @@ export const journey = new Journey({
     await kibanaPage.waitForListViewTable();
   })
 
-  .step('Go to Promotion Tracking Dashboard', async ({ page }) => {
-    await page.click(subj('dashboardListingTitleLink-Promotion-Dashboard'));
+  .step('Go to Promotion Tracking Dashboard', async ({ kibanaPage }) => {
+    await kibanaPage.listViewItemLink('Promotion Dashboard').click();
   })
 
   .step('Change time range', async ({ page }) => {
-    await page.click(subj('superDatePickerToggleQuickMenuButton'));
-    await page.click(subj('superDatePickerCommonlyUsed_Last_30 days'));
+    // Either picker variant may be present depending on the feature flag state.
+    const control = page
+      .locator(
+        `[data-test-subj="dateRangePickerControlButton"], [data-test-subj="superDatePickerToggleQuickMenuButton"]`
+      )
+      .first();
+    await control.waitFor({ timeout: 10000 });
+    const testSubj = await control.getAttribute('data-test-subj');
+    if (testSubj === 'dateRangePickerControlButton') {
+      await control.click();
+      await page.click(subj('dateRangePickerPresetItem-Last_30_days'));
+    } else {
+      await control.click();
+      await page.click(subj('superDatePickerCommonlyUsed_Last_30 days'));
+    }
   })
 
   .step('Wait for visualization animations to finish', async ({ kibanaPage }) => {

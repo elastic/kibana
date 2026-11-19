@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
   * Custom execution status of Security rules that is different from the status used in the Alerting Framework. We merge our custom status with the Framework's status to determine the resulting status of a rule.
@@ -24,16 +24,12 @@ import { z } from '@kbn/zod/v4';
 - failed - Rule failed to execute due to unhandled exception or a reason defined in the business logic of its executor function.
 - succeeded - Rule executed successfully without any issues. Note: this status is just an indication of a rule's "health". The rule might or might not generate any alerts despite of it.
   */
+export const RuleExecutionStatus = lazySchema(() =>
+  z.enum(['going to run', 'running', 'partial failure', 'failed', 'succeeded'])
+);
 export type RuleExecutionStatus = z.infer<typeof RuleExecutionStatus>;
-export const RuleExecutionStatus = z.enum([
-  'going to run',
-  'running',
-  'partial failure',
-  'failed',
-  'succeeded',
-]);
 export type RuleExecutionStatusEnum = typeof RuleExecutionStatus.enum;
 export const RuleExecutionStatusEnum = RuleExecutionStatus.enum;
 
+export const RuleExecutionStatusOrder = lazySchema(() => z.number().int());
 export type RuleExecutionStatusOrder = z.infer<typeof RuleExecutionStatusOrder>;
-export const RuleExecutionStatusOrder = z.number().int();

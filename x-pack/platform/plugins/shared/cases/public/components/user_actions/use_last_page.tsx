@@ -10,6 +10,7 @@ import { useMemo } from 'react';
 
 import type { CaseUserActionsStats } from '../../containers/types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
+import { hasNonTypeActivityFilter } from '../user_actions_activity_bar/utils';
 
 export const useLastPage = ({
   userActivityQueryParams,
@@ -23,12 +24,25 @@ export const useLastPage = ({
       return 1;
     }
 
+    // When a non-type filter is set, `userActionsStats` no longer
+    // reflects the filtered totals, so the split pagination (infinite pages
+    // 1..N-1 + a separately fetched last page N) can't be computed from it.
+    // Returning 1 here disables the separate last-page fetch and lets the
+    // infinite query alone paginate through the filtered results using the
+    // `total` returned by the API.
+    if (hasNonTypeActivityFilter(userActivityQueryParams)) {
+      return 1;
+    }
+
     const perPage = userActivityQueryParams.perPage;
     let lastPageType = 1;
 
     switch (userActivityQueryParams.type) {
       case 'action':
-        lastPageType = Math.ceil(userActionsStats.totalOtherActions / perPage);
+        // Must match the server `buildActionFilter`.
+        lastPageType = Math.ceil(
+          (userActionsStats.total - userActionsStats.totalCommentCreations) / perPage
+        );
         break;
       case 'user':
         lastPageType = Math.ceil(userActionsStats.totalCommentCreations / perPage || 1);

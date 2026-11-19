@@ -10,11 +10,23 @@
 import React from 'react';
 import { faker } from '@faker-js/faker';
 import { I18nProvider } from '@kbn/i18n-react';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import type { DashboardListingPageProps } from './dashboard_listing_page';
 import { DashboardListingPage } from './dashboard_listing_page';
+import { coreServices } from '../../services/kibana_services';
+
+const mockUseParams = jest.fn().mockReturnValue({});
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: () => mockUseParams(),
+}));
+
+const mockGetListingTabs = jest.fn().mockReturnValue([]);
+jest.mock('../hooks/dashboard_mount_context', () => ({
+  useDashboardMountContext: () => ({ getListingTabs: mockGetListingTabs }),
+}));
 
 // Mock child components. The Dashboard listing page mostly passes down props to shared UX components which are tested in their own packages.
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
@@ -58,7 +70,7 @@ const renderDashboardListingPage = (props: Partial<DashboardListingPageProps> = 
 
 test('renders analytics no data page when the user has no data view', async () => {
   mockIsDashboardAppInNoDataState.mockResolvedValueOnce(true);
-  dataService.dataViews.hasData.hasUserDataView = jest.fn().mockResolvedValue(false);
+  dataService.dataViews.hasData.hasDataView = jest.fn().mockResolvedValue(false);
 
   renderDashboardListingPage();
 
@@ -84,7 +96,7 @@ test('When given a title that matches multiple dashboards, filter on the title',
   mockFindByTitle.mockResolvedValue(undefined);
   const redirectTo = jest.fn();
 
-  renderDashboardListingPage({ title: 'search by title', redirectTo });
+  renderDashboardListingPage({ redirectTitle: 'search by title', redirectTo });
 
   await waitFor(() => {
     expect(redirectTo).not.toHaveBeenCalled();
@@ -101,7 +113,7 @@ test('When given a title that matches one dashboard, redirect to dashboard', asy
   });
   const redirectTo = jest.fn();
 
-  renderDashboardListingPage({ title: 'search by title', redirectTo });
+  renderDashboardListingPage({ redirectTitle: 'search by title', redirectTo });
 
   await waitFor(() => {
     expect(redirectTo).toHaveBeenCalledWith({
@@ -109,5 +121,101 @@ test('When given a title that matches one dashboard, redirect to dashboard', asy
       id: 'you_found_me',
       useReplace: true,
     });
+  });
+});
+
+test('does not mount the listing while the title lookup is pending', async () => {
+  let resolveFindByTitle: (value: undefined) => void = () => {};
+  mockFindByTitle.mockReturnValue(
+    new Promise((resolve) => {
+      resolveFindByTitle = resolve;
+    })
+  );
+  (DashboardListing as jest.Mock).mockClear();
+  const redirectTo = jest.fn();
+
+  renderDashboardListingPage({ redirectTitle: 'search by title', redirectTo });
+
+  // the no data lookup has settled once its promise resolves, so the title lookup is the only gate left
+  await waitFor(() => {
+    expect(mockFindByTitle).toHaveBeenCalled();
+  });
+  await act(async () => {
+    await Promise.resolve();
+  });
+  expect(DashboardListing).not.toHaveBeenCalled();
+  expect(redirectTo).not.toHaveBeenCalled();
+
+  await act(async () => {
+    resolveFindByTitle(undefined);
+  });
+
+  await waitFor(() => {
+    expect(DashboardListing).toHaveBeenCalledWith(
+      expect.objectContaining({ initialFilter: 'search by title' }),
+      expect.any(Object) // react context
+    );
+  });
+});
+
+test('When the title lookup rejects, filter on the title', async () => {
+  let rejectFindByTitle: (reason: Error) => void = () => {};
+  mockFindByTitle.mockReturnValue(
+    new Promise((_, reject) => {
+      rejectFindByTitle = reject;
+    })
+  );
+  (DashboardListing as jest.Mock).mockClear();
+  const redirectTo = jest.fn();
+
+  renderDashboardListingPage({ redirectTitle: 'search by title', redirectTo });
+
+  await waitFor(() => {
+    expect(mockFindByTitle).toHaveBeenCalled();
+  });
+  expect(DashboardListing).not.toHaveBeenCalled();
+
+  await act(async () => {
+    rejectFindByTitle(new Error('lookup failed'));
+  });
+
+  await waitFor(() => {
+    expect(DashboardListing).toHaveBeenCalledWith(
+      expect.objectContaining({ initialFilter: 'search by title' }),
+      expect.any(Object) // react context
+    );
+  });
+  expect(redirectTo).not.toHaveBeenCalled();
+});
+
+test('sets only "Dashboards" breadcrumb on default tab', async () => {
+  renderDashboardListingPage();
+
+  await waitFor(() => {
+    expect(coreServices.chrome.setBreadcrumbs).toHaveBeenCalledWith([{ text: 'Dashboards' }], {
+      project: { value: [] },
+    });
+  });
+});
+
+test('sets "Dashboards > Tab Title" breadcrumbs on active tab', async () => {
+  mockUseParams.mockReturnValue({ activeTab: 'visualizations' });
+  mockGetListingTabs.mockReturnValue([
+    { id: 'visualizations', title: 'Visualizations', getTableList: jest.fn() },
+  ]);
+
+  renderDashboardListingPage();
+
+  await waitFor(() => {
+    expect(coreServices.chrome.setBreadcrumbs).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          text: 'Dashboards',
+          'data-test-subj': 'dashboardListingBreadcrumb-visualizations',
+        }),
+        { text: 'Visualizations' },
+      ],
+      { project: { value: [{ text: 'Visualizations' }] } }
+    );
   });
 });

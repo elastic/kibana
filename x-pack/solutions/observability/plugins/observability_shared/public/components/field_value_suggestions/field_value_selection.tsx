@@ -6,7 +6,7 @@
  */
 
 import type { FormEvent } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiText,
@@ -14,11 +14,15 @@ import {
   EuiSwitch,
   EuiSpacer,
   EuiFilterButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
   EuiLoadingSpinner,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -37,22 +41,76 @@ const formatOptions = (
   excludedValues?: string[],
   showCount?: boolean
 ): EuiSelectableOption[] => {
-  const uniqueValues: Record<string, number> = {};
+  const uniqueValues: Record<string, { count?: number; tooltip?: string }> = {};
 
-  values?.forEach(({ label, count }) => {
-    uniqueValues[label] = count;
+  values?.forEach(({ label, count, tooltip }) => {
+    uniqueValues[label] = { count, tooltip };
   });
 
-  return Object.entries(uniqueValues).map(([label, count]) => ({
-    label,
-    append: showCount ? (
-      <Counter>
-        <EuiText size="xs">{count}</EuiText>
-      </Counter>
-    ) : null,
-    ...(selectedValue?.includes(label) ? { checked: 'on' } : {}),
-    ...(excludedValues?.includes(label) ? { checked: 'off' } : {}),
-  }));
+  // Apply reads `options`, not `selectedValue`. Keep applied selections in the
+  // list when suggestions omit them (search filter, or a refetch of the
+  // already-filtered set) so Apply cannot drop them. They have no known count,
+  // so none is shown rather than a misleading 0.
+  const ensureLabel = (label: string) => {
+    if (uniqueValues[label] === undefined) {
+      uniqueValues[label] = {};
+    }
+  };
+  selectedValue?.forEach(ensureLabel);
+  excludedValues?.forEach(ensureLabel);
+
+  return Object.entries(uniqueValues).map(([label, { count, tooltip }]) => {
+    const counter =
+      count === undefined ? null : (
+        <Counter>
+          <EuiText size="xs">{count}</EuiText>
+        </Counter>
+      );
+    const tooltipIcon = <EuiIconTip type="question" color="subdued" content={tooltip} />;
+
+    let append: EuiSelectableOption['append'] = null;
+    if (showCount && counter && tooltip) {
+      append = (
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>{counter}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{tooltipIcon}</EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    } else if (showCount && counter) {
+      append = counter;
+    } else if (tooltip) {
+      append = tooltipIcon;
+    }
+
+    return {
+      label,
+      append,
+      ...(selectedValue?.includes(label) ? { checked: 'on' } : {}),
+      ...(excludedValues?.includes(label) ? { checked: 'off' } : {}),
+    };
+  });
+};
+
+const hasSameLabels = (first: EuiSelectableOption[], second: EuiSelectableOption[]): boolean =>
+  first.length === second.length &&
+  isEqual(map(first, 'label').sort(), map(second, 'label').sort());
+
+// Rebuilds the list from fresh suggestions while keeping what the user has checked so far,
+// including checked options the new suggestions no longer list.
+const carryOverChecks = (
+  next: EuiSelectableOption[],
+  current: EuiSelectableOption[]
+): EuiSelectableOption[] => {
+  const currentByLabel = new Map(current.map((option) => [option.label, option]));
+  const nextLabels = new Set(next.map(({ label }) => label));
+
+  const merged = next.map(({ checked: _checked, ...option }) => {
+    const checked = currentByLabel.get(option.label)?.checked;
+    return checked ? { ...option, checked } : option;
+  });
+  const omitted = current.filter(({ label, checked }) => checked && !nextLabels.has(label));
+
+  return [...merged, ...omitted];
 };
 
 export function FieldValueSelection({
@@ -76,6 +134,9 @@ export function FieldValueSelection({
   compressed = true,
   useLogicalAND,
   showLogicalConditionSwitch = false,
+  isDisabled = false,
+  disabledTooltip,
+  dataTestSubj,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
   const { euiTheme } = useEuiTheme();
@@ -92,10 +153,31 @@ export function FieldValueSelection({
     setIsLogicalAND(useLogicalAND);
   }, [useLogicalAND]);
 
+  const valuesKey = JSON.stringify(values);
+  const selectedValueKey = JSON.stringify(selectedValue);
+
+  const previousSelectedValueKey = useRef(selectedValueKey);
+
   useEffect(() => {
-    setOptions(formatOptions(values, selectedValue, excludedValue, showCount));
+    const selectionChanged = previousSelectedValueKey.current !== selectedValueKey;
+    previousSelectedValueKey.current = selectedValueKey;
+
+    setOptions((current) => {
+      const next = formatOptions(values, selectedValue, excludedValue, showCount);
+      if (!(isPopoverOpen || forceOpen) || selectionChanged) {
+        return next;
+      }
+      // New suggestions can arrive while the popover is open (a refetch, or results for
+      // the typed search). Show them, but keep the checks made so far: rebuilding from
+      // props alone would wipe them. A changed applied selection takes precedence.
+      const merged = carryOverChecks(next, current);
+      // Replacing the options regenerates the rows, which swallows a click that lands
+      // mid-update. Count-only changes are not worth that, so keep the list as is.
+      return hasSameLabels(merged, current) ? current : merged;
+    });
+    // values/selectedValue are represented by the serialized keys above.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(values), JSON.stringify(selectedValue), showCount, excludedValue]);
+  }, [valuesKey, selectedValueKey, showCount, excludedValue, isPopoverOpen, forceOpen]);
 
   const onButtonClick = () => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -104,6 +186,7 @@ export function FieldValueSelection({
   const closePopover = () => {
     setIsPopoverOpen(false);
     setForceOpen?.(false);
+    setQuery('');
   };
 
   const onChange = (optionsN: EuiSelectableOption[]) => {
@@ -119,11 +202,12 @@ export function FieldValueSelection({
       style={width ? { width } : {}}
       size="m"
       color="text"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
-      data-test-subj={'fieldValueSelectionBtn'}
+      data-test-subj={dataTestSubj ?? 'fieldValueSelectionBtn'}
       fullWidth={fullWidth}
+      isDisabled={isDisabled}
     >
       {label}
     </EuiButton>
@@ -133,21 +217,35 @@ export function FieldValueSelection({
 
   const filterButton = (
     <EuiFilterButton
-      data-test-subj={`o11yFilterGroupButton-${label}`}
+      data-test-subj={dataTestSubj ?? `o11yFilterGroupButton-${label}`}
       aria-label={i18n.translate('xpack.observabilityShared.fieldValueSelection.label', {
         defaultMessage: 'expands filter group for {label} filter',
         values: { label },
       })}
       isSelected={isPopoverOpen || forceOpen}
       hasActiveFilters={numOfFilters > 0}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       numActiveFilters={numOfFilters}
       numFilters={options.length}
       onClick={onButtonClick}
+      isDisabled={isDisabled}
     >
       {label}
     </EuiFilterButton>
   );
+
+  if (isDisabled) {
+    const triggerButton = button || (asFilterButton ? filterButton : anchorButton);
+    return (
+      <Wrapper>
+        {disabledTooltip ? (
+          <EuiToolTip content={disabledTooltip}>{triggerButton}</EuiToolTip>
+        ) : (
+          triggerButton
+        )}
+      </Wrapper>
+    );
+  }
 
   const applyDisabled = () => {
     const currSelected = (options ?? [])
@@ -171,6 +269,13 @@ export function FieldValueSelection({
     <Wrapper>
       <EuiPopover
         id="popover"
+        aria-label={i18n.translate(
+          'xpack.observabilityShared.fieldValueSelection.popoverAriaLabel',
+          {
+            defaultMessage: 'Filter options for {label}',
+            values: { label },
+          }
+        )}
         panelPaddingSize="none"
         button={button || (asFilterButton ? filterButton : anchorButton)}
         isOpen={isPopoverOpen || forceOpen}
@@ -179,6 +284,7 @@ export function FieldValueSelection({
         display="block"
       >
         <EuiSelectable
+          data-test-subj="o11yFieldValueSelectionSelectable"
           searchable
           singleSelection={singleSelection}
           searchProps={{
@@ -195,6 +301,7 @@ export function FieldValueSelection({
           }}
           listProps={{
             onFocusBadge: false,
+            paddingSize: 's',
           }}
           options={options}
           onChange={onChange}
@@ -274,6 +381,7 @@ export function FieldValueSelection({
 
                     setIsPopoverOpen(false);
                     setForceOpen?.(false);
+                    setQuery('');
                   }}
                 >
                   {i18n.translate('xpack.observabilityShared.fieldValueSelection.apply', {

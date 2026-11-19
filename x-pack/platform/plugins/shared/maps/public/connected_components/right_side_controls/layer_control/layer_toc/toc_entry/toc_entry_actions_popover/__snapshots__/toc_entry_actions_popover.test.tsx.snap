@@ -4,6 +4,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
 <Fragment>
   <EuiPopover
     anchorPosition="leftUp"
+    aria-label="Layer actions"
     button={
       <Memo(Connect(TOCEntryButton))
         displayName="layer 1"
@@ -56,8 +57,9 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
                 "data-test-subj": "fitToBoundsButton",
                 "disabled": false,
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
-                  type="expand"
+                  type="maximize"
                 />,
                 "name": "Fit to data",
                 "onClick": [Function],
@@ -66,8 +68,9 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
               Object {
                 "data-test-subj": "layerVisibilityToggleButton",
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
-                  type="eyeClosed"
+                  type="eyeSlash"
                 />,
                 "name": "Hide layer",
                 "onClick": [Function],
@@ -77,6 +80,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
                 "data-test-subj": "layerSettingsButton",
                 "disabled": false,
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
                   type="pencil"
                 />,
@@ -87,6 +91,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
               Object {
                 "data-test-subj": "cloneLayerButton",
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
                   type="copy"
                 />,
@@ -97,6 +102,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
               Object {
                 "data-test-subj": "removeLayerButton",
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
                   type="trash"
                 />,
@@ -118,6 +124,7 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
 <Fragment>
   <EuiPopover
     anchorPosition="leftUp"
+    aria-label="Layer actions"
     button={
       <Memo(Connect(TOCEntryButton))
         displayName="layer 1"
@@ -170,8 +177,9 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
                 "data-test-subj": "fitToBoundsButton",
                 "disabled": false,
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
-                  type="expand"
+                  type="maximize"
                 />,
                 "name": "Fit to data",
                 "onClick": [Function],
@@ -180,8 +188,9 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
               Object {
                 "data-test-subj": "layerVisibilityToggleButton",
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
-                  type="eyeClosed"
+                  type="eyeSlash"
                 />,
                 "name": "Hide layer",
                 "onClick": [Function],
@@ -191,6 +200,7 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
                 "data-test-subj": "layerSettingsButton",
                 "disabled": false,
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
                   type="pencil"
                 />,
@@ -201,6 +211,7 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
               Object {
                 "data-test-subj": "cloneLayerButton",
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
                   type="copy"
                 />,
@@ -211,6 +222,7 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
               Object {
                 "data-test-subj": "removeLayerButton",
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
                   type="trash"
                 />,
@@ -232,6 +244,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
 <Fragment>
   <EuiPopover
     anchorPosition="leftUp"
+    aria-label="Layer actions"
     button={
       <Memo(Connect(TOCEntryButton))
         displayName="layer 1"
@@ -284,8 +297,9 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
                 "data-test-subj": "fitToBoundsButton",
                 "disabled": true,
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
-                  type="expand"
+                  type="maximize"
                 />,
                 "name": "Fit to data",
                 "onClick": [Function],
@@ -294,8 +308,9 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
               Object {
                 "data-test-subj": "layerVisibilityToggleButton",
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
-                  type="eyeClosed"
+                  type="eyeSlash"
                 />,
                 "name": "Hide layer",
                 "onClick": [Function],
@@ -305,6 +320,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
                 "data-test-subj": "layerSettingsButton",
                 "disabled": false,
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
                   type="pencil"
                 />,
@@ -315,6 +331,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
               Object {
                 "data-test-subj": "cloneLayerButton",
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
                   type="copy"
                 />,
@@ -325,6 +342,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
               Object {
                 "data-test-subj": "removeLayerButton",
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
                   type="trash"
                 />,
@@ -346,6 +364,7 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
 <Fragment>
   <EuiPopover
     anchorPosition="leftUp"
+    aria-label="Layer actions"
     button={
       <Memo(Connect(TOCEntryButton))
         displayName="layer 1"
@@ -399,8 +418,9 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
                 "data-test-subj": "fitToBoundsButton",
                 "disabled": false,
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
-                  type="expand"
+                  type="maximize"
                 />,
                 "name": "Fit to data",
                 "onClick": [Function],
@@ -409,6 +429,7 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
               Object {
                 "data-test-subj": "layerVisibilityToggleButton",
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
                   type="eye"
                 />,
@@ -420,6 +441,7 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
                 "data-test-subj": "layerSettingsButton",
                 "disabled": false,
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
                   type="pencil"
                 />,
@@ -430,6 +452,7 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
               Object {
                 "data-test-subj": "cloneLayerButton",
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
                   type="copy"
                 />,
@@ -440,6 +463,7 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
               Object {
                 "data-test-subj": "removeLayerButton",
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
                   type="trash"
                 />,
@@ -461,6 +485,7 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
 <Fragment>
   <EuiPopover
     anchorPosition="leftUp"
+    aria-label="Layer actions"
     button={
       <Memo(Connect(TOCEntryButton))
         displayName="layer 1"
@@ -513,8 +538,9 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
                 "data-test-subj": "fitToBoundsButton",
                 "disabled": false,
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
-                  type="expand"
+                  type="maximize"
                 />,
                 "name": "Fit to data",
                 "onClick": [Function],
@@ -523,8 +549,9 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
               Object {
                 "data-test-subj": "layerVisibilityToggleButton",
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
-                  type="eyeClosed"
+                  type="eyeSlash"
                 />,
                 "name": "Hide layer",
                 "onClick": [Function],
@@ -544,6 +571,7 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
 <Fragment>
   <EuiPopover
     anchorPosition="leftUp"
+    aria-label="Layer actions"
     button={
       <Memo(Connect(TOCEntryButton))
         displayName="layer 1"
@@ -596,8 +624,9 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
                 "data-test-subj": "fitToBoundsButton",
                 "disabled": false,
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
-                  type="expand"
+                  type="maximize"
                 />,
                 "name": "Fit to data",
                 "onClick": [Function],
@@ -606,8 +635,9 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
               Object {
                 "data-test-subj": "layerVisibilityToggleButton",
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
-                  type="eyeClosed"
+                  type="eyeSlash"
                 />,
                 "name": "Hide layer",
                 "onClick": [Function],
@@ -616,6 +646,7 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
               Object {
                 "data-test-subj": "showThisLayerOnlyButton",
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
                   type="eye"
                 />,
@@ -627,6 +658,7 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
                 "data-test-subj": "layerSettingsButton",
                 "disabled": false,
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
                   type="pencil"
                 />,
@@ -637,6 +669,7 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
               Object {
                 "data-test-subj": "cloneLayerButton",
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
                   type="copy"
                 />,
@@ -647,6 +680,7 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
               Object {
                 "data-test-subj": "removeLayerButton",
                 "icon": <EuiIcon
+                  aria-hidden={true}
                   size="m"
                   type="trash"
                 />,

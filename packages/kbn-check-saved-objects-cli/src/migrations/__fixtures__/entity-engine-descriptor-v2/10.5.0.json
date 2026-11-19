@@ -1,0 +1,37 @@
+{
+  "10.4.0": [
+    {
+      "type": "user",
+      "status": "started",
+      "logExtractionState": {
+        "lastExecutionTimestamp": "2026-03-04T17:37:20.000Z"
+      },
+      "versionState": {
+        "version": "2",
+        "state": "running",
+        "isMigratedFromV1": true
+      }
+    }
+  ],
+  "10.5.0": [
+    {
+      "type": "user",
+      "status": "started",
+      "logExtractionState": {
+        "paginationTimestamp": null,
+        "paginationId": null,
+        "lastExecutionTimestamp": "2026-03-04T17:37:20.000Z",
+        "logsPageCursorStartTimestamp": null,
+        "logsPageCursorStartId": null,
+        "logsPageCursorEndTimestamp": null,
+        "logsPageCursorEndId": null
+      },
+      "error": null,
+      "versionState": {
+        "version": "2",
+        "state": "running",
+        "isMigratedFromV1": true
+      }
+    }
+  ]
+}

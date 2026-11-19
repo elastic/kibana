@@ -31,7 +31,7 @@ export const TotalExecutionTime: React.FC<TotalExecutionTimeProps> = ({
   migrationType,
 }) => {
   const humanizedDuration = useMemo(() => {
-    return getDurationFomatter().convert(milliseconds);
+    return getDurationFomatter().convertToText(milliseconds);
   }, [milliseconds]);
 
   const toolTipContent = useMemo(

@@ -181,14 +181,6 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
-                "entity": {
-                  "properties": {
-                    "id": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
-                },
                 "full_name": {
                   "fields": {
                     "text": {
@@ -665,14 +657,6 @@
                 "email": {
                   "ignore_above": 1024,
                   "type": "keyword"
-                },
-                "entity": {
-                  "properties": {
-                    "id": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
                 },
                 "full_name": {
                   "fields": {
@@ -2092,23 +2076,11 @@
                 }
               }
             },
-            "entity": {
+            "target": {
               "properties": {
                 "id": {
                   "ignore_above": 1024,
                   "type": "keyword"
-                }
-              }
-            },
-            "target": {
-              "properties": {
-                "entity": {
-                  "properties": {
-                    "id": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
                 }
               }
             },
@@ -5281,14 +5253,6 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
-                "entity": {
-                  "properties": {
-                    "id": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
-                },
                 "full_name": {
                   "fields": {
                     "text": {
@@ -5360,14 +5324,6 @@
             "name": {
               "ignore_above": 1024,
               "type": "keyword"
-            },
-            "entity": {
-              "properties": {
-                "id": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
             },
             "node": {
               "properties": {
@@ -5462,14 +5418,6 @@
                 "name": {
                   "ignore_above": 1024,
                   "type": "keyword"
-                },
-                "entity": {
-                  "properties": {
-                    "id": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
                 },
                 "node": {
                   "properties": {
@@ -5987,14 +5935,6 @@
                 "email": {
                   "ignore_above": 1024,
                   "type": "keyword"
-                },
-                "entity": {
-                  "properties": {
-                    "id": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
                 },
                 "full_name": {
                   "fields": {
@@ -8476,14 +8416,6 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
-            "entity": {
-              "properties": {
-                "id": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
-            },
             "full_name": {
               "fields": {
                 "text": {
@@ -8563,14 +8495,6 @@
                 "email": {
                   "ignore_above": 1024,
                   "type": "keyword"
-                },
-                "entity": {
-                  "properties": {
-                    "id": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
-                    }
-                  }
                 },
                 "full_name": {
                   "fields": {

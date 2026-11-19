@@ -7,9 +7,11 @@
 
 export type {
   Actions,
+  AiIndexActions,
+  AlertingActions,
+  AlertsActions,
   ApiActions,
   AppActions,
-  AlertingActions,
   CasesActions,
   SavedObjectActions,
   SpaceActions,

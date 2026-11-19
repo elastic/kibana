@@ -133,7 +133,7 @@ describe('DefaultEditorAgg component', () => {
       </EuiThemeProvider>
     );
 
-    expect(setTouched).toBeCalledWith(false);
+    expect(setTouched).toHaveBeenCalledWith(false);
   });
 
   it('should last bucket has truthy isLastBucket prop', () => {

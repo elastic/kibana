@@ -17,6 +17,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
 
+  /**
+   * Purpose: Dashboard space + feature controls test
+   *
+   * Migration: Migrate to scout
+   */
   describe('spaces', () => {
     const customSpace = 'custom_space';
     before(async () => {
@@ -61,7 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('dashboardLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
-        await testSubjects.existOrFail('newItemButton');
+        await dashboard.expectCreateButtonExists();
       });
 
       it(`create new dashboard shows addNew button`, async () => {

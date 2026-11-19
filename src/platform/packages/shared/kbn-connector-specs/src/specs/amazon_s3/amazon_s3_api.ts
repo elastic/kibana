@@ -9,6 +9,11 @@
 
 import { Parser } from 'xml2js';
 import type { ActionContext } from '../../connector_spec';
+import {
+  setConnectorActionErrorMeta,
+  getEstimatedBase64OutputBytes,
+  getResponseContentLengthBytes,
+} from '../../connector_utils';
 import { calculateAWSA4Signature, sha256Hash } from '../../auth_types/aws_crypto_helpers';
 import type {
   AmazonS3BucketObjectListing,
@@ -40,13 +45,24 @@ function createAwsS3Error(error: unknown): Error {
     message?: string;
     $metadata?: { httpStatusCode?: number };
   };
+  let s3Error: Error;
   if (awsError.name && awsError.message) {
-    return new Error(`AWS S3 error (${awsError.name}): ${awsError.message}`);
+    s3Error = new Error(`AWS S3 error (${awsError.name}): ${awsError.message}`);
   } else if (awsError.message) {
-    return new Error(`AWS S3 error: ${awsError.message}`);
+    s3Error = new Error(`AWS S3 error: ${awsError.message}`);
   } else {
-    return new Error(`Unknown AWS S3 error: ${JSON.stringify(error)}`);
+    s3Error = new Error(`Unknown AWS S3 error: ${JSON.stringify(error)}`);
   }
+
+  const contentLengthBytes = getResponseContentLengthBytes(error);
+  if (contentLengthBytes !== undefined) {
+    setConnectorActionErrorMeta(s3Error, {
+      contentLengthBytes,
+      estimatedOutputBytes: getEstimatedBase64OutputBytes(contentLengthBytes),
+    });
+  }
+
+  return s3Error;
 }
 
 function getJsObjectOrValue(
@@ -243,19 +259,19 @@ export async function getAmazonS3BucketObjectMetadata(
     return {
       acceptRanges: rawResponse.headers['accept-ranges'],
       bucket: bucketName,
-      cacheControl: rawResponse.headers['cache-control'],
+      cacheControl: rawResponse.headers['cache-control'] as string,
       contentDisposition: rawResponse.headers['content-disposition'],
-      contentEncoding: rawResponse.headers['content-encoding'],
+      contentEncoding: rawResponse.headers['content-encoding'] as string,
       contentLanguage: rawResponse.headers['content-language'],
-      contentLength: parseInt(rawResponse.headers['content-length'] || '0', 10),
+      contentLength: parseInt((rawResponse.headers['content-length'] as string) || '0', 10),
       contentRange: rawResponse.headers['content-range'],
-      contentType: rawResponse.headers['content-type'],
+      contentType: rawResponse.headers['content-type'] as string,
       eTag: rawResponse.headers.ETag || rawResponse.headers.etag,
       expires: rawResponse.headers.expires,
       key: objectKey,
       lastModified: rawResponse.headers['last-modified'],
       region,
-      server: rawResponse.headers.server,
+      server: rawResponse.headers.server as string,
       storageClass: rawResponse.headers['x-amz-storage-class'],
     };
   } catch (error: unknown) {
@@ -344,8 +360,8 @@ export async function downloadAmazonS3BucketObject(
     return {
       bucket: bucketName,
       key: objectKey,
-      contentType: response.headers['content-type'] || 'application/octet-stream',
-      contentLength: parseInt(response.headers['content-length'] || '0', 10),
+      contentType: (response.headers['content-type'] as string) || 'application/octet-stream',
+      contentLength: parseInt((response.headers['content-length'] as string) || '0', 10),
       lastModified: response.headers['last-modified'],
       etag: response.headers.ETag || response.headers.etag,
       hasContent: true,

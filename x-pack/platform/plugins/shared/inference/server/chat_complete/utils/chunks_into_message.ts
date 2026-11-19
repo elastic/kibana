@@ -12,13 +12,12 @@ import type {
   ToolOptions,
 } from '@kbn/inference-common';
 import { ChatCompletionEventType, withoutTokenCountEvents } from '@kbn/inference-common';
-import { trace } from '@opentelemetry/api';
 import type { Logger } from '@kbn/logging';
 import type { OperatorFunction } from 'rxjs';
 import { map, merge, share, toArray } from 'rxjs';
-import { setChoice } from '@kbn/inference-tracing/src/with_chat_complete_span';
 import { validateToolCalls } from '../../util/validate_tool_calls';
 import { mergeChunks } from './merge_chunks';
+import { normalizeToolCallIndexes } from './normalize_tool_call_indexes';
 
 export function chunksIntoMessage<TToolOptions extends ToolOptions>({
   logger,
@@ -33,7 +32,7 @@ export function chunksIntoMessage<TToolOptions extends ToolOptions>({
   | ChatCompletionMessageEvent<TToolOptions>
 > {
   return (chunks$) => {
-    const shared$ = chunks$.pipe(share());
+    const shared$ = chunks$.pipe(normalizeToolCallIndexes(), share());
 
     return merge(
       shared$,
@@ -46,14 +45,11 @@ export function chunksIntoMessage<TToolOptions extends ToolOptions>({
           logger.debug(() => `Received completed message: ${JSON.stringify(concatenatedChunk)}`);
 
           const { content, refusal, tool_calls: toolCalls } = concatenatedChunk;
-          const activeSpan = trace.getActiveSpan();
-          if (activeSpan) {
-            setChoice(activeSpan, { content, toolCalls });
-          }
 
           const validatedToolCalls = validateToolCalls<TToolOptions>({
             ...toolOptions,
             toolCalls,
+            logger,
           });
 
           return {

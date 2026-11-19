@@ -104,6 +104,22 @@ describe('#setup()', () => {
       );
     });
 
+    it('applies hideChrome from an AppUpdater before start resolves', async () => {
+      const setup = service.setup(setupDeps);
+      const updater$ = new BehaviorSubject<AppUpdater>(() => ({ hideChrome: true }));
+      setup.register(Symbol('plugin'), createApp({ id: 'app1', updater$ }));
+
+      const { applications$ } = await service.start(startDeps);
+
+      let applications = await firstValueFrom(applications$);
+      expect(applications.get('app1')).toEqual(expect.objectContaining({ hideChrome: true }));
+
+      updater$.next(() => ({ hideChrome: false }));
+
+      applications = await firstValueFrom(applications$);
+      expect(applications.get('app1')).toEqual(expect.objectContaining({ hideChrome: false }));
+    });
+
     it('allows to register an AppUpdater for the application', async () => {
       const setup = service.setup(setupDeps);
 
@@ -1277,5 +1293,57 @@ describe('#stop()', () => {
     service.stop();
     expect(removeListenerSpy).toHaveBeenCalledTimes(1);
     expect(removeListenerSpy).toHaveBeenCalledWith('beforeunload', handler);
+  });
+});
+
+describe('#start() getRegisteredAppsInfo()', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
+    const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
+    setupDeps = { http, analytics, redirectTo: jest.fn() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      theme: themeServiceMock.createStartContract(),
+      customBranding: customBrandingServiceMock.createStartContract(),
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
+    };
+    service = new ApplicationService();
+  });
+
+  it('attributes each registered app to the plugin that registered it', async () => {
+    const discoverPlugin = Symbol('discover');
+    const dashboardPlugin = Symbol('dashboard');
+    const { register } = service.setup(setupDeps);
+    register(discoverPlugin, createApp({ id: 'discover' }));
+    register(dashboardPlugin, createApp({ id: 'dashboards' }));
+
+    const { getRegisteredAppsInfo } = await service.start(startDeps);
+
+    expect(getRegisteredAppsInfo()).toEqual([
+      { appId: 'discover', owner: discoverPlugin, deepLinkIds: [] },
+      { appId: 'dashboards', owner: dashboardPlugin, deepLinkIds: [] },
+    ]);
+  });
+
+  it('flattens nested deep-link ids that resolve to a path', async () => {
+    const owner = Symbol('management');
+    const deepLinks: AppDeepLink[] = [
+      {
+        id: 'transform',
+        title: 'Transform',
+        path: '/transform',
+        deepLinks: [{ id: 'transform_create', title: 'Create', path: '/transform/create' }],
+      },
+      { id: 'no_path_group', title: 'Group', deepLinks: [] },
+    ];
+    const { register } = service.setup(setupDeps);
+    register(owner, createApp({ id: 'management', deepLinks }));
+
+    const { getRegisteredAppsInfo } = await service.start(startDeps);
+
+    const info = getRegisteredAppsInfo().find(({ appId }) => appId === 'management');
+    expect(info?.deepLinkIds).toEqual(['transform', 'transform_create']);
   });
 });

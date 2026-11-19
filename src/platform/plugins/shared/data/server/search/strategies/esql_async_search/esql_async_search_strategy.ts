@@ -15,10 +15,12 @@ import type { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { EsqlAsyncQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchParams } from '@kbn/es-types';
 import type { WithRequiredProperty } from '@kbn/utility-types';
+import { ensureApproximationLicense } from '@kbn/esql-utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import {
   getCommonDefaultAsyncSubmitParams,
   getCommonDefaultAsyncGetParams,
+  getAsStreamWithRetryOption,
 } from '../common/async_utils';
 import { pollSearch } from '../../../../common';
 import { getKbnSearchError } from '../../report_search_error';
@@ -64,7 +66,8 @@ export const esqlAsyncSearchStrategyProvider = (
         ...options.transport,
         signal: options.abortSignal,
         meta: true,
-        asStream: options.stream,
+        asStream: getAsStreamWithRetryOption(options.stream),
+        requestTimeout: 10_000, // The P99 latency for this API is around 9s and 10s is a good compromise between waiting for partial results and not keeping the UI blocked.
       }
     );
   }
@@ -77,9 +80,6 @@ export const esqlAsyncSearchStrategyProvider = (
     const params = {
       ...getCommonDefaultAsyncGetParams(searchConfig, options),
       ...(request.params?.keep_alive ? { keep_alive: request.params.keep_alive } : {}),
-      ...(request.params?.wait_for_completion_timeout
-        ? { wait_for_completion_timeout: request.params.wait_for_completion_timeout }
-        : {}),
     };
 
     return esClient.asCurrentUser.esql.asyncQueryGet(
@@ -93,7 +93,8 @@ export const esqlAsyncSearchStrategyProvider = (
         ...options.transport,
         signal: options.abortSignal,
         meta: true,
-        asStream: options.stream,
+        asStream: getAsStreamWithRetryOption(options.stream),
+        requestTimeout: 600_000, // 10 minutes, making this huge enough that it should never interfere with the `wait_for_completion_timeout` param, which is what should be controlling the timeout of the search request.
       }
     );
   }
@@ -101,13 +102,24 @@ export const esqlAsyncSearchStrategyProvider = (
   async function submitEsqlSearch(
     request: IKibanaSearchRequest<ESQLQueryRequest>,
     options: IAsyncSearchOptions,
-    { esClient }: SearchStrategyDependencies
+    { esClient, licensing }: SearchStrategyDependencies
   ) {
     if (!request.params) throw new Error('Missing request params');
     const { dropNullColumns, ...requestParams } = request.params;
 
+    const license = await licensing?.getLicense();
+    const validLicense = ensureApproximationLicense(license);
+
+    if (!validLicense && options.approximation) {
+      logger.warn(
+        'Dropping approximation:true from ESQL search because approximation is not supported at your license level. Upgrade to Enterprise license to enable fast mode.'
+      );
+    }
+
     const params = {
       ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options)),
+      ...(validLicense &&
+        options.approximation !== undefined && { approximation: options.approximation }),
       ...requestParams,
     };
 
@@ -120,7 +132,7 @@ export const esqlAsyncSearchStrategyProvider = (
         ...options.transport,
         signal: options.abortSignal,
         meta: true,
-        asStream: options.stream,
+        asStream: getAsStreamWithRetryOption(options.stream),
       }
     );
   }
@@ -136,8 +148,8 @@ export const esqlAsyncSearchStrategyProvider = (
     const { abortSignal, ...options } = searchOptions;
     const search = async () => {
       const response = await (!id
-        ? submitEsqlSearch(request, options, deps)
-        : options.retrieveResults
+        ? submitEsqlSearch({ id, ...request }, options, deps)
+        : options.returnIntermediateResults
         ? stopEsqlAsyncSearch(id, options, deps)
         : getEsqlAsyncSearch({ id, ...request }, options, deps));
 

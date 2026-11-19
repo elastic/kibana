@@ -12,12 +12,13 @@ import type { Monitor } from '../monitor';
 export interface PerformanceInfo {
   fps: number;
   jankPercentage: number;
+  baselineFps: number;
   history: number[];
-  maxFps: number;
   minFps: number;
 }
 
 export class PerformanceMonitor implements Monitor<PerformanceInfo> {
+  private static readonly WARMUP_SAMPLE_COUNT = 3;
   private frameHistory: number[] = [];
   private callbacks: Array<(info: PerformanceInfo) => void> = [];
 
@@ -28,6 +29,7 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
 
   // baseline (target) FPS;
   private baselineFps = 60;
+  private warmupSamples = 0;
 
   // Bookkeeping for per-second FPS aggregation.
   private bucketStart = 0;
@@ -46,10 +48,11 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
   startMonitoring() {
     if (this.isMonitoring || !this.isSupported()) return;
 
+    const publishReset =
+      this.frameHistory.length > 0 || this.warmupSamples > 0 || this.baselineFps !== 60;
     this.isMonitoring = true;
     this.setupVisibilityHandling();
-
-    this.initializeWithBaselineData();
+    this.initializeHistory(publishReset);
     this.startLoop();
   }
 
@@ -70,6 +73,10 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
   destroy() {
     this.stopMonitoring();
     this.frameHistory = [];
+    this.baselineFps = 60;
+    this.warmupSamples = 0;
+    this.bucketStart = 0;
+    this.bucketFrames = 0;
     this.callbacks = [];
   }
 
@@ -82,21 +89,22 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
 
   // ---- internal ----
 
-  private initializeWithBaselineData() {
-    // Prefill history to avoid noisy first renders; use calibrated baseline.
-    this.frameHistory = new Array(this.maxHistorySize).fill(this.baselineFps);
-    this.emit({
-      fps: this.baselineFps,
-      jankPercentage: 0,
-      history: [...this.frameHistory],
-      maxFps: this.baselineFps,
-      minFps: this.baselineFps,
-    });
-
-    // Reset per-second bucket
-    const now = performance.now();
-    this.bucketStart = now;
+  private initializeHistory(publishReset = false) {
+    this.frameHistory = [];
+    this.baselineFps = 60;
+    this.warmupSamples = 0;
+    this.bucketStart = performance.now();
     this.bucketFrames = 0;
+
+    if (publishReset) {
+      this.emit({
+        fps: 0,
+        jankPercentage: 0,
+        baselineFps: 60,
+        history: [],
+        minFps: 0,
+      });
+    }
   }
 
   private startLoop() {
@@ -110,13 +118,14 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
       const elapsed = now - this.bucketStart;
       if (elapsed >= 1000) {
         // Compute FPS for the elapsed window rather than assuming exactly 1000ms
-        const fps = Math.round((this.bucketFrames * 1000) / elapsed);
-
-        // Clamp to a reasonable range to avoid noisy spikes
-        const clamped = Math.max(0, Math.min(fps, 60));
-
-        this.pushFps(clamped);
-        this.emitSnapshot(clamped);
+        const measuredFps = Math.round((this.bucketFrames * 1000) / elapsed);
+        if (this.warmupSamples < PerformanceMonitor.WARMUP_SAMPLE_COUNT) {
+          this.warmupSamples++;
+        } else {
+          this.pushFps(measuredFps);
+          this.emitSnapshot(measuredFps);
+          this.updateBaselineFromRecentHistory();
+        }
 
         // Prepare next bucket. Carry over any spillover time to reduce drift.
         // If more than 1s elapsed (extreme throttling), just reset cleanly.
@@ -126,9 +135,6 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
           this.bucketStart += 1000;
         }
         this.bucketFrames = 0;
-
-        // Slowly adapt baseline upward/downward to follow device refresh changes (e.g., ProMotion).
-        this.updateBaselineFromRecentHistory();
       }
 
       this.animationId = requestAnimationFrame(tick);
@@ -145,10 +151,7 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
           this.animationId = undefined;
         }
       } else if (this.isMonitoring && this.animationId == null) {
-        // Reset the per-second bucket to avoid a giant elapsed gap on resume.
-        const now = performance.now();
-        this.bucketStart = now;
-        this.bucketFrames = 0;
+        this.initializeHistory(true);
         this.startLoop();
       }
     };
@@ -162,17 +165,13 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
   }
 
   private emitSnapshot(currentFps: number) {
-    const history = this.frameHistory.length ? this.frameHistory : [currentFps];
-    const maxFps = Math.max(...history);
-    const minFps = Math.min(...history);
-    const jankPercentage = this.calculateJankPercentage(history, this.baselineFps);
-
+    const { frameHistory, baselineFps } = this;
     this.emit({
       fps: currentFps,
-      jankPercentage,
-      history: [...history],
-      maxFps,
-      minFps,
+      jankPercentage: this.calculateJankPercentage(frameHistory, baselineFps),
+      baselineFps,
+      history: [...frameHistory],
+      minFps: Math.min(...frameHistory),
     });
   }
 
@@ -192,16 +191,22 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
   private updateBaselineFromRecentHistory() {
     if (this.frameHistory.length < 3) return;
 
-    // Use the 75th percentile as a “healthy” indicator, then gently ease baseline.
     const sorted = [...this.frameHistory].sort((a, b) => a - b);
     const p75 = sorted[Math.floor(sorted.length * 0.75)];
-    const target = Math.max(30, Math.min(240, p75));
+    const min = sorted[0];
+    const max = sorted.at(-1) ?? min;
+    if (
+      this.frameHistory.length >= this.maxHistorySize &&
+      max - min <= 0.1 * max &&
+      max < this.baselineFps * 0.85
+    ) {
+      this.baselineFps = Math.max(60, Math.min(240, Math.round(p75)));
+      return;
+    }
 
-    // Exponential smoothing toward target (fast up, slower down to avoid flip-flop).
-    const upAlpha = 0.35;
-    const downAlpha = 0.15;
-    const alpha = target > this.baselineFps ? upAlpha : downAlpha;
+    const target = Math.max(60, Math.min(240, p75));
+    if (target <= this.baselineFps) return;
 
-    this.baselineFps = Math.round(this.baselineFps + alpha * (target - this.baselineFps));
+    this.baselineFps = Math.round(this.baselineFps + 0.35 * (target - this.baselineFps));
   }
 }

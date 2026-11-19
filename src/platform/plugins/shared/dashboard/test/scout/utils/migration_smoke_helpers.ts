@@ -10,14 +10,7 @@
 import fs from 'fs';
 import path from 'path';
 import { expect } from '@kbn/scout/ui';
-import type { ScoutPage } from '@kbn/scout';
-import type { KbnClient } from '@kbn/test';
-
-export interface ImportedSavedObject {
-  id: string;
-  type: string;
-  title: string;
-}
+import type { KbnClient, ScoutPage } from '@kbn/scout';
 
 export interface DashboardPanel {
   embeddableConfig?: { enhancements?: { dynamicActions?: { events?: unknown[] } } };
@@ -25,19 +18,6 @@ export interface DashboardPanel {
 
 export const openDashboard = async (page: ScoutPage, id: string) => {
   await page.gotoApp('dashboards', { hash: `/view/${id}` });
-};
-
-export const findImportedSavedObjectId = (
-  imported: ImportedSavedObject[],
-  type: string,
-  title: string
-) => {
-  const savedObject = imported.find((entry) => entry.type === type && entry.title === title);
-  expect(
-    savedObject,
-    `Saved object "${title}" (${type}) not found in imported objects`
-  ).toBeTruthy();
-  return savedObject!.id;
 };
 
 const readExportEntries = (exportPath: string) => {

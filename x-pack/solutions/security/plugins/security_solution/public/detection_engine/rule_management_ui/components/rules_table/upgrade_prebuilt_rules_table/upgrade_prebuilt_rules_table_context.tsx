@@ -12,7 +12,10 @@ import type {
   PrebuiltRulesFilter,
   SortOrder,
 } from '../../../../../../common/api/detection_engine';
-import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
+import type {
+  RuleUpgradeCustomizationCounts,
+  RuleUpgradeState,
+} from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../constants';
@@ -72,10 +75,10 @@ export interface UpgradePrebuiltRulesTableState {
    */
   isRefetching: boolean;
   /**
-   * Is true when installing security_detection_rules
-   * package in background
+   * Is true while the `security_detection_engine` Fleet package is being
+   * initialized (installed or upgraded) in the background.
    */
-  isUpgradingSecurityPackages: boolean;
+  isInitializingPrebuiltRulesPackage: boolean;
   /**
    * List of rule IDs that are currently being upgraded
    */
@@ -98,6 +101,15 @@ export interface UpgradePrebuiltRulesTableActions {
   reFetchRules: () => void;
   upgradeRules: (ruleIds: RuleSignatureId[]) => void;
   upgradeAllRules: () => void;
+  upgradeRulesToTarget: (ruleIds: RuleSignatureId[]) => void;
+  upgradeAllRulesToTarget: () => void;
+  getSelectedRulesCustomizationCounts: (
+    ruleIds: RuleSignatureId[]
+  ) => RuleUpgradeCustomizationCounts;
+  /**
+   * Re-fetches the upgrade review and returns up-to-date counts for the whole filtered set.
+   */
+  fetchAllRulesCustomizationCounts: () => Promise<RuleUpgradeCustomizationCounts | null>;
   setFilterOptions: Dispatch<SetStateAction<PrebuiltRulesFilter>>;
   setPagination: Dispatch<SetStateAction<{ page: number; perPage: number }>>;
   setSortingOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesSortingOptions>>;
@@ -164,7 +176,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     isLoading,
     isFetching,
     isRefetching,
-    isUpgradingSecurityPackages,
+    isInitializingPrebuiltRulesPackage,
     loadingRules,
     lastUpdated,
     rulePreviewFlyout,
@@ -174,13 +186,22 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     reFetchRules,
     upgradeRules,
     upgradeAllRules,
+    upgradeRulesToTarget,
+    upgradeAllRulesToTarget,
+    getSelectedRulesCustomizationCounts,
+    fetchAllRulesCustomizationCounts,
   } = usePrebuiltRulesUpgrade({
     pagination,
     sort: {
       field: findRulesSortField,
       order: sortingOptions.order,
     },
-    filter: filterOptions,
+    filterOptions: {
+      tags: filterOptions.tags,
+      customizationStatus: filterOptions.customization_status,
+    },
+    searchTerm: filterOptions.name,
+    withCustomizationCounts: true,
   });
 
   const actions = useMemo<UpgradePrebuiltRulesTableActions>(
@@ -188,12 +209,25 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       reFetchRules,
       upgradeRules,
       upgradeAllRules,
+      upgradeRulesToTarget,
+      upgradeAllRulesToTarget,
+      getSelectedRulesCustomizationCounts,
+      fetchAllRulesCustomizationCounts,
       setFilterOptions,
       openRulePreview,
       setPagination,
       setSortingOptions,
     }),
-    [reFetchRules, upgradeRules, upgradeAllRules, openRulePreview]
+    [
+      reFetchRules,
+      upgradeRules,
+      upgradeAllRules,
+      upgradeRulesToTarget,
+      upgradeAllRulesToTarget,
+      getSelectedRulesCustomizationCounts,
+      fetchAllRulesCustomizationCounts,
+      openRulePreview,
+    ]
   );
 
   const providerValue = useMemo<UpgradePrebuiltRulesContextType>(
@@ -207,7 +241,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         isLoading,
         isFetching,
         isRefetching,
-        isUpgradingSecurityPackages,
+        isInitializingPrebuiltRulesPackage,
         loadingRules,
         lastUpdated,
         pagination: {
@@ -227,7 +261,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       isLoading,
       isFetching,
       isRefetching,
-      isUpgradingSecurityPackages,
+      isInitializingPrebuiltRulesPackage,
       loadingRules,
       lastUpdated,
       pagination,

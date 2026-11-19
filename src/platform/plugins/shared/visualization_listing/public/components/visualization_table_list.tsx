@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useRef, useMemo, useEffect } from 'react';
+import React, { useCallback, useRef, useMemo, useEffect, useState } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { Reference } from '@kbn/content-management-utils';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
@@ -36,30 +34,20 @@ import {
   getVisualizationListingTableStyles,
 } from '@kbn/visualization-listing-components';
 
-interface SavedObjectWithReferences {
-  id: string;
-  type: string;
-  attributes: Record<string, unknown>;
-  references: Reference[];
-}
-
 interface VisualizationTableListProps {
   core: CoreStart;
   visualizations: VisualizationsStart;
-  contentManagement: ContentManagementPublicStart;
   embeddable: EmbeddableStart;
-  savedObjectsTagging?: SavedObjectsTaggingApi;
   parentProps: TableListTabParentProps;
 }
 
 export const VisualizationTableList = ({
   core,
   visualizations,
-  contentManagement,
   embeddable,
-  savedObjectsTagging,
   parentProps,
 }: VisualizationTableListProps) => {
+  const { getBreadcrumbs, onFetchSuccess, setPageDataTestSubject, showCreateButton } = parentProps;
   const euiThemeContext = useEuiTheme();
   const tableStyles = useMemo(
     () => getVisualizationListingTableStyles(euiThemeContext),
@@ -72,15 +60,27 @@ export const VisualizationTableList = ({
   const visualizeCapabilities = core.application.capabilities.visualize_v2;
   const visualizedUserContent = useRef<VisualizeUserContent[]>();
   const closeNewVisModal = useRef(() => {});
+  const [refreshListBouncer, setRefreshListBouncer] = useState(false);
+  const refreshList = useCallback(() => setRefreshListBouncer((bouncer) => !bouncer), []);
 
-  const createNewVis = useCallback(async () => {
-    const currentApp = await firstValueFrom(core.application.currentAppId$);
-    closeNewVisModal.current = visualizations.showNewVisModal({
-      originatingApp: currentApp,
-      originatingPath: window.location.hash,
-      outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
-    });
-  }, [visualizations, core.application]);
+  const createNewVis = useCallback(() => {
+    firstValueFrom(core.application.currentAppId$)
+      .then((currentApp) => {
+        closeNewVisModal.current = visualizations.showNewVisModal({
+          embeddableState: currentApp
+            ? { originatingApp: currentApp, breadcrumbs: getBreadcrumbs?.(currentApp) }
+            : undefined,
+          outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
+        });
+      })
+      .catch((error) => {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate('visualizationListing.visualizeListingCreateErrorTitle', {
+            defaultMessage: 'Error opening new visualization modal',
+          }),
+        });
+      });
+  }, [visualizations, core.application, core.notifications.toasts, getBreadcrumbs]);
 
   useEffect(() => {
     return () => {
@@ -92,6 +92,8 @@ export const VisualizationTableList = ({
     async ({ attributes: { id }, editor = { editUrl: '' } }: VisualizeUserContent) => {
       if (!('editApp' in editor || 'editUrl' in editor)) {
         await (editor as { onEdit: (id: string) => Promise<void> }).onEdit(id);
+        // The editor may have saved changes, so reload the list once it closes.
+        refreshList();
         return;
       }
 
@@ -109,7 +111,7 @@ export const VisualizationTableList = ({
           path,
           state: {
             originatingApp: currentApp,
-            originatingPath: window.location.hash,
+            breadcrumbs: getBreadcrumbs?.(currentApp),
           },
         });
         return;
@@ -117,7 +119,7 @@ export const VisualizationTableList = ({
 
       core.application.navigateToApp(targetApp, { path });
     },
-    [core.application, embeddable]
+    [core.application, embeddable, getBreadcrumbs, refreshList]
   );
 
   const fetchItems = useCallback(
@@ -153,37 +155,17 @@ export const VisualizationTableList = ({
   );
 
   const onContentEditorSave = useCallback(
-    async (args: { id: string; title: string; description?: string; tags: string[] }) => {
+    async (args: { id: string; title: string; description?: string }) => {
       const content = visualizedUserContent.current?.find(({ id }) => id === args.id);
-
       if (content) {
-        const result = (await contentManagement.client.get({
-          contentTypeId: content.savedObjectType,
-          id: content.id,
-        })) as { item: SavedObjectWithReferences };
-
-        if (result?.item) {
-          let references = result.item.references || [];
-          if (savedObjectsTagging) {
-            references = savedObjectsTagging.ui.updateTagsReferences(references, args.tags || []);
-          }
-
-          await contentManagement.client.update({
-            contentTypeId: content.savedObjectType,
-            id: content.id,
-            data: {
-              ...result.item.attributes,
-              title: args.title,
-              description: args.description ?? '',
-            },
-            options: {
-              references,
-            },
-          });
-        }
+        // Note: the visualize listing table does not currently support tag editing
+        await visualizations.updateVisualizationLibraryItem(content.id, content.type, {
+          title: args.title,
+          description: args.description ?? '',
+        });
       }
     },
-    [contentManagement, savedObjectsTagging]
+    [visualizations]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -204,12 +186,10 @@ export const VisualizationTableList = ({
   const deleteItems = useCallback(
     async (items: object[]) => {
       await Promise.all(
-        (items as VisualizeUserContent[]).map(async (item) => {
-          await contentManagement.client.delete({
-            contentTypeId: item.savedObjectType,
-            id: item.id,
-          });
-        })
+        // Goes through each type's own client, since not every type is a content management type.
+        (items as VisualizeUserContent[]).map(({ id, savedObjectType }) =>
+          visualizations.deleteVisualizationLibraryItem(id, savedObjectType)
+        )
       ).catch((error) => {
         core.notifications.toasts.addError(error, {
           title: i18n.translate('visualizationListing.visualizeListingDeleteErrorTitle', {
@@ -218,7 +198,7 @@ export const VisualizationTableList = ({
         });
       });
     },
-    [contentManagement, core.notifications.toasts]
+    [visualizations, core.notifications.toasts]
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
@@ -234,13 +214,14 @@ export const VisualizationTableList = ({
         findItems={fetchItems}
         deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
         editItem={visualizeCapabilities.save ? editItem : undefined}
+        refreshListBouncer={refreshListBouncer}
         contentEditor={{
           isReadonly: !visualizeCapabilities.save,
           onSave: onContentEditorSave,
           customValidators: contentEditorValidators,
         }}
         emptyPrompt={noItemsFragment}
-        createItem={createNewVis}
+        createItem={showCreateButton === false ? undefined : createNewVis}
         customTableColumn={getCustomColumn()}
         customSortingOptions={getCustomSortingOptions()}
         initialPageSize={initialPageSize}
@@ -273,7 +254,8 @@ export const VisualizationTableList = ({
               }
             : undefined
         }
-        {...parentProps}
+        onFetchSuccess={onFetchSuccess}
+        setPageDataTestSubject={setPageDataTestSubject}
       />
     </div>
   );

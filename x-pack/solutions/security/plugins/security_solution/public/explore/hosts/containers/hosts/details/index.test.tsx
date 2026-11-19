@@ -5,15 +5,29 @@
  * 2.0.
  */
 
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { ID, useHostDetails } from '.';
 import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
+import { useUiSetting } from '../../../../../common/lib/kibana';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 
 jest.mock('../../../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));
+jest.mock('../../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../../common/lib/kibana');
+  return { ...actual, useUiSetting: jest.fn(() => false) };
+});
+jest.mock('@kbn/entity-store/public', () => ({
+  FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
+  useEntityStoreEuidApi: jest.fn(() => undefined),
+}));
+
 const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
+const mockUseUiSetting = useUiSetting as jest.Mock;
+const mockUseEntityStoreEuidApi = useEntityStoreEuidApi as jest.Mock;
 const mockSearch = jest.fn();
 
 const defaultProps = {
@@ -28,6 +42,8 @@ const defaultProps = {
 describe('useHostDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseUiSetting.mockReturnValue(false);
+    mockUseEntityStoreEuidApi.mockReturnValue(undefined);
     mockUseSearchStrategy.mockReturnValue({
       loading: false,
       result: {
@@ -47,6 +63,24 @@ describe('useHostDetails', () => {
     expect(mockSearch).toHaveBeenCalled();
   });
 
+  it('labels the search with the hosts page execution context', () => {
+    renderHook(() => useHostDetails(defaultProps), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockUseSearchStrategy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-hosts_page',
+            id: 'host_details',
+          },
+        },
+      })
+    );
+  });
+
   it('does not run search when skip = true', () => {
     const props = {
       ...defaultProps,
@@ -58,6 +92,276 @@ describe('useHostDetails', () => {
 
     expect(mockSearch).not.toHaveBeenCalled();
   });
+
+  it('does not run search when hostName is empty and entity store v2 is not enabled', () => {
+    const { endDate, startDate, indexNames, id, skip } = defaultProps;
+    renderHook(
+      () =>
+        useHostDetails({
+          endDate,
+          startDate,
+          indexNames,
+          id,
+          skip,
+          hostName: '',
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    expect(mockSearch).not.toHaveBeenCalled();
+  });
+
+  it('does not run search when both entityId and hostName are empty and entity store v2 is enabled', () => {
+    mockUseUiSetting.mockReturnValue(true);
+    mockUseEntityStoreEuidApi.mockReturnValue({ euid: {}, getBuiltInEntityDefinition });
+
+    renderHook(() => useHostDetails({ ...defaultProps, hostName: '', entityId: undefined }), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockSearch).not.toHaveBeenCalled();
+  });
+
+  it('runs search with host.name filter when entity store v2 is enabled and entityId is undefined but hostName is provided', () => {
+    mockUseUiSetting.mockReturnValue(true);
+    mockUseEntityStoreEuidApi.mockReturnValue({ euid: {}, getBuiltInEntityDefinition });
+
+    renderHook(() => useHostDetails(defaultProps), { wrapper: TestProviders });
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filterQuery: JSON.stringify({ term: { 'host.name': 'my-macbook' } }),
+      })
+    );
+  });
+
+  it('does not run search when entity store v2 is enabled and entity Id is specified but euidApi.euid is undefined', () => {
+    mockUseUiSetting.mockReturnValue(true);
+    mockUseEntityStoreEuidApi.mockReturnValue({ euid: undefined, getBuiltInEntityDefinition });
+
+    renderHook(() => useHostDetails({ ...defaultProps, entityId: 'my-macbook' }), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockSearch).not.toHaveBeenCalled();
+  });
+
+  it('uses the record-based EUID filter in filterQuery when entity store v2 is enabled', () => {
+    mockUseUiSetting.mockReturnValue(true);
+    const recordFilter = { bool: { filter: [{ term: { 'host.id': 'host-1' } }] } };
+    const getEuidFilterBasedOnEntityRecord = jest.fn().mockReturnValue(recordFilter);
+    mockUseEntityStoreEuidApi.mockReturnValue({
+      euid: { dsl: { getEuidFilterBasedOnEntityRecord } },
+      getBuiltInEntityDefinition,
+    });
+
+    const entityRecord = { entity: { id: 'host:host-1' }, host: { id: 'host-1' } };
+
+    renderHook(
+      () =>
+        useHostDetails({
+          ...defaultProps,
+          entityId: 'host:host-1',
+          entityRecord: entityRecord as never,
+        }),
+      { wrapper: TestProviders }
+    );
+
+    expect(getEuidFilterBasedOnEntityRecord).toHaveBeenCalledWith(
+      getBuiltInEntityDefinition('host'),
+      entityRecord
+    );
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filterQuery: JSON.stringify(recordFilter),
+      })
+    );
+  });
+
+  it('ORs the EUID filters of the target and its alias records in the resolution-group view', () => {
+    mockUseUiSetting.mockReturnValue(true);
+    const getEuidFilterBasedOnEntityRecord = jest.fn(
+      (_type: string, record: { host: { id: string } }) => ({
+        term: { 'host.id': record.host.id },
+      })
+    );
+    mockUseEntityStoreEuidApi.mockReturnValue({
+      euid: { dsl: { getEuidFilterBasedOnEntityRecord } },
+      getBuiltInEntityDefinition,
+    });
+
+    const entityRecord = { entity: { id: 'host:host-1' }, host: { id: 'host-1' } };
+    const aliasRecords = [{ entity: { id: 'host:host-2' }, host: { id: 'host-2' } }];
+
+    renderHook(
+      () =>
+        useHostDetails({
+          ...defaultProps,
+          entityId: 'host:host-1',
+          entityRecord: entityRecord as never,
+          aliasRecords: aliasRecords as never,
+        }),
+      { wrapper: TestProviders }
+    );
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filterQuery: JSON.stringify({
+          bool: {
+            should: [{ term: { 'host.id': 'host-1' } }, { term: { 'host.id': 'host-2' } }],
+            minimum_should_match: 1,
+          },
+        }),
+      })
+    );
+  });
+
+  it('falls back to host.name filter when the record-based EUID filter is undefined', () => {
+    mockUseUiSetting.mockReturnValue(true);
+    const getEuidFilterBasedOnEntityRecord = jest.fn().mockReturnValue(undefined);
+    mockUseEntityStoreEuidApi.mockReturnValue({
+      euid: { dsl: { getEuidFilterBasedOnEntityRecord } },
+      getBuiltInEntityDefinition,
+    });
+
+    const entityRecord = { entity: { id: 'host:host-1' }, host: {} };
+
+    renderHook(
+      () =>
+        useHostDetails({
+          ...defaultProps,
+          entityId: 'host:host-1',
+          entityRecord: entityRecord as never,
+        }),
+      { wrapper: TestProviders }
+    );
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filterQuery: JSON.stringify({ term: { 'host.name': 'my-macbook' } }),
+      })
+    );
+  });
+
+  it('uses host.name in filterQuery when entity store v2 is disabled', () => {
+    mockUseEntityStoreEuidApi.mockReturnValue({ euid: {}, getBuiltInEntityDefinition });
+
+    renderHook(() => useHostDetails(defaultProps), { wrapper: TestProviders });
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filterQuery: JSON.stringify({ term: { 'host.name': 'my-macbook' } }),
+      })
+    );
+  });
+
+  it('does not run search while the entity-store record is loading and no record is available yet', () => {
+    mockUseUiSetting.mockReturnValue(true);
+    mockUseEntityStoreEuidApi.mockReturnValue({ euid: {}, getBuiltInEntityDefinition });
+
+    renderHook(() => useHostDetails({ ...defaultProps, entityStoreInitialLoading: true }), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockSearch).not.toHaveBeenCalled();
+  });
+
+  it('runs the scoped search when a record is present even while entityStoreInitialLoading is true', () => {
+    mockUseUiSetting.mockReturnValue(true);
+    const recordFilter = { bool: { filter: [{ term: { 'host.id': 'host-1' } }] } };
+    const getEuidFilterBasedOnEntityRecord = jest.fn().mockReturnValue(recordFilter);
+    mockUseEntityStoreEuidApi.mockReturnValue({
+      euid: { dsl: { getEuidFilterBasedOnEntityRecord } },
+      getBuiltInEntityDefinition,
+    });
+
+    const entityRecord = { entity: { id: 'host:host-1' }, host: { id: 'host-1' } };
+
+    renderHook(
+      () =>
+        useHostDetails({
+          ...defaultProps,
+          entityId: 'host:host-1',
+          entityRecord: entityRecord as never,
+          entityStoreInitialLoading: true,
+        }),
+      { wrapper: TestProviders }
+    );
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filterQuery: JSON.stringify(recordFilter),
+      })
+    );
+  });
+
+  it('runs the scoped record-based search once the entity-store record has resolved', () => {
+    mockUseUiSetting.mockReturnValue(true);
+    const recordFilter = { bool: { filter: [{ term: { 'host.id': 'host-1' } }] } };
+    const getEuidFilterBasedOnEntityRecord = jest.fn().mockReturnValue(recordFilter);
+    mockUseEntityStoreEuidApi.mockReturnValue({
+      euid: { dsl: { getEuidFilterBasedOnEntityRecord } },
+      getBuiltInEntityDefinition,
+    });
+
+    const entityRecord = { entity: { id: 'host:host-1' }, host: { id: 'host-1' } };
+
+    renderHook(
+      () =>
+        useHostDetails({
+          ...defaultProps,
+          entityId: 'host:host-1',
+          entityRecord: entityRecord as never,
+          entityStoreInitialLoading: false,
+        }),
+      { wrapper: TestProviders }
+    );
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filterQuery: JSON.stringify(recordFilter),
+      })
+    );
+  });
+
+  it('runs the host.name fallback once the store has resolved with no record', () => {
+    mockUseUiSetting.mockReturnValue(true);
+    mockUseEntityStoreEuidApi.mockReturnValue({ euid: {}, getBuiltInEntityDefinition });
+
+    renderHook(
+      () =>
+        useHostDetails({
+          ...defaultProps,
+          entityId: undefined,
+          entityRecord: undefined,
+          entityStoreInitialLoading: false,
+        }),
+      { wrapper: TestProviders }
+    );
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filterQuery: JSON.stringify({ term: { 'host.name': 'my-macbook' } }),
+      })
+    );
+  });
+
+  it('ignores entityStoreInitialLoading when entity store v2 is disabled', () => {
+    mockUseEntityStoreEuidApi.mockReturnValue({ euid: {}, getBuiltInEntityDefinition });
+
+    renderHook(() => useHostDetails({ ...defaultProps, entityStoreInitialLoading: true }), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filterQuery: JSON.stringify({ term: { 'host.name': 'my-macbook' } }),
+      })
+    );
+  });
+
   it('skip = true will cancel any running request', () => {
     const props = {
       ...defaultProps,

@@ -6,8 +6,34 @@
  */
 
 import type OpenAI from 'openai';
+import type { ChatCompletionReasoning } from '@kbn/inference-common';
 
-export type OpenAIRequest = Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string };
+export type OpenAIRequest = Omit<OpenAI.ChatCompletionCreateParams, 'model'> & {
+  model?: string;
+  /**
+   * Elasticsearch unified chat completion reasoning config (not OpenAI's `reasoning_effort`).
+   * Forwarded to `_inference/chat_completion` for provider translation.
+   */
+  reasoning?: ChatCompletionReasoning;
+};
+
+/** Chunk delta with `reasoning`, which the `openai` SDK types omit. */
+export type OpenAIChatCompletionChunkDelta =
+  OpenAI.ChatCompletionChunk['choices'][number]['delta'] & {
+    reasoning?: string | null;
+  };
+
+/** Completion message with `reasoning`, which the `openai` SDK types omit. */
+export type OpenAIChatCompletionMessage = OpenAI.ChatCompletionMessage & {
+  reasoning?: string | null;
+};
+
+/** Usage with the Elasticsearch inference API's `cache_write_tokens`, which the `openai` SDK types omit. */
+export type OpenAICompletionUsage = OpenAI.CompletionUsage & {
+  prompt_tokens_details?: OpenAI.CompletionUsage.PromptTokensDetails & {
+    cache_write_tokens?: number;
+  };
+};
 
 // duplicated from x-pack/platform/plugins/shared/stack_connectors/common/openai/constants.ts
 // because depending on stack_connectors from the inference plugin creates a cyclic dependency...

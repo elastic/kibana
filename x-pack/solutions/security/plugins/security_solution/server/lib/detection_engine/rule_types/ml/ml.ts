@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint require-atomic-updates: ["error", { "allowProperties": true }] */
-
 import type { KibanaRequest } from '@kbn/core/server';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
@@ -120,7 +118,9 @@ export const mlExecutor = async ({
         isLoggedRequestsEnabled,
       });
       anomalyResults = searchResults.anomalyResults;
+      // Collect rule execution metrics
       result.totalEventsFound = anomalyResults.hits.hits.length;
+      result.alertsCandidateCount = anomalyResults.hits.hits.length;
       loggedRequests.push(...(searchResults.loggedRequests ?? []));
     } catch (error) {
       result.errors.push(error.message);

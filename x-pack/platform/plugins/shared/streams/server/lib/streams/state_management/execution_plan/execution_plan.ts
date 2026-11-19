@@ -29,6 +29,7 @@ import {
   deleteIngestPipeline,
   upsertIngestPipeline,
 } from '../../ingest_pipelines/manage_ingest_pipelines';
+import { ATTACHMENT_TYPES } from '../../attachments/types';
 import { getErrorMessage } from '../../errors/parse_error';
 import { upsertEsqlView, deleteEsqlView } from '../../esql_views/manage_esql_views';
 import { retryTransientEsErrors } from '../../helpers/retry';
@@ -46,7 +47,6 @@ import type {
   DeleteEsqlViewAction,
   DeleteIndexTemplateAction,
   DeleteIngestPipelineAction,
-  DeleteQueriesAction,
   ElasticsearchAction,
   UpdateDataStreamMappingsAction,
   UpdateLifecycleAction,
@@ -62,7 +62,6 @@ import type {
   UnlinkSystemsAction,
   UpdateIngestSettingsAction,
   UpdateFailureStoreAction,
-  UnlinkFeaturesAction,
 } from './types';
 
 /**
@@ -96,10 +95,8 @@ export class ExecutionPlan {
       upsert_dot_streams_document: [],
       delete_dot_streams_document: [],
       update_data_stream_mappings: [],
-      delete_queries: [],
       unlink_assets: [],
       unlink_systems: [],
-      unlink_features: [],
       update_ingest_settings: [],
       upsert_esql_view: [],
       delete_esql_view: [],
@@ -137,6 +134,11 @@ export class ExecutionPlan {
       requiredPermissions.cluster.length === 0 &&
       Object.keys(requiredPermissions.index).length === 0
     ) {
+      return true;
+    }
+
+    // Skip permission checks when security is disabled
+    if (!this.dependencies.isSecurityEnabled) {
       return true;
     }
 
@@ -187,10 +189,8 @@ export class ExecutionPlan {
         delete_dot_streams_document,
         update_data_stream_mappings,
         update_failure_store,
-        delete_queries,
         unlink_assets,
         unlink_systems,
-        unlink_features,
         update_ingest_settings,
         upsert_esql_view,
         delete_esql_view,
@@ -232,10 +232,8 @@ export class ExecutionPlan {
       await Promise.all([
         this.deleteComponentTemplates(delete_component_template),
         this.deleteIngestPipelines(delete_ingest_pipeline),
-        this.deleteQueries(delete_queries),
         this.unlinkAssets(unlink_assets),
         this.unlinkSystems(unlink_systems),
-        this.unlinkFeatures(unlink_features),
         this.deleteEsqlViews(delete_esql_view),
       ]);
 
@@ -268,42 +266,24 @@ export class ExecutionPlan {
     }
   }
 
-  private async deleteQueries(actions: DeleteQueriesAction[]) {
-    if (actions.length === 0) {
-      return;
-    }
-
-    return Promise.all(
-      actions.map((action) => this.dependencies.queryClient.deleteAll(action.request.definition))
-    );
-  }
-
   private async unlinkAssets(actions: UnlinkAssetsAction[]) {
     if (actions.length === 0) {
       return;
     }
 
-    return Promise.all(
-      actions.flatMap((action) => [
-        this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'dashboard'),
-        this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'rule'),
-      ])
+    // syncAttachmentList with an empty list clears all attachments of that type for the stream.
+    await Promise.all(
+      actions.flatMap((action) =>
+        ATTACHMENT_TYPES.map((type) =>
+          this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], type)
+        )
+      )
     );
   }
 
   private async unlinkSystems(actions: UnlinkSystemsAction[]) {
     // Systems have been removed; this is a no-op kept for backward compatibility
     // with existing execution plans that may contain unlink_systems actions.
-  }
-
-  private async unlinkFeatures(actions: UnlinkFeaturesAction[]) {
-    if (actions.length === 0) {
-      return;
-    }
-
-    return Promise.all(
-      actions.map((action) => this.dependencies.featureClient.deleteFeatures(action.request.name))
-    );
   }
 
   private async upsertComponentTemplates(actions: UpsertComponentTemplateAction[]) {
@@ -511,7 +491,10 @@ export class ExecutionPlan {
               query: action.request.query,
             }),
           { logger: this.dependencies.logger }
-        )
+        ),
+      // Sequential to avoid ConcurrentModificationException in Elasticsearch's
+      // PlanTelemetry when multiple PUT view requests arrive in parallel.
+      { sequential: true }
     );
   }
 

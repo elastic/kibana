@@ -8,7 +8,8 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
-import { useEuiTheme, EuiButtonEmpty, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
+import { useEuiTheme, EuiButtonEmpty, EuiSpacer, EuiText } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { RecursivePartial, AxisStyle, PartialTheme, BarSeriesProps } from '@elastic/charts';
 import { Chart, Settings, Axis, ScaleType, Position, BarSeries } from '@elastic/charts';
 
@@ -220,10 +221,10 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
           jobConfig.analysis[analysisType].num_top_feature_importance_values === 0
         ) {
           return (
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
-              data-test-subj="mlTotalFeatureImportanceNotCalculatedCallout"
               size="s"
+              data-test-subj="mlTotalFeatureImportanceNotCalculatedCallout"
               title={
                 <FormattedMessage
                   id="xpack.ml.dataframe.analytics.exploration.totalFeatureImportanceNotCalculatedCalloutMessage"
@@ -235,10 +236,10 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
         } else {
           // or is it because the data is uniform
           return (
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
-              data-test-subj="mlNoTotalFeatureImportanceCallout"
               size="s"
+              data-test-subj="mlNoTotalFeatureImportanceCallout"
               title={
                 <FormattedMessage
                   id="xpack.ml.dataframe.analytics.exploration.noTotalFeatureImportanceCalloutMessage"

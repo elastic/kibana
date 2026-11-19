@@ -65,8 +65,11 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   const { data: cloudConnectors } = useGetCloudConnectors({
     cloudProvider,
     accountType,
+    packageName: packageInfo.name,
   });
   const cloudConnectorsCount = cloudConnectors?.length;
+  const templateSha =
+    cloudConnectors?.find(({ id }) => id === newPolicy.cloud_connector_id)?.iac_key ?? undefined;
   const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
 
   useEffect(() => {
@@ -100,7 +103,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
       name: (
         <FormattedMessage
           id="xpack.fleet.cloudConnector.setup.newConnectionTab"
-          defaultMessage="New Connection"
+          defaultMessage="New Identity"
         />
       ),
       content: (
@@ -145,6 +148,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
             setCredentials={updatePolicyWithNewCredentials}
             accountType={accountType}
             iacTemplateUrl={iacTemplateUrl}
+            templateSha={templateSha}
           />
         </>
       ),
@@ -154,7 +158,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
       name: (
         <FormattedMessage
           id="xpack.fleet.cloudConnector.setup.existingConnectionTab"
-          defaultMessage="Existing Connection"
+          defaultMessage="Existing Identity"
         />
       ),
       content: (
@@ -165,6 +169,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           credentials={existingConnectionCredentials}
           setCredentials={updatePolicyWithExistingCredentials}
           accountType={accountType}
+          packageName={packageInfo.name}
         />
       ),
     },
@@ -203,6 +208,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           setCredentials={updatePolicyWithNewCredentials}
           accountType={accountType}
           iacTemplateUrl={iacTemplateUrl}
+          templateSha={templateSha}
         />
       )}
       {reusableFeatureEnabled && (

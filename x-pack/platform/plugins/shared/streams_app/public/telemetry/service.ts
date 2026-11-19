@@ -19,8 +19,6 @@ import {
   streamsProcessingSavedEventType,
   streamsRetentionChangedEventType,
   streamsSchemaUpdatedEventType,
-  streamsSignificantEventsCreatedEventType,
-  streamsSignificantEventsSuggestionsGeneratedEventType,
   wiredStreamsStatusChangedEventType,
   streamsFeatureIdentificationSavedEventType,
   streamsFeatureIdentificationDeletedEventType,
@@ -47,8 +45,6 @@ export class StreamsTelemetryService {
     this.analytics.registerEventType(streamsRetentionChangedEventType);
     this.analytics.registerEventType(streamsChildStreamCreatedEventType);
     this.analytics.registerEventType(streamsSchemaUpdatedEventType);
-    this.analytics.registerEventType(streamsSignificantEventsSuggestionsGeneratedEventType);
-    this.analytics.registerEventType(streamsSignificantEventsCreatedEventType);
     this.analytics.registerEventType(wiredStreamsStatusChangedEventType);
     this.analytics.registerEventType(streamsFeatureIdentificationSavedEventType);
     this.analytics.registerEventType(streamsFeatureIdentificationDeletedEventType);

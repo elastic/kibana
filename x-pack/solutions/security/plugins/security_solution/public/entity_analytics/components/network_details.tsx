@@ -7,30 +7,28 @@
 
 import React, { useCallback } from 'react';
 
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FlowTargetSourceDest } from '../../../common/search_strategy/security_solution/network';
 import { NetworkDetailsLink } from '../../common/components/links';
 import { TruncatableText } from '../../common/components/truncatable_text';
 import { getEmptyTagValue } from '../../common/components/empty_value';
-import { NetworkPanelKey } from '../../flyout/network_details';
+import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 
 interface Props {
   ip: string | undefined | null;
 }
 
 const NetworkDetailsComponent: React.FC<Props> = ({ ip }) => {
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openNetworkFlyout } = useFlyoutApi();
   const openNetworkDetailsSidePanel = useCallback(() => {
-    openFlyout({
-      right: {
-        id: NetworkPanelKey,
-        params: {
-          ip,
-          flowTarget: FlowTargetSourceDest.source,
-        },
-      },
-    });
-  }, [ip, openFlyout]);
+    if (ip) {
+      openNetworkFlyout({
+        ip,
+        flowTarget: FlowTargetSourceDest.source,
+        origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
+      });
+    }
+  }, [ip, openNetworkFlyout]);
 
   if (!ip) {
     return getEmptyTagValue();

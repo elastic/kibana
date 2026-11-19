@@ -12,6 +12,11 @@ import type { TimeRange } from '@kbn/data-plugin/common';
 import { renderHook } from '@testing-library/react';
 import type { UnifiedHistogramBucketInterval } from '../../../types';
 import { useTimeRange } from './use_time_range';
+import { DataViewSource } from '@kbn/data-source';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
+
+const dataSource = new DataViewSource(dataViewWithTimefieldMock);
 
 jest.mock('@kbn/datemath', () => ({
   parse: jest.fn((datetime: string) => {
@@ -42,6 +47,7 @@ describe('useTimeRange', () => {
         bucketInterval,
         timeRange,
         timeInterval,
+        dataSource,
       })
     );
     expect(result.current.timeRangeText).toMatchInlineSnapshot(
@@ -56,6 +62,7 @@ describe('useTimeRange', () => {
         bucketInterval,
         timeRange,
         timeInterval: '1m',
+        dataSource,
       })
     );
     expect(result.current.timeRangeText).toMatchInlineSnapshot(
@@ -69,6 +76,7 @@ describe('useTimeRange', () => {
         uiSettings,
         timeRange,
         timeInterval,
+        dataSource,
       })
     );
     expect(result.current.timeRangeText).toMatchInlineSnapshot(
@@ -83,6 +91,7 @@ describe('useTimeRange', () => {
         bucketInterval,
         timeRange,
         timeInterval,
+        dataSource,
       })
     );
     expect(result.current.timeRangeDisplay).toMatchInlineSnapshot(`
@@ -107,6 +116,7 @@ describe('useTimeRange', () => {
         },
         timeRange,
         timeInterval,
+        dataSource,
       })
     );
     expect(result.current.timeRangeDisplay).toMatchInlineSnapshot(`
@@ -134,6 +144,11 @@ describe('useTimeRange', () => {
           <EuiIconTip
             color="warning"
             content="This interval creates buckets that are too large to show in the selected time range, so it has been scaled to 1 minute."
+            iconProps={
+              Object {
+                "data-test-subj": "unifiedHistogramIntervalWarning",
+              }
+            }
             title="Warning"
             type="warning"
           />
@@ -153,6 +168,7 @@ describe('useTimeRange', () => {
         },
         timeRange,
         timeInterval,
+        dataSource,
       })
     );
     expect(result.current.timeRangeDisplay).toMatchInlineSnapshot(`
@@ -180,6 +196,11 @@ describe('useTimeRange', () => {
           <EuiIconTip
             color="warning"
             content="This interval creates too many buckets to show in the selected time range, so it has been scaled to 1 minute."
+            iconProps={
+              Object {
+                "data-test-subj": "unifiedHistogramIntervalWarning",
+              }
+            }
             title="Warning"
             type="warning"
           />
@@ -195,8 +216,7 @@ describe('useTimeRange', () => {
         bucketInterval,
         timeRange,
         timeInterval,
-        isPlainRecord: true,
-        timeField: '@timestamp',
+        dataSource: createMockEsqlSource([], [], '@timestamp'),
       })
     );
     expect(result.current.timeRangeDisplay).toMatchInlineSnapshot(`
@@ -217,7 +237,7 @@ describe('useTimeRange', () => {
         bucketInterval,
         timeRange,
         timeInterval,
-        isPlainRecord: true,
+        dataSource: createMockEsqlSource(),
       })
     );
     expect(result.current.timeRangeDisplay).toBeNull();

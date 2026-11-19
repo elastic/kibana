@@ -7,7 +7,6 @@
 
 import React, { useEffect } from 'react';
 import {
-  EuiCallOut,
   EuiCodeBlock,
   EuiFieldText,
   EuiFormRow,
@@ -18,6 +17,7 @@ import {
   EuiCode,
   EuiFieldPassword,
 } from '@elastic/eui';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -46,7 +46,7 @@ export interface IsConvertedToSecret {
 }
 
 export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props) => {
-  const { docLinks, cloud } = useStartServices();
+  const { docLinks } = useStartServices();
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState<IsConvertedToSecret>({
     serviceToken: false,
@@ -54,8 +54,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
     sslKey: false,
   });
   const { enableSyncIntegrationsOnRemote, enableSSLSecrets } = ExperimentalFeaturesService.get();
-  const enableSyncIntegrations =
-    enableSyncIntegrationsOnRemote && licenseService.isEnterprise() && !cloud?.isServerlessEnabled;
+  const enableSyncIntegrations = enableSyncIntegrationsOnRemote && licenseService.isEnterprise();
 
   const [isRemoteClusterInstructionsOpen, setIsRemoteClusterInstructionsOpen] =
     React.useState(false);
@@ -131,7 +130,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
             defaultMessage: 'Specify host URL',
           }
         )}
-        {...inputs.elasticsearchUrlInput.props}
+        {...inputs.remoteElasticsearchUrlInput.props}
         isUrl
       />
       <EuiSpacer size="m" />
@@ -186,7 +185,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         </SecretFormRow>
       )}
       <EuiSpacer size="m" />
-      <EuiCallOut
+      <KbnInfoCallout
         title={
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.serviceTokenCalloutText"
@@ -201,7 +200,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
   "remote": true
 }`}
         </EuiCodeBlock>
-      </EuiCallOut>
+      </KbnInfoCallout>
       <EuiSpacer size="m" />
       <SSLFormSection
         type={inputs.typeInput.value as FormType}
@@ -213,6 +212,20 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
       <EuiSpacer size="m" />
       {enableSyncIntegrations ? (
         <>
+          <KbnWarningCallout
+            announceOnMount
+            data-test-subj="syncIntegrationsServerlessCallout"
+            title={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.syncIntegrationsServerlessCallout',
+              {
+                defaultMessage:
+                  'Integration sync is not supported when the remote cluster is a serverless project.',
+              }
+            )}
+            size="s"
+            heading="p"
+          />
+          <EuiSpacer size="m" />
           <EuiFormRow
             fullWidth
             helpText={
@@ -259,9 +272,8 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                 />
               </EuiFormRow>
               <EuiSpacer size="m" />
-              <EuiCallOut
+              <KbnInfoCallout
                 announceOnMount
-                iconType="info"
                 title={
                   <FormattedMessage
                     id="xpack.fleet.settings.editOutputFlyout.remoteClusterConfigurationCalloutTitle"
@@ -376,7 +388,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                     />
                   </>
                 )}
-              </EuiCallOut>
+              </KbnInfoCallout>
               <EuiSpacer size="m" />
               <EuiFormRow
                 fullWidth
@@ -427,7 +439,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
               </EuiFormRow>
 
               <EuiSpacer size="m" />
-              <EuiCallOut
+              <KbnInfoCallout
                 announceOnMount
                 title={
                   <FormattedMessage
@@ -454,7 +466,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
      }
    }`}
                 </EuiCodeBlock>
-              </EuiCallOut>
+              </KbnInfoCallout>
               <EuiSpacer size="m" />
             </>
           )}

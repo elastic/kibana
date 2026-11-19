@@ -16,3 +16,4 @@ export { KibanaMonacoConnectorHandler } from './kibana_monaco_connector_handler'
 export { GenericMonacoConnectorHandler } from './generic_monaco_connector_handler';
 export { HttpMonacoConnectorStepHandler } from './http_connector_step_handler';
 export { WorkflowExecuteMonacoConnectorHandler } from './workflow_execute_handler';
+export { FlowControlMonacoStepHandler } from './flow_control_monaco_step_handler';

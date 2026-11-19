@@ -9,16 +9,14 @@ import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react
 import moment from 'moment';
 
 import type {
+  BarStyleAccessor,
   BrushEndListener,
   ElementClickListener,
-  XYChartElementEvent,
+  RectAnnotationSpec,
   XYBrushEvent,
+  XYChartElementEvent,
 } from '@elastic/charts';
 import { Axis, Chart, HistogramBarSeries, Position, ScaleType, Settings } from '@elastic/charts';
-import type {
-  BarStyleAccessor,
-  RectAnnotationSpec,
-} from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
 import { getTimeZone } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
@@ -492,7 +490,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
         >
           <Settings
             onBrushEnd={viewMode !== VIEW_MODE.BRUSH ? (onBrushEnd as BrushEndListener) : undefined}
-            onElementClick={onElementClick}
+            onElementClick={nonInteractive ? undefined : onElementClick}
             onProjectionAreaChange={({ projection }) => {
               setMlBrushMarginLeft(projection.left);
               setMlBrushWidth(projection.width);
@@ -507,7 +505,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
             id="aiops-histogram-bottom-axis"
             position={Position.Bottom}
             showOverlappingTicks={true}
-            tickFormat={(value) => xAxisFormatter.convert(value)}
+            tickFormat={(value) => xAxisFormatter.convertToText(value)}
             labelFormat={() => ''}
           />
           {adjustedChartPoints?.length && (

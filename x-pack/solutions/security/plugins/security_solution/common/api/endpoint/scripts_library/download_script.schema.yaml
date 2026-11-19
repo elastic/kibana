@@ -9,9 +9,7 @@ paths:
       operationId: EndpointScriptLibraryDownloadScript
       description: Download a script file
       x-codegen-enabled: false
-      x-labels: []
-      #      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
-      #      x-labels: [ ess, serverless ]
+      x-labels: [ ess, serverless ]
       parameters:
         - name: script_id
           in: path
@@ -20,6 +18,7 @@ paths:
           example: 'fr518850-681a-4y60-aa98-e22640cae2b8'
           schema:
             type: string
+            maxLength: 256
             description: The ID of the script entry.
             example: 'fr518850-681a-4y60-aa98-e22640cae2b8'
 
@@ -29,7 +28,7 @@ paths:
           content:
             application/octet-stream:
               schema:
-                type: object
+                type: string
                 format: binary
                 description: A download stream is returned.
               examples:

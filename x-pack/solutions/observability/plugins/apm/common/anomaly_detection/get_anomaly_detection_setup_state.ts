@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { APIReturnType } from '@kbn/apm-api-shared';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { FETCH_STATUS } from '../../public/hooks/use_fetcher';
-import type { APIReturnType } from '../../public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '../environment_filter_values';
 
 export enum AnomalyDetectionSetupState {
@@ -74,4 +74,29 @@ export function getAnomalyDetectionSetupState({
   }
 
   return AnomalyDetectionSetupState.NoJobs;
+}
+
+export function getIsAnomalyDetectionConfigured(setupState: AnomalyDetectionSetupState) {
+  switch (setupState) {
+    case AnomalyDetectionSetupState.UpToDate:
+    case AnomalyDetectionSetupState.UpgradeableJobs:
+    case AnomalyDetectionSetupState.LegacyJobs:
+    case AnomalyDetectionSetupState.NoJobsForEnvironment:
+      return true;
+    default:
+      return false;
+  }
+}
+
+export function getIsAnomalyDetectionConfiguredForEnvironment(
+  setupState: AnomalyDetectionSetupState
+) {
+  switch (setupState) {
+    case AnomalyDetectionSetupState.UpToDate:
+    case AnomalyDetectionSetupState.UpgradeableJobs:
+    case AnomalyDetectionSetupState.LegacyJobs:
+      return true;
+    default:
+      return false;
+  }
 }

@@ -6,6 +6,7 @@
  */
 
 import * as z from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 import {
   RuleSignatureId,
   RuleVersion,
@@ -17,10 +18,12 @@ import {
  * They are excluded from all install/upgrade flows and fetched separately.
  */
 export type DeprecatedPrebuiltRuleAsset = z.infer<typeof DeprecatedPrebuiltRuleAsset>;
-export const DeprecatedPrebuiltRuleAsset = z.object({
-  rule_id: RuleSignatureId,
-  version: RuleVersion,
-  deprecated: z.literal(true),
-  name: z.string(),
-  deprecated_reason: z.string().optional(),
-});
+export const DeprecatedPrebuiltRuleAsset = lazySchema(() =>
+  z.object({
+    rule_id: RuleSignatureId,
+    version: RuleVersion,
+    deprecated: z.literal(true),
+    name: z.string(),
+    deprecated_reason: z.string().optional(),
+  })
+);

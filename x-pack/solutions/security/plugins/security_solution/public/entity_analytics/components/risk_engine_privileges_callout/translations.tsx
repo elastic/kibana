@@ -44,7 +44,7 @@ export const MissingPrivilegesCallOutBody: React.FC<MissingPrivileges> = ({
                   >
                     <FormattedMessage
                       id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.riskEngineRequirementsDocLink"
-                      defaultMessage="Risk Scoring prerequisites"
+                      defaultMessage="Risk score maintainer prerequisites"
                     />
                   </EuiLink>
                 ),
@@ -72,7 +72,7 @@ export const MissingPrivilegesCallOutBody: React.FC<MissingPrivileges> = ({
               <>
                 <FormattedMessage
                   id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.clusterPrivilegesEnableTitle"
-                  defaultMessage="Missing Elasticsearch cluster privileges to enable Risk Score engine:"
+                  defaultMessage="Missing Elasticsearch cluster privileges to enable the risk score maintainer:"
                 />
                 <ul>
                   {clusterPrivileges.enable.map((privilege) => (
@@ -85,7 +85,7 @@ export const MissingPrivilegesCallOutBody: React.FC<MissingPrivileges> = ({
               <>
                 <FormattedMessage
                   id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.clusterPrivilegesRunTitle"
-                  defaultMessage="Missing Elasticsearch cluster privileges to run Risk Score engine:"
+                  defaultMessage="Missing Elasticsearch cluster privileges to run the risk score maintainer:"
                 />
                 <ul>
                   {clusterPrivileges.run.map((privilege) => (

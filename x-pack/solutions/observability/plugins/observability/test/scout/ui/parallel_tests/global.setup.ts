@@ -7,27 +7,30 @@
 
 import { mergeTests, globalSetupHook as obltGlobalSetupHook, tags } from '@kbn/scout-oblt';
 import { synthtraceFixture } from '@kbn/scout-synthtrace';
+import {
+  resetAlertingV2NavSettings,
+  setAlertingV2EnabledSetting,
+} from '../fixtures/alerting_v2_setting';
+import { GENERATED_METRICS } from '../fixtures/constants';
+import { generateLogsData, generateMetricsData, generateRulesData } from '../fixtures/generators';
 
 const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
-import {
-  createDataView,
-  generateLogsData,
-  generateMetricsData,
-  generateRulesData,
-} from '../fixtures/generators';
-import { GENERATED_METRICS } from '../fixtures/constants';
+
+// Keeps the plain Alerts navigation link and the Rules page heading tabs, which change when alerting v2 is on.
+globalSetupHook(
+  'Disable alerting v2',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  async ({ kbnClient, log }) => {
+    log.debug('[setup] resetting alerting v2 nav settings and disabling alerting v2');
+    await resetAlertingV2NavSettings(kbnClient);
+    await setAlertingV2EnabledSetting(kbnClient, false);
+  }
+);
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  async ({
-    apiServices,
-    log,
-    logsSynthtraceEsClient,
-    kbnClient,
-    infraSynthtraceEsClient,
-    esClient,
-  }) => {
+  async ({ apiServices, log, logsSynthtraceEsClient, infraSynthtraceEsClient, esClient }) => {
     log.info('Generating Observability data...');
     await generateRulesData(apiServices);
 
@@ -43,10 +46,11 @@ globalSetupHook(
     });
 
     log.info('Creating default data view for .alerts-* pattern...');
-    await createDataView(kbnClient, {
+    await apiServices.dataViews.create({
       name: 'Default Alerts Data View',
       id: 'default-alerts-data-view',
       title: '.alerts-*',
+      override: true,
     });
 
     await generateLogsData({

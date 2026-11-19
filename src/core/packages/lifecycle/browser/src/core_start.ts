@@ -28,6 +28,7 @@ import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import type { IUserStorageClient } from '@kbn/core-user-storage-browser';
 
 /**
  * Core services exposed to the `Plugin` start lifecycle
@@ -82,6 +83,8 @@ export interface CoreStart {
   security: SecurityServiceStart;
   /** {@link UserProfileServiceStart} */
   userProfile: UserProfileServiceStart;
+  /** {@link IUserStorageClient} */
+  userStorage: IUserStorageClient;
   /** {@link RenderingService} */
   rendering: RenderingService;
 }

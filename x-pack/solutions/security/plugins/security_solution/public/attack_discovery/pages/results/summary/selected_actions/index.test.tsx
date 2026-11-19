@@ -33,15 +33,9 @@ jest.mock('../../take_action/use_update_alerts_status', () => ({
 }));
 
 jest.mock('../../take_action/use_add_to_case', () => ({
-  useAddToNewCase: () => ({
+  useAddToCase: () => ({
     disabled: false,
-    onAddToNewCase: jest.fn(),
-  }),
-}));
-
-jest.mock('../../take_action/use_add_to_existing_case', () => ({
-  useAddToExistingCase: () => ({
-    onAddToExistingCase: jest.fn(),
+    onAddToCase: jest.fn(),
   }),
 }));
 
@@ -49,6 +43,7 @@ jest.mock('../../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assi
   useViewInAiAssistant: () => ({
     showAssistantOverlay: jest.fn(),
     disabled: false,
+    isAssistantVisible: true,
   }),
 }));
 
@@ -198,10 +193,6 @@ describe('SelectedActions', () => {
 
       it('renders the add to case button', () => {
         expect(screen.getByTestId('addToCase')).toBeInTheDocument();
-      });
-
-      it('renders the add to existing case button', () => {
-        expect(screen.getByTestId('addToExistingCase')).toBeInTheDocument();
       });
     });
 

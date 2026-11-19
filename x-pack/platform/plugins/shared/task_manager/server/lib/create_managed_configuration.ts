@@ -9,18 +9,24 @@ import stats from 'stats-lite';
 import type { Observable } from 'rxjs';
 import { interval, merge, of } from 'rxjs';
 import { filter, mergeScan, map, scan } from 'rxjs';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
-import { isEsCannotExecuteScriptError } from './identify_es_error';
 import type { TaskManagerConfig } from '../config';
-import { CLAIM_STRATEGY_MGET, DEFAULT_POLL_INTERVAL, MAX_CAPACITY } from '../config';
+import { CLAIM_STRATEGY_MGET, LOW_UTILIZATION_POLL_INTERVAL, MAX_CAPACITY } from '../config';
 import { TaskCost } from '../task';
-import { getBulkUpdateStatusCode, isClusterBlockException, getMsearchStatusCode } from './errors';
+import { isClusterBlockException } from './errors';
+import type { BackpressureReason } from './backpressure_reason';
+import { getBackpressureReason } from './backpressure_reason';
 
 const FLUSH_MARKER = Symbol('flush');
 export const ADJUST_THROUGHPUT_INTERVAL = 10 * 1000;
 export const PREFERRED_MAX_POLL_INTERVAL = 60 * 1000;
 export const INTERVAL_AFTER_BLOCK_EXCEPTION = 61 * 1000;
+
+// Error-free windows to hold backpressure before clearing. Must exceed the
+// cluster-block poll cadence (INTERVAL_AFTER_BLOCK_EXCEPTION) so its sparse
+// re-detections keep the signal armed instead of flapping.
+export const BACKPRESSURE_HOLD_INTERVALS =
+  Math.ceil(INTERVAL_AFTER_BLOCK_EXCEPTION / ADJUST_THROUGHPUT_INTERVAL) + 2;
 
 // Capacity is measured in number of normal cost tasks that can be run
 // At a minimum, we need to be able to run a single task with the greatest cost
@@ -45,6 +51,24 @@ const POLL_INTERVAL_INCREASE_PERCENTAGE = 1.2;
 interface ErrorScanResult {
   count: number;
   isBlockException: boolean;
+  reason: BackpressureReason | null;
+}
+
+/**
+ * Whether Task Manager is applying Elasticsearch-driven backpressure. Capacity
+ * drops below baseline only on ES-pressure errors, and only the cluster-block
+ * branch produces the poll-interval sentinel (normal backoff caps at 60s). The
+ * low-utilization poll-interval change and pool saturation are excluded so this
+ * stays distinct from capacity-driven delay.
+ */
+export function isBackpressureActive(
+  currentCapacity: number,
+  startingCapacity: number,
+  currentPollInterval: number
+): boolean {
+  return (
+    currentCapacity < startingCapacity || currentPollInterval === INTERVAL_AFTER_BLOCK_EXCEPTION
+  );
 }
 
 export function createCapacityScan(
@@ -100,7 +124,10 @@ export function createPollIntervalScan(
   tmUtilizationQueue: (value?: number | undefined) => number[]
 ) {
   return scan(
-    (previousPollInterval: number, [{ count: errorCount, isBlockException }, tmUtilization]) => {
+    (
+      previousPollInterval: number,
+      [{ count: errorCount, isBlockException }, tmUtilization]: [ErrorScanResult, number]
+    ) => {
       let newPollInterval: number;
       let updatedForCapacity = false;
       let avgTmUtilization = 0;
@@ -144,10 +171,13 @@ export function createPollIntervalScan(
           // If the task claim strategy is mget, increase the poll interval if the the avg used capacity over 15s is less than 25%.
           const queue = tmUtilizationQueue(tmUtilization);
           avgTmUtilization = stats.mean(queue);
-          if (claimStrategy === CLAIM_STRATEGY_MGET && newPollInterval < DEFAULT_POLL_INTERVAL) {
+          if (
+            claimStrategy === CLAIM_STRATEGY_MGET &&
+            newPollInterval < LOW_UTILIZATION_POLL_INTERVAL
+          ) {
             updatedForCapacity = true;
             if (avgTmUtilization < 25) {
-              newPollInterval = DEFAULT_POLL_INTERVAL;
+              newPollInterval = LOW_UTILIZATION_POLL_INTERVAL;
             } else {
               // If the the used capacity is greater than or equal to 25% reset the polling interval.
               newPollInterval = startingPollInterval;
@@ -181,59 +211,71 @@ export function countErrors(
   return merge(
     // Flush error count at fixed interval
     interval(countInterval).pipe(map(() => FLUSH_MARKER)),
-    errors$.pipe(
-      filter(
-        (e) =>
-          SavedObjectsErrorHelpers.isTooManyRequestsError(e) ||
-          SavedObjectsErrorHelpers.isEsUnavailableError(e) ||
-          SavedObjectsErrorHelpers.isGeneralError(e) ||
-          isEsCannotExecuteScriptError(e) ||
-          getMsearchStatusCode(e) === 429 ||
-          (getMsearchStatusCode(e) !== undefined && getMsearchStatusCode(e)! >= 500) ||
-          getBulkUpdateStatusCode(e) === 429 ||
-          (getBulkUpdateStatusCode(e) !== undefined && getBulkUpdateStatusCode(e)! >= 500) ||
-          isClusterBlockException(e)
-      )
-    )
+    // Only errors Task Manager backs off on; classifier is shared with `reason`.
+    errors$.pipe(filter((e) => getBackpressureReason(e) !== null))
   ).pipe(
     // When tag is "flush", reset the error counter
     // Otherwise increment the error counter
-    mergeScan(({ count, isBlockException }, next) => {
-      return next === FLUSH_MARKER
-        ? of(emitErrorCount(count, isBlockException), resetErrorCount())
-        : of(incrementOrEmitErrorCount(count, isClusterBlockException(next as Error)));
-    }, emitErrorCount(0, false)),
+    mergeScan(({ count, isBlockException, reason }, next) => {
+      if (next === FLUSH_MARKER) {
+        return of(emitErrorCount(count, isBlockException, reason), resetErrorCount());
+      }
+      const error = next as Error;
+      return of(
+        incrementOrEmitErrorCount(
+          count,
+          isClusterBlockException(error),
+          getBackpressureReason(error)
+        )
+      );
+    }, emitErrorCount(0, false, null)),
     filter(isEmitEvent),
-    map(({ count, isBlockException }) => {
-      return { count, isBlockException };
+    map(({ count, isBlockException, reason }) => {
+      return { count, isBlockException, reason };
     })
   );
 }
 
-function emitErrorCount(count: number, isBlockException: boolean) {
+function emitErrorCount(
+  count: number,
+  isBlockException: boolean,
+  reason: BackpressureReason | null
+) {
   return {
     tag: 'emit',
     isBlockException,
     count,
+    reason,
   };
 }
 
-function isEmitEvent(event: { tag: string; count: number; isBlockException: boolean }) {
+function isEmitEvent(event: {
+  tag: string;
+  count: number;
+  isBlockException: boolean;
+  reason: BackpressureReason | null;
+}) {
   return event.tag === 'emit';
 }
 
-function incrementOrEmitErrorCount(count: number, isBlockException: boolean) {
+function incrementOrEmitErrorCount(
+  count: number,
+  isBlockException: boolean,
+  reason: BackpressureReason | null
+) {
   if (isBlockException) {
     return {
       tag: 'emit',
       isBlockException,
       count: count + 1,
+      reason,
     };
   }
   return {
     tag: 'inc',
     isBlockException,
     count: count + 1,
+    reason,
   };
 }
 
@@ -242,6 +284,7 @@ function resetErrorCount() {
     tag: 'initial',
     isBlockException: false,
     count: 0,
+    reason: null,
   };
 }
 

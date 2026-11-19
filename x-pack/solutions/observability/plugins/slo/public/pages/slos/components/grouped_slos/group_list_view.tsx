@@ -41,6 +41,7 @@ interface Props {
   groupBy: GroupByField;
   summary?: GroupSummary;
   filters?: Filter[];
+  isInteractive?: boolean;
 }
 
 export function GroupListView({
@@ -52,6 +53,7 @@ export function GroupListView({
   groupBy,
   summary,
   filters,
+  isInteractive = true,
 }: Props) {
   const groupQuery = `"${groupBy}": "${group}"`;
   const query = kqlQuery ? `${groupQuery} and ${kqlQuery}` : groupQuery;
@@ -173,9 +175,18 @@ export function GroupListView({
                     >
                       <EuiLink
                         data-test-subj="o11yGroupListViewLink"
-                        href={basePath.prepend(
-                          paths.sloDetails(summary!.worst.slo?.id, summary!.worst.slo?.instanceId)
-                        )}
+                        {...(!isInteractive
+                          ? {
+                              disabled: true,
+                            }
+                          : {
+                              href: basePath.prepend(
+                                paths.sloDetails(
+                                  summary!.worst.slo?.id,
+                                  summary!.worst.slo?.instanceId
+                                )
+                              ),
+                            })}
                       >
                         {i18n.translate('xpack.slo.group.worstPerforming', {
                           defaultMessage: 'Worst performing: ',
@@ -202,6 +213,7 @@ export function GroupListView({
                   loading={isLoading || isRefetching}
                   error={isError}
                   view={view}
+                  isInteractive={isInteractive}
                 />
                 <EuiSpacer size="m" />
                 {total > 0 && total > itemsPerPage ? (

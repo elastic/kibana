@@ -6,8 +6,13 @@
  */
 
 import type { InheritedFieldDefinition, Streams } from '@kbn/streams-schema';
-import { otelReservedFields } from '@kbn/streams-schema';
+import {
+  otelReservedFields,
+  otelRootBuiltInFieldNames,
+  ecsRootBuiltInFieldNames,
+} from '@kbn/streams-schema';
 import { addAliasesForNamespacedFields, baseMappings, baseFields } from './logs_layer';
+import { ecsBaseFields } from './logs_ecs_layer';
 
 describe('logs_layer', () => {
   describe('baseMappings and otelReservedFields sync', () => {
@@ -16,6 +21,16 @@ describe('logs_layer', () => {
       const reservedFieldsSorted = [...otelReservedFields].sort();
 
       expect(baseMappingsKeys).toEqual(reservedFieldsSorted);
+    });
+  });
+
+  describe('built-in root field names sync', () => {
+    it('should have otelBaseFields keys match otelRootBuiltInFieldNames', () => {
+      expect(Object.keys(baseFields).sort()).toEqual([...otelRootBuiltInFieldNames].sort());
+    });
+
+    it('should have ecsBaseFields keys match ecsRootBuiltInFieldNames', () => {
+      expect(Object.keys(ecsBaseFields).sort()).toEqual([...ecsRootBuiltInFieldNames].sort());
     });
   });
   describe('addAliasesForNamespacedFields', () => {

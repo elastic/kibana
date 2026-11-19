@@ -11,6 +11,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 
 export interface MaintenanceWindowsPublicSetupDependencies {
   management: ManagementSetup;
@@ -22,4 +23,5 @@ export interface MaintenanceWindowsPublicStartDependencies {
   serverless?: ServerlessPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   data: DataPublicPluginStart;
+  kql: KqlPluginStart;
 }

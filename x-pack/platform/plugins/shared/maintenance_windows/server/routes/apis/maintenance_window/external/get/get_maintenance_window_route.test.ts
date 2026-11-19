@@ -11,7 +11,7 @@ import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { maintenanceWindowClientMock } from '../../../../../maintenance_window_client.mock';
 import { getMaintenanceWindowRoute } from './get_maintenance_window_route';
-import { getMockMaintenanceWindow } from '../../../../../data/test_helpers';
+import { getMockMaintenanceWindowDomain } from '../../../../../data/test_helpers';
 import { MaintenanceWindowStatus } from '../../../../../../common';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
@@ -21,7 +21,7 @@ jest.mock('../../../../../lib/license_api_access', () => ({
 }));
 
 const mockMaintenanceWindow = {
-  ...getMockMaintenanceWindow(),
+  ...getMockMaintenanceWindowDomain(),
   eventStartTime: new Date().toISOString(),
   eventEndTime: new Date().toISOString(),
   status: MaintenanceWindowStatus.Running,
@@ -54,6 +54,7 @@ describe('getMaintenanceWindowRoute', () => {
           "since": "9.1.0",
           "stability": "stable",
         },
+        "oasOperationObject": [Function],
         "summary": "Get maintenance window details.",
         "tags": Array [
           "oas-tag:maintenance-window",

@@ -1,0 +1,19 @@
+openapi: 3.0.0
+info:
+  title: loosening_no_flag
+  version: '1'
+paths:
+  /api/test:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                a:
+                  type: string
+      responses:
+        '200':
+          description: ok

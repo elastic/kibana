@@ -6,11 +6,11 @@
  */
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 export const ConfiguredByNodeWarning: React.FC = () => {
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       title={
         <FormattedMessage
           id="xpack.remoteClusters.configuredByNodeWarningTitle"
@@ -18,8 +18,6 @@ export const ConfiguredByNodeWarning: React.FC = () => {
             elasticsearch.yml configuration file."
         />
       }
-      color="primary"
-      iconType="info"
       data-test-subj="remoteClusterConfiguredByNodeWarning"
     />
   );

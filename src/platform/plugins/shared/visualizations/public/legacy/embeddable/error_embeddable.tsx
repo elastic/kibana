@@ -10,7 +10,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 
-import { PresentationPanelError } from '@kbn/presentation-panel-plugin/public';
+import { PresentationPanelError } from '@kbn/embeddable-plugin/public';
 
 import { Embeddable } from './embeddable';
 import type { EmbeddableInput, EmbeddableOutput } from './i_embeddable';

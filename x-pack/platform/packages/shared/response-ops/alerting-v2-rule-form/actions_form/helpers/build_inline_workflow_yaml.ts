@@ -1,0 +1,64 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
+import { INLINE_WORKFLOW_INPUTS, INLINE_WORKFLOW_TAG } from '../constants';
+import { getInlineActionStepDefinition } from '../registry';
+import type { InlineWorkflowActionDraft } from '../types';
+import { parseInlineParams } from './parse_inline_params';
+
+export class InvalidInlineWorkflowError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidInlineWorkflowError';
+  }
+}
+
+export const stepTypeFromConnectorType = (connectorTypeId: string, subAction?: string): string => {
+  const typeId = connectorTypeId.startsWith('.') ? connectorTypeId.slice(1) : connectorTypeId;
+  return subAction ? `${typeId}.${subAction}` : typeId;
+};
+
+export const buildInlineWorkflowYaml = (action: InlineWorkflowActionDraft): string => {
+  const definition = getInlineActionStepDefinition(action.stepType);
+  if (!definition) {
+    throw new InvalidInlineWorkflowError(`Unknown inline action step type: ${action.stepType}`);
+  }
+  if (!action.connectorId) {
+    throw new InvalidInlineWorkflowError('A connector must be selected.');
+  }
+
+  const { params, errors } = parseInlineParams(definition, action.params);
+  if (!params) {
+    throw new InvalidInlineWorkflowError(errors.join(' '));
+  }
+
+  const workflow = {
+    name: `${definition.label} notification`,
+    enabled: true,
+    tags: [INLINE_WORKFLOW_TAG],
+    triggers: [
+      {
+        type: 'manual',
+        inputs: INLINE_WORKFLOW_INPUTS,
+      },
+    ],
+    steps: [
+      {
+        name: 'notify',
+        type: stepTypeFromConnectorType(
+          definition.connectorTypeId,
+          definition.connectorTypeSubAction
+        ),
+        'connector-id': action.connectorId,
+        with: params,
+      },
+    ],
+  };
+
+  return stringifyWorkflowDefinition(workflow);
+};

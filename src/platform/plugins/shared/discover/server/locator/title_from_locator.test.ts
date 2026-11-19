@@ -44,7 +44,7 @@ let mockServices: Services;
 let mockSavedSearch: SavedObject<SavedSearchAttributes>;
 
 // mock params containing the discover app locator
-let mockPayload: Array<{ params: DiscoverAppLocatorParams }>;
+let mockPayload: Array<{ params: DiscoverAppLocatorParams & { title?: string } }>;
 
 beforeAll(async () => {
   const dataStartMock = dataPluginMock.createStartContract();

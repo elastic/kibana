@@ -16,12 +16,12 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 
 import apm from 'elastic-apm-node';
 import { withSpan } from '@kbn/apm-utils';
+import { runKibanaServer } from '@kbn/test-kibana-server';
 import { applyFipsOverrides, fipsIsEnabled } from '../lib/fips';
 import { Config, readConfigFile } from '../../functional_test_runner';
 
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
 import { runElasticsearch } from '../lib/run_elasticsearch';
-import { runKibanaServer } from '../lib/run_kibana_server';
 import type { RunTestsOptions } from './flags';
 /**
  * Run servers and tests for each config
@@ -96,6 +96,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           log,
           config,
           esVersion: options.esVersion,
+          retry: options.retry,
         }).finally(() => {
           tx.end();
         });
@@ -111,18 +112,19 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         };
 
         let shutdownEs: (() => Promise<void>) | undefined;
+        let esPromise: Promise<void> | undefined;
 
         try {
-          if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
-            shutdownEs = await withSpan('start_elasticsearch', () =>
-              runElasticsearch({ ...options, log, config, onEarlyExit })
-            );
-            if (abortCtrl.signal.aborted) {
-              return;
-            }
-          }
+          esPromise =
+            process.env.TEST_ES_DISABLE_STARTUP !== 'true'
+              ? withSpan('start_elasticsearch', () =>
+                  runElasticsearch({ ...options, log, config, onEarlyExit })
+                ).then((shutdown) => {
+                  shutdownEs = shutdown;
+                })
+              : undefined;
 
-          await withSpan('start_kibana', () =>
+          const kibanaPromise = withSpan('start_kibana', () =>
             runKibanaServer({
               procs,
               config,
@@ -136,6 +138,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               ],
             })
           );
+
+          await Promise.all([esPromise, kibanaPromise]);
+
+          if (abortCtrl.signal.aborted) {
+            return;
+          }
 
           const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
 
@@ -183,6 +191,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               config,
               esVersion: options.esVersion,
               signal: abortCtrl.signal,
+              retry: options.retry,
             })
           );
 
@@ -200,6 +209,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
             await withSpan('shutdown_kibana', () => procs.stop('kibana'));
           } finally {
+            await esPromise?.catch(() => {});
+
             if (shutdownEs) {
               await withSpan('shutdown_es', () => shutdownEs!());
             }

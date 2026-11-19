@@ -13,8 +13,6 @@ import { AddNote, CREATE_NOTE_ERROR } from './add_note';
 import { ADD_NOTE_BUTTON_TEST_ID, ADD_NOTE_MARKDOWN_TEST_ID } from './test_ids';
 import { ReqStatus } from '../store/notes.slice';
 
-jest.mock('../../flyout/document_details/shared/hooks/use_which_flyout');
-
 const mockAddError = jest.fn();
 jest.mock('../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({
@@ -23,8 +21,8 @@ jest.mock('../../common/hooks/use_app_toasts', () => ({
 }));
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,

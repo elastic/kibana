@@ -5,11 +5,8 @@
  * 2.0.
  */
 import { riskScorePreviewRoute } from './preview';
+import { riskScoreEntityCalculationRouteV2 } from './entity_calculation_v2';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import {
-  deprecatedRiskScoreEntityCalculationRoute,
-  riskScoreEntityCalculationRoute,
-} from './entity_calculation';
 
 export const registerRiskScoreRoutes = ({
   router,
@@ -17,6 +14,5 @@ export const registerRiskScoreRoutes = ({
   logger,
 }: EntityAnalyticsRoutesDeps) => {
   riskScorePreviewRoute(router, logger);
-  riskScoreEntityCalculationRoute(router, getStartServices, logger);
-  deprecatedRiskScoreEntityCalculationRoute(router, getStartServices, logger);
+  riskScoreEntityCalculationRouteV2(router, getStartServices, logger);
 };

@@ -16,6 +16,7 @@ import type {
 } from './profile_service';
 import { AsyncProfileService, ProfileService } from './profile_service';
 import type { CellRenderersExtensionParams, Profile } from './types';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from './toolkit';
 
 interface TestParams {
   myParam: string;
@@ -91,9 +92,11 @@ describe('ProfileService', () => {
     service.registerProvider(provider2);
     const params = {
       context: { profileId: 'test-profile-1', myContext: 'test' },
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     };
     const params2 = {
       context: { profileId: 'test-profile-2', myContext: 'test' },
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     };
     const profile = service.getProfile(params);
     const profile2 = service.getProfile(params2);
@@ -111,7 +114,10 @@ describe('ProfileService', () => {
   it('should return empty profile if no provider is found', () => {
     service.registerProvider(provider);
     expect(
-      service.getProfile({ context: { profileId: 'test-profile-2', myContext: 'test' } })
+      service.getProfile({
+        context: { profileId: 'test-profile-2', myContext: 'test' },
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      })
     ).toEqual({});
   });
 
@@ -128,6 +134,19 @@ describe('ProfileService', () => {
     expect(provider2.resolve).toHaveBeenCalledTimes(1);
     expect(provider2.resolve).toHaveBeenCalledWith({ myParam: 'test' });
     expect(provider3.resolve).not.toHaveBeenCalled();
+  });
+
+  it('should include inherited telemetry labels and the profile id', () => {
+    service.registerProvider({
+      ...provider2,
+      telemetryLabels: ['logs-family', 'test-profile-2'],
+    });
+
+    expect(service.resolve({ myParam: 'test' })).toEqual({
+      profileId: 'test-profile-2',
+      myContext: 'test',
+      telemetryLabels: ['logs-family', 'test-profile-2'],
+    });
   });
 
   it('should resolve to default context if no matching context is found', () => {

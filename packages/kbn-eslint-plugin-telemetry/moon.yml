@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/repo-packages'
   - '@kbn/repo-info'
+  - '@kbn/swc-register'
 tags:
   - shared-common
   - package
@@ -29,27 +30,7 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - oxlint_plugin.js
+    - rules/**/*.mjs
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+tasks: {}

@@ -7,58 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Row } from '@tanstack/react-table';
 import { debounce } from 'lodash';
-import { useCallback, useLayoutEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import {
-  useDataCascadeState,
-  type GroupNode,
-  type LeafNode,
-  type IStoreState,
-} from '../../../store_provider';
-import { calculateActiveStickyIndex, type UseVirtualizerReturnType } from '../virtualizer';
+  useCallback,
+  useLayoutEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useEffect,
+} from 'react';
+import { useDataCascadeState, type GroupNode, type LeafNode } from '../../../store_provider';
+import { calculateActiveStickyIndex, type VirtualizerInstanceType } from '../virtualizer';
+import type {
+  DataCascadeUISnapshot,
+  DataCascadeRestorableState,
+  DataCascadeUISnapshotStore,
+  UseExposePublicApiOptions,
+  UseExposePublicApiReturnValue,
+} from './types';
 
-/**
- * Snapshot of data cascade ui state for use with useSyncExternalStore.
- * Includes virtualizer-derived state and specific table state.
- */
-export interface DataCascadeUISnapshot<
-  G extends GroupNode = GroupNode,
-  L extends LeafNode = LeafNode
-> extends Pick<IStoreState<G, L>['table'], 'expanded' | 'rowSelection'> {
-  scrollRect: { width: number; height: number };
-  scrollOffset: number;
-  range: { startIndex: number; endIndex: number } | null;
-  isScrolling: boolean;
-  activeStickyIndex: number | null;
-  totalRowCount: number;
-  totalSize: number;
-}
-
-/**
- * useSyncExternalStore-compatible store for data cascade ui state.
- */
-export interface DataCascadeUISnapshotStore<G extends GroupNode, L extends LeafNode> {
-  subscribe(onStoreChange: () => void): () => void;
-  getSnapshot(): DataCascadeUISnapshot<G, L>;
-  getServerSnapshot(): DataCascadeUISnapshot<G, L>;
-}
-
-/**
- * Options for useExposePublicApi. Supplies table/UI state needed to build the snapshot.
- */
-export interface UseExposePublicApiOptions<G extends GroupNode> {
-  rows: Row<G>[];
-  enableStickyGroupHeader: boolean;
-}
-
-/**
- * Return value of useExposePublicApi.
- */
-export interface UseExposePublicApiReturnValue {
-  /** Updates the store snapshot from virtualizer instance changes */
-  collectVirtualizerStateChanges: (instance: UseVirtualizerReturnType | undefined) => void;
-}
+export type { DataCascadeRestorableState, DataCascadeUISnapshot };
 
 const createDefaultUISnapshot = <G extends GroupNode, L extends LeafNode>(): DataCascadeUISnapshot<
   G,
@@ -73,7 +41,35 @@ const createDefaultUISnapshot = <G extends GroupNode, L extends LeafNode>(): Dat
   totalSize: 0,
   expanded: {},
   rowSelection: {},
+  scrollAnchorItemIndex: null,
+  connectedChildren: {},
 });
+
+/**
+ * Derives a {@link DataCascadeRestorableState} from a live snapshot,
+ * keeping only the fields meaningful for restoration.
+ */
+export const toRestorableState = <G extends GroupNode, L extends LeafNode>(
+  snapshot: DataCascadeUISnapshot<G, L>
+): DataCascadeRestorableState => {
+  const connectedChildren: DataCascadeRestorableState['connectedChildren'] = {};
+
+  for (const [key, child] of Object.entries(snapshot.connectedChildren)) {
+    connectedChildren[key] = {
+      cellId: child.cellId,
+      scrollAnchorItemIndex: child.scrollAnchorItemIndex,
+      isConnected: !child.isDetached,
+    };
+  }
+
+  return {
+    expanded: typeof snapshot.expanded === 'object' ? snapshot.expanded : undefined,
+    rowSelection: snapshot.rowSelection,
+    scrollRect: snapshot.scrollRect,
+    scrollAnchorItemIndex: snapshot.scrollAnchorItemIndex,
+    connectedChildren,
+  };
+};
 
 /**
  * Definition of the public API ref for the data cascade component.
@@ -107,19 +103,11 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
   ref: React.Ref<DataCascadeImplRef<G, L>>,
   options: UseExposePublicApiOptions<G>
 ): UseExposePublicApiReturnValue {
-  // Use a stable handle object and only update its method.
-  const handleRef = useRef<DataCascadeImplRef<G, L>>({
-    getUISnapshotStore: () => null,
-  });
-
   const { rows } = options;
   const state = useDataCascadeState<G, L>();
 
   const expanded = useMemo<DataCascadeUISnapshot<G, L>['expanded']>(
-    () =>
-      typeof state.table.expanded === 'object' && state.table.expanded !== null
-        ? state.table.expanded
-        : {},
+    () => (typeof state.table.expanded === 'object' ? state.table.expanded : {}),
     [state.table.expanded]
   );
 
@@ -141,90 +129,102 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
     snapshot: createDefaultUISnapshot(),
   });
 
-  const subscribe = useCallback((onUISnapshotChange: () => void) => {
-    storeRef.current.listeners.add(onUISnapshotChange);
-    return () => {
-      storeRef.current.listeners.delete(onUISnapshotChange);
+  // The store handed to consumers, its identity never changes.
+  const store = useMemo<DataCascadeUISnapshotStore<G, L>>(() => {
+    const getSnapshot = () => storeRef.current.snapshot;
+    return {
+      subscribe(onUISnapshotChange) {
+        storeRef.current.listeners.add(onUISnapshotChange);
+        return () => {
+          storeRef.current.listeners.delete(onUISnapshotChange);
+        };
+      },
+      getSnapshot,
+      getServerSnapshot: getSnapshot,
     };
   }, []);
 
-  const getSnapshot = useCallback((): DataCascadeUISnapshot<G, L> => storeRef.current.snapshot, []);
-  const getServerSnapshot = useCallback(
-    (): DataCascadeUISnapshot<G, L> => storeRef.current.snapshot,
-    []
-  );
+  const updateSnapshot = useCallback((patch: Partial<DataCascadeUISnapshot<G, L>>) => {
+    storeRef.current.snapshot = { ...storeRef.current.snapshot, ...patch };
+  }, []);
+
+  const emitSnapshot = useCallback(() => {
+    storeRef.current.listeners.forEach((listener) => listener());
+  }, []);
 
   /** Notifies all subscribed listeners that the store snapshot may have changed. */
   const notifyListeners = useMemo(
     () =>
       debounce(() => {
         const opts = optionsRef.current;
+
+        if (opts.isRestoring) return;
+
         const { expanded: exp, rowSelection: sel } = latestStateRef.current;
 
-        storeRef.current.snapshot = {
-          ...storeRef.current.snapshot,
-          totalRowCount: opts.rows.length,
-          expanded: exp,
-          rowSelection: sel,
-        };
-
-        storeRef.current.listeners.forEach((listener) => listener());
+        updateSnapshot({ totalRowCount: opts.rows.length, expanded: exp, rowSelection: sel });
+        emitSnapshot();
       }, 100),
-    []
+    [updateSnapshot, emitSnapshot]
   );
+
+  useEffect(() => () => notifyListeners.cancel(), [notifyListeners]);
+
+  useEffect(() => {
+    const childController = options.childController;
+
+    if (!childController) return;
+
+    return childController.subscribe(() => {
+      if (optionsRef.current.isRestoring || childController.isRestoring) return;
+
+      updateSnapshot({
+        connectedChildren: Object.fromEntries(childController.getConnectedChildren()),
+      });
+      emitSnapshot();
+    });
+  }, [options.childController, updateSnapshot, emitSnapshot]);
 
   /** scans updates from virtualizer instance and updates the store snapshot. */
   const collectVirtualizerStateChanges = useCallback(
-    (instance: UseVirtualizerReturnType | undefined) => {
+    (instance: VirtualizerInstanceType) => {
       const opts = optionsRef.current;
 
-      // if the virtualizer instance is not null, update the store snapshot
-      if (instance != null) {
-        const range =
-          instance.range != null
-            ? { startIndex: instance.range.startIndex, endIndex: instance.range.endIndex }
-            : null;
-        const activeStickyIndex = calculateActiveStickyIndex(
+      if (opts.isRestoring) return;
+
+      const range =
+        instance.range != null
+          ? { startIndex: instance.range.startIndex, endIndex: instance.range.endIndex }
+          : null;
+      const scrollOffset = instance.scrollOffset ?? 0;
+
+      updateSnapshot({
+        scrollOffset,
+        ...(opts.childController
+          ? { connectedChildren: Object.fromEntries(opts.childController.getConnectedChildren()) }
+          : {}),
+        range,
+        isScrolling: instance.isScrolling ?? false,
+        activeStickyIndex: calculateActiveStickyIndex(
           opts.rows,
           range?.startIndex ?? 0,
           opts.enableStickyGroupHeader
-        );
+        ),
+        scrollRect: instance.scrollRect ?? { width: 0, height: 0 },
+        totalSize: instance.getTotalSize(),
+        scrollAnchorItemIndex: instance.getVirtualItemForOffset(scrollOffset)?.index ?? null,
+      });
 
-        storeRef.current.snapshot = {
-          ...storeRef.current.snapshot,
-          scrollOffset: instance.scrollOffset ?? 0,
-          range,
-          isScrolling: instance.isScrolling ?? false,
-          activeStickyIndex,
-          scrollRect: instance.scrollRect ?? { width: 0, height: 0 },
-          totalSize: instance.getTotalSize ? instance.getTotalSize() : 0,
-        };
-
-        notifyListeners();
-      }
+      notifyListeners();
     },
-    [notifyListeners]
+    [notifyListeners, updateSnapshot]
   );
 
   useLayoutEffect(() => {
     notifyListeners();
   }, [notifyListeners, expanded, rowSelection, rows.length]);
 
-  const getStateStore = useCallback(
-    (): DataCascadeUISnapshotStore<G, L> => ({
-      subscribe,
-      getSnapshot,
-      getServerSnapshot,
-    }),
-    [subscribe, getSnapshot, getServerSnapshot]
-  );
-
-  handleRef.current = {
-    getUISnapshotStore: getStateStore,
-  };
-
-  // Populate the forwarded ref with the stable handle after mount
-  useImperativeHandle(ref, () => handleRef.current, []);
+  useImperativeHandle(ref, () => ({ getUISnapshotStore: () => store }), [store]);
 
   return { collectVirtualizerStateChanges };
 }

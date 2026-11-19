@@ -1,0 +1,15 @@
+version: '1'
+name: Simple Workflow
+description: A simple two-step fixture for unit tests
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: step_one
+    type: connector.slack-post-message
+    connector_id: slack-1
+    message: Step one
+  - name: step_two
+    type: connector.slack-post-message
+    connector_id: slack-1
+    message: Step two

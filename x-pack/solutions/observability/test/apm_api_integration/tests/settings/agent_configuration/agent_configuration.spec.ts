@@ -10,7 +10,7 @@ import { inspect } from 'util';
 import expect from '@kbn/expect';
 import { omit, orderBy } from 'lodash';
 import type { AgentConfigurationIntake } from '@kbn/apm-plugin/common/agent_configuration/configuration_types';
-import type { AgentConfigSearchParams } from '@kbn/apm-plugin/server/routes/settings/agent_configuration/route';
+import type { AgentConfigSearchParams } from '@kbn/apm-api-shared';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { UserApiClient } from '../../../common/config';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';

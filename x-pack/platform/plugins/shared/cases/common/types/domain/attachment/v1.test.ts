@@ -6,28 +6,28 @@
  */
 
 import {
-  AttachmentAttributesBasicRt,
-  FileAttachmentMetadataRt,
-  SingleFileAttachmentMetadataRt,
   AttachmentType,
-  UserCommentAttachmentPayloadRt,
-  AlertAttachmentPayloadRt,
-  ActionsAttachmentPayloadRt,
   ExternalReferenceStorageType,
-  ExternalReferenceAttachmentPayloadRt,
-  PersistableStateAttachmentPayloadRt,
-  AttachmentRt,
-  UserCommentAttachmentRt,
-  AlertAttachmentRt,
-  ActionsAttachmentRt,
-  ExternalReferenceAttachmentRt,
-  PersistableStateAttachmentRt,
-  AttachmentPatchAttributesRt,
+  SingleFileAttachmentMetadataSchema,
+  FileAttachmentMetadataSchema,
+  AttachmentAttributesBasicSchema,
+  UserCommentAttachmentPayloadSchema,
+  UserCommentAttachmentSchema,
+  AlertAttachmentPayloadSchema,
+  AlertAttachmentSchema,
+  ActionsAttachmentPayloadSchema,
+  ActionsAttachmentSchema,
+  ExternalReferenceAttachmentPayloadSchema,
+  ExternalReferenceAttachmentSchema,
+  PersistableStateAttachmentPayloadSchema,
+  PersistableStateAttachmentSchema,
+  AttachmentSchema,
+  AttachmentPatchAttributesSchema,
 } from './v1';
 
 describe('Attachments', () => {
   describe('Files', () => {
-    describe('SingleFileAttachmentMetadataRt', () => {
+    describe('SingleFileAttachmentMetadataSchema', () => {
       const defaultRequest = {
         created: '2020-02-19T23:06:33.798Z',
         extension: 'png',
@@ -36,25 +36,22 @@ describe('Attachments', () => {
       };
 
       it('has expected attributes in request', () => {
-        const query = SingleFileAttachmentMetadataRt.decode(defaultRequest);
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: defaultRequest,
-        });
+        const result = SingleFileAttachmentMetadataSchema.safeParse(defaultRequest);
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(defaultRequest);
       });
 
-      it('removes foo:bar attributes from request', () => {
-        const query = SingleFileAttachmentMetadataRt.decode({ ...defaultRequest, foo: 'bar' });
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: defaultRequest,
+      it('strips unknown fields', () => {
+        const result = SingleFileAttachmentMetadataSchema.safeParse({
+          ...defaultRequest,
+          foo: 'bar',
         });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(defaultRequest);
       });
     });
 
-    describe('FileAttachmentMetadataRt', () => {
+    describe('FileAttachmentMetadataSchema', () => {
       const defaultRequest = {
         created: '2020-02-19T23:06:33.798Z',
         extension: 'png',
@@ -63,40 +60,22 @@ describe('Attachments', () => {
       };
 
       it('has expected attributes in request', () => {
-        const query = FileAttachmentMetadataRt.decode({ files: [defaultRequest] });
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: {
-            files: [
-              {
-                ...defaultRequest,
-              },
-            ],
-          },
-        });
+        const result = FileAttachmentMetadataSchema.safeParse({ files: [defaultRequest] });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({ files: [defaultRequest] });
       });
 
-      it('removes foo:bar attributes from request', () => {
-        const query = FileAttachmentMetadataRt.decode({
+      it('strips unknown fields from files', () => {
+        const result = FileAttachmentMetadataSchema.safeParse({
           files: [{ ...defaultRequest, foo: 'bar' }],
         });
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: {
-            files: [
-              {
-                ...defaultRequest,
-              },
-            ],
-          },
-        });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({ files: [defaultRequest] });
       });
     });
   });
 
-  describe('AttachmentAttributesBasicRt', () => {
+  describe('AttachmentAttributesBasicSchema', () => {
     const defaultRequest = {
       created_at: '2019-11-25T22:32:30.608Z',
       created_by: {
@@ -112,25 +91,19 @@ describe('Attachments', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = AttachmentAttributesBasicRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = AttachmentAttributesBasicSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = AttachmentAttributesBasicRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = AttachmentAttributesBasicSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('UserCommentAttachmentPayloadRt', () => {
+  describe('UserCommentAttachmentPayloadSchema', () => {
     const defaultRequest = {
       comment: 'This is a sample comment',
       type: AttachmentType.user,
@@ -138,25 +111,22 @@ describe('Attachments', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = UserCommentAttachmentPayloadRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = UserCommentAttachmentPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = UserCommentAttachmentPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
+    it('strips unknown fields', () => {
+      const result = UserCommentAttachmentPayloadSchema.safeParse({
+        ...defaultRequest,
+        foo: 'bar',
       });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('AlertAttachmentPayloadRt', () => {
+  describe('AlertAttachmentPayloadSchema', () => {
     const defaultRequest = {
       alertId: 'alert-id-1',
       index: 'alert-index-1',
@@ -169,37 +139,28 @@ describe('Attachments', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = AlertAttachmentPayloadRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = AlertAttachmentPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = AlertAttachmentPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = AlertAttachmentPayloadSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from rule', () => {
-      const query = AlertAttachmentPayloadRt.decode({
+    it('strips unknown fields from rule', () => {
+      const result = AlertAttachmentPayloadSchema.safeParse({
         ...defaultRequest,
         rule: { id: 'rule-id-1', name: 'Awesome rule', foo: 'bar' },
       });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('ActionsAttachmentPayloadRt', () => {
+  describe('ActionsAttachmentPayloadSchema', () => {
     const defaultRequest = {
       type: AttachmentType.actions,
       comment: 'I just isolated the host!',
@@ -216,67 +177,19 @@ describe('Attachments', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = ActionsAttachmentPayloadRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = ActionsAttachmentPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = ActionsAttachmentPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from actions', () => {
-      const query = ActionsAttachmentPayloadRt.decode({
-        ...defaultRequest,
-        actions: {
-          targets: [
-            {
-              hostname: 'host1',
-              endpointId: '001',
-            },
-          ],
-          type: 'isolate',
-          foo: 'bar',
-        },
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from targets', () => {
-      const query = ActionsAttachmentPayloadRt.decode({
-        ...defaultRequest,
-        actions: {
-          targets: [
-            {
-              hostname: 'host1',
-              endpointId: '001',
-              foo: 'bar',
-            },
-          ],
-          type: 'isolate',
-        },
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = ActionsAttachmentPayloadSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('ExternalReferenceAttachmentPayloadRt', () => {
+  describe('ExternalReferenceAttachmentPayloadSchema', () => {
     const defaultRequest = {
       type: AttachmentType.externalReference,
       externalReferenceId: 'my-id',
@@ -285,104 +198,48 @@ describe('Attachments', () => {
       externalReferenceMetadata: { test_foo: 'foo' },
       owner: 'cases',
     };
+
     it('has expected attributes in request', () => {
-      const query = ExternalReferenceAttachmentPayloadRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = ExternalReferenceAttachmentPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = ExternalReferenceAttachmentPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from externalReferenceStorage', () => {
-      const query = ExternalReferenceAttachmentPayloadRt.decode({
+    it('strips unknown fields', () => {
+      const result = ExternalReferenceAttachmentPayloadSchema.safeParse({
         ...defaultRequest,
-        externalReferenceStorage: {
-          type: ExternalReferenceStorageType.elasticSearchDoc,
-          foo: 'bar',
-        },
+        foo: 'bar',
       });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from externalReferenceStorage with soType', () => {
-      const query = ExternalReferenceAttachmentPayloadRt.decode({
-        ...defaultRequest,
-        externalReferenceStorage: {
-          type: ExternalReferenceStorageType.savedObject,
-          soType: 'awesome',
-          foo: 'bar',
-        },
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: {
-          ...defaultRequest,
-          externalReferenceStorage: {
-            type: ExternalReferenceStorageType.savedObject,
-            soType: 'awesome',
-          },
-        },
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('PersistableStateAttachmentPayloadRt', () => {
+  describe('PersistableStateAttachmentPayloadSchema', () => {
     const defaultRequest = {
       type: AttachmentType.persistableState,
       persistableStateAttachmentState: { test_foo: 'foo' },
       persistableStateAttachmentTypeId: '.test',
       owner: 'cases',
     };
+
     it('has expected attributes in request', () => {
-      const query = PersistableStateAttachmentPayloadRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = PersistableStateAttachmentPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = PersistableStateAttachmentPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from persistableStateAttachmentState', () => {
-      const query = PersistableStateAttachmentPayloadRt.decode({
+    it('strips unknown fields', () => {
+      const result = PersistableStateAttachmentPayloadSchema.safeParse({
         ...defaultRequest,
-        persistableStateAttachmentState: { test_foo: 'foo', foo: 'bar' },
+        foo: 'bar',
       });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: {
-          ...defaultRequest,
-          persistableStateAttachmentState: { test_foo: 'foo', foo: 'bar' },
-        },
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('AttachmentRt', () => {
+  describe('AttachmentSchema', () => {
     const defaultRequest = {
       comment: 'Solve this fast!',
       type: AttachmentType.user,
@@ -400,26 +257,21 @@ describe('Attachments', () => {
       updated_at: null,
       updated_by: null,
     };
-    it('has expected attributes in request', () => {
-      const query = AttachmentRt.decode(defaultRequest);
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('has expected attributes in request', () => {
+      const result = AttachmentSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = AttachmentRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = AttachmentSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('UserCommentAttachmentRt', () => {
+  describe('UserCommentAttachmentSchema', () => {
     const defaultRequest = {
       comment: 'Solve this fast!',
       type: AttachmentType.user,
@@ -437,36 +289,28 @@ describe('Attachments', () => {
       updated_at: null,
       updated_by: null,
     };
-    it('has expected attributes in request', () => {
-      const query = UserCommentAttachmentRt.decode(defaultRequest);
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('has expected attributes in request', () => {
+      const result = UserCommentAttachmentSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = UserCommentAttachmentRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = UserCommentAttachmentSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('AlertAttachmentRt', () => {
+  describe('AlertAttachmentSchema', () => {
     const defaultRequest = {
       alertId: 'alert-id-1',
       index: 'alert-index-1',
       type: AttachmentType.alert,
       id: 'alert-comment-id',
       owner: 'cases',
-      rule: {
-        id: 'rule-id-1',
-        name: 'Awesome rule',
-      },
+      rule: { id: 'rule-id-1', name: 'Awesome rule' },
       version: 'WzQ3LDFc',
       created_at: '2020-02-19T23:06:33.798Z',
       created_by: {
@@ -479,53 +323,35 @@ describe('Attachments', () => {
       updated_at: null,
       updated_by: null,
     };
+
     it('has expected attributes in request', () => {
-      const query = AlertAttachmentRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = AlertAttachmentSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = AlertAttachmentRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = AlertAttachmentSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from created_by', () => {
-      const query = AlertAttachmentRt.decode({
+    it('strips unknown fields from created_by', () => {
+      const result = AlertAttachmentSchema.safeParse({
         ...defaultRequest,
-        created_by: {
-          full_name: 'Leslie Knope',
-          username: 'lknope',
-          email: 'leslie.knope@elastic.co',
-          foo: 'bar',
-        },
+        created_by: { ...defaultRequest.created_by, foo: 'bar' },
       });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('ActionsAttachmentRt', () => {
+  describe('ActionsAttachmentSchema', () => {
     const defaultRequest = {
       type: AttachmentType.actions,
       comment: 'I just isolated the host!',
       actions: {
-        targets: [
-          {
-            hostname: 'host1',
-            endpointId: '001',
-          },
-        ],
+        targets: [{ hostname: 'host1', endpointId: '001' }],
         type: 'isolate',
       },
       owner: 'cases',
@@ -542,26 +368,21 @@ describe('Attachments', () => {
       updated_at: null,
       updated_by: null,
     };
-    it('has expected attributes in request', () => {
-      const query = ActionsAttachmentRt.decode(defaultRequest);
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('has expected attributes in request', () => {
+      const result = ActionsAttachmentSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = ActionsAttachmentRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = ActionsAttachmentSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('ExternalReferenceAttachmentRt', () => {
+  describe('ExternalReferenceAttachmentSchema', () => {
     const defaultRequest = {
       type: AttachmentType.externalReference,
       externalReferenceId: 'my-id',
@@ -582,29 +403,21 @@ describe('Attachments', () => {
       updated_at: null,
       updated_by: null,
     };
-    it('has expected attributes in request', () => {
-      const query = ExternalReferenceAttachmentRt.decode(defaultRequest);
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('has expected attributes in request', () => {
+      const result = ExternalReferenceAttachmentSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = ExternalReferenceAttachmentRt.decode({
-        ...defaultRequest,
-        foo: 'bar',
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = ExternalReferenceAttachmentSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('PersistableStateAttachmentRt', () => {
+  describe('PersistableStateAttachmentSchema', () => {
     const defaultRequest = {
       type: AttachmentType.persistableState,
       persistableStateAttachmentState: { test_foo: 'foo' },
@@ -623,58 +436,73 @@ describe('Attachments', () => {
       updated_at: null,
       updated_by: null,
     };
-    it('has expected attributes in request', () => {
-      const query = PersistableStateAttachmentRt.decode(defaultRequest);
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('has expected attributes in request', () => {
+      const result = PersistableStateAttachmentSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = PersistableStateAttachmentRt.decode({
-        ...defaultRequest,
-        foo: 'bar',
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = PersistableStateAttachmentSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('AttachmentPatchAttributesRt', () => {
+  describe('AttachmentPatchAttributesSchema', () => {
     const defaultRequest = {
       type: AttachmentType.actions,
       actions: {
-        targets: [
-          {
-            hostname: 'host1',
-            endpointId: '001',
-          },
-        ],
+        targets: [{ hostname: 'host1', endpointId: '001' }],
         type: 'isolate',
       },
       owner: 'cases',
     };
+
     it('has expected attributes in request', () => {
-      const query = AttachmentPatchAttributesRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = AttachmentPatchAttributesSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = AttachmentPatchAttributesRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = AttachmentPatchAttributesSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
+  });
+});
+
+describe('Stored attachment schemas are shape-only', () => {
+  const basic = {
+    created_at: '2024-01-01T00:00:00.000Z',
+    created_by: { username: 'u', full_name: 'U', email: 'u@e.co' },
+    pushed_at: null,
+    pushed_by: null,
+    updated_at: null,
+    updated_by: null,
+  };
+
+  it('accepts a legacy comment longer than the request limit', () => {
+    const result = UserCommentAttachmentSchema.safeParse({
+      ...basic,
+      id: 'id',
+      version: '1',
+      type: AttachmentType.user,
+      owner: 'securitySolution',
+      comment: 'a'.repeat(40000),
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts persistable state with nested strings and keys over the request limits', () => {
+    const result = PersistableStateAttachmentPayloadSchema.safeParse({
+      type: AttachmentType.persistableState,
+      owner: 'securitySolution',
+      persistableStateAttachmentTypeId: '.test',
+      persistableStateAttachmentState: { ['k'.repeat(500)]: { nested: 'v'.repeat(40000) } },
+    });
+    expect(result.success).toBe(true);
   });
 });

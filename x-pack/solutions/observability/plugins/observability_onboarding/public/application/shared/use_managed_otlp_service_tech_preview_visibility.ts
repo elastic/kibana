@@ -27,6 +27,8 @@ export function useManagedOtlpServiceTechPreviewVisibility(): boolean {
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
+  // Hide the badge when mOTLP goes GA (feature flag is true)
+  const isManagedOtlpGa = featureFlags.useBooleanValue(IS_MANAGED_OTLP_GA, false);
 
   // mOTLP is already GA in Serverless, never show the badge
   if (isServerless) {
@@ -37,9 +39,6 @@ export function useManagedOtlpServiceTechPreviewVisibility(): boolean {
   if (!isManagedOtlpServiceAvailable) {
     return false;
   }
-
-  // Hide the badge when mOTLP goes GA (feature flag is true)
-  const isManagedOtlpGa = featureFlags.getBooleanValue(IS_MANAGED_OTLP_GA, false);
 
   return !isManagedOtlpGa;
 }

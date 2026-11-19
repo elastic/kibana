@@ -459,6 +459,32 @@ describe('SidebarService (integration)', () => {
       expect(start.getApp<TestState, TestActions>(APP_ID_A).getState$()).toBe(
         start.getApp<TestState, TestActions>(APP_ID_A).getState$()
       );
+      expect(start.getApp(APP_ID_A).isOpen$()).toBe(start.getApp(APP_ID_A).isOpen$());
+    });
+
+    it('reports app-specific open state', () => {
+      const service = createService();
+      registerApp(service, { appId: APP_ID_A });
+      registerApp(service, { appId: APP_ID_B });
+
+      const start = service.start();
+      const appA = start.getApp(APP_ID_A);
+      const appB = start.getApp(APP_ID_B);
+      const appAOpenStates: boolean[] = [];
+      const subscription = appA.isOpen$().subscribe((isOpen) => appAOpenStates.push(isOpen));
+
+      appA.open();
+      expect(appA.isOpen()).toBe(true);
+
+      appB.open();
+      expect(appA.isOpen()).toBe(false);
+      expect(appB.isOpen()).toBe(true);
+
+      appB.close();
+      expect(appB.isOpen()).toBe(false);
+      expect(appAOpenStates).toEqual([false, true, false]);
+
+      subscription.unsubscribe();
     });
 
     it('closes only when the current app is closed', () => {

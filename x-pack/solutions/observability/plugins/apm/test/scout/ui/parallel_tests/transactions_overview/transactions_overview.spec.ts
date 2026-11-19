@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
-import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
+import { waitForApmAppMenuReady } from '../../fixtures/page_helpers';
 
 test.describe(
   'Transactions Overview',
@@ -50,7 +50,7 @@ test.describe(
 
       // Navigate to Overview tab
       await page.getByTestId('overviewTab').click();
-      await waitForApmSettingsHeaderLink(page);
+      await waitForApmAppMenuReady(page);
 
       expect(page.url()).toContain('transactionType=Worker');
 

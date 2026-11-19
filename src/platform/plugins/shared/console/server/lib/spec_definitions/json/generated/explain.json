@@ -15,11 +15,17 @@
       "lenient": "__flag__",
       "preference": "",
       "routing": [],
+      "_slice": "",
       "_source": "__flag__",
       "_source_excludes": [],
       "_source_includes": [],
       "stored_fields": [],
       "q": ""
+    },
+    "data_autocomplete_rules": {
+      "query": {
+        "__scope_link": "GLOBAL.query"
+      }
     },
     "methods": [
       "GET",

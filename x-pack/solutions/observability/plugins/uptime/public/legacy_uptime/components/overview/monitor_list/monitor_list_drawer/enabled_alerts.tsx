@@ -7,13 +7,13 @@
 
 import React, { useContext } from 'react';
 import {
-  EuiCallOut,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiListGroup,
   EuiLoadingSpinner,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/list_group_item';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -42,7 +42,6 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
 
   (monitorAlerts ?? []).forEach((alert, ind) => {
     listItems.push({
-      size: 's',
       label: alert.name,
       href: getUrlForAlert(alert.id, basePath),
       'data-test-subj': 'uptimeMonitorListDrawerAlert' + ind,
@@ -59,7 +58,7 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
       </EuiDescriptionListTitle>
       <EuiDescriptionListDescription>
         {listItems.length === 0 && !loading && (
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
             size="s"
             title={i18n.translate('xpack.uptime.monitorList.enabledAlerts.noAlert', {
@@ -67,7 +66,7 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
             })}
           />
         )}
-        {loading ? <EuiLoadingSpinner /> : <LinkGroupList listItems={listItems} flush={true} />}
+        {loading ? <EuiLoadingSpinner /> : <LinkGroupList listItems={listItems} />}
       </EuiDescriptionListDescription>
     </EuiDescriptionList>
   );

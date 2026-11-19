@@ -8,7 +8,22 @@
  */
 
 export { runOasdiff } from './run_oasdiff';
+export { runOasdiffStructural } from './run_oasdiff_structural';
 export { parseOasdiff } from './parse_oasdiff';
 export type { OasdiffEntry } from './parse_oasdiff';
+export {
+  OASDIFF_RULE_POLICY,
+  getRulePolicy,
+  isIgnoredRule,
+  isPromotedRule,
+  isReportOnlyRule,
+} from './rule_policy';
+export type { RuleDisposition, RulePolicyEntry } from './rule_policy';
 export { applyAllowlist } from './breaking_rules';
 export type { BreakingChange, FilterResult } from './breaking_rules';
+export { buildRequestBodyIndex } from './build_request_body_index';
+export type { RequestBodyIndex, RequestBodyConsumer } from './build_request_body_index';
+export {
+  detectAdditionalPropertiesTightening,
+  REQUEST_ADDITIONAL_PROPERTIES_TIGHTENED_ID,
+} from './detect_additional_properties_tightening';

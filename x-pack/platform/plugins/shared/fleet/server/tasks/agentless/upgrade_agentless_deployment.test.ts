@@ -20,6 +20,9 @@ import { agentlessAgentService } from '../../services/agents/agentless_agent';
 
 import { getAgentsByKuery } from '../../services/agents';
 
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../../common/services';
+import { AGENTS_PREFIX } from '../../constants';
+
 import {
   UPGRADE_AGENT_DEPLOYMENTS_TASK_VERSION,
   UPGRADE_AGENTLESS_DEPLOYMENTS_TASK_TYPE,
@@ -140,7 +143,9 @@ describe('Upgrade Agentless Deployments', () => {
         mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][
           UPGRADE_AGENTLESS_DEPLOYMENTS_TASK_TYPE
         ].createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance, abortController });
+      const taskRunner = createTaskRunner(
+        taskManagerMock.createRunContext({ taskInstance, signal: abortController.signal })
+      );
       return taskRunner.run();
     };
 
@@ -306,6 +311,42 @@ describe('Upgrade Agentless Deployments', () => {
       await runTask();
 
       expect(agentlessAgentService.upgradeAgentlessDeployment).not.toHaveBeenCalled();
+    });
+
+    it('should use the version-aware kuery when fetching agents', async () => {
+      await runTask();
+
+      const expectedKuery = `(${buildPolicyBaseIdsWithFallbackKuery(
+        [mockAgentPolicy.id],
+        `${AGENTS_PREFIX}.policy_base_id`,
+        `${AGENTS_PREFIX}.policy_id`
+      )}) and ${AGENTS_PREFIX}.status:online`;
+      expect(mockedGetAgentsByKuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ kuery: expectedKuery })
+      );
+    });
+
+    it('should upgrade agentless deployments when the agent has a version-specific policy_id', async () => {
+      // Agents enrolled on a version-specific policy carry a policy_id like "base-id#9.2".
+      // removeVersionSuffixFromPolicyId must strip the suffix so the agent is matched.
+      mockedGetAgentsByKuery.mockResolvedValue({
+        agents: [
+          {
+            id: 'agent-1',
+            policy_id: `${mockAgentPolicy.id}#9.2`,
+            status: 'online',
+            agent: { version: '9.2.0' },
+          },
+        ],
+      });
+
+      await runTask();
+
+      expect(agentlessAgentService.upgradeAgentlessDeployment).toHaveBeenCalledWith(
+        mockAgentPolicy.id
+      );
     });
   });
 });

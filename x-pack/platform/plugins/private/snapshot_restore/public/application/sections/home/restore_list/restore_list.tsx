@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useState, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPopover,
@@ -106,7 +107,7 @@ export const RestoreList: React.FunctionComponent = () => {
     if (restores && restores.length === 0) {
       content = (
         <EuiPageTemplate.EmptyPrompt
-          iconType="managementApp"
+          iconType="gear"
           title={
             <h1 data-test-subj="noRestoredSnapshotsHeader">
               <FormattedMessage
@@ -145,6 +146,10 @@ export const RestoreList: React.FunctionComponent = () => {
             <EuiFlexItem grow={false}>
               <EuiPopover
                 id="srRestoreListIntervalMenu"
+                aria-label={i18n.translate(
+                  'xpack.snapshotRestore.restoreList.intervalMenuAriaLabel',
+                  { defaultMessage: 'Refresh interval options' }
+                )}
                 button={
                   <EuiButtonEmpty
                     size="xs"
@@ -183,7 +188,6 @@ export const RestoreList: React.FunctionComponent = () => {
                   items={INTERVAL_OPTIONS.map((interval) => (
                     <EuiContextMenuItem
                       key={interval}
-                      icon="empty"
                       onClick={() => {
                         resendRequest();
                         setCurrentInterval(interval);

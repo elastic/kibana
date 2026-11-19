@@ -25,6 +25,7 @@ import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
@@ -38,13 +39,13 @@ import type {
   LensTopNavMenuEntryGenerator,
   LensAttributesService,
 } from '@kbn/lens-common';
-import { LENS_SHARE_STATE_ACTION } from '@kbn/lens-common';
+import { LENS_EMBEDDABLE_TYPE, LENS_SHARE_STATE_ACTION } from '@kbn/lens-common';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { App } from './app';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import type { LensPluginStartDependencies } from '../plugin';
-import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
+import { LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
 import type { RedirectToOriginProps, HistoryLocationState } from './types';
 import type { LensRootStore } from '../state_management';
 import { makeConfigureStore, navigateAway, loadInitial, setState } from '../state_management';
@@ -121,7 +122,6 @@ export async function getLensServices(
     eventAnnotationService,
     uiActions: startDependencies.uiActions,
     lensDocumentService: new LensDocumentService(coreStart.http),
-    presentationUtil: startDependencies.presentationUtil,
     dataViewEditor: startDependencies.dataViewEditor,
     dataViewFieldEditor: startDependencies.dataViewFieldEditor,
     charts: startDependencies.charts,
@@ -182,7 +182,7 @@ export async function mountApp(
       tooltip: i18n.translate('xpack.lens.badge.readOnly.tooltip', {
         defaultMessage: 'Unable to save visualizations to the library',
       }),
-      iconType: 'glasses',
+      iconType: 'readOnly',
     });
   }
   coreStart.chrome.docTitle.change(
@@ -214,6 +214,11 @@ export async function mountApp(
       initialContext && 'originatingApp' in initialContext ? initialContext.originatingApp : null;
     const mergedOriginatingApp =
       embeddableEditorIncomingState?.originatingApp ?? contextOriginatingApp;
+    const mergedOriginatingPath =
+      embeddableEditorIncomingState?.originatingPath ??
+      (initialContext && 'originatingPath' in initialContext
+        ? initialContext.originatingPath
+        : undefined);
     if (!mergedOriginatingApp) {
       throw new Error('redirectToOrigin called without an originating app');
     }
@@ -226,7 +231,7 @@ export async function mountApp(
       stateTransfer.navigateToWithEmbeddablePackages<LensSerializedAPIConfig>(
         mergedOriginatingApp,
         {
-          path: embeddableEditorIncomingState?.originatingPath,
+          path: mergedOriginatingPath,
           state: [
             {
               embeddableId: isCopied ? undefined : embeddableId,
@@ -239,7 +244,7 @@ export async function mountApp(
       );
     } else {
       coreStart.application.navigateToApp(mergedOriginatingApp, {
-        path: embeddableEditorIncomingState?.originatingPath,
+        path: mergedOriginatingPath,
       });
     }
   };
@@ -315,8 +320,8 @@ export async function mountApp(
       }, [initialInput, props.history, redirectCallback]);
       useEffect(() => {
         (async () => {
-          const hasUserDataView = await data.dataViews.hasData.hasUserDataView().catch(() => false);
-          if (!hasUserDataView) {
+          const hasDataView = await data.dataViews.hasData.hasDataView().catch(() => false);
+          if (!hasDataView) {
             setEditorState('no_data');
             return;
           }
@@ -326,7 +331,19 @@ export async function mountApp(
       }, [initCallback, initialInput, props.history, redirectCallback]);
 
       if (editorState === 'loading') {
-        return <EuiLoadingSpinner />;
+        return (
+          <div
+            css={css({
+              display: 'flex',
+              flexGrow: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+            })}
+          >
+            <EuiLoadingSpinner size="xl" />
+          </div>
+        );
       }
 
       if (editorState === 'no_data') {
@@ -437,6 +454,11 @@ export async function mountApp(
     lensServices.inspector.closeInspector();
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
-    stateTransfer.clearEditorState?.(APP_ID);
+    // Only clear editor state on intentional programmatic navigation,
+    // not on browser back/forward. `POP` must preserve the state so that
+    // navigating forward again restores the originating app breadcrumb context.
+    if (params.history.action !== 'POP') {
+      stateTransfer.clearEditorState?.(APP_ID);
+    }
   };
 }

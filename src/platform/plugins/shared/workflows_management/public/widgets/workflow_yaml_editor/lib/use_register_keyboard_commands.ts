@@ -122,6 +122,19 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
             saveAndRun();
           }),
         }),
+
+        // Find & replace
+        editor.addAction({
+          id: 'workflows.editor.action.findAndReplace',
+          label: i18n.translate('workflows.workflowDetail.yamlEditor.action.findAndReplace', {
+            defaultMessage: 'Find & replace',
+          }),
+          // eslint-disable-next-line no-bitwise
+          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyF],
+          run: withReadOnlyCheck((ed) => {
+            ed.trigger('keyboard', 'editor.action.startFindReplaceAction', null);
+          }),
+        }),
       ];
     },
     [unregisterKeyboardCommands]

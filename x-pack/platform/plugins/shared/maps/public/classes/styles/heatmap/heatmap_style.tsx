@@ -8,11 +8,12 @@
 import React from 'react';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { EuiIcon } from '@elastic/eui';
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
 import type { IStyle } from '../style';
 import { HeatmapStyleEditor } from './components/heatmap_style_editor';
 import { HeatmapLegend } from './components/legend/heatmap_legend';
 import { DEFAULT_HEATMAP_COLOR_RAMP_NAME, getOrdinalMbColorRampStops } from '../color_palettes';
-import { LAYER_STYLE_TYPE, GRID_RESOLUTION } from '../../../../common/constants';
+import { LAYER_STYLE_TYPE } from '../../../../common/constants';
 import type { HeatmapStyleDescriptor, StyleDescriptor } from '../../../../common/descriptor_types';
 import type { IField } from '../../fields/field';
 
@@ -25,19 +26,19 @@ export class HeatmapStyle implements IStyle {
   readonly _descriptor: Required<HeatmapStyleDescriptor>;
 
   constructor(
-    descriptor: { colorRampName?: HeatmapStyleDescriptor['colorRampName'] } = {
-      colorRampName: DEFAULT_HEATMAP_COLOR_RAMP_NAME,
+    descriptor: { color_ramp_name?: HeatmapStyleDescriptor['color_ramp_name'] } = {
+      color_ramp_name: DEFAULT_HEATMAP_COLOR_RAMP_NAME,
     }
   ) {
-    this._descriptor = HeatmapStyle.createDescriptor(descriptor.colorRampName);
+    this._descriptor = HeatmapStyle.createDescriptor(descriptor.color_ramp_name);
   }
 
   static createDescriptor(
-    colorRampName?: HeatmapStyleDescriptor['colorRampName']
+    colorRampName?: HeatmapStyleDescriptor['color_ramp_name']
   ): Required<HeatmapStyleDescriptor> {
     return {
       type: LAYER_STYLE_TYPE.HEATMAP,
-      colorRampName: colorRampName ? colorRampName : DEFAULT_HEATMAP_COLOR_RAMP_NAME,
+      color_ramp_name: colorRampName ? colorRampName : DEFAULT_HEATMAP_COLOR_RAMP_NAME,
     };
   }
 
@@ -48,25 +49,25 @@ export class HeatmapStyle implements IStyle {
   renderEditor(onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void) {
     const onHeatmapColorChange = ({ colorRampName }: { colorRampName: string }) => {
       const styleDescriptor = HeatmapStyle.createDescriptor(
-        colorRampName as HeatmapStyleDescriptor['colorRampName']
+        colorRampName as HeatmapStyleDescriptor['color_ramp_name']
       );
       onStyleDescriptorChange(styleDescriptor);
     };
 
     return (
       <HeatmapStyleEditor
-        colorRampName={this._descriptor.colorRampName}
+        colorRampName={this._descriptor.color_ramp_name}
         onHeatmapColorChange={onHeatmapColorChange}
       />
     );
   }
 
   renderLegendDetails(field: IField) {
-    return <HeatmapLegend colorRampName={this._descriptor.colorRampName} field={field} />;
+    return <HeatmapLegend colorRampName={this._descriptor.color_ramp_name} field={field} />;
   }
 
   getIcon() {
-    return <EuiIcon size="m" type="heatmap" />;
+    return <EuiIcon size="m" type="chartHeatmap" aria-hidden={true} />;
   }
 
   setMBPaintProperties({
@@ -100,7 +101,7 @@ export class HeatmapStyle implements IStyle {
     }
 
     const colorStops = getOrdinalMbColorRampStops(
-      this._descriptor.colorRampName,
+      this._descriptor.color_ramp_name,
       MIN_RANGE,
       MAX_RANGE,
       false

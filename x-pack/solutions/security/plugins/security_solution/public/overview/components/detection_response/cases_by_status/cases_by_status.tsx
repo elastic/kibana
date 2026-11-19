@@ -45,6 +45,7 @@ export const barchartConfigs = {
       rect: {
         widthPixel: 22,
         opacity: 1,
+        dimmed: { opacity: 0.25 },
       },
     },
   },

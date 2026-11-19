@@ -9,7 +9,7 @@ import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import React from 'react';
 
-import type { ColumnHeaderOptions, TimelineItem } from '@kbn/timelines-plugin/common';
+import type { ColumnHeaderOptions, TimelineItem } from '@kbn/securitysolution-timeline-common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 
@@ -36,6 +36,7 @@ export const getFormattedFields = ({
             isExpanded={false}
             isExpandable={true}
             data={dataTableRows[props.rowIndex].data}
+            ecsData={dataTableRows[props.rowIndex].ecs}
             eventId={dataTableRows[props.rowIndex]._id}
             scopeId={scopeId}
             linkValues={undefined}

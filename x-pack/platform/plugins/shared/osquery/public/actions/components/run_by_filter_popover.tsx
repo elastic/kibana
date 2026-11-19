@@ -34,6 +34,9 @@ const SEARCH_USERS_PLACEHOLDER = i18n.translate(
 
 const PANEL_PROPS = { 'data-test-subj': 'history-run-by-filter-popover' };
 const POPOVER_CONTENT_STYLE = { width: POPOVER_WIDTH };
+const LIST_PROPS = {
+  paddingSize: 's' as const,
+};
 
 interface RunByFilterPopoverProps {
   selectedUserIds: string[];
@@ -41,19 +44,23 @@ interface RunByFilterPopoverProps {
   enabled: boolean;
 }
 
+const getFallbackAvatarUser = (username: string) => ({ username });
+
 const toSelectableOption = (
   option: HistoryUserOption,
   isSelected: boolean
-): EuiSelectableOption => {
-  const user = option.profile?.user ?? { username: option.userId };
-
-  return {
-    label: option.displayName,
-    key: option.userId,
-    checked: isSelected ? 'on' : undefined,
-    prepend: <UserAvatar user={user} avatar={option.profile?.data?.avatar} size="s" />,
-  };
-};
+): EuiSelectableOption => ({
+  label: option.displayName,
+  key: option.userId,
+  checked: isSelected ? 'on' : undefined,
+  prepend: (
+    <UserAvatar
+      user={option.profile?.user ?? getFallbackAvatarUser(option.userId)}
+      avatar={option.profile?.data?.avatar}
+      size="s"
+    />
+  ),
+});
 
 const RunByFilterPopoverComponent: React.FC<RunByFilterPopoverProps> = ({
   selectedUserIds,
@@ -124,7 +131,7 @@ const RunByFilterPopoverComponent: React.FC<RunByFilterPopoverProps> = ({
 
   const triggerButton = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={togglePopover}
       isLoading={isLoading}
       isSelected={isOpen}
@@ -145,6 +152,7 @@ const RunByFilterPopoverComponent: React.FC<RunByFilterPopoverProps> = ({
       panelPaddingSize="none"
       repositionOnScroll
       panelProps={PANEL_PROPS}
+      aria-label={RUN_BY_LABEL}
     >
       <EuiSelectable
         searchable
@@ -159,6 +167,7 @@ const RunByFilterPopoverComponent: React.FC<RunByFilterPopoverProps> = ({
         noMatchesMessage={i18n.translate('xpack.osquery.historyFilters.noUsersMatch', {
           defaultMessage: 'No users match search',
         })}
+        listProps={LIST_PROPS}
       >
         {(list, search) => (
           <div css={POPOVER_CONTENT_STYLE}>

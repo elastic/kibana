@@ -27,12 +27,24 @@ export type { GraphProps } from './graph/graph';
 export type {
   NodeViewModel,
   EdgeViewModel,
-  GroupNodeViewModel,
-  LabelNodeViewModel,
+  ConnectorGroupNodeViewModel,
+  EventNodeViewModel,
   EntityNodeViewModel,
   RelationshipNodeViewModel,
   NodeProps,
 } from './types';
+export type {
+  GraphTelemetryEvent,
+  GraphTelemetryHandler,
+  GraphNodeType,
+  GraphNodeAction,
+  GraphToggleState,
+  GraphExpansionAction,
+  GraphEmptyStateReason,
+  GraphFetchErrorCategory,
+  GraphGroupedItemType,
+} from './graph_telemetry';
+export { isExpansionAction, getEmptyStateReason } from './graph_telemetry';
 export {
   isEntityNode,
   getNodeDocumentMode,
@@ -40,7 +52,3 @@ export {
   isEntityNodeEnriched,
   getSingleDocumentData,
 } from './utils';
-export { Callout, type CalloutProps } from './callout/callout';
-export { getCalloutConfig } from './callout/callout.config';
-export { useGraphCallout } from '../hooks/use_graph_callout';
-export { type CalloutVariant, type CalloutConfig } from './callout/callout.translations';

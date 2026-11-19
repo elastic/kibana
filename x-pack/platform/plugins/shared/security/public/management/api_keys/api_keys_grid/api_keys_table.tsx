@@ -20,6 +20,7 @@ import {
   EuiFilterButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiLink,
   EuiSearchBar,
   EuiSpacer,
@@ -152,7 +153,33 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         ) {
           keyType = 'managed';
         }
-        return <ApiKeyBadge type={keyType} />;
+        const hasCertificateIdentity =
+          apiKeyRecord.type === 'cross_cluster' && !!apiKeyRecord.certificate_identity;
+        return (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <ApiKeyBadge type={keyType} />
+            </EuiFlexItem>
+            {hasCertificateIdentity ? (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type="key"
+                  data-test-subj="apiKeyCertificateIdentityIcon"
+                  aria-label={i18n.translate(
+                    'xpack.security.management.apiKeys.table.certificateIdentityIconLabel',
+                    { defaultMessage: 'Strong identity verification is active' }
+                  )}
+                  content={i18n.translate(
+                    'xpack.security.management.apiKeys.table.certificateIdentityTooltip',
+                    {
+                      defaultMessage: 'Strong identity verification is active',
+                    }
+                  )}
+                />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        );
       },
     }
   );
@@ -397,7 +424,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
                     data-test-subj="apiKeysTablePreviousPageButton"
                     disabled={!hasPreviousPage || loading}
                     onClick={onPreviousPage}
-                    iconType="arrowLeft"
+                    iconType="chevronSingleLeft"
                     iconSide="left"
                   >
                     <FormattedMessage
@@ -411,7 +438,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
                     data-test-subj="apiKeysTableNextPageButton"
                     disabled={!hasNextPage || loading}
                     onClick={onNextPage}
-                    iconType="arrowRight"
+                    iconType="chevronSingleRight"
                     iconSide="right"
                   >
                     <FormattedMessage
@@ -601,7 +628,7 @@ export const UsersFilterButton: FunctionComponent<CustomComponentProps> = ({ que
     <UserProfilesPopover
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={() => setIsOpen((toggle) => !toggle)}
           isSelected={isOpen}
           numFilters={usernames.length}

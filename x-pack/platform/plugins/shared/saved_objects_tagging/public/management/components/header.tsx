@@ -6,9 +6,9 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
-import { EuiButton, EuiPageHeader } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo } from 'react';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
+import { i18n } from '@kbn/i18n';
 
 interface HeaderProps {
   canCreate: boolean;
@@ -16,39 +16,34 @@ interface HeaderProps {
 }
 
 export const Header: FC<HeaderProps> = ({ canCreate, onCreate }) => {
+  const menu = useMemo<AppHeaderMenu | undefined>(() => {
+    if (!canCreate) {
+      return undefined;
+    }
+
+    return {
+      primaryActionItem: {
+        id: 'createTag',
+        label: i18n.translate('xpack.savedObjectsTagging.management.actions.createTagButton', {
+          defaultMessage: 'Create tag',
+        }),
+        iconType: 'tag',
+        testId: 'createTagButton',
+        run: onCreate,
+      },
+    };
+  }, [canCreate, onCreate]);
+
   return (
-    <EuiPageHeader
-      pageTitle={
-        <FormattedMessage
-          id="xpack.savedObjectsTagging.management.headerTitle"
-          defaultMessage="Tags"
-        />
-      }
-      bottomBorder
-      description={
-        <FormattedMessage
-          id="xpack.savedObjectsTagging.management.headerDescription"
-          defaultMessage="Use tags to categorize and easily find your objects."
-        />
-      }
-      rightSideItems={[
-        canCreate && (
-          <EuiButton
-            key="createTag"
-            iconType="tag"
-            color="primary"
-            fill
-            data-test-subj="createTagButton"
-            onClick={onCreate}
-            isDisabled={false}
-          >
-            <FormattedMessage
-              id="xpack.savedObjectsTagging.management.actions.createTagButton"
-              defaultMessage="Create tag"
-            />
-          </EuiButton>
-        ),
-      ]}
+    <AppHeader
+      title={i18n.translate('xpack.savedObjectsTagging.management.headerTitle', {
+        defaultMessage: 'Tags',
+      })}
+      description={i18n.translate('xpack.savedObjectsTagging.management.headerDescription', {
+        defaultMessage: 'Use tags to categorize and easily find your objects.',
+      })}
+      spacing="bleed"
+      menu={menu}
     />
   );
 };

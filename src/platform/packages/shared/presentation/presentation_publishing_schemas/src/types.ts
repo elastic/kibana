@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { Writable } from '@kbn/utility-types';
+import type { z } from '@kbn/zod';
 import type { serializedTitlesSchema } from './titles_schema';
 import type { serializedTimeRangeSchema } from './time_range_schema';
 
-export type SerializedTimeRange = Writable<TypeOf<typeof serializedTimeRangeSchema>>;
-export type SerializedTitles = Writable<TypeOf<typeof serializedTitlesSchema>>;
+export type SerializedTimeRange = z.output<typeof serializedTimeRangeSchema>;
+export type SerializedTitles = z.output<typeof serializedTitlesSchema>;

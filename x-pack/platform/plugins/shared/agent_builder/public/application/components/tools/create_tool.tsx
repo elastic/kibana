@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
 import { useCreateTool } from '../../hooks/tools/use_create_tools';
 import { Tool } from './tool';
 import { ToolFormMode } from './form/tool_form';

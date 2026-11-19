@@ -24,18 +24,28 @@ export {
   getFormatByAccessor,
 } from './accessors';
 export { getColorCategories, getLegacyColorCategories } from './color_categories';
+export { sortRowsByRangeLowerBound } from './sort_rows_by_range';
 export {
   LegendSize,
   LegendLayout,
   LegendSizeToPixels,
   DEFAULT_LEGEND_SIZE,
+  LENS_DEFAULT_LEGEND_SIZE,
   getLegendLayout,
 } from './legend';
 
+export { isFilterableColumnSet, getFilterDrilldownWarningMessage } from './computed_column_warning';
 export type { Simplify, MakeOverridesSerializable, ChartSizeSpec, ChartSizeEvent } from './types';
 export { isChartSizeEvent } from './types';
 export type { ExpressionValueVisDimension } from './expression_value_dimension';
 export type { XYLegendValue } from './legend';
+export {
+  ChartPosition,
+  ChartHorizontalAlignment,
+  ChartVerticalAlignment,
+  ChartLayoutDirection,
+  ChartLegendValue,
+} from './constants';
 export type {
   HistogramParams,
   DateHistogramParams,

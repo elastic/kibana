@@ -7,18 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useReducer, useCallback } from 'react';
+import React, { useMemo, useReducer, useCallback, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { ContentListClientState, ContentListStateContextValue } from './types';
-import { DEFAULT_FILTERS } from './types';
 import { ContentListStateContext } from './use_content_list_state';
 import { useContentListConfig } from '../context';
-import { isSortingConfig, isPaginationConfig, isSearchConfig } from '../features';
+import type { ContentListFeatures } from '../features';
+import { isPaginationConfig, isSearchConfig } from '../features';
 import { DEFAULT_PAGE_SIZE } from '../features/pagination';
+import { getInitialSort, getPersistedSort } from '../features/sorting';
 import { getPersistedPageSize } from '../features/pagination';
 import type { PaginationConfig } from '../features/pagination';
 import { reducer, DEFAULT_SELECTION } from './state_reducer';
 import { useContentListItemsQuery } from '../query';
+import { ContentListUrlSync } from '../features/url_sync';
 
 /**
  * Props for `ContentListStateProvider`.
@@ -49,6 +51,16 @@ const resolveInitialPageSize = (
 };
 
 /**
+ * Resolve the sort the list opens with.
+ *
+ * Precedence:
+ * 1. Persisted sort for the given `queryKeyScope`, if allowed by the sorting config (user preference).
+ * 2. Configured `sorting.initialSort` (or the default).
+ */
+const resolveInitialSort = (queryKeyScope: string, sorting: ContentListFeatures['sorting']) =>
+  getPersistedSort(queryKeyScope, sorting) ?? getInitialSort(sorting);
+
+/**
  * Internal provider component that manages the runtime state of the content list.
  *
  * This provider:
@@ -66,13 +78,8 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
   const { features, queryKeyScope } = useContentListConfig();
   const { sorting, pagination, search } = features;
 
-  // Determine initial sort from sorting config (default: title ascending).
-  const initialSort = useMemo(() => {
-    if (isSortingConfig(sorting) && sorting.initialSort) {
-      return sorting.initialSort;
-    }
-    return { field: 'title', direction: 'asc' as const };
-  }, [sorting]);
+  // Resolved once at mount so the opening sort stays stable for URL sync.
+  const [initialSort] = useState(() => resolveInitialSort(queryKeyScope, sorting));
 
   // Determine initial page size from pagination config or persisted value.
   const initialPageSize = useMemo(
@@ -88,11 +95,10 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
     return undefined;
   }, [search]);
 
-  // Initial client state (search, filters, sort, page, selection).
+  // Initial client state (query text, sort, page, selection).
   const initialClientState: ContentListClientState = useMemo(
     () => ({
-      search: { queryText: initialSearch ?? '' },
-      filters: { ...DEFAULT_FILTERS, search: initialSearch },
+      queryText: initialSearch ?? '',
       sort: initialSort,
       page: { index: 0, size: initialPageSize },
       selection: { ...DEFAULT_SELECTION },
@@ -106,36 +112,61 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
   const {
     items,
     totalItems,
-    counts,
     isLoading,
     isFetching,
     error,
+    hasNoItems,
+    hasNoResults,
+    hasActiveQuery,
     refetch: queryRefetch,
+    requery: queryRequery,
   } = useContentListItemsQuery(clientState);
 
-  // Expose refetch for manual refresh.
+  const { dataSource } = useContentListConfig();
+
   const refetch = useCallback(() => queryRefetch(), [queryRefetch]);
 
-  // Combine client state with query data for unified state interface.
+  const refresh = useCallback(async () => {
+    await dataSource.onRefresh?.();
+    await queryRequery();
+  }, [dataSource, queryRequery]);
+
   const contextValue: ContentListStateContextValue = useMemo(
     () => ({
       state: {
         ...clientState,
         items,
         totalItems,
-        counts,
         isLoading,
         isFetching,
         error,
+        hasNoItems,
+        hasNoResults,
+        hasActiveQuery,
       },
       dispatch,
       refetch,
+      refresh,
     }),
-    [clientState, items, totalItems, counts, isLoading, isFetching, error, dispatch, refetch]
+    [
+      clientState,
+      items,
+      totalItems,
+      isLoading,
+      isFetching,
+      error,
+      hasNoItems,
+      hasNoResults,
+      hasActiveQuery,
+      dispatch,
+      refetch,
+      refresh,
+    ]
   );
 
   return (
     <ContentListStateContext.Provider value={contextValue}>
+      <ContentListUrlSync initialSort={initialSort} />
       {children}
     </ContentListStateContext.Provider>
   );

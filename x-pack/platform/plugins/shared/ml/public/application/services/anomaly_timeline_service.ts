@@ -13,7 +13,6 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { InfluencersFilterQuery, MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { TimeBucketsInterval, TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { getBoundsRoundedToInterval, TimeBuckets } from '@kbn/ml-time-buckets';
-import type { SeverityThreshold } from '../../../common/types/anomalies';
 import type { MlApi } from './ml_api_service';
 import type {
   ExplorerJob,
@@ -118,7 +117,8 @@ export class AnomalyTimelineService {
     selectedJobs: Array<{ id: string; bucketSpanSeconds: number }>,
     chartWidth?: number,
     bucketInterval?: TimeBucketsInterval,
-    overallScore?: SeverityThreshold[]
+    overallScore?: Array<{ min: number; max?: number }>,
+    signal?: AbortSignal
   ): Promise<OverallSwimlaneData> {
     const interval = bucketInterval ?? this.getSwimlaneBucketInterval(selectedJobs, chartWidth!);
 
@@ -152,7 +152,8 @@ export class AnomalyTimelineService {
       overallBucketsBounds.min.valueOf(),
       overallBucketsBounds.max.valueOf(),
       interval.asSeconds() + 's',
-      minOverallScore
+      minOverallScore,
+      signal
     );
 
     const overallSwimlaneData = this.processOverallResults(
@@ -189,7 +190,8 @@ export class AnomalyTimelineService {
     swimlaneContainerWidth?: number,
     influencersFilterQuery?: any,
     bucketInterval?: TimeBucketsInterval,
-    swimLaneSeverity?: SeverityThreshold[]
+    swimLaneSeverity?: Array<{ min: number; max?: number }>,
+    signal?: AbortSignal
   ): Promise<ViewBySwimLaneData | undefined> {
     const timefilterBounds = this.getTimeBounds();
     if (timefilterBounds === undefined) {
@@ -216,29 +218,35 @@ export class AnomalyTimelineService {
     if (viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL) {
       const jobIds =
         fieldValues !== undefined && fieldValues.length > 0 ? fieldValues : selectedJobIds;
-      response = await this.mlApi.results.getScoresByBucket({
-        jobIds,
-        earliestMs: searchBounds.min.valueOf(),
-        latestMs: searchBounds.max.valueOf(),
-        intervalMs,
-        perPage,
-        fromPage,
-        swimLaneSeverity,
-      });
+      response = await this.mlApi.results.getScoresByBucket(
+        {
+          jobIds,
+          earliestMs: searchBounds.min.valueOf(),
+          latestMs: searchBounds.max.valueOf(),
+          intervalMs,
+          perPage,
+          fromPage,
+          swimLaneSeverity,
+        },
+        signal
+      );
     } else {
-      response = await this.mlApi.results.getInfluencerValueMaxScoreByTime({
-        jobIds: selectedJobIds,
-        influencerFieldName: viewBySwimlaneFieldName,
-        influencerFieldValues: fieldValues,
-        earliestMs: searchBounds.min.valueOf(),
-        latestMs: searchBounds.max.valueOf(),
-        intervalMs,
-        maxResults: swimlaneLimit,
-        perPage,
-        fromPage,
-        influencersFilterQuery,
-        swimLaneSeverity,
-      });
+      response = await this.mlApi.results.getInfluencerValueMaxScoreByTime(
+        {
+          jobIds: selectedJobIds,
+          influencerFieldName: viewBySwimlaneFieldName,
+          influencerFieldValues: fieldValues,
+          earliestMs: searchBounds.min.valueOf(),
+          latestMs: searchBounds.max.valueOf(),
+          intervalMs,
+          maxResults: swimlaneLimit,
+          perPage,
+          fromPage,
+          influencersFilterQuery,
+          swimLaneSeverity,
+        },
+        signal
+      );
     }
 
     if (response === undefined) {
@@ -268,7 +276,7 @@ export class AnomalyTimelineService {
     bucketInterval: TimeBucketsInterval,
     selectionInfluencers: MlEntityField[],
     influencersFilterQuery: InfluencersFilterQuery,
-    swimLaneSeverity: SeverityThreshold[]
+    swimLaneSeverity: Array<{ min: number; max?: number }>
   ) {
     const selectedJobIds = selectedJobs.map((d) => d.id);
 
@@ -326,7 +334,7 @@ export class AnomalyTimelineService {
     scoresByTime: { [timeMs: number]: number },
     searchBounds: Required<TimeRangeBounds>,
     interval: number,
-    selectedSeverity: SeverityThreshold[]
+    selectedSeverity: Array<{ min: number; max?: number }>
   ): OverallSwimlaneData {
     const overallLabel = OVERALL_LABEL;
     const dataset: OverallSwimlaneData = {

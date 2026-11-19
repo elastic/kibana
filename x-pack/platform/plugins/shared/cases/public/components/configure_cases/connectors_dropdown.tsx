@@ -31,7 +31,7 @@ export interface Props {
 }
 
 const suspendedComponentWithProps = (ComponentToSuspend: React.ComponentType) => {
-  // eslint-disable-next-line react/display-name
+  // eslint-disable-next-line @kbn/compat/react-display-name
   return (props: Record<string, unknown>) => (
     <Suspense fallback={<EuiLoadingSpinner size={'m'} />}>
       <ComponentToSuspend {...props} />
@@ -51,8 +51,9 @@ const noConnectorOption = {
             margin-right: 13px;
             margin-bottom: 0 !important;
           `}
-          type="minusInCircle"
+          type="minusCircle"
           size={ICON_SIZE}
+          aria-hidden={true}
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -96,6 +97,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                         : suspendedComponentWithProps(iconClass)
                     }
                     size={ICON_SIZE}
+                    aria-hidden={true}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

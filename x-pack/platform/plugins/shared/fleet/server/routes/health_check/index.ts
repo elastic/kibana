@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -25,6 +27,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: `Check Fleet Server health`,
+      description:
+        'Check the health status of a Fleet Server instance by its host ID. Returns the server status and name if available.',
       options: {
         tags: ['oas-tag:Fleet internals'],
       },
@@ -32,6 +36,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_health_check.yaml'),
+        },
         validate: {
           request: PostHealthCheckRequestSchema,
           response: {

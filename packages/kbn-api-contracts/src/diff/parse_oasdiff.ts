@@ -8,6 +8,7 @@
  */
 
 import type { BreakingChange } from './breaking_rules';
+import { getRulePolicy, isIgnoredRule, isPromotedRule, isReportOnlyRule } from './rule_policy';
 
 export interface OasdiffEntry {
   id: string;
@@ -28,22 +29,42 @@ const ID_TO_TYPE: Readonly<Record<string, BreakingChange['type']>> = {
   'request-parameter-removed': 'parameter_removed',
   'response-required-property-removed': 'response_property_removed',
   'response-optional-property-removed': 'response_property_removed',
+  'kbn:request-additional-properties-tightened': 'request_body_tightened',
 };
 
-// These oasdiff warning-level (level 2) checks are promoted to blocking because
-// they break Terraform provider configurations that reference the removed fields.
-const PROMOTED_WARNING_IDS = new Set([
-  'request-property-removed',
-  'request-parameter-removed',
-  'response-optional-property-removed',
-]);
-
+// Errors are included on oasdiff's own level. Warnings are included only when the
+// declared policy promotes them or keeps them as report-only. A rule the policy
+// ignores is dropped at either level.
 const isIncluded = ({ id, level }: OasdiffEntry): boolean =>
-  level >= 3 || PROMOTED_WARNING_IDS.has(id);
+  !isIgnoredRule(id) && (level >= 3 || isPromotedRule(id) || isReportOnlyRule(id));
 
-const mapEntryToBreakingChange = ({ id, path, operation, text }: OasdiffEntry): BreakingChange => {
+/**
+ * Whether a rule's `source` is a location in the spec. Kibana's own `kbn:` rules
+ * set it to a JSON pointer. oasdiff sets it to the path of the spec file it read,
+ * which changes per CI agent and per distribution, so it can't identify a change.
+ */
+export const hasLocationSource = (oasdiffId: string): boolean => oasdiffId.startsWith('kbn:');
+
+const mapEntryToBreakingChange = ({
+  id,
+  path,
+  operation,
+  text,
+  source,
+}: OasdiffEntry): BreakingChange => {
   const type = ID_TO_TYPE[id] ?? 'operation_breaking';
-  return { type, path, method: type === 'path_removed' ? undefined : operation, reason: text };
+  const policy = getRulePolicy(id);
+  return {
+    type,
+    path,
+    method: type === 'path_removed' ? undefined : operation,
+    reason: text,
+    oasdiffId: id,
+    ...(hasLocationSource(id) ? { source } : {}),
+    ...(policy?.disposition === 'report_only'
+      ? { reportOnly: true, policyReason: policy.reason }
+      : {}),
+  };
 };
 
 export const parseOasdiff = (entries: OasdiffEntry[]): BreakingChange[] =>

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ProjectRouting } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
@@ -20,6 +21,7 @@ import type {
   ValidationIndicesError,
   ValidationUIError,
 } from '../../../components/logging/log_analysis_setup/initial_configuration_step';
+import { useIsInfraMlCpsEnabled } from '../../../hooks/use_infra_ml_cps';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../hooks/use_tracked_promise';
 import type { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
@@ -28,7 +30,8 @@ type SetupHandler = (
   indices: string[],
   startTime: number | undefined,
   endTime: number | undefined,
-  datasetFilter: DatasetFilter
+  datasetFilter: DatasetFilter,
+  projectRouting?: ProjectRouting
 ) => void;
 
 interface AnalysisSetupStateArguments<T extends JobType> {
@@ -49,6 +52,25 @@ export const useAnalysisSetupState = <T extends JobType>({
   const { services } = useKibanaContextForPlugin();
   const [startTime, setStartTime] = useState<number | undefined>(Date.now() - fourWeeksInMs);
   const [endTime, setEndTime] = useState<number | undefined>(undefined);
+
+  const isCpsEnabled = useIsInfraMlCpsEnabled();
+  const [projectRouting, setProjectRouting] = useState<ProjectRouting>(undefined);
+  const [isCpsManagerReady, setIsCpsManagerReady] = useState(false);
+
+  useEffect(() => {
+    if (!isCpsEnabled) return;
+    let cancelled = false;
+    // cpsManager.whenReady() never rejects. Even if something goes wrong, it will resolve with a standard value. A catch block isn't required
+    services.cps?.cpsManager?.whenReady().then(() => {
+      if (!cancelled) {
+        setProjectRouting(services.cps?.cpsManager?.getDefaultProjectRouting());
+        setIsCpsManagerReady(true);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isCpsEnabled, services.cps]);
 
   const isTimeRangeValid = useMemo(
     () => (startTime != null && endTime != null ? startTime < endTime : true),
@@ -164,7 +186,8 @@ export const useAnalysisSetupState = <T extends JobType>({
           sourceConfiguration.indices,
           sourceConfiguration.timestampField,
           sourceConfiguration.runtimeMappings,
-          services.http.fetch
+          services.http.fetch,
+          projectRouting
         );
       },
       onResolve: ({ data: { errors } }) => {
@@ -174,7 +197,7 @@ export const useAnalysisSetupState = <T extends JobType>({
         setValidatedIndices([]);
       },
     },
-    [sourceConfiguration.indices, sourceConfiguration.timestampField]
+    [sourceConfiguration.indices, sourceConfiguration.timestampField, projectRouting]
   );
 
   const [validateDatasetsRequest, validateDatasets] = useTrackedPromise(
@@ -191,27 +214,47 @@ export const useAnalysisSetupState = <T extends JobType>({
           startTime ?? 0,
           endTime ?? Date.now(),
           sourceConfiguration.runtimeMappings,
-          services.http.fetch
+          services.http.fetch,
+          projectRouting
         );
       },
       onResolve: ({ data: { datasets } }) => {
         updateIndicesWithAvailableDatasets(datasets);
       },
     },
-    [validIndexNames, sourceConfiguration.timestampField, startTime, endTime]
+    [validIndexNames, sourceConfiguration.timestampField, startTime, endTime, projectRouting]
   );
 
   const setUp = useCallback(() => {
-    return setUpModule(selectedIndexNames, startTime, endTime, datasetFilter);
-  }, [setUpModule, selectedIndexNames, startTime, endTime, datasetFilter]);
+    return setUpModule(selectedIndexNames, startTime, endTime, datasetFilter, projectRouting);
+  }, [setUpModule, selectedIndexNames, startTime, endTime, datasetFilter, projectRouting]);
 
   const cleanUpAndSetUp = useCallback(() => {
-    return cleanUpAndSetUpModule(selectedIndexNames, startTime, endTime, datasetFilter);
-  }, [cleanUpAndSetUpModule, selectedIndexNames, startTime, endTime, datasetFilter]);
+    return cleanUpAndSetUpModule(
+      selectedIndexNames,
+      startTime,
+      endTime,
+      datasetFilter,
+      projectRouting
+    );
+  }, [
+    cleanUpAndSetUpModule,
+    selectedIndexNames,
+    startTime,
+    endTime,
+    datasetFilter,
+    projectRouting,
+  ]);
 
+  // Treating the CPS manager warm-up as "validating" both disables submission and
+  // suppresses the transient MISSING_PROJECT_ROUTING error until the default project
+  // routing has been seeded.
   const isValidating = useMemo(
-    () => validateIndicesRequest.state === 'pending' || validateDatasetsRequest.state === 'pending',
-    [validateDatasetsRequest.state, validateIndicesRequest.state]
+    () =>
+      validateIndicesRequest.state === 'pending' ||
+      validateDatasetsRequest.state === 'pending' ||
+      (isCpsEnabled && !isCpsManagerReady),
+    [validateDatasetsRequest.state, validateIndicesRequest.state, isCpsManagerReady, isCpsEnabled]
   );
 
   const validationErrors = useMemo<ValidationUIError[]>(() => {
@@ -235,6 +278,10 @@ export const useAnalysisSetupState = <T extends JobType>({
       ...(selectedIndexNames.length === 0 ? [{ error: 'TOO_FEW_SELECTED_INDICES' as const }] : []),
       // time range
       ...(!isTimeRangeValid ? [{ error: 'INVALID_TIME_RANGE' as const }] : []),
+      // project scope must be explicit when CPS is available
+      ...(isCpsEnabled && projectRouting === undefined
+        ? [{ error: 'MISSING_PROJECT_ROUTING' as const }]
+        : []),
     ];
   }, [
     isValidating,
@@ -243,38 +290,50 @@ export const useAnalysisSetupState = <T extends JobType>({
     validatedIndices,
     selectedIndexNames,
     isTimeRangeValid,
+    isCpsEnabled,
+    projectRouting,
   ]);
 
   const prevStartTime = usePrevious(startTime);
   const prevEndTime = usePrevious(endTime);
   const prevValidIndexNames = usePrevious(validIndexNames);
+  const prevProjectRouting = usePrevious(projectRouting);
+
+  // Hold off validation until the CPS manager has seeded the default project routing,
+  // so the first request already carries the correct scope instead of being clamped to
+  // the origin project and immediately refetched.
+  const isAwaitingProjectRouting = isCpsEnabled && !isCpsManagerReady;
 
   useEffect(() => {
-    if (!isTimeRangeValid) {
+    if (!isTimeRangeValid || isAwaitingProjectRouting) {
       return;
     }
 
     validateIndices();
-  }, [isTimeRangeValid, validateIndices]);
+  }, [isTimeRangeValid, isAwaitingProjectRouting, validateIndices]);
 
   useEffect(() => {
-    if (!isTimeRangeValid) {
+    if (!isTimeRangeValid || isAwaitingProjectRouting) {
       return;
     }
 
     if (
       startTime !== prevStartTime ||
       endTime !== prevEndTime ||
+      projectRouting !== prevProjectRouting ||
       !isEqual(validIndexNames, prevValidIndexNames)
     ) {
       validateDatasets();
     }
   }, [
     endTime,
+    isAwaitingProjectRouting,
     isTimeRangeValid,
     prevEndTime,
+    prevProjectRouting,
     prevStartTime,
     prevValidIndexNames,
+    projectRouting,
     startTime,
     validIndexNames,
     validateDatasets,
@@ -284,9 +343,13 @@ export const useAnalysisSetupState = <T extends JobType>({
     cleanUpAndSetUp,
     datasetFilter,
     endTime,
+    isCpsEnabled,
+    isCpsManagerReady,
     isValidating,
+    projectRouting,
     selectedIndexNames,
     setEndTime,
+    setProjectRouting,
     setStartTime,
     setUp,
     startTime,

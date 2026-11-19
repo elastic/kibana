@@ -12,14 +12,19 @@ import {
   migrateAlertPageControlsTo816,
 } from './migrate_alert_page_controls';
 import type { StartPlugins } from '../../../types';
-import type { ControlGroupRuntimeState, ControlPanelState } from '@kbn/control-group-renderer';
+import type { ControlGroupRuntimeState } from '@kbn/control-group-renderer';
+import {
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
+  OPTIONS_LIST_CONTROL,
+} from '@kbn/controls-constants';
 
 const OLD_FORMAT = {
   viewMode: 'view',
   id: '5bc0ef0f-c6a9-4eaf-9fc5-9703fcb85482',
   panels: {
     '0': {
-      type: 'optionsListControl',
+      type: OPTIONS_LIST_CONTROL,
       order: 0,
       grow: true,
       width: 'small',
@@ -44,7 +49,7 @@ const OLD_FORMAT = {
       },
     },
     '1': {
-      type: 'optionsListControl',
+      type: OPTIONS_LIST_CONTROL,
       order: 1,
       grow: true,
       width: 'small',
@@ -68,7 +73,7 @@ const OLD_FORMAT = {
       },
     },
     '2': {
-      type: 'optionsListControl',
+      type: OPTIONS_LIST_CONTROL,
       order: 2,
       grow: true,
       width: 'small',
@@ -90,7 +95,7 @@ const OLD_FORMAT = {
       },
     },
     '3': {
-      type: 'optionsListControl',
+      type: OPTIONS_LIST_CONTROL,
       order: 3,
       grow: true,
       width: 'small',
@@ -151,82 +156,86 @@ const OLD_FORMAT = {
   },
 };
 
-const NEW_FORMAT: ControlGroupRuntimeState<NewFormatExplicitInput & ControlPanelState> = {
+const NEW_FORMAT = {
   initialChildControlState: {
     '0': {
-      type: 'optionsListControl',
+      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+      ...DEFAULT_PINNED_CONTROL_STATE,
+      type: OPTIONS_LIST_CONTROL,
       order: 0,
-      displaySettings: {
-        hideExclude: true,
-        hideSort: true,
-        hideActionBar: true,
-        hideExists: true,
+      display_settings: {
+        hide_exclude: true,
+        hide_sort: true,
+        hide_action_bar: true,
+        hide_exists: true,
         placeholder: '',
       },
       width: 'small',
-      dataViewId: 'security_solution_alerts_dv',
+      data_view_id: 'security_solution_alerts_dv',
       title: 'Status',
-      fieldName: 'kibana.alert.workflow_status',
-      selectedOptions: ['open'],
+      field_name: 'kibana.alert.workflow_status',
+      selected_options: ['open'],
       persist: true,
     },
     '1': {
-      type: 'optionsListControl',
+      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+      ...DEFAULT_PINNED_CONTROL_STATE,
+      type: OPTIONS_LIST_CONTROL,
       order: 1,
-      displaySettings: {
-        hideExclude: true,
-        hideSort: true,
-        hideActionBar: true,
-        hideExists: true,
+      display_settings: {
+        hide_exclude: true,
+        hide_sort: true,
+        hide_action_bar: true,
+        hide_exists: true,
         placeholder: '',
       },
       width: 'small',
-      dataViewId: 'security_solution_alerts_dv',
+      data_view_id: 'security_solution_alerts_dv',
       title: 'Severity',
-      fieldName: 'kibana.alert.severity',
-      selectedOptions: [],
+      field_name: 'kibana.alert.severity',
       persist: false,
     },
     '2': {
-      type: 'optionsListControl',
+      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+      ...DEFAULT_PINNED_CONTROL_STATE,
+      type: OPTIONS_LIST_CONTROL,
       order: 2,
-      displaySettings: {
-        hideExclude: true,
-        hideSort: true,
-        hideActionBar: false,
-        hideExists: false,
+      display_settings: {
+        hide_exclude: true,
+        hide_sort: true,
+        hide_action_bar: false,
+        hide_exists: false,
         placeholder: '',
       },
       width: 'small',
-      dataViewId: 'security_solution_alerts_dv',
+      data_view_id: 'security_solution_alerts_dv',
       title: 'User',
-      fieldName: 'user.name',
-      selectedOptions: [],
-
+      field_name: 'user.name',
       persist: false,
     },
     '3': {
-      type: 'optionsListControl',
+      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+      ...DEFAULT_PINNED_CONTROL_STATE,
+      type: OPTIONS_LIST_CONTROL,
       order: 3,
-      displaySettings: {
-        hideExclude: true,
-        hideSort: true,
-        hideActionBar: false,
-        hideExists: false,
+      display_settings: {
+        hide_exclude: true,
+        hide_sort: true,
+        hide_action_bar: false,
+        hide_exists: false,
         placeholder: '',
       },
       width: 'small',
-      dataViewId: 'security_solution_alerts_dv',
+      data_view_id: 'security_solution_alerts_dv',
       title: 'Host',
-      fieldName: 'host.name',
-      selectedOptions: [],
+      field_name: 'host.name',
       persist: false,
     },
   },
   ignoreParentSettings: {
     ignoreValidations: false,
   },
-};
+} as unknown as ControlGroupRuntimeState<NewFormatExplicitInput>;
 const storage = new Storage(localStorage);
 
 const mockPlugins = {
@@ -273,7 +282,14 @@ describe('migrateAlertPageControlsTo816', () => {
       await migrateAlertPageControlsTo816(storage, mockPlugins);
       const migrated = storage.get(GET_PAGE_FILTER_STORAGE_KEY());
       const EXPECTED_NEW_FORMAT = structuredClone(NEW_FORMAT);
-      EXPECTED_NEW_FORMAT.initialChildControlState['0'].displaySettings.hideExists = true;
+      const first = EXPECTED_NEW_FORMAT.initialChildControlState[0];
+      expect(migrated).toMatchObject({
+        ...EXPECTED_NEW_FORMAT,
+        initialChildControlState: {
+          ...EXPECTED_NEW_FORMAT.initialChildControlState,
+          '0': { ...first, display_settings: { ...first.display_settings, hide_exists: true } },
+        },
+      });
       expect(migrated).toMatchObject(EXPECTED_NEW_FORMAT);
     });
   });
@@ -313,8 +329,14 @@ describe('migrateAlertPageControlsTo816', () => {
       await migrateAlertPageControlsTo816(storage, mockPlugins);
       const migrated = storage.get(GET_PAGE_FILTER_STORAGE_KEY(nonDefaultSpaceId));
       const EXPECTED_NEW_FORMAT = structuredClone(NEW_FORMAT);
-      EXPECTED_NEW_FORMAT.initialChildControlState['0'].displaySettings.hideExists = true;
-      expect(migrated).toMatchObject(EXPECTED_NEW_FORMAT);
+      const first = EXPECTED_NEW_FORMAT.initialChildControlState[0];
+      expect(migrated).toMatchObject({
+        ...EXPECTED_NEW_FORMAT,
+        initialChildControlState: {
+          ...EXPECTED_NEW_FORMAT.initialChildControlState,
+          '0': { ...first, display_settings: { ...first.display_settings, hide_exists: true } },
+        },
+      });
     });
   });
 });

@@ -15,7 +15,7 @@ Use `trackUserAction` to record user actions:
 core.userActivity.trackUserAction({
   event: {
     action: 'create_alerting_rule',
-    type: 'creation',
+    type: ['creation'],
     start: new Date().toISOString(),
     end: new Date().toISOString(),
     duration: 250000000, // 250ms in ns
@@ -24,19 +24,23 @@ core.userActivity.trackUserAction({
 });
 ```
 
-You can optionally provide a custom message and metadata:
+You can optionally provide a custom message, ECS `event.outcome`, top-level ECS `error.*` fields, and metadata. Each producer passes its own metadata bucket through the `kibana` param, emitted as `kibana.<bucket>.*` (in this example, `kibana.dashboard.*`). Buckets are declared in `UserActivityKibanaMetadata` ([`src/types.ts`](./src/types.ts)), so adding a new one requires a Core-reviewed change:
 
 ```ts
 core.userActivity.trackUserAction({
-  message: 'User snoozed an alerting rule',
-  event: { action: 'snooze_alerting_rule', type: 'change' },
-  object: { id: 'rule-456', name: 'CPU usage threshold', type: 'rule', tags: ['production'] },
-  metadata: {
-    ui_surface: 'rules_table',
-    interaction_id: 'snooze_rule_flyout',
+  message: 'User refreshed dashboard "Web traffic"',
+  event: { action: 'dashboard_refresh', type: ['access'], outcome: 'success' },
+  object: { id: 'dash-123', name: 'Web traffic', type: 'dashboard', tags: ['production'] },
+  kibana: {
+    dashboard: {
+      panel_count: 12,
+      refresh_interval: 60000,
+    },
   },
 });
 ```
+
+For failed actions, set `event.outcome` to `failure` and populate `error` with ECS fields (`type`, `message`, `stack_trace`, `code`) instead of stuffing failure detail only into the metadata bucket. When `event.outcome` is omitted, the emitted event defaults to `unknown`.
 
 ## Registering new actions
 
@@ -108,7 +112,9 @@ The following context is automatically added to every log entry by Kibana's HTTP
 | `user.roles` | Array of roles |
 | `client.ip` | IP address |
 | `client.address` | IP address (OTel compliance) |
-| `session.id` | Session ID |
+| `source.ip` | Copy of `client.ip` (ECS `source`) |
+| `source.address` | Copy of `client.ip` (ECS `source`) |
+| `kibana.session.id` | Session ID |
 | `kibana.space.id` | Current space ID |
 | `http.request.referrer` | Referrer |
 
@@ -118,8 +124,9 @@ Here's the current schema reference: [`docs/reference/user-activity.md`](../../.
 
 Some of the fields in the schema come from:
 
-- `trackUserAction()` params (for example `message`, `event.*`, `object.*`, `metadata.*`)
-- Injected context (for example `user.*`, `session.*`, `client.*`, `kibana.space.id`, and `http.request.referrer`)
+- `trackUserAction()` params (for example `message` and `event.*`; the `object` param is emitted as `kibana.object.*`, and the `kibana` param buckets as `kibana.<bucket>.*`, for example `kibana.dashboard.*`)
+- Injected context (for example `user.*`, `client.*`, `source.*`, `kibana.session.id`, `kibana.space.id`, and `http.request.referrer`)
+- Fields derived by the service (`kibana.saved_object.type` and `kibana.saved_object.id`, emitted when `object.type` is a registered saved object type)
 - Fields automatically added by the logging system / JSON layout (for example `@timestamp`)
 
 > **Important**
@@ -165,28 +172,28 @@ The user activity log captures **deliberate user decisions**, not system behavio
 
 ## 2. Event Naming Format
 
-### Base Structure: `{verb}_{context}_{noun}`
+### Base Structure: `{context}_{noun}_{verb}`
 
 | Part | Role | Constraints |
 | --- | --- | --- |
-| **verb** | The action the user took | Must come from the approved verb list (Section 3) |
 | **context** | Kibana feature area | Canonical plugin name, no invented abbreviations |
 | **noun** | The object type acted on | Singular, lowercase, matches the product name for the entity |
+| **verb** | The action the user took | Must come from the approved verb list (Section 3) |
 
 All lowercase, snake\_case. No camelCase, no hyphens.
 
-For bulk variants, append `_bulk` to the noun: `delete_cases_comment_bulk`.
+For bulk variants, append `_bulk` to the noun: `cases_comment_bulk_delete`.
 
 ### Examples
 
-| Event name | Verb | Context | Noun |
+| Event name | Context | Noun | Verb |
 | --- | --- | --- | --- |
-| `create_alerting_rule` | `create` | `alerting` | `rule` |
-| `delete_cases_comment` | `delete` | `cases` | `comment` |
-| `enable_security_rule` | `enable` | `security` | `rule` |
-| `push_cases_case` | `push` | `cases` | `case` |
-| `submit_ai_assistant_prompt` | `submit` | `ai_assistant` | `prompt` |
-| `install_fleet_integration` | `install` | `fleet` | `integration` |
+| `alerting_rule_create` | `alerting` | `rule` | `create` |
+| `cases_comment_delete` | `cases` | `comment` | `delete` |
+| `security_rule_enable` | `security` | `rule` | `enable` |
+| `cases_case_push` | `cases` | `case` | `push` |
+| `ai_assistant_prompt_submit` | `ai_assistant` | `prompt` | `submit` |
+| `fleet_integration_install` | `fleet` | `integration` | `install` |
 
 ## 3. Approved Verb List
 
@@ -225,8 +232,8 @@ Use only verbs from this list. If a new verb is genuinely needed, propose it wit
 | `submit` | User submits a prompt or form for processing | `send`, `run` (for AI prompts) |
 | `run` | User manually triggers an on-demand execution | `execute`, `fire` |
 | `schedule` | User schedules a future or recurring action | `automate` |
-| `log_in` | User logs in |  |
-| `log_out` | User logs out |  |
+| `log_in` | User logs in | `authenticate`,`logged in` |
+| `log_out` | User logs out | `unauthenticate`,`logged out` |
 
 ## 4. Language for Human-Readable Fields
 
@@ -270,31 +277,29 @@ Format: `{Subject} {past-tense verb} {object} [{qualifier}].`
 ## 5. Kibana-Specific Examples
 
 ### Alerting
-
 | Event action | Outcome | `message` |
 | --- | --- | --- |
-| `create_alerting_rule` | `unknown` | `User is creating a rule.` |
-| `create_alerting_rule` | `success` | `User created rule "High CPU Alert" (id: 1a2b3c).` |
-| `create_alerting_rule` | `failure` | `User failed to create a rule. Reason: Not authorized.` |
-| `snooze_alerting_rule` | `unknown` | `User is snoozing rule "High CPU Alert" (id: 1a2b3c) for 8 hours.` |
-| `run_alerting_rule` | `success` | `User ran rule "High CPU Alert" (id: 1a2b3c) on demand.` |
+| `alerting_rule_create` | `unknown` | `User is creating a rule.` |
+| `alerting_rule_create` | `success` | `User created rule "High CPU Alert" (id: 1a2b3c).` |
+| `alerting_rule_create` | `failure` | `User failed to create a rule. Reason: Not authorized.` |
+| `alerting_rule_snooze` | `unknown` | `User is snoozing rule "High CPU Alert" (id: 1a2b3c) for 8 hours.` |
+| `alerting_rule_run` | `success` | `User ran rule "High CPU Alert" (id: 1a2b3c) on demand.` |
 
 ### Cases
-
 | Event action | Outcome | `message` |
 | --- | --- | --- |
-| `create_cases_case` | `success` | `User created case "Login Failure Spike" (id: case-001).` |
-| `update_cases_status` | `success` | `User updated status of case "Login Failure Spike" (id: case-001) to "in-progress".` |
-| `push_cases_case` | `unknown` | `User is pushing case "Login Failure Spike" (id: case-001) to ServiceNow.` |
-| `close_cases_case` | `success` | `User closed case "Login Failure Spike" (id: case-001).` |
+| `cases_case_create` | `success` | `User created case "Login Failure Spike" (id: case-001).` |
+| `cases_status_update` | `success` | `User updated status of case "Login Failure Spike" (id: case-001) to "in-progress".` |
+| `cases_case_push` | `unknown` | `User is pushing case "Login Failure Spike" (id: case-001) to ServiceNow.` |
+| `cases_case_close` | `success` | `User closed case "Login Failure Spike" (id: case-001).` |
 
 ### Security / Detection
-
 | Event action | Outcome | `message` |
 | --- | --- | --- |
-| `create_security_rule` | `success` | `User created detection rule "Potential Credential Dumping" (id: rule-sec-001).` |
-| `enable_security_rule` | `unknown` | `User is enabling detection rule "Potential Credential Dumping" (id: rule-sec-001).` |
-| `acknowledge_security_alert` | `success` | `User acknowledged alert (id: alert-sec-999) for rule "Potential Credential Dumping".` |
+| `security_rule_create` | `success` | `User created detection rule "Potential Credential Dumping" (id: rule-sec-001).` |
+| `security_rule_enable` | `unknown` | `User is enabling detection rule "Potential Credential Dumping" (id: rule-sec-001).` |
+| `security_alert_acknowledge` | `success` | `User acknowledged alert (id: alert-sec-999) for rule "Potential Credential Dumping".` |
+
 
 
 
@@ -302,12 +307,12 @@ Format: `{Subject} {past-tense verb} {object} [{qualifier}].`
 
 - [ ] The action is user-initiated, not system-triggered or auto-fired
 - [ ] The action changes state or represents a high-intent interaction, not a passive read
-- [ ] Event name follows `{verb}_{context}_{noun}` in snake\_case
+- [ ] Event name follows `{context}_{noun}_{verb}` in snake\_case
 - [ ] Verb is from the approved list
 - [ ] Context matches the canonical Kibana plugin name
 - [ ] `message` uses correct tense relative to `event.outcome`
 - [ ] `message` includes the object name (quoted) and ID where available
 - [ ] `message` uses "User" as the subject in active voice
 - [ ] No duplicate sub-event is emitted for the same user action
-- [ ] Bulk operations use the `_bulk` suffix instead of emitting N individual events
+- [ ] Bulk operations, append  `_bulk` to the noun
 

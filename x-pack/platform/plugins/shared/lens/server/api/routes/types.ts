@@ -6,3 +6,5 @@
  */
 
 export type * from './internal/types';
+
+export type { LensApiConfigLibItemNoESQL } from './visualizations/schema/common';

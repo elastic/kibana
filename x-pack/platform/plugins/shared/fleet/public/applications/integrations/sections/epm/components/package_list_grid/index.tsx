@@ -7,26 +7,33 @@
 
 import type { ReactNode, FunctionComponent } from 'react';
 import { useMemo } from 'react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
   EuiButton,
   EuiButtonIcon,
-  EuiPopover,
-  EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiSpacer,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
-import { useLocalSearch, searchIdField } from '../../../../hooks';
+import { useLocalSearch, searchIdField, useStartServices } from '../../../../hooks';
+import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../../constants';
+import type { CreatePackagePolicyRouteState } from '../../../../types';
 
 import type { IntegrationCardItem } from '../../screens/home';
+import { withSearchMemberMatch } from '../../screens/home/search_member_match';
+import { buildCollectionVariants } from '../../screens/home/collection_variants';
+import { CollectionFlyout } from '../../screens/home/components/collection_flyout';
 
 import type {
   ExtendedIntegrationCategory,
@@ -43,11 +50,13 @@ import { MissingIntegrationContent } from './missing_integrations';
 import { SearchBox } from './search_box';
 
 const StickySidebar = styled(EuiFlexItem)`
-  position: sticky;
-  top: calc(
-    var(--kbn-application--sticky-headers-offset, 96px) +
-      ${(props) => props.theme.eui.euiSizeL /* 24px */}
-  );
+  @media (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+    position: sticky;
+    top: calc(
+      var(--kbn-application--sticky-headers-offset, 96px) +
+        ${(props) => props.theme.eui.euiSizeL /* 24px */}
+    );
+  }
 `;
 
 export interface PackageListGridProps {
@@ -80,6 +89,19 @@ export interface PackageListGridProps {
   // Security Solution sends the id to determine which element to scroll when the user interacting with the package list
   scrollElementId?: string;
   onlyAgentlessFilter?: boolean;
+  backgroundColor?: 'plain' | 'transparent';
+  /**
+   * Opt-in for hosts outside the Integrations app (e.g. Security onboarding). When set, clicking a
+   * collection card opens the variant chooser flyout inside the grid instead of calling the card's
+   * own `onCardClick`. Variant links carry these as `returnAppId`/`returnPath` so the package
+   * detail and add-integration pages navigate back to the host. Leave unset when the host manages
+   * the chooser itself (Fleet's own pages use the `?collection=` URL param).
+   */
+  collectionReturnLocation?: { appId: string; path: string };
+  /** Called when a collection card is clicked, e.g. for telemetry. Only used with `collectionReturnLocation`. */
+  onCollectionClick?: (card: IntegrationCardItem) => void;
+  /** Called when a variant is picked in the chooser. Only used with `collectionReturnLocation`. */
+  onCollectionVariantClick?: (member: IntegrationCardItem) => void;
 }
 
 export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
@@ -108,8 +130,13 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   showSearchTools = true,
   spacer = true,
   scrollElementId,
+  backgroundColor,
+  collectionReturnLocation,
+  onCollectionClick,
+  onCollectionVariantClick,
 }) => {
   const euiTheme = useEuiTheme();
+  const { application, http } = useStartServices();
   const localSearch = useLocalSearch(list, !!isLoading);
 
   const [isPopoverOpen, setPopover] = useState(false);
@@ -158,10 +185,88 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
       ? list.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
       : list;
 
-    return sortByFeaturedIntegrations
-      ? promoteFeaturedIntegrations(filteredList, selectedCategory)
+    const withMemberMatch = searchTerm
+      ? filteredList.map((item) => withSearchMemberMatch(item, searchTerm))
       : filteredList;
+
+    return sortByFeaturedIntegrations
+      ? promoteFeaturedIntegrations(withMemberMatch, selectedCategory)
+      : withMemberMatch;
   }, [isLoading, list, localSearch, searchTerm, selectedCategory, sortByFeaturedIntegrations]);
+
+  const [openCollectionId, setOpenCollectionId] = useState<string | undefined>();
+
+  // With `collectionReturnLocation`, the grid owns the collection chooser: replace the host's
+  // click handler on collection cards (it would otherwise navigate to the card's fallback url).
+  const gridList: IntegrationCardItem[] = useMemo(() => {
+    if (!collectionReturnLocation) return filteredPromotedList;
+    return filteredPromotedList.map((card) =>
+      card.isCollectionCard
+        ? {
+            ...card,
+            onCardClick: () => {
+              onCollectionClick?.(card);
+              setOpenCollectionId(card.name);
+            },
+          }
+        : card
+    );
+  }, [collectionReturnLocation, filteredPromotedList, onCollectionClick]);
+
+  const openCollectionCard = useMemo(
+    () =>
+      openCollectionId
+        ? filteredPromotedList.find((c) => c.isCollectionCard && c.name === openCollectionId)
+        : undefined,
+    [openCollectionId, filteredPromotedList]
+  );
+
+  // Close the chooser when filters or search remove (or degrade) the open collection.
+  // Only once loaded: the list is empty while packages load.
+  useEffect(() => {
+    if (!isLoading && openCollectionId && !openCollectionCard) setOpenCollectionId(undefined);
+  }, [isLoading, openCollectionId, openCollectionCard]);
+
+  const collectionVariants = useMemo(
+    () =>
+      openCollectionCard && collectionReturnLocation
+        ? buildCollectionVariants(
+            openCollectionCard,
+            {
+              returnAppId: collectionReturnLocation.appId,
+              returnPath: collectionReturnLocation.path,
+            },
+            (href, member) => {
+              onCollectionVariantClick?.(member);
+              setOpenCollectionId(undefined);
+
+              // Like `PackageCard`, navigate within the integrations app and hand the host's
+              // cancel/save targets over as route state: the add-integration page reads the save
+              // target only from state, not from the `returnAppId`/`returnPath` query params.
+              const integrationsBase = http.basePath.prepend(INTEGRATIONS_BASE_PATH);
+              if (!href.startsWith(integrationsBase)) {
+                application.navigateToUrl(href);
+                return;
+              }
+              const hostTarget: [string, { path: string }] = [
+                collectionReturnLocation.appId,
+                { path: collectionReturnLocation.path },
+              ];
+              const state: CreatePackagePolicyRouteState = {
+                onCancelNavigateTo: hostTarget,
+                onCancelUrl: application.getUrlForApp(...hostTarget),
+                onSaveNavigateTo: hostTarget,
+              };
+              application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
+                path: href.slice(integrationsBase.length),
+                state,
+              });
+            }
+          )
+        : [],
+    [openCollectionCard, collectionReturnLocation, onCollectionVariantClick, application, http]
+  );
+
   const splitSubcategories = (
     subcategories: CategoryFacet[] | undefined
   ): { visibleSubCategories?: CategoryFacet[]; hiddenSubCategories?: CategoryFacet[] } => {
@@ -214,7 +319,10 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
         data-test-subj="epmList.mainColumn"
         style={{
           position: 'relative',
-          backgroundColor: euiTheme.euiTheme.colors.backgroundBasePlain,
+          backgroundColor:
+            backgroundColor === 'transparent'
+              ? 'transparent'
+              : euiTheme.euiTheme.colors.backgroundBasePlain,
           alignSelf: 'stretch',
         }}
       >
@@ -274,23 +382,28 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
             {hiddenSubCategoriesItems?.length ? (
               <EuiFlexItem grow={false}>
                 <EuiPopover
+                  aria-label={i18n.translate('xpack.fleet.epmList.subcategoriesPopoverAriaLabel', {
+                    defaultMessage: 'More subcategories',
+                  })}
                   data-test-subj="epmList.showMoreSubCategoriesButton"
                   id="moreSubCategories"
                   button={
-                    <EuiButtonIcon
-                      display="base"
-                      onClick={onButtonClick}
-                      iconType="boxesVertical"
-                      aria-label="Show more subcategories"
-                      size="s"
-                    />
+                    <EuiToolTip content="Show more subcategories" disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        display="base"
+                        onClick={onButtonClick}
+                        iconType="ellipsis"
+                        aria-label="Show more subcategories"
+                        size="s"
+                      />
+                    </EuiToolTip>
                   }
                   isOpen={isPopoverOpen}
                   closePopover={closePopover}
                   panelPaddingSize="none"
                   anchorPosition="downLeft"
                 >
-                  <EuiContextMenuPanel size="s" items={hiddenSubCategoriesItems} />
+                  <EuiContextMenuPanel items={hiddenSubCategoriesItems} />
                 </EuiPopover>
               </EuiFlexItem>
             ) : null}
@@ -307,7 +420,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
           <GridColumn
             emptyStateStyles={emptyStateStyles}
             isLoading={!!isLoading}
-            list={filteredPromotedList}
+            list={gridList}
             showMissingIntegrationMessage={showMissingIntegrationMessage}
             showCardLabels={showCardLabels}
             scrollElementId={scrollElementId}
@@ -325,6 +438,14 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
           </>
         )}
       </EuiFlexItem>
+      {openCollectionCard && collectionReturnLocation && (
+        <CollectionFlyout
+          title={openCollectionCard.title}
+          description={openCollectionCard.description}
+          variants={collectionVariants}
+          onClose={() => setOpenCollectionId(undefined)}
+        />
+      )}
     </EuiFlexGroup>
   );
 };

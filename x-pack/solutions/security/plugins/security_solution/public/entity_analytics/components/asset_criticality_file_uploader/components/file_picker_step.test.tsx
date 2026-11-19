@@ -72,4 +72,60 @@ describe('AssetCriticalityFilePickerStep', () => {
 
     expect(container.querySelector('.euiProgress')).not.toBeNull();
   });
+
+  describe('CSV format guidance', () => {
+    const renderStep = () =>
+      render(
+        <AssetCriticalityFilePickerStep
+          onFileChange={mockOnFileChange}
+          isLoading={mockIsLoading}
+        />,
+        { wrapper: TestProviders }
+      );
+
+    it('should display the header row description', () => {
+      const { getByText } = renderStep();
+
+      expect(
+        getByText(/The first row of the file must contain a header/, { exact: false })
+      ).toBeInTheDocument();
+    });
+
+    it('should display the entity type description with "type" column requirement', () => {
+      const { getByText } = renderStep();
+
+      expect(
+        getByText(/The header for this column must be "type"/, { exact: false })
+      ).toBeInTheDocument();
+    });
+
+    it('should display the identifier fields description', () => {
+      const { getByText } = renderStep();
+
+      expect(
+        getByText(/Entities that match ALL of the identifiers specified in a row will be updated/, {
+          exact: false,
+        })
+      ).toBeInTheDocument();
+    });
+
+    it('should display the criticality level description with "criticality_level" column requirement', () => {
+      const { getByText } = renderStep();
+
+      expect(
+        getByText(/The header for this column must be "criticality_level"/, { exact: false })
+      ).toBeInTheDocument();
+    });
+
+    it('should display the sample CSV with a header row', () => {
+      const { getByText } = renderStep();
+
+      expect(
+        getByText(
+          /type,user\.email,user\.name,user\.full_name,host\.name,host\.domain,service\.name,criticality_level/,
+          { exact: false }
+        )
+      ).toBeInTheDocument();
+    });
+  });
 });

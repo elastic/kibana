@@ -15,8 +15,9 @@ import { AppContextProvider } from '../../../../app_context';
 import type { AppDependencies } from '../../../../app_context';
 import { IndexActionsContextMenu } from './index_actions_context_menu';
 import type { Index } from '@kbn/index-management-shared-types';
-import { notificationService } from '../../../../services/notification';
-import { navigateToIndexDetailsPage, getIndexDetailsLink } from '../../../../services/routing';
+import { NotificationService } from '../../../../services/notification';
+import { getIndexDetailsLink } from '../../../../services/routing';
+import { IndexDetailsSection } from '../../../../../../common/constants';
 import { type DocCountResult, RequestResultType } from '../index_table/get_doc_count';
 
 // EUI context menus keep inactive panels mounted with `pointer-events: none`,
@@ -26,15 +27,6 @@ const user = userEvent.setup({ pointerEventsCheck: 0, delay: null });
 jest.mock('../../../../services/routing', () => ({
   ...jest.requireActual('../../../../services/routing'),
   getIndexDetailsLink: jest.fn(() => '/indices/some/stats'),
-  navigateToIndexDetailsPage: jest.fn(),
-}));
-
-jest.mock('../../../../services/notification', () => ({
-  ...jest.requireActual('../../../../services/notification'),
-  notificationService: {
-    showSuccessToast: jest.fn(),
-    showDangerToast: jest.fn(),
-  },
 }));
 
 jest.mock(
@@ -59,6 +51,7 @@ jest.mock(
 );
 
 const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDependencies => {
+  const toasts = { add: jest.fn() } as any;
   const base: AppDependencies = {
     core: {
       fatalErrors: {} as unknown as AppDependencies['core']['fatalErrors'],
@@ -93,7 +86,7 @@ const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDep
       } as unknown as AppDependencies['services']['extensionsService'],
       uiMetricService: {} as unknown as AppDependencies['services']['uiMetricService'],
       httpService: {} as unknown as AppDependencies['services']['httpService'],
-      notificationService,
+      notificationService: new NotificationService(toasts),
     },
     config: {
       enableIndexActions: true,
@@ -108,6 +101,9 @@ const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDep
       enableSemanticText: false,
       enforceAdaptiveAllocations: false,
       enableFailureStoreRetentionDisabling: true,
+      enableIndexMode: true,
+      enableVectorCount: false,
+      showManagedDataStreamsByDefault: true,
       isServerless: false,
     },
     history: { push: jest.fn() } as unknown as AppDependencies['history'],
@@ -120,7 +116,7 @@ const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDep
     docLinks: {} as unknown as AppDependencies['docLinks'],
     kibanaVersion: {} as unknown as AppDependencies['kibanaVersion'],
     overlays: {} as unknown as AppDependencies['overlays'],
-    canUseSyntheticSource: false,
+    hasAtLeastEnterpriseLicense: false,
     privs: { monitor: true, manageEnrich: true, monitorEnrich: true, manageIndexTemplates: true },
   };
 
@@ -395,65 +391,34 @@ describe('IndexActionsContextMenu', () => {
   });
 
   describe('WHEN navigating to index detail pages', () => {
-    describe('AND WHEN clicking Overview/Settings/Mapping', () => {
-      it('SHOULD call navigateToIndexDetailsPage for each navigation', async () => {
+    it.each([
+      ['Overview', /show index overview/i, IndexDetailsSection.Overview],
+      ['Settings', /show index settings/i, IndexDetailsSection.Settings],
+      ['Mapping', /show index mapping/i, IndexDetailsSection.Mappings],
+      ['Stats', /show index stats/i, IndexDetailsSection.Stats],
+    ])(
+      'SHOULD use history.push with getIndexDetailsLink WHEN clicking %s',
+      async (_name, itemText, section) => {
         const props = getBaseProps();
         const historyPush = jest.fn();
-        const ctx = getIndexManagementCtx({
+        renderWithProviders(<IndexActionsContextMenu {...props} />, {
           history: { push: historyPush } as unknown as AppDependencies['history'],
         });
-        render(
-          <I18nProvider>
-            <AppContextProvider value={ctx}>
-              <IndexActionsContextMenu {...props} />
-            </AppContextProvider>
-          </I18nProvider>
-        );
 
         await openContextMenu();
         const menu = await screen.findByTestId('indexContextMenu');
-        const overviewBtn = await within(menu).findByText(/show index overview/i);
-        await user.click(overviewBtn);
+        await user.click(await within(menu).findByText(itemText));
 
-        await openContextMenu();
-        const menu2 = await screen.findByTestId('indexContextMenu');
-        const settingsBtn = await within(menu2).findByText(/show index settings/i);
-        await user.click(settingsBtn);
-
-        await openContextMenu();
-        const menu3 = await screen.findByTestId('indexContextMenu');
-        const mappingBtn = await within(menu3).findByText(/show index mapping/i);
-        await user.click(mappingBtn);
-
-        expect(navigateToIndexDetailsPage).toHaveBeenCalledTimes(3);
-      });
-    });
-
-    describe('AND WHEN clicking Stats', () => {
-      it('SHOULD use history.push with getIndexDetailsLink', async () => {
-        const props = getBaseProps();
-        const historyPush = jest.fn();
-        const ctx = getIndexManagementCtx({
-          history: { push: historyPush } as unknown as AppDependencies['history'],
-        });
-        render(
-          <I18nProvider>
-            <AppContextProvider value={ctx}>
-              <IndexActionsContextMenu {...props} />
-            </AppContextProvider>
-          </I18nProvider>
+        expect(getIndexDetailsLink).toHaveBeenCalledTimes(1);
+        expect(getIndexDetailsLink).toHaveBeenCalledWith(
+          props.indexNames[0],
+          props.indicesListURLParams,
+          section
         );
-
-        await openContextMenu();
-        const menu = await screen.findByTestId('indexContextMenu');
-        const statsBtn = await within(menu).findByText(/show index stats/i);
-
-        await user.click(statsBtn);
-
-        expect(getIndexDetailsLink).toHaveBeenCalled();
+        expect(historyPush).toHaveBeenCalledTimes(1);
         expect(historyPush).toHaveBeenCalledWith('/indices/some/stats');
-      });
-    });
+      }
+    );
   });
 
   describe('WHEN enableIndexActions flag is disabled', () => {
@@ -794,6 +759,40 @@ describe('IndexActionsContextMenu', () => {
 
         expect(getByName).not.toHaveBeenCalled();
       });
+
+      it.each(['close', 'closed'])(
+        'SHOULD NOT call getByName when the index status is %s',
+        async (status) => {
+          const props = getBaseProps();
+          const getByName = jest.fn();
+          const emptyDocCount$ = of<Record<string, DocCountResult>>({});
+          const closedIndexProps: MenuProps = {
+            ...props,
+            indices: [
+              {
+                name: 'index-1',
+                status: status as Index['status'],
+                primary: 1,
+                hidden: false,
+                aliases: [],
+                isFrozen: false,
+                // documents intentionally omitted
+              } satisfies Partial<Index>,
+            ] as Index[],
+            indexStatusByName: { 'index-1': status as Index['status'] },
+            docCountApi: {
+              getByName,
+              getObservable: () => emptyDocCount$,
+              abort: jest.fn(),
+            },
+          };
+
+          renderWithProviders(<IndexActionsContextMenu {...closedIndexProps} />);
+          await openContextMenu();
+
+          expect(getByName).not.toHaveBeenCalled();
+        }
+      );
     });
 
     describe('AND WHEN index is hidden or already a lookup index', () => {

@@ -21,6 +21,7 @@ export const useUpdateTags = () => {
     async (
       requestFn: () => Promise<any>,
       onSuccess: (hasCompleted?: boolean) => void,
+      onError?: () => void,
       successMessage?: string,
       errorMessage?: string
     ) => {
@@ -46,6 +47,7 @@ export const useUpdateTags = () => {
             defaultMessage: 'Tag(s) update failed',
           });
         notifications.toasts.addError(error, { title: errorTitle });
+        onError?.();
       }
     },
     [notifications.toasts]
@@ -56,12 +58,14 @@ export const useUpdateTags = () => {
       agentId: string,
       newTags: string[],
       onSuccess: () => void,
+      onError?: () => void,
       successMessage?: string,
       errorMessage?: string
     ) => {
       await wrapRequest(
         async () => await sendPutAgentTagsUpdate(agentId, { tags: newTags }),
         onSuccess,
+        onError,
         successMessage,
         errorMessage
       );
@@ -75,6 +79,7 @@ export const useUpdateTags = () => {
       tagsToAdd: string[],
       tagsToRemove: string[],
       onSuccess: (hasCompleted?: boolean) => void,
+      onError?: () => void,
       successMessage?: string,
       errorMessage?: string
     ) => {
@@ -87,6 +92,7 @@ export const useUpdateTags = () => {
             includeInactive: true,
           }),
         onSuccess,
+        onError,
         successMessage,
         errorMessage
       );

@@ -17,7 +17,7 @@ export const SETTINGS_TITLE = i18n.translate(
 export const CONNECTOR_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.conversations.settings.connectorTitle',
   {
-    defaultMessage: 'Connector',
+    defaultMessage: 'Model',
   }
 );
 

@@ -25,6 +25,8 @@ export const deleteCommentRoute = createCasesRoute({
   routerOptions: {
     access: 'public',
     summary: `Delete a case comment or alert`,
+    description:
+      'Deletes a comment or alert from a case. If it is a file attachment, its file is also deleted.',
     // decription: 'You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.',
     tags: ['oas-tag:cases'],
   },
@@ -33,7 +35,7 @@ export const deleteCommentRoute = createCasesRoute({
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
       await client.attachments.delete({
-        attachmentID: request.params.comment_id,
+        savedObjectId: request.params.comment_id,
         caseID: request.params.case_id,
       });
 

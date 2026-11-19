@@ -47,7 +47,7 @@ describe('AssistantConversationBanner', () => {
   it('renders ElasticLlmCallout when Elastic LLM is enabled', () => {
     (useAssistantContext as jest.Mock).mockReturnValue({ inferenceEnabled: true });
     const mockConnectors = [
-      { id: 'mockLLM', actionTypeId: '.inference', isPreconfigured: true },
+      { id: 'mockLLM', actionTypeId: '.inference', isPreconfigured: false, isEis: true },
     ] as AIConnector[];
 
     const mockConversation = {

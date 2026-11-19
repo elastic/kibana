@@ -45,6 +45,7 @@ export const useStateManagers = ({
     createTabsStorageManager({
       urlStateStorage,
       storage: services.storage,
+      profileStateRegistry: services.profileStateRegistry,
       enabled: tabsEnabled,
     })
   );
@@ -54,6 +55,8 @@ export const useStateManagers = ({
     return new DiscoverSearchSessionManager({
       history: services.history,
       session: services.data.search.session,
+      replayCache: services.data.replayCache,
+      timefilter: services.data.query.timefilter.timefilter,
     });
   });
   const [internalState] = useState(() =>

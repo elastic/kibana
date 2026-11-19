@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
 import { coreServices, dataService, serverlessService } from '../../services/kibana_services';
 import { getDashboardBreadcrumb } from '../_dashboard_app_strings';
@@ -23,22 +25,32 @@ import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import type { DashboardRedirect } from '../types';
 import { findService } from '../../dashboard_client';
 import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
+import { LANDING_PAGE_PATH } from '../../../common/page_bundle_constants';
 
 export interface DashboardListingPageProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
   redirectTo: DashboardRedirect;
   initialFilter?: string;
-  title?: string;
+  /**
+   * Title of a dashboard to redirect to, read from the `title` URL param.
+   * Only the value at mount is used: on load, the dashboard with a matching title is looked up
+   * and redirected to. If there is no unique match, the listing is filtered by this title instead.
+   */
+  redirectTitle?: string;
 }
 
 export const DashboardListingPage = ({
-  title,
+  redirectTitle,
   redirectTo,
   initialFilter,
   kbnUrlStateStorage,
 }: DashboardListingPageProps) => {
   const { getListingTabs } = useDashboardMountContext();
+  const { activeTab: activeTabParam } = useParams<{ activeTab?: string }>();
   const [showNoDataPage, setShowNoDataPage] = useState<boolean | undefined>();
+  // Hold off rendering the listing until the title lookup settles.
+  // The listing table removes the title from the URL on load, so it must not mount mid-lookup.
+  const [isFindingTitle, setIsFindingTitle] = useState(Boolean(redirectTitle));
   useEffect(() => {
     let isMounted = true;
     (async () => {
@@ -50,24 +62,42 @@ export const DashboardListingPage = ({
     };
   }, []);
 
+  const activeTabTitle = useMemo(() => {
+    if (!activeTabParam || activeTabParam === 'dashboards') return undefined;
+    return getListingTabs().find((tab) => tab.id === activeTabParam)?.title;
+  }, [activeTabParam, getListingTabs]);
+
   useEffect(() => {
-    coreServices.chrome.setBreadcrumbs(
-      [
-        {
-          text: getDashboardBreadcrumb(),
-        },
-      ],
-      {
-        project: { value: [] },
-      }
-    );
+    const dashboardCrumb = { text: getDashboardBreadcrumb() };
+
+    if (activeTabTitle) {
+      const tabCrumb = { text: activeTabTitle };
+      coreServices.chrome.setBreadcrumbs(
+        [
+          {
+            ...dashboardCrumb,
+            'data-test-subj': `dashboardListingBreadcrumb-${activeTabParam}`,
+            onClick: () =>
+              coreServices.application.navigateToUrl(
+                coreServices.application.getUrlForApp('dashboards', {
+                  path: `#${LANDING_PAGE_PATH}`,
+                })
+              ),
+          },
+          tabCrumb,
+        ],
+        { project: { value: [tabCrumb] } }
+      );
+    } else {
+      coreServices.chrome.setBreadcrumbs([dashboardCrumb], { project: { value: [] } });
+    }
 
     if (serverlessService) {
       // if serverless breadcrumbs available,
       // reset any deeper context breadcrumbs to only keep the main "dashboard" part that comes from the navigation config
-      serverlessService.setBreadcrumbs([]);
+      serverlessService.setBreadcrumbs(activeTabTitle ? [{ text: activeTabTitle }] : []);
     }
-  }, []);
+  }, [activeTabTitle, activeTabParam]);
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
@@ -75,25 +105,55 @@ export const DashboardListingPage = ({
       dataService.query,
       kbnUrlStateStorage
     );
-    if (title) {
-      findService.findByTitle(title).then((result) => {
-        if (!result) return;
+
+    return () => {
+      stopSyncingQueryServiceStateWithUrl();
+    };
+  }, [kbnUrlStateStorage]);
+
+  useEffect(() => {
+    if (!redirectTitle) return;
+
+    findService
+      .findByTitle(redirectTitle)
+      .then((result) => {
+        if (!result) {
+          setIsFindingTitle(false);
+          return;
+        }
         redirectTo({
           destination: 'dashboard',
           id: result.id,
           useReplace: true,
         });
+      })
+      .catch(() => {
+        // show the listing filtered by title if the dashboard can not be looked up
+        setIsFindingTitle(false);
       });
-    }
+    // Title search only occurs on the initial value.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    return () => {
-      stopSyncingQueryServiceStateWithUrl();
-    };
-  }, [title, redirectTo, kbnUrlStateStorage]);
+  // Both feed `DashboardListing`'s tab definitions; an unstable identity there remounts the active tab.
+  const goToDashboard = useCallback(
+    (id?: string, viewMode?: ViewMode) => {
+      redirectTo({ destination: 'dashboard', id, editMode: viewMode === 'edit' });
+    },
+    [redirectTo]
+  );
 
-  const titleFilter = title ? `${title}` : '';
+  // Rebuilt per router render, and URL-synced search triggers one per keystroke.
+  const kbnUrlStateStorageRef = useRef(kbnUrlStateStorage);
+  kbnUrlStateStorageRef.current = kbnUrlStateStorage;
 
-  if (showNoDataPage === undefined) {
+  const getDashboardUrl = useCallback(
+    (id: string, timeRestore: boolean) =>
+      getDashboardListItemLink(kbnUrlStateStorageRef.current, id, timeRestore),
+    []
+  );
+
+  if (showNoDataPage === undefined || isFindingTitle) {
     return null;
   }
 
@@ -105,13 +165,9 @@ export const DashboardListingPage = ({
       {!showNoDataPage && (
         <DashboardListing
           useSessionStorageIntegration={true}
-          initialFilter={initialFilter ?? titleFilter}
-          goToDashboard={(id, viewMode) => {
-            redirectTo({ destination: 'dashboard', id, editMode: viewMode === 'edit' });
-          }}
-          getDashboardUrl={(id, timeRestore) => {
-            return getDashboardListItemLink(kbnUrlStateStorage, id, timeRestore);
-          }}
+          initialFilter={initialFilter ?? redirectTitle ?? ''}
+          goToDashboard={goToDashboard}
+          getDashboardUrl={getDashboardUrl}
           getTabs={getListingTabs}
         />
       )}

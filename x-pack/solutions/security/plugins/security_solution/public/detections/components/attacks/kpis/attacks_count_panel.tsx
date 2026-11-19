@@ -15,6 +15,8 @@ import * as i18n from '../../alerts_kpis/chart_panels/chart_select/translations'
 import { useUserData } from '../../user_info';
 import type { AttacksKpiPanelBaseProps } from './types';
 
+const NoopChartOptionsContextMenu = () => null;
+
 /**
  * Renders the Attacks Count KPI panel, wrapping the AlertsCountPanel.
  */
@@ -40,6 +42,7 @@ export const AttacksCountPanel = React.memo(
         signalIndexName={signalIndexName}
         title={title}
         inspectTitle={i18n.COUNTS}
+        chartOptionsContextMenu={NoopChartOptionsContextMenu}
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
         stackByField0={stackBy0}

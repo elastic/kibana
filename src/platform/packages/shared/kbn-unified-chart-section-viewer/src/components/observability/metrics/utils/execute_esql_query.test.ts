@@ -12,12 +12,12 @@ import { getESQLResults } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import { getTime } from '@kbn/data-plugin/public';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { dataViewWithAtTimefieldMock } from '@kbn/unified-histogram/__mocks__/data_view_with_timefield';
 import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from './execution_context_enums';
-import { executeEsqlQuery } from './execute_esql_query';
+import { EsqlResponseError } from '../../../../common/errors/esql_response_error';
+import { executeEsqlQuery, fetchEsqlResponseOrThrow } from './execute_esql_query';
 import { getMetricsExecutionContext } from './execution_context';
 
 jest.mock('@kbn/esql-utils', () => ({
@@ -61,7 +61,7 @@ describe('executeEsqlQuery', () => {
     mockGetTime.mockReturnValue(undefined);
   });
 
-  it('calls getESQLResults with the given esqlQuery, search, signal, dataView, timeRange, and variables', async () => {
+  it('calls getESQLResults with the given esqlQuery, search, sessionId, signal, timeFieldName, timeRange, and variables', async () => {
     const signal = new AbortController().signal;
     const timeRange = { from: 'now-15m', to: 'now' };
     const variables = [{ key: 'x', value: 'y', type: ESQLVariableType.VALUES }];
@@ -69,12 +69,14 @@ describe('executeEsqlQuery', () => {
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
+      sessionId: 'cached-session',
       signal,
-      dataView: dataViewWithAtTimefieldMock,
+      timeFieldName: '@timestamp',
       timeRange,
       filters: [],
       variables,
       uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
     });
 
     expect(mockGetESQLResults).toHaveBeenCalledTimes(1);
@@ -82,31 +84,55 @@ describe('executeEsqlQuery', () => {
       expect.objectContaining({
         esqlQuery: 'TS metrics-* | METRICS_INFO',
         search: mockSearch,
+        sessionId: 'cached-session',
         signal,
         timeRange,
         variables,
         ...getMetricsExecutionContext(
           MetricsExecutionContextAction.FETCH,
-          MetricsExecutionContextName.METRICS_INFO
+          MetricsExecutionContextName.METRICS_INFO,
+          { profile_id: 'metrics-data-source-profile' }
         ),
       })
     );
+    expect(mockGetESQLResults.mock.calls[0][0]).not.toHaveProperty('approximation');
   });
 
   it('passes metrics info execution context so the request is labeled in APM', async () => {
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
-      dataView: dataViewWithAtTimefieldMock,
+      timeFieldName: '@timestamp',
       uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
     });
 
     expect(mockGetESQLResults).toHaveBeenCalledWith(
       expect.objectContaining({
         executionContext: getMetricsExecutionContext(
           MetricsExecutionContextAction.FETCH,
-          MetricsExecutionContextName.METRICS_INFO
+          MetricsExecutionContextName.METRICS_INFO,
+          { profile_id: 'metrics-data-source-profile' }
         ).executionContext,
+      })
+    );
+  });
+
+  it('forwards profileId onto executionContext.meta so the server-side APM transaction is tagged via the standardized pipeline', async () => {
+    await executeEsqlQuery({
+      esqlQuery: 'TS metrics-* | METRICS_INFO',
+      search: mockSearch,
+      timeFieldName: '@timestamp',
+      uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
+    });
+
+    expect(mockGetESQLResults).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: expect.objectContaining({
+          page: 'metrics_fetch_metrics_info',
+          meta: { profile_id: 'metrics-data-source-profile' },
+        }),
       })
     );
   });
@@ -115,11 +141,12 @@ describe('executeEsqlQuery', () => {
     const result = await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
-      dataView: dataViewWithAtTimefieldMock,
+      timeFieldName: '@timestamp',
       uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
     });
 
-    expect(result).toStrictEqual([
+    expect(result.documents).toStrictEqual([
       {
         metric_name: 'metric.name',
         data_stream: 'metrics-stream-1',
@@ -129,9 +156,13 @@ describe('executeEsqlQuery', () => {
         dimension_fields: 'host',
       },
     ]);
+    expect(result.requestParams).toStrictEqual({
+      query: 'TS metrics-* | METRICS_INFO',
+    });
+    expect(result.rawResponse).toBeDefined();
   });
 
-  it('builds filter from time and filters when timeRange and dataView have timeFieldName', async () => {
+  it('builds filter from time and filters when timeRange and timeFieldName are provided', async () => {
     const timeFilter = {
       meta: { index: 'test', type: 'range' as const },
       query: { range: {} },
@@ -141,16 +172,17 @@ describe('executeEsqlQuery', () => {
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
-      dataView: dataViewWithAtTimefieldMock,
+      timeFieldName: '@timestamp',
       timeRange: { from: 'now-1h', to: 'now' },
       filters: [],
       uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
     });
 
     expect(mockGetTime).toHaveBeenCalledWith(
-      dataViewWithAtTimefieldMock,
+      undefined,
       { from: 'now-1h', to: 'now' },
-      { fieldName: dataViewWithAtTimefieldMock.timeFieldName }
+      { fieldName: '@timestamp' }
     );
     expect(mockBuildEsQuery).toHaveBeenCalled();
     expect(mockGetESQLResults).toHaveBeenCalledWith(
@@ -166,9 +198,10 @@ describe('executeEsqlQuery', () => {
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
-      dataView: dataViewWithAtTimefieldMock,
+      timeFieldName: '@timestamp',
       filters: [],
       uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
     });
 
     expect(mockGetESQLResults).toHaveBeenCalledWith(
@@ -176,5 +209,85 @@ describe('executeEsqlQuery', () => {
         filter: undefined,
       })
     );
+  });
+
+  it('throws EsqlResponseError when response contains an Elasticsearch error object', async () => {
+    mockGetESQLResults.mockResolvedValueOnce({
+      response: {
+        error: {
+          type: 'remote_transport_exception',
+          reason: 'ccs query failed',
+        },
+      },
+      params: { query: '' },
+    } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
+
+    await expect(
+      executeEsqlQuery({
+        esqlQuery: 'TS metrics-* | METRICS_INFO',
+        search: mockSearch,
+        timeFieldName: '@timestamp',
+        uiSettings: mockUiSettings,
+        profileId: 'metrics-data-source-profile',
+      })
+    ).rejects.toMatchObject({
+      name: 'EsqlResponseError',
+      message: 'remote_transport_exception: ccs query failed',
+    });
+  });
+
+  it('sets status on EsqlResponseError when response includes top-level status', async () => {
+    mockGetESQLResults.mockResolvedValueOnce({
+      response: {
+        error: {
+          type: 'remote_transport_exception',
+          reason: 'ccs query failed',
+        },
+        status: 400,
+      },
+      params: { query: '' },
+    } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
+
+    await expect(
+      executeEsqlQuery({
+        esqlQuery: 'TS metrics-* | METRICS_INFO',
+        search: mockSearch,
+        timeFieldName: '@timestamp',
+        uiSettings: mockUiSettings,
+        profileId: 'metrics-data-source-profile',
+      })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+});
+
+describe('fetchEsqlResponseOrThrow', () => {
+  it('throws EsqlResponseError for error responses', async () => {
+    mockGetESQLResults.mockResolvedValueOnce({
+      response: {
+        error: {
+          type: 'illegal_argument_exception',
+          reason: 'bad request',
+        },
+      },
+      params: { query: '' },
+    } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
+
+    await expect(
+      fetchEsqlResponseOrThrow({} as Parameters<typeof getESQLResults>[0])
+    ).rejects.toThrow(EsqlResponseError);
+  });
+
+  it('passes through payload status on EsqlResponseError', async () => {
+    mockGetESQLResults.mockResolvedValueOnce({
+      response: {
+        error: { type: 'illegal_argument_exception', reason: 'bad request' },
+        status: 400,
+      },
+      params: { query: '' },
+    } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
+
+    await expect(
+      fetchEsqlResponseOrThrow({} as Parameters<typeof getESQLResults>[0])
+    ).rejects.toMatchObject({ status: 400 });
   });
 });

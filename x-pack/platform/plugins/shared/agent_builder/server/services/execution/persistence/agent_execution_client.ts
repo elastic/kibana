@@ -7,40 +7,81 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ChatEvent } from '@kbn/agent-builder-common';
-import type { AgentExecution, SerializedExecutionError, FindExecutionsOptions } from '../types';
-import { ExecutionStatus } from '../types';
+import type {
+  ChatEvent,
+  ExecutionAbortReason,
+  SerializedExecutionError,
+  UserIdAndName,
+} from '@kbn/agent-builder-common';
+import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
+import type { AgentExecution, FindExecutionsOptions } from '@kbn/agent-builder-server/execution';
 import type { AgentExecutionProperties, AgentExecutionStorage } from './agent_execution_storage';
 import { agentExecutionIndexName, createStorage } from './agent_execution_storage';
 
+const UPDATE_RETRY_ON_CONFLICT = 3;
+
 type CreateExecutionParams = Pick<
   AgentExecution,
-  'executionId' | 'agentId' | 'spaceId' | 'agentParams' | 'metadata'
+  | 'executionId'
+  | 'agentId'
+  | 'spaceId'
+  | 'agentParams'
+  | 'metadata'
+  | 'executionMode'
+  | 'interactivity'
+  | 'parentExecutionId'
+  | 'owner'
+  | 'runAs'
 >;
 
-/**
- * Lightweight snapshot returned by {@link AgentExecutionClient.peek}.
- * Includes only the status, error, and event count — no events payload.
- */
+/** What a status update records alongside the status. */
+export interface UpdateExecutionStatusOptions {
+  /** The error that ended the execution (`failed`, or the abort error for `aborted`). */
+  error?: SerializedExecutionError;
+  /** Where the abort came from; only meaningful with `aborted`. */
+  abortReason?: ExecutionAbortReason;
+}
+
+/** Lightweight snapshot returned by {@link AgentExecutionClient.peek}, without the events. */
 export interface ExecutionPeek {
   status: ExecutionStatus;
   error?: SerializedExecutionError;
   eventCount: number;
+  lastHeartbeat?: string;
+  conversationId?: string;
+  agentId?: string;
+  spaceId?: string;
+  owner?: UserIdAndName;
+  runAs?: AgentExecution['runAs'];
 }
+
+const runAsFromEs = (
+  runAs: NonNullable<AgentExecutionProperties['run_as']>
+): NonNullable<AgentExecution['runAs']> => ({
+  type: runAs.type,
+  serviceAccountId: runAs.service_account_id,
+});
 
 const fromEs = (source: AgentExecutionProperties): AgentExecution => {
   return {
     executionId: source.execution_id,
     '@timestamp': source['@timestamp'],
+    ...(source.last_heartbeat ? { lastHeartbeat: source.last_heartbeat } : {}),
     status: source.status,
     agentId: source.agent_id,
+    executionMode: source.execution_mode ?? AgentExecutionMode.conversation,
+    ...(source.interactivity ? { interactivity: source.interactivity } : {}),
+    ...(source.parent_execution_id ? { parentExecutionId: source.parent_execution_id } : {}),
     spaceId: source.space_id,
+    ...(source.owner ? { owner: source.owner } : {}),
+    ...(source.run_as ? { runAs: runAsFromEs(source.run_as) } : {}),
     agentParams: source.agent_params,
     eventCount: source.event_count ?? 0,
     events: source.events ?? [],
     ...(source.error ? { error: source.error } : {}),
+    ...(source.abort_reason ? { abortReason: source.abort_reason } : {}),
     ...(source.metadata ? { metadata: source.metadata } : {}),
-  };
+  } as AgentExecution;
 };
 
 /**
@@ -50,18 +91,28 @@ export interface AgentExecutionClient {
   /** Create a new execution document. */
   create(execution: CreateExecutionParams): Promise<AgentExecution>;
 
-  /** Get an execution document by id (real-time GET). Returns undefined if not found. */
-  get(executionId: string): Promise<AgentExecution | undefined>;
+  /**
+   * Get an execution document by id (real-time GET). Returns undefined if not found. `signal`
+   * aborts the read.
+   */
+  get(executionId: string, options?: { signal?: AbortSignal }): Promise<AgentExecution | undefined>;
 
   /** Update the status of an execution, optionally persisting an error. */
+  /**
+   * Updates the execution status. `aborted` is sticky against a later `failed` or `completed`.
+   * `error` and `abortReason` are recorded when given.
+   */
   updateStatus(
     executionId: string,
     status: ExecutionStatus,
-    error?: SerializedExecutionError
+    options?: UpdateExecutionStatusOptions
   ): Promise<void>;
 
   /** Append events to an execution document using a scripted update. */
   appendEvents(executionId: string, events: ChatEvent[]): Promise<void>;
+
+  /** Update the execution's `last_heartbeat` to the current time (liveness signal). */
+  updateHeartbeat(executionId: string): Promise<void>;
 
   /**
    * Lightweight status check (real-time GET with `_source_includes`).
@@ -79,6 +130,9 @@ export interface AgentExecutionClient {
     executionId: string,
     since?: number
   ): Promise<{ events: ChatEvent[]; status: ExecutionStatus; error?: SerializedExecutionError }>;
+
+  /** Delete an execution document. Resolves silently when it does not exist. */
+  delete(executionId: string): Promise<void>;
 
   /** Search executions by metadata and/or status filters. */
   find(options: FindExecutionsOptions): Promise<AgentExecution[]>;
@@ -116,6 +170,11 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     spaceId,
     agentParams,
     metadata,
+    executionMode,
+    interactivity,
+    parentExecutionId,
+    owner,
+    runAs,
   }: CreateExecutionParams): Promise<AgentExecution> {
     if (metadata) {
       for (const key of Object.keys(metadata)) {
@@ -129,35 +188,39 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     const document: AgentExecutionProperties = {
       execution_id: executionId,
       '@timestamp': now,
+      last_heartbeat: now,
       status: ExecutionStatus.scheduled,
       agent_id: agentId,
+      execution_mode: executionMode,
+      ...(interactivity ? { interactivity } : {}),
+      parent_execution_id: parentExecutionId,
       space_id: spaceId,
+      ...(owner ? { owner } : {}),
+      ...(runAs
+        ? { run_as: { type: runAs.type, service_account_id: runAs.serviceAccountId } }
+        : {}),
       agent_params: agentParams,
       event_count: 0,
       events: [],
-      ...(metadata ? { metadata } : {}),
+      metadata: metadata ?? {},
     };
 
+    // Reads by id are real-time GETs, and searches already tolerate the lag on status updates.
     await this.storage.getClient().index({
       id: executionId,
       document,
+      op_type: 'create',
+      refresh: false,
     });
 
-    return {
-      executionId,
-      '@timestamp': now,
-      status: ExecutionStatus.scheduled,
-      agentId,
-      spaceId,
-      agentParams,
-      eventCount: 0,
-      events: [],
-      ...(metadata ? { metadata } : {}),
-    };
+    return fromEs(document);
   }
 
-  async get(executionId: string): Promise<AgentExecution | undefined> {
-    const source = await this.getSource(executionId);
+  async get(
+    executionId: string,
+    { signal }: { signal?: AbortSignal } = {}
+  ): Promise<AgentExecution | undefined> {
+    const source = await this.getSource(executionId, signal);
     if (!source) {
       return undefined;
     }
@@ -167,14 +230,26 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
   async updateStatus(
     executionId: string,
     status: ExecutionStatus,
-    error?: SerializedExecutionError
+    { error, abortReason }: UpdateExecutionStatusOptions = {}
   ): Promise<void> {
+    // `aborted` is sticky: once an abort was requested the execution reports it. Neither a later
+    // `failed` / `completed` (the graph ending inside the abort-detection window) nor a later
+    // `running` (the abort landing between a handler's status read and its write) may overwrite
+    // it — otherwise the abort monitor would see `running` and never cancel. The error, when
+    // given, is still recorded.
     await this.esClient.update({
       index: agentExecutionIndexName,
       id: executionId,
-      doc: {
-        status,
-        ...(error ? { error } : {}),
+      retry_on_conflict: UPDATE_RETRY_ON_CONFLICT,
+      script: {
+        lang: 'painless',
+        source: `
+          boolean keepAborted = ctx._source.status == 'aborted' && params.status != 'aborted';
+          if (!keepAborted) { ctx._source.status = params.status; }
+          if (params.error != null) { ctx._source.error = params.error; }
+          if (params.abort_reason != null) { ctx._source.abort_reason = params.abort_reason; }
+        `,
+        params: { status, error: error ?? null, abort_reason: abortReason ?? null },
       },
     });
   }
@@ -186,6 +261,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     await this.esClient.update({
       index: agentExecutionIndexName,
       id: executionId,
+      retry_on_conflict: UPDATE_RETRY_ON_CONFLICT,
       script: {
         source: `
           if (ctx._source.events == null) { ctx._source.events = []; }
@@ -197,25 +273,72 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     });
   }
 
+  async updateHeartbeat(executionId: string): Promise<void> {
+    await this.esClient.update({
+      index: agentExecutionIndexName,
+      id: executionId,
+      retry_on_conflict: UPDATE_RETRY_ON_CONFLICT,
+      doc: {
+        last_heartbeat: new Date().toISOString(),
+      },
+    });
+  }
+
   async peek(executionId: string): Promise<ExecutionPeek | undefined> {
     try {
       const response = await this.esClient.get<AgentExecutionProperties>({
         index: agentExecutionIndexName,
         id: executionId,
-        _source_includes: ['status', 'error', 'event_count'] as string[],
+        _source_includes: [
+          'status',
+          'error',
+          'event_count',
+          'last_heartbeat',
+          'agent_params.conversationId',
+          'agent_id',
+          'space_id',
+          'owner',
+          'run_as',
+        ] as string[],
       });
       const source = response._source;
       if (!source) {
         return undefined;
       }
+      const {
+        agent_params: agentParams,
+        agent_id: agentId,
+        space_id: spaceId,
+        owner,
+        run_as: runAs,
+      } = source;
+      const conversationId =
+        agentParams && 'conversationId' in agentParams ? agentParams.conversationId : undefined;
       return {
         status: source.status,
         eventCount: source.event_count ?? 0,
         ...(source.error ? { error: source.error } : {}),
+        ...(source.last_heartbeat ? { lastHeartbeat: source.last_heartbeat } : {}),
+        ...(conversationId ? { conversationId } : {}),
+        ...(agentId ? { agentId } : {}),
+        ...(spaceId ? { spaceId } : {}),
+        ...(owner ? { owner } : {}),
+        ...(runAs ? { runAs: runAsFromEs(runAs) } : {}),
       };
     } catch (err) {
       if (err?.meta?.statusCode === 404) {
         return undefined;
+      }
+      throw err;
+    }
+  }
+
+  async delete(executionId: string): Promise<void> {
+    try {
+      await this.esClient.delete({ index: agentExecutionIndexName, id: executionId });
+    } catch (err) {
+      if (err?.meta?.statusCode === 404) {
+        return;
       }
       throw err;
     }
@@ -285,12 +408,15 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
   /**
    * Shared helper: real-time GET on the execution document.
    */
-  private async getSource(executionId: string): Promise<AgentExecutionProperties | undefined> {
+  private async getSource(
+    executionId: string,
+    signal?: AbortSignal
+  ): Promise<AgentExecutionProperties | undefined> {
     try {
-      const response = await this.esClient.get<AgentExecutionProperties>({
-        index: agentExecutionIndexName,
-        id: executionId,
-      });
+      const response = await this.esClient.get<AgentExecutionProperties>(
+        { index: agentExecutionIndexName, id: executionId },
+        { signal }
+      );
       return response._source;
     } catch (err) {
       if (err?.meta?.statusCode === 404) {

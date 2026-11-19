@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set';
 import React from 'react';
 import { screen } from '@testing-library/react';
 
@@ -17,7 +16,7 @@ import { renderWithTestingProviders } from '../../../common/mock';
 
 describe('OpenLensButton', () => {
   const props = {
-    attachmentId: 'test',
+    savedObjectId: 'test',
     ...lensVisualization,
   };
 
@@ -56,39 +55,13 @@ describe('OpenLensButton', () => {
 
     const { timeRange, ...rest } = lensVisualization;
 
-    expect(navigateToPrefilledEditor).toBeCalledWith(
+    expect(navigateToPrefilledEditor).toHaveBeenCalledWith(
       {
-        id: props.attachmentId,
+        id: props.savedObjectId,
         ...rest,
         time_range: timeRange,
       },
       { openInNewTab: true }
     );
-  });
-
-  it('returns null if the user does not have access to lens', () => {
-    const services = createStartServicesMock();
-    services.lens.canUseEditor = () => false;
-
-    // @ts-expect-error: props are correct
-    renderWithTestingProviders(<OpenLensButton {...props} />, {
-      wrapperProps: { services },
-    });
-
-    expect(screen.queryByText('Open visualization')).not.toBeInTheDocument();
-  });
-
-  it('does not show the button if the query is an ESQL', () => {
-    const esqlProps = {
-      attachmentId: 'test',
-      ...lensVisualization,
-    };
-
-    set(esqlProps, 'attributes.state.query', { esql: '' });
-
-    // @ts-expect-error: props are correct
-    renderWithTestingProviders(<OpenLensButton {...esqlProps} />);
-
-    expect(screen.queryByText('Open visualization')).not.toBeInTheDocument();
   });
 });

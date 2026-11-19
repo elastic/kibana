@@ -11,7 +11,20 @@ import type { KibanaRole } from '../../../../../common';
 import { getPrivilegedRoleName } from '../../../../../common';
 import { coreWorkerFixtures } from '../../worker';
 
-export type LoginFunction = (role: string) => Promise<void>;
+export interface LoginOptions {
+  /**
+   * Built-in UIAM organization roles the user holds on top of the role, such as `billing-admin`
+   * or `organization-admin`. Only supported on local UIAM-enabled serverless projects.
+   */
+  organizationRoles?: string[];
+  /**
+   * Built-in UIAM project roles the user holds on the project type Kibana runs as, named without
+   * the type prefix, such as `admin`. Only supported on local UIAM-enabled serverless projects.
+   */
+  projectRoles?: string[];
+}
+
+export type LoginFunction = (role: string, options?: LoginOptions) => Promise<void>;
 
 export interface BrowserAuthFixture {
   /**
@@ -32,15 +45,35 @@ export interface BrowserAuthFixture {
   /**
    * Logs in as a user with a role.
    * @param role - A role object that defines the Kibana and ES previleges.
+   * @param options - Extra UIAM organization and project roles for the user, see {@link LoginOptions}.
    * @returns A Promise that resolves once the cookie in browser is set.
    */
-  loginAs: (role: string) => Promise<void>;
+  loginAs: LoginFunction;
   /**
    * Logs in as a user with a custom role.
    * @param role - A role object that defines the Kibana and ES previleges. Role will re-created if it doesn't exist.
    * @returns A Promise that resolves once the cookie in browser is set.
    */
   loginWithCustomRole: (role: KibanaRole) => Promise<void>;
+  /**
+   * Logs in as a SAML user whose privileges match the named Elasticsearch role
+   * (e.g. `'kibana_admin'`, `'superuser'`, `'monitoring_user'`).
+   *
+   * Fetches the role descriptor from Elasticsearch and provisions it into the
+   * worker's custom role slot — works on both local and Cloud environments.
+   * No entry in `roles.yml` is required.
+   *
+   * @param roleName - The name of the ES role to look up and log in as.
+   * @returns A Promise that resolves once the cookie in browser is set.
+   *
+   * @example
+   * test('kibana_admin cannot see CCR link', async ({ browserAuth, page }) => {
+   *   await browserAuth.loginWithBuiltInRole('kibana_admin');
+   *   await page.goto('/app/management');
+   *   await expect(page.locator('[data-test-subj="cross_cluster_replication"]')).toBeHidden();
+   * });
+   */
+  loginWithBuiltInRole: (roleName: string) => Promise<void>;
 }
 
 /**
@@ -65,14 +98,22 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
       ]);
     };
 
-    const loginAs: LoginFunction = async (role: string) => {
-      const cookie = await samlAuth.session.getInteractiveUserSessionCookieWithRoleScope(role);
+    const loginAs: LoginFunction = async (role, options) => {
+      const cookie = await samlAuth.session.getInteractiveUserSessionCookieWithRoleScope(role, {
+        organizationRoles: options?.organizationRoles,
+        projectRoles: options?.projectRoles,
+      });
       await setSessionCookie(cookie);
     };
 
     const loginWithCustomRole = async (role: KibanaRole) => {
       // the samlAuth fixture handles the custom role creation and deletion
       await samlAuth.setCustomRole(role);
+      return loginAs(samlAuth.customRoleName);
+    };
+
+    const loginWithBuiltInRole = async (roleName: string) => {
+      await samlAuth.setBuiltInRole(roleName);
       return loginAs(samlAuth.customRoleName);
     };
 
@@ -90,6 +131,7 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
       loginAsPrivilegedUser,
       loginAs,
       loginWithCustomRole,
+      loginWithBuiltInRole,
     });
   },
 });

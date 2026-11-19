@@ -140,20 +140,20 @@ export class MonitoringPlugin
     const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
 
     // Register collector objects for stats to show up in the APIs
-    if (plugins.usageCollection) {
-      coreSetup.savedObjects.registerType({
-        name: SAVED_OBJECT_TELEMETRY,
-        hidden: true,
-        namespaceType: 'agnostic',
-        mappings: {
-          properties: {
-            reportedClusterUuids: {
-              type: 'keyword',
-            },
+    coreSetup.savedObjects.registerType({
+      name: SAVED_OBJECT_TELEMETRY,
+      hidden: true,
+      namespaceType: 'agnostic',
+      mappings: {
+        properties: {
+          reportedClusterUuids: {
+            type: 'keyword',
           },
         },
-      });
+      },
+    });
 
+    if (plugins.usageCollection) {
       registerCollectors(plugins.usageCollection, config, () => this.cluster);
       registerMonitoringTelemetryCollection(
         plugins.usageCollection,

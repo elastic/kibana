@@ -1,4 +1,5 @@
 summary: Create a runtime field.
+description: Create a long-type runtime field that emits a value derived from the foo source field.
 value:
   {
   "name": "runtimeFoo",

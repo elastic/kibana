@@ -8,7 +8,7 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
-import { mockSourcererScope } from '../../../../sourcerer/containers/mocks';
+import { mockDataViewSpec } from '../../../../data_view_manager/mocks/timeline_data_view';
 import { mockTimelineData } from '../../../../common/mock';
 import type { TransformTimelineItemToUnifiedRowsReturn } from './utils';
 import { transformTimelineItemToUnifiedRows } from './utils';
@@ -22,7 +22,7 @@ describe('utils', () => {
       result = transformTimelineItemToUnifiedRows({
         events: testTimelineData,
         dataView: new DataView({
-          spec: mockSourcererScope.sourcererDataView,
+          spec: mockDataViewSpec,
           fieldFormats: fieldFormatsMock,
         }),
       });

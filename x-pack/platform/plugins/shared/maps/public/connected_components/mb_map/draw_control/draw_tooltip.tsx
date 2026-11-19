@@ -124,6 +124,9 @@ export class DrawTooltip extends Component<Props, State> {
           pointerEvents: 'none',
           transform: `translate(${this.state.x - 13}px, ${this.state.y - 13}px)`,
         }}
+        aria-label={i18n.translate('xpack.maps.drawTooltip.popoverAriaLabel', {
+          defaultMessage: 'Draw instructions',
+        })}
       >
         <EuiText color="subdued" size="xs">
           {instructions}

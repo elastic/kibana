@@ -1,0 +1,994 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback, useMemo } from 'react';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { EuiSpacer } from '@elastic/eui';
+import { useUpdateAssetCriticality } from '../../entity_analytics/api/hooks/use_update_asset_criticality';
+import { useEntityRiskScoreRecalculation } from '../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
+import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
+import { useQueryInspector } from '../../common/components/page/manage_query';
+import { useGlobalTime } from '../../common/containers/use_global_time';
+import {
+  type ServiceItem,
+  buildEntityNameFilter,
+  buildHostNamesFilter,
+  buildUserNamesFilter,
+  EntityType as SearchEntityType,
+  type EntityRiskScore,
+  type RiskSeverity,
+  type RiskStats,
+} from '../../../common/search_strategy';
+import { useKibana } from '../../common/lib/kibana';
+import { Content as HostPanelContent } from '../../flyout_v2/entity/host/main/content';
+import { Header as HostPanelHeader } from '../../flyout_v2/entity/host/main/header';
+import { useObservedHost } from '../../flyout_v2/entity/host/main/hooks/use_observed_host';
+import { EntityType } from '../../../common/entity_analytics/types';
+import {
+  buildRiskScoreStateFromEntityRecord,
+  getRiskFromEntityRecord,
+} from '../../flyout/entity_details/shared/entity_store_risk_utils';
+import { useEntityFromStore } from '../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
+import {
+  mergeLegacyIdentityWhenStoreEntityMissing,
+  type IdentityFields,
+} from '../../flyout/document_details/shared/utils';
+import { HOST_PANEL_RISK_SCORE_QUERY_ID } from '../../flyout_v2/entity/host/main/constants';
+import { FlyoutBody } from '../../flyout/shared/components/flyout_body';
+import { FlyoutHeader } from '../../flyout/shared/components/flyout_header';
+import {
+  useEntityPanelTabs,
+  TABLE_TAB_ID,
+} from '../../flyout/entity_details/shared/hooks/use_entity_panel_tabs';
+import { EntityPanelHeaderTabs } from '../../flyout/entity_details/shared/components/entity_panel_tabs';
+import { EntityStoreTableTab } from '../../flyout/entity_details/shared/components/entity_store_table_tab';
+import { EntitySummaryGrid } from '../../flyout/entity_details/shared/components/entity_summary_grid';
+import {
+  HostPanelKey,
+  ServicePanelKey,
+  UserPanelKey,
+} from '../../flyout/entity_details/shared/constants';
+import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { EntityEventTypes } from '../../common/lib/telemetry';
+import { Content as UserPanelContent } from '../../flyout_v2/entity/user/main/content';
+import { Header as UserPanelHeader } from '../../flyout_v2/entity/user/main/header';
+import { useObservedUser } from '../../flyout_v2/entity/user/main/hooks/use_observed_user';
+import { useManagedUser } from '../../flyout/entity_details/shared/hooks/use_managed_user';
+import { USER_PANEL_RISK_SCORE_QUERY_ID } from '../../flyout_v2/entity/user/main/constants';
+import { Content as ServicePanelContent } from '../../flyout_v2/entity/service/main/content';
+import { Header as ServicePanelHeader } from '../../flyout_v2/entity/service/main/header';
+import { useObservedService } from '../../flyout_v2/entity/service/main/hooks/use_observed_service';
+import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from '../../flyout_v2/entity/service/main/constants';
+import { FlyoutLoading } from '../../flyout_v2/shared/components/flyout_loading';
+import type {
+  EntityAttachmentIdentifier,
+  EntityAttachmentRiskStats,
+} from '../attachment_types/entity_attachment/types';
+import { useEntityForAttachment } from '../attachment_types/entity_attachment/use_entity_for_attachment';
+import {
+  getHostNameForHostDetailsUrl,
+  getServiceNameForServiceDetailsUrl,
+  getUserNameForUserDetailsUrl,
+} from '../attachment_types/entity_explore_navigation';
+import { useEntityAnalyticsAgentNavigation } from '../attachment_types/entity_analytics_agent_navigation_context';
+import type { RiskScoreState } from '../../entity_analytics/api/hooks/use_risk_score';
+import { entityAttachmentQueryClient } from '../attachment_types/entity_attachment/query_client';
+
+const AGENT_BUILDER_ENTITY_CARD_SCOPE = 'agent-builder-entity-card';
+
+/**
+ * Namespaced Inspect query ids for the Agent Builder entity Preview canvas.
+ * Must not collide with the Security entity flyout ids — both share one Redux store, and the
+ * flyout's `useQueryInspector` cleanup `deleteQuery` would otherwise disable Preview Inspect.
+ */
+const AGENT_BUILDER_HOST_PANEL_RISK_SCORE_QUERY_ID = `agentBuilder${HOST_PANEL_RISK_SCORE_QUERY_ID}`;
+const AGENT_BUILDER_USER_PANEL_RISK_SCORE_QUERY_ID = `agentBuilder${USER_PANEL_RISK_SCORE_QUERY_ID}`;
+const AGENT_BUILDER_SERVICE_PANEL_RISK_SCORE_QUERY_ID = `agentBuilder${SERVICE_PANEL_RISK_SCORE_QUERY_ID}`;
+
+const FIRST_RECORD_PAGINATION = {
+  cursorStart: 0,
+  querySize: 1,
+};
+
+/**
+ * Builds a {@link RiskScoreState} directly from the rich `EntityAttachmentRiskStats`
+ * payload embedded by the server-side `security.get_entity` tool. The attachment
+ * payload carries the same field set as a risk-index document (category_1_score,
+ * category_1_count, category_2_score, modifiers, …) — far richer than the entity
+ * store's summary `entity.risk` (which only has `calculated_level`/`calculated_score`/
+ * `calculated_score_norm`). Mirrors how the inline `EntityCard` consumes
+ * `attachmentRiskStats` so the Preview Only flyout's `FlyoutRiskSummary` shows the
+ * same Alerts/Asset Criticality/Watchlists/Result rows the chat card already does
+ * (instead of the all-zero stub `buildRiskScoreStateFromEntityRecord` produces when
+ * the entity store record lacks category breakdowns).
+ */
+const buildEntityRiskScoreFromAttachmentRiskStats = <T extends EntityType>(
+  entityType: T,
+  attachmentRiskStats: EntityAttachmentRiskStats,
+  entityName: string
+): EntityRiskScore<T> => {
+  const riskStats = {
+    ...attachmentRiskStats,
+    rule_risks: [],
+    multipliers: [],
+  } as unknown as RiskStats;
+
+  return {
+    '@timestamp': attachmentRiskStats['@timestamp'] ?? new Date().toISOString(),
+    [entityType]: { name: entityName, risk: riskStats },
+  } as unknown as EntityRiskScore<T>;
+};
+
+const buildRiskScoreStateFromAttachmentRiskStats = <T extends EntityType>(
+  entityType: T,
+  attachmentRiskStats: EntityAttachmentRiskStats,
+  entityName: string
+): RiskScoreState<T> => {
+  const dataItem = buildEntityRiskScoreFromAttachmentRiskStats(
+    entityType,
+    attachmentRiskStats,
+    entityName
+  );
+
+  return {
+    data: [dataItem] as RiskScoreState<T>['data'],
+    inspect: { dsl: [], response: [] },
+    isInspected: false,
+    refetch: () => {},
+    totalCount: 1,
+    isAuthorized: true,
+    hasEngineBeenInstalled: true,
+    loading: false,
+    error: null,
+  };
+};
+
+const useOpenHostInvestigationInEntityAnalytics = ({
+  hostName,
+  entityIdForPanels,
+  scopeId,
+  safeContextID,
+}: {
+  hostName: string;
+  entityIdForPanels?: string;
+  scopeId: string;
+  safeContextID: string;
+}): ((path?: EntityDetailsPath) => void) => {
+  const { telemetry } = useKibana().services;
+  const { navigateWithFlyout } = useEntityAnalyticsAgentNavigation();
+
+  return useCallback(
+    (path?: EntityDetailsPath) => {
+      telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
+        entity: SearchEntityType.host,
+      });
+      navigateWithFlyout({
+        preview: [],
+        left: { path },
+        right: {
+          id: HostPanelKey,
+          params: {
+            contextID: safeContextID,
+            scopeId,
+            hostName,
+            entityId: entityIdForPanels,
+          },
+        },
+      });
+    },
+    [entityIdForPanels, hostName, navigateWithFlyout, safeContextID, scopeId, telemetry]
+  );
+};
+
+const HostEntityFlyoutOverviewCanvas: React.FC<{
+  hostName: string;
+  entityId?: string;
+  attachmentRiskStats?: EntityAttachmentRiskStats;
+  attachmentResolutionRiskStats?: EntityAttachmentRiskStats;
+  hideHeaderIcons: boolean;
+}> = ({
+  hostName,
+  entityId,
+  attachmentRiskStats,
+  attachmentResolutionRiskStats,
+  hideHeaderIcons,
+}) => {
+  const euidApi = useEntityStoreEuidApi();
+
+  const safeContextID = AGENT_BUILDER_ENTITY_CARD_SCOPE;
+  const scopeId = AGENT_BUILDER_ENTITY_CARD_SCOPE;
+  const isPreviewMode = false;
+
+  const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
+
+  const hostStoreIdentityFields = useMemo(
+    () => (!entityId && hostName ? { 'host.name': hostName } : undefined),
+    [entityId, hostName]
+  );
+
+  const entityFromStoreResult = useEntityFromStore({
+    entityId,
+    identityFields: hostStoreIdentityFields,
+    entityType: 'host',
+    skip: isInitializing,
+  });
+
+  const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
+    const legacyFields =
+      hostName != null && hostName !== '' ? { 'host.name': hostName } : ({} as IdentityFields);
+    const fromStore =
+      euidApi?.euid?.getEntityIdentifiersFromDocument(
+        euidApi.getBuiltInEntityDefinition('host'),
+        entityFromStoreResult.entityRecord
+      ) ?? {};
+    return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
+  }, [euidApi, entityFromStoreResult.entityRecord, hostName]);
+
+  const hostNameFilterQuery = useMemo(
+    () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
+    [hostName]
+  );
+
+  const observedHost = useObservedHost(hostName, scopeId, entityFromStoreResult);
+
+  const riskScoreState = useRiskScore({
+    riskEntity: EntityType.host,
+    filterQuery: hostNameFilterQuery,
+    onlyLatest: false,
+    pagination: FIRST_RECORD_PAGINATION,
+    skip: !!observedHost?.entityRecord,
+  });
+
+  const { inspect, refetch, loading } = riskScoreState;
+
+  const onRecalculation = useCallback(() => entityAttachmentQueryClient.invalidateQueries(), []);
+
+  const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
+    useEntityRiskScoreRecalculation({
+      entityType: EntityType.host,
+      identifier: hostName,
+      entityId: observedHost.entityRecord?.entity?.id,
+      entityStoreV2Enabled: true,
+      entityFromStoreResult,
+      riskScoreState,
+      onRecalculation,
+    });
+
+  const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('host', {
+    onSuccess: calculateEntityRiskScore,
+    refetchEntityRecord: entityFromStoreResult.refetch,
+  });
+
+  const panelDisplayEntityId = observedHost.entityRecord?.entity?.id;
+
+  const hasEntityStoreRecord = observedHost.entityRecord != null;
+
+  useQueryInspector({
+    deleteQuery,
+    inspect: hasEntityStoreRecord ? entityFromStoreResult?.inspect ?? null : inspect,
+    loading: hasEntityStoreRecord ? entityFromStoreResult?.isLoading ?? false : loading,
+    queryId: AGENT_BUILDER_HOST_PANEL_RISK_SCORE_QUERY_ID,
+    refetch: hasEntityStoreRecord ? entityFromStoreResult?.refetch ?? (() => {}) : refetch,
+    setQuery,
+  });
+
+  const riskScoreStateFromStore = observedHost.entityRecord
+    ? buildRiskScoreStateFromEntityRecord(EntityType.host, observedHost.entityRecord, {
+        refetch: observedHost.refetchEntityStore ?? (() => {}),
+        isLoading: observedHost.isLoading,
+        error: null,
+        inspect: entityFromStoreResult?.inspect,
+      })
+    : null;
+
+  const riskScoreStateFromAttachment = useMemo(
+    () =>
+      attachmentRiskStats
+        ? buildRiskScoreStateFromAttachmentRiskStats(EntityType.host, attachmentRiskStats, hostName)
+        : null,
+    [attachmentRiskStats, hostName]
+  );
+
+  const prefetchedResolutionRisk = useMemo(
+    () =>
+      attachmentResolutionRiskStats
+        ? buildEntityRiskScoreFromAttachmentRiskStats(
+            EntityType.host,
+            attachmentResolutionRiskStats,
+            hostName
+          )
+        : undefined,
+    [attachmentResolutionRiskStats, hostName]
+  );
+
+  const effectiveRiskScoreState =
+    riskScoreStateFromAttachment ?? riskScoreStateFromStore ?? riskScoreState;
+
+  const onCriticalitySave =
+    entityFromStoreResult.entityRecord && observedHost.entityRecord
+      ? (level: CriticalityLevelWithUnassigned) =>
+          updateAssetCriticalityLevel(level, observedHost.entityRecord)
+      : undefined;
+
+  const entityStoreEntityId = observedHost.entityRecord?.entity?.id;
+
+  const openDetailsPanel = useOpenHostInvestigationInEntityAnalytics({
+    hostName,
+    entityIdForPanels: panelDisplayEntityId,
+    scopeId,
+    safeContextID,
+  });
+
+  const noEntityInStore = !entityFromStoreResult.isLoading && !observedHost.entityRecord;
+
+  const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
+    entityRecord: observedHost.entityRecord ?? null,
+  });
+
+  const tabsNode = tabs ? (
+    <EntityPanelHeaderTabs
+      tabs={tabs}
+      selectedTabId={selectedTabId}
+      setSelectedTabId={setSelectedTabId}
+    />
+  ) : undefined;
+
+  return (
+    <>
+      <FlyoutHeader>
+        <HostPanelHeader
+          hostName={hostName}
+          lastSeen={observedHost.lastSeen}
+          entityId={panelDisplayEntityId}
+          isEntityInStore={!!observedHost.entityRecord}
+          riskLevel={
+            observedHost.entityRecord
+              ? ((getRiskFromEntityRecord(observedHost.entityRecord)?.calculated_level ??
+                  'Unknown') as RiskSeverity)
+              : undefined
+          }
+        />
+      </FlyoutHeader>
+      <FlyoutBody>
+        {observedHost.entityRecord && (
+          <EntitySummaryGrid
+            entityRecord={observedHost.entityRecord}
+            criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
+            onCriticalitySave={onCriticalitySave}
+          />
+        )}
+        {tabsNode}
+        {tabs && <EuiSpacer size="l" />}
+        {tabs && selectedTabId === TABLE_TAB_ID && observedHost.entityRecord ? (
+          <EntityStoreTableTab entityRecord={observedHost.entityRecord} />
+        ) : (
+          <HostPanelContent
+            identityFields={documentEntityIdentifiers}
+            observedHost={observedHost}
+            riskScoreState={effectiveRiskScoreState}
+            entityRiskScores={entityRiskScores}
+            contextID={safeContextID}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+            recalculatingScore={recalculatingScore}
+            onAssetCriticalityChange={calculateEntityRiskScore}
+            isPreviewMode={isPreviewMode}
+            entityRecord={observedHost.entityRecord ?? undefined}
+            noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled
+            entityStoreEntityId={entityStoreEntityId}
+            prefetchedResolutionRisk={prefetchedResolutionRisk}
+            riskScoreQueryId={AGENT_BUILDER_HOST_PANEL_RISK_SCORE_QUERY_ID}
+            hideHeaderIcons={hideHeaderIcons}
+          />
+        )}
+      </FlyoutBody>
+    </>
+  );
+};
+
+const useOpenUserInvestigationInEntityAnalytics = ({
+  userName,
+  entityIdForPanels,
+  identityFields,
+  scopeId,
+  safeContextID,
+}: {
+  userName: string;
+  entityIdForPanels?: string;
+  identityFields: IdentityFields;
+  scopeId: string;
+  safeContextID: string;
+}): ((path: EntityDetailsPath) => void) => {
+  const { telemetry } = useKibana().services;
+  const { navigateWithFlyout } = useEntityAnalyticsAgentNavigation();
+
+  return useCallback(
+    (path: EntityDetailsPath) => {
+      telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
+        entity: SearchEntityType.user,
+      });
+      navigateWithFlyout({
+        preview: [],
+        left: { path },
+        right: {
+          id: UserPanelKey,
+          params: {
+            contextID: safeContextID,
+            userName,
+            identityFields,
+            entityId: entityIdForPanels,
+            scopeId,
+          },
+        },
+      });
+    },
+    [
+      entityIdForPanels,
+      identityFields,
+      navigateWithFlyout,
+      safeContextID,
+      scopeId,
+      telemetry,
+      userName,
+    ]
+  );
+};
+
+const UserEntityFlyoutOverviewCanvas: React.FC<{
+  userName: string;
+  entityId?: string;
+  attachmentRiskStats?: EntityAttachmentRiskStats;
+  attachmentResolutionRiskStats?: EntityAttachmentRiskStats;
+  hideHeaderIcons: boolean;
+}> = ({
+  userName,
+  entityId: entityIdProp,
+  attachmentRiskStats,
+  attachmentResolutionRiskStats,
+  hideHeaderIcons,
+}) => {
+  const euidApi = useEntityStoreEuidApi();
+
+  const safeContextID = AGENT_BUILDER_ENTITY_CARD_SCOPE;
+  const scopeId = AGENT_BUILDER_ENTITY_CARD_SCOPE;
+  const isPreviewMode = false;
+
+  const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
+
+  const userStoreIdentityFields = useMemo(
+    () => (!entityIdProp && userName ? { 'user.name': userName } : undefined),
+    [entityIdProp, userName]
+  );
+
+  const entityFromStoreResult = useEntityFromStore({
+    entityId: entityIdProp,
+    identityFields: userStoreIdentityFields,
+    entityType: 'user',
+    skip: isInitializing,
+  });
+
+  const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
+    const legacyFields =
+      userName != null && userName !== '' ? { 'user.name': userName } : ({} as IdentityFields);
+    const fromStore =
+      euidApi?.euid?.getEntityIdentifiersFromDocument(
+        euidApi.getBuiltInEntityDefinition('user'),
+        entityFromStoreResult.entityRecord
+      ) ?? {};
+    return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
+  }, [euidApi, entityFromStoreResult.entityRecord, userName]);
+
+  const userNameFilterQuery = useMemo(
+    () => (userName ? buildUserNamesFilter([userName]) : undefined),
+    [userName]
+  );
+  const observedUser = useObservedUser(userName, scopeId, entityFromStoreResult);
+
+  const panelDisplayEntityId = observedUser.entityRecord?.entity?.id;
+
+  const riskScoreState = useRiskScore({
+    riskEntity: EntityType.user,
+    filterQuery: userNameFilterQuery,
+    onlyLatest: false,
+    pagination: FIRST_RECORD_PAGINATION,
+    skip: !!observedUser?.entityRecord,
+  });
+
+  const { inspect, loading } = riskScoreState;
+  const managedUser = useManagedUser();
+
+  const onRecalculation = useCallback(() => entityAttachmentQueryClient.invalidateQueries(), []);
+
+  const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
+    useEntityRiskScoreRecalculation({
+      entityType: EntityType.user,
+      identifier: userName,
+      entityId: observedUser.entityRecord?.entity?.id,
+      entityStoreV2Enabled: true,
+      entityFromStoreResult,
+      riskScoreState,
+      onRecalculation,
+    });
+
+  const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('user', {
+    onSuccess: calculateEntityRiskScore,
+    refetchEntityRecord: entityFromStoreResult.refetch,
+  });
+
+  const useEntityStoreInspectForRisk = observedUser.entityRecord != null;
+
+  useQueryInspector({
+    deleteQuery,
+    inspect: useEntityStoreInspectForRisk ? entityFromStoreResult?.inspect ?? null : inspect,
+    loading: useEntityStoreInspectForRisk ? entityFromStoreResult?.isLoading ?? false : loading,
+    queryId: AGENT_BUILDER_USER_PANEL_RISK_SCORE_QUERY_ID,
+    refetch: useEntityStoreInspectForRisk
+      ? entityFromStoreResult?.refetch ?? (() => {})
+      : riskScoreState.refetch,
+    setQuery,
+  });
+
+  const entityStoreEntityId = observedUser.entityRecord?.entity?.id;
+
+  const openDetailsPanel = useOpenUserInvestigationInEntityAnalytics({
+    userName,
+    entityIdForPanels: panelDisplayEntityId,
+    identityFields: documentEntityIdentifiers,
+    scopeId,
+    safeContextID,
+  });
+
+  const riskScoreStateFromStore = observedUser.entityRecord
+    ? buildRiskScoreStateFromEntityRecord(EntityType.user, observedUser.entityRecord, {
+        refetch: observedUser.refetchEntityStore ?? (() => {}),
+        isLoading: observedUser.isLoading,
+        error: null,
+        inspect: entityFromStoreResult?.inspect,
+      })
+    : null;
+
+  const riskScoreStateFromAttachment = useMemo(
+    () =>
+      attachmentRiskStats
+        ? buildRiskScoreStateFromAttachmentRiskStats(EntityType.user, attachmentRiskStats, userName)
+        : null,
+    [attachmentRiskStats, userName]
+  );
+
+  const prefetchedResolutionRisk = useMemo(
+    () =>
+      attachmentResolutionRiskStats
+        ? buildEntityRiskScoreFromAttachmentRiskStats(
+            EntityType.user,
+            attachmentResolutionRiskStats,
+            userName
+          )
+        : undefined,
+    [attachmentResolutionRiskStats, userName]
+  );
+
+  const effectiveRiskScoreState =
+    riskScoreStateFromAttachment ?? riskScoreStateFromStore ?? riskScoreState;
+
+  const onCriticalitySave = entityFromStoreResult.entityRecord
+    ? (level: CriticalityLevelWithUnassigned) =>
+        updateAssetCriticalityLevel(level, entityFromStoreResult.entityRecord)
+    : undefined;
+
+  const entityStoreLookupRequested =
+    Boolean(entityIdProp) ||
+    Boolean(userStoreIdentityFields && Object.keys(userStoreIdentityFields).length > 0);
+
+  const noEntityInStore =
+    entityStoreLookupRequested &&
+    !entityFromStoreResult.isLoading &&
+    !entityFromStoreResult.entityRecord;
+
+  const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
+    entityRecord: entityFromStoreResult.entityRecord ?? null,
+  });
+
+  const tabsNode = tabs ? (
+    <EntityPanelHeaderTabs
+      tabs={tabs}
+      selectedTabId={selectedTabId}
+      setSelectedTabId={setSelectedTabId}
+    />
+  ) : undefined;
+
+  return (
+    <>
+      <UserPanelHeader
+        lastSeen={observedUser.lastSeen}
+        managedUser={managedUser}
+        userName={userName}
+        entityId={panelDisplayEntityId}
+        identityFields={documentEntityIdentifiers}
+        isEntityInStore={!!entityFromStoreResult.entityRecord}
+        riskLevel={
+          entityFromStoreResult.entityRecord
+            ? ((getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
+                'Unknown') as RiskSeverity)
+            : undefined
+        }
+      />
+      <FlyoutBody>
+        {entityFromStoreResult.entityRecord && (
+          <EntitySummaryGrid
+            entityRecord={entityFromStoreResult.entityRecord}
+            criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
+            onCriticalitySave={onCriticalitySave}
+          />
+        )}
+        {tabsNode}
+        {tabs && <EuiSpacer size="l" />}
+        {tabs && selectedTabId === TABLE_TAB_ID && entityFromStoreResult.entityRecord ? (
+          <EntityStoreTableTab entityRecord={entityFromStoreResult.entityRecord} />
+        ) : (
+          <UserPanelContent
+            observedUser={observedUser}
+            riskScoreState={effectiveRiskScoreState}
+            entityRiskScores={entityRiskScores}
+            recalculatingScore={recalculatingScore}
+            onAssetCriticalityChange={calculateEntityRiskScore}
+            contextID={safeContextID}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+            isPreviewMode={isPreviewMode}
+            identityFields={documentEntityIdentifiers}
+            entityRecord={observedUser.entityRecord ?? undefined}
+            noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled
+            entityStoreEntityId={entityStoreEntityId}
+            prefetchedResolutionRisk={prefetchedResolutionRisk}
+            riskScoreQueryId={AGENT_BUILDER_USER_PANEL_RISK_SCORE_QUERY_ID}
+            hideHeaderIcons={hideHeaderIcons}
+          />
+        )}
+      </FlyoutBody>
+    </>
+  );
+};
+
+const useOpenServiceInvestigationInEntityAnalytics = ({
+  serviceName,
+  entityIdForPanels,
+  scopeId,
+  safeContextID,
+}: {
+  serviceName: string;
+  entityIdForPanels?: string;
+  scopeId: string;
+  safeContextID: string;
+}): ((path: EntityDetailsPath) => void) => {
+  const { telemetry } = useKibana().services;
+  const { navigateWithFlyout } = useEntityAnalyticsAgentNavigation();
+
+  return useCallback(
+    (path: EntityDetailsPath) => {
+      telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
+        entity: SearchEntityType.service,
+      });
+      navigateWithFlyout({
+        preview: [],
+        left: { path },
+        right: {
+          id: ServicePanelKey,
+          params: {
+            contextID: safeContextID,
+            scopeId,
+            serviceName,
+            entityId: entityIdForPanels,
+          },
+        },
+      });
+    },
+    [entityIdForPanels, navigateWithFlyout, safeContextID, scopeId, serviceName, telemetry]
+  );
+};
+
+const ServiceEntityFlyoutOverviewCanvas: React.FC<{
+  serviceName: string;
+  entityId: string;
+  attachmentRiskStats?: EntityAttachmentRiskStats;
+  attachmentResolutionRiskStats?: EntityAttachmentRiskStats;
+  hideHeaderIcons: boolean;
+}> = ({
+  serviceName,
+  entityId,
+  attachmentRiskStats,
+  attachmentResolutionRiskStats,
+  hideHeaderIcons,
+}) => {
+  const euidApi = useEntityStoreEuidApi();
+
+  const safeContextID = AGENT_BUILDER_ENTITY_CARD_SCOPE;
+  const scopeId = AGENT_BUILDER_ENTITY_CARD_SCOPE;
+  const isPreviewMode = false;
+
+  const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
+
+  const serviceStoreIdentityFields = useMemo(
+    () => (!entityId && serviceName ? { 'service.name': serviceName } : undefined),
+    [entityId, serviceName]
+  );
+  const entityFromStoreResult = useEntityFromStore<ServiceItem>({
+    entityId,
+    identityFields: serviceStoreIdentityFields,
+    entityType: 'service',
+    skip: isInitializing,
+  });
+
+  const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
+    const legacyFields =
+      serviceName != null && serviceName !== ''
+        ? { 'service.name': serviceName }
+        : ({} as IdentityFields);
+    const fromStore =
+      euidApi?.euid?.getEntityIdentifiersFromDocument(
+        euidApi.getBuiltInEntityDefinition('service'),
+        entityFromStoreResult.entityRecord ?? {}
+      ) ?? {};
+    return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
+  }, [entityFromStoreResult.entityRecord, euidApi, serviceName]);
+
+  const serviceNameFilterQuery = useMemo(
+    () => (serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined),
+    [serviceName]
+  );
+  const observedService = useObservedService(serviceName, scopeId, entityFromStoreResult);
+
+  const riskScoreState = useRiskScore({
+    riskEntity: EntityType.service,
+    filterQuery: serviceNameFilterQuery,
+    onlyLatest: false,
+    pagination: FIRST_RECORD_PAGINATION,
+    skip: !!observedService?.entityRecord,
+  });
+
+  const { inspect, refetch, loading } = riskScoreState;
+
+  const onRecalculation = useCallback(() => entityAttachmentQueryClient.invalidateQueries(), []);
+
+  const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
+    useEntityRiskScoreRecalculation({
+      entityType: EntityType.service,
+      identifier: serviceName,
+      entityId: observedService.entityRecord?.entity?.id,
+      entityStoreV2Enabled: true,
+      entityFromStoreResult,
+      riskScoreState,
+      onRecalculation,
+    });
+
+  const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('service', {
+    onSuccess: calculateEntityRiskScore,
+    refetchEntityRecord: entityFromStoreResult.refetch,
+  });
+
+  const panelDisplayEntityId = observedService.entityRecord?.entity?.id;
+
+  const hasEntityStoreRecord = observedService.entityRecord != null;
+
+  useQueryInspector({
+    deleteQuery,
+    inspect: hasEntityStoreRecord ? entityFromStoreResult?.inspect ?? null : inspect,
+    loading: hasEntityStoreRecord ? entityFromStoreResult?.isLoading ?? false : loading,
+    queryId: AGENT_BUILDER_SERVICE_PANEL_RISK_SCORE_QUERY_ID,
+    refetch: hasEntityStoreRecord ? entityFromStoreResult?.refetch ?? (() => {}) : refetch,
+    setQuery,
+  });
+
+  const riskScoreStateFromStore = observedService.entityRecord
+    ? buildRiskScoreStateFromEntityRecord(EntityType.service, observedService.entityRecord, {
+        refetch: observedService.refetchEntityStore ?? (() => {}),
+        isLoading: observedService.isLoading,
+        error: null,
+        inspect: entityFromStoreResult?.inspect,
+      })
+    : null;
+
+  const riskScoreStateFromAttachment = useMemo(
+    () =>
+      attachmentRiskStats
+        ? buildRiskScoreStateFromAttachmentRiskStats(
+            EntityType.service,
+            attachmentRiskStats,
+            serviceName
+          )
+        : null,
+    [attachmentRiskStats, serviceName]
+  );
+
+  const prefetchedResolutionRisk = useMemo(
+    () =>
+      attachmentResolutionRiskStats
+        ? buildEntityRiskScoreFromAttachmentRiskStats(
+            EntityType.service,
+            attachmentResolutionRiskStats,
+            serviceName
+          )
+        : undefined,
+    [attachmentResolutionRiskStats, serviceName]
+  );
+
+  const effectiveRiskScoreState =
+    riskScoreStateFromAttachment ?? riskScoreStateFromStore ?? riskScoreState;
+
+  const onCriticalitySave =
+    entityFromStoreResult.entityRecord && observedService.entityRecord
+      ? (level: CriticalityLevelWithUnassigned) =>
+          updateAssetCriticalityLevel(level, observedService.entityRecord)
+      : undefined;
+
+  const entityStoreEntityId = observedService.entityRecord?.entity?.id;
+
+  const openDetailsPanel = useOpenServiceInvestigationInEntityAnalytics({
+    serviceName,
+    entityIdForPanels: panelDisplayEntityId,
+    scopeId,
+    safeContextID,
+  });
+
+  const noEntityInStore = !entityFromStoreResult.isLoading && !observedService.entityRecord;
+
+  const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
+    entityRecord: observedService.entityRecord ?? null,
+  });
+
+  const tabsNode = tabs ? (
+    <EntityPanelHeaderTabs
+      tabs={tabs}
+      selectedTabId={selectedTabId}
+      setSelectedTabId={setSelectedTabId}
+    />
+  ) : undefined;
+
+  return (
+    <>
+      <FlyoutHeader>
+        <ServicePanelHeader
+          serviceName={serviceName}
+          lastSeen={observedService.lastSeen}
+          entityId={panelDisplayEntityId}
+          isEntityInStore={!!observedService.entityRecord}
+          riskLevel={
+            observedService.entityRecord
+              ? ((getRiskFromEntityRecord(observedService.entityRecord)?.calculated_level ??
+                  'Unknown') as RiskSeverity)
+              : undefined
+          }
+        />
+      </FlyoutHeader>
+      <FlyoutBody>
+        {observedService.entityRecord && (
+          <EntitySummaryGrid
+            entityRecord={observedService.entityRecord}
+            criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
+            onCriticalitySave={onCriticalitySave}
+          />
+        )}
+        {tabsNode}
+        {tabs && <EuiSpacer size="l" />}
+        {tabs && selectedTabId === TABLE_TAB_ID && observedService.entityRecord ? (
+          <EntityStoreTableTab entityRecord={observedService.entityRecord} />
+        ) : (
+          <ServicePanelContent
+            identityFields={documentEntityIdentifiers}
+            observedService={observedService}
+            riskScoreState={effectiveRiskScoreState}
+            entityRiskScores={entityRiskScores}
+            contextID={safeContextID}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+            recalculatingScore={recalculatingScore}
+            onAssetCriticalityChange={calculateEntityRiskScore}
+            isPreviewMode={isPreviewMode}
+            entityRecord={observedService.entityRecord ?? undefined}
+            noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled
+            entityStoreEntityId={entityStoreEntityId}
+            prefetchedResolutionRisk={prefetchedResolutionRisk}
+            riskScoreQueryId={AGENT_BUILDER_SERVICE_PANEL_RISK_SCORE_QUERY_ID}
+            hideHeaderIcons={hideHeaderIcons}
+          />
+        )}
+      </FlyoutBody>
+    </>
+  );
+};
+
+export interface EntityCardFlyoutOverviewCanvasProps {
+  /**
+   * Attachment identifier emitted by the Security skill/tool. Entry component resolves the
+   * canonical entity store record client-side via `useEntityForAttachment` and dispatches to
+   * the per-type canvas with `hostName`/`userName`/`serviceName` + optional `entityId`.
+   */
+  identifier: EntityAttachmentIdentifier;
+  /** Rich risk-doc projection from `security.get_entity`; preferred over entity-store summary risk. */
+  riskStats?: EntityAttachmentRiskStats;
+  /** Resolution-group risk fallback; threaded through to {@link FlyoutRiskSummary}. */
+  resolutionRiskStats?: EntityAttachmentRiskStats;
+  /** Hides redundant section-header arrows when navigation targets the v2 flyout. */
+  hideHeaderIcons?: boolean;
+}
+
+/**
+ * Dispatches the appropriate host/user/service entity flyout overview canvas for an Agent
+ * Builder `security.entity` attachment. `generic` identifier types return `null` because the
+ * Security expandable flyout only supports host/user/service panels today.
+ *
+ * The surface is intentionally decoupled from the inline `EntityCard` (which bypasses Redux and
+ * Security providers). This canvas mounts inside `SecurityReduxEmbeddedProvider`, so it can
+ * reuse all Security flyout hooks (`useGlobalTime`, `useRiskScore`, `useObservedHost`, sourcerer,
+ * etc.) exactly like the in-app expandable flyout.
+ */
+export const EntityCardFlyoutOverviewCanvas: React.FC<EntityCardFlyoutOverviewCanvasProps> = ({
+  identifier,
+  riskStats,
+  resolutionRiskStats,
+  hideHeaderIcons = false,
+}) => {
+  const { data, isLoading } = useEntityForAttachment(identifier);
+
+  if (isLoading && !data) {
+    return <FlyoutLoading />;
+  }
+
+  const entityName = data?.displayName ?? identifier.identifier;
+  const entityId = data?.entityId ?? identifier.entityStoreId ?? identifier.identifier;
+  const sources = data?.sources ?? [];
+  const exploreRow = {
+    entity_type: identifier.identifierType,
+    entity_id: entityId,
+    entity_name: entityName,
+    source: sources.length > 0 ? { entity: { source: sources } } : undefined,
+  };
+
+  if (identifier.identifierType === 'host') {
+    const hostName = getHostNameForHostDetailsUrl(exploreRow);
+    return (
+      <HostEntityFlyoutOverviewCanvas
+        hostName={hostName}
+        entityId={entityId}
+        attachmentRiskStats={riskStats}
+        attachmentResolutionRiskStats={resolutionRiskStats}
+        hideHeaderIcons={hideHeaderIcons}
+      />
+    );
+  }
+
+  if (identifier.identifierType === 'user') {
+    const userName = getUserNameForUserDetailsUrl(exploreRow);
+    return (
+      <UserEntityFlyoutOverviewCanvas
+        userName={userName}
+        entityId={entityId}
+        attachmentRiskStats={riskStats}
+        attachmentResolutionRiskStats={resolutionRiskStats}
+        hideHeaderIcons={hideHeaderIcons}
+      />
+    );
+  }
+
+  if (identifier.identifierType === 'service') {
+    const displayName = getServiceNameForServiceDetailsUrl(exploreRow);
+    return (
+      <ServiceEntityFlyoutOverviewCanvas
+        serviceName={displayName}
+        entityId={entityId}
+        attachmentRiskStats={riskStats}
+        attachmentResolutionRiskStats={resolutionRiskStats}
+        hideHeaderIcons={hideHeaderIcons}
+      />
+    );
+  }
+
+  return null;
+};

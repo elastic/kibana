@@ -8,8 +8,12 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { StorageTransportOptions } from '../..';
+import type { TransportResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
+import { esql } from '@elastic/esql';
+import type { StorageClientBulkRequest, StorageTransportOptions } from '../..';
 import { StorageIndexAdapter, type StorageSettings } from '../..';
+import { MAX_RETRIES } from './retry_transient_es_errors';
 
 const createLoggerMock = (): jest.Mocked<Logger> => {
   const logger = {
@@ -33,6 +37,9 @@ const storageSettings = {
 
 const createMockEsClient = () => {
   const client = {
+    info: jest.fn().mockResolvedValue({
+      version: { build_flavor: 'default' },
+    }),
     search: jest.fn().mockResolvedValue({
       hits: { hits: [{ _id: 'doc1', _index: 'test_index', _source: { foo: 'bar' } }] },
     }),
@@ -76,9 +83,20 @@ const createMockEsClient = () => {
         template: { mappings: {} },
       }),
       putMapping: jest.fn().mockResolvedValue({}),
+      putSettings: jest.fn().mockResolvedValue({}),
     },
   } as unknown as jest.Mocked<ElasticsearchClient>;
   return client;
+};
+
+interface EsqlQueryMock {
+  esql: {
+    query: jest.Mock;
+  };
+}
+
+const addEsqlQueryMock = (client: jest.Mocked<ElasticsearchClient>, query: jest.Mock): void => {
+  (client as unknown as EsqlQueryMock).esql = { query };
 };
 
 describe('StorageIndexAdapter - transport options forwarding', () => {
@@ -138,6 +156,51 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     );
   });
 
+  it('forwards if_seq_no and if_primary_term for bulk index operations', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.bulk({
+      operations: [
+        {
+          index: {
+            _id: 'doc1',
+            if_seq_no: 7,
+            if_primary_term: 2,
+            document: { foo: 'bar' },
+          },
+        },
+      ],
+    });
+
+    expect(esClient.bulk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        operations: [{ index: { _id: 'doc1', if_seq_no: 7, if_primary_term: 2 } }, { foo: 'bar' }],
+      })
+    );
+  });
+
+  it('rejects bulk index operations with only one OCC field set', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    expect(() =>
+      client.bulk({
+        operations: [
+          {
+            index: {
+              _id: 'doc1',
+              if_seq_no: 7,
+              document: { foo: 'bar' },
+            },
+          } as unknown as StorageClientBulkRequest<{ _id?: string }>['operations'][number],
+        ],
+      })
+    ).toThrow('Bulk index OCC requires both if_seq_no and if_primary_term');
+
+    expect(esClient.bulk).not.toHaveBeenCalled();
+  });
+
   it('forwards transport options to esClient.delete', async () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
@@ -162,6 +225,187 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     );
   });
 
+  it('includes settings in the index template', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.objectContaining({
+          settings: expect.objectContaining({
+            auto_expand_replicas: '0-1',
+            number_of_shards: 1,
+          }),
+        }),
+      })
+    );
+  });
+
+  it('forwards priority to the index template when set', async () => {
+    const adapter = new StorageIndexAdapter(
+      esClient,
+      loggerMock,
+      { ...storageSettings, priority: 600 },
+      { isServerless: true }
+    );
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({ priority: 600 })
+    );
+  });
+
+  it('omits priority from the index template when unset', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      isServerless: true,
+    });
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.not.objectContaining({ priority: expect.anything() })
+    );
+  });
+
+  it('omits index template settings when isServerless option is true', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      isServerless: true,
+    });
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.not.objectContaining({ settings: expect.anything() }),
+      })
+    );
+  });
+
+  it('includes index template settings when isServerless option is false', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      isServerless: false,
+    });
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.objectContaining({
+          settings: expect.objectContaining({ auto_expand_replicas: '0-1' }),
+        }),
+      })
+    );
+  });
+
+  it('omits settings when info() reports serverless and isServerless is not provided', async () => {
+    (esClient.info as jest.Mock).mockResolvedValue({
+      version: { build_flavor: 'serverless' },
+    });
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.info).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.not.objectContaining({ settings: expect.anything() }),
+      })
+    );
+  });
+
+  it('does not call info() when isServerless option is provided', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      isServerless: true,
+    });
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.info).not.toHaveBeenCalled();
+  });
+
+  it('retries without settings when both info() and isServerless are unavailable', async () => {
+    (esClient.info as jest.Mock).mockRejectedValue(new Error('forbidden'));
+
+    const serverlessError = new errors.ResponseError({
+      statusCode: 400,
+      headers: {},
+      warnings: [],
+      meta: {} as TransportResult['meta'],
+      body: {
+        error: {
+          type: 'illegal_argument_exception',
+          reason:
+            'Settings [index.auto_expand_replicas,index.number_of_shards] are not available when running in serverless mode',
+        },
+      },
+    } as TransportResult);
+    (esClient.indices.putIndexTemplate as jest.Mock).mockRejectedValueOnce(serverlessError);
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
+    expect(esClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        template: expect.objectContaining({
+          settings: expect.objectContaining({ auto_expand_replicas: '0-1' }),
+        }),
+      })
+    );
+    expect(esClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        template: expect.not.objectContaining({ settings: expect.anything() }),
+      })
+    );
+  });
+
+  it('skips settings on subsequent writes after reactive serverless detection', async () => {
+    (esClient.info as jest.Mock).mockRejectedValue(new Error('forbidden'));
+
+    const serverlessError = new errors.ResponseError({
+      statusCode: 400,
+      headers: {},
+      warnings: [],
+      meta: {} as TransportResult['meta'],
+      body: {
+        error: {
+          type: 'illegal_argument_exception',
+          reason:
+            'Settings [index.auto_expand_replicas,index.number_of_shards] are not available when running in serverless mode',
+        },
+      },
+    } as TransportResult);
+    (esClient.indices.putIndexTemplate as jest.Mock).mockRejectedValueOnce(serverlessError);
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+    await client.index({ id: 'doc2', document: { foo: 'baz' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
+    expect(esClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({
+        template: expect.not.objectContaining({ settings: expect.anything() }),
+      })
+    );
+  });
+
   it('works without transport options (backward compatible)', async () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
@@ -169,5 +413,493 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     await client.search({ track_total_hits: false, size: 10, query: { match_all: {} } });
 
     expect(esClient.search).toHaveBeenCalledWith(expect.objectContaining({ index: 'test_index' }));
+  });
+
+  it('forwards transport options to esClient.bulk for create operations', async () => {
+    esClient.bulk.mockResolvedValueOnce({
+      errors: false,
+      items: [{ create: { _id: 'doc1', result: 'created', status: 201, _index: 'test_index' } }],
+      took: 1,
+    });
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.bulk(
+      {
+        operations: [{ create: { _id: 'doc1', document: { foo: 'bar' } } }],
+      },
+      transportOptions
+    );
+
+    expect(esClient.bulk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        require_alias: true,
+        operations: [{ create: { _id: 'doc1' } }, { foo: 'bar' }],
+      }),
+      transportOptions
+    );
+  });
+});
+
+describe('StorageIndexAdapter - esql method', () => {
+  let esClient: jest.Mocked<ElasticsearchClient>;
+  let esqlQuery: jest.Mock;
+  let loggerMock: jest.Mocked<Logger>;
+
+  const mockEsqlResponse = {
+    columns: [{ name: 'foo', type: 'keyword' }],
+    values: [['bar']],
+  };
+
+  beforeEach(() => {
+    esClient = createMockEsClient();
+    esqlQuery = jest.fn().mockResolvedValue(mockEsqlResponse);
+    addEsqlQueryMock(esClient, esqlQuery);
+    loggerMock = createLoggerMock();
+  });
+
+  it('renders FROM + caller pipeline and returns the ES|QL response', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    const result = await client.esql({ pipeline: esql`LIMIT 1` });
+
+    expect(esqlQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM test_index | LIMIT 1', format: 'json' })
+    );
+    expect(result).toEqual(mockEsqlResponse);
+  });
+
+  it('emits a METADATA clause when metadata is provided', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.esql({ metadata: ['_id', '_source'], pipeline: esql`LIMIT 1` });
+
+    expect(esqlQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: 'FROM test_index METADATA _id, _source | LIMIT 1',
+      })
+    );
+  });
+
+  it('forwards param-hole values from the pipeline ComposerQuery to esClient.esql.query', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    const searchTerm = '*foo*';
+    await client.esql({ pipeline: esql`WHERE foo LIKE ${{ searchTerm }} | LIMIT 5` });
+
+    expect(esqlQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.stringContaining('?searchTerm'),
+        params: expect.arrayContaining([{ searchTerm: '*foo*' }]),
+      })
+    );
+  });
+
+  it('returns empty response when the storage index does not exist (404 path)', async () => {
+    const notFoundError = new errors.ResponseError({
+      statusCode: 404,
+      headers: {},
+      warnings: [],
+      meta: {} as TransportResult['meta'],
+      body: { error: { type: 'index_not_found_exception', reason: 'no such index' } },
+    } as TransportResult);
+    esqlQuery.mockRejectedValueOnce(notFoundError);
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    const result = await client.esql({ pipeline: esql`LIMIT 1` });
+
+    expect(result).toEqual({ columns: [], values: [] });
+  });
+
+  it('returns empty response for 400 verification_exception with Unknown index', async () => {
+    const unknownIndexError = new errors.ResponseError({
+      statusCode: 400,
+      headers: {},
+      warnings: [],
+      meta: {} as TransportResult['meta'],
+      body: {
+        error: { type: 'verification_exception', reason: 'Unknown index [test_index]' },
+      },
+    } as TransportResult);
+    esqlQuery.mockRejectedValueOnce(unknownIndexError);
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    const result = await client.esql({ pipeline: esql`LIMIT 1` });
+    expect(result).toEqual({ columns: [], values: [] });
+  });
+
+  it('prepends SET options before the FROM clause when setOptions is provided', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.esql({ pipeline: esql`LIMIT 1`, setOptions: { unmapped_fields: 'LOAD' } });
+
+    expect(esqlQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.stringMatching(/^SET unmapped_fields = "LOAD".*FROM test_index.*LIMIT 1$/s),
+      })
+    );
+  });
+
+  it('throws a clear error when the pipeline starts with a FROM clause', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await expect(client.esql({ pipeline: esql`FROM other_index | LIMIT 1` })).rejects.toThrow(
+      /pipeline must not start with a FROM clause/
+    );
+
+    expect(esqlQuery).not.toHaveBeenCalled();
+  });
+
+  it('rethrows non-404 errors (verification_exception, etc.)', async () => {
+    const verificationError = new errors.ResponseError({
+      statusCode: 400,
+      headers: {},
+      warnings: [],
+      meta: {} as TransportResult['meta'],
+      body: {
+        error: { type: 'verification_exception', reason: 'Unknown column [foo]' },
+      },
+    } as TransportResult);
+    esqlQuery.mockRejectedValueOnce(verificationError);
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await expect(client.esql({ pipeline: esql`LIMIT 1` })).rejects.toThrow(
+      'verification_exception'
+    );
+  });
+
+  it('applies migrateSource to _source column when metadata includes _source', async () => {
+    const rawSource = { foo: 'bar', version: 0 };
+    const migratedSource = { foo: 'bar', version: 1 };
+    esqlQuery.mockResolvedValueOnce({
+      columns: [
+        { name: '_source', type: 'unsupported' },
+        { name: 'foo', type: 'keyword' },
+      ],
+      values: [[rawSource, 'bar']],
+    });
+
+    const migrateSource = jest.fn().mockReturnValue(migratedSource);
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      migrateSource,
+    });
+    const client = adapter.getClient();
+
+    const result = await client.esql({ metadata: ['_source'], pipeline: esql`LIMIT 1` });
+
+    expect(migrateSource).toHaveBeenCalledWith(rawSource);
+    expect(result.values[0][0]).toEqual(migratedSource);
+  });
+
+  it('skips migrateSource when metadata does not include _source (even with migrateSource configured)', async () => {
+    const rawSource = { foo: 'bar', version: 0 };
+    esqlQuery.mockResolvedValueOnce({
+      columns: [{ name: '_source', type: 'unsupported' }],
+      values: [[rawSource]],
+    });
+
+    const migrateSource = jest.fn().mockReturnValue({ foo: 'bar', version: 1 });
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      migrateSource,
+    });
+    const client = adapter.getClient();
+
+    // metadata omitted — even if a `_source` column shows up in the response,
+    // the adapter must not touch it (caller did not opt in).
+    await client.esql({ pipeline: esql`LIMIT 1` });
+
+    expect(migrateSource).not.toHaveBeenCalled();
+  });
+
+  it('skips migrateSource when migrateSource: false is passed', async () => {
+    const rawSource = { foo: 'bar', version: 0 };
+    esqlQuery.mockResolvedValueOnce({
+      columns: [{ name: '_source', type: 'unsupported' }],
+      values: [[rawSource]],
+    });
+
+    const migrateSource = jest.fn().mockReturnValue({ foo: 'bar', version: 1 });
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      migrateSource,
+    });
+    const client = adapter.getClient();
+
+    const result = await client.esql({
+      metadata: ['_source'],
+      pipeline: esql`LIMIT 1`,
+      migrateSource: false,
+    });
+
+    expect(migrateSource).not.toHaveBeenCalled();
+    expect(result.values[0][0]).toEqual(rawSource);
+  });
+
+  it('forwards filter and transport options to esClient.esql.query', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    const filter = {
+      bool: { filter: [{ range: { '@timestamp': { gte: 'now-1h' } } }] },
+    };
+    const transportOptions: StorageTransportOptions = {
+      maxResponseSize: 50 * 1024 * 1024,
+      requestTimeout: 30_000,
+    };
+    await client.esql({ pipeline: esql`LIMIT 5`, filter }, transportOptions);
+
+    expect(esqlQuery).toHaveBeenCalledWith(expect.objectContaining({ filter }), transportOptions);
+  });
+
+  it('awaits ensureMappingsBeforeReading before issuing the ES|QL query', async () => {
+    // Defer the write index lookup that updateMappingsIfNeeded awaits so the
+    // ensureMappingsBeforeReading promise stays pending until we release it.
+    let releaseGetIndices!: () => void;
+    const getIndicesPromise = new Promise<{
+      'test_index-000001': { aliases: { test_index: { is_write_index: true } } };
+    }>((resolve) => {
+      releaseGetIndices = () =>
+        resolve({
+          'test_index-000001': { aliases: { test_index: { is_write_index: true } } },
+        });
+    });
+    (esClient.indices.get as jest.Mock).mockReturnValueOnce(getIndicesPromise);
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    const esqlPromise = client.esql({ pipeline: esql`LIMIT 1` });
+
+    // Microtask flush; the adapter should still be waiting on the alias lookup,
+    // so esql.query must not have been issued yet.
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(esqlQuery).not.toHaveBeenCalled();
+
+    releaseGetIndices();
+    await esqlPromise;
+
+    expect(esqlQuery).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('StorageIndexAdapter - write index resolution', () => {
+  let esClient: jest.Mocked<ElasticsearchClient>;
+  let loggerMock: jest.Mocked<Logger>;
+
+  beforeEach(() => {
+    esClient = createMockEsClient();
+    loggerMock = createLoggerMock();
+  });
+
+  it('resolves the write index from a single indices.get on the alias', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    await adapter
+      .getClient()
+      .search({ track_total_hits: false, size: 1, query: { match_all: {} } });
+
+    expect(esClient.indices.get).toHaveBeenCalledWith({ index: 'test_index' });
+    expect(esClient.indices.getAlias).not.toHaveBeenCalled();
+  });
+
+  it('does not throw on read when the alias does not exist yet', async () => {
+    (esClient.indices.get as jest.Mock).mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 404,
+        body: { error: { type: 'index_not_found_exception' } },
+      } as unknown as TransportResult<unknown, unknown>)
+    );
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    await expect(
+      adapter.getClient().search({ track_total_hits: false, size: 1, query: { match_all: {} } })
+    ).resolves.toBeDefined();
+
+    expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+  });
+
+  it('creates the index on write when the alias does not exist yet', async () => {
+    (esClient.indices.get as jest.Mock).mockResolvedValue({});
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    await expect(
+      adapter.getClient().index({ id: 'doc1', document: { foo: 'bar' } })
+    ).resolves.toBeDefined();
+
+    expect(esClient.indices.create).toHaveBeenCalledWith({ index: 'test_index-000001' });
+  });
+
+  it('ignores indices the alias does not point to as write index', async () => {
+    (esClient.indices.get as jest.Mock).mockResolvedValue({
+      'test_index-000001': {
+        mappings: { _meta: { version: 'current' } },
+        aliases: { test_index: { is_write_index: false } },
+      },
+    });
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    await adapter.getClient().index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.create).toHaveBeenCalledWith({ index: 'test_index-000001' });
+  });
+});
+
+describe('StorageIndexAdapter - transient error retries', () => {
+  let esClient: jest.Mocked<ElasticsearchClient>;
+  let loggerMock: jest.Mocked<Logger>;
+
+  const retryableError = () =>
+    new errors.ResponseError({
+      statusCode: 503,
+      body: { error: { type: 'no_shard_available_action_exception' } },
+    } as unknown as TransportResult<unknown, unknown>);
+
+  const writeIndexState = {
+    'test_index-000001': {
+      mappings: { _meta: { version: 'current' } },
+      aliases: { test_index: { is_write_index: true } },
+    },
+  };
+
+  beforeEach(() => {
+    esClient = createMockEsClient();
+    loggerMock = createLoggerMock();
+  });
+
+  it('retries the write index lookup when Elasticsearch is not ready yet', async () => {
+    (esClient.indices.get as jest.Mock)
+      .mockRejectedValueOnce(retryableError())
+      .mockResolvedValue(writeIndexState);
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    await expect(
+      adapter.getClient().search({ track_total_hits: false, size: 1, query: { match_all: {} } })
+    ).resolves.toBeDefined();
+
+    expect(esClient.indices.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries index creation when the cluster is busy', async () => {
+    (esClient.indices.get as jest.Mock).mockResolvedValue({});
+    (esClient.indices.create as jest.Mock)
+      .mockRejectedValueOnce(
+        new errors.ResponseError({
+          statusCode: 503,
+          body: { error: { type: 'process_cluster_event_timeout_exception' } },
+        } as unknown as TransportResult<unknown, unknown>)
+      )
+      .mockResolvedValue({});
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    await expect(
+      adapter.getClient().index({ id: 'doc1', document: { foo: 'bar' } })
+    ).resolves.toBeDefined();
+
+    expect(esClient.indices.create).toHaveBeenCalledTimes(2);
+  });
+
+  it('gives up after the retry budget and rethrows the Elasticsearch error', async () => {
+    jest.useFakeTimers();
+    (esClient.indices.get as jest.Mock).mockRejectedValue(retryableError());
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    const search = adapter
+      .getClient()
+      .search({ track_total_hits: false, size: 1, query: { match_all: {} } });
+    // Attach the rejection handler before the backoff runs out, so the rejection is never floating.
+    const assertion = expect(search).rejects.toThrow('no_shard_available_action_exception');
+    await jest.advanceTimersByTimeAsync(60_000);
+    await assertion;
+
+    expect(esClient.indices.get).toHaveBeenCalledTimes(MAX_RETRIES + 1);
+    jest.useRealTimers();
+  });
+
+  it('does not retry a non-transient error', async () => {
+    (esClient.indices.get as jest.Mock).mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 400,
+        body: { error: { type: 'illegal_argument_exception' } },
+      } as unknown as TransportResult<unknown, unknown>)
+    );
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    await expect(
+      adapter.getClient().search({ track_total_hits: false, size: 1, query: { match_all: {} } })
+    ).rejects.toThrow('illegal_argument_exception');
+
+    expect(esClient.indices.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry document reads and writes', async () => {
+    (esClient.search as jest.Mock).mockRejectedValue(retryableError());
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    await expect(
+      adapter.getClient().search({ track_total_hits: false, size: 1, query: { match_all: {} } })
+    ).rejects.toThrow('no_shard_available_action_exception');
+
+    expect(esClient.search).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('StorageIndexAdapter - clean', () => {
+  let esClient: jest.Mocked<ElasticsearchClient>;
+  let loggerMock: jest.Mocked<Logger>;
+
+  beforeEach(() => {
+    esClient = createMockEsClient();
+    loggerMock = createLoggerMock();
+    esClient.indices.delete = jest.fn().mockResolvedValue({ acknowledged: true });
+    esClient.indices.deleteIndexTemplate = jest.fn().mockResolvedValue({ acknowledged: true });
+  });
+
+  it('deletes a hidden backing index', async () => {
+    // Elasticsearch omits hidden indices unless the wildcard expansion asks for them.
+    (esClient.indices.get as jest.Mock).mockImplementation(
+      (params: { expand_wildcards?: string | string[] }) => {
+        const wildcards = Array.isArray(params.expand_wildcards)
+          ? params.expand_wildcards
+          : params.expand_wildcards?.split(',') ?? [];
+        const includesHidden = wildcards.includes('hidden') || wildcards.includes('all');
+        if (!includesHidden) {
+          return Promise.resolve({});
+        }
+        return Promise.resolve({
+          'test_index-000001': {
+            settings: { index: { hidden: 'true' } },
+            aliases: { test_index: { is_write_index: true } },
+          },
+        });
+      }
+    );
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    await expect(adapter.getClient().clean()).resolves.toEqual({
+      acknowledged: true,
+      result: 'deleted',
+    });
+
+    expect(esClient.indices.delete).toHaveBeenCalledWith({ index: 'test_index-000001' });
   });
 });

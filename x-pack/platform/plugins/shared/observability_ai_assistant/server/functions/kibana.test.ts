@@ -5,42 +5,43 @@
  * 2.0.
  */
 
-import type { AxiosRequestConfig } from 'axios';
-import axios from 'axios';
 import { registerKibanaFunction } from './kibana';
 import type { FunctionRegistrationParameters } from '.';
 
-jest.mock('axios');
-const mockedAxios = jest.mocked(axios);
+function registerFunction(
+  overrides: {
+    headers?: Record<string, string | string[]>;
+    fetchError?: Error;
+  } = {}
+) {
+  const logger = { info: jest.fn(), debug: jest.fn(), warn: jest.fn(), error: jest.fn() };
+  const fetch = jest.fn().mockImplementation((pathname: string) => {
+    if (overrides.fetchError) {
+      throw overrides.fetchError;
+    }
 
-function registerFunction(overrides: {
-  publicBaseUrl?: string;
-  requestUrl?: URL;
-  rewrittenUrl?: URL;
-  headers?: Record<string, string>;
-}) {
-  const logger = { info: jest.fn(), error: jest.fn() };
+    return {
+      body: { ok: true },
+      request: { url: `https://target.example/base${pathname}` },
+    };
+  });
+  const scopedClient = { fetch };
   const coreStart = {
     http: {
-      basePath: {
-        publicBaseUrl: overrides.publicBaseUrl ?? 'https://kibana.example.com:5601',
-        serverBasePath: '',
-        get: jest.fn(),
+      selfClient: {
+        asScoped: jest.fn().mockReturnValue(scopedClient),
       },
     },
   };
 
   const resources = {
     request: {
-      url:
-        overrides.requestUrl ??
-        new URL('https://source.example/internal/observability_ai_assistant/chat/complete'),
-      rewrittenUrl: overrides.rewrittenUrl,
-      headers: {
+      url: new URL('https://source.example/internal/observability_ai_assistant/chat/complete'),
+      basePath: '',
+      headers: overrides.headers ?? {
         'content-type': 'application/json',
         host: 'attacker.example',
         origin: 'https://attacker.example',
-        ...(overrides.headers ?? {}),
       },
     },
     logger,
@@ -57,6 +58,7 @@ function registerFunction(overrides: {
   return {
     handler: functions.registerFunction.mock.calls[0][1],
     coreStart,
+    fetch,
     resources,
   };
 }
@@ -64,61 +66,77 @@ function registerFunction(overrides: {
 describe('kibana tool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedAxios.mockResolvedValue({ data: { ok: true } });
   });
 
-  it('forwards requests to the configured publicBaseUrl host only', async () => {
-    const { handler } = registerFunction({
-      headers: {
-        host: 'malicious-host:9200',
-        origin: 'https://malicious-host:9200',
-        'x-forwarded-host': 'another-host',
-      },
-    });
+  it('calls Kibana through the Core scoped self client with internal access', async () => {
+    const { handler, coreStart, fetch, resources } = registerFunction();
+    const signal = new AbortController().signal;
 
-    await handler({
-      arguments: {
-        method: 'GET',
-        pathname: '/api/saved_objects/_find',
-        query: { type: 'dashboard' },
+    const result = await handler(
+      {
+        arguments: {
+          method: 'POST',
+          pathname: '/api/apm/agent_keys/private-target-id',
+          query: { type: 'private-query-value' },
+          body: { sensitive: 'private-body-value' },
+        },
       },
-    });
-
-    const forwardedRequest = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
-    expect(forwardedRequest.url).toBe(
-      'https://kibana.example.com:5601/api/saved_objects/_find?type=dashboard'
+      signal
     );
-    expect(forwardedRequest.url).not.toContain('malicious-host');
+
+    expect(coreStart.http.selfClient.asScoped).toHaveBeenCalledWith(resources.request);
+    expect(fetch).toHaveBeenCalledWith('/api/apm/agent_keys/private-target-id', {
+      method: 'POST',
+      query: { type: 'private-query-value' },
+      body: { sensitive: 'private-body-value' },
+      signal,
+      forwardRequestHeaders: true,
+      access: 'internal',
+      asResponse: true,
+    });
+    expect(result).toEqual({ content: { ok: true } });
+    expect(resources.logger.info).not.toHaveBeenCalled();
+    expect(resources.logger.error).not.toHaveBeenCalled();
   });
 
-  it('builds the forwarded url using the space from the incoming request path', async () => {
-    const { handler } = registerFunction({
-      requestUrl: new URL(
-        'https://source.example/s/my-space/internal/observability_ai_assistant/chat/complete'
-      ),
-    });
+  it('propagates self-call errors unchanged without plugin logging', async () => {
+    const error = new Error('self-call failed');
+    const { handler, fetch, resources } = registerFunction({ fetchError: error });
 
-    await handler({
-      arguments: {
-        method: 'POST',
-        pathname: '/api/apm/agent_keys',
-        body: { foo: 'bar' },
-      },
-    });
-
-    expect(mockedAxios).toHaveBeenCalledWith(
-      expect.objectContaining({
-        url: 'https://kibana.example.com:5601/s/my-space/api/apm/agent_keys',
-        data: JSON.stringify({ foo: 'bar' }),
+    await expect(
+      handler({
+        arguments: {
+          method: 'GET',
+          pathname: '/api/private-target/private-id',
+        },
       })
+    ).rejects.toBe(error);
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/private-target/private-id',
+      expect.objectContaining({ access: 'internal' })
     );
+    expect(resources.logger.info).not.toHaveBeenCalled();
+    expect(resources.logger.debug).not.toHaveBeenCalled();
+    expect(resources.logger.warn).not.toHaveBeenCalled();
+    expect(resources.logger.error).not.toHaveBeenCalled();
   });
 
-  it('forwards authorization header', async () => {
-    const { handler } = registerFunction({
+  it('opts into Core safe request header forwarding for self calls', async () => {
+    const { handler, fetch } = registerFunction({
       headers: {
-        authorization: 'Basic dGVzdA==',
-        'x-forwarded-user': 'should-be-stripped',
+        accept: 'application/json',
+        'accept-language': 'en-US',
+        authorization: 'Bearer attacker',
+        cookie: 'sid=attacker',
+        host: 'attacker.example',
+        'kbn-version': '1.2.3',
+        origin: 'https://origin.example',
+        referer: 'https://origin.example/app/home',
+        'sec-fetch-site': 'same-origin',
+        'x-elastic-internal-origin': 'attacker',
+        'x-elastic-product-origin': 'observability',
+        'x-kbn-context': '%7B%7D',
       },
     });
 
@@ -129,25 +147,12 @@ describe('kibana tool', () => {
       },
     });
 
-    const forwardedRequest = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
-    expect(forwardedRequest.headers?.authorization).toBe('Basic dGVzdA==');
-    expect(forwardedRequest.headers).not.toHaveProperty('x-forwarded-user');
-  });
-
-  it('throws when server.publicBaseUrl is not configured', async () => {
-    const { handler, coreStart } = registerFunction({});
-    coreStart.http.basePath.publicBaseUrl = undefined as any;
-
-    await expect(
-      handler({
-        arguments: {
-          method: 'GET',
-          pathname: '/api/saved_objects/_find',
-          query: { type: 'dashboard' },
-        },
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/status',
+      expect.objectContaining({
+        forwardRequestHeaders: true,
+        access: 'internal',
       })
-    ).rejects.toThrow(
-      'Cannot invoke Kibana tool: "server.publicBaseUrl" must be configured in kibana.yml'
     );
   });
 });

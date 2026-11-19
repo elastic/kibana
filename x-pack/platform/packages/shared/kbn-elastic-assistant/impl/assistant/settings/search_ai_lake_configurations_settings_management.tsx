@@ -169,7 +169,7 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
         `}
       >
         <EuiFlexItem grow={false} css={{ width: '200px' }}>
-          <EuiListGroup flush>
+          <EuiListGroup>
             {tabs.map(({ id, label, onClick, isSelected }) => (
               <EuiListGroupItem
                 key={id}
@@ -177,7 +177,6 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
                 onClick={onClick}
                 data-test-subj={`settingsPageTab-${id}`}
                 isActive={isSelected}
-                size="s"
               />
             ))}
           </EuiListGroup>

@@ -6,7 +6,7 @@
  */
 
 import path from 'path';
-import getPort from 'get-port';
+import getPort, { portNumbers } from 'get-port';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { findTestPluginPaths } from '@kbn/test';
@@ -42,6 +42,7 @@ interface CreateTestConfigOptions {
   maxAlerts?: number;
   emailMaximumBodyLength?: number;
   indexRefreshInterval?: string | false;
+  ruleChangeTrackingEnabled?: boolean;
 }
 
 // test.not-enabled is specifically not enabled
@@ -93,6 +94,8 @@ const enabledActionTypes = [
   'test.connector-with-hooks',
   'test.deprecated',
   'test.single_file_connector',
+  'test.oauth-connector',
+  'test.oauth-executor',
 ];
 
 export const getPreConfiguredActions = (
@@ -233,6 +236,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     experimentalFeatures = [],
     maxAlerts = 20,
     indexRefreshInterval,
+    ruleChangeTrackingEnabled = false,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -248,7 +252,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
 
     const proxyPort =
-      process.env.ALERTING_PROXY_PORT ?? (await getPort({ port: getPort.makeRange(6200, 6299) }));
+      process.env.ALERTING_PROXY_PORT ?? (await getPort({ port: portNumbers(6200, 6299) }));
 
     // Create URLs of identical simple webhook servers using TLS, but we'll
     // create custom host settings for them below.
@@ -328,6 +332,13 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ? []
         : [`--xpack.actions.email.maximum_body_length=${options.emailMaximumBodyLength}`];
 
+    const ruleChangeTrackingSettings = ruleChangeTrackingEnabled
+      ? [
+          '--xpack.alerting.ruleChangeTracking.enabled=true',
+          `--xpack.alerting.ruleChangeTracking.scope=${JSON.stringify(['stack'])}`,
+        ]
+      : [];
+
     return {
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles: testFiles ? testFiles : [require.resolve(`../${name}/tests/`)],
@@ -363,6 +374,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.enableFooterInEmail=${enableFooterInEmail}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerting.invalidateApiKeysTask.removalDelay="1s"',
+          // Task Manager keeps the keys it granted queued for an hour by default, which is longer
+          // than any test can wait for a key to actually be revoked.
+          '--xpack.task_manager.invalidate_api_key_task.removalDelay="1s"',
           '--xpack.alerting.healthCheck.interval="1s"',
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
           `--xpack.alerting.rules.run.alerts.max=${maxAlerts}`,
@@ -381,7 +395,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledRuleTypesSetting,
           ...enabledRuleTypesSetting,
           ...emailMaximumBodyLengthSetting,
-          '--xpack.eventLog.logEntries=true',
+          ...ruleChangeTrackingSettings,
+          '--xpack.eventLog.logEntries=false',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
             'actions:test.excluded',
           ])}`,
@@ -390,7 +405,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
-          ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
+          ...findTestPluginPaths(
+            path.resolve(__dirname, '../../../test_plugins/response_ops/alerting_api_integration')
+          ),
           `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [
@@ -402,10 +419,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.task_manager.allow_reading_invalid_state=false',
           '--xpack.actions.queued.max=500',
           `--xpack.stack_connectors.enableExperimental=${JSON.stringify(experimentalFeatures)}`,
-          '--xpack.uptime.service.password=test',
-          '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
-          '--xpack.uptime.service.devUrl=mockDevUrl',
-          '--xpack.uptime.service.manifestUrl=mockDevUrl',
+          '--xpack.synthetics.service.password=test',
+          '--xpack.synthetics.service.username=localKibanaIntegrationTestsUser',
+          '--xpack.synthetics.service.devUrl=mockDevUrl',
+          '--xpack.synthetics.service.manifestUrl=mockDevUrl',
         ],
       },
       indexRefreshInterval,

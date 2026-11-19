@@ -7,7 +7,8 @@
 import { useMemo } from 'react';
 
 import { useGetFileByPathQuery } from '../../../../../hooks';
-import { getBreakingChanges, parseYamlChangelog } from '../utils';
+import { useYaml } from '../../../../../../../services';
+import { getBreakingChanges, getBreakingChangesInRange, parseYamlChangelog } from '../utils';
 
 /**
  * @param packageName the package to get the changelog for
@@ -19,6 +20,7 @@ export const useChangelog = (
   latestVersion: string,
   currentVersion?: string
 ) => {
+  const yaml = useYaml();
   const {
     data,
     error: getFileError,
@@ -28,13 +30,18 @@ export const useChangelog = (
   const error = getFileError?.statusCode === 404 ? null : getFileError;
 
   const changelog = useMemo(() => {
-    return parseYamlChangelog(data, latestVersion, currentVersion);
-  }, [data, latestVersion, currentVersion]);
+    if (!yaml) return [];
+    return parseYamlChangelog(yaml.parse, data, latestVersion, currentVersion);
+  }, [yaml, data, latestVersion, currentVersion]);
 
   const breakingChanges = useMemo(() => {
-    const _breakingChanges = getBreakingChanges(changelog);
+    // The changelog includes the current version, which must not be reported as a breaking change
+    // of the upgrade. The range matches the server-side check of upgrade APIs.
+    const _breakingChanges = currentVersion
+      ? getBreakingChangesInRange(changelog, currentVersion, latestVersion)
+      : getBreakingChanges(changelog);
     return _breakingChanges.length > 0 ? _breakingChanges : null;
-  }, [changelog]);
+  }, [changelog, currentVersion, latestVersion]);
 
   return {
     changelog,

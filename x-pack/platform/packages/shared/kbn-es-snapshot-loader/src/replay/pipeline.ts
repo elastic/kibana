@@ -8,30 +8,42 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-const TIMESTAMP_TRANSFORM_SCRIPT = `
-  // Reset the _id field to null to avoid conflicts with subsequent reindex operations
-  ctx._id = null;
-  if (ctx.containsKey('@timestamp') && ctx['@timestamp'] != null) {
+// `now_ms` is fixed per replay: a per-document clock would shift documents unevenly and collide TSDB ids.
+const timestampTransformBody = (doc: string) => `
+  if (${doc}.containsKey('@timestamp') && ${doc}['@timestamp'] != null) {
     Instant maxTime = Instant.parse(params.max_timestamp);
-    Instant originalTime = Instant.parse(ctx['@timestamp'].toString());
+    Instant originalTime = Instant.parse(${doc}['@timestamp'].toString());
     long deltaMillis = maxTime.toEpochMilli() - originalTime.toEpochMilli();
-    Instant now = Instant.ofEpochMilli(System.currentTimeMillis());
-    ctx['@timestamp'] = now.minusMillis(deltaMillis).toString();
+    Instant now = Instant.ofEpochMilli(params.now_ms);
+    ${doc}['@timestamp'] = now.minusMillis(deltaMillis).toString();
   }
 `;
+
+// Ingest pipeline version: nulls _id so the destination generates a fresh ID,
+// avoiding conflicts when reindexing into a regular index that enforces uniqueness.
+const TIMESTAMP_TRANSFORM_SCRIPT = `
+  ctx._id = null;
+  ${timestampTransformBody('ctx')}
+`;
+
+// Inline reindex script version: operates on _source only. Data streams
+// auto-generate IDs, so _id manipulation is unnecessary (and unsupported).
+export const TIMESTAMP_REINDEX_SCRIPT = timestampTransformBody('ctx._source');
 
 export async function createTimestampPipeline({
   esClient,
   log,
   pipelineName,
   maxTimestamp,
+  nowMs,
 }: {
   esClient: Client;
   log: ToolingLog;
   pipelineName: string;
   maxTimestamp: string;
+  nowMs: number;
 }): Promise<string> {
-  log.debug(`Creating timestamp transformation pipeline (max: ${maxTimestamp})`);
+  log.debug(`Creating timestamp transformation pipeline (max: ${maxTimestamp}, now: ${nowMs})`);
 
   try {
     await esClient.ingest.putPipeline({
@@ -42,7 +54,7 @@ export async function createTimestampPipeline({
         {
           script: {
             lang: 'painless',
-            params: { max_timestamp: maxTimestamp },
+            params: { max_timestamp: maxTimestamp, now_ms: nowMs },
             source: TIMESTAMP_TRANSFORM_SCRIPT,
           },
         },

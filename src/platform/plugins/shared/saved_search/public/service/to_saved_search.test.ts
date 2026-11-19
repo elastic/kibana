@@ -32,6 +32,7 @@ describe('toSavedSearch', () => {
           columns: ['message', 'extension'],
           grid: {},
           hideChart: false,
+          hideTable: false,
           isTextBasedQuery: false,
         },
       },
@@ -43,6 +44,7 @@ describe('toSavedSearch', () => {
       columns: ['message', 'extension'],
       grid: {},
       hideChart: false,
+      hideTable: false,
       isTextBasedQuery: false,
       kibanaSavedObjectMeta: {
         searchSourceJSON: '{}',
@@ -68,12 +70,15 @@ describe('toSavedSearch', () => {
         "controlGroupJson": undefined,
         "density": undefined,
         "description": "",
+        "documentsDisplayMode": undefined,
         "grid": Object {},
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": false,
+        "hideTable": false,
         "id": undefined,
         "isTextBasedQuery": false,
+        "jsonModeSettings": undefined,
         "managed": false,
         "references": Array [
           Object {
@@ -87,6 +92,7 @@ describe('toSavedSearch', () => {
         "rowsPerPage": undefined,
         "sampleSize": undefined,
         "searchSource": Object {
+          "build": [MockFunction],
           "create": [MockFunction],
           "createChild": [MockFunction],
           "createCopy": [MockFunction],
@@ -119,6 +125,7 @@ describe('toSavedSearch', () => {
             "desc",
           ],
         ],
+        "tabTypeState": undefined,
         "tabs": Array [
           Object {
             "attributes": Object {
@@ -128,6 +135,7 @@ describe('toSavedSearch', () => {
               ],
               "grid": Object {},
               "hideChart": false,
+              "hideTable": false,
               "isTextBasedQuery": false,
               "kibanaSavedObjectMeta": Object {
                 "searchSourceJSON": "{}",
@@ -165,6 +173,7 @@ describe('toSavedSearch', () => {
           columns: ['my', 'tab', 'columns'],
           grid: {},
           hideChart: false,
+          hideTable: false,
           isTextBasedQuery: false,
         },
       },
@@ -176,6 +185,7 @@ describe('toSavedSearch', () => {
       columns: ['message', 'extension'],
       grid: {},
       hideChart: false,
+      hideTable: false,
       isTextBasedQuery: false,
       kibanaSavedObjectMeta: {
         searchSourceJSON: '{}',
@@ -202,12 +212,15 @@ describe('toSavedSearch', () => {
         "controlGroupJson": undefined,
         "density": undefined,
         "description": "",
+        "documentsDisplayMode": undefined,
         "grid": Object {},
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": false,
+        "hideTable": false,
         "id": undefined,
         "isTextBasedQuery": false,
+        "jsonModeSettings": undefined,
         "managed": false,
         "references": Array [
           Object {
@@ -221,6 +234,7 @@ describe('toSavedSearch', () => {
         "rowsPerPage": undefined,
         "sampleSize": undefined,
         "searchSource": Object {
+          "build": [MockFunction],
           "create": [MockFunction],
           "createChild": [MockFunction],
           "createCopy": [MockFunction],
@@ -253,6 +267,7 @@ describe('toSavedSearch', () => {
             "desc",
           ],
         ],
+        "tabTypeState": undefined,
         "tabs": Array [
           Object {
             "attributes": Object {
@@ -263,6 +278,7 @@ describe('toSavedSearch', () => {
               ],
               "grid": Object {},
               "hideChart": false,
+              "hideTable": false,
               "isTextBasedQuery": false,
               "kibanaSavedObjectMeta": Object {
                 "searchSourceJSON": "{}",

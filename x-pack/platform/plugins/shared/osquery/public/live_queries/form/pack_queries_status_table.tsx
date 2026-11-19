@@ -15,13 +15,12 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiNotificationBadge,
-  RIGHT_ALIGNMENT,
   EuiBadge,
   EuiText,
+  formatDate,
 } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment-timezone';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QueryDetailsFlyout } from './query_details_flyout';
 import { PackResultsHeader } from './pack_results_header';
@@ -31,11 +30,12 @@ import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import type { PackItem } from '../../packs/types';
 import { PackViewInLensAction } from '../../lens/pack_view_in_lens';
 import { PackViewInDiscoverAction } from '../../discover/pack_view_in_discover';
-import { AddToCaseWrapper } from '../../cases/add_to_cases';
-import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 import { TagsColumn } from '../../actions/components/tags_column';
 import { RowKebabMenu } from './row_kebab_menu';
-import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
+import {
+  ExportFiltersProvider,
+  useExportFiltersContext,
+} from '../../results/export_filters_context';
 import type { AddToTimelineHandler } from '../../types';
 
 const truncateTooltipTextCss = {
@@ -48,24 +48,36 @@ const truncateTooltipTextCss = {
   },
 };
 
-const euiFlexItemCss = {
+const queryClampCss = {
   cursor: 'pointer',
+  '.euiCodeBlock__code': {
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical' as const,
+    overflow: 'hidden',
+  },
 };
 
-const euiFlexItemWithMinWidthCss = {
+const queryClampFlexItemCss = {
   minWidth: 0,
-  ...euiFlexItemCss,
 };
 
-// TODO fix types
-const euiBasicTableCss = {
+const errorTextCss = {
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap' as const,
+};
+
+const euiBasicTableCss = ({ euiTheme }: UseEuiTheme) => ({
   '.euiTableRow.euiTableRow-isExpandedRow > td > div': {
-    border: '1px solid #d3dae6',
+    border: euiTheme.border.thin,
   },
 
   '.euiTableRow.euiTableRow-isExpandedRow .euiTableCellContent': {
     paddingLeft: 0,
     paddingRight: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
   },
 
   'div.euiDataGrid__virtualized::-webkit-scrollbar': {
@@ -80,7 +92,7 @@ const euiBasicTableCss = {
     borderLeft: '0px',
     borderRight: '0px',
   },
-};
+});
 
 const EMPTY_ARRAY: PackQueryStatusItem[] = [];
 
@@ -97,7 +109,7 @@ interface DocsColumnResultsProps {
 const DocsColumnResults: React.FC<DocsColumnResultsProps> = ({ count, isLive }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
-      {count ? <EuiNotificationBadge color="subdued">{count}</EuiNotificationBadge> : '-'}
+      {count ? <EuiBadge color="hollow">{count}</EuiBadge> : '\u2014'}
     </EuiFlexItem>
     {!isLive ? (
       <EuiFlexItem grow={false} data-test-subj={'live-query-loading'}>
@@ -113,29 +125,38 @@ interface AgentsColumnResultsProps {
   failed?: number;
 }
 
+const agentsSeparatorCss = ({ euiTheme }: UseEuiTheme) => ({ color: euiTheme.colors.subduedText });
+
 const AgentsColumnResults: React.FC<AgentsColumnResultsProps> = ({
   successful,
   pending,
   failed,
 }) => (
-  <EuiFlexGroup gutterSize="s" alignItems="center">
+  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
     <EuiFlexItem grow={false}>
-      <EuiText color="subdued">
-        <EuiBadge color="success">{successful}</EuiBadge>
-        {' / '}
-        <EuiBadge color="default">{pending}</EuiBadge>
-        {' / '}
-        <EuiBadge color={failed ? 'danger' : 'default'}>{failed}</EuiBadge>
-      </EuiText>
+      <EuiBadge color="success">{successful}</EuiBadge>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <span css={agentsSeparatorCss}>/</span>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiBadge color="default">{pending}</EuiBadge>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <span css={agentsSeparatorCss}>/</span>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiBadge color={failed ? 'danger' : 'default'}>{failed}</EuiBadge>
     </EuiFlexItem>
   </EuiFlexGroup>
 );
 
-type PackQueryStatusItem = Partial<{
+export type PackQueryStatusItem = Partial<{
   action_id: string;
   id: string;
-  query: string;
+  query?: string;
   agents: string[];
+  interval: number;
   ecs_mapping?: ECSMapping;
   version?: string;
   platform?: string;
@@ -154,11 +175,13 @@ interface PackQueriesStatusTableProps {
   startDate?: string;
   expirationDate?: string;
   showResultsHeader?: boolean;
+  hideResultsTitle?: boolean;
   addToTimeline?: AddToTimelineHandler;
   scheduleId?: string;
   executionCount?: number;
   packName?: string;
   tags?: string[];
+  onSaveQuery?: () => void;
 }
 
 const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = ({
@@ -169,13 +192,15 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   startDate,
   expirationDate,
   showResultsHeader,
+  hideResultsTitle,
   addToTimeline,
   scheduleId,
   executionCount,
   packName,
   tags,
+  onSaveQuery,
 }) => {
-  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
+  const exportFiltersStore = useExportFiltersContext();
   const [queryDetailsFlyoutOpen, setQueryDetailsFlyoutOpen] = useState<{
     id: string;
     query: string;
@@ -183,6 +208,15 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const handleQueryFlyoutOpen = useCallback(
     (item: any) => () => {
       setQueryDetailsFlyoutOpen(item);
+    },
+    []
+  );
+  const handleQueryFlyoutKeyDown = useCallback(
+    (item: any) => (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setQueryDetailsFlyoutOpen(item);
+      }
     },
     []
   );
@@ -203,29 +237,41 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderQueryColumn = useCallback(
-    (query: string, item: any) => {
+    (query: string | undefined, item: PackQueryStatusItem) => {
+      // Error rows carry no SQL — render the error text instead of crashing on removeMultilines(undefined).
+      if (!query) {
+        const errorText = item?.error ?? '';
+
+        return (
+          <EuiToolTip content={errorText} display="block">
+            <EuiText size="s" color="danger" tabIndex={0} css={errorTextCss}>
+              {errorText}
+            </EuiText>
+          </EuiToolTip>
+        );
+      }
+
       const singleLine = removeMultilines(query);
-      const content = singleLine.length > 55 ? `${singleLine.substring(0, 55)}...` : singleLine;
+      const content = singleLine.length > 120 ? `${singleLine.substring(0, 120)}...` : singleLine;
 
       const queryContent = (
-        <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-          {content}
-        </EuiCodeBlock>
+        <div
+          css={queryClampCss}
+          role="button"
+          tabIndex={0}
+          onClick={handleQueryFlyoutOpen(item)}
+          onKeyDown={handleQueryFlyoutKeyDown(item)}
+        >
+          <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
+            {content}
+          </EuiCodeBlock>
+        </div>
       );
 
       if (scheduleId && packName) {
         return (
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
-            wrap={false}
-            justifyContent="spaceBetween"
-          >
-            <EuiFlexItem
-              grow={true}
-              css={euiFlexItemWithMinWidthCss}
-              onClick={handleQueryFlyoutOpen(item)}
-            >
+          <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false}>
+            <EuiFlexItem grow={false} css={queryClampFlexItemCss}>
               {queryContent}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -237,13 +283,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         );
       }
 
-      return (
-        <EuiFlexItem css={euiFlexItemCss} onClick={handleQueryFlyoutOpen(item)}>
-          {queryContent}
-        </EuiFlexItem>
-      );
+      return queryContent;
     },
-    [handleQueryFlyoutOpen, scheduleId, packName]
+    [handleQueryFlyoutOpen, handleQueryFlyoutKeyDown, scheduleId, packName]
   );
 
   const renderDocsColumn = useCallback((item: PackQueryStatusItem) => {
@@ -268,7 +310,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   // These renderers intentionally ignore the row item — the value is the same
   // for all rows since it comes from the parent execution context, not per-query data.
   const renderRunAtColumn = useCallback(
-    () => (startDate ? <EuiText size="s">{moment(startDate).format('lll')}</EuiText> : null),
+    () => (startDate ? <EuiText size="s">{formatDate(startDate)}</EuiText> : null),
     [startDate]
   );
 
@@ -284,24 +326,24 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderDiscoverResultsAction = useCallback(
-    (item: any) => (
+    (item: PackQueryStatusItem) => (
       <PackViewInDiscoverAction
         item={item}
         scheduleId={scheduleId}
         executionCount={executionCount}
-        timestamp={scheduleId ? startDate : undefined}
+        timestamp={startDate}
       />
     ),
     [scheduleId, executionCount, startDate]
   );
 
   const renderLensResultsAction = useCallback(
-    (item: any) => (
+    (item: PackQueryStatusItem) => (
       <PackViewInLensAction
         item={item}
         scheduleId={scheduleId}
         executionCount={executionCount}
-        timestamp={scheduleId ? startDate : undefined}
+        timestamp={startDate}
       />
     ),
     [scheduleId, executionCount, startDate]
@@ -313,9 +355,15 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         const itemIdToExpandedRowMapValues = { ...prevValue };
         if (itemIdToExpandedRowMapValues[item.id]) {
           delete itemIdToExpandedRowMapValues[item.id];
+          // Row is being collapsed: clear the store entry so a later expand
+          // doesn't read stale filter state. This is the correct owner for
+          // the clear signal because it can't be confused by a tab switch.
+          if (item.action_id) {
+            exportFiltersStore?.clearFilters(item.action_id);
+          }
         } else {
           itemIdToExpandedRowMapValues[item.id] = (
-            <EuiFlexGroup gutterSize="xl">
+            <EuiFlexGroup gutterSize="none">
               <EuiFlexItem>
                 <ResultTabs
                   liveQueryActionId={actionId}
@@ -338,121 +386,113 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         return itemIdToExpandedRowMapValues;
       });
     },
-    [actionId, startDate, expirationDate, agentIds, addToTimeline, scheduleId, executionCount]
-  );
-
-  const renderToggleResultsAction = useCallback(
-    (item: any) =>
-      item?.action_id && data?.length && data.length > 1 ? (
-        <EuiButtonIcon
-          data-test-subj={`toggleIcon-${item.id}`}
-          onClick={getHandleErrorsToggle(item)}
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
-          aria-label={i18n.translate('xpack.osquery.pack.queriesTable.toggleResultsAriaLabel', {
-            defaultMessage: 'Toggle results',
-          })}
-        />
-      ) : (
-        <></>
-      ),
-    [data, getHandleErrorsToggle, itemIdToExpandedRowMap]
+    [
+      actionId,
+      exportFiltersStore,
+      startDate,
+      expirationDate,
+      agentIds,
+      addToTimeline,
+      scheduleId,
+      executionCount,
+    ]
   );
 
   const getItemId = useCallback((item: PackItem) => get(item, 'id'), []) as unknown as string;
 
   const renderResultActions = useCallback(
-    (row: PackQueryStatusItem) => {
-      if (isHistoryEnabled) {
-        return (
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>{renderDiscoverResultsAction(row)}</EuiFlexItem>
-            <EuiFlexItem grow={false}>{renderLensResultsAction(row)}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <RowKebabMenu
-                row={row}
-                actionId={actionId}
-                agentIds={agentIds}
-                addToTimeline={addToTimeline}
-                scheduleId={scheduleId}
-                executionCount={executionCount}
-                onViewQuery={handleQueryFlyoutOpen(row)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      }
-
-      // Legacy layout: inline action buttons without kebab menu
-      const resultActions = [
-        { render: renderDiscoverResultsAction },
-        { render: renderLensResultsAction },
-        {
-          render: (item: PackQueryStatusItem) =>
-            item.action_id && (
-              <AddToTimelineButton
-                field="action_id"
-                value={item.action_id}
-                isIcon={true}
-                addToTimeline={addToTimeline}
-              />
-            ),
-        },
-        {
-          render: (item: PackQueryStatusItem) =>
-            actionId && (
-              <AddToCaseWrapper
-                actionId={actionId}
-                agentIds={agentIds}
-                queryId={item.action_id}
-                isIcon={true}
-                isDisabled={!item.action_id}
-                scheduleId={scheduleId}
-                executionCount={executionCount}
-              />
-            ),
-        },
-        {
-          render: (item: PackQueryStatusItem) => (
-            <EuiButtonIcon
-              iconType={'expand'}
-              onClick={handleQueryFlyoutOpen(item)}
-              aria-label={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
-                defaultMessage: 'View query',
-              })}
-            />
-          ),
-        },
-      ];
-
-      return resultActions.map((action) => action.render(row));
-    },
+    (row: PackQueryStatusItem) => (
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>{renderDiscoverResultsAction(row)}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{renderLensResultsAction(row)}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <RowKebabMenu
+            row={row}
+            actionId={actionId}
+            agentIds={agentIds}
+            addToTimeline={addToTimeline}
+            scheduleId={scheduleId}
+            executionCount={executionCount}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
     [
-      isHistoryEnabled,
       actionId,
       addToTimeline,
       agentIds,
       executionCount,
-      handleQueryFlyoutOpen,
       renderDiscoverResultsAction,
       renderLensResultsAction,
       scheduleId,
     ]
   );
 
-  const renderActionsColumn = useCallback(
-    (row: PackQueryStatusItem) => (
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        {data && data.length > 1 && (
-          <EuiFlexItem grow={false}>{renderToggleResultsAction(row)}</EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>{renderResultActions(row)}</EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    [data, renderResultActions, renderToggleResultsAction]
+  const renderViewQueryColumn = useCallback(
+    (row: PackQueryStatusItem) => {
+      if (!row.query) return null;
+
+      return (
+        <EuiToolTip
+          content={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
+            defaultMessage: 'View query',
+          })}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="maximize"
+            onClick={handleQueryFlyoutOpen(row)}
+            aria-label={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
+              defaultMessage: 'View query',
+            })}
+          />
+        </EuiToolTip>
+      );
+    },
+    [handleQueryFlyoutOpen]
+  );
+
+  const renderExpanderColumn = useCallback(
+    (item: PackQueryStatusItem) =>
+      item?.action_id && item?.id ? (
+        <EuiToolTip
+          content={i18n.translate('xpack.osquery.pack.queriesTable.toggleResultsAriaLabel', {
+            defaultMessage: 'Toggle results',
+          })}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj={`toggleIcon-${item.id}`}
+            onClick={getHandleErrorsToggle(item)}
+            iconType={itemIdToExpandedRowMap[item.id] ? 'chevronSingleDown' : 'chevronSingleRight'}
+            aria-label={i18n.translate('xpack.osquery.pack.queriesTable.toggleResultsAriaLabel', {
+              defaultMessage: 'Toggle results',
+            })}
+          />
+        </EuiToolTip>
+      ) : null,
+    [getHandleErrorsToggle, itemIdToExpandedRowMap]
   );
 
   const columns = useMemo(
     () => [
+      ...(data && data.length > 1
+        ? [
+            {
+              field: '',
+              name: '',
+              width: '28px',
+              isExpander: true,
+              render: renderExpanderColumn,
+            },
+          ]
+        : []),
+      {
+        field: '',
+        name: '',
+        width: '28px',
+        render: renderViewQueryColumn,
+      },
       {
         field: 'id',
         name: i18n.translate('xpack.osquery.pack.queriesTable.idColumnTitle', {
@@ -467,9 +507,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           defaultMessage: 'Query',
         }),
         render: renderQueryColumn,
-        width: '40%',
+        width: '42%',
       },
-      ...(isHistoryEnabled && !scheduleId && tags
+      ...(!scheduleId && tags
         ? [
             {
               field: '',
@@ -486,7 +526,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         name: i18n.translate('xpack.osquery.pack.queriesTable.docsResultsColumnTitle', {
           defaultMessage: 'Docs',
         }),
-        width: '80px',
+        width: '60px',
         render: renderDocsColumn,
       },
       {
@@ -497,19 +537,19 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         width: '160px',
         render: renderAgentsColumn,
       },
-      ...(isHistoryEnabled && startDate
+      ...(startDate
         ? [
             {
               field: '',
               name: i18n.translate('xpack.osquery.pack.queriesTable.runAtColumnTitle', {
                 defaultMessage: 'Run at',
               }),
-              width: '180px',
+              width: '160px',
               render: renderRunAtColumn,
             },
           ]
         : []),
-      ...(isHistoryEnabled && scheduleId && executionCount != null
+      ...(scheduleId && executionCount != null
         ? [
             {
               field: '',
@@ -521,42 +561,19 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
             },
           ]
         : []),
-      ...(isHistoryEnabled
-        ? [
-            {
-              field: '',
-              name: i18n.translate('xpack.osquery.pack.queriesTable.actionsColumnTitle', {
-                defaultMessage: 'Actions',
-              }),
-              width: '120px',
-              render: renderActionsColumn,
-            },
-          ]
-        : [
-            {
-              field: '',
-              name: i18n.translate('xpack.osquery.pack.queriesTable.viewResultsColumnTitle', {
-                defaultMessage: 'View results',
-              }),
-              width: '120px',
-              render: renderResultActions,
-            },
-            {
-              field: '',
-              id: 'actions',
-              width: '45px',
-              isVisuallyHiddenLabel: true,
-              alignment: RIGHT_ALIGNMENT,
-              actions: [
-                {
-                  render: renderToggleResultsAction,
-                },
-              ],
-            },
-          ]),
+      {
+        field: '',
+        name: i18n.translate('xpack.osquery.pack.queriesTable.actionsColumnTitle', {
+          defaultMessage: 'Actions',
+        }),
+        width: '80px',
+        render: renderResultActions,
+      },
     ],
     [
-      isHistoryEnabled,
+      data,
+      renderExpanderColumn,
+      renderViewQueryColumn,
       renderIDColumn,
       renderQueryColumn,
       renderDocsColumn,
@@ -564,9 +581,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       renderRunAtColumn,
       renderExecutionCountColumn,
       renderTagsColumn,
-      renderActionsColumn,
       renderResultActions,
-      renderToggleResultsAction,
       startDate,
       scheduleId,
       executionCount,
@@ -611,6 +626,10 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           agentIds={agentIds}
           addToTimeline={addToTimeline}
           isScheduled={!!scheduleId}
+          scheduleId={scheduleId}
+          executionCount={executionCount}
+          onSaveQuery={onSaveQuery}
+          hideTitle={hideResultsTitle}
         />
       )}
       <EuiBasicTable
@@ -631,4 +650,10 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 };
 
-export const PackQueriesStatusTable = React.memo(PackQueriesStatusTableComponent);
+const PackQueriesStatusTableMemo = React.memo(PackQueriesStatusTableComponent);
+
+export const PackQueriesStatusTable: React.FC<PackQueriesStatusTableProps> = (props) => (
+  <ExportFiltersProvider>
+    <PackQueriesStatusTableMemo {...props} />
+  </ExportFiltersProvider>
+);

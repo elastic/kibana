@@ -5,14 +5,15 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const ReadOnlyCallout = ({ projectId }: { projectId?: string }) => {
   if (projectId) {
     return (
       <>
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount
           title={
             <FormattedMessage
@@ -20,16 +21,14 @@ export const ReadOnlyCallout = ({ projectId }: { projectId?: string }) => {
               defaultMessage="This configuration is read-only"
             />
           }
-          iconType="document"
-        >
-          <p>
+          text={
             <FormattedMessage
               id="xpack.synthetics.project.readOnly.callout.content"
               defaultMessage="This monitor was added from an external project: {projectId}. From this page, you can only enable and disable the monitor and its alerts, or remove it. To make configuration changes, you have to edit its source file and push it again from that project."
               values={{ projectId: <strong>{projectId}</strong> }}
             />
-          </p>
-        </EuiCallOut>
+          }
+        />
         <EuiSpacer size="m" />
       </>
     );

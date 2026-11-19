@@ -179,7 +179,6 @@ describe('body', () => {
         skip: false,
         startDate: '2020-07-07T08:20:18.966Z',
         type: 'details',
-        hostName: 'host-1',
         ...(path === 'events' && { additionalFilters: mockHostDetailsPageFilters }),
       });
     })

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { expect as baseExpect } from '@playwright/test';
+import type { expect as baseExpect, Expect } from '@playwright/test';
 import type { ToHaveStatusCodeOptions } from './to_have_status_code';
 
 /**
@@ -42,8 +42,12 @@ export interface GenericMatchers {
   toStrictEqual(expected: unknown): void;
   /** Ensures that `value > expected` for number or big integer values */
   toBeGreaterThan(expected: number): void;
+  /** Ensures that `value >= expected` for number or big integer values */
+  toBeGreaterThanOrEqual(expected: number): void;
   /** Ensures that `value < expected` for number or big integer values */
   toBeLessThan(expected: number): void;
+  /** Ensures that `value <= expected` for number or big integer values */
+  toBeLessThanOrEqual(expected: number): void;
   /** Compares contents of the value with contents of `expected`, performing "deep equality" check. Allows extra properties to be present in the value */
   toMatchObject(expected: unknown): void;
   /** Ensures that string value matches a regular expression or string */
@@ -98,6 +102,16 @@ export type Matchers = GenericMatchers &
 export type AsymmetricMatcher = ReturnType<typeof baseExpect.anything>;
 
 /**
+ * Derived from Playwright's Expect['poll'] — keeps our types in sync with Playwright.
+ */
+type PlaywrightPoll = Expect['poll'];
+type PlaywrightPollResult = ReturnType<PlaywrightPoll>;
+export type PollOptions = NonNullable<Parameters<PlaywrightPoll>[1]>;
+export type PollMatchers = Pick<PlaywrightPollResult, keyof GenericMatchers> & {
+  not: Pick<PlaywrightPollResult['not'], keyof GenericMatchers['not']>;
+};
+
+/**
  * Asymmetric matchers available on the expect object.
  * These can be used inside toMatchObject() for flexible value matching.
  */
@@ -110,4 +124,6 @@ export interface AsymmetricMatchers {
   arrayContaining<T>(expected: T[]): AsymmetricMatcher;
   /** Matches an object that contains and matches all of the properties in the expected object */
   objectContaining<T extends Record<string, unknown>>(expected: T): AsymmetricMatcher;
+  /** Matches a string that contains the expected substring */
+  stringContaining(expected: string): AsymmetricMatcher;
 }

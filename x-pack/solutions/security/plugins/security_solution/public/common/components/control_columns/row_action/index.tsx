@@ -6,32 +6,35 @@
  */
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { RefObject } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
-import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
-import { DocumentFlyout } from '../../../../flyout_v2/document';
-import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
-import { useKibana } from '../../../lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { TableId } from '@kbn/securitysolution-data-table';
 import {
-  DocumentDetailsLeftPanelKey,
-  DocumentDetailsRightPanelKey,
-} from '../../../../flyout/document_details/shared/constants/panel_keys';
+  SECURITY_CELL_ACTIONS_CASE_EVENTS,
+  SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
+import {
+  createCellActionRenderer,
+  rulePreviewCellActionRenderer,
+} from '../../../../flyout_v2/shared/components/cell_actions';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { getAlertIndexAlias } from '../../../../flyout/document_details/shared/hooks/use_event_details';
+import { useSpaceId } from '../../../hooks/use_space_id';
+import { useKibana } from '../../../lib/kibana';
 import type {
   ControlColumnProps,
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../../common/types';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
-import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
-import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
+import { type ColumnHeaderOptions, type OnRowSelected } from '../../../../../common/types/timeline';
+import { DocumentEventTypes, FLYOUT_ORIGIN, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
-import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
+import { getDocumentHistoryTitle } from '../../../../flyout_v2/document/main/utils/get_header_title';
 
 export type RowActionProps = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -42,6 +45,7 @@ export type RowActionProps = EuiDataGridCellValueElementProps & {
   index: number;
   isEventViewer: boolean;
   loadingEventIds: Readonly<string[]>;
+  onRemoveFromCase?: (eventId: string) => void;
   onRowSelected: OnRowSelected;
   onRuleChange?: () => void;
   pageRowIndex: number;
@@ -52,7 +56,22 @@ export type RowActionProps = EuiDataGridCellValueElementProps & {
   showCheckboxes: boolean;
   tabType?: string;
   tableId: string;
+  /**
+   * Handle to the alerts table this row belongs to. Provided by the alerts table so the document
+   * flyout's "Toggle column in table" action can add/remove columns on it. Absent for other tables.
+   */
+  alertsTableRef?: RefObject<AlertsTableImperativeApi>;
   width: number;
+  /**
+   * Optional override for the "expand flyout" row action. When provided,
+   * clicking the expand button calls this callback instead of opening the
+   * document details flyout directly. The alerts page uses this so the alerts table
+   * can drive the in-flyout pagination (see `usePaginatedFlyout` in `flyout_v2/document/pagination`).
+   *
+   * If omitted (e.g. for the cases events table), the default behaviour of
+   * opening the document details flyout directly is preserved.
+   */
+  onExpandFlyout?: () => void;
 };
 
 const RowActionComponent = ({
@@ -64,6 +83,8 @@ const RowActionComponent = ({
   index,
   isEventViewer,
   loadingEventIds,
+  onExpandFlyout,
+  onRemoveFromCase,
   onRowSelected,
   onRuleChange,
   pageRowIndex,
@@ -75,6 +96,7 @@ const RowActionComponent = ({
   showCheckboxes,
   tabType,
   tableId,
+  alertsTableRef,
   width,
 }: RowActionProps) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
@@ -83,13 +105,10 @@ const RowActionComponent = ({
     [esHitRecord]
   );
 
-  const { services } = useKibana();
-  const { telemetry, overlays } = services;
-  const store = useStore();
-  const history = useHistory();
+  const { telemetry } = useKibana().services;
+  const spaceId = useSpaceId();
 
-  const { openFlyout } = useExpandableFlyoutApi();
-  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const { openDocumentFlyoutFromIndex, openDocumentFlyoutFromPattern, openNotes } = useFlyoutApi();
 
   const columnValues = useMemo(
     () =>
@@ -112,74 +131,85 @@ const RowActionComponent = ({
   } = useUserPrivileges();
   const showNotes = canReadNotes;
 
+  const handleAlertUpdated = useCallback(() => {
+    refetch?.();
+  }, [refetch]);
+
+  // Cell action renderer for the new document details flyout opened from this table.
+  // The table scope is always bound and the details-flyout trigger is used — that trigger is the
+  // only one that registers the "Toggle column in table" action, and binding the scope makes the
+  // action compatible for both Timeline/table scopes. How the column toggle is applied depends on
+  // the table:
+  // - Alerts tables forward their `alertsTableRef` so the toggle targets the imperatively-controlled
+  //   table.
+  // - Event tables (e.g. the Explore host/user pages) have no ref; the toggle dispatches to the
+  //   Redux data table store keyed by the bound scope instead.
+  // - The alerts table on the Cases page uses the case-events trigger.
+  const documentFlyoutCellActionRenderer = useMemo(
+    () =>
+      createCellActionRenderer(tableId, {
+        triggerId:
+          tableId === TableId.alertsOnCasePage
+            ? SECURITY_CELL_ACTIONS_CASE_EVENTS
+            : SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+        visibleCellActions: 6,
+        alertsTableRef,
+      }),
+    [tableId, alertsTableRef]
+  );
+
   const handleOnEventDetailPanelOpened = useCallback(() => {
-    if (newFlyoutSystemEnabled && hit) {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <DocumentFlyout hit={hit} renderCellActions={cellActionRenderer} />,
-        }),
-        {
-          ownFocus: false,
-          resizable: true,
-          size: 's',
-          type: 'overlay',
-        }
-      );
-    } else {
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: tableId,
-          },
-        },
+    if (onExpandFlyout) {
+      onExpandFlyout();
+      return;
+    }
+
+    if (!hit) {
+      return;
+    }
+
+    if (tableId === TableId.rulePreview) {
+      // Rule preview alert rows reference their backing .internal.preview. index, which is
+      // not included in any data view pattern. Convert to the alias and resolve via the
+      // pattern-based wrapper.
+      const resolvedIndex = indexName
+        ? getAlertIndexAlias(indexName, spaceId) ?? indexName
+        : undefined;
+      openDocumentFlyoutFromPattern({
+        documentId: eventId,
+        indexName: resolvedIndex,
+        renderCellActions: rulePreviewCellActionRenderer,
+        onAlertUpdated: handleAlertUpdated,
+        origin: FLYOUT_ORIGIN.ALERTS_TABLE,
+        title: getDocumentHistoryTitle(hit),
       });
-      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-        location: tableId,
-        panel: 'right',
+    } else {
+      openDocumentFlyoutFromIndex({
+        documentId: eventId,
+        indexName: indexName ?? undefined,
+        renderCellActions: documentFlyoutCellActionRenderer,
+        onAlertUpdated: handleAlertUpdated,
+        origin: FLYOUT_ORIGIN.ALERTS_TABLE,
+        title: getDocumentHistoryTitle(hit),
       });
     }
   }, [
-    eventId,
     hit,
-    indexName,
-    newFlyoutSystemEnabled,
-    openFlyout,
-    overlays,
-    history,
-    services,
-    store,
     tableId,
-    telemetry,
+    spaceId,
+    indexName,
+    openDocumentFlyoutFromPattern,
+    openDocumentFlyoutFromIndex,
+    documentFlyoutCellActionRenderer,
+    eventId,
+    handleAlertUpdated,
+    onExpandFlyout,
   ]);
 
   const toggleShowNotes = useCallback(() => {
-    openFlyout({
-      right: {
-        id: DocumentDetailsRightPanelKey,
-        params: {
-          id: eventId,
-          indexName,
-          scopeId: tableId,
-        },
-      },
-      left: {
-        id: DocumentDetailsLeftPanelKey,
-        path: {
-          tab: LeftPanelNotesTab,
-        },
-        params: {
-          id: eventId,
-          indexName,
-          scopeId: tableId,
-        },
-      },
-    });
+    if (hit) {
+      openNotes({ hit, origin: FLYOUT_ORIGIN.ALERTS_TABLE });
+    }
     telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
       location: tableId,
     });
@@ -187,7 +217,7 @@ const RowActionComponent = ({
       location: tableId,
       panel: 'left',
     });
-  }, [eventId, indexName, openFlyout, tableId, telemetry]);
+  }, [hit, openNotes, tableId, telemetry]);
 
   const Action = controlColumn.rowCellRender;
 
@@ -213,6 +243,7 @@ const RowActionComponent = ({
           isEventViewer={isEventViewer}
           loadingEventIds={loadingEventIds}
           onEventDetailsPanelOpened={handleOnEventDetailPanelOpened}
+          onRemoveFromCase={onRemoveFromCase}
           onRowSelected={onRowSelected}
           onRuleChange={onRuleChange}
           refetch={refetch}

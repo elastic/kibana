@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { cloneDeep } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
@@ -15,12 +16,46 @@ import type { CoreSetup, CoreTheme } from '@kbn/core/public';
 import type { PartialTheme, Theme } from '@elastic/charts';
 import { LIGHT_THEME, getChartsTheme } from '@elastic/charts';
 
+import { applyNumericFontFamily } from './helpers';
+
+const createUseDarkMode = (getDarkModeEnabled$: () => Observable<CoreTheme>) => (): boolean => {
+  const [value, update] = useState(false);
+
+  useEffect(() => {
+    const s = getDarkModeEnabled$().subscribe((val) => {
+      update(val.darkMode);
+    });
+    return () => s.unsubscribe();
+  }, []);
+
+  return value;
+};
+
+const createUseChartsBaseTheme =
+  (getCurrentTheme: () => Theme, getChartsBaseTheme$: () => Observable<Theme>) => (): Theme => {
+    const [value, update] = useState(getCurrentTheme());
+    const ref = useRef(value);
+
+    useEffect(() => {
+      const s = getChartsBaseTheme$().subscribe((val) => {
+        if (val !== ref.current) {
+          ref.current = val;
+          update(val);
+        }
+      });
+      return () => s.unsubscribe();
+    }, []);
+
+    return value;
+  };
+
 export class ThemeService {
   /** Returns default charts theme */
   public readonly chartsDefaultBaseTheme = LIGHT_THEME;
 
   private theme$?: Observable<CoreTheme>;
   private _chartsBaseTheme$ = new BehaviorSubject(this.chartsDefaultBaseTheme);
+  private readonly baseThemeCache = new Map<string, Theme>();
 
   /** An observable of the current charts base theme */
   public chartsBaseTheme$ = this._chartsBaseTheme$.asObservable();
@@ -43,18 +78,7 @@ export class ThemeService {
    *
    * @deprecated use `useKibanaIsDarkMode`
    */
-  public useDarkMode = (): boolean => {
-    const [value, update] = useState(false);
-
-    useEffect(() => {
-      const s = this.darkModeEnabled$.subscribe((val) => {
-        update(val.darkMode);
-      });
-      return () => s.unsubscribe();
-    }, []);
-
-    return value;
-  };
+  public useDarkMode = createUseDarkMode(() => this.darkModeEnabled$);
 
   /**
    * @deprecated No longer need to use theme on top of baseTheme, see https://github.com/elastic/kibana/pull/170914#issuecomment-1823014121
@@ -88,22 +112,10 @@ export class ThemeService {
   };
 
   /** A React hook for consuming the charts theme */
-  public useChartsBaseTheme = (): Theme => {
-    const [value, update] = useState(this._chartsBaseTheme$.getValue());
-    const ref = useRef(value);
-
-    useEffect(() => {
-      const s = this.chartsBaseTheme$.subscribe((val) => {
-        if (val !== ref.current) {
-          ref.current = val;
-          update(val);
-        }
-      });
-      return () => s.unsubscribe();
-    }, []);
-
-    return value;
-  };
+  public useChartsBaseTheme = createUseChartsBaseTheme(
+    () => this._chartsBaseTheme$.getValue(),
+    () => this.chartsBaseTheme$
+  );
 
   /**
    * Initialize theme service with dark mode
@@ -113,14 +125,30 @@ export class ThemeService {
   public init(theme: CoreSetup['theme']) {
     this.theme$ = theme.theme$;
     this.theme$.subscribe((newTheme) => {
-      this._chartsBaseTheme$.next(getChartsTheme(newTheme));
-      const chartsTheme = getChartsTheme(newTheme);
-      const { fill } = chartsTheme.axes.tickLabel;
-      chartsTheme.axes.axisTitle.fill = fill;
-      chartsTheme.axes.axisTitle.fontWeight = 500;
-      chartsTheme.axes.axisPanelTitle.fill = fill;
-      chartsTheme.axes.axisPanelTitle.fontWeight = 500;
-      this._chartsBaseTheme$.next(chartsTheme);
+      this._chartsBaseTheme$.next(this.getChartsBaseTheme(newTheme));
     });
+  }
+
+  private getChartsBaseTheme(coreTheme: CoreTheme): Theme {
+    const cacheKey = `${coreTheme.name}:${coreTheme.darkMode ? 'dark' : 'light'}`;
+    const cached = this.baseThemeCache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    // `getChartsTheme` returns a frozen base theme singleton from @elastic/charts.
+    // Clone it before applying our overrides, otherwise mutating read-only
+    // properties throws and aborts the theme subscription before the updated theme
+    // is emitted, leaving charts stuck on the previous theme (e.g. on dark -> light).
+    const chartsTheme = cloneDeep(getChartsTheme(coreTheme));
+    applyNumericFontFamily(chartsTheme);
+    const { fill } = chartsTheme.axes.tickLabel;
+    chartsTheme.axes.axisTitle.fill = fill;
+    chartsTheme.axes.axisTitle.fontWeight = 500;
+    chartsTheme.axes.axisPanelTitle.fill = fill;
+    chartsTheme.axes.axisPanelTitle.fontWeight = 500;
+
+    this.baseThemeCache.set(cacheKey, chartsTheme);
+    return chartsTheme;
   }
 }

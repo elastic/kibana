@@ -81,6 +81,7 @@ export const RiskScoreField = ({
         onChange={handleDefaultRiskScoreChange}
         value={value}
         errorMessage={errorMessage}
+        isDisabled={isDisabled}
       />
       <EuiFlexItem>
         <RiskScoreOverride

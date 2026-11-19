@@ -12,6 +12,11 @@ import type { GaugeShape } from '@kbn/expression-gauge-plugin/common';
 
 export const LENS_GAUGE_ID = 'lnsGauge';
 
+/**
+ * Default number of color bands (palette steps) for the gauge color-by-value palette.
+ */
+export const LENS_GAUGE_DEFAULT_COLOR_STEPS = 4;
+
 export const GAUGE_SHAPES = {
   HORIZONTAL_BULLET: 'horizontalBullet',
   VERTICAL_BULLET: 'verticalBullet',
@@ -19,6 +24,11 @@ export const GAUGE_SHAPES = {
   ARC: 'arc',
   CIRCLE: 'circle',
 } as const;
+
+/**
+ * Shape used when a gauge state does not specify one.
+ */
+export const LENS_GAUGE_DEFAULT_SHAPE = GAUGE_SHAPES.HORIZONTAL_BULLET;
 
 export const GAUGE_TICKS_POSITIONS = {
   HIDDEN: 'hidden',

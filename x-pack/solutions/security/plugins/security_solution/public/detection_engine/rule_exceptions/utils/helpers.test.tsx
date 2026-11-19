@@ -300,6 +300,23 @@ describe('Exception helpers', () => {
       expect(result).toEqual(payload);
     });
 
+    test('should not update wildcard entry values with backslashes', () => {
+      const payload = [
+        getExceptionListItemSchemaMock({
+          entries: [
+            {
+              field: 'process.executable.caseless',
+              operator: 'included',
+              type: 'wildcard',
+              value: 'C:\\Users\\*\\app.exe',
+            },
+          ],
+        }),
+      ];
+      const result = prepareExceptionItemsForBulkClose(payload);
+      expect(result[0].entries[0]).toEqual(payload[0].entries[0]);
+    });
+
     test("should update entry fields when they start with 'event.'", () => {
       const payload = [
         {
@@ -1297,7 +1314,7 @@ describe('Exception helpers', () => {
             sha256: 'some hash',
           },
         },
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        // eslint-disable-next-line @kbn/compat/typescript-naming-convention
         Memory_protection: {
           feature: 'signature',
         },
@@ -1349,7 +1366,7 @@ describe('Exception helpers', () => {
             sha256: 'some hash',
           },
         },
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        // eslint-disable-next-line @kbn/compat/typescript-naming-convention
         Memory_protection: {
           feature: 'signature',
         },
@@ -1390,7 +1407,7 @@ describe('Exception helpers', () => {
             },
           },
         },
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        // eslint-disable-next-line @kbn/compat/typescript-naming-convention
         Memory_protection: {
           feature: 'shellcode_thread',
           self_injection: true,
@@ -1471,7 +1488,7 @@ describe('Exception helpers', () => {
             },
           },
         },
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        // eslint-disable-next-line @kbn/compat/typescript-naming-convention
         Memory_protection: {
           feature: 'shellcode_thread',
           self_injection: true,
@@ -2457,9 +2474,7 @@ describe('Exception helpers', () => {
           id: 'kibana.alert.ancestors.id',
           overrideField: 'Source event',
         },
-        {
-          id: 'host.name',
-        },
+        { id: 'host.name' },
         // Fields used in support of Response Actions
         ...SUPPORTED_AGENT_ID_ALERT_FIELDS.map((fieldPath) => {
           return {
@@ -2471,9 +2486,7 @@ describe('Exception helpers', () => {
         {
           id: 'Endpoint.policy.applied.artifacts.global.channel',
         },
-        {
-          id: 'user.name',
-        },
+        { id: 'user.name' },
         {
           id: 'cloud.provider',
         },

@@ -3,11 +3,7 @@
     "data_autocomplete_rules": {
       "source": {
         "index": { "__one_of": ["SOURCE_INDEX_NAME", []] },
-        "query": {}
-      },
-      "dest": {
-        "index": "",
-        "results_field": ""
+        "query": { "__scope_link": "GLOBAL.query" }
       },
       "analysis": {
         "__one_of": [{
@@ -48,9 +44,7 @@
             }
           }
         ]
-      },
-      "description": "",
-      "model_memory_limit": ""
+      }
     }
   }
 }

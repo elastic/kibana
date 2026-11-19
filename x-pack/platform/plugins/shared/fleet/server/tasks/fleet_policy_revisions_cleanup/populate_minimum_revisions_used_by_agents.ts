@@ -85,6 +85,6 @@ const queryMinimumRevisionsUsedByAgents = async (
         },
       },
     },
-    { signal: context.abortController?.signal }
+    { signal: context.signal }
   );
 };

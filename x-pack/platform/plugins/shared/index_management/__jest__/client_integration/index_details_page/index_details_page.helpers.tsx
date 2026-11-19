@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MemoryRouter } from '@kbn/shared-ux-router';
 import { Route } from '@kbn/shared-ux-router';
 import type { RouteComponentProps } from 'react-router-dom';
@@ -15,7 +16,9 @@ import type { HttpSetup } from '@kbn/core/public';
 
 import { IndexDetailsSection } from '../../../common/constants';
 import { DetailsPage } from '../../../public/application/sections/home/index_list/details_page/details_page';
+import { DetailsPageMappings } from '../../../public/application/sections/home/index_list/details_page/details_page_mappings';
 import { WithAppDependencies } from '../helpers/setup_environment';
+import { testIndexMock } from './mocks';
 
 export const renderIndexDetailsPage = async ({
   httpSetup,
@@ -62,6 +65,26 @@ export const renderIndexDetailsPage = async ({
   );
 
   render(<Comp />);
-  await screen.findByTestId('indexDetailsHeader');
+  await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
   return { history: capturedHistory };
+};
+
+/**
+ * Renders the index details mappings tab on its own, without the details page shell around it
+ * (router, app header and menu, tab strip, quick stats and the requests they issue).
+ */
+export const renderIndexDetailsMappings = async ({
+  httpSetup,
+  deps = {},
+}: {
+  httpSetup: HttpSetup;
+  deps?: Record<string, unknown>;
+}) => {
+  const Comp = WithAppDependencies(() => <DetailsPageMappings index={testIndexMock} />, httpSetup, {
+    url: { locators: { get: () => ({ navigate: jest.fn(), getUrl: jest.fn() }) } },
+    ...deps,
+  });
+
+  render(<Comp />);
+  await screen.findByTestId('indexDetailsMappingsAddField');
 };

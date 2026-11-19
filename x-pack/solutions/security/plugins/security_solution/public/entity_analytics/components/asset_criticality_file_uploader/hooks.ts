@@ -12,7 +12,7 @@ import { useCallback, useMemo } from 'react';
 import type { EuiStepHorizontalProps } from '@elastic/eui/src/components/steps/step_horizontal';
 import { noop } from 'lodash/fp';
 import { useFormatBytes } from '../../../common/components/formatted_bytes';
-import { validateFile, validateParsedContent } from './validations';
+import { validateFile } from './validations';
 import { useKibana } from '../../../common/lib/kibana';
 import type { OnCompleteParams } from './types';
 import type { ReducerState } from './reducer';
@@ -88,9 +88,8 @@ export const useFileValidation = ({ onError, onComplete }: UseFileChangeCbParams
             return;
           }
 
-          const { invalid, valid, errors } = validateParsedContent(parsedFile.data);
+          const valid = parsedFile.data;
           const validLinesAsText = unparse(valid);
-          const invalidLinesAsText = unparse(invalid);
           const processingEndTime = Date.now();
           const tookMs = processingEndTime - processingStartTime;
           onComplete({
@@ -102,12 +101,12 @@ export const useFileValidation = ({ onError, onComplete }: UseFileChangeCbParams
               size: returnedFile?.size ?? 0,
               validLines: {
                 text: validLinesAsText,
-                count: valid.length,
+                count: valid.length - 1, // Subtracting 1 to not count the header row
               },
               invalidLines: {
-                text: invalidLinesAsText,
-                count: invalid.length,
-                errors,
+                text: ``,
+                count: 0,
+                errors: [],
               },
             },
           });
@@ -142,16 +141,6 @@ export const useNavigationSteps = (
             goToFirstStep(); // User can only go back to the first step from the second step
           }
         },
-      },
-      {
-        title: i18n.translate(
-          'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.fileValidationStepTitle',
-          {
-            defaultMessage: 'File validation',
-          }
-        ),
-        status: getStepStatus(2, state.step),
-        onClick: noop, // Prevents the user from navigating by clicking on the step
       },
       {
         title: i18n.translate(

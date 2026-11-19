@@ -8,6 +8,7 @@
  */
 
 import type { UserProfile } from '@kbn/user-profile-components';
+import type { ContentListUserProfilesServices, UserProfileEntry } from '@kbn/content-list-provider';
 
 /**
  * Mock user profiles matching the user IDs used in mock dashboard/content data.
@@ -78,20 +79,24 @@ export const MOCK_USER_PROFILES_MAP: Record<string, UserProfile> = MOCK_USER_PRO
 );
 
 /**
- * Mock user profile service functions for storybook
+ * Convert raw `UserProfile` to the `UserProfileEntry` format used by the content list.
  */
-const mockGetUserProfile = async (uid: string) => {
-  return MOCK_USER_PROFILES_MAP[uid] || { uid, user: { username: uid }, enabled: true, data: {} };
-};
+const toEntry = (p: UserProfile): UserProfileEntry => ({
+  uid: p.uid,
+  user: p.user,
+  email: p.user.email ?? '',
+  fullName: p.user.full_name ?? p.user.username,
+});
 
-const mockBulkGetUserProfiles = async (uids: string[]) => {
-  return uids.map(
-    (uid) =>
-      MOCK_USER_PROFILES_MAP[uid] || { uid, user: { username: uid }, enabled: true, data: {} }
-  );
-};
-
-export const mockUserProfileServices = {
-  getUserProfile: mockGetUserProfile,
-  bulkGetUserProfiles: mockBulkGetUserProfiles,
+/**
+ * Mock `ContentListUserProfilesServices` for content list provider.
+ *
+ * Provides `bulkResolve` backed by the static `MOCK_USER_PROFILES` data.
+ */
+export const mockContentListUserProfilesServices: ContentListUserProfilesServices = {
+  bulkResolve: async (uids) =>
+    uids
+      .map((uid) => MOCK_USER_PROFILES_MAP[uid])
+      .filter((p): p is UserProfile => !!p)
+      .map(toEntry),
 };

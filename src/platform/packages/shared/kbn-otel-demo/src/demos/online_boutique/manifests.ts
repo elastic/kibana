@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
 import type { DemoManifestGenerator, ManifestOptions } from '../../types';
 
 /**
@@ -145,10 +145,11 @@ function createCommonManifests(options: ManifestOptions): object[] {
         },
         spec: {
           serviceAccountName: 'otel-collector',
+          ...(options.hostAliases ? { hostAliases: options.hostAliases } : {}),
           containers: [
             {
               name: 'otel-collector',
-              image: 'otel/opentelemetry-collector-contrib:0.115.1',
+              image: options.collectorImage || 'otel/opentelemetry-collector-contrib:0.115.1',
               args: ['--config=/etc/otel-collector-config.yaml'],
               ports: [
                 { containerPort: 4317, name: 'otlp-grpc' },
@@ -414,6 +415,6 @@ export const onlineBoutiqueManifests: DemoManifestGenerator = {
       });
     }
 
-    return manifests.map((m) => yaml.dump(m)).join('---\n');
+    return manifests.map((m) => stringify(m)).join('---\n');
   },
 };

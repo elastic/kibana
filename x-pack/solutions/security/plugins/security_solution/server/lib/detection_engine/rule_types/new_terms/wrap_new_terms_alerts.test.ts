@@ -44,7 +44,7 @@ describe('wrapNewTermsAlerts', () => {
       rewrites: {
         publicBaseUrl,
         inputIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        spaceId: 'otherSpace',
+        spaceId: 'other-space',
       },
     });
     const alerts = wrapNewTermsAlerts({
@@ -52,11 +52,11 @@ describe('wrapNewTermsAlerts', () => {
       eventsAndTerms: [{ event: doc, newTerms: ['127.0.0.1'] }],
     });
 
-    expect(alerts[0]._id).toEqual('f7877a31b1cc83373dbc9ba5939ebfab1db66545');
-    expect(alerts[0]._source[ALERT_UUID]).toEqual('f7877a31b1cc83373dbc9ba5939ebfab1db66545');
+    expect(alerts[0]._id).toEqual('b8143fa480c96c94688bd70871711fcf5478ee95');
+    expect(alerts[0]._source[ALERT_UUID]).toEqual('b8143fa480c96c94688bd70871711fcf5478ee95');
     expect(alerts[0]._source[ALERT_NEW_TERMS]).toEqual(['127.0.0.1']);
     expect(alerts[0]._source[ALERT_URL]).toContain(
-      'http://somekibanabaseurl.com/s/otherSpace/app/security/alerts/redirect/f7877a31b1cc83373dbc9ba5939ebfab1db66545?index=.alerts-security.alerts-otherSpace'
+      'http://somekibanabaseurl.com/s/other-space/app/security/alerts/redirect/b8143fa480c96c94688bd70871711fcf5478ee95?index=.alerts-security.alerts-other-space'
     );
   });
 
@@ -67,7 +67,7 @@ describe('wrapNewTermsAlerts', () => {
       rewrites: {
         publicBaseUrl,
         inputIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        spaceId: 'otherSpace',
+        spaceId: 'other-space',
       },
     });
     const alerts = wrapNewTermsAlerts({
@@ -75,11 +75,11 @@ describe('wrapNewTermsAlerts', () => {
       eventsAndTerms: [{ event: doc, newTerms: ['127.0.0.2'] }],
     });
 
-    expect(alerts[0]._id).toEqual('75e5a507a4bc48bcd983820c7fd2d9621ff4e2ea');
-    expect(alerts[0]._source[ALERT_UUID]).toEqual('75e5a507a4bc48bcd983820c7fd2d9621ff4e2ea');
+    expect(alerts[0]._id).toEqual('9eab1f07709065fa65dd687c2df7a30f4c5f6c9d');
+    expect(alerts[0]._source[ALERT_UUID]).toEqual('9eab1f07709065fa65dd687c2df7a30f4c5f6c9d');
     expect(alerts[0]._source[ALERT_NEW_TERMS]).toEqual(['127.0.0.2']);
     expect(alerts[0]._source[ALERT_URL]).toContain(
-      'http://somekibanabaseurl.com/s/otherSpace/app/security/alerts/redirect/75e5a507a4bc48bcd983820c7fd2d9621ff4e2ea?index=.alerts-security.alerts-otherSpace'
+      'http://somekibanabaseurl.com/s/other-space/app/security/alerts/redirect/9eab1f07709065fa65dd687c2df7a30f4c5f6c9d?index=.alerts-security.alerts-other-space'
     );
   });
 
@@ -90,7 +90,7 @@ describe('wrapNewTermsAlerts', () => {
       rewrites: {
         publicBaseUrl,
         inputIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        spaceId: 'otherSpace',
+        spaceId: 'other-space',
       },
     });
     const alerts = wrapNewTermsAlerts({
@@ -98,11 +98,11 @@ describe('wrapNewTermsAlerts', () => {
       eventsAndTerms: [{ event: doc, newTerms: ['127.0.0.1', '127.0.0.2'] }],
     });
 
-    expect(alerts[0]._id).toEqual('86a216cfa4884767d9bb26d2b8db911cb4aa85ce');
-    expect(alerts[0]._source[ALERT_UUID]).toEqual('86a216cfa4884767d9bb26d2b8db911cb4aa85ce');
+    expect(alerts[0]._id).toEqual('7d3dfa1c3f6d5dbf5e7a1b069a9707adbdb48948');
+    expect(alerts[0]._source[ALERT_UUID]).toEqual('7d3dfa1c3f6d5dbf5e7a1b069a9707adbdb48948');
     expect(alerts[0]._source[ALERT_NEW_TERMS]).toEqual(['127.0.0.1', '127.0.0.2']);
     expect(alerts[0]._source[ALERT_URL]).toContain(
-      'http://somekibanabaseurl.com/s/otherSpace/app/security/alerts/redirect/86a216cfa4884767d9bb26d2b8db911cb4aa85ce?index=.alerts-security.alerts-otherSpace'
+      'http://somekibanabaseurl.com/s/other-space/app/security/alerts/redirect/7d3dfa1c3f6d5dbf5e7a1b069a9707adbdb48948?index=.alerts-security.alerts-other-space'
     );
   });
 });

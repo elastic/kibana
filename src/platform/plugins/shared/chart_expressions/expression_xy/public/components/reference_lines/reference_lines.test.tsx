@@ -100,7 +100,7 @@ describe('ReferenceLines', () => {
     beforeEach(() => {
       defaultProps = {
         formatters: {},
-        xAxisFormatter: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
+        xAxisFormatter: { convertToText: jest.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
         axesConfiguration: [
           {
@@ -133,6 +133,65 @@ describe('ReferenceLines', () => {
           },
         },
       };
+    });
+
+    const invalidResults: Array<{ description: string; rows: Datatable['rows'] }> = [
+      { description: 'empty results', rows: [] },
+      { description: 'missing values', rows: [{}] },
+      { description: 'null values', rows: [{ yAccessorLeftFirstId: null }] },
+      { description: 'string values', rows: [{ yAccessorLeftFirstId: '10' }] },
+      { description: 'NaN values', rows: [{ yAccessorLeftFirstId: NaN }] },
+      { description: 'infinite values', rows: [{ yAccessorLeftFirstId: Infinity }] },
+    ];
+
+    it.each(invalidResults)('omits annotations for $description', ({ rows }) => {
+      const [layer] = createLayers(
+        [
+          {
+            forAccessor: 'yAccessorLeftFirstId',
+            position: 'left',
+            lineStyle: 'solid',
+            fill: 'above',
+            type: 'referenceLineDecorationConfig',
+          },
+        ],
+        { ...data, rows }
+      );
+      const wrapper = shallow(<ReferenceLineLayer {...defaultProps} layer={layer} />);
+      expect(wrapper.find(ReferenceLineAnnotations)).toHaveLength(0);
+    });
+
+    it('retains valid annotations and uses only the first result row', () => {
+      const [layer] = createLayers(
+        [
+          {
+            forAccessor: 'yAccessorLeftFirstId',
+            position: 'left',
+            lineStyle: 'solid',
+            fill: 'above',
+            type: 'referenceLineDecorationConfig',
+          },
+          {
+            forAccessor: 'yAccessorLeftSecondId',
+            position: 'left',
+            lineStyle: 'solid',
+            fill: 'above',
+            type: 'referenceLineDecorationConfig',
+          },
+        ],
+        {
+          ...data,
+          rows: [
+            { yAccessorLeftFirstId: 0, yAccessorLeftSecondId: null },
+            { yAccessorLeftFirstId: 100, yAccessorLeftSecondId: 200 },
+          ],
+        }
+      );
+      const wrapper = shallow(<ReferenceLineLayer {...defaultProps} layer={layer} />);
+      const annotations = wrapper.find(ReferenceLineAnnotations);
+      expect(annotations).toHaveLength(1);
+      expect(annotations.prop('config')).toMatchObject({ value: 0, nextValue: undefined });
+      expect(layer.decorations).toHaveLength(2);
     });
 
     it('should not throw on null data', () => {
@@ -174,8 +233,8 @@ describe('ReferenceLines', () => {
         <ReferenceLines
           {...defaultProps}
           formatters={{
-            yAccessorLeftFirstId: { convert: convertLeft } as unknown as FieldFormat,
-            yAccessorRightFirstId: { convert: convertRight } as unknown as FieldFormat,
+            yAccessorLeftFirstId: { convertToText: convertLeft } as unknown as FieldFormat,
+            yAccessorRightFirstId: { convertToText: convertRight } as unknown as FieldFormat,
           }}
           layers={createLayers(
             [
@@ -226,7 +285,7 @@ describe('ReferenceLines', () => {
 
       expect(convertLeft).toHaveBeenCalled();
       expect(convertRight).toHaveBeenCalled();
-      expect(defaultProps.xAxisFormatter.convert).not.toHaveBeenCalled();
+      expect(defaultProps.xAxisFormatter.convertToText).not.toHaveBeenCalled();
     });
 
     it.each([
@@ -543,13 +602,69 @@ describe('ReferenceLines', () => {
     );
   });
 
+  it('prefers the shared y axis formatter over a reference column formatter', () => {
+    const wrapper = shallow(
+      <ReferenceLines
+        xAxisFormatter={{ convertToText: (value: unknown) => String(value) } as FieldFormat}
+        isHorizontal={false}
+        paddingMap={{}}
+        yAxesMap={{ left: undefined, right: undefined }}
+        axesConfiguration={[
+          {
+            groupId: 'left',
+            position: 'left',
+            series: [],
+            formatter: {
+              convertToText: (value: unknown) => `axis-${value}`,
+            } as unknown as FieldFormat,
+          },
+        ]}
+        formatters={{
+          yAccessorLeftFirstId: {
+            convertToText: (value: unknown) => `column-${value}`,
+          } as unknown as FieldFormat,
+        }}
+        layers={createLayers(
+          [
+            {
+              forAccessor: 'yAccessorLeftFirstId',
+              position: 'left',
+              lineStyle: 'solid',
+              type: 'referenceLineDecorationConfig',
+            },
+          ],
+          {
+            type: 'datatable',
+            rows: [row],
+            columns: Object.keys(row).map((id) => ({
+              id,
+              name: id,
+              meta: { type: 'number' },
+            })),
+          }
+        )}
+      />
+    );
+
+    expect(
+      wrapper
+        .find(ReferenceLineLayer)
+        .dive()
+        .find(ReferenceLineAnnotations)
+        .first()
+        .dive()
+        .find(LineAnnotation)
+        .prop('dataValues')
+    ).toEqual(expect.arrayContaining([{ dataValue: 5, details: 'axis-5', header: undefined }]));
+  });
+
   describe('referenceLines', () => {
     let defaultProps: Omit<ReferenceLinesProps, 'data' | 'layers'>;
 
     beforeEach(() => {
       defaultProps = {
         formatters: {},
-        xAxisFormatter: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
+        xAxisFormatter: { convertToText: jest.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
         axesConfiguration: [
           {

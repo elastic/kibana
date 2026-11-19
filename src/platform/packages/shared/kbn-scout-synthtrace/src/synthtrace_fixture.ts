@@ -10,27 +10,40 @@
 import { Readable } from 'stream';
 import type {
   ApmFields,
+  ApmSynthtracePipelines,
   Fields,
   InfraDocument,
   SynthtraceGenerator,
   LogDocument,
 } from '@kbn/synthtrace-client';
+import type { OtelDocument } from '@kbn/synthtrace';
 import type { SynthtraceEsClient } from '@kbn/synthtrace/src/lib/shared/base_client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace/src/lib/apm/client/apm_synthtrace_es_client';
 import { coreWorkerFixtures } from '@kbn/scout';
 import { getSynthtraceClient } from './get_synthtrace_client';
 
+export interface ApmSynthtraceFixtureClient
+  extends Pick<SynthtraceEsClient<ApmFields>, 'index' | 'clean'> {
+  setPipeline: SynthtraceEsClient<ApmFields>['setPipeline'];
+  resolvePipelineType: ApmSynthtraceEsClient['resolvePipelineType'];
+}
+
 export interface SynthtraceFixture {
-  apmSynthtraceEsClient: Pick<SynthtraceEsClient<ApmFields>, 'index' | 'clean'>;
+  apmSynthtraceEsClient: ApmSynthtraceFixtureClient;
   infraSynthtraceEsClient: Pick<SynthtraceEsClient<InfraDocument>, 'index' | 'clean'>;
   logsSynthtraceEsClient: Pick<SynthtraceEsClient<LogDocument>, 'index' | 'clean'>;
+  otelSynthtraceEsClient: Pick<SynthtraceEsClient<OtelDocument>, 'index' | 'clean'>;
 }
 
 const useSynthtraceClient = async <TFields extends Fields>(
   client: SynthtraceEsClient<TFields>,
   use: (client: Pick<SynthtraceEsClient<TFields>, 'index' | 'clean'>) => Promise<void>
 ) => {
-  const index = async (events: SynthtraceGenerator<TFields>) => {
-    await client.index(Readable.from(Array.from(events)));
+  const index = async (
+    events: SynthtraceGenerator<TFields>,
+    pipelineCallback?: (base: Readable) => NodeJS.WritableStream
+  ) => {
+    await client.index(Readable.from(Array.from(events)), pipelineCallback);
   };
 
   const clean = async () => await client.clean();
@@ -48,7 +61,24 @@ export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture
         config,
       });
 
-      await useSynthtraceClient<ApmFields>(apmEsClient, use);
+      const index = async (
+        events: SynthtraceGenerator<ApmFields>,
+        pipelineCallback?: (base: Readable) => NodeJS.WritableStream
+      ) => {
+        await apmEsClient.index(Readable.from(Array.from(events)), pipelineCallback);
+      };
+
+      const clean = async () => await apmEsClient.clean();
+
+      const setPipeline: ApmSynthtraceFixtureClient['setPipeline'] =
+        apmEsClient.setPipeline.bind(apmEsClient);
+
+      const resolvePipelineType: ApmSynthtraceFixtureClient['resolvePipelineType'] = (
+        pipeline: ApmSynthtracePipelines,
+        options?
+      ) => apmEsClient.resolvePipelineType(pipeline, options);
+
+      await use({ index, clean, setPipeline, resolvePipelineType });
     },
     { scope: 'worker' },
   ],
@@ -74,6 +104,18 @@ export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture
       });
 
       await useSynthtraceClient<LogDocument>(logsEsClient, use);
+    },
+    { scope: 'worker' },
+  ],
+  otelSynthtraceEsClient: [
+    async ({ esClient, log, config }, use) => {
+      const { otelEsClient } = await getSynthtraceClient('otelEsClient', {
+        esClient,
+        log,
+        config,
+      });
+
+      await useSynthtraceClient<OtelDocument>(otelEsClient, use);
     },
     { scope: 'worker' },
   ],

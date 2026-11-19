@@ -11,23 +11,42 @@ import { resolve, join } from 'path';
 import { format as formatUrl } from 'url';
 import Fs from 'fs';
 
-import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
+import {
+  CA_CERT_PATH,
+  KBN_CERT_PATH,
+  KBN_KEY_PATH,
+  KBN_SERVERLESS_UIAM_CERTS,
+  kibanaDevServiceAccount,
+} from '@kbn/dev-utils';
+import type { KbnServerlessProjectType } from '@kbn/dev-utils';
 import {
   fleetPackageRegistryDockerImage,
   defineDockerServersConfig,
-  getDockerFileMountPath,
-} from '@kbn/test';
+} from '@kbn/test-docker-servers';
+import { getDockerFileMountPath } from '@kbn/es';
 import {
   MOCK_IDP_REALM_NAME,
+  MOCK_IDP_UIAM_CLOUD_ID,
   MOCK_IDP_UIAM_ORGANIZATION_ID,
   MOCK_IDP_UIAM_PROJECT_ID,
+  MOCK_IDP_UIAM_SERVICE_URL,
+  MOCK_IDP_UIAM_SHARED_SECRET,
 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { PRODUCT_DOC_STUB_REPOSITORY_URL } from '@kbn/test-kibana-server';
 import type { ScoutServerConfig } from '../../../../../types';
 import { SAML_IDP_PLUGIN_PATH, SERVERLESS_IDP_METADATA_PATH, JWKS_PATH } from '../../../constants';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
-const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+// EPR_REQUIRE_PACKAGE_SIGNATURES=false: the `:lite` distribution ships some
+// packages without `.sig` files, so opt out of upstream signature enforcement
+// (added in elastic/package-registry#1646).
+const dockerArgs: string[] = [
+  '-v',
+  `${packageRegistryConfig}:/package-registry/config.yml`,
+  '-e',
+  'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
+];
 
 /**
  * This is used by CI to set the docker registry port
@@ -36,6 +55,9 @@ const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/
  * if this is defined it takes precedence over the `packageRegistryOverride` variable
  */
 const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+
+// Indicates whether the config is used on CI or locally.
+const isRunOnCI = process.env.CI;
 
 const servers = {
   elasticsearch: {
@@ -54,6 +76,25 @@ const servers = {
     password: 'changeme',
   },
 };
+
+const UIAM_CERT_ARG_PREFIXES = [
+  '--xpack.security.uiam.ssl.certificate=',
+  '--xpack.security.uiam.ssl.key=',
+];
+
+/**
+ * Swaps the UIAM client certificate of the base config, which names a search project, for the one
+ * of the given project type. UIAM reads Kibana's project type from the certificate, and refuses to
+ * let Kibana assume the service accounts of a project of another type.
+ */
+export const withUiamCertOfProject = (
+  serverArgs: string[],
+  projectType: KbnServerlessProjectType
+): string[] => [
+  ...serverArgs.filter((arg) => !UIAM_CERT_ARG_PREFIXES.some((prefix) => arg.startsWith(prefix))),
+  `--xpack.security.uiam.ssl.certificate=${KBN_SERVERLESS_UIAM_CERTS[projectType].certPath}`,
+  `--xpack.security.uiam.ssl.key=${KBN_SERVERLESS_UIAM_CERTS[projectType].keyPath}`,
+];
 
 export const defaultConfig: ScoutServerConfig = {
   serverless: true,
@@ -94,6 +135,7 @@ export const defaultConfig: ScoutServerConfig = {
     ],
     ssl: true, // SSL is required for SAML realm
   },
+  esServerlessOptions: { uiam: true },
   kbnTestServer: {
     buildArgs: [],
     env: {
@@ -116,6 +158,8 @@ export const defaultConfig: ScoutServerConfig = {
       `--elasticsearch.serviceAccountToken=${kibanaDevServiceAccount.token}`,
       `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
       '--telemetry.sendUsageTo=staging',
+      // Keeps test servers from downloading the real product documentation artifacts
+      `--xpack.productDocBase.artifactRepositoryUrl=${PRODUCT_DOC_STUB_REPOSITORY_URL}`,
       `--logging.appenders.deprecation=${JSON.stringify({
         type: 'console',
         layout: {
@@ -150,13 +194,15 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.cloud.base_url=https://fake-cloud.elastic.co',
       '--xpack.cloud.billing_url=/billing/overview/',
       '--xpack.cloud.deployments_url=/deployments',
-      '--xpack.cloud.id=ftr_fake_cloud_id',
+      `--xpack.cloud.id=${MOCK_IDP_UIAM_CLOUD_ID}`,
       `--xpack.cloud.organization_id=${MOCK_IDP_UIAM_ORGANIZATION_ID}`,
       '--xpack.cloud.organization_url=/account/',
       '--xpack.cloud.profile_url=/user/settings/',
       '--xpack.cloud.projects_url=/projects/',
       `--xpack.cloud.serverless.project_id=${MOCK_IDP_UIAM_PROJECT_ID}`,
       '--xpack.cloud.users_and_roles_url=/account/members/',
+      // Clears `dataUsageDisabled` from config/serverless.yml, as the project controller does
+      '--xpack.dataUsage.enableExperimental=[]',
       // Ensure that SAML is used as the default authentication method whenever a user navigates to Kibana. In other
       // words, Kibana should attempt to authenticate the user using the provider with the lowest order if the Login
       // Selector is disabled (which is how Serverless Kibana is configured). By declaring `cloud-basic` with a higher
@@ -174,6 +220,7 @@ export const defaultConfig: ScoutServerConfig = {
       `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
+      '--xpack.fleet.productVersionsApiTimeoutMs=5000',
       `--xpack.fleet.fleetServerHosts=${JSON.stringify([
         {
           id: 'default-fleet-server',
@@ -194,6 +241,13 @@ export const defaultConfig: ScoutServerConfig = {
           ],
         },
       ])}`,
+      ...(isRunOnCI ? [] : ['--mockIdpPlugin.uiam.enabled=true']),
+      `--xpack.security.uiam.enabled=true`,
+      `--xpack.security.uiam.url=${MOCK_IDP_UIAM_SERVICE_URL}`,
+      `--xpack.security.uiam.sharedSecret=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+      `--xpack.security.uiam.ssl.certificate=${KBN_CERT_PATH}`,
+      `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
+      '--xpack.security.uiam.ssl.verificationMode=none',
     ],
   },
 };

@@ -1,0 +1,415 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render, fireEvent, waitFor, act } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { ConnectorSelector } from './connector_selector';
+import { ConnectorSetup } from './connector_setup';
+import { useLoadConnectors } from '@kbn/inference-connectors';
+
+const mockConnectors = [
+  {
+    id: 'connector-1',
+    name: 'My OpenAI Connector',
+    actionTypeId: '.gen-ai',
+    isPreconfigured: false,
+    isMissingSecrets: false,
+  },
+  {
+    id: 'connector-2',
+    name: 'My Bedrock Connector',
+    actionTypeId: '.bedrock',
+    isPreconfigured: true,
+    isMissingSecrets: false,
+  },
+  {
+    id: 'Elastic-Managed-LLM',
+    name: 'Elastic Managed LLM',
+    actionTypeId: '.inference',
+    isPreconfigured: true,
+    isMissingSecrets: false,
+  },
+];
+
+const mockActionTypes = [
+  { id: '.gen-ai', name: 'OpenAI', enabled: true },
+  { id: '.bedrock', name: 'Amazon Bedrock', enabled: true },
+  { id: '.gemini', name: 'Google Gemini', enabled: true },
+  { id: '.inference', name: 'Inference', enabled: true },
+];
+
+// Mock the useLoadConnectors hook
+const mockRefetch = jest.fn();
+jest.mock('@kbn/inference-connectors', () => ({
+  useLoadConnectors: jest.fn(() => ({
+    data: [],
+    isLoading: false,
+    refetch: jest.fn(),
+  })),
+}));
+const mockUseLoadConnectors = useLoadConnectors as jest.Mock;
+
+const mockHttpGet = jest.fn();
+const mockSettingsGet = jest.fn().mockReturnValue(undefined);
+const mockGetAddConnectorFlyout = jest
+  .fn()
+  .mockReturnValue(<div data-test-subj="addConnectorFlyout" />);
+
+const createMockServices = () => {
+  const coreStart = coreMock.createStart();
+  return {
+    ...coreStart,
+    http: {
+      ...coreStart.http,
+      get: mockHttpGet,
+    },
+    settings: {
+      client: {
+        get: mockSettingsGet,
+      },
+    },
+    triggersActionsUi: {
+      ...triggersActionsUiMock.createStart(),
+      getAddConnectorFlyout: mockGetAddConnectorFlyout,
+      actionTypeRegistry: {
+        get: jest.fn().mockReturnValue({ iconClass: 'logoOpenAI' }),
+      },
+    },
+    application: {
+      ...coreStart.application,
+      capabilities: {
+        ...coreStart.application.capabilities,
+        actions: {
+          ...(coreStart.application.capabilities?.actions ?? {}),
+          save: true,
+        },
+      },
+    },
+  };
+};
+
+const mockServices = createMockServices();
+
+const TestProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <I18nProvider>
+    <KibanaContextProvider services={mockServices}>{children}</KibanaContextProvider>
+  </I18nProvider>
+);
+
+let testForm: FormHook;
+
+const FormWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { form } = useForm({
+    defaultValue: { connectorId: '' },
+    schema: {
+      connectorId: {
+        validations: [{ validator: fieldValidators.emptyField('Connector required') }],
+      },
+    },
+  });
+  testForm = form;
+
+  return (
+    <Form form={form}>
+      {children}
+      <span data-test-subj="formConnectorId">
+        {String(form.getFields().connectorId?.value ?? '')}
+      </span>
+    </Form>
+  );
+};
+
+const renderConnectorSelector = async (props = {}) => {
+  let result: ReturnType<typeof render>;
+  await act(async () => {
+    result = render(
+      <TestProviders>
+        <FormWrapper>
+          <ConnectorSelector {...props} />
+        </FormWrapper>
+      </TestProviders>
+    );
+  });
+  return result!;
+};
+
+const renderConnectorSetup = (props: { onClose: jest.Mock; onConnectorCreated?: jest.Mock }) => {
+  return render(
+    <TestProviders>
+      <ConnectorSetup {...props} />
+    </TestProviders>
+  );
+};
+
+describe('ConnectorSelector', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseLoadConnectors.mockReturnValue({
+      data: mockConnectors,
+      isLoading: false,
+      refetch: mockRefetch,
+    });
+  });
+
+  describe('rendering', () => {
+    it('should render the connector selector button', async () => {
+      const { getByTestId } = await renderConnectorSelector();
+      expect(getByTestId('connector-selector')).toBeInTheDocument();
+    });
+
+    it('should hide the control when no connectors exist', async () => {
+      mockUseLoadConnectors.mockReturnValue({
+        data: [],
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      const { queryByTestId } = await renderConnectorSelector();
+      expect(queryByTestId('connector-selector')).not.toBeInTheDocument();
+    });
+
+    it('should show an inline error when the connector fails validation but connectors exist', async () => {
+      mockUseLoadConnectors.mockReturnValue({
+        data: mockConnectors.map((connector) => ({ ...connector, isMissingSecrets: true })),
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      const { getByTestId, queryByText } = await renderConnectorSelector();
+      expect(queryByText('Connector required')).not.toBeInTheDocument();
+
+      await act(async () => {
+        await testForm.validateFields(['connectorId']);
+      });
+
+      expect(getByTestId('connector-selector')).toBeInTheDocument();
+      expect(queryByText('Connector required')).toBeInTheDocument();
+    });
+
+    it('should show loading spinner when connectors are loading', async () => {
+      mockUseLoadConnectors.mockReturnValue({
+        data: mockConnectors,
+        isLoading: true,
+        refetch: mockRefetch,
+      });
+
+      const { getByTestId } = await renderConnectorSelector();
+      expect(getByTestId('connectorSelectorLoading')).toBeInTheDocument();
+    });
+
+    it('should display the first connector name on the button', async () => {
+      const { getByTestId } = await renderConnectorSelector();
+
+      await waitFor(() => {
+        expect(getByTestId('connector-selector')).toHaveTextContent('My OpenAI Connector');
+      });
+    });
+  });
+
+  describe('default connector selection', () => {
+    it('should select first available connector as default', async () => {
+      const { getByTestId } = await renderConnectorSelector();
+
+      await waitFor(() => {
+        expect(getByTestId('connector-selector')).toHaveTextContent('My OpenAI Connector');
+      });
+    });
+
+    it('should select user settings default connector when set', async () => {
+      mockSettingsGet.mockReturnValue('connector-2');
+
+      const { getByTestId } = await renderConnectorSelector();
+
+      await waitFor(() => {
+        expect(getByTestId('connector-selector')).toHaveTextContent('My Bedrock Connector');
+      });
+    });
+
+    it('should fall back to first available connector when settings default is not found', async () => {
+      mockSettingsGet.mockReturnValue('non-existent-id');
+
+      const { getByTestId } = await renderConnectorSelector();
+
+      await waitFor(() => {
+        expect(getByTestId('connector-selector')).toHaveTextContent('My OpenAI Connector');
+      });
+    });
+
+    it('should switch to the default connector when the selected connector is removed', async () => {
+      const { getByTestId, rerender } = await renderConnectorSelector();
+      await waitFor(() => expect(testForm.getFields().connectorId.value).toBe('connector-1'));
+
+      mockUseLoadConnectors.mockReturnValue({
+        data: mockConnectors.slice(1),
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+      rerender(
+        <TestProviders>
+          <FormWrapper>
+            <ConnectorSelector />
+          </FormWrapper>
+        </TestProviders>
+      );
+
+      await waitFor(() => expect(testForm.getFields().connectorId.value).toBe('connector-2'));
+      expect(getByTestId('connector-selector')).toHaveTextContent('My Bedrock Connector');
+    });
+
+    it('should clear the connector when the last connector is removed', async () => {
+      const { rerender } = await renderConnectorSelector();
+      await waitFor(() => expect(testForm.getFields().connectorId.value).toBe('connector-1'));
+
+      mockUseLoadConnectors.mockReturnValue({
+        data: [],
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+      rerender(
+        <TestProviders>
+          <FormWrapper>
+            <ConnectorSelector />
+          </FormWrapper>
+        </TestProviders>
+      );
+
+      await waitFor(() => expect(testForm.getFields().connectorId.value).toBe(''));
+      let areFieldsValid = true;
+      await act(async () => {
+        ({ areFieldsValid } = await testForm.validateFields(['connectorId']));
+      });
+      expect(areFieldsValid).toBe(false);
+    });
+  });
+
+  describe('popover interactions', () => {
+    it('should open popover when button is clicked', async () => {
+      const { getByTestId, queryByTestId } = await renderConnectorSelector();
+
+      await act(async () => {
+        fireEvent.click(getByTestId('connector-selector'));
+      });
+
+      await waitFor(() => {
+        expect(queryByTestId('connectorSelectorPopover')).toBeInTheDocument();
+      });
+    });
+  });
+});
+
+describe('ConnectorSetup', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockHttpGet.mockResolvedValue(mockActionTypes);
+  });
+
+  describe('rendering', () => {
+    it('should show loading spinner while loading action types', async () => {
+      mockHttpGet.mockImplementation(() => new Promise(() => {})); // Never resolves
+
+      const onClose = jest.fn();
+      const { getByTestId } = renderConnectorSetup({ onClose });
+
+      expect(getByTestId('connectorSetupLoading')).toBeInTheDocument();
+    });
+
+    it('should render flyout with AI connector types', async () => {
+      const onClose = jest.fn();
+      const { findByTestId, findByText } = renderConnectorSetup({ onClose });
+
+      await findByTestId('connectorSetupPage');
+
+      expect(await findByText('OpenAI')).toBeInTheDocument();
+      expect(await findByText('Amazon Bedrock')).toBeInTheDocument();
+      expect(await findByText('Google Gemini')).toBeInTheDocument();
+    });
+
+    it('should show "No AI connector types available" when no types exist', async () => {
+      mockHttpGet.mockResolvedValue([]);
+
+      const onClose = jest.fn();
+      const { findByTestId } = renderConnectorSetup({ onClose });
+
+      expect(await findByTestId('noConnectorTypes')).toBeInTheDocument();
+    });
+
+    it('should filter to only AI connector types', async () => {
+      mockHttpGet.mockResolvedValue([
+        ...mockActionTypes,
+        { id: '.email', name: 'Email', enabled: true }, // Non-AI connector
+        { id: '.slack', name: 'Slack', enabled: true }, // Non-AI connector
+      ]);
+
+      const onClose = jest.fn();
+      const { findByTestId, queryByText } = renderConnectorSetup({ onClose });
+
+      await findByTestId('connectorSetupPage');
+
+      // AI connectors should be present
+      expect(queryByText('OpenAI')).toBeInTheDocument();
+      // Non-AI connectors should NOT be present
+      expect(queryByText('Email')).not.toBeInTheDocument();
+      expect(queryByText('Slack')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('connector type selection', () => {
+    it('should open add connector flyout when a connector type is clicked', async () => {
+      const onClose = jest.fn();
+      const { findByTestId } = renderConnectorSetup({ onClose });
+
+      await findByTestId('connectorSetupPage');
+
+      await act(async () => {
+        fireEvent.click(await findByTestId('actionType-.gen-ai'));
+      });
+
+      expect(mockGetAddConnectorFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          initialConnector: { actionTypeId: '.gen-ai' },
+        })
+      );
+    });
+  });
+
+  describe('callbacks', () => {
+    it('should call onClose when flyout is closed', async () => {
+      const onClose = jest.fn();
+      const { findByRole } = renderConnectorSetup({ onClose });
+
+      // Find and click the close button
+      const closeButton = await findByRole('button', { name: /close/i });
+      fireEvent.click(closeButton);
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('error handling', () => {
+    it('should show error toast when loading action types fails', async () => {
+      mockHttpGet.mockRejectedValue(new Error('Network error'));
+
+      const onClose = jest.fn();
+      renderConnectorSetup({ onClose });
+
+      await waitFor(() => {
+        expect(mockServices.notifications.toasts.addDanger).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Unable to load connector types',
+          })
+        );
+      });
+    });
+  });
+});

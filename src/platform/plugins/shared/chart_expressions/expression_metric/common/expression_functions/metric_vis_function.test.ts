@@ -31,9 +31,9 @@ describe('interpreter/functions#metricVis', () => {
     secondaryAlign: 'right',
     iconAlign: 'left',
     valueFontSize: 'default',
+    density: 'compact',
     primaryPosition: 'bottom',
-    titleWeight: 'bold',
-    secondaryLabelPosition: 'before',
+    secondaryNameVisibility: 'before',
     applyColorTo: 'background',
   };
 

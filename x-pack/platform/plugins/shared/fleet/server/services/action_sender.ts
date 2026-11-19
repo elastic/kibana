@@ -13,6 +13,8 @@ import type { AgentActionType } from '../types';
 export interface AgentActionEvent {
   eventType: AgentActionType;
   agentCount: number;
+  sourceType?: 'serverless' | 'ech';
+  targetType?: 'serverless' | 'ech';
 }
 
 export const FLEET_ACTIONS_CHANNEL_NAME = 'fleet-actions';

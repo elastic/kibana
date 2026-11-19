@@ -33,6 +33,10 @@ import { IndexPatternAdapter } from '@kbn/index-adapter';
 import { ElasticSearchSaver } from '@kbn/langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
 import type { ESSearchRequest } from '@kbn/es-types';
+import {
+  AttackDiscoveryScheduleDataClient,
+  type CreateAttackDiscoveryScheduleDataClientParams,
+} from '@kbn/attack-discovery-schedules-common';
 import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
 import { defendInsightsFieldMap } from '../lib/defend_insights/persistence/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
@@ -68,8 +72,6 @@ import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { DefendInsightsDataClient } from '../lib/defend_insights/persistence';
 import { createGetElserId, ensureProductDocumentationInstalled } from './helpers';
 import { hasAIAssistantLicense } from '../routes/helpers';
-import type { CreateAttackDiscoveryScheduleDataClientParams } from '../lib/attack_discovery/schedules/data_client';
-import { AttackDiscoveryScheduleDataClient } from '../lib/attack_discovery/schedules/data_client';
 import {
   ANONYMIZATION_FIELDS_COMPONENT_TEMPLATE,
   ANONYMIZATION_FIELDS_INDEX_PATTERN,
@@ -94,6 +96,7 @@ export interface AIAssistantServiceOpts {
   taskManager: TaskManagerSetupContract;
   pluginStop$: Subject<void>;
   productDocManager: Promise<ProductDocBaseStartContract['management']>;
+  adhocAttackDiscoveryDataClient: IRuleDataClient;
 }
 
 export interface CreateAIAssistantClientParams {
@@ -585,9 +588,14 @@ export class AIAssistantService {
   private async checkResourcesInstallation(opts: CreateAIAssistantClientParams) {
     const licensing = await opts.licensing;
     if (!hasAIAssistantLicense(licensing.license)) return null;
-    // Check if resources installation has succeeded
+
+    if (!(await this.ensureSpaceResources(opts.spaceId))) return null;
+  }
+
+  /** @returns `false` when the install and its retry both failed. No license check. */
+  public async ensureSpaceResources(spaceId: string): Promise<boolean> {
     const { result: initialized, error } = await this.getSpaceResourcesInitializationPromise(
-      opts.spaceId
+      spaceId
     );
 
     // If space level resources initialization failed, retry
@@ -607,27 +615,25 @@ export class AIAssistantService {
         }
       }
 
-      this.resourceInitializationHelper.retry(opts.spaceId, initRetryPromise);
+      this.resourceInitializationHelper.retry(spaceId, initRetryPromise);
 
-      const retryResult = await this.resourceInitializationHelper.getInitializedResources(
-        opts.spaceId ?? DEFAULT_NAMESPACE_STRING
-      );
+      const retryResult = await this.resourceInitializationHelper.getInitializedResources(spaceId);
 
       if (!retryResult.result) {
-        const errorLogPrefix = `There was an error in the framework installing spaceId-level resources and creating concrete indices for spaceId "${opts.spaceId}" - `;
+        const errorLogPrefix = `There was an error in the framework installing spaceId-level resources and creating concrete indices for spaceId "${spaceId}" - `;
         // Retry also failed
         this.options.logger.warn(
           retryResult.error && error
             ? `${errorLogPrefix}Retry failed with errors: ${error}`
             : `${errorLogPrefix}Original error: ${error}; Error after retry: ${retryResult.error}`
         );
-        return null;
+        return false;
       } else {
-        this.options.logger.info(
-          `Resource installation for "${opts.spaceId}" succeeded after retry`
-        );
+        this.options.logger.info(`Resource installation for "${spaceId}" succeeded after retry`);
       }
     }
+
+    return true;
   }
 
   public async getProductDocumentationStatus(): Promise<InstallationStatus> {
@@ -760,6 +766,7 @@ export class AIAssistantService {
   ): Promise<AttackDiscoveryScheduleDataClient | null> {
     return new AttackDiscoveryScheduleDataClient({
       actionsClient: opts.actionsClient,
+      filterTags: opts.filterTags,
       logger: opts.logger,
       rulesClient: opts.rulesClient,
     });
@@ -895,6 +902,24 @@ export class AIAssistantService {
       if (!alertSummaryIndexName) {
         await this.alertSummaryDataStream.installSpace(spaceId);
       }
+
+      // Ensure the ad-hoc Attack Discovery alerts index exists for the default space so the Attacks
+      // data view (which references it) doesn't 404 the options-list `status` control before
+      // the first ad-hoc attack is ever written. getWriter() installs the concrete index as a
+      // side effect and writes no documents.
+      if (spaceId === DEFAULT_NAMESPACE_STRING) {
+        try {
+          await this.options.adhocAttackDiscoveryDataClient.getWriter({ namespace: spaceId });
+        } catch (e: unknown) {
+          // e.g. RuleDataWriteDisabledError when xpack.ruleRegistry.write.enabled=false — the index
+          // legitimately cannot exist in that config; log and continue rather than aborting space init.
+          const errorMessage = e instanceof Error ? e.message : String(e);
+          this.options.logger.warn(
+            `Unable to pre-create ad-hoc Attack Discovery index for space "${spaceId}": ${errorMessage}`
+          );
+        }
+      }
+
       const checkpointsIndexName = await this.checkpointsDataStream.getInstalledIndexName(spaceId);
       if (!checkpointsIndexName) {
         await this.checkpointsDataStream.createIndex(spaceId);

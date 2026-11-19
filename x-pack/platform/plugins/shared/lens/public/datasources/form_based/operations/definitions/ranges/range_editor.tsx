@@ -149,9 +149,9 @@ const BaseRangeEditor = ({
       >
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={decreaseButtonLabel} delay="long" disableScreenReaderOutput>
+            <EuiToolTip content={decreaseButtonLabel} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="minusInCircle"
+                iconType="minusCircle"
                 color="text"
                 data-test-subj="lns-indexPattern-range-maxBars-minus"
                 onClick={() =>
@@ -175,9 +175,9 @@ const BaseRangeEditor = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={increaseButtonLabel} delay="long" disableScreenReaderOutput>
+            <EuiToolTip content={increaseButtonLabel} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 color="text"
                 data-test-subj="lns-indexPattern-range-maxBars-plus"
                 onClick={() =>
@@ -190,7 +190,7 @@ const BaseRangeEditor = ({
         </EuiFlexGroup>
       </EuiFormRow>
 
-      <EuiButtonEmpty size="xs" iconType="controlsHorizontal" onClick={() => onToggleEditor()}>
+      <EuiButtonEmpty size="xs" iconType="controls" onClick={() => onToggleEditor()}>
         {i18n.translate('xpack.lens.indexPattern.ranges.customIntervalsToggle', {
           defaultMessage: 'Create custom ranges',
         })}

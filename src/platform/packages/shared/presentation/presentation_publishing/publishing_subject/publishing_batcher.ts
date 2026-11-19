@@ -7,102 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, debounceTime, skip } from 'rxjs';
 import type {
   AnyPublishingSubject,
   PublishingSubject,
   UnwrapPublishingSubjectTuple,
 } from './types';
-
-const hasSubjectsArrayChanged = (
-  subjectsA: AnyPublishingSubject[],
-  subjectsB: AnyPublishingSubject[]
-) => {
-  if (subjectsA.length !== subjectsB.length) return true;
-
-  for (let i = 0; i < subjectsA.length; i++) {
-    // here we only compare if the subjects are both either defined or undefined.
-    if (Boolean(subjectsA[i]) !== Boolean(subjectsB[i])) return true;
-  }
-  return false;
-};
-
-/**
- * @deprecated use useBatchedPublishingSubjects instead.
- *
- * Batches the latest values of multiple publishing subjects into a single object. Use this to avoid unnecessary re-renders.
- * Use when `subjects` may not be defined on initial component render.
- *
- * @param subjects Publishing subjects array.
- *   When 'subjects' is expected to change, 'subjects' must be part of component react state.
- */
-export const useBatchedOptionalPublishingSubjects = <
-  SubjectsType extends [...AnyPublishingSubject[]]
->(
-  ...subjects: [...SubjectsType]
-): UnwrapPublishingSubjectTuple<SubjectsType> => {
-  const isFirstRender = useRef(true);
-
-  const previousSubjects = useRef<SubjectsType>(subjects);
-  // Can not use 'useMemo' because 'subjects' gets a new reference on each call because of spread
-  const subjectsToUse = (() => {
-    // avoid rebuilding the subscription when the subjects are the same
-    if (!hasSubjectsArrayChanged(previousSubjects.current ?? [], subjects)) {
-      return previousSubjects.current;
-    }
-    previousSubjects.current = subjects;
-    return subjects;
-  })();
-
-  /**
-   * Set up latest published values state, initialized with the current values of the subjects.
-   */
-  const [latestPublishedValues, setLatestPublishedValues] = useState<
-    UnwrapPublishingSubjectTuple<SubjectsType>
-  >(() => unwrapPublishingSubjectArray(subjectsToUse));
-
-  /**
-   * Subscribe to all subjects and update the latest values when any of them change.
-   */
-  useLayoutEffect(() => {
-    if (!isFirstRender.current) {
-      setLatestPublishedValues(unwrapPublishingSubjectArray(subjectsToUse));
-    } else {
-      isFirstRender.current = false;
-    }
-
-    const definedSubjects: Array<PublishingSubject<unknown>> = [];
-    const definedSubjectIndices: number[] = [];
-
-    for (let i = 0; i < subjectsToUse.length; i++) {
-      if (!subjectsToUse[i]) continue;
-      definedSubjects.push(subjectsToUse[i] as PublishingSubject<unknown>);
-      definedSubjectIndices.push(i);
-    }
-    if (definedSubjects.length === 0) return;
-    const subscription = combineLatest(definedSubjects)
-      .pipe(
-        // When a new observer subscribes to a BehaviorSubject, it immediately receives the current value. Skip this emit.
-        skip(1),
-        debounceTime(0)
-      )
-      .subscribe((values) => {
-        setLatestPublishedValues((lastPublishedValues) => {
-          const newLatestPublishedValues: UnwrapPublishingSubjectTuple<SubjectsType> = [
-            ...lastPublishedValues,
-          ] as UnwrapPublishingSubjectTuple<SubjectsType>;
-          for (let i = 0; i < values.length; i++) {
-            newLatestPublishedValues[definedSubjectIndices[i]] = values[i] as never;
-          }
-          return newLatestPublishedValues;
-        });
-      });
-    return () => subscription.unsubscribe();
-  }, [subjectsToUse]);
-
-  return latestPublishedValues;
-};
 
 /**
  * Batches the latest values of multiple publishing subjects into a single object. Use this to avoid unnecessary re-renders.
@@ -146,7 +57,6 @@ export const useBatchedPublishingSubjects = <
           setLatestPublishedValues(values as UnwrapPublishingSubjectTuple<SubjectsType>);
         }),
     // 'subjects' gets a new reference on each call because of spread
-    // Use 'useBatchedOptionalPublishingSubjects' when 'subjects' are expected to change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );

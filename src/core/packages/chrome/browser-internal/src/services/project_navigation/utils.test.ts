@@ -13,7 +13,7 @@ import type {
   ChromeProjectNavigationNode,
   NavigationTreeDefinition,
 } from '@kbn/core-chrome-browser/src';
-import { flattenNav, findActiveNodes, parseNavigationTree } from './utils';
+import { collectNavTreeLinks, flattenNav, findActiveNodes, parseNavigationTree } from './utils';
 
 const getDeepLink = (id: string, path: string, title = ''): ChromeNavLink => ({
   id,
@@ -21,7 +21,53 @@ const getDeepLink = (id: string, path: string, title = ''): ChromeNavLink => ({
   href: `http://mocked/kibana/foo/${path}`,
   title,
   baseUrl: '',
-  visibleIn: ['globalSearch'],
+  visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
+});
+
+describe('collectNavTreeLinks', () => {
+  test('collects link targets from body and footer, recursing into children', () => {
+    const navTree = {
+      body: [
+        { type: 'recentlyAccessed' },
+        {
+          id: 'root',
+          title: 'Root',
+          children: [
+            { id: 'discover', link: 'discover' },
+            {
+              id: 'group',
+              title: 'Group',
+              children: [{ id: 'transform', link: 'management:transform' }],
+            },
+          ],
+        },
+      ],
+      footer: [{ id: 'dashboards', link: 'dashboards' }],
+    } as unknown as NavigationTreeDefinition;
+
+    expect(collectNavTreeLinks(navTree)).toEqual([
+      'discover',
+      'management:transform',
+      'dashboards',
+    ]);
+  });
+
+  test('de-duplicates repeated link targets', () => {
+    const navTree = {
+      body: [
+        { id: 'a', link: 'discover' },
+        { id: 'b', link: 'discover' },
+      ],
+    } as unknown as NavigationTreeDefinition;
+
+    expect(collectNavTreeLinks(navTree)).toEqual(['discover']);
+  });
+
+  test('returns an empty array when there are no links', () => {
+    const navTree = { body: [{ type: 'recentlyAccessed' }] } as unknown as NavigationTreeDefinition;
+
+    expect(collectNavTreeLinks(navTree)).toEqual([]);
+  });
 });
 
 describe('flattenNav', () => {
@@ -460,6 +506,121 @@ describe('findActiveNodes', () => {
           title: 'Item 2',
           deepLink: getDeepLink('item2', 'item2'),
           path: 'root.item2',
+        },
+      ],
+    ]);
+  });
+
+  test('keeps app-level links active on sibling routes when url includes defaultPath', () => {
+    const agentBuilderLink: ChromeNavLink = {
+      ...getDeepLink('agent_builder', 'agent_builder/agents', 'Agents'),
+      baseUrl: '/foo/agent_builder',
+      url: '/foo/agent_builder/agents',
+    };
+    const flattendNavTree: Record<string, ChromeProjectNavigationNode> = {
+      '[0]': {
+        id: 'agent_builder',
+        title: 'Agents',
+        path: 'agent_builder',
+        deepLink: agentBuilderLink,
+      },
+    };
+
+    const expected = [
+      [
+        {
+          id: 'agent_builder',
+          title: 'Agents',
+          path: 'agent_builder',
+          deepLink: agentBuilderLink,
+        },
+      ],
+    ];
+
+    expect(findActiveNodes('/foo/agent_builder/agents', flattendNavTree)).toEqual(expected);
+    expect(findActiveNodes('/foo/agent_builder/manage/agents', flattendNavTree)).toEqual(expected);
+    expect(findActiveNodes('/foo/agent_builder#/agents', flattendNavTree)).toEqual(expected);
+    expect(findActiveNodes('/foo/agent_builder_other', flattendNavTree)).toEqual([]);
+    expect(findActiveNodes('/foo/other', flattendNavTree)).toEqual([]);
+  });
+
+  test('does not match deep links against baseUrl', () => {
+    const manageLink: ChromeNavLink = {
+      ...getDeepLink('agent_builder:manage', 'agent_builder/manage/agents', 'Manage'),
+      baseUrl: '/foo/agent_builder',
+      url: '/foo/agent_builder/manage/agents',
+    };
+    const flattendNavTree: Record<string, ChromeProjectNavigationNode> = {
+      '[0]': {
+        id: 'manage',
+        title: 'Manage',
+        path: 'manage',
+        deepLink: manageLink,
+      },
+    };
+
+    expect(findActiveNodes('/foo/agent_builder/manage/agents', flattendNavTree)).toEqual([
+      [
+        {
+          id: 'manage',
+          title: 'Manage',
+          path: 'manage',
+          deepLink: manageLink,
+        },
+      ],
+    ]);
+    expect(findActiveNodes('/foo/agent_builder/conversations', flattendNavTree)).toEqual([]);
+  });
+
+  test('prefers a longer deep link over the app-level baseUrl', () => {
+    const appLink: ChromeNavLink = {
+      ...getDeepLink('agent_builder', 'agent_builder/agents', 'Agents'),
+      baseUrl: '/foo/agent_builder',
+      url: '/foo/agent_builder/agents',
+    };
+    const manageLink: ChromeNavLink = {
+      ...getDeepLink('agent_builder:manage', 'agent_builder/manage/agents', 'Manage'),
+      baseUrl: '/foo/agent_builder',
+      url: '/foo/agent_builder/manage/agents',
+    };
+    const flattendNavTree: Record<string, ChromeProjectNavigationNode> = {
+      '[0]': {
+        id: 'agent_builder',
+        title: 'Agents',
+        path: 'agent_builder',
+        deepLink: appLink,
+      },
+      '[0][0]': {
+        id: 'manage',
+        title: 'Manage',
+        path: 'agent_builder.manage',
+        deepLink: manageLink,
+      },
+    };
+
+    expect(findActiveNodes('/foo/agent_builder/conversations', flattendNavTree)).toEqual([
+      [
+        {
+          id: 'agent_builder',
+          title: 'Agents',
+          path: 'agent_builder',
+          deepLink: appLink,
+        },
+      ],
+    ]);
+    expect(findActiveNodes('/foo/agent_builder/manage/agents', flattendNavTree)).toEqual([
+      [
+        {
+          id: 'agent_builder',
+          title: 'Agents',
+          path: 'agent_builder',
+          deepLink: appLink,
+        },
+        {
+          id: 'manage',
+          title: 'Manage',
+          path: 'agent_builder.manage',
+          deepLink: manageLink,
         },
       ],
     ]);

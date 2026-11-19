@@ -57,3 +57,6 @@ export const SORTED_SCRIPT_TAGS_KEYS = Object.freeze(
 export const SCRIPT_LIBRARY_SORTABLE_FIELDS: readonly SortableScriptLibraryFields[] = Object.freeze(
   ['name', 'createdAt', 'createdBy', 'updatedAt', 'updatedBy', 'fileSize']
 );
+
+export const SCRIPT_LIBRARY_ALLOWED_FILE_TYPES = Object.freeze(['archive', 'script'] as const);
+export type ScriptLibraryAllowedFileType = (typeof SCRIPT_LIBRARY_ALLOWED_FILE_TYPES)[number];

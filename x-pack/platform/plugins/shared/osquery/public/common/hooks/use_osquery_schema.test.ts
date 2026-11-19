@@ -17,7 +17,7 @@ jest.mock('../lib/kibana');
 // Mock the fallback JSON — returned as a pre-sorted list so the hook's
 // sortBy() call produces a deterministic result in tests.
 // Path must match `v${FALLBACK_OSQUERY_VERSION}.json` from common/constants.
-jest.mock('../schemas/osquery/v5.19.0.json', () => [
+jest.mock('../../../common/schemas/osquery/v5.19.0.json', () => [
   { name: 'processes', description: 'Running processes', platforms: ['linux'], columns: [] },
   { name: 'users', description: 'Local users', platforms: ['linux'], columns: [] },
 ]);
@@ -133,7 +133,7 @@ describe('useOsquerySchema', () => {
     });
   });
 
-  describe('staleTime: Infinity caching', () => {
+  describe('staleTime caching', () => {
     it('should only make one HTTP request when the hook is rendered twice in the same client', async () => {
       const { result: result1 } = renderHook(() => useOsquerySchema(), {
         wrapper: createWrapper(queryClient),
@@ -161,6 +161,28 @@ describe('useOsquerySchema', () => {
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
       expect(result.current.osqueryVersion).toBe('5.20.0');
+    });
+
+    it('should return pkgVersion from the API response', async () => {
+      mockHttp.get.mockResolvedValue({ ...MOCK_API_RESPONSE, pkgVersion: '1.35.1' });
+
+      const { result } = renderHook(() => useOsquerySchema(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(result.current.pkgVersion).toBe('1.35.1');
+    });
+
+    it('should return undefined pkgVersion when absent from API response', async () => {
+      const { result } = renderHook(() => useOsquerySchema(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(result.current.pkgVersion).toBeUndefined();
     });
 
     it('should fall back to FALLBACK_OSQUERY_VERSION when the API response has no version field', async () => {

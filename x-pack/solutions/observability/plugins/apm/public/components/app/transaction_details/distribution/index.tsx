@@ -15,7 +15,6 @@ import type { SavedSearchTableConfig } from '@kbn/saved-search-component';
 import { AT_TIMESTAMP } from '@kbn/apm-types';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 
-import { useWaterfallFetcher } from '../use_waterfall_fetcher';
 import { useUnifiedWaterfallFetcher } from '../use_unified_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';
 
@@ -28,6 +27,8 @@ import { fromQuery, push, toQuery } from '../../../shared/links/url_helpers';
 import type { TransactionTab } from '../waterfall_with_summary/transaction_tabs';
 import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
 import type { TraceSamplesFetchResult } from '../../../../hooks/use_transaction_trace_samples_fetcher';
+import { isDiscoverDefaultLogColumns } from './get_trace_logs_columns';
+import { isValidSampleIndex } from '../is_valid_sample_index';
 
 interface TransactionDistributionProps {
   onChartSelection: (event: XYBrushEvent) => void;
@@ -46,7 +47,7 @@ export function TransactionDistribution({
   const { traceId, transactionId } = urlParams;
 
   const {
-    query: { rangeFrom, rangeTo, showCriticalPath, environment },
+    query: { rangeFrom, rangeTo, showCriticalPath, sampleIndex },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view'
@@ -56,15 +57,38 @@ export function TransactionDistribution({
 
   const history = useHistory();
 
-  const waterfallFetchResult = useWaterfallFetcher({
-    traceId,
-    transactionId,
-    start,
-    end,
-  });
   const { waterfallItemId, detailTab } = urlParams;
 
   const { serviceName } = useApmServiceContext();
+
+  const traceSamples = traceSamplesFetchResult.data?.traceSamples;
+
+  const selectedSampleIndex = useMemo(() => {
+    if (!traceSamples || !isValidSampleIndex(sampleIndex, traceSamples)) {
+      return undefined;
+    }
+    const sampleAtIndex = traceSamples[sampleIndex];
+    const matchesUrlIds =
+      sampleAtIndex.traceId === traceId && sampleAtIndex.transactionId === transactionId;
+    return matchesUrlIds ? sampleIndex : undefined;
+  }, [sampleIndex, traceSamples, traceId, transactionId]);
+
+  // Derive the selected sample from the URL so the pagination index stays in
+  // sync with browser back/forward navigation. Passing `selectedSample` (even
+  // as `null`) puts `WaterfallWithSummary` into its controlled mode, where the
+  // index is derived from the URL instead of from local click-only state.
+  // Prefer the validated index when present so paired samples are kept distinct;
+  // fall back to matching by identifier for URLs without a usable `sampleIndex`.
+  const selectedSample = useMemo(() => {
+    if (traceSamples && isValidSampleIndex(selectedSampleIndex, traceSamples)) {
+      return traceSamples[selectedSampleIndex];
+    }
+    return (
+      traceSamples?.find(
+        (sample) => sample.traceId === traceId && sample.transactionId === transactionId
+      ) ?? null
+    );
+  }, [traceSamples, traceId, transactionId, selectedSampleIndex]);
 
   const unifiedWaterfallFetchResult = useUnifiedWaterfallFetcher({
     start,
@@ -73,9 +97,8 @@ export function TransactionDistribution({
     entryTransactionId: transactionId,
   });
 
-  const markerCurrentEvent = waterfallFetchResult.useUnified
-    ? unifiedWaterfallFetchResult.entryTransaction?.transaction?.duration?.us
-    : waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
+  const markerCurrentEvent =
+    unifiedWaterfallFetchResult.entryTransaction?.transaction?.duration?.us;
 
   const { chartData, hasData, percentileThresholdValue, status, totalDocCount } =
     useTransactionDistributionChartData();
@@ -105,13 +128,14 @@ export function TransactionDistribution({
   );
 
   const onSampleClick = useCallback(
-    (sample: { transactionId: string; traceId: string }) => {
+    (sample: { transactionId: string; traceId: string }, index: number) => {
       history.push({
         ...history.location,
         search: fromQuery({
           ...toQuery(history.location.search),
           transactionId: sample.transactionId,
           traceId: sample.traceId,
+          sampleIndex: index,
         }),
       });
     },
@@ -161,23 +185,26 @@ export function TransactionDistribution({
         : config.grid;
 
       // Only include logs params with actual values to keep URLs clean
-      const hasColumns = config.columns && config.columns.length > 0;
+      const hasColumns = config.columns && !isDiscoverDefaultLogColumns(config.columns);
       const hasSort = cleanedSort && cleanedSort.length > 0;
       const hasGrid = cleanedGrid && Object.keys(cleanedGrid).length > 0;
 
-      history.replace({
-        ...history.location,
-        search: fromQuery({
-          ...currentQuery,
-          // Only include params that have meaningful values
-          logsColumns: hasColumns ? JSON.stringify(config.columns) : undefined,
-          logsSort: hasSort ? JSON.stringify(cleanedSort) : undefined,
-          logsGrid: hasGrid ? JSON.stringify(cleanedGrid) : undefined,
-          logsRowHeight: config.rowHeight,
-          logsRowsPerPage: config.rowsPerPage,
-          logsDensity: config.density,
-        }),
+      const nextSearch = fromQuery({
+        ...currentQuery,
+        logsColumns: hasColumns ? JSON.stringify(config.columns) : undefined,
+        logsSort: hasSort ? JSON.stringify(cleanedSort) : undefined,
+        logsGrid: hasGrid ? JSON.stringify(cleanedGrid) : undefined,
+        logsRowHeight: config.rowHeight,
+        logsRowsPerPage: config.rowsPerPage,
+        logsDensity: config.density,
       });
+
+      if (nextSearch !== history.location.search.slice(1)) {
+        history.replace({
+          ...history.location,
+          search: nextSearch,
+        });
+      }
     },
     [history]
   );
@@ -200,21 +227,19 @@ export function TransactionDistribution({
 
         <EuiSpacer size="s" />
         <WaterfallWithSummary
-          environment={environment}
           onSampleClick={onSampleClick}
           onTabClick={onTabClick}
           serviceName={serviceName}
           waterfallItemId={waterfallItemId}
           detailTab={detailTab as TransactionTab | undefined}
-          waterfallFetchResult={waterfallFetchResult.waterfall}
-          waterfallFetchStatus={waterfallFetchResult.status}
           traceSamplesFetchStatus={traceSamplesFetchResult.status}
-          traceSamples={traceSamplesFetchResult.data?.traceSamples}
+          traceSamples={traceSamples}
+          selectedSample={selectedSample}
+          selectedSampleIndex={selectedSampleIndex}
           showCriticalPath={showCriticalPath}
           onShowCriticalPathChange={onShowCriticalPathChange}
           logsTableConfig={logsTableConfig}
           onLogsTableConfigChange={onLogsTableConfigChange}
-          useUnified={waterfallFetchResult.useUnified}
           unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
           entryTransactionId={transactionId}
           rangeFrom={rangeFrom}

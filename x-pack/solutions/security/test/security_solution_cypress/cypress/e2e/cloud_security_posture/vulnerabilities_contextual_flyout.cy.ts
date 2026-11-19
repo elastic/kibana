@@ -193,7 +193,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
       cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).should('be.visible');
     });
 
-    it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
+    it('should display the findings table upon clicking on vulnerabilities accordion', () => {
       cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).click();
       cy.get(CSP_INSIGHT_VULNERABILITIES_TABLE).should('be.visible');
     });

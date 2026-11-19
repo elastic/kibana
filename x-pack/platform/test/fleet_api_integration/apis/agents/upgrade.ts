@@ -75,10 +75,18 @@ export default function (providerContext: FtrProviderContext) {
           type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           overwrite: true,
           attributes: {
-            policy_id: 'fleet-server-policy',
+            policy_ids: ['fleet-server-policy'],
             name: 'Fleet Server',
+            enabled: true,
+            inputs: [],
+            revision: 1,
+            created_at: new Date().toISOString(),
+            created_by: 'system',
+            updated_at: new Date().toISOString(),
+            updated_by: 'system',
             package: {
               name: 'fleet_server',
+              version: '1.0.0',
             },
           },
         });
@@ -654,10 +662,18 @@ export default function (providerContext: FtrProviderContext) {
           type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           overwrite: true,
           attributes: {
-            policy_id: 'fleet-server-policy',
+            policy_ids: ['fleet-server-policy'],
             name: 'Fleet Server',
+            enabled: true,
+            inputs: [],
+            revision: 1,
+            created_at: new Date().toISOString(),
+            created_by: 'system',
+            updated_at: new Date().toISOString(),
+            updated_by: 'system',
             package: {
               name: 'fleet_server',
+              version: '1.0.0',
             },
           },
         });

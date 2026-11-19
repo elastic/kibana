@@ -9,6 +9,7 @@ export type TopologyDirection = 'downstream' | 'upstream' | 'both';
 
 export interface ServiceTopologyNode {
   'service.name': string;
+  'agent.name'?: string;
 }
 
 export interface ExternalNode {

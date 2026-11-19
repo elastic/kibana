@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import {
@@ -21,16 +21,16 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { MlCalendar } from '@kbn/ml-common-types/calendars';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import {
   filterCalendarsForDst,
   separateCalendarsByType,
 } from '../../../../../../../../../settings/calendars/dst_utils';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
-import type { MlCalendar } from '../../../../../../../../../../../common/types/calendars';
 import { useMlApi } from '../../../../../../../../../contexts/kibana';
 import { GLOBAL_CALENDAR } from '../../../../../../../../../../../common/constants/calendars';
-import { ML_PAGES } from '../../../../../../../../../../../common/constants/locator';
 import { DescriptionDst } from './description_dst';
 import { useMlManagementLink } from '../../../../../../../../../contexts/kibana/use_create_url';
 import { MANAGEMENT_SECTION_IDS } from '../../../../../../../../../management';
@@ -46,9 +46,10 @@ export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
   const [selectedCalendars, setSelectedCalendars] = useState<MlCalendar[]>(
     filterCalendarsForDst(jobCreator.calendars, isDst)
   );
-  const [selectedOptions, setSelectedOptions] = useState<
-    Array<EuiComboBoxOptionOption<MlCalendar>>
-  >([]);
+  const selectedOptions = useMemo<Array<EuiComboBoxOptionOption<MlCalendar>>>(
+    () => selectedCalendars.map((c) => ({ label: c.calendar_id, value: c })),
+    [selectedCalendars]
+  );
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<MlCalendar>>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const titleId = useGeneratedHtmlId({ prefix: 'calendarsSelection' });
@@ -60,7 +61,6 @@ export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
       (c) => c.job_ids.includes(GLOBAL_CALENDAR) === false
     );
     setOptions(filteredCalendars.map((c) => ({ label: c.calendar_id, value: c })));
-    setSelectedOptions(selectedCalendars.map((c) => ({ label: c.calendar_id, value: c })));
     setIsLoading(false);
   }
 
@@ -83,7 +83,6 @@ export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
     selectedOptions,
     isLoading,
     onChange: (optionsIn) => {
-      setSelectedOptions(optionsIn);
       setSelectedCalendars(optionsIn.map((o) => o.value!));
     },
   };

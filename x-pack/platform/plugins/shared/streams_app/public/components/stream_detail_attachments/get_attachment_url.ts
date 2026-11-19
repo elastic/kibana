@@ -6,12 +6,8 @@
  */
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import {
-  ruleDetailsLocatorID,
-  sloDetailsLocatorID,
-  type RuleDetailsLocatorParams,
-  type SloDetailsLocatorParams,
-} from '@kbn/deeplinks-observability';
+import { ruleDetailsLocatorID, type RuleDetailsLocatorParams } from '@kbn/rule-data-utils';
+import { sloDetailsLocatorID, type SloDetailsLocatorParams } from '@kbn/deeplinks-observability';
 import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 

@@ -81,6 +81,9 @@ export interface AppDependencies {
     enableSemanticText: boolean;
     enforceAdaptiveAllocations: boolean;
     enableFailureStoreRetentionDisabling: boolean;
+    enableIndexMode: boolean;
+    enableVectorCount: boolean;
+    showManagedDataStreamsByDefault: boolean;
     isServerless: boolean;
   };
   history: ScopedHistory;
@@ -91,7 +94,7 @@ export interface AppDependencies {
   docLinks: DocLinksStart;
   kibanaVersion: SemVer;
   overlays: OverlayStart;
-  canUseSyntheticSource: boolean;
+  hasAtLeastEnterpriseLicense: boolean;
   privs: {
     monitor: boolean;
     manageEnrich: boolean;

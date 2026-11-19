@@ -6,7 +6,7 @@
  */
 
 import { useContext } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useGetUrlParams } from '../../../hooks';
 import { esKuerySelector } from '../../../state/selectors';

@@ -9,6 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+const runWorkflowExecutePrivilegeRequiredTooltip = i18n.translate(
+  'workflows.actionButtons.runWorkflow.executePrivilegeRequired',
+  {
+    defaultMessage: 'You need the Workflows "Execute" privilege to run workflows.',
+  }
+);
+
 interface GetRunTooltipContentProps {
   isValid: boolean;
   canRunWorkflow: boolean;
@@ -41,15 +48,24 @@ interface GetTestRunTooltipContentProps {
   isValid: boolean;
   canRunWorkflow: boolean;
   isExecutionsTab: boolean;
+  isSaving?: boolean;
+  hasWorkflowAccess?: boolean;
 }
 export function getTestRunTooltipContent({
   isValid,
   canRunWorkflow,
   isExecutionsTab,
+  isSaving = false,
+  hasWorkflowAccess = true,
 }: GetTestRunTooltipContentProps) {
   if (isExecutionsTab) {
     return i18n.translate('workflows.actionButtons.runWorkflow.executionsTab', {
       defaultMessage: 'Can not run workflow from executions tab',
+    });
+  }
+  if (isSaving) {
+    return i18n.translate('workflows.actionButtons.runWorkflow.saving', {
+      defaultMessage: 'Workflow is saving',
     });
   }
   if (!isValid) {
@@ -58,22 +74,53 @@ export function getTestRunTooltipContent({
     });
   }
   if (!canRunWorkflow) {
-    return i18n.translate('workflows.actionButtons.runWorkflow.notAllowed', {
-      defaultMessage: 'You are not allowed to run workflows',
+    return runWorkflowExecutePrivilegeRequiredTooltip;
+  }
+  if (!hasWorkflowAccess) {
+    return i18n.translate('workflows.actionButtons.runWorkflow.accessRequired', {
+      defaultMessage: 'You need {executor} or {editor} access to run this workflow.',
+      values: { executor: 'Executor', editor: 'Editor' },
     });
   }
   return null;
+}
+
+interface GetRunStepTooltipContentProps {
+  isValid: boolean;
+  canExecuteWorkflow: boolean;
+}
+
+/** Tooltip for YAML editor per-step Run — mirrors full-workflow Run privilege (`executeWorkflow`). */
+export function getRunStepTooltipContent({
+  isValid,
+  canExecuteWorkflow,
+}: GetRunStepTooltipContentProps): string {
+  if (!isValid) {
+    return i18n.translate('workflows.workflowDetail.yamlEditor.stepActions.runStep.disabled', {
+      defaultMessage: 'Fix errors to run the step',
+    });
+  }
+  if (!canExecuteWorkflow) {
+    return runWorkflowExecutePrivilegeRequiredTooltip;
+  }
+  return i18n.translate('workflows.workflowDetail.yamlEditor.stepActions.runStep.tooltip', {
+    defaultMessage: 'Run step',
+  });
 }
 
 interface GetSaveWorkflowTooltipContentProps {
   isExecutionsTab: boolean;
   canSaveWorkflow: boolean;
   isCreate: boolean;
+  hasUnsavedChanges: boolean;
+  isManagedWorkflow?: boolean;
 }
 export function getSaveWorkflowTooltipContent({
   isExecutionsTab,
   canSaveWorkflow,
   isCreate,
+  hasUnsavedChanges,
+  isManagedWorkflow = false,
 }: GetSaveWorkflowTooltipContentProps) {
   if (isExecutionsTab) {
     return i18n.translate('workflows.actionButtons.saveWorkflow.executionsTab', {
@@ -90,6 +137,16 @@ export function getSaveWorkflowTooltipContent({
         defaultMessage: 'You are not allowed to update workflows',
       });
     }
+  }
+  if (isManagedWorkflow) {
+    return i18n.translate('workflows.actionButtons.saveWorkflow.managedWorkflow', {
+      defaultMessage: 'Managed workflow YAML is read-only',
+    });
+  }
+  if (!hasUnsavedChanges) {
+    return i18n.translate('workflows.actionButtons.saveWorkflow.noChanges', {
+      defaultMessage: 'No changes to save',
+    });
   }
   return null;
 }

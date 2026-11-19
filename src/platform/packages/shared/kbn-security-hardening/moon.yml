@@ -16,13 +16,15 @@ project:
   channel: ''
   owner: '@elastic/kibana-security'
   sourceRoot: src/platform/packages/shared/kbn-security-hardening
-dependsOn: []
+dependsOn:
+  - '@kbn/scout'
 tags:
   - shared-common
   - package
   - prod
   - group-platform
   - shared
+  - scout-tests
 fileGroups:
   src:
     - '**/*.ts'

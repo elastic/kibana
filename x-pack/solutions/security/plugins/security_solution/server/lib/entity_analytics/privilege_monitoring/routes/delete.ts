@@ -11,7 +11,7 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
-  DeleteEntityEngineRequestQuery,
+  DeleteMonitoringEngineRequestQuery,
   type DeleteMonitoringEngineResponse,
 } from '../../../../../common/api/entity_analytics';
 import {
@@ -25,7 +25,9 @@ import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const deletePrivilegeMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  { experimentalFeatures }: EntityAnalyticsRoutesDeps['config'],
+  docLinks: EntityAnalyticsRoutesDeps['docLinks']
 ) => {
   router.versioned
     .delete({
@@ -48,9 +50,20 @@ export const deletePrivilegeMonitoringEngineRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(DeleteEntityEngineRequestQuery),
+            query: buildRouteValidationWithZod(DeleteMonitoringEngineRequestQuery),
           },
         },
+        ...(experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
       withMinimumLicense(
         async (

@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { AttacksCountPanel } from './attacks_count_panel';
+import { AlertsCountPanel } from '../../alerts_kpis/alerts_count_panel';
 import { useAttacksKpiState } from './common/use_attacks_kpi_state';
 import { useEuiComboBoxReset } from '../../../../common/components/use_combo_box_reset';
 import { useUserData } from '../../user_info';
@@ -64,5 +65,22 @@ describe('AttacksCountPanel', () => {
     const { getByTestId } = render(<AttacksCountPanel {...props} />);
 
     expect(getByTestId('alerts-count-panel')).toBeInTheDocument();
+  });
+
+  it('passes chartOptionsContextMenu to AlertsCountPanel to hide the inspect button', () => {
+    const props = {
+      filters: [],
+      title: 'Test Title',
+      isExpanded: true,
+      setIsExpanded: mockSetIsExpanded,
+    };
+
+    render(<AttacksCountPanel {...props} />);
+
+    const mockedAlertsCountPanel = AlertsCountPanel as unknown as jest.Mock;
+    expect(mockedAlertsCountPanel).toHaveBeenCalledWith(
+      expect.objectContaining({ chartOptionsContextMenu: expect.any(Function) }),
+      expect.anything()
+    );
   });
 });

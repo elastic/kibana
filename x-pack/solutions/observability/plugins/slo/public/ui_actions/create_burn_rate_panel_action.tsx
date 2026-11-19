@@ -19,6 +19,7 @@ import {
   SLO_BURN_RATE_EMBEDDABLE_ID,
 } from '../embeddable/slo/burn_rate/constants';
 import type { SLORepositoryClient } from '../types';
+import { isValidLicense } from './is_valid_license';
 
 export function createBurnRatePanelAction(
   coreStart: CoreStart,
@@ -29,9 +30,9 @@ export function createBurnRatePanelAction(
     id: ADD_BURN_RATE_ACTION_ID,
     grouping: COMMON_OBSERVABILITY_GROUPING,
     order: 20,
-    getIconType: () => 'visGauge',
+    getIconType: () => 'chartGauge',
     isCompatible: async ({ embeddable }) => {
-      return apiIsPresentationContainer(embeddable);
+      return (await isValidLicense(pluginsStart)) && apiIsPresentationContainer(embeddable);
     },
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();

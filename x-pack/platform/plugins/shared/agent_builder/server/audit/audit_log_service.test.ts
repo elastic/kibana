@@ -230,6 +230,57 @@ describe('AuditLogService', () => {
     );
   });
 
+  it('maps bulk skill delete fulfilled true to success skill delete audit', () => {
+    const { service } = createService();
+    const request = {} as KibanaRequest;
+    const logSkillDeletedSpy = jest.spyOn(service, 'logSkillDeleted').mockImplementation(() => {});
+
+    service.logBulkSkillDeleteResults(request, {
+      ids: ['s1'],
+      deleteResults: [{ status: 'fulfilled', value: true }],
+    });
+
+    expect(logSkillDeletedSpy).toHaveBeenCalledWith(request, { skillId: 's1' });
+  });
+
+  it('maps bulk skill delete fulfilled false to failure skill delete audit', () => {
+    const { service } = createService();
+    const request = {} as KibanaRequest;
+    const logSkillDeletedSpy = jest.spyOn(service, 'logSkillDeleted').mockImplementation(() => {});
+
+    service.logBulkSkillDeleteResults(request, {
+      ids: ['s1'],
+      deleteResults: [{ status: 'fulfilled', value: false }],
+    });
+
+    expect(logSkillDeletedSpy).toHaveBeenCalledWith(
+      request,
+      expect.objectContaining({
+        skillId: 's1',
+        error: expect.objectContaining({ message: 'Skill delete returned false' }),
+      })
+    );
+  });
+
+  it('maps bulk skill delete rejected to failure skill delete audit', () => {
+    const { service } = createService();
+    const request = {} as KibanaRequest;
+    const logSkillDeletedSpy = jest.spyOn(service, 'logSkillDeleted').mockImplementation(() => {});
+
+    service.logBulkSkillDeleteResults(request, {
+      ids: ['s1'],
+      deleteResults: [{ status: 'rejected', reason: new Error('boom') }],
+    });
+
+    expect(logSkillDeletedSpy).toHaveBeenCalledWith(
+      request,
+      expect.objectContaining({
+        skillId: 's1',
+        error: expect.objectContaining({ message: 'boom' }),
+      })
+    );
+  });
+
   it('maps bulk create MCP success to tool create audit', () => {
     const { service } = createService();
     const request = {} as KibanaRequest;
@@ -299,6 +350,24 @@ describe('AuditLogService', () => {
         toolId: 'n.t1',
         toolType: 'mcp',
         error: expect.objectContaining({ message: 'Unknown error' }),
+      })
+    );
+  });
+
+  it('scopes a conversation creation audit event to the request', () => {
+    const auditLogger = { log: jest.fn() };
+    const { service, security } = createService({ auditLogger });
+    const request = {} as KibanaRequest;
+
+    service.logConversationCreated(request, { conversationId: 'conv-1', agentId: 'agent-1' });
+
+    expect(security.audit.asScoped).toHaveBeenCalledWith(request);
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'User has created conversation [id=conv-1, agent=agent-1]',
+        event: expect.objectContaining({
+          action: AgentBuilderAuditAction.CONVERSATION_CREATE,
+        }),
       })
     );
   });

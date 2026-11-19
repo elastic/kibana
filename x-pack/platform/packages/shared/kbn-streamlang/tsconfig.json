@@ -21,5 +21,6 @@
     "@kbn/datemath",
     "@kbn/tinymath",
     "@kbn/grok-ui",
+    "@kbn/index-management-shared-types",
   ]
 }

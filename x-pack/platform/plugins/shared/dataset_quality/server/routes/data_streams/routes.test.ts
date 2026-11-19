@@ -79,6 +79,7 @@ describe('dataStreamDetailsRoute', () => {
         },
       },
       getEsCapabilities: jest.fn(),
+      getIsSecurityEnabled: jest.fn().mockResolvedValue(true),
       params: {
         path: {
           dataStream: 'logs-test-default',
@@ -166,6 +167,7 @@ describe('dataStreamDetailsRoute', () => {
         start: 1234567890,
         end: 1234567900,
         isServerless: false,
+        isSecurityEnabled: true,
       });
 
       expect(mockGetDataStreamDefaultRetentionPeriod).toHaveBeenCalledWith({
@@ -318,6 +320,7 @@ describe('updateFailureStoreRoute', () => {
         },
       },
       getEsCapabilities: jest.fn(),
+      getIsSecurityEnabled: jest.fn().mockResolvedValue(true),
       params: {
         path: {
           dataStream: 'logs-test-default',

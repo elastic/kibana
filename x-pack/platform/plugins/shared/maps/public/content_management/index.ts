@@ -7,4 +7,4 @@
 
 export { getMapClient } from './maps_client';
 
-export { checkForDuplicateTitle } from './duplicate_title_check';
+export { hasLibraryItemWithTitle } from './has_library_item_with_title';

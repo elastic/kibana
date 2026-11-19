@@ -1,0 +1,12 @@
+openapi: 3.0.3
+info:
+  title: 'Security Solution Initialization API (Elastic Cloud and self-hosted)'
+  description: 'Use the initialization API to set up the assets Elastic Security needs to operate in a Kibana space, such as list indices, security data views, prebuilt detection rules, endpoint protection, AI prompts, and detection rule monitoring assets.'
+
+tags:
+  - name: 'Security Solution Initialization API'
+    x-displayName: 'Security solution initialization'
+    description: |
+      Use the initialization API to set up the assets Elastic Security needs to operate in a Kibana space.
+
+      A single request can run one or more initialization flows. Each flow provisions a specific set of assets (for example, list indices, security data views, prebuilt detection rules, endpoint protection, AI prompts, or detection rule monitoring assets). The response reports a per-flow result so you can tell which flows completed and which returned an error.

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux-v7';
 import type { Ast } from '@kbn/interpreter';
 import deepEqual from 'react-fast-compare';
 import type { ExpressionAstExpression, ExpressionValue } from '@kbn/expressions-plugin/common';

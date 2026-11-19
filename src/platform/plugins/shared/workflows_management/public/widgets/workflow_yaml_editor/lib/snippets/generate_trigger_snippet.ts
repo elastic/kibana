@@ -15,12 +15,17 @@ import { isTriggerType } from '@kbn/workflows';
 const CUSTOM_TRIGGER_CONDITION_COMMENT =
   'Filter the subscription by using KQL, use event.* to target event properties';
 
+const CONNECTOR_ID_COMMENT =
+  'Id of the connector instance this trigger is bound to, or "*" for every instance of this type';
+
 interface GenerateTriggerSnippetOptions {
   full?: boolean;
   monacoSuggestionFormat?: boolean;
   withTriggersSection?: boolean;
   /** Default KQL condition for custom triggers (used when inserting trigger from UI). */
   defaultCondition?: string;
+  /** When true, include a `connector-id` field (connector-event triggers). */
+  requiresConnectorId?: boolean;
 }
 
 /**
@@ -39,6 +44,7 @@ export function generateTriggerSnippet(
     monacoSuggestionFormat,
     withTriggersSection,
     defaultCondition,
+    requiresConnectorId,
   }: GenerateTriggerSnippetOptions = {}
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
@@ -79,9 +85,23 @@ export function generateTriggerSnippet(
       parameters = {};
       break;
 
+    case 'page':
+      parameters = {
+        title: monacoSuggestionFormat ? '${1:Report an incident}' : 'Report an incident',
+        description: monacoSuggestionFormat
+          ? '${2:Tell us what happened}'
+          : 'Tell us what happened',
+        inputs: {
+          properties: { summary: { type: 'string', description: 'What happened' } },
+          required: ['summary'],
+        },
+      };
+      break;
+
     default:
       // Custom triggers: include on/condition so users can add a KQL filter (use defaultCondition when provided)
       parameters = {
+        ...(requiresConnectorId ? { 'connector-id': '' } : {}),
         on: { condition: defaultCondition ?? '' },
       };
       break;
@@ -112,6 +132,10 @@ export function generateTriggerSnippet(
       /(on:\n)(\s+)(condition:)/,
       `$1$2# ${CUSTOM_TRIGGER_CONDITION_COMMENT}\n$2$3`
     );
+  }
+
+  if (requiresConnectorId && result.includes('connector-id:')) {
+    result = result.replace(/(^|\n)(\s*)(connector-id:)/, `$1$2# ${CONNECTOR_ID_COMMENT}\n$2$3`);
   }
 
   return result;

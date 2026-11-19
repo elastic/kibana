@@ -8,6 +8,7 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
+import moment from 'moment';
 import { from } from 'rxjs';
 import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
 import { type Logger } from '@kbn/core/server';
@@ -92,11 +93,82 @@ describe('Search service', () => {
 
     await runMockSearch(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search.search).toBeCalled();
+    expect(mockContext.search.search).toHaveBeenCalled();
     expect(mockContext.search.search.mock.calls[0][0]).toStrictEqual(mockBody);
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
       body: response,
+    });
+  });
+
+  it('handler passes pollLength as an Elasticsearch duration search option, not as part of the request', async () => {
+    const mockContext = {
+      search: {
+        search: jest.fn().mockReturnValue(from(Promise.resolve({ id: 'yay', rawResponse: {} }))),
+      },
+    };
+
+    // the route's body validation turns the `pollLength` string into a duration
+    const mockRequest = httpServerMock.createKibanaRequest({
+      body: { params: {}, pollLength: moment.duration(30, 's') },
+      params: { strategy: 'foo', id: 'yay' },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await runMockSearch(mockContext, mockRequest, mockResponse);
+
+    const [[request, options]] = mockContext.search.search.mock.calls;
+    expect(request).toStrictEqual({ id: 'yay', params: {} });
+    expect(options).toEqual(expect.objectContaining({ strategy: 'foo', pollLength: '30000ms' }));
+  });
+
+  it('handler passes a zero pollLength through as 0ms', async () => {
+    const mockContext = {
+      search: {
+        search: jest.fn().mockReturnValue(from(Promise.resolve({ id: 'yay', rawResponse: {} }))),
+      },
+    };
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      body: { params: {}, pollLength: moment.duration(0) },
+      params: { strategy: 'foo', id: 'yay' },
+    });
+
+    await runMockSearch(mockContext, mockRequest, httpServerMock.createResponseFactory());
+
+    const [[, options]] = mockContext.search.search.mock.calls;
+    expect(options).toEqual(expect.objectContaining({ pollLength: '0ms' }));
+  });
+
+  describe('pollLength validation', () => {
+    const getBodySchema = () => {
+      registerSearchRoute(
+        mockCoreSetup.http.createRouter(),
+        mockLogger,
+        mockCoreSetup.executionContext
+      );
+      const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+      const { validate } =
+        mockRouter.versioned.post.mock.results[0].value.addVersion.mock.calls[0][0];
+      return validate.request.body;
+    };
+
+    it.each([['30s'], ['100ms'], ['0'], [5000]])('accepts %p', (pollLength) => {
+      const { pollLength: validated } = getBodySchema().validate({ pollLength });
+      expect(moment.isDuration(validated)).toBe(true);
+    });
+
+    it('is optional', () => {
+      expect(getBodySchema().validate({}).pollLength).toBeUndefined();
+    });
+
+    it.each([['banana'], ['-1s'], [{}]])('rejects %p', (pollLength) => {
+      expect(() => getBodySchema().validate({ pollLength })).toThrow();
+    });
+
+    it('rejects a long string before parsing it', () => {
+      const pollLength = '0s'.repeat(100_000);
+      expect(() => getBodySchema().validate({ pollLength })).toThrow(/at most \[30\] characters/);
     });
   });
 
@@ -120,7 +192,7 @@ describe('Search service', () => {
     await runMockSearch(mockContext, mockRequest, mockResponse);
 
     // verify error
-    expect(mockResponse.customError).toBeCalled();
+    expect(mockResponse.customError).toHaveBeenCalled();
     const error: any = mockResponse.customError.mock.calls[0][0];
     expect(error.statusCode).toBe(400);
     expect(error.body.message).toBe('search_phase_execution_exception');
@@ -149,7 +221,7 @@ describe('Search service', () => {
 
     await runMockSearch(mockContext, mockRequest, mockResponse);
 
-    expect(mockResponse.customError).toBeCalled();
+    expect(mockResponse.customError).toHaveBeenCalled();
     const error: any = mockResponse.customError.mock.calls[0][0];
     expect(error.statusCode).toBe(404);
     expect(error.body.message).toBe('index_not_found_exception');
@@ -176,7 +248,7 @@ describe('Search service', () => {
 
     await runMockSearch(mockContext, mockRequest, mockResponse);
 
-    expect(mockResponse.customError).toBeCalled();
+    expect(mockResponse.customError).toHaveBeenCalled();
     const error: any = mockResponse.customError.mock.calls[0][0];
     expect(error.statusCode).toBe(500);
     expect(error.body.message).toBe('This is odd');
@@ -201,7 +273,7 @@ describe('Search service', () => {
 
     await runMockDelete(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search.cancel).toBeCalled();
-    expect(mockContext.search.cancel).toBeCalledWith(id, { strategy });
+    expect(mockContext.search.cancel).toHaveBeenCalled();
+    expect(mockContext.search.cancel).toHaveBeenCalledWith(id, { strategy });
   });
 });

@@ -10,10 +10,8 @@ import { LockManagerService } from '@kbn/lock-manager';
 import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import type { StreamsPluginStartDependencies } from '../../types';
 import { createStreamsStorageClient } from './storage/streams_storage_client';
-import type { QueryClient } from './assets/query/query_client';
 import { StreamsClient } from './client';
 import type { AttachmentClient } from './attachments/attachment_client';
-import type { FeatureClient } from './feature';
 
 export class StreamsService {
   constructor(
@@ -24,18 +22,16 @@ export class StreamsService {
 
   async getClient({
     attachmentClient,
-    queryClient,
-    featureClient,
     esClient,
     esClientAsInternalUser,
     uiSettingsClient,
+    isSecurityEnabled,
   }: {
     attachmentClient: AttachmentClient;
-    queryClient: QueryClient;
-    featureClient: FeatureClient;
     esClient: ElasticsearchClient;
     esClientAsInternalUser: ElasticsearchClient;
     uiSettingsClient: IUiSettingsClient;
+    isSecurityEnabled: boolean;
   }): Promise<StreamsClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
@@ -48,14 +44,13 @@ export class StreamsService {
 
     return new StreamsClient({
       attachmentClient,
-      queryClient,
       logger,
-      featureClient,
       esClient,
       esClientAsInternalUser,
       lockManager: new LockManagerService(this.coreSetup, logger),
       storageClient: createStreamsStorageClient(esClientAsInternalUser, logger),
       isServerless,
+      isSecurityEnabled,
       isWiredStreamViewsEnabled,
       isDev: this.isDev,
     });

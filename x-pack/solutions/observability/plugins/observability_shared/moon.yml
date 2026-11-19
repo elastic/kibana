@@ -32,7 +32,6 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/spaces-plugin'
   - '@kbn/core-application-browser'
-  - '@kbn/core-application-common'
   - '@kbn/datemath'
   - '@kbn/rison'
   - '@kbn/kibana-utils-plugin'
@@ -42,9 +41,6 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/share-plugin'
   - '@kbn/shared-ux-error-boundary'
-  - '@kbn/management-settings-field-definition'
-  - '@kbn/management-settings-types'
-  - '@kbn/management-settings-utilities'
   - '@kbn/core-chrome-browser'
   - '@kbn/rule-data-utils'
   - '@kbn/es-query'
@@ -53,8 +49,9 @@ dependsOn:
   - '@kbn/charts-theme'
   - '@kbn/deeplinks-observability'
   - '@kbn/home-sample-data-tab'
-  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-browser'
   - '@kbn/controls-constants'
+  - '@kbn/apm-types'
 tags:
   - plugin
   - prod
@@ -70,26 +67,4 @@ fileGroups:
     - .storybook/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+tasks: {}

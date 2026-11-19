@@ -12,12 +12,12 @@ import axios from 'axios';
 import type { ExecSyncOptions } from 'child_process';
 import { execFileSync, execSync } from 'child_process';
 
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 
-import { parseLinkHeader } from './parse_link_header';
-import type { Artifact } from './types/artifact';
-import type { Build, BuildStatus } from './types/build';
-import type { Job, JobState } from './types/job';
+import { parseLinkHeader } from './parse_link_header.ts';
+import type { Artifact } from './types/artifact.ts';
+import type { Build, BuildStatus } from './types/build.ts';
+import type { Job, JobState } from './types/job.ts';
 
 type ExecType =
   | ((command: string, execOpts: ExecSyncOptions) => Buffer | null)
@@ -27,14 +27,11 @@ export interface BuildkiteClientConfig {
   baseUrl?: string;
   token?: string;
   exec?: ExecType;
-}
-
-export interface BuildkiteGroup {
-  group: string;
-  steps: BuildkiteStep[];
+  timeoutMs?: number;
 }
 
 export type BuildkiteStep =
+  | BuildkiteGroupStep
   | BuildkiteCommandStep
   | BuildkiteInputStep
   | BuildkiteTriggerStep
@@ -54,6 +51,42 @@ export interface BuildkiteAgentTargetingRule {
   diskSizeGb?: number;
 }
 
+export type BuildkiteSignalReason =
+  | 'none'
+  | 'agent_stop'
+  | 'agent_refused'
+  | 'cancel'
+  | 'process_run_error'
+  | 'signature_rejected'
+  | '*';
+
+export interface BuildkiteAutomaticRetryRule {
+  exit_status?: string | number;
+  signal_reason?: BuildkiteSignalReason;
+  limit: number;
+}
+
+export interface BuildkiteRetry {
+  automatic: BuildkiteAutomaticRetryRule[];
+}
+
+// Retry on spot preemption / lost agent, never on timeouts
+export const retryOnPreemption = (limit: number): BuildkiteRetry => ({
+  automatic: [
+    { signal_reason: 'agent_stop', limit },
+    { exit_status: '-1', signal_reason: 'none', limit },
+  ],
+});
+
+export interface BuildkiteGroupStep {
+  group: string;
+  steps: BuildkiteStep[];
+  key?: string;
+  depends_on?: string | string[];
+  retry?: BuildkiteRetry;
+  env?: { [key: string]: string | number };
+}
+
 export interface BuildkiteCommandStep {
   command: string;
   label: string;
@@ -65,12 +98,7 @@ export interface BuildkiteCommandStep {
   timeout_in_minutes?: number;
   key?: string;
   depends_on?: string | string[];
-  retry?: {
-    automatic: Array<{
-      exit_status: string;
-      limit: number;
-    }>;
-  };
+  retry?: BuildkiteRetry;
   env?: { [key: string]: string | number };
 }
 
@@ -109,12 +137,7 @@ export interface BuildkiteInputStep {
   timeout_in_minutes?: number;
   key?: string;
   depends_on?: string | string[];
-  retry?: {
-    automatic: Array<{
-      exit_status: string;
-      limit: number;
-    }>;
-  };
+  retry?: BuildkiteRetry;
   env?: { [key: string]: string | number };
 }
 
@@ -154,7 +177,9 @@ export interface BuildkiteTriggerBuildParams {
 }
 
 export interface BuildkiteWaitStep {
-  wait: string;
+  wait: string | null;
+  key?: string;
+  depends_on?: string | string[];
   if?: string;
   allow_dependency_failure?: boolean;
   continue_on_failure?: boolean;
@@ -181,6 +206,7 @@ export class BuildkiteClient {
         Authorization: `Bearer ${BUILDKITE_TOKEN}`,
       },
       allowAbsoluteUrls: false,
+      timeout: config.timeoutMs,
     });
 
     this.exec = config.exec ?? execSync;
@@ -228,6 +254,40 @@ export class BuildkiteClient {
       return null;
     }
     return builds[0];
+  };
+
+  getFinishedBuildsForBranch = async (
+    pipelineSlug: string,
+    branch: string,
+    numberOfBuilds: number,
+    { excludeJobs = false }: { excludeJobs?: boolean } = {}
+  ): Promise<Build[]> => {
+    const params = new URLSearchParams({ branch, per_page: String(numberOfBuilds) });
+    if (excludeJobs) {
+      params.append('exclude_jobs', 'true');
+    }
+    params.append('state[]', 'passed');
+    params.append('state[]', 'failed');
+    params.append('state[]', 'canceled');
+    const response = await this.http.get(
+      `v2/organizations/elastic/pipelines/${encodeURIComponent(
+        pipelineSlug
+      )}/builds?${params.toString()}`
+    );
+    return response.data as Build[];
+  };
+
+  getInProgressBuilds = async (pipelineSlug: string): Promise<Build[]> => {
+    const params = new URLSearchParams({ per_page: '100', exclude_jobs: 'true' });
+    params.append('state[]', 'scheduled');
+    params.append('state[]', 'running');
+    params.append('state[]', 'failing');
+    const response = await this.http.get(
+      `v2/organizations/elastic/pipelines/${encodeURIComponent(
+        pipelineSlug
+      )}/builds?${params.toString()}`
+    );
+    return response.data as Build[];
   };
 
   getCurrentBuild = (includeRetriedJobs = false) => {
@@ -431,9 +491,9 @@ export class BuildkiteClient {
     });
   };
 
-  uploadSteps = (steps: Array<BuildkiteStep | BuildkiteGroup>) => {
+  uploadSteps = (steps: Array<BuildkiteStep>) => {
     this.exec(`buildkite-agent pipeline upload`, {
-      input: dump({ steps }),
+      input: stringify({ steps }),
       stdio: ['pipe', 'inherit', 'inherit'],
     });
   };

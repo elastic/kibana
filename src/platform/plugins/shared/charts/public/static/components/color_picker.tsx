@@ -199,6 +199,7 @@ export const ColorPicker = ({
                 type="dot"
                 size="l"
                 color={selectedColor}
+                aria-hidden={true}
                 css={[
                   visColorPickerValueDotStyle,
                   color === selectedColor ? visColorPickerValueDotSelectedStyle : null,

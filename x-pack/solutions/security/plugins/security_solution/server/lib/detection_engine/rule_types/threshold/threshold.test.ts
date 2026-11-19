@@ -14,6 +14,7 @@ import { sampleEmptyAggsSearchResults } from '../__mocks__/es_results';
 import { getThresholdTermsHash } from './utils';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { getSharedParamsMock } from '../__mocks__/shared_params';
+import { getNoReadableShardsWarning } from '../utils/no_readable_shards';
 import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 
@@ -146,6 +147,29 @@ describe('threshold_executor', () => {
         }`,
       ]);
     });
+    it('should warn instead of failing when the search resolved to no shards', async () => {
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
+        ...sampleEmptyAggsSearchResults(),
+        _shards: { total: 0, successful: 0, failed: 0, skipped: 0 },
+        aggregations: undefined,
+      });
+
+      const result = await thresholdExecutor({
+        sharedParams,
+        services: ruleServices,
+        state: { initialized: true, signalHistory: {} },
+        startedAt: new Date(),
+        licensing,
+        scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.errors).toEqual([]);
+      expect(result.warningMessages).toEqual([
+        getNoReadableShardsWarning({ inputIndex: sharedParams.inputIndex }),
+      ]);
+    });
+
     it('should call scheduleNotificationResponseActionsService', async () => {
       const state = {
         initialized: true,
@@ -159,7 +183,7 @@ describe('threshold_executor', () => {
         licensing,
         scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
       });
-      expect(mockScheduledNotificationResponseAction).toBeCalledWith({
+      expect(mockScheduledNotificationResponseAction).toHaveBeenCalledWith({
         signals: result.createdSignals,
         signalsCount: result.createdSignalsCount,
         responseActions: sharedParams.completeRule.ruleParams.responseActions,

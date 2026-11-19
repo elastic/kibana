@@ -9,7 +9,11 @@ import {
   doesPackageHaveIntegrations,
   getNormalizedInputs,
 } from '../../../../../../../common/services';
+import { isInputAllowedForDeploymentMode } from '../../../../../../../common/services/agentless_policy_helper';
+import { isVarGroupOptionHiddenInDeploymentMode } from '../../../../../../../common/services/var_group_helpers';
+import { isCloudProvider } from '../../../../../../../common/types';
 import type {
+  CloudProvider,
   PackageInfo,
   RegistryInput,
   RegistryVarGroup,
@@ -89,6 +93,110 @@ export function isInputVisibleForVarGroupSelections(
 }
 
 /**
+ * Compute the var_group options to hide when the package policy form is scoped to a
+ * single policy template (integration). An option is hidden when every input of that
+ * policy template available in the selected deployment mode declares it in
+ * `hide_in_var_group_options`, since selecting it would leave the integration without
+ * any usable inputs.
+ */
+export function getHiddenVarGroupOptionsForPolicyTemplate(
+  packageInfo: PackageInfo | undefined,
+  policyTemplateName: string | undefined,
+  isAgentlessEnabled: boolean
+): Record<string, string[]> | undefined {
+  if (!packageInfo?.var_groups?.length || !policyTemplateName) {
+    return undefined;
+  }
+
+  const policyTemplate = packageInfo.policy_templates?.find(
+    (template) => template.name === policyTemplateName
+  );
+  if (!policyTemplate) {
+    return undefined;
+  }
+
+  const deploymentMode = isAgentlessEnabled ? 'agentless' : 'default';
+  const inputs = getNormalizedInputs(policyTemplate).filter((input) =>
+    isInputAllowedForDeploymentMode(
+      { type: input.type, policy_template: policyTemplateName },
+      deploymentMode,
+      packageInfo
+    )
+  );
+  if (!inputs.length) {
+    return undefined;
+  }
+
+  const hiddenOptions: Record<string, string[]> = {};
+  for (const varGroup of packageInfo.var_groups) {
+    const hiddenOptionNames = varGroup.options
+      .filter((option) =>
+        inputs.every((input) =>
+          input.hide_in_var_group_options?.[varGroup.name]?.includes(option.name)
+        )
+      )
+      .map((option) => option.name);
+
+    if (hiddenOptionNames.length > 0) {
+      hiddenOptions[varGroup.name] = hiddenOptionNames;
+    }
+  }
+
+  return Object.keys(hiddenOptions).length > 0 ? hiddenOptions : undefined;
+}
+
+/**
+ * Compute the var_group options to hide because their cloud provider's identity federation
+ * has been disabled by feature flag. An option is hidden when its `provider` is in
+ * `disabledProviders`, unless it is already the saved selection for its var_group — an
+ * existing policy configured with identity federation must stay editable rather than being
+ * silently reset to the first visible option.
+ */
+export function getHiddenVarGroupOptionsForDisabledProviders(
+  varGroups: RegistryVarGroup[] | undefined,
+  disabledProviders: readonly CloudProvider[],
+  savedSelections?: VarGroupSelection
+): Record<string, string[]> | undefined {
+  if (!varGroups?.length || !disabledProviders.length) {
+    return undefined;
+  }
+
+  const hiddenOptions: Record<string, string[]> = {};
+  for (const varGroup of varGroups) {
+    const hiddenOptionNames = varGroup.options
+      .filter(
+        (option) =>
+          isCloudProvider(option.provider) &&
+          disabledProviders.includes(option.provider) &&
+          savedSelections?.[varGroup.name] !== option.name
+      )
+      .map((option) => option.name);
+
+    if (hiddenOptionNames.length > 0) {
+      hiddenOptions[varGroup.name] = hiddenOptionNames;
+    }
+  }
+
+  return Object.keys(hiddenOptions).length > 0 ? hiddenOptions : undefined;
+}
+
+/**
+ * Merge several hide-option maps (var_group name → hidden option names), deduplicating names.
+ * Returns undefined when nothing is hidden so callers can keep passing `undefined` through.
+ */
+export function mergeHiddenVarGroupOptions(
+  ...maps: Array<Record<string, string[]> | undefined>
+): Record<string, string[]> | undefined {
+  const merged: Record<string, string[]> = {};
+  for (const map of maps) {
+    for (const [groupName, optionNames] of Object.entries(map ?? {})) {
+      merged[groupName] = [...new Set([...(merged[groupName] ?? []), ...optionNames])];
+    }
+  }
+  return Object.keys(merged).length > 0 ? merged : undefined;
+}
+
+/**
  * Get visible options for a var group, filtering out options that should be hidden
  * based on deployment mode or hide_in_var_group_options configuration.
  *
@@ -100,25 +208,16 @@ export function getVisibleOptions(
   hideInVarGroupOptions?: Record<string, string[]>
 ): RegistryVarGroupOption[] {
   const hiddenOptionNames = hideInVarGroupOptions?.[varGroup.name] ?? [];
+  const deploymentMode = isAgentlessEnabled ? 'agentless' : 'default';
 
-  return varGroup.options.filter((option) => {
-    // Check if option is hidden via hide_in_var_group_options
-    if (hiddenOptionNames.includes(option.name)) {
-      return false;
-    }
-
-    // Check if option is hidden based on deployment mode
-    if (option.hide_in_deployment_modes) {
-      if (isAgentlessEnabled && option.hide_in_deployment_modes.includes('agentless')) {
-        return false;
-      }
-      if (!isAgentlessEnabled && option.hide_in_deployment_modes.includes('default')) {
-        return false;
-      }
-    }
-
-    return true;
-  });
+  // Deployment-mode hiding shares its rule with validation (common
+  // `isVarGroupOptionHiddenInDeploymentMode`) so the form's first visible
+  // option and validation's fallback can never drift apart.
+  return varGroup.options.filter(
+    (option) =>
+      !hiddenOptionNames.includes(option.name) &&
+      !isVarGroupOptionHiddenInDeploymentMode(option, deploymentMode)
+  );
 }
 
 /**

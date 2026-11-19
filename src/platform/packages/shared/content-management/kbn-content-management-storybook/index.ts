@@ -55,5 +55,4 @@ export {
   // User Profiles
   MOCK_USER_PROFILES,
   MOCK_USER_PROFILES_MAP,
-  mockUserProfileServices,
 } from '@kbn/content-list-mock-data';

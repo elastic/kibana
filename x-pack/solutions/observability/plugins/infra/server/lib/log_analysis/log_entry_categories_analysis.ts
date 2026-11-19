@@ -23,7 +23,12 @@ import {
 } from '../../../common/log_analysis';
 import { startTracingSpan } from '../../../common/performance_tracing';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
-import { fetchMlJob, getLogEntryDatasets } from './common';
+import {
+  fetchIsInfraMlCpsEnabled,
+  fetchMlJob,
+  getLogEntryDatasets,
+  resolveJobProjectRouting,
+} from './common';
 import { InsufficientLogAnalysisMlJobConfigurationError, UnknownCategoryError } from './errors';
 import type { LogEntryCategoryHit } from './queries/log_entry_categories';
 import {
@@ -157,7 +162,8 @@ export async function getLogEntryCategoryExamples(
   endTime: number,
   categoryId: number,
   exampleCount: number,
-  resolvedLogView: ResolvedLogView
+  resolvedLogView: ResolvedLogView,
+  isCpsPlatformGateEnabled: () => Promise<boolean>
 ) {
   const finalizeLogEntryCategoryExamplesSpan = startTracingSpan('get category example log entries');
 
@@ -168,14 +174,21 @@ export async function getLogEntryCategoryExamples(
     logEntryCategoriesJobTypes[0]
   );
 
-  const {
-    mlJob,
-    timing: { spans: fetchMlJobSpans },
-  } = await fetchMlJob(context.infra.mlAnomalyDetectors, logEntryCategoriesCountJobId);
+  const [
+    {
+      mlJob,
+      timing: { spans: fetchMlJobSpans },
+    },
+    isMlCpsEnabled,
+  ] = await Promise.all([
+    fetchMlJob(context.infra.mlAnomalyDetectors, logEntryCategoriesCountJobId),
+    fetchIsInfraMlCpsEnabled(isCpsPlatformGateEnabled, context.infra.mlSystem),
+  ]);
 
   const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
   const indices = customSettings?.logs_source_config?.indexPattern;
   const timestampField = customSettings?.logs_source_config?.timestampField;
+  const projectRouting = resolveJobProjectRouting(mlJob, isMlCpsEnabled);
   const { tiebreakerField, runtimeMappings } = resolvedLogView;
 
   if (indices == null || timestampField == null) {
@@ -206,7 +219,8 @@ export async function getLogEntryCategoryExamples(
     startTime,
     endTime,
     category._source.terms,
-    exampleCount
+    exampleCount,
+    projectRouting
   );
 
   const logEntryCategoryExamplesSpan = finalizeLogEntryCategoryExamplesSpan();
@@ -419,15 +433,16 @@ async function fetchLogEntryCategoryExamples(
   startTime: number,
   endTime: number,
   categoryQuery: string,
-  exampleCount: number
+  exampleCount: number,
+  projectRouting?: string
 ) {
   const finalizeEsSearchSpan = startTracingSpan('Fetch examples from ES');
 
   const {
     hits: { hits },
   } = decodeOrThrow(logEntryCategoryExamplesResponseRT)(
-    await requestContext.core.elasticsearch.client.asCurrentUser.search(
-      createLogEntryCategoryExamplesQuery(
+    await requestContext.core.elasticsearch.client.asCurrentUser.search({
+      ...createLogEntryCategoryExamplesQuery(
         indices,
         runtimeMappings,
         timestampField,
@@ -436,8 +451,9 @@ async function fetchLogEntryCategoryExamples(
         endTime,
         categoryQuery,
         exampleCount
-      )
-    )
+      ),
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
+    })
   );
 
   const esSearchSpan = finalizeEsSearchSpan();

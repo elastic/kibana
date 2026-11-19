@@ -77,7 +77,7 @@ export const useUnifiedHistory = ({
           pageSize,
           ...(nextPage ? { nextPage } : {}),
           ...(kuery ? { kuery } : {}),
-          ...(sourceFilters && sourceFilters.length > 0 && sourceFilters.length < 3
+          ...(sourceFilters && sourceFilters.length > 0
             ? { sourceFilters: sourceFilters.join(',') }
             : {}),
           ...(userIds && userIds.length > 0 ? { userIds: userIds.join(',') } : {}),

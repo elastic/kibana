@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewsContract, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { FieldFormatsStartCommon, FieldFormat } from '@kbn/field-formats-plugin/common';
-import type {
-  AggsCommonStart,
-  AggConfig,
-  AggParamsDateHistogram,
-  AggParamsHistogram,
-  CreateAggConfigParams,
-  IAggType,
+import type { FieldFormat, FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import type { Unit } from '@kbn/datemath';
+import { isObject } from 'lodash';
+import {
+  type AggConfig,
+  type AggsCommonStart,
+  type CreateAggConfigParams,
+  type IAggType,
 } from '../search';
 import { BUCKET_TYPES } from '../search/aggs/buckets/bucket_agg_types';
 import type { TimeRange } from '../types';
@@ -25,7 +25,80 @@ interface DateHistogramMeta {
   interval?: string;
   timeZone?: string;
   timeRange?: TimeRange;
+  dropPartials?: boolean;
+  domain?: { min: number; max: number };
 }
+
+interface HistogramDSLParams {
+  used_interval: string | number;
+  used_time_zone?: string;
+  drop_partials?: boolean;
+}
+
+const isHistogramDSLParams = (params: unknown): params is HistogramDSLParams => {
+  if (isObject(params) && Object.hasOwn(params, 'used_interval'))
+    return (
+      typeof (params as HistogramDSLParams).used_interval === 'string' ||
+      typeof (params as HistogramDSLParams).used_interval === 'number'
+    );
+  return false;
+};
+
+const ESQL_UNIT_TO_DATEMATH = {
+  millisecond: 'ms',
+  second: 's',
+  minute: 'm',
+  hour: 'h',
+  day: 'd',
+  week: 'w',
+  month: 'M',
+  year: 'y',
+} as const satisfies Record<string, Unit>;
+type ESQLUnit = keyof typeof ESQL_UNIT_TO_DATEMATH;
+
+const isESQLUnit = (s: string): s is ESQLUnit => s in ESQL_UNIT_TO_DATEMATH;
+
+interface ESQLBucketMeta {
+  interval: number;
+  unit?: string;
+}
+
+const getEsqlBucket = (column: DatatableColumn): ESQLBucketMeta | undefined => {
+  const isESQLBucketMeta = (meta: unknown): meta is ESQLBucketMeta => {
+    if (isObject(meta) && Object.hasOwn(meta, 'interval')) {
+      return typeof (meta as ESQLBucketMeta).interval === 'number';
+    }
+    return false;
+  };
+
+  const bucket = column.meta.esMeta?.bucket;
+
+  if (isESQLBucketMeta(bucket)) {
+    return bucket;
+  }
+};
+
+// Convert the raw ES|QL bucket into a datemath interval string, e.g. 30 + "minute" -> "30m"
+const formatEsqlBucketAsDateMathInterval = (bucket: ESQLBucketMeta): string => {
+  const unitDateMath =
+    bucket.unit && isESQLUnit(bucket.unit) ? ESQL_UNIT_TO_DATEMATH[bucket.unit] : undefined;
+  return unitDateMath ? `${bucket.interval}${unitDateMath}` : `${bucket.interval}`;
+};
+
+const getDropPartials = (params: unknown): boolean | undefined => {
+  if (typeof params === 'object' && params !== null && 'drop_partials' in params) {
+    return Boolean(params.drop_partials);
+  }
+  return undefined;
+};
+
+const isDomain = (value: unknown): value is { min: number; max: number } =>
+  typeof value === 'object' && value !== null && 'min' in value && 'max' in value;
+
+const getDomain = (column: DatatableColumn): { min: number; max: number } | undefined => {
+  const computedDomain = column.meta.sourceParams?.computedDomain;
+  return isDomain(computedDomain) ? computedDomain : undefined;
+};
 
 export class DatatableUtilitiesService {
   constructor(
@@ -63,10 +136,10 @@ export class DatatableUtilitiesService {
   }
 
   /**
-   * Helper function returning the used interval, used time zone and applied time filters for data table column created by the date_histogramm agg type.
-   * "auto" will get expanded to the actually used interval.
-   * If the column is not a column created by a date_histogram aggregation of the esaggs data source,
-   * this function will return undefined.
+   * Returns the used interval, time zone, applied time range and drop-partials flag for a
+   * date histogram column. "auto" will get expanded to the actually used interval.
+   * Handles both esaggs date_histogram columns and ES|QL date BUCKET columns
+   * (esMeta.bucket with a date unit). Returns undefined for any other column.
    */
   getDateHistogramMeta(
     column: DatatableColumn,
@@ -74,22 +147,37 @@ export class DatatableUtilitiesService {
       timeZone: string;
     }> = {}
   ): DateHistogramMeta | undefined {
-    if (!column.meta.sourceParams || !column.meta.sourceParams.params) {
+    const params = column.meta.sourceParams?.params;
+    const appliedTimeRange = this.getColumnTimeRange(column);
+    const dropPartials = getDropPartials(params);
+
+    // ES|QL path: interval comes from the raw esMeta.bucket,
+    const bucket = getEsqlBucket(column);
+    if (bucket && bucket.unit && isESQLUnit(bucket.unit)) {
+      const domain = getDomain(column);
+      return {
+        interval: formatEsqlBucketAsDateMathInterval(bucket),
+        timeZone: defaults.timeZone,
+        timeRange: appliedTimeRange,
+        dropPartials,
+        domain,
+      };
+    }
+
+    // esaggs path
+    if (!params || !isHistogramDSLParams(params) || typeof params.used_interval !== 'string') {
       return;
     }
-
-    const params = column.meta.sourceParams.params as AggParamsDateHistogram;
-
-    let interval: string | undefined;
-    if (params.used_interval && params.used_interval !== 'auto') {
-      interval = params.used_interval;
-    }
-
     return {
-      interval,
+      interval: params.used_interval,
       timeZone: params.used_time_zone || defaults.timeZone,
-      timeRange: column.meta.sourceParams.appliedTimeRange as TimeRange | undefined,
+      timeRange: appliedTimeRange,
+      dropPartials,
     };
+  }
+
+  getColumnTimeRange(column: DatatableColumn): TimeRange | undefined {
+    return column.meta.sourceParams?.appliedTimeRange as TimeRange | undefined;
   }
 
   async getDataView(column: DatatableColumn): Promise<DataView | undefined> {
@@ -124,20 +212,30 @@ export class DatatableUtilitiesService {
   }
 
   /**
-   * Helper function returning the used interval for data table column created by the histogramm agg type.
+   * Returns the used interval for a numeric histogram column.
    * "auto" will get expanded to the actually used interval.
-   * If the column is not a column created by a histogram aggregation of the esaggs data source,
-   * this function will return undefined.
+   * Handles both esaggs histogram columns and ES|QL numeric BUCKET columns
+   * (esMeta.bucket without a date unit). Returns undefined for any other column.
    */
   getNumberHistogramInterval(column: DatatableColumn): number | undefined {
-    if (column.meta.source !== 'esaggs') {
-      return;
+    // ES|QL path: a numeric bucket has an interval but no date unit.
+    const bucket = getEsqlBucket(column);
+    if (bucket && (!bucket.unit || !isESQLUnit(bucket.unit))) {
+      return bucket.interval;
     }
-    if (column.meta.sourceParams?.type !== BUCKET_TYPES.HISTOGRAM) {
+
+    // esaggs path
+    if (
+      column.meta.source === 'esaggs' &&
+      column.meta.sourceParams?.type !== BUCKET_TYPES.HISTOGRAM
+    ) {
       return;
     }
 
-    const params = column.meta.sourceParams.params as unknown as AggParamsHistogram;
+    const params = column.meta.sourceParams?.params;
+    if (!params || !isHistogramDSLParams(params)) {
+      return;
+    }
 
     if (!params.used_interval || typeof params.used_interval === 'string') {
       return;

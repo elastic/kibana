@@ -8,8 +8,8 @@
  */
 
 import type { ComponentProps } from 'react';
-import React, { useImperativeHandle, useState } from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import React, { Profiler, useImperativeHandle, useRef, useState } from 'react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   createRestorableStateProvider,
@@ -250,5 +250,96 @@ describe('createRestorableStateProvider', () => {
     await waitFor(() => {
       expect(mockStoredValue).toBeUndefined();
     });
+  });
+
+  it('batches persistence with the state update', () => {
+    const { withRestorableState, useRestorableState } =
+      createRestorableStateProvider<RestorableState>();
+
+    const renderCounts = {
+      commits: 0,
+      childRenders: 0,
+    };
+
+    const Child = () => {
+      renderCounts.childRenders += 1;
+      const [message, setMessage] = useRestorableState('message', 'Hello');
+
+      return (
+        <button data-test-subj="batched-button" onClick={() => setMessage('Hello World')}>
+          {message}
+        </button>
+      );
+    };
+
+    const WrappedChild = withRestorableState(Child);
+
+    const Harness = () => {
+      const [initialState, setInitialState] = useState<RestorableState | undefined>(undefined);
+      const mountedRef = useRef(false);
+
+      return (
+        <Profiler
+          id="restorable-state"
+          onRender={() => {
+            if (mountedRef.current) {
+              renderCounts.commits += 1;
+            } else {
+              mountedRef.current = true;
+            }
+          }}
+        >
+          <WrappedChild initialState={initialState} onInitialStateChange={setInitialState} />
+        </Profiler>
+      );
+    };
+
+    render(<Harness />);
+
+    expect(renderCounts.childRenders).toBe(1);
+
+    fireEvent.click(screen.getByTestId('batched-button'));
+
+    expect(screen.getByTestId('batched-button')).toHaveTextContent('Hello World');
+    expect(renderCounts.childRenders).toBe(2);
+    expect(renderCounts.commits).toBe(1);
+  });
+
+  it('useRestorableStateValue reflects updates made by another consumer', async () => {
+    const { withRestorableState, useRestorableState, useRestorableStateValue } =
+      createRestorableStateProvider<RestorableState>();
+
+    const Child = () => {
+      const [, setCount] = useRestorableState('count', 0);
+      return (
+        <button
+          data-test-subj="value-child-button"
+          onClick={() => setCount((prev) => (prev ?? 0) + 1)}
+        >
+          increment
+        </button>
+      );
+    };
+
+    const Parent = () => {
+      const count = useRestorableStateValue('count');
+      return (
+        <>
+          <div data-test-subj="value-observer">count: {count ?? 'unset'}</div>
+          <Child />
+        </>
+      );
+    };
+
+    const WrappedParent = withRestorableState(Parent);
+    render(<WrappedParent />);
+
+    expect(screen.getByTestId('value-observer')).toHaveTextContent('count: unset');
+
+    await userEvent.click(screen.getByTestId('value-child-button'));
+    expect(screen.getByTestId('value-observer')).toHaveTextContent('count: 1');
+
+    await userEvent.click(screen.getByTestId('value-child-button'));
+    expect(screen.getByTestId('value-observer')).toHaveTextContent('count: 2');
   });
 });

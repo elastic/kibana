@@ -12,6 +12,7 @@ import type { Observable } from 'rxjs';
 import { switchMap, combineLatest, BehaviorSubject, of } from 'rxjs';
 import type {
   AnalyticsServiceStart,
+  ApplicationStart,
   // CoreStart,
   HttpSetup,
   NotificationsStart,
@@ -34,6 +35,7 @@ import type {
 } from '@kbn/file-upload-common';
 import { isEqual } from 'lodash';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { buildPath } from '@kbn/core-http-browser';
 import type { FileAnalysis } from './file_wrapper';
 import { FileWrapper } from './file_wrapper';
 
@@ -64,6 +66,7 @@ export interface Dependencies {
   fileUpload: FileUploadPluginStartApi;
   http: HttpSetup;
   notifications: NotificationsStart;
+  capabilities: ApplicationStart['capabilities'];
 }
 
 export interface Config<T = IndicesIndexSettings | MappingTypeMapping> {
@@ -139,6 +142,7 @@ export class FileUploadManager {
   private initializedWithExistingIndex: boolean = false;
   private fileUploadTelemetryService: FileUploadTelemetryService;
   private importAbortController: AbortController | null = null;
+  private canCreateDataView: boolean = false;
 
   private readonly _uploadStatus$ = new BehaviorSubject<UploadStatus>({
     analysisStatus: STATUS.NOT_STARTED,
@@ -182,6 +186,7 @@ export class FileUploadManager {
     this.http = dependencies.http;
     this.notifications = dependencies.notifications;
 
+    this.canCreateDataView = dependencies.capabilities.indexPatterns.save === true;
     this.uploadSessionId = FileUploadTelemetryService.generateId();
     this.setExistingIndexName(existingIndexName);
     this.initializedWithExistingIndex = existingIndexName !== null;
@@ -810,7 +815,7 @@ export class FileUploadManager {
     checkImportAborted();
 
     let dataViewResp;
-    if (this.autoCreateDataView && dataViewName !== null) {
+    if (this.canCreateDataView && this.autoCreateDataView && dataViewName !== null) {
       this.setStatus({
         dataViewCreated: STATUS.STARTED,
       });
@@ -932,7 +937,7 @@ export class FileUploadManager {
     }
     try {
       const { mappings } = await this.http.fetch<{ mappings: MappingTypeMapping }>(
-        `/api/index_management/mapping/${existingIndexName}`,
+        buildPath('/api/index_management/mapping/{existingIndexName}', { existingIndexName }),
         {
           method: 'GET',
           version: '1',

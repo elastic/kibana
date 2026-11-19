@@ -12,10 +12,10 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiSpacer,
-  EuiCallOut,
   EuiLink,
   EuiBasicTable,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -86,9 +86,7 @@ const childConfig: FieldConfig = {
 
 export const RelationsParameter = () => {
   const renderWarning = () => (
-    <EuiCallOut
-      color="warning"
-      iconType="warning"
+    <KbnWarningCallout
       size="s"
       title={
         <FormattedMessage
@@ -203,7 +201,7 @@ export const RelationsParameter = () => {
                       }
                     );
                     return (
-                      <EuiToolTip content={label} delay="long" disableScreenReaderOutput>
+                      <EuiToolTip content={label} disableScreenReaderOutput>
                         <EuiButtonIcon
                           data-test-subj="removeRelationshipButton"
                           aria-label={label}

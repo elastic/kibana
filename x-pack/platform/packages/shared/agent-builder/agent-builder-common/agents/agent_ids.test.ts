@@ -72,6 +72,16 @@ describe('validateAgentId', () => {
     const error = validateAgentId({ agentId, builtIn: true });
     expect(error).toBeUndefined();
   });
+
+  test('rejects the reserved id "_self" for user-created agents', () => {
+    const error = validateAgentId({ agentId: '_self', builtIn: false });
+    expect(error).toBe(`Agent id "_self" is reserved and cannot be used.`);
+  });
+
+  test('rejects the reserved id "_self" for built-in agents', () => {
+    const error = validateAgentId({ agentId: '_self', builtIn: true });
+    expect(error).toBe(`Agent id "_self" is reserved and cannot be used.`);
+  });
 });
 
 describe('agentId regexp', () => {

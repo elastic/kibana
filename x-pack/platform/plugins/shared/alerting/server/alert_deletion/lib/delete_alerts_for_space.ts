@@ -6,6 +6,7 @@
  */
 
 import type { RulesSettingsAlertDeleteProperties } from '@kbn/alerting-types';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { omitBy } from 'lodash';
 import { allowedAppCategories, type AlertDeletionContext } from '../alert_deletion_client';
 import { deleteAlertsForQuery, getActiveAlertsQuery, getInactiveAlertsQuery } from '.';
@@ -13,8 +14,8 @@ import { deleteAlertsForQuery, getActiveAlertsQuery, getInactiveAlertsQuery } fr
 export const deleteAlertsForSpace = async (
   context: AlertDeletionContext,
   settings: RulesSettingsAlertDeleteProperties,
-  spaceId: string,
-  abortController: AbortController
+  spaceId: SpaceId,
+  signal: AbortSignal
 ): Promise<{ numAlertsDeleted: number; errors?: string[] }> => {
   const taskManager = await context.taskManagerStartPromise;
 
@@ -59,7 +60,7 @@ export const deleteAlertsForSpace = async (
         taskIds,
         alertUuidsToClear,
         errors: activeAlertDeletionErrors,
-      } = await deleteAlertsForQuery(context, indices, activeAlertsQuery, abortController);
+      } = await deleteAlertsForQuery(context, indices, activeAlertsQuery, signal);
 
       numAlertsDeleted += numActiveAlertsDeleted;
       errors.push(...activeAlertDeletionErrors);
@@ -89,7 +90,7 @@ export const deleteAlertsForSpace = async (
 
     try {
       const { numAlertsDeleted: numInactiveAlertsDeleted, errors: inactiveAlertDeletionErrors } =
-        await deleteAlertsForQuery(context, indices, inactiveAlertsQuery, abortController);
+        await deleteAlertsForQuery(context, indices, inactiveAlertsQuery, signal);
       numAlertsDeleted += numInactiveAlertsDeleted;
       errors.push(...inactiveAlertDeletionErrors);
     } catch (err) {

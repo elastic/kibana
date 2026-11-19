@@ -13,16 +13,25 @@ import { oneOfLiterals } from '../common/utils';
 const comparators = Object.values(COMPARATORS);
 
 const searchConfigSchema = schema.object({
-  index: schema.string(),
+  index: schema.string({ maxLength: 10000 }),
 });
 
-export const degradedDocsParamsSchema = schema.object({
-  timeUnit: schema.string(),
-  timeSize: schema.number(),
-  threshold: schema.arrayOf(schema.number()),
-  comparator: oneOfLiterals(comparators),
-  groupBy: schema.maybe(schema.arrayOf(schema.string())),
-  searchConfiguration: searchConfigSchema,
-});
+export const degradedDocsParamsSchema = schema.object(
+  {
+    timeUnit: schema.string({ maxLength: 64 }),
+    timeSize: schema.number(),
+    threshold: schema.arrayOf(schema.number(), { maxSize: 2 }),
+    comparator: oneOfLiterals(comparators),
+    groupBy: schema.maybe(schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 100 })),
+    searchConfiguration: searchConfigSchema,
+  },
+  {
+    meta: {
+      title: 'Degraded Docs Rule Params',
+      description:
+        'The parameters for the degraded docs rule. These parameters are appropriate when `rule_type_id` is `datasetQuality.degradedDocs`.',
+    },
+  }
+);
 
 export type DegradedDocsRuleParams = TypeOf<typeof degradedDocsParamsSchema>;

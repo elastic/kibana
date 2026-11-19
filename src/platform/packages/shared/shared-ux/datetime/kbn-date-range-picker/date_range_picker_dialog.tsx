@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 
 import { EuiPopover, keys, useEuiTheme } from '@elastic/eui';
 
+import { getMonthInViewFocusTarget } from './calendar';
 import { CALENDAR_SCROLLER_SELECTOR, FOCUSABLE_SELECTOR } from './constants';
 import { useDateRangePickerContext } from './date_range_picker_context';
 import { DateRangePickerControl } from './date_range_picker_control';
@@ -97,8 +98,8 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
             }
 
             // Tab INTO calendar: restore the saved day so the user lands where
-            // they left off. Falls back to the first `tabIndex={0}` day in the scroller
-            // (react-day-picker's focused day) if the calendar hasn't been visited yet.
+            // they left off. Falls back to the `tabIndex={0}` day of the month
+            // currently in view if the calendar hasn't been visited yet.
             const justBefore = firstCalIdx > 0 ? tabbables[firstCalIdx - 1] : null;
             const justAfter = lastCalIdx < tabbables.length - 1 ? tabbables[lastCalIdx + 1] : null;
 
@@ -109,7 +110,7 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
               const saved = lastFocusedCalendarDayRef.current;
               const target =
                 (saved && document.body.contains(saved) ? saved : null) ??
-                calendarScroller.querySelector<HTMLElement>('[tabindex="0"]');
+                getMonthInViewFocusTarget(calendarScroller);
               if (target) {
                 event.preventDefault();
                 target.focus();
@@ -137,6 +138,7 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
 
   return (
     <EuiPopover
+      aria-labelledby={panelId}
       css={width === 'full' && popoverWrapperFullWidthStyles}
       button={<DateRangePickerControl />}
       isOpen={isEditing}
@@ -146,7 +148,7 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
       repositionToCrossAxis={false}
       display={width === 'auto' ? 'inline' : 'block'}
       ownFocus={false}
-      data-test-subj="dateRangePickerDialogTriggerWrapper"
+      data-test-subj="dateRangePickerPopoverTriggerWrapper"
       panelPaddingSize="none"
       panelRef={(node) => {
         panelRef.current = node;
@@ -154,6 +156,7 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
       panelProps={{
         id: panelId,
         'aria-label': dialogTexts.ariaLabel,
+        'data-test-subj': 'dateRangePickerPopoverPanel',
         'aria-modal': undefined,
         tabIndex: -1,
         onKeyDown: onPanelKeyDown,

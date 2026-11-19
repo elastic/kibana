@@ -57,15 +57,6 @@ describe('ActionWrapper', () => {
     );
     expect((CasesProvider as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
       Object {
-        "features": Object {
-          "alerts": Object {
-            "sync": true,
-          },
-          "observables": Object {
-            "autoExtract": true,
-            "enabled": true,
-          },
-        },
         "owner": Array [
           "securitySolution",
         ],
@@ -86,15 +77,6 @@ describe('ActionWrapper', () => {
 
     expect((CasesProvider as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
       Object {
-        "features": Object {
-          "alerts": Object {
-            "sync": false,
-          },
-          "observables": Object {
-            "autoExtract": false,
-            "enabled": true,
-          },
-        },
         "owner": Array [
           "cases",
         ],
@@ -115,15 +97,6 @@ describe('ActionWrapper', () => {
 
     expect((CasesProvider as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
       Object {
-        "features": Object {
-          "alerts": Object {
-            "sync": false,
-          },
-          "observables": Object {
-            "autoExtract": false,
-            "enabled": true,
-          },
-        },
         "owner": Array [
           "observability",
         ],
@@ -144,15 +117,6 @@ describe('ActionWrapper', () => {
 
     expect((CasesProvider as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
       Object {
-        "features": Object {
-          "alerts": Object {
-            "sync": false,
-          },
-          "observables": Object {
-            "autoExtract": false,
-            "enabled": true,
-          },
-        },
         "owner": Array [],
         "permissions": Object {
           "create": true,
@@ -168,6 +132,6 @@ describe('ActionWrapper', () => {
         <div />
       </ActionWrapper>
     );
-    expect(mockCasePermissions).toBeCalledWith(undefined);
+    expect(mockCasePermissions).toHaveBeenCalledWith(undefined);
   });
 });

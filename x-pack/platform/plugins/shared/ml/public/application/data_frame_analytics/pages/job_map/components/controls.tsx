@@ -6,8 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect, useState, useContext, useCallback, useMemo } from 'react';
-import type cytoscape from 'cytoscape';
+import React, { useEffect, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
@@ -31,14 +30,14 @@ import {
 } from '@elastic/eui';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
-import { CytoscapeContext } from './cytoscape';
-import { ML_PAGES } from '../../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import {
   useMlLocator,
   useNotifications,
   useNavigateToPath,
   useMlKibana,
+  useMlManagementLocator,
 } from '../../../../contexts/kibana';
 import { useEnabledFeatures } from '../../../../contexts/ml';
 import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
@@ -48,48 +47,58 @@ import {
 } from '../../analytics_management/components/action_delete';
 import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
 import { useMlIndexUtils } from '../../../../util/index_service';
+import type { JobMapNodeData } from '../map_elements_to_flow';
+import type { GetDataObjectParameter } from '../use_fetch_analytics_map_data';
+import { JOB_MAP_INDEX_PATTERN_TYPE } from '../job_map_flow_constants';
 
 interface Props {
   details: Record<string, any>;
-  getNodeData: any;
+  getNodeData: (params?: GetDataObjectParameter) => void;
   modelId?: string;
+  selectedNodeData: JobMapNodeData | undefined;
+  onClearSelection: () => void;
   updateElements: (nodeId: string, nodeLabel: string, destIndexNode?: string) => void;
   refreshJobsCallback: () => void;
 }
 
 function getListItemsFactory(showLicenseInfo: boolean) {
-  return (details: Record<string, any>): EuiDescriptionListProps['listItems'] => {
-    if (showLicenseInfo === false) {
-      delete details.license_level;
-    }
-
-    return Object.entries(details).map(([key, value]) => {
-      let description;
-      if (key === 'create_time') {
-        description = formatHumanReadableDateTimeSeconds(moment(value).unix() * 1000);
-      } else {
-        description =
-          typeof value === 'object' ? (
+  return (details: Record<string, unknown>): EuiDescriptionListProps['listItems'] => {
+    return Object.entries(details)
+      .filter(([key]) => showLicenseInfo || key !== 'license_level')
+      .map(([key, value]) => {
+        let description: React.ReactNode;
+        if (key === 'create_time') {
+          description = formatHumanReadableDateTimeSeconds(
+            moment(value as moment.MomentInput).unix() * 1000
+          );
+        } else if (typeof value === 'object') {
+          description = (
             <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
               {JSON.stringify(value, null, 2)}
             </EuiCodeBlock>
-          ) : (
-            value
           );
-      }
+        } else {
+          description = String(value);
+        }
 
-      return {
-        title: key,
-        description,
-      };
-    });
+        return {
+          title: key,
+          description,
+        };
+      });
   };
 }
 
-export const Controls: FC<Props> = React.memo(
-  ({ details, getNodeData, modelId, refreshJobsCallback, updateElements }) => {
-    const [showFlyout, setShowFlyout] = useState<boolean>(false);
-    const [selectedNode, setSelectedNode] = useState<cytoscape.NodeSingular | undefined>();
+export const JobMapNodeFlyout: FC<Props> = React.memo(
+  ({
+    details,
+    getNodeData,
+    modelId,
+    refreshJobsCallback,
+    selectedNodeData,
+    onClearSelection,
+    updateElements,
+  }) => {
     const [isPopoverOpen, setPopover] = useState<boolean>(false);
     const [didUntag, setDidUntag] = useState<boolean>(false);
 
@@ -124,119 +133,90 @@ export const Controls: FC<Props> = React.memo(
 
     const { toasts } = useNotifications();
     const mlLocator = useMlLocator()!;
+    const mlManagementLocator = useMlManagementLocator();
     const navigateToPath = useNavigateToPath();
     const navigateToWizardWithClonedJob = useNavigateToWizardWithClonedJob();
 
-    const cy = useContext(CytoscapeContext);
-    const deselect = useCallback(() => {
-      if (cy) {
-        cy.elements().unselect();
-      }
-      setShowFlyout(false);
-      setSelectedNode(undefined);
-    }, [cy, setSelectedNode]);
-
-    const nodeId = selectedNode?.data('id');
-    const nodeLabel = selectedNode?.data('label');
-    const nodeType = selectedNode?.data('type');
+    const closePopover = useCallback(() => {
+      setPopover(false);
+    }, []);
 
     const onCreateJobClick = useCallback(async () => {
-      const dataViewId = await getDataViewIdFromName(nodeLabel);
+      if (selectedNodeData === undefined) {
+        return;
+      }
+      const dataViewId = await getDataViewIdFromName(selectedNodeData.label);
 
-      if (dataViewId !== null) {
-        const path = await mlLocator.getUrl({
-          page: ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB,
-          pageState: { index: dataViewId },
+      if (dataViewId !== null && mlManagementLocator) {
+        mlManagementLocator?.navigate({
+          sectionId: 'ml',
+          appId: `analytics/${ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB}?index=${dataViewId}`,
         });
-
-        await navigateToPath(path);
-      } else {
+      } else if (dataViewId === null) {
         toasts.addDanger(
           i18n.translate('xpack.ml.dataframe.analyticsMap.flyout.dataViewMissingMessage', {
             defaultMessage: 'To create a job from this index create a data view for {indexTitle}.',
-            values: { indexTitle: nodeLabel },
+            values: { indexTitle: selectedNodeData.label },
           })
         );
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [nodeLabel]);
+    }, [getDataViewIdFromName, mlManagementLocator, selectedNodeData, toasts]);
 
     const onManagePipeline = useCallback(async () => {
+      if (selectedNodeData === undefined) {
+        return;
+      }
       const ingestPipelineLocator = share.url.locators.get('INGEST_PIPELINES_APP_LOCATOR');
-      if (ingestPipelineLocator && nodeLabel !== null) {
+      if (ingestPipelineLocator) {
         const path = await ingestPipelineLocator.getUrl({
           page: 'pipeline_list',
         });
 
         // Passing pipelineId here because pipeline_list is not recognizing pipelineId params
-        await navigateToUrl(`${path}/?pipeline=${nodeLabel}`);
+        await navigateToUrl(`${path}/?pipeline=${selectedNodeData.label}`);
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [share.url.locators, nodeLabel]);
+    }, [navigateToUrl, selectedNodeData, share.url.locators]);
 
     const onAnalyzeDataDrift = useCallback(async () => {
+      if (selectedNodeData === undefined) {
+        return;
+      }
       closePopover();
       const path = await mlLocator.getUrl({
         page: ML_PAGES.DATA_DRIFT_CUSTOM,
-        pageState: { comparison: nodeLabel },
+        pageState: { comparison: selectedNodeData.label },
       });
       await navigateToPath(path);
-    }, [nodeLabel, navigateToPath, mlLocator]);
+    }, [closePopover, mlLocator, navigateToPath, selectedNodeData]);
 
     const onCloneJobClick = useCallback(async () => {
-      navigateToWizardWithClonedJob({ config: details[nodeId], stats: details[nodeId]?.stats });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [nodeId]);
+      if (selectedNodeData === undefined) {
+        return;
+      }
+      navigateToWizardWithClonedJob({
+        config: details[selectedNodeData.id],
+        stats: details[selectedNodeData.id]?.stats,
+      });
+    }, [details, navigateToWizardWithClonedJob, selectedNodeData]);
 
     const onActionsButtonClick = () => {
-      setPopover(!isPopoverOpen);
+      setPopover((prev) => !prev);
     };
-
-    const closePopover = () => {
-      setPopover(false);
-    };
-
-    // Set up Cytoscape event handlers
-    useEffect(() => {
-      const selectHandler: cytoscape.EventHandler = (event) => {
-        const targetNode = event.target;
-        if (targetNode._private.data.type === JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING) {
-          toasts.addWarning(
-            i18n.translate('xpack.ml.dataframe.analyticsMap.flyout.jobMissingMessage', {
-              defaultMessage: 'There is no data available for job {label}.',
-              values: { label: targetNode._private.data.label },
-            })
-          );
-          return;
-        }
-        setSelectedNode(targetNode);
-        setShowFlyout(true);
-      };
-
-      if (cy) {
-        cy.on('select', 'node', selectHandler);
-        cy.on('unselect', 'node', deselect);
-      }
-
-      return () => {
-        if (cy) {
-          cy.removeListener('select', 'node', selectHandler);
-          cy.removeListener('unselect', 'node', deselect);
-        }
-      };
-    }, [cy, deselect, toasts]);
 
     useEffect(
       function updateElementsOnClose() {
+        if (selectedNodeData === undefined) {
+          return;
+        }
         if ((isModalVisible === false && deleteItem === true) || didUntag === true) {
           let destIndexNode;
           if (deleteTargetIndex === true || didUntag === true) {
-            const jobDetails = details[nodeId];
+            const jobDetails = details[selectedNodeData.id];
             const destIndex = jobDetails.dest.index;
             destIndexNode = `${destIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
           }
-          updateElements(nodeId, nodeLabel, destIndexNode);
-          setShowFlyout(false);
+          updateElements(selectedNodeData.id, selectedNodeData.label, destIndexNode);
+          onClearSelection();
         }
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -245,9 +225,11 @@ export const Controls: FC<Props> = React.memo(
 
     const flyoutTitleId = useGeneratedHtmlId();
 
-    if (showFlyout === false) {
+    if (selectedNodeData === undefined) {
       return null;
     }
+
+    const { id: nodeId, label: nodeLabel, type: nodeType } = selectedNodeData;
 
     const button = (
       <EuiButton
@@ -330,10 +312,7 @@ export const Controls: FC<Props> = React.memo(
               icon="branch"
               onClick={() => {
                 getNodeData({ id: nodeLabel, type: nodeType });
-                if (cy) {
-                  cy.elements().unselect();
-                }
-                setShowFlyout(false);
+                onClearSelection();
                 setPopover(false);
               }}
             >
@@ -368,7 +347,7 @@ export const Controls: FC<Props> = React.memo(
           aria-labelledby={flyoutTitleId}
           ownFocus
           size="m"
-          onClose={deselect}
+          onClose={onClearSelection}
           data-test-subj="mlAnalyticsJobMapFlyout"
         >
           <EuiFlyoutHeader>
@@ -393,7 +372,7 @@ export const Controls: FC<Props> = React.memo(
                   compressed
                   type="column"
                   listItems={
-                    nodeType === 'index-pattern'
+                    nodeType === JOB_MAP_INDEX_PATTERN_TYPE
                       ? getListItems(details[nodeId][nodeLabel])
                       : getListItems(details[nodeId])
                   }
@@ -404,6 +383,12 @@ export const Controls: FC<Props> = React.memo(
           <EuiFlyoutFooter>
             {nodeType !== JOB_MAP_NODE_TYPES.TRAINED_MODEL && items.length > 0 ? (
               <EuiPopover
+                aria-label={i18n.translate(
+                  'xpack.ml.dataframe.analyticsMap.flyout.nodeActionsPopoverAria',
+                  {
+                    defaultMessage: 'Node actions',
+                  }
+                )}
                 button={button}
                 isOpen={isPopoverOpen}
                 closePopover={closePopover}

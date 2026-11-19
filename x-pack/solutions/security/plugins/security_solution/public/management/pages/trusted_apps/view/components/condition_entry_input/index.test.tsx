@@ -16,7 +16,7 @@ import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoin
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { OPERATOR_TITLES } from '../../translations';
+import { ENTRY_PROPERTY_TITLES, OPERATOR_TITLES } from '../../translations';
 
 let onRemoveMock: jest.Mock;
 let onChangeMock: jest.Mock;
@@ -97,9 +97,9 @@ describe('Condition entry input', () => {
   it('should not be able to call on remove for field input because disabled', async () => {
     props = { ...props, isRemoveDisabled: true };
     render();
-    expect(onRemoveMock).toHaveBeenCalledTimes(0);
     const removeButton = renderResult.getByTestId(`${formPrefix}-remove`) as HTMLButtonElement;
-    await userEvent.click(removeButton);
+
+    expect(removeButton).toBeDisabled();
     expect(onRemoveMock).toHaveBeenCalledTimes(0);
   });
 
@@ -138,24 +138,57 @@ describe('Condition entry input', () => {
   });
 
   it.each([
-    { os: OperatingSystem.WINDOWS, expectedLength: 3 },
-    { os: OperatingSystem.LINUX, expectedLength: 2 },
-    { os: OperatingSystem.MAC, expectedLength: 3 },
-  ])(
-    `should be able to select $expectedLength options when OS is $os`,
-    async ({ os, expectedLength }) => {
-      props = { ...props, os };
-      render();
-      await userEvent.click(screen.getByTestId(`${formPrefix}-field`));
-      const options = screen.getAllByRole('option');
-      expect(options).toHaveLength(expectedLength);
+    {
+      os: OperatingSystem.WINDOWS,
+      expectedNames: [
+        'Hash md5, sha1, or sha256',
+        'Path The full path of the application',
+        'Signature The signer of the application',
+      ],
+    },
+    {
+      os: OperatingSystem.LINUX,
+      expectedNames: ['Hash md5, sha1, or sha256', 'Path The full path of the application'],
+    },
+    {
+      os: OperatingSystem.MAC,
+      expectedNames: [
+        'Hash md5, sha1, or sha256',
+        'Path The full path of the application',
+        'Signature The signer of the application',
+      ],
+    },
+  ])('should expose the expected field options when OS is $os', async ({ os, expectedNames }) => {
+    props = { ...props, os };
+    render();
+    await userEvent.click(screen.getByTestId(`${formPrefix}-field`));
+    const options = screen.getAllByRole('option');
+    expect(options).toHaveLength(expectedNames.length);
+    for (const name of expectedNames) {
+      expect(screen.getByRole('option', { name })).toBeInTheDocument();
     }
-  );
+    if (os === OperatingSystem.LINUX) {
+      expect(
+        screen.queryByRole('option', { name: 'Signature The signer of the application' })
+      ).not.toBeInTheDocument();
+    }
+  });
 
   it('should have operator value selected when field is HASH', () => {
     render();
     const operatorField = renderResult.getByTestId(`${formPrefix}-operator`);
     expect(operatorField).toHaveValue(OPERATOR_TITLES.is);
+  });
+
+  it('should name the operator and value inputs even when labels are not shown', () => {
+    props = { ...props, showLabels: false };
+    render();
+    expect(renderResult.getByTestId(`${formPrefix}-operator`)).toHaveAccessibleName(
+      ENTRY_PROPERTY_TITLES.operator
+    );
+    expect(renderResult.getByTestId(`${formPrefix}-value`)).toHaveAccessibleName(
+      ENTRY_PROPERTY_TITLES.value
+    );
   });
 
   it('should show operator dropdown with two values when field is PATH', async () => {

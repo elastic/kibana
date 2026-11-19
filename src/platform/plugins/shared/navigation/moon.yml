@@ -33,14 +33,19 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/std'
   - '@kbn/router-utils'
-  - '@kbn/split-button'
   - '@kbn/scout'
+  - '@kbn/security-plugin'
+  - '@kbn/navigation-customization-components'
+  - '@kbn/core-chrome-navigation-customization'
+  - '@kbn/zod'
+  - '@kbn/core-chrome-browser-navigation-utils'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -50,26 +55,4 @@ fileGroups:
     - server/**/*.ts
     - test/**/*.ts
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+tasks: {}

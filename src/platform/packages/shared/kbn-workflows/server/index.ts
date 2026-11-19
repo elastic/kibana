@@ -8,8 +8,38 @@
  */
 
 export { ExecutionError } from './errors/execution_error';
+export { yieldToEventLoop } from './lib/yield_to_event_loop';
 export { loadWorkflowExampleContent } from './examples';
+export { validateWorkflowForExecution } from './lib/validate_workflow_for_execution';
+export { buildWorkflowFilters } from './lib/workflow_filters';
+export type {
+  BuildWorkflowFiltersParams,
+  DeletedFilter,
+  ManagedFilter,
+  WorkflowQueryFilter,
+} from './lib/workflow_filters';
+export type {
+  ResumeExternalHitlParams,
+  WorkflowsApiRequestHandlerContext,
+  WorkflowsClient,
+} from './types';
+
+export { WorkflowRepository } from './repositories/workflow_repository';
+export { GLOBAL_WORKFLOW_SPACE_ID } from './constants';
+
 export {
-  getStepExecutionsByIds,
-  getStepExecutionsByWorkflowExecution,
-} from './repositories/step_execution_repository';
+  EXTERNAL_RESUME_API_PATH,
+  EXTERNAL_RESUME_FORM_API_PATH,
+  DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
+  DEFAULT_HITL_INPUT_CHANNEL_MESSAGE,
+  DEFAULT_HITL_INPUT_OPEN_FORM_LABEL,
+  DEFAULT_WAIT_FOR_INPUT_TIMEOUT,
+} from './external_resume/constants';
+export { buildExternalResumeUrl } from './external_resume/build_external_resume_url';
+export { buildExternalResumeFormUrl } from './external_resume/build_external_resume_form_url';
+
+export type {
+  GetManagedWorkflowStatusOptions,
+  ManagedWorkflowStatus,
+  ManagedWorkflowStatusReport,
+} from './types';

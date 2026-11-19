@@ -13,6 +13,7 @@ import * as i18n from '../../translations';
 
 interface ExceptionListsTableSearchProps {
   onSearch: (args: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]) => void;
+  onInputChange?: (value: string) => void;
 }
 
 // TODO replace this component with the @Kbn/securitysolution-exception-list-components
@@ -37,20 +38,24 @@ export const EXCEPTIONS_SEARCH_SCHEMA = {
   },
 };
 
-export const ListsSearchBar = React.memo<ExceptionListsTableSearchProps>(({ onSearch }) => {
-  return (
-    <EuiSearchBar
-      data-test-subj="exceptionsHeaderSearch"
-      aria-label={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
-      onChange={onSearch}
-      box={{
-        [`data-test-subj`]: 'exceptionsHeaderSearchInput',
-        placeholder: i18n.EXCEPTION_LIST_SEARCH_PLACEHOLDER,
-        incremental: false,
-        schema: EXCEPTIONS_SEARCH_SCHEMA,
-      }}
-    />
-  );
-});
+export const ListsSearchBar = React.memo<ExceptionListsTableSearchProps>(
+  ({ onSearch, onInputChange }) => {
+    return (
+      <div onInput={(e) => onInputChange?.((e.target as HTMLInputElement).value)}>
+        <EuiSearchBar
+          data-test-subj="exceptionsHeaderSearch"
+          aria-label={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
+          onChange={onSearch}
+          box={{
+            [`data-test-subj`]: 'exceptionsHeaderSearchInput',
+            placeholder: i18n.EXCEPTION_LIST_SEARCH_PLACEHOLDER,
+            incremental: false,
+            schema: EXCEPTIONS_SEARCH_SCHEMA,
+          }}
+        />
+      </div>
+    );
+  }
+);
 
 ListsSearchBar.displayName = 'ListsSearchBar';

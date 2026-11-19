@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z, lazySchema } from '@kbn/zod';
 import { SOURCE_TYPES } from '../../../../../common';
 import { MVT_FIELD_TYPE } from '../../../../../common/constants';
 import {
@@ -15,197 +15,146 @@ import {
 } from './es_agg_source_schemas';
 import { ESQLSourceSchema, ESSearchSourceSchema } from './es_source_schemas';
 
-export const EMSFileSourceSchema = schema.object(
-  {
-    id: schema.string({
-      meta: { description: 'Administrative boundaries layer id from Elastic Maps Service (EMS).' },
-    }),
-    type: schema.literal(SOURCE_TYPES.EMS_FILE),
-    tooltipProperties: schema.maybe(
-      schema.arrayOf(schema.string(), {
-        meta: {
-          description: 'Administrative boundary properties displayed in tooltip.',
-        },
-      })
-    ),
-  },
-  {
-    meta: {
+export const EMSFileSourceSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().meta({
+        description: 'Administrative boundaries layer id from Elastic Maps Service (EMS).',
+      }),
+      type: z.literal(SOURCE_TYPES.EMS_FILE),
+      tooltipProperties: z.array(z.string()).optional().meta({
+        description: 'Administrative boundary properties displayed in tooltip.',
+      }),
+    })
+    .strict()
+    .meta({
       description: 'Administrative boundaries from Elastic Maps Service (EMS).',
-    },
-    unknowns: 'forbid',
-  }
+    })
 );
 
-export const EMSTMSSourceSchema = schema.object(
-  {
-    id: schema.maybe(
-      schema.string({
-        meta: {
-          description:
-            'Tile Map Service (TMS) layer id from Elastic Maps Service (EMS). Required when isAutoSelect is false.',
-        },
-      })
-    ),
-    type: schema.literal(SOURCE_TYPES.EMS_TMS),
-    isAutoSelect: schema.maybe(
-      schema.boolean({
-        defaultValue: false,
-        meta: {
-          description:
-            'When true, EMS TMS layer mirrors the Kibana theme, displaying light basemap tiles with light theme and dark basemap tiles with dark theme.',
-        },
-      })
-    ),
-    lightModeDefault: schema.maybe(
-      schema.string({
-        meta: {
-          description:
-            'BWC flag to preserve auto selected bright basemap tiles for maps created before 8.0.',
-        },
-      })
-    ),
-  },
-  {
-    meta: {
+export const EMSTMSSourceSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().optional().meta({
+        description:
+          'Tile Map Service (TMS) layer id from Elastic Maps Service (EMS). Required when isAutoSelect is false.',
+      }),
+      type: z.literal(SOURCE_TYPES.EMS_TMS),
+      isAutoSelect: z.boolean().default(false).optional().meta({
+        description:
+          'When true, EMS TMS layer mirrors the Kibana theme, displaying light basemap tiles with light theme and dark basemap tiles with dark theme.',
+      }),
+      lightModeDefault: z.string().optional().meta({
+        description:
+          'BWC flag to preserve auto selected bright basemap tiles for maps created before 8.0.',
+      }),
+    })
+    .strict()
+    .meta({
       description: 'Basemap from Elastic Maps Service (EMS) Tile Map Service (TMS).',
-    },
-    unknowns: 'forbid',
-  }
+    })
 );
 
-export const kibanaTilemapSourceSchema = schema.object(
-  {
-    type: schema.literal(SOURCE_TYPES.KIBANA_TILEMAP),
-  },
-  {
-    meta: {
+export const kibanaTilemapSourceSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal(SOURCE_TYPES.KIBANA_TILEMAP),
+    })
+    .strict()
+    .meta({
       description: `Tile map service configured by 'map.tilemap.url' kibana.yml setting.`,
-    },
-    unknowns: 'forbid',
-  }
+    })
 );
 
-export const WMSSourceSchema = schema.object(
-  {
-    serviceUrl: schema.uri({
-      meta: {
+export const WMSSourceSchema = lazySchema(() =>
+  z
+    .object({
+      serviceUrl: z.url().meta({
         description: 'WMS URL',
-      },
-    }),
-    layers: schema.string({
-      meta: {
+      }),
+      layers: z.string().meta({
         description: 'Comma separated list of layer names',
-      },
-    }),
-    styles: schema.string({
-      meta: {
+      }),
+      styles: z.string().meta({
         description: 'Comma separated list of style names',
-      },
-    }),
-    type: schema.literal(SOURCE_TYPES.WMS),
-  },
-  {
-    meta: {
+      }),
+      type: z.literal(SOURCE_TYPES.WMS),
+    })
+    .strict()
+    .meta({
       description: 'Raster source from Web Map Service (WMS)',
-    },
-    unknowns: 'forbid',
-  }
+    })
 );
 
-export const XYZTMSSourceSchema = schema.object(
-  {
-    urlTemplate: schema.uri({
-      meta: {
+export const XYZTMSSourceSchema = lazySchema(() =>
+  z
+    .object({
+      urlTemplate: z.url().meta({
         description: 'TMS URL',
-      },
-    }),
-    type: schema.literal(SOURCE_TYPES.EMS_XYZ),
-  },
-  {
-    meta: {
+      }),
+      type: z.literal(SOURCE_TYPES.EMS_XYZ),
+    })
+    .strict()
+    .meta({
       description: 'Raster source from Tile Map Service (TMS)',
-    },
-    unknowns: 'forbid',
-  }
+    })
 );
 
-export const MVTFieldSchema = schema.object({
-  name: schema.string(),
-  type: schema.oneOf([
-    schema.literal(MVT_FIELD_TYPE.NUMBER),
-    schema.literal(MVT_FIELD_TYPE.STRING),
-  ]),
-});
+export const MVTFieldSchema = lazySchema(() =>
+  z
+    .object({
+      name: z.string(),
+      type: z.union([z.literal(MVT_FIELD_TYPE.NUMBER), z.literal(MVT_FIELD_TYPE.STRING)]),
+    })
+    .strict()
+);
 
-export const TiledSingleLayerVectorSourceSchema = schema.object(
-  {
-    fields: schema.maybe(schema.arrayOf(MVTFieldSchema)),
-    layerName: schema.string({
-      meta: {
+export const TiledSingleLayerVectorSourceSchema = lazySchema(() =>
+  z
+    .object({
+      fields: z.array(MVTFieldSchema).optional(),
+      layerName: z.string().meta({
         description: 'source layer name',
-      },
-    }),
-    maxSourceZoom: schema.maybe(
-      schema.number({
-        max: 24,
-        min: 0,
-        defaultValue: 24,
-        meta: {
-          description:
-            'Maximum zoom levels of the availability of the a particular layerName in the tileset at urlTemplate.',
-        },
-      })
-    ),
-    minSourceZoom: schema.number({
-      max: 24,
-      min: 0,
-      defaultValue: 0,
-      meta: {
+      }),
+      maxSourceZoom: z.number().min(0).max(24).default(24).optional().meta({
+        description:
+          'Maximum zoom levels of the availability of the a particular layerName in the tileset at urlTemplate.',
+      }),
+      minSourceZoom: z.number().min(0).max(24).default(0).meta({
         description:
           'Minimum zoom levels of the availability of the a particular layerName in the tileset at urlTemplate.',
-      },
-    }),
-    urlTemplate: schema.uri({
-      meta: {
+      }),
+      urlTemplate: z.url().meta({
         description: 'MVT URL',
-      },
-    }),
-    tooltipProperties: schema.maybe(
-      schema.arrayOf(schema.string(), {
-        meta: {
-          description: 'Vector feature properties displayed in tooltip.',
-        },
-      })
-    ),
-    type: schema.literal(SOURCE_TYPES.MVT_SINGLE_LAYER),
-  },
-  {
-    meta: {
+      }),
+      tooltipProperties: z.array(z.string()).optional().meta({
+        description: 'Vector feature properties displayed in tooltip.',
+      }),
+      type: z.literal(SOURCE_TYPES.MVT_SINGLE_LAYER),
+    })
+    .strict()
+    .meta({
       description: 'Vector tile source that displays a single source layer',
-    },
-    unknowns: 'forbid',
-  }
+    })
 );
 
-export const sourceSchema = schema.oneOf([
-  schema.object(
-    {
-      type: schema.string(),
-    },
-    {
-      unknowns: 'allow',
-    }
-  ),
-  EMSFileSourceSchema,
-  EMSTMSSourceSchema,
-  kibanaTilemapSourceSchema,
-  WMSSourceSchema,
-  XYZTMSSourceSchema,
-  TiledSingleLayerVectorSourceSchema,
-  ESGeoGridSourceSchema,
-  ESGeoLineSourceSchema,
-  ESPewPewSourceSchema,
-  ESSearchSourceSchema,
-  ESQLSourceSchema,
-]);
+export const sourceSchema = lazySchema(() =>
+  z.union([
+    z
+      .object({
+        type: z.string(),
+      })
+      .loose(),
+    EMSFileSourceSchema,
+    EMSTMSSourceSchema,
+    kibanaTilemapSourceSchema,
+    WMSSourceSchema,
+    XYZTMSSourceSchema,
+    TiledSingleLayerVectorSourceSchema,
+    ESGeoGridSourceSchema,
+    ESGeoLineSourceSchema,
+    ESPewPewSourceSchema,
+    ESSearchSourceSchema,
+    ESQLSourceSchema,
+  ])
+);

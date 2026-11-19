@@ -18,6 +18,10 @@ interface Props {
   children: React.ReactNode;
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export const FormProvider = ({ children, form }: Props) => (
   <FormContext.Provider value={form}>{children}</FormContext.Provider>
 );
@@ -26,6 +30,10 @@ interface Options {
   throwIfNotFound?: boolean;
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export const useFormContext = function <T extends FormData = FormData>({
   throwIfNotFound = true,
 }: Options = {}) {

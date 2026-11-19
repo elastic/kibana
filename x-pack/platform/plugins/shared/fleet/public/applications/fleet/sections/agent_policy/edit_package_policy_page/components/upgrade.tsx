@@ -16,7 +16,6 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiCallOut,
   EuiLink,
   EuiFlyout,
   EuiCodeBlock,
@@ -26,6 +25,7 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import { KbnInfoCallout, KbnSuccessCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import styled from 'styled-components';
 
 import type {
@@ -48,12 +48,10 @@ const HasNewSecretsCallOut = ({ newSecrets }: { newSecrets: RegistryVarsEntry[] 
   const { docLinks } = useStartServices();
 
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       title={i18n.translate('xpack.fleet.upgradePackagePolicy.statusCallOut.hasNewSecretsTitle', {
         defaultMessage: 'New secrets added',
       })}
-      color="primary"
-      iconType="info"
     >
       <FormattedMessage
         id="xpack.fleet.upgradePackagePolicy.statusCallout.hasNewSecrets"
@@ -82,7 +80,7 @@ const HasNewSecretsCallOut = ({ newSecrets }: { newSecrets: RegistryVarsEntry[] 
           ),
         }}
       />
-    </EuiCallOut>
+    </KbnInfoCallout>
   );
 };
 
@@ -96,30 +94,29 @@ const HasConflictsCallout = ({
   onPreviousConfigurationClick?: () => void;
 }) => {
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       title={i18n.translate('xpack.fleet.upgradePackagePolicy.statusCallOut.errorTitle', {
         defaultMessage: 'Review field conflicts',
       })}
-      color="warning"
-      iconType="warning"
-    >
-      <FormattedMessage
-        id="xpack.fleet.upgradePackagePolicy.statusCallout.errorContent"
-        defaultMessage="This integration has conflicting fields from version {currentVersion} to {upgradeVersion} Review the configuration and save to perform the upgrade. You may reference your {previousConfigurationLink} for comparison."
-        values={{
-          currentVersion: currentPackagePolicy?.package?.version,
-          upgradeVersion: proposedUpgradePackagePolicy?.package?.version,
-          previousConfigurationLink: (
-            <EuiLink onClick={onPreviousConfigurationClick}>
-              <FormattedMessage
-                id="xpack.fleet.upgradePackagePolicy.statusCallout.previousConfigurationLink"
-                defaultMessage="previous configuration"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-    </EuiCallOut>
+      text={
+        <FormattedMessage
+          id="xpack.fleet.upgradePackagePolicy.statusCallout.errorContent"
+          defaultMessage="This integration has conflicting fields from version {currentVersion} to {upgradeVersion} Review the configuration and save to perform the upgrade. You may reference your {previousConfigurationLink} for comparison."
+          values={{
+            currentVersion: currentPackagePolicy?.package?.version,
+            upgradeVersion: proposedUpgradePackagePolicy?.package?.version,
+            previousConfigurationLink: (
+              <EuiLink onClick={onPreviousConfigurationClick}>
+                <FormattedMessage
+                  id="xpack.fleet.upgradePackagePolicy.statusCallout.previousConfigurationLink"
+                  defaultMessage="previous configuration"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      }
+    />
   );
 };
 
@@ -131,38 +128,36 @@ const ReadyToUpgradeCallOut = ({
   proposedUpgradePackagePolicy?: DryRunPackagePolicy;
 }) => {
   return (
-    <EuiCallOut
+    <KbnSuccessCallout
       title={i18n.translate('xpack.fleet.upgradePackagePolicy.statusCallOut.successTitle', {
         defaultMessage: 'Ready to upgrade',
       })}
-      color="success"
-      iconType="checkCircleFill"
-    >
-      <FormattedMessage
-        id="xpack.fleet.upgradePackagePolicy.statusCallout.successContent"
-        defaultMessage="This integration is ready to be upgraded from version {currentVersion} to {upgradeVersion}. Review the changes below and save to upgrade."
-        values={{
-          currentVersion: currentPackagePolicy?.package?.version,
-          upgradeVersion: proposedUpgradePackagePolicy?.package?.version,
-        }}
-      />
-    </EuiCallOut>
+      text={
+        <FormattedMessage
+          id="xpack.fleet.upgradePackagePolicy.statusCallout.successContent"
+          defaultMessage="This integration is ready to be upgraded from version {currentVersion} to {upgradeVersion}. Review the changes below and save to upgrade."
+          values={{
+            currentVersion: currentPackagePolicy?.package?.version,
+            upgradeVersion: proposedUpgradePackagePolicy?.package?.version,
+          }}
+        />
+      }
+    />
   );
 };
 
 const InputMigrationCallout = () => (
-  <EuiCallOut
+  <KbnInfoCallout
     title={i18n.translate('xpack.fleet.upgradePackagePolicy.statusCallOut.inputMigrationTitle', {
       defaultMessage: 'Input type migration',
     })}
-    color="primary"
-    iconType="info"
-  >
-    <FormattedMessage
-      id="xpack.fleet.upgradePackagePolicy.statusCallout.inputMigrationContent"
-      defaultMessage="This upgrade replaces the input used for data collection. Your existing configuration has been automatically carried over."
-    />
-  </EuiCallOut>
+    text={
+      <FormattedMessage
+        id="xpack.fleet.upgradePackagePolicy.statusCallout.inputMigrationContent"
+        defaultMessage="This upgrade replaces the input used for data collection. Your existing configuration has been automatically carried over."
+      />
+    }
+  />
 );
 
 export const UpgradeStatusCallout: React.FunctionComponent<{

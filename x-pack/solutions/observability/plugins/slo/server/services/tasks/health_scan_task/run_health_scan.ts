@@ -17,7 +17,7 @@ interface Dependencies {
   scopedClusterClient: IScopedClusterClient;
   soClient: SavedObjectsClient;
   logger: Logger;
-  abortController: AbortController;
+  signal: AbortSignal;
 }
 
 interface RunParams {
@@ -113,7 +113,7 @@ async function bulkInsertHealthDocuments(
   documents: HealthDocument[],
   dependencies: Dependencies
 ): Promise<void> {
-  const { scopedClusterClient, logger, abortController } = dependencies;
+  const { scopedClusterClient, logger, signal } = dependencies;
   logger.debug(`Bulk inserting ${documents.length} health documents`);
 
   const operations = documents.flatMap((doc) => [
@@ -121,10 +121,7 @@ async function bulkInsertHealthDocuments(
     doc,
   ]);
 
-  await scopedClusterClient.asInternalUser.bulk(
-    { operations, refresh: false },
-    { signal: abortController.signal }
-  );
+  await scopedClusterClient.asInternalUser.bulk({ operations, refresh: false }, { signal });
 }
 
 function delay(ms: number): Promise<void> {

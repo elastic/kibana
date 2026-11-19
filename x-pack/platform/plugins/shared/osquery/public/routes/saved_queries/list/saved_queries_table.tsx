@@ -346,14 +346,13 @@ const SavedQueriesTableComponent = () => {
   const saveQueryButton = useMemo(
     () => (
       <EuiButton
-        fill
         {...newQueryLinkProps}
-        iconType="plusInCircle"
+        iconType="plusCircle"
         isDisabled={!permissions.writeSavedQueries}
       >
         <FormattedMessage
-          id="xpack.osquery.savedQueryList.saveQueryButtonLabel"
-          defaultMessage="Save query"
+          id="xpack.osquery.savedQueryList.createQueryButtonLabel"
+          defaultMessage="Create query"
         />
       </EuiButton>
     ),

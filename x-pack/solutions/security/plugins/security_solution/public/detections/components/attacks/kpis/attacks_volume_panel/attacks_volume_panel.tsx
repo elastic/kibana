@@ -25,6 +25,7 @@ import { DEFAULT_DATE_FORMAT } from '../../../../../../common/constants';
 import { ATTACKS_VOLUME_TITLE } from './translations';
 
 const ATTACKS_VOLUME_PANEL_HEIGHT = 200;
+export const ATTACKS_VOLUME_PANEL_TEST_ID = 'attacksVolumePanel';
 
 export interface AttacksVolumePanelProps {
   /** Optional array of filters to apply to the query */
@@ -47,7 +48,7 @@ export const AttacksVolumePanel: React.FC<AttacksVolumePanelProps> = React.memo(
     const { items, isLoading } = useAttacksVolumeData({ filters, query });
 
     return (
-      <EuiPanel hasBorder={true}>
+      <EuiPanel hasBorder={true} data-test-subj={ATTACKS_VOLUME_PANEL_TEST_ID}>
         <EuiTitle size="xs">
           <h3>{ATTACKS_VOLUME_TITLE}</h3>
         </EuiTitle>

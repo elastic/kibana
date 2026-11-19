@@ -24,8 +24,10 @@ import type {
   PrebootPlugin,
 } from '@kbn/core-plugins-server';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
+import type { ServiceToken } from '@kbn/core-di';
 import { Setup, Start } from '@kbn/core-di';
 import { createSetupModule, createStartModule } from '@kbn/core-di-internal';
+import { runPluginInitialize } from './deferred_init';
 
 const OSS_PATH_REGEX = /[\/|\\]src[\/|\\]plugins[\/|\\]/; // Matches src/plugins directory on POSIX and Windows
 const XPACK_PATH_REGEX = /[\/|\\]x-pack[\/|\\]plugins[\/|\\]/; // Matches x-pack/plugins directory on POSIX and Windows
@@ -68,6 +70,7 @@ export class PluginWrapper<
 
   private readonly log: Logger;
   private readonly initializerContext: PluginInitializerContext;
+  private readonly initialization: PromiseWithResolvers<void>;
 
   private definition?: PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart>;
   private instance?:
@@ -86,6 +89,8 @@ export class PluginWrapper<
       readonly manifest: PluginManifest;
       readonly opaqueId: PluginOpaqueId;
       readonly initializerContext: PluginInitializerContext;
+      /** Settles the promise `initializerContext.initialization.initialize()` returns. */
+      readonly initialization: PromiseWithResolvers<void>;
     }
   ) {
     this.path = params.path;
@@ -93,6 +98,7 @@ export class PluginWrapper<
     this.manifest = params.manifest;
     this.opaqueId = params.opaqueId;
     this.initializerContext = params.initializerContext;
+    this.initialization = params.initialization;
     this.log = params.initializerContext.logger.get();
     this.name = params.manifest.id;
     this.configPath = params.manifest.configPath;
@@ -138,13 +144,13 @@ export class PluginWrapper<
 
     if (this.definition.module) {
       this.container = (setupContext as CoreSetup).injection.getContainer();
-      this.container.loadSync(this.definition.module);
-      this.container.loadSync(createSetupModule(this.initializerContext, setupContext, plugins));
+      this.container.load(this.definition.module);
+      this.container.load(createSetupModule(this.initializerContext, setupContext, plugins));
     }
 
     return [
       this.instance?.setup(setupContext as CoreSetup<TPluginsStart, TStart>, plugins),
-      this.container?.get<TSetup>(Setup),
+      this.container?.get(Setup as ServiceToken<TSetup>),
     ].find(Boolean)!;
   }
 
@@ -164,10 +170,10 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
     }
 
-    this.container?.loadSync(createStartModule(startContext, plugins));
+    this.container?.load(createStartModule(startContext, plugins));
     const contract = [
       this.instance?.start(startContext, plugins),
-      this.container?.get<TStart>(Start),
+      this.container?.get(Start as ServiceToken<TStart>),
     ].find(Boolean)!;
 
     if (isPromise(contract)) {
@@ -183,6 +189,36 @@ export class PluginWrapper<
   }
 
   /**
+   * Runs the `initialize` function exposed by the plugin instance and settles the plugin's
+   * initialization with its outcome. Resolves it right away when the plugin has no `initialize`.
+   * @param startContext The same context the plugin's `start` received.
+   * @param plugins The same dependency contracts the plugin's `start` received.
+   * @param wrapInitialize Wraps the call to the plugin's `initialize`, so core can measure it. It
+   * must return the call's outcome unchanged.
+   */
+  public runInitialize(
+    startContext: CoreStart,
+    plugins: TPluginsStart,
+    wrapInitialize: (run: () => Promise<void>) => Promise<void> = (run) => run()
+  ): void {
+    const { instance } = this;
+    const initialize =
+      instance && !this.isPrebootPluginInstance(instance)
+        ? instance.initialize?.bind(instance)
+        : undefined;
+
+    this.initialization.resolve(
+      initialize
+        ? runPluginInitialize({
+            pluginName: this.name,
+            log: this.log,
+            initialize: () => wrapInitialize(() => initialize(startContext, plugins)),
+          })
+        : undefined
+    );
+  }
+
+  /**
    * Calls optional `stop` function exposed by the plugin initializer.
    */
   public async stop() {
@@ -191,7 +227,7 @@ export class PluginWrapper<
     }
 
     await this.instance?.stop?.();
-    await this.container?.unbindAll();
+    await this.container?.unbindAllAsync();
     this.instance = undefined;
     this.container = undefined;
   }

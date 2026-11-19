@@ -8,6 +8,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -16,7 +17,12 @@ import { RolesGridPage } from './roles_grid_page';
 import { rolesAPIClientMock } from '../index.mock';
 import type { RolesAPIClient } from '../roles_api_client';
 
-const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
+const renderWithIntl = (ui: React.ReactElement) =>
+  render(
+    <MockAppHeaderProvider>
+      <I18nProvider>{ui}</I18nProvider>
+    </MockAppHeaderProvider>
+  );
 
 describe('<RolesGridPage />', () => {
   let apiClientMock: jest.Mocked<PublicMethodsOf<RolesAPIClient>>;
@@ -83,6 +89,8 @@ describe('<RolesGridPage />', () => {
       expect(screen.queryByTestId('permissionDeniedMessage')).not.toBeInTheDocument();
       expect(screen.getByText('Reserved')).toBeInTheDocument();
     });
+    expect(screen.getByTestId('createRoleButton')).toBeInTheDocument();
+    expect(screen.getByTestId('showReservedRolesSwitch')).toBeInTheDocument();
   });
 
   it('renders disabled roles as such', async () => {
@@ -189,5 +197,65 @@ describe('<RolesGridPage />', () => {
       expect(screen.getByText('test-role-1')).toBeInTheDocument();
     });
     expect(screen.queryByTestId('createRoleButton')).not.toBeInTheDocument();
+  });
+
+  it('hides the create action until the first load settles', async () => {
+    let resolveRoles: (value: Awaited<ReturnType<typeof apiClientMock.queryRoles>>) => void;
+    apiClientMock.queryRoles.mockReturnValue(
+      new Promise((resolve) => {
+        resolveRoles = resolve;
+      })
+    );
+
+    renderWithIntl(
+      <RolesGridPage
+        rolesAPIClient={apiClientMock}
+        history={history}
+        notifications={notifications}
+        i18n={i18n}
+        buildFlavor={'traditional'}
+        analytics={analytics}
+        theme={theme}
+        userProfile={userProfile}
+        rendering={rendering}
+      />
+    );
+
+    expect(screen.queryByTestId('createRoleButton')).not.toBeInTheDocument();
+
+    resolveRoles!({
+      total: 0,
+      count: 0,
+      roles: [],
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('createRoleButton')).toBeInTheDocument();
+    });
+  });
+
+  it('shows the create action after a non-403 load error', async () => {
+    apiClientMock.queryRoles.mockRejectedValue({
+      body: { statusCode: 500, message: 'boom' },
+    });
+
+    renderWithIntl(
+      <RolesGridPage
+        rolesAPIClient={apiClientMock}
+        history={history}
+        notifications={notifications}
+        i18n={i18n}
+        buildFlavor={'traditional'}
+        analytics={analytics}
+        theme={theme}
+        userProfile={userProfile}
+        rendering={rendering}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('createRoleButton')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('permissionDeniedMessage')).not.toBeInTheDocument();
   });
 });

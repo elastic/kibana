@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FindItemsParams } from '../datasource';
+import type { FindItemsParams, ActiveFilters } from '../datasource';
 
 /**
  * Query keys for content list items.
@@ -38,4 +38,35 @@ export const contentListKeys = {
    */
   items: (queryKeyScope: string, params: Omit<FindItemsParams, 'signal'>) =>
     [...contentListKeys.all(queryKeyScope), 'items', params] as const,
+
+  /**
+   * Query key for the shared user profile cache.
+   *
+   * @param queryKeyScope - Stable scope identifier for cache isolation.
+   */
+  profiles: (queryKeyScope: string) =>
+    [...contentListKeys.all(queryKeyScope), 'user-profiles'] as const,
+
+  /**
+   * Query key for filter facets (popover options with counts).
+   *
+   * @param queryKeyScope - Stable scope identifier for cache isolation.
+   * @param filterId - Filter dimension key (e.g. `'createdBy'`, `'tag'`).
+   * @param filters - Active filters excluding the filter being fetched.
+   */
+  filterFacets: (queryKeyScope: string, filterId: string, filters: ActiveFilters) =>
+    [...contentListKeys.all(queryKeyScope), 'filterFacets', filterId, filters] as const,
+
+  /**
+   * Prefix matching every filter facet query in a scope, regardless of filter
+   * dimension or active filters.
+   *
+   * Providers whose facets are derived from a mutable item set invalidate this
+   * when that set changes — the per-dimension keys exclude their own filter, so
+   * they do not change when a selection narrows the underlying data.
+   *
+   * @param queryKeyScope - Stable scope identifier for cache isolation.
+   */
+  allFilterFacets: (queryKeyScope: string) =>
+    [...contentListKeys.all(queryKeyScope), 'filterFacets'] as const,
 };

@@ -11,7 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORK_DIR="/tmp/console_definitions_temp"
 KIBANA_REPO="https://github.com/elastic/kibana.git"
 ES_SPEC_REPO="https://github.com/elastic/elasticsearch-specification.git"
-VERSIONS=("9.2")
+VERSIONS=("9.4")
 
 echo "=== Console Definitions Generator ==="
 echo "Script directory: $SCRIPT_DIR"
@@ -53,7 +53,9 @@ process_version() {
 
     # Bootstrap Kibana dependencies
     echo "Bootstrapping Kibana dependencies for version $version..."
-    if [ -f ".buildkite/scripts/bootstrap.sh" ]; then
+    if [ -f pnpm-lock.yaml ]; then
+      pnpm install || echo "pnpm install failed..."
+    elif [ -f yarn.lock ]; then
       yarn install || echo "yarn install failed..."
     fi
 

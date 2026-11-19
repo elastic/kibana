@@ -58,7 +58,6 @@ export async function mountManagementSection(
     fieldFormats,
     savedObjectsManagement,
     savedSearch,
-    contentManagement,
     fieldsMetadata,
   } = plugins;
   const { docTitle } = chrome;
@@ -97,7 +96,6 @@ export async function mountManagementSection(
     fieldFormats,
     savedObjectsManagement,
     savedSearch,
-    contentManagement,
     fieldsMetadata,
   };
 

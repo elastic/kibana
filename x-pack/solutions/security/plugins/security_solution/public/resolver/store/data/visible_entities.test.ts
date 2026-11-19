@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Store, AnyAction, Reducer } from 'redux';
-import { createStore } from 'redux';
+import type { Store, AnyAction, Reducer } from 'redux-v4';
+import { createStore } from 'redux-v4';
 import { analyzerReducer } from '../reducer';
 import type { AnalyzerById } from '../../types';
 import type { ResolverNode } from '../../../../common/endpoint/types';

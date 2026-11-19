@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LensAttributes } from '../../types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 export const singleMetricESQLDatatableAttributes: LensAttributes = {
   title: 'Single metric datatable',
@@ -42,7 +43,7 @@ export const singleMetricESQLDatatableAttributes: LensAttributes = {
       },
     },
     filters: [],
-    query: { esql: 'FROM kibana_sample_data_logs | STATS COUNT(*) ' },
+    query: { language: 'kuery', query: '' },
     visualization: {
       layerId: '2f980b0d-7877-4ae2-9b0e-8cc3058d146d',
       layerType: 'data',
@@ -66,7 +67,7 @@ export const singleMetricESQLDatatableAttributes: LensAttributes = {
     needsRefresh: false,
   },
   visualizationType: 'lnsDatatable',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 export const singleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
@@ -90,7 +91,7 @@ export const singleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
         },
       ],
     },
-    query: { esql: 'FROM kibana_sample_data_logs | LIMIT 10' },
+    query: { language: 'kuery', query: '' },
     filters: [],
     datasourceStates: {
       textBased: {
@@ -165,7 +166,7 @@ export const singleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
     },
   },
   visualizationType: 'lnsDatatable',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 export const multipleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
@@ -271,7 +272,7 @@ export const multipleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
       },
     },
     filters: [],
-    query: { esql: 'FROM kibana_sample_data_logs | LIMIT 10' },
+    query: { language: 'kuery', query: '' },
     visualization: {
       layerId: '6a3b6914-09c5-4a98-9e92-335c2b75acf0',
       layerType: 'data',
@@ -317,7 +318,7 @@ export const multipleMetricRowSplitESQLDatatableAttributes: LensAttributes = {
     },
   },
   visualizationType: 'lnsDatatable',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 export const fullConfigESQLDatatableAttributes: LensAttributes = {
@@ -399,7 +400,7 @@ export const fullConfigESQLDatatableAttributes: LensAttributes = {
       rowHeightLines: 4,
       paging: { enabled: true, size: 20 },
     },
-    query: { esql: 'FROM kibana_sample_data_logs | LIMIT 10' },
+    query: { language: 'kuery', query: '' },
     filters: [],
     datasourceStates: {
       textBased: {
@@ -532,7 +533,7 @@ export const fullConfigESQLDatatableAttributes: LensAttributes = {
     },
   },
   visualizationType: 'lnsDatatable',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 export const sortedByTransposedMetricColumnESQLDatatableAttributes: LensAttributes = {
@@ -571,9 +572,7 @@ export const sortedByTransposedMetricColumnESQLDatatableAttributes: LensAttribut
         direction: 'desc',
       },
     },
-    query: {
-      esql: 'FROM kibana_sample_data_logs | LIMIT 10',
-    },
+    query: { language: 'kuery', query: '' },
     filters: [],
     datasourceStates: {
       textBased: {
@@ -683,5 +682,89 @@ export const sortedByTransposedMetricColumnESQLDatatableAttributes: LensAttribut
       },
     },
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
+};
+
+/**
+ * ES|QL progress bars as the editor saves them, including the values it keeps for another fill mode:
+ * - a metric with the default seed: a gradient fill with the inert seed color and a bare `status` palette
+ * - a numeric row with a single fill, a leftover palette and a left alignment
+ */
+export const progressBarESQLDatatableAttributes: LensAttributes = {
+  title: 'Progress bars',
+  references: [],
+  state: {
+    visualization: {
+      layerId: '8d3c5f0a-1b2e-4c6d-9e7f-0a1b2c3d4e5f',
+      layerType: 'data',
+      columns: [
+        {
+          columnId: 'bytes',
+          isTransposed: false,
+          isMetric: true,
+          alignment: 'right',
+          colorMode: 'progress',
+          palette: { type: 'palette', name: 'status' },
+          fillStyle: { fillMode: 'gradient', color: '#61A2FF', valueRange: { mode: 'auto' } },
+        },
+        {
+          columnId: 'memory',
+          isTransposed: false,
+          isMetric: false,
+          alignment: 'left',
+          colorMode: 'progress',
+          palette: { type: 'palette', name: 'status' },
+          fillStyle: { fillMode: 'single', color: '#16C5C0', valueRange: { mode: 'auto' } },
+        },
+      ],
+    },
+    query: { language: 'kuery', query: '' },
+    filters: [],
+    datasourceStates: {
+      textBased: {
+        layers: {
+          '8d3c5f0a-1b2e-4c6d-9e7f-0a1b2c3d4e5f': {
+            index: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
+            query: { esql: 'FROM kibana_sample_data_logs | LIMIT 10' },
+            columns: [
+              {
+                columnId: 'bytes',
+                fieldName: 'bytes',
+                label: 'bytes',
+                customLabel: false,
+                meta: { type: 'number', esType: 'long' },
+                inMetricDimension: true,
+              },
+              {
+                columnId: 'memory',
+                fieldName: 'memory',
+                label: 'memory',
+                customLabel: false,
+                meta: { type: 'number', esType: 'double' },
+              },
+            ],
+            timeField: '@timestamp',
+          },
+        },
+      },
+    },
+    adHocDataViews: {
+      e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a: {
+        id: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
+        title: 'kibana_sample_data_logs',
+        timeFieldName: '@timestamp',
+        sourceFilters: [],
+        type: 'esql',
+        fieldFormats: {},
+        runtimeFieldMap: {},
+        allowNoIndex: false,
+        name: 'kibana_sample_data_logs',
+        allowHidden: false,
+        managed: false,
+      },
+    },
+    needsRefresh: false,
+  },
+  visualizationType: 'lnsDatatable',
+  version: LENS_ITEM_LATEST_VERSION,
 };

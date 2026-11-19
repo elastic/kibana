@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiTable, EuiTableBody, EuiTableHeader, EuiTableHeaderCell } from '@elastic/eui';
+import { EuiTable, EuiTableBody } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { ResultField } from './result_field';
@@ -27,18 +27,6 @@ export const ResultFields: React.FC<Props> = ({ documentId, fields, isExpanded }
         values: { documentId },
       })}
     >
-      <EuiTableHeader>
-        <EuiTableHeaderCell width="20%">
-          {i18n.translate('xpack.searchIndexDocuments.resultFields.fieldTypeHeaderLabel', {
-            defaultMessage: 'Field',
-          })}
-        </EuiTableHeaderCell>
-        <EuiTableHeaderCell>
-          {i18n.translate('xpack.searchIndexDocuments.resultFields.contentstableHeaderLabel', {
-            defaultMessage: 'Contents',
-          })}
-        </EuiTableHeaderCell>
-      </EuiTableHeader>
       <EuiTableBody>
         {fields.map((field) => (
           <ResultField
@@ -47,6 +35,8 @@ export const ResultFields: React.FC<Props> = ({ documentId, fields, isExpanded }
             fieldName={field.fieldName}
             fieldValue={field.fieldValue}
             fieldType={field.fieldType}
+            dimensions={field.dimensions}
+            embeddings={field.embeddings}
             key={field.fieldName}
           />
         ))}

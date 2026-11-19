@@ -10,15 +10,18 @@
 import type { ForEachStep } from '@kbn/workflows';
 import type { EnterForeachNode } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import type { StepIoService } from '../../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import { EnterForeachNodeImpl } from '../enter_foreach_node_impl';
+import { ITERATION_STEP_TYPE, iterationStepIdFromIndex } from '../utils';
 
 describe('EnterForeachNodeImpl', () => {
   let node: EnterForeachNode;
   let workflowExecutionRuntimeManager: WorkflowExecutionRuntimeManager;
   let stepExecutionRuntime: StepExecutionRuntime;
   let workflowLogger: IWorkflowEventLogger;
+  let stepIoService: StepIoService;
   let underTest: EnterForeachNodeImpl;
 
   beforeEach(() => {
@@ -35,7 +38,7 @@ describe('EnterForeachNodeImpl', () => {
     workflowExecutionRuntimeManager = {} as unknown as WorkflowExecutionRuntimeManager;
     workflowExecutionRuntimeManager.navigateToNextNode = jest.fn();
     workflowExecutionRuntimeManager.navigateToNode = jest.fn();
-    workflowExecutionRuntimeManager.enterScope = jest.fn();
+    workflowExecutionRuntimeManager.navigateToSynthetic = jest.fn();
 
     stepExecutionRuntime = {} as unknown as StepExecutionRuntime;
     stepExecutionRuntime.startStep = jest.fn();
@@ -50,11 +53,16 @@ describe('EnterForeachNodeImpl', () => {
 
     workflowLogger = {} as unknown as IWorkflowEventLogger;
     workflowLogger.logDebug = jest.fn();
+    stepIoService = {
+      pinForeachSource: jest.fn(),
+      unpinForeachScope: jest.fn(),
+    } as unknown as StepIoService;
     underTest = new EnterForeachNodeImpl(
       node,
       workflowExecutionRuntimeManager,
       stepExecutionRuntime,
-      workflowLogger
+      workflowLogger,
+      stepIoService
     );
   });
 
@@ -66,7 +74,10 @@ describe('EnterForeachNodeImpl', () => {
     it('should enter the iteration scope', async () => {
       await underTest.run();
 
-      expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenCalledWith('0');
+      expect(workflowExecutionRuntimeManager.navigateToSynthetic).toHaveBeenCalledWith({
+        stepId: iterationStepIdFromIndex(0),
+        stepType: ITERATION_STEP_TYPE,
+      });
     });
 
     describe('when foreach configuration is an array with items', () => {
@@ -82,10 +93,12 @@ describe('EnterForeachNodeImpl', () => {
         expect(stepExecutionRuntime.startStep).toHaveBeenCalledWith();
       });
 
-      it('should set step input equal to provided rendered JSON', async () => {
+      it('should persist foreach and items after evaluation succeeds', async () => {
         await underTest.run();
+        expect(stepExecutionRuntime.setInput).toHaveBeenCalledTimes(1);
         expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
           foreach: JSON.stringify(['item1', 'item2', 'item3']),
+          items: ['item1', 'item2', 'item3'],
         });
       });
 
@@ -97,6 +110,17 @@ describe('EnterForeachNodeImpl', () => {
           index: 0,
           total: 3,
         });
+      });
+
+      it('should pin the foreach source for the lifetime of the loop', async () => {
+        await underTest.run();
+
+        expect(stepIoService.pinForeachSource).toHaveBeenCalledWith(
+          'testStep',
+          node.configuration.foreach
+        );
+        // The loop runs, so the pin must NOT be released on enter.
+        expect(stepIoService.unpinForeachScope).not.toHaveBeenCalled();
       });
     });
 
@@ -119,6 +143,7 @@ describe('EnterForeachNodeImpl', () => {
 
         expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
           foreach: '{{steps.testStep.array}}',
+          items: ['item1', 'item2', 'item3'],
         });
       });
 
@@ -147,8 +172,14 @@ describe('EnterForeachNodeImpl', () => {
         (
           stepExecutionRuntime.contextManager.evaluateExpressionInContext as jest.Mock
         ).mockReturnValue(null);
-        await expect(underTest.run()).rejects.toThrowError(
+        await expect(underTest.run()).rejects.toThrow(
           'Foreach expression must evaluate to an array. Expression "{{steps.testStep.array}}" resolved to object (null).'
+        );
+        expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
+          foreach: '{{steps.testStep.array}}',
+        });
+        expect(stepExecutionRuntime.setInput).not.toHaveBeenCalledWith(
+          expect.objectContaining({ items: expect.anything() })
         );
       });
 
@@ -158,7 +189,7 @@ describe('EnterForeachNodeImpl', () => {
         ).mockReturnValue({
           key: 'value',
         });
-        await expect(underTest.run()).rejects.toThrowError(
+        await expect(underTest.run()).rejects.toThrow(
           'Foreach expression must evaluate to an array. Expression "{{steps.testStep.array}}" resolved to object: {"key":"value"}.'
         );
       });
@@ -167,7 +198,7 @@ describe('EnterForeachNodeImpl', () => {
         (
           stepExecutionRuntime.contextManager.evaluateExpressionInContext as jest.Mock
         ).mockReturnValue('{"key": value }');
-        await expect(underTest.run()).rejects.toThrowError(
+        await expect(underTest.run()).rejects.toThrow(
           'Unable to parse rendered value: {"key": value }'
         );
       });
@@ -203,7 +234,7 @@ describe('EnterForeachNodeImpl', () => {
         (
           stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
         ).mockReturnValue(JSON.stringify({ foo: 'bar' }));
-        await expect(underTest.run()).rejects.toThrowError(
+        await expect(underTest.run()).rejects.toThrow(
           'Foreach expression must evaluate to an array.'
         );
       });
@@ -212,7 +243,7 @@ describe('EnterForeachNodeImpl', () => {
         (
           stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
         ).mockReturnValue('{"key": value }');
-        await expect(underTest.run()).rejects.toThrowError(
+        await expect(underTest.run()).rejects.toThrow(
           'Unable to parse rendered value: {"key": value }'
         );
       });
@@ -247,6 +278,18 @@ describe('EnterForeachNodeImpl', () => {
           { workflow: { step_id: 'testStep' } }
         );
       });
+
+      it('should release the source pin when there are no items to iterate', async () => {
+        await underTest.run();
+
+        // Pin is taken eagerly before items are evaluated; an empty array means
+        // no iterations will run, so the pin must be released immediately.
+        expect(stepIoService.pinForeachSource).toHaveBeenCalledWith(
+          'testStep',
+          node.configuration.foreach
+        );
+        expect(stepIoService.unpinForeachScope).toHaveBeenCalledWith('testStep');
+      });
     });
 
     describe('when foreach configuration is a native array', () => {
@@ -258,6 +301,7 @@ describe('EnterForeachNodeImpl', () => {
         await underTest.run();
         expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
           foreach: JSON.stringify(['a', 'b', 'c']),
+          items: ['a', 'b', 'c'],
         });
       });
 
@@ -271,12 +315,12 @@ describe('EnterForeachNodeImpl', () => {
         });
       });
 
-      it('should not call renderValueAccordingToContext or evaluateExpressionInContext', async () => {
+      it('should render templates inside the native array', async () => {
         await underTest.run();
 
         expect(
           stepExecutionRuntime.contextManager.renderValueAccordingToContext
-        ).not.toHaveBeenCalled();
+        ).toHaveBeenCalledWith(['a', 'b', 'c']);
         expect(
           stepExecutionRuntime.contextManager.evaluateExpressionInContext
         ).not.toHaveBeenCalled();
@@ -285,7 +329,10 @@ describe('EnterForeachNodeImpl', () => {
       it('should enter the first iteration scope', async () => {
         await underTest.run();
 
-        expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenCalledWith('0');
+        expect(workflowExecutionRuntimeManager.navigateToSynthetic).toHaveBeenCalledWith({
+          stepId: iterationStepIdFromIndex(0),
+          stepType: ITERATION_STEP_TYPE,
+        });
         expect(workflowExecutionRuntimeManager.navigateToNextNode).toHaveBeenCalled();
       });
     });
@@ -299,6 +346,7 @@ describe('EnterForeachNodeImpl', () => {
         await underTest.run();
         expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
           foreach: JSON.stringify([]),
+          items: [],
         });
       });
 
@@ -322,7 +370,7 @@ describe('EnterForeachNodeImpl', () => {
     it('should throw an error if foreach configuration is not provided', async () => {
       node.configuration.foreach = undefined as any;
 
-      await expect(underTest.run()).rejects.toThrowError(
+      await expect(underTest.run()).rejects.toThrow(
         'Foreach configuration is required. Please specify an array or expression that evaluates to an array.'
       );
       expect(workflowExecutionRuntimeManager.navigateToNextNode).not.toHaveBeenCalled();
@@ -331,7 +379,7 @@ describe('EnterForeachNodeImpl', () => {
     it('should throw an error if foreach configuration is not an array', async () => {
       node.configuration.foreach = JSON.stringify({ key: 'value' });
 
-      await expect(underTest.run()).rejects.toThrowError(
+      await expect(underTest.run()).rejects.toThrow(
         'Foreach expression must evaluate to an array. Expression "{"key":"value"}" resolved to object: {"key":"value"}.'
       );
       expect(stepExecutionRuntime.startStep).toHaveBeenCalledTimes(1);
@@ -350,13 +398,16 @@ describe('EnterForeachNodeImpl', () => {
     it('should enter iteration scope', async () => {
       await underTest.run();
 
-      expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenCalledWith('1');
+      expect(workflowExecutionRuntimeManager.navigateToSynthetic).toHaveBeenCalledWith({
+        stepId: iterationStepIdFromIndex(1),
+        stepType: ITERATION_STEP_TYPE,
+      });
     });
 
     it('should enter scope only once', async () => {
       await underTest.run();
 
-      expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenCalledTimes(1);
+      expect(workflowExecutionRuntimeManager.navigateToSynthetic).toHaveBeenCalledTimes(1);
     });
 
     it('should not start step', async () => {

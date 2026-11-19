@@ -24,13 +24,15 @@ export interface FleetApiService {
   };
   integration: {
     install: (name: string) => Promise<any>;
+    installPackage: (name: string, version: string, opts?: { force?: boolean }) => Promise<any>;
+    getPackage: (name: string) => Promise<any>;
     delete: (name: string) => Promise<any>;
   };
   package_policies: {
     get: (queryParams?: Record<string, any>) => Promise<any>;
     getById: (id: string) => Promise<any>;
     create: (body: PackagePolicyCreateBody, queryParams?: Record<string, string>) => Promise<any>;
-    delete: (id: string) => Promise<any>;
+    delete: (id: string, opts?: { force?: boolean }) => Promise<any>;
     bulkDelete: (ids: [string]) => Promise<any>;
   };
   agent_policies: {
@@ -107,6 +109,33 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
         );
       },
 
+      installPackage: async (name: string, version: string, opts?: { force?: boolean }) => {
+        return await measurePerformanceAsync(
+          log,
+          `fleetApi.integration.installPackage [${name}@${version}]`,
+          async () => {
+            return await kbnClient.request({
+              method: 'POST',
+              path: `/api/fleet/epm/packages/${name}/${version}`,
+              body: { force: opts?.force ?? true },
+            });
+          }
+        );
+      },
+
+      getPackage: async (name: string) => {
+        return await measurePerformanceAsync(
+          log,
+          `fleetApi.integration.getPackage [${name}]`,
+          async () => {
+            return await kbnClient.request({
+              method: 'GET',
+              path: `/api/fleet/epm/packages/${name}`,
+            });
+          }
+        );
+      },
+
       delete: async (name: string) => {
         return await measurePerformanceAsync(
           log,
@@ -164,7 +193,7 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
           }
         );
       },
-      delete: async (id: string) => {
+      delete: async (id: string, { force }: { force?: boolean } = {}) => {
         return await measurePerformanceAsync(
           log,
           `fleetApi.package_policies.delete [${id}]`,
@@ -172,6 +201,7 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
             const response = await kbnClient.request({
               method: 'DELETE',
               path: `/api/fleet/package_policies/${id}`,
+              query: force ? { force } : undefined,
               ignoreErrors: [400],
             });
             return { status: response.status };

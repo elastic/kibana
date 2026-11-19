@@ -10,6 +10,7 @@
     "public/**/*.json",
   ],
   "kbn_references": [
+    "@kbn/data-source",
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/analytics",
@@ -26,6 +27,7 @@
     "@kbn/utility-types-jest",
     "@kbn/config-schema",
     "@kbn/css-utils",
+    "@kbn/config",
   ],
   "exclude": [
     "target/**/*",

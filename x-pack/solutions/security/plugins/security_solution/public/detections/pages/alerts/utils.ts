@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { encode } from '@kbn/rison';
-import { expandableFlyoutStateFromEventMeta } from '../../../flyout/document_details/shared/hooks/url/expandable_flyout_state_from_event_meta';
+import { encodeFlyoutV2UrlParam } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 
 export interface ResolveFlyoutParamsConfig {
   index: string;
@@ -14,20 +13,16 @@ export interface ResolveFlyoutParamsConfig {
 }
 
 /**
- * Resolves url parameters for the flyout, serialized as
- * rison string. NOTE: if user is already redirected to this route with flyout parameters set,
- * we simply use them. It will be the case when users are coming here using a link obtained
- * with Share Button on the Expandable Flyout
+ * Resolves the flyoutV2 URL parameter for the new flyout system.
+ * If the URL already carries a flyoutV2 param (e.g. from a prior share link), preserves it.
+ * Otherwise encodes a document descriptor for the given alert.
  */
-export const resolveFlyoutParams = (
+export const resolveFlyoutV2Params = (
   { index, alertId }: ResolveFlyoutParamsConfig,
   currentParamsString: string | null
-) => {
+): string => {
   if (currentParamsString) {
     return currentParamsString;
   }
-
-  return encode(
-    expandableFlyoutStateFromEventMeta({ index, eventId: alertId, scopeId: 'alerts-page' })
-  );
+  return encodeFlyoutV2UrlParam([{ kind: 'document', documentId: alertId, indexName: index }]);
 };

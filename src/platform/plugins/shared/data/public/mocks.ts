@@ -14,6 +14,7 @@ import type { DataPlugin } from '.';
 import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 import { createNowProviderMock } from './now_provider/mocks';
+import { createDateRangePickerPresetsServiceMock } from './date_range_picker_presets/mocks';
 
 export type Setup = jest.Mocked<ReturnType<DataPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<DataPlugin['start']>>;
@@ -39,14 +40,27 @@ const createStartContract = (): Start => {
     dataViews: dataViewsMock,
     datatableUtilities: createDatatableUtilitiesMock(),
     search: searchServiceMock.createStartContract(),
+    replayCache: {
+      get: jest.fn().mockReturnValue({ hit: false }),
+      set: jest.fn(),
+      delete: jest.fn(),
+      clear: jest.fn(),
+    },
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
+    dateRangePickerPresets: createDateRangePickerPresetsServiceMock(),
     nowProvider: createNowProviderMock(),
   };
 };
 
 export { createSearchSourceMock } from '../common/search/search_source/mocks';
 export { getCalculateAutoTimeExpression } from '../common/search/aggs';
+export {
+  getPersistedSearchSessionSavedObjectAttributesMock,
+  getSearchSessionEBTManagerMock,
+  getSessionsClientMock,
+} from './search/session/mocks';
+export { createSearchUsageCollectorMock } from './search/collectors/mocks';
 
 export const dataPluginMock = {
   createSetupContract,

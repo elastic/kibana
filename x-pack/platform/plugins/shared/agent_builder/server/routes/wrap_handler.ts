@@ -5,17 +5,28 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { Logger, RequestHandler } from '@kbn/core/server';
-import { isAgentBuilderError } from '@kbn/agent-builder-common';
+import {
+  AgentBuilderErrorCode,
+  isAgentBuilderError,
+  isConversationBusyError,
+} from '@kbn/agent-builder-common';
+import { isInferenceError } from '@kbn/inference-common';
 import { isValidLicense } from '../../common/license';
 import type { AgentBuilderHandlerContext } from '../request_handler_context';
 
+const AGENT_BUILDER_ERROR_CODES: ReadonlySet<string> = new Set(
+  Object.values(AgentBuilderErrorCode)
+);
+
 export interface RouteWrapConfig {
   /**
-   * The feature flag to gate this route behind.
+   * The feature flag(s) to gate this route behind. Pass a single flag or an
+   * array of flags; when an array is given, every flag must be enabled (AND).
    * Defaults to false (no feature flag gating).
    */
-  featureFlag?: string | false;
+  featureFlag?: string | string[] | false;
   /**
    * If true, will not check license level
    */
@@ -31,8 +42,11 @@ export const getHandlerWrapper =
     return async (ctx, req, res) => {
       if (featureFlag !== false) {
         const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(featureFlag);
-        if (!enabled) {
+        const featureFlags = Array.isArray(featureFlag) ? featureFlag : [featureFlag];
+        const flagValues = await Promise.all(
+          featureFlags.map((flag) => uiSettings.client.get(flag))
+        );
+        if (!flagValues.every(Boolean)) {
           return res.notFound();
         }
       }
@@ -52,26 +66,57 @@ export const getHandlerWrapper =
       try {
         return await handler(ctx, req, res);
       } catch (e) {
-        if (isAgentBuilderError(e)) {
-          logger.error(e);
+        // Inference errors must be checked before agent builder errors:
+        // both share the same `ServerSentEventError` base class, so `isAgentBuilderError`
+        // also matches inference errors. Inference errors carry `meta.status` (not
+        // `meta.statusCode`), so we propagate that status when present.
+        if (isInferenceError(e)) {
+          const status = e.meta?.status;
+          if (typeof status === 'number' && status >= 400 && status < 600) {
+            logger.error(e);
+            return res.customError({
+              body: { message: e.message },
+              statusCode: status,
+            });
+          }
+        }
+        if (isAgentBuilderError(e) && AGENT_BUILDER_ERROR_CODES.has(e.code)) {
+          // A busy conversation is an expected refusal the caller retries, not a failure.
+          if (isConversationBusyError(e)) {
+            logger.debug(`Request refused: ${e.message}`);
+          } else {
+            logger.error(e);
+          }
+
           return res.customError({
             body: {
               message: e.message,
               attributes: {
+                code: e.code,
                 trace_id: e.meta?.traceId,
+                active_execution_id: e.meta?.activeExecutionId,
               },
             },
             statusCode: e.meta?.statusCode ?? 500,
           });
-        } else {
-          logger.error(`Unexpected error in handler: ${e.stack ?? e.message}`);
+        }
+        // A 4xx Boom is a refusal the caller can act on, for example a service account that
+        // can't be granted the API key a scheduled task needs.
+        if (Boom.isBoom(e) && e.output.statusCode < 500) {
+          logger.warn(`Request refused: ${e.message}`);
           return res.customError({
-            body: {
-              message: e.message ?? 'An unexpected error occurred',
-            },
-            statusCode: 500,
+            body: { message: e.message },
+            statusCode: e.output.statusCode,
+            headers: e.output.headers as { [key: string]: string },
           });
         }
+        logger.error(`Unexpected error in handler: ${e.stack ?? e.message}`);
+        return res.customError({
+          body: {
+            message: e.message ?? 'An unexpected error occurred',
+          },
+          statusCode: 500,
+        });
       }
     };
   };

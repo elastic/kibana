@@ -41,6 +41,14 @@ const getAllowedPackage = (filePath) => {
     return { package: '@kbn/scout' };
   }
 
+  // example plugins (OSS and x-pack)
+  if (/\/examples\/[^/]+\/test\/(?:scout|scout_\w+)\//.test(filePath)) {
+    return { package: '@kbn/scout' };
+  }
+  if (/\/x-pack\/examples\/[^/]+\/test\/(?:scout|scout_\w+)\//.test(filePath)) {
+    return { package: '@kbn/scout' };
+  }
+
   return null;
 };
 
@@ -72,13 +80,8 @@ module.exports = {
     },
   },
 
-  create(context) {
-    const filePath = context.getFilename();
-    const allowed = getAllowedPackage(filePath);
-
-    if (!allowed) {
-      return {};
-    }
+  createOnce(context) {
+    let allowed;
 
     const checkSource = (sourceNode) => {
       const source = sourceNode.value;
@@ -104,6 +107,12 @@ module.exports = {
     };
 
     return {
+      before() {
+        allowed = getAllowedPackage(context.filename);
+        if (!allowed) {
+          return false;
+        }
+      },
       ImportDeclaration(node) {
         checkSource(node.source);
       },

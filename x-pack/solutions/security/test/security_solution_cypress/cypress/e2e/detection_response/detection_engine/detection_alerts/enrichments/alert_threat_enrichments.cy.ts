@@ -22,14 +22,12 @@ import { expandFirstAlert, setEnrichmentDates } from '../../../../../tasks/alert
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { addsFieldsToTimeline, visitRuleDetailsPage } from '../../../../../tasks/rule_details';
 import {
-  expandDocumentDetailsExpandableFlyoutLeftSection,
-  openTableTab,
-} from '../../../../../tasks/expandable_flyout/alert_details_right_panel';
+  filterDocumentFlyoutTableTab,
+  openDocumentFlyoutTableTab,
+  openDocumentFlyoutThreatIntelligenceTool,
+} from '../../../../../tasks/document_flyout';
 import { installMockPrebuiltRulesPackage } from '../../../../../tasks/api_calls/prebuilt_rules';
-import { filterTableTabTable } from '../../../../../tasks/expandable_flyout/alert_details_right_panel_table_tab';
-import { DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_THREAT_ENRICHMENTS } from '../../../../../screens/expandable_flyout/alert_details_right_panel_table_tab';
-import { openThreatIntelligenceTab } from '../../../../../tasks/expandable_flyout/alert_details_left_panel_threat_intelligence_tab';
-import { openInsightsTab } from '../../../../../tasks/expandable_flyout/alert_details_left_panel';
+import { DOCUMENT_FLYOUT_TABLE_TAB_THREAT_ENRICHMENTS_ROW } from '../../../../../screens/document_flyout';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
@@ -114,10 +112,10 @@ describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServ
 
     waitForAlertsToPopulate();
     expandFirstAlert();
-    openTableTab();
-    filterTableTabTable('threat.enrichments');
+    openDocumentFlyoutTableTab();
+    filterDocumentFlyoutTableTab('threat.enrichments');
 
-    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_THREAT_ENRICHMENTS).then(($el) => {
+    cy.get(DOCUMENT_FLYOUT_TABLE_TAB_THREAT_ENRICHMENTS_ROW).then(($el) => {
       const text = $el.text();
       expectedFields.forEach((field) => {
         expect(text).to.include(field);
@@ -125,7 +123,7 @@ describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServ
     });
   });
 
-  it('Displays threat indicator details on the threat intel tab', () => {
+  it('Displays threat indicator details in the threat intelligence tool', () => {
     const expectedThreatIndicatorData = [
       { field: 'feed.name', value: 'AbuseCH malware' },
       { field: 'indicator.file.hash.md5', value: '9b6c3518a91d23ed77504b5416bfb5b3' },
@@ -160,9 +158,7 @@ describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServ
 
     waitForAlertsToPopulate();
     expandFirstAlert();
-    expandDocumentDetailsExpandableFlyoutLeftSection();
-    openInsightsTab();
-    openThreatIntelligenceTab();
+    openDocumentFlyoutThreatIntelligenceTool();
 
     cy.get(THREAT_DETAILS_VIEW).within(() => {
       cy.get(TABLE_ROWS).should('have.length', expectedThreatIndicatorData.length);
@@ -178,14 +174,12 @@ describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServ
   });
 
   describe('with additional indicators', () => {
-    it('Displays matched fields from both indicator match rules and investigation time enrichments on Threat Intel tab', () => {
+    it('Displays matched fields from both indicator match rules and investigation time enrichments in the threat intelligence tool', () => {
       waitForAlertsToPopulate();
       cy.task('esArchiverLoad', { archiveName: 'threat_indicator2' });
 
       expandFirstAlert();
-      expandDocumentDetailsExpandableFlyoutLeftSection();
-      openInsightsTab();
-      openThreatIntelligenceTab();
+      openDocumentFlyoutThreatIntelligenceTool();
       setEnrichmentDates('08/05/2018 10:00 AM');
 
       const indicatorMatchRuleEnrichment = {

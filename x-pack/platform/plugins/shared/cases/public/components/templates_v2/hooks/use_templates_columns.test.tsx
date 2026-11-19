@@ -175,6 +175,7 @@ describe('useTemplatesColumns', () => {
       name: 'Test',
       owner: 'securitySolution',
       definition: '',
+      definitionString: '',
       templateVersion: 1,
       deletedAt: null,
       author: 'test-user',
@@ -262,6 +263,7 @@ describe('useTemplatesColumns', () => {
       name: 'Test',
       owner: 'securitySolution',
       definition: '',
+      definitionString: '',
       templateVersion: 1,
       deletedAt: null,
       author: 'test-user',
@@ -292,12 +294,15 @@ describe('useTemplatesColumns', () => {
       expect(screen.getByTestId('template-column-fields')).toHaveTextContent('5');
     });
 
-    it('shows beacon alongside tooltip when fieldNames are present', () => {
+    it('shows beacon alongside tooltip when fieldDefinitions are present', () => {
       const column = getFieldCountColumn();
       const template = {
         ...baseTemplate,
         fieldCount: 2,
-        fieldNames: ['severity', 'hostname'],
+        fieldDefinitions: [
+          { name: 'severity', label: 'Severity', type: 'keyword', control: 'TEXT' },
+          { name: 'hostname', label: 'Hostname', type: 'keyword', control: 'TEXT' },
+        ],
         fieldSearchMatches: true,
       };
       render(<>{column.render!(2, template)}</>);

@@ -24,6 +24,8 @@ import {
   type DataSchemaFormat,
 } from '@kbn/metrics-data-access-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DEFAULT_SCHEMA, SCHEMA_SELECTOR_DOCS_LINKS } from '../../common/constants';
+import type { EntityTypes } from '../../common/http_api/shared/entity_type';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 import { Popover } from './popover';
 
@@ -31,13 +33,13 @@ const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.infra.schemaSelector.notAvail
   defaultMessage: 'Selected schema is not available for this query.',
 });
 
-const SCHEMA_DOCUMENTATION_LINK = 'https://ela.st/docs-otel-schema-selector-hosts';
-
 const SCHEMA_LABEL = i18n.translate('xpack.infra.schemaSelector.label', {
   defaultMessage: 'Schema',
 });
 
-const PrependLabel = () => {
+const PrependLabel = ({ nodeType }: { nodeType: EntityTypes }) => {
+  const documentationLink = SCHEMA_SELECTOR_DOCS_LINKS[nodeType];
+
   return (
     <EuiFormLabel>
       <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
@@ -46,20 +48,22 @@ const PrependLabel = () => {
           <Popover buttonAriaLabelText={SCHEMA_LABEL}>
             <FormattedMessage
               id="xpack.infra.schemaSelector.description"
-              defaultMessage="Select which data collection schema your entities are observed with.{nextLine} See {documentation} for more information."
+              defaultMessage="Select which data collection schema your entities are observed with.{hasDocumentation, select, true {{nextLine} See {documentation} for more information.} other {}}"
               values={{
+                hasDocumentation: String(!!documentationLink),
                 nextLine: <br />,
-                documentation: (
+                documentation: documentationLink ? (
                   <EuiLink
                     data-test-subj="infraSchemaSelectorDocumentationLink"
-                    href={SCHEMA_DOCUMENTATION_LINK}
+                    href={documentationLink}
                     target="_blank"
+                    external
                   >
                     {i18n.translate('xpack.infra.schemaSelector.documentation', {
                       defaultMessage: 'documentation',
                     })}
                   </EuiLink>
-                ),
+                ) : null,
               }}
             />
           </Popover>
@@ -87,7 +91,7 @@ const InvalidDisplay = ({ value }: { value: string }) => {
       <EuiFlexItem grow={false}>
         <EuiToolTip position="top" content={SCHEMA_NOT_AVAILABLE}>
           <EuiToken
-            iconType="alert"
+            iconType="warning"
             tabIndex={0}
             size="s"
             color="euiColorVis9"
@@ -133,13 +137,13 @@ export const SchemaSelector = ({
   schemas,
   value,
   isLoading,
-  isHostsView = false,
+  nodeType,
 }: {
   onChange: (selected: DataSchemaFormat) => void;
   schemas: DataSchemaFormat[];
   value: DataSchemaFormat;
   isLoading: boolean;
-  isHostsView?: boolean;
+  nodeType: EntityTypes;
 }) => {
   const {
     services: { telemetry },
@@ -207,37 +211,35 @@ export const SchemaSelector = ({
   }, [value, schemas, telemetry]);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem grow={0}>
-        <EuiFormRow
-          aria-label={i18n.translate('xpack.infra.schemaSelector.select.ariaLabel', {
-            defaultMessage: 'Schema selector for data collection',
-          })}
-          css={{ minWidth: isHostsView ? '400px' : '300px' }}
-          helpText={
-            (options.length > 1 || (options.length === 1 && isInvalid)) &&
-            i18n.translate('xpack.infra.schemaSelector.select.helpText', {
-              defaultMessage: 'There are hosts available in another schema',
-            })
-          }
-        >
-          <EuiSuperSelect
-            onClickCapture={handleSchemaSelectorClick}
-            data-test-subj="infraSchemaSelect"
-            id="infraSchemaSelectorSelect"
-            options={displayOptions}
-            compressed
-            valueOfSelected={isInvalid ? 'unknown' : value ?? 'semconv'}
-            onChange={onSelect}
-            isLoading={isLoading}
-            fullWidth
-            css={{
-              fontSize: useEuiFontSize('s').fontSize,
-            }}
-            prepend={<PrependLabel />}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiFormRow
+      aria-label={i18n.translate('xpack.infra.schemaSelector.select.ariaLabel', {
+        defaultMessage: 'Schema selector for data collection',
+      })}
+      css={{ minWidth: '300px' }}
+      helpText={
+        (options.length > 1 || (options.length === 1 && isInvalid)) &&
+        i18n.translate('xpack.infra.schemaSelector.select.otherSchemaAvailableHelpText', {
+          defaultMessage:
+            '{nodeType, select, host {There are hosts available in another schema} pod {There are Kubernetes pods available in another schema} other {There are entities available in another schema}}',
+          values: { nodeType },
+        })
+      }
+    >
+      <EuiSuperSelect
+        onClickCapture={handleSchemaSelectorClick}
+        data-test-subj="infraSchemaSelect"
+        id="infraSchemaSelectorSelect"
+        options={displayOptions}
+        compressed
+        valueOfSelected={isInvalid ? 'unknown' : value ?? DEFAULT_SCHEMA}
+        onChange={onSelect}
+        isLoading={isLoading}
+        fullWidth
+        css={{
+          fontSize: useEuiFontSize('s').fontSize,
+        }}
+        prepend={<PrependLabel nodeType={nodeType} />}
+      />
+    </EuiFormRow>
   );
 };

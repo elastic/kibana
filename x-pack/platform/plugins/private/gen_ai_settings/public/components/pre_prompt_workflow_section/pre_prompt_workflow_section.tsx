@@ -50,7 +50,11 @@ export const PrePromptWorkflowSection: React.FC = () => {
         return [];
       }
       const response = await agentBuilder.tools.listWorkflows({ page: 1, limit: 1000 });
-      return response.results.map((workflow) => ({ id: workflow.id, name: workflow.name }));
+      return response.results.map((workflow) => ({
+        id: workflow.id,
+        name: workflow.name,
+        enabled: workflow.enabled,
+      }));
     },
   });
 
@@ -80,7 +84,7 @@ export const PrePromptWorkflowSection: React.FC = () => {
           <EuiTitle size="s">
             <h3 data-test-subj="agentBuilderSectionTitle">
               <FormattedMessage
-                id="genAiSettings.agentBuilder.title"
+                id="xpack.genAiSettings.agentBuilder.title"
                 defaultMessage="Agent Builder"
               />
             </h3>

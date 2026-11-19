@@ -8,10 +8,10 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 
 import { getContext, resetContext } from 'kea';
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 
 import { of } from 'rxjs';
 
@@ -72,6 +72,7 @@ export const renderApp = (
     fleet,
     uiActions,
     searchNavigation,
+    spaces,
   } = plugins;
 
   const productFeatures = features ?? { ...DEFAULT_PRODUCT_FEATURES };
@@ -106,6 +107,7 @@ export const renderApp = (
     lens,
     ml,
     navigateToUrl,
+    notifications,
     productFeatures,
     renderHeaderActions: (HeaderActions) =>
       params.setHeaderActionMenu(
@@ -117,6 +119,7 @@ export const renderApp = (
     setChromeIsVisible: chrome.setIsVisible,
     setDocTitle: chrome.docTitle.change,
     share,
+    spaces,
     uiActions,
     uiSettings,
     updateSideNavDefinition,
@@ -132,30 +135,32 @@ export const renderApp = (
 
   const unmountFlashMessagesLogic = mountFlashMessagesLogic({ notifications });
   ReactDOM.render(
-    <I18nProvider>
-      <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
-        <EuiThemeProvider darkMode={core.theme.getTheme().darkMode}>
-          <KibanaContextProvider
-            services={{
-              ...core,
-              ...plugins,
-            }}
-          >
-            <CellActionsProvider
-              getTriggerCompatibleActions={plugins.uiActions.getTriggerCompatibleActions}
+    chrome.withProvider(
+      <I18nProvider>
+        <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
+          <EuiThemeProvider darkMode={core.theme.getTheme().darkMode}>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                ...plugins,
+              }}
             >
-              <CloudContext>
-                <Provider store={store}>
-                  <Router history={params.history}>
-                    <App features={features} kibanaVersion={kibanaVersion} />
-                  </Router>
-                </Provider>
-              </CloudContext>
-            </CellActionsProvider>
-          </KibanaContextProvider>
-        </EuiThemeProvider>
-      </KibanaThemeProvider>
-    </I18nProvider>,
+              <CellActionsProvider
+                getTriggerCompatibleActions={plugins.uiActions.getTriggerCompatibleActions}
+              >
+                <CloudContext>
+                  <Provider store={store}>
+                    <Router history={params.history}>
+                      <App features={features} kibanaVersion={kibanaVersion} />
+                    </Router>
+                  </Provider>
+                </CloudContext>
+              </CellActionsProvider>
+            </KibanaContextProvider>
+          </EuiThemeProvider>
+        </KibanaThemeProvider>
+      </I18nProvider>
+    ) as React.ReactElement,
     params.element
   );
   return () => {

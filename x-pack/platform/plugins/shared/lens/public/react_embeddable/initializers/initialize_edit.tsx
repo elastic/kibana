@@ -15,7 +15,6 @@ import type {
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { apiHasAppContext, apiPublishesDisabledActionIds } from '@kbn/presentation-publishing';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -28,10 +27,17 @@ import type {
   LensInternalApi,
   LensRuntimeState,
 } from '@kbn/lens-common';
+import {
+  ON_APPLY_FILTER,
+  ON_CLICK_VALUE,
+  ON_OPEN_PANEL_MENU,
+  ON_SELECT_RANGE,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import type { LensEmbeddableStartServices } from '../types';
 import {
   extractInheritedViewModeObservable,
+  getParentContext,
   saveUpdatedLinkedAnnotationsToLibrary,
 } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
@@ -43,18 +49,40 @@ import {
   apiPublishesIsEditableByUser,
 } from '../type_guards';
 import type { SearchContextConfig } from './initialize_search_context';
+import { isESQLModeEnabled } from './utils';
 
 function getSupportedTriggers(
   getState: GetStateType,
   visualizationMap: LensEmbeddableStartServices['visualizationMap']
 ) {
   return () => {
+    const panelTriggers = [ON_OPEN_PANEL_MENU];
     const currentState = getState();
     if (currentState.attributes?.visualizationType) {
-      return visualizationMap[currentState.attributes.visualizationType]?.triggers || [];
+      return ensureNestedTriggers([
+        ...panelTriggers,
+        ...(visualizationMap[currentState.attributes.visualizationType]?.triggers ?? []),
+      ]);
     }
-    return [];
+    return panelTriggers;
   };
+}
+
+/**
+ * ON_CLICK_VALUE and ON_SELECT_RANGE also trigger ON_APPLY_FILTER.
+ * This function appends ON_APPLY_FILTER to the list of triggers if either ON_CLICK_VALUE
+ * or ON_SELECT_RANGE is supported.
+ * @param triggers
+ */
+function ensureNestedTriggers(triggers: string[]): string[] {
+  if (
+    !triggers.includes(ON_APPLY_FILTER) &&
+    (triggers.includes(ON_CLICK_VALUE) || triggers.includes(ON_SELECT_RANGE))
+  ) {
+    return [...triggers, ON_APPLY_FILTER];
+  }
+
+  return triggers;
 }
 
 function isReadOnly(viewMode$: PublishingSubject<ViewMode>) {
@@ -95,8 +123,6 @@ export function initializeEditApi(
     return currentState.managed || (hasManagedApi(parentApi) ? parentApi.isManaged : false);
   };
 
-  const isESQLModeEnabled = () => uiSettings.get(ENABLE_ESQL);
-
   const viewMode$ = extractInheritedViewModeObservable(parentApi);
 
   const { disabledActionIds$, setDisabledActionIds } = apiPublishesDisabledActionIds(parentApi)
@@ -105,11 +131,6 @@ export function initializeEditApi(
         disabledActionIds$: new BehaviorSubject<string[] | undefined>(undefined),
         setDisabledActionIds: noop,
       };
-
-  if (isTextBasedLanguage(initialState)) {
-    // do not expose the drilldown action for ES|QL
-    setDisabledActionIds(disabledActionIds$?.getValue()?.concat(['OPEN_FLYOUT_ADD_DRILLDOWN']));
-  }
 
   /**
    * Inline editing section
@@ -128,6 +149,7 @@ export function initializeEditApi(
           valueInput: currentState,
           originatingApp: parentApiContext.currentAppId ?? 'dashboards',
           originatingPath: parentApiContext.getCurrentPath?.(),
+          originatingContainer: getParentContext(parentApi)?.type,
           searchSessionId: currentState.searchSessionId,
         },
         skipAppLeave,
@@ -209,7 +231,7 @@ export function initializeEditApi(
     }
     const currentState = getState();
     // check if it's in ES|QL mode
-    if (isTextBasedLanguage(currentState) && !isESQLModeEnabled()) {
+    if (isTextBasedLanguage(currentState) && !isESQLModeEnabled({ uiSettings })) {
       return false;
     }
     if (isManaged(currentState)) {
@@ -247,13 +269,13 @@ export function initializeEditApi(
         : async (attributes) => {
             let appliedAttributes = attributes;
             if (attributes.visualizationType === 'lnsXY') {
-              const updatedVizState = await saveUpdatedLinkedAnnotationsToLibrary(
+              const updatedVisState = await saveUpdatedLinkedAnnotationsToLibrary(
                 attributes.state.visualization,
                 startDependencies.eventAnnotationService
               );
               appliedAttributes = {
                 ...attributes,
-                state: { ...attributes.state, visualization: updatedVizState },
+                state: { ...attributes.state, visualization: updatedVisState },
               };
             }
             internalApi.updateEditingState(false);
@@ -310,7 +332,7 @@ export function initializeEditApi(
           core: startDependencies.coreStart,
           api: parentApi,
           loadContent: getEditPanel,
-          options: { uuid },
+          options: { uuid, isEsql: isTextBasedLanguage(getState()) },
         });
       },
       getEditPanel,
@@ -352,7 +374,7 @@ export function initializeEditApi(
               closeFlyout,
             });
           },
-          options: { uuid },
+          options: { uuid, isEsql: isTextBasedLanguage(getState()) },
         });
       },
       getEditHref: async () => {

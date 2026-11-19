@@ -20,9 +20,8 @@ import type { IngestStreamSettings } from './settings';
 import { ingestStreamSettingsSchema } from './settings';
 import type { FailureStore } from './failure_store';
 import { failureStoreSchema } from './failure_store';
-import type { IngestStreamProcessing } from './processing';
-import { ingestStreamProcessingSchema } from './processing';
-import type { StrictOmit } from '../core';
+import type { IngestStreamProcessing, IngestStreamProcessingUpsert } from './processing';
+import { ingestStreamProcessingSchema, ingestStreamProcessingUpsertSchema } from './processing';
 
 interface IngestStreamPrivileges {
   // User can change everything about the stream
@@ -73,9 +72,7 @@ export const ingestBaseSchemaFields = {
 
 export const ingestBaseUpsertSchemaFields = {
   ...ingestBaseSchemaFields,
-  processing: ingestStreamProcessingSchema.merge(
-    z.object({ updated_at: z.undefined().optional() })
-  ),
+  processing: ingestStreamProcessingUpsertSchema,
 };
 
 export const IngestBase: Validation<unknown, IngestBase> = validation(
@@ -83,15 +80,9 @@ export const IngestBase: Validation<unknown, IngestBase> = validation(
   z.object(ingestBaseSchemaFields)
 );
 
-type OmitIngestBaseUpsertProps<
-  T extends {
-    processing: Omit<IngestStreamProcessing, 'updated_at'> & { updated_at?: string };
-  }
-> = Omit<T, 'processing'> & {
-  processing: StrictOmit<IngestBase['processing'], 'updated_at'>;
+export type IngestBaseUpsertRequest = Omit<IngestBase, 'processing'> & {
+  processing: IngestStreamProcessingUpsert;
 };
-
-export type IngestBaseUpsertRequest = OmitIngestBaseUpsertProps<IngestBase>;
 
 export const IngestBaseUpsertRequest: Validation<unknown, IngestBaseUpsertRequest> = validation(
   z.unknown(),
@@ -122,6 +113,7 @@ export namespace IngestBaseStream {
   > extends BaseStream.GetResponse<TDefinition> {
     privileges: IngestStreamPrivileges;
     index_mode?: IngestStreamIndexMode;
+    replicated?: boolean;
   }
 
   export type UpsertRequest<
@@ -144,7 +136,7 @@ type OmitIngestBaseStreamUpsertProps<
   }
 > = Omit<T, 'ingest'> & {
   ingest: Omit<IngestBase, 'processing'> & {
-    processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: never };
+    processing: IngestStreamProcessingUpsert;
   };
 };
 
@@ -156,6 +148,7 @@ export const ingestBaseStreamGetResponseSchema = baseStreamGetResponseSchema.ext
   stream: ingestBaseStreamDefinitionSchema,
   privileges: ingestStreamPrivilegesSchema,
   index_mode: z.optional(ingestStreamIndexModeSchema),
+  replicated: z.optional(z.boolean()),
 });
 
 export const ingestBaseStreamUpsertDefinitionSchema = baseStreamUpsertDefinitionSchema.extend({

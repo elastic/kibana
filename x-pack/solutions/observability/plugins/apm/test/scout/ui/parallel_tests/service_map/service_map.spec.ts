@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
+import { EXTENDED_TIMEOUT, SERVICE_OPBEANS_JAVA } from '../../fixtures/constants';
 
 test.describe(
   'Service map',
@@ -29,16 +30,25 @@ test.describe(
       await serviceMapPage.waitForServiceMapToLoad();
     });
 
-    test('shows a detailed service map', async ({ page, pageObjects: { serviceMapPage } }) => {
-      await serviceMapPage.gotoDetailedServiceMapWithDateSelected(
-        testData.START_DATE,
-        testData.END_DATE
-      );
-      expect(page.url()).toContain('/services/opbeans-java/service-map');
-      await serviceMapPage.waitForServiceMapToLoad();
-      await serviceMapPage.clickZoomOut();
-      await serviceMapPage.centerServiceMapBtn.click();
-      await serviceMapPage.clickZoomIn();
+    test('navigates from the contextual map to the global map with service context', async ({
+      page,
+      pageObjects: { serviceDetailsPage, serviceMapPage },
+    }) => {
+      const { overviewTab } = serviceDetailsPage;
+
+      await overviewTab.goToTab({
+        serviceName: SERVICE_OPBEANS_JAVA,
+        rangeFrom: testData.START_DATE,
+        rangeTo: testData.END_DATE,
+      });
+      await overviewTab.waitForContextualServiceMapToLoad();
+      await expect(overviewTab.exploreInServiceMapLink).toBeVisible();
+
+      await overviewTab.exploreInServiceMapLink.click();
+
+      await expect(page).toHaveURL(new RegExp(`/app/apm(?:#)?/service-map`));
+      expect(page.url()).toContain('controlSelections');
+      expect(page.url()).toContain(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.waitForServiceMapToLoad();
     });
 
@@ -48,10 +58,41 @@ test.describe(
     }) => {
       await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
       await serviceMapPage.typeInTheSearchBar('_id : foo');
-      await serviceMapPage.waitForServiceMapToLoad();
-      await expect(serviceMapPage.noServicesPlaceholder).toBeVisible();
+      await expect(serviceMapPage.noServicesPlaceholder).toBeVisible({ timeout: EXTENDED_TIMEOUT });
       await expect(serviceMapPage.noServicesPlaceholder).toHaveText('No services available');
       await expect(page.getByTestId('apmUnifiedSearchBar')).toBeVisible();
+    });
+
+    test('options panel: find in page, filter placeholders, and Ctrl+K focus', async ({
+      page,
+      pageObjects: { serviceMapPage },
+    }) => {
+      await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
+      await serviceMapPage.waitForServiceMapToLoad();
+      await serviceMapPage.settleServiceMapLayout();
+
+      await expect(serviceMapPage.serviceMapOptionsPanel).toBeVisible();
+      await expect(serviceMapPage.serviceMapFindInPageInput).toBeVisible();
+
+      await expect(page.getByPlaceholder('Alert status')).toBeVisible();
+      await expect(page.getByPlaceholder('SLO Status')).toBeVisible();
+      await expect(page.getByPlaceholder('Anomaly Severity')).toBeVisible();
+
+      await serviceMapPage.serviceMapFindInPageInput.fill('opbeans');
+      await expect(serviceMapPage.serviceMapFindMatchSummary).toHaveText(
+        /[1-9][0-9]*\/[1-9][0-9]*/
+      );
+
+      await page.getByTestId('serviceMapHideControlsButton').click();
+      await expect(serviceMapPage.serviceMapFindInPageInput).toBeHidden();
+      await serviceMapPage.openFindInPageWithKeyboardShortcut();
+      await expect(serviceMapPage.serviceMapFindInPageInput).toBeVisible();
+      await expect(serviceMapPage.serviceMapFindInPageInput).toBeFocused();
+
+      await page.getByTestId('serviceMapHideControlsButton').click();
+      await expect(serviceMapPage.serviceMapFindInPageInput).toBeHidden();
+      await page.getByTestId('serviceMapShowControlsButton').click();
+      await expect(serviceMapPage.serviceMapFindInPageInput).toBeVisible();
     });
   }
 );

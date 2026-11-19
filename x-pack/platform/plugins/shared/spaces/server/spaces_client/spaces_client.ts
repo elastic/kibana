@@ -7,23 +7,27 @@
 
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
+import { isEqual } from 'lodash';
 
 import type { BuildFlavor } from '@kbn/config/src/types';
+import { sanitizeImageDataUrl } from '@kbn/content-sanitization';
 import type {
   ISavedObjectsPointInTimeFinder,
   ISavedObjectsRepository,
   SavedObject,
 } from '@kbn/core/server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { INpreClient } from '@kbn/cps/server/npre';
 import { getSpaceDefaultNpreName, PROJECT_ROUTING } from '@kbn/cps-common';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 
 import { isReservedSpace } from '../../common';
-import type { spaceV1 as v1 } from '../../common';
+import type { InitialSolutionSetupView, spaceV1 as v1 } from '../../common';
 import type { ConfigType } from '../config';
 import { withSpaceSolutionDisabledFeatures } from '../lib/utils/space_solution_disabled_features';
+import type { SpaceSavedObjectAttributes } from '../types';
 
 const SUPPORTED_GET_SPACE_PURPOSES: v1.GetAllSpacesPurpose[] = [
   'any',
@@ -49,6 +53,23 @@ export interface ISpacesClient {
    * @param id the space id.
    */
   get(id: string): Promise<v1.Space>;
+
+  /**
+   * Retrieve the persisted disabled features for a space.
+   * @param id the space id.
+   */
+  getPersistedFeatureVisibility(id: string): Promise<string[]>;
+
+  /**
+   * Returns whether the default space still requires one-time initial solution setup.
+   */
+  isInitialSolutionSetupRequired(): Promise<boolean>;
+
+  /**
+   * Completes one-time initial solution setup for the default space.
+   * @param solution the selected solution view.
+   */
+  completeInitialSolutionSetup(solution: InitialSolutionSetupView): Promise<void>;
 
   /**
    * Creates a space.
@@ -118,7 +139,7 @@ export class SpacesClient implements ISpacesClient {
 
     this.debugLogger(`SpacesClient.getAll(). querying all spaces`);
 
-    const { saved_objects: savedObjects } = await this.repository.find({
+    const { saved_objects: savedObjects } = await this.repository.find<SpaceSavedObjectAttributes>({
       type: 'space',
       page: 1,
       perPage: this.config.maxSpaces,
@@ -131,7 +152,7 @@ export class SpacesClient implements ISpacesClient {
   }
 
   public async get(id: string) {
-    const savedObject = await this.repository.get('space', id);
+    const savedObject = await this.repository.get<SpaceSavedObjectAttributes>('space', id);
     const space = this.transformSavedObjectToSpace(savedObject);
 
     if (this.npreClient && (await this.npreClient.canGetNpre())) {
@@ -140,6 +161,47 @@ export class SpacesClient implements ISpacesClient {
     }
 
     return space;
+  }
+
+  public async getPersistedFeatureVisibility(id: string) {
+    const spaceObject = await this.repository.get<{ disabledFeatures?: string[] }>('space', id);
+
+    return spaceObject.attributes.disabledFeatures ?? [];
+  }
+
+  public async isInitialSolutionSetupRequired() {
+    const spaceObject = await this.repository.get<SpaceSavedObjectAttributes>(
+      'space',
+      DEFAULT_SPACE_ID
+    );
+    return spaceObject.attributes.solutionSetupRequired === true;
+  }
+
+  public async completeInitialSolutionSetup(solution: InitialSolutionSetupView) {
+    if (this.isServerless) {
+      throw Boom.badRequest(
+        'Unable to complete initial solution setup, solution property is forbidden in serverless'
+      );
+    }
+
+    const spaceObject = await this.repository.get<SpaceSavedObjectAttributes>(
+      'space',
+      DEFAULT_SPACE_ID
+    );
+
+    if (spaceObject.attributes.solutionSetupRequired !== true) {
+      throw Boom.conflict('Initial solution setup is already complete');
+    }
+
+    await this.repository.update<SpaceSavedObjectAttributes>(
+      'space',
+      DEFAULT_SPACE_ID,
+      {
+        solution,
+        solutionSetupRequired: false,
+      },
+      { version: spaceObject.version }
+    );
   }
 
   public async create(space: v1.Space) {
@@ -174,6 +236,9 @@ export class SpacesClient implements ISpacesClient {
       throw Boom.badRequest('Unable to create Space, solution property cannot be empty');
     }
 
+    // Sanitize before any side effects so an invalid image never leaves a partial write behind.
+    const imageUrl = this.sanitizeImageUrl(space.imageUrl);
+
     let projectRoutingExpression: string | undefined;
     if (Object.hasOwn(space, 'projectRouting')) {
       if (!this.npreClient) {
@@ -194,7 +259,11 @@ export class SpacesClient implements ISpacesClient {
     this.debugLogger(`SpacesClient.create(), using RBAC. Attempting to create space`);
 
     const id = space.id;
-    const attributes = this.generateSpaceAttributes(space);
+    const attributes = this.generateSpaceAttributes({
+      ...space,
+      name: space.name.trim(),
+      imageUrl,
+    });
 
     const createdSavedObject = await this.repository.create('space', attributes, { id });
 
@@ -235,6 +304,9 @@ export class SpacesClient implements ISpacesClient {
       throw Boom.badRequest('Unable to update Space, solution property cannot be empty');
     }
 
+    // Sanitize before any side effects so an invalid image never leaves a partial write behind.
+    const imageUrl = this.sanitizeImageUrl(space.imageUrl);
+
     const npreName = getSpaceDefaultNpreName(id);
     if (Object.hasOwn(space, 'projectRouting')) {
       if (!this.npreClient) {
@@ -252,10 +324,39 @@ export class SpacesClient implements ISpacesClient {
       delete space.projectRouting;
     }
 
-    const attributes = this.generateSpaceAttributes(space);
+    const existingSpaceSavedObject = await this.repository.get<SpaceSavedObjectAttributes>(
+      'space',
+      id
+    );
+    const existingSpaceDisabledFeatures = Array.isArray(
+      existingSpaceSavedObject.attributes.disabledFeatures
+    )
+      ? existingSpaceSavedObject.attributes.disabledFeatures
+      : [];
+    const spaceToPersist = this.shouldPreserveStoredDisabledFeatures(
+      existingSpaceSavedObject,
+      space
+    )
+      ? { ...space, disabledFeatures: existingSpaceDisabledFeatures }
+      : space;
+
+    // Preserve existing leading/trailing whitespace (backwards compatibility for legacy spaces),
+    // but trim if a new name is being set to prevent introducing new whitespace.
+    const existingName = existingSpaceSavedObject.attributes.name as string;
+    const resolvedName = space.name === existingName ? space.name : space.name.trim();
+    const completesInitialSolutionSetup =
+      id === DEFAULT_SPACE_ID &&
+      existingSpaceSavedObject.attributes.solutionSetupRequired === true &&
+      Boolean(space.solution);
+    const attributes = {
+      ...this.generateSpaceAttributes({ ...spaceToPersist, name: resolvedName, imageUrl }),
+      ...(completesInitialSolutionSetup ? { solutionSetupRequired: false } : {}),
+    };
     await this.repository.update('space', id, attributes);
-    const updatedSavedObject = await this.repository.get('space', id);
-    const updatedSpace = this.transformSavedObjectToSpace(updatedSavedObject);
+    const updatedSpace = this.transformSavedObjectToSpace({
+      id,
+      attributes: { ...existingSpaceSavedObject.attributes, ...attributes },
+    });
 
     if (this.npreClient && (await this.npreClient.canGetNpre())) {
       updatedSpace.projectRouting = await this.npreClient.getNpre(npreName);
@@ -272,7 +373,7 @@ export class SpacesClient implements ISpacesClient {
   }
 
   public async delete(id: string) {
-    const existingSavedObject = await this.repository.get('space', id);
+    const existingSavedObject = await this.repository.get<SpaceSavedObjectAttributes>('space', id);
 
     if (isReservedSpace(this.transformSavedObjectToSpace(existingSavedObject))) {
       throw Boom.badRequest(`The ${id} space cannot be deleted because it is reserved.`);
@@ -309,7 +410,9 @@ export class SpacesClient implements ISpacesClient {
     await this.repository.bulkUpdate(objectsToUpdate);
   }
 
-  private transformSavedObjectToSpace = (savedObject: SavedObject<any>): v1.Space => {
+  private transformSavedObjectToSpace = (
+    savedObject: Pick<SavedObject<SpaceSavedObjectAttributes>, 'id' | 'attributes'>
+  ): v1.Space => {
     // Solution isn't supported in the serverless offering.
     const solution = !this.isServerless ? savedObject.attributes.solution : undefined;
     return {
@@ -342,6 +445,22 @@ export class SpacesClient implements ISpacesClient {
       ...(!this.isServerless && space.solution ? { solution: space.solution } : {}),
     };
   };
+
+  /**
+   * Strips active content (scripts, event handlers, links) from SVG avatars before they are persisted.
+   * Raster images and empty values are returned unchanged.
+   */
+  private sanitizeImageUrl(imageUrl: string | undefined) {
+    if (!imageUrl) {
+      return imageUrl;
+    }
+
+    try {
+      return sanitizeImageDataUrl(imageUrl);
+    } catch (error) {
+      throw Boom.badRequest(`Unable to save Space, the image is not a valid SVG: ${error.message}`);
+    }
+  }
 
   /**
    * Collects a map of all deprecated feature IDs and the feature IDs that replace them.
@@ -386,5 +505,42 @@ export class SpacesClient implements ISpacesClient {
     }
 
     return deprecatedFeatureReferences;
+  }
+
+  private isClassicSolution(solution?: v1.Space['solution']) {
+    return solution == null || solution === 'classic';
+  }
+
+  private shouldPreserveStoredDisabledFeatures(
+    existingSpaceSavedObject: SavedObject<SpaceSavedObjectAttributes>,
+    incomingSpace: v1.Space
+  ) {
+    if (this.isServerless) {
+      return false;
+    }
+
+    const existingSolution = existingSpaceSavedObject.attributes.solution;
+    const incomingSolution = Object.hasOwn(incomingSpace, 'solution')
+      ? incomingSpace.solution
+      : existingSolution;
+
+    // Switch to non-classic solution
+    // Preserve stored disabledFeatures when switching to non-classic solution
+    if (!this.isClassicSolution(incomingSolution)) {
+      return true;
+    }
+
+    // Switch to Classic solution
+    // From non-classic: Preserve stored disabledFeatures if there are no changes to the defaults
+    if (!this.isClassicSolution(existingSolution)) {
+      const normalizeDisabledFeatures = (arr: readonly string[]) => Array.from(new Set(arr)).sort();
+      const incomingDisabledFeatures = normalizeDisabledFeatures(incomingSpace.disabledFeatures);
+      const defaultDisabledFeatures = normalizeDisabledFeatures(
+        withSpaceSolutionDisabledFeatures(this.features.getKibanaFeatures(), [], existingSolution)
+      );
+      return isEqual(incomingDisabledFeatures, defaultDisabledFeatures);
+    }
+    // From classic: accept caller intent
+    return false;
   }
 }

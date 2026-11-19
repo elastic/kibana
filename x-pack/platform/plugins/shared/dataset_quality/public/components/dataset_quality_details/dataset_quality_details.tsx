@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { useDatasetDetailsTelemetry, useDatasetQualityDetailsState } from '../../hooks';
 import { DataStreamNotFoundPrompt } from './index_not_found_prompt';
@@ -53,12 +53,7 @@ export default function DatasetQualityDetails() {
     <>
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="datasetDetailsContainer">
         <EuiFlexItem grow={false}>
-          {view === 'dataQuality' && (
-            <>
-              <Header />
-              <EuiHorizontalRule />
-            </>
-          )}
+          {view === 'dataQuality' && <Header />}
           <Overview openAlertFlyout={() => setRuleType(DEGRADED_DOCS_RULE_TYPE_ID)} />
           {view === 'dataQuality' && (
             <>

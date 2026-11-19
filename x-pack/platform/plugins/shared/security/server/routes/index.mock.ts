@@ -11,6 +11,7 @@ import {
   coreMock,
   httpResourcesMock,
   httpServiceMock,
+  i18nServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import { getDocLinks } from '@kbn/doc-links';
@@ -23,14 +24,18 @@ import { analyticsServiceMock } from '../analytics/analytics_service.mock';
 import { authenticationServiceMock } from '../authentication/authentication_service.mock';
 import { authorizationMock } from '../authorization/index.mock';
 import { ConfigSchema, createConfig } from '../config';
+import { serviceAccountsServiceMock } from '../service_accounts/service_accounts_service.mock';
 import { sessionMock } from '../session_management/session.mock';
 import type { SecurityRequestHandlerContext } from '../types';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
 
 export const routeDefinitionParamsMock = {
-  create: (rawConfig: Record<string, unknown> = {}) => {
+  create: (
+    rawConfig: Record<string, unknown> = {},
+    validationContext: Record<string, unknown> = {}
+  ) => {
     const config = createConfig(
-      ConfigSchema.validate(rawConfig),
+      ConfigSchema.validate(rawConfig, validationContext),
       loggingSystemMock.create().get(),
       { isTLSEnabled: false }
     );
@@ -50,9 +55,15 @@ export const routeDefinitionParamsMock = {
       getAuthenticationService: jest.fn().mockReturnValue(authenticationServiceMock.createStart()),
       getAnonymousAccessService: jest.fn(),
       getUserProfileService: jest.fn().mockReturnValue(userProfileServiceMock.createStart()),
+      getServiceAccountsService: jest
+        .fn()
+        .mockReturnValue(serviceAccountsServiceMock.createStart()),
+      serverlessProjectId: 'mock-project-id',
+      serverlessProjectType: 'search',
       analyticsService: analyticsServiceMock.createSetup(),
       buildFlavor: 'traditional',
       docLinks: { links: getDocLinks({ kibanaBranch: 'main', buildFlavor: 'traditional' }) },
+      i18n: i18nServiceMock.createSetupContract(),
     } as unknown as DeeplyMockedKeys<RouteDefinitionParams>;
   },
 };

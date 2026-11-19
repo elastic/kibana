@@ -1,0 +1,43 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        uninstallAllExample:
+          summary: "Uninstall all entity types"
+          description: "Uninstall all entity engines from the Entity Store."
+          value:
+            entityTypes:
+              - user
+              - host
+              - service
+              - generic
+        uninstallSingleExample:
+          summary: "Uninstall a single entity type"
+          description: "Uninstall only the host engine from the Entity Store."
+          value:
+            entityTypes:
+              - host
+responses:
+  200:
+    description: "Indicates a successful response."
+    content:
+      application/json:
+        examples:
+          uninstallSuccessExample:
+            summary: "Entity Store uninstalled"
+            description: "The specified entity engines were successfully uninstalled."
+            value:
+              ok: true
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X POST -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -d '{"entityTypes":["user","host","service","generic"]}' \
+        "${KIBANA_URL}/api/security/entity_store/uninstall"
+  - lang: Console
+    source: |
+      POST kbn://api/security/entity_store/uninstall
+      {
+        "entityTypes": ["user", "host", "service", "generic"]
+      }

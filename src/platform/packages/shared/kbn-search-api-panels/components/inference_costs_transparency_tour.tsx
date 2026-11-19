@@ -52,6 +52,7 @@ export interface InferenceCostsTransparencyTourProps {
   promoId: string;
   isCloudEnabled: boolean;
   isReady?: boolean;
+  fieldName: string;
   children: React.ReactElement;
 }
 
@@ -61,6 +62,7 @@ export const InferenceCostsTransparencyTour = ({
   promoId,
   isCloudEnabled,
   isReady = true,
+  fieldName,
   children,
 }: InferenceCostsTransparencyTourProps) => {
   const { euiTheme } = useEuiTheme();
@@ -89,7 +91,7 @@ export const InferenceCostsTransparencyTour = ({
               id="searchApiPanels.inferenceCosts.tour.description"
               defaultMessage="Using {semanticText} requires an inference endpoint and may incur costs based on Elastic Inference Service token usage or Machine Learning (ML) node usage, depending on your configuration."
               values={{
-                semanticText: <EuiCode>semantic_text</EuiCode>,
+                semanticText: <EuiCode>{fieldName}</EuiCode>,
               }}
             />
           </p>
@@ -121,7 +123,7 @@ export const InferenceCostsTransparencyTour = ({
                 data-telemetry-id={`${dataId}-learnMore-btn`}
                 target="_blank"
                 iconSide="right"
-                iconType="popout"
+                iconType="external"
               >
                 {i18n.TOUR_CTA}
               </EuiButton>,

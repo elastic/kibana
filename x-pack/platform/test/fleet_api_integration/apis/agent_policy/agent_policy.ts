@@ -132,7 +132,13 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
         expect(body.items.length).to.eql(1);
-        const { id, updated_at: updatedAt, version, ...rest } = body.items[0];
+        const {
+          id,
+          updated_at: updatedAt,
+          created_at: createdAt,
+          version,
+          ...rest
+        } = body.items[0];
         expectSnapshot(rest).toMatch();
       });
 
@@ -489,8 +495,16 @@ export default function (providerContext: FtrProviderContext) {
               overwrite: true,
               attributes: {
                 name: `system-${i + 1}`,
+                enabled: true,
+                inputs: [],
+                revision: 1,
+                created_at: new Date().toISOString(),
+                created_by: 'system',
+                updated_at: new Date().toISOString(),
+                updated_by: 'system',
                 package: {
                   name: 'system',
+                  version: '1.0.0',
                 },
                 latest_revision: true,
               },
@@ -528,8 +542,16 @@ export default function (providerContext: FtrProviderContext) {
           overwrite: true,
           attributes: {
             name: 'system-456',
+            enabled: true,
+            inputs: [],
+            revision: 1,
+            created_at: new Date().toISOString(),
+            created_by: 'system',
+            updated_at: new Date().toISOString(),
+            updated_by: 'system',
             package: {
               name: 'system',
+              version: '1.0.0',
             },
             latest_revision: true,
           },
@@ -541,8 +563,16 @@ export default function (providerContext: FtrProviderContext) {
           overwrite: true,
           attributes: {
             name: 'system-123',
+            enabled: true,
+            inputs: [],
+            revision: 1,
+            created_at: new Date().toISOString(),
+            created_by: 'system',
+            updated_at: new Date().toISOString(),
+            updated_by: 'system',
             package: {
               name: 'system',
+              version: '1.0.0',
             },
             latest_revision: true,
           },
@@ -569,6 +599,49 @@ export default function (providerContext: FtrProviderContext) {
         const policy = policies.find((p: any) => (p.id = res.body.item.id));
 
         expect(policy.package_policies[0].name).be('system-457');
+      });
+
+      it('should create unique system package policy names when creating multiple policies concurrently with sys_monitoring', async () => {
+        const concurrentCount = 3;
+
+        const results = await Promise.all(
+          new Array(concurrentCount).fill(null).map((_, i) =>
+            supertest
+              .post(`/api/fleet/agent_policies`)
+              .query({ sys_monitoring: true })
+              .set('kbn-xsrf', 'xxxx')
+              .send({
+                name: `Concurrent sys monitoring policy ${Date.now()}-${i}`,
+                namespace: 'default',
+                force: true,
+              })
+              .expect(200)
+          )
+        );
+
+        const policyIds = results.map((r: any) => r.body.item.id);
+
+        // Use _bulk_get with explicit IDs to avoid pagination issues and get full package policy details
+        const {
+          body: { items: createdPolicies },
+        } = await supertest
+          .post('/api/fleet/agent_policies/_bulk_get')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ ids: policyIds, full: true })
+          .expect(200);
+
+        const systemPolicyNames: string[] = createdPolicies.map(
+          (p: any) => p.package_policies[0].name
+        );
+
+        // All system package policy names must be unique — no duplicates from the race condition
+        const uniqueNames = new Set(systemPolicyNames);
+        expect(uniqueNames.size).to.equal(concurrentCount);
+
+        // Names must follow the numeric scheme (system-N), not fall back to UUID suffixes
+        systemPolicyNames.forEach((name) => {
+          expect(name).to.match(/^system-\d+$/);
+        });
       });
 
       it('should create policy with global data tags given valid tags', async () => {
@@ -857,7 +930,7 @@ export default function (providerContext: FtrProviderContext) {
             description: 'Test',
           })
           .expect(200);
-        const { id, updated_at, version, ...newPolicy } = item;
+        const { id, updated_at, created_at, version, ...newPolicy } = item;
 
         expect(newPolicy).to.eql({
           name: 'Copied policy',
@@ -873,8 +946,11 @@ export default function (providerContext: FtrProviderContext) {
           is_protected: false,
           space_ids: ['default'],
           supports_agentless: false,
+          has_agent_version_conditions: false,
           min_agent_version: null,
           package_agent_version_conditions: null,
+          download_source_id: null,
+          download_source_ids: [],
         });
       });
 
@@ -1042,8 +1118,16 @@ export default function (providerContext: FtrProviderContext) {
             overwrite: true,
             attributes: {
               name: `system-1`,
+              enabled: true,
+              inputs: [],
+              revision: 1,
+              created_at: new Date().toISOString(),
+              created_by: 'system',
+              updated_at: new Date().toISOString(),
+              updated_by: 'system',
               package: {
                 name: 'system',
+                version: '1.0.0',
               },
               latest_revision: true,
             },
@@ -1127,8 +1211,16 @@ export default function (providerContext: FtrProviderContext) {
             overwrite: true,
             attributes: {
               name: `system-1`,
+              enabled: true,
+              inputs: [],
+              revision: 1,
+              created_at: new Date().toISOString(),
+              created_by: 'system',
+              updated_at: new Date().toISOString(),
+              updated_by: 'system',
               package: {
                 name: 'system',
+                version: '1.0.0',
               },
               latest_revision: true,
             },
@@ -1370,7 +1462,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
-        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+        const { id, created_at, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
@@ -1385,6 +1477,9 @@ export default function (providerContext: FtrProviderContext) {
           package_policies: [],
           is_protected: false,
           space_ids: ['default'],
+          has_agent_version_conditions: false,
+          min_agent_version: null,
+          package_agent_version_conditions: null,
         });
       });
 
@@ -1430,7 +1525,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
-        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+        const { id, created_at, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
@@ -1445,6 +1540,9 @@ export default function (providerContext: FtrProviderContext) {
           package_policies: [],
           is_protected: false,
           space_ids: ['default'],
+          has_agent_version_conditions: false,
+          min_agent_version: null,
+          package_agent_version_conditions: null,
         });
       });
 
@@ -1590,7 +1688,7 @@ export default function (providerContext: FtrProviderContext) {
             force: true,
           })
           .expect(200);
-        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+        const { id, created_at, updated_at, version, ...newPolicy } = updatedPolicy;
         createdPolicyIds.push(updatedPolicy.id);
 
         expect(newPolicy).to.eql({
@@ -1607,6 +1705,9 @@ export default function (providerContext: FtrProviderContext) {
           monitoring_enabled: ['logs', 'metrics'],
           inactivity_timeout: 1209600,
           space_ids: ['default'],
+          has_agent_version_conditions: false,
+          min_agent_version: null,
+          package_agent_version_conditions: null,
         });
 
         const listResponseAfterUpdate = await fetchPackageList();
@@ -1650,7 +1751,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+        const { id, created_at, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
@@ -1672,6 +1773,9 @@ export default function (providerContext: FtrProviderContext) {
               },
             },
           },
+          has_agent_version_conditions: false,
+          min_agent_version: null,
+          package_agent_version_conditions: null,
         });
       });
 
@@ -1767,7 +1871,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+        const { id, created_at, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
@@ -1788,6 +1892,9 @@ export default function (providerContext: FtrProviderContext) {
               percentage: 10,
             },
           ],
+          has_agent_version_conditions: false,
+          min_agent_version: null,
+          package_agent_version_conditions: null,
         });
       });
 
@@ -1856,6 +1963,44 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body.message).to.eql(
           'Output of type "logstash" is not usable with policy "test-agentless-policy".'
         );
+      });
+
+      it('should keep the agent policy id immutable', async () => {
+        const {
+          body: { item: policy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name: 'Immutable id policy', namespace: 'default' })
+          .expect(200);
+        createdPolicyIds.push(policy.id);
+
+        // a body id that differs from the path id is rejected, including unsafe ids
+        for (const id of ['../../../../\\@bad-account.co', 'some-other-id']) {
+          const { body } = await supertest
+            .put(`/api/fleet/agent_policies/${policy.id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ id, name: 'Immutable id policy', namespace: 'default' })
+            .expect(400);
+          expect(body.message).to.contain('Cannot change agent policy ID');
+        }
+
+        // a body id matching the path id is accepted and ignored
+        const {
+          body: { item: updatedPolicy },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${policy.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ id: policy.id, name: 'Immutable id policy updated', namespace: 'default' })
+          .expect(200);
+        expect(updatedPolicy.id).to.eql(policy.id);
+        expect(updatedPolicy.name).to.eql('Immutable id policy updated');
+
+        // reads always return the canonical saved object id
+        const {
+          body: { item: fetchedPolicy },
+        } = await supertest.get(`/api/fleet/agent_policies/${policy.id}`).expect(200);
+        expect(fetchedPolicy.id).to.eql(policy.id);
       });
     });
 
@@ -1936,6 +2081,82 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         await supertest.get(`/api/fleet/agent_policies/${hostedPolicy.id}`).expect(404);
+      });
+
+      it('should remove the policy from a shared package policy whose package is not available', async () => {
+        const createAgentPolicy = async (name: string) => {
+          const {
+            body: { item },
+          } = await supertest
+            .post(`/api/fleet/agent_policies`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ name, namespace: 'default' })
+            .expect(200);
+          return item.id;
+        };
+        const policyToDeleteId = await createAgentPolicy('Policy to delete');
+        const remainingPolicyId = await createAgentPolicy('Remaining policy');
+        const packagePolicyId = 'shared-package-policy-not-available';
+
+        // Written directly as a saved object: the package is neither installed nor in the
+        // registry, so its package info can't be loaded.
+        await kibanaServer.savedObjects.create({
+          id: packagePolicyId,
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          overwrite: true,
+          attributes: {
+            name: 'not-available-1',
+            namespace: 'default',
+            enabled: true,
+            inputs: [],
+            revision: 1,
+            policy_id: policyToDeleteId,
+            policy_ids: [policyToDeleteId, remainingPolicyId],
+            created_at: new Date().toISOString(),
+            created_by: 'system',
+            updated_at: new Date().toISOString(),
+            updated_by: 'system',
+            package: {
+              name: 'not_available_package',
+              title: 'Not available package',
+              version: '1.0.0',
+            },
+            latest_revision: true,
+          },
+        });
+
+        try {
+          await supertest
+            .post('/api/fleet/agent_policies/delete')
+            .set('kbn-xsrf', 'xxx')
+            .send({ agentPolicyId: policyToDeleteId })
+            .expect(200);
+
+          await supertest.get(`/api/fleet/agent_policies/${policyToDeleteId}`).expect(404);
+
+          const { attributes } = await kibanaServer.savedObjects.get<{
+            policy_id: string;
+            policy_ids: string[];
+            revision: number;
+            updated_by: string;
+          }>({
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            id: packagePolicyId,
+          });
+          expect(attributes.policy_ids).to.eql([remainingPolicyId]);
+          expect(attributes.policy_id).to.eql(remainingPolicyId);
+          expect(attributes.revision).to.eql(1);
+          expect(attributes.updated_by).to.eql('elastic');
+        } finally {
+          await kibanaServer.savedObjects.bulkDelete({
+            objects: [{ type: PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: packagePolicyId }],
+          });
+          await supertest
+            .post('/api/fleet/agent_policies/delete')
+            .set('kbn-xsrf', 'xxx')
+            .send({ agentPolicyId: remainingPolicyId })
+            .expect(200);
+        }
       });
 
       describe('Errors when trying to delete', () => {
@@ -2086,6 +2307,7 @@ export default function (providerContext: FtrProviderContext) {
         const {
           package_policies: packagePolicies,
           id,
+          created_at: createdAt,
           space_ids: spaceIds,
           updated_at: updatedAt,
           version: policyVersion,

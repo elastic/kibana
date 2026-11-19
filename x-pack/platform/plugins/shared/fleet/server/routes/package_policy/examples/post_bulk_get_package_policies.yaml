@@ -1,0 +1,55 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postBulkGetPackagePoliciesRequestExample:
+          description: 'Retrieve multiple package policies by ID'
+          value:
+            ids:
+              - 'package-policy-id-1'
+              - 'package-policy-id-2'
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postBulkGetPackagePoliciesExample:
+            description: 'The requested package policies'
+            value:
+              items:
+                - id: 'package-policy-id-1'
+                  name: 'nginx-1'
+                  namespace: 'default'
+                  enabled: true
+                  policy_ids:
+                    - 'agent-policy-id-1'
+                  package:
+                    name: 'nginx'
+                    title: 'Nginx'
+                    version: '1.20.0'
+                  inputs: []
+                  created_at: '2024-01-15T10:00:00.000Z'
+                  updated_at: '2024-01-15T10:00:00.000Z'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'
+  404:
+    description: 'Not Found'
+    content:
+      application/json:
+        examples:
+          notFoundExample:
+            description: 'One or more package policies were not found'
+            value:
+              statusCode: 404
+              error: 'Not Found'
+              message: 'Package policy package-policy-id-2 not found'

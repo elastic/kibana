@@ -1,0 +1,139 @@
+{
+  "meta": {
+    "timestamp": 1778000000000,
+    "date": "2026-05-01T12:00:00.000Z",
+    "kibanaCommitHash": "40d3fe6a693980c56hdc2f83d7892eef7eg998674",
+    "buildUrl": null,
+    "pullRequestUrl": null
+  },
+  "typeDefinitions": {
+    "task": {
+      "name": "task",
+      "migrationVersions": ["7.4.0", "7.6.0", "8.0.0", "8.2.0", "8.5.0", "8.8.0"],
+      "hash": "789edead32ea09558ceb54f64fd9aa4d324d94d0",
+      "modelVersions": [
+        {
+          "version": "1",
+          "modelVersionHash": "aaa1000000000000000000000000000000000000000000000000000000000001",
+          "changeTypes": ["mappings_deprecation"],
+          "hasTransformation": false,
+          "newMappings": [],
+          "schemas": {
+            "forwardCompatibility": {
+              "type": "object",
+              "keys": {
+                "taskType": { "type": "string" },
+                "status": { "type": "string" }
+              },
+              "preferences": { "allowUnknown": true }
+            },
+            "create": {
+              "type": "object",
+              "keys": {
+                "taskType": { "type": "string" },
+                "status": { "type": "string" }
+              }
+            }
+          }
+        },
+        {
+          "version": "2",
+          "modelVersionHash": "aaa2000000000000000000000000000000000000000000000000000000000002",
+          "changeTypes": ["mappings_addition"],
+          "hasTransformation": false,
+          "newMappings": ["partition.type"],
+          "schemas": {
+            "forwardCompatibility": {
+              "type": "object",
+              "keys": {
+                "taskType": { "type": "string" },
+                "status": { "type": "string" },
+                "partition": { "type": "number" }
+              },
+              "preferences": { "allowUnknown": true }
+            },
+            "create": {
+              "type": "object",
+              "keys": {
+                "taskType": { "type": "string" },
+                "status": { "type": "string" },
+                "partition": { "type": "number" }
+              }
+            }
+          }
+        },
+        {
+          "version": "3",
+          "modelVersionHash": "aaa3999999999999999999999999999999999999999999999999999999999999",
+          "changeTypes": [],
+          "hasTransformation": false,
+          "newMappings": [],
+          "schemas": {
+            "forwardCompatibility": {
+              "type": "object",
+              "keys": {
+                "taskType": {
+                  "type": "string",
+                  "rules": [{ "name": "max", "args": { "limit": 255 } }]
+                },
+                "status": { "type": "string" },
+                "partition": { "type": "number" }
+              },
+              "preferences": { "allowUnknown": true }
+            },
+            "create": {
+              "type": "object",
+              "keys": {
+                "taskType": {
+                  "type": "string",
+                  "rules": [{ "name": "max", "args": { "limit": 255 } }]
+                },
+                "status": { "type": "string" },
+                "partition": { "type": "number" }
+              }
+            }
+          }
+        },
+        {
+          "version": "4",
+          "modelVersionHash": "aaa4000000000000000000000000000000000000000000000000000000000004",
+          "changeTypes": [],
+          "hasTransformation": false,
+          "newMappings": [],
+          "schemas": {
+            "forwardCompatibility": {
+              "type": "object",
+              "keys": {
+                "taskType": {
+                  "type": "string",
+                  "rules": [{ "name": "max", "args": { "limit": 255 } }]
+                },
+                "status": { "type": "string" },
+                "partition": { "type": "number" }
+              },
+              "preferences": { "allowUnknown": true }
+            },
+            "create": {
+              "type": "object",
+              "keys": {
+                "taskType": {
+                  "type": "string",
+                  "rules": [{ "name": "max", "args": { "limit": 255 } }]
+                },
+                "status": { "type": "string" },
+                "partition": { "type": "number" }
+              }
+            }
+          }
+        }
+      ],
+      "schemaVersions": [],
+      "mappings": {
+        "dynamic": false,
+        "properties.taskType.type": "keyword",
+        "properties.status.type": "keyword",
+        "properties.partition.type": "integer"
+      }
+    }
+  }
+}

@@ -8,12 +8,12 @@
 import { firstValueFrom } from 'rxjs';
 import type { DataViewBase, Query } from '@kbn/es-query';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import semverGte from 'semver/functions/gte';
 import type {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
-} from '@kbn/timelines-plugin/common';
+} from '@kbn/securitysolution-timeline-search-strategy';
 import { canFetchPackageAndAgentPolicies } from '../../../../../common/endpoint/service/authz/authz';
 import type {
   IsolationRouteRequestBody,

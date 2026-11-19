@@ -9,10 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { useAssetInventoryRoutes } from './use_asset_inventory_routes';
 import { useKibana } from '../../common/lib/kibana';
 import { API_VERSIONS } from '../../../common/constants';
-import {
-  ASSET_INVENTORY_ENABLE_API_PATH,
-  ASSET_INVENTORY_STATUS_API_PATH,
-} from '../../../common/api/asset_inventory/constants';
+import { ASSET_INVENTORY_INSTALL_DATA_VIEW_API_PATH } from '../../../common/api/asset_inventory/constants';
 
 jest.mock('../../common/lib/kibana');
 
@@ -28,32 +25,16 @@ describe('useAssetInventoryRoutes', () => {
     });
   });
 
-  it('calls the correct endpoint and options for `postEnableAssetInventory`', async () => {
-    mockFetch.mockResolvedValue({ success: true });
+  it('calls the correct endpoint and options for `postInstallAssetInventoryDataView`', async () => {
+    mockFetch.mockResolvedValue({});
 
     const { result } = renderHook(useAssetInventoryRoutes);
-    await result.current.postEnableAssetInventory();
+    await result.current.postInstallAssetInventoryDataView();
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
-    expect(mockFetch).toHaveBeenCalledWith(ASSET_INVENTORY_ENABLE_API_PATH, {
+    expect(mockFetch).toHaveBeenCalledWith(ASSET_INVENTORY_INSTALL_DATA_VIEW_API_PATH, {
       method: 'POST',
       version: API_VERSIONS.public.v1,
-      body: JSON.stringify({}),
     });
-  });
-
-  it('calls the correct endpoint and options for `getAssetInventoryStatus`', async () => {
-    mockFetch.mockResolvedValue({ status: 'enabled' });
-
-    const { result } = renderHook(useAssetInventoryRoutes);
-    const response = await result.current.getAssetInventoryStatus();
-
-    expect(mockFetch).toHaveBeenCalledTimes(1);
-    expect(mockFetch).toHaveBeenCalledWith(ASSET_INVENTORY_STATUS_API_PATH, {
-      method: 'GET',
-      version: API_VERSIONS.public.v1,
-      query: {},
-    });
-    expect(response).toEqual({ status: 'enabled' });
   });
 });

@@ -1,0 +1,5 @@
+java.lang.RuntimeException: Activity not obfuscated
+	at co.elastic.otel.android.integration.Crasher.crash(Crasher.kt:24)
+	at co.elastic.otel.android.integration.CrashActivity.onCreate$lambda$0(CrashActivity.kt:31)
+	at co.elastic.otel.android.integration.CrashActivity.onCreate(CrashActivity.kt:30)
+	at android.os.Handler.handleCallback(Handler.java:789)

@@ -22,6 +22,7 @@ describe('FieldsMetadataClient - client-side proxy support', () => {
 
   it('should allow accessing base fields from find() result', async () => {
     const mockResponse = {
+      streamFields: {},
       fields: {
         '@timestamp': {
           name: '@timestamp',
@@ -49,6 +50,7 @@ describe('FieldsMetadataClient - client-side proxy support', () => {
 
   it('should allow accessing prefixed fields via proxy on client side', async () => {
     const mockResponse = {
+      streamFields: {},
       fields: {
         'service.name': {
           name: 'name',
@@ -88,6 +90,7 @@ describe('FieldsMetadataClient - client-side proxy support', () => {
 
   it('should return undefined for non-existent prefixed fields', async () => {
     const mockResponse = {
+      streamFields: {},
       fields: {
         'service.name': {
           name: 'name',
@@ -108,6 +111,7 @@ describe('FieldsMetadataClient - client-side proxy support', () => {
 
   it('should support "in" operator for prefixed fields on client side', async () => {
     const mockResponse = {
+      streamFields: {},
       fields: {
         '@timestamp': {
           name: '@timestamp',
@@ -140,6 +144,7 @@ describe('FieldsMetadataClient - client-side proxy support', () => {
 
   it('should not enumerate prefixed fields to avoid payload bloat', async () => {
     const mockResponse = {
+      streamFields: {},
       fields: {
         '@timestamp': { name: '@timestamp', type: 'date' },
         'service.name': { name: 'name', flat_name: 'service.name', type: 'keyword' },
@@ -167,6 +172,7 @@ describe('FieldsMetadataClient - client-side proxy support', () => {
 
   it('should cache proxied results', async () => {
     const mockResponse = {
+      streamFields: {},
       fields: {
         'service.name': {
           name: 'name',

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<!--
+  Task 8 live-validation harness for the exploratory-tester roadmap.
+
+  Stock Kibana does not exhibit these 10 seeded scenarios on demand, so this
+  page deliberately reproduces each one's real browser-level DOM/console/
+  network signature (via a live server, real fetch()/AbortController/
+  history calls — not synthetic JSON) so the actual detector-injection
+  bundle (inject-detectors.js) and the actual shadow-collector bridge
+  (action-scoped-collector.md Install/Drain, run through a real
+  browser_run_code_unsafe call) can be exercised against genuine browser
+  events, closing the gap the existing jsdom/fake-EventEmitter unit tests
+  cannot: those feed pre-built event objects directly into the reducer/
+  detector functions and never execute real browser APIs.
+
+  Serve with: python3 -m http.server <port> from this directory, then
+  navigate to /seeded-live-harness.html#<scenario>. Each scenario is
+  triggered by calling the matching window.seed*() function (via
+  browser_evaluate) rather than requiring simulated clicks, so results are
+  deterministic and don't depend on layout/timing of a real click.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>exploratory-tester seeded-scenario harness</title>
+</head>
+<body>
+<h1>exploratory-tester seeded-scenario harness</h1>
+<p id="status">idle</p>
+<div id="ccs-badge-container"></div>
+<div id="permission-panel"></div>
+<div id="spinner-container"></div>
+
+<script>
+function setStatus(text) {
+  document.getElementById('status').textContent = text;
+}
+
+// 1. Silent 500 — request fails server-side, no visible UI error, no
+// console.error either (the "silent" part) — Detector B/shadow collector
+// must catch this from the network status alone.
+window.seedSilent500 = async function () {
+  setStatus('silent-500: requesting');
+  try {
+    await fetch('/api/seeded/silent-500');
+  } catch (e) {
+    // swallowed on purpose — the page must show nothing to the user
+  }
+  setStatus('silent-500: done (no visible error, by design)');
+};
+
+// 2. Delayed missing element — a spinner is shown, the element it is
+// waiting for never appears within a realistic timeout window.
+window.seedDelayedMissingElement = function (delayMs) {
+  const container = document.getElementById('spinner-container');
+  // data-test-subj + class mirror EUI's real loading-spinner markup so
+  // check-dom-anomalies.js's actual selectors match, not a hand-picked one.
+  container.innerHTML =
+    '<div data-test-subj="loadingSpinner" class="euiLoadingSpinner" role="progressbar" aria-label="Loading">Loading…</div>';
+  setStatus('delayed-missing-element: spinner shown, target element intentionally never renders');
+  // Intentionally never replaces the spinner — this is the bug: the
+  // target content that should replace it after `delayMs` never arrives.
+  setTimeout(() => {
+    setStatus('delayed-missing-element: timeout elapsed, spinner still showing');
+  }, delayMs);
+};
+
+// 3. Intentional query variants — same path, meaningfully different query
+// strings. Must never be grouped as duplicate/repeated calls.
+window.seedQueryVariants = async function () {
+  setStatus('query-variants: requesting');
+  await Promise.all([
+    fetch('/api/seeded/search?q=alpha&page=1'),
+    fetch('/api/seeded/search?q=beta&page=1'),
+    fetch('/api/seeded/search?q=alpha&page=2'),
+  ]);
+  setStatus('query-variants: done');
+};
+
+// 4. Duplicate click — the exact same request fired twice in rapid
+// succession (a real double-submit bug), same path AND same query.
+window.seedDuplicateClick = async function () {
+  setStatus('duplicate-click: requesting');
+  await Promise.all([
+    fetch('/api/seeded/submit?id=42'),
+    fetch('/api/seeded/submit?id=42'),
+  ]);
+  setStatus('duplicate-click: done');
+};
+
+// 5. CCS badge — check-dom-anomalies.js does not detect a generic
+// "cross-cluster search is active" indicator; it specifically targets
+// Kibana's icon-only search-response-warnings badge (partial/CCS
+// failures), whose visible text is only a count — the real "Problem with
+// N cluster(s)" message renders only inside a popover after a click. This
+// reproduces that exact markup shape, matching the real detector's
+// documented selector rather than an invented one.
+window.seedCcsBadge = function (warningCount) {
+  const container = document.getElementById('ccs-badge-container');
+  container.innerHTML =
+    '<button data-test-subj="searchResponseWarningsBadgeToogleButton" title="' +
+    warningCount + ' warnings">' + warningCount + ' warnings</button>';
+  setStatus('ccs-badge: rendered (icon-only, popover text not yet revealed)');
+};
+
+// 6. Known noise — a polling endpoint hit repeatedly (heartbeat-style),
+// which detectors should suppress as noise, but one poll in the middle
+// genuinely fails — that failure must still be surfaced despite the
+// surrounding suppression.
+window.seedKnownNoiseWithGenuineFailure = async function (pollCount) {
+  setStatus('known-noise: polling');
+  for (let i = 0; i < pollCount; i++) {
+    const failThisOne = i === Math.floor(pollCount / 2);
+    await fetch('/api/seeded/poll' + (failThisOne ? '?fail=1' : ''));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  setStatus('known-noise: done, ' + pollCount + ' polls, 1 genuine failure injected');
+};
+
+// 7. Permission gating — a 403 from the server, and the panel that should
+// be hidden for this role is (correctly) not rendered.
+window.seedPermissionGating = async function () {
+  setStatus('permission-gating: requesting');
+  const res = await fetch('/api/seeded/admin-only');
+  const panel = document.getElementById('permission-panel');
+  if (res.status === 403) {
+    panel.innerHTML = ''; // correctly hidden — not a bug by itself
+  }
+  setStatus('permission-gating: done (HTTP ' + res.status + ')');
+};
+
+// 8. Cancellation — a request the page itself aborts before it settles.
+// Must read as an intentional cancellation, not a duplicate/retry bug and
+// not a silent failure.
+window.seedCancellation = async function () {
+  setStatus('cancellation: requesting');
+  const controller = new AbortController();
+  const req = fetch('/api/seeded/slow?delay=2000', { signal: controller.signal });
+  setTimeout(() => controller.abort(), 100);
+  try {
+    await req;
+  } catch (e) {
+    // expected AbortError
+  }
+  setStatus('cancellation: aborted by the page itself');
+};
+
+// 9. Refresh mid-request — an in-flight request is abandoned by a real
+// navigation (same-document pushState, then a full reload), not a
+// synthetic frame-detach.
+window.seedRefreshMidRequest = function () {
+  setStatus('refresh-mid-request: firing request then navigating');
+  fetch('/api/seeded/slow?delay=5000').catch(() => {});
+  setTimeout(() => {
+    history.pushState({}, '', '#after-refresh');
+    location.reload();
+  }, 100);
+};
+</script>
+</body>
+</html>

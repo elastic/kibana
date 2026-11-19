@@ -9,6 +9,7 @@ import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandlerContext, RouteValidatorConfig } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers, kibanaResponseFactory } from '@kbn/core/server';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { MAX_CLOUD_ONBOARDING_TOKEN_LENGTH } from '../route_length_limits';
 import { CLOUD_DATA_SAVED_OBJECT_ID } from './constants';
 import { setPostCloudSolutionDataRoute } from './set_cloud_data_route';
 import type { RouteOptions } from '.';
@@ -111,5 +112,35 @@ describe('POST /internal/cloud/solution', () => {
       CLOUD_DATA_SAVED_OBJECT_ID,
       { onboardingData: request.body.onboardingData }
     );
+  });
+
+  describe('maxLength bounds', () => {
+    it('accepts a token at the configured limit', async () => {
+      const { routeValidation } = await setup();
+      const bodySchema = (routeValidation as any).request.body;
+
+      expect(() =>
+        bodySchema.validate({
+          onboardingData: {
+            solutionType: 'security',
+            token: 'a'.repeat(MAX_CLOUD_ONBOARDING_TOKEN_LENGTH),
+          },
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects a token over the configured limit', async () => {
+      const { routeValidation } = await setup();
+      const bodySchema = (routeValidation as any).request.body;
+
+      expect(() =>
+        bodySchema.validate({
+          onboardingData: {
+            solutionType: 'security',
+            token: 'a'.repeat(MAX_CLOUD_ONBOARDING_TOKEN_LENGTH + 1),
+          },
+        })
+      ).toThrow(/maximum length/i);
+    });
   });
 });

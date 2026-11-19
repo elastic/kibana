@@ -1,0 +1,223 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Logger } from '@kbn/logging';
+import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
+import {
+  createTaskRunError,
+  getErrorSource,
+  TaskErrorSource,
+} from '@kbn/task-manager-plugin/server/task_running';
+import { ErrorHandlingMiddleware } from './error_handling_middleware';
+import { createRuleExecutionMiddlewareContext } from './test_utils';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import { collectStreamResults, createPipelineStream, createRulePipelineState } from '../test_utils';
+import { getFailedStep } from '../execution_outcome';
+import { createExecutionContext, RuleExecutionCancellationError } from '../../execution_context';
+
+describe('ErrorHandlingMiddleware', () => {
+  let middleware: ErrorHandlingMiddleware;
+  let logger: jest.Mocked<Logger>;
+
+  beforeEach(() => {
+    const { loggerService, mockLogger } = createLoggerService();
+    logger = mockLogger;
+    middleware = new ErrorHandlingMiddleware(loggerService);
+  });
+
+  it('calls next and returns result on success', async () => {
+    const expectedState = createRulePipelineState();
+    const next = jest.fn().mockReturnValue(createPipelineStream([expectedState]));
+
+    const context = createRuleExecutionMiddlewareContext();
+    const result = await collectStreamResults(
+      middleware.execute(context, next, createPipelineStream([expectedState]))
+    );
+
+    expect(result).toEqual([{ type: 'continue', state: expectedState }]);
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('logs error and rethrows on failure', async () => {
+    const error = new Error('Step failed');
+    const next = jest.fn().mockReturnValue(
+      (async function* () {
+        throw error;
+      })()
+    );
+    const context = createRuleExecutionMiddlewareContext({ name: 'fetch_rule' });
+
+    await expect(
+      collectStreamResults(middleware.execute(context, next, createPipelineStream()))
+    ).rejects.toThrow('Step failed');
+    expect(logger.error).toHaveBeenCalledWith(
+      'Step failed',
+      expect.objectContaining({
+        labels: {
+          code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
+          step: 'fetch_rule',
+          error_source: 'framework',
+        },
+      })
+    );
+  });
+
+  it('overrides the message for ES|QL user errors so the query fragment is not logged', async () => {
+    const error = createTaskRunError(
+      new errors.ResponseError({
+        statusCode: 400,
+        body: {
+          error: {
+            type: 'verification_exception',
+            reason: 'Found 1 problem\nline 1:1: Unknown column [secret_field]',
+          },
+        },
+      } as DiagnosticResult),
+      TaskErrorSource.USER
+    );
+    const next = jest.fn().mockReturnValue(
+      (async function* () {
+        throw error;
+      })()
+    );
+    const context = createRuleExecutionMiddlewareContext({ name: 'execute_rule_query' });
+
+    await expect(
+      collectStreamResults(middleware.execute(context, next, createPipelineStream()))
+    ).rejects.toBe(error);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'Rule query failed to parse or verify',
+      expect.objectContaining({
+        labels: {
+          code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
+          step: 'execute_rule_query',
+          error_source: 'user',
+        },
+        error: expect.objectContaining({
+          message: 'Rule query failed to parse or verify',
+        }),
+      })
+    );
+    const loggedMessage = (logger.error as jest.Mock).mock.calls[0][0] as string;
+    expect(loggedMessage).not.toContain('secret_field');
+  });
+
+  it('labels a failure as framework when no step tagged it as a user error', async () => {
+    const error = new errors.ResponseError({
+      statusCode: 400,
+      body: { error: { type: 'verification_exception', reason: 'Unknown column [x]' } },
+    } as DiagnosticResult);
+    const next = jest.fn().mockReturnValue(
+      (async function* () {
+        throw error;
+      })()
+    );
+    const context = createRuleExecutionMiddlewareContext({ name: 'director' });
+
+    await expect(
+      collectStreamResults(middleware.execute(context, next, createPipelineStream()))
+    ).rejects.toBe(error);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        labels: {
+          code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
+          step: 'director',
+          error_source: 'framework',
+        },
+      })
+    );
+  });
+
+  it('tags the rethrown error with the failing step', async () => {
+    const error = new Error('Step failed');
+    const next = jest.fn().mockReturnValue(
+      (async function* () {
+        throw error;
+      })()
+    );
+    const context = createRuleExecutionMiddlewareContext({ name: 'fetch_rule' });
+
+    const thrown = await collectStreamResults(
+      middleware.execute(context, next, createPipelineStream())
+    ).catch((caught) => caught);
+
+    expect(thrown).toBe(error);
+    expect(getFailedStep(thrown)).toBe('fetch_rule');
+  });
+
+  it('preserves task manager error decorations on the rethrown error', async () => {
+    const error = createTaskRunError(new Error('Query rejected'), TaskErrorSource.USER);
+    const next = jest.fn().mockReturnValue(
+      (async function* () {
+        throw error;
+      })()
+    );
+    const context = createRuleExecutionMiddlewareContext({ name: 'execute_rule_query' });
+
+    const thrown = await collectStreamResults(
+      middleware.execute(context, next, createPipelineStream())
+    ).catch((caught) => caught);
+
+    expect(getErrorSource(thrown)).toBe(TaskErrorSource.USER);
+  });
+
+  it('keeps the innermost step and logs once when the error crosses downstream steps', async () => {
+    const error = new Error('Step failed');
+    const failing = jest.fn().mockReturnValue(
+      (async function* () {
+        throw error;
+      })()
+    );
+
+    // Mirrors the pipeline: each step's middleware wraps the previous step's stream.
+    const innerStream = middleware.execute(
+      createRuleExecutionMiddlewareContext({ name: 'fetch_rule' }),
+      failing,
+      createPipelineStream()
+    );
+    const outerStream = middleware.execute(
+      createRuleExecutionMiddlewareContext({ name: 'store_alert_events' }),
+      (stream) => stream,
+      innerStream
+    );
+
+    const thrown = await collectStreamResults(outerStream).catch((caught) => caught);
+
+    expect(getFailedStep(thrown)).toBe('fetch_rule');
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledWith(
+      'Step failed',
+      expect.objectContaining({ labels: expect.objectContaining({ step: 'fetch_rule' }) })
+    );
+  });
+
+  it('does not log RULE_EXECUTION_STEP_FAILED for a bare-abort cancellation', async () => {
+    const abortController = new AbortController();
+    abortController.abort();
+    const executionContext = createExecutionContext(abortController.signal);
+
+    const next = jest.fn().mockReturnValue(
+      (async function* () {
+        executionContext.throwIfAborted();
+      })()
+    );
+
+    const context = createRuleExecutionMiddlewareContext({ name: 'execute_rule_query' });
+
+    await expect(
+      collectStreamResults(middleware.execute(context, next, createPipelineStream()))
+    ).rejects.toThrow(RuleExecutionCancellationError);
+
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+});

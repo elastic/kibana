@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFormRow, EuiComboBox, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 import type { SerializerFunc } from '../../../shared_imports';
@@ -95,10 +96,9 @@ export const PathParameter = ({ field, allFields }: Props) => {
             <>
               {!Boolean(suggestedFields.length) && (
                 <>
-                  <EuiCallOut
+                  <KbnWarningCallout
                     announceOnMount
                     size="s"
-                    color="warning"
                     title={i18n.translate(
                       'xpack.idxMgmt.mappingsEditor.aliasType.noFieldsAddedWarningMessage',
                       {

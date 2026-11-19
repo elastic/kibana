@@ -14,20 +14,21 @@ export function getTableItemClosestToTimestamp(
   anomalyTime: number,
   entityFields?: MlEntityField[]
 ) {
-  const filteredAnomalies = entityFields
-    ? anomalies.filter((anomaly) => {
-        const currentEntity = {
-          entityName: anomaly.entityName,
-          entityValue: anomaly.entityValue,
-        };
+  const filteredAnomalies =
+    Array.isArray(entityFields) && entityFields.length > 0
+      ? anomalies.filter((anomaly) => {
+          const currentEntity = {
+            entityName: anomaly.entityName,
+            entityValue: anomaly.entityValue,
+          };
 
-        return entityFields.some(
-          (field) =>
-            field.fieldName === currentEntity.entityName &&
-            field.fieldValue === currentEntity.entityValue
-        );
-      })
-    : anomalies;
+          return entityFields.some(
+            (field) =>
+              field.fieldName === currentEntity.entityName &&
+              field.fieldValue === currentEntity.entityValue
+          );
+        })
+      : anomalies;
 
   return filteredAnomalies.reduce<MlAnomaliesTableRecord | undefined>(
     (closestItem, currentItem) => {

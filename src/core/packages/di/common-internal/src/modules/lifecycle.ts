@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ContainerModule,
-  type ContainerModuleLoadOptions,
-  type ServiceIdentifier,
-} from 'inversify';
+import { ContainerModule, type ContainerModuleLoadOptions } from 'inversify';
 import type { LoggerFactory } from '@kbn/logging';
+import type { ServiceToken, CoreDiServiceStart } from '@kbn/core-di';
 import { PluginSetup, PluginStart } from '@kbn/core-di';
 
 /** @internal */
@@ -21,7 +18,14 @@ export interface InternalPluginInitializerContext {
 }
 
 /** @internal */
-export type ServiceIdentifierFactory<T> = <K extends keyof T>(key: K) => ServiceIdentifier<T[K]>;
+export interface InternalCoreStartContext {
+  injection: CoreDiServiceStart;
+}
+
+/** @internal */
+export type ServiceIdentifierFactory<TBase> = <T extends TBase, K extends keyof T>(
+  key: K
+) => ServiceToken<T[K]>;
 
 function loadEach<T extends object>(
   { bind }: ContainerModuleLoadOptions,
@@ -45,11 +49,14 @@ export const InternalPluginInitializer =
 export const InternalCoreSetup = createServiceIdentifierFactory('core', 'setup');
 
 /** @internal */
-export const InternalCoreStart = createServiceIdentifierFactory('core', 'start');
+export const InternalCoreStart = createServiceIdentifierFactory<InternalCoreStartContext>(
+  'core',
+  'start'
+);
 
 /** @internal */
 export function createSetupModule<
-  TPluginInitializerContext extends object,
+  TPluginInitializerContext extends InternalPluginInitializerContext,
   TCoreSetupContext extends object,
   TPluginsSetup extends object
 >(
@@ -65,10 +72,10 @@ export function createSetupModule<
 }
 
 /** @internal */
-export function createStartModule<TCoreStartContext extends object, TPluginsStart extends object>(
-  coreStartContext: TCoreStartContext,
-  plugins: TPluginsStart
-) {
+export function createStartModule<
+  TCoreStartContext extends InternalCoreStartContext,
+  TPluginsStart extends object
+>(coreStartContext: TCoreStartContext, plugins: TPluginsStart) {
   return new ContainerModule((options) => {
     loadEach(options, coreStartContext, InternalCoreStart);
     loadEach(options, plugins, PluginStart);

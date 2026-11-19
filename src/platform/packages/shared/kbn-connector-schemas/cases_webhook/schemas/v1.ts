@@ -6,10 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { AuthConfiguration, SecretConfigurationSchema, WebhookMethods } from '../../common/auth';
 
-const HeadersSchema = z.record(z.string(), z.string());
+const HeadersSchema = lazySchema(() => z.record(z.string(), z.string()));
 
 export const ExternalIncidentServiceConfiguration = {
   createIncidentUrl: z.string(),
@@ -46,44 +46,48 @@ export const ExternalIncidentServiceConfiguration = {
   additionalFields: AuthConfiguration.additionalFields,
 };
 
-export const ExternalIncidentServiceConfigurationSchema = z
-  .object(ExternalIncidentServiceConfiguration)
-  .strict();
+export const ExternalIncidentServiceConfigurationSchema = lazySchema(() =>
+  z.object(ExternalIncidentServiceConfiguration).strict()
+);
 
-export const ExecutorSubActionPushParamsSchema = z
-  .object({
-    incident: z
-      .object({
-        title: z.string(),
-        description: z.string().nullable().default(null),
-        id: z.string().nullable().default(null),
-        severity: z.string().nullable().default(null),
-        status: z.string().nullable().default(null),
-        externalId: z.string().nullable().default(null),
-        tags: z.array(z.string()).nullable().default(null),
-      })
-      .strict(),
-    comments: z
-      .array(
-        z
-          .object({
-            comment: z.string(),
-            commentId: z.string(),
-          })
-          .strict()
-      )
-      .nullable()
-      .default(null),
-  })
-  .strict();
-
-export const ExecutorParamsSchema = z.discriminatedUnion('subAction', [
+export const ExecutorSubActionPushParamsSchema = lazySchema(() =>
   z
     .object({
-      subAction: z.literal('pushToService'),
-      subActionParams: ExecutorSubActionPushParamsSchema,
+      incident: z
+        .object({
+          title: z.string(),
+          description: z.string().nullable().default(null),
+          id: z.string().nullable().default(null),
+          severity: z.string().nullable().default(null),
+          status: z.string().nullable().default(null),
+          externalId: z.string().nullable().default(null),
+          tags: z.array(z.string()).nullable().default(null),
+        })
+        .strict(),
+      comments: z
+        .array(
+          z
+            .object({
+              comment: z.string(),
+              commentId: z.string(),
+            })
+            .strict()
+        )
+        .nullable()
+        .default(null),
     })
-    .strict(),
-]);
+    .strict()
+);
+
+export const ExecutorParamsSchema = lazySchema(() =>
+  z.discriminatedUnion('subAction', [
+    z
+      .object({
+        subAction: z.literal('pushToService'),
+        subActionParams: ExecutorSubActionPushParamsSchema,
+      })
+      .strict(),
+  ])
+);
 
 export const ExternalIncidentServiceSecretConfigurationSchema = SecretConfigurationSchema;

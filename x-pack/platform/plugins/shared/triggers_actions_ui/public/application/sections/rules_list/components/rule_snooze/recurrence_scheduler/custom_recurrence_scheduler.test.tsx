@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import moment from 'moment';
 import React from 'react';
 import { RRuleFrequency } from '../../../../../../types';
@@ -27,7 +29,7 @@ describe('CustomRecurrenceScheduler', () => {
   });
 
   test('render', () => {
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <CustomRecurrenceScheduler
         startDate={startDate}
         onChange={onChange}
@@ -35,18 +37,17 @@ describe('CustomRecurrenceScheduler', () => {
         minimumRecurrenceDays={1}
       />
     );
-    expect(wrapper.find('[data-test-subj="customRecurrenceScheduler"]').exists()).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="customRecurrenceSchedulerFrequency"]').first().props().value
-    ).toEqual(RRuleFrequency.DAILY);
-    expect(wrapper.find('[data-test-subj="customRecurrenceSchedulerWeekly"]').exists()).toBeFalsy();
-    expect(
-      wrapper.find('[data-test-subj="customRecurrenceSchedulerMonthly"]').exists()
-    ).toBeFalsy();
+    expect(screen.getByTestId('customRecurrenceScheduler')).toBeInTheDocument();
+    // customRecurrenceSchedulerFrequency is a select element
+    expect(screen.getByTestId('customRecurrenceSchedulerFrequency')).toHaveValue(
+      String(RRuleFrequency.DAILY)
+    );
+    expect(screen.queryByTestId('customRecurrenceSchedulerWeekly')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('customRecurrenceSchedulerMonthly')).not.toBeInTheDocument();
   });
 
   test('render weekly options', () => {
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <CustomRecurrenceScheduler
         startDate={startDate}
         onChange={onChange}
@@ -54,16 +55,14 @@ describe('CustomRecurrenceScheduler', () => {
         minimumRecurrenceDays={1}
       />
     );
-    expect(
-      wrapper.find('[data-test-subj="customRecurrenceSchedulerWeekly"]').exists()
-    ).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="customRecurrenceSchedulerFrequency"]').first().props().value
-    ).toEqual(RRuleFrequency.WEEKLY);
+    expect(screen.getByTestId('customRecurrenceSchedulerWeekly')).toBeInTheDocument();
+    expect(screen.getByTestId('customRecurrenceSchedulerFrequency')).toHaveValue(
+      String(RRuleFrequency.WEEKLY)
+    );
   });
 
   test('render monthly options', () => {
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <CustomRecurrenceScheduler
         startDate={startDate}
         onChange={onChange}
@@ -71,16 +70,14 @@ describe('CustomRecurrenceScheduler', () => {
         minimumRecurrenceDays={1}
       />
     );
-    expect(
-      wrapper.find('[data-test-subj="customRecurrenceSchedulerMonthly"]').exists()
-    ).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="customRecurrenceSchedulerFrequency"]').first().props().value
-    ).toEqual(RRuleFrequency.MONTHLY);
+    expect(screen.getByTestId('customRecurrenceSchedulerMonthly')).toBeInTheDocument();
+    expect(screen.getByTestId('customRecurrenceSchedulerFrequency')).toHaveValue(
+      String(RRuleFrequency.MONTHLY)
+    );
   });
 
-  test('should call onChange when state changed ', () => {
-    const wrapper = mountWithIntl(
+  test('should call onChange when state changed', async () => {
+    renderWithI18n(
       <CustomRecurrenceScheduler
         startDate={startDate}
         onChange={onChange}
@@ -89,13 +86,16 @@ describe('CustomRecurrenceScheduler', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="customRecurrenceSchedulerFrequency"]').first().simulate('click');
-    wrapper.find('option[data-test-subj="ruleSnoozeSchedulerRecurWeek"]').first().simulate('click');
+    // Change the frequency select to weekly
+    await userEvent.selectOptions(
+      screen.getByTestId('customRecurrenceSchedulerFrequency'),
+      String(RRuleFrequency.WEEKLY)
+    );
     expect(onChange).toHaveBeenCalled();
   });
 
-  test('should enforce minimum recurrence days', () => {
-    const wrapper = mountWithIntl(
+  test('should enforce minimum recurrence days', async () => {
+    renderWithI18n(
       <CustomRecurrenceScheduler
         startDate={startDate}
         onChange={onChange}
@@ -103,14 +103,12 @@ describe('CustomRecurrenceScheduler', () => {
         minimumRecurrenceDays={3}
       />
     );
-    expect(
-      wrapper.find('input[data-test-subj="customRecurrenceSchedulerInterval"]').first().props()
-        .value
-    ).toEqual(3);
-    wrapper
-      .find('input[data-test-subj="customRecurrenceSchedulerInterval"]')
-      .first()
-      .simulate('change', { target: { value: 4 } });
+
+    const intervalInput = screen.getByTestId('customRecurrenceSchedulerInterval');
+    expect(intervalInput).toHaveValue(3);
+
+    await userEvent.tripleClick(intervalInput);
+    await userEvent.paste('4');
     expect(onChange).toHaveBeenCalledWith({
       bymonth: [],
       bymonthday: [],
@@ -118,10 +116,9 @@ describe('CustomRecurrenceScheduler', () => {
       freq: 3,
       interval: 4,
     });
-    wrapper
-      .find('input[data-test-subj="customRecurrenceSchedulerInterval"]')
-      .first()
-      .simulate('change', { target: { value: 1 } });
+
+    await userEvent.tripleClick(intervalInput);
+    await userEvent.paste('1');
     expect(onChange).toHaveBeenCalledWith({
       bymonth: [],
       bymonthday: [],

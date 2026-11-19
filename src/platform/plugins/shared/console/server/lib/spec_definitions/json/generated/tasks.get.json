@@ -10,7 +10,8 @@
         "-1",
         "0"
       ],
-      "wait_for_completion": "__flag__"
+      "wait_for_completion": "__flag__",
+      "follow_relocations": "__flag__"
     },
     "methods": [
       "GET"

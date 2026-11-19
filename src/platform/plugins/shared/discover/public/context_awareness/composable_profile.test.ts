@@ -14,7 +14,6 @@ import type { Profile } from './types';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 
 const getCellRenderersParams = {
-  actions: { addFilter: jest.fn() },
   dataView: dataViewWithTimefieldMock,
   density: DataGridDensity.COMPACT,
   rowHeight: 0,

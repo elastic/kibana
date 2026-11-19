@@ -16,7 +16,13 @@ import {
 import { nodeBuilder } from '@kbn/es-query';
 import { Spaces } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { AlertUtils, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import {
+  AlertUtils,
+  TaskManagerUtils,
+  getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+} from '../../../../common/lib';
 
 const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
 
@@ -33,6 +39,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       space: Spaces.space1,
       supertestWithoutAuth: supertest,
     });
+    const taskManagerUtils = new TaskManagerUtils(es, retry);
 
     const createRule = async () => {
       const { body: createdRule } = await supertest
@@ -191,7 +198,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getMuteInstanceRequest(ruleId, alertInstanceId);
 
       // Run the rule to trigger reconciliation
-      await alertUtils.runSoon(ruleId);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       // Wait for alert document to be updated
       await retry.try(async () => {
@@ -220,7 +227,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getMuteInstanceRequest(ruleId, alertInstanceId);
 
       // Run the rule to trigger reconciliation
-      await alertUtils.runSoon(ruleId);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       // Wait for alert to be muted
       await retry.try(async () => {
@@ -235,7 +242,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getUnmuteInstanceRequest(ruleId, alertInstanceId);
 
       // Run the rule to trigger reconciliation
-      await alertUtils.runSoon(ruleId);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       // Wait for alert document to be updated
       await retry.try(async () => {
@@ -261,7 +268,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getMuteAllRequest(ruleId);
 
       // Run the rule to trigger reconciliation
-      await alertUtils.runSoon(ruleId);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       // Wait for all alert documents to be updated
       await retry.try(async () => {
@@ -286,21 +293,22 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getMuteAllRequest(ruleId);
 
       // Run the rule to trigger reconciliation
-      await alertUtils.runSoon(ruleId);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       // Wait for alerts to be muted
       await retry.try(async () => {
         const alerts = await getAlertsByRuleId(ruleId);
+        expect(alerts.length).greaterThan(0);
         alerts.forEach((alert: any) => {
           expect(alert._source[ALERT_MUTED]).to.be(true);
         });
       });
 
       // Now unmute all alerts
-      await alertUtils.getUnmuteAllRequest(ruleId);
+      await alertUtils.unmuteAll(ruleId);
 
       // Run the rule to trigger reconciliation
-      await alertUtils.runSoon(ruleId);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       // Wait for all alert documents to be updated
       await retry.try(async () => {
@@ -366,7 +374,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
 
       // Run the rule to trigger reconciliation
-      await alertUtils.runSoon(ruleId);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       // Wait for reconciliation to fix the muted state
       await retry.try(async () => {

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { PureComponent } from 'react';
+import React, { PureComponent, useMemo } from 'react';
+import type { ComponentProps, FC, PropsWithChildren } from 'react';
+import { css } from '@emotion/react';
 import { get } from 'lodash';
 import {
   EuiButton,
@@ -24,12 +26,13 @@ import {
   EuiText,
   EuiTextArea,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { encode } from '../../lib';
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
-import { ElementCard } from '../element_card';
+import { ElementCard, ElementCardWrapper } from '../element_card';
 const MAX_NAME_LENGTH = 40;
 const MAX_DESCRIPTION_LENGTH = 100;
 
@@ -75,6 +78,27 @@ const strings = {
       defaultMessage: 'Save',
     }),
 };
+
+const CustomElementForm: FC<
+  PropsWithChildren<{ grow?: ComponentProps<typeof EuiFlexItem>['grow'] }>
+> = ({ children, grow }) => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(
+    () => css`
+      & .canvasCustomElementForm__thumbnailHelp {
+        color: ${euiTheme.colors.darkShade};
+      }
+    `,
+    [euiTheme]
+  );
+
+  return (
+    <EuiFlexItem className="canvasCustomElementForm" css={styles} grow={grow}>
+      {children}
+    </EuiFlexItem>
+  );
+};
+
 interface Props {
   /**
    * initial value of the name of the custom element
@@ -154,7 +178,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
         </EuiModalHeader>
         <EuiModalBody>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
-            <EuiFlexItem className="canvasCustomElementForm" grow={2}>
+            <CustomElementForm grow={2}>
               <EuiFormRow
                 label={strings.getNameInputLabel()}
                 helpText={strings.getCharactersRemainingDescription(MAX_NAME_LENGTH - name.length)}
@@ -202,17 +226,14 @@ export class CustomElementModal extends PureComponent<Props, State> {
               <EuiText className="canvasCustomElementForm__thumbnailHelp" size="xs">
                 <p>{strings.getImageInputDescription()}</p>
               </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem
-              className="canvasElementCard__wrapper canvasCustomElementForm__preview"
-              grow={1}
-            >
+            </CustomElementForm>
+            <ElementCardWrapper className="canvasCustomElementForm__preview" grow={1}>
               <EuiTitle size="xxxs">
                 <h4>{strings.getElementPreviewTitle()}</h4>
               </EuiTitle>
               <EuiSpacer size="s" />
               <ElementCard title={name} description={description} image={image} />
-            </EuiFlexItem>
+            </ElementCardWrapper>
           </EuiFlexGroup>
         </EuiModalBody>
         <EuiModalFooter>

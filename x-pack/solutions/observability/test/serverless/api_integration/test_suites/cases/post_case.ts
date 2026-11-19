@@ -30,20 +30,26 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should create a case', async () => {
-      expect(
-        await svlCases.api.createCase(
-          svlCases.api.getPostCaseRequest('observability', {
-            connector: {
-              id: '123',
-              name: 'Jira',
-              type: ConnectorTypes.jira,
-              fields: { issueType: 'Task', priority: 'High', parent: null },
-            },
-          }),
-          roleAuthc,
-          200
-        )
+      const payload = svlCases.api.getPostCaseRequest('observability', {
+        connector: {
+          id: '123',
+          name: 'Jira',
+          type: ConnectorTypes.jira,
+          fields: { issueType: 'Task', priority: 'High', parent: null },
+        },
+      });
+      const postedCase = await svlCases.api.createCase(payload, roleAuthc, 200);
+
+      const { created_by: createdBy, ...data } =
+        svlCases.omit.removeServerGeneratedPropertiesFromCase(postedCase);
+      const { created_by: _, ...expected } = svlCases.api.postCaseResp(
+        'observability',
+        null,
+        payload
       );
+
+      expect(createdBy).to.have.keys('full_name', 'email', 'username');
+      expect(data).to.eql(expected);
     });
 
     it('should throw 403 when create a case with securitySolution as owner', async () => {

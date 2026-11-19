@@ -79,14 +79,6 @@ const getTestUtils = (
                 notify_when: 'onThrottleInterval',
                 updated_by: 'elastic',
                 api_key_owner: 'elastic',
-                ...(describeType === 'internal'
-                  ? {
-                      artifacts: {
-                        dashboards: [],
-                        investigation_guide: { blob: '' },
-                      },
-                    }
-                  : {}),
                 api_key_created_by_user: false,
                 mute_all: false,
                 muted_alert_ids: [],
@@ -99,6 +91,9 @@ const getTestUtils = (
                       monitoring: response.body.monitoring,
                       snooze_schedule: response.body.snooze_schedule,
                       is_snoozed_until: response.body.is_snoozed_until,
+                      created_by_profile_uid: null,
+                      updated_by_profile_uid: null,
+                      api_key_owner_profile_uid: null,
                     }
                   : {}),
               });

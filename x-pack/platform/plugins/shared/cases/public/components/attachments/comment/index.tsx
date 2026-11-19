@@ -8,29 +8,27 @@
 import React from 'react';
 import classNames from 'classnames';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
-import type {
-  AttachmentType,
-  UnifiedValueAttachmentViewProps,
+import {
+  CommentAttachmentPayloadSchema,
+  type CommentAttachmentData,
+} from '../../../../common/types/domain/attachment/comment/v2';
+import {
+  AttachmentActionType,
+  defineAttachment,
+  type UnifiedValueAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
-import { AttachmentActionType } from '../../../client/attachment_framework/types';
-import { COMMENT, ADDED_COMMENT, DELETE_COMMENT_SUCCESS_TITLE } from './translations';
+import { COMMENT, ADDED_COMMENT, REMOVED_COMMENT_LABEL_TITLE } from './translations';
 import { createCommentActionCss, hasDraftComment } from './utils';
 
-interface UnifiedCommentViewProps extends UnifiedValueAttachmentViewProps {
-  data: {
-    content: string;
-  };
-}
+type CommentViewProps = UnifiedValueAttachmentViewProps<CommentAttachmentData>;
 
 const CommentAttachmentChildrenLazy = React.lazy(async () => {
   const { CommentChildren } = await import('./comment_children');
 
-  const CommentAttachmentChildren: React.FC<UnifiedValueAttachmentViewProps> = (props) => (
+  const CommentAttachmentChildren: React.FC<CommentViewProps> = (props) => (
     <CommentChildren
-      // TODO: attachmentId here means saved object id
-      // it's a legacy term that should be renamed to savedObjectId
-      commentId={props.attachmentId}
-      content={props.data.content as string}
+      commentId={props.savedObjectId}
+      content={props.data.content}
       caseId={props.caseData.id}
       version={props.version}
     />
@@ -46,24 +44,33 @@ const CommentTimelineAvatarLazy = React.lazy(() =>
   }))
 );
 
+const CommentTimelineAvatarIcon: React.FC<Pick<CommentViewProps, 'createdBy'>> = ({
+  createdBy,
+}) => (
+  <React.Suspense fallback={null}>
+    <CommentTimelineAvatarLazy createdBy={createdBy} />
+  </React.Suspense>
+);
+CommentTimelineAvatarIcon.displayName = 'CommentTimelineAvatarIcon';
+
 const CommentActionsLazy = React.lazy(() =>
   import('./comment_actions').then(({ CommentActions }) => ({
     default: CommentActions,
   }))
 );
 
-const getCommentClassName = (props: UnifiedCommentViewProps): string | undefined => {
+const getCommentClassName = (props: CommentViewProps): string | undefined => {
   if (!props.rowContext) return undefined;
 
-  const { attachmentId, caseData } = props;
+  const { savedObjectId, caseData } = props;
   const { selectedOutlineCommentId, manageMarkdownEditIds, loadingCommentIds, appId } =
     props.rowContext;
 
-  const outlined = attachmentId === selectedOutlineCommentId;
-  const isEdit = manageMarkdownEditIds.includes(attachmentId);
-  const isLoading = loadingCommentIds.includes(attachmentId);
+  const outlined = savedObjectId === selectedOutlineCommentId;
+  const isEdit = manageMarkdownEditIds.includes(savedObjectId);
+  const isLoading = loadingCommentIds.includes(savedObjectId);
   const draftFooter =
-    !isEdit && !isLoading && hasDraftComment(appId, caseData.id, attachmentId, props.data.content);
+    !isEdit && !isLoading && hasDraftComment(appId, caseData.id, savedObjectId, props.data.content);
 
   return classNames('userAction__comment', {
     outlined,
@@ -72,21 +79,15 @@ const getCommentClassName = (props: UnifiedCommentViewProps): string | undefined
   });
 };
 
-const getCommentAttachmentViewObject = (props: UnifiedValueAttachmentViewProps) => {
-  const commentProps = props as UnifiedCommentViewProps;
-  const className = getCommentClassName(commentProps);
+const getCommentCreationActivity = (props: CommentViewProps) => {
+  const className = getCommentClassName(props);
   const css = createCommentActionCss(props.rowContext.euiTheme);
 
   return {
     event: ADDED_COMMENT,
-    timelineAvatar: (
-      <React.Suspense fallback={null}>
-        <CommentTimelineAvatarLazy createdBy={props.createdBy} />
-      </React.Suspense>
-    ),
     children: CommentAttachmentChildrenLazy,
     hideDefaultActions: true,
-    getActions: (viewProps: UnifiedValueAttachmentViewProps) => [
+    getActions: (viewProps: CommentViewProps) => [
       {
         type: AttachmentActionType.CUSTOM as const,
         isPrimary: true,
@@ -94,10 +95,8 @@ const getCommentAttachmentViewObject = (props: UnifiedValueAttachmentViewProps) 
           return (
             <React.Suspense fallback={null}>
               <CommentActionsLazy
-                // TODO: attachmentId here meant saved object id
-                // it's a legacy term that should be renamed to savedObjectId
-                commentId={viewProps.attachmentId}
-                content={viewProps.data.content as string}
+                commentId={viewProps.savedObjectId}
+                content={viewProps.data.content}
               />
             </React.Suspense>
           );
@@ -113,10 +112,12 @@ const getCommentAttachmentViewObject = (props: UnifiedValueAttachmentViewProps) 
  * Returns the comment (user) attachment type for registration with the unified registry.
  * Renders comment body via CommentChildren and uses CommentTimelineAvatar.
  */
-export const getCommentAttachmentType = (): AttachmentType<UnifiedValueAttachmentViewProps> => ({
-  id: COMMENT_ATTACHMENT_TYPE,
-  icon: 'editorComment',
-  displayName: COMMENT,
-  getAttachmentViewObject: (props) => getCommentAttachmentViewObject(props),
-  getAttachmentRemovalObject: () => ({ event: DELETE_COMMENT_SUCCESS_TITLE }),
-});
+export const getCommentAttachmentType = () =>
+  defineAttachment({
+    id: COMMENT_ATTACHMENT_TYPE,
+    getIcon: (props) => <CommentTimelineAvatarIcon createdBy={props.createdBy} />,
+    getLabel: () => COMMENT,
+    getCreationActivity: getCommentCreationActivity,
+    getRemovalActivity: () => ({ event: REMOVED_COMMENT_LABEL_TITLE }),
+    schema: CommentAttachmentPayloadSchema,
+  });

@@ -111,8 +111,8 @@ export function defineCommonRoutes({
   );
 
   const basicParamsSchema = schema.object({
-    username: schema.string({ minLength: 1 }),
-    password: schema.string({ minLength: 1 }),
+    username: schema.string({ minLength: 1, maxLength: 1024 }),
+    password: schema.string({ minLength: 1, maxLength: 1024 }),
   });
 
   function getLoginAttemptForProviderType<T extends string>(
@@ -156,9 +156,9 @@ export function defineCommonRoutes({
       },
       validate: {
         body: schema.object({
-          providerType: schema.string(),
-          providerName: schema.string(),
-          currentURL: schema.string(),
+          providerType: schema.string({ maxLength: 1024 }),
+          providerName: schema.string({ maxLength: 1024 }),
+          currentURL: schema.string({ maxLength: 8192 }),
           params: schema.conditional(
             schema.siblingRef('providerType'),
             schema.oneOf([

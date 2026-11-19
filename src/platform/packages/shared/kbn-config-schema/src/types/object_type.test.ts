@@ -317,16 +317,29 @@ test('includes namespace in failure when wrong value type', () => {
   );
 });
 
-test('individual keys can validated', () => {
+test('individual keys can be validated and converted', () => {
   const type = schema.object({
     foo: schema.boolean(),
   });
 
-  const value = false;
-  expect(() => type.validateKey('foo', value)).not.toThrowError();
+  expect(type.validateKey('foo', false)).toBe(false);
+  expect(type.validateKey('foo', 'true')).toBe(true);
+  expect(() => type.validateKey('foo', 'invalid')).toThrowErrorMatchingInlineSnapshot(
+    `"[foo]: expected value of type [boolean] but got [string]"`
+  );
   expect(() => type.validateKey('bar', '')).toThrowErrorMatchingInlineSnapshot(
     `"bar is not a valid part of this schema"`
   );
+});
+
+test('validateKey rejects keys inherited from the object prototype', () => {
+  const type = schema.object({ foo: schema.string() });
+
+  for (const key of ['toString', 'constructor', '__proto__']) {
+    expect(() => type.validateKey(key, 'value')).toThrow(
+      `${key} is not a valid part of this schema`
+    );
+  }
 });
 
 test('allow unknown keys when unknowns = `allow`', () => {
@@ -783,7 +796,7 @@ describe('#extends', () => {
 
     expect(() => {
       extended.validate({ initial: 'foo', added: 42 });
-    }).not.toThrowError();
+    }).not.toThrow();
 
     expectType<TypeOf<typeof extended>>({
       added: 12,
@@ -807,7 +820,7 @@ describe('#extends', () => {
 
     expect(() => {
       extended.validate({ string: 'foo' });
-    }).not.toThrowError();
+    }).not.toThrow();
 
     expectType<TypeOf<typeof extended>>({
       string: 'foo',
@@ -832,7 +845,7 @@ describe('#extends', () => {
 
     expect(() => {
       extended.validate({ string: 'foo', mutated: 'bar' });
-    }).not.toThrowError();
+    }).not.toThrow();
 
     expectType<TypeOf<typeof extended>>({
       string: 'foo',
@@ -864,7 +877,7 @@ describe('#extends', () => {
     );
     expect(() => {
       extended.validate({ original: 'foo', mutated: 'bar' });
-    }).not.toThrowError();
+    }).not.toThrow();
 
     expectType<TypeOf<typeof extended>>({
       original: 'foo',

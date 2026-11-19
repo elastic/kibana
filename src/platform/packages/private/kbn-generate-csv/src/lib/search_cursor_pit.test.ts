@@ -45,6 +45,15 @@ class TestSearchCursorPit extends SearchCursorPit {
   }
 }
 
+function mockSuccessfulCreationPIT(
+  esClient: IScopedClusterClient,
+  pitId: string = 'somewhat-pit-id'
+) {
+  return jest
+    .spyOn(esClient.asCurrentUser, 'openPointInTime')
+    .mockResolvedValue({ id: pitId } as OpenPointInTimeResponse);
+}
+
 describe('CSV Export Search Cursor', () => {
   let settings: SearchCursorSettings;
   let es: IScopedClusterClient;
@@ -68,15 +77,12 @@ describe('CSV Export Search Cursor', () => {
     es = elasticsearchServiceMock.createScopedClusterClient();
     data = createSearchRequestHandlerContext();
 
-    openPointInTimeSpy = jest
-      .spyOn(es.asCurrentUser, 'openPointInTime')
-      .mockResolvedValue({ id: 'somewhat-pit-id' } as OpenPointInTimeResponse);
-
     logger = loggingSystemMock.createLogger();
   });
 
   describe('with default settings', () => {
     beforeEach(async () => {
+      openPointInTimeSpy = mockSuccessfulCreationPIT(es);
       cursor = new TestSearchCursorPit(
         'test-index-pattern-string',
         settings,
@@ -87,7 +93,7 @@ describe('CSV Export Search Cursor', () => {
 
       await cursor.initialize();
 
-      expect(openPointInTimeSpy).toBeCalledTimes(1);
+      expect(openPointInTimeSpy).toHaveBeenCalledTimes(1);
     });
 
     it('supports pit and max_concurrent_shard_requests', async () => {
@@ -98,8 +104,8 @@ describe('CSV Export Search Cursor', () => {
       const searchSource = createSearchSourceMock();
       await cursor.getPage(searchSource);
 
-      expect(dataSearchSpy).toBeCalledTimes(1);
-      expect(dataSearchSpy).toBeCalledWith(
+      expect(dataSearchSpy).toHaveBeenCalledTimes(1);
+      expect(dataSearchSpy).toHaveBeenCalledWith(
         {
           params: expect.objectContaining({
             pit: { id: 'somewhat-pit-id', keep_alive: '10m' },
@@ -134,6 +140,7 @@ describe('CSV Export Search Cursor', () => {
   describe('with max_concurrent_shard_requests=0', () => {
     beforeEach(async () => {
       settings.maxConcurrentShardRequests = 0;
+      openPointInTimeSpy = mockSuccessfulCreationPIT(es);
 
       cursor = new TestSearchCursorPit(
         'test-index-pattern-string',
@@ -145,7 +152,7 @@ describe('CSV Export Search Cursor', () => {
 
       await cursor.initialize();
 
-      expect(openPointInTimeSpy).toBeCalledTimes(1);
+      expect(openPointInTimeSpy).toHaveBeenCalledTimes(1);
     });
 
     it('suppresses max_concurrent_shard_requests from search body', async () => {
@@ -156,8 +163,8 @@ describe('CSV Export Search Cursor', () => {
       const searchSource = createSearchSourceMock();
       await cursor.getPage(searchSource);
 
-      expect(dataSearchSpy).toBeCalledTimes(1);
-      expect(dataSearchSpy).toBeCalledWith(
+      expect(dataSearchSpy).toHaveBeenCalledTimes(1);
+      expect(dataSearchSpy).toHaveBeenCalledWith(
         {
           params: {
             fields: [],
@@ -174,6 +181,47 @@ describe('CSV Export Search Cursor', () => {
           strategy: 'es',
           transport: { maxRetries: 0, requestTimeout: '10m' },
         }
+      );
+    });
+  });
+
+  describe('ensure errors involving PIT creation include error messages', () => {
+    beforeEach(() => {
+      settings.maxConcurrentShardRequests = 0;
+    });
+
+    it('throws an error if PIT creation fails', async () => {
+      openPointInTimeSpy = jest
+        .spyOn(es.asCurrentUser, 'openPointInTime')
+        .mockRejectedValue(
+          new Error('Wops!', { cause: new Error('Original error message: Wat?') })
+        );
+
+      cursor = new TestSearchCursorPit(
+        'test-index-pattern-string',
+        settings,
+        { data, es },
+        new AbortController(),
+        logger
+      );
+      await expect(cursor.initialize()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Error opening PIT for index pattern [test-index-pattern-string]: Wops!"`
+      );
+    });
+
+    it('throws an error if PIT creation fails without an error message', async () => {
+      openPointInTimeSpy = jest
+        .spyOn(es.asCurrentUser, 'openPointInTime')
+        .mockResolvedValue({} as OpenPointInTimeResponse);
+      cursor = new TestSearchCursorPit(
+        'test-index-pattern-string',
+        settings,
+        { data, es },
+        new AbortController(),
+        logger
+      );
+      await expect(cursor.initialize()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to get PIT for index pattern: [test-index-pattern-string], no errors were thrown"`
       );
     });
   });

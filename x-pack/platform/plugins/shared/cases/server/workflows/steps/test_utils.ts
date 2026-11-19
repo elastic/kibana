@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+import type { CasesClient } from '../../client';
 
 interface CreateStepHandlerContextParams {
   input?: unknown;
@@ -27,6 +28,9 @@ export const createStepHandlerContext = ({
     config,
     contextManager: {
       getFakeRequest: jest.fn().mockReturnValue({} as KibanaRequest),
+      getContext: jest.fn(() => {
+        throw new Error('getContext is not available');
+      }),
     },
     logger: {
       debug: jest.fn(),
@@ -43,4 +47,14 @@ export const createStepHandlerContext = ({
     ...context,
     ...overrides,
   };
+};
+
+export const createBulkUpdateCasesClientMock = <TCase extends object>(updatedCase: TCase) => {
+  const get = jest.fn();
+  const bulkUpdate = jest.fn().mockResolvedValue([updatedCase]);
+  const getCasesClient = jest.fn().mockResolvedValue({
+    cases: { get, bulkUpdate },
+  } as unknown as CasesClient);
+
+  return { get, bulkUpdate, getCasesClient };
 };

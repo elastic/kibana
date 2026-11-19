@@ -10,7 +10,7 @@
 import { Readable } from 'stream';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
+import { kibanaResponseFactory } from '@kbn/core/server';
 
 import type { FileServiceStart } from '../../file_service';
 
@@ -40,7 +40,7 @@ describe('upload', () => {
     deleteFn = jest.fn(async () => {}); // We need it to be a promise, or it'll crash because of missing `.catch`
     fileService.getById.mockResolvedValueOnce({
       id: 'test',
-      data: { size: 1 },
+      data: { size: 1, fileKind: 'test' },
       uploadContent,
       delete: deleteFn,
     } as unknown as File);

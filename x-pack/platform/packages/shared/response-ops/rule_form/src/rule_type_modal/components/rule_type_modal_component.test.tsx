@@ -153,7 +153,7 @@ describe('RuleTypeModalComponent', () => {
     {
       id: 'ruleType1',
       description: 'The first test rule type',
-      iconClass: 'beaker',
+      iconClass: 'flask',
       documentationUrl: 'https://example.com/docs/ruleType1',
       validate: () => ({ isValid: true, errors: [] }),
       ruleParamsExpression: () => <div>Rule Type 1 Params</div>,
@@ -222,6 +222,7 @@ describe('RuleTypeModalComponent', () => {
     );
 
     expect(screen.getByText('Create new rule')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleTypeModalClassicBadge')).not.toBeInTheDocument();
     // all rules that do not require app context should be present
     ruleTypes.forEach((ruleType) => {
       if (ruleType.requiresAppContext) {
@@ -230,6 +231,39 @@ describe('RuleTypeModalComponent', () => {
         expect(screen.getByText(ruleType.description)).toBeInTheDocument();
       }
     });
+  });
+
+  it('does not render the Classic badge by default', () => {
+    render(
+      <RuleTypeModalComponent
+        onClose={mockOnClose}
+        onSelectRuleType={mockOnSelectRuleType}
+        onSelectTemplate={mockOnSelectTemplate}
+        filteredRuleTypes={[]}
+        registeredRuleTypes={ruleTypes}
+        http={mockHttp}
+        toasts={mockToasts}
+      />
+    );
+
+    expect(screen.queryByTestId('ruleTypeModalClassicBadge')).not.toBeInTheDocument();
+  });
+
+  it('renders the Classic badge when showClassicBadge is true', () => {
+    render(
+      <RuleTypeModalComponent
+        onClose={mockOnClose}
+        onSelectRuleType={mockOnSelectRuleType}
+        onSelectTemplate={mockOnSelectTemplate}
+        filteredRuleTypes={[]}
+        registeredRuleTypes={ruleTypes}
+        http={mockHttp}
+        toasts={mockToasts}
+        showClassicBadge
+      />
+    );
+
+    expect(screen.getByTestId('ruleTypeModalClassicBadge')).toHaveTextContent('Classic');
   });
 
   it('should call onClose when the close button is clicked', () => {

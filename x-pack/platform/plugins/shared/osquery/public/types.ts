@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
@@ -17,6 +18,7 @@ import type {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -28,6 +30,7 @@ import type {
 } from './shared_components';
 import type { useAllLiveQueries, UseAllLiveQueriesConfig } from './actions/use_all_live_queries';
 import type { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
+import type { OsqueryIcon } from './components/osquery_icon';
 
 /**
  * Minimal DataProvider type for timeline integration within the osquery plugin.
@@ -58,6 +61,7 @@ export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
   OsqueryResult: ReturnType<typeof getLazyOsqueryResult>;
   OsqueryResults: ReturnType<typeof getLazyOsqueryResults>;
+  OsqueryIcon: typeof OsqueryIcon;
   LiveQueryField?: ReturnType<typeof getLazyLiveQueryField>;
   isOsqueryAvailable: (props: { agentId: string }) => boolean;
   fetchInstallationStatus: () => { loading: boolean; disabled: boolean; permissionDenied: boolean };
@@ -69,21 +73,6 @@ export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
 }
 
-/**
- * @internal
- */
-export interface OsqueryTimelinesStart {
-  getHoverActions: () => {
-    getAddToTimelineButton: (props: {
-      dataProvider: unknown[];
-      field: string;
-      ownFocus: boolean;
-      showTooltip: boolean;
-      startServices: { analytics: unknown; i18n: unknown; theme: unknown };
-    }) => unknown;
-  };
-}
-
 export interface StartPlugins {
   discover: DiscoverStart;
   data: DataPublicPluginStart;
@@ -91,17 +80,18 @@ export interface StartPlugins {
   lens?: LensPublicStart;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
+  cps?: CPSPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesPublicStart;
-  timelines?: OsqueryTimelinesStart;
-  uiActions?: UiActionsStart;
-  unifiedSearch?: UnifiedSearchPublicPluginStart;
+  uiActions: UiActionsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   appName?: string;
 }
 
 export interface SetupPlugins {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cases?: CasesPublicSetup;
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export type StartServices = CoreStart & StartPlugins;

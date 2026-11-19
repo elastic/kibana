@@ -13,6 +13,7 @@ import type {
   NewPackagePolicy,
   PackagePolicyInput,
   PackagePolicyInputStream,
+  PackagePolicyConfigRecord,
   PackagePolicyConfigRecordEntry,
   PackageInfo,
   RegistryStream,
@@ -22,18 +23,37 @@ import type {
   RegistryVarGroup,
 } from '../types';
 
-import { DATASET_VAR_NAME } from '../constants';
+import {
+  DATASET_VAR_NAME,
+  DATA_STREAM_TYPE_VAR_NAME,
+  VALIDATE_DATASTREAMS_PERMISSION_REGEX,
+} from '../constants';
 
 import {
   isValidNamespace,
   doesPackageHaveIntegrations,
   getNormalizedInputs,
   getNormalizedDataStreams,
+  getInputEffectiveName,
+  buildInputKey,
 } from '.';
 import { packageHasNoPolicyTemplates } from './policy_template';
-import { isValidDataset } from './is_valid_namespace';
+import { isValidDataset, isValidDataStreamType } from './is_valid_namespace';
+import {
+  getFirstVisibleVarGroupOption,
+  inferVarGroupSelections,
+  sanitizeVarGroupSelections,
+} from './var_group_helpers';
+import type { VarGroupDeploymentMode } from './var_group_helpers';
 
 type Errors = string[] | null;
+
+const AGENT_VARIABLE_REGEX = /\$\{[^}]+\}/;
+
+export interface ValidatePackagePolicyDeps {
+  safeLoadYaml: (yaml: string) => any;
+  conditionValidator?: (expr?: string) => Array<{ line: number; column: number; message: string }>;
+}
 
 interface DurationParseResult {
   isValid: boolean;
@@ -131,6 +151,7 @@ type ValidationRequiredVars = Record<string, ValidationRequiredVarsEntry[]>;
 export interface PackagePolicyConfigValidationResults {
   required_vars?: ValidationRequiredVars | null;
   vars?: ValidationEntry;
+  condition?: Errors;
 }
 
 export type PackagePolicyInputValidationResults = PackagePolicyConfigValidationResults & {
@@ -142,8 +163,33 @@ export type PackagePolicyValidationResults = {
   description: Errors;
   namespace: Errors;
   additional_datastreams_permissions: Errors;
+  condition: Errors;
   inputs: Record<PackagePolicyInput['type'], PackagePolicyInputValidationResults> | null;
 } & PackagePolicyConfigValidationResults;
+
+const validateCondition = (
+  expr: string | boolean | null | undefined,
+  conditionValidator: ValidatePackagePolicyDeps['conditionValidator']
+): Errors => {
+  if (!conditionValidator) return null;
+  // Handlebars can parse text values like 'true'/'false' as booleans; coerce to string.
+  const normalized =
+    typeof expr === 'string' ? expr : typeof expr === 'boolean' ? String(expr) : undefined;
+  const errors = conditionValidator(normalized);
+  if (!errors.length) return null;
+  return formatAgentConditionErrors(errors);
+};
+
+/** Error messages for the syntax errors of an agent condition, as the condition fields show them. */
+export const formatAgentConditionErrors = (
+  errors: ReturnType<NonNullable<ValidatePackagePolicyDeps['conditionValidator']>>
+): string[] =>
+  errors.map(({ line, column, message }) =>
+    i18n.translate('xpack.fleet.packagePolicyValidation.conditionSyntaxErrorMessage', {
+      defaultMessage: 'Line {line}, column {col}: {message}',
+      values: { line, col: column + 1, message },
+    })
+  );
 
 const validatePackageRequiredVars = (
   streamOrInput: Pick<NewPackagePolicyInputStream | PackagePolicyInput, 'vars' | 'enabled'>,
@@ -266,8 +312,47 @@ const isVarRequiredByVarGroup = (
   return false;
 };
 
-const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
-  /^(logs)|(metrics)|(traces)|(synthetics)|(profiling)-(.*)$/;
+/**
+ * Effective var_group selections for validation. Stored selections naming a removed option are dropped.
+ * Groups without a valid selection fall back to the option inferred from populated vars, then (only when
+ * `allowFirstVisibleFallback`, i.e. stream-level groups) to the first option visible in `deploymentMode`.
+ * Package-level groups get no invented default: validation runs before upgrade persists selections,
+ * so a default could 400 policies that upgraded fine before.
+ */
+const getEffectiveVarGroupSelections = (
+  varGroups: RegistryVarGroup[] | undefined,
+  varGroupSelections: Record<string, string> | undefined,
+  vars?: PackagePolicyConfigRecord,
+  deploymentMode?: VarGroupDeploymentMode,
+  allowFirstVisibleFallback = false
+): Record<string, string> | undefined => {
+  if (!varGroups || varGroups.length === 0) {
+    return varGroupSelections;
+  }
+
+  // Drop stored selections that name no existing option in their group.
+  const validSelections = sanitizeVarGroupSelections(varGroups, varGroupSelections);
+
+  const inferredSelections = vars
+    ? inferVarGroupSelections(varGroups, vars, deploymentMode)
+    : undefined;
+
+  let effective: Record<string, string> | undefined;
+  for (const group of varGroups) {
+    if (validSelections?.[group.name]) continue;
+    const fallbackName =
+      inferredSelections?.[group.name] ??
+      (allowFirstVisibleFallback
+        ? getFirstVisibleVarGroupOption(group, deploymentMode)?.name
+        : undefined);
+    if (!fallbackName) continue;
+    if (!effective) {
+      effective = { ...(validSelections ?? {}) };
+    }
+    effective[group.name] = fallbackName;
+  }
+  return effective ?? validSelections;
+};
 
 /*
  * Returns validation information for a given package policy and package info
@@ -276,15 +361,23 @@ const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
 export const validatePackagePolicy = (
   packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo,
-  safeLoadYaml: (yaml: string) => any,
+  deps: ValidatePackagePolicyDeps,
   spaceSettings?: { allowedNamespacePrefixes?: string[] }
 ): PackagePolicyValidationResults => {
+  const { safeLoadYaml, conditionValidator } = deps;
   const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
+  // The form hides var_group options per deployment mode, so validation must
+  // fall back to the first option visible in the same mode. The mode follows
+  // the policy itself, exactly like the form's agentless toggle does.
+  const deploymentMode: VarGroupDeploymentMode = packagePolicy.supports_agentless
+    ? 'agentless'
+    : 'default';
   const validationResults: PackagePolicyValidationResults = {
     name: null,
     description: null,
     namespace: null,
     additional_datastreams_permissions: null,
+    condition: null,
     inputs: {},
     vars: {},
   };
@@ -325,16 +418,24 @@ export const validatePackagePolicy = (
       );
   }
 
+  validationResults.condition = validateCondition(packagePolicy.condition, conditionValidator);
+
   // Validate package-level vars
   const packageVarsByName = keyBy(packageInfo.vars || [], 'name');
   const packageVars = Object.entries(packagePolicy.vars || {});
   const packageVarGroups = packageInfo.var_groups;
   const packageVarGroupSelections = packagePolicy.var_group_selections;
+  const effectivePackageVarGroupSelections = getEffectiveVarGroupSelections(
+    packageVarGroups,
+    packageVarGroupSelections,
+    packagePolicy.vars,
+    deploymentMode
+  );
 
   if (packageVars.length) {
     validationResults.vars = packageVars.reduce((results, [name, varEntry]) => {
       // Skip validation for vars that are controlled by var_groups but not currently visible
-      if (!shouldValidateVar(name, packageVarGroups, packageVarGroupSelections)) {
+      if (!shouldValidateVar(name, packageVarGroups, effectivePackageVarGroupSelections)) {
         results[name] = null;
         return results;
       }
@@ -343,7 +444,7 @@ export const validatePackagePolicy = (
       const requiredByVarGroup = isVarRequiredByVarGroup(
         name,
         packageVarGroups,
-        packageVarGroupSelections
+        effectivePackageVarGroupSelections
       );
 
       results[name] = validatePackagePolicyConfig(
@@ -369,7 +470,11 @@ export const validatePackagePolicy = (
   >((varDefs, policyTemplate) => {
     const inputs = getNormalizedInputs(policyTemplate);
     inputs.forEach((input) => {
-      const varDefKey = hasIntegrations ? `${policyTemplate.name}-${input.type}` : input.type;
+      const varDefKey = buildInputKey(
+        getInputEffectiveName(input),
+        policyTemplate.name,
+        hasIntegrations
+      );
 
       if ((input.vars || []).length) {
         varDefs[varDefKey] = keyBy(input.vars || [], 'name');
@@ -382,9 +487,11 @@ export const validatePackagePolicy = (
   >((reqVarDefs, policyTemplate) => {
     const inputs = getNormalizedInputs(policyTemplate);
     inputs.forEach((input) => {
-      const requiredVarDefKey = hasIntegrations
-        ? `${policyTemplate.name}-${input.type}`
-        : input.type;
+      const requiredVarDefKey = buildInputKey(
+        getInputEffectiveName(input),
+        policyTemplate.name,
+        hasIntegrations
+      );
 
       if ((input.vars || []).length) {
         reqVarDefs[requiredVarDefKey] = input.required_vars;
@@ -426,11 +533,15 @@ export const validatePackagePolicy = (
   }, {});
 
   // Validate each package policy input with either its own var fields and stream vars
-  packagePolicy.inputs.forEach((input) => {
+  (packagePolicy.inputs ?? []).forEach((input) => {
     if (!input.vars && !input.streams) {
       return;
     }
-    const inputKey = hasIntegrations ? `${input.policy_template}-${input.type}` : input.type;
+    const inputKey = buildInputKey(
+      getInputEffectiveName(input),
+      input.policy_template,
+      hasIntegrations
+    );
     const inputValidationResults: PackagePolicyInputValidationResults = {
       vars: undefined,
       required_vars: undefined,
@@ -465,22 +576,37 @@ export const validatePackagePolicy = (
       delete inputValidationResults.required_vars;
     }
 
+    const inputConditionErrors = validateCondition(input.condition, conditionValidator);
+    if (inputConditionErrors !== null) {
+      inputValidationResults.condition = inputConditionErrors;
+    }
+
     // Validate each input stream with var definitions
     if (input.streams.length) {
       input.streams.forEach((stream) => {
         const streamValidationResults: PackagePolicyConfigValidationResults = {};
-        const streamKey = `${stream.data_stream.dataset}-${input.type}`;
+        const streamKey = `${stream.data_stream.dataset}-${getInputEffectiveName(input)}`;
 
         const streamVarDefs = streamVarDefsByDatasetAndInput[streamKey];
         const streamVarGroups = streamVarGroupsByDatasetAndInput[streamKey];
         const streamVarGroupSelections = stream.var_group_selections;
+        const effectiveStreamVarGroupSelections = getEffectiveVarGroupSelections(
+          streamVarGroups,
+          streamVarGroupSelections,
+          stream.vars,
+          deploymentMode,
+          // Stream-level var_groups are new (package-spec >= 3.6.0): the
+          // first-visible fallback matches the form default here. Package-level
+          // groups deliberately get no invented default (see above).
+          true
+        );
 
         if (streamVarDefs && Object.keys(streamVarDefs).length) {
           streamValidationResults.vars = Object.keys(streamVarDefs).reduce((results, name) => {
             const configEntry = stream?.vars?.[name];
 
             // Skip validation for vars not visible due to var_group selections
-            if (!shouldValidateVar(name, streamVarGroups, streamVarGroupSelections)) {
+            if (!shouldValidateVar(name, streamVarGroups, effectiveStreamVarGroupSelections)) {
               results[name] = null;
               return results;
             }
@@ -489,7 +615,7 @@ export const validatePackagePolicy = (
             const requiredByVarGroup = isVarRequiredByVarGroup(
               name,
               streamVarGroups,
-              streamVarGroupSelections
+              effectiveStreamVarGroupSelections
             );
 
             results[name] =
@@ -518,13 +644,22 @@ export const validatePackagePolicy = (
           }
         }
 
+        const streamConditionErrors = validateCondition(stream.condition, conditionValidator);
+        if (streamConditionErrors !== null) {
+          streamValidationResults.condition = streamConditionErrors;
+        }
+
         inputValidationResults.streams![stream.data_stream.dataset] = streamValidationResults;
       });
     } else {
       delete inputValidationResults.streams;
     }
 
-    if (inputValidationResults.vars || inputValidationResults.streams) {
+    if (
+      inputValidationResults.vars ||
+      inputValidationResults.streams ||
+      inputValidationResults.condition
+    ) {
       validationResults.inputs![inputKey] = inputValidationResults;
     }
   });
@@ -620,7 +755,9 @@ export const validatePackagePolicyConfig = (
 
   if (varDef.type === 'yaml') {
     try {
-      parsedValue = safeLoadYaml(value);
+      // Coerce to string before parsing to match the behavior of js-yaml.load,
+      // which internally calls String(input). The yaml package requires a string.
+      parsedValue = safeLoadYaml(String(value));
     } catch (e) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidYamlFormatErrorMessage', {
@@ -809,11 +946,26 @@ export const validatePackagePolicyConfig = (
     }
   }
 
-  if (varName === DATASET_VAR_NAME && packageType === 'input' && parsedValue !== undefined) {
-    const { valid, error } = isValidDataset(
-      parsedValue.dataset ? parsedValue.dataset : parsedValue,
-      false
-    );
+  if (varName === DATASET_VAR_NAME && parsedValue !== undefined) {
+    const dataset = parsedValue.dataset ? parsedValue.dataset : parsedValue;
+    // Integration packages may use agent variables (e.g. ${env.NAME}) that Kibana can't resolve.
+    // Input packages stay strict because Kibana installs templates named after the dataset.
+    const isAgentResolved =
+      packageType !== 'input' && typeof dataset === 'string' && AGENT_VARIABLE_REGEX.test(dataset);
+    if (!isAgentResolved) {
+      const { valid, error } = isValidDataset(dataset, false);
+      if (!valid && error) {
+        errors.push(error);
+      }
+    }
+  }
+
+  if (
+    varName === DATA_STREAM_TYPE_VAR_NAME &&
+    packageType === 'input' &&
+    parsedValue !== undefined
+  ) {
+    const { valid, error } = isValidDataStreamType(parsedValue, false);
     if (!valid && error) {
       errors.push(error);
     }

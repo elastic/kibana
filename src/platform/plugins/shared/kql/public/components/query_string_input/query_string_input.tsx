@@ -31,7 +31,6 @@ import type { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
 import type { Query, Filter } from '@kbn/es-query';
 import { getQueryLog } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { type DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   getFieldSubtypeNested,
@@ -42,6 +41,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { buildQueryFromFilters } from '@kbn/es-query';
+import type { FilterableSource } from '@kbn/data-source';
 import { matchPairs } from './match_pairs';
 import { toUser } from './to_user';
 import { fromUser } from './from_user';
@@ -102,7 +102,7 @@ export interface QueryStringInputDependencies {
 }
 
 export interface QueryStringInputProps {
-  indexPatterns: Array<DataView | string | DataViewByIdOrTitle>;
+  indexPatterns: Array<FilterableSource | string | DataViewByIdOrTitle>;
   query: Query;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -151,6 +151,11 @@ export interface QueryStringInputProps {
    * Add additional filters used for suggestions
    */
   filtersForSuggestions?: Filter[];
+
+  /**
+   * Debounce delay in ms for fetching suggestions. Defaults to 100.
+   */
+  suggestionsDebounceMs?: number;
 }
 
 interface State {
@@ -160,7 +165,7 @@ interface State {
   suggestionLimit: number;
   selectionStart: number | null;
   selectionEnd: number | null;
-  indexPatterns: DataView[];
+  indexPatterns: FilterableSource[];
 
   /**
    * Part of state because passed down to child components
@@ -183,7 +188,7 @@ const KEY_CODES = {
 export class QueryStringInput extends PureComponent<QueryStringInputProps, State> {
   static defaultProps = {
     storageKey: KIBANA_USER_QUERY_LANGUAGE_KEY,
-    iconType: 'search',
+    iconType: 'magnify',
     isClearable: true,
   };
 
@@ -224,8 +229,8 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
   private fetchIndexPatterns = debounce(async () => {
     const [objectPatterns = [], stringPatterns = []] = partition<
       QueryStringInputProps['indexPatterns'][number],
-      DataView
-    >(this.props.indexPatterns || [], (indexPattern): indexPattern is DataView => {
+      FilterableSource
+    >(this.props.indexPatterns || [], (indexPattern): indexPattern is FilterableSource => {
       return (
         typeof indexPattern === 'object' &&
         Object.hasOwn(indexPattern, 'fields') &&
@@ -333,7 +338,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     if (!this.componentIsUnmounting) {
       this.setState({ suggestions });
     }
-  }, 100);
+  }, this.props.suggestionsDebounceMs ?? 100);
 
   private onSubmit = (query: Query) => {
     if (this.props.onSubmit) {
@@ -447,6 +452,10 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
         case KEY_CODES.ESC:
           if (isSuggestionsVisible) {
             event.preventDefault();
+            // Without this, the Esc keeps bubbling up to ancestor handlers
+            // (e.g. EuiFlyout's Esc-to-close), so closing the autocomplete
+            // would also dismiss the surrounding overlay.
+            event.stopPropagation();
           }
           this.setState({ isSuggestionsVisible: false, index: null });
           break;
@@ -727,6 +736,9 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
   public componentWillUnmount() {
     if (this.abortController) this.abortController.abort();
     if (this.updateSuggestions.cancel) this.updateSuggestions.cancel();
+    if (this.props.onChangeQueryInputFocus) {
+      this.props.onChangeQueryInputFocus(false);
+    }
     this.componentIsUnmounting = true;
     window.removeEventListener('resize', this.handleResize);
     if (this.hasScrollListener) window.removeEventListener('scroll', this.onOutsideClick);

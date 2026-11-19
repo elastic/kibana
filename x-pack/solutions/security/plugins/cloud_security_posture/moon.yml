@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/securitysolution-es-utils'
   - '@kbn/core-elasticsearch-client-server-mocks'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/shared-ux-router'
   - '@kbn/core-saved-objects-server'
@@ -69,7 +70,6 @@ dependsOn:
   - '@kbn/cloud-security-posture'
   - '@kbn/analytics'
   - '@kbn/management-settings-ids'
-  - '@kbn/expandable-flyout'
   - '@kbn/code-editor-mock'
   - '@kbn/core-saved-objects-utils-server'
   - '@kbn/licensing-types'
@@ -78,12 +78,20 @@ dependsOn:
   - '@kbn/react-kibana-context-theme'
   - '@kbn/react-query'
   - '@kbn/kql'
+  - '@kbn/entity-store'
+  - '@kbn/logging-mocks'
+  - '@kbn/core-spaces-common'
+  - '@kbn/es-errors'
+  - '@kbn/app-header'
+  - '@kbn/app-menu'
+  - '@kbn/security-solution-features'
 tags:
   - plugin
   - prod
   - group-security
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -94,26 +102,4 @@ fileGroups:
     - server/**/*.json
     - public/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+tasks: {}

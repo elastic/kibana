@@ -8,3 +8,4 @@
 export { useDevToolsRequest } from './devtools_request';
 export { useOnSubmit } from './form';
 export { useSetupTechnology } from './setup_technology';
+export { useAwsOnboardingTelemetry } from './aws_onboarding_telemetry';

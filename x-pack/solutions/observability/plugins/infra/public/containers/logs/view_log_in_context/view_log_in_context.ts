@@ -7,12 +7,14 @@
 
 import { useState } from 'react';
 import createContainer from 'constate';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { LogEntry, LogViewReference } from '@kbn/logs-shared-plugin/common';
 
 interface ViewLogInContextProps {
   logViewReference: LogViewReference;
   startTimestamp: number;
   endTimestamp: number;
+  projectRouting?: ProjectRouting;
 }
 
 export interface ViewLogInContextState extends ViewLogInContextProps {
@@ -27,13 +29,14 @@ export const useViewLogInContext = (
   props: ViewLogInContextProps
 ): [ViewLogInContextState, ViewLogInContextCallbacks] => {
   const [contextEntry, setContextEntry] = useState<LogEntry | undefined>();
-  const { startTimestamp, endTimestamp, logViewReference } = props;
+  const { startTimestamp, endTimestamp, logViewReference, projectRouting } = props;
 
   return [
     {
       startTimestamp,
       endTimestamp,
       logViewReference,
+      projectRouting,
       contextEntry,
     },
     {

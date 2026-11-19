@@ -65,13 +65,13 @@ export class PinControlAction
           defaultMessage: 'Unpin',
         })
       : i18n.translate('controls.controlGroup.floatingActions.pinControl', {
-          defaultMessage: 'Pin to Dashboard',
+          defaultMessage: 'Pin to dashboard',
         });
   }
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
-    return embeddable.parentApi.panelIsPinned(embeddable.uuid) ? 'pinFilled' : 'pin';
+    return embeddable.parentApi.panelIsPinned(embeddable.uuid) ? 'pinFill' : 'pin';
   }
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {

@@ -7,20 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as React from 'react';
-import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { NewsLoadingPrompt } from './loading_news';
 
-describe('news_loading', () => {
-  describe('rendering', () => {
-    it('renders the default News Loading', () => {
-      const wrapper = shallow(<NewsLoadingPrompt showPlainSpinner={false} />);
-      expect(toJson(wrapper)).toMatchSnapshot();
-    });
-    it('renders the News Loading with EuiLoadingSpinner', () => {
-      const wrapper = shallow(<NewsLoadingPrompt showPlainSpinner={true} />);
-      expect(toJson(wrapper)).toMatchSnapshot();
-    });
+const renderPrompt = (showPlainSpinner: boolean) =>
+  render(
+    <I18nProvider>
+      <NewsLoadingPrompt showPlainSpinner={showPlainSpinner} />
+    </I18nProvider>
+  );
+
+describe('NewsLoadingPrompt', () => {
+  it('renders the Elastic loading indicator', () => {
+    renderPrompt(false);
+
+    expect(screen.getByText('Getting the latest news...')).toBeInTheDocument();
+    expect(screen.getByTestId('newsfeedElasticSpinner')).toBeInTheDocument();
+    expect(screen.queryByTestId('newsfeedPlainSpinner')).not.toBeInTheDocument();
+  });
+
+  it('renders a plain spinner when showPlainSpinner is true', () => {
+    renderPrompt(true);
+
+    expect(screen.getByText('Getting the latest news...')).toBeInTheDocument();
+    expect(screen.getByTestId('newsfeedPlainSpinner')).toBeInTheDocument();
+    expect(screen.queryByTestId('newsfeedElasticSpinner')).not.toBeInTheDocument();
   });
 });

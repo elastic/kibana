@@ -47,7 +47,11 @@ const FlyoutFooterComponent: React.FC<Props> = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           {hasConnectorTypeSelected && !isUsingInitialConnector ? (
-            <EuiButtonEmpty onClick={onBack} data-test-subj="create-connector-flyout-back-btn">
+            <EuiButtonEmpty
+              onClick={onBack}
+              disabled={isSaving}
+              data-test-subj="create-connector-flyout-back-btn"
+            >
               {i18n.translate(
                 'xpack.triggersActionsUI.sections.actionConnectorAdd.backButtonLabel',
                 {

@@ -6,9 +6,10 @@
  */
 
 import React, { useState } from 'react';
-import { EuiCallOut, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { InstalledPackageUIPackageListItem } from '../types';
 
@@ -71,25 +72,24 @@ export const ConfirmBulkUninstallModal: React.FunctionComponent<{
         }
       }}
     >
-      <EuiCallOut
-        color="danger"
-        iconType="info"
+      <KbnDangerCallout
         title={i18n.translate('xpack.fleet.installedIntegrations.bulkUninstallModal.calloutTitle', {
           defaultMessage: 'This action cannot be undone.',
         })}
-      >
-        {isSingleItem ? (
-          <FormattedMessage
-            id="xpack.fleet.installedIntegrations.bulkUninstallModal.calloutContentSingleItem"
-            defaultMessage="All Kibana and Elasticsearch assets created by this integration will be also removed."
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.fleet.installedIntegrations.bulkUninstallModal.calloutContent"
-            defaultMessage="All Kibana and Elasticsearch assets created by these integrations will be also removed. Review and edit your selection if needed."
-          />
-        )}
-      </EuiCallOut>
+        text={
+          isSingleItem ? (
+            <FormattedMessage
+              id="xpack.fleet.installedIntegrations.bulkUninstallModal.calloutContentSingleItem"
+              defaultMessage="All Kibana and Elasticsearch assets created by this integration will be also removed."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.installedIntegrations.bulkUninstallModal.calloutContent"
+              defaultMessage="All Kibana and Elasticsearch assets created by these integrations will be also removed. Review and edit your selection if needed."
+            />
+          )
+        }
+      />
     </EuiConfirmModal>
   );
 };

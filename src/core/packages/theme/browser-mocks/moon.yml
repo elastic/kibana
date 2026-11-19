@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/core-theme-browser'
   - '@kbn/core-theme-browser-internal'
+  - '@kbn/core-theme-browser-internal-types'
   - '@kbn/lazy-object'
 tags:
   - shared-browser
@@ -32,26 +33,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+tasks: {}

@@ -7,6 +7,7 @@
 
 import type {
   ActionLicense,
+  AttachmentUIV2,
   CasesFindResponseUI,
   CaseUI,
   CasesUI,
@@ -20,7 +21,7 @@ import {
   allCases,
   basicCase,
   basicCaseMetrics,
-  basicCaseCommentPatch,
+  basicCommentUnified,
   basicCasePost,
   basicResolvedCase,
   pushedCase,
@@ -55,6 +56,14 @@ import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from '../constants';
 export const resolveCase = async (caseId: string, signal: AbortSignal): Promise<ResolvedCase> =>
   Promise.resolve(basicResolvedCase);
 
+export const getCase = async ({
+  caseId,
+  signal,
+}: {
+  caseId: string;
+  signal?: AbortSignal;
+}): Promise<CaseUI> => Promise.resolve(basicCase);
+
 export const getSingleCaseMetrics = async (
   caseId: string,
   signal: AbortSignal
@@ -86,6 +95,7 @@ export const getCases = async ({
     owner: [],
     category: [],
     customFields: {},
+    extendedFieldFilters: [],
     from: DEFAULT_FROM_DATE,
     to: DEFAULT_TO_DATE,
   },
@@ -111,13 +121,14 @@ export const patchCase = async (
 export const updateCases = async (
   cases: CaseUpdateRequest[],
   signal: AbortSignal
-): Promise<CasesUI> => Promise.resolve(allCases.cases);
+): Promise<Array<CaseUI & { updateSummary?: { syncedAlertCount: number } }>> =>
+  Promise.resolve(allCases.cases.map((theCase) => ({ ...theCase })));
 
 export const createAttachments = async (
   newComment: AttachmentRequest,
   caseId: string,
   signal: AbortSignal
-): Promise<CaseUI> => Promise.resolve(basicCase);
+): Promise<AttachmentUIV2[]> => Promise.resolve([basicCommentUnified]);
 
 export const deleteComment = async (
   caseId: string,
@@ -131,7 +142,7 @@ export const patchComment = async (
   commentUpdate: string,
   version: string,
   signal: AbortSignal
-): Promise<CaseUI> => Promise.resolve(basicCaseCommentPatch);
+): Promise<void> => Promise.resolve(undefined);
 
 export const deleteCases = async (caseIds: string[], signal: AbortSignal): Promise<boolean> =>
   Promise.resolve(true);
@@ -188,6 +199,8 @@ export const getSimilarCases = async () => allCasesSnake;
 export const postObservable = jest.fn();
 export const patchObservable = jest.fn();
 export const deleteObservable = jest.fn();
-export const bulkPostObservables = jest.fn();
+export const bulkDeleteObservables = jest.fn();
+
+export const bulkDeleteAttachments = jest.fn();
 
 export const searchEvents = jest.fn();

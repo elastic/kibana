@@ -8,18 +8,91 @@
  */
 
 import { addMessagesToReport } from './add_messages_to_report';
-import { getFailures } from './get_failures';
+import { extractErrorMessage } from './failure_text';
+import { getFailures, type TestFailure } from './get_failures';
 import type { ProcessReportsParams } from './process_reports_types';
-import { createFailureIssue, updateFailureIssue } from './report_failure';
+import { createFailureIssue, updateFailureIssue, updateSuiteIssue } from './report_failure';
 import { reportFailuresToEs } from './report_failures_to_es';
 import { reportFailuresToFile } from './report_failures_to_file';
 import { getReportMessageIter } from './report_metadata';
 import { getRootMetadata, readTestReport } from './test_report';
 
+// At most one NEW GitHub issue is opened per report. `--bail` used to stop a config at its first
+// failure, so at most one new failure per run reached the reporter; removing it (behind
+// FTR_SMART_RETRY_ENABLED) let a broken config open an issue per test. Multiple distinct new
+// failures in one run usually indicate a systemic/environmental failure (e.g. out of disk space),
+// so we cap new issue creation at one per report. Existing tracked issues are always updated
+// regardless (cheap: just a counter bump and a build link, and they carry real signal). Duplicate
+// classname+name entries (e.g. retry artifacts) are deduplicated and do not consume the slot.
+// See https://github.com/elastic/kibana/issues/278308.
+//
+// Failures the FTR marked as cascading are excluded from all of this: they are the hooks that a
+// Mocha timeout forced to fail on its way out, so they all describe the same event. Only the
+// failure that caused the abort reaches GitHub, the rest are listed on its report.
+//
+// FTR failures sharing an error message with enough others in the same report are one event too
+// (e.g. an API they all call returning 500), so the group opens at most one new issue: for its
+// first failure, and only when none of its tests is tracked yet. Tracked issues are still updated.
+const SAME_ERROR_MIN_FAILURES = 3;
+
+const describeFailure = ({ name, location }: TestFailure) =>
+  location && location !== 'unknown' ? `"${name}" (${location})` : `"${name}"`;
+
+/**
+ * Point every failure in a same-error group at the group's first failure. Returns, per first
+ * failure, the issue of a tracked test in its group, which then stands in for a new issue.
+ */
+const markSameErrorFailures = (
+  failures: TestFailure[],
+  getTrackedIssueUrl: (failure: TestFailure) => string | undefined
+) => {
+  const failuresByError = new Map<string, TestFailure[]>();
+  const seenKeys = new Set<string>();
+
+  for (const failure of failures) {
+    if (failure.testType !== 'ftr' || failure.likelyIrrelevant || failure.cascading) {
+      continue;
+    }
+
+    const key = `${failure.classname}\n${failure.name}`;
+    const errorMessage = extractErrorMessage(failure.failure);
+    if (!errorMessage || seenKeys.has(key)) {
+      continue;
+    }
+    seenKeys.add(key);
+
+    const group = failuresByError.get(errorMessage);
+    if (group) {
+      group.push(failure);
+    } else {
+      failuresByError.set(errorMessage, [failure]);
+    }
+  }
+
+  const trackedIssueUrlByFirstFailure = new Map<TestFailure, string>();
+  for (const [first, ...rest] of failuresByError.values()) {
+    if (rest.length + 1 < SAME_ERROR_MIN_FAILURES) {
+      continue;
+    }
+
+    let trackedIssueUrl: string | undefined;
+    for (const failure of rest) {
+      failure.sameErrorAs = first;
+      trackedIssueUrl ??= getTrackedIssueUrl(failure);
+    }
+    if (trackedIssueUrl) {
+      trackedIssueUrlByFirstFailure.set(first, trackedIssueUrl);
+    }
+  }
+  return trackedIssueUrlByFirstFailure;
+};
+
+/** Returns the failures considered for an issue: not irrelevant, not cascading, no duplicates. */
 export async function processJUnitReports(
   reportPaths: string[],
   params: ProcessReportsParams
-): Promise<void> {
+): Promise<TestFailure[]> {
+  const considered: TestFailure[] = [];
   const {
     log,
     existingIssues,
@@ -29,6 +102,8 @@ export async function processJUnitReports(
     pipeline,
     prependTitle,
     updateGithub,
+    perTestIssues,
+    suiteIssueComments,
     indexInEs,
     reportUpdate,
     bkMeta,
@@ -45,6 +120,19 @@ export async function processJUnitReports(
       await reportFailuresToEs(log, failures);
     }
 
+    const trackedSameErrorIssueUrls = markSameErrorFailures(
+      failures,
+      (failure) =>
+        (existingIssues.getSuiteIssueForFailure(failure) ?? existingIssues.getForFailure(failure))
+          ?.github.htmlUrl
+    );
+
+    const seenNewIssueKeys = new Set<string>();
+    let newIssueCreated = false;
+    let skippedNewFailures = 0;
+    let cascadingFailures = 0;
+    let sameErrorFailures = 0;
+
     for (const failure of failures) {
       const pushMessage = (msg: string) => {
         messages.push({
@@ -55,10 +143,73 @@ export async function processJUnitReports(
       };
 
       if (failure.likelyIrrelevant) {
+        const { infraReason } = failure;
+        if (infraReason) {
+          log.info(
+            `FTR failure is likely an infrastructure issue (${infraReason.category}): ` +
+              `${failure.classname} - ${failure.name}`
+          );
+        }
         pushMessage(
-          'Failure is likely irrelevant' +
-            (updateGithub ? ', so an issue was not created or updated' : '')
+          (infraReason
+            ? `Failure is likely an infrastructure issue (${infraReason.category})`
+            : 'Failure is likely irrelevant') +
+            (updateGithub ? ', so an issue was not created or updated' : '') +
+            (infraReason ? `. ${infraReason.message}` : '')
         );
+        continue;
+      }
+
+      if (failure.cascading) {
+        cascadingFailures += 1;
+        pushMessage(
+          'Failure is a consequence of an earlier Mocha timeout that aborted the config run, so an ' +
+            'issue was not created or updated. See the failure that caused the abort.'
+        );
+        failure.failureCount = 0;
+        continue;
+      }
+
+      // Deduplicate by classname+name: retry artifacts can emit the same test twice in one XML.
+      const key = `${failure.classname}\n${failure.name}`;
+      if (seenNewIssueKeys.has(key)) {
+        failure.failureCount = 0;
+        continue;
+      }
+      seenNewIssueKeys.add(key);
+      considered.push(failure);
+
+      // a test tracked by a suite issue gets its failures counted there, not on an issue of its own;
+      // the daily report and the consistent failure check comment on it, or this job without the check
+      const suiteIssue = existingIssues.getSuiteIssueForFailure(failure);
+      if (suiteIssue) {
+        const { newBody, newCount } = await updateSuiteIssue(
+          suiteIssue,
+          githubApi,
+          suiteIssueComments ? { buildUrl, branch, pipeline, failure } : undefined
+        );
+        const url = suiteIssue.github.htmlUrl;
+        // in dry-run nothing was written, so the next failure of the suite counts from the same body
+        if (updateGithub) {
+          suiteIssue.github.body = newBody;
+        }
+        failure.githubIssue = url;
+        failure.failureCount = updateGithub ? newCount : newCount - 1;
+        pushMessage(
+          `Test is tracked by a flaky suite issue with ${
+            newCount - 1
+          } failures on tracked branches: ${url}`
+        );
+        if (updateGithub) {
+          pushMessage(`Updated flaky suite issue: ${url} (fail count: ${newCount})`);
+        }
+        continue;
+      }
+
+      // its per-test issue, if any, is left for the suite issue it gets to replace
+      if (!perTestIssues) {
+        pushMessage('No suite issue tracks this test yet');
+        failure.failureCount = 0;
         continue;
       }
 
@@ -73,7 +224,9 @@ export async function processJUnitReports(
           failure
         );
         const url = existingIssue.github.htmlUrl;
-        existingIssue.github.body = newBody;
+        if (updateGithub) {
+          existingIssue.github.body = newBody;
+        }
         failure.githubIssue = url;
         failure.failureCount = updateGithub ? newCount : newCount - 1;
         pushMessage(`Test has failed ${newCount - 1} times on tracked branches: ${url}`);
@@ -83,6 +236,38 @@ export async function processJUnitReports(
         continue;
       }
 
+      if (failure.sameErrorAs) {
+        sameErrorFailures += 1;
+        pushMessage(
+          `Skipped opening a new issue: failed with the same error as ` +
+            `${describeFailure(failure.sameErrorAs)}, an earlier failure in this run`
+        );
+        failure.failureCount = 0;
+        continue;
+      }
+
+      const trackedSameErrorIssueUrl = trackedSameErrorIssueUrls.get(failure);
+      if (trackedSameErrorIssueUrl) {
+        sameErrorFailures += 1;
+        pushMessage(
+          'Skipped opening a new issue: later tests in this run failed with the same error and ' +
+            `one is already tracked: ${trackedSameErrorIssueUrl}`
+        );
+        failure.failureCount = 0;
+        continue;
+      }
+
+      if (newIssueCreated) {
+        skippedNewFailures += 1;
+        pushMessage(
+          'Skipped opening a new issue: only the first new failure in a report opens a GitHub ' +
+            'issue, multiple new failures in one run usually indicate a systemic failure'
+        );
+        failure.failureCount = 0;
+        continue;
+      }
+
+      newIssueCreated = true;
       const newIssue = await createFailureIssue(
         buildUrl,
         failure,
@@ -100,6 +285,30 @@ export async function processJUnitReports(
       failure.failureCount = updateGithub ? 1 : 0;
     }
 
+    if (cascadingFailures > 0) {
+      log.info(
+        `Ignored ${cascadingFailures} failure(s) in ${reportPath} that cascaded from an earlier ` +
+          `Mocha timeout aborting the config run. They are listed on the report of the failure ` +
+          `that caused the abort.`
+      );
+    }
+
+    if (sameErrorFailures > 0) {
+      log.info(
+        `Skipped opening new issues for ${sameErrorFailures} failure(s) in ${reportPath} that ` +
+          `share their error with other failures in the run. Tracked issues were updated normally.`
+      );
+    }
+
+    if (skippedNewFailures > 0) {
+      log.warning(
+        `Opened one new issue for the first new failure and skipped ${skippedNewFailures} ` +
+          `additional new failure(s) for ${reportPath}, likely a systemic failure. Existing ` +
+          `tracked issues were updated normally. All failures are still indexed to ES and ` +
+          `written to the failure report.`
+      );
+    }
+
     // mutates report to include messages and writes updated report to disk
     await addMessagesToReport({
       report,
@@ -111,4 +320,6 @@ export async function processJUnitReports(
 
     await reportFailuresToFile(log, failures, bkMeta, getRootMetadata(report));
   }
+
+  return considered;
 }

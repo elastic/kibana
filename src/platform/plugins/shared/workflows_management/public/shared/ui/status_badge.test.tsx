@@ -71,13 +71,58 @@ describe('StatusBadge', () => {
   describe('basic rendering', () => {
     it('renders status without date', () => {
       renderWithI18n(<StatusBadge status={ExecutionStatus.COMPLETED} />);
-      // The status label is "Success" for COMPLETED status
       expect(screen.getByText(/success/i)).toBeInTheDocument();
     });
 
     it('returns null when status is undefined', () => {
       const { container } = renderWithI18n(<StatusBadge status={undefined} />);
       expect(container).toBeEmptyDOMElement();
+    });
+  });
+
+  describe('responsive dual-render structure', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-03-30T10:00:00Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('renders both long and narrow format spans when a date is provided', () => {
+      const { container } = renderWithI18n(
+        <StatusBadge status={ExecutionStatus.COMPLETED} date="2026-03-30T09:00:00Z" />
+      );
+
+      const spans = container.querySelectorAll('.euiFlexItem span');
+      expect(spans.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('renders only status label text when no date is provided', () => {
+      const { container } = renderWithI18n(<StatusBadge status={ExecutionStatus.COMPLETED} />);
+
+      expect(screen.getByText(/success/i)).toBeInTheDocument();
+      const spans = container.querySelectorAll('.euiFlexItem span[class*="css"]');
+      expect(spans.length).toBe(0);
+    });
+
+    it('renders the status icon for all statuses', () => {
+      const statuses = [
+        ExecutionStatus.COMPLETED,
+        ExecutionStatus.FAILED,
+        ExecutionStatus.PENDING,
+        ExecutionStatus.CANCELLED,
+        ExecutionStatus.TIMED_OUT,
+        ExecutionStatus.SKIPPED,
+      ];
+
+      for (const status of statuses) {
+        const { unmount } = renderWithI18n(
+          <StatusBadge status={status} date="2026-03-30T09:00:00Z" />
+        );
+        unmount();
+      }
     });
   });
 });

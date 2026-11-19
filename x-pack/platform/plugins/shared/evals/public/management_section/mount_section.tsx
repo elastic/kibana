@@ -28,40 +28,35 @@ const aiBreadcrumbLabel = i18n.translate('xpack.evals.stackManagement.breadcrumb
 
 export const mountManagementSection = async ({
   core,
-  mountParams: { element, setBreadcrumbs, history, basePath },
+  mountParams: { element, setBreadcrumbs, history },
 }: MountSectionParams) => {
   const [coreStart, startDeps] = await core.getStartServices();
   coreStart.chrome.docTitle.change(PLUGIN_NAME);
 
-  const queryClient = new QueryClient();
-  const breadcrumbPrefix = [{ text: aiBreadcrumbLabel }, { text: PLUGIN_NAME }];
-  const getHref = (path: string) =>
-    coreStart.application.getUrlForApp('management', {
-      path: `${basePath}${path === '/' ? '' : path}`,
-    });
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 30_000,
+      },
+    },
+  });
 
-  const rootStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    flex: 1,
-    minHeight: 0,
-  } as React.CSSProperties;
+  const breadcrumbPrefix = [{ text: aiBreadcrumbLabel }, { text: PLUGIN_NAME }];
+  const getHref = (path: string) => path;
 
   const App = () => (
-    <div style={rootStyle}>
-      <QueryClientProvider client={queryClient}>
-        <I18nProvider>
-          <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
-            <EvalsApp
-              history={history}
-              setBreadcrumbs={setBreadcrumbs}
-              getHref={getHref}
-              breadcrumbPrefix={breadcrumbPrefix}
-            />
-          </KibanaContextProvider>
-        </I18nProvider>
-      </QueryClientProvider>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <I18nProvider>
+        <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
+          <EvalsApp
+            history={history}
+            setBreadcrumbs={setBreadcrumbs}
+            getHref={getHref}
+            breadcrumbPrefix={breadcrumbPrefix}
+          />
+        </KibanaContextProvider>
+      </I18nProvider>
+    </QueryClientProvider>
   );
 
   ReactDOM.render(wrapWithTheme(<App />, core.theme), element);

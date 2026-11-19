@@ -12,12 +12,8 @@ import { apm } from '@elastic/apm-rum';
 
 import { getErrorBoundaryLabels } from '../../lib';
 import { useErrorBoundary } from '../services';
+import type { BaseErrorBoundaryState, BaseErrorBoundaryProps } from '../../types';
 import { SectionFatalPrompt, SectionRecoverablePrompt } from './message_components';
-import {
-  BaseErrorBoundary,
-  type BaseErrorBoundaryState,
-  type BaseErrorBoundaryProps,
-} from './base_error_boundary';
 
 interface SectionErrorBoundaryProps {
   sectionName: string;
@@ -56,7 +52,7 @@ export const KibanaSectionErrorBoundary = (
   return <SectionErrorBoundaryInternal {...props} services={services} />;
 };
 
-class SectionErrorBoundaryInternal extends BaseErrorBoundary<
+class SectionErrorBoundaryInternal extends React.Component<
   React.PropsWithChildren<SectionErrorBoundaryProps> & BaseErrorBoundaryProps,
   SectionErrorBoundaryState
 > {
@@ -79,9 +75,7 @@ class SectionErrorBoundaryInternal extends BaseErrorBoundary<
     console.error('Error caught by Kibana React Error Boundary'); // eslint-disable-line no-console
     console.error(error); // eslint-disable-line no-console
 
-    // Enqueue the error instead of registering it immediately
-    const enqueuedError = this.props.services.errorService.enqueueError(error, errorInfo);
-    const { id: errorId, isFatal, name } = enqueuedError;
+    const { isFatal, name } = this.props.services.errorService.enqueueError(error, errorInfo);
 
     this.setState((prevState) => {
       const nextRetryCount = (prevState.retryCount ?? 0) + 1;
@@ -91,7 +85,6 @@ class SectionErrorBoundaryInternal extends BaseErrorBoundary<
         errorInfo,
         componentName: name,
         isFatal,
-        errorId,
         retryCount: nextRetryCount,
       };
     });

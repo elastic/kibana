@@ -32,7 +32,7 @@ export const getCypressBaseConfig = (
       chromeWebSecurity: false,
       defaultCommandTimeout: 60000,
       execTimeout: 120000,
-      pageLoadTimeout: 12000,
+      pageLoadTimeout: 60000,
 
       retries: {
         runMode: 1,
@@ -40,11 +40,11 @@ export const getCypressBaseConfig = (
       },
 
       screenshotsFolder:
-        '../../../target/kibana-security-solution/public/management/cypress/screenshots',
+        '../../../../../target/kibana-security-solution/public/management/cypress/screenshots',
       trashAssetsBeforeRuns: false,
-      video: true,
-      videoCompression: 15,
-      videosFolder: '../../../target/kibana-security-solution/public/management/cypress/videos',
+      video: false,
+      videosFolder:
+        '../../../../../target/kibana-security-solution/public/management/cypress/videos',
       viewportHeight: 1200,
       viewportWidth: 1920,
       experimentalStudio: true,
@@ -98,7 +98,7 @@ export const getCypressBaseConfig = (
 
           responseActionTasks(on, config);
 
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
           require('@cypress/grep/plugin').plugin(config);
 
           on('after:spec', (_, results) => {

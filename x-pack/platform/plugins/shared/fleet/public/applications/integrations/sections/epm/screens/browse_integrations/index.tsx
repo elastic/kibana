@@ -5,13 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { useLocation, useHistory } from 'react-router-dom';
 
-import { css } from '@emotion/react';
+import { OBLT_DEFAULT_CATEGORIES } from '../../../../../../../common/constants';
+import { buildCollectionVariants } from '../home/collection_variants';
+import type { CollectionVariant } from '../home/card_utils';
+import { COLLECTION_QUERYPARAM } from '../home/card_utils';
+import { CollectionFlyout } from '../home/components/collection_flyout';
 
-import { useBreadcrumbs, useStartServices } from '../../../../hooks';
+import {
+  useAuthz,
+  useAutomaticImportAuthz,
+  useBreadcrumbs,
+  useStartServices,
+} from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 
@@ -19,7 +28,11 @@ import { ResponsivePackageGrid } from './components/responsive_package_grid';
 import { SearchAndFiltersBar } from './components/search_and_filters_bar';
 import { Sidebar } from './components/side_bar';
 import { useBrowseIntegrationHook } from './hooks';
-import { useSetUrlCategory } from './hooks/url_categories';
+import {
+  useSetUrlCategory,
+  useUrlDefaultCategories,
+  useSetUrlDefaultCategories,
+} from './hooks/url_categories';
 import { NoDataPrompt } from './components/no_data_prompt';
 import {
   ManageIntegrationsTable,
@@ -31,23 +44,39 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 }) => {
   useBreadcrumbs('integrations_all');
 
-  const { automaticImportVTwo, application } = useStartServices();
+  const { automaticImport, cloud } = useStartServices();
   const { pathname, search } = useLocation();
   const history = useHistory();
+
+  const queryParams = useMemo(() => new URLSearchParams(search), [search]);
+  const openCollectionGroupId = queryParams.get(COLLECTION_QUERYPARAM) ?? undefined;
+
+  const openCollection = useCallback(
+    (groupId: string) => {
+      const next = new URLSearchParams(search);
+      next.set(COLLECTION_QUERYPARAM, groupId);
+      history.replace({ search: next.toString() });
+    },
+    [history, search]
+  );
+
+  const closeCollection = useCallback(() => {
+    const next = new URLSearchParams(search);
+    next.delete(COLLECTION_QUERYPARAM);
+    history.replace({ search: next.toString() });
+  }, [history, search]);
   const euiTheme = useEuiTheme();
 
-  const automaticImportCapabilities = (
-    application.capabilities as Record<string, { view?: boolean } | undefined>
-  ).automatic_import;
-  const canReadAutomaticImportIntegrations =
-    automaticImportCapabilities?.view ?? Boolean(automaticImportVTwo);
+  const { canView: canReadAutomaticImportIntegrations, canCreate: canCreateAutomaticImport } =
+    useAutomaticImportAuthz();
+  const canUploadPackages = useAuthz().integrations.uploadPackages;
 
   const useGetAllIntegrationsHook = canReadAutomaticImportIntegrations
-    ? automaticImportVTwo?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations
+    ? automaticImport?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations
     : useEmptyAllIntegrations;
   const {
     integrations,
-    isLoading: isLoadingCreatedIntegrations,
+    isInitialLoading: isLoadingCreatedIntegrations,
     isError: isCreatedIntegrationsError,
     refetch: refetchCreatedIntegrations,
   } = useGetAllIntegrationsHook();
@@ -71,10 +100,12 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
   );
 
   const setUrlCategory = useSetUrlCategory();
+  const setUrlDefaultCategories = useSetUrlDefaultCategories();
+  const urlDefaultCategories = useUrlDefaultCategories();
   const {
     allCategories,
     initialSelectedCategory,
-    selectedCategory,
+    selectedCategories,
     mainCategories,
     isLoading,
     isLoadingCategories,
@@ -82,10 +113,98 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    filteredCards,
+    filteredCards: rawFilteredCards,
     onCategoryChange,
     availableSubCategories,
   } = useBrowseIntegrationHook({ prereleaseIntegrationsEnabled });
+
+  // Override onCardClick for collection tiles so they open the flyout instead of navigating away.
+  const filteredCards = useMemo(
+    () =>
+      rawFilteredCards.map((card) => {
+        if (!card.isCollectionCard) return card;
+        return { ...card, onCardClick: () => openCollection(card.name) };
+      }),
+    [rawFilteredCards, openCollection]
+  );
+
+  // Resolve the open collection card from rawFilteredCards so the flyout variants
+  // reflect the active filter state (category, signal, setup method, etc.).
+  const openCollectionCard = useMemo(
+    () =>
+      openCollectionGroupId
+        ? rawFilteredCards.find((c) => c.isCollectionCard && c.name === openCollectionGroupId)
+        : undefined,
+    [openCollectionGroupId, rawFilteredCards]
+  );
+
+  // Clear stale ?collection= param when active filters remove or degrade the open collection
+  // so it does not unexpectedly re-open the flyout after the filter is cleared.
+  // Guard on isLoading AND errors: rawFilteredCards is empty while packages load or when the
+  // catalog fetch fails, so openCollectionCard would be undefined in both cases — wipe the
+  // param only once the catalog has loaded successfully.
+  useEffect(() => {
+    if (isLoading || eprPackageLoadingError || !openCollectionGroupId || openCollectionCard) return;
+    closeCollection();
+  }, [
+    isLoading,
+    eprPackageLoadingError,
+    openCollectionGroupId,
+    openCollectionCard,
+    closeCollection,
+  ]);
+
+  const collectionReturnPath = useMemo(() => {
+    if (!openCollectionGroupId) return undefined;
+    const params = new URLSearchParams(search);
+    params.set(COLLECTION_QUERYPARAM, openCollectionGroupId);
+    return `${pathname}?${params.toString()}`;
+  }, [openCollectionGroupId, pathname, search]);
+
+  const collectionVariants: CollectionVariant[] = useMemo(() => {
+    if (!openCollectionCard || !collectionReturnPath) return [];
+    return buildCollectionVariants(openCollectionCard, {
+      returnAppId: 'integrations',
+      returnPath: collectionReturnPath,
+    });
+  }, [openCollectionCard, collectionReturnPath]);
+
+  // Tracks whether we've already auto-redirected to the default categories this page visit.
+  // Without this, clicking "All categories" (which clears URL categories) would immediately
+  // trigger another redirect back to the defaults — preventing the user from removing them.
+  const hasAutoRedirectedRef = useRef(false);
+
+  const isObservability = cloud?.serverless?.projectType === 'observability';
+
+  useEffect(() => {
+    if (
+      hasAutoRedirectedRef.current ||
+      !isObservability ||
+      isLoading ||
+      isManageIntegrationsView ||
+      initialSelectedCategory ||
+      urlDefaultCategories.length > 0
+    )
+      return;
+    // Mark as redirected regardless of whether valid defaults exist, so the
+    // effect does not keep re-running when none of the default categories exist
+    // in the catalog.
+    hasAutoRedirectedRef.current = true;
+    const validDefaults = OBLT_DEFAULT_CATEGORIES.filter((cat) =>
+      categoryExists(cat, allCategories)
+    );
+    if (validDefaults.length > 0) {
+      setUrlDefaultCategories(validDefaults, { replace: true });
+    }
+  }, [
+    isObservability,
+    isLoading,
+    isManageIntegrationsView,
+    initialSelectedCategory,
+    urlDefaultCategories.length,
+    allCategories,
+    setUrlDefaultCategories,
+  ]);
 
   if (!isLoading && !categoryExists(initialSelectedCategory, allCategories)) {
     setUrlCategory({ category: '' }, { replace: true });
@@ -104,76 +223,90 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
   }
 
   return (
-    <EuiFlexGroup
-      justifyContent="flexEnd"
-      alignItems="flexStart"
-      gutterSize="none"
-      data-test-subj="epmList.integrationCards"
-    >
-      <Sidebar
-        isLoading={isLoading}
-        categories={mainCategories}
-        selectedCategory={selectedCategory}
-        onCategoryChange={onCategoryChange}
-        CreateIntegrationCardButton={
-          canReadAutomaticImportIntegrations
-            ? automaticImportVTwo?.components.CreateIntegrationSideCardButton
-            : undefined
-        }
-        hasCreatedIntegrations={hasCreatedIntegrations}
-        onManageIntegrationsClick={onManageIntegrationsClick}
-      />
-      <EuiFlexItem grow={5}>
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="none"
-          css={css`
-            padding: 16px 8px;
-          `}
-        >
-          {!isManageIntegrationsView && (
-            <SearchAndFiltersBar
-              categories={mainCategories}
-              availableSubCategories={availableSubCategories}
-            />
-          )}
-          {noEprCallout ? noEprCallout : null}
-          <EuiFlexItem
-            grow={1}
-            data-test-subj="epmList.mainColumn"
-            style={{
-              position: 'relative',
-              backgroundColor: euiTheme.euiTheme.colors.backgroundBasePlain,
-            }}
-          >
-            {isManageIntegrationsView ? (
-              <ManageIntegrationsTable
-                integrations={integrations}
-                isLoading={isLoadingCreatedIntegrations}
-                isError={isCreatedIntegrationsError}
-                onRefetch={refetchCreatedIntegrations}
-              />
-            ) : filteredCards.length === 0 && !isLoading ? (
-              <NoDataPrompt />
-            ) : (
-              <ResponsivePackageGrid
-                items={filteredCards}
-                isLoading={
-                  isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations
-                }
+    <>
+      {openCollectionCard && (
+        <CollectionFlyout
+          title={openCollectionCard.title}
+          description={openCollectionCard.description}
+          variants={collectionVariants}
+          onClose={closeCollection}
+        />
+      )}
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+        alignItems="flexStart"
+        gutterSize="none"
+        data-test-subj="epmList.integrationCards"
+      >
+        <Sidebar
+          isLoading={isLoading}
+          categories={mainCategories}
+          selectedCategories={selectedCategories}
+          onCategoryChange={onCategoryChange}
+          showCreatedIntegrations={canReadAutomaticImportIntegrations}
+          CreateIntegrationCardButton={
+            canCreateAutomaticImport || canUploadPackages
+              ? automaticImport?.components.CreateIntegrationSideCardButton
+              : undefined
+          }
+          canCreateIntegration={canCreateAutomaticImport}
+          canUploadIntegrationPackage={canUploadPackages}
+          hasCreatedIntegrations={hasCreatedIntegrations}
+          createdIntegrationsCount={integrations.length}
+          isLoadingCreatedIntegrations={isLoadingCreatedIntegrations}
+          manageIntegrationsHref={manageIntegrationsHref}
+          onManageIntegrationsClick={onManageIntegrationsClick}
+        />
+        <EuiFlexItem grow={5}>
+          <EuiFlexGroup direction="column" gutterSize="none">
+            {!isManageIntegrationsView && (
+              <SearchAndFiltersBar
+                categories={mainCategories}
+                availableSubCategories={availableSubCategories}
               />
             )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+            {noEprCallout ? noEprCallout : null}
+            <EuiFlexItem
+              grow={1}
+              data-test-subj="epmList.mainColumn"
+              style={{
+                position: 'relative',
+                backgroundColor: euiTheme.euiTheme.colors.backgroundBasePlain,
+              }}
+            >
+              {isManageIntegrationsView ? (
+                <>
+                  <EuiSpacer size="m" />
+                  <ManageIntegrationsTable
+                    integrations={integrations}
+                    isLoading={isLoadingCreatedIntegrations}
+                    isError={isCreatedIntegrationsError}
+                    onRefetch={refetchCreatedIntegrations}
+                    prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
+                  />
+                </>
+              ) : filteredCards.length === 0 && !isLoading ? (
+                <NoDataPrompt />
+              ) : (
+                <ResponsivePackageGrid
+                  items={filteredCards}
+                  isLoading={
+                    isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations
+                  }
+                />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };
 
 function useEmptyAllIntegrations() {
   return {
     integrations: [] as CreatedIntegrationRow[],
-    isLoading: false,
+    isInitialLoading: false,
     isError: false,
     error: null,
     refetch: () => {},

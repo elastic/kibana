@@ -19,7 +19,7 @@
  * MVP implementation focusing on core asset discovery actions.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
@@ -41,10 +41,19 @@ export const ShodanConnector: ConnectorSpec = {
   actions: {
     searchHosts: {
       isTool: true,
-      input: z.object({
-        query: z.string().describe('Search query'),
-        page: z.number().int().min(1).optional().default(1).describe('Page number'),
-      }),
+      scope: 'read',
+      description:
+        'Search Shodan for internet-exposed hosts and services using Shodan query syntax (e.g. "apache country:DE port:443"). ' +
+        'Returns matching host banners, the total match count, and facets; use countResults when only totals are needed (it does not consume query credits).',
+      input: lazySchema(() =>
+        z.object({
+          query: z
+            .string()
+            .max(2000)
+            .describe('Shodan search query, e.g. "nginx port:443 country:US"'),
+          page: z.number().int().min(1).optional().default(1).describe('Page number'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { query: string; page?: number };
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
@@ -65,9 +74,14 @@ export const ShodanConnector: ConnectorSpec = {
 
     getHostInfo: {
       isTool: true,
-      input: z.object({
-        ip: z.ipv4().describe('IP address'),
-      }),
+      scope: 'read',
+      description:
+        'Get everything Shodan knows about a single IPv4 address: open ports, hostnames, location, organization, and per-service banner data.',
+      input: lazySchema(() =>
+        z.object({
+          ip: z.ipv4().max(45).describe('IP address'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
@@ -91,10 +105,23 @@ export const ShodanConnector: ConnectorSpec = {
 
     countResults: {
       isTool: true,
-      input: z.object({
-        query: z.string().describe('Search query'),
-        facets: z.string().optional().describe('Facets to include'),
-      }),
+      scope: 'read',
+      description:
+        'Count the Shodan hosts matching a search query without returning the hosts themselves, optionally broken down by facets. ' +
+        'Use this to size exposure before running searchHosts; returns the total and facet buckets.',
+      input: lazySchema(() =>
+        z.object({
+          query: z
+            .string()
+            .max(2000)
+            .describe('Shodan search query, e.g. "nginx port:443 country:US"'),
+          facets: z
+            .string()
+            .max(1000)
+            .optional()
+            .describe('Comma-separated facets to include, e.g. "country,org:10"'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { query: string; facets?: string };
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
@@ -114,7 +141,10 @@ export const ShodanConnector: ConnectorSpec = {
 
     getServices: {
       isTool: true,
-      input: z.object({}),
+      scope: 'read',
+      description:
+        'List the services (protocols) Shodan crawls, as a map of service name to description. Useful for building valid search queries.',
+      input: lazySchema(() => z.object({})),
       handler: async (ctx) => {
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         const response = await ctx.client.get('https://api.shodan.io/shodan/services', {
@@ -129,24 +159,15 @@ export const ShodanConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      try {
-        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
-        await ctx.client.get('https://api.shodan.io/shodan/host/8.8.8.8', {
-          params: { key: apiKey },
-        });
-        return {
-          ok: true,
-          message: 'Successfully connected to Shodan API',
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect: ${error}`,
-        };
-      }
+      const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
+      await ctx.client.get('https://api.shodan.io/shodan/host/8.8.8.8', {
+        params: { key: apiKey },
+      });
+      return {};
     },
     description: i18n.translate('connectorSpecs.shodan.test.description', {
       defaultMessage: 'Verifies Shodan API key',
     }),
+    enabled: true,
   },
 };

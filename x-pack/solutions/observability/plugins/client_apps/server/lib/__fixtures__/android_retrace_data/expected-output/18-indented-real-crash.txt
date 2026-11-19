@@ -1,0 +1,17 @@
+FATAL EXCEPTION: main
+Process: co.elastic.otel.android.integration, PID: 4883
+java.lang.RuntimeException: Intentional crash for deobfuscation testing
+	at co.elastic.otel.android.integration.Crasher.deepCrash(Crasher.kt:31)
+	at co.elastic.otel.android.integration.Crasher.crash(Crasher.kt:24)
+	at co.elastic.otel.android.integration.CrashActivity.onCreate$lambda$0(CrashActivity.kt:31)
+	at android.os.Handler.handleCallback(Handler.java:789)
+	at android.os.Handler.dispatchMessage(Handler.java:98)
+	at android.os.Looper.loop(Looper.java:164)
+	at android.app.ActivityThread.main(ActivityThread.java:6541)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.Zygote$MethodAndArgsCaller.run(Zygote.java:240)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:767)
+Caused by: java.lang.IllegalArgumentException: Root cause: Intentional crash for deobfuscation testing
+	at co.elastic.otel.android.integration.Crasher.rootCause(Crasher.kt:36)
+	at co.elastic.otel.android.integration.Crasher.deepCrash(Crasher.kt:29)
+	... 9 more

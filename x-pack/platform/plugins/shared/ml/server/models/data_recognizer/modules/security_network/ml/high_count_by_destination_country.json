@@ -15,7 +15,9 @@
       "destination.geo.country_name",
       "destination.as.organization.name",
       "source.ip",
-      "destination.ip"
+      "destination.ip",
+      "destination.port",
+      "process.name"
     ]
   },
   "allow_lazy_open": true,
@@ -29,6 +31,6 @@
     "created_by": "ml-module-security-network",
     "security_app_display_name": "Spike in Network Traffic to a Country",
     "managed": true,
-    "job_revision": 4
+    "job_revision": 5
   }
 }

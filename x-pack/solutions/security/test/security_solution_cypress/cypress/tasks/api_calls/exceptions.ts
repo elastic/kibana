@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { CreateEndpointListItemResponse } from '@kbn/securitysolution-endpoint-exceptions-common/api';
+import type {
+  CreateEndpointListItemResponse,
+  FindEndpointListItemsResponse,
+} from '@kbn/securitysolution-endpoint-exceptions-common/api';
 import type {
   ExceptionListSchema,
   ExceptionListItemSchema,
@@ -27,6 +30,12 @@ export const createEndpointExceptionListItem = (item: CreateEndpointListItemSche
     method: 'POST',
     url: ENDPOINT_LIST_ITEM_URL,
     body: item,
+  });
+
+export const getEndpointExceptionListItems = () =>
+  rootRequest<FindEndpointListItemsResponse>({
+    method: 'GET',
+    url: `${ENDPOINT_LIST_ITEM_URL}/_find`,
   });
 
 export const createExceptionList = (

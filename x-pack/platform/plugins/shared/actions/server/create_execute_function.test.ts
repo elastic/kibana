@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { v4 as uuidv4 } from 'uuid';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
@@ -76,7 +77,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: Buffer.from('123:abc').toString('base64'),
         source: asHttpRequestExecutionSource(request),
@@ -129,6 +130,119 @@ describe('bulkExecute()', () => {
     });
   });
 
+  test('persists uiamApiKeyExternal on the action task params when provided', async () => {
+    const actionTypeRegistry = actionTypeRegistryMock.create();
+    const executeFn = createBulkExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry,
+      isESOCanEncrypt: true,
+      inMemoryConnectors: [],
+      configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '123',
+          type: 'action',
+          attributes: { actionTypeId: 'mock-action' },
+          references: [],
+        },
+      ],
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '234',
+          type: 'action_task_params',
+          attributes: { actionId: '123' },
+          references: [],
+        },
+      ],
+    });
+    await executeFn(savedObjectsClient, [
+      {
+        id: '123',
+        params: { baz: false },
+        spaceId: DEFAULT_SPACE_ID,
+        executionId: '123abc',
+        apiKey: 'essu_user_created_key',
+        uiamApiKeyExternal: true,
+        source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'mock-action',
+      },
+    ]);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          type: 'action_task_params',
+          attributes: expect.objectContaining({
+            apiKey: 'essu_user_created_key',
+            uiamApiKeyExternal: true,
+          }),
+        }),
+      ],
+      { refresh: false }
+    );
+  });
+
+  test('persists uiamApiKeyId on the action task params when provided', async () => {
+    const actionTypeRegistry = actionTypeRegistryMock.create();
+    const executeFn = createBulkExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry,
+      isESOCanEncrypt: true,
+      inMemoryConnectors: [],
+      configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '123',
+          type: 'action',
+          attributes: { actionTypeId: 'mock-action' },
+          references: [],
+        },
+      ],
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '234',
+          type: 'action_task_params',
+          attributes: { actionId: '123' },
+          references: [],
+        },
+      ],
+    });
+    await executeFn(savedObjectsClient, [
+      {
+        id: '123',
+        params: { baz: false },
+        spaceId: DEFAULT_SPACE_ID,
+        executionId: '123abc',
+        apiKey: 'essu_secret',
+        uiamApiKeyId: 'uiam-key-id',
+        source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'mock-action',
+      },
+    ]);
+    // The alerting invalidation task looks the key up by id; `apiKey` itself is encrypted.
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          type: 'action_task_params',
+          attributes: expect.objectContaining({
+            apiKey: 'essu_secret',
+            uiamApiKeyId: 'uiam-key-id',
+          }),
+        }),
+      ],
+      { refresh: false }
+    );
+  });
+
   test('schedules the action with all given parameters and consumer', async () => {
     const actionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createBulkExecutionEnqueuerFunction({
@@ -168,7 +282,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         consumer: 'test-consumer',
         apiKey: Buffer.from('123:abc').toString('base64'),
@@ -259,7 +373,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         apiKey: Buffer.from('123:abc').toString('base64'),
         source: asHttpRequestExecutionSource(request),
         executionId: '123abc',
@@ -357,7 +471,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: Buffer.from('123:abc').toString('base64'),
         source: asSavedObjectExecutionSource(source),
@@ -453,7 +567,7 @@ describe('bulkExecute()', () => {
       {
         id: 'system-connector-test.system-action',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: 'system-connector-.casesabc',
         apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
         source: asSavedObjectExecutionSource(source),
@@ -549,7 +663,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         apiKey: Buffer.from('123:abc').toString('base64'),
         source: asSavedObjectExecutionSource(source),
         executionId: '123abc',
@@ -666,7 +780,7 @@ describe('bulkExecute()', () => {
       {
         id: 'system-connector-test.system-action',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         apiKey: Buffer.from('system-connector-test.system-action:abc').toString('base64'),
         source: asSavedObjectExecutionSource(source),
         executionId: 'system-connector-.casesabc',
@@ -751,7 +865,7 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -813,7 +927,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
@@ -822,7 +936,7 @@ describe('bulkExecute()', () => {
       {
         id: '234',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
@@ -889,7 +1003,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
@@ -954,7 +1068,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
@@ -1012,7 +1126,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
@@ -1051,7 +1165,7 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -1111,7 +1225,7 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -1121,7 +1235,7 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '456xyz',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -1200,17 +1314,17 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
           actionTypeId: 'mock-action',
-          priority: TaskPriority.Low,
+          priority: TaskPriority.Maintenance,
         },
         {
           id: '123',
           params: { baz: false },
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '456xyz',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -1289,7 +1403,7 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -1299,7 +1413,7 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '456xyz',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),

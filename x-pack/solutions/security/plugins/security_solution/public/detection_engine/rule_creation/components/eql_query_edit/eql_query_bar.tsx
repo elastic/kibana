@@ -54,6 +54,8 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   const { addError } = useAppToasts();
   const { uiSettings } = useKibana().services;
   const filterManager = useRef<FilterManager>(new FilterManager(uiSettings));
+  const validateRef = useRef(field.validate);
+  validateRef.current = field.validate;
   const { isValidating, value: fieldValue, setValue: setFieldValue, isValid, errors } = field;
   const errorMessages = useMemo(() => errors.map((x) => x.message), [errors]);
 
@@ -82,6 +84,14 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
       addError(requestError.message, { title: i18n.EQL_VALIDATION_REQUEST_ERROR });
     }
   }, [errors, addError]);
+
+  // `use_field` only re-runs validators when the field value changes. The EQL validator closes
+  // over the current data view / index pattern, so errors from a previous index can stick around
+  // after switching back to a valid index until the user edits the query. Re-validate whenever
+  // the index pattern identity changes.
+  useEffect(() => {
+    void validateRef.current();
+  }, [indexPattern.id, indexPattern.title]);
 
   useEffect(() => {
     if (onValidatingChange) {

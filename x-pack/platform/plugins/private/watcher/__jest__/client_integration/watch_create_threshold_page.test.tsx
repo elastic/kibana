@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { I18nProvider } from '@kbn/i18n-react';
 import '@kbn/code-editor-mock/jest_helper';
 
@@ -50,11 +51,11 @@ const WATCH_VISUALIZE_DATA = {
 // Since watchID's are dynamically created, we have to mock the function that generates them.
 jest.mock('uuid', () => ({
   v4: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     return require('./helpers/jest_constants').WATCH_ID;
   },
   v1: () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     return require('./helpers/jest_constants').WATCH_ID;
   },
 }));
@@ -184,7 +185,9 @@ describe('<ThresholdWatchEditPage /> create route', () => {
   });
 
   test('should set the correct page title', () => {
-    expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create threshold alert');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Create threshold alert'
+    );
   });
 
   describe('form validation', () => {

@@ -1,0 +1,118 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useMemo } from 'react';
+import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
+import type { ChangeHistoryCompareSpec } from '../types/change_history_compare';
+import type { ChangeHistoryDetail } from '../types/change_history_detail';
+import type { ChangeHistoryCompareMode } from '../types/change_history_compare_mode';
+import type { ChangeHistoryListItem } from '../types/change_history_list_item';
+import { resolveChangeHistoryCompareEndpoints } from '../utils/resolve_change_history_compare_endpoints';
+import { useChangeHistoryDetail } from './use_change_history_detail';
+
+export interface UseChangeHistoryCompareArgs {
+  adapter: ChangeHistoryAdapter;
+  objectId: string;
+  listItems: ChangeHistoryListItem[];
+  selectedChange?: ChangeHistoryDetail;
+  selectedChangeId?: string;
+  compareMode?: ChangeHistoryCompareMode;
+  /** Compare resolution and detail loads are skipped until a compare mode is set. */
+  enabled?: boolean;
+}
+
+export interface UseChangeHistoryCompareResult {
+  compareSpec?: ChangeHistoryCompareSpec;
+  isLoadingCompareContext: boolean;
+}
+
+export const useChangeHistoryCompare = ({
+  adapter,
+  objectId,
+  listItems,
+  selectedChange,
+  selectedChangeId,
+  compareMode,
+  enabled = true,
+}: UseChangeHistoryCompareArgs): UseChangeHistoryCompareResult => {
+  const endpoints = useMemo(
+    () =>
+      enabled && selectedChangeId && compareMode
+        ? resolveChangeHistoryCompareEndpoints(listItems, selectedChangeId, compareMode)
+        : undefined,
+    [compareMode, enabled, listItems, selectedChangeId]
+  );
+
+  const baselineChangeId = endpoints?.baselineChangeId;
+  const targetChangeId = endpoints?.targetChangeId;
+
+  const shouldLoadBaseline =
+    enabled &&
+    Boolean(baselineChangeId) &&
+    Boolean(selectedChangeId) &&
+    baselineChangeId !== selectedChangeId;
+  const shouldLoadTarget =
+    enabled &&
+    Boolean(targetChangeId) &&
+    Boolean(selectedChangeId) &&
+    targetChangeId !== selectedChangeId;
+
+  const { change: loadedBaselineChange, isLoading: isFetchingBaseline } = useChangeHistoryDetail({
+    adapter,
+    objectId,
+    changeId: baselineChangeId,
+    enabled: shouldLoadBaseline,
+  });
+
+  const { change: loadedTargetChange, isLoading: isFetchingTarget } = useChangeHistoryDetail({
+    adapter,
+    objectId,
+    changeId: targetChangeId,
+    enabled: shouldLoadTarget,
+  });
+
+  // keepPreviousData keeps `isLoading` false while a new id loads, so data for a different id
+  // also counts as loading.
+  const isLoadingBaseline =
+    isFetchingBaseline ||
+    (loadedBaselineChange !== undefined && loadedBaselineChange.id !== baselineChangeId);
+  const isLoadingTarget =
+    isFetchingTarget ||
+    (loadedTargetChange !== undefined && loadedTargetChange.id !== targetChangeId);
+
+  // keepPreviousData can leave a detail for a different id here; ignore it.
+  const baselineChange =
+    baselineChangeId === selectedChangeId
+      ? selectedChange
+      : loadedBaselineChange?.id === baselineChangeId
+      ? loadedBaselineChange
+      : undefined;
+  const targetChange =
+    targetChangeId === selectedChangeId
+      ? selectedChange
+      : loadedTargetChange?.id === targetChangeId
+      ? loadedTargetChange
+      : undefined;
+
+  const isLoadingCompareContext =
+    (shouldLoadBaseline && isLoadingBaseline) || (shouldLoadTarget && isLoadingTarget);
+
+  const compareSpec = useMemo((): ChangeHistoryCompareSpec | undefined => {
+    // while loading, baseline/target may still hold the previous comparison's data
+    if (isLoadingCompareContext || !endpoints || !baselineChange || !targetChange) {
+      return undefined;
+    }
+
+    return {
+      comparisonType: endpoints.comparisonType,
+      baseline: baselineChange,
+      target: targetChange,
+    };
+  }, [baselineChange, endpoints, isLoadingCompareContext, targetChange]);
+
+  return { compareSpec, isLoadingCompareContext };
+};

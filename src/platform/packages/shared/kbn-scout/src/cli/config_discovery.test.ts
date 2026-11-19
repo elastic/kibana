@@ -10,6 +10,7 @@
 import type { FlagsReader } from '@kbn/dev-cli-runner';
 import type { ScoutTestableModuleWithConfigs } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { findPackageForPath } from '@kbn/repo-packages';
 import fs from 'fs';
 import {
   filterModulesByScoutCiConfig,
@@ -43,6 +44,10 @@ jest.mock('fs', () => {
   };
 });
 
+jest.mock('@kbn/repo-packages', () => ({
+  findPackageForPath: jest.fn(),
+}));
+
 jest.mock('@kbn/repo-info', () => ({
   REPO_ROOT: '/mock/repo/root',
 }));
@@ -59,7 +64,7 @@ jest.mock('../tests_discovery/search_configs', () => ({
 
 jest.mock('@kbn/scout-reporting/src/registry', () => {
   // Access the module-level store
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const testModule = require('./config_discovery.test');
   return {
     ...jest.requireActual('@kbn/scout-reporting/src/registry'),
@@ -76,8 +81,17 @@ jest.mock('../servers/configs', () => ({
 }));
 
 describe('runDiscoverPlaywrightConfigs', () => {
+  const originalTargetAttributes = process.env.SCOUT_TARGET_ATTRIBUTES;
   let flagsReader: jest.Mocked<FlagsReader>;
   let log: jest.Mocked<ToolingLog>;
+
+  afterAll(() => {
+    if (originalTargetAttributes === undefined) {
+      delete process.env.SCOUT_TARGET_ATTRIBUTES;
+    } else {
+      process.env.SCOUT_TARGET_ATTRIBUTES = originalTargetAttributes;
+    }
+  });
 
   const mockFilteredModules: ModuleDiscoveryInfo[] = [
     {
@@ -115,18 +129,20 @@ describe('runDiscoverPlaywrightConfigs', () => {
       info: jest.fn(),
       error: jest.fn(),
       warn: jest.fn(),
+      warning: jest.fn(),
     } as any;
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    delete process.env.SCOUT_TARGET_ATTRIBUTES;
 
     // Re-setup fs mocks after clearing
     (fs.readFileSync as jest.Mock).mockImplementation((path: string) => {
       if (typeof path === 'string' && path.endsWith('package.json')) {
         return JSON.stringify({ name: 'kibana', version: '1.0.0' });
       }
-      // For yaml files (used by search_configs)
+      // For YAML files (used by search_configs)
       if (typeof path === 'string' && path.endsWith('.yml')) {
         return 'mock yaml content';
       }
@@ -139,6 +155,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockReturnValue(false);
     flagsReader.arrayOfStrings.mockReturnValue([]);
+    flagsReader.string.mockImplementation(() => '');
+
+    (findPackageForPath as jest.Mock).mockReset();
 
     (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(mockFilteredModules);
     (getScoutCiExcludedConfigs as jest.Mock).mockReturnValue([]);
@@ -156,10 +175,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'abc123',
+              testChannels: [],
               tests: [
                 {
                   id: 'test1',
@@ -189,10 +210,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/parallel.playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginA/test/scout/ui/parallel.playwright.config.ts',
               exists: true,
               sha1: 'def456',
+              testChannels: [],
               tests: [
                 {
                   id: 'test3',
@@ -220,17 +243,19 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/shared/pluginB/test/scout/api/playwright.config.ts',
             category: 'api',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/shared/pluginB/test/scout/api/playwright.config.ts',
               exists: true,
               sha1: 'ghi789',
+              testChannels: [],
               tests: [
                 {
                   id: 'test4',
                   title: 'Test 4',
                   expectedStatus: 'passed',
                   location: { file: 'test4.spec.ts', line: 1, column: 1 },
-                  tags: ['@cloud-serverless-workplaceai'], // Only serverless, not in tags.deploymentAgnostic
+                  tags: ['@cloud-serverless-vectordb'], // Only serverless, not in tags.deploymentAgnostic
                 },
               ],
             },
@@ -251,10 +276,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'src/platform/packages/shared/packageA/test/scout/api/playwright.config.ts',
             category: 'api',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'src/platform/packages/shared/packageA/test/scout/api/playwright.config.ts',
               exists: true,
               sha1: 'jkl012',
+              testChannels: [],
               tests: [
                 {
                   id: 'test5',
@@ -282,8 +309,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockImplementation((flag) => {
       if (flag === 'save') return false;
-      if (flag === 'validate') return true;
-      return false;
+      return flag === 'validate';
     });
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
@@ -294,6 +320,243 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(Array.isArray(callArgs[1])).toBe(true);
   });
 
+  describe('"--validate" test tag checks', () => {
+    const firstTest = () => mockTestableModules.modules[0].configs[0].manifest.tests[0];
+
+    const runValidate = () => {
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.boolean.mockImplementation((flag) => flag === 'validate');
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+    };
+
+    it('rejects a test tagged with limits alone', () => {
+      firstTest().tags = ['@limit/only-fips'];
+
+      expect(runValidate).toThrow(
+        /invalid Scout test tag usage[\s\S]*At least one of the following tags is required/
+      );
+    });
+
+    it('rejects conflicting limit tags', () => {
+      firstTest().tags = ['@local-stateful-classic', '@limit/only-fips', '@limit/except-fips'];
+
+      expect(runValidate).toThrow(/Conflicting limit tags for the 'fips' target attribute/);
+    });
+
+    it('reports a malformed limit tag instead of failing discovery on it', () => {
+      firstTest().tags = ['@local-stateful-classic', '@limit/onlyfips'];
+
+      expect(runValidate).toThrow(/Invalid limit tag\(s\): @limit\/onlyfips/);
+    });
+
+    it('names the offending file and test', () => {
+      const test = firstTest();
+      test.tags = ['@limit/only-fips'];
+
+      expect(runValidate).toThrow(`${test.location.file}: test "${test.title}"`);
+    });
+
+    it('tolerates tags Playwright derives from test titles', () => {
+      firstTest().tags = ['@timestamp', '@local-stateful-classic'];
+
+      expect(runValidate).not.toThrow();
+    });
+
+    it('ignores global setup and teardown hooks, which carry no target tag', () => {
+      const test = firstTest();
+      test.tags = [];
+      test.location = {
+        ...test.location,
+        file: 'plugin/test/scout/ui/parallel_tests/global.setup.ts',
+      };
+
+      expect(runValidate).not.toThrow();
+    });
+
+    it('does not run without "--validate"', () => {
+      firstTest().tags = ['@limit/only-fips'];
+      flagsReader.enum.mockReturnValue('all');
+
+      expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).not.toThrow();
+    });
+  });
+
+  describe('"--configs" flag (explicit allow-list)', () => {
+    const requestedPath =
+      'x-pack/platform/plugins/private/pluginA/test/scout/ui/playwright.config.ts';
+
+    it('limits output to the requested config and bypasses the CI filter on "--save"', () => {
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.string.mockImplementation((name: string) =>
+        name === 'configs' ? requestedPath : ''
+      );
+      flagsReader.boolean.mockImplementation((flag) => flag === 'save');
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      // CI enabled/disabled/registration filter must NOT run for an explicit allow-list.
+      expect(filterModulesByScoutCiConfig).not.toHaveBeenCalled();
+      expect(fs.writeFileSync).toHaveBeenCalled();
+
+      const writeCall = (fs.writeFileSync as jest.Mock).mock.calls[0];
+      const savedData = JSON.parse(writeCall[1]);
+      const savedPaths = savedData.flatMap((m: any) => m.configs.map((c: any) => c.path));
+      expect(savedPaths).toEqual([requestedPath]);
+      expect(savedPaths.some((p: string) => p.includes('parallel.playwright.config.ts'))).toBe(
+        false
+      );
+
+      expect(log.info).toHaveBeenCalledWith(
+        expect.stringContaining('Scout configs saved for CI (requested configs)')
+      );
+    });
+
+    it('normalizes a leading "./" and de-duplicates requested paths', () => {
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.string.mockImplementation((name: string) =>
+        name === 'configs' ? `./${requestedPath}, ${requestedPath}` : ''
+      );
+      flagsReader.boolean.mockImplementation((flag) => flag === 'save');
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      const writeCall = (fs.writeFileSync as jest.Mock).mock.calls[0];
+      const savedData = JSON.parse(writeCall[1]);
+      const savedPaths = savedData.flatMap((m: any) => m.configs.map((c: any) => c.path));
+      expect(savedPaths).toEqual([requestedPath]);
+    });
+
+    it('throws a clear error when a requested config is unknown', () => {
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.string.mockImplementation((name: string) =>
+        name === 'configs' ? 'does/not/exist/playwright.config.ts' : ''
+      );
+      flagsReader.boolean.mockImplementation((flag) => flag === 'save');
+
+      expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(
+        /were not found among discovered Playwright configs/
+      );
+    });
+
+    it('includes requested custom-server configs without "--include-custom-servers"', () => {
+      flagsReader.enum.mockReturnValue('all');
+      const customPath =
+        'x-pack/platform/plugins/private/pluginCustom/test/scout_custom/ui/playwright.config.ts';
+      flagsReader.string.mockImplementation((name: string) =>
+        name === 'configs' ? customPath : ''
+      );
+      flagsReader.boolean.mockImplementation((flag) => flag === 'save');
+
+      mockTestableModules.modules = [
+        {
+          name: 'pluginCustom',
+          group: 'groupCustom',
+          type: 'plugin' as const,
+          visibility: 'private' as const,
+          root: 'x-pack/platform/plugins/private/pluginCustom',
+          configs: [
+            {
+              path: customPath,
+              category: 'ui',
+              type: 'playwright',
+              namespace: undefined,
+              manifest: {
+                path: customPath,
+                exists: true,
+                sha1: 'custom123',
+                testChannels: [],
+                tests: [
+                  {
+                    id: 'customTest1',
+                    title: 'Custom Test 1',
+                    expectedStatus: 'passed',
+                    location: { file: 'custom.spec.ts', line: 1, column: 1 },
+                    tags: ['@local-stateful-classic'],
+                  },
+                ],
+              },
+              server: { configSet: 'custom' },
+            },
+          ],
+        },
+      ];
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      const writeCall = (fs.writeFileSync as jest.Mock).mock.calls[0];
+      const savedData = JSON.parse(writeCall[1]);
+      const savedPaths = savedData.flatMap((m: any) => m.configs.map((c: any) => c.path));
+      expect(savedPaths).toEqual([customPath]);
+    });
+  });
+
+  describe('"--targetAttribute" flag (test limits)', () => {
+    const setLimitTagsOnPackageA = (limitTags: string[]) => {
+      const packageA = mockTestableModules.modules.find((module) => module.name === 'packageA')!;
+      packageA.configs[0].manifest.tests[0].tags = [
+        '@local-stateful-classic',
+        '@cloud-stateful-classic',
+        '@cloud-serverless-observability_complete',
+        ...limitTags,
+      ];
+    };
+
+    const discoveredModuleCounts = (): string => {
+      const foundMessage = log.info.mock.calls.find((call) =>
+        call[0].includes('Found Playwright config files')
+      );
+      expect(foundMessage).toBeDefined();
+      return foundMessage![0];
+    };
+
+    it('drops configs whose only tests require an undeclared attribute', () => {
+      setLimitTagsOnPackageA(['@limit/only-fips']);
+      flagsReader.enum.mockReturnValue('all');
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      expect(discoveredModuleCounts()).toContain('0 package(s)');
+    });
+
+    it('keeps those configs when the attribute is declared', () => {
+      setLimitTagsOnPackageA(['@limit/only-fips']);
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.arrayOfStrings.mockImplementation((name: string) =>
+        name === 'targetAttribute' ? ['fips'] : []
+      );
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      expect(discoveredModuleCounts()).toContain('1 package(s)');
+      expect(log.info).toHaveBeenCalledWith('Test target attributes: fips');
+    });
+
+    it('drops configs limited to the attribute being absent when it is declared', () => {
+      setLimitTagsOnPackageA(['@limit/except-fips']);
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.arrayOfStrings.mockImplementation((name: string) =>
+        name === 'targetAttribute' ? ['fips'] : []
+      );
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      expect(discoveredModuleCounts()).toContain('0 package(s)');
+    });
+
+    it('never reports limit tags as test target tags', () => {
+      setLimitTagsOnPackageA(['@limit/except-fips']);
+      flagsReader.enum.mockReturnValue('all');
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      const packageAMessage = log.info.mock.calls.find((call) =>
+        call[0].includes('src/platform/packages/shared/packageA')
+      );
+      expect(packageAMessage).toBeDefined();
+      expect(packageAMessage![0]).not.toContain('@limit/');
+    });
+  });
+
   it('filters configs based on target tags for "all" target (tags.deploymentAgnostic)', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockReturnValue(false);
@@ -301,7 +564,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
     // pluginA has local/cloud-stateful-classic, serverless-observability_complete, serverless-security_complete, serverless-search which are in tags.deploymentAgnostic
-    // pluginB has serverless-workplaceai which is NOT in tags.deploymentAgnostic, it should be excluded
+    // pluginB has serverless-vectordb which is NOT in tags.deploymentAgnostic, it should be excluded
     // packageA has local/cloud-stateful-classic and serverless-observability_complete which are in tags.deploymentAgnostic
 
     const infoCalls = log.info.mock.calls;
@@ -320,7 +583,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
     // pluginA has @cloud-serverless-observability_complete, @cloud-serverless-security_complete, @cloud-serverless-search
-    // pluginB has @cloud-serverless-workplaceai
+    // pluginB has @cloud-serverless-vectordb
     // packageA has @cloud-serverless-observability_complete
 
     const infoCalls = log.info.mock.calls;
@@ -360,7 +623,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     // pluginA config1 has @local-stateful-classic which matches @local-*
     // pluginA parallel has @cloud-serverless-search which does NOT match @local-*
-    // pluginB has @cloud-serverless-workplaceai which does NOT match @local-*
+    // pluginB has @cloud-serverless-vectordb which does NOT match @local-*
     // packageA has @local-stateful-classic which matches @local-*
 
     const infoCalls = log.info.mock.calls;
@@ -397,10 +660,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
           path: 'x-pack/platform/plugins/private/pluginLocalServerless/test/scout/ui/playwright.config.ts',
           category: 'ui',
           type: 'playwright',
+          namespace: undefined,
           manifest: {
             path: 'x-pack/platform/plugins/private/pluginLocalServerless/test/scout/ui/playwright.config.ts',
             exists: true,
             sha1: 'local789',
+            testChannels: [],
             tests: [
               {
                 id: 'localServerlessTest',
@@ -422,7 +687,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     // pluginA config1 has @local-stateful-classic which matches @local-stateful-*
     // pluginA parallel has @cloud-serverless-search which does NOT match
-    // pluginB has @cloud-serverless-workplaceai which does NOT match
+    // pluginB has @cloud-serverless-vectordb which does NOT match
     // pluginLocalServerless has @local-serverless-search which does NOT match @local-stateful-*
     // packageA has @local-stateful-classic which matches @local-stateful-*
 
@@ -465,10 +730,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginCustom/test/scout_custom/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginCustom/test/scout_custom/ui/playwright.config.ts',
               exists: true,
               sha1: 'custom123',
+              testChannels: [],
               tests: [
                 {
                   id: 'customTest1',
@@ -487,10 +754,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginCustom/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginCustom/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'normal456',
+              testChannels: [],
               tests: [
                 {
                   id: 'normalTest1',
@@ -546,10 +815,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: excludedConfigPath,
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/.meta/ui/parallel.json',
               exists: true,
               sha1: 'exclude123',
+              testChannels: [],
               tests: [
                 {
                   id: 'excludedTest',
@@ -568,10 +839,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/solutions/security/plugins/cloud_security_posture/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'include456',
+              testChannels: [],
               tests: [
                 {
                   id: 'includedTest',
@@ -631,7 +904,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     const infoCalls = log.info.mock.calls;
     expect(infoCalls.length).toBeGreaterThan(0);
-    expect(infoCalls[0][0]).toContain('Found Playwright config files');
+    expect(infoCalls.some((call) => call[0].includes('Found Playwright config files'))).toBe(true);
 
     // Check that config logs include tags
     const configLogs = infoCalls.filter((call) => call[0].startsWith('- '));
@@ -658,17 +931,19 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginNoMatch/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginNoMatch/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'mno345',
+              testChannels: [],
               tests: [
                 {
                   id: 'testNoMatch',
                   title: 'Test No Match',
                   expectedStatus: 'passed',
                   location: { file: 'test.spec.ts', line: 1, column: 1 },
-                  tags: ['@cloud-serverless-workplaceai'], // Not in ESS_ONLY
+                  tags: ['@cloud-serverless-vectordb'], // Not in ESS_ONLY
                 },
               ],
             },
@@ -705,8 +980,63 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(Array.isArray(savedData)).toBe(true);
 
     expect(log.info).toHaveBeenCalledWith(
-      expect.stringContaining('Scout configs were filtered for CI. Saved')
+      expect.stringContaining('Scout configs saved for CI (full suite)')
     );
+  });
+
+  it('preserves test channel metadata when saving configs', () => {
+    flagsReader.enum.mockReturnValue('all');
+    flagsReader.boolean.mockImplementation((flag) => {
+      if (flag === 'save') return true;
+      if (flag === 'validate') return false;
+      return false;
+    });
+
+    (filterModulesByScoutCiConfig as jest.Mock).mockImplementation((_log, modules) => modules);
+
+    mockTestableModules.modules = [
+      {
+        name: 'pluginChannels',
+        group: 'groupChannels',
+        type: 'plugin' as const,
+        visibility: 'private' as const,
+        root: 'x-pack/platform/plugins/private/pluginChannels',
+        configs: [
+          {
+            path: 'x-pack/platform/plugins/private/pluginChannels/test/scout/ui/playwright.config.ts',
+            category: 'ui',
+            type: 'playwright',
+            namespace: undefined,
+            manifest: {
+              path: 'x-pack/platform/plugins/private/pluginChannels/test/scout/ui/playwright.config.ts',
+              exists: true,
+              sha1: 'channels123',
+              testChannels: ['ci-on-commit', 'ci-batch-daily'],
+              tests: [
+                {
+                  id: 'channelTest',
+                  title: 'Channel Test',
+                  expectedStatus: 'passed',
+                  location: { file: 'channel.spec.ts', line: 1, column: 1 },
+                  tags: ['@local-stateful-classic'],
+                },
+              ],
+            },
+            server: {
+              configSet: 'default',
+            },
+          },
+        ],
+      },
+    ];
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    const writeCall = (fs.writeFileSync as jest.Mock).mock.calls[0];
+    const savedData = JSON.parse(writeCall[1]);
+
+    expect(savedData).toHaveLength(1);
+    expect(savedData[0].configs[0].testChannels).toEqual(['ci-on-commit', 'ci-batch-daily']);
   });
 
   it('filters out modules with no matching configs after tag filtering', () => {
@@ -715,7 +1045,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
-    // pluginB has @cloud-serverless-workplaceai which doesn't match @cloud-stateful-*, it should be filtered out
+    // pluginB has @cloud-serverless-vectordb which doesn't match @cloud-stateful-*, it should be filtered out
     const infoCalls = log.info.mock.calls;
     const moduleLogs = infoCalls.filter(
       (call) => call[0].includes('] plugin:') || call[0].includes('] package:')
@@ -743,10 +1073,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginNoTests/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginNoTests/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'pqr678',
+              testChannels: [],
               tests: [
                 {
                   id: 'testFailed',
@@ -781,7 +1113,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(foundMessage![0]).toBe('No Playwright config files found');
   });
 
-  it('only collects tags from passed spec files', () => {
+  it('only collects tags from runnable tests', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockReturnValue(false);
 
@@ -798,10 +1130,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginMixedTests/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginMixedTests/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'stu901',
+              testChannels: [],
               tests: [
                 {
                   id: 'test1',
@@ -821,8 +1155,8 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   id: 'test3',
                   title: 'Test 3',
                   expectedStatus: 'passed',
-                  location: { file: 'test3.ts', line: 1, column: 1 }, // Not a .spec.ts file
-                  tags: ['@cloud-serverless-search'], // Should NOT be included (not .spec.ts)
+                  location: { file: 'parallel_tests/global.setup.ts', line: 1, column: 1 },
+                  tags: ['@cloud-serverless-search'], // Should NOT be included (setup hook)
                 },
                 {
                   id: 'test4',
@@ -867,7 +1201,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     // For target 'all', only tags in deploymentAgnostic are shown (filtered by filterModulesByTargetTags)
     expect(configLogCall![0]).toContain('@local-stateful-classic');
     expect(configLogCall![0]).toContain('@cloud-serverless-observability_complete');
-    // Should NOT contain tags from failed tests or non-spec files
+    // Should NOT contain tags from failed tests or global setup hooks
     expect(configLogCall![0]).not.toContain('@cloud-serverless-security_complete');
     expect(configLogCall![0]).not.toContain('@cloud-serverless-search');
   });
@@ -903,10 +1237,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginTestModes/test/scout/ui/playwright.config.ts',
             category: 'ui',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginTestModes/test/scout/ui/playwright.config.ts',
               exists: true,
               sha1: 'vwx234',
+              testChannels: [],
               tests: [
                 {
                   id: 'testModes1',
@@ -929,10 +1265,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
             path: 'x-pack/platform/plugins/private/pluginTestModes/test/scout/api/playwright.config.ts',
             category: 'api',
             type: 'playwright',
+            namespace: undefined,
             manifest: {
               path: 'x-pack/platform/plugins/private/pluginTestModes/test/scout/api/playwright.config.ts',
               exists: true,
               sha1: 'yza567',
+              testChannels: [],
               tests: [
                 {
                   id: 'testModes2',
@@ -981,10 +1319,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginSearch/test/scout/ui/playwright.config.ts',
               category: 'ui',
               type: 'playwright',
+              namespace: undefined,
               manifest: {
                 path: 'x-pack/platform/plugins/private/pluginSearch/test/scout/ui/playwright.config.ts',
                 exists: true,
                 sha1: 'bcd234',
+                testChannels: [],
                 tests: [
                   {
                     id: 'flattenTest1',
@@ -1003,10 +1343,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginSearch/test/scout/api/playwright.config.ts',
               category: 'api',
               type: 'playwright',
+              namespace: undefined,
               manifest: {
                 path: 'x-pack/platform/plugins/private/pluginSearch/test/scout/api/playwright.config.ts',
                 exists: true,
                 sha1: 'cde345',
+                testChannels: [],
                 tests: [
                   {
                     id: 'flattenTest2',
@@ -1034,10 +1376,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginPlatform/test/scout/ui/playwright.config.ts',
               category: 'ui',
               type: 'playwright',
+              namespace: undefined,
               manifest: {
                 path: 'x-pack/platform/plugins/private/pluginPlatform/test/scout/ui/playwright.config.ts',
                 exists: true,
                 sha1: 'def456',
+                testChannels: [],
                 tests: [
                   {
                     id: 'flattenTest3',
@@ -1065,10 +1409,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/solutions/observability/plugins/pluginOblt/test/scout/ui/playwright.config.ts',
               category: 'ui',
               type: 'playwright',
+              namespace: undefined,
               manifest: {
                 path: 'x-pack/solutions/observability/plugins/pluginOblt/test/scout/ui/playwright.config.ts',
                 exists: true,
                 sha1: 'efg567',
+                testChannels: [],
                 tests: [
                   {
                     id: 'flattenTest4',
@@ -1091,8 +1437,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     it('logs flattened structure when "--flatten" is set without "--save"', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
-        if (flag === 'flatten') return true;
-        return false;
+        return flag === 'flatten';
       });
 
       runDiscoverPlaywrightConfigs(flagsReader, log);
@@ -1113,8 +1458,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
         if (flag === 'flatten') return true;
-        if (flag === 'save') return true;
-        return false;
+        return flag === 'save';
       });
 
       (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(
@@ -1174,8 +1518,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
         if (flag === 'flatten') return true;
-        if (flag === 'save') return true;
-        return false;
+        return flag === 'save';
       });
 
       (filterModulesByScoutCiConfig as jest.Mock).mockReturnValue(
@@ -1206,7 +1549,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
         'node scripts/scout run-tests --location cloud --arch stateful --domain classic';
 
       // Find stateful group for 'search'
-      // For stateful (ECH), domain is based on group: 'search' => 'search'
       const statefulSearchGroup = savedData.find(
         (g: any) =>
           g.testTarget?.arch === 'stateful' &&
@@ -1214,13 +1556,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
           g.scoutCommand === statefulScoutCmd
       );
       expect(statefulSearchGroup).toBeDefined();
-      expect(statefulSearchGroup.testTarget.domain).toBe('search');
+      expect(statefulSearchGroup.testTarget.domain).toBe('classic');
       expect(statefulSearchGroup.configs).toContain(
         'x-pack/platform/plugins/private/pluginSearch/test/scout/ui/playwright.config.ts'
       );
 
       // Find stateful group for 'platform'
-      // For stateful (ECH), domain is based on group: 'platform' => 'classic'
       const statefulPlatformGroup = savedData.find(
         (g: any) =>
           g.testTarget?.arch === 'stateful' &&
@@ -1271,8 +1612,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       flagsReader.enum.mockReturnValue('all');
       flagsReader.boolean.mockImplementation((flag) => {
         if (flag === 'flatten') return true;
-        if (flag === 'save') return true;
-        return false;
+        return flag === 'save';
       });
 
       // Set up a module with a config that has multiple serverRunFlags
@@ -1288,10 +1628,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
               path: 'x-pack/platform/plugins/private/pluginMultiMode/test/scout/ui/playwright.config.ts',
               category: 'ui',
               type: 'playwright',
+              namespace: undefined,
               manifest: {
                 path: 'x-pack/platform/plugins/private/pluginMultiMode/test/scout/ui/playwright.config.ts',
                 exists: true,
                 sha1: 'fgh678',
+                testChannels: [],
                 tests: [
                   {
                     id: 'multiModeTest',
@@ -1388,6 +1730,147 @@ describe('runDiscoverPlaywrightConfigs', () => {
       expect(serverlessObltGroup.configs).toContain(
         'x-pack/platform/plugins/private/pluginMultiMode/test/scout/ui/playwright.config.ts'
       );
+    });
+  });
+
+  describe('"--testing-scope" flag', () => {
+    const TESTING_SCOPE_PATH = '/mock/testing_scope.json';
+
+    const setupTestingScope = (scope: Record<string, unknown>) => {
+      (fs.readFileSync as jest.Mock).mockImplementation((readPath: string) => {
+        if (readPath === TESTING_SCOPE_PATH) {
+          return JSON.stringify(scope);
+        }
+        if (typeof readPath === 'string' && readPath.endsWith('package.json')) {
+          return JSON.stringify({ name: 'kibana', version: '1.0.0' });
+        }
+        if (typeof readPath === 'string' && readPath.endsWith('.yml')) {
+          return 'mock yaml content';
+        }
+        return '';
+      });
+    };
+
+    beforeEach(() => {
+      (findPackageForPath as jest.Mock).mockImplementation((_root: string, absPath: string) => {
+        if (absPath.includes('/pluginA/')) return { id: '@kbn/pluginA' };
+        if (absPath.includes('/pluginB/')) return { id: '@kbn/pluginB' };
+        if (absPath.includes('/packageA/')) return { id: '@kbn/packageA' };
+        return undefined;
+      });
+    });
+
+    it('routes kind=full/critical-files to a full suite run (warning preserved upstream, no "limited to" message here)', () => {
+      flagsReader.enum.mockReturnValue('mki');
+      flagsReader.boolean.mockReturnValue(false);
+      flagsReader.string.mockImplementation((name: string) =>
+        name === 'testing-scope' ? TESTING_SCOPE_PATH : ''
+      );
+      setupTestingScope({
+        kind: 'full',
+        reason: 'critical-files',
+        affectedModules: ['@kbn/scout'],
+      });
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      const infoCalls = log.info.mock.calls;
+      // No filtering applied: every module passes through to the target-tag step.
+      expect(infoCalls.some((call) => String(call[0]).includes('limited to'))).toBe(false);
+    });
+
+    it('routes kind=tests-only to the configs fast path using affectedConfigs', () => {
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.boolean.mockReturnValue(false);
+      flagsReader.string.mockImplementation((name: string) =>
+        name === 'testing-scope' ? TESTING_SCOPE_PATH : ''
+      );
+      setupTestingScope({
+        kind: 'tests-only',
+        affectedModules: ['@kbn/pluginA'],
+        affectedConfigs: [
+          'x-pack/platform/plugins/private/pluginA/test/scout/ui/playwright.config.ts',
+        ],
+      });
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      const infoCalls = log.info.mock.calls;
+      expect(
+        infoCalls.some((call) => String(call[0]).includes('limited to affected configs'))
+      ).toBe(true);
+    });
+
+    it('routes kind=dependency-tree to the affected-modules filter', () => {
+      flagsReader.enum.mockReturnValue('mki');
+      flagsReader.boolean.mockReturnValue(false);
+      flagsReader.string.mockImplementation((name: string) =>
+        name === 'testing-scope' ? TESTING_SCOPE_PATH : ''
+      );
+      setupTestingScope({
+        kind: 'dependency-tree',
+        affectedModules: ['@kbn/pluginA'],
+      });
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      const infoCalls = log.info.mock.calls;
+      expect(
+        infoCalls.some((call) => String(call[0]).includes('limited to affected modules'))
+      ).toBe(true);
+    });
+
+    it('marks isAffected on every module from scope.affectedModules even when kind=full', () => {
+      flagsReader.enum.mockReturnValue('mki');
+      flagsReader.boolean.mockReturnValue(false);
+      flagsReader.string.mockImplementation((name: string) =>
+        name === 'testing-scope' ? TESTING_SCOPE_PATH : ''
+      );
+      setupTestingScope({
+        kind: 'full',
+        reason: 'selective-disabled',
+        affectedModules: ['@kbn/pluginA'],
+      });
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      const infoCalls = log.info.mock.calls;
+      // Full-suite run: pluginA, pluginB, and packageA all included.
+      const foundMessage = infoCalls.find((call) =>
+        String(call[0]).includes('Found Playwright config files')
+      );
+      expect(foundMessage).toBeDefined();
+      expect(foundMessage![0]).toContain('2 plugin(s)');
+      expect(foundMessage![0]).toContain('1 package(s)');
+      // Marking ran: the "Affected modules: ..." line appears.
+      expect(infoCalls.some((call) => String(call[0]).includes('Affected modules:'))).toBe(true);
+    });
+
+    it('runs the full suite without marking when --testing-scope is omitted', () => {
+      flagsReader.enum.mockReturnValue('mki');
+      flagsReader.boolean.mockReturnValue(false);
+      flagsReader.string.mockImplementation(() => '');
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      const infoCalls = log.info.mock.calls;
+      // Marking did NOT run.
+      expect(infoCalls.some((call) => String(call[0]).includes('Affected modules:'))).toBe(false);
+      // Full-suite log is emitted.
+      expect(infoCalls.some((call) => String(call[0]).includes('no testing-scope provided'))).toBe(
+        true
+      );
+    });
+
+    it('throws when the testing-scope file is missing required fields', () => {
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.boolean.mockReturnValue(false);
+      flagsReader.string.mockImplementation((name: string) =>
+        name === 'testing-scope' ? TESTING_SCOPE_PATH : ''
+      );
+      setupTestingScope({ kind: 'full' }); // missing affectedModules
+
+      expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(/testing-scope file/i);
     });
   });
 });

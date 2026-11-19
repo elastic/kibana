@@ -25,9 +25,13 @@ export function hasNoResults$({
   api: DataControlStateManager['api'];
   controlFetch$: Observable<FetchContext>;
   setIsLoading: (isLoading: boolean) => void;
-}) {
+}): {
+  hasNoResults$: Observable<boolean>;
+  cancelRequests: () => void;
+} {
   let prevRequestAbortController: AbortController | undefined;
-  return combineLatest([
+
+  const observable = combineLatest([
     controlFetch$,
     api.appliedFilters$,
     api.useGlobalFilters$,
@@ -40,7 +44,7 @@ export function hasNoResults$({
       }
     }),
     switchMap(async ([controlFetchContext, rangeFilters, useGlobalFilters, ignoreValidations]) => {
-      const dataView = api.dataViews$?.value?.[0];
+      const dataView = api.dataSources$?.value?.[0];
       const rangeFilter = rangeFilters?.[0];
       if (!dataView || !rangeFilter || ignoreValidations) {
         return false;
@@ -67,6 +71,16 @@ export function hasNoResults$({
       setIsLoading(false);
     })
   );
+
+  return {
+    hasNoResults$: observable,
+    cancelRequests: () => {
+      if (prevRequestAbortController) {
+        prevRequestAbortController.abort();
+        prevRequestAbortController = undefined;
+      }
+    },
+  };
 }
 
 async function hasNoResults({

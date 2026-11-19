@@ -23,7 +23,10 @@ import type { EqlSearchResponse } from './types';
 import type { ISearchStrategy } from '../../types';
 import { getDefaultSearchParams } from '../es_search';
 import { getIgnoreThrottled } from '../ese_search/request_utils';
-import { getCommonDefaultAsyncGetParams } from '../common/async_utils';
+import {
+  getCommonDefaultAsyncGetParams,
+  getCommonDefaultAsyncSubmitParams,
+} from '../common/async_utils';
 
 export const eqlSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,
@@ -60,7 +63,7 @@ export const eqlSearchStrategyProvider = (
           : {
               ...(await getIgnoreThrottled(uiSettingsClient)),
               ...defaultParams,
-              ...getCommonDefaultAsyncGetParams(searchConfig, options, {
+              ...getCommonDefaultAsyncSubmitParams(searchConfig, options, {
                 /* disable until full eql support */ disableSearchSessions: true,
               }),
               ...request.params,
@@ -73,6 +76,7 @@ export const eqlSearchStrategyProvider = (
                 ...options.transport,
                 signal: options.abortSignal,
                 meta: true,
+                requestTimeout: 600_000, // large enough to never interfere with `wait_for_completion_timeout`, which should control the timeout of the poll
               }
             )
           : // @ts-expect-error optional key cannot be used since search doesn't expect undefined

@@ -5,15 +5,42 @@
  * 2.0.
  */
 
-import { merge, cloneDeep } from 'lodash';
+import { merge, cloneDeep, get } from 'lodash';
 
-import type { SerializedPolicy } from '../../../../../../common/types';
+import type { RolloverAction, SerializedPolicy } from '../../../../../../common/types';
 
-import { defaultPolicy, defaultRolloverAction } from '../../../../constants';
+import { defaultPolicy } from '../../../../constants';
 
 import type { FormInternal } from '../../types';
+import {
+  DEFAULT_ROLLOVER_TRIGGER_FIELDS,
+  ROLLOVER_RESTRICTION_FIELDS,
+  ROLLOVER_TRIGGER_FIELDS,
+  ROLLOVER_UNIT_PATHS,
+  type RolloverField,
+} from '../../constants';
 
 import { serializeMigrateAndAllocateActions } from './serialize_migrate_and_allocate_actions';
+
+const numberRolloverFields = new Set<RolloverField>([
+  'max_docs',
+  'max_primary_shard_docs',
+  'min_docs',
+  'min_primary_shard_docs',
+]);
+
+const hasRolloverValue = (value: unknown): boolean => {
+  if (typeof value === 'number') {
+    return Number.isFinite(value);
+  }
+
+  return value !== undefined && value !== null && value !== '';
+};
+
+const getRolloverUnit = (data: FormInternal, field: RolloverField): string => {
+  const unitPath = ROLLOVER_UNIT_PATHS[field];
+  return unitPath ? get(data, unitPath, '') : '';
+};
 
 export const createSerializer =
   (originalPolicy?: SerializedPolicy) =>
@@ -48,9 +75,7 @@ export const createSerializer =
     /**
      * Important shared values for serialization
      */
-    const isUsingRollover = Boolean(
-      hotEnabled && (hotMeta?.isUsingDefaultRollover || hotMeta?.customRollover?.enabled)
-    );
+    const isUsingRollover = Boolean(hotEnabled && hotMeta?.customRollover?.enabled);
 
     // Next copy over all meta fields and delete any fields that have been removed
     // by fields exposed in the form. It is very important that we do not delete
@@ -69,49 +94,39 @@ export const createSerializer =
          * HOT PHASE ROLLOVER
          */
         if (isUsingRollover) {
-          if (_meta.hot?.isUsingDefaultRollover) {
-            hotPhaseActions.rollover = cloneDeep(defaultRolloverAction);
-          } else {
-            // Rollover may not exist if editing an existing policy with initially no rollover configured
-            if (!hotPhaseActions.rollover) {
-              hotPhaseActions.rollover = {};
-            }
-
-            // We are using user-defined, custom rollover settings.
-            if (updatedPolicy.phases.hot?.actions.rollover?.max_age) {
-              hotPhaseActions.rollover.max_age = `${hotPhaseActions.rollover.max_age}${
-                hotMeta?.customRollover?.maxAgeUnit ?? ''
-              }`;
-            } else {
-              delete hotPhaseActions.rollover.max_age;
-            }
-
-            if (typeof updatedPolicy.phases.hot?.actions.rollover?.max_docs !== 'number') {
-              delete hotPhaseActions.rollover.max_docs;
-            }
-
-            if (updatedPolicy.phases.hot?.actions.rollover?.max_primary_shard_size) {
-              hotPhaseActions.rollover.max_primary_shard_size = `${
-                hotPhaseActions.rollover.max_primary_shard_size
-              }${hotMeta?.customRollover?.maxPrimaryShardSizeUnit ?? ''}`;
-            } else {
-              delete hotPhaseActions.rollover.max_primary_shard_size;
-            }
-
-            if (
-              typeof updatedPolicy.phases.hot?.actions.rollover?.max_primary_shard_docs !== 'number'
-            ) {
-              delete hotPhaseActions.rollover.max_primary_shard_docs;
-            }
-
-            if (updatedPolicy.phases.hot?.actions.rollover?.max_size) {
-              hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${
-                hotMeta?.customRollover?.maxStorageSizeUnit ?? ''
-              }`;
-            } else {
-              delete hotPhaseActions.rollover.max_size;
-            }
+          // Rollover may not exist if editing an existing policy with initially no rollover configured
+          if (!hotPhaseActions.rollover) {
+            hotPhaseActions.rollover = {};
           }
+
+          const activeTriggerFields =
+            hotMeta?.customRollover?.triggerFields ?? DEFAULT_ROLLOVER_TRIGGER_FIELDS;
+          const activeRestrictionFields = hotMeta?.customRollover?.restrictionFields ?? [];
+          const activeRolloverFields = new Set<RolloverField>([
+            ...activeTriggerFields,
+            ...activeRestrictionFields,
+          ]);
+          const controlledRolloverFields: RolloverField[] = [
+            ...ROLLOVER_TRIGGER_FIELDS,
+            ...ROLLOVER_RESTRICTION_FIELDS,
+          ];
+          const updatedRollover = updatedPolicy.phases.hot?.actions.rollover as
+            | RolloverAction
+            | undefined;
+
+          controlledRolloverFields.forEach((field) => {
+            const formValue = updatedRollover?.[field];
+            if (!activeRolloverFields.has(field) || !hasRolloverValue(formValue)) {
+              delete hotPhaseActions.rollover![field];
+              return;
+            }
+
+            if (!numberRolloverFields.has(field)) {
+              (hotPhaseActions.rollover as Record<string, unknown>)[field] = `${
+                hotPhaseActions.rollover![field]
+              }${getRolloverUnit(data, field)}`;
+            }
+          });
 
           /**
            * HOT PHASE FORCEMERGE
@@ -183,6 +198,15 @@ export const createSerializer =
             ...hotPhaseActions.searchable_snapshot,
             snapshot_repository: searchableSnapshotMeta?.repository,
           };
+          if (hotPhaseActions.searchable_snapshot.force_merge_index === true) {
+            delete hotPhaseActions.searchable_snapshot.force_merge_index;
+          }
+          if (hotPhaseActions.searchable_snapshot.force_merge_index === false) {
+            delete hotPhaseActions.searchable_snapshot.force_merge_on_clone;
+          }
+          if (hotPhaseActions.searchable_snapshot.force_merge_on_clone === true) {
+            delete hotPhaseActions.searchable_snapshot.force_merge_on_clone;
+          }
         } else {
           delete hotPhaseActions.searchable_snapshot;
         }
@@ -330,6 +354,15 @@ export const createSerializer =
           ...coldPhase.actions.searchable_snapshot,
           snapshot_repository: searchableSnapshotMeta?.repository,
         };
+        if (coldPhase.actions.searchable_snapshot.force_merge_index === true) {
+          delete coldPhase.actions.searchable_snapshot.force_merge_index;
+        }
+        if (coldPhase.actions.searchable_snapshot.force_merge_index === false) {
+          delete coldPhase.actions.searchable_snapshot.force_merge_on_clone;
+        }
+        if (coldPhase.actions.searchable_snapshot.force_merge_on_clone === true) {
+          delete coldPhase.actions.searchable_snapshot.force_merge_on_clone;
+        }
       } else {
         delete coldPhase.actions.searchable_snapshot;
       }
@@ -375,6 +408,15 @@ export const createSerializer =
           ...frozenPhase.actions.searchable_snapshot,
           snapshot_repository: searchableSnapshotMeta?.repository,
         };
+        if (frozenPhase.actions.searchable_snapshot.force_merge_index === true) {
+          delete frozenPhase.actions.searchable_snapshot.force_merge_index;
+        }
+        if (frozenPhase.actions.searchable_snapshot.force_merge_index === false) {
+          delete frozenPhase.actions.searchable_snapshot.force_merge_on_clone;
+        }
+        if (frozenPhase.actions.searchable_snapshot.force_merge_on_clone === true) {
+          delete frozenPhase.actions.searchable_snapshot.force_merge_on_clone;
+        }
       } else {
         delete frozenPhase.actions.searchable_snapshot;
       }

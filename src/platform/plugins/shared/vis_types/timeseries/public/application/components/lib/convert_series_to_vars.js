@@ -14,7 +14,7 @@ import { getLastValue } from '../../../../common/last_value_utils';
 import { getValueOrEmpty, emptyLabel } from '../../../../common/empty_label';
 import { createTickFormatter } from './tick_formatter';
 import { getMetricsField } from './get_metrics_field';
-import { createFieldFormatter } from './create_field_formatter';
+import { createTextFieldFormatter } from './create_field_formatter';
 import moment from 'moment';
 import { getFieldsForTerms } from '../../../../common/fields_utils';
 
@@ -36,7 +36,7 @@ export const convertSeriesToVars = (series, model, getConfig = null, fieldFormat
 
         const formatter =
           seriesModel.formatter === DATA_FORMATTERS.DEFAULT
-            ? createFieldFormatter(getMetricsField(seriesModel.metrics), fieldFormatMap)
+            ? createTextFieldFormatter(getMetricsField(seriesModel.metrics), fieldFormatMap)
             : createTickFormatter(seriesModel.formatter, seriesModel.value_template, getConfig);
         const lastValue = getLastValue(row.data);
 
@@ -58,10 +58,9 @@ export const convertSeriesToVars = (series, model, getConfig = null, fieldFormat
           const fieldsForTerms = getFieldsForTerms(seriesModel.terms_field);
 
           if (fieldsForTerms.length === 1) {
-            rowLabel = createFieldFormatter(
+            rowLabel = createTextFieldFormatter(
               fieldsForTerms[0],
               fieldFormatMap,
-              undefined,
               false,
               dataView
             )(row.label);

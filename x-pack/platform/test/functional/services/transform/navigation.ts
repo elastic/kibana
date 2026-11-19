@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TransformFunction } from '@kbn/transform-plugin/common/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function TransformNavigationProvider({ getPageObjects, getService }: FtrProviderContext) {
@@ -16,8 +17,15 @@ export function TransformNavigationProvider({ getPageObjects, getService }: FtrP
       return await pageObjects.common.navigateToApp('transform');
     },
 
+    async navigateToCreateTransform(savedObjectId: string, transformFunction: TransformFunction) {
+      return await pageObjects.common.navigateToApp('transform', {
+        path: `create_transform/${savedObjectId}`,
+        search: `?transformFunction=${transformFunction}`,
+      });
+    },
+
     async navigateToRules() {
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('rules');
       await testSubjects.click('rulesTab');
       await testSubjects.existOrFail('rulesList');
     },

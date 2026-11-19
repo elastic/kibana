@@ -17,7 +17,8 @@ import type {
   KafkaConnectionTypeType,
   AgentUpgradeDetails,
   OutputPreset,
-  AgentlessPolicy,
+  AgentlessAgentPolicyConfig,
+  OtlpExporterConfig,
 } from '../../common/types';
 import type {
   AgentStatus,
@@ -34,7 +35,12 @@ import type {
   PackagePolicyConfigRecord,
 } from '../../common/types/models/package_policy';
 import type { SecretReference } from '../../common/types/models/secret';
-import type { KafkaAuthType, KafkaCompressionType } from '../../common/types';
+import type {
+  KafkaAuthType,
+  KafkaCompressionType,
+  KafkaKerberosConfig,
+  KafkaOAuth2Config,
+} from '../../common/types';
 import type {
   KafkaPartitionType,
   KafkaSaslMechanism,
@@ -45,7 +51,16 @@ import type {
   CloudProvider,
   CloudConnectorVars,
   AccountType,
+  IacUpgradeStatus,
+  VerificationStatus,
 } from '../../common/types/models/cloud_connector';
+import type {
+  CloudOnboardingDeploymentAuthMethod,
+  CloudOnboardingInstance,
+  DeploymentMethod,
+  CloudOnboardingDeploymentStatus,
+} from '../../common/types/models/cloud_onboarding_deployment';
+import type { CloudConnectorCallback } from '../../common/types/models/provisioning_callback';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -69,6 +84,7 @@ export interface AgentPolicySOAttributes {
   data_output_id?: string | null;
   monitoring_output_id?: string | null;
   download_source_id?: string | null;
+  download_source_ids?: string[];
   fleet_server_host_id?: string | null;
   schema_version?: string;
   agent_features?: Array<{ name: string; enabled: boolean }>;
@@ -77,9 +93,11 @@ export interface AgentPolicySOAttributes {
   agents?: number;
   overrides?: any | null;
   global_data_tags?: Array<{ name: string; value: string | number }>;
-  agentless?: AgentlessPolicy;
+  supports_agentless?: boolean | null;
+  agentless?: AgentlessAgentPolicyConfig;
   version?: string;
   has_agent_version_conditions?: boolean;
+  is_verifier?: boolean;
   min_agent_version?: string | null;
   package_agent_version_conditions?: AgentPolicyAgentVersionCondition[] | null;
 }
@@ -92,6 +110,7 @@ export interface AgentSOAttributes {
   local_metadata: AgentMetadata;
   unenrolled_at?: string;
   unenrollment_started_at?: string;
+  unenrolled_reason?: string;
   upgraded_at?: string | null;
   upgrade_started_at?: string | null;
   upgrade_details?: AgentUpgradeDetails;
@@ -99,9 +118,10 @@ export interface AgentSOAttributes {
   default_api_key?: string;
   default_api_key_id?: string;
   policy_id?: string;
+  policy_base_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
-  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
+  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'disconnected';
   last_checkin_message?: string;
   tags?: string[];
   components?: FleetServerAgentComponent[];
@@ -127,6 +147,7 @@ export interface FleetServerHostSOAttributes {
   is_default: boolean;
   is_preconfigured: boolean;
   is_internal?: boolean;
+  allow_edit?: string[];
   proxy_id?: string | null;
   secrets?: {
     ssl?: {
@@ -145,7 +166,7 @@ export interface PackagePolicySOAttributes {
   revision: number;
   created_at: string;
   created_by: string;
-  inputs: PackagePolicyInput[];
+  inputs?: PackagePolicyInput[];
   policy_id?: string | null;
   policy_ids: string[];
   // Nullable to allow user to reset to default outputs
@@ -169,22 +190,30 @@ export interface PackagePolicySOAttributes {
   latest_revision?: boolean;
   inputs_for_versions?: Record<string, PackagePolicyInput[]>;
   package_agent_version_condition?: string;
+  condition?: string | null;
+  onboarding_deployment_id?: string | null;
 }
 
 export interface OutputSoBaseAttributes {
   is_default: boolean;
   is_default_monitoring: boolean;
+  is_default_otel?: boolean;
   name: string;
+  is_internal?: boolean;
+  is_preconfigured?: boolean;
+  allow_edit?: string[];
+  output_id?: string;
+}
+
+export interface BeatsSoBaseAttributes extends OutputSoBaseAttributes {
   hosts?: string[];
   ca_sha256?: string | null;
   ca_trusted_fingerprint?: string | null;
-  is_internal?: boolean;
-  is_preconfigured?: boolean;
   config_yaml?: string | null;
+  otel_exporter_config_yaml?: string | null;
+  otel_disable_beatsauth?: boolean | null;
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
-  allow_edit?: string[];
-  output_id?: string;
   ssl?: string | null; // encrypted ssl field
   preset?: OutputPreset;
   write_to_logs_streams?: boolean | null;
@@ -195,12 +224,12 @@ export interface OutputSoBaseAttributes {
   };
 }
 
-interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
+interface OutputSoElasticsearchAttributes extends BeatsSoBaseAttributes {
   type: OutputType['Elasticsearch'];
   secrets?: {};
 }
 
-export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttributes {
+export interface OutputSoRemoteElasticsearchAttributes extends BeatsSoBaseAttributes {
   type: OutputType['RemoteElasticsearch'];
   service_token?: string | null;
   secrets?: {
@@ -215,11 +244,11 @@ export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttri
   sync_uninstalled_integrations?: boolean;
 }
 
-interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
+interface OutputSoLogstashAttributes extends BeatsSoBaseAttributes {
   type: OutputType['Logstash'];
 }
 
-export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
+export interface OutputSoKafkaAttributes extends BeatsSoBaseAttributes {
   type: OutputType['Kafka'];
   client_id?: string;
   version?: string;
@@ -233,6 +262,8 @@ export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
   sasl?: {
     mechanism?: ValueOf<KafkaSaslMechanism>;
   };
+  oauth2?: KafkaOAuth2Config;
+  kerberos?: KafkaKerberosConfig;
   partition?: ValueOf<KafkaPartitionType>;
   random?: {
     group_events?: number;
@@ -267,11 +298,29 @@ export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
   };
 }
 
-export type OutputSOAttributes =
+export interface OutputSoOtlpAttributes extends OutputSoBaseAttributes {
+  type: OutputType['Otlp'];
+  otlp_exporter: OtlpExporterConfig;
+  secrets?: {
+    otlp_exporter?: {
+      tls?: {
+        key_pem?: { id: string };
+        tpm?: {
+          owner_auth?: { id: string };
+          auth?: { id: string };
+        };
+      };
+    };
+  };
+}
+
+export type BeatsOutputSOAttributes =
   | OutputSoElasticsearchAttributes
   | OutputSoRemoteElasticsearchAttributes
   | OutputSoLogstashAttributes
   | OutputSoKafkaAttributes;
+
+export type OutputSOAttributes = BeatsOutputSOAttributes | OutputSoOtlpAttributes;
 
 export interface SettingsSOAttributes {
   prerelease_integrations_enabled?: boolean;
@@ -282,6 +331,7 @@ export interface SettingsSOAttributes {
   action_secret_storage_requirements_met?: boolean;
   ssl_secret_storage_requirements_met?: boolean;
   download_source_auth_secret_storage_requirements_met?: boolean;
+  otlp_output_requirements_met?: boolean;
   use_space_awareness_migration_status?: 'pending' | 'success' | 'error';
   use_space_awareness_migration_started_at?: string | null;
   delete_unenrolled_agents?: {
@@ -305,8 +355,10 @@ export interface DownloadSourceSOAttributes {
   name: string;
   host: string;
   is_default: boolean;
+  is_preconfigured?: boolean;
   source_id?: string;
   proxy_id?: string | null;
+  reserve_diskspace?: boolean;
   ssl?: string | null; // encrypted ssl field
   auth?: string | null; // encrypted auth field
   secrets?: {
@@ -329,4 +381,79 @@ export interface CloudConnectorSOAttributes {
   vars: CloudConnectorVars;
   created_at: string;
   updated_at: string;
+  verification_status?: VerificationStatus;
+  verification_started_at?: string;
+  verification_failed_at?: string;
+  iac_key?: string | null;
+  iac_blueprint_id?: string | null;
+  iac_blueprint_version?: string | null;
+  iac_deployment_id?: string;
+  iac_upgrade_status?: IacUpgradeStatus;
+  iac_upgrade_checked_at?: string;
+}
+
+export interface CloudOnboardingDeploymentSOAttributes {
+  /** Cloud provider — determines how deploymentId/deploymentName are interpreted (e.g. for AWS, deploymentId is the CFN stack ARN). */
+  provider: CloudProvider;
+  /** FK to fleet-cloud-connector — the AWS account connection this deployment belongs to. Absent for static-keys deployments. Null after MI→ECF transition clears the association. */
+  connectorId?: string | null;
+  /** Active delivery mechanisms included in this deployment (managed_integration, ecf, agent_based). */
+  mechanisms: DeploymentMethod[];
+  /** Provider-specific deployment identifier. For AWS: the CloudFormation stack ARN. Set after the user deploys the stack. */
+  deploymentId?: string;
+  /** Human-readable deployment name. For AWS: the CloudFormation stack name. */
+  deploymentName?: string;
+  /** All service IDs (e.g. 'cloudtrail', 'elb_logs') covered across all mechanisms in this deployment. */
+  services: string[];
+  /** Lifecycle status: pending → deploying → succeeded | failed. */
+  status: CloudOnboardingDeploymentStatus;
+  /** Error detail when status is 'failed'. */
+  statusMessage?: string;
+  /** Number of deploy attempts — incremented on each retry. */
+  attemptCount: number;
+  /** Per-service config arrays — serviceVars[serviceId] is an array where each entry represents one data source (region + S3 bucket + service-specific fields). Multiple entries support multiple buckets/sources for the same service. */
+  serviceVars?: Record<string, Record<string, unknown>>;
+  /** Global AWS region from the Service Settings step. Used to re-run deploy on retry and to hydrate the onboarding flow on resume. */
+  globalRegion?: string;
+  /** Integration name as entered in the Service settings step, before any per-package suffix is applied. Used to identify the onboarding session. */
+  integrationName?: string;
+  /** Integration description as entered in the Service settings step. Set on every package policy created by the deploy. */
+  description?: string;
+  /** Global data stream namespace from the Service settings step. Absent or empty means each policy inherits its agent policy's namespace. */
+  namespace?: string;
+  /** Whether the global namespace uses dedicated index templates (the package's namespace_customization_enabled_for list), as set in the Service settings step. Absent means off. */
+  dedicatedNamespaceTemplates?: boolean;
+  /** The service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume so duplicates and their names come back. */
+  instances?: CloudOnboardingInstance[];
+  /** Package policy settings from the Service settings step that apply to every package policy of the deployment, keyed by package policy field (e.g. output_id). Each deployment method uses only the settings it supports. */
+  policySettings?: Record<string, unknown>;
+  /** Names of the integration packages this deployment covers. Mapped as keyword so deployments can be listed per package. */
+  packageNames?: string[];
+  /** Display name of each service as shown in the onboarding flow, by service id. */
+  serviceNames?: Record<string, string>;
+  /** Username of the user who last wrote the deployment. */
+  updatedBy?: string;
+  /** Data format selected in the Services step: 'ecs' or 'otel'. Used to hydrate the services step on resume so service filtering is consistent. */
+  dataFormat?: 'ecs' | 'otel';
+  /**
+   * Authentication method for this deployment.
+   * - managed_integration: identity_federation | static_keys
+   * - agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role
+   * Null after MI→ECF transition clears the field.
+   */
+  authMethod?: CloudOnboardingDeploymentAuthMethod | null;
+  /** Fleet package policy IDs — one per distinct integration package (e.g. one for 'aws', one for 'aws_bedrock'). Present when agentless is in mechanisms. For agent_based, the package policies are attached to the user-managed agent policies tracked in agentPolicyIds. */
+  packagePolicyIds?: string[];
+  /** instanceId → policyId mapping persisted after deploy. Hydrated into session storage on resume so cleanup correctly targets stale policies when services are removed after reopening a deployed onboarding URL. */
+  policyIdsByInstance?: Record<string, string>;
+  /** Agent policy IDs for agent_based mechanism — the user-managed policies the package policies are attached to. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies. */
+  agentPolicyIds?: string[];
+  /** Elasticsearch API key ID for push mechanisms (ecf). Set by the backend after key creation; used to identify the key for rotation/revocation. */
+  apiKeyId?: string;
+}
+
+/** Stored shape of a callback record: the item without its id, plus the token binding. */
+export interface ProvisioningCallbackSOAttributes extends Omit<CloudConnectorCallback, 'id'> {
+  /** Keyed hash of the record's token, bound to its id, space and expiry. The token itself is never stored. */
+  token_hash: string;
 }

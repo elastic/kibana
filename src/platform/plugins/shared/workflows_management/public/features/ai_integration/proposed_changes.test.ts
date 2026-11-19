@@ -305,7 +305,38 @@ describe('ProposalManager', () => {
     } as unknown as KeyboardEvent);
 
     expect(manager.hasPendingProposals()).toBe(false);
-    expect(onAccept).toHaveBeenCalledWith('all');
+    expect(onAccept).toHaveBeenCalledWith({ proposalId: 'all', isBulkAction: true });
+
+    addDocSpy.mockRestore();
+  });
+
+  it('hotkeys run after a mouse move over the editor without a mouseenter', () => {
+    const addDocSpy = jest.spyOn(document, 'addEventListener');
+    const original = 'line1\nline2\nline3\n';
+    const editor = createRealisticMockEditor(original);
+    manager.initialize(editor);
+
+    manager.applyAfterYaml('line1\nchanged\nline3\n');
+    const keyHandler = addDocSpy.mock.calls.find(
+      (c: unknown[]) => c[0] === 'keydown' && c[2] === true
+    )![1] as (e: KeyboardEvent) => void;
+    const mouseMoveHandler = (editor.onMouseMove as jest.Mock).mock.calls[0][0] as (
+      e: unknown
+    ) => void;
+
+    mouseMoveHandler({ target: { position: null } });
+    keyHandler({
+      key: 'Backspace',
+      ctrlKey: true,
+      shiftKey: false,
+      metaKey: true,
+      altKey: false,
+      preventDefault: jest.fn(),
+      stopPropagation: jest.fn(),
+    } as unknown as KeyboardEvent);
+
+    expect(editor.getModel().getValue()).toBe(original);
+    expect(manager.hasPendingProposals()).toBe(false);
 
     addDocSpy.mockRestore();
   });
@@ -340,7 +371,7 @@ describe('ProposalManager', () => {
 
     expect(editor.getModel().getValue()).toBe(original);
     expect(manager.hasPendingProposals()).toBe(false);
-    expect(onReject).toHaveBeenCalledWith('all');
+    expect(onReject).toHaveBeenCalledWith({ proposalId: 'all', isBulkAction: true });
 
     addDocSpy.mockRestore();
   });
@@ -478,7 +509,7 @@ describe('ProposalManager', () => {
       manager.applyAfterYaml('line1\nchanged\n');
       manager.acceptHunk(0);
 
-      expect(onAccept).toHaveBeenCalledWith('all');
+      expect(onAccept).toHaveBeenCalledWith({ proposalId: 'all', isBulkAction: false });
     });
   });
 
@@ -502,7 +533,7 @@ describe('ProposalManager', () => {
       manager.applyAfterYaml('line1\nchanged\n');
       manager.rejectHunk(0);
 
-      expect(onReject).toHaveBeenCalledWith('all');
+      expect(onReject).toHaveBeenCalledWith({ proposalId: 'all', isBulkAction: false });
     });
   });
 
@@ -518,7 +549,7 @@ describe('ProposalManager', () => {
       manager.acceptAll();
 
       expect(manager.hasPendingProposals()).toBe(false);
-      expect(onAccept).toHaveBeenCalledWith('all');
+      expect(onAccept).toHaveBeenCalledWith({ proposalId: 'all', isBulkAction: true });
     });
 
     it('preserves editor model content after acceptAll', () => {
@@ -544,7 +575,7 @@ describe('ProposalManager', () => {
 
       expect(editor.getModel().getValue()).toBe(original);
       expect(manager.hasPendingProposals()).toBe(false);
-      expect(onReject).toHaveBeenCalledWith('all');
+      expect(onReject).toHaveBeenCalledWith({ proposalId: 'all', isBulkAction: true });
     });
 
     it('restores original content after insert', () => {
@@ -707,6 +738,59 @@ describe('ProposalManager', () => {
       manager.rejectAll();
 
       expect(editor.getModel().getValue()).toBe('user-content\n');
+    });
+  });
+
+  describe('suspend and resume', () => {
+    const replaceContent = (editor: ReturnType<typeof createRealisticMockEditor>, text: string) => {
+      const model = editor.getModel();
+      const lastLine = model.getLineCount();
+      model.pushEditOperations(
+        null,
+        [
+          {
+            range: {
+              startLineNumber: 1,
+              startColumn: 1,
+              endLineNumber: lastLine,
+              endColumn: model.getLineMaxColumn(lastLine),
+            },
+            text,
+          },
+        ],
+        () => null
+      );
+      editor._simulateExternalContentChange();
+    };
+
+    it('keeps pending proposals while the editor shows other content', () => {
+      const editor = createRealisticMockEditor('line1\nline2\nline3\n');
+      manager.initialize(editor);
+      manager.applyAfterYaml('line1\nchanged\nline3\n');
+
+      manager.suspend();
+      expect(manager.hasPendingProposals()).toBe(false);
+      expect(manager.hasSuspendedProposals()).toBe(true);
+
+      // A past execution's YAML, then the proposed YAML from the store again.
+      replaceContent(editor, 'line1\nline2\nline3\n');
+      replaceContent(editor, 'line1\nchanged\nline3\n');
+      manager.resume();
+
+      expect(manager.hasSuspendedProposals()).toBe(false);
+      expect(manager.getDiffHunks()).toHaveLength(1);
+
+      manager.rejectAll();
+      expect(editor.getModel().getValue()).toBe('line1\nline2\nline3\n');
+    });
+
+    it('does nothing without pending proposals', () => {
+      const editor = createRealisticMockEditor('line1\n');
+      manager.initialize(editor);
+
+      manager.suspend();
+
+      expect(manager.hasSuspendedProposals()).toBe(false);
     });
   });
 

@@ -22,6 +22,11 @@ spec:
       provider_settings:
         trigger_mode: none
       pipeline_file: .buildkite/pipelines/emergency_release.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/emergency_release.yml
+            cleanup_sparse_state: true
       teams:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ

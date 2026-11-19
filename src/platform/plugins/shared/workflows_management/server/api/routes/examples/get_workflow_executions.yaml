@@ -34,6 +34,7 @@ responses:
               page: 1
               size: 20
               total: 2
+              hasNamedExecution: false
 x-codeSamples:
   - lang: curl
     source: |
@@ -42,4 +43,4 @@ x-codeSamples:
         -H "Authorization: ApiKey ${API_KEY}"
   - lang: Console
     source: |
-      GET kbn://api/workflows/workflow/{workflowId}/executions?page=1&size=20
+      GET kbn://api/workflows/workflow/{workflowId}/executions?page=1&size=20&startedAfter=now-1d&startedBefore=now

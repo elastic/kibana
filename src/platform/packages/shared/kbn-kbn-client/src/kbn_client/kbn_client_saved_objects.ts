@@ -53,6 +53,7 @@ interface IndexOptions<Attributes> {
   overwrite?: boolean;
   migrationVersion?: MigrationVersion;
   references?: Reference[];
+  space?: string;
 }
 
 interface UpdateOptions<Attributes> extends IndexOptions<Attributes> {
@@ -194,6 +195,18 @@ export class KbnClientSavedObjects {
     return data;
   }
 
+  private buildCreatePath(options: Pick<IndexOptions<any>, 'space' | 'id' | 'type'>) {
+    const { space, id, type } = options;
+    if (space) {
+      return id
+        ? uriencode`/s/${space}/internal/ftr/kbn_client_so/${type}/${id}`
+        : uriencode`/s/${space}/internal/ftr/kbn_client_so/${type}`;
+    }
+    return id
+      ? uriencode`/internal/ftr/kbn_client_so/${type}/${id}`
+      : uriencode`/internal/ftr/kbn_client_so/${type}`;
+  }
+
   /**
    * Create a saved object
    */
@@ -201,10 +214,8 @@ export class KbnClientSavedObjects {
     this.log.debug('Creating saved object: %j', options);
 
     const { data } = await this.requester.request<SavedObjectResponse<Attributes>>({
-      description: 'update saved object',
-      path: options.id
-        ? uriencode`/internal/ftr/kbn_client_so/${options.type}/${options.id}`
-        : uriencode`/internal/ftr/kbn_client_so/${options.type}`,
+      description: 'create saved object',
+      path: this.buildCreatePath(options),
       query: {
         overwrite: options.overwrite,
       },
@@ -226,7 +237,9 @@ export class KbnClientSavedObjects {
 
     const { data } = await this.requester.request<SavedObjectResponse<Attributes>>({
       description: 'update saved object',
-      path: uriencode`/internal/ftr/kbn_client_so/${options.type}/${options.id}`,
+      path: options.space
+        ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/${options.type}/${options.id}`
+        : uriencode`/internal/ftr/kbn_client_so/${options.type}/${options.id}`,
       query: {
         overwrite: options.overwrite,
       },

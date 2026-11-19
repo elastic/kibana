@@ -7,11 +7,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import { waitFor, renderHook } from '@testing-library/react';
-import {
-  INTERNAL_TAGS_URL,
-  SECURITY_TAG_DESCRIPTION,
-  SECURITY_TAG_NAME,
-} from '../../../common/constants';
+import { SECURITY_TAG_DESCRIPTION, SECURITY_TAG_NAME } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
 import { useFetchSecurityTags } from './use_fetch_security_tags';
 import { DEFAULT_TAGS_RESPONSE } from '../../common/containers/tags/__mocks__/api';
@@ -26,13 +22,14 @@ jest.mock('../../../common/utils/get_ramdom_color', () => ({
 const mockGet = jest.fn();
 const mockAbortSignal = {} as unknown as AbortSignal;
 const mockCreateTag = jest.fn();
+const mockFindByName = jest.fn();
 const renderUseCreateSecurityDashboardLink = () => renderHook(() => useFetchSecurityTags(), {});
 
 describe('useFetchSecurityTags', () => {
   beforeAll(() => {
     useKibana().services.http = { get: mockGet } as unknown as HttpStart;
     useKibana().services.savedObjectsTagging = {
-      client: { create: mockCreateTag } as unknown as ITagsClient,
+      client: { create: mockCreateTag, findByName: mockFindByName } as unknown as ITagsClient,
     } as unknown as SavedObjectsTaggingApi;
     global.AbortController = jest.fn().mockReturnValue({
       abort: jest.fn(),
@@ -50,18 +47,12 @@ describe('useFetchSecurityTags', () => {
     renderUseCreateSecurityDashboardLink();
 
     await waitFor(() => {
-      expect(mockGet).toHaveBeenCalledWith(
-        INTERNAL_TAGS_URL,
-        expect.objectContaining({
-          query: { name: SECURITY_TAG_NAME },
-          signal: mockAbortSignal,
-        })
-      );
+      expect(mockFindByName).toHaveBeenCalledWith(SECURITY_TAG_NAME, { exact: true });
     });
   });
 
   test('should create a Security Solution tag if no Security Solution tags were found', async () => {
-    mockGet.mockResolvedValue([]);
+    mockFindByName.mockResolvedValue(null);
 
     renderUseCreateSecurityDashboardLink();
 
@@ -75,13 +66,13 @@ describe('useFetchSecurityTags', () => {
   });
 
   test('should return Security Solution tags', async () => {
-    mockGet.mockResolvedValue(DEFAULT_TAGS_RESPONSE);
+    mockFindByName.mockResolvedValue(DEFAULT_TAGS_RESPONSE[0]);
 
     const expected = DEFAULT_TAGS_RESPONSE.map((tag) => ({
-      id: tag.id,
       type: 'tag',
-      ...tag.attributes,
+      ...tag,
     }));
+
     const { result } = renderUseCreateSecurityDashboardLink();
 
     await waitFor(() => {

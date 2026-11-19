@@ -5,18 +5,28 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import { registerSearchApiKeysRoutes } from '@kbn/search-api-keys-server';
 
-export class SearchGettingStartedPlugin implements Plugin {
-  constructor(_initContext: PluginInitializerContext) {}
+export class SearchGettingStartedPlugin implements Plugin<{}, {}> {
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
 
   public setup(core: CoreSetup) {
-    // Minimal server plugin - no setup needed
+    registerSearchApiKeysRoutes(core.http.createRouter(), this.logger);
     return {};
   }
 
-  public start(core: CoreStart) {
-    // Minimal server plugin - no start logic needed
+  public start(_core: CoreStart) {
     return {};
   }
 }

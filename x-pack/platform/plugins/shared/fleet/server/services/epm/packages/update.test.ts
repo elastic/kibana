@@ -143,6 +143,83 @@ describe('reviewUpgrade', () => {
   });
 });
 
+describe('updatePackage — namespace_customization_settings per-namespace merge', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('merges incoming namespace settings per-namespace, preserving namespaces absent from the payload', async () => {
+    const soClient = savedObjectsClientMock.create();
+    getInstallationObject.mockResolvedValueOnce({
+      id: 'test-pkg',
+      attributes: {
+        name: 'test-pkg',
+        version: '1.0.0',
+        namespace_customization_settings: {
+          production: { ilm_policy: 'old-policy' },
+          staging: { ilm_policy: 'hot-warm' },
+        },
+      },
+    });
+    getPackageInfo.mockResolvedValueOnce({});
+
+    const { ilmPolicyChanges } = await updatePackage({
+      savedObjectsClient: soClient,
+      pkgName: 'test-pkg',
+      namespace_customization_settings: { production: { ilm_policy: 'new-policy' } },
+    });
+
+    // staging is preserved; only production changed
+    expect(soClient.update).toHaveBeenCalledWith(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      'test-pkg',
+      expect.objectContaining({
+        namespace_customization_settings: {
+          production: { ilm_policy: 'new-policy' },
+          staging: { ilm_policy: 'hot-warm' },
+        },
+      }),
+      expect.objectContaining({ mergeAttributes: false })
+    );
+    expect(ilmPolicyChanges).toEqual([{ namespace: 'production', ilmPolicy: 'new-policy' }]);
+  });
+
+  it('clears a namespace when the payload sends an empty object for it', async () => {
+    const soClient = savedObjectsClientMock.create();
+    getInstallationObject.mockResolvedValueOnce({
+      id: 'test-pkg',
+      attributes: {
+        name: 'test-pkg',
+        version: '1.0.0',
+        namespace_customization_settings: {
+          production: { ilm_policy: 'old-policy' },
+          staging: { ilm_policy: 'hot-warm' },
+        },
+      },
+    });
+    getPackageInfo.mockResolvedValueOnce({});
+
+    const { ilmPolicyChanges } = await updatePackage({
+      savedObjectsClient: soClient,
+      pkgName: 'test-pkg',
+      namespace_customization_settings: { production: {} },
+    });
+
+    // production is deleted (empty object = clear); staging is untouched
+    expect(soClient.update).toHaveBeenCalledWith(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      'test-pkg',
+      expect.objectContaining({
+        namespace_customization_settings: {
+          staging: { ilm_policy: 'hot-warm' },
+        },
+      }),
+      expect.objectContaining({ mergeAttributes: false })
+    );
+    expect(ilmPolicyChanges).toEqual([{ namespace: 'production', ilmPolicy: undefined }]);
+  });
+});
+
 describe('updatePackage', () => {
   afterEach(() => {
     jest.clearAllMocks();

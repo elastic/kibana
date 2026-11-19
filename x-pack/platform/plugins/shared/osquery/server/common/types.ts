@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { RRuleScheduleConfig, ScheduleType } from '../../common';
+import type { ResultType } from '../../common/result_type';
+
 export interface IQueryPayload {
   name: string;
   id: string;
@@ -20,13 +23,26 @@ export interface PackSavedObject {
     id: string;
     name: string;
     query: string;
-    interval: number;
+    /**
+     * Per-query interval (seconds) for interval-mode queries. Optional because
+     * queries that opt into `schedule_type: 'rrule'` intentionally omit
+     * `interval` per `convertPackQueriesToSO`'s mutual-exclusivity logic.
+     */
+    interval?: number;
     timeout?: number;
     snapshot?: boolean;
     removed?: boolean;
     schedule_id?: string;
     start_date?: string;
     ecs_mapping?: Record<string, unknown>;
+    /** Per-query schedule type override. Mutually exclusive with sibling fields per type. */
+    schedule_type?: ScheduleType;
+    /** Per-query RRULE schedule override. Only present when `schedule_type === 'rrule'`. */
+    rrule_schedule?: RRuleScheduleConfig;
+    /** V5: Whether this query is enabled. When false, omitted from Fleet emit. Default: true. */
+    enabled?: boolean;
+    /** V5: Per-query result type override. */
+    result_type?: ResultType;
   }>;
   version?: number;
   enabled: boolean | undefined;
@@ -40,6 +56,35 @@ export interface PackSavedObject {
   read_only?: boolean;
   shards: SOShard;
   references: Array<{ name: string; type: string; id: string }>;
+  /**
+   * Pack-level schedule type. When absent, no pack-level schedule is set:
+   * each query supplies its own per-query `interval` and there is no default
+   * to inherit. Interval and rrule are equal-class modes — neither is the
+   * default.
+   *
+   * Nullable because routes clear the prior-mode pack-level field
+   * on a schedule_type transition. `packSchemaV3` accepts `null`
+   * for all three pack-level scheduling fields.
+   */
+  schedule_type?: ScheduleType | null;
+  /**
+   * Pack-level interval (seconds) — the default each query inherits when the
+   * pack runs in interval mode. Only present when `schedule_type === 'interval'`.
+   * Nullable to support the mode-transition clear.
+   */
+  interval?: number | null;
+  /**
+   * Pack-level RRULE schedule. Only present when `schedule_type === 'rrule'`.
+   * The server stamps this onto each query that has no individual override.
+   * Nullable to support the mode-transition clear.
+   */
+  rrule_schedule?: RRuleScheduleConfig | null;
+  /** V5: Pack-level minimum osquery version default. */
+  min_osquery_version?: string | null;
+  /** V5: Pack-level result type default. */
+  result_type?: ResultType | null;
+  /** V5: Pack-level platform default. Fans out to inheriting queries; not a gate. */
+  platform?: string | null;
 }
 
 export interface SavedQuerySavedObject {

@@ -6,6 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
+import Boom from '@hapi/boom';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { AlertStatus } from '@kbn/rule-data-utils';
@@ -18,7 +19,9 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_UNTRACKED,
   ALERT_TIME_RANGE,
+  ALERT_TRACKED,
   ALERT_UUID,
+  SPACE_IDS,
 } from '@kbn/rule-data-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { RulesClientContext } from '../../rules_client';
@@ -48,21 +51,51 @@ interface SetAlertsToUntrackedParamsWithDep extends SetAlertsToUntrackedParams {
 
 type UntrackedAlertsResult = Array<{ [ALERT_RULE_UUID]: string; [ALERT_UUID]: string }>;
 
+type RuleTypeIdConsumersPairs =
+  Parameters<BulkEnsureAuthorizedForUntrack>[0]['ruleTypeIdConsumersPairs'];
+
 interface ConsumersAndRuleTypesAggregation {
   ruleTypeIds: {
+    sum_other_doc_count?: number;
     buckets: Array<{
       key: string;
       consumers: {
+        sum_other_doc_count?: number;
         buckets: Array<{ key: string }>;
       };
     }>;
   };
 }
 
+// Upper bounds for the authorization aggregation. They are far above the number of
+// registered rule types and consumers, and we fail closed if they are ever exceeded.
+const MAX_RULE_TYPE_BUCKETS = 1000;
+const MAX_CONSUMER_BUCKETS = 100;
+
+// Limits a query to the rule type and consumer pairs the user was authorized for
+const getAuthorizedPairsFilter = (
+  authorizedPairs: RuleTypeIdConsumersPairs
+): QueryDslQueryContainer => ({
+  bool: {
+    should: authorizedPairs.map(({ ruleTypeId, consumers }) => ({
+      bool: {
+        filter: [
+          { term: { [ALERT_RULE_TYPE_ID]: ruleTypeId } },
+          { terms: { [ALERT_RULE_CONSUMER]: consumers } },
+        ],
+      },
+    })),
+    minimum_should_match: 1,
+  },
+});
+
 const getUntrackQuery = (
   params: SetAlertsToUntrackedParamsWithDep,
-  alertStatus: AlertStatus
+  alertStatus: AlertStatus,
+  authorizedPairs?: RuleTypeIdConsumersPairs
 ): QueryDslQueryContainer => {
+  const { spaceId } = params;
+
   const statusTerms: Array<{ term: Record<string, { value: string }> }> = [
     {
       term: {
@@ -71,12 +104,33 @@ const getUntrackQuery = (
     },
   ];
 
+  // Restrict untracking to alerts that belong to the active space only.
+  //
+  // Note we intentionally do NOT include the all-spaces wildcard ('*') here, unlike the
+  // read-side `getSpacesFilter` in rule_registry. Reading globally visible alerts across
+  // spaces is legitimate, but mutating them is not: the only rule types that write '*'
+  // alerts are internally managed (e.g. Streams "Significant Events"), whose alerts are
+  // point-in-time occurrence records that back an internal feature and are never meant to
+  // be untracked by users. Matching '*' here would let a caller in one space mutate a
+  // document shared by every space. Please keep this divergence from the read path.
+  //
+  // When spaceId is absent (internal cleanup calls), no space filter is applied.
+  const spaceFilter = spaceId ? { terms: { [SPACE_IDS]: [spaceId] } } : undefined;
+  const authorizationFilter = authorizedPairs
+    ? getAuthorizedPairsFilter(authorizedPairs)
+    : undefined;
+  const baseFilterClauses: QueryDslQueryContainer[] = [
+    ...(spaceFilter ? [spaceFilter] : []),
+    ...(authorizationFilter ? [authorizationFilter] : []),
+  ];
+
   if (params.isUsingQuery) {
     const { query } = params;
+    const filterClauses = [...baseFilterClauses, ...(query ?? [])];
     return {
       bool: {
         must: statusTerms,
-        ...(query ? { filter: query } : {}),
+        ...(filterClauses.length > 0 ? { filter: filterClauses } : {}),
       },
     };
   } else {
@@ -112,17 +166,19 @@ const getUntrackQuery = (
             },
           },
         ],
+        ...(baseFilterClauses.length > 0 ? { filter: baseFilterClauses } : {}),
       },
     };
   }
 };
 
-const bulkEnsureAuthorizedToUntrack = async (params: SetAlertsToUntrackedParamsWithDep) => {
-  const { esClient, indices, bulkEnsureAuthorized } = params;
+const bulkEnsureAuthorizedToUntrack = async (
+  params: SetAlertsToUntrackedParamsWithDep,
+  indices: string[],
+  bulkEnsureAuthorized: BulkEnsureAuthorizedForUntrack
+): Promise<RuleTypeIdConsumersPairs> => {
+  const { esClient } = params;
 
-  if (!bulkEnsureAuthorized) {
-    return;
-  }
   // Fetch all rule type IDs and rule consumers, then run the provided bulkEnsureAuthorized check once
   const response = await esClient.search<never, ConsumersAndRuleTypesAggregation>({
     index: indices,
@@ -131,15 +187,26 @@ const bulkEnsureAuthorizedToUntrack = async (params: SetAlertsToUntrackedParamsW
     query: getUntrackQuery(params, ALERT_STATUS_ACTIVE),
     aggs: {
       ruleTypeIds: {
-        terms: { field: ALERT_RULE_TYPE_ID },
-        aggs: { consumers: { terms: { field: ALERT_RULE_CONSUMER } } },
+        terms: { field: ALERT_RULE_TYPE_ID, size: MAX_RULE_TYPE_BUCKETS },
+        aggs: {
+          consumers: { terms: { field: ALERT_RULE_CONSUMER, size: MAX_CONSUMER_BUCKETS } },
+        },
       },
     },
     expand_wildcards: ['open', 'hidden'],
   });
-  const ruleTypeIdBuckets = response.aggregations?.ruleTypeIds.buckets;
-  if (!ruleTypeIdBuckets) {
+  const ruleTypeIdsAggregation = response.aggregations?.ruleTypeIds;
+  if (!ruleTypeIdsAggregation) {
     throw new Error('Unable to fetch ruleTypeIds for authorization');
+  }
+
+  const { buckets: ruleTypeIdBuckets, sum_other_doc_count: otherRuleTypesCount } =
+    ruleTypeIdsAggregation;
+  const isAggregationTruncated =
+    Boolean(otherRuleTypesCount) ||
+    ruleTypeIdBuckets.some(({ consumers }) => Boolean(consumers.sum_other_doc_count));
+  if (isAggregationTruncated) {
+    throw new Error('Unable to authorize untracking: too many rule types or consumers matched');
   }
 
   const ruleTypeIdConsumersPairs = ruleTypeIdBuckets.map(
@@ -151,11 +218,13 @@ const bulkEnsureAuthorizedToUntrack = async (params: SetAlertsToUntrackedParamsW
 
   for (const pair of ruleTypeIdConsumersPairs) {
     if (pair.consumers.includes('siem')) {
-      throw new Error('Untracking Security alerts is not permitted');
+      throw Boom.forbidden('Untracking Security alerts is not permitted');
     }
   }
 
   await bulkEnsureAuthorized({ ruleTypeIdConsumersPairs });
+
+  return ruleTypeIdConsumersPairs;
 };
 
 const getAuthorizedAlertsIndices = async ({
@@ -209,8 +278,15 @@ export async function setAlertsToUntracked(
     indices = params.indices || [];
   }
 
-  if (bulkEnsureAuthorized) {
-    await bulkEnsureAuthorizedToUntrack(params);
+  // When authorization is required, only the alerts of the authorized rule type and consumer
+  // pairs are updated, even if new alerts matched the query after the check
+  const authorizedPairs = bulkEnsureAuthorized
+    ? await bulkEnsureAuthorizedToUntrack(params, indices, bulkEnsureAuthorized)
+    : undefined;
+
+  if (authorizedPairs?.length === 0) {
+    logger.debug('No active alerts matched the query');
+    return [];
   }
 
   try {
@@ -227,7 +303,7 @@ export async function setAlertsToUntracked(
           source: getUntrackUpdatePainlessScript(new Date()),
           lang: 'painless',
         },
-        query: getUntrackQuery(params, ALERT_STATUS_ACTIVE),
+        query: getUntrackQuery(params, ALERT_STATUS_ACTIVE, authorizedPairs),
         refresh: true,
       });
 
@@ -263,7 +339,7 @@ export async function setAlertsToUntracked(
       allow_no_indices: true,
       _source: [ALERT_RULE_UUID, ALERT_UUID],
       size: total,
-      query: getUntrackQuery(params, ALERT_STATUS_UNTRACKED),
+      query: getUntrackQuery(params, ALERT_STATUS_UNTRACKED, authorizedPairs),
     });
 
     return searchResponse.hits.hits.map((hit) => hit._source) as UntrackedAlertsResult;
@@ -283,8 +359,10 @@ if (!ctx._source.containsKey('${ALERT_STATUS}') || ctx._source['${ALERT_STATUS}'
   ctx._source.${ALERT_STATUS} = '${ALERT_STATUS_UNTRACKED}';
   ctx._source.${ALERT_END} = '${now.toISOString()}';
   ctx._source.${ALERT_TIME_RANGE}.lte = '${now.toISOString()}';
+  ctx._source.${ALERT_TRACKED} = false;
 } else {
   ctx._source['${ALERT_STATUS}'] = '${ALERT_STATUS_UNTRACKED}';
   ctx._source['${ALERT_END}'] = '${now.toISOString()}';
   ctx._source['${ALERT_TIME_RANGE}'].lte = '${now.toISOString()}';
+  ctx._source['${ALERT_TRACKED}'] = false;
 }`;

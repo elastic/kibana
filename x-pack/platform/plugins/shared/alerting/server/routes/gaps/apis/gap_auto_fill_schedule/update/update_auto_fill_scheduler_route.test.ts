@@ -10,6 +10,7 @@ import { licenseStateMock } from '../../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../../rules_client.mock';
+import { gapReasonType } from '../../../../../../common/constants/gap_reason';
 import { updateAutoFillSchedulerRoute } from './update_auto_fill_scheduler_route';
 
 const rulesClient = rulesClientMock.create();
@@ -49,6 +50,7 @@ describe('updateAutoFillSchedulerRoute', () => {
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-02T00:00:00.000Z',
   };
+  const excludedReasons = [gapReasonType.RULE_DISABLED];
 
   test('calls update gap auto fill scheduler with transformed params', async () => {
     const licenseState = licenseStateMock.create();
@@ -94,6 +96,7 @@ describe('updateAutoFillSchedulerRoute', () => {
         gap_fill_range: 'now-30d',
         max_backfills: 50,
         num_retries: 2,
+        excluded_reasons: excludedReasons,
         created_by: 'user',
         updated_by: 'user',
         created_at: '2024-01-01T00:00:00.000Z',

@@ -10,6 +10,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { z } from '@kbn/zod/v4';
 import type { ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionTypeRegistry } from './action_type_registry';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ActionType } from './types';
 import type { ILicenseState } from './lib';
 import { ActionExecutionSourceType, ActionExecutor, TaskRunnerFactory } from './lib';
@@ -89,6 +90,7 @@ describe('actionTypeRegistry', () => {
               createTaskRunner: expect.any(Function),
               maxAttempts: 3,
               cost: TaskCost.Tiny,
+              taskTypeGroup: 'actions',
               title: 'My connector type',
             },
           },
@@ -144,6 +146,19 @@ describe('actionTypeRegistry', () => {
       );
     });
 
+    test('throws if a supported feature id exceeds the max length', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      expect(() =>
+        actionTypeRegistry.register(
+          getConnectorType({
+            supportedFeatureIds: ['a'.repeat(101)],
+          })
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Feature IDs for connector type \\"my-connector-type\\" must not exceed 100 characters."`
+      );
+    });
+
     test('registers gold+ connector types to the licensing feature usage API', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       actionTypeRegistry.register(
@@ -188,6 +203,95 @@ describe('actionTypeRegistry', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"Kibana privilege authorization is only supported for system actions and action types that are registered under a sub-feature"`
       );
+    });
+  });
+
+  describe('register() - versioned specs', () => {
+    test('stores a copy of the given specs', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'catalog-type',
+          spec: { legacySpec: 'v0' },
+          specs: new Map([
+            ['1.0', { spec: 'v1' }],
+            ['2.0', { spec: 'v2' }],
+          ]),
+        })
+      );
+
+      expect(actionTypeRegistry.getSpec('catalog-type', '1.0')).toEqual({ spec: 'v1' });
+      expect(actionTypeRegistry.getSpec('catalog-type', '2.0')).toEqual({ spec: 'v2' });
+      expect(actionTypeRegistry.getSpec('catalog-type')).toEqual({ legacySpec: 'v0' });
+    });
+
+    test('throws if a spec version is already registered', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'catalog-type',
+          specs: new Map([['1.0', { spec: 'v1' }]]),
+        })
+      );
+
+      expect(() =>
+        actionTypeRegistry.register(
+          getConnectorType({
+            id: 'catalog-type',
+            specs: new Map([['1.0', { spec: 'v1' }]]),
+          })
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Skipping catalog connector \\"catalog-type\\" version \\"1.0\\": type is already registered."`
+      );
+    });
+
+    test('allows adding a new version to an already registered action type and does not re-register task definitions', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'catalog-type',
+          specs: new Map([['1.0', { spec: 'v1' }]]),
+        })
+      );
+      expect(actionTypeRegistry.getSpec('catalog-type', '1.0')).toEqual({ spec: 'v1' });
+      expect(actionTypeRegistry.getSpec('catalog-type', '2.0')).toBeUndefined();
+      expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledWith({
+        'actions:catalog-type': {
+          createTaskRunner: expect.any(Function),
+          maxAttempts: 3,
+          cost: TaskCost.Tiny,
+          taskTypeGroup: 'actions',
+          title: 'My connector type',
+        },
+      });
+
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'catalog-type',
+          specs: new Map([['2.0', { spec: 'v2' }]]),
+        })
+      );
+      expect(actionTypeRegistry.getSpec('catalog-type', '1.0')).toEqual({ spec: 'v1' });
+      expect(actionTypeRegistry.getSpec('catalog-type', '2.0')).toEqual({ spec: 'v2' });
+      expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
+    });
+
+    test('validates the given type before adding spec versions', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      expect(() =>
+        actionTypeRegistry.register(
+          getConnectorType({
+            id: 'catalog-type',
+            specs: new Map([['2.0', { spec: 'v2' }]]),
+            supportedFeatureIds: ['foo'],
+          })
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid feature ids \\"foo\\" for connector type \\"catalog-type\\"."`
+      );
+      expect(actionTypeRegistry.getSpec('catalog-type', '2.0')).toBeUndefined();
     });
   });
 
@@ -236,6 +340,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: false,
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -294,6 +399,7 @@ describe('actionTypeRegistry', () => {
           validate: { params: expect.any(Object) },
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
         {
           id: 'my-connector-type-with-subaction',
@@ -307,6 +413,7 @@ describe('actionTypeRegistry', () => {
           validate: { params: expect.any(Object) },
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
 
@@ -354,45 +461,15 @@ describe('actionTypeRegistry', () => {
         expect(err.message).toMatchInlineSnapshot(`
           "[
             {
-              \\"code\\": \\"invalid_union\\",
-              \\"errors\\": [
-                [
-                  {
-                    \\"origin\\": \\"number\\",
-                    \\"code\\": \\"too_small\\",
-                    \\"minimum\\": 5,
-                    \\"inclusive\\": true,
-                    \\"path\\": [
-                      \\"subActionParams\\",
-                      \\"value\\"
-                    ],
-                    \\"message\\": \\"Too small: expected number to be >=5\\"
-                  }
-                ],
-                [
-                  {
-                    \\"code\\": \\"invalid_value\\",
-                    \\"values\\": [
-                      \\"subaction2\\"
-                    ],
-                    \\"path\\": [
-                      \\"subAction\\"
-                    ],
-                    \\"message\\": \\"Invalid input: expected \\\\\\"subaction2\\\\\\"\\"
-                  },
-                  {
-                    \\"expected\\": \\"string\\",
-                    \\"code\\": \\"invalid_type\\",
-                    \\"path\\": [
-                      \\"subActionParams\\",
-                      \\"message\\"
-                    ],
-                    \\"message\\": \\"Invalid input: expected string, received undefined\\"
-                  }
-                ]
+              \\"origin\\": \\"number\\",
+              \\"code\\": \\"too_small\\",
+              \\"minimum\\": 5,
+              \\"inclusive\\": true,
+              \\"path\\": [
+                \\"subActionParams\\",
+                \\"value\\"
               ],
-              \\"path\\": [],
-              \\"message\\": \\"Invalid input\\"
+              \\"message\\": \\"Too small: expected number to be >=5\\"
             }
           ]"
         `);
@@ -452,6 +529,28 @@ describe('actionTypeRegistry', () => {
       expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
     });
 
+    test('returns only sandbox-capable connector types when asked', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(getConnectorType());
+      actionTypeRegistry.register(
+        getConnectorType({ id: 'spec-type', sandboxSupportedAuthTypes: ['bearer'] })
+      );
+      actionTypeRegistry.register(
+        getConnectorType({ id: 'hook-type', isSandboxCapable: () => true })
+      );
+
+      expect(actionTypeRegistry.list({ sandboxCapableOnly: true }).map(({ id }) => id)).toEqual([
+        'spec-type',
+        'hook-type',
+      ]);
+      expect(actionTypeRegistry.list().map(({ id }) => id)).toEqual([
+        'my-connector-type',
+        'spec-type',
+        'hook-type',
+      ]);
+    });
+
     test('returns list of connector types filtered by feature id if provided', () => {
       mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
@@ -475,6 +574,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: false,
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -508,6 +608,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: true,
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
     });
@@ -542,6 +643,7 @@ describe('actionTypeRegistry', () => {
           supportedFeatureIds: ['siem'],
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
     });
@@ -960,6 +1062,121 @@ describe('actionTypeRegistry', () => {
 
       const result = registry.isDeprecated('test.action');
       expect(result).toBe(true);
+    });
+  });
+
+  describe('isSpecActionType()', () => {
+    it('returns true for a spec-sourced type', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+      registry.register(getConnectorType({ id: 'spec-backed', source: ACTION_TYPE_SOURCES.spec }));
+
+      expect(registry.isSpecActionType('spec-backed')).toBe(true);
+    });
+
+    it('returns false for a classic type', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+      registry.register(getConnectorType());
+
+      expect(registry.isSpecActionType('my-connector-type')).toBe(false);
+    });
+
+    it('returns false for an unknown id without throwing', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      expect(registry.isSpecActionType('unknown')).toBe(false);
+    });
+  });
+
+  describe('getSpec()', () => {
+    it('returns the source spec for a spec-backed type', () => {
+      const spec = { metadata: { id: 'spec-backed' } };
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'spec-backed',
+          spec,
+        })
+      );
+
+      expect(actionTypeRegistry.getSpec('spec-backed')).toBe(spec);
+    });
+
+    it('returns undefined for a classic type without a spec', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(getConnectorType());
+
+      expect(actionTypeRegistry.getSpec('my-connector-type')).toBeUndefined();
+    });
+
+    it('returns undefined for an unknown id without throwing', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      expect(actionTypeRegistry.getSpec('unknown')).toBeUndefined();
+    });
+
+    describe('with a version', () => {
+      it('returns the spec for the requested version', () => {
+        const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+        actionTypeRegistry.register(
+          getConnectorType({
+            id: 'catalog-type',
+            specs: new Map([
+              ['1.0', { spec: 'v1' }],
+              ['2.0', { spec: 'v2' }],
+            ]),
+          })
+        );
+
+        expect(actionTypeRegistry.getSpec('catalog-type', '1.0')).toEqual({ spec: 'v1' });
+        expect(actionTypeRegistry.getSpec('catalog-type', '2.0')).toEqual({ spec: 'v2' });
+      });
+
+      it('returns undefined for an unregistered version', () => {
+        const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+        actionTypeRegistry.register(
+          getConnectorType({
+            id: 'catalog-type',
+            specs: new Map([['1.0', { spec: 'v1' }]]),
+          })
+        );
+
+        expect(actionTypeRegistry.getSpec('catalog-type', '2.0')).toBeUndefined();
+      });
+
+      it('returns undefined for an unknown id without throwing', () => {
+        const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+        expect(actionTypeRegistry.getSpec('unknown', '1.0')).toBeUndefined();
+      });
+
+      it('returns the legacy spec when no version is requested for a type with both', () => {
+        const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+        actionTypeRegistry.register(
+          getConnectorType({
+            id: 'catalog-type',
+            spec: { legacySpec: 'v0' },
+            specs: new Map([['1.0', { spec: 'v1' }]]),
+          })
+        );
+
+        expect(actionTypeRegistry.getSpec('catalog-type')).toEqual({ legacySpec: 'v0' });
+      });
+
+      it('returns undefined when no version is requested for a type with only versioned specs', () => {
+        const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+        actionTypeRegistry.register(
+          getConnectorType({
+            id: 'catalog-type',
+            spec: undefined,
+            specs: new Map([
+              ['1.0', { spec: 'v1' }],
+              ['2.0', { spec: 'v2' }],
+            ]),
+          })
+        );
+
+        expect(actionTypeRegistry.getSpec('catalog-type')).toBeUndefined();
+      });
     });
   });
 

@@ -94,11 +94,10 @@ export interface ISearchOptions {
   isRestore?: boolean;
 
   /**
-   * By default, when polling, we don't retrieve the results of the search request (until it is complete). (For async
-   * search, this is the difference between calling _async_search/{id} and _async_search/status/{id}.) setting this to
-   * `true` will request the search results, regardless of whether or not the search is complete.
+   * By default, when polling, we don't retrieve the results of the search request (until it is complete).
+   * setting this to `true` will request the search results, regardless of whether or not the search is complete.
    */
-  retrieveResults?: boolean;
+  returnIntermediateResults?: boolean;
 
   /**
    * Represents a meta-information about a Kibana entity intitating a saerch request.
@@ -130,6 +129,17 @@ export interface ISearchOptions {
    * Project routing configuration for cross-project search (CPS).
    */
   projectRouting?: ProjectRouting;
+
+  /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results.
+   */
+  approximation?: boolean;
+
+  /**
+   * How long a poll for an async search waits for completion (as an Elasticsearch duration, e.g. `30s`).
+   * Set by the search interceptor when polling, so strategies that rebuild `params` still long-poll.
+   */
+  pollLength?: string;
 }
 
 /**
@@ -144,8 +154,10 @@ export type ISearchOptionsSerializable = Pick<
   | 'isStored'
   | 'isSearchStored'
   | 'isRestore'
-  | 'retrieveResults'
+  | 'returnIntermediateResults'
   | 'executionContext'
   | 'stream'
   | 'projectRouting'
+  | 'approximation'
+  | 'pollLength'
 >;

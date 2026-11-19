@@ -7,8 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 
 import type { ExternalRouteDeps } from '.';
+import { putSpaceExamples } from './examples';
 import { API_VERSIONS, type Space } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
 import { getSpaceSchema } from '../../../lib/space_schema';
@@ -22,6 +24,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/space/{id}',
       access: 'public',
       summary: `Update a space`,
+      description: 'Update an existing Kibana space.',
       options: {
         tags: ['oas-tag:spaces'],
       },
@@ -36,6 +39,9 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: putSpaceExamples,
+        },
         validate: {
           request: {
             params: schema.object({
@@ -50,6 +56,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
           },
           response: {
             200: {
+              body: () => getSpaceSchema(isServerless),
               description: 'Indicates a successful call.',
             },
           },
@@ -58,12 +65,13 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
       createLicensedRouteHandler(async (context, request, response) => {
         const spacesClient = getSpacesService().createSpacesClient(request);
 
-        const space = request.body;
+        // Body id was format-validated by getSpaceSchema; trusted re-brand into Space.id.
+        const space = { ...request.body, id: brandSpaceId(request.body.id) };
         const id = request.params.id;
 
         let result: Space;
         try {
-          result = await spacesClient.update(id, { ...space });
+          result = await spacesClient.update(id, space);
         } catch (error) {
           if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
             return response.notFound();

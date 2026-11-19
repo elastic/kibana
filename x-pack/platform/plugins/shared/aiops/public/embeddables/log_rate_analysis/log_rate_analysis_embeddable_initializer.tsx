@@ -31,8 +31,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
+import type { LogRateAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/log_rate_analysis';
 import { TimeFieldWarning } from '../../components/time_field_warning';
-import type { LogRateAnalysisEmbeddableState } from '../../../common/embeddables/log_rate_analysis/types';
+import { getLogRateAnalysisDefaultTitle } from './default_title';
 
 export interface LogRateAnalysisEmbeddableInitializerProps {
   dataViews: DataViewsPublicPluginStart;
@@ -40,7 +41,7 @@ export interface LogRateAnalysisEmbeddableInitializerProps {
   initialInput?: Partial<LogRateAnalysisEmbeddableState>;
   onCreate: (props: LogRateAnalysisEmbeddableState) => void;
   onCancel: () => void;
-  onPreview: (update: LogRateAnalysisEmbeddableState) => Promise<void>;
+  onPreview?: (update: LogRateAnalysisEmbeddableState) => Promise<void>;
   isNewPanel: boolean;
 }
 
@@ -59,7 +60,7 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
   const isMounted = useMountedState();
 
   const [formInput, setFormInput] = useState<LogRateAnalysisEmbeddableState>(
-    pick(initialInput ?? {}, ['dataViewId']) as LogRateAnalysisEmbeddableState
+    pick(initialInput ?? {}, ['data_view_id']) as LogRateAnalysisEmbeddableState
   );
 
   // State to track if the selected data view is time based, undefined is used
@@ -68,8 +69,8 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
 
   const isFormValid = useMemo(
     () =>
-      isPopulatedObject(formInput, ['dataViewId']) &&
-      formInput.dataViewId !== '' &&
+      isPopulatedObject(formInput, ['data_view_id']) &&
+      formInput.data_view_id !== '' &&
       isDataViewTimeBased === true,
     [formInput, isDataViewTimeBased]
   );
@@ -77,17 +78,13 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
   const updatedProps = useMemo(() => {
     return {
       ...formInput,
-      title: isPopulatedObject(formInput)
-        ? i18n.translate('xpack.aiops.embeddableLogRateAnalysis.attachmentTitle', {
-            defaultMessage: 'Log rate analysis',
-          })
-        : '',
+      title: initialInput?.title?.trim() || getLogRateAnalysisDefaultTitle(),
     };
-  }, [formInput]);
+  }, [formInput, initialInput?.title]);
 
   useEffect(
     function previewChanges() {
-      if (isFormValid) {
+      if (isFormValid && onPreview) {
         onPreview(updatedProps);
       }
     },
@@ -98,7 +95,7 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
     (dataViewId: string | undefined) => {
       setFormInput({
         ...formInput,
-        dataViewId: dataViewId ?? '',
+        data_view_id: dataViewId ?? '',
       });
       setIsDataViewTimeBased(undefined);
     },
@@ -109,7 +106,7 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
     function checkIsDataViewTimeBased() {
       setIsDataViewTimeBased(undefined);
 
-      const { dataViewId } = formInput;
+      const { data_view_id: dataViewId } = formInput;
 
       if (!dataViewId) {
         return;
@@ -162,10 +159,10 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
           >
             <>
               <IndexPatternSelect
-                autoFocus={!formInput.dataViewId}
+                autoFocus={!formInput.data_view_id}
                 fullWidth
                 compressed
-                indexPatternId={formInput.dataViewId ?? ''}
+                indexPatternId={formInput.data_view_id ?? ''}
                 placeholder={i18n.translate(
                   'xpack.aiops.embeddableLogRateAnalysis.config.dataViewSelectorPlaceholder',
                   {

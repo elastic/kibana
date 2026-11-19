@@ -46,6 +46,7 @@ export interface SSLSettings {
   key?: Buffer;
   passphrase?: string;
   ca?: Buffer;
+  allowPartialTrustChain?: boolean;
 }
 
 export interface ProxySettings {

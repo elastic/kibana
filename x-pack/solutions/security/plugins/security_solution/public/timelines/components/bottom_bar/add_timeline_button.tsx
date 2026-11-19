@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import * as i18n from './translations';
 import { useCreateTimeline } from '../../hooks/use_create_timeline';
@@ -58,14 +65,16 @@ export const AddTimelineButton = React.memo<AddTimelineButtonComponentProps>(({ 
 
   const plusButton = useMemo(
     () => (
-      <EuiButtonIcon
-        iconType="plusInCircle"
-        iconSize="m"
-        color="primary"
-        data-test-subj="timeline-bottom-bar-open-button"
-        aria-label={i18n.ADD_TIMELINE}
-        onClick={togglePopover}
-      />
+      <EuiToolTip content={i18n.ADD_TIMELINE} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="plusCircle"
+          iconSize="m"
+          color="primary"
+          data-test-subj="timeline-bottom-bar-open-button"
+          aria-label={i18n.ADD_TIMELINE}
+          onClick={togglePopover}
+        />
+      </EuiToolTip>
     ),
     [togglePopover]
   );
@@ -78,11 +87,13 @@ export const AddTimelineButton = React.memo<AddTimelineButtonComponentProps>(({ 
           isOpen={isPopoverOpen}
           closePopover={() => setPopover(false)}
           repositionOnScroll
+          panelPaddingSize="s"
+          aria-label={i18n.ADD_TIMELINE}
         >
           <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 color="text"
                 data-test-subj="timeline-bottom-bar-create-new-timeline"
                 onClick={handleCreateNewTimeline}
@@ -92,7 +103,7 @@ export const AddTimelineButton = React.memo<AddTimelineButtonComponentProps>(({ 
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 color="text"
                 data-test-subj="timeline-bottom-bar-create-new-timeline-template"
                 onClick={handleCreateNewTimelineTemplate}

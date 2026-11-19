@@ -22,6 +22,9 @@ import { GLOBAL_ARTIFACT_TAG } from '../../../../../../common/endpoint/service/a
 import { useFetchPolicyData } from '../../../../components/policy_selector/hooks/use_fetch_policy_data';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { buildPerPolicyTag } from '../../../../../../common/endpoint/service/artifacts/utils';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../hooks/artifacts/use_endpoint_per_policy_opt_in';
+import type { UseQueryResult } from '@kbn/react-query';
+import type { GetEndpointExceptionsPerPolicyOptInResponse } from '../../../../../../common/api/endpoint/endpoint_exceptions_per_policy_opt_in/endpoint_exceptions_per_policy_opt_in.gen';
 
 jest.setTimeout(15_000);
 
@@ -30,6 +33,12 @@ jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
 jest.mock('../../../../../common/hooks/use_license');
 jest.mock('../../../../components/policy_selector/hooks/use_fetch_policy_data');
+jest.mock('../../../../hooks/artifacts/use_endpoint_per_policy_opt_in');
+
+const mockedUseGetEndpointExceptionsPerPolicyOptIn =
+  useGetEndpointExceptionsPerPolicyOptIn as jest.MockedFunction<
+    typeof useGetEndpointExceptionsPerPolicyOptIn
+  >;
 
 /** When some props and states change, `EndpointExceptionsForm` will recreate its internal `processChanged` function,
  * and therefore will call it from a `useEffect` hook.
@@ -65,6 +74,13 @@ const TestComponentWrapper: typeof EndpointExceptionsForm = (
 
   return <EndpointExceptionsForm {...formProps} item={item} onChange={handleOnChange} />;
 };
+
+const expectReactNodeContainingMessage = (substring: string) =>
+  expect.objectContaining({
+    props: expect.objectContaining({
+      defaultMessage: expect.stringContaining(substring),
+    }),
+  });
 
 describe('Endpoint exceptions form', () => {
   const formPrefix = 'endpointExceptions-form';
@@ -151,6 +167,9 @@ describe('Endpoint exceptions form', () => {
         ] as PackagePolicy[],
       },
     });
+    mockedUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
+      data: { status: true },
+    } as UseQueryResult<GetEndpointExceptionsPerPolicyOptInResponse, Error>);
 
     formProps = {
       item: latestUpdatedItem,
@@ -389,36 +408,156 @@ describe('Endpoint exceptions form', () => {
           expect(renderResult.getByTestId('duplicate-fields-warning-message')).toBeInTheDocument();
         });
       });
-    });
 
-    describe('wildcard with wrong operator', () => {
-      beforeEach(() => {
-        formProps.item.name = 'test name';
+      it('should show warning text when duplicate fields are added in second OR group', async () => {
         formProps.item.entries = [
           {
-            field: 'process.code_signature.subject_name',
+            field: 'timestamp',
             operator: 'included',
             type: 'match',
-            value: 'C:\\*\\test.exe',
+            value: '3',
           },
         ];
-      });
-
-      it('should display warning when wildcard is used with IS operator', async () => {
-        await act(() => render());
-
-        expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout')).toBeInTheDocument();
-      });
-
-      it('should provide confirm modal labels when wildcard warning exists', async () => {
+        formProps.additionalEntries = [
+          [
+            {
+              field: 'cheese',
+              operator: 'included',
+              type: 'match',
+              value: 'some value',
+            },
+          ],
+          [
+            {
+              field: 'process.name',
+              operator: 'included',
+              type: 'match',
+              value: 'some value',
+            },
+            {
+              field: 'process.name',
+              operator: 'excluded',
+              type: 'match',
+              value: 'some other value',
+            },
+          ],
+        ];
         render();
 
         await waitFor(() => {
-          expect(formProps.onChange).toHaveBeenCalledWith(
-            expect.objectContaining({
-              confirmModalLabels: expect.anything(),
-            })
-          );
+          expect(renderResult.getByTestId('duplicate-fields-warning-message')).toBeInTheDocument();
+        });
+      });
+    });
+
+    describe('warnings', () => {
+      describe('wildcard with wrong operator', () => {
+        beforeEach(() => {
+          formProps.item.name = 'test name';
+          formProps.item.entries = [
+            {
+              field: 'process.code_signature.subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'C:\\abc*\\test.exe',
+            },
+          ];
+        });
+
+        it('should display warning when wildcard is used with IS operator', async () => {
+          await act(() => render());
+
+          expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout')).toBeInTheDocument();
+          expect(renderResult.queryByTestId('unnecessaryEscapingCallout')).not.toBeInTheDocument();
+        });
+
+        it('should provide confirm modal labels when wildcard warning exists', async () => {
+          render();
+
+          await waitFor(() => {
+            expect(formProps.onChange).toHaveBeenCalledWith(
+              expect.objectContaining({
+                confirmModalLabels: expect.objectContaining({
+                  listOfWarnings: [expect.stringContaining('wildcards')],
+                }),
+              })
+            );
+          });
+        });
+      });
+
+      describe('unnecessary escaping', () => {
+        beforeEach(() => {
+          formProps.item.name = 'test name';
+          formProps.item.entries = [
+            {
+              field: 'process.code_signature.subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'C:\\\\abc\\\\test.exe',
+            },
+          ];
+        });
+
+        it('should display warning when escaping is used', async () => {
+          await act(() => render());
+
+          expect(
+            renderResult.queryByTestId('wildcardWithWrongOperatorCallout')
+          ).not.toBeInTheDocument();
+          expect(renderResult.getByTestId('unnecessaryEscapingCallout')).toBeInTheDocument();
+        });
+
+        it('should provide confirm modal labels when unnecessary escaping warning exists', async () => {
+          render();
+
+          await waitFor(() => {
+            expect(formProps.onChange).toHaveBeenCalledWith(
+              expect.objectContaining({
+                confirmModalLabels: expect.objectContaining({
+                  listOfWarnings: [expectReactNodeContainingMessage('escaping')],
+                }),
+              })
+            );
+          });
+        });
+      });
+
+      describe('multiple warnings', () => {
+        beforeEach(() => {
+          formProps.item.name = 'test name';
+          formProps.item.entries = [
+            {
+              field: 'process.code_signature.subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'C:\\\\*\\\\test.exe',
+            },
+          ];
+        });
+
+        it('should display both warnings when both warnings exist', async () => {
+          await act(() => render());
+
+          expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout')).toBeInTheDocument();
+          expect(renderResult.getByTestId('unnecessaryEscapingCallout')).toBeInTheDocument();
+        });
+
+        it('should provide confirm modal labels when both warnings exist', async () => {
+          render();
+
+          await waitFor(() => {
+            expect(formProps.onChange).toHaveBeenCalledWith(
+              expect.objectContaining({
+                confirmModalLabels: expect.objectContaining({
+                  listOfWarnings: [
+                    expect.stringContaining('wildcards'),
+                    expectReactNodeContainingMessage('escaping'),
+                  ],
+                }),
+              })
+            );
+          });
         });
       });
     });
@@ -507,6 +646,15 @@ describe('Endpoint exceptions form', () => {
       mockLicenseService.isPlatinumPlus.mockReturnValue(true);
     });
 
+    it('should not display policy assignment when user has not opted in', async () => {
+      mockedUseGetEndpointExceptionsPerPolicyOptIn.mockReturnValue({
+        data: { status: false },
+      } as UseQueryResult<GetEndpointExceptionsPerPolicyOptInResponse, Error>);
+      await act(() => render());
+
+      expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).not.toBeInTheDocument();
+    });
+
     it('should not display policy assignment when license is below platinum', async () => {
       mockLicenseService.isPlatinumPlus.mockReturnValue(false);
       await act(() => render());
@@ -514,7 +662,7 @@ describe('Endpoint exceptions form', () => {
       expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).not.toBeInTheDocument();
     });
 
-    it('should display policy assignment when license is at least platinum', async () => {
+    it('should display policy assignment when license is at least platinum and opt-in is true', async () => {
       await act(() => render());
       expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).toBeInTheDocument();
     });

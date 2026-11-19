@@ -15,7 +15,18 @@ import {
 import * as searchHooks from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
+const mockUrlParams = jest.fn();
+jest.mock('../../../hooks', () => ({
+  useGetUrlParams: () => mockUrlParams(),
+}));
+
 describe('useStepWaterfallMetrics', () => {
+  beforeEach(() => {
+    mockUrlParams.mockReturnValue({});
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
   it('returns result as expected', () => {
     const searchHook = jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
       loading: false,
@@ -80,7 +91,7 @@ describe('useStepWaterfallMetrics', () => {
         size: 1000,
         index: SYNTHETICS_INDEX_PATTERN,
       },
-      ['44D-444FFF-444-FFF-3333', true],
+      ['44D-444FFF-444-FFF-3333', true, undefined],
       { name: 'getWaterfallStepMetrics' }
     );
     expect(result.current).toEqual({
@@ -92,5 +103,27 @@ describe('useStepWaterfallMetrics', () => {
         },
       ],
     });
+  });
+
+  it('queries the CCS-prefixed index when remoteName is in the URL', () => {
+    mockUrlParams.mockReturnValue({ remoteName: 'remote-a' });
+
+    const searchHook = jest
+      .spyOn(searchHooks, 'useEsSearch')
+      .mockReturnValue({ loading: false, data: undefined } as any);
+
+    renderHook(() =>
+      useStepWaterfallMetrics({
+        checkGroup: 'cg-1',
+        hasNavigationRequest: true,
+        stepIndex: 1,
+      })
+    );
+
+    expect(searchHook).toHaveBeenCalledWith(
+      expect.objectContaining({ index: `remote-a:${SYNTHETICS_INDEX_PATTERN}` }),
+      expect.arrayContaining(['remote-a']),
+      expect.any(Object)
+    );
   });
 });

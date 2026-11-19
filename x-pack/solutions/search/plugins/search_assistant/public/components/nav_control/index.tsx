@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiErrorBoundary, EuiShowFor, EuiToolTip } from '@elastic/eui';
+import { EuiErrorBoundary, EuiShowFor, EuiToolTip, type EuiToolTipRef } from '@elastic/eui';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -16,9 +16,13 @@ import type { AIAssistantPluginStartDependencies } from '@kbn/ai-assistant/src/t
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { isMac } from '@kbn/shared-ux-utility';
 import { AiButton } from '@kbn/shared-ux-ai-components';
+
+const queryClient = new QueryClient();
+
 interface NavControlWithProviderDeps {
   coreStart: CoreStart;
   pluginsStart: AIAssistantPluginStartDependencies;
@@ -34,11 +38,13 @@ export const NavControlWithProvider = ({ coreStart, pluginsStart }: NavControlWi
             ...pluginsStart,
           }}
         >
-          <RedirectAppLinks coreStart={coreStart}>
-            <coreStart.i18n.Context>
-              <NavControl />
-            </coreStart.i18n.Context>
-          </RedirectAppLinks>
+          <QueryClientProvider client={queryClient}>
+            <RedirectAppLinks coreStart={coreStart}>
+              <coreStart.i18n.Context>
+                <NavControl />
+              </coreStart.i18n.Context>
+            </RedirectAppLinks>
+          </QueryClientProvider>
         </KibanaContextProvider>
       </KibanaThemeProvider>
     </EuiErrorBoundary>
@@ -95,11 +101,7 @@ export function NavControl() {
     title: undefined,
   };
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const tooltipRef = useRef<EuiToolTip>(null);
-
-  const handleTooltipMouseOut = useCallback(() => {
-    tooltipRef.current?.hideToolTip();
-  }, []);
+  const tooltipRef = useRef<EuiToolTipRef>(null);
 
   const handleClick = () => {
     tooltipRef.current?.hideToolTip();
@@ -115,7 +117,7 @@ export function NavControl() {
   return (
     <>
       <EuiShowFor sizes={['m', 'l', 'xl']}>
-        <EuiToolTip content={shortcutLabel} ref={tooltipRef} onMouseOut={handleTooltipMouseOut}>
+        <EuiToolTip content={shortcutLabel} ref={tooltipRef}>
           <AiButton
             buttonRef={buttonRef}
             variant={variant}
@@ -131,11 +133,7 @@ export function NavControl() {
       </EuiShowFor>
 
       <EuiShowFor sizes={['xs', 's']}>
-        <EuiToolTip
-          content={fullTooltipContent}
-          ref={tooltipRef}
-          onMouseOut={handleTooltipMouseOut}
-        >
+        <EuiToolTip content={fullTooltipContent} ref={tooltipRef}>
           <AiButton
             buttonRef={buttonRef}
             iconOnly

@@ -1,12 +1,11 @@
 # Kibana Platform Serverless Tests
 
 The tests and helper methods (services, page objects) defined here in
-`x-pack/platform/test/serverless` cover the platform-shared serverless functionality that works across all serverless project types (Security, Observability, Search, Workplace AI).
+`x-pack/platform/test/serverless` cover the platform-shared serverless functionality that works across all serverless project types (Security, Observability, Search, VectorDB).
 
 **Important**: Only tests that validate platform-shared functionality should be located here. Solution-specific serverless tests should be located in their respective solution directories: `x-pack/solutions/<solution>/test/serverless`.
 
 For instructions on how to set up Docker for serverless ES images, please refer to
-[src/platform/packages/shared/kbn-es/README](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/README.mdx).
 [src/platform/packages/shared/kbn-es/README](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/README.mdx).
 
 ## Platform Serverless Testing Structure and Conventions
@@ -88,7 +87,7 @@ Platform serverless tests should only be added when testing functionality that i
 
 ### Roles-based testing
 
-Each serverless project has its own set of SAML roles with [specfic permissions defined in roles.yml](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles)
+Each serverless project has its own set of SAML roles with [specific permissions defined in roles.yml](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles)
 and in order to properly test Kibana functionality, test design requires to login with
 a project-supported SAML role. FTR provides `samlAuth` service to do SAML authentication, that allows UI tests to set
 the SAML cookie in the browser context and generates api key to use in the api integration tests. See examples below.
@@ -191,7 +190,7 @@ describe("my internal APIs test suite", async function() {
 With custom native roles now enabled for Security, Search, and Observability projects on MKI, FTR supports
 defining and authenticating with custom roles in both UI functional and API integration tests.
 
-To test custom roles on a project type that doesn't yet support them, use a feature flags test config ([example](./functional/test_suites/data_usage/privileges.ts)). This allows testing in the Kibana CI before the feature is enabled on MKI. Once the project type officially supports custom roles, move the tests to a standard FTR config to enable execution on MKI.
+To test custom roles on a project type that doesn't yet support them, use a feature flags test config. This allows testing in the Kibana CI before the feature is enabled on MKI. Once the project type officially supports custom roles, move the tests to a standard FTR config to enable execution on MKI.
 
 When running tests locally against MKI, ensure that the `.ftr/role_users.json` file includes the reserved role name `custom_role_worker_1` along with its credentials. This role name has been updated for compatibility with Scout, which supports parallel test execution and allows multiple credential pairs to be passed.
 
@@ -372,7 +371,7 @@ For tests using package registry we have enabled a configuration that uses a doc
 To be able to run this version locally you must have a Docker daemon running in your system and set `FLEET_PACKAGE_REGISTRY_PORT` env var. In order to set this variable execute
 
 ```bash
-export set FLEET_PACKAGE_REGISTRY_PORT=12345
+export FLEET_PACKAGE_REGISTRY_PORT=12345
 ```
 
 To unset the variable, and run the tests against the real endpoint again, execute

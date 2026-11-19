@@ -6,8 +6,16 @@
  */
 
 import type { ReactNode, MouseEventHandler } from 'react';
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  useEuiShadowFlat,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const strings = {
@@ -23,19 +31,36 @@ interface Props {
 }
 
 export const Tray = ({ children, done }: Props) => {
+  const { euiTheme } = useEuiTheme();
+  const shadowFlat = useEuiShadowFlat();
+  const styles = useMemo(
+    () => css`
+      ${shadowFlat}
+
+      & .canvasTray__panel {
+        background-color: ${euiTheme.components.forms.background};
+      }
+    `,
+    [euiTheme, shadowFlat]
+  );
+
   return (
     <>
       <EuiFlexGroup className="canvasTray__toggle" justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            size="s"
-            onClick={done}
-            aria-label={strings.getCloseTrayAriaLabel()}
-            iconType="arrowDown"
-          />
+          <EuiToolTip content={strings.getCloseTrayAriaLabel()} disableScreenReaderOutput>
+            <EuiButtonIcon
+              size="s"
+              onClick={done}
+              aria-label={strings.getCloseTrayAriaLabel()}
+              iconType="chevronSingleDown"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <div className="canvasTray">{children}</div>
+      <div className="canvasTray" css={styles}>
+        {children}
+      </div>
     </>
   );
 };

@@ -1,0 +1,79 @@
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-system.security-default",
+    "id": "scout-syssec-idp-user-a",
+    "index": ".ds-logs-system.security-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:06:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "winlogbeat",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "system.security",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "creation",
+        "category": ["iam"],
+        "kind": "event",
+        "module": "system",
+        "outcome": "success",
+        "type": ["user"]
+      },
+      "host": {
+        "id": "test-win-host-id-a",
+        "name": "test-win-a",
+        "hostname": "test-win-a"
+      },
+      "user": {
+        "id": "test-user-a",
+        "name": "test-user-a",
+        "domain": "TESTDOMAIN"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-system.security-default",
+    "id": "scout-syssec-idp-user-b",
+    "index": ".ds-logs-system.security-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:07:00Z",
+      "agent": {
+        "id": "scout-test-agent",
+        "type": "winlogbeat",
+        "version": "8.17.4"
+      },
+      "data_stream": {
+        "dataset": "system.security",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "event": {
+        "action": "creation",
+        "category": ["iam"],
+        "kind": "event",
+        "module": "system",
+        "outcome": "success",
+        "type": ["user"]
+      },
+      "host": {
+        "id": "test-win-host-id-b",
+        "name": "test-win-b",
+        "hostname": "test-win-b"
+      },
+      "user": {
+        "id": "test-user-b",
+        "name": "test-user-b",
+        "domain": "TESTDOMAIN"
+      }
+    }
+  }
+}

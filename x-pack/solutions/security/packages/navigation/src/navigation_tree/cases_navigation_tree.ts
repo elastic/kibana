@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import type { StandardNodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '../constants';
 import { securityLink } from '../links';
 
-export const createCasesNavigationTree = (templatesEnabled: boolean = false): NodeDefinition => {
-  const children: NodeDefinition[] = [
+export const createCasesNavigationTree = (): StandardNodeDefinition => {
+  const children: StandardNodeDefinition[] = [
     {
       id: `${SecurityPageName.case}-all`,
       link: securityLink(SecurityPageName.case),
@@ -25,18 +25,10 @@ export const createCasesNavigationTree = (templatesEnabled: boolean = false): No
     },
   ];
 
-  if (templatesEnabled) {
-    children.push({
-      id: SecurityPageName.caseTemplates,
-      link: securityLink(SecurityPageName.caseTemplates),
-    });
-  }
-
   return {
     id: SecurityPageName.case,
     link: securityLink(SecurityPageName.case),
     icon: 'briefcase',
     children,
-    ...(templatesEnabled && { renderAs: 'panelOpener' as const }),
   };
 };

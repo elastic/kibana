@@ -9,9 +9,8 @@ import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/li
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { rangeQuery, typedSearch } from '@kbn/observability-plugin/server/utils/queries';
-import type * as t from 'io-ts';
 import moment from 'moment';
-import type { alertDetailsContextRt } from '@kbn/observability-plugin/server/services';
+import type { AlertDetailsContextualInsightsHandlerQuery } from '@kbn/observability-plugin/server/services';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { CONTAINER_ID } from '@kbn/apm-types';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
@@ -31,7 +30,7 @@ export async function getContainerIdFromSignals({
   logSourcesService,
   apmEventClient,
 }: {
-  query: t.TypeOf<typeof alertDetailsContextRt>;
+  query: AlertDetailsContextualInsightsHandlerQuery;
   esClient: ElasticsearchClient;
   logSourcesService: LogSourcesService;
   coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;

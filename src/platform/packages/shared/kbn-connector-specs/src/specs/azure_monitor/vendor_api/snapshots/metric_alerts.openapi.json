@@ -1,0 +1,846 @@
+{
+  "components": {
+    "schemas": {
+      "MetricAlertAction": {
+        "properties": {
+          "actionGroupId": {
+            "type": "string"
+          },
+          "webHookProperties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "MetricAlertCriteria": {
+        "additionalProperties": {},
+        "discriminator": {
+          "propertyName": "odata.type"
+        },
+        "properties": {
+          "odata.type": {
+            "$ref": "#/components/schemas/Odatatype"
+          }
+        },
+        "required": [
+          "odata.type"
+        ],
+        "type": "object"
+      },
+      "MetricAlertErrorResponse": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/Microsoft.Common.ErrorResponseError"
+          }
+        },
+        "type": "object"
+      },
+      "MetricAlertProperties": {
+        "properties": {
+          "actionProperties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/MetricAlertAction"
+            },
+            "type": "array"
+          },
+          "autoMitigate": {
+            "type": "boolean"
+          },
+          "criteria": {
+            "$ref": "#/components/schemas/MetricAlertCriteria"
+          },
+          "customProperties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "description": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "evaluationFrequency": {
+            "format": "duration",
+            "type": "string"
+          },
+          "isMigrated": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "lastUpdatedTime": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "resolveConfiguration": {
+            "$ref": "#/components/schemas/ResolveConfiguration"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "severity": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "targetResourceRegion": {
+            "type": "string"
+          },
+          "targetResourceType": {
+            "type": "string"
+          },
+          "windowSize": {
+            "format": "duration",
+            "type": "string"
+          }
+        },
+        "required": [
+          "severity",
+          "enabled",
+          "scopes",
+          "evaluationFrequency",
+          "criteria"
+        ],
+        "type": "object"
+      },
+      "MetricAlertPropertiesPatch": {
+        "properties": {
+          "actionProperties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/MetricAlertAction"
+            },
+            "type": "array"
+          },
+          "autoMitigate": {
+            "type": "boolean"
+          },
+          "criteria": {
+            "$ref": "#/components/schemas/MetricAlertCriteria"
+          },
+          "customProperties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "description": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "evaluationFrequency": {
+            "format": "duration",
+            "type": "string"
+          },
+          "isMigrated": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "lastUpdatedTime": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "resolveConfiguration": {
+            "$ref": "#/components/schemas/ResolveConfiguration"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "severity": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "targetResourceRegion": {
+            "type": "string"
+          },
+          "targetResourceType": {
+            "type": "string"
+          },
+          "windowSize": {
+            "format": "duration",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MetricAlertResource": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TrackedResource"
+          }
+        ],
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/Microsoft.Common.Identity"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/MetricAlertProperties"
+          }
+        },
+        "required": [
+          "properties"
+        ],
+        "type": "object"
+      },
+      "MetricAlertResourceCollection": {
+        "properties": {
+          "nextLink": {
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "$ref": "#/components/schemas/MetricAlertResource"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "MetricAlertResourcePatch": {
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/Microsoft.Common.Identity"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/MetricAlertPropertiesPatch"
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "MetricAlertStatus": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/MetricAlertStatusProperties"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MetricAlertStatusCollection": {
+        "properties": {
+          "value": {
+            "items": {
+              "$ref": "#/components/schemas/MetricAlertStatus"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "MetricAlertStatusProperties": {
+        "properties": {
+          "dimensions": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "status": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Microsoft.Common.ErrorDetail": {
+        "properties": {
+          "additionalInfo": {
+            "items": {
+              "$ref": "#/components/schemas/Microsoft.Common.ErrorDetailAdditionalInfoItem"
+            },
+            "type": "array"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Microsoft.Common.ErrorDetailAdditionalInfoItem": {
+        "properties": {
+          "info": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Microsoft.Common.ErrorResponseError": {
+        "properties": {
+          "additionalInfo": {
+            "items": {
+              "$ref": "#/components/schemas/Microsoft.Common.ErrorResponseErrorAdditionalInfoItem"
+            },
+            "type": "array"
+          },
+          "code": {
+            "type": "string"
+          },
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/Microsoft.Common.ErrorDetail"
+            },
+            "type": "array"
+          },
+          "message": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Microsoft.Common.ErrorResponseErrorAdditionalInfoItem": {
+        "properties": {
+          "info": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Microsoft.Common.Identity": {
+        "properties": {
+          "principalId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "tenantId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Microsoft.Common.IdentityType"
+          },
+          "userAssignedIdentities": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Microsoft.Common.UserIdentityProperties"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "Microsoft.Common.IdentityType": {
+        "enum": [
+          "SystemAssigned",
+          "UserAssigned",
+          "None"
+        ],
+        "type": "string"
+      },
+      "Microsoft.Common.UserIdentityProperties": {
+        "properties": {
+          "clientId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "principalId": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Odatatype": {
+        "enum": [
+          "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+          "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria",
+          "Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria",
+          "Microsoft.Azure.Monitor.PromQLCriteria"
+        ],
+        "type": "string"
+      },
+      "ResolveConfiguration": {
+        "properties": {
+          "autoResolved": {
+            "type": "boolean"
+          },
+          "timeToResolve": {
+            "format": "duration",
+            "type": "string"
+          }
+        },
+        "required": [
+          "autoResolved"
+        ],
+        "type": "object"
+      },
+      "Resource": {
+        "properties": {
+          "id": {
+            "format": "arm-id",
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "systemData": {
+            "$ref": "#/components/schemas/systemData",
+            "readOnly": true
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "title": "Resource",
+        "type": "object"
+      },
+      "TrackedResource": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Resource"
+          }
+        ],
+        "properties": {
+          "location": {
+            "type": "string"
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "location"
+        ],
+        "title": "Tracked Resource",
+        "type": "object"
+      },
+      "systemData": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "createdByType": {
+            "enum": [
+              "User",
+              "Application",
+              "ManagedIdentity",
+              "Key"
+            ],
+            "type": "string"
+          },
+          "lastModifiedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastModifiedBy": {
+            "type": "string"
+          },
+          "lastModifiedByType": {
+            "enum": [
+              "User",
+              "Application",
+              "ManagedIdentity",
+              "Key"
+            ],
+            "type": "string"
+          }
+        },
+        "readOnly": true,
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "azure_auth": {
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
+            "scopes": {
+              "user_impersonation": "impersonate your user account"
+            }
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "MonitorManagementClient"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/metricAlerts": {
+      "get": {
+        "operationId": "MetricAlerts_ListBySubscription",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricAlertResourceCollection"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricAlertErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-pageable": {
+          "nextLinkName": "nextLink"
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts": {
+      "get": {
+        "operationId": "MetricAlerts_ListByResourceGroup",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricAlertResourceCollection"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricAlertErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-pageable": {
+          "nextLinkName": "nextLink"
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}": {
+      "get": {
+        "operationId": "MetricAlerts_Get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricAlertResource"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricAlertErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "MetricAlerts_Update",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetricAlertResourcePatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricAlertResource"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricAlertErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}/status": {
+      "get": {
+        "operationId": "MetricAlertsStatus_List",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ruleName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricAlertStatusCollection"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricAlertErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "azure_auth": [
+        "user_impersonation"
+      ]
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://management.azure.com"
+    }
+  ]
+}

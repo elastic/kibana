@@ -12,7 +12,6 @@ import { pluck } from 'rxjs';
 import {
   EuiProvider,
   EuiBasicTable,
-  EuiCallOut,
   EuiCodeBlock,
   EuiPageTemplate,
   EuiSpacer,
@@ -20,6 +19,7 @@ import {
 } from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { KbnSuccessCallout } from '@kbn/ui-callout';
 import { ExpressionsContext } from './expressions_context';
 
 const expression = `getEvents
@@ -70,9 +70,7 @@ export function App() {
               items={datatable.rows ?? []}
             />
           ) : (
-            <EuiCallOut announceOnMount={false} color="success">
-              <p>Click or press any key.</p>
-            </EuiCallOut>
+            <KbnSuccessCallout announceOnMount={false} title="Click or press any key." />
           )}
         </EuiPageTemplate.Section>
       </EuiPageTemplate>

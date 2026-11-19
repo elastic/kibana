@@ -8,15 +8,14 @@ import type React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
 import type { EuiIconProps } from '@elastic/eui';
 import type { BoolQuery } from '@kbn/es-query';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import type { EuiVarsColors } from './hooks/use_eui_theme';
 
 export interface StartPlugins {
   data: DataPublicPluginStart;
-  timelines: TimelinesUIStart;
   sessionView: SessionViewStart;
 }
 
@@ -33,8 +32,20 @@ export interface GlobalFilter {
   endDate: string;
 }
 
+export type KubernetesPageHeaderMenuItem = NonNullable<AppHeaderMenu['items']>[number];
+
+/**
+ * The parts of the page `AppHeader` owned by the Kubernetes page. The host renders the header
+ * and supplies the rest (title, back navigation, shared Security menu items).
+ */
+export interface KubernetesPageHeaderProps {
+  description: string;
+  menu: AppHeaderMenu;
+}
+
 export interface KubernetesSecurityDeps {
   filter: React.ReactNode;
+  renderHeader: (headerProps: KubernetesPageHeaderProps) => React.ReactNode;
   renderSessionsView: (sessionsFilterQuery: string | undefined) => JSX.Element;
   indexPattern?: IndexPattern;
   globalFilter: GlobalFilter;

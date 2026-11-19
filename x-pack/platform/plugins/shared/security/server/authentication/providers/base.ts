@@ -12,10 +12,14 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
-import { deepFreeze } from '@kbn/std';
+import { deepFreeze, isInternalURL } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { AuthenticatedUser } from '../../../common';
+import {
+  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
+  KIBANA_AUTH_FULL_HEADER,
+} from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import type { SessionValue } from '../../session_management';
 import type { UiamServicePublic } from '../../uiam';
@@ -145,6 +149,9 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
    * Returns HTTP authentication scheme that provider uses within `Authorization` HTTP header that
    * it attaches to all successfully authenticated requests to Elasticsearch or `null` in case
    * provider doesn't attach any additional `Authorization` HTTP headers.
+   *
+   * Not to be confused with `AuthenticatedUser.http_authentication_scheme`, which describes the
+   * scheme used on the inbound client request instead of the outbound request to Elasticsearch.
    */
   abstract getHTTPAuthenticationScheme(): string | null;
 
@@ -163,10 +170,13 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
     // For "minimal" authentication, we don't need to call the `_authenticate` endpoint and can just
     // return a static user proxy. The caveat here is that we don't validate credentials, but it
     // will be done by the Elasticsearch itself.
+    // We also want to skip minimal authentication for requests that explicitly ask for the full authentication
+    // information by setting `kbn-auth-full` header to `true` (e.g., during re-authentication).
     if (
       session &&
       session.username &&
-      request.route.options.security?.authc?.enabled === 'minimal'
+      request.route.options.security?.authc?.enabled === 'minimal' &&
+      request.headers[KIBANA_AUTH_FULL_HEADER] !== 'true'
     ) {
       this.logger.debug(`Performing "minimal" authentication for request ${request.url.pathname}.`);
       return this.getMinAuthenticationUserProxy(session);
@@ -183,6 +193,41 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
   }
 
   /**
+   * Returns the original request URL with the URL hash fragment captured on the client side and
+   * passed to the server via the `auth_url_hash` query string parameter.
+   * @param request Request instance.
+   * @param urlHash Value of the `auth_url_hash` query string parameter.
+   */
+  protected getRequestOriginalURLWithHash(request: KibanaRequest, urlHash: string) {
+    // The client-side capture URL app always sends either an empty string or a hash fragment.
+    const isURLHashFragment = urlHash === '' || urlHash.startsWith('#');
+    if (!isURLHashFragment) {
+      this.logger.warn(
+        `"${AUTH_URL_HASH_QUERY_STRING_PARAMETER}" is not a URL hash fragment and will be ignored.`
+      );
+    }
+
+    return this.getInternalRedirectURL(
+      request,
+      `${this.options.getRequestOriginalURL(request)}${isURLHashFragment ? urlHash : ''}`
+    );
+  }
+
+  /**
+   * Returns the specified URL if it's a Kibana internal URL, or the base path URL otherwise.
+   * @param request Request instance.
+   * @param redirectURL URL user is supposed to be redirected to.
+   */
+  protected getInternalRedirectURL(request: KibanaRequest, redirectURL: string) {
+    if (isInternalURL(redirectURL, this.options.basePath.serverBasePath)) {
+      return redirectURL;
+    }
+
+    this.logger.warn('Redirect URL is not a valid Kibana internal URL, using base path instead.');
+    return `${this.options.basePath.get(request)}/`;
+  }
+
+  /**
    * Converts Elasticsearch Authentication result to a Kibana authenticated user.
    * @param authenticationInfo Result returned from the `_authenticate` operation.
    */
@@ -194,6 +239,7 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
         this.options.isElasticCloudDeployment() &&
         authenticationInfo.authentication_realm.type === 'saml' &&
         authenticationInfo.authentication_realm.name === ELASTIC_CLOUD_SSO_REALM_NAME,
+      http_authentication_scheme: null,
     } as AuthenticatedUser);
   }
 
@@ -212,6 +258,8 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
       // We should probably refactor audit logs to avoid using `roles` property for minimally
       // authenticated users and then remove this property altogether and throw for its access.
       roles: [],
+      // Minimally-authenticated users are authenticated via session cookie, not HTTP credentials.
+      http_authentication_scheme: null,
     };
 
     return deepFreeze(

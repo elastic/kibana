@@ -7,26 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { from } from '@kbn/esql-composer';
+import { esql } from '@elastic/esql';
 import { getEsqlQuery } from './get_esql_query';
-import type { QueryOperator } from '@kbn/esql-composer/src/types';
 
-const source = from('index');
+const render = (condition: ReturnType<typeof getEsqlQuery>): string => {
+  const query = esql.from('index');
+  if (condition) {
+    query.where`${condition}`;
+  }
+  return query.print('pipe-multiline');
+};
 
 describe('getEsqlQuery', () => {
-  const emptyQueryOperator: QueryOperator = (sourceQuery) => sourceQuery;
-
   it('returns a transaction query if transactionType, serviceName and transactionName are present', () => {
-    const result = source
-      .pipe(
-        getEsqlQuery({
-          serviceName: 'orders-service',
-          transactionName: 'GET /api/orders',
-          transactionType: 'request',
-          spanName: 'span-1',
-        }) || emptyQueryOperator
-      )
-      .toString();
+    const result = render(
+      getEsqlQuery({
+        serviceName: 'orders-service',
+        transactionName: 'GET /api/orders',
+        transactionType: 'request',
+        spanName: 'span-1',
+      })
+    );
 
     expect(result).toEqual(
       'FROM index\n  | WHERE service.name == "orders-service" AND transaction.name == "GET /api/orders" AND transaction.type == "request"'
@@ -34,16 +35,14 @@ describe('getEsqlQuery', () => {
   });
 
   it('returns a span query if serviceName and spanName are present', () => {
-    const result = source
-      .pipe(
-        getEsqlQuery({
-          serviceName: 'orders-service',
-          spanName: 'span-1',
-          transactionName: undefined,
-          transactionType: undefined,
-        }) || emptyQueryOperator
-      )
-      .toString();
+    const result = render(
+      getEsqlQuery({
+        serviceName: 'orders-service',
+        spanName: 'span-1',
+        transactionName: undefined,
+        transactionType: undefined,
+      })
+    );
 
     expect(result).toEqual(
       'FROM index\n  | WHERE service.name == "orders-service" AND span.name == "span-1"'
@@ -51,32 +50,42 @@ describe('getEsqlQuery', () => {
   });
 
   it('returns empty query if only serviceName', () => {
-    const result = source
-      .pipe(
-        getEsqlQuery({
-          serviceName: 'orders-service',
-          spanName: undefined,
-          transactionName: undefined,
-          transactionType: undefined,
-        }) || emptyQueryOperator
-      )
-      .toString();
+    const result = render(
+      getEsqlQuery({
+        serviceName: 'orders-service',
+        spanName: undefined,
+        transactionName: undefined,
+        transactionType: undefined,
+      })
+    );
 
-    expect(result).toEqual(source.toString());
+    expect(result).toEqual(esql.from('index').print('pipe-multiline'));
+  });
+
+  it('preserves backslashes in span names without double-escaping', () => {
+    const result = render(
+      getEsqlQuery({
+        serviceName: 'orders-service',
+        spanName: String.raw`C:\temp\new.cs`,
+        transactionName: undefined,
+        transactionType: undefined,
+      })
+    );
+
+    expect(result).toEqual(String.raw`FROM index
+  | WHERE service.name == "orders-service" AND span.name == "C:\\temp\\new.cs"`);
   });
 
   it('returns empty query if everything is undefined', () => {
-    const result = source
-      .pipe(
-        getEsqlQuery({
-          serviceName: undefined,
-          spanName: undefined,
-          transactionName: undefined,
-          transactionType: undefined,
-        }) || emptyQueryOperator
-      )
-      .toString();
+    const result = render(
+      getEsqlQuery({
+        serviceName: undefined,
+        spanName: undefined,
+        transactionName: undefined,
+        transactionType: undefined,
+      })
+    );
 
-    expect(result).toEqual(source.toString());
+    expect(result).toEqual(esql.from('index').print('pipe-multiline'));
   });
 });

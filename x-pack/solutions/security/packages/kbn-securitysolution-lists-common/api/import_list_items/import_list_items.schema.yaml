@@ -34,6 +34,10 @@ paths:
                     127.0.0.7
                     127.0.0.8
                     127.0.0.9
+            examples:
+              ipLinesFile:
+                value:
+                  file: list_values.txt
       parameters:
         - name: list_id
           in: query
@@ -130,6 +134,11 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                conflict:
+                  value:
+                    message: 'List with the specified list_id does not exist, create the list or fix list_id to import to an existing one'
+                    status_code: 409
         500:
           description: Internal server error response
           content:

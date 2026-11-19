@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/react-hooks",
   "owner": [
-    "@elastic/obs-onboarding-team"
+    "@elastic/streams-ui"
   ],
   "group": "platform",
   "visibility": "shared"

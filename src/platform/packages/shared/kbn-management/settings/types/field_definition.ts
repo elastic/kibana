@@ -98,10 +98,16 @@ export interface FieldDefinition<
    */
   solutionViews?: UiSettingsSolutions;
   /**
-   * Technical preview information for the field
+   * Technical preview information for the field.
+   * A setting should carry at most one maturity badge — avoid setting both this and {@link FieldDefinition.experimental}.
    * @see {@link TechnicalPreviewSettings}
    */
   technicalPreview?: TechnicalPreviewSettings;
+  /**
+   * Experimental information for the field. Supports the same options as {@link TechnicalPreviewSettings}.
+   * A setting should carry at most one maturity badge — avoid setting both this and {@link FieldDefinition.technicalPreview}.
+   */
+  experimental?: TechnicalPreviewSettings;
 }
 
 /**

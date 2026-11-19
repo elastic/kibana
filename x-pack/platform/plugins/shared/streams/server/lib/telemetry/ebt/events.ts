@@ -8,20 +8,12 @@
 import {
   STREAMS_ENDPOINT_LATENCY_EVENT,
   STREAMS_STATE_ERROR_EVENT,
-  STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
-  STREAMS_SIGNIFICANT_EVENTS_QUERIES_GENERATED_EVENT_TYPE,
-  STREAMS_INSIGHTS_GENERATED_EVENT_TYPE,
   STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE,
-  STREAMS_FEATURES_IDENTIFIED_EVENT_TYPE,
 } from './constants';
 import {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
-  streamsDescriptionGeneratedSchema,
-  streamsSignificantEventsQueriesGeneratedSchema,
-  streamsInsightsGeneratedSchema,
   streamsProcessingPipelineSuggestedSchema,
-  streamsFeaturesIdentifiedSchema,
 } from './schemas';
 
 const streamsEndpointLatencyEventType = {
@@ -34,35 +26,13 @@ const streamsStateErrorEventType = {
   schema: streamsStateErrorSchema,
 };
 
-const streamsDescriptionGeneratedEventType = {
-  eventType: STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
-  schema: streamsDescriptionGeneratedSchema,
-};
-const streamsSignificantEventsGeneratedEventType = {
-  eventType: STREAMS_SIGNIFICANT_EVENTS_QUERIES_GENERATED_EVENT_TYPE,
-  schema: streamsSignificantEventsQueriesGeneratedSchema,
-};
-const streamsInsightsGeneratedEventType = {
-  eventType: STREAMS_INSIGHTS_GENERATED_EVENT_TYPE,
-  schema: streamsInsightsGeneratedSchema,
-};
-
 const streamsProcessingPipelineSuggestedEventType = {
   eventType: STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE,
   schema: streamsProcessingPipelineSuggestedSchema,
 };
 
-const streamsFeaturesIdentifiedEventType = {
-  eventType: STREAMS_FEATURES_IDENTIFIED_EVENT_TYPE,
-  schema: streamsFeaturesIdentifiedSchema,
-};
-
 export {
   streamsEndpointLatencyEventType,
   streamsStateErrorEventType,
-  streamsDescriptionGeneratedEventType,
-  streamsSignificantEventsGeneratedEventType,
-  streamsInsightsGeneratedEventType,
   streamsProcessingPipelineSuggestedEventType,
-  streamsFeaturesIdentifiedEventType,
 };

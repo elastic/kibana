@@ -184,4 +184,57 @@ describe('Stage: outdatedDocumentsSearchRead', () => {
       logs: expect.any(Array),
     });
   });
+
+  it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_READ when the ES response is too large', () => {
+    const state = createState({ batchSize: 1000 });
+    const res = Either.left({
+      type: 'es_response_too_large',
+      contentLength: 104868433,
+    }) as StateActionResponse<'OUTDATED_DOCUMENTS_SEARCH_READ'>;
+
+    const newState = outdatedDocumentsSearchRead(state, res, context);
+
+    expect(newState).toEqual({
+      ...state,
+      controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
+      batchSize: 500,
+      logs: [
+        {
+          level: 'warning',
+          message:
+            'Read a batch with a response content length of 104868433 bytes which exceeds the Elasticsearch client maximum response size, retrying by reducing the batch size in half to 500.',
+        },
+      ],
+    });
+  });
+
+  it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_READ does not reduce batch size below 1', () => {
+    const state = createState({ batchSize: 1.5 });
+    const res = Either.left({
+      type: 'es_response_too_large',
+      contentLength: 2345,
+    }) as StateActionResponse<'OUTDATED_DOCUMENTS_SEARCH_READ'>;
+
+    const newState = outdatedDocumentsSearchRead(state, res, context);
+
+    expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_READ');
+    expect(newState).toMatchObject({ batchSize: 1 });
+  });
+
+  it('OUTDATED_DOCUMENTS_SEARCH_READ -> FATAL when the ES response is too large and batchSize is already 1', () => {
+    const state = createState({ batchSize: 1 });
+    const res = Either.left({
+      type: 'es_response_too_large',
+      contentLength: 2345,
+    }) as StateActionResponse<'OUTDATED_DOCUMENTS_SEARCH_READ'>;
+
+    const newState = outdatedDocumentsSearchRead(state, res, context);
+
+    expect(newState).toEqual({
+      ...state,
+      controlState: 'FATAL',
+      reason:
+        'After reducing the read batch size to a single document, the response content length was 2345 bytes which still exceeded the Elasticsearch client maximum response size.',
+    });
+  });
 });

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   useEuiTheme,
   EuiPanel,
@@ -20,13 +20,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { InspectButtonContainer } from '../../../../../common/components/inspect';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
-import { UserPanelKey } from '../../../../../flyout/entity_details/shared/constants';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 
 import { buildPrivilegedUsersTableColumns } from './columns';
 import { HeaderSection } from '../../../../../common/components/header_section';
@@ -44,20 +44,19 @@ const TITLE = i18n.translate(
 const PRIVILEGED_USERS_TABLE_ID = 'PrivilegedUsers-table';
 
 const useOpenUserFlyout = () => {
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openUserFlyout } = useFlyoutApi();
 
-  return (userName: string) => {
-    openFlyout({
-      right: {
-        id: UserPanelKey,
-        params: {
-          contextID: PRIVILEGED_USERS_TABLE_ID,
-          userName,
-          scopeId: PRIVILEGED_USERS_TABLE_ID,
-        },
-      },
-    });
-  };
+  return useCallback(
+    (userName: string) => {
+      openUserFlyout({
+        userName,
+        scopeId: PRIVILEGED_USERS_TABLE_ID,
+        contextID: PRIVILEGED_USERS_TABLE_ID,
+        origin: FLYOUT_ORIGIN.PRIVILEGED_USERS_TABLE,
+      });
+    },
+    [openUserFlyout]
+  );
 };
 
 export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId }) => {

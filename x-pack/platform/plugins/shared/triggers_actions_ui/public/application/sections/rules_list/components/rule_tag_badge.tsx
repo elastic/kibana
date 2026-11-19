@@ -61,7 +61,6 @@ export const RuleTagBadge = <T extends RuleTagBadgeOptions>(props: RuleTagBadgeP
         color="hollow"
         iconType="tag"
         iconSide="left"
-        tabIndex={-1}
         onClick={onClick}
         onClickAriaLabel="Tags"
       >
@@ -105,6 +104,7 @@ export const RuleTagBadge = <T extends RuleTagBadgeOptions>(props: RuleTagBadgeP
       anchorPosition="upCenter"
       isOpen={isOpen} // The props exists as it's required in props types
       closePopover={onClose}
+      aria-label={tagTitle}
     >
       <EuiPopoverTitle data-test-subj={titleDataTestSubj}>{tagTitle}</EuiPopoverTitle>
       <div style={containerStyle}>{tagBadges}</div>

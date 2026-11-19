@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { forwardRef, useMemo } from 'react';
+import React, { forwardRef, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiText } from '@elastic/eui';
+import { EuiText, useEuiTheme } from '@elastic/eui';
 import { useAgentSkills } from '../../../../../../../hooks/skills/use_agent_skills';
 import { useAgentId } from '../../../../../../../hooks/use_conversation';
 import type { CommandMenuComponentProps, CommandMenuHandle } from '../../types';
@@ -26,21 +26,51 @@ const descriptionStyles = css`
 `;
 
 export const Skills = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
-  ({ query, onSelect }, ref) => {
+  ({ query, onSelect, onContentChange }, ref) => {
+    const { euiTheme } = useEuiTheme();
     const agentId = useAgentId();
     const { skills, isLoading } = useAgentSkills({ agentId });
 
-    const descriptionsByKey = useMemo(
-      () => new Map(skills.map((skill) => [skill.id, skill.description])),
-      [skills]
+    const skillRowStyles = useMemo(
+      () => css`
+        display: flex;
+        align-items: baseline;
+        gap: ${euiTheme.size.s};
+        min-width: 0;
+      `,
+      [euiTheme.size.s]
     );
 
     const options: CommandMenuListOption[] = useMemo(() => {
       const lowerQuery = query.toLowerCase();
       return skills
         .filter((skill) => skill.name.toLowerCase().includes(lowerQuery))
-        .map((skill) => ({ key: skill.id, label: skill.name }));
-    }, [skills, query]);
+        .map((skill) => {
+          if (!skill.description) {
+            return { key: skill.id, label: skill.name };
+          }
+          return {
+            key: skill.id,
+            label: skill.name,
+            renderLabel: (
+              <span css={skillRowStyles}>
+                <span>{skill.name}</span>
+                <EuiText css={descriptionStyles} size="xs" color="subdued" component="span">
+                  {skill.description}
+                </EuiText>
+              </span>
+            ),
+          };
+        });
+    }, [skills, query, skillRowStyles]);
+
+    // Lets the popover stay closed once it's clear there's nothing to show,
+    // instead of leaving a "No matching results" panel open indefinitely as
+    // the user keeps typing past an unresolved mention.
+    const hasVisibleContent = isLoading || options.length > 0;
+    useEffect(() => {
+      onContentChange?.(hasVisibleContent, query);
+    }, [hasVisibleContent, query, onContentChange]);
 
     return (
       <CommandMenuList
@@ -54,17 +84,6 @@ export const Skills = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
             id: option.key,
             metadata: {},
           });
-        }}
-        renderExtraContent={(key: string) => {
-          const description = descriptionsByKey.get(key);
-          if (!description) {
-            return null;
-          }
-          return (
-            <EuiText css={descriptionStyles} size="xs" color="subdued" component="span">
-              {description}
-            </EuiText>
-          );
         }}
         width={SKILLS_MENU_WIDTH}
         data-test-subj="skillsMenu"

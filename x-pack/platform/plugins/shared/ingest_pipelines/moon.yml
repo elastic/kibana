@@ -17,11 +17,11 @@ project:
   owner: '@elastic/kibana-management'
   sourceRoot: x-pack/platform/plugins/shared/ingest_pipelines
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/core'
   - '@kbn/licensing-plugin'
   - '@kbn/features-plugin'
   - '@kbn/security-plugin'
-  - '@kbn/file-upload-plugin'
   - '@kbn/es-ui-shared-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/management-plugin'
@@ -50,39 +50,21 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/code-editor-mock'
+  - '@kbn/scout'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - __jest__/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+tasks: {}

@@ -25,7 +25,6 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.deploymentAgn
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects, page }) => {
     await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.goto();
     await pageObjects.dashboard.openNewDashboard();
     dashboardUrl = page.url();
   });
@@ -36,7 +35,7 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.deploymentAgn
 
   const createAndAddMapByValue = async (pageObjects: PageObjects) => {
     await pageObjects.dashboard.addMapPanel();
-    await pageObjects.maps.waitForRenderComplete();
+    await pageObjects.maps.waitForLayersToLoad();
     await pageObjects.maps.saveAndReturnButton.click();
     await pageObjects.dashboard.waitForRenderComplete();
   };
@@ -44,7 +43,7 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.deploymentAgn
   const openMapEditorAndAddLayer = async (pageObjects: PageObjects) => {
     const [panelTitle] = await pageObjects.dashboard.getPanelTitles();
     await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel', panelTitle);
-    await pageObjects.maps.waitForRenderComplete();
+    await pageObjects.maps.waitForLayersToLoad();
 
     await pageObjects.maps.addLayerButton.click();
     await pageObjects.maps.layerAddForm.waitFor({ state: 'visible' });
@@ -58,7 +57,7 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.deploymentAgn
   };
 
   const saveMapToLibraryAndReturn = async (pageObjects: PageObjects) => {
-    await pageObjects.maps.saveButton.click();
+    await pageObjects.maps.clickSaveButton();
     await pageObjects.maps.saveFromModal(`${MAPS_LIBRARY_NAME_PREFIX} ${mapCounter++}`, {
       redirectToOrigin: true,
     });
@@ -66,7 +65,7 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.deploymentAgn
   };
 
   const saveMapToLibraryAndStay = async (pageObjects: PageObjects, page: ScoutPage) => {
-    await pageObjects.maps.saveButton.click();
+    await pageObjects.maps.clickSaveButton();
     await pageObjects.maps.saveFromModal(`${MAPS_LIBRARY_NAME_PREFIX} ${mapCounter++}`, {
       redirectToOrigin: false,
     });

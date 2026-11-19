@@ -1,16 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`rendering renders correctly 1`] = `
-<Aside
-  overlay={true}
-  overlayBackground="#fff"
+<aside
+  css="unknown styles"
 >
-  <FlexGroup
-    overlay={
-      Object {
-        "overlay": true,
-      }
-    }
+  <EuiFlexGroup
+    alignItems="center"
+    css="unknown styles"
+    direction="column"
+    gutterSize="s"
+    justifyContent="center"
   >
     <EuiFlexItem
       grow={false}
@@ -32,6 +31,6 @@ exports[`rendering renders correctly 1`] = `
         </p>
       </EuiText>
     </EuiFlexItem>
-  </FlexGroup>
-</Aside>
+  </EuiFlexGroup>
+</aside>
 `;

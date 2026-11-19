@@ -10,6 +10,7 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
 import {
   apmServiceGroupMaxNumberOfServices,
+  apmMaxNumberOfServices,
   defaultApmServiceEnvironment,
   enableComparisonByDefault,
   enableInspectEsQueries,
@@ -19,15 +20,13 @@ import {
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
   apmProgressiveLoading,
+  apmTraceLogsDefaultColumns,
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import {
-  BottomBarActions,
-  useEditableSettings,
-  useUiTracker,
-} from '@kbn/observability-shared-plugin/public';
+import { BottomBarActions, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
+import { useEditableSettings } from '@kbn/management-settings-hooks';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useProfilingPluginSetting } from '../../../../hooks/use_profiling_integration_setting';
 
@@ -40,6 +39,7 @@ const FieldRow = withSuspense(LazyFieldRow);
 const SETTINGS_KEYS = [
   enableComparisonByDefault,
   defaultApmServiceEnvironment,
+  apmMaxNumberOfServices,
   apmServiceGroupMaxNumberOfServices,
   enableInspectEsQueries,
   apmProgressiveLoading,
@@ -47,11 +47,14 @@ const SETTINGS_KEYS = [
   apmAWSLambdaRequestCostPerMillion,
   apmEnableTableSearchBar,
   apmEnableServiceInventoryTableSearchBar,
+  apmTraceLogsDefaultColumns,
 ];
+
+const SETTINGS_KEYS_WITH_PROFILING = [...SETTINGS_KEYS, apmEnableTransactionProfiling];
 
 function getApmSettingsKeys(isProfilingPluginEnabled: boolean) {
   if (isProfilingPluginEnabled) {
-    SETTINGS_KEYS.push(...[apmEnableTransactionProfiling]);
+    return SETTINGS_KEYS_WITH_PROFILING;
   }
 
   return SETTINGS_KEYS;
@@ -67,16 +70,13 @@ export function GeneralSettings() {
   const isProfilingPluginEnabled = useProfilingPluginSetting();
   const apmSettingsKeys = getApmSettingsKeys(isProfilingPluginEnabled);
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings(apmSettingsKeys);
+    useEditableSettings({ settingsKeys: apmSettingsKeys, settingsClient: settings.client });
 
   async function handleSave() {
     try {
-      const reloadPage = Object.keys(unsavedChanges).some((key) => {
-        return fields[key].requiresPageReload;
-      });
-      await saveAll();
+      const { requiresReload } = await saveAll();
       trackApmEvent({ metric: 'general_settings_save' });
-      if (reloadPage) {
+      if (requiresReload) {
         window.location.reload();
       }
     } catch (e) {
@@ -97,6 +97,10 @@ export function GeneralSettings() {
       <EuiSpacer />
       {apmSettingsKeys.map((settingKey) => {
         const field = fields[settingKey];
+        if (!field) {
+          return null;
+        }
+
         return (
           <FieldRowProvider
             {...{

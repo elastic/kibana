@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useChoices } from '../lib/servicenow/use_choices';
@@ -74,23 +75,23 @@ const choicesResponse = {
 describe('ServiceNowITOMParamsFields renders', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useChoicesMock.mockImplementation((args) => {
+    useChoicesMock.mockImplementation(() => {
       return choicesResponse;
     });
   });
 
   test('all params fields is rendered', () => {
-    const wrapper = mount(<ServiceNowITOMParamsFields {...defaultProps} />);
-    expect(wrapper.find('[data-test-subj="sourceInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="nodeInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="typeInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="resourceInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="metric_nameInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="event_classInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="message_keyInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="severitySelect"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="descriptionTextArea"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="additional_infoJsonEditor"]').exists()).toBeTruthy();
+    render(<ServiceNowITOMParamsFields {...defaultProps} />);
+    expect(screen.getByTestId('sourceInput')).toBeInTheDocument();
+    expect(screen.getByTestId('nodeInput')).toBeInTheDocument();
+    expect(screen.getByTestId('typeInput')).toBeInTheDocument();
+    expect(screen.getByTestId('resourceInput')).toBeInTheDocument();
+    expect(screen.getByTestId('metric_nameInput')).toBeInTheDocument();
+    expect(screen.getByTestId('event_classInput')).toBeInTheDocument();
+    expect(screen.getByTestId('message_keyInput')).toBeInTheDocument();
+    expect(screen.getByTestId('severitySelect')).toBeInTheDocument();
+    expect(screen.getByTestId('descriptionTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('additional_infoJsonEditor')).toBeInTheDocument();
   });
 
   test('If severity has errors, form row is invalid', () => {
@@ -98,9 +99,8 @@ describe('ServiceNowITOMParamsFields renders', () => {
       ...defaultProps,
       errors: { severity: ['error'] },
     };
-    const wrapper = mount(<ServiceNowITOMParamsFields {...newProps} />);
-    const severity = wrapper.find('[data-test-subj="severitySelect"]').first();
-    expect(severity.prop('isInvalid')).toBeTruthy();
+    render(<ServiceNowITOMParamsFields {...newProps} />);
+    expect(screen.getByTestId('severitySelect')).toHaveAttribute('aria-invalid', 'true');
   });
 
   test('When subActionParams is undefined, set to default', () => {
@@ -111,7 +111,7 @@ describe('ServiceNowITOMParamsFields renders', () => {
       actionParams: newParams,
     };
 
-    mount(<ServiceNowITOMParamsFields {...newProps} />);
+    render(<ServiceNowITOMParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1]).toEqual({
       message_key: '{{rule.id}}:{{alert.id}}',
       additional_info: JSON.stringify(
@@ -142,14 +142,19 @@ describe('ServiceNowITOMParamsFields renders', () => {
       ...defaultProps,
       actionParams: newParams,
     };
-    mount(<ServiceNowITOMParamsFields {...newProps} />);
+    render(<ServiceNowITOMParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1]).toEqual('addEvent');
   });
 
   test('Resets fields when connector changes', () => {
-    const wrapper = mount(<ServiceNowITOMParamsFields {...defaultProps} />);
+    const { rerender } = render(<ServiceNowITOMParamsFields {...defaultProps} />);
     expect(editAction.mock.calls.length).toEqual(0);
-    wrapper.setProps({ actionConnector: { ...connector, id: '1234' } });
+    rerender(
+      <ServiceNowITOMParamsFields
+        {...defaultProps}
+        actionConnector={{ ...connector, id: '1234' }}
+      />
+    );
     expect(editAction.mock.calls.length).toEqual(1);
     expect(editAction.mock.calls[0][1]).toEqual({
       message_key: '{{rule.id}}:{{alert.id}}',
@@ -175,46 +180,86 @@ describe('ServiceNowITOMParamsFields renders', () => {
   });
 
   test('it transforms the categories to options correctly', async () => {
-    const wrapper = mount(<ServiceNowITOMParamsFields {...defaultProps} />);
-
-    wrapper.update();
-    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('options')).toEqual([
+    render(<ServiceNowITOMParamsFields {...defaultProps} />);
+    const select = screen.getByTestId('severitySelect') as HTMLSelectElement;
+    const options = Array.from(select.options)
+      .filter((opt) => opt.value !== '')
+      .map((opt) => ({ value: opt.value, text: opt.text }));
+    expect(options).toEqual([
       { value: '1', text: '1 - Critical' },
       { value: '2', text: '2 - Major' },
     ]);
   });
 
   describe('UI updates', () => {
-    const changeEvent = { target: { value: 'Bug' } } as React.ChangeEvent<HTMLSelectElement>;
-    const simpleFields = [
-      { dataTestSubj: 'input[data-test-subj="sourceInput"]', key: 'source' },
-      { dataTestSubj: 'textarea[data-test-subj="descriptionTextArea"]', key: 'description' },
-      { dataTestSubj: '[data-test-subj="nodeInput"]', key: 'node' },
-      { dataTestSubj: '[data-test-subj="typeInput"]', key: 'type' },
-      { dataTestSubj: '[data-test-subj="resourceInput"]', key: 'resource' },
-      { dataTestSubj: '[data-test-subj="metric_nameInput"]', key: 'metric_name' },
-      { dataTestSubj: '[data-test-subj="event_classInput"]', key: 'event_class' },
-      { dataTestSubj: '[data-test-subj="message_keyInput"]', key: 'message_key' },
-      { dataTestSubj: '[data-test-subj="severitySelect"]', key: 'severity' },
-    ];
+    test('source update triggers editAction', async () => {
+      render(<ServiceNowITOMParamsFields {...defaultProps} />);
+      await userEvent.tripleClick(screen.getByTestId('sourceInput'));
+      await userEvent.paste('Bug');
+      expect(editAction.mock.calls.at(-1)[1].source).toEqual('Bug');
+    });
 
-    simpleFields.forEach((field) =>
-      test(`${field.key} update triggers editAction :D`, () => {
-        const wrapper = mount(<ServiceNowITOMParamsFields {...defaultProps} />);
-        const theField = wrapper.find(field.dataTestSubj).first();
-        theField.prop('onChange')!(changeEvent);
-        expect(editAction.mock.calls[0][1][field.key]).toEqual(changeEvent.target.value);
-      })
-    );
+    test('description update triggers editAction', async () => {
+      render(<ServiceNowITOMParamsFields {...defaultProps} />);
+      await userEvent.tripleClick(screen.getByTestId('descriptionTextArea'));
+      await userEvent.paste('Bug');
+      expect(editAction.mock.calls.at(-1)[1].description).toEqual('Bug');
+    });
 
-    test('additional_info update triggers editAction correctly', () => {
-      const newValue = '{"foo": "bar"}' as unknown as React.ChangeEvent<HTMLSelectElement>;
-      const wrapper = mount(<ServiceNowITOMParamsFields {...defaultProps} />);
-      const theField = wrapper.find('[data-test-subj="additional_infoJsonEditor"]').first();
+    test('node update triggers editAction', async () => {
+      render(<ServiceNowITOMParamsFields {...defaultProps} />);
+      await userEvent.tripleClick(screen.getByTestId('nodeInput'));
+      await userEvent.paste('Bug');
+      expect(editAction.mock.calls.at(-1)[1].node).toEqual('Bug');
+    });
 
-      theField.prop('onChange')!(newValue);
+    test('type update triggers editAction', async () => {
+      render(<ServiceNowITOMParamsFields {...defaultProps} />);
+      await userEvent.tripleClick(screen.getByTestId('typeInput'));
+      await userEvent.paste('Bug');
+      expect(editAction.mock.calls.at(-1)[1].type).toEqual('Bug');
+    });
 
-      expect(editAction.mock.calls[0][1].additional_info).toEqual(newValue);
+    test('resource update triggers editAction', async () => {
+      render(<ServiceNowITOMParamsFields {...defaultProps} />);
+      await userEvent.tripleClick(screen.getByTestId('resourceInput'));
+      await userEvent.paste('Bug');
+      expect(editAction.mock.calls.at(-1)[1].resource).toEqual('Bug');
+    });
+
+    test('metric_name update triggers editAction', async () => {
+      render(<ServiceNowITOMParamsFields {...defaultProps} />);
+      await userEvent.tripleClick(screen.getByTestId('metric_nameInput'));
+      await userEvent.paste('Bug');
+      expect(editAction.mock.calls.at(-1)[1].metric_name).toEqual('Bug');
+    });
+
+    test('event_class update triggers editAction', async () => {
+      render(<ServiceNowITOMParamsFields {...defaultProps} />);
+      await userEvent.tripleClick(screen.getByTestId('event_classInput'));
+      await userEvent.paste('Bug');
+      expect(editAction.mock.calls.at(-1)[1].event_class).toEqual('Bug');
+    });
+
+    test('message_key update triggers editAction', async () => {
+      render(<ServiceNowITOMParamsFields {...defaultProps} />);
+      await userEvent.tripleClick(screen.getByTestId('message_keyInput'));
+      await userEvent.paste('Bug');
+      expect(editAction.mock.calls.at(-1)[1].message_key).toEqual('Bug');
+    });
+
+    test('severity update triggers editAction', async () => {
+      render(<ServiceNowITOMParamsFields {...defaultProps} />);
+      await userEvent.selectOptions(screen.getByTestId('severitySelect'), '1');
+      expect(editAction.mock.calls.at(-1)[1].severity).toEqual('1');
+    });
+
+    test('additional_info update triggers editAction correctly', async () => {
+      const newValue = '{"foo": "bar"}';
+      render(<ServiceNowITOMParamsFields {...defaultProps} />);
+      await userEvent.tripleClick(screen.getByTestId('additional_infoJsonEditor'));
+      await userEvent.paste(newValue);
+      expect(editAction.mock.calls.at(-1)[1].additional_info).toEqual(newValue);
     });
   });
 });

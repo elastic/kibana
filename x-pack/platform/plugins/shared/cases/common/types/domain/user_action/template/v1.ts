@@ -1,0 +1,26 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod/v4';
+import { UserActionTypes } from '../action/v1';
+
+export const TemplateUserActionPayloadSchema = z.object({
+  template: z
+    .object({
+      id: z.string(),
+      version: z.number(),
+      // Optional point-in-time snapshot of the applied template's name so the activity log can read
+      // "applied <name> template" without a lookup. Older user actions predate it.
+      name: z.string().optional(),
+    })
+    .nullable(),
+});
+
+export const TemplateUserActionSchema = z.object({
+  type: z.literal(UserActionTypes.template),
+  payload: TemplateUserActionPayloadSchema,
+});

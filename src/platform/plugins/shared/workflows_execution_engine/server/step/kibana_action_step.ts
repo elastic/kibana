@@ -10,27 +10,44 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { FetcherConfigSchema } from '@kbn/workflows';
-import { buildKibanaRequest } from '@kbn/workflows';
+import {
+  buildKibanaRequest,
+  IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+  KibanaHttpMethods,
+} from '@kbn/workflows';
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
-import { getOutboundEventChainHeaders } from '@kbn/workflows-extensions/server';
-import type { z } from '@kbn/zod/v4';
 import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
-import { getKibanaUrl } from '../utils';
+import {
+  type BufferedRawBody,
+  CallKibanaApiResponseTooLargeError,
+  type CallKibanaApiResult,
+  isIgnoredCallerHeader,
+  KibanaApiCallError,
+} from '../lib/call_kibana_api';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
+/** Wait for response headers when the step has no `timeout`. */
+const KIBANA_STEP_RESPONSE_HEADERS_TIMEOUT_MS = 300_000;
+
+/** Error bodies are truncated, not size-limited by `max-step-size`, so failures keep their status. */
+const KIBANA_STEP_ERROR_BODY_MAX_BYTES = 1024 * 1024;
+
 /**
- * Fetcher configuration options for customizing HTTP requests
- * Derived from the Zod schema to ensure type safety and avoid duplication
+ * Describes a single field in a multipart/form-data upload.
+ * Used by the `form_data` param of `kibana.request` steps.
  */
-type FetcherOptions = NonNullable<z.infer<typeof FetcherConfigSchema>> & {
-  // Allow additional undici Agent options to be passed through
-  [key: string]: any;
-};
+interface FormDataFieldSpec {
+  /** The field value or file content. */
+  content: string | Uint8Array;
+  /** Optional filename hint (e.g. "export.ndjson"). */
+  filename?: string;
+  /** MIME type of the field value (e.g. "application/ndjson"). */
+  content_type?: string;
+}
 
 export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   constructor(
@@ -50,7 +67,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
 
   public getInput() {
     const stepWith = this.node.configuration?.with || {};
-    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(stepWith);
+    return this.stepExecutionRuntime.contextManager.renderObjectAccordingToContextAsync(stepWith);
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
@@ -59,16 +76,25 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     const stepWith = withInputs || this.node.configuration.with;
     // Extract meta params (not forwarded as HTTP request params)
     const {
+      debug = false,
       use_server_info = false,
       use_localhost = false,
-      debug = false,
       ...httpParams
     } = stepWith;
 
     if (use_server_info && use_localhost) {
       throw new Error(
-        'Cannot set both use_server_info and use_localhost — they are mutually exclusive. ' +
-          'Use use_server_info to route via the internal server address, or use_localhost to route via localhost:5601.'
+        'Cannot set both use_server_info and use_localhost — they are mutually exclusive.'
+      );
+    }
+    if (use_localhost) {
+      this.workflowLogger.logWarn(
+        'The "use_localhost" setting now routes through the Kibana listener via server.selfHttp (local target), not a hardcoded http://localhost:5601.',
+        {
+          event: { action: 'kibana-action' },
+          tags: ['kibana'],
+          labels: { step_type: stepType },
+        }
       );
     }
 
@@ -83,17 +109,13 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         },
       });
 
-      // Get Kibana base URL (respecting force flags) and authentication
-      const kibanaUrl = this.getKibanaUrl(use_server_info, use_localhost);
-      const authHeaders = this.getAuthHeaders();
-
-      // Generic approach like Dev Console - just forward the request to Kibana
-      const result = await this.executeKibanaRequest(
-        kibanaUrl,
-        authHeaders,
+      const result = await this.executeViaSelfClient(
         stepType,
         httpParams,
-        debug
+        debug,
+        // Both flags opt into Core's local self HTTP target (the configured listener).
+        // Hardcoded localhost:5601 is not preserved; the listener may use another bind address or port.
+        use_server_info || use_localhost ? 'local' : undefined
       );
 
       this.workflowLogger.logInfo(`Kibana action completed: ${stepType}`, {
@@ -120,249 +142,172 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
 
       const failure = this.handleFailure(stepWith, error);
       if (debug && failure.error) {
-        const kibanaUrl = this.getKibanaUrl(use_server_info, use_localhost);
+        const kibanaUrl = error instanceof KibanaApiCallError ? error.url : undefined;
         failure.error = {
           type: failure.error.type,
           message: failure.error.message,
-          details: { ...failure.error.details, _debug: { kibanaUrl } },
+          details: {
+            ...failure.error.details,
+            _debug: kibanaUrl ? { kibanaUrl } : { selfClient: true },
+          },
         };
       }
       return failure;
     }
   }
 
-  private getKibanaUrl(use_server_info = false, use_localhost = false): string {
-    const coreStart = this.stepExecutionRuntime.contextManager.getCoreStart();
-    const { cloudSetup } = this.stepExecutionRuntime.contextManager.getDependencies();
-    return getKibanaUrl(coreStart, cloudSetup, use_server_info, use_localhost);
-  }
-
-  private getAuthHeaders(): Record<string, string> {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'kbn-xsrf': 'true',
-    };
-
-    // Get fakeRequest for authentication (created by Task Manager from taskInstance.apiKey)
-    const fakeRequest = this.stepExecutionRuntime.contextManager.getFakeRequest();
-    if (fakeRequest?.headers?.authorization) {
-      // Use API key from fakeRequest if available
-      headers.Authorization = fakeRequest.headers.authorization.toString();
-    } else {
-      // error
-      throw new Error('No authentication headers found');
-    }
-    return headers;
-  }
-
-  private async executeKibanaRequest(
-    kibanaUrl: string,
-    authHeaders: Record<string, string>,
+  private async executeViaSelfClient(
     stepType: string,
     params: any,
-    debug: boolean = false
+    debug: boolean = false,
+    target?: 'local'
   ): Promise<any> {
-    // Get current space ID from workflow context
-    const spaceId = this.stepExecutionRuntime.contextManager.getContext().workflow.spaceId;
-
-    // Extract and remove fetcher configuration from params (it's only for our internal use)
-    const { fetcher: fetcherOptions, ...cleanParams } = params;
-
-    // Build the request config from either raw API format or connector definitions
+    const spaceId = this.stepExecutionRuntime.contextManager.getWorkflowSpaceId();
+    if (params.fetcher !== undefined) {
+      this.workflowLogger.logWarn(IGNORED_KIBANA_FETCHER_SETTING_MESSAGE, {
+        event: { action: 'kibana-action' },
+        tags: ['kibana', 'deprecated'],
+        labels: { step_type: stepType },
+      });
+    }
+    // Core's scoped self client owns redirect/TLS/dispatcher policy. YAML `fetcher` is
+    // accepted for compatibility and warned above; it is never applied.
+    const { fetcher: _fetcherOptions, ...cleanParams } = params;
+    // Raw `request`/`form_data` paths are Kibana-root paths sent unchanged, and generated
+    // connector paths already include the workflow space.
     let requestConfig: {
       method: string;
       path: string;
-      body?: any;
-      query?: any;
+      body?: unknown;
+      rawBody?: BufferedRawBody;
+      query?: Record<string, string | number | boolean | undefined>;
       headers?: Record<string, string>;
     };
 
+    if (cleanParams.body !== undefined && cleanParams.form_data !== undefined) {
+      throw new Error('Cannot set both body and form_data — they are mutually exclusive.');
+    }
     if (cleanParams.request) {
-      // Raw API format: { request: { method, path, body, query, headers } } - like Dev Console
-      const { method = 'GET', path, body, query, headers: customHeaders } = cleanParams.request;
-      requestConfig = { method, path, body, query, headers: { ...authHeaders, ...customHeaders } };
+      const { method = 'GET', path, body, query, headers } = cleanParams.request;
+      requestConfig = { method, path, body, query, headers };
+    } else if (cleanParams.form_data) {
+      const { form_data, method = 'POST', path, query, headers } = cleanParams;
+      requestConfig = { method, path, query, headers, rawBody: this.buildFormData(form_data) };
     } else {
-      // Use generated connector definitions to determine method and path (covers all 454+ Kibana APIs)
-      const {
-        method,
-        path,
-        body,
-        query,
-        headers: connectorHeaders,
-      } = buildKibanaRequest(stepType, cleanParams, spaceId);
-      requestConfig = {
-        method,
-        path,
-        body,
-        query,
-        headers: { ...authHeaders, ...connectorHeaders },
-      };
+      requestConfig = buildKibanaRequest(stepType, cleanParams, spaceId);
     }
 
-    const result = await this.makeHttpRequest(kibanaUrl, requestConfig, fetcherOptions);
-
-    if (debug) {
-      return {
-        ...result,
-        _debug: {
-          fullUrl: this.buildFullUrl(kibanaUrl, requestConfig.path, requestConfig.query),
-          method: requestConfig.method,
-        },
-      };
+    const normalizedMethod = requestConfig.method?.toUpperCase();
+    if (!normalizedMethod || !(KibanaHttpMethods as readonly string[]).includes(normalizedMethod)) {
+      throw new Error(
+        `Invalid HTTP method "${requestConfig.method}". Valid values: ${KibanaHttpMethods.join(
+          ', '
+        )}`
+      );
     }
 
-    return result;
-  }
-
-  private buildFullUrl(kibanaUrl: string, path: string, query?: Record<string, string>): string {
-    let fullUrl = `${kibanaUrl}${path}`;
-    if (query && Object.keys(query).length > 0) {
-      fullUrl = `${fullUrl}?${new URLSearchParams(query).toString()}`;
-    }
-    return fullUrl;
-  }
-
-  private async makeHttpRequest(
-    kibanaUrl: string,
-    requestConfig: {
-      method: string;
-      path: string;
-      body?: any;
-      query?: any;
-      headers?: Record<string, string>;
-    },
-    fetcherOptions?: FetcherOptions
-  ): Promise<any> {
-    const { method, path, body, query, headers = {} } = requestConfig;
-
-    // Two paths can lead to emitEvent: (1) In-process: a workflow step (e.g. kibana.createCase) runs in
-    // the same process and gets the fakeRequest from step context; getCasesClient(fakeRequest) and later
-    // emitEvent(fakeRequest) see the Symbol-set context — no headers needed. (2) Outbound HTTP: this
-    // step (kibana.request) sends a new HTTP request; the route handler receives a new request object
-    // with no Symbol. Inject these headers so the server can restore context (depth + sourceWorkflowId)
-    // and enforce the event-chain depth cap when that handler calls emitEvent.
-    const fakeRequest = this.stepExecutionRuntime.contextManager.getFakeRequest();
-    const outboundHeaders = { ...headers, ...getOutboundEventChainHeaders(fakeRequest) };
-
-    // Build full URL with query parameters
-    let fullUrl = `${kibanaUrl}${path}`;
-    if (query && Object.keys(query).length > 0) {
-      const queryString = new URLSearchParams(query).toString();
-      fullUrl = `${fullUrl}?${queryString}`;
-    }
-
-    // Build fetch options
-    const fetchOptions: RequestInit = {
-      method,
-      headers: outboundHeaders,
-      body: body ? JSON.stringify(body) : undefined,
-    };
-
-    // Apply undici Agent with fetcher options
-    if (fetcherOptions && Object.keys(fetcherOptions).length > 0) {
-      const { Agent } = await import('undici');
-
-      const {
-        skip_ssl_verification,
-        follow_redirects,
-        max_redirects,
-        keep_alive,
-        ...otherOptions
-      } = fetcherOptions;
-
-      const agentOptions: any = { ...otherOptions };
-
-      // Map our options to undici Agent options
-      if (skip_ssl_verification) {
-        agentOptions.connect = { ...(agentOptions.connect || {}), rejectUnauthorized: false };
-      }
-      if (max_redirects !== undefined) {
-        agentOptions.maxRedirections = max_redirects;
-      }
-      if (keep_alive !== undefined) {
-        agentOptions.keepAliveTimeout = keep_alive ? 60000 : 0;
-        agentOptions.keepAliveMaxTimeout = keep_alive ? 600000 : 0;
-      }
-
-      (fetchOptions as any).dispatcher = new Agent(agentOptions);
-
-      // Handle redirect at fetch level
-      if (follow_redirects === false) {
-        fetchOptions.redirect = 'manual';
-      }
-    }
-
-    // Make the HTTP request
-    const response = await fetch(fullUrl, fetchOptions);
-
-    if (!response.ok) {
-      const errorBody = await this.readStreamWithLimit(response, {
-        maxBytes: 1024 * 1024,
-        onExceed: 'truncate',
-      });
-      throw new Error(`HTTP ${response.status}: ${errorBody}`);
-    }
-
-    if (response.status === 204 || response.status === 304) {
-      return {};
-    }
-
-    return this.readResponseBody(response);
-  }
-
-  /**
-   * Reads a fetch Response body as a stream with size enforcement.
-   * Delegates to the shared stream reader with 'throw' behavior on size exceeded.
-   */
-  private async readResponseBody(response: Response): Promise<any> {
-    if (!response.body) {
-      return null;
-    }
-
-    const maxSize = this.getMaxResponseBytes();
-    const text = await this.readStreamWithLimit(response, {
-      maxBytes: maxSize,
-      onExceed: 'throw',
-    });
-    if (!text) return null;
-    try {
-      return JSON.parse(text);
-    } catch {
-      return text;
-    }
-  }
-
-  /**
-   * Reads a Response body stream with a byte-size limit.
-   * Two behaviors when the limit is exceeded:
-   *  - 'throw': cancels the stream and throws a ResponseSizeLimitError
-   *  - 'truncate': cancels the stream and returns the data read so far with a truncation marker
-   */
-  private async readStreamWithLimit(
-    response: Response,
-    opts: { maxBytes: number; onExceed: 'throw' | 'truncate' }
-  ): Promise<string> {
-    if (!response.body) return '';
-    const reader = response.body.getReader();
-    const chunks: Uint8Array[] = [];
-    let totalBytes = 0;
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        totalBytes += value.byteLength;
-        if (opts.maxBytes > 0 && totalBytes > opts.maxBytes) {
-          void reader.cancel();
-          if (opts.onExceed === 'throw') {
-            throw new ResponseSizeLimitError(opts.maxBytes, this.step.name);
-          }
-          return `${Buffer.concat(chunks).toString('utf-8')}... [truncated]`;
+    const ignoredHeaders = Object.keys(requestConfig.headers ?? {}).filter(isIgnoredCallerHeader);
+    if (ignoredHeaders.length > 0) {
+      this.workflowLogger.logWarn(
+        `Ignoring headers that Kibana sets for Kibana steps: ${ignoredHeaders.join(', ')}.`,
+        {
+          event: { action: 'kibana-action' },
+          tags: ['kibana'],
+          labels: { step_type: stepType },
         }
-        chunks.push(value);
-      }
-    } finally {
-      reader.releaseLock();
+      );
     }
-    return Buffer.concat(chunks).toString('utf-8');
+
+    const contextManager = this.stepExecutionRuntime.contextManager;
+    let result: CallKibanaApiResult;
+    try {
+      result = await contextManager.callKibanaApi({
+        method: normalizedMethod as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
+        path: requestConfig.path,
+        prefixSpace: false,
+        body:
+          requestConfig.rawBody === undefined
+            ? this.selfClientBody(requestConfig.body, requestConfig.headers)
+            : undefined,
+        rawBody: requestConfig.rawBody,
+        query: requestConfig.query,
+        headers: requestConfig.headers,
+        maxResponseBytes: this.getMaxResponseBytes(),
+        maxErrorBodyBytes: KIBANA_STEP_ERROR_BODY_MAX_BYTES,
+        target,
+        signal: this.stepExecutionRuntime.abortController.signal,
+        timeout:
+          this.stepExecutionRuntime.getStepTimeoutMs() ?? KIBANA_STEP_RESPONSE_HEADERS_TIMEOUT_MS,
+      });
+    } catch (error) {
+      if (error instanceof CallKibanaApiResponseTooLargeError) {
+        throw new ResponseSizeLimitError(error.limitBytes, this.step.name);
+      }
+      throw error;
+    }
+
+    if (
+      debug &&
+      result.body &&
+      typeof result.body === 'object' &&
+      !Buffer.isBuffer(result.body) &&
+      !Array.isArray(result.body)
+    ) {
+      return { ...result.body, _debug: { method: normalizedMethod, fullUrl: result.url } };
+    }
+    return result.body;
+  }
+
+  /**
+   * Core sends string bodies unchanged. A non-JSON string with `application/json` would be
+   * invalid JSON, so encode only that case.
+   * Strings that are already JSON stay raw, including an explicit non-JSON content type.
+   */
+  private selfClientBody(body: unknown, headers?: Record<string, string>): unknown {
+    if (typeof body !== 'string' || !this.sendsJsonBody(headers)) {
+      return body;
+    }
+    try {
+      JSON.parse(body);
+      return body;
+    } catch {
+      return JSON.stringify(body);
+    }
+  }
+
+  private sendsJsonBody(headers?: Record<string, string>): boolean {
+    const contentType = Object.entries(headers ?? {}).find(
+      ([name]) => name.toLowerCase() === 'content-type'
+    )?.[1];
+    if (contentType === undefined) {
+      return true;
+    }
+    const mediaType = contentType.split(';', 1)[0].trim().toLowerCase();
+    return mediaType === 'application/json' || mediaType.endsWith('+json');
+  }
+
+  private buildFormData(formData: Record<string, FormDataFieldSpec>): FormData {
+    const fd = new FormData();
+    for (const [fieldName, spec] of Object.entries(formData)) {
+      const content =
+        typeof spec.content === 'string' ? spec.content : new Uint8Array(spec.content);
+      if (spec.filename !== undefined) {
+        // File field: include filename so the server gets Content-Disposition: form-data; filename="..."
+        const blob = new Blob([content], {
+          type: spec.content_type ?? 'application/octet-stream',
+        });
+        fd.append(fieldName, blob, spec.filename);
+      } else if (spec.content_type !== undefined) {
+        // Typed blob without a filename (e.g. application/json fragment)
+        const blob = new Blob([content], { type: spec.content_type });
+        fd.append(fieldName, blob);
+      } else if (typeof content !== 'string') {
+        fd.append(fieldName, new Blob([content]));
+      } else {
+        // Plain text field — serialize as a string so Content-Disposition has no filename
+        fd.append(fieldName, content);
+      }
+    }
+    return fd;
   }
 }

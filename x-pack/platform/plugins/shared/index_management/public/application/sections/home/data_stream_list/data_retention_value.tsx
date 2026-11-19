@@ -6,14 +6,43 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiIconTip, EuiLink, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { DataStream } from '../../../../../common/types';
 import { ILM_PAGES_POLICY_EDIT } from '../../../constants';
 import { useAppContext } from '../../../app_context';
 import { useIlmLocator } from '../../../services/use_ilm_locator';
-import { getLifecycleValue, isNextGenIlm } from '../../../lib/data_streams';
+import {
+  getIlmPolicyNameForSummary,
+  getLifecycleValue,
+  isIlmLifecyclePreferred,
+  isLookupLifecycleNotApplicable,
+  resolveLifecycleForSummary,
+} from '../../../lib/data_streams';
+
+export const LookupLifecycleNotApplicable = () => (
+  <span data-test-subj="lookupLifecycleNotApplicable">
+    <EuiTextColor color="subdued">
+      {i18n.translate('xpack.idxMgmt.dataStreamList.dataRetention.lookupNotApplicableLabel', {
+        defaultMessage: 'Not applicable',
+      })}
+    </EuiTextColor>{' '}
+    <EuiIconTip
+      position="top"
+      type="info"
+      size="s"
+      color="subdued"
+      content={i18n.translate(
+        'xpack.idxMgmt.dataStreamList.dataRetention.lookupNotApplicableTooltip',
+        {
+          defaultMessage:
+            'Data retention is not applied to the data of a lookup data stream. Index lifecycle management and data stream lifecycle skip indices with the lookup index mode.',
+        }
+      )}
+    />
+  </span>
+);
 
 export const DataRetentionValue = ({
   dataStream,
@@ -26,21 +55,38 @@ export const DataRetentionValue = ({
 }) => {
   const { core } = useAppContext();
 
-  const ilmPolicyName = dataStream.ilmPolicyName;
+  const ilmPolicyName = getIlmPolicyNameForSummary(dataStream);
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, ilmPolicyName);
 
-  if (isNextGenIlm(dataStream) && ilmPolicyName) {
+  if (isLookupLifecycleNotApplicable(dataStream)) {
+    return <LookupLifecycleNotApplicable />;
+  }
+
+  if (isIlmLifecyclePreferred(dataStream)) {
     const ilmLabel = i18n.translate('xpack.idxMgmt.dataStreamList.dataRetention.ilmBadgeLabel', {
       defaultMessage: 'ILM',
     });
+    const policyName =
+      ilmPolicyName ??
+      i18n.translate('xpack.idxMgmt.dataStreamList.dataRetention.unknownIlmPolicyLabel', {
+        defaultMessage: 'Unknown policy',
+      });
 
     return (
       <>
         {ilmPolicyLink ? (
           <EuiLink
             data-test-subj={valueTestSubj}
-            data-href={ilmPolicyLink}
-            onClick={() => core.application.navigateToUrl(ilmPolicyLink)}
+            href={ilmPolicyLink}
+            onClick={(event: React.MouseEvent) => {
+              // Let the browser handle modified clicks (open in new tab, etc.) natively; only
+              // intercept plain left clicks for in-app (SPA) navigation.
+              if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) {
+                return;
+              }
+              event.preventDefault();
+              core.application.navigateToUrl(ilmPolicyLink);
+            }}
             css={{
               whiteSpace: 'nowrap' as const,
               textOverflow: 'ellipsis',
@@ -53,19 +99,26 @@ export const DataRetentionValue = ({
               'xpack.idxMgmt.dataStreamList.dataRetention.ilmLinkAriaLabel',
               {
                 defaultMessage: 'ILM policy: {name}',
-                values: { name: ilmPolicyName },
+                values: { name: policyName },
               }
             )}
           >
-            {ilmPolicyName}
+            {policyName}
           </EuiLink>
         ) : (
-          <span data-test-subj={valueTestSubj}>{ilmPolicyName}</span>
+          <span data-test-subj={valueTestSubj}>{policyName}</span>
         )}{' '}
         <EuiBadge color="hollow">{ilmLabel}</EuiBadge>
       </>
     );
   }
 
-  return <>{getLifecycleValue(dataStream.lifecycle, infiniteAsIcon)}</>;
+  return (
+    <>
+      {getLifecycleValue(
+        resolveLifecycleForSummary(dataStream.lifecycle, { hasDataStream: true }),
+        infiniteAsIcon
+      )}
+    </>
+  );
 };

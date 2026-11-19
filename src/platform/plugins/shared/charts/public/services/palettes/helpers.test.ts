@@ -43,6 +43,14 @@ describe('workoutColorForValue', () => {
       expect(workoutColorForValue(123, DEFAULT_PROPS, { min: 0, max: 200 })).toBe('blue');
     });
 
+    it('colors the top band for predefined palettes with continuity "none"', () => {
+      // empty stops => uniform distribution over [min, max], so the last band is
+      // [150, 200] and 190 must resolve to the last color even without max continuity
+      expect(
+        workoutColorForValue(190, { ...DEFAULT_PROPS, continuity: 'none' }, { min: 0, max: 200 })
+      ).toBe('yellow'); // previously undefined
+    });
+
     it('find the right color for custom stops palettes', () => {
       expect(
         workoutColorForValue(
@@ -179,6 +187,14 @@ describe('workoutColorForValue', () => {
     };
     it('find the right color for predefined palettes', () => {
       expect(workoutColorForValue(123, DEFAULT_PROPS, { min: 0, max: 200 })).toBe('blue');
+    });
+
+    it('colors the top band for predefined palettes with continuity "none"', () => {
+      // 190/200 => 95%, last band is [75, 100], so it must resolve to the last color
+      // even without max continuity
+      expect(
+        workoutColorForValue(190, { ...DEFAULT_PROPS, continuity: 'none' }, { min: 0, max: 200 })
+      ).toBe('yellow');
     });
 
     it('find the right color for custom stops palettes', () => {

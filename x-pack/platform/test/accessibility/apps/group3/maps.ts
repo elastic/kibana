@@ -11,25 +11,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const contentList = getService('contentList');
   const inspector = getService('inspector');
-  const { common, header, home, maps } = getPageObjects(['common', 'header', 'home', 'maps']);
+  const sampleData = getService('sampleData');
+  const { common, maps } = getPageObjects(['common', 'maps']);
 
   describe('Maps app Accessibility', () => {
     before(async () => {
-      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await header.waitUntilLoadingHasFinished();
-      await home.addSampleDataSet('flights');
+      await sampleData.testResources.installKibanaSampleData('flights');
       await common.navigateToApp('maps');
     });
 
     after(async () => {
-      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await header.waitUntilLoadingHasFinished();
-      await home.removeSampleDataSet('flights');
+      await sampleData.testResources.removeKibanaSampleData('flights');
     });
 
     it('loads  maps workpads', async function () {
@@ -98,10 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('maps listing page', async function () {
       await common.navigateToApp('maps');
-      await retry.waitFor(
-        'maps workpads visible',
-        async () => await testSubjects.exists('itemsInMemTable')
-      );
+      await contentList.waitForReady();
       await a11y.testAppSnapshot();
     });
 
@@ -111,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('provides bulk delete', async function () {
-      await testSubjects.click('deleteSelectedItems');
+      await testSubjects.click('contentListToolbar-selectionBar-deleteButton');
       await a11y.testAppSnapshot();
       await retry.waitFor(
         'maps cancel button exists',

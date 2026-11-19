@@ -22,6 +22,7 @@ import type { AssetDetailsLocator } from '@kbn/observability-shared-plugin/commo
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Environment } from '../../../../common/environment_rt';
+import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import type { SectionRecord, Action } from './sections_helper';
 import { getNonEmptySections } from './sections_helper';
@@ -78,7 +79,7 @@ export const getSections = ({
   const podId = transaction.kubernetes?.pod?.uid;
   const containerId = transaction.container?.id;
 
-  const time = Math.round(transaction.timestamp.us / 1000);
+  const time = Math.round(getTimestampUs(transaction) / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);
 
   const uptimeLink = uptimeLocator?.getRedirectUrl(

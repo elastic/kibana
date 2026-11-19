@@ -19,6 +19,7 @@ import type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
   GetSpaceResult,
+  InitialSolutionSetupView,
   ISpacesClient,
   Space,
 } from '@kbn/spaces-plugin/server';
@@ -41,9 +42,6 @@ const PURPOSE_PRIVILEGE_MAP: Record<
     authorization.actions.ui.get('savedObjectsManagement', 'shareIntoSpace'),
   ],
 };
-
-/** @internal */
-export const LEGACY_URL_ALIAS_TYPE = 'legacy-url-alias';
 
 export class SecureSpacesClientWrapper implements ISpacesClient {
   private readonly useRbac: boolean;
@@ -192,6 +190,95 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     );
 
     return space;
+  }
+
+  public async getPersistedFeatureVisibility(id: string) {
+    if (this.useRbac) {
+      try {
+        await this.ensureAuthorizedAtSpace(
+          id,
+          this.authorization.actions.login,
+          `Unauthorized to get ${id} space`
+        );
+      } catch (error) {
+        this.auditLogger.log(
+          spaceAuditEvent({
+            action: SpaceAuditAction.GET,
+            savedObject: { type: 'space', id },
+            error,
+          })
+        );
+        throw error;
+      }
+    }
+
+    this.auditLogger.log(
+      spaceAuditEvent({
+        action: SpaceAuditAction.GET,
+        savedObject: { type: 'space', id },
+      })
+    );
+
+    return this.spacesClient.getPersistedFeatureVisibility(id);
+  }
+
+  public async isInitialSolutionSetupRequired() {
+    if (this.useRbac) {
+      try {
+        await this.ensureAuthorizedGlobally(
+          this.authorization.actions.space.manage,
+          'Unauthorized to get initial solution setup state'
+        );
+      } catch (error) {
+        this.auditLogger.log(
+          spaceAuditEvent({
+            action: SpaceAuditAction.GET,
+            savedObject: { type: 'space', id: 'default' },
+            error,
+          })
+        );
+        throw error;
+      }
+    }
+
+    this.auditLogger.log(
+      spaceAuditEvent({
+        action: SpaceAuditAction.GET,
+        savedObject: { type: 'space', id: 'default' },
+      })
+    );
+
+    return this.spacesClient.isInitialSolutionSetupRequired();
+  }
+
+  public async completeInitialSolutionSetup(solution: InitialSolutionSetupView) {
+    if (this.useRbac) {
+      try {
+        await this.ensureAuthorizedGlobally(
+          this.authorization.actions.space.manage,
+          'Unauthorized to complete initial solution setup'
+        );
+      } catch (error) {
+        this.auditLogger.log(
+          spaceAuditEvent({
+            action: SpaceAuditAction.UPDATE,
+            savedObject: { type: 'space', id: 'default' },
+            error,
+          })
+        );
+        throw error;
+      }
+    }
+
+    this.auditLogger.log(
+      spaceAuditEvent({
+        action: SpaceAuditAction.UPDATE,
+        outcome: 'unknown',
+        savedObject: { type: 'space', id: 'default' },
+      })
+    );
+
+    return this.spacesClient.completeInitialSolutionSetup(solution);
   }
 
   public async create(space: Space) {

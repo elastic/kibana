@@ -7,10 +7,14 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { EntityType } from '@kbn/entity-store/common';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { DateRange } from '../../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import type { AfterKey } from './types';
 
 const EUID_RUNTIME_FIELD = 'euid';
+
+const DEFAULT_RANGE: DateRange = { start: 'now-10d', end: 'now' };
 
 /** Entity name fields for top_hits _source when syncMarker is set (used by getEntityNameFromDoc) */
 const ENTITY_NAME_SOURCE_FIELDS = [
@@ -21,19 +25,67 @@ const ENTITY_NAME_SOURCE_FIELDS = [
   'entity.name',
 ] as const;
 
+/**
+ * Builds a search body for querying a user-specified source index during index source sync.
+ * Filters by correlation field values (from entity store) and an optional KQL queryRule.
+ * Groups results by the identifier field using a composite aggregation.
+ */
+export const buildIndexSourceSearchBody = (
+  identifierField: string,
+  correlationValues: string[],
+  afterKey?: AfterKey,
+  pageSize: number = 100,
+  queryRule?: string,
+  range?: DateRange
+): Omit<estypes.SearchRequest, 'index'> => {
+  const effectiveRange = range ?? DEFAULT_RANGE;
+  const must: estypes.QueryDslQueryContainer[] = [
+    { terms: { [identifierField]: correlationValues } },
+    { range: { '@timestamp': { gte: effectiveRange.start, lte: effectiveRange.end } } },
+  ];
+
+  if (queryRule) {
+    must.push(toElasticsearchQuery(fromKueryExpression(queryRule)));
+  }
+
+  return {
+    size: 0,
+    query: { bool: { must } },
+    aggs: {
+      identifiers: {
+        composite: {
+          size: pageSize,
+          sources: [{ identifier: { terms: { field: identifierField } } }],
+          ...(afterKey ? { after: afterKey } : {}),
+        },
+      },
+    },
+  };
+};
+
+/**
+ * Builds a search body for querying integration source indices during integration source sync.
+ * Uses EUID runtime mappings to compute entity IDs from source documents.
+ */
 export const buildEntitiesSearchBody = (
   entityType: EntityType,
   afterKey?: AfterKey,
   pageSize: number = 100,
   syncMarker?: string,
-  allowedEntityIds?: string[]
+  allowedEntityIds?: string[],
+  queryRule?: string,
+  range?: DateRange
 ): Omit<estypes.SearchRequest, 'index'> => {
-  const must = [euid.dsl.getEuidDocumentsContainsIdFilter(entityType)];
+  const must: estypes.QueryDslQueryContainer[] = [
+    euid.dsl.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition(entityType)),
+  ];
   if (allowedEntityIds && allowedEntityIds.length > 0) {
     must.push({ terms: { [EUID_RUNTIME_FIELD]: allowedEntityIds } });
   }
   if (syncMarker) {
     must.push({ range: { '@timestamp': { gte: syncMarker, lte: 'now' } } });
+  } else if (range) {
+    must.push({ range: { '@timestamp': { gte: range.start, lte: range.end } } });
   }
 
   const entitiesComposite = {
@@ -42,28 +94,47 @@ export const buildEntitiesSearchBody = (
     ...(afterKey ? { after: afterKey } : {}),
   };
 
+  const latestDocSort: estypes.Sort = [
+    { '@timestamp': { order: 'desc' } },
+    { _seq_no: { order: 'desc' } },
+  ];
+
   return {
     size: 0,
     query: { bool: { must } },
     runtime_mappings: {
-      [EUID_RUNTIME_FIELD]: euid.painless.getEuidRuntimeMapping(entityType),
+      [EUID_RUNTIME_FIELD]: euid.painless.getEuidRuntimeMapping(
+        getBuiltInEntityDefinition(entityType)
+      ),
     },
     aggs: {
       entities: {
         composite: entitiesComposite,
-        ...(syncMarker
-          ? {
-              aggs: {
-                latest_doc: {
-                  top_hits: {
-                    size: 1,
-                    sort: [{ '@timestamp': { order: 'desc' as const } }],
-                    _source: [...ENTITY_NAME_SOURCE_FIELDS],
+        aggs: {
+          latest_doc: {
+            top_hits: {
+              size: 1,
+              sort: latestDocSort,
+              _source: [...ENTITY_NAME_SOURCE_FIELDS],
+            },
+          },
+          ...(queryRule
+            ? {
+                latest_matching_doc: {
+                  filter: toElasticsearchQuery(fromKueryExpression(queryRule)),
+                  aggs: {
+                    doc: {
+                      top_hits: {
+                        size: 1,
+                        sort: latestDocSort,
+                        _source: false,
+                      },
+                    },
                   },
                 },
-              },
-            }
-          : {}),
+              }
+            : {}),
+        },
       },
     },
   };

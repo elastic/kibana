@@ -14,7 +14,7 @@ export { createKbnUrl } from './kibana_url';
 export { createSamlSessionManager } from './saml_auth';
 
 export type { KibanaUrl } from './kibana_url';
-export type { SamlSessionManager } from '@kbn/test';
+export type { SamlSessionManager } from '@kbn/test-saml-auth';
 export { ScoutLogger } from './logger';
 export type { KbnClient } from '@kbn/kbn-client';
 export type { Client as EsClient } from '@elastic/elasticsearch';

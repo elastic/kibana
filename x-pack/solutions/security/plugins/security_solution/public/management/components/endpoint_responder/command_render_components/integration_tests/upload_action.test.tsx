@@ -37,10 +37,9 @@ import {
   UPGRADE_AGENT_FOR_RESPONDER,
 } from '../../../../../common/translations';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
-// TODO These tests need revisting, they are not finishing
-// upgrade to user-event v14 https://github.com/elastic/kibana/pull/189949
-describe.skip('When using `upload` response action', () => {
+describe('When using `upload` response action', () => {
   let user: UserEvent;
   let render: (
     capabilities?: EndpointCapabilities[]
@@ -118,7 +117,7 @@ describe.skip('When using `upload` response action', () => {
 
   it('should require `--file` argument', async () => {
     await render();
-    console.enterCommand('upload');
+    await console.enterCommand('upload');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument-message')).toHaveTextContent(
@@ -129,7 +128,7 @@ describe.skip('When using `upload` response action', () => {
 
   it('should error if `--file` argument is not set (no file selected)', async () => {
     await render();
-    console.enterCommand('upload --file');
+    await console.enterCommand('upload --file');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument-message')).toHaveTextContent(
@@ -140,7 +139,7 @@ describe.skip('When using `upload` response action', () => {
 
   it('should call upload api with expected payload', async () => {
     const { getByTestId } = await render();
-    console.enterCommand('upload --file', { inputOnly: true });
+    await console.enterCommand('upload --file', { inputOnly: true });
 
     await user.upload(getByTestId('console-arg-file-picker'), file);
 
@@ -168,7 +167,7 @@ describe.skip('When using `upload` response action', () => {
 
   it('should allow `--overwrite` argument', async () => {
     const { getByTestId } = await render();
-    console.enterCommand('upload --overwrite --file', { inputOnly: true });
+    await console.enterCommand('upload --overwrite --file', { inputOnly: true });
 
     await user.upload(getByTestId('console-arg-file-picker'), file);
 
@@ -188,7 +187,7 @@ describe.skip('When using `upload` response action', () => {
   it('should show an error if user has no authz to file operations', async () => {
     endpointPrivileges.canWriteFileOperations = false;
     const { getByTestId } = await render();
-    console.enterCommand('upload --overwrite --file', { inputOnly: true });
+    await console.enterCommand('upload --overwrite --file', { inputOnly: true });
 
     await user.upload(getByTestId('console-arg-file-picker'), file);
 
@@ -204,7 +203,7 @@ describe.skip('When using `upload` response action', () => {
   it('should show an error if the endpoint does not support `upload_file` capability', async () => {
     endpointCapabilities = [] as unknown as typeof ENDPOINT_CAPABILITIES;
     const { getByTestId } = await render();
-    console.enterCommand('upload --overwrite --file', { inputOnly: true });
+    await console.enterCommand('upload --overwrite --file', { inputOnly: true });
 
     await user.upload(getByTestId('console-arg-file-picker'), file);
 
@@ -215,6 +214,51 @@ describe.skip('When using `upload` response action', () => {
         UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'upload')
       );
     });
+  });
+
+  it('should show pending status while the `upload` action is not yet complete', async () => {
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'upload',
+        agents: ['a.b.c'],
+        isCompleted: false,
+        wasSuccessful: false,
+        agentState: {
+          'a.b.c': { isCompleted: false, wasSuccessful: false },
+        },
+      }),
+    });
+    const { getByTestId } = await render();
+    await console.enterCommand('upload --file', { inputOnly: true });
+    await user.upload(getByTestId('console-arg-file-picker'), file);
+
+    console.submitCommand();
+
+    await waitFor(() => {
+      expect(getByTestId('upload-pending')).toHaveTextContent('upload is pending');
+    });
+  });
+
+  it('should show success when the `upload` action completes with no errors', async () => {
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'upload',
+        agents: ['a.b.c'],
+      }),
+    });
+    const { getByTestId } = await render();
+    await console.enterCommand('upload --file', { inputOnly: true });
+    await user.upload(getByTestId('console-arg-file-picker'), file);
+
+    console.submitCommand();
+
+    await waitFor(() => {
+      expect(getByTestId('upload-success')).toBeTruthy();
+    });
+
+    expect(getByTestId('upload-actionResult-hostStatus')).toHaveTextContent(
+      'upload completed successfully'
+    );
   });
 
   it.each([
@@ -238,6 +282,7 @@ describe.skip('When using `upload` response action', () => {
       'agent-a': {
         isCompleted: true,
         wasSuccessful: false,
+        wasCanceled: false,
         errors: ['not found'],
         completedAt: new Date().toISOString(),
       },
@@ -253,7 +298,7 @@ describe.skip('When using `upload` response action', () => {
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
 
-    console.enterCommand('upload --file', { inputOnly: true });
+    await console.enterCommand('upload --file', { inputOnly: true });
     await user.upload(renderResult.getByTestId('console-arg-file-picker'), file);
 
     console.submitCommand();

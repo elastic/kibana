@@ -9,6 +9,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
+import { useSyntheticsDataViewIndexPatterns } from '../hooks/use_synthetics_data_view_index_patterns';
 import { ERRORS_LABEL } from './monitor_errors_count';
 import type { ClientPluginsStart } from '../../../../../plugin';
 
@@ -24,6 +25,7 @@ export const MonitorErrorSparklines = ({ from, to, id }: Props) => {
 
   const { euiTheme } = useEuiTheme();
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
+  const dataTypesIndexPatterns = useSyntheticsDataViewIndexPatterns();
 
   const time = useMemo(() => ({ from, to }), [from, to]);
 
@@ -38,6 +40,7 @@ export const MonitorErrorSparklines = ({ from, to, id }: Props) => {
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
       hideTicks={true}
+      dataTypesIndexPatterns={dataTypesIndexPatterns}
       attributes={[
         {
           time,

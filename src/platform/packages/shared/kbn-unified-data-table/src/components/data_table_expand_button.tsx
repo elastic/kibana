@@ -9,7 +9,7 @@
 
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, type EuiToolTipRef } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UnifiedDataTableContext } from '../table_context';
 import { useControlColumn } from '../hooks/use_control_column';
@@ -20,16 +20,20 @@ import { useControlColumn } from '../hooks/use_control_column';
 export const ExpandButton = (props: EuiDataGridCellValueElementProps) => {
   const { record, rowIndex } = useControlColumn(props);
 
-  const toolTipRef = useRef<EuiToolTip>(null);
+  const toolTipRef = useRef<EuiToolTipRef>(null);
   const [pressed, setPressed] = useState<boolean>(false);
   const { expanded, setExpanded, componentsTourSteps } = useContext(UnifiedDataTableContext);
 
   const tourStep = componentsTourSteps ? componentsTourSteps.expandButton : undefined;
 
   const isCurrentRowExpanded = record === expanded;
-  const buttonLabel = i18n.translate('unifiedDataTable.grid.viewDoc', {
-    defaultMessage: 'Toggle dialog with details',
-  });
+  const buttonLabel = isCurrentRowExpanded
+    ? i18n.translate('unifiedDataTable.grid.closeDocDetails', {
+        defaultMessage: 'Close details',
+      })
+    : i18n.translate('unifiedDataTable.grid.viewDocDetails', {
+        defaultMessage: 'View details',
+      });
 
   const testSubj = record?.isAnchor
     ? 'docTableExpandToggleColumnAnchor'
@@ -51,7 +55,6 @@ export const ExpandButton = (props: EuiDataGridCellValueElementProps) => {
   return (
     <EuiToolTip
       content={buttonLabel}
-      delay="long"
       ref={toolTipRef}
       anchorClassName="unifiedDataTable__rowControl"
       disableScreenReaderOutput
@@ -69,7 +72,7 @@ export const ExpandButton = (props: EuiDataGridCellValueElementProps) => {
           setExpanded?.(nextHit);
         }}
         color={isCurrentRowExpanded ? 'primary' : 'text'}
-        iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}
+        iconType={isCurrentRowExpanded ? 'minimize' : 'maximize'}
         isSelected={isCurrentRowExpanded}
       />
     </EuiToolTip>

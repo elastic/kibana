@@ -31,7 +31,7 @@ export const Dashboard404Page = ({
         dashboardRedirect
           ? [
               <EuiButtonEmpty
-                iconType="arrowLeft"
+                iconType="chevronSingleLeft"
                 flush="both"
                 onClick={() => dashboardRedirect({ destination: 'listing' })}
               >

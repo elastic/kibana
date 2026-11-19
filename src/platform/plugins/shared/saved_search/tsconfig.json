@@ -21,7 +21,6 @@
     "@kbn/utility-types-jest",
     "@kbn/expressions-plugin",
     "@kbn/embeddable-plugin",
-    "@kbn/saved-objects-plugin",
     "@kbn/es-query",
     "@kbn/logging",
     "@kbn/core-plugins-server",
@@ -29,10 +28,13 @@
     "@kbn/search-types",
     "@kbn/unified-data-table",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/core-http-browser-internal",
     "@kbn/core-http-browser",
     "@kbn/discover-utils",
     "@kbn/logging-mocks",
+    "@kbn/discover-session-constants",
+    "@kbn/esql-language",
+    "@kbn/core-test-helpers-model-versions",
+    "@kbn/core-http-browser-mocks",
   ],
   "exclude": ["target/**/*"]
 }

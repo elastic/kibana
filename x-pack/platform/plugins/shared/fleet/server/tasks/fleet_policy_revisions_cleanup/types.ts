@@ -15,7 +15,7 @@ export interface Config {
 }
 
 export interface Context {
-  abortController?: AbortController;
+  signal?: AbortSignal;
   logger: Logger;
   config: Config;
 }

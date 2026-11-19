@@ -80,7 +80,65 @@ export const INDEFINITE_RETENTION_LABEL = i18n.translate(
   { defaultMessage: 'Indefinite' }
 );
 
+export const CPS_DOCUMENTS_WARNING = i18n.translate(
+  'xpack.streams.streamsTreeTable.cpsDocumentsWarning',
+  {
+    defaultMessage:
+      'Cross-project search is active. Document counts shown here are local to this project and may differ from Discover results.',
+  }
+);
+
 export const NO_RETENTION_LABEL = i18n.translate(
   'xpack.streams.streamsRetentionColumn.noDataAriaLabel',
   { defaultMessage: 'No retention policy configured' }
+);
+
+export const INGESTION_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.streamsTreeTable.ingestionColumnName',
+  { defaultMessage: 'Ingestion' }
+);
+
+export const STORAGE_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.streamsTreeTable.storageColumnName',
+  { defaultMessage: 'Storage' }
+);
+
+export const STREAM_TYPE_FILTER_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.streamTypeFilter.label',
+  { defaultMessage: 'Type' }
+);
+
+export const STREAM_TYPE_CLASSIC_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.streamTypeFilter.classicLabel',
+  { defaultMessage: 'Classic' }
+);
+
+export const STREAM_TYPE_WIRED_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.streamTypeFilter.wiredLabel',
+  { defaultMessage: 'Wired' }
+);
+
+export const STREAM_TYPE_QUERY_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.streamTypeFilter.queryLabel',
+  { defaultMessage: 'Query' }
+);
+
+export const DATA_QUALITY_FILTER_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.dataQualityFilter.label',
+  { defaultMessage: 'Data quality' }
+);
+
+export const DATA_QUALITY_GOOD_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.dataQualityFilter.goodLabel',
+  { defaultMessage: 'Good' }
+);
+
+export const DATA_QUALITY_DEGRADED_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.dataQualityFilter.degradedLabel',
+  { defaultMessage: 'Degraded' }
+);
+
+export const DATA_QUALITY_POOR_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.dataQualityFilter.poorLabel',
+  { defaultMessage: 'Poor' }
 );

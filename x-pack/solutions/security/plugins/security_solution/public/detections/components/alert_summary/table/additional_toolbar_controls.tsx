@@ -9,7 +9,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { groupIdSelector } from '../../../../common/store/grouping/selectors';
 import { updateGroups } from '../../../../common/store/grouping/actions';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';

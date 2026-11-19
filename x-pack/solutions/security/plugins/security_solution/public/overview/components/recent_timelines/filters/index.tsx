@@ -17,12 +17,12 @@ const toggleButtonIcons: EuiButtonGroupOptionProps[] = [
   {
     id: 'favorites',
     label: i18n.FAVORITES,
-    iconType: 'starFilled',
+    iconType: 'starFill',
   },
   {
     id: `recently-updated`,
     label: i18n.LAST_UPDATED,
-    iconType: 'documentEdit',
+    iconType: 'pencil',
   },
 ];
 

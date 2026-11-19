@@ -14,53 +14,65 @@ import {
 import type { UseFetchGraphDataParams } from '../../hooks/use_fetch_graph_data';
 import { useMockDataContext } from './mock_context_provider';
 
-// Scenario: Grouped entities node as actor (4 items, different ecsParentField, all availableInEntityStore = false)
+// Scenario: Grouped entities node as actor (4 items, different entity types, all availableInEntityStore = false)
 // with single target
 export const groupedActorMockData = {
   nodes: [
     {
       id: 'grp(a(mixed-entities)-b(target-role))',
-      shape: 'group',
+      kind: 'connectorGroup',
     },
     {
       id: 'mixed-entities',
       color: 'primary',
-      shape: 'rectangle',
+      kind: 'entity',
       icon: 'users',
       count: 4,
       label: 'Mixed Entities',
       tag: 'Actor',
+      riskScore: { min: 55.0, max: 92.0 },
+      assetCriticality: [
+        { level: 'high_impact', count: 2 },
+        { level: 'medium_impact', count: 1 },
+        { level: 'low_impact', count: 1 },
+      ],
       documentsData: [
         {
           id: 'user-entity-1',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
-            ecsParentField: 'user',
             availableInEntityStore: false,
+            engine_type: 'user',
+            sources: ['okta'],
+            sourceFields: { 'user.email': 'user1@example.com' },
           },
         },
         {
           id: 'service-entity-1',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
-            ecsParentField: 'service',
             availableInEntityStore: false,
+            engine_type: 'service',
+            sources: ['endpoint'],
+            sourceFields: { 'service.name': 'auth-service' },
           },
         },
         {
           id: 'host-entity-1',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
-            ecsParentField: 'host',
             availableInEntityStore: false,
+            sources: ['cloud_asset_inventory'],
+            sourceFields: { 'host.id': 'host-abc', 'host.name': 'web-server-1' },
           },
         },
         {
           id: 'entity-entity-1',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
-            ecsParentField: 'entity',
             availableInEntityStore: false,
+            sources: ['active_directory'],
+            sourceFields: { 'entity.id': 'entity-entity-1' },
           },
         },
       ],
@@ -68,10 +80,12 @@ export const groupedActorMockData = {
     {
       id: 'target-role',
       color: 'primary',
-      shape: 'hexagon',
+      kind: 'entity',
       icon: 'question',
       label: 'Target Role',
       tag: 'Role',
+      riskScore: { min: 74.5, max: 74.5 },
+      assetCriticality: [{ level: 'low_impact', count: 1 }],
       documentsData: [
         {
           id: 'target-role',
@@ -79,8 +93,9 @@ export const groupedActorMockData = {
           entity: {
             name: 'Target Role',
             type: 'role',
-            ecsParentField: 'entity',
             availableInEntityStore: true,
+            sources: ['cloud_asset_inventory'],
+            sourceFields: { 'entity.id': 'target-role' },
           },
         },
       ],
@@ -89,7 +104,7 @@ export const groupedActorMockData = {
       id: 'a(mixed-entities)-b(target-role)label(google.iam.admin.v1.CreateRole)',
       label: 'google.iam.admin.v1.CreateRole',
       color: 'danger',
-      shape: 'label',
+      kind: 'event',
       parentId: 'grp(a(mixed-entities)-b(target-role))',
       documentsData: [
         {
@@ -131,17 +146,17 @@ export const groupedActorMockData = {
   ],
 };
 
-// Scenario: Single entity node actor with grouped entities node as target (4 items, different ecsParentField, all availableInEntityStore = false)
+// Scenario: Single entity node actor with grouped entities node as target (4 items, different entity types, all availableInEntityStore = false)
 export const groupedTargetMockData = {
   nodes: [
     {
       id: 'grp(a(single-actor)-b(mixed-targets))',
-      shape: 'group',
+      kind: 'connectorGroup',
     },
     {
       id: 'single-actor',
       color: 'primary',
-      shape: 'ellipse',
+      kind: 'entity',
       icon: 'user',
       label: 'Single Actor',
       tag: 'User',
@@ -152,8 +167,13 @@ export const groupedTargetMockData = {
           entity: {
             name: 'Single Actor',
             type: 'user',
-            ecsParentField: 'user',
             availableInEntityStore: true,
+            engine_type: 'user',
+            sourceFields: {
+              'user.id': 'single-actor',
+              'user.email': 'actor@example.com',
+              'user.name': 'Single Actor',
+            },
           },
         },
       ],
@@ -161,7 +181,7 @@ export const groupedTargetMockData = {
     {
       id: 'mixed-targets',
       color: 'primary',
-      shape: 'rectangle',
+      kind: 'entity',
       icon: 'storage',
       count: 4,
       label: 'Mixed Targets',
@@ -171,32 +191,37 @@ export const groupedTargetMockData = {
           id: 'user-target-1',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
-            ecsParentField: 'user',
             availableInEntityStore: false,
+            sourceFields: { 'user.target.id': 'target-user-1' },
           },
         },
         {
           id: 'service-target-1',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
-            ecsParentField: 'service',
             availableInEntityStore: false,
+            sourceFields: { 'service.target.name': 'target-svc' },
           },
         },
         {
           id: 'host-target-1',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
-            ecsParentField: 'host',
             availableInEntityStore: false,
+            engine_type: 'host',
+            sourceFields: {
+              'host.id': 'target-host-abc',
+              'host.hostname': 'db-server-1',
+            },
           },
         },
         {
           id: 'entity-target-1',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
-            ecsParentField: 'entity',
             availableInEntityStore: false,
+            engine_type: 'generic',
+            sourceFields: { 'entity.id': 'entity-target-1' },
           },
         },
       ],
@@ -205,7 +230,7 @@ export const groupedTargetMockData = {
       id: 'a(single-actor)-b(mixed-targets)label(google.iam.admin.v1.CreateRole)',
       label: 'google.iam.admin.v1.CreateRole',
       color: 'danger',
-      shape: 'label',
+      kind: 'event',
       parentId: 'grp(a(single-actor)-b(mixed-targets))',
       documentsData: [
         {
@@ -252,12 +277,12 @@ export const singleActorMockData = {
   nodes: [
     {
       id: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
-      shape: 'group',
+      kind: 'connectorGroup',
     },
     {
       id: 'admin@example.com',
       color: 'primary',
-      shape: 'ellipse',
+      kind: 'entity',
       icon: 'user',
       label: 'admin@example.com',
       tag: 'User',
@@ -266,8 +291,9 @@ export const singleActorMockData = {
           id: 'admin@example.com',
           type: DOCUMENT_TYPE_ENTITY,
           entity: {
-            ecsParentField: 'user',
             availableInEntityStore: false,
+            engine_type: 'user',
+            sourceFields: { 'user.email': 'admin@example.com', 'user.name': 'admin' },
           },
         },
       ],
@@ -275,7 +301,7 @@ export const singleActorMockData = {
     {
       id: 'projects/your-project-id/roles/customRole',
       color: 'primary',
-      shape: 'hexagon',
+      kind: 'entity',
       icon: 'question',
       label: 'Custom Role',
       tag: 'Role',
@@ -286,8 +312,11 @@ export const singleActorMockData = {
           entity: {
             name: 'Custom Role',
             type: 'role',
-            ecsParentField: 'entity',
             availableInEntityStore: true,
+            engine_type: 'generic',
+            sourceFields: {
+              'entity.id': 'projects/your-project-id/roles/customRole',
+            },
           },
         },
       ],
@@ -296,7 +325,7 @@ export const singleActorMockData = {
       id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
       label: 'google.iam.admin.v1.CreateRole',
       color: 'danger',
-      shape: 'label',
+      kind: 'event',
       parentId: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
       documentsData: [
         {
@@ -309,7 +338,7 @@ export const singleActorMockData = {
       id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole)',
       label: 'google.iam.admin.v1.UpdateRole',
       color: 'primary',
-      shape: 'label',
+      kind: 'event',
       parentId: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
       documentsData: [
         {
@@ -322,7 +351,7 @@ export const singleActorMockData = {
       id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.DeleteRole)',
       label: 'google.iam.admin.v1.DeleteRole',
       color: 'primary',
-      shape: 'label',
+      kind: 'event',
       parentId: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
     },
   ],
@@ -406,7 +435,8 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
     () => ({
       isLoading: false,
       isFetching: useFetchGraphDataMock?.isFetching ?? false,
-      isError: false,
+      isError: useFetchGraphDataMock?.isError ?? false,
+      error: useFetchGraphDataMock?.error,
       data: mockData,
       refresh: useFetchGraphDataMock?.refresh ?? (() => {}),
     }),

@@ -22,12 +22,18 @@ export interface ConnectorSetupProps {
   conversation?: Conversation;
   onConversationUpdate?: ({ cId }: { cId: string }) => Promise<void>;
   updateConversationsOnSaveConnector?: boolean;
+  /**
+   * The ID of the feature to load connectors for.
+   * By default, it loads connectors for 'elastic_assistant'.
+   */
+  loadConnectorFeatureId?: string;
 }
 
 export const ConnectorSetup = ({
   conversation: defaultConversation,
   onConversationUpdate,
   updateConversationsOnSaveConnector = true,
+  loadConnectorFeatureId = 'elastic_assistant',
 }: ConnectorSetupProps) => {
   const conversation = useMemo(
     () => defaultConversation || WELCOME_CONVERSATION,
@@ -41,7 +47,7 @@ export const ConnectorSetup = ({
 
   const { refetch: refetchConnectors } = useLoadConnectors({
     http,
-    featureId: 'elastic_assistant',
+    featureId: loadConnectorFeatureId,
     settings,
   });
 

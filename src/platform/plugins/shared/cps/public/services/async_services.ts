@@ -8,7 +8,6 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { getSpaceDefaultNpreName } from '@kbn/cps-common';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
 
@@ -19,11 +18,10 @@ export { createProjectFetcher } from './project_fetcher';
  * Returns {@link PROJECT_ROUTING.ALL} when the expression doesn't exist (404).
  */
 export const fetchDefaultProjectRouting = async (http: HttpSetup): Promise<string> => {
-  const basePath = http.basePath.get();
-  const { spaceId } = getSpaceIdFromPath(basePath, http.basePath.serverBasePath);
-  const projectRoutingName = getSpaceDefaultNpreName(spaceId);
+  const projectRoutingName = getSpaceDefaultNpreName(http.spaceId);
 
   try {
+    // codeql[js/kibana/unsafe-dynamic-http-path] segment is kibana_space_${spaceId}_default; spaceId is parsed by getSpaceIdFromPath and matches /^[a-z0-9_-]+$/
     return await http.get<string>(`/internal/cps/project_routing/${projectRoutingName}`);
   } catch (error) {
     if (error?.response?.status === 404) {

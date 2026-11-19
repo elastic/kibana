@@ -21,16 +21,19 @@ dependsOn:
   - '@kbn/developer-examples-plugin'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
   - group-platform
   - private
+  - scout-tests
 fileGroups:
   src:
     - index.ts
     - common/**/*.ts
     - public/**/*.ts
     - public/**/*.tsx
+    - test/scout_examples/**/*
     - '!target/**/*'
 tasks: {}

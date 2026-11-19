@@ -30,11 +30,14 @@ interface BulkInstallPackagesParams {
   >;
   esClient: ElasticsearchClient;
   force?: boolean;
+  allowOutdatedVersion?: boolean;
   spaceId: string;
   preferredSource?: 'registry' | 'bundled';
   prerelease?: boolean;
   request?: KibanaRequest;
   skipIfInstalled?: boolean;
+  checkBreakingChanges?: boolean;
+  acknowledgeBreakingChanges?: boolean;
 }
 
 export async function bulkInstallPackages({
@@ -43,9 +46,12 @@ export async function bulkInstallPackages({
   esClient,
   spaceId,
   force,
+  allowOutdatedVersion,
   prerelease,
   request,
   skipIfInstalled,
+  checkBreakingChanges,
+  acknowledgeBreakingChanges,
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
 
@@ -145,9 +151,12 @@ export async function bulkInstallPackages({
         installSource: 'registry',
         spaceId,
         force,
+        allowOutdatedVersion,
         prerelease: prerelease || ('prerelease' in pkgKeyProps && pkgKeyProps.prerelease),
         request,
         skipDataStreamRollover: pkgKeyProps.skipDataStreamRollover,
+        checkBreakingChanges,
+        acknowledgeBreakingChanges,
       });
 
       if (installResult.error) {

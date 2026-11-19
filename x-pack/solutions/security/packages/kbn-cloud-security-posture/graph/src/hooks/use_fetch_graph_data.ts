@@ -13,6 +13,7 @@ import type {
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EVENT_GRAPH_VISUALIZATION_API } from '../common/constants';
+import { GraphFetchError } from './graph_fetch_error';
 
 /**
  * Interface for the input parameters of the useFetchGraphData hook.
@@ -85,13 +86,22 @@ export const useFetchGraphData = ({
   options,
 }: UseFetchGraphDataParams): UseFetchGraphDataResult => {
   const queryClient = useQueryClient();
-  const { esQuery, originEventIds, entityIds, start, end, pinnedIds } = req.query;
+  const { esQuery, originEventIds, entityIds, start, end, pinnedIds, projectRouting } = req.query;
   const {
     services: { http },
   } = useKibana();
   const QUERY_KEY = useMemo(
-    () => ['useFetchGraphData', originEventIds, entityIds, start, end, esQuery, pinnedIds],
-    [end, entityIds, esQuery, originEventIds, start, pinnedIds]
+    () => [
+      'useFetchGraphData',
+      originEventIds,
+      entityIds,
+      start,
+      end,
+      esQuery,
+      pinnedIds,
+      projectRouting,
+    ],
+    [end, entityIds, esQuery, originEventIds, start, pinnedIds, projectRouting]
   );
 
   const { isLoading, isError, data, isFetching, error } = useQuery<GraphResponse>(
@@ -108,7 +118,10 @@ export const useFetchGraphData = ({
         });
       } catch (err) {
         // extract error message in case its not under err.message
-        throw new Error(err.body?.message ?? err.message);
+        throw new GraphFetchError(
+          err.body?.message ?? err.message,
+          err.response?.status ?? err.body?.statusCode
+        );
       }
     },
     {

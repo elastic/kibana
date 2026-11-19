@@ -14,8 +14,10 @@ import type {
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { Runner } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { isAllowedBuiltinTool } from '@kbn/agent-builder-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import {
   createBuiltinToolRegistry,
@@ -28,10 +30,12 @@ import { isEnabledDefinition } from './tool_types/definitions';
 import { createPersistedProviderFn } from './persisted';
 import { createToolRegistry } from './tool_registry';
 import { createToolHealthClient } from './health';
+import type { AgentBuilderConfig } from '../../config';
 
 export interface ToolsServiceSetupDeps {
   logger: Logger;
   workflowsManagement?: WorkflowsServerPluginSetup;
+  config: AgentBuilderConfig;
 }
 
 export interface ToolsServiceStartDeps {
@@ -41,6 +45,7 @@ export interface ToolsServiceStartDeps {
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   actions: ActionsPluginStart;
+  securityPlugin: SecurityPluginStart | undefined;
 }
 
 export class ToolsService {
@@ -74,10 +79,21 @@ export class ToolsService {
     uiSettings,
     savedObjects,
     actions,
+    securityPlugin,
   }: ToolsServiceStartDeps): ToolsServiceStart {
-    const { logger, workflowsManagement } = this.setupDeps!;
+    const { logger, workflowsManagement, config } = this.setupDeps!;
 
-    const toolTypes = getToolTypeDefinitions({ workflowsManagement, actions });
+    const toolTypes = getToolTypeDefinitions({
+      workflowsManagement,
+      security: securityPlugin,
+      actions,
+      indexSearchDeps: {
+        uiSettings,
+        savedObjects,
+        topSnippetsDefaults: config.topSnippets,
+      },
+      logger,
+    });
 
     // Compute the set of tool types that have health tracking enabled
     const healthTrackedToolTypes = new Set(
@@ -90,6 +106,8 @@ export class ToolsService {
     const builtinProviderFn = createBuiltinProviderFn({
       registry: this.builtinRegistry,
       toolTypes,
+      uiSettings,
+      savedObjects,
     });
     const persistedProviderFn = createPersistedProviderFn({
       logger,
@@ -106,6 +124,10 @@ export class ToolsService {
         logger,
         esClient: elasticsearch.client.asInternalUser,
       });
+      const soClient = savedObjects.getScopedClient(request);
+      const experimentalFeaturesEnabled = await uiSettings
+        .asScopedToClient(soClient)
+        .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
 
       return createToolRegistry({
         getRunner,
@@ -118,6 +140,7 @@ export class ToolsService {
         healthClient,
         logger,
         healthTrackedToolTypes,
+        experimentalFeaturesEnabled,
       });
     };
 

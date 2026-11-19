@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { syntheticsThrottlingEnabled } from '@kbn/observability-plugin/public';
 import { useConnectionProfiles } from './use_connection_profiles';
@@ -46,6 +47,9 @@ export const ThrottlingConfigField = (props: ThrottlingConfigFieldProps) => {
     <>
       <EuiSuperSelect
         data-test-subj="syntheticsThrottlingSelect"
+        aria-label={i18n.translate('xpack.synthetics.monitorConfig.throttlingProfile.ariaLabel', {
+          defaultMessage: 'Throttling profile',
+        })}
         options={options}
         onChange={(newValue) => {
           if (newValue === PROFILE_VALUES_ENUM.CUSTOM) {

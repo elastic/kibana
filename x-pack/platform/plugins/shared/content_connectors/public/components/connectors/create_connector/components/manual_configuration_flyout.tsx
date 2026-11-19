@@ -72,10 +72,10 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
   } = useKibana();
 
   const { connectorName } = useValues(
-    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+    NewConnectorLogic({ http, navigateToApp: application?.navigateToApp })
   );
   const { setRawName, createConnector } = useActions(
-    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+    NewConnectorLogic({ http, navigateToApp: application?.navigateToApp })
   );
   const { euiTheme } = useEuiTheme();
   return (

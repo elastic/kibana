@@ -28,7 +28,6 @@
     "@kbn/es-types",
     "@kbn/spaces-plugin",
     "@kbn/core-application-browser",
-    "@kbn/core-application-common",
     "@kbn/datemath",
     "@kbn/rison",
     "@kbn/kibana-utils-plugin",
@@ -38,9 +37,6 @@
     "@kbn/utility-types",
     "@kbn/share-plugin",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/management-settings-field-definition",
-    "@kbn/management-settings-types",
-    "@kbn/management-settings-utilities",
     "@kbn/core-chrome-browser",
     "@kbn/rule-data-utils",
     "@kbn/es-query",
@@ -49,8 +45,9 @@
     "@kbn/charts-theme",
     "@kbn/deeplinks-observability",
     "@kbn/home-sample-data-tab",
-    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-browser",
     "@kbn/controls-constants",
+    "@kbn/apm-types",
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

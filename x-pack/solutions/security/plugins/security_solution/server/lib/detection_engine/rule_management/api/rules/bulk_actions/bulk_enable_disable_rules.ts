@@ -6,11 +6,16 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { DetectionRulesAuthz } from '../../../../../../../common/detection_engine/rule_management/authz';
 import { invariant } from '../../../../../../../common/utils/invariant';
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
+import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { RuleAlertType } from '../../../../rule_schema';
-import { validateBulkEnableRule } from '../../../logic/bulk_actions/validations';
+import {
+  validateBulkDisableRule,
+  validateBulkEnableRule,
+} from '../../../logic/bulk_actions/validations';
 
 interface BulkEnableDisableRulesArgs {
   rules: RuleAlertType[];
@@ -18,6 +23,7 @@ interface BulkEnableDisableRulesArgs {
   isDryRun?: boolean;
   rulesClient: RulesClient;
   mlAuthz: MlAuthz;
+  rulesAuthz: DetectionRulesAuthz;
 }
 
 interface BulkEnableDisableRulesOutcome {
@@ -31,54 +37,66 @@ export const bulkEnableDisableRules = async ({
   rulesClient,
   action: operation,
   mlAuthz,
-}: BulkEnableDisableRulesArgs): Promise<BulkEnableDisableRulesOutcome> => {
-  const errors: Array<PromisePoolError<RuleAlertType, Error>> = [];
+  rulesAuthz,
+}: BulkEnableDisableRulesArgs): Promise<BulkEnableDisableRulesOutcome> =>
+  withSecuritySpan(
+    {
+      name: 'ruleManagement.bulkEnableDisableRules',
+      labels: { action: operation, count: String(rules.length) },
+    },
+    async () => {
+      const errors: Array<PromisePoolError<RuleAlertType, Error>> = [];
 
-  // In the first step, we validate if the rules can be enabled
-  const validatedRules: RuleAlertType[] = [];
-  await Promise.all(
-    rules.map(async (rule) => {
-      try {
-        await validateBulkEnableRule({ mlAuthz, rule });
-        validatedRules.push(rule);
-      } catch (error) {
-        errors.push({ item: rule, error });
+      // In the first step, we validate if the rules can be enabled
+      const validatedRules: RuleAlertType[] = [];
+      await Promise.all(
+        rules.map(async (rule) => {
+          try {
+            if (operation === 'enable') {
+              await validateBulkEnableRule({ mlAuthz, rule, rulesAuthz });
+            } else {
+              await validateBulkDisableRule({ mlAuthz, rule, rulesAuthz });
+            }
+            validatedRules.push(rule);
+          } catch (error) {
+            errors.push({ item: rule, error });
+          }
+        })
+      );
+
+      if (isDryRun || validatedRules.length === 0) {
+        return {
+          updatedRules: validatedRules,
+          errors,
+        };
       }
-    })
-  );
 
-  if (isDryRun || validatedRules.length === 0) {
-    return {
-      updatedRules: validatedRules,
-      errors,
-    };
-  }
+      // Then if it's not a dry run, we enable the rules that passed the validation
+      const ruleIds = validatedRules.map(({ id }) => id);
 
-  // Then if it's not a dry run, we enable the rules that passed the validation
-  const ruleIds = validatedRules.map(({ id }) => id);
+      // Perform actual update using the rulesClient
+      const results =
+        operation === 'enable'
+          ? await rulesClient.bulkEnableRules({ ids: ruleIds })
+          : await rulesClient.bulkDisableRules({ ids: ruleIds });
 
-  // Perform actual update using the rulesClient
-  const results =
-    operation === 'enable'
-      ? await rulesClient.bulkEnableRules({ ids: ruleIds })
-      : await rulesClient.bulkDisableRules({ ids: ruleIds });
+      // Rule objects returned from the bulkEnableRules are not
+      // compatible with the response type. So we need to map them to
+      // the original rules and update the enabled field
+      errors.push(
+        ...results.errors.map(({ rule: { id }, message }) => {
+          const rule = rules.find((r) => r.id === id);
+          invariant(rule != null, 'Unexpected rule id');
+          return {
+            item: rule,
+            error: new Error(message),
+          };
+        })
+      );
 
-  // Rule objects returned from the bulkEnableRules are not
-  // compatible with the response type. So we need to map them to
-  // the original rules and update the enabled field
-  errors.push(
-    ...results.errors.map(({ rule: { id }, message }) => {
-      const rule = rules.find((r) => r.id === id);
-      invariant(rule != null, 'Unexpected rule id');
       return {
-        item: rule,
-        error: new Error(message),
+        updatedRules: results.rules as RuleAlertType[],
+        errors,
       };
-    })
+    }
   );
-
-  return {
-    updatedRules: results.rules as RuleAlertType[],
-    errors,
-  };
-};

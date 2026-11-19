@@ -96,7 +96,7 @@ export function ServiceGroupsList() {
                   controlOnly
                   compressed
                   data-test-subj="apmServiceGroupsListFieldText"
-                  icon="search"
+                  icon="magnify"
                   fullWidth
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}

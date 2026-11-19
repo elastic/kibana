@@ -46,13 +46,14 @@ export const MultiSelectPopover = React.memo(
 
     return (
       <EuiPopover
+        aria-label={title}
         ownFocus
         button={
           <EuiFilterGroup>
             <EuiFilterButton
               grow={false}
               data-test-subj={'multiselect-popover-button'}
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               onClick={() => togglePopover()}
               numFilters={allItems.length}
               isSelected={isItemPopoverOpen}

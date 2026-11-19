@@ -27,7 +27,7 @@ const mockCreateStatusColumn = createStatusColumn as jest.MockedFunction<typeof 
 const openScheduleDetails = jest.fn();
 const enableSchedule = jest.fn();
 const disableSchedule = jest.fn();
-const deleteSchedule = jest.fn();
+const requestDeleteSchedule = jest.fn();
 
 describe('useColumns', () => {
   beforeEach(() => {
@@ -40,7 +40,7 @@ describe('useColumns', () => {
         openScheduleDetails,
         enableSchedule,
         disableSchedule,
-        deleteSchedule,
+        requestDeleteSchedule,
       })
     );
   });
@@ -62,6 +62,9 @@ describe('useColumns', () => {
   });
 
   it('should invoke `createActionsColumn`', () => {
-    expect(mockCreateActionsColumn).toHaveBeenCalledWith({ isDisabled: false, deleteSchedule });
+    expect(mockCreateActionsColumn).toHaveBeenCalledWith({
+      isDisabled: false,
+      requestDeleteSchedule,
+    });
   });
 });

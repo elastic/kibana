@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 
 import React, { useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -19,6 +19,7 @@ import { AggregatedTransactionsBadge } from '../../shared/aggregated_transaction
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { replace } from '../../shared/links/url_helpers';
 import { TransactionsTable } from '../../shared/transactions_table';
+import { AnomaliesAutomaticEnvironmentSelectionCallout } from '../../shared/anomalies_automatic_environment_selection_callout';
 
 export function TransactionOverview() {
   const {
@@ -65,16 +66,14 @@ export function TransactionOverview() {
   }, [start, end, onPageReady]);
 
   return (
-    <>
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <AnomaliesAutomaticEnvironmentSelectionCallout />
+      </EuiFlexItem>
       {fallbackToTransactions && (
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <AggregatedTransactionsBadge />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-        </>
+        <EuiFlexItem>
+          <AggregatedTransactionsBadge />
+        </EuiFlexItem>
       )}
       <TransactionCharts
         serviceName={serviceName}
@@ -100,6 +99,6 @@ export function TransactionOverview() {
           onLoadTable={handleOnLoadTable}
         />
       </EuiPanel>
-    </>
+    </EuiFlexGroup>
   );
 }

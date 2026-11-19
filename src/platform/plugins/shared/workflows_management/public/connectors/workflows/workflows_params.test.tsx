@@ -11,6 +11,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getManagedWorkflowSelectorVisibilityContext } from '@kbn/workflows';
 import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
 import type { WorkflowsActionParams } from './types';
 import WorkflowsParamsFields from './workflows_params';
@@ -101,6 +102,11 @@ describe('WorkflowsParamsFields', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
+          capabilities: {
+            workflowsManagement: {
+              readManagedWorkflow: true,
+            },
+          },
           getUrlForApp: jest.fn().mockReturnValue('/app/workflows'),
         },
       },
@@ -120,7 +126,11 @@ describe('WorkflowsParamsFields', () => {
     expect(mockEditAction).toHaveBeenCalledWith('subAction', 'run', 0);
     expect(mockEditAction).toHaveBeenCalledWith(
       'subActionParams',
-      { workflowId: '', summaryMode: true },
+      {
+        workflowId: '',
+        summaryMode: true,
+        alertStates: { new: true, ongoing: false, recovered: false },
+      },
       0
     );
   });
@@ -172,6 +182,52 @@ describe('WorkflowsParamsFields', () => {
       const select = screen.getByTestId('workflowIdSelect');
       expect(select).toBeInTheDocument();
     });
+  });
+
+  test('should request rule action managed workflows when user can read managed workflows', async () => {
+    await act(async () => {
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+    });
+
+    await waitFor(() => {
+      expect(mockWorkflowApi.getWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({
+          size: 1000,
+          page: 1,
+          query: '',
+          managed: 'all',
+          visibilityContext: [getManagedWorkflowSelectorVisibilityContext('rule_action')],
+        })
+      );
+    });
+  });
+
+  test('should request the default unmanaged workflow list when user cannot read managed workflows', async () => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            workflowsManagement: {
+              readManagedWorkflow: false,
+            },
+          },
+          getUrlForApp: jest.fn().mockReturnValue('/app/workflows'),
+        },
+      },
+    } as any);
+
+    await act(async () => {
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+    });
+
+    await waitFor(() => {
+      expect(mockWorkflowApi.getWorkflows).toHaveBeenCalled();
+    });
+
+    const [params] = mockWorkflowApi.getWorkflows.mock.calls[0];
+    expect(params).toMatchObject({ size: 1000, page: 1, query: '' });
+    expect(params).not.toHaveProperty('managed');
+    expect(params).not.toHaveProperty('visibilityContext');
   });
 
   test('should handle workflow selection', async () => {
@@ -234,7 +290,7 @@ describe('WorkflowsParamsFields', () => {
     fireEvent.click(input);
 
     await waitFor(() => {
-      const createButtons = screen.getAllByText('Create your first workflow');
+      const createButtons = screen.getAllByText('Create workflow');
       expect(createButtons.length).toBeGreaterThan(0);
     });
   });
@@ -458,7 +514,7 @@ describe('WorkflowsParamsFields', () => {
     // Should show no workflows available
     await waitFor(() => {
       expect(screen.getAllByText("You don't have any workflows yet").length).toBeGreaterThan(0);
-      const createButtons = screen.getAllByText('Create your first workflow');
+      const createButtons = screen.getAllByText('Create workflow');
       expect(createButtons.length).toBeGreaterThan(0);
     });
   });
@@ -822,6 +878,212 @@ describe('WorkflowsParamsFields', () => {
     });
   });
 
+  describe('Alert state checkboxes (alertStates parameter)', () => {
+    test('should render alert state checkboxes', async () => {
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getAllByText('Run workflow for').length).toBeGreaterThan(0);
+        expect(screen.getByLabelText('New alerts')).toBeInTheDocument();
+        expect(screen.getByLabelText('Ongoing alerts')).toBeInTheDocument();
+        expect(screen.getByLabelText('Recovered alerts')).toBeInTheDocument();
+      });
+    });
+
+    test('should default to new=checked, ongoing=unchecked, recovered=unchecked', async () => {
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('New alerts')).toBeChecked();
+        expect(screen.getByLabelText('Ongoing alerts')).not.toBeChecked();
+        expect(screen.getByLabelText('Recovered alerts')).not.toBeChecked();
+      });
+    });
+
+    test('should reflect alertStates from action params', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'test-workflow',
+            alertStates: { new: true, ongoing: true, recovered: false },
+          },
+        } as WorkflowsActionParams,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('New alerts')).toBeChecked();
+        expect(screen.getByLabelText('Ongoing alerts')).toBeChecked();
+        expect(screen.getByLabelText('Recovered alerts')).not.toBeChecked();
+      });
+    });
+
+    test('should toggle alert state on checkbox click', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'test-workflow',
+            summaryMode: true,
+            alertStates: { new: true, ongoing: false, recovered: false },
+          },
+        } as WorkflowsActionParams,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      const recoveredCheckbox = screen.getByLabelText('Recovered alerts');
+      await act(async () => {
+        fireEvent.click(recoveredCheckbox);
+      });
+
+      await waitFor(() => {
+        expect(mockEditAction).toHaveBeenCalledWith(
+          'subActionParams',
+          expect.objectContaining({
+            alertStates: { new: true, ongoing: false, recovered: true },
+          }),
+          0
+        );
+      });
+    });
+
+    test('should initialize alertStates when missing from subActionParams', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'test-workflow',
+            summaryMode: true,
+          },
+        } as WorkflowsActionParams,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(mockEditAction).toHaveBeenCalledWith(
+          'subActionParams',
+          expect.objectContaining({
+            alertStates: { new: true, ongoing: false, recovered: false },
+          }),
+          0
+        );
+      });
+    });
+
+    test('should initialize alertStates together with summaryMode in a single editAction call', async () => {
+      const props = {
+        ...defaultProps,
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            workflowId: 'test-workflow',
+          },
+        } as any,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(mockEditAction).toHaveBeenCalledWith(
+          'subActionParams',
+          {
+            workflowId: 'test-workflow',
+            summaryMode: true,
+            alertStates: { new: true, ongoing: false, recovered: false },
+          },
+          0
+        );
+      });
+    });
+
+    test('should hide alert state checkboxes for Security detection rules', async () => {
+      const props = {
+        ...defaultProps,
+        ruleTypeId: 'siem.queryRule',
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.queryByLabelText('New alerts')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Ongoing alerts')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Recovered alerts')).not.toBeInTheDocument();
+      });
+    });
+
+    test('should hide alert state checkboxes for attack-discovery rules', async () => {
+      const props = {
+        ...defaultProps,
+        ruleTypeId: 'attack-discovery',
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.queryByLabelText('New alerts')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Ongoing alerts')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Recovered alerts')).not.toBeInTheDocument();
+      });
+    });
+
+    test('should show alert state checkboxes for non-SIEM rules', async () => {
+      const props = {
+        ...defaultProps,
+        ruleTypeId: 'metrics.alert.threshold',
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('New alerts')).toBeInTheDocument();
+        expect(screen.getByLabelText('Ongoing alerts')).toBeInTheDocument();
+        expect(screen.getByLabelText('Recovered alerts')).toBeInTheDocument();
+      });
+    });
+
+    test('should show alert state checkboxes when ruleTypeId is undefined', async () => {
+      const props = {
+        ...defaultProps,
+        ruleTypeId: undefined,
+      };
+
+      await act(async () => {
+        renderWithIntl(<WorkflowsParamsFields {...props} />);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('New alerts')).toBeInTheDocument();
+        expect(screen.getByLabelText('Ongoing alerts')).toBeInTheDocument();
+        expect(screen.getByLabelText('Recovered alerts')).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('Action frequency (summaryMode parameter)', () => {
     test('should render Action frequency section with switch', async () => {
       await act(async () => {
@@ -854,7 +1116,7 @@ describe('WorkflowsParamsFields', () => {
       await waitFor(() => {
         expect(mockEditAction).toHaveBeenCalledWith(
           'subActionParams',
-          { workflowId: 'test-workflow', summaryMode: true },
+          expect.objectContaining({ workflowId: 'test-workflow', summaryMode: true }),
           0
         );
       });
@@ -876,7 +1138,11 @@ describe('WorkflowsParamsFields', () => {
       await waitFor(() => {
         expect(mockEditAction).toHaveBeenCalledWith(
           'subActionParams',
-          { workflowId: '', summaryMode: true },
+          {
+            workflowId: '',
+            summaryMode: true,
+            alertStates: { new: true, ongoing: false, recovered: false },
+          },
           0
         );
       });

@@ -14,7 +14,7 @@ import type {
   ESQLRegistrySolutionId,
 } from '@kbn/esql-types';
 import { ESQL_CLASSIC_SOLUTION_ID } from '@kbn/esql-types';
-import { getIndexPatternFromESQLQuery, getSourceCommandFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternsFromESQLQuery, getSourceCommandFromESQLQuery } from '@kbn/esql-utils';
 import { checkSourceExistence, findMatchingIndicesFromPattern } from './utils';
 
 /**
@@ -86,7 +86,8 @@ export class ESQLExtensionsRegistry {
     // Validates that the index pattern extracted from the ES|QL `FROM` command
     // exists within the available `sources` (indices, aliases, or data streams).
     // If the specified source isn't found, no recommended queries will be returned.
-    const indexPattern = getIndexPatternFromESQLQuery(queryString);
+    const { indexPattern, indexPatternWithoutRemoteClusterPrefix: matchingIndexPattern } =
+      getIndexPatternsFromESQLQuery(queryString);
     if (!checkSourceExistence(availableDatasources, indexPattern)) {
       return [];
     }
@@ -97,7 +98,7 @@ export class ESQLExtensionsRegistry {
     // 1. **Direct matches**: If the command uses a specific index (e.g., `logs-2023`), it retrieves queries registered for that exact index.
     // 2. **Pattern coverage**: If the command uses a wildcard pattern (e.g., `logs-*`), it returns queries registered for concrete indices that match this pattern (e.g., a recommended query for `logs-2023`).
     // 3. **Reverse coverage**: If the command specifies a concrete index, it also includes queries whose *registered pattern* covers that specific index (e.g., a recommended query for `logs*` would be returned for `logs-2023`).
-    const matchingIndices = findMatchingIndicesFromPattern(map, indexPattern);
+    const matchingIndices = findMatchingIndicesFromPattern(map, matchingIndexPattern);
     if (matchingIndices.length > 0) {
       recommendedItems.push(
         ...matchingIndices
@@ -144,7 +145,8 @@ export class ESQLExtensionsRegistry {
           );
         }
 
-        return getIndexPatternFromESQLQuery(recommendedQuery.query);
+        return getIndexPatternsFromESQLQuery(recommendedQuery.query)
+          .indexPatternWithoutRemoteClusterPrefix;
       },
       (existingQueries, newQuery) => existingQueries.some((q) => q.query === newQuery.query),
       'query'
@@ -217,7 +219,9 @@ export class ESQLExtensionsRegistry {
         continue; // Skip if the recommended item is malformed (missing name or query)
       }
 
-      const indexPattern = getIndexPatternFromESQLQuery(item.query);
+      const indexPattern = getIndexPatternsFromESQLQuery(
+        item.query
+      ).indexPatternWithoutRemoteClusterPrefix;
       if (!indexPattern) {
         // No index pattern found, possibly malformed or not valid for registration
         continue;

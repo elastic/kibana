@@ -10,14 +10,19 @@ import type { Pagination } from '@elastic/eui';
 import { useQuery } from '@kbn/react-query';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import type { ServerApiError } from '../../../../common/types';
-import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
+import {
+  MANAGEMENT_DEFAULT_SORT_FIELD,
+  MANAGEMENT_DEFAULT_SORT_ORDER,
+  MANAGEMENT_PAGE_SIZE_OPTIONS,
+} from '../../../common/constants';
 import { useUrlParams } from '../../../hooks/use_url_params';
 import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import type { ArtifactListPageUrlParams } from '../types';
 import type { MaybeImmutable } from '../../../../../common/endpoint/types';
+import type { ArtifactEnabledStatus } from '../../../common/utils';
 import { useKueryFromExceptionsSearchFilter } from './use_kuery_from_exceptions_search_filter';
 import { useListArtifact } from '../../../hooks/artifacts';
-import { useUrlPagination } from '../../../hooks/use_url_pagination';
+import { paginationFromUrlParams } from '../../../hooks/use_url_pagination';
 
 type WithArtifactListDataInterface = ReturnType<typeof useListArtifact> & {
   /**
@@ -39,20 +44,31 @@ type WithArtifactListDataInterface = ReturnType<typeof useListArtifact> & {
 
 export const useWithArtifactListData = (
   apiClient: ExceptionsListApiClient,
-  searchableFields: MaybeImmutable<string[]>
+  searchableFields: MaybeImmutable<string[]>,
+  sortableFields: MaybeImmutable<string[]> = [],
+  enabledStatus?: ArtifactEnabledStatus
 ): WithArtifactListDataInterface => {
   const isMounted = useIsMounted();
 
+  const { urlParams } = useUrlParams<ArtifactListPageUrlParams>();
   const {
-    urlParams: { filter, includedPolicies },
-  } = useUrlParams<ArtifactListPageUrlParams>();
+    filter,
+    includedPolicies,
+    sortField: sortFieldParam,
+    sortOrder: sortOrderParam,
+  } = urlParams;
 
-  const {
-    pagination: { page, pageSize },
-  } = useUrlPagination();
+  // Not using `useUrlPagination`: its state lags one render behind the URL, which would send
+  // a request with the new filter/sort but the old page.
+  const { page, pageSize } = useMemo(() => paginationFromUrlParams(urlParams), [urlParams]);
 
   // Used to determine if the `does data exist` check should be done.
-  const kuery = useKueryFromExceptionsSearchFilter(filter, searchableFields, includedPolicies);
+  const kuery = useKueryFromExceptionsSearchFilter(
+    filter,
+    searchableFields,
+    includedPolicies,
+    enabledStatus
+  );
 
   const {
     data: doesDataExist,
@@ -77,6 +93,16 @@ export const useWithArtifactListData = (
 
   const [isPageInitializing, setIsPageInitializing] = useState(true);
 
+  const requestedSortField = sortFieldParam || MANAGEMENT_DEFAULT_SORT_FIELD;
+  const sortField =
+    sortableFields.length > 0 && !sortableFields.includes(requestedSortField)
+      ? MANAGEMENT_DEFAULT_SORT_FIELD
+      : requestedSortField;
+  const sortOrder =
+    sortOrderParam && ['asc', 'desc'].includes(sortOrderParam)
+      ? sortOrderParam
+      : MANAGEMENT_DEFAULT_SORT_ORDER;
+
   const listDataRequest = useListArtifact(
     apiClient,
     {
@@ -84,6 +110,9 @@ export const useWithArtifactListData = (
       perPage: pageSize,
       filter,
       policies: includedPolicies ? includedPolicies.split(',') : [],
+      enabledStatus,
+      sortField,
+      sortOrder,
     },
     searchableFields
   );
@@ -105,7 +134,8 @@ export const useWithArtifactListData = (
     }
   }, [isLoadingDataExists, isMounted, isPageInitializing]);
 
-  // Update the uiPagination once the query succeeds
+  // Update the uiPagination once the query succeeds. Page and total must come from the same
+  // response, otherwise page correction could run against the total of a different result set.
   useEffect(() => {
     if (isMounted() && listData && !isLoadingListData && isSuccessListData) {
       setUiPagination((prevState) => {

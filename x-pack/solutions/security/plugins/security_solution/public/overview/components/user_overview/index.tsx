@@ -11,6 +11,7 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { EntityTableLinkRenderer } from '../../../flyout/entity_details/shared/components/entity_table/types';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -20,7 +21,10 @@ import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/default_renderer';
+import {
+  DefaultFieldRenderer,
+  toFieldRendererItems,
+} from '../../../timelines/components/field_renderers/default_renderer';
 import {
   FirstLastSeen,
   FirstLastSeenType,
@@ -32,7 +36,8 @@ import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_ca
 import { AnomalyScores } from '../../../common/components/ml/score/anomaly_scores';
 import type { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
 import { DescriptionListStyled, OverviewWrapper } from '../../../common/components/page';
-import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
+import { OpenFlyoutLink } from '../../../flyout_v2/shared/components/open_flyout_link';
+import { FLYOUT_LINK_TEST_ID } from '../../../flyout/shared/components/test_ids';
 
 import * as i18n from './translations';
 
@@ -40,6 +45,9 @@ import { OverviewDescriptionList } from '../../../common/components/overview_des
 import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
 import { RiskScoreDocTooltip } from '../common';
+import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
+import type { InspectQuery } from '../../../common/store/inputs/model';
 
 export interface UserSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -56,7 +64,21 @@ export interface UserSummaryProps {
   userName: string;
   indexPatterns: string[];
   jobNameById: Record<string, string | undefined>;
-  isFlyoutOpen?: boolean;
+  /** When provided, replaces OpenFlyoutLink for IP addresses. */
+  linkRenderer?: EntityTableLinkRenderer;
+  /** When using Entity Store v2: pre-fetched risk state from entity store. */
+  riskScoreState?: RiskScoreState<EntityType.user>;
+  /** When using Entity Store v2: first seen from entity lifecycle. */
+  firstSeenFromEntityStore?: string;
+  /** When using Entity Store v2: last seen from entity lifecycle. */
+  lastSeenFromEntityStore?: string;
+  /** When true, inspect button is always visible (e.g. in document details flyout). Default false = show on hover. */
+  showInspectButtonAlways?: boolean;
+  /**
+   * Optional renderer for the host.ip value. Defaults to `OpenFlyoutLink`. Callers (e.g. the
+   * attack Entities tool) can supply their own link to control how the network flyout opens.
+   */
+  renderIpLink?: (ip: string) => React.ReactNode;
 }
 
 const UserRiskOverviewWrapper = styled(EuiFlexGroup, {
@@ -67,6 +89,10 @@ const UserRiskOverviewWrapper = styled(EuiFlexGroup, {
 `;
 
 export const USER_OVERVIEW_RISK_SCORE_QUERY_ID = 'riskInputsTabQuery';
+
+/** Stable references for useQueryInspector when risk data comes from the entity store (avoids render loops). */
+const ENTITY_STORE_RISK_INSPECT_PLACEHOLDER: InspectQuery = { dsl: [], response: [] };
+const noopRiskScoreRefetch = (): void => {};
 
 export const UserOverview = React.memo<UserSummaryProps>(
   ({
@@ -84,11 +110,17 @@ export const UserOverview = React.memo<UserSummaryProps>(
     userName,
     indexPatterns,
     jobNameById,
-    isFlyoutOpen = false,
+    linkRenderer: LinkRenderer,
+    riskScoreState: riskScoreStateFromEntityStore,
+    firstSeenFromEntityStore,
+    lastSeenFromEntityStore,
+    showInspectButtonAlways = false,
+    renderIpLink,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const darkMode = useKibanaIsDarkMode();
+
     const filterQuery = useMemo(
       () => (userName ? buildUserNamesFilter([userName]) : undefined),
       [userName]
@@ -96,32 +128,37 @@ export const UserOverview = React.memo<UserSummaryProps>(
     const { deleteQuery, setQuery } = useGlobalTime();
 
     const {
-      data: userRisk,
-      isAuthorized,
+      data: userRiskFromSearch,
+      isAuthorized: isRiskScoreAuthorized,
       inspect: inspectRiskScore,
       loading: loadingRiskScore,
       refetch: refetchRiskScore,
     } = useRiskScore({
       filterQuery,
-      skip: userName == null,
+      skip: !!riskScoreStateFromEntityStore || !userName,
       riskEntity: EntityType.user,
       onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,
     });
 
+    const userRisk = riskScoreStateFromEntityStore?.data ?? userRiskFromSearch;
+    const isAuthorized = riskScoreStateFromEntityStore ? true : isRiskScoreAuthorized;
+
     useQueryInspector({
       deleteQuery,
-      inspect: inspectRiskScore,
-      loading: loadingRiskScore,
+      inspect: riskScoreStateFromEntityStore
+        ? ENTITY_STORE_RISK_INSPECT_PLACEHOLDER
+        : inspectRiskScore,
+      loading: riskScoreStateFromEntityStore ? false : loadingRiskScore,
       queryId: USER_OVERVIEW_RISK_SCORE_QUERY_ID,
-      refetch: refetchRiskScore,
+      refetch: riskScoreStateFromEntityStore ? noopRiskScoreRefetch : refetchRiskScore,
       setQuery,
     });
 
     const getDefaultRenderer = useCallback(
       (fieldName: string, fieldData: UserItem) => (
         <DefaultFieldRenderer
-          rowItems={getOr([], fieldName, fieldData)}
+          rowItems={toFieldRendererItems(getOr([], fieldName, fieldData))}
           attrName={fieldName}
           idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
           scopeId={scopeId}
@@ -228,25 +265,35 @@ export const UserOverview = React.memo<UserSummaryProps>(
         [
           {
             title: i18n.FIRST_SEEN,
-            description: (
-              <FirstLastSeen
-                indexPatterns={indexPatterns}
-                field={'user.name'}
-                value={userName}
-                type={FirstLastSeenType.FIRST_SEEN}
-              />
-            ),
+            description:
+              firstSeenFromEntityStore != null ? (
+                <PreferenceFormattedDateFromPrimitive value={firstSeenFromEntityStore} />
+              ) : userName != null && userName !== '' ? (
+                <FirstLastSeen
+                  indexPatterns={indexPatterns}
+                  field="user.name"
+                  value={userName}
+                  type={FirstLastSeenType.FIRST_SEEN}
+                />
+              ) : (
+                getEmptyTagValue()
+              ),
           },
           {
             title: i18n.LAST_SEEN,
-            description: (
-              <FirstLastSeen
-                indexPatterns={indexPatterns}
-                field={'user.name'}
-                value={userName}
-                type={FirstLastSeenType.LAST_SEEN}
-              />
-            ),
+            description:
+              lastSeenFromEntityStore != null ? (
+                <PreferenceFormattedDateFromPrimitive value={lastSeenFromEntityStore} />
+              ) : userName != null && userName !== '' ? (
+                <FirstLastSeen
+                  indexPatterns={indexPatterns}
+                  field="user.name"
+                  value={userName}
+                  type={FirstLastSeenType.LAST_SEEN}
+                />
+              ) : (
+                getEmptyTagValue()
+              ),
           },
         ],
         [
@@ -263,22 +310,29 @@ export const UserOverview = React.memo<UserSummaryProps>(
             title: i18n.HOST_IP,
             description: (
               <DefaultFieldRenderer
-                rowItems={getOr([], 'host.ip', data)}
+                rowItems={toFieldRendererItems(getOr([], 'host.ip', data))}
                 attrName={'host.ip'}
                 idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
                 scopeId={scopeId}
-                render={(ip) =>
-                  ip != null ? (
-                    <FlyoutLink
-                      field={'host.ip'}
-                      value={ip}
-                      scopeId={scopeId}
-                      isFlyoutOpen={isFlyoutOpen}
-                    />
+                render={(ip) => {
+                  if (ip == null) {
+                    return getEmptyTagValue();
+                  }
+                  if (renderIpLink) {
+                    return renderIpLink(ip);
+                  }
+                  return LinkRenderer ? (
+                    <LinkRenderer field="host.ip" value={ip}>
+                      {ip}
+                    </LinkRenderer>
                   ) : (
-                    getEmptyTagValue()
-                  )
-                }
+                    <OpenFlyoutLink
+                      field="host.ip"
+                      value={ip}
+                      data-test-subj={FLYOUT_LINK_TEST_ID}
+                    />
+                  );
+                }}
               />
             ),
           },
@@ -291,13 +345,16 @@ export const UserOverview = React.memo<UserSummaryProps>(
         contextID,
         scopeId,
         userName,
+        firstSeenFromEntityStore,
+        lastSeenFromEntityStore,
         firstColumn,
-        isFlyoutOpen,
+        renderIpLink,
+        LinkRenderer,
       ]
     );
     return (
       <>
-        <InspectButtonContainer>
+        <InspectButtonContainer show={!showInspectButtonAlways}>
           <OverviewWrapper
             direction={isInDetailsSidePanel ? 'column' : 'row'}
             data-test-subj="user-overview"

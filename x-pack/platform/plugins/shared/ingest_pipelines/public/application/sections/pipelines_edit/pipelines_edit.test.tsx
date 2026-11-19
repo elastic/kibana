@@ -70,6 +70,7 @@ jest.mock('../../components', () => ({
       <div data-test-subj="isEditing">{String(props.isEditing)}</div>
     </div>
   ),
+  PipelineAppHeader: () => <div data-test-subj="pipelineAppHeader" />,
 }));
 
 const renderWithRoute = (initialRouteEntry: string, services: DeepPartialMockServices) => {

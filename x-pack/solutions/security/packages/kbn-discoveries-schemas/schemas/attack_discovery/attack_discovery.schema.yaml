@@ -1,0 +1,54 @@
+openapi: 3.0.0
+info:
+  title: Attack Discovery Types
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    # NOTE: These schemas are used as REST request/response payloads for the new internal APIs,
+    # so we use snake_case property names (Elasticsearch API convention).
+    AttackDiscovery:
+      type: object
+      description: An attack discovery generated from one or more alerts
+      required:
+        - alert_ids
+        - details_markdown
+        - summary_markdown
+        - title
+      properties:
+        alert_ids:
+          description: The alert IDs that the attack discovery is based on
+          items:
+            type: string
+          type: array
+        id:
+          description: UUID of attack discovery
+          type: string
+        details_markdown:
+          description: Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
+          type: string
+        entity_summary_markdown:
+          description: A short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax
+          type: string
+        mitre_attack_tactics:
+          description: An array of MITRE ATT&CK tactic for the attack discovery
+          items:
+            type: string
+          type: array
+        summary_markdown:
+          description: A markdown summary of attack discovery, using the same syntax
+          type: string
+        title:
+          description: A title for the attack discovery, in plain text
+          type: string
+        timestamp:
+          description: The time the attack discovery was generated
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
+
+    AttackDiscoveries:
+      type: array
+      description: Array of attack discoveries
+      items:
+        $ref: '#/components/schemas/AttackDiscovery'
+

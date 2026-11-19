@@ -45,8 +45,8 @@ const useTimelineEventsDetails = jest.requireMock('../../../timelines/containers
 
 const mockRefetch = jest.fn();
 
-const createSearchHit = (source: Record<string, unknown> | undefined) =>
-  source !== undefined ? { _id: 'attack-1', _source: source } : undefined;
+const createSearchHit = (source: Record<string, unknown> | undefined, index?: string) =>
+  source !== undefined ? { _id: 'attack-1', _index: index, _source: source } : undefined;
 
 describe('useAttackDetails', () => {
   beforeEach(() => {
@@ -78,6 +78,20 @@ describe('useAttackDetails', () => {
     expect(result.current.attack?.title).toBe('Test');
     expect(mockTransformDocumentToApi).toHaveBeenCalled();
     expect(mockTransformFromApi).toHaveBeenCalled();
+  });
+
+  it('passes searchHit._index to transformAttackDiscoveryAlertDocumentToApi so that attack.index is populated', () => {
+    const searchHit = createSearchHit(
+      { 'kibana.alert.attack_discovery.title': 'Test attack' },
+      '.attacks-default'
+    );
+    useTimelineEventsDetails.mockReturnValue([false, [], searchHit, null, mockRefetch]);
+
+    renderHook(() => useAttackDetails({ attackId: 'attack-1', indexName: '.alerts-default' }));
+
+    expect(mockTransformDocumentToApi).toHaveBeenCalledWith(
+      expect.objectContaining({ index: '.attacks-default' })
+    );
   });
 
   it('returns null attackDiscovery when searchHit is undefined', () => {

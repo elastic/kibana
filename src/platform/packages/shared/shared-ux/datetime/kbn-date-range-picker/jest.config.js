@@ -8,11 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../../../..',
   roots: ['<rootDir>/src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker'],
-  moduleNameMapper: {
-    '^react-day-picker$':
-      '<rootDir>/src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/calendar/__mocks__/react-day-picker.tsx',
-  },
 };

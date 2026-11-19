@@ -39,6 +39,10 @@ const alertingFeatures = [
     ruleTypeId: INDEX_THRESHOLD_ID,
     consumers: [ALERTING_EXAMPLE_APP_ID, ALERTING_FEATURE_ID],
   },
+  {
+    ruleTypeId: patternRule.id,
+    consumers: [ALERTING_EXAMPLE_APP_ID, ALERTING_FEATURE_ID],
+  },
 ];
 
 export class AlertingExamplePlugin implements Plugin<void, void, AlertingExampleDeps> {
@@ -54,7 +58,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
       }),
       app: [],
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
       category: DEFAULT_APP_CATEGORIES.management,
       alerting: alertingFeatures,
@@ -76,7 +80,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
             read: [],
           },
           management: {
-            insightsAndAlerting: ['triggersActions'],
+            insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
           },
           ui: [],
         },
@@ -94,7 +98,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
             read: [],
           },
           management: {
-            insightsAndAlerting: ['triggersActions'],
+            insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
           },
           ui: [],
         },

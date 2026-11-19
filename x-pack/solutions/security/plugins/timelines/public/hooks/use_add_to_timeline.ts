@@ -80,7 +80,7 @@ export const getDropTargetCoordinate = (): Position | null => {
  */
 export const getDraggableCoordinate = (draggableId: DraggableId): Position | null => {
   // The placeholder in the "Drop anything highlighted here to build an OR query":
-  const draggable = document.querySelector(`[data-rbd-draggable-id="${draggableId}"]`);
+  const draggable = document.querySelector(`[data-rfd-draggable-id="${draggableId}"]`);
 
   if (draggable != null) {
     return getPosition(draggable);

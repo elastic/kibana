@@ -34,7 +34,7 @@ export const TransformHealthColoredDot: FC<TransformHealthProps> = ({
   const health = (
     <EuiHealth
       color={transformHealthColor}
-      textSize={compact ? 'xs' : undefined}
+      textSize={compact ? 's' : undefined}
       data-test-subj="transformListHealth"
     >
       {transformHealthLabel}
@@ -43,7 +43,11 @@ export const TransformHealthColoredDot: FC<TransformHealthProps> = ({
   );
 
   if (showToolTip) {
-    return <EuiToolTip content={transformHealthDescription}>{health}</EuiToolTip>;
+    return (
+      <EuiToolTip content={transformHealthDescription} anchorProps={{ style: { display: 'flex' } }}>
+        {health}
+      </EuiToolTip>
+    );
   }
 
   return health;

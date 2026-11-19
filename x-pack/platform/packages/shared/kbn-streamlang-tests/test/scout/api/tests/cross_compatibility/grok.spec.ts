@@ -31,8 +31,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: '55.3.244.1 GET /index.html 15824 0.043', client: { ip: null } }]; // Pre-map the field, ES|QL requires it
         await testBed.ingest('ingest-grok', docs, processors);
@@ -62,8 +62,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
           { case: 'groked', attributes: { should_exist: 'YES' }, message: '55.3.244.1' },
@@ -118,10 +118,10 @@ apiTest.describe(
           };
 
           // Both transpilers should throw validation errors for Mustache templates
-          expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+          await expect(transpileIngestPipeline(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed'
           );
-          expect(() => transpileEsql(streamlangDSL)).toThrow(
+          await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed'
           );
         }
@@ -141,8 +141,8 @@ apiTest.describe(
             } as GrokProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
         // Example log from COMMONAPACHELOG pattern
         const docs = [
           {
@@ -188,8 +188,8 @@ apiTest.describe(
             } as GrokProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
         const docs = [{ message: '1.2.3.4 5.6.7.8' }];
         await testBed.ingest('ingest-grok-multi', docs, processors);
         const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-grok-multi');
@@ -217,8 +217,8 @@ apiTest.describe(
             } as GrokProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
         const docs = [{ message: '1.2.3.4 [2025-09-13T12:34:56.789Z] OK' }];
         await testBed.ingest('ingest-grok-special', docs, processors);
         const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-grok-special');
@@ -251,8 +251,8 @@ apiTest.describe(
             } as GrokProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
         const docs = [{ message: '1.2.3.4', untouched: 'preserved' }];
         await testBed.ingest('ingest-grok-source', docs, processors);
         const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-grok-source');
@@ -284,8 +284,8 @@ apiTest.describe(
             } as GrokProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
         const docs = [{ message: '1.2.3.4 This is the extracted message', untouched: 'preserved' }];
 
         await testBed.ingest('ingest-grok-override', docs, processors);
@@ -323,8 +323,8 @@ apiTest.describe(
             } as GrokProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         // Pre-map
         const mappingDoc = {
@@ -405,8 +405,8 @@ apiTest.describe(
             } as GrokProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
         const docs = [
           { id: 1, message: '1.2.3.4', flag: 'yes' },
           { id: 2, message: '192.168.1.1' },
@@ -443,8 +443,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ log: { level: 'info' } }];
         const { errors } = await testBed.ingest('ingest-grok-fail', docs, processors);
@@ -474,8 +474,8 @@ apiTest.describe(
             } as GrokProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
         const docs = [
           { message: '1.2.3.4 GET' }, // missing size
         ];
@@ -517,8 +517,8 @@ apiTest.describe(
             } as GrokProcessor,
           ],
         };
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
         const docs = [{ message: 'no match here at all' }];
 
         const { errors } = await testBed.ingest('ingest-grok-nomatch', docs, processors);
@@ -555,8 +555,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'I love burmese cats!' }];
 
@@ -591,8 +591,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'I love burmese cats!' }];
 
@@ -626,8 +626,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: '127.0.0.1 [Jan 11, 2011]' }];
 

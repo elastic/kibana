@@ -36,6 +36,7 @@ export { TaskStatus, TaskPriority, TaskCost } from './task';
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 
 export { asInterval } from './lib/intervals';
+export { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 export {
   isUnrecoverableError,
   throwUnrecoverableError,
@@ -46,7 +47,12 @@ export {
 
 export type { DecoratedError } from './task_running';
 
-export type { RunNowResult, BulkUpdateTaskResult } from './task_scheduling';
+export type {
+  RunNowResult,
+  RunSoonOptions,
+  BulkUpdateTaskResult,
+  BulkUpdateSchedulesOptions,
+} from './task_scheduling';
 export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
 export {
   IdleTaskWithExpiredRunAt,
@@ -55,11 +61,16 @@ export {
 export { aggregateTaskOverduePercentilesForType } from './queries/aggregate_task_overdue_percentiles_for_type';
 
 export { runInvalidate } from './invalidate_api_keys/lib';
+export { decodeStoredApiKey, getUiamApiKeyId, getUiamApiKeySecret } from './lib/api_key_utils';
 export type {
   TaskManagerPlugin as TaskManager,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from './plugin';
+
+export { TaskAlreadyRunningError } from './lib/errors';
+
+export { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants';
 
 export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   schema: configSchema,
@@ -72,6 +83,10 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
       deprecate('claim_strategy', 'a future version', {
         level: 'warning',
         message: `Configuring "xpack.task_manager.claim_strategy" is deprecated and will be removed in a future version. This setting should be removed.`,
+      }),
+      deprecate('request_timeouts', 'a future version', {
+        level: 'warning',
+        message: `Configuring "xpack.task_manager.request_timeouts" is deprecated and will be removed in a future version. This setting should be removed.`,
       }),
       (settings, fromPath, addDeprecation) => {
         const taskManager = get(settings, fromPath);
@@ -110,6 +125,9 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   },
   exposeToUsage: {
     claim_strategy: true,
+    claim_nudge: {
+      enabled: true,
+    },
     discovery: {
       active_nodes_lookback: true,
     },

@@ -8,13 +8,15 @@
  */
 
 import type { DrilldownTransforms, EmbeddableTransforms } from '@kbn/embeddable-plugin/common';
-import type { SearchEmbeddableState, StoredSearchEmbeddableState } from './types';
+import type { SearchEmbeddablePanelApiState, StoredSearchEmbeddableState } from './types';
 import { getTransformIn } from './get_transform_in';
 import { getTransformOut } from './get_transform_out';
 
+export type { SearchEmbeddablePanelApiState } from './types';
+
 export function getSearchEmbeddableTransforms(
   drilldownTransforms: DrilldownTransforms
-): EmbeddableTransforms<StoredSearchEmbeddableState, SearchEmbeddableState> {
+): EmbeddableTransforms<StoredSearchEmbeddableState, SearchEmbeddablePanelApiState> {
   return {
     transformIn: getTransformIn(drilldownTransforms.transformIn),
     transformOut: getTransformOut(drilldownTransforms.transformOut),

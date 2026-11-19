@@ -11,3 +11,7 @@ export { LanguageDocumentationPopoverContent } from './src/components/as_popover
 export { LanguageDocumentationFlyout } from './src/components/as_flyout';
 export { LanguageDocumentationInline } from './src/components/as_inline';
 export type { LanguageDocumentationSections } from './src/types';
+
+// Used by the ES|QL documentation generation scripts in @kbn/esql-scripts
+export { getLicenseInfoForFunctions, getLicenseInfoForCommand } from './src/utils/get_license_info';
+export type { FunctionDefinition, CommandDefinition, MultipleLicenseInfo } from './src/types';

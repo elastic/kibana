@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -23,6 +23,12 @@ import { useConfirmModal } from '../../hooks/use_confirm_modal';
 
 import type { DownloadSourceBase } from '../../../../../../../common/types';
 
+import {
+  validateSslPathInput,
+  validateSslPathInputSecret,
+  validateSslPathsCombo,
+} from '../ssl_form_validators';
+
 import { confirmUpdate } from './confirm_update';
 
 export type AuthType = 'none' | 'username_password' | 'api_key';
@@ -32,6 +38,7 @@ export interface DownloadSourceFormInputsType {
   defaultDownloadSourceInput: ReturnType<typeof useSwitchInput>;
   hostInput: ReturnType<typeof useInput>;
   proxyIdInput: ReturnType<typeof useInput>;
+  reserveDiskspaceInput: ReturnType<typeof useSwitchInput>;
   sslCertificateInput: ReturnType<typeof useInput>;
   sslKeyInput: ReturnType<typeof useInput>;
   sslKeySecretInput: ReturnType<typeof useSecretInput>;
@@ -74,22 +81,28 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
 
   const proxyIdInput = useInput(downloadSource?.proxy_id ?? '', () => undefined, isEditDisabled);
 
+  // agent reserves disk space by default when the setting is not set
+  const reserveDiskspaceInput = useSwitchInput(
+    downloadSource?.reserve_diskspace ?? true,
+    isEditDisabled
+  );
+
   const sslCertificateAuthoritiesInput = useComboInput(
     'sslCertificateAuthoritiesComboxBox',
     downloadSource?.ssl?.certificate_authorities ?? [],
-    undefined,
+    validateSslPathsCombo,
     undefined
   );
   const sslCertificateInput = useInput(
     downloadSource?.ssl?.certificate ?? '',
-    undefined,
+    validateSslPathInput,
     undefined
   );
-  const sslKeyInput = useInput(downloadSource?.ssl?.key ?? '', undefined, undefined);
+  const sslKeyInput = useInput(downloadSource?.ssl?.key ?? '', validateSslPathInput, undefined);
 
   const sslKeySecretInput = useSecretInput(
     (downloadSource as DownloadSourceBase)?.secrets?.ssl?.key,
-    undefined,
+    validateSslPathInputSecret,
     undefined
   );
 
@@ -139,6 +152,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     hostInput,
     defaultDownloadSourceInput,
     proxyIdInput,
+    reserveDiskspaceInput,
     sslCertificateInput,
     sslKeyInput,
     sslCertificateAuthoritiesInput,
@@ -154,10 +168,32 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
 
+  const { setErrors: setUsernameErrors } = usernameInput;
+  const { setErrors: setPasswordErrors } = passwordInput;
+  const { cancelEdit: cancelPasswordSecretEdit } = passwordSecretInput;
+  const { setErrors: setApiKeyErrors } = apiKeyInput;
+  const { cancelEdit: cancelApiKeySecretEdit } = apiKeySecretInput;
+
+  useEffect(() => {
+    setUsernameErrors(undefined);
+    setPasswordErrors(undefined);
+    cancelPasswordSecretEdit();
+    setApiKeyErrors(undefined);
+    cancelApiKeySecretEdit();
+  }, [
+    authTypeInput.value,
+    setUsernameErrors,
+    setPasswordErrors,
+    cancelPasswordSecretEdit,
+    setApiKeyErrors,
+    cancelApiKeySecretEdit,
+  ]);
+
   const validate = useCallback(() => {
     const nameInputValid = nameInput.validate();
     const hostValid = hostInput.validate();
 
+    const sslCertificateAuthoritiesValid = sslCertificateAuthoritiesInput.validate();
     const sslCertificateValid = sslCertificateInput.validate();
     const sslKeyValid = sslKeyInput.validate();
     const sslKeySecretValid = sslKeySecretInput.validate();
@@ -174,7 +210,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     let authValid = true;
     if (authType === 'username_password') {
       // Username & password tab: require both username and password
-      const hasUsername = !!usernameInput.value;
+      const hasUsername = !!usernameInput.value.trim();
       const hasPassword = !!passwordInput.value || !!passwordSecretInput.value;
       if (!hasUsername) {
         usernameInput.setErrors([
@@ -212,6 +248,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     return (
       nameInputValid &&
       hostValid &&
+      sslCertificateAuthoritiesValid &&
       sslCertificateValid &&
       sslKeyValid &&
       sslKeySecretValid &&
@@ -226,6 +263,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
   }, [
     nameInput,
     hostInput,
+    sslCertificateAuthoritiesInput,
     sslCertificateInput,
     sslKeyInput,
     sslKeySecretInput,
@@ -249,7 +287,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
       let auth: PostDownloadSourceRequest['body']['auth'] | null;
 
       const filteredHeaders = headersInput.value.filter(
-        (header) => header.key !== '' || header.value !== ''
+        (header) => header.key.trim() !== '' || header.value.trim() !== ''
       );
       const hasHeaders = filteredHeaders.length > 0;
 
@@ -298,6 +336,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
         host: hostInput.value.trim(),
         is_default: defaultDownloadSourceInput.value,
         proxy_id: proxyIdInput.value || null,
+        reserve_diskspace: reserveDiskspaceInput.value,
         ssl: {
           certificate: sslCertificateInput.value,
           key: sslKeyInput.value || undefined,
@@ -343,6 +382,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     notifications.toasts,
     onSuccess,
     proxyIdInput.value,
+    reserveDiskspaceInput.value,
     sslCertificateAuthoritiesInput.value,
     sslCertificateInput.value,
     sslKeyInput.value,
@@ -357,11 +397,26 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     validate,
   ]);
 
+  const authType = authTypeInput.value as AuthType;
+  const isAuthMissing =
+    (authType === 'username_password' &&
+      (!usernameInput.value.trim() || (!passwordInput.value && !passwordSecretInput.value))) ||
+    (authType === 'api_key' && !apiKeyInput.value && !apiKeySecretInput.value);
+
   return {
     inputs,
     submit,
     isLoading,
-    isDisabled: isLoading || (downloadSource && !hasChanged) || isEditDisabled,
+    isDisabled:
+      isLoading ||
+      (downloadSource && !hasChanged) ||
+      isEditDisabled ||
+      !nameInput.value ||
+      !hostInput.value ||
+      isAuthMissing ||
+      sslCertificateAuthoritiesInput.props.isInvalid ||
+      sslCertificateInput.props.isInvalid ||
+      (sslKeyInput.value ? sslKeyInput.props.isInvalid : sslKeySecretInput.props.isInvalid),
   };
 }
 
@@ -413,8 +468,8 @@ export function validateDownloadSourceHeaders(
   pairs.forEach((pair, index) => {
     const { key, value } = pair;
 
-    const hasKey = !!key;
-    const hasValue = !!value;
+    const hasKey = key.trim() !== '';
+    const hasValue = value.trim() !== '';
 
     if (hasKey && !hasValue) {
       errors.push({

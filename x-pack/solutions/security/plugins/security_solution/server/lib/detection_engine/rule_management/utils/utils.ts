@@ -10,7 +10,9 @@ import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { FindResult, PartialRule } from '@kbn/alerting-plugin/server';
+import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
+import type { GapReasonType } from '@kbn/alerting-plugin/common/constants/gap_reason';
+import type { FindResult, PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
 
@@ -20,17 +22,24 @@ import type {
   RuleAction as RuleActionSchema,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type {
+  FindRulesSortField,
   FindRulesResponse,
   RuleToImport,
 } from '../../../../../common/api/detection_engine/rule_management';
-import type { WarningSchema } from '../../../../../common/api/detection_engine';
+import type { SortOrder, WarningSchema } from '../../../../../common/api/detection_engine';
+import {
+  MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
+  MAX_RULES_WITH_GAPS_TO_FETCH,
+} from '../../../../../common/constants';
 
 import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
 import type { InvestigationFieldsCombined, RuleAlertType, RuleParams } from '../../rule_schema';
 import { hasValidRuleType } from '../../rule_schema';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';
 import type { BulkActionError } from '../api/rules/bulk_actions/bulk_actions_response';
+import { getGapFilteredRuleIds } from '../logic/search/get_gap_filtered_rule_ids';
 
 type PromiseFromStreams = RuleToImport | Error;
 const MAX_CONCURRENT_SEARCHES = 10;
@@ -79,6 +88,53 @@ export const transformFindAlerts = (
   };
 };
 
+export const resolveGapPreFilter = async ({
+  rulesClient,
+  filter,
+  sortField,
+  sortOrder,
+  gapFillStatuses,
+  gapsRangeStart,
+  gapsRangeEnd,
+  excludedReasons,
+  schedulerId,
+}: {
+  rulesClient: RulesClient;
+  filter: string | undefined;
+  sortField?: FindRulesSortField;
+  sortOrder?: SortOrder;
+  gapFillStatuses: GapFillStatus[];
+  gapsRangeStart: string;
+  gapsRangeEnd: string;
+  excludedReasons?: GapReasonType[];
+  schedulerId?: string;
+}): Promise<{ ruleIds: string[]; warnings: WarningSchema[] }> => {
+  const { ruleIds, truncated } = await getGapFilteredRuleIds({
+    rulesClient,
+    gapRange: { start: gapsRangeStart, end: gapsRangeEnd },
+    gapFillStatuses,
+    maxRuleIds: MAX_RULES_WITH_GAPS_TO_FETCH,
+    filter,
+    sortField,
+    sortOrder,
+    excludedReasons,
+    schedulerId,
+  });
+
+  return {
+    ruleIds,
+    warnings: truncated
+      ? [
+          {
+            type: MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
+            message: `Only the first ${MAX_RULES_WITH_GAPS_TO_FETCH} rules with gaps in the selected time range are returned. Additional rules with gaps are not included in this response.`,
+            actionPath: '',
+          },
+        ]
+      : [],
+  };
+};
+
 export const transform = (rule: PartialRule<RuleParams>): RuleResponse | null => {
   if (hasValidRuleType(rule)) {
     return internalRuleToAPIResponse(rule);
@@ -88,8 +144,7 @@ export const transform = (rule: PartialRule<RuleParams>): RuleResponse | null =>
 };
 
 export const getTupleDuplicateErrorsAndUniqueRules = (
-  rules: PromiseFromStreams[],
-  isOverwrite: boolean
+  rules: PromiseFromStreams[]
 ): [BulkError[], PromiseFromStreams[]] => {
   const { errors, rulesAcc } = rules.reduce(
     (acc, parsedRule) => {
@@ -97,7 +152,7 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
         acc.rulesAcc.set(uuidv4(), parsedRule);
       } else {
         const { rule_id: ruleId } = parsedRule;
-        if (acc.rulesAcc.has(ruleId) && !isOverwrite) {
+        if (acc.rulesAcc.has(ruleId)) {
           acc.errors.set(
             uuidv4(),
             createBulkErrorObject({
@@ -193,53 +248,57 @@ export const migrateLegacyActionsIds = async (
   rules: PromiseFromStreams[],
   savedObjectsClient: SavedObjectsClientContract,
   actionsClient: ActionsClient
-): Promise<PromiseFromStreams[]> => {
-  const isImportRule = (r: unknown): r is RuleToImport => !(r instanceof Error);
+): Promise<PromiseFromStreams[]> =>
+  withSecuritySpan('ruleManagement.migrateLegacyActionsIds', async () => {
+    const isImportRule = (r: unknown): r is RuleToImport => !(r instanceof Error);
 
-  const toReturn = await pMap(
-    rules,
-    async (rule) => {
-      if (isImportRule(rule) && rule.actions != null && !isEmpty(rule.actions)) {
-        // filter out system actions, since they were not part of any 7.x releases and do not need to be migrated
-        const [systemActions, extActions] = partition<RuleAction>((action) =>
-          actionsClient.isSystemAction(action.id)
-        )(rule.actions);
-        // can we swap the pre 8.0 action connector(s) id with the new,
-        // post-8.0 action id (swap the originId for the new _id?)
-        const newActions: Array<RuleAction | Error> = await pMap(
-          (extActions as RuleAction[]) ?? [],
-          (action: RuleAction) => swapActionIds(action, savedObjectsClient),
-          { concurrency: MAX_CONCURRENT_SEARCHES }
-        );
+    const toReturn = await pMap(
+      rules,
+      async (rule) => {
+        if (isImportRule(rule) && rule.actions != null && !isEmpty(rule.actions)) {
+          // filter out system actions, since they were not part of any 7.x releases and do not need to be migrated
+          const [systemActions, extActions] = partition<RuleAction>((action) =>
+            actionsClient.isSystemAction(action.id)
+          )(rule.actions);
+          // can we swap the pre 8.0 action connector(s) id with the new,
+          // post-8.0 action id (swap the originId for the new _id?)
+          const newActions: Array<RuleAction | Error> = await pMap(
+            (extActions as RuleAction[]) ?? [],
+            (action: RuleAction) => swapActionIds(action, savedObjectsClient),
+            { concurrency: MAX_CONCURRENT_SEARCHES }
+          );
 
-        // were there any errors discovered while trying to migrate and swap the action connector ids?
-        const [actionMigrationErrors, newlyMigratedActions] = partition<RuleAction | Error, Error>(
-          (item): item is Error => item instanceof Error
-        )(newActions);
+          // were there any errors discovered while trying to migrate and swap the action connector ids?
+          const [actionMigrationErrors, newlyMigratedActions] = partition<
+            RuleAction | Error,
+            Error
+          >((item): item is Error => item instanceof Error)(newActions);
 
-        if (actionMigrationErrors == null || actionMigrationErrors.length === 0) {
-          return { ...rule, actions: [...newlyMigratedActions, ...systemActions] };
+          if (actionMigrationErrors == null || actionMigrationErrors.length === 0) {
+            return { ...rule, actions: [...newlyMigratedActions, ...systemActions] };
+          }
+
+          return [
+            { ...rule, actions: [...newlyMigratedActions, ...systemActions] },
+            new Error(
+              JSON.stringify(
+                createBulkErrorObject({
+                  ruleId: rule.rule_id,
+                  statusCode: 409,
+                  message: `${actionMigrationErrors
+                    .map((error: Error) => error.message)
+                    .join(',')}`,
+                })
+              )
+            ),
+          ];
         }
-
-        return [
-          { ...rule, actions: [...newlyMigratedActions, ...systemActions] },
-          new Error(
-            JSON.stringify(
-              createBulkErrorObject({
-                ruleId: rule.rule_id,
-                statusCode: 409,
-                message: `${actionMigrationErrors.map((error: Error) => error.message).join(',')}`,
-              })
-            )
-          ),
-        ];
-      }
-      return rule;
-    },
-    { concurrency: MAX_CONCURRENT_SEARCHES }
-  );
-  return toReturn.flat();
-};
+        return rule;
+      },
+      { concurrency: MAX_CONCURRENT_SEARCHES }
+    );
+    return toReturn.flat();
+  });
 
 /**
  * In ESS 8.10.x "investigation_fields" are mapped as string[].

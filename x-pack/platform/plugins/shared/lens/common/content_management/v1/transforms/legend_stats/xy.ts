@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LegendValue } from '@elastic/charts';
+import { ChartLegendValue } from '@kbn/chart-expressions-common';
 
 import type { XYVisualizationState } from '../../../../../public/visualizations/xy/types';
 
@@ -31,7 +31,7 @@ export function convertXYToLegendStats(
         ...state.legend,
         legendStats: [
           ...new Set([
-            ...(valuesInLegend ? [LegendValue.CurrentAndLastValue] : []),
+            ...(valuesInLegend ? [ChartLegendValue.CurrentAndLastValue] : []),
             ...(state.legend.legendStats ?? []),
           ]),
         ],

@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTableState } from '@kbn/ml-in-memory-table';
 import React, { useCallback, useEffect, useMemo, useRef, type FC } from 'react';
+import { useIsInteractive } from '../../hooks/use_is_interactive';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import type { FieldConfig, SelectedChangePoint } from './change_point_detection_context';
@@ -35,6 +36,7 @@ export interface ChangePointsTableProps {
   isLoading: boolean;
   onSelectionChange?: (update: SelectedChangePoint[]) => void;
   onRenderComplete?: () => void;
+  parentApi?: unknown;
 }
 
 function getFilterConfig(
@@ -67,7 +69,8 @@ function getFilterConfig(
   };
 }
 
-const pageSizeOptions = [5, 10, 15];
+const DEFAULT_PAGE_SIZE = 10;
+const pageSizeOptions = [5, DEFAULT_PAGE_SIZE, 15];
 
 export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   isLoading,
@@ -75,7 +78,10 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   fieldConfig,
   onSelectionChange,
   onRenderComplete,
+  parentApi,
 }) => {
+  const isInteractive = useIsInteractive(parentApi);
+
   const {
     fieldFormats,
     data: {
@@ -85,7 +91,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   } = useAiopsAppContext();
   const { dataView } = useDataSource();
 
-  const chartLoadingCount = useRef<number>(0);
+  const chartLoadingById = useRef<Record<string, boolean>>({});
 
   const { onTableChange, pagination, sorting } = useTableState<ChangePointAnnotation>(
     annotations ?? [],
@@ -93,7 +99,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
     'asc',
     {
       pageIndex: 0,
-      pageSize: 10,
+      pageSize: DEFAULT_PAGE_SIZE,
       pageSizeOptions,
     }
   );
@@ -101,30 +107,50 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   const dateFormatter = useMemo(() => fieldFormats.deserialize({ id: 'date' }), [fieldFormats]);
 
   useEffect(() => {
-    // Reset loading counter on pagination or sort change
-    chartLoadingCount.current = 0;
-  }, [pagination.pageIndex, pagination.pageSize, sorting.sort]);
+    // Reset loading state on pagination or sort change
+    chartLoadingById.current = {};
+  }, [pagination.pageIndex, pagination.pageSize, sorting.sort.field, sorting.sort.direction]);
+
+  const pageSize = pagination.pageSize ?? DEFAULT_PAGE_SIZE;
+  const visibleRowCount = Math.min(
+    pageSize,
+    Math.max(0, annotations.length - pagination.pageIndex * pageSize)
+  );
 
   /**
    * Callback to track render of each chart component
    * to report when all charts on the current page are ready.
    */
   const onChartRenderCompleteCallback = useCallback(
-    (isLoadingChart: boolean) => {
+    (chartId: string, isLoadingChart: boolean) => {
       if (!onRenderComplete) return;
-      if (!isLoadingChart) {
-        chartLoadingCount.current++;
-      }
-      if (chartLoadingCount.current === pagination.pageSize) {
+      chartLoadingById.current[chartId] = isLoadingChart;
+      const loadingStates = Object.values(chartLoadingById.current);
+      if (
+        visibleRowCount > 0 &&
+        loadingStates.length === visibleRowCount &&
+        loadingStates.every((v) => !v)
+      ) {
         onRenderComplete();
       }
     },
-    [onRenderComplete, pagination.pageSize]
+    [onRenderComplete, visibleRowCount]
   );
 
-  const hasActions = fieldConfig.splitField !== undefined && embeddingOrigin !== 'cases';
+  const isDashboardEmbedding = embeddingOrigin === 'dashboard';
+  const hasActions =
+    isInteractive && fieldConfig.splitField !== undefined && embeddingOrigin !== 'cases';
 
   const { bucketInterval } = useChangePointDetectionContext();
+
+  // Prevents timestamp and p-value cells from wrapping excessively in narrow tables,
+  // which would make the values unreadable. Capped at 3 lines as a safe maximum.
+  const lineClampStyle: React.CSSProperties = {
+    display: '-webkit-box',
+    WebkitLineClamp: 3,
+    WebkitBoxOrient: 'vertical',
+    overflow: 'hidden',
+  };
 
   const columns: Array<EuiBasicTableColumn<ChangePointAnnotation>> = [
     {
@@ -134,10 +160,15 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       name: i18n.translate('xpack.aiops.changePointDetection.timeColumn', {
         defaultMessage: 'Time',
       }),
+      dataType: 'date',
       sortable: true,
       truncateText: false,
-      width: '230px',
-      render: (timestamp: ChangePointAnnotation['timestamp']) => dateFormatter.convert(timestamp),
+      render: (timestamp: ChangePointAnnotation['timestamp']) => (
+        <span style={isDashboardEmbedding ? lineClampStyle : undefined}>
+          {dateFormatter.convertToText(timestamp)}
+        </span>
+      ),
+      width: isDashboardEmbedding ? '180px' : '20%',
     },
     {
       id: 'preview',
@@ -156,10 +187,14 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       render: (annotation: ChangePointAnnotation) => {
         return (
           <MiniChartPreview
+            parentApi={parentApi}
             annotation={annotation}
             fieldConfig={fieldConfig}
             interval={bucketInterval.expression}
-            onRenderComplete={onChartRenderCompleteCallback.bind(null, false)}
+            onLoading={(isLoadingChart) =>
+              onChartRenderCompleteCallback(annotation.id, isLoadingChart)
+            }
+            onRenderComplete={() => onChartRenderCompleteCallback(annotation.id, false)}
           />
         );
       },
@@ -172,8 +207,9 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
         defaultMessage: 'Type',
       }),
       sortable: true,
-      truncateText: false,
+      truncateText: true,
       render: (type: ChangePointAnnotation['type']) => <EuiBadge color="hollow">{type}</EuiBadge>,
+      width: isDashboardEmbedding ? '130px' : '15%',
     },
     {
       id: 'pValue',
@@ -190,29 +226,26 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       },
       sortable: true,
       truncateText: false,
-      render: (pValue: ChangePointAnnotation['p_value']) =>
-        pValue !== undefined ? pValue.toPrecision(3) : '-',
+      render: (pValue: ChangePointAnnotation['p_value']) => (
+        <span style={isDashboardEmbedding ? lineClampStyle : undefined}>
+          {pValue !== undefined ? pValue.toPrecision(3) : '-'}
+        </span>
+      ),
+      width: isDashboardEmbedding ? '120px' : '15%',
     },
     ...(fieldConfig.splitField
       ? [
           {
-            id: 'groupName',
-            'data-test-subj': 'aiopsChangePointGroupName',
-            field: 'group.name',
-            name: i18n.translate('xpack.aiops.changePointDetection.fieldNameColumn', {
-              defaultMessage: 'Field name',
-            }),
-            truncateText: false,
-          },
-          {
             id: 'groupValue',
             'data-test-subj': 'aiopsChangePointGroupValue',
             field: 'group.value',
-            name: i18n.translate('xpack.aiops.changePointDetection.fieldValueColumn', {
-              defaultMessage: 'Field value',
-            }),
+            name: fieldConfig.splitField,
             truncateText: false,
             sortable: true,
+            width: isDashboardEmbedding ? '120px' : '15%',
+            render: (value: string) => (
+              <span style={isDashboardEmbedding ? lineClampStyle : undefined}>{value}</span>
+            ),
           },
           ...(hasActions
             ? [
@@ -304,6 +337,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
 
   return (
     <EuiInMemoryTable<ChangePointAnnotation>
+      tableLayout={isDashboardEmbedding ? 'auto' : 'fixed'}
       tableCaption={i18n.translate('xpack.aiops.changePointDetection.resultsTableCaption', {
         defaultMessage: 'Change point detection results',
       })}
@@ -316,7 +350,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       pagination={
         pagination.pageSizeOptions![0] > pagination!.totalItemCount ? undefined : pagination
       }
-      sorting={sorting}
+      sorting={{ ...sorting, ...(!isInteractive && { readOnly: true }) }}
       onTableChange={onTableChange}
       rowProps={(item) => ({
         'data-test-subj': `aiopsChangePointResultsTableRow row-${item.id}`,
@@ -348,6 +382,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({
   annotation,
   onRenderComplete,
   onLoading,
+  parentApi,
 }) => {
   const {
     lens: { EmbeddableComponent },
@@ -358,7 +393,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({
   const { filters, query, attributes, timeRange } = useCommonChartProps({
     annotation,
     fieldConfig,
-    previewMode: true,
+    isInteractive: false,
     bucketInterval: bucketInterval.expression,
   });
 
@@ -396,12 +431,13 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({
         filters={filters}
         // @ts-ignore
         attributes={attributes}
-        renderMode={'preview'}
+        renderMode={'non-interactive'}
         executionContext={{
           type: 'aiops_change_point_detection_chart',
           name: 'Change point detection',
         }}
         onLoad={onLoading}
+        parentApi={parentApi}
       />
     </div>
   );

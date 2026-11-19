@@ -11,6 +11,7 @@
     "__mocks__/*",
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     "@kbn/kibana-react-plugin",
     "@kbn/telemetry-management-section-plugin",

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type {
   CoreSetup,
   CoreStart,
@@ -20,14 +21,13 @@ export class ElasticConsolePlugin implements Plugin {
 
   setup(core: CoreSetup) {
     core.application.register({
-      id: 'elasticConsole',
-      title: 'Elastic Console',
+      id: 'elasticRamen',
+      title: 'Elastic Ramen',
       visibleIn: [],
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
-        const featureFlagEnabled = coreStart.featureFlags.getBooleanValue(
-          ELASTIC_CONSOLE_ENABLED_FLAG,
-          false
+        const featureFlagEnabled = await firstValueFrom(
+          coreStart.featureFlags.getBooleanValue$(ELASTIC_CONSOLE_ENABLED_FLAG, false)
         );
         const advancedSettingEnabled = coreStart.uiSettings.get<boolean>(
           ELASTIC_CONSOLE_ENABLED_SETTING_ID,
@@ -35,7 +35,7 @@ export class ElasticConsolePlugin implements Plugin {
         );
         if (!featureFlagEnabled || !advancedSettingEnabled) {
           const { element } = params;
-          element.innerHTML = '<div>Elastic Console is not enabled.</div>';
+          element.innerHTML = '<div>Elastic Ramen is not enabled.</div>';
           return () => {};
         }
         const { renderApp } = await import('./application');

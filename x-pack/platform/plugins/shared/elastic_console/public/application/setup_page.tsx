@@ -7,13 +7,10 @@
 
 import React, { useCallback, useState } from 'react';
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiCallOut,
   EuiCodeBlock,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
   EuiPageTemplate,
   EuiSpacer,
   EuiText,
@@ -22,12 +19,22 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 
-const LOCAL_AGENT_URL = 'http://localhost:14642';
-
 interface SetupResponse {
   elasticsearchUrl: string;
   kibanaUrl: string;
   apiKeyEncoded: string;
+}
+
+function blob(data: SetupResponse) {
+  return JSON.stringify(
+    {
+      kibanaUrl: data.kibanaUrl,
+      elasticsearchUrl: data.elasticsearchUrl,
+      apiKey: data.apiKeyEncoded,
+    },
+    null,
+    2
+  );
 }
 
 export const SetupPage: React.FC = () => {
@@ -35,65 +42,14 @@ export const SetupPage: React.FC = () => {
   const [setupData, setSetupData] = useState<SetupResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [autoDeliveryStatus, setAutoDeliveryStatus] = useState<'idle' | 'success' | 'failed'>(
-    'idle'
-  );
 
   const handleSetup = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    setAutoDeliveryStatus('idle');
 
     try {
-      const data = await services.http.post<SetupResponse>('/internal/elastic_console/setup');
+      const data = await services.http.post<SetupResponse>('/internal/elastic_ramen/setup');
       setSetupData(data);
-
-      // Attempt auto-delivery to local agent
-      try {
-        await fetch(`${LOCAL_AGENT_URL}/config`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            elasticsearch_url: data.elasticsearchUrl,
-            kibana_url: data.kibanaUrl,
-            api_key: data.apiKeyEncoded,
-            provider: {
-              kibana: {
-                name: 'Kibana LLM Gateway',
-                id: 'kibana',
-                npm: '@ai-sdk/openai-compatible',
-                env: [],
-                models: {
-                  default: {
-                    id: 'default',
-                    name: 'Default Connector',
-                    attachment: false,
-                    reasoning: false,
-                    temperature: true,
-                    tool_call: true,
-                    release_date: '2025-01-01',
-                    cost: { input: 0, output: 0 },
-                    limit: { context: 128000, output: 8192 },
-                  },
-                },
-                options: {
-                  baseURL: `${data.kibanaUrl}/internal/elastic_console/v1`,
-                  apiKey: 'ignored',
-                  headers: {
-                    Authorization: `ApiKey ${data.apiKeyEncoded}`,
-                    'x-elastic-internal-origin': 'kibana',
-                    'kbn-xsrf': 'true',
-                  },
-                },
-              },
-            },
-            model: 'kibana/default',
-          }),
-        });
-        setAutoDeliveryStatus('success');
-      } catch {
-        setAutoDeliveryStatus('failed');
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create setup credentials');
     } finally {
@@ -101,24 +57,44 @@ export const SetupPage: React.FC = () => {
     }
   }, [services.http]);
 
+  const json = setupData ? blob(setupData) : '';
+
   return (
     <EuiPageTemplate>
-      <EuiPageTemplate.Header pageTitle="Elastic Console Setup" />
+      <EuiPageTemplate.Header
+        pageTitle={<>{'🍜 Elastic Ramen Setup'}</>}
+        rightSideItems={[<EuiBetaBadge label="Experimental" color="hollow" />]}
+      />
       <EuiPageTemplate.Section>
+        <EuiCallOut
+          title="Experimental feature — proceed with caution"
+          color="warning"
+          iconType="flask"
+        >
+          <p>
+            Elastic Ramen is an <strong>experimental</strong> feature under active development. It
+            may change, break, or be removed without notice. Use at your own risk — it can expose AI
+            connectors to external tools and may produce unexpected behavior. Do not rely on it for
+            production workloads.
+          </p>
+        </EuiCallOut>
+
+        <EuiSpacer />
+
         <EuiText>
           <p>
-            Generate connection credentials for external tools to use Kibana-configured AI
-            connectors via an OpenAI-compatible API.
+            Create connection credentials for Elastic Ramen. Paste the JSON into the RAMEN setup
+            dialog to connect.
           </p>
         </EuiText>
 
         <EuiSpacer />
 
-        <EuiButton fill onClick={handleSetup} isLoading={isLoading}>
-          Generate credentials
-        </EuiButton>
-
-        <EuiSpacer />
+        {!setupData && (
+          <EuiButton fill onClick={handleSetup} isLoading={isLoading}>
+            Create credentials
+          </EuiButton>
+        )}
 
         {error && (
           <>
@@ -129,76 +105,36 @@ export const SetupPage: React.FC = () => {
           </>
         )}
 
-        {autoDeliveryStatus === 'success' && (
+        {setupData && (
           <>
             <EuiCallOut
               announceOnMount
-              title="Credentials delivered to local agent"
+              title="Credentials created"
               color="success"
               iconType="check"
             >
               <p>
-                The credentials were automatically sent to the local Elastic Console agent at{' '}
-                {LOCAL_AGENT_URL}.
+                Copy the JSON below and paste it into the Elastic Ramen setup dialog. The API key
+                expires in 30 days.
               </p>
             </EuiCallOut>
-            <EuiSpacer />
-          </>
-        )}
 
-        {autoDeliveryStatus === 'failed' && setupData && (
-          <>
-            <EuiCallOut
-              announceOnMount
-              title="Could not reach local agent"
-              color="warning"
-              iconType="warning"
-            >
-              <p>No local agent found at {LOCAL_AGENT_URL}. Copy the credentials below manually.</p>
-            </EuiCallOut>
             <EuiSpacer />
-          </>
-        )}
 
-        {setupData && (
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem>
-              <EuiFormRow label="Kibana URL" fullWidth>
-                <EuiFieldText value={setupData.kibanaUrl} readOnly fullWidth />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow label="Elasticsearch URL" fullWidth>
-                <EuiFieldText value={setupData.elasticsearchUrl} readOnly fullWidth />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow label="API Key (Base64)" fullWidth>
-                <EuiCodeBlock language="text" paddingSize="s" isCopyable>
-                  {setupData.apiKeyEncoded}
-                </EuiCodeBlock>
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiCopy
-                textToCopy={JSON.stringify(
-                  {
-                    kibanaUrl: setupData.kibanaUrl,
-                    elasticsearchUrl: setupData.elasticsearchUrl,
-                    apiKey: setupData.apiKeyEncoded,
-                  },
-                  null,
-                  2
-                )}
-              >
-                {(copy) => (
-                  <EuiButton onClick={copy} iconType="copy">
-                    Copy all as JSON
-                  </EuiButton>
-                )}
-              </EuiCopy>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            <EuiCodeBlock language="json" paddingSize="m" isCopyable>
+              {json}
+            </EuiCodeBlock>
+
+            <EuiSpacer />
+
+            <EuiCopy textToCopy={json}>
+              {(copy) => (
+                <EuiButton fill onClick={copy} iconType="copy">
+                  Copy JSON
+                </EuiButton>
+              )}
+            </EuiCopy>
+          </>
         )}
       </EuiPageTemplate.Section>
     </EuiPageTemplate>

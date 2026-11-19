@@ -7,7 +7,7 @@
 
 import type { Class } from 'utility-types';
 
-import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 
 import { getLensFeatureFlags } from './get_feature_flags';

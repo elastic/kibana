@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
-import type { ComponentType } from 'react';
-import type { ReactElement } from 'react-markdown';
+import type { ComponentType, ReactElement } from 'react';
 import { useSpaceId } from '../../hooks/use_space_id';
 
 type OmitSpaceId<T extends { spaceId: string }> = Omit<T, 'spaceId'>;

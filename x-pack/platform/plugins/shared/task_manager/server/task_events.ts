@@ -7,7 +7,7 @@
 
 import { monitorEventLoopDelay } from 'perf_hooks';
 
-import type { ConcreteTaskInstance } from './task';
+import type { ConcreteTaskInstance, TaskTypeGroup } from './task';
 
 import type { Result, Err } from './lib/result_type';
 import type { ClaimAndFillPoolResult } from './lib/fill_pool';
@@ -15,6 +15,7 @@ import type { PollingError } from './polling';
 import type { DecoratedError, TaskRunResult } from './task_running';
 import type { EventLoopDelayConfig } from './config';
 import type { TaskManagerMetrics } from './metrics/task_metrics_collector';
+import type { BackpressureReason } from './lib/backpressure_reason';
 
 export enum TaskPersistence {
   Recurring = 'recurring',
@@ -29,6 +30,7 @@ export enum TaskEventType {
   TASK_POLLING_CYCLE = 'TASK_POLLING_CYCLE',
   TASK_MANAGER_METRIC = 'TASK_MANAGER_METRIC',
   TASK_MANAGER_STAT = 'TASK_MANAGER_STAT',
+  TASK_MANAGER_BACKPRESSURE = 'TASK_MANAGER_BACKPRESSURE',
 }
 
 export interface TaskTiming {
@@ -43,19 +45,18 @@ export function startTaskTimer(): () => TaskTiming {
   return () => ({ start, stop: Date.now() });
 }
 
-export function startTaskTimerWithEventLoopMonitoring(
-  eventLoopDelayConfig: EventLoopDelayConfig
-): () => TaskTiming {
-  const stopTaskTimer = startTaskTimer();
+/**
+ * Starts event-loop delay (ELD) monitoring and returns a stop function.
+ * The stop function disables the histogram and returns the max block time in ms.
+ * It must be called exactly once — calling it disables the histogram as a side effect.
+ */
+export function startEventLoopMonitoring(eventLoopDelayConfig: EventLoopDelayConfig): () => number {
   const eldHistogram = eventLoopDelayConfig.monitor ? monitorEventLoopDelay() : null;
   eldHistogram?.enable();
-
   return () => {
-    const { start, stop } = stopTaskTimer();
     eldHistogram?.disable();
-    const eldMax = eldHistogram?.max ?? 0;
-    const eventLoopBlockMs = Math.round(eldMax / 1000 / 1000); // original in nanoseconds
-    return { start, stop, eventLoopBlockMs };
+    const eldMaxNs = eldHistogram?.max ?? 0;
+    return Math.round(eldMaxNs / 1_000_000);
   };
 }
 
@@ -70,6 +71,7 @@ export interface RanTask {
   persistence: TaskPersistence;
   result: TaskRunResult;
   isExpired: boolean;
+  taskTypeGroup?: TaskTypeGroup;
 }
 export type ErroredTask = RanTask & {
   error: DecoratedError;
@@ -89,6 +91,13 @@ export type TaskManagerStats =
   | 'workerUtilization'
   | 'runDelay';
 export type TaskManagerStat = TaskEvent<number, never, TaskManagerStats>;
+
+/** Point-in-time snapshot of whether Task Manager is throttling because Elasticsearch is unhealthy, with the ES-pressure cause. */
+export interface TaskManagerBackpressureStats {
+  active: boolean;
+  reason: BackpressureReason | null;
+}
+export type TaskManagerBackpressure = TaskEvent<TaskManagerBackpressureStats, never>;
 
 export type OkResultOf<EventType> = EventType extends TaskEvent<infer OkResult, infer ErrorResult>
   ? OkResult
@@ -181,6 +190,15 @@ export function asTaskManagerMetricEvent(
   };
 }
 
+export function asTaskManagerBackpressureEvent(
+  event: Result<TaskManagerBackpressureStats, never>
+): TaskManagerBackpressure {
+  return {
+    type: TaskEventType.TASK_MANAGER_BACKPRESSURE,
+    event,
+  };
+}
+
 export function isTaskMarkRunningEvent(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskMarkRunning {
@@ -216,4 +234,9 @@ export function isTaskManagerMetricEvent(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskManagerStat {
   return taskEvent.type === TaskEventType.TASK_MANAGER_METRIC;
+}
+export function isTaskManagerBackpressureEvent(
+  taskEvent: TaskEvent<unknown, unknown>
+): taskEvent is TaskManagerBackpressure {
+  return taskEvent.type === TaskEventType.TASK_MANAGER_BACKPRESSURE;
 }

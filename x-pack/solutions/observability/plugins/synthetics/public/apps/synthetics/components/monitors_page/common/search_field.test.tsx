@@ -6,10 +6,11 @@
  */
 import React from 'react';
 import * as URL from '../../../hooks/use_url_params';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { act, fireEvent } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
 import type { SyntheticsUrlParams } from '../../../utils/url_params/get_supported_url_params';
 import { SearchField } from './search_field';
+import { ClearAllFilters } from './monitor_filters/clear_all_filters';
 
 describe('SearchField', () => {
   let useUrlParamsSpy: jest.SpyInstance<[URL.GetUrlParams, URL.UpdateUrlParams]>;
@@ -17,6 +18,9 @@ describe('SearchField', () => {
   let updateUrlParamsMock: jest.Mock;
 
   beforeEach(() => {
+    // Drive the component's 300ms `useDebounce` deterministically so the test
+    // never depends on a real timer firing on time under CI parallel load.
+    jest.useFakeTimers();
     useUrlParamsSpy = jest.spyOn(URL, 'useUrlParams');
     useGetUrlParamsSpy = jest.spyOn(URL, 'useGetUrlParams');
     updateUrlParamsMock = jest.fn();
@@ -25,10 +29,11 @@ describe('SearchField', () => {
   });
 
   afterEach(() => {
+    jest.useRealTimers();
     jest.restoreAllMocks();
   });
 
-  it('updates url params when searching', async () => {
+  it('updates url params when searching', () => {
     const searchInput = 'test input';
     const { getByTestId } = render(<SearchField />);
 
@@ -36,10 +41,12 @@ describe('SearchField', () => {
       target: { value: searchInput },
     });
 
-    await waitFor(() => {
-      expect(updateUrlParamsMock).toBeCalledWith({
-        query: searchInput,
-      });
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    expect(updateUrlParamsMock).toHaveBeenCalledWith({
+      query: searchInput,
     });
   });
 
@@ -53,5 +60,61 @@ describe('SearchField', () => {
     const input = getByTestId('syntheticsOverviewSearchInput') as HTMLInputElement;
 
     expect(input.value).toEqual(searchInput);
+  });
+
+  it('re-syncs the input when the URL query is updated externally after the user has typed', () => {
+    // Simulates the Error Insights flow: the user types something, the panel
+    // (e.g. an emerging-term card) then rewrites the `query` URL param, and
+    // the input must reflect the new URL value rather than the stale typed text.
+    useGetUrlParamsSpy.mockReturnValue({ query: '' } as SyntheticsUrlParams);
+
+    const { getByTestId, rerender } = render(<SearchField />);
+    const input = getByTestId('syntheticsOverviewSearchInput') as HTMLInputElement;
+
+    fireEvent.change(input, { target: { value: 'user typed' } });
+    expect(input.value).toBe('user typed');
+
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+    expect(updateUrlParamsMock).toHaveBeenCalledWith({ query: 'user typed' });
+
+    useGetUrlParamsSpy.mockReturnValue({ query: 'external value' } as SyntheticsUrlParams);
+    rerender(<SearchField />);
+
+    const current = getByTestId('syntheticsOverviewSearchInput') as HTMLInputElement;
+    expect(current.value).toBe('external value');
+  });
+
+  it('does not write a pending search after clear-all when the URL query was already empty', () => {
+    useGetUrlParamsSpy.mockReturnValue({
+      query: '',
+      tags: ['prod'],
+    } as SyntheticsUrlParams);
+
+    const { getByTestId, getByRole } = render(
+      <>
+        <SearchField />
+        <ClearAllFilters />
+      </>
+    );
+
+    fireEvent.change(getByTestId('syntheticsOverviewSearchInput'), {
+      target: { value: 'checkout' },
+    });
+    fireEvent.click(getByRole('button', { name: 'Clear all selected Synthetics filters' }));
+
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    expect(updateUrlParamsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: undefined,
+        tags: undefined,
+      })
+    );
+    expect(updateUrlParamsMock).not.toHaveBeenCalledWith({ query: 'checkout' });
+    expect((getByTestId('syntheticsOverviewSearchInput') as HTMLInputElement).value).toBe('');
   });
 });

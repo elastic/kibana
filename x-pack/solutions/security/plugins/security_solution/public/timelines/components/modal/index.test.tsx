@@ -11,10 +11,21 @@ import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineModal } from '.';
+import { useUnmanagedFlyoutZIndex } from '../../../common/hooks/use_unmanaged_flyout_z_index';
+import { timelineFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/flyout_history';
 
-jest.mock('../timeline', () => ({
-  StatefulTimeline: () => <div data-test-subj="StatefulTimelineMock" />,
-}));
+const mockCapturedFlyoutSessionContext = jest.fn();
+jest.mock('../timeline', () => {
+  const { useFlyoutSessionContext } = jest.requireActual('../../../flyout_v2/session_context');
+  return {
+    StatefulTimeline: () => {
+      mockCapturedFlyoutSessionContext(useFlyoutSessionContext());
+      return <div data-test-subj="StatefulTimelineMock" />;
+    },
+  };
+});
+
+jest.mock('../../../common/hooks/use_unmanaged_flyout_z_index');
 
 const mockIsFullScreen = jest.fn(() => false);
 jest.mock('../../../common/store/selectors', () => ({
@@ -35,6 +46,7 @@ const renderTimelineModal = () =>
 describe('TimelineModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useUnmanagedFlyoutZIndex).mockReturnValue(undefined);
   });
 
   it('should render the timeline', async () => {
@@ -61,5 +73,24 @@ describe('TimelineModal', () => {
     expect(getByTestId('timeline-portal-overlay-mask')).toHaveClass(
       'timeline-portal-overlay-mask--full-screen'
     );
+  });
+
+  it('passes its visibility down to useUnmanagedFlyoutZIndex', () => {
+    renderTimelineModal();
+
+    expect(useUnmanagedFlyoutZIndex).toHaveBeenCalledWith({
+      id: 'security-solution-timeline',
+      active: true,
+    });
+  });
+
+  it('scopes flyouts opened from within Timeline to their own, dedicated history key', () => {
+    renderTimelineModal();
+
+    expect(mockCapturedFlyoutSessionContext).toHaveBeenCalledWith({
+      session: 'start',
+      historyKey: timelineFlyoutHistoryKey,
+      isChildFlyout: false,
+    });
   });
 });

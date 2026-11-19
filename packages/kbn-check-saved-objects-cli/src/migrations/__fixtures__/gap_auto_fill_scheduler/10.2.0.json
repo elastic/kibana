@@ -1,0 +1,50 @@
+{
+  "10.1.0": [
+    {
+      "name": "Default gap auto-fill scheduler",
+      "enabled": true,
+      "schedule": {
+        "interval": "1h"
+      },
+      "gapFillRange": "now-1d",
+      "maxBackfills": 1000,
+      "numRetries": 3,
+      "scope": ["securitySolution"],
+      "ruleTypes": [
+        {
+          "type": "siem.queryRule",
+          "consumer": "siem"
+        }
+      ],
+      "ruleTypeConsumerPairs": ["siem.queryRule:siem"],
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    }
+  ],
+  "10.2.0": [
+    {
+      "name": "Default gap auto-fill scheduler",
+      "enabled": true,
+      "schedule": {
+        "interval": "1h"
+      },
+      "gapFillRange": "now-1d",
+      "maxBackfills": 1000,
+      "numRetries": 3,
+      "scope": ["securitySolution"],
+      "ruleTypes": [
+        {
+          "type": "siem.queryRule",
+          "consumer": "siem"
+        }
+      ],
+      "ruleTypeConsumerPairs": ["siem.queryRule:siem"],
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}

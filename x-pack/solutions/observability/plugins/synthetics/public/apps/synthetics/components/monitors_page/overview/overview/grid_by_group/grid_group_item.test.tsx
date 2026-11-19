@@ -15,7 +15,7 @@ jest.mock('../../../hooks/use_overview_trends_requests', () => ({
 import { useOverviewTrendsRequests } from '../../../hooks/use_overview_trends_requests';
 import { GroupGridItem } from './grid_group_item';
 import type { OverviewStatusMetaData } from '../../types';
-import { WrappedHelper } from '../../../../../utils/testing';
+import { HookWrapper } from '../../../../../utils/testing/hook_helpers';
 
 describe('GridGroupItem', () => {
   const renderComponent = (props: Partial<React.ComponentProps<typeof GroupGridItem>> = {}) => {
@@ -29,9 +29,9 @@ describe('GridGroupItem', () => {
       view: 'cardView',
     };
     return render(
-      <WrappedHelper>
+      <HookWrapper>
         <GroupGridItem {...defaultProps} {...props} />
-      </WrappedHelper>
+      </HookWrapper>
     );
   };
   it('calls useOverviewTrendsRequests to fetch trends for visible monitors', () => {

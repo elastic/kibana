@@ -1,0 +1,12 @@
+spec_id: .amazon_s3
+name: "Amazon S3 (testing)"
+auth_type: aws_credentials
+config:
+  region: "us-east-1"
+secrets:
+  accessKeyId:
+    vault: secret/ent-search-team/connectors-sources/s3
+    field: access-key-id
+  secretAccessKey:
+    vault: secret/ent-search-team/connectors-sources/s3
+    field: secret-key

@@ -14,6 +14,7 @@ describe('convertUserProfileAPI', () => {
   it('returns the API from the source', () => {
     const source: CoreUserProfileDelegateContract = {
       getCurrent: jest.fn(),
+      getCurrentProfileId: jest.fn(),
       bulkGet: jest.fn(),
       suggest: jest.fn(),
       update: jest.fn(),
@@ -22,6 +23,7 @@ describe('convertUserProfileAPI', () => {
     const output = convertUserProfileAPI(source);
 
     expect(output.getCurrent).toBe(source.getCurrent);
+    expect(output.getCurrentProfileId).toBe(source.getCurrentProfileId);
     expect(output.bulkGet).toBe(source.bulkGet);
     expect(output.suggest).toBe(source.suggest);
     expect(output.update).toBe(source.update);

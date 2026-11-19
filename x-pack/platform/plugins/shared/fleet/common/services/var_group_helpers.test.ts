@@ -14,6 +14,10 @@ import {
   shouldShowVar,
   isVarRequiredByVarGroup,
   isVarInSelectedVarGroupOption,
+  inferVarGroupSelections,
+  isVarGroupOptionHiddenInDeploymentMode,
+  getFirstVisibleVarGroupOption,
+  sanitizeVarGroupSelections,
   type VarGroupSelection,
 } from './var_group_helpers';
 
@@ -257,6 +261,358 @@ describe('var_group_helpers', () => {
 
       // isVarInSelectedVarGroupOption returns false for uncontrolled vars
       expect(isVarInSelectedVarGroupOption('some_other_var', varGroups, selections)).toBe(false);
+    });
+  });
+
+  describe('inferVarGroupSelections', () => {
+    // Mirrors the aws package's credential_type var_group
+    const awsCredentialVarGroup = (): RegistryVarGroup => ({
+      name: 'credential_type',
+      title: 'Setup Access',
+      selector_title: 'Preferred method',
+      required: true,
+      options: [
+        {
+          name: 'identity_federation',
+          title: 'Identity Federation',
+          vars: ['role_arn', 'supports_identity_federation'],
+          provider: 'aws',
+        },
+        {
+          name: 'direct_access_key',
+          title: 'Direct Access Keys',
+          vars: ['access_key_id', 'secret_access_key'],
+        },
+        {
+          name: 'temporary_access_key',
+          title: 'Temporary Access Keys',
+          vars: ['access_key_id', 'secret_access_key', 'session_token'],
+        },
+        {
+          name: 'assume_role',
+          title: 'Assume Role',
+          vars: ['role_arn'],
+        },
+        {
+          name: 'shared_credentials',
+          title: 'Shared Credentials',
+          vars: ['shared_credential_file', 'credential_profile_name'],
+        },
+      ],
+    });
+
+    it('should infer direct_access_key from populated access keys (upgrade regression case)', () => {
+      // A pre-var_groups policy configured with Direct Access Keys must not be
+      // presented as identity_federation (the first option) after upgrade
+      const inferred = inferVarGroupSelections([awsCredentialVarGroup()], {
+        access_key_id: { type: 'text', value: 'AKIA123' },
+        secret_access_key: { type: 'password', value: 'secret' },
+        role_arn: { type: 'text', value: '' },
+      });
+
+      expect(inferred).toEqual({ credential_type: 'direct_access_key' });
+    });
+
+    it('should prefer temporary_access_key when session_token is also populated', () => {
+      const inferred = inferVarGroupSelections([awsCredentialVarGroup()], {
+        access_key_id: { type: 'text', value: 'AKIA123' },
+        secret_access_key: { type: 'password', value: 'secret' },
+        session_token: { type: 'password', value: 'token' },
+      });
+
+      expect(inferred).toEqual({ credential_type: 'temporary_access_key' });
+    });
+
+    it('should prefer assume_role over identity_federation when only role_arn is set', () => {
+      // assume_role is fully populated (1/1) while identity_federation is not (1/2)
+      const inferred = inferVarGroupSelections([awsCredentialVarGroup()], {
+        role_arn: { type: 'text', value: 'arn:aws:iam::123:role/x' },
+      });
+
+      expect(inferred).toEqual({ credential_type: 'assume_role' });
+    });
+
+    it('should infer identity_federation when its flag is explicitly true', () => {
+      const inferred = inferVarGroupSelections([awsCredentialVarGroup()], {
+        role_arn: { type: 'text', value: 'arn:aws:iam::123:role/x' },
+        supports_identity_federation: { type: 'bool', value: true },
+      });
+
+      expect(inferred).toEqual({ credential_type: 'identity_federation' });
+    });
+
+    it('should not count a false boolean as evidence (sanitized migration default)', () => {
+      const inferred = inferVarGroupSelections([awsCredentialVarGroup()], {
+        access_key_id: { type: 'text', value: 'AKIA123' },
+        secret_access_key: { type: 'password', value: 'secret' },
+        supports_identity_federation: { type: 'bool', value: false },
+      });
+
+      expect(inferred).toEqual({ credential_type: 'direct_access_key' });
+    });
+
+    it('should count secret references as configured values', () => {
+      const inferred = inferVarGroupSelections([awsCredentialVarGroup()], {
+        access_key_id: { type: 'text', value: 'AKIA123' },
+        secret_access_key: { type: 'password', value: { id: 'secret-ref-id', isSecretRef: true } },
+      });
+
+      expect(inferred).toEqual({ credential_type: 'direct_access_key' });
+    });
+
+    it('should return undefined when no option vars are populated', () => {
+      expect(
+        inferVarGroupSelections([awsCredentialVarGroup()], {
+          unrelated_var: { type: 'text', value: 'something' },
+          role_arn: { type: 'text', value: '' },
+        })
+      ).toBeUndefined();
+    });
+
+    it('should return undefined for missing inputs', () => {
+      expect(inferVarGroupSelections(undefined, { a: { value: 'x' } })).toBeUndefined();
+      expect(inferVarGroupSelections([], { a: { value: 'x' } })).toBeUndefined();
+      expect(inferVarGroupSelections([awsCredentialVarGroup()], undefined)).toBeUndefined();
+    });
+
+    it('should leave a group unselected on an unresolvable tie', () => {
+      const varGroup: RegistryVarGroup = {
+        name: 'ambiguous',
+        title: 'Ambiguous',
+        selector_title: 'Pick one',
+        options: [
+          { name: 'a', title: 'A', vars: ['shared_var'] },
+          { name: 'b', title: 'B', vars: ['shared_var'] },
+        ],
+      };
+
+      expect(inferVarGroupSelections([varGroup], { shared_var: { value: 'set' } })).toBeUndefined();
+    });
+
+    it('should infer independently across multiple var_groups', () => {
+      const secondGroup: RegistryVarGroup = {
+        name: 'data_collection',
+        title: 'Data Collection',
+        selector_title: 'Mode',
+        options: [
+          { name: 'polling', title: 'Polling', vars: ['poll_interval'] },
+          { name: 'streaming', title: 'Streaming', vars: ['stream_endpoint'] },
+        ],
+      };
+
+      const inferred = inferVarGroupSelections([awsCredentialVarGroup(), secondGroup], {
+        access_key_id: { type: 'text', value: 'AKIA123' },
+        secret_access_key: { type: 'password', value: 'secret' },
+        stream_endpoint: { type: 'text', value: 'https://stream.example.com' },
+      });
+
+      expect(inferred).toEqual({
+        credential_type: 'direct_access_key',
+        data_collection: 'streaming',
+      });
+    });
+
+    it('should never infer an option hidden in the given deployment mode', () => {
+      // Validation and the form must agree on the default, and an option
+      // the form hides in this mode cannot be the one validation checks —
+      // even when its vars are the only populated ones.
+      const group: RegistryVarGroup = {
+        name: 'log_group_source',
+        title: 'Log Group Source',
+        selector_title: 'Select log group source',
+        options: [
+          { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+          {
+            name: 'log_group_name',
+            title: 'Log Group Name',
+            vars: ['log_group_name', 'region_name'],
+            hide_in_deployment_modes: ['default'],
+          },
+        ],
+      };
+
+      expect(
+        inferVarGroupSelections(
+          [group],
+          {
+            log_group_name: { type: 'text', value: 'my-group' },
+            region_name: { type: 'text', value: 'us-east-1' },
+          },
+          'default'
+        )
+      ).toBeUndefined();
+      expect(
+        inferVarGroupSelections(
+          [group],
+          {
+            log_group_name: { type: 'text', value: 'my-group' },
+            region_name: { type: 'text', value: 'us-east-1' },
+          },
+          'agentless'
+        )
+      ).toEqual({ log_group_source: 'log_group_name' });
+    });
+
+    it('should infer the visible option when both a hidden and a visible option have populated vars', () => {
+      // Without the mode filter, the hidden Name option would win outright
+      // (2/2 vs the ARN option's 1/1). With it, the hidden option is skipped
+      // and the ARN option — the best visible one — is inferred.
+      const group: RegistryVarGroup = {
+        name: 'log_group_source',
+        title: 'Log Group Source',
+        selector_title: 'Select log group source',
+        options: [
+          { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+          {
+            name: 'log_group_name',
+            title: 'Log Group Name',
+            vars: ['log_group_name', 'region_name'],
+            hide_in_deployment_modes: ['default'],
+          },
+        ],
+      };
+
+      expect(
+        inferVarGroupSelections(
+          [group],
+          {
+            log_group_arn: { type: 'text', value: 'arn:aws:logs:us-east-1:123:log-group:g' },
+            log_group_name: { type: 'text', value: 'my-group' },
+            region_name: { type: 'text', value: 'us-east-1' },
+          },
+          'default'
+        )
+      ).toEqual({ log_group_source: 'log_group_arn' });
+      expect(
+        inferVarGroupSelections([group], {
+          log_group_arn: { type: 'text', value: 'arn:aws:logs:us-east-1:123:log-group:g' },
+          log_group_name: { type: 'text', value: 'my-group' },
+          region_name: { type: 'text', value: 'us-east-1' },
+        })
+      ).toEqual({ log_group_source: 'log_group_name' });
+    });
+  });
+
+  describe('isVarGroupOptionHiddenInDeploymentMode', () => {
+    const hiddenInDefault = {
+      name: 'log_group_arn',
+      title: 'Log Group ARN',
+      vars: ['log_group_arn'],
+      hide_in_deployment_modes: ['default' as const],
+    };
+
+    it('should return false when no deployment mode is given', () => {
+      expect(isVarGroupOptionHiddenInDeploymentMode(hiddenInDefault, undefined)).toBe(false);
+    });
+
+    it('should return true when the option hides the given mode', () => {
+      expect(isVarGroupOptionHiddenInDeploymentMode(hiddenInDefault, 'default')).toBe(true);
+      expect(isVarGroupOptionHiddenInDeploymentMode(hiddenInDefault, 'agentless')).toBe(false);
+    });
+
+    it('should return false when the option has no hide_in_deployment_modes', () => {
+      expect(
+        isVarGroupOptionHiddenInDeploymentMode({ name: 'x', title: 'X', vars: ['x'] }, 'default')
+      ).toBe(false);
+    });
+  });
+
+  describe('getFirstVisibleVarGroupOption', () => {
+    const groupWithHiddenFirstOption: RegistryVarGroup = {
+      name: 'log_group_source',
+      title: 'Log group',
+      selector_title: 'Identify the log group by',
+      options: [
+        {
+          name: 'log_group_arn',
+          title: 'Log Group ARN',
+          vars: ['log_group_arn'],
+          hide_in_deployment_modes: ['default'],
+        },
+        {
+          name: 'log_group_name',
+          title: 'Log Group Name',
+          vars: ['log_group_name', 'region_name'],
+        },
+      ],
+    };
+
+    it('should return the first option when nothing is hidden', () => {
+      expect(getFirstVisibleVarGroupOption(groupWithHiddenFirstOption, 'agentless')?.name).toBe(
+        'log_group_arn'
+      );
+    });
+
+    it('should skip options hidden in the given deployment mode', () => {
+      expect(getFirstVisibleVarGroupOption(groupWithHiddenFirstOption, 'default')?.name).toBe(
+        'log_group_name'
+      );
+    });
+
+    it('should skip options listed in hiddenOptionNames', () => {
+      expect(
+        getFirstVisibleVarGroupOption(groupWithHiddenFirstOption, 'agentless', ['log_group_arn'])
+          ?.name
+      ).toBe('log_group_name');
+    });
+
+    it('should return undefined when every option is hidden', () => {
+      expect(
+        getFirstVisibleVarGroupOption(groupWithHiddenFirstOption, 'default', ['log_group_name'])
+      ).toBeUndefined();
+    });
+  });
+
+  describe('sanitizeVarGroupSelections', () => {
+    const groups: RegistryVarGroup[] = [
+      {
+        name: 'auth_method',
+        title: 'Authentication',
+        selector_title: 'Select method',
+        options: [
+          { name: 'api_key', title: 'API Key', vars: ['api_key_var'] },
+          { name: 'oauth', title: 'OAuth', vars: ['client_id', 'client_secret'] },
+        ],
+      },
+      {
+        name: 'log_group_source',
+        title: 'Log Group Source',
+        selector_title: 'Select log group source',
+        options: [
+          { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+          { name: 'log_group_name', title: 'Log Group Name', vars: ['log_group_name'] },
+        ],
+      },
+    ];
+
+    it('should drop a stored selection naming a removed option and keep the valid ones', () => {
+      expect(
+        sanitizeVarGroupSelections(groups, {
+          auth_method: 'saml',
+          log_group_source: 'log_group_name',
+        })
+      ).toEqual({ log_group_source: 'log_group_name' });
+    });
+
+    it('should return the input unchanged when every stored selection names an existing option', () => {
+      const saved = { auth_method: 'oauth', log_group_source: 'log_group_arn' };
+      expect(sanitizeVarGroupSelections(groups, saved)).toBe(saved);
+    });
+
+    it('should keep entries for groups the package no longer declares', () => {
+      expect(
+        sanitizeVarGroupSelections(groups, {
+          auth_method: 'oauth',
+          removed_group: 'whatever',
+        })
+      ).toEqual({ auth_method: 'oauth', removed_group: 'whatever' });
+    });
+
+    it('should return undefined unchanged and not fail without var_groups', () => {
+      expect(sanitizeVarGroupSelections(groups, undefined)).toBeUndefined();
+      expect(sanitizeVarGroupSelections(undefined, { auth_method: 'oauth' })).toEqual({
+        auth_method: 'oauth',
+      });
     });
   });
 });

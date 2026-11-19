@@ -11,7 +11,6 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { StatusBadge } from '.';
 import { TestProviders } from '../../../../../../common/mock';
 import { mockAttackDiscoverySchedule } from '../../../../mock/mock_attack_discovery_schedule';
-import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 
 const renderScheduleStatus = (
   status: 'unknown' | 'ok' | 'active' | 'error' | 'warning' = 'ok',
@@ -70,7 +69,6 @@ describe('StatusBadge', () => {
 
     const status = screen.getByTestId('scheduleExecutionStatus');
     fireEvent.mouseOver(status.parentElement as Node);
-    await waitForEuiToolTipVisible();
 
     const tooltip = screen.getByRole('tooltip');
     expect(tooltip).toHaveTextContent('Failed');
@@ -81,7 +79,6 @@ describe('StatusBadge', () => {
 
     const status = screen.getByTestId('scheduleExecutionStatus');
     fireEvent.mouseOver(status.parentElement as Node);
-    await waitForEuiToolTipVisible();
 
     const tooltip = screen.getByRole('tooltip');
     expect(tooltip).toHaveTextContent('Failed badly!');

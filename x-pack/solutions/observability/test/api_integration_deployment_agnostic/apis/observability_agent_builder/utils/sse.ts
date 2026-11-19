@@ -10,9 +10,15 @@ interface SseEvent {
   data: Record<string, unknown>;
 }
 
-interface AiInsightResponse {
+export interface AiInsightStreamError {
+  message: string;
+  code?: string;
+  retryable?: boolean;
+}
+export interface AiInsightResponse {
   summary: string;
   context: string;
+  streamError?: AiInsightStreamError;
 }
 
 const EVENT_PREFIX = 'event: ';
@@ -46,17 +52,33 @@ export function decodeSseEvents(body: Buffer | string): SseEvent[] {
   );
 }
 
+function parseStreamErrorPayload(data: Record<string, unknown>): AiInsightStreamError | undefined {
+  const payload = data.error as Record<string, unknown> | undefined;
+  if (!payload || typeof payload.message !== 'string') {
+    return undefined;
+  }
+  const meta = payload.meta as Record<string, unknown> | undefined;
+  return {
+    message: payload.message,
+    code: typeof payload.code === 'string' ? payload.code : undefined,
+    retryable: meta?.retryable === true,
+  };
+}
+
 /**
- * Parses SSE response into AiInsightResponse with summary and context.
+ * Parses SSE response into AiInsightResponse with summary, context, and optional stream error
+ * (same `event: error` frames the UI turns into ServerSentEventError).
  */
 export function parseSseResponse(body: Buffer | string): AiInsightResponse {
   const events = decodeSseEvents(body);
 
   const contextEvent = events.find((e) => e.type === 'context');
   const messageEvent = events.find((e) => e.type === 'chatCompletionMessage');
+  const errorEvent = events.find((e) => e.type === 'error');
 
   return {
     context: (contextEvent?.data?.context as string) || '',
     summary: (messageEvent?.data?.content as string) || '',
+    streamError: errorEvent ? parseStreamErrorPayload(errorEvent.data) : undefined,
   };
 }

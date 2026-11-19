@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import { createMockWorkflowContextRegistry } from '../../../../../../common/lib/create_workflow_context_registry.mock';
 import { getFakeAutocompleteContextParams } from '../context/build_autocomplete_context.test';
 import { getCompletionItemProvider } from '../get_completion_item_provider';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 async function getSuggestions(
   yamlContent: string,
@@ -21,6 +24,7 @@ async function getSuggestions(
     connectorTypes
   );
   const completionProvider = getCompletionItemProvider(
+    emptyRegistry,
     () => fakeAutocompleteContextParams.editorState
   );
 
@@ -74,6 +78,7 @@ steps:
     expect(suggestions.map((s) => s.label).sort()).toEqual(
       [
         'consts',
+        'context',
         'event',
         'kibanaUrl',
         'metadata',
@@ -97,6 +102,7 @@ steps:
         '"{{ workflow$0 }}"',
         '"{{ inputs$0 }}"',
         '"{{ consts$0 }}"',
+        '"{{ context$0 }}"',
         '"{{ now$0 }}"',
         '"{{ parent$0 }}"',
         '"{{ steps$0 }}"',
@@ -128,6 +134,7 @@ steps:
         '{{ workflow$0 }}',
         '{{ inputs$0 }}',
         '{{ consts$0 }}',
+        '{{ context$0 }}',
         '{{ now$0 }}',
         '{{ parent$0 }}',
         '{{ steps$0 }}',
@@ -591,9 +598,11 @@ version: "1"
 name: "test"
 consts:
   apiUrl: "https://api.example.com"
-inputs:
-  - name: threshold
-    type: number
+triggers:
+  - type: manual
+    inputs:
+      - name: threshold
+        type: number
 steps:
   - name: step1
     type: console

@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { DataViewBase } from '@kbn/es-query';
 import moment from 'moment';
 import type { Logger } from '@kbn/logging';
 import { isCustom } from './metric_expression_params';
@@ -44,9 +45,11 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   compositeSize: number,
   alertOnGroupDisappear: boolean,
   logger: Logger,
+  dataView?: DataViewBase,
   lastPeriodEnd?: number,
   timeframe?: { start?: number; end: number },
-  missingGroups: MissingGroupsRecord[] = []
+  missingGroups: MissingGroupsRecord[] = [],
+  scheduleInterval?: number
 ): Promise<Array<Record<string, Evaluation>>> => {
   const { criteria, groupBy, filterQuery } = params;
 
@@ -59,7 +62,8 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         intervalAsMS,
         criterion.aggType,
         timeframe,
-        lastPeriodEnd
+        lastPeriodEnd,
+        scheduleInterval
       );
 
       const currentValues = await getData(
@@ -72,6 +76,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         alertOnGroupDisappear,
         calculatedTimerange,
         logger,
+        dataView,
         lastPeriodEnd
       );
 

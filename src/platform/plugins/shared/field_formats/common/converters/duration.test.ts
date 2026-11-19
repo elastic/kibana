@@ -8,10 +8,56 @@
  */
 
 import { DurationFormat } from './duration';
-import { HTML_CONTEXT_TYPE } from '../content_types';
+import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
+import { asPrettyString } from '../utils';
+import {
+  getDurationUnitFromOutputFormat,
+  getDurationUnitInSeconds,
+} from '../constants/duration_formats';
+
+describe('getDurationUnitInSeconds', () => {
+  it.each([
+    ['picoseconds', 0.000000000001],
+    ['nanoseconds', 0.000000001],
+    ['microseconds', 0.000001],
+    ['milliseconds', 0.001],
+    ['seconds', 1],
+    ['minutes', 60],
+    ['hours', 3600],
+    ['days', 86400],
+    ['weeks', 604800],
+    ['months', 2592000],
+    ['years', 31536000],
+  ])('returns the number of seconds in %s', (unit, seconds) => {
+    expect(getDurationUnitInSeconds(unit)).toBe(seconds);
+  });
+
+  it('returns undefined for unsupported units', () => {
+    expect(getDurationUnitInSeconds('fortnights')).toBeUndefined();
+  });
+
+  it.each([
+    ['humanize', 'seconds'],
+    ['humanizePrecise', 'seconds'],
+    ['asMilliseconds', 'milliseconds'],
+    ['asSeconds', 'seconds'],
+    ['asMinutes', 'minutes'],
+    ['asHours', 'hours'],
+    ['asDays', 'days'],
+    ['asWeeks', 'weeks'],
+    ['asMonths', 'months'],
+    ['asYears', 'years'],
+  ])('maps output format %s to coordinate unit %s', (outputFormat, unit) => {
+    expect(getDurationUnitFromOutputFormat(outputFormat)).toBe(unit);
+  });
+
+  it('returns undefined for an unsupported output format', () => {
+    expect(getDurationUnitFromOutputFormat('asFortnights')).toBeUndefined();
+  });
+});
 
 describe('Duration Format', () => {
-  test('handles missing values in html context', () => {
+  test('handles missing values', () => {
     const duration = new DurationFormat(
       {
         inputFormat: 'seconds',
@@ -19,12 +65,51 @@ describe('Duration Format', () => {
       },
       jest.fn()
     );
-    expect(duration.convert(null, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
+    expect(duration.convertToText(null)).toBe('(null)');
+    expect(duration.convertToText(undefined)).toBe('(null)');
+    expectReactElementWithNull(duration.convertToReact(null));
+    expectReactElementWithNull(duration.convertToReact(undefined));
+  });
+
+  test('returns a plain string for a numeric duration', () => {
+    const formatter = new DurationFormat(
+      { inputFormat: 'seconds', outputFormat: 'humanize' },
+      jest.fn()
     );
-    expect(duration.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
+
+    expect(formatter.convertToText(60)).toBe('a minute');
+    expect(formatter.convertToReact(60)).toBe('a minute');
+  });
+
+  test('renders object values (e.g. histogram fields) as JSON instead of NaN', () => {
+    const formatter = new DurationFormat(
+      { inputFormat: 'seconds', outputFormat: 'humanize' },
+      jest.fn()
     );
+    const histogramValue = { scale: 20, sum: 0.000825416, min: 0.000825416, max: 0.000825416 };
+
+    expect(formatter.convertToText(histogramValue)).toBe(asPrettyString(histogramValue));
+    expect(formatter.convertToReact(histogramValue)).toBe(asPrettyString(histogramValue));
+  });
+
+  test('wraps a multi-value array with bracket notation', () => {
+    const formatter = new DurationFormat(
+      { inputFormat: 'seconds', outputFormat: 'humanize' },
+      jest.fn()
+    );
+
+    expect(formatter.convertToText([60, 3600])).toBe('["a minute","an hour"]');
+    expectReactElementAsArray(formatter.convertToReact([60, 3600]), ['a minute', 'an hour']);
+  });
+
+  test('returns the single element without brackets for a one-element array', () => {
+    const formatter = new DurationFormat(
+      { inputFormat: 'seconds', outputFormat: 'humanize' },
+      jest.fn()
+    );
+
+    expect(formatter.convertToText([60])).toBe('["a minute"]');
+    expect(formatter.convertToReact([60])).toBe('a minute');
   });
 
   testCase({
@@ -177,15 +262,49 @@ describe('Duration Format', () => {
     fixtures: [
       {
         input: 1988,
-        output: '0.00 milliseconds',
+        output: '1.99 microseconds',
       },
       {
         input: 658,
-        output: '0.00 milliseconds',
+        output: '658.00 nanoseconds',
       },
       {
         input: 3857,
-        output: '0.00 milliseconds',
+        output: '3.86 microseconds',
+      },
+      {
+        input: 1000,
+        output: '1.00 microseconds',
+      },
+      {
+        input: 1000000,
+        output: '1.00 milliseconds',
+      },
+      {
+        input: -1988,
+        output: '-1.99 microseconds',
+      },
+    ],
+  });
+
+  testCase({
+    inputFormat: 'picoseconds',
+    outputFormat: 'humanizePrecise',
+    outputPrecision: 2,
+    showSuffix: true,
+    useShortSuffix: true,
+    fixtures: [
+      {
+        input: 500,
+        output: '0.50 ns',
+      },
+      {
+        input: 1500,
+        output: '1.50 ns',
+      },
+      {
+        input: 2500000,
+        output: '2.50 µs',
       },
     ],
   });
@@ -202,7 +321,7 @@ describe('Duration Format', () => {
       },
       {
         input: 658,
-        output: '0.66 milliseconds',
+        output: '658.00 microseconds',
       },
       {
         input: 3857,
@@ -223,11 +342,11 @@ describe('Duration Format', () => {
       },
       {
         input: 0,
-        output: '0.0 milliseconds',
+        output: '0',
       },
       {
         input: 658,
-        output: '0.7 milliseconds',
+        output: '658.0 microseconds',
       },
       {
         input: 3857,
@@ -374,7 +493,15 @@ describe('Duration Format', () => {
     fixtures: [
       {
         input: 0.5,
-        output: '0.50 ms',
+        output: '500.00 µs',
+      },
+      {
+        input: -0.5,
+        output: '-500.00 µs',
+      },
+      {
+        input: 0,
+        output: '0',
       },
       {
         input: -123.5,
@@ -545,7 +672,7 @@ describe('Duration Format', () => {
     fixtures: [
       {
         input: 0.5,
-        output: '1ms',
+        output: '500µs',
       },
       {
         input: -123,
@@ -597,7 +724,13 @@ describe('Duration Format', () => {
           },
           jest.fn()
         );
-        expect(duration.convert(input)).toBe(output);
+        expect(duration.convertToText(input)).toBe(output);
+
+        if (output === '(null)') {
+          expectReactElementWithNull(duration.convertToReact(input));
+        } else {
+          expect(duration.convertToReact(input)).toBe(output);
+        }
       });
     });
   }

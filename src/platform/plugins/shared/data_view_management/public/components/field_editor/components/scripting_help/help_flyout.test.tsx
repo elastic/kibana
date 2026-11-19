@@ -8,48 +8,51 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
+import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__/data_view';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen, within } from '@testing-library/react';
 import { ScriptingHelpFlyout } from './help_flyout';
 
-import type { DataView } from '@kbn/data-views-plugin/public';
-
-import type { ExecuteScript } from '../../types';
-
-jest.mock('./test_script', () => ({
-  TestScript: () => {
-    return `<div>mockTestScript</div>`;
-  },
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({
+    services: {
+      docLinks: {
+        links: {
+          scriptedFields: {
+            luceneExpressions: '#',
+            painless: '#',
+            painlessApi: '#',
+            painlessSyntax: '#',
+          },
+        },
+      },
+    },
+  }),
 }));
 
-const indexPatternMock = {} as DataView;
+const renderFlyout = (isVisible: boolean) =>
+  renderWithI18n(
+    <ScriptingHelpFlyout
+      executeScript={jest.fn()}
+      indexPattern={buildDataViewMock({})}
+      isVisible={isVisible}
+      lang="painless"
+      onClose={jest.fn()}
+    />
+  );
 
 describe('ScriptingHelpFlyout', () => {
-  it('should render normally', async () => {
-    const component = shallow(
-      <ScriptingHelpFlyout
-        isVisible={true}
-        indexPattern={indexPatternMock}
-        lang="painless"
-        executeScript={(() => {}) as unknown as ExecuteScript}
-        onClose={() => {}}
-      />
-    );
+  it('should render normally', () => {
+    renderFlyout(true);
 
-    expect(component).toMatchSnapshot();
+    expect(within(screen.getByTestId('syntaxTab')).getByText('Syntax')).toBeVisible();
+    expect(within(screen.getByTestId('testTab')).getByText('Preview results')).toBeVisible();
+    expect(screen.getByText('Painless')).toBeVisible();
   });
 
-  it('should render nothing if not visible', async () => {
-    const component = shallow(
-      <ScriptingHelpFlyout
-        isVisible={true}
-        indexPattern={indexPatternMock}
-        lang="painless"
-        executeScript={(() => {}) as unknown as ExecuteScript}
-        onClose={() => {}}
-      />
-    );
+  it('should render nothing if not visible', () => {
+    const { container } = renderFlyout(false);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toBeEmptyDOMElement();
   });
 });

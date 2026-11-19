@@ -12,7 +12,9 @@ class InferenceEndpointsDocLinks {
   public elasticInferenceService: string = '';
   public semanticSearchElser: string = '';
   public semanticSearchE5: string = '';
-
+  public featureSettings: string = '';
+  public externalInference: string = '';
+  public selfHostedInference: string = '';
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
@@ -20,6 +22,9 @@ class InferenceEndpointsDocLinks {
     this.elasticInferenceService = newDocLinks.enterpriseSearch.elasticInferenceService;
     this.semanticSearchElser = newDocLinks.enterpriseSearch.elser;
     this.semanticSearchE5 = newDocLinks.enterpriseSearch.e5Model;
+    this.featureSettings = newDocLinks.inferenceManagement.featureSettings;
+    this.externalInference = newDocLinks.inferenceManagement.externalInference;
+    this.selfHostedInference = newDocLinks.inferenceManagement.selfHostedInference;
   }
 }
 

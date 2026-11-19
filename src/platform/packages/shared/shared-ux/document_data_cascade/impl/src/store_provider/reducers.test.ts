@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { enableMapSet } from 'immer';
+import { enableMapSet } from 'immer-v9';
 import {
   createStoreReducers,
   type IStoreState,
   type GroupNode,
   type LeafNode,
-  type TableState,
+  type CascadeTableState,
 } from './reducers';
 
 describe('createStoreReducers', () => {
   const initialState: IStoreState<GroupNode, LeafNode> = {
-    table: {} as TableState,
+    table: {} as CascadeTableState,
     groupNodes: [],
     leafNodes: new Map(),
     groupByColumns: [],
@@ -103,7 +103,7 @@ describe('createStoreReducers', () => {
           expanded: {
             '0': true,
           },
-        } as unknown as TableState,
+        } as unknown as CascadeTableState,
         leafNodes: new Map([['leaf:0', [{ id: 'group-0:leaf:0' }]]]),
       };
 

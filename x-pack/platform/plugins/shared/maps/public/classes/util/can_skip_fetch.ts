@@ -19,7 +19,7 @@ export function updateDueToExtent(prevMeta: DataRequestMeta = {}, nextMeta: Data
   const { buffer: previousBuffer } = prevMeta;
   const { buffer: newBuffer } = nextMeta;
 
-  if (!previousBuffer || !previousBuffer || !newBuffer) {
+  if (!previousBuffer || !newBuffer) {
     return SOURCE_UPDATE_REQUIRED;
   }
 

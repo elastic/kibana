@@ -35,6 +35,7 @@ import { schema } from '@kbn/config-schema';
 import { RULE_SAVED_OBJECT_TYPE } from '../..';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { GapBase } from '../../application/gaps/types';
+import { gapReasonType } from '../../../common/constants';
 
 const mockNow = '2020-01-01T02:00:00.000Z';
 const eventLogger = eventLoggerMock.create();
@@ -385,6 +386,17 @@ describe('AlertingEventLogger', () => {
             { id: 'bbb', type: 'alert', type_id: 'test', rel: 'primary' },
           ],
         },
+      });
+    });
+
+    test('should update standard event with rule tags correctly', () => {
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      alertingEventLogger.addOrUpdateRuleData({ tags: ['tag-1', 'tag-3'] });
+
+      expect(alertingEventLogger.getEvent()).toEqual({
+        ...event,
+        tags: ['tag-1', 'tag-3'],
       });
     });
   });
@@ -1477,6 +1489,7 @@ describe('AlertingEventLogger', () => {
       expect(() =>
         alertingEventLogger.reportGap({
           gap: { gte: '', lte: '' },
+          reason: { type: gapReasonType.RULE_DID_NOT_RUN },
         })
       ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
     });
@@ -1487,7 +1500,10 @@ describe('AlertingEventLogger', () => {
         gte: '2022-05-05T15:59:54.480Z',
         lte: '2022-05-05T16:59:54.480Z',
       };
-      alertingEventLogger.reportGap({ gap: range });
+      alertingEventLogger.reportGap({
+        gap: range,
+        reason: { type: gapReasonType.RULE_DISABLED },
+      });
 
       const gap: GapBase = {
         status: 'unfilled' as const,
@@ -1501,6 +1517,7 @@ describe('AlertingEventLogger', () => {
         in_progress_duration_ms: 0,
         updated_at: mockNow,
         failed_auto_fill_attempts: 0,
+        reason: { type: gapReasonType.RULE_DISABLED },
       };
 
       const event = createGapRecord(ruleContext, ruleData, [alertSO], gap);
@@ -1534,6 +1551,7 @@ describe('AlertingEventLogger', () => {
       filled_duration_ms: 3600000,
       unfilled_duration_ms: 0,
       in_progress_duration_ms: 0,
+      reason: { type: gapReasonType.RULE_DISABLED },
     };
 
     test('should call eventLogger.updateEvents with correct parameters', async () => {
@@ -1594,6 +1612,7 @@ describe('helper functions', () => {
       type: ruleType,
       consumer: 'test-consumer',
       revision: 0,
+      tags: ['tag-1', 'tag-2'],
     };
     ruleDataWithName = { ...ruleData, name: 'my-super-cool-rule' };
     alertSO = { id: '123', relation: 'primary', type: 'alert', typeId: 'test' };
@@ -1615,6 +1634,7 @@ describe('helper functions', () => {
       expect(record.rule).toBeDefined();
 
       // these fields should be explicitly set
+      expect(record.tags).toEqual(['tag-1', 'tag-2']);
       expect(record.event?.action).toEqual('execute');
       expect(record.event?.kind).toEqual('alert');
       expect(record.event?.category).toEqual([ruleData.type?.producer]);
@@ -2102,6 +2122,14 @@ describe('helper functions', () => {
       });
     });
 
+    test('updates event tags if provided', () => {
+      updateEventWithRuleData(event, { ruleTags: ['tag-1', 'tag-2'] });
+      expect(event).toEqual({
+        ...expectedEvent,
+        tags: ['tag-1', 'tag-2'],
+      });
+    });
+
     test('updates event rule saved object if provided', () => {
       updateEventWithRuleData(event, {
         savedObjects: [
@@ -2173,6 +2201,7 @@ describe('helper functions', () => {
           gte: '2022-05-05T15:59:54.480Z',
           lte: '2022-05-05T16:59:54.480Z',
         },
+        reason: { type: gapReasonType.RULE_DID_NOT_RUN },
       });
 
       // these fields should be explicitly set

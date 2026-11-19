@@ -17,6 +17,7 @@ export {
 export {
   type CodeOwnerArea,
   CODE_OWNER_AREAS,
-  CODE_OWNER_AREA_MAPPINGS,
+  getCodeOwnerAreaMappings,
   findAreaForCodeOwner,
 } from './src/code_owner_areas';
+export { type Team, TEAMS_FILE, getTeams, getTeamById, getTeamByGithubHandle } from './src/teams';

@@ -10,7 +10,7 @@ import type { EnrichmentDataSource } from '../../common/url_schema';
 
 type StreamType = 'wired' | 'classic' | 'query' | 'unknown';
 
-type ConfigurationMode = 'interactive' | 'yaml';
+type ConfigurationMode = 'interactive' | 'yaml' | 'json';
 
 type StreamsAttachmentCountProps = {
   name: string;
@@ -101,23 +101,6 @@ interface StreamsSchemaUpdatedProps {
   stream_type: StreamType;
 }
 
-interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
-  duration_ms: number;
-  input_tokens_used: number;
-  output_tokens_used: number;
-  count: number;
-  features_selected: number;
-  features_total: number;
-  stream_name: string;
-  stream_type: StreamType;
-}
-
-interface StreamsSignificantEventsCreatedProps {
-  count: number;
-  stream_name: string;
-  stream_type: StreamType;
-}
-
 interface StreamsFeatureIdentificationSavedProps {
   count: number;
   stream_name: string;
@@ -176,8 +159,6 @@ export {
   type StreamsProcessingSavedProps,
   type StreamsChildStreamCreatedProps,
   type StreamsSchemaUpdatedProps,
-  type StreamsSignificantEventsSuggestionsGeneratedEventProps,
-  type StreamsSignificantEventsCreatedProps,
   type WiredStreamsStatusChangedProps,
   type StreamsFeatureIdentificationSavedProps,
   type StreamsFeatureIdentificationDeletedProps,

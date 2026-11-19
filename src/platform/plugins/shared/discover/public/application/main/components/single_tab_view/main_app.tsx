@@ -15,6 +15,7 @@ import { addHelpMenuToAppChrome } from '../../../../components/help_menu/help_me
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useSavedSearchAliasMatchRedirect } from '../../../../hooks/saved_search_alias_match_redirect';
 import { useAdHocDataViews } from '../../hooks/use_adhoc_data_views';
+import { DiscoverAgentBuilderConfig } from './discover_agent_builder_config';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -38,6 +39,7 @@ export function DiscoverMainApp() {
 
   return (
     <RootDragDropProvider>
+      <DiscoverAgentBuilderConfig />
       <DiscoverLayoutMemoized />
     </RootDragDropProvider>
   );

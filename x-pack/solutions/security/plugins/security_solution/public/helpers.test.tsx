@@ -9,13 +9,17 @@ import { shallow } from 'enzyme';
 import type { Capabilities } from '@kbn/core/public';
 import { ALERTS_FEATURE_ID, CASES_FEATURE_ID, SECURITY_FEATURE_ID } from '../common/constants';
 import { mockEcsDataWithAlert } from './common/mock';
-import { ALERT_RULE_UUID, ALERT_RULE_NAME, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_RULE_PARAMETERS, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import {
-  parseRoute,
-  isSubPluginAvailable,
-  getSubPluginRoutesByCapabilities,
   getField,
+  getSubPluginRoutesByCapabilities,
   isDashboardViewPath,
+  isRuleCreationPath,
+  isRuleEditPath,
+  isPageWithAppHeaderPath,
+  isEndpointManagementPath,
+  isSubPluginAvailable,
+  parseRoute,
 } from './helpers';
 import type { StartedSubPlugins } from './types';
 import {
@@ -248,7 +252,7 @@ describe('public helpers getField', () => {
         risk_score: '21',
         severity: 'low',
         timeline_id: '1234-2136-11ea-9864-ebc8cc1cb8c2',
-        timeline_title: 'Untitled timeline',
+        timeline_title: 'Untitled Timeline',
         meta: {
           from: '1000m',
           kibana_siem_app_url: 'https://localhost:5601/app/security',
@@ -297,4 +301,110 @@ describe('isDashboardViewPath', () => {
   it('returns false for dashboard listing path', () => {
     expect(isDashboardViewPath('/dashboards')).toEqual(false);
   });
+});
+
+describe('isRuleCreationPath', () => {
+  it('returns true for the rule creation path', () => {
+    expect(isRuleCreationPath('/rules/create')).toEqual(true);
+  });
+
+  it.each(['/rules', '/rules/management', '/rules/id/123/edit'])(
+    'returns false for %s',
+    (pathname) => {
+      expect(isRuleCreationPath(pathname)).toEqual(false);
+    }
+  );
+});
+
+describe('isRuleEditPath', () => {
+  it('returns true for the rule editing path', () => {
+    expect(isRuleEditPath('/rules/id/123/edit')).toEqual(true);
+  });
+
+  it.each(['/rules/id/123', '/rules/id/123/alerts', '/rules/create'])(
+    'returns false for %s',
+    (pathname) => {
+      expect(isRuleEditPath(pathname)).toEqual(false);
+    }
+  );
+});
+
+describe('isPageWithAppHeaderPath', () => {
+  it.each([
+    ['the rule changes history page', '/rules/id/rule-id/changes-history'],
+    ['the installed rules tab', '/rules/management'],
+    ['the rule monitoring tab', '/rules/monitoring'],
+    ['the rule updates tab', '/rules/updates'],
+    ['the add Elastic rules page', '/rules/add_rules'],
+    ['the rule creation page', '/rules/create'],
+    ['the rule editing page', '/rules/id/rule-id/edit'],
+    ['the MITRE coverage page', '/rules_coverage_overview'],
+    ['the rule details overview tab', '/rules/id/rule-id/overview'],
+    ['the rule details alerts tab', '/rules/id/rule-id/alerts'],
+    ['the rule details rule exceptions tab', '/rules/id/rule-id/rule_exceptions'],
+    ['the rule details endpoint exceptions tab', '/rules/id/rule-id/endpoint_exceptions'],
+    ['the rule details execution results tab', '/rules/id/rule-id/execution_results'],
+    ['the shared exception lists page', '/exceptions'],
+    ['the exception list details page', '/exceptions/details/list-1'],
+    ['a cloud security posture page', '/cloud_security_posture/findings'],
+    ['the cloud security posture base path', '/cloud_security_posture'],
+    ['the Manage landing page', '/manage'],
+    ['the Configurations page', '/configurations'],
+    ['a Configurations sub-route', '/configurations/integrations/browse'],
+    ['an endpoint management page', '/administration/endpoints'],
+    ['a rules tab with a trailing slash', '/rules/management/'],
+    ['a rule details tab with a trailing slash', '/rules/id/rule-id/overview/'],
+    ['a rule details path with an encoded rule id', '/rules/id/rule%20id/overview'],
+  ])('returns true for %s', (_name, pathname) => {
+    expect(isPageWithAppHeaderPath(pathname)).toBe(true);
+  });
+
+  it.each([
+    ['a rule details path without a tab', '/rules/id/rule-id'],
+    ['a rule details path with an unknown tab', '/rules/id/rule-id/unknown_tab'],
+    ['the alerts page', '/alerts'],
+    ['the hosts page', '/hosts'],
+    ['the dashboards page', '/dashboards'],
+    ['an empty path', ''],
+    ['the root path', '/'],
+    ['a page under Manage', '/manage/sub-page'],
+    ['the administration notes page', '/administration/notes'],
+    ['the rules page without a tab', '/rules'],
+    ['a rule details tab with an extra segment', '/rules/id/rule-id/overview/extra'],
+    [
+      'the rule changes history page with an extra segment',
+      '/rules/id/rule-id/changes-history/extra',
+    ],
+    ['a rule details path with an empty rule id', '/rules/id//overview'],
+    ['the add Elastic rules page with an extra segment', '/rules/add_rules/extra'],
+    ['a path that only starts like a rules tab', '/rules/managementfoo'],
+    ['a path that only starts like the exceptions base path', '/exceptionsfoo'],
+    [
+      'a path that only starts like the cloud security posture base path',
+      '/cloud_security_posturefoo',
+    ],
+  ])('returns false for %s', (_name, pathname) => {
+    expect(isPageWithAppHeaderPath(pathname)).toBe(false);
+  });
+});
+
+describe('isEndpointManagementPath', () => {
+  it.each([
+    '/administration/endpoints',
+    '/administration/policy',
+    '/administration/policy/abc-123/settings',
+    '/administration/trusted_apps',
+    '/administration/custom_yara_signatures',
+    '/administration/response_actions_history',
+    '/administration/script_library',
+  ])('returns true for %s', (pathname) => {
+    expect(isEndpointManagementPath(pathname)).toEqual(true);
+  });
+
+  it.each(['/administration', '/administration/notes', '/manage', '/alerts'])(
+    'returns false for %s',
+    (pathname) => {
+      expect(isEndpointManagementPath(pathname)).toEqual(false);
+    }
+  );
 });

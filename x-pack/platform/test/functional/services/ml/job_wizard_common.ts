@@ -26,7 +26,7 @@ export function MachineLearningJobWizardCommonProvider(
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const headerPage = getPageObject('header');
-  const browser = getService('browser');
+  const timePicker = getPageObject('timePicker');
 
   function advancedSectionSelector(subSelector?: string) {
     const subj = 'mlJobWizardAdvancedSection';
@@ -462,12 +462,14 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async addInfluencer(influencer: string) {
-      await comboBox.set('mlInfluencerSelect > comboBoxInput', influencer);
-      const actualInfluencerSelection = await this.getSelectedInfluencers();
-      expect(actualInfluencerSelection).to.contain(
-        influencer,
-        `Expected influencer selection to contain '${influencer}' (got '${actualInfluencerSelection}')`
-      );
+      await retry.tryForTime(5000, async () => {
+        await comboBox.set('mlInfluencerSelect > comboBoxInput', influencer);
+        const actualInfluencerSelection = await this.getSelectedInfluencers();
+        expect(actualInfluencerSelection).to.contain(
+          influencer,
+          `Expected influencer selection to contain '${influencer}' (got '${actualInfluencerSelection}')`
+        );
+      });
     },
 
     async assertAnomalyChartExists(chartType: string, preSelector?: string) {
@@ -516,12 +518,9 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async getSelectedDateRange() {
-      const dateRange = await testSubjects.find('mlJobWizardDateRange');
-      const [startPicker, endPicker] = await dateRange.findAllByClassName('euiFieldText');
-      return {
-        startDate: await startPicker.getAttribute('value'),
-        endDate: await endPicker.getAttribute('value'),
-      };
+      await testSubjects.existOrFail('mlJobWizardDateRange');
+      const { start, end } = await timePicker.getTimeConfig();
+      return { startDate: start, endDate: end };
     },
 
     async assertDateRangeSelection(expectedStartDate: string, expectedEndDate: string) {
@@ -662,17 +661,9 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async setTimeRange({ startTime, endTime }: { startTime?: string; endTime?: string }) {
-      const opts = {
-        clearWithKeyboard: true,
-        typeCharByChar: true,
-      };
-
-      if (startTime)
-        await testSubjects.setValue('mlJobWizardDatePickerRangeStartDate', startTime, opts);
-      if (endTime) await testSubjects.setValue('mlJobWizardDatePickerRangeEndDate', endTime, opts);
-
-      // escape popover
-      await browser.pressKeys(browser.keys.ESCAPE);
+      // The picker takes the whole range at once, so keep the current value for an omitted bound.
+      const { startDate, endDate } = await this.getSelectedDateRange();
+      await timePicker.setAbsoluteRange(startTime ?? startDate, endTime ?? endDate);
     },
 
     async goToJobDetailsStep() {

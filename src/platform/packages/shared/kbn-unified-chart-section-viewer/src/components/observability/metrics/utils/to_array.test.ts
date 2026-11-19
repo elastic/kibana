@@ -10,8 +10,8 @@
 import { toArray } from './to_array';
 
 describe('toArray', () => {
-  it('returns empty array when value is null', () => {
-    expect(toArray(null)).toEqual([]);
+  it('returns [null] when value is null', () => {
+    expect(toArray(null)).toEqual([null]);
   });
 
   it('returns empty array when value is undefined', () => {

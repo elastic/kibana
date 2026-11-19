@@ -1,0 +1,104 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  DESTINATION_NODE_TYPE,
+  PROCESSING_NODE_TYPE,
+  ROUTING_NODE_TYPE,
+  SOURCE_NODE_TYPE,
+} from './types';
+
+/**
+ * Background dot grid spacing (px). Column/row gaps are multiples of this so
+ * nodes and connectors align to the same visual grid.
+ */
+export const GRID_SIZE = 16;
+
+export const SNAP_SIZE = 12;
+
+/** Center-to-center horizontal distance between successive layout columns (px). */
+export const COLUMN_GAP = 360;
+
+/** Center-to-center vertical distance between successive rows within the canvas (px). */
+export const ROW_GAP = 120;
+
+/** Viewport zoom bounds for the canvas. */
+export const MIN_ZOOM = 0.3;
+export const MAX_ZOOM = 2;
+
+/**
+ * Padding applied when fitting the graph into the viewport. Bottom padding is
+ * an absolute clearance so nodes stay above the floating toolbar; a fractional
+ * value is not enough once the toolbar is overlaid on the pane.
+ */
+export const FIT_VIEW_PADDING = {
+  top: 0.12,
+  left: 0.15,
+  right: 0.15,
+  bottom: '128px',
+} as const;
+
+/** Animation duration (ms) for the fit-to-screen control. */
+export const FIT_VIEW_DURATION = 400;
+
+/**
+ * Comfortable margin (px, in flow coordinates) kept around the graph bounds when
+ * bounding how far the canvas can be panned, so people can move a little past
+ * the content but never drift into infinite empty space.
+ */
+export const PAN_MARGIN = 500;
+
+/** Fixed card widths (px) for each node kind; the single source of truth used
+ * by both the node components and the pan-bound estimate below. */
+export const SOURCE_NODE_WIDTH = 246;
+// Wide enough for the stats footer in the worst case, all on one row: a rate such as `12.5k/s`, a
+// latency such as `999ms`, the `Failures` badge, and a two-digit index count such as `99 indices`.
+// The columns of the layout are `COLUMN_GAP` apart, center to center, so this does not move them.
+export const DESTINATION_NODE_WIDTH = 300;
+export const ROUTING_NODE_WIDTH = 172;
+export const PROCESSING_NODE_WIDTH = 130;
+
+/**
+ * Revisit whenever a card gains or loses a content row.
+ */
+// The stats footer of a source that reports metrics adds 28 (a 24 row and a 4 margin). A direct
+// source has no footer, so its card is shorter than the height the layout reserves.
+export const SOURCE_NODE_HEIGHT = 102;
+// The stats footer of an Elasticsearch destination adds 28 (a 24 row and a 4 margin). An S3
+// destination has no footer, so its card is shorter than the height the layout reserves.
+export const DESTINATION_NODE_HEIGHT = 106;
+/** A routing card with a single rule. Each extra rule adds a row. */
+export const ROUTING_NODE_HEIGHT = 96;
+// Two lines of stats (40) plus the card's padding and border (18).
+export const PROCESSING_NODE_HEIGHT = 58;
+
+export const NODE_HEIGHT_BY_TYPE: Readonly<Record<string, number>> = {
+  [SOURCE_NODE_TYPE]: SOURCE_NODE_HEIGHT,
+  [DESTINATION_NODE_TYPE]: DESTINATION_NODE_HEIGHT,
+  [ROUTING_NODE_TYPE]: ROUTING_NODE_HEIGHT,
+  [PROCESSING_NODE_TYPE]: PROCESSING_NODE_HEIGHT,
+};
+
+/**
+ * Fallback node footprint (px) used when computing the pan bounds before React
+ * Flow has measured a node's real DOM size. Derived from the widest card so the
+ * estimate never undershoots the real content.
+ */
+export const NODE_WIDTH_ESTIMATE = Math.max(SOURCE_NODE_WIDTH, DESTINATION_NODE_WIDTH);
+export const NODE_HEIGHT_ESTIMATE = Math.max(SOURCE_NODE_HEIGHT, DESTINATION_NODE_HEIGHT);
+
+/** Minimap overview dimensions (px), matching the prototype. */
+export const MINIMAP_WIDTH = 150;
+export const MINIMAP_HEIGHT = 90;
+
+export const MINIMAP_MASK_COLOR = 'rgba(105, 112, 125, 0.14)';
+
+/** Opacity of nodes and edges outside the flow of the hovered node. */
+export const FLOW_DIMMED_OPACITY = 0.2;
+
+/** Fade duration (ms) when the flow highlight is applied or cleared. */
+export const FLOW_HIGHLIGHT_TRANSITION_MS = 120;

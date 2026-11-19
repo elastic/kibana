@@ -10,7 +10,7 @@
  * to extract information for display in dashboards.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type { MlSeverityType } from './anomaly_severity';
 import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 import { ML_ANOMALY_SEVERITY_TYPES } from './anomaly_severity_types';
@@ -44,7 +44,7 @@ export type MlEntityFieldOperation =
 /**
  * Interface of an entity field
  */
-export type MlEntityField = TypeOf<typeof mlEntityFieldSchema>;
+export type MlEntityField = z.output<typeof mlEntityFieldSchema>;
 
 // List of function descriptions for which actual values from record level results should be displayed.
 const DISPLAY_ACTUAL_FUNCTIONS = [

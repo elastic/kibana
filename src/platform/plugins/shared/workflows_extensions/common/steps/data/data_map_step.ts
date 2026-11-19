@@ -20,15 +20,19 @@ export const ConfigSchema = z.object({
 
 /** Reserved key that triggers array iteration in a nested field spec. */
 export const MAP_DIRECTIVE = '$map';
-const MAP_BINDING_IDENTIFIER_REGEX = /^[A-Za-z_][A-Za-z0-9_]*$/;
+export const MAP_BINDING_IDENTIFIER_REGEX = /^[A-Za-z_][A-Za-z0-9_]*$/;
+export const DEFAULT_ITEM_BINDING = 'item';
+export const DEFAULT_INDEX_BINDING = 'index';
 
 /**
  * The value of the `$map` directive inside a nested field spec.
  *   - `items` (required): a Liquid template expression that resolves to an array
  *     (e.g. `"${{ item.tags }}"`). Rendered using the current context just like any other field.
- *   - `item` (optional): the variable name each element is bound to. Defaults to `"item"`.
+ *   - `item` (optional): the variable name each element is bound to.
+ *     Defaults to `DEFAULT_ITEM_BINDING`.
  *     Must match `[a-zA-Z_][a-zA-Z0-9_]*`.
- *   - `index` (optional): the variable name for the iteration index. Defaults to `"index"`.
+ *   - `index` (optional): the variable name for the iteration index.
+ *     Defaults to `DEFAULT_INDEX_BINDING`.
  *     Must match `[a-zA-Z_][a-zA-Z0-9_]*`.
  */
 export interface MapDirectiveValue {
@@ -57,8 +61,8 @@ export interface MapDirectiveValue {
  * is `{ items, item?, index? }`. When present, the field produces an **array** in the output.
  * `items` is a Liquid template expression (e.g. `"${{ item.tags }}"`) rendered using the
  * current context — the same rendering used for all other field values. Each element is bound
- * to the name given by `item` (defaults to `"item"`) and the iteration index to `index`
- * (defaults to `"index"`). All ancestor variables remain in scope.
+ * to the name given by `item` (defaults to `DEFAULT_ITEM_BINDING`) and the iteration index to `index`
+ * (defaults to `DEFAULT_INDEX_BINDING`). All ancestor variables remain in scope.
  *
  * Objects without `$map` are literal nesting: rendered with the current context.
  */
@@ -112,20 +116,21 @@ export const dataMapStepCommonDefinition: CommonStepDefinition<
   }),
   documentation: {
     details: i18n.translate('workflowsExtensions.dataMapStep.documentation.details', {
-      defaultMessage: `The ${DataMapStepTypeId} step transforms arrays or single objects by applying a mapping configuration. For arrays, it maps each item and returns an array. For objects, it maps the single object and returns an object. Use {itemSyntax} to reference the current item and {indexSyntax} to access the item's position. The output is accessible via {outputSyntax}.
+      defaultMessage: `The {stepType} step transforms arrays or single objects by applying a mapping configuration. For arrays, it maps each item and returns an array. For objects, it maps the single object and returns an object. Use {itemSyntax} to reference the current item and {indexSyntax} to access the item's position. The output is accessible via {outputSyntax}.
 
 To map nested arrays, add a {mapDirective} key inside a nested field object with the form {mapDirectiveShape}. The {mapItems} value is a Liquid template expression rendered using the current context (the same rendering applied to all other fields), and each element is bound to the name given by {mapItemProp} (defaults to {mapItemDefault}). The iteration index is bound to the name given by {mapIndexProp} (defaults to {mapIndexDefault}), and parent variables remain in scope. Nested objects without {mapDirective} produce literal object output. 
 If nested {mapItems} value in the source data resolves to any non-array value (including \`null\` or \`undefined\`), an empty array (\`[]\`) is going to be returned to guarantee output consistency. Nested recursion depth is limited to 10 levels.`,
       values: {
+        stepType: DataMapStepTypeId,
         itemSyntax: '`{{ item.field }}`',
         indexSyntax: '`{{ index }}`',
         mapDirective: '`$map`',
         mapDirectiveShape: '`$map: { items: "${{ ... }}", item?: "...", index?: "..." }`',
         mapItems: '`items`',
         mapItemProp: '`item`',
-        mapItemDefault: '`"item"`',
+        mapItemDefault: `\`"${DEFAULT_ITEM_BINDING}"\``,
         mapIndexProp: '`index`',
-        mapIndexDefault: '`"index"`',
+        mapIndexDefault: `\`"${DEFAULT_INDEX_BINDING}"\``,
         outputSyntax: '`{{ steps.stepName.output }}`',
       },
     }),

@@ -1,0 +1,52 @@
+requestBody:
+  content:
+    multipart/form-data:
+      examples:
+        resolveImportErrorsRequest:
+          summary: Resolve import errors by retrying objects
+          value:
+            file: file.ndjson
+            retries:
+              - type: dashboard
+                id: example-dashboard-1
+                overwrite: true
+                replaceReferences: []
+responses:
+  '200':
+    description: A successful resolve import errors response.
+    content:
+      application/json:
+        examples:
+          resolveImportErrorsResponse:
+            summary: A successful resolve import errors response
+            value:
+              success: true
+              successCount: 1
+              errors: []
+              successResults:
+                - type: dashboard
+                  id: example-dashboard-1
+                  managed: false
+  '400':
+    description: A bad request.
+    content:
+      application/json:
+        examples:
+          badRequestResponse:
+            summary: A bad request error
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: Invalid file extension .txt
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/saved_objects/_resolve_import_errors" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        --form file=@file.ndjson \
+        --form retries='[{"type":"dashboard","id":"example-dashboard-1","overwrite":true,"replaceReferences":[]}]'
+  - lang: Console
+    source: |
+      POST kbn://api/saved_objects/_resolve_import_errors

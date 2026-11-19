@@ -100,15 +100,14 @@ export default function (providerContext: FtrProviderContext) {
       .send({ agentPolicyId });
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/246424
-  describe.skip('input package policy rollback', function () {
+  describe('input package policy rollback', function () {
     skipIfNoDockerRegistry(providerContext);
 
     let agentPolicyId: string;
     before(async () => {
+      await fleetAndAgents.setup();
       const agentPolicy = await createAgentPolicy();
       agentPolicyId = agentPolicy.id;
-      await fleetAndAgents.setup();
     });
 
     after(async () => {
@@ -131,12 +130,7 @@ export default function (providerContext: FtrProviderContext) {
 
       await retry.tryForTime(10000, async () => {
         const installation = await getInstallationInfo(supertest, PACKAGE_NAME, START_VERSION);
-        expectIdArraysEqual(installation.installed_es, [
-          {
-            id: 'input_package_upgrade-README.md',
-            type: 'knowledge_base',
-          },
-        ]);
+        expectIdArraysEqual(installation.installed_es, []);
       });
 
       await uninstallPackage(PACKAGE_NAME, START_VERSION);

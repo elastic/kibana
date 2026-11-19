@@ -7,9 +7,7 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "user": {
-        "entity": {
-          "id": "admin@example.com"
-        }
+        "id": "admin@example.com"
       },
       "client": {
         "user": {
@@ -118,6 +116,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -132,9 +133,7 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "user": {
-        "entity": {
-          "id": "admin2@example.com"
-        }
+        "id": "admin2@example.com"
       },
       "client": {
         "user": {
@@ -243,6 +242,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -257,9 +259,7 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "user": {
-        "entity": {
-          "id": "admin3@example.com"
-        }
+        "id": "admin3@example.com"
       },
       "client": {
         "user": {
@@ -368,6 +368,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -382,9 +385,7 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "user": {
-        "entity": {
-          "id": "admin3@example.com"
-        }
+        "id": "admin3@example.com"
       },
       "client": {
         "user": {
@@ -493,6 +494,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -507,9 +511,7 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "user": {
-        "entity": {
-          "id": "admin5@example.com"
-        }
+        "id": "admin5@example.com"
       },
       "client": {
         "user": {
@@ -627,9 +629,7 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "user": {
-        "entity": {
-          "id": "admin@example.com"
-        }
+        "id": "admin@example.com"
       },
       "client": {
         "user": {
@@ -738,6 +738,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -752,10 +755,7 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "service": {
-        "entity": {
-          "id": "service-account-123@project.iam.gserviceaccount.com"
-        },
-        "name": "compute.googleapis.com"
+        "name": "ServiceAccount123"
       },
       "cloud": {
         "project": {
@@ -810,12 +810,10 @@
       ],
       "host": {
         "target": {
-          "entity": {
-            "id": [
-              "host-instance-1",
-              "host-instance-2"
-            ]
-          }
+          "id": [
+            "host-instance-1",
+            "host-instance-2"
+          ]
         }
       },
       "user_agent": {
@@ -824,6 +822,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/400.0.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -989,9 +990,6 @@
           "multivalue@example.com"
         ]
       },
-      "service": {
-        "name": "test.googleapis.com"
-      },
       "source": {
         "ip": "10.0.0.5"
       },
@@ -1001,6 +999,9 @@
         },
         "name": "Other",
         "original": "test-client/1.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -1015,9 +1016,7 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "user": {
-        "entity": {
-          "id": "new-schema-user@example.com"
-        }
+        "id": "new-schema-user@example.com"
       },
       "client": {
         "user": {
@@ -1109,6 +1108,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/350.0.0"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1123,9 +1125,7 @@
     "source": {
       "@timestamp": "2024-09-10T14:30:00.000Z",
       "user": {
-        "entity": {
-          "id": "entity-user@example.com"
-        }
+        "id": "entity-user@example.com"
       },
       "client": {
         "user": {
@@ -1189,12 +1189,7 @@
         ]
       },
       "service": {
-        "name": "compute.googleapis.com",
-        "target": {
-          "entity": {
-            "id": "entity-service-target-1"
-          }
-        }
+        "name": "compute.googleapis.com"
       },
       "source": {
         "ip": "10.0.0.10"
@@ -1206,6 +1201,14 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/370.0.0"
+      },
+      "entity": {
+        "target": {
+          "id": "entity-service-target-1"
+        }
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1220,9 +1223,7 @@
     "source": {
       "@timestamp": "2024-09-11T10:00:00.000Z",
       "user": {
-        "entity": {
-          "id": "multi-target-user@example.com"
-        }
+        "id": "multi-target-user@example.com"
       },
       "client": {
         "user": {
@@ -1283,12 +1284,7 @@
       "service": {
         "name": "storage.googleapis.com",
         "target": {
-          "entity": {
-            "id": [
-              "projects/multi-target-project-id/buckets/target-bucket-c",
-              "projects/multi-target-project-id/serviceAccounts/target-sa-different@multi-target-project-id.iam.gserviceaccount.com"
-            ]
-          }
+          "name": "TargetServiceDifferent"
         }
       },
       "source": {
@@ -1298,7 +1294,8 @@
         "target": {
           "id": [
             "projects/multi-target-project-id/buckets/target-bucket-a",
-            "projects/multi-target-project-id/buckets/target-bucket-b"
+            "projects/multi-target-project-id/buckets/target-bucket-b",
+            "projects/multi-target-project-id/buckets/target-bucket-c"
           ]
         }
       },
@@ -1309,6 +1306,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/380.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -1323,9 +1323,7 @@
     "source": {
       "@timestamp": "2024-09-12T10:00:00.000Z",
       "user": {
-        "entity": {
-          "id": "partial-user@example.com"
-        }
+        "id": "partial-user@example.com"
       },
       "client": {
         "user": {
@@ -1392,9 +1390,7 @@
       },
       "host": {
         "target": {
-          "entity": {
-            "id": "partial-host-instance-1"
-          }
+          "id": "partial-host-instance-1"
         }
       },
       "tags": [],
@@ -1418,9 +1414,7 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "user": {
-        "entity": {
-          "id": "group-actor-1@example.com"
-        }
+        "id": "group-actor-1@example.com"
       },
       "entity": {
         "target": {
@@ -1451,9 +1445,7 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "user": {
-        "entity": {
-          "id": "group-actor-2@example.com"
-        }
+        "id": "group-actor-2@example.com"
       },
       "entity": {
         "target": {
@@ -1484,9 +1476,7 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "user": {
-        "entity": {
-          "id": "group-actor-3@example.com"
-        }
+        "id": "group-actor-3@example.com"
       },
       "entity": {
         "target": {
@@ -1517,9 +1507,7 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "user": {
-        "entity": {
-          "id": "group-actor-4@example.com"
-        }
+        "id": "group-actor-4@example.com"
       },
       "entity": {
         "target": {
@@ -1550,9 +1538,7 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "user": {
-        "entity": {
-          "id": "group-actor-5@example.com"
-        }
+        "id": "group-actor-5@example.com"
       },
       "entity": {
         "target": {
@@ -1583,9 +1569,7 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "user": {
-        "entity": {
-          "id": "group-actor-6@example.com"
-        }
+        "id": "group-actor-6@example.com"
       },
       "entity": {
         "target": {
@@ -1616,9 +1600,7 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "user": {
-        "entity": {
-          "id": "solo-actor@example.com"
-        }
+        "id": "solo-actor@example.com"
       },
       "entity": {
         "target": {
@@ -1650,9 +1632,7 @@
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "user": {
         "name": "relationships-test-user",
-        "entity": {
-          "id": "relationships-test-user"
-        }
+        "id": "relationships-test-user"
       },
       "cloud": {
         "account": {
@@ -1689,9 +1669,7 @@
       },
       "service": {
         "target": {
-          "entity": {
-            "id": "relationships-target-service"
-          }
+          "name": "Relationships Target Service"
         },
         "name": "sts.amazonaws.com"
       },
@@ -1702,6 +1680,9 @@
         },
         "name": "AWS SDK",
         "original": "aws-sdk-go/1.44.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -1717,15 +1698,9 @@
       "@timestamp": "2024-09-01T12:35:00.789Z",
       "user": {
         "name": "gcp-admin-user@my-gcp-project.iam.gserviceaccount.com",
-        "entity": {
-          "id": "gcp-admin-user@my-gcp-project.iam.gserviceaccount.com"
-        }
-      },
-      "service": {
+        "id": "gcp-admin-user@my-gcp-project.iam.gserviceaccount.com",
         "target": {
-          "entity": {
-            "id": "data-pipeline@my-gcp-project.iam.gserviceaccount.com"
-          }
+          "id": "data-pipeline@my-gcp-project.iam.gserviceaccount.com"
         }
       },
       "cloud": {
@@ -1773,6 +1748,9 @@
         },
         "name": "google-cloud-sdk",
         "original": "google-cloud-sdk gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -1788,15 +1766,11 @@
       "@timestamp": "2024-09-01T12:40:00.789Z",
       "user": {
         "name": "gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com",
-        "entity": {
-          "id": "gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com"
-        }
+        "id": "gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com"
       },
       "host": {
         "target": {
-          "entity": {
-            "id": "projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1"
-          }
+          "id": "projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1"
         }
       },
       "cloud": {
@@ -1844,6 +1818,9 @@
         },
         "name": "google-cloud-sdk",
         "original": "google-cloud-sdk gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -1859,22 +1836,17 @@
       "@timestamp": "2024-09-01T12:45:00.789Z",
       "user": {
         "name": "Hierarchy Root User",
-        "entity": {
-          "id": "rel-hierarchy-root-user"
-        }
-      },
-      "host": {
-        "target": {
-          "entity": {
-            "id": "rel-hierarchy-host-1"
-          }
-        }
-      },
-      "entity": {
+        "id": "rel-hierarchy-root-user",
         "target": {
           "id": "rel-hierarchy-identity-1"
         }
       },
+      "host": {
+        "target": {
+          "id": "rel-hierarchy-host-1"
+        }
+      },
+      "entity": {},
       "cloud": {
         "account": {
           "id": "rel-hierarchy-account"
@@ -1916,6 +1888,9 @@
         },
         "name": "gcloud",
         "original": "gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1931,15 +1906,12 @@
       "@timestamp": "2024-09-01T12:46:00.789Z",
       "user": {
         "name": "Hierarchy Identity 1",
-        "entity": {
-          "id": "rel-hierarchy-identity-1"
-        }
-      },
-      "entity": {
+        "id": "rel-hierarchy-identity-1",
         "target": {
           "id": "rel-hierarchy-delegate-1"
         }
       },
+      "entity": {},
       "cloud": {
         "account": {
           "id": "rel-hierarchy-account"
@@ -1981,6 +1953,9 @@
         },
         "name": "gcloud",
         "original": "gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -1996,15 +1971,12 @@
       "@timestamp": "2024-09-01T12:47:00.789Z",
       "user": {
         "name": "Hierarchy Identity 1",
-        "entity": {
-          "id": "rel-hierarchy-identity-1"
-        }
-      },
-      "entity": {
+        "id": "rel-hierarchy-identity-1",
         "target": {
           "id": "rel-hierarchy-delegate-1"
         }
       },
+      "entity": {},
       "cloud": {
         "account": {
           "id": "rel-hierarchy-account"
@@ -2046,6 +2018,9 @@
         },
         "name": "gcloud",
         "original": "gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -2060,9 +2035,7 @@
     "source": {
       "@timestamp": "2024-09-01T13:00:00.000Z",
       "host": {
-        "entity": {
-          "id": "partial-host-instance-1"
-        }
+        "id": "partial-host-instance-1"
       },
       "cloud": {
         "project": {
@@ -2075,6 +2048,116 @@
         "id": "entities-partial-host-event-id",
         "kind": "event",
         "outcome": "success"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "entities-host-multiple-ips-event",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T13:00:00.000Z",
+      "host": {
+        "id": "host-with-multiple-ips-actor",
+        "entity": {
+          "id": "host:host-with-multiple-ips-actor"
+        },
+        "target": {
+          "id": "host-with-multiple-ips-target",
+          "entity": {
+            "id": "host:host-with-multiple-ips-target"
+          }
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "partial-data-project-id"
+        },
+        "provider": "gcp"
+      },
+      "event": {
+        "action": "google.compute.v1.Instances.start",
+        "id": "entities-host-multiple-ips-event-id",
+        "kind": "event",
+        "outcome": "success"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "MultiActorMultiTargetEvent123",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T14:00:00.000Z",
+      "user": {
+        "email": [
+          "multi-actor-1@example.com",
+          "multi-actor-2@example.com"
+        ],
+        "name": [
+          "Multi Actor 1",
+          "Multi Actor 2"
+        ],
+        "id": [
+          "multi-actor-1@example.com",
+          "multi-actor-2@example.com"
+        ]
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.ManageMultipleResources",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network",
+          "configuration"
+        ],
+        "id": "multi-actor-multi-target-event",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "change",
+          "access",
+          "allowed"
+        ]
+      },
+      "entity": {
+        "target": {
+          "id": [
+            "projects/your-project-id/buckets/target-bucket-1",
+            "projects/your-project-id/buckets/target-bucket-2"
+          ]
+        }
+      },
+      "service": {
+        "name": "iam.googleapis.com",
+        "target": {
+          "name": "TargetMultiService1"
+        }
+      },
+      "source": {
+        "ip": "10.0.0.20"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }

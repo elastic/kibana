@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type {
   ElasticsearchClient,
@@ -27,6 +27,7 @@ export interface BulkUpgradeTaskParams {
   force?: boolean;
   prerelease?: boolean;
   upgradePackagePolicies?: boolean;
+  acknowledgeBreakingChanges?: boolean;
 }
 
 interface BulkUpgradeTaskState {
@@ -43,13 +44,13 @@ interface BulkUpgradeTaskState {
 }
 
 export async function _runBulkUpgradeTask({
-  abortController,
+  signal,
   taskParams,
   logger,
   request,
 }: {
   taskParams: BulkUpgradeTaskParams;
-  abortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
   request: KibanaRequest;
 }) {
@@ -59,6 +60,7 @@ export async function _runBulkUpgradeTask({
     force,
     prerelease,
     upgradePackagePolicies,
+    acknowledgeBreakingChanges,
   } = taskParams;
   const esClient = appContextService.getInternalUserESClient();
   const savedObjectsClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
@@ -67,7 +69,7 @@ export async function _runBulkUpgradeTask({
 
   for (const pkg of packages) {
     // Throw between package install if task is aborted
-    if (abortController.signal.aborted) {
+    if (signal.aborted) {
       throw new Error('Task was aborted');
     }
     try {
@@ -80,6 +82,8 @@ export async function _runBulkUpgradeTask({
         pkgkey: pkg?.version ? `${pkg.name}-${pkg.version}` : pkg.name,
         force,
         prerelease,
+        checkBreakingChanges: true,
+        acknowledgeBreakingChanges,
       });
 
       if (installResult.error) {
@@ -126,6 +130,9 @@ async function bulkUpgradePackagePolicies({
   });
 
   if (policyIdsToUpgrade.items.length) {
+    // Agentless is intentionally NOT filtered out under disableAgentlessLegacyAPI: the flag targets
+    // the public legacy policy APIs, not this system path. Same engine the agentless API uses, and
+    // the periodic deployment-sync task reconciles the workload by revision.
     const upgradePackagePoliciesResults = await packagePolicyService.bulkUpgrade(
       savedObjectsClient,
       esClient,

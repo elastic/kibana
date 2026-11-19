@@ -1,0 +1,6 @@
+{
+  "integration": "network",
+  "version": "1.0.0",
+  "dataStream": "network.security",
+  "fidelity": "authored"
+}

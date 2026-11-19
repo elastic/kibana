@@ -34,7 +34,9 @@ export {
   type HasTimeRange,
   type SearchEmbeddableRuntimeState,
   type SearchEmbeddableApi,
+  type SearchEmbeddablePanelApiState,
 } from './embeddable';
 export type { DiscoverServices } from './build_services';
+export type { ExpandedDocRef } from './application/main/utils/expanded_doc';
 
 export const loadSharingDataHelpers = () => import('./utils/get_sharing_data');

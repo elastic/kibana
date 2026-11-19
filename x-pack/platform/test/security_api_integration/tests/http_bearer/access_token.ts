@@ -8,6 +8,7 @@
 import { expect as jestExpect } from 'expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 
@@ -41,9 +42,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       const response = await supertest
         .get('/internal/security/me')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'true')
         .set('authorization', `Bearer ${accessToken}`)
-        .expect(200, expectedUser);
+        .expect(200);
+
+      jestExpect(response.body).toMatchObject(expectedUser);
 
       // Make sure we don't automatically create a session
       expect(response.headers['set-cookie']).to.be(undefined);
@@ -53,18 +57,21 @@ export default function ({ getService }: FtrProviderContext) {
       const { accessToken, expectedUser } = await createToken();
 
       // try it once
-      await supertest
+      const responseOne = await supertest
         .get('/internal/security/me')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'true')
         .set('authorization', `Bearer ${accessToken}`)
-        .expect(200, expectedUser);
+        .expect(200);
+      jestExpect(responseOne.body).toMatchObject(expectedUser);
 
       // try it again to verity it isn't invalidated after a single request
-      await supertest
+      const responseTwo = await supertest
         .get('/internal/security/me')
         .set('kbn-xsrf', 'true')
         .set('authorization', `Bearer ${accessToken}`)
-        .expect(200, expectedUser);
+        .expect(200);
+      jestExpect(responseTwo.body).toMatchObject(expectedUser);
     });
 
     it('rejects invalid access token via authorization Bearer header', async () => {

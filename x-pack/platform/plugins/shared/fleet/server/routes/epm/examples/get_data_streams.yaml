@@ -1,0 +1,27 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getDataStreamsExample:
+            description: 'List of data streams from installed packages'
+            value:
+              data_streams:
+                - name: 'logs-system.syslog-default'
+                  title: 'System syslog logs'
+                  package: 'system'
+                  package_version: '1.55.0'
+                  index_template: 'logs-system.syslog'
+                  ilm_policy: 'logs-default'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

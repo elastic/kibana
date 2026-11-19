@@ -27,7 +27,7 @@ import { PrebootService } from '@kbn/core-preboot-server-internal';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import { HttpService } from '@kbn/core-http-server-internal';
 import { ElasticsearchService } from '@kbn/core-elasticsearch-server-internal';
-import { MetricsService } from '@kbn/core-metrics-server-internal';
+import { EventLoopWatchdogService, MetricsService } from '@kbn/core-metrics-server-internal';
 import { CapabilitiesService } from '@kbn/core-capabilities-server-internal';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SavedObjectsService } from '@kbn/core-saved-objects-server-internal';
@@ -40,6 +40,7 @@ import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
 import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
 import { DataStreamsService } from '@kbn/core-data-streams-server-internal';
+import { PubSubService } from '@kbn/core-pubsub-server-internal';
 import {
   CoreRouteHandlerContext,
   PrebootCoreRouteHandlerContext,
@@ -60,11 +61,19 @@ import type { DiscoveredPlugins } from '@kbn/core-plugins-server-internal';
 import { PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
+import {
+  HTTPAuthorizationHeader,
+  isUiamCredential,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { PricingService } from '@kbn/core-pricing-server-internal';
 import { CoreInjectionService } from '@kbn/core-di-server-internal';
 import { SpanStatusCode } from '@opentelemetry/api';
 import { withActiveSpan } from '@kbn/tracing-utils';
+import { UserStorageService } from '@kbn/core-user-storage-server-internal';
+import { setLazyConfigSchemaDisabled } from '@kbn/config-schema';
+import { setLazySchemaDisabled } from '@kbn/zod';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
@@ -90,6 +99,7 @@ export class Server {
   private readonly environment: EnvironmentService;
   private readonly node: NodeService;
   private readonly metrics: MetricsService;
+  private readonly eventLoopWatchdog: EventLoopWatchdogService;
   private readonly httpRateLimiter: HttpRateLimiterService;
   private readonly httpResources: HttpResourcesService;
   private readonly status: StatusService;
@@ -109,6 +119,8 @@ export class Server {
   private readonly userProfile: UserProfileService;
   private readonly injection: CoreInjectionService;
   private readonly dataStreams: DataStreamsService;
+  private readonly pubsub: PubSubService;
+  private readonly userStorage: UserStorageService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -118,6 +130,8 @@ export class Server {
   private discoveredPlugins?: DiscoveredPlugins;
   private readonly logger: LoggerFactory;
   private nodeRoles?: NodeRoles;
+  private nodeRoleNames?: readonly string[];
+  private readonly serviceVersion: string;
 
   private readonly uptimePerStep: Partial<UptimeSteps> = {};
 
@@ -128,12 +142,12 @@ export class Server {
   ) {
     const constructorStartUptime = performance.now();
 
-    const serviceVersion =
+    this.serviceVersion =
       env.packageInfo.buildFlavor === 'serverless'
         ? env.packageInfo.buildShaShort
         : env.packageInfo.version;
     this.loggingSystem.setGlobalContext({
-      service: { version: serviceVersion, type: 'kibana', state: 'initializing' },
+      service: { version: this.serviceVersion, type: 'kibana', state: 'initializing' },
     });
     this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('server');
@@ -154,6 +168,7 @@ export class Server {
     this.environment = new EnvironmentService(core);
     this.node = new NodeService(core);
     this.metrics = new MetricsService(core);
+    this.eventLoopWatchdog = new EventLoopWatchdogService(core);
     this.status = new StatusService(core);
     this.coreApp = new CoreAppsService(core);
     this.httpRateLimiter = new HttpRateLimiterService();
@@ -172,6 +187,8 @@ export class Server {
     this.security = new SecurityService(core);
     this.userProfile = new UserProfileService(core);
     this.dataStreams = new DataStreamsService(core);
+    this.pubsub = new PubSubService(core);
+    this.userStorage = new UserStorageService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -217,6 +234,11 @@ export class Server {
     });
     const nodePreboot = await this.node.preboot({ loggingSystem: this.loggingSystem });
     this.nodeRoles = nodePreboot.roles;
+    this.nodeRoleNames = nodePreboot.roleNames;
+
+    // Apply the `disableLazyZodSchemas` / `disableLazyConfigSchemas` static overrides before plugin
+    // discovery so that schemas evaluated at plugin-module-load time observe them.
+    await this.#applyLazySchemaOverrides();
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     this.discoveredPlugins = await this.plugins.discover({
@@ -234,21 +256,25 @@ export class Server {
     const uiSettingsPreboot = await this.uiSettings.preboot();
     const loggingPreboot = this.logging.preboot({ loggingSystem: this.loggingSystem });
 
+    const { uiPlugins, pluginTree, pluginPaths } = this.discoveredPlugins.preboot;
+
+    const contextServicePreboot = this.context.preboot({
+      pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
+    });
+    const docLinksPreboot = this.docLinks.setup();
+
+    // The preboot HTTP server always starts, so probes can reach Kibana while it boots (e.g. waiting for ES or running migrations).
+    // When preboot is disabled, it only serves 503 responses (including `/api/status`) and the ELU history API.
+    const httpPreboot = await this.http.preboot({
+      context: contextServicePreboot,
+      docLinks: docLinksPreboot,
+    });
+    await this.status.preboot({ http: httpPreboot });
+    await this.metrics.preboot({ http: httpPreboot });
+
     let corePreboot: InternalCorePreboot | undefined;
 
     if (!disablePreboot) {
-      const { uiPlugins, pluginTree, pluginPaths } = this.discoveredPlugins.preboot;
-
-      const contextServicePreboot = this.context.preboot({
-        pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
-      });
-      const docLinksPreboot = this.docLinks.setup();
-
-      const httpPreboot = await this.http.preboot({
-        context: contextServicePreboot,
-        docLinks: docLinksPreboot,
-      });
-
       // setup i18n prior to any other service, to have translations ready
       const i18nPreboot = await this.i18n.preboot({ http: httpPreboot, pluginPaths });
 
@@ -257,8 +283,6 @@ export class Server {
       this.capabilities.preboot({ http: httpPreboot });
 
       const elasticsearchServicePreboot = await this.elasticsearch.preboot();
-
-      await this.status.preboot({ http: httpPreboot });
 
       const renderingPreboot = await this.rendering.preboot({
         http: httpPreboot,
@@ -364,6 +388,7 @@ export class Server {
     });
 
     const dataStreamsSetup = await this.dataStreams.setup();
+    const pubsubSetup = this.pubsub.setup();
 
     const metricsSetup = await this.metrics.setup({
       http: httpSetup,
@@ -402,6 +427,11 @@ export class Server {
       savedObjects: savedObjectsSetup,
     });
 
+    const userStorageSetup = this.userStorage.setup({
+      http: httpSetup,
+      savedObjects: savedObjectsSetup,
+    });
+
     const statusSetup = await this.status.setup({
       analytics: analyticsSetup,
       elasticsearch: elasticsearchServiceSetup,
@@ -415,9 +445,21 @@ export class Server {
       loggingSystem: this.loggingSystem,
     });
 
+    if (!this.nodeRoleNames) {
+      throw new Error('Node roles are only known after preboot');
+    }
+    await this.eventLoopWatchdog.setup({
+      status: statusSetup,
+      nodeRoles: this.nodeRoleNames,
+      serviceVersion: this.serviceVersion,
+    });
+
     const customBrandingSetup = this.customBranding.setup();
     const userSettingsServiceSetup = this.userSettingsService.setup();
-    const featureFlagsSetup = this.featureFlags.setup();
+    const featureFlagsSetup = this.featureFlags.setup({
+      http: httpSetup,
+      savedObjects: savedObjectsSetup,
+    });
 
     const renderingSetup = await this.rendering.setup({
       elasticsearch: elasticsearchServiceSetup,
@@ -465,10 +507,13 @@ export class Server {
       userProfile: userProfileSetup,
       injection: injectionSetup,
       dataStreams: dataStreamsSetup,
+      pubsub: pubsubSetup,
+      userStorage: userStorageSetup,
     };
 
-    const pluginsSetup = await this.plugins.setup(coreSetup);
-    this.#pluginsInitialized = pluginsSetup.initialized;
+    const { contracts, initialized } = await this.plugins.setup(coreSetup);
+    coreSetup._plugins = contracts;
+    this.#pluginsInitialized = initialized;
     /**
      * This is a necessary step to ensure that the pricing service is ready to be used.
      * It must be called after all plugins have been setup.
@@ -537,7 +582,6 @@ export class Server {
     });
 
     const deprecationsStart = this.deprecations.start();
-    const userActivityStart = this.userActivity.start();
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await withActiveSpan(
       'saved_objects.migration',
@@ -568,6 +612,10 @@ export class Server {
       }
     );
 
+    const userActivityStart = this.userActivity.start({
+      typeRegistry: savedObjectsStart.getTypeRegistry(),
+    });
+
     if (this.nodeRoles?.migrator === true) {
       this.log.info('Detected migrator node role; shutting down Kibana...');
       throw new CriticalError(
@@ -579,19 +627,46 @@ export class Server {
 
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
+    const userStorageStart = this.userStorage.start({
+      savedObjects: savedObjectsStart,
+      security: securityStart,
+    });
     const customBrandingStart = this.customBranding.start();
     const metricsStart = await this.metrics.start();
     const httpStart = this.http.getStartContract();
     httpStart.setRedactedSessionIdGetter((request) =>
       securityStart.authc.getRedactedSessionId(request)
     );
+    const uiam = securityStart.authc.apiKeys.uiam;
+    if (uiam) {
+      httpStart.setSelfClientUiamAttestationGetter((request, outboundAuthorization) => {
+        const credential = outboundAuthorization
+          ? HTTPAuthorizationHeader.parseFromValue(outboundAuthorization)
+          : null;
+        if (!credential || !isUiamCredential(credential)) {
+          return undefined;
+        }
+        if (uiam.isExternalApiKey(request)) {
+          return undefined;
+        }
+
+        return uiam.getInternalCallerAttestationHeaders(credential)[
+          UIAM_INTERNAL_CALLER_ATTESTATION_HEADER
+        ];
+      });
+      httpStart.setSelfClientOwnClientAuthenticationCheck((value) =>
+        uiam.isOwnClientAuthentication(value)
+      );
+    }
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,
       exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
 
-    const featureFlagsStart = this.featureFlags.start();
+    const featureFlagsStart = this.featureFlags.start({ savedObjects: savedObjectsStart });
+    this.eventLoopWatchdog.start({ featureFlags: featureFlagsStart });
+    const pubsubStart = this.pubsub.start();
 
     const pricingStart = this.pricing.start();
 
@@ -600,6 +675,7 @@ export class Server {
 
     this.rendering.start({
       featureFlags: featureFlagsStart,
+      userStorage: userStorageStart,
     });
 
     this.coreStart = {
@@ -622,31 +698,36 @@ export class Server {
       pricing: pricingStart,
       injection: injectionStart,
       dataStreams: dataStreamsStart,
+      pubsub: pubsubStart,
+      userStorage: userStorageStart,
     };
 
     this.coreApp.start(this.coreStart);
 
-    const { contracts } = await this.plugins.start(this.coreStart);
-    this.coreStart._plugins = contracts;
+    await this.plugins.start(this.coreStart);
 
     await this.http.start();
+    this.status.setReady(true);
 
     return this.coreStart;
   }
 
   public async stop() {
     this.log.debug('stopping server');
+    this.status.setReady(false);
 
     this.coreApp.stop();
     this.httpRateLimiter.stop();
     await this.analytics.stop();
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
+    this.pubsub.stop(); // Stop dispatching before consumers are torn down, so no handler starts against a stopped plugin
     await this.plugins.stop();
     await this.savedObjects.stop();
     await this.elasticsearch.stop();
     await this.uiSettings.stop();
     await this.rendering.stop();
     await this.metrics.stop();
+    await this.eventLoopWatchdog.stop();
     await this.status.stop();
     await this.logging.stop();
     await this.customBranding.stop();
@@ -655,6 +736,7 @@ export class Server {
     this.deprecations.stop();
     this.security.stop();
     this.userProfile.stop();
+    this.userStorage.stop();
   }
 
   private async ensureValidConfiguration() {
@@ -678,6 +760,20 @@ export class Server {
         .error(
           `Strict config validation failed! Extra unknown keys removed in Serverless-compatible mode. Original error: ${validationError}`
         );
+    }
+  }
+
+  async #applyLazySchemaOverrides() {
+    const featureFlagsCfg = await firstValueFrom(
+      this.configService.atPath<{ overrides?: Record<string, unknown> }>('feature_flags')
+    );
+    const { disableLazyZodSchemas, disableLazyConfigSchemas } = featureFlagsCfg.overrides ?? {};
+
+    if (typeof disableLazyZodSchemas === 'boolean') {
+      setLazySchemaDisabled(disableLazyZodSchemas);
+    }
+    if (typeof disableLazyConfigSchemas === 'boolean') {
+      setLazyConfigSchemaDisabled(disableLazyConfigSchemas);
     }
   }
 

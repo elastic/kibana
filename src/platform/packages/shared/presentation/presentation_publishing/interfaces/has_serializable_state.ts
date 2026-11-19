@@ -7,14 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MaybePromise } from '@kbn/utility-types';
+import type { Observable } from 'rxjs';
+
 export interface HasSerializableState<SerializedState extends object = object> {
+  /**
+   * Emit on any state change.
+   *
+   * Must not emit on subscribe.
+   * Must not debounce.
+   */
+  anyStateChange$: Observable<void>;
+  /**
+   * latestState$ is added to the interface so that we can reduce the amount of times that
+   * serializedState is called, since serializedState can be expensive to compute.
+   */
+  latestState$: Observable<SerializedState>;
+
   /**
    * Serializes all state into a format that can be saved into
    * some external store. The opposite of `deserialize` in the {@link ReactEmbeddableFactory}
    */
   serializeState: () => SerializedState;
+
+  /**
+   * Applies a serialized state snapshot owned by the parent container.
+   */
+  applySerializedState: (state: SerializedState) => MaybePromise<void>;
 }
 
 export const apiHasSerializableState = (api: unknown | null): api is HasSerializableState => {
-  return Boolean((api as HasSerializableState)?.serializeState);
+  return Boolean(
+    (api as HasSerializableState)?.serializeState &&
+      (api as HasSerializableState)?.applySerializedState &&
+      (api as HasSerializableState)?.anyStateChange$ &&
+      (api as HasSerializableState)?.latestState$
+  );
 };

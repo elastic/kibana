@@ -13,7 +13,10 @@ import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 
 import {
+  ACCESS_CONTROL_EDITOR_PASSWORD,
+  ACCESS_CONTROL_EDITOR_USERNAME,
   activateSimpleUserProfile,
+  createAccessControlEditorUser,
   createSimpleUser,
   loginAsKibanaAdmin,
   loginAsNotObjectOwner,
@@ -34,6 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await security.testUser.setRoles(['kibana_savedobjects_editor']);
       await createSimpleUser(es);
+      await createAccessControlEditorUser(es);
     });
     after(async () => {
       await security.testUser.restoreDefaults();
@@ -77,8 +81,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('should reject', function () {
-      this.tags('skipFIPS');
-
       it('should throw when transferring ownership of object owned by a different user and not admin', async () => {
         const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile(es);
         const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
@@ -96,8 +98,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { cookie: notOwnerCookie } = await loginAsNotObjectOwner(
           supertestWithoutAuth,
-          'test_user',
-          'changeme'
+          ACCESS_CONTROL_EDITOR_USERNAME,
+          ACCESS_CONTROL_EDITOR_PASSWORD
         );
         const transferResponse = await supertestWithoutAuth
           .put('/access_control_objects/change_owner')

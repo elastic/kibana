@@ -13,7 +13,7 @@ export type ToolDocument = Pick<GetResponse<ToolProperties>, '_source' | '_id'>;
 
 export type ToolPersistedDefinition<TConfig extends object = {}> = Omit<
   ToolDefinition<ToolType, TConfig>,
-  'readonly'
+  'readonly' | 'experimental'
 > & {
   created_at: string;
   updated_at: string;

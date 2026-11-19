@@ -71,6 +71,9 @@ export interface ClientConfigType {
   enableTogglingDataRetention?: boolean;
   enableProjectLevelRetentionChecks?: boolean;
   enableFailureStoreRetentionDisabling?: boolean;
+  enableIndexMode?: boolean;
+  enableVectorCount?: boolean;
+  showManagedDataStreamsByDefault?: boolean;
   dev: {
     enableSemanticText?: boolean;
   };

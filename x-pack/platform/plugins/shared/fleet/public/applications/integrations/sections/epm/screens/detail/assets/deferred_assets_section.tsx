@@ -8,7 +8,8 @@
 import React from 'react';
 import type { FunctionComponent } from 'react';
 
-import { EuiSpacer, EuiCallOut, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -55,10 +56,8 @@ export const DeferredAssetsSection: FunctionComponent<Props> = ({
         </h2>
       </EuiTitle>
       <EuiSpacer size="l" />
-      <EuiCallOut
+      <KbnWarningCallout
         size="m"
-        color="warning"
-        iconType="warning"
         title={getDeferredInstallationMsg(deferredInstallations.length, { authz })}
       />
       <EuiSpacer size="l" />

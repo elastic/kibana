@@ -12,6 +12,7 @@ import { getWorkflowInputsSuggestions } from './get_workflow_inputs_suggestions'
 import { INPUT_STRING_PLACEHOLDER } from '../../../../../../../common/consts/placeholders';
 import type { WorkflowsResponse } from '../../../../../../entities/workflows/model/types';
 import type { StepPropInfo } from '../../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
+import { createStepInfo } from '../../../../../../shared/test_utils';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
 type WorkflowInputsContext = AutocompleteContext & {
@@ -75,6 +76,7 @@ function buildFocusedStepInfo(workflowId: string) {
     stepId: 'step1',
     stepType: 'workflow.execute',
     stepYamlNode,
+    path: ['steps', 0],
     lineStart: 1,
     lineEnd: 5,
     propInfos,
@@ -101,14 +103,7 @@ describe('getWorkflowInputsSuggestions', () => {
 
   it('returns null when step is not a workflow step', async () => {
     const ctx = makeContext({
-      focusedStepInfo: {
-        stepId: 's',
-        stepType: 'slack',
-        stepYamlNode: {} as any,
-        lineStart: 1,
-        lineEnd: 1,
-        propInfos: {},
-      },
+      focusedStepInfo: createStepInfo({ stepId: 's', stepType: 'slack', lineEnd: 1 }),
     });
     const result = await getWorkflowInputsSuggestions(ctx);
     expect(result).toBeNull();

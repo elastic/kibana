@@ -1,0 +1,30 @@
+title: Related case
+description: >
+  Summary of a case returned when listing cases that contain a given alert.
+  This is a subset of the full case response.
+type: object
+required:
+  - id
+  - title
+  - description
+  - status
+  - createdAt
+  - totals
+properties:
+  id:
+    type: string
+    description: The case identifier.
+  title:
+    type: string
+    description: The case title.
+  description:
+    type: string
+    description: The case description.
+  status:
+    $ref: 'case_status.yaml'
+  createdAt:
+    type: string
+    format: date-time
+    description: When the case was created.
+  totals:
+    $ref: 'attachment_totals.yaml'

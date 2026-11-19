@@ -25,6 +25,11 @@ spec:
       branch_configuration: main
       default_branch: main
       pipeline_file: ".buildkite/pipelines/chromium_linux_build/build_chromium.yml"
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/chromium_linux_build/build_chromium.yml
+            cleanup_sparse_state: true
       provider_settings:
         trigger_mode: none
       teams:

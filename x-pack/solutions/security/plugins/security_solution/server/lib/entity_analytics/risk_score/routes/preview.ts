@@ -21,7 +21,9 @@ import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskScoreAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
-import { buildRiskScoreServiceForRequest } from './helpers';
+import { calculateScoresWithESQLV2 } from './calculate_scores_v2';
+import { getConfiguration } from '../../risk_engine/utils/saved_object_configuration';
+import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan } from '../../telemetry/traces';
 
 export const riskScorePreviewRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -51,12 +53,6 @@ export const riskScorePreviewRoute = (
         const soClient = coreContext.savedObjects.client;
         const securityConfig = await securityContext.getConfig();
 
-        const riskScoreService = buildRiskScoreServiceForRequest(
-          securityContext,
-          coreContext,
-          logger
-        );
-
         const {
           after_keys: userAfterKeys,
           data_view_id: dataViewId,
@@ -71,11 +67,13 @@ export const riskScorePreviewRoute = (
           filters: customFilters,
         } = request.body;
 
-        const entityAnalyticsConfig = await riskScoreService.getConfigurationWithDefaults(
-          securityConfig.entityAnalytics
-        );
-
-        const alertSampleSizePerShard = entityAnalyticsConfig?.alertSampleSizePerShard;
+        const savedObjectConfiguration = await getConfiguration({
+          savedObjectsClient: soClient,
+          namespace: securityContext.getSpaceId(),
+        });
+        const alertSampleSizePerShard =
+          savedObjectConfiguration?.alertSampleSizePerShard ??
+          securityConfig.entityAnalytics.riskEngine.alertSampleSizePerShard;
 
         try {
           const { index, runtimeMappings } = await getRiskInputsIndex({
@@ -90,21 +88,37 @@ export const riskScorePreviewRoute = (
           const excludeAlertStatuses = excludedStatuses || ['closed'];
           const excludeAlertTags = excludedTags || [];
           const filters = customFilters || [];
-
-          const result = await riskScoreService.calculateScores({
-            afterKeys,
-            debug,
-            filter,
-            identifierType: identifierType as EntityType,
-            index,
-            pageSize,
-            range,
-            runtimeMappings,
-            weights,
-            alertSampleSizePerShard,
-            excludeAlertStatuses,
-            excludeAlertTags,
-            filters,
+          if (debug === true) {
+            logger.warn('Risk score preview debug mode is unsupported in v2 preview path');
+          }
+          const namespace = securityContext.getSpaceId();
+          const result = await runWithSpan({
+            name: ENTITY_ANALYTICS_SPAN_NAMES.riskScoreOndemandCalculate,
+            namespace,
+            attributes: {
+              'entity_analytics.operation': 'preview',
+              ...(identifierType ? { 'entity_analytics.entity_type': identifierType } : {}),
+            },
+            cb: () =>
+              calculateScoresWithESQLV2({
+                afterKeys,
+                filter,
+                identifierType: identifierType as EntityType,
+                index,
+                pageSize,
+                range,
+                runtimeMappings,
+                weights,
+                alertSampleSizePerShard,
+                excludeAlertStatuses,
+                excludeAlertTags,
+                filters,
+                esClient: coreContext.elasticsearch.client.asCurrentUser,
+                logger,
+                crudClient: securityContext.getEntityStoreUpdateClient(),
+                soClient,
+                namespace,
+              }),
           });
 
           securityContext.getAuditLogger()?.log({

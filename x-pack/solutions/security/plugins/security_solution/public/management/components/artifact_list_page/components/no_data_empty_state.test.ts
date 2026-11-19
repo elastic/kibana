@@ -13,6 +13,7 @@ import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { getFormComponentMock } from '../mocks';
 import { getArtifactListPageRenderingSetup } from '../mocks';
 import { artifactListPageLabels } from '../translations';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 describe('When showing the Empty State in ArtifactListPage', () => {
   let render: (
@@ -56,10 +57,10 @@ describe('When showing the Empty State in ArtifactListPage', () => {
     });
   });
 
-  it('should hide page headers', async () => {
+  it('should not show page header (headerless layout)', async () => {
     render();
 
-    expect(renderResult.queryByTestId('header-page-title')).toBe(null);
+    expect(renderResult.queryByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBe(null);
   });
 
   describe('and user is allowed to Create entries', () => {

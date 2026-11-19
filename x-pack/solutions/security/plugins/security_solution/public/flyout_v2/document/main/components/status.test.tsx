@@ -1,0 +1,126 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render } from '@testing-library/react';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { Status } from './status';
+import { STATUS_TITLE_TEST_ID } from './test_ids';
+
+jest.mock('./status_popover_button', () => ({
+  StatusPopoverButton: ({
+    eventId,
+    contextId,
+    onStatusUpdated,
+    disabled,
+  }: {
+    eventId: string;
+    contextId: string;
+    onStatusUpdated?: () => void;
+    disabled?: boolean;
+  }) => (
+    <button
+      data-test-subj="mockStatusPopoverButton"
+      data-event-id={eventId}
+      data-context-id={contextId}
+      data-disabled={String(disabled ?? false)}
+      onClick={onStatusUpdated}
+      type="button"
+    />
+  ),
+}));
+
+const createMockHit = (
+  flattened: DataTableRecord['flattened'],
+  raw: DataTableRecord['raw'] = { _id: 'es-alert-1' }
+): DataTableRecord =>
+  ({
+    id: 'alert-1',
+    raw,
+    flattened,
+    isAnchor: false,
+  } as DataTableRecord);
+
+const alertHit = createMockHit({
+  'kibana.alert.workflow_status': 'open',
+});
+
+const remoteAlertHit = createMockHit(
+  { 'kibana.alert.workflow_status': 'open' },
+  { _id: 'es-alert-1', _index: 'remote-cluster:.alerts-security.alerts-default' }
+);
+
+const renderComponent = (props: Partial<Parameters<typeof Status>[0]> = {}) =>
+  render(
+    <IntlProvider locale="en">
+      <Status hit={alertHit} {...props} />
+    </IntlProvider>
+  );
+
+describe('<Status />', () => {
+  it('renders the interactive status button by default', () => {
+    const { getByTestId } = renderComponent();
+
+    expect(getByTestId(STATUS_TITLE_TEST_ID)).toHaveTextContent('Status');
+    expect(getByTestId('mockStatusPopoverButton')).toHaveAttribute('data-event-id', 'es-alert-1');
+    expect(getByTestId('mockStatusPopoverButton')).toHaveAttribute('data-context-id', '');
+  });
+
+  it('wraps the status button with the provided cell action renderer', () => {
+    const renderCellActions = jest.fn(({ children, field, value, scopeId }) => (
+      <div
+        data-test-subj="wrappedCellActions"
+        data-field={field}
+        data-value={value}
+        data-scope-id={scopeId}
+      >
+        {children}
+      </div>
+    ));
+
+    const { getByTestId } = renderComponent({ renderCellActions });
+
+    expect(renderCellActions).toHaveBeenCalledTimes(1);
+    expect(getByTestId('wrappedCellActions')).toHaveAttribute(
+      'data-field',
+      'kibana.alert.workflow_status'
+    );
+    expect(getByTestId('wrappedCellActions')).toHaveAttribute('data-value', 'open');
+    expect(getByTestId('wrappedCellActions')).toHaveAttribute('data-scope-id', '');
+  });
+
+  it('calls the alert update callback after a status change', () => {
+    const onAlertUpdated = jest.fn();
+    const { getByTestId } = renderComponent({ onAlertUpdated });
+
+    getByTestId('mockStatusPopoverButton').click();
+
+    expect(onAlertUpdated).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders an empty value when the alert has no workflow status', () => {
+    const { container, queryByTestId } = renderComponent({
+      hit: createMockHit({}),
+    });
+
+    expect(queryByTestId('mockStatusPopoverButton')).not.toBeInTheDocument();
+    expect(container).toHaveTextContent('Status—');
+  });
+
+  it('passes disabled=false to the status button for a local alert', () => {
+    const { getByTestId } = renderComponent({ hit: alertHit });
+
+    expect(getByTestId('mockStatusPopoverButton')).toHaveAttribute('data-disabled', 'false');
+  });
+
+  it('passes disabled=true to the status button for a remote alert', () => {
+    const { getByTestId } = renderComponent({ hit: remoteAlertHit });
+
+    expect(getByTestId('mockStatusPopoverButton')).toHaveAttribute('data-disabled', 'true');
+  });
+});

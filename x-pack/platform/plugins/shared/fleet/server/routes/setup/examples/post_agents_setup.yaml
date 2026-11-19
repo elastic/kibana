@@ -1,0 +1,22 @@
+responses:
+  200:
+    description: 'Fleet setup completed'
+    content:
+      application/json:
+        examples:
+          agentsSetupSuccessExample:
+            description: 'Fleet setup initialized successfully with no non-fatal errors'
+            value:
+              isInitialized: true
+              nonFatalErrors: []
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

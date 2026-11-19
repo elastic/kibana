@@ -40,7 +40,7 @@ export const throwDescriptiveErrorIfResponseIsNotValid = ({
   requiredAttributesToBeInTheResponse?: string[];
 }) => {
   const requiredContentType = 'application/json';
-  const contentType = res.headers['content-type'];
+  const contentType = res.headers['content-type'] as string | undefined;
   const data = res.data;
 
   // If status is 204 and there is no data, we just return

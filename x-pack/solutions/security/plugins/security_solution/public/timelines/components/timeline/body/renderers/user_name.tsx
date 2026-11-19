@@ -8,37 +8,48 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { isString } from 'lodash/fp';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { UserPanelKey } from '../../../../../flyout/entity_details/shared/constants';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { UserDetailsLink } from '../../../../../common/components/links';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
+import { useUiSetting } from '../../../../../common/lib/kibana';
+import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 
 interface Props {
-  contextId: string;
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   isButton?: boolean;
   onClick?: () => void;
   value: string | number | undefined | null;
   title?: string;
+  entityId?: string;
 }
 
 const UserNameComponent: React.FC<Props> = ({
   Component,
-  contextId,
   isButton,
   onClick,
   title,
   value,
+  entityId,
 }) => {
+  const { openUserFlyout } = useFlyoutApi();
+  const isInSecurityApp = useIsInSecurityApp();
+
   const eventContext = useContext(StatefulEventContext);
   const userName = `${value}`;
   const isInTimelineContext = userName && eventContext?.timelineID;
-  const { openFlyout } = useExpandableFlyoutApi();
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
-  const isInSecurityApp = useIsInSecurityApp();
+  const { entityRecord } = useEntityFromStore({
+    entityId,
+    entityType: 'user',
+    skip: !entityStoreV2Enabled,
+  });
+
+  const resolvedEntityId = entityRecord?.entity?.id;
 
   const openUserDetailsSidePanel = useCallback(
     (e: React.SyntheticEvent) => {
@@ -52,20 +63,9 @@ const UserNameComponent: React.FC<Props> = ({
         return;
       }
 
-      const { timelineID } = eventContext;
-
-      openFlyout({
-        right: {
-          id: UserPanelKey,
-          params: {
-            userName,
-            contextID: contextId,
-            scopeId: timelineID,
-          },
-        },
-      });
+      openUserFlyout({ userName, entityId: resolvedEntityId });
     },
-    [contextId, eventContext, isInTimelineContext, onClick, openFlyout, userName]
+    [eventContext, isInTimelineContext, onClick, userName, resolvedEntityId, openUserFlyout]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined

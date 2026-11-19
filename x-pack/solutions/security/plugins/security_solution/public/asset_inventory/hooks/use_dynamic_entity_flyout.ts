@@ -5,38 +5,57 @@
  * 2.0.
  */
 
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
   ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS,
   ASSET_INVENTORY_EXPAND_FLYOUT_ERROR,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { useCallback, useEffect, useRef } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../common/lib/kibana';
-import {
-  HostPanelKey,
-  ServicePanelKey,
-  GenericEntityPanelKey,
-  UserPanelKey,
-} from '../../flyout/entity_details/shared/constants';
-import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
+import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
+import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
+import type { EntityFlyoutHandle } from '../../flyout_v2/entity/use_entity_flyout_api';
 
 interface InventoryFlyoutProps {
+  /** Raw _source from the asset document (required for EUID extraction) */
+  entityId: string;
   entityDocId?: string;
   entityType?: string;
   entityName?: string;
-  scopeId?: string;
+  scopeId: string;
   contextId?: string;
 }
 
 export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () => void }) => {
-  const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
+  const { openHostFlyout, openUserFlyout, openServiceFlyout, openGenericEntityFlyout } =
+    useFlyoutApi();
   const { notifications } = useKibana().services;
-  useOnExpandableFlyoutClose({ callback: onFlyoutClose });
+
+  // The flyout opened from the table, so deselecting its row can close it. Cleared once it closes.
+  const flyoutRef = useRef<EntityFlyoutHandle | null>(null);
+  // Read through a ref so a new `onFlyoutClose` (e.g. an inline arrow) doesn't need re-wiring.
+  const onFlyoutCloseRef = useRef(onFlyoutClose);
+  useEffect(() => {
+    onFlyoutCloseRef.current = onFlyoutClose;
+  }, [onFlyoutClose]);
+
+  // Remembers the opened flyout, and tells the table when the user closes it so the row highlight
+  // follows. Ignores a flyout that was already replaced by a newer one (another row was opened).
+  const trackFlyout = useCallback((handle: EntityFlyoutHandle | undefined) => {
+    if (!handle) return;
+    flyoutRef.current = handle;
+    handle.onClose.then(() => {
+      if (flyoutRef.current !== handle) return;
+      flyoutRef.current = null;
+      onFlyoutCloseRef.current();
+    });
+  }, []);
 
   const openDynamicFlyout = ({
     entityDocId,
+    entityId,
     entityType,
     entityName,
     scopeId,
@@ -60,44 +79,71 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
       return;
     }
 
+    let handle: EntityFlyoutHandle | undefined;
     switch (entityType) {
       case 'user':
-        openFlyout({
-          right: { id: UserPanelKey, params: { userName: entityName, scopeId, contextId } },
+        handle = openUserFlyout({
+          userName: entityName ?? '',
+          entityId,
+          scopeId,
+          contextID: contextId,
+          origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
         });
         break;
       case 'host':
-        openFlyout({
-          right: { id: HostPanelKey, params: { hostName: entityName, scopeId, contextId } },
+        handle = openHostFlyout({
+          hostName: entityName ?? '',
+          entityId,
+          scopeId,
+          contextID: contextId,
+          origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
         });
         break;
       case 'service':
-        openFlyout({
-          right: { id: ServicePanelKey, params: { serviceName: entityName, scopeId, contextId } },
+        handle = openServiceFlyout({
+          serviceName: entityName ?? '',
+          entityId,
+          scopeId,
+          contextID: contextId,
+          origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
         });
         break;
-
       default:
-        openFlyout({
-          right: {
-            id: GenericEntityPanelKey,
-            params: {
-              entityDocId,
-              scopeId,
-              contextId,
-              isEngineMetadataExist: Boolean(entityType), // Pass whether entityType exists to avoid error state in generic flyout
-            },
-          },
-        });
+        if (entityDocId && entityId) {
+          handle = openGenericEntityFlyout({
+            entityDocId,
+            entityId,
+            scopeId,
+            contextID: contextId,
+            origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
+          });
+        } else if (entityId) {
+          handle = openGenericEntityFlyout({
+            entityId,
+            scopeId,
+            contextID: contextId,
+            origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
+          });
+        } else if (entityDocId) {
+          handle = openGenericEntityFlyout({
+            entityDocId,
+            scopeId,
+            contextID: contextId,
+            origin: FLYOUT_ORIGIN.ASSET_INVENTORY,
+          });
+        }
         break;
     }
 
+    trackFlyout(handle);
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS);
   };
 
-  const closeDynamicFlyout = () => {
-    closeFlyout();
-  };
+  const closeDynamicFlyout = useCallback(() => {
+    const handle = flyoutRef.current;
+    flyoutRef.current = null;
+    handle?.close();
+  }, []);
 
   return {
     openDynamicFlyout,

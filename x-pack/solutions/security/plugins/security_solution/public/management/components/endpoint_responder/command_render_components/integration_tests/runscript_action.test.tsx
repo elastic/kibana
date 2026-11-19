@@ -21,15 +21,23 @@ import {
 } from '../../../console/components/console_manager/mocks';
 import { getEndpointConsoleCommands } from '../..';
 import React from 'react';
-import type { EndpointPrivileges } from '../../../../../../common/endpoint/types';
+import type {
+  ActionDetails,
+  EndpointPrivileges,
+  ResponseActionRunScriptOutputContent,
+  ResponseActionRunScriptParameters,
+} from '../../../../../../common/endpoint/types';
 import { enterConsoleCommand, getConsoleSelectorsAndActionMock } from '../../../console/mocks';
 import { SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE } from '../../../../../../common/endpoint/constants';
+import type { GetEndpointConsoleCommandsOptions } from '../../lib/console_commands_definition';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 describe('When using runscript action from response console', () => {
   let mockedContext: AppContextTestRender;
   let user: UserEvent;
   let render: (
-    agentType?: ResponseActionAgentType
+    agentType?: ResponseActionAgentType,
+    endpointCapabilities?: GetEndpointConsoleCommandsOptions['endpointCapabilities']
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
@@ -38,6 +46,38 @@ describe('When using runscript action from response console', () => {
   >;
   let consoleMockUtils: ReturnType<typeof getConsoleSelectorsAndActionMock>;
   let endpointPrivileges: EndpointPrivileges;
+  let runscriptActionDetails: ActionDetails<
+    ResponseActionRunScriptOutputContent,
+    ResponseActionRunScriptParameters
+  >;
+
+  /** Selects the second script (no input required) from the script selector and submits the command */
+  const submitRunscriptCommand = async () => {
+    await render();
+    await enterConsoleCommand(renderResult, user, 'runscript --script', { inputOnly: true });
+    await waitFor(() =>
+      user.click(renderResult.getAllByTestId('scriptSelector-runscript-0-script')[1])
+    );
+    await waitFor(() => {
+      expect(renderResult.queryByTestId('scriptSelector-runscript-0-popoverPanel')).toBeNull();
+    });
+    consoleMockUtils.submitCommand();
+  };
+
+  const setRunscriptActionDetailsToFailed = () => {
+    runscriptActionDetails.wasSuccessful = false;
+    runscriptActionDetails.status = 'failed';
+    runscriptActionDetails.errors = ['error one', 'error two'];
+    runscriptActionDetails.agentState = {
+      'a.b.c': {
+        isCompleted: true,
+        wasSuccessful: false,
+        wasCanceled: false,
+        completedAt: new Date().toISOString(),
+        errors: ['error one', 'error two'],
+      },
+    };
+  };
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -53,7 +93,12 @@ describe('When using runscript action from response console', () => {
     mockedContext = createAppRootMockRenderer();
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
     endpointPrivileges = { ...getEndpointAuthzInitialStateMock(), loading: false };
-    render = async (agentType: ResponseActionAgentType = 'endpoint') => {
+    render = async (
+      agentType: ResponseActionAgentType = 'endpoint',
+      endpointCapabilities: GetEndpointConsoleCommandsOptions['endpointCapabilities'] = [
+        ...ENDPOINT_CAPABILITIES,
+      ]
+    ) => {
       renderResult = mockedContext.render(
         <ConsoleManagerTestComponent
           registerConsoleProps={() => {
@@ -63,7 +108,7 @@ describe('When using runscript action from response console', () => {
                 commands: getEndpointConsoleCommands({
                   agentType,
                   endpointAgentId: 'a.b.c',
-                  endpointCapabilities: [...ENDPOINT_CAPABILITIES],
+                  endpointCapabilities,
                   endpointPrivileges,
                   platform: 'linux',
                 }),
@@ -224,13 +269,80 @@ describe('When using runscript action from response console', () => {
         ).not.toBeNull();
       });
     });
+
+    describe('and the runscript command is submitted', () => {
+      beforeEach(() => {
+        const generator = new EndpointActionGenerator('test');
+
+        runscriptActionDetails = generator.generateActionDetails<
+          ResponseActionRunScriptOutputContent,
+          ResponseActionRunScriptParameters
+        >({
+          command: 'runscript',
+          agentType: 'sentinel_one',
+          agents: ['a.b.c'],
+        });
+
+        apiMocks.responseProvider.actionDetails.mockImplementation(() => ({
+          data: runscriptActionDetails,
+        }));
+      });
+
+      it('should show success with the runscript results when action completes successfully', async () => {
+        await submitRunscriptCommand();
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('runscript-success')).toBeTruthy();
+        });
+
+        expect(renderResult.getByTestId('runscript-actionResult-hostStatus')).toHaveTextContent(
+          'runscript completed successfully'
+        );
+        expect(renderResult.getByTestId('runscript-actionResult-runscriptResults')).toBeTruthy();
+        expect(
+          renderResult.queryByTestId('runscript-actionResult-runscriptResults-outputFailureMessage')
+        ).toBeNull();
+      });
+
+      it('should show failure with error output when action fails', async () => {
+        setRunscriptActionDetailsToFailed();
+        await submitRunscriptCommand();
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('runscript-actionFailure')).toBeTruthy();
+        });
+
+        expect(renderResult.getByTestId('runscript-actionResult-hostStatus')).toHaveTextContent(
+          'runscript failed'
+        );
+        expect(
+          renderResult.getByTestId(
+            'runscript-actionResult-runscriptResults-outputFailureMessage-response-action-failure-info'
+          ).textContent
+        ).toMatch(/error one \| error two/);
+      });
+
+      it('should show api failure if runscript request fails', async () => {
+        apiMocks.responseProvider.runscript.mockRejectedValueOnce({
+          status: 500,
+          message: 'this is an error',
+        } as never);
+        await submitRunscriptCommand();
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('runscript-apiFailure').textContent).toMatch(
+            /this is an error/
+          );
+        });
+      });
+    });
   });
 
   describe('and agent type is Endpoint', () => {
     beforeEach(async () => {
       const _render = render;
 
-      render = () => _render('endpoint');
+      render = (_, capabilities) => _render('endpoint', capabilities);
 
       mockedContext.setExperimentalFlag({
         responseActionsEndpointRunScript: true,
@@ -303,6 +415,22 @@ describe('When using runscript action from response console', () => {
       expect(renderResult.getByTestId('test-unknownCommandError').textContent).toEqual(
         'Unsupported text/commandThe text you entered runscript is unsupported! Click  Help or type help for assistance.'
       );
+    });
+
+    it('should display help panel "+" button disabled if Endpoint does not support runscript', async () => {
+      await render(
+        'endpoint',
+        ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'runscript')
+      );
+      consoleMockUtils.openHelpPanel();
+
+      expect(
+        (
+          renderResult.getByTestId(
+            'test-commandList-Responseactions-runscript-addToInput'
+          ) as HTMLButtonElement
+        ).disabled
+      ).toBe(true);
     });
 
     it('should retrieve and display list of scripts for OS type', async () => {
@@ -411,6 +539,79 @@ describe('When using runscript action from response console', () => {
         expect(
           renderResult.queryByTestId('textareaInputArgument-runscript-inputParams-0-popoverPanel')
         ).not.toBeNull();
+      });
+    });
+
+    describe('and the runscript command is submitted', () => {
+      beforeEach(() => {
+        const generator = new EndpointActionGenerator('test');
+
+        runscriptActionDetails = generator.generateActionDetails<
+          ResponseActionRunScriptOutputContent,
+          ResponseActionRunScriptParameters
+        >({
+          command: 'runscript',
+          agentType: 'endpoint',
+          agents: ['a.b.c'],
+        });
+
+        runscriptActionDetails.outputs = {
+          'a.b.c': generator.generateExecuteActionResponseOutput({
+            content: { stdout: 'script output here', stderr: '' },
+          }),
+        };
+
+        apiMocks.responseProvider.actionDetails.mockImplementation(() => ({
+          data: runscriptActionDetails,
+        }));
+      });
+
+      it('should show success with the runscript results when action completes successfully', async () => {
+        await submitRunscriptCommand();
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('runscript-success')).toBeTruthy();
+        });
+
+        expect(renderResult.getByTestId('runscript-actionResult-hostStatus')).toHaveTextContent(
+          'runscript completed successfully'
+        );
+        expect(renderResult.getByTestId('runscript-actionResult-runscriptResults')).toBeTruthy();
+        expect(
+          renderResult.getByTestId('runscript-actionResult-runscriptResults-output')
+        ).toHaveTextContent('script output here');
+      });
+
+      it('should show failure with error output when action fails', async () => {
+        setRunscriptActionDetailsToFailed();
+        await submitRunscriptCommand();
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('runscript-actionFailure')).toBeTruthy();
+        });
+
+        expect(renderResult.getByTestId('runscript-actionResult-hostStatus')).toHaveTextContent(
+          'runscript failed'
+        );
+        expect(
+          renderResult.getByTestId(
+            'runscript-actionResult-runscriptResults-outputFailureMessage-response-action-failure-info'
+          ).textContent
+        ).toMatch(/error one \| error two/);
+      });
+
+      it('should show api failure if runscript request fails', async () => {
+        apiMocks.responseProvider.runscript.mockRejectedValueOnce({
+          status: 500,
+          message: 'this is an error',
+        } as never);
+        await submitRunscriptCommand();
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('runscript-apiFailure').textContent).toMatch(
+            /this is an error/
+          );
+        });
       });
     });
   });

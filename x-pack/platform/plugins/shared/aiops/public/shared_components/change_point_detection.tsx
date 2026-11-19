@@ -7,6 +7,7 @@
 import { css } from '@emotion/react';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
+import type { ChangePointAggregationFunction } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { UI_SETTINGS } from '@kbn/data-service';
 import type { TimeRange } from '@kbn/es-query';
@@ -15,6 +16,7 @@ import { pick } from 'lodash';
 import React, { useEffect, useMemo, useState, type FC } from 'react';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import type { PublishesFilters } from '@kbn/presentation-publishing';
 import {
   ChangePointDetectionControlsContextProvider,
@@ -41,7 +43,7 @@ export interface ChangePointDetectionProps {
   viewType?: ChangePointDetectionViewType;
   dataViewId: string;
   timeRange: TimeRange;
-  fn: 'avg' | 'sum' | 'min' | 'max' | string;
+  fn: ChangePointAggregationFunction;
   metricField: string;
   splitField?: string;
   partitions?: string[];
@@ -60,10 +62,13 @@ export interface ChangePointDetectionProps {
   lastReloadRequestTime?: number;
   /** Origin of the embeddable instance */
   embeddingOrigin?: string;
-  onLoading: (isLoading: boolean) => void;
+  onLoading?: (isLoading: boolean) => void;
   onRenderComplete: () => void;
   onError: (error: Error) => void;
   filtersApi?: PublishesFilters;
+  /** Optional manager used by dashboard panels to cancel in-flight and pending requests */
+  requestCancellationManager?: RequestCancellationManager;
+  parentApi: unknown;
 }
 
 const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
@@ -85,6 +90,8 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
   embeddingOrigin,
   lastReloadRequestTime,
   filtersApi,
+  requestCancellationManager,
+  parentApi,
 }) => {
   const deps = useMemo(() => {
     const { charts, lens, data, usageCollection, fieldFormats, share, storage, unifiedSearch } =
@@ -134,10 +141,8 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
     );
   }, [manualReload$]);
 
-  // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376>
   return (
     <div
-      data-shared-item=""
       data-test-subj="aiopsEmbeddableChangePointChart"
       css={css`
         width: 100%;
@@ -164,6 +169,8 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
                     onLoading={onLoading}
                     onRenderComplete={onRenderComplete}
                     onError={onError}
+                    requestCancellationManager={requestCancellationManager}
+                    parentApi={parentApi}
                   />
                 </ChangePointDetectionControlsContextProvider>
               </FilterQueryContextProvider>

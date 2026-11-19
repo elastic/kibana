@@ -6,6 +6,7 @@
  */
 
 import type { IngestSimulateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { transpileIngestPipeline } from '@kbn/streamlang';
 import type { FieldDefinition, Streams } from '@kbn/streams-schema';
 import {
@@ -15,7 +16,7 @@ import {
   LOGS_ECS_STREAM_NAME,
   namespacePrefixes,
 } from '@kbn/streams-schema';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import { createStreamlangResolverOptions } from '../resolvers';
 import { executePipelineSimulation } from '../../../routes/internal/streams/processing/simulation_handler';
 import { baseMappings } from '../component_templates/logs_layer';
 import { MalformedFieldsError } from '../errors/malformed_fields_error';
@@ -31,11 +32,12 @@ export function validateAncestorFields({
 }) {
   const isEcsStream = getRoot(streamName) === LOGS_ECS_STREAM_NAME;
 
-  for (const ancestor of ancestors) {
-    for (const fieldName in fields) {
-      if (!Object.hasOwn(fields, fieldName)) {
-        continue;
-      }
+  for (const fieldName in fields) {
+    if (!Object.hasOwn(fields, fieldName)) {
+      continue;
+    }
+
+    for (const ancestor of ancestors) {
       const ancestorField = ancestor.ingest.wired.fields[fieldName];
       if (ancestorField) {
         const fieldType = fields[fieldName].type;
@@ -47,33 +49,41 @@ export function validateAncestorFields({
           );
         }
       }
-      // Skip OTEL namespace validation for logs.ecs streams which use ECS field conventions
-      if (!isEcsStream) {
+    }
+
+    // System fields (e.g. `stream.name`) are managed by Streams itself and have no
+    // user-defined ES mapping, so the OTel naming rules don't apply to them.
+    if (fields[fieldName].type === 'system') {
+      continue;
+    }
+
+    // Skip OTEL namespace validation for logs.ecs streams which use ECS field conventions.
+    // Run this even when there are no ancestors so root streams are validated too.
+    if (!isEcsStream) {
+      if (
+        !namespacePrefixes.some((prefix) => fieldName.startsWith(prefix)) &&
+        !keepFields.includes(fieldName)
+      ) {
+        throw new MalformedFieldsError(
+          `Field ${fieldName} is not allowed to be defined as it doesn't match the namespaced ECS or OTel schema.`
+        );
+      }
+      for (const prefix of namespacePrefixes) {
+        const prefixedName = `${prefix}${fieldName}`;
         if (
-          !namespacePrefixes.some((prefix) => fieldName.startsWith(prefix)) &&
-          !keepFields.includes(fieldName)
+          Object.hasOwn(fields, prefixedName) ||
+          ancestors.some((ancestor) => Object.hasOwn(ancestor.ingest.wired.fields, prefixedName))
         ) {
           throw new MalformedFieldsError(
-            `Field ${fieldName} is not allowed to be defined as it doesn't match the namespaced ECS or OTel schema.`
+            `Field ${fieldName} is an automatic alias of ${prefixedName} because of otel compat mode`
           );
         }
-        for (const prefix of namespacePrefixes) {
-          const prefixedName = `${prefix}${fieldName}`;
-          if (
-            Object.hasOwn(fields, prefixedName) ||
-            Object.hasOwn(ancestor.ingest.wired.fields, prefixedName)
-          ) {
-            throw new MalformedFieldsError(
-              `Field ${fieldName} is an automatic alias of ${prefixedName} because of otel compat mode`
-            );
-          }
-        }
-        // check the otelMappings - they are aliases and are not allowed to have the same name as a field
-        if (fieldName in baseMappings) {
-          throw new MalformedFieldsError(
-            `Field ${fieldName} is an automatic alias of another field because of otel compat mode`
-          );
-        }
+      }
+      // check the otelMappings - they are aliases and are not allowed to have the same name as a field
+      if (fieldName in baseMappings) {
+        throw new MalformedFieldsError(
+          `Field ${fieldName} is an automatic alias of another field because of otel compat mode`
+        );
       }
     }
   }
@@ -108,7 +118,18 @@ export async function validateSimulation(
   definition: Streams.ClassicStream.Definition | Streams.WiredStream.Definition,
   esClient: ElasticsearchClient
 ) {
-  if (definition.ingest.processing.steps.length === 0) {
+  const processors =
+    'processors' in definition.ingest.processing
+      ? definition.ingest.processing.processors
+      : (
+          await transpileIngestPipeline(
+            definition.ingest.processing,
+            undefined,
+            createStreamlangResolverOptions(esClient)
+          )
+        ).processors;
+
+  if (processors.length === 0) {
     return;
   }
 
@@ -119,7 +140,7 @@ export async function validateSimulation(
       },
     ],
     pipeline: {
-      processors: transpileIngestPipeline(definition.ingest.processing).processors,
+      processors,
     },
   };
   const simulationResult = await executePipelineSimulation(esClient, simulationBody);

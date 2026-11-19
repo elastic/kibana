@@ -7,6 +7,7 @@
 
 import type {
   NewPackagePolicy,
+  PackageInfo,
   SINGLE_ACCOUNT,
   ORGANIZATION_ACCOUNT,
 } from '@kbn/fleet-plugin/common';
@@ -84,6 +85,7 @@ export interface GetAwsCredentialTypeConfigParams {
   optionId: string;
   showCloudConnectors: boolean;
   provider: CloudProviders;
+  packageInfo?: PackageInfo;
 }
 
 export type CloudConnectorType = typeof CLOUD_CONNECTOR_TYPE;

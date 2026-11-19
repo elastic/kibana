@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { evaluateKql } from '@kbn/eval-kql';
-import { isKqlSyntaxError } from './kql_utils';
+import type { KueryNode } from '@kbn/es-query';
+import { decodeKqlTemplateValues, evaluateKql } from '@kbn/eval-kql';
+import { yieldToEventLoop } from '@kbn/workflows/server';
+import { parseKqlCondition, renderKqlCondition } from './kql_utils';
 import { dataFindStepCommonDefinition } from '../../../common/steps/data';
 import type { StepHandlerContext } from '../../step_registry/types';
 import { createServerStepDefinition } from '../../step_registry/types';
@@ -18,31 +20,39 @@ type FindStepContext = StepHandlerContext<
   typeof dataFindStepCommonDefinition.configSchema
 >;
 
-function searchForMatch(
+async function searchForMatch(
   items: unknown[],
-  condition: string,
+  kqlAst: KueryNode,
   context: FindStepContext
-): { item: unknown; index: number | null; aborted?: boolean } {
+): Promise<{ item: unknown; index: number | null; aborted?: boolean }> {
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
 
+    await yieldToEventLoop();
     if (context.abortSignal?.aborted) {
       context.logger.warn('Find operation aborted by signal');
       return { item: null, index: null, aborted: true };
     }
 
-    try {
-      const matches = evaluateKql(condition, { item, index: i });
+    if (item === null || typeof item !== 'object') {
+      // A non-object item (e.g. `null` or a scalar) cannot satisfy an
+      // `item.<field>` condition. KQL now evaluates such a path to a non-match
+      // rather than throwing, so warn explicitly here to preserve the
+      // visibility operators expect when a malformed item is skipped.
+      context.logger.warn(
+        `Skipping non-object item at index ${i} (received ${item === null ? 'null' : typeof item})`
+      );
+    } else {
+      try {
+        const matches = evaluateKql(kqlAst, { item, index: i });
 
-      if (matches) {
-        context.logger.debug(`Found match at index ${i}`);
-        return { item, index: i };
+        if (matches) {
+          context.logger.debug(`Found match at index ${i}`);
+          return { item, index: i };
+        }
+      } catch (error) {
+        context.logger.warn(`Failed to evaluate condition for item at index ${i}`, error);
       }
-    } catch (error) {
-      if (isKqlSyntaxError(error)) {
-        throw new Error(`Invalid KQL condition: ${(error as Error).message}`);
-      }
-      context.logger.warn(`Failed to evaluate condition for item at index ${i}`, error);
     }
   }
 
@@ -53,8 +63,9 @@ export const dataFindStepDefinition = createServerStepDefinition({
   ...dataFindStepCommonDefinition,
   handler: async (context) => {
     try {
-      const items = context.contextManager.renderInputTemplate(context.config.items);
-      const { condition, errorIfEmpty } = context.input;
+      const items = context.config.items;
+      const { errorIfEmpty } = context.input;
+      const condition = renderKqlCondition(context.contextManager, context.rawInput.condition);
 
       if (!Array.isArray(items)) {
         context.logger.error(`Input items has invalid type: ${typeof items}`);
@@ -78,10 +89,16 @@ export const dataFindStepDefinition = createServerStepDefinition({
       }
 
       context.logger.debug(
-        `Finding first match in ${items.length} item(s) with condition: ${condition}`
+        `Finding first match in ${items.length} item(s) with condition: ${decodeKqlTemplateValues(
+          condition
+        )}`
       );
 
-      const { aborted, ...result } = searchForMatch(items, condition, context);
+      const { aborted, ...result } = await searchForMatch(
+        items,
+        parseKqlCondition(condition),
+        context
+      );
 
       if (aborted) {
         return { error: new Error('Operation was aborted') };

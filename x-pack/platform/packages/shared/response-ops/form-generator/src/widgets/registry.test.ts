@@ -10,6 +10,7 @@ import { getWidgetComponent } from './registry';
 import { WidgetType } from './types';
 import { getMeta, addMeta } from '../schema_connector_metadata';
 import { TextWidget } from './components/text_widget';
+import { NumberWidget } from './components/number_widget';
 import { PasswordWidget } from './components/password_widget';
 import { HiddenWidget } from './components/hidden_widget';
 
@@ -78,17 +79,25 @@ describe('Widget Registry', () => {
 
       expect(component).toBe(HiddenWidget);
     });
+
+    it('should prioritize hidden: true over an explicit widget value', () => {
+      const schema = z.url();
+      addMeta(schema, { widget: WidgetType.Text, hidden: true });
+      const component = getWidgetComponent(schema);
+
+      expect(component).toBe(HiddenWidget);
+    });
   });
 
-  describe('getDefaultWidgetForSchema - unknown schema types', () => {
-    it('should throw error for unknown schema type without explicit widget', () => {
+  describe('getDefaultWidgetForSchema - number schemas', () => {
+    it('should return NumberWidget for z.number() without explicit widget', () => {
       const schema = z.number();
-
-      expect(() => getWidgetComponent(schema)).toThrow(
-        /No widget found for schema type: ZodNumber/
-      );
+      const component = getWidgetComponent(schema);
+      expect(component).toBe(NumberWidget);
     });
+  });
 
+  describe('getDefaultWidgetForSchema - unsupported schema types', () => {
     it('should throw error for z.boolean() without explicit widget', () => {
       const schema = z.boolean();
 

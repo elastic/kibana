@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type { readResponseBodySchema } from './schemas';
 
-export type MarkdownReadResponseBody = TypeOf<typeof readResponseBodySchema>;
+export type MarkdownReadResponseBody = z.output<typeof readResponseBodySchema>;

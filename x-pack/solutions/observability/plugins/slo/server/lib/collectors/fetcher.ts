@@ -4,15 +4,86 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isCCSRemoteIndexName } from '@kbn/es-query';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { isNonLocalIndexName } from '@kbn/es-query';
+import type {
+  ISavedObjectsPointInTimeFinder,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import { ALL_VALUE, COMPOSITE_SLO_MAX_MEMBERS } from '@kbn/slo-schema';
 import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
-import type { StoredSLODefinition } from '../../domain/models';
-import { SO_SLO_TYPE } from '../../saved_objects';
+import type { StoredCompositeSLODefinition, StoredSLODefinition } from '../../domain/models';
+import { SO_SLO_COMPOSITE_TYPE, SO_SLO_TYPE } from '../../saved_objects';
 import type { Usage } from './type';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 
-export const fetcher = async (context: CollectorFetchContext) => {
+export type GetCompositeSoClient = () => Promise<SavedObjectsClientContract>;
+
+const getEmptyCompositeUsage = (): Usage['composite'] => ({
+  definitions: { total: 0 },
+  by_status: { enabled: 0, disabled: 0 },
+  by_budgeting_method: { occurrences: 0 },
+  by_composite_method: { weightedAverage: 0 },
+  members: { min: 0, avg: 0, max: 0, at_max_count: 0 },
+});
+
+const fetchCompositeUsage = async (
+  getCompositeSoClient: GetCompositeSoClient,
+  logger: Logger
+): Promise<Usage['composite']> => {
+  const usage = getEmptyCompositeUsage();
+  let totalMembers = 0;
+  let finder: ISavedObjectsPointInTimeFinder<StoredCompositeSLODefinition, unknown> | undefined;
+
+  try {
+    const soClient = await getCompositeSoClient();
+    finder = soClient.createPointInTimeFinder<StoredCompositeSLODefinition>({
+      type: SO_SLO_COMPOSITE_TYPE,
+      perPage: 100,
+      namespaces: ['*'],
+    });
+
+    for await (const response of finder.find()) {
+      for (const { attributes } of response.saved_objects) {
+        const { enabled, budgetingMethod, compositeMethod, members } = attributes;
+        const membersCount = members.length;
+
+        usage.definitions.total += 1;
+        usage.by_status[enabled ? 'enabled' : 'disabled'] += 1;
+        usage.by_budgeting_method[budgetingMethod] += 1;
+        usage.by_composite_method[compositeMethod] += 1;
+
+        totalMembers += membersCount;
+        usage.members.min =
+          usage.definitions.total === 1 ? membersCount : Math.min(usage.members.min, membersCount);
+        usage.members.max = Math.max(usage.members.max, membersCount);
+        if (membersCount >= COMPOSITE_SLO_MAX_MEMBERS) {
+          usage.members.at_max_count += 1;
+        }
+      }
+    }
+
+    usage.members.avg =
+      usage.definitions.total > 0
+        ? Math.round((totalMembers / usage.definitions.total) * 100) / 100
+        : 0;
+  } catch (error) {
+    logger.warn(`Failed to collect composite SLO usage: ${error.message}`);
+    return getEmptyCompositeUsage();
+  } finally {
+    await finder
+      ?.close()
+      .catch((error) => logger.warn(`Failed to close composite SLO finder: ${error.message}`));
+  }
+
+  return usage;
+};
+
+export const fetcher = async (
+  context: CollectorFetchContext,
+  logger: Logger,
+  getCompositeSoClient: GetCompositeSoClient
+) => {
   const finder = context.soClient.createPointInTimeFinder<StoredSLODefinition>({
     type: SO_SLO_TYPE,
     perPage: 100,
@@ -33,7 +104,7 @@ export const fetcher = async (context: CollectorFetchContext) => {
     },
   });
 
-  let usage: Usage['slo'] = {
+  let sloUsage: Usage['slo'] = {
     total: 0,
     definitions: {
       total: 0,
@@ -57,13 +128,13 @@ export const fetcher = async (context: CollectorFetchContext) => {
   };
 
   for await (const response of finder.find()) {
-    usage = response.saved_objects.reduce((acc, so) => {
+    sloUsage = response.saved_objects.reduce((acc, so) => {
       return {
         ...acc,
         total: acc.total + 1, // deprecated in favor of definitions.total
         definitions: {
           total: acc.definitions.total + 1,
-          total_with_ccs: isCCSRemoteIndexName(so.attributes.indicator.params.index)
+          total_with_ccs: isNonLocalIndexName(so.attributes.indicator.params.index)
             ? acc.definitions.total_with_ccs + 1
             : acc.definitions.total_with_ccs,
           total_with_groups: [so.attributes.groupBy].flat().includes(ALL_VALUE)
@@ -103,12 +174,13 @@ export const fetcher = async (context: CollectorFetchContext) => {
           }),
         },
       };
-    }, usage);
+    }, sloUsage);
   }
 
   await finder.close();
 
   return {
-    slo: usage,
+    slo: sloUsage,
+    composite: await fetchCompositeUsage(getCompositeSoClient, logger),
   };
 };

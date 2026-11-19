@@ -17,6 +17,7 @@ project:
   owner: '@elastic/response-ops'
   sourceRoot: x-pack/platform/plugins/private/reporting
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/actions-plugin'
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -43,11 +44,12 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/rison'
   - '@kbn/task-manager-plugin'
+  - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/core-http-server'
   - '@kbn/core-test-helpers-test-utils'
   - '@kbn/safer-lodash-set'
   - '@kbn/reporting-common'
-  - '@kbn/core-http-router-server-internal'
+  - '@kbn/std'
   - '@kbn/reporting-public'
   - '@kbn/reporting-server'
   - '@kbn/reporting-export-types-csv'
@@ -62,11 +64,12 @@ dependsOn:
   - '@kbn/reporting-csv-share-panel'
   - '@kbn/react-kibana-mount'
   - '@kbn/core-security-common'
+  - '@kbn/core-security-server'
   - '@kbn/core-http-server-utils'
   - '@kbn/core-saved-objects-server'
   - '@kbn/rrule'
   - '@kbn/notifications-plugin'
-  - '@kbn/spaces-utils'
+  - '@kbn/core-spaces-common'
   - '@kbn/logging-mocks'
   - '@kbn/shared-ux-router'
   - '@kbn/controls-plugin'
@@ -76,7 +79,6 @@ dependsOn:
   - '@kbn/response-ops-recurring-schedule-form'
   - '@kbn/core-mount-utils-browser-internal'
   - '@kbn/core-user-profile-browser'
-  - '@kbn/core-capabilities-common'
   - '@kbn/core-ui-settings-common'
   - '@kbn/licensing-types'
   - '@kbn/react-query'
@@ -85,38 +87,18 @@ dependsOn:
   - '@kbn/core-user-profile-browser-mocks'
   - '@kbn/zod'
   - '@kbn/deeplinks-analytics'
+  - '@kbn/es-query'
 tags:
   - plugin
   - prod
   - group-platform
   - private
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+tasks: {}

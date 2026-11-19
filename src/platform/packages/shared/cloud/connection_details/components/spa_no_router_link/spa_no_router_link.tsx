@@ -9,10 +9,7 @@
 
 import * as React from 'react';
 import { EuiLink } from '@elastic/eui';
-
-const hasActiveModifierKey = (event: React.MouseEvent): boolean => {
-  return event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
-};
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 
 export interface SpaNoRouterLinkProps {
   url: string;
@@ -29,7 +26,6 @@ export const SpaNoRouterLink: React.FC<React.PropsWithChildren<SpaNoRouterLinkPr
   ...rest
 }) => {
   return (
-    /* eslint-disable-next-line @elastic/eui/href-or-on-click */
     <EuiLink
       {...rest}
       href={url}

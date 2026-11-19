@@ -10,6 +10,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import pRetry, { AbortError } from 'p-retry';
+import { withTimeout as promiseWithTimeout } from '@kbn/std';
 import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack-platform/functional/services/ml/api';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { setupKnowledgeBase, waitForKnowledgeBaseReady } from './knowledge_base';
@@ -263,12 +264,11 @@ class TimeoutError extends Error {
 }
 
 async function withTimeout<T>(promise: Promise<T>, timeout: number): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<T>((_, reject) => {
-      setTimeout(() => reject(new TimeoutError(`Operation timed out after ${timeout}ms`)), timeout);
-    }),
-  ]);
+  const outcome = await promiseWithTimeout({ promise, timeoutMs: timeout });
+  if (outcome.timedout) {
+    throw new TimeoutError(`Operation timed out after ${timeout}ms`);
+  }
+  return outcome.value;
 }
 
 async function retryOnTimeout<T>(fn: () => Promise<T>, timeout = 60_000): Promise<T> {

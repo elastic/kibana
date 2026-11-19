@@ -7,11 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { COLUMN_PLACEHOLDER_PREFIX } from '../constants';
 import type { DeleteDocAction, DocUpdate } from '../types';
 
-export function parsePrimitive(value: unknown): string | number | boolean | object | unknown {
+export function parsePrimitive(
+  value: unknown,
+  fieldType?: string
+): string | number | boolean | object | unknown {
   if (typeof value !== 'string') {
+    return value;
+  }
+
+  // For string-based fields (text/keyword) keep the raw text so values like "{}"
+  // are stored as is instead of being cast.
+  if (fieldType === KBN_FIELD_TYPES.STRING) {
     return value;
   }
 

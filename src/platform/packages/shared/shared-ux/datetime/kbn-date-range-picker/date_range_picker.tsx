@@ -75,8 +75,18 @@ export interface DateRangePickerProps {
   defaultValue?: string;
   /** Callback for when the time changes */
   onChange: (props: DateRangePickerOnChangeProps) => void;
-  /** Custom format for displaying (and parsing?) dates */
-  dateFormat?: string;
+  /**
+   * Additional moment format strings accepted when parsing absolute dates the
+   * user types, e.g. the Kibana `dateFormat` setting. Does not affect display.
+   */
+  inputDateFormats?: string[];
+  /**
+   * Locale used to recognise and generate named ranges, natural-language
+   * durations/instants, and delimiters. English is always recognised
+   * alongside the active locale.
+   * @default `i18n.getLocale()`
+   */
+  locale?: string;
   /** Show invalid state */
   isInvalid?: boolean;
   /**
@@ -84,6 +94,18 @@ export interface DateRangePickerProps {
    * @default false
    */
   disabled?: boolean;
+  /**
+   * Tooltip shown on the control and time window buttons while `disabled` is true.
+   */
+  disabledTooltip?: React.ReactNode;
+  /**
+   * Shows the current value but prevents changing it: the control and time
+   * window buttons can't be interacted with, but (unlike `disabled`) the
+   * control isn't visually dimmed. The auto-refresh play/pause button is
+   * unaffected.
+   * @default false
+   */
+  readOnly?: boolean;
   /**
    * Called when the editing input text changes.
    * @beta
@@ -103,8 +125,9 @@ export interface DateRangePickerProps {
    */
   compressed?: boolean;
   /**
-   * When `true`, the idle-state control hides its text label and only shows
-   * the short-duration badge.
+   * When true, hides the text label and shows only the duration badge.
+   * The badge is hidden for relative-to-now ranges (e.g. "Last 15 minutes")
+   * when not collapsed, since the label already conveys the duration.
    * @default false
    */
   collapsed?: boolean;
@@ -139,13 +162,46 @@ export interface DateRangePickerProps {
   /** Called when the user changes a setting in the settings panel. */
   onSettingsChange: (settings: DateRangePickerSettings) => void;
   /**
-   * A valid time zone name, from the IANA database, e.g. "America/Los_Angeles".
-   * This is only informational, it won't affect how dates are handled.
+   * A valid time zone name from the IANA database, e.g. "America/Los_Angeles".
+   * Calendar selections use this time zone to determine day boundaries.
+   * Use `Browser` or omit the prop to use the browser's time zone.
+   *
+   * Range text is formatted separately using Moment's global default time zone.
+   * Consumers must configure Moment and this prop with the same time zone. Kibana
+   * keeps them synchronized using the `dateFormat:tz` advanced setting.
+   *
    * @link https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
    */
   timeZone?: string;
   /** Fires at the end of each auto-refresh interval while `settings.autoRefresh` exists, is enabled and timer is unpaused. */
   onRefresh?: () => void;
+  /**
+   * Increment this value whenever an external timer (e.g. the Kibana timefilter) triggers a
+   * refresh, so the visual countdown resets to stay in sync with actual query cadence and
+   * relative bounds (e.g. `now-15m`) are re-resolved against the current time.
+   * `undefined` on first render is ignored.
+   */
+  refreshEpoch?: number;
+  /**
+   * Increment this value whenever the host refreshed its data without changing `value`
+   * (e.g. a manual "Refresh"), so relative bounds (e.g. `now-15m`) are re-resolved against the
+   * current time and the displayed absolute dates advance with the data. Unlike `refreshEpoch`,
+   * this does not reset the auto-refresh countdown. `undefined` on first render is ignored.
+   */
+  resolveEpoch?: number;
+  /**
+   * Prepends the Kibana server `basePath` to an internal URL path.
+   * Typically provided as `core.http.basePath.prepend`.
+   * When omitted, paths are used as-is.
+   */
+  prependBasePath?: (path: string) => string;
+  /**
+   * Whether the current user can access the Advanced Settings management page.
+   * When `false`, links to Advanced Settings are hidden in the settings panel.
+   * Typically derived from `capabilities.advancedSettings.save`.
+   * @default false
+   */
+  canAccessAdvancedSettings?: boolean;
 }
 
 export interface DateRangePickerOnChangeProps extends TimeRangeBounds {

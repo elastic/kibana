@@ -10,6 +10,8 @@
 import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
 import type { JsonValue } from '@kbn/utility-types';
+import { resolveKibanaStepTypeAlias } from '@kbn/workflows';
+import { isYamlValidationMarkerOwner } from '@kbn/workflows-yaml';
 import type {
   BuiltHoverContext,
   HoverContext,
@@ -21,7 +23,6 @@ import type {
 import { getMonacoConnectorHandler } from './provider_registry';
 import { getPathAtOffset, getTriggerNodes } from '../../../../../common/lib/yaml';
 import { performComputation } from '../../../../entities/workflows/store/workflow_detail/utils/computation';
-import { isYamlValidationMarkerOwner } from '../../../../features/validate_workflow_yaml/model/types';
 import { triggerSchemas } from '../../../../trigger_schemas';
 import type {
   ExecutionContext,
@@ -61,11 +62,72 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     position: monaco.Position,
     cancellationToken: monaco.CancellationToken
   ): Promise<monaco.languages.Hover | null> {
+    if (cancellationToken.isCancellationRequested) {
+      return null;
+    }
+
     const customHover = await this.provideCustomHover(model, position);
     if (customHover) {
       return customHover;
     }
+
+    if (cancellationToken.isCancellationRequested) {
+      return null;
+    }
+
+    const markers = monaco.editor.getModelMarkers({ resource: model.uri });
+    const deprecatedStepMarkerNearby = markers.find(
+      (marker) =>
+        marker.source === 'deprecated-step-validation' &&
+        marker.startLineNumber === position.lineNumber &&
+        ((marker.startColumn <= position.column && marker.endColumn >= position.column) ||
+          Math.abs(marker.startColumn - position.column) <= 3 ||
+          Math.abs(marker.endColumn - position.column) <= 3)
+    );
+
+    if (deprecatedStepMarkerNearby) {
+      return this.provideDeprecatedStepHover(model, position, deprecatedStepMarkerNearby);
+    }
+
     return getInterceptedHover(model, position, cancellationToken);
+  }
+
+  private async provideDeprecatedStepHover(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    _marker: monaco.editor.IMarker
+  ): Promise<monaco.languages.Hover | null> {
+    const yamlDocument = this.getYamlDocument();
+    if (!yamlDocument) {
+      return null;
+    }
+
+    const context = await this.buildHoverContext(model, position, yamlDocument);
+    if (!context || context.kind !== 'connector') {
+      return null;
+    }
+
+    const resolvedConnectorType = resolveKibanaStepTypeAlias(context.connectorType);
+    const handler = getMonacoConnectorHandler(resolvedConnectorType);
+    const stepContext = context.stepContext
+      ? { ...context.stepContext, stepType: resolvedConnectorType }
+      : undefined;
+
+    const richHover = handler
+      ? await handler.generateHoverContent({
+          ...context,
+          connectorType: resolvedConnectorType,
+          stepContext,
+        })
+      : null;
+
+    if (!richHover) {
+      return null;
+    }
+
+    return {
+      contents: [richHover],
+    };
   }
   /**
    * Provide hover information for the current position
@@ -493,13 +555,13 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
 
       if (templateInfo.filters.length > 0 && templateInfo.isOnFilter) {
         evaluatedPath = templateInfo.expression;
-        value = evaluateExpression({
+        value = await evaluateExpression({
           expression: templateInfo.expression,
           context: evalContext,
         });
       } else {
         evaluatedPath = templateInfo.pathUpToCursor.join('.');
-        value = evaluateExpression({
+        value = await evaluateExpression({
           expression: evaluatedPath,
           context: evalContext,
         });

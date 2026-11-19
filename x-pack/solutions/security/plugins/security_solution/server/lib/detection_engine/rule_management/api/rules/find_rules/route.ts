@@ -10,10 +10,12 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
+import type { GapReasonType } from '@kbn/alerting-plugin/common/constants/gap_reason';
 import {
   DETECTION_ENGINE_RULES_URL_FIND,
   MAX_RULES_WITH_GAPS_TO_FETCH,
   MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
+  EXCLUDED_GAP_REASONS_KEY,
 } from '../../../../../../../common/constants';
 import type { FindRulesResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
@@ -65,6 +67,11 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
           const gapFillStatuses = (query.gap_fill_statuses ?? []) as GapFillStatus[];
 
           if (gapFillStatuses.length > 0 && query.gaps_range_start && query.gaps_range_end) {
+            const uiSettingsClient = ctx.core.uiSettings.client;
+            const excludedReasons = await uiSettingsClient.get<GapReasonType[]>(
+              EXCLUDED_GAP_REASONS_KEY
+            );
+
             const { ruleIds: gapRuleIds, truncated } = await getGapFilteredRuleIds({
               rulesClient,
               gapRange: {
@@ -76,6 +83,8 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
               filter: query.filter,
               sortField: query.sort_field,
               sortOrder: query.sort_order,
+              excludedReasons,
+              schedulerId: query.gap_auto_fill_scheduler_id,
             });
 
             if (truncated) {

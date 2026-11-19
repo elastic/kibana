@@ -9,13 +9,15 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-import type { ExampleRequestHandlerContext } from '../request_context';
+import type { WorkflowsExtensionsRequestHandlerContext } from '@kbn/workflows-extensions/server';
 import { EMIT_LOOP_ROUTE_PATH } from '../../common/constants';
 import { LOOP_TRIGGER_ID } from '../../common/triggers/loop_trigger';
 
 export { EMIT_LOOP_ROUTE_PATH };
 
-export function registerEmitLoopRoute(router: IRouter<ExampleRequestHandlerContext>): void {
+export function registerEmitLoopRoute(
+  router: IRouter<WorkflowsExtensionsRequestHandlerContext>
+): void {
   router.post(
     {
       path: EMIT_LOOP_ROUTE_PATH,
@@ -35,9 +37,8 @@ export function registerEmitLoopRoute(router: IRouter<ExampleRequestHandlerConte
     async (context, request, response) => {
       try {
         const workflows = await context.workflows;
-        const client = workflows.getWorkflowsClient();
         const iteration = request.body.iteration ?? 0;
-        await client.emitEvent(LOOP_TRIGGER_ID, { iteration });
+        await workflows.emitEvent(LOOP_TRIGGER_ID, { iteration });
         return response.ok({
           body: { ok: true, triggerId: LOOP_TRIGGER_ID, iteration },
         });

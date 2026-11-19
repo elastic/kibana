@@ -17,10 +17,10 @@ import { urlServiceTestSetup } from '../../../../common/url_service/__tests__/se
 import type { IShareContext } from '../../context';
 import { ShareProvider } from '../../context';
 
+// eslint-disable-next-line prefer-const
 let urlService: BrowserUrlService;
 
 // @ts-expect-error there is a type error because we override the shortUrls implementation
-// eslint-disable-next-line prefer-const
 ({ service: urlService } = urlServiceTestSetup());
 
 const shortUrlService = urlService.shortUrls.get(null)!;
@@ -50,7 +50,7 @@ const mockShareContext: IShareContext = {
     title: 'title',
     config: {},
   },
-  sharingData: { title: 'title', url: 'url' },
+  sharingData: { title: 'title', url: 'url', locatorParams: { id: 'test', params: {} } },
 };
 
 const renderComponent = (

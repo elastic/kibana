@@ -10,6 +10,7 @@ import type {
   IngestPipelineDateProcessor,
   IngestPipelineDissectProcessor,
   IngestPipelineGrokProcessor,
+  IngestPipelineUriPartsProcessor,
   IngestPipelineManualIngestPipelineProcessor,
   IngestPipelineMathProcessor,
   IngestPipelineRenameProcessor,
@@ -29,6 +30,9 @@ import type {
   IngestPipelineConcatProcessor,
   IngestPipelineNetworkDirectionProcessor,
   IngestPipelineJsonExtractProcessor,
+  IngestPipelineEnrichProcessor,
+  IngestPipelineUserAgentProcessor,
+  IngestPipelineRegisteredDomainProcessor,
 } from '../../../../types/processors/ingest_pipeline_processors';
 
 type WithOptionalTracingTag<T> = T & { tag?: string };
@@ -36,6 +40,7 @@ type WithOptionalTracingTag<T> = T & { tag?: string };
 export interface ActionToIngestType {
   grok: WithOptionalTracingTag<IngestPipelineGrokProcessor>;
   dissect: WithOptionalTracingTag<IngestPipelineDissectProcessor>;
+  uri_parts: WithOptionalTracingTag<IngestPipelineUriPartsProcessor>;
   date: WithOptionalTracingTag<IngestPipelineDateProcessor>;
   math: WithOptionalTracingTag<IngestPipelineMathProcessor>;
   rename: WithOptionalTracingTag<IngestPipelineRenameProcessor>;
@@ -56,5 +61,8 @@ export interface ActionToIngestType {
   concat: WithOptionalTracingTag<IngestPipelineConcatProcessor>;
   network_direction: WithOptionalTracingTag<IngestPipelineNetworkDirectionProcessor>;
   json_extract: WithOptionalTracingTag<IngestPipelineJsonExtractProcessor>;
+  enrich: WithOptionalTracingTag<IngestPipelineEnrichProcessor>;
+  user_agent: WithOptionalTracingTag<IngestPipelineUserAgentProcessor>;
+  registered_domain: WithOptionalTracingTag<IngestPipelineRegisteredDomainProcessor>;
   manual_ingest_pipeline: WithOptionalTracingTag<IngestPipelineManualIngestPipelineProcessor>;
 }

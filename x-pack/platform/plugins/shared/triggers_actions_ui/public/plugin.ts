@@ -7,11 +7,13 @@
 
 import type {
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   Plugin as CorePlugin,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { from, map, switchMap } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
@@ -24,7 +26,6 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import type { CasesService } from '@kbn/response-ops-alerts-table/types';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -32,7 +33,8 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { getRulesAppDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
+import type { KqlPluginStart } from '@kbn/kql/public';
+import { triggersActionsRoute, TRIGGERS_ACTIONS_RULES_CAPABILITY_ID } from '@kbn/rule-data-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -45,12 +47,17 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ON_OPEN_PANEL_MENU, ALERT_RULE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import { RuleDetailsLocatorDefinition } from './locators/rule_details';
+import { RulesLocatorDefinition } from './locators/rules';
 import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
+import { getAddConnectorFormLazy } from './common/get_add_connector_form';
+import type { CreateConnectorFormProps } from './application/sections/action_connector_form';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
@@ -77,9 +84,8 @@ import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_lo
 import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
-import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { AlertRuleFromVisAction } from './common/alert_rule_from_vis_ui_action';
-import { createSetBreadcrumbs } from './application/lib/breadcrumb';
+import { getRulesAppUpdate, getRulesManagementVisibleIn$ } from './get_rules_app_update';
 
 import type {
   ActionTypeModel,
@@ -99,11 +105,18 @@ import type {
   RulesListNotifyBadgePropsWithApi,
   RulesListProps,
 } from './types';
-import type { RuleSettingsLinkProps } from './application/components/rules_setting/rules_settings_link';
 import type { UntrackAlertsModalProps } from './application/sections/common/components/untrack_alerts_modal';
 import { isRuleSnoozed } from './application/lib';
 import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
 import { getUntrackModalLazy } from './common/get_untrack_modal';
+import { getClassicRulesPageLazy } from './common/get_classic_rules_page';
+import type {
+  ClassicRulesPageInternalDeps,
+  ClassicRulesPagePluginsStart,
+  ClassicRulesPageProps,
+} from './application/classic_rules_page';
+
+export type { ClassicRulesPageProps } from './application/classic_rules_page';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -121,6 +134,9 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getAddConnectorFlyout: (
     props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<CreateConnectorFlyoutProps>;
+  getAddConnectorForm: (
+    props: Omit<CreateConnectorFormProps, 'actionTypeRegistry'>
+  ) => ReactElement;
   getEditConnectorFlyout: (
     props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<EditConnectorFlyoutProps>;
@@ -143,7 +159,6 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => ReactElement<AlertSummaryWidgetProps>;
   getRuleSnoozeModal: (props: RuleSnoozeModalProps) => ReactElement<RuleSnoozeModalProps>;
   getUntrackModal: (props: UntrackAlertsModalProps) => ReactElement<UntrackAlertsModalProps>;
-  getRulesSettingsLink: (props: RuleSettingsLinkProps) => ReactElement<RuleSettingsLinkProps>;
   getRuleHelpers: (rule: Rule<RuleTypeParams>) => {
     isRuleSnoozed: boolean;
     getNextRuleSnoozeSchedule: {
@@ -161,6 +176,10 @@ export interface TriggersAndActionsUIPublicPluginStart {
    * Returns the formatter function if the rule type has one registered, undefined otherwise.
    */
   getAlertFormatter: (ruleTypeId: string) => AlertFormatter | undefined;
+  /**
+   * Classic (v1) Rules page, for hosts that mount it outside Stack Management.
+   */
+  getClassicRulesPage: (props: ClassicRulesPageProps) => ReactElement<ClassicRulesPageProps>;
 }
 
 interface PluginsSetup {
@@ -169,6 +188,7 @@ interface PluginsSetup {
   home?: HomePublicPluginSetup;
   cloud?: CloudSetup;
   actions: ActionsPublicPluginSetup;
+  share: SharePluginSetup;
 }
 
 interface PluginsStart {
@@ -183,6 +203,7 @@ interface PluginsStart {
   features: FeaturesPluginStart;
   expressions: ExpressionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   licensing: LicensingPluginStart;
   serverless?: ServerlessPluginStart;
   fieldFormats: FieldFormatsRegistry;
@@ -192,6 +213,7 @@ interface PluginsStart {
   contentManagement?: ContentManagementPublicStart;
   share: SharePluginStart;
   cps?: CPSPluginStart;
+  inspector?: InspectorStart;
 }
 
 export class Plugin
@@ -209,6 +231,8 @@ export class Plugin
   private connectorServices?: ConnectorServices;
   readonly experimentalFeatures: ExperimentalFeatures;
   private readonly isServerless: boolean;
+  private cloud?: CloudSetup;
+  private actionsSetup?: ActionsPublicPluginSetup;
 
   constructor(ctx: PluginInitializerContext) {
     this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -222,21 +246,19 @@ export class Plugin
     const actionTypeRegistry = this.actionTypeRegistry;
     const ruleTypeRegistry = this.ruleTypeRegistry;
     const isServerless = this.isServerless;
-    const experimentalFeatures = this.experimentalFeatures;
+    this.cloud = plugins.cloud;
+    this.actionsSetup = plugins.actions;
     this.connectorServices = {
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
       enabledEmailServices: plugins.actions.enabledEmailServices,
       isWebhookSslWithPfxEnabled: plugins.actions.isWebhookSslWithPfxEnabled,
-    };
-
-    const getCasesPlugin = async (): Promise<CasesService | undefined> => {
-      const { cases: casesResponse } = await core.plugins.onStart<{
-        cases: CasesService;
-      }>('cases');
-      return casesResponse.found ? casesResponse.contract : undefined;
+      isInboundEventsEnabled: plugins.actions.isInboundEventsEnabled,
     };
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
+
+    plugins.share.url.locators.create(new RulesLocatorDefinition());
+    plugins.share.url.locators.create(new RuleDetailsLocatorDefinition());
 
     const featureTitle = i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
       defaultMessage: 'Rules',
@@ -294,75 +316,41 @@ export class Plugin
     }
 
     if (this.config.rules.enabled) {
-      if (this.experimentalFeatures.unifiedRulesPage) {
-        core.application.register({
-          id: 'rules',
-          appRoute: '/app/rules',
-          title: i18n.translate('xpack.triggersActionsUI.rulesPage.title', {
-            defaultMessage: 'Rules',
-          }),
-          category: DEFAULT_APP_CATEGORIES.management,
-          visibleIn: ['sideNav'],
-          async mount(params: AppMountParameters) {
-            const [coreStart, pluginsStart] = (await core.getStartServices()) as [
-              CoreStart,
-              PluginsStart,
-              unknown
-            ];
-
-            const { renderRulesPageApp } = await import('./application/rules_page_app');
-
-            // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
-            // subset of this privilege are not authorized to access this endpoint and will receive a 404
-            // error that causes the Alerting view to fail to load.
-            let kibanaFeatures: KibanaFeature[];
-            try {
-              kibanaFeatures = await pluginsStart.features.getFeatures();
-            } catch (err) {
-              kibanaFeatures = [];
-            }
-
-            return renderRulesPageApp({
-              ...coreStart,
-              actions: plugins.actions,
-              getCasesPlugin,
-              security: pluginsStart.security,
-              cloud: plugins.cloud,
-              data: pluginsStart.data,
-              dataViews: pluginsStart.dataViews,
-              dataViewEditor: pluginsStart.dataViewEditor,
-              charts: pluginsStart.charts,
-              alerting: pluginsStart.alerting,
-              spaces: pluginsStart.spaces,
-              unifiedSearch: pluginsStart.unifiedSearch,
-              isCloud: Boolean(plugins.cloud?.isCloudEnabled),
-              element: params.element,
-              theme: coreStart.theme,
-              storage: new Storage(window.localStorage),
-              setBreadcrumbs: createSetBreadcrumbs(coreStart.chrome.setBreadcrumbs),
-              history: params.history,
-              actionTypeRegistry,
-              ruleTypeRegistry,
-              kibanaFeatures,
-              licensing: pluginsStart.licensing,
-              expressions: pluginsStart.expressions,
-              isServerless,
-              fieldFormats: pluginsStart.fieldFormats,
-              lens: pluginsStart.lens,
-              fieldsMetadata: pluginsStart.fieldsMetadata,
-              contentManagement: pluginsStart.contentManagement,
-              share: pluginsStart.share,
-              cps: pluginsStart.cps,
-              uiActions: pluginsStart.uiActions,
-            });
-          },
-        });
-      }
+      core.application.register({
+        id: 'rules',
+        appRoute: '/app/rules',
+        title: i18n.translate('xpack.triggersActionsUI.rulesPage.title', {
+          defaultMessage: 'Rules',
+        }),
+        visibleIn: ['projectSideNav'],
+        // Gate this app on the Rules management capability.
+        updater$: from(core.getStartServices()).pipe(
+          map(
+            ([coreStart]): AppUpdater =>
+              () =>
+                getRulesAppUpdate(coreStart.application.capabilities)
+          )
+        ),
+        category: DEFAULT_APP_CATEGORIES.management,
+        async mount(params: AppMountParameters) {
+          const [coreStart] = (await core.getStartServices()) as [CoreStart, PluginsStart, unknown];
+          const { pathname, search, hash } = params.history.location;
+          await coreStart.application.navigateToApp('management', {
+            path: `/insightsAndAlerting/${PLUGIN_ID}${pathname}${search}${hash}`,
+            replace: true,
+          });
+          return () => {};
+        },
+      });
 
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: PLUGIN_ID,
         title: featureTitle,
+        capabilitiesId: TRIGGERS_ACTIONS_RULES_CAPABILITY_ID,
         order: 1,
+        visibleIn$: from(core.getStartServices()).pipe(
+          switchMap(([coreStart]) => getRulesManagementVisibleIn$(coreStart))
+        ),
         async mount(params: ManagementAppMountParams) {
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
@@ -370,33 +358,7 @@ export class Plugin
             unknown
           ];
 
-          if (experimentalFeatures.unifiedRulesPage) {
-            const currentLocation = params.history.location;
-            const search = currentLocation.search;
-
-            const [, page, id] = currentLocation.pathname.split('/');
-
-            switch (page) {
-              case 'rules':
-                await coreStart.application.navigateToApp('rules');
-                break;
-              case 'rule':
-                await coreStart.application.navigateToApp('rules', {
-                  path: getRulesAppDetailsRoute(id),
-                  replace: true,
-                });
-                break;
-              default:
-                await coreStart.application.navigateToApp('rules', {
-                  path: currentLocation.pathname + search,
-                  replace: true,
-                });
-                break;
-            }
-
-            return () => {};
-          }
-          const { renderApp } = await import('./application/rules_app');
+          const { renderRulesPageApp } = await import('./application/rules_page_app');
 
           // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
           // subset of this privilege are not authorized to access this endpoint and will receive a 404
@@ -408,10 +370,10 @@ export class Plugin
             kibanaFeatures = [];
           }
 
-          return renderApp({
+          return renderRulesPageApp({
             ...coreStart,
             actions: plugins.actions,
-            security: pluginsStart.security,
+            security: { ...coreStart.security, ...pluginsStart.security },
             cloud: plugins.cloud,
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
@@ -420,9 +382,10 @@ export class Plugin
             alerting: pluginsStart.alerting,
             spaces: pluginsStart.spaces,
             unifiedSearch: pluginsStart.unifiedSearch,
+            kql: pluginsStart.kql,
             isCloud: Boolean(plugins.cloud?.isCloudEnabled),
             element: params.element,
-            theme: params.theme,
+            theme: coreStart.theme,
             storage: new Storage(window.localStorage),
             setBreadcrumbs: params.setBreadcrumbs,
             history: params.history,
@@ -431,7 +394,7 @@ export class Plugin
             kibanaFeatures,
             licensing: pluginsStart.licensing,
             expressions: pluginsStart.expressions,
-            isServerless: !!pluginsStart.serverless,
+            isServerless,
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
             fieldsMetadata: pluginsStart.fieldsMetadata,
@@ -439,6 +402,7 @@ export class Plugin
             share: pluginsStart.share,
             uiActions: pluginsStart.uiActions,
             cps: pluginsStart.cps,
+            inspector: pluginsStart.inspector,
           });
         },
       });
@@ -497,8 +461,12 @@ export class Plugin
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: ALERTS_PAGE_ID,
         title: alertsFeatureTitle,
-        capabilitiesId: PLUGIN_ID,
+        capabilitiesId: ALERTS_PAGE_ID,
         order: 0,
+        // Keep the deep link for project side nav. `hideFromGlobalSearch` drops the
+        // entire deep link, which also hides the page from Search/ES and VectorDB
+        // nav trees that reference `management:triggersActionsAlerts`.
+        visibleIn: ['projectSideNav'],
         async mount(params: ManagementAppMountParams) {
           const { renderApp } = await import('./application/alerts_app');
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
@@ -516,7 +484,7 @@ export class Plugin
           return renderApp({
             ...coreStart,
             actions: plugins.actions,
-            security: pluginsStart.security,
+            security: { ...coreStart.security, ...pluginsStart.security },
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
             dataViewEditor: pluginsStart.dataViewEditor,
@@ -524,6 +492,7 @@ export class Plugin
             alerting: pluginsStart.alerting,
             spaces: pluginsStart.spaces,
             unifiedSearch: pluginsStart.unifiedSearch,
+            kql: pluginsStart.kql,
             isCloud: Boolean(plugins.cloud?.isCloudEnabled),
             element: params.element,
             theme: params.theme,
@@ -563,6 +532,21 @@ export class Plugin
   }
 
   public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
+    const internalDeps: ClassicRulesPageInternalDeps = {
+      actions:
+        this.actionsSetup ??
+        ({
+          validateEmailAddresses: this.connectorServices?.validateEmailAddresses ?? (() => []),
+          enabledEmailServices: this.connectorServices?.enabledEmailServices ?? [],
+        } as ActionsPublicPluginSetup),
+      security: plugins.security,
+      cloud: this.cloud,
+      actionTypeRegistry: this.actionTypeRegistry,
+      ruleTypeRegistry: this.ruleTypeRegistry,
+      isServerless: this.isServerless,
+      pluginsStart: plugins as ClassicRulesPagePluginsStart,
+    };
+
     const createAlertRuleAction = async () => {
       const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry, {
         coreStart: core,
@@ -602,6 +586,14 @@ export class Plugin
       },
       getAddConnectorFlyout: (props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>) => {
         return getAddConnectorFlyoutLazy({
+          ...props,
+          actionTypeRegistry: this.actionTypeRegistry,
+          connectorServices: this.connectorServices!,
+          isServerless: !!plugins.serverless,
+        });
+      },
+      getAddConnectorForm: (props: Omit<CreateConnectorFormProps, 'actionTypeRegistry'>) => {
+        return getAddConnectorFormLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,
@@ -671,9 +663,6 @@ export class Plugin
       getUntrackModal: (props: UntrackAlertsModalProps) => {
         return getUntrackModalLazy(props);
       },
-      getRulesSettingsLink: (props: RuleSettingsLinkProps) => {
-        return getRulesSettingsLinkLazy(props);
-      },
       getRuleHelpers: (rule: Rule<RuleTypeParams>) => {
         return {
           isRuleSnoozed: isRuleSnoozed({
@@ -691,6 +680,8 @@ export class Plugin
         }
         return this.ruleTypeRegistry.get(ruleTypeId).format;
       },
+      getClassicRulesPage: (props: ClassicRulesPageProps) =>
+        getClassicRulesPageLazy({ ...props, internalDeps }),
     };
   }
 

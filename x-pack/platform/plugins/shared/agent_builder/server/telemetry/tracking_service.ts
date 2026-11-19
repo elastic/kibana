@@ -8,7 +8,12 @@
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
-import { AGENTBUILDER_USAGE_DOMAIN, trackLLMUsage as trackLLMUsageCounter } from './usage_counters';
+import {
+  AGENTBUILDER_USAGE_DOMAIN,
+  trackLLMUsage as trackLLMUsageCounter,
+  trackSkillInvocation as trackSkillInvocationCounter,
+  trackPluginImport as trackPluginImportCounter,
+} from './usage_counters';
 import {
   normalizeErrorType,
   sanitizeForCounterName,
@@ -214,6 +219,33 @@ export class TrackingService {
       this.logger.error(
         `Failed to track error: ${err instanceof Error ? err.message : String(err)}`
       );
+    }
+  }
+
+  /**
+   * Track a skill invocation
+   * @param origin - Skill origin (builtin, custom, or plugin)
+   */
+  trackSkillInvocation(origin: 'builtin' | 'custom' | 'plugin'): void {
+    try {
+      trackSkillInvocationCounter(this.usageCounter, origin);
+      this.logger.debug(`Tracked skill invocation: origin=${origin}`);
+    } catch (error) {
+      this.logger.error(`Failed to track skill invocation: ${error.message}`);
+    }
+  }
+
+  /**
+   * Track a plugin import
+   * @param sourceType - The original source type from the install request
+   */
+  trackPluginImport(sourceType: string): void {
+    try {
+      const importType = sourceType === 'url' ? 'url' : 'upload';
+      trackPluginImportCounter(this.usageCounter, importType);
+      this.logger.debug(`Tracked plugin import: sourceType=${importType}`);
+    } catch (error) {
+      this.logger.error(`Failed to track plugin import: ${error.message}`);
     }
   }
 }

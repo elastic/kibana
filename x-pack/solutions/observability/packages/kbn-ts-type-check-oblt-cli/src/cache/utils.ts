@@ -12,7 +12,7 @@ import Path from 'path';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import globby from 'globby';
+import { globby } from 'globby';
 import { asyncForEachWithLimit } from '@kbn/std';
 import { CACHE_IGNORE_GLOBS, TYPES_DIRECTORY_GLOB, TYPE_CHECK_CONFIG_GLOB } from './constants';
 export type { ArchiveMetadata } from './file_system/types';
@@ -25,6 +25,23 @@ export const getPullRequestNumber = (): string | undefined => {
 
   return value;
 };
+
+/**
+ * Extracts the GitHub PR number from a commit message that follows Kibana's
+ * squash-merge convention: the subject ends with "(#NNNN)".
+ * Returns undefined for commits that don't match (e.g. merge commits, direct pushes).
+ */
+export async function extractPrNumberFromCommitMessage(sha: string): Promise<string | undefined> {
+  try {
+    const { stdout } = await execa('git', ['log', '--format=%s', '-n', '1', sha], {
+      cwd: REPO_ROOT,
+    });
+    const match = stdout.trim().match(/\(#(\d+)\)$/);
+    return match ? match[1] : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 export async function resolveCurrentCommitSha(): Promise<string | undefined> {
   if (process.env.BUILDKITE_COMMIT) {

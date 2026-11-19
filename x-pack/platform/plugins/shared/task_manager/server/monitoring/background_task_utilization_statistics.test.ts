@@ -12,7 +12,12 @@ import { take, bufferCount, skip, map } from 'rxjs';
 import type { ConcreteTaskInstance } from '../task';
 import { TaskStatus } from '../task';
 import type { TaskTiming, TaskManagerStats } from '../task_events';
-import { asTaskRunEvent, TaskPersistence, asTaskManagerStatEvent } from '../task_events';
+import {
+  asTaskRunEvent,
+  TaskPersistence,
+  asTaskManagerStatEvent,
+  asTaskManagerBackpressureEvent,
+} from '../task_events';
 import { asOk } from '../lib/result_type';
 import type { TaskLifecycleEvent } from '../polling_lifecycle';
 import { TaskRunResult } from '../task_running';
@@ -550,6 +555,37 @@ describe('Task Run Statistics', () => {
         }
       });
     });
+
+    test('reports es_backpressure_active as 1 while backpressure is active and 0 otherwise', async () => {
+      const events$ = new Subject<TaskLifecycleEvent>();
+      const taskPollingLifecycle = taskPollingLifecycleMock.create({
+        events$: events$ as Observable<TaskLifecycleEvent>,
+      });
+
+      const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
+        taskPollingLifecycle,
+        new AdHocTaskCounter(),
+        pollInterval
+      );
+
+      return new Promise<void>((resolve) => {
+        BackgroundTaskUtilizationAggregator.pipe(
+          map(({ value }: AggregatedStat<BackgroundTaskUtilizationStat>) => value),
+          take(3),
+          bufferCount(3)
+        ).subscribe(([initial, active, inactive]) => {
+          expect(initial.es_backpressure_active).toEqual(0);
+          expect(active.es_backpressure_active).toEqual(1);
+          expect(inactive.es_backpressure_active).toEqual(0);
+          resolve();
+        });
+
+        events$.next(
+          asTaskManagerBackpressureEvent(asOk({ active: true, reason: 'too_many_requests' }))
+        );
+        events$.next(asTaskManagerBackpressureEvent(asOk({ active: false, reason: null })));
+      });
+    });
   });
 
   describe('summarizeUtilizationStats', () => {
@@ -579,6 +615,7 @@ describe('Task Run Statistics', () => {
           },
         },
         load: 63,
+        es_backpressure_active: 1,
       },
     };
 
@@ -639,6 +676,7 @@ describe('Task Run Statistics', () => {
           timestamp: monitoredStats.timestamp,
           value: {
             load: 63,
+            es_backpressure_active: 1,
           },
         },
       });

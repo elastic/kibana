@@ -6,6 +6,7 @@
  */
 
 import type { RepositoryStrategy } from './types';
+import { DEFAULT_REPOSITORY_REGISTER_REQUEST_TIMEOUT_MS } from './constants';
 
 export interface GcsRepositoryConfig {
   bucket: string;
@@ -21,18 +22,26 @@ export function createGcsRepository(config: GcsRepositoryConfig): RepositoryStra
         throw new Error('GCS repository bucket is required');
       }
     },
-    async register({ esClient, repoName }) {
-      await esClient.snapshot.createRepository({
-        name: repoName,
-        body: {
-          type: 'gcs',
-          settings: {
-            bucket: config.bucket,
-            ...(config.basePath && { base_path: config.basePath }),
-            ...(config.client && { client: config.client }),
+    async register({ esClient, repoName, verify }) {
+      await esClient.snapshot.createRepository(
+        {
+          name: repoName,
+          // Repository verification can take longer than the default 30s cluster-event timeout,
+          // especially for remote repository types (like GCS). Bump timeouts for reliability.
+          master_timeout: '2m',
+          timeout: '2m',
+          verify: verify ?? false,
+          body: {
+            type: 'gcs',
+            settings: {
+              bucket: config.bucket,
+              ...(config.basePath && { base_path: config.basePath }),
+              ...(config.client && { client: config.client }),
+            },
           },
         },
-      });
+        { requestTimeout: DEFAULT_REPOSITORY_REGISTER_REQUEST_TIMEOUT_MS }
+      );
     },
   };
 }

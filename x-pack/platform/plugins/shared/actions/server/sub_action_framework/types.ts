@@ -36,6 +36,8 @@ export interface ServiceParams<Config, Secrets> {
   secrets: Secrets;
   services: Services;
   request?: KibanaRequest;
+  /** Saved-object version of the connector, or IN_MEMORY_CONNECTOR_REVISION for preconfigured connectors. */
+  connectorVersion?: string;
 }
 
 export type SubActionRequestParams<R> = {
@@ -123,6 +125,7 @@ export interface SubActionConnectorType<Config, Secrets> {
   getService: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
   renderParameterTemplates?: RenderParameterTemplates<ExecutorParams>;
   isSystemActionType?: boolean;
+  isDeprecated?: boolean;
   subFeature?: SubFeature;
   getKibanaPrivileges?: (args?: {
     params?: { subAction: string; subActionParams: Record<string, unknown> };

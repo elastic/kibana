@@ -17,21 +17,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     before(async () => {
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
     });
 
-    after(async () => {
-      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await ml.securityUI.logout();
-
-      await ml.securityCommon.cleanMlUsers();
-      await ml.securityCommon.cleanMlRoles();
-
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote');
-
-      await ml.testResources.resetKibanaTimeZone();
-    });
-
-    loadTestFile(require.resolve('./anomaly_charts_dashboard_embeddables'));
     loadTestFile(require.resolve('./single_metric_viewer_dashboard_embeddables'));
     loadTestFile(require.resolve('./anomaly_embeddables_migration'));
     loadTestFile(require.resolve('./lens_to_ml'));

@@ -7,24 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import { loadWorkflowThunk } from './load_workflow_thunk';
 import { PLUGIN_ID } from '../../../../../../common';
 import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
+import {
+  acceptAllActiveProposals,
+  carryConversationToWorkflow,
+  isSidebarOpen,
+  requestSidebarRestore,
+} from '../../../../../features/ai_integration';
 import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
 import {
+  selectAiAssisted,
   selectWorkflow,
   selectWorkflowDefinition,
   selectWorkflowId,
   selectYamlString,
 } from '../selectors';
-import { setWorkflow } from '../slice';
+import { setWorkflow, setYamlString } from '../slice';
 
-export type SaveYamlParams = void;
+/**
+ * Without params, saves the current draft of the open workflow. With them, saves `yamlString` to
+ * `id`, and saves nothing if another workflow has been opened since.
+ */
+export type SaveYamlParams = void | { id: string | undefined; yamlString: string };
 export type SaveYamlResponse = void;
 
 export const saveYamlThunk = createAsyncThunk<
@@ -33,7 +44,10 @@ export const saveYamlThunk = createAsyncThunk<
   { state: RootState; extra: { services: WorkflowsServices } }
 >(
   'detail/saveYamlThunk',
-  async (_, { getState, dispatch, rejectWithValue, extra: { services } }) => {
+  async (params, { getState, dispatch, rejectWithValue, extra: { services } }) => {
+    if (params && selectWorkflowId(getState()) !== params.id) {
+      return rejectWithValue('Another workflow was opened before saving');
+    }
     const { http, notifications, application } = services;
     const workflowApi = new WorkflowApi(http);
 
@@ -49,9 +63,19 @@ export const saveYamlThunk = createAsyncThunk<
           },
         });
 
+    const isAiAssisted = selectAiAssisted(getState());
+
+    // Save implicitly accepts any pending AI diff decorations. Dispatch the
+    // post-accept YAML into Redux explicitly — the Monaco→Redux sync is
+    // debounced and may not have flushed by the read below.
+    const postAcceptYaml = acceptAllActiveProposals();
+    if (postAcceptYaml != null) {
+      dispatch(setYamlString(postAcceptYaml));
+    }
+
     try {
       const state = getState();
-      const yamlString = selectYamlString(state);
+      const yamlString = params ? params.yamlString : selectYamlString(state);
       const workflowDefinition = selectWorkflowDefinition(state);
       const id = selectWorkflowId(state);
 
@@ -77,6 +101,7 @@ export const saveYamlThunk = createAsyncThunk<
           isBulkAction: false,
           error: undefined,
           origin: 'workflow_detail',
+          aiAssisted: isAiAssisted,
         });
 
         // For consistency, dispatch the loadWorkflow thunk to update the workflow in the store to the latest version from the API
@@ -92,7 +117,19 @@ export const saveYamlThunk = createAsyncThunk<
           error: undefined,
           editorType: 'yaml', // Saving YAML always comes from YAML editor
           origin: 'workflow_detail',
+          aiAssisted: isAiAssisted,
         });
+
+        // Migrate the create-session chat onto the saved workflow's tag
+        // BEFORE `dispatch(setWorkflow)` — the resulting re-render of the
+        // agent-builder integration would otherwise race the consume.
+        carryConversationToWorkflow(workflow.id);
+
+        // If the sidebar was open at save time, ask the destination editor
+        // to re-open it — the `navigateToApp` below remounts the app.
+        if (isSidebarOpen()) {
+          requestSidebarRestore(workflow.id);
+        }
 
         // Update the workflow in the store
         dispatch(setWorkflow(workflow));
@@ -133,12 +170,14 @@ export const saveYamlThunk = createAsyncThunk<
           isBulkAction: false,
           error: errorObj,
           origin: 'workflow_detail',
+          aiAssisted: isAiAssisted,
         });
       } else {
         telemetry.reportWorkflowCreated({
           workflowDefinition: errorWorkflowDefinition || undefined,
           error: errorObj,
           origin: 'workflow_detail',
+          aiAssisted: isAiAssisted,
         });
       }
 

@@ -52,6 +52,9 @@ export function RelationshipExpression(props: Props) {
       panelPaddingSize="s"
       anchorPosition="downCenter"
       repositionOnScroll={true}
+      aria-label={i18n.translate('xpack.maps.spatialJoin.wizardForm.relationshipPopoverAriaLabel', {
+        defaultMessage: 'Spatial join relationship',
+      })}
     >
       <DistanceForm
         initialDistance={props.distance}

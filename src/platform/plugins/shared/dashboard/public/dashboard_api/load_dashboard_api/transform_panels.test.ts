@@ -9,12 +9,12 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import { transformPanels } from './transform_panels';
-import type { DashboardPanel, DashboardSection } from '../../../server';
+import type { DashboardPanel, DashboardSection } from '@kbn/as-code-dashboard-schema';
 
 describe('transformPanels', () => {
   const mockTransformOut = jest.fn();
   beforeAll(() => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     require('../../services/kibana_services').embeddableService = {
       getLegacyURLTransform: async () => mockTransformOut,
     };
@@ -35,7 +35,7 @@ describe('transformPanels', () => {
         {
           grid: { x: 0, y: 0, w: 6, h: 6 },
           config: {},
-          uid: '1',
+          id: '1',
           type: 'testPanelType',
         },
         {
@@ -44,12 +44,12 @@ describe('transformPanels', () => {
           grid: {
             y: 6,
           },
-          uid: 'section1',
+          id: 'section1',
           panels: [
             {
               grid: { x: 0, y: 0, w: 6, h: 6 },
               config: {},
-              uid: '3',
+              id: '3',
               type: 'testPanelType',
             },
           ],
@@ -84,7 +84,7 @@ describe('transformPanels', () => {
       {
         grid: { x: 0, y: 0, w: 6, h: 6 },
         config: { title: 'panel One' },
-        uid: '1',
+        id: '1',
         type: 'testPanelType',
       },
     ]);

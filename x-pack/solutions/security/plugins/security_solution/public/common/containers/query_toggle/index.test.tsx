@@ -50,7 +50,7 @@ describe('useQueryToggle', () => {
       result.current.setToggleStatus(false);
     });
     expect(result.current.toggleStatus).toEqual(false);
-    expect(mockSet).toBeCalledWith('kibana.siem:queryId.query.toggle:overview', false);
+    expect(mockSet).toHaveBeenCalledWith('kibana.siem:queryId.query.toggle:overview', false);
     cleanup();
   });
   it('null storage key, do not set', async () => {
@@ -60,7 +60,7 @@ describe('useQueryToggle', () => {
     act(() => {
       result.current.setToggleStatus(false);
     });
-    expect(mockSet).not.toBeCalled();
+    expect(mockSet).not.toHaveBeenCalled();
     cleanup();
   });
 });

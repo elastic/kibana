@@ -10,10 +10,20 @@ import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { USERS_PATH } from '../../../../common/constants';
+import {
+  mergeEntityResolutionIntoUrlState,
+  parseEntityIdentifiersFromUrlParam,
+  parseEntityResolutionFromUrlState,
+} from '../../../common/components/link_to';
 import { UsersTableType } from '../store/model';
 import { Users } from './users';
 import { UsersDetails } from './details';
 import { usersDetailsPagePath, usersDetailsTabPath, usersTabPath } from './constants';
+
+const USERS_DETAILS_TAB_NAMES = `${UsersTableType.authentications}|${UsersTableType.anomalies}|${UsersTableType.events}|${UsersTableType.risk}`;
+
+/** Legacy URLs with a base64 entity segment between user name and tab. */
+const usersDetailsLegacyEntityTabPath = `${usersDetailsPagePath}/:legacyEntityIdentifiers/:tabName(${USERS_DETAILS_TAB_NAMES})`;
 
 export const UsersContainer = React.memo(() => {
   return (
@@ -33,19 +43,52 @@ export const UsersContainer = React.memo(() => {
         )}
       />
       <Route
+        path={usersDetailsLegacyEntityTabPath}
+        render={({
+          match: {
+            params: { detailName, legacyEntityIdentifiers, tabName },
+          },
+          location,
+        }) => {
+          const { entityId, identityFields } =
+            parseEntityIdentifiersFromUrlParam(legacyEntityIdentifiers);
+          const urlStateQuery = mergeEntityResolutionIntoUrlState(location.search, {
+            entityId,
+            identityFields,
+            displayName: decodeURIComponent(detailName),
+            entityType: 'user',
+          });
+          return (
+            <Redirect
+              to={{
+                pathname: `${USERS_PATH}/name/${detailName}/${tabName}`,
+                search: urlStateQuery.replace(/^\?/, ''),
+              }}
+            />
+          );
+        }}
+      />
+      <Route
         path={usersDetailsTabPath}
         render={({
           match: {
             params: { detailName },
           },
-        }) => (
-          <UsersDetails
-            usersDetailsPagePath={usersDetailsPagePath}
-            detailName={decodeURIComponent(detailName)}
-          />
-        )}
+          location,
+        }) => {
+          const { entityId, identityFields } = parseEntityResolutionFromUrlState(location.search);
+          return (
+            <UsersDetails
+              usersDetailsPagePath={usersDetailsPagePath}
+              detailName={decodeURIComponent(detailName)}
+              entityId={entityId}
+              identityFields={identityFields}
+            />
+          );
+        }}
       />
       <Route // Redirect to the first tab when tabName is not present.
+        exact
         path={usersDetailsPagePath}
         render={({
           match: {

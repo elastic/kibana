@@ -21,7 +21,14 @@ export const wrapperCss = {
 };
 
 export const fullWidthContentCss = ({ euiTheme }: UseEuiTheme) => ({
-  padding: `0 ${euiTheme.size.l}`,
+  padding: `${euiTheme.size.l}`,
+  flex: 1,
+  minWidth: 0,
+});
+
+/** Query results pages: content starts 12px under the AppHeader, aligned with its 16px inset. */
+export const resultsContentCss = ({ euiTheme }: UseEuiTheme) => ({
+  padding: `${euiTheme.size.m} ${euiTheme.size.base} ${euiTheme.size.l}`,
   flex: 1,
   minWidth: 0,
 });
@@ -31,14 +38,4 @@ export const fullWidthFormContentCss = (theme: UseEuiTheme) => ({
   maxWidth: 1200,
   margin: '0 auto',
   width: '100%',
-});
-
-export const navCss = ({ euiTheme }: UseEuiTheme) => ({
-  background: euiTheme.colors.emptyShade,
-  borderBottom: euiTheme.border.thin,
-  padding: `${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.l}`,
-  '.euiTabs': {
-    paddingLeft: '3px',
-    marginLeft: '-3px',
-  },
 });

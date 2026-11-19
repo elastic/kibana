@@ -1,0 +1,73 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Logger } from '@kbn/core/server';
+import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../utils/internal_saved_objects_client';
+import { createEntitySourcesService } from '../entity_sources/entity_sources_service';
+import { watchlistEntitySourceTypeName } from '../entity_sources/infra';
+import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan } from '../../telemetry/traces';
+
+export interface WatchlistMaintainerDeps {
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
+  logger: Logger;
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey'];
+}
+
+type WatchlistMaintainerConfig = Pick<RegisterEntityMaintainerConfig, 'setup' | 'run'>;
+
+export const createWatchlistMaintainer = ({
+  getStartServices,
+  logger,
+  hasEncryptionKey,
+}: WatchlistMaintainerDeps): WatchlistMaintainerConfig => ({
+  setup: async ({ status }) => {
+    const namespace = status.metadata.namespace;
+    logger.debug(`Initializing watchlist maintainer for namespace "${namespace}"`);
+    logger.info(`Watchlist maintainer setup completed for namespace "${namespace}"`);
+    return status.state;
+  },
+  run: async ({ status, esClient, signal }) => {
+    const namespace = status.metadata.namespace;
+
+    const [coreStart, pluginsStart] = await getStartServices();
+    const license = await pluginsStart.licensing.getLicense();
+
+    if (!license.hasAtLeast('platinum')) {
+      logger.debug('Watchlist maintainer run skipped due to insufficient license');
+      return status.state;
+    }
+
+    logger.debug(`Watchlist maintainer run for namespace "${namespace}"`);
+
+    const soClient = buildNamespacedInternalSavedObjectsClientUnsafe({
+      coreStart,
+      namespace,
+      includedHiddenTypes: [watchlistEntitySourceTypeName],
+    });
+
+    const entitySourcesService = createEntitySourcesService({
+      esClient,
+      soClient,
+      logger,
+      namespace,
+      getStartServices,
+      hasEncryptionKey,
+    });
+
+    await runWithSpan({
+      name: ENTITY_ANALYTICS_SPAN_NAMES.watchlistTaskRun,
+      namespace,
+      cb: () => entitySourcesService.syncAllWatchlists({ abortSignal: signal }),
+    });
+
+    return status.state;
+  },
+});
+
+export type RegisterWatchlistMaintainerDeps = WatchlistMaintainerDeps;

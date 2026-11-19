@@ -10,7 +10,13 @@ import { sumBy } from 'lodash';
 import type { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import type { Environment } from '../../../../common/environment_rt';
-import { getDurationField, getEventType } from '../utils';
+import type { EntityType } from '../../../../common/correlations/types';
+import {
+  getDurationField,
+  getDurationFieldFromEntityType,
+  getEventType,
+  getEventTypeFromEntityType,
+} from '../utils';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBackwardCompatibleDocumentTypeFilter } from '../../../lib/helpers/transactions';
 
@@ -23,7 +29,8 @@ export const fetchDurationRanges = async ({
   kuery,
   query,
   chartType,
-  searchMetrics,
+  entityType,
+  searchMetrics = false,
   isOtel = false,
 }: {
   rangeSteps: number[];
@@ -33,21 +40,31 @@ export const fetchDurationRanges = async ({
   environment: Environment;
   kuery: string;
   query: estypes.QueryDslQueryContainer;
-  chartType: LatencyDistributionChartType;
-  searchMetrics: boolean;
+  chartType?: LatencyDistributionChartType;
+  entityType?: EntityType;
+  searchMetrics?: boolean;
   isOtel?: boolean;
 }): Promise<{
   totalDocCount: number;
   durationRanges: Array<{ key: number; doc_count: number }>;
 }> => {
+  const useEntityType = entityType !== undefined;
   // when using metrics data, ensure we filter by docs with the appropriate duration field
-  const filteredQuery = searchMetrics
-    ? {
-        bool: {
-          filter: [query, ...getBackwardCompatibleDocumentTypeFilter(true)],
-        },
-      }
-    : query;
+  const filteredQuery =
+    !useEntityType && searchMetrics
+      ? {
+          bool: {
+            filter: [query, ...getBackwardCompatibleDocumentTypeFilter(true)],
+          },
+        }
+      : query;
+
+  const eventType = useEntityType
+    ? getEventTypeFromEntityType(entityType)
+    : getEventType(chartType!, searchMetrics);
+  const durationField = useEntityType
+    ? getDurationFieldFromEntityType(entityType, isOtel)
+    : getDurationField(chartType!, searchMetrics, isOtel);
 
   const ranges = rangeSteps.reduce(
     (p, to) => {
@@ -65,7 +82,7 @@ export const fetchDurationRanges = async ({
     'get_duration_ranges',
     {
       apm: {
-        events: [getEventType(chartType, searchMetrics)],
+        events: [eventType],
       },
       track_total_hits: false,
       size: 0,
@@ -79,7 +96,7 @@ export const fetchDurationRanges = async ({
       aggs: {
         logspace_ranges: {
           range: {
-            field: getDurationField(chartType, searchMetrics, isOtel),
+            field: durationField,
             ranges,
           },
         },

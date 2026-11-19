@@ -9,6 +9,7 @@
     "public/**/*",
     "common/**/*",
     "__fixtures__/*",
+    "test/scout/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
@@ -38,8 +39,10 @@
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
-    "@kbn/react-kibana-context-render",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/scout",
+    "@kbn/ui-callout",
+    "@kbn/app-header"
   ],
   "exclude": ["target/**/*"]
 }

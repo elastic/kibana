@@ -9,14 +9,11 @@
 import { loadConfiguration } from '@kbn/apm-config-loader';
 import { initTracing } from '@kbn/tracing';
 import { initMetrics } from '@kbn/metrics';
+import { context } from '@opentelemetry/api';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 
-import { resources } from '@elastic/opentelemetry-node/sdk';
-import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
-import {
-  ATTR_SERVICE_INSTANCE_ID,
-  ATTR_DEPLOYMENT_ENVIRONMENT_NAME,
-} from '@opentelemetry/semantic-conventions/incubating';
 import { maybeInitAutoInstrumentations } from './init_autoinstrumentations';
+import { buildOtelResources } from './build_otel_resources';
 
 /**
  *
@@ -49,51 +46,33 @@ export const initTelemetry = (
   }
 
   // resource.attributes.*
-  const resource = resources
-    .detectResources({
-      detectors: [
-        resources.envDetector,
-        resources.hostDetector,
-        resources.osDetector,
-        resources.processDetector,
-      ],
-    })
-    .merge(
-      resources.resourceFromAttributes({
-        // TODO: Since we are deprecating `elastic.apm.*` settings, we should provide a way to set these attributes in the `telemetry.*` config.
-        [ATTR_SERVICE_NAME]: apmConfig.serviceName,
-        [ATTR_SERVICE_VERSION]: apmConfig.serviceVersion,
-        [ATTR_SERVICE_INSTANCE_ID]: apmConfig.serviceNodeName,
-        // Reverse-mapping APM Server transformations:
-        // https://github.com/elastic/apm-data/blob/2f9cdbf722e5be5bf77d99fbcaab7a70a7e83fff/input/otlp/metadata.go#L69-L74
-        [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: apmConfig.environment,
+  const resource = buildOtelResources(serviceName);
 
-        // From https://opentelemetry.io/docs/specs/semconv/resource/process/
-        'process.pid': process.pid,
-        'process.runtime.name': 'nodejs',
-        'process.runtime.version': process.version,
-
-        ...(apmConfig.globalLabels as Record<string, unknown>),
-      })
-    );
+  // The context manager runs unconditionally (outside the telemetry.enabled gate) because the
+  // dedicated inference tracer provider needs context.active() for span parent-child propagation
+  // and baggage for inference context detection, even when global tracing is off.
+  const contextManager = new AsyncLocalStorageContextManager();
+  context.setGlobalContextManager(contextManager);
+  contextManager.enable();
 
   if (telemetryConfig.enabled) {
     if (telemetryConfig.tracing.enabled) {
       maybeInitAutoInstrumentations();
     }
 
+    // Synchronous: OtelAppender captures the global provider at construction; MeterProvider defers async resource attrs until first export.
+    if (telemetryConfig.metrics.enabled || monitoringCollectionConfig.enabled) {
+      initMetrics({
+        resource,
+        metricsConfig: telemetryConfig.metrics,
+        monitoringCollectionConfig,
+      });
+    }
+
     const asyncSettled = resource.waitForAsyncAttributes?.() ?? Promise.resolve();
     asyncSettled.then(() => {
       if (telemetryConfig.tracing.enabled) {
         initTracing({ resource, tracingConfig: telemetryConfig.tracing });
-      }
-
-      if (telemetryConfig.metrics.enabled || monitoringCollectionConfig.enabled) {
-        initMetrics({
-          resource,
-          metricsConfig: telemetryConfig.metrics,
-          monitoringCollectionConfig,
-        });
       }
     });
   }

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, of, Subject, switchMap } from 'rxjs';
 import {
   scrollToTop,
   scrollToBottom,
@@ -15,12 +16,47 @@ import {
   getViewportBoundaries,
   getScrollPosition,
 } from '@kbn/core-chrome-layout-utils';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import { apiPublishesRelatedPanels } from '@kbn/presentation-publishing';
+import type { DashboardChildren } from './layout_manager/types';
 
 export const highlightAnimationDuration = 2000;
 
+const getRelatedPanelsFromSiblings = (
+  children: DashboardChildren,
+  idToCompareForBlur: string
+): Observable<string[]> => {
+  const relatedPanelPublishers = Object.entries(children)
+    .map(([id, sibling]) =>
+      apiPublishesRelatedPanels(sibling)
+        ? sibling.relatedPanels$.pipe(
+            map((relatedPanels) => ({
+              id,
+              relatedPanels,
+            }))
+          )
+        : null
+    )
+    .filter((result) => result !== null);
+
+  // combineLatest([]) completes without emitting, so use of([]) when nobody publishes relatedPanels$.
+  if (!relatedPanelPublishers.length) {
+    return of([]);
+  }
+
+  return combineLatest(relatedPanelPublishers).pipe(
+    map((entries) =>
+      entries
+        .map(({ id, relatedPanels }) => (relatedPanels.includes(idToCompareForBlur) ? id : null))
+        .filter((result) => result !== null)
+    )
+  );
+};
+
 export function initializeTrackPanel(
   untilLoaded: (id: string) => Promise<undefined>,
-  dashboardContainerRef$: BehaviorSubject<HTMLElement | null>
+  children$: Observable<DashboardChildren>,
+  viewMode$: BehaviorSubject<ViewMode>
 ) {
   const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const focusedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
@@ -28,6 +64,7 @@ export function initializeTrackPanel(
   const scrollToPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const scrollToBottom$ = new Subject<void>();
   const scrollPosition$ = new BehaviorSubject<number | undefined>(undefined);
+  const relatedPanelsIndicatorId$ = new BehaviorSubject<string | undefined>(undefined);
 
   function setScrollToPanelId(id: string | undefined) {
     if (scrollToPanelId$.value !== id) scrollToPanelId$.next(id);
@@ -37,74 +74,159 @@ export function initializeTrackPanel(
     if (expandedPanelId$.value !== id) expandedPanelId$.next(id);
   }
 
-  return {
-    expandedPanelId$,
-    expandPanel: (panelId: string) => {
-      const isPanelExpanded = panelId === expandedPanelId$.value;
-
-      if (isPanelExpanded) {
-        setExpandedPanelId(undefined);
-        setScrollToPanelId(panelId);
-        return;
-      }
-
-      setExpandedPanelId(panelId);
-      scrollPosition$.next(getScrollPosition());
-    },
+  const blurredPanelIds$ = new BehaviorSubject<string[]>([]);
+  const blurredPanelIdsSubscription = combineLatest([
+    children$,
     focusedPanelId$,
-    highlightPanelId$,
-    highlightPanel: (panelRef: HTMLDivElement) => {
-      const id = highlightPanelId$.value;
-      if (!id) return;
-
-      untilLoaded(id).then(async () => {
-        // Adds the highlight class in the next event loop to allow the DOM to update
-        await new Promise((res) => setTimeout(res, 0));
-        panelRef.classList.add('dshDashboardGrid__item--highlighted');
-        // Removes the class after the highlight animation finishes
-        await new Promise((res) => setTimeout(res, highlightAnimationDuration));
-        panelRef.classList.remove('dshDashboardGrid__item--highlighted');
-      });
-
-      highlightPanelId$.next(undefined);
-    },
-    scrollToPanelId$,
-    scrollToPanel: async (panelRef: HTMLDivElement) => {
-      const id = scrollToPanelId$.value;
-      if (!id) return;
-
-      untilLoaded(id).then(() => {
-        if (scrollPosition$.value !== undefined) {
-          scrollTo({ top: scrollPosition$.value, behavior: 'smooth' });
-          scrollPosition$.next(undefined);
-        } else {
-          const { top: viewportTop, bottom: viewportBottom } = getViewportBoundaries();
-          const { top: panelTop, bottom: panelBottom } = panelRef.getBoundingClientRect();
-
-          // only scroll if panel is not fully visible within the current viewport
-          if (panelTop < viewportTop || panelBottom > viewportBottom) {
-            panelRef.scrollIntoView({ block: 'start', behavior: 'smooth' });
-          }
+    relatedPanelsIndicatorId$,
+    viewMode$,
+  ])
+    .pipe(
+      // Get the relatedPanels$ subject of the focused panel and use it to determine blurred panels
+      map(([children, focusedPanelId, relatedPanelsIndicatorId, viewMode]) => {
+        // To decide whether to blur a panel, a panel in focus takes precedence over something indicating related panels
+        const idToCompareForBlur = focusedPanelId ?? relatedPanelsIndicatorId;
+        if (!idToCompareForBlur || viewMode !== 'edit') {
+          return of({
+            focusedChildId: '',
+            relatedPanels: [],
+            siblings: [],
+          });
         }
 
-        setScrollToPanelId(undefined);
-      });
+        const siblings = Object.keys(children);
+        const focusedChild = children[idToCompareForBlur];
+        const relatedPanels$ = apiPublishesRelatedPanels(focusedChild)
+          ? focusedChild.relatedPanels$
+          : // If the focused child doesn't publish related panels, derive which panels it's related to from siblings that do
+            getRelatedPanelsFromSiblings(children, idToCompareForBlur);
+        return relatedPanels$.pipe(
+          map((relatedPanels) => ({ focusedChildId: idToCompareForBlur, relatedPanels, siblings }))
+        );
+      }),
+      switchMap((result) => result)
+    )
+    .subscribe(({ relatedPanels, siblings, focusedChildId }) => {
+      blurredPanelIds$.next(
+        siblings.filter(
+          (siblingId) => siblingId !== focusedChildId && !relatedPanels.includes(siblingId)
+        )
+      );
+    });
+
+  const selectedPanelIds$ = new BehaviorSubject<string[]>([]);
+  // Selection must not survive a view mode switch, and must drop panels that no longer exist
+  const selectionCleanupSubscription = combineLatest([viewMode$, children$]).subscribe(
+    ([viewMode, children]) => {
+      const current = selectedPanelIds$.value;
+      if (!current.length) return;
+      const next = viewMode === 'edit' ? current.filter((id) => Boolean(children[id])) : [];
+      if (next.length !== current.length) selectedPanelIds$.next(next);
+    }
+  );
+
+  return {
+    api: {
+      selectedPanelIds$,
+      togglePanelSelection: (panelId: string) => {
+        const current = selectedPanelIds$.value;
+        selectedPanelIds$.next(
+          current.includes(panelId) ? current.filter((id) => id !== panelId) : [...current, panelId]
+        );
+      },
+      clearSelectedPanels: () => {
+        if (selectedPanelIds$.value.length) selectedPanelIds$.next([]);
+      },
+      addPanelsToSelection: (panelIds: string[]) => {
+        const next = Array.from(new Set([...selectedPanelIds$.value, ...panelIds]));
+        if (next.length !== selectedPanelIds$.value.length) selectedPanelIds$.next(next);
+      },
+      expandedPanelId$,
+      expandPanel: (panelId: string) => {
+        const isPanelExpanded = panelId === expandedPanelId$.value;
+
+        if (isPanelExpanded) {
+          setExpandedPanelId(undefined);
+          setScrollToPanelId(panelId);
+          return;
+        }
+
+        setExpandedPanelId(panelId);
+        scrollPosition$.next(getScrollPosition());
+      },
+      focusedPanelId$,
+      highlightPanelId$,
+      highlightPanel: (panelRef: HTMLDivElement) => {
+        const id = highlightPanelId$.value;
+        if (!id) return;
+
+        untilLoaded(id)
+          .then(async () => {
+            // Adds the highlight class in the next event loop to allow the DOM to update
+            await new Promise((res) => setTimeout(res, 0));
+            panelRef.classList.add('dshDashboardGrid__item--highlighted');
+            // Removes the class after the highlight animation finishes
+            await new Promise((res) => setTimeout(res, highlightAnimationDuration));
+            panelRef.classList.remove('dshDashboardGrid__item--highlighted');
+          })
+          .catch(() => {
+            // highlighting is cosmetic; ignore panels that fail to load
+          });
+
+        highlightPanelId$.next(undefined);
+      },
+      relatedPanelsIndicatorId$,
+      setRelatedPanelsIndicatorId: (panelId: string | undefined) => {
+        relatedPanelsIndicatorId$.next(panelId);
+      },
+      scrollToPanelId$,
+      scrollToPanel: async (panelRef: HTMLDivElement) => {
+        const id = scrollToPanelId$.value;
+        if (!id) return;
+
+        untilLoaded(id)
+          .then(() => {
+            if (scrollPosition$.value !== undefined) {
+              scrollTo({ top: scrollPosition$.value, behavior: 'smooth' });
+              scrollPosition$.next(undefined);
+            } else {
+              const { top: viewportTop, bottom: viewportBottom } = getViewportBoundaries();
+              const { top: panelTop, bottom: panelBottom } = panelRef.getBoundingClientRect();
+
+              // only scroll if panel is not fully visible within the current viewport
+              if (panelTop < viewportTop || panelBottom > viewportBottom) {
+                panelRef.scrollIntoView({ block: 'start', behavior: 'smooth' });
+              }
+            }
+
+            setScrollToPanelId(undefined);
+          })
+          .catch(() => {
+            // scrolling is cosmetic; just clear the pending scroll request
+            setScrollToPanelId(undefined);
+          });
+      },
+      scrollPosition$,
+      scrollToTop: () => {
+        scrollToTop({ behavior: 'smooth' });
+      },
+      scrollToBottom$,
+      scrollToBottom: () => {
+        scrollToBottom({ behavior: 'smooth' });
+      },
+      setFocusedPanelId: (id: string | undefined) => {
+        if (focusedPanelId$.value !== id) focusedPanelId$.next(id);
+        setScrollToPanelId(id);
+      },
+      setHighlightPanelId: (id: string | undefined) => {
+        if (highlightPanelId$.value !== id) highlightPanelId$.next(id);
+      },
+      setScrollToPanelId,
+      blurredPanelIds$,
     },
-    scrollPosition$,
-    scrollToTop: () => {
-      scrollToTop({ behavior: 'smooth' });
+    cleanup: () => {
+      blurredPanelIdsSubscription.unsubscribe();
+      selectionCleanupSubscription.unsubscribe();
     },
-    scrollToBottom$,
-    scrollToBottom: () => {
-      scrollToBottom({ behavior: 'smooth' });
-    },
-    setFocusedPanelId: (id: string | undefined) => {
-      if (focusedPanelId$.value !== id) focusedPanelId$.next(id);
-      setScrollToPanelId(id);
-    },
-    setHighlightPanelId: (id: string | undefined) => {
-      if (highlightPanelId$.value !== id) highlightPanelId$.next(id);
-    },
-    setScrollToPanelId,
   };
 }

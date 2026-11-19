@@ -9,7 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useCore } from '../../../../app_context';
 
 const i18nTexts = {
@@ -46,13 +47,10 @@ interface Props {
 export const DataStreamsGlobalStateCallOut: FunctionComponent<Props> = ({ dataStreamsCount }) => {
   const { docLinks } = useCore();
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       data-test-subj="dataStreamWarningCallOut"
       title={i18nTexts.callout.title(dataStreamsCount)}
-      iconType="warning"
-      color="warning"
-    >
-      {i18nTexts.callout.body(docLinks.links.snapshotRestore.createSnapshot)}
-    </EuiCallOut>
+      text={i18nTexts.callout.body(docLinks.links.snapshotRestore.createSnapshot)}
+    />
   );
 };

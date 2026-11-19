@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import qs from 'query-string';
-import { offsetRt } from '../../../../common/comparison_rt';
+import { toBooleanFromString } from '../../../../common/utils/to_boolean_from_string';
+import { offsetSchema } from '../../../../common/comparison_rt';
 import { useApmParams } from '../../../hooks/use_apm_params';
 
 function RedirectBackends({ to }: { to: string }) {
@@ -33,24 +33,24 @@ function RedirectBackendsOverviewToDependenciesOverview() {
 export const legacyBackends = {
   '/backends/inventory': {
     element: <RedirectBackends to="/dependencies/inventory" />,
-    params: t.partial({
-      query: t.intersection([t.type({ comparisonEnabled: toBooleanRt }), offsetRt]),
+    params: z.object({
+      query: z.object({ comparisonEnabled: toBooleanFromString }).merge(offsetSchema).optional(),
     }),
   },
   '/backends/{dependencyName}/overview': {
     element: <RedirectBackendsOverviewToDependenciesOverview />,
-    params: t.type({ path: t.type({ dependencyName: t.string }) }),
+    params: z.object({ path: z.object({ dependencyName: z.string() }) }),
   },
   '/backends': {
     element: <Outlet />,
-    params: t.partial({
-      query: t.intersection([
-        t.type({
-          comparisonEnabled: toBooleanRt,
-          dependencyName: t.string,
-        }),
-        offsetRt,
-      ]),
+    params: z.object({
+      query: z
+        .object({
+          comparisonEnabled: toBooleanFromString,
+          dependencyName: z.string(),
+        })
+        .merge(offsetSchema)
+        .optional(),
     }),
     children: {
       '/backends': {
@@ -60,14 +60,13 @@ export const legacyBackends = {
         element: <RedirectBackends to="/dependencies/operations" />,
       },
       '/backends/operation': {
-        params: t.type({
-          query: t.intersection([
-            t.type({ spanName: t.string }),
-            t.partial({
-              sampleRangeFrom: toNumberRt,
-              sampleRangeTo: toNumberRt,
-            }),
-          ]),
+        params: z.object({
+          query: z.object({ spanName: z.string() }).merge(
+            z.object({
+              sampleRangeFrom: z.coerce.number().optional(),
+              sampleRangeTo: z.coerce.number().optional(),
+            })
+          ),
         }),
         element: <RedirectBackends to="/dependencies/operation" />,
       },

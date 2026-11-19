@@ -12,4 +12,9 @@ export {
   type GenerateOpenApiDocumentOptionsFilters,
 } from './src/generate_oas';
 
-export type { OasMetaExtensions } from './src/oas_converter/zod/lib';
+export { OasSchemaCollisionError } from './src/oas_converter';
+
+// Writes the operation-level `x-state` string. Exported so @kbn/api-contracts can
+// round-trip it in a test: the contract checker's parseXState decodes exactly
+// what this produces, and that test fails loudly if the wording here ever drifts.
+export { getXState } from './src/util';

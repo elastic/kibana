@@ -32,9 +32,27 @@ export { getTemplateInputs } from './get_template_inputs';
 
 export type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 export { handleInstallPackageFailure, installPackage, ensureInstalledPackage } from './install';
+export {
+  assertPackagePoliciesUpgradeAcknowledged,
+  getPackagePoliciesUpgradeBreakingChanges,
+  packagePolicyBreakingChangesToError,
+} from './breaking_changes';
 export { reinstallPackageForInstallation } from './reinstall';
 export { removeInstallation } from './remove';
 export { updateCustomIntegration, incrementVersionAndUpdate } from './update_custom_integration';
+export {
+  handleNamespaceTemplateRestoreAfterPackageInstall,
+  insertNamespaceCustomTemplate,
+  isNamespaceCustomizationEnabledForPackage,
+  syncNamespaceTemplates,
+} from './namespace_datastream_templates';
+export type { SyncNamespaceTemplatesSummary } from './namespace_datastream_templates';
+export {
+  handleIlmSettingsRestoreAfterPackageInstall,
+  insertIlmComponentTemplate,
+  syncIlmPolicy,
+} from './namespace_ilm_settings';
+export type { SyncIlmPolicySummary } from './namespace_ilm_settings';
 export class PackageNotInstalledError extends Error {
   constructor(pkgkey: string) {
     super(`${pkgkey} is not installed`);

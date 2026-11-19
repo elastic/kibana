@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/ecs-data-quality-dashboard-plugin",
   "owner": [
-    "@elastic/security-threat-hunting-investigations"
+    "@elastic/security-investigations"
   ],
   "group": "security",
   "visibility": "private",

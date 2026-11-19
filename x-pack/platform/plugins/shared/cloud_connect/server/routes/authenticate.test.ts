@@ -10,6 +10,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import { registerAuthenticateRoute } from './authenticate';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import type { CloudConnectApiKey } from '../types';
+import { CLOUD_CONNECT_READ_SECURITY, CLOUD_CONNECT_MANAGE_SECURITY } from './route_security';
 
 jest.mock('../services/cloud_connect_client');
 jest.mock('../lib/create_storage_service');
@@ -69,7 +70,7 @@ describe('Authentication Routes', () => {
       customError: jest.fn((params) => params),
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { createStorageService } = require('../lib/create_storage_service');
     createStorageService.mockResolvedValue(mockStorageService);
   });
@@ -94,6 +95,13 @@ describe('Authentication Routes', () => {
         (call) => call[0].path === '/internal/cloud_connect/config'
       );
       routeHandler = getCall![1];
+    });
+
+    it('should require the cloudConnect read privilege', () => {
+      const getCall = mockRouter.get.mock.calls.find(
+        (call) => call[0].path === '/internal/cloud_connect/config'
+      );
+      expect(getCall![0].security).toEqual(CLOUD_CONNECT_READ_SECURITY);
     });
 
     it('should return config with license and cluster info on happy path', async () => {
@@ -174,7 +182,7 @@ describe('Authentication Routes', () => {
       const mockGetStartServices = jest.fn();
       const hasEncryptedSOEnabled = true;
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { createStorageService } = require('../lib/create_storage_service');
       createStorageService.mockResolvedValue(mockStorageService);
 
@@ -191,6 +199,13 @@ describe('Authentication Routes', () => {
         (call) => call[0].path === '/internal/cloud_connect/authenticate'
       );
       routeHandler = postCall![1];
+    });
+
+    it('should require the cloudConnect manage privilege', () => {
+      const postCall = mockRouter.post.mock.calls.find(
+        (call) => call[0].path === '/internal/cloud_connect/authenticate'
+      );
+      expect(postCall![0].security).toEqual(CLOUD_CONNECT_MANAGE_SECURITY);
     });
 
     it('should authenticate with cluster-scoped key (happy path)', async () => {
@@ -272,7 +287,7 @@ describe('Authentication Routes', () => {
     });
 
     it('should authenticate with admin key and generate cluster-scoped key', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { getCurrentClusterData } = require('../lib/cluster_info');
 
       mockCloudConnectInstance.validateApiKeyScope.mockResolvedValue({

@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  type CoreStart,
-  type Logger,
-  type AnalyticsServiceSetup,
-  SECURITY_EXTENSION_ID,
-} from '@kbn/core/server';
+import type { CoreStart, Logger, AnalyticsServiceSetup } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -25,6 +20,8 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { ConfigType } from '../../../../config';
 
 import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from '../constants';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
+import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../utils/internal_saved_objects_client';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -33,7 +30,6 @@ import {
 import { getApiKeyManager } from '../auth/api_key';
 import { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import { createDataSourcesService } from '../data_sources/data_sources_service';
-import { buildFakeScopedRequest } from '../../risk_score/tasks/helpers';
 import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
 import { monitoringEntitySourceType } from '../saved_objects';
 
@@ -161,16 +157,23 @@ const createPrivilegeMonitoringTaskRunnerFactory =
       run: async () => {
         const [core] = await deps.getStartServices();
         const config = deps.config;
-        return runPrivilegeMonitoringTask({
-          isCancelled,
-          logger: deps.logger,
-          telemetry: deps.telemetry,
-          taskInstance,
-          experimentalFeatures: deps.experimentalFeatures,
-          core,
-          config,
-          getPrivilegedUserMonitoringDataClient: deps.getPrivilegedUserMonitoringDataClient,
-        });
+        return core.executionContext.withContext(
+          buildEaExecutionContext(
+            EA_EXECUTION_CONTEXT_NAMES.PRIVILEGE_MONITORING_TASK,
+            taskInstance.id
+          ),
+          () =>
+            runPrivilegeMonitoringTask({
+              isCancelled,
+              logger: deps.logger,
+              telemetry: deps.telemetry,
+              taskInstance,
+              experimentalFeatures: deps.experimentalFeatures,
+              core,
+              config,
+              getPrivilegedUserMonitoringDataClient: deps.getPrivilegedUserMonitoringDataClient,
+            })
+        );
       },
       cancel: async () => {
         cancelled = true;
@@ -236,13 +239,10 @@ const runPrivilegeMonitoringTask = async ({
     }
     const maxUsersAllowed =
       config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
-    const request = buildFakeScopedRequest({
-      namespace: state.namespace,
+    const soClient = buildNamespacedInternalSavedObjectsClientUnsafe({
       coreStart: core,
-    });
-    const soClient = core.savedObjects.getScopedClient(request, {
+      namespace: state.namespace,
       includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
-      excludedExtensions: [SECURITY_EXTENSION_ID],
     });
     const dataSourcesService = createDataSourcesService(dataClient, soClient, maxUsersAllowed);
     await dataSourcesService.syncAllSources();

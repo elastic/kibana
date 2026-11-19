@@ -20,7 +20,7 @@ export const GoToSpacesButton: React.FC<GoToSpacesButtonProps> = ({
 }) => {
   return (
     <EuiButton
-      iconType="popout"
+      iconType="external"
       iconSide="right"
       data-test-subj={navigateToPermissions ? 'goToPermissionsTabButton' : 'goToSpacesButton'}
       onClick={onNavigateToSpaces}
@@ -28,8 +28,8 @@ export const GoToSpacesButton: React.FC<GoToSpacesButtonProps> = ({
       <FormattedMessage
         id={
           navigateToPermissions
-            ? 'genAiSettings.goToPermissionsTabButtonLabel'
-            : 'genAiSettings.goToSpacesButtonLabel'
+            ? 'xpack.genAiSettings.goToPermissionsTabButtonLabel'
+            : 'xpack.genAiSettings.goToSpacesButtonLabel'
         }
         defaultMessage={navigateToPermissions ? 'Go to Permissions tab' : 'Go to Space Settings'}
       />

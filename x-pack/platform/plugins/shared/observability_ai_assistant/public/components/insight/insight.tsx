@@ -5,16 +5,17 @@
  * 2.0.
  */
 import {
-  EuiHorizontalRule,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTextArea,
-  EuiCallOut,
-  EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isArray, isEmpty, last, once } from 'lodash';
@@ -33,7 +34,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
 import { useFlyoutState } from '../../hooks/use_flyout_state';
-import { getConnectorsManagementHref } from '../../utils/navigate_to_connectors';
+import { getModelManagementHref } from '../../utils/navigate_to_connectors';
 import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 import { StartChatButton } from '../buttons/start_chat_button';
 import { StopGeneratingButton } from '../buttons/stop_generating_button';
@@ -173,6 +174,13 @@ function PromptEdit({
 }) {
   const [prompt, setPrompt] = useState(initialPrompt);
 
+  const cancelLabel = i18n.translate('xpack.observabilityAiAssistant.insight.cancelPromptEdit', {
+    defaultMessage: 'Cancel',
+  });
+  const sendPromptLabel = i18n.translate('xpack.observabilityAiAssistant.insight.sendPromptEdit', {
+    defaultMessage: 'Send prompt',
+  });
+
   return (
     <EuiFlexGroup alignItems={'center'}>
       <EuiFlexItem grow={true}>
@@ -191,29 +199,29 @@ function PromptEdit({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          aria-label={i18n.translate('xpack.observabilityAiAssistant.insight.cancelPromptEdit', {
-            defaultMessage: 'Cancel',
-          })}
-          data-test-subj="observabilityAiAssistantInsightCancelEditPromptButtonIcon"
-          iconType="cross"
-          display="base"
-          color="danger"
-          size="m"
-          onClick={onCancel}
-        />
+        <EuiToolTip content={cancelLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            aria-label={cancelLabel}
+            data-test-subj="observabilityAiAssistantInsightCancelEditPromptButtonIcon"
+            iconType="cross"
+            display="base"
+            color="danger"
+            size="m"
+            onClick={onCancel}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          aria-label={i18n.translate('xpack.observabilityAiAssistant.insight.sendPromptEdit', {
-            defaultMessage: 'Send prompt',
-          })}
-          data-test-subj="observabilityAiAssistantInsightSendEditPromptButtonIcon"
-          iconType="kqlFunction"
-          display="fill"
-          size="m"
-          onClick={() => onSend(prompt)}
-        />
+        <EuiToolTip content={sendPromptLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            aria-label={sendPromptLabel}
+            data-test-subj="observabilityAiAssistantInsightSendEditPromptButtonIcon"
+            iconType="kqlFunction"
+            display="fill"
+            size="m"
+            onClick={() => onSend(prompt)}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -430,7 +438,7 @@ export function Insight({
     }
   } else if (!connectors.loading && !connectors.connectors?.length) {
     children = (
-      <MissingCredentialsCallout connectorsManagementHref={getConnectorsManagementHref(http!)} />
+      <MissingCredentialsCallout connectorsManagementHref={getModelManagementHref(http!)} />
     );
   } else if (messages.status === FETCH_STATUS.FAILURE) {
     children = (

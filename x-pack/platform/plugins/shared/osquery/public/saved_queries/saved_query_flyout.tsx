@@ -41,6 +41,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue
   const {
     serializer,
     idSet,
+    isLoadingIds,
     handleSubmit,
     formState: { isSubmitting },
   } = hooksForm;
@@ -98,6 +99,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue
               <EuiButton
                 data-test-subj="savedQueryFlyoutSaveButton"
                 isLoading={isSubmitting}
+                isDisabled={isLoadingIds}
                 onClick={handleSubmit(onSubmit)}
                 fill
               >

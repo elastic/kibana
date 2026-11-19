@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { dump } from 'js-yaml';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -20,18 +19,27 @@ import {
   EuiFlyoutFooter,
   EuiButtonEmpty,
   EuiButton,
-  EuiCallOut,
   EuiIconTip,
   EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import { MAX_FLYOUT_WIDTH } from '../constants';
-import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from '../hooks';
+import {
+  useGetOneAgentPolicyFull,
+  useGetOneAgentPolicy,
+  useStartServices,
+  useAuthz,
+} from '../hooks';
 
-import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../services';
+import { agentPolicyRouteService, getYamlFormatters } from '../services';
+import type { YamlFormatters } from '../../../services/yaml_formatters';
 import { API_VERSIONS } from '../../../../common/constants';
-import { splitVersionSuffixFromPolicyId } from '../../../../common/services/version_specific_policies_utils';
+import {
+  splitVersionSuffixFromPolicyId,
+  hasAgentVersionSuffix,
+} from '../../../../common/services/version_specific_policies_utils';
 
 import { Loading } from '.';
 
@@ -47,9 +55,18 @@ export const AgentPolicyYamlFlyout = memo<{
   onClose: () => void;
 }>(({ policyId, revision, onClose }) => {
   const flyoutTitleId = useGeneratedHtmlId();
-  const { version: agentVersion } = splitVersionSuffixFromPolicyId(policyId);
+  const agentVersion = hasAgentVersionSuffix(policyId)
+    ? splitVersionSuffixFromPolicyId(policyId).version
+    : null;
+  const [formatters, setFormatters] = useState<YamlFormatters | null>(null);
+
+  useEffect(() => {
+    getYamlFormatters().then(setFormatters);
+  }, []);
 
   const core = useStartServices();
+  const authz = useAuthz();
+  const canReadSettings = authz.fleet.readSettings;
   const {
     isLoading: isLoadingYaml,
     data: yamlData,
@@ -60,27 +77,25 @@ export const AgentPolicyYamlFlyout = memo<{
     (packagePolicy) => packagePolicy?.secret_references?.length
   );
 
-  const body = isLoadingYaml ? (
-    <Loading />
-  ) : error ? (
-    <EuiCallOut
-      announceOnMount
-      title={
-        <FormattedMessage
-          id="xpack.fleet.policyDetails.errorGettingFullAgentPolicy"
-          defaultMessage="Error loading agent policy yaml"
-        />
-      }
-      color="danger"
-      iconType="warning"
-    >
-      {error.message}
-    </EuiCallOut>
-  ) : (
-    <EuiCodeBlock language="yaml" isCopyable fontSize="m" whiteSpace="pre">
-      {fullAgentPolicyToYaml(yamlData!.item, dump)}
-    </EuiCodeBlock>
-  );
+  const body =
+    isLoadingYaml || !formatters ? (
+      <Loading />
+    ) : error ? (
+      <KbnDangerCallout
+        announceOnMount
+        title={
+          <FormattedMessage
+            id="xpack.fleet.policyDetails.errorGettingFullAgentPolicy"
+            defaultMessage="Error loading agent policy yaml"
+          />
+        }
+        text={error.message}
+      />
+    ) : (
+      <EuiCodeBlock language="yaml" isCopyable fontSize="m" whiteSpace="pre">
+        {formatters.fullAgentPolicyToYaml(yamlData!.item)}
+      </EuiCodeBlock>
+    );
 
   const revisionQueryParam = revision ? `&revision=${revision}` : '';
   const downloadLink =
@@ -90,16 +105,16 @@ export const AgentPolicyYamlFlyout = memo<{
   const downloadYaml = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
-      if (!yamlData?.item) {
+      if (!yamlData?.item || !formatters) {
         return;
       }
-      const yaml = fullAgentPolicyToYaml(yamlData.item, dump);
+      const yamlStr = formatters.fullAgentPolicyToYaml(yamlData.item);
       const link = document.createElement('a');
-      link.href = `data:text/x-yaml;charset=utf-8,${encodeURIComponent(yaml)}`;
+      link.href = `data:text/x-yaml;charset=utf-8,${encodeURIComponent(yamlStr)}`;
       link.download = 'elastic-agent.yml';
       link.click();
     },
-    [yamlData]
+    [yamlData, formatters]
   );
 
   return (
@@ -143,10 +158,34 @@ export const AgentPolicyYamlFlyout = memo<{
             )}
           </h2>
         </EuiTitle>
+        {!canReadSettings && (
+          <>
+            <EuiSpacer size="m" />
+            <KbnWarningCallout
+              announceOnMount
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.policyDetails.secretsRedactedTitle"
+                  defaultMessage="Some proxy credentials may not be shown"
+                />
+              }
+              size="m"
+              text={
+                <FormattedMessage
+                  id="xpack.fleet.policyDetails.secretsRedactedDescription"
+                  defaultMessage="Proxy headers and TLS private keys are only visible to users with the {privilege} Kibana privilege for Fleet."
+                  values={{
+                    privilege: <strong>{'Fleet > Settings: Read'}</strong>,
+                  }}
+                />
+              }
+            />
+          </>
+        )}
         {packagePoliciesContainSecrets && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
               title={
                 <FormattedMessage
@@ -155,17 +194,16 @@ export const AgentPolicyYamlFlyout = memo<{
                 />
               }
               size="m"
-              color="primary"
-              iconType="info"
-            >
-              <FormattedMessage
-                id="xpack.fleet.policyDetails.secretsDescription"
-                defaultMessage="Kibana does not have access to secret values. You will need to set these values manually after deploying the agent policy. Look out for environment variables in the format {envVarPrefix} in the agent configuration."
-                values={{
-                  envVarPrefix: <code>{'${SECRET_0}'}</code>,
-                }}
-              />
-            </EuiCallOut>
+              text={
+                <FormattedMessage
+                  id="xpack.fleet.policyDetails.secretsDescription"
+                  defaultMessage="Kibana does not have access to secret values. You will need to set these values manually after deploying the agent policy. Look out for environment variables in the format {envVarPrefix} in the agent configuration."
+                  values={{
+                    envVarPrefix: <code>{'${SECRET_0}'}</code>,
+                  }}
+                />
+              }
+            />
           </>
         )}
       </EuiFlyoutHeader>
@@ -186,7 +224,7 @@ export const AgentPolicyYamlFlyout = memo<{
               href={downloadLink}
               iconType="download"
               onClick={downloadYaml}
-              isDisabled={Boolean(isLoadingYaml || !yamlData)}
+              isDisabled={Boolean(isLoadingYaml || !yamlData || !formatters)}
             >
               <FormattedMessage
                 id="xpack.fleet.policyDetails.yamlDownloadButtonLabel"

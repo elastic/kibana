@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SelectionOption } from '@kbn/workflows/types/latest';
+import type { PropertySelectionHandler, SelectionOption } from '@kbn/workflows/types/latest';
 import { SortFieldCase } from '../../common/ui';
 import { getCases, resolveCase } from '../containers/api';
 import { DEFAULT_FILTER_OPTIONS } from '../containers/constants';
@@ -23,8 +23,8 @@ const toCaseSelectionOption = (theCase: CaseSelectionShape): SelectionOption<str
   description: theCase.description,
 });
 
-export const caseIdSelection = {
-  search: async (input: string) => {
+export const caseIdSelection: PropertySelectionHandler<string> = {
+  search: async (input) => {
     const query = input.trim();
     if (query.length === 0) {
       return [];
@@ -46,7 +46,7 @@ export const caseIdSelection = {
 
     return response.cases.map((theCase) => toCaseSelectionOption(theCase));
   },
-  resolve: async (value: string) => {
+  resolve: async (value) => {
     const caseId = value.trim();
     if (caseId.length === 0) {
       return null;
@@ -59,10 +59,10 @@ export const caseIdSelection = {
       return null;
     }
   },
-  getDetails: async (value: string, _context: unknown, option: SelectionOption<string> | null) => {
+  getDetails: async (value, _context, option) => {
     if (option) {
       return {
-        message: i18n.CASE_CAN_BE_USED_MESSAGE(option.label),
+        message: i18n.CASE_CAN_BE_USED_MESSAGE(option.label ?? ''), // label type is optional but it is always set by toCaseSelectionOption
       };
     }
 

@@ -28,6 +28,54 @@ describe('SalesforceConnector', () => {
     jest.clearAllMocks();
   });
 
+  it('should define every action (except test) as a tool for agent exposure', () => {
+    for (const actionName of Object.keys(SalesforceConnector.actions)) {
+      if (actionName !== 'test') {
+        expect(SalesforceConnector.actions[actionName].isTool).toBe(true);
+      }
+    }
+  });
+
+  describe('auth', () => {
+    it('supports oauth_client_credentials auth', () => {
+      const types = (SalesforceConnector.auth?.types as Array<string | { type: string }>).map((t) =>
+        typeof t === 'string' ? t : t.type
+      );
+      expect(types).toContain('oauth_client_credentials');
+    });
+
+    it('supports oauth_authorization_code with correct Salesforce defaults and placeholders', () => {
+      const oauthType = (
+        SalesforceConnector.auth?.types as Array<
+          | string
+          | {
+              type: string;
+              defaults?: Record<string, unknown>;
+              overrides?: Record<string, unknown>;
+            }
+        >
+      ).find((t) => typeof t === 'object' && t.type === 'oauth_authorization_code');
+      expect(oauthType).toBeDefined();
+      expect(oauthType).toMatchObject({
+        type: 'oauth_authorization_code',
+        defaults: {
+          scope: 'api refresh_token',
+        },
+        overrides: {
+          meta: {
+            authorizationUrl: {
+              placeholder: 'https://login.salesforce.com/services/oauth2/authorize',
+            },
+            tokenUrl: {
+              placeholder: 'https://login.salesforce.com/services/oauth2/token',
+            },
+            scope: { hidden: true },
+          },
+        },
+      });
+    });
+  });
+
   describe('query action', () => {
     it('should run SOQL query', async () => {
       const mockResponse = {
@@ -67,6 +115,27 @@ describe('SalesforceConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}${nextUrl}`, {});
+    });
+
+    it.each([
+      '@attacker.example/collect',
+      '//attacker.example/collect',
+      'https://attacker.example/services/data/v66.0/query/01gxx0000001',
+      '/services/data/v66.0/query/01gxx@attacker.example',
+      '/services/data/v66.0/sobjects/User',
+    ])('rejects nextRecordsUrl %s without calling Salesforce', async (nextRecordsUrl) => {
+      await expect(
+        SalesforceConnector.actions.query.handler(mockContext, { soql: '', nextRecordsUrl })
+      ).rejects.toThrow('nextRecordsUrl must be the relative path');
+      expect(mockClient.get).not.toHaveBeenCalled();
+    });
+
+    it('rejects a non-cursor nextRecordsUrl in the input schema', () => {
+      const result = SalesforceConnector.actions.query.input.safeParse({
+        soql: '',
+        nextRecordsUrl: '@attacker.example/collect',
+      });
+      expect(result.success).toBe(false);
     });
   });
 
@@ -128,6 +197,17 @@ describe('SalesforceConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}${nextUrl}`, {});
+    });
+
+    it('rejects a nextRecordsUrl that would leave the Salesforce host', async () => {
+      await expect(
+        SalesforceConnector.actions.search.handler(mockContext, {
+          searchTerm: 'test',
+          returning: 'Account',
+          nextRecordsUrl: '@attacker.example/collect',
+        })
+      ).rejects.toThrow('nextRecordsUrl must be the relative path');
+      expect(mockClient.get).not.toHaveBeenCalled();
     });
   });
 
@@ -212,6 +292,16 @@ describe('SalesforceConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}${nextUrl}`, {});
     });
 
+    it('rejects a nextRecordsUrl that would leave the Salesforce host', async () => {
+      await expect(
+        SalesforceConnector.actions.list_records.handler(mockContext, {
+          sobjectName: 'Account',
+          nextRecordsUrl: '@attacker.example/collect',
+        })
+      ).rejects.toThrow('nextRecordsUrl must be the relative path');
+      expect(mockClient.get).not.toHaveBeenCalled();
+    });
+
     it('should throw on invalid sobject name (SOQL injection safety)', async () => {
       await expect(
         SalesforceConnector.actions.list_records.handler(mockContext, {
@@ -244,35 +334,25 @@ describe('SalesforceConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = SalesforceConnector.test;
+
     it('should return success when API is accessible', async () => {
       mockClient.get.mockResolvedValue({
         data: { totalSize: 1, done: true, records: [{ Id: '005xx000001' }] },
       });
 
-      if (!SalesforceConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await SalesforceConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}/services/data/v66.0/query`, {
         params: { q: 'SELECT Id FROM User LIMIT 1' },
       });
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Salesforce',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid token'));
 
-      if (!SalesforceConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await SalesforceConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Invalid token');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

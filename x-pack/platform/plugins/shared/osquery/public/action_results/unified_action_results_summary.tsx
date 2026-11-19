@@ -24,7 +24,7 @@ import { getStatusCellRenderers } from './status_cell_renderers';
 import { euiProgressCss } from '../results/results_table_shared';
 import { useBulkAgentDetails } from './use_bulk_agent_details';
 import { enrichEdgesWithErrors } from './enrich_edges';
-import type { ActionResultsSummaryProps } from './legacy_action_results_summary';
+import type { ActionResultsSummaryProps } from './types';
 
 const DEFAULT_PAGE_SIZE = 20;
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
@@ -57,10 +57,6 @@ const COLUMN_DISPLAY_SETTINGS = {
   },
 };
 
-const STATUS_COLUMNS_META = {
-  'action_response.osquery.count': { type: 'number' as const },
-};
-
 let storageInstance: Storage;
 const getStorage = () => {
   if (!storageInstance) {
@@ -80,7 +76,9 @@ const statusTableContainerCss = {
 
 const unifiedTableWrapperCss = {
   flex: '1 1 auto',
-  minHeight: 200,
+  '.euiDataGrid__controls': {
+    paddingLeft: '8px',
+  },
 };
 
 const gridStyleOverride = {
@@ -199,8 +197,10 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
     [getFleetAppUrl]
   );
 
-  // Pagination
-  const totalItemCount = agentIds?.length ?? 0;
+  // Pagination — `data.total` covers both Live (agentIds.length) and Scheduled
+  // (server hits.total). Scheduled queries have no `agentIds`, so deriving the
+  // count from `agentIds.length` would yield pageCount=0 and leave Next enabled.
+  const totalItemCount = data.total;
   const totalPages = Math.ceil(totalItemCount / pageSize);
 
   const handlePageChange = useCallback((newPageIndex: number) => {
@@ -227,6 +227,14 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
     currentAgentCountRef.current = agentIds?.length;
   }, [agentIds?.length, data.aggregations.totalResponded, error, expired]);
 
+  // Remount the grid on fullscreen exit to reset internal EuiDataGrid column widths that persist from the wider viewport.
+  const [gridKey, setGridKey] = useState(0);
+  const handleFullScreenChange = useCallback((isFullScreen: boolean) => {
+    if (!isFullScreen) {
+      setGridKey((k) => k + 1);
+    }
+  }, []);
+
   if (!dataView) {
     return null;
   }
@@ -239,6 +247,7 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
         <div css={tableWrapperCss} data-test-subj="osqueryStatusTable">
           <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
             <UnifiedDataTable
+              key={gridKey}
               ariaLabelledBy="osquery-status-results"
               dataView={dataView}
               columns={DEFAULT_COLUMNS}
@@ -248,6 +257,7 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
               sort={EMPTY_SORT}
               showTimeCol={false}
               showFullScreenButton={appName === OSQUERY_PLUGIN_NAME}
+              onFullScreenChange={handleFullScreenChange}
               canDragAndDropColumns={false}
               isSortEnabled={false}
               isPaginationEnabled={false}
@@ -255,12 +265,12 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
               totalHits={totalItemCount}
               services={unifiedDataTableServices}
               consumer="osquery"
-              columnsMeta={STATUS_COLUMNS_META}
               showColumnTokens={false}
               settings={COLUMN_DISPLAY_SETTINGS}
               onSetColumns={noop}
               controlColumnIds={EMPTY_CONTROL_COLUMN_IDS}
               gridStyleOverride={gridStyleOverride}
+              rowHeightState={0}
               dataGridDensityState={DataGridDensity.EXPANDED}
             />
           </CellActionsProvider>

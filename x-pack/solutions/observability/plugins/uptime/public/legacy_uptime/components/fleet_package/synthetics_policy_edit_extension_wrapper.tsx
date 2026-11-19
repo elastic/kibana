@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FleetStartServices } from '@kbn/fleet-plugin/public';
-import { EuiButton, EuiCallOut } from '@elastic/eui';
 import type { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import type { PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEditMonitorLocator } from './use_edit_monitor_locator';
 import { DeprecateNoticeModal } from './deprecate_notice_modal';
@@ -20,6 +21,22 @@ enum DataStream {
   ICMP = 'icmp',
   BROWSER = 'browser',
 }
+
+export const getMonitorRefFromVars = (
+  vars?: PackagePolicyConfigRecord
+): { configId: string; monitorSpaces: string[] } => {
+  try {
+    const { config_id: configId, meta } = JSON.parse(vars?.processors?.value)[0].add_fields.fields;
+    const spaceId: string | string[] | undefined = meta?.space_id;
+    return {
+      configId: configId ?? '',
+      monitorSpaces: spaceId ? [spaceId].flat() : [],
+    };
+  } catch (e) {
+    return { configId: '', monitorSpaces: [] };
+  }
+};
+
 /**
  * Exports Synthetics-specific package policy instructions
  * for use in the Ingest app create / edit package policy
@@ -42,27 +59,29 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
       Object.values(DataStream).includes(stream.data_stream.dataset as DataStream)
     )?.vars;
 
-    let configId: string = '';
-    try {
-      configId = JSON.parse(vars?.processors.value)[0].add_fields.fields.config_id;
-    } catch (e) {
-      // ignore
-    }
+    const { configId, monitorSpaces } = useMemo(() => getMonitorRefFromVars(vars), [vars]);
 
-    const url = useEditMonitorLocator({ configId, locators });
+    const url = useEditMonitorLocator({
+      configId,
+      monitorSpaces,
+      packagePolicyId: currentPolicy.id,
+      locators,
+    });
 
     if (currentPolicy.is_managed) {
       return (
-        <EuiCallOut announceOnMount>
-          <p data-test-subj="syntheticsManagedPolicyCallout">{EDIT_IN_SYNTHETICS_DESC}</p>
-          <EuiButton
-            isLoading={!url}
-            href={url + `?packagePolicyId=${currentPolicy.id}`}
-            data-test-subj="syntheticsEditMonitorButton"
-          >
-            {EDIT_IN_SYNTHETICS_LABEL}
-          </EuiButton>
-        </EuiCallOut>
+        <KbnInfoCallout
+          announceOnMount
+          title={<p data-test-subj="syntheticsManagedPolicyCallout">{EDIT_IN_SYNTHETICS_DESC}</p>}
+          actionProps={{
+            primary: {
+              isLoading: !url,
+              href: url,
+              'data-test-subj': 'syntheticsEditMonitorButton',
+              children: EDIT_IN_SYNTHETICS_LABEL,
+            },
+          }}
+        />
       );
     } else {
       return <DeprecateNoticeModal onCancel={onCancel} />;

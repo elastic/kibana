@@ -13,18 +13,16 @@ import type { GetAggregatableFields, UseInspectButtonParams } from './hooks';
 import { getAggregatableFields, useInspectButton, useStackByFields } from './hooks';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { TestProviders } from '../../../../common/mock';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
-jest.mock('../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn(),
-  getScopeFromPath: jest.fn(),
-}));
 jest.mock('../../../../data_view_manager/hooks/use_browser_fields');
+jest.mock('../../../../data_view_manager/hooks/use_data_view', () => ({
+  useDataView: jest.fn(() => ({ dataView: {}, status: 'ready' })),
+}));
 
 describe('getAggregatableFields', () => {
   test('getAggregatableFields when useLensCompatibleFields = false', () => {
@@ -68,15 +66,10 @@ describe('getAggregatableFields', () => {
 });
 
 describe('hooks', () => {
-  const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
   const mockUseBrowserFields = useBrowserFields as jest.Mock;
 
   describe('useInspectButton', () => {
     beforeEach(() => {
-      mockUseSourcererDataView.mockReturnValue({
-        browserFields: mockBrowserFields,
-      });
-
       jest.clearAllMocks();
     });
 
@@ -120,9 +113,6 @@ describe('hooks', () => {
     });
 
     it('returns only aggregateable fields', () => {
-      mockUseSourcererDataView.mockReturnValue({
-        browserFields: mockBrowserFields,
-      });
       mockUseBrowserFields.mockReturnValue(mockBrowserFields);
 
       const wrapper = ({ children }: React.PropsWithChildren) => (
@@ -138,9 +128,6 @@ describe('hooks', () => {
     });
 
     it('returns only Lens compatible fields (check if one of esTypes is keyword)', () => {
-      mockUseSourcererDataView.mockReturnValue({
-        browserFields: { base: mockBrowserFields.base },
-      });
       mockUseBrowserFields.mockReturnValue({ base: mockBrowserFields.base });
 
       const wrapper = ({ children }: React.PropsWithChildren) => (
@@ -157,9 +144,6 @@ describe('hooks', () => {
     });
 
     it('returns only Lens compatible fields (check if it is a nested field)', () => {
-      mockUseSourcererDataView.mockReturnValue({
-        browserFields: { nestedField: mockBrowserFields.nestedField },
-      });
       mockUseBrowserFields.mockReturnValue({ nestedField: mockBrowserFields.nestedField });
 
       const wrapper = ({ children }: React.PropsWithChildren) => (

@@ -46,6 +46,9 @@ export const getGeneration = async ({
       authenticatedUser,
       eventLogIndex,
       executionUuid,
+      // Dismissal only hides a generation from the recent-generations list; when
+      // fetching a single generation for display we want its actual outcome.
+      ignoreDismissed: true,
       logger,
       spaceId,
     });

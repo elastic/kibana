@@ -12,7 +12,12 @@ import type { Ast } from '@kbn/interpreter';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { PaletteRegistry, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { CUSTOM_PALETTE, applyPaletteParams, getOverridePaletteStops } from '@kbn/coloring';
+import {
+  CUSTOM_PALETTE,
+  applyPaletteParams,
+  getOverridePaletteColors,
+  isValueBasedPalette,
+} from '@kbn/coloring';
 import type {
   GaugeExpressionFunctionDefinition,
   GaugeShape,
@@ -35,6 +40,7 @@ import type {
   UserMessage,
   Visualization,
 } from '@kbn/lens-common';
+import { LENS_GAUGE_DEFAULT_SHAPE } from '@kbn/lens-common';
 import { getSuggestions } from './suggestions';
 import type { GaugeVisualizationState } from './constants';
 import { GROUP_ID, LENS_GAUGE_ID } from './constants';
@@ -66,13 +72,14 @@ function computePaletteParams(
   paletteService: PaletteRegistry,
   palette: PaletteOutput<CustomPaletteParams>
 ) {
-  const stops = getOverridePaletteStops(paletteService, palette);
+  const colors = getOverridePaletteColors(paletteService, palette);
+  const stops = palette.params?.stops?.map(({ stop }) => stop) ?? [];
 
   return {
     ...palette.params,
-    // rewrite colors and stops as two distinct arguments
-    colors: stops?.map(({ color }) => color),
-    stops: palette.params?.name === 'custom' ? stops?.map(({ stop }) => stop) : [],
+    colors,
+    // Positions are a custom-palette concept only; named palettes distribute uniformly at render.
+    stops: palette.params?.name === CUSTOM_PALETTE ? stops : [],
     reverse: false, // managed at UI level
   };
 }
@@ -142,17 +149,25 @@ const toExpression = (
     return null;
   }
 
+  const colorMode = state?.colorMode ?? 'none';
+  const palette =
+    colorMode === 'palette'
+      ? state.palette?.params
+        ? state.palette
+        : getDefaultPalette(paletteService)
+      : undefined;
+
   const gaugeFn = buildExpressionFunction<GaugeExpressionFunctionDefinition>('gauge', {
     metric: state.metricAccessor,
     min: state.minAccessor,
     max: state.maxAccessor,
     goal: state.goalAccessor,
-    shape: state.shape ?? GaugeShapes.HORIZONTAL_BULLET,
-    colorMode: state?.colorMode ?? 'none',
-    palette: state.palette?.params
+    shape: state.shape ?? LENS_GAUGE_DEFAULT_SHAPE,
+    colorMode,
+    palette: palette?.params
       ? paletteService
           .get(CUSTOM_PALETTE)
-          .toExpression(computePaletteParams(paletteService, state.palette))
+          .toExpression(computePaletteParams(paletteService, palette))
       : undefined,
     ticksPosition: state.ticksPosition ?? 'auto',
     labelMinor: state.labelMinor,
@@ -228,7 +243,7 @@ export const getGaugeVisualization = ({
       state || {
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
-        shape: GaugeShapes.HORIZONTAL_BULLET,
+        shape: LENS_GAUGE_DEFAULT_SHAPE,
         colorMode: 'palette',
         palette:
           mainPalette?.type === 'legacyPalette'
@@ -672,7 +687,12 @@ function getConfigurationAccessorsAndPalette(
   paletteService: PaletteRegistry,
   activeData?: FramePublicAPI['activeData']
 ) {
-  const hasColoring = Boolean(state.colorMode !== 'none' && state.palette?.params?.stops);
+  const effectivePalette =
+    state.colorMode === 'palette'
+      ? isValueBasedPalette(state.palette)
+        ? state.palette
+        : getDefaultPalette(paletteService)
+      : undefined;
 
   const row = getActiveDataForLayer(state?.layerId, activeData)?.rows?.[0];
   const { metricAccessor } = state ?? {};
@@ -680,12 +700,12 @@ function getConfigurationAccessorsAndPalette(
   const accessors = getAccessorsFromState(state);
 
   let palette;
-  if (row != null && metricAccessor != null && state?.palette != null && hasColoring) {
+  if (row != null && metricAccessor != null && effectivePalette != null) {
     const currentMinMax = {
       min: getMinValue(row, accessors),
       max: getMaxValue(row, accessors),
     };
-    const displayStops = applyPaletteParams(paletteService, state?.palette, currentMinMax);
+    const displayStops = applyPaletteParams(paletteService, effectivePalette, currentMinMax);
     palette = displayStops.map(({ color }) => color);
   }
   return { metricAccessor, accessors, palette };

@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import {
   BreadcrumbsContextProvider,
   RouteRenderer,
   RouterProvider,
 } from '@kbn/typed-react-router-config';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { rememberClassicTabOrigin } from '../../hooks/use_streams_home_link';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
-import { StreamsTourProvider } from '../streams_tour';
 import { streamsAppRouter } from '../../routes/config';
 import type { StreamsAppStartDependencies } from '../../types';
 import type { StreamsAppServices } from '../../services/types';
 import { KbnUrlStateStorageFromRouterProvider } from '../../util/kbn_url_state_context';
 import { DateRangeRedirect } from '../date_range_redirect';
+import { UpdateExecutionContextOnRouteChange } from './update_execution_context_on_route_change';
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,9 @@ export function AppRoot({
 } & { appMountParameters: AppMountParameters }) {
   const { history } = appMountParameters;
 
+  // Leaving Streams resets the Classic tab origin.
+  useEffect(() => () => rememberClassicTabOrigin(), []);
+
   const context = {
     appParams: appMountParameters,
     core: coreStart,
@@ -50,10 +54,10 @@ export function AppRoot({
 
   return (
     <StreamsAppContextProvider context={context}>
-      <StreamsTourProvider>
-        <QueryClientProvider client={queryClient}>
-          {/* @ts-expect-error upgrade typescript v5.4.5 */}
-          <RouterProvider history={history} router={streamsAppRouter}>
+      <QueryClientProvider client={queryClient}>
+        {/* @ts-expect-error upgrade typescript v5.4.5 */}
+        <RouterProvider history={history} router={streamsAppRouter}>
+          <UpdateExecutionContextOnRouteChange>
             <DateRangeRedirect>
               <PerformanceContextProvider>
                 <KbnUrlStateStorageFromRouterProvider>
@@ -63,9 +67,9 @@ export function AppRoot({
                 </KbnUrlStateStorageFromRouterProvider>
               </PerformanceContextProvider>
             </DateRangeRedirect>
-          </RouterProvider>
-        </QueryClientProvider>
-      </StreamsTourProvider>
+          </UpdateExecutionContextOnRouteChange>
+        </RouterProvider>
+      </QueryClientProvider>
     </StreamsAppContextProvider>
   );
 }

@@ -31,8 +31,8 @@ import {
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 
-import type { LinksLayoutType } from '../../../common/content_management';
-import { LINKS_HORIZONTAL_LAYOUT, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
+import { LINKS_HORIZONTAL_LAYOUT, LINKS_VERTICAL_LAYOUT } from '../../../common/constants';
+import type { LinksLayoutType } from '../../../common/types';
 import { focusMainFlyout } from '../../editor/links_editor_tools';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
 import { coreServices } from '../../services/kibana_services';
@@ -221,7 +221,7 @@ export const LinksEditor = ({
                   <EuiButtonEmpty
                     flush="left"
                     size="s"
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     onClick={() => addOrEditLink()}
                     data-test-subj="links--panelEditor--addLinkBtn"
                   >
@@ -347,7 +347,7 @@ const styles = {
     return css({
       '.linkEditor': {
         maxInlineSize: `calc(${euiTheme.size.xs} * 125)`,
-        height: 'var(--kbn-application--content-height)',
+        height: 'var(--kbn-layout--application-height)',
         position: 'fixed',
         display: 'flex',
         inlineSize: '50vw',

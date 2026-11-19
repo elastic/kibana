@@ -6,7 +6,10 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT } from '../../../lib/telemetry/event_based/events';
+import {
+  ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT,
+  ENDPOINT_WORKFLOW_INSIGHTS_DISMISSED_EVENT,
+} from '../../../lib/telemetry/event_based/events';
 import type {
   UpdateWorkflowInsightsRequestBody,
   UpdateWorkflowInsightsRequestParams,
@@ -81,19 +84,11 @@ const updateInsightsRouteHandler = (
       });
     }
 
+    const actionType = request.body.action?.type;
     const onlyActionTypeUpdate = isOnlyActionTypeUpdate(request.body);
 
     if (!canWriteWorkflowInsights && !onlyActionTypeUpdate) {
       return response.forbidden({ body: 'Unauthorized to update workflow insights' });
-    }
-
-    if (onlyActionTypeUpdate) {
-      if (request.body.action?.type === 'remediated') {
-        const telemetry = endpointContext.service.getTelemetryService();
-        telemetry.reportEvent(ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT.eventType, {
-          insightId,
-        });
-      }
     }
 
     logger.debug(`Updating insight ${insightId}`);
@@ -130,6 +125,26 @@ const updateInsightsRouteHandler = (
         request.body as Partial<SecurityWorkflowInsight>,
         backingIndex
       );
+
+      if (onlyActionTypeUpdate) {
+        try {
+          const telemetry = endpointContext.service.getTelemetryService();
+          const insightType = retrievedInsight._source?.type ?? 'unknown';
+          if (actionType === 'remediated') {
+            telemetry.reportEvent(ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT.eventType, {
+              insightId,
+              insightType,
+            });
+          } else if (actionType === 'dismissed') {
+            telemetry.reportEvent(ENDPOINT_WORKFLOW_INSIGHTS_DISMISSED_EVENT.eventType, {
+              insightType,
+            });
+          }
+        } catch (e) {
+          logger.debug(`Failed to report workflow insights telemetry: ${e.message}`);
+        }
+      }
+
       return response.ok({ body });
     } catch (e) {
       return errorHandler(logger, response, e);

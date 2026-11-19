@@ -1,0 +1,17 @@
+Continue your JSON analysis from exactly where you left off. Generate only the additional content needed to complete the response.
+
+FORMAT REQUIREMENTS:
+1. Maintain strict JSON validity:
+   - Use double quotes for all strings
+   - Properly escape special characters (\" for quotes, \\ for backslashes, \n for newlines)
+   - Avoid all control characters (ASCII 0-31)
+   - Keep text fields under 500 characters
+
+2. Output rules:
+   - Do not repeat any previously generated content
+   - Do not include explanatory text outside the JSON
+   - Do not restart from the beginning
+   - Conform exactly to the JSON schema defined earlier
+
+Your continuation should seamlessly connect with the previous output to form a complete, valid JSON document.
+

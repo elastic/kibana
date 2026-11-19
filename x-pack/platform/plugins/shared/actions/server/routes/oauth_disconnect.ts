@@ -12,20 +12,27 @@ import { INTERNAL_BASE_ACTION_API_PATH, type DisconnectOAuthPathParams } from '.
 import { disconnectOAuthPathParamsSchema } from '../../common/routes/connector/apis/oauth';
 import type { ActionsRequestHandlerContext } from '../types';
 import type { ActionsPluginsStart } from '../plugin';
-import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 import { verifyAccessAndContext } from './verify_access_and_context';
-import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
+import { ConnectorTokenClient } from '../lib/connector_token_client';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import { OAUTH_API_TAG } from '../feature';
+import { ACTION_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 
 export const oauthDisconnectRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState,
   logger: Logger,
-  coreSetup: CoreSetup<ActionsPluginsStart>
+  coreSetup: CoreSetup<ActionsPluginsStart>,
+  configurationUtilities: ActionsConfigurationUtilities
 ) => {
   router.post(
     {
       path: `${INTERNAL_BASE_ACTION_API_PATH}/connector/{connectorId}/_oauth_disconnect`,
-      security: DEFAULT_ACTION_ROUTE_SECURITY,
+      security: {
+        authz: {
+          requiredPrivileges: [OAUTH_API_TAG],
+        },
+      },
       options: {
         access: 'internal',
         summary: i18n.translate('xpack.actions.oauthDisconnect.routeSummary', {
@@ -85,17 +92,44 @@ export const oauthDisconnectRoute = (
 
         const core = await context.core;
         const [, { encryptedSavedObjects }] = await coreSetup.getStartServices();
-        const userConnectorTokenClient = new UserConnectorTokenClient({
-          encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
-            includedHiddenTypes: ['user_connector_token'],
-          }),
-          unsecuredSavedObjectsClient: core.savedObjects.getClient({
-            includedHiddenTypes: ['user_connector_token'],
-          }),
+        const unsecuredSavedObjectsClient = core.savedObjects.getClient({
+          includedHiddenTypes: ['user_connector_token'],
+        });
+        const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
+          includedHiddenTypes: ['action', 'user_connector_token'],
+        });
+        const connectorTokenClient = new ConnectorTokenClient({
+          encryptedSavedObjectsClient,
+          unsecuredSavedObjectsClient,
           logger: routeLogger,
+          configurationUtilities,
         });
 
-        await userConnectorTokenClient.deleteConnectorTokens({ connectorId, profileUid });
+        let authType: string | undefined;
+        let provider: string | undefined;
+        try {
+          const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<{
+            config: { authType?: string };
+            secrets: { authType?: string; provider?: string };
+          }>(ACTION_SAVED_OBJECT_TYPE, connectorId, {
+            namespace: unsecuredSavedObjectsClient.getCurrentNamespace(),
+          });
+          authType = rawAction.attributes.secrets.authType || rawAction.attributes.config?.authType;
+          provider = rawAction.attributes.secrets.provider;
+        } catch (err) {
+          routeLogger.error(
+            `Failed to read OAuth configuration for connector "${connectorId}": ${err.message}`
+          );
+        }
+
+        await actionsClient.evictClientPool(connectorId);
+
+        await connectorTokenClient.deleteConnectorTokens({
+          connectorId,
+          profileUid,
+          authType,
+          provider,
+        });
 
         routeLogger.info(`OAuth tokens deleted for connector: ${connectorId}`);
 

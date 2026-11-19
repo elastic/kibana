@@ -10,11 +10,13 @@ import PropTypes from 'prop-types';
 import { EuiFormRow, EuiTextArea, EuiSpacer, EuiButton } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { withDebounceArg } from '../../../public/components/with_debounce_arg';
+import { useCanvasTextAreaCodeStyles } from '../../../public/lib/use_canvas_text_area_code_styles';
 import { ArgumentStrings } from '../../../i18n';
 
 const { Textarea: strings } = ArgumentStrings;
 
 const TextAreaArgInput = ({ argValue, typeInstance, onValueChange, renderError, argId }) => {
+  const textAreaCodeStyles = useCanvasTextAreaCodeStyles();
   const confirm = typeInstance?.options?.confirm;
   const [value, setValue] = useState(argValue);
 
@@ -43,6 +45,7 @@ const TextAreaArgInput = ({ argValue, typeInstance, onValueChange, renderError, 
       <EuiFormRow display="rowCompressed">
         <EuiTextArea
           className="canvasTextArea__code"
+          css={textAreaCodeStyles}
           id={argId}
           compressed
           rows={10}

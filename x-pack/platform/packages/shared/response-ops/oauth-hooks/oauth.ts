@@ -15,6 +15,7 @@ export { OAUTH_BROADCAST_CHANNEL_NAME };
 
 interface OAuthFlowCompletedMessageBase {
   connectorId: string;
+  statusCode: number;
 }
 
 export interface OAuthFlowCompletedSuccessMessage extends OAuthFlowCompletedMessageBase {

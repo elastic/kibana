@@ -1,0 +1,1033 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Logger } from '@kbn/core/server';
+import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  DEFAULT_TIME_RANGE,
+  VISUALIZATION_ATTACHMENT_TYPE,
+} from '@kbn/agent-builder-visualizations-common';
+import {
+  buildCustomContentConfig,
+  buildLensConfig,
+  buildVegaConfig,
+  selectDefaultTimeRange,
+} from '@kbn/agent-builder-visualizations-server';
+import { createVisualizationTool } from './create_visualization';
+
+jest.mock('@kbn/agent-builder-visualizations-server', () => ({
+  buildCustomContentConfig: jest.fn(),
+  buildLensConfig: jest.fn(),
+  buildVegaConfig: jest.fn(),
+  selectDefaultTimeRange: jest.fn(),
+}));
+
+const mockBuildLens = buildLensConfig as jest.Mock;
+const mockBuildVega = buildVegaConfig as jest.Mock;
+const mockSelectDefaultTimeRange = selectDefaultTimeRange as jest.Mock;
+const mockBuildCustomContent = buildCustomContentConfig as jest.Mock;
+
+const createLogger = (): Logger =>
+  ({
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  } as unknown as Logger);
+
+interface MockAttachments {
+  getAttachmentRecord: jest.Mock;
+  add: jest.Mock;
+  update: jest.Mock;
+}
+
+const createAttachments = (): MockAttachments => ({
+  getAttachmentRecord: jest.fn().mockReturnValue(undefined),
+  add: jest.fn().mockResolvedValue({ id: 'att-new', current_version: 1 }),
+  update: jest.fn().mockResolvedValue({ current_version: 2 }),
+});
+
+const lensTarget = (chartType: SupportedChartType = SupportedChartType.XY) => ({
+  type: 'lens' as const,
+  chartType,
+});
+const vegaTarget = { type: 'vega' as const };
+const customContentTarget = (
+  rest: {
+    removeAllQueries?: boolean;
+    dataQueries?: Array<{ description?: string; esql?: string; index?: string }>;
+  } = {}
+) => ({
+  type: 'custom_content' as const,
+  ...('removeAllQueries' in rest ? {} : { dataQueries: [{ description: 'a status board' }] }),
+  ...rest,
+});
+const attachmentTarget = (
+  attachmentId: string,
+  rest: {
+    chartType?: SupportedChartType;
+    esql?: string | null;
+    removeAllQueries?: boolean;
+    dataQueries?: Array<{ description?: string; esql?: string; index?: string }>;
+  } = {}
+) => ({ type: 'attachment' as const, attachment_id: attachmentId, ...rest });
+
+const runHandler = async (
+  params: Record<string, unknown>,
+  overrides: { logger?: Logger; attachments?: MockAttachments } = {}
+) => {
+  const logger = overrides.logger ?? createLogger();
+  const attachments = overrides.attachments ?? createAttachments();
+  const tool = createVisualizationTool();
+  const result = (await tool.handler(
+    params as never,
+    {
+      esClient: {} as never,
+      modelProvider: {} as never,
+      logger,
+      events: {} as never,
+      attachments: attachments as never,
+    } as never
+  )) as { results: Array<{ type: string; data: any }> };
+  return { result, logger, attachments };
+};
+
+describe('createVisualizationTool schema', () => {
+  const schema = createVisualizationTool().schema;
+
+  it('requires a target', () => {
+    expect(schema.safeParse({ query: 'errors over time' }).success).toBe(false);
+    expect(
+      schema.safeParse({ query: 'errors over time', target: { type: 'unknown' } }).success
+    ).toBe(false);
+  });
+
+  it('requires chartType for a new Lens visualization', () => {
+    expect(schema.safeParse({ query: 'errors over time', target: lensTarget() }).success).toBe(
+      true
+    );
+
+    expect(schema.safeParse({ query: 'errors over time', target: { type: 'lens' } }).success).toBe(
+      false
+    );
+  });
+
+  it('allows a new Vega visualization without chartType', () => {
+    expect(schema.safeParse({ query: 'small multiples by host', target: vegaTarget }).success).toBe(
+      true
+    );
+  });
+
+  it('allows a new custom content visualization without chartType', () => {
+    expect(
+      schema.safeParse({ query: 'a status board per host', target: customContentTarget() }).success
+    ).toBe(true);
+  });
+
+  it('accepts leftover esql: null on every target and treats it as omitted', () => {
+    const lens = schema.safeParse({
+      query: 'errors over time',
+      target: { ...lensTarget(), esql: null },
+    });
+    expect(lens.success).toBe(true);
+    if (lens.success) {
+      expect(lens.data.target).toMatchObject({ type: 'lens', esql: null });
+    }
+
+    expect(
+      schema.safeParse({ query: 'flows by host', target: { ...vegaTarget, esql: null } }).success
+    ).toBe(true);
+  });
+
+  it('accepts dataQueries and removeAllQueries only on custom_content and attachment targets', () => {
+    expect(
+      schema.safeParse({
+        query: 'a welcome banner',
+        target: customContentTarget({ removeAllQueries: true }),
+      }).success
+    ).toBe(true);
+    expect(
+      schema.safeParse({
+        query: 'drop the data',
+        target: attachmentTarget('existing', { removeAllQueries: true }),
+      }).success
+    ).toBe(true);
+
+    const lens = schema.safeParse({
+      query: 'errors over time',
+      target: { ...lensTarget(), removeAllQueries: true },
+    });
+    expect(lens.success).toBe(true);
+    if (lens.success) {
+      expect(lens.data.target).not.toHaveProperty('removeAllQueries');
+    }
+  });
+
+  it.each([
+    ['a new custom content panel', 'esql', { type: 'custom_content', esql: 'FROM x' }],
+    ['a new custom content panel', 'has_data', { type: 'custom_content', has_data: false }],
+    [
+      'an attachment update',
+      'regenerate_esql',
+      { type: 'attachment', attachment_id: 'a', regenerate_esql: true },
+    ],
+    [
+      'an attachment update',
+      'has_data',
+      { type: 'attachment', attachment_id: 'a', has_data: true },
+    ],
+  ])('rejects the removed field on %s: %s', (_what, name, target) => {
+    const result = schema.safeParse({ query: 'x', target });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues.map(({ message }) => message).join()).toContain(
+      `"${name}" is no longer accepted`
+    );
+  });
+
+  it('still treats esql: null on a custom content target as omitted', () => {
+    expect(
+      schema.safeParse({ query: 'x', target: { ...customContentTarget(), esql: null } }).success
+    ).toBe(true);
+  });
+
+  it('strips leftover contentMode instead of failing the call', () => {
+    const lens = schema.safeParse({
+      query: 'errors over time',
+      target: { ...lensTarget(), contentMode: 'static' },
+    });
+    expect(lens.success).toBe(true);
+    if (lens.success) {
+      expect(lens.data.target).not.toHaveProperty('contentMode');
+    }
+  });
+
+  it('allows an attachment update without chartType and requires the attachment id', () => {
+    expect(
+      schema.safeParse({ query: 'use a clearer title', target: attachmentTarget('existing') })
+        .success
+    ).toBe(true);
+    expect(
+      schema.safeParse({ query: 'use a clearer title', target: { type: 'attachment' } }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        query: 'use a clearer title',
+        target: { type: 'attachment', attachment_id: '' },
+      }).success
+    ).toBe(false);
+  });
+
+  it('accepts an optional time_range', () => {
+    expect(schema.safeParse({ query: 'errors over time', target: lensTarget() }).success).toBe(
+      true
+    );
+
+    expect(
+      schema.safeParse({
+        query: 'errors over time',
+        target: lensTarget(),
+        time_range: { from: 'now-7d', to: 'now' },
+      }).success
+    ).toBe(true);
+  });
+
+  it('fills a blank time_range endpoint with now-24h / now instead of failing', () => {
+    const base = { query: 'errors over time', target: lensTarget() };
+
+    const missingTo = schema.safeParse({ ...base, time_range: { from: 'now-7d' } });
+    expect(missingTo.success).toBe(true);
+    if (missingTo.success) {
+      expect(missingTo.data.time_range).toEqual({ from: 'now-7d', to: DEFAULT_TIME_RANGE.to });
+    }
+
+    const to = new Date().toISOString();
+    const blankFrom = schema.safeParse({
+      ...base,
+      time_range: { from: '', to },
+    });
+    expect(blankFrom.success).toBe(true);
+    if (blankFrom.success) {
+      expect(blankFrom.data.time_range).toEqual({ from: DEFAULT_TIME_RANGE.from, to });
+    }
+
+    const blankTo = schema.safeParse({ ...base, time_range: { from: 'now-7d', to: '' } });
+    expect(blankTo.success).toBe(true);
+    if (blankTo.success) {
+      expect(blankTo.data.time_range).toEqual({ from: 'now-7d', to: DEFAULT_TIME_RANGE.to });
+    }
+  });
+
+  it('rejects a time_range whose endpoints are not valid Kibana date math', () => {
+    const base = { query: 'errors over time', target: lensTarget() };
+
+    expect(schema.safeParse({ ...base, time_range: { from: '', to: '' } }).success).toBe(true);
+    expect(schema.safeParse({ ...base, time_range: { from: '', to: '' } }).data?.time_range).toBe(
+      undefined
+    );
+    expect(schema.safeParse({ ...base, time_range: { from: '', to: 'not-a-date' } }).success).toBe(
+      false
+    );
+    expect(
+      schema.safeParse({ ...base, time_range: { from: 'yesterday', to: 'today' } }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        ...base,
+        time_range: { from: '2026-01-02T00:00:00.000Z', to: '2026-01-01T00:00:00.000Z' },
+      }).success
+    ).toBe(false);
+
+    expect(schema.safeParse({ ...base, time_range: { from: 'now-7d', to: 'now' } }).success).toBe(
+      true
+    );
+    expect(
+      schema.safeParse({
+        ...base,
+        time_range: { from: '2024-05-20T00:00:00.000Z', to: '2024-05-24T23:59:59.999Z' },
+      }).success
+    ).toBe(true);
+  });
+});
+
+describe('createVisualizationTool handler', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockBuildLens.mockResolvedValue({
+      selectedChartType: SupportedChartType.XY,
+      validatedConfig: { title: 'Errors over time' },
+      esqlQuery: 'FROM logs | STATS count() BY @timestamp',
+    });
+    mockBuildVega.mockResolvedValue({
+      spec: '{"$schema":"vega-lite"}',
+      esqlQuery: 'FROM logs | STATS count() BY host',
+    });
+    mockSelectDefaultTimeRange.mockResolvedValue({
+      from: 'now-15m',
+      to: 'now',
+      mode: 'relative',
+    });
+    mockBuildCustomContent.mockResolvedValue({
+      esqlQueries: ['FROM logs | STATS count() BY host'],
+      template: '<div>{{ row["host"].value }}</div>',
+      height: 420,
+    });
+  });
+
+  it('builds a Lens visualization and persists it', async () => {
+    const { result, attachments } = await runHandler({
+      query: 'errors over time',
+      target: lensTarget(),
+    });
+
+    expect(mockBuildLens).toHaveBeenCalledTimes(1);
+    expect(mockBuildLens).toHaveBeenCalledWith(
+      expect.objectContaining({ chartType: SupportedChartType.XY, esql: undefined })
+    );
+    expect(mockBuildVega).not.toHaveBeenCalled();
+    expect(attachments.add).toHaveBeenCalledWith(
+      expect.objectContaining({ type: VISUALIZATION_ATTACHMENT_TYPE })
+    );
+
+    expect(result.results).toHaveLength(1);
+    const [{ type, data }] = result.results;
+    expect(type).toBe(ToolResultType.visualization);
+    expect(data.renderer).toBe('lens');
+    expect(data.visualization).toEqual({ title: 'Errors over time' });
+    expect(data.chart_type).toBe(SupportedChartType.XY);
+    expect(data.esql).toBe('FROM logs | STATS count() BY @timestamp');
+    expect(data.time_range).toEqual({ from: 'now-15m', to: 'now' });
+    expect(data.attachment_id).toBe('att-new');
+    expect(data.version).toBe(1);
+    // The natural-language query is not echoed back in the result.
+    expect(data.query).toBeUndefined();
+  });
+
+  it('passes a supplied esql through to the Lens builder', async () => {
+    await runHandler({
+      query: 'errors over time',
+      target: { ...lensTarget(), esql: 'FROM logs | STATS count() BY @timestamp' },
+    });
+
+    expect(mockBuildLens).toHaveBeenCalledWith(
+      expect.objectContaining({ esql: 'FROM logs | STATS count() BY @timestamp' })
+    );
+  });
+
+  it('builds a Vega visualization when the target type is "vega"', async () => {
+    const { result } = await runHandler({ query: 'flows by host', target: vegaTarget });
+
+    expect(mockBuildVega).toHaveBeenCalledTimes(1);
+    expect(mockBuildLens).not.toHaveBeenCalled();
+
+    const [{ type, data }] = result.results;
+    expect(type).toBe(ToolResultType.visualization);
+    expect(data.renderer).toBe('vega');
+    expect(data.visualization).toEqual({ spec: '{"$schema":"vega-lite"}' });
+    expect(data.esql).toBe('FROM logs | STATS count() BY host');
+    expect(data.chart_type).toBeUndefined();
+    expect(data.time_range).toEqual({ from: 'now-15m', to: 'now' });
+    expect(data.query).toBeUndefined();
+  });
+
+  it('omits time_range when selectDefaultTimeRange returns undefined', async () => {
+    mockSelectDefaultTimeRange.mockResolvedValue(undefined);
+
+    const { result, attachments } = await runHandler({
+      query: 'errors over time',
+      target: lensTarget(),
+    });
+
+    expect(result.results[0].data.time_range).toBeUndefined();
+    expect(attachments.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.not.objectContaining({ time_range: expect.anything() }),
+      })
+    );
+  });
+
+  it('keeps the existing renderer when updating by attachment id', async () => {
+    const attachments = createAttachments();
+    attachments.getAttachmentRecord.mockReturnValue({
+      id: 'existing',
+      type: VISUALIZATION_ATTACHMENT_TYPE,
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: {
+            renderer: 'vega',
+            query: 'old query',
+            visualization: { spec: '{"old":true}' },
+            esql: 'FROM old',
+          },
+        },
+      ],
+    });
+
+    const { result } = await runHandler(
+      { query: 'tweak it', target: attachmentTarget('existing') },
+      { attachments }
+    );
+
+    expect(mockBuildVega).toHaveBeenCalledTimes(1);
+    expect(mockBuildLens).not.toHaveBeenCalled();
+    // The prior spec is reused as the edit baseline.
+    expect(mockBuildVega).toHaveBeenCalledWith(
+      expect.objectContaining({ existingSpec: '{"old":true}' })
+    );
+    expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
+    expect(attachments.update).toHaveBeenCalledWith(
+      'existing',
+      expect.objectContaining({ data: expect.objectContaining({ renderer: 'vega' }) })
+    );
+    expect(attachments.add).not.toHaveBeenCalled();
+
+    const [{ type, data }] = result.results;
+    expect(type).toBe(ToolResultType.visualization);
+    expect(data.renderer).toBe('vega');
+    expect(data.attachment_id).toBe('existing');
+    expect(data.version).toBe(2);
+    expect(data.time_range).toBeUndefined();
+  });
+
+  it('treats an attachment with no renderer as Lens when updating', async () => {
+    const attachments = createAttachments();
+    attachments.getAttachmentRecord.mockReturnValue({
+      id: 'legacy',
+      type: VISUALIZATION_ATTACHMENT_TYPE,
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: {
+            query: 'old query',
+            visualization: { type: 'lnsXY' },
+            esql: 'FROM old',
+          },
+        },
+      ],
+    });
+
+    const { result } = await runHandler(
+      { query: 'tweak it', target: attachmentTarget('legacy') },
+      { attachments }
+    );
+
+    expect(mockBuildLens).toHaveBeenCalledTimes(1);
+    expect(mockBuildVega).not.toHaveBeenCalled();
+    // The prior config is handed to the Lens builder rather than discarded.
+    expect(mockBuildLens).toHaveBeenCalledWith(
+      expect.objectContaining({ parsedExistingConfig: { type: 'lnsXY' } })
+    );
+
+    const [{ data }] = result.results;
+    expect(data.renderer).toBe('lens');
+  });
+
+  it('treats leftover esql: null on Lens as omitted so the chart still builds', async () => {
+    await runHandler({
+      query: 'errors over time',
+      target: { ...lensTarget(), esql: null },
+    });
+
+    expect(mockBuildLens).toHaveBeenCalledWith(expect.objectContaining({ esql: undefined }));
+  });
+
+  it('rejects removeAllQueries on a Lens update, which has one query it cannot remove', async () => {
+    const attachments = createAttachments();
+    attachments.getAttachmentRecord.mockReturnValue({
+      id: 'existing',
+      type: VISUALIZATION_ATTACHMENT_TYPE,
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: {
+            renderer: 'lens',
+            query: 'errors over time',
+            visualization: { title: 'Errors' },
+            esql: 'FROM logs | STATS count() BY @timestamp',
+          },
+        },
+      ],
+    });
+
+    const { result } = await runHandler(
+      { query: 'drop the data', target: attachmentTarget('existing', { removeAllQueries: true }) },
+      { attachments }
+    );
+
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(mockBuildLens).not.toHaveBeenCalled();
+  });
+
+  it('reuses the existing time_range on edit instead of probing', async () => {
+    const attachments = createAttachments();
+    attachments.getAttachmentRecord.mockReturnValue({
+      id: 'existing',
+      type: VISUALIZATION_ATTACHMENT_TYPE,
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: {
+            renderer: 'lens',
+            query: 'errors over time',
+            visualization: { title: 'Errors' },
+            esql: 'FROM logs | STATS count() BY @timestamp',
+            time_range: { from: 'now-7d', to: 'now' },
+          },
+        },
+      ],
+    });
+
+    const { result } = await runHandler(
+      { query: 'make it a line chart', target: attachmentTarget('existing') },
+      { attachments }
+    );
+
+    expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
+    expect(attachments.update).toHaveBeenCalledWith(
+      'existing',
+      expect.objectContaining({
+        data: expect.objectContaining({ time_range: { from: 'now-7d', to: 'now' } }),
+      })
+    );
+    expect(result.results[0].data.time_range).toEqual({ from: 'now-7d', to: 'now' });
+  });
+
+  it('uses an explicit time_range on create and skips the data-aware probe', async () => {
+    const { result, attachments } = await runHandler({
+      query: 'errors over the last 7 days',
+      target: lensTarget(),
+      time_range: { from: 'now-7d', to: 'now' },
+    });
+
+    expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
+    expect(result.results[0].data.time_range).toEqual({ from: 'now-7d', to: 'now' });
+    expect(attachments.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ time_range: { from: 'now-7d', to: 'now' } }),
+      })
+    );
+  });
+
+  it('fills a blank time_range.from and persists that range instead of probing', async () => {
+    const to = new Date().toISOString();
+    const schema = createVisualizationTool().schema;
+    const parsed = schema.parse({
+      query: 'count of requests by response.keyword',
+      index: 'kibana_sample_data_logs',
+      target: lensTarget(),
+      time_range: { from: '', to },
+    });
+
+    const { result, attachments } = await runHandler(parsed);
+
+    expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
+    expect(result.results[0].data.time_range).toEqual({ from: DEFAULT_TIME_RANGE.from, to });
+    expect(attachments.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ time_range: { from: DEFAULT_TIME_RANGE.from, to } }),
+      })
+    );
+  });
+
+  it('uses an explicit time_range on edit instead of the stored range', async () => {
+    const attachments = createAttachments();
+    attachments.getAttachmentRecord.mockReturnValue({
+      id: 'existing',
+      type: VISUALIZATION_ATTACHMENT_TYPE,
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: {
+            renderer: 'lens',
+            query: 'errors over time',
+            visualization: { title: 'Errors' },
+            esql: 'FROM logs | STATS count() BY @timestamp',
+            time_range: { from: 'now-24h', to: 'now' },
+          },
+        },
+      ],
+    });
+
+    const { result } = await runHandler(
+      {
+        query: 'show the last 30 days',
+        target: attachmentTarget('existing'),
+        time_range: { from: 'now-30d', to: 'now' },
+      },
+      { attachments }
+    );
+
+    expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
+    expect(result.results[0].data.time_range).toEqual({ from: 'now-30d', to: 'now' });
+    expect(attachments.update).toHaveBeenCalledWith(
+      'existing',
+      expect.objectContaining({
+        data: expect.objectContaining({ time_range: { from: 'now-30d', to: 'now' } }),
+      })
+    );
+  });
+
+  it('returns an error when the attachment to update does not exist', async () => {
+    const { result, attachments } = await runHandler({
+      query: 'tweak it',
+      target: attachmentTarget('missing'),
+    });
+
+    const [{ type, data }] = result.results;
+    expect(type).toBe(ToolResultType.error);
+    expect(data.message).toContain('Visualization attachment "missing" not found');
+    expect(mockBuildLens).not.toHaveBeenCalled();
+    expect(mockBuildVega).not.toHaveBeenCalled();
+    expect(attachments.add).not.toHaveBeenCalled();
+    expect(attachments.update).not.toHaveBeenCalled();
+  });
+
+  it('surfaces an error result when persistence fails instead of silently succeeding', async () => {
+    const attachments = createAttachments();
+    attachments.add.mockRejectedValue(new Error('index_not_found'));
+
+    const { result, logger } = await runHandler(
+      { query: 'errors over time', target: lensTarget() },
+      { attachments }
+    );
+
+    expect(result.results).toHaveLength(1);
+    const [{ type, data }] = result.results;
+    expect(type).toBe(ToolResultType.error);
+    expect(data.message).toContain('index_not_found');
+    expect(logger.error).toHaveBeenCalled();
+  });
+
+  it('returns an error result when spec generation throws', async () => {
+    mockBuildLens.mockRejectedValue(new Error('esql_generation_failed'));
+
+    const { result } = await runHandler({
+      query: 'broken',
+      target: lensTarget(SupportedChartType.Metric),
+    });
+
+    const [{ type, data }] = result.results;
+    expect(type).toBe(ToolResultType.error);
+    expect(data.message).toContain('esql_generation_failed');
+    expect(data.metadata).toEqual(
+      expect.objectContaining({ renderer: 'lens', chartType: SupportedChartType.Metric })
+    );
+  });
+
+  it('gives an actionable hint when index auto-discovery fails and no index was passed', async () => {
+    // The deeply-nested error surfaced when the referenced fields are ungrounded.
+    mockBuildLens.mockRejectedValue(
+      new Error(
+        'Failed to generate a valid Vega specification. Last error: Could not resolve a valid ' +
+          'ES|QL query for the visualization: Could not generate ESQL query: Could not discover a ' +
+          'suitable index for the query. Please specify an index explicitly.'
+      )
+    );
+
+    const { result } = await runHandler({
+      query: 'cpu by host',
+      target: lensTarget(),
+    });
+
+    const [{ type, data }] = result.results;
+    expect(type).toBe(ToolResultType.error);
+    expect(data.message).toContain('Could not find an index matching the requested fields');
+    expect(data.message).toContain('retry create_visualization with an explicit "index"');
+  });
+
+  it('does not add the index hint when an explicit index was provided', async () => {
+    mockBuildLens.mockRejectedValue(
+      new Error('Could not discover a suitable index for the query.')
+    );
+
+    const { result } = await runHandler({
+      query: 'cpu by host',
+      index: 'metrics-*',
+      target: lensTarget(),
+    });
+
+    const [{ data }] = result.results;
+    expect(data.message).toContain('Failed to create visualization:');
+    expect(data.message).not.toContain('Could not find an index matching');
+  });
+
+  describe('custom content', () => {
+    const STORED_ATTACHMENT = {
+      id: 'att-1',
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: {
+            renderer: 'custom_content',
+            query: 'a status board per host',
+            visualization: { template: '<div>old</div>' },
+            esql: 'FROM logs | STATS count() BY host',
+          },
+        },
+      ],
+    };
+
+    const storedAttachment = (data: Record<string, unknown> = {}) => {
+      const attachments = createAttachments();
+      attachments.getAttachmentRecord.mockReturnValue({
+        ...STORED_ATTACHMENT,
+        versions: [{ version: 1, data: { ...STORED_ATTACHMENT.versions[0].data, ...data } }],
+      });
+      return attachments;
+    };
+
+    it('builds a new panel with the custom content builder and persists the template', async () => {
+      const { result, attachments } = await runHandler({
+        query: 'a status board per host',
+        index: 'logs-*',
+        target: customContentTarget({
+          dataQueries: [{ esql: 'FROM logs | STATS count() BY host' }],
+        }),
+      });
+
+      expect(mockBuildLens).not.toHaveBeenCalled();
+      expect(mockBuildVega).not.toHaveBeenCalled();
+      expect(mockBuildCustomContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          nlQuery: 'a status board per host',
+          dataQueries: [{ esql: 'FROM logs | STATS count() BY host' }],
+          existing: undefined,
+        })
+      );
+      expect(attachments.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: VISUALIZATION_ATTACHMENT_TYPE,
+          data: expect.objectContaining({
+            renderer: 'custom_content',
+            query: 'a status board per host',
+            visualization: { template: '<div>{{ row["host"].value }}</div>', height: 420 },
+            esql: ['FROM logs | STATS count() BY host'],
+          }),
+        })
+      );
+
+      const [{ type, data }] = result.results;
+      expect(type).toBe(ToolResultType.visualization);
+      expect(data.renderer).toBe('custom_content');
+      expect(data.attachment_id).toBe('att-new');
+    });
+
+    // The whole point of the custom content result shape: several KB of generated
+    // markup must not be echoed back into the model's context.
+    it('does not return the template in the tool result', async () => {
+      const { result } = await runHandler({
+        query: 'a status board per host',
+        target: customContentTarget(),
+      });
+
+      const [{ data }] = result.results;
+      expect(data.visualization).toEqual({ prompt: 'a status board per host' });
+      expect(JSON.stringify(data)).not.toContain('row["host"]');
+    });
+
+    describe('data queries', () => {
+      const dataQueries = [{ description: 'totals', index: 'logs' }, { description: 'top hosts' }];
+
+      it('hands the data queries of a new panel to the builder and stores every query it returns', async () => {
+        mockBuildCustomContent.mockResolvedValue({
+          esqlQueries: ['FROM logs | STATS n = COUNT(*)', 'FROM logs | STATS n = COUNT(*) BY host'],
+          template: '<div>two queries</div>',
+          height: 400,
+        });
+
+        const { result, attachments } = await runHandler({
+          query: 'totals above a host list',
+          target: customContentTarget({ dataQueries }),
+        });
+
+        expect(mockBuildCustomContent).toHaveBeenCalledWith(
+          expect.objectContaining({ dataQueries, existing: undefined })
+        );
+        expect(attachments.add).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              esql: ['FROM logs | STATS n = COUNT(*)', 'FROM logs | STATS n = COUNT(*) BY host'],
+            }),
+          })
+        );
+        // The result echoes the first query, as before.
+        const [{ data }] = result.results;
+        expect(data.esql).toBe('FROM logs | STATS n = COUNT(*)');
+      });
+
+      it('gives the builder the stored queries of an attachment, saved as a list', async () => {
+        await runHandler(
+          {
+            query: 'show the busiest',
+            target: attachmentTarget('att-1', {
+              dataQueries: [{}, { description: 'the ten busiest services' }],
+            }),
+          },
+          { attachments: storedAttachment({ esql: ['FROM a', 'FROM b'] }) }
+        );
+
+        expect(mockBuildCustomContent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            existing: expect.objectContaining({ esqlQueries: ['FROM a', 'FROM b'] }),
+          })
+        );
+      });
+
+      it('reads an attachment saved with a single query string as one query', async () => {
+        await runHandler(
+          { query: 'restyle', target: attachmentTarget('att-1') },
+          { attachments: storedAttachment({ esql: 'FROM only' }) }
+        );
+
+        expect(mockBuildCustomContent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            existing: expect.objectContaining({ esqlQueries: ['FROM only'] }),
+          })
+        );
+      });
+
+      const messageOf = (result: { results: Array<{ data: unknown }> }) =>
+        (result.results[0].data as { message: string }).message;
+
+      it('rejects data queries combined with removeAllQueries', async () => {
+        const { result } = await runHandler({
+          query: 'x',
+          target: customContentTarget({ dataQueries, removeAllQueries: true }),
+        });
+
+        expect(result.results[0].type).toBe(ToolResultType.error);
+        expect(messageOf(result)).toContain('cannot be combined with "dataQueries"');
+        expect(mockBuildCustomContent).not.toHaveBeenCalled();
+      });
+
+      it("gives a Lens or Vega panel's only way to name a query, esql, no place on a custom content one", async () => {
+        const { result } = await runHandler(
+          { query: 'x', target: attachmentTarget('att-1', { esql: 'FROM x' }) },
+          { attachments: storedAttachment() }
+        );
+
+        expect(result.results[0].type).toBe(ToolResultType.error);
+        expect(messageOf(result)).toContain('"esql" only applies to Lens and Vega');
+        expect(mockBuildCustomContent).not.toHaveBeenCalled();
+      });
+
+      it('rejects a supplied query that a visualization could not store, before generating anything', async () => {
+        const { result } = await runHandler({
+          query: 'x',
+          target: customContentTarget({
+            dataQueries: [{ description: 'totals' }, { esql: 'a'.repeat(4097) }],
+          }),
+        });
+
+        expect(result.results[0].type).toBe(ToolResultType.error);
+        expect(messageOf(result)).toContain('at most 4096 characters');
+        expect(mockBuildCustomContent).not.toHaveBeenCalled();
+      });
+
+      it('needs a new panel to say whether it has data', async () => {
+        const { result } = await runHandler({
+          query: 'a banner',
+          target: { type: 'custom_content' },
+        });
+
+        expect(result.results[0].type).toBe(ToolResultType.error);
+        expect(messageOf(result)).toContain('needs "dataQueries"');
+        expect(mockBuildCustomContent).not.toHaveBeenCalled();
+      });
+
+      it('generates the entries that name no index from the index of the call', async () => {
+        await runHandler({
+          query: 'totals above a host list',
+          index: 'logs-*',
+          target: customContentTarget({
+            dataQueries: [
+              { description: 'totals' },
+              { description: 'top hosts', index: 'hosts' },
+              { esql: 'FROM x' },
+            ],
+          }),
+        });
+
+        expect(mockBuildCustomContent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            dataQueries: [
+              { description: 'totals', index: 'logs-*' },
+              { description: 'top hosts', index: 'hosts' },
+              { esql: 'FROM x' },
+            ],
+          })
+        );
+      });
+    });
+
+    it('persists a panel without data with no esql when the builder returns no query', async () => {
+      mockBuildCustomContent.mockResolvedValue({
+        esqlQueries: [],
+        template: '<div>banner</div>',
+        height: 200,
+      });
+
+      const { result, attachments } = await runHandler({
+        query: 'a banner',
+        target: customContentTarget({ removeAllQueries: true }),
+      });
+
+      expect(mockBuildCustomContent).toHaveBeenCalledWith(
+        expect.objectContaining({ removeAllQueries: true })
+      );
+      expect(attachments.add.mock.calls[0][0].data).not.toHaveProperty('esql');
+      expect(result.results[0].data.esql).toBeUndefined();
+    });
+
+    it('passes the time range the user named to the builder', async () => {
+      await runHandler({
+        query: 'errors last week',
+        time_range: { from: 'now-7d', to: 'now' },
+        target: customContentTarget(),
+      });
+
+      expect(mockBuildCustomContent).toHaveBeenCalledWith(
+        expect.objectContaining({ timeRange: { from: 'now-7d', to: 'now' } })
+      );
+    });
+
+    it('hands the stored query and template of the attachment to the builder on an update', async () => {
+      const { result, attachments } = await runHandler(
+        { query: 'use a darker background', target: attachmentTarget('att-1') },
+        { attachments: storedAttachment() }
+      );
+
+      expect(mockBuildLens).not.toHaveBeenCalled();
+      expect(mockBuildCustomContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          nlQuery: 'use a darker background',
+          existing: {
+            esqlQueries: ['FROM logs | STATS count() BY host'],
+            template: '<div>old</div>',
+          },
+        })
+      );
+      expect(attachments.update).toHaveBeenCalled();
+      const [{ data }] = result.results;
+      expect(data.renderer).toBe('custom_content');
+      expect(data.attachment_id).toBe('att-1');
+    });
+
+    it('hands the stored template of a panel without data to the builder', async () => {
+      const attachments = storedAttachment({ esql: undefined });
+
+      await runHandler(
+        {
+          query: 'add the total',
+          target: attachmentTarget('att-1', { dataQueries: [{ description: 'add the total' }] }),
+        },
+        { attachments }
+      );
+
+      expect(mockBuildCustomContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dataQueries: [{ description: 'add the total' }],
+          existing: { esqlQueries: [], template: '<div>old</div>' },
+        })
+      );
+    });
+
+    it('forwards the data queries of an update to the builder, as they are', async () => {
+      const dataQueries = [{}, { description: 'also split by operating system' }];
+
+      await runHandler(
+        {
+          query: 'also split by operating system',
+          target: attachmentTarget('att-1', { dataQueries }),
+        },
+        { attachments: storedAttachment() }
+      );
+
+      expect(mockBuildCustomContent).toHaveBeenCalledWith(expect.objectContaining({ dataQueries }));
+    });
+
+    it('persists the query the builder returns on an update, and drops it when there is none', async () => {
+      mockBuildCustomContent.mockResolvedValue({
+        esqlQueries: [],
+        template: '<div>static</div>',
+        height: 200,
+      });
+      const attachments = storedAttachment();
+
+      const { result } = await runHandler(
+        { query: 'make it static', target: attachmentTarget('att-1', { removeAllQueries: true }) },
+        { attachments }
+      );
+
+      expect(attachments.update.mock.calls[0][1].data).not.toHaveProperty('esql');
+      expect(result.results[0].data.esql).toBeUndefined();
+    });
+
+    it('reports a builder failure as an error result with its message', async () => {
+      mockBuildCustomContent.mockRejectedValue(
+        new Error('Could not generate an ES|QL query for this panel: no suitable index')
+      );
+
+      const { result, attachments } = await runHandler({
+        query: 'a status board per host',
+        target: customContentTarget(),
+      });
+
+      const [{ type, data }] = result.results;
+      expect(type).toBe(ToolResultType.error);
+      expect(data.message).toContain('Could not generate an ES|QL query');
+      expect(attachments.add).not.toHaveBeenCalled();
+    });
+  });
+});

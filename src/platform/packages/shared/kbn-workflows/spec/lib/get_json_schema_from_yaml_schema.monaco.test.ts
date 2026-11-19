@@ -22,6 +22,50 @@ function resolveSchemaRef(schema: any, rootSchema: any): any {
   return schema;
 }
 
+function resolveSchemaRefDeep(schema: any, rootSchema: any): any {
+  let current = schema;
+  const visitedRefs = new Set<string>();
+
+  while (current && current.$ref && typeof current.$ref === 'string') {
+    if (visitedRefs.has(current.$ref)) {
+      break;
+    }
+    visitedRefs.add(current.$ref);
+
+    const resolved = resolveSchemaRef(current, rootSchema);
+    if (!resolved || resolved === current) {
+      break;
+    }
+    current = resolved;
+  }
+
+  return current;
+}
+
+function isObjectLikeSchema(schema: any): boolean {
+  if (!schema || typeof schema !== 'object') return false;
+  if (schema.type === 'object') return true;
+  if (schema.properties && typeof schema.properties === 'object') return true;
+  if (schema.patternProperties && typeof schema.patternProperties === 'object') return true;
+  if ('additionalProperties' in schema) return true;
+  return false;
+}
+
+function hasArrayType(schema: any): boolean {
+  if (!schema || typeof schema !== 'object') return false;
+  if (schema.type === 'array') return true;
+  if (schema.anyOf && Array.isArray(schema.anyOf)) {
+    return schema.anyOf.some((item: any) => hasArrayType(item));
+  }
+  if (schema.oneOf && Array.isArray(schema.oneOf)) {
+    return schema.oneOf.some((item: any) => hasArrayType(item));
+  }
+  if (schema.allOf && Array.isArray(schema.allOf)) {
+    return schema.allOf.some((item: any) => hasArrayType(item));
+  }
+  return false;
+}
+
 describe('Monaco Schema Generation - Inputs Field', () => {
   it('should generate schema without array format for inputs.properties', () => {
     const workflowZodSchema = generateYamlSchemaFromConnectors([]);
@@ -40,16 +84,6 @@ describe('Monaco Schema Generation - Inputs Field', () => {
       // The important thing is that the actual validation works, which is tested elsewhere
       return;
     }
-
-    // Helper to check if a schema has array type (should not)
-    const hasArrayType = (schema: any): boolean => {
-      if (!schema || typeof schema !== 'object') return false;
-      if (schema.type === 'array') return true;
-      if (schema.anyOf && Array.isArray(schema.anyOf)) {
-        return schema.anyOf.some((s: any) => hasArrayType(s));
-      }
-      return false;
-    };
 
     // Check the inputs schema structure
     if (inputsSchema?.anyOf && Array.isArray(inputsSchema.anyOf)) {
@@ -75,28 +109,38 @@ describe('Monaco Schema Generation - Inputs Field', () => {
         expect(nonNullSchema.type).toBe('object');
         expect(nonNullSchema.properties).toBeDefined();
         expect(nonNullSchema.properties.properties).toBeDefined();
-        expect(nonNullSchema.properties.properties.type).toBe('object');
+        const resolvedPropertiesSchema = resolveSchemaRefDeep(
+          nonNullSchema.properties.properties,
+          jsonSchema
+        );
+        expect(isObjectLikeSchema(resolvedPropertiesSchema)).toBe(true);
         // Should NOT be an array
-        expect(nonNullSchema.properties.properties.type).not.toBe('array');
+        expect(hasArrayType(resolvedPropertiesSchema)).toBe(false);
       }
     } else {
       // Not wrapped in anyOf
       expect(inputsSchema.type).toBe('object');
       expect(inputsSchema.properties).toBeDefined();
       expect(inputsSchema.properties.properties).toBeDefined();
-      expect(inputsSchema.properties.properties.type).toBe('object');
-      expect(inputsSchema.properties.properties.type).not.toBe('array');
+      const resolvedPropertiesSchema = resolveSchemaRefDeep(
+        inputsSchema.properties.properties,
+        jsonSchema
+      );
+      expect(isObjectLikeSchema(resolvedPropertiesSchema)).toBe(true);
+      expect(hasArrayType(resolvedPropertiesSchema)).toBe(false);
     }
 
     // Verify that inputs.properties is an object, not an array
     const objectSchemaFromAnyOf = inputsSchema?.anyOf
       ?.map((s: any) => resolveSchemaRef(s, jsonSchema))
       ?.find((s: any) => s.type === 'object');
-    const propertiesSchema =
-      objectSchemaFromAnyOf?.properties?.properties || inputsSchema?.properties?.properties;
+    const propertiesSchema = resolveSchemaRefDeep(
+      objectSchemaFromAnyOf?.properties?.properties || inputsSchema?.properties?.properties,
+      jsonSchema
+    );
     expect(propertiesSchema).toBeDefined();
-    expect(propertiesSchema.type).toBe('object');
-    expect(propertiesSchema.type).not.toBe('array');
+    expect(isObjectLikeSchema(propertiesSchema)).toBe(true);
+    expect(hasArrayType(propertiesSchema)).toBe(false);
   });
 
   it('should validate a workflow with JSON Schema inputs against the generated Monaco schema', () => {
@@ -200,8 +244,12 @@ describe('Monaco Schema Generation - Inputs Field', () => {
       const objectSchema = objectSchemas[0];
       expect(objectSchema.properties).toBeDefined();
       expect(objectSchema.properties.properties).toBeDefined();
-      expect(objectSchema.properties.properties.type).toBe('object');
-      expect(objectSchema.properties.properties.type).not.toBe('array');
+      const resolvedPropertiesSchema = resolveSchemaRefDeep(
+        objectSchema.properties.properties,
+        jsonSchema
+      );
+      expect(isObjectLikeSchema(resolvedPropertiesSchema)).toBe(true);
+      expect(hasArrayType(resolvedPropertiesSchema)).toBe(false);
     } else {
       // If not wrapped in anyOf, it should still be an object (not array)
       expect(inputsSchema.type).not.toBe('array');

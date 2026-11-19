@@ -18,9 +18,14 @@ import {
   EuiRadioGroup,
 } from '@elastic/eui';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { getFields } from '@kbn/triggers-actions-ui-plugin/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
-import { getESQLAdHocDataview, getESQLResults } from '@kbn/esql-utils';
+import {
+  getESQLResults,
+  getESQLTimeField,
+  getEsqlSourceColumns,
+  getProjectRoutingFromEsqlQuery,
+  getSourceCommandQueryFromESQLQuery,
+} from '@kbn/esql-utils';
 import { type AggregateQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
@@ -113,7 +118,7 @@ const keepRecommendedWarning = i18n.translate(
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, metadata, setRuleParams, setRuleProperty, errors, data }) => {
-  const { http, isServerless, dataViews, uiSettings } = useTriggerUiActionServices();
+  const { http, isServerless, uiSettings, cps } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, groupBy } = ruleParams;
   const isEdit = !!metadata?.isEdit;
 
@@ -268,15 +273,18 @@ export const EsqlQueryExpression: React.FC<
     async (q: AggregateQuery) => {
       const fetchTimeFieldsData = async (queryObj: AggregateQuery) => {
         try {
-          const esqlDataView = await getESQLAdHocDataview({
-            dataViewsService: dataViews,
-            query: queryObj.esql,
-            http,
-          });
-          const indexPattern: string = esqlDataView.getIndexPattern();
-          const currentEsFields = await getFields(http, [indexPattern]);
-          const newTimeFieldOptions = getTimeFieldOptions(currentEsFields);
-          const timestampField = esqlDataView.timeFieldName;
+          // Load the source columns with ES|QL (like Discover), so federated datasets work too
+          // Rules run with the space default routing, unless the query sets its own
+          const projectRouting =
+            getProjectRoutingFromEsqlQuery(queryObj.esql) ??
+            cps?.cpsManager?.getDefaultProjectRouting();
+          const sourceQuery = getSourceCommandQueryFromESQLQuery(queryObj.esql);
+          const [columns, timestampField] = await Promise.all([
+            getEsqlSourceColumns({ esqlQuery: sourceQuery, http, projectRouting }),
+            getESQLTimeField({ query: queryObj.esql, http, projectRouting }),
+          ]);
+
+          const newTimeFieldOptions = getTimeFieldOptions(columns);
           return { newTimeFieldOptions, timestampField };
         } catch (e) {
           return { newTimeFieldOptions: [], timestampField: undefined };
@@ -285,14 +293,17 @@ export const EsqlQueryExpression: React.FC<
 
       const { newTimeFieldOptions, timestampField } = await fetchTimeFieldsData(q);
       setTimeFieldOptions([firstFieldOption, ...newTimeFieldOptions]);
-      if (!timeField && timestampField) {
+      const isOption = (field?: string) => newTimeFieldOptions.some(({ value }) => value === field);
+      if (isOption(timeField)) {
+        return;
+      }
+      if (timestampField && isOption(timestampField)) {
         setParam('timeField', timestampField);
+        return;
       }
-      if (!newTimeFieldOptions.find(({ value }) => value === timeField)) {
-        clearParam('timeField');
-      }
+      clearParam('timeField');
     },
-    [timeField, setParam, clearParam, dataViews, http]
+    [timeField, setParam, clearParam, http, cps]
   );
 
   return (
@@ -312,7 +323,6 @@ export const EsqlQueryExpression: React.FC<
           isLoading={isLoading}
           editorIsInline
           expandToFitQueryOnMount
-          hasOutline
           mergeExternalMessages
         />
       </EuiFormRow>
@@ -405,7 +415,12 @@ export const EsqlQueryExpression: React.FC<
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow id="timeWindowUnit">
+          <EuiFormRow
+            id="timeWindowUnit"
+            aria-label={i18n.translate('xpack.stackAlerts.esQuery.ui.timeWindowUnitAriaLabel', {
+              defaultMessage: 'Time window unit',
+            })}
+          >
             <EuiSelect
               name="timeWindowUnit"
               data-test-subj="timeWindowUnitSelect"

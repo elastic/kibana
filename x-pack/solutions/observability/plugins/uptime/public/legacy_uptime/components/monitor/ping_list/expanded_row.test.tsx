@@ -97,8 +97,8 @@ describe('PingListExpandedRow', () => {
         direction="column"
       >
         <EuiFlexItem>
-          <EuiCallOut
-            color="primary"
+          <KbnInfoCallout
+            title="Response details"
           >
             <EuiDescriptionList
               listItems={
@@ -126,7 +126,7 @@ describe('PingListExpandedRow', () => {
                 ]
               }
             />
-          </EuiCallOut>
+          </KbnInfoCallout>
         </EuiFlexItem>
       </EuiFlexGroup>
     `);

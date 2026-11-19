@@ -8,6 +8,15 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { stackMonitoringCommonSchema } from '../common';
 
-export const esVersionMismatchParamsSchema = stackMonitoringCommonSchema.extends({});
+export const esVersionMismatchParamsSchema = stackMonitoringCommonSchema.extends(
+  {},
+  {
+    meta: {
+      title: 'ES Version Mismatch Rule Params',
+      description:
+        'The parameters for the ES version mismatch rule. These parameters are appropriate when `rule_type_id` is `monitoring_alert_elasticsearch_version_mismatch`.',
+    },
+  }
+);
 
 export type EsVersionMismatchParams = TypeOf<typeof esVersionMismatchParamsSchema>;

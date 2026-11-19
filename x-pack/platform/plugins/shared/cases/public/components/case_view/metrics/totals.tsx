@@ -13,7 +13,6 @@ import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../co
 import {
   ASSOCIATED_HOSTS_METRIC,
   ASSOCIATED_USERS_METRIC,
-  ISOLATED_HOSTS_METRIC,
   TOTAL_ALERTS_METRIC,
   TOTAL_CONNECTORS_METRIC,
 } from './translations';
@@ -57,22 +56,17 @@ const useGetTitleValueMetricItems = (
   metrics: SingleCaseMetrics | null,
   features: SingleCaseMetricsFeature[]
 ): MetricItems => {
-  const { alerts, actions, connectors } = metrics ?? {};
+  const { alerts, connectors } = metrics ?? {};
   const totalConnectors = connectors?.total ?? 0;
   const alertsCount = alerts?.count ?? 0;
   const totalAlertUsers = alerts?.users?.total ?? 0;
   const totalAlertHosts = alerts?.hosts?.total ?? 0;
-  const totalIsolatedHosts = calculateTotalIsolatedHosts(actions);
 
   const metricItems = useMemo<MetricItems>(() => {
     const items: Array<[SingleCaseMetricsFeature, Omit<MetricItem, 'id'>]> = [
       [CaseMetricsFeature.ALERTS_COUNT, { title: TOTAL_ALERTS_METRIC, value: alertsCount }],
       [CaseMetricsFeature.ALERTS_USERS, { title: ASSOCIATED_USERS_METRIC, value: totalAlertUsers }],
       [CaseMetricsFeature.ALERTS_HOSTS, { title: ASSOCIATED_HOSTS_METRIC, value: totalAlertHosts }],
-      [
-        CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
-        { title: ISOLATED_HOSTS_METRIC, value: totalIsolatedHosts },
-      ],
       [CaseMetricsFeature.CONNECTORS, { title: TOTAL_CONNECTORS_METRIC, value: totalConnectors }],
     ];
 
@@ -83,23 +77,7 @@ const useGetTitleValueMetricItems = (
       ],
       []
     );
-  }, [
-    features,
-    alertsCount,
-    totalAlertUsers,
-    totalAlertHosts,
-    totalIsolatedHosts,
-    totalConnectors,
-  ]);
+  }, [features, alertsCount, totalAlertUsers, totalAlertHosts, totalConnectors]);
 
   return metricItems;
-};
-
-const calculateTotalIsolatedHosts = (actions: SingleCaseMetrics['actions']) => {
-  if (!actions?.isolateHost) {
-    return 0;
-  }
-
-  // prevent the metric from being negative
-  return Math.max(actions.isolateHost.isolate.total - actions.isolateHost.unisolate.total, 0);
 };

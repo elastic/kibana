@@ -42,6 +42,7 @@
     "@kbn/securitysolution-es-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-elasticsearch-server",
+    "@kbn/core-elasticsearch-server-utils",
     "@kbn/core-saved-objects-api-server",
     "@kbn/shared-ux-router",
     "@kbn/core-saved-objects-server",
@@ -67,7 +68,6 @@
     "@kbn/cloud-security-posture",
     "@kbn/analytics",
     "@kbn/management-settings-ids",
-    "@kbn/expandable-flyout",
     "@kbn/code-editor-mock",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/licensing-types",
@@ -75,7 +75,14 @@
     "@kbn/shared-ux-card-no-data",
     "@kbn/react-kibana-context-theme",
     "@kbn/react-query",
-    "@kbn/kql"
+    "@kbn/kql",
+    "@kbn/entity-store",
+    "@kbn/logging-mocks",
+    "@kbn/core-spaces-common",
+    "@kbn/es-errors",
+    "@kbn/app-header",
+    "@kbn/app-menu",
+    "@kbn/security-solution-features"
   ],
   "exclude": ["target/**/*"]
 }

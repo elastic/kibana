@@ -45,7 +45,10 @@ export const createExternalService: ServiceFactory<ExternalServiceITOM> = ({
 
       snService.checkInstance(res);
     } catch (error) {
-      throw addServiceMessageToError(error, `Unable to add event`);
+      throw addServiceMessageToError(error, `Unable to add event`, {
+        endpoint: 'event',
+        method: 'post',
+      });
     }
   };
 

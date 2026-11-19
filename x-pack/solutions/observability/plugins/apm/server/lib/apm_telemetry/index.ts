@@ -13,17 +13,18 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
+import type { APMUsage } from './types';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 import { collectDataTelemetry } from './collect_data_telemetry';
-import type { APMUsage } from './types';
 import { apmSchema } from './schema';
 import { getTelemetryClient } from './telemetry_client';
 
 export const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
+export const APM_TELEMETRY_TASK_TIMEOUT = '10m';
 
 export async function createApmTelemetry({
   core,
@@ -45,30 +46,37 @@ export async function createApmTelemetry({
   taskManager.registerTaskDefinitions({
     [APM_TELEMETRY_TASK_NAME]: {
       title: 'Collect APM usage',
-      createTaskRunner: () => {
+      // Task Manager aborts the signal when this timeout elapses or the task is cancelled
+      timeout: APM_TELEMETRY_TASK_TIMEOUT,
+      createTaskRunner: ({ signal }) => {
         return {
           run: async () => {
-            await collectAndStore();
+            await collectAndStore(signal);
           },
-          cancel: async () => {},
         };
       },
     },
   });
 
-  const telemetryClient = await getTelemetryClient({ core });
   const [coreStart] = await core.getStartServices();
   const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
   const apmIndices = await getApmIndices(savedObjectsClient);
 
-  const collectAndStore = async () => {
+  const collectAndStore = async (signal: AbortSignal) => {
+    const telemetryClient = await getTelemetryClient({ core, signal });
     const dataTelemetry = await collectDataTelemetry({
       indices: apmIndices,
       telemetryClient,
       logger,
       savedObjectsClient,
       isProd,
+      signal,
     });
+
+    if (signal.aborted) {
+      logger.debug('APM telemetry task was aborted, skipping saved object update');
+      return;
+    }
 
     await savedObjectsClient.create(
       APM_TELEMETRY_SAVED_OBJECT_TYPE,

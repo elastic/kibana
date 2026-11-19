@@ -33,7 +33,12 @@ export const HelpPopoverButton = ({
   return (
     <EuiText size="xs">
       <EuiLink onClick={onClick}>
-        <EuiIcon size="s" type="question" css={helpPopoverStyles.button(euiThemeContext)} />
+        <EuiIcon
+          size="s"
+          type="question"
+          css={helpPopoverStyles.button(euiThemeContext)}
+          aria-hidden={true}
+        />
         {children}
       </EuiLink>
     </EuiText>
@@ -79,6 +84,7 @@ export const HelpPopover = ({
 }) => {
   return (
     <EuiPopover
+      aria-label={title}
       anchorPosition={anchorPosition}
       button={button}
       closePopover={closePopover}
@@ -112,6 +118,7 @@ export const WrappingHelpPopover = ({
   return (
     <KibanaRenderContextProvider {...startServices}>
       <EuiWrappingPopover
+        aria-label={title}
         anchorPosition={anchorPosition}
         button={button}
         closePopover={closePopover}

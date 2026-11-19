@@ -8,6 +8,7 @@
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { MetadataForDependencyResponse } from '@kbn/apm-api-shared';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { maybe } from '../../../common/utils/maybe';
 import {
@@ -16,11 +17,6 @@ import {
   SPAN_TYPE,
 } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-
-export interface MetadataForDependencyResponse {
-  spanType: string | undefined;
-  spanSubtype: string | undefined;
-}
 
 export async function getMetadataForDependency({
   apmEventClient,

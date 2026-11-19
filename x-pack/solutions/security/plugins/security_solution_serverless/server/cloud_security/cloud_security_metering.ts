@@ -34,7 +34,14 @@ export const cloudSecurityMetringCallback = async ({
   const tier: Tier = getCloudProductTier(config, logger);
 
   try {
-    const cloudSecuritySolutions: CloudSecuritySolutions[] = [CSPM, KSPM, CNVM];
+    const isCspmMeteringEnabled = config.cloudSecurityMetering.cspm.enabled;
+    if (!isCspmMeteringEnabled) {
+      logger.info('CSPM metering is disabled');
+    }
+
+    const cloudSecuritySolutions: CloudSecuritySolutions[] = isCspmMeteringEnabled
+      ? [CSPM, KSPM, CNVM]
+      : [KSPM, CNVM];
 
     const promiseResults = await Promise.allSettled(
       cloudSecuritySolutions.map((cloudSecuritySolution) => {

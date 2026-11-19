@@ -29,7 +29,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { type FC, useMemo, useState } from 'react';
 import { groupBy } from 'lodash';
-import type { ModelDownloadItem } from '../../../common/types/trained_models';
+import type { ModelDownloadItem } from '@kbn/ml-common-types/trained_models';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useMlKibana } from '../contexts/kibana';
 import { ElandPythonClient } from './eland_python_client';
@@ -166,7 +166,7 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
               <div>
                 <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="logoElastic" size="l" />
+                    <EuiIcon aria-hidden={true} type="logoElastic" size="l" />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiTitle size={'s'}>

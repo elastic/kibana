@@ -90,6 +90,10 @@ const extractEuiIconText = (str: string) => {
 
 jest.mock('../../../../../../common/lib/kibana');
 
+jest.mock('../host_name', () => ({
+  HostName: () => null,
+}));
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -100,7 +104,6 @@ jest.mock('@elastic/eui', () => {
 
 jest.mock('../../../../../../common/components/link_to');
 jest.mock('../../../../../../overview/components/events_by_dataset');
-
 describe('GenericRowRenderer', () => {
   const mount = useMountAppended();
 

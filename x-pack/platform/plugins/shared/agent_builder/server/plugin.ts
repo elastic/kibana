@@ -9,12 +9,17 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { ConversationUpdatedOptIn } from '@kbn/agent-builder-server';
 import {
-  AGENT_BUILDER_INFERENCE_FEATURE_ID,
-  AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
-  AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
-} from '@kbn/agent-builder-common/constants';
+  CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+  SUPPORTED_IMAGE_MIME_TYPES,
+  MAX_IMAGE_BYTES,
+} from '@kbn/agent-builder-common/attachments';
+import { createConversationPublicClient } from './services/conversation/conversation_public_client';
+import { createAttachmentPublicClient } from './services/attachments';
 import type { AgentBuilderConfig } from './config';
+import { registerTracingExporter } from './tracing/register_tracing';
 import { ServiceManager } from './services';
 import type {
   AgentBuilderPluginSetup,
@@ -23,9 +28,15 @@ import type {
   AgentBuilderStartDependencies,
 } from './types';
 import { registerFeatures } from './features';
+import {
+  AGENT_WORKLOAD_TYPE,
+  resolveAgentWorkloads,
+} from './services/agents/service_account_binding';
+import { createStorage as createAgentStorage } from './services/agents/persisted/client/storage';
 import { registerRoutes } from './routes';
+import { agentBuilderSpaceSettingsType } from './saved_objects';
 import { registerUISettings } from './ui_settings';
-import { getRunAgentStepDefinition } from './step_types';
+import { getRunAgentStepDefinition, rerankStepDefinition } from './step_types';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
 import { registerAgentBuilderHandlerContext } from './request_handler_context';
 import { createAgentBuilderUsageCounter } from './telemetry/usage_counters';
@@ -34,13 +45,26 @@ import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
+import { registerAfterExecutionWorkflowsHook } from './hooks/agent_workflows/register_after_execution_workflows_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
-import { createConnectorLifecycleHandler } from './services/connector_lifecycle/connector_lifecycle_handler';
+import { createRelevantSkillsCycleHook } from './services/execution/run_agent/cycle_hooks/relevant_skills_hook';
 import { registerTaskDefinitions } from './services/execution';
-import { createModelProviderFactory } from './services/runner/model_provider';
-import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './services/sml';
+import {
+  createModelProviderFactory,
+  createRuntimeModelProviderFactory,
+} from './services/execution/runner/model_provider';
 import { createSmlTools } from './services/tools/builtin/sml';
+import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
+import { registerInferenceFeatures } from './inference_features';
+import { createConversationEventBus } from './workflows/triggers/conversation_event_bus';
+import { registerAttachmentWorkflowSteps, registerConversationWorkflowSteps } from './workflows';
+import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { apiPrivileges } from '../common/features';
+import { runToolIdBackfill } from './backfills/tool_id_backfill';
+import { RecommendedEndpointsPoller } from './recommended_endpoints_poller';
+import { registerDeductiveAgent } from './services/execution/run_agent/deductive/register_deductive_agent';
+import { getDeploymentInfo } from './utils/deployment_info';
 
 export class AgentBuilderPlugin
   implements
@@ -53,14 +77,22 @@ export class AgentBuilderPlugin
 {
   private logger: Logger;
   private config: AgentBuilderConfig;
+  private readonly env: PluginInitializerContext['env'];
   private serviceManager: ServiceManager;
+  private cloudSetup?: CloudSetup;
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
   private home: HomeServerPluginSetup | null = null;
+  private teardownTracing?: () => Promise<void>;
+  private startDeps?: AgentBuilderStartDependencies;
+  private readonly conversationEventBus = createConversationEventBus();
+  private readonly conversationUpdatedOptIns: ConversationUpdatedOptIn[] = [];
+  private recommendedEndpointsPoller?: RecommendedEndpointsPoller;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.env = context.env;
     this.serviceManager = new ServiceManager(this.config);
   }
 
@@ -69,6 +101,18 @@ export class AgentBuilderPlugin
     setupDeps: AgentBuilderSetupDependencies
   ): AgentBuilderPluginSetup {
     this.home = setupDeps.home;
+    this.cloudSetup = setupDeps.cloud;
+
+    setupDeps.files.registerFileKind({
+      id: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+      allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
+      maxSizeBytes: MAX_IMAGE_BYTES,
+      http: {
+        create: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+        download: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    });
+
     // Create usage counter for telemetry (if usageCollection is available)
     if (setupDeps.usageCollection) {
       this.usageCounter = createAgentBuilderUsageCounter(setupDeps.usageCollection);
@@ -82,24 +126,7 @@ export class AgentBuilderPlugin
       this.logger.warn('Usage collection plugin not available, telemetry disabled');
     }
 
-    if (setupDeps.searchInferenceEndpoints) {
-      setupDeps.searchInferenceEndpoints.features.register({
-        featureId: AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
-        featureName: 'Agent Builder',
-        featureDescription: 'Parent feature for Agent Builder',
-        taskType: 'chat_completion',
-        recommendedEndpoints: AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
-      });
-
-      setupDeps.searchInferenceEndpoints.features.register({
-        parentFeatureId: AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
-        featureId: AGENT_BUILDER_INFERENCE_FEATURE_ID,
-        featureName: 'Agent Builder',
-        featureDescription: 'Agent Builder inference endpoint configuration',
-        taskType: 'chat_completion',
-        recommendedEndpoints: AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
-      });
-    }
+    registerInferenceFeatures({ searchInferenceEndpoints: setupDeps.searchInferenceEndpoints });
 
     // Register server-side EBT events for Agent Builder
     this.analyticsService = new AnalyticsService(
@@ -114,10 +141,18 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       cloud: setupDeps.cloud,
       usageApi: setupDeps.usageApi,
+      actions: setupDeps.actions,
     });
+
+    serviceSetups.hooks.registerCycleHook(
+      createRelevantSkillsCycleHook({
+        getUiSettings: async () => (await coreSetup.getStartServices())[0].uiSettings,
+      })
+    );
 
     registerTaskDefinitions({
       taskManager: setupDeps.taskManager,
+      getStartServices: coreSetup.getStartServices,
       getTaskHandler: () => {
         const services = this.serviceManager.internalStart;
         if (!services) {
@@ -127,26 +162,28 @@ export class AgentBuilderPlugin
       },
     });
 
-    // Register SML crawler task definition
-    registerSmlCrawlerTaskDefinition({
-      taskManager: setupDeps.taskManager,
-      getCrawlerDeps: async () => {
+    registerFeatures({ features: setupDeps.features });
+
+    // Registered even where service accounts are disabled so existing bindings can still be
+    // listed and removed.
+    coreSetup.security.serviceAccounts.registerWorkloadType({
+      type: AGENT_WORKLOAD_TYPE,
+      name: 'Agent',
+      description: 'Agent Builder agent that runs every conversation as the bound service account',
+      resolveWorkloads: async (workloads, { signal }) => {
         const [coreStart] = await coreSetup.getStartServices();
-        const services = this.serviceManager.internalStart;
-        if (!services) {
-          throw new Error('getCrawlerDeps called before service init');
-        }
-        return {
-          smlService: services.sml,
-          elasticsearch: coreStart.elasticsearch,
-          savedObjects: coreStart.savedObjects,
-          uiSettings: coreStart.uiSettings,
-          logger: this.logger.get('services.sml'),
-        };
+        return resolveAgentWorkloads({
+          storage: createAgentStorage({
+            logger: this.logger.get('agents'),
+            esClient: coreStart.elasticsearch.client.asInternalUser,
+          }),
+          workloads,
+          signal,
+        });
       },
     });
 
-    registerFeatures({ features: setupDeps.features });
+    coreSetup.savedObjects.registerType(agentBuilderSpaceSettingsType);
 
     // Phantom capability: not a registered feature privilege. Used as an admin check
     // (e.g. superuser / wildcard roles get true). Resolved in the switcher via ES hasPrivileges.
@@ -162,10 +199,61 @@ export class AgentBuilderPlugin
     );
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
+    // External Deductive execution path (agent + Advanced Settings). Self-contained in the
+    // deductive module so the whole temporary integration can be removed by deleting it.
+    registerDeductiveAgent({
+      coreSetup,
+      uiSettings: coreSetup.uiSettings,
+      agents: serviceSetups.agents,
+      register: this.config.deductive?.register ?? false,
+    });
 
     setupDeps.workflowsExtensions.registerStepDefinition(
       getRunAgentStepDefinition(this.serviceManager)
     );
+    setupDeps.workflowsExtensions.registerStepDefinition(rerankStepDefinition);
+
+    registerConversationWorkflowSteps(setupDeps.workflowsExtensions, {
+      getConversationClient: async (request) => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Conversation service not available — plugin has not started');
+        }
+        return services.conversations.getScopedClient({ request });
+      },
+      getAgentRegistry: async (request) => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Agents service not available — plugin has not started');
+        }
+        return services.agents.getRegistry({ request });
+      },
+      getExecutionService: () => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Execution service not available — plugin has not started');
+        }
+        return services.execution;
+      },
+    });
+
+    registerAttachmentWorkflowSteps(setupDeps.workflowsExtensions, {
+      getAttachmentClient: async (request) => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Attachment client not available — plugin has not started');
+        }
+        const [coreStart, startDeps] = await coreSetup.getStartServices();
+        return createAttachmentPublicClient({
+          request,
+          conversationsService: services.conversations,
+          attachmentsService: services.attachments,
+          coreStart,
+          spaces: startDeps.spaces,
+          source: 'workflow',
+        });
+      },
+    });
 
     registerAgentBuilderHandlerContext({ coreSetup });
 
@@ -194,36 +282,41 @@ export class AgentBuilderPlugin
       getInternalServices,
     });
 
-    registerSkillToolsLoaderHook(serviceSetups);
+    registerAfterExecutionWorkflowsHook(serviceSetups, {
+      workflowsManagement: setupDeps.workflowsManagement,
+      logger: this.logger,
+      getInternalServices,
+    });
+
+    registerSkillToolsLoaderHook(serviceSetups, {
+      analyticsService: this.analyticsService,
+      trackingService: this.trackingService,
+    });
 
     const smlTools = createSmlTools({
-      getSmlService: () => {
-        const services = this.serviceManager.internalStart;
-        if (!services) {
-          throw new Error('SML service not available — plugin has not started');
+      getAgentBuilderSml: () => {
+        if (!this.startDeps) {
+          throw new Error('Agent Builder SML not available — plugin has not started');
         }
-        return services.sml;
+        return this.startDeps.agentBuilderSml;
       },
     });
     smlTools.forEach((tool) => {
       serviceSetups.tools.register(tool);
     });
 
-    // Register connector lifecycle listener to auto-create workflows/tools
-    // when connectors with workflow definitions are created.
-    // The handler checks the connectors-enabled feature flag and workflows
-    // availability at runtime, so we always register.
-    const connectorLifecycleHandler = createConnectorLifecycleHandler({
-      serviceManager: this.serviceManager,
-      workflowsManagement: setupDeps.workflowsManagement,
-      logger: this.logger.get('connector-lifecycle'),
-      getStartServices: coreSetup.getStartServices,
+    const connectorTools = createConnectorTools({
+      getActions: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.actions;
+      },
+      getInference: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.inference;
+      },
     });
-
-    setupDeps.actions.registerConnectorLifecycleListener({
-      connectorTypes: '*',
-      onPostCreate: connectorLifecycleHandler.onPostCreate,
-      onPostDelete: connectorLifecycleHandler.onPostDelete,
+    connectorTools.forEach((tool) => {
+      serviceSetups.tools.register(tool);
     });
 
     return {
@@ -232,32 +325,84 @@ export class AgentBuilderPlugin
       },
       agents: {
         register: serviceSetups.agents.register.bind(serviceSetups.agents),
+        registerType: serviceSetups.agents.registerType.bind(serviceSetups.agents),
+        registerAiIndexResolver: serviceSetups.agents.registerAiIndexResolver.bind(
+          serviceSetups.agents
+        ),
       },
       attachments: {
         registerType: serviceSetups.attachments.registerType.bind(serviceSetups.attachments),
       },
+      renderers: {
+        register: serviceSetups.renderers.register.bind(serviceSetups.renderers),
+      },
+      conversationEvents: {
+        register: serviceSetups.conversationEvents.register.bind(serviceSetups.conversationEvents),
+      },
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
+        registerCycleHook: serviceSetups.hooks.registerCycleHook.bind(serviceSetups.hooks),
       },
       skills: {
         register: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
       },
-      sml: {
-        registerType: serviceSetups.sml.registerType.bind(serviceSetups.sml),
+      plugins: {
+        register: serviceSetups.plugins.register.bind(serviceSetups.plugins),
       },
+      conversationTemplates: {
+        register: serviceSetups.conversationTemplates.register.bind(
+          serviceSetups.conversationTemplates
+        ),
+      },
+      conversations: {
+        enableUpdatedTrigger: (optIn) => {
+          this.conversationUpdatedOptIns.push(optIn);
+        },
+      },
+      callbacks: {
+        registerConversationResolver: serviceSetups.callbacks.registerConversationResolver,
+        registerOnBeforeNewConversation: serviceSetups.callbacks.registerOnBeforeNewConversation,
+        registerTransport: serviceSetups.callbacks.registerTransport,
+      },
+      topSnippets: this.config.topSnippets,
     };
   }
 
-  start(
-    coreStart: CoreStart,
-    { inference, spaces, actions, taskManager }: AgentBuilderStartDependencies
-  ): AgentBuilderPluginStart {
-    const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
+  start(coreStart: CoreStart, startDeps: AgentBuilderStartDependencies): AgentBuilderPluginStart {
+    this.startDeps = startDeps;
+    void registerTracingExporter({
+      core: coreStart,
+      tracingConfig: this.config.tracing,
+    }).then((teardownTracing) => {
+      this.teardownTracing = teardownTracing;
+    });
+    const {
+      inference,
+      spaces,
+      actions,
+      taskManager,
+      searchInferenceEndpoints,
+      licensing,
+      security: securityPlugin,
+      isomer,
+    } = startDeps;
+    const { elasticsearch, http, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
+
+    this.cleanupLegacySmlTasks(taskManager).catch((error) => {
+      this.logger.warn(`Failed to clean up legacy SML tasks: ${(error as Error).message}`);
+    });
+
+    this.runBackfill(elasticsearch).catch((error) => {
+      this.logger.error(`Backfill failed: ${(error as Error).message}`);
+    });
+
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
+      securityPlugin,
       elasticsearch,
+      http,
       inference,
       spaces,
       actions,
@@ -268,9 +413,38 @@ export class AgentBuilderPlugin
       taskManager,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
+      searchInferenceEndpoints,
+      licensing,
+      deploymentInfo: getDeploymentInfo({
+        cloud: this.cloudSetup,
+        packageInfo: this.env.packageInfo,
+        airgapped: this.env.airgapped,
+      }),
+      deductiveRegister: this.config.deductive?.register ?? false,
+      isomer,
+      getSmlTypeDefinition: startDeps.agentBuilderSml.getTypeDefinition,
+      cloud: this.cloudSetup,
+      conversationEventBus: this.conversationEventBus,
     });
 
-    const { tools, agents, skills, runnerFactory, execution } = startServices;
+    registerConversationWorkflowEventBridge(
+      this.conversationEventBus,
+      startDeps.workflowsExtensions,
+      this.logger,
+      this.conversationUpdatedOptIns
+    );
+
+    const {
+      tools,
+      agents,
+      skills,
+      runnerFactory,
+      execution,
+      plugins,
+      conversations,
+      conversationTemplates,
+      attachments,
+    } = startServices;
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
@@ -279,25 +453,28 @@ export class AgentBuilderPlugin
 
     const modelProviderFactory = createModelProviderFactory({
       inference,
-      uiSettings,
-      savedObjects,
       trackingService: this.trackingService,
+      searchInferenceEndpoints,
+      logger: this.logger.get('model-provider'),
+      spaces,
+      security,
+      elasticsearch,
     });
 
-    // Schedule SML crawler tasks for all registered types
-    scheduleSmlCrawlerTasks({
-      taskManager,
-      smlService: startServices.sml,
-      logger: this.logger.get('services.sml'),
-    }).catch((error) => {
-      this.logger.error(`Failed to schedule SML crawler tasks: ${error.message}`);
+    this.recommendedEndpointsPoller = new RecommendedEndpointsPoller({
+      logger: this.logger.get('recommended-endpoints-poller'),
+      esClient: elasticsearch.client.asInternalUser,
+      features: searchInferenceEndpoints.features,
     });
-
-    const smlService = startServices.sml;
+    // Intentionally not started: the EIS-derived list is too broad with the current family
+    // heuristic, so the static recommended endpoints are used instead.
+    // See https://github.com/elastic/search-team/issues/16741
+    // this.recommendedEndpointsPoller.start();
 
     return {
       agents: {
         getRegistry: ({ request }) => agents.getRegistry({ request }),
+        ensure: agents.ensure,
         runAgent: runner.runAgent.bind(runner),
       },
       tools: {
@@ -308,33 +485,69 @@ export class AgentBuilderPlugin
         getRegistry: skills.getRegistry.bind(skills),
         register: skills.registerSkill.bind(skills),
       },
+      plugins: {
+        getRegistry: ({ request }) => plugins.getRegistry({ request }),
+      },
       execution: {
         executeAgent: execution.executeAgent.bind(execution),
         getExecution: execution.getExecution.bind(execution),
         findExecutions: execution.findExecutions.bind(execution),
       },
       runtime: {
-        createModelProvider: modelProviderFactory,
+        createModelProvider: createRuntimeModelProviderFactory(modelProviderFactory),
       },
-      sml: {
-        indexAttachment: async (params) => {
-          const soClient = savedObjects.getScopedClient(params.request);
-          const spaceId =
-            params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
-          return smlService.indexAttachment({
-            originId: params.originId,
-            attachmentType: params.attachmentType,
-            action: params.action,
-            spaces: [spaceId],
-            esClient: elasticsearch.client.asInternalUser,
-            savedObjectsClient: soClient,
-            logger: this.logger.get('services.sml'),
-            request: params.request,
-          });
+      conversations: {
+        getScopedClient: async ({ request }) => {
+          const client = await conversations.getScopedClient({ request });
+          const agentRegistry = await agents.getRegistry({ request });
+          return createConversationPublicClient({ client, agentRegistry, source: 'server_api' });
         },
       },
+      attachments: {
+        getScopedClient: async ({ request }) =>
+          createAttachmentPublicClient({
+            request,
+            conversationsService: conversations,
+            attachmentsService: attachments,
+            coreStart,
+            spaces,
+            source: 'server_api',
+          }),
+      },
+      conversationTemplates,
     };
   }
 
-  stop() {}
+  async stop() {
+    this.recommendedEndpointsPoller?.stop();
+    await this.teardownTracing?.();
+  }
+
+  /**
+   * Applies all registered tool ID backfills.
+   */
+  private async runBackfill(elasticsearch: CoreStart['elasticsearch']): Promise<void> {
+    const logger = this.logger.get('backfill');
+    const esClient = elasticsearch.client.asInternalUser;
+    await runToolIdBackfill(logger, esClient);
+  }
+
+  /**
+   * Remove orphaned SML crawler task instances from older scheduled-task id prefixes.
+   * Safe on every start — uses a single `bulkRemove` for the known legacy instance ids.
+   */
+  private async cleanupLegacySmlTasks(taskManager: AgentBuilderStartDependencies['taskManager']) {
+    const logger = this.logger.get('sml-migration');
+    const legacyTaskIds = [
+      'agent_builder:sml_crawler:visualization',
+      'agent_builder:sml_crawler:connector',
+      'agent_builder:sml_crawler:dashboard',
+      'agent_builder:sml_crawler:workflow',
+    ];
+    try {
+      await taskManager.bulkRemove(legacyTaskIds);
+    } catch (error) {
+      logger.warn(`Failed to remove legacy SML crawler tasks: ${(error as Error).message}`);
+    }
+  }
 }

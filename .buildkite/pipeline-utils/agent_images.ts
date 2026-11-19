@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dump } from 'js-yaml';
-import type { BuildkiteAgentTargetingRule } from './buildkite';
-import { BuildkiteClient } from './buildkite';
-import { FIPS_VERSION, prHasFIPSLabel } from './pr_labels';
+import { stringify } from 'yaml';
+import type { BuildkiteAgentTargetingRule } from './buildkite/index.ts';
+import { BuildkiteClient } from './buildkite/index.ts';
+import { FIPS_VERSION, prHasFIPSLabel } from './pr_labels.ts';
+import { pdBalanced, spotZones } from './step-library/presets.ts';
 
 export const ELASTIC_IMAGES_QA_PROJECT = 'elastic-images-qa';
 export const USE_QA_IMAGE_GH_LABEL = 'ci:use-qa-image';
@@ -23,7 +24,9 @@ export const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   provider: 'gcp',
   image: 'family/kibana-ubuntu-2404',
   imageProject: ELASTIC_IMAGES_PROD_PROJECT,
-  diskSizeGb: 105,
+  // Boot disk (GB). Without it the agent manager provisions 100 GB. PR jobs peak at ~66 GB, so
+  // 85 GB leaves ample headroom. Steps that need more set their own `diskSizeGb`.
+  diskSizeGb: 85,
 };
 
 const getFIPSImage = () => {
@@ -41,6 +44,8 @@ const getFIPSImage = () => {
   return {
     ...DEFAULT_AGENT_IMAGE_CONFIG,
     image,
+    // FIPS image disk usage has not been measured; keep the agent manager default.
+    diskSizeGb: undefined,
   };
 };
 
@@ -74,7 +79,7 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
   }
 
   if (returnYaml) {
-    return dump({ agents: config });
+    return stringify({ agents: config });
   }
 
   return config;
@@ -82,10 +87,10 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
 
 const expandAgentQueue = (queueName: string = 'n2-4-spot', diskSizeGb?: number) => {
   const [kind, cores, addition] = queueName.split('-');
-  const zonesToUse = 'southamerica-east1-c,asia-south2-a,us-central1-f';
+  const zonesToUse = spotZones.n2.join(',');
   const additionalProps =
     {
-      spot: { preemptible: true, zones: zonesToUse },
+      spot: { preemptible: true, spotZones: zonesToUse, ...pdBalanced },
       virt: { enableNestedVirtualization: true, spotZones: zonesToUse },
     }[addition] || {};
 

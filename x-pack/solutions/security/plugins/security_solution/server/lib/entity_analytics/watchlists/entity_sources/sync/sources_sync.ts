@@ -6,39 +6,68 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics';
-import type { MonitoringEntitySourceDescriptorClient } from '../../../privilege_monitoring/saved_objects';
-import type { EntityStoreEntityIdsByType } from '../../entities/service';
+import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
+import type { EntityStoreEntityIdsByType, WatchlistsByEuid } from '../../entities/service';
+import type { CorrelationMap } from '../../entities/types';
+
+export interface SyncSourceEntry {
+  source: MonitoringEntitySource;
+  entityStoreEntityIdsByType: EntityStoreEntityIdsByType;
+  correlationMap?: CorrelationMap;
+  watchlistsByEuid: WatchlistsByEuid;
+  /** entity.id range for this page, used to scope deletion detection. */
+  pageRange?: { gt?: string; lte?: string };
+}
 
 export type SourceProcessor = (
   source: MonitoringEntitySource,
-  entityStoreEntityIdsByType: EntityStoreEntityIdsByType
+  entityStoreEntityIdsByType: EntityStoreEntityIdsByType,
+  correlationMap: CorrelationMap | undefined,
+  watchlistsByEuid: WatchlistsByEuid,
+  pageRange?: { gt?: string; lte?: string }
 ) => Promise<void>;
+
+export interface SyncResult {
+  sourceId: string;
+  failed: boolean;
+}
 
 export const createSourcesSyncService = ({ logger }: { logger: Logger }) => {
   const syncBySourceIds = async ({
-    descriptorClient,
     sources,
     process,
   }: {
-    descriptorClient: MonitoringEntitySourceDescriptorClient;
-    sources: { sourceId: string; entityStoreEntityIdsByType: EntityStoreEntityIdsByType }[];
+    sources: SyncSourceEntry[];
     process: SourceProcessor;
-  }): Promise<void> => {
+  }): Promise<SyncResult[]> => {
     if (sources.length === 0) {
       logger.debug('[WatchlistSync] No entity sources linked to watchlist. Skipping sync.');
-      return;
+      return [];
     }
 
-    // Process sources sequentially to avoid race conditions
-    for (const { sourceId, entityStoreEntityIdsByType } of sources) {
+    const results: SyncResult[] = [];
+    for (const {
+      source,
+      entityStoreEntityIdsByType,
+      correlationMap,
+      watchlistsByEuid,
+      pageRange,
+    } of sources) {
       try {
-        const source = await descriptorClient.get(sourceId);
-        await process(source, entityStoreEntityIdsByType);
+        await process(
+          source,
+          entityStoreEntityIdsByType,
+          correlationMap,
+          watchlistsByEuid,
+          pageRange
+        );
+        results.push({ sourceId: source.id, failed: false });
       } catch (error) {
-        logger.warn(`[WatchlistSync] Source processing failed for ${sourceId}: ${String(error)}`);
+        logger.warn(`[WatchlistSync] Source processing failed for ${source.id}: ${String(error)}`);
+        results.push({ sourceId: source.id, failed: true });
       }
     }
+    return results;
   };
 
   return { syncBySourceIds };

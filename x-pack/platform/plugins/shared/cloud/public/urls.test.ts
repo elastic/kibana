@@ -6,7 +6,7 @@
  */
 
 import { coreMock, securityServiceMock } from '@kbn/core/public/mocks';
-import { CLOUD_USER_BILLING_ADMIN_ROLE } from '../common/constants';
+import type { CloudConfigType } from '.';
 import { CloudUrlsService } from './urls';
 
 const baseConfig = {
@@ -14,17 +14,29 @@ const baseConfig = {
   billing_url: '/billing/',
   deployments_url: '/user/deployments',
   deployment_url: '/abc123',
+  create_deployment_url: '/deployments/create',
   profile_url: '/user/settings/',
   organization_url: '/account/',
   performance_url: '/performance/',
   projects_url: '/projects/',
+  create_project_url: '/projects/create',
   users_and_roles_url: '/users_and_roles/',
+};
+
+const serverlessConfig = {
+  ...baseConfig,
+  deployment_url: '/projects/vectordb/abc123/',
+  serverless: { project_id: 'abc123' },
 };
 
 const kibanaUrl = 'https://cloud.elastic.co/abc123/kibana';
 
 describe('Cloud Plugin URLs Service', () => {
-  const setupServiceWithRoles = (userRoles: string[] = []) => {
+  const setupServiceWithRolesAndCapabilities = (
+    userRoles: string[] = [],
+    capabilities: Record<string, Record<string, boolean>> = {},
+    config: CloudConfigType = baseConfig
+  ) => {
     const urls = new CloudUrlsService();
 
     const coreSetup = coreMock.createSetup();
@@ -36,15 +48,21 @@ describe('Cloud Plugin URLs Service', () => {
         roles: userRoles,
       })
     );
+
+    // Mock capabilities
+    Object.entries(capabilities).forEach(([key, value]) => {
+      (coreStart.application.capabilities as Record<string, Record<string, boolean>>)[key] = value;
+    });
+
     coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
 
-    urls.setup(baseConfig, coreSetup, kibanaUrl);
+    urls.setup(config, coreSetup, kibanaUrl);
 
     return { urls };
   };
 
   const setupService = () => {
-    return setupServiceWithRoles([]);
+    return setupServiceWithRolesAndCapabilities([]);
   };
 
   it('exposes basic Cloud URLs', () => {
@@ -53,30 +71,152 @@ describe('Cloud Plugin URLs Service', () => {
     expect(urls.getUrls()).toEqual({
       baseUrl: 'https://cloud.elastic.co',
       deploymentUrl: 'https://cloud.elastic.co/abc123',
+      deploymentEditUrl: 'https://cloud.elastic.co/abc123/edit',
+      deploymentSecurityUrl: 'https://cloud.elastic.co/abc123/security',
+      deploymentUpgradeUrl: 'https://cloud.elastic.co/abc123?show_upgrade=true',
       deploymentsUrl: 'https://cloud.elastic.co/user/deployments',
+      createDeploymentUrl: 'https://cloud.elastic.co/deployments/create',
       kibanaUrl: 'https://cloud.elastic.co/abc123/kibana',
       organizationUrl: 'https://cloud.elastic.co/account/',
       performanceUrl: 'https://cloud.elastic.co/performance/',
       profileUrl: 'https://cloud.elastic.co/user/settings/',
       projectsUrl: 'https://cloud.elastic.co/projects/',
+      createProjectUrl: 'https://cloud.elastic.co/projects/create',
       snapshotsUrl: 'https://cloud.elastic.co/abc123/elasticsearch/snapshots/',
+    });
+  });
+
+  it('targets the organization in every Cloud URL', async () => {
+    const { urls } = setupServiceWithRolesAndCapabilities(
+      ['admin'],
+      { users: { save: true } },
+      { ...serverlessConfig, deployment_url: '/projects/vectordb/abc123', organization_id: 'org1' }
+    );
+
+    expect(urls.getUrls()).toEqual({
+      baseUrl: 'https://cloud.elastic.co',
+      kibanaUrl: 'https://cloud.elastic.co/abc123/kibana',
+      deploymentUrl: 'https://cloud.elastic.co/projects/vectordb/abc123#uTargetOrganizationId=org1',
+      deploymentEditUrl:
+        'https://cloud.elastic.co/projects/vectordb/abc123/edit#uTargetOrganizationId=org1',
+      deploymentSecurityUrl:
+        'https://cloud.elastic.co/projects/vectordb/abc123/security#uTargetOrganizationId=org1',
+      deploymentUpgradeUrl:
+        'https://cloud.elastic.co/projects/vectordb/abc123?show_upgrade=true#uTargetOrganizationId=org1',
+      deploymentsUrl: 'https://cloud.elastic.co/user/deployments#uTargetOrganizationId=org1',
+      createDeploymentUrl: 'https://cloud.elastic.co/deployments/create#uTargetOrganizationId=org1',
+      organizationUrl: 'https://cloud.elastic.co/account#uTargetOrganizationId=org1',
+      performanceUrl: 'https://cloud.elastic.co/performance#uTargetOrganizationId=org1',
+      profileUrl: 'https://cloud.elastic.co/user/settings/',
+      projectsUrl: 'https://cloud.elastic.co/projects#uTargetOrganizationId=org1',
+      createProjectUrl: 'https://cloud.elastic.co/projects/create#uTargetOrganizationId=org1',
+      snapshotsUrl:
+        'https://cloud.elastic.co/projects/vectordb/abc123/elasticsearch/snapshots#uTargetOrganizationId=org1',
+    });
+    await expect(urls.getPrivilegedUrls()).resolves.toEqual({
+      billingUrl: 'https://cloud.elastic.co/billing#uTargetOrganizationId=org1',
+      usersAndRolesUrl: 'https://cloud.elastic.co/users_and_roles#uTargetOrganizationId=org1',
+      searchPowerUrl:
+        'https://cloud.elastic.co/projects/vectordb/abc123?tab=settings&edit=search_power#uTargetOrganizationId=org1',
+    });
+  });
+
+  it.each([
+    ['superuser', 'https://cloud.elastic.co/billing/'],
+    ['admin', 'https://cloud.elastic.co/billing/'],
+    ['developer', undefined],
+  ])(
+    'exposes privileged Search Power URL in Serverless when user has the %s role',
+    async (role, billingUrl) => {
+      const { urls } = setupServiceWithRolesAndCapabilities([role], {}, serverlessConfig);
+
+      await expect(urls.getPrivilegedUrls()).resolves.toEqual({
+        billingUrl,
+        usersAndRolesUrl: undefined,
+        searchPowerUrl:
+          'https://cloud.elastic.co/projects/vectordb/abc123?tab=settings&edit=search_power',
+      });
+    }
+  );
+
+  it('exposes privileged Search Power URL when one of several roles can edit Search Power', async () => {
+    const { urls } = setupServiceWithRolesAndCapabilities(
+      ['viewer', 'developer'],
+      {},
+      serverlessConfig
+    );
+
+    await expect(urls.getPrivilegedUrls()).resolves.toEqual({
+      billingUrl: undefined,
+      usersAndRolesUrl: undefined,
+      searchPowerUrl:
+        'https://cloud.elastic.co/projects/vectordb/abc123?tab=settings&edit=search_power',
+    });
+  });
+
+  it('does not expose privileged Search Power URL when user roles cannot edit Search Power', async () => {
+    const { urls } = setupServiceWithRolesAndCapabilities(['viewer'], {}, serverlessConfig);
+
+    await expect(urls.getPrivilegedUrls()).resolves.toEqual(
+      expect.objectContaining({ searchPowerUrl: undefined })
+    );
+  });
+
+  it('does not expose privileged Search Power URL outside of Serverless', async () => {
+    const { urls } = setupServiceWithRolesAndCapabilities(['superuser']);
+
+    await expect(urls.getPrivilegedUrls()).resolves.toEqual(
+      expect.objectContaining({ searchPowerUrl: undefined })
+    );
+  });
+
+  it.each(['superuser', 'admin'])(
+    'exposes privileged billing URL when user has the %s role',
+    async (role) => {
+      const { urls } = setupServiceWithRolesAndCapabilities([role, 'other_role']);
+
+      await expect(urls.getPrivilegedUrls()).resolves.toEqual({
+        billingUrl: 'https://cloud.elastic.co/billing/',
+        usersAndRolesUrl: undefined,
+      });
+    }
+  );
+
+  it('does not expose privileged billing URL if user does not have an admin role', async () => {
+    const { urls } = setupServiceWithRolesAndCapabilities(['other_role']);
+
+    await expect(urls.getPrivilegedUrls()).resolves.toEqual({
+      billingUrl: undefined,
+      usersAndRolesUrl: undefined,
+    });
+  });
+
+  it('exposes privileged users and roles URL when user has manage_security privilege', async () => {
+    const { urls } = setupServiceWithRolesAndCapabilities([], { users: { save: true } });
+
+    await expect(urls.getPrivilegedUrls()).resolves.toEqual({
+      billingUrl: undefined,
       usersAndRolesUrl: 'https://cloud.elastic.co/users_and_roles/',
     });
   });
 
-  it('exposes privileged billing URL', () => {
-    const { urls } = setupServiceWithRoles([CLOUD_USER_BILLING_ADMIN_ROLE, 'other_role']); // Include specially-named billing admin role
+  it('does not expose privileged users and roles URL when user lacks manage_security privilege', async () => {
+    const { urls } = setupServiceWithRolesAndCapabilities([], { users: { save: false } });
 
-    expect(urls.getPrivilegedUrls()).resolves.toEqual({
-      billingUrl: 'https://cloud.elastic.co/billing/',
+    await expect(urls.getPrivilegedUrls()).resolves.toEqual({
+      billingUrl: undefined,
+      usersAndRolesUrl: undefined,
     });
   });
 
-  it('does not expose privileged billing URL if user does not have billing admin role', async () => {
-    const { urls } = setupServiceWithRoles(['other_role']);
+  it('exposes both privileged URLs when user has both privileges', async () => {
+    const { urls } = setupServiceWithRolesAndCapabilities(['admin'], {
+      users: { save: true },
+    });
 
-    expect(urls.getPrivilegedUrls()).resolves.toEqual({
-      billingUrl: undefined,
+    await expect(urls.getPrivilegedUrls()).resolves.toEqual({
+      billingUrl: 'https://cloud.elastic.co/billing/',
+      usersAndRolesUrl: 'https://cloud.elastic.co/users_and_roles/',
     });
   });
 });

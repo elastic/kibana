@@ -1,0 +1,747 @@
+{
+  "sha1": "617bdc2e17d956b74f16bdbdbea0cb2f70cf2fdb",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "3779c9b38070049-52448a51bc04f3a",
+      "title": "Ingest RUM test data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "b57c3f49719590f-12bd27d5a7ad176",
+      "title": "Digital Experience applications API from the sessions index reads the applications from the raw events, then from the sessions index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/applications_from_sessions.spec.ts",
+        "line": 249,
+        "column": 19
+      }
+    },
+    {
+      "id": "8dc11f41e4be27e-80c8bab2fa38a6a",
+      "title": "Digital Experience applications API from the sessions index keeps the page loads and sessions of the last bucket when the range ends inside it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/applications_sessions.spec.ts",
+        "line": 47,
+        "column": 43
+      }
+    },
+    {
+      "id": "4d64b9f6e8c1046-3d4eebadea59a46",
+      "title": "Digital Experience applications API returns the metrics of the EDOT Browser applications",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/applications.spec.ts",
+        "line": 22,
+        "column": 12
+      }
+    },
+    {
+      "id": "4d64b9f6e8c1046-1c32de1c9247a58",
+      "title": "Digital Experience applications API returns 403 without the Digital Experience privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/applications.spec.ts",
+        "line": 87,
+        "column": 27
+      }
+    },
+    {
+      "id": "4d64b9f6e8c1046-34f332c881b003b",
+      "title": "Digital Experience applications API returns 403 without the APM privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/applications.spec.ts",
+        "line": 90,
+        "column": 14
+      }
+    },
+    {
+      "id": "4d64b9f6e8c1046-7aadb38fddc0699",
+      "title": "Digital Experience applications API returns 403 without Elasticsearch details when no data can be read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/applications.spec.ts",
+        "line": 101,
+        "column": 25
+      }
+    },
+    {
+      "id": "4d64b9f6e8c1046-f21dc1b0faa35e7",
+      "title": "Digital Experience applications API returns 400 for invalid query params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/applications.spec.ts",
+        "line": 111,
+        "column": 4
+      }
+    },
+    {
+      "id": "4d64b9f6e8c1046-2e48f8523254d4f",
+      "title": "Digital Experience applications API accepts environments up to 1024 characters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/applications.spec.ts",
+        "line": 135,
+        "column": 14
+      }
+    },
+    {
+      "id": "05b5afb090a51c6-01f18d2608ac0d3",
+      "title": "Digital Experience applications API with Classic RUM data returns the metrics of a Classic RUM application",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/classic_applications.spec.ts",
+        "line": 29,
+        "column": 9
+      }
+    },
+    {
+      "id": "05b5afb090a51c6-65bb286518fcbe8",
+      "title": "Digital Experience applications API with Classic RUM data buckets both sources on the same keys, at local midnight and noon",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/classic_applications.spec.ts",
+        "line": 57,
+        "column": 32
+      }
+    },
+    {
+      "id": "74bcf4992516272-04bdcdf07cf4409",
+      "title": "Digital Experience errors API returns the error groups of the application",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/errors.spec.ts",
+        "line": 22,
+        "column": 13
+      }
+    },
+    {
+      "id": "74bcf4992516272-4c7c8b3c82d711b",
+      "title": "Digital Experience errors API returns no errors for an application without data, or another environment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/errors.spec.ts",
+        "line": 34,
+        "column": 11
+      }
+    },
+    {
+      "id": "74bcf4992516272-587a95c44d07a8b",
+      "title": "Digital Experience errors API lists an environment with browser data but no errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/errors.spec.ts",
+        "line": 54,
+        "column": 61
+      }
+    },
+    {
+      "id": "74bcf4992516272-3f4d58fd6459248",
+      "title": "Digital Experience errors API groups the missing and empty stack traces of a type together",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/errors.spec.ts",
+        "line": 75,
+        "column": 22
+      }
+    },
+    {
+      "id": "74bcf4992516272-bafe30a690deea7",
+      "title": "Digital Experience errors API returns 403 without the APM privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/errors.spec.ts",
+        "line": 93,
+        "column": 14
+      }
+    },
+    {
+      "id": "352c90281147e6e-096e6d6c1c13b7d",
+      "title": "Digital Experience with its feature flag off GET internal/digital_experience/applications answers 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_disabled.spec.ts",
+        "line": 32,
+        "column": 49
+      }
+    },
+    {
+      "id": "352c90281147e6e-b73ec29034e6df6",
+      "title": "Digital Experience with its feature flag off GET internal/digital_experience/sessions/status answers 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_disabled.spec.ts",
+        "line": 32,
+        "column": 49
+      }
+    },
+    {
+      "id": "352c90281147e6e-718806b7ed430e6",
+      "title": "Digital Experience with its feature flag off POST internal/digital_experience/sessions/enable answers 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_disabled.spec.ts",
+        "line": 32,
+        "column": 49
+      }
+    },
+    {
+      "id": "ec1e2e4853fab11-0c4803a19d1706a",
+      "title": "Digital Experience feature privileges registers the feature with its privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
+        "line": 109,
+        "column": 21
+      }
+    },
+    {
+      "id": "ec1e2e4853fab11-8d260c0622bf136",
+      "title": "Digital Experience feature privileges resolves show, save and short URLs, but not managing sessions, for the all privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
+        "line": 220,
+        "column": 32
+      }
+    },
+    {
+      "id": "ec1e2e4853fab11-0dabe9471ba6f63",
+      "title": "Digital Experience feature privileges resolves show and save, but no short URLs, for all without the Short URLs sub-feature",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
+        "line": 220,
+        "column": 32
+      }
+    },
+    {
+      "id": "ec1e2e4853fab11-b874ca4f8902b7c",
+      "title": "Digital Experience feature privileges resolves short URLs with the url_create sub-feature privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
+        "line": 220,
+        "column": 32
+      }
+    },
+    {
+      "id": "ec1e2e4853fab11-ffa37e824ce68d9",
+      "title": "Digital Experience feature privileges resolves show only for the read privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
+        "line": 220,
+        "column": 32
+      }
+    },
+    {
+      "id": "ec1e2e4853fab11-0ac4efc2b1709c1",
+      "title": "Digital Experience feature privileges resolves managing sessions only with the manage_sessions sub-feature privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
+        "line": 220,
+        "column": 32
+      }
+    },
+    {
+      "id": "ec1e2e4853fab11-ec8e902d7e4258a",
+      "title": "Digital Experience feature privileges resolves no access without the digital_experience privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/feature_privileges.spec.ts",
+        "line": 220,
+        "column": 32
+      }
+    },
+    {
+      "id": "fe1c4beda635f77-b576f9fbec2d7c2",
+      "title": "Digital Experience network API returns the HTTP requests and slowest resources of the application",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/network.spec.ts",
+        "line": 22,
+        "column": 13
+      }
+    },
+    {
+      "id": "fe1c4beda635f77-48e6ba725a5b101",
+      "title": "Digital Experience network API returns empty lists for an application without data, or another environment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/network.spec.ts",
+        "line": 35,
+        "column": 40
+      }
+    },
+    {
+      "id": "fe1c4beda635f77-49109df406e1a81",
+      "title": "Digital Experience network API lists an environment with page loads but no resources",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/network.spec.ts",
+        "line": 56,
+        "column": 61
+      }
+    },
+    {
+      "id": "fe1c4beda635f77-538266efc06a111",
+      "title": "Digital Experience network API returns 403 without the APM privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/network.spec.ts",
+        "line": 77,
+        "column": 25
+      }
+    },
+    {
+      "id": "a96b174c2f77244-e079573bd9db89f",
+      "title": "Digital Experience applications API with partial index access on serverless reports EDOT Browser as partially available when its logs are not readable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/partial_index_access_serverless.spec.ts",
+        "line": 34,
+        "column": 49
+      }
+    },
+    {
+      "id": "a96b174c2f77244-460300abe87d21f",
+      "title": "Digital Experience applications API with partial index access on serverless reports no partially available source for the viewer role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/partial_index_access_serverless.spec.ts",
+        "line": 46,
+        "column": 11
+      }
+    },
+    {
+      "id": "b11fddbc68c0b06-f347b6ec04ba511",
+      "title": "Digital Experience applications API with partial index access reports Classic RUM as partially available when only the OTel indices are readable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/partial_index_access.spec.ts",
+        "line": 60,
+        "column": 20
+      }
+    },
+    {
+      "id": "b11fddbc68c0b06-a38450f417dbdf4",
+      "title": "Digital Experience applications API with partial index access reports EDOT Browser as partially available when its logs are not readable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/partial_index_access.spec.ts",
+        "line": 75,
+        "column": 25
+      }
+    },
+    {
+      "id": "b11fddbc68c0b06-366f847e6947fd2",
+      "title": "Digital Experience applications API with partial index access reports no partially available source for the viewer role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/partial_index_access.spec.ts",
+        "line": 84,
+        "column": 37
+      }
+    },
+    {
+      "id": "e08d4a09e7354d6-f976293566f58af",
+      "title": "Digital Experience saved views lets the read privilege list the views, and refuses it saving, changing and deleting them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/saved_views.spec.ts",
+        "line": 56,
+        "column": 5
+      }
+    },
+    {
+      "id": "e08d4a09e7354d6-262e9388eb6c998",
+      "title": "Digital Experience saved views lets the all privilege save, replace and delete a view, and refuses a name that is taken",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/saved_views.spec.ts",
+        "line": 90,
+        "column": 23
+      }
+    },
+    {
+      "id": "e08d4a09e7354d6-67d82573ee38de8",
+      "title": "Digital Experience saved views lists the views that are valid when one holds what no route would save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/saved_views.spec.ts",
+        "line": 136,
+        "column": 93
+      }
+    },
+    {
+      "id": "e08d4a09e7354d6-a8cffe389d5e22c",
+      "title": "Digital Experience saved views keeps the views of one space from the others",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/saved_views.spec.ts",
+        "line": 172,
+        "column": 9
+      }
+    },
+    {
+      "id": "c004af908bbcd9d-8a5b577f1ca42bf",
+      "title": "Enabling Digital Experience sessions enables sessions for an admin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/sessions_enable.spec.ts",
+        "line": 57,
+        "column": 35
+      }
+    },
+    {
+      "id": "c004af908bbcd9d-3a41a20410d7a62",
+      "title": "Enabling Digital Experience sessions refuses a user whose source read is filtered by document-level security",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/sessions_enable.spec.ts",
+        "line": 70,
+        "column": 13
+      }
+    },
+    {
+      "id": "4f9ec263bb0efae-fef534748fff23e",
+      "title": "Digital Experience session summaries task summarizes the OTel events of a session, and recovers from an invalidated key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/sessions_task.spec.ts",
+        "line": 209,
+        "column": 5
+      }
+    },
+    {
+      "id": "e886a1833eb4b9f-110c72e79f445c4",
+      "title": "Digital Experience histogram buckets in the time zone counts the page loads by 12 hours from local midnight and noon in the time zone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/time_zone_buckets.spec.ts",
+        "line": 84,
+        "column": 42
+      }
+    },
+    {
+      "id": "e886a1833eb4b9f-7a9b6d12ca16015",
+      "title": "Digital Experience histogram buckets in the time zone counts the page loads by local days across a daylight saving change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/time_zone_buckets.spec.ts",
+        "line": 84,
+        "column": 42
+      }
+    },
+    {
+      "id": "e886a1833eb4b9f-1f550a2ce8c51a1",
+      "title": "Digital Experience histogram buckets in the time zone counts the page loads by 12 hours from UTC midnight and noon without a time zone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/time_zone_buckets.spec.ts",
+        "line": 84,
+        "column": 42
+      }
+    },
+    {
+      "id": "e886a1833eb4b9f-ae6c6023b9e8b22",
+      "title": "Digital Experience histogram buckets in the time zone buckets the Overview trend in the time zone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/time_zone_buckets.spec.ts",
+        "line": 109,
+        "column": 41
+      }
+    },
+    {
+      "id": "e886a1833eb4b9f-b82c1f0e3c5a109",
+      "title": "Digital Experience histogram buckets in the time zone returns 400 for an unknown time zone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/time_zone_buckets.spec.ts",
+        "line": 127,
+        "column": 15
+      }
+    },
+    {
+      "id": "4de5963868d3a32-445744ba5ddb123",
+      "title": "Digital Experience usage API returns the pages, breakdowns and clicks of the application",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/usage.spec.ts",
+        "line": 33,
+        "column": 2
+      }
+    },
+    {
+      "id": "4de5963868d3a32-9ab78c036653408",
+      "title": "Digital Experience usage API returns empty lists for an application without data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/usage.spec.ts",
+        "line": 46,
+        "column": 25
+      }
+    },
+    {
+      "id": "4de5963868d3a32-22d14443f3740c2",
+      "title": "Digital Experience usage API only returns the data of the selected environment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/usage.spec.ts",
+        "line": 54,
+        "column": 14
+      }
+    },
+    {
+      "id": "4de5963868d3a32-fd6ee783272be31",
+      "title": "Digital Experience usage API returns 403 without the APM privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/usage.spec.ts",
+        "line": 78,
+        "column": 11
+      }
+    },
+    {
+      "id": "12d608385ae2769-8d02a0fbae70808",
+      "title": "Delete the mock OTel RUM data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/global.teardown.ts",
+        "line": 14,
+        "column": 35
+      }
+    },
+    {
+      "id": "12d608385ae2769-7156c27b3549905",
+      "title": "Restore the Digital Experience feature flag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/global.teardown.ts",
+        "line": 19,
+        "column": 27
+      }
+    }
+  ]
+}

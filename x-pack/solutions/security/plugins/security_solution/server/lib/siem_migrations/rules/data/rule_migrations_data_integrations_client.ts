@@ -7,12 +7,22 @@
 
 import pMap from 'p-map';
 import type { PackageList, PackageListItem } from '@kbn/fleet-plugin/common';
+import {
+  estimateTokens,
+  truncateTokens,
+} from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { RuleMigrationIntegration } from '../types';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
+import { filterUnchangedByVersion } from './utils/filter_unchanged_by_version';
 
 const INTEGRATION_WEIGHTS = [
-  { ids: ['endpoint'], weight: 1.5 }, // Elastic Defend should be boosted
+  // These integrations should be boosted because in many cases they are used as fallback.
+  { ids: ['endpoint'], weight: 10 },
+  { ids: ['network_traffic'], weight: 10 },
 ];
+
+const PATH_PATTERNS_TO_INCLUDE_IN_KB = ['sample_event', 'knowledge_base'];
+const MAX_KB_TOKENS = 80_000;
 
 /**
  * excludes Splunk, QRadar and Elastic Security integrations since automatic migrations
@@ -20,12 +30,19 @@ const INTEGRATION_WEIGHTS = [
  * for which artifacts are being migrated
  *
  * */
-const EXCLUDED_INTEGRATIONS = ['splunk', 'elastic_security', 'ibm_qradar'];
+const EXCLUDED_INTEGRATIONS = [
+  'splunk',
+  'elastic_security',
+  'ibm_qradar',
+  'microsoft_sentinel',
+  'sentinel_one',
+  'sentinel_one_cloud_funnel',
+];
 
 /* The minimum score required for a integration to be considered correct, might need to change this later */
 const MIN_SCORE = 7 as const;
 /* The number of integrations the RAG will return, sorted by score */
-const RETURNED_INTEGRATIONS = 5 as const;
+const RETURNED_INTEGRATIONS = 7 as const;
 const PACKAGE_METADATA_CONCURRENCY = 30 as const;
 
 export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBaseClient {
@@ -38,6 +55,14 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
     return packages?.filter((pkg) => pkg.data_streams?.some(({ type }) => type === 'logs'));
   }
 
+  /**
+   * Builds the document to index for a package.
+   * Returns `null` when the package has no logs data stream, or when its archive could not be read:
+   * in that case the package is left out of this run and, as it is not indexed with its version,
+   * it is picked up again on the next populate.
+   * When the fields metadata cannot be fetched (e.g. an uploaded package that is not in the registry),
+   * the package is still built, without `fields_metadata`.
+   */
   private async processIntegration(pkg: PackageListItem): Promise<RuleMigrationIntegration | null> {
     const logsDataStreams = pkg.data_streams?.filter(({ type }) => type === 'logs');
     if (!logsDataStreams?.length) {
@@ -60,10 +85,16 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       );
     }
 
+    const packageKnowledgeBase = await this.fetchPackageKnowledgeBase(pkg);
+    if (packageKnowledgeBase === undefined) {
+      return null;
+    }
+
     return {
       title: pkg.title,
       id: pkg.name,
       description: pkg?.description || '',
+      knowledge_base: packageKnowledgeBase,
       data_streams: logsDataStreams.map((stream) => ({
         dataset: stream.dataset,
         index_pattern: `${stream.type}-${stream.dataset}-*`,
@@ -73,17 +104,89 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
         pkg.title,
         pkg.description,
         ...logsDataStreams.map((stream) => stream.title),
+        packageKnowledgeBase,
       ].join(' - '),
       fields_metadata: fieldsMetadata,
+      version: pkg.version,
     };
   }
 
-  /** Indexes an array of integrations to be used with ELSER semantic search queries */
+  /** Returns `undefined` when the package archive could not be read, so the caller can tell it apart from a package without knowledge base files (an empty string) */
+  private async fetchPackageKnowledgeBase(pkg: PackageListItem): Promise<string | undefined> {
+    let packageKnowledgeBase = '';
+
+    try {
+      const packageArchive = await this.dependencies.packageService?.asInternalUser.getPackage(
+        pkg.name,
+        pkg.version
+      );
+
+      const allPaths = await packageArchive?.archiveIterator?.getPaths();
+      const relevantPaths = allPaths?.filter((path) =>
+        PATH_PATTERNS_TO_INCLUDE_IN_KB.some((includedPath) => path.includes(includedPath))
+      );
+
+      let currentTokens = 0;
+      await packageArchive?.archiveIterator?.traverseEntries(
+        async (entry) => {
+          if (!entry.buffer || !relevantPaths?.includes(entry.path)) {
+            return;
+          }
+          if (currentTokens >= MAX_KB_TOKENS) {
+            return;
+          }
+          const content = entry.buffer.toString('utf8');
+          const nextChunk = `\n Source : ${entry.path}\n${content}`;
+          const chunkTokens = estimateTokens(nextChunk);
+          const remainingBudget = MAX_KB_TOKENS - currentTokens;
+
+          if (chunkTokens > remainingBudget) {
+            packageKnowledgeBase += `\n Source : ${entry.path}\n${truncateTokens(
+              content,
+              remainingBudget
+            )}`;
+            currentTokens = MAX_KB_TOKENS;
+            this.logger.debug(
+              `Truncated ${entry.path} for ${pkg.name}: token limit (${MAX_KB_TOKENS}) reached`
+            );
+          } else {
+            packageKnowledgeBase += nextChunk;
+            currentTokens += chunkTokens;
+          }
+        },
+        (path) => relevantPaths?.includes(path) ?? false
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch package archive for ${
+          pkg.name
+        }, it is skipped and will be retried on the next start: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return undefined;
+    }
+    return packageKnowledgeBase;
+  }
+
+  /**
+   * Indexes integrations for ELSER semantic search, skipping packages whose version is already indexed.
+   * Note: changes to how the doc (`elser_embedding`, `knowledge_base`, `data_streams`, `fields_metadata`)
+   * is built only apply to a package once its version changes.
+   */
   public async populate(): Promise<void> {
     const index = await this.getIndexName();
     const packages = await this.getSecurityLogsPackages();
     if (packages) {
-      const ragIntegrations = await pMap(packages, (pkg) => this.processIntegration(pkg), {
+      const changedPackages = await filterUnchangedByVersion({
+        esClient: this.esClient,
+        index,
+        logger: this.logger,
+        items: packages,
+        getItemDetails: ({ name, version }) => ({ id: name, version }),
+      });
+
+      const ragIntegrations = await pMap(changedPackages, (pkg) => this.processIntegration(pkg), {
         concurrency: PACKAGE_METADATA_CONCURRENCY,
       });
 
@@ -92,7 +195,9 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
       );
 
       if (validIntegrations.length === 0) {
-        this.logger.debug('No security integrations with logs data streams found to index');
+        this.logger.debug(
+          'No new or updated security integrations with logs data streams to index'
+        );
         return;
       }
 

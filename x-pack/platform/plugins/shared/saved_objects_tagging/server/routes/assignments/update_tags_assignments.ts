@@ -11,8 +11,8 @@ import { AssignmentError } from '../../services';
 
 export const registerUpdateTagsAssignmentsRoute = (router: TagsPluginRouter) => {
   const objectReferenceSchema = schema.object({
-    type: schema.string(),
-    id: schema.string(),
+    type: schema.string({ minLength: 1, maxLength: 256 }),
+    id: schema.string({ minLength: 1, maxLength: 256 }),
   });
 
   router.post(
@@ -28,7 +28,10 @@ export const registerUpdateTagsAssignmentsRoute = (router: TagsPluginRouter) => 
       validate: {
         body: schema.object(
           {
-            tags: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
+            tags: schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
+              minSize: 1,
+              maxSize: 100,
+            }),
             assign: schema.arrayOf(objectReferenceSchema, { defaultValue: [], maxSize: 1000 }),
             unassign: schema.arrayOf(objectReferenceSchema, { defaultValue: [], maxSize: 1000 }),
           },

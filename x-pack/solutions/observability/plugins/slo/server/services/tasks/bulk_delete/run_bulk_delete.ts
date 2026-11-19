@@ -20,14 +20,14 @@ interface Dependencies {
   rulesClient: RulesClientApi;
   deleteSLO: DeleteSLO;
   logger: Logger;
-  abortController: AbortController;
+  signal: AbortSignal;
 }
 
 export async function runBulkDelete(
   params: BulkDeleteParams,
   dependencies: Dependencies
 ): Promise<BulkDeleteResult[]> {
-  const { scopedClusterClient, rulesClient, deleteSLO, logger, abortController } = dependencies;
+  const { scopedClusterClient, rulesClient, deleteSLO, logger, signal } = dependencies;
 
   logger.debug(`Starting bulk deletion for SLO [${params.list.join(', ')}]`);
 
@@ -36,7 +36,11 @@ export async function runBulkDelete(
   const promises = params.list.map(async (sloId) => {
     return limiter(async () => {
       try {
-        await deleteSLO.execute(sloId, { skipRuleDeletion: true, skipDataDeletion: true });
+        await deleteSLO.execute(sloId, {
+          skipRuleDeletion: true,
+          skipDataDeletion: true,
+          bulk: true,
+        });
       } catch (err) {
         return {
           id: sloId,
@@ -74,7 +78,7 @@ export async function runBulkDelete(
             },
           },
         },
-        { signal: abortController.signal }
+        { signal }
       ),
       scopedClusterClient.asCurrentUser.deleteByQuery(
         {
@@ -94,7 +98,7 @@ export async function runBulkDelete(
             },
           },
         },
-        { signal: abortController.signal }
+        { signal }
       ),
     ]);
   } catch (err) {

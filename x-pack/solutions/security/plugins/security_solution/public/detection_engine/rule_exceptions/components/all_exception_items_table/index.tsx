@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
-import styled from 'styled-components';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import styled from '@emotion/styled';
 
 import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
@@ -30,6 +30,7 @@ import {
   getSavedObjectTypes,
 } from '@kbn/securitysolution-list-utils';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { EndpointExceptionsMovedCallout } from '../../../../exceptions/components/endpoint_exceptions_moved_callout';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
@@ -45,6 +46,7 @@ import { ExceptionsViewerUtility } from './utility_bar';
 import { ExceptionsViewerItems } from './all_items';
 import { EditExceptionFlyout } from '../edit_exception_flyout';
 import { AddExceptionFlyout } from '../add_exception_flyout';
+import { ExceptionItemDeleteConfirmModal } from '../exception_item_delete_confirm_modal';
 import * as i18n from './translations';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import type { Rule } from '../../../rule_management/logic/types';
@@ -431,6 +433,10 @@ const ExceptionsViewerComponent = ({
     [setFlyoutType, handleGetExceptionListItems, onRuleChange]
   );
 
+  const [exceptionToDelete, setExceptionToDelete] = useState<ExceptionListItemIdentifiers | null>(
+    null
+  );
+
   const handleDeleteException = useCallback(
     async ({ id: itemId, name, namespaceType }: ExceptionListItemIdentifiers) => {
       const abortCtrl = new AbortController();
@@ -461,6 +467,17 @@ const ExceptionsViewerComponent = ({
     },
     [handleGetExceptionListItems, services.http, setViewerState, toasts]
   );
+
+  const handleCancelDeleteException = useCallback(() => {
+    setExceptionToDelete(null);
+  }, []);
+
+  const handleConfirmDeleteException = useCallback(() => {
+    if (exceptionToDelete != null) {
+      handleDeleteException(exceptionToDelete);
+    }
+    setExceptionToDelete(null);
+  }, [exceptionToDelete, handleDeleteException]);
 
   // User privileges checks
   useEffect((): void => {
@@ -505,18 +522,53 @@ const ExceptionsViewerComponent = ({
   const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
     'endpointExceptionsMovedUnderManagement'
   );
-  // TODO: switch to per-policy use opt-in state in follow-up (https://github.com/elastic/security-team/issues/14870)
-  const hasUserOptedInForPerPolicyUse = true;
+  const { data: endpointPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
 
-  const showEndpointExceptionsMovedCallout =
-    isEndpointExceptionsMovedFFEnabled &&
-    (isEndpointSecurityRule ||
-      (isDetectionRuleWithEndpointExceptions && !hasUserOptedInForPerPolicyUse));
+  const endpointExceptionsMovedCallout = useMemo(() => {
+    if (!isEndpointExceptionsMovedFFEnabled) {
+      return null;
+    }
 
-  const showEndpointExceptionNoLongerEvaluatedCallout =
-    isEndpointExceptionsMovedFFEnabled &&
-    isDetectionRuleWithEndpointExceptions &&
-    hasUserOptedInForPerPolicyUse;
+    if (
+      isEndpointSecurityRule &&
+      (endpointPerPolicyOptIn?.status === false || endpointPerPolicyOptIn?.reason === 'userOptedIn')
+    ) {
+      return (
+        <EndpointExceptionsMovedCallout
+          id="exceptionsViewer-EndpointSecurityRule"
+          dismissable={false}
+          title="moved"
+        />
+      );
+    }
+
+    if (isDetectionRuleWithEndpointExceptions) {
+      if (endpointPerPolicyOptIn?.status === false) {
+        return (
+          <EndpointExceptionsMovedCallout
+            id="exceptionsViewer-rulesWithEndpointExceptions-NotOptedIn"
+            dismissable={false}
+            title="moved"
+          />
+        );
+      } else if (endpointPerPolicyOptIn?.reason === 'userOptedIn') {
+        return (
+          <EndpointExceptionsMovedCallout
+            id={`exceptionsViewer-rulesWithEndpointExceptions-UserOptedIn`}
+            dismissable={true}
+            title="noLongerEvaluatedOnRules"
+          />
+        );
+      }
+    }
+
+    return null;
+  }, [
+    isEndpointExceptionsMovedFFEnabled,
+    isEndpointSecurityRule,
+    endpointPerPolicyOptIn,
+    isDetectionRuleWithEndpointExceptions,
+  ]);
 
   return (
     <>
@@ -535,6 +587,14 @@ const ExceptionsViewerComponent = ({
           />
         )}
 
+      {exceptionToDelete != null && (
+        <ExceptionItemDeleteConfirmModal
+          exceptionItemName={exceptionToDelete.name}
+          onCancel={handleCancelDeleteException}
+          onConfirm={handleConfirmDeleteException}
+        />
+      )}
+
       {currenFlyout === 'addException' && rule != null && (
         <AddExceptionFlyout
           rules={[rule]}
@@ -549,20 +609,7 @@ const ExceptionsViewerComponent = ({
 
       <EuiPanel hasBorder={false} hasShadow={false}>
         <>
-          {showEndpointExceptionsMovedCallout && (
-            <EndpointExceptionsMovedCallout
-              id="exceptionsViewer-EndpointSecurityRule"
-              dismissable={false}
-              title="moved"
-            />
-          )}
-          {showEndpointExceptionNoLongerEvaluatedCallout && (
-            <EndpointExceptionsMovedCallout
-              id={`exceptionsViewer-rulesWithEndpointExceptions`}
-              dismissable={true}
-              title="noLongerEvaluatedOnRules"
-            />
-          )}
+          {endpointExceptionsMovedCallout}
 
           <StyledText size="s">
             {isEndpointSpecified ? i18n.ENDPOINT_EXCEPTIONS_TAB_ABOUT : i18n.EXCEPTIONS_TAB_ABOUT}
@@ -596,7 +643,7 @@ const ExceptionsViewerComponent = ({
             isEndpoint={isEndpointSpecified}
             ruleReferences={allReferences}
             viewerState={viewerState}
-            onDeleteException={handleDeleteException}
+            onDeleteException={setExceptionToDelete}
             onEditExceptionItem={handleEditException}
             onCreateExceptionListItem={handleAddException}
           />

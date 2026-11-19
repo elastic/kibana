@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import {
   CaseStatuses,
   CaseSeverity,
@@ -15,7 +16,12 @@ import {
 } from '@kbn/cases-plugin/common/types/domain';
 import type { ConnectorJiraTypeFields } from '@kbn/cases-plugin/common/types/domain';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
-import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
+import {
+  getPostCaseRequest,
+  postCaseResp,
+  defaultUser,
+  userActionSourceUser,
+} from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   createCase,
@@ -25,6 +31,7 @@ import {
   createConfiguration,
   getConfigurationRequest,
   getCaseSavedObjectsFromES,
+  getCase,
 } from '../../../../common/lib/api';
 import {
   secOnly,
@@ -150,6 +157,7 @@ export default ({ getService }: FtrProviderContext): void => {
           created_by: defaultUser,
           comment_id: null,
           owner: 'securitySolutionFixture',
+          source: userActionSourceUser,
           payload: {
             description: postedCase.description,
             title: postedCase.title,
@@ -733,6 +741,81 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(theCase.total_alerts).to.eql(0);
         expect(theCase.total_comments).to.eql(0);
+      });
+    });
+
+    describe('extract_observables_source', () => {
+      // The fixture owner has no auto-extract default, so the baseline value is `false`.
+      it('stores "explicit" when the request value differs from the default', async () => {
+        await createCase(
+          supertest,
+          getPostCaseRequest({ settings: { syncAlerts: true, extractObservables: true } })
+        );
+
+        const res = await getCaseSavedObjectsFromES({ es });
+
+        expect(res.body.hits.hits.length).to.eql(1);
+        expect(res.body.hits.hits[0]._source?.cases!.extract_observables_source).to.eql('explicit');
+      });
+
+      it('stores "space_default" when the request value equals the default', async () => {
+        await createCase(
+          supertest,
+          getPostCaseRequest({ settings: { syncAlerts: true, extractObservables: false } })
+        );
+
+        const res = await getCaseSavedObjectsFromES({ es });
+
+        expect(res.body.hits.hits.length).to.eql(1);
+        expect(res.body.hits.hits[0]._source?.cases!.extract_observables_source).to.eql(
+          'space_default'
+        );
+      });
+
+      it('stores "space_default" when the request omits settings.extractObservables', async () => {
+        await createCase(supertest, getPostCaseRequest({ settings: { syncAlerts: true } }));
+
+        const res = await getCaseSavedObjectsFromES({ es });
+
+        expect(res.body.hits.hits.length).to.eql(1);
+        expect(res.body.hits.hits[0]._source?.cases!.extract_observables_source).to.eql(
+          'space_default'
+        );
+      });
+
+      it('does not return the source in the create or the get response', async () => {
+        const createdCase = await createCase(supertest, getPostCaseRequest());
+        const fetchedCase = await getCase({ supertest, caseId: createdCase.id });
+
+        for (const theCase of [createdCase, fetchedCase]) {
+          expect(Object.keys(theCase)).not.to.contain('extract_observables_source');
+          expect(Object.keys(theCase.settings)).to.eql(['syncAlerts', 'extractObservables']);
+        }
+      });
+
+      it('returns a 400 when the request contains a top-level extract_observables_source', async () => {
+        await createCase(
+          supertest,
+          {
+            ...getPostCaseRequest(),
+            extract_observables_source: 'rule',
+          } as unknown as CasePostRequest,
+          400
+        );
+      });
+
+      it('returns a 400 when the request contains settings.extractObservablesSource', async () => {
+        await createCase(
+          supertest,
+          getPostCaseRequest({
+            settings: {
+              syncAlerts: true,
+              extractObservables: true,
+              extractObservablesSource: 'rule',
+            } as unknown as CasePostRequest['settings'],
+          }),
+          400
+        );
       });
     });
 

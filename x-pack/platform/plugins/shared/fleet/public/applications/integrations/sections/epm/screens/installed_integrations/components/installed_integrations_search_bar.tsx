@@ -113,6 +113,7 @@ export const InstalledIntegrationsSearchBar: React.FunctionComponent<{
           <EuiFilterGroup>
             {statuses.map((item) => (
               <EuiFilterButton
+                key={item.status}
                 iconType={item.iconType}
                 iconSide="left"
                 css={css`

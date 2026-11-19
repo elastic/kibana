@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorContractUnion, ConnectorTypeInfo } from '@kbn/workflows';
+import type {
+  ConnectorContractUnion,
+  ConnectorTypeInfo,
+  StepDeprecationInfo,
+} from '@kbn/workflows';
 import type {
   PublicStepDefinition,
   WorkflowsExtensionsPublicPluginStart,
@@ -17,7 +21,7 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 
-type WorkflowsExtensions =
+export type WorkflowsExtensions =
   | WorkflowsExtensionsPublicPluginStart
   | WorkflowsExtensionsServerPluginStart;
 
@@ -31,6 +35,7 @@ class StepSchemas {
   private workflowsExtensions: WorkflowsExtensions | null = null;
   private allConnectorsCache: ConnectorContractUnion[] | null = null;
   private allConnectorsMapCache: Map<string, ConnectorContractUnion> | null = null;
+  private deprecatedStepMetadataCache: Readonly<Record<string, StepDeprecationInfo>> | null = null;
   private dynamicConnectorTypesCache: Record<string, ConnectorTypeInfo> | null = null;
   private lastProcessedConnectorTypesHash: string | null = null;
 
@@ -56,15 +61,6 @@ class StepSchemas {
     return this.workflowsExtensions?.getStepDefinition(stepTypeId);
   }
 
-  /**
-   * Helper function to check if a step definition is a public step definition
-   */
-  public isPublicStepDefinition(
-    stepDefinition: ServerStepDefinition | PublicStepDefinition
-  ): stepDefinition is PublicStepDefinition {
-    return 'label' in stepDefinition;
-  }
-
   // Cache getters and setters
   public getAllConnectorsCache(): ConnectorContractUnion[] | null {
     return this.allConnectorsCache;
@@ -72,6 +68,7 @@ class StepSchemas {
 
   public setAllConnectorsCache(cache: ConnectorContractUnion[] | null): void {
     this.allConnectorsCache = cache;
+    this.deprecatedStepMetadataCache = null;
   }
 
   public getAllConnectorsMapCache(): Map<string, ConnectorContractUnion> | null {
@@ -80,6 +77,16 @@ class StepSchemas {
 
   public setAllConnectorsMapCache(cache: Map<string, ConnectorContractUnion> | null): void {
     this.allConnectorsMapCache = cache;
+  }
+
+  public getDeprecatedStepMetadataCache(): Readonly<Record<string, StepDeprecationInfo>> | null {
+    return this.deprecatedStepMetadataCache;
+  }
+
+  public setDeprecatedStepMetadataCache(
+    cache: Readonly<Record<string, StepDeprecationInfo>> | null
+  ): void {
+    this.deprecatedStepMetadataCache = cache;
   }
 
   public getDynamicConnectorTypesCache(): Record<string, ConnectorTypeInfo> | null {

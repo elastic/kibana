@@ -10,7 +10,6 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { CannotOverrideError } from '../ui_settings_errors';
-import { Cache } from '../cache';
 import type { UiSettingsServiceOptions } from '../types';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
 
@@ -33,34 +32,84 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   private readonly id: UiSettingsServiceOptions['id'];
   private readonly buildNum: UiSettingsServiceOptions['buildNum'];
   private readonly savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
-  private readonly cache: Cache;
+  private readonly sharedUserProvidedCache?: UiSettingsServiceOptions['sharedUserProvidedCache'];
+  private readonly namespace: string;
 
   constructor(options: UiSettingsServiceOptions) {
     super(options);
-    const { savedObjectsClient, type, id, buildNum } = options;
+    const { savedObjectsClient, type, id, buildNum, sharedUserProvidedCache, namespace } = options;
     this.type = type;
     this.id = id;
     this.buildNum = buildNum;
     this.savedObjectsClient = savedObjectsClient;
-    this.cache = new Cache();
+    this.sharedUserProvidedCache = sharedUserProvidedCache;
+    this.namespace = namespace;
   }
 
-  async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
-    const cachedValue = this.cache.get();
-    if (cachedValue) {
-      return cachedValue;
+  async getUserProvided<T = unknown>(bypassCache = false): Promise<UserProvided<T>> {
+    if (this.sharedUserProvidedCache && !bypassCache) {
+      // check for in-flight read request (deduplication)
+      const inflightRead = this.sharedUserProvidedCache.getInflightRead(this.namespace);
+      if (inflightRead) {
+        try {
+          this.log.debug(
+            `[UiSettings] getUserProvided using existing in-flight read for namespace=${this.namespace}`
+          );
+          return this.applyOverrides(await inflightRead);
+        } catch {
+          // The in-flight read belongs to another caller, so this caller reads with its own client.
+          this.log.debug(
+            `[UiSettings] getUserProvided in-flight read failed for namespace=${this.namespace}; reading with this caller`
+          );
+        }
+      }
+
+      const sharedCached = this.sharedUserProvidedCache.get(this.namespace);
+      if (sharedCached) {
+        return this.applyOverrides(sharedCached);
+      }
+
+      this.log.debug(
+        `[UiSettings] getUserProvided cache MISS - fetching from ES for namespace=${this.namespace}`
+      );
     }
 
-    const userProvided: UserProvided<T> = this.onReadHook(await this.read());
+    // Fetch from ES, process, and cache
+    const promise = this.computeUserProvided<T>();
 
-    // write all overridden keys, dropping the userValue is override is null and
-    // adding keys for overrides that are not in saved object
+    if (!bypassCache) {
+      // Register in-flight promise for deduplication
+      //
+      // if the cache is being bypassed, we don't want to register the promise as other
+      // calls should not wait for it but should use the existing cache entry until it is updated
+      this.sharedUserProvidedCache?.setInflightRead(this.namespace, promise);
+    }
+
+    try {
+      return this.applyOverrides(await promise);
+    } catch (error) {
+      // A 403 or an unavailable Elasticsearch resolves to defaults for this caller only.
+      // The shared promise still rejects, so anyone waiting on it reads again.
+      if (this.isIgnorableError(error)) {
+        return this.applyOverrides({});
+      }
+      throw error;
+    }
+  }
+
+  private applyOverrides<T = unknown>(userProvided: UserProvided<T>): UserProvided<T> {
+    const result = { ...userProvided };
     for (const [key, value] of Object.entries(this.overrides)) {
-      userProvided[key] =
+      result[key] =
         value === null ? { isOverridden: true } : { isOverridden: true, userValue: value };
     }
+    return result;
+  }
 
-    this.cache.set(userProvided);
+  private async computeUserProvided<T = unknown>(): Promise<UserProvided<T>> {
+    const userProvided: UserProvided<T> = this.onReadHook(await this.read());
+
+    this.sharedUserProvidedCache?.set(this.namespace, userProvided);
 
     return userProvided;
   }
@@ -69,9 +118,22 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     changes: Record<string, any>,
     { handleWriteErrors }: { validateKeys?: boolean; handleWriteErrors?: boolean } = {}
   ) {
-    this.cache.del();
+    if (this.sharedUserProvidedCache) {
+      this.log.debug(
+        `[UiSettings] setMany invalidating SHARED cache for namespace=${this.namespace}`
+      );
+      this.sharedUserProvidedCache.del(this.namespace);
+    }
+
     this.onWriteHook(changes);
+
     await this.write({ changes, handleWriteErrors });
+
+    // Invalidate again after the write commits: a concurrent read landing in the window between the
+    // pre-write invalidation and the ES commit can re-cache the pre-write value for a fresh TTL.
+    this.sharedUserProvidedCache?.del(this.namespace);
+
+    this.log.debug(`[UiSettings] setMany ES write COMPLETED for namespace=${this.namespace}`);
   }
 
   async set(key: string, value: any) {
@@ -182,10 +244,6 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
         }
 
         return failedUpgradeAttributes;
-      }
-
-      if (this.isIgnorableError(error)) {
-        return {};
       }
 
       throw error;

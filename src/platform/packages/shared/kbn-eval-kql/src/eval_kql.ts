@@ -18,8 +18,8 @@ import type {
 import { KQL_NODE_TYPE_WILDCARD, nodeTypes } from '@kbn/es-query/src/kuery/node_types';
 import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 
-export function evaluateKql(kql: string, context: Record<string, any>): boolean {
-  const kqlAst = fromKueryExpression(kql);
+export function evaluateKql(kql: string | KueryNode, context: Record<string, any>): boolean {
+  const kqlAst = typeof kql === 'string' ? fromKueryExpression(kql) : kql;
   return evaluateRecursive(kqlAst, context);
 }
 
@@ -164,7 +164,13 @@ function readContextPath(
   let result: any = context;
 
   for (const segment of propertyPathSegments) {
-    if (!(segment in result)) {
+    // A path segment can only be read from an object. When an intermediate
+    // value is a scalar/null/undefined (e.g. `a.b` where `a` resolved to a
+    // string, or to `undefined` because the referenced step output is absent),
+    // the next segment does not exist — treat it as "not found" rather than
+    // letting `segment in result` throw `TypeError: Cannot use 'in' operator`.
+    // KQL term semantics: a field path that does not resolve is simply false.
+    if (result === null || typeof result !== 'object' || !(segment in result)) {
       return { pathExists: false, value: undefined }; // Path not found in context
     }
 
@@ -174,6 +180,10 @@ function readContextPath(
   return { pathExists: true, value: result };
 }
 
+function isDateMathExpression(value: string): boolean {
+  return value.startsWith('now') || value.includes('||');
+}
+
 function convertLiteralToValue(
   node: KqlLiteralNode,
   expectedType: 'string' | 'number' | 'boolean'
@@ -181,10 +191,11 @@ function convertLiteralToValue(
   switch (expectedType) {
     case 'string': {
       const strValue = String(node.value);
-      const parsed = dateMath.parse(strValue);
-      if (parsed?.isValid()) {
-        // it's a date math expression, return the resolved ISO string
-        return parsed.toISOString();
+      if (isDateMathExpression(strValue)) {
+        const parsed = dateMath.parse(strValue);
+        if (parsed?.isValid()) {
+          return parsed.toISOString();
+        }
       }
 
       return strValue;

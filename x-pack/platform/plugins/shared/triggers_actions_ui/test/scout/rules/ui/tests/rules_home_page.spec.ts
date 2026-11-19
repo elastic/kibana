@@ -1,0 +1,117 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { KibanaRole } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { triggersActionsRoute } from '@kbn/rule-data-utils';
+import {
+  test,
+  makeEsQueryRule,
+  openRulesListAndSearch,
+  CLASSIC_RULES_LIST_URL_RE,
+} from '../fixtures';
+
+const RULES_APP = 'rules';
+const APP_TITLE_SUBJ = 'appHeaderTitle';
+
+const ALERTS_AND_ACTIONS_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['.alerts-*'], privileges: ['read'] }],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: { actions: ['all'], stackAlerts: ['all'] },
+      spaces: ['*'],
+    },
+  ],
+};
+
+const ONLY_ACTIONS_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [] },
+  kibana: [
+    {
+      base: [],
+      feature: { actions: ['all'] },
+      spaces: ['*'],
+    },
+  ],
+};
+
+test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
+  const createdRuleIds: string[] = [];
+
+  test.afterAll(async ({ apiServices }) => {
+    await Promise.allSettled(createdRuleIds.map((id) => apiServices.alerting.rules.delete(id)));
+    createdRuleIds.length = 0;
+  });
+
+  test('loads the Rules page with alerts-and-actions role', async ({ browserAuth, page }) => {
+    await browserAuth.loginWithCustomRole(ALERTS_AND_ACTIONS_ROLE);
+    await page.gotoApp(RULES_APP);
+
+    await expect(page.testSubj.locator(APP_TITLE_SUBJ)).toHaveText('Rules');
+    await expect(page).toHaveURL(CLASSIC_RULES_LIST_URL_RE);
+  });
+
+  test('shows the no-permission prompt when the user has actions but no alerting privilege', async ({
+    browserAuth,
+    page,
+  }) => {
+    await browserAuth.loginWithCustomRole(ONLY_ACTIONS_ROLE);
+    await page.gotoApp(RULES_APP);
+
+    await expect(page.testSubj.locator('noPermissionPrompt')).toBeVisible();
+  });
+
+  test('loads the Rules page as admin', async ({ browserAuth, page }) => {
+    await browserAuth.loginAsAdmin();
+    await page.gotoApp(RULES_APP);
+
+    await expect(page.testSubj.locator(APP_TITLE_SUBJ)).toHaveText('Rules');
+    await expect(page).toHaveURL(CLASSIC_RULES_LIST_URL_RE);
+  });
+
+  test('renders a newly-created rule and opens its details', async ({
+    apiServices,
+    browserAuth,
+    page,
+    pageObjects,
+  }) => {
+    const rules = pageObjects.classicRulesPage;
+    const ruleResponse = await apiServices.alerting.rules.create(
+      makeEsQueryRule('scout-home-page')
+    );
+    const ruleId = ruleResponse.data.id;
+    const ruleName = ruleResponse.data.name;
+    createdRuleIds.push(ruleId);
+
+    await browserAuth.loginAsAdmin();
+    await openRulesListAndSearch(page, ruleName);
+
+    await test.step('renders the rules list with the rule visible', async () => {
+      await expect(rules.rulesList).toBeVisible();
+      await expect(rules.ruleNameLink(ruleName)).toBeVisible();
+    });
+
+    await test.step('rule-name link href stays within the host mount', async () => {
+      await expect(rules.ruleNameLink(ruleName)).toHaveAttribute(
+        'href',
+        /\/triggersActions\/rule\//
+      );
+      await expect(rules.ruleNameLink(ruleName)).not.toHaveAttribute('href', /\/app\/rules\//);
+    });
+
+    await test.step('navigates to the rule details page when clicking the rule', async () => {
+      await rules.clickRuleName(ruleName);
+      await page.waitForURL(new RegExp(`/rule/${ruleId}(\\b|$)`));
+      await expect(page).toHaveURL(new RegExp(`${triggersActionsRoute}/rule/${ruleId}`));
+    });
+  });
+});

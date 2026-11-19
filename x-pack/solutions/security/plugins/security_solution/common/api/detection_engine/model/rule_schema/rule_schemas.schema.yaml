@@ -191,11 +191,17 @@ components:
           format: date-time
         updated_by:
           type: string
+        updated_by_profile_uid:
+          type: string
+          description: The user profile UID of the user who last updated the rule. Only present when the rule was updated through an authenticated Kibana session. Resolve it to a display name with the user profiles API.
         created_at:
           type: string
           format: date-time
         created_by:
           type: string
+        created_by_profile_uid:
+          type: string
+          description: The user profile UID of the user who created the rule. Only present when the rule was created through an authenticated Kibana session. Resolve it to a display name with the user profiles API.
         revision:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleRevision'
         # NOTE: For now, Required Fields are
@@ -921,6 +927,15 @@ components:
     RuleCreateProps:
       discriminator:
         propertyName: type
+        mapping:
+          eql: '#/components/schemas/EqlRuleCreateProps'
+          query: '#/components/schemas/QueryRuleCreateProps'
+          saved_query: '#/components/schemas/SavedQueryRuleCreateProps'
+          threshold: '#/components/schemas/ThresholdRuleCreateProps'
+          threat_match: '#/components/schemas/ThreatMatchRuleCreateProps'
+          machine_learning: '#/components/schemas/MachineLearningRuleCreateProps'
+          new_terms: '#/components/schemas/NewTermsRuleCreateProps'
+          esql: '#/components/schemas/EsqlRuleCreateProps'
       anyOf:
         - $ref: '#/components/schemas/EqlRuleCreateProps'
         - $ref: '#/components/schemas/QueryRuleCreateProps'
@@ -934,6 +949,15 @@ components:
     RuleUpdateProps:
       discriminator:
         propertyName: type
+        mapping:
+          eql: '#/components/schemas/EqlRuleUpdateProps'
+          query: '#/components/schemas/QueryRuleUpdateProps'
+          saved_query: '#/components/schemas/SavedQueryRuleUpdateProps'
+          threshold: '#/components/schemas/ThresholdRuleUpdateProps'
+          threat_match: '#/components/schemas/ThreatMatchRuleUpdateProps'
+          machine_learning: '#/components/schemas/MachineLearningRuleUpdateProps'
+          new_terms: '#/components/schemas/NewTermsRuleUpdateProps'
+          esql: '#/components/schemas/EsqlRuleUpdateProps'
       anyOf:
         - $ref: '#/components/schemas/EqlRuleUpdateProps'
         - $ref: '#/components/schemas/QueryRuleUpdateProps'
@@ -958,6 +982,15 @@ components:
     RuleResponse:
       discriminator:
         propertyName: type
+        mapping:
+          eql: '#/components/schemas/EqlRule'
+          query: '#/components/schemas/QueryRule'
+          saved_query: '#/components/schemas/SavedQueryRule'
+          threshold: '#/components/schemas/ThresholdRule'
+          threat_match: '#/components/schemas/ThreatMatchRule'
+          machine_learning: '#/components/schemas/MachineLearningRule'
+          new_terms: '#/components/schemas/NewTermsRule'
+          esql: '#/components/schemas/EsqlRule'
       anyOf:
         - $ref: '#/components/schemas/EqlRule'
         - $ref: '#/components/schemas/QueryRule'

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { JobCreate as JobCreateView } from './job_create';
 
 import { isSaving, getCreateJobError, getCloneJobConfig } from '../../store/selectors';

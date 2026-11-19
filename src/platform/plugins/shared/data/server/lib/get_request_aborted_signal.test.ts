@@ -23,13 +23,13 @@ describe('abortableRequestHandler', () => {
 
     // Shouldn't be aborted or call onAborted prior to disconnecting
     expect(signal.aborted).toBe(false);
-    expect(onAborted).not.toBeCalled();
+    expect(onAborted).not.toHaveBeenCalled();
 
     abortedSubject.next();
     jest.runAllTimers();
 
     // Should be aborted and call onAborted after disconnecting
     expect(signal.aborted).toBe(true);
-    expect(onAborted).toBeCalled();
+    expect(onAborted).toHaveBeenCalled();
   });
 });

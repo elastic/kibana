@@ -17,7 +17,10 @@ project:
   owner: '@elastic/response-ops'
   sourceRoot: x-pack/platform/plugins/shared/actions
 dependsOn:
+  - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
+  - '@kbn/crypto'
+  - '@kbn/human-readable-id'
   - '@kbn/spaces-plugin'
   - '@kbn/security-plugin'
   - '@kbn/licensing-plugin'
@@ -50,12 +53,14 @@ dependsOn:
   - '@kbn/serverless'
   - '@kbn/actions-types'
   - '@kbn/core-http-server'
+  - '@kbn/core-spaces-common'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/security-plugin-types-server'
   - '@kbn/core-application-common'
   - '@kbn/cloud-plugin'
   - '@kbn/core-http-server-utils'
   - '@kbn/es-errors'
+  - '@kbn/storage-adapter'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/licensing-types'
   - '@kbn/lazy-object'
@@ -65,12 +70,16 @@ dependsOn:
   - '@kbn/actions-utils'
   - '@kbn/encrypted-saved-objects-shared'
   - '@kbn/usage-api-plugin'
+  - '@kbn/core-security-common'
+  - '@kbn/core-security-server'
+  - '@kbn/core-test-helpers-model-versions'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - server/**/*
@@ -78,26 +87,4 @@ fileGroups:
     - public/**/*
     - common/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+tasks: {}

@@ -64,7 +64,7 @@ export function SLOContextMenu({
     <EuiButtonEmpty
       data-test-subj={`${id}GroupMenuButton`}
       size="xs"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={handleTogglePopover}
       isLoading={loading}
@@ -92,7 +92,7 @@ export function SLOContextMenu({
               anchorPosition="downLeft"
               aria-label={label}
             >
-              <EuiContextMenuPanel size="s" items={items} style={{ minWidth: 160 }} />
+              <EuiContextMenuPanel items={items} style={{ minWidth: 160 }} />
             </EuiPopover>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -114,7 +114,6 @@ export function ContextMenuItem({
 
   return (
     <EuiContextMenuItem
-      size="s"
       aria-label={option.label}
       key={option.value}
       icon={getIconType(option.checked)}

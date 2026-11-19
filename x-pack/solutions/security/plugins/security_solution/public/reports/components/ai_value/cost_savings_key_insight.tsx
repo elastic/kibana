@@ -16,26 +16,36 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import { MessageRole } from '@kbn/inference-common';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { VisualizationTablesWithMeta } from '../../../common/components/visualization_actions/types';
 import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from './translations';
 import { licenseService } from '../../../common/hooks/use_license';
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import { useFindCostSavingsPrompts } from '../../hooks/use_find_cost_savings_prompts';
-import { useDefaultAIConnectorId } from '../../../common/hooks/use_default_ai_connector_id';
 import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
+import { getSampleKeyInsightMarkdown } from './sample_data';
 
 interface Props {
-  isLoading: boolean;
+  isSample: boolean;
+  from: string;
+  to: string;
   lensResponse: VisualizationTablesWithMeta | null;
 }
 
-const CostSavingsKeyInsightLoader: React.FC<Props> = ({ isLoading, lensResponse }) => {
+const CostSavingsKeyInsightLoader: React.FC<{
+  lensResponse: VisualizationTablesWithMeta | null;
+}> = ({ lensResponse }) => {
   const { http, notifications, inference } = useKibana().services;
   const [insightResult, setInsightResult] = useState<string>('');
-  const { defaultConnectorId } = useDefaultAIConnectorId();
+  const { data: aiConnectors } = useLoadConnectors({
+    http,
+    featureId: 'ai_value_report',
+    toasts: notifications.toasts,
+  });
+  const defaultConnectorId = aiConnectors?.[0]?.id;
   const exportContext = useAIValueExportContext();
   const setInsightForExportContext = exportContext?.setInsight;
 
@@ -77,15 +87,14 @@ const CostSavingsKeyInsightLoader: React.FC<Props> = ({ isLoading, lensResponse 
       setInsightForExportContext?.(insightResult);
     }
   }, [setInsightForExportContext, insightResult]);
-  return <CostSavingsKeyInsightView insight={insightResult} isLoading={isLoading} />;
+  return <CostSavingsKeyInsightView insight={insightResult} />;
 };
 
 interface ViewProps {
   insight: string;
-  isLoading: boolean;
 }
 
-const CostSavingsKeyInsightView: React.FC<ViewProps> = ({ insight, isLoading }) => {
+const CostSavingsKeyInsightView: React.FC<ViewProps> = ({ insight }) => {
   const {
     euiTheme: { size, colors },
   } = useEuiTheme();
@@ -104,7 +113,7 @@ const CostSavingsKeyInsightView: React.FC<ViewProps> = ({ insight, isLoading }) 
 
   return (
     <div
-      data-test-subj="alertProcessingKeyInsightsContainer"
+      data-test-subj="costSavingsKeyInsightsContainer"
       css={css`
         background: linear-gradient(
           112deg,
@@ -120,51 +129,50 @@ const CostSavingsKeyInsightView: React.FC<ViewProps> = ({ insight, isLoading }) 
         }
       `}
     >
-      <span>
-        <EuiFlexGroup
-          gutterSize="s"
-          alignItems="center"
-          responsive={false}
-          data-test-subj="alertProcessingKeyInsightsGreetingGroup"
-          // These props are necessary when rendering the component in export mode.
-          // This attribute signals the export logic that it should wait for this element
-          data-shared-item
-          // This indicates that it finished loading and therefore it can be exported
-          data-render-complete={isRenderComplete}
-          ref={containerRef}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="logoElastic" size="m" data-test-subj="alertProcessingKeyInsightsLogo" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <p data-test-subj="alertProcessingKeyInsightsGreeting">{i18n.KEY_INSIGHT}</p>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="flexStart"
+        responsive={false}
+        data-test-subj="costSavingsKeyInsightsGreetingGroup"
+        // These props are necessary when rendering the component in export mode.
+        // This attribute signals the export logic that it should wait for this element
+        data-shared-item
+        // This indicates that it finished loading and therefore it can be exported
+        data-render-complete={isRenderComplete}
+        ref={containerRef}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <p data-test-subj="costSavingsKeyInsightsGreeting">{i18n.KEY_INSIGHT}</p>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="sparkles" color="primary" aria-hidden={true} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-        <EuiSpacer size="m" />
+      <EuiSpacer size="m" />
 
-        {insight && !isLoading ? (
-          <Markdown
-            onRender={handleMarkdownRender}
-            markdown={insight}
-            className="keyInsightMarkdown"
-          />
-        ) : (
-          <EuiSkeletonText lines={3} size="s" isLoading={true} />
-        )}
-      </span>
+      {insight ? (
+        <Markdown
+          onRender={handleMarkdownRender}
+          markdownContent={insight}
+          className="keyInsightMarkdown"
+          readOnly
+        />
+      ) : (
+        <EuiSkeletonText lines={3} size="s" isLoading={true} />
+      )}
     </div>
   );
 };
 
-export const CostSavingsKeyInsight: React.FC<Props> = (props) => {
+export const CostSavingsKeyInsight: React.FC<Props> = ({ isSample, from, to, lensResponse }) => {
   const exportContext = useAIValueExportContext();
-  const Loading = useMemo(() => <CostSavingsKeyInsightView isLoading={true} insight={''} />, []);
+  const Loading = useMemo(() => <CostSavingsKeyInsightView insight={''} />, []);
 
-  if (props.isLoading) {
-    return Loading;
+  if (isSample) {
+    return <CostSavingsKeyInsightView insight={getSampleKeyInsightMarkdown(from, to)} />;
   }
 
   if (exportContext?.forwardedState?.insight) {
@@ -178,11 +186,11 @@ export const CostSavingsKeyInsight: React.FC<Props> = (props) => {
     }
 
     if (shouldRegenerateInsight === false) {
-      return <CostSavingsKeyInsightView isLoading={false} insight={insight} />;
+      return <CostSavingsKeyInsightView insight={insight} />;
     }
   }
 
-  return <CostSavingsKeyInsightLoader isLoading={false} lensResponse={props.lensResponse} />;
+  return <CostSavingsKeyInsightLoader lensResponse={lensResponse} />;
 };
 
 const getPrompt = (result: string, prompts: { part1: string; part2: string }) => {

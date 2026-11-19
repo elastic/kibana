@@ -5,7 +5,7 @@ steps:
       - |
           STORYBOOK_URL=$$(buildkite-agent meta-data get pr_comment:storybooks:head)
 
-          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+          node .buildkite/scripts/lifecycle/comment_on_pr.ts \
             --message "$$STORYBOOK_URL" \
             --context "kibana-storybooks-from-pr" \
             --clear-previous
@@ -13,7 +13,10 @@ steps:
       provider: gcp
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
-      machineType: n2-standard-8
+      machineType: n4-standard-16
+      diskType: hyperdisk-balanced
+      preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c
     timeout_in_minutes: 50
     retry:
       automatic:

@@ -14,7 +14,7 @@ export const SuspendProcessRouteRequestSchema = {
     ...BaseActionRequestSchema,
     parameters: schema.oneOf([
       schema.object({ pid: schema.number({ min: 1 }) }),
-      schema.object({ entity_id: schema.string({ minLength: 1 }) }),
+      schema.object({ entity_id: schema.string({ minLength: 1, maxLength: 256 }) }),
     ]),
   }),
 };

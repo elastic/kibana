@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { AlertsHistogramPanel } from '../../alerts_kpis/alerts_histogram_panel';
 import { CHART_PANEL_HEIGHT, TREND_CHART_HEIGHT } from './common/constants';
 import { useAttacksKpiState } from './common/use_attacks_kpi_state';

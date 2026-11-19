@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-# Sync GitHub `models:*` and `models:judge:*` labels from LiteLLM + EIS model discovery.
+# Sync GitHub `models:*` and `models:judge:*` labels from OpenRouter + EIS model discovery.
 #
 # This step discovers models from both sources and runs create_models_labels.sh with --prune
 # to create/update labels for active models and deprecate labels for decommissioned ones.
@@ -57,19 +57,19 @@ if [[ "${EIS_DISCOVERY_OK}" == "true" ]]; then
   LABEL_ARGS+=(--judge-from-eis-models-json "target/eis_models.json")
 fi
 
-# --- Source 2: LiteLLM model discovery ---
+# --- Source 2: OpenRouter model discovery ---
 # Decode vault config from KBN_EVALS_CONFIG_B64 to a temp file so create_models_labels.sh
-# can read LiteLLM credentials (baseUrl, virtualKey).
+# can read OpenRouter credentials (baseUrl, apiKey).
 VAULT_CONFIG_TMP=""
 
-echo "--- LiteLLM model discovery"
+echo "--- OpenRouter model discovery"
 if [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
   VAULT_CONFIG_TMP="$(mktemp)"
   printf '%s' "$KBN_EVALS_CONFIG_B64" | base64 -d > "$VAULT_CONFIG_TMP"
-  LABEL_ARGS+=(--from-litellm-vault-config "$VAULT_CONFIG_TMP")
-  LABEL_ARGS+=(--judge-from-litellm-vault-config "$VAULT_CONFIG_TMP")
+  LABEL_ARGS+=(--from-openrouter-vault-config "$VAULT_CONFIG_TMP")
+  LABEL_ARGS+=(--judge-from-openrouter-vault-config "$VAULT_CONFIG_TMP")
 else
-  echo "Warning: KBN_EVALS_CONFIG_B64 not set; skipping LiteLLM model labels" >&2
+  echo "Warning: KBN_EVALS_CONFIG_B64 not set; skipping OpenRouter model labels" >&2
 fi
 
 # Clean up temp file on exit

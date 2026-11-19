@@ -120,6 +120,30 @@ describe('<ComponentTemplateList />', () => {
     });
   });
 
+  describe('WHEN manageIndexTemplates privilege is false', () => {
+    const readOnlyAppContext = {
+      privs: {
+        manageIndexTemplates: false,
+      },
+    };
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
+      renderComponentTemplateList(httpSetup, coreStart, { appContextMerge: readOnlyAppContext });
+      await screen.findByTestId('componentTemplatesTable');
+    });
+
+    test('SHOULD hide create, row actions, and bulk selection controls', () => {
+      expect(screen.queryByTestId('createComponentTemplateButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('editComponentTemplateButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('deleteComponentTemplatexButton')).not.toBeInTheDocument();
+
+      const table = getTable();
+      const firstRow = table.getRows()[0];
+      expect(within(firstRow as HTMLElement).queryByRole('checkbox')).not.toBeInTheDocument();
+    });
+  });
+
   describe('if filter is set, component templates are filtered', () => {
     test('search value is set if url param is set', async () => {
       const filter = 'usedBy=(test_index_template_1)';

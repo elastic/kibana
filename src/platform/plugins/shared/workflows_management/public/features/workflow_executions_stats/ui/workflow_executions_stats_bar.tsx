@@ -16,9 +16,9 @@ import {
   Position,
   ScaleType,
   Settings,
+  timeFormatter,
   Tooltip,
 } from '@elastic/charts';
-import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
 import { EuiPageTemplate, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -37,7 +37,7 @@ export function WorkflowExecutionStatsBar({ height }: WorkflowExecutionStatsBarP
     return <EuiPageTemplate offset={0} />;
   }
 
-  if (data.executions.length === 0) {
+  if (!data.executions?.length) {
     return null;
   }
 
@@ -70,8 +70,10 @@ export function WorkflowExecutionStatsBar({ height }: WorkflowExecutionStatsBarP
     [ExecutionStatus.CANCELLED]: euiTheme.colors.vis.euiColorVis8,
     [ExecutionStatus.TIMED_OUT]: euiTheme.colors.vis.euiColorVis6,
     [ExecutionStatus.PENDING]: euiTheme.colors.vis.euiColorVis1,
+    [ExecutionStatus.QUEUED]: euiTheme.colors.vis.euiColorVis1,
     [ExecutionStatus.WAITING]: euiTheme.colors.vis.euiColorVis1,
     [ExecutionStatus.WAITING_FOR_INPUT]: euiTheme.colors.vis.euiColorVis1,
+    [ExecutionStatus.WAITING_FOR_CHILD]: euiTheme.colors.vis.euiColorVis1,
     [ExecutionStatus.RUNNING]: euiTheme.colors.vis.euiColorVis1,
     [ExecutionStatus.SKIPPED]: euiTheme.colors.vis.euiColorVis1,
   };

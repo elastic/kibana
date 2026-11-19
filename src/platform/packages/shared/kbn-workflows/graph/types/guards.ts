@@ -12,8 +12,11 @@ import type {
   DataSetGraphNode,
   ElasticsearchGraphNode,
   KibanaGraphNode,
+  SyntheticGraphNode,
+  WaitForApprovalGraphNode,
   WaitForInputGraphNode,
   WaitGraphNode,
+  WorkflowExecuteGraphNode,
   WorkflowOutputGraphNode,
 } from './nodes/base';
 import type {
@@ -41,6 +44,7 @@ import type {
   ExitTimeoutZoneNode,
   ExitTryBlockNode,
 } from './nodes/on_failure_nodes';
+import type { EnterParallelNode, ExitParallelNode } from './nodes/parallel_nodes';
 import type {
   EnterCaseBranchNode,
   EnterDefaultBranchNode,
@@ -52,6 +56,9 @@ import type {
 import type { GraphNodeUnion } from './nodes/union';
 import type { LoopStepType } from '../../spec/schema';
 import { LoopStepTypes } from '../../spec/schema';
+
+export const isSynthetic = (node: GraphNodeUnion): node is SyntheticGraphNode =>
+  'isSynthetic' in node && node.isSynthetic === true;
 
 export const isAtomic = (node: GraphNodeUnion): node is AtomicGraphNode => node.type === 'atomic';
 
@@ -66,11 +73,17 @@ export const isWait = (node: GraphNodeUnion): node is WaitGraphNode => node.type
 export const isWaitForInput = (node: GraphNodeUnion): node is WaitForInputGraphNode =>
   node.type === 'waitForInput';
 
+export const isWaitForApproval = (node: GraphNodeUnion): node is WaitForApprovalGraphNode =>
+  node.type === 'waitForApproval';
+
 export const isDataSet = (node: GraphNodeUnion): node is DataSetGraphNode =>
   node.type === 'data.set';
 
 export const isWorkflowOutput = (node: GraphNodeUnion): node is WorkflowOutputGraphNode =>
   node.type === 'workflow.output';
+
+export const isWorkflowExecute = (node: GraphNodeUnion): node is WorkflowExecuteGraphNode =>
+  node.type === 'workflow.execute';
 
 export const isEnterIf = (node: GraphNodeUnion): node is EnterIfNode => node.type === 'enter-if';
 
@@ -98,6 +111,12 @@ export const isLoopEnterNode = (node: GraphNodeUnion): node is LoopEnterNode =>
 
 export const isExitWhile = (node: GraphNodeUnion): node is ExitWhileNode =>
   node.type === 'exit-while';
+
+export const isEnterParallel = (node: GraphNodeUnion): node is EnterParallelNode =>
+  node.type === 'enter-parallel';
+
+export const isExitParallel = (node: GraphNodeUnion): node is ExitParallelNode =>
+  node.type === 'exit-parallel';
 
 export const isEnterRetry = (node: GraphNodeUnion): node is EnterRetryNode =>
   node.type === 'enter-retry';

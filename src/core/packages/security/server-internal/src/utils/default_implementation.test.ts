@@ -8,6 +8,7 @@
  */
 
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { getDefaultSecurityImplementation } from './default_implementation';
 
 describe('getDefaultSecurityImplementation', () => {
@@ -21,6 +22,12 @@ describe('getDefaultSecurityImplementation', () => {
     it('returns null', async () => {
       const user = implementation.authc.getCurrentUser({} as any);
       expect(user).toBeNull();
+    });
+  });
+
+  describe('authc.getPrincipal', () => {
+    it('returns null', () => {
+      expect(implementation.authc.getPrincipal({} as any)).toBeNull();
     });
   });
 
@@ -40,6 +47,12 @@ describe('getDefaultSecurityImplementation', () => {
     });
   });
 
+  describe('authz.uiam', () => {
+    it('is null (UIAM authorization requires the security plugin)', () => {
+      expect(implementation.authz.uiam).toBeNull();
+    });
+  });
+
   describe('audit.asScoped', () => {
     it('returns null', async () => {
       const logger = implementation.audit.asScoped({} as any);
@@ -52,6 +65,43 @@ describe('getDefaultSecurityImplementation', () => {
       const logger = implementation.audit.withoutRequest;
       expect(logger.enabled).toBe(false);
       expect(logger.log({ message: 'no request' })).toBeUndefined();
+    });
+  });
+
+  describe('serviceAccounts', () => {
+    it('isEnabled returns false', () => {
+      expect(implementation.serviceAccounts.isEnabled()).toBe(false);
+    });
+
+    it('create rejects', async () => {
+      await expect(
+        implementation.serviceAccounts.create(httpServerMock.createKibanaRequest(), {
+          name: 'my-service-account',
+          roles: ['viewer'],
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
+    });
+
+    // Handles are handed out at setup regardless of whether a delegate ever registers, so every
+    // workload method has to fail closed rather than run unauthenticated.
+    it.each([
+      'bindWorkload',
+      'unbindWorkload',
+      'getWorkloadBinding',
+      'getWorkloadServiceAccountSummary',
+      'withScopedRequestForWorkload',
+    ] as const)('%s rejects', async (method) => {
+      await expect(
+        (implementation.serviceAccounts[method] as () => Promise<unknown>)()
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
+    });
+  });
+
+  describe('fakeRequestEnricher', () => {
+    it('is a no-op (no security delegate registered)', () => {
+      expect(() =>
+        implementation.fakeRequestEnricher({} as any, { profileId: 'u_test_profile_123' })
+      ).not.toThrow();
     });
   });
 });

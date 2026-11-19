@@ -19,11 +19,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
 
   describe('Serverless Synonyms Set Detail', function () {
     before(async () => {
       await kibanaServer.uiSettings.update({ 'searchSynonyms:synonymsEnabled': 'true' });
-      await pageObjects.svlCommonPage.loginWithRole('developer');
+      await retry.try(async () => {
+        await pageObjects.svlCommonPage.loginWithRole('developer');
+      });
     });
 
     describe('Synonyms Set Detail Page', () => {

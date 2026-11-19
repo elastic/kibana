@@ -1,24 +1,28 @@
 ---
 navigation_title: "{{gemini}}"
+description: "Documentation for the deprecated Google Gemini connector, used to send requests to Google Gemini models from Kibana."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/gemini-action-type.html
 applies_to:
-  stack: all
-  serverless: all
+  stack: deprecated 9.5
+  serverless: deprecated
 ---
 
 # {{gemini}} connector and action [gemini-action-type]
+
+:::{include} _snippets/deprecated-llm-connector-note.md
+:::
 
 The {{gemini}} connector uses [axios](https://github.com/axios/axios) to send a POST request to {{gemini}}.
 
 ## Create connectors in {{kib}} [define-gemini-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
+```{applies_to}
+stack: deprecated =9.5, removed 9.6+
+serverless: unavailable
+```
 
-:::{image} ../images/gemini-connector.png
-:alt: {{gemini}} connector
-:screenshot:
-:::
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [gemini-connector-configuration]
 
@@ -48,12 +52,7 @@ Credentials JSON
 
 ## Test connectors [gemini-action-configuration]
 
-You can test connectors as you're creating or editing the connector in {{kib}}. For example:
-
-:::{image} ../images/gemini-params.png
-:alt: {{gemini}} params test
-:screenshot:
-:::
+You can test connectors as you're creating or editing the connector in {{kib}}.
 
 The {{gemini}} actions have the following configuration properties.
 

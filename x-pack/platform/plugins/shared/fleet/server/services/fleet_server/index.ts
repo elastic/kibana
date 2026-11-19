@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
 import { uniqBy } from 'lodash';
@@ -17,6 +17,11 @@ import {
   FLEET_SERVER_PACKAGE,
 } from '../../../common/constants';
 import { SO_SEARCH_LIMIT } from '../../constants';
+import {
+  buildPolicyBaseIdWithFallbackKuery,
+  buildPolicyBaseIdsWithFallbackKuery,
+  removeVersionSuffixFromPolicyId,
+} from '../../../common/services/version_specific_policies_utils';
 import { getAgentsByKuery, getAgentStatusById } from '../agents';
 import { packagePolicyService } from '../package_policy';
 import { agentPolicyService } from '../agent_policy';
@@ -75,7 +80,7 @@ export const hasFleetServersForPolicies = async (
               ? `namespaces:"${spaceIds?.[0]}"`
               : `not namespaces:* or namespaces:"${DEFAULT_SPACE_ID}"`;
 
-          return `(policy_id:"${id}" and (${space}))`;
+          return `(${buildPolicyBaseIdWithFallbackKuery(id)} and (${space}))`;
         })
         .join(' or ')
     );
@@ -139,9 +144,7 @@ export async function checkFleetServerVersionsForSecretsStorage(
     return false;
   }
 
-  const kuery = `policy_id:(${Array.from(policyIds)
-    .map((id) => `"${id}"`)
-    .join(' or ')})`;
+  const kuery = buildPolicyBaseIdsWithFallbackKuery(Array.from(policyIds));
 
   const managedAgentPolicies = await agentPolicyService.getAllManagedAgentPolicies(soClient);
   const fleetServerAgents = await getAgentsByKuery(esClient, soClient, {
@@ -180,8 +183,9 @@ export async function checkFleetServerVersionsForSecretsStorage(
         continue;
       }
 
+      const agentPolicyBaseId = removeVersionSuffixFromPolicyId(fleetServerAgent.policy_id ?? '');
       const isManagedAgentPolicy = managedAgentPolicies.some(
-        (managedPolicy) => managedPolicy.id === fleetServerAgent.policy_id
+        (managedPolicy) => managedPolicy.id === agentPolicyBaseId
       );
 
       // If this is an agent enrolled in a managed policy, and it is no longer active then we ignore it if it's

@@ -21,7 +21,11 @@ const MINUTE = 60 * SECOND;
 const noop = () => {};
 
 interface RunOptions extends ProcOptions {
-  wait: true | RegExp;
+  /**
+   * When omitted or `false`, start the process and return without waiting for a log line or exit.
+   * `true` waits for the process to exit; a `RegExp` waits for a matching log line.
+   */
+  wait?: true | RegExp | false;
   waitTimeout?: number | false;
   onEarlyExit?: (msg: string) => void;
 }
@@ -35,6 +39,7 @@ interface RunOptions extends ProcOptions {
  */
 export class ProcRunner {
   private closing = false;
+  private teardownPromise: Promise<void> | undefined;
   private procs: Proc[] = [];
   private signalUnsubscribe: () => void;
 
@@ -52,17 +57,8 @@ export class ProcRunner {
    *  Start a process, tracking it by `name`
    */
   async run(name: string, options: RunOptions) {
-    const {
-      args = [],
-      cwd = process.cwd(),
-      stdin = undefined,
-      wait = false,
-      waitTimeout = 15 * MINUTE,
-      env = process.env,
-      onEarlyExit,
-      writeLogsToPath,
-    } = options;
-    const cmd = options.cmd === 'node' ? process.execPath : options.cmd;
+    const { wait = false, waitTimeout = 15 * MINUTE, onEarlyExit, ...procOptions } = options;
+    const cmd = procOptions.cmd === 'node' ? process.execPath : procOptions.cmd;
 
     if (this.closing) {
       throw new Error('ProcRunner is closing');
@@ -77,12 +73,8 @@ export class ProcRunner {
     }
 
     const proc = this.startProc(name, {
+      ...procOptions,
       cmd,
-      args,
-      cwd,
-      env,
-      stdin,
-      writeLogsToPath,
     });
 
     if (onEarlyExit) {
@@ -172,16 +164,21 @@ export class ProcRunner {
 
   /**
    *  Close the ProcRunner and stop all running
-   *  processes with `signal`
+   *  processes with `signal`. Calling it again while a teardown is in
+   *  progress resolves when that teardown completes.
    *
    *  @param  {String} [signal=undefined]
    *  @return {Promise}
    */
-  async teardown(signal: NodeJS.Signals | 'exit' = 'exit') {
-    if (this.closing) {
-      return;
+  teardown(signal: NodeJS.Signals | 'exit' = 'exit'): Promise<void> {
+    if (!this.teardownPromise) {
+      this.teardownPromise = this.stopAllProcs(signal);
     }
 
+    return this.teardownPromise;
+  }
+
+  private async stopAllProcs(signal: NodeJS.Signals | 'exit') {
     this.closing = true;
     this.signalUnsubscribe();
 

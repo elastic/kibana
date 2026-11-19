@@ -33,6 +33,12 @@ describe('JinaReaderConnector', () => {
     jest.clearAllMocks();
   });
 
+  it('supports Context Engine alongside workflows and Agent Builder', () => {
+    expect(JinaReaderConnector.metadata.supportedFeatureIds).toContain('workflows');
+    expect(JinaReaderConnector.metadata.supportedFeatureIds).toContain('agentBuilder');
+    expect(JinaReaderConnector.metadata.supportedFeatureIds).toContain('contextEngine');
+  });
+
   describe('browse action', () => {
     it('should browse URL and return markdown content', async () => {
       const mockResponse = {
@@ -182,6 +188,17 @@ describe('JinaReaderConnector', () => {
           url: 'https://example.com',
         })
       ).rejects.toThrow('Network error');
+    });
+
+    it('should preserve transport errors without a response', async () => {
+      const error = new Error('maxContentLength size of 5120 exceeded');
+      mockClient.post.mockRejectedValue(error);
+
+      await expect(
+        JinaReaderConnector.actions.browse.handler(mockContext, {
+          url: 'https://example.com',
+        })
+      ).rejects.toBe(error);
     });
 
     it('should handle errors with code by returning error response', async () => {
@@ -679,6 +696,8 @@ describe('JinaReaderConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = JinaReaderConnector.test;
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         status: 200,
@@ -686,32 +705,18 @@ describe('JinaReaderConnector', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!JinaReaderConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await JinaReaderConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://r.jina.ai');
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Jina Reader API: \nOK',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on error', async () => {
       const error: HttpError = new Error('Network error');
       error.response = { status: 500, data: {} };
       mockClient.get.mockRejectedValue(error);
 
-      if (!JinaReaderConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await JinaReaderConnector.test.handler(mockContext);
-
-      expect(mockClient.get).toHaveBeenCalledWith('https://r.jina.ai');
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Failed to connect');
-      expect(result.message).toContain('Network error');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
     it('should use overrideBrowseUrl from config', async () => {
@@ -726,10 +731,7 @@ describe('JinaReaderConnector', () => {
         config: { overrideBrowseUrl: 'https://custom.jina.ai' },
       } as unknown as ActionContext;
 
-      if (!JinaReaderConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      await JinaReaderConnector.test.handler(contextWithConfig);
+      await testSpec.handler(contextWithConfig);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://custom.jina.ai');
     });

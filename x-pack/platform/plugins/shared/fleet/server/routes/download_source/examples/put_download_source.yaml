@@ -1,0 +1,46 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        putDownloadSourceRequestExample:
+          description: 'Update an agent binary download source'
+          value:
+            name: 'Updated download source'
+            host: 'https://updated-host.example.com/downloads/'
+            is_default: false
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          putDownloadSourceExample:
+            description: 'The updated agent binary download source'
+            value:
+              item:
+                id: 'download-source-id-1'
+                name: 'Updated download source'
+                host: 'https://updated-host.example.com/downloads/'
+                is_default: false
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'
+  404:
+    description: 'Not Found'
+    content:
+      application/json:
+        examples:
+          notFoundExample:
+            description: 'No download source was found with the given ID'
+            value:
+              statusCode: 404
+              error: 'Not Found'
+              message: 'Download source download-source-id-1 not found'

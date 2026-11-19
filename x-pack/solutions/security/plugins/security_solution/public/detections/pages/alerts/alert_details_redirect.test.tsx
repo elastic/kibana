@@ -12,6 +12,7 @@ import { AlertDetailsRedirect } from './alert_details_redirect';
 import { TestProviders } from '../../../common/mock';
 import { ALERT_DETAILS_REDIRECT_PATH, ALERTS_PATH } from '../../../../common/constants';
 import { mockHistory } from '../../../common/utils/route/mocks';
+import { encodeFlyoutV2UrlParam } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -30,45 +31,6 @@ const mockPathname = `${ALERT_DETAILS_REDIRECT_PATH}/${testAlertId}`;
 describe('AlertDetailsRedirect', () => {
   afterEach(() => {
     mockHistory.replace.mockClear();
-  });
-
-  describe('with index and timestamp query parameters set', () => {
-    it('redirects to the expected path with the correct query parameters', () => {
-      const testSearch = `?index=${testIndex}&timestamp=${testTimestamp}`;
-      const historyMock = {
-        ...mockHistory,
-        location: {
-          hash: '',
-          pathname: mockPathname,
-          search: testSearch,
-          state: '',
-        },
-      };
-      render(
-        <TestProviders>
-          <Router history={historyMock}>
-            <AlertDetailsRedirect />
-          </Router>
-        </TestProviders>
-      );
-
-      const expectedSearch = new URLSearchParams({
-        query: "(language:kuery,query:'_id: test-alert-id')",
-        timerange:
-          "(global:(linkTo:!(timeline,socTrends),timerange:(from:'2023-04-20T12:00:00.000Z',kind:absolute,to:'2023-04-20T12:05:00.000Z')),timeline:(linkTo:!(global,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
-        pageFilters:
-          '!((display_settings:(hide_action_bar:!f),exclude:!f,exists_selected:!f,field_name:kibana.alert.workflow_status,selected_options:!(),title:Status))',
-        flyout:
-          '(preview:!(),right:(id:document-details-right,params:(id:test-alert-id,indexName:.someTestIndex,scopeId:alerts-page)))',
-      });
-
-      expect(historyMock.replace).toHaveBeenCalledWith({
-        hash: '',
-        pathname: ALERTS_PATH,
-        search: `?${expectedSearch.toString()}`,
-        state: undefined,
-      });
-    });
   });
 
   describe('with only index query parameter set', () => {
@@ -94,11 +56,12 @@ describe('AlertDetailsRedirect', () => {
       const expectedSearchParam = new URLSearchParams({
         query: "(language:kuery,query:'_id: test-alert-id')",
         timerange:
-          "(global:(linkTo:!(timeline,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',kind:absolute,to:'2020-07-08T08:25:18.966Z')),timeline:(linkTo:!(global,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
+          "(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',kind:absolute,to:'2020-07-08T08:25:18.966Z')),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
         pageFilters:
           '!((display_settings:(hide_action_bar:!f),exclude:!f,exists_selected:!f,field_name:kibana.alert.workflow_status,selected_options:!(),title:Status))',
-        flyout:
-          '(preview:!(),right:(id:document-details-right,params:(id:test-alert-id,indexName:.someTestIndex,scopeId:alerts-page)))',
+        flyoutV2: encodeFlyoutV2UrlParam([
+          { kind: 'document', documentId: testAlertId, indexName: testIndex },
+        ]),
       });
 
       expect(historyMock.replace).toHaveBeenCalledWith({
@@ -132,11 +95,16 @@ describe('AlertDetailsRedirect', () => {
       const expectedSearchParam = new URLSearchParams({
         query: "(language:kuery,query:'_id: test-alert-id')",
         timerange:
-          "(global:(linkTo:!(timeline,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',kind:absolute,to:'2020-07-08T08:25:18.966Z')),timeline:(linkTo:!(global,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
+          "(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',kind:absolute,to:'2020-07-08T08:25:18.966Z')),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
         pageFilters:
           '!((display_settings:(hide_action_bar:!f),exclude:!f,exists_selected:!f,field_name:kibana.alert.workflow_status,selected_options:!(),title:Status))',
-        flyout:
-          '(preview:!(),right:(id:document-details-right,params:(id:test-alert-id,indexName:.internal.alerts-security.alerts-default,scopeId:alerts-page)))',
+        flyoutV2: encodeFlyoutV2UrlParam([
+          {
+            kind: 'document',
+            documentId: testAlertId,
+            indexName: '.internal.alerts-security.alerts-default',
+          },
+        ]),
       });
 
       expect(historyMock.replace).toHaveBeenCalledWith({
@@ -145,6 +113,98 @@ describe('AlertDetailsRedirect', () => {
         search: `?${expectedSearchParam.toString()}`,
         state: undefined,
       });
+    });
+  });
+
+  describe('with index and timestamp query parameters set', () => {
+    it('emits flyoutV2 param (not legacy flyout) with index and timestamp set', () => {
+      const testSearch = `?index=${testIndex}&timestamp=${testTimestamp}`;
+      const historyMock = {
+        ...mockHistory,
+        location: {
+          hash: '',
+          pathname: mockPathname,
+          search: testSearch,
+          state: '',
+        },
+      };
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <AlertDetailsRedirect />
+          </Router>
+        </TestProviders>
+      );
+
+      const expectedFlyoutV2 = encodeFlyoutV2UrlParam([
+        { kind: 'document', documentId: testAlertId, indexName: testIndex },
+      ]);
+      const expectedSearch = new URLSearchParams({
+        query: "(language:kuery,query:'_id: test-alert-id')",
+        timerange:
+          "(global:(linkTo:!(timeline),timerange:(from:'2023-04-20T12:00:00.000Z',kind:absolute,to:'2023-04-20T12:05:00.000Z')),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
+        pageFilters:
+          '!((display_settings:(hide_action_bar:!f),exclude:!f,exists_selected:!f,field_name:kibana.alert.workflow_status,selected_options:!(),title:Status))',
+        flyoutV2: expectedFlyoutV2,
+      });
+
+      expect(historyMock.replace).toHaveBeenCalledWith({
+        hash: '',
+        pathname: ALERTS_PATH,
+        search: `?${expectedSearch.toString()}`,
+        state: undefined,
+      });
+    });
+
+    it('does not emit legacy flyout param', () => {
+      const historyMock = {
+        ...mockHistory,
+        location: {
+          hash: '',
+          pathname: mockPathname,
+          search: `?index=${testIndex}&timestamp=${testTimestamp}`,
+          state: '',
+        },
+      };
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <AlertDetailsRedirect />
+          </Router>
+        </TestProviders>
+      );
+
+      const [[callArg]] = (historyMock.replace as jest.Mock).mock.calls;
+      expect(callArg.search).not.toContain('flyout=');
+      expect(callArg.search).toContain('flyoutV2=');
+    });
+
+    it('preserves existing flyoutV2 param from the URL', () => {
+      const existingFlyoutV2 = encodeFlyoutV2UrlParam([
+        { kind: 'document', documentId: 'existing-id', indexName: '.existing-index' },
+      ]);
+      const historyMock = {
+        ...mockHistory,
+        location: {
+          hash: '',
+          pathname: mockPathname,
+          search: `?index=${testIndex}&timestamp=${testTimestamp}&flyoutV2=${encodeURIComponent(
+            existingFlyoutV2
+          )}`,
+          state: '',
+        },
+      };
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <AlertDetailsRedirect />
+          </Router>
+        </TestProviders>
+      );
+
+      const [[callArg]] = (historyMock.replace as jest.Mock).mock.calls;
+      const search = new URLSearchParams(callArg.search);
+      expect(search.get('flyoutV2')).toBe(existingFlyoutV2);
     });
   });
 });

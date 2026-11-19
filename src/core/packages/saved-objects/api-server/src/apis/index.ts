@@ -52,6 +52,7 @@ export type {
   SavedObjectsFindOptionsReference,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
+  SavedObjectsFindSort,
   SavedObjectsPitParams,
 } from './find';
 export type { SavedObjectsGetOptions } from './get';
@@ -90,3 +91,4 @@ export type {
   SavedObjectsChangeAccessModeOptions,
 } from './change_access_control';
 export type { SavedObjectsSearchOptions, SavedObjectsSearchResponse } from './search';
+export type { SavedObjectsEsqlOptions, SavedObjectsEsqlResponse } from './esql';

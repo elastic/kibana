@@ -5,20 +5,11 @@
  * 2.0.
  */
 
-import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { CoreSetup, Plugin as KibanaPlugin } from '@kbn/core/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { ILicense } from '@kbn/licensing-types';
 import { KibanaFramework } from './lib/kibana_framework';
 import { registerGrokdebuggerRoutes } from './routes/api/grokdebugger';
-
-export const config = {
-  schema: schema.object({
-    enabled: offeringBasedSchema({
-      serverless: schema.boolean({ defaultValue: true }),
-    }),
-  }),
-};
 
 interface GrokdebuggerServerPluginDependencies {
   licensing: LicensingPluginSetup;

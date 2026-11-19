@@ -10,6 +10,8 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { createMemoryHistory } from 'history';
 import { Route, Router } from '@kbn/shared-ux-router';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+
 import type { GeoipDatabase } from '../../common/types';
 import { API_BASE_PATH } from '../../common/constants';
 import { ManageProcessors } from '../../public/application/sections';
@@ -29,7 +31,7 @@ describe('<ManageProcessors />', () => {
       </Router>
     );
 
-    await screen.findByTestId('manageProcessorsTitle');
+    await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
     await screen.findByTestId(expectedTestId);
   };
 
@@ -66,7 +68,9 @@ describe('<ManageProcessors />', () => {
       await renderManageProcessors('geoipDatabaseList');
 
       // Page title
-      expect(screen.getByTestId('manageProcessorsTitle')).toHaveTextContent('Manage Processors');
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Manage Processors'
+      );
 
       // Add database button
       expect(screen.getByTestId('addGeoipDatabaseButton')).toBeInTheDocument();

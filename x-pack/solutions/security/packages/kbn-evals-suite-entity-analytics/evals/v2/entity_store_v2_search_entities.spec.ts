@@ -7,23 +7,73 @@
 
 import { tags } from '@kbn/scout-security';
 import { evaluate } from '../../src/evaluate';
+import {
+  assignEntitiesToWatchlist,
+  bulkIndexEntities,
+  createWatchlist,
+  deleteEntityEngines,
+  deleteWatchlistsByName,
+  installEntityStoreV2AndWait,
+} from '../../src/setup_helpers';
 
 /**
  * Entity Store V2 - search_entities tool routing evals.
  *
  * These specs validate that the entity-analytics skill correctly routes entity
  * search queries to the `security.search_entities` tool when Entity Store V2 is
- * enabled. Tool routing assertions are checked without requiring pre-seeded data;
- * the tool may return "no entities found" but it MUST be called.
+ * enabled. Most assertions are pure routing checks (the tool may return "no entities
+ * found" but it MUST be called).
  *
- * For data-grounded assertions (verifying actual risk scores, watchlist members, etc.)
- * seed the entity store first using the security-documents-generator populate script
- * described in the evals_entity_analytics_v2 configSet.
+ * The "who is on watchlist X" example is grounded: beforeAll seeds a "Privileged Users"
+ * watchlist with members so the get_watchlist_id → search_entities resolution chain runs
+ * against real data.
  */
+const SEEDED_USER_EUIDS = ['user:jsmith123', 'user:rjones456', 'user:alice', 'user:bob'];
+const SEEDED_HOST_EUIDS = ['host:server01'];
+const ALL_SEEDED_EUIDS = [...SEEDED_USER_EUIDS, ...SEEDED_HOST_EUIDS];
+
+const MANAGED_WATCHLIST_NAMES = ['Privileged Users'];
+
 evaluate.describe(
   'SIEM Entity Analytics V2 Skill - Search Entities',
   { tag: tags.serverless.security.complete },
   () => {
+    evaluate.beforeAll(async ({ log, esClient, supertest }) => {
+      await installEntityStoreV2AndWait({ supertest, log });
+
+      await bulkIndexEntities({
+        esClient,
+        entities: ALL_SEEDED_EUIDS.map((euid) => ({ euid })),
+      });
+
+      // Seed a "Privileged Users" watchlist with members so get_watchlist_id can resolve the
+      // name to a real id and search_entities can return its members.
+      await deleteWatchlistsByName({ supertest, names: MANAGED_WATCHLIST_NAMES });
+      const { id: privilegedUsersId } = await createWatchlist({
+        supertest,
+        watchlist: {
+          name: 'Privileged Users',
+          description: 'Sensitive accounts under continuous review',
+          riskModifier: 1.5,
+        },
+      });
+      await assignEntitiesToWatchlist({
+        supertest,
+        watchlistId: privilegedUsersId,
+        euids: ALL_SEEDED_EUIDS,
+      });
+    });
+
+    evaluate.afterAll(async ({ log, supertest }) => {
+      // Best-effort cleanup; the next beforeAll is idempotent and clears leftovers by name.
+      try {
+        await deleteWatchlistsByName({ supertest, names: MANAGED_WATCHLIST_NAMES });
+      } catch (err) {
+        log.warning(`Watchlist cleanup failed during teardown: ${(err as Error).message}`);
+      }
+      await deleteEntityEngines({ supertest, log });
+    });
+
     evaluate('entity store v2: search entities questions', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
@@ -178,18 +228,48 @@ evaluate.describe(
             },
             {
               input: {
-                question: 'What users are on the "Privileged User" watchlist?',
+                question: 'Who is on the Privileged Users watchlist?',
               },
               output: {
                 criteria: [
-                  'Return users that belong to the "Privileged User" watchlist, or clearly state that no entities on that watchlist were found.',
-                  'Do not fabricate watchlist membership data.',
+                  'Resolve the watchlist named "Privileged Users" to its id, then list its members, or clearly state that no such watchlist exists / it has no members.',
+                  'Present member entities with risk score and risk level where available.',
+                  'Do not fabricate watchlist or entity membership data.',
+                ],
+                toolCalls: [
+                  {
+                    id: 'security.get_watchlist_id',
+                    criteria: [
+                      'The tool is called with an identifier of "Privileged Users" to resolve the watchlist id.',
+                    ],
+                  },
+                  {
+                    id: 'security.search_entities',
+                    criteria: [
+                      'The tool is called with a watchlists parameter containing the id resolved from the security.get_watchlist_id call, to enumerate members of the watchlist.',
+                    ],
+                  },
+                ],
+              },
+              metadata: { query_intent: 'Factual' },
+            },
+            {
+              input: {
+                question:
+                  'Are there any critical-risk hosts right now, and is that risk data current?',
+              },
+              output: {
+                criteria: [
+                  'Return critical-risk hosts, or clearly state that none were found.',
+                  'If the risk score grounding signal reports the risk-score maintainer as stopped or never_started, explain that clearly instead of concluding the environment is safe, and note how stale or unavailable the risk data is.',
+                  'If the risk score grounding signal reports started, do not add an unnecessary "scoring is current" caveat.',
+                  'Do not fabricate entity or risk data.',
                 ],
                 toolCalls: [
                   {
                     id: 'security.search_entities',
                     criteria: [
-                      'The tool is called with a watchlists parameter containing "Privileged User" or equivalent.',
+                      'The tool is called with entityTypes containing "host" and a riskLevels filter containing "Critical" (or equivalent).',
                     ],
                   },
                 ],

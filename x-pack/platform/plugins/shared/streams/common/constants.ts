@@ -12,10 +12,21 @@ export const ASSET_VERSION = 1;
 export const ATTACHMENT_SUGGESTIONS_LIMIT = 50;
 
 export const STREAMS_FEATURE_ID = 'streams';
-export const STREAMS_CONSUMER = 'streams';
-export const STREAMS_PRODUCER = 'streams';
 
-export const STREAMS_RULE_REGISTRATION_CONTEXT = 'streams';
+export const STREAMS_CONFIGURATION_SAVED_OBJECT_TYPE = 'streams-configuration';
+export const STREAMS_UI_METADATA_SAVED_OBJECT_TYPE = 'streams-ui-metadata';
+export const STREAMS_METADATA_REFERENCE_NAME = 'streamsMetadata';
+/** V1 has a single authored unit; callers should use this id until multiple units exist. */
+export const STREAMS_DEFAULT_UNIT_ID = 'default';
+
+/** Max data stream names in one request to the POST variants of the bulk stats endpoints. */
+export const MAX_STATS_STREAM_NAMES = 1000;
+
+/** Classic data stream the V2 backend writes unit telemetry to, in the project itself. */
+export const UNIT_METRICS_STREAM = 'metrics-streams.otel-default';
+
+export const getStreamsUiMetadataSavedObjectId = (configurationSavedObjectId: string): string =>
+  `${configurationSavedObjectId}-streams-ui-metadata`;
 
 export const STREAMS_API_PRIVILEGES = {
   read: 'read_stream',
@@ -23,6 +34,25 @@ export const STREAMS_API_PRIVILEGES = {
 } as const;
 
 export const STREAMS_UI_PRIVILEGES = {
+  manage: 'manage',
+  show: 'show',
+} as const;
+
+/** Kibana feature for Streams V2 (map, sources, destinations). */
+export const STREAMS_V2_FEATURE_ID = 'streamsV2';
+
+/** API privilege names are global, so these must stay distinct from `STREAMS_API_PRIVILEGES`. */
+export const STREAMS_V2_API_PRIVILEGES = {
+  read: 'read_streams_v2',
+  manage: 'manage_streams_v2',
+} as const;
+
+/** Data stream stats routes are shared by both experiences, so either read privilege grants them. */
+export const STREAMS_STATS_READ_PRIVILEGE = {
+  anyRequired: [STREAMS_API_PRIVILEGES.read, STREAMS_V2_API_PRIVILEGES.read],
+};
+
+export const STREAMS_V2_UI_PRIVILEGES = {
   manage: 'manage',
   show: 'show',
 } as const;
@@ -42,16 +72,8 @@ export const STREAMS_TIERED_AI_FEATURE: PricingProductFeature = {
   products: [{ name: 'observability', tier: 'complete' }],
 };
 
-export const STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE: PricingProductFeature = {
-  id: 'streams:significant-events',
-  description: 'Enable significant events feature for streams',
-  products: [{ name: 'observability', tier: 'complete' }],
-};
-
-export const STREAMS_TIERED_FEATURES = [
-  STREAMS_TIERED_ML_FEATURE,
-  STREAMS_TIERED_AI_FEATURE,
-  STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
-];
+export const STREAMS_TIERED_FEATURES = [STREAMS_TIERED_ML_FEATURE, STREAMS_TIERED_AI_FEATURE];
 
 export const FAILURE_STORE_SELECTOR = '::failures';
+
+export const STREAMS_SETTINGS_DOCUMENT_ID = 'kibana_streams_settings';

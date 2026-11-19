@@ -7,6 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
+import { getAttackDiscoveryEventOwnerFilter } from '@kbn/discoveries';
 
 import { ATTACK_DISCOVERY_EVENT_PROVIDER } from '../../../../../common/constants';
 import { getAttackDiscoveryGenerationsAggs } from '../get_attack_discovery_generations_aggs';
@@ -22,6 +23,7 @@ export const getAttackDiscoveryGenerationsQuery = ({
   authenticatedUser,
   end = DEFAULT_END,
   eventLogIndex,
+  scheduled,
   size,
   start = DEFAULT_START,
   spaceId,
@@ -29,6 +31,13 @@ export const getAttackDiscoveryGenerationsQuery = ({
   authenticatedUser: AuthenticatedUser;
   end?: string;
   eventLogIndex: string;
+  /**
+   * When provided, filters by generation source:
+   * - `true` → only scheduled generations (event.category: scheduled)
+   * - `false` → only ad-hoc generations (event.category: interactive or action)
+   * - `undefined` → all generations (no category filter)
+   */
+  scheduled?: boolean;
   size: number;
   start?: string;
   spaceId: string;
@@ -52,11 +61,8 @@ export const getAttackDiscoveryGenerationsQuery = ({
             'event.provider': ATTACK_DISCOVERY_EVENT_PROVIDER,
           },
         },
-        {
-          term: {
-            'user.name': authenticatedUser.username,
-          },
-        },
+        // the user's own events, plus events written by a service account (e.g. an AlertZero Worker)
+        getAttackDiscoveryEventOwnerFilter(authenticatedUser.username),
         {
           term: {
             'kibana.space_ids': spaceId,
@@ -86,6 +92,16 @@ export const getAttackDiscoveryGenerationsQuery = ({
             field: 'event.action',
           },
         },
+        // When `scheduled` is provided, filter by `event.category` (the generation source):
+        // - `true`  → only scheduled runs (event.category: scheduled)
+        // - `false` → only ad-hoc runs (event.category: interactive or action)
+        // The `event.category` field is always set by `writeAttackDiscoveryEvent` via the `source`
+        // parameter, so this filter is reliable.
+        ...(scheduled === true
+          ? [{ term: { 'event.category': 'scheduled' } }]
+          : scheduled === false
+          ? [{ bool: { must_not: [{ term: { 'event.category': 'scheduled' } }] } }]
+          : []),
       ],
     },
   },

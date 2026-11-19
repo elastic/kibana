@@ -73,7 +73,15 @@ const ErrorDetailsLink = ({ error }: { error: ResponseError }) => {
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      aria-label={i18n.translate(
+        'xpack.upgradeAssistant.overview.deprecationLogs.errorDetailsPopoverAriaLabel',
+        { defaultMessage: 'Error details' }
+      )}
+    >
       <EuiText style={{ width: 300 }}>
         <p>{error.message as string}</p>
       </EuiText>

@@ -394,7 +394,7 @@ When creating a new connector type, your plugin will eventually call `server.plu
 
 Consider working with the alerting team on early structure /design feedback of new connectors, especially as the APIs and infrastructure are still under development.
 
-Don't forget to ping @elastic/security-detection-rule-management and @elastic/security-detection-engine to see if the new connector should be enabled within their solution.
+Don't forget to ping @elastic/security-detection-engineering to see if the new connector should be enabled within their solution.
 
 ## Licensing
 
@@ -414,7 +414,7 @@ We suggest following the template provided in `docs/action-type-template.md`. Th
 
 ## Tests
 
-The connector type should have both unit tests and functional tests. For functional tests, if your connector interacts with a 3rd party service via HTTP, you may be able to create a simulator for your service to test with. See the existing functional test servers in the directory [`x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server`](../../../../test/alerting_api_integration/common/plugins/actions_simulators/server)
+The connector type should have both unit tests and functional tests. For functional tests, if your connector interacts with a 3rd party service via HTTP, you may be able to create a simulator for your service to test with. See the existing functional test servers in the directory [`x-pack/platform/test_plugins/response_ops/alerting_api_integration/actions_simulators/server`](../../../test_plugins/response_ops/alerting_api_integration/actions_simulators/server)
 
 ## Connector type config and secrets
 

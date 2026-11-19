@@ -19,11 +19,8 @@ import moment from 'moment';
 import { EuiPopover } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import {
-  getFormattedSeverityScore,
-  getSeverityWithLow,
-  getThemeResolvedSeverityColor,
-} from '@kbn/ml-anomaly-utils';
+import { getFormattedSeverityScore, getSeverityWithLow } from '@kbn/ml-anomaly-utils';
+import { getThemeResolvedSeverityColor } from '@kbn/ml-anomaly-utils/use_severity_color';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { context } from '@kbn/kibana-react-plugin/public';
 
@@ -72,6 +69,7 @@ export class ExplorerChartDistribution extends React.Component {
     tooltipService: PropTypes.object.isRequired,
     cursor$: PropTypes.object,
     euiTheme: PropTypes.object.isRequired,
+    isEmbeddable: PropTypes.bool,
   };
 
   constructor(props) {
@@ -264,7 +262,7 @@ export class ExplorerChartDistribution extends React.Component {
         .append('text')
         .text((d) => {
           if (fieldFormat !== undefined) {
-            return fieldFormat.convert(d, 'text');
+            return fieldFormat.convertToText(d);
           } else {
             if (chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {
               return lineChartYScale.tickFormat()(d);
@@ -416,7 +414,7 @@ export class ExplorerChartDistribution extends React.Component {
         .tickFormat((d) => (d === SCHEDULE_EVENT_MARKER_ENTITY ? null : d));
 
       if (fieldFormat !== undefined) {
-        yAxis.tickFormat((d) => fieldFormat.convert(d, 'text'));
+        yAxis.tickFormat((d) => fieldFormat.convertToText(d));
       }
 
       const axes = lineChartGroup.append('g');
@@ -755,7 +753,7 @@ export class ExplorerChartDistribution extends React.Component {
   };
 
   render() {
-    const { seriesConfig } = this.props;
+    const { seriesConfig, isEmbeddable } = this.props;
 
     if (typeof seriesConfig === 'undefined') {
       // just return so the empty directive renders without an error later on
@@ -764,12 +762,16 @@ export class ExplorerChartDistribution extends React.Component {
 
     // create a chart loading placeholder
     const isLoading = seriesConfig.loading;
+    const telemetrySource = isEmbeddable
+      ? 'embeddable_distribution_chart'
+      : 'explorer_distribution_chart';
 
     return (
       <>
         <RuleEditorFlyout
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
+          telemetrySource={telemetrySource}
         />
         {this.state.alertFlyoutVisible && this.state.alertFlyoutParams && (
           <MlAnomalyAlertFlyout
@@ -786,6 +788,12 @@ export class ExplorerChartDistribution extends React.Component {
             }}
           >
             <EuiPopover
+              aria-label={i18n.translate(
+                'xpack.ml.explorer.distributionChart.anomalyActionsPopoverAriaLabel',
+                {
+                  defaultMessage: 'Anomaly actions',
+                }
+              )}
               isOpen={true}
               closePopover={() => this.closePopover()}
               panelPaddingSize="none"

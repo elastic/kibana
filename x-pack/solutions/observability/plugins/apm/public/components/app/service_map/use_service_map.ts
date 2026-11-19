@@ -4,15 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import type { ReactFlowServiceMapResponse } from '../../../../common/service_map';
+import type { BoolQuery } from '@kbn/es-query';
+import type {
+  ReactFlowServiceMapResponse,
+  ServiceMapResponse,
+} from '../../../../common/service_map';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import type { Environment } from '../../../../common/environment_rt';
 import { transformToReactFlow } from '../../../../common/service_map';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { usePreferredServicesDataSource } from '../../../hooks/use_preferred_services_data_source';
+import { useServiceMapGroupingEnabled } from '../../../hooks/use_service_map_grouping_enabled';
+import { filterServiceMapSpansByEnvironment } from './filter_service_map_spans_by_environment';
 
 const INITIAL_STATE: ReactFlowServiceMapResponse = {
   nodes: [],
@@ -27,6 +35,17 @@ export interface UseServiceMapResult {
   status: FETCH_STATUS;
 }
 
+/** Unwrap response in case the API returns { data: ServiceMapResponse } */
+function getRawResponse(data: unknown): unknown {
+  if (data && typeof data === 'object' && 'data' in data) {
+    const inner = (data as { data: unknown }).data;
+    if (inner && typeof inner === 'object' && 'spans' in inner) {
+      return inner;
+    }
+  }
+  return data;
+}
+
 export const useServiceMap = ({
   start,
   end,
@@ -34,6 +53,8 @@ export const useServiceMap = ({
   serviceName,
   serviceGroupId,
   kuery,
+  strictEnvironmentScope,
+  esQuery,
 }: {
   environment: Environment;
   kuery: string;
@@ -41,19 +62,36 @@ export const useServiceMap = ({
   end: string;
   serviceGroupId?: string;
   serviceName?: string;
+  /** Drop cross-env spans before transforming when `environment` is a specific env. */
+  strictEnvironmentScope?: boolean;
+  /**
+   * Pre-built ES query from buildEsQuery() (filter bar + Controls API selections).
+   * `null` = search bar mounted but query not yet computed (gate fetch).
+   * `undefined` = no search bar provider (embeddable — fetch immediately).
+   */
+  esQuery?: { bool: BoolQuery } | null;
 }): UseServiceMapResult => {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
+  const isGroupingEnabled = useServiceMapGroupingEnabled();
 
-  const [serviceMapNodes, setServiceMapNodes] = useState<UseServiceMapResult>({
-    data: INITIAL_STATE,
-    status: FETCH_STATUS.LOADING,
-  });
+  // With grouping enabled, the service stats are read from the same source as the service
+  // inventory, and like the inventory, the map isn't fetched until there is one. The source comes
+  // from the nearest time range metadata provider, not from these arguments, so the provider must
+  // be set up with the same range and kuery as the map.
+  const preferred = usePreferredServicesDataSource({ start, end, kuery });
+  const source = isGroupingEnabled ? preferred?.source : undefined;
 
-  const { data, status, error } = useFetcher(
+  const fetcherResult = useFetcher(
     (callApmApi) => {
-      // When we don't have a license or a valid license, don't make the request.
       if (!license || !isActivePlatinumLicense(license) || !config.serviceMapEnabled) {
+        return;
+      }
+      // esQuery === null means search bar hasn't computed yet — wait.
+      if (esQuery === null) {
+        return;
+      }
+      if (isGroupingEnabled && !source) {
         return;
       }
 
@@ -66,6 +104,14 @@ export const useServiceMap = ({
             serviceName,
             serviceGroup: serviceGroupId,
             kuery,
+            ...(esQuery ? { esQuery: JSON.stringify(esQuery) } : {}),
+            ...(source
+              ? {
+                  documentType: source.documentType,
+                  rollupInterval: source.rollupInterval,
+                  useDurationSummary: source.hasDurationSummaryField,
+                }
+              : {}),
           },
         },
       });
@@ -78,42 +124,54 @@ export const useServiceMap = ({
       end,
       serviceGroupId,
       kuery,
+      esQuery,
       config.serviceMapEnabled,
+      isGroupingEnabled,
+      source,
     ],
     { preservePreviousData: false }
   );
 
-  useEffect(() => {
-    if (status === FETCH_STATUS.LOADING) {
-      setServiceMapNodes((prevState) => ({ ...prevState, status: FETCH_STATUS.LOADING }));
-      return;
+  const { data, status, error } = fetcherResult;
+
+  return useMemo((): UseServiceMapResult => {
+    if (status === FETCH_STATUS.NOT_INITIATED || status === FETCH_STATUS.LOADING) {
+      return { data: INITIAL_STATE, status: FETCH_STATUS.LOADING };
     }
 
     if (status === FETCH_STATUS.FAILURE || error) {
-      setServiceMapNodes({
+      return {
         data: INITIAL_STATE,
         status: FETCH_STATUS.FAILURE,
         error,
-      });
-      return;
+      };
     }
 
-    if (data && 'spans' in data) {
+    const raw = getRawResponse(data);
+    if (raw && typeof raw === 'object' && 'spans' in raw) {
       try {
-        const reactFlowData = transformToReactFlow(data);
-        setServiceMapNodes({
+        const response = raw as ServiceMapResponse;
+        const scopedResponse =
+          strictEnvironmentScope && environment !== ENVIRONMENT_ALL.value
+            ? {
+                ...response,
+                spans: filterServiceMapSpansByEnvironment(response.spans, environment),
+              }
+            : response;
+        const reactFlowData = transformToReactFlow(scopedResponse);
+        return {
           data: reactFlowData,
           status: FETCH_STATUS.SUCCESS,
-        });
+        };
       } catch (err) {
-        setServiceMapNodes({
+        return {
           data: INITIAL_STATE,
           status: FETCH_STATUS.FAILURE,
-          error: err,
-        });
+          error: err as Error,
+        };
       }
     }
-  }, [data, status, error]);
 
-  return serviceMapNodes;
+    return { data: INITIAL_STATE, status: FETCH_STATUS.SUCCESS };
+  }, [data, status, error, environment, strictEnvironmentScope]);
 };

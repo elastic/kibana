@@ -18,10 +18,11 @@ const defaultProps: ContentFrameworkSectionProps = {
   description: 'Section description',
   actions: [
     {
-      icon: 'expand',
+      icon: 'maximize',
       onClick: jest.fn(),
       ariaLabel: 'Expand section',
       dataTestSubj: 'unifiedDocViewerSectionActionButton-expand',
+      ebt: { action: 'expand', element: 'sectionExpandButton' },
     },
     {
       icon: 'fullScreen',
@@ -29,6 +30,7 @@ const defaultProps: ContentFrameworkSectionProps = {
       ariaLabel: 'Full screen',
       dataTestSubj: 'unifiedDocViewerSectionActionButton-fullScreen',
       label: 'Full Screen',
+      ebt: { action: 'fullScreen', element: 'sectionFullScreenButton' },
     },
   ],
   children: <div>Section children</div>,

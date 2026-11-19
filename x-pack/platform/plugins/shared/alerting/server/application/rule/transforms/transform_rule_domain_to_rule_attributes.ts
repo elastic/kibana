@@ -43,11 +43,23 @@ export const transformRuleDomainToRuleAttributes = ({
     ...(rule.scheduledTaskId !== undefined ? { scheduledTaskId: rule.scheduledTaskId } : {}),
     createdBy: rule.createdBy,
     updatedBy: rule.updatedBy,
+    ...(rule.createdByProfileUid !== undefined
+      ? { createdByProfileUid: rule.createdByProfileUid }
+      : {}),
+    ...(rule.updatedByProfileUid !== undefined
+      ? { updatedByProfileUid: rule.updatedByProfileUid }
+      : {}),
+    ...(rule.apiKeyOwnerProfileUid !== undefined
+      ? { apiKeyOwnerProfileUid: rule.apiKeyOwnerProfileUid }
+      : {}),
     createdAt: rule.createdAt.toISOString(),
     updatedAt: rule.updatedAt.toISOString(),
     apiKey: rule.apiKey,
     apiKeyOwner: rule.apiKeyOwner,
     ...(rule.uiamApiKey !== undefined ? { uiamApiKey: rule.uiamApiKey } : {}),
+    ...(rule.uiamApiKeyExternal !== undefined
+      ? { uiamApiKeyExternal: rule.uiamApiKeyExternal }
+      : {}),
     ...(rule.apiKeyCreatedByUser !== undefined
       ? { apiKeyCreatedByUser: rule.apiKeyCreatedByUser }
       : {}),
@@ -55,6 +67,7 @@ export const transformRuleDomainToRuleAttributes = ({
     ...(rule.notifyWhen !== undefined ? { notifyWhen: rule.notifyWhen } : {}),
     muteAll: rule.muteAll,
     mutedInstanceIds: rule.mutedInstanceIds,
+    ...(rule.snoozedInstances !== undefined ? { snoozedInstances: rule.snoozedInstances } : {}),
     ...(meta ? { meta } : {}),
     ...(rule.executionStatus
       ? {

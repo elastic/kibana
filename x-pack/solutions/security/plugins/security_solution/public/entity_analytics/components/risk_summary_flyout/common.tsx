@@ -24,18 +24,23 @@ interface EntityData {
   risk: RiskStats;
 }
 
+const formatContribution = (score: number): string =>
+  `${score > 0 ? '+' : ''}${formatRiskScore(score)}`;
+
 export const columnsArray: Array<EuiBasicTableColumn<TableItem>> = [
   {
     field: 'category',
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.entityDetails.categoryColumnLabel"
-        defaultMessage="Category"
+        id="xpack.securitySolution.flyout.entityDetails.riskInputColumnLabel"
+        defaultMessage="Risk input"
       />
     ),
     truncateText: false,
     mobileOptions: { show: true },
     sortable: true,
+    render: (category: string, { count }: TableItem) =>
+      count === undefined ? category : `${category} (${count})`,
     footer: (
       <FormattedMessage
         id="xpack.securitySolution.flyout.entityDetails.categoryColumnFooterLabel"
@@ -47,8 +52,8 @@ export const columnsArray: Array<EuiBasicTableColumn<TableItem>> = [
     field: 'score',
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.entityDetails.scoreColumnLabel"
-        defaultMessage="Score"
+        id="xpack.securitySolution.flyout.entityDetails.contributionColumnLabel"
+        defaultMessage="Contribution"
       />
     ),
     truncateText: false,
@@ -56,29 +61,10 @@ export const columnsArray: Array<EuiBasicTableColumn<TableItem>> = [
     sortable: true,
     dataType: 'number',
     align: 'right',
-    render: formatRiskScore,
+    render: formatContribution,
     footer: (props) => (
       <span data-test-subj="risk-summary-result-score">
         {formatRiskScore(sumBy((i) => i.score, props.items))}
-      </span>
-    ),
-  },
-  {
-    field: 'count',
-    name: (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.entityDetails.inputsColumnLabel"
-        defaultMessage="Inputs"
-      />
-    ),
-    truncateText: false,
-    mobileOptions: { show: true },
-    sortable: true,
-    dataType: 'number',
-    align: 'right',
-    footer: (props) => (
-      <span data-test-subj="risk-summary-result-count">
-        {sumBy((i) => i.count ?? 0, props.items)}
       </span>
     ),
   },
@@ -86,8 +72,9 @@ export const columnsArray: Array<EuiBasicTableColumn<TableItem>> = [
 
 export const getItems: (
   entityData: EntityData | undefined,
-  isPrivmonEnabled: boolean
-) => TableItem[] = (entityData, isPrivmonEnabled) => {
+  isPrivmonEnabled: boolean,
+  isWatchlistEnabled: boolean
+) => TableItem[] = (entityData, isPrivmonEnabled, isWatchlistEnabled) => {
   const items = [
     {
       category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
@@ -113,19 +100,34 @@ export const getItems: (
   ];
 
   if (isPrivmonEnabled) {
-    items.push({
-      category: i18n.translate(
-        'xpack.securitySolution.flyout.entityDetails.privilegedUserGroupLabel',
-        {
-          defaultMessage: 'Privileged User',
-        }
-      ),
-      score:
-        entityData?.risk.modifiers?.find(
-          (modifier) => modifier.type === 'watchlist' && modifier.subtype === 'privmon'
-        )?.contribution ?? 0,
-      count: undefined,
-    });
+    if (isWatchlistEnabled) {
+      const watchlistModifiers =
+        entityData?.risk.modifiers?.filter((modifier) => modifier.type === 'watchlist') ?? [];
+      items.push({
+        category: i18n.translate(
+          'xpack.securitySolution.flyout.entityDetails.watchlistsGroupLabel',
+          {
+            defaultMessage: 'Watchlists',
+          }
+        ),
+        score: watchlistModifiers.reduce((sum, mod) => sum + mod.contribution, 0),
+        count: watchlistModifiers.length,
+      });
+    } else {
+      items.push({
+        category: i18n.translate(
+          'xpack.securitySolution.flyout.entityDetails.privilegedUserGroupLabel',
+          {
+            defaultMessage: 'Privileged User',
+          }
+        ),
+        score:
+          entityData?.risk.modifiers?.find(
+            (modifier) => modifier.type === 'watchlist' && modifier.subtype === 'privmon'
+          )?.contribution ?? 0,
+        count: undefined,
+      });
+    }
   }
 
   return items;

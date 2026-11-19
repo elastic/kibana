@@ -316,9 +316,11 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
         await testSubjects.click(ui.pages.kbManagementTab.bulkImportSaveButton);
 
-        const toast = await testSubjects.find(ui.pages.kbManagementTab.toastTitle);
-        const toastText = await toast.getVisibleText();
-        expect(toastText).to.eql('Something went wrong');
+        await retry.try(async () => {
+          const toast = await testSubjects.find(ui.pages.kbManagementTab.toastTitle);
+          const toastText = await toast.getVisibleText();
+          expect(toastText).to.eql('Something went wrong');
+        });
 
         const count = await getKnowledgeBaseEntryCount();
         expect(count).to.eql(0);

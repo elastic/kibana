@@ -56,7 +56,7 @@ const TemplatesTableEmptyPromptComponent: React.FC<TemplatesTableEmptyPromptProp
           size="s"
           onClick={onCreateTemplate}
           href={createTemplateUrl}
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="templates-table-add-template"
         >
           {i18n.CREATE_TEMPLATE}

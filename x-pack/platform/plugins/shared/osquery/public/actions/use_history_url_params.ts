@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { parse, stringify } from 'query-string';
+import queryString from 'query-string';
 import type { SourceFilter } from '../../common/api/unified_history/types';
+import { saveHistoryFilters } from './history_filter_storage';
 
 export const DEFAULT_START_DATE = 'now-24h';
 export const DEFAULT_END_DATE = 'now';
@@ -41,7 +42,7 @@ const DEFAULTS: Omit<HistoryUrlFilters, 'pageSize'> = {
   sortDirection: DEFAULT_SORT_DIRECTION,
 };
 
-const parseCommaSeparated = (value: string | string[] | null | undefined): string[] => {
+const parseCommaSeparated = (value: string | Array<string | null> | null | undefined): string[] => {
   if (!value) return [];
   const raw = Array.isArray(value) ? value[0] : value;
   if (!raw) return [];
@@ -49,12 +50,16 @@ const parseCommaSeparated = (value: string | string[] | null | undefined): strin
   return raw.split(',').filter(Boolean);
 };
 
-const parseSourceFilters = (value: string | string[] | null | undefined): SourceFilter[] =>
+const parseSourceFilters = (
+  value: string | Array<string | null> | null | undefined
+): SourceFilter[] =>
   parseCommaSeparated(value).filter((v): v is SourceFilter =>
     VALID_SOURCES.includes(v as SourceFilter)
   );
 
-const parsePageSize = (value: string | string[] | null | undefined): number | undefined => {
+const parsePageSize = (
+  value: string | Array<string | null> | null | undefined
+): number | undefined => {
   if (!value) return undefined;
   const raw = Array.isArray(value) ? value[0] : value;
   const num = Number(raw);
@@ -62,7 +67,9 @@ const parsePageSize = (value: string | string[] | null | undefined): number | un
   return Number.isFinite(num) && num > 0 ? num : undefined;
 };
 
-const parseSortDirection = (value: string | string[] | null | undefined): SortDirection => {
+const parseSortDirection = (
+  value: string | Array<string | null> | null | undefined
+): SortDirection => {
   const raw = Array.isArray(value) ? value[0] : value;
 
   return raw && VALID_SORT_DIRECTIONS.includes(raw as SortDirection)
@@ -70,14 +77,14 @@ const parseSortDirection = (value: string | string[] | null | undefined): SortDi
     : DEFAULT_SORT_DIRECTION;
 };
 
-const parseString = (value: string | string[] | null | undefined): string => {
+const parseString = (value: string | Array<string | null> | null | undefined): string => {
   if (!value) return '';
 
   return Array.isArray(value) ? value[0] ?? '' : value;
 };
 
 export const parseHistoryUrlParams = (search: string): HistoryUrlFilters => {
-  const params = parse(search);
+  const params = queryString.parse(search);
 
   return {
     q: parseString(params.q) || DEFAULTS.q,
@@ -111,12 +118,22 @@ export const useHistoryUrlParams = () => {
 
   const filters = useMemo(() => parseHistoryUrlParams(search), [search]);
 
+  // Sync sessionStorage with the current URL on mount and whenever the
+  // search string changes (e.g. user manually edits the URL bar).
+  useEffect(() => {
+    saveHistoryFilters(search);
+  }, [search]);
+
   const replaceUrl = useCallback(
     (nextFilters: HistoryUrlFilters) => {
       const serialized = serializeHistoryUrlParams(nextFilters);
-      const qs = stringify(serialized, { sort: false, skipNull: true });
+      const qs = queryString.stringify(serialized, { sort: false, skipNull: true });
+      const nextSearch = qs ? `?${qs}` : '';
+      // Eager save — the useEffect above will also fire after history.replace,
+      // but writing here avoids a brief window where sessionStorage is stale.
+      saveHistoryFilters(nextSearch);
       const currentPathname = history.location.pathname;
-      history.replace({ pathname: currentPathname, search: qs ? `?${qs}` : '' });
+      history.replace({ pathname: currentPathname, search: nextSearch });
     },
     [history]
   );

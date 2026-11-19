@@ -17,17 +17,21 @@ import {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID,
 } from '../../test_ids';
 import {
   emitFilterToggle,
+  emitIsOneOfFilterToggle,
   isFilterActiveForScope,
   isEntityRelationshipExpandedForScope,
   emitEntityRelationshipToggle,
+  emitPinnedEuidToggle,
 } from '../../filters/filter_store';
+import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../common/constants';
 
-// Mock filter_store module to control isFilterActiveForScope and isEntityRelationshipExpandedForScope
+// Mock filter_store module
 jest.mock('../../filters/filter_store', () => {
   const actual = jest.requireActual('../../filters/filter_store');
   return {
@@ -35,7 +39,9 @@ jest.mock('../../filters/filter_store', () => {
     isFilterActiveForScope: jest.fn(() => false),
     isEntityRelationshipExpandedForScope: jest.fn(() => false),
     emitFilterToggle: jest.fn(),
+    emitIsOneOfFilterToggle: jest.fn(),
     emitEntityRelationshipToggle: jest.fn(),
+    emitPinnedEuidToggle: jest.fn(),
   };
 });
 
@@ -47,8 +53,14 @@ const mockIsEntityRelationshipExpandedForScope =
     typeof isEntityRelationshipExpandedForScope
   >;
 const mockEmitFilterToggle = emitFilterToggle as jest.MockedFunction<typeof emitFilterToggle>;
+const mockEmitIsOneOfFilterToggle = emitIsOneOfFilterToggle as jest.MockedFunction<
+  typeof emitIsOneOfFilterToggle
+>;
 const mockEmitEntityRelationshipToggle = emitEntityRelationshipToggle as jest.MockedFunction<
   typeof emitEntityRelationshipToggle
+>;
+const mockEmitPinnedEuidToggle = emitPinnedEuidToggle as jest.MockedFunction<
+  typeof emitPinnedEuidToggle
 >;
 
 // Mock useNodeExpandGraphPopover to capture and expose itemsFn
@@ -73,8 +85,8 @@ jest.mock('./use_node_expand_popover', () => ({
 
 const createMockNode = (
   docMode: 'single-entity' | 'grouped-entities',
-  ecsParentField?: string,
-  hasEntityEnrichment: boolean = true
+  hasEntityEnrichment: boolean = true,
+  engineType?: 'user' | 'host' | 'service' | 'generic'
 ): NodeProps => {
   const baseNode = {
     id: 'test-node-id',
@@ -92,7 +104,7 @@ const createMockNode = (
     data: {
       id: 'entity-123',
       color: 'primary' as const,
-      shape: 'ellipse' as const,
+      kind: 'entity' as const,
       label: 'Test Entity',
     },
   } as NodeProps;
@@ -102,8 +114,13 @@ const createMockNode = (
       id: 'entity-123',
       type: 'entity' as const,
       entity: {
-        ecsParentField,
         availableInEntityStore: hasEntityEnrichment,
+        engine_type: engineType,
+        sourceFields: {
+          'user.id': 'test-user',
+          'user.email': 'test@example.com',
+          'entity.id': 'entity-abc',
+        },
       },
     };
 
@@ -128,8 +145,9 @@ const createMockNode = (
         id,
         type: 'entity' as const,
         entity: {
-          ecsParentField,
           availableInEntityStore: hasEntityEnrichment,
+          engine_type: engineType,
+          sourceFields: { 'host.id': id },
         },
       };
 
@@ -163,14 +181,16 @@ describe('useEntityNodeExpandPopover', () => {
     jest.clearAllMocks();
     capturedItemsFn = null;
     mockEmitFilterToggle.mockClear();
+    mockEmitIsOneOfFilterToggle.mockClear();
     mockEmitEntityRelationshipToggle.mockClear();
+    mockEmitPinnedEuidToggle.mockClear();
     mockIsFilterActiveForScope.mockReturnValue(false);
     mockIsEntityRelationshipExpandedForScope.mockReturnValue(false);
   });
 
   describe('itemsFn - single-entity mode', () => {
     it('should return all 4 menu items when docMode is single-entity and entity is enriched', () => {
-      const node = createMockNode('single-entity', 'user');
+      const node = createMockNode('single-entity');
       renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
@@ -200,12 +220,13 @@ describe('useEntityNodeExpandPopover', () => {
       expect(items[5]).toMatchObject({
         type: 'item',
         testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+        label: 'Show entity details',
         disabled: false,
       });
     });
 
     it('should return only filter items when onOpenEventPreview is not provided', () => {
-      const node = createMockNode('single-entity', 'user');
+      const node = createMockNode('single-entity');
       renderHook(() => useEntityNodeExpandPopover(scopeId));
 
       expect(capturedItemsFn).not.toBeNull();
@@ -230,7 +251,7 @@ describe('useEntityNodeExpandPopover', () => {
 
   describe('itemsFn - grouped-entities mode', () => {
     it('should return only entity details item when docMode is grouped-entities and onOpenEventPreview provided', () => {
-      const node = createMockNode('grouped-entities', 'user');
+      const node = createMockNode('grouped-entities');
       renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
@@ -240,13 +261,14 @@ describe('useEntityNodeExpandPopover', () => {
       expect(items).toHaveLength(1);
       expect(items[0]).toMatchObject({
         type: 'item',
-        testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+        testSubject: GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID,
+        label: 'Show grouped entities',
         disabled: false,
       });
     });
 
     it('should return empty array when docMode is grouped-entities and onOpenEventPreview not provided', () => {
-      const node = createMockNode('grouped-entities', 'user');
+      const node = createMockNode('grouped-entities');
       renderHook(() => useEntityNodeExpandPopover(scopeId));
 
       expect(capturedItemsFn).not.toBeNull();
@@ -257,7 +279,7 @@ describe('useEntityNodeExpandPopover', () => {
     });
 
     it('should not show filter actions in grouped-entities mode', () => {
-      const node = createMockNode('grouped-entities', 'user');
+      const node = createMockNode('grouped-entities');
       renderHook(() => useEntityNodeExpandPopover(scopeId));
 
       expect(capturedItemsFn).not.toBeNull();
@@ -284,7 +306,7 @@ describe('useEntityNodeExpandPopover', () => {
 
   describe('shouldDisableEntityDetailsListItem', () => {
     it('should disable entity details when entity is not enriched in single-entity mode', () => {
-      const node = createMockNode('single-entity', 'user', false);
+      const node = createMockNode('single-entity', false);
       renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
@@ -302,7 +324,7 @@ describe('useEntityNodeExpandPopover', () => {
     });
 
     it('should enable entity details when entity is enriched in single-entity mode', () => {
-      const node = createMockNode('single-entity', 'user', true);
+      const node = createMockNode('single-entity', true);
       renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
@@ -319,7 +341,7 @@ describe('useEntityNodeExpandPopover', () => {
     });
 
     it('should disable entity details when documentsData does not contain entity enrichment', () => {
-      const node = createMockNode('single-entity', 'user', false);
+      const node = createMockNode('single-entity', false);
       renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
@@ -338,7 +360,7 @@ describe('useEntityNodeExpandPopover', () => {
     });
 
     it('should also disable entity details in grouped-entities mode when documentsData does not contain entity enrichment', () => {
-      const node = createMockNode('grouped-entities', 'user', false);
+      const node = createMockNode('grouped-entities', false);
       renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
@@ -348,7 +370,7 @@ describe('useEntityNodeExpandPopover', () => {
       expect(items).toHaveLength(1);
       expect(items[0]).toMatchObject({
         type: 'item',
-        testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+        testSubject: GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID,
         disabled: false, // Not disabled - grouped mode doesn't check enrichment
       });
     });
@@ -356,7 +378,7 @@ describe('useEntityNodeExpandPopover', () => {
 
   describe('action labels', () => {
     it('should show "Show" labels when filters are not active', () => {
-      const node = createMockNode('single-entity', 'user');
+      const node = createMockNode('single-entity');
       renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
@@ -387,10 +409,10 @@ describe('useEntityNodeExpandPopover', () => {
     });
 
     it('should show "Hide" labels when filters are active', () => {
-      // Mock isFilterActiveForScope to return true
+      // Mock all filter checks as active (actor/target sourceFields + related events)
       mockIsFilterActiveForScope.mockReturnValue(true);
 
-      const node = createMockNode('single-entity', 'user');
+      const node = createMockNode('single-entity');
       renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
@@ -409,7 +431,7 @@ describe('useEntityNodeExpandPopover', () => {
 
   describe('filter action via event bus', () => {
     it('should emit filter toggle event when filter item is clicked', () => {
-      const node = createMockNode('single-entity', 'user');
+      const node = createMockNode('single-entity');
       renderHook(() => useEntityNodeExpandPopover(scopeId));
 
       expect(capturedItemsFn).not.toBeNull();
@@ -424,17 +446,229 @@ describe('useEntityNodeExpandPopover', () => {
         relatedItem.onClick();
       }
 
-      // Verify event was emitted
+      // The mock node id has no EUID prefix, so it resolves to the generic type and filters on
+      // its single entity.* value — a lone value emits a phrase filter, not an isOneOf.
       expect(mockEmitFilterToggle).toHaveBeenCalledWith(
         scopeId,
         expect.any(String),
-        expect.any(String),
+        'entity-abc',
         'show'
       );
     });
 
+    it('should emit pinned EUID toggle when "actions by" filter item is clicked', () => {
+      const node = createMockNode('single-entity');
+      renderHook(() => useEntityNodeExpandPopover(scopeId));
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const actionsByItem = items.find(
+        (item) =>
+          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID
+      );
+
+      if (actionsByItem?.type === 'item' && actionsByItem.onClick) {
+        actionsByItem.onClick();
+      }
+
+      expect(mockEmitPinnedEuidToggle).toHaveBeenCalledWith(scopeId, node.id, 'show');
+    });
+
+    it('should emit pinned EUID hide when hiding the last entity filter', () => {
+      // Before toggle: return true so button says "Hide"
+      // After emitFilterToggle calls: return false (no remaining filters)
+      let afterToggle = false;
+      mockEmitFilterToggle.mockImplementation(() => {
+        afterToggle = true;
+      });
+      mockIsFilterActiveForScope.mockImplementation(() => !afterToggle);
+
+      const node = createMockNode('single-entity');
+      renderHook(() => useEntityNodeExpandPopover(scopeId));
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const actionsByItem = items.find(
+        (item) =>
+          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID
+      );
+
+      if (actionsByItem?.type === 'item' && actionsByItem.onClick) {
+        actionsByItem.onClick();
+      }
+
+      expect(mockEmitPinnedEuidToggle).toHaveBeenCalledWith(scopeId, node.id, 'hide');
+    });
+
+    it('should not emit pinned EUID hide when other entity filters remain active', () => {
+      // All filter checks return true (both roles have active filters)
+      mockIsFilterActiveForScope.mockReturnValue(true);
+
+      const node = createMockNode('single-entity');
+      renderHook(() => useEntityNodeExpandPopover(scopeId));
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const actionsByItem = items.find(
+        (item) =>
+          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID
+      );
+
+      if (actionsByItem?.type === 'item' && actionsByItem.onClick) {
+        actionsByItem.onClick();
+      }
+
+      // Should NOT unpin because other role filters are still active
+      expect(mockEmitPinnedEuidToggle).not.toHaveBeenCalledWith(scopeId, node.id, 'hide');
+    });
+
+    it('should emit RELATED_USER with user.* source field values when engine_type is user', () => {
+      const node = createMockNode('single-entity', true, 'user');
+      renderHook(() => useEntityNodeExpandPopover(scopeId));
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const relatedItem = items.find(
+        (item) =>
+          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID
+      );
+
+      if (relatedItem?.type === 'item' && relatedItem.onClick) {
+        relatedItem.onClick();
+      }
+
+      // Multiple values → emitIsOneOfFilterToggle with the full array
+      expect(mockEmitIsOneOfFilterToggle).toHaveBeenCalledWith(
+        scopeId,
+        RELATED_USER,
+        ['test-user', 'test@example.com'],
+        'show'
+      );
+      expect(mockEmitFilterToggle).not.toHaveBeenCalledWith(
+        scopeId,
+        RELATED_ENTITY,
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('should check RELATED_USER with user.* source field values for isRelatedEventsActive when engine_type is user', () => {
+      mockIsFilterActiveForScope.mockImplementation(
+        (_, field, value) =>
+          field === RELATED_USER && Array.isArray(value) && value.includes('test-user')
+      );
+
+      const node = createMockNode('single-entity', true, 'user');
+      renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const relatedItem = items.find(
+        (item) =>
+          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID
+      );
+
+      // Filter is active for user, so the label should say "Hide"
+      if (relatedItem?.type === 'item') {
+        expect(relatedItem.label).toContain('Hide');
+      }
+    });
+
+    it('should emit RELATED_HOST via isOneOf with host.* source field values when engine_type is host', () => {
+      const customNode: NodeProps = {
+        id: 'test-node-id',
+        type: 'entity',
+        position: { x: 0, y: 0 },
+        dragging: false,
+        zIndex: 0,
+        selectable: true,
+        deletable: true,
+        selected: false,
+        draggable: true,
+        isConnectable: true,
+        positionAbsoluteX: 0,
+        positionAbsoluteY: 0,
+        data: {
+          id: 'entity-123',
+          color: 'primary' as const,
+          kind: 'entity' as const,
+          label: 'Test Entity',
+          documentsData: [
+            {
+              id: 'entity-123',
+              type: 'entity' as const,
+              entity: {
+                engine_type: 'host',
+                availableInEntityStore: true,
+                sourceFields: { 'host.name': 'server-1', 'host.id': 'host-abc' },
+              },
+            },
+          ],
+        },
+      } as unknown as NodeProps;
+
+      renderHook(() => useEntityNodeExpandPopover(scopeId));
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(customNode);
+
+      const relatedItem = items.find(
+        (item) =>
+          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID
+      );
+
+      if (relatedItem?.type === 'item' && relatedItem.onClick) {
+        relatedItem.onClick();
+      }
+
+      expect(mockEmitIsOneOfFilterToggle).toHaveBeenCalledWith(
+        scopeId,
+        RELATED_HOST,
+        ['server-1', 'host-abc'],
+        'show'
+      );
+      expect(mockEmitFilterToggle).not.toHaveBeenCalledWith(
+        scopeId,
+        RELATED_ENTITY,
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('should use RELATED_ENTITY with entity.* source field values, never the calculated EUID', () => {
+      const node = createMockNode('single-entity', true);
+      renderHook(() => useEntityNodeExpandPopover(scopeId));
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const relatedItem = items.find(
+        (item) =>
+          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID
+      );
+
+      if (relatedItem?.type === 'item' && relatedItem.onClick) {
+        relatedItem.onClick();
+      }
+
+      // Only the entity.* source field value. The node id ('test-node-id') is the calculated EUID,
+      // which appears in no event field — including it produced a filter that matched nothing.
+      expect(mockEmitFilterToggle).toHaveBeenCalledWith(
+        scopeId,
+        RELATED_ENTITY,
+        'entity-abc',
+        'show'
+      );
+      expect(mockEmitIsOneOfFilterToggle).not.toHaveBeenCalled();
+    });
+
     it('should call onOpenEventPreview callback when entity details item is clicked', () => {
-      const node = createMockNode('single-entity', 'user');
+      const node = createMockNode('single-entity');
 
       renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
@@ -457,7 +691,7 @@ describe('useEntityNodeExpandPopover', () => {
 
   describe('entity relationships', () => {
     it('should render "Show entity relationships" item for enriched single-entity node', () => {
-      const node = createMockNode('single-entity', 'user', true);
+      const node = createMockNode('single-entity', true);
       renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
@@ -481,7 +715,7 @@ describe('useEntityNodeExpandPopover', () => {
     });
 
     it('should disable "Show entity relationships" when entity is not enriched', () => {
-      const node = createMockNode('single-entity', 'user', false);
+      const node = createMockNode('single-entity', false);
       renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
@@ -509,7 +743,7 @@ describe('useEntityNodeExpandPopover', () => {
     });
 
     it('should show "Hide entity relationships" when entity is expanded in the event bus', () => {
-      const node = createMockNode('single-entity', 'user', true);
+      const node = createMockNode('single-entity', true);
       mockIsEntityRelationshipExpandedForScope.mockReturnValue(true);
 
       renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
@@ -531,7 +765,7 @@ describe('useEntityNodeExpandPopover', () => {
     });
 
     it('should show "Show entity relationships" when entity is not expanded in the event bus', () => {
-      const node = createMockNode('single-entity', 'user', true);
+      const node = createMockNode('single-entity', true);
       mockIsEntityRelationshipExpandedForScope.mockReturnValue(false);
 
       renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
@@ -552,7 +786,7 @@ describe('useEntityNodeExpandPopover', () => {
     });
 
     it('should not render "Show entity relationships" for grouped-entities mode', () => {
-      const node = createMockNode('grouped-entities', 'user', true);
+      const node = createMockNode('grouped-entities', true);
       renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
@@ -568,7 +802,7 @@ describe('useEntityNodeExpandPopover', () => {
     });
 
     it('should emit entity relationship toggle event when clicked (show)', () => {
-      const node = createMockNode('single-entity', 'user', true);
+      const node = createMockNode('single-entity', true);
       mockIsEntityRelationshipExpandedForScope.mockReturnValue(false);
 
       renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
@@ -590,7 +824,7 @@ describe('useEntityNodeExpandPopover', () => {
     });
 
     it('should emit entity relationship toggle event when clicked (hide)', () => {
-      const node = createMockNode('single-entity', 'user', true);
+      const node = createMockNode('single-entity', true);
       mockIsEntityRelationshipExpandedForScope.mockReturnValue(true);
 
       renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
@@ -609,6 +843,178 @@ describe('useEntityNodeExpandPopover', () => {
         relationshipsItem.onClick();
         expect(mockEmitEntityRelationshipToggle).toHaveBeenCalledWith(scopeId, node.id, 'hide');
       }
+    });
+  });
+
+  describe('telemetry', () => {
+    const onTelemetryEvent = jest.fn();
+
+    const clickItem = (testSubject: string, node: NodeProps) => {
+      const items = capturedItemsFn!(node);
+      const item = items.find(
+        (candidate) => candidate.type === 'item' && candidate.testSubject === testSubject
+      );
+      if (item?.type === 'item') {
+        item.onClick?.();
+      }
+    };
+
+    beforeEach(() => {
+      onTelemetryEvent.mockClear();
+    });
+
+    it('reports show_entity_relationships with the show state', () => {
+      renderHook(() =>
+        useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview, undefined, onTelemetryEvent)
+      );
+      clickItem(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
+        createMockNode('single-entity')
+      );
+
+      expect(onTelemetryEvent).toHaveBeenCalledTimes(1);
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'entity',
+        action: 'show_entity_relationships',
+        state: 'show',
+      });
+    });
+
+    it('reports show_entity_relationships with the hide state when already expanded', () => {
+      mockIsEntityRelationshipExpandedForScope.mockReturnValue(true);
+      renderHook(() =>
+        useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview, undefined, onTelemetryEvent)
+      );
+      clickItem(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
+        createMockNode('single-entity')
+      );
+
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'entity',
+        action: 'show_entity_relationships',
+        state: 'hide',
+      });
+    });
+
+    it('reports show_actions_by for the actor filter', () => {
+      renderHook(() =>
+        useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview, undefined, onTelemetryEvent)
+      );
+      clickItem(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID, createMockNode('single-entity'));
+
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'entity',
+        action: 'show_actions_by',
+        state: 'show',
+      });
+    });
+
+    it('reports show_actions_on for the target filter', () => {
+      renderHook(() =>
+        useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview, undefined, onTelemetryEvent)
+      );
+      clickItem(GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID, createMockNode('single-entity'));
+
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'entity',
+        action: 'show_actions_on',
+        state: 'show',
+      });
+    });
+
+    it('reports show_related_events with the show state', () => {
+      renderHook(() =>
+        useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview, undefined, onTelemetryEvent)
+      );
+      clickItem(GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID, createMockNode('single-entity'));
+
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'entity',
+        action: 'show_related_events',
+        state: 'show',
+      });
+    });
+
+    it('reports show_related_events with the hide state when already active', () => {
+      mockIsFilterActiveForScope.mockReturnValue(true);
+      renderHook(() =>
+        useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview, undefined, onTelemetryEvent)
+      );
+      clickItem(GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID, createMockNode('single-entity'));
+
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'entity',
+        action: 'show_related_events',
+        state: 'hide',
+      });
+    });
+
+    it('reports show_details for a single entity and still opens the preview', () => {
+      const node = createMockNode('single-entity');
+      renderHook(() =>
+        useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview, undefined, onTelemetryEvent)
+      );
+      clickItem(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID, node);
+
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'entity',
+        action: 'show_details',
+      });
+      expect(mockOnOpenEventPreview).toHaveBeenCalledWith(node.data);
+    });
+
+    it('reports show_grouped_entities for a grouped entity node', () => {
+      renderHook(() =>
+        useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview, undefined, onTelemetryEvent)
+      );
+      clickItem(
+        GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID,
+        createMockNode('grouped-entities')
+      );
+
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'grouped_entity',
+        action: 'show_grouped_entities',
+      });
+    });
+
+    it('does not report when no entity filter can be built for the node', () => {
+      const node = createMockNode('single-entity');
+      // No sourceFields means no filter spec can be built, so the click does nothing.
+      const entity = (node.data as { documentsData: Array<{ entity: object }> }).documentsData[0]
+        .entity as Record<string, unknown>;
+      delete entity.sourceFields;
+
+      renderHook(() =>
+        useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview, undefined, onTelemetryEvent)
+      );
+      clickItem(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID, node);
+      clickItem(GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID, node);
+      clickItem(GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID, node);
+
+      expect(onTelemetryEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not throw on any click path when onTelemetryEvent is omitted', () => {
+      const node = createMockNode('single-entity');
+      renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
+
+      expect(() => {
+        clickItem(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID, node);
+        clickItem(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID, node);
+        clickItem(GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID, node);
+        clickItem(GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID, node);
+        clickItem(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID, node);
+      }).not.toThrow();
     });
   });
 });

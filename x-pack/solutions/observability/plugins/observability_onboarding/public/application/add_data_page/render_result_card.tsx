@@ -1,0 +1,85 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { CardIcon, SearchMemberMatchDescription } from '@kbn/fleet-plugin/public';
+import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import { CuratedTileCard, VariantCountBadge } from '../add_data_grid';
+import { getCollectionGroupId, isCollectionCard } from './collection_card';
+import type { TrackTileClick } from './use_track_tile_click';
+
+const EXTERNAL_URL_PATTERN = /^https?:\/\//;
+
+const getDescription = (item: IntegrationCardItem): React.ReactNode =>
+  item.searchMemberMatch ? (
+    <SearchMemberMatchDescription
+      memberTitles={item.searchMemberMatch.memberTitles}
+      collectionTitle={item.searchMemberMatch.collectionTitle}
+    />
+  ) : (
+    item.description
+  );
+
+/** Search results reuse the curated grid's tile card, so they look the same. */
+const renderPlainCard = (
+  item: IntegrationCardItem,
+  trackTileClick: TrackTileClick
+): React.ReactNode => (
+  <CuratedTileCard
+    tile={{
+      id: item.id,
+      title: item.title,
+      description: getDescription(item),
+      icon: (
+        <CardIcon icons={item.icons} packageName={item.name} version={item.version} size="xl" />
+      ),
+      href: item.url,
+      // Matches PackageCard's own http(s) check, so external items still open in a new tab.
+      target: EXTERNAL_URL_PATTERN.test(item.url) ? '_blank' : undefined,
+      onClick: trackTileClick({ tile_id: item.id, surface: 'search_result' }, item.onCardClick),
+      'data-test-subj': `addDataResultCard-${item.id}`,
+    }}
+  />
+);
+
+export interface RenderResultCardOptions {
+  /** Names the chooser to open in the url, which is what renders the flyout. */
+  onOpenCollection: (groupId: string) => void;
+  trackTileClick: TrackTileClick;
+}
+
+/**
+ * Collection cards open the page-hosted chooser instead of navigating, so the
+ * renderer closes over that callback instead of being a static function.
+ */
+export const createRenderResultCard =
+  ({ onOpenCollection, trackTileClick }: RenderResultCardOptions) =>
+  (item: IntegrationCardItem): React.ReactNode => {
+    if (!isCollectionCard(item)) {
+      return renderPlainCard(item, trackTileClick);
+    }
+
+    const groupId = getCollectionGroupId(item);
+    return (
+      <CuratedTileCard
+        tile={{
+          id: item.id,
+          title: item.title,
+          description: getDescription(item),
+          icon: (
+            <CardIcon icons={item.icons} packageName={item.name} version={item.version} size="xl" />
+          ),
+          badge: <VariantCountBadge count={item.groupMembers.length} />,
+          onClick: trackTileClick(
+            { tile_id: item.id, surface: 'search_result', collection_id: groupId },
+            () => onOpenCollection(groupId)
+          ),
+          'data-test-subj': `addDataResultCard-${item.id}`,
+        }}
+      />
+    );
+  };

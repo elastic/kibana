@@ -1,7 +1,15 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
+    "types": [
+      "node",
+      "jest",
+      "@emotion/jest",
+      "@testing-library/jest-dom",
+      "@kbn/ambient-ui-types",
+      "@kbn/core-user-settings-types"
+    ]
   },
   "include": [
     "common/**/*",
@@ -11,10 +19,17 @@
     "__mocks__/**/*"
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/cloud-plugin",
+    "@kbn/cps",
+    "@kbn/cps-utils",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/es-query",
     "@kbn/features-plugin",
+    "@kbn/content-sanitization",
     "@kbn/licensing-plugin",
     "@kbn/spaces-plugin",
+    "@kbn/core-spaces-common",
     "@kbn/task-manager-plugin",
     "@kbn/data-views-plugin",
     "@kbn/es-ui-shared-plugin",
@@ -44,6 +59,7 @@
     "@kbn/utils",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-saved-objects-server",
+    "@kbn/core-test-helpers-model-versions",
     "@kbn/utility-types-jest",
     "@kbn/es-errors",
     "@kbn/logging",
@@ -68,7 +84,6 @@
     "@kbn/code-editor-mock",
     "@kbn/core-security-browser",
     "@kbn/core-security-server",
-    "@kbn/core-http-router-server-internal",
     "@kbn/react-kibana-mount",
     "@kbn/core-security-common",
     "@kbn/core-i18n-browser-mocks",
@@ -76,6 +91,7 @@
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-user-profile-server",
     "@kbn/core-user-profile-browser",
+    "@kbn/core-user-profile-browser-hooks",
     "@kbn/security-api-key-management",
     "@kbn/security-form-components",
     "@kbn/core-security-server-mocks",
@@ -95,9 +111,25 @@
     "@kbn/licensing-types",
     "@kbn/lazy-object",
     "@kbn/scout",
+    "@kbn/es",
+    "@kbn/test-es-server",
+    "@kbn/dev-utils",
+    "@kbn/security-api-integration-helpers",
     "@kbn/mock-idp-utils",
     "@kbn/core-user-activity-server",
-    "@kbn/core-user-activity-server-mocks"
+    "@kbn/core-user-activity-server-mocks",
+    "@kbn/deeplinks-agent-builder",
+    "@kbn/react-query",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-browser",
+    "@kbn/core-user-profile-common",
+    "@kbn/core-chrome-browser-components",
+    "@kbn/core-logging-server",
+    "@kbn/projects-solutions-groups",
+    "@kbn/unsaved-changes-prompt",
+    "@kbn/ui-callout",
+    "@kbn/zod",
+    "@kbn/zod-helpers",
   ],
   "exclude": ["target/**/*"]
 }

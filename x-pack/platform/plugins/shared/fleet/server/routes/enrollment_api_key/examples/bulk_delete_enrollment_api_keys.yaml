@@ -1,0 +1,40 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        bulkDeleteByIdsExample:
+          description: 'Bulk delete enrollment API keys by IDs'
+          value:
+            tokenIds:
+              - 'token-id-1'
+              - 'token-id-2'
+            forceDelete: true
+        bulkDeleteByKueryExample:
+          description: 'Bulk delete enrollment API keys by KQL query'
+          value:
+            kuery: 'policy_id:"policy-id-1"'
+            forceDelete: false
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          bulkDeleteEnrollmentApiKeysExample:
+            description: 'The enrollment API keys were successfully processed'
+            value:
+              action: 'deleted'
+              count: 2
+              successCount: 2
+              errorCount: 0
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'Either tokenIds or kuery must be provided'

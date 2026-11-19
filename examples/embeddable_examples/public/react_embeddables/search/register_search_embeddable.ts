@@ -12,7 +12,7 @@ import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import type { Services } from './types';
 
 export function registerSearchEmbeddable(embeddable: EmbeddableSetup, services: Promise<Services>) {
-  embeddable.registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
+  embeddable.registerEmbeddablePublicDefinition(SEARCH_EMBEDDABLE_TYPE, async () => {
     const { getSearchEmbeddableFactory } = await import('./search_react_embeddable');
     return getSearchEmbeddableFactory(await services);
   });

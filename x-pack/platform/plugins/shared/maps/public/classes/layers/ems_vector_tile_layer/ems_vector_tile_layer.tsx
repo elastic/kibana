@@ -146,9 +146,21 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return `${this.getId()}_${name}`;
   }
 
+  // Returns the tileLayerId that produced the currently-loaded style data. The mb sources,
+  // layers and color filter must all be derived from this value rather than the live
+  // 'getTileLayerId()' (which reflects the global dark mode flag). When the color mode changes,
+  // the flag flips synchronously while the matching light/dark style is still being fetched
+  // asynchronously; using the live value here would namespace the mb source with the new theme
+  // while it still holds the previous theme's layers, leaving the basemap stuck on the old theme
+  // until the next re-sync.
+  _getLoadedTileLayerId() {
+    const loadedTileLayerId = this.getSourceDataRequest()?.getLoadedMeta().tileLayerId;
+    return loadedTileLayerId ?? this.getSource().getTileLayerId();
+  }
+
   _generateMbSourceIdPrefix() {
     const DELIMITTER = '___';
-    return `${this.getId()}${DELIMITTER}${this.getSource().getTileLayerId()}${DELIMITTER}`;
+    return `${this.getId()}${DELIMITTER}${this._getLoadedTileLayerId()}${DELIMITTER}`;
   }
 
   _generateMbSourceId(name: string | undefined) {
@@ -207,6 +219,23 @@ export class EmsVectorTileLayer extends AbstractLayer {
   _makeNamespacedImageId(imageId: string) {
     const prefix = this.getSource().getSpriteNamespacePrefix() + '/';
     return prefix + imageId;
+  }
+
+  // Supports plain image ids and legacy zoom functions, e.g. { stops: [[0, 'circle-11'], [9, '']] }.
+  _namespaceImageProperty<T>(value: T): T {
+    if (typeof value === 'string') {
+      return (value === '' ? value : this._makeNamespacedImageId(value)) as T;
+    }
+    if (value && typeof value === 'object' && 'stops' in value && Array.isArray(value.stops)) {
+      return {
+        ...value,
+        stops: value.stops.map(([zoom, imageId]: [number, string]) => [
+          zoom,
+          this._namespaceImageProperty(imageId),
+        ]),
+      };
+    }
+    return value;
   }
 
   _requiresPrevSourceCleanup(mbMap: MbMap) {
@@ -340,22 +369,14 @@ export class EmsVectorTileLayer extends AbstractLayer {
           id: mbLayerId,
         };
 
-        if (
-          newLayerObject.type === 'symbol' &&
-          newLayerObject.layout &&
-          typeof newLayerObject.layout['icon-image'] === 'string'
-        ) {
-          newLayerObject.layout['icon-image'] = this._makeNamespacedImageId(
+        if (newLayerObject.type === 'symbol' && newLayerObject.layout?.['icon-image']) {
+          newLayerObject.layout['icon-image'] = this._namespaceImageProperty(
             newLayerObject.layout['icon-image']
           );
         }
 
-        if (
-          newLayerObject.type === 'fill' &&
-          newLayerObject.paint &&
-          typeof newLayerObject.paint['fill-pattern'] === 'string'
-        ) {
-          newLayerObject.paint['fill-pattern'] = this._makeNamespacedImageId(
+        if (newLayerObject.type === 'fill' && newLayerObject.paint?.['fill-pattern']) {
+          newLayerObject.paint['fill-pattern'] = this._namespaceImageProperty(
             newLayerObject.paint['fill-pattern']
           );
         }
@@ -395,13 +416,12 @@ export class EmsVectorTileLayer extends AbstractLayer {
     const color = this.getCurrentStyle().getColor();
 
     const colorOperation = TMSService.colorOperationDefaults.find(({ style }) => {
-      return style === this.getSource().getTileLayerId();
+      return style === this._getLoadedTileLayerId();
     });
     if (!colorOperation) return;
     const { operation, percentage } = colorOperation;
 
     const properties = TMSService.transformColorProperties(
-      // @ts-expect-error TMSService is using maplibre 3.1.0 so LayerSpecification type from 5.1.1 does not match
       mbLayer,
       color,
       operation as unknown as blendMode,
@@ -438,10 +458,8 @@ export class EmsVectorTileLayer extends AbstractLayer {
 
     const textProperty =
       locale === AUTOSELECT_EMS_LOCALE
-        ? // @ts-expect-error TMSService is using maplibre 3.1.0 so LayerSpecification type from 5.1.1 does not match
-          TMSService.transformLanguageProperty(mbLayer, i18n.getLocale())
-        : // @ts-expect-error TMSService is using maplibre 3.1.0 so LayerSpecification type from 5.1.1 does not match
-          TMSService.transformLanguageProperty(mbLayer, locale);
+        ? TMSService.transformLanguageProperty(mbLayer, i18n.getLocale())
+        : TMSService.transformLanguageProperty(mbLayer, locale);
     if (textProperty !== undefined) {
       mbMap.setLayoutProperty(mbLayerId, 'text-field', textProperty);
     }
@@ -497,7 +515,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
 
   getLayerIcon(): LayerIcon {
     return {
-      icon: <EuiIcon size="m" type="grid" />,
+      icon: <EuiIcon size="m" type="grid" aria-hidden={true} />,
       tooltipContent: i18n.translate('xpack.maps.emsVectorTileLayer.layerDescription', {
         defaultMessage: `Reference map provided by Elastic Maps Service (EMS).`,
       }),

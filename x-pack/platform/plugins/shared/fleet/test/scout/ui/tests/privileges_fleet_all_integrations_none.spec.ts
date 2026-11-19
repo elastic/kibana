@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
 import { getFleetAllIntegrationsNoneRole } from '../fixtures/services/privileges';

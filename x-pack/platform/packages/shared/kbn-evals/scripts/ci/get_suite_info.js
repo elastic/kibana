@@ -7,7 +7,7 @@
  */
 
 const { readFileSync } = require('fs');
-const path = require('path');
+const { fromRoot } = require('@kbn/repo-info');
 
 const suiteId = process.argv[2] || process.env.EVAL_SUITE_ID || '';
 if (!suiteId) {
@@ -15,7 +15,7 @@ if (!suiteId) {
   process.exit(1);
 }
 
-const suitesPath = path.resolve(__dirname, '../../evals.suites.json');
+const suitesPath = fromRoot('.buildkite/pipelines/evals/evals.suites.json');
 const raw = readFileSync(suitesPath, 'utf8');
 const parsed = JSON.parse(raw);
 const suites = Array.isArray(parsed?.suites) ? parsed.suites : [];
@@ -31,5 +31,22 @@ process.stdout.write(
     id: suite.id,
     name: suite.name,
     slackChannel: suite.slackChannel,
+    // Shard `specFiles` are relative to this file's directory, so the fanout needs it to check them.
+    configPath: suite.configPath,
+    shards: Array.isArray(suite.shards) ? suite.shards : [],
+    stepTimeoutInMinutes: suite.stepTimeoutInMinutes,
+    scoutHook: suite.scoutHook,
+    vaultSecret: suite.vaultSecret,
+    scoutArch: suite.scoutArch,
+    scoutDomain: suite.scoutDomain,
+    // The Scout server config set (plugin flags the suite's stack needs). run_suite.sh
+    // falls back to it when EVAL_SERVER_CONFIG_SET is unset (on-demand path).
+    serverConfigSet: suite.serverConfigSet,
+    // Per-spec model config and the suite-level fallback, so `get_fanout_matrix.js` can resolve each
+    // spec's models without re-reading the suites config.
+    specModelGroups: Array.isArray(suite.specModelGroups) ? suite.specModelGroups : [],
+    weeklyEisModelGroups: Array.isArray(suite.weeklyEisModelGroups)
+      ? suite.weeklyEisModelGroups
+      : [],
   })
 );

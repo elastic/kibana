@@ -53,7 +53,7 @@ export function LinkDashboard({
           <EuiButtonEmpty
             color="text"
             size="s"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             data-test-subj="infraLinkDashboardMenu"
             onClick={onClick}
             disabled={!canSave}

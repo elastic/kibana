@@ -20,7 +20,6 @@ import type { AssetCriticalityService } from '../asset_criticality';
 import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privileged_users_crud';
 
 import type { RiskScoreBucket } from '../types';
-import { RIEMANN_ZETA_VALUE } from './constants';
 import { getGlobalWeightForIdentifierType, max10DecimalPlaces } from './helpers';
 
 import {
@@ -82,11 +81,9 @@ export const applyScoreModifiers = async ({
 
   const [criticality, privmon] = await Promise.all(modifierPromises);
 
-  return _.zipWith(
-    page.buckets,
-    criticality,
-    privmon,
-    riskScoreDocFactory({ now, identifierField: page.identifierField, globalWeight })
+  const factory = riskScoreDocFactory({ now, identifierField: page.identifierField, globalWeight });
+  return _.zipWith(page.buckets, criticality, privmon, (bucket, crit, priv) =>
+    factory(bucket, crit, priv ? [priv] : [])
   );
 };
 
@@ -99,20 +96,28 @@ interface RiskScoreDocFactoryParams {
 export const riskScoreDocFactory =
   ({ now, identifierField, globalWeight = 1 }: RiskScoreDocFactoryParams) =>
   (
+    // NOTE: This legacy factory intentionally overlaps with the v2 factory in
+    // `modifiers/apply_modifiers_from_entities.ts` while v1 and v2 pipelines
+    // coexist. Once v1 is removed in this release, consolidate duplicated score
+    // math/doc assembly paths as a follow-up cleanup.
     bucket: RiskScoreBucket,
     criticalityModifierFields: Modifier<'asset_criticality'> | undefined,
-    privmonWatchlistModifierFields: Modifier<'watchlist'> | undefined
+    watchlistModifiers: Array<Modifier<'watchlist'>>
   ): EntityRiskScoreRecord => {
     const risk = bucket.top_inputs.risk_details;
 
     const alertsRiskScoreFields = {
-      category_1_score: max10DecimalPlaces(risk.value.category_1_score / RIEMANN_ZETA_VALUE), // normalize value to be between 0-100
+      category_1_score: max10DecimalPlaces(risk.value.normalized_score), // already normalized by the sample size the query used
       category_1_count: risk.value.category_1_count,
     };
 
+    const watchlistModifierProduct = watchlistModifiers.reduce(
+      (acc, m) => acc * (m.modifier_value ?? 1),
+      1
+    );
+
     const totalModifier =
-      (criticalityModifierFields?.modifier_value ?? 1) *
-      (privmonWatchlistModifierFields?.modifier_value ?? 1);
+      (criticalityModifierFields?.modifier_value ?? 1) * watchlistModifierProduct;
 
     const originalScore = risk.value.normalized_score * globalWeight;
     const totalScoreWithModifiers = bayesianUpdate({
@@ -128,9 +133,7 @@ export const riskScoreDocFactory =
       calculated_score_norm: max10DecimalPlaces(totalScoreWithModifiers),
     };
 
-    const appliedModifiers = [criticalityModifierFields, privmonWatchlistModifierFields].filter(
-      isDefined
-    );
+    const appliedModifiers = [criticalityModifierFields, ...watchlistModifiers].filter(isDefined);
 
     const getContribution = getProportionalModifierContribution(
       appliedModifiers.map((modifier) => modifier.modifier_value ?? 1),

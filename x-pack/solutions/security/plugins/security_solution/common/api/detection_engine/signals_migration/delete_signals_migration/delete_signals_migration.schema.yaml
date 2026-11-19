@@ -11,13 +11,13 @@ paths:
       summary: Clean up detection alert migrations
       deprecated: true
       description: |
-        Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
-        the migration process. A successful migration will result in both the old and new indices being present.
-        As such, the old, orphaned index can (and likely should) be deleted.
+        **DEPRECATED.** Cleanup API for old migration artifacts. Do not add new call sites.
+        **WARNING:** This schedules deletions; ensure no production reads still point at the source index.
 
-        While you can delete these indices manually,
-        the endpoint accomplishes this task by applying a deletion policy to the relevant index, causing it to be deleted
-        after 30 days. It also deletes other artifacts specific to the migration implementation.
+        Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
+        the migration process. A successful migration can leave both the old and new indices present, so the old
+        index may be deleted. While you can delete these indices manually, the endpoint applies a deletion policy
+        to the relevant index, causing it to be deleted after 30 days, and removes other migration-specific artifacts.
       tags:
         - Alerts migration API
       requestBody:
@@ -37,6 +37,10 @@ paths:
               required: [migration_ids]
               example:
                 migration_ids: [924f7c50-505f-11eb-ae0a-3fa2e626a51d]
+            examples:
+              cleanupMigrations:
+                value:
+                  migration_ids: [924f7c50-505f-11eb-ae0a-3fa2e626a51d]
       responses:
         200:
           description: Successful response
@@ -64,18 +68,35 @@ paths:
                 oneOf:
                   - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: '[request body].migration_ids: at least one migration id is required to run cleanup'
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
 
 components:
   schemas:

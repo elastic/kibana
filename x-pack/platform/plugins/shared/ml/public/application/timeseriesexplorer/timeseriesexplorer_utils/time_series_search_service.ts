@@ -10,7 +10,8 @@ import { each, find, get, filter } from 'lodash';
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
 import type { MlEntityField, ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
-import type { Job } from '../../../../common/types/anomaly_detection_jobs';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { ModelPlotOutput } from '../../services/results_service/result_service_rx';
 import type { MlApi } from '../../services/ml_api_service';
 import { type MlResultsService, mlResultsServiceProvider } from '../../services/results_service';
@@ -136,11 +137,13 @@ export function timeSeriesSearchServiceFactory(mlResultsService: MlResultsServic
    */
   function getChartDetails(
     job: Job,
+    datafeed: Datafeed,
     detectorIndex: number,
     entityFields: MlEntityField[],
     earliestMs: number,
     latestMs: number,
-    metricFunctionDescription?: ES_AGGREGATION
+    metricFunctionDescription?: ES_AGGREGATION,
+    signal?: AbortSignal
   ) {
     return new Promise((resolve, reject) => {
       const obj: TimeSeriesExplorerChartDetails = {
@@ -177,6 +180,8 @@ export function timeSeriesSearchServiceFactory(mlResultsService: MlResultsServic
             timeFieldName: chartConfig.timeField,
             earliestMs,
             latestMs,
+            datafeed,
+            signal,
           })
           .then((results: any) => {
             each(blankEntityFields, (field) => {

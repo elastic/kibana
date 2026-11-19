@@ -12,10 +12,23 @@ import { queryKeys } from '../query_keys';
 
 export const getKey = queryKeys.getInternalRuleTypes;
 
-export const useGetInternalRuleTypesQuery = ({ http }: { http: HttpStart }) => {
+export interface UseGetInternalRuleTypesQueryParams {
+  http: HttpStart;
+  /**
+   * When `true`, the query also includes rule types the user can read as alerts
+   * (not only as rules). Alert views opt in so alerts-only users still receive a
+   * non-empty list.
+   */
+  includeAlertViewableTypes?: boolean;
+}
+
+export const useGetInternalRuleTypesQuery = ({
+  http,
+  includeAlertViewableTypes = false,
+}: UseGetInternalRuleTypesQueryParams) => {
   return useQuery({
-    queryKey: getKey(),
-    queryFn: () => getInternalRuleTypes({ http }),
+    queryKey: getKey({ includeAlertViewableTypes }),
+    queryFn: () => getInternalRuleTypes({ http, includeAlertViewableTypes }),
     staleTime: Infinity,
   });
 };

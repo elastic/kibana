@@ -10,14 +10,16 @@ For information about how to update these settings, refer to the appropriate ins
 
 The settings are grouped by feature or purpose, for example:
 
-- [AI Assistant](/reference/configuration-reference/ai-assistant-settings.md)
+
 - [Alerting](/reference/configuration-reference/alerting-settings.md)
 - [APM](/reference/configuration-reference/apm-settings.md)
+- [Background search and search sessions](/reference/configuration-reference/search-sessions-settings.md)
 - [Banners](/reference/configuration-reference/banner-settings.md)
 - [Cases](/reference/configuration-reference/cases-settings.md)
 - [Fleet](/reference/configuration-reference/fleet-settings.md)
 - [General](/reference/configuration-reference/general-settings.md)
 - [Internationalization](/reference/configuration-reference/internationalization-settings.md)
+- [Knowledge base artifact settings for AI Assistants](/reference/configuration-reference/ai-assistant-settings.md)
 - [Logging](/reference/configuration-reference/logging-settings.md)
 - [Logs](/reference/configuration-reference/logs-settings.md)
 - [Maps](/reference/configuration-reference/map-settings.md)
@@ -25,7 +27,6 @@ The settings are grouped by feature or purpose, for example:
 - [Monitoring](/reference/configuration-reference/monitoring-settings.md)
 - [Product intercept](/reference/configuration-reference/product-intercept-settings.md)
 - [Reporting](/reference/configuration-reference/reporting-settings.md)
-- [Search sessions](/reference/configuration-reference/search-sessions-settings.md)
 - [Security](/reference/configuration-reference/security-settings.md)
 - [Share](/reference/configuration-reference/share-settings.md)
 - [Spaces](/reference/configuration-reference/spaces-settings.md)

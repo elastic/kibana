@@ -11,13 +11,16 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
+import { once } from 'lodash';
 import { silence } from '../common';
 import { getPlaywrightGrepTag } from '../playwright/utils';
 import { getConfigRootDir, loadServersConfig } from './configs';
 import type { StartServerOptions } from './flags';
 import { preCreateSecurityIndexesViaSamlAuth } from './pre_create_security_indexes';
+import { ensureDefaultSpaceNPRE } from './ensure_default_space_npre';
 import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
+import { registerServerShutdown } from './server_shutdown';
 
 export async function startServers(log: ToolingLog, options: StartServerOptions) {
   const runStartTime = Date.now();
@@ -35,12 +38,19 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     const config = await loadServersConfig(options.testTarget, log, configRootDir);
     const pwGrepTag = getPlaywrightGrepTag(options.testTarget);
 
-    const shutdownEs = await runElasticsearch({
-      config,
-      log,
-      esFrom: options.esFrom,
-      logsDir: options.logsDir,
-    });
+    const shutdownEs = once(
+      await runElasticsearch({
+        config,
+        log,
+        esFrom: options.esFrom,
+        preserveEsData: options.preserveEsData,
+        logsDir: options.logsDir,
+      })
+    );
+
+    const removeShutdownHook = registerServerShutdown(procs, shutdownEs);
+
+    await ensureDefaultSpaceNPRE(config, log);
 
     await runKibanaServer({
       procs,
@@ -58,19 +68,24 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     // success message so that it doesn't get buried
     await silence(log, 5000);
 
-    // Pre-create Elasticsearch Security indexes after server startup
-    await preCreateSecurityIndexesViaSamlAuth(config, log);
+    // Pre-create Elasticsearch Security indexes after server startup. Skipped for `prebootOnly`
+    // config sets: Kibana is deliberately held in the `preboot` stage, so it serves no SAML
+    // endpoints to authenticate against.
+    if (!config.get('prebootOnly')) {
+      await preCreateSecurityIndexesViaSamlAuth(config, log);
+    }
 
     log.success(
       '\n\n' +
         dedent`
           Elasticsearch and Kibana are ready for functional testing.
-          Use 'npx playwright test --project local --grep ${pwGrepTag} --config <path_to_Playwright.config.ts>' to run tests'
+          Use 'node scripts/playwright test --project local --grep ${pwGrepTag} --config <path_to_Playwright.config.ts>' to run tests'
         ` +
         '\n\n'
     );
 
     await procs.waitForAllToStop();
     await shutdownEs();
+    removeShutdownHook();
   });
 }

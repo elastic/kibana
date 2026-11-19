@@ -12,7 +12,7 @@ import {
   euiPaletteGreen,
   euiPaletteWarm,
 } from '@elastic/eui';
-import type { MlSavedObjectType } from '../../../common/types/saved_objects';
+import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 
 type MemoryItem = MlSavedObjectType | 'jvm-heap-size' | 'estimated-available-memory';
 

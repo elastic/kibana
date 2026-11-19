@@ -13,7 +13,6 @@ import type {
   AgentBuilderPlatformPluginSetup,
   AgentBuilderPlatformPluginStart,
 } from './types';
-import { AgentBuilderPlatformPlugin } from './plugin';
 
 export const plugin: PluginInitializer<
   AgentBuilderPlatformPluginSetup,
@@ -21,7 +20,9 @@ export const plugin: PluginInitializer<
   PluginSetupDependencies,
   PluginStartDependencies
 > = async (pluginInitializerContext: PluginInitializerContext<PluginConfig>) => {
+  const { AgentBuilderPlatformPlugin } = await import('./plugin');
   return new AgentBuilderPlatformPlugin(pluginInitializerContext);
 };
 
 export { config } from './config';
+export type { AgentBuilderPlatformPluginSetup, AgentBuilderPlatformPluginStart } from './types';

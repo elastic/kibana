@@ -29,6 +29,7 @@ import { EsLegacyConfigService } from './services/es_legacy_config_service';
 import type { ObservabilityOnboardingConfig } from './config';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../common/telemetry_events';
 import { ObservabilityOnboardingPricingFeature } from '../common/pricing_features';
+import { installReceiptsDestination } from './lib/ingest_receipts';
 
 export class ObservabilityOnboardingPlugin
   implements
@@ -40,6 +41,9 @@ export class ObservabilityOnboardingPlugin
     >
 {
   private readonly logger: Logger;
+  private isServerless = false;
+  private managedOtlpServiceUrl?: string;
+  public receiptsDestinationInstall?: Promise<void>;
   esLegacyConfigService = new EsLegacyConfigService();
 
   constructor(
@@ -74,6 +78,8 @@ export class ObservabilityOnboardingPlugin
     }) as ObservabilityOnboardingRouteHandlerResources['plugins'];
 
     const config = this.initContext.config.get<ObservabilityOnboardingConfig>();
+    this.isServerless = config.serverless.enabled;
+    this.managedOtlpServiceUrl = plugins.observability.managedOtlpServiceUrl;
 
     const dependencies: Omit<
       ObservabilityOnboardingRouteHandlerResources,
@@ -135,6 +141,15 @@ export class ObservabilityOnboardingPlugin
   }
 
   public start(core: CoreStart) {
+    if (this.isServerless || Boolean(this.managedOtlpServiceUrl)) {
+      // Creates the data stream too, not only the template, so the reader can query a stream that
+      // always exists and operators can see the destination from the first boot.
+      this.receiptsDestinationInstall = installReceiptsDestination({
+        esClient: core.elasticsearch.client.asInternalUser,
+        logger: this.logger,
+      });
+    }
+
     return {};
   }
 

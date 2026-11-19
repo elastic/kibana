@@ -10,6 +10,8 @@ import type {
   SearchRequest,
   SearchResponse,
   Duration,
+  IndicesGetMappingRequest,
+  IndicesGetMappingResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type {
   AuthenticatedUser,
@@ -51,6 +53,11 @@ export class SiemMigrationsDataBaseClient {
       this.logger.error(`Error getting profile_uid for user ${username}: ${error}`);
       return username;
     }
+  }
+
+  /** Fetches index mappings as the current user. */
+  public async getMapping(params: IndicesGetMappingRequest): Promise<IndicesGetMappingResponse> {
+    return this.esScopedClient.asCurrentUser.indices.getMapping(params);
   }
 
   protected processHit<T extends object>(hit: SearchHit<T>, override: Partial<T> = {}): Stored<T> {
@@ -95,7 +102,7 @@ export class SiemMigrationsDataBaseClient {
     /* Returns the next batch of search results */
     const next = async (): Promise<Array<Stored<T>>> => {
       if (!pitId) {
-        // eslint-disable-next-line require-atomic-updates
+        // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
         pitId = await pitPromise;
       }
       if (!currentBatchSearch) {
@@ -121,7 +128,7 @@ export class SiemMigrationsDataBaseClient {
       }
       const response = await currentBatchSearch;
       if (response.pit_id) {
-        // eslint-disable-next-line require-atomic-updates
+        // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
         pitId = response.pit_id;
       }
       return this.processResponseHits(response);

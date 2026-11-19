@@ -8,8 +8,7 @@
 import { InferenceEndpoints } from '../__mocks__/inference_endpoints';
 
 import { type GroupedInferenceEndpointsData, GroupByOptions } from '../types';
-import { GroupByReducer, GroupBySort, UNKNOWN_MODEL_ID_FALLBACK } from './group_by';
-import { ELASTIC_GROUP_ID } from './known_models';
+import { GroupByReducer, GroupBySort } from './group_by';
 
 const makeGroup = (groupId: string, groupLabel: string): GroupedInferenceEndpointsData => ({
   groupId,
@@ -76,110 +75,8 @@ describe('group by utils', () => {
         expect(result.hugging_face.groupLabel).toBe('Hugging Face');
       });
     });
-
-    describe('GroupByOptions.Model', () => {
-      const reducer = GroupByReducer(GroupByOptions.Model);
-
-      it('groups endpoints matching a known model group by that group id', () => {
-        const anthropicEndpoints = InferenceEndpoints.filter((e) =>
-          [
-            '.anthropic-claude-4.5-opus-chat_completion',
-            '.anthropic-claude-4.5-opus-completion',
-          ].includes(e.inference_id)
-        );
-        const result = anthropicEndpoints.reduce(reducer, {});
-
-        expect(Object.keys(result)).toEqual(['Anthropic']);
-        expect(result.Anthropic.endpoints).toHaveLength(2);
-        expect(result.Anthropic.endpoints).toEqual(anthropicEndpoints);
-      });
-
-      it('groups Elastic-branded endpoints (elser, rerank) under the elastic group', () => {
-        const elasticModelEndpoints = InferenceEndpoints.filter((e) =>
-          ['.elser-2-elastic', '.rerank-v1-elasticsearch'].includes(e.inference_id)
-        );
-        const result = elasticModelEndpoints.reduce(reducer, {});
-
-        expect(Object.keys(result)).toEqual([ELASTIC_GROUP_ID]);
-        expect(result[ELASTIC_GROUP_ID].endpoints).toHaveLength(2);
-      });
-
-      it('groups gp-llm-v2 and rainbow-sprinkles endpoints under the anthropic group', () => {
-        const anthropicEndpoints = InferenceEndpoints.filter((e) =>
-          [
-            '.gp-llm-v2-chat_completion',
-            '.gp-llm-v2-completion',
-            '.rainbow-sprinkles-elastic',
-          ].includes(e.inference_id)
-        );
-        const result = anthropicEndpoints.reduce(reducer, {});
-
-        expect(Object.keys(result)).toEqual(['Anthropic']);
-        expect(result.Anthropic.endpoints).toHaveLength(3);
-      });
-
-      it('groups endpoints with no model id at all under the unknown model fallback', () => {
-        const noModelIdEndpoints = InferenceEndpoints.filter((e) =>
-          [
-            'alibabacloud-endpoint-without-model-id',
-            'hugging-face-endpoint-without-model-id',
-          ].includes(e.inference_id)
-        );
-        const result = noModelIdEndpoints.reduce(reducer, {});
-
-        expect(Object.keys(result)).toEqual([UNKNOWN_MODEL_ID_FALLBACK]);
-        expect(result[UNKNOWN_MODEL_ID_FALLBACK].groupLabel).toBe('Unknown Model');
-        expect(result[UNKNOWN_MODEL_ID_FALLBACK].endpoints).toHaveLength(2);
-      });
-
-      it('accumulates endpoints from different groups into separate keys', () => {
-        const mixed = InferenceEndpoints.filter((e) =>
-          [
-            '.anthropic-claude-3.7-sonnet-chat_completion',
-            '.google-gemini-2.5-flash-chat_completion',
-            '.openai-gpt-4.1-chat_completion',
-          ].includes(e.inference_id)
-        );
-        const result = mixed.reduce(reducer, {});
-
-        expect(Object.keys(result).sort()).toEqual(['Anthropic', 'Google', 'OpenAI']);
-        expect(result.Anthropic.endpoints).toHaveLength(1);
-        expect(result.Google.endpoints).toHaveLength(1);
-        expect(result.OpenAI.endpoints).toHaveLength(1);
-      });
-    });
   });
   describe('GroupBySort', () => {
-    describe('GroupByOptions.Model', () => {
-      const sort = GroupBySort(GroupByOptions.Model);
-
-      it('keeps stable order for groups with the same label', () => {
-        const a = makeGroup('some-model', 'Some Model');
-        const b = makeGroup('some-model', 'Some Model');
-        expect([a, b].sort(sort)).toEqual([a, b]);
-      });
-
-      it('sorts the Elastic group before any other group', () => {
-        const elastic = makeGroup(ELASTIC_GROUP_ID, 'Elastic');
-        const openai = makeGroup('openai', 'OpenAI');
-        const anthropic = makeGroup('anthropic', 'Anthropic');
-        expect([openai, anthropic, elastic].sort(sort)).toEqual([elastic, anthropic, openai]);
-      });
-
-      it('sorts alphabetically by label when neither group is Elastic', () => {
-        const anthropic = makeGroup('anthropic', 'Anthropic');
-        const google = makeGroup('google', 'Google');
-        const openai = makeGroup('openai', 'OpenAI');
-        expect([openai, google, anthropic].sort(sort)).toEqual([anthropic, google, openai]);
-      });
-
-      it('keeps Elastic first even when other labels sort before "Elastic" alphabetically', () => {
-        const elastic = makeGroup(ELASTIC_GROUP_ID, 'Elastic');
-        const aardvark = makeGroup('aardvark', 'Aardvark');
-        const zephyr = makeGroup('zephyr', 'Zephyr');
-        expect([zephyr, aardvark, elastic].sort(sort)).toEqual([elastic, aardvark, zephyr]);
-      });
-    });
     describe('GroupByOptions.Service', () => {
       const sort = GroupBySort(GroupByOptions.Service);
 

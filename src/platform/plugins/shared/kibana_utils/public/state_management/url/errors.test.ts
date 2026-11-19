@@ -22,7 +22,7 @@ describe('state management URL errors', () => {
     const error = new Error();
     onGetError(error);
     onGetError(error);
-    expect(notifications.toasts.addError).toBeCalledTimes(1);
+    expect(notifications.toasts.addError).toHaveBeenCalledTimes(1);
   });
 
   test('notifies on save error only once', () => {
@@ -30,6 +30,6 @@ describe('state management URL errors', () => {
     const error = new Error();
     onSetError(error);
     onSetError(error);
-    expect(notifications.toasts.addError).toBeCalledTimes(1);
+    expect(notifications.toasts.addError).toHaveBeenCalledTimes(1);
   });
 });

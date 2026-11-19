@@ -11,22 +11,22 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'home', 'svlCommonPage']);
 
-  // Failing - test user permission issue?
-  // https://github.com/elastic/kibana/issues/248690
+  // Failing: See https://github.com/elastic/kibana/issues/266763
   describe.skip('Sample data in serverless', function () {
+    this.tags(['skipSvlVectorDB']);
     before(async () => {
       await pageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     after(async () => {
-      await pageObjects.home.removeSampleDataSet('ecommerce');
+      await pageObjects.home.removeSampleDataSetFromUi('ecommerce');
     });
 
     it('Sample data loads', async () => {
       await pageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
-      await pageObjects.home.addSampleDataSet('ecommerce');
+      await pageObjects.home.addSampleDataSetFromUi('ecommerce');
       const ecommerce = await pageObjects.home.isSampleDataSetInstalled('ecommerce');
       expect(ecommerce).toBe(true);
     });

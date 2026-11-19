@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from './serverless.base.config';
+import { defaultConfig, withUiamCertOfProject } from './serverless.base.config';
 import type { ScoutServerConfig } from '../../../../../types';
 
 export const servers: ScoutServerConfig = {
@@ -19,9 +19,14 @@ export const servers: ScoutServerConfig = {
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
-      ...defaultConfig.kbnTestServer.serverArgs,
+      ...withUiamCertOfProject(defaultConfig.kbnTestServer.serverArgs, 'observability'),
       '--serverless=oblt',
       '--coreApp.allowDynamicConfigOverrides=true',
+      // Synthetics service config — matches the FTR deployment-agnostic serverless base
+      // so the Elastic-managed `dev` public location is available for Synthetics API tests.
+      '--xpack.uptime.service.password=test',
+      '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+      '--xpack.uptime.service.devUrl=mockDevUrl',
       '--xpack.uptime.service.manifestUrl=mockDevUrl',
     ],
   },

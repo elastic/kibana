@@ -16,6 +16,7 @@ const userMapping = {
     name: mappings.text(),
     age: mappings.integer(),
     email: mappings.keyword(),
+    nickname: mappings.wildcard(),
     isActive: mappings.boolean(),
     createdAt: mappings.date(),
   },
@@ -29,6 +30,7 @@ export const validUser: UserDocument = {
   name: 'John Doe',
   age: 30,
   email: 'john@example.com',
+  nickname: 'Johnny',
   isActive: true,
   createdAt: '2024-01-01T00:00:00Z',
 };
@@ -61,6 +63,13 @@ export const invalidUser3: UserDocument = {
   isActive: 'yes',
 };
 
+// ERROR: wrong type for nickname (should be string)
+export const invalidUser4: UserDocument = {
+  name: 'John',
+  // @ts-expect-error - nickname must be a string
+  nickname: 123,
+};
+
 // Test that MappingsDefinition enforces correct property types
 // ERROR: invalid mapping type
 export const invalidMapping: MappingsDefinition = {
@@ -74,6 +83,7 @@ export const invalidMapping: MappingsDefinition = {
 const objectMapping = {
   properties: {
     nestedObj: mappings.object({
+      dynamic: 'strict',
       properties: {
         name: mappings.text(),
         age: mappings.integer(),

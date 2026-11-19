@@ -15,16 +15,35 @@ import {
   kbnTestConfig,
   kibanaTestSuperuserServerless,
   getDockerFileMountPath,
+  PRODUCT_DOC_STUB_REPOSITORY_URL,
 } from '@kbn/test';
-import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
-import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
+import {
+  MOCK_IDP_REALM_NAME,
+  MOCK_IDP_UIAM_CLOUD_ID,
+  MOCK_IDP_UIAM_ORGANIZATION_ID,
+  MOCK_IDP_UIAM_PROJECT_ID,
+  MOCK_IDP_UIAM_SERVICE_URL,
+  MOCK_IDP_UIAM_SHARED_SECRET,
+} from '@kbn/mock-idp-utils';
 import path from 'path';
 import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
 import { services as svlServices } from './services';
 
+// Indicates whether the config is used on CI or locally.
+const isRunOnCI = process.env.CI;
+
 export default async () => {
   const packageRegistryConfig = path.join(__dirname, './common/package_registry_config.yml');
-  const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+  // EPR_REQUIRE_PACKAGE_SIGNATURES=false: the `:lite` distribution ships some
+  // packages without `.sig` files, so opt out of upstream signature enforcement
+  // (added in elastic/package-registry#1646).
+  const dockerArgs: string[] = [
+    '-v',
+    `${packageRegistryConfig}:/package-registry/config.yml`,
+    '-e',
+    'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
+  ];
 
   /**
    * This is used by CI to set the docker registry port
@@ -50,9 +69,12 @@ export default async () => {
   // "Fake" SAML provider
   const idpPath = resolve(
     __dirname,
-    '../../security_api_integration/plugins/saml_provider/metadata.xml'
+    '../../../test_plugins/security_api_integration/plugins/saml_provider/metadata.xml'
   );
-  const samlIdPPlugin = resolve(__dirname, '../../security_api_integration/plugins/saml_provider');
+  const samlIdPPlugin = resolve(
+    __dirname,
+    '../../../test_plugins/security_api_integration/plugins/saml_provider'
+  );
 
   const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
 
@@ -97,7 +119,7 @@ export default async () => {
       ],
       ssl: true, // SSL is required for SAML realm
     },
-
+    esServerlessOptions: { uiam: true },
     kbnTestServer: {
       buildArgs: [],
       env: {
@@ -120,6 +142,8 @@ export default async () => {
         `--elasticsearch.serviceAccountToken=${kibanaDevServiceAccount.token}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         '--telemetry.sendUsageTo=staging',
+        // Keeps test servers from downloading the real product documentation artifacts
+        `--xpack.productDocBase.artifactRepositoryUrl=${PRODUCT_DOC_STUB_REPOSITORY_URL}`,
         `--logging.appenders.deprecation=${JSON.stringify({
           type: 'console',
           layout: {
@@ -163,12 +187,12 @@ export default async () => {
         })}`,
         '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
-        // configure security reponse header report-to settings to mimic MKI configuration
+        // configure security response header report-to settings to mimic MKI configuration
         `--csp.report_to=${JSON.stringify(['violations-endpoint'])}`,
         `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
-        // normally below is injected by control plane
-        '--xpack.cloud.id=ftr_fake_cloud_id',
-        `--xpack.cloud.serverless.project_id=fakeprojectid`,
+        `--xpack.cloud.id=${MOCK_IDP_UIAM_CLOUD_ID}`,
+        `--xpack.cloud.organization_id=${MOCK_IDP_UIAM_ORGANIZATION_ID}`,
+        `--xpack.cloud.serverless.project_id=${MOCK_IDP_UIAM_PROJECT_ID}`,
         `--xpack.cloud.base_url=https://fake-cloud.elastic.co`,
         `--xpack.cloud.projects_url=/projects/`,
         `--xpack.cloud.profile_url=/user/settings/`,
@@ -176,10 +200,21 @@ export default async () => {
         `--xpack.cloud.deployments_url=/deployments`,
         `--xpack.cloud.organization_url=/account/`,
         `--xpack.cloud.users_and_roles_url=/account/members/`,
+        ...(isRunOnCI ? [] : ['--mockIdpPlugin.uiam.enabled=true']),
+        `--xpack.security.uiam.enabled=true`,
+        `--xpack.security.uiam.url=${MOCK_IDP_UIAM_SERVICE_URL}`,
+        `--xpack.security.uiam.sharedSecret=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+        `--xpack.security.uiam.ssl.certificate=${KBN_CERT_PATH}`,
+        `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
+        '--xpack.security.uiam.ssl.verificationMode=none',
+        '--xpack.fleet.experimentalFeatures.installIntegrationsKnowledge=false',
       ],
     },
 
-    security: { disableTestUser: true },
+    security: {
+      disableTestUser: true,
+      cookieLogin: false, // serverless uses SAML-based auth, not basic-auth cookie login
+    },
 
     // Used by FTR to recognize serverless project and change its behavior accordingly
     serverless: true,

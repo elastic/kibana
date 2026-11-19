@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import type { WorkflowsServices } from '../../../../../types';
@@ -22,7 +22,6 @@ export interface RunWorkflowResponse {
   workflowExecutionId: string;
 }
 
-// This is unused thunk, but I think it worth keeping it. Maybe will be used in the future.
 export const runWorkflowThunk = createAsyncThunk<
   RunWorkflowResponse,
   RunWorkflowParams,

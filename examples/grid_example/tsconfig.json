@@ -25,6 +25,7 @@
     "@kbn/presentation-publishing",
     "@kbn/es-query",
     "@kbn/ui-actions-plugin",
-    "@kbn/embeddable-examples-plugin"
+    "@kbn/embeddable-examples-plugin",
+    "@kbn/ui-callout"
   ]
 }

@@ -12,6 +12,7 @@ import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import { getExecutorServices } from './get_executor_services';
+import { resolveCpsData } from './resolve_cps_data';
 import type { TaskRunnerContext } from './types';
 import { ruleMonitoringServiceMock } from '../monitoring/rule_monitoring_service.mock';
 import { ruleResultServiceMock } from '../monitoring/rule_result_service.mock';
@@ -28,6 +29,10 @@ jest.mock('../lib/wrap_search_source_client', () => ({
 
 jest.mock('../lib/wrap_async_search_client', () => ({
   wrapAsyncSearchClient: jest.fn().mockReturnValue({ search: jest.fn(), getMetrics: jest.fn() }),
+}));
+
+jest.mock('./resolve_cps_data', () => ({
+  resolveCpsData: jest.fn().mockResolvedValue({ linkedProjects: [] }),
 }));
 
 const projectRouting: AsScopedOptions = { projectRouting: 'space' };
@@ -148,6 +153,60 @@ describe('getExecutorServices', () => {
 
       expect(dataSearchAsScoped).toHaveBeenCalledTimes(1);
       expect(dataSearchAsScoped).toHaveBeenCalledWith(fakeRequest, projectRouting);
+    });
+  });
+
+  describe('getDataViews', () => {
+    it('creates the data views service with the current-user ES client for CPS fan-out', async () => {
+      const context = createMockContext();
+      const fakeRequest = createFakeRequest();
+
+      const executorServices = getExecutorServices({
+        context,
+        fakeRequest,
+        abortController,
+        logger,
+        ruleMonitoringService,
+        ruleResultService,
+        ruleData,
+      });
+
+      await executorServices.getDataViews();
+
+      const scopedClusterClient = (context.elasticsearch.client.asScoped as jest.Mock).mock
+        .results[0].value;
+      expect(context.dataViews.dataViewsServiceFactory).toHaveBeenCalledWith(
+        expect.anything(),
+        scopedClusterClient.asCurrentUser
+      );
+    });
+  });
+
+  describe('getCpsData', () => {
+    it('resolves CPS data with the internal user (routing expression) and current user (linked projects)', async () => {
+      const context = createMockContext();
+      const fakeRequest = createFakeRequest();
+
+      const executorServices = getExecutorServices({
+        context,
+        fakeRequest,
+        abortController,
+        logger,
+        ruleMonitoringService,
+        ruleResultService,
+        ruleData,
+      });
+
+      await executorServices.getCpsData();
+
+      const scopedClusterClient = (context.elasticsearch.client.asScoped as jest.Mock).mock
+        .results[0].value;
+      expect(resolveCpsData).toHaveBeenCalledWith(
+        scopedClusterClient.asInternalUser,
+        scopedClusterClient.asCurrentUser,
+        ruleData.spaceId,
+        logger
+      );
     });
   });
 });

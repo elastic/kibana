@@ -26,7 +26,7 @@ describe('crete_list_item_bulk', () => {
     const firstRecord = getIndexESListItemMock();
     const secondRecord = getIndexESListItemMock(VALUE_2);
     [firstRecord.tie_breaker_id, secondRecord.tie_breaker_id] = TIE_BREAKERS;
-    expect(options.esClient.bulk).toBeCalledWith({
+    expect(options.esClient.bulk).toHaveBeenCalledWith({
       body: [
         { create: { _index: LIST_ITEM_INDEX } },
         firstRecord,
@@ -41,6 +41,6 @@ describe('crete_list_item_bulk', () => {
   test('It should not call the dataClient when the values are empty', async () => {
     const options = getCreateListItemBulkOptionsMock();
     options.value = [];
-    expect(options.esClient.bulk).not.toBeCalled();
+    expect(options.esClient.bulk).not.toHaveBeenCalled();
   });
 });

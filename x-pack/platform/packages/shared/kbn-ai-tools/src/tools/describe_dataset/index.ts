@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { dateRangeQuery } from '@kbn/es-query';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { getSampleDocuments } from './get_sample_documents';
-import { mergeSampleDocumentsWithFieldCaps } from './merge_sample_documents_with_field_caps';
+import { timeoutSignal } from '@kbn/std';
+import type { ESQLSearchResponse } from '@kbn/es-types';
+import { buildCountQuery } from '../../utils/build_count_query';
+import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
+import { DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '../../utils/default_esql_query_timeout';
+import { getSampleDocumentsEsql } from './get_sample_documents';
+import { mergeSampleDocumentsWithSchema } from './merge_sample_documents_with_schema';
 
 export async function describeDataset({
   esClient,
@@ -17,42 +20,87 @@ export async function describeDataset({
   end,
   index,
   kql,
-  filter,
+  signal,
 }: {
   esClient: ElasticsearchClient;
   start: number;
   end: number;
   index: string | string[];
   kql?: string;
-  filter?: QueryDslQueryContainer | QueryDslQueryContainer[];
+  signal?: AbortSignal;
 }) {
-  const [fieldCaps, hits] = await Promise.all([
-    esClient.fieldCaps({
-      index,
-      fields: '*',
-      index_filter: {
-        bool: {
-          filter: dateRangeQuery(start, end),
-        },
-      },
-    }),
-    getSampleDocuments({
-      esClient,
-      index,
-      start,
-      end,
-      kql,
-      filter,
-    }),
-  ]);
+  const deadline = signal ? undefined : timeoutSignal(DEFAULT_ESQL_QUERY_TIMEOUT_MS);
+  try {
+    // `deadline` is set exactly when the caller did not pass `signal`.
+    const requestSignal = signal ?? deadline!;
+    const [columns, sampleDocs, total] = await Promise.all([
+      getEsqlColumnSchema({
+        esClient,
+        index,
+        start,
+        end,
+        signal: requestSignal,
+      }),
+      getSampleDocumentsEsql({
+        esClient,
+        index,
+        start,
+        end,
+        kql,
+        abortSignal: requestSignal,
+      }),
+      runEsqlPopulationCount({
+        esClient,
+        index,
+        start,
+        end,
+        kql,
+        signal: requestSignal,
+      }),
+    ]);
 
-  const total = hits.total;
+    const schema = columns.map((column) => {
+      return {
+        name: column.name,
+        types: column.originalTypes ?? [column.type],
+      };
+    });
 
-  const analysis = mergeSampleDocumentsWithFieldCaps({
-    hits: hits.hits,
-    total: total ?? 0,
-    fieldCaps,
-  });
+    const analysis = mergeSampleDocumentsWithSchema({
+      hits: sampleDocs.hits,
+      total,
+      schema,
+    });
 
-  return analysis;
+    return analysis;
+  } finally {
+    deadline?.dispose();
+  }
+}
+
+async function runEsqlPopulationCount({
+  esClient,
+  index,
+  start,
+  end,
+  kql,
+  signal,
+}: {
+  esClient: ElasticsearchClient;
+  index: string | string[];
+  start: number;
+  end: number;
+  kql?: string;
+  signal?: AbortSignal;
+}): Promise<number> {
+  const response = (await esClient.esql.query(
+    {
+      query: buildCountQuery({ index, start, end, kql }),
+      drop_null_columns: true,
+    },
+    { signal }
+  )) as unknown as ESQLSearchResponse;
+  const total = response.values[0]?.[0];
+
+  return typeof total === 'number' ? total : 0;
 }

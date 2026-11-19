@@ -7,17 +7,48 @@
 
 export * from './impl/schemas';
 export * from './constants';
-export { buildRouteValidationWithZod } from './impl/schemas/common';
+export { goldenClusterPrivileges } from './golden_cluster_privileges';
 export {
-  buildRunFilterQuery,
+  buildExperimentFilterQuery,
   buildExampleScoresQuery,
   buildDatasetExampleScoresQuery,
+  buildSpaceFilter,
   buildStatsAggregation,
   parseStatsAggregationResponse,
+  buildEvaluatorModelsAggregation,
+  parseEvaluatorModelsAggregation,
+  buildExperimentEvaluatorsAggregation,
+  parseExperimentEvaluatorsAggregation,
+  buildExperimentRunsAggregation,
+  parseExperimentRunsAggregation,
+  buildExperimentRunsFetchQuery,
+  buildExperimentTracesAggregation,
+  parseExperimentTracesAggregation,
   SCORES_SORT_ORDER,
-  buildRunsListingFilterQuery,
-  buildRunsListingAggregation,
-  parseRunsListingResponse,
+  buildExperimentsListingFilterQuery,
+  buildExperimentsListingAggregation,
+  parseExperimentsListingResponse,
   buildModelDisplayId,
+  escapeWildcard,
 } from './impl/query_builders';
-export type { RunsListingResult, RunDetailEvaluatorStat } from './impl/query_builders';
+export type {
+  ExperimentsListingResult,
+  ExperimentDetailEvaluatorStat,
+  EvaluatorJudgeModel,
+  ExperimentRunKey,
+} from './impl/query_builders';
+export { getDatasetId } from './impl/dataset_ids';
+export { getEvaluatorDefinitionId, getEvaluatorSuccessorId } from './impl/evaluator_ids';
+export { ALL_SPACES_ID, DEFAULT_SPACE_ID, resolveDatasetHomeSpace } from './impl/spaces';
+export {
+  pairScores,
+  compareScores,
+  resolveDirection,
+  isImproved,
+  PARAMETRIC_UPGRADE_MIN_PAIRS,
+} from './impl/statistics';
+export type { PairedScore } from './impl/statistics';
+export {
+  DEFAULT_JUDGE_SCORE_DIRECTION,
+  getJudgeScoreDirection,
+} from './impl/judge_score_direction';

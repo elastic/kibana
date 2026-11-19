@@ -1,8 +1,27 @@
 post:
   summary: Create a runtime field
   operationId: createRuntimeFieldDefault
+  description: >
+    Create a runtime field for a data view.
+    Runtime fields are computed at query time using a
+    [Painless script](https://www.elastic.co/docs/explore-analyze/scripting/modules-scripting-painless)
+    and do not require reindexing.
+    If no `script` is provided, the runtime field returns the corresponding value from the document `_source`.
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X POST "${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/runtime_field" \
+          -H "Authorization: ApiKey ${API_KEY}" \
+          -H "kbn-xsrf: true" \
+          -H "Content-Type: application/json" \
+          -d '{"name":"hour_of_day","runtimeField":{"type":"long","script":{"source":"emit(doc['"'"'timestamp'"'"'].value.getHour())"}}}'
+    - lang: Console
+      source: |
+        POST kbn://api/data_views/data_view/{viewId}/runtime_field
+        {"name":"hour_of_day","runtimeField":{"type":"long","script":{"source":"emit(doc['timestamp'].value.getHour())"}}}
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/view_id.yaml'
@@ -33,13 +52,32 @@ post:
       content:
         application/json:
           schema:
-            type: object    
+            type: object
+          examples:
+            createRuntimeFieldResponse:
+              $ref: '../components/examples/create_runtime_field_response.yaml'
 
 put:
   summary: Create or update a runtime field
   operationId: createUpdateRuntimeFieldDefault
+  description: >
+    Create or update a runtime field for a data view.
+    If the runtime field already exists, it is replaced with the new definition.
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X PUT "${KIBANA_URL}/api/data_views/data_view/${DATA_VIEW_ID}/runtime_field" \
+          -H "Authorization: ApiKey ${API_KEY}" \
+          -H "kbn-xsrf: true" \
+          -H "Content-Type: application/json" \
+          -d '{"name":"hour_of_day","runtimeField":{"type":"long","script":{"source":"emit(doc['"'"'timestamp'"'"'].value.getHour())"}}}'
+    - lang: Console
+      source: |
+        PUT kbn://api/data_views/data_view/{viewId}/runtime_field
+        {"name":"hour_of_day","runtimeField":{"type":"long","script":{"source":"emit(doc['timestamp'].value.getHour())"}}}
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - name: viewId
@@ -84,12 +122,15 @@ put:
                 type: array
                 items:
                   type: object
-          # examples:
-          #   createRuntimeFieldResponse:
-          #     $ref: '../components/examples/create_runtime_field_response.yaml'
+          examples:
+            createUpdateRuntimeFieldResponse:
+              $ref: '../components/examples/create_runtime_field_response.yaml'
     '400':
       description: Bad request
       content:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            createUpdateRuntimeFieldBadRequest:
+              $ref: '../components/examples/error_400_response.yaml'

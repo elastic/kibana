@@ -20,13 +20,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { WatchlistsFlyoutKey } from '../../../../../flyout/entity_details/shared/constants';
 import { InspectButton, InspectButtonContainer } from '../../../../../common/components/inspect';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
+import { useWatchlistFlyout } from '../../flyout/use_watchlist_flyout';
 import { useDeleteWatchlist, useWatchlistsTableData } from './hooks';
 import { buildWatchlistsManagementTableColumns } from './columns';
 import type { WatchlistTableItemType } from './types';
@@ -34,10 +33,13 @@ import type { WatchlistTableItemType } from './types';
 export const WATCHLISTS_MANAGEMENT_TABLE_ID = 'watchlistsManagementTableId';
 export const WATCHLISTS_MANAGEMENT_TABLE_QUERY_ID = 'watchlistsManagementTableQueryId';
 
-export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ spaceId }) => {
+export const WatchlistsManagementTable: React.FC<{ spaceId: string; canWrite?: boolean }> = ({
+  spaceId,
+  canWrite = true,
+}) => {
   const { setQuery, deleteQuery } = useGlobalTime();
   const { euiTheme } = useEuiTheme();
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openEdit, flyout } = useWatchlistFlyout(spaceId);
   const { addError } = useAppToasts();
   const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
     useBoolState();
@@ -45,18 +47,11 @@ export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ space
   const modalTitleId = useGeneratedHtmlId({ prefix: 'watchlistsDeleteConfirmation' });
   const onEdit = useCallback(
     (record: WatchlistTableItemType) => {
-      openFlyout({
-        right: {
-          id: WatchlistsFlyoutKey,
-          params: {
-            mode: 'edit',
-            watchlistId: record.id,
-            spaceId,
-          },
-        },
-      });
+      if (record.id) {
+        openEdit(record.id);
+      }
     },
-    [openFlyout, spaceId]
+    [openEdit]
   );
   const deleteMutation = useDeleteWatchlist(spaceId);
 
@@ -93,7 +88,7 @@ export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ space
     setPendingDelete(null);
     hideDeleteConfirmation();
   }, [deleteMutation, hideDeleteConfirmation, onDeleteCancel, pendingDelete]);
-  const columns = buildWatchlistsManagementTableColumns(euiTheme, onEdit, onDelete);
+  const columns = buildWatchlistsManagementTableColumns(euiTheme, onEdit, onDelete, canWrite);
   const { visibleRecords, isLoading, hasError, refetch, inspect } = useWatchlistsTableData(
     spaceId,
     0,
@@ -213,6 +208,7 @@ export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ space
           />
         </EuiConfirmModal>
       )}
+      {flyout}
     </InspectButtonContainer>
   );
 };

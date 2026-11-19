@@ -319,9 +319,9 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
 
     const onChangePathToExecutable = useCallback(
       (event: React.ChangeEvent<HTMLInputElement>) => {
-        const pathToExecutable = event.target.value.trim();
+        const pathToExecutable = event.target.value;
         toggleHasPathToExecutableError(
-          draftScript.fileType === 'archive' && !pathToExecutable.length
+          draftScript.fileType === 'archive' && !pathToExecutable.trim().length
         );
         setHasFormChanged(true);
 
@@ -385,7 +385,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
     );
 
     const onChangeDescription = useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
+      (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const description = e.target.value.trim();
         toggleHasEmptyDescription(!description);
         setHasFormChanged(true);
@@ -455,6 +455,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
             data-test-subj={getTestId('file-picker-row')}
           >
             <EuiFilePicker
+              aria-label={SCRIPT_LIBRARY_LABELS.flyout.body.edit.filePickerPrompt.label}
               data-test-subj={getTestId('file-picker')}
               isInvalid={hasFileError && hasFileBeenChanged}
               id={filePickerUUID}
@@ -598,8 +599,9 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
           }
           data-test-subj={getTestId('description-row')}
         >
-          <EuiFieldText
+          <EuiTextArea
             defaultValue={draftScript.description}
+            rows={3}
             onChange={onChangeDescription}
             data-test-subj={getTestId('description-input')}
           />

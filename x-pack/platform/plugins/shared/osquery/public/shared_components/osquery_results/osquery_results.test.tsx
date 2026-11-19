@@ -99,5 +99,6 @@ describe('Osquery Results', () => {
     expect(getByTestId('osquery-results-comment'));
     expect(getByText('Test-rule')).toBeInTheDocument();
     expect(getByText('attached query')).toBeInTheDocument();
+    expect(getByText('Tags')).toBeInTheDocument();
   });
 });

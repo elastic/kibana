@@ -1,0 +1,151 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+import { Parser } from '@elastic/esql';
+import { summary } from './summary';
+
+describe('STATS summary', () => {
+  it.each([
+    {
+      description: 'STATS with assigned aggregation',
+      query: 'FROM index | STATS var0=AVG(field2)',
+      expectedNewColumns: ['var0'],
+      expectedAggregates: ['var0'],
+      expectedGrouping: [],
+      expectedRenamedColumnsPairs: [],
+    },
+    {
+      description: 'STATS with function aggregation',
+      query: 'FROM index | STATS AVG(field2)',
+      expectedNewColumns: ['AVG(field2)'],
+      expectedAggregates: ['AVG(field2)'],
+      expectedGrouping: [],
+      expectedRenamedColumnsPairs: [],
+    },
+    {
+      description: 'STATS with function aggregation and grouping',
+      query: 'FROM a | STATS AVG(field2) BY field1',
+      expectedNewColumns: ['AVG(field2)'],
+      expectedAggregates: ['AVG(field2)'],
+      expectedGrouping: ['field1'],
+      expectedRenamedColumnsPairs: [],
+    },
+    {
+      description: 'STATS with assigned aggregation and assigned grouping columns',
+      query: 'FROM a | STATS avg=AVG(field2) BY buckets=BUCKET(@timestamp,50,?_tstart,?_tend)',
+      expectedNewColumns: ['avg', 'buckets'],
+      expectedAggregates: ['avg'],
+      expectedGrouping: ['buckets'],
+      expectedRenamedColumnsPairs: [],
+    },
+    {
+      description: 'STATS with assigned aggregation and WHERE clause',
+      query: 'FROM a | STATS avg=AVG(field2) WHERE field1 > 100',
+      expectedNewColumns: ['avg'],
+      expectedAggregates: ['avg'],
+      expectedGrouping: [],
+      expectedRenamedColumnsPairs: [],
+    },
+    {
+      description: 'STATS with function aggregation and WHERE clause',
+      query: 'FROM a | STATS AVG(field2) WHERE field1 > 100',
+      expectedNewColumns: ['AVG(field2)'],
+      expectedAggregates: ['AVG(field2)'],
+      expectedGrouping: [],
+      expectedRenamedColumnsPairs: [],
+    },
+    {
+      description: 'can handle many aggregates and groupings',
+      query: 'FROM a | STATS AVG(field1), field2, MIN(field3) BY field4, field5',
+      expectedNewColumns: ['AVG(field1)', 'field2', 'MIN(field3)'],
+      expectedAggregates: ['AVG(field1)', 'field2', 'MIN(field3)'],
+      expectedGrouping: ['field4', 'field5'],
+      expectedRenamedColumnsPairs: [],
+    },
+    {
+      description: 'can have params and quoted fields in grouping',
+      query: 'FROM index | STATS max(1) BY `a😎`, ?123, a.?b.?0.`😎`',
+      expectedNewColumns: ['max(1)'],
+      expectedAggregates: ['max(1)'],
+      expectedGrouping: ['a😎', '?123', 'a.?b.?0.😎'],
+      expectedRenamedColumnsPairs: [],
+    },
+    {
+      description: 'works well with BUCKET function',
+      query: 'FROM index | STATS BY BUCKET(@timestamp,50,?_tstart,?_tend)',
+      expectedNewColumns: ['BUCKET(@timestamp,50,?_tstart,?_tend)'],
+      expectedAggregates: [],
+      expectedGrouping: ['BUCKET(@timestamp,50,?_tstart,?_tend)'],
+      expectedRenamedColumnsPairs: [],
+    },
+    {
+      description: 'STATS ... BY new = old is treated as a rename',
+      query: 'FROM a | STATS AVG(field2) BY new=field1',
+      expectedNewColumns: ['AVG(field2)', 'new'],
+      expectedAggregates: ['AVG(field2)'],
+      expectedGrouping: ['new'],
+      expectedRenamedColumnsPairs: [['new', 'field1']],
+    },
+    {
+      description: 'STATS ... BY new = old captures multiple renames',
+      query: 'FROM a | STATS AVG(field3) BY new1=field1, new2=field2',
+      expectedNewColumns: ['AVG(field3)', 'new1', 'new2'],
+      expectedAggregates: ['AVG(field3)'],
+      expectedGrouping: ['new1', 'new2'],
+      expectedRenamedColumnsPairs: [
+        ['new1', 'field1'],
+        ['new2', 'field2'],
+      ],
+    },
+    {
+      description: 'STATS ... BY new = bucket(...) is not a rename',
+      query: 'FROM a | STATS AVG(field2) BY buckets=BUCKET(@timestamp,50,?_tstart,?_tend)',
+      expectedNewColumns: ['AVG(field2)', 'buckets'],
+      expectedAggregates: ['AVG(field2)'],
+      expectedGrouping: ['buckets'],
+      expectedRenamedColumnsPairs: [],
+    },
+  ])(
+    '$description',
+    ({
+      query,
+      expectedNewColumns,
+      expectedAggregates,
+      expectedGrouping,
+      expectedRenamedColumnsPairs,
+    }) => {
+      const {
+        root: {
+          commands: [, command],
+        },
+      } = Parser.parseQuery(query);
+      const result = summary(command, query);
+
+      expect(result.newColumns).toEqual(new Set(expectedNewColumns));
+      expect(result.aggregates).toEqual(
+        new Set(
+          expectedAggregates.map((field) =>
+            expect.objectContaining({
+              field,
+            })
+          )
+        )
+      );
+      expect(result.grouping).toEqual(
+        new Set(
+          expectedGrouping.map((field) =>
+            expect.objectContaining({
+              field,
+            })
+          )
+        )
+      );
+      expect(result.renamedColumnsPairs).toEqual(new Set(expectedRenamedColumnsPairs));
+    }
+  );
+});

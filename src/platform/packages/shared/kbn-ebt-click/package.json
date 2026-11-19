@@ -1,0 +1,9 @@
+{
+  "name": "@kbn/ebt-click",
+  "private": true,
+  "version": "1.0.0",
+  "description": "EBT click tracking utilities — action constants, types, and helpers for cross-team reuse",
+  "author": "Elastic Obs Exploration",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "sideEffects": false
+}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch, Middleware } from 'redux';
+import type { Dispatch, Middleware } from 'redux-v4';
 import type { LoadingIndicatorInterface } from '../../lib/loading_indicator';
 import { loadingIndicator as defaultLoadingIndicator } from '../../lib/loading_indicator';
 import { convert } from '../../lib/modify_path';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useDispatch, useSelector } from 'react-redux';
-import { usePageReady, type Meta } from '@kbn/ebt-tools';
+import { useDispatch, useSelector } from 'react-redux-v7';
+import { usePageReady, type Meta } from '@kbn/ebt-tools/react';
 import { initialLoadReported, selectOverviewStatus } from '../state/overview_status';
 
 export const useSyntheticsPageReady = (props?: { meta?: Meta }) => {

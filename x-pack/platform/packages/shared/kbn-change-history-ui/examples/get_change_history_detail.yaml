@@ -1,0 +1,56 @@
+summary: Get a single change history entry
+description: Returns full change detail including the post-change snapshot for preview.
+operationId: getEntityChangeHistoryDetail
+tags:
+  - change history
+parameters:
+  - name: objectId
+    in: path
+    required: true
+    schema:
+      type: string
+  - name: eventId
+    in: path
+    required: true
+    schema:
+      type: string
+responses:
+  '200':
+    description: Change detail
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ChangeHistoryDetail'
+        examples:
+          default:
+            value:
+              id: 018f0000-0000-7000-8000-000000000002
+              timestamp: '2026-06-15T10:30:00.000Z'
+              actor:
+                name: bob
+              action: entity_update
+              reason: Threshold adjusted by user
+              snapshot:
+                name: example
+                enabled: true
+                settings:
+                  threshold: 42
+              metadata:
+                version: 2
+  '404':
+    description: Entity or change not found
+components:
+  schemas:
+    ChangeHistoryDetail:
+      allOf:
+        - $ref: './list_change_history.yaml#/components/schemas/ChangeHistoryListItem'
+        - type: object
+          required:
+            - snapshot
+          properties:
+            reason:
+              type: string
+            snapshot:
+              description: Opaque post-change entity snapshot for the preview slot
+              type: object
+              additionalProperties: true

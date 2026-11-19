@@ -85,7 +85,7 @@ const useExpandButtonPopover = () => {
       anchorElement={state.anchorElement}
       closePopover={closePopoverHandler}
     >
-      <EuiListGroup color="primary" gutterSize="none" bordered={false} flush={true}>
+      <EuiListGroup color="primary" bordered={false}>
         <PopoverListItem
           iconType="chartTagCloud"
           label="Explore related entities"
@@ -181,7 +181,7 @@ const Template = ({ nodes, edges }: GraphResponse) => {
   const nodesWithHandlers = useMemo(() => {
     return nodes.map((node) => {
       const nodeViewModel: NodeViewModel = { ...node };
-      if (nodeViewModel.shape !== 'group') {
+      if (nodeViewModel.kind !== 'connectorGroup') {
         nodeViewModel.nodeClick = nodeClickHandler;
         nodeViewModel.expandButtonClick = expandButtonClickHandler;
       }

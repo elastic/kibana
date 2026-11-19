@@ -24,6 +24,7 @@ export const createKbnFieldTypes = (): KbnFieldType[] => [
       ES_FIELD_TYPES.TEXT,
       ES_FIELD_TYPES.MATCH_ONLY_TEXT,
       ES_FIELD_TYPES.KEYWORD,
+      ES_FIELD_TYPES.WILDCARD,
       ES_FIELD_TYPES.VERSION,
       ES_FIELD_TYPES._TYPE,
       ES_FIELD_TYPES._ID,
@@ -130,6 +131,11 @@ export const createKbnFieldTypes = (): KbnFieldType[] => [
     name: KBN_FIELD_TYPES.TDIGEST,
     filterable: false,
     esTypes: [ES_FIELD_TYPES.TDIGEST],
+  }),
+  new KbnFieldType({
+    name: KBN_FIELD_TYPES.FLATTENED,
+    filterable: false,
+    esTypes: [ES_FIELD_TYPES.FLATTENED],
   }),
   new KbnFieldType({
     name: KBN_FIELD_TYPES.CONFLICT,

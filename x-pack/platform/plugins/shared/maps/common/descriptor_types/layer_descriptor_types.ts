@@ -12,6 +12,7 @@ import type { Feature } from 'geojson';
 import type {
   StoredEMSVectorTileLayer,
   StoredHeatmapLayer,
+  StoredLayer,
   StoredLayerGroup,
   StoredRasterLayer,
   StoredVectorLayer,
@@ -53,15 +54,10 @@ export type TileError = {
   error?: ErrorCause;
 };
 
-interface RuntimeLayerState {
+export interface RuntimeLayerState {
   __dataRequests?: DataRequestDescriptor[];
   __isPreviewLayer?: boolean;
-  __trackedLayerDescriptor?:
-    | StoredEMSVectorTileLayer
-    | StoredHeatmapLayer
-    | StoredLayerGroup
-    | StoredRasterLayer
-    | StoredVectorLayer;
+  __trackedLayerDescriptor?: StoredLayer;
   __areTilesLoaded?: boolean;
   __tileMetaFeatures?: TileMetaFeature[];
   __tileErrors?: TileError[];
@@ -69,6 +65,7 @@ interface RuntimeLayerState {
 
 export type VectorLayerDescriptor = Omit<StoredVectorLayer, 'joins'> & {
   joins?: JoinDescriptor[];
+  [key: string]: unknown;
 } & RuntimeLayerState;
 
 export type HeatmapLayerDescriptor = StoredHeatmapLayer & RuntimeLayerState;

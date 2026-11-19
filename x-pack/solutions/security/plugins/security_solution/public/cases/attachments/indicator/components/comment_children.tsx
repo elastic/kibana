@@ -9,11 +9,12 @@ import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingLogo, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { LOADING_LOGO_TEST_ID } from './test_ids';
 import { useStyles } from './styles';
 import { useIndicatorById } from '../hooks/use_indicator_by_id';
-import type { IndicatorAttachmentMetadata } from '../utils/attachments';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import type { IndicatorAttachmentMetadata } from '..';
 
 export const INDICATOR_NAME_TEST_ID = 'tiCasesIndicatorName';
 export const INDICATOR_FEED_NAME_TEST_ID = 'tiCasesIndicatorFeedName';
@@ -41,20 +42,13 @@ export const CommentChildren: FC<CommentChildrenProps> = ({ id, metadata }) => {
 
   const { indicatorName, indicatorType, indicatorFeedName } = metadata;
 
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openIocFlyout } = useFlyoutApi();
 
-  const open = useCallback(
-    () =>
-      openFlyout({
-        right: {
-          id: 'ioc-details-right',
-          params: {
-            id: indicator?._id,
-          },
-        },
-      }),
-    [indicator?._id, openFlyout]
-  );
+  const open = useCallback(() => {
+    if (indicator) {
+      openIocFlyout({ indicator, origin: FLYOUT_ORIGIN.CASE_ATTACHMENT });
+    }
+  }, [indicator, openIocFlyout]);
 
   if (isLoading) {
     return <EuiLoadingLogo data-test-subj={LOADING_LOGO_TEST_ID} logo="logoSecurity" size="xl" />;

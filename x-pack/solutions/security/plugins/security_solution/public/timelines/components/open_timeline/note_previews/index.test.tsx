@@ -18,14 +18,23 @@ import type { OpenTimelineResult, TimelineResultNote } from '../types';
 import { NotePreviews } from '.';
 import { useDeleteNote } from './hooks/use_delete_note';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../../data_view_manager/hooks/__mocks__/use_data_view';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 const mockDispatch = jest.fn();
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_selector');
+jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
+jest.mock('../../../../data_view_manager/hooks/use_data_view');
+jest.mock('../../../../flyout_v2/use_flyout_api');
 
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
@@ -43,6 +52,7 @@ describe('NotePreviews', () => {
   let note1updated: number;
   let note2updated: number;
   let note3updated: number;
+  let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
@@ -61,6 +71,10 @@ describe('NotePreviews', () => {
         crud: true,
       },
     });
+    (useSelectedPatterns as jest.Mock).mockReturnValue(['test1', 'test2']);
+    jest.mocked(useDataView).mockReturnValue(withIndices(['test1', 'test2']));
+    flyoutApi = createFlyoutApiMock();
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
   });
 
   test('it renders a note preview for each note when isModal is false', () => {
@@ -304,6 +318,46 @@ describe('NotePreviews', () => {
     );
 
     expect(wrapper.find(`[data-test-subj="notes-toggle-event-details"]`).exists()).toBeFalsy();
+  });
+
+  describe('Toggle event details', () => {
+    const renderWithNote = () => {
+      const timeline = mockTimelineResults[0];
+      (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+
+      return render(
+        <TestProviders>
+          <NotePreviews
+            notes={[
+              {
+                noteId: 'noteId1',
+                note: 'a note',
+                savedObjectId: 'test-id',
+                updated: note2updated,
+                updatedBy: 'alice',
+              },
+            ]}
+            showTimelineDescription
+            timelineId="test-timeline-id"
+          />
+        </TestProviders>,
+        {
+          wrapper: createReactQueryWrapper(),
+        }
+      );
+    };
+
+    it('should open the document flyout (from pattern)', () => {
+      const { getByTestId } = renderWithNote();
+
+      fireEvent.click(getByTestId('notes-toggle-event-details'));
+
+      expect(flyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalledWith({
+        documentId: 'event1',
+        indexName: 'test1,test2',
+        origin: FLYOUT_ORIGIN.NOTE_PREVIEW,
+      });
+    });
   });
 
   describe('Delete Notes', () => {

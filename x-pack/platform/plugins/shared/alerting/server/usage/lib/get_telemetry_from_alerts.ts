@@ -39,6 +39,7 @@ export async function getTotalAlertsCountAggregations({
   try {
     const query = {
       index: AAD_INDEX_PATTERN,
+      expand_wildcards: ['open', 'hidden'] as Array<'open' | 'hidden'>,
       size: 0,
       query: {
         match_all: {},

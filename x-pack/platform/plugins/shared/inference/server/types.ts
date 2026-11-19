@@ -8,21 +8,36 @@
 import type {
   PluginStartContract as ActionsPluginStart,
   PluginSetupContract as ActionsPluginSetup,
+  ActionsClient,
 } from '@kbn/actions-plugin/server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
+/**
+ * Narrow interface for the actions plugin dependency used internally by the
+ * inference plugin. Only the `getActionsClientWithRequest` method is needed,
+ * so consumers don't have to depend on the full {@link ActionsPluginStart}.
+ */
+export interface ActionsClientProvider {
+  getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
+}
 import type {
   BoundInferenceClient,
   BoundOptions,
+  ChatCompleteOptions,
+  FeatureChatCompleteAPI,
   InferenceClient,
   InferenceConnector,
 } from '@kbn/inference-common';
-import type { InferenceChatModel, InferenceChatModelParams } from '@kbn/inference-langchain';
+import type { InferenceChatModel, InferenceChatModelBaseParams } from '@kbn/inference-langchain';
 import type { InferenceCallbacks } from '@kbn/inference-common/src/chat_complete';
 import type {
   AnonymizationPluginStart,
   AnonymizationPluginSetup,
 } from '@kbn/anonymization-plugin/server';
+import type { AiAnonymizationSettingsPluginSetup } from '@kbn/ai-anonymization-settings-plugin/server';
 import type { InferenceEndpoint } from './util/get_inference_endpoints';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -30,6 +45,7 @@ import type { InferenceEndpoint } from './util/get_inference_endpoints';
 export interface InferenceSetupDependencies {
   actions: ActionsPluginSetup;
   anonymization?: AnonymizationPluginSetup;
+  aiAnonymizationSettings?: AiAnonymizationSettingsPluginSetup;
 }
 
 export interface InferenceStartDependencies {
@@ -38,9 +54,42 @@ export interface InferenceStartDependencies {
 }
 
 /**
+ * Resolves the options to call a feature's top endpoint with, scoped to the given request.
+ */
+export type FeatureEndpointResolver = (
+  featureId: string,
+  request: KibanaRequest
+) => Promise<Pick<ChatCompleteOptions, 'connectorId' | 'reasoning'> | undefined>;
+
+/**
+ * A {@link FeatureEndpointResolver} already scoped to a request.
+ */
+export type ScopedFeatureEndpointResolver = (
+  featureId: string
+) => ReturnType<FeatureEndpointResolver>;
+
+/**
+ * The model to call: either a connector directly, or a feature whose top endpoint is resolved
+ * through the registered {@link FeatureEndpointResolver}. The two are mutually exclusive.
+ */
+export type InferenceModelTarget =
+  | { connectorId: string; featureId?: never }
+  | { featureId: string; connectorId?: never };
+
+/**
+ * An {@link InferenceClient} whose `chatComplete` also accepts a `featureId` instead of a `connectorId`.
+ */
+export type InferenceServerClient = InferenceClient & { chatComplete: FeatureChatCompleteAPI };
+
+/**
  * Setup contract of the inference plugin.
  */
-export interface InferenceServerSetup {}
+export interface InferenceServerSetup {
+  /**
+   * Registers the resolver used by `chatComplete({ featureId })`. Only one resolver can be registered.
+   */
+  registerFeatureEndpointResolver: (resolver: FeatureEndpointResolver) => void;
+}
 
 /**
  * Options to create an inference client using the {@link InferenceServerStart.getClient} API.
@@ -57,13 +106,19 @@ export interface InferenceUnboundClientCreateOptions {
 }
 
 /**
+ * Parameters a server-side client can be bound to: the {@link BoundOptions} with the model
+ * given either as a `connectorId` or as a `featureId` (see {@link InferenceModelTarget}).
+ */
+export type ServerBoundOptions = Omit<BoundOptions, 'connectorId'> & InferenceModelTarget;
+
+/**
  * Options to create a bound inference client using the {@link InferenceServerStart.getClient} API.
  */
 export interface InferenceBoundClientCreateOptions extends InferenceUnboundClientCreateOptions {
   /**
    * The parameters to bind the client to.
    */
-  bindTo: BoundOptions;
+  bindTo: ServerBoundOptions;
 }
 
 /**
@@ -78,7 +133,7 @@ export type InferenceClientCreateOptions =
  */
 export interface InferenceServerStart {
   /**
-   * Creates an {@link InferenceClient}, scoped to a request.
+   * Creates an {@link InferenceServerClient}, scoped to a request.
    *
    * @example
    * ```ts
@@ -86,6 +141,17 @@ export interface InferenceServerStart {
    *
    * const chatResponse = inferenceClient.chatComplete({
    *   connectorId: 'my-connector-id',
+   *   messages: [{ role: MessageRole.User, content: 'Do something' }],
+   * });
+   * ```
+   *
+   * Server features can pass a `featureId` instead of a `connectorId`. The feature's top model,
+   * and its `reasoning`, are then resolved from the model settings.
+   *
+   * @example
+   * ```ts
+   * const chatResponse = inferenceClient.chatComplete({
+   *   featureId: 'my-feature-id',
    *   messages: [{ role: MessageRole.User, content: 'Do something' }],
    * });
    * ```
@@ -107,10 +173,21 @@ export interface InferenceServerStart {
    *   messages: [{ role: MessageRole.User, content: 'Do something' }],
    * });
    * ```
+   *
+   * A client can also be bound to a `featureId`, so that every `chatComplete`, `output` and
+   * `prompt` call uses the feature's top model.
+   *
+   * @example
+   * ```ts
+   * const inferenceClient = myStartDeps.inference.getClient({
+   *   request,
+   *   bindTo: { featureId: 'my-feature-id' },
+   * });
+   * ```
    */
   getClient: <T extends InferenceClientCreateOptions>(
     options: T
-  ) => T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
+  ) => T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceServerClient;
 
   /**
    * Creates a langchain {@link InferenceChatModel} that will be using the inference framework
@@ -125,8 +202,36 @@ export interface InferenceServerStart {
    *    temperature: 0.3,
    *   }
    * });
+   * ```
+   *
+   * A chat model can also be built from a `featureId`. The feature's top endpoint is resolved
+   * once to load the connector exposed by `getConnector()`, and every call then goes through
+   * `chatComplete({ featureId })`, so the feature's `reasoning` applies.
+   *
+   * @example
+   * ```ts
+   * const chatModel = await myStartDeps.inference.getChatModel({
+   *   request,
+   *   featureId: 'my-feature-id',
+   *   chatModelOptions: {},
+   * });
+   * ```
    */
   getChatModel: (options: CreateChatModelOptions) => Promise<InferenceChatModel>;
+
+  /**
+   * Resolves the connector a feature's top endpoint runs on, without calling the model.
+   * Throws the same errors as `chatComplete({ featureId })`: a request error (400) when the
+   * feature has no endpoint, and an internal error when no feature endpoint resolver is registered.
+   *
+   * @param featureId - The inference feature to resolve the connector for
+   * @param request - The Kibana request to scope the operation to
+   * @returns A promise that resolves to the connector of the feature's top endpoint
+   */
+  resolveFeatureConnector: (
+    featureId: string,
+    request: KibanaRequest
+  ) => Promise<InferenceConnector>;
 
   /**
    * Returns a list of all available inference connectors.
@@ -142,7 +247,7 @@ export interface InferenceServerStart {
    * @param request - The Kibana request to scope the operation to
    * @returns A promise that resolves to the default inference connector
    */
-  getDefaultConnector: (request: KibanaRequest) => Promise<InferenceConnector>;
+  getDefaultConnector: (request: KibanaRequest) => Promise<InferenceConnector | undefined>;
 
   /**
    * Retrieves a specific inference connector by its ID.
@@ -153,6 +258,40 @@ export interface InferenceServerStart {
    * @throws Error if the connector with the specified ID does not exist
    */
   getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
+
+  /**
+   * Creates an {@link InferenceClient} using pre-scoped services instead of a
+   * {@link KibanaRequest}. This is useful for background tasks (e.g. alerting rule
+   * executors) that have scoped clients but no HTTP request context.
+   *
+   * Note: anonymization features are not available on clients created this way, and
+   * inference endpoints are always called in streaming mode because the per-space
+   * streaming setting cannot be read without a request.
+   *
+   * @param actionsClient - A pre-scoped actions client
+   * @param esClient - A pre-scoped Elasticsearch client
+   */
+  getClientWithoutRequest: (
+    actionsClient: PublicMethodsOf<ActionsClient>,
+    esClient: ElasticsearchClient
+  ) => InferenceClient;
+
+  /**
+   * Retrieves a specific inference connector by its ID, using pre-scoped services
+   * instead of a {@link KibanaRequest}. This is useful for background tasks (e.g.
+   * alerting rule executors) that have scoped clients but no HTTP request.
+   *
+   * @param id - The unique identifier of the connector to retrieve
+   * @param actionsClient - A pre-scoped actions client
+   * @param esClient - A pre-scoped Elasticsearch client
+   * @returns A promise that resolves to the requested inference connector
+   * @throws Error if the connector with the specified ID does not exist
+   */
+  getConnectorByIdWithoutClientRequest: (
+    id: string,
+    actionsClient: PublicMethodsOf<ActionsClient>,
+    esClient: ElasticsearchClient
+  ) => Promise<InferenceConnector>;
 
   /**
    * Lists available Elasticsearch inference endpoints, optionally filtered by task type.
@@ -170,20 +309,27 @@ export interface InferenceServerStart {
    * @throws Error if the endpoint does not exist
    */
   getInferenceEndpointById: (inferenceId: string) => Promise<InferenceEndpoint>;
+
+  /**
+   * Installs the managed inference token usage dashboard (and its data view) into
+   * the default space. Idempotent: existing assets are overwritten.
+   *
+   * Callers are responsible for gating this on whether token usage tracking is
+   * enabled — the inference plugin no longer self-installs the dashboard.
+   */
+  installTokenUsageDashboard: () => Promise<void>;
 }
 
 /**
  * Options to create an inference chat model using the {@link InferenceServerStart.getChatModel} API.
+ *
+ * The model is given either as a `connectorId` or as a `featureId` (see {@link InferenceModelTarget}).
  */
-export interface CreateChatModelOptions {
+export type CreateChatModelOptions = {
   /**
    * The request to scope the client to.
    */
   request: KibanaRequest;
-  /**
-   * The id of the GenAI connector to use.
-   */
-  connectorId: string;
   /**
    * Callback to be used by the client to report lifecycle events.
    */
@@ -191,5 +337,5 @@ export interface CreateChatModelOptions {
   /**
    * Additional parameters to be passed down to the model constructor.
    */
-  chatModelOptions: Omit<InferenceChatModelParams, 'connector' | 'chatComplete' | 'logger'>;
-}
+  chatModelOptions: Omit<InferenceChatModelBaseParams, 'connector' | 'logger'>;
+} & InferenceModelTarget;

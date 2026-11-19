@@ -10,6 +10,7 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiPortal, EuiProgress } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import {
   getHttp,
   getTypes,
@@ -30,8 +31,7 @@ const NewVisModal = lazy(() => import('./new_vis_modal'));
 export interface ShowNewVisModalParams {
   editorParams?: string[];
   onClose?: () => void;
-  originatingApp?: string;
-  originatingPath?: string;
+  embeddableState?: EmbeddableEditorState;
   outsideVisualizeApp?: boolean;
   createByValue?: boolean;
   showAggsSelection?: boolean;
@@ -46,8 +46,7 @@ export interface ShowNewVisModalParams {
 export function showNewVisModal({
   editorParams = [],
   onClose,
-  originatingApp,
-  originatingPath,
+  embeddableState,
   outsideVisualizeApp,
   showAggsSelection,
   selectedVisType,
@@ -81,8 +80,7 @@ export function showNewVisModal({
           <NewVisModal
             isOpen={true}
             onClose={handleClose}
-            originatingApp={originatingApp}
-            originatingPath={originatingPath}
+            embeddableState={embeddableState}
             stateTransfer={getEmbeddable().getStateTransfer()}
             outsideVisualizeApp={outsideVisualizeApp}
             editorParams={editorParams}

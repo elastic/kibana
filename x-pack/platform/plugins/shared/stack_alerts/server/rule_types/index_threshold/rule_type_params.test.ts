@@ -6,8 +6,8 @@
  */
 
 import {
-  ParamsSchema,
-  type Params,
+  IndexThresholdRuleParamsSchema,
+  type IndexThresholdRuleParams,
   type CoreQueryParams,
 } from '@kbn/response-ops-rule-params/index_threshold';
 import { MAX_GROUPS } from '@kbn/response-ops-rule-params/common';
@@ -15,7 +15,7 @@ import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
 import { Comparator } from '../../../common/comparator_types';
 
-const DefaultParams: Writable<Partial<Params>> = {
+const DefaultParams: Writable<Partial<IndexThresholdRuleParams>> = {
   index: 'index-name',
   timeField: 'time-field',
   aggType: 'count',
@@ -27,7 +27,7 @@ const DefaultParams: Writable<Partial<Params>> = {
 };
 
 describe('ruleType Params validate()', () => {
-  runTests(ParamsSchema, DefaultParams);
+  runTests(IndexThresholdRuleParamsSchema, DefaultParams);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let params: any;
@@ -79,8 +79,8 @@ describe('ruleType Params validate()', () => {
     return () => validate();
   }
 
-  function validate(): TypeOf<typeof ParamsSchema> {
-    return ParamsSchema.validate(params);
+  function validate(): TypeOf<typeof IndexThresholdRuleParamsSchema> {
+    return IndexThresholdRuleParamsSchema.validate(params);
   }
 });
 

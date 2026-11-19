@@ -17,7 +17,7 @@ project:
   owner: '@elastic/response-ops'
   sourceRoot: src/platform/packages/shared/kbn-grouping
 dependsOn:
-  - '@kbn/data-views-plugin'
+  - '@kbn/data-views-types'
   - '@kbn/es-query'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
@@ -36,26 +36,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+tasks: {}

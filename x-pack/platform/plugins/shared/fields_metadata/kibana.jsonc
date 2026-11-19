@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/fields-metadata-plugin",
-  "owner": "@elastic/obs-onboarding-team",
+  "owner": "@elastic/streams-ui",
   "group": "platform",
   "visibility": "shared",
   "description": "Exposes services for async usage and search of fields metadata.",

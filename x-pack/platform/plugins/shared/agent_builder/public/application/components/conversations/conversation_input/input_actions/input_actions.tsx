@@ -5,27 +5,49 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTourStep } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { TourStep, useAgentBuilderTour } from '../../../../context/agent_builder_tour_context';
-import { AgentSelector } from './agent_selector';
 import { ConversationActionButton } from './conversation_action_button';
 import { ConnectorSelector } from './connector_selector';
+import { TriggerModeSelector } from './trigger_mode_selector';
+import { ChatTriggerMode } from '../../../../../../common/http_api/chat';
+
+const mentionButtonLabel = i18n.translate(
+  'xpack.agentBuilder.conversationInput.inputActions.mentionButtonLabel',
+  { defaultMessage: 'Mention a user or the agent' }
+);
+
+const connectorFlexItemStyles = css`
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+`;
 
 interface InputActionsProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
-  resetToPendingMessage: () => void;
-  agentId?: string;
+  isSubmitting: boolean;
+  showTriggerModeSelector: boolean;
+  triggerMode: ChatTriggerMode;
+  onTriggerModeChange: (mode: ChatTriggerMode) => void;
+  onMentionClick?: () => void;
+  isMentionDisabled?: boolean;
 }
 
 export const InputActions: React.FC<InputActionsProps> = ({
   onSubmit,
   isSubmitDisabled,
-  resetToPendingMessage,
-  agentId,
+  isSubmitting,
+  showTriggerModeSelector,
+  triggerMode,
+  onTriggerModeChange,
+  onMentionClick,
+  isMentionDisabled = false,
 }) => {
-  const { getStepProps } = useAgentBuilderTour();
+  const showConnectorSelector = triggerMode !== ChatTriggerMode.Never;
+  const showStartActions = showConnectorSelector || Boolean(onMentionClick);
 
   return (
     <EuiFlexItem grow={false}>
@@ -33,25 +55,51 @@ export const InputActions: React.FC<InputActionsProps> = ({
         gutterSize="s"
         responsive={false}
         alignItems="center"
-        justifyContent="spaceBetween"
+        justifyContent={showStartActions ? 'spaceBetween' : 'flexEnd'}
       >
+        {showStartActions && (
+          <EuiFlexItem grow={false} css={connectorFlexItemStyles}>
+            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+              {onMentionClick && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={mentionButtonLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="at"
+                      color="text"
+                      size="s"
+                      aria-label={mentionButtonLabel}
+                      data-test-subj="agentBuilderConversationInputMentionButton"
+                      // Keeps the focus in the editor, so the menu opens under the caret
+                      onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
+                      isDisabled={isMentionDisabled}
+                      onClick={onMentionClick}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+              {showConnectorSelector && (
+                <EuiFlexItem grow={false} css={connectorFlexItemStyles}>
+                  <ConnectorSelector />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
-          <EuiTourStep {...getStepProps(TourStep.LlmSelector)}>
-            <ConnectorSelector />
-          </EuiTourStep>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiTourStep {...getStepProps(TourStep.AgentSelector)}>
-                <AgentSelector agentId={agentId} />
-              </EuiTourStep>
-            </EuiFlexItem>
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+            {showTriggerModeSelector && (
+              <EuiFlexItem grow={false}>
+                <TriggerModeSelector
+                  triggerMode={triggerMode}
+                  onTriggerModeChange={onTriggerModeChange}
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <ConversationActionButton
                 onSubmit={onSubmit}
                 isSubmitDisabled={isSubmitDisabled}
-                resetToPendingMessage={resetToPendingMessage}
+                isSubmitting={isSubmitting}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -70,7 +70,7 @@ export const TemplateYamlValidationAccordion: React.FC<TemplateYamlValidationAcc
   } else if (!validationErrors || validationErrors.length === 0) {
     icon = (
       <EuiIcon
-        type="checkInCircleFilled"
+        type="checkCircleFill"
         color={euiTheme.colors.vis.euiColorVisSuccess0}
         size="m"
         aria-hidden={true}
@@ -84,7 +84,7 @@ export const TemplateYamlValidationAccordion: React.FC<TemplateYamlValidationAcc
 
     icon = (
       <EuiIcon
-        type={hasErrors ? 'errorFilled' : 'warningFilled'}
+        type={hasErrors ? 'errorFill' : 'warningFill'}
         color={hasErrors ? 'danger' : euiTheme.colors.vis.euiColorVis8}
         size="m"
         aria-hidden={true}
@@ -155,7 +155,7 @@ export const TemplateYamlValidationAccordion: React.FC<TemplateYamlValidationAcc
             >
               <EuiFlexItem grow={false}>
                 <EuiIcon
-                  type={error.severity === 'error' ? 'errorFilled' : 'warningFilled'}
+                  type={error.severity === 'error' ? 'errorFill' : 'warningFill'}
                   color={error.severity === 'error' ? 'danger' : euiTheme.colors.vis.euiColorVis8}
                   size="s"
                   css={styles.validationErrorIcon}

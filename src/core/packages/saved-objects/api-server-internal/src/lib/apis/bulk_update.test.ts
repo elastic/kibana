@@ -40,7 +40,9 @@ import {
   mockTimestamp,
   mappings,
   createRegistry,
+  createType,
   createDocumentMigrator,
+  getMockGetResponse,
   getMockMgetResponse,
   type TypeIdTuple,
   createSpySerializer,
@@ -55,6 +57,9 @@ import {
 } from '../../test_helpers/repository.test.common';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import { schema } from '@kbn/config-schema';
+
+const UPDATE_SCHEMA_TYPE = 'update-schema-type';
 
 interface ExpectedErrorResult {
   type: string;
@@ -71,6 +76,18 @@ describe('#bulkUpdate', () => {
   let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
+  const updateSchema = schema.object(
+    { title: schema.string(), count: schema.maybe(schema.number()) },
+    { unknowns: 'ignore' }
+  );
+  registry.registerType(
+    createType(UPDATE_SCHEMA_TYPE, {
+      migrations: {},
+      modelVersions: {
+        1: { changes: [], schemas: { create: updateSchema, update: updateSchema } },
+      },
+    })
+  );
   const documentMigrator = createDocumentMigrator(registry);
 
   const expectSuccess = ({ type, id }: { type: string; id: string }) => {
@@ -258,6 +275,38 @@ describe('#bulkUpdate', () => {
                 [obj2.type]: {
                   title: 'Testing',
                   hello: 'dolly',
+                },
+              }),
+            ],
+          }),
+          expect.any(Object)
+        );
+      });
+
+      it('indexes a valid update and keeps unknown stored attributes', async () => {
+        const obj = {
+          type: UPDATE_SCHEMA_TYPE,
+          id: 'three',
+          attributes: { count: 2 },
+        };
+        const stored = getMockGetResponse(registry, obj);
+        stored._source![UPDATE_SCHEMA_TYPE] = { title: 'Testing', legacyFlag: true };
+        client.mget.mockResponseOnce({ docs: [stored] });
+        client.bulk.mockResponseOnce(getMockBulkUpdateResponse(registry, [obj]));
+
+        const result = await repository.bulkUpdate([obj]);
+
+        expect(result).toEqual({ saved_objects: [expectSuccess(obj)] });
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({
+            operations: [
+              getBulkIndexEntry('index', obj),
+              expect.objectContaining({
+                [UPDATE_SCHEMA_TYPE]: {
+                  title: 'Testing',
+                  count: 2,
+                  legacyFlag: true,
                 },
               }),
             ],
@@ -529,7 +578,7 @@ describe('#bulkUpdate', () => {
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.bulkUpdate([obj], { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrowError(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
       });
 
       it(`returns error when type is invalid`, async () => {
@@ -569,6 +618,20 @@ describe('#bulkUpdate', () => {
         const _obj = { ...obj, type: MULTI_NAMESPACE_ISOLATED_TYPE };
         const mgetResponse = getMockMgetResponse(registry, [obj1, obj2, _obj], 'bar-namespace');
         await bulkUpdateMultiError([obj1, obj2, _obj], { namespace }, mgetResponse);
+      });
+
+      it(`returns error when update schema validation fails`, async () => {
+        const _obj = { type: UPDATE_SCHEMA_TYPE, id: 'three', attributes: { count: 'lots' } };
+        await bulkUpdateError(
+          _obj,
+          false,
+          expectErrorResult(
+            _obj,
+            createBadRequestErrorPayload(
+              '[attributes.count]: expected value of type [number] but got [string]'
+            )
+          )
+        );
       });
 
       it(`returns bulk error`, async () => {

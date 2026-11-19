@@ -28,7 +28,7 @@ export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
   pagination,
 }) => {
   const [, updateUrlParams] = useUrlParams();
-  const icon = direction === 'prev' ? 'arrowLeft' : 'arrowRight';
+  const icon = direction === 'prev' ? 'chevronSingleLeft' : 'chevronSingleRight';
 
   const ariaLabel =
     direction === 'next'

@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import { DocumentResponseRt } from './v1';
+import { DocumentResponseSchema } from './v1';
 
 describe('Documents', () => {
-  describe('DocumentResponseRt', () => {
+  describe('DocumentResponseSchema', () => {
     it('has expected attributes in request', () => {
       const defaultRequest = [{ id: '1', index: '2', attached_at: '3' }];
-
-      const query = DocumentResponseRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = DocumentResponseSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
     it('multiple attributes in request', () => {
@@ -25,22 +21,16 @@ describe('Documents', () => {
         { id: '1', index: '2', attached_at: '3' },
         { id: '2', index: '3', attached_at: '4' },
       ];
-      const query = DocumentResponseRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = DocumentResponseSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
+    it('strips unknown fields', () => {
       const defaultRequest = [{ id: '1', index: '2', attached_at: '3' }];
-      const query = DocumentResponseRt.decode([{ ...defaultRequest[0], foo: 'bar' }]);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = DocumentResponseSchema.safeParse([{ ...defaultRequest[0], foo: 'bar' }]);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 });

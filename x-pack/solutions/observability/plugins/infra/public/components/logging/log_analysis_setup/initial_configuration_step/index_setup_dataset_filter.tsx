@@ -14,6 +14,7 @@ import {
   EuiPopoverTitle,
   EuiSelectable,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import type { DatasetFilter, QualityWarning } from '../../../../../common/log_analysis';
@@ -64,7 +65,7 @@ export const IndexSetupDatasetFilter: React.FC<{
       disabled={isDisabled}
       isSelected={isVisible}
       onClick={show}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
     >
       <FormattedMessage
         id="xpack.infra.analysisSetup.indexDatasetFilterIncludeAllButtonLabel"
@@ -85,8 +86,16 @@ export const IndexSetupDatasetFilter: React.FC<{
         closePopover={hide}
         isOpen={isVisible}
         panelPaddingSize="none"
+        aria-label={i18n.translate('xpack.infra.analysisSetup.indexDatasetFilterPopoverAriaLabel', {
+          defaultMessage: 'Filter datasets',
+        })}
       >
-        <EuiSelectable onChange={changeDatasetFilter} options={selectableOptions} searchable>
+        <EuiSelectable
+          onChange={changeDatasetFilter}
+          options={selectableOptions}
+          searchable
+          listProps={{ paddingSize: 's' }}
+        >
           {(list, search) => (
             <div>
               <EuiPopoverTitle>{search}</EuiPopoverTitle>

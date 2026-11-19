@@ -12,10 +12,14 @@ import React from 'react';
 import { StreamsAppPageTemplate } from '../components/streams_app_page_template';
 import { StreamsAppRouterBreadcrumb } from '../components/streams_app_router_breadcrumb';
 import { RedirectTo } from '../components/redirect_to';
-import { StreamListView } from '../components/stream_list_view';
+import { StreamManagementDefaultRedirect } from '../components/stream_management_default_redirect';
+import { StreamsRootRedirect } from '../components/streams_root_redirect';
 import { StreamDetailRoot } from '../components/stream_root';
-import { StreamDetailManagement } from '../components/data_management/stream_detail_management';
-import { SignificantEventsDiscoveryPage } from '../components/significant_events_discovery/page';
+import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
+import { StreamsLayout } from '../components/streams_layout';
+import { RedirectToDefaultLayoutTab } from '../components/streams_layout/redirect_to_default_layout_tab';
+import { IndexInspectPage } from '../components/index_inspect/index_inspect_page';
+import { DEFAULT_INDEX_INSPECT_TAB } from '../components/index_inspect/types';
 
 /**
  * Optional time range query params.
@@ -26,17 +30,27 @@ const timeRangeQueryParams = t.partial({
   rangeTo: t.string,
 });
 
+const flyoutParams = t.partial({
+  flyoutName: t.string,
+  flyoutTab: t.string,
+});
+
 /**
  * Extended query params for management routes that may include
- * additional feature-specific params (e.g., significant events flyout).
+ * additional feature-specific params (e.g., data quality page state).
  */
 const managementQueryParams = t.partial({
   rangeFrom: t.string,
   rangeTo: t.string,
-  // Significant events flyout params
-  openFlyout: t.string,
   // Data quality page state
   pageState: t.string,
+});
+
+/**
+ * The unit an index page was opened from, used only for its back link.
+ */
+const unitQueryParams = t.partial({
+  unitId: t.string,
 });
 
 /**
@@ -62,27 +76,79 @@ const streamsAppRoutes = {
     ),
     children: {
       '/': {
-        element: <StreamListView />,
+        element: <StreamsRootRedirect />,
         params: t.partial({
           query: timeRangeQueryParams,
         }),
       },
-      '/_discovery': {
+      /**
+       * Declared before `/{key}` so `v2` wins over a stream name.
+       */
+      '/v2': {
         element: <Outlet />,
         children: {
-          '/_discovery': {
-            element: <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />,
+          '/v2': {
+            element: <RedirectToDefaultLayoutTab />,
+            params: t.partial({
+              query: timeRangeQueryParams,
+            }),
           },
-          '/_discovery/{tab}': {
-            element: <SignificantEventsDiscoveryPage />,
+          '/v2/unit/{unitId}': {
+            element: <RedirectToDefaultLayoutTab />,
             params: t.intersection([
               t.type({
                 path: t.type({
-                  tab: t.string,
+                  unitId: t.string,
                 }),
               }),
               t.partial({
                 query: timeRangeQueryParams,
+              }),
+            ]),
+          },
+          '/v2/unit/{unitId}/{tab}': {
+            element: <StreamsLayout />,
+            params: t.intersection([
+              t.type({
+                path: t.type({
+                  unitId: t.string,
+                  tab: t.string,
+                }),
+              }),
+              t.partial({
+                query: t.intersection([timeRangeQueryParams, flyoutParams]),
+              }),
+            ]),
+          },
+          '/v2/indices/{indexName}': {
+            element: (
+              <RedirectTo
+                path="/v2/indices/{indexName}/{tab}"
+                params={{ path: { tab: DEFAULT_INDEX_INSPECT_TAB } }}
+              />
+            ),
+            params: t.intersection([
+              t.type({
+                path: t.type({
+                  indexName: t.string,
+                }),
+              }),
+              t.partial({
+                query: t.intersection([timeRangeQueryParams, unitQueryParams]),
+              }),
+            ]),
+          },
+          '/v2/indices/{indexName}/{tab}': {
+            element: <IndexInspectPage />,
+            params: t.intersection([
+              t.type({
+                path: t.type({
+                  indexName: t.string,
+                  tab: t.string,
+                }),
+              }),
+              t.partial({
+                query: t.intersection([managementQueryParams, unitQueryParams]),
               }),
             ]),
           },
@@ -106,17 +172,13 @@ const streamsAppRoutes = {
         ]),
         children: {
           '/{key}': {
-            element: (
-              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />
-            ),
+            element: <StreamManagementDefaultRedirect />,
           },
           /**
            * This route redirects from legacy overview/dashboard links to the management page
            */
           '/{key}/{tab}': {
-            element: (
-              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />
-            ),
+            element: <StreamManagementDefaultRedirect />,
             params: t.intersection([
               t.type({
                 path: t.type({
@@ -147,9 +209,7 @@ const streamsAppRoutes = {
            * Works on more in-depth routes as well, e.g. /{key}/management/{tab}/{subtab}/random-path.
            */
           '/*': {
-            element: (
-              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />
-            ),
+            element: <StreamManagementDefaultRedirect />,
           },
         },
       },

@@ -5,52 +5,43 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z, lazySchema } from '@kbn/zod';
 import { querySchema } from '@kbn/es-query-server';
 import { SOURCE_TYPES } from '../../../../../common';
 import { BaseESAggSourceSchema } from './es_agg_source_schemas';
 
-export const ESJoinSourceSchema = BaseESAggSourceSchema.extends({
-  type: schema.string(),
-  whereQuery: schema.maybe(querySchema),
-});
-
-export const ESDistanceSourceSchema = ESJoinSourceSchema.extends(
-  {
-    distance: schema.number(),
-    geoField: schema.string(),
-    type: schema.literal(SOURCE_TYPES.ES_DISTANCE_SOURCE),
-  },
-  {
-    unknowns: 'forbid',
-  }
+export const ESJoinSourceSchema = lazySchema(() =>
+  BaseESAggSourceSchema.extend({
+    type: z.string(),
+    whereQuery: querySchema.optional(),
+  })
 );
 
-export const ESTermSourceSchema = ESJoinSourceSchema.extends(
-  {
-    size: schema.maybe(
-      schema.number({
-        min: 1,
+export const ESDistanceSourceSchema = lazySchema(() =>
+  ESJoinSourceSchema.extend({
+    distance: z.number(),
+    geoField: z.string(),
+    type: z.literal(SOURCE_TYPES.ES_DISTANCE_SOURCE),
+  })
+);
+
+export const ESTermSourceSchema = lazySchema(() =>
+  ESJoinSourceSchema.extend({
+    size: z.number().min(1).optional(),
+    term: z.string(),
+    type: z.literal(SOURCE_TYPES.ES_TERM_SOURCE),
+  })
+);
+
+export const joinSourceSchema = lazySchema(() =>
+  z.union([
+    z
+      .object({
+        id: z.string(),
+        type: z.string(),
       })
-    ),
-    term: schema.string(),
-    type: schema.literal(SOURCE_TYPES.ES_TERM_SOURCE),
-  },
-  {
-    unknowns: 'forbid',
-  }
+      .loose(),
+    ESDistanceSourceSchema,
+    ESTermSourceSchema,
+  ])
 );
-
-export const joinSourceSchema = schema.oneOf([
-  schema.object(
-    {
-      id: schema.string(),
-      type: schema.string(),
-    },
-    {
-      unknowns: 'allow',
-    }
-  ),
-  ESDistanceSourceSchema,
-  ESTermSourceSchema,
-]);

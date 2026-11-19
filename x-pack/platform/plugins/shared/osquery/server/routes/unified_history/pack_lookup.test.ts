@@ -11,7 +11,13 @@ import type { PackSavedObject } from '../../common/types';
 const makePackSO = (
   id: string,
   name: string,
-  queries: Array<{ id: string; query: string; name?: string; schedule_id?: string }>
+  queries: Array<{
+    id: string;
+    query: string;
+    name?: string;
+    schedule_id?: string;
+    ecs_mapping?: Record<string, unknown>;
+  }>
 ) =>
   ({
     id,
@@ -132,5 +138,36 @@ describe('buildPackLookup', () => {
 
   test('returns empty map for empty input', () => {
     expect(buildPackLookup([]).size).toBe(0);
+  });
+
+  test('populates ecsMapping in object form when the query has array-format ecs_mapping', () => {
+    const packSOs = [
+      makePackSO('pack-1', 'my_pack', [
+        {
+          id: 'q1',
+          query: 'SELECT pid FROM processes',
+          schedule_id: 'sched-uuid',
+          ecs_mapping: [
+            { key: 'process.pid', result: { type: 'field', value: 'pid' } },
+          ] as unknown as Record<string, unknown>,
+        },
+      ]),
+    ];
+
+    const lookup = buildPackLookup(packSOs);
+    const entry = lookup.get('sched-uuid');
+
+    expect(entry).toBeDefined();
+    expect(entry?.ecsMapping).toEqual({ 'process.pid': { field: 'pid' } });
+    expect(entry?.queryText).toBe('SELECT pid FROM processes');
+  });
+
+  test('sets ecsMapping to undefined when the query has no ecs_mapping', () => {
+    const packSOs = [
+      makePackSO('pack-1', 'my_pack', [{ id: 'q1', query: 'SELECT 1', schedule_id: 'sched-uuid' }]),
+    ];
+
+    const lookup = buildPackLookup(packSOs);
+    expect(lookup.get('sched-uuid')?.ecsMapping).toBeUndefined();
   });
 });

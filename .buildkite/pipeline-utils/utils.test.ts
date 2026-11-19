@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getKibanaDir, getVersionsFile } from './utils';
+import { getKibanaDir, getVersionsFile } from './utils.ts';
 import fs from 'fs';
 
 // TODO: replace mocha with jest, and write tests that mock FS

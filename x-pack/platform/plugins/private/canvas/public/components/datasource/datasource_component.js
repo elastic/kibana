@@ -13,12 +13,12 @@ import {
   EuiButton,
   EuiSpacer,
   EuiIcon,
-  EuiCallOut,
   EuiButtonEmpty,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { dataViewsService } from '../../services/kibana_services';
 import { DatasourceSelector } from './datasource_selector';
@@ -164,14 +164,18 @@ export class DatasourceComponent extends PureComponent {
         <div className="canvasDataSource__section">
           <EuiButtonEmpty
             iconSide="right"
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             onClick={() => setSelecting(!selecting)}
             className="canvasDataSource__triggerButton"
             flush="left"
             size="s"
             data-test-subj="canvasChangeDatasourceButton"
           >
-            <EuiIcon type={stateDatasource.image} className="canvasDataSource__triggerButtonIcon" />
+            <EuiIcon
+              type={stateDatasource.image}
+              className="canvasDataSource__triggerButtonIcon"
+              aria-hidden
+            />
             {stateDatasource.displayName}
           </EuiButtonEmpty>
           <EuiSpacer size="s" />
@@ -199,9 +203,10 @@ export class DatasourceComponent extends PureComponent {
               </EuiFlexGroup>
             </>
           ) : (
-            <EuiCallOut color="warning">
-              <p>{strings.getExpressionArgDescription()}</p>
-            </EuiCallOut>
+            <KbnWarningCallout
+              announceOnMount={false}
+              text={strings.getExpressionArgDescription()}
+            />
           )}
         </div>
 

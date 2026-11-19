@@ -6,8 +6,16 @@
  */
 
 import type { FC } from 'react';
-import React, { useState, useContext, useEffect } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useState, useContext, useEffect, useMemo } from 'react';
+import { css } from '@emotion/react';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  shade,
+  transparentize,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { PageManager } from '../page_manager';
@@ -59,8 +67,25 @@ export const Toolbar: FC<Props> = ({
   totalPages,
   workpadName,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [activeTray, setActiveTray] = useState<TrayType | null>(null);
   const { getUrl, previousPage } = useContext(WorkpadRoutingContext);
+  const styles = useMemo(
+    () => css`
+      & .canvasTray__toggle {
+        background-color: ${euiTheme.components.forms.background};
+
+        button {
+          box-shadow: 0 -2px 1px ${transparentize(euiTheme.colors.fullShade, 0.1)};
+        }
+      }
+
+      & .canvasToolbar__container {
+        background-color: ${shade(euiTheme.colors.lightestShade, 0.05)};
+      }
+    `,
+    [euiTheme]
+  );
 
   // While the tray doesn't get activated if the workpad isn't writeable,
   // this effect will ensure that if the tray is open and the workpad
@@ -90,7 +115,7 @@ export const Toolbar: FC<Props> = ({
   };
 
   return (
-    <div className="canvasToolbar hide-for-sharing">
+    <div className="canvasToolbar hide-for-sharing" css={styles}>
       {activeTray !== null && <Tray done={() => setActiveTray(null)}>{trays[activeTray]}</Tray>}
       <div className="canvasToolbar__container">
         <EuiFlexGroup gutterSize="none" alignItems="center">
@@ -103,7 +128,7 @@ export const Toolbar: FC<Props> = ({
                 <RoutingButtonIcon
                   color="text"
                   to={getUrl(selectedPageNumber - 1)}
-                  iconType="arrowLeft"
+                  iconType="chevronSingleLeft"
                   isDisabled={selectedPageNumber <= 1}
                   aria-label={strings.getPreviousPageAriaLabel()}
                   data-test-subj="previousPageButton"
@@ -122,7 +147,7 @@ export const Toolbar: FC<Props> = ({
                 <RoutingButtonIcon
                   color="text"
                   to={getUrl(selectedPageNumber + 1)}
-                  iconType="arrowRight"
+                  iconType="chevronSingleRight"
                   isDisabled={selectedPageNumber >= totalPages}
                   aria-label={strings.getNextPageAriaLabel()}
                   data-test-subj="nextPageButton"
@@ -133,7 +158,7 @@ export const Toolbar: FC<Props> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     color="text"
-                    iconType="editorCodeBlock"
+                    iconType="code"
                     onClick={() => toggleTray('expression')}
                     data-test-subj="canvasExpressionEditorButton"
                   >

@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/plugins/private/image_embeddable'],
   coverageDirectory:
@@ -17,4 +17,5 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/src/platform/plugins/private/image_embeddable/{__packages_do_not_import__,common,public,server,static}/**/*.{ts,tsx}',
   ],
+  setupFiles: ['<rootDir>/src/platform/plugins/private/image_embeddable/jest_setup.ts'],
 };

@@ -8,9 +8,12 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { StepExecutionsDataClient } from '@kbn/workflows-execution-engine/server';
+
+import { buildTimeRangeFilter } from './build_time_range_filter';
 
 export interface StepExecutionListResult {
   results: EsWorkflowStepExecution[];
@@ -20,40 +23,78 @@ export interface StepExecutionListResult {
 }
 
 export interface SearchStepExecutionsParams {
-  esClient: ElasticsearchClient;
+  stepExecutionsDataClient: StepExecutionsDataClient;
   logger: Logger;
-  stepsExecutionIndex: string;
   /** When set, search steps for a single workflow run (existing behavior). */
   workflowExecutionId?: string;
   /** When set, search steps across all runs of a workflow. Use with optional stepId. */
   workflowId?: string;
-  stepId?: string;
+  /** When set, search steps for this document lifetime instead of `workflowId`. */
+  workflowUid?: string;
+  stepId?: string | string[];
+  /** When set, only step executions of this type, e.g. `ai.agent`. */
+  stepType?: string;
   additionalQuery?: estypes.QueryDslQueryContainer;
   spaceId: string;
   sourceExcludes?: string[];
+  /**
+   * When set, only these `_source` paths are returned. Takes precedence over `sourceExcludes`,
+   * for callers that need a couple of fields off documents whose `output` can be megabytes.
+   */
+  sourceIncludes?: string[];
   page?: number;
   size?: number;
+  /**
+   * Defaults to newest-first for workflow-level search. Single-run lists
+   * (execution detail) pass `startedAt:asc` so page 1 matches mget of `stepExecutionIds`.
+   */
+  sort?: 'startedAt:asc' | 'startedAt:desc';
+  /** Datemath lower bound for filtering by startedAt. */
+  startedAfter?: string;
+  /** Datemath upper bound for filtering by startedAt. */
+  startedBefore?: string;
 }
 
 function buildMustQueries(params: {
   workflowExecutionId?: string;
   workflowId?: string;
-  stepId?: string;
+  workflowUid?: string;
+  stepId?: string | string[];
+  stepType?: string;
   spaceId: string;
   additionalQuery?: estypes.QueryDslQueryContainer;
+  startedAfter?: string;
+  startedBefore?: string;
 }): estypes.QueryDslQueryContainer[] {
   const mustQueries: estypes.QueryDslQueryContainer[] = [{ term: { spaceId: params.spaceId } }];
   if (params.workflowExecutionId !== undefined) {
     mustQueries.push({ term: { workflowRunId: params.workflowExecutionId } });
   }
-  if (params.workflowId !== undefined) {
+  if (params.workflowUid !== undefined) {
+    mustQueries.push({ term: { workflowUid: params.workflowUid } });
+  } else if (params.workflowId !== undefined) {
     mustQueries.push({ term: { workflowId: params.workflowId } });
   }
   if (params.stepId !== undefined) {
-    mustQueries.push({ term: { stepId: params.stepId } });
+    mustQueries.push(
+      Array.isArray(params.stepId)
+        ? { terms: { stepId: params.stepId } }
+        : { term: { stepId: params.stepId } }
+    );
+  }
+  if (params.stepType !== undefined) {
+    mustQueries.push({ term: { stepType: params.stepType } });
   }
   if (params.additionalQuery) {
     mustQueries.push(params.additionalQuery);
+  }
+  const startedAtRange = buildTimeRangeFilter(
+    'startedAt',
+    params.startedAfter,
+    params.startedBefore
+  );
+  if (startedAtRange) {
+    mustQueries.push(startedAtRange);
   }
   return mustQueries;
 }
@@ -69,42 +110,56 @@ function getTotalFromResponse(
 }
 
 export const searchStepExecutions = async ({
-  esClient,
+  stepExecutionsDataClient,
   logger,
-  stepsExecutionIndex,
   workflowExecutionId,
   workflowId,
+  workflowUid,
   stepId,
+  stepType,
   additionalQuery,
   spaceId,
   sourceExcludes,
+  sourceIncludes,
   page,
   size,
+  sort = 'startedAt:desc',
+  startedAfter,
+  startedBefore,
 }: SearchStepExecutionsParams): Promise<StepExecutionListResult> => {
-  if (workflowExecutionId === undefined && workflowId === undefined) {
-    throw new Error('Either workflowExecutionId or workflowId must be provided');
+  if (workflowExecutionId === undefined && workflowId === undefined && workflowUid === undefined) {
+    throw new Error('Either workflowExecutionId, workflowId, or workflowUid must be provided');
   }
 
   try {
-    logger.debug(`Searching step executions in index ${stepsExecutionIndex}`);
+    logger.debug('Searching step executions');
 
     const mustQueries = buildMustQueries({
       workflowExecutionId,
       workflowId,
+      workflowUid,
       stepId,
+      stepType,
       spaceId,
       additionalQuery,
+      startedAfter,
+      startedBefore,
     });
 
-    const isPaginated = workflowId !== undefined && (page !== undefined || size !== undefined);
+    const isPaginated = page !== undefined || size !== undefined;
     const pageSize = size ?? (isPaginated ? 100 : 1000);
     const from = isPaginated && page !== undefined ? (page - 1) * pageSize : 0;
 
-    const response = await esClient.search<EsWorkflowStepExecution>({
-      index: stepsExecutionIndex,
+    const sourceFilter = sourceIncludes?.length
+      ? { includes: sourceIncludes }
+      : sourceExcludes?.length
+      ? { excludes: sourceExcludes }
+      : undefined;
+
+    const response = await stepExecutionsDataClient.search({
       query: { bool: { must: mustQueries } },
-      ...(sourceExcludes?.length ? { _source: { excludes: sourceExcludes } } : {}),
-      sort: 'startedAt:desc',
+      ...(sourceFilter ? { _source: sourceFilter } : {}),
+      sort,
       from,
       size: pageSize,
       track_total_hits: isPaginated,

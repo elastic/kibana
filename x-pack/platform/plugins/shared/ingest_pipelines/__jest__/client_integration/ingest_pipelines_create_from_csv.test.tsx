@@ -12,7 +12,10 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { createMemoryHistory } from 'history';
 import { Route, Router } from '@kbn/shared-ux-router';
 
-import { API_BASE_PATH } from '../../common/constants';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+
+import { API_BASE_PATH, PARSE_CSV_MAX_FILE_BYTES } from '../../common/constants';
 import { PipelinesCreateFromCsv } from '../../public/application/sections/pipelines_create_from_csv';
 import { getCreateFromCsvPath, ROUTES } from '../../public/application/services/navigation';
 
@@ -55,18 +58,27 @@ describe('<PipelinesCreateFromCsv />', () => {
       </Router>
     );
 
-    await screen.findByTestId('pageTitle');
+    await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
   };
 
   describe('on component mount', () => {
     test('should render the correct page header and documentation link', async () => {
       await renderPipelinesCreateFromCsv();
 
-      expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create pipeline from CSV');
-      expect(screen.getByTestId('documentationLink')).toHaveTextContent('CSV to pipeline docs');
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Create pipeline from CSV'
+      );
+      await openAppMenuOverflow();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
     });
 
     describe('form validation', () => {
+      test('should display the parse CSV file size limit', async () => {
+        await renderPipelinesCreateFromCsv();
+
+        expect(screen.getByText('Upload file (up to 10 MB)')).toBeInTheDocument();
+      });
+
       test('should prevent form submission if file for upload is missing', async () => {
         await renderPipelinesCreateFromCsv();
 
@@ -76,6 +88,29 @@ describe('<PipelinesCreateFromCsv />', () => {
           target: { files: [new File(['x'], 'foo.csv')] },
         });
         await waitFor(() => expect(screen.getByTestId('processFileButton')).not.toBeDisabled());
+      });
+
+      test('should reject a file larger than the parse CSV limit without uploading it', async () => {
+        const readFile = jest.fn(() => Promise.resolve('oversized'));
+        const oversizedFile = new File([], 'oversized.csv');
+        Object.defineProperties(oversizedFile, {
+          size: { value: PARSE_CSV_MAX_FILE_BYTES + 1 },
+          text: { value: readFile },
+        });
+
+        await renderPipelinesCreateFromCsv();
+        fireEvent.change(screen.getByTestId('csvFilePicker'), {
+          target: { files: [oversizedFile] },
+        });
+
+        const postCallsBefore = httpSetup.post.mock.calls.length;
+        fireEvent.click(screen.getByTestId('processFileButton'));
+
+        const callout = await screen.findByTestId('errorCallout');
+        expect(callout).toHaveTextContent('File too large');
+        expect(callout).toHaveTextContent('File is greater than allowed size of 10 MB.');
+        expect(readFile).not.toHaveBeenCalled();
+        expect(httpSetup.post).toHaveBeenCalledTimes(postCallsBefore);
       });
     });
 

@@ -118,7 +118,7 @@ describe('KibanaMigrator', () => {
       const options = mockOptions();
       const kibanaMigrator = new KibanaMigrator(options);
       const doc = {} as any;
-      expect(() => kibanaMigrator.migrateDocument(doc)).toThrowError(
+      expect(() => kibanaMigrator.migrateDocument(doc)).toThrow(
         /Migrations are not ready. Make sure prepareMigrations is called first./i
       );
     });
@@ -130,8 +130,8 @@ describe('KibanaMigrator', () => {
       jest.spyOn(DocumentMigrator.prototype, 'migrate').mockImplementation((doc) => doc);
       const doc = {} as any;
 
-      expect(() => kibanaMigrator.migrateDocument(doc)).not.toThrowError();
-      expect(DocumentMigrator.prototype.migrate).toBeCalledTimes(1);
+      expect(() => kibanaMigrator.migrateDocument(doc)).not.toThrow();
+      expect(DocumentMigrator.prototype.migrate).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -270,14 +270,6 @@ const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2'): KibanaMigratorOptions => {
     logger: loggingSystemMock.create().get(),
     kibanaVersion: '8.2.3',
     waitForMigrationCompletion: false,
-    defaultIndexTypesMap: {
-      '.my_index': ['testtype', 'testtype2'],
-      '.task_index': ['testtasktype'],
-      // this index no longer has any types registered in typeRegistry
-      // but we still need a migrator for it, so that 'testtype3' documents
-      // are moved over to their new index (.my_index)
-      '.my_complementary_index': ['testtype3'],
-    },
     hashToVersionMap: {},
     typeRegistry: createRegistry([
       // typeRegistry depicts an updated index map:

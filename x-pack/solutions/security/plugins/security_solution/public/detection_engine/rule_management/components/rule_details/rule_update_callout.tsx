@@ -29,7 +29,7 @@ const RuleUpdateCalloutComponent = ({
       page: 1, // we only want to fetch one result
       perPage: 1,
     },
-    filter: { rule_ids: [rule.id] },
+    filterOptions: { ruleIds: [rule.rule_id] },
     onUpgrade,
   });
 
@@ -64,7 +64,7 @@ const RuleUpdateCalloutComponent = ({
         <p>{message}</p>
         {updateCallToActionButton}
       </EuiCallOut>
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
       {rulePreviewFlyout}
     </>
   );

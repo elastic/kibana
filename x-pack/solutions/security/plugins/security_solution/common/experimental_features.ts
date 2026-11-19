@@ -18,7 +18,7 @@ export const allowedExperimentalValues = Object.freeze({
    * we don't want people to be able to violate security by getting access to whole documents
    * around telemetry they should not.
    * @see telemetry_detection_rules_preview_route.ts
-   * @see test/security_solution_api_integration/test_suites/telemetry/README.md
+   * @see test_suites/test-suites-security-solution-apis/test_suites/telemetry/README.md
    */
   previewTelemetryUrlEnabled: false,
 
@@ -30,11 +30,6 @@ export const allowedExperimentalValues = Object.freeze({
    * - We show a table with plain execution logs on the Rule Details page.
    */
   extendedRuleExecutionLoggingEnabled: false,
-
-  /**
-   * Enables the SOC trends timerange and stats on D&R page
-   */
-  socTrendsEnabled: false,
 
   /**
    * `runscript` response actions for SentinelOne hosts.
@@ -50,22 +45,63 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointMemoryDump: true,
 
   /**
+   * `physical` memory dump type for the Memory Dump response action for Elastic Defend Endpoint
+   * Release: 9.6, backported to 9.5.x
+   */
+  responseActionsEndpointMemoryDumpRaw: true,
+
+  /**
    * `runscript` response action for Elastic Defend Endpoint
    * Release: 9.4
    */
-  responseActionsEndpointRunScript: false,
+  responseActionsEndpointRunScript: true,
 
   /**
    * Support for Automated Endpoint `runscript` (from rules)
    * Release: 9.4
    */
-  responseActionsEndpointAutomatedRunScript: false,
+  responseActionsEndpointAutomatedRunScript: true,
 
   /**
    * Scripts library in support of `runscript`/upload-execute` new command for elastic defend
    * Release: 9.4
    */
-  responseActionsScriptLibraryManagement: false,
+  responseActionsScriptLibraryManagement: true,
+
+  /**
+   * `cancel` response action for Elastic Defend Endpoint
+   * Release: 9.5
+   */
+  responseActionsEndpointCancel: true,
+
+  /**
+   * `kill_descendants` parameter option for the `kill-process` response action for Elastic Defend Endpoint
+   * Release: 9.6
+   */
+  responseActionsEndpointKillProcessDescendants: true,
+
+  /**
+   * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
+   * (Fleet remote output) is visible from the managing cluster's Kibana.
+   * Release: 9.5
+   */
+  defendRemoteOutputCcs: true,
+
+  /**
+   * Enables Cross-Project Search fan-out for Elastic Defend read paths on serverless, moving the reads
+   * it covers from the internal user to a project-routed current-user client. Fan-out additionally
+   * requires the request to resolve at least one linked project via `cps.isCpsActive()`, so a
+   * serverless project with no linked projects reads exactly as it did before CPS. Off until the
+   * request user holds index privileges on the Defend indices: a missing grant drops rows silently.
+   */
+  defendCrossProjectSearch: true,
+
+  /**
+   * AI Agent chat-first endpoint response actions skill (isolate, unisolate, etc.)
+   *
+   * Release: 9.6.0
+   */
+  endpointResponseActionsSkill: true,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -88,28 +124,18 @@ export const allowedExperimentalValues = Object.freeze({
   riskScoreAssistantToolDisabled: false,
 
   /**
-   * Entity Analytics: Disables the Risk Score AI Assistant tool.
+   * Retired no-op. The Entity Analytics homepage is always on. Kept so existing
+   * `xpack.securitySolution.enableExperimental` entries, including
+   * `disable:entityAnalyticsNewHomePageEnabled`, remain valid during upgrade.
    */
-  entityDetailsHighlightsEnabled: true,
-
-  /**
-   * Enables the new Entity Analytics home page experience.
-   */
-  entityAnalyticsNewHomePageEnabled: false,
+  entityAnalyticsNewHomePageEnabled: true,
 
   /**
    * Enables the lead generation pipeline for Entity Analytics.
    * When enabled, the lead generation engine, observation modules,
    * API routes, and persistence indices are activated.
    */
-  leadGenerationEnabled: false,
-
-  /**
-   * Enables lead generation details: the "i" icon on lead cards/list items
-   * and the "How this lead was generated" flyout.
-   * Requires `leadGenerationEnabled` to also be true.
-   */
-  leadGenerationDetailsEnabled: false,
+  leadGenerationEnabled: true,
 
   /**
    * disables ES|QL rules
@@ -117,9 +143,9 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
-   * Enables the storing of gaps in the event log
+   * Enables gap reason display in the gaps table and reason-based filtering.
    */
-  storeGapsInEventLogEnabled: true,
+  gapReasonDetectionEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
@@ -127,20 +153,28 @@ export const allowedExperimentalValues = Object.freeze({
   filterProcessDescendantsForTrustedAppsEnabled: true,
 
   /**
-   * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
-   * can be disabled if necessary in a given environment.
+   * Entity Analytics: enables attaching entities (users, hosts, IPs) to a case from
+   * Entity Analytics surfaces such as the entity flyout, and registers the
+   * `security.entity` unified cases attachment type.
    */
-  entityStoreDisabled: false,
+  entityAttachmentsEnabled: true,
 
   /**
    * Enables AI rule creation feature
    */
-  aiRuleCreationEnabled: false,
+  aiRuleCreationEnabled: true,
 
   /**
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,
+
+  /**
+   * Enables the v2 rule migration agent graph, which runs pre-built rule matching
+   * (security-team#18589) through a dedicated subgraph that generates its own semantic
+   * queries and calls pre-built rules search as a tool, instead of the v1 one-shot node.
+   */
+  ruleMigrationGraphv2: false,
 
   /**
    * Enables the Defend Insights Policy Response Failure feature
@@ -149,17 +183,15 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
+   * Additionally: enables import/export for all Endpoint artifacts.
    */
-  endpointExceptionsMovedUnderManagement: false,
+  endpointExceptionsMovedUnderManagement: true,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
    * Release: 8.18/9.0
    */
   crowdstrikeRunScriptEnabled: true,
-
-  /** Enables new Data View Picker */
-  newDataViewPickerEnabled: true,
 
   /**
    * Enables Microsoft Defender for Endpoint's RunScript command
@@ -179,14 +211,15 @@ export const allowedExperimentalValues = Object.freeze({
   trustedDevices: true,
 
   /**
+   * Enables custom YARA signature management in Elastic Defend.
+   */
+  customYaraSignaturesEnabled: true,
+
+  /**
    * Enables the ability to import and migration dashboards through automatic migration service
    */
   automaticDashboardsMigration: true,
 
-  /**
-   * Enables the SIEM Readiness Dashboard feature
-   */
-  siemReadinessDashboard: false,
   /**
    * Enables Microsoft Defender for Endpoint's Cancel command
    * Release: 9.2.0
@@ -195,11 +228,21 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Protects all the work related to the attacks and alerts alignment effort
    */
-  enableAlertsAndAttacksAlignment: false,
+  enableAlertsAndAttacksAlignment: true,
+  /**
+   * Enables attaching an attack, together with its constituent alerts, to a case from
+   * the Attacks page and the attack flyout, and registers the `security.attack` unified
+   * cases attachment type on the server.
+   */
+  attackAttachments: true,
   /**
    *  Enables the QRadar rules import feature
    */
   qradarRulesMigration: true,
+  /**
+   *  Enables the Microsoft Sentinel rules import feature
+   */
+  sentinelRulesMigration: true,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
@@ -208,7 +251,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Entity Analytics Watchlist feature.
    */
-  entityAnalyticsWatchlistEnabled: false,
+  entityAnalyticsWatchlistEnabled: true,
 
   /**
    * Enables the Trial Companion feature.
@@ -227,6 +270,11 @@ export const allowedExperimentalValues = Object.freeze({
   splunkV2DashboardsEnabled: true,
 
   /**
+   * Enables the Tines workflows migration API (create, get, update, start, and stop).
+   */
+  tinesWorkflowsMigration: false,
+
+  /**
    * Enables Detection Engine Health UI
    */
   deHealthUIEnabled: false,
@@ -239,17 +287,124 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Automatic Troubleshooting Agent Builder skill
    */
-  automaticTroubleshootingSkill: false,
+  automaticTroubleshootingSkill: true,
+
+  /** Enables the universal Automatic Troubleshooting Agent Builder skill */
+  automaticTroubleshootingUniversalSkill: false,
 
   /**
-   * Enables the new flyout using the EUI flyout system
+   * Enables the PCI DSS v4.0.1 Compliance Agent Builder skill and its backing tools.
+   * Gates skill + tool registration so the feature can ship dark and be enabled per environment.
    */
-  newFlyoutSystemEnabled: false,
+  pciComplianceAgentBuilder: true,
+
+  /**
+   * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
+   */
+  endpointForensicAnalysisSkill: true,
+
+  /**
+   * Enables the Elastic Defend Policy Management Agent Builder skill
+   */
+  elasticDefendPolicyManagementSkill: true,
+
+  /**
+   * Enables the investigate-rule Agent Builder skill.
+   */
+  investigateRuleSkill: true,
+
+  /**
+   * Enables the find-security-rules Agent Builder skill.
+   * Part of the DEX AI skills family (`dexAiSkill*`).
+   */
+  dexAiSkillFindRules: true,
+
+  /**
+   * Enables the recommend-prebuilt-rules Agent Builder skill.
+   * Part of the DEX AI skills family (`dexAiSkill*`).
+   */
+  dexAiSkillRecommendPrebuiltRules: true,
 
   /**
    * Uses entity store v2 for entity analytics skill
    */
-  entityAnalyticsEntityStoreV2: false,
+  entityAnalyticsEntityStoreV2: true,
+
+  /**
+   * Enables entity ML anomaly details API
+   */
+  entityAnalyticsAnomalyDetails: true,
+
+  /**
+   * Enables the Detection Rule Changes History API endpoint
+   * (`GET /api/detection_engine/rules/_history`).
+   *
+   * Independent of the alerting framework's `xpack.alerting.ruleChangeTracking.enabled`
+   * config flag, which gates the underlying primitive that produces the history
+   * records. Both must be enabled for the API to return non-empty results.
+   */
+  ruleChangesHistoryEnabled: true,
+
+  /**
+   * Enables the agent builder `run_rule_preview` tool and the `security.rule.preview`
+   * attachment (server type + client renderer). Gates registration so the feature can
+   * ship dark and be enabled per environment.
+   */
+  rulePreviewAttachmentEnabled: false,
+
+  /**
+   * Enables the risk score history API endpoint for Entity Analytics.
+   */
+  riskScoreHistoryEnabled: true,
+
+  /**
+   * Enables UI treatments surfacing rules whose MITRE ATT&CK mappings drift
+   * from the locally stored kibana mappings after a MITRE version bump.
+   */
+  mitreAttackUpdatesUIEnabled: true,
+
+  /**
+   * Enables the reworked Elastic Defend policy settings form with
+   * per-operating-system protection configuration.
+   * Release: 9.6
+   */
+  perOsPolicySettings: true,
+
+  /**
+   * Enables ransomware protection for Linux in Elastic Defend policies.
+   * When disabled, `linux.ransomware` is not added to new policies, is stripped from updated
+   * ones, and is not shown in the UI.
+   * Requires `perOsPolicySettings`: the Linux toggle exists only in the per-OS policy form, so the
+   * feature is treated as disabled unless both flags are on (`isLinuxRansomwareProtectionEnabled`).
+   * Release: 9.6
+   */
+  linuxRansomwareProtection: true,
+
+  /**
+   * Enables the AI Data Collection card in the per-OS Elastic Defend policy settings form and
+   * turns AI event enrichment on by default for new policies (requires `perOsPolicySettings`).
+   * Release: 9.6
+   */
+  endpointAiDataCollection: true,
+
+  /**
+   * Enables the Registry credential hardening toggle in the Elastic Defend policy
+   * Attack Surface Reduction section (`windows.attack_surface_reduction.registry_credential_hardening`).
+   * Release: 9.6
+   */
+  registryCredentialHardening: true,
+
+  /**
+   * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
+   * creation policy but has no entity store record, create the entity (with its risk score)
+   * instead of silently dropping the score.
+   */
+  riskScoreCreateMissingEntitiesEnabled: true,
+
+  /**
+   * Enables the SIEM Rule Migrations Agent Builder tools.
+   */
+  siemRuleMigrationsAgentBuilderEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

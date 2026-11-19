@@ -60,7 +60,7 @@ describe('custom branding service', () => {
   describe('#stop', () => {
     it('runs fine if service never set up', () => {
       const service = new CustomBrandingService();
-      expect(() => service.stop()).not.toThrowError();
+      expect(() => service.stop()).not.toThrow();
     });
 
     it('stops customBranding$ and hasCustomBranding$', async () => {

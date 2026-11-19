@@ -36,7 +36,7 @@ export function ChatBanner({
     >
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiIcon size="l" type={icon} />
+          <EuiIcon size="l" type={icon} aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow>
           <EuiText size="xs">

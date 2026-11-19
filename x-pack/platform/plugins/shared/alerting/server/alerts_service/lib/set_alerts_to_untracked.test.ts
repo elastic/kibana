@@ -6,7 +6,13 @@
  */
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  ALERT_UUID,
+  SPACE_IDS,
+} from '@kbn/rule-data-utils';
 import { setAlertsToUntracked } from './set_alerts_to_untracked';
 
 let clusterClient: ElasticsearchClientMock;
@@ -16,8 +22,32 @@ const getAllAuthorizedRuleTypesFindOperationMock = jest.fn();
 const getAlertIndicesAliasMock = jest.fn();
 const bulkEnsureAuthorizedMock = jest.fn();
 
+const mockSearchResponseBase = {
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+  hits: { hits: [] },
+};
+
+const mockAuthorizedPairsFilter = {
+  bool: {
+    should: [
+      {
+        bool: {
+          filter: [
+            { term: { [ALERT_RULE_TYPE_ID]: 'some rule type' } },
+            { terms: { [ALERT_RULE_CONSUMER]: ['o11y'] } },
+          ],
+        },
+      },
+    ],
+    minimum_should_match: 1,
+  },
+};
+
 describe('setAlertsToUntracked()', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     jest.useFakeTimers();
     const date = '2023-03-28T22:27:28.159Z';
     jest.setSystemTime(new Date(date));
@@ -99,10 +129,12 @@ describe('setAlertsToUntracked()', () => {
         ctx._source.kibana.alert.status = 'untracked';
         ctx._source.kibana.alert.end = '2023-03-28T22:27:28.159Z';
         ctx._source.kibana.alert.time_range.lte = '2023-03-28T22:27:28.159Z';
+        ctx._source.kibana.alert.tracked = false;
       } else {
         ctx._source['kibana.alert.status'] = 'untracked';
         ctx._source['kibana.alert.end'] = '2023-03-28T22:27:28.159Z';
         ctx._source['kibana.alert.time_range'].lte = '2023-03-28T22:27:28.159Z';
+        ctx._source['kibana.alert.tracked'] = false;
       }",
           },
         },
@@ -166,10 +198,12 @@ describe('setAlertsToUntracked()', () => {
         ctx._source.kibana.alert.status = 'untracked';
         ctx._source.kibana.alert.end = '2023-03-28T22:27:28.159Z';
         ctx._source.kibana.alert.time_range.lte = '2023-03-28T22:27:28.159Z';
+        ctx._source.kibana.alert.tracked = false;
       } else {
         ctx._source['kibana.alert.status'] = 'untracked';
         ctx._source['kibana.alert.end'] = '2023-03-28T22:27:28.159Z';
         ctx._source['kibana.alert.time_range'].lte = '2023-03-28T22:27:28.159Z';
+        ctx._source['kibana.alert.tracked'] = false;
       }",
           },
         },
@@ -452,10 +486,16 @@ describe('setAlertsToUntracked()', () => {
       esClient: clusterClient,
     });
 
-    expect(getAlertIndicesAliasMock).lastCalledWith(['test-rule-type'], 'default');
+    expect(getAlertIndicesAliasMock).toHaveBeenLastCalledWith(['test-rule-type'], 'default');
+
+    // The authorization search must run on the same indices as the update
+    expect(clusterClient.search.mock.calls[0][0]).toMatchObject({
+      index: ['test-alert-index'],
+    });
 
     expect(clusterClient.updateByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
+        index: ['test-alert-index'],
         query: {
           bool: {
             must: [
@@ -468,6 +508,12 @@ describe('setAlertsToUntracked()', () => {
               },
             ],
             filter: [
+              {
+                terms: {
+                  [SPACE_IDS]: ['default'],
+                },
+              },
+              mockAuthorizedPairsFilter,
               {
                 bool: {
                   must: {
@@ -497,6 +543,12 @@ describe('setAlertsToUntracked()', () => {
               },
             ],
             filter: [
+              {
+                terms: {
+                  [SPACE_IDS]: ['default'],
+                },
+              },
+              mockAuthorizedPairsFilter,
               {
                 bool: {
                   must: {
@@ -587,7 +639,7 @@ describe('setAlertsToUntracked()', () => {
       esClient: clusterClient,
     });
 
-    expect(getAlertIndicesAliasMock).lastCalledWith(['test-rule-type'], 'default');
+    expect(getAlertIndicesAliasMock).toHaveBeenLastCalledWith(['test-rule-type'], 'default');
 
     expect(clusterClient.updateByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -603,6 +655,12 @@ describe('setAlertsToUntracked()', () => {
               },
             ],
             filter: [
+              {
+                terms: {
+                  [SPACE_IDS]: ['default'],
+                },
+              },
+              mockAuthorizedPairsFilter,
               {
                 bool: {
                   must: {
@@ -620,5 +678,307 @@ describe('setAlertsToUntracked()', () => {
 
     expect(clusterClient.search).not.toHaveBeenCalledWith();
     expect(result).toEqual([]);
+  });
+
+  describe('authorization aggregation', () => {
+    const mockManyRuleTypeBuckets = Array.from({ length: 11 }, (_, index) => ({
+      key: `rule-type-${index}`,
+      consumers: { buckets: [{ key: 'o11y' }] },
+    }));
+
+    test('should request enough buckets to cover every rule type and consumer', async () => {
+      clusterClient.search.mockResponseOnce({
+        ...mockSearchResponseBase,
+        aggregations: { ruleTypeIds: { buckets: mockManyRuleTypeBuckets } },
+      });
+
+      await setAlertsToUntracked({
+        logger,
+        esClient: clusterClient,
+        indices: ['test-index'],
+        alertUuids: ['test-alert-uuid'],
+        bulkEnsureAuthorized: bulkEnsureAuthorizedMock,
+      });
+
+      expect(clusterClient.search.mock.calls[0][0]).toMatchObject({
+        aggs: {
+          ruleTypeIds: {
+            terms: { field: ALERT_RULE_TYPE_ID, size: 1000 },
+            aggs: { consumers: { terms: { field: ALERT_RULE_CONSUMER, size: 100 } } },
+          },
+        },
+      });
+      expect(bulkEnsureAuthorizedMock).toHaveBeenCalledWith({
+        ruleTypeIdConsumersPairs: mockManyRuleTypeBuckets.map(({ key }) => ({
+          ruleTypeId: key,
+          consumers: ['o11y'],
+        })),
+      });
+    });
+
+    test('should fail closed when some rule types are left out of the aggregation', async () => {
+      clusterClient.search.mockResponseOnce({
+        ...mockSearchResponseBase,
+        aggregations: {
+          ruleTypeIds: { sum_other_doc_count: 1, buckets: mockManyRuleTypeBuckets },
+        },
+      });
+
+      await expect(
+        setAlertsToUntracked({
+          logger,
+          esClient: clusterClient,
+          indices: ['test-index'],
+          alertUuids: ['test-alert-uuid'],
+          bulkEnsureAuthorized: bulkEnsureAuthorizedMock,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to authorize untracking: too many rule types or consumers matched"`
+      );
+      expect(bulkEnsureAuthorizedMock).not.toHaveBeenCalled();
+      expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+    });
+
+    test('should fail closed when some consumers are left out of the aggregation', async () => {
+      clusterClient.search.mockResponseOnce({
+        ...mockSearchResponseBase,
+        aggregations: {
+          ruleTypeIds: {
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'some rule type',
+                consumers: { sum_other_doc_count: 1, buckets: [{ key: 'o11y' }] },
+              },
+            ],
+          },
+        },
+      });
+
+      await expect(
+        setAlertsToUntracked({
+          logger,
+          esClient: clusterClient,
+          indices: ['test-index'],
+          alertUuids: ['test-alert-uuid'],
+          bulkEnsureAuthorized: bulkEnsureAuthorizedMock,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to authorize untracking: too many rule types or consumers matched"`
+      );
+      expect(bulkEnsureAuthorizedMock).not.toHaveBeenCalled();
+      expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+    });
+
+    test('should fail on a siem consumer even when it is not among the first 10 rule types', async () => {
+      clusterClient.search.mockResponseOnce({
+        ...mockSearchResponseBase,
+        aggregations: {
+          ruleTypeIds: {
+            buckets: [
+              ...mockManyRuleTypeBuckets,
+              { key: 'siem.notifications', consumers: { buckets: [{ key: 'siem' }] } },
+            ],
+          },
+        },
+      });
+
+      await expect(
+        setAlertsToUntracked({
+          logger,
+          esClient: clusterClient,
+          indices: ['test-index'],
+          alertUuids: ['test-alert-uuid'],
+          bulkEnsureAuthorized: bulkEnsureAuthorizedMock,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Untracking Security alerts is not permitted"`);
+      expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+    });
+
+    test('should only update and return alerts of the authorized rule type and consumer pairs', async () => {
+      clusterClient.search.mockResponseOnce({
+        ...mockSearchResponseBase,
+        aggregations: {
+          ruleTypeIds: {
+            buckets: [{ key: 'some rule type', consumers: { buckets: [{ key: 'o11y' }] } }],
+          },
+        },
+      });
+      clusterClient.updateByQuery.mockResponseOnce({ total: 1, updated: 1 });
+
+      await setAlertsToUntracked({
+        logger,
+        esClient: clusterClient,
+        indices: ['test-index'],
+        alertUuids: ['test-alert-uuid'],
+        spaceId: 'space1',
+        bulkEnsureAuthorized: bulkEnsureAuthorizedMock,
+      });
+
+      const expectedFilter = [{ terms: { [SPACE_IDS]: ['space1'] } }, mockAuthorizedPairsFilter];
+      expect(clusterClient.updateByQuery.mock.lastCall![0].query).toMatchObject({
+        bool: { filter: expectedFilter },
+      });
+      expect(clusterClient.search.mock.lastCall![0]).toMatchObject({
+        query: { bool: { filter: expectedFilter } },
+      });
+    });
+
+    test('should skip the update when no active alerts matched', async () => {
+      clusterClient.search.mockResponseOnce({
+        ...mockSearchResponseBase,
+        aggregations: { ruleTypeIds: { buckets: [] } },
+      });
+
+      const result = await setAlertsToUntracked({
+        logger,
+        esClient: clusterClient,
+        indices: ['test-index'],
+        alertUuids: ['test-alert-uuid'],
+        bulkEnsureAuthorized: bulkEnsureAuthorizedMock,
+      });
+
+      expect(result).toEqual([]);
+      expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+    });
+
+    test('should not limit the update to authorized pairs when no authorization is required', async () => {
+      await setAlertsToUntracked({
+        logger,
+        esClient: clusterClient,
+        indices: ['test-index'],
+        ruleIds: ['test-rule'],
+      });
+
+      const query = clusterClient.updateByQuery.mock.lastCall![0].query as {
+        bool: { filter?: unknown };
+      };
+      expect(query.bool.filter).toBeUndefined();
+    });
+  });
+
+  describe('space isolation (direct UUID path)', () => {
+    test('should include space filter in updateByQuery when spaceId is provided', async () => {
+      await setAlertsToUntracked({
+        logger,
+        esClient: clusterClient,
+        indices: ['test-index'],
+        alertUuids: ['test-alert-uuid'],
+        spaceId: 'space1',
+      });
+
+      expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(1);
+      expect(clusterClient.updateByQuery.mock.lastCall![0].query).toMatchObject({
+        bool: {
+          must: expect.any(Array),
+          filter: [
+            {
+              terms: {
+                [SPACE_IDS]: ['space1'],
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    test('should include space filter in authorization search when spaceId is provided', async () => {
+      clusterClient.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [] },
+        aggregations: {
+          ruleTypeIds: {
+            buckets: [{ key: 'some-rule', consumers: { buckets: [{ key: 'o11y' }] } }],
+          },
+        },
+      });
+
+      await setAlertsToUntracked({
+        logger,
+        esClient: clusterClient,
+        indices: ['test-index'],
+        alertUuids: ['test-alert-uuid'],
+        spaceId: 'space1',
+        bulkEnsureAuthorized: bulkEnsureAuthorizedMock,
+      });
+
+      // First search is for authorization aggregation
+      expect(clusterClient.search.mock.calls[0][0]).toMatchObject({
+        query: {
+          bool: {
+            must: expect.any(Array),
+            filter: [
+              {
+                terms: {
+                  [SPACE_IDS]: ['space1'],
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    test('should not include space filter when spaceId is absent', async () => {
+      await setAlertsToUntracked({
+        logger,
+        esClient: clusterClient,
+        indices: ['test-index'],
+        alertUuids: ['test-alert-uuid'],
+      });
+
+      const query = clusterClient.updateByQuery.mock.lastCall![0].query as {
+        bool: { filter?: unknown };
+      };
+      expect(query.bool.filter).toBeUndefined();
+    });
+
+    test('should include space filter in post-update search when spaceId is provided', async () => {
+      clusterClient.updateByQuery.mockResponseOnce({ total: 1, updated: 1 });
+
+      await setAlertsToUntracked({
+        logger,
+        esClient: clusterClient,
+        indices: ['test-index'],
+        alertUuids: ['test-alert-uuid'],
+        spaceId: 'space1',
+      });
+
+      // The search after update should also carry the space filter
+      expect(clusterClient.search.mock.lastCall![0]).toMatchObject({
+        query: {
+          bool: {
+            must: expect.any(Array),
+            filter: [
+              {
+                terms: {
+                  [SPACE_IDS]: ['space1'],
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    test('should NOT include the all-spaces wildcard in the space filter', async () => {
+      // Untracking must never match globally visible ('*') alerts (e.g. internally managed
+      // Streams "Significant Events" alerts). Only the caller's own space is allowed.
+      await setAlertsToUntracked({
+        logger,
+        esClient: clusterClient,
+        indices: ['test-index'],
+        alertUuids: ['test-alert-uuid'],
+        spaceId: 'space1',
+      });
+
+      const query = clusterClient.updateByQuery.mock.lastCall![0].query as {
+        bool: { filter: Array<{ terms: Record<string, string[]> }> };
+      };
+      expect(query.bool.filter[0].terms[SPACE_IDS]).toEqual(['space1']);
+      expect(query.bool.filter[0].terms[SPACE_IDS]).not.toContain('*');
+    });
   });
 });

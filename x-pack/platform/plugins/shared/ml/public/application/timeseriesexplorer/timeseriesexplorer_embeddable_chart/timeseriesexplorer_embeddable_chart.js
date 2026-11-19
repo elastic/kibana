@@ -9,46 +9,26 @@
  * React component for rendering Single Metric Viewer.
  */
 
-import { get, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import moment from 'moment-timezone';
-import {
-  Subject,
-  Subscription,
-  forkJoin,
-  map,
-  debounceTime,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 
 import PropTypes from 'prop-types';
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
-import { ML_JOB_AGGREGATION, aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
+import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
-import {
-  isModelPlotEnabled,
-  isModelPlotChartableForDetector,
-  isSourceDataChartableForDetector,
-  mlFunctionToESAggregation,
-} from '../../../../common/util/job_utils';
-
+import { takeUntilAborted } from '../../util/take_until_aborted';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
 import { ForecastingModal } from '../components/forecasting_modal/forecasting_modal';
 import { TimeseriesexplorerNoChartData } from '../components/timeseriesexplorer_no_chart_data';
 
-import {
-  APP_STATE_ACTION,
-  CHARTS_POINT_TARGET,
-  TIME_FIELD_NAME,
-} from '../timeseriesexplorer_constants';
+import { APP_STATE_ACTION, CHARTS_POINT_TARGET } from '../timeseriesexplorer_constants';
 import { getControlsForDetector } from '../get_controls_for_detector';
 import { TimeSeriesChartWithTooltips } from '../components/timeseries_chart/timeseries_chart_with_tooltip';
 import { isMetricDetector } from '../get_function_description';
@@ -59,7 +39,22 @@ import { timeSeriesExplorerServiceFactory } from '../../util/time_series_explore
 import { getTimeseriesexplorerDefaultState } from '../timeseriesexplorer_utils';
 import { mlJobServiceFactory } from '../../services/job_service';
 import { forecastServiceFactory } from '../../services/forecast_service';
-import { SingleMetricViewerTitle } from './timeseriesexplorer_title';
+import { EntityFieldNamesAndFilterButtons } from './timeseriesexplorer_title';
+import {
+  SingleMetricViewerChartSurface,
+  applySmvTableFilter,
+  buildCriteriaFields,
+  consumeSmvContextLoadResult,
+  fetchAnomaliesTableData$,
+  buildSmvEmptyFocusStatePatch,
+  getModelPlotEnabledForDetector,
+  getSmvContextLoadErrorMessages,
+  getSmvDataReloadPlan,
+  getSmvFocusLoadErrorMessage,
+  loadSingleMetricContextData,
+  smvReloadSnapshotFromSmvHostProps,
+  subscribeSmvBrushToFocusZoom,
+} from '../timeseriesexplorer_chart_controller';
 
 export class TimeSeriesExplorerEmbeddableChart extends React.Component {
   static propTypes = {
@@ -70,7 +65,9 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     chartWidth: PropTypes.number.isRequired,
     chartHeight: PropTypes.number,
     lastRefresh: PropTypes.number.isRequired,
+    onLoading: PropTypes.func,
     onRenderComplete: PropTypes.func,
+    requestCancellationManager: PropTypes.object,
     previousRefresh: PropTypes.number.isRequired,
     selectedJob: PropTypes.object.isRequired,
     selectedJobStats: PropTypes.object.isRequired,
@@ -79,7 +76,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     selectedEntities: PropTypes.object,
     selectedForecastId: PropTypes.string,
     tableInterval: PropTypes.string,
-    tableSeverity: PropTypes.number,
+    tableSeverity: PropTypes.oneOfType([PropTypes.number, PropTypes.array, PropTypes.object]),
     zoom: PropTypes.object,
     toastNotificationService: PropTypes.object,
     dataViewsService: PropTypes.object,
@@ -98,9 +95,65 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
   contextChart$ = new Subject();
 
   /**
+   * When false, skips anomalies table fetches in the brush → focus pipeline.
+   */
+  includeAnomaliesTable = true;
+
+  /**
    * Access ML services in react context.
    */
   static contextType = context;
+
+  contextLoadAbortController;
+
+  /** Signal of the focus load currently in flight, used to tell cancellation apart from empty data. */
+  focusLoadSignal;
+
+  /**
+   * True from the start of a context load until its automatic (debounced) focus load starts.
+   * That focus load isn't a user action, so it must not lift a cancellation made in between.
+   */
+  autoFocusLoadPending = false;
+
+  /** Bumped synchronously at the start of each context load so an aborted load can tell a successor has started. */
+  loadGeneration = 0;
+
+  /**
+   * True while a refresh is waiting to schedule its focus load. The previous focus series is still
+   * in state, and the pipeline would otherwise skip the load the panel loading flag is waiting on.
+   */
+  pendingRefreshFocus = false;
+
+  /**
+   * Last chart that finished loading. A cancel restores this instead of leaving the context
+   * series from the in-flight load next to the previous focus series.
+   */
+  chartSnapshot;
+
+  /** Fields a context or focus load replaces. User toggles (show/hide series) are left as they are. */
+  static chartSnapshotFields = [
+    'chartDetails',
+    'contextAggregationInterval',
+    'contextChartData',
+    'contextForecastData',
+    'dataNotChartable',
+    'focusAggregationInterval',
+    'focusAnnotationData',
+    'focusChartData',
+    'focusForecastData',
+    'fullRefresh',
+    'hasResults',
+    'modelPlotEnabled',
+    'showAnnotationsCheckbox',
+    'showForecastCheckbox',
+    'showModelBoundsCheckbox',
+    'swimlaneData',
+    'tableData',
+    'zoomFrom',
+    'zoomTo',
+    'zoomFromFocusLoaded',
+    'zoomToFocusLoaded',
+  ];
 
   getBoundsRoundedToInterval;
   mlTimeSeriesExplorer;
@@ -152,33 +205,9 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
   previousShowModelBounds = undefined;
 
   tableFilter = (field, value, operator) => {
-    const entities = this.getControlsForDetector();
-    const entity = entities.find(({ fieldName }) => fieldName === field);
-
-    if (entity === undefined) {
-      return;
-    }
-
-    const { appStateHandler } = this.props;
-
-    let resultValue = '';
-    if (operator === '+' && entity.fieldValue !== value) {
-      resultValue = value;
-    } else if (operator === '-' && entity.fieldValue === value) {
-      resultValue = null;
-    } else {
-      return;
-    }
-
-    const resultEntities = {
-      ...entities.reduce((appStateEntities, appStateEntity) => {
-        appStateEntities[appStateEntity.fieldName] = appStateEntity.fieldValue;
-        return appStateEntities;
-      }, {}),
-      [entity.fieldName]: resultValue,
-    };
-
-    appStateHandler(APP_STATE_ACTION.SET_ENTITIES, resultEntities);
+    applySmvTableFilter(field, value, operator, this.getControlsForDetector(), (entities) =>
+      this.props.appStateHandler(APP_STATE_ACTION.SET_ENTITIES, entities)
+    );
   };
 
   contextChartSelectedInitCallDone = false;
@@ -227,26 +256,35 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       searchBounds,
       selectedJob,
       functionDescription,
-      TIME_FIELD_NAME
+      this.focusLoadSignal
     );
   }
 
-  contextChartSelected = (selection) => {
+  /**
+   * @param selection brushed range to load into the focus chart
+   * @param forceFocus true when this selection comes from a refresh. By the time the context
+   *   request returns, `previousRefresh` has caught up with `lastRefresh`, so the duplicate-brush
+   *   check would otherwise skip the focus load that `onRenderComplete` is waiting on.
+   * @returns whether a focus load was scheduled
+   */
+  contextChartSelected = (selection, forceFocus = false) => {
     const zoomState = {
       from: selection.from.toISOString(),
       to: selection.to.toISOString(),
     };
 
     if (
+      !forceFocus &&
       isEqual(this.props.zoom, zoomState) &&
       this.state.focusChartData !== undefined &&
       this.props.previousRefresh === this.props.lastRefresh
     ) {
-      return;
+      return false;
     }
 
     this.contextChart$.next(selection);
     this.props.appStateHandler(APP_STATE_ACTION.SET_ZOOM, zoomState);
+    return true;
   };
 
   loadAnomaliesTableData = (earliestMs, latestMs) => {
@@ -260,70 +298,72 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     } = this.props;
     const entityControls = this.getControlsForDetector();
 
-    return this.context.services.mlServices.mlApi.results
-      .getAnomaliesTableData(
-        [selectedJob.job_id],
-        this.getCriteriaFields(selectedDetectorIndex, entityControls),
-        [],
-        tableInterval,
-        tableSeverity,
-        earliestMs,
-        latestMs,
-        dateFormatTz,
-        ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
-        undefined,
-        undefined,
-        functionDescription
-      )
-      .pipe(
-        map((resp) => {
-          const anomalies = resp.anomalies;
-          anomalies.forEach((anomaly) => {
-            // Add a detector property to each anomaly.
-            // Default to functionDescription if no description available.
-            // TODO - when job_service is moved server_side, move this to server endpoint.
-            const jobDetectors = selectedJob.analysis_config.detectors;
-            const detector = jobDetectors[anomaly.detectorIndex];
-            anomaly.detector = get(
-              detector,
-              ['detector_description'],
-              anomaly.source.function_description
-            );
-
-            // For detectors with rules, add a property with the rule count.
-            const customRules = detector.custom_rules;
-            if (customRules !== undefined) {
-              anomaly.rulesLength = customRules.length;
-            }
-
-            // Add properties used for building the links menu.
-            // TODO - when job_service is moved server_side, move this to server endpoint.
-            if (selectedJob.custom_settings && selectedJob.custom_settings.custom_urls) {
-              anomaly.customUrls = selectedJob.custom_settings.custom_urls;
-            }
-          });
-
-          return {
-            tableData: {
-              anomalies,
-              interval: resp.interval,
-              examplesByJobId: resp.examplesByJobId,
-              showViewSeriesLink: false,
-            },
-          };
-        })
-      );
+    return fetchAnomaliesTableData$({
+      mlApi: this.context.services.mlServices.mlApi,
+      jobId: selectedJob.job_id,
+      criteriaFields: this.getCriteriaFields(selectedDetectorIndex, entityControls),
+      tableInterval,
+      tableSeverity,
+      earliestMs,
+      latestMs,
+      dateFormatTz,
+      functionDescription,
+      enrichment: { source: 'singleJob', selectedJob },
+    });
   };
 
   setForecastId = (forecastId) => {
     this.props.appStateHandler(APP_STATE_ACTION.SET_FORECAST_ID, forecastId);
   };
 
+  captureChartSnapshot = () => {
+    const state = {};
+    for (const field of TimeSeriesExplorerEmbeddableChart.chartSnapshotFields) {
+      state[field] = this.state[field];
+    }
+    return { state, zoom: this.props.zoom };
+  };
+
+  /** Remember the chart before the first in-flight load replaces any of it. Later commits overwrite this. */
+  ensureChartSnapshot = () => {
+    if (this.chartSnapshot === undefined) {
+      this.chartSnapshot = this.captureChartSnapshot();
+    }
+  };
+
+  commitChartSnapshot = () => {
+    this.chartSnapshot = this.captureChartSnapshot();
+  };
+
+  revertToChartSnapshot = () => {
+    if (this.unmounted) {
+      return;
+    }
+    this.pendingRefreshFocus = false;
+    const snapshot = this.chartSnapshot;
+    const finish = () => {
+      this.props.onRenderComplete?.();
+    };
+    if (snapshot === undefined) {
+      this.setState({ loading: false, fullRefresh: false }, finish);
+      return;
+    }
+    this.setState({ ...snapshot.state, loading: false, chartDataError: undefined }, finish);
+    if (!isEqual(this.props.zoom, snapshot.zoom)) {
+      this.props.appStateHandler(
+        snapshot.zoom === undefined ? APP_STATE_ACTION.UNSET_ZOOM : APP_STATE_ACTION.SET_ZOOM,
+        snapshot.zoom
+      );
+    }
+  };
+
   displayErrorToastMessages = (error, errorMsg) => {
     if (this.props.toastNotificationService) {
       this.props.toastNotificationService.displayErrorToast(error, errorMsg, 2000);
     }
-    this.setState({ loading: false, chartDataError: errorMsg });
+    this.setState({ loading: false, chartDataError: errorMsg }, () => {
+      this.props.onRenderComplete?.();
+    });
   };
 
   loadSingleMetricData = (fullRefresh = true) => {
@@ -331,7 +371,6 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       autoZoomDuration,
       bounds,
       selectedDetectorIndex,
-      selectedForecastId,
       zoom,
       functionDescription,
       selectedJob,
@@ -347,251 +386,162 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
 
     const functionToPlotByIfMetric = aggregationTypeTransform.toES(functionDescription);
 
-    this.contextChartSelectedInitCallDone = false;
+    // The embeddable owns cancellation. This load stops when that signal or the local controller aborts.
+    const { requestCancellationManager } = this.props;
+    // Captured before the async context request. A later render updates `previousRefresh`, so the
+    // completion path can no longer tell a refresh apart from a duplicate brush.
+    const forceFocus = this.props.previousRefresh !== this.props.lastRefresh;
+    this.pendingRefreshFocus = forceFocus;
+    this.loadGeneration = (this.loadGeneration ?? 0) + 1;
+    const generation = this.loadGeneration;
+    this.contextLoadAbortController?.abort(AbortReason.REPLACED);
+    this.contextLoadAbortController = new AbortController();
+    const contextLoadSignal = requestCancellationManager
+      ? AbortSignal.any([this.contextLoadAbortController.signal, requestCancellationManager.signal])
+      : this.contextLoadAbortController.signal;
+    if (contextLoadSignal.aborted) {
+      // Cancelled before the load started: don't send requests until the next load.
+      if (generation === this.loadGeneration && contextLoadSignal.reason !== AbortReason.REPLACED) {
+        this.revertToChartSnapshot();
+      }
+      return;
+    }
+    this.ensureChartSnapshot();
+    contextLoadSignal.addEventListener(
+      'abort',
+      () => {
+        // A replaced load is followed by a new one that manages the loading state.
+        // A user cancel puts the previous finished chart back; context may already be applied.
+        if (
+          !this.unmounted &&
+          generation === this.loadGeneration &&
+          contextLoadSignal.reason !== AbortReason.REPLACED
+        ) {
+          this.revertToChartSnapshot();
+        }
+      },
+      { once: true }
+    );
 
-    // Only when `fullRefresh` is true we'll reset all data
-    // and show the loading spinner within the page.
+    this.contextChartSelectedInitCallDone = false;
+    this.autoFocusLoadPending = true;
+
+    this.props.onLoading?.(true);
+
+    // Only when `fullRefresh` is true we show the loading spinner within the page and reset all
+    // data. The reset is deferred until the new data has loaded (or failed), so that cancelling the
+    // load keeps showing the previous data.
     const entityControls = this.getControlsForDetector();
+    const fullRefreshResetPatch = fullRefresh
+      ? {
+          chartDetails: undefined,
+          contextChartData: undefined,
+          contextForecastData: undefined,
+          focusChartData: undefined,
+          focusForecastData: undefined,
+          showForecastCheckbox: false,
+          modelPlotEnabled: getModelPlotEnabledForDetector(
+            selectedJob,
+            selectedDetectorIndex,
+            entityControls
+          ),
+          hasResults: false,
+          dataNotChartable: false,
+        }
+      : {};
     this.setState(
       {
         fullRefresh,
         loadCounter: currentLoadCounter + 1,
         loading: true,
         chartDataError: undefined,
-        ...(fullRefresh
-          ? {
-              chartDetails: undefined,
-              contextChartData: undefined,
-              contextForecastData: undefined,
-              focusChartData: undefined,
-              focusForecastData: undefined,
-              modelPlotEnabled:
-                isModelPlotChartableForDetector(selectedJob, selectedDetectorIndex) &&
-                isModelPlotEnabled(selectedJob, selectedDetectorIndex, entityControls),
-              hasResults: false,
-              dataNotChartable: false,
-            }
-          : {}),
       },
       () => {
-        const { loadCounter, modelPlotEnabled } = this.state;
-        const { selectedJob } = this.props;
-
+        const { loadCounter } = this.state;
+        const modelPlotEnabled =
+          fullRefreshResetPatch.modelPlotEnabled ?? this.state.modelPlotEnabled;
         const detectorIndex = selectedDetectorIndex;
 
-        let awaitingCount = 3;
-
-        const stateUpdate = {};
-
-        // finish() function, called after each data set has been loaded and processed.
-        // The last one to call it will trigger the page render.
-        const finish = (counterVar) => {
-          awaitingCount--;
-          if (awaitingCount === 0 && counterVar === loadCounter) {
-            stateUpdate.hasResults =
-              (Array.isArray(stateUpdate.contextChartData) &&
-                stateUpdate.contextChartData.length > 0) ||
-              (Array.isArray(stateUpdate.contextForecastData) &&
-                stateUpdate.contextForecastData.length > 0);
-            stateUpdate.loading = false;
-
-            // Set zoomFrom/zoomTo attributes in scope which will result in the metric chart automatically
-            // selecting the specified range in the context chart, and so loading that date range in the focus chart.
-            // Only touch the zoom range if data for the context chart has been loaded and all necessary
-            // partition fields have a selection.
-            if (
-              stateUpdate.contextChartData.length &&
-              this.arePartitioningFieldsProvided() === true
-            ) {
-              // Check for a zoom parameter in the appState (URL).
-              let focusRange = this.mlTimeSeriesExplorer.calculateInitialFocusRange(
-                zoom,
-                stateUpdate.contextAggregationInterval,
-                bounds
-              );
-              if (
-                focusRange === undefined ||
-                this.previousSelectedForecastId !== this.props.selectedForecastId
-              ) {
-                focusRange = this.mlTimeSeriesExplorer.calculateDefaultFocusRange(
-                  autoZoomDuration,
-                  stateUpdate.contextAggregationInterval,
-                  stateUpdate.contextChartData,
-                  stateUpdate.contextForecastData
-                );
-                this.previousSelectedForecastId = this.props.selectedForecastId;
-              }
-
-              this.contextChartSelected({
-                from: focusRange[0],
-                to: focusRange[1],
-              });
-            }
-
-            this.setState(stateUpdate);
-            if (this.props.onRenderComplete !== undefined) {
-              this.props.onRenderComplete();
-            }
-          }
-        };
-
-        const nonBlankEntities = entityControls.filter((entity) => {
-          return entity.fieldValue !== null;
-        });
-
-        if (
-          modelPlotEnabled === false &&
-          isSourceDataChartableForDetector(selectedJob, detectorIndex) === false &&
-          nonBlankEntities.length > 0
-        ) {
-          // For detectors where model plot has been enabled with a terms filter and the
-          // selected entity(s) are not in the terms list, indicate that data cannot be viewed.
-          stateUpdate.hasResults = false;
-          stateUpdate.loading = false;
-          stateUpdate.dataNotChartable = true;
-          this.setState(stateUpdate);
-          return;
-        }
-
-        // Calculate the aggregation interval for the context chart.
-        // Context chart swimlane will display bucket anomaly score at the same interval.
-        stateUpdate.contextAggregationInterval =
-          this.mlTimeSeriesExplorer.calculateAggregationInterval(
-            bounds,
-            CHARTS_POINT_TARGET,
-            selectedJob
-          );
-
-        // Ensure the search bounds align to the bucketing interval so that the first and last buckets are complete.
-        // For sum or count detectors, short buckets would hold smaller values, and model bounds would also be affected
-        // to some extent with all detector functions if not searching complete buckets.
-        const searchBounds = this.getBoundsRoundedToInterval(
+        loadSingleMetricContextData({
+          signal: contextLoadSignal,
           bounds,
-          stateUpdate.contextAggregationInterval,
-          false
-        );
-
-        // Query 1 - load metric data at low granularity across full time range.
-        // Pass a counter flag into the finish() function to make sure we only process the results
-        // for the most recent call to the load the data in cases where the job selection and time filter
-        // have been altered in quick succession (such as from the job picker with 'Apply time range').
-        const counter = loadCounter;
-        this.context.services.mlServices.mlTimeSeriesSearchService
-          .getMetricData(
-            selectedJob,
-            detectorIndex,
-            nonBlankEntities,
-            searchBounds.min.valueOf(),
-            searchBounds.max.valueOf(),
-            stateUpdate.contextAggregationInterval.asMilliseconds(),
-            functionToPlotByIfMetric
-          )
-          .toPromise()
-          .then((resp) => {
-            const fullRangeChartData = this.mlTimeSeriesExplorer.processMetricPlotResults(
-              resp.results,
-              modelPlotEnabled
-            );
-            stateUpdate.contextChartData = fullRangeChartData;
-            finish(counter);
-          })
-          .catch((err) => {
-            const errorMsg = i18n.translate('xpack.ml.timeSeriesExplorer.metricDataErrorMessage', {
-              defaultMessage: 'Error getting metric data',
-            });
-            this.displayErrorToastMessages(err, errorMsg);
-          });
-
-        // Query 2 - load max record score at same granularity as context chart
-        // across full time range for use in the swimlane.
-        this.context.services.mlServices.mlResultsService
-          .getRecordMaxScoreByTime(
-            selectedJob.job_id,
-            this.getCriteriaFields(detectorIndex, entityControls),
-            searchBounds.min.valueOf(),
-            searchBounds.max.valueOf(),
-            stateUpdate.contextAggregationInterval.asMilliseconds(),
-            functionToPlotByIfMetric
-          )
-          .then((resp) => {
-            const fullRangeRecordScoreData = this.mlTimeSeriesExplorer.processRecordScoreResults(
-              resp.results
-            );
-            stateUpdate.swimlaneData = fullRangeRecordScoreData;
-            finish(counter);
-          })
-          .catch((err) => {
-            const errorMsg = i18n.translate(
-              'xpack.ml.timeSeriesExplorer.bucketAnomalyScoresErrorMessage',
-              {
-                defaultMessage: 'Error getting bucket anomaly scores',
+          selectedJob,
+          detectorIndex,
+          entityControls,
+          modelPlotEnabled,
+          selectedForecastId: this.props.selectedForecastId,
+          functionToPlotByIfMetric,
+          functionDescription: this.props.functionDescription,
+          zoom,
+          previousSelectedForecastId: this.previousSelectedForecastId,
+          autoZoomDuration,
+          arePartitioningFieldsProvided: this.arePartitioningFieldsProvided(),
+          criteriaFields: this.getCriteriaFields(detectorIndex, entityControls),
+          displayError: (error, message) => {
+            // A failed load can't be cancelled, so the previous data is no longer relevant.
+            if (loadCounter === this.state.loadCounter) {
+              this.setState(fullRefreshResetPatch);
+            }
+            this.displayErrorToastMessages(error, message);
+          },
+          errorMessages: getSmvContextLoadErrorMessages(this.props.selectedForecastId),
+          deps: {
+            mlTimeSeriesSearchService: this.context.services.mlServices.mlTimeSeriesSearchService,
+            mlResultsService: this.context.services.mlServices.mlResultsService,
+            mlForecastService: this.mlForecastService,
+            mlTimeSeriesExplorer: this.mlTimeSeriesExplorer,
+            getBoundsRoundedToInterval: this.getBoundsRoundedToInterval,
+          },
+        }).then((result) => {
+          if (result === null) {
+            // Aborted or failed without a successor. A newer load increments `loadGeneration`
+            // synchronously, so this must not clear that load's in-progress state.
+            // Errors already report themselves. A cancel restores the previous chart; the abort
+            // listener does that too, and calling it again is the same snapshot.
+            const cancelled =
+              contextLoadSignal.aborted && contextLoadSignal.reason !== AbortReason.REPLACED;
+            if (!this.unmounted && generation === this.loadGeneration && cancelled) {
+              this.revertToChartSnapshot();
+            } else if (generation === this.loadGeneration) {
+              this.pendingRefreshFocus = false;
+            }
+            return;
+          }
+          let focusScheduled = false;
+          consumeSmvContextLoadResult({
+            result,
+            isUnmounted: () => this.unmounted,
+            loadCounterWhenStarted: loadCounter,
+            readLoadCounter: () => this.state.loadCounter,
+            syncPreviousSelectedForecastIdFromProps: () => {
+              this.previousSelectedForecastId = this.props.selectedForecastId;
+            },
+            applyZoomSelection: (range) => {
+              focusScheduled = this.contextChartSelected(range, forceFocus);
+              if (!focusScheduled) {
+                this.pendingRefreshFocus = false;
               }
-            );
-
-            this.displayErrorToastMessages(err, errorMsg);
+            },
+            applyStatePatch: (patch) => {
+              // Context can land before focus. Don't treat that half-updated chart as the
+              // snapshot a cancel restores.
+              const commitWhenApplied = !focusScheduled;
+              this.setState({ ...fullRefreshResetPatch, ...patch }, () => {
+                if (commitWhenApplied && generation === this.loadGeneration) {
+                  this.commitChartSnapshot();
+                }
+              });
+            },
+            // If focus will load next, wait for applyFocusPipelinePatch before completing.
+            // Otherwise complete now (empty / dataNotChartable / no zoom / skipped focus)
+            // so the dashboard refresh button cannot stay on Cancel.
+            afterStatePatch: (_statePatch, { hasPendingFocus }) => {
+              if (!hasPendingFocus || !focusScheduled) {
+                this.props.onRenderComplete?.();
+              }
+            },
           });
-
-        // Query 3 - load details on the chart used in the chart title (charting function and entity(s)).
-        this.context.services.mlServices.mlTimeSeriesSearchService
-          .getChartDetails(
-            selectedJob,
-            detectorIndex,
-            entityControls,
-            searchBounds.min.valueOf(),
-            searchBounds.max.valueOf()
-          )
-          .then((resp) => {
-            stateUpdate.chartDetails = resp.results;
-            finish(counter);
-          })
-          .catch((err) => {
-            this.displayErrorToastMessages(
-              err,
-              i18n.translate('xpack.ml.timeSeriesExplorer.entityCountsErrorMessage', {
-                defaultMessage: 'Error getting entity counts',
-              })
-            );
-          });
-
-        // Plus query for forecast data if there is a forecastId stored in the appState.
-        if (selectedForecastId !== undefined) {
-          awaitingCount++;
-          const detector = selectedJob.analysis_config.detectors[detectorIndex];
-          const esAgg = mlFunctionToESAggregation(detector.function);
-          const aggType =
-            modelPlotEnabled === false &&
-            (esAgg === ML_JOB_AGGREGATION.SUM || esAgg === ML_JOB_AGGREGATION.COUNT)
-              ? { avg: 'sum', max: 'sum', min: 'sum' }
-              : undefined;
-
-          this.mlForecastService
-            .getForecastData(
-              selectedJob,
-              detectorIndex,
-              selectedForecastId,
-              nonBlankEntities,
-              searchBounds.min.valueOf(),
-              searchBounds.max.valueOf(),
-              stateUpdate.contextAggregationInterval.asMilliseconds(),
-              aggType
-            )
-            .toPromise()
-            .then((resp) => {
-              stateUpdate.contextForecastData = this.mlTimeSeriesExplorer.processForecastResults(
-                resp.results
-              );
-              finish(counter);
-            })
-            .catch((err) => {
-              this.displayErrorToastMessages(
-                err,
-                i18n.translate('xpack.ml.timeSeriesExplorer.forecastDataErrorMessage', {
-                  defaultMessage: 'Error loading forecast data for forecast ID {forecastId}',
-                  values: { forecastId: selectedForecastId },
-                })
-              );
-            });
-        }
+        });
       }
     );
   };
@@ -611,15 +561,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
    * @param entities
    */
   getCriteriaFields(detectorIndex, entities) {
-    // Only filter on the entity if the field has a value.
-    const nonBlankEntities = entities.filter((entity) => entity.fieldValue !== null);
-    return [
-      {
-        fieldName: 'detector_index',
-        fieldValue: detectorIndex,
-      },
-      ...nonBlankEntities,
-    ];
+    return buildCriteriaFields(detectorIndex, entities);
   }
 
   async componentDidMount() {
@@ -636,85 +578,91 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
 
     // Listen for context chart updates.
     this.subscriptions.add(
-      this.contextChart$
-        .pipe(
-          tap((selection) => {
-            this.setState({
-              zoomFrom: selection.from,
-              zoomTo: selection.to,
-            });
-          }),
-          debounceTime(500),
-          tap((selection) => {
-            const {
-              contextChartData,
-              contextForecastData,
-              focusChartData,
-              zoomFromFocusLoaded,
-              zoomToFocusLoaded,
-            } = this.state;
-
-            if (
-              (contextChartData === undefined || contextChartData.length === 0) &&
-              (contextForecastData === undefined || contextForecastData.length === 0)
-            ) {
-              return;
-            }
-
-            if (
-              (this.contextChartSelectedInitCallDone === false && focusChartData === undefined) ||
-              zoomFromFocusLoaded.getTime() !== selection.from.getTime() ||
-              zoomToFocusLoaded.getTime() !== selection.to.getTime()
-            ) {
-              this.contextChartSelectedInitCallDone = true;
-
-              this.setState({
-                loading: true,
-                fullRefresh: false,
-              });
-            }
-          }),
-          switchMap((selection) => {
-            // Calculate the aggregation interval for the focus chart.
-            const bounds = { min: moment(selection.from), max: moment(selection.to) };
-
-            // Ensure the search bounds align to the bucketing interval so that the first and last buckets are complete.
-            // For sum or count detectors, short buckets would hold smaller values, and model bounds would also be affected
-            // to some extent with all detector functions if not searching complete buckets.
-            const searchBounds = this.getBoundsRoundedToInterval(
-              bounds,
-              this.getFocusAggregationInterval({
-                from: selection.from,
-                to: selection.to,
-              }),
-              false
-            );
-
-            return forkJoin([
-              this.getFocusData(selection),
-              // Load the data for the anomalies table.
-              this.loadAnomaliesTableData(searchBounds.min.valueOf(), searchBounds.max.valueOf()),
-            ]);
-          }),
-          withLatestFrom(this.contextChart$)
-        )
-        .subscribe(([[refreshFocusData, tableData], selection]) => {
-          const { modelPlotEnabled } = this.state;
-
-          // All the data is ready now for a state update.
+      subscribeSmvBrushToFocusZoom(this.contextChart$, {
+        includeAnomaliesTable: this.includeAnomaliesTable,
+        isBrushFocusInitPending: () => this.contextChartSelectedInitCallDone === false,
+        markBrushFocusInitHandled: () => {
+          this.contextChartSelectedInitCallDone = true;
+        },
+        onBrushPreview: (selection) => {
           this.setState({
-            focusAggregationInterval: this.getFocusAggregationInterval({
-              from: selection.from,
-              to: selection.to,
-            }),
-            loading: false,
-            showModelBoundsCheckbox: modelPlotEnabled && refreshFocusData.focusChartData.length > 0,
-            zoomFromFocusLoaded: selection.from,
-            zoomToFocusLoaded: selection.to,
-            ...refreshFocusData,
-            ...tableData,
+            zoomFrom: selection.from,
+            zoomTo: selection.to,
           });
-        })
+        },
+        readChartZoomState: () => ({
+          contextChartData: this.state.contextChartData,
+          contextForecastData: this.state.contextForecastData,
+          // A refresh keeps the previous focus series until the new one arrives. Treat it as
+          // missing so the pipeline starts a real focus load and always reaches onRenderComplete.
+          focusChartData: this.pendingRefreshFocus ? undefined : this.state.focusChartData,
+          zoomFromFocusLoaded: this.state.zoomFromFocusLoaded,
+          zoomToFocusLoaded: this.state.zoomToFocusLoaded,
+        }),
+        onFocusPipelineStarting: () => {
+          this.focusSnapshotGeneration = this.loadGeneration;
+          this.pendingRefreshFocus = false;
+          this.props.onLoading?.(true);
+          this.setState({
+            loading: true,
+            fullRefresh: false,
+            chartDataError: undefined,
+          });
+        },
+        getFocusAggregationInterval: (selection) => this.getFocusAggregationInterval(selection),
+        getBoundsRoundedToInterval: this.getBoundsRoundedToInterval,
+        getFocusData$: (selection) => {
+          const { requestCancellationManager } = this.props;
+          // A new brush is a user action, so it lifts an earlier cancellation. The automatic
+          // focus load that follows a context load is not, so it stays cancelled.
+          if (!this.autoFocusLoadPending) {
+            requestCancellationManager?.resumeAfterCancellation();
+          }
+          this.autoFocusLoadPending = false;
+          this.focusLoadSignal = requestCancellationManager?.signal;
+          return this.getFocusData(selection)?.pipe(takeUntilAborted(this.focusLoadSignal));
+        },
+        getAnomaliesTableForRange$: (earliestMs, latestMs) =>
+          this.loadAnomaliesTableData(earliestMs, latestMs).pipe(
+            takeUntilAborted(this.focusLoadSignal)
+          ),
+        readModelPlotEnabled: () => this.state.modelPlotEnabled,
+        readSelectedForecastId: () => this.props.selectedForecastId,
+        applyFocusPipelinePatch: (patch) => {
+          const focusGeneration = this.focusSnapshotGeneration;
+          this.setState(patch, () => {
+            if (focusGeneration === this.loadGeneration) {
+              this.commitChartSnapshot();
+            }
+            this.props.onRenderComplete?.();
+          });
+        },
+        onFocusPipelineEmpty: (selection) => {
+          const focusLoadSignal = this.focusLoadSignal;
+          if (focusLoadSignal?.aborted) {
+            // Replaced loads belong to the successor. A cancel puts the previous chart back,
+            // including context data this load already applied.
+            if (
+              focusLoadSignal.reason !== AbortReason.REPLACED &&
+              this.focusSnapshotGeneration === this.loadGeneration
+            ) {
+              this.revertToChartSnapshot();
+            }
+            return;
+          }
+          // Empty focus is terminal for reporting, not an error.
+          this.setState(buildSmvEmptyFocusStatePatch(selection), () => {
+            if (this.focusSnapshotGeneration === this.loadGeneration) {
+              this.commitChartSnapshot();
+            }
+            this.props.onRenderComplete?.();
+          });
+        },
+        onFocusPipelineError: (error) => {
+          // Completes reporting via onRenderComplete so deferred focus waits cannot hang.
+          this.displayErrorToastMessages(error, getSmvFocusLoadErrorMessage());
+        },
+      })
     );
 
     if (this.context && this.props.selectedJob !== undefined) {
@@ -747,27 +695,11 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       }
     }
 
-    if (
-      previousProps === undefined ||
-      !isEqual(previousProps.bounds, this.props.bounds) ||
-      (!isEqual(previousProps.lastRefresh, this.props.lastRefresh) &&
-        previousProps.lastRefresh !== 0) ||
-      !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
-      !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
-      previousProps.selectedForecastId !== this.props.selectedForecastId ||
-      previousProps.selectedJob?.job_id !== this.props.selectedJob?.job_id ||
-      previousProps.selectedJobId !== this.props.selectedJobId ||
-      previousProps.functionDescription !== this.props.functionDescription
-    ) {
-      const fullRefresh =
-        previousProps === undefined ||
-        !isEqual(previousProps.bounds, this.props.bounds) ||
-        !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
-        !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
-        previousProps.selectedForecastId !== this.props.selectedForecastId ||
-        previousProps.selectedJobId !== this.props.selectedJobId ||
-        previousProps.selectedJob?.job_id !== this.props.selectedJob?.job_id ||
-        previousProps.functionDescription !== this.props.functionDescription;
+    const { shouldReload, fullRefresh } = getSmvDataReloadPlan(
+      previousProps === undefined ? undefined : smvReloadSnapshotFromSmvHostProps(previousProps),
+      smvReloadSnapshotFromSmvHostProps(this.props)
+    );
+    if (shouldReload) {
       this.loadSingleMetricData(fullRefresh);
     }
 
@@ -777,8 +709,9 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
   }
 
   componentWillUnmount() {
-    this.subscriptions.unsubscribe();
     this.unmounted = true;
+    this.contextLoadAbortController?.abort();
+    this.subscriptions.unsubscribe();
   }
 
   render() {
@@ -789,6 +722,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       chartHeight,
       lastRefresh,
       onForecastComplete,
+      isInteractive,
       selectedEntities,
       selectedDetectorIndex,
       selectedJob,
@@ -843,6 +777,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       zoomFromFocusLoaded,
       zoomToFocusLoaded,
       autoZoomDuration,
+      isInteractive,
     };
 
     const entityControls = this.getControlsForDetector();
@@ -865,31 +800,11 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     this.previousChartProps = chartProps;
     this.previousShowForecast = showForecast;
     this.previousShowModelBounds = showModelBounds;
-
     return (
-      <>
-        {fieldNamesWithEmptyValues.length > 0 && (
-          <>
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="xpack.ml.timeSeriesExplorer.singleMetricRequiredMessage"
-                  defaultMessage="To view a single metric, select {missingValuesCount, plural, one {a value for {fieldName1}} other {values for {fieldName1} and {fieldName2}}}."
-                  values={{
-                    missingValuesCount: fieldNamesWithEmptyValues.length,
-                    fieldName1: fieldNamesWithEmptyValues[0],
-                    fieldName2: fieldNamesWithEmptyValues[1],
-                  }}
-                />
-              }
-              iconType="question"
-              size="s"
-            />
-            <EuiSpacer size="m" />
-          </>
-        )}
-        <EuiSpacer size="m" />
-
+      <SingleMetricViewerChartSurface
+        fieldNamesWithEmptyValues={fieldNamesWithEmptyValues}
+        controlsSlot={<EuiSpacer size="m" />}
+      >
         {fullRefresh && loading === true && (
           <LoadingIndicator
             label={i18n.translate('xpack.ml.timeSeriesExplorer.loadingLabel', {
@@ -917,13 +832,13 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
           (fullRefresh === false || loading === false) &&
           hasResults === true && (
             <div>
-              <SingleMetricViewerTitle
+              <EntityFieldNamesAndFilterButtons
                 api={this.props.api}
-                functionLabel={chartDetails.functionLabel}
                 entityData={chartDetails.entityData}
+                isInteractive={isInteractive}
               />
               <EuiFlexGroup style={{ float: 'right' }} alignItems="center">
-                {showModelBoundsCheckbox && (
+                {isInteractive && showModelBoundsCheckbox && (
                   <TimeseriesExplorerCheckbox
                     id="toggleModelBoundsCheckbox"
                     label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
@@ -934,7 +849,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                   />
                 )}
 
-                {showAnnotationsCheckbox && (
+                {isInteractive && showAnnotationsCheckbox && (
                   <TimeseriesExplorerCheckbox
                     id="toggleAnnotationsCheckbox"
                     label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
@@ -945,7 +860,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                   />
                 )}
 
-                {showForecastCheckbox && (
+                {isInteractive && showForecastCheckbox && (
                   <EuiFlexItem grow={false}>
                     <TimeseriesExplorerCheckbox
                       id="toggleShowForecastCheckbox"
@@ -962,7 +877,8 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                   </EuiFlexItem>
                 )}
 
-                {arePartitioningFieldsProvided &&
+                {isInteractive &&
+                  arePartitioningFieldsProvided &&
                   selectedJob &&
                   shouldShowForecastButton === true && (
                     <EuiFlexItem grow={false} style={{ textAlign: 'right' }}>
@@ -1000,10 +916,12 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                 lastRefresh={lastRefresh}
                 tableData={tableData}
                 sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+                telemetrySource={'embeddable_single_metric_viewer_chart'}
+                requestCancellationManager={this.props.requestCancellationManager}
               />
             </div>
           )}
-      </>
+      </SingleMetricViewerChartSurface>
     );
   }
 }

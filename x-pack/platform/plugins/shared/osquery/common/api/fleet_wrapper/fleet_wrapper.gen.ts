@@ -14,36 +14,42 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const GetAgentDetailsRequestParams = lazySchema(() =>
+  z.object({
+    id: z.string(),
+  })
+);
 export type GetAgentDetailsRequestParams = z.infer<typeof GetAgentDetailsRequestParams>;
-export const GetAgentDetailsRequestParams = z.object({
-  id: z.string(),
-});
 export type GetAgentDetailsRequestParamsInput = z.input<typeof GetAgentDetailsRequestParams>;
 
+export const GetAgentDetailsResponse = lazySchema(() => z.object({}));
 export type GetAgentDetailsResponse = z.infer<typeof GetAgentDetailsResponse>;
-export const GetAgentDetailsResponse = z.object({});
 
+export const GetAgentPackagePoliciesResponse = lazySchema(() => z.object({}));
 export type GetAgentPackagePoliciesResponse = z.infer<typeof GetAgentPackagePoliciesResponse>;
-export const GetAgentPackagePoliciesResponse = z.object({});
 
+export const GetAgentPoliciesResponse = lazySchema(() => z.object({}));
 export type GetAgentPoliciesResponse = z.infer<typeof GetAgentPoliciesResponse>;
-export const GetAgentPoliciesResponse = z.object({});
 
+export const GetAgentPolicyRequestParams = lazySchema(() =>
+  z.object({
+    id: z.string(),
+  })
+);
 export type GetAgentPolicyRequestParams = z.infer<typeof GetAgentPolicyRequestParams>;
-export const GetAgentPolicyRequestParams = z.object({
-  id: z.string(),
-});
 export type GetAgentPolicyRequestParamsInput = z.input<typeof GetAgentPolicyRequestParams>;
 
+export const GetAgentPolicyResponse = lazySchema(() => z.object({}));
 export type GetAgentPolicyResponse = z.infer<typeof GetAgentPolicyResponse>;
-export const GetAgentPolicyResponse = z.object({});
+export const GetAgentsRequestQuery = lazySchema(() =>
+  z.object({
+    query: z.object({}),
+  })
+);
 export type GetAgentsRequestQuery = z.infer<typeof GetAgentsRequestQuery>;
-export const GetAgentsRequestQuery = z.object({
-  query: z.object({}),
-});
 export type GetAgentsRequestQueryInput = z.input<typeof GetAgentsRequestQuery>;
 
+export const GetAgentsResponse = lazySchema(() => z.object({}));
 export type GetAgentsResponse = z.infer<typeof GetAgentsResponse>;
-export const GetAgentsResponse = z.object({});

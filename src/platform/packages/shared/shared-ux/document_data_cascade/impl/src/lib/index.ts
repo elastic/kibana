@@ -13,3 +13,15 @@ export {
   getCascadeRowLeafDataCacheKey,
   getLeafIdFromCacheKey,
 } from './utils';
+export type {
+  ChildVirtualizerController,
+  ConnectedChildState,
+  ChildConnectionHandle,
+} from './core/virtualizer/types';
+export { useConnectedChildVirtualizer } from './core/virtualizer/use_connected_child_virtualizer';
+export type {
+  UseConnectedChildVirtualizerOptions,
+  UseConnectedChildVirtualizerResult,
+} from './core/virtualizer/types';
+
+export { createChildVirtualizerController } from './core/virtualizer/child_controller';

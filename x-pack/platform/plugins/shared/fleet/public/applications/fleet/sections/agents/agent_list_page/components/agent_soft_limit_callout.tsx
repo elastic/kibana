@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useConfig } from '../../../../hooks';
 
@@ -15,23 +15,22 @@ export const AgentSoftLimitCallout = () => {
   const config = useConfig();
 
   return (
-    <EuiCallOut
-      iconType="warning"
-      color="warning"
+    <KbnWarningCallout
       title={
         <FormattedMessage
           id="xpack.fleet.agentSoftLimitCallout.calloutTitle"
           defaultMessage="Max number of online agents reached"
         />
       }
-    >
-      <FormattedMessage
-        id="xpack.fleet.agentSoftLimitCallout.calloutDescription"
-        defaultMessage="Fleet supports a maximum of {nbAgents} active agents. You need to unenroll some agents to ensure that all active agents are able to connect and new agents can be enrolled."
-        values={{
-          nbAgents: <FormattedNumber value={config.internal?.activeAgentsSoftLimit ?? 25000} />,
-        }}
-      />
-    </EuiCallOut>
+      text={
+        <FormattedMessage
+          id="xpack.fleet.agentSoftLimitCallout.calloutDescription"
+          defaultMessage="Fleet supports a maximum of {nbAgents} active agents. You need to unenroll some agents to ensure that all active agents are able to connect and new agents can be enrolled."
+          values={{
+            nbAgents: <FormattedNumber value={config.internal?.activeAgentsSoftLimit ?? 25000} />,
+          }}
+        />
+      }
+    />
   );
 };

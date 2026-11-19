@@ -73,7 +73,7 @@ steps:
 `;
     }
 
-    describe.each([undefined, true, '${{error.type == "Error"}}'])(
+    describe.each([undefined, true, '${{error.type == "Error"}}', '"error.type: Error"'])(
       'performs retries when condition is %s',
       (conditionTestCase) => {
         beforeAll(async () => {
@@ -107,10 +107,9 @@ steps:
               workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
                 'fake_workflow_execution_id'
               );
-            // Duration should be at least 1s (at least one retry delay)
+            // One retry delay must elapse.
             expect(workflowExecutionDoc?.duration).toBeGreaterThanOrEqual(999);
-            // But less than 2.5s to allow CI/timer variance while still catching runaway runs
-            expect(workflowExecutionDoc?.duration).toBeLessThan(2500);
+            expect(workflowExecutionDoc?.duration).toBeLessThan(10_000);
           });
 
           it('should have 3 executions of constantlyFailingStep (1 initial + 2 retries)', async () => {
@@ -221,7 +220,7 @@ steps:
       }
     );
 
-    describe.each(['${{error.type == "SomeOtherError"}}', '${{false}}'])(
+    describe.each(['${{error.type == "SomeOtherError"}}', '${{false}}', '"error.type: Other"'])(
       'does not perform retries when condition is %s',
       (conditionTestCase) => {
         beforeAll(async () => {

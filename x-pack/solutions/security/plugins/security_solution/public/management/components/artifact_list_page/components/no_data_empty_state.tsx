@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import styled, { css } from 'styled-components';
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ManagementEmptyStateWrapper } from '../../management_empty_state_wrapper';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -29,7 +29,6 @@ export const NoDataEmptyState = memo<{
   canCreateItems?: boolean;
   /** Should the Add button be disabled */
   isAddDisabled?: boolean;
-  backComponent?: React.ReactNode;
   secondaryAboutInfo?: React.ReactNode;
   'data-test-subj'?: string;
 }>(
@@ -37,7 +36,6 @@ export const NoDataEmptyState = memo<{
     onAdd,
     onImport,
     isAddDisabled = false,
-    backComponent,
     'data-test-subj': dataTestSubj,
     titleLabel,
     titleNoEntriesLabel,
@@ -57,7 +55,7 @@ export const NoDataEmptyState = memo<{
         {canCreateItems ? (
           <EmptyPrompt
             data-test-subj={dataTestSubj}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             title={<h2 data-test-subj={getTestId('title')}>{titleLabel}</h2>}
             body={
               <div data-test-subj={getTestId('aboutInfo')}>
@@ -71,26 +69,26 @@ export const NoDataEmptyState = memo<{
               </div>
             }
             actions={[
-              <EuiFlexGroup>
-                <EuiButton
-                  fill
-                  isDisabled={isAddDisabled}
-                  onClick={onAdd}
-                  data-test-subj={getTestId('addButton')}
-                >
-                  {primaryButtonLabel}
-                </EuiButton>
-                {isEndpointExceptionsMovedUnderManagementFFEnabled && (
-                  <EuiButton
-                    isDisabled={isAddDisabled}
-                    onClick={onImport}
-                    data-test-subj={getTestId('importButton')}
-                  >
-                    {importButtonLabel}
-                  </EuiButton>
-                )}
-              </EuiFlexGroup>,
-              ...(backComponent ? [backComponent] : []),
+              <EuiButton
+                fill
+                isDisabled={isAddDisabled}
+                onClick={onAdd}
+                data-test-subj={getTestId('addButton')}
+              >
+                {primaryButtonLabel}
+              </EuiButton>,
+
+              ...(isEndpointExceptionsMovedUnderManagementFFEnabled
+                ? [
+                    <EuiButtonEmpty
+                      isDisabled={isAddDisabled}
+                      onClick={onImport}
+                      data-test-subj={getTestId('importButton')}
+                    >
+                      {importButtonLabel}
+                    </EuiButtonEmpty>,
+                  ]
+                : []),
             ]}
           />
         ) : (

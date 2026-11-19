@@ -8,6 +8,7 @@
 import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import { matchers as emotionMatchers } from '@emotion/jest';
 import { AlertsCountPanel } from '.';
 
 import type { Status } from '../../../../../common/api/detection_engine';
@@ -16,6 +17,8 @@ import { TestProviders } from '../../../../common/mock';
 import { ChartContextMenu } from '../chart_panels/chart_context_menu';
 import { COUNTS } from '../chart_panels/chart_select/translations';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
+
+expect.extend(emotionMatchers);
 
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';
@@ -130,7 +133,7 @@ describe('toggleQuery', () => {
       fireEvent.click(getByTestId('query-toggle-header'));
     });
 
-    expect(mockSetIsExpanded).toBeCalledWith(false);
+    expect(mockSetIsExpanded).toHaveBeenCalledWith(false);
   });
 
   it('when isExpanded is true, render counts panel', () => {
@@ -148,6 +151,24 @@ describe('toggleQuery', () => {
       </TestProviders>
     );
     expect(queryByTestId('visualization-embeddable')).not.toBeInTheDocument();
+  });
+
+  it('when isExpanded is true, uses the expanded panel height', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <AlertsCountPanel {...defaultProps} isExpanded={true} panelHeight={375} />
+      </TestProviders>
+    );
+    expect(getByTestId('alertsCountPanel')).toHaveStyleRule('height', '375px');
+  });
+
+  it('when isExpanded is false, uses the collapsed panel height', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <AlertsCountPanel {...defaultProps} isExpanded={false} panelHeight={375} />
+      </TestProviders>
+    );
+    expect(getByTestId('alertsCountPanel')).toHaveStyleRule('height', '64px');
   });
 });
 

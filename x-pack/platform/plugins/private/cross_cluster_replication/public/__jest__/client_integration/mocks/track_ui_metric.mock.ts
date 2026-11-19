@@ -11,8 +11,6 @@ jest.mock('../../../app/services/track_ui_metric', () => {
   return {
     ...original,
     trackUiMetric: jest.fn(),
-    trackUserRequest: (request: Promise<any>) => {
-      return request.then((response) => response);
-    },
+    trackUserRequest: <T>(request: Promise<T>): Promise<T> => request,
   };
 });

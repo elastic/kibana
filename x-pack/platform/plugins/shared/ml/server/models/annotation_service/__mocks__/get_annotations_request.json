@@ -72,7 +72,7 @@
               {
                 "query_string": {
                   "analyze_wildcard": false,
-                  "query": "job_id:jobIdMock"
+                  "query": "job_id:job-id-mock"
                 }
               }
             ]

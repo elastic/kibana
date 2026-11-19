@@ -8,7 +8,11 @@
 import type { RestoreConfig, LoadResult } from '../types';
 import { getErrorMessage } from '../utils';
 import { getSnapshotMetadata, deleteRepository, generateRepoName } from '../repository';
-import { filterIndicesToRestore, restoreIndices } from './restore';
+import {
+  filterIndicesToRestore,
+  restoreIndices,
+  waitForRestoredIndicesToBeActive,
+} from './restore';
 
 export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult> {
   const {
@@ -20,6 +24,7 @@ export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult
     renamePattern,
     renameReplacement,
     allowNoMatches,
+    indexSettings,
   } = config;
 
   const result: LoadResult = {
@@ -78,8 +83,13 @@ export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult
       indices: indicesToRestore,
       renamePattern,
       renameReplacement,
+      indexSettings,
     });
     result.restoredIndices = restoredIndices;
+
+    if (indexSettings !== undefined) {
+      await waitForRestoredIndicesToBeActive({ esClient, restoredIndices });
+    }
 
     result.success = true;
     log.info(`Restore completed: ${restoredIndices.length} indices restored successfully`);

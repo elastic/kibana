@@ -12,10 +12,14 @@ export const transformExecuteConnectorResponse = ({
   actionId,
   retry,
   serviceMessage,
+  errorName,
+  errorMeta,
   ...res
 }: ActionTypeExecutorResult<unknown>): ConnectorExecuteResponseV1 => ({
   ...res,
   connector_id: actionId,
   ...(retry && retry instanceof Date ? { retry: retry.toISOString() } : { retry }),
   ...(serviceMessage ? { service_message: serviceMessage } : {}),
+  ...(errorName ? { error_name: errorName } : {}),
+  ...(errorMeta ? { error_meta: errorMeta } : {}),
 });

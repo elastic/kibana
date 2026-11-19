@@ -6,6 +6,65 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "configuration": {
+        "*": {
+          "category": "",
+          "default_value": "",
+          "depends_on": [
+            {
+              "field": "",
+              "value": ""
+            }
+          ],
+          "display": {
+            "__one_of": [
+              "textbox",
+              "textarea",
+              "numeric",
+              "toggle",
+              "dropdown"
+            ]
+          },
+          "label": "",
+          "options": [
+            {
+              "label": "",
+              "value": ""
+            }
+          ],
+          "order": "",
+          "placeholder": "",
+          "required": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "sensitive": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "tooltip": "",
+          "type": {
+            "__one_of": [
+              "str",
+              "int",
+              "list",
+              "bool"
+            ]
+          },
+          "ui_restrictions": [],
+          "validations": [
+            {}
+          ],
+          "value": ""
+        }
+      },
+      "values": {}
+    },
     "methods": [
       "PUT"
     ],

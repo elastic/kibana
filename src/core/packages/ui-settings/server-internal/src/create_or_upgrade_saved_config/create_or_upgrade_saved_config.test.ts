@@ -201,7 +201,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         const error = new Error('foo');
         savedObjectsClient.create.mockRejectedValue(error);
 
-        await expect(run({ handleWriteErrors: false })).rejects.toThrowError(error);
+        await expect(run({ handleWriteErrors: false })).rejects.toThrow(error);
       });
     });
     describe('handleWriteErrors:true', () => {
@@ -246,7 +246,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
           SavedObjectsErrorHelpers.decorateGeneralError(error)
         );
 
-        await expect(run({ handleWriteErrors: true })).rejects.toThrowError(error);
+        await expect(run({ handleWriteErrors: true })).rejects.toThrow(error);
       });
 
       it('throws error for all other exceptions', async () => {
@@ -254,7 +254,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         const error = new Error('foo');
         savedObjectsClient.create.mockRejectedValue(error);
 
-        await expect(run({ handleWriteErrors: true })).rejects.toThrowError(error);
+        await expect(run({ handleWriteErrors: true })).rejects.toThrow(error);
       });
     });
   });

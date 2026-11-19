@@ -9,6 +9,7 @@ import React from 'react';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { scopedHistoryMock } from '@kbn/core-application-browser-mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
@@ -16,13 +17,13 @@ import type { GetTabsProps } from './edit_space_tabs';
 import { getTabs } from './edit_space_tabs';
 
 const space = {
-  id: 'my-space',
+  id: asSpaceId('my-space'),
   name: 'My Space',
   disabledFeatures: [],
 };
 const features = [
   new KibanaFeature({
-    id: 'feature-1',
+    id: asSpaceId('feature-1'),
     name: 'feature 1',
     app: [],
     category: DEFAULT_APP_CATEGORIES.kibana,
@@ -68,39 +69,12 @@ describe('Edit Space Tabs: getTabs', () => {
     ]);
   });
 
-  it('can include count of roles as a badge for Permissions tab', () => {
-    const isRoleManagementEnabled = true;
-    const isSecurityEnabled = true;
-    const capabilities = getCapabilities();
-
-    const rolesTab = getTabs({
-      rolesCount: 42,
-      isRoleManagementEnabled,
-      capabilities,
-      space,
-      features,
-      history,
-      allowFeatureVisibility,
-      allowSolutionVisibility,
-      isSecurityEnabled,
-      enableSecurityLink: '',
-    }).find((tab) => tab.id === 'roles');
-
-    if (!rolesTab?.append) {
-      throw new Error('roles tab did not exist or did not have a badge!');
-    }
-    const { getByText } = render(rolesTab.append);
-
-    expect(getByText('42')).toBeInTheDocument();
-  });
-
   it('should show a warning callout when security is disabled', () => {
     const isRoleManagementEnabled = true;
     const isSecurityEnabled = false;
     const capabilities = getCapabilities();
 
     const rolesTab = getTabs({
-      rolesCount: 0,
       isRoleManagementEnabled,
       capabilities,
       space,

@@ -7,22 +7,25 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
+import {
+  interceptEntityStoreStatus,
+  setGrouping,
+} from '../../../tasks/entity_analytics/entity_analytics_home';
 import { ENTITY_ANALYTICS_HOME_PAGE_URL } from '../../../urls/navigation';
 import {
-  PAGE_TITLE,
-  ENTITIES_TABLE_GRID,
-  ENTITIES_TABLE_EMPTY,
-  DATAGRID_HEADER,
   DATAGRID_COLUMN_SELECTOR,
+  DATAGRID_HEADER,
   DATAGRID_SORTING_SELECTOR,
+  ENTITIES_TABLE_GRID,
   EXPAND_ROW_BUTTON,
-  TIMELINE_ACTION,
   FIELDS_SELECTOR_BUTTON,
+  FIELDS_SELECTOR_CLOSE,
   FIELDS_SELECTOR_MODAL,
   FIELDS_SELECTOR_RESET,
-  FIELDS_SELECTOR_CLOSE,
+  FLYOUT_TITLE_TEXT,
   LAST_UPDATED,
-  FLYOUT_RIGHT_PANEL,
+  PAGE_TITLE,
+  TIMELINE_ACTION,
 } from '../../../screens/entity_analytics/entity_analytics_home';
 import { TIMELINE_FLYOUT_WRAPPER } from '../../../screens/timeline';
 
@@ -41,9 +44,10 @@ describe(
     env: {
       ftrConfig: {
         kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'entityAnalyticsNewHomePageEnabled',
-          ])}`,
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
+          // This suite asserts against the legacy home page's `entityAnalyticsHomePage`
+          // test subject; pin the flag until the suite is migrated to the new page.
+          '--feature_flags.overrides.securitySolution.useNewEntityAnalyticsPage=false',
         ],
       },
     },
@@ -54,8 +58,11 @@ describe(
     });
 
     beforeEach(() => {
+      interceptEntityStoreStatus('running');
       login();
+      setGrouping(['none']);
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
+      cy.wait('@entityStoreStatus', { timeout: 20000 });
       waitForTableToLoad();
     });
 
@@ -70,13 +77,13 @@ describe(
       });
 
       it('displays the correct entity count', () => {
-        cy.contains('6 entities').should('be.visible');
+        cy.contains('13 entities').should('be.visible');
       });
 
       it('shows all default column headers', () => {
         const expectedHeaders = [
           'Entity name',
-          'Entity id',
+          'Entity ID',
           'Data source',
           'Resolved to',
           'Entity type',
@@ -129,8 +136,7 @@ describe(
           .invoke('text')
           .then((entityName) => {
             cy.get(EXPAND_ROW_BUTTON).first().click();
-            cy.get(FLYOUT_RIGHT_PANEL).should('be.visible');
-            cy.get('[data-test-subj="flyoutTitleText"]').should('contain', entityName.trim());
+            cy.get(FLYOUT_TITLE_TEXT).should('be.visible').and('contain', entityName.trim());
           });
       });
 
@@ -166,33 +172,6 @@ describe(
         cy.get(LAST_UPDATED).should('be.visible');
         cy.get(LAST_UPDATED).should('contain', 'Updated');
       });
-    });
-  }
-);
-
-describe(
-  'Entities table - Empty state',
-  {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'entityAnalyticsNewHomePageEnabled',
-          ])}`,
-        ],
-      },
-    },
-  },
-  () => {
-    beforeEach(() => {
-      login();
-      visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
-      cy.get(PAGE_TITLE).should('exist');
-    });
-
-    it('displays empty state when no entity data exists', () => {
-      cy.get(ENTITIES_TABLE_EMPTY).should('exist');
     });
   }
 );

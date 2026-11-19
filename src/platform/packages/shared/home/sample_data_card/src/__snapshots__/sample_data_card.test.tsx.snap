@@ -15,6 +15,7 @@ exports[`SampleDataCard installed renders with app links 1`] = `
         class="euiFlexGroup euiCard__icon emotion-euiFlexGroup-responsive-m-center-stretch-row-euiCard__icon-vertical"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="test-file-stub"
         />
       </div>
@@ -92,7 +93,7 @@ exports[`SampleDataCard installed renders with app links 1`] = `
             >
               <button
                 aria-label="View Sample Data Set"
-                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+                class="euiButton emotion-euiButtonDisplay-m-base-primary"
                 type="button"
               >
                 <span
@@ -133,6 +134,7 @@ exports[`SampleDataCard installed renders without app links 1`] = `
         class="euiFlexGroup euiCard__icon emotion-euiFlexGroup-responsive-m-center-stretch-row-euiCard__icon-vertical"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="test-file-stub"
         />
       </div>
@@ -205,7 +207,7 @@ exports[`SampleDataCard installed renders without app links 1`] = `
           >
             <button
               aria-label="View Sample Data Set"
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+              class="euiButton emotion-euiButtonDisplay-m-base-primary"
               data-test-subj="launchSampleDataSetsample-data-set"
               type="button"
             >
@@ -242,6 +244,7 @@ exports[`SampleDataCard not installed renders 1`] = `
         class="euiFlexGroup euiCard__icon emotion-euiFlexGroup-responsive-m-center-stretch-row-euiCard__icon-vertical"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="test-file-stub"
         />
       </div>
@@ -283,7 +286,7 @@ exports[`SampleDataCard not installed renders 1`] = `
           >
             <button
               aria-label="Install Sample Data Set"
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-text"
+              class="euiButton emotion-euiButtonDisplay-m-base-text"
               data-test-subj="addSampleDataSetsample-data-set"
               type="button"
             >

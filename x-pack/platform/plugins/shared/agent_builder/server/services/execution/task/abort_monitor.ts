@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { ExecutionStatus } from '../types';
+import { ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient } from '../persistence';
 import { ABORT_POLL_INTERVAL_MS } from '../constants';
 
@@ -81,7 +81,7 @@ export class AbortMonitor {
       }
       if (execution.status === ExecutionStatus.aborted) {
         this.logger.info(`Execution ${this.executionId} was aborted, propagating abort signal`);
-        this.abortController.abort();
+        this.abortController.abort(execution.abortReason);
         this.stop();
       } else if (
         execution.status === ExecutionStatus.completed ||

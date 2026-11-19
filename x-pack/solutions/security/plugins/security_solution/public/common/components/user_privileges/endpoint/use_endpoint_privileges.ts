@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { isEmpty } from 'lodash';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
-import { useCurrentUser, useKibana } from '../../../lib/kibana';
+import { KibanaServices, useCurrentUser, useKibana } from '../../../lib/kibana';
 import { useLicense } from '../../../hooks/use_license';
 import type {
   EndpointPrivileges,
@@ -32,6 +32,7 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const user = useCurrentUser();
 
   const kibanaServices = useKibana().services;
+
   const fleetServicesFromUseKibana = kibanaServices.fleet;
   // The `fleetServicesFromPluginStart` will be defined when this hooks called from a component
   // that is being rendered under the Fleet context (UI extensions). The `fleetServicesFromUseKibana`
@@ -44,17 +45,19 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const [userRolesCheckDone, setUserRolesCheckDone] = useState<boolean>(false);
   const [userRoles, setUserRoles] = useState<MaybeImmutable<string[]>>([]);
 
+  const isServerless = KibanaServices.getBuildFlavor() === 'serverless';
+
   const privileges = useMemo(() => {
     const loading = !userRolesCheckDone || !user;
 
     const privilegeList: EndpointPrivileges = Object.freeze({
       loading,
       ...(!loading && fleetAuthz && !isEmpty(user)
-        ? calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)
+        ? calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, isServerless)
         : getEndpointAuthzInitialState()),
     });
     return privilegeList;
-  }, [userRolesCheckDone, user, fleetAuthz, licenseService, userRoles]);
+  }, [userRolesCheckDone, user, fleetAuthz, licenseService, userRoles, isServerless]);
 
   // get user roles
   useEffect(() => {

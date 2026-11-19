@@ -10,15 +10,32 @@ import type {
   PageObjects,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
 } from '@kbn/scout-search';
-import { test as base, createLazyPageObject } from '@kbn/scout-search';
+import { test as base, spaceTest as spaceBase, createLazyPageObject } from '@kbn/scout-search';
+// Page objects owned by the console plugin, reused here as test helpers:
+import {
+  ConsolePage,
+  EmbeddedConsole,
+} from '@kbn/console-plugin/test/scout/ui/fixtures/page_objects';
 import { Homepage } from './page_objects/homepage';
 
 export interface ExtendedScoutTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
     homepage: Homepage;
+    embeddedConsole: EmbeddedConsole;
+    consolePage: ConsolePage;
   };
   browserAuth: BrowserAuthFixture;
+}
+
+export interface ExtendedScoutParallelTestFixtures extends ScoutParallelTestFixtures {
+  pageObjects: ScoutParallelTestFixtures['pageObjects'] & {
+    homepage: Homepage;
+    embeddedConsole: EmbeddedConsole;
+    consolePage: ConsolePage;
+  };
 }
 
 export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>({
@@ -35,7 +52,35 @@ export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>(
     const extendedPageObjects = {
       ...pageObjects,
       homepage: createLazyPageObject(Homepage, page),
+      embeddedConsole: createLazyPageObject(EmbeddedConsole, page),
+      consolePage: createLazyPageObject(ConsolePage, page),
     };
     await use(extendedPageObjects);
   },
 });
+
+export const spaceTest = spaceBase.extend<
+  ExtendedScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures
+>({
+  pageObjects: async (
+    {
+      pageObjects,
+      page,
+    }: {
+      pageObjects: ExtendedScoutParallelTestFixtures['pageObjects'];
+      page: ExtendedScoutParallelTestFixtures['page'];
+    },
+    use: (pageObjects: ExtendedScoutParallelTestFixtures['pageObjects']) => Promise<void>
+  ) => {
+    const extendedPageObjects = {
+      ...pageObjects,
+      homepage: createLazyPageObject(Homepage, page),
+      embeddedConsole: createLazyPageObject(EmbeddedConsole, page),
+      consolePage: createLazyPageObject(ConsolePage, page),
+    };
+    await use(extendedPageObjects);
+  },
+});
+
+export { mockDeploymentStats } from './mocks';

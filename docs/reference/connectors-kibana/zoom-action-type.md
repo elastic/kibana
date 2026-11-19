@@ -11,6 +11,8 @@ applies_to:
 
 The Zoom connector enables access to Zoom meetings, cloud recordings, transcripts, chat logs, and meeting participants through the Zoom REST API v2.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-zoom-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
@@ -40,7 +42,7 @@ List meetings
 
 Get meeting details
 :   Get details of a scheduled or recurring meeting, including topic, agenda, start time, duration, timezone, host info, join URL, passcode, and settings. Use this to understand what a meeting is about before looking at recordings or participants.
-    - `meetingId` (required): Meeting ID or UUID.
+    - `meetingId` (required): Numeric meeting ID (not a UUID).
 
 Get past meeting details
 :   Get summary information for a meeting that has already ended. Returns total minutes, participant count, and actual start and end times. Only works for past meetings.
@@ -71,7 +73,7 @@ Get meeting participants
 
 Get meeting registrants
 :   List people who registered for a meeting. Works for both upcoming and past meetings that have registration turned on.
-    - `meetingId` (required): Meeting ID.
+    - `meetingId` (required): Numeric meeting ID (not a UUID).
     - `status` (optional): Filter by registration status. Valid values: `pending`, `approved`, `denied`. Defaults to `approved`.
     - `pageSize` (optional): Number of results per page (1 to 300).
     - `nextPageToken` (optional): Pagination token from a previous response.
@@ -86,7 +88,41 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [zoom-api-credentials]
 
-To use the Zoom connector, create a Server-to-Server OAuth app in the Zoom Marketplace:
+The Zoom connector supports two authentication methods: **OAuth Authorization Code** (recommended) and **Server-to-Server OAuth** (via Bearer token).
+
+### OAuth Authorization Code (recommended)
+
+Use this method to let users authorize the connector with their own Zoom account. The connector handles token exchange and refresh automatically.
+
+::::{note}
+You must create a **General** app in the Zoom Marketplace (not a User-managed app). The `cloud_recording` scopes required for recording access are only available on General apps. If you do not intend to publish the app publicly, you can request **Unlisted** status from Zoom after creation.
+::::
+
+1. Go to the [Zoom App Marketplace](https://marketplace.zoom.us/).
+2. Select **Develop** > **Build App**.
+3. Select **General App**.
+4. Enter an app name and select **Create**.
+5. On the **App Credentials** tab, copy the **Client ID** and **Client Secret**.
+6. Set the **OAuth Redirect URL** to your Kibana OAuth callback URL (for example, `https://<your-kibana-host>/api/actions/connector/_oauth_callback`).
+7. On the **Scopes** tab, add the following granular scopes:
+   - `user:read:user` — verify connection
+   - `meeting:read:meeting` — get meeting details
+   - `meeting:read:list_meetings` — list meetings
+   - `meeting:read:past_meeting` — get past meeting details
+   - `meeting:read:list_past_participants` — list past meeting participants
+   - `meeting:read:list_registrants` — list meeting registrants
+   - `cloud_recording:read:list_recording_files` — get meeting recordings
+   - `cloud_recording:read:list_user_recordings` — list user recordings
+8. On the **Activation** tab, select **Activate your app**.
+9. In {{kib}}, create a Zoom connector and select **OAuth Authorization Code** as the authentication method. Enter the **Client ID** and **Client Secret**, then authorize with your Zoom account.
+
+::::{note}
+Cloud recordings (including transcripts and chat logs) require a Zoom Pro plan or higher.
+::::
+
+### Server-to-Server OAuth
+
+Use this method for automated or backend access without user interaction. Tokens are generated manually and expire after 1 hour.
 
 1. Go to the [Zoom App Marketplace](https://marketplace.zoom.us/).
 2. Select **Develop** > **Build App**.

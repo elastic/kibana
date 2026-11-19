@@ -237,6 +237,36 @@ describe('BulkActions', () => {
     expect(installTranslatedDashboards).toHaveBeenCalled();
   });
 
+  it('should disable the install translated button when the user lacks Dashboards: All privilege', () => {
+    mockSiemMigrationsService.dashboards.getMissingCapabilities.mockReturnValue([
+      { capability: 'dashboard_v2.createNew', description: 'Analytics > Dashboards: All' },
+    ]);
+    const mockTranslationStats: DashboardMigrationTranslationStats = {
+      id: 'migration-1',
+      dashboards: {
+        total: 13,
+        success: {
+          total: 11,
+          result: { full: 3, partial: 1, untranslatable: 7 },
+          installable: 3,
+        },
+        failed: 2,
+      },
+    };
+    const { getByTestId } = render(
+      <TestProviders>
+        <BulkActions
+          selectedDashboards={[]}
+          translationStats={mockTranslationStats}
+          isTableLoading={false}
+          installTranslatedDashboards={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('installTranslatedItemsButton')).toBeDisabled();
+  });
+
   it('renders the install selected button', () => {
     const mockTranslationStats: DashboardMigrationTranslationStats = {
       id: 'migration-1',
@@ -312,5 +342,45 @@ describe('BulkActions', () => {
 
     fireEvent.click(getByTestId('installSelectedItemsButton'));
     expect(installSelectedDashboards).toHaveBeenCalled();
+  });
+
+  it('keeps the install selected button enabled when only partially translated dashboards are selected', () => {
+    const mockTranslationStats: DashboardMigrationTranslationStats = {
+      id: 'migration-1',
+      dashboards: {
+        total: 13,
+        success: {
+          total: 11,
+          result: {
+            full: 3,
+            partial: 1,
+            untranslatable: 7,
+          },
+          installable: 4,
+        },
+        failed: 2,
+      },
+    };
+    const selectedDashboards = [
+      getDashboardMigrationDashboardMock({
+        id: '1',
+        status: SiemMigrationStatus.COMPLETED,
+        translation_result: MigrationTranslationResult.PARTIAL,
+      }),
+    ];
+    const { getByTestId, getByText } = render(
+      <TestProviders>
+        <BulkActions
+          selectedDashboards={selectedDashboards}
+          translationStats={mockTranslationStats}
+          isTableLoading={false}
+          installSelectedDashboards={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    // Dashboards can install partially translated items, so the button stays enabled
+    expect(getByTestId('installSelectedItemsButton')).not.toBeDisabled();
+    expect(getByText('Install selected (1)')).toBeInTheDocument();
   });
 });

@@ -36,7 +36,7 @@ export const ChecksNavigation = ({ timestamp, details }: Props) => {
         <EuiButtonEmpty
           data-test-subj="syntheticsChecksNavigationPreviousCheckButton"
           size={isMobile ? 'xs' : 'm'}
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
           isDisabled={!details?.previous}
           onClick={() => {
             history.push(`/journey/${details?.previous?.checkGroup}/steps`);
@@ -66,7 +66,7 @@ export const ChecksNavigation = ({ timestamp, details }: Props) => {
         <EuiButtonEmpty
           data-test-subj="syntheticsChecksNavigationNextCheckButton"
           size={isMobile ? 'xs' : 'm'}
-          iconType="arrowRight"
+          iconType="chevronSingleRight"
           iconSide="right"
           isDisabled={!details?.next}
           onClick={() => {

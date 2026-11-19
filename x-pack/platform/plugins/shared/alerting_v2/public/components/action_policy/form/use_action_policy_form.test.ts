@@ -1,0 +1,183 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { renderHook, act } from '@testing-library/react';
+import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import { useActionPolicyForm } from './use_action_policy_form';
+import { DEFAULT_FORM_STATE } from './constants';
+
+const EXISTING_POLICY: ActionPolicyResponse = {
+  id: 'policy-1',
+  name: 'Critical production alerts',
+  description: 'Routes critical alerts',
+  enabled: true,
+  matcher: { expression: 'data.severity : "critical"' },
+  grouping: { mode: 'per_field', fields: ['host.name', 'service.name'] },
+  throttle: { strategy: 'time_interval', interval: '5m' },
+  destinations: [{ type: 'workflow', id: 'workflow-2' }],
+  created_by: { profile_uid: 'elastic' },
+  created_at: '2026-03-01T10:00:00.000Z',
+  updated_by: { profile_uid: 'elastic' },
+  updated_at: '2026-03-01T10:00:00.000Z',
+};
+
+describe('useActionPolicyForm', () => {
+  describe('create mode (no initialValues)', () => {
+    it('returns isEditMode as false', () => {
+      const { result } = renderHook(() =>
+        useActionPolicyForm({
+          onSubmitCreate: jest.fn(),
+          onSubmitUpdate: jest.fn(),
+        })
+      );
+
+      expect(result.current.isEditMode).toBe(false);
+    });
+
+    it('initializes form with DEFAULT_FORM_STATE', () => {
+      const { result } = renderHook(() =>
+        useActionPolicyForm({
+          onSubmitCreate: jest.fn(),
+          onSubmitUpdate: jest.fn(),
+        })
+      );
+
+      expect(result.current.methods.getValues()).toEqual(DEFAULT_FORM_STATE);
+    });
+
+    it('calls onSubmitCreate with the raw form values on submit', async () => {
+      const onSubmitCreate = jest.fn();
+      const { result } = renderHook(() =>
+        useActionPolicyForm({
+          onSubmitCreate,
+          onSubmitUpdate: jest.fn(),
+        })
+      );
+
+      await act(async () => {
+        result.current.methods.setValue('name', 'My policy');
+        result.current.methods.setValue('description', 'A description');
+      });
+
+      await act(async () => {
+        await result.current.handleSubmit();
+      });
+
+      expect(onSubmitCreate).toHaveBeenCalledTimes(1);
+      expect(onSubmitCreate).toHaveBeenCalledWith({
+        name: 'My policy',
+        description: 'A description',
+        matcher: null,
+        groupingMode: 'per_alert',
+        groupBy: [],
+        throttleStrategy: 'on_status_change',
+        throttleInterval: '',
+        destinations: [],
+        inlineActions: [],
+      });
+    });
+  });
+
+  describe('edit mode (with initialValues)', () => {
+    it('returns isEditMode as true', () => {
+      const { result } = renderHook(() =>
+        useActionPolicyForm({
+          initialValues: EXISTING_POLICY,
+          onSubmitCreate: jest.fn(),
+          onSubmitUpdate: jest.fn(),
+        })
+      );
+
+      expect(result.current.isEditMode).toBe(true);
+    });
+
+    it('initializes form with values derived from the existing policy', () => {
+      const { result } = renderHook(() =>
+        useActionPolicyForm({
+          initialValues: EXISTING_POLICY,
+          onSubmitCreate: jest.fn(),
+          onSubmitUpdate: jest.fn(),
+        })
+      );
+
+      expect(result.current.methods.getValues()).toEqual({
+        name: 'Critical production alerts',
+        description: 'Routes critical alerts',
+        matcher: { expression: 'data.severity : "critical"' },
+        groupingMode: 'per_field',
+        groupBy: ['host.name', 'service.name'],
+        throttleStrategy: 'time_interval',
+        throttleInterval: '5m',
+        destinations: [{ type: 'workflow', id: 'workflow-2' }],
+        inlineActions: [],
+      });
+    });
+
+    it('maps default strategy when no throttle is present', () => {
+      const policyWithoutThrottle: ActionPolicyResponse = {
+        ...EXISTING_POLICY,
+        grouping: undefined,
+        throttle: undefined,
+      };
+      const { result } = renderHook(() =>
+        useActionPolicyForm({
+          initialValues: policyWithoutThrottle,
+          onSubmitCreate: jest.fn(),
+          onSubmitUpdate: jest.fn(),
+        })
+      );
+
+      expect(result.current.methods.getValues().groupingMode).toBe('per_alert');
+      expect(result.current.methods.getValues().throttleStrategy).toBe('on_status_change');
+    });
+
+    it('calls onSubmitUpdate with id and raw form values on submit', async () => {
+      const onSubmitUpdate = jest.fn();
+      const { result } = renderHook(() =>
+        useActionPolicyForm({
+          initialValues: EXISTING_POLICY,
+          onSubmitCreate: jest.fn(),
+          onSubmitUpdate,
+        })
+      );
+
+      await act(async () => {
+        await result.current.handleSubmit();
+      });
+
+      expect(onSubmitUpdate).toHaveBeenCalledTimes(1);
+      expect(onSubmitUpdate).toHaveBeenCalledWith('policy-1', {
+        name: 'Critical production alerts',
+        description: 'Routes critical alerts',
+        groupingMode: 'per_field',
+        matcher: { expression: 'data.severity : "critical"' },
+        groupBy: ['host.name', 'service.name'],
+        throttleStrategy: 'time_interval',
+        throttleInterval: '5m',
+        destinations: [{ type: 'workflow', id: 'workflow-2' }],
+        inlineActions: [],
+      });
+    });
+
+    it('does not call onSubmitCreate in edit mode', async () => {
+      const onSubmitCreate = jest.fn();
+      const { result } = renderHook(() =>
+        useActionPolicyForm({
+          initialValues: EXISTING_POLICY,
+          onSubmitCreate,
+          onSubmitUpdate: jest.fn(),
+        })
+      );
+
+      await act(async () => {
+        await result.current.handleSubmit();
+      });
+
+      expect(onSubmitCreate).not.toHaveBeenCalled();
+    });
+  });
+});

@@ -126,7 +126,7 @@ describe('JiraServiceManagementParamFields', () => {
 
     fireEvent.change(screen.getByDisplayValue('hello'), { target: { value: 'a new message' } });
 
-    expect(editAction).toBeCalledTimes(1);
+    expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "subActionParams",
@@ -146,7 +146,7 @@ describe('JiraServiceManagementParamFields', () => {
       target: { value: 'a new description' },
     });
 
-    expect(editAction).toBeCalledTimes(1);
+    expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "subActionParams",
@@ -165,7 +165,7 @@ describe('JiraServiceManagementParamFields', () => {
 
     fireEvent.change(screen.getByDisplayValue('456'), { target: { value: 'a new alias' } });
 
-    expect(editAction).toBeCalledTimes(1);
+    expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "subActionParams",
@@ -193,7 +193,7 @@ describe('JiraServiceManagementParamFields', () => {
     expect(screen.getByDisplayValue('123')).toBeInTheDocument();
 
     fireEvent.change(screen.getByDisplayValue('123'), { target: { value: 'a new alias' } });
-    expect(editAction).toBeCalledTimes(1);
+    expect(editAction).toHaveBeenCalledTimes(1);
 
     rerender(
       <JiraServiceManagementParamFields
@@ -211,7 +211,7 @@ describe('JiraServiceManagementParamFields', () => {
 
     expect(screen.queryByDisplayValue('hello')).not.toBeInTheDocument();
 
-    expect(editAction).toBeCalledTimes(1);
+    expect(editAction).toHaveBeenCalledTimes(1);
   });
 
   it('calls editAction with only the alias when the component is rerendered with mismatched closeAlert and params', async () => {
@@ -238,7 +238,7 @@ describe('JiraServiceManagementParamFields', () => {
 
     expect(screen.queryByDisplayValue('hello')).not.toBeInTheDocument();
 
-    expect(editAction).toBeCalledTimes(1);
+    expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "subActionParams",
@@ -275,7 +275,7 @@ describe('JiraServiceManagementParamFields', () => {
 
     expect(screen.queryByDisplayValue('456')).not.toBeInTheDocument();
 
-    expect(editAction).toBeCalledTimes(1);
+    expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "subActionParams",
@@ -294,7 +294,7 @@ describe('JiraServiceManagementParamFields', () => {
     expect(screen.getByDisplayValue('123')).toBeInTheDocument();
 
     fireEvent.change(screen.getByDisplayValue('123'), { target: { value: 'a new alias' } });
-    expect(editAction).toBeCalledTimes(1);
+    expect(editAction).toHaveBeenCalledTimes(1);
 
     rerender(
       // @ts-expect-error upgrade typescript v4.9.5
@@ -314,7 +314,7 @@ describe('JiraServiceManagementParamFields', () => {
 
     expect(screen.queryByDisplayValue('hello')).not.toBeInTheDocument();
 
-    expect(editAction).toBeCalledTimes(2);
+    expect(editAction).toHaveBeenCalledTimes(2);
 
     expect(editAction.mock.calls[1]).toMatchInlineSnapshot(`
           Array [
@@ -335,7 +335,7 @@ describe('JiraServiceManagementParamFields', () => {
       screen.getByText('Close alert')
     );
 
-    expect(editAction).toBeCalledTimes(1);
+    expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
             "subAction",

@@ -8,7 +8,6 @@
 import React, { useMemo } from 'react';
 import type { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
 import { PageScope } from '../../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { sourceDestinationFieldMappings } from '../map_config';
 import {
   getEmptyTagValue,
@@ -28,8 +27,6 @@ export const PointToolTipContentComponent = ({
   contextId,
   featureProps,
 }: PointToolTipContentProps) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   const featureDescriptionListItems = useMemo(
     () =>
       featureProps.map((featureProp) => {
@@ -46,7 +43,7 @@ export const PointToolTipContentComponent = ({
                   attrName={key}
                   idPrefix={`map-point-tooltip-${contextId}-${key}-${value}`}
                   render={(item) => getRenderedFieldValue(key, item)}
-                  scopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
+                  scopeId={PageScope.explore}
                 />
               ) : (
                 getEmptyTagValue()
@@ -55,7 +52,7 @@ export const PointToolTipContentComponent = ({
           ),
         };
       }),
-    [contextId, featureProps, newDataViewPickerEnabled]
+    [contextId, featureProps]
   );
 
   return <DescriptionListStyled listItems={featureDescriptionListItems} />;

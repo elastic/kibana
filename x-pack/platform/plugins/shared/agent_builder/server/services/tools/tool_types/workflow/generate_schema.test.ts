@@ -40,14 +40,18 @@ describe('generateSchema', () => {
         version: '1',
         enabled: true,
         steps: [],
-        triggers: [{ type: 'manual' }],
-        inputs: [
+        triggers: [
           {
-            name: 'tool_name',
-            type: 'choice' as const,
-            options: ['search_code', 'search_repositories'],
-            description: 'Tool to use',
-            required: true,
+            type: 'manual',
+            inputs: [
+              {
+                name: 'tool_name',
+                type: 'choice' as const,
+                options: ['search_code', 'search_repositories'],
+                description: 'Tool to use',
+                required: true,
+              },
+            ],
           },
         ],
       } as WorkflowDetailDto['definition'],
@@ -70,12 +74,16 @@ describe('generateSchema', () => {
         version: '1',
         enabled: true,
         steps: [],
-        triggers: [{ type: 'manual' }],
-        inputs: [
+        triggers: [
           {
-            name: 'query',
-            type: 'string' as const,
-            required: false,
+            type: 'manual',
+            inputs: [
+              {
+                name: 'query',
+                type: 'string' as const,
+                required: false,
+              },
+            ],
           },
         ],
       } as WorkflowDetailDto['definition'],
@@ -88,7 +96,7 @@ describe('generateSchema', () => {
     expect(jsonSchema.properties?.query).not.toHaveProperty('enum');
   });
 
-  it('maps JSON Schema object inputs with string enum to the same enum list', () => {
+  it('maps legacy root-level inputs to workflow tool parameters', () => {
     const workflow = buildWorkflow({
       definition: {
         name: 'Test',
@@ -96,15 +104,55 @@ describe('generateSchema', () => {
         enabled: true,
         steps: [],
         triggers: [{ type: 'manual' }],
-        inputs: {
-          properties: {
-            status: {
-              type: 'string',
-              enum: ['active', 'inactive'],
+        inputs: [
+          {
+            name: 'query',
+            type: 'string' as const,
+            required: true,
+            description: 'Search query',
+          },
+          {
+            name: 'limit',
+            type: 'number' as const,
+            required: false,
+          },
+        ],
+      } as WorkflowDetailDto['definition'],
+    });
+
+    const schema = generateSchema({ workflow });
+    const jsonSchema = z.toJSONSchema(schema, { io: 'input', unrepresentable: 'any' });
+
+    expect(jsonSchema.properties?.query).toMatchObject({
+      type: 'string',
+      description: 'Search query',
+    });
+    expect(jsonSchema.properties?.limit).toMatchObject({ type: 'number' });
+    expect(jsonSchema.required).toContain('query');
+    expect(jsonSchema.required).not.toContain('limit');
+  });
+
+  it('maps JSON Schema object inputs with string enum to the same enum list', () => {
+    const workflow = buildWorkflow({
+      definition: {
+        name: 'Test',
+        version: '1',
+        enabled: true,
+        steps: [],
+        triggers: [
+          {
+            type: 'manual',
+            inputs: {
+              properties: {
+                status: {
+                  type: 'string',
+                  enum: ['active', 'inactive'],
+                },
+              },
+              required: ['status'],
             },
           },
-          required: ['status'],
-        },
+        ],
       },
     });
 

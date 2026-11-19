@@ -32,6 +32,10 @@ const SEARCH_USERS_PLACEHOLDER = i18n.translate(
 
 const POPOVER_CONTENT_STYLE = { width: POPOVER_WIDTH };
 
+const LIST_PROPS = {
+  paddingSize: 's' as const,
+};
+
 interface CreatedByFilterPopoverProps {
   /** Unique usernames of users who created saved objects */
   users: string[];
@@ -41,20 +45,27 @@ interface CreatedByFilterPopoverProps {
   'data-test-subj'?: string;
 }
 
+const getFallbackAvatarUser = (username: string) => ({ username });
+
 const toSelectableOption = (
   username: string,
   isSelected: boolean,
   usernameToProfile: Map<string, UserProfileWithAvatar>
 ): EuiSelectableOption => {
   const profile = usernameToProfile.get(username);
-  const user = profile?.user ?? { username };
   const displayName = profile?.user.full_name || username;
 
   return {
     label: displayName,
     key: username,
     checked: isSelected ? 'on' : undefined,
-    prepend: <UserAvatar user={user} avatar={profile?.data?.avatar} size="s" />,
+    prepend: (
+      <UserAvatar
+        user={profile?.user ?? getFallbackAvatarUser(username)}
+        avatar={profile?.data?.avatar}
+        size="s"
+      />
+    ),
   };
 };
 
@@ -115,7 +126,7 @@ const CreatedByFilterPopoverComponent: React.FC<CreatedByFilterPopoverProps> = (
 
   const triggerButton = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={togglePopover}
       isSelected={isOpen}
       hasActiveFilters={selectedUsers.length > 0}
@@ -135,6 +146,7 @@ const CreatedByFilterPopoverComponent: React.FC<CreatedByFilterPopoverProps> = (
       panelPaddingSize="none"
       repositionOnScroll
       panelProps={panelProps}
+      aria-label={CREATED_BY_LABEL}
     >
       <EuiSelectable
         searchable
@@ -148,6 +160,7 @@ const CreatedByFilterPopoverComponent: React.FC<CreatedByFilterPopoverProps> = (
         noMatchesMessage={i18n.translate('xpack.osquery.tableToolbar.noUsersMatch', {
           defaultMessage: 'No users match search',
         })}
+        listProps={LIST_PROPS}
       >
         {(list, search) => (
           <div style={POPOVER_CONTENT_STYLE}>

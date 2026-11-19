@@ -56,7 +56,11 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
     };
 
     wfExecutionRuntimeManagerMock = {
-      getWorkflowExecution: jest.fn(),
+      getWorkflowExecution: jest.fn().mockReturnValue({
+        id: 'wf-exec-1',
+        spaceId: 'default',
+        startedAt: '2025-09-25T10:14:30.000Z',
+      }),
       setWorkflowError: jest.fn(),
       navigateToNextNode: jest.fn(),
       markWorkflowTimeouted: jest.fn(),
@@ -72,12 +76,12 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       stepExecutionRuntimeFactoryMock
     );
 
-    mockDateNow = new Date('2025-09-25T10:15:30.000Z');
+    mockDateNow = new Date('2025-09-25T10:14:35.000Z');
     mockParseDuration.mockReturnValue(60000); // 60 seconds default
   });
 
   describe('run method', () => {
-    it('should navigate to next node', async () => {
+    it('should navigate to next node only (workflow timeout resume is scheduled from handleExecutionDelay)', async () => {
       await impl.run();
       expect(wfExecutionRuntimeManagerMock.navigateToNextNode).toHaveBeenCalledTimes(1);
       expect(wfExecutionRuntimeManagerMock.navigateToNextNode).toHaveBeenCalledWith();
@@ -290,18 +294,19 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       expect(result).toBeUndefined(); // void returns undefined
     });
 
-    it('should handle edge case where timeout exactly equals current duration', async () => {
+    it('should time out when duration equals the timeout limit', async () => {
       const startTime = new Date().getTime() - 60000; // exactly 60 seconds ago
       mockParseDuration.mockReturnValue(60000); // exactly 60 seconds timeout
 
       wfExecutionRuntimeManagerMock.getWorkflowExecution = jest.fn().mockReturnValue({
         startedAt: new Date(startTime).toISOString(),
       });
+      (monitoredStepExecutionRuntimeMock.scopeStack.isEmpty as jest.Mock).mockReturnValue(true);
 
       impl.monitor(monitoredStepExecutionRuntimeMock);
 
-      // Should not timeout when duration equals timeout limit (using > comparison)
-      expect(monitoredStepExecutionRuntimeMock.abortController.abort).not.toHaveBeenCalled();
+      expect(monitoredStepExecutionRuntimeMock.abortController.abort).toHaveBeenCalledTimes(1);
+      expect(wfExecutionRuntimeManagerMock.markWorkflowTimeouted).toHaveBeenCalledTimes(1);
     });
 
     it('should timeout when duration is greater than timeout by 1ms', async () => {

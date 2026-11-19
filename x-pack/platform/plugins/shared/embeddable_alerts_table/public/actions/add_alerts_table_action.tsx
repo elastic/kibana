@@ -39,12 +39,13 @@ export const getAddAlertsTableAction = (
       const hasAccessToAnyRuleTypes = await checkRuleTypesPermissions(http);
       return apiIsPresentationContainer(embeddable) && hasAccessToAnyRuleTypes;
     },
-    execute: async ({ embeddable }) => {
+    execute: async ({ embeddable, returnFocus }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
 
       openLazyFlyout({
         core: coreServices,
         parentApi: embeddable,
+        returnFocus,
         loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
           const { ConfigEditor } = await import('../components/config_editor');
           return (

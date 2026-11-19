@@ -16,7 +16,7 @@ import { ScaleType } from '@elastic/charts';
 
 import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { createFieldFormatter } from '../../lib/create_field_formatter';
+import { createTextFieldFormatter } from '../../lib/create_field_formatter';
 import { checkIfSeriesHaveSameFormatters } from '../../lib/check_if_series_have_same_formatters';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
 import { Markdown } from '@kbn/shared-ux-markdown';
@@ -64,7 +64,7 @@ class TimeseriesVisualization extends Component {
     // formatting each doc value with custom field formatter if fieldFormatMap contains that doc field name
     Object.keys(doc).forEach((fieldName) => {
       if (fieldFormatMap?.[fieldName]) {
-        const valueFieldFormatter = createFieldFormatter(fieldName, fieldFormatMap);
+        const valueFieldFormatter = createTextFieldFormatter(fieldName, fieldFormatMap);
         doc[fieldName] = valueFieldFormatter(doc[fieldName]);
       }
     });
@@ -194,7 +194,7 @@ class TimeseriesVisualization extends Component {
 
       const seriesGroupTickFormatter =
         seriesGroup.formatter === DATA_FORMATTERS.DEFAULT
-          ? createFieldFormatter(getMetricsField(seriesGroup.metrics), fieldFormatMap)
+          ? createTextFieldFormatter(getMetricsField(seriesGroup.metrics), fieldFormatMap)
           : TimeseriesVisualization.getTickFormatter(seriesGroup, getConfig);
 
       const palette = {

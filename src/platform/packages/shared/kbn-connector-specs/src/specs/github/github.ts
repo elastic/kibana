@@ -16,15 +16,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
-import { UISchemas, type ActionContext, type ConnectorSpec } from '../../connector_spec';
-import { withMcpClient } from '../../lib/mcp';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { UISchemas, type ConnectorSpec } from '../../connector_spec';
+import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
+import { githubEvents } from './events';
+import { githubSkillFile } from './skills/github_skill';
+import { toTimelinePage } from './timeline';
 import type {
+  AddAssigneeInput,
+  AddIssueCommentInput,
+  AddLabelsInput,
   CallToolInput,
+  CreateBranchInput,
+  CreateIssueInput,
+  CreateOrUpdateFileInput,
+  CreatePullRequestInput,
   GetCommitInput,
   GetFileContentsInput,
   GetIssueCommentsInput,
   GetIssueInput,
+  GetIssueTimelineInput,
   GetLatestReleaseInput,
   ListBranchesInput,
   ListCommitsInput,
@@ -32,120 +43,140 @@ import type {
   ListPullRequestsInput,
   ListReleasesInput,
   ListTagsInput,
+  MergePullRequestInput,
   PullRequestReadInput,
+  RequestReviewersInput,
   SearchCodeInput,
   SearchIssuesInput,
   SearchPullRequestsInput,
   SearchRepositoriesInput,
   SearchUsersInput,
+  TriggerWorkflowInput,
+  UpdateIssueInput,
+  UpdatePullRequestInput,
 } from './types';
 import {
+  AddAssigneeInputSchema,
+  AddIssueCommentInputSchema,
+  AddLabelsInputSchema,
+  CallToolInputSchema,
+  CreateBranchInputSchema,
+  CreateIssueInputSchema,
+  CreateOrUpdateFileInputSchema,
+  CreatePullRequestInputSchema,
+  GetCommitInputSchema,
+  GetFileContentsInputSchema,
+  GetIssueCommentsInputSchema,
+  GetIssueInputSchema,
+  GetIssueTimelineInputSchema,
+  GetLatestReleaseInputSchema,
   GetMeInputSchema,
-  ListToolsInputSchema,
-  SearchCodeInputSchema,
-  SearchRepositoriesInputSchema,
-  SearchIssuesInputSchema,
-  SearchPullRequestsInputSchema,
-  SearchUsersInputSchema,
+  ListBranchesInputSchema,
+  ListCommitsInputSchema,
   ListIssuesInputSchema,
   ListPullRequestsInputSchema,
-  ListCommitsInputSchema,
-  ListBranchesInputSchema,
   ListReleasesInputSchema,
   ListTagsInputSchema,
-  GetCommitInputSchema,
-  GetLatestReleaseInputSchema,
+  ListToolsInputSchema,
+  MergePullRequestInputSchema,
   PullRequestReadInputSchema,
-  GetFileContentsInputSchema,
-  GetIssueInputSchema,
-  GetIssueCommentsInputSchema,
-  CallToolInputSchema,
+  RequestReviewersInputSchema,
+  SearchCodeInputSchema,
+  SearchIssuesInputSchema,
+  SearchPullRequestsInputSchema,
+  SearchRepositoriesInputSchema,
+  SearchUsersInputSchema,
+  TriggerWorkflowInputSchema,
+  UpdateIssueInputSchema,
+  UpdatePullRequestInputSchema,
 } from './types';
 
 const GITHUB_MCP_SERVER_URL = 'https://api.githubcopilot.com/mcp/';
-
-const parseJsonTextFromContentParts = (
-  content: Array<{ type: string; text?: string }>
-): unknown => {
-  const text = content
-    .filter((part) => part.type === 'text' && typeof part.text === 'string')
-    .map((part) => part.text)
-    .join('\n');
-
-  try {
-    return JSON.parse(text);
-  } catch {
-    return text;
-  }
-};
-
-const callToolContent = async (
-  ctx: ActionContext,
-  toolName: string,
-  args?: Record<string, unknown>
-) => {
-  return withMcpClient(ctx, async (mcp) => {
-    const result = await mcp.callTool({ name: toolName, arguments: args ?? {} });
-    return result.content;
-  });
-};
-
-const callToolJson = async (
-  ctx: ActionContext,
-  toolName: string,
-  args: Record<string, unknown> = {}
-): Promise<unknown> => {
-  return withMcpClient(ctx, async (mcp) => {
-    const result = await mcp.callTool({ name: toolName, arguments: args });
-    return parseJsonTextFromContentParts(result.content);
-  });
-};
+const GITHUB_API_BASE = 'https://api.github.com';
+const GITHUB_API_VERSION_HEADER = { 'X-GitHub-Api-Version': '2022-11-28' } as const;
 
 export const GithubConnector: ConnectorSpec = {
   metadata: {
     id: '.github',
     displayName: 'GitHub',
-    description: i18n.translate('core.kibanaConnectorSpecs.github.metadata.description', {
+    description: i18n.translate('connectorSpecs.github.metadata.description', {
       defaultMessage:
-        'Search repositories, issues, and pull requests, browse file contents, and list branches in GitHub',
+        'Search, browse, and manage GitHub repositories: create and update issues and pull requests, add comments, labels, and assignees, create branches, trigger workflows, and merge pull requests.',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
-    types: ['bearer'],
+    types: [
+      {
+        type: 'oauth_authorization_code',
+        supportsSandbox: true,
+        defaults: {
+          authorizationUrl: 'https://github.com/login/oauth/authorize',
+          tokenUrl: 'https://github.com/login/oauth/access_token',
+          scope: 'repo',
+        },
+        overrides: {
+          meta: {
+            authorizationUrl: { hidden: true },
+            tokenUrl: { hidden: true },
+            scope: { hidden: true },
+          },
+        },
+      },
+      {
+        type: 'bearer',
+        supportsSandbox: true,
+        defaults: {},
+        overrides: {
+          label: i18n.translate('connectorSpecs.github.auth.bearer.label', {
+            defaultMessage: 'Personal Access Token (PAT)',
+          }),
+        },
+      },
+    ],
     headers: {
       Accept: 'application/vnd.github+json',
     },
   },
 
-  schema: z.object({
-    serverUrl: UISchemas.url()
-      .default(GITHUB_MCP_SERVER_URL)
-      .describe('GitHub MCP Server URL')
-      .meta({
-        widget: 'text',
-        placeholder: 'https://api.githubcopilot.com/mcp/',
-        label: i18n.translate('connectorSpecs.github.config.serverUrl.label', {
-          defaultMessage: 'MCP Server URL',
+  schema: lazySchema(() =>
+    z.object({
+      serverUrl: UISchemas.url()
+        .default(GITHUB_MCP_SERVER_URL)
+        .describe('GitHub MCP Server URL')
+        .meta({
+          widget: 'text',
+          placeholder: 'https://api.githubcopilot.com/mcp/',
+          hidden: true,
+          label: i18n.translate('connectorSpecs.github.config.serverUrl.label', {
+            defaultMessage: 'MCP Server URL',
+          }),
+          helpText: i18n.translate('connectorSpecs.github.config.serverUrl.helpText', {
+            defaultMessage: 'The URL of the GitHub Copilot MCP server.',
+          }),
         }),
-        helpText: i18n.translate('connectorSpecs.github.config.serverUrl.helpText', {
-          defaultMessage: 'The URL of the GitHub Copilot MCP server.',
-        }),
-      }),
-  }),
+    })
+  ),
 
   validateUrls: {
     fields: ['serverUrl'],
   },
 
+  sandbox: {
+    hosts: ['api.github.com', 'api.githubcopilot.com'],
+    hostsFromConfig: ['serverUrl'],
+  },
+
+  events: githubEvents,
+
   actions: {
     getMe: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.getMe.description', {
-        defaultMessage: 'Get the authenticated GitHub user profile.',
-      }),
+      scope: 'read',
+      description: 'Get the authenticated GitHub user profile.',
       input: GetMeInputSchema,
       handler: async (ctx) => {
         return callToolJson(ctx, 'get_me');
@@ -154,9 +185,8 @@ export const GithubConnector: ConnectorSpec = {
 
     searchCode: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.searchCode.description', {
-        defaultMessage: 'Search for code across GitHub repositories.',
-      }),
+      scope: 'read',
+      description: 'Search for code across GitHub repositories.',
       input: SearchCodeInputSchema,
       handler: async (ctx, input: SearchCodeInput) => {
         return callToolJson(ctx, 'search_code', {
@@ -169,9 +199,8 @@ export const GithubConnector: ConnectorSpec = {
 
     searchRepositories: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.searchRepositories.description', {
-        defaultMessage: 'Search for GitHub repositories.',
-      }),
+      scope: 'read',
+      description: 'Search for GitHub repositories.',
       input: SearchRepositoriesInputSchema,
       handler: async (ctx, input: SearchRepositoriesInput) => {
         return callToolJson(ctx, 'search_repositories', {
@@ -184,9 +213,8 @@ export const GithubConnector: ConnectorSpec = {
 
     searchIssues: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.searchIssues.description', {
-        defaultMessage: 'Search for issues across GitHub repositories.',
-      }),
+      scope: 'read',
+      description: 'Search for issues across GitHub repositories.',
       input: SearchIssuesInputSchema,
       handler: async (ctx, input: SearchIssuesInput) => {
         return callToolJson(ctx, 'search_issues', {
@@ -201,9 +229,8 @@ export const GithubConnector: ConnectorSpec = {
 
     searchPullRequests: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.searchPullRequests.description', {
-        defaultMessage: 'Search for pull requests across GitHub repositories.',
-      }),
+      scope: 'read',
+      description: 'Search for pull requests across GitHub repositories.',
       input: SearchPullRequestsInputSchema,
       handler: async (ctx, input: SearchPullRequestsInput) => {
         return callToolJson(ctx, 'search_pull_requests', {
@@ -218,9 +245,8 @@ export const GithubConnector: ConnectorSpec = {
 
     searchUsers: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.searchUsers.description', {
-        defaultMessage: 'Search for GitHub users.',
-      }),
+      scope: 'read',
+      description: 'Search for GitHub users.',
       input: SearchUsersInputSchema,
       handler: async (ctx, input: SearchUsersInput) => {
         return callToolJson(ctx, 'search_users', {
@@ -233,9 +259,8 @@ export const GithubConnector: ConnectorSpec = {
 
     listIssues: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.listIssues.description', {
-        defaultMessage: 'List issues in a GitHub repository. Uses cursor-based pagination.',
-      }),
+      scope: 'read',
+      description: 'List issues in a GitHub repository. Uses cursor-based pagination.',
       input: ListIssuesInputSchema,
       handler: async (ctx, input: ListIssuesInput) => {
         return callToolJson(ctx, 'list_issues', {
@@ -250,9 +275,8 @@ export const GithubConnector: ConnectorSpec = {
 
     listPullRequests: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.listPullRequests.description', {
-        defaultMessage: 'List pull requests in a GitHub repository. Uses cursor-based pagination.',
-      }),
+      scope: 'read',
+      description: 'List pull requests in a GitHub repository. Uses cursor-based pagination.',
       input: ListPullRequestsInputSchema,
       handler: async (ctx, input: ListPullRequestsInput) => {
         return callToolJson(ctx, 'list_pull_requests', {
@@ -267,9 +291,8 @@ export const GithubConnector: ConnectorSpec = {
 
     listCommits: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.listCommits.description', {
-        defaultMessage: 'List commits in a GitHub repository. Uses cursor-based pagination.',
-      }),
+      scope: 'read',
+      description: 'List commits in a GitHub repository. Uses cursor-based pagination.',
       input: ListCommitsInputSchema,
       handler: async (ctx, input: ListCommitsInput) => {
         return callToolJson(ctx, 'list_commits', {
@@ -284,9 +307,8 @@ export const GithubConnector: ConnectorSpec = {
 
     listBranches: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.listBranches.description', {
-        defaultMessage: 'List branches in a GitHub repository. Uses cursor-based pagination.',
-      }),
+      scope: 'read',
+      description: 'List branches in a GitHub repository. Uses cursor-based pagination.',
       input: ListBranchesInputSchema,
       handler: async (ctx, input: ListBranchesInput) => {
         return callToolJson(ctx, 'list_branches', {
@@ -300,9 +322,8 @@ export const GithubConnector: ConnectorSpec = {
 
     listReleases: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.listReleases.description', {
-        defaultMessage: 'List releases in a GitHub repository. Uses cursor-based pagination.',
-      }),
+      scope: 'read',
+      description: 'List releases in a GitHub repository. Uses cursor-based pagination.',
       input: ListReleasesInputSchema,
       handler: async (ctx, input: ListReleasesInput) => {
         return callToolJson(ctx, 'list_releases', {
@@ -316,9 +337,8 @@ export const GithubConnector: ConnectorSpec = {
 
     listTags: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.listTags.description', {
-        defaultMessage: 'List tags in a GitHub repository. Uses cursor-based pagination.',
-      }),
+      scope: 'read',
+      description: 'List tags in a GitHub repository. Uses cursor-based pagination.',
       input: ListTagsInputSchema,
       handler: async (ctx, input: ListTagsInput) => {
         return callToolJson(ctx, 'list_tags', {
@@ -332,9 +352,8 @@ export const GithubConnector: ConnectorSpec = {
 
     getCommit: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.getCommit.description', {
-        defaultMessage: 'Get details of a specific commit.',
-      }),
+      scope: 'read',
+      description: 'Get details of a specific commit.',
       input: GetCommitInputSchema,
       handler: async (ctx, input: GetCommitInput) => {
         return callToolJson(ctx, 'get_commit', {
@@ -347,9 +366,8 @@ export const GithubConnector: ConnectorSpec = {
 
     getLatestRelease: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.getLatestRelease.description', {
-        defaultMessage: 'Get the latest release of a GitHub repository.',
-      }),
+      scope: 'read',
+      description: 'Get the latest release of a GitHub repository.',
       input: GetLatestReleaseInputSchema,
       handler: async (ctx, input: GetLatestReleaseInput) => {
         return callToolJson(ctx, 'get_latest_release', { owner: input.owner, repo: input.repo });
@@ -358,9 +376,8 @@ export const GithubConnector: ConnectorSpec = {
 
     pullRequestRead: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.pullRequestRead.description', {
-        defaultMessage: 'Read the full details of a specific pull request.',
-      }),
+      scope: 'read',
+      description: 'Read the full details of a specific pull request.',
       input: PullRequestReadInputSchema,
       handler: async (ctx, input: PullRequestReadInput) => {
         return callToolJson(ctx, 'pull_request_read', {
@@ -374,9 +391,8 @@ export const GithubConnector: ConnectorSpec = {
 
     getFileContents: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.getFileContents.description', {
-        defaultMessage: 'Get the contents of a file or directory from a GitHub repository.',
-      }),
+      scope: 'read',
+      description: 'Get the contents of a file or directory from a GitHub repository.',
       input: GetFileContentsInputSchema,
       handler: async (ctx, input: GetFileContentsInput) => {
         return callToolContent(ctx, 'get_file_contents', {
@@ -390,9 +406,8 @@ export const GithubConnector: ConnectorSpec = {
 
     getIssue: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.getIssue.description', {
-        defaultMessage: 'Get details of a specific issue in a GitHub repository.',
-      }),
+      scope: 'read',
+      description: 'Get details of a specific issue in a GitHub repository.',
       input: GetIssueInputSchema,
       handler: async (ctx, input: GetIssueInput) => {
         return callToolJson(ctx, 'issue_read', {
@@ -406,9 +421,8 @@ export const GithubConnector: ConnectorSpec = {
 
     getIssueComments: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.getIssueComments.description', {
-        defaultMessage: 'Get comments for a specific issue in a GitHub repository.',
-      }),
+      scope: 'read',
+      description: 'Get comments for a specific issue in a GitHub repository.',
       input: GetIssueCommentsInputSchema,
       handler: async (ctx, input: GetIssueCommentsInput) => {
         return callToolJson(ctx, 'issue_read', {
@@ -420,12 +434,298 @@ export const GithubConnector: ConnectorSpec = {
       },
     },
 
+    getIssueTimeline: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'Get the timeline of an issue or pull request with exact timestamps: label added or removed, comments, cross-references from other issues or repositories, close and reopen with the reason, review requests and reviews. Use it to answer "when" and "who" questions about the history of an issue. Pass excludeEventTypes such as ["subscribed","mentioned"] to drop the noise before paging, and eventTypes to keep only some types. Returns one page of up to 100 events, oldest first, so the most recent events are on the last page: the result has lastPage, which you can pass as page to jump straight to them. Use page to read more while hasMore is true. When eventTypes is set, an empty page does not mean you are done: keep paging while hasMore is true. The connected and disconnected events show when and who, not which pull request or issue was linked. The line-commented and commit-commented events group several comments: createdAt, actor, id and url are those of the first comment, and commentCount says how many there are.',
+      input: GetIssueTimelineInputSchema,
+      handler: async (ctx, input: GetIssueTimelineInput) => {
+        const { owner, repo, issueNumber, eventTypes, excludeEventTypes, page, perPage } = input;
+        const response = await ctx.client.get<object[]>(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/issues/${issueNumber}/timeline`,
+          {
+            params: {
+              page,
+              per_page: perPage,
+              ...(excludeEventTypes?.length ? { exclude: excludeEventTypes.join(',') } : {}),
+            },
+            headers: GITHUB_API_VERSION_HEADER,
+          }
+        );
+        return toTimelinePage(response, { page, eventTypes });
+      },
+    },
+
+    createIssue: {
+      isTool: true,
+      scope: 'write',
+      description:
+        'Create a new issue in a GitHub repository. Returns the created issue including its number, URL, and state.',
+      input: CreateIssueInputSchema,
+      handler: async (ctx, input: CreateIssueInput) => {
+        const { owner, repo, title, body, assignees, labels, milestone } = input;
+        const requestBody: Record<string, unknown> = { title };
+        if (body !== undefined) requestBody.body = body;
+        if (assignees !== undefined) requestBody.assignees = assignees;
+        if (labels !== undefined) requestBody.labels = labels;
+        if (milestone !== undefined) requestBody.milestone = milestone;
+        const response = await ctx.client.post(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/issues`,
+          requestBody,
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    addIssueComment: {
+      isTool: true,
+      scope: 'write',
+      description:
+        'Add a comment to an existing issue or pull request. Returns the created comment including its ID and URL.',
+      input: AddIssueCommentInputSchema,
+      handler: async (ctx, input: AddIssueCommentInput) => {
+        const { owner, repo, issueNumber, body } = input;
+        const response = await ctx.client.post(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/issues/${issueNumber}/comments`,
+          { body },
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    updateIssue: {
+      isTool: true,
+      scope: 'destroy',
+      description:
+        'Update an existing issue (title, body, state, assignees, labels, or milestone). At least one field must be provided. To close an issue set state to "closed".',
+      input: UpdateIssueInputSchema,
+      handler: async (ctx, input: UpdateIssueInput) => {
+        const { owner, repo, issueNumber, title, body, state, assignees, labels, milestone } =
+          input;
+        const requestBody: Record<string, unknown> = {};
+        if (title !== undefined) requestBody.title = title;
+        if (body !== undefined) requestBody.body = body;
+        if (state !== undefined) requestBody.state = state;
+        if (assignees !== undefined) requestBody.assignees = assignees;
+        if (labels !== undefined) requestBody.labels = labels;
+        if (milestone !== undefined) requestBody.milestone = milestone;
+        const response = await ctx.client.patch(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/issues/${issueNumber}`,
+          requestBody,
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    createPullRequest: {
+      isTool: true,
+      scope: 'write',
+      description:
+        'Create a new pull request. The head branch must already exist and have commits not in the base branch. Returns the PR including its number and URL.',
+      input: CreatePullRequestInputSchema,
+      handler: async (ctx, input: CreatePullRequestInput) => {
+        const { owner, repo, title, head, base, body, draft, maintainerCanModify } = input;
+        const requestBody: Record<string, unknown> = { title, head, base };
+        if (body !== undefined) requestBody.body = body;
+        if (draft !== undefined) requestBody.draft = draft;
+        if (maintainerCanModify !== undefined)
+          requestBody.maintainer_can_modify = maintainerCanModify;
+        const response = await ctx.client.post(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls`,
+          requestBody,
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    mergePullRequest: {
+      isTool: true,
+      scope: 'destroy',
+      description:
+        'Merge an open pull request. Returns the merge commit SHA and a confirmation message. Fails if the PR is not mergeable.',
+      input: MergePullRequestInputSchema,
+      handler: async (ctx, input: MergePullRequestInput) => {
+        const { owner, repo, pullNumber, commitTitle, commitMessage, mergeMethod } = input;
+        const requestBody: Record<string, unknown> = { merge_method: mergeMethod };
+        if (commitTitle !== undefined) requestBody.commit_title = commitTitle;
+        if (commitMessage !== undefined) requestBody.commit_message = commitMessage;
+        const response = await ctx.client.put(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/pulls/${pullNumber}/merge`,
+          requestBody,
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    addLabels: {
+      isTool: true,
+      scope: 'write',
+      description:
+        'Add one or more labels to an issue or pull request. Labels are added without removing existing ones. Returns the full updated label list.',
+      input: AddLabelsInputSchema,
+      handler: async (ctx, input: AddLabelsInput) => {
+        const { owner, repo, issueNumber, labels } = input;
+        const response = await ctx.client.post(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/issues/${issueNumber}/labels`,
+          { labels },
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    addAssignee: {
+      isTool: true,
+      scope: 'write',
+      description:
+        'Add one or more assignees to an issue or pull request. Assignees are added without removing existing ones.',
+      input: AddAssigneeInputSchema,
+      handler: async (ctx, input: AddAssigneeInput) => {
+        const { owner, repo, issueNumber, assignees } = input;
+        const response = await ctx.client.post(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/issues/${issueNumber}/assignees`,
+          { assignees },
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    createBranch: {
+      isTool: true,
+      scope: 'write',
+      description:
+        'Create a new branch (git ref) in a repository. The ref must start with "refs/heads/". Use getCommit or listCommits to find a valid SHA.',
+      input: CreateBranchInputSchema,
+      handler: async (ctx, input: CreateBranchInput) => {
+        const { owner, repo, ref, sha } = input;
+        const response = await ctx.client.post(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/git/refs`,
+          { ref, sha },
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    createOrUpdateFile: {
+      isTool: true,
+      scope: 'destroy',
+      description:
+        'Create or update a single file in a repository. The content must be Base64-encoded. To update an existing file, provide the current file blob SHA (get it via getFileContents). Returns the commit and file metadata.',
+      input: CreateOrUpdateFileInputSchema,
+      handler: async (ctx, input: CreateOrUpdateFileInput) => {
+        const { owner, repo, path, message, content, sha, branch } = input;
+        const requestBody: Record<string, unknown> = { message, content };
+        if (sha !== undefined) requestBody.sha = sha;
+        if (branch !== undefined) requestBody.branch = branch;
+        const response = await ctx.client.put(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/contents/${path.split('/').map(encodeURIComponent).join('/')}`,
+          requestBody,
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    updatePullRequest: {
+      isTool: true,
+      scope: 'destroy',
+      description:
+        'Update an open pull request (title, body, state, base branch, or maintainer permissions). At least one field must be provided. To close a PR set state to "closed".',
+      input: UpdatePullRequestInputSchema,
+      handler: async (ctx, input: UpdatePullRequestInput) => {
+        const { owner, repo, pullNumber, title, body, state, base, maintainerCanModify } = input;
+        const requestBody: Record<string, unknown> = {};
+        if (title !== undefined) requestBody.title = title;
+        if (body !== undefined) requestBody.body = body;
+        if (state !== undefined) requestBody.state = state;
+        if (base !== undefined) requestBody.base = base;
+        if (maintainerCanModify !== undefined)
+          requestBody.maintainer_can_modify = maintainerCanModify;
+        const response = await ctx.client.patch(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/pulls/${pullNumber}`,
+          requestBody,
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    requestReviewers: {
+      isTool: true,
+      scope: 'write',
+      description:
+        'Request one or more reviewers (individuals or teams) on a pull request. Reviewers are added without removing existing requests. Returns the updated PR. Note: GitHub rejects requests where a reviewer is the same user as the PR author with a 422 error — do not request the authenticated user as a reviewer on their own PR.',
+      input: RequestReviewersInputSchema,
+      handler: async (ctx, input: RequestReviewersInput) => {
+        const { owner, repo, pullNumber, reviewers, teamReviewers } = input;
+        const requestBody: Record<string, unknown> = {};
+        if (reviewers !== undefined) requestBody.reviewers = reviewers;
+        if (teamReviewers !== undefined) requestBody.team_reviewers = teamReviewers;
+        const response = await ctx.client.post(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/pulls/${pullNumber}/requested_reviewers`,
+          requestBody,
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    triggerWorkflow: {
+      isTool: true,
+      scope: 'write',
+      description:
+        'Trigger a workflow_dispatch event for a GitHub Actions workflow. The workflow must have a workflow_dispatch trigger defined in its YAML. Returns nothing on success (HTTP 204).',
+      input: TriggerWorkflowInputSchema,
+      handler: async (ctx, input: TriggerWorkflowInput) => {
+        const { owner, repo, workflowId, ref, inputs } = input;
+        const requestBody: Record<string, unknown> = { ref };
+        if (inputs !== undefined) requestBody.inputs = inputs;
+        await ctx.client.post(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/actions/workflows/${encodeURIComponent(workflowId)}/dispatches`,
+          requestBody,
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return { ok: true };
+      },
+    },
+
     listTools: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.listTools.description', {
-        defaultMessage:
-          'List all tools available on the GitHub MCP server. Use this to discover available capabilities or refresh tool context for the LLM.',
-      }),
+      scope: 'read',
+      description:
+        'List all tools available on the GitHub MCP server. Use this to discover available capabilities or refresh tool context for the LLM.',
       input: ListToolsInputSchema,
       handler: async (ctx) => {
         return withMcpClient(ctx, async (mcp) => {
@@ -437,10 +737,9 @@ export const GithubConnector: ConnectorSpec = {
 
     callTool: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.github.actions.callTool.description', {
-        defaultMessage:
-          'Call any tool on the GitHub MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.',
-      }),
+      scope: 'destroy',
+      description:
+        'Call any tool on the GitHub MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.',
       input: CallToolInputSchema,
       handler: async (ctx, input: CallToolInput) => {
         return callToolContent(ctx, input.name, input.arguments);
@@ -449,18 +748,35 @@ export const GithubConnector: ConnectorSpec = {
   },
 
   test: {
+    enabled: true,
     description: i18n.translate('connectorSpecs.github.test.description', {
       defaultMessage:
         'Verifies connection to the GitHub Copilot MCP server by listing available tools.',
     }),
     handler: async (ctx) => {
       return withMcpClient(ctx, async (mcp) => {
-        const { tools } = await mcp.listTools();
-        return {
-          ok: true,
-          message: `Connected to GitHub MCP server. ${tools.length} tools available.`,
-        };
+        await mcp.listTools();
+        return {};
       });
     },
   },
+
+  skillFiles: [githubSkillFile],
+
+  skill: [
+    'Action strategy guide:',
+    '- Parameter names are camelCase. Use the exact names shown (e.g. issueNumber, pullNumber, workflowId) — never snake_case equivalents like issue_number or pull_number.',
+    '- Start with getMe to identify the authenticated user.',
+    '- For broad discovery: use search* actions (searchCode, searchRepositories, searchIssues, searchPullRequests, searchUsers).',
+    '- If the `/connector-github` skill is available, prefer it for searching and listing issues and pull requests: it returns compact results instead of the full (very large) API payload.',
+    '- For browsing a specific repo: use list* actions (listIssues, listPullRequests, listCommits, listBranches, listReleases, listTags). All use cursor-based pagination via "first" + "after".',
+    '- For specific details: use get* actions (getIssue, getIssueComments, pullRequestRead, getCommit, getLatestRelease, getFileContents).',
+    '- For history (who or when a label was added, links from other repos, review requests): getIssueTimeline. Pass excludeEventTypes ["subscribed","mentioned"] by default: they are most of a timeline and rarely answer a history question. Events are oldest first: for the latest change, call once and then read the page given in lastPage. Keep paging while hasMore is true, even after an empty page.',
+    '- Write actions (require write permission on the repo):',
+    '  - Issues: createIssue, updateIssue, addIssueComment, addLabels, addAssignee.',
+    '  - Pull requests: createPullRequest, updatePullRequest, mergePullRequest, requestReviewers.',
+    '  - Repo management: createBranch (SHA from listCommits or getCommit), createOrUpdateFile (content must be Base64-encoded), triggerWorkflow.',
+    '- createOrUpdateFile requires the current blob SHA when updating an existing file; fetch it first with getFileContents.',
+    '- For capabilities not yet exposed as named actions: listTools to discover, callTool to invoke.',
+  ].join('\n'),
 };

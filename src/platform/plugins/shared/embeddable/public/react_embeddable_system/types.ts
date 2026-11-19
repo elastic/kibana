@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import type {
   CanLockHoverActions,
   HasSerializableState,
   HasType,
   PublishesPhaseEvents,
+  StateComparators,
 } from '@kbn/presentation-publishing';
 import type React from 'react';
+import type { MaybePromise } from '@kbn/utility-types';
+import type { DefaultPresentationPanelApi } from './panel_component/types';
 import type { initializeDrilldownsManager } from '../drilldowns/drilldowns_manager';
 import type { SerializedDrilldowns } from '../../server';
+import type { PlacementStrategy } from './constants';
 
 /**
  * The default embeddable API that all Embeddables must implement.
@@ -30,13 +33,13 @@ export interface DefaultEmbeddableApi<SerializedState extends object = object>
     HasSerializableState<SerializedState> {}
 
 /**
- * Defines the subset of the default embeddable API that the `setApi` method uses, which allows implementors
- * to omit aspects of the API that will be automatically added by `setApi`.
+ * Defines the subset of the default embeddable API that the `finalizeApi` method uses, which allows implementors
+ * to omit aspects of the API that will be automatically added by `finalizeApi`.
  */
 export type EmbeddableApiRegistration<
   SerializedState extends object = object,
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
-> = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$' | keyof CanLockHoverActions>;
+> = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$' | 'relatedPanels$' | keyof CanLockHoverActions>;
 
 export interface BuildEmbeddableProps<
   SerializedState extends object = object,
@@ -68,7 +71,7 @@ export interface BuildEmbeddableProps<
   initializeDrilldownsManager(
     embeddableUuid: string,
     state: SerializedDrilldowns
-  ): Promise<ReturnType<typeof initializeDrilldownsManager>>;
+  ): ReturnType<typeof initializeDrilldownsManager>;
 }
 
 /**
@@ -78,7 +81,7 @@ export interface BuildEmbeddableProps<
  * Embeddables are React components that manage their own state, can be serialized and
  * deserialized, and return an API that can be used to interact with them imperatively.
  **/
-export interface EmbeddableFactory<
+export interface EmbeddablePublicDefinition<
   SerializedState extends object = object,
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
 > {
@@ -95,4 +98,35 @@ export interface EmbeddableFactory<
   buildEmbeddable: (
     props: BuildEmbeddableProps<SerializedState, Api>
   ) => Promise<{ Component: React.FC<{}>; api: Api }>;
+
+  /**
+   * Returns comparators used to determine whether two serialized states are equal.
+   */
+  getComparators?: (embeddableState: SerializedState) => StateComparators<SerializedState>;
+
+  /**
+   * Provide placement hints to customize initial placement
+   */
+  getPlacementHints?: (serializedState?: SerializedState) => MaybePromise<{
+    strategy?: PlacementStrategy;
+    height?: number;
+    width?: number;
+  }>;
+
+  /**
+   * Provide layout contraints to customize resize behavior
+   */
+  layoutConstraints?: LayoutConstraints;
+
+  /**
+   * Determine whether an incoming embeddable state duplicates an existing embeddable state of the same type.
+   */
+  isDuplicate?: (incomingState: SerializedState, existingState: SerializedState) => boolean;
 }
+
+export type LayoutConstraints = {
+  minWidth?: number;
+  maxWidth?: number;
+  minHeight?: number;
+  maxHeight?: number;
+};

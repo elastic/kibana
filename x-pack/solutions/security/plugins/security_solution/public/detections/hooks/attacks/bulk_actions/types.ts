@@ -55,6 +55,8 @@ export interface BaseAttackContextMenuItemsProps {
 export interface BaseAttackProps {
   /** ID of the attack */
   attackId: string;
+  /** Concrete Elasticsearch index where the attack alert is stored */
+  attackIndex?: string;
   /** IDs of related alerts */
   relatedAlertIds: string[];
 }
@@ -98,7 +100,10 @@ export interface AttackWithCase extends BaseAttackProps {
 /**
  * Represents an attack with alert IDs that should be investigated in Timeline.
  */
-export type AttackWithTimelineAlerts = BaseAttackProps;
+export interface AttackWithTimelineAlerts extends BaseAttackProps {
+  /** When the attack was detected, used to open Timeline on a range holding its alerts. */
+  timestamp?: string;
+}
 
 /**
  * Extended content panel configuration for attack bulk actions.

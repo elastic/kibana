@@ -17,6 +17,7 @@ export function NotificationsProvider(
 ) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const retry = getService('retry');
 
   return {
     async assertNotificationIndicatorExist(expectExist = true) {
@@ -28,20 +29,40 @@ export function NotificationsProvider(
     },
 
     async assertNotificationErrorsCount(expectedCount: number) {
-      const actualCount = await testSubjects.getVisibleText('mlNotificationErrorsIndicator');
-      expect(actualCount).to.greaterThan(expectedCount);
+      const notificationsTab = await testSubjects.find(
+        'mlManagementOverviewPageTabs notifications'
+      );
+      const badge = await notificationsTab.findByCssSelector('.euiNotificationBadge');
+      const actualCount = await badge.getVisibleText();
+      expect(Number(actualCount)).to.greaterThan(expectedCount);
     },
 
     // This is a workaround for receiving available filter dropdown options,
     // since EUI doesn't allow testSubjects for filters.
     async getAvailableTypeFilters() {
-      const filterButton = await find.byCssSelector(
-        '.euiFilterGroup > *:nth-child(2) .euiFilterButton'
-      );
-      await filterButton.click();
-      const optionElements = await find.allByCssSelector('li[role="option"].euiSelectableListItem');
-      const optionTexts = await Promise.all(
-        optionElements.map(async (element) => await element.getVisibleText())
+      let optionTexts: string[] = [];
+      // Selenium dispatches a click at the point the element occupied when the
+      // click was computed, so a layout shift on this page can swallow it.
+      await retry.waitForWithTimeout(
+        'notification type filter options to render',
+        30_000,
+        async () => {
+          const filterButton = await find.byCssSelector(
+            'button[aria-label="Type Selection"]',
+            5_000
+          );
+          if ((await filterButton.getAttribute('aria-expanded')) !== 'true') {
+            await filterButton.click();
+          }
+          const optionElements = await find.allByCssSelector(
+            'li[role="option"].euiSelectableListItem',
+            2_000
+          );
+          optionTexts = await Promise.all(
+            optionElements.map(async (element) => await element.getVisibleText())
+          );
+          return optionTexts.length > 0 && optionTexts.every((text) => text.trim().length > 0);
+        }
       );
 
       return optionTexts;

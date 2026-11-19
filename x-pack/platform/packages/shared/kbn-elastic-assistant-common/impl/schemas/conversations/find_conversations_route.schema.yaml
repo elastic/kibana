@@ -6,6 +6,13 @@ paths:
   /api/security_ai_assistant/current_user/conversations/_find:
     get:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/security_ai_assistant/current_user/conversations/_find?page=1&per_page=20' \
+             --header "Authorization: $API_KEY"
       x-labels: [ess, serverless]
       operationId: FindConversations
       description: Get a list of all conversations for the current user. This endpoint allows users to search, filter, sort, and paginate through their conversations.
@@ -100,8 +107,30 @@ paths:
                   - perPage
                   - total
                   - data
+              examples:
+                FindConversationsResponse200Example:
+                  value:
+                    page: 1
+                    perPage: 20
+                    total: 5
+                    data:
+                      - id: "conv-abc123"
+                        title: "Security Discussion"
+                        category: "assistant"
+                        createdAt: "2023-10-31T12:00:00Z"
+                        updatedAt: "2023-10-31T12:05:00Z"
+                        createdBy:
+                          id: "user1"
+                          name: "John Doe"
+                        users:
+                          - id: "user1"
+                            name: "John Doe"
+                        namespace: "default"
+                        messages: []
+                        replacements: {}
+                        excludeFromLastConversationStorage: false
         400:
-          description: Generic Error. The request could not be processed due to an invalid query parameter or other issue.
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -116,6 +145,12 @@ paths:
                   message:
                     type: string
                     example: "Invalid filter query parameter"
+              examples:
+                FindConversationsResponse400Example:
+                  value:
+                    statusCode: 400
+                    error: "Bad Request"
+                    message: "Invalid filter parameter."
 
 components:
   schemas:

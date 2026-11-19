@@ -22,7 +22,7 @@ const queueMessageStyle = ({ euiTheme }: UseEuiTheme) => css`
 export function Queue() {
   return (
     <div>
-      <StatementListHeading iconType="logstashQueue" title="Queue" />
+      <StatementListHeading iconType="queue" title="Queue" />
       <EuiSpacer size="s" />
       <EuiText css={queueMessageStyle}>
         <FormattedMessage

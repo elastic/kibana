@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z, lazySchema } from '@kbn/zod';
 import {
   DEFAULT_ICON,
   ICON_SOURCE,
@@ -15,177 +15,224 @@ import {
 import { fieldMetaOptionsSchema } from './field_meta_options_schema';
 import { styleFieldSchema } from './style_field_schema';
 
-export const symbolizeAsOptions = schema.object({
-  value: schema.maybe(
-    schema.oneOf([
-      schema.literal(SYMBOLIZE_AS_TYPES.CIRCLE),
-      schema.literal(SYMBOLIZE_AS_TYPES.ICON),
-    ])
-  ),
-});
+export const symbolizeAsOptions = lazySchema(() =>
+  z
+    .object({
+      value: z
+        .union([z.literal(SYMBOLIZE_AS_TYPES.CIRCLE), z.literal(SYMBOLIZE_AS_TYPES.ICON)])
+        .optional(),
+    })
+    .strict()
+);
 
-export const symbolizeAsSchema = schema.object(
-  {
-    options: schema.object({
-      value: schema.maybe(
-        schema.oneOf([
-          schema.literal(SYMBOLIZE_AS_TYPES.CIRCLE),
-          schema.literal(SYMBOLIZE_AS_TYPES.ICON),
-        ])
-      ),
-    }),
-  },
-  {
-    defaultValue: {
+export const symbolizeAsSchema = lazySchema(() =>
+  z
+    .object({
+      options: z
+        .object({
+          value: z
+            .union([z.literal(SYMBOLIZE_AS_TYPES.CIRCLE), z.literal(SYMBOLIZE_AS_TYPES.ICON)])
+            .optional(),
+        })
+        .strict()
+        .default({}), // need default to match config-schema behavior
+    })
+    .strict()
+    .default({
       options: {
         value: SYMBOLIZE_AS_TYPES.CIRCLE,
       },
-    },
-    meta: {
+    })
+    .meta({
       description: 'Configure to symbolize Point features as Circle markers or Icons',
-    },
-  }
+    })
 );
 
-const iconSource = schema.maybe(
-  schema.oneOf([schema.literal(ICON_SOURCE.CUSTOM), schema.literal(ICON_SOURCE.MAKI)])
+const iconSource = lazySchema(() =>
+  z.union([z.literal(ICON_SOURCE.CUSTOM), z.literal(ICON_SOURCE.MAKI)]).optional()
 );
 
-export const iconStop = schema.object({
-  stop: schema.nullable(schema.string()),
-  icon: schema.string(),
-  iconSource,
-});
+export const iconStop = lazySchema(() =>
+  z
+    .object({
+      stop: z.string().nullable().default(null),
+      icon: z.string(),
+      icon_source: iconSource,
+    })
+    .strict()
+);
 
-export const iconDynamicOptions = schema.object({
-  iconPaletteId: schema.nullable(schema.string()),
-  customIconStops: schema.maybe(schema.arrayOf(iconStop)),
-  useCustomIconMap: schema.maybe(schema.boolean()),
-  field: schema.maybe(styleFieldSchema),
-  fieldMetaOptions: fieldMetaOptionsSchema,
-});
+export const iconDynamicOptions = lazySchema(() =>
+  z
+    .object({
+      icon_palette_id: z.string().nullable().default(null),
+      custom_icon_stops: z.array(iconStop).optional(),
+      use_custom_icon_map: z.boolean().optional(),
+      field: styleFieldSchema.optional(),
+      field_meta_options: fieldMetaOptionsSchema,
+    })
+    .strict()
+);
 
-export const iconStaticOptions = schema.object({
-  value: schema.string({
-    meta: {
-      description: 'icon id',
-    },
-  }),
-  label: schema.maybe(schema.string()),
-  svg: schema.maybe(schema.string()),
-  iconSource: schema.maybe(iconSource),
-});
+export const iconStaticOptions = lazySchema(() =>
+  z
+    .object({
+      value: z.string().meta({
+        description: 'icon id',
+      }),
+      label: z.string().optional(),
+      svg: z.string().optional(),
+      icon_source: iconSource.optional(),
+    })
+    .strict()
+);
 
-export const iconSchema = schema.oneOf(
-  [
-    schema.object({
-      type: schema.literal(STYLE_TYPE.STATIC),
-      options: iconStaticOptions,
-    }),
-    schema.object({
-      type: schema.literal(STYLE_TYPE.DYNAMIC),
-      options: iconDynamicOptions,
-    }),
-  ],
-  {
-    defaultValue: {
+export const iconSchema = lazySchema(() =>
+  z
+    .union([
+      z
+        .object({
+          type: z.literal(STYLE_TYPE.STATIC),
+          options: iconStaticOptions,
+        })
+        .strict(),
+      z
+        .object({
+          type: z.literal(STYLE_TYPE.DYNAMIC),
+          options: iconDynamicOptions,
+        })
+        .strict(),
+    ])
+    .default({
       type: STYLE_TYPE.STATIC,
       options: {
         value: DEFAULT_ICON,
       },
-    },
-    meta: {
+    })
+    .meta({
       description: 'Configure to set Point feature icon',
-    },
-  }
+    })
 );
 
-export const orientationDynamicOptions = schema.object({
-  field: schema.maybe(styleFieldSchema),
-  fieldMetaOptions: fieldMetaOptionsSchema,
-});
+export const orientationDynamicOptions = lazySchema(() =>
+  z
+    .object({
+      field: styleFieldSchema.optional(),
+      field_meta_options: fieldMetaOptionsSchema,
+    })
+    .strict()
+);
 
-export const orientationStaticOptions = schema.object({
-  orientation: schema.number(),
-});
+export const orientationStaticOptions = lazySchema(() =>
+  z
+    .object({
+      orientation: z.number(),
+    })
+    .strict()
+);
 
-export const orientationSchema = schema.oneOf(
-  [
-    schema.object({
-      type: schema.literal(STYLE_TYPE.STATIC),
-      options: orientationStaticOptions,
-    }),
-    schema.object({
-      type: schema.literal(STYLE_TYPE.DYNAMIC),
-      options: orientationDynamicOptions,
-    }),
-  ],
-  {
-    defaultValue: {
+export const orientationSchema = lazySchema(() =>
+  z
+    .union([
+      z
+        .object({
+          type: z.literal(STYLE_TYPE.STATIC),
+          options: orientationStaticOptions,
+        })
+        .strict(),
+      z
+        .object({
+          type: z.literal(STYLE_TYPE.DYNAMIC),
+          options: orientationDynamicOptions,
+        })
+        .strict(),
+    ])
+    .default({
       type: STYLE_TYPE.STATIC,
       options: {
         orientation: 0,
       },
-    },
-    meta: {
+    })
+    .meta({
       description:
         'Configure to rotate the icon clockwise. Ignored when Point features are symbolized as circle markers',
-    },
-  }
+    })
 );
 
-export const sizeDynamicOptions = schema.object({
-  minSize: schema.number(),
-  maxSize: schema.number(),
-  field: schema.maybe(styleFieldSchema),
-  fieldMetaOptions: fieldMetaOptionsSchema,
-  invert: schema.maybe(schema.boolean()),
-});
+export const sizeDynamicOptions = lazySchema(() =>
+  z
+    .object({
+      min_size: z.number(),
+      max_size: z.number(),
+      field: styleFieldSchema.optional(),
+      field_meta_options: fieldMetaOptionsSchema,
+      invert: z.boolean().optional(),
+    })
+    .strict()
+);
 
-export const sizeStaticOptions = schema.object({
-  size: schema.number(),
-});
+export const sizeStaticOptions = lazySchema(() =>
+  z
+    .object({
+      size: z.number(),
+    })
+    .strict()
+);
 
-const sizeStaticSchema = schema.object({
-  type: schema.literal(STYLE_TYPE.STATIC),
-  options: sizeStaticOptions,
-});
+const sizeStaticSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal(STYLE_TYPE.STATIC),
+      options: sizeStaticOptions,
+    })
+    .strict()
+);
 
-const sizeDynamiceSchema = schema.object({
-  type: schema.literal(STYLE_TYPE.DYNAMIC),
-  options: sizeDynamicOptions,
-});
-export const sizeSchema = schema.oneOf([sizeStaticSchema, sizeDynamiceSchema]);
-export const lineWidthSchema = schema.oneOf([sizeStaticSchema, sizeDynamiceSchema], {
-  defaultValue: {
-    type: STYLE_TYPE.STATIC,
-    options: {
-      size: 1,
-    },
-  },
-  meta: {
-    description: 'Configure to set feature border width',
-  },
-});
-export const iconSizeSchema = schema.oneOf([sizeStaticSchema, sizeDynamiceSchema], {
-  defaultValue: {
-    type: STYLE_TYPE.STATIC,
-    options: {
-      size: 6,
-    },
-  },
-  meta: {
-    description: 'Configure to set Point feature radius size in pixels',
-  },
-});
-export const labelSizeSchema = schema.oneOf([sizeStaticSchema, sizeDynamiceSchema], {
-  defaultValue: {
-    type: STYLE_TYPE.STATIC,
-    options: {
-      size: 14,
-    },
-  },
-  meta: {
-    description: 'Configure to set label text size',
-  },
-});
+const sizeDynamiceSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal(STYLE_TYPE.DYNAMIC),
+      options: sizeDynamicOptions,
+    })
+    .strict()
+);
+export const sizeSchema = lazySchema(() => z.union([sizeStaticSchema, sizeDynamiceSchema]));
+export const lineWidthSchema = lazySchema(() =>
+  z
+    .union([sizeStaticSchema, sizeDynamiceSchema])
+    .default({
+      type: STYLE_TYPE.STATIC,
+      options: {
+        size: 1,
+      },
+    })
+    .meta({
+      description: 'Configure to set feature border width',
+    })
+);
+export const iconSizeSchema = lazySchema(() =>
+  z
+    .union([sizeStaticSchema, sizeDynamiceSchema])
+    .default({
+      type: STYLE_TYPE.STATIC,
+      options: {
+        size: 6,
+      },
+    })
+    .meta({
+      description: 'Configure to set Point feature radius size in pixels',
+    })
+);
+export const labelSizeSchema = lazySchema(() =>
+  z
+    .union([sizeStaticSchema, sizeDynamiceSchema])
+    .default({
+      type: STYLE_TYPE.STATIC,
+      options: {
+        size: 14,
+      },
+    })
+    .meta({
+      description: 'Configure to set label text size',
+    })
+);

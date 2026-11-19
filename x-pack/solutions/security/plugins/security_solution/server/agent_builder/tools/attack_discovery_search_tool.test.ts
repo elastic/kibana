@@ -57,7 +57,7 @@ describe('attackDiscoverySearchTool', () => {
 
       const result = tool.schema.safeParse(invalidInput);
 
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
     });
   });
 
@@ -84,7 +84,7 @@ describe('attackDiscoverySearchTool', () => {
         'MV_CONTAINS(kibana.alert.attack_discovery.alert_ids,"alert-2")'
       );
       expect(callArgs.query).toContain('@timestamp >=');
-      expect(callArgs.query).toContain('LIMIT 100');
+      expect(callArgs.query).toContain('LIMIT 10');
     });
 
     it('uses handler context spaceId in ES|QL index pattern', async () => {
@@ -130,7 +130,7 @@ describe('attackDiscoverySearchTool', () => {
     it('limits results appropriately', async () => {
       const mockEsqlResponse = {
         columns: [{ name: '_id', type: 'keyword' }],
-        values: Array.from({ length: 100 }, (_, i) => [`attack-discovery-${i}`]),
+        values: Array.from({ length: 10 }, (_, i) => [`attack-discovery-${i}`]),
       };
       (executeEsql as jest.Mock).mockResolvedValue(mockEsqlResponse);
 
@@ -140,7 +140,20 @@ describe('attackDiscoverySearchTool', () => {
       );
 
       const callArgs = (executeEsql as jest.Mock).mock.calls[0][0];
-      expect(callArgs.query).toContain('LIMIT 100');
+      expect(callArgs.query).toContain('LIMIT 10');
+    });
+
+    it('returns error for invalid spaceId format', async () => {
+      const result = (await tool.handler(
+        { alertIds: ['alert-1'] },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, { spaceId: 'bad space"id' })
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results).toHaveLength(1);
+      const errorResult = result.results[0] as ErrorResult;
+      expect(errorResult.type).toBe(ToolResultType.error);
+      expect(errorResult.data.message).toContain('Invalid space ID format');
+      expect(executeEsql).not.toHaveBeenCalled();
     });
 
     it('handles query failures', async () => {
@@ -157,6 +170,37 @@ describe('attackDiscoverySearchTool', () => {
       expect(errorResult.type).toBe(ToolResultType.error);
       expect(errorResult.data.message).toContain('Error: ES|QL query failed');
       expect(mockLogger.error).toHaveBeenCalled();
+    });
+
+    it('filters out alert IDs with unsafe characters', async () => {
+      (executeEsql as jest.Mock).mockResolvedValue({ columns: [], values: [] });
+
+      await tool.handler(
+        { alertIds: ['valid-id', 'injection"attempt', 'also-valid'] },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const callArgs = (executeEsql as jest.Mock).mock.calls[0][0];
+      expect(callArgs.query).toContain(
+        'MV_CONTAINS(kibana.alert.attack_discovery.alert_ids,"valid-id")'
+      );
+      expect(callArgs.query).toContain(
+        'MV_CONTAINS(kibana.alert.attack_discovery.alert_ids,"also-valid")'
+      );
+      expect(callArgs.query).not.toContain('injection');
+    });
+
+    it('returns error when all alert IDs are invalid', async () => {
+      const result = (await tool.handler(
+        { alertIds: ['has"quote', 'has space', 'has;semi'] },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results).toHaveLength(1);
+      const errorResult = result.results[0] as ErrorResult;
+      expect(errorResult.type).toBe(ToolResultType.error);
+      expect(errorResult.data.message).toContain('No valid alert IDs');
+      expect(executeEsql).not.toHaveBeenCalled();
     });
 
     it('builds date filter for last 7 days', async () => {

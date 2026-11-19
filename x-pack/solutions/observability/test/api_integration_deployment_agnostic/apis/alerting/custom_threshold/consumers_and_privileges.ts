@@ -529,8 +529,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...getRuleConfiguration({ dataViewId: DATA_VIEW_ID, consumer }),
         });
         expect(createdRule.statusCode).to.be(400);
-        expect(createdRule.message).to.be(
-          '[request body.consumer]: expected value of type [string] but got [undefined]'
+        expect(createdRule.message).to.contain(
+          'expected value of type [string] but got [undefined]'
         );
       });
     });

@@ -11,7 +11,7 @@ export const markdown: ElementFactory = () => ({
   displayName: 'Text',
   type: 'text',
   help: 'Add text using Markdown',
-  icon: 'visText',
+  icon: 'text',
   expression: `kibana
 | selectFilter
 | demodata

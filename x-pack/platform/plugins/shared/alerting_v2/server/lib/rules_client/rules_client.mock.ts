@@ -1,0 +1,58 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import type { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
+import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher.mock';
+import type { PluginConfig } from '../../config';
+import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
+import { createUserService } from '../services/user_service/user_service.mock';
+import { createLoggerService } from '../services/logger_service/logger_service.mock';
+import { ArtifactTypeRegistry, registerBuiltinArtifactTypes } from '../artifact_types';
+import { createRuleChangesHistoryClientMock } from '../rule_changes_history/rule_changes_history_client.mock';
+import { RulesClient } from './rules_client';
+import { createConfigServiceMock } from '../services/config_service/config_service.mock';
+
+export function createRulesClient(): {
+  rulesClient: RulesClient;
+  mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  ruleEventPublisher: RuleEventPublisher;
+} {
+  const { rulesSavedObjectService, mockSavedObjectsClient } = createRulesSavedObjectService();
+  const request = httpServerMock.createKibanaRequest();
+  const taskManager = taskManagerMock.createStart();
+  const { userService } = createUserService();
+  const { publisher: ruleEventPublisher } = createRuleEventPublisher();
+  const { loggerService } = createLoggerService();
+  const artifactTypeRegistry = new ArtifactTypeRegistry();
+  registerBuiltinArtifactTypes(artifactTypeRegistry);
+
+  const config = {
+    enabled: true,
+    invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
+    rules: { minimumScheduleInterval: '1m', maxScheduledPerMinute: 400 },
+  } as PluginConfig;
+
+  const rulesClient = new RulesClient(
+    request,
+    rulesSavedObjectService,
+    taskManager,
+    userService,
+    'default',
+    createConfigServiceMock(config),
+    rulesSavedObjectService,
+    ruleEventPublisher,
+    loggerService,
+    artifactTypeRegistry,
+    { actor: 'user', options: {} },
+    createRuleChangesHistoryClientMock()
+  );
+
+  return { rulesClient, mockSavedObjectsClient, ruleEventPublisher };
+}

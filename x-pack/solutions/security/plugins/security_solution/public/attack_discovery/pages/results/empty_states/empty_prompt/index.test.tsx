@@ -10,16 +10,27 @@ import React from 'react';
 
 import { EmptyPrompt } from '.';
 import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
+import { useHasWorkflowsPrivileges } from '../../../hooks/use_has_workflows_privileges';
 import { TestProviders } from '../../../../../common/mock';
 
 jest.mock('../../../../../assistant/use_assistant_availability');
+jest.mock('../../../hooks/use_has_workflows_privileges');
+
+const mockUseHasWorkflowsPrivileges = useHasWorkflowsPrivileges as jest.Mock;
 
 describe('EmptyPrompt', () => {
   const aiConnectorsCount = 2;
   const attackDiscoveriesCount = 0;
   const onGenerate = jest.fn();
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseHasWorkflowsPrivileges.mockReturnValue({
+      hasWorkflowsExecute: true,
+      hasWorkflowsRead: true,
+      missingPrivileges: { featurePrivileges: [], indexPrivileges: [] },
+    });
+  });
 
   describe('when the user has the assistant privilege', () => {
     beforeEach(() => {
@@ -163,6 +174,45 @@ describe('EmptyPrompt', () => {
       const generateButton = screen.getByTestId('generate');
 
       expect(generateButton).toBeDisabled();
+    });
+  });
+
+  describe('when the user lacks the workflows execute privilege', () => {
+    beforeEach(() => {
+      (useAssistantAvailability as jest.Mock).mockReturnValue({
+        hasAssistantPrivilege: true,
+        isAssistantEnabled: true,
+      });
+      mockUseHasWorkflowsPrivileges.mockReturnValue({
+        hasWorkflowsExecute: false,
+        hasWorkflowsRead: false,
+        missingPrivileges: {
+          featurePrivileges: [['workflowsManagement', ['read', 'execute']]],
+          indexPrivileges: [],
+        },
+      });
+
+      render(
+        <TestProviders>
+          <EmptyPrompt
+            aiConnectorsCount={aiConnectorsCount}
+            attackDiscoveriesCount={attackDiscoveriesCount}
+            isLoading={false}
+            isDisabled={false}
+            onGenerate={onGenerate}
+          />
+        </TestProviders>
+      );
+    });
+
+    it('disables the generate button', () => {
+      expect(screen.getByTestId('generate')).toBeDisabled();
+    });
+
+    it('does not call onGenerate when the generate button is clicked', () => {
+      fireEvent.click(screen.getByTestId('generate'));
+
+      expect(onGenerate).not.toHaveBeenCalled();
     });
   });
 

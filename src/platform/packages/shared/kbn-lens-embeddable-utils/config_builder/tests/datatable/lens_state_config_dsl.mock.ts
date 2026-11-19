@@ -15,6 +15,7 @@ import type {
   AvgIndexPatternColumn,
 } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 export const singleMetricDatatableAttributes: LensAttributes = {
   visualizationType: 'lnsDatatable',
@@ -70,7 +71,7 @@ export const singleMetricDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -196,7 +197,7 @@ export const singleMetricRowSplitDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -386,7 +387,7 @@ export const multiMetricRowSplitDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -698,7 +699,7 @@ export const fullConfigDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -855,7 +856,7 @@ export const sortedByTransposedMetricColumnDatatableAttributes: LensAttributes =
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -1012,7 +1013,7 @@ export const sortedByRowDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -1103,7 +1104,7 @@ export const defaultColorByValueAttributes: LensAttributes = {
     adHocDataViews: {},
   },
   title: 'testing color by value palette',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsDatatable',
   references: [
     {
@@ -1200,13 +1201,191 @@ export const selectorColorByValueAttributes: LensAttributes = {
     adHocDataViews: {},
   },
   title: 'testing color by value palette',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsDatatable',
   references: [
     {
       type: 'index-pattern',
       id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
       name: 'indexpattern-datasource-layer-4153c826-5f82-4fb5-942b-5947250e8b58',
+    },
+  ],
+};
+
+/**
+ * Progress bars as the editor saves them, including the values it keeps for another fill mode:
+ * - the default seed: a gradient fill with the inert seed color and a bare `status` palette
+ * - a gradient fill with a custom range and no stored alignment
+ * - a single fill with a leftover custom palette
+ * - a solid fill with a leftover color, a custom palette, a custom range and a left alignment
+ */
+export const progressBarDatatableAttributes: LensAttributes = {
+  visualizationType: 'lnsDatatable',
+  title: 'Progress bars',
+  state: {
+    visualization: {
+      columns: [
+        {
+          columnId: '6a1b1b2e-2f0b-4b8e-9d0a-5c9a2b1f3e01',
+          isTransposed: false,
+          isMetric: true,
+          alignment: 'right',
+          colorMode: 'progress',
+          palette: { type: 'palette', name: 'status' },
+          fillStyle: { fillMode: 'gradient', color: '#61A2FF', valueRange: { mode: 'auto' } },
+        },
+        {
+          columnId: '6a1b1b2e-2f0b-4b8e-9d0a-5c9a2b1f3e02',
+          isTransposed: false,
+          isMetric: true,
+          colorMode: 'progress',
+          palette: { type: 'palette', name: 'status' },
+          fillStyle: {
+            fillMode: 'gradient',
+            color: '#61A2FF',
+            valueRange: { mode: 'custom', min: 8000, max: 10942.5 },
+          },
+        },
+        {
+          columnId: '6a1b1b2e-2f0b-4b8e-9d0a-5c9a2b1f3e03',
+          isTransposed: false,
+          isMetric: true,
+          alignment: 'right',
+          colorMode: 'progress',
+          palette: {
+            type: 'palette',
+            name: 'custom',
+            params: {
+              steps: 5,
+              stops: [
+                { color: '#24c292', stop: 10000 },
+                { color: '#aee8d2', stop: 10942.5 },
+              ],
+              rangeType: 'number',
+              rangeMin: null,
+              rangeMax: 11000,
+              continuity: 'below',
+              colorStops: [
+                { color: '#24c292', stop: null },
+                { color: '#aee8d2', stop: 10000 },
+              ],
+              name: 'custom',
+            },
+          },
+          fillStyle: { fillMode: 'single', color: '#16C5C0', valueRange: { mode: 'auto' } },
+        },
+        {
+          columnId: '6a1b1b2e-2f0b-4b8e-9d0a-5c9a2b1f3e04',
+          isTransposed: false,
+          isMetric: true,
+          alignment: 'left',
+          colorMode: 'progress',
+          palette: {
+            type: 'palette',
+            name: 'custom',
+            params: {
+              steps: 5,
+              stops: [
+                { color: '#24c292', stop: 10000 },
+                { color: '#aee8d2', stop: 10942.5 },
+              ],
+              rangeType: 'number',
+              rangeMin: null,
+              rangeMax: 11000,
+              continuity: 'below',
+              colorStops: [
+                { color: '#24c292', stop: null },
+                { color: '#aee8d2', stop: 10000 },
+              ],
+              name: 'custom',
+            },
+          },
+          fillStyle: {
+            fillMode: 'solid',
+            color: '#61A2FF',
+            valueRange: { mode: 'custom', min: 4179.1, max: 10942.5 },
+          },
+        },
+      ],
+      layerId: '6a1b1b2e-2f0b-4b8e-9d0a-5c9a2b1f3e00',
+      layerType: 'data',
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          '6a1b1b2e-2f0b-4b8e-9d0a-5c9a2b1f3e00': {
+            columns: {
+              '6a1b1b2e-2f0b-4b8e-9d0a-5c9a2b1f3e01': {
+                label: 'Count of records',
+                dataType: 'number',
+                operationType: 'count',
+                isBucketed: false,
+                sourceField: '___records___',
+                params: {
+                  emptyAsNull: true,
+                },
+              } as CountIndexPatternColumn,
+              '6a1b1b2e-2f0b-4b8e-9d0a-5c9a2b1f3e02': {
+                label: 'Average of bytes',
+                dataType: 'number',
+                operationType: 'average',
+                sourceField: 'bytes',
+                isBucketed: false,
+                params: {
+                  emptyAsNull: true,
+                },
+              } as AvgIndexPatternColumn,
+              '6a1b1b2e-2f0b-4b8e-9d0a-5c9a2b1f3e03': {
+                label: 'Median of bytes',
+                dataType: 'number',
+                operationType: 'median',
+                sourceField: 'bytes',
+                isBucketed: false,
+                params: {
+                  emptyAsNull: true,
+                },
+              } as MedianIndexPatternColumn,
+              '6a1b1b2e-2f0b-4b8e-9d0a-5c9a2b1f3e04': {
+                label: 'Average of memory',
+                dataType: 'number',
+                operationType: 'average',
+                sourceField: 'memory',
+                isBucketed: false,
+                params: {
+                  emptyAsNull: true,
+                },
+              } as AvgIndexPatternColumn,
+            },
+            columnOrder: [
+              '6a1b1b2e-2f0b-4b8e-9d0a-5c9a2b1f3e01',
+              '6a1b1b2e-2f0b-4b8e-9d0a-5c9a2b1f3e02',
+              '6a1b1b2e-2f0b-4b8e-9d0a-5c9a2b1f3e03',
+              '6a1b1b2e-2f0b-4b8e-9d0a-5c9a2b1f3e04',
+            ],
+            sampling: 1,
+            ignoreGlobalFilters: false,
+            incompleteColumns: {},
+          },
+        },
+      },
+      textBased: {
+        layers: {},
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+  version: LENS_ITEM_LATEST_VERSION,
+  references: [
+    {
+      type: 'index-pattern',
+      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      name: 'indexpattern-datasource-layer-6a1b1b2e-2f0b-4b8e-9d0a-5c9a2b1f3e00',
     },
   ],
 };

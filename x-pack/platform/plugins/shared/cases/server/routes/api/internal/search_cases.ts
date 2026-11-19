@@ -33,7 +33,7 @@ export const searchCasesRoute = createCasesRoute({
         throw Boom.badRequest('Owner is required.');
       }
 
-      const res: caseApiV1.CasesFindResponse = await casesClient.cases.search({ ...options });
+      const res: caseApiV1.CasesSearchResponse = await casesClient.cases.search({ ...options });
 
       return response.ok({
         body: res,

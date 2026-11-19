@@ -10,15 +10,14 @@
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
+import { isFilterPinned } from '@kbn/es-query';
 import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import { toStoredFilters, fromStoredFilters } from '@kbn/as-code-filters-transforms';
-import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
-import type { Moment } from 'moment';
-import moment from 'moment';
 import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
@@ -30,15 +29,19 @@ import {
   distinctUntilChanged,
   finalize,
   map,
+  merge,
+  skip,
+  startWith,
   switchMap,
   tap,
 } from 'rxjs';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { dataService } from '../services/kibana_services';
 import { logger } from '../services/logger';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
-import type { DashboardCreationOptions } from './types';
-import type { DashboardState } from '../../common';
+import type { DashboardApi, DashboardCreationOptions } from './types';
 import { cleanFiltersForSerialize } from './clean_filters_for_serialize';
+import { getUnifiedSearchComparators } from '../../common/dashboard_state/unified_search';
 
 export const COMPARE_DEBOUNCE = 100;
 
@@ -47,6 +50,7 @@ export function initializeUnifiedSearchManager(
   timeRestore$: PublishingSubject<boolean>,
   waitForPanelsToLoad$: Observable<void>,
   getLastSavedState: () => DashboardState | undefined,
+  userActivity$: DashboardApi['userActivity$'],
   creationOptions?: DashboardCreationOptions
 ) {
   const {
@@ -56,11 +60,15 @@ export function initializeUnifiedSearchManager(
   } = dataService.query;
 
   const reload$ = new Subject<void>();
-  const query$ = new BehaviorSubject<Query | undefined>(initialState.query);
+  const query$ = new BehaviorSubject<Query | undefined>(
+    initialState.query ? toStoredQuery(initialState.query) : undefined
+  );
+  const asCodeQuery$ = new BehaviorSubject<DashboardState['query']>(initialState.query);
   // setAndSyncQuery method not needed since query synced with 2-way data binding
-  function setQuery(query: Query) {
+  function setQuery(query: Query | undefined) {
     if (!fastIsEqual(query, query$.value)) {
       query$.next(query);
+      asCodeQuery$.next(query ? toAsCodeQuery(query) : undefined);
     }
   }
   const refreshInterval$ = new BehaviorSubject<RefreshInterval | undefined>(
@@ -232,32 +240,14 @@ export function initializeUnifiedSearchManager(
     );
   }
 
-  const comparators = {
-    filters: (a, b) =>
-      compareFilters(
-        toStoredFilters(a, logger) ?? [],
-        toStoredFilters(b, logger) ?? [],
-        COMPARE_ALL_OPTIONS
-      ),
-    query: 'deepEquality',
-    refresh_interval: (a: RefreshInterval | undefined, b: RefreshInterval | undefined) =>
-      timeRestore$.value ? fastIsEqual(a, b) : true,
-    time_range: (a: TimeRange | undefined, b: TimeRange | undefined) => {
-      if (!timeRestore$.value) return true; // if time restore is set to false, time range doesn't count as a change.
-      if (!areTimesEqual(a?.from, b?.from) || !areTimesEqual(a?.to, b?.to)) {
-        return false;
-      }
-      return true;
-    },
-  } as StateComparators<
-    Pick<DashboardState, 'filters' | 'query' | 'refresh_interval' | 'time_range'>
-  >;
+  const comparators = getUnifiedSearchComparators(() => timeRestore$.value, logger);
 
   const getState = (): Pick<
     DashboardState,
     'filters' | 'query' | 'refresh_interval' | 'time_range'
   > => {
     const serializableFilters = asCodeFilters$.value;
+    const asCodeQuery = query$.value ? toAsCodeQuery(query$.value) : undefined;
 
     const timeRange =
       timeRestore$.value && timeRange$.value
@@ -276,12 +266,20 @@ export function initializeUnifiedSearchManager(
         : undefined;
 
     return {
-      query: query$.value,
+      ...(asCodeQuery && { query: asCodeQuery }),
       ...(serializableFilters?.length && { filters: serializableFilters }),
       ...(refreshInterval && { refresh_interval: refreshInterval }),
       ...(timeRange && { time_range: timeRange }),
     };
   };
+
+  const anyStateChange$ = merge(
+    asCodeFilters$.pipe(skip(1)),
+    asCodeQuery$.pipe(skip(1)),
+    refreshInterval$.pipe(skip(1)),
+    timeRange$.pipe(skip(1)),
+    timeRestore$.pipe(skip(1))
+  ).pipe(map(() => undefined));
 
   return {
     api: {
@@ -298,23 +296,22 @@ export function initializeUnifiedSearchManager(
       timeslice$,
     },
     internalApi: {
+      anyStateChange$,
       unifiedSearchFilters$,
       startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return combineLatest([
-          asCodeFilters$,
-          query$,
-          refreshInterval$,
-          timeRange$,
-          timeRestore$,
-        ]).pipe(
+        return anyStateChange$.pipe(
+          // anyStateChange$ does not emit on subscribe
+          // use startWith to compare unsaved changes on subscribe
+          startWith(undefined),
           debounceTime(COMPARE_DEBOUNCE),
-
-          map(([filters, query, refresh_interval, time_range]) => ({
-            filters,
-            query,
-            refresh_interval,
-            time_range,
-          })),
+          map(() => {
+            return {
+              filters: asCodeFilters$.getValue(),
+              query: asCodeQuery$.getValue(),
+              refresh_interval: refreshInterval$.getValue(),
+              time_range: timeRange$.getValue(),
+            };
+          }),
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) =>
             diffComparators(comparators, lastSavedState, latestState)
@@ -326,9 +323,8 @@ export function initializeUnifiedSearchManager(
           ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),
           ...(toStoredFilters(lastSavedState.filters, logger) ?? []),
         ]);
-        if (lastSavedState.query) {
-          setQuery(lastSavedState.query);
-        }
+        const storedQuery = lastSavedState.query ? toStoredQuery(lastSavedState.query) : undefined;
+        setQuery(storedQuery);
         if (lastSavedState.time_range) {
           setAndSyncTimeRange(lastSavedState.time_range);
         }
@@ -345,20 +341,3 @@ export function initializeUnifiedSearchManager(
     },
   };
 }
-
-const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
-  if (moment(time).isValid()) {
-    return moment(time).utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-  } else {
-    // If it's not a valid moment date, then it should be a string representing a relative time
-    // like 'now' or 'now-15m'.
-    return time as string;
-  }
-};
-
-export const areTimesEqual = (
-  timeA?: string | Moment | undefined,
-  timeB?: string | Moment | undefined
-) => {
-  return convertTimeToUTCString(timeA) === convertTimeToUTCString(timeB);
-};

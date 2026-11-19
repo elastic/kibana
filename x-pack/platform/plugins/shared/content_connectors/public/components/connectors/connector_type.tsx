@@ -28,7 +28,7 @@ export const ConnectorType: React.FC<ConnectorTypeProps> = ({ serviceType }) => 
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
       {connector && connector.iconPath && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type={connector.iconPath} size="m" />
+          <EuiIcon type={connector.iconPath} size="m" aria-hidden={true} />
         </EuiFlexItem>
       )}
       <EuiFlexItem>

@@ -26,6 +26,7 @@ export enum ES_FIELD_TYPES {
   TEXT = 'text',
   MATCH_ONLY_TEXT = 'match_only_text',
   KEYWORD = 'keyword',
+  WILDCARD = 'wildcard',
   VERSION = 'version',
 
   BOOLEAN = 'boolean',
@@ -65,6 +66,7 @@ export enum ES_FIELD_TYPES {
   HISTOGRAM = 'histogram',
   EXPONENTIAL_HISTOGRAM = 'exponential_histogram',
   TDIGEST = 'tdigest',
+  FLATTENED = 'flattened',
 
   NULL = 'null',
 }
@@ -91,6 +93,7 @@ export enum KBN_FIELD_TYPES {
   HISTOGRAM = 'histogram',
   EXPONENTIAL_HISTOGRAM = 'exponential_histogram',
   TDIGEST = 'tdigest',
+  FLATTENED = 'flattened',
   MISSING = 'missing',
   NULL = 'null',
 }

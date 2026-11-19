@@ -3362,3 +3362,65 @@
   "coreMigrationVersion": "8.8.0",
   "typeMigrationVersion": "10.2.0"
 }
+
+{
+  "id": "test-dashboard-interactions",
+  "type": "dashboard",
+  "namespaces": ["default"],
+  "updated_at": "2026-04-09T22:56:16.348Z",
+  "created_at": "2026-04-09T22:55:35.088Z",
+  "version": "WzMyNSwxXQ==",
+  "attributes": {
+    "description": "",
+    "title": "Test Options List Control",
+    "pinned_panels": {
+      "panels": {
+        "d91b71a5-e178-4a4d-b55a-84ba87b97bc0": {
+          "order": 0,
+          "type": "options_list_control",
+          "width": "medium",
+          "grow": false,
+          "config": {
+            "use_global_filters": true,
+            "ignore_validations": false,
+            "field_name": "sound.keyword",
+            "exclude": false,
+            "exists_selected": false,
+            "selected_options": [],
+            "sort": {
+              "by": "_count",
+              "direction": "desc"
+            },
+            "search_technique": "wildcard",
+            "single_select": false,
+            "run_past_timeout": false,
+            "dataViewRefName": "d91b71a5-e178-4a4d-b55a-84ba87b97bc0:optionsListDataView"
+          }
+        }
+      }
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"hidePanelBorders\":false,\"useMargins\":true,\"autoApplyFilters\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false}",
+    "panelsJSON": "[{\"type\":\"visualization\",\"embeddableConfig\":{},\"panelIndex\":\"bc950365-fc11-4fe9-9b8c-b31334970c9f\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"bc950365-fc11-4fe9-9b8c-b31334970c9f\"}}]",
+    "timeFrom": "2018-01-01T00:00:00.000Z",
+    "timeTo": "2018-04-13T00:00:00.000Z",
+    "timeRestore": true,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+    }
+  },
+  "references": [
+    {
+      "name": "bc950365-fc11-4fe9-9b8c-b31334970c9f:savedObjectRef",
+      "type": "visualization",
+      "id": "50643b60-3dd3-11e8-b2b9-5d5dc1715159"
+    },
+    {
+      "name": "d91b71a5-e178-4a4d-b55a-84ba87b97bc0:optionsListDataView",
+      "type": "index-pattern",
+      "id": "a0f483a0-3dc9-11e8-8660-4d65aa086b3c"
+    }
+  ],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "10.3.0"
+}

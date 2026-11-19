@@ -20,6 +20,7 @@ import { IndicesCheckContext } from './contexts/indices_check_context';
 import { useIndicesCheck } from './hooks/use_indices_check';
 import { useResultsRollup } from './hooks/use_results_rollup';
 import { ilmPhaseOptionsStatic, EMPTY_STAT } from './constants';
+import { ilmPhasesFromSelectedOptions } from './utils/ilm_phases_from_selected_options';
 import { DataQualitySummary } from './data_quality_summary';
 import { DataQualityDetails } from './data_quality_details';
 
@@ -46,6 +47,8 @@ interface Props {
   reportDataQualityCheckAllCompleted?: ReportDataQualityCheckAllCompleted;
   setLastChecked: (lastChecked: string) => void;
   startDate?: string | null;
+  /** Rendered in the summary panel, left of the ILM phase filter */
+  summaryFilters?: React.ReactNode;
   theme?: PartialTheme;
   defaultStartTime: string;
   defaultEndTime: string;
@@ -73,6 +76,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   reportDataQualityCheckAllCompleted,
   setLastChecked,
   startDate,
+  summaryFilters,
   theme,
   defaultStartTime,
   defaultEndTime,
@@ -104,7 +108,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
     [toasts]
   );
   const ilmPhases: string[] = useMemo(
-    () => selectedIlmPhaseOptions.map(({ label }) => label),
+    () => ilmPhasesFromSelectedOptions(selectedIlmPhaseOptions),
     [selectedIlmPhaseOptions]
   );
 
@@ -151,7 +155,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
         <IndicesCheckContext.Provider value={indicesCheckHookReturnValue}>
           <EuiFlexGroup data-test-subj="body" direction="column" gutterSize="none">
             <EuiFlexItem grow={false}>
-              <DataQualitySummary />
+              <DataQualitySummary summaryFilters={summaryFilters} />
               <EuiSpacer size="l" />
             </EuiFlexItem>
 

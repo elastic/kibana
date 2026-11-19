@@ -6,12 +6,16 @@
  */
 
 import React from 'react';
+import { of } from 'rxjs';
 import { renderWithI18n as render } from '@kbn/test-jest-helpers';
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { TestProviders } from '../../mock';
 import { MarkdownRenderer } from './renderer';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { UpsellingProvider } from '../upselling_provider';
+import { APP_UI_ID } from '../../../../common';
+
+const mockCurrentAppId$ = of(APP_UI_ID);
 
 jest.mock('../../utils/default_date_settings', () => {
   const original = jest.requireActual('../../utils/default_date_settings');
@@ -41,6 +45,7 @@ jest.mock('../../lib/kibana/kibana_react', () => {
           navigateToApp: jest.fn(),
           getUrlForApp: (appId: string, options?: { path?: string; deepLinkId?: boolean }) =>
             `${appId}/${options?.deepLinkId ?? ''}${options?.path ?? ''}`,
+          currentAppId$: mockCurrentAppId$,
         },
         uiSettings: {
           get: jest.fn(),

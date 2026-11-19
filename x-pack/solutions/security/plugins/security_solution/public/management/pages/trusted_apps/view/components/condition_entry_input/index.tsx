@@ -10,7 +10,14 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import type { EuiSuperSelectOption, EuiSuperSelectProps } from '@elastic/eui';
-import { EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFieldText,
+  EuiFormRow,
+  EuiSuperSelect,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
 import type { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
@@ -214,6 +221,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
                 name="operator"
                 value={OPERATOR_TITLES.is}
                 data-test-subj={getTestId('operator')}
+                aria-label={ENTRY_PROPERTY_TITLES.operator}
                 readOnly
               />
             )}
@@ -234,23 +242,32 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
               onChange={handleValueUpdate}
               onBlur={handleValueOnBlur}
               data-test-subj={getTestId('value')}
+              aria-label={ENTRY_PROPERTY_TITLES.value}
             />
           </ConditionEntryCell>
         </InputItem>
         <InputItem gridArea="remove">
           {/* Unicode `nbsp` is used below so that Remove button is properly displayed */}
           <ConditionEntryCell showLabel={showLabels} label={'\u00A0'}>
-            <EuiButtonIcon
-              color="danger"
-              iconType="trash"
-              onClick={handleRemoveClick}
-              isDisabled={isRemoveDisabled}
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.removeLabel',
                 { defaultMessage: 'Remove Entry' }
               )}
-              data-test-subj={getTestId('remove')}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                color="danger"
+                iconType="trash"
+                onClick={handleRemoveClick}
+                isDisabled={isRemoveDisabled}
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.removeLabel',
+                  { defaultMessage: 'Remove Entry' }
+                )}
+                data-test-subj={getTestId('remove')}
+              />
+            </EuiToolTip>
           </ConditionEntryCell>
         </InputItem>
       </InputGroup>

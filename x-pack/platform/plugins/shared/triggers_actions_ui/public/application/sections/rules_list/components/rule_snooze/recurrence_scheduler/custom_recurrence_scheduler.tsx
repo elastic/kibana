@@ -121,6 +121,10 @@ export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps>
         data-test-subj="customRecurrenceScheduler"
         fullWidth
         hasEmptyLabelSpace
+        aria-label={i18n.translate(
+          'xpack.triggersActionsUI.ruleSnoozeScheduler.recurrenceIntervalAriaLabel',
+          { defaultMessage: 'Recurrence interval' }
+        )}
       >
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>

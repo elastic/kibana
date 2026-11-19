@@ -17,8 +17,8 @@ import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { CustomOptionsComponentProps } from '../../types';
 import { OptionsListEditorOptions } from './options_list_editor_options';
 import { OptionsListControlContext } from '../options_list_context_provider';
-import type { OptionsListComponentApi } from '../types';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
+import type { DSLOptionsListComponentApi } from '../types';
 
 describe('Options list sorting button', () => {
   const getMockedState = <State extends OptionsListControlState = OptionsListControlState>(
@@ -38,7 +38,7 @@ describe('Options list sorting button', () => {
     field,
     componentApi = {},
   }: Pick<CustomOptionsComponentProps, 'initialState' | 'field'> & {
-    componentApi?: Partial<OptionsListComponentApi>;
+    componentApi?: Partial<DSLOptionsListComponentApi>;
   }) => {
     const { componentApi: mockComponentApiBase, displaySettings } = getOptionsListContextMock();
     const component = render(
@@ -68,7 +68,7 @@ describe('Options list sorting button', () => {
       const toggle = component.getByTestId('optionsListControl__runPastTimeoutAdditionalSetting');
       expect(toggle.getAttribute('aria-checked')).toBe('false');
       await userEvent.click(toggle);
-      expect(updateState).toBeCalledWith({ run_past_timeout: true });
+      expect(updateState).toHaveBeenCalledWith({ run_past_timeout: true });
       expect(toggle.getAttribute('aria-checked')).toBe('true');
     });
 
@@ -93,7 +93,7 @@ describe('Options list sorting button', () => {
     expect(component.container.querySelector('input#single')).toBeChecked();
 
     await userEvent.click(multiSelect!);
-    expect(updateState).toBeCalledWith({ single_select: false });
+    expect(updateState).toHaveBeenCalledWith({ single_select: false });
     expect(multiSelect).toBeChecked();
     expect(component.container.querySelector('input#single')).not.toBeChecked();
   });
@@ -182,7 +182,7 @@ describe('Options list sorting button', () => {
           </OptionsListControlContext.Provider>
         );
 
-        expect(updateState).toBeCalledWith({ search_technique: 'exact' });
+        expect(updateState).toHaveBeenCalledWith({ search_technique: 'exact' });
         expect(component.container.querySelector('input#prefix')).not.toBeChecked();
         expect(component.container.querySelector('input#exact')).toBeChecked();
         expect(component.container.querySelector('input#wildcard')).toBeNull();
@@ -209,7 +209,7 @@ describe('Options list sorting button', () => {
         /** responds to change in search technique */
         const exactSearch = component.container.querySelector('input#exact');
         await userEvent.click(exactSearch!);
-        expect(updateState).toBeCalledWith({ search_technique: 'exact' });
+        expect(updateState).toHaveBeenCalledWith({ search_technique: 'exact' });
         expect(component.container.querySelector('input#prefix')).not.toBeChecked();
         expect(exactSearch).toBeChecked();
         expect(component.container.querySelector('input#wildcard')).not.toBeChecked();
@@ -226,7 +226,7 @@ describe('Options list sorting button', () => {
           </OptionsListControlContext.Provider>
         );
 
-        expect(updateState).toBeCalledWith({ search_technique: 'exact' });
+        expect(updateState).toHaveBeenCalledWith({ search_technique: 'exact' });
       });
 
       test('if neither the initial or current search technique is valid, revert to the default', async () => {
@@ -245,7 +245,7 @@ describe('Options list sorting button', () => {
         /** responds to change in search technique */
         const prefixSearch = component.container.querySelector('input#prefix');
         await userEvent.click(prefixSearch!);
-        expect(updateState).toBeCalledWith({ search_technique: 'prefix' });
+        expect(updateState).toHaveBeenCalledWith({ search_technique: 'prefix' });
 
         /** responds to the field type changing */
         component.rerender(
@@ -259,7 +259,7 @@ describe('Options list sorting button', () => {
           </OptionsListControlContext.Provider>
         );
 
-        expect(updateState).toBeCalledWith({ search_technique: 'exact' });
+        expect(updateState).toHaveBeenCalledWith({ search_technique: 'exact' });
       });
     });
   });

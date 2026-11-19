@@ -105,7 +105,7 @@ export const getColumns = ({
           disabled={!allowed || !hasUpdateAIAssistantAnonymization}
           color={anonymized ? 'primary' : 'text'}
           flush="both"
-          iconType={anonymized ? 'eyeClosed' : 'eye'}
+          iconType={anonymized ? 'eyeSlash' : 'eye'}
           isSelected={anonymized ? true : false}
           onClick={() => {
             handleRowChecked(field);

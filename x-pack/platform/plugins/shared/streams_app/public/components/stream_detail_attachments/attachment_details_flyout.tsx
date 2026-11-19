@@ -14,6 +14,7 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiLink,
+  EuiSpacer,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
@@ -189,12 +190,14 @@ export function AttachmentDetailsFlyout({
         <EuiTitle size="m">
           <h2 id={flyoutTitleId}>{attachment.title}</h2>
         </EuiTitle>
+        <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" responsive={false}>
           {url && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 data-test-subj="streamsAppAttachmentDetailsFlyoutGoToButton"
                 iconType={typeConfig.icon}
+                size="s"
                 onClick={handleNavigateToAttachment}
               >
                 {i18n.translate('xpack.streams.attachmentDetailsFlyout.goToButtonLabel', {
@@ -208,8 +211,9 @@ export function AttachmentDetailsFlyout({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 data-test-subj="streamsAppAttachmentDetailsFlyoutUnlinkButton"
-                iconType="unlink"
+                iconType="linkSlash"
                 color="danger"
+                size="s"
                 onClick={handleUnlink}
               >
                 {i18n.translate('xpack.streams.attachmentDetailsFlyout.removeButtonLabel', {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { matchers as emotionMatchers } from '@emotion/jest';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
-import 'jest-styled-components';
+expect.extend(emotionMatchers);
 import { useLocation } from 'react-router-dom';
 
 import { SecurityPageName } from '../../../../../common/constants';
@@ -166,17 +166,7 @@ describe('AlertsTreemapPanel', () => {
     );
   });
 
-  it('renders the panel with the expected class to style the overflow-y scroll bar', async () => {
-    render(
-      <TestProviders>
-        <AlertsTreemapPanel {...defaultProps} />
-      </TestProviders>
-    );
-
-    await waitFor(() => expect(screen.getByTestId('treemapPanel')).toHaveClass('eui-yScroll'));
-  });
-
-  it('renders the panel with an auto overflow-y to allow vertical scrolling when necessary when the panel is expanded', async () => {
+  it('renders the panel with a hidden overflow-y when the panel is expanded, delegating scrolling to the inner content', async () => {
     render(
       <TestProviders>
         <AlertsTreemapPanel {...defaultProps} />
@@ -184,7 +174,7 @@ describe('AlertsTreemapPanel', () => {
     );
 
     await waitFor(() =>
-      expect(screen.getByTestId('treemapPanel')).toHaveStyleRule('overflow-y', 'auto')
+      expect(screen.getByTestId('treemapPanel')).toHaveStyleRule('overflow-y', 'hidden')
     );
   });
 

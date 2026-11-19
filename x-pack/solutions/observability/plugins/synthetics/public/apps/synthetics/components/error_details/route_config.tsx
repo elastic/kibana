@@ -7,19 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import type { useHistory } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { MonitorDetailsLocation } from '../monitor_details/monitor_details_location';
-import { ResolvedAt } from './components/resolved_at';
-import { ErrorStartedAt } from './components/error_started_at';
 import { ErrorDetailsPage } from './error_details_page';
-import { ErrorDuration } from './components/error_duration';
 import { ERROR_DETAILS_ROUTE } from '../../../../../common/constants';
 import type { RouteProps } from '../../routes';
 
 export const getErrorDetailsRouteConfig = (
-  history: ReturnType<typeof useHistory>,
-  syntheticsPath: string,
+  _history: ReturnType<typeof useHistory>,
+  _syntheticsPath: string,
   baseTitle: string
 ) => {
   return {
@@ -30,19 +24,5 @@ export const getErrorDetailsRouteConfig = (
     path: ERROR_DETAILS_ROUTE,
     component: ErrorDetailsPage,
     dataTestSubj: 'syntheticsMonitorEditPage',
-    pageHeader: {
-      pageTitle: (
-        <FormattedMessage
-          id="xpack.synthetics.editMonitor.errorDetailsRoute.title"
-          defaultMessage="Error details"
-        />
-      ),
-      rightSideItems: [
-        <ErrorDuration />,
-        <MonitorDetailsLocation isDisabled={true} />,
-        <ResolvedAt />,
-        <ErrorStartedAt />,
-      ],
-    },
   } as RouteProps;
 };

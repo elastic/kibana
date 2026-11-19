@@ -6,12 +6,12 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
-import { CloudConnectedPlugin } from './plugin';
 
 export { config } from './config';
 export type { CloudConnectConfig } from './config';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { CloudConnectedPlugin } = await import('./plugin');
   return new CloudConnectedPlugin(initializerContext);
 }
 

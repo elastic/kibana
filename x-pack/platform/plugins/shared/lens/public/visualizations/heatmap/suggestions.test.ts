@@ -759,5 +759,163 @@ describe('heatmap suggestions', () => {
         },
       ]);
     });
+
+    test('when Y axis is numeric, sets ySortPredicate to descending', () => {
+      expect(
+        getSuggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'date-column',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'date',
+                  scale: 'interval',
+                  label: 'Date',
+                },
+              },
+              {
+                columnId: 'number-bucket-column',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'number',
+                  scale: 'interval',
+                  label: 'Price range',
+                },
+              },
+              {
+                columnId: 'metric-column',
+                operation: {
+                  isBucketed: false,
+                  dataType: 'number',
+                  scale: 'ratio',
+                  label: 'Count',
+                },
+              },
+            ],
+            changeType: 'initial',
+          },
+          state: {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+          } as HeatmapVisualizationState,
+          keptLayerIds: ['first'],
+        })
+      ).toEqual([
+        {
+          state: {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            shape: 'heatmap',
+            xAccessor: 'date-column',
+            yAccessor: 'number-bucket-column',
+            valueAccessor: 'metric-column',
+            gridConfig: {
+              type: HEATMAP_GRID_FUNCTION,
+              isCellLabelVisible: false,
+              isYAxisLabelVisible: true,
+              isXAxisLabelVisible: true,
+              isYAxisTitleVisible: false,
+              isXAxisTitleVisible: false,
+              ySortPredicate: 'desc',
+            },
+            legend: {
+              isVisible: true,
+              position: Position.Right,
+              type: LEGEND_FUNCTION,
+            },
+          },
+          title: 'Heat map',
+          hide: false,
+          incomplete: false,
+          previewIcon: IconChartHeatmap,
+          score: 0.3,
+        },
+      ]);
+    });
+
+    test('when Y axis is a string, does not set ySortPredicate', () => {
+      const result = getSuggestions({
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [
+            {
+              columnId: 'date-column',
+              operation: {
+                isBucketed: true,
+                dataType: 'date',
+                scale: 'interval',
+                label: 'Date',
+              },
+            },
+            {
+              columnId: 'string-bucket-column',
+              operation: {
+                isBucketed: true,
+                dataType: 'string',
+                scale: 'ratio',
+                label: 'Region',
+              },
+            },
+            {
+              columnId: 'metric-column',
+              operation: {
+                isBucketed: false,
+                dataType: 'number',
+                scale: 'ratio',
+                label: 'Count',
+              },
+            },
+          ],
+          changeType: 'initial',
+        },
+        state: {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+        } as HeatmapVisualizationState,
+        keptLayerIds: ['first'],
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].state.gridConfig).not.toHaveProperty('ySortPredicate');
+    });
+
+    test('puts time on x for a range bucket over time', () => {
+      const [suggestion] = getSuggestions({
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [
+            {
+              columnId: 'range-column',
+              operation: { isBucketed: true, dataType: 'number_range', label: 'bucket' },
+            },
+            {
+              columnId: 'date-column',
+              operation: { isBucketed: true, dataType: 'date', label: 'Date' },
+            },
+            {
+              columnId: 'metric-column',
+              operation: { isBucketed: false, dataType: 'number', label: 'Count' },
+            },
+          ],
+          changeType: 'initial',
+        },
+        keptLayerIds: [],
+      });
+
+      expect(suggestion).toMatchObject({
+        hide: false,
+        score: 0.9,
+        state: {
+          xAccessor: 'date-column',
+          yAccessor: 'range-column',
+          gridConfig: { ySortPredicate: 'desc' },
+        },
+      });
+    });
   });
 });

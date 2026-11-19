@@ -6,16 +6,15 @@
  */
 
 import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
 import { NetworkDetailsLink } from '../../../common/components/links';
-import { NetworkPanelKey } from '../../../flyout/network_details';
-import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
+import { OpenFlyoutLink } from '../../../flyout_v2/shared/components/open_flyout_link';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 
 const tryStringify = (value: string | object | null | undefined): string => {
   try {
@@ -53,9 +52,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   onClick,
   title,
 }) => {
-  const { openFlyout } = useExpandableFlyoutApi();
-
-  const eventContext = useContext(StatefulEventContext);
+  const { openNetworkFlyout } = useFlyoutApi();
 
   const openNetworkDetailsSidePanel = useCallback(
     (ip: string) => {
@@ -63,22 +60,15 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         onClick();
       }
 
-      if (eventContext) {
-        openFlyout({
-          right: {
-            id: NetworkPanelKey,
-            params: {
-              ip,
-              scopeId: eventContext.timelineID,
-              flowTarget: fieldName.includes(FlowTargetSourceDest.destination)
-                ? FlowTargetSourceDest.destination
-                : FlowTargetSourceDest.source,
-            },
-          },
-        });
-      }
+      const flowTarget = fieldName.includes(FlowTargetSourceDest.destination)
+        ? FlowTargetSourceDest.destination
+        : FlowTargetSourceDest.source;
+
+      // This callback is only used when `Component` is provided, i.e. from the alerts/timeline
+      // table's `EuiDataGrid` cell (see the `content` memo below) — not from inside a flyout.
+      openNetworkFlyout({ ip, flowTarget, origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK });
     },
-    [onClick, eventContext, fieldName, openFlyout]
+    [onClick, fieldName, openNetworkFlyout]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
@@ -94,22 +84,14 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           title={title}
         />
       ) : (
-        <FlyoutLink
+        <OpenFlyoutLink
           field={fieldName}
           value={address}
-          scopeId={eventContext?.timelineID ?? ''}
+          asParent
           data-test-subj="network-details"
         />
       ),
-    [
-      Component,
-      address,
-      isButton,
-      openNetworkDetailsSidePanel,
-      title,
-      eventContext?.timelineID,
-      fieldName,
-    ]
+    [Component, address, isButton, openNetworkDetailsSidePanel, title, fieldName]
   );
 
   return content;

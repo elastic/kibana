@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ruleLastRunOutcomeValues } from '@kbn/alerting-plugin/common/routes/rule/common';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID, brandSpaceId } from '@kbn/core-spaces-common';
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -19,6 +20,7 @@ import { appContextService } from '../../../../app_context';
 import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
 import type { ArchiveAsset } from '../../../kibana/assets/install';
+import { getSpaceScopedAssetId } from '../../../kibana/assets/install';
 import { saveKibanaAssetsRefs } from '../../install';
 import { MAX_CONCURRENT_RULE_CREATION_OPERATIONS } from '../../../../../constants';
 import { generateTemplateIndexPattern } from '../../../elasticsearch/template/template';
@@ -35,30 +37,70 @@ function getRuleId({
   return `fleet-${spaceId ? spaceId : DEFAULT_SPACE_ID}-${pkgName}-${templateId}`;
 }
 
+type ExistingRule = Awaited<ReturnType<RulesClientApi['get']>>;
+
+// Rules created as enabled before OOTB rules defaulted to disabled may keep failing every run when their
+// data does not exist. Disable the ones the user never touched.
+async function disableUntouchedFailingRule(
+  { rulesClient, logger }: { rulesClient: RulesClientApi; logger: InstallContext['logger'] },
+  {
+    ruleId,
+    rule,
+  }: { ruleId: string; rule: Pick<ExistingRule, 'enabled' | 'createdAt' | 'updatedAt' | 'lastRun'> }
+) {
+  const { enabled, createdAt, updatedAt, lastRun } = rule;
+  if (!enabled || !createdAt || !updatedAt) {
+    return;
+  }
+  if (new Date(createdAt).getTime() !== new Date(updatedAt).getTime()) {
+    return;
+  }
+  if (lastRun?.outcome !== ruleLastRunOutcomeValues.FAILED) {
+    return;
+  }
+  if (!lastRun.outcomeMsg?.some((message) => message.includes('verification_exception'))) {
+    return;
+  }
+
+  try {
+    await rulesClient.disableRule({ id: ruleId });
+    logger.info(`Disabled rule ${ruleId}: failing with verification_exception and never modified`);
+  } catch (e) {
+    logger.warn(`Error disabling failing rule ${ruleId}`, { error: e });
+  }
+}
+
 export async function createAlertingRuleFromTemplate(
   deps: { rulesClient?: RulesClientApi; logger: InstallContext['logger'] },
   params: {
     alertTemplateArchiveAsset: ArchiveAsset;
     spaceId?: string;
     pkgName: string;
+    installAsAdditionalSpace?: boolean;
   }
 ): Promise<KibanaAssetReference> {
   const { rulesClient, logger } = deps;
-  const { pkgName, alertTemplateArchiveAsset, spaceId } = params;
+  const { pkgName, alertTemplateArchiveAsset, spaceId, installAsAdditionalSpace } = params;
   const ruleId = getRuleId({ pkgName, templateId: alertTemplateArchiveAsset.id, spaceId });
   try {
     if (!rulesClient) {
       throw new FleetError('Rules client is not available');
     }
 
-    const template = await rulesClient
-      .getTemplate({ id: alertTemplateArchiveAsset.id })
-      .catch((err) => {
-        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-          return undefined;
-        }
-        throw err;
-      });
+    // When the package was installed in an additional space its alerting_rule_template SOs
+    // were saved with a space-scoped hashed ID (originId = archive ID). Look up by that
+    // hashed ID so the template can be found in this space.
+    const templateLookupId =
+      installAsAdditionalSpace && spaceId
+        ? getSpaceScopedAssetId(alertTemplateArchiveAsset.id, spaceId)
+        : alertTemplateArchiveAsset.id;
+
+    const template = await rulesClient.getTemplate({ id: templateLookupId }).catch((err) => {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        return undefined;
+      }
+      throw err;
+    });
     if (!template) {
       throw new FleetError(`Rule template ${alertTemplateArchiveAsset.id} not found`);
     }
@@ -71,6 +113,7 @@ export async function createAlertingRuleFromTemplate(
     });
     // Already created
     if (rule) {
+      await disableUntouchedFailingRule({ rulesClient, logger }, { ruleId, rule });
       return {
         id: ruleId,
         type: KibanaSavedObjectType.alert,
@@ -90,6 +133,7 @@ export async function createAlertingRuleFromTemplate(
         consumer: 'alerts',
       }, // what value for consumer will make sense?
       options: { id: ruleId },
+      templateId: alertTemplateArchiveAsset.id,
     });
 
     return {
@@ -128,7 +172,7 @@ export async function createInactivityMonitoringTemplate(
   deps: { logger: Logger; savedObjectsClient: SavedObjectsClientContract },
   params: {
     packageInfo: InstallablePackage;
-    spaceId?: string;
+    spaceId: string;
     installAsAdditionalSpace?: boolean;
   }
 ): Promise<KibanaAssetReference | undefined> {
@@ -163,14 +207,13 @@ export async function createInactivityMonitoringTemplate(
       // scoped or unscoped client causes incorrect namespace resolution for get/create.
       const internalSoClient = appContextService
         .getInternalUserSOClient()
-        .asScopedToNamespace(spaceId ?? DEFAULT_SPACE_ID);
+        .asScopedToNamespace(spaceId);
 
       // Check if the template already exists
       const existing = await internalSoClient
-        .get<{ params?: Record<string, unknown> }>(
-          KibanaSavedObjectType.alertingRuleTemplate,
-          templateId
-        )
+        .get<{
+          params?: Record<string, unknown>;
+        }>(KibanaSavedObjectType.alertingRuleTemplate, templateId)
         .catch((err) => {
           if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
             return undefined;
@@ -207,6 +250,7 @@ export async function createInactivityMonitoringTemplate(
           savedObjectsClient,
           pkgName,
           [templateRef],
+          spaceId,
           installAsAdditionalSpace,
           true
         );
@@ -254,6 +298,7 @@ export async function createInactivityMonitoringTemplate(
         savedObjectsClient,
         pkgName,
         [templateRef],
+        spaceId,
         installAsAdditionalSpace,
         true
       );
@@ -272,11 +317,31 @@ export async function createInactivityMonitoringTemplate(
 export async function stepCreateAlertingAssets(
   context: Pick<
     InstallContext,
-    'logger' | 'savedObjectsClient' | 'packageInstallContext' | 'spaceId' | 'request'
+    | 'logger'
+    | 'savedObjectsClient'
+    | 'packageInstallContext'
+    | 'spaceId'
+    | 'request'
+    | 'installedPkg'
   > & { installAsAdditionalSpace?: boolean }
 ) {
-  const { logger, savedObjectsClient, packageInstallContext, spaceId, installAsAdditionalSpace } =
-    context;
+  const {
+    logger,
+    savedObjectsClient,
+    packageInstallContext,
+    spaceId,
+    installAsAdditionalSpace: explicitInstallAsAdditionalSpace,
+    installedPkg,
+  } = context;
+
+  // When called from the state machine the flag is not set on InstallContext; derive it from
+  // the package's primary installation space so that secondary-space reinstalls save refs to
+  // additional_spaces_installed_kibana instead of installed_kibana.
+  const installAsAdditionalSpace =
+    explicitInstallAsAdditionalSpace ??
+    (installedPkg
+      ? (installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID) !== spaceId
+      : false);
   const { packageInfo } = packageInstallContext;
   const { name: pkgName } = packageInfo;
 
@@ -286,6 +351,26 @@ export async function stepCreateAlertingAssets(
     { packageInfo, spaceId, installAsAdditionalSpace }
   );
 
+  // When running from the primary space during a full reinstall, also recreate the inactivity
+  // monitoring template for every registered secondary space. The archive-asset reinstall step
+  // deletes the template SO (it is an alerting_rule_template hidden type) but does not recreate
+  // it because it lives outside the package archive. stepCreateAlertingAssets is only invoked
+  // once per install (for the primary space), so without this loop secondary spaces would be
+  // left without their inactivity template after any primary-space reinstall.
+  if (!installAsAdditionalSpace && installedPkg) {
+    const primarySpaceId = installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
+    for (const additionalSpaceId of Object.keys(
+      installedPkg.attributes.additional_spaces_installed_kibana ?? {}
+    ).filter((s) => s !== primarySpaceId)) {
+      const spaceScopedClient =
+        appContextService.getInternalUserSOClientForSpaceId(additionalSpaceId);
+      await createInactivityMonitoringTemplate(
+        { logger, savedObjectsClient: spaceScopedClient },
+        { packageInfo, spaceId: additionalSpaceId, installAsAdditionalSpace: true }
+      );
+    }
+  }
+
   // Create alerting rules templates from archive assets
   if (pkgName !== FLEET_ELASTIC_AGENT_PACKAGE) {
     return;
@@ -293,7 +378,9 @@ export async function stepCreateAlertingAssets(
 
   await withPackageSpan('Install elastic agent rules', async () => {
     const rulesClient = context.request
-      ? await appContextService.getAlertingStart()?.getRulesClientWithRequest(context.request)
+      ? await appContextService
+          .getAlertingStart()
+          ?.getRulesClientWithRequestInSpace(context.request, brandSpaceId(spaceId))
       : undefined;
 
     const alertTemplateAssets: ArchiveAsset[] = [];
@@ -315,7 +402,7 @@ export async function stepCreateAlertingAssets(
       async (alertTemplate) => {
         const ref = await createAlertingRuleFromTemplate(
           { rulesClient, logger },
-          { alertTemplateArchiveAsset: alertTemplate, spaceId, pkgName }
+          { alertTemplateArchiveAsset: alertTemplate, spaceId, pkgName, installAsAdditionalSpace }
         );
 
         assetRefs.push(ref);
@@ -323,6 +410,14 @@ export async function stepCreateAlertingAssets(
       { concurrency: MAX_CONCURRENT_RULE_CREATION_OPERATIONS }
     );
 
-    await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, false, true);
+    await saveKibanaAssetsRefs(
+      savedObjectsClient,
+      pkgName,
+      assetRefs,
+      spaceId,
+      installAsAdditionalSpace ?? false,
+      true,
+      [KibanaSavedObjectType.alert]
+    );
   });
 }

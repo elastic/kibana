@@ -14,7 +14,7 @@ import { AddToLibraryAction } from './library_add_action';
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('@kbn/saved-objects-plugin/public', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const { render } = require('@testing-library/react');
   const MockSavedObjectSaveModal = ({
     onSave,
@@ -25,8 +25,6 @@ jest.mock('@kbn/saved-objects-plugin/public', () => {
     onSave({
       newTitle: 'Library panel one',
       newCopyOnSave: true,
-      isTitleDuplicateConfirmed: false,
-      onTitleDuplicate: () => {},
       newDescription: '',
     });
     return null;
@@ -44,7 +42,7 @@ describe('AddToLibraryAction', () => {
   const saveToLibraryMock = jest.fn(async () => 'libraryId1');
   const replacePanelMock = jest.fn();
   const embeddableApi = {
-    checkForDuplicateTitle: async () => {},
+    hasLibraryItemWithTitle: async () => false,
     canLinkToLibrary: async () => true,
     canUnlinkFromLibrary: async () => false,
     getSerializedStateByReference: () => ({ savedObjectId: 'libraryId1' }),

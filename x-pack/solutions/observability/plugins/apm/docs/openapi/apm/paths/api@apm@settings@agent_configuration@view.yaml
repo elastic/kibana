@@ -1,5 +1,9 @@
 get:
   summary: Get single agent configuration
+  description: >
+    Retrieve a single agent configuration matching the given service name and environment.
+    You must have `read` privileges for the APM and User Experience feature in Kibana.
+    If no matching configuration is found, the API returns a 404.
   operationId: getSingleAgentConfiguration
   tags:
     - APM agent configuration
@@ -24,21 +28,33 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/single_agent_configuration_response.yaml'
+          examples:
+            getSingleAgentConfigurationResponseExample1:
+              $ref: '../components/examples/agent_configuration_intake_object_view_200_response1.yaml'
     '400':
       description: Bad Request response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            badRequestResponse:
+              $ref: '../components/examples/error_400_response.yaml'
     '401':
       description: Unauthorized response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
+          examples:
+            unauthorizedResponse:
+              $ref: '../components/examples/error_401_response.yaml'
     '404':
       description: Not found response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
+          examples:
+            notFoundResponse:
+              $ref: '../components/examples/error_404_response.yaml'

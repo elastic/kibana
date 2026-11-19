@@ -90,7 +90,7 @@ describe('ViewDetailsPopover', () => {
       expect(request1MockOpenInInspector).not.toHaveBeenCalled();
       expect(request2MockOpenInInspector).not.toHaveBeenCalled();
 
-      const openRequest1Button = screen.getByRole('button', { name: 'My first request' });
+      const openRequest1Button = screen.getByRole('menuitem', { name: 'My first request' });
       fireEvent.click(openRequest1Button);
       expect(request1MockOpenInInspector).toHaveBeenCalled();
       expect(request2MockOpenInInspector).not.toHaveBeenCalled();
@@ -103,7 +103,7 @@ describe('ViewDetailsPopover', () => {
       expect(request1MockOpenInInspector).not.toHaveBeenCalled();
       expect(request2MockOpenInInspector).not.toHaveBeenCalled();
 
-      const openRequest1Button = screen.getByRole('button', { name: 'My first request' });
+      const openRequest1Button = screen.getByRole('menuitem', { name: 'My first request' });
       fireEvent.click(openRequest1Button);
       expect(request1MockOpenInInspector).toHaveBeenCalled();
       expect(request2MockOpenInInspector).not.toHaveBeenCalled();
@@ -122,8 +122,8 @@ describe('ViewDetailsPopover', () => {
       const viewDetailsButton = screen.getByRole('button');
       fireEvent.click(viewDetailsButton);
 
-      screen.getByRole('button', { name: 'Request' });
-      screen.getByRole('button', { name: 'Request (2)' });
+      screen.getByRole('menuitem', { name: 'Request' });
+      screen.getByRole('menuitem', { name: 'Request (2)' });
     });
   });
 });

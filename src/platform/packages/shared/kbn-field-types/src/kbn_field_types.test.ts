@@ -55,6 +55,7 @@ describe('utils/kbn_field_types', () => {
   describe('castEsToKbnFieldTypeName()', () => {
     test('returns the kbnFieldType name that matches the esType', () => {
       expect(castEsToKbnFieldTypeName(ES_FIELD_TYPES.KEYWORD)).toBe('string');
+      expect(castEsToKbnFieldTypeName(ES_FIELD_TYPES.WILDCARD)).toBe('string');
       expect(castEsToKbnFieldTypeName(ES_FIELD_TYPES.FLOAT)).toBe('number');
       expect(castEsToKbnFieldTypeName(ES_FIELD_TYPES.UNSIGNED_LONG)).toBe('number');
     });
@@ -78,6 +79,7 @@ describe('utils/kbn_field_types', () => {
         KBN_FIELD_TYPES.DATE,
         KBN_FIELD_TYPES.DATE_RANGE,
         KBN_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
+        KBN_FIELD_TYPES.FLATTENED,
         KBN_FIELD_TYPES.GEO_POINT,
         KBN_FIELD_TYPES.GEO_SHAPE,
         KBN_FIELD_TYPES.HISTOGRAM,

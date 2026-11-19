@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import ResilientParamsFields from './resilient_params';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('./use_get_incident_types');
@@ -75,23 +75,21 @@ describe('ResilientParamsFields renders', () => {
   });
 
   test('all params fields are rendered', () => {
-    const wrapper = mount(<ResilientParamsFields {...defaultProps} />);
-    expect(wrapper.find('[data-test-subj="incidentTypeComboBox"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toStrictEqual(
-      6
-    );
-    expect(wrapper.find('[data-test-subj="nameInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="descriptionTextArea"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="commentsTextArea"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="additionalFields"]').length > 0).toBeTruthy();
+    render(<ResilientParamsFields {...defaultProps} />);
+    expect(screen.getByTestId('incidentTypeComboBox')).toBeInTheDocument();
+    expect(screen.getByTestId('nameInput')).toBeInTheDocument();
+    expect(screen.getByTestId('descriptionTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('commentsTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('additionalFields')).toBeInTheDocument();
   });
+
   test('it shows loading when loading incident types', () => {
     useGetIncidentTypesMock.mockReturnValue({ ...useGetIncidentTypesResponse, isLoading: true });
-    const wrapper = mount(<ResilientParamsFields {...defaultProps} />);
-
+    render(<ResilientParamsFields {...defaultProps} />);
+    // EUI ComboBox renders a loading spinner when isLoading is true
     expect(
-      wrapper.find('[data-test-subj="incidentTypeComboBox"]').first().prop('isLoading')
-    ).toBeTruthy();
+      screen.getByTestId('incidentTypeComboBox').querySelector('.euiLoadingSpinner')
+    ).toBeInTheDocument();
   });
 
   test('it shows loading when loading severity', () => {
@@ -99,22 +97,15 @@ describe('ResilientParamsFields renders', () => {
       ...useGetSeverityResponse,
       isLoading: true,
     });
-
-    const wrapper = mount(<ResilientParamsFields {...defaultProps} />);
-
-    expect(
-      wrapper.find('[data-test-subj="severitySelect"]').first().prop('isLoading')
-    ).toBeTruthy();
+    render(<ResilientParamsFields {...defaultProps} />);
+    expect(screen.getByTestId('severitySelect')).toBeDisabled();
   });
 
   test('it disabled the fields when loading issue types', () => {
     useGetIncidentTypesMock.mockReturnValue({ ...useGetIncidentTypesResponse, isLoading: true });
-
-    const wrapper = mount(<ResilientParamsFields {...defaultProps} />);
-
-    expect(
-      wrapper.find('[data-test-subj="incidentTypeComboBox"]').first().prop('isDisabled')
-    ).toBeTruthy();
+    render(<ResilientParamsFields {...defaultProps} />);
+    const comboBoxInput = within(screen.getByTestId('incidentTypeComboBox')).getByRole('combobox');
+    expect(comboBoxInput).toBeDisabled();
   });
 
   test('it disabled the fields when loading severity', () => {
@@ -122,20 +113,19 @@ describe('ResilientParamsFields renders', () => {
       ...useGetSeverityResponse,
       isLoading: true,
     });
-
-    const wrapper = mount(<ResilientParamsFields {...defaultProps} />);
-
-    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('disabled')).toBeTruthy();
+    render(<ResilientParamsFields {...defaultProps} />);
+    expect(screen.getByTestId('severitySelect')).toBeDisabled();
   });
+
   test('If name has errors, form row is invalid', () => {
     const newProps = {
       ...defaultProps,
       errors: { 'subActionParams.incident.name': ['error'] },
     };
-    const wrapper = mount(<ResilientParamsFields {...newProps} />);
-    const title = wrapper.find('[data-test-subj="nameInput"]').first();
-    expect(title.prop('isInvalid')).toBeTruthy();
+    render(<ResilientParamsFields {...newProps} />);
+    expect(screen.getByTestId('nameInput')).toHaveAttribute('aria-invalid', 'true');
   });
+
   test('When subActionParams is undefined, set to default', () => {
     const { subActionParams, ...newParams } = actionParams;
 
@@ -143,12 +133,13 @@ describe('ResilientParamsFields renders', () => {
       ...defaultProps,
       actionParams: newParams,
     };
-    mount(<ResilientParamsFields {...newProps} />);
+    render(<ResilientParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1]).toEqual({
       incident: {},
       comments: [],
     });
   });
+
   test('When subAction is undefined, set to default', () => {
     const { subAction, ...newParams } = actionParams;
 
@@ -156,45 +147,55 @@ describe('ResilientParamsFields renders', () => {
       ...defaultProps,
       actionParams: newParams,
     };
-    mount(<ResilientParamsFields {...newProps} />);
+    render(<ResilientParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1]).toEqual('pushToService');
   });
+
   test('Resets fields when connector changes', () => {
-    const wrapper = mount(<ResilientParamsFields {...defaultProps} />);
+    const { rerender } = render(<ResilientParamsFields {...defaultProps} />);
     expect(editAction.mock.calls.length).toEqual(0);
-    wrapper.setProps({ actionConnector: { ...connector, id: '1234' } });
+    rerender(
+      <ResilientParamsFields {...defaultProps} actionConnector={{ ...connector, id: '1234' }} />
+    );
     expect(editAction.mock.calls.length).toEqual(1);
     expect(editAction.mock.calls[0][1]).toEqual({
       incident: {},
       comments: [],
     });
   });
+
   describe('UI updates', () => {
-    const changeEvent = { target: { value: 'Bug' } } as React.ChangeEvent<HTMLSelectElement>;
-    const simpleFields = [
-      { dataTestSubj: 'input[data-test-subj="nameInput"]', key: 'name' },
-      { dataTestSubj: 'textarea[data-test-subj="descriptionTextArea"]', key: 'description' },
-      { dataTestSubj: '[data-test-subj="severitySelect"]', key: 'severityCode' },
-    ];
-    simpleFields.forEach((field) =>
-      test(`${field.key} update triggers editAction :D`, () => {
-        const wrapper = mount(<ResilientParamsFields {...defaultProps} />);
-        const theField = wrapper.find(field.dataTestSubj).first();
-        theField.prop('onChange')!(changeEvent);
-        expect(editAction.mock.calls[0][1].incident[field.key]).toEqual(changeEvent.target.value);
-      })
-    );
-    test('incidentTypeComboBox creation triggers editAction', () => {
-      const wrapper = mount(<ResilientParamsFields {...defaultProps} />);
-      const incidentTypes = wrapper.find('[data-test-subj="incidentTypeComboBox"]');
-      (
-        incidentTypes.at(0).props() as unknown as {
-          onChange: (a: EuiComboBoxOptionOption[]) => void;
-        }
-      ).onChange([{ label: 'Cool' }]);
-      expect(editAction.mock.calls[0][1].incident.incidentTypes).toEqual(['Cool']);
+    test('name update triggers editAction', async () => {
+      render(<ResilientParamsFields {...defaultProps} />);
+      await userEvent.tripleClick(screen.getByTestId('nameInput'));
+      await userEvent.paste('Bug');
+      expect(editAction.mock.calls.at(-1)[1].incident.name).toEqual('Bug');
     });
-    test('incidentTypes undefined triggers editAction', () => {
+
+    test('description update triggers editAction', async () => {
+      render(<ResilientParamsFields {...defaultProps} />);
+      await userEvent.tripleClick(screen.getByTestId('descriptionTextArea'));
+      await userEvent.paste('Bug');
+      expect(editAction.mock.calls.at(-1)[1].incident.description).toEqual('Bug');
+    });
+
+    test('severityCode update triggers editAction', async () => {
+      render(<ResilientParamsFields {...defaultProps} />);
+      await userEvent.selectOptions(screen.getByTestId('severitySelect'), '4');
+      expect(editAction.mock.calls.at(-1)[1].incident.severityCode).toEqual('4');
+    });
+
+    test('incidentTypeComboBox creation triggers editAction', async () => {
+      render(<ResilientParamsFields {...defaultProps} />);
+      const input = within(screen.getByTestId('incidentTypeComboBox')).getByRole('combobox');
+      await userEvent.click(input);
+      await userEvent.type(input, 'Malware');
+      const option = await screen.findByText('Malware');
+      await userEvent.click(option, { pointerEventsCheck: 0 });
+      expect(editAction.mock.calls[0][1].incident.incidentTypes).toEqual(['19']);
+    });
+
+    test('incidentTypes undefined triggers editAction', async () => {
       const newProps = {
         ...defaultProps,
         actionParams: {
@@ -208,20 +209,18 @@ describe('ResilientParamsFields renders', () => {
           },
         },
       };
-      const wrapper = mount(<ResilientParamsFields {...newProps} />);
-      const incidentTypes = wrapper.find('[data-test-subj="incidentTypeComboBox"]');
-      (
-        incidentTypes.at(0).props() as unknown as {
-          onBlur: () => void;
-        }
-      ).onBlur();
-      expect(editAction.mock.calls[0][1].incident.incidentTypes).toEqual([]);
+      render(<ResilientParamsFields {...newProps} />);
+      const input = within(screen.getByTestId('incidentTypeComboBox')).getByRole('combobox');
+      // Trigger blur without selection to verify empty incidentTypes
+      await userEvent.click(input);
+      await userEvent.tab();
+      expect(editAction.mock.calls.at(-1)[1].incident.incidentTypes).toEqual([]);
     });
-    test('A comment triggers editAction', () => {
-      const wrapper = mount(<ResilientParamsFields {...defaultProps} />);
-      const comments = wrapper.find('textarea[data-test-subj="commentsTextArea"]');
-      expect(comments.simulate('change', changeEvent));
-      expect(editAction.mock.calls[0][1].comments.length).toEqual(1);
+
+    test('A comment triggers editAction', async () => {
+      render(<ResilientParamsFields {...defaultProps} />);
+      await userEvent.type(screen.getByTestId('commentsTextArea'), 'Bug');
+      expect(editAction.mock.calls.at(-1)[1].comments.length).toEqual(1);
     });
   });
 });

@@ -188,9 +188,8 @@ describe('UnifiedFieldList <FieldItemButton />', () => {
 
     expect(screen.getByTestId('field-script date')).toBeInTheDocument();
 
-    const markElement = screen.getByTestId('field-script date').querySelector('mark');
-    expect(markElement).toBeInTheDocument();
-    expect(markElement).toHaveTextContent('script date');
+    const markElements = screen.getByTestId('field-script date').querySelectorAll('mark');
+    expect(Array.from(markElements).map(({ textContent }) => textContent)).toEqual(['sc', 'te']);
   });
 
   it('renders properly for search with spaces', async () => {
@@ -202,8 +201,21 @@ describe('UnifiedFieldList <FieldItemButton />', () => {
 
     expect(screen.getByTestId('field-script date')).toBeInTheDocument();
 
-    const markElement = screen.getByTestId('field-script date').querySelector('mark');
-    expect(markElement).toBeInTheDocument();
-    expect(markElement).toHaveTextContent('script date');
+    const markElements = screen.getByTestId('field-script date').querySelectorAll('mark');
+    expect(Array.from(markElements).map(({ textContent }) => textContent)).toEqual(['sc', 'te']);
+  });
+
+  it('does not highlight the whole field name when no specific part matches', async () => {
+    await act(async () =>
+      renderWithKibanaRenderContext(
+        <FieldItemButton
+          {...commonProps}
+          field={scriptedField}
+          fieldSearchHighlight="not-a-match"
+        />
+      )
+    );
+
+    expect(screen.getByTestId('field-script date').querySelector('mark')).not.toBeInTheDocument();
   });
 });

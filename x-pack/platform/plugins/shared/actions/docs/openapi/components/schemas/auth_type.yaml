@@ -4,5 +4,6 @@ nullable: true
 enum:
   - webhook-authentication-basic
   - webhook-authentication-ssl
+  - webhook-oauth2-client-credentials
 description: >
-  The type of authentication to use: basic, SSL, or none.
+  The type of authentication to use: basic, SSL, OAuth2 client credentials, or none.

@@ -32,10 +32,6 @@ export const OPERATION_TYPE_OVERRIDES: Record<string, OperationTypeOverride> = {
   // Streams - new, no existing users, no aliases needed
   'get-streams': { type: 'streams.list', backward: false },
   'get-streams-name': { type: 'streams.get', backward: false },
-  'get-streams-name-significant-events': {
-    type: 'streams.getSignificantEvents',
-    backward: false,
-  },
 };
 
 /**
@@ -47,3 +43,7 @@ export const KIBANA_TYPE_ALIASES: Record<string, string> = Object.fromEntries(
     .filter(([, v]) => v.backward)
     .map(([oldOp, v]) => [`kibana.${oldOp}`, `kibana.${v.type}`])
 );
+
+export function resolveKibanaStepTypeAlias(stepType: string): string {
+  return KIBANA_TYPE_ALIASES[stepType] ?? stepType;
+}

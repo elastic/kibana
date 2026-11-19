@@ -8,13 +8,22 @@
 import { i18n } from '@kbn/i18n';
 import type { AvailableReferenceLineIcon } from '@kbn/expression-xy-plugin/common';
 import type { AvailableMetricIcon } from '@kbn/expression-metric-vis-plugin/common';
-import { iconSortCriteria, type IconSet, sharedSetOfIcons } from '@kbn/visualization-ui-components';
+import {
+  iconSortCriteria,
+  type IconSet,
+  sharedSetOfIcons,
+  annotationReferenceLineSharedSetOfIcons,
+  emptyIconEntry,
+} from '@kbn/visualization-ui-components';
 
-export const referenceLineIconsSet: IconSet<AvailableReferenceLineIcon> = sharedSetOfIcons;
+export const referenceLineIconsSet: IconSet<AvailableReferenceLineIcon> = [
+  emptyIconEntry,
+  ...annotationReferenceLineSharedSetOfIcons,
+].sort(iconSortCriteria);
 
 export const metricIconsSet: IconSet<AvailableMetricIcon> = [
+  emptyIconEntry,
   ...sharedSetOfIcons,
-  // use spread here to avoid to cast single entries
   ...([
     {
       value: 'sortUp',
@@ -47,24 +56,10 @@ export const metricIconsSet: IconSet<AvailableMetricIcon> = [
       }),
     },
     {
-      value: 'heart',
-      label: i18n.translate('xpack.lens.metric.iconSelect.heartLabel', { defaultMessage: 'Heart' }),
-    },
-    {
-      value: 'mapMarker',
-      label: i18n.translate('xpack.lens.metric.iconSelect.mapMarkerLabel', {
-        defaultMessage: 'Map Marker',
-      }),
-    },
-    {
       value: 'pin',
       label: i18n.translate('xpack.lens.metric.iconSelect.mapPinLabel', {
         defaultMessage: 'Map Pin',
       }),
-    },
-    {
-      value: 'starEmpty',
-      label: i18n.translate('xpack.lens.metric.iconSelect.starLabel', { defaultMessage: 'Star' }),
     },
   ] as const),
 ].sort(iconSortCriteria);

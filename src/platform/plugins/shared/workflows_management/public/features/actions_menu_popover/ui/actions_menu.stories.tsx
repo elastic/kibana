@@ -9,10 +9,12 @@
 
 import type { Meta } from '@storybook/react';
 import { ActionsMenu } from './actions_menu';
+import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 
 const meta: Meta = {
   title: 'ActionsMenu',
   component: ActionsMenu,
+  decorators: [kibanaReactDecorator],
 };
 
 export default meta;

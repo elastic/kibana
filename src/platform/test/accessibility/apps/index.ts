@@ -9,24 +9,19 @@
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-export default function ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'settings']);
+  const sampleData = getService('sampleData');
 
   describe('a11y tests', function () {
     describe('using flights sample data', function () {
       before(async () => {
-        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-          useActualUrl: true,
-        });
-        await PageObjects.home.addSampleDataSet('flights');
+        await sampleData.testResources.installKibanaSampleData('flights');
       });
 
       after(async () => {
-        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-          useActualUrl: true,
-        });
-        await PageObjects.home.removeSampleDataSet('flights');
+        await sampleData.testResources.removeKibanaSampleData('flights');
+        await kibanaServer.uiSettings.unset('defaultIndex');
         await kibanaServer.savedObjects.clean({
           types: ['search', 'index-pattern', 'visualization', 'dashboard'],
         });
@@ -34,16 +29,7 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
 
       loadTestFile(require.resolve('./dashboard'));
       loadTestFile(require.resolve('./filter_panel'));
-      loadTestFile(require.resolve('./home'));
-      loadTestFile(require.resolve('./discover'));
       loadTestFile(require.resolve('./visualize'));
-      loadTestFile(require.resolve('./kibana_overview_with_data'));
-    });
-
-    describe('not using sample data', function () {
-      loadTestFile(require.resolve('./management'));
-      loadTestFile(require.resolve('./console'));
-      loadTestFile(require.resolve('./kibana_overview_without_data'));
     });
   });
 }

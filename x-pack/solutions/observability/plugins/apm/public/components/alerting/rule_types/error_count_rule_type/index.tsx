@@ -43,6 +43,7 @@ import {
   NoDataState,
 } from '../../ui_components/chart_preview/chart_preview_helper';
 import { ApmRuleKqlFilter } from '../../ui_components/apm_rule_kql_filter';
+import { DEFAULT_GROUP_BY_ERROR_COUNT } from '../../../../../common/rules/get_all_groupby_fields';
 
 export interface ErrorCountRuleParams {
   windowSize?: number;
@@ -71,6 +72,8 @@ export function ErrorCountRuleType(props: Props) {
     createCallApmApi(services as CoreStart);
   }, [services]);
 
+  const isNewRule = ruleParams.threshold === undefined;
+
   const params = defaults(
     { ...omit(metadata, ['start', 'end']), ...ruleParams },
     {
@@ -78,6 +81,7 @@ export function ErrorCountRuleType(props: Props) {
       windowSize: 5,
       windowUnit: TIME_UNITS.MINUTE,
       environment: ENVIRONMENT_ALL.value,
+      ...(isNewRule && { groupBy: [...DEFAULT_GROUP_BY_ERROR_COUNT] }),
     }
   );
 
@@ -202,14 +206,14 @@ export function ErrorCountRuleType(props: Props) {
         })}
         helpText={i18n.translate('xpack.apm.ruleFlyout.errorCount.createAlertPerHelpText', {
           defaultMessage:
-            'Create an alert for every unique value. For example: "transaction.name". By default, alert is created for every unique service.name and service.environment.',
+            'Create an alert for every unique value. By default, alert is created for every unique service.name, service.environment and transaction.name.',
         })}
         fullWidth
         display="rowCompressed"
       >
         <APMRuleGroupBy
           onChange={onGroupByChange}
-          options={{ groupBy: ruleParams.groupBy }}
+          options={{ groupBy: params.groupBy }}
           fields={[TRANSACTION_NAME, ERROR_GROUP_ID, ERROR_GROUP_NAME]}
           preSelectedOptions={[SERVICE_NAME, SERVICE_ENVIRONMENT]}
         />

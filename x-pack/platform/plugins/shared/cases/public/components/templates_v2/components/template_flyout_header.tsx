@@ -20,7 +20,7 @@ export const TemplateFlyoutHeader = React.memo<TemplateFlyoutHeaderProps>(({ ste
 
   return (
     <EuiFlyoutHeader data-test-subj="template-flyout-header" hasBorder>
-      <EuiTitle size="m">
+      <EuiTitle size="s">
         <h2>{i18n.IMPORT_TEMPLATE}</h2>
       </EuiTitle>
       <EuiText

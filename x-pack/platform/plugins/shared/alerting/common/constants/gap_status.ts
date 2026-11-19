@@ -26,6 +26,7 @@ export const gapFillStatus = {
   UNFILLED: 'unfilled',
   IN_PROGRESS: 'in_progress',
   FILLED: 'filled',
+  ERROR: 'error',
 } as const;
 
 export type GapFillStatus = (typeof gapFillStatus)[keyof typeof gapFillStatus];

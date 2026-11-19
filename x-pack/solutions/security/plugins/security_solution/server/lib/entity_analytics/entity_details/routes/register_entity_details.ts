@@ -7,14 +7,12 @@
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { entityDetailsHighlightsRoute } from './entity_details_highlight';
+import { entityDetailsAiSummaryRoute } from './entity_details_ai_summary';
+import { entityDetailsGetAiSummaryRoute } from './entity_details_get_ai_summary';
 
-export const registerEntityDetailsRoutes = ({
-  router,
-  logger,
-  config,
-  getStartServices,
-  ml,
-}: EntityAnalyticsRoutesDeps) => {
+export const registerEntityDetailsRoutes = (routeDeps: EntityAnalyticsRoutesDeps) => {
   // Internal routes
-  entityDetailsHighlightsRoute(router, logger, getStartServices, ml);
+  entityDetailsHighlightsRoute(routeDeps);
+  entityDetailsAiSummaryRoute(routeDeps);
+  entityDetailsGetAiSummaryRoute(routeDeps);
 };

@@ -162,6 +162,10 @@ interface OnboardingCloudForwarderEventContext {
   cloudServiceProvider?: string;
 }
 
+interface OnboardingKubernetesEventContext {
+  selectedCollectorMethod?: 'edot' | 'existing_collector';
+}
+
 /**
  * Additional flow-specific context that might
  * be attached to telemetry events.
@@ -170,6 +174,7 @@ export interface OnboardingFlowEventContext {
   autoDetect?: OnboardingAutoDetectEventContext;
   firehose?: OnboardingFirehoseFlowEventContext;
   cloudforwarder?: OnboardingCloudForwarderEventContext;
+  kubernetes?: OnboardingKubernetesEventContext;
 }
 
 const flowContextSchema: SchemaValue<OnboardingFlowEventContext | undefined> = {
@@ -231,6 +236,20 @@ const flowContextSchema: SchemaValue<OnboardingFlowEventContext | undefined> = {
           _meta: {
             description:
               "The cloud service provider where the cloud forwarder is deployed. Can be 'aws', 'gcp' or 'azure'",
+            optional: true,
+          },
+        },
+      },
+      _meta: {
+        optional: true,
+      },
+    },
+    kubernetes: {
+      properties: {
+        selectedCollectorMethod: {
+          type: 'keyword',
+          _meta: {
+            description: 'Which Kubernetes OTel collector setup method is selected in the UI.',
             optional: true,
           },
         },
@@ -338,32 +357,51 @@ export const OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT: Eve
   },
 };
 
-export const OBSERVABILITY_ONBOARDING_WIRED_STREAMS_AUTO_ENABLED_EVENT: EventTypeOpts<{
-  flow_type: string;
-  success: boolean;
-  error_message?: string;
-}> = {
-  eventType: 'observability_onboarding_wired_streams_auto_enabled',
-  schema: {
-    flow_type: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'The onboarding flow type where auto-enable was triggered (otel_host, otel_kubernetes, elastic_agent_kubernetes, auto_detect)',
+export type AddDataTileSurface = 'tile' | 'mini_tile' | 'search_result' | 'collection_variant';
+
+export interface AddDataTileClickEventFields {
+  tile_id: string;
+  surface: AddDataTileSurface;
+  collection_id?: string;
+  has_search_term: boolean;
+  is_recommended?: boolean;
+}
+
+export const OBSERVABILITY_ONBOARDING_ADD_DATA_TILE_CLICK_TELEMETRY_EVENT: EventTypeOpts<AddDataTileClickEventFields> =
+  {
+    eventType: 'observability_onboarding_add_data_tile_click',
+    schema: {
+      tile_id: {
+        type: 'keyword',
+        _meta: {
+          description: 'Tile id, or Fleet card id for search results and variants.',
+        },
+      },
+      surface: {
+        type: 'keyword',
+        _meta: {
+          description: 'tile, mini_tile, search_result or collection_variant.',
+        },
+      },
+      collection_id: {
+        type: 'keyword',
+        _meta: {
+          description: 'Fleet group id, set on chooser opens and variant picks.',
+          optional: true,
+        },
+      },
+      has_search_term: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the search field held a term.',
+        },
+      },
+      is_recommended: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the variant had the Recommended badge.',
+          optional: true,
+        },
       },
     },
-    success: {
-      type: 'boolean',
-      _meta: {
-        description: 'Whether the auto-enable operation succeeded',
-      },
-    },
-    error_message: {
-      type: 'text',
-      _meta: {
-        description: 'Error message if auto-enable failed',
-        optional: true,
-      },
-    },
-  },
-};
+  };

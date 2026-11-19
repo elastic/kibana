@@ -82,7 +82,7 @@ export const EmptyPage: FC = () => {
           data-test-subj={INTEGRATION_LINK_ID}
           href={integrationsPageLink}
           color="primary"
-          iconType="plusInCircle"
+          iconType="plusCircle"
           fill
         >
           <FormattedMessage

@@ -1,0 +1,176 @@
+{
+  "sha1": "ffe12b88c3f6d5ef9c310b7586e566ae7f419ca1",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "9bce89873e5159b-49a387e65cecf33",
+      "title": "Analyzer resolver entity to tree for linked-cluster events entity lookup finds a linked-cluster process and tree returns parent and child",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/analyzer_resolver_linked_events.spec.ts",
+        "line": 190,
+        "column": 7
+      }
+    },
+    {
+      "id": "db410a9fb4d7600-bff7379b6ed22e0",
+      "title": "CPS routing with a non-existent NPRE `_alias:_origin` resolves the origin project only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/missing_npre_routing.spec.ts",
+        "line": 145,
+        "column": 41
+      }
+    },
+    {
+      "id": "db410a9fb4d7600-34a9e9c8f94d4a6",
+      "title": "CPS routing with a non-existent NPRE `_alias:*` fans out to flat world (origin + linked)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/missing_npre_routing.spec.ts",
+        "line": 146,
+        "column": 75
+      }
+    },
+    {
+      "id": "db410a9fb4d7600-562285c973fc5e6",
+      "title": "CPS routing with a non-existent NPRE a non-existent NPRE fans out to flat world (same as `_alias:*`)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/missing_npre_routing.spec.ts",
+        "line": 151,
+        "column": 5
+      }
+    },
+    {
+      "id": "752be1b1bae5fc6-45adf789df21325",
+      "title": "Hunt Watch - index scope and worker coverage across projects resolves a linked project pattern through index_scope when the space routes to it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
+        "line": 134,
+        "column": 7
+      }
+    },
+    {
+      "id": "752be1b1bae5fc6-c30a0b9df7cde34",
+      "title": "Hunt Watch - index scope and worker coverage across projects does not report an unqualified pattern missing when only the linked project has its data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
+        "line": 176,
+        "column": 5
+      }
+    },
+    {
+      "id": "752be1b1bae5fc6-100b06c2a31330c",
+      "title": "Hunt Watch - index scope and worker coverage across projects cannot resolve a linked project pattern in a space routed to the origin only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
+        "line": 219,
+        "column": 16
+      }
+    },
+    {
+      "id": "752be1b1bae5fc6-687412fd0a9b7d5",
+      "title": "Hunt Watch - index scope and worker coverage across projects finds a Tier 1 IOC hit on the linked project",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
+        "line": 241,
+        "column": 5
+      }
+    },
+    {
+      "id": "752be1b1bae5fc6-8a2b27ce2f16523",
+      "title": "Hunt Watch - index scope and worker coverage across projects answers worker coverage from the role for the built-in Serverless role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
+        "line": 279,
+        "column": 11
+      }
+    },
+    {
+      "id": "752be1b1bae5fc6-336624e5d868c5c",
+      "title": "Hunt Watch - index scope and worker coverage across projects lists a custom pattern with data that the built-in role cannot read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
+        "line": 297,
+        "column": 34
+      }
+    },
+    {
+      "id": "d50399edb526a93-e1ab797843d3103",
+      "title": "CPS relationship maintainer — accesses from linked serverless project writes accesses_frequently relationship to origin entity when 5 SSH events ingested on linked project",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/maintainers/accesses.spec.ts",
+        "line": 83,
+        "column": 68
+      }
+    },
+    {
+      "id": "dd1d9b329962437-f244caf87571b20",
+      "title": "CPS relationship maintainer — communicates_with from linked serverless project writes communicates_with relationship to origin entity when a CloudTrail event is ingested on linked project",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/maintainers/communicates_with.spec.ts",
+        "line": 85,
+        "column": 65
+      }
+    }
+  ]
+}

@@ -12,7 +12,7 @@ import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { findGapsSearchAfter } from './find_gaps';
 import type { Gap } from './gap';
-import type { GapStatus } from '../../../common/constants';
+import type { GapStatus, GapReasonType } from '../../../common/constants';
 import { gapStatus } from '../../../common/constants';
 
 interface ProcessAllRuleGapsParams<T> {
@@ -20,6 +20,7 @@ interface ProcessAllRuleGapsParams<T> {
   start?: string;
   end?: string;
   statuses?: GapStatus[];
+  excludedReasons?: GapReasonType[];
   options?: {
     maxProcessedGapsPerRule?: number;
   };
@@ -77,6 +78,7 @@ export const processAllRuleGaps = async <T>({
   start,
   end,
   statuses = [gapStatus.PARTIALLY_FILLED, gapStatus.UNFILLED],
+  excludedReasons,
   options,
   logger,
   eventLogClient,
@@ -118,6 +120,7 @@ export const processAllRuleGaps = async <T>({
             end,
             perPage: PROCESS_GAPS_DEFAULT_PAGE_SIZE,
             statuses,
+            excludedReasons,
             sortField: '@timestamp',
             sortOrder: 'asc',
             searchAfter,

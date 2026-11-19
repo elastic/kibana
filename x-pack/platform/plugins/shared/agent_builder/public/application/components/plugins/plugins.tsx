@@ -22,7 +22,7 @@ export const AgentBuilderPlugins = () => {
   return (
     <KibanaPageTemplate data-test-subj="agentBuilderPluginsPage">
       <KibanaPageTemplate.Header
-        pageTitle={labels.plugins.title}
+        pageTitle={labels.plugins.libraryTitle}
         description={i18n.translate('xpack.agentBuilder.plugins.pluginsDescription', {
           defaultMessage:
             'Plugins are installable packages that bundle agent capabilities such as skills, and are compatible with the Claude agent plugin specification.',

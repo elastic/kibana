@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
@@ -18,7 +18,9 @@ import type {
   XYVisualizationState,
 } from '@kbn/lens-plugin/public';
 import { css } from '@emotion/react';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { PageScope } from '../../../data_view_manager/constants';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -33,6 +35,32 @@ import { useVisualizationResponse } from './use_visualization_response';
 import { useInspect } from '../inspect/use_inspect';
 
 const DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL'];
+
+/** Index patterns Inspect should show, excluding the injected scope data view. */
+export const getInspectAdHocIndexPatterns = (
+  adHocDataViews: Record<string, DataViewSpec> | undefined,
+  scopeDataViewId?: string
+): string[] | null => {
+  if (adHocDataViews == null) {
+    return null;
+  }
+
+  const indexPatterns = Object.entries(adHocDataViews).reduce<string[]>((acc, [id, spec]) => {
+    // The scope data view title is the default Explore pattern, not the indices this chart queried.
+    if (scopeDataViewId != null && id === scopeDataViewId) {
+      return acc;
+    }
+    // `title` is the index pattern. `name` is the display label (for example
+    // "Security solution explore") and is not what Inspect should show.
+    const indexPattern = spec?.title ?? spec?.name;
+    if (indexPattern != null) {
+      acc.push(indexPattern);
+    }
+    return acc;
+  }, []);
+
+  return indexPatterns.length > 0 ? indexPatterns : null;
+};
 
 const getStyles = (width?: string | number, height?: number) => {
   return {
@@ -70,6 +98,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   disableOnClickFilter = false,
   casesAttachmentMetadata,
   signalIndexName,
+  excludedPatterns,
   esql,
 }) => {
   const styles = useMemo(
@@ -104,6 +133,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     title: '',
     esql,
     signalIndexName,
+    excludedPatterns,
   });
   const preferredSeriesType = (attributes?.state?.visualization as XYVisualizationState)
     ?.preferredSeriesType;
@@ -194,17 +224,10 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [createFiltersFromValueClickAction, updateDateRange, preferredSeriesType, disableOnClickFilter]
   );
 
+  const { dataView } = useDataView(scopeId);
   const adHocDataViews = useMemo(
-    () =>
-      attributes?.state?.adHocDataViews != null
-        ? Object.values(attributes?.state?.adHocDataViews).reduce((acc, adHocDataView) => {
-            if (adHocDataView?.name != null) {
-              acc.push(adHocDataView?.name);
-            }
-            return acc;
-          }, [] as string[])
-        : null,
-    [attributes?.state?.adHocDataViews]
+    () => getInspectAdHocIndexPatterns(attributes?.state?.adHocDataViews, dataView.id),
+    [attributes?.state?.adHocDataViews, dataView.id]
   );
 
   if (!searchSessionId) {
@@ -259,7 +282,6 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             onLoad={setInspectData}
             overrides={overrides}
             searchSessionId={searchSessionId}
-            showInspector={false}
             style={lensComponentStyle}
             css={{ minWidth: '100px' }}
             syncCursor={false}

@@ -240,7 +240,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 fullWidth
                 helpText={<HelpTextWithPadding>{DATA_COLLECTION_HELP_TEXT}</HelpTextWithPadding>}
               >
-                <EuiRadio {...getEndpointPresetsProps('DataCollection')} />
+                <EuiRadio name="endpointPreset" {...getEndpointPresetsProps('DataCollection')} />
               </EuiFormRow>
               <EuiSpacer size="s" />
               <EuiFormRow
@@ -254,7 +254,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                   </HelpTextWithPadding>
                 }
               >
-                <EuiRadio {...getEndpointPresetsProps('NGAV')} />
+                <EuiRadio name="endpointPreset" {...getEndpointPresetsProps('NGAV')} />
               </EuiFormRow>
               <EuiSpacer size="s" />
               <EuiFormRow
@@ -268,7 +268,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                   </HelpTextWithPadding>
                 }
               >
-                <EuiRadio {...getEndpointPresetsProps('EDREssential')} />
+                <EuiRadio name="endpointPreset" {...getEndpointPresetsProps('EDREssential')} />
               </EuiFormRow>
               <EuiSpacer size="s" />
               <EuiFormRow
@@ -282,7 +282,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                   </HelpTextWithPadding>
                 }
               >
-                <EuiRadio {...getEndpointPresetsProps('EDRComplete')} />
+                <EuiRadio name="endpointPreset" {...getEndpointPresetsProps('EDRComplete')} />
               </EuiFormRow>
 
               {showNote && (
@@ -356,7 +356,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 </HelpTextWithPadding>
               }
             >
-              <EuiRadio {...getCloudEventsProps('ALL_EVENTS')} />
+              <EuiRadio name="cloudEvent" {...getCloudEventsProps('ALL_EVENTS')} />
             </EuiFormRow>
             <EuiSpacer size="s" />
             <EuiFormRow
@@ -384,7 +384,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 </HelpTextWithPadding>
               }
             >
-              <EuiRadio {...getCloudEventsProps('INTERACTIVE_ONLY')} />
+              <EuiRadio name="cloudEvent" {...getCloudEventsProps('INTERACTIVE_ONLY')} />
             </EuiFormRow>
           </>
         )}

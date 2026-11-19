@@ -11,7 +11,7 @@ describe('helpers', () => {
   describe('getIconFromFieldName', () => {
     it('returns the expected icon for a known field name', () => {
       const fieldName = 'host.name';
-      const expectedIcon = 'desktop';
+      const expectedIcon = 'display';
 
       const icon = getIconFromFieldName(fieldName);
 

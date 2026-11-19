@@ -6,80 +6,46 @@
  */
 
 import React from 'react';
-import type { ShareContext } from '@kbn/share-plugin/public';
-import type {
-  ExportShareDerivatives,
-  RegisterShareIntegrationArgs,
-} from '@kbn/share-plugin/public/types';
+import type { ExportShareParameters, ShareContext } from '@kbn/share-plugin/public';
 import type { ReportingSharingData } from '@kbn/reporting-public/share/share_context_menu';
 import { EuiButton } from '@elastic/eui';
 import type { ReportingAPIClient } from '@kbn/reporting-public';
-import type { HttpSetup } from '@kbn/core-http-browser';
-import { SCHEDULED_REPORT_VALID_LICENSES } from '@kbn/reporting-common';
 import type { ReportTypeId } from '../../types';
-import { getKey as getReportingHealthQueryKey } from '../hooks/use_get_reporting_health_query';
-import { queryClient } from '../../query_client';
-import { SCHEDULE_EXPORT_BUTTON_LABEL } from '../translations';
+import { SCHEDULE_EXPORT_BUTTON_LABEL, SCHEDULED_REPORT_FLYOUT_TITLE } from '../translations';
 import type { ReportingPublicPluginStartDependencies } from '../../plugin';
-import { getReportingHealth } from '../apis/get_reporting_health';
 import { supportedReportTypes } from '../report_params';
+import { ScheduledReportFlyoutShareWrapper } from '../components/scheduled_report_flyout_share_wrapper';
 
-export interface CreateScheduledReportProviderOptions {
-  apiClient: ReportingAPIClient;
-  services: ReportingPublicPluginStartDependencies;
-}
+export function getReportingShareIntegrationConfig(
+  apiClient: ReportingAPIClient,
+  services: ReportingPublicPluginStartDependencies,
+  shareOpts: ShareContext
+): ExportShareParameters {
+  const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
 
-export const shouldRegisterScheduledReportShareIntegration = async (http: HttpSetup) => {
-  const { isSufficientlySecure, hasPermanentEncryptionKey } = await queryClient.fetchQuery({
-    queryKey: getReportingHealthQueryKey(),
-    queryFn: () => getReportingHealth({ http }),
-  });
-  return isSufficientlySecure && hasPermanentEncryptionKey;
-};
-
-export const createScheduledReportShareIntegration = ({
-  apiClient,
-  services,
-}: CreateScheduledReportProviderOptions): RegisterShareIntegrationArgs<ExportShareDerivatives> => {
   return {
-    id: 'scheduledReports',
-    groupId: 'exportDerivatives',
-    getShareIntegrationConfig: async (shareOpts: ShareContext) => {
-      const { ScheduledReportFlyoutShareWrapper } = await import(
-        '../components/scheduled_report_flyout_share_wrapper'
+    label: ({ openFlyout }) => (
+      <EuiButton iconType="calendar" onClick={openFlyout} data-test-subj="scheduleExport">
+        {SCHEDULE_EXPORT_BUTTON_LABEL}
+      </EuiButton>
+    ),
+    shouldRender: ({ availableExportItems }) => {
+      const supportedExportItemsForScheduling = availableExportItems.filter((exportItem) =>
+        supportedReportTypes.includes(exportItem.config.exportType as ReportTypeId)
       );
-      const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
-
-      return {
-        label: ({ openFlyout }) => (
-          <EuiButton iconType="calendar" onClick={openFlyout} data-test-subj="scheduleExport">
-            {SCHEDULE_EXPORT_BUTTON_LABEL}
-          </EuiButton>
-        ),
-        shouldRender: ({ availableExportItems }) => {
-          const supportedExportItemsForScheduling = availableExportItems.filter((exportItem) =>
-            supportedReportTypes.includes(exportItem.config.exportType as ReportTypeId)
-          );
-          return supportedExportItemsForScheduling.length > 0;
-        },
-        flyoutContent: ({ closeFlyout }) => {
-          return (
-            <ScheduledReportFlyoutShareWrapper
-              apiClient={apiClient}
-              services={services}
-              sharingData={sharingData}
-              onClose={closeFlyout}
-            />
-          );
-        },
-        flyoutSizing: { size: 'm', maxWidth: 500 },
-      };
+      return supportedExportItemsForScheduling.length > 0;
     },
-    prerequisiteCheck: ({ license }) => {
-      if (!license || !license.type) {
-        return false;
-      }
-      return SCHEDULED_REPORT_VALID_LICENSES.includes(license.type);
+    flyoutContent: ({ closeFlyout }) => {
+      return (
+        <ScheduledReportFlyoutShareWrapper
+          apiClient={apiClient}
+          services={services}
+          sharingData={sharingData}
+          onClose={closeFlyout}
+        />
+      );
     },
+    flyoutSizing: { size: 'm', maxWidth: 500 },
+    flyoutAriaLabel: SCHEDULED_REPORT_FLYOUT_TITLE,
   };
-};
+}

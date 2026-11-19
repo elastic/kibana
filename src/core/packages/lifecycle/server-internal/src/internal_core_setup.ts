@@ -34,6 +34,8 @@ import type { InternalFeatureFlagsSetup } from '@kbn/core-feature-flags-server-i
 import type { PricingServiceSetup } from '@kbn/core-pricing-server';
 import type { InternalCoreDiServiceSetup } from '@kbn/core-di-internal';
 import type { DataStreamsSetup } from '@kbn/core-data-streams-server';
+import type { InternalPubSubSetup } from '@kbn/core-pubsub-server-internal';
+import type { UserStorageServiceSetup } from '@kbn/core-user-storage-server';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -64,4 +66,7 @@ export interface InternalCoreSetup {
   pricing: PricingServiceSetup;
   injection: InternalCoreDiServiceSetup;
   dataStreams: DataStreamsSetup;
+  pubsub: InternalPubSubSetup;
+  userStorage: UserStorageServiceSetup;
+  _plugins?: Map<string, any>;
 }

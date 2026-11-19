@@ -15,13 +15,11 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
 import { createInitialState } from './initial_state';
-import { waitGroup } from './kibana_migrator_utils';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { next } from './next';
 import { runResilientMigrator, type RunResilientMigratorParams } from './run_resilient_migrator';
 import {
   hashToVersionMapMock,
-  indexTypesMapMock,
   savedObjectTypeRegistryMock,
 } from './run_resilient_migrator.fixtures';
 import type { InitState, State } from './state';
@@ -74,12 +72,9 @@ describe('runResilientMigrator', () => {
     expect(createInitialState).toHaveBeenCalledWith({
       kibanaVersion: options.kibanaVersion,
       waitForMigrationCompletion: options.waitForMigrationCompletion,
-      mustRelocateDocuments: options.mustRelocateDocuments,
       indexTypes: options.indexTypes,
-      indexTypesMap: options.indexTypesMap,
       hashToVersionMap: options.hashToVersionMap,
       targetIndexMappings: options.targetIndexMappings,
-      preMigrationScript: options.preMigrationScript,
       migrationVersionPerType: options.migrationVersionPerType,
       coreMigrationVersionPerType: options.coreMigrationVersionPerType,
       indexPrefix: options.indexPrefix,
@@ -123,9 +118,7 @@ const mockOptions = (): RunResilientMigratorParams => {
     client: mockedClient,
     kibanaVersion: '8.8.0',
     waitForMigrationCompletion: false,
-    mustRelocateDocuments: true,
     indexTypes: ['a', 'c'],
-    indexTypesMap: indexTypesMapMock,
     hashToVersionMap: hashToVersionMapMock,
     targetIndexMappings: {
       properties: {
@@ -139,12 +132,8 @@ const mockOptions = (): RunResilientMigratorParams => {
         },
       },
     },
-    readyToReindex: waitGroup(),
-    doneReindexing: waitGroup(),
-    updateRelocationAliases: waitGroup(),
     logger,
     transformRawDocs: jest.fn(),
-    preMigrationScript: "ctx._id = ctx._source.type + ':' + ctx._id",
     migrationVersionPerType: { my_dashboard: '7.10.1', my_viz: '8.0.0' },
     coreMigrationVersionPerType: {},
     indexPrefix: '.my_index',

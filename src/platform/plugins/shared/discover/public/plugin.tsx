@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import type {
   AppMountParameters,
   AppUpdater,
@@ -22,14 +22,20 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
-import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
-import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
+import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
+import type { TimeRange } from '@kbn/es-query';
+import {
+  CHANGE_POINT_GRID_EMBEDDABLE_TYPE,
+  DISCOVER_APP_LOCATOR,
+  PLUGIN_ID,
+  type DiscoverAppLocator,
+} from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
   type DiscoverContextAppLocator,
@@ -44,6 +50,7 @@ import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import { defaultCustomizationContext } from './customizations/defaults';
 import {
   ACTION_ADD_DISCOVER_SESSION_PANEL,
+  ACTION_EXPLORE_CHANGE_POINT_GRID_IN_DISCOVER,
   ACTION_VIEW_SAVED_SEARCH,
   LEGACY_LOG_STREAM_EMBEDDABLE,
 } from './embeddable/constants';
@@ -63,7 +70,10 @@ import type { DiscoverEBTContextProps, DiscoverEBTManager } from './ebt_manager'
 import { registerDiscoverEBTManagerAnalytics } from './ebt_manager/discover_ebt_manager_registrations';
 import type { ProfileProviderSharedServices, ProfilesManager } from './context_awareness';
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
+import { registerEsqlResultsAttachmentUi } from './agent_builder/register_esql_results_ui';
+import { registerDiscoverSessionAttachmentUi } from './agent_builder/register_discover_session_ui';
 import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
+import { getDiscoverRecentlyAccessedService } from './services/discover_recently_accessed_service';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -106,9 +116,17 @@ export class DiscoverPlugin
 
       this.locator = plugins.share.url.locators.create({
         id: DISCOVER_APP_LOCATOR,
+        getTimeRange: (params) => params.timeRange,
+        setTimeRange: (params, timeRange?: TimeRange) => ({
+          ...params,
+          timeRange,
+        }),
         getLocation: async (params) => {
-          const { appLocatorGetLocation } = await getLocators();
-          return appLocatorGetLocation({ useHash }, params);
+          const [{ appLocatorGetLocation }, profileStateRegistry] = await Promise.all([
+            getLocators(),
+            getProfileStateRegistry(),
+          ]);
+          return appLocatorGetLocation({ useHash, profileStateRegistry }, params);
         },
       });
 
@@ -170,16 +188,22 @@ export class DiscoverPlugin
     });
 
     registerDiscoverEBTManagerAnalytics(core, this.discoverEbtContext$);
+    void getUnifiedChartSectionViewerAnalytics().then(
+      ({ registerUnifiedChartSectionViewerEbtEvents }) =>
+        registerUnifiedChartSectionViewerEbtEvents(core.analytics)
+    );
 
     core.application.register({
       id: PLUGIN_ID,
-      title: 'Discover',
+      title: i18n.translate('discover.discoverTitle', {
+        defaultMessage: 'Discover',
+      }),
       updater$: this.appStateUpdater,
       order: 1000,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
-      visibleIn: ['globalSearch', 'sideNav', 'kibanaOverview'],
+      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav', 'kibanaOverview'],
       mount: async (params: AppMountParameters) => {
         const [[coreStart, discoverStartPlugins], historyService, ebtManager, { renderApp }] =
           await Promise.all([
@@ -241,6 +265,42 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
+    const agentBuilder = plugins.agentBuilder;
+    if (agentBuilder) {
+      registerEsqlResultsAttachmentUi(agentBuilder);
+      registerDiscoverSessionAttachmentUi({
+        agentBuilder,
+        unifiedSearch: plugins.unifiedSearch,
+        locator: this.locator,
+        embeddable: plugins.embeddable,
+        application: core.application,
+      });
+    }
+
+    plugins.navigation.registerNavigationLinks({
+      id: 'discoverLinks',
+      target: 'discover',
+      lists: [
+        {
+          id: 'recentlyViewed',
+          title: i18n.translate('discover.navigation.recentlyViewedTitle', {
+            defaultMessage: 'Recently viewed',
+          }),
+          items$: getDiscoverRecentlyAccessedService(core.http)
+            .get$()
+            .pipe(
+              map((items) =>
+                items.map((item) => ({
+                  id: item.id,
+                  href: core.http.basePath.prepend(item.link),
+                  label: item.label,
+                }))
+              )
+            ),
+        },
+      ],
+    });
+
     plugins.cps?.cpsManager?.registerAppAccess('discover', () => ProjectRoutingAccess.EDITABLE);
 
     plugins.uiActions.addTriggerActionAsync(
@@ -249,6 +309,15 @@ export class DiscoverPlugin
       async () => {
         const { ViewSavedSearchAction } = await getEmbeddableServices();
         return new ViewSavedSearchAction(core.application, this.locator!);
+      }
+    );
+
+    plugins.uiActions.addTriggerActionAsync(
+      ON_OPEN_PANEL_MENU,
+      ACTION_EXPLORE_CHANGE_POINT_GRID_IN_DISCOVER,
+      async () => {
+        const { ExploreChangePointGridInDiscoverAction } = await getEmbeddableServices();
+        return new ExploreChangePointGridInDiscoverAction(core.application, this.locator!);
       }
     );
 
@@ -389,9 +458,10 @@ export class DiscoverPlugin
     scopedHistory?: ScopedHistory;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }) => {
-    const [{ buildServices }, historyService] = await Promise.all([
+    const [{ buildServices }, historyService, profileStateRegistry] = await Promise.all([
       getSharedServices(),
       getHistoryService(),
+      getProfileStateRegistry(),
     ]);
     return buildServices({
       core,
@@ -404,6 +474,7 @@ export class DiscoverPlugin
       scopedHistory,
       urlTracker: this.urlTracker!,
       profilesManager,
+      profileStateRegistry,
       ebtManager,
       setHeaderActionMenu,
     });
@@ -430,7 +501,7 @@ export class DiscoverPlugin
       });
     };
 
-    plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
+    plugins.embeddable.registerAddFromLibraryType<DiscoverSessionAttributes>({
       onAdd: async (container, savedObject) => {
         const { addPanelFromLibrary } = await getEmbeddableServices();
         await addPanelFromLibrary(container, savedObject);
@@ -439,10 +510,22 @@ export class DiscoverPlugin
       savedObjectName: i18n.translate('discover.savedSearch.savedObjectName', {
         defaultMessage: 'Discover session',
       }),
-      getIconForSavedObject: () => 'discoverApp',
+      getIconForSavedObject: () => 'productDiscover',
     });
 
-    plugins.embeddable.registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
+    plugins.embeddable.registerEmbeddablePublicDefinition(
+      CHANGE_POINT_GRID_EMBEDDABLE_TYPE,
+      async () => {
+        const [discoverServices, { getChangePointGridEmbeddableFactory }] = await Promise.all([
+          getDiscoverServicesForEmbeddable(),
+          getEmbeddableServices(),
+        ]);
+
+        return getChangePointGridEmbeddableFactory({ discoverServices });
+      }
+    );
+
+    plugins.embeddable.registerEmbeddablePublicDefinition(SEARCH_EMBEDDABLE_TYPE, async () => {
       const [startServices, discoverServices, { getSearchEmbeddableFactory }] = await Promise.all([
         getStartServices(),
         getDiscoverServicesForEmbeddable(),
@@ -456,19 +539,22 @@ export class DiscoverPlugin
     });
 
     // We register a specialized saved search embeddable factory for the log stream embeddable to support old log stream panels.
-    plugins.embeddable.registerReactEmbeddableFactory(LEGACY_LOG_STREAM_EMBEDDABLE, async () => {
-      const [startServices, discoverServices, { getLegacyLogStreamEmbeddableFactory }] =
-        await Promise.all([
-          getStartServices(),
-          getDiscoverServicesForEmbeddable(),
-          getEmbeddableServices(),
-        ]);
+    plugins.embeddable.registerEmbeddablePublicDefinition(
+      LEGACY_LOG_STREAM_EMBEDDABLE,
+      async () => {
+        const [startServices, discoverServices, { getLegacyLogStreamEmbeddableFactory }] =
+          await Promise.all([
+            getStartServices(),
+            getDiscoverServicesForEmbeddable(),
+            getEmbeddableServices(),
+          ]);
 
-      return getLegacyLogStreamEmbeddableFactory({
-        startServices,
-        discoverServices,
-      });
-    });
+        return getLegacyLogStreamEmbeddableFactory({
+          startServices,
+          discoverServices,
+        });
+      }
+    );
 
     plugins.embeddable.registerLegacyURLTransform(
       SEARCH_EMBEDDABLE_TYPE,
@@ -483,6 +569,8 @@ export class DiscoverPlugin
 const getLocators = () => import('./plugin_imports/locators');
 const getEmbeddableServices = () => import('./plugin_imports/embeddable_services');
 const getSharedServices = () => import('./plugin_imports/shared_services');
+const getUnifiedChartSectionViewerAnalytics = () =>
+  import('@kbn/unified-chart-section-viewer/src/analytics');
 
 const getHistoryService = once(async () => {
   const { HistoryService } = await getSharedServices();
@@ -492,4 +580,9 @@ const getHistoryService = once(async () => {
 const getEmptyEbtManager = once(async () => {
   const { DiscoverEBTManager } = await getSharedServices();
   return new DiscoverEBTManager(); // It is not initialized outside of Discover
+});
+
+const getProfileStateRegistry = once(async () => {
+  const { createProfileStateRegistry } = await getSharedServices();
+  return createProfileStateRegistry();
 });

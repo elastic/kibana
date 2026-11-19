@@ -6,7 +6,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { isValidUserProfileAvatarColor } from '@kbn/user-profile-components';
+import { sanitizeImageDataUrl } from '@kbn/content-sanitization';
+import type { UserProfileData } from '@kbn/core-user-profile-common';
+import {
+  isValidUserProfileAvatarColor,
+  isValidUserProfileAvatarInitials,
+  USER_AVATAR_MAX_INITIALS,
+  USER_AVATAR_MAX_INITIALS_CODE_UNITS,
+} from '@kbn/user-profile-components/server';
+import type { DotKeysOf } from '@kbn/utility-types';
 
 import type { RouteDefinitionParams } from '..';
 import { IMAGE_FILE_TYPES } from '../../../common/constants';
@@ -15,17 +23,39 @@ import { flattenObject } from '../../lib';
 import { getPrintableSessionId } from '../../session_management';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
+type UserProfileUpdatePayload = Pick<UserProfileData, 'userSettings'>;
+type UserProfileUpdatePaths = DotKeysOf<UserProfileUpdatePayload>;
+
 /** User profile data keys that are allowed to be updated by Cloud users */
-const ALLOWED_KEYS_UPDATE_CLOUD = ['userSettings.darkMode', 'userSettings.contrastMode'];
+const ALLOWED_KEYS_UPDATE_CLOUD = [
+  'userSettings.darkMode',
+  'userSettings.contrastMode',
+  'userSettings.agentBuilderAnnouncementModalSeen',
+  'userSettings.agentBuilderAnnouncementModalSeenBySpaceJson',
+  'userSettings.locale',
+  'userSettings.rememberSelectedSpace',
+  'userSettings.lastSelectedSpaceId',
+] as const satisfies readonly UserProfileUpdatePaths[];
 
 const MAX_STRING_FIELD_LENGTH = 1024;
 
 const MAX_USER_PROFILE_DATA_SIZE_BYTES = 1000 * 1024;
 
+/** Stringified JSON map (space id → seen); cap is defensive and stays well under {@link MAX_USER_PROFILE_DATA_SIZE_BYTES}. */
+const MAX_AGENT_BUILDER_ANNOUNCEMENT_SPACE_JSON_CHARS = 64 * 1024;
+
 const userProfileUpdateSchema = schema.object({
   avatar: schema.maybe(
     schema.object({
-      initials: schema.nullable(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
+      initials: schema.nullable(
+        schema.string({
+          maxLength: USER_AVATAR_MAX_INITIALS_CODE_UNITS,
+          validate: (value) =>
+            isValidUserProfileAvatarInitials(value)
+              ? undefined
+              : `must have at most ${USER_AVATAR_MAX_INITIALS} characters`,
+        })
+      ),
       color: schema.nullable(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
       imageUrl: schema.nullable(schema.string()),
     })
@@ -43,6 +73,15 @@ const userProfileUpdateSchema = schema.object({
       contrastMode: schema.maybe(
         schema.oneOf([schema.literal('system'), schema.literal('standard'), schema.literal('high')])
       ),
+      agentBuilderAnnouncementModalSeen: schema.maybe(schema.boolean()),
+      agentBuilderAnnouncementModalSeenBySpaceJson: schema.maybe(
+        schema.string({ maxLength: MAX_AGENT_BUILDER_ANNOUNCEMENT_SPACE_JSON_CHARS })
+      ),
+      locale: schema.maybe(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
+      rememberSelectedSpace: schema.maybe(schema.boolean()),
+      lastSelectedSpaceId: schema.maybe(
+        schema.nullable(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH }))
+      ),
     })
   ),
 });
@@ -53,6 +92,7 @@ export function defineUpdateUserProfileDataRoute({
   getUserProfileService,
   logger,
   getAuthenticationService,
+  i18n: i18nService,
 }: RouteDefinitionParams) {
   router.post(
     {
@@ -91,9 +131,10 @@ export function defineUpdateUserProfileDataRoute({
 
       const currentUser = getAuthenticationService().getCurrentUser(request);
 
-      const userProfileData = request.body;
-      const imageDataUrl = userProfileData.avatar?.imageUrl;
-      if (imageDataUrl && typeof imageDataUrl === 'string') {
+      let userProfileData = request.body;
+      const avatar = userProfileData.avatar;
+      const imageDataUrl = avatar?.imageUrl;
+      if (avatar && imageDataUrl && typeof imageDataUrl === 'string') {
         const matches = imageDataUrl.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
         if (!matches || matches.length !== 3) {
           return response.customError({
@@ -110,6 +151,20 @@ export function defineUpdateUserProfileDataRoute({
             statusCode: 415,
           });
         }
+
+        // SVG avatars can carry scripts and event handlers, so strip active content before storing.
+        let sanitizedImageDataUrl: string;
+        try {
+          sanitizedImageDataUrl = sanitizeImageDataUrl(imageDataUrl);
+        } catch (error) {
+          logger.warn(`Failed to sanitize user profile avatar image: ${error.message}`);
+          return response.badRequest({ body: 'Invalid avatar image' });
+        }
+
+        userProfileData = {
+          ...userProfileData,
+          avatar: { ...avatar, imageUrl: sanitizedImageDataUrl },
+        };
       }
 
       const avatarColor = userProfileData.avatar?.color;
@@ -123,13 +178,28 @@ export function defineUpdateUserProfileDataRoute({
         }
       }
 
+      const requestedLocale = userProfileData.userSettings?.locale;
+      if (requestedLocale) {
+        const configuredLocales = i18nService.getLocales();
+        // An empty `i18n.locales` disables the picker but Kibana still runs in the default locale.
+        const allowedLocales =
+          configuredLocales.length > 0 ? configuredLocales : [i18nService.getLocale()];
+        if (!allowedLocales.includes(requestedLocale)) {
+          return response.customError({
+            body: `Locale "${requestedLocale}" is not enabled for this deployment`,
+            statusCode: 400,
+          });
+        }
+      }
+
       const keysToUpdate = Object.keys(flattenObject(userProfileData));
 
       if (currentUser?.elastic_cloud_user) {
         // We only allow specific user profile data to be updated by Elastic Cloud SSO users.
         const isUpdateAllowed = keysToUpdate.every((key) =>
-          ALLOWED_KEYS_UPDATE_CLOUD.includes(key)
+          (ALLOWED_KEYS_UPDATE_CLOUD as readonly string[]).includes(key)
         );
+
         if (keysToUpdate.length === 0 || !isUpdateAllowed) {
           logger.warn(
             `Elastic Cloud SSO users aren't allowed to update profiles in Kibana. (sid: ${getPrintableSessionId(

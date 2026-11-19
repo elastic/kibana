@@ -27,6 +27,7 @@ import {
   MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_CUSTOM_YARA_SIGNATURES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_ENDPOINT_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
@@ -36,6 +37,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_DEVICES_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH,
+  MANAGEMENT_ROUTING_CUSTOM_YARA_SIGNATURES_PATH,
 } from './constants';
 import { isDefaultOrMissing, getArtifactListPageUrlPath } from './url_routing';
 
@@ -305,6 +307,29 @@ export const getBlocklistsListPath = (location?: Partial<ArtifactListPageUrlPara
   });
 
   return getArtifactListPageUrlPath(path, location);
+};
+
+export const getCustomYaraSignaturesListPath = (
+  location?: Partial<ArtifactListPageUrlParams>
+): string => {
+  const path = generatePath(MANAGEMENT_ROUTING_CUSTOM_YARA_SIGNATURES_PATH, {
+    tabName: AdministrationSubTab.customYaraSignatures,
+  });
+
+  return getArtifactListPageUrlPath(path, location);
+};
+
+export const getPolicyCustomYaraSignaturesPath = (
+  policyId: string,
+  location?: Partial<PolicyDetailsArtifactsPageLocation>
+) => {
+  const path = generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_CUSTOM_YARA_SIGNATURES_PATH, {
+    tabName: AdministrationSubTab.policies,
+    policyId,
+  });
+  return `${path}${appendSearch(
+    querystring.stringify(normalizePolicyDetailsArtifactsListPageLocation(location))
+  )}`;
 };
 
 export const getPolicyBlocklistsPath = (

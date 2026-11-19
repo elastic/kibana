@@ -134,7 +134,7 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
         {!connectorExists && !connectors.length && onNewConnectorClicked ? (
           <EuiButtonEmpty
             data-test-subj="addNewConnectorButton"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             isDisabled={isDisabled}
             size="xs"
             onClick={onNewConnectorClicked}
@@ -145,7 +145,7 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
           <EuiInputPopover
             input={
               <EuiButton
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 iconSide="right"
                 size="s"
                 color="text"
@@ -161,6 +161,7 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
                 }}
                 data-test-subj="connector-selector"
                 isDisabled={isDisabled}
+                aria-label={i18n.getConnectorButtonAriaLabel(buttonLabel)}
               >
                 {buttonLabel}
               </EuiButton>

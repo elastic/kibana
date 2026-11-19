@@ -11,14 +11,31 @@ import Path from 'path';
 
 import chalk from 'chalk';
 import dedent from 'dedent';
-import { getLogLevelFlagsHelp } from '@kbn/tooling-log';
+import { getLogLevelFlagsHelp, getLogLevelFlagHelpItems } from '@kbn/tooling-log';
 
+import type { FlagHelpItem } from './flags/types';
 import type { Command } from './run/run_with_commands';
 
 const DEFAULT_GLOBAL_USAGE = `node ${Path.relative(process.cwd(), process.argv[1])}`;
 export const GLOBAL_FLAGS = dedent`
   --help             Show this message
 `;
+
+const GLOBAL_FLAG_ITEMS: FlagHelpItem[] = [{ flag: '--help', description: 'Show this message' }];
+
+export function formatFlagHelpItems(items: FlagHelpItem[]): string {
+  if (items.length === 0) return '';
+  const maxWidth = Math.max(...items.map((item) => item.flag.length));
+  const padWidth = maxWidth + 2;
+  return items
+    .map((item) => {
+      const lines = item.description.split('\n');
+      const firstLine = `${item.flag.padEnd(padWidth)}${lines[0]}`;
+      const rest = lines.slice(1).map((l) => ' '.repeat(padWidth) + l);
+      return [firstLine, ...rest].join('\n');
+    })
+    .join('\n');
+}
 
 export function indent(str: string, depth: number) {
   const prefix = ' '.repeat(depth);
@@ -41,15 +58,17 @@ export function getHelp({
 }: {
   description?: string;
   usage?: string;
-  flagHelp?: string;
+  flagHelp?: string | FlagHelpItem[];
   defaultLogLevel?: string;
   examples?: string;
 }) {
-  const optionHelp = joinAndTrimLines(
-    dedent(flagHelp || ''),
-    getLogLevelFlagsHelp(defaultLogLevel),
-    GLOBAL_FLAGS
-  );
+  const optionHelp = Array.isArray(flagHelp)
+    ? formatFlagHelpItems([
+        ...flagHelp,
+        ...getLogLevelFlagHelpItems(defaultLogLevel),
+        ...GLOBAL_FLAG_ITEMS,
+      ])
+    : joinAndTrimLines(dedent(flagHelp || ''), getLogLevelFlagsHelp(defaultLogLevel), GLOBAL_FLAGS);
 
   const examplesHelp = examples ? joinAndTrimLines('Examples:', examples) : '';
 
@@ -70,14 +89,19 @@ export function getCommandLevelHelp({
   command,
 }: {
   usage?: string;
-  globalFlagHelp?: string;
+  globalFlagHelp?: string | FlagHelpItem[];
   command: Command<any>;
 }) {
   const globalUsage = dedent(usage || '') || DEFAULT_GLOBAL_USAGE;
-  const globalHelp = joinAndTrimLines(dedent(globalFlagHelp || ''), GLOBAL_FLAGS);
+  const globalHelp = Array.isArray(globalFlagHelp)
+    ? formatFlagHelpItems([...globalFlagHelp, ...GLOBAL_FLAG_ITEMS])
+    : joinAndTrimLines(dedent(globalFlagHelp || ''), GLOBAL_FLAGS);
 
   const commandUsage = dedent(command.usage || '') || `${command.name} [...args]`;
-  const commandFlags = joinAndTrimLines(dedent(command.flags?.help || ''));
+  const commandHelp = command.flags?.help;
+  const commandFlags = Array.isArray(commandHelp)
+    ? formatFlagHelpItems(commandHelp)
+    : joinAndTrimLines(dedent(commandHelp || ''));
 
   return `
   ${globalUsage} ${commandUsage}
@@ -105,22 +129,26 @@ export function getHelpForAllCommands({
 }: {
   description?: string;
   usage?: string;
-  globalFlagHelp?: string;
+  globalFlagHelp?: string | FlagHelpItem[];
   commands: Array<Command<any>>;
 }) {
   const globalUsage = dedent(usage || '') || DEFAULT_GLOBAL_USAGE;
-  const globalHelp = joinAndTrimLines(dedent(globalFlagHelp || ''), GLOBAL_FLAGS);
+  const globalHelp = Array.isArray(globalFlagHelp)
+    ? formatFlagHelpItems([...globalFlagHelp, ...GLOBAL_FLAG_ITEMS])
+    : joinAndTrimLines(dedent(globalFlagHelp || ''), GLOBAL_FLAGS);
 
   const commandsHelp = commands
     .map((command) => {
-      const options = command.flags?.help
+      const commandHelp = command.flags?.help;
+      const optionText = Array.isArray(commandHelp)
+        ? formatFlagHelpItems(commandHelp)
+        : joinAndTrimLines(dedent(commandHelp || ''));
+
+      const options = commandHelp
         ? '\n' +
           dedent`
             Options:
-              ${indent(
-                joinAndTrimLines(dedent(command.flags?.help || '')),
-                '              '.length
-              )}
+              ${indent(optionText, '              '.length)}
           ` +
           '\n'
         : '';

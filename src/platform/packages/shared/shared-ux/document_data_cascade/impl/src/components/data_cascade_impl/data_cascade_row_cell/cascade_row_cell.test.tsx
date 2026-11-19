@@ -9,10 +9,14 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import type { Row } from '@tanstack/react-table';
 import { CascadeRowCellPrimitive } from './cascade_row_cell';
-import type { CascadeVirtualizerReturnValue } from '../../../lib/core/virtualizer';
-import { DataCascadeProvider } from '../../../store_provider';
+import type {
+  ChildVirtualizerController,
+  CascadeVirtualizerReturnValue,
+} from '../../../lib/core/virtualizer';
+import type { CascadeTableRow } from '../../../lib/core/table';
+import { DataCascadeProvider, type GroupNode } from '../../../store_provider';
+import { StickyHeaderExtensionPointProvider } from '../data_cascade_row/components/cascade_row_header_extension_point';
 
 const renderComponent = ({
   cascadeGroups,
@@ -36,16 +40,23 @@ const renderComponent = ({
       cascadeGroups={cascadeGroups}
       initialGroupColumn={initialGroupColumn}
     >
-      {/* @ts-expect-error -- we don't need to provide all the props */}
-      <CascadeRowCellPrimitive
-        size="m"
-        onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}
-        onCascadeLeafNodeCollapsed={onCascadeLeafNodeCollapsed}
-        row={row}
-        getVirtualizer={getVirtualizer}
+      <StickyHeaderExtensionPointProvider
+        stickyEnabled={false}
+        rowIndex={4}
+        rowElement={null}
+        headerElementRef={React.createRef<HTMLDivElement>()}
+        extensionPointElement={document.createElement('div')}
       >
-        {children}
-      </CascadeRowCellPrimitive>
+        <CascadeRowCellPrimitive
+          size="m"
+          onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}
+          onCascadeLeafNodeCollapsed={onCascadeLeafNodeCollapsed}
+          row={row}
+          getVirtualizer={getVirtualizer}
+        >
+          {children}
+        </CascadeRowCellPrimitive>
+      </StickyHeaderExtensionPointProvider>
     </DataCascadeProvider>
   );
 };
@@ -63,8 +74,15 @@ describe('CascadeRowCellPrimitive', () => {
         scrollOffset: 0,
         scrollElement: null,
         activeStickyIndex: null,
-        virtualizedRowComputedTranslateValue: new Map(),
         preventRowSizeChangePropagation: jest.fn(() => jest.fn()),
+        childController: {
+          isDetached: jest.fn(() => false),
+          clearPersistedAnchor: jest.fn(),
+          subscribe: jest.fn(() => () => {}),
+          shouldActivate: jest.fn(() => true),
+          enqueue: jest.fn(() => jest.fn()),
+          isReturningCell: jest.fn(() => false),
+        },
       } as unknown as CascadeVirtualizerReturnValue)
   );
 
@@ -85,7 +103,10 @@ describe('CascadeRowCellPrimitive', () => {
         original: rowData,
         getToggleSelectedHandler: jest.fn(),
         getToggleExpandedHandler: jest.fn(),
-      } as unknown as Row<any>,
+        getIsSelected: jest.fn(() => false),
+        getIsSomeSelected: jest.fn(() => false),
+        getCanSelect: jest.fn(() => true),
+      } as unknown as CascadeTableRow<GroupNode>,
       children: () => <div>Test Child</div>,
       onCascadeLeafNodeExpanded,
       getVirtualizer: mockVirtualizerGetter,
@@ -117,7 +138,10 @@ describe('CascadeRowCellPrimitive', () => {
         original: rowData,
         getToggleSelectedHandler: jest.fn(),
         getToggleExpandedHandler: jest.fn(),
-      } as unknown as Row<any>,
+        getIsSelected: jest.fn(() => false),
+        getIsSomeSelected: jest.fn(() => false),
+        getCanSelect: jest.fn(() => true),
+      } as unknown as CascadeTableRow<GroupNode>,
       children: () => <div>Test Child</div>,
       onCascadeLeafNodeExpanded,
       onCascadeLeafNodeCollapsed,
@@ -146,7 +170,7 @@ describe('CascadeRowCellPrimitive', () => {
         randomField: 'randomValue',
       });
 
-      renderComponent({
+      const { container } = renderComponent({
         cascadeGroups,
         initialGroupColumn: [cascadeGroups[0]],
         row: {
@@ -156,7 +180,10 @@ describe('CascadeRowCellPrimitive', () => {
           original: rowData,
           getToggleSelectedHandler: jest.fn(),
           getToggleExpandedHandler: jest.fn(),
-        } as unknown as Row<any>,
+          getIsSelected: jest.fn(() => false),
+          getIsSomeSelected: jest.fn(() => false),
+          getCanSelect: jest.fn(() => true),
+        } as unknown as CascadeTableRow<GroupNode>,
         children: (props) => {
           childPropsSpy(props);
           return <div>Test Child</div>;
@@ -165,26 +192,41 @@ describe('CascadeRowCellPrimitive', () => {
         getVirtualizer: mockVirtualizerGetter,
       });
 
+      const cell = container.querySelector('[data-cascade-row-loading]');
+      expect(cell).toHaveAttribute('data-cascade-row-loading', 'true');
+
       await waitFor(() => {
         expect(childPropsSpy).toHaveBeenCalledWith(
           expect.objectContaining({
             cellId: expect.any(String),
             nodePath: expect.any(Array),
-            getScrollElement: expect.any(Function),
-            getScrollOffset: expect.any(Function),
-            getScrollMargin: expect.any(Function),
-            preventSizeChangePropagation: expect.any(Function),
+            nodePathMap: expect.any(Object),
+            data: expect.anything(),
+            rowIndex: 4,
+            stickyHeaderExtensionPoint: expect.objectContaining({
+              stickyEnabled: false,
+              extensionPointElement: expect.any(HTMLDivElement),
+            }),
           })
         );
       });
+
+      expect(cell).toHaveAttribute('data-cascade-row-loading', 'false');
     });
 
-    it('should provide a working preventSizeChangePropagation function that calls the virtualizer method', async () => {
+    it('should provide virtualizerController from the virtualizer childController', async () => {
       const cascadeGroups = ['group1', 'group2'];
-      let capturedPreventSizeChangePropagation: (() => () => void) | null = null;
-      const mockCleanup = jest.fn();
-      const mockPreventRowSizeChangePropagation = jest.fn(() => mockCleanup);
+      let capturedVirtualizerController: ChildVirtualizerController | undefined;
       const mockOnCascadeLeafNodeExpanded = jest.fn().mockResolvedValue(mockLeafData);
+
+      const mockChildController = {
+        isDetached: jest.fn(() => false),
+        clearPersistedAnchor: jest.fn(),
+        subscribe: jest.fn(() => () => {}),
+        shouldActivate: jest.fn(() => true),
+        enqueue: jest.fn(() => jest.fn()),
+        isReturningCell: jest.fn(() => false),
+      };
 
       const customMockVirtualizerGetter = jest.fn(
         () =>
@@ -196,67 +238,7 @@ describe('CascadeRowCellPrimitive', () => {
             scrollOffset: 0,
             scrollElement: null,
             activeStickyIndex: null,
-            virtualizedRowComputedTranslateValue: new Map(),
-            preventRowSizeChangePropagation: mockPreventRowSizeChangePropagation,
-          } as unknown as CascadeVirtualizerReturnValue)
-      );
-
-      const rowData = cascadeGroups.reduce((acc, value, idx) => ({ ...acc, [value]: idx }), {
-        id: '1',
-        randomField: 'randomValue',
-      });
-
-      const rowIndex = 5;
-
-      renderComponent({
-        cascadeGroups,
-        initialGroupColumn: [cascadeGroups[0]],
-        row: {
-          id: '1',
-          index: rowIndex,
-          depth: 0,
-          original: rowData,
-          getToggleSelectedHandler: jest.fn(),
-          getToggleExpandedHandler: jest.fn(),
-        } as unknown as Row<any>,
-        children: (props) => {
-          capturedPreventSizeChangePropagation = props.preventSizeChangePropagation;
-          return <div>Test Child</div>;
-        },
-        onCascadeLeafNodeExpanded: mockOnCascadeLeafNodeExpanded,
-        getVirtualizer: customMockVirtualizerGetter,
-      });
-
-      await waitFor(() => {
-        expect(capturedPreventSizeChangePropagation).not.toBeNull();
-      });
-
-      // Call the function and verify it delegates to the virtualizer
-      const cleanup = capturedPreventSizeChangePropagation!();
-      expect(mockPreventRowSizeChangePropagation).toHaveBeenCalledWith(rowIndex);
-
-      // Verify the cleanup function is returned
-      expect(cleanup).toBe(mockCleanup);
-    });
-
-    it('should provide getScrollElement that returns the virtualizer scrollElement', async () => {
-      const cascadeGroups = ['group1', 'group2'];
-      let capturedGetScrollElement: (() => Element | null) | null = null;
-      const mockScrollElement = document.createElement('div');
-      const mockOnCascadeLeafNodeExpanded = jest.fn().mockResolvedValue(mockLeafData);
-
-      const customMockVirtualizerGetter = jest.fn(
-        () =>
-          ({
-            getVirtualItems: jest.fn(() => []),
-            getTotalSize: jest.fn(() => 0),
-            isScrolling: false,
-            measureElement: jest.fn(),
-            scrollOffset: 0,
-            scrollElement: mockScrollElement,
-            activeStickyIndex: null,
-            virtualizedRowComputedTranslateValue: new Map(),
-            preventRowSizeChangePropagation: jest.fn(() => jest.fn()),
+            childController: mockChildController,
           } as unknown as CascadeVirtualizerReturnValue)
       );
 
@@ -275,9 +257,12 @@ describe('CascadeRowCellPrimitive', () => {
           original: rowData,
           getToggleSelectedHandler: jest.fn(),
           getToggleExpandedHandler: jest.fn(),
-        } as unknown as Row<any>,
+          getIsSelected: jest.fn(() => false),
+          getIsSomeSelected: jest.fn(() => false),
+          getCanSelect: jest.fn(() => true),
+        } as unknown as CascadeTableRow<GroupNode>,
         children: (props) => {
-          capturedGetScrollElement = props.getScrollElement;
+          capturedVirtualizerController = props.virtualizerController;
           return <div>Test Child</div>;
         },
         onCascadeLeafNodeExpanded: mockOnCascadeLeafNodeExpanded,
@@ -285,10 +270,10 @@ describe('CascadeRowCellPrimitive', () => {
       });
 
       await waitFor(() => {
-        expect(capturedGetScrollElement).not.toBeNull();
+        expect(capturedVirtualizerController).toBeDefined();
       });
 
-      expect(capturedGetScrollElement!()).toBe(mockScrollElement);
+      expect(capturedVirtualizerController).toBe(mockChildController);
     });
   });
 });

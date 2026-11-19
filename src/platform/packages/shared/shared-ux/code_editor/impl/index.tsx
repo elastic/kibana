@@ -17,9 +17,82 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CodeEditorProps } from './code_editor';
-export type { CodeEditorProps } from './code_editor';
-export { monaco } from '@kbn/monaco';
+export type { CodeEditorProps, CodeEditorScope } from './code_editor';
+export { monaco, BarePluginApi, jsonDefaults } from '@kbn/monaco';
+export type { KbnMonacoLanguageThemeResolver } from '@kbn/monaco';
+// per-editor chrome; the value export is for editors created with `monaco.editor.create*` directly
+export { applyKbnCodeEditorChromeOverrides } from './react_monaco_editor/utils/chrome_overrides';
+export type {
+  KbnCodeEditorChromeColorId,
+  KbnCodeEditorChromeColors,
+  KbnCodeEditorChromeOverrides,
+  KbnCodeEditorChromeOverridesHandle,
+} from './react_monaco_editor/utils/chrome_overrides';
 export * from './react_monaco_editor/languages/supported';
+export {
+  // editor theme
+  CODE_EDITOR_DEFAULT_THEME_ID,
+  initializeRegisteredLanguagesTheme,
+  // language definitions
+  XJsonLang,
+  PainlessLang,
+  SQLLang,
+  ESQLLang,
+  YamlLang,
+  ConsoleLang,
+  ConsoleOutputLang,
+  MarkdownLang,
+  GrokLang,
+  HandlebarsLang,
+  CssLang,
+  HJsonLang,
+  PromQLLang,
+  // esql
+  ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
+  // console
+  getParsedRequestsProvider,
+  ConsoleParsedRequestsProvider,
+  ConsoleWorkerProxyService,
+  createOutputParser,
+  // yaml
+  configureMonacoYamlSchema,
+  // painless
+  EditorStateService,
+  PainlessCompletionAdapter,
+  // lifecycle
+  initializeSupportedLanguages,
+  // undo/redo
+  getUndoRedoService,
+} from '@kbn/monaco';
+export type {
+  // general
+  LangModuleType,
+  CompleteLangModuleType,
+  CustomLangModuleType,
+  MonacoEditorError,
+  LangValidation,
+  SyntaxErrors,
+  BaseWorkerDefinition,
+  // undo/redo
+  UndoRedoService,
+  UndoRedoElement,
+  // esql
+  ESQLDependencies,
+  MonacoMessage,
+  // console
+  ConsoleOutputParser,
+  ConsoleParserResult,
+  ErrorAnnotation,
+  ParsedRequest,
+  // painless
+  PainlessContext,
+  PainlessCompletionKind,
+  PainlessCompletionItem,
+  PainlessCompletionResult,
+  PainlessAutocompleteField,
+  EditorState,
+  Language,
+} from '@kbn/monaco';
 
 const LazyCodeEditorBase = React.lazy(() =>
   import(/* webpackChunkName: "code-editor-entry" */ './code_editor').then((m) => ({

@@ -2,47 +2,56 @@
 
 set -euo pipefail
 
-echo '--- Log out of gcloud'
-./.buildkite/scripts/common/activate_service_account.sh --unset-impersonation || echo "Failed to unset impersonation"
-./.buildkite/scripts/common/activate_service_account.sh --logout-gcloud || echo "Failed to log out of gcloud"
+# Agents from the gobld queue run a single job on a VM that's deleted afterwards, so logging out of
+# gcloud there only costs time (~3 s). Other agents, such as long-lived bare-metal workers, still
+# log out so the next job doesn't inherit this job's credentials.
+if [[ "${BUILDKITE_AGENT_META_DATA_QUEUE:-}" != "gobld" ]]; then
+  echo '--- Log out of gcloud'
+  ./.buildkite/scripts/common/activate_service_account.sh --unset-impersonation || echo "Failed to unset impersonation"
+  ./.buildkite/scripts/common/activate_service_account.sh --logout-gcloud || echo "Failed to log out of gcloud"
+fi
 
 IS_TEST_EXECUTION_STEP="$(buildkite-agent meta-data get "${BUILDKITE_JOB_ID}_is_test_execution_step" --default '')"
 
 if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   echo "--- Upload Artifacts"
-  buildkite-agent artifact upload '**/.scout/test-artifacts/**/*.png'
-  buildkite-agent artifact upload '.scout/reports/scout-playwright-test-failures-*/**/*'
-  buildkite-agent artifact upload '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
-  buildkite-agent artifact upload 'target/junit/**/*'
-  buildkite-agent artifact upload 'target/kibana-coverage/jest/**/*'
-  buildkite-agent artifact upload 'target/kibana-coverage/functional/**/*'
-  buildkite-agent artifact upload 'target/kibana-*'
-  buildkite-agent artifact upload 'target/kibana-security-solution/**/*.png'
-  buildkite-agent artifact upload 'target/kibana-security-solution/**/management/**/*.mp4'
-  buildkite-agent artifact upload 'target/kibana-osquery/**/*.png'
-  buildkite-agent artifact upload 'target/kibana-osquery/**/*.mp4'
-  buildkite-agent artifact upload 'target/kibana-fleet/**/*.png'
-  buildkite-agent artifact upload 'target/test-metrics/*'
-  buildkite-agent artifact upload 'target/test-suites-ci-plan.json'
-  buildkite-agent artifact upload 'test/**/screenshots/diff/*.png'
-  buildkite-agent artifact upload 'test/**/screenshots/failure/*.png'
-  buildkite-agent artifact upload 'test/**/screenshots/session/*.png'
-  buildkite-agent artifact upload 'src/platform/test/**/screenshots/diff/*.png'
-  buildkite-agent artifact upload 'src/platform/test/**/screenshots/failure/*.png'
-  buildkite-agent artifact upload 'src/platform/test/**/screenshots/session/*.png'
-  buildkite-agent artifact upload 'src/platform/test/functional/failure_debug/html/*.html'
-  buildkite-agent artifact upload 'x-pack/platform/test/**/screenshots/diff/*.png'
-  buildkite-agent artifact upload 'x-pack/platform/test/**/screenshots/failure/*.png'
-  buildkite-agent artifact upload 'x-pack/platform/test/**/screenshots/session/*.png'
-  buildkite-agent artifact upload 'x-pack/platform/test/functional/failure_debug/html/*.html'
-  buildkite-agent artifact upload 'x-pack/platform/test/serverless/**/screenshots/diff/*.png'
-  buildkite-agent artifact upload 'x-pack/platform/test/serverless/**/screenshots/failure/*.png'
-  buildkite-agent artifact upload 'x-pack/platform/test/serverless/**/screenshots/session/*.png'
-  buildkite-agent artifact upload 'x-pack/platform/test/serverless/**/failure_debug/html/*.html'
-  buildkite-agent artifact upload '.es/**/*.hprof'
-  buildkite-agent artifact upload 'data/es_debug_*.tar.gz'
-  buildkite-agent artifact upload '.es/es*.log'
-  buildkite-agent artifact upload '.es/uiam*.log'
+
+  ARTIFACT_PATTERNS=(
+    '{examples,packages,src,x-pack}/**/.scout/test-artifacts/**/*.png'
+    '.scout/reports/scout-playwright-test-failures-*/**/*'
+    '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
+    'target/junit/**/*'
+    'target/kibana-*'
+    'target/kibana-security-solution/**/*.png'
+    'target/kibana-security-solution/**/management/**/*.mp4'
+    'target/kibana-osquery/**/*.png'
+    'target/kibana-osquery/**/*.mp4'
+    'target/kibana-fleet/**/*.png'
+    'target/test-metrics/*'
+    'target/test-suites-ci-plan.json'
+    'target/cypress-results/**/*.ndjson'
+    'test/**/screenshots/diff/*.png'
+    'test/**/screenshots/failure/*.png'
+    'test/**/screenshots/session/*.png'
+    'src/platform/test/**/screenshots/diff/*.png'
+    'src/platform/test/**/screenshots/failure/*.png'
+    'src/platform/test/**/screenshots/session/*.png'
+    'src/platform/test/functional/failure_debug/html/*.html'
+    'x-pack/platform/test/**/screenshots/diff/*.png'
+    'x-pack/platform/test/**/screenshots/failure/*.png'
+    'x-pack/platform/test/**/screenshots/session/*.png'
+    'x-pack/platform/test/functional/failure_debug/html/*.html'
+    'x-pack/platform/test/serverless/**/screenshots/diff/*.png'
+    'x-pack/platform/test/serverless/**/screenshots/failure/*.png'
+    'x-pack/platform/test/serverless/**/screenshots/session/*.png'
+    'x-pack/platform/test/serverless/**/failure_debug/html/*.html'
+    '.es/**/*.hprof'
+    'data/es_debug_*.tar.gz'
+    '.es/es*.log'
+    '.es/uiam*.log'
+  )
+
+  buildkite-agent artifact upload "$(printf '%s;' "${ARTIFACT_PATTERNS[@]}")"
 
   if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
     if [[ $BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG == 'elasticsearch-serverless-intake' ]]; then
@@ -50,22 +59,45 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
       node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" 'target/junit/**/*.xml'\
         --no-github-update --no-index-errors
     else
-      echo "--- Run Failed Test Reporter"
+      echo "--- Run Failed Test Reporter (JUnit)"
       node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" \
-        'target/junit/**/*.xml' \
+        'target/junit/**/*.xml'
+
+      # Scout: only update GitHub once a Scout lane has failed in at least 2 attempts
+      # of the current build. The counter is set by run_test_lane.sh on real test
+      # failures (exit 10) and is not incremented by agent-lost retries (exit -1).
+      # BK annotations are still produced because target/test_failures artifacts are
+      # generated regardless of --no-github-update.
+      SCOUT_FAILURE_COUNT=0
+      if [[ -n "${BUILDKITE_STEP_KEY:-}" ]]; then
+        SCOUT_FAILURE_COUNT=$(buildkite-agent meta-data get "${BUILDKITE_STEP_KEY}_scout_failure_count" --default "0" 2>/dev/null || echo 0)
+      fi
+      SCOUT_GH_FLAG="--no-github-update"
+      SCOUT_GH_UPDATE_STATUS="disabled"
+      if [[ "$SCOUT_FAILURE_COUNT" -ge 2 ]]; then
+        SCOUT_GH_FLAG=""
+        SCOUT_GH_UPDATE_STATUS="enabled"
+      fi
+      echo "--- Run Failed Test Reporter (Scout, failure_count=$SCOUT_FAILURE_COUNT, github_update=$SCOUT_GH_UPDATE_STATUS)"
+      node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" $SCOUT_GH_FLAG \
         '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
     fi
   fi
 
   if [[ -d 'target/test_failures' ]]; then
     buildkite-agent artifact upload 'target/test_failures/**/*'
-    ts-node .buildkite/scripts/lifecycle/annotate_test_failures.ts
+    node .buildkite/scripts/lifecycle/annotate_test_failures.ts
   fi
 
   if [[ -d 'target/agent_diagnostics' ]]; then
     buildkite-agent artifact upload 'target/agent_diagnostics/**/*'
   fi
 
+fi
+
+if compgen -G 'target/kibana-check*' > /dev/null 2>&1; then
+  echo "--- Upload scripts/check logs"
+  buildkite-agent artifact upload 'target/kibana-check*'
 fi
 
 if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then

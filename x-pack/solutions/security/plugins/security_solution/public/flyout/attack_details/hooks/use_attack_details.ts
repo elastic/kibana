@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
+import type {
+  TimelineEventsDetailsItem,
+  RunTimeMappings,
+} from '@kbn/securitysolution-timeline-search-strategy';
 import {
   type AttackDiscoveryAlert,
   transformAttackDiscoveryAlertDocumentToApi,
@@ -74,7 +77,7 @@ export const useAttackDetails = ({
   // https://github.com/elastic/kibana/issues/244205
   const pageScope = PageScope.attacks;
   const { dataView } = useDataView(pageScope);
-  const browserFields = useBrowserFields(pageScope);
+  const browserFields = useBrowserFields(dataView);
 
   const runtimeMappings = dataView?.getRuntimeMappings() as RunTimeMappings;
 
@@ -97,6 +100,7 @@ export const useAttackDetails = ({
         attackDiscoveryAlertDocument: source as AttackDiscoveryAlertDocument,
         enableFieldRendering: true,
         id: searchHit._id ?? attackId,
+        index: searchHit._index,
         withReplacements: true,
       });
       return transformAttackDiscoveryAlertFromApi(apiAlert);

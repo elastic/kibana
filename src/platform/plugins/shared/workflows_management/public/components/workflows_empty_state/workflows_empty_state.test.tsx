@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
-import { WorkflowsEmptyState } from './workflows_empty_state';
+import { WorkflowsEmptyStateReadOnly } from './workflows_empty_state';
+import { TestProvider } from '../../shared/mocks/test_providers';
 
-// Mock useKibana hook
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
+const mockNavigateToApp = jest.fn();
+
+jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       http: {
@@ -21,63 +22,34 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
           prepend: (path: string) => `/mock-base-path${path}`,
         },
       },
+      application: { navigateToApp: mockNavigateToApp },
     },
   }),
 }));
 
-const renderWithIntl = (component: React.ReactElement) => {
-  return render(<I18nProvider>{component}</I18nProvider>);
-};
+const renderWithProviders = (component: React.ReactElement) =>
+  render(<TestProvider>{component}</TestProvider>);
 
-describe('WorkflowsEmptyState', () => {
-  it('renders the empty state with title and description', () => {
-    renderWithIntl(<WorkflowsEmptyState />);
+describe('WorkflowsEmptyStateReadOnly', () => {
+  it('renders the read-only empty state with title and description', () => {
+    renderWithProviders(<WorkflowsEmptyStateReadOnly />);
 
-    expect(screen.getByText('Get Started with Workflows')).toBeInTheDocument();
+    expect(screen.getByText('Workflows list will be here')).toBeInTheDocument();
     expect(screen.getByText(/Workflows let you automate repetitive tasks/)).toBeInTheDocument();
   });
 
-  it('renders the create button when user can create workflows', () => {
-    const onCreateWorkflow = jest.fn();
-    renderWithIntl(
-      <WorkflowsEmptyState canCreateWorkflow={true} onCreateWorkflow={onCreateWorkflow} />
-    );
+  it('does not render create workflow actions', () => {
+    renderWithProviders(<WorkflowsEmptyStateReadOnly />);
 
-    const createButton = screen.getByText('Create a new workflow');
-    expect(createButton).toBeInTheDocument();
-
-    fireEvent.click(createButton);
-    expect(onCreateWorkflow).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText('Create workflow')).not.toBeInTheDocument();
+    expect(screen.queryByText('Example workflows')).not.toBeInTheDocument();
+    expect(screen.queryByText('Need help?')).not.toBeInTheDocument();
   });
 
-  it('does not render the create button when user cannot create workflows', () => {
-    renderWithIntl(<WorkflowsEmptyState canCreateWorkflow={false} />);
+  it('shows the required write privilege in the footer', () => {
+    renderWithProviders(<WorkflowsEmptyStateReadOnly />);
 
-    expect(screen.queryByText('Create a new workflow')).not.toBeInTheDocument();
-  });
-
-  it('does not render the create button when onCreateWorkflow is not provided', () => {
-    renderWithIntl(<WorkflowsEmptyState canCreateWorkflow={true} />);
-
-    expect(screen.queryByText('Create a new workflow')).not.toBeInTheDocument();
-  });
-
-  it('renders the footer with documentation link', () => {
-    renderWithIntl(<WorkflowsEmptyState />);
-
-    expect(screen.getByText('Need help?')).toBeInTheDocument();
-    expect(screen.getByText('Read documentation')).toBeInTheDocument();
-  });
-
-  it('renders the illustration image', () => {
-    renderWithIntl(<WorkflowsEmptyState />);
-
-    const images = screen.getAllByRole('presentation');
-    const mainImage = images.find((img) => img.tagName === 'IMG');
-    expect(mainImage).toBeInTheDocument();
-    expect(mainImage).toHaveAttribute(
-      'src',
-      '/mock-base-path/plugins/workflowsManagement/assets/empty_state.svg'
-    );
+    expect(screen.getByText('Minimum privileges required:')).toBeInTheDocument();
+    expect(screen.getByText('Workflows: Write')).toBeInTheDocument();
   });
 });

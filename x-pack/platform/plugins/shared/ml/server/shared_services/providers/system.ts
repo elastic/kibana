@@ -10,15 +10,17 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { MlInfoResponse } from '../../../common/types/ml_server_info';
+import type { MlInfoResponse } from '@kbn/ml-common-types/ml_server_info';
 import type {
   MlCapabilitiesResponse,
   ResolveMlCapabilities,
-} from '../../../common/types/capabilities';
+} from '@kbn/ml-common-types/capabilities';
 import type { GetGuards } from '../shared_services';
 import type { MlLicense } from '../../../common/license';
+import type { ServerlessInfo } from '../../types';
 import { spacesUtilsProvider } from '../../lib/spaces_utils';
 import { capabilitiesProvider } from '../../lib/capabilities';
+import { getMlInfo } from '../../models/system/ml_info';
 
 export interface MlSystemProvider {
   mlSystemProvider(
@@ -36,7 +38,8 @@ export function getMlSystemProvider(
   mlLicense: MlLicense,
   getSpaces: (() => Promise<SpacesPluginStart>) | undefined,
   cloud: CloudSetup | undefined,
-  resolveMlCapabilities: ResolveMlCapabilities
+  resolveMlCapabilities: ResolveMlCapabilities,
+  serverless: ServerlessInfo
 ): MlSystemProvider {
   return {
     mlSystemProvider(request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) {
@@ -61,13 +64,13 @@ export function getMlSystemProvider(
           });
         },
         async mlInfo(): Promise<MlInfoResponse> {
-          return await guards.isMinimumLicense().ok(async ({ mlClient }) => {
-            const info = await mlClient.info();
-            const cloudId = cloud && cloud.cloudId;
-            return {
-              ...info,
-              cloudId,
-            };
+          return await guards.isMinimumLicense().ok(async ({ mlClient, scopedClient }) => {
+            return getMlInfo({
+              mlClient,
+              client: scopedClient,
+              cloud,
+              serverless,
+            });
           });
         },
         async mlAnomalySearch<T>(

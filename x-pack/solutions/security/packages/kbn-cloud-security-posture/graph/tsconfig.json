@@ -24,7 +24,6 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/expandable-flyout",
     "@kbn/react-query",
-    "@kbn/fleet-plugin",
-    "@kbn/core-http-browser",
+    "@kbn/entity-store",
   ]
 }

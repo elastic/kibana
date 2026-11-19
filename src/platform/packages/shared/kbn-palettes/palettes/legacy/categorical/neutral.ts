@@ -18,7 +18,7 @@ const NEUTRAL_COLOR_DARK = schemeGreys.slice().reverse();
 export const getNeutralPalette = (darkMode: boolean) =>
   new KbnCategoricalPalette({
     id: KbnPalette.Neutral,
-    name: i18n.translate('palettes.elastic.name', {
+    name: i18n.translate('palettes.neutral.name', {
       defaultMessage: 'Neutral',
     }),
     standalone: true,

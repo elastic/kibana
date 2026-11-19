@@ -11,11 +11,11 @@
     "@kbn/dev-utils",
     "@kbn/elastic-agent-utils",
     "@kbn/zod",
-    "@kbn/sample-log-parser",
     "@kbn/tooling-log",
     "@kbn/streams-schema",
     "@kbn/streamlang",
-    "@kbn/repo-info"
+    "@kbn/repo-info",
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }

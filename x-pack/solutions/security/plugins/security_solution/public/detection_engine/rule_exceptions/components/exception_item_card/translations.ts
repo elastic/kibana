@@ -200,3 +200,24 @@ export const AFFECTED_LIST = i18n.translate(
     defaultMessage: 'Affects shared list',
   }
 );
+
+export const EXCEPTION_ITEM_ACTIONS_MENU_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.ruleExceptions.exceptionItem.actionsMenuAriaLabel',
+  {
+    defaultMessage: 'Exception item actions menu',
+  }
+);
+
+export const AFFECTED_RULES_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.ruleExceptions.exceptionItem.affectedRulesPopoverAriaLabel',
+  {
+    defaultMessage: 'Affected rules',
+  }
+);
+
+export const AFFECTED_LIST_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.ruleExceptions.exceptionItem.affectedListPopoverAriaLabel',
+  {
+    defaultMessage: 'Affects shared list',
+  }
+);

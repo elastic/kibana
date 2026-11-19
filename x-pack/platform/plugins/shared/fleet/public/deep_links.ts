@@ -31,7 +31,7 @@ export const getFleetDeepLinks: (
       id: FleetDeepLinkId.agents,
       title: i18n.translate('xpack.fleet.deepLinks.agents.title', { defaultMessage: 'Agents' }),
       path: FLEET_ROUTING_PATHS.agents,
-      visibleIn: !authz?.fleet.readAgents ? [] : ['globalSearch'],
+      visibleIn: !authz?.fleet.readAgents ? [] : ['globalSearch', 'projectSideNav'],
     },
     {
       id: FleetDeepLinkId.policies,
@@ -39,7 +39,7 @@ export const getFleetDeepLinks: (
         defaultMessage: 'Agent policies',
       }),
       path: FLEET_ROUTING_PATHS.policies,
-      visibleIn: !authz?.fleet.readAgentPolicies ? [] : ['globalSearch'],
+      visibleIn: !authz?.fleet.readAgentPolicies ? [] : ['globalSearch', 'projectSideNav'],
     },
     {
       id: FleetDeepLinkId.enrollmentTokens,
@@ -47,7 +47,7 @@ export const getFleetDeepLinks: (
         defaultMessage: 'Enrollment tokens',
       }),
       path: FLEET_ROUTING_PATHS.enrollment_tokens,
-      visibleIn: !authz?.fleet.allAgents ? [] : ['globalSearch'],
+      visibleIn: !authz?.fleet.allAgents ? [] : ['globalSearch', 'projectSideNav'],
     },
     {
       id: FleetDeepLinkId.uninstallTokens,
@@ -55,7 +55,7 @@ export const getFleetDeepLinks: (
         defaultMessage: 'Uninstall tokens',
       }),
       path: FLEET_ROUTING_PATHS.uninstall_tokens,
-      visibleIn: !authz?.fleet.allAgents ? [] : ['globalSearch'],
+      visibleIn: !authz?.fleet.allAgents ? [] : ['globalSearch', 'projectSideNav'],
     },
     {
       id: FleetDeepLinkId.dataStreams,
@@ -70,7 +70,7 @@ export const getFleetDeepLinks: (
         defaultMessage: 'Settings',
       }),
       path: FLEET_ROUTING_PATHS.settings,
-      visibleIn: !authz?.fleet.readSettings ? [] : ['globalSearch'],
+      visibleIn: !authz?.fleet.readSettings ? [] : ['globalSearch', 'projectSideNav'],
     },
   ];
 };

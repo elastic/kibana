@@ -75,6 +75,7 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
       '&.dshDashboardGrid__item--highlighted': {
         position: 'relative',
         isolation: 'isolate',
+        zIndex: euiTheme.levels.toast,
       },
       '&.dshDashboardGrid__item--highlighted .embPanel': {
         overflow: 'visible !important',
@@ -92,7 +93,7 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
         height: 'calc(100% + 10px)',
         backgroundImage: rotatingGradient,
         filter: brightenInDarkMode(1.5),
-        borderRadius: euiTheme.border.radius.medium,
+        borderRadius: euiTheme.border.radius.control,
         animation: `${borderSpinKeyframes} ${highlightAnimationDuration}ms ease-out`,
       },
       '&.dshDashboardGrid__item--highlighted::after': {

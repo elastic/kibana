@@ -12,16 +12,21 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   prepareIncident,
   addServiceMessageToError,
+  createServiceNowApiError,
+  isServiceNowApiError,
   getPushedDate,
   throwIfSubActionIsNotSupported,
   getAxiosInstance,
   throwIfAdditionalFieldsNotSupported,
 } from './utils';
 import type { ResponseError } from './types';
+import { ServiceNowApiError } from './types';
 import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connector_token_client.mock';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 jest.mock('@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token', () => ({
   getOAuthJwtAccessToken: jest.fn(),
@@ -145,6 +150,174 @@ describe('utils', () => {
           '[Action][ServiceNow]: Unable to do action. Error: invalid_grant'
         );
       });
+    });
+  });
+
+  describe('context suffix', () => {
+    test('appends status, method, and endpoint when context is provided', () => {
+      const axiosError = {
+        message: 'An error occurred',
+        response: { status: 403, data: { error: { message: 'Denied', detail: 'no access' } } },
+      } as ResponseError;
+
+      expect(
+        addServiceMessageToError(axiosError, 'Unable to do action', {
+          endpoint: 'table',
+          method: 'get',
+        }).message
+      ).toBe(
+        '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: Denied: no access [status=403] [method=get] [endpoint=table]'
+      );
+    });
+
+    test('omits method when not provided', () => {
+      const axiosError = {
+        message: 'Boom',
+        response: { status: 500, data: { error: { message: 'Boom', detail: '' } } },
+      } as ResponseError;
+
+      expect(
+        addServiceMessageToError(axiosError, 'Unable to do action', { endpoint: 'table' }).message
+      ).toMatch(/\[status=500\] \[endpoint=table\]$/);
+    });
+
+    test('uses ServiceNowApiError.status when error.response is absent', () => {
+      const err = createServiceNowApiError('forced', { status: 200, body: {} });
+
+      expect(
+        addServiceMessageToError(err as unknown as ResponseError, 'Unable to do action', {
+          endpoint: 'import_set',
+          method: 'post',
+        }).message
+      ).toContain('[status=200] [method=post] [endpoint=import_set]');
+    });
+
+    test('falls back to error.code when no status is available', () => {
+      const err = Object.assign(new Error('Unsupported protocol foo:'), {
+        isAxiosError: true as const,
+        code: 'ERR_BAD_REQUEST',
+      });
+
+      expect(
+        addServiceMessageToError(err as unknown as ResponseError, 'Unable to do action', {
+          endpoint: 'table',
+          method: 'post',
+        }).message
+      ).toContain('[status=ERR_BAD_REQUEST]');
+    });
+
+    test('falls back to "none" when no signal is available', () => {
+      const err = new Error('something broke') as unknown as ResponseError;
+
+      expect(
+        addServiceMessageToError(err, 'Unable to do action', { endpoint: 'other' }).message
+      ).toContain('[status=none] [endpoint=other]');
+    });
+
+    test('does not append suffix when context is omitted (backwards compatible)', () => {
+      const axiosError = {
+        message: 'An error occurred',
+        response: { status: 403, data: { error: { message: 'Denied' } } },
+      } as ResponseError;
+
+      expect(addServiceMessageToError(axiosError, 'Unable to do action').message).not.toMatch(
+        /\[status=/
+      );
+    });
+  });
+
+  describe('createServiceNowApiError', () => {
+    test('builds an error with status and body', () => {
+      const err = createServiceNowApiError('boom', { status: 200, body: { foo: 1 } });
+      expect(err.message).toBe('boom');
+      expect(err.status).toBe(200);
+      expect(err.body).toEqual({ foo: 1 });
+    });
+
+    test('is tagged as a USER task error', () => {
+      const err = createServiceNowApiError('boom', { status: 200 });
+      expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
+    });
+
+    test('isServiceNowApiError returns true for it', () => {
+      const err = createServiceNowApiError('boom', { status: 200 });
+      expect(isServiceNowApiError(err)).toBe(true);
+      expect(err).toBeInstanceOf(ServiceNowApiError);
+    });
+
+    test('isServiceNowApiError returns false for plain Error', () => {
+      expect(isServiceNowApiError(new Error('x'))).toBe(false);
+    });
+  });
+
+  describe('maxContentLength classification', () => {
+    test('tags axios maxContentLength errors as USER', () => {
+      const err = Object.assign(new Error('maxContentLength size of 1024 exceeded'), {
+        isAxiosError: true as const,
+        code: 'ERR_BAD_RESPONSE',
+      });
+
+      addServiceMessageToError(err as unknown as ResponseError, 'Unable to create incident', {
+        endpoint: 'import_set',
+        method: 'post',
+      });
+
+      expect(getErrorSource(err as unknown as Error)).toBe(TaskErrorSource.USER);
+    });
+
+    test('tags axios maxContentLength errors as USER even when response metadata is present', () => {
+      const err = Object.assign(new Error('maxContentLength size of 20971520 exceeded'), {
+        isAxiosError: true as const,
+        code: 'ERR_BAD_RESPONSE',
+        response: { status: 200, headers: { 'content-length': '104857600' } },
+      });
+
+      addServiceMessageToError(err as unknown as ResponseError, 'Unable to create incident', {
+        endpoint: 'import_set',
+        method: 'post',
+      });
+
+      expect(getErrorSource(err as unknown as Error)).toBe(TaskErrorSource.USER);
+    });
+
+    test('does not tag a plain HTTP 4xx as USER via this path (response present)', () => {
+      const err = Object.assign(new Error('Request failed'), {
+        isAxiosError: true as const,
+        code: 'ERR_BAD_REQUEST',
+        response: { status: 413, data: {} },
+      });
+
+      addServiceMessageToError(err as unknown as ResponseError, 'Unable to create incident', {
+        endpoint: 'table',
+        method: 'post',
+      });
+
+      expect(getErrorSource(err as unknown as Error)).toBeUndefined();
+    });
+
+    test('does not tag a generic network error as USER', () => {
+      const err = Object.assign(new Error('connect ECONNREFUSED'), {
+        isAxiosError: true as const,
+        code: 'ECONNREFUSED',
+      });
+
+      addServiceMessageToError(err as unknown as ResponseError, 'Unable to create incident', {
+        endpoint: 'table',
+        method: 'post',
+      });
+
+      expect(getErrorSource(err as unknown as Error)).toBeUndefined();
+    });
+
+    test('does not tag a plain Error as USER even if message mentions maxContentLength', () => {
+      const err = new Error('maxContentLength was set somewhere');
+
+      addServiceMessageToError(err as unknown as ResponseError, 'Unable to create incident', {
+        endpoint: 'table',
+        method: 'post',
+      });
+
+      expect(getErrorSource(err)).toBeUndefined();
     });
   });
 

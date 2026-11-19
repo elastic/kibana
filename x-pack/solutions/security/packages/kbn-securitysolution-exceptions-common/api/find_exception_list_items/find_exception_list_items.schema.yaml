@@ -50,6 +50,8 @@ paths:
         - name: search
           in: query
           required: false
+          description: |
+            Free-text search term applied to exception list item fields (for example a hostname or file path fragment).
           schema:
             type: string
             example: host.name

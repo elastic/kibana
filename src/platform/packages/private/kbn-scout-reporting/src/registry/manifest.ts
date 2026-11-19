@@ -13,11 +13,15 @@ import type { TestCase } from '@playwright/test/reporter';
 import { globSync } from 'fast-glob';
 import path from 'node:path';
 import { SCOUT_CONFIG_MANIFEST_PATH_GLOB } from '@kbn/scout-info';
+import type { ScoutTestChannel } from '@kbn/scout-info';
 
 let git: SimpleGit;
 
+// Awaited inside ScoutManifestUpdater.onExit, which Playwright does not time out.
+const GIT_COMMAND_TIMEOUT_MS = 30_000;
+
 export const getGitSHA1ForPath = async (p: string) => {
-  if (git === undefined) git = simpleGit(REPO_ROOT);
+  if (git === undefined) git = simpleGit(REPO_ROOT, { timeout: { block: GIT_COMMAND_TIMEOUT_MS } });
   return (await git.raw(['ls-tree', '--object-only', 'HEAD', p])).trim();
 };
 
@@ -25,6 +29,7 @@ export interface ScoutConfigManifest {
   path: string;
   exists: boolean;
   sha1: string;
+  testChannels: ScoutTestChannel[];
   tests: {
     id: string;
     title: string;

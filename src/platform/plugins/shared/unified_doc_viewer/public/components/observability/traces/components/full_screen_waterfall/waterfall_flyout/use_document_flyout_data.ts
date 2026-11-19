@@ -9,16 +9,17 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { spanFlyoutId, useSpanFlyoutData } from './span_flyout';
+import { useSpanFlyoutData } from './span_flyout';
 import { useLogFlyoutData } from './logs_flyout';
-
-export type DocumentType = 'spanDetailFlyout' | 'logsFlyout';
+import type { TraceDocFlyoutType } from '../../../common/types';
 
 export interface UseDocumentFlyoutDataParams {
-  type: DocumentType;
+  type: TraceDocFlyoutType;
   docId: string;
   traceId: string;
   docIndex?: string;
+  /** Absolute window to search the document in; defaults to the global time filter. */
+  timeRange?: { from: string; to: string };
 }
 
 /**
@@ -33,8 +34,8 @@ export interface BaseFlyoutData {
 }
 
 export interface DocumentFlyoutData extends BaseFlyoutData {
-  type: DocumentType;
-  // Log-specific fields (only present when type is 'logsFlyout')
+  type: TraceDocFlyoutType;
+  // Log-specific fields (only present when type is 'log')
   logDataView?: DocViewRenderProps['dataView'] | null;
 }
 
@@ -48,12 +49,14 @@ export function useDocumentFlyoutData({
   docId,
   traceId,
   docIndex,
+  timeRange,
 }: UseDocumentFlyoutDataParams): DocumentFlyoutData {
-  const isSpanType = type === spanFlyoutId;
+  const isSpanType = type === 'span';
 
   const spanData = useSpanFlyoutData({
     spanId: isSpanType ? docId : '',
     traceId,
+    timeRange,
   });
 
   const logData = useLogFlyoutData({

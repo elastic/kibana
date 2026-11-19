@@ -7,11 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui/src/components/common';
 
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
+import { useGetUrlParams } from '../../../hooks';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
+import { getStepDetailLink } from '../../step_details_page/hooks/use_step_detail_page';
 
 export const StepDetailsLinkIcon = ({
   stepIndex,
@@ -31,8 +34,18 @@ export const StepDetailsLinkIcon = ({
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
   const selectedLocation = useSelectedLocation({ refetchMonitorEnabled: false });
+  const spaceId = useUrlSpaceId();
+  const { remoteName } = useGetUrlParams();
 
-  const stepDetailsLink = `${basePath}/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=${selectedLocation?.id}`;
+  const stepDetailsLink = getStepDetailLink({
+    basePath,
+    monitorId: configId,
+    checkGroupId: checkGroup,
+    stepIndex: stepIndex ?? 1,
+    locationId: selectedLocation?.id,
+    spaceId,
+    remoteName,
+  });
 
   if (asButton) {
     return (
@@ -40,7 +53,7 @@ export const StepDetailsLinkIcon = ({
         data-test-subj="syntheticsStepDetailsLinkIconButton"
         {...commonProps}
         flush="left"
-        iconType="apmTrace"
+        iconType="chartWaterfall"
         href={stepDetailsLink}
       >
         {/* @ts-expect-error Type '(stepIndex?: number) => string' is not assignable to type 'ReactNode'.*/}
@@ -50,15 +63,16 @@ export const StepDetailsLinkIcon = ({
   }
 
   return (
-    <EuiButtonIcon
-      data-test-subj="syntheticsStepDetailsLinkIconButton"
-      {...commonProps}
-      title={VIEW_DETAILS(stepIndex)}
-      size="s"
-      href={stepDetailsLink}
-      target={target}
-      iconType="apmTrace"
-    />
+    <EuiToolTip content={VIEW_DETAILS(stepIndex)} disableScreenReaderOutput>
+      <EuiButtonIcon
+        data-test-subj="syntheticsStepDetailsLinkIconButton"
+        {...commonProps}
+        size="s"
+        href={stepDetailsLink}
+        target={target}
+        iconType="chartWaterfall"
+      />
+    </EuiToolTip>
   );
 };
 

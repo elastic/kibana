@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  type CustomTriggerSchemaConfig,
+  getTriggerName,
+  toCustomTriggerSchemaConfigs,
+  type TriggerSchemaOptions,
+} from '@kbn/workflows';
 import type {
   PublicTriggerDefinition,
   WorkflowsExtensionsPublicPluginStart,
@@ -19,9 +25,19 @@ import type {
  */
 class TriggerSchemas {
   private extensions: WorkflowsExtensionsPublicPluginStart | null = null;
+  private pageTriggerEnabled = false;
 
-  public initialize(workflowsExtensions: WorkflowsExtensionsPublicPluginStart): void {
+  public initialize(
+    workflowsExtensions: WorkflowsExtensionsPublicPluginStart,
+    { pagesEnabled = false }: { pagesEnabled?: boolean } = {}
+  ): void {
     this.extensions = workflowsExtensions;
+    this.pageTriggerEnabled = pagesEnabled;
+  }
+
+  /** Built-in trigger options for YAML schema generation (`workflowsManagement.pages.enabled`). */
+  public getTriggerSchemaOptions(): TriggerSchemaOptions {
+    return { includePageTrigger: this.pageTriggerEnabled };
   }
 
   /**
@@ -38,11 +54,23 @@ class TriggerSchemas {
     return this.extensions?.getTriggerDefinition(triggerType);
   }
 
+  /** Display name: registered title, then the built-in label, then the type id. */
+  public getTriggerName(triggerType: string): string {
+    return getTriggerName(triggerType, this.getTriggerDefinition(triggerType)?.title);
+  }
+
   /**
    * Returns registered trigger ids.
    */
   public getRegisteredIds(): string[] {
     return this.getTriggerDefinitions().map((t) => t.id);
+  }
+
+  /**
+   * Trigger entries for YAML schema generation, including `requiresConnectorId`.
+   */
+  public getRegisteredTriggersForSchema(): CustomTriggerSchemaConfig[] {
+    return toCustomTriggerSchemaConfigs(this.getTriggerDefinitions());
   }
 
   /**

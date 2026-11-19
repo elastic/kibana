@@ -37,7 +37,6 @@ const useStyles = () => {
 
   return {
     settingsAccordionButtonClassName: cssClassName`
-      color: ${euiTheme.colors.primary};
       padding-top: ${euiTheme.size.s};
       padding-bottom: ${euiTheme.size.s};
     `,

@@ -5,7 +5,8 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@testing-library/jest-dom"
     ]
   },
   "include": [
@@ -20,7 +21,19 @@
     "@kbn/core-feature-flags-browser",
     "@kbn/logging",
     "@kbn/core-base-browser-mocks",
+    "@kbn/core-http-browser",
+    "@kbn/core-http-browser-internal",
+    "@kbn/core-http-browser-mocks",
     "@kbn/core-injected-metadata-browser-internal",
     "@kbn/core-injected-metadata-browser-mocks",
+    "@kbn/use-observable",
+    "@kbn/std",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/core-overlays-browser",
+    "@kbn/core-rendering-browser",
+    "@kbn/core-mount-utils-browser",
+    "@kbn/test-jest-helpers",
+    "@kbn/ui-callout",
   ]
 }

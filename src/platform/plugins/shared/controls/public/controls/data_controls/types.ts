@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
 import type { HasPanelCapabilities } from '@kbn/presentation-publishing';
 import type {
   AppliesFilters,
   HasEditCapabilities,
   PublishesBlockingError,
   PublishesDataLoading,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
@@ -24,7 +25,7 @@ import type { StateManager } from '@kbn/presentation-publishing/state_manager/ty
 import type { initializeLabelManager } from '../control_labels';
 import type { HasCustomPrepend } from '../types';
 
-export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
+export type DataControlFieldFormatter = TextContextTypeConvert | ((toFormat: any) => string);
 
 export interface PublishesField {
   field$: PublishingSubject<DataViewField | undefined>;
@@ -34,7 +35,7 @@ export interface PublishesField {
 export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'] &
   Partial<HasCustomPrepend> &
   HasEditCapabilities &
-  PublishesDataViews &
+  PublishesDataSources<DataView> &
   PublishesBlockingError &
   PublishesField &
   PublishesDataLoading &

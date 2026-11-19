@@ -127,7 +127,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
               anchorProps={tooltipAncherProps}
               content={getConnectedConnectorsTooltipContent(connectedCount, isCrawler)}
             >
-              <EuiBadge color="success">
+              <EuiBadge tabIndex={0} color="success">
                 {getConnectedConnectorsBadgeLabel(connectedCount)}
               </EuiBadge>
             </EuiToolTip>
@@ -136,7 +136,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
               anchorProps={tooltipAncherProps}
               content={getIncompleteConnectorsTooltip(incompleteCount, isCrawler)}
             >
-              <EuiBadge color="warning">
+              <EuiBadge tabIndex={0} color="warning">
                 {getIncompleteConnectorsBadgeLabel(incompleteCount)}
               </EuiBadge>
             </EuiToolTip>
@@ -167,12 +167,14 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
               anchorProps={tooltipAncherProps}
               content={getRunningJobsTooltip(inProgressCount, isCrawler)}
             >
-              <EuiBadge>{getRunningJobsBadgeLabel(inProgressCount, isCrawler)}</EuiBadge>
+              <EuiBadge tabIndex={0}>
+                {getRunningJobsBadgeLabel(inProgressCount, isCrawler)}
+              </EuiBadge>
             </EuiToolTip>
 
             {!isCrawler && (
               <EuiToolTip anchorProps={tooltipAncherProps} content={getIdleJobsTooltip(idleCount)}>
-                <EuiBadge>{getIdleJobsLabel(idleCount)}</EuiBadge>
+                <EuiBadge tabIndex={0}>{getIdleJobsLabel(idleCount)}</EuiBadge>
               </EuiToolTip>
             )}
 
@@ -180,14 +182,14 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
               anchorProps={tooltipAncherProps}
               content={getOrphanedJobsTooltip(orphanedCount, isCrawler)}
             >
-              <EuiBadge>{getOrphanedJobsLabel(orphanedCount, isCrawler)}</EuiBadge>
+              <EuiBadge tabIndex={0}>{getOrphanedJobsLabel(orphanedCount, isCrawler)}</EuiBadge>
             </EuiToolTip>
 
             <EuiToolTip
               anchorProps={tooltipAncherProps}
               content={getSyncJobErrorsTooltip(errorCount, isCrawler)}
             >
-              <EuiBadge color={errorCount > 0 ? 'danger' : 'default'}>
+              <EuiBadge tabIndex={0} color={errorCount > 0 ? 'danger' : 'default'}>
                 {getSyncJobErrorsLabel(errorCount, isCrawler)}
               </EuiBadge>
             </EuiToolTip>

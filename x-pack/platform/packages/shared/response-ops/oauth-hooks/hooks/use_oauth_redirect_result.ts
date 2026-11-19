@@ -49,12 +49,16 @@ export const useOAuthRedirectResult = ({
     }
 
     const broadcastChannel = new BroadcastChannel(OAUTH_BROADCAST_CHANNEL_NAME);
+    const statusCodeRaw = searchParams.get(OAUTH_CALLBACK_QUERY_PARAMS.STATUS_CODE);
+    const parsedStatusCode = statusCodeRaw != null ? Number(statusCodeRaw) : NaN;
+    const statusCode = Number.isInteger(parsedStatusCode) ? parsedStatusCode : undefined;
 
     if (oauthAuthorization === OAuthAuthorizationStatus.Success) {
       onSuccessRef.current?.(connectorId);
       broadcastChannel.postMessage({
         connectorId,
         status: OAuthAuthorizationStatus.Success,
+        statusCode: statusCode ?? 200,
       } as OAuthFlowCompletedSuccessMessage);
     } else {
       const error = searchParams.get(OAUTH_CALLBACK_QUERY_PARAMS.ERROR);
@@ -67,6 +71,7 @@ export const useOAuthRedirectResult = ({
       broadcastChannel.postMessage({
         connectorId,
         status: OAuthAuthorizationStatus.Error,
+        statusCode: statusCode ?? 500,
         error: errorMessage,
       } as OAuthFlowCompletedErrorMessage);
     }

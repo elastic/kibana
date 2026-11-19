@@ -1,0 +1,171 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
+import { setStubKibanaServices } from '@kbn/presentation-util-plugin/public/services/mocks';
+import type { DiscoverSessionSaveDashboardModalProps } from './discover_session_save_dashboard_modal';
+import { DiscoverSessionSaveDashboardModal } from './discover_session_save_dashboard_modal';
+
+const renderSaveModal = (
+  overrides: Partial<DiscoverSessionSaveDashboardModalProps> = {}
+): {
+  onClose: jest.MockedFunction<() => void>;
+  onCopyOnSaveChange: jest.MockedFunction<(newCopyOnSave: boolean) => void>;
+  onSave: jest.MockedFunction<DiscoverSessionSaveDashboardModalProps['onSave']>;
+  rerender: (nextOverrides: Partial<DiscoverSessionSaveDashboardModalProps>) => void;
+} => {
+  const onClose = jest.fn();
+  const onCopyOnSaveChange = jest.fn();
+  const onSave: jest.MockedFunction<DiscoverSessionSaveDashboardModalProps['onSave']> = jest
+    .fn()
+    .mockResolvedValue(undefined);
+
+  const getSaveModal = (props: Partial<DiscoverSessionSaveDashboardModalProps>) => (
+    <EuiProvider>
+      <I18nProvider>
+        <DiscoverSessionSaveDashboardModal
+          hasLibraryItemWithTitle={async () => false}
+          hideDashboardOptions={true}
+          initialTags={[]}
+          initialTimeRestore={false}
+          isTimeBased={true}
+          onClose={onClose}
+          onCopyOnSaveChange={onCopyOnSaveChange}
+          onSave={onSave}
+          sessionId="saved-session-id"
+          title="My session"
+          {...props}
+        />
+      </I18nProvider>
+    </EuiProvider>
+  );
+
+  const { rerender } = render(getSaveModal(overrides));
+
+  return {
+    onClose,
+    onCopyOnSaveChange,
+    onSave,
+    rerender: (nextOverrides) => rerender(getSaveModal({ ...overrides, ...nextOverrides })),
+  };
+};
+
+describe('DiscoverSessionSaveDashboardModal', () => {
+  beforeAll(() => {
+    setStubKibanaServices();
+  });
+
+  it('shows the store time switch when isTimeBased is true', async () => {
+    renderSaveModal({ isTimeBased: true });
+    await screen.findByTestId('savedObjectSaveModal');
+    expect(screen.getByTestId('storeTimeWithSearch')).toBeInTheDocument();
+  });
+
+  it('hides the store time switch when isTimeBased is false', async () => {
+    renderSaveModal({ isTimeBased: false });
+    await screen.findByTestId('savedObjectSaveModal');
+    expect(screen.queryByTestId('storeTimeWithSearch')).not.toBeInTheDocument();
+  });
+
+  it('keeps the initial store time choice when the session becomes time-based later', async () => {
+    const { rerender } = renderSaveModal({ initialTimeRestore: true, isTimeBased: false });
+    await screen.findByTestId('savedObjectSaveModal');
+
+    rerender({ isTimeBased: true });
+
+    expect(screen.getByTestId('storeTimeWithSearch')).toBeChecked();
+  });
+
+  it('shows the store time switch when store time starts on and isTimeBased is false', async () => {
+    renderSaveModal({ initialTimeRestore: true, isTimeBased: false });
+    await screen.findByTestId('savedObjectSaveModal');
+    expect(screen.getByTestId('storeTimeWithSearch')).toBeChecked();
+  });
+
+  it('passes modal state to onSave', async () => {
+    const { onSave } = renderSaveModal();
+
+    await screen.findByTestId('savedObjectSaveModal');
+
+    await userEvent.click(screen.getByTestId('storeTimeWithSearch'));
+    await userEvent.click(screen.getByTestId('confirmSaveSavedObjectButton'));
+
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalledTimes(1);
+    });
+
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        addToLibrary: true,
+        dashboardId: null,
+        newTags: [],
+        newTimeRestore: true,
+        newTitle: 'My session',
+      })
+    );
+  });
+
+  it('shows a store time error without changing the selection and lets the user turn it off', async () => {
+    const { onSave, rerender } = renderSaveModal({ initialTimeRestore: true });
+    await screen.findByTestId('savedObjectSaveModal');
+
+    rerender({ isTimeBased: false, hasTimeRestoreError: true });
+
+    const timeSwitch = screen.getByTestId('storeTimeWithSearch');
+    expect(timeSwitch).toBeInvalid();
+    expect(timeSwitch).toBeChecked();
+    await userEvent.click(timeSwitch);
+    await userEvent.click(screen.getByTestId('confirmSaveSavedObjectButton'));
+    await waitFor(() =>
+      expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ newTimeRestore: false }))
+    );
+  });
+
+  it('forwards copy-on-save toggle changes', async () => {
+    const { onCopyOnSaveChange } = renderSaveModal({ isTimeBased: false });
+
+    await screen.findByTestId('saveAsNewCheckbox');
+    await userEvent.click(screen.getByTestId('saveAsNewCheckbox'));
+
+    expect(onCopyOnSaveChange).toHaveBeenCalledWith(true);
+  });
+
+  it('hides add-to-library checkbox but keeps destination options', async () => {
+    renderSaveModal({ hideDashboardOptions: false, isTimeBased: false });
+
+    await screen.findByTestId('add-to-dashboard-options');
+
+    expect(screen.queryByTestId('add-to-library-checkbox')).not.toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: 'None' })).toBeInTheDocument();
+  });
+
+  it('always saves by reference even when saving to dashboard', async () => {
+    const { onSave } = renderSaveModal({ hideDashboardOptions: false, isTimeBased: false });
+
+    await screen.findByTestId('saveAsNewCheckbox');
+    await userEvent.click(screen.getByTestId('saveAsNewCheckbox'));
+    await userEvent.click(screen.getByRole('radio', { name: 'New' }));
+    await userEvent.click(screen.getByTestId('confirmSaveSavedObjectButton'));
+
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalledTimes(1);
+    });
+
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        addToLibrary: true,
+        dashboardId: 'new',
+      })
+    );
+  });
+});

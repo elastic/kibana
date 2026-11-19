@@ -125,4 +125,105 @@ describe('useQueryAlerts', () => {
     rerender();
     expect(abortSpy).toHaveBeenCalledTimes(2);
   });
+
+  describe('refetch invariant', () => {
+    test('refetch is null before the first fetch completes', () => {
+      // Synchronous snapshot: fetch is in flight but has not resolved yet.
+      const { result } = renderHook(() => useQueryAlerts<unknown, unknown>(defaultProps));
+      expect(result.current.refetch).toBeNull();
+    });
+
+    test('refetch is a function after a successful fetch', async () => {
+      const { result } = renderHook(() => useQueryAlerts<unknown, unknown>(defaultProps));
+      await waitFor(() => expect(result.current.refetch).toBeInstanceOf(Function));
+    });
+
+    test('refetch is a function after a failed fetch', async () => {
+      jest.spyOn(api, 'fetchQueryAlerts').mockImplementation(() => {
+        throw new Error('fetch error');
+      });
+      const { result } = renderHook(() => useQueryAlerts<unknown, unknown>(defaultProps));
+      await waitFor(() => expect(result.current.refetch).toBeInstanceOf(Function));
+    });
+
+    test('refetch stays null permanently when skip=true', async () => {
+      const { result } = renderHook(() =>
+        useQueryAlerts<unknown, unknown>({ ...defaultProps, skip: true })
+      );
+      // Allow any pending microtasks / effects to flush before asserting.
+      await act(async () => {});
+      expect(result.current.refetch).toBeNull();
+    });
+  });
+
+  describe('executionContext', () => {
+    test('forwards the current executionContext to fetchAlerts', async () => {
+      const spy = jest.spyOn(api, 'fetchQueryAlerts');
+      const context = { name: 'alerts-table', id: 'panel-1' };
+      renderHook(() =>
+        useQueryAlerts<unknown, unknown>({ ...defaultProps, executionContext: context })
+      );
+      await waitFor(() => expect(spy).toHaveBeenCalled());
+      expect(spy).toHaveBeenLastCalledWith(expect.objectContaining({ context }));
+    });
+
+    test('does not re-fetch when a fresh executionContext literal is passed on every render', async () => {
+      // Regression guard: PR review flagged that using `executionContext` as an effect
+      // dependency causes an unbounded abort+refetch loop when callers pass a fresh
+      // literal (e.g. `buildExecutionContext(...)` inline) because the effect's own
+      // setState updates re-render the caller.
+      const spy = jest.spyOn(api, 'fetchQueryAlerts');
+      const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
+
+      const { rerender } = renderHook(() =>
+        // Fresh object identity on every render.
+        useQueryAlerts<unknown, unknown>({
+          ...defaultProps,
+          executionContext: { name: 'alerts-table', id: 'panel-1' },
+        })
+      );
+      await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
+
+      const fetchCallsAfterInitial = spy.mock.calls.length;
+      const abortCallsAfterInitial = abortSpy.mock.calls.length;
+
+      // Simulate five identity-changing re-renders (as an inline
+      // `buildExecutionContext(...)` prop would cause).
+      for (let i = 0; i < 5; i++) rerender();
+      await act(async () => {});
+
+      // No additional fetches, no additional aborts triggered by executionContext
+      // identity change. Cleanup on unmount is separate and not counted here.
+      expect(spy).toHaveBeenCalledTimes(fetchCallsAfterInitial);
+      expect(abortSpy).toHaveBeenCalledTimes(abortCallsAfterInitial);
+    });
+
+    test('reads the latest executionContext from the ref on the next fetch', async () => {
+      // Sanity: ref-based reads still see updated context values on subsequent fetches
+      // (proven via refetch, which is the only way a new fetch fires without other deps changing).
+      const spy = jest.spyOn(api, 'fetchQueryAlerts');
+      const firstContext = { name: 'alerts-table', id: 'panel-1' };
+      const secondContext = { name: 'alerts-table', id: 'panel-2' };
+
+      const { rerender, result } = renderHook<
+        ReturnQueryAlerts<unknown, unknown>,
+        { context: object }
+      >(
+        ({ context }) =>
+          useQueryAlerts<unknown, unknown>({ ...defaultProps, executionContext: context }),
+        { initialProps: { context: firstContext } }
+      );
+      await waitFor(() => expect(result.current.refetch).toBeInstanceOf(Function));
+      expect(spy).toHaveBeenLastCalledWith(expect.objectContaining({ context: firstContext }));
+
+      rerender({ context: secondContext });
+      act(() => {
+        result.current.refetch!();
+      });
+
+      await waitFor(() =>
+        expect(spy).toHaveBeenLastCalledWith(expect.objectContaining({ context: secondContext }))
+      );
+    });
+  });
 });

@@ -8,6 +8,17 @@
  */
 
 export { LensConfigBuilder } from './config_builder';
+export {
+  LENS_ERROR_CODES,
+  LENS_ERROR_TYPE,
+  isLensErrorCode,
+  LensError,
+  InvalidConfigurationError,
+  DataViewNotFoundError,
+  DatasourceNotFoundError,
+  DatasourceUnsupportedError,
+} from './errors';
+export type { LensErrorCode } from './errors';
 export type {
   DataViewsCommon,
   LensAttributes,
@@ -37,7 +48,16 @@ export type {
   LensBaseLayer,
   LensXYConfigBase,
   LensBreakdownConfig,
+  LensLegendConfig,
+  LensYBoundsConfig,
 } from './types';
 
-export { lensApiStateSchema } from './schema';
-export type { LensApiState as LensApiSchemaType } from './schema';
+export {
+  isLensESQLConfig,
+  isLensDSLConfig,
+  isLensAPIFormat,
+  isLensLegacyFormat,
+  isLensLegacyAttributes,
+} from './utils';
+
+export * from './schema';

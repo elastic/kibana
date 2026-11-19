@@ -9,6 +9,10 @@ paths:
       operationId: ReadListPrivileges
       x-codegen-enabled: true
       summary: Get value list privileges
+      description: |
+        Returns the caller's authentication state and the Elasticsearch `cluster`, `index`, and `application`
+        privileges for `.lists` and `.items` data streams in the current Kibana space. Use this to decide which list
+        APIs (`read` vs `all` operations) are available before you create or import lists.
       responses:
         200:
           description: Successful response
@@ -103,6 +107,12 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: 'Unable to resolve list privileges: invalid or missing space context for this request'
         401:
           description: Unsuccessful authentication response
           content:

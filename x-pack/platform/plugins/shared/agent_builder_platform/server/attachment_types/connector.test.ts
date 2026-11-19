@@ -6,7 +6,6 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { ToolType } from '@kbn/agent-builder-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import {
   AttachmentType,
@@ -14,13 +13,23 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import type { AgentFormattedAttachment } from '@kbn/agent-builder-server/attachments';
 import { getConnectorSpec } from '@kbn/connector-specs';
+import { formatSchemaForLlm } from '@kbn/agent-builder-server';
+import { z } from '@kbn/zod/v4';
 import { createConnectorAttachmentType } from './connector';
+import { renderSurface, surfaceContext } from './test_utils';
 
 jest.mock('@kbn/connector-specs', () => ({
+  ...jest.requireActual('@kbn/connector-specs'),
   getConnectorSpec: jest.fn(),
 }));
 
+jest.mock('@kbn/agent-builder-server', () => ({
+  ...jest.requireActual('@kbn/agent-builder-server'),
+  formatSchemaForLlm: jest.fn(),
+}));
+
 const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
+const formatSchemaForLlmMock = formatSchemaForLlm as jest.MockedFunction<typeof formatSchemaForLlm>;
 
 const createAttachment = (
   data: ConnectorAttachmentData
@@ -34,18 +43,6 @@ const validData: ConnectorAttachmentData = {
   connector_id: 'connector-123',
   connector_name: 'My Github Connector',
   connector_type: '.github',
-  tools: [
-    {
-      tool_id: 'github.my-github.search_repos',
-      description: 'Search GitHub repositories',
-      configuration: { workflow_id: 'workflow-1' },
-    },
-    {
-      tool_id: 'github.my-github.create_issue',
-      description: 'Create a GitHub issue',
-      configuration: { workflow_id: 'workflow-2' },
-    },
-  ],
 };
 
 const formatContext = {
@@ -54,7 +51,10 @@ const formatContext = {
 };
 
 describe('connector attachment type', () => {
-  const connectorType = createConnectorAttachmentType();
+  const soClient = { get: jest.fn() };
+  const connectorType = createConnectorAttachmentType({
+    getActionSavedObjectsClient: async () => soClient as never,
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -62,53 +62,32 @@ describe('connector attachment type', () => {
 
   describe('validate', () => {
     it('accepts valid connector data', () => {
-      const result = connectorType.validate(validData);
+      const result = connectorType.validate(validData, formatContext);
       expect(result).toEqual({ valid: true, data: validData });
-    });
-
-    it('accepts valid data with empty tools array', () => {
-      const data = { ...validData, tools: [] };
-      const result = connectorType.validate(data);
-      expect(result).toEqual({ valid: true, data });
     });
 
     it('rejects data missing connector_id', () => {
       const { connector_id: _, ...data } = validData;
-      const result = connectorType.validate(data);
+      const result = connectorType.validate(data, formatContext);
       expect(result).toEqual({ valid: false, error: expect.any(String) });
     });
 
     it('rejects data missing connector_name', () => {
       const { connector_name: _, ...data } = validData;
-      const result = connectorType.validate(data);
+      const result = connectorType.validate(data, formatContext);
       expect(result).toEqual({ valid: false, error: expect.any(String) });
     });
 
     it('rejects data missing connector_type', () => {
       const { connector_type: _, ...data } = validData;
-      const result = connectorType.validate(data);
-      expect(result).toEqual({ valid: false, error: expect.any(String) });
-    });
-
-    it('rejects data missing tools', () => {
-      const { tools: _, ...data } = validData;
-      const result = connectorType.validate(data);
-      expect(result).toEqual({ valid: false, error: expect.any(String) });
-    });
-
-    it('rejects tools with missing workflow_id', () => {
-      const data = {
-        ...validData,
-        tools: [{ tool_id: 'tool-1', description: 'desc', configuration: {} }],
-      };
-      const result = connectorType.validate(data);
+      const result = connectorType.validate(data, formatContext);
       expect(result).toEqual({ valid: false, error: expect.any(String) });
     });
   });
 
   describe('format', () => {
     describe('getRepresentation', () => {
-      it('returns text with connector name and tool descriptions', () => {
+      it('returns text with connector name and description when no spec is found', () => {
         getConnectorSpecMock.mockReturnValue(undefined);
 
         const attachment = createAttachment(validData);
@@ -123,13 +102,11 @@ describe('connector attachment type', () => {
           value: expect.stringContaining('My Github Connector'),
         });
         expect((representation as { value: string }).value).toContain(
-          'github.my-github.search_repos'
+          'platform.core.execute_connector_sub_action'
         );
-        expect((representation as { value: string }).value).toContain('Search GitHub repositories');
         expect((representation as { value: string }).value).toContain(
-          'github.my-github.create_issue'
+          '"connectorId":"connector-123"'
         );
-        expect((representation as { value: string }).value).toContain('Create a GitHub issue');
       });
 
       it('uses metadata.description from connector spec when available', () => {
@@ -142,6 +119,7 @@ describe('connector attachment type', () => {
             supportedFeatureIds: [],
           },
           actions: {},
+          test: { handler: jest.fn(), enabled: false },
         });
 
         const attachment = createAttachment(validData);
@@ -152,6 +130,7 @@ describe('connector attachment type', () => {
         const representation = formatted.getRepresentation!() as { value: string };
 
         expect(representation.value).toContain('Generic GitHub connector');
+        expect(representation.value).toContain('platform.core.execute_connector_sub_action');
       });
 
       it('falls back to connector_type when no spec is found', () => {
@@ -165,11 +144,324 @@ describe('connector attachment type', () => {
         const representation = formatted.getRepresentation!() as { value: string };
 
         expect(representation.value).toContain('Description: .github');
+        expect(representation.value).toContain('"connectorId":"connector-123"');
+      });
+
+      it('lists sub-actions from ConnectorSpec when available', () => {
+        const inputSchema = z.object({
+          query: z.string().describe('Search query'),
+        });
+        getConnectorSpecMock.mockReturnValue({
+          metadata: {
+            id: '.slack2',
+            displayName: 'Slack',
+            description: 'Search and send Slack messages',
+            minimumLicense: 'enterprise',
+            supportedFeatureIds: [],
+          },
+          actions: {
+            searchMessages: {
+              isTool: true,
+              scope: 'read' as const,
+              description: 'Search Slack messages',
+              input: inputSchema,
+              handler: jest.fn(),
+            },
+            sendMessage: {
+              isTool: true,
+              scope: 'read' as const,
+              description: 'Send a message to a channel',
+              input: inputSchema,
+              handler: jest.fn(),
+            },
+            internalAction: {
+              isTool: false,
+              scope: 'read' as const,
+              description: 'Internal only',
+              input: inputSchema,
+              handler: jest.fn(),
+            },
+          },
+          test: { handler: jest.fn(), enabled: false },
+        });
+        formatSchemaForLlmMock.mockReturnValue('query (string, required): Search query');
+
+        const attachment = createAttachment({
+          ...validData,
+          connector_type: '.slack2',
+        });
+        const formatted = connectorType.format(
+          attachment,
+          formatContext
+        ) as AgentFormattedAttachment;
+        const representation = formatted.getRepresentation!() as { value: string };
+
+        expect(representation.value).toContain('execute_connector_sub_action');
+        expect(representation.value).toContain('searchMessages: Search Slack messages');
+        expect(representation.value).toContain('sendMessage: Send a message to a channel');
+        expect(representation.value).not.toContain('internalAction');
+        expect(representation.value).toContain('Connector ID: connector-123');
+        expect(representation.value).toContain('Required JSON shape for tool');
+        expect(representation.value).toContain(
+          '"connectorId":"connector-123","subAction":"<sub-action name>","params":{ ... }'
+        );
+      });
+
+      it('filters sub-actions by selected_actions allowlist', () => {
+        const inputSchema = z.object({ query: z.string() });
+        getConnectorSpecMock.mockReturnValue({
+          metadata: {
+            id: '.slack2',
+            displayName: 'Slack',
+            description: 'Slack connector',
+            minimumLicense: 'enterprise',
+            supportedFeatureIds: [],
+          },
+          actions: {
+            searchMessages: {
+              isTool: true,
+              scope: 'read' as const,
+              description: 'Search Slack messages',
+              input: inputSchema,
+              handler: jest.fn(),
+            },
+            sendMessage: {
+              isTool: true,
+              scope: 'read' as const,
+              description: 'Send a message to a channel',
+              input: inputSchema,
+              handler: jest.fn(),
+            },
+            internalAction: {
+              isTool: false,
+              scope: 'read' as const,
+              description: 'Internal only',
+              input: inputSchema,
+              handler: jest.fn(),
+            },
+          },
+          test: { handler: jest.fn(), enabled: false },
+        });
+        formatSchemaForLlmMock.mockReturnValue('query (string, required): Search query');
+
+        const attachment = createAttachment({
+          ...validData,
+          connector_type: '.slack2',
+          selected_actions: ['sendMessage', 'internalAction'],
+        });
+        const formatted = connectorType.format(
+          attachment,
+          formatContext
+        ) as AgentFormattedAttachment;
+        const representation = formatted.getRepresentation!() as { value: string };
+
+        expect(representation.value).toContain('sendMessage: Send a message to a channel');
+        expect(representation.value).not.toContain('internalAction');
+        expect(representation.value).not.toContain('searchMessages');
+      });
+
+      it('includes skill content when spec has skill', () => {
+        const inputSchema = z.object({});
+        getConnectorSpecMock.mockReturnValue({
+          metadata: {
+            id: '.slack2',
+            displayName: 'Slack',
+            description: 'Slack connector',
+            minimumLicense: 'enterprise',
+            supportedFeatureIds: [],
+          },
+          actions: {
+            sendMessage: {
+              isTool: true,
+              scope: 'read' as const,
+              description: 'Send a message',
+              input: inputSchema,
+              handler: jest.fn(),
+            },
+          },
+          test: { handler: jest.fn(), enabled: false },
+          skill: 'Always resolve channel ID before sending a message.',
+        });
+        formatSchemaForLlmMock.mockReturnValue('No parameters');
+
+        const attachment = createAttachment({
+          ...validData,
+          connector_type: '.slack2',
+        });
+        const formatted = connectorType.format(
+          attachment,
+          formatContext
+        ) as AgentFormattedAttachment;
+        const representation = formatted.getRepresentation!() as { value: string };
+
+        expect(representation.value).toContain(
+          'Always resolve channel ID before sending a message.'
+        );
+        expect(representation.value).not.toContain('Note: not every action may be available');
+      });
+
+      it('prepends a cross-reference note before skill content when selected_actions is restricted', () => {
+        const inputSchema = z.object({});
+        getConnectorSpecMock.mockReturnValue({
+          metadata: {
+            id: '.slack2',
+            displayName: 'Slack',
+            description: 'Slack connector',
+            minimumLicense: 'enterprise',
+            supportedFeatureIds: [],
+          },
+          actions: {
+            sendMessage: {
+              isTool: true,
+              scope: 'read' as const,
+              description: 'Send a message',
+              input: inputSchema,
+              handler: jest.fn(),
+            },
+          },
+          test: { handler: jest.fn(), enabled: false },
+          skill: 'Always resolve channel ID before sending a message.',
+        });
+        formatSchemaForLlmMock.mockReturnValue('No parameters');
+
+        const attachment = createAttachment({
+          ...validData,
+          connector_type: '.slack2',
+          selected_actions: ['sendMessage'],
+        });
+        const formatted = connectorType.format(
+          attachment,
+          formatContext
+        ) as AgentFormattedAttachment;
+        const representation = formatted.getRepresentation!() as { value: string };
+
+        expect(representation.value).toContain(
+          'Note: not every action may be available on this instance.'
+        );
+        expect(representation.value).toContain('verify it appears in the list above');
+        expect(representation.value).toContain(
+          'Always resolve channel ID before sending a message.'
+        );
+      });
+
+      describe('annotation hints', () => {
+        const inputSchema = z.object({ channel: z.string().describe('Channel name') });
+
+        beforeEach(() => {
+          formatSchemaForLlmMock.mockReturnValue('channel (string, required): Channel name');
+        });
+
+        it('shows [WRITE] for a write-scoped action', () => {
+          getConnectorSpecMock.mockReturnValue({
+            metadata: {
+              id: '.slack2',
+              displayName: 'Slack',
+              description: 'Slack connector',
+              minimumLicense: 'enterprise',
+              supportedFeatureIds: [],
+            },
+            actions: {
+              sendMessage: {
+                isTool: true,
+                scope: 'write',
+                description: 'Send a message to a channel',
+                input: inputSchema,
+                handler: jest.fn(),
+              },
+              searchMessages: {
+                isTool: true,
+                scope: 'read' as const,
+                description: 'Search messages',
+                input: inputSchema,
+                handler: jest.fn(),
+              },
+            },
+            test: { handler: jest.fn(), enabled: false },
+          });
+
+          const attachment = createAttachment({ ...validData, connector_type: '.slack2' });
+          const formatted = connectorType.format(
+            attachment,
+            formatContext
+          ) as AgentFormattedAttachment;
+          const representation = formatted.getRepresentation!() as { value: string };
+
+          expect(representation.value).toContain(
+            'sendMessage [WRITE]: Send a message to a channel'
+          );
+          expect(representation.value).toMatch(/- searchMessages: Search messages/);
+          expect(representation.value).not.toContain('searchMessages [');
+        });
+
+        it('shows [DESTROY] for a destroy-scoped action', () => {
+          getConnectorSpecMock.mockReturnValue({
+            metadata: {
+              id: '.slack2',
+              displayName: 'Slack',
+              description: 'Slack connector',
+              minimumLicense: 'enterprise',
+              supportedFeatureIds: [],
+            },
+            actions: {
+              deleteMessage: {
+                isTool: true,
+                scope: 'destroy',
+                description: 'Delete a message',
+                input: inputSchema,
+                handler: jest.fn(),
+              },
+            },
+            test: { handler: jest.fn(), enabled: false },
+          });
+
+          const attachment = createAttachment({ ...validData, connector_type: '.slack2' });
+          const formatted = connectorType.format(
+            attachment,
+            formatContext
+          ) as AgentFormattedAttachment;
+          const representation = formatted.getRepresentation!() as { value: string };
+
+          expect(representation.value).toContain('deleteMessage [DESTROY]: Delete a message');
+        });
+
+        it('shows no hint tag for a read-only action with no annotations', () => {
+          getConnectorSpecMock.mockReturnValue({
+            metadata: {
+              id: '.slack2',
+              displayName: 'Slack',
+              description: 'Slack connector',
+              minimumLicense: 'enterprise',
+              supportedFeatureIds: [],
+            },
+            actions: {
+              searchMessages: {
+                isTool: true,
+                scope: 'read' as const,
+                description: 'Search messages',
+                input: inputSchema,
+                handler: jest.fn(),
+              },
+            },
+            test: { handler: jest.fn(), enabled: false },
+          });
+
+          const attachment = createAttachment({ ...validData, connector_type: '.slack2' });
+          const formatted = connectorType.format(
+            attachment,
+            formatContext
+          ) as AgentFormattedAttachment;
+          const representation = formatted.getRepresentation!() as { value: string };
+
+          expect(representation.value).toMatch(/- searchMessages: Search messages/);
+          expect(representation.value).not.toContain('searchMessages [');
+        });
       });
     });
 
     describe('getBoundedTools', () => {
-      it('returns WorkflowAttachmentBoundedTool entries with correct type and config', () => {
+      it('always returns empty array', () => {
+        getConnectorSpecMock.mockReturnValue(undefined);
+
         const attachment = createAttachment(validData);
         const formatted = connectorType.format(
           attachment,
@@ -177,24 +469,32 @@ describe('connector attachment type', () => {
         ) as AgentFormattedAttachment;
         const boundedTools = formatted.getBoundedTools!();
 
-        expect(boundedTools).toEqual([
-          {
-            id: 'github.my-github.search_repos',
-            type: ToolType.workflow,
-            description: 'Search GitHub repositories',
-            configuration: { workflow_id: 'workflow-1' },
-          },
-          {
-            id: 'github.my-github.create_issue',
-            type: ToolType.workflow,
-            description: 'Create a GitHub issue',
-            configuration: { workflow_id: 'workflow-2' },
-          },
-        ]);
+        expect(boundedTools).toEqual([]);
       });
 
-      it('returns empty array when tools array is empty', () => {
-        const attachment = createAttachment({ ...validData, tools: [] });
+      it('returns empty array when spec has sub-actions', () => {
+        const inputSchema = z.object({});
+        getConnectorSpecMock.mockReturnValue({
+          metadata: {
+            id: '.slack2',
+            displayName: 'Slack',
+            description: 'Slack connector',
+            minimumLicense: 'enterprise',
+            supportedFeatureIds: [],
+          },
+          actions: {
+            searchMessages: {
+              isTool: true,
+              scope: 'read' as const,
+              description: 'Search messages',
+              input: inputSchema,
+              handler: jest.fn(),
+            },
+          },
+          test: { handler: jest.fn(), enabled: false },
+        });
+
+        const attachment = createAttachment(validData);
         const formatted = connectorType.format(
           attachment,
           formatContext
@@ -213,10 +513,31 @@ describe('connector attachment type', () => {
   });
 
   describe('getAgentDescription', () => {
-    it('returns a non-empty string', () => {
+    it('documents platform tool id and required JSON envelope', () => {
       const description = connectorType.getAgentDescription!();
-      expect(typeof description).toBe('string');
-      expect(description.length).toBeGreaterThan(0);
+      expect(description).toContain('platform.core.execute_connector_sub_action');
+      expect(description).toContain('connectorId');
+      expect(description).toContain('subAction');
+      expect(description).toContain('params');
+    });
+  });
+
+  describe('resolve', () => {
+    const mockConnector = (attributes: Record<string, unknown>) =>
+      soClient.get.mockResolvedValue({
+        id: 'connector-123',
+        type: 'action',
+        attributes,
+        references: [],
+      });
+
+    it('reads the connector by id as the requesting user', async () => {
+      mockConnector({ name: 'My Github Connector', actionTypeId: '.github', config: {} });
+
+      const result = await connectorType.resolve!('connector-123', formatContext as never);
+
+      expect(soClient.get).toHaveBeenCalledWith('action', 'connector-123');
+      expect(result).toEqual(validData);
     });
   });
 
@@ -224,5 +545,63 @@ describe('connector attachment type', () => {
     it('is true', () => {
       expect(connectorType.isReadonly).toBe(true);
     });
+  });
+});
+
+describe('connector toSurfaceComposition', () => {
+  const connectorType = createConnectorAttachmentType({
+    getActionSavedObjectsClient: async () => ({} as never),
+  });
+  const spec = {
+    metadata: {
+      id: '.github',
+      displayName: 'GitHub',
+      description: 'Generic GitHub connector',
+      minimumLicense: 'enterprise' as const,
+      supportedFeatureIds: [],
+    },
+    actions: {
+      searchIssues: { isTool: true, input: z.object({}), handler: jest.fn() },
+      createIssue: { isTool: true, input: z.object({}), handler: jest.fn() },
+    },
+    test: { handler: jest.fn(), enabled: false },
+  };
+
+  it('shows the spec description, and the type and actions as fields', async () => {
+    getConnectorSpecMock.mockReturnValue(spec as unknown as ReturnType<typeof getConnectorSpec>);
+
+    const composition = await connectorType.toSurfaceComposition?.(
+      createAttachment({ ...validData, selected_actions: ['searchIssues'] }),
+      surfaceContext
+    );
+
+    expect(composition).toEqual({
+      type: 'view',
+      title: 'My Github Connector',
+      body: [
+        { type: 'markdown', text: 'Generic GitHub connector' },
+        {
+          type: 'fields',
+          items: [
+            { label: 'Type', value: 'GitHub' },
+            { label: 'Actions', value: 'searchIssues' },
+          ],
+        },
+      ],
+    });
+    expect((await renderSurface(composition)).valid).toBe(true);
+  });
+
+  it('shows the type id without a spec', async () => {
+    getConnectorSpecMock.mockReturnValue(undefined);
+
+    const composition = await connectorType.toSurfaceComposition?.(
+      createAttachment(validData),
+      surfaceContext
+    );
+
+    expect(composition?.body).toEqual([
+      { type: 'fields', items: [{ label: 'Type', value: '.github' }] },
+    ]);
   });
 });

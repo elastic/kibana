@@ -34,7 +34,7 @@ import type {
   LensAppServices,
   GenericIndexPatternColumn,
 } from '@kbn/lens-common';
-import { isColumnFormatted } from '../operations/definitions/helpers';
+import { isColumnFormatted } from '@kbn/lens-common';
 import { DurationRowInputs } from './formatting/duration_input';
 import { Prepend, PrependWidthProvider } from '../../../shared_components/prepend_provider';
 
@@ -373,6 +373,7 @@ export function FormatSelector(props: FormatSelectorProps) {
           <EuiFormRow
             display="columnCompressed"
             hasEmptyLabelSpace
+            fullWidth
             helpText={
               <EuiLink
                 href={docLinks.links.indexPatterns.fieldFormattersNumber}
@@ -388,6 +389,7 @@ export function FormatSelector(props: FormatSelectorProps) {
             <EuiFieldText
               data-test-subj={'numberEditorFormatPattern'}
               compressed
+              fullWidth
               prepend={
                 <Prepend>
                   {i18n.translate('xpack.lens.indexPattern.custom.patternLabel', {

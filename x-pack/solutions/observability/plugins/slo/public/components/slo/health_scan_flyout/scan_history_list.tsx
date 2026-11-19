@@ -8,7 +8,6 @@
 import {
   EuiBadge,
   EuiBasicTable,
-  type EuiBasicTableColumn,
   EuiButton,
   EuiButtonIcon,
   EuiEmptyPrompt,
@@ -17,6 +16,8 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
+  type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { HealthScanSummary } from '@kbn/slo-schema';
@@ -96,15 +97,23 @@ export function ScanHistoryList({ onSelectScanId }: Props) {
       actions: [
         {
           render: (scan: HealthScanSummary) => (
-            <EuiButtonIcon
-              iconType="inspect"
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.slo.healthScanFlyout.scanHistoryList.viewResultsAriaLabel',
                 { defaultMessage: 'View results' }
               )}
-              onClick={() => onSelectScanId(scan.scanId)}
-              data-test-subj={`healthScanViewResults-${scan.scanId}`}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="inspect"
+                aria-label={i18n.translate(
+                  'xpack.slo.healthScanFlyout.scanHistoryList.viewResultsAriaLabel',
+                  { defaultMessage: 'View results' }
+                )}
+                onClick={() => onSelectScanId(scan.scanId)}
+                data-test-subj={`healthScanViewResults-${scan.scanId}`}
+              />
+            </EuiToolTip>
           ),
         },
       ],

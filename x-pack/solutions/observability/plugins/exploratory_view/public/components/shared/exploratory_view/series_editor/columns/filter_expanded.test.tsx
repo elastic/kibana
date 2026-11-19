@@ -80,7 +80,7 @@ describe('FilterExpanded', function () {
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toBeCalledWith(
+      expect(spy).toHaveBeenCalledWith(
         expect.objectContaining({
           time: { from: 'now-15m', to: 'now' },
           sourceField: USER_AGENT_NAME,

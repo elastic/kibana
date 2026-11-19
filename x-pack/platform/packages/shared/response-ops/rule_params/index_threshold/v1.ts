@@ -20,7 +20,7 @@ import {
   validateComparator,
 } from '../common/utils';
 
-export type Params = TypeOf<typeof ParamsSchema>;
+export type IndexThresholdRuleParams = TypeOf<typeof IndexThresholdRuleParamsSchema>;
 
 export const CoreQueryParamsSchemaProperties = {
   index: schema.oneOf(
@@ -105,7 +105,7 @@ export const CoreQueryParamsSchemaProperties = {
 export const CoreQueryParamsSchema = schema.object(CoreQueryParamsSchemaProperties);
 export type CoreQueryParams = TypeOf<typeof CoreQueryParamsSchema>;
 
-export const ParamsSchema = schema.object(
+export const IndexThresholdRuleParamsSchema = schema.object(
   {
     ...CoreQueryParamsSchemaProperties,
     // the comparison function to use to determine if the threshold as been met
@@ -114,7 +114,14 @@ export const ParamsSchema = schema.object(
     // two values, the others require one.
     threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
   },
-  { validate: validateParams }
+  {
+    validate: validateParams,
+    meta: {
+      title: 'Index Threshold Rule Params',
+      description:
+        'The parameters for the index threshold rule. These parameters are appropriate when `rule_type_id` is `.index-threshold`.',
+    },
+  }
 );
 
 // using direct type not allowed, circular reference, so body is typed to any
@@ -123,7 +130,8 @@ function validateParams(anyParams: unknown): string | undefined {
   const coreQueryValidated = validateCoreQueryBody(anyParams);
   if (coreQueryValidated) return coreQueryValidated;
 
-  const { thresholdComparator, threshold }: Params = anyParams as Params;
+  const { thresholdComparator, threshold }: IndexThresholdRuleParams =
+    anyParams as IndexThresholdRuleParams;
 
   if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
     return i18n.translate(

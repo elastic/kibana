@@ -11,21 +11,36 @@ import { RenderRuleName } from './formatted_field_helpers';
 import { TestProviders } from '../../../../../common/mock';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
+import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/components/link_to');
 jest.mock('../../../../../common/components/user_privileges');
+jest.mock('../../../../../flyout_v2/use_flyout_api');
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 const useKibanaMock = useKibana as jest.Mock;
 
 const mockNavigateToApp = jest.fn();
 
+const inTimelineContext = {
+  enableHostDetailsFlyout: true,
+  enableIpDetailsFlyout: true,
+  timelineID: TimelineId.active,
+  tabType: TimelineTabs.query,
+};
+
 const defaultProps = {
   fieldName: 'kibana.alert.rule.name',
   linkValue: 'rule-id-123',
   value: 'Test Rule Name',
 };
+
+const flyoutApi = createFlyoutApiMock();
 
 describe('RenderRuleName', () => {
   beforeEach(() => {
@@ -38,6 +53,7 @@ describe('RenderRuleName', () => {
         },
       },
     });
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
   });
 
   describe('link rendering based on rules read permission', () => {
@@ -106,6 +122,38 @@ describe('RenderRuleName', () => {
 
         expect(mockNavigateToApp).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('when in a timeline context', () => {
+    beforeEach(() => {
+      useUserPrivilegesMock.mockReturnValue({
+        rulesPrivileges: {
+          rules: { read: true, edit: false },
+          exceptions: { read: false, crud: false },
+        },
+      });
+    });
+
+    const renderInTimelineContext = () =>
+      render(
+        <TestProviders>
+          <StatefulEventContext.Provider value={inTimelineContext}>
+            <RenderRuleName {...defaultProps} />
+          </StatefulEventContext.Provider>
+        </TestProviders>
+      );
+
+    it('opens the rule flyout', () => {
+      renderInTimelineContext();
+      fireEvent.click(screen.getByTestId('ruleName'));
+
+      expect(flyoutApi.openRuleFlyout).toHaveBeenCalledWith({
+        ruleId: defaultProps.linkValue,
+        origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
+        title: 'Rule: Test Rule Name',
+      });
+      expect(mockNavigateToApp).not.toHaveBeenCalled();
     });
   });
 });

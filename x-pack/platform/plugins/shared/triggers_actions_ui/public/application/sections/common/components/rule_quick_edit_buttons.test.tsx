@@ -6,7 +6,6 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from './rule_quick_edit_buttons';
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -57,44 +56,37 @@ describe('rule_quick_edit_buttons', () => {
     it('shows untrack active alerts modal if `autoRecoverAlerts` is `true`', async () => {
       renderComponent({ autoRecoverAlerts: true });
 
-      await userEvent.click(await screen.getByTestId('bulkDisable'));
+      await userEvent.click(screen.getByTestId('bulkDisable'));
+      expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
+      expect(onDisable).not.toHaveBeenCalled();
 
-      await waitFor(async () => {
-        expect(await screen.queryByTestId('untrackAlertsModal')).toBeInTheDocument();
-        expect(onDisable).not.toHaveBeenCalled();
-      });
-
-      await userEvent.click(await screen.getByTestId('confirmModalConfirmButton'));
-      await waitFor(async () => {
+      await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(() => {
         expect(onDisable).toHaveBeenCalledTimes(1);
-        expect(onDisable).toHaveBeenCalledWith(false);
       });
+      expect(onDisable).toHaveBeenCalledWith(false);
     });
 
     it('shows untrack active alerts modal if `autoRecoverAlerts` is `undefined`', async () => {
       renderComponent({ autoRecoverAlerts: undefined });
 
-      await userEvent.click(await screen.getByTestId('bulkDisable'));
+      await userEvent.click(screen.getByTestId('bulkDisable'));
+      expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
+      expect(onDisable).not.toHaveBeenCalled();
 
-      await waitFor(async () => {
-        expect(await screen.queryByTestId('untrackAlertsModal')).toBeInTheDocument();
-        expect(onDisable).not.toHaveBeenCalled();
-      });
-
-      await userEvent.click(await screen.getByTestId('confirmModalConfirmButton'));
-      await waitFor(async () => {
+      await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(() => {
         expect(onDisable).toHaveBeenCalledTimes(1);
-        expect(onDisable).toHaveBeenCalledWith(false);
       });
+      expect(onDisable).toHaveBeenCalledWith(false);
     });
 
     it('does not show untrack active alerts modal if `autoRecoverAlerts` is `false`', async () => {
       renderComponent({ autoRecoverAlerts: false });
 
-      await userEvent.click(await screen.getByTestId('bulkDisable'));
-
-      await waitFor(async () => {
-        expect(await screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('bulkDisable'));
+      expect(screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+      await waitFor(() => {
         expect(onDisable).toHaveBeenCalledWith(false);
       });
     });
@@ -106,27 +98,29 @@ describe('rule_quick_edit_buttons', () => {
       enabled: true,
     } as RuleTableItem;
 
-    const wrapper = mountWithIntl(
-      <RuleQuickEditButtons
-        isAllSelected={false}
-        getFilter={() => null}
-        selectedItems={[mockRule]}
-        onPerformingAction={() => {}}
-        onActionPerformed={() => {}}
-        onEnable={async () => {}}
-        onDisable={async () => {}}
-        updateRulesToBulkEdit={() => {}}
-      />
+    render(
+      <IntlProvider locale="en">
+        <RuleQuickEditButtons
+          isAllSelected={false}
+          getFilter={() => null}
+          selectedItems={[mockRule]}
+          onPerformingAction={() => {}}
+          onActionPerformed={() => {}}
+          onEnable={async () => {}}
+          onDisable={async () => {}}
+          updateRulesToBulkEdit={() => {}}
+        />
+      </IntlProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="bulkEnable"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="bulkDisable"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="updateAPIKeys"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="bulkDelete"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="bulkSnooze"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="bulkUnsnooze"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="bulkSnoozeSchedule"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="bulkRemoveSnoozeSchedule"]').exists()).toBeTruthy();
+    expect(screen.getByTestId('bulkEnable')).toBeInTheDocument();
+    expect(screen.getByTestId('bulkDisable')).toBeInTheDocument();
+    expect(screen.getByTestId('updateAPIKeys')).toBeInTheDocument();
+    expect(screen.getByTestId('bulkDelete')).toBeInTheDocument();
+    expect(screen.getByTestId('bulkSnooze')).toBeInTheDocument();
+    expect(screen.getByTestId('bulkUnsnooze')).toBeInTheDocument();
+    expect(screen.getByTestId('bulkSnoozeSchedule')).toBeInTheDocument();
+    expect(screen.getByTestId('bulkRemoveSnoozeSchedule')).toBeInTheDocument();
   });
 
   it('renders enableAll if rules are all disabled', async () => {
@@ -135,21 +129,23 @@ describe('rule_quick_edit_buttons', () => {
       enabled: false,
     } as RuleTableItem;
 
-    const wrapper = mountWithIntl(
-      <RuleQuickEditButtons
-        isAllSelected={false}
-        getFilter={() => null}
-        selectedItems={[mockRule]}
-        onPerformingAction={() => {}}
-        onActionPerformed={() => {}}
-        onEnable={async () => {}}
-        onDisable={async () => {}}
-        updateRulesToBulkEdit={() => {}}
-      />
+    render(
+      <IntlProvider locale="en">
+        <RuleQuickEditButtons
+          isAllSelected={false}
+          getFilter={() => null}
+          selectedItems={[mockRule]}
+          onPerformingAction={() => {}}
+          onActionPerformed={() => {}}
+          onEnable={async () => {}}
+          onDisable={async () => {}}
+          updateRulesToBulkEdit={() => {}}
+        />
+      </IntlProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="bulkEnable"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="bulkDisable"]').exists()).toBeTruthy();
+    expect(screen.getByTestId('bulkEnable')).toBeInTheDocument();
+    expect(screen.getByTestId('bulkDisable')).toBeInTheDocument();
   });
 
   it('removes the snooze bulk actions if in select all mode', async () => {
@@ -158,26 +154,28 @@ describe('rule_quick_edit_buttons', () => {
       enabled: true,
     } as RuleTableItem;
 
-    const wrapper = mountWithIntl(
-      <RuleQuickEditButtons
-        isAllSelected={true}
-        getFilter={() => null}
-        selectedItems={[mockRule]}
-        onPerformingAction={() => {}}
-        onActionPerformed={() => {}}
-        onEnable={async () => {}}
-        onDisable={async () => {}}
-        updateRulesToBulkEdit={() => {}}
-      />
+    render(
+      <IntlProvider locale="en">
+        <RuleQuickEditButtons
+          isAllSelected={true}
+          getFilter={() => null}
+          selectedItems={[mockRule]}
+          onPerformingAction={() => {}}
+          onActionPerformed={() => {}}
+          onEnable={async () => {}}
+          onDisable={async () => {}}
+          updateRulesToBulkEdit={() => {}}
+        />
+      </IntlProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="bulkEnable"]').first().prop('isDisabled')).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="bulkDelete"]').first().prop('isDisabled')).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="updateAPIKeys"]').first().prop('isDisabled')).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="bulkSnooze"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="bulkUnsnooze"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="bulkSnoozeSchedule"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="bulkRemoveSnoozeSchedule"]').exists()).toBeFalsy();
+    expect(screen.getByTestId('bulkEnable')).not.toBeDisabled();
+    expect(screen.getByTestId('bulkDelete')).not.toBeDisabled();
+    expect(screen.getByTestId('updateAPIKeys')).not.toBeDisabled();
+    expect(screen.queryByTestId('bulkSnooze')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('bulkUnsnooze')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('bulkSnoozeSchedule')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('bulkRemoveSnoozeSchedule')).not.toBeInTheDocument();
   });
 
   it('properly sets rules or filters to delete when not selecting all', async () => {
@@ -187,20 +185,22 @@ describe('rule_quick_edit_buttons', () => {
       enabledInLicense: true,
     } as RuleTableItem;
 
-    const wrapper = mountWithIntl(
-      <RuleQuickEditButtons
-        isAllSelected={false}
-        getFilter={() => null}
-        selectedItems={[mockRule]}
-        onPerformingAction={() => {}}
-        onActionPerformed={() => {}}
-        onEnable={async () => {}}
-        onDisable={async () => {}}
-        updateRulesToBulkEdit={updateRulesToBulkEdit}
-      />
+    render(
+      <IntlProvider locale="en">
+        <RuleQuickEditButtons
+          isAllSelected={false}
+          getFilter={() => null}
+          selectedItems={[mockRule]}
+          onPerformingAction={() => {}}
+          onActionPerformed={() => {}}
+          onEnable={async () => {}}
+          onDisable={async () => {}}
+          updateRulesToBulkEdit={updateRulesToBulkEdit}
+        />
+      </IntlProvider>
     );
 
-    wrapper.find('[data-test-subj="bulkSnooze"]').first().simulate('click');
+    await userEvent.click(screen.getByTestId('bulkSnooze'));
     expect(updateRulesToBulkEdit).toHaveBeenCalledTimes(1);
   });
 });

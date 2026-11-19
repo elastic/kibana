@@ -1,0 +1,775 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { CountTimeframeStrategy } from './count_timeframe_strategy';
+import type {
+  AlertEpisodeStatus,
+  AlertEventStatus,
+} from '../../../resources/datastreams/alert_events';
+import { alertEpisodeStatus, alertEventStatus } from '../../../resources/datastreams/alert_events';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { createRuleResponse } from '../../test_utils';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { buildLatestAlertEvent, buildStrategyStateTransitionContext } from '../test_utils';
+
+describe('CountTimeframeStrategy', () => {
+  let strategy: CountTimeframeStrategy;
+
+  beforeEach(() => {
+    const { loggerService } = createLoggerService();
+    strategy = new CountTimeframeStrategy(loggerService);
+  });
+
+  const getNextState = (...args: Parameters<typeof buildStrategyStateTransitionContext>) =>
+    strategy.getNextState(buildStrategyStateTransitionContext(...args));
+
+  const expectTransition = ({
+    from,
+    on,
+    to,
+    stateTransition,
+    noDataStrategy,
+    statusCount,
+    expectedStatusCount,
+    evaluatedAt,
+    previousTimestamp,
+  }: {
+    from?: AlertEpisodeStatus;
+    on: AlertEventStatus;
+    to: AlertEpisodeStatus;
+    stateTransition?: RuleResponse['state_transition'];
+    noDataStrategy?: NonNullable<RuleResponse['no_data']>['strategy'];
+    statusCount?: number | null;
+    expectedStatusCount?: number;
+    evaluatedAt?: string;
+    previousTimestamp?: string;
+  }) => {
+    const result = getNextState({
+      eventStatus: on,
+      stateTransition,
+      noDataStrategy,
+      evaluatedAt,
+      ...(from != null
+        ? {
+            previousEpisode: buildLatestAlertEvent({
+              episodeStatus: from,
+              eventStatus: on,
+              statusCount,
+              previousTimestamp,
+            }),
+          }
+        : {}),
+    });
+
+    expect(result).toEqual({
+      status: to,
+      ...(expectedStatusCount != null ? { statusCount: expectedStatusCount } : {}),
+    });
+  };
+
+  it('has name "count_timeframe"', () => {
+    expect(strategy.name).toBe('count_timeframe');
+  });
+
+  describe('canHandle', () => {
+    it('returns true when rule has stateTransition', () => {
+      expect(
+        strategy.canHandle(createRuleResponse({ state_transition: { pending: { count: 3 } } }))
+      ).toBe(true);
+    });
+
+    it('returns false when stateTransition is an empty object', () => {
+      expect(strategy.canHandle(createRuleResponse({ state_transition: {} }))).toBe(false);
+    });
+
+    it('returns false when stateTransition is undefined', () => {
+      expect(strategy.canHandle(createRuleResponse({ state_transition: undefined }))).toBe(false);
+    });
+  });
+
+  describe('without stateTransition config (falls back to basic)', () => {
+    it.each<[string, AlertEpisodeStatus, AlertEventStatus, AlertEpisodeStatus]>([
+      [
+        'pending',
+        alertEpisodeStatus.inactive,
+        alertEventStatus.breached,
+        alertEpisodeStatus.pending,
+      ],
+      ['active', alertEpisodeStatus.pending, alertEventStatus.breached, alertEpisodeStatus.active],
+      [
+        'recovering',
+        alertEpisodeStatus.active,
+        alertEventStatus.recovered,
+        alertEpisodeStatus.recovering,
+      ],
+      [
+        'inactive',
+        alertEpisodeStatus.recovering,
+        alertEventStatus.recovered,
+        alertEpisodeStatus.inactive,
+      ],
+    ])('transitions to %s', (_label, from, on, to) => {
+      expectTransition({ from, on, to });
+    });
+  });
+
+  describe('pendingCount of 0 (skip pending)', () => {
+    const stateTransition: RuleResponse['state_transition'] = { pending: { count: 0 } };
+
+    it('transitions directly to active from inactive on breach', () => {
+      expectTransition({
+        from: alertEpisodeStatus.inactive,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+      });
+    });
+
+    it('transitions directly to active when no previous episode', () => {
+      expectTransition({
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+      });
+    });
+  });
+
+  describe('pendingCount threshold', () => {
+    const stateTransition: RuleResponse['state_transition'] = { pending: { count: 3 } };
+
+    it('enters pending with statusCount 1 from inactive', () => {
+      expectTransition({
+        from: alertEpisodeStatus.inactive,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.pending,
+        stateTransition,
+        expectedStatusCount: 1,
+      });
+    });
+
+    it('enters pending with statusCount 1 when no previous episode', () => {
+      expectTransition({
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.pending,
+        stateTransition,
+        expectedStatusCount: 1,
+      });
+    });
+
+    it('stays in pending when count threshold not met', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.pending,
+        stateTransition,
+        statusCount: 1,
+        expectedStatusCount: 2,
+      });
+    });
+
+    it('transitions to active when count threshold is met', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+        statusCount: 3,
+      });
+    });
+
+    it('transitions to active when count exceeds threshold', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+        statusCount: 5,
+      });
+    });
+
+    it('still transitions pending to inactive on recovered event', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.recovered,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        statusCount: 3,
+      });
+    });
+  });
+
+  describe('pendingTimeframe threshold', () => {
+    it('transitions to active when timeframe is met', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.active,
+        stateTransition: { pending: { timeframe: '2m' } },
+        statusCount: 1,
+        evaluatedAt: '2025-01-01T00:02:00.000Z',
+        previousTimestamp: '2025-01-01T00:00:00.000Z',
+      });
+    });
+
+    it('stays pending when timeframe is not met', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.pending,
+        stateTransition: { pending: { timeframe: '5m' } },
+        statusCount: 2,
+        expectedStatusCount: 3,
+        evaluatedAt: '2025-01-01T00:03:00.000Z',
+        previousTimestamp: '2025-01-01T00:00:00.000Z',
+      });
+    });
+
+    it('uses OR to combine count and timeframe', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.active,
+        stateTransition: { pending: { count: 5, timeframe: '2m', operator: 'or' } },
+        statusCount: 1,
+        evaluatedAt: '2025-01-01T00:02:00.000Z',
+        previousTimestamp: '2025-01-01T00:00:00.000Z',
+      });
+    });
+
+    it('uses AND to combine count and timeframe', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.pending,
+        stateTransition: { pending: { count: 5, timeframe: '2m', operator: 'and' } },
+        statusCount: 1,
+        expectedStatusCount: 2,
+        evaluatedAt: '2025-01-01T00:02:00.000Z',
+        previousTimestamp: '2025-01-01T00:00:00.000Z',
+      });
+    });
+  });
+
+  describe('recoveringCount of 0 (skip recovering)', () => {
+    const stateTransition: RuleResponse['state_transition'] = { recovering: { count: 0 } };
+
+    it('transitions directly to inactive from active on recovered', () => {
+      expectTransition({
+        from: alertEpisodeStatus.active,
+        on: alertEventStatus.recovered,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+      });
+    });
+  });
+
+  describe('recoveringCount threshold', () => {
+    const stateTransition: RuleResponse['state_transition'] = { recovering: { count: 3 } };
+
+    it('enters recovering with statusCount 1 from active', () => {
+      expectTransition({
+        from: alertEpisodeStatus.active,
+        on: alertEventStatus.recovered,
+        to: alertEpisodeStatus.recovering,
+        stateTransition,
+        expectedStatusCount: 1,
+      });
+    });
+
+    it('stays recovering when count threshold not met', () => {
+      expectTransition({
+        from: alertEpisodeStatus.recovering,
+        on: alertEventStatus.recovered,
+        to: alertEpisodeStatus.recovering,
+        stateTransition,
+        statusCount: 1,
+        expectedStatusCount: 2,
+      });
+    });
+
+    it('transitions to inactive when count threshold is met', () => {
+      expectTransition({
+        from: alertEpisodeStatus.recovering,
+        on: alertEventStatus.recovered,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        statusCount: 3,
+      });
+    });
+
+    it('still transitions recovering to active on breached event', () => {
+      expectTransition({
+        from: alertEpisodeStatus.recovering,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+        statusCount: 1,
+      });
+    });
+  });
+
+  describe('recoveringTimeframe threshold', () => {
+    it('transitions to inactive when timeframe is met', () => {
+      expectTransition({
+        from: alertEpisodeStatus.recovering,
+        on: alertEventStatus.recovered,
+        to: alertEpisodeStatus.inactive,
+        stateTransition: { recovering: { timeframe: '2m' } },
+        statusCount: 1,
+        evaluatedAt: '2025-01-01T00:02:00.000Z',
+        previousTimestamp: '2025-01-01T00:00:00.000Z',
+      });
+    });
+
+    it('stays recovering when timeframe is not met', () => {
+      expectTransition({
+        from: alertEpisodeStatus.recovering,
+        on: alertEventStatus.recovered,
+        to: alertEpisodeStatus.recovering,
+        stateTransition: { recovering: { timeframe: '5m' } },
+        statusCount: 2,
+        expectedStatusCount: 3,
+        evaluatedAt: '2025-01-01T00:03:00.000Z',
+        previousTimestamp: '2025-01-01T00:00:00.000Z',
+      });
+    });
+
+    it('uses OR to combine count and timeframe', () => {
+      expectTransition({
+        from: alertEpisodeStatus.recovering,
+        on: alertEventStatus.recovered,
+        to: alertEpisodeStatus.inactive,
+        stateTransition: { recovering: { count: 5, timeframe: '2m', operator: 'or' } },
+        statusCount: 1,
+        evaluatedAt: '2025-01-01T00:02:00.000Z',
+        previousTimestamp: '2025-01-01T00:00:00.000Z',
+      });
+    });
+
+    it('uses AND to combine count and timeframe', () => {
+      expectTransition({
+        from: alertEpisodeStatus.recovering,
+        on: alertEventStatus.recovered,
+        to: alertEpisodeStatus.recovering,
+        stateTransition: { recovering: { count: 5, timeframe: '2m', operator: 'and' } },
+        statusCount: 1,
+        expectedStatusCount: 2,
+        evaluatedAt: '2025-01-01T00:02:00.000Z',
+        previousTimestamp: '2025-01-01T00:00:00.000Z',
+      });
+    });
+  });
+
+  describe('combined pending and recovering thresholds', () => {
+    const stateTransition: RuleResponse['state_transition'] = {
+      pending: { count: 2 },
+      recovering: { count: 2 },
+    };
+
+    it('applies pending threshold independently of recovering', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+        statusCount: 2,
+      });
+    });
+
+    it('applies recovering threshold independently of pending', () => {
+      expectTransition({
+        from: alertEpisodeStatus.recovering,
+        on: alertEventStatus.recovered,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        statusCount: 2,
+      });
+    });
+  });
+
+  describe('no previous episode or status count', () => {
+    it('treats status count as 0 when the previous episode is not present', () => {
+      expectTransition({
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.pending,
+        stateTransition: { pending: { count: 3 } },
+        expectedStatusCount: 1,
+      });
+    });
+
+    it('treats status count as 1 when the previous episode is present but the status count no', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.pending,
+        stateTransition: { pending: { count: 3 } },
+        statusCount: null,
+        expectedStatusCount: 2,
+      });
+    });
+  });
+
+  describe('malformed duration fallback', () => {
+    it('ignores an invalid pending.timeframe and evaluates count only', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.active,
+        stateTransition: { pending: { count: 2, timeframe: 'bad' } },
+        statusCount: 2,
+      });
+    });
+
+    it('ignores an invalid recovering.timeframe and evaluates count only', () => {
+      expectTransition({
+        from: alertEpisodeStatus.recovering,
+        on: alertEventStatus.recovered,
+        to: alertEpisodeStatus.inactive,
+        stateTransition: { recovering: { count: 2, timeframe: 'bad' } },
+        statusCount: 2,
+      });
+    });
+  });
+
+  describe('unaffected transitions (same as basic)', () => {
+    const stateTransition: RuleResponse['state_transition'] = {
+      pending: { count: 5 },
+      recovering: { count: 5 },
+    };
+
+    it.each<[string, AlertEpisodeStatus, AlertEventStatus, AlertEpisodeStatus]>([
+      ['active', alertEpisodeStatus.active, alertEventStatus.breached, alertEpisodeStatus.active],
+      [
+        'inactive',
+        alertEpisodeStatus.inactive,
+        alertEventStatus.recovered,
+        alertEpisodeStatus.inactive,
+      ],
+      [
+        'inactive',
+        alertEpisodeStatus.inactive,
+        alertEventStatus.no_data,
+        alertEpisodeStatus.inactive,
+      ],
+    ])('stays %s', (_label, from, on, to) => {
+      expectTransition({ from, on, to, stateTransition });
+    });
+  });
+
+  describe("no_data event with no_data.strategy: 'resolve'", () => {
+    const stateTransition: RuleResponse['state_transition'] = {
+      pending: { count: 3 },
+      recovering: { count: 3 },
+    };
+
+    it('transitions inactive → inactive immediately, ignoring pending gating', () => {
+      expectTransition({
+        from: alertEpisodeStatus.inactive,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        noDataStrategy: 'resolve',
+      });
+    });
+
+    it('transitions pending → inactive immediately, ignoring pending gating', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        noDataStrategy: 'resolve',
+        statusCount: 1,
+      });
+    });
+
+    it('transitions active → inactive immediately, ignoring recovery delay', () => {
+      expectTransition({
+        from: alertEpisodeStatus.active,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        noDataStrategy: 'resolve',
+      });
+    });
+
+    it('transitions recovering → inactive immediately, ignoring recovery delay', () => {
+      expectTransition({
+        from: alertEpisodeStatus.recovering,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        noDataStrategy: 'resolve',
+        statusCount: 1,
+      });
+    });
+  });
+
+  describe("no_data event with no_data.strategy: 'alert'", () => {
+    const stateTransition: RuleResponse['state_transition'] = {
+      pending: { count: 3 },
+      recovering: { count: 3 },
+    };
+
+    it.each<[AlertEpisodeStatus]>([
+      [alertEpisodeStatus.inactive],
+      [alertEpisodeStatus.active],
+      [alertEpisodeStatus.recovering],
+    ])('transitions %s → active', (from) => {
+      expectTransition({
+        from,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+        noDataStrategy: 'alert',
+      });
+    });
+
+    it('keeps a pending episode in pending when the consecutive-breach threshold is not yet met', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.pending,
+        stateTransition,
+        noDataStrategy: 'alert',
+        statusCount: 1,
+        expectedStatusCount: 2,
+      });
+    });
+
+    it('advances a pending episode to active once the consecutive-breach threshold is met', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+        noDataStrategy: 'alert',
+        statusCount: 3,
+      });
+    });
+  });
+
+  describe('evaluations spent in a phase before it resolves', () => {
+    const minute = (n: number) =>
+      new Date(Date.parse('2026-01-01T00:00:00.000Z') + n * 60_000).toISOString();
+
+    const evaluationThatResolves = ({
+      stateTransition,
+      from,
+      on,
+      until,
+    }: {
+      stateTransition: RuleResponse['state_transition'];
+      from?: AlertEpisodeStatus;
+      on: AlertEventStatus;
+      until: AlertEpisodeStatus;
+    }): number => {
+      let previousEpisode =
+        from != null
+          ? buildLatestAlertEvent({
+              episodeStatus: from,
+              eventStatus: alertEventStatus.breached,
+              previousTimestamp: minute(0),
+            })
+          : undefined;
+
+      let phaseStartedAt: string | undefined;
+
+      for (let evaluation = 1; evaluation <= 10; evaluation++) {
+        const result = strategy.getNextState(
+          buildStrategyStateTransitionContext({
+            eventStatus: on,
+            stateTransition,
+            evaluatedAt: minute(evaluation - 1),
+            previousEpisode,
+          })
+        );
+
+        if (result.status === until) {
+          return evaluation;
+        }
+
+        // `status_count === 1` marks a (re)entry into the phase, so the phase start
+        // pins to this evaluation and stays put while the phase is held. Production
+        // derives the same value as MAX(@timestamp) over `status_count == 1` events.
+        if (result.statusCount === 1) {
+          phaseStartedAt = minute(evaluation - 1);
+        }
+
+        // `last_episode_timestamp` advances to the most recently stored event each
+        // evaluation, while `last_episode_phase_started_at` stays pinned to phase entry,
+        // so elapsed time accumulates across evaluations rather than resetting.
+        previousEpisode = buildLatestAlertEvent({
+          episodeStatus: result.status,
+          eventStatus: on,
+          statusCount: result.statusCount,
+          previousTimestamp: minute(evaluation - 1),
+          phaseStartedAt,
+        });
+      }
+
+      return -1;
+    };
+
+    it.each([
+      [0, 1],
+      [1, 2],
+      [2, 3],
+      [3, 4],
+    ])('pending count %i becomes active on evaluation %i', (count, expected) => {
+      expect(
+        evaluationThatResolves({
+          stateTransition: { pending: { count } },
+          on: alertEventStatus.breached,
+          until: alertEpisodeStatus.active,
+        })
+      ).toBe(expected);
+    });
+
+    it.each([
+      [0, 1],
+      [1, 2],
+      [2, 3],
+      [3, 4],
+    ])('recovering count %i becomes inactive on evaluation %i', (count, expected) => {
+      expect(
+        evaluationThatResolves({
+          stateTransition: { recovering: { count } },
+          from: alertEpisodeStatus.active,
+          on: alertEventStatus.recovered,
+          until: alertEpisodeStatus.inactive,
+        })
+      ).toBe(expected);
+    });
+
+    // These evaluations are 1 minute apart (see `minute`). Because elapsed time is
+    // measured against the pinned phase-entry timestamp, an ANDed timeframe accumulates
+    // across evaluations and resolves once cumulative elapsed time exceeds it, whether
+    // the timeframe is shorter or longer than the 1-minute schedule interval.
+    it('pending count 0 ORed with any timeframe is immediate regardless of schedule', () => {
+      expect(
+        evaluationThatResolves({
+          stateTransition: { pending: { count: 0, timeframe: '5m', operator: 'or' } },
+          on: alertEventStatus.breached,
+          until: alertEpisodeStatus.active,
+        })
+      ).toBe(1);
+    });
+
+    it('pending count 0 ANDed with a timeframe shorter than the schedule interval resolves on evaluation 2', () => {
+      expect(
+        evaluationThatResolves({
+          stateTransition: { pending: { count: 0, timeframe: '30s', operator: 'and' } },
+          on: alertEventStatus.breached,
+          until: alertEpisodeStatus.active,
+        })
+      ).toBe(2);
+    });
+
+    it('pending count 0 ANDed with a timeframe longer than the schedule interval resolves once cumulative elapsed time exceeds it', () => {
+      expect(
+        evaluationThatResolves({
+          stateTransition: { pending: { count: 0, timeframe: '5m', operator: 'and' } },
+          on: alertEventStatus.breached,
+          until: alertEpisodeStatus.active,
+        })
+      ).toBe(6);
+    });
+
+    it('recovering count 0 ORed with any timeframe is immediate regardless of schedule', () => {
+      expect(
+        evaluationThatResolves({
+          stateTransition: { recovering: { count: 0, timeframe: '5m', operator: 'or' } },
+          from: alertEpisodeStatus.active,
+          on: alertEventStatus.recovered,
+          until: alertEpisodeStatus.inactive,
+        })
+      ).toBe(1);
+    });
+
+    it('recovering count 0 ANDed with a timeframe shorter than the schedule interval resolves on evaluation 2', () => {
+      expect(
+        evaluationThatResolves({
+          stateTransition: { recovering: { count: 0, timeframe: '30s', operator: 'and' } },
+          from: alertEpisodeStatus.active,
+          on: alertEventStatus.recovered,
+          until: alertEpisodeStatus.inactive,
+        })
+      ).toBe(2);
+    });
+
+    it('recovering count 0 ANDed with a timeframe longer than the schedule interval resolves once cumulative elapsed time exceeds it', () => {
+      expect(
+        evaluationThatResolves({
+          stateTransition: { recovering: { count: 0, timeframe: '5m', operator: 'and' } },
+          from: alertEpisodeStatus.active,
+          on: alertEventStatus.recovered,
+          until: alertEpisodeStatus.inactive,
+        })
+      ).toBe(6);
+    });
+  });
+
+  describe('mid-phase episode with no derivable phase-entry timestamp', () => {
+    it('falls back to last_episode_timestamp to resolve a pending episode', () => {
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.breached,
+          stateTransition: { pending: { count: 0, timeframe: '30s', operator: 'and' } },
+          evaluatedAt: '2026-01-01T00:05:00.000Z',
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: alertEpisodeStatus.pending,
+            eventStatus: alertEventStatus.breached,
+            statusCount: 3,
+            previousTimestamp: '2026-01-01T00:04:00.000Z',
+            phaseStartedAt: null,
+          }),
+        })
+      );
+
+      expect(result.status).toBe(alertEpisodeStatus.active);
+    });
+
+    it('falls back to last_episode_timestamp to resolve a recovering episode', () => {
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.recovered,
+          stateTransition: { recovering: { count: 0, timeframe: '30s', operator: 'and' } },
+          evaluatedAt: '2026-01-01T00:05:00.000Z',
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: alertEpisodeStatus.recovering,
+            eventStatus: alertEventStatus.recovered,
+            statusCount: 3,
+            previousTimestamp: '2026-01-01T00:04:00.000Z',
+            phaseStartedAt: null,
+          }),
+        })
+      );
+
+      expect(result.status).toBe(alertEpisodeStatus.inactive);
+    });
+
+    it('holds the phase when the fallback elapsed is still below the timeframe', () => {
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.breached,
+          stateTransition: { pending: { count: 0, timeframe: '5m', operator: 'and' } },
+          evaluatedAt: '2026-01-01T00:05:00.000Z',
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: alertEpisodeStatus.pending,
+            eventStatus: alertEventStatus.breached,
+            statusCount: 3,
+            previousTimestamp: '2026-01-01T00:04:00.000Z',
+            phaseStartedAt: null,
+          }),
+        })
+      );
+
+      expect(result.status).toBe(alertEpisodeStatus.pending);
+    });
+  });
+});

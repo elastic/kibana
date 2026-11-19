@@ -92,6 +92,29 @@ describe('DocTitleService', () => {
         expect(titles).toEqual(['Kibana', 'title 2 - Kibana', 'title 3 - Kibana']);
       });
     });
+
+    describe('titleParts$', () => {
+      it('emits title parts separately from the rendered string', () => {
+        document.title = 'Kibana';
+        const docTitle = new DocTitleService();
+        const { titleParts$ } = docTitle.setup({ document });
+        const { change } = docTitle.start();
+
+        const parts: Array<readonly string[]> = [];
+        titleParts$.subscribe((value) => {
+          parts.push(value);
+        });
+
+        change('CPU - Memory');
+        change(['SLOs', 'Observability']);
+
+        expect(parts).toEqual([
+          ['Kibana'],
+          ['CPU - Memory', 'Kibana'],
+          ['SLOs', 'Observability', 'Kibana'],
+        ]);
+      });
+    });
   });
 
   describe('#start', () => {

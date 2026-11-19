@@ -18,14 +18,16 @@ project:
   sourceRoot: packages/kbn-failed-test-reporter-cli
 dependsOn:
   - '@kbn/ci-stats-reporter'
+  - '@kbn/code-owners'
   - '@kbn/dev-cli-runner'
   - '@kbn/dev-cli-errors'
-  - '@kbn/dev-utils'
   - '@kbn/tooling-log'
   - '@kbn/ftr-screenshot-filename'
   - '@kbn/jest-serializers'
   - '@kbn/journeys'
   - '@kbn/repo-info'
+  - '@kbn/scout-info'
+  - '@kbn/scout-reporting'
 tags:
   - shared-common
   - package
@@ -37,26 +39,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+tasks: {}

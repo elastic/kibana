@@ -8,19 +8,11 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiImage,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiIllustration, EuiSpacer } from '@elastic/eui';
+import { cloudRocketDeploy } from '@elastic/eui-illustrations';
+import { AnnouncementBanner } from '@kbn/announcement-banner';
 import * as i18n from '../translations';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
-import searchRocketIcon from '../assets/search-rocket.svg';
 
 /**
  * Props for the EisUpdateCallout component.
@@ -38,9 +30,6 @@ import searchRocketIcon from '../assets/search-rocket.svg';
  * @property {() => void} handleOnClick
  *   Callback function invoked when the call-to-action button is clicked.
  *
- * @property {'row' | 'column'} direction
- *   Layout direction for the callout content. Determines how the icon and text are arranged.
- *
  * @property {boolean | undefined} hasUpdatePrivileges
  *   Indicates whether the user has update privileges. If false, the callout will not be shown.
  *
@@ -52,7 +41,6 @@ export interface EisUpdateCalloutProps {
   promoId: string;
   shouldShowEisUpdateCallout: boolean;
   handleOnClick: () => void;
-  direction: 'row' | 'column';
   hasUpdatePrivileges: boolean | undefined;
   addSpacer?: 'top' | 'bottom';
 }
@@ -62,7 +50,6 @@ export const EisUpdateCallout = ({
   promoId,
   shouldShowEisUpdateCallout,
   handleOnClick,
-  direction,
   hasUpdatePrivileges,
   addSpacer,
 }: EisUpdateCalloutProps) => {
@@ -79,49 +66,30 @@ export const EisUpdateCallout = ({
   return (
     <>
       {addSpacer === 'top' && <EuiSpacer size="l" />}
-      <EuiCallOut
+      <AnnouncementBanner
         data-test-subj={dataId}
-        css={({ euiTheme }) => ({
-          backgroundColor: `${euiTheme.colors.backgroundBaseSubdued}`,
-          border: `${euiTheme.border.thin}`,
-          borderRadius: `${euiTheme.border.radius.medium}`,
-        })}
+        title={i18n.EIS_CALLOUT_TITLE}
+        text={i18n.EIS_UPDATE_CALLOUT_DESCRIPTION}
+        media={<EuiIllustration type={cloudRocketDeploy} alt="" />}
+        color="highlighted"
         onDismiss={onDismissPromo}
-      >
-        <EuiFlexGroup direction={direction} alignItems="flexStart">
-          <EuiImage src={searchRocketIcon} alt="" size="original" />
-          <div>
-            <EuiTitle>
-              <h4>{i18n.EIS_CALLOUT_TITLE}</h4>
-            </EuiTitle>
-            <EuiText color="subdued" size="s">
-              <p>{i18n.EIS_UPDATE_CALLOUT_DESCRIPTION}</p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
-              <EuiButton
-                fullWidth={false}
-                color="text"
-                size="s"
-                onClick={handleOnClick}
-                data-test-subj="eisUpdateCalloutCtaBtn"
-                data-telemetry-id={`${dataId}-updateToEis-btn`}
-              >
-                {i18n.EIS_UPDATE_CALLOUT_CTA}
-              </EuiButton>
-              <EuiLink
-                href={ctaLink}
-                target="_blank"
-                external
-                color="text"
-                data-telemetry-id={`${dataId}-viewEisDocs-btn`}
-              >
-                {i18n.EIS_CALLOUT_DOCUMENTATION_BTN}
-              </EuiLink>
-            </EuiFlexGroup>
-          </div>
-        </EuiFlexGroup>
-      </EuiCallOut>
+        actionProps={{
+          primary: {
+            children: i18n.EIS_UPDATE_CALLOUT_CTA,
+            onClick: handleOnClick,
+            'data-test-subj': 'eisUpdateCalloutCtaBtn',
+            'data-telemetry-id': `${dataId}-updateToEis-btn`,
+          },
+          secondary: {
+            children: i18n.EIS_CALLOUT_DOCUMENTATION_BTN,
+            href: ctaLink,
+            target: '_blank',
+            iconType: 'external',
+            iconSide: 'right',
+            'data-telemetry-id': `${dataId}-viewEisDocs-btn`,
+          },
+        }}
+      />
       {addSpacer === 'bottom' && <EuiSpacer size="l" />}
     </>
   );

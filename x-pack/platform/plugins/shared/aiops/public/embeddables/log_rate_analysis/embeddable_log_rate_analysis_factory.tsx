@@ -8,8 +8,9 @@
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import { openLazyFlyout } from '@kbn/presentation-util';
 
 import {
@@ -22,31 +23,45 @@ import {
   titleComparators,
   timeRangeComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 
 import fastIsEqual from 'fast-deep-equal';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, distinctUntilChanged, map, merge, skipWhile } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, merge, skip, skipWhile } from 'rxjs';
+import type { LogRateAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/log_rate_analysis';
 import { getLogRateAnalysisEmbeddableWrapperComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import { initializeLogRateAnalysisControls } from './initialize_log_rate_analysis_analysis_controls';
 import type { LogRateAnalysisEmbeddableApi } from './types';
 import { EmbeddableLogRateAnalysisUserInput } from './log_rate_analysis_config_input';
-import type { LogRateAnalysisEmbeddableState } from '../../../common/embeddables/log_rate_analysis/types';
+import { canUseAiops } from '../../capabilities';
+import { normalizeStoredPanelTitle } from '../normalize_stored_panel_title';
+import { getLogRateAnalysisDefaultTitle } from './default_title';
 
 export type EmbeddableLogRateAnalysisType = typeof EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE;
 
 export const getLogRateAnalysisEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {
-  const factory: EmbeddableFactory<LogRateAnalysisEmbeddableState, LogRateAnalysisEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<
+    LogRateAnalysisEmbeddableState,
+    LogRateAnalysisEmbeddableApi
+  > = {
     type: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
+      canUseAiops(coreStart, true);
       const runtimeState = initialState;
       const timeRangeManager = initializeTimeRangeManager(initialState);
-      const titleManager = initializeTitleManager(initialState);
+      const titleManager = initializeTitleManager({
+        ...initialState,
+        title: normalizeStoredPanelTitle(initialState.title),
+      });
+      const defaultTitle$ = new BehaviorSubject<string | undefined>(
+        getLogRateAnalysisDefaultTitle()
+      );
 
       const { logRateAnalysisControlsApi, serializeLogRateAnalysisChartState } =
         initializeLogRateAnalysisControls(runtimeState);
@@ -54,47 +69,51 @@ export const getLogRateAnalysisEmbeddableFactory = (
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      const initialDataViewId =
-        runtimeState.dataViewId ?? (await pluginStart.data.dataViews.getDefaultId());
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
-        initialDataViewId ? [await pluginStart.data.dataViews.get(initialDataViewId)] : undefined
-      );
+      const dataSources$ = new BehaviorSubject<DataView[] | undefined>([
+        await pluginStart.data.dataViews.get(runtimeState.data_view_id),
+      ]);
 
       const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
 
-      function serializeState() {
-        return {
+      const stateApi = initializeStateApi<LogRateAnalysisEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           ...timeRangeManager.getLatestState(),
           ...serializeLogRateAnalysisChartState(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<LogRateAnalysisEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           timeRangeManager.anyStateChange$,
           titleManager.anyStateChange$,
-          logRateAnalysisControlsApi.dataViewId
-        ).pipe(map(() => undefined)),
+          logRateAnalysisControlsApi.dataViewId.pipe(
+            skip(1),
+            map(() => undefined)
+          )
+        ),
         getComparators: () => ({
-          dataViewId: 'referenceEquality',
+          data_view_id: 'referenceEquality',
           ...timeRangeComparators,
           ...titleComparators,
         }),
-        onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
-          timeRangeManager.reinitializeState(lastSaved);
-          logRateAnalysisControlsApi.updateUserInput(lastSaved ?? {});
+        applySerializedState: (nextState) => {
+          const normalizedState = {
+            ...nextState,
+            title: normalizeStoredPanelTitle(nextState.title),
+          };
+          titleManager.reinitializeState(normalizedState);
+          timeRangeManager.reinitializeState(normalizedState);
+          logRateAnalysisControlsApi.updateUserInput(normalizedState);
         },
       });
+
+      const requestCancellationManager = new RequestCancellationManager();
 
       const api = finalizeApi({
         ...timeRangeManager.api,
         ...titleManager.api,
-        ...unsavedChangesApi,
+        defaultTitle$,
+        ...stateApi,
         ...logRateAnalysisControlsApi,
         getTypeDisplayName: () =>
           i18n.translate('xpack.aiops.logRateAnalysis.typeDisplayName', {
@@ -133,9 +152,20 @@ export const getLogRateAnalysisEmbeddableFactory = (
         },
         dataLoading$,
         blockingError$,
-        dataViews$,
-        serializeState,
+        dataSources$,
+        cancelRequests: (reason?: AbortReason) => {
+          requestCancellationManager.cancel(reason);
+          // Without this the dashboard keeps showing the panel as loading, which keeps the
+          // cancel button visible and blocks `waitForPanelsToLoad$`.
+          dataLoading$.next(false);
+        },
       });
+
+      // Starting a new load lifts a previous cancellation.
+      const fetchSubscription = merge(
+        fetch$(api),
+        logRateAnalysisControlsApi.dataViewId.pipe(skip(1))
+      ).subscribe(() => requestCancellationManager.startLoad());
 
       const LogRateAnalysisEmbeddableWrapper = getLogRateAnalysisEmbeddableWrapperComponent(
         coreStart,
@@ -143,8 +173,14 @@ export const getLogRateAnalysisEmbeddableFactory = (
       );
 
       const onLoading = (v: boolean) => dataLoading$.next(v);
-      const onRenderComplete = () => dataLoading$.next(false);
-      const onError = (error: Error) => blockingError$.next(error);
+      const onRenderComplete = () => {
+        dataLoading$.next(false);
+      };
+      const onError = (error: Error) => {
+        // A cancellation is not a panel error
+        if (error?.name === 'AbortError') return;
+        blockingError$.next(error);
+      };
 
       return {
         api,
@@ -152,6 +188,10 @@ export const getLogRateAnalysisEmbeddableFactory = (
           if (!apiHasExecutionContext(parentApi)) {
             throw new Error('Parent API does not have execution context');
           }
+
+          useEffect(() => {
+            return () => fetchSubscription.unsubscribe();
+          }, []);
 
           const [dataViewId] = useBatchedPublishingSubjects(api.dataViewId);
 
@@ -190,6 +230,8 @@ export const getLogRateAnalysisEmbeddableFactory = (
               onError={onError}
               embeddingOrigin={embeddingOrigin}
               lastReloadRequestTime={lastReloadRequestTime}
+              requestCancellationManager={requestCancellationManager}
+              parentApi={parentApi}
             />
           );
         },

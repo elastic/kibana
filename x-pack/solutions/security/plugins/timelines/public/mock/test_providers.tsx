@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
-import type { Store } from 'redux';
-import { ThemeProvider } from 'styled-components';
+import { Provider as ReduxStoreProvider } from 'react-redux-v7';
+import type { Store } from 'redux-v4';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore } from 'redux-toolkit-v1';
 import { createKibanaContextProviderMock } from './kibana_react.mock';
 import { timelineReducer } from '../store/timeline/reducer';
 
@@ -46,9 +45,7 @@ const TestProvidersComponent: React.FC<Props> = ({
   <I18nProvider>
     <MockKibanaContextProvider>
       <ReduxStoreProvider store={store}>
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          {children}
-        </ThemeProvider>
+        <EuiThemeProvider>{children}</EuiThemeProvider>
       </ReduxStoreProvider>
     </MockKibanaContextProvider>
   </I18nProvider>

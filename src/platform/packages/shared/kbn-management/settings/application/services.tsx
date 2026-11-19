@@ -218,7 +218,7 @@ export const SettingsApplicationKibanaProvider: FC<
     isCustomSetting,
     isOverriddenSetting,
     subscribeToUpdates,
-    addUrlToHistory: (url: string) => history.push({ pathname: '', search: url }),
+    addUrlToHistory: (url: string) => history.replace({ pathname: '', search: url }),
     getActiveSpace: spaces.getActiveSpace,
     subscribeToActiveSpace: (fn: () => void) => {
       return spaces.getActiveSpace$().subscribe(fn);

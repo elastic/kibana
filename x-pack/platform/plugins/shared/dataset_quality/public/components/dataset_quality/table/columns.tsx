@@ -391,7 +391,7 @@ export const getDatasetQualityTableColumns = ({
                 ) : (
                   fieldFormats
                     .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
-                    .convert(timestamp)
+                    .convertToText(timestamp)
                 )}
               </EuiSkeletonRectangle>
             ),

@@ -8,7 +8,8 @@
 import type { Filter, Query } from '@kbn/es-query';
 import { EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
+import type { RunTimeMappings } from '@kbn/securitysolution-timeline-search-strategy';
 import { useAlertsLocalStorage } from './alerts_local_storage';
 import type { AlertsSettings } from './alerts_local_storage/types';
 import { ChartContextMenu } from './chart_context_menu';
@@ -16,7 +17,6 @@ import { ChartSelect } from './chart_select';
 import { ChartCollapse } from './chart_collapse';
 import * as i18n from './chart_select/translations';
 import { AlertsTreemapPanel } from '../alerts_treemap_panel';
-import type { RunTimeMappings } from '../../../../sourcerer/store/model';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { useEuiComboBoxReset } from '../../../../common/components/use_combo_box_reset';
 import { AlertsHistogramPanel } from '../alerts_histogram_panel';
@@ -38,7 +38,7 @@ const FullHeightFlexItem = styled(EuiFlexItem)`
 `;
 
 const ChartSelectContainer = styled.div`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+  margin-left: ${({ theme }) => theme.euiTheme.size.s};
 `;
 
 export interface Props {
@@ -172,7 +172,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
   ]);
 
   return (
-    <div data-test-subj="chartPanels">
+    <div data-test-subj="chartPanels" css={{ 'max-height': CHART_PANEL_HEIGHT, overflow: 'auto' }}>
       {alertViewSelection === 'trend' && (
         <FullHeightFlexItem grow={2}>
           {isLoadingIndexPattern ? (

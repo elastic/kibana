@@ -7,15 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JSONSchema7 } from 'json-schema';
-import type { z } from '@kbn/zod/v4';
-import type { LegacyWorkflowInput, WorkflowInputSchema, WorkflowOutput } from '../schema';
+import type { JSONSchema7, JSONSchema7Definition } from 'json-schema';
+import type { Document } from 'yaml';
+import { parseDocument } from 'yaml';
+import {
+  builtinWorkflowInputDefinitions,
+  KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
+} from '../builtin_workflow_input_definitions';
+import type { WorkflowOutput, WorkflowYaml } from '../schema';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
-import type { JsonSchema } from '../schema/common/json_model_shape_schema';
+import {
+  isSchemaValuedAdditionalProperties,
+  type JsonSchema,
+} from '../schema/common/json_model_shape_schema';
+import {
+  isManualTrigger,
+  type LegacyWorkflowInput,
+  type WorkflowInput,
+} from '../schema/triggers/manual_trigger_schema';
 
 export type NormalizableFieldSchema =
   | JsonModelSchemaType
   | Array<LegacyWorkflowInput | WorkflowOutput>;
+
+/**
+ * Indicates whether an input value comes from the workflow schema or the caller.
+ */
+export type RenderInputValueSource = 'default' | 'provided';
+
+export type RenderInputValue = (value: unknown, source: RenderInputValueSource) => unknown;
+
+function renderValue(
+  value: unknown,
+  renderInputValue: RenderInputValue | undefined,
+  source: RenderInputValueSource
+): unknown {
+  return renderInputValue ? renderInputValue(value, source) : value;
+}
 
 /**
  * Converts a legacy workflow field definition to a JSON Schema property
@@ -64,7 +92,7 @@ function convertLegacyFieldToJsonSchemaProperty(field: LegacyWorkflowInput): JSO
  * @returns The fields in the new JSON Schema object format
  */
 export function convertLegacyFieldsToJsonSchema(
-  legacyFields: Array<z.infer<typeof WorkflowInputSchema>>
+  legacyFields: LegacyWorkflowInput[]
 ): JsonModelSchemaType {
   const properties: Record<string, JsonSchema> = {};
   const required: string[] = [];
@@ -117,12 +145,98 @@ export function normalizeFieldsToJsonSchema(
     }
   }
 
+  if (
+    typeof fields === 'object' &&
+    fields !== null &&
+    !Array.isArray(fields) &&
+    'additionalProperties' in fields &&
+    isSchemaValuedAdditionalProperties(
+      (fields as { additionalProperties?: unknown }).additionalProperties
+    )
+  ) {
+    return fields as JsonModelSchemaType;
+  }
+
   if (Array.isArray(fields)) {
     return convertLegacyFieldsToJsonSchema(fields as LegacyWorkflowInput[]);
   }
 
   return undefined;
 }
+
+/**
+ * Resolves workflow inputs from the definition and normalizes them to JSON Schema object form.
+ *
+ * When inputs exist and can be normalized, the return value is always {@link JsonModelSchemaType}
+ * (never the legacy array-of-fields shape).
+ *
+ * Supports the legacy inputs format (array of field definitions) by converting it via
+ * {@link normalizeFieldsToJsonSchema}.
+ *
+ * Falls back to root-level `inputs` on the definition for backward compatibility when the manual
+ * trigger block has no inputs.
+ */
+export const getInputsFromDefinition = (
+  definition: WorkflowYaml | Partial<WorkflowYaml> | undefined | null
+): JsonModelSchemaType | undefined => {
+  const manualTriggerInDefinition = definition?.triggers?.find((trigger) =>
+    isManualTrigger(trigger)
+  );
+  let inputsInDefinition = manualTriggerInDefinition?.inputs;
+
+  if (!inputsInDefinition) {
+    // Backward compatibility with workflows that still use root-level inputs
+    inputsInDefinition = (definition as Record<string, unknown>)?.inputs as WorkflowInput;
+  }
+
+  return normalizeFieldsToJsonSchema(inputsInDefinition);
+};
+
+/**
+ * Returns normalized workflow inputs (JSON Schema object form) from a definition and/or raw YAML.
+ *
+ * First uses {@link getInputsFromDefinition} on `definition`. When that yields nothing (for example
+ * the definition object is partial or stale), parses `yaml` when provided (either a YAML string or
+ * a `Document` from the `yaml` package), converts it to JSON, and runs {@link getInputsFromDefinition} on that
+ * result so inputs can still be recovered from the editor buffer.
+ *
+ * Parse or extraction failures are ignored; the function returns `undefined` in those cases.
+ */
+export function extractNormalizedInputsFromYaml(
+  definition: WorkflowYaml | null,
+  yaml?: Document | string | null
+): Record<string, unknown> | undefined {
+  const inputsFromDefinition = getInputsFromDefinition(definition);
+
+  if (inputsFromDefinition) {
+    return inputsFromDefinition;
+  }
+
+  if (!yaml) {
+    return undefined;
+  }
+
+  try {
+    let yamlDoc: Document;
+
+    if (typeof yaml === 'string') {
+      yamlDoc = parseDocument(yaml);
+    } else {
+      yamlDoc = yaml;
+    }
+
+    const yamlJson = yamlDoc.toJSON() as WorkflowYaml;
+    return getInputsFromDefinition(yamlJson);
+  } catch {
+    // Ignore errors when extracting from YAML
+  }
+
+  return undefined;
+}
+
+// Boolean schemas, and the `null` a half-written draft can declare, set no defaults.
+const isSchemaObject = (schema: unknown): schema is JSONSchema7 =>
+  typeof schema === 'object' && schema !== null;
 
 /**
  * Applies defaults to a nested object property
@@ -133,14 +247,18 @@ export function normalizeFieldsToJsonSchema(
 function applyDefaultToObjectProperty(
   prop: JSONSchema7,
   currentValue: unknown,
-  inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>
+  inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>,
+  renderInputValue?: RenderInputValue
 ): unknown {
+  if (!isSchemaObject(prop)) {
+    return currentValue;
+  }
   if (currentValue === undefined) {
     if (prop.default !== undefined) {
-      return prop.default;
+      return renderValue(prop.default, renderInputValue, 'default');
     }
     if (prop.type === 'object' && prop.properties) {
-      return applyDefaultFromSchema(prop, undefined, inputsSchema);
+      return applyDefaultFromSchema(prop, undefined, inputsSchema, renderInputValue);
     }
     return undefined;
   }
@@ -151,10 +269,10 @@ function applyDefaultToObjectProperty(
     typeof currentValue === 'object' &&
     !Array.isArray(currentValue)
   ) {
-    return applyDefaultFromSchema(prop, currentValue, inputsSchema);
+    return applyDefaultFromSchema(prop, currentValue, inputsSchema, renderInputValue);
   }
 
-  return currentValue;
+  return renderValue(currentValue, renderInputValue, 'provided');
 }
 
 /**
@@ -166,13 +284,19 @@ function applyDefaultToObjectProperty(
 function applyDefaultsToObjectProperties(
   schema: JSONSchema7,
   value: Record<string, unknown>,
-  inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>
+  inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>,
+  renderInputValue?: RenderInputValue
 ): Record<string, unknown> {
   const result: Record<string, unknown> = { ...value };
   for (const [key, propSchema] of Object.entries(schema.properties || {})) {
     const prop = propSchema as JSONSchema7;
     const currentValue = result[key];
-    const defaultValue = applyDefaultToObjectProperty(prop, currentValue, inputsSchema);
+    const defaultValue = applyDefaultToObjectProperty(
+      prop,
+      currentValue,
+      inputsSchema,
+      renderInputValue
+    );
     if (defaultValue !== undefined) {
       result[key] = defaultValue;
     }
@@ -183,10 +307,13 @@ function applyDefaultsToObjectProperties(
 /**
  * Recursively checks if a schema has any defaults (direct or nested)
  */
-function hasDefaultsRecursive(
+export function hasDefaultsRecursive(
   schema: JSONSchema7,
   inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>
 ): boolean {
+  if (!isSchemaObject(schema)) {
+    return false;
+  }
   // Resolve $ref if present
   if (schema.$ref && inputsSchema) {
     const resolvedSchema = resolveRef(schema.$ref, inputsSchema);
@@ -221,18 +348,19 @@ function hasDefaultsRecursive(
 
 function createObjectWithDefaults(
   schema: JSONSchema7,
-  inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>
+  inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>,
+  renderInputValue?: RenderInputValue
 ): Record<string, unknown> | undefined {
   const result: Record<string, unknown> = {};
   for (const [key, propSchema] of Object.entries(schema.properties || {})) {
     const prop = propSchema as JSONSchema7;
-    const isRequired = schema.required?.includes(key) ?? false;
+    const isRequired = Array.isArray(schema.required) && schema.required.includes(key);
 
     // Include property if:
     // 1. It's required, OR
     // 2. It has defaults (direct or nested)
     if (isRequired || hasDefaultsRecursive(prop, inputsSchema)) {
-      const defaultValue = applyDefaultFromSchema(prop, undefined, inputsSchema);
+      const defaultValue = applyDefaultFromSchema(prop, undefined, inputsSchema, renderInputValue);
       if (defaultValue !== undefined) {
         result[key] = defaultValue;
       }
@@ -242,8 +370,11 @@ function createObjectWithDefaults(
 }
 
 /**
- * Resolves a $ref reference within the inputs schema context
- * @param ref - The $ref string (e.g., "#/definitions/UserSchema")
+ * Resolves a $ref reference within the inputs schema context, or from
+ * {@link builtinWorkflowInputDefinitions} when the ref uses
+ * {@link KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX}.
+ *
+ * @param ref - The $ref string (e.g., "#/definitions/UserSchema" or "#/kibana/definitions/MyType")
  * @param inputsSchema - The full inputs schema containing definitions
  * @returns The resolved schema, or null if not found
  */
@@ -251,9 +382,18 @@ export function resolveRef(
   ref: string,
   inputsSchema: ReturnType<typeof normalizeFieldsToJsonSchema>
 ): JSONSchema7 | null {
-  if (!ref.startsWith('#/')) {
-    // External references not supported yet
+  // A draft being typed can hold any value here; external references are not supported yet.
+  if (typeof ref !== 'string' || !ref.startsWith('#/')) {
     return null;
+  }
+
+  if (ref.startsWith(KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX)) {
+    const id = ref.slice(KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX.length);
+    if (!id || id.includes('/')) {
+      return null;
+    }
+    const builtin = builtinWorkflowInputDefinitions[id];
+    return (builtin ?? null) as JSONSchema7 | null;
   }
 
   const path = ref.slice(2).split('/'); // Remove '#/' and split
@@ -281,14 +421,18 @@ export function resolveRef(
 function applyDefaultFromSchema(
   schema: JSONSchema7,
   value: unknown,
-  inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>
+  inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>,
+  renderInputValue?: RenderInputValue
 ): unknown {
+  if (!isSchemaObject(schema)) {
+    return value;
+  }
   // Resolve $ref if present
   if (schema.$ref && inputsSchema) {
     const resolvedSchema = resolveRef(schema.$ref, inputsSchema);
     if (resolvedSchema) {
       // Use resolved schema for applying defaults
-      return applyDefaultFromSchema(resolvedSchema, value, inputsSchema);
+      return applyDefaultFromSchema(resolvedSchema, value, inputsSchema, renderInputValue);
     }
   }
   // If value is already provided, use it (unless it's undefined/null for objects)
@@ -303,20 +447,21 @@ function applyDefaultFromSchema(
       return applyDefaultsToObjectProperties(
         schema,
         value as Record<string, unknown>,
-        inputsSchema
+        inputsSchema,
+        renderInputValue
       );
     }
-    return value;
+    return renderValue(value, renderInputValue, 'provided');
   }
 
   // If value is not provided, use default if available
   if (schema.default !== undefined) {
-    return schema.default;
+    return renderValue(schema.default, renderInputValue, 'default');
   }
 
   // For objects, create object with defaults for required properties or properties with defaults
   if (schema.type === 'object' && schema.properties) {
-    const objectWithDefaults = createObjectWithDefaults(schema, inputsSchema);
+    const objectWithDefaults = createObjectWithDefaults(schema, inputsSchema, renderInputValue);
     // If we created an object with defaults, return it; otherwise return undefined
     // This ensures nested objects with defaults are created even if not required
     return objectWithDefaults;
@@ -330,15 +475,45 @@ function applyDefaultFromSchema(
   return undefined;
 }
 
+const hasPropertyDefault = (
+  propertySchema: JSONSchema7Definition | undefined,
+  rootSchema: JsonModelSchemaType
+): boolean => {
+  if (!propertySchema || typeof propertySchema !== 'object') {
+    return false;
+  }
+  const resolvedSchema = propertySchema.$ref
+    ? resolveRef(propertySchema.$ref, rootSchema) ?? propertySchema
+    : propertySchema;
+  return resolvedSchema.default !== undefined;
+};
+
+/**
+ * Drops top-level inputs with a default from `required`, so plain JSON Schema validators
+ * (e.g. Monaco) accept omitting them the same way applyInputDefaults fills them in.
+ */
+export function omitRequiredWithDefaults(schema: JsonModelSchemaType): JsonModelSchemaType {
+  const { required, properties } = schema as JSONSchema7;
+  if (!required || !properties) {
+    return schema;
+  }
+  return {
+    ...schema,
+    required: required.filter((key) => !hasPropertyDefault(properties[key], schema)),
+  } as JsonModelSchemaType;
+}
+
 /**
  * Applies default values from JSON Schema to workflow inputs
+ * Keep in sync with omitRequiredWithDefaults when changing which inputs receive defaults.
  * @param inputs - The actual input values provided (may be partial or undefined)
  * @param inputsSchema - The normalized JSON Schema inputs definition
  * @returns The inputs with defaults applied
  */
 export function applyInputDefaults(
   inputs: Record<string, unknown> | undefined,
-  inputsSchema: ReturnType<typeof normalizeFieldsToJsonSchema>
+  inputsSchema: ReturnType<typeof normalizeFieldsToJsonSchema>,
+  renderInputValue?: RenderInputValue
 ): Record<string, unknown> | undefined {
   if (!inputsSchema?.properties) {
     return inputs;
@@ -353,28 +528,25 @@ export function applyInputDefaults(
 
     // Apply defaults if value is missing or undefined
     if (currentValue === undefined) {
-      const defaultValue = applyDefaultFromSchema(jsonSchema, undefined, inputsSchema);
+      const defaultValue = applyDefaultFromSchema(
+        jsonSchema,
+        undefined,
+        inputsSchema,
+        renderInputValue
+      );
       if (defaultValue !== undefined) {
         result[propertyName] = defaultValue;
         hasAnyDefaults = true;
       }
-    } else if (
-      jsonSchema.type === 'object' &&
-      jsonSchema.properties &&
-      typeof currentValue === 'object' &&
-      !Array.isArray(currentValue)
-    ) {
-      // Recursively apply defaults to nested objects
-      const updatedValue = applyDefaultFromSchema(jsonSchema, currentValue, inputsSchema);
-      if (updatedValue !== undefined) {
+    } else {
+      const updatedValue = applyDefaultFromSchema(
+        jsonSchema,
+        currentValue,
+        inputsSchema,
+        renderInputValue
+      );
+      if (updatedValue !== undefined && !Object.is(updatedValue, currentValue)) {
         result[propertyName] = updatedValue;
-        hasAnyDefaults = true;
-      }
-    } else if (jsonSchema.$ref) {
-      // Handle $ref: resolve and apply defaults
-      const defaultValue = applyDefaultFromSchema(jsonSchema, currentValue, inputsSchema);
-      if (defaultValue !== undefined) {
-        result[propertyName] = defaultValue;
         hasAnyDefaults = true;
       }
     }

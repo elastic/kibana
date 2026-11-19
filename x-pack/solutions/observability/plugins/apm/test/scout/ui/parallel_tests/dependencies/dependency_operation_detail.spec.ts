@@ -80,7 +80,20 @@ test.describe(
       await test.step('verify span link flyout is visible', async () => {
         const flyoutLocator = page.getByRole('dialog');
         await expect(flyoutLocator).toBeVisible();
-        await expect(flyoutLocator.getByRole('heading', { name: 'Span details' })).toBeVisible();
+        const headerLocator = page.testSubj.locator('spanFlyoutHeader');
+        await expect(headerLocator.getByRole('heading', { name: 'Span details' })).toBeVisible();
+      });
+    });
+
+    test('Service badge in waterfall links to service overview', async ({
+      page,
+      pageObjects: { dependencyDetailsPage },
+    }) => {
+      await test.step('click service badge and verify navigation to service overview', async () => {
+        await dependencyDetailsPage.operationDetailSubpage.clickWaterfallServiceBadge();
+        await expect(page).toHaveURL(
+          new RegExp(`/services/${dependencyDetailsPage.SERVICE_NAME}/overview`)
+        );
       });
     });
 

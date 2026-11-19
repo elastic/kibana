@@ -342,7 +342,9 @@ describe('convertMathProcessorToESQL', () => {
         where: { field: 'active', eq: true },
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL total = CASE(active == TRUE, price * quantity, total)');
+      expect(result).toBe(
+        'EVAL total = CASE(COALESCE(active == TRUE, FALSE), price * quantity, total)'
+      );
     });
 
     it('should handle where with gt condition', () => {
@@ -353,7 +355,7 @@ describe('convertMathProcessorToESQL', () => {
         where: { field: 'priority', gt: 5 },
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
-      expect(result).toBe('EVAL doubled = CASE(priority > 5, price * 2, doubled)');
+      expect(result).toBe('EVAL doubled = CASE(COALESCE(priority > 5, FALSE), price * 2, doubled)');
     });
 
     it('should handle where with exists condition', () => {
@@ -381,7 +383,7 @@ describe('convertMathProcessorToESQL', () => {
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
       expect(result).toBe(
-        'EVAL discounted = CASE(eligible == TRUE AND price > 100, price * 0.9, discounted)'
+        'EVAL discounted = CASE(COALESCE(eligible == TRUE, FALSE) AND COALESCE(price > 100, FALSE), price * 0.9, discounted)'
       );
     });
   });
@@ -458,7 +460,7 @@ describe('convertMathProcessorToESQL', () => {
       };
       const result = commandsToString(convertMathProcessorToESQL(processor));
       expect(result).toBe(
-        'EVAL total = CASE(active == TRUE AND NOT(price IS NULL) AND NOT(quantity IS NULL), price * quantity, total)'
+        'EVAL total = CASE(COALESCE(active == TRUE, FALSE) AND NOT(price IS NULL) AND NOT(quantity IS NULL), price * quantity, total)'
       );
     });
   });

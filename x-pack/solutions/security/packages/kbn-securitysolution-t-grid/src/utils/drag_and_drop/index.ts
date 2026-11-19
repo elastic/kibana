@@ -127,6 +127,3 @@ export const fieldWasDroppedOnTimelineColumns = (result: DropResult): boolean =>
  * header drop zone in the timeline
  */
 export const DRAG_TYPE_FIELD = 'drag-type-field';
-
-/** This class is added to the document body while timeline field dragging */
-export const IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME = 'is-timeline-field-dragging';

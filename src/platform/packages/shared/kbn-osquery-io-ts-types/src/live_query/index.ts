@@ -51,7 +51,7 @@ export type Interval = t.TypeOf<typeof interval>;
 export const intervalOrUndefined = t.union([interval, t.undefined]);
 export type IntervalOrUndefined = t.TypeOf<typeof intervalOrUndefined>;
 
-export const timeout = inRangeRt(60, 60 * 15);
+export const timeout = inRangeRt(60, 60 * 60 * 24);
 export type Timeout = t.TypeOf<typeof timeout>;
 export const timeoutOrUndefined = t.union([timeout, t.undefined]);
 export type TimeoutOrUndefined = t.TypeOf<typeof timeoutOrUndefined>;

@@ -17,7 +17,7 @@ export const samplePieVis = {
     name: 'pie',
     title: 'Pie',
     description: 'Compare parts of a whole',
-    icon: 'visPie',
+    icon: 'chartPie',
     stage: 'production',
     options: {
       showTimePicker: true,

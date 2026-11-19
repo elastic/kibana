@@ -5,9 +5,17 @@
  * 2.0.
  */
 
+jest.mock('@elastic/schemas/es/tools/manifest.js', () => ({
+  esManifest: [{ id: 'indices.create' }, { id: 'indices.delete' }],
+}));
+
+jest.mock('@elastic/schemas/kibana/tools/manifest.js', () => ({
+  kibanaManifest: [{ id: 'cases.create' }],
+}));
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { ToolType } from '@kbn/agent-builder-common';
-import type { InternalToolDefinition } from '@kbn/agent-builder-server';
+import type { InternalToolDefinition, RunApprovals } from '@kbn/agent-builder-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
@@ -86,17 +94,20 @@ describe('ToolRegistryImpl', () => {
   const setup = ({
     builtinTools = [],
     persistedTools = [],
+    experimentalFeaturesEnabled = false,
   }: {
     builtinTools?: InternalToolDefinition[];
     persistedTools?: InternalToolDefinition[];
+    experimentalFeaturesEnabled?: boolean;
   } = {}) => {
     const builtinProvider = createMockBuiltinProvider(builtinTools);
     const persistedProvider = createMockPersistedProvider(persistedTools);
     const healthClient = createMockHealthClient();
+    const runTool = jest.fn().mockResolvedValue({ results: [] });
 
     const registry = createToolRegistry({
       logger: loggerMock.create(),
-      getRunner: jest.fn() as any,
+      getRunner: (() => ({ runTool })) as any,
       builtinProvider,
       persistedProvider,
       request,
@@ -105,9 +116,10 @@ describe('ToolRegistryImpl', () => {
       savedObjects,
       healthClient,
       healthTrackedToolTypes: new Set(),
+      experimentalFeaturesEnabled,
     });
 
-    return { registry, builtinProvider, persistedProvider };
+    return { registry, builtinProvider, persistedProvider, runTool };
   };
 
   describe('list', () => {
@@ -404,6 +416,189 @@ describe('ToolRegistryImpl', () => {
 
       expect(tools).toHaveLength(1);
       expect(tools[0].id).toBe('mcp.tavily.search');
+    });
+  });
+
+  describe('experimental filtering', () => {
+    const normalTool = availableTool({
+      id: 'normal-tool',
+      type: ToolType.builtin,
+      experimental: false,
+    });
+    const experimentalTool = availableTool({
+      id: 'experimental-tool',
+      type: ToolType.builtin,
+      experimental: true,
+    });
+
+    describe('when experimentalFeaturesEnabled is false', () => {
+      it('has() returns false for experimental tools', async () => {
+        const { registry } = setup({
+          builtinTools: [experimentalTool],
+          experimentalFeaturesEnabled: false,
+        });
+        expect(await registry.has('experimental-tool')).toBe(false);
+      });
+
+      it('has() returns true for non-experimental tools', async () => {
+        const { registry } = setup({
+          builtinTools: [normalTool],
+          experimentalFeaturesEnabled: false,
+        });
+        expect(await registry.has('normal-tool')).toBe(true);
+      });
+
+      it('get() throws not-found for experimental tools', async () => {
+        const { registry } = setup({
+          builtinTools: [experimentalTool],
+          experimentalFeaturesEnabled: false,
+        });
+        await expect(registry.get('experimental-tool')).rejects.toThrow();
+      });
+
+      it('get() returns the tool for non-experimental tools', async () => {
+        const { registry } = setup({
+          builtinTools: [normalTool],
+          experimentalFeaturesEnabled: false,
+        });
+        const result = await registry.get('normal-tool');
+        expect(result.id).toBe('normal-tool');
+      });
+
+      it('list() excludes experimental tools', async () => {
+        const { registry } = setup({
+          builtinTools: [normalTool, experimentalTool],
+          experimentalFeaturesEnabled: false,
+        });
+        const result = await registry.list();
+        expect(result).toHaveLength(1);
+        expect(result[0].id).toBe('normal-tool');
+      });
+    });
+
+    describe('when experimentalFeaturesEnabled is true', () => {
+      it('has() returns true for experimental tools', async () => {
+        const { registry } = setup({
+          builtinTools: [experimentalTool],
+          experimentalFeaturesEnabled: true,
+        });
+        expect(await registry.has('experimental-tool')).toBe(true);
+      });
+
+      it('get() returns experimental tools', async () => {
+        const { registry } = setup({
+          builtinTools: [experimentalTool],
+          experimentalFeaturesEnabled: true,
+        });
+        const result = await registry.get('experimental-tool');
+        expect(result.id).toBe('experimental-tool');
+      });
+
+      it('list() includes experimental tools', async () => {
+        const { registry } = setup({
+          builtinTools: [normalTool, experimentalTool],
+          experimentalFeaturesEnabled: true,
+        });
+        const result = await registry.list();
+        expect(result).toHaveLength(2);
+      });
+    });
+
+    it('non-experimental tools are returned regardless of the flag', async () => {
+      const off = setup({
+        builtinTools: [normalTool],
+        experimentalFeaturesEnabled: false,
+      });
+      const on = setup({
+        builtinTools: [normalTool],
+        experimentalFeaturesEnabled: true,
+      });
+      expect(await off.registry.has('normal-tool')).toBe(true);
+      expect(await on.registry.has('normal-tool')).toBe(true);
+    });
+  });
+
+  describe('execute', () => {
+    const tool = availableTool({ id: 'my_tool' });
+
+    it.each<{ description: string; approvals?: RunApprovals }>([
+      {
+        description: 'a grant',
+        approvals: { autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.create' }] },
+      },
+      { description: 'no grant', approvals: undefined },
+    ])('forwards $description to the runner unchanged', async ({ approvals }) => {
+      const { registry, runTool } = setup({ builtinTools: [tool] });
+
+      await registry.execute({ toolId: 'my_tool', toolParams: {}, approvals });
+
+      expect(runTool).toHaveBeenCalledTimes(1);
+      expect(runTool).toHaveBeenCalledWith(expect.objectContaining({ approvals }));
+    });
+  });
+
+  describe('availability check timeouts', () => {
+    const never = () => new Promise<never>(() => {});
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('does not time out checks that resolve within 5s', async () => {
+      const isAvailable = jest.fn(
+        () =>
+          new Promise<{ status: 'available' }>((resolve) =>
+            setTimeout(() => resolve({ status: 'available' }), 4000)
+          )
+      );
+      const tool = availableTool({ id: 'slow_tool', isAvailable });
+      const { registry } = setup({ builtinTools: [tool] });
+
+      const promise = registry.list();
+      await jest.advanceTimersByTimeAsync(4000);
+
+      expect((await promise).map((t) => t.id)).toEqual(['slow_tool']);
+      expect(isAvailable).toHaveBeenCalledTimes(1);
+    });
+
+    it('retries a timed-out check and uses the result of the retry', async () => {
+      const isAvailable = jest
+        .fn()
+        .mockImplementationOnce(never)
+        .mockResolvedValueOnce({ status: 'available' });
+      const tool = availableTool({ id: 'flaky_tool', isAvailable });
+      const { registry } = setup({ builtinTools: [tool] });
+
+      const promise = registry.list();
+      await jest.advanceTimersByTimeAsync(5000 + 250);
+
+      expect((await promise).map((t) => t.id)).toEqual(['flaky_tool']);
+      expect(isAvailable).toHaveBeenCalledTimes(2);
+    });
+
+    it('treats the tool as unavailable once all retries timed out', async () => {
+      const isAvailable = jest.fn(never);
+      const tool = availableTool({ id: 'stuck_tool', isAvailable });
+      const { registry } = setup({ builtinTools: [tool] });
+
+      const promise = registry.list();
+      await jest.advanceTimersByTimeAsync(3 * 5000 + 250 + 500);
+
+      expect(await promise).toEqual([]);
+      expect(isAvailable).toHaveBeenCalledTimes(3);
+    });
+
+    it('does not retry when the check resolves as unavailable', async () => {
+      const isAvailable = jest.fn(async () => ({ status: 'unavailable' as const }));
+      const tool = availableTool({ id: 'unavailable_tool', isAvailable });
+      const { registry } = setup({ builtinTools: [tool] });
+
+      expect(await registry.list()).toEqual([]);
+      expect(isAvailable).toHaveBeenCalledTimes(1);
     });
   });
 });

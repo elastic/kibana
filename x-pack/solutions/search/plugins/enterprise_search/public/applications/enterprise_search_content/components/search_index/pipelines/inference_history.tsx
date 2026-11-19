@@ -55,7 +55,7 @@ export const InferenceHistory: React.FC = () => {
       <EuiSpacer />
       <DataPanel
         hasBorder
-        iconType="compute"
+        iconType="processor"
         title={<h3>{historyTitle}</h3>}
         subtitle={i18n.translate(
           'xpack.enterpriseSearch.content.indices.pipelines.tabs.inferenceHistory.subtitle',

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type React from 'react';
 import type { KibanaErrorService } from './src/services/error_service';
 
 /**
@@ -18,12 +19,29 @@ export interface KibanaErrorBoundaryServices {
   errorService: KibanaErrorService;
 }
 
+/** @internal */
+export interface BaseErrorBoundaryProps {
+  services: KibanaErrorBoundaryServices;
+}
+
+/** @internal */
+export interface BaseErrorBoundaryState {
+  error: Error | null;
+  errorInfo: React.ErrorInfo | null;
+  componentName: string | null;
+  isFatal: boolean | null;
+}
+
 /**
- * {analytics: AnalyticsServiceStart | undefined}
  * @public
  */
 export interface KibanaErrorBoundaryProviderDeps {
-  analytics:
+  /**
+   * Unused. Caught errors are reported to APM RUM only, not EBT.
+   * Retained so existing call sites continue to type-check.
+   * @deprecated
+   */
+  analytics?:
     | {
         reportEvent: (eventType: string, eventData: object) => void;
       }

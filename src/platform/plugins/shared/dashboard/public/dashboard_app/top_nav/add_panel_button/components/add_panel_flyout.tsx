@@ -7,52 +7,65 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
-import useAsync from 'react-use/lib/useAsync';
-import { i18n as i18nFn } from '@kbn/i18n';
+import React, { useCallback, useEffect, useState } from 'react';
+
 import {
   EuiEmptyPrompt,
-  EuiButtonEmpty,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
-  EuiTitle,
-  EuiFieldSearch,
-  useEuiTheme,
   EuiSkeletonText,
+  EuiTab,
+  EuiTabs,
   EuiText,
+  EuiTitle,
+  type UseEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DashboardApi } from '../../../../dashboard_api/types';
-import type { MenuItem, MenuItemGroup } from '../types';
-import { getMenuItemGroups } from '../get_menu_item_groups';
-import { Groups } from './groups';
+import { AiButton } from '@kbn/shared-ux-ai-components';
+import useAsync from 'react-use/lib/useAsync';
 
-export function AddPanelFlyout({
+import type { DashboardApi } from '../../../../dashboard_api/types';
+import { embeddableService, uiActionsService } from '../../../../services/kibana_services';
+import { onAddPanelClick, useMenuItemGroups } from '../use_menu_item_groups';
+import { useFeaturedItems } from '../use_featured_items';
+import type { MenuItem, MenuItemGroup } from '../types';
+import { Groups } from './groups';
+import { FeaturedItemCard } from './featured_item_card';
+import { OPEN_DASHBOARD_CHAT_ACTION_ID } from '../../../../dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat_action';
+import { openDashboardChat } from '../../../../dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat';
+
+const TAB_NEW_ID = 'new' as const;
+const TAB_LIBRARY_ID = 'library' as const;
+type FlyoutTab = typeof TAB_NEW_ID | typeof TAB_LIBRARY_ID;
+
+function NewPanelContent({
   dashboardApi,
-  closeFlyout,
-  ariaLabelledBy,
+  returnFocus,
 }: {
   dashboardApi: DashboardApi;
-  closeFlyout: () => void;
-  ariaLabelledBy: string;
+  returnFocus?: () => void;
 }) {
-  const { euiTheme } = useEuiTheme();
-
   const {
-    value: groups,
-    loading,
-    error,
-  } = useAsync(async () => {
-    return await getMenuItemGroups(dashboardApi);
-  }, [dashboardApi]);
+    groups,
+    loading: isLoadingGroups,
+    error: loadGroupsError,
+  } = useMenuItemGroups({ dashboardApi, returnFocus });
+  const { featuredItems, loading: isLoadingFeaturedItems } = useFeaturedItems({
+    dashboardApi,
+    returnFocus,
+  });
+  const hasChatAction = uiActionsService.hasAction(OPEN_DASHBOARD_CHAT_ACTION_ID);
 
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filteredGroups, setFilteredGroups] = useState<MenuItemGroup[]>([]);
+
   useEffect(() => {
     if (!searchTerm) {
       return setFilteredGroups(groups ?? []);
@@ -92,91 +105,185 @@ export function AddPanelFlyout({
   }, [groups, searchTerm]);
 
   return (
+    <EuiSkeletonText isLoading={isLoadingGroups || isLoadingFeaturedItems}>
+      <EuiFlexGroup
+        data-test-subj="dashboardPanelSelectionFlyout"
+        direction="column"
+        responsive={false}
+        gutterSize="m"
+      >
+        <EuiFlexItem grow={false} css={styles.stickySearchBar}>
+          <EuiForm component="form" fullWidth>
+            <EuiFormRow>
+              <EuiFieldSearch
+                autoFocus
+                compressed
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                }}
+                aria-label={i18n.translate('dashboard.editorMenu.addPanelFlyout.searchLabelText', {
+                  defaultMessage: 'Search field for panels',
+                })}
+                data-test-subj="dashboardPanelSelectionFlyout__searchInput"
+              />
+            </EuiFormRow>
+          </EuiForm>
+        </EuiFlexItem>
+        {(hasChatAction || featuredItems.length > 0) && (
+          <EuiFlexItem grow={false} css={styles.featuredPanelsWrapper}>
+            {hasChatAction && (
+              <AiButton
+                key={OPEN_DASHBOARD_CHAT_ACTION_ID}
+                fullWidth
+                size="s"
+                variant="base"
+                iconType="productAgent"
+                onClick={(event: React.MouseEvent) => {
+                  onAddPanelClick(event, dashboardApi, openDashboardChat);
+                }}
+                data-test-subj="create-action-Create with chat"
+              >
+                {i18n.translate('dashboard.addPanelFlyout.createWithChatButtonLabel', {
+                  defaultMessage: 'Create with chat',
+                })}
+              </AiButton>
+            )}
+            {featuredItems.map(
+              (item) => !item.isDisabled && <FeaturedItemCard key={item.id} item={item} />
+            )}
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem css={styles.flyoutContentWrapper}>
+          {loadGroupsError ? (
+            <EuiEmptyPrompt
+              iconType="warning"
+              iconColor="danger"
+              body={
+                <EuiText size="s" textAlign="center">
+                  <FormattedMessage
+                    id="dashboard.solutionToolbar.addPanelFlyout.loadingErrorDescription"
+                    defaultMessage="An error occurred loading the available dashboard panels for selection"
+                  />
+                </EuiText>
+              }
+              data-test-subj="dashboardPanelSelectionErrorIndicator"
+            />
+          ) : (
+            <Groups groups={filteredGroups} />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiSkeletonText>
+  );
+}
+
+function LibraryContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
+  const {
+    value: LibraryComponent,
+    loading,
+    error,
+  } = useAsync(() => embeddableService.getAddFromLibraryContentComponent(), [embeddableService]);
+
+  if (loading) {
+    return <EuiSkeletonText />;
+  }
+
+  if (error || !LibraryComponent) {
+    return (
+      <EuiEmptyPrompt
+        iconType="warning"
+        iconColor="danger"
+        body={
+          <EuiText size="s" textAlign="center">
+            <FormattedMessage
+              id="dashboard.addToDashboardFlyout.libraryLoadError"
+              defaultMessage="An error occurred loading the library"
+            />
+          </EuiText>
+        }
+        data-test-subj="dashboardLibraryLoadErrorIndicator"
+      />
+    );
+  }
+
+  return <LibraryComponent container={dashboardApi} />;
+}
+
+export function AddPanelFlyout({
+  dashboardApi,
+  ariaLabelledBy,
+  returnFocus,
+  initialTab = TAB_NEW_ID,
+}: {
+  dashboardApi: DashboardApi;
+  ariaLabelledBy: string;
+  returnFocus?: () => void;
+  initialTab?: FlyoutTab;
+}) {
+  const [selectedTab, setSelectedTab] = useState<FlyoutTab>(initialTab);
+
+  const onTabClick = useCallback((tab: FlyoutTab) => {
+    setSelectedTab(tab);
+  }, []);
+
+  return (
     <>
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader hasBorder={false} data-test-subj="addToDashboardFlyout-header">
         <EuiTitle size="s">
           <h1 id={ariaLabelledBy}>
             <FormattedMessage
               id="dashboard.solutionToolbar.addPanelFlyout.headingText"
-              defaultMessage="Add panel"
+              defaultMessage="Add to dashboard"
             />
           </h1>
         </EuiTitle>
+        <EuiTabs bottomBorder={true}>
+          <EuiTab
+            isSelected={selectedTab === TAB_NEW_ID}
+            onClick={() => onTabClick(TAB_NEW_ID)}
+            data-test-subj="addToDashboardTab-new"
+          >
+            <FormattedMessage id="dashboard.addToDashboardFlyout.tabs.new" defaultMessage="New" />
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === TAB_LIBRARY_ID}
+            onClick={() => onTabClick(TAB_LIBRARY_ID)}
+            data-test-subj="addToDashboardTab-library"
+          >
+            <FormattedMessage
+              id="dashboard.addToDashboardFlyout.tabs.fromLibrary"
+              defaultMessage="From library"
+            />
+          </EuiTab>
+        </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiSkeletonText isLoading={loading}>
-          <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
-            <EuiFlexItem
-              grow={false}
-              css={{
-                position: 'sticky',
-                top: euiTheme.size.m,
-                zIndex: 1,
-                boxShadow: `0 -${euiTheme.size.m} 0 4px ${euiTheme.colors.backgroundBasePlain}`,
-              }}
-            >
-              <EuiForm component="form" fullWidth>
-                <EuiFormRow css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}>
-                  <EuiFieldSearch
-                    autoFocus
-                    compressed
-                    value={searchTerm}
-                    onChange={(e) => {
-                      setSearchTerm(e.target.value);
-                    }}
-                    aria-label={i18nFn.translate(
-                      'dashboard.editorMenu.addPanelFlyout.searchLabelText',
-                      { defaultMessage: 'search field for panels' }
-                    )}
-                    data-test-subj="dashboardPanelSelectionFlyout__searchInput"
-                  />
-                </EuiFormRow>
-              </EuiForm>
-            </EuiFlexItem>
-            <EuiFlexItem
-              css={{
-                minHeight: '20vh',
-                ...(error
-                  ? {
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }
-                  : {}),
-              }}
-            >
-              {error ? (
-                <EuiEmptyPrompt
-                  iconType="warning"
-                  iconColor="danger"
-                  body={
-                    <EuiText size="s" textAlign="center">
-                      <FormattedMessage
-                        id="dashboard.solutionToolbar.addPanelFlyout.loadingErrorDescription"
-                        defaultMessage="An error occurred loading the available dashboard panels for selection"
-                      />
-                    </EuiText>
-                  }
-                  data-test-subj="dashboardPanelSelectionErrorIndicator"
-                />
-              ) : (
-                <Groups groups={filteredGroups} />
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiSkeletonText>
+        {selectedTab === TAB_NEW_ID ? (
+          <NewPanelContent dashboardApi={dashboardApi} returnFocus={returnFocus} />
+        ) : (
+          <LibraryContent dashboardApi={dashboardApi} />
+        )}
       </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeFlyout} data-test-subj="dashboardPanelSelectionCloseBtn">
-              <FormattedMessage
-                id="dashboard.solutionToolbar.addPanelFlyout.cancelButtonText"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
     </>
   );
 }
+
+const styles = {
+  stickySearchBar: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'sticky',
+      top: euiTheme.size.m,
+      zIndex: euiTheme.levels.header,
+      boxShadow: `0 -${euiTheme.size.m} 0 4px ${euiTheme.colors.backgroundBasePlain}`,
+    }),
+  featuredPanelsWrapper: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'flex',
+      flexDirection: 'column',
+      gap: euiTheme.size.s,
+    }),
+  flyoutContentWrapper: css({
+    minHeight: '20vh',
+  }),
+};

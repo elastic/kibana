@@ -12,8 +12,8 @@ import { timelineActions } from '../../store';
 import { TimelineBottomBar } from '.';
 import { TimelineId } from '../../../../common/types';
 
-jest.mock('react-redux', () => {
-  const origin = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const origin = jest.requireActual('react-redux-v7');
   return {
     ...origin,
     useDispatch: jest.fn().mockReturnValue(jest.fn()),

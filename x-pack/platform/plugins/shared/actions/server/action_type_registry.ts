@@ -11,8 +11,10 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { ActionType as CommonActionType } from '../common';
-import { areValidFeatures } from '../common';
+import { areValidFeatures, MAX_FEATURE_ID_LENGTH } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
 import type { ActionExecutionSourceType, ILicenseState, TaskRunnerFactory } from './lib';
 import { getActionTypeFeatureUsageName } from './lib';
@@ -23,6 +25,7 @@ import type {
   ActionTypeSecrets,
   InMemoryConnector,
 } from './types';
+import { isSandboxCapableConnectorType } from './application/connector/lib/is_sandbox_capable_connector';
 
 export interface ActionTypeRegistryOpts {
   licensing: LicensingPluginSetup;
@@ -36,6 +39,7 @@ export interface ActionTypeRegistryOpts {
 interface ListOpts {
   featureId?: string;
   exposeValidation?: boolean;
+  sandboxCapableOnly?: boolean;
 }
 
 export class ActionTypeRegistry {
@@ -121,6 +125,12 @@ export class ActionTypeRegistry {
     Boolean(this.actionTypes.get(actionTypeId)?.isSystemActionType);
 
   /**
+   * Returns true if the action type is defined by a connector spec
+   */
+  public isSpecActionType = (actionTypeId: string): boolean =>
+    this.actionTypes.get(actionTypeId)?.source === ACTION_TYPE_SOURCES.spec;
+
+  /**
    * Returns true if the connector type has a sub-feature type defined
    */
   public hasSubFeature = (actionTypeId: string): boolean =>
@@ -143,7 +153,7 @@ export class ActionTypeRegistry {
   }
 
   /**
-   * Registers an action type to the action type registry
+   * Registers an action type or adds spec versions to an existing spec-backed type.
    */
   public register<
     Config extends ActionTypeConfig = ActionTypeConfig,
@@ -151,7 +161,13 @@ export class ActionTypeRegistry {
     Params extends ActionTypeParams = ActionTypeParams,
     ExecutorResultData = void
   >(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>) {
-    if (this.has(actionType.id)) {
+    const registeredActionType = this.actionTypes.get(actionType.id);
+    const hasVersionedSpecs =
+      registeredActionType?.specs !== undefined && registeredActionType?.specs?.size > 0;
+
+    const { specs } = actionType;
+
+    if (registeredActionType && (!hasVersionedSpecs || !specs?.size)) {
       throw new Error(
         i18n.translate(
           'xpack.actions.actionTypeRegistry.register.duplicateActionTypeErrorMessage',
@@ -165,6 +181,23 @@ export class ActionTypeRegistry {
       );
     }
 
+    if (registeredActionType && specs) {
+      for (const version of specs.keys()) {
+        if (registeredActionType.specs?.has(version)) {
+          throw new Error(
+            i18n.translate(
+              'xpack.actions.actionTypeRegistry.register.duplicateSpecVersionErrorMessage',
+              {
+                defaultMessage:
+                  'Skipping catalog connector "{id}" version "{version}": type is already registered.',
+                values: { id: actionType.id, version },
+              }
+            )
+          );
+        }
+      }
+    }
+
     if (!actionType.supportedFeatureIds || actionType.supportedFeatureIds.length === 0) {
       throw new Error(
         i18n.translate('xpack.actions.actionTypeRegistry.register.missingSupportedFeatureIds', {
@@ -172,6 +205,19 @@ export class ActionTypeRegistry {
             'At least one "supportedFeatureId" value must be supplied for connector type "{connectorTypeId}".',
           values: {
             connectorTypeId: actionType.id,
+          },
+        })
+      );
+    }
+
+    if (actionType.supportedFeatureIds.some((id) => id.length > MAX_FEATURE_ID_LENGTH)) {
+      throw new Error(
+        i18n.translate('xpack.actions.actionTypeRegistry.register.featureIdTooLong', {
+          defaultMessage:
+            'Feature IDs for connector type "{connectorTypeId}" must not exceed {maxLength} characters.',
+          values: {
+            connectorTypeId: actionType.id,
+            maxLength: MAX_FEATURE_ID_LENGTH,
           },
         })
       );
@@ -207,15 +253,19 @@ export class ActionTypeRegistry {
       actionTypeMaxAttempts: actionType.maxAttempts,
     });
 
-    this.actionTypes.set(actionType.id, { ...actionType } as unknown as ActionType);
+    this.actionTypes.set(actionType.id, {
+      ...actionType,
+      ...(specs && { specs: new Map([...(registeredActionType?.specs ?? []), ...specs]) }),
+    } as unknown as ActionType);
 
-    // Skip task type registration for connectors without execute/params
-    if (actionType.executor && actionType.validate.params) {
+    // Skip task type registration for new connectors without execute/params or for already registered connectors
+    if (!registeredActionType && actionType.executor && actionType.validate.params) {
       this.taskManager.registerTaskDefinitions({
         [`actions:${actionType.id}`]: {
           title: actionType.name,
           maxAttempts,
           cost: TaskCost.Tiny,
+          taskTypeGroup: TaskTypeGroup.Actions,
           createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
         },
       });
@@ -255,12 +305,15 @@ export class ActionTypeRegistry {
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
   public list(
-    { featureId, exposeValidation }: ListOpts = { exposeValidation: false }
+    { featureId, exposeValidation, sandboxCapableOnly }: ListOpts = { exposeValidation: false }
   ): CommonActionType[] {
     return Array.from(this.actionTypes)
       .filter(([_, actionType]) => {
         return featureId ? actionType.supportedFeatureIds.includes(featureId) : true;
       })
+      .filter(([_, actionType]) =>
+        sandboxCapableOnly ? isSandboxCapableConnectorType(actionType) : true
+      )
       .map(([actionTypeId, actionType]) => ({
         id: actionTypeId,
         name: actionType.name,
@@ -281,6 +334,9 @@ export class ActionTypeRegistry {
           : {}),
         isDeprecated: !!actionType.isDeprecated,
         allowMultipleSystemActions: actionType.allowMultipleSystemActions,
+        description: actionType.description,
+        isExperimental: actionType.isExperimental,
+        isTestable: Boolean(actionType.isTestable),
       }));
   }
 
@@ -297,5 +353,17 @@ export class ActionTypeRegistry {
 
   isDeprecated(actionTypeId: string): boolean {
     return Boolean(this.actionTypes.get(actionTypeId)?.isDeprecated);
+  }
+
+  /**
+   * Returns a requested spec version, or the legacy spec / first registered version if omitted.
+   */
+  public getSpec(id: string, version?: string): ConnectorSpec | undefined {
+    const actionType = this.actionTypes.get(id);
+    if (version !== undefined) {
+      return actionType?.specs?.get(version);
+    }
+
+    return actionType?.spec;
   }
 }

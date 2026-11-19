@@ -39,7 +39,7 @@ describe('handleWarnings', () => {
       },
     });
 
-    expect(addWarningSpy).toBeCalledTimes(0);
+    expect(addWarningSpy).toHaveBeenCalledTimes(0);
   });
 
   it('should show notifications for warnings when there is no callback', () => {
@@ -60,7 +60,7 @@ describe('handleWarnings', () => {
       },
     });
 
-    expect(addWarningSpy).toBeCalledTimes(1);
+    expect(addWarningSpy).toHaveBeenCalledTimes(1);
   });
 
   it('should show notifications for warnings not handled by callback', () => {
@@ -83,8 +83,8 @@ describe('handleWarnings', () => {
       },
     });
 
-    expect(callbackMock).toBeCalledTimes(1);
-    expect(addWarningSpy).toBeCalledTimes(1);
+    expect(callbackMock).toHaveBeenCalledTimes(1);
+    expect(addWarningSpy).toHaveBeenCalledTimes(1);
   });
 
   it('should not show notifications for warnings handled by callback', () => {
@@ -107,7 +107,7 @@ describe('handleWarnings', () => {
       },
     });
 
-    expect(callbackMock).toBeCalledTimes(1);
-    expect(addWarningSpy).toBeCalledTimes(0);
+    expect(callbackMock).toHaveBeenCalledTimes(1);
+    expect(addWarningSpy).toHaveBeenCalledTimes(0);
   });
 });

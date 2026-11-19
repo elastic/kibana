@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
+import type { ResultType } from '../../../common/result_type';
 import type { SOShard } from '../../common/types';
 import type { PackQueryInput } from './utils';
 
@@ -23,6 +25,19 @@ export interface PackResponseData {
   updated_by_profile_uid?: string;
   policy_ids?: string[];
   shards?: SOShard;
+  read_only?: boolean;
+  /** Pack-level schedule type (discriminated read response). */
+  schedule_type?: ScheduleType;
+  /** Pack-level interval (seconds) — present only when `schedule_type === 'interval'`. */
+  interval?: number;
+  /** Pack-level RRULE schedule — present only when `schedule_type === 'rrule'`. */
+  rrule_schedule?: RRuleScheduleConfig;
+  /** V5: Pack-level minimum osquery version default. */
+  min_osquery_version?: string;
+  /** V5: Pack-level result type default. */
+  result_type?: ResultType;
+  /** V5: Pack-level platform (OS) default. */
+  platform?: string;
 }
 
 export interface ReadPackResponseData {
@@ -46,4 +61,16 @@ export interface ReadPackResponseData {
   migrationVersion?: Record<string, string>;
   managed?: boolean;
   coreMigrationVersion?: string;
+  /** Pack-level schedule type (discriminated read response). */
+  schedule_type?: ScheduleType;
+  /** Pack-level interval (seconds) — present only when `schedule_type === 'interval'`. */
+  interval?: number;
+  /** Pack-level RRULE schedule — present only when `schedule_type === 'rrule'`. */
+  rrule_schedule?: RRuleScheduleConfig;
+  /** V5: Pack-level minimum osquery version default. */
+  min_osquery_version?: string;
+  /** V5: Pack-level result type default. */
+  result_type?: ResultType;
+  /** V5: Pack-level platform (OS) default. */
+  platform?: string;
 }

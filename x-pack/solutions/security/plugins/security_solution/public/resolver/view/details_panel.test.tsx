@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { render } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -36,16 +36,6 @@ const renderDetailsPanel = ({
   const store = createMockStore(
     {
       ...mockGlobalState,
-      sourcerer: {
-        ...mockGlobalState.sourcerer,
-        sourcererScopes: {
-          ...mockGlobalState.sourcerer.sourcererScopes,
-          analyzer: {
-            ...mockGlobalState.sourcerer.sourcererScopes.default,
-            selectedPatterns: [],
-          },
-        },
-      },
       analyzer: {
         'details-panel-test': reduxState,
       },

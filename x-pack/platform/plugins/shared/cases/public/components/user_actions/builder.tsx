@@ -21,6 +21,9 @@ import { createCategoryUserActionBuilder } from './category';
 import { createCustomFieldsUserActionBuilder } from './custom_fields/custom_fields';
 import { createObservablesUserActionBuilder } from './observables';
 import { createExtendedFieldsUserActionBuilder } from './extended_fields';
+import { createTemplateUserActionBuilder } from './template';
+import { createWorkflowUserActionBuilder } from './workflow';
+import { createBulkAttachmentsUserActionBuilder } from './bulk_attachments';
 
 export const builderMap: UserActionBuilderMap = {
   create_case: createCaseUserActionBuilder,
@@ -38,4 +41,7 @@ export const builderMap: UserActionBuilderMap = {
   customFields: createCustomFieldsUserActionBuilder,
   observables: createObservablesUserActionBuilder,
   extended_fields: createExtendedFieldsUserActionBuilder,
+  template: createTemplateUserActionBuilder,
+  workflow: createWorkflowUserActionBuilder,
+  bulkAttachments: createBulkAttachmentsUserActionBuilder,
 };

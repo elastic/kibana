@@ -22,6 +22,8 @@ import {
   rulesReadUser,
   secAll as rulesNone,
   secAllUser as rulesNoneUser,
+  rulesReadManualRunAll,
+  rulesReadManualRunAllUser,
 } from '../../../../tasks/privileges';
 
 import { RULES_URL } from '../../../../urls/navigation';
@@ -34,6 +36,7 @@ import {
   fillScheduleRuleAndContinue,
 } from '../../../../tasks/create_new_rule';
 import {
+  bulkGapFillFromDetailsPage,
   goToRuleDetailsOf,
   manualRuleRunFromDetailsPage,
 } from '../../../../tasks/alerts_detection_rules';
@@ -42,7 +45,7 @@ import {
   goToExceptionsTab,
   goToExecutionLogTab,
   goToRuleEditSettings,
-  waitForExecutionLogTabToBePopulated,
+  waitForExecutionResultsTableToBePopulated,
 } from '../../../../tasks/rule_details';
 import { EDIT_SUBMIT_BUTTON } from '../../../../screens/edit_rule';
 import {
@@ -51,21 +54,21 @@ import {
   RULE_FILL_ALL_GAPS_BUTTON,
 } from '../../../../screens/rule_details';
 import {
-  expectRuleSnoozed,
+  expectRuleSnoozedOnDetailsPage,
+  expectSnoozeDisabledOnDetailsPage,
   expectUnsnoozeSuccessToast,
-  snoozeRule,
-  unsnoozeRule,
+  snoozeRuleOnDetailsPage,
+  unsnoozeRuleOnDetailsPage,
 } from '../../../../tasks/rule_snoozing';
-import { UNSNOOZED_BADGE } from '../../../../screens/rule_snoozing';
-const usersToCreate = [rulesAllUser, rulesReadUser, rulesNoneUser];
-const rolesToCreate = [rulesAll, rulesRead, rulesNone];
+const usersToCreate = [rulesAllUser, rulesReadUser, rulesNoneUser, rulesReadManualRunAllUser];
+const rolesToCreate = [rulesAll, rulesRead, rulesNone, rulesReadManualRunAll];
 
 // As part of the rules RBAC effort, we have created these tests with roles that only have the new rules feature 'securitySolutionRulesVX' enabled in order to test
 // the features that said roles should have access to. Notice that the roles created are very minimal and only contain the new rules feature.
 
 describe('Rules table - privileges', { tags: ['@ess'] }, () => {
-  const ruleName = 'My rule';
-  const createRule = () => {
+  const testRuleName = 'My rule';
+  const createRule = (ruleName: string) => {
     const rule = getCustomQueryRuleParams({ name: ruleName });
     loginWithUser(rulesAllUser);
     visit(RULES_URL);
@@ -81,14 +84,14 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
     deleteAlertsAndRules();
     deleteUsersAndRoles(usersToCreate, rolesToCreate);
     createUsersAndRoles(usersToCreate, rolesToCreate);
-    createRule();
+    createRule(testRuleName);
   });
 
   describe('securitySolutionRulesV1.all', () => {
     beforeEach(() => {
       loginWithUser(rulesAllUser);
       visit(RULES_URL);
-      goToRuleDetailsOf(ruleName);
+      goToRuleDetailsOf(testRuleName);
     });
 
     it(`should be able to edit rules`, () => {
@@ -102,7 +105,7 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
       });
 
       it(`should be able to see the execution history`, () => {
-        waitForExecutionLogTabToBePopulated(1);
+        waitForExecutionResultsTableToBePopulated();
       });
 
       it('should be able to trigger gap fills', () => {
@@ -128,10 +131,10 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
       );
     });
 
-    it('should be able to adjust snooze settings', () => {
-      snoozeRule('3 days');
-      expectRuleSnoozed('3 days');
-      unsnoozeRule();
+    it('should be able to set and remove snooze from the "More" menu', () => {
+      snoozeRuleOnDetailsPage('3 days');
+      expectRuleSnoozedOnDetailsPage('3 days');
+      unsnoozeRuleOnDetailsPage();
       expectUnsnoozeSuccessToast();
     });
   });
@@ -140,7 +143,7 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
     beforeEach(() => {
       loginWithUser(rulesReadUser);
       visit(RULES_URL);
-      goToRuleDetailsOf(ruleName);
+      goToRuleDetailsOf(testRuleName);
     });
 
     it(`should not be able to edit rules`, () => {
@@ -153,7 +156,7 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
       });
 
       it(`should be able to see the execution history`, () => {
-        waitForExecutionLogTabToBePopulated(1);
+        waitForExecutionResultsTableToBePopulated();
       });
 
       it('should not be able to trigger gap fills', () => {
@@ -172,8 +175,31 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
       cy.get(ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN).should('not.exist');
     });
 
-    it('should not be able to adjust snooze settings', () => {
-      cy.get(UNSNOOZED_BADGE).should('be.disabled');
+    it('should not be able to set snooze from the "More" menu', () => {
+      expectSnoozeDisabledOnDetailsPage();
+    });
+  });
+
+  describe('securitySolutionRulesV4.read with manual run', () => {
+    const ruleNameForManualRunPrivilegesTest = 'ruleNameForManualRunPrivilegesTest';
+    before(() => {
+      loginWithUser(rulesAllUser);
+      createRule(ruleNameForManualRunPrivilegesTest);
+    });
+
+    beforeEach(() => {
+      loginWithUser(rulesReadManualRunAllUser);
+      visit(RULES_URL);
+      goToRuleDetailsOf(ruleNameForManualRunPrivilegesTest);
+    });
+
+    it('should be able to trigger gap fills', () => {
+      goToExecutionLogTab();
+      bulkGapFillFromDetailsPage();
+    });
+
+    it('should be able to trigger manual runs', () => {
+      manualRuleRunFromDetailsPage();
     });
   });
 });

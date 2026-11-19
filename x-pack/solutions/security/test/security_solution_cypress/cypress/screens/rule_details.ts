@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export const POPOVER_ACTIONS_TRIGGER_BUTTON =
-  '[data-test-subj="rules-details-popover-button-icon"]';
+export const POPOVER_ACTIONS_TRIGGER_BUTTON = '[data-test-subj="app-menu-overflow-button"]';
 
 export const EXPORT_RULE_ACTION_BUTTON = '[data-test-subj="rules-details-export-rule"]';
 
@@ -52,12 +51,6 @@ export const INDEX_PATTERNS_DETAILS = 'Index patterns';
 
 export const INVESTIGATION_FIELDS_DETAILS = 'Custom highlighted fields';
 
-export const ENDPOINT_EXCEPTIONS_TAB = 'a[data-test-subj="navigation-endpoint_exceptions"]';
-
-export const INDICATOR_INDEX_PATTERNS = 'Indicator index patterns';
-
-export const INDICATOR_INDEX_QUERY = 'Indicator index query';
-
 export const INDICATOR_MAPPING = 'Indicator mapping';
 
 export const INTEGRATION_LINK = '[data-test-subj="integrationLink"]';
@@ -68,21 +61,18 @@ export const INVESTIGATION_NOTES_MARKDOWN = 'test markdown';
 
 export const INVESTIGATION_NOTES_TOGGLE = '[data-test-subj="stepAboutDetailsToggle-notes"]';
 
-export const MITRE_ATTACK_DETAILS = 'MITRE ATT&CK';
-
 export const FIELDS_BROWSER_BTN =
   '[data-test-subj="alertsTableIsLoaded"] [data-test-subj="show-field-browser"]';
 
 export const LAST_EXECUTION_STATUS_REFRESH_BUTTON =
   '[data-test-subj="ruleLastExecutionStatusRefreshButton"]';
 
-export const RULE_NAME_HEADER = '[data-test-subj="header-page-title"]';
+export const RULE_NAME_HEADER =
+  '[data-test-subj="header-page-title"], [data-test-subj="appHeaderTitle"]';
 
 export const RULE_NAME_OVERRIDE_DETAILS = 'Rule name override';
 
 export const RISK_SCORE_DETAILS = 'Risk score';
-
-export const INDICATOR_PREFIX_OVERRIDE = 'Indicator prefix override';
 
 export const REFERENCE_URLS_DETAILS = 'Reference URLs';
 
@@ -93,7 +83,11 @@ export const REMOVE_EXCEPTION_BTN = '[data-test-subj="exceptionItemCardHeader-ac
 
 export const EDIT_EXCEPTION_BTN = '[data-test-subj="exceptionItemCardHeader-actionItem-edit"]';
 
-export const RULE_SWITCH = '[data-test-subj="ruleSwitch"]';
+export const RULE_ENABLED_BADGE = '[data-test-subj="ruleDetailsEnabledBadge"]';
+
+export const RULE_ENABLE_ACTION = '[data-test-subj="ruleDetailsEnableRule"]';
+
+export const RULE_DISABLE_ACTION = '[data-test-subj="ruleDetailsDisableRule"]';
 
 export const RULE_TYPE_DETAILS = 'Rule type';
 
@@ -138,6 +132,11 @@ export const ALERT_SUPPRESSION_INSUFFICIENT_LICENSING_ICON =
 export const HIGHLIGHTED_ROWS_IN_TABLE =
   '[data-test-subj="euiDataGridBody"] .alertsTableHighlightedRow';
 
+export const ADDITIONAL_FILTERS_BUTTON = '[data-test-subj="additionalFilters-popover"]';
+
+export const SHOW_BUILDING_BLOCK_ALERTS_CHECKBOX =
+  '[data-test-subj="showBuildingBlockAlertsCheckbox"]';
+
 export const MAX_SIGNALS_DETAILS = '[data-test-subj="maxSignalsPropertyValue"]';
 
 export const DESCRIPTION_SETUP_GUIDE_BUTTON = '[data-test-subj="stepAboutDetailsToggle-setup"]';
@@ -146,11 +145,38 @@ export const DESCRIPTION_SETUP_GUIDE_CONTENT = '[data-test-subj="stepAboutDetail
 
 export const EXECUTIONS_TAB = 'a[data-test-subj="navigation-execution_results"]';
 
-export const EXECUTION_SHOWING = `[data-test-subj="executionsShowing"]`;
+export const EXECUTION_RESULTS_CONTAINER = `[data-test-subj="executionResultsContainer"]`;
 
-export const EXECUTION_TABLE = `[data-test-subj="executionsTable"]`;
+export const EXECUTION_RESULTS_TABLE = `[data-test-subj="executionResultsTable"]`;
 
-export const EXECUTION_LOG_CONTAINER = `[data-test-subj="executionLogContainer"]`;
+export const EXECUTION_DETAILS_FLYOUT = `[data-test-subj="executionDetailsFlyout"]`;
+
+export const EXECUTION_DETAILS_FLYOUT_MESSAGE_SECTION = `[data-test-subj="executionDetailsFlyoutMessageSection"]`;
+
+export const EXECUTION_RESULTS_TABLE_ACTION_VIEW_DETAILS = `[data-test-subj="executionResultsTableActionViewDetails"]`;
+
+// Execution results table cell selectors
+export const EXECUTION_RESULTS_TABLE_CELL_STATUS = `[data-test-subj="executionResultsTableCellStatus"]`;
+export const EXECUTION_RESULTS_TABLE_CELL_RUN_TYPE = `[data-test-subj="executionResultsTableCellRunType"]`;
+export const EXECUTION_RESULTS_TABLE_CELL_TIMESTAMP = `[data-test-subj="executionResultsTableCellTimestamp"]`;
+export const EXECUTION_RESULTS_TABLE_CELL_DURATION = `[data-test-subj="executionResultsTableCellDuration"]`;
+export const EXECUTION_RESULTS_TABLE_CELL_ALERTS = `[data-test-subj="executionResultsTableCellAlerts"]`;
+export const EXECUTION_RESULTS_TABLE_CELL_MESSAGE = `[data-test-subj="executionResultsTableCellMessage"]`;
+
+// Execution details flyout header selectors
+export const EXECUTION_DETAILS_FLYOUT_HEADER_STATUS = `[data-test-subj="executionDetailsFlyoutHeaderStatus"]`;
+export const EXECUTION_DETAILS_FLYOUT_HEADER_RUN_TYPE = `[data-test-subj="executionDetailsFlyoutHeaderRunType"]`;
+
+// Execution details flyout field value selectors
+export const EXECUTION_DETAILS_FLYOUT_ALERT_COUNT = `[data-test-subj="executionDetailsFlyoutAlertCount"]`;
+export const EXECUTION_DETAILS_FLYOUT_CANDIDATE_COUNT = `[data-test-subj="executionDetailsFlyoutCandidateCount"]`;
+export const EXECUTION_DETAILS_FLYOUT_MATCHED_INDICES = `[data-test-subj="executionDetailsFlyoutMatchedIndices"]`;
+export const EXECUTION_DETAILS_FLYOUT_FROZEN_INDICES = `[data-test-subj="executionDetailsFlyoutFrozenIndices"]`;
+export const EXECUTION_DETAILS_FLYOUT_GAP_DURATION = `[data-test-subj="executionDetailsFlyoutGapDuration"]`;
+export const EXECUTION_DETAILS_FLYOUT_SCHEDULING_DELAY = `[data-test-subj="executionDetailsFlyoutSchedulingDelay"]`;
+export const EXECUTION_DETAILS_FLYOUT_EXECUTION_DURATION = `[data-test-subj="executionDetailsFlyoutExecutionDuration"]`;
+export const EXECUTION_DETAILS_FLYOUT_SEARCH_DURATION = `[data-test-subj="executionDetailsFlyoutSearchDuration"]`;
+export const EXECUTION_DETAILS_FLYOUT_INDEX_DURATION = `[data-test-subj="executionDetailsFlyoutIndexDuration"]`;
 
 export const EXECUTION_RUN_TYPE_FILTER = `[data-test-subj="ExecutionRunTypeFilter"]`;
 

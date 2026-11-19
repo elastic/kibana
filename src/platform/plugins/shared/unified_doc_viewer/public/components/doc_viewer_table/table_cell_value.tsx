@@ -19,7 +19,7 @@ import {
   euiFontSize,
   type UseEuiTheme,
 } from '@elastic/eui';
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { Fragment, useCallback, useState, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IgnoredReason } from '@kbn/discover-utils';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -77,7 +77,7 @@ const IgnoreWarning: React.FC<IgnoreWarningProps> = React.memo(({ rawValue, reas
         `}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type="warning" color="warning" />
+          <EuiIcon type="warning" color="warning" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTextColor color="warning">
@@ -97,10 +97,10 @@ const IgnoreWarning: React.FC<IgnoreWarningProps> = React.memo(({ rawValue, reas
 
 interface TableFieldValueProps {
   field: string;
-  formattedValue: string;
+  formattedValue: ReactNode;
   rawValue: unknown;
   ignoreReason?: IgnoredReason;
-  isDetails?: boolean; // true when inside EuiDataGrid cell popover
+  isDetails?: boolean; // true when inside the cell details surface
   isHighlighted?: boolean; // whether it's matching a search term
 }
 
@@ -166,17 +166,18 @@ export const TableFieldValue = ({
       <EuiFlexGroup gutterSize="s" direction="row" alignItems="flexStart">
         {isCollapsible && (
           <EuiFlexItem grow={false} css={styles.collapseButtonWrapper}>
-            <EuiButtonIcon
-              iconType={isCollapsed ? 'plusInSquare' : 'minusInSquare'}
-              size="xs"
-              color="primary"
-              data-test-subj={`toggleLongFieldValue-${field}`}
-              title={toggleButtonLabel}
-              aria-label={toggleButtonLabel}
-              aria-expanded={!isCollapsed}
-              aria-controls={valueElementId}
-              onClick={onToggleCollapse}
-            />
+            <EuiToolTip content={toggleButtonLabel} disableScreenReaderOutput position="left">
+              <EuiButtonIcon
+                iconType={isCollapsed ? 'plusSquare' : 'minusSquare'}
+                size="xs"
+                color="primary"
+                data-test-subj={`toggleLongFieldValue-${field}`}
+                aria-label={toggleButtonLabel}
+                aria-expanded={!isCollapsed}
+                aria-controls={valueElementId}
+                onClick={onToggleCollapse}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
         <EuiFlexItem>
@@ -185,15 +186,15 @@ export const TableFieldValue = ({
             className="kbnDocViewer__value"
             css={[
               styles.docViewerValue,
+              isDetails && styles.docViewerValueDetails,
               isHighlighted && !isDetails && styles.docViewerValueHighlighted,
               shouldTruncate && styles.docViewerValueTruncated,
             ]}
             id={valueElementId}
             data-test-subj={valueElementId}
-            // Value returned from formatFieldValue is always sanitized
-            // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{ __html: formattedValue }}
-          />
+          >
+            {formattedValue}
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </Fragment>
@@ -203,7 +204,6 @@ export const TableFieldValue = ({
 const componentStyles = {
   docViewerValue: (themeContext: UseEuiTheme) => {
     const { euiTheme } = themeContext;
-    const { fontSize } = euiFontSize(themeContext, 's');
 
     return css({
       wordBreak: 'break-all',
@@ -211,12 +211,12 @@ const componentStyles = {
       whiteSpace: 'pre-wrap',
       lineHeight: euiTheme.font.lineHeightMultiplier,
       verticalAlign: 'top',
-
-      '.euiDataGridRowCell__popover &': {
-        fontSize,
-      },
     });
   },
+  docViewerValueDetails: (themeContext: UseEuiTheme) =>
+    css({
+      fontSize: euiFontSize(themeContext, 's').fontSize,
+    }),
   docViewerValueHighlighted: ({ euiTheme }: UseEuiTheme) =>
     css({
       fontWeight: euiTheme.font.weight.bold,

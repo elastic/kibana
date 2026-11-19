@@ -40,7 +40,7 @@ export function AttributionFormRow(props: Props) {
             <div className="mapAttributionFormRow__field">
               <AttributionPopover
                 onChange={props.onChange}
-                popoverButtonIcon="plusInCircleFilled"
+                popoverButtonIcon="plusCircle"
                 popoverButtonLabel={i18n.translate('xpack.maps.attribution.addBtnLabel', {
                   defaultMessage: 'Add attribution',
                 })}

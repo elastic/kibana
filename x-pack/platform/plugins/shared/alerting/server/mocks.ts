@@ -38,6 +38,7 @@ const createSetupMock = () => {
     }),
     getDataStreamAdapter: jest.fn(),
     registerConnectorAdapter: jest.fn(),
+    enableAlertStatusChanged: jest.fn(),
   });
 
   return mock;
@@ -135,7 +136,7 @@ const createRuleMonitoringServiceMock = () => {
   const mock = lazyObject({
     setMetric: jest.fn(),
     setMetrics: jest.fn(),
-    clearGapRange: jest.fn(),
+    clearGap: jest.fn(),
   }) as unknown as jest.Mocked<PublicRuleMonitoringService>;
 
   return mock;

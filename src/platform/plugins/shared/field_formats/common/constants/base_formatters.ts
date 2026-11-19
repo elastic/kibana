@@ -26,6 +26,7 @@ import {
   TruncateFormat,
   UrlFormat,
   HistogramFormat,
+  NumberRangeFormat,
 } from '../converters';
 
 export const baseFormatters: FieldFormatInstanceType[] = [
@@ -43,7 +44,7 @@ export const baseFormatters: FieldFormatInstanceType[] = [
   StaticLookupFormat,
   StringFormat,
   TruncateFormat,
-  // @ts-expect-error upgrade typescript v5.1.6
   UrlFormat,
   HistogramFormat,
+  NumberRangeFormat,
 ];

@@ -7,17 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { distinctUntilChanged, filter, take, type Subscription } from 'rxjs';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
-import type { Setup as InspectorSetup } from '@kbn/inspector-plugin/public';
+import type {
+  Setup as InspectorSetup,
+  Start as InspectorStart,
+} from '@kbn/inspector-plugin/public';
 
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   ADD_PANEL_TRIGGER,
@@ -31,17 +37,17 @@ import {
   setDocLinks,
   setMapsEms,
   setUsageCollectionStart,
+  setHttp,
 } from './services';
 
-import { createVegaFn } from './vega_fn';
-import { vegaVisType } from './vega_type';
 import type { IServiceSettings } from './vega_view/vega_map_view/service_settings/service_settings_types';
 
 import type { ConfigSchema } from '../server/config';
 
-import { getVegaInspectorView } from './vega_inspector';
-import { getVegaVisRenderer } from './vega_vis_renderer';
+import { getVegaInspectorView } from './vega_inspector/vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
+import { VEGA_AS_CODE_ENABLED_FLAG, VEGA_EMBEDDABLE_TYPE } from '../common/constants';
+import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -54,6 +60,7 @@ export interface VegaVisualizationDependencies {
 
 /** @internal */
 export interface VegaPluginSetupDependencies {
+  embeddable: EmbeddableSetup;
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   inspector: InspectorSetup;
@@ -64,23 +71,30 @@ export interface VegaPluginSetupDependencies {
 export interface VegaPluginStartDependencies {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
+  expressions: ReturnType<ExpressionsPublicPlugin['start']>;
   mapsEms: MapsEmsPluginPublicStart;
   dataViews: DataViewsPublicPluginStart;
   uiActions: UiActionsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   usageCollection: UsageCollectionStart;
+  inspector: InspectorStart;
 }
 
 /** @internal */
 export class VegaPlugin implements Plugin<void, void> {
   initializerContext: PluginInitializerContext<ConfigSchema>;
+  private addActionsSubscription?: Subscription;
+  private librarySubscription?: Subscription;
+  private registerLibrary?: () => Promise<void>;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
   }
 
   public setup(
-    core: CoreSetup,
-    { inspector, data, expressions, visualizations }: VegaPluginSetupDependencies
+    core: CoreSetup<VegaPluginStartDependencies>,
+    { embeddable, inspector, data, expressions, visualizations }: VegaPluginSetupDependencies
   ) {
     setInjectedVars({
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
@@ -96,14 +110,48 @@ export class VegaPlugin implements Plugin<void, void> {
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 
-    expressions.registerFunction(() => createVegaFn(visualizationDependencies));
-    expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));
+    // Resolves when the editor closes.
+    const openLibraryEditor = async (id: string) => {
+      const [[coreStart, startDeps], { openVegaLibraryEditor }] = await Promise.all([
+        core.getStartServices(),
+        import('./library/open_vega_library_editor'),
+      ]);
+      await openVegaLibraryEditor({ core: coreStart, deps: startDeps, id });
+    };
 
-    visualizations.createBaseVisualization(vegaVisType);
+    visualizations.createBaseVisualizationAsync('vega', async () => {
+      const [[, startPlugins], { vegaVisType, createVegaFn, getVegaVisRenderer }] =
+        await Promise.all([core.getStartServices(), import('./async_module')]);
+      if (!startPlugins.expressions.getFunction('vega')) {
+        expressions.registerFunction(() => createVegaFn(visualizationDependencies));
+        expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));
+      }
+      return vegaVisType;
+    });
+
+    embeddable.registerEmbeddablePublicDefinition(VEGA_EMBEDDABLE_TYPE, async () => {
+      const [[startCore, startDeps], { vegaEmbeddableFactory }] = await Promise.all([
+        core.getStartServices(),
+        import('./embeddable/vega_embeddable'),
+      ]);
+      return vegaEmbeddableFactory(startCore, {
+        uiActions: startDeps.uiActions,
+        SearchBar: startDeps.unifiedSearch.ui.SearchBar,
+        visualizationDependencies,
+        libraryEditorDependencies: startDeps,
+      });
+    });
+
+    // Registered in `start`, once the feature flag can be read.
+    this.registerLibrary = async () => {
+      const { registerVegaLibrary } = await import('./library/register_vega_library');
+      registerVegaLibrary({ visualizations, embeddable, openLibraryEditor });
+    };
   }
 
   public start(core: CoreStart, deps: VegaPluginStartDependencies) {
     setNotifications(core.notifications);
+    setHttp(core.http);
     setData(deps.data);
     setDataViews(deps.dataViews);
     setDocLinks(core.docLinks);
@@ -111,12 +159,45 @@ export class VegaPlugin implements Plugin<void, void> {
     setThemeService(core.theme);
     setUsageCollectionStart(deps.usageCollection);
 
-    deps.uiActions.registerActionAsync('addVegaPanelAction', async () => {
+    const asCodeEnabled$ = core.featureFlags
+      .getBooleanValue$(VEGA_AS_CODE_ENABLED_FLAG, false)
+      .pipe(distinctUntilChanged());
+
+    // Without the flag, the Visualize listing shouldn't query the library API.
+    this.librarySubscription = asCodeEnabled$
+      .pipe(filter(Boolean), take(1))
+      .subscribe(() => this.registerLibrary?.());
+
+    deps.uiActions.registerActionAsync(ADD_VEGA_PANEL_ACTION_ID, async () => {
       const { getAddVegaPanelAction } = await import('./add_vega_panel_action');
       return getAddVegaPanelAction(deps);
     });
-    deps.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addVegaPanelAction');
 
-    deps.uiActions.attachAction(ADD_CANVAS_ELEMENT_TRIGGER, 'addVegaPanelAction');
+    // The embeddable definition is always registered (see setup) so existing Vega panels keep
+    // rendering even after a flag rollback.
+    deps.uiActions.registerActionAsync(ADD_VEGA_EMBEDDABLE_ACTION_ID, async () => {
+      const { getAddVegaEmbeddableAction } = await import(
+        './embeddable/add_vega_embeddable_action'
+      );
+      return getAddVegaEmbeddableAction(core);
+    });
+
+    // The feature flag swaps both Dashboard and Canvas from legacy Visualize action to the
+    // standalone embeddable action.
+    this.addActionsSubscription = asCodeEnabled$.subscribe((useEmbeddableAction) => {
+      const [actionToAttach, actionToDetach] = useEmbeddableAction
+        ? [ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID]
+        : [ADD_VEGA_PANEL_ACTION_ID, ADD_VEGA_EMBEDDABLE_ACTION_ID];
+
+      for (const trigger of [ADD_PANEL_TRIGGER, ADD_CANVAS_ELEMENT_TRIGGER]) {
+        deps.uiActions.attachAction(trigger, actionToAttach);
+        deps.uiActions.detachAction(trigger, actionToDetach);
+      }
+    });
+  }
+
+  public stop() {
+    this.addActionsSubscription?.unsubscribe();
+    this.librarySubscription?.unsubscribe();
   }
 }

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { noop } from 'lodash';
 import React from 'react';
@@ -16,7 +14,6 @@ import { useEsqlParamsValidation } from '../../hooks/use_esql_params_validation'
 import type { EsqlToolFormData } from '../../types/tool_form_types';
 
 export const EsqlEditorField = React.memo(() => {
-  const { euiTheme } = useEuiTheme();
   const { control, formState, trigger } = useFormContext<EsqlToolFormData>();
   const { isSubmitted } = formState;
 
@@ -36,9 +33,6 @@ export const EsqlEditorField = React.memo(() => {
               triggerEsqlParamWarnings();
             }
           }}
-          css={css`
-            margin-top: -${euiTheme.size.base};
-          `}
         >
           <ESQLLangEditor
             query={{ esql: field.value }}

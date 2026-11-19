@@ -1,0 +1,368 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ToolingLog } from '@kbn/tooling-log';
+import Url from 'url';
+import type { ServerlessProjectType } from '@kbn/es';
+import { createHash } from 'crypto';
+import { fetchKibanaVersionHeaderString } from './fetch_kibana_version';
+import { isValidHostname, readCloudUsersFromFile } from './helper';
+import type { Session } from './saml_auth';
+import {
+  createCloudSAMLSession,
+  createCustomRealmSAMLSession,
+  createLocalSAMLSession,
+  getSecurityProfile,
+} from './saml_auth';
+import type { GetSessionByRole, Role, User } from './types';
+
+export interface HostOptions {
+  protocol: 'http' | 'https';
+  hostname: string;
+  port?: number;
+  username: string;
+  password: string;
+}
+
+export interface SamlSessionManagerOptions {
+  hostOptions: HostOptions;
+  isCloud: boolean;
+  supportedRoles?: SupportedRoles;
+  cloudHostName?: string;
+  cloudUsersFilePath: string;
+  serverless?: SamlSessionManagerServerlessOptions;
+  customSamlRealm?: CustomSamlRealmOptions;
+  log: ToolingLog;
+}
+
+/**
+ * Cloud-only: listed roles log in through a custom SAML provider that trusts the mock IdP,
+ * instead of Cloud users from `cloudUsersFilePath`.
+ */
+export interface CustomSamlRealmOptions {
+  providerName: string;
+  roles: string[];
+}
+
+export interface SamlSessionManagerServerlessOptions {
+  uiam: boolean;
+  projectType: ServerlessProjectType;
+  organizationId: string;
+}
+
+export interface SupportedRoles {
+  sourcePath: string;
+  roles: string[];
+}
+
+export interface GetCookieOptions {
+  forceNewSession?: boolean;
+  spaceId?: string;
+  /**
+   * Built-in UIAM organization roles the user holds on top of `role`, such as `billing-admin` or
+   * `organization-admin`. Only supported for local UIAM-enabled serverless sessions. Each distinct
+   * combination is a distinct user with its own session.
+   */
+  organizationRoles?: string[];
+  /**
+   * Built-in UIAM project roles the user holds on the project type Kibana runs as, named without
+   * the type prefix, such as `admin`. Only supported for local UIAM-enabled serverless sessions.
+   * Each distinct combination is a distinct user with its own session.
+   */
+  projectRoles?: string[];
+}
+
+/**
+ * Manages cookies associated with user roles
+ */
+export class SamlSessionManager {
+  private readonly isCloud: boolean;
+  private readonly kbnHost: string;
+  private readonly kbnUsername: string;
+  private readonly kbnPassword: string;
+  private kbnVersionResolved?: string;
+  private readonly log: ToolingLog;
+  private readonly roleToUserMap: Map<Role, User>;
+  private readonly sessionCache: Map<Role, Session>;
+  private readonly supportedRoles?: SupportedRoles;
+  private readonly cloudHostName?: string;
+  private readonly cloudUsersFilePath: string;
+  private readonly serverless?: SamlSessionManagerServerlessOptions;
+  private readonly customSamlRealm?: CustomSamlRealmOptions;
+
+  constructor(options: SamlSessionManagerOptions) {
+    this.log = options.log;
+    const hostOptionsWithoutAuth = {
+      protocol: options.hostOptions.protocol,
+      hostname: options.hostOptions.hostname,
+      port: options.hostOptions.port,
+    };
+    this.kbnHost = Url.format(hostOptionsWithoutAuth);
+    this.kbnUsername = options.hostOptions.username;
+    this.kbnPassword = options.hostOptions.password;
+    this.isCloud = options.isCloud;
+    this.cloudHostName = options.cloudHostName || process.env.TEST_CLOUD_HOST_NAME;
+    if (this.isCloud) {
+      this.validateCloudHostName();
+    }
+    this.cloudUsersFilePath = options.cloudUsersFilePath;
+    this.sessionCache = new Map<Role, Session>();
+    this.roleToUserMap = new Map<Role, User>();
+    this.supportedRoles = options.supportedRoles;
+    this.serverless = options.serverless;
+    this.customSamlRealm = options.customSamlRealm;
+    this.validateCloudSetting();
+  }
+
+  private async getKibanaVersionForCloudSaml(): Promise<string> {
+    if (this.kbnVersionResolved !== undefined) {
+      return this.kbnVersionResolved;
+    }
+    const version = await fetchKibanaVersionHeaderString(
+      this.kbnHost,
+      this.kbnUsername,
+      this.kbnPassword,
+      this.log
+    );
+    this.kbnVersionResolved = version;
+    return version;
+  }
+
+  private validateCloudHostName() {
+    if (!this.cloudHostName) {
+      throw new Error(
+        `'cloudHostName' is required for Cloud authentication. Provide it in the constructor or via the TEST_CLOUD_HOST_NAME environment variable.`
+      );
+    }
+
+    if (!isValidHostname(this.cloudHostName)) {
+      throw new Error(`TEST_CLOUD_HOST_NAME is not a valid hostname: ${this.cloudHostName}`);
+    }
+  }
+
+  /**
+   * Validates if the 'kbnHost' points to Cloud, even if 'isCloud' was set to false
+   */
+  private validateCloudSetting() {
+    const cloudSubDomains = ['elastic.cloud', 'foundit.no', 'cloud.es.io', 'elastic-cloud.com'];
+    const isCloudHost = cloudSubDomains.some((domain) => this.kbnHost.endsWith(domain));
+
+    if (!this.isCloud && isCloudHost) {
+      throw new Error(
+        `SamlSessionManager: 'isCloud' was set to false, but 'kbnHost' appears to be a Cloud instance: ${this.kbnHost}
+Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
+      );
+    }
+  }
+
+  /**
+   * Loads cloud users from '.ftr/role_users.json'
+   * QAF prepares the file for CI pipelines, make sure to add it manually for local run
+   */
+  private getCloudUsers = () => {
+    if (this.roleToUserMap.size === 0) {
+      this.log.info(`Reading cloud user credentials from ${this.cloudUsersFilePath}`);
+      const data = readCloudUsersFromFile(this.cloudUsersFilePath);
+      for (const [roleName, user] of data) {
+        this.roleToUserMap.set(roleName, user);
+      }
+    }
+
+    return this.roleToUserMap;
+  };
+
+  private getCloudUserByRole = (role: string) => {
+    if (this.getCloudUsers().has(role)) {
+      return this.getCloudUsers().get(role)!;
+    } else {
+      throw new Error(`User with '${role}' role is not defined`);
+    }
+  };
+
+  private getSessionByRole = async (options: GetSessionByRole): Promise<Session> => {
+    const { role, forceNewSession, spaceId } = options;
+    // The same set of UIAM roles must map to the same user regardless of order.
+    const organizationRoles = [...new Set(options.organizationRoles ?? [])].sort();
+    const projectRoles = [...new Set(options.projectRoles ?? [])].sort();
+
+    // Validate role before creating SAML session
+    this.validateRole(role);
+    this.validateUiamRoles('organization', organizationRoles);
+    this.validateUiamRoles('project', projectRoles);
+
+    const userKey = [
+      role,
+      ...organizationRoles,
+      ...projectRoles.map((projectRole) => `project-${projectRole}`),
+    ].join('+');
+    const cacheKey = spaceId ? `${userKey}:${spaceId}` : userKey;
+
+    // Check if session is cached and not forced to create the new one
+    if (!forceNewSession && this.sessionCache.has(cacheKey)) {
+      return this.sessionCache.get(cacheKey)!;
+    }
+
+    const session = await this.createSessionForRole(role, organizationRoles, projectRoles);
+    this.sessionCache.set(cacheKey, session);
+
+    if (forceNewSession) {
+      this.log.debug(`Session for role '${role}' was force updated.`);
+    }
+
+    return session;
+  };
+
+  private createSessionForRole = async (
+    role: string,
+    organizationRoles: string[] = [],
+    projectRoles: string[] = []
+  ): Promise<Session> => {
+    if (this.isCloud) {
+      const kbnVersion = await this.getKibanaVersionForCloudSaml();
+
+      if (this.customSamlRealm?.roles.includes(role)) {
+        const { providerName } = this.customSamlRealm;
+        this.log.debug(
+          `Creating new SAML session for role '${role}' with custom SAML provider '${providerName}'`
+        );
+        return await createCustomRealmSAMLSession({
+          providerName,
+          username: `elastic_${role}`,
+          email: `elastic_${role}@elastic.co`,
+          fullname: `test ${role}`,
+          role,
+          kbnHost: this.kbnHost,
+          kbnVersion,
+          log: this.log,
+        });
+      }
+
+      this.log.debug(`Creating new cloud SAML session for role '${role}'`);
+      const { email, password } = this.getCloudUserByRole(role);
+      return await createCloudSAMLSession({
+        hostname: this.cloudHostName!,
+        email,
+        password,
+        kbnHost: this.kbnHost,
+        kbnVersion,
+        log: this.log,
+      });
+    }
+
+    // A user holding extra UIAM roles is a different user from the plain role holder.
+    const userName = [
+      role,
+      ...organizationRoles,
+      ...projectRoles.map((projectRole) => `project-${projectRole}`),
+    ].join('_');
+    // UIAM service requires numeric usernames, so we hash the role name (first 4 bytes) to generate a unique username.
+    const username = this.serverless?.uiam
+      ? createHash('sha256').update(`elastic_${userName}`).digest().readUInt32BE(0).toString()
+      : `elastic_${userName}`;
+    this.log.debug(
+      `Creating new local SAML session for a user '${username}' with role '${role}' (serverless: ${!!this
+        .serverless}, uiam: ${!!this.serverless?.uiam}, uiam organization roles: ${JSON.stringify(
+        organizationRoles
+      )}, uiam project roles: ${JSON.stringify(projectRoles)})`
+    );
+    return await createLocalSAMLSession({
+      username,
+      email: `elastic_${userName}@elastic.co`,
+      fullname: `test ${role}`,
+      role,
+      kbnHost: this.kbnHost,
+      serverless: this.serverless
+        ? {
+            organizationId: this.serverless.organizationId,
+            projectType: this.serverless.projectType,
+            uiamEnabled: this.serverless.uiam,
+            ...(organizationRoles.length > 0 ? { organizationRoleIds: organizationRoles } : {}),
+            ...(projectRoles.length > 0 ? { projectRoles } : {}),
+          }
+        : undefined,
+      log: this.log,
+    });
+  };
+
+  private validateUiamRoles = (kind: 'organization' | 'project', uiamRoles: string[]): void => {
+    if (uiamRoles.length > 0 && (this.isCloud || !this.serverless?.uiam)) {
+      throw new Error(
+        `UIAM ${kind} roles [${uiamRoles.join(
+          ', '
+        )}] can only be granted to local UIAM-enabled serverless sessions.`
+      );
+    }
+  };
+
+  validateRole = (role: string): void => {
+    if (this.supportedRoles && !this.supportedRoles.roles.includes(role)) {
+      const errorMessage = [
+        `Role '${role}' not found in ${
+          this.supportedRoles.sourcePath
+        }. Available predefined roles: ${this.supportedRoles.roles.join(', ')}.`,
+        `Is '${role}' a custom test role? → Use 'loginWithCustomRole()' for functional tests or 'getApiKeyForCustomRole()' for API tests to log in with custom Kibana and Elasticsearch privileges.`,
+        `Is '${role}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${this.supportedRoles.sourcePath} to enable it for testing.`,
+      ].join('\n\n');
+
+      throw new Error(errorMessage);
+    }
+  };
+
+  async getApiCredentialsForRole(role: string, options?: GetCookieOptions) {
+    const session = await this.getSessionByRole({
+      role,
+      forceNewSession: options?.forceNewSession ?? false,
+      organizationRoles: options?.organizationRoles,
+      projectRoles: options?.projectRoles,
+    });
+    return { Cookie: `sid=${session.getCookieValue()}` };
+  }
+
+  async getInteractiveUserSessionCookieWithRoleScope(role: string, options?: GetCookieOptions) {
+    const session = await this.getSessionByRole({
+      role,
+      forceNewSession: options?.forceNewSession ?? false,
+      spaceId: options?.spaceId,
+      organizationRoles: options?.organizationRoles,
+      projectRoles: options?.projectRoles,
+    });
+    return session.getCookieValue();
+  }
+
+  async getEmail(
+    role: string,
+    options?: Pick<GetCookieOptions, 'organizationRoles' | 'projectRoles'>
+  ) {
+    const session = await this.getSessionByRole({
+      role,
+      forceNewSession: false,
+      organizationRoles: options?.organizationRoles,
+      projectRoles: options?.projectRoles,
+    });
+    return session.email;
+  }
+
+  async getUserData(
+    role: string,
+    options?: Pick<GetCookieOptions, 'organizationRoles' | 'projectRoles'>
+  ) {
+    const { cookie } = await this.getSessionByRole({
+      role,
+      forceNewSession: false,
+      organizationRoles: options?.organizationRoles,
+      projectRoles: options?.projectRoles,
+    });
+    const profileData = await getSecurityProfile({ kbnHost: this.kbnHost, cookie, log: this.log });
+    return profileData;
+  }
+
+  getSupportedRoles() {
+    return this.supportedRoles ? this.supportedRoles.roles : [];
+  }
+}

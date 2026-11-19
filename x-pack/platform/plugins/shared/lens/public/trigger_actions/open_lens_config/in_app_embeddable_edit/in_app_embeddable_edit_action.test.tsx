@@ -26,10 +26,9 @@ describe('inapp editing of Lens embeddable', () => {
       expression: 'definitely a valid expression',
       visualizationType: 'testVis',
       state: {
-        query: { esql: 'from test' },
         filters: [{ query: { match_phrase: { src: 'test' } }, meta: { index: 'index-pattern-0' } }],
         datasourceStates: {
-          formBased: { layers: {} },
+          textBased: { layers: { layer1: { query: { esql: 'from test' }, columns: [] } } },
         },
         visualization: {},
       },
@@ -95,6 +94,9 @@ describe('inapp editing of Lens embeddable', () => {
         ...attributes,
         state: {
           ...attributes.state,
+          datasourceStates: {
+            formBased: { layers: {} },
+          },
           query: {
             language: 'kuery',
             query: '',

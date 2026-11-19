@@ -5,28 +5,36 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { AnyToolTypeDefinition } from './definitions';
 import { getEsqlToolType } from './esql';
-import { getIndexSearchToolType } from './index_search';
+import { getIndexSearchToolType, type IndexSearchToolTypeDeps } from './index_search';
 import { getWorkflowToolType } from './workflow';
 import { getBuiltinToolType } from './builtin';
 import { getMcpToolType } from './mcp';
 
 export const getToolTypeDefinitions = ({
   workflowsManagement,
+  security,
   actions,
+  indexSearchDeps,
+  logger,
 }: {
   workflowsManagement?: WorkflowsServerPluginSetup;
+  security: SecurityPluginStart | undefined;
   actions: ActionsPluginStart;
+  indexSearchDeps: IndexSearchToolTypeDeps;
+  logger: Logger;
 }): AnyToolTypeDefinition[] => {
   const toolTypes: AnyToolTypeDefinition<any, any, any>[] = [
     getBuiltinToolType(),
     getEsqlToolType(),
-    getIndexSearchToolType(),
-    getWorkflowToolType({ workflowsManagement }),
-    getMcpToolType({ actions }),
+    getIndexSearchToolType(indexSearchDeps),
+    getWorkflowToolType({ workflowsManagement, security }),
+    getMcpToolType({ actions, logger }),
   ];
   return toolTypes;
 };

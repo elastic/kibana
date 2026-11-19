@@ -5,27 +5,10 @@
  * 2.0.
  */
 
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import type { EntityType } from '@kbn/entity-store/public';
 
-import { getHostFlyoutPanelProps, isHostName } from './get_host_flyout_panel_props';
-import { getUserFlyoutPanelProps, isUserName } from './get_user_flyout_panel_props';
-
-export const getFlyoutPanelProps = ({
-  contextId,
-  fieldName,
-  value,
-}: {
-  contextId: string;
-  fieldName: string;
-  value: string | number | undefined;
-}): FlyoutPanelProps | null => {
-  if (isHostName(fieldName) && typeof value === 'string') {
-    return getHostFlyoutPanelProps({ contextId, hostName: value });
-  }
-
-  if (isUserName(fieldName) && typeof value === 'string') {
-    return getUserFlyoutPanelProps({ contextId, userName: value });
-  }
-
-  return null;
+export const ENTITY_TYPE_BY_FIELD: Record<string, EntityType> = {
+  'host.name': 'host',
+  'host.hostname': 'host',
+  'user.name': 'user',
 };

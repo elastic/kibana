@@ -16,6 +16,7 @@ import { useAssetDetailsUrlState } from '../hooks/use_asset_details_url_state';
 import { useHostAttachmentConfig } from '../hooks/use_host_attachment_config';
 import { usePageHeader } from '../hooks/use_page_header';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
+import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import type { ContentTemplateProps } from '../types';
 
 export const Flyout = ({
@@ -40,7 +41,7 @@ export const Flyout = ({
         componentName: ASSET_DETAILS_FLYOUT_COMPONENT_NAME,
         assetType: entity.type,
         tabId: activeTabId,
-        schema_selected: schema || 'ecs',
+        schema_selected: schema || DEFAULT_SCHEMA,
       });
     }
   }, [schema, entity.type, activeTabId, telemetry, loading]);
@@ -55,6 +56,7 @@ export const Flyout = ({
   return (
     <EuiFlyout
       onClose={handleOnClose}
+      data-test-subj="infraAssetDetailsFlyout"
       data-component-name={ASSET_DETAILS_FLYOUT_COMPONENT_NAME}
       data-asset-type={entity.type}
       data-schema-selected={schema}

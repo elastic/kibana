@@ -6,6 +6,8 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import path from 'node:path';
+import { getDurationInMilliseconds } from '@kbn/response-ops-schedule-schema';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { MaintenanceWindowRequestHandlerContext } from '../../../../../types';
@@ -25,9 +27,11 @@ import {
 } from '../../../../schemas/maintenance_window/external/request/update';
 import { maintenanceWindowResponseSchemaV1 } from '../../../../schemas/maintenance_window/external/response';
 import { transformInternalMaintenanceWindowToExternalV1 } from '../common/transforms';
-import { getDurationInMilliseconds } from '../../../../../lib/transforms/custom_to_rrule/util';
 
 import { transformUpdateBodyV1 } from './transform_update_body';
+
+const updateMaintenanceWindowExamples = () =>
+  path.join(__dirname, 'update_maintenance_window_examples.yaml');
 
 export const updateMaintenanceWindowRoute = (
   router: IRouter<MaintenanceWindowRequestHandlerContext>,
@@ -70,6 +74,7 @@ export const updateMaintenanceWindowRoute = (
         access: 'public',
         summary: 'Update a maintenance window.',
         tags: ['oas-tag:maintenance-window'],
+        oasOperationObject: updateMaintenanceWindowExamples,
         availability: {
           since: '9.1.0',
           stability: 'stable',

@@ -10,6 +10,7 @@ import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
 import { CopyExportedSplunkQuery } from './copy_exported_splunk_query';
 import * as i18n from './translations';
 import { CopyExportedQradarQuery } from './copy_exported_qradar_query';
+import { CopyExportedSentinelQuery } from './copy_exported_sentinel_query';
 import { MigrationSource } from '../../../../../../../common/types';
 
 export interface CopyExportQueryStepProps {
@@ -27,6 +28,7 @@ export const useCopyExportQueryStep = ({
     () => ({
       [MigrationSource.SPLUNK]: <CopyExportedSplunkQuery onCopied={onCopied} />,
       [MigrationSource.QRADAR]: <CopyExportedQradarQuery />,
+      [MigrationSource.SENTINEL]: <CopyExportedSentinelQuery />,
     }),
     [onCopied]
   );

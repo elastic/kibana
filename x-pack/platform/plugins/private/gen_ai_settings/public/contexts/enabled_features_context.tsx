@@ -10,9 +10,9 @@ import React, { createContext, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import type { Space } from '@kbn/spaces-plugin/public';
+import { ANONYMIZATION_FEATURE_ACTIVE } from '@kbn/anonymization-common';
 import { useKibana } from '../hooks/use_kibana';
 import type { GenAiSettingsConfigType } from '../../common/config';
-import { isAnonymizationCapabilities } from '../utils/anonymization_capabilities';
 
 export interface EnabledFeatures {
   showSpacesIntegration: boolean;
@@ -67,11 +67,7 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
     const showChatExperienceSetting =
       config.showChatExperienceSetting === false ? false : hasAgentAndAnyAssistant;
 
-    const anonymizationCapabilities = capabilities.anonymization;
-    const showAnonymizationProfilesSection =
-      isAnonymizationCapabilities(anonymizationCapabilities) &&
-      anonymizationCapabilities.show === true &&
-      config.showAnonymizationProfileSettings;
+    const showAnonymizationProfilesSection = ANONYMIZATION_FEATURE_ACTIVE;
 
     return {
       showSpacesIntegration: config.showSpacesIntegration,

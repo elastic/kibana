@@ -8,11 +8,11 @@
 import type { Subscription } from 'rxjs';
 
 import type { ElasticsearchClient, ElasticsearchServiceStart, Logger } from '@kbn/core/server';
-import type { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import pRetry from 'p-retry';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
@@ -25,12 +25,16 @@ interface TelemetryConfigWatcherOptions {
   immediateRetry: boolean;
 }
 
+const STOPPED_MESSAGE =
+  'TelemetryConfigWatcher stopped, abandoning in-flight endpoint policy telemetry update';
+
 export class TelemetryConfigWatcher {
   private logger: Logger;
   private esClient: ElasticsearchClient;
   private policyService: PackagePolicyClient;
   private endpointAppContextService: EndpointAppContextService;
   private subscription: Subscription | undefined;
+  private isStopped = false;
   private retryOptions: Partial<pRetry.Options>;
 
   constructor(
@@ -54,7 +58,10 @@ export class TelemetryConfigWatcher {
     this.subscription = telemetryConfigProvider.getObservable()?.subscribe(this.watch.bind(this));
   }
 
+  /** Unsubscribes from telemetry config changes and abandons any in-flight run before endpoint services stop */
   public stop() {
+    this.isStopped = true;
+
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -80,6 +87,10 @@ export class TelemetryConfigWatcher {
       try {
         response = await pRetry(
           (attemptCount) => {
+            if (this.isStopped) {
+              throw new pRetry.AbortError(STOPPED_MESSAGE);
+            }
+
             const soClient =
               this.endpointAppContextService.savedObjects.createInternalUnscopedSoClient(false);
 
@@ -107,6 +118,11 @@ export class TelemetryConfigWatcher {
           }
         );
       } catch (e) {
+        if (this.isStopped) {
+          this.logger.debug(STOPPED_MESSAGE);
+          return;
+        }
+
         this.logger.warn(
           `Unable to verify endpoint policies in line with telemetry change: failed to fetch package policies: ${stringify(
             e
@@ -119,7 +135,7 @@ export class TelemetryConfigWatcher {
         () => `Processing page [${response.page}] with [${response.items.length}] policy(s)`
       );
 
-      const updatesBySpace: Record<string, UpdatePackagePolicy[]> = {};
+      const updatesBySpace: Record<string, UpdatePackagePolicyWithId[]> = {};
 
       for (const policy of response.items as PolicyData[]) {
         const updatePolicy = getPolicyDataForUpdate(policy);
@@ -141,6 +157,11 @@ export class TelemetryConfigWatcher {
       }
 
       for (const [spaceId, spaceUpdates] of Object.entries(updatesBySpace)) {
+        if (this.isStopped) {
+          this.logger.debug(STOPPED_MESSAGE);
+          return;
+        }
+
         this.logger.debug(`Updating [${spaceUpdates.length}] policies for space [${spaceId}]`);
 
         const soClientForSpace =
@@ -151,7 +172,13 @@ export class TelemetryConfigWatcher {
 
         try {
           const updateResult = await pRetry(
-            () => this.policyService.bulkUpdate(soClientForSpace, this.esClient, spaceUpdates),
+            () => {
+              if (this.isStopped) {
+                throw new pRetry.AbortError(STOPPED_MESSAGE);
+              }
+
+              return this.policyService.bulkUpdate(soClientForSpace, this.esClient, spaceUpdates);
+            },
             {
               onFailedAttempt: (error) =>
                 this.logger.debug(
@@ -190,6 +217,11 @@ export class TelemetryConfigWatcher {
           failed += failedPolicies.length;
           conflicts += conflictedPolicies.length;
         } catch (e) {
+          if (this.isStopped) {
+            this.logger.debug(STOPPED_MESSAGE);
+            return;
+          }
+
           this.logger.warn(
             `Unable to update telemetry config state to ${isTelemetryEnabled} in space [${spaceId}] for policies: ${spaceUpdates.map(
               (update) => update.id

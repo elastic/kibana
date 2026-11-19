@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
@@ -128,9 +128,18 @@ export const useInspect = ({
     [isDisabled, loading, queryId, request, response]
   );
 
+  const adHocDataViews = useMemo(
+    () =>
+      inspect?.indexPattern != null && inspect.indexPattern.length > 0
+        ? inspect.indexPattern
+        : undefined,
+    [inspect]
+  );
+
   return {
     additionalRequests,
     additionalResponses,
+    adHocDataViews,
     handleClick,
     handleCloseModal,
     isButtonDisabled,

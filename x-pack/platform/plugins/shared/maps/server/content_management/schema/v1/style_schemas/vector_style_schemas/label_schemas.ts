@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z, lazySchema } from '@kbn/zod';
 import {
   LABEL_BORDER_SIZES,
   LABEL_POSITIONS,
@@ -15,107 +15,124 @@ import {
 } from '../../../../../../common/constants';
 import { styleFieldSchema } from './style_field_schema';
 
-export const labelBorderSizeOptions = schema.object({
-  size: schema.oneOf([
-    schema.literal(LABEL_BORDER_SIZES.NONE),
-    schema.literal(LABEL_BORDER_SIZES.SMALL),
-    schema.literal(LABEL_BORDER_SIZES.MEDIUM),
-    schema.literal(LABEL_BORDER_SIZES.LARGE),
-  ]),
-});
+export const labelBorderSizeOptions = lazySchema(() =>
+  z
+    .object({
+      size: z.union([
+        z.literal(LABEL_BORDER_SIZES.NONE),
+        z.literal(LABEL_BORDER_SIZES.SMALL),
+        z.literal(LABEL_BORDER_SIZES.MEDIUM),
+        z.literal(LABEL_BORDER_SIZES.LARGE),
+      ]),
+    })
+    .strict()
+);
 
-export const labelBorderSizeSchema = schema.object(
-  {
-    options: labelBorderSizeOptions,
-  },
-  {
-    defaultValue: {
+export const labelBorderSizeSchema = lazySchema(() =>
+  z
+    .object({
+      options: labelBorderSizeOptions,
+    })
+    .strict()
+    .default({
       options: {
         size: LABEL_BORDER_SIZES.SMALL,
       },
-    },
-    meta: {
+    })
+    .meta({
       description: 'Configure to set label border width',
-    },
-  }
+    })
 );
 
-export const labelPositionSchema = schema.object(
-  {
-    options: schema.object({
-      position: schema.oneOf([
-        schema.literal(LABEL_POSITIONS.BOTTOM),
-        schema.literal(LABEL_POSITIONS.CENTER),
-        schema.literal(LABEL_POSITIONS.TOP),
-      ]),
-    }),
-  },
-  {
-    defaultValue: {
+export const labelPositionSchema = lazySchema(() =>
+  z
+    .object({
+      options: z
+        .object({
+          position: z.union([
+            z.literal(LABEL_POSITIONS.BOTTOM),
+            z.literal(LABEL_POSITIONS.CENTER),
+            z.literal(LABEL_POSITIONS.TOP),
+          ]),
+        })
+        .strict(),
+    })
+    .strict()
+    .default({
       options: {
         position: LABEL_POSITIONS.CENTER,
       },
-    },
-    meta: {
+    })
+    .meta({
       description: 'Configure to place label above, in the center of, or below the Point feature',
-    },
-  }
+    })
 );
 
-export const labelZoomRangeSchema = schema.object(
-  {
-    options: schema.object({
-      useLayerZoomRange: schema.boolean(),
-      minZoom: schema.number(),
-      maxZoom: schema.number(),
-    }),
-  },
-  {
-    defaultValue: {
+export const labelZoomRangeSchema = lazySchema(() =>
+  z
+    .object({
+      options: z
+        .object({
+          use_layer_zoom_range: z.boolean(),
+          min_zoom: z.number(),
+          max_zoom: z.number(),
+        })
+        .strict(),
+    })
+    .strict()
+    .default({
       options: {
-        useLayerZoomRange: true,
-        minZoom: MIN_ZOOM,
-        maxZoom: MAX_ZOOM,
+        use_layer_zoom_range: true,
+        min_zoom: MIN_ZOOM,
+        max_zoom: MAX_ZOOM,
       },
-    },
-    meta: {
+    })
+    .meta({
       description: 'Configure to set the zoom range for which labels are displayed',
-    },
-  }
+    })
 );
 
-export const labelDynamicOptions = schema.object({
-  field: schema.maybe(styleFieldSchema),
-});
+export const labelDynamicOptions = lazySchema(() =>
+  z
+    .object({
+      field: styleFieldSchema.optional(),
+    })
+    .strict()
+);
 
-export const labelStaticOptions = schema.object({
-  value: schema.string({
-    meta: {
-      description: 'Provided value displayed as feature label',
-    },
-  }),
-});
+export const labelStaticOptions = lazySchema(() =>
+  z
+    .object({
+      value: z.string().meta({
+        description: 'Provided value displayed as feature label',
+      }),
+    })
+    .strict()
+);
 
-export const labelSchema = schema.oneOf(
-  [
-    schema.object({
-      type: schema.literal(STYLE_TYPE.STATIC),
-      options: labelStaticOptions,
-    }),
-    schema.object({
-      type: schema.literal(STYLE_TYPE.DYNAMIC),
-      options: labelDynamicOptions,
-    }),
-  ],
-  {
-    defaultValue: {
+export const labelSchema = lazySchema(() =>
+  z
+    .union([
+      z
+        .object({
+          type: z.literal(STYLE_TYPE.STATIC),
+          options: labelStaticOptions,
+        })
+        .strict(),
+      z
+        .object({
+          type: z.literal(STYLE_TYPE.DYNAMIC),
+          options: labelDynamicOptions.default({}), // need default to match config-schema behavior
+        })
+        .strict(),
+    ])
+    .default({
       type: STYLE_TYPE.STATIC,
       options: {
         value: '',
       },
-    },
-    meta: {
+    })
+    .meta({
       description: 'Configure to set label content',
-    },
-  }
+    })
 );

@@ -10,7 +10,7 @@
 import { createContext, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isFunction } from 'lodash';
-import { from } from 'rxjs';
+import { distinctUntilChanged, from, map } from 'rxjs';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type {
@@ -35,7 +35,9 @@ import { createTabAppStateObservable } from '../application/main/state_managemen
 import { createTabPersistableStateObservable } from '../application/main/state_management/utils/create_tab_persistable_state_observable';
 import type { DiscoverServices } from '../build_services';
 import {
+  fromSavedObjectTabToAppState,
   fromSavedSearchToSavedObjectTab,
+  getDataViewOfSource,
   internalStateActions,
   selectTabRuntimeState,
   selectTabSavedSearch,
@@ -102,13 +104,14 @@ export const getExtendedDiscoverStateContainer = ({
       getState: internalState.getState,
     }),
   getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => {
+    const persistedTab = fromSavedSearchToSavedObjectTab({
+      tab: getCurrentTab(),
+      savedSearch: newSavedSearch,
+      services,
+    });
     return getInitialAppState({
-      initialUrlState: undefined,
-      persistedTab: fromSavedSearchToSavedObjectTab({
-        tab: getCurrentTab(),
-        savedSearch: newSavedSearch,
-        services,
-      }),
+      initialUrlState: fromSavedObjectTabToAppState({ tab: persistedTab }),
+      persistedTab,
       dataView: newSavedSearch.searchSource.getField('index'),
       services,
     });
@@ -122,12 +125,15 @@ export const getExtendedDiscoverStateContainer = ({
     });
   },
   getCurrentTabDataView$: () =>
-    selectTabRuntimeState(runtimeStateManager, getCurrentTab().id).currentDataView$.asObservable(),
+    selectTabRuntimeState(runtimeStateManager, getCurrentTab().id).currentDataSource$.pipe(
+      map(getDataViewOfSource),
+      distinctUntilChanged()
+    ),
   internalActions: {
     setAppState: internalStateActions.setAppState,
     updateGlobalState: internalStateActions.updateGlobalState,
     updateAppStateAndReplaceUrl: internalStateActions.updateAppStateAndReplaceUrl,
-    resetAppState: internalStateActions.resetAppState,
+    initializeTabState: internalStateActions.initializeTabState,
     initializeAndSync: internalStateActions.initializeAndSync,
     stopSyncing: internalStateActions.stopSyncing,
     openDiscoverSession: internalStateActions.openDiscoverSession,

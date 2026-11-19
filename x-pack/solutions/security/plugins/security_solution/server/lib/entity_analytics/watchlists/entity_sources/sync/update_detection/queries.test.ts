@@ -5,9 +5,95 @@
  * 2.0.
  */
 
-import { buildEntitiesSearchBody } from './queries';
+import { buildEntitiesSearchBody, buildIndexSourceSearchBody } from './queries';
 
 describe('Watchlist sync queries', () => {
+  describe('buildIndexSourceSearchBody', () => {
+    it('constructs search body with terms filter on identifier field', () => {
+      const searchBody = buildIndexSourceSearchBody('user.name', ['jdoe', 'admin']);
+      expect(searchBody.size).toBe(0);
+      expect(searchBody.query?.bool?.must).toContainEqual({
+        terms: { 'user.name': ['jdoe', 'admin'] },
+      });
+      expect(searchBody.aggs?.identifiers?.composite?.sources).toEqual([
+        { identifier: { terms: { field: 'user.name' } } },
+      ]);
+      expect(searchBody.aggs?.identifiers?.composite?.size).toBe(100);
+      expect(searchBody.runtime_mappings).toBeUndefined();
+    });
+
+    it('applies queryRule as KQL filter', () => {
+      const searchBody = buildIndexSourceSearchBody(
+        'user.name',
+        ['jdoe'],
+        undefined,
+        100,
+        'event.action: "login"'
+      );
+      const must = searchBody.query?.bool?.must as unknown[];
+      // terms filter + default range filter + KQL filter
+      expect(must).toHaveLength(3);
+      expect(must[0]).toEqual({ terms: { 'user.name': ['jdoe'] } });
+    });
+
+    it('handles pagination with afterKey', () => {
+      const afterKey = { identifier: 'jdoe' };
+      const searchBody = buildIndexSourceSearchBody('user.name', ['jdoe'], afterKey);
+      expect(searchBody.aggs?.identifiers?.composite?.after).toEqual(afterKey);
+    });
+
+    it('uses custom page size', () => {
+      const searchBody = buildIndexSourceSearchBody('user.name', ['jdoe'], undefined, 50);
+      expect(searchBody.aggs?.identifiers?.composite?.size).toBe(50);
+    });
+
+    it('does not add KQL filter when queryRule is undefined', () => {
+      const searchBody = buildIndexSourceSearchBody('host.name', ['server-1']);
+      // terms filter + default range filter
+      expect(searchBody.query?.bool?.must).toHaveLength(2);
+    });
+
+    it('applies @timestamp range filter from provided range', () => {
+      const range = { start: 'now-7d', end: 'now' };
+      const searchBody = buildIndexSourceSearchBody(
+        'user.name',
+        ['jdoe'],
+        undefined,
+        100,
+        undefined,
+        range
+      );
+      expect(searchBody.query?.bool?.must).toContainEqual({
+        range: { '@timestamp': { gte: 'now-7d', lte: 'now' } },
+      });
+    });
+
+    it('uses default 10-day range when range is not provided', () => {
+      const searchBody = buildIndexSourceSearchBody('user.name', ['jdoe']);
+      expect(searchBody.query?.bool?.must).toContainEqual({
+        range: { '@timestamp': { gte: 'now-10d', lte: 'now' } },
+      });
+    });
+
+    it('composes range filter with queryRule filter', () => {
+      const range = { start: 'now-14d', end: 'now' };
+      const searchBody = buildIndexSourceSearchBody(
+        'user.name',
+        ['jdoe'],
+        undefined,
+        100,
+        'event.action: "login"',
+        range
+      );
+      const must = searchBody.query?.bool?.must as unknown[];
+      // terms filter + range filter + KQL filter
+      expect(must).toHaveLength(3);
+      expect(must).toContainEqual({
+        range: { '@timestamp': { gte: 'now-14d', lte: 'now' } },
+      });
+    });
+  });
+
   describe('buildEntitiesSearchBody', () => {
     it('constructs the correct search body with default page size', () => {
       const searchBody = buildEntitiesSearchBody('user');
@@ -46,7 +132,7 @@ describe('Watchlist sync queries', () => {
       expect(searchBody.runtime_mappings?.euid).toBeDefined();
     });
 
-    it('adds @timestamp range filter and latest_doc top_hits when syncMarker is set', () => {
+    it('adds @timestamp range filter when syncMarker is set', () => {
       const syncMarker = '2024-01-15T00:00:00Z';
       const searchBody = buildEntitiesSearchBody('user', undefined, 100, syncMarker);
 
@@ -54,20 +140,21 @@ describe('Watchlist sync queries', () => {
       expect(searchBody.query?.bool?.must).toContainEqual({
         range: { '@timestamp': { gte: syncMarker, lte: 'now' } },
       });
+    });
+
+    it('always adds latest_doc top_hits, with an _id tiebreaker, regardless of syncMarker', () => {
+      const searchBody = buildEntitiesSearchBody('user');
 
       const latestDocAgg = searchBody.aggs?.entities?.aggs?.latest_doc;
       expect(latestDocAgg).toBeDefined();
       expect(latestDocAgg?.top_hits?.size).toBe(1);
-      expect(latestDocAgg?.top_hits?.sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
+      expect(latestDocAgg?.top_hits?.sort).toEqual([
+        { '@timestamp': { order: 'desc' } },
+        { _seq_no: { order: 'desc' } },
+      ]);
       expect(latestDocAgg?.top_hits?._source).toContain('@timestamp');
       expect(latestDocAgg?.top_hits?._source).toContain('user.name');
       expect(latestDocAgg?.top_hits?._source).toContain('host.name');
-    });
-
-    it('does not add latest_doc agg when syncMarker is not set', () => {
-      const searchBody = buildEntitiesSearchBody('user');
-      expect(searchBody.aggs?.entities?.aggs).toBeUndefined();
-      expect(searchBody.query?.bool?.must).toHaveLength(1);
     });
 
     it('adds an allowlist terms filter when allowed entity ids are provided', () => {
@@ -90,6 +177,98 @@ describe('Watchlist sync queries', () => {
       expect(searchBody.query?.bool?.must).toContainEqual({
         range: { '@timestamp': { gte: syncMarker, lte: 'now' } },
       });
+    });
+
+    it('does not apply queryRule as a top-level query filter — uses latest_matching_doc instead', () => {
+      // queryRule is deliberately kept out of query.bool.must: filtering there would let a
+      // stale, superseded document (e.g. an old admin-role doc for a since-demoted user)
+      // count as a current match.
+      const searchBody = buildEntitiesSearchBody(
+        'user',
+        undefined,
+        100,
+        undefined,
+        undefined,
+        'event.action: "login"'
+      );
+      expect(searchBody.query?.bool?.must).toHaveLength(1);
+
+      const latestMatchingDocAgg = searchBody.aggs?.entities?.aggs?.latest_matching_doc;
+      expect(latestMatchingDocAgg?.filter).toBeDefined();
+      expect(latestMatchingDocAgg?.aggs?.doc?.top_hits?.size).toBe(1);
+      expect(latestMatchingDocAgg?.aggs?.doc?.top_hits?._source).toBe(false);
+    });
+
+    it('does not add latest_matching_doc agg when queryRule is undefined', () => {
+      const searchBody = buildEntitiesSearchBody('user');
+      expect(searchBody.aggs?.entities?.aggs?.latest_matching_doc).toBeUndefined();
+      expect(searchBody.query?.bool?.must).toHaveLength(1);
+    });
+
+    it('composes queryRule with syncMarker and allowedEntityIds', () => {
+      const syncMarker = '2024-01-15T00:00:00Z';
+      const searchBody = buildEntitiesSearchBody(
+        'user',
+        undefined,
+        100,
+        syncMarker,
+        ['user:jdoe'],
+        'user.roles: "admin"'
+      );
+      // base entity-type filter + euid terms filter + range filter
+      expect(searchBody.query?.bool?.must).toHaveLength(3);
+      expect(searchBody.query?.bool?.must).toContainEqual({
+        terms: { euid: ['user:jdoe'] },
+      });
+      expect(searchBody.query?.bool?.must).toContainEqual({
+        range: { '@timestamp': { gte: syncMarker, lte: 'now' } },
+      });
+      expect(searchBody.aggs?.entities?.aggs?.latest_matching_doc?.filter).toBeDefined();
+    });
+
+    it('applies range filter when no syncMarker is set', () => {
+      const range = { start: 'now-7d', end: 'now' };
+      const searchBody = buildEntitiesSearchBody(
+        'user',
+        undefined,
+        100,
+        undefined,
+        undefined,
+        undefined,
+        range
+      );
+
+      expect(searchBody.query?.bool?.must).toContainEqual({
+        range: { '@timestamp': { gte: 'now-7d', lte: 'now' } },
+      });
+    });
+
+    it('prefers syncMarker over range when both are provided', () => {
+      const syncMarker = '2024-01-15T00:00:00Z';
+      const range = { start: 'now-7d', end: 'now' };
+      const searchBody = buildEntitiesSearchBody(
+        'user',
+        undefined,
+        100,
+        syncMarker,
+        undefined,
+        undefined,
+        range
+      );
+
+      // syncMarker takes precedence
+      expect(searchBody.query?.bool?.must).toContainEqual({
+        range: { '@timestamp': { gte: syncMarker, lte: 'now' } },
+      });
+      // range filter should NOT be present separately
+      expect(searchBody.query?.bool?.must).not.toContainEqual({
+        range: { '@timestamp': { gte: 'now-7d', lte: 'now' } },
+      });
+    });
+
+    it('does not add range filter when neither syncMarker nor range is set', () => {
+      const searchBody = buildEntitiesSearchBody('user');
+      expect(searchBody.query?.bool?.must).toHaveLength(1);
     });
   });
 });

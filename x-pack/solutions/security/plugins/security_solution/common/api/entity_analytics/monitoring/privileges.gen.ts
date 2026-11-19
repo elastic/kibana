@@ -15,8 +15,9 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 
 import { EntityAnalyticsPrivileges } from '../common/common.gen';
 
+export const PrivMonPrivilegesResponse = lazySchema(() => EntityAnalyticsPrivileges);
 export type PrivMonPrivilegesResponse = z.infer<typeof PrivMonPrivilegesResponse>;
-export const PrivMonPrivilegesResponse = EntityAnalyticsPrivileges;

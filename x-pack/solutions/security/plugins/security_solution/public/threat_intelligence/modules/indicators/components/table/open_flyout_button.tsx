@@ -7,9 +7,9 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
-import { IOCRightPanelKey } from '../../../../../flyout/ioc_details/constants/panel_keys';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import { BUTTON_TEST_ID } from './test_ids';
 import { VIEW_DETAILS_BUTTON_LABEL } from './translations';
 
@@ -24,20 +24,11 @@ export interface OpenIndicatorFlyoutButtonProps {
  * Button added to the actions column of the indicators table to open/close the IndicatorFlyout component.
  */
 export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyoutButtonProps) => {
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openIocFlyout } = useFlyoutApi();
 
-  const open = useCallback(
-    () =>
-      openFlyout({
-        right: {
-          id: IOCRightPanelKey,
-          params: {
-            id: indicator._id,
-          },
-        },
-      }),
-    [indicator._id, openFlyout]
-  );
+  const open = useCallback(() => {
+    openIocFlyout({ indicator, origin: FLYOUT_ORIGIN.THREAT_INTEL_TABLE });
+  }, [openIocFlyout, indicator]);
 
   return (
     <EuiToolTip content={VIEW_DETAILS_BUTTON_LABEL} disableScreenReaderOutput>
@@ -45,7 +36,7 @@ export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyou
         aria-label={VIEW_DETAILS_BUTTON_LABEL}
         data-test-subj={BUTTON_TEST_ID}
         color="text"
-        iconType="expand"
+        iconType="maximize"
         onClick={open}
         size="s"
       />

@@ -86,7 +86,10 @@ describe('useSavedVisInstance', () => {
       ...coreStartMock,
       toastNotifications,
       visEditorsRegistry,
-      stateTransferService: createEmbeddableStateTransferMock(),
+      stateTransferService: {
+        ...createEmbeddableStateTransferMock(),
+        getAppNameFromId: jest.fn(),
+      },
       chrome: { setBreadcrumbs: jest.fn(), docTitle: { change: jest.fn() } },
       history: {
         location: {
@@ -141,7 +144,10 @@ describe('useSavedVisInstance', () => {
       });
       expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Test Vis');
       expect(getEditBreadcrumbs).toHaveBeenCalledWith(
-        { originatingAppName: undefined, redirectToOrigin: undefined },
+        expect.objectContaining({
+          originatingAppName: undefined,
+          redirectToOrigin: expect.any(Function),
+        }),
         'Test Vis'
       );
       expect(getCreateBreadcrumbs).not.toHaveBeenCalled();
@@ -179,7 +185,10 @@ describe('useSavedVisInstance', () => {
       });
       expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Test Vis');
       expect(getEditBreadcrumbs).toHaveBeenCalledWith(
-        { originatingAppName: undefined, redirectToOrigin: undefined },
+        expect.objectContaining({
+          originatingAppName: undefined,
+          redirectToOrigin: expect.any(Function),
+        }),
         'Test Vis'
       );
       expect(getCreateBreadcrumbs).not.toHaveBeenCalled();
@@ -190,6 +199,39 @@ describe('useSavedVisInstance', () => {
         from: 'now-7d/d',
         to: 'now',
       });
+    });
+
+    test('should pass originating app context to breadcrumbs when navigating from another app', async () => {
+      mockServices.stateTransferService.getAppNameFromId = jest.fn().mockReturnValue('Dashboards');
+      const incomingBreadcrumbs = [
+        { text: 'Dashboards', href: '/app/dashboards' },
+        { text: 'My Dashboard', href: '/app/dashboards#/view/abc123' },
+      ];
+
+      const { result } = renderHook(() =>
+        useSavedVisInstance(
+          mockServices,
+          eventEmitter,
+          true,
+          'dashboards',
+          savedVisId,
+          undefined,
+          undefined,
+          incomingBreadcrumbs
+        )
+      );
+
+      result.current.visEditorRef.current = document.createElement('div');
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      expect(getEditBreadcrumbs).toHaveBeenCalledWith(
+        expect.objectContaining({
+          originatingAppName: 'Dashboards',
+          incomingBreadcrumbs,
+          redirectToOrigin: expect.any(Function),
+        }),
+        'Test Vis'
+      );
     });
 
     test('should destroy the editor and the savedVis on unmount if chrome exists', async () => {
@@ -225,17 +267,17 @@ describe('useSavedVisInstance', () => {
 
       result.current.visEditorRef.current = document.createElement('div');
 
+      await waitFor(() => {
+        expect(result.current.visEditorController).toBeDefined();
+        expect(result.current.savedVisInstance).toBeDefined();
+      });
+
       expect(mockGetVisualizationInstance).toHaveBeenCalledWith(mockServices, {
         indexPattern: '1a2b3c4d',
         type: 'area',
       });
-
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-
       expect(getCreateBreadcrumbs).toHaveBeenCalled();
       expect(mockEmbeddableHandlerRender).not.toHaveBeenCalled();
-      expect(result.current.visEditorController).toBeDefined();
-      expect(result.current.savedVisInstance).toBeDefined();
     });
 
     test('should throw error if vis type is invalid', async () => {
@@ -246,9 +288,11 @@ describe('useSavedVisInstance', () => {
 
       renderHook(() => useSavedVisInstance(mockServices, eventEmitter, true, undefined, undefined));
 
-      expect(mockGetVisualizationInstance).not.toHaveBeenCalled();
-      expect(redirectWhenMissing).toHaveBeenCalled();
-      expect(toastNotifications.addWarning).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockGetVisualizationInstance).not.toHaveBeenCalled();
+        expect(redirectWhenMissing).toHaveBeenCalled();
+        expect(toastNotifications.addWarning).toHaveBeenCalled();
+      });
     });
 
     test("should throw error if index pattern or saved search id doesn't exist in search params", async () => {
@@ -259,9 +303,11 @@ describe('useSavedVisInstance', () => {
 
       renderHook(() => useSavedVisInstance(mockServices, eventEmitter, true, undefined, undefined));
 
-      expect(mockGetVisualizationInstance).not.toHaveBeenCalled();
-      expect(redirectWhenMissing).toHaveBeenCalled();
-      expect(toastNotifications.addWarning).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockGetVisualizationInstance).not.toHaveBeenCalled();
+        expect(redirectWhenMissing).toHaveBeenCalled();
+        expect(toastNotifications.addWarning).toHaveBeenCalled();
+      });
     });
   });
 

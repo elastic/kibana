@@ -10,6 +10,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { BadgeGroup } from './badge_group';
+import type { NullableMetricUnit } from '../../../types';
+import { getUnitLabel } from '../../../common/utils';
 
 describe('BadgeGroup', () => {
   const renderItem = (item: string, index: number) => <span key={index}>{item}</span>;
@@ -52,5 +54,13 @@ describe('BadgeGroup', () => {
     expect(getByText('a')).toBeInTheDocument();
     expect(getByText('b')).toBeInTheDocument();
     expect(queryByText('No value')).not.toBeInTheDocument();
+  });
+  it('renders null as a badge', () => {
+    const units: NullableMetricUnit[] = [null];
+    const { getByText } = render(
+      <BadgeGroup items={units} renderItem={(item) => getUnitLabel({ unit: item })} />
+    );
+
+    expect(getByText('null')).toBeInTheDocument();
   });
 });

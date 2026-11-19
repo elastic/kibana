@@ -7,6 +7,7 @@
       "node",
       "react",
       "@kbn/ambient-ui-types",
+      "@kbn/ambient-common-types",
     ]
   },
   "include": [
@@ -15,16 +16,10 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/i18n-react",
     "@kbn/interpreter",
     "@kbn/utility-types",
-    "@kbn/shared-ux-utility",
-    "@kbn/test-jest-helpers",
     "@kbn/data-plugin",
-    "@kbn/ui-theme",
-    "@kbn/visualization-utils",
     "@kbn/palettes",
-    "@kbn/field-formats-plugin",
     "@kbn/field-formats-common",
     "@kbn/expressions-plugin",
   ],

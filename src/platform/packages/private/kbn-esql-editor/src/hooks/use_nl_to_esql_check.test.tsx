@@ -11,7 +11,7 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { useNlToEsqlCheck, NL_TO_ESQL_FLAG } from './use_nl_to_esql_check';
+import { clearNlToEsqlLicenseCache, useNlToEsqlCheck } from './use_nl_to_esql_check';
 
 describe('useNlToEsqlCheck', () => {
   const coreStart = coreMock.createStart();
@@ -39,33 +39,20 @@ describe('useNlToEsqlCheck', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    clearNlToEsqlLicenseCache();
     getLicenseMock.mockResolvedValue(validLicense);
   });
 
-  it('should return false when the feature flag is disabled', () => {
-    (coreStart.featureFlags.getBooleanValue as jest.Mock).mockImplementation(
-      (key: string, defaultValue: boolean) => {
-        if (key === NL_TO_ESQL_FLAG) return false;
-        return defaultValue;
-      }
-    );
-
+  it('should return false when getLicense is not available', () => {
     const { result } = renderHook(() => useNlToEsqlCheck(), {
-      wrapper: createWrapper({ getLicense: getLicenseMock }),
+      wrapper: createWrapper(undefined),
     });
 
     expect(result.current).toBe(false);
     expect(getLicenseMock).not.toHaveBeenCalled();
   });
 
-  it('should return true when the flag is enabled and license is enterprise', async () => {
-    (coreStart.featureFlags.getBooleanValue as jest.Mock).mockImplementation(
-      (key: string, defaultValue: boolean) => {
-        if (key === NL_TO_ESQL_FLAG) return true;
-        return defaultValue;
-      }
-    );
-
+  it('should return true when license is enterprise', async () => {
     const { result } = renderHook(() => useNlToEsqlCheck(), {
       wrapper: createWrapper({ getLicense: getLicenseMock }),
     });
@@ -76,13 +63,7 @@ describe('useNlToEsqlCheck', () => {
     expect(getLicenseMock).toHaveBeenCalledTimes(1);
   });
 
-  it('should return false when the flag is enabled but license is not enterprise', async () => {
-    (coreStart.featureFlags.getBooleanValue as jest.Mock).mockImplementation(
-      (key: string, defaultValue: boolean) => {
-        if (key === NL_TO_ESQL_FLAG) return true;
-        return defaultValue;
-      }
-    );
+  it('should return false when license is not enterprise', async () => {
     getLicenseMock.mockResolvedValue(invalidLicense);
 
     const { result } = renderHook(() => useNlToEsqlCheck(), {
@@ -92,5 +73,17 @@ describe('useNlToEsqlCheck', () => {
     await act(async () => {});
 
     expect(result.current).toBe(false);
+  });
+
+  it('reuses the license result for the next editor', async () => {
+    const wrapper = createWrapper({ getLicense: getLicenseMock });
+    const first = renderHook(() => useNlToEsqlCheck(), { wrapper });
+
+    await act(async () => {});
+    expect(first.result.current).toBe(true);
+
+    const second = renderHook(() => useNlToEsqlCheck(), { wrapper });
+    expect(second.result.current).toBe(true);
+    expect(getLicenseMock).toHaveBeenCalledTimes(1);
   });
 });

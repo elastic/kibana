@@ -27,6 +27,7 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  UPDATE_DATA_VIEW_FIELDS_SUMMARY,
   UPDATE_DATA_VIEW_FIELDS_DESCRIPTION,
 } from '../../../constants';
 import { toApiSpec } from '../util/to_api_spec';
@@ -105,6 +106,7 @@ const fieldUpdateSchema = schema.object({
       schema.string({
         minLength: 1,
         maxLength: 1_000,
+        meta: { description: 'A custom display label for the field. Set to `null` to remove.' },
       })
     )
   ),
@@ -113,14 +115,26 @@ const fieldUpdateSchema = schema.object({
       schema.string({
         minLength: 1,
         maxLength: MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
+        meta: { description: 'A custom description for the field. Set to `null` to remove.' },
       })
     )
   ),
-  count: schema.maybe(schema.nullable(schema.number())),
+  count: schema.maybe(
+    schema.nullable(
+      schema.number({
+        meta: { description: 'A popularity count for the field. Set to `null` to remove.' },
+      })
+    )
+  ),
   format: schema.maybe(schema.nullable(serializedFieldFormatSchema)),
 });
 
-const updateFieldsActionRouteFactory = (path: string, serviceKey: string, description?: string) => {
+const updateFieldsActionRouteFactory = (
+  path: string,
+  serviceKey: string,
+  summary?: string,
+  description?: string
+) => {
   return (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -133,6 +147,7 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string, descri
       .post({
         path,
         access: 'public',
+        summary,
         description,
         security: {
           authz: {
@@ -150,6 +165,7 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string, descri
                   id: schema.string({
                     minLength: 1,
                     maxLength: 1_000,
+                    meta: { description: 'The unique identifier of the data view.' },
                   }),
                 },
                 { unknowns: 'allow' }
@@ -160,7 +176,13 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string, descri
                     minLength: 1,
                     maxLength: 1_000,
                   }),
-                  fieldUpdateSchema
+                  fieldUpdateSchema,
+                  {
+                    meta: {
+                      description:
+                        'A map of field names to their updated metadata. Each entry can set a custom label, custom description, popularity count, or field format.',
+                    },
+                  }
                 ),
               }),
             },
@@ -215,10 +237,13 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string, descri
 export const registerUpdateFieldsRoute = updateFieldsActionRouteFactory(
   `${SPECIFIC_DATA_VIEW_PATH}/fields`,
   SERVICE_KEY,
+  UPDATE_DATA_VIEW_FIELDS_SUMMARY,
   UPDATE_DATA_VIEW_FIELDS_DESCRIPTION
 );
 
 export const registerUpdateFieldsRouteLegacy = updateFieldsActionRouteFactory(
   `${SPECIFIC_DATA_VIEW_PATH_LEGACY}/fields`,
-  SERVICE_KEY_LEGACY
+  SERVICE_KEY_LEGACY,
+  UPDATE_DATA_VIEW_FIELDS_SUMMARY,
+  'Deprecated in 8.0.0. Use the data_views/data_view/{id}/fields endpoint instead.'
 );

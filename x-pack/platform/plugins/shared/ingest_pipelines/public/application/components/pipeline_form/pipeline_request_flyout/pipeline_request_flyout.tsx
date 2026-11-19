@@ -10,9 +10,10 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { Pipeline } from '../../../../../common/types';
-import { useFormContext, ViewApiRequestFlyout, useKibana } from '../../../../shared_imports';
-
+import { useFormContext, ViewApiRequestFlyout, useKibana, XJson } from '../../../../shared_imports';
 import type { ReadProcessorsFunction } from '../types';
+
+const { expandLiteralStrings } = XJson;
 
 interface Props {
   closeFlyout: () => void;
@@ -41,7 +42,7 @@ export const PipelineRequestFlyout: FunctionComponent<Props> = ({
 
   const { name, ...pipelineBody } = pipeline;
   const endpoint = `PUT _ingest/pipeline/${name || '<pipelineName>'}`;
-  const request = `${endpoint}\n${JSON.stringify(pipelineBody, null, 2)}`;
+  const request = `${endpoint}\n${expandLiteralStrings(JSON.stringify(pipelineBody, null, 2))}`;
 
   const title = name
     ? i18n.translate('xpack.ingestPipelines.requestFlyout.namedTitle', {

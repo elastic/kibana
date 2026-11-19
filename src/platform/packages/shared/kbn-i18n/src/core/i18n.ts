@@ -15,7 +15,7 @@ import type { Translation, TranslationInput } from '../translation';
 import { defaultEnFormats } from './formats';
 import type { FormatXMLElementFn, PrimitiveType } from './types';
 
-const EN_LOCALE = 'en';
+export const EN_LOCALE = 'en';
 const defaultLocale = EN_LOCALE;
 
 /**
@@ -155,6 +155,17 @@ export function translate(
       throw new Error('Missing `defaultMessage`.');
     }
 
+    // Plain English defaults do not need ICU parsing. Avoid retaining a message
+    // formatter for each one when there is no translated message for the ID.
+    if (
+      typeof defaultMessage === 'string' &&
+      intl.locale === intl.defaultLocale &&
+      (!intl.messages || !Object.prototype.hasOwnProperty.call(intl.messages, id)) &&
+      !/[{}<>']/.test(defaultMessage)
+    ) {
+      return defaultMessage;
+    }
+
     return intl.formatMessage(
       {
         id,
@@ -194,6 +205,16 @@ export function init(newTranslation?: TranslationInput) {
   }
 
   activateTranslation(newTranslation);
+  isInitialized = true;
+}
+
+/**
+ * Marks the engine as initialized without loading any translation file.
+ * Call this when the effective locale is English so the pre-allocated default
+ * `intl` instance (which is already wired to English) is used directly,
+ * avoiding an unnecessary network round-trip and React context re-render.
+ */
+export function initDefault() {
   isInitialized = true;
 }
 

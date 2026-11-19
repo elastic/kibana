@@ -91,8 +91,8 @@ export const DiscoverLink = React.memo(
     return (
       <EuiButtonEmpty
         {...discoverLinkProps}
-        color="primary"
         iconType="discoverApp"
+        aria-label={discoverLinkTitle}
         data-test-subj="logsExplorerDiscoverFallbackLink"
       >
         {discoverLinkTitle}
@@ -104,7 +104,7 @@ export const DiscoverLink = React.memo(
 export const discoverLinkTitle = i18n.translate(
   'xpack.observabilityLogsOverview.discoverLinkTitle',
   {
-    defaultMessage: 'Open in Discover',
+    defaultMessage: 'Open logs in Discover',
   }
 );
 

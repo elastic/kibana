@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WorkflowEventLoggerService } from './workflow_event_logger_service';
+export { WorkflowEventLoggerFactory } from './workflow_event_logger_factory';
+export { WorkflowEventQueue } from './workflow_event_queue';
+export { WorkflowLogsQueryService } from './workflow_logs_query_service';
 
 export type {
   WorkflowEventLoggerContext,
+  WorkflowEventFlushOptions,
   WorkflowEventLoggerOptions,
   IWorkflowEventLogger,
-  IWorkflowEventLoggerService,
+  IWorkflowLogsQueryService,
   ExecutionLogsParams,
   StepLogsParams,
   LogsByLevelParams,

@@ -1,0 +1,34 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { Route, Routes } from '@kbn/shared-ux-router';
+import React from 'react';
+import { ContextLandingPage } from './context_landing_page';
+import { AiIndexDetailPage } from './pages/ai_index_detail_page';
+import { DreamingTemplatePage } from './pages/dreaming_template_page';
+import { AiIndexUnknownPathRedirect, UnknownPathRedirect } from './pages/unknown_path_redirect';
+import { CONTEXT_ENGINE_PATHS } from './paths';
+
+export const ContextEngineRoutes = () => (
+  <Routes>
+    <Route path={CONTEXT_ENGINE_PATHS.dreamingTemplate} exact component={DreamingTemplatePage} />
+    <Route
+      path={[
+        CONTEXT_ENGINE_PATHS.detail,
+        CONTEXT_ENGINE_PATHS.detailSources,
+        CONTEXT_ENGINE_PATHS.detailKnowledgeDocuments,
+        CONTEXT_ENGINE_PATHS.detailKnowledgeDocument,
+        CONTEXT_ENGINE_PATHS.detailSettings,
+      ]}
+      exact
+      component={AiIndexDetailPage}
+    />
+    <Route path={CONTEXT_ENGINE_PATHS.landing} exact component={ContextLandingPage} />
+    <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexUnknownPathRedirect} />
+    <Route component={UnknownPathRedirect} />
+  </Routes>
+);

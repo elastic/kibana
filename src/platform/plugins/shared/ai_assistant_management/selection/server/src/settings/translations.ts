@@ -46,5 +46,5 @@ export const CLASSIC_AI_ASSISTANT = i18n.translate(
 );
 export const AI_AGENT = i18n.translate(
   'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueAgent',
-  { defaultMessage: 'AI Agent (Beta)' }
+  { defaultMessage: 'AI Agent' }
 );

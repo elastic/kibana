@@ -9,6 +9,7 @@
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { useCallback, useEffect, useMemo } from 'react';
+import { setBreakdownField } from '@kbn/discover-utils';
 import type {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramFetchParams,
@@ -26,7 +27,6 @@ import {
   topPanelHeightSelector,
 } from '../utils/state_selectors';
 import { useStateSelector } from './use_state_selector';
-import { setBreakdownField } from '../utils/local_storage_utils';
 
 export const useStateProps = ({
   services,
@@ -50,7 +50,8 @@ export const useStateProps = ({
   const lensAdapters = useStateSelector(stateService?.state$, lensAdaptersSelector);
   const lensDataLoading$ = useStateSelector(stateService?.state$, lensDataLoadingSelector$);
 
-  const { breakdown, isTimeBased, isESQLQuery, timeInterval } = fetchParams || {};
+  const { breakdown, isTimeBased, dataSource, timeInterval } = fetchParams || {};
+  const isEsql = dataSource?.kind === 'esql';
 
   const hits = useMemo(() => {
     if (totalHitsResult instanceof Error) {
@@ -64,7 +65,7 @@ export const useStateProps = ({
   }, [totalHitsResult, totalHitsStatus]);
 
   const chart = useMemo(() => {
-    if (!isTimeBased && !isESQLQuery) {
+    if (!isTimeBased && !isEsql) {
       return undefined;
     }
 
@@ -72,7 +73,7 @@ export const useStateProps = ({
       hidden: chartHidden,
       timeInterval,
     };
-  }, [chartHidden, isESQLQuery, isTimeBased, timeInterval]);
+  }, [chartHidden, isEsql, isTimeBased, timeInterval]);
 
   /**
    * Callbacks
@@ -137,13 +138,6 @@ export const useStateProps = ({
       setBreakdownField(services.storage, localStorageKeyPrefix, breakdownField);
     }
   }, [breakdownField, localStorageKeyPrefix, services.storage]);
-
-  // Clear the Lens request adapter when the chart is hidden
-  useEffect(() => {
-    if (chartHidden || !chart) {
-      stateService?.setLensRequestAdapter(undefined);
-    }
-  }, [chart, chartHidden, stateService]);
 
   return {
     topPanelHeight,

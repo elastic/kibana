@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LensApiState } from '../../schema';
-import type { PieState } from '../../schema/charts/pie';
-import { mosaicStateSchema } from '../../schema/charts/mosaic';
-import { partitionStateSchema } from '../../schema/charts/partition';
-import { pieStateSchema } from '../../schema/charts/pie';
-import { treemapStateSchema } from '../../schema/charts/treemap';
-import { waffleStateSchema } from '../../schema/charts/waffle';
-import { validateAPIConverter, validateConverter } from '../validate';
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import type { LensPartitionVisualizationState } from '@kbn/lens-common';
+
+import type { LensApiConfigChartType } from '../../schema';
+import { mosaicConfigSchema, type MosaicConfig } from '../../schema/charts/mosaic';
+import { pieConfigSchema, type PieConfig, type PieConfigNoESQL } from '../../schema/charts/pie';
+import type { TreemapConfig, TreemapConfigNoESQL } from '../../schema/charts/treemap';
+import type { WaffleConfig, WaffleConfigNoESQL } from '../../schema/charts/waffle';
+import type { ColorMappingType } from '../../schema/color';
+import { AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import { esqlCharts } from './lens_api_config.mock';
 import { LensConfigBuilder } from '../../config_builder';
 import {
@@ -31,68 +33,77 @@ import {
   mosaicLegacyESQLState,
   waffleLegacyESQLState,
 } from './lens_state_config.mock';
-import type { LensPartitionVisualizationState } from '@kbn/lens-common';
+import { validator } from '../utils/validator';
+import type { LensAttributes } from '../../types';
+import { partitionConfigSchema, type PartitionConfig } from '../../schema/charts/partition';
 
 describe('Partition', () => {
-  describe('validateConverter', () => {
+  describe('state transform validation', () => {
     const datasets = [
-      { name: 'pie/donut basic', config: pieLegacyBasicState, schema: pieStateSchema },
-      { name: 'treemap basic', config: treemapLegacyBasicState, schema: treemapStateSchema },
-      { name: 'mosaic basic', config: mosaicLegacyBasicState, schema: mosaicStateSchema },
-      { name: 'waffle basic', config: waffleLegacyBasicState, schema: waffleStateSchema },
+      { name: 'pie basic', type: 'pie', config: pieLegacyBasicState },
+      { name: 'treemap basic', type: 'treemap', config: treemapLegacyBasicState },
+      { name: 'mosaic basic', type: 'mosaic', config: mosaicLegacyBasicState },
+      { name: 'waffle basic', type: 'waffle', config: waffleLegacyBasicState },
       {
-        name: 'pie/donut advanced with collapsed groups',
+        name: 'pie advanced with collapsed groups',
+        type: 'pie',
         config: pieLegacyAdvancedStateWithMultipleMetricsAndCollapsedGroups,
-        schema: pieStateSchema,
       },
       {
         name: 'treemap advanced with collapsed groups',
+        type: 'treemap',
         config: treemapLegacyAdvancedStateWithMultipleMetricsAndCollapsedGroups,
-        schema: treemapStateSchema,
       },
       {
         name: 'mosaic advanced with collapsed groups',
+        type: 'mosaic',
         config: mosaicLegacyAdvancedStateWithMultipleMetricsAndCollapsedGroups,
-        schema: mosaicStateSchema,
       },
       {
         name: 'waffle advanced with collapsed groups',
+        type: 'waffle',
         config: waffleLegacyAdvancedStateWithCollapsedGroups,
-        schema: waffleStateSchema,
       },
       {
         name: 'pie esql basic',
+        type: 'pie',
         config: pieLegacyESQLState,
-        schema: pieStateSchema,
       },
       {
         name: 'treemap esql basic',
+        type: 'treemap',
         config: treemapLegacyESQLState,
-        schema: treemapStateSchema,
       },
       {
         name: 'mosaic esql basic',
+        type: 'mosaic',
         config: mosaicLegacyESQLState,
-        schema: mosaicStateSchema,
       },
       {
         name: 'waffle esql basic',
+        type: 'waffle',
         config: waffleLegacyESQLState,
-        schema: waffleStateSchema,
       },
-    ];
-    for (const { name, config, schema } of datasets) {
-      it(`should convert a legacy ${name} chart`, () => {
-        validateConverter(config, schema);
-        validateConverter(config, partitionStateSchema);
+    ] satisfies {
+      name: string;
+      type: Extract<LensApiConfigChartType, 'pie' | 'treemap' | 'mosaic' | 'waffle'>;
+      config: LensAttributes;
+    }[];
+
+    for (const { name, type, config } of datasets) {
+      it(`should convert from state ${name} chart`, () => {
+        validator[type].fromState(config);
       });
     }
   });
 
-  describe('validateAPIConverter', () => {
+  describe('api transform validation', () => {
     for (const config of esqlCharts) {
       it(`should convert an API ${config.title} chart`, () => {
-        validateAPIConverter(config as LensApiState, partitionStateSchema);
+        validator[config.type].fromApi(
+          config as any, // TODO fix test types here'
+          ['ignore_global_filters', 'sampling']
+        );
       });
     }
   });
@@ -103,13 +114,634 @@ describe('Partition', () => {
       (pieLegacyESQLState.state
         .visualization as LensPartitionVisualizationState)!.layers[0].collapseFns!.partition_value_accessor_group_by_0 =
         '' as unknown as 'min';
-      const apiConfig = builder.toAPIFormat(pieLegacyESQLState) as PieState;
+      const apiConfig = builder.toAPIFormat(pieLegacyESQLState) as PieConfig;
 
       // The group should have color mapping (since empty string collapseFns means no collapse)
       expect(apiConfig.group_by?.[0].color).toHaveProperty('mode', 'categorical');
 
       // The group shouldn't have collapse_by (empty strings should be stripped)
       expect(apiConfig.group_by?.[0]).not.toHaveProperty('collapse_by');
+    });
+  });
+
+  describe('color default application', () => {
+    const baseDataSource = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'test-index',
+      time_field: '@timestamp',
+    } as const;
+
+    it('should emit AUTO_COLOR on pie metric when no group_by is present', () => {
+      const config = {
+        type: 'pie',
+        title: 'Pie color default test',
+        data_source: baseDataSource,
+        metrics: [{ operation: 'count', empty_as_null: false }],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies PieConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as PieConfig;
+
+      expect(apiOutput.metrics[0].color).toEqual(AUTO_COLOR);
+    });
+
+    it('should emit default categorical color mapping on group_by when present', () => {
+      const config = {
+        type: 'pie',
+        title: 'Pie group_by color default test',
+        data_source: baseDataSource,
+        metrics: [{ operation: 'count', empty_as_null: false }],
+        group_by: [
+          {
+            operation: 'terms',
+            fields: ['tags.keyword'],
+            limit: 3,
+          },
+        ],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies PieConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as PieConfig;
+
+      expect(apiOutput.group_by?.[0].color).toEqual(DEFAULT_CATEGORICAL_COLOR_MAPPING);
+    });
+
+    it('should store the default categorical color mapping when the first active group has no color in pie chart', () => {
+      const config = {
+        type: 'pie',
+        title: 'Pie group_by color default in state',
+        data_source: baseDataSource,
+        metrics: [{ operation: 'count', empty_as_null: false }],
+        group_by: [
+          { operation: 'terms', fields: ['tags.keyword'], limit: 3, collapse_by: 'sum' },
+          { operation: 'terms', fields: ['agent.keyword'], limit: 3 },
+        ],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies PieConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+
+      expect(vizState.layers[0].colorMapping).toEqual({
+        colorMode: { type: 'categorical' },
+        paletteId: 'default',
+        assignments: [],
+        specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+      });
+    });
+
+    it('should not store a color mapping when every group is collapsed in pie chart', () => {
+      const config = {
+        type: 'pie',
+        title: 'Pie with every group collapsed',
+        data_source: baseDataSource,
+        metrics: [{ operation: 'count', empty_as_null: false }],
+        group_by: [{ operation: 'terms', fields: ['tags.keyword'], limit: 3, collapse_by: 'sum' }],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies PieConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+
+      expect(vizState.layers[0].colorMapping).toBeUndefined();
+    });
+
+    it('should emit AUTO_COLOR on treemap metric when no group_by is present', () => {
+      const config = {
+        type: 'treemap',
+        title: 'Treemap color default test',
+        data_source: baseDataSource,
+        metrics: [{ operation: 'count', empty_as_null: false }],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies TreemapConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as TreemapConfig;
+
+      expect(apiOutput.metrics[0].color).toEqual(AUTO_COLOR);
+    });
+
+    it('should emit AUTO_COLOR on waffle metric when no group_by is present', () => {
+      const config = {
+        type: 'waffle',
+        title: 'Waffle color default test',
+        data_source: baseDataSource,
+        metrics: [{ operation: 'count', empty_as_null: false }],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies WaffleConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as WaffleConfig;
+
+      expect(apiOutput.metrics[0].color).toEqual(AUTO_COLOR);
+    });
+
+    describe('static metric color and groups', () => {
+      const basePieConfig = {
+        type: 'pie',
+        title: 'Static metric color',
+        data_source: baseDataSource,
+        metrics: [
+          { operation: 'count', empty_as_null: false, color: { type: 'static', color: '#ff0000' } },
+        ],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies PieConfigNoESQL;
+
+      const baseTreemapConfig = { ...basePieConfig, type: 'treemap' } satisfies TreemapConfigNoESQL;
+
+      const baseWaffleConfig = { ...basePieConfig, type: 'waffle' } satisfies WaffleConfigNoESQL;
+
+      const activeGroup: NonNullable<PieConfigNoESQL['group_by']>[number] = {
+        operation: 'terms',
+        fields: ['tags.keyword'],
+        limit: 3,
+      };
+
+      const collapsedGroup: NonNullable<PieConfigNoESQL['group_by']>[number] = {
+        ...activeGroup,
+        collapse_by: 'sum',
+      };
+
+      it.each<[string, PieConfigNoESQL | TreemapConfigNoESQL | WaffleConfigNoESQL]>([
+        ['pie', basePieConfig],
+        ['treemap', baseTreemapConfig],
+        ['waffle', baseWaffleConfig],
+      ])(
+        'should neither store nor emit a static metric color when a group is active in %s',
+        (_name, base) => {
+          const config = { ...base, group_by: [activeGroup] } satisfies PartitionConfig;
+
+          const builder = new LensConfigBuilder();
+          const lensState = builder.fromAPIFormat(config);
+          const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+          const apiOutput = builder.toAPIFormat(lensState) as
+            | PieConfig
+            | TreemapConfig
+            | WaffleConfig;
+          const parsed = partitionConfigSchema.parse(apiOutput) as
+            | PieConfig
+            | TreemapConfig
+            | WaffleConfig;
+
+          expect(vizState.layers[0].colorsByDimension).toBeUndefined();
+          expect(apiOutput.metrics[0].color).toBeUndefined();
+          expect(parsed.metrics[0].color).toBeUndefined();
+        }
+      );
+
+      it.each<[string, PieConfigNoESQL | TreemapConfigNoESQL | WaffleConfigNoESQL]>([
+        ['pie', basePieConfig],
+        ['treemap', baseTreemapConfig],
+        ['waffle', baseWaffleConfig],
+      ])('should keep a static metric color when every group is collapsed in %s', (_name, base) => {
+        const config = { ...base, group_by: [collapsedGroup] } satisfies PartitionConfig;
+
+        const builder = new LensConfigBuilder();
+        const lensState = builder.fromAPIFormat(config);
+        const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+        const apiOutput = builder.toAPIFormat(lensState) as
+          | PieConfigNoESQL
+          | TreemapConfigNoESQL
+          | WaffleConfigNoESQL;
+        const parsed = partitionConfigSchema.parse(apiOutput) as
+          | PieConfigNoESQL
+          | TreemapConfigNoESQL
+          | WaffleConfigNoESQL;
+
+        expect(vizState.layers[0].colorsByDimension).toEqual({
+          partition_value_accessor_metric_0: '#ff0000',
+        });
+        expect(apiOutput.metrics[0].color).toEqual({ type: 'static', color: '#ff0000' });
+        expect(parsed.metrics[0].color).toEqual(apiOutput.metrics[0].color);
+      });
+    });
+
+    it('should not add a color on the collapsed group after schema parse in pie chart', () => {
+      const config = {
+        type: 'pie',
+        title: 'Pie group colors',
+        data_source: baseDataSource,
+        metrics: [{ operation: 'count', empty_as_null: false }],
+        group_by: [
+          { operation: 'terms', fields: ['tags.keyword'], limit: 3, collapse_by: 'sum' },
+          { operation: 'terms', fields: ['agent.keyword'], limit: 3 },
+        ],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies PieConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as PieConfig;
+      const parsed = pieConfigSchema.parse(apiOutput);
+
+      expect(apiOutput.group_by?.[0].color).toBeUndefined();
+      expect(apiOutput.group_by?.[1].color).toEqual(DEFAULT_CATEGORICAL_COLOR_MAPPING);
+      expect(parsed.group_by?.[0].color).toBeUndefined();
+      expect(parsed.group_by?.[1].color).toEqual(DEFAULT_CATEGORICAL_COLOR_MAPPING);
+    });
+
+    it('should apply the color of the first non-collapsed group, not of a collapsed one carrying the default mapping in pie chart', () => {
+      const customMapping: ColorMappingType = {
+        mode: 'categorical',
+        palette: 'default',
+        mapping: [{ values: ['a'], color: { type: 'color_code', value: '#ff0000' } }],
+      };
+      const config = {
+        type: 'pie',
+        title: 'Pie group color on the active group',
+        data_source: baseDataSource,
+        metrics: [{ operation: 'count', empty_as_null: false }],
+        group_by: [
+          {
+            operation: 'terms',
+            fields: ['tags.keyword'],
+            limit: 3,
+            collapse_by: 'sum',
+            color: DEFAULT_CATEGORICAL_COLOR_MAPPING,
+          },
+          { operation: 'terms', fields: ['agent.keyword'], limit: 3, color: customMapping },
+        ],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies PieConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as PieConfig;
+
+      expect(apiOutput.group_by?.[0].color).toBeUndefined();
+      expect(apiOutput.group_by?.[1].color).toEqual(customMapping);
+    });
+
+    it('should accept a color on a collapsed group but neither store nor emit it in mosaic chart', () => {
+      const config = {
+        type: 'mosaic',
+        title: 'Mosaic color on a collapsed group',
+        data_source: baseDataSource,
+        metric: { operation: 'count', empty_as_null: false },
+        group_by: [
+          {
+            operation: 'terms',
+            fields: ['tags.keyword'],
+            limit: 3,
+            collapse_by: 'sum',
+            color: {
+              mode: 'categorical',
+              palette: 'default',
+              mapping: [{ values: ['a'], color: { type: 'color_code', value: '#ff0000' } }],
+            },
+          },
+        ],
+        group_breakdown_by: [{ operation: 'terms', fields: ['agent.keyword'], limit: 3 }],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies MosaicConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+      const apiOutput = builder.toAPIFormat(lensState) as MosaicConfig;
+
+      expect(mosaicConfigSchema.safeParse(config).success).toBe(true);
+      expect(vizState.layers[0].colorMapping).toBeUndefined();
+      expect(apiOutput.group_by?.[0].color).toBeUndefined();
+    });
+  });
+
+  describe('API to state colorsByDimension index preservation', () => {
+    const baseDataSource = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'test-index',
+      time_field: '@timestamp',
+    } as const;
+
+    const RED = '#ff0000';
+    const BLUE = '#0000ff';
+
+    it('should preserve sparse static colors across metric positions', () => {
+      // Four metrics, with static colors on positions 1, 3 and 4 only.
+      const config = {
+        type: 'pie',
+        title: 'colorsByDimension sparse test',
+        data_source: baseDataSource,
+        metrics: [
+          { operation: 'count', empty_as_null: false },
+          { operation: 'count', empty_as_null: false, color: { type: 'static', color: RED } },
+          { operation: 'count', empty_as_null: false },
+          { operation: 'count', empty_as_null: false, color: { type: 'static', color: BLUE } },
+          { operation: 'count', empty_as_null: false, color: { type: 'static', color: BLUE } },
+        ],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies PieConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+      const apiOutput = builder.toAPIFormat(lensState) as PieConfig;
+
+      expect(vizState.layers[0].colorsByDimension).toEqual({
+        partition_value_accessor_metric_1: RED,
+        partition_value_accessor_metric_3: BLUE,
+        partition_value_accessor_metric_4: BLUE,
+      });
+      expect(apiOutput.metrics[0].color).toEqual(AUTO_COLOR);
+      expect(apiOutput.metrics[1].color).toEqual({ type: 'static', color: RED });
+      expect(apiOutput.metrics[2].color).toEqual(AUTO_COLOR);
+      expect(apiOutput.metrics[3].color).toEqual({ type: 'static', color: BLUE });
+      expect(apiOutput.metrics[4].color).toEqual({ type: 'static', color: BLUE });
+    });
+  });
+
+  describe('API to state collapseFns index preservation', () => {
+    const baseDataSource = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'test-index',
+      time_field: '@timestamp',
+    } as const;
+
+    it('should keep the collapse and the color on their own groups when a collapsed group follows an active one in pie chart', () => {
+      const config = {
+        type: 'pie',
+        title: 'Collapsed group after an active one',
+        data_source: baseDataSource,
+        metrics: [{ operation: 'count', empty_as_null: false }],
+        group_by: [
+          {
+            operation: 'terms',
+            fields: ['host.name'],
+            limit: 3,
+            color: {
+              mode: 'categorical',
+              palette: 'default',
+              mapping: [{ values: ['a'], color: { type: 'color_code', value: '#ff0000' } }],
+            },
+          },
+          { operation: 'terms', fields: ['agent.keyword'], limit: 3, collapse_by: 'sum' },
+        ],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies PieConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+      const apiOutput = builder.toAPIFormat(lensState) as PieConfig;
+
+      expect(vizState.layers[0].collapseFns).toEqual({
+        partition_value_accessor_group_by_1: 'sum',
+      });
+      expect(apiOutput.group_by?.[0].collapse_by).toBeUndefined();
+      expect(apiOutput.group_by?.[0].color).toEqual(config.group_by[0].color);
+      expect(apiOutput.group_by?.[1].collapse_by).toBe('sum');
+      expect(apiOutput.group_by?.[1].color).toBeUndefined();
+    });
+
+    it('should keep each collapse on its own group when an active group sits between collapsed ones in pie chart', () => {
+      const config = {
+        type: 'pie',
+        title: 'Active group between collapsed ones',
+        data_source: baseDataSource,
+        metrics: [{ operation: 'count', empty_as_null: false }],
+        group_by: [
+          { operation: 'terms', fields: ['host.name'], limit: 3, collapse_by: 'sum' },
+          { operation: 'terms', fields: ['agent.keyword'], limit: 3 },
+          { operation: 'terms', fields: ['geo.dest'], limit: 3, collapse_by: 'max' },
+        ],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies PieConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+      const apiOutput = builder.toAPIFormat(lensState) as PieConfig;
+
+      expect(vizState.layers[0].collapseFns).toEqual({
+        partition_value_accessor_group_by_0: 'sum',
+        partition_value_accessor_group_by_2: 'max',
+      });
+      expect(apiOutput.group_by?.map(({ collapse_by }) => collapse_by)).toEqual([
+        'sum',
+        undefined,
+        'max',
+      ]);
+      expect(apiOutput.group_by?.[1].color).toEqual(DEFAULT_CATEGORICAL_COLOR_MAPPING);
+    });
+
+    it('should keep the collapse on its own group_breakdown_by dimension in mosaic chart', () => {
+      const config = {
+        type: 'mosaic',
+        title: 'Collapsed breakdown after an active one',
+        data_source: baseDataSource,
+        metric: { operation: 'count', empty_as_null: false },
+        group_by: [{ operation: 'terms', fields: ['host.name'], limit: 3 }],
+        group_breakdown_by: [
+          { operation: 'terms', fields: ['agent.keyword'], limit: 3 },
+          { operation: 'terms', fields: ['geo.dest'], limit: 3, collapse_by: 'sum' },
+        ],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies MosaicConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+      const apiOutput = builder.toAPIFormat(lensState) as MosaicConfig;
+
+      expect(vizState.layers[0].collapseFns).toEqual({
+        partition_value_accessor_group_breakdown_by_1: 'sum',
+      });
+      expect(apiOutput.group_breakdown_by?.map(({ collapse_by }) => collapse_by)).toEqual([
+        undefined,
+        'sum',
+      ]);
+    });
+  });
+
+  describe('waffle legend values', () => {
+    const baseDataSource = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'test-index',
+      time_field: '@timestamp',
+    } as const;
+
+    const baseWaffleConfig = {
+      type: 'waffle',
+      title: 'Waffle legend test',
+      data_source: baseDataSource,
+      metrics: [{ operation: 'count', empty_as_null: false }],
+      group_by: [
+        {
+          operation: 'terms',
+          fields: ['tags.keyword'],
+          limit: 3,
+        },
+      ],
+      sampling: 1,
+      ignore_global_filters: false,
+    } satisfies WaffleConfig;
+
+    it('should map legend.values: ["absolute"] to legendStats: ["value"] in state', () => {
+      const config = {
+        ...baseWaffleConfig,
+        legend: { values: ['absolute'] as ['absolute'] },
+      } satisfies WaffleConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+
+      expect(vizState.layers[0].legendStats).toEqual(['value']);
+    });
+
+    it('should map omitted legend.values to legendStats: [] in state', () => {
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(baseWaffleConfig);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+
+      expect(vizState.layers[0].legendStats).toEqual([]);
+    });
+
+    it('should roundtrip legend.values: ["absolute"] correctly', () => {
+      const config = {
+        ...baseWaffleConfig,
+        legend: { values: ['absolute'] as ['absolute'] },
+      } satisfies WaffleConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as WaffleConfig;
+
+      expect(apiOutput.legend?.values).toEqual(['absolute']);
+    });
+
+    it('should roundtrip omitted legend.values correctly', () => {
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(baseWaffleConfig);
+      const apiOutput = builder.toAPIFormat(lensState) as WaffleConfig;
+
+      expect(apiOutput.legend?.values).toBeUndefined();
+    });
+
+    it('should serialize existing waffle state without legendStats as legend.values: ["absolute"]', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const apiOutput = builder.toAPIFormat(waffleLegacyBasicState) as WaffleConfig;
+
+      expect(apiOutput.legend?.values).toEqual(['absolute']);
+    });
+
+    it('should serialize waffle state with only unsupported legendStats as omitted legend.values', () => {
+      const state = structuredClone(waffleLegacyBasicState);
+      const { layers } = state.state.visualization as LensPartitionVisualizationState;
+      layers[0].legendStats = ['percent'];
+
+      const builder = new LensConfigBuilder(undefined, true);
+      const apiOutput = builder.toAPIFormat(state) as WaffleConfig;
+
+      expect(apiOutput.legend?.values).toBeUndefined();
+    });
+
+    it('should serialize waffle state with empty legendStats as omitted legend.values', () => {
+      const state = structuredClone(waffleLegacyBasicState);
+      const { layers } = state.state.visualization as LensPartitionVisualizationState;
+      layers[0].legendStats = [];
+
+      const builder = new LensConfigBuilder(undefined, true);
+      const apiOutput = builder.toAPIFormat(state) as WaffleConfig;
+
+      expect(apiOutput.legend?.values).toBeUndefined();
+    });
+
+    it('should serialize waffle state with the value stat among unsupported ones as legend.values: ["absolute"]', () => {
+      const state = structuredClone(waffleLegacyBasicState);
+      const { layers } = state.state.visualization as LensPartitionVisualizationState;
+      layers[0].legendStats = ['value', 'percent'];
+
+      const builder = new LensConfigBuilder(undefined, true);
+      const apiOutput = builder.toAPIFormat(state) as WaffleConfig;
+
+      expect(apiOutput.legend?.values).toEqual(['absolute']);
+    });
+  });
+
+  describe('legend position', () => {
+    const baseDataSource = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'test-index',
+      time_field: '@timestamp',
+    } as const;
+
+    const basePartitionConfig = {
+      title: 'Partition legend position test',
+      data_source: baseDataSource,
+      group_by: [
+        {
+          operation: 'terms',
+          fields: ['tags.keyword'],
+          limit: 3,
+        },
+      ],
+      sampling: 1,
+      ignore_global_filters: false,
+    } satisfies Omit<PartitionConfig, 'type'>;
+
+    const basePieConfig = {
+      ...basePartitionConfig,
+      type: 'pie',
+      metrics: [{ operation: 'count', empty_as_null: false }],
+    } satisfies PieConfig;
+
+    const baseTreemapConfig = {
+      ...basePieConfig,
+      type: 'treemap',
+      metrics: [{ operation: 'count', empty_as_null: false }],
+    } satisfies TreemapConfig;
+
+    const baseWaffleConfig = {
+      ...basePieConfig,
+      type: 'waffle',
+      metrics: [{ operation: 'count', empty_as_null: false }],
+    } satisfies WaffleConfig;
+
+    const baseMosaicConfig = {
+      ...basePieConfig,
+      type: 'mosaic',
+      metric: { operation: 'count', empty_as_null: false },
+    } satisfies MosaicConfig;
+
+    it.each<[string, PieConfig | TreemapConfig | WaffleConfig | MosaicConfig]>([
+      ['pie', basePieConfig],
+      ['treemap', baseTreemapConfig],
+      ['waffle', baseWaffleConfig],
+      ['mosaic', baseMosaicConfig],
+    ])('should roundtrip for %s chart', (_name, config) => {
+      const partitionConfig = {
+        ...config,
+        legend: { position: 'bottom' },
+      } satisfies PartitionConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(partitionConfig);
+      const apiOutput = builder.toAPIFormat(lensState) as PieConfig;
+
+      expect(apiOutput.legend?.position).toBe('bottom');
     });
   });
 });

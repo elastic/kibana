@@ -39,15 +39,80 @@ export const NONGROUPED_SPANS: Record<string, string[]> = {
 export const GROUPABLE_SPAN_TYPE = 'external';
 export const GROUPABLE_SPAN_SUBTYPE = 'http';
 
-// Node dimensions for React Flow service map
-export const SERVICE_NODE_CIRCLE_SIZE = 56;
+/**
+ * Failure rate at or above this share is a warning on the service map (amber ring / text).
+ * Below it, a non-zero rate stays a low (grey) signal.
+ */
+export const FAILURE_RATE_WARNING = 0.01;
+
+/**
+ * Failure rate at or above this share is a problem on the service map (red ring / text).
+ */
+export const FAILURE_RATE_DANGER = 0.05;
+
+/**
+ * Below this many requests over the map range, a failure rate is noise and stays uncoloured
+ * (one failure of five reads as 20%).
+ */
+export const MIN_REQUESTS_FOR_FAILURE_RATE = 20;
+
+/**
+ * A service whose throughput is below this share of the map's median is drawn faded (idle).
+ * Relative, not a fixed rate: on a quiet estate every service would be below any fixed rate.
+ */
+export const IDLE_SHARE_OF_MEDIAN = 0.1;
+
+/** Opacity for idle (low-traffic) service nodes. */
+export const IDLE_NODE_OPACITY = 0.5;
+
+// Node dimensions for React Flow service map (circle for services, square for closed groups)
+export const SERVICE_NODE_SIZE = 56;
 export const DEPENDENCY_NODE_DIAMOND_SIZE = 48;
+/** Max width for service / group labels and badge rows under the node. */
+export const NODE_LABEL_MAX_WIDTH = 220;
 
 /** Border width (px) for service and dependency nodes when not selected. */
 export const NODE_BORDER_WIDTH_DEFAULT = 3;
-/** Border width (px) for service and dependency nodes when selected or critical. */
+/** Border width (px) for service and dependency nodes when selected. */
 export const NODE_BORDER_WIDTH_SELECTED = 4;
 // When rotated 45deg, the diagonal becomes the width/height: size * sqrt(2)
 export const DEPENDENCY_NODE_DIAMOND_CONTAINER_SIZE = Math.ceil(
   DEPENDENCY_NODE_DIAMOND_SIZE * Math.SQRT2
 );
+
+// Dagre layout constants
+export const NODE_WIDTH = 200;
+export const NODE_HEIGHT = 80;
+export const RANK_SEPARATION = 120;
+export const NODE_SEPARATION = 80;
+export const GRAPH_MARGIN = 50;
+
+/**
+ * Below this node count the service map is never folded into serpentine bands: small maps already
+ * fit the viewport, and folding them just adds visual noise.
+ */
+export const FOLD_MIN_NODE_COUNT = 12;
+
+/**
+ * Only fold a Dagre layout when its long axis is at least this many times its short axis. A graph
+ * that is already roughly square (within this ratio) is left untouched.
+ */
+export const FOLD_ASPECT_RATIO_THRESHOLD = 2.5;
+
+/**
+ * Target aspect ratio (long axis / short axis) of the folded serpentine *cell grid* — that is, the
+ * ranks-per-band × band-count grid, sizing each rank as one cell. `1` aims for a square grid; the
+ * band count is derived from this and the rank count so the choice stays stable even when a few
+ * ranks fan out far taller than the rest (those outliers must not stretch the bands back out into a
+ * near-straight line). Kept at a square target so deep chains fold into a compact block rather than
+ * a few very long rows.
+ */
+export const FOLD_TARGET_ASPECT_RATIO = 1.0;
+
+/**
+ * Fraction of edges that must connect adjacent ranks (Dagre layers) before folding is allowed.
+ * Folding wraps the rank axis, so layouts whose edges mostly hop between neighbouring ranks stay
+ * clean; graphs with many long-range edges are left as the standard Dagre layout to avoid turning
+ * those edges into long diagonals.
+ */
+export const FOLD_MIN_LOCAL_EDGE_FRACTION = 0.6;

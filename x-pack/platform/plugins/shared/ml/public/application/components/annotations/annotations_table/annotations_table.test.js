@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import jobConfig from '../../../../../common/types/__mocks__/job_config_farequote.json';
+import jobConfig from '@kbn/ml-common-types/__mocks__/job_config_farequote.json';
 import mockAnnotations from './__mocks__/mock_annotations.json';
 import { AnnotationsTable } from './annotations_table';
 import React from 'react';

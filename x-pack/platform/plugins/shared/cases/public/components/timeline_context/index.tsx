@@ -29,6 +29,11 @@ interface TimelineProcessingPluginRendererProps {
   [key: string]: string | null | undefined;
 }
 
+export interface SelectTimelineModalProps {
+  onSelect: (args: { savedObjectId: string; title: string }) => void;
+  onClose: () => void;
+}
+
 export interface CasesTimelineIntegration {
   editor_plugins: {
     parsingPlugin: Plugin;
@@ -43,6 +48,9 @@ export interface CasesTimelineIntegration {
       onChange: (newValue: string) => void
     ) => UseInsertTimelineReturn;
   };
+  components?: {
+    SelectTimelineModal: React.ComponentType<SelectTimelineModalProps>;
+  };
 }
 
 // This context is available to all children of the stateful_event component where the provider is currently set
@@ -56,7 +64,7 @@ export const CasesTimelineIntegrationProvider: FC<
   }>
 > =
   // TODO: Fix this manually. Issue #123375
-  // eslint-disable-next-line react/display-name
+  // eslint-disable-next-line @kbn/compat/react-display-name
   ({ children, timelineIntegration }) => {
     const [activeTimelineIntegration] = useState(timelineIntegration ?? null);
 

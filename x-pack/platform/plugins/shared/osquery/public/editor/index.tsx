@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import { useEuiTheme } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 
 import { monaco } from '@kbn/monaco';
@@ -24,7 +25,6 @@ interface OsqueryEditorProps {
 }
 
 const editorOptions = {
-  theme: 'osquery',
   automaticLayout: true,
 };
 const MIN_HEIGHT = 100;
@@ -33,9 +33,27 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   onChange,
   commands,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { tableNames, tablesRecord } = useOsqueryTables();
   const [editorValue, setEditorValue] = useState(defaultValue ?? '');
   const [height, setHeight] = useState(MIN_HEIGHT);
+
+  // Monaco's overflow widgets (autocomplete suggestions) are rendered via a portal to document.body.
+  // By default, the CodeEditor only detects flyouts (z-index 1000) and sets z-index to 1100.
+  // When the editor is inside a modal (z-index 8000), suggestions appear behind the modal.
+  // Override to render above modals in all contexts.
+  const overflowWidgetsZIndex = (euiTheme.levels.modal as number) + 1;
+
+  const containerStyle = useMemo(
+    () => ({
+      border: euiTheme.border.thin,
+      borderRadius: euiTheme.border.radius.medium,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      overflow: 'hidden' as const,
+    }),
+    [euiTheme.border.thin, euiTheme.border.radius.medium, euiTheme.colors.backgroundBaseSubdued]
+  );
+
   useDebounce(
     () => {
       onChange(editorValue);
@@ -78,15 +96,19 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   );
 
   return (
-    <CodeEditor
-      languageId={'sql'}
-      value={editorValue}
-      onChange={setEditorValue}
-      options={editorOptions}
-      height={height + 'px'}
-      width="100%"
-      editorDidMount={editorDidMount}
-    />
+    <div style={containerStyle}>
+      <CodeEditor
+        languageId={'sql'}
+        value={editorValue}
+        onChange={setEditorValue}
+        options={editorOptions}
+        height={height + 'px'}
+        width="100%"
+        editorDidMount={editorDidMount}
+        overflowWidgetsContainerZIndexOverride={overflowWidgetsZIndex}
+        transparentBackground
+      />
+    </div>
   );
 };
 

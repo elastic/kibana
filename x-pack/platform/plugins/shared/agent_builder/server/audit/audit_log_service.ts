@@ -14,9 +14,11 @@ import { asError } from '../utils/as_error';
 import {
   AgentBuilderAuditAction,
   agentAuditEvent,
+  conversationAuditEvent,
   skillAuditEvent,
   toolAuditEvent,
   type AgentAuditEventParams,
+  type ConversationAuditEventParams,
   type SkillAuditEventParams,
   type ToolAuditEventParams,
 } from './audit_events';
@@ -54,6 +56,19 @@ export class AuditLogService {
         error: asError(error),
       });
     }
+  }
+
+  logConversationCreated(
+    request: KibanaRequest,
+    params: Omit<ConversationAuditEventParams, 'action'>
+  ): void {
+    this.log(
+      request,
+      conversationAuditEvent({
+        ...params,
+        action: AgentBuilderAuditAction.CONVERSATION_CREATE,
+      })
+    );
   }
 
   logAgentCreated(request: KibanaRequest, params: Omit<AgentAuditEventParams, 'action'>): void {
@@ -200,6 +215,31 @@ export class AuditLogService {
         };
       })
     );
+  }
+
+  /**
+   * Bulk helper used by internal bulk skill delete.
+   */
+  logBulkSkillDeleteResults(
+    request: KibanaRequest,
+    params: { ids: string[]; deleteResults: Array<PromiseSettledResult<boolean>> }
+  ): void {
+    const { ids, deleteResults } = params;
+    for (let index = 0; index < deleteResults.length; index++) {
+      const settled = deleteResults[index];
+      const skillId = ids[index];
+      if (settled.status === 'fulfilled' && settled.value) {
+        this.logSkillDeleted(request, { skillId });
+      } else {
+        this.logSkillDeleted(request, {
+          skillId,
+          error:
+            settled.status === 'rejected'
+              ? asError(settled.reason)
+              : new Error('Skill delete returned false'),
+        });
+      }
+    }
   }
 
   /**

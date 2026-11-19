@@ -10,9 +10,14 @@ import React from 'react';
 import { TestProviders } from '../../common/mock';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { useAgentBuilderAttachment } from './use_agent_builder_attachment';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
-import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
+
+const mockUseUiSetting = jest.fn().mockReturnValue(false);
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useUiSetting: (...args: unknown[]) => mockUseUiSetting(...args),
+}));
 
 const mockChatRef = {
   close: jest.fn(),
@@ -49,8 +54,10 @@ describe('useAgentBuilderAttachment', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    mockOpenAgentBuilderChat.mockClear();
+    mockChatRef.close.mockClear();
     jest.spyOn(Date, 'now').mockReturnValue(1234567890);
+    mockUseUiSetting.mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -88,8 +95,49 @@ describe('useAgentBuilderAttachment', () => {
         },
       ],
       sessionTag: 'security',
-      agentId: THREAT_HUNTING_AGENT_ID,
     });
+  });
+
+  it('forwards attachmentDescription onto the attachment as description', () => {
+    const { result } = renderHook(
+      () =>
+        useAgentBuilderAttachment({
+          ...defaultParams,
+          attachmentDescription: 'Rule: My detection rule',
+        }),
+      { wrapper: createWrapper(mockAgentBuilderService) }
+    );
+
+    act(() => {
+      result.current.openAgentBuilderFlyout();
+    });
+
+    expect(mockOpenAgentBuilderChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [expect.objectContaining({ description: 'Rule: My detection rule' })],
+      })
+    );
+  });
+
+  it('forwards origin onto the attachment', () => {
+    const { result } = renderHook(
+      () =>
+        useAgentBuilderAttachment({
+          ...defaultParams,
+          origin: 'rule-so-id',
+        }),
+      { wrapper: createWrapper(mockAgentBuilderService) }
+    );
+
+    act(() => {
+      result.current.openAgentBuilderFlyout();
+    });
+
+    expect(mockOpenAgentBuilderChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [expect.objectContaining({ origin: 'rule-so-id' })],
+      })
+    );
   });
 
   it('opens flyout with correct sessionTag', () => {
@@ -136,6 +184,22 @@ describe('useAgentBuilderAttachment', () => {
     });
 
     expect(mockOpenAgentBuilderChat).not.toHaveBeenCalled();
+  });
+
+  it('does not pass agentId when skills are enabled', () => {
+    mockUseUiSetting.mockReturnValue(true);
+
+    const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {
+      wrapper: createWrapper(mockAgentBuilderService),
+    });
+
+    act(() => {
+      result.current.openAgentBuilderFlyout();
+    });
+
+    expect(mockOpenAgentBuilderChat).toHaveBeenCalledTimes(1);
+    const callArgs = mockOpenAgentBuilderChat.mock.calls[0][0];
+    expect(callArgs).not.toHaveProperty('agentId');
   });
 
   it('generates attachment ID with timestamp', async () => {

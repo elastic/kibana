@@ -42,8 +42,10 @@ export interface DiffHunk {
 }
 
 export interface ProposalManagerOptions {
-  onAccept?: (proposalId: string) => void;
-  onReject?: (proposalId: string) => void;
+  onAccept?: (context: { proposalId: string; isBulkAction: boolean }) => void;
+  onReject?: (context: { proposalId: string; isBulkAction: boolean }) => void;
+  onHunkAccepted?: (hunkIndex: number) => void;
+  onHunkRejected?: (hunkIndex: number) => void;
 }
 
 interface HunkUIState {
@@ -99,14 +101,18 @@ export class ProposalManager {
   private contentChangeDisposable: monaco.IDisposable | null = null;
   private mouseMoveRafId: ReturnType<typeof requestAnimationFrame> | null = null;
   private isInternalEdit = false;
+  private isBulkOperation = false;
   private undoRedoService: UndoRedoService | undefined;
   private isDisposing = false;
+  private isSuspended = false;
 
   initialize(editor: monaco.editor.IStandaloneCodeEditor, options?: ProposalManagerOptions): void {
     this.editor = editor;
     this.options = options ?? {};
 
     this.mouseMoveDisposable = editor.onMouseMove((e) => {
+      // `mouseenter` does not fire if the pointer was already there when the editor mounted.
+      this.pointerInsideHotkeySurface = true;
       if (!this.hasPendingProposals()) return;
       const lineNumber = e.target.position?.lineNumber;
       if (lineNumber == null) return;
@@ -166,7 +172,7 @@ export class ProposalManager {
       this.originalModel = monaco.editor.createModel(model.getValue(), model.getLanguageId());
 
       this.contentChangeDisposable = model.onDidChangeContent(() => {
-        if (this.isInternalEdit) return;
+        if (this.isInternalEdit || this.isSuspended) return;
 
         if (this.hasPendingProposals()) {
           this.recomputeDiff();
@@ -233,11 +239,15 @@ export class ProposalManager {
     const newOrigValue = newOrigLines.join('\n');
     this.originalModel.setValue(newOrigValue);
 
+    if (!this.isBulkOperation) {
+      this.options.onHunkAccepted?.(hunkIndex);
+    }
+
     this.recomputeDiff();
     this.renderDiffUI();
 
-    if (!this.hasPendingProposals()) {
-      this.options.onAccept?.('all');
+    if (!this.hasPendingProposals() && !this.isBulkOperation) {
+      this.options.onAccept?.({ proposalId: 'all', isBulkAction: false });
     }
 
     if (this.undoRedoService && !this.isDisposing) {
@@ -285,11 +295,15 @@ export class ProposalManager {
     );
     this.isInternalEdit = false;
 
+    if (!this.isBulkOperation) {
+      this.options.onHunkRejected?.(hunkIndex);
+    }
+
     this.recomputeDiff();
     this.renderDiffUI();
 
-    if (!this.hasPendingProposals()) {
-      this.options.onReject?.('all');
+    if (!this.hasPendingProposals() && !this.isBulkOperation) {
+      this.options.onReject?.({ proposalId: 'all', isBulkAction: false });
     }
 
     if (this.undoRedoService && !this.isDisposing && inverseOps) {
@@ -319,17 +333,47 @@ export class ProposalManager {
   acceptAll(): void {
     if (!this.originalModel || !this.editor) return;
 
+    this.isBulkOperation = true;
     while (this.diffHunks.length > 0) {
       this.acceptHunk(0);
     }
+    this.isBulkOperation = false;
+    this.options.onAccept?.({ proposalId: 'all', isBulkAction: true });
   }
 
   rejectAll(): void {
     if (!this.originalModel || !this.editor) return;
 
+    this.isBulkOperation = true;
     while (this.diffHunks.length > 0) {
       this.rejectHunk(0);
     }
+    this.isBulkOperation = false;
+    this.options.onReject?.({ proposalId: 'all', isBulkAction: true });
+  }
+
+  /**
+   * Hides pending proposals while the editor shows other content, such as a
+   * past execution. Keeps the original content so `resume` can show them again.
+   */
+  suspend(): void {
+    if (!this.hasPendingProposals()) return;
+    this.isSuspended = true;
+    this.diffHunks = [];
+    this.clearAllHunkUI();
+    this.removeBulkBar();
+  }
+
+  /** Shows suspended proposals again, against the current editor content. */
+  resume(): void {
+    if (!this.isSuspended) return;
+    this.isSuspended = false;
+    this.recomputeDiff();
+    this.renderDiffUI();
+  }
+
+  hasSuspendedProposals(): boolean {
+    return this.isSuspended;
   }
 
   getDiffHunks(): DiffHunk[] {
@@ -338,6 +382,11 @@ export class ProposalManager {
 
   hasPendingProposals(): boolean {
     return this.diffHunks.length > 0;
+  }
+
+  /** Current content of the underlying editor model, or undefined if unavailable. */
+  getCurrentContent(): string | undefined {
+    return this.editor?.getModel()?.getValue();
   }
 
   dispose(): void {

@@ -219,7 +219,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
             <EuiText size="m">{i18n.SYSTEM_PROMPTS_TABLE_SETTINGS_DESCRIPTION}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="plusInCircle" onClick={onCreate} disabled={isTableLoading}>
+            <EuiButton iconType="plusCircle" onClick={onCreate} disabled={isTableLoading}>
               {i18n.CREATE_SYSTEM_PROMPT_LABEL}
             </EuiButton>
           </EuiFlexItem>

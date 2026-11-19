@@ -14,10 +14,14 @@ import {
 import { TestProviders } from '../../common/mock';
 import { DashboardRenderer } from './dashboard_renderer';
 
-jest.mock('@kbn/dashboard-plugin/public', () => ({
-  DashboardRenderer: jest.fn(() => <div data-test-subj="dashboardRenderer" />),
-  DashboardTopNav: jest.fn(() => <span data-test-subj="dashboardTopNav" />),
-}));
+jest.mock('@kbn/dashboard-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/dashboard-plugin/public');
+  return {
+    ...actual,
+    DashboardRenderer: jest.fn(() => <div data-test-subj="dashboardRenderer" />),
+    DashboardTopNav: jest.fn(() => <span data-test-subj="dashboardTopNav" />),
+  };
+});
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -64,10 +68,21 @@ describe('DashboardRenderer', () => {
       expect.objectContaining({
         viewMode: 'view',
         time_range: props.timeRange,
-        query: props.query,
+        query: {
+          expression: props.query.query,
+          language: 'kql',
+        },
         filters: props.filters,
       })
     );
+  });
+
+  it('publishes its dashboard as the Dashboard app client API', () => {
+    render(<DashboardRenderer {...props} />, { wrapper: TestProviders });
+
+    expect(
+      (DashboardContainerRenderer as unknown as jest.Mock).mock.calls[0][0].publishAsAppClientApi
+    ).toBe(true);
   });
 
   it('does not render when No Read Permission', () => {

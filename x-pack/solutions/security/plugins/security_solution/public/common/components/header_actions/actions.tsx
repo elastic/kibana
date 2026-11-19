@@ -6,9 +6,10 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import {
   makeSelectDocumentNotesBySavedObjectId,
   makeSelectNotesByDocumentId,
@@ -32,8 +33,8 @@ import { AlertContextMenu } from '../../../detections/components/alerts_table/ti
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import * as i18n from './translations';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
-import { useNavigateToAnalyzer } from '../../../flyout/document_details/shared/hooks/use_navigate_to_analyzer';
-import { useNavigateToSessionView } from '../../../flyout/document_details/shared/hooks/use_navigate_to_session_view';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../lib/telemetry';
 
 const ActionsContainer = styled.div`
   align-items: center;
@@ -54,6 +55,7 @@ export type ActionsComponentProps = Pick<
   | 'hit'
   | 'isEventViewer'
   | 'onEventDetailsPanelOpened'
+  | 'onRemoveFromCase'
   | 'onRuleChange'
   | 'refetch'
   | 'showNotes'
@@ -74,6 +76,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
   hit,
   isEventViewer = false,
   onEventDetailsPanelOpened,
+  onRemoveFromCase,
   onRuleChange,
   refetch,
   showNotes,
@@ -85,27 +88,16 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
   );
 
   const { startTransaction } = useStartTransaction();
+  const { openAnalyzer, openSessionView: openSessionViewFlyout } = useFlyoutApi();
 
   const eventType = getEventType(ecsData);
 
-  const { navigateToAnalyzer } = useNavigateToAnalyzer({
-    isFlyoutOpen: false,
-    eventId,
-    indexName: ecsData._index,
-    scopeId: timelineId,
-  });
-
-  const { navigateToSessionView } = useNavigateToSessionView({
-    isFlyoutOpen: false,
-    eventId,
-    indexName: ecsData._index,
-    scopeId: timelineId,
-  });
-
   const handleClick = useCallback(() => {
     startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
-    navigateToAnalyzer();
-  }, [startTransaction, navigateToAnalyzer]);
+    if (hit) {
+      openAnalyzer({ hit, onAlertUpdated: () => refetch?.(), origin: FLYOUT_ORIGIN.ROW_ACTION });
+    }
+  }, [startTransaction, hit, openAnalyzer, refetch]);
 
   const sessionViewConfig = useMemo(() => {
     const { process, _id, _index, timestamp, kibana } = ecsData;
@@ -134,8 +126,15 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
 
   const openSessionView = useCallback(() => {
     startTransaction({ name: ALERTS_ACTIONS.OPEN_SESSION_VIEW });
-    navigateToSessionView();
-  }, [navigateToSessionView, startTransaction]);
+    if (hit) {
+      openSessionViewFlyout({
+        hit,
+        jumpToCursor: sessionViewConfig?.jumpToCursor,
+        jumpToEntityId: sessionViewConfig?.jumpToEntityId,
+        onAlertUpdated: () => refetch?.(),
+      });
+    }
+  }, [startTransaction, hit, openSessionViewFlyout, sessionViewConfig, refetch]);
 
   const onExpandEvent = useCallback(() => {
     onEventDetailsPanelOpened();
@@ -174,6 +173,11 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
     [isEnterprisePlus, sessionViewConfig]
   );
 
+  const isRemoteDocument = useMemo(
+    () => isNonLocalIndexName(ecsData._index ?? ''),
+    [ecsData._index]
+  );
+
   return (
     <ActionsContainer data-test-subj="actions-container">
       <>
@@ -184,7 +188,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
                 <EuiButtonIcon
                   aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
                   data-test-subj="expand-event"
-                  iconType="expand"
+                  iconType="maximize"
                   onClick={onExpandEvent}
                   size="s"
                   color="text"
@@ -227,12 +231,11 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
         )}
         <AlertContextMenu
           ariaLabel={i18n.MORE_ACTIONS_FOR_ROW({ ariaRowindex, columnValues })}
-          ariaRowindex={ariaRowindex}
-          columnValues={columnValues}
           key="alert-context-menu"
           ecsRowData={ecsData}
           scopeId={timelineId}
-          disabled={false}
+          isRemoteDocument={isRemoteDocument}
+          onRemoveFromCase={onRemoveFromCase}
           onRuleChange={onRuleChange}
           refetch={refetch}
         />

@@ -1,0 +1,80 @@
+# -----
+# Copy from internal roles config in elasticsearch-controller
+# -----
+
+# Predefined roles for "VectorDB" project types
+
+viewer:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: ['manage_own_api_key', 'read_pipeline', 'read_project_routing']
+  indices:
+    - names:
+        - '*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'read_view_metadata'
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - 'read'
+      resources:
+        - '*'
+    # TODO temporary workaround for https://github.com/elastic/kibana/issues/264219 ; remove once resolved
+    - application: 'kibana-.kibana'
+      privileges:
+        - 'api:cluster:monitor/project_routing/get'
+      resources:
+        - '*'
+developer:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: ['all']
+  indices:
+    - names:
+        - '*'
+      privileges:
+        - 'all'
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - 'all'
+      resources:
+        - '*'
+    # TODO temporary workaround for https://github.com/elastic/kibana/issues/264219 ; remove once resolved
+    - application: 'kibana-.kibana'
+      privileges:
+        - 'api:cluster:monitor/project_routing/get'
+      resources:
+        - '*'
+
+# admin role defined in elasticsearch controller
+admin:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: ['all']
+  indices:
+    - names: ['*']
+      privileges: ['all']
+      allow_restricted_indices: false
+  applications:
+    - application: '*'
+      privileges: ['*']
+      resources: ['*']
+
+# temporarily added for testing purpose
+system_indices_superuser:
+  cluster: ['all']
+  indices:
+    - names: ['*']
+      privileges: ['all']
+      allow_restricted_indices: true
+  applications:
+    - application: '*'
+      privileges: ['*']
+      resources: ['*']
+  run_as: ['*']

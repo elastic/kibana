@@ -12,6 +12,8 @@ import { OSQUERY_ACTIONS_INDEX } from '@kbn/osquery-plugin/common/constants';
 import type { EndpointAuthz } from '../../../../../../common/endpoint/types/authz';
 import type { ActionRequestOptions } from '../../../../../../common/search_strategy/endpoint/response_actions';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
+import { prefixIndexPatternsWithCcs } from '../../../../../endpoint/utils/ccs_utils';
+import { buildOriginSpaceIdFilter } from '../../../../../endpoint/services/actions/utils/build_origin_space_id_filter';
 
 const EndpointFieldsLimited = [
   'EndpointActions.action_id',
@@ -20,8 +22,23 @@ const EndpointFieldsLimited = [
   'EndpointActions.data.command',
 ];
 
+/**
+ * The alert ids this query is keyed on are caller-supplied, so a fanned-out read needs its own space
+ * bound. Defend and Osquery stamp the space on different fields, and this query spans both indices,
+ * so each document shape is bounded by the field it actually carries.
+ */
+const buildSpaceFilter = (spaceId: string): estypes.QueryDslQueryContainer => ({
+  bool: {
+    should: [
+      buildOriginSpaceIdFilter(spaceId, { matchMissingOriginSpaceId: false }),
+      { term: { space_id: spaceId } },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
 export const buildResponseActionsQuery = (
-  { alertIds, sort }: ActionRequestOptions,
+  { alertIds, sort, ccsEnabled, spaceId }: ActionRequestOptions,
   authz: EndpointAuthz | void
 ): ISearchRequestParams => {
   const fields = authz?.canAccessEndpointActionsLogManagement
@@ -30,7 +47,10 @@ export const buildResponseActionsQuery = (
 
   const dslQuery = {
     allow_no_indices: true,
-    index: [ENDPOINT_ACTIONS_INDEX, OSQUERY_ACTIONS_INDEX],
+    index: prefixIndexPatternsWithCcs(
+      [ENDPOINT_ACTIONS_INDEX, OSQUERY_ACTIONS_INDEX].join(','),
+      ccsEnabled ?? false
+    ).split(','),
     ignore_unavailable: true,
     fields,
     _source: false,
@@ -44,6 +64,7 @@ export const buildResponseActionsQuery = (
             terms: { 'data.alert_id': alertIds },
           },
         ] as estypes.QueryDslQueryContainer[],
+        ...(spaceId ? { filter: [buildSpaceFilter(spaceId)] } : {}),
       },
     },
     sort: [

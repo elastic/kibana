@@ -18,3 +18,5 @@ export type {
   ClassicNavItem,
   ClassicNavItemDeepLink,
 } from './types';
+
+export { SEARCH_INDEX_MANAGEMENT_LOCATOR_ID } from './constants';

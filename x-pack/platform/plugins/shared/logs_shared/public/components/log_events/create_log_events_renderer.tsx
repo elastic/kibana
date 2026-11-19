@@ -28,6 +28,7 @@ export const createLogEventsRenderer =
     timeRange,
     index,
     displayOptions = DEFAULT_DISPLAY_OPTIONS,
+    executionContext,
   }: LogEventsProps) => {
     // Convert user queries to ES filters that will be highlighted
     const documentFilters = useMemo(() => {
@@ -83,6 +84,7 @@ export const createLogEventsRenderer =
         {...(contextFilters.length > 0 && { nonHighlightingFilters: contextFilters })}
         displayOptions={displayOptions}
         height="100%"
+        executionContext={executionContext}
         dependencies={{
           embeddable,
           searchSource,

@@ -80,7 +80,7 @@ describe('SQL search strategy', () => {
           .search({ params }, { transport: { requestTimeout: 30000 } }, mockDeps)
           .toPromise();
 
-        expect(mockSqlQuery).toBeCalled();
+        expect(mockSqlQuery).toHaveBeenCalled();
         const [request, searchOptions] = mockSqlQuery.mock.calls[0];
         expect(request).toEqual({
           format: 'json',
@@ -111,18 +111,35 @@ describe('SQL search strategy', () => {
           .search({ id: 'foo', params }, { transport: { requestTimeout: 30000 } }, mockDeps)
           .toPromise();
 
-        expect(mockSqlGetAsync).toBeCalled();
+        expect(mockSqlGetAsync).toHaveBeenCalled();
         const [request, searchOptions] = mockSqlGetAsync.mock.calls[0];
         expect(request).toEqual({
           format: 'json',
           id: 'foo',
           keep_alive: '60000ms',
-          wait_for_completion_timeout: '100ms',
+          wait_for_completion_timeout: '2000ms',
         });
         expect(searchOptions).toEqual({
           meta: true,
-          requestTimeout: 30000,
+          requestTimeout: 600_000,
           signal: undefined,
+        });
+      });
+
+      it('uses options.pollLength as wait_for_completion_timeout when polling', async () => {
+        mockSqlGetAsync.mockResolvedValueOnce(mockSqlResponse);
+
+        const esSearch = await sqlSearchStrategyProvider(mockSearchConfig, mockLogger);
+
+        await esSearch.search({ id: 'foo' }, { pollLength: '30s' }, mockDeps).toPromise();
+
+        expect(mockSqlGetAsync).toHaveBeenCalled();
+        const [request] = mockSqlGetAsync.mock.calls[0];
+        expect(request).toEqual({
+          format: 'json',
+          id: 'foo',
+          keep_alive: '60000ms',
+          wait_for_completion_timeout: '30s',
         });
       });
 
@@ -148,9 +165,9 @@ describe('SQL search strategy', () => {
           err = e;
         }
 
-        expect(mockSqlQuery).toBeCalled();
+        expect(mockSqlQuery).toHaveBeenCalled();
         expect(err).not.toBeUndefined();
-        expect(mockSqlDelete).toBeCalled();
+        expect(mockSqlDelete).toHaveBeenCalled();
       });
     });
 
@@ -166,7 +183,7 @@ describe('SQL search strategy', () => {
 
         await esSearch.search({ params }, { sessionId: '1' }, mockDeps).toPromise();
 
-        expect(mockSqlQuery).toBeCalled();
+        expect(mockSqlQuery).toHaveBeenCalled();
         const request = mockSqlQuery.mock.calls[0][0];
         expect(request.query).toEqual(params.query);
 
@@ -185,7 +202,7 @@ describe('SQL search strategy', () => {
 
         await esSearch.search({ id: 'foo', params }, { sessionId: '1' }, mockDeps).toPromise();
 
-        expect(mockSqlGetAsync).toBeCalled();
+        expect(mockSqlGetAsync).toHaveBeenCalled();
         const request = mockSqlGetAsync.mock.calls[0][0];
         expect(request.id).toEqual('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout');
@@ -204,7 +221,7 @@ describe('SQL search strategy', () => {
 
         await esSearch.search({ params }, { sessionId: '1' }, mockDeps).toPromise();
 
-        expect(mockSqlQuery).toBeCalled();
+        expect(mockSqlQuery).toHaveBeenCalled();
         const request = mockSqlQuery.mock.calls[0][0];
         expect(request.query).toEqual(params.query);
 
@@ -224,7 +241,7 @@ describe('SQL search strategy', () => {
 
         await esSearch.search({ id: 'foo', params }, { sessionId: '1' }, mockDeps).toPromise();
 
-        expect(mockSqlGetAsync).toBeCalled();
+        expect(mockSqlGetAsync).toHaveBeenCalled();
         const request = mockSqlGetAsync.mock.calls[0][0];
         expect(request.id).toEqual('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout');
@@ -255,7 +272,7 @@ describe('SQL search strategy', () => {
       } catch (e) {
         err = e;
       }
-      expect(mockSqlQuery).toBeCalled();
+      expect(mockSqlQuery).toHaveBeenCalled();
       expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(404);
       expect(err?.message).toBe(errResponse.message);
@@ -279,7 +296,7 @@ describe('SQL search strategy', () => {
       } catch (e) {
         err = e;
       }
-      expect(mockSqlQuery).toBeCalled();
+      expect(mockSqlQuery).toHaveBeenCalled();
       expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(500);
       expect(err?.message).toBe(errResponse.message);
@@ -344,7 +361,7 @@ describe('SQL search strategy', () => {
 
       await esSearch.cancel!(id, {}, mockDeps);
 
-      expect(mockSqlDelete).toBeCalled();
+      expect(mockSqlDelete).toHaveBeenCalled();
       const request = mockSqlDelete.mock.calls[0][0];
       expect(request).toEqual({ id });
     });
@@ -359,7 +376,7 @@ describe('SQL search strategy', () => {
       const esSearch = await sqlSearchStrategyProvider(mockSearchConfig, mockLogger);
       await esSearch.extend!(id, keepAlive, {}, mockDeps);
 
-      expect(mockSqlGetAsync).toBeCalled();
+      expect(mockSqlGetAsync).toHaveBeenCalled();
       const request = mockSqlGetAsync.mock.calls[0][0];
       expect(request).toEqual({ id, keep_alive: keepAlive });
     });

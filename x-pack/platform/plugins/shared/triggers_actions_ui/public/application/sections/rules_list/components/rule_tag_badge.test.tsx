@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { RuleTagBadge } from './rule_tag_badge';
 
 const onClickMock = jest.fn();
@@ -22,45 +22,41 @@ describe('RuleTagBadge', () => {
   });
 
   it('renders the initial badge count correctly', () => {
-    const wrapper = mountWithIntl(
-      <RuleTagBadge isOpen={false} tags={tags} onClick={onClickMock} onClose={onCloseMock} />
-    );
+    render(<RuleTagBadge isOpen={false} tags={tags} onClick={onClickMock} onClose={onCloseMock} />);
 
-    expect(wrapper.find('[data-test-subj="ruleTagBadge"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="ruleTagBadge"]').first().text()).toEqual(
-      `${tags.length}`
-    );
+    expect(screen.getByTestId('ruleTagBadge')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleTagBadge')).toHaveTextContent(`${tags.length}`);
   });
 
-  it('can open and close the popover', () => {
-    const { rerender, baseElement } = render(
+  it('can open and close the popover', async () => {
+    const { rerender } = render(
       <RuleTagBadge isOpen={false} tags={tags} onClick={onClickMock} onClose={onCloseMock} />
     );
 
-    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-a"]')).toBe(null);
-    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-b"]')).toBe(null);
-    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-c"]')).toBe(null);
+    expect(screen.queryByTestId('ruleTagBadgeItem-a')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleTagBadgeItem-b')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleTagBadgeItem-c')).not.toBeInTheDocument();
 
-    fireEvent.click(baseElement.querySelector('[data-test-subj="ruleTagBadge"]')!);
+    await userEvent.click(screen.getByTestId('ruleTagBadge'));
     expect(onClickMock).toHaveBeenCalledTimes(1);
 
     rerender(
       <RuleTagBadge isOpen={true} tags={tags} onClick={onClickMock} onClose={onCloseMock} />
     );
 
-    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-a"]')).toBeTruthy();
-    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-b"]')).toBeTruthy();
-    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-c"]')).toBeTruthy();
+    expect(screen.getByTestId('ruleTagBadgeItem-a')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleTagBadgeItem-b')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleTagBadgeItem-c')).toBeInTheDocument();
 
-    fireEvent.click(baseElement.querySelector('[data-test-subj="ruleTagBadge"]')!);
+    await userEvent.click(screen.getByTestId('ruleTagBadge'));
     expect(onClickMock).toHaveBeenCalledTimes(2);
   });
 
   it('shows all the tags without clicking when passing "spread" props with "true"', () => {
-    const wrapper = mountWithIntl(<RuleTagBadge tags={tags} tagsOutPopover={true} />);
-    expect(wrapper.find('[data-test-subj="tagsOutPopover"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="ruleTagBadgeItem-a"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="ruleTagBadgeItem-b"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="ruleTagBadgeItem-c"]').exists()).toBeTruthy();
+    render(<RuleTagBadge tags={tags} tagsOutPopover={true} />);
+    expect(screen.getByTestId('tagsOutPopover')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleTagBadgeItem-a')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleTagBadgeItem-b')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleTagBadgeItem-c')).toBeInTheDocument();
   });
 });

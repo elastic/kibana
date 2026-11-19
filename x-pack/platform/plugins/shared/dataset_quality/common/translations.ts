@@ -104,6 +104,20 @@ export const flyoutFailedDocsTrendText = i18n.translate(
   }
 );
 
+export const degradedDocsOverTimeText = i18n.translate(
+  'xpack.datasetQuality.overview.degradedDocsOverTime',
+  {
+    defaultMessage: 'Degraded documents over time',
+  }
+);
+
+export const failedDocsOverTimeText = i18n.translate(
+  'xpack.datasetQuality.overview.failedDocsOverTime',
+  {
+    defaultMessage: 'Failed documents over time',
+  }
+);
+
 export const flyoutDegradedDocsPercentageText = i18n.translate(
   'xpack.datasetQuality.flyoutDegradedDocsPercentage',
   {
@@ -763,6 +777,13 @@ export const manualMitigationCustomPipelineCopyPipelineNameAriaText = i18n.trans
   }
 );
 
+export const manualMitigationCustomPipelineCopyPipelineNameSuccessText = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.copyPipelineNameSuccess',
+  {
+    defaultMessage: 'Pipeline name copied to clipboard',
+  }
+);
+
 export const manualMitigationCustomPipelineCreateEditPipelineLink = i18n.translate(
   'xpack.datasetQuality.details.degradedField.possibleMitigation.createEditPipelineLink',
   {
@@ -881,5 +902,19 @@ export const createConvertProcessor = i18n.translate(
   'xpack.datasetQuality.details.degradedField.possibleMitigation.createConvertProcessorLink',
   {
     defaultMessage: 'Create a convert processor',
+  }
+);
+
+export const qualityIssuesTableCaption = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssuesTableCaption',
+  {
+    defaultMessage: 'Quality issues',
+  }
+);
+
+export const failedDocsInfoTableCaption = i18n.translate(
+  'xpack.datasetQuality.details.failedDocsInfoTableCaption',
+  {
+    defaultMessage: 'Failed documents information',
   }
 );

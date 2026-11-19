@@ -29,7 +29,7 @@ describe('getColumnState', () => {
       alignment: 'left',
       colorMode: 'none',
     });
-    expect(mockGetPalette).toBeCalledTimes(0);
+    expect(mockGetPalette).toHaveBeenCalledTimes(0);
   });
 
   test('should return column state with palette if series is provided', () => {
@@ -40,7 +40,7 @@ describe('getColumnState', () => {
       colorMode: 'text',
       palette: { id: 'custom' },
     });
-    expect(mockGetPalette).toBeCalledTimes(1);
+    expect(mockGetPalette).toHaveBeenCalledTimes(1);
   });
 
   test('should return column state with collapseFn if collapseFn is provided', () => {
@@ -52,6 +52,6 @@ describe('getColumnState', () => {
       palette: { id: 'custom' },
       collapseFn: 'max',
     });
-    expect(mockGetPalette).toBeCalledTimes(1);
+    expect(mockGetPalette).toHaveBeenCalledTimes(1);
   });
 });

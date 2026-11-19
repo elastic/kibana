@@ -11,6 +11,7 @@ import {
   MOCK_IDP_ATTRIBUTE_ROLES,
   MOCK_IDP_ATTRIBUTE_EMAIL,
   MOCK_IDP_ATTRIBUTE_NAME,
+  MOCK_IDP_SP_BASE_URL,
 } from '@kbn/mock-idp-utils';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import {
@@ -27,11 +28,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import type { DeploymentAgnosticCommonServices } from '../services';
 import { services } from '../services';
-import {
-  AI_ASSISTANT_SNAPSHOT_REPO_PATH,
-  STREAMS_SNAPSHOT_REPO_PATH,
-  LOCAL_PRODUCT_DOC_PATH,
-} from './common_paths';
+import { AI_ASSISTANT_SNAPSHOT_REPO_PATH, STREAMS_SNAPSHOT_REPO_PATH } from './common_paths';
 
 interface CreateTestConfigOptions<T> {
   esServerArgs?: string[];
@@ -49,13 +46,12 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     if (options.esServerArgs || options.kbnServerArgs) {
       throw new Error(
-        `FTR doesn't provision custom ES/Kibana server arguments into the ESS deployment.
-  It may lead to unexpected test failures on Cloud. Please contact #appex-qa.`
+        `Deployment-agnostic configs run unchanged on ECH (Elastic Cloud). Custom ES/Kibana server args passed here
+  won't be set on ECH and will cause unexpected test failures.
+  If your test needs a feature flag, create a config under feature_flag_configs/ using
+  createStatefulFeatureFlagTestConfig from feature_flag.stateful.config.base.ts.`
       );
     }
-
-    // if config is executed on CI or locally
-    const isRunOnCI = process.env.CI;
 
     const xPackAPITestsConfig = await readConfigFile(
       require.resolve('../../api_integration/config.ts')
@@ -67,7 +63,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
     );
     const samlIdPPlugin = path.resolve(
       __dirname,
-      '../../security_api_integration/plugins/saml_provider'
+      '../../../test_plugins/security_api_integration/plugins/saml_provider'
     );
 
     const servers = {
@@ -80,8 +76,6 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
         protocol: process.env.TEST_CLOUD ? 'https' : 'http',
       },
     };
-
-    const kbnUrl = `${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`;
 
     return {
       servers,
@@ -99,6 +93,8 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
         exclude: [...(options.suiteTags?.exclude || []), 'skipStateful'],
       },
 
+      // ⚠️  Do not add server args here to make tests pass as they won't be set on ECH (Elastic Cloud Hosted).
+      //     If your test needs a feature flag, use createStatefulFeatureFlagTestConfig (feature_flag_configs/).
       esTestCluster: {
         ...xPackAPITestsConfig.get('esTestCluster'),
         serverArgs: [
@@ -107,9 +103,12 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=0`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${idpPath}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id=${MOCK_IDP_ENTITY_ID}`,
-          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${kbnUrl}`,
-          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${kbnUrl}/api/security/saml/callback`,
-          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${kbnUrl}/logout`,
+          // SP args must match the fixed URL the mock IdP plugin embeds in SAML responses.
+          // The plugin's `onPreResponse` rewrites IdP-bound redirects to the actual Kibana URL
+          // (`server.publicBaseUrl` below) at runtime, so ES does not need to know that URL.
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${MOCK_IDP_SP_BASE_URL}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${MOCK_IDP_SP_BASE_URL}/logout`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal=${MOCK_IDP_ATTRIBUTE_PRINCIPAL}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
@@ -123,12 +122,12 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           path.resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml'),
         ],
       },
+      // ⚠️  Do not add server args here to make tests pass as they won't be set on ECH (Elastic Cloud Hosted).
+      //     If your test needs a feature flag, use createStatefulFeatureFlagTestConfig (feature_flag_configs/).
       kbnTestServer: {
         ...xPackAPITestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-          // if the config is run locally, explicitly enable mock-idp-plugin for UI role selector
-          ...(isRunOnCI ? [] : ['--mockIdpPlugin.enabled=true']),
           // This ensures that we register the Security SAML API endpoints.
           // In the real world the SAML config is injected by control plane.
           `--plugin-path=${samlIdPPlugin}`,
@@ -144,12 +143,11 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
             basic: { 'cloud-basic': { order: 1 } },
           })}`,
           `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
-          '--xpack.uptime.service.password=test',
-          '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
-          '--xpack.uptime.service.devUrl=mockDevUrl',
-          '--xpack.uptime.service.manifestUrl=mockDevUrl',
+          '--xpack.synthetics.service.password=test',
+          '--xpack.synthetics.service.username=localKibanaIntegrationTestsUser',
+          '--xpack.synthetics.service.devUrl=mockDevUrl',
+          '--xpack.synthetics.service.manifestUrl=mockDevUrl',
           '--xpack.observabilityAIAssistant.disableKbSemanticTextMigration=true',
-          `--xpack.productDocBase.artifactRepositoryUrl=file:///${LOCAL_PRODUCT_DOC_PATH}`,
           ...(dockerRegistryPort
             ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
             : []),

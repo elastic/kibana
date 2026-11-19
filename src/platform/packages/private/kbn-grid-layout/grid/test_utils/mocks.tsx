@@ -11,6 +11,13 @@ import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { ObservedSize } from 'use-resize-observer/polyfilled';
 
+import type { ScrollContainer } from '@kbn/core-chrome-layout-utils';
+import {
+  DASHBOARD_GRID_COLUMN_COUNT,
+  DASHBOARD_GRID_MARGIN_SIZE,
+  DASHBOARD_GRID_ROW_HEIGHT,
+} from '@kbn/dashboard-constants';
+
 import type { ActivePanelEvent } from '../grid_panel';
 import type { ActiveSectionEvent } from '../grid_section';
 import type {
@@ -22,13 +29,9 @@ import type {
 } from '../types';
 import { getSampleOrderedLayout } from './sample_layout';
 
-const DASHBOARD_MARGIN_SIZE = 8;
-const DASHBOARD_GRID_HEIGHT = 20;
-const DASHBOARD_GRID_COLUMN_COUNT = 48;
-
 export const gridSettings = {
-  gutterSize: DASHBOARD_MARGIN_SIZE,
-  rowHeight: DASHBOARD_GRID_HEIGHT,
+  gutterSize: DASHBOARD_GRID_MARGIN_SIZE,
+  rowHeight: DASHBOARD_GRID_ROW_HEIGHT,
   columnCount: DASHBOARD_GRID_COLUMN_COUNT,
 };
 export const mockRenderPanelContents = jest.fn((panelId) => (
@@ -54,6 +57,7 @@ export const getGridLayoutStateManagerMock = (overrides?: Partial<GridLayoutStat
       columnPixelWidth: 10,
       keyboardDragTopLimit: 0,
     }),
+    scrollContainer$: new BehaviorSubject<ScrollContainer>(document.documentElement),
     sectionRefs: { current: {} },
     ...overrides,
   } as GridLayoutStateManager;

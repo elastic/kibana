@@ -14,6 +14,7 @@ import { Env, RawConfigService } from '@kbn/config';
 import { CriticalError } from '@kbn/core-base-server-internal';
 import { Root } from './root';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
+import { registerFatalExitLogging } from './register_fatal_exit_logging';
 
 interface BootstrapArgs {
   configs: string[];
@@ -37,7 +38,7 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   // from `core/server` will load `dev-utils`. As some tests are mocking the `fs` package,
   // and as `REPO_ROOT` is initialized on the fly when importing `dev-utils` and requires
   // the `fs` package, it causes failures. This is why we use a dynamic `require` here.
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const { REPO_ROOT } = require('@kbn/repo-info');
 
   const env = Env.createDefault(REPO_ROOT, {
@@ -49,11 +50,26 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
   rawConfigService.loadConfig();
 
-  const root = new Root(rawConfigService, env, onRootShutdown);
+  const root = new Root(rawConfigService, env, handleRootShutdown);
   const cliLogger = root.logger.get('cli');
   const rootLogger = root.logger.get('root');
 
+  const fatalExitLogging = registerFatalExitLogging({ logger: rootLogger });
+
+  // Every shutdown reported by `Root.shutdown()` ends up here, so the fatal exit guard
+  // only has to speak up for terminations that never reach this path.
+  function handleRootShutdown(error?: any) {
+    fatalExitLogging.markShutdownReasonReported();
+    onRootShutdown(error);
+  }
+
   rootLogger.info('Kibana is starting');
+
+  if (!isCodeGenerationFromStringsDisallowed()) {
+    rootLogger.warn(
+      'Code generation from strings is allowed on this Kibana instance. This hardening measure was disabled (KBN_DISALLOW_CODE_GEN_FROM_STRINGS=false / --disallow-code-generation-from-strings not set).'
+    );
+  }
 
   cliLogger.debug('Kibana configurations evaluated in this order: ' + env.configs.join(', '));
 
@@ -127,6 +143,16 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
     }
   } catch (err) {
     await shutdown(err);
+  }
+}
+
+function isCodeGenerationFromStringsDisallowed(): boolean {
+  try {
+    // eslint-disable-next-line no-new-func -- we are intentionally trying to execute code generation from strings
+    new Function('');
+    return false;
+  } catch {
+    return true;
   }
 }
 

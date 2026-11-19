@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { matchers as emotionMatchers } from '@emotion/jest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { mount } from 'enzyme';
-// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
-import 'jest-styled-components';
+expect.extend(emotionMatchers);
 import type { Filter } from '@kbn/es-query';
 
 import { SecurityPageName } from '../../../../app/types';
@@ -181,7 +181,7 @@ describe('AlertsHistogramPanel', () => {
     const option = await screen.findByText(optionToSelect);
     fireEvent.click(option);
 
-    expect(onFieldSelected).toBeCalledWith(optionToSelect);
+    expect(onFieldSelected).toHaveBeenCalledWith(optionToSelect);
   });
 
   describe('stackByLabel', () => {
@@ -333,7 +333,7 @@ describe('AlertsHistogramPanel', () => {
           preventDefault: jest.fn(),
         });
 
-      expect(mockNavigateToApp).toBeCalledWith('securitySolutionUI', {
+      expect(mockNavigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
         deepLinkId: SecurityPageName.alerts,
         path: '',
       });
@@ -411,8 +411,8 @@ describe('AlertsHistogramPanel', () => {
         );
 
         wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
-        expect(mockSetIsExpanded).toBeCalledWith(false);
-        expect(mockSetToggle).not.toBeCalled();
+        expect(mockSetIsExpanded).toHaveBeenCalledWith(false);
+        expect(mockSetToggle).not.toHaveBeenCalled();
         wrapper.unmount();
       });
 
@@ -441,6 +441,24 @@ describe('AlertsHistogramPanel', () => {
         );
         wrapper.unmount();
       });
+
+      it('when isExpanded is true, uses the expanded panel height', () => {
+        const { getByTestId } = render(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} isExpanded={true} panelHeight={375} />
+          </TestProviders>
+        );
+        expect(getByTestId('alerts-histogram-panel')).toHaveStyleRule('height', '375px');
+      });
+
+      it('when isExpanded is false, uses the collapsed panel height', () => {
+        const { getByTestId } = render(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} isExpanded={false} panelHeight={375} />
+          </TestProviders>
+        );
+        expect(getByTestId('alerts-histogram-panel')).toHaveStyleRule('height', '64px');
+      });
     });
 
     describe('When setIsExpanded is not available, use toggleQuery', () => {
@@ -453,7 +471,7 @@ describe('AlertsHistogramPanel', () => {
           </TestProviders>
         );
         wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
-        expect(mockSetToggle).toBeCalledWith(false);
+        expect(mockSetToggle).toHaveBeenCalledWith(false);
         wrapper.unmount();
       });
 

@@ -6,15 +6,20 @@
  */
 
 import { useState, useMemo, useEffect } from 'react';
-import { combineLatest, tap, debounceTime, switchMap, skipWhile, of } from 'rxjs';
+import { combineLatest, tap, debounceTime, switchMap, skipWhile, of, EMPTY } from 'rxjs';
 import { Subject, catchError } from 'rxjs';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { CoreStart } from '@kbn/core/public';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import { fetch$ } from '@kbn/presentation-publishing';
-import type { SeverityThreshold } from '../../../common/types/anomalies';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import type { ErrorType } from '@kbn/ml-error-utils';
+import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
 import type { AnomalyChartsServices, AnomalyChartsApi } from '..';
 import { getJobsObservable } from '../common/get_jobs_observable';
-import { OVERALL_LABEL, SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
+import { OVERALL_LABEL } from '../../application/explorer/explorer_constants';
 import { processFilters } from '../common/process_filters';
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
 import {
@@ -24,6 +29,7 @@ import {
 } from '../../application/explorer/explorer_utils';
 import type { ExplorerChartsData } from '../../application/explorer/explorer_charts/explorer_charts_container_service';
 import type { MlStartDependencies } from '../../plugin';
+import { takeUntilAborted } from '../../application/util/take_until_aborted';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
@@ -36,7 +42,8 @@ export function useAnomalyChartsData(
     onRenderComplete: () => void;
     onLoading: (v: boolean) => void;
     onError: (error: Error) => void;
-  }
+  },
+  requestCancellationManager?: RequestCancellationManager
 ): {
   chartsData: ExplorerChartsData | undefined;
   isLoading: boolean;
@@ -47,6 +54,12 @@ export function useAnomalyChartsData(
   const [chartsData, setChartsData] = useState<ExplorerChartsData>();
   const [error, setError] = useState<Error | null>();
   const [isLoading, setIsLoading] = useState(false);
+
+  const cancellationManager = useMemo(
+    () => requestCancellationManager ?? new RequestCancellationManager(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
   const severity$ = useMemo(() => new Subject<SeverityThreshold[]>(), []);
@@ -60,10 +73,17 @@ export function useAnomalyChartsData(
       dataPublishingServices: fetch$(api),
     })
       .pipe(
-        tap(setIsLoading.bind(null, true)),
+        tap(() => {
+          // Starting a new load lifts a previous cancellation. This happens before the debounce so
+          // that cancelling while the fetch is still debouncing prevents the requests from starting.
+          cancellationManager.startLoad();
+          setIsLoading(true);
+        }),
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
         tap(() => {
-          renderCallbacks.onLoading(true);
+          if (!cancellationManager.signal.aborted) {
+            renderCallbacks.onLoading(true);
+          }
         }),
         switchMap(
           ({
@@ -73,6 +93,12 @@ export function useAnomalyChartsData(
             severityValue,
             dataPublishingServices,
           }) => {
+            const { signal } = cancellationManager;
+            if (signal.aborted) {
+              // Cancelled before the requests started.
+              setIsLoading(false);
+              return EMPTY;
+            }
             const { timeRange: timeRangeInput, filters, query } = dataPublishingServices;
             if (!explorerJobs) {
               // couldn't load the list of jobs
@@ -97,11 +123,14 @@ export function useAnomalyChartsData(
             }
 
             const bounds = anomalyExplorerService.getTimeBounds();
+            if (bounds.min === undefined || bounds.max === undefined) {
+              throw new Error('Unable to load anomaly charts: time range bounds are not defined.');
+            }
 
             // Can be from input time range or from the timefilter bar
             const selections: AppStateSelectedCells = {
               lanes: [OVERALL_LABEL],
-              times: [bounds.min?.unix()!, bounds.max?.unix()!],
+              times: [bounds.min.unix(), bounds.max.unix()],
               type: SWIMLANE_TYPE.OVERALL,
             };
 
@@ -114,22 +143,38 @@ export function useAnomalyChartsData(
 
             const timeRange = getSelectionTimeRange(selections, bounds);
 
-            return anomalyExplorerService.getAnomalyData$(
-              jobIds,
-              embeddableContainerWidth,
-              timeRange.earliestMs,
-              timeRange.latestMs,
-              severityValue,
-              influencersFilterQuery,
-              selectionInfluencers,
-              maxSeriesToPlot
-            );
+            return anomalyExplorerService
+              .getAnomalyData$(
+                jobIds,
+                embeddableContainerWidth,
+                timeRange.earliestMs,
+                timeRange.latestMs,
+                severityValue,
+                influencersFilterQuery,
+                selectionInfluencers,
+                maxSeriesToPlot
+              )
+              .pipe(
+                // Unsubscribing aborts the in-flight request.
+                takeUntilAborted(signal),
+                tap({
+                  complete: () => {
+                    // A replaced request is followed by a new load that manages the loading state.
+                    if (signal.aborted && signal.reason !== AbortReason.REPLACED) {
+                      setIsLoading(false);
+                    }
+                  },
+                })
+              );
           }
         ),
-        catchError((e) => {
+        catchError((e: unknown) => {
           // eslint-disable-next-line no-console
           console.error(`Error occured fetching anomaly charts data for embeddable\n`, e);
-          setError(e.body);
+          const message = extractErrorMessage(e as ErrorType);
+          setError(e instanceof Error ? e : new Error(message));
+          setIsLoading(false);
+          renderCallbacks.onLoading(false);
           return of(undefined);
         })
       )

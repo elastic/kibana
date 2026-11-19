@@ -19,14 +19,11 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import React from 'react';
 import { createEsqlDataSource } from '../../../common/data_sources';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
-import type {
-  Action,
-  ActionDefinition,
-  ActionExecutionContext,
-} from '@kbn/ui-actions-plugin/public/actions';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
 import { type AdditionalCellAction, type DiscoverCellActionExecutionContext } from '../types';
 import { createContextAwarenessMocks } from '../__mocks__';
 import { type ScopedProfilesManager } from '../profiles_manager';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../toolkit';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import { v4 as uuidv4 } from 'uuid';
 import type { ScopedDiscoverEBTManager } from '../../ebt_manager';
@@ -38,12 +35,11 @@ let mockUuid = 0;
 
 jest.mock('uuid', () => ({ ...jest.requireActual('uuid'), v4: jest.fn() }));
 
-const mockActions: Array<ActionDefinition<DiscoverCellActionExecutionContext>> = [];
+const mockActions: string[] = [];
 const mockTriggerActions: Record<string, string[]> = { [DISCOVER_CELL_ACTIONS_TRIGGER_ID]: [] };
 
-jest.spyOn(discoverServiceMock.uiActions, 'registerAction').mockImplementation((action) => {
-  mockActions.push(action as ActionDefinition<DiscoverCellActionExecutionContext>);
-  return action as Action;
+jest.spyOn(discoverServiceMock.uiActions, 'registerActionAsync').mockImplementation((actionId) => {
+  mockActions.push(actionId);
 });
 
 jest
@@ -54,7 +50,7 @@ jest
 
 jest.spyOn(discoverServiceMock.uiActions, 'unregisterAction').mockImplementation((id) => {
   mockActions.splice(
-    mockActions.findIndex((action) => action.id === id),
+    mockActions.findIndex((actionId) => actionId === id),
     1
   );
 });
@@ -99,6 +95,7 @@ describe('useAdditionalCellActions', () => {
     mockScopedEbtManager = scopedEbtManagerMock;
     mockScopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager({
       scopedEbtManager: mockScopedEbtManager,
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     });
     (uuidv4 as jest.Mock).mockImplementation(() => (++mockUuid).toString());
   });

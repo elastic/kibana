@@ -17,7 +17,9 @@ import type {
   BasicFetchProps,
   FetchRuleProps,
   FetchRulesResponse,
+  FetchSearchRulesProps,
   FetchRulesProps,
+  FetchSearchRulesResponse,
 } from '../../logic/types';
 
 export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RuleResponse> =>
@@ -55,6 +57,10 @@ export const fetchRuleById = jest.fn(
 
 export const fetchRules = async (_: FetchRulesProps): Promise<FetchRulesResponse> =>
   Promise.resolve(rulesMock);
+
+export const fetchSearchRules = async (
+  _: FetchSearchRulesProps
+): Promise<FetchSearchRulesResponse> => Promise.resolve(rulesMock);
 
 export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> =>
   Promise.resolve(['elastic', 'love', 'quality', 'code']);

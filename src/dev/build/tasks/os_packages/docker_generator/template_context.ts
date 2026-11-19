@@ -22,6 +22,7 @@ export interface TemplateContext {
   imageTag: string;
   dockerBuildDir: string;
   dockerTargetFilename: string;
+  skipDockerImageArchive?: boolean;
   dockerBuildDate: string;
   usePublicArtifact?: boolean;
   publicArtifactSubdomain: string;
@@ -35,4 +36,6 @@ export interface TemplateContext {
   revision: string;
   architecture?: string;
   fips?: boolean;
+  tarZstd?: boolean;
+  tarExt: string;
 }

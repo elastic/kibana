@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import type { HostEcs, OsEcs } from '@kbn/securitysolution-ecs';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
@@ -34,6 +34,8 @@ import { HostsTableType } from '../../store/model';
 import { useNavigateTo } from '../../../../common/lib/kibana/hooks';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
@@ -51,7 +53,7 @@ interface HostsTableProps {
 }
 
 export type HostsTableColumns = [
-  Columns<HostEcs['name']>,
+  Columns<HostEcs['name'], HostsEdges>,
   Columns<HostItem['lastSeen']>,
   Columns<OsEcs['name']>,
   Columns<OsEcs['version']>,
@@ -88,6 +90,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
 }) => {
   const dispatch = useDispatch();
   const { navigateTo } = useNavigateTo();
+  const { openHostFlyout } = useFlyoutApi();
   const getHostsSelector = useMemo(() => hostsSelectors.hostsSelector(), []);
   const { activePage, direction, limit, sortField } = useDeepEqualSelector((state) =>
     getHostsSelector(state, type)
@@ -140,6 +143,19 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
+  const openHostDetails = useCallback(
+    (hostName: string, entityId: string) => {
+      openHostFlyout({
+        hostName,
+        entityId,
+        contextID: tableType,
+        scopeId: tableType,
+        origin: FLYOUT_ORIGIN.HOSTS_TABLE,
+      });
+    },
+    [openHostFlyout]
+  );
+
   const dispatchSeverityUpdate = useCallback(
     (s: RiskSeverity) => {
       dispatch(
@@ -160,9 +176,15 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
     () =>
       getHostsColumns(
         isPlatinumOrTrialLicense && hasEntityAnalyticsCapability,
-        dispatchSeverityUpdate
+        dispatchSeverityUpdate,
+        openHostDetails
       ),
-    [dispatchSeverityUpdate, isPlatinumOrTrialLicense, hasEntityAnalyticsCapability]
+    [
+      dispatchSeverityUpdate,
+      isPlatinumOrTrialLicense,
+      hasEntityAnalyticsCapability,
+      openHostDetails,
+    ]
   );
   const sorting = useMemo(() => getSorting(sortField, direction), [sortField, direction]);
 

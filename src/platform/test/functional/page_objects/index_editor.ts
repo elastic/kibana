@@ -10,11 +10,13 @@
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
-const ADD_ROW_COLUMN_INDEX = 1;
+// Grid index of the add-row control column (after the color-indicator and selection columns)
+const ADD_ROW_COLUMN_INDEX = 2;
 
 export class IndexEditorObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
+  private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly es = this.ctx.getService('es');
@@ -37,12 +39,12 @@ export class IndexEditorObject extends FtrService {
   }
 
   public async setColumn(name: string, type: string, columnIndex: number) {
-    const columnHeaders = await this.testSubjects.findAll('indexEditorColumnNameButton');
-    const columnHeader = columnHeaders[columnIndex];
-
-    expect(columnHeader).to.not.be(undefined);
-
-    await columnHeader.click();
+    await this.retry.try(async () => {
+      const columnHeaders = await this.testSubjects.findAll('indexEditorColumnNameButton');
+      const columnHeader = columnHeaders[columnIndex];
+      expect(columnHeader).to.not.be(undefined);
+      await columnHeader.click();
+    });
 
     await this.comboBox.set('indexEditorColumnTypeSelect', type);
     await this.testSubjects.setValue('indexEditorColumnNameInput', name);
@@ -51,8 +53,16 @@ export class IndexEditorObject extends FtrService {
 
   public async addColumn(name: string, type: string): Promise<void> {
     await this.testSubjects.click('indexEditorAddColumnButton');
-
-    await this.comboBox.set('indexEditorColumnTypeSelect', type);
+    await this.testSubjects.exists('indexEditorColumnTypeSelect');
+    await this.retry.try(async () => {
+      // The visible chip can desync from React state when comboBox.set is interrupted
+      // by a re-render mid-click. Clear first to bypass the `isOptionSelected` shortcut,
+      // then verify the name input appeared (conditionally rendered only when columnType
+      // is actually set in React state).
+      await this.comboBox.clear('indexEditorColumnTypeSelect');
+      await this.comboBox.set('indexEditorColumnTypeSelect', type);
+      await this.testSubjects.existOrFail('indexEditorColumnNameInput', { timeout: 5000 });
+    });
     await this.testSubjects.setValue('indexEditorColumnNameInput', name);
     await this.common.pressEnterKey();
   }
@@ -63,10 +73,12 @@ export class IndexEditorObject extends FtrService {
   }
 
   public async setCellValue(rowIndex: number, columnIndex: number, value: string): Promise<void> {
-    await this.testSubjects.click(`indexEditorCellValue-${rowIndex}-${columnIndex}`);
-    const input = await this.testSubjects.find('indexEditorCellValueInput');
-    await input.clearValueWithKeyboard();
-    await input.type(value, { charByChar: true });
+    await this.retry.try(async () => {
+      await this.testSubjects.click(`indexEditorCellValue-${rowIndex}-${columnIndex}`);
+      const input = await this.testSubjects.find('indexEditorCellValueInput');
+      await input.clearValueWithKeyboard();
+      await input.type(value, { charByChar: true });
+    });
     await this.common.pressEnterKey();
   }
 
@@ -133,9 +145,20 @@ export class IndexEditorObject extends FtrService {
   }
 
   public async search(query: string): Promise<void> {
-    const searchBar = await this.testSubjects.find('indexEditorQueryBar');
-    await searchBar.clearValue();
-    await searchBar.type(query);
+    // clearValue does not update controlled KQL input; use clearValueWithKeyboard.
+    await this.retry.try(async () => {
+      await this.testSubjects.click('indexEditorQueryBar');
+      const input = await this.find.activeElement();
+      await input.clearValueWithKeyboard();
+      await input.type(query);
+      const currentQuery =
+        (await this.testSubjects.getAttribute('indexEditorQueryBar', 'value')) ?? '';
+      if (currentQuery !== query) {
+        throw new Error(
+          `Failed to set index editor query to "${query}", instead query is "${currentQuery}"`
+        );
+      }
+    });
     await this.common.pressEnterKey();
   }
 }

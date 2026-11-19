@@ -14,6 +14,7 @@ import {
   AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { ToolType, isMcpTool, type McpToolDefinition } from '@kbn/agent-builder-common/tools';
+import { hasWorkflowReadPrivilege } from '@kbn/agent-builder-tools-base/workflows';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -31,14 +32,18 @@ import type {
   ListMcpToolsResponse,
   GetConnectorResponse,
   ListMcpToolsHealthResponse,
-  McpToolHealthState,
-  McpToolHealthStatus,
   ValidateNamespaceResponse,
+  BulkDeleteConnectorResult,
+  BulkDeleteConnectorsResponse,
 } from '../../../common/http_api/tools';
+import { OAUTH_STATUS } from '../../../common/http_api/tools';
 import { internalApiPath } from '../../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from '../route_security';
 import { getToolTypeInfo, bulkCreateMcpTools } from '../../services/tools/utils';
+import { getMcpToolsHealth, getNotMcpConnectorMessage } from '../../services/tools/tool_types/mcp';
 import { toConnectorItem } from '../utils';
+
+const PER_USER_AUTH_MODE = 'per-user';
 
 export function registerInternalToolsRoutes({
   router,
@@ -48,6 +53,12 @@ export function registerInternalToolsRoutes({
   pluginsSetup: { workflowsManagement },
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
+
+  // Resolves the security plugin start contract, used by the workflow privilege helpers.
+  const getSecurity = async () => {
+    const [, startDeps] = await coreSetup.getStartServices();
+    return startDeps.security;
+  };
 
   // bulk delete tools
   router.post(
@@ -269,7 +280,6 @@ export function registerInternalToolsRoutes({
       } = await listSearchSources({
         pattern,
         includeHidden: false,
-        includeKibanaIndices: false,
         excludeIndicesRepresentedAsAlias: true,
         excludeIndicesRepresentedAsDatastream: true,
         esClient,
@@ -302,9 +312,19 @@ export function registerInternalToolsRoutes({
 
       const toolTypes = tools.getToolDefinitions();
 
+      // Only advertise the workflow tool type as creatable to users who can reference workflows.
+      const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
+      const workflowToolsCreatable = workflowsManagement
+        ? await hasWorkflowReadPrivilege({
+            security: await getSecurity(),
+            request,
+            spaceId,
+          })
+        : false;
+
       return response.ok<GetToolTypeInfoResponse>({
         body: {
-          toolTypes: getToolTypeInfo(toolTypes),
+          toolTypes: getToolTypeInfo(toolTypes, { workflowToolsCreatable }),
         },
       });
     })
@@ -334,9 +354,20 @@ export function registerInternalToolsRoutes({
 
       const currentSpace = (await ctx.agentBuilder).spaces.getSpaceId();
 
+      // Listing workflows requires `workflowsManagement:read`; without it, return an empty set
+      const canRead = await hasWorkflowReadPrivilege({
+        security: await getSecurity(),
+        request,
+        spaceId: currentSpace,
+      });
+      if (!canRead) {
+        return response.ok<ListWorkflowsResponse>({ body: { results: [] } });
+      }
+
       const { results } = await workflowsManagement.management.getWorkflows(
-        { page: request.query.page, size: request.query.limit, enabled: [true] },
-        currentSpace
+        { page: request.query.page, size: request.query.limit },
+        currentSpace,
+        { request }
       );
 
       return response.ok<ListWorkflowsResponse>({
@@ -345,6 +376,7 @@ export function registerInternalToolsRoutes({
             id: workflow.id,
             name: workflow.name,
             description: workflow.description,
+            enabled: workflow.enabled,
           })),
         },
       });
@@ -376,16 +408,32 @@ export function registerInternalToolsRoutes({
 
       const currentSpace = (await ctx.agentBuilder).spaces.getSpaceId();
 
+      // Reading a workflow definition requires `workflowsManagement:read`.
+      const canRead = await hasWorkflowReadPrivilege({
+        security: await getSecurity(),
+        request,
+        spaceId: currentSpace,
+      });
+      if (!canRead) {
+        return response.forbidden({
+          body: {
+            message: `Unauthorized to read workflow '${request.params.id}'. The 'workflowsManagement' read privilege is required.`,
+          },
+        });
+      }
+
       const workflow = await workflowsManagement.management.getWorkflow(
         request.params.id,
-        currentSpace
+        currentSpace,
+        request
       );
 
+      if (!workflow) return response.notFound();
       return response.ok<GetWorkflowResponse>({
         body: {
-          id: workflow!.id,
-          name: workflow!.name,
-          description: workflow!.description,
+          id: workflow.id,
+          name: workflow.name,
+          description: workflow.description,
         },
       });
     })
@@ -464,10 +512,40 @@ export function registerInternalToolsRoutes({
       const compatibleTypeIds = new Set(compatibleTypes.map((t) => t.id));
       const { type } = request.query;
 
-      const connectors: ConnectorItem[] = allConnectors
-        .filter((connector) => compatibleTypeIds.has(connector.actionTypeId))
-        .filter((connector) => (type ? connector.actionTypeId === type : true))
-        .map(toConnectorItem);
+      // MCP v1 isn't Agent Builder-compatible (it can't be used as a generic tool), but
+      // the MCP server management UI still needs to list its own connectors by exact
+      // type; any other explicit type request must still be AB-compatible.
+      const filteredConnectors = allConnectors.filter((connector) => {
+        if (type !== undefined) {
+          return (
+            connector.actionTypeId === type &&
+            (type === MCP_CONNECTOR_ID || compatibleTypeIds.has(type))
+          );
+        }
+        return compatibleTypeIds.has(connector.actionTypeId);
+      });
+
+      // OAuth connectors count as authorized only while the user's token is usable
+      // (unexpired, or refreshable).
+      const oauthConnectorIds = filteredConnectors
+        .filter((connector) => connector.authMode === PER_USER_AUTH_MODE)
+        .map((connector) => connector.id);
+
+      const authorizedConnectorIds = await pluginsStart.actions.getUsableUserOAuthConnectorIds(
+        request,
+        oauthConnectorIds
+      );
+
+      const connectors: ConnectorItem[] = filteredConnectors.map((connector) => {
+        const isOAuth = connector.authMode === PER_USER_AUTH_MODE;
+        return toConnectorItem(connector, {
+          oauthStatus: isOAuth
+            ? authorizedConnectorIds.has(connector.id)
+              ? OAUTH_STATUS.AUTHORIZED
+              : OAUTH_STATUS.DISCONNECTED
+            : undefined,
+        });
+      });
 
       return response.ok<ListConnectorsResponse>({
         body: {
@@ -496,10 +574,59 @@ export function registerInternalToolsRoutes({
 
       const connector = await actionsClient.get({ id: connectorId });
 
+      let oauthStatus;
+      if (connector.authMode === PER_USER_AUTH_MODE) {
+        const usableConnectorIds = await pluginsStart.actions.getUsableUserOAuthConnectorIds(
+          request,
+          [connectorId]
+        );
+        oauthStatus = usableConnectorIds.has(connectorId)
+          ? OAUTH_STATUS.AUTHORIZED
+          : OAUTH_STATUS.DISCONNECTED;
+      }
+
       return response.ok<GetConnectorResponse>({
         body: {
-          connector: toConnectorItem(connector),
+          connector: toConnectorItem(connector, { oauthStatus }),
         },
+      });
+    })
+  );
+
+  // bulk delete connectors (internal)
+  router.post(
+    {
+      path: `${internalApiPath}/connectors/_bulk_delete`,
+      validate: {
+        body: schema.object({
+          ids: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 100 }),
+        }),
+      },
+      options: { access: 'internal' },
+      security: TOOLS_WRITE_SECURITY,
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const [, pluginsStart] = await coreSetup.getStartServices();
+      const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
+      const { ids } = request.body;
+
+      const deleteResults = await Promise.allSettled(ids.map((id) => actionsClient.delete({ id })));
+
+      const results: BulkDeleteConnectorResult[] = deleteResults.map((result, index) => {
+        if (result.status === 'fulfilled') {
+          return { connectorId: ids[index], success: true };
+        }
+        return {
+          connectorId: ids[index],
+          success: false,
+          reason: result.reason.toJSON?.() ?? {
+            error: { message: 'Unknown error' },
+          },
+        };
+      });
+
+      return response.ok<BulkDeleteConnectorsResponse>({
+        body: { results },
       });
     })
   );
@@ -525,9 +652,9 @@ export function registerInternalToolsRoutes({
       const connector = await actionsClient.get({ id: connectorId });
 
       if (connector.actionTypeId !== MCP_CONNECTOR_ID) {
-        response.badRequest({
+        return response.badRequest({
           body: {
-            message: `Connector '${connectorId}' is not an MCP connector. Expected type '${MCP_CONNECTOR_ID}', got '${connector.actionTypeId}'`,
+            message: getNotMcpConnectorMessage(connectorId, connector.actionTypeId),
           },
         });
       }
@@ -585,94 +712,7 @@ export function registerInternalToolsRoutes({
       }
 
       const healthStates = await healthClient.listBySpace();
-      const healthByToolId = new Map(
-        healthStates.map((healthState) => [healthState.toolId, healthState])
-      );
-
-      const connectorIds = [...new Set(mcpTools.map((tool) => tool.configuration.connector_id))];
-
-      const connectorResults = await Promise.allSettled(
-        connectorIds.map(async (connectorId) => {
-          const connector = await actionsClient.get({ id: connectorId });
-          const executeResult = (await actionsClient.execute({
-            actionId: connectorId,
-            params: { subAction: 'listTools' },
-          })) as ActionTypeExecutorResult<ListToolsResponse>;
-
-          return {
-            connectorId,
-            connector,
-            mcpServerTools: executeResult.status === 'ok' ? executeResult.data?.tools ?? [] : [],
-            listToolsError: executeResult.status === 'error' ? executeResult.message : undefined,
-          };
-        })
-      );
-
-      const connectorDataMap = new Map<
-        string,
-        {
-          exists: boolean;
-          mcpServerTools: string[];
-          listToolsError?: string;
-        }
-      >();
-
-      for (let i = 0; i < connectorIds.length; i++) {
-        const connectorId = connectorIds[i];
-        const result = connectorResults[i];
-
-        if (result.status === 'fulfilled') {
-          connectorDataMap.set(connectorId, {
-            exists: true,
-            mcpServerTools: result.value.mcpServerTools.map((mcpServerTool) => mcpServerTool.name),
-            listToolsError: result.value.listToolsError,
-          });
-        } else {
-          connectorDataMap.set(connectorId, {
-            exists: false,
-            mcpServerTools: [],
-          });
-        }
-      }
-
-      const results: McpToolHealthState[] = mcpTools.map((tool) => {
-        const toolConnectorId = tool.configuration.connector_id;
-        const mcpToolName = tool.configuration.tool_name;
-        const connectorData = connectorDataMap.get(toolConnectorId);
-        const toolHealth = healthByToolId.get(tool.id);
-
-        let status: McpToolHealthStatus = 'healthy';
-        let errorMessage: string | undefined;
-
-        // Check connector exists
-        if (!connectorData?.exists) {
-          status = 'connector_not_found';
-          errorMessage = `Connector '${toolConnectorId}' not found`;
-        }
-        // Check if listing MCP tools failed
-        else if (connectorData.listToolsError) {
-          status = 'list_tools_failed';
-          errorMessage = connectorData.listToolsError;
-        }
-        // Check if the specific MCP tool exists on the server
-        else if (!connectorData.mcpServerTools.includes(mcpToolName)) {
-          status = 'tool_not_found';
-          errorMessage = `Tool '${mcpToolName}' not found on MCP server`;
-        }
-        // Check if the tool has failed health checks
-        else if (toolHealth && toolHealth.status !== 'healthy') {
-          status = 'tool_unhealthy';
-          errorMessage = toolHealth.errorMessage;
-        }
-
-        return {
-          toolId: tool.id,
-          connectorId: toolConnectorId,
-          mcpToolName,
-          status,
-          errorMessage,
-        };
-      });
+      const results = await getMcpToolsHealth({ actionsClient, mcpTools, healthStates });
 
       return response.ok<ListMcpToolsHealthResponse>({
         body: { results },

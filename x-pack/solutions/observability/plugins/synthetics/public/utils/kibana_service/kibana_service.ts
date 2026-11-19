@@ -19,6 +19,8 @@ class KibanaService {
   public setupPlugins!: ClientPluginsSetup;
   public isDev!: boolean;
   public isServerless!: boolean;
+  public isCCSEnabled!: boolean;
+  public secretConnectionsEnabled = true;
   public appMountParameters!: AppMountParameters;
   public startPlugins!: ClientPluginsStart;
 
@@ -28,12 +30,16 @@ class KibanaService {
     startPlugins,
     isDev,
     isServerless,
+    isCCSEnabled,
+    secretConnectionsEnabled = true,
   }: {
     coreSetup: CoreSetup;
     coreStart: CoreStart;
     startPlugins: ClientPluginsStart;
     isDev: boolean;
     isServerless: boolean;
+    isCCSEnabled: boolean;
+    secretConnectionsEnabled?: boolean;
   }) {
     this.coreSetup = coreSetup;
     this.coreStart = coreStart;
@@ -42,6 +48,8 @@ class KibanaService {
     apiService.http = coreStart.http;
     this.isDev = isDev;
     this.isServerless = isServerless;
+    this.isCCSEnabled = isCCSEnabled;
+    this.secretConnectionsEnabled = secretConnectionsEnabled;
   }
 
   public get toasts() {

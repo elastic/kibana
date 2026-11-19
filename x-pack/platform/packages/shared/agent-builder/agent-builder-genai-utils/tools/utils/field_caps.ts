@@ -9,7 +9,28 @@ import type {
   FieldCapsResponse,
   FieldCapsFieldCapability,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { MappingField } from './mappings';
+import { excludeFrozenTierQuery } from './data_tiers';
+
+/**
+ * Calls `_field_caps` for the given index, alias, data stream or pattern.
+ */
+export const fetchFieldCaps = async ({
+  index,
+  esClient,
+  includeFrozen = false,
+}: {
+  index: string;
+  esClient: ElasticsearchClient;
+  includeFrozen?: boolean;
+}): Promise<FieldCapsResponse> => {
+  return esClient.fieldCaps({
+    index,
+    fields: ['*'],
+    ...(includeFrozen ? {} : { index_filter: excludeFrozenTierQuery() }),
+  });
+};
 
 /**
  * response for {@link processFieldCapsResponse}
@@ -81,6 +102,7 @@ export const processFieldCapsResponsePerIndex = (
         meta,
         searchable: capability.searchable,
       };
+      applyTsdbMarkers(field, capability);
 
       const targetIndices =
         capability.indices == null
@@ -119,10 +141,24 @@ const processField = (
   const fieldCaps = Object.values(entry)[0];
   const meta = extractMeta(fieldCaps);
 
-  return {
+  const field: MappingField = {
     path,
     type: fieldCaps.type,
     meta,
     searchable: fieldCaps.searchable,
   };
+  applyTsdbMarkers(field, fieldCaps);
+  return field;
+};
+
+/**
+ * Copies TSDB markers from a field_caps capability onto a MappingField.
+ */
+const applyTsdbMarkers = (field: MappingField, fieldCaps: FieldCapsFieldCapability): void => {
+  if (fieldCaps.time_series_dimension === true) {
+    field.tsDimension = true;
+  }
+  if (typeof fieldCaps.time_series_metric === 'string') {
+    field.tsMetric = fieldCaps.time_series_metric;
+  }
 };

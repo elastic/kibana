@@ -41,6 +41,12 @@ paths:
                 id: ip_list
                 name: Bad ips - updated
                 description: Latest list of bad ips
+            examples:
+              replaceList:
+                value:
+                  id: ip_list
+                  name: Bad ips - updated
+                  description: Latest list of bad ips
       responses:
         200:
           description: Successful response

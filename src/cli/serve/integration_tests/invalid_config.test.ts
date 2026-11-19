@@ -31,6 +31,10 @@ describe('cli invalid config support', () => {
         ['scripts/kibana', '--config', INVALID_CONFIG_PATH, '--migrations.skip=true'],
         {
           cwd: REPO_ROOT,
+          env: {
+            ...process.env,
+            DISABLE_SWC_REGISTER_CACHE: '1',
+          },
         }
       );
       expect(error).toBe(undefined);
@@ -57,6 +61,6 @@ describe('cli invalid config support', () => {
 
       expect(status).toBe(64);
     },
-    20 * 1000
+    120 * 1000
   );
 });

@@ -18,15 +18,28 @@ import {
   MOCK_IDP_ATTRIBUTE_ROLES,
   MOCK_IDP_ENTITY_ID,
   MOCK_IDP_REALM_NAME,
+  MOCK_IDP_SP_BASE_URL,
   MOCK_IDP_UIAM_ORGANIZATION_ID,
 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { defineDockerServersConfig, fleetPackageRegistryDockerImage } from '@kbn/test';
+import { PRODUCT_DOC_STUB_REPOSITORY_URL } from '@kbn/test-kibana-server';
+import {
+  defineDockerServersConfig,
+  fleetPackageRegistryDockerImage,
+} from '@kbn/test-docker-servers';
 import type { ScoutServerConfig } from '../../../../../types';
 import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../../../constants';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
-const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+// EPR_REQUIRE_PACKAGE_SIGNATURES=false: the `:lite` distribution ships some
+// packages without `.sig` files, so opt out of upstream signature enforcement
+// (added in elastic/package-registry#1646).
+const dockerArgs: string[] = [
+  '-v',
+  `${packageRegistryConfig}:/package-registry/config.yml`,
+  '-e',
+  'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
+];
 
 /**
  * This is used by CI to set the docker registry port
@@ -35,9 +48,6 @@ const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/
  * if this is defined it takes precedence over the `packageRegistryOverride` variable
  */
 const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
-
-// if config is executed on CI or locally
-const isRunOnCI = process.env.CI;
 
 const servers = {
   elasticsearch: {
@@ -88,9 +98,12 @@ export const defaultConfig: ScoutServerConfig = {
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=0`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${STATEFUL_IDP_METADATA_PATH}`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id=${MOCK_IDP_ENTITY_ID}`,
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${kbnUrl}`,
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${kbnUrl}/api/security/saml/callback`,
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${kbnUrl}/logout`,
+      // SP args must match the fixed URL the mock IdP plugin embeds in SAML responses.
+      // The plugin's `onPreResponse` rewrites IdP-bound redirects to the actual Kibana URL
+      // (`server.publicBaseUrl` below) at runtime, so ES does not need to know that URL.
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${MOCK_IDP_SP_BASE_URL}`,
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback`,
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${MOCK_IDP_SP_BASE_URL}/logout`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal=${MOCK_IDP_ATTRIBUTE_PRINCIPAL}`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
@@ -119,15 +132,18 @@ export const defaultConfig: ScoutServerConfig = {
       `--data.search.aggs.shardDelay.enabled=true`,
       `--data.query.timefilter.minRefreshInterval=1000`,
       `--security.showInsecureClusterWarning=false`,
+      '--xpack.spaces.initialSolutionSetup.enabled=false',
       '--telemetry.banner=false',
       '--telemetry.optIn=false',
       // These are *very* important to have them pointing to staging
       '--telemetry.sendUsageTo=staging',
+      // Keeps test servers from downloading the real product documentation artifacts
+      `--xpack.productDocBase.artifactRepositoryUrl=${PRODUCT_DOC_STUB_REPOSITORY_URL}`,
       `--server.maxPayload=1679958`,
       // newsfeed mock service
-      `--plugin-path=${join(REPO_ROOT, '/src/platform/test/common/plugins/newsfeed')}`,
+      `--plugin-path=${join(REPO_ROOT, '/src/platform/test_plugins/common/newsfeed')}`,
       // otel mock service
-      `--plugin-path=${join(REPO_ROOT, '/src/platform/test/common/plugins/otel_metrics')}`,
+      `--plugin-path=${join(REPO_ROOT, '/src/platform/test_plugins/otel_metrics')}`,
       `--newsfeed.service.urlRoot=${kbnUrl}`,
       `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/v{VERSION}.json`,
       `--logging.appenders.deprecation=${JSON.stringify({
@@ -168,14 +184,13 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
       '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects,
       '--savedObjects.allowHttpApiAccess=false', // override default to not allow hiddenFromHttpApis saved objects access to the http APIs see https://github.com/elastic/dev/issues/2200
-      // explicitly disable internal API restriction. See https://github.com/elastic/kibana/issues/163654
-      '--server.restrictInternalApis=false',
       // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
       `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
       // x-pack/platform/test/api_integration/config.ts
       '--xpack.security.session.idleTimeout=3600000', // 1 hour
       '--telemetry.optIn=true',
       '--xpack.fleet.agents.pollingRequestTimeout=5000', // 5 seconds
+      '--xpack.fleet.productVersionsApiTimeoutMs=5000',
       '--xpack.ruleRegistry.write.enabled=true',
       '--xpack.ruleRegistry.write.enabled=true',
       '--xpack.ruleRegistry.write.cache.enabled=false',
@@ -203,8 +218,6 @@ export const defaultConfig: ScoutServerConfig = {
         },
       ])}`,
       // Agent policies are now created via Fleet API using the helper function from @kbn-scout
-      // SAML configuration
-      ...(isRunOnCI ? [] : ['--mockIdpPlugin.enabled=true']),
       // This ensures that we register the Security SAML API endpoints.
       // In the real world the SAML config is injected by control plane.
       `--plugin-path=${SAML_IDP_PLUGIN_PATH}`,
@@ -221,6 +234,11 @@ export const defaultConfig: ScoutServerConfig = {
         basic: { 'cloud-basic': { order: 1 } },
       })}`,
       `--server.publicBaseUrl=${kbnUrl}`,
+      // Synthetics service config — matches the FTR deployment-agnostic base
+      '--xpack.synthetics.service.password=test',
+      '--xpack.synthetics.service.username=localKibanaIntegrationTestsUser',
+      '--xpack.synthetics.service.devUrl=mockDevUrl',
+      '--xpack.synthetics.service.manifestUrl=mockDevUrl',
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
     ],

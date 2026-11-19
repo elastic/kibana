@@ -39,6 +39,12 @@
     "@kbn/cloud-security-posture-common",
     "@kbn/security-plugin-types-common",
     "@kbn/securitysolution-utils",
-    "@kbn/maintenance-windows-plugin"
+    "@kbn/ml-common-types",
+    "@kbn/maintenance-windows-plugin",
+    "@kbn/test-saml-auth",
+    "@kbn/es",
+    "@kbn/mock-idp-utils",
+    "@kbn/securitysolution-rules",
+    "@kbn/securitysolution-alerts-page-url",
   ]
 }

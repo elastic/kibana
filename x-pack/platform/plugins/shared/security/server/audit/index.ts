@@ -6,6 +6,8 @@
  */
 
 export { AuditService } from './audit_service';
+export type { AuditLogWriteAccess } from './audit_write_access';
+export type { ServiceAccountAuditEventParams } from './audit_events';
 export {
   userLoginEvent,
   userLogoutEvent,
@@ -17,4 +19,6 @@ export {
   savedObjectEvent,
   spaceAuditEvent,
   SpaceAuditAction,
+  serviceAccountAuditEvent,
+  ServiceAccountAuditAction,
 } from './audit_events';

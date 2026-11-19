@@ -10,6 +10,7 @@
 import { fieldList } from '@kbn/data-views-plugin/common';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/public';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 
 const shallowMockedFields: FieldSpec[] = [
   {
@@ -125,7 +126,12 @@ export const buildDataViewMock = ({
     getFieldByName: jest.fn((fieldName: string) => dataViewFields.getByName(fieldName)),
     timeFieldName,
     docvalueFields: [],
-    getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+    getFormatterForField: jest.fn(() => ({
+      type: { id: FIELD_FORMAT_IDS.STRING },
+      param: jest.fn(),
+      convertToText: (value: unknown) => value,
+      convertToReact: (value: unknown) => value,
+    })),
     isTimeBased: () => !!timeFieldName,
     isTimeNanosBased: () => false,
     isPersisted: () => isPersisted,

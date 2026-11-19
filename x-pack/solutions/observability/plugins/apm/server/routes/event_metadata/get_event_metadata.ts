@@ -9,6 +9,10 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ERROR_ID, SPAN_ID, ID, TRANSACTION_ID } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import {
+  LONG_FIELDS_SOURCE_FALLBACK,
+  mergeLongFieldsFromSource,
+} from './merge_long_fields_from_source';
 
 export async function getEventMetadata({
   apmEventClient,
@@ -43,12 +47,14 @@ export async function getEventMetadata({
       },
     },
     size: 1,
-    _source: false,
+    _source: LONG_FIELDS_SOURCE_FALLBACK,
     fields: [{ field: '*', include_unmapped: true }],
     terminate_after: 1,
   });
 
-  return response.hits.hits[0].fields;
+  const hit = response.hits.hits[0];
+
+  return mergeLongFieldsFromSource(hit);
 }
 
 function getFieldNames(processorEvent: ProcessorEvent) {

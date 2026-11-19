@@ -26,6 +26,11 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/build_pr_and_deploy_cloud.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/build_pr_and_deploy_cloud.yml
+            cleanup_sparse_state: true
       provider_settings:
         build_pull_requests: true
         prefix_pull_request_fork_branch_names: false

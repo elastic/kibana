@@ -9,13 +9,16 @@
 
 import { useCallback, useRef, useState, type MutableRefObject } from 'react';
 import type {
-  ESQLCallbacks,
   ESQLSourceResult,
   IndicesAutocompleteResult,
   IndexAutocompleteItem,
 } from '@kbn/esql-types';
-import type { monaco } from '@kbn/monaco';
-import { BROWSER_POPOVER_WIDTH, DataSourceSelectionChange } from '@kbn/esql-resource-browser';
+import type { monaco } from '@kbn/code-editor';
+import {
+  BROWSER_POPOVER_WIDTH,
+  DataSourceSelectionChange,
+  type DataSourceSelectionDetails,
+} from '@kbn/esql-resource-browser';
 import {
   computeInsertionText,
   computeRemovalRange,
@@ -29,13 +32,13 @@ import { BROWSER_POPOVER_VERTICAL_OFFSET } from './constants';
 import {
   ResourceBrowserType,
   ResourceBrowserOpenedFrom,
+  ViewSelectedSource,
   type ESQLEditorTelemetryService,
 } from '../telemetry/telemetry_service';
 
 interface UseDataSourceBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
-  esqlCallbacks: ESQLCallbacks;
   telemetryService: ESQLEditorTelemetryService;
 }
 
@@ -53,14 +56,10 @@ const normalizeTimeseriesIndices = (result: IndicesAutocompleteResult): ESQLSour
 export function useDataSourceBrowser({
   editorRef,
   editorModel,
-  esqlCallbacks,
   telemetryService,
 }: UseDataSourceBrowserParams) {
   const [isDataSourceBrowserOpen, setIsDataSourceBrowserOpen] = useState(false);
   const [browserPopoverPosition, setBrowserPopoverPosition] = useState<BrowserPopoverPosition>({});
-
-  const [allSources, setAllSources] = useState<ESQLSourceResult[]>([]);
-  const [isLoadingSources, setIsLoadingSources] = useState(false);
 
   const sourcesRangeRef = useRef<monaco.IRange | undefined>(undefined);
   const isTSCommandRef = useRef(false);
@@ -68,6 +67,7 @@ export function useDataSourceBrowser({
   const openCursorOffsetRef = useRef<number | undefined>(undefined);
   const insertionOffsetRef = useRef<number | undefined>(undefined);
   const selectedSourcesRef = useRef<string[]>([]);
+  const preloadedSourcesRef = useRef<ESQLSourceResult[] | undefined>(undefined);
 
   const updatePopoverPosition = useCallback(() => {
     const editor = editorRef.current;
@@ -90,16 +90,6 @@ export function useDataSourceBrowser({
 
     setBrowserPopoverPosition({ top: absoluteTop, left: absoluteLeft });
   }, [editorRef]);
-
-  const fetchSources = useCallback(async () => {
-    const { getSources, getTimeseriesIndices } = esqlCallbacks;
-    if (isTSCommandRef.current) {
-      const result = (await getTimeseriesIndices?.()) ?? { indices: [] };
-      return normalizeTimeseriesIndices(result);
-    }
-
-    return (await getSources?.()) ?? [];
-  }, [esqlCallbacks]);
 
   const openIndicesBrowser = useCallback(
     async (options?: {
@@ -165,12 +155,8 @@ export function useDataSourceBrowser({
 
       // If callers already have sources (e.g. from autocomplete context) we can reuse them to avoid
       // an extra async fetch, improving responsiveness.
-      const preloadedSources = options?.preloadedSources;
+      const preloadedFromSources = options?.preloadedSources;
       const preloadedTimeSeriesSources = options?.preloadedTimeSeriesSources;
-      const shouldUsePreloaded = Boolean(
-        (isTSCommandRef.current && preloadedTimeSeriesSources?.length) ||
-          (!isTSCommandRef.current && preloadedSources?.length)
-      );
 
       telemetryService.trackResourceBrowserOpened({
         browserType: ResourceBrowserType.DATA_SOURCES,
@@ -180,24 +166,19 @@ export function useDataSourceBrowser({
             : ResourceBrowserOpenedFrom.AUTOCOMPLETE,
       });
 
+      // Store any preloaded items for the browser to render immediately. If nothing is preloaded,
+      // the browser component will fetch sources on its own.
+      const shouldUsePreloaded = Boolean(
+        (isTSCommandRef.current && preloadedTimeSeriesSources) ||
+          (!isTSCommandRef.current && preloadedFromSources)
+      );
       if (shouldUsePreloaded) {
-        const normalized =
-          isTSCommandRef.current && preloadedTimeSeriesSources
-            ? normalizeTimeseriesIndices({ indices: preloadedTimeSeriesSources })
-            : preloadedSources ?? [];
-        setAllSources(normalized);
-        setIsLoadingSources(false);
+        const normalized = isTSCommandRef.current
+          ? normalizeTimeseriesIndices({ indices: preloadedTimeSeriesSources ?? [] })
+          : preloadedFromSources ?? [];
+        preloadedSourcesRef.current = normalized;
       } else {
-        // Fetch the sources
-        setIsLoadingSources(true);
-        try {
-          const fetched = await fetchSources();
-          setAllSources(fetched);
-        } catch {
-          setAllSources([]);
-        } finally {
-          setIsLoadingSources(false);
-        }
+        preloadedSourcesRef.current = undefined;
       }
 
       // Position the popover near the cursor before opening it.
@@ -205,11 +186,15 @@ export function useDataSourceBrowser({
 
       setIsDataSourceBrowserOpen(true);
     },
-    [editorModel, editorRef, updatePopoverPosition, fetchSources, telemetryService]
+    [editorModel, editorRef, updatePopoverPosition, telemetryService]
   );
 
   const handleDataSourceBrowserSelect = useCallback(
-    (sourceName: string, change: DataSourceSelectionChange) => {
+    (
+      sourceName: string,
+      change: DataSourceSelectionChange,
+      details: DataSourceSelectionDetails
+    ) => {
       const editor = editorRef.current;
       const model = editorModel.current;
       const insertAtOffset = insertionOffsetRef.current;
@@ -245,6 +230,11 @@ export function useDataSourceBrowser({
               : ResourceBrowserOpenedFrom.AUTOCOMPLETE,
           action: change,
         });
+
+        // Deselecting a view is not a selection, so only additions are reported.
+        if (change === DataSourceSelectionChange.Add && details.isView) {
+          telemetryService.trackViewSelected({ source: ViewSelectedSource.RESOURCE_BROWSER });
+        }
       }
 
       // We use minimal edits (insert/delete exact spans) rather than rewriting the whole sources
@@ -320,8 +310,8 @@ export function useDataSourceBrowser({
     isDataSourceBrowserOpen,
     setIsDataSourceBrowserOpen,
     browserPopoverPosition,
-    allSources,
-    isLoadingSources,
+    preloadedSources: preloadedSourcesRef.current,
+    isTimeseries: isTSCommandRef.current,
     selectedSources: selectedSourcesRef.current,
     openIndicesBrowser,
     handleDataSourceBrowserSelect,

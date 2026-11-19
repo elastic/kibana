@@ -5,50 +5,267 @@
  * 2.0.
  */
 
+import type { DefaultEvaluators, Evaluator } from '@kbn/evals';
 import { tags } from '@kbn/scout';
 import { METADATA_UNITED_TRANSFORM } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { evaluate } from '../../src/evaluate';
+import { seedTroubleshootingScenarios } from '../../src/data_generators/scenario_seeding';
+import { cleanupTroubleshootingData } from '../../src/data_generators/cleanup';
 import {
-  waitForEndpointPackage,
-  waitForTransformPropagation,
-  seedScenario,
-  SCENARIOS,
-} from '../../src/data_generators/endpoint_data';
-import { cleanupSeededData } from '../../src/data_generators/cleanup';
+  CUSTOM_YARA_SIGNATURE_SCENARIOS,
+  cleanupCustomYaraSignatures,
+  seedCustomYaraSignatures,
+} from '../../src/data_generators/custom_yara_signatures_seed';
+import {
+  createTroubleshootingToolUsageEvaluator,
+  GENERATE_INSIGHT_TOOL_ID,
+} from '../../src/troubleshooting_tool_usage_evaluator';
 
-const SKILL_PATH = 'skills/security/endpoint/elastic_defend_configuration_troubleshooting/SKILL.md';
+const SKILL_PATH = 'skills/security/endpoint/elastic-defend-configuration-troubleshooting/SKILL.md';
 const UNITED_TRANSFORM_WILDCARD = `${METADATA_UNITED_TRANSFORM}*`;
+
+const COMMON_CRITERIA = [
+  `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
+  'Called automatic_troubleshooting.check_endpoint_package_freshness before the final diagnosis',
+  'Called generate_insight to persist structured findings',
+] as const;
+
+const P0_EVALS = [
+  {
+    name: 'endpoint_alerts_missing_output_shipping_failure_explicit_prompt',
+    description:
+      'Validates that the agent identifies missing endpoint alerts caused by failed Logstash output shipping.',
+    question:
+      'Why are endpoint alerts missing for host eval-endpoint-alerts-missing-output-s? The policy looks successful.',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried evidence for eval-endpoint-alerts-missing-output-s in endpoint metadata, policy response, or endpoint security logs',
+      'Identified the Logstash output SSL handshake or output connectivity failure as the reason alert documents are not reaching Elasticsearch',
+      'Explained that the policy response is successful and the missing alerts are caused by telemetry shipping, not policy application',
+      'Recommended checking Fleet output or Logstash SSL configuration and verifying event flow after the output is fixed',
+    ],
+  },
+  {
+    name: 'endpoint_exception_field_mismatch_explicit_prompt',
+    description:
+      'Validates that the agent detects an Endpoint Alert Exception field/value mismatch.',
+    question:
+      'Why is my Elastic Defend endpoint exception not suppressing alerts on endpoint eval-endpoint-exception-field-mismatc?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried endpoint alert evidence for eval-endpoint-exception-field-mismatc',
+      'Identified that the exception used file.path while the alert value that should match is process.executable',
+      'Explained that Endpoint Alert Exceptions require literal field matching against the alert document',
+      'Recommended recreating the endpoint exception with process.executable = C:\\Program Files\\GoodApp\\good.exe or comparing entries to the alert fields',
+    ],
+  },
+  {
+    name: 'endpoint_alert_needs_endpoint_exception_not_siem_explicit_prompt',
+    description:
+      'Validates that the agent distinguishes SIEM rule exceptions from Endpoint Alert Exceptions.',
+    question:
+      'I added a SIEM rule exception, so why does Elastic Defend still block on eval-endpoint-alert-needs-endpoint-ex?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried evidence for eval-endpoint-alert-needs-endpoint-ex and its endpoint alert or artifact state',
+      'Identified that a SIEM Rule Exception does not reach the Elastic Defend endpoint agent',
+      'Explained that endpoint blocking requires an Endpoint Alert Exception rather than only a detection rule exception',
+      'Recommended creating an Endpoint Alert Exception assigned to the affected policy or using alert fields such as file hash, signature, or path',
+    ],
+  },
+  {
+    name: 'trusted_app_wrong_condition_field',
+    description:
+      'Validates that the agent identifies a Trusted Application condition field mismatch.',
+    question:
+      'Why is my trusted app not working on endpoint eval-trusted-app-wrong-condition-fiel?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried process or artifact evidence for eval-trusted-app-wrong-condition-fiel',
+      'Identified that the Trusted Application condition used the wrong field, such as file.path, while the process event shows process.executable',
+      'Recommended using process.executable = C:\\Program Files\\NoisyApp\\noisy.exe for the Trusted Application entry',
+      'Explained that field/operator mismatches silently prevent Trusted Applications from matching the running process',
+    ],
+  },
+  {
+    name: 'linux_high_cpu_monitoring_scripts',
+    description:
+      'Validates that the agent diagnoses Linux high CPU from monitoring script process churn.',
+    question: 'Why is Elastic Defend using high CPU on eval-linux-high-cpu-monitoring-script?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried endpoint metrics or process events for eval-linux-high-cpu-monitoring-script',
+      'Identified process_events as the dominant CPU impact category',
+      'Identified /opt/monitoring/check_database.sh or its short-lived child processes as the source of process churn',
+      'Recommended a targeted Trusted Application, Event Filter, or event reduction strategy rather than treating this as a policy response failure',
+    ],
+  },
+  {
+    name: 'windows_high_cpu_authentication_events',
+    description:
+      'Validates that the agent diagnoses Windows high CPU from authentication event volume.',
+    question: 'Why is Elastic Defend causing high CPU on eval-windows-high-cpu-authentication-?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried endpoint metrics for eval-windows-high-cpu-authentication-',
+      'Identified authentication_events or Windows Security event IDs 4624 and 4634 as the dominant CPU source',
+      'Recognized the policy response is successful and the degraded state is caused by event processing load',
+      'Recommended event filters, Trusted Applications for noisy sources, or disabling Malicious Behavior Protection only when acceptable',
+    ],
+  },
+  {
+    name: 'linux_missed_checkins_selinux_203_exec',
+    description:
+      'Validates that the agent diagnoses Linux missed check-ins caused by SELinux 203/EXEC denial.',
+    question: 'Why is endpoint eval-linux-missed-checkins-selinux-20 unhealthy?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried current endpoint or agent health evidence for eval-linux-missed-checkins-selinux-20',
+      'Identified missed check-ins with systemd status 203/EXEC',
+      'Identified SELinux denied execute on /opt/Elastic/Endpoint/elastic-endpoint with an unlabeled_t context as the cause',
+      'Recommended fixing the SELinux file context with semanage or restorecon and restarting ElasticEndpoint.service',
+    ],
+  },
+  {
+    name: 'windows_missed_checkins_crash_dump',
+    description:
+      'Validates that the agent diagnoses Windows missed check-ins caused by repeated Endpoint crashes.',
+    question: 'Why is endpoint eval-windows-missed-checkins-crash-du unhealthy?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried current endpoint or agent health evidence for eval-windows-missed-checkins-crash-du',
+      'Identified missed check-ins caused by repeated elastic-endpoint.exe crashes rather than a policy response failure',
+      'Mentioned the crash dump path C:\\Program Files\\Elastic\\Endpoint\\cache\\CrashDumps\\elasticendpoint.dmp',
+      'Recommended collecting the crash dump or diagnostics and restarting the service or rebooting as recovery steps',
+    ],
+  },
+  {
+    name: 'output_kafka_message_size_rejection_explicit_prompt',
+    description:
+      'Validates that the agent diagnoses Kafka output rejection from oversized messages.',
+    question:
+      'Why is endpoint eval-output-kafka-message-size-reject degraded with Kafka output errors?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried endpoint security log evidence for eval-output-kafka-message-size-reject',
+      'Identified Kafka Broker: Message size too large or max.message.bytes as the root cause',
+      'Explained the version-aware behavior that newer versions drop non-retriable oversized messages instead of retrying indefinitely',
+      'Recommended increasing Kafka topic or broker message-size limits or reducing event sizes with filters or Trusted Applications',
+    ],
+  },
+  {
+    name: 'windows_bsod_network_driver_regression_explicit_prompt',
+    description: 'Validates that the agent diagnoses the Windows network driver BSOD regression.',
+    question:
+      'Why did eval-windows-bsod-network-driver-regr blue screen after installing Elastic Defend?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried BSOD or endpoint security log evidence for eval-windows-bsod-network-driver-regr',
+      'Identified KERNEL_MODE_HEAP_CORRUPTION with elastic_endpoint_driver.sys on Elastic Defend 8.18.3',
+      'Recognized this as the known network driver pool corruption regression involving long-lived idle network connections',
+      'Recommended upgrading to 8.18.4 or disabling advanced.kernel.network as an immediate mitigation with the host-isolation tradeoff',
+    ],
+  },
+  {
+    name: 'incompatible_aws_vpc_cni_ebpf_conflict',
+    description:
+      'Validates that the agent diagnoses AWS VPC CNI network policy failures caused by TC eBPF conflicts.',
+    question:
+      'Why did network policies stop working on Elastic Defend endpoint eval-incompatible-aws-vpc-cni-ebpf-co?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried endpoint or endpoint security log evidence for eval-incompatible-aws-vpc-cni-ebpf-co',
+      'Identified a TC eBPF conflict between Elastic Defend host isolation probes and AWS VPC CNI aws-network-policy-agent',
+      'Explained that disabling Linux network event collection does not fix the host isolation TC probe conflict',
+      'Recommended setting linux.advanced.host_isolation.allowed to false if host isolation is not required',
+    ],
+  },
+  {
+    name: 'currently_healthy_endpoint_no_active_issue',
+    description:
+      'Validates that the agent reports a currently healthy endpoint and asks for a specific symptom instead of mining logs or inventing a root cause.',
+    question: 'Why is endpoint eval-currently-healthy-endpoint unhealthy?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried current endpoint and agent state and the newest policy response for eval-currently-healthy-endpoint',
+      'Concluded the endpoint is currently healthy based on the successful newest policy response and current endpoint metadata, instead of asserting a root cause',
+      'Did not call integration_knowledge or search warning/error logs to manufacture a root cause for the healthy endpoint',
+      'Asked the user for a specific symptom, time range, alert, or behavior to investigate instead of reporting a root cause',
+    ],
+  },
+] as const;
+
+/** Signature-only questions name no endpoint, so the agent must answer without generate_insight. */
+const CUSTOM_YARA_SIGNATURE_MAX_TOOL_CALLS = 12;
+
+const getTroubleshootingEvaluators = ({
+  traceBasedEvaluators: { toolCalls, latency, inputTokens, outputTokens, cachedTokens },
+}: DefaultEvaluators): Evaluator[] => [
+  createTroubleshootingToolUsageEvaluator() as Evaluator,
+  toolCalls,
+  latency,
+  inputTokens,
+  outputTokens,
+  cachedTokens,
+];
+
+const CUSTOM_YARA_SIGNATURE_COMMON_CRITERIA = [
+  `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
+  'Queried custom YARA signatures with automatic_troubleshooting.get_endpoint_artifacts',
+  'Did not call generate_insight, because the question does not involve a specific endpoint',
+  'Did not give a menu path such as "Security → Manage → Custom YARA Signatures"; when pointing to where signatures are managed, referred to the Custom YARA signatures tab of the Artifacts page',
+] as const;
+
+const CUSTOM_YARA_SIGNATURE_EVALS = [
+  {
+    name: 'custom_yara_signature_not_assigned_to_policy',
+    description:
+      'Validates that the agent identifies an enabled custom YARA signature that is not assigned to any policy.',
+    question: `The custom YARA signature ${CUSTOM_YARA_SIGNATURE_SCENARIOS.noPolicy.name} is enabled but never detects anything. Why?`,
+    criteria: [
+      ...CUSTOM_YARA_SIGNATURE_COMMON_CRITERIA,
+      `Identified that ${CUSTOM_YARA_SIGNATURE_SCENARIOS.noPolicy.name} is not assigned to any policy and is not global`,
+      'Recommended assigning the signature to the policy of the affected endpoints or making it global',
+    ],
+  },
+  {
+    name: 'custom_yara_signature_disabled',
+    description: 'Validates that the agent identifies a disabled custom YARA signature.',
+    question: `Why does the custom YARA signature ${CUSTOM_YARA_SIGNATURE_SCENARIOS.disabled.name} never alert on any endpoint?`,
+    criteria: [
+      ...CUSTOM_YARA_SIGNATURE_COMMON_CRITERIA,
+      `Identified that ${CUSTOM_YARA_SIGNATURE_SCENARIOS.disabled.name} is disabled, so it is not packed into the endpoint artifact and never runs`,
+      'Recommended enabling the signature',
+    ],
+  },
+  {
+    name: 'custom_yara_signature_unknown_name',
+    description:
+      'Validates that the agent reports a non-existent custom YARA signature instead of substituting another one.',
+    question:
+      'The custom YARA signature EVAL_TS_yara_totally_made_up_999 is not alerting. What is wrong with it?',
+    criteria: [
+      ...CUSTOM_YARA_SIGNATURE_COMMON_CRITERIA,
+      'Stated that no custom YARA signature named EVAL_TS_yara_totally_made_up_999 exists',
+      'Did not diagnose a different signature as if it were EVAL_TS_yara_totally_made_up_999',
+    ],
+  },
+] as const;
 
 evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, () => {
   let unitedTransformId: string;
 
-  evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, chatClient, log }) => {
-    await waitForEndpointPackage(kbnClient, esClient, log);
-
-    const { transforms } = await esClient.transform.getTransformStats({
-      transform_id: UNITED_TRANSFORM_WILDCARD,
-    });
-    unitedTransformId = transforms[0].id;
-
-    try {
-      await chatClient.converse({ message: 'hello' });
-    } catch (e) {
-      log.warning(`Warmup failed: ${e}`);
-    }
-
-    const clients = { esClient, internalEsClient };
-    // waiting for transforms takes a while so seed all scenarios here
-    await seedScenario(clients, SCENARIOS.incompatibleAntivirus);
-    await seedScenario(clients, SCENARIOS.policyResponseFailure);
-    await seedScenario(clients, SCENARIOS.stoppedUnitedTransform);
-
-    await waitForTransformPropagation(esClient, log, {
-      metadataCurrent: 3,
-      metadataUnited: 3,
+  evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
+    unitedTransformId = await seedTroubleshootingScenarios({
+      kbnClient,
+      esClient,
+      internalEsClient,
+      agentBuilderClient,
+      log,
     });
   });
 
-  evaluate('incompatible antivirus detection', async ({ evaluateDataset }) => {
+  evaluate('incompatible antivirus detection', async ({ evaluateDataset, evaluators }) => {
     await evaluateDataset({
       dataset: {
         name: 'endpoint: incompatible antivirus detection',
@@ -71,10 +288,11 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
           },
         ],
       },
+      extraEvaluators: getTroubleshootingEvaluators(evaluators),
     });
   });
 
-  evaluate('policy response failure', async ({ evaluateDataset }) => {
+  evaluate('policy response failure', async ({ evaluateDataset, evaluators }) => {
     await evaluateDataset({
       dataset: {
         name: 'endpoint: policy response failure',
@@ -96,6 +314,64 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
           },
         ],
       },
+      extraEvaluators: getTroubleshootingEvaluators(evaluators),
+    });
+  });
+
+  for (const evalDefinition of P0_EVALS) {
+    evaluate(evalDefinition.name, async ({ evaluateDataset, evaluators }) => {
+      await evaluateDataset({
+        dataset: {
+          name: `endpoint: ${evalDefinition.name}`,
+          description: evalDefinition.description,
+          examples: [
+            {
+              input: {
+                question: evalDefinition.question,
+              },
+              output: {
+                criteria: [...evalDefinition.criteria],
+              },
+            },
+          ],
+        },
+        extraEvaluators: getTroubleshootingEvaluators(evaluators),
+      });
+    });
+  }
+
+  evaluate.describe('custom YARA signatures', () => {
+    evaluate.beforeAll(async ({ kbnClient }) => {
+      await cleanupCustomYaraSignatures(kbnClient);
+      await seedCustomYaraSignatures(kbnClient);
+    });
+
+    for (const evalDefinition of CUSTOM_YARA_SIGNATURE_EVALS) {
+      evaluate(evalDefinition.name, async ({ evaluateDataset, evaluators }) => {
+        await evaluateDataset({
+          dataset: {
+            name: `endpoint: ${evalDefinition.name}`,
+            description: evalDefinition.description,
+            examples: [
+              {
+                input: {
+                  question: evalDefinition.question,
+                },
+                output: {
+                  criteria: [...evalDefinition.criteria],
+                  max_tool_calls: CUSTOM_YARA_SIGNATURE_MAX_TOOL_CALLS,
+                  forbidden_tools: [GENERATE_INSIGHT_TOOL_ID],
+                },
+              },
+            ],
+          },
+          extraEvaluators: getTroubleshootingEvaluators(evaluators),
+        });
+      });
+    }
+
+    evaluate.afterAll(async ({ kbnClient }) => {
+      await cleanupCustomYaraSignatures(kbnClient);
     });
   });
 
@@ -107,31 +383,36 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
       });
     });
 
-    evaluate('stopped united transform', async ({ evaluateDataset }) => {
-      await evaluateDataset({
-        dataset: {
-          name: 'endpoint: stopped united transform',
-          description:
-            'Validates that the agent detects a stopped united metadata transform and recommends restarting it.',
-          examples: [
-            {
-              input: {
-                question: 'I am missing endpoints on the endpoint list page. Can you troubleshoot?',
+    evaluate(
+      'missing_endpoint_list_stopped_united_transform',
+      async ({ evaluateDataset, evaluators }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'endpoint: missing_endpoint_list_stopped_united_transform',
+            description:
+              'Validates that the agent detects a stopped united metadata transform and recommends restarting it.',
+            examples: [
+              {
+                input: {
+                  question:
+                    'I am missing endpoints on the endpoint list page. Can you troubleshoot?',
+                },
+                output: {
+                  criteria: [
+                    `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
+                    'Called get_package_configurations to inspect transform settings and stats',
+                    'Identified that the endpoint.metadata_united transform is stopped',
+                    'Recommended restarting the stopped transform as a remediation step',
+                    'Called generate_insight to persist structured findings',
+                  ],
+                },
               },
-              output: {
-                criteria: [
-                  `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
-                  'Called get_package_configurations to inspect transform settings and stats',
-                  'Identified that the endpoint.metadata_united transform is stopped',
-                  'Recommended restarting the stopped transform as a remediation step',
-                  'Called generate_insight to persist structured findings',
-                ],
-              },
-            },
-          ],
-        },
-      });
-    });
+            ],
+          },
+          extraEvaluators: getTroubleshootingEvaluators(evaluators),
+        });
+      }
+    );
 
     evaluate.afterAll(async ({ esClient, log }) => {
       try {
@@ -162,6 +443,6 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
       ignore_unavailable: true,
     });
 
-    await cleanupSeededData({ esClient, internalEsClient });
+    await cleanupTroubleshootingData({ esClient, internalEsClient });
   });
 });

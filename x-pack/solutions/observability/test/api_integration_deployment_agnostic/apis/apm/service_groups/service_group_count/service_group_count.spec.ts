@@ -7,9 +7,8 @@
 import expect from '@kbn/expect';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { ApmRuleType, ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
-import { SERVICE_NAME } from '@kbn/apm-plugin/common/es_fields/apm';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   createServiceGroupApi,
@@ -29,10 +28,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const start = Date.now() - 24 * 60 * 60 * 1000;
   const end = Date.now();
 
-  const cleanUpAlerts = ({ roleAuthc, ruleId }: { roleAuthc: RoleCredentials; ruleId: string }) => {
+  const cleanUpAlerts = ({
+    roleAuthc,
+    ruleId,
+  }: {
+    roleAuthc: RoleCredentials;
+    ruleId?: string;
+  }) => {
     return alertingApi.cleanUpAlerts({
       roleAuthc,
-      ruleId,
+      ...(ruleId ? { ruleId } : {}),
       alertIndexName: APM_ALERTS_INDEX,
       connectorIndexName: APM_ACTION_VARIABLE_INDEX,
       consumer: 'apm',
@@ -85,7 +90,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       before(async () => {
         roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-        await cleanUpAlerts({ roleAuthc, ruleId });
+        await cleanUpAlerts({ roleAuthc });
         const createdRule = await alertingApi.createRule({
           name: 'Latency threshold | synth-go',
           params: {
@@ -102,14 +107,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           roleAuthc,
         });
 
+        expect(createdRule.id).to.be.ok();
         ruleId = createdRule.id;
+        await alertingApi.runRule(roleAuthc, ruleId);
         await alertingApi.waitForAlertInIndex({
           ruleId,
           indexName: APM_ALERTS_INDEX,
-          filters: [
-            { term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } },
-            { exists: { field: SERVICE_NAME } },
-          ],
         });
       });
 

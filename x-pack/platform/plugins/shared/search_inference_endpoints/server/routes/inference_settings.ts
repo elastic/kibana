@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 import { i18n } from '@kbn/i18n';
+import type { InferenceConnector } from '@kbn/inference-common';
 import {
   INFERENCE_SETTINGS_SO_TYPE,
   INFERENCE_SETTINGS_ID,
@@ -17,21 +18,65 @@ import {
 } from '../../common/constants';
 import type { InferenceSettingsAttributes, InferenceSettingsResponse } from '../../common/types';
 import { APIRoutes } from '../../common/types';
-import { inferenceSettingsSchemaV1 } from '../saved_objects/schema/v1';
+import { inferenceSettingsSchemaV2 } from '../saved_objects/schema/v2';
+import type { InferenceFeatureRegistry } from '../inference_feature_registry';
+import { resolveFeatureEndpoints } from '../inference_endpoints';
 import { errorHandler } from '../utils/error_handler';
-import { parseInferenceSettingsSO, validateInferenceSettings } from '../utils/inference_settings';
+import {
+  parseInferenceSettingsSO,
+  validateEndpointParameters,
+  validateInferenceSettings,
+} from '../utils/inference_settings';
 
 const EMPTY_SETTINGS: InferenceSettingsResponse = {
   _meta: { id: INFERENCE_SETTINGS_ID },
   data: { features: [] },
 };
 
+const resolveAllEndpointIds = (
+  settings: InferenceSettingsAttributes,
+  featureRegistry: InferenceFeatureRegistry,
+  logger: Logger
+): string[] => {
+  const soFeaturesMap = new Map(settings.features.map((f) => [f.feature_id, f]));
+
+  const resolvedEndpointIds = featureRegistry
+    .getAll()
+    .filter((f) => f.parentFeatureId !== undefined)
+    .flatMap((f) =>
+      resolveFeatureEndpoints(featureRegistry, soFeaturesMap, f.featureId, logger).endpoints.map(
+        ({ id }) => id
+      )
+    );
+
+  return [...new Set(resolvedEndpointIds)];
+};
+
+const findInvalidEndpoints = async (
+  ids: string[],
+  checkConnector: (id: string) => Promise<InferenceConnector>
+): Promise<string[]> => {
+  const invalid: string[] = [];
+  for (const id of ids) {
+    try {
+      await checkConnector(id);
+    } catch {
+      invalid.push(id);
+    }
+  }
+  return invalid;
+};
+
 export const defineInferenceSettingsRoutes = ({
   logger,
   router,
+  featureRegistry,
+  getConnectorById,
 }: {
   logger: Logger;
   router: IRouter;
+  featureRegistry: InferenceFeatureRegistry;
+  getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
 }) => {
   router.versioned
     .get({
@@ -39,7 +84,7 @@ export const defineInferenceSettingsRoutes = ({
       path: APIRoutes.GET_INFERENCE_SETTINGS,
       security: {
         authz: {
-          requiredPrivileges: [ApiPrivileges.manage(PLUGIN_ID)],
+          requiredPrivileges: [ApiPrivileges.read(PLUGIN_ID)],
         },
       },
     })
@@ -47,47 +92,26 @@ export const defineInferenceSettingsRoutes = ({
       {
         security: {
           authz: {
-            requiredPrivileges: [ApiPrivileges.manage(PLUGIN_ID)],
+            requiredPrivileges: [ApiPrivileges.read(PLUGIN_ID)],
           },
         },
         validate: {},
         version: ROUTE_VERSIONS.v1,
       },
-      errorHandler(logger)(async (context, _request, response) => {
-        const soClient = (await context.core).savedObjects.getClient({
+      errorHandler(logger)(async (context, request, response) => {
+        const coreContext = await context.core;
+        const soClient = coreContext.savedObjects.getClient({
           includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
         });
 
+        let settingsBody: InferenceSettingsResponse;
         try {
           const so = await soClient.get<InferenceSettingsAttributes>(
             INFERENCE_SETTINGS_SO_TYPE,
             INFERENCE_SETTINGS_ID
           );
 
-          if (so.error) {
-            if (so.error.statusCode === 404) {
-              return response.ok({
-                body: EMPTY_SETTINGS,
-                headers: { 'content-type': 'application/json' },
-              });
-            }
-            return response.customError({
-              statusCode: so.error.statusCode,
-              body: {
-                message: so.error.message,
-                attributes: {
-                  error: so.error.error,
-                  ...(so.error.metadata ?? {}),
-                },
-              },
-            });
-          }
-
-          const body: InferenceSettingsResponse = parseInferenceSettingsSO(so);
-          return response.ok({
-            body,
-            headers: { 'content-type': 'application/json' },
-          });
+          settingsBody = parseInferenceSettingsSO(so);
         } catch (e) {
           if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
             return response.ok({
@@ -97,6 +121,24 @@ export const defineInferenceSettingsRoutes = ({
           }
           throw e;
         }
+
+        let invalidEndpoints: string[] = [];
+
+        if (settingsBody.data.features.length > 0) {
+          try {
+            const ids = resolveAllEndpointIds(settingsBody.data, featureRegistry, logger);
+            invalidEndpoints = await findInvalidEndpoints(ids, (id) =>
+              getConnectorById(id, request)
+            );
+          } catch (e) {
+            logger.warn(`Failed to validate inference endpoints: ${e.message}`);
+          }
+        }
+
+        return response.ok({
+          body: { ...settingsBody, invalidEndpoints },
+          headers: { 'content-type': 'application/json' },
+        });
       })
     );
 
@@ -119,7 +161,7 @@ export const defineInferenceSettingsRoutes = ({
         },
         validate: {
           request: {
-            body: inferenceSettingsSchemaV1,
+            body: inferenceSettingsSchemaV2,
           },
         },
         version: ROUTE_VERSIONS.v1,
@@ -127,7 +169,14 @@ export const defineInferenceSettingsRoutes = ({
       errorHandler(logger)(async (context, request, response) => {
         const attrs = request.body;
 
-        const validationErrors = validateInferenceSettings(attrs);
+        let validationErrors = validateInferenceSettings(attrs);
+        if (validationErrors.length === 0) {
+          validationErrors = await validateEndpointParameters(
+            attrs,
+            (id) => getConnectorById(id, request),
+            logger
+          );
+        }
         if (validationErrors.length > 0) {
           return response.badRequest({
             body: {
@@ -148,19 +197,6 @@ export const defineInferenceSettingsRoutes = ({
           attrs,
           { id: INFERENCE_SETTINGS_ID, overwrite: true }
         );
-
-        if (so.error) {
-          return response.customError({
-            statusCode: so.error.statusCode,
-            body: {
-              message: so.error.message,
-              attributes: {
-                error: so.error.error,
-                ...(so.error.metadata ?? {}),
-              },
-            },
-          });
-        }
 
         const body: InferenceSettingsResponse = parseInferenceSettingsSO(so);
         return response.ok({

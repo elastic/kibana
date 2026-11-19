@@ -19,6 +19,7 @@ import {
   OWNER_SPACE_ID_TAG_PREFIX,
   ADVANCED_MODE_TAG,
   TRUSTED_PROCESS_DESCENDANTS_TAG,
+  DISABLED_ARTIFACT_TAG,
 } from './constants';
 
 export type TagFilter = (tag: string) => boolean;
@@ -123,6 +124,25 @@ export const getEffectedPolicySelectionByTags = (
     selected,
   };
 };
+
+export const addGlobalPolicyTag = (tags: string[]): string[] => [
+  ...tags,
+  ...(tags.includes(GLOBAL_ARTIFACT_TAG) ? [] : [GLOBAL_ARTIFACT_TAG]),
+];
+
+export const removeGlobalPolicyTag = (tags: string[]): string[] =>
+  tags.filter((tag) => tag !== GLOBAL_ARTIFACT_TAG);
+
+export const isArtifactDisabled = (item: Partial<Pick<ExceptionListItemSchema, 'tags'>>): boolean =>
+  (item.tags ?? []).includes(DISABLED_ARTIFACT_TAG);
+
+export const addDisabledArtifactTag = (tags: string[]): string[] => [
+  ...tags,
+  ...(tags.includes(DISABLED_ARTIFACT_TAG) ? [] : [DISABLED_ARTIFACT_TAG]),
+];
+
+export const removeDisabledArtifactTag = (tags: string[]): string[] =>
+  tags.filter((tag) => tag !== DISABLED_ARTIFACT_TAG);
 
 export const isAdvancedModeEnabled = (
   item: Partial<Pick<ExceptionListItemSchema, 'tags'>>

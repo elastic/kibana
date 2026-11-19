@@ -6,7 +6,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import type { DataTableRecordWithIndex } from '../components/data_management/shared';
+import type { DataTableRecordWithIndex } from '../components/stream_management/data_management/shared';
 
 export const useDocumentExpansion = (hits: DataTableRecordWithIndex[]) => {
   const [currentDoc, setExpandedDoc] = useState<DataTableRecordWithIndex | undefined>(undefined);

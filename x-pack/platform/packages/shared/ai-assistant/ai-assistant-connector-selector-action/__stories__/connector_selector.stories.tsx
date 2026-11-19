@@ -64,6 +64,7 @@ export default {
           closePopover={closePopover}
           panelPaddingSize="none"
           anchorPosition="downLeft"
+          aria-label="Connector selector"
         >
           <EuiContextMenu initialPanelId={0} panels={panels} />
         </EuiPopover>

@@ -17,6 +17,7 @@ import type {
   TimefilterContract,
 } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { AggregateQuery } from '@kbn/es-query';
 import type { NavigateToLensContext } from '@kbn/lens-common';
 import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
 import type { VisGroups } from './vis_groups_enum';
@@ -134,6 +135,8 @@ export interface VisTypeDefinition<TVisParams extends VisParams> {
   readonly getProjectRoutingOverrides?: (
     visParams: VisParams
   ) => Promise<Array<{ name?: string; value: string }> | undefined>;
+
+  readonly getEsqlQuery?: (visParams: VisParams) => AggregateQuery | undefined;
 
   readonly isAccessible?: boolean;
   /**

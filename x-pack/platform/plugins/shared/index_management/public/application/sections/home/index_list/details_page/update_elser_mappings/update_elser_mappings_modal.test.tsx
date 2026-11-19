@@ -15,9 +15,11 @@ import {
   isElserOnMlNodeSemanticField,
 } from '../../../../../components/mappings_editor/lib/utils';
 import * as apiService from '../../../../../services/api';
-import { notificationService } from '../../../../../services/notification';
 import type { NormalizedFields, State } from '../../../../../components/mappings_editor/types';
 import { UpdateElserMappingsModal } from './update_elser_mappings_modal';
+import { AppContextProvider } from '../../../../../app_context';
+import type { AppDependencies } from '../../../../../app_context';
+import { NotificationService } from '../../../../../services/notification';
 import {
   createMappingViewFieldsFixture,
   defaultDenormalizedMappings,
@@ -51,36 +53,54 @@ jest.mock('../../../../../services', () => ({
   },
 }));
 
-jest.mock('../../../../../services/notification', () => ({
-  notificationService: { showSuccessToast: jest.fn(), showDangerToast: jest.fn() },
-}));
-
 const deNormalizeMock = jest.mocked(deNormalize);
 const prepareFieldsForEisUpdateMock = jest.mocked(prepareFieldsForEisUpdate);
 const isElserOnMlNodeSemanticFieldMock = jest.mocked(isElserOnMlNodeSemanticField);
 const mappingsContextMock = jest.mocked(mappingsContext);
-const notificationServiceMock = jest.mocked(notificationService);
 const updateIndexMappingsMock = jest.mocked(apiService.updateIndexMappings);
+
+// The accessible name of a selectable option is built from its content, which
+// includes the appended inference id badge.
+const getMappingOption = (container: HTMLElement, fieldName: string) =>
+  within(container).getByRole('option', {
+    name: new RegExp(`^${fieldName}\\b`),
+  });
+
+let notificationService: NotificationService;
+let showSuccessToastSpy: jest.SpyInstance;
+let showDangerToastSpy: jest.SpyInstance;
 
 const renderEisUpdateCallout = ({
   hasUpdatePrivileges = true,
 }: {
   hasUpdatePrivileges?: boolean;
 } = {}) => {
+  const ctx = {
+    services: {
+      notificationService,
+    },
+  } as unknown as AppDependencies;
+
   return render(
-    <UpdateElserMappingsModal
-      indexName="test-index"
-      refetchMapping={refetchMapping}
-      setIsModalOpen={setIsModalOpen}
-      hasUpdatePrivileges={hasUpdatePrivileges}
-      modalId="test-modal-id"
-    />
+    <AppContextProvider value={ctx}>
+      <UpdateElserMappingsModal
+        indexName="test-index"
+        refetchMapping={refetchMapping}
+        setIsModalOpen={setIsModalOpen}
+        hasUpdatePrivileges={hasUpdatePrivileges}
+        modalId="test-modal-id"
+      />
+    </AppContextProvider>
   );
 };
 
 describe('UpdateElserMappingsModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const toasts = { add: jest.fn() } as any;
+    notificationService = new NotificationService(toasts);
+    showSuccessToastSpy = jest.spyOn(notificationService, 'showSuccessToast');
+    showDangerToastSpy = jest.spyOn(notificationService, 'showDangerToast');
     const fieldsById: NormalizedFields = createMappingViewFieldsFixture();
 
     mappingsContextMock.useMappingsState.mockReturnValue({
@@ -100,10 +120,12 @@ describe('UpdateElserMappingsModal', () => {
     renderEisUpdateCallout();
 
     expect(screen.getByTestId('updateElserMappingsModal')).toBeInTheDocument();
-    expect(screen.getByTestId('updateElserMappingsSelect')).toBeInTheDocument();
 
-    expect(screen.getByRole('option', { name: 'name' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'text' })).toBeInTheDocument();
+    const selectable = screen.getByTestId('updateElserMappingsSelect');
+    expect(selectable).toBeInTheDocument();
+
+    expect(getMappingOption(selectable, 'name')).toBeInTheDocument();
+    expect(getMappingOption(selectable, 'text')).toBeInTheDocument();
 
     const badges = screen.getAllByText('.elser-2-elasticsearch');
     expect(badges).toHaveLength(2);
@@ -118,7 +140,7 @@ describe('UpdateElserMappingsModal', () => {
   it('should enable Apply button when at least one option is checked', async () => {
     renderEisUpdateCallout();
     const selectable = screen.getByTestId('updateElserMappingsSelect');
-    const firstOption = within(selectable).getByRole('option', { name: 'name' });
+    const firstOption = getMappingOption(selectable, 'name');
     await userEvent.click(firstOption);
 
     const applyBtn = screen.getByTestId('UpdateElserMappingsModalApplyBtn');
@@ -135,7 +157,7 @@ describe('UpdateElserMappingsModal', () => {
     renderEisUpdateCallout();
 
     const selectable = screen.getByTestId('updateElserMappingsSelect');
-    const firstOption = within(selectable).getByRole('option', { name: 'name' });
+    const firstOption = getMappingOption(selectable, 'name');
     await userEvent.click(firstOption);
 
     updateIndexMappingsMock.mockResolvedValue({ error: null, data: null });
@@ -144,7 +166,7 @@ describe('UpdateElserMappingsModal', () => {
     await userEvent.click(applyBtn);
 
     expect(updateIndexMappingsMock).toHaveBeenCalledTimes(1);
-    expect(notificationServiceMock.showSuccessToast).toHaveBeenCalledTimes(1);
+    expect(showSuccessToastSpy).toHaveBeenCalledTimes(1);
     expect(setIsModalOpen).toHaveBeenCalledWith(false);
     expect(refetchMapping).toHaveBeenCalled();
   });
@@ -153,7 +175,7 @@ describe('UpdateElserMappingsModal', () => {
     renderEisUpdateCallout();
 
     const selectable = screen.getByTestId('updateElserMappingsSelect');
-    const firstOption = within(selectable).getByRole('option', { name: 'name' });
+    const firstOption = getMappingOption(selectable, 'name');
     await userEvent.click(firstOption);
 
     const errorMessage = 'Something has gone wrong';
@@ -166,7 +188,7 @@ describe('UpdateElserMappingsModal', () => {
     await userEvent.click(applyBtn);
 
     expect(updateIndexMappingsMock).toHaveBeenCalledTimes(1);
-    expect(notificationServiceMock.showDangerToast).toHaveBeenCalledTimes(1);
+    expect(showDangerToastSpy).toHaveBeenCalledTimes(1);
     expect(setIsModalOpen).toHaveBeenCalledWith(false);
   });
 

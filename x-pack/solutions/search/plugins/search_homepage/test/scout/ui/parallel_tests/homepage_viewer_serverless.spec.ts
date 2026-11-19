@@ -9,7 +9,7 @@ import { tags } from '@kbn/scout-search';
 import { expect } from '@kbn/scout-search/ui';
 import { test } from '../fixtures';
 
-test.describe('Homepage - Viewer: Serverless search', { tag: [...tags.serverless.search] }, () => {
+test.describe('Homepage - Viewer on serverless', { tag: tags.serverless.search }, () => {
   test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
     await page.addInitScript(() => {
@@ -18,8 +18,8 @@ test.describe('Homepage - Viewer: Serverless search', { tag: [...tags.serverless
     await pageObjects.homepage.goto();
   });
 
-  test('should show Changelog label in kibana version on serverless', async ({ pageObjects }) => {
-    const versionBadge = await pageObjects.homepage.getKibanaVersionBadge();
-    await expect(versionBadge).toContainText('Changelog');
+  test('shows the data card without the manage data action', async ({ pageObjects }) => {
+    await expect(pageObjects.homepage.dataCard).toBeVisible();
+    await expect(pageObjects.homepage.manageDataButton).toBeHidden();
   });
 });

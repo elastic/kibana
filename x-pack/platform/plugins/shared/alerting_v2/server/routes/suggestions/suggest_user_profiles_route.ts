@@ -1,0 +1,115 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { lazySchema, z } from '@kbn/zod/v4';
+import { errorResponseSchema, suggestUserProfilesResponseSchema } from '@kbn/alerting-v2-schemas';
+import { Request } from '@kbn/core-di-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
+import { inject, injectable } from 'inversify';
+import { UserService } from '../../lib/services/user_service/user_service';
+import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
+import { ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH } from '../constants';
+
+const ROUTE_AUTH_PRIVILEGES = [ALERTING_V2_API_PRIVILEGES.alerts.read] as const;
+
+const suggestUserProfilesBodySchema = lazySchema(() =>
+  z
+    .object({
+      name: z
+        .string()
+        .max(256)
+        .optional()
+        .describe('Name fragment to search by. Omit or leave empty to list profiles unfiltered.'),
+      size: z
+        .number()
+        .int()
+        .min(0)
+        .max(100)
+        .optional()
+        .describe('Maximum number of profiles to return. Defaults to 10'),
+    })
+    .strict()
+);
+
+type SuggestUserProfilesBody = z.infer<typeof suggestUserProfilesBodySchema>;
+
+/**
+ *
+ * There is no generic platform/browser endpoint for “suggest user profiles” that we can safely call directly.
+ *
+ * Why:
+ *
+ * bulkGet is built-in (/internal/security/user_profile/_bulk_get), but suggest is intentionally app-defined.
+ *
+ * In browser APIs, userProfile.suggest requires a path argument (your app’s route), not just params.
+ *
+ * Optional post-filtering via `requiredPrivileges` on `userProfiles.suggest` is server-only; this route relies on HTTP authz instead so ES matches are not dropped by a second privileges pass.
+ *
+ * So we need an app route that:
+ * - accepts only safe inputs (name, size, dataPath — same shape as browser suggest params)
+ * - calls Core's userProfile.suggest(...)
+ * - enforces authz (read alert episodes) and internal access
+ *
+ * So the new route is basically the secure “adapter” between UI search and Core's user-profile suggest service.
+ **/
+@injectable()
+export class SuggestUserProfilesRoute extends BaseAlertingRoute {
+  static method = 'post' as const;
+  static path = ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH;
+  static security: RouteSecurity = {
+    authz: {
+      requiredPrivileges: [...ROUTE_AUTH_PRIVILEGES],
+    },
+  };
+  static routeOptions = {
+    access: 'internal' as const,
+    summary: 'Suggest user profiles',
+    description: 'Suggest user profiles for assignee search in alert episodes.',
+  } as const;
+  static schemas = {
+    request: {
+      body: suggestUserProfilesBodySchema,
+    },
+    response: {
+      200: {
+        body: () => suggestUserProfilesResponseSchema,
+        description: 'Returns a list of suggested user profiles.',
+      },
+      400: {
+        body: () => errorResponseSchema,
+        description: 'Indicates an invalid schema or parameters.',
+      },
+    },
+  };
+
+  protected readonly routeName = 'suggest user profiles';
+
+  constructor(
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
+    @inject(Request)
+    private readonly request: KibanaRequest<unknown, unknown, SuggestUserProfilesBody>,
+    @inject(UserService)
+    private readonly userService: UserService
+  ) {
+    super(ctx);
+  }
+
+  protected async execute() {
+    const { name, size } = this.request.body;
+    const body = await this.userService.suggestUsers({
+      // An empty name must reach Elasticsearch as "no filter" so the picker can
+      // show an initial list of profiles before the user types anything.
+      name: name || undefined,
+      size,
+      dataPath: 'avatar',
+    });
+
+    return this.ctx.response.ok({ body });
+  }
+}

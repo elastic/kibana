@@ -21,35 +21,105 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import type { ESQLSourceResult } from '@kbn/esql-types';
+import type { CoreStart } from '@kbn/core/public';
+import type { ESQLSourceResult, EsqlView } from '@kbn/esql-types';
+import { ESQL_VIEWS_CAPABILITIES, ESQL_VIEWS_FEATURE_ID } from '@kbn/esql-types';
+import type { ILicense } from '@kbn/licensing-types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getDatasets, getESQLSources, getTimeseriesIndices, getViews } from '@kbn/esql-utils';
 import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
 import { getSourceTypeKey, getSourceTypeLabel } from './utils';
 import { DATA_SOURCE_BROWSER_I18N_KEYS } from './i18n';
-import { DataSourceSelectionChange } from '../types';
+import { DataSourceSelectionChange, type DataSourceSelectionDetails } from '../types';
+import { useAllSources } from './use_all_sources';
 
 // Filter panel size constants
 const FILTER_PANEL_WIDTH = 250; // Width in pixels for the filter panel lists
 const FILTER_PANEL_MAX_HEIGHT = 250; // Maximum height in pixels for the filter panel lists
 
+interface DataSourceBrowserKibanaServices {
+  core: Pick<CoreStart, 'application' | 'http'>;
+  esql?: {
+    getLicense?: () => Promise<ILicense | undefined>;
+    enrichSources?: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
+    enrichViews?: (views: EsqlView[]) => Promise<EsqlView[]>;
+  };
+}
+
 interface DataSourceBrowserProps {
   isOpen: boolean;
-  isLoading: boolean;
-  allSources: ESQLSourceResult[];
+  isTimeseries: boolean;
+  /**
+   * Sources passed from autocomplete to render immediately without fetching.
+   * If empty/undefined, the browser will fetch sources using Kibana services.
+   */
+  preloadedSources?: ESQLSourceResult[];
   selectedSources?: string[];
   onClose: () => void;
-  onSelect: (sourceName: string, change: DataSourceSelectionChange) => void;
+  onCloseComplete?: () => void;
+  onSelect: (
+    sourceName: string,
+    change: DataSourceSelectionChange,
+    details: DataSourceSelectionDetails
+  ) => void;
   position?: { top?: number; left?: number };
 }
 
 export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   isOpen,
-  isLoading,
-  allSources,
+  isTimeseries,
+  preloadedSources,
   selectedSources = [],
   onClose,
+  onCloseComplete,
   onSelect,
   position,
 }) => {
+  const kibana = useKibana<DataSourceBrowserKibanaServices>();
+  const { core } = kibana.services;
+  const { http, application } = core;
+  const getLicense = kibana.services?.esql?.getLicense;
+  const enrichSources = kibana.services?.esql?.enrichSources;
+  const enrichViews = kibana.services?.esql?.enrichViews;
+
+  const getTimeseriesIndicesCallback = useCallback(async () => {
+    return await getTimeseriesIndices(http);
+  }, [http]);
+
+  const getSourcesCallback = useCallback(async () => {
+    return await getESQLSources({ http, application }, getLicense, enrichSources);
+  }, [application, enrichSources, getLicense, http]);
+
+  const getDatasetsCallback = useCallback(() => getDatasets(http), [http]);
+
+  const canReadViews =
+    application.capabilities[ESQL_VIEWS_FEATURE_ID]?.[ESQL_VIEWS_CAPABILITIES.read] === true;
+
+  const getViewsCallback = useCallback(async () => {
+    // Refreshes the cache entry the editor reads, rather than reading it.
+    const result = await getViews.call({ forceRefresh: true }, http);
+    if (!enrichViews) {
+      return result;
+    }
+    try {
+      return { ...result, views: await enrichViews(result.views) };
+    } catch (error) {
+      // Metadata is optional: listing the views unenriched beats listing none of them.
+      // eslint-disable-next-line no-console
+      console.error('Failed to enrich the ES|QL views', error);
+      return result;
+    }
+  }, [enrichViews, http]);
+
+  const { allSources, isLoading } = useAllSources({
+    isOpen,
+    preloadedSources,
+    getSources: getSourcesCallback,
+    getTimeseriesIndices: getTimeseriesIndicesCallback,
+    getDatasets: getDatasetsCallback,
+    getViews: canReadViews ? getViewsCallback : undefined,
+    isTimeseries,
+  });
   const { euiTheme } = useEuiTheme();
 
   const [searchValue, setSearchValue] = useState('');
@@ -148,6 +218,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
         type: source.type,
         typeKey: getSourceTypeKey(source.type),
         title: source.title,
+        isView: source.isView === true,
       },
     }));
   }, [allSources, selectedSources]);
@@ -189,8 +260,9 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
 
       const key = changedOption.key as string;
       const isAdding = changedOption.checked === 'on';
-
-      onSelect(key, isAdding ? DataSourceSelectionChange.Add : DataSourceSelectionChange.Remove);
+      onSelect(key, isAdding ? DataSourceSelectionChange.Add : DataSourceSelectionChange.Remove, {
+        isView: changedOption.data?.isView === true,
+      });
     },
     [onSelect]
   );
@@ -246,7 +318,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="chevronSingleRight" />
+                  <EuiIcon type="chevronSingleRight" aria-hidden={true} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
@@ -269,7 +341,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   const filterPanel = isIntegrationPopoverOpen ? (
     <>
       <EuiPopoverTitle paddingSize="s" onClick={() => setIsIntegrationPopoverOpen(false)}>
-        <EuiIcon type="chevronSingleLeft" />
+        <EuiIcon type="chevronSingleLeft" aria-hidden={true} />
         <EuiLink
           color="text"
           css={css`
@@ -310,6 +382,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
         }
         listProps={{
           bordered: false, // Doesn't work so we overwrite the border style with filterListStyles
+          paddingSize: 's',
         }}
       >
         {(list) => (
@@ -335,6 +408,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
       filterPanel={filterPanel}
       isOpen={isOpen}
       onClose={onClose}
+      onCloseComplete={onCloseComplete}
       onSelect={handleSelectionChange}
       isFilterOpen={isFilterPopoverOpen}
       setIsFilterOpen={setIsFilterPopoverOpen}
@@ -344,6 +418,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
       isLoading={isLoading}
       searchValue={searchValue}
       setSearchValue={setSearchValue}
+      dataTestSubj="esqlDataSourceBrowser"
     />
   );
 };

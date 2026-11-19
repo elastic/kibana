@@ -18,6 +18,7 @@ export const noCasesCapabilities = (): CasesCapabilities => ({
   case_reopen: false,
   create_comment: false,
   cases_assign: false,
+  cases_manage_templates: false,
 });
 
 export const readCasesCapabilities = (): CasesCapabilities => ({
@@ -31,6 +32,7 @@ export const readCasesCapabilities = (): CasesCapabilities => ({
   case_reopen: false,
   create_comment: false,
   cases_assign: false,
+  cases_manage_templates: false,
 });
 
 export const allCasesCapabilities = (): CasesCapabilities => ({
@@ -44,6 +46,7 @@ export const allCasesCapabilities = (): CasesCapabilities => ({
   case_reopen: true,
   create_comment: true,
   cases_assign: true,
+  cases_manage_templates: true,
 });
 
 export const noCasesPermissions = (): CasesPermissions => ({
@@ -58,6 +61,7 @@ export const noCasesPermissions = (): CasesPermissions => ({
   reopenCase: false,
   createComment: false,
   assign: false,
+  manageTemplates: false,
 });
 
 export const readCasesPermissions = (): CasesPermissions => ({
@@ -72,6 +76,7 @@ export const readCasesPermissions = (): CasesPermissions => ({
   reopenCase: false,
   createComment: false,
   assign: false,
+  manageTemplates: false,
 });
 
 export const writeCasesPermissions = (): CasesPermissions => ({
@@ -86,6 +91,7 @@ export const writeCasesPermissions = (): CasesPermissions => ({
   reopenCase: true,
   createComment: true,
   assign: true,
+  manageTemplates: true,
 });
 
 export const allCasesPermissions = (): CasesPermissions => ({
@@ -100,4 +106,5 @@ export const allCasesPermissions = (): CasesPermissions => ({
   reopenCase: true,
   createComment: true,
   assign: true,
+  manageTemplates: true,
 });

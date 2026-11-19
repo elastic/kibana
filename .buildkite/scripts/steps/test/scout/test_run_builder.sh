@@ -2,7 +2,25 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/steps/functional/common.sh
+source .buildkite/scripts/bootstrap.sh
+.buildkite/scripts/setup_es_snapshot_cache.sh
+
+# Test target attributes the distributed tests will run under. Declared explicitly here,
+# at the entry point of the distribution process, so tests tagged
+# '@limit/<selection-method>-<target-attr>' are filtered accordingly. `env.sh` exports the
+# equivalent SCOUT_TARGET_ATTRIBUTES for the steps that run the distributed tests.
+TARGET_ATTRIBUTE_FLAGS=()
+
+# Runtime stats default to the pull-request pipeline, which never runs with attributes. Point
+# the lookup at this build's own pipeline so attribute-specific history can accumulate, and
+# widen the lookback because the attribute-carrying pipelines run daily, not per commit.
+STATS_SOURCE_FLAGS=()
+
+if should_enable_fips; then
+  export NODE_OPTIONS="${NODE_OPTIONS:-} --enable-fips --openssl-config=$HOME/nodejs.cnf"
+  TARGET_ATTRIBUTE_FLAGS+=(--targetAttribute fips)
+  STATS_SOURCE_FLAGS+=(--pipelineSlug "${BUILDKITE_PIPELINE_SLUG:-kibana-fips}" --lookbackDays 7)
+fi
 
 echo '--- Verify Playwright CLI is functional'
 node scripts/scout run-playwright-test-check
@@ -12,11 +30,107 @@ echo '--- Update Scout Test Config Manifests'
 # so they do not cause extra modules to be considered "changed" in the next step.
 node scripts/scout.js update-test-config-manifests --concurrencyLimit 3
 
+# Resolve Scout's selective-testing scope once, before either distribution
+# strategy runs. Both artifacts produced below (code_changes.json and
+# testing_scope.json) are consumed by the configs/lanes branches further down
+# and by other pipeline steps (e.g. FTR/Jest run-order pick).
+
+# PR builds: GITHUB_PR_MERGE_BASE is computed by set_git_merge_base() in util.sh.
+# On-merge builds: falls back to HEAD~1 (parent of the merge commit).
+if [[ -n "${GITHUB_PR_MERGE_BASE:-}" ]]; then
+  echo "Merge base (PR): ${GITHUB_PR_MERGE_BASE}"
+else
+  echo "GITHUB_PR_MERGE_BASE not set — using HEAD~1 as merge base (on-merge build)"
+fi
+AFFECTED_MERGE_BASE="${GITHUB_PR_MERGE_BASE:-HEAD~1}"
+
+mkdir -p .scout
+CODE_CHANGES_FILE=".scout/code_changes.json"
+export TESTING_SCOPE_FILE=".scout/testing_scope.json"
+
+echo '--- Resolve Scout selective-testing scope'
+
+# Build the generic code-changes file (changed files + affected @kbn/ modules)
+# consumed by `scout resolve-testing-scope` below.
+node "$(dirname "${0}")/resolve_selective_testing.ts" \
+  "$AFFECTED_MERGE_BASE" \
+  "$CODE_CHANGES_FILE"
+
+# Decide the scope once (full / tests-only / dependency-tree) so every
+# downstream step uses the same decision.
+SELECTIVE_SCOUT_FLAG=()
+if [[ "${SELECTIVE_TESTING_ENABLED:-}" == "true" ]] \
+  && ! is_pr_with_label "scout:run-all-tests"; then
+  SELECTIVE_SCOUT_FLAG=(--selective-testing)
+  echo "Selective testing: enabled (Scout CLI will auto-select tests-only / dependency-tree mode based on the diff)"
+else
+  echo "Selective testing: disabled"
+  echo "Reason: SELECTIVE_TESTING_ENABLED=${SELECTIVE_TESTING_ENABLED:-false}, 'scout:run-all-tests' label=$(is_pr_with_label "scout:run-all-tests" && echo yes || echo no)"
+fi
+
+node scripts/scout resolve-testing-scope \
+  --code-changes "$CODE_CHANGES_FILE" \
+  --scope-output "$TESTING_SCOPE_FILE" \
+  "${SELECTIVE_SCOUT_FLAG[@]}"
+
+buildkite-agent artifact upload "$CODE_CHANGES_FILE"
+# Consumed by the configs/lanes branches below. The Jest/FTR "Pick Test Group
+# Run Order" step computes its own scope independently, so it does not need
+# this artifact.
+buildkite-agent artifact upload "$TESTING_SCOPE_FILE"
+
+# Moon shadow-mode comparison (observational only); upload if present.
+CODE_CHANGES_MOON_SHADOW_FILE=".scout/code_changes.moon_shadow.json"
+if [[ -f "$CODE_CHANGES_MOON_SHADOW_FILE" ]]; then
+  buildkite-agent artifact upload "$CODE_CHANGES_MOON_SHADOW_FILE"
+fi
+
+# On-merge shadow mode: resolves the Scout scope from the Pre-Build commit range for comparison only.
+resolve_on_merge_shadow_scope() {
+  local selection base mode reason
+  local shadow_code_changes=".scout/code_changes.on_merge_shadow.json"
+  local shadow_scope=".scout/testing_scope.on_merge_shadow.json"
+
+  selection="$(buildkite-agent meta-data get on-merge-selection --default '')" || return 1
+  if [[ -z "$selection" ]]; then
+    echo "No on-merge selection recorded by Pre-Build; skipping"
+    return 0
+  fi
+
+  mode="$(jq -r '.testTypes.scout.mode // empty' <<<"$selection")" || return 1
+  base="$(jq -r '.base // empty' <<<"$selection")" || return 1
+  if [[ "$mode" != "selective" || -z "$base" ]]; then
+    reason="$(jq -r '.testTypes.scout.reason // "no base"' <<<"$selection")" || return 1
+    echo "Scout shadow scope: full ($reason)"
+    echo "On-merge selective testing (shadow) for Scout: full ($reason)" |
+      buildkite-agent annotate --context on-merge-selective-shadow-scout --style info || return 1
+    return 0
+  fi
+
+  node "$(dirname "${0}")/resolve_selective_testing.ts" "$base" "$shadow_code_changes" || return 1
+  node scripts/scout resolve-testing-scope \
+    --code-changes "$shadow_code_changes" \
+    --scope-output "$shadow_scope" \
+    --selective-testing || return 1
+  buildkite-agent artifact upload "$shadow_code_changes" || return 1
+  buildkite-agent artifact upload "$shadow_scope" || return 1
+
+  jq -r --arg base "$base" '"On-merge selective testing (shadow) for Scout: \(.kind) scope from base \($base[0:12]) — \(.affectedConfigs // [] | length) affected config(s), \(.affectedModules | length) affected module(s); all configs still run"' \
+    "$shadow_scope" |
+    buildkite-agent annotate --context on-merge-selective-shadow-scout --style info || return 1
+}
+
+if [[ "${BUILDKITE_PIPELINE_SLUG:-}" == "kibana-on-merge" && "${ON_MERGE_SELECTIVE_MODE:-off}" == "shadow" ]]; then
+  echo '--- Resolve on-merge Scout selective-testing scope (shadow)'
+  resolve_on_merge_shadow_scope || echo "On-merge Scout shadow scope failed (ignored)"
+fi
+
 SCOUT_TEST_DISTRIBUTION_STRATEGY="${SCOUT_TEST_DISTRIBUTION_STRATEGY:-configs}"
 
 if [[ "$SCOUT_TEST_DISTRIBUTION_STRATEGY" == "lanes" ]]; then
   echo '--- Update Scout Test Config Stats'
-  node scripts/scout update-test-config-stats
+  node scripts/scout update-test-config-stats \
+    "${STATS_SOURCE_FLAGS[@]+"${STATS_SOURCE_FLAGS[@]}"}"
 
   echo '--- Create Test Tracks'
   SERVERLESS_TARGETS=(
@@ -26,7 +140,7 @@ if [[ "$SCOUT_TEST_DISTRIBUTION_STRATEGY" == "lanes" ]]; then
     local-serverless-security_complete
     local-serverless-security_essentials
     local-serverless-security_ease
-    local-serverless-workplaceai
+    local-serverless-vectordb
   )
 
   TEST_TARGET_FLAGS=()
@@ -42,11 +156,13 @@ if [[ "$SCOUT_TEST_DISTRIBUTION_STRATEGY" == "lanes" ]]; then
   fi
 
   node scripts/scout create-test-tracks \
-    --estimatedLaneSetupMinutes "${SCOUT_TEST_LANE_ESTIMATED_SETUP_MINUTES:-3}" \
+    --estimatedLaneSetupMinutes "${SCOUT_TEST_LANE_ESTIMATED_SETUP_MINUTES:-5}" \
     --targetRuntimeMinutes "${SCOUT_TEST_LANE_TARGET_RUNTIME_MINUTES:-15}" \
+    --combineShortLanes \
+    --testing-scope "$TESTING_SCOPE_FILE" \
     "${TEST_TARGET_FLAGS[@]}" \
+    "${TARGET_ATTRIBUTE_FLAGS[@]+"${TARGET_ATTRIBUTE_FLAGS[@]}"}" \
     --showMultiTrackSummary
-
 else
   if [[ "${BUILDKITE_BRANCH:-}" == "main" || "${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-}" == "main" ]]; then
     SCOUT_DISCOVERY_TARGET="local"
@@ -54,38 +170,28 @@ else
     SCOUT_DISCOVERY_TARGET="local-stateful-only"
   fi
 
-  AFFECTED_MODULES_FILE=""
-  if [[ -n "${GITHUB_PR_MERGE_BASE:-}" ]] && [[ "${SELECTIVE_TESTING_ENABLED:-}" == "true" ]]; then
-    mkdir -p .scout
-    AFFECTED_MODULES_FILE=".scout/affected_modules.json"
-    .buildkite/pipeline-utils/affected-packages/list_affected \
-      --strategy git --deep --merge-base "$GITHUB_PR_MERGE_BASE" --json \
-      > "$AFFECTED_MODULES_FILE"
-  fi
-
-  echo "--- Discover Playwright Configs and upload to Buildkite artifacts${AFFECTED_MODULES_FILE:+ (selective testing)}"
-  AFFECTED_FLAG=()
-  if [[ -n "$AFFECTED_MODULES_FILE" ]]; then
-    AFFECTED_FLAG=(--affected-modules "$AFFECTED_MODULES_FILE")
-  fi
+  echo "--- Discover Playwright Configs and upload to Buildkite artifacts"
   node scripts/scout discover-playwright-configs \
     --include-custom-servers \
     --target "$SCOUT_DISCOVERY_TARGET" \
-    "${AFFECTED_FLAG[@]}" \
+    --testing-scope "$TESTING_SCOPE_FILE" \
+    "${TARGET_ATTRIBUTE_FLAGS[@]+"${TARGET_ATTRIBUTE_FLAGS[@]}"}" \
     --save
   cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
   buildkite-agent artifact upload "scout_playwright_configs.json"
+  upload_tmp_artifact scout_playwright_configs.json scout_playwright_configs.json "$BUILDKITE_BUILD_ID"
 fi
-
-echo '--- Running Scout API Integration Tests'
-node scripts/scout.js run-tests \
-  --location local \
-  --arch stateful \
-  --domain classic \
-  --config src/platform/packages/shared/kbn-scout/test/scout/api/parallel.playwright.config.ts \
-  --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
 
 source .buildkite/scripts/steps/test/scout/upload_report_events.sh
 
 echo '--- Producing Scout Test Execution Steps'
-ts-node "$(dirname "${0}")/test_run_builder.ts"
+node "$(dirname "${0}")/test_run_builder.ts"
+
+echo '--- Upload scout test run order artifacts to GCS'
+if [[ -f scout_playwright_configs_scheduled.json ]]; then
+  upload_tmp_artifact scout_playwright_configs_scheduled.json scout_playwright_configs_scheduled.json "$BUILDKITE_BUILD_ID"
+fi
+
+if [[ -f .scout/test_lane_loads.json ]]; then
+  upload_tmp_artifact .scout/test_lane_loads.json .scout/test_lane_loads.json "$BUILDKITE_BUILD_ID"
+fi

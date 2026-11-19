@@ -26,6 +26,7 @@ export interface ChatMessage {
 
 export interface ConverseResponse {
   conversationId?: string;
+  traceId?: string;
   messages: ChatMessage[];
   errors: any[];
   steps?: any[];

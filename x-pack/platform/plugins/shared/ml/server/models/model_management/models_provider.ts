@@ -36,8 +36,6 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../../common/constants/trained_models';
-import type { MlFeatures } from '../../../common/constants/app';
 import type {
   DFAModelItem,
   ExistingModelBase,
@@ -46,8 +44,8 @@ import type {
   TrainedModelItem,
   TrainedModelUIItem,
   TrainedModelWithPipelines,
-} from '../../../common/types/trained_models';
-import { isBuiltInModel, isExistingModel } from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+import { isBuiltInModel, isExistingModel } from '@kbn/ml-common-types/trained_models';
 import {
   isDFAModelItem,
   isElasticModel,
@@ -55,7 +53,12 @@ import {
   type ModelDownloadState,
   type PipelineDefinition,
   type TrainedModelConfigResponse,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+import type { MlFeatures } from '../../../common/constants/app';
+import {
+  DEFAULT_TRAINED_MODELS_PAGE_SIZE,
+  PIPELINE_SIMULATE_MAX_RESPONSE_BYTES,
+} from '../../../common/constants/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
 import { filterForEnabledFeatureModels } from '../../routes/trained_models';
@@ -460,19 +463,10 @@ export class ModelsProvider {
       docs,
       pipeline: pipelineConfig,
     };
-    let result = {};
-    try {
-      result = await this._client.asCurrentUser.ingest.simulate(simulateRequest);
-    } catch (error) {
-      if (error.statusCode === 404) {
-        // ES returns 404 when there are no pipelines
-        // Instead, we should return an empty response and a 200
-        return result;
-      }
-      throw error;
-    }
-
-    return result;
+    return await this._client.asCurrentUser.ingest.simulate(simulateRequest, {
+      maxResponseSize: PIPELINE_SIMULATE_MAX_RESPONSE_BYTES,
+      headers: { 'accept-encoding': 'identity' },
+    });
   }
 
   /**
@@ -545,6 +539,11 @@ export class ModelsProvider {
   async getPipelineToIndicesMap(pipelineIds: Set<string>): Promise<Record<string, string[]>> {
     const pipelineIdsToDestinationIndices: Record<string, string[]> = {};
 
+    // No model pipelines to match, so avoid fetching settings for every index in the cluster
+    if (pipelineIds.size === 0) {
+      return pipelineIdsToDestinationIndices;
+    }
+
     let indicesPermissions;
     let indicesSettings;
 
@@ -566,11 +565,25 @@ export class ModelsProvider {
       return pipelineIdsToDestinationIndices;
     }
 
+    // From list of model pipelines, find all indices that have pipeline set as index.default_pipeline
+    const indexToPipeline = new Map<string, string>();
+    for (const [indexName, { settings }] of Object.entries(indicesSettings)) {
+      const defaultPipeline = settings?.index?.default_pipeline;
+      if (defaultPipeline && pipelineIds.has(defaultPipeline)) {
+        indexToPipeline.set(indexName, defaultPipeline);
+      }
+    }
+
+    if (indexToPipeline.size === 0) {
+      return pipelineIdsToDestinationIndices;
+    }
+
     try {
+      // Only check privileges for the matching indices, not every index with a default pipeline
       const hasPrivilegesResponse = await this._client.asCurrentUser.security.hasPrivileges({
         index: [
           {
-            names: Object.keys(indicesSettings),
+            names: Array.from(indexToPipeline.keys()),
             privileges: ['read'],
           },
         ],
@@ -584,14 +597,8 @@ export class ModelsProvider {
       return pipelineIdsToDestinationIndices;
     }
 
-    // From list of model pipelines, find all indices that have pipeline set as index.default_pipeline
-    for (const [indexName, { settings }] of Object.entries(indicesSettings)) {
-      const defaultPipeline = settings?.index?.default_pipeline;
-      if (
-        defaultPipeline &&
-        pipelineIds.has(defaultPipeline) &&
-        indicesPermissions[indexName]?.read === true
-      ) {
+    for (const [indexName, defaultPipeline] of indexToPipeline) {
+      if (indicesPermissions[indexName]?.read === true) {
         if (Array.isArray(pipelineIdsToDestinationIndices[defaultPipeline])) {
           pipelineIdsToDestinationIndices[defaultPipeline].push(indexName);
         } else {
@@ -719,6 +726,10 @@ export class ModelsProvider {
               // 5. If any of the transforms use these indices as source , find the destination indices to complete the map
               if (foundTransform) {
                 const transformDestIndex = foundTransform.dest.index;
+                // Destination index is optional on the transform API; skip nodes we cannot name.
+                if (!isDefined(transformDestIndex)) {
+                  continue;
+                }
                 const transformNodeId = `${foundTransform.id}-${JOB_MAP_NODE_TYPES.TRANSFORM}`;
                 const transformDestIndexNodeId = `${transformDestIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
 

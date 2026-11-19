@@ -10,7 +10,10 @@
 export type {
   UserActivityObject,
   UserActivityEventType,
+  UserActivityEventOutcome,
+  UserActivityError,
   UserActivityEvent,
+  UserActivityKibanaMetadata,
   TrackUserActionParams,
   UserActivityServiceSetup,
   UserActivityServiceStart,

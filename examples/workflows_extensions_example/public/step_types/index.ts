@@ -10,8 +10,11 @@
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { setVarStepDefinition } from './setvar_step';
 import { getExternalStepDefinition } from './external_step';
+import { durablePollStepDefinition } from './durable_poll_step';
+import { pollOnlyJobStepDefinition } from './poll_only_job_step';
 import type { IExampleExternalService } from '../../common/external_service/types';
 
+const asyncFeatureFlagExample = () => Promise.resolve(true);
 export interface RegisterStepDefinitionsDependencies {
   externalService: IExampleExternalService;
 }
@@ -21,5 +24,13 @@ export const registerStepDefinitions = (
   deps: RegisterStepDefinitionsDependencies
 ) => {
   workflowsExtensions.registerStepDefinition(setVarStepDefinition);
-  workflowsExtensions.registerStepDefinition(getExternalStepDefinition(deps));
+  workflowsExtensions.registerStepDefinition(durablePollStepDefinition);
+  workflowsExtensions.registerStepDefinition(pollOnlyJobStepDefinition);
+  workflowsExtensions.registerStepDefinition(async () => {
+    const isFeatureFlagEnabled = await asyncFeatureFlagExample();
+    if (!isFeatureFlagEnabled) {
+      return undefined; // Skips step registration
+    }
+    return getExternalStepDefinition(deps);
+  });
 };

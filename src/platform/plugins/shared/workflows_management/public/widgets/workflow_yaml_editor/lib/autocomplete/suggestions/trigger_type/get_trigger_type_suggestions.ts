@@ -7,22 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import {
-  AlertRuleTriggerSchema,
-  isTriggerType,
-  ManualTriggerSchema,
-  ScheduledTriggerSchema,
-} from '@kbn/workflows';
+import { getBuiltInTriggerDefinitions, isTriggerType } from '@kbn/workflows';
+import { mapPublicTriggerToDisplay } from '../../../../../../lib/map_public_trigger_to_display';
 import { triggerSchemas } from '../../../../../../trigger_schemas';
 import { generateTriggerSnippet } from '../../../snippets/generate_trigger_snippet';
 
 /** Shape used for both built-in and registered trigger suggestions */
 interface TriggerSuggestionItem {
   type: string;
+  label: string;
   description: string;
   icon: monaco.languages.CompletionItemKind;
+}
+
+function matchesTriggerTypePrefix(item: TriggerSuggestionItem, typePrefix: string): boolean {
+  const normalizedPrefix = typePrefix.toLowerCase().trim();
+  if (normalizedPrefix.length === 0) {
+    return true;
+  }
+
+  const normalizedType = item.type.toLowerCase();
+  const normalizedLabel = item.label.toLowerCase();
+
+  if (normalizedPrefix.includes('.')) {
+    return normalizedType.includes(normalizedPrefix);
+  }
+
+  return normalizedType.includes(normalizedPrefix) || normalizedLabel.includes(normalizedPrefix);
 }
 
 /**
@@ -35,26 +47,29 @@ export function getTriggerTypeSuggestions(
   const suggestions: monaco.languages.CompletionItem[] = [];
 
   const builtInTriggerTypes = getBuiltInTriggerTypesFromSchema();
-  const registeredTriggers = triggerSchemas.getTriggerDefinitions().map(
-    (t): TriggerSuggestionItem => ({
-      type: t.id,
-      description: t.description ?? t.title ?? t.id,
-      icon: monaco.languages.CompletionItemKind.TypeParameter,
-    })
-  );
+  const registeredTriggers = triggerSchemas
+    .getTriggerDefinitions()
+    .map((t): TriggerSuggestionItem => {
+      const display = mapPublicTriggerToDisplay(t);
+
+      return {
+        type: display.id,
+        label: display.label,
+        description: display.documentation,
+        icon: monaco.languages.CompletionItemKind.TypeParameter,
+      };
+    });
   const allTriggerTypes: TriggerSuggestionItem[] = [...builtInTriggerTypes, ...registeredTriggers];
 
-  const matchingTriggerTypes =
-    typePrefix.length > 0
-      ? allTriggerTypes.filter((triggerType) =>
-          triggerType.type.toLowerCase().includes(typePrefix.toLowerCase().trim())
-        )
-      : allTriggerTypes;
+  const matchingTriggerTypes = allTriggerTypes.filter((triggerType) =>
+    matchesTriggerTypePrefix(triggerType, typePrefix)
+  );
 
   matchingTriggerTypes.forEach((triggerType) => {
     const triggerDef = triggerSchemas.getTriggerDefinition(triggerType.type);
     const snippetText = generateTriggerSnippet(triggerType.type, {
       defaultCondition: triggerDef?.snippets?.condition,
+      requiresConnectorId: triggerDef?.requiresConnectorId,
     });
 
     // Extended range for multi-line insertion
@@ -66,15 +81,10 @@ export function getTriggerTypeSuggestions(
     };
 
     const isEventDriven = !isTriggerType(triggerType.type);
-    const detail = isEventDriven
-      ? i18n.translate('workflows.triggerSuggestions.eventDrivenTriggerDetail', {
-          defaultMessage: 'Event-driven trigger',
-        })
-      : i18n.translate('workflows.triggerSuggestions.workflowTriggerDetail', {
-          defaultMessage: 'Workflow trigger',
-        });
-
     const sortPrefix = isEventDriven ? '1_' : '0_';
+    // Label is the technical id (`alert`, `alerting.actions.alertAcked`). The
+    // display name (connector name plus event title) stays in detail. filterText
+    // is the same id so YAML schema suggestions dedupe on that key.
     suggestions.push({
       label: triggerType.type,
       kind: triggerType.icon,
@@ -84,7 +94,7 @@ export function getTriggerTypeSuggestions(
       documentation: triggerType.description,
       filterText: triggerType.type,
       sortText: `!${sortPrefix}${triggerType.type}`,
-      detail,
+      detail: triggerType.label,
       preselect: false,
     });
   });
@@ -97,66 +107,36 @@ export function getTriggerTypeSuggestions(
  */
 export function getAllTriggerTypesForSuggestions(): TriggerSuggestionItem[] {
   const builtIn = getBuiltInTriggerTypesFromSchema();
-  const registered = triggerSchemas.getTriggerDefinitions().map(
-    (t): TriggerSuggestionItem => ({
-      type: t.id,
-      description: t.description ?? t.title ?? t.id,
+  const registered = triggerSchemas.getTriggerDefinitions().map((t): TriggerSuggestionItem => {
+    const display = mapPublicTriggerToDisplay(t);
+
+    return {
+      type: display.id,
+      label: display.label,
+      description: display.documentation,
       icon: monaco.languages.CompletionItemKind.TypeParameter,
-    })
-  );
+    };
+  });
   return [...builtIn, ...registered];
 }
 
-// Cache for built-in trigger types extracted from schema
-let builtInTriggerTypesCache: Array<{
-  type: string;
-  description: string;
-  icon: monaco.languages.CompletionItemKind;
-}> | null = null;
+const BUILT_IN_TRIGGER_ICONS: Record<string, monaco.languages.CompletionItemKind> = {
+  alert: monaco.languages.CompletionItemKind.Customcolor,
+  scheduled: monaco.languages.CompletionItemKind.Operator,
+  manual: monaco.languages.CompletionItemKind.TypeParameter,
+  page: monaco.languages.CompletionItemKind.Module,
+};
 
 /**
- * Extract built-in trigger types from the workflow schema (single source of truth)
+ * Built-in trigger types for suggestions. `page` appears only with `workflowsManagement.pages.enabled`.
  */
-export function getBuiltInTriggerTypesFromSchema(): Array<{
-  type: string;
-  description: string;
-  icon: monaco.languages.CompletionItemKind;
-}> {
-  if (builtInTriggerTypesCache !== null) {
-    return builtInTriggerTypesCache;
-  }
-
-  // Extract trigger types from the actual schema definitions
-  const builtInSchemaConfigs = [
-    {
-      schema: AlertRuleTriggerSchema,
-      description: 'Trigger workflow when an alert rule fires',
-      icon: monaco.languages.CompletionItemKind.Customcolor, // Alert/event icon
-    },
-    {
-      schema: ScheduledTriggerSchema,
-      description: 'Trigger workflow on a schedule (cron or interval)',
-      icon: monaco.languages.CompletionItemKind.Operator, // Schedule/operator icon
-    },
-    {
-      schema: ManualTriggerSchema,
-      description: 'Trigger workflow manually',
-      icon: monaco.languages.CompletionItemKind.TypeParameter, // Manual/keyword icon
-    },
-  ];
-
-  const triggerTypes = builtInSchemaConfigs.map(({ schema, description, icon }) => {
-    // Extract the literal type value from the Zod schema
-    const typeField = schema.shape.type;
-    const triggerType = typeField.def.values[0] as string; // Get the literal value from z.literal()
-
-    return {
-      type: triggerType,
+export function getBuiltInTriggerTypesFromSchema(): TriggerSuggestionItem[] {
+  return getBuiltInTriggerDefinitions(triggerSchemas.getTriggerSchemaOptions()).map(
+    ({ id, label, description }) => ({
+      type: id,
+      label,
       description,
-      icon,
-    };
-  });
-
-  builtInTriggerTypesCache = triggerTypes;
-  return triggerTypes;
+      icon: BUILT_IN_TRIGGER_ICONS[id] ?? monaco.languages.CompletionItemKind.TypeParameter,
+    })
+  );
 }

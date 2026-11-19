@@ -255,9 +255,7 @@ describe('When on the host isolation exceptions entry form', () => {
       ).toBeTruthy();
     });
 
-    // FIXME:PT not sure why this test is not working but I have spent several hours now on it and can't
-    //          figure it out. Skipping for now and will try to come back to it.
-    it.skip('should display form submission errors', async () => {
+    it('should display form submission errors', async () => {
       const error = new Error('oh oh - error') as IHttpFetchError;
       exceptionsApiMock.responseProvider.exceptionUpdate.mockImplementation(() => {
         throw error;
@@ -268,11 +266,10 @@ describe('When on the host isolation exceptions entry form', () => {
 
       await waitFor(() => {
         expect(exceptionsApiMock.responseProvider.exceptionUpdate).toHaveBeenCalled();
+        expect(getByTestId('hostIsolationExceptions-form-submitError').textContent).toMatch(
+          'oh oh - error'
+        );
       });
-
-      expect(getByTestId('hostIsolationExceptions-form-submitError').textContent).toMatch(
-        'oh oh - error'
-      );
     });
   });
 });

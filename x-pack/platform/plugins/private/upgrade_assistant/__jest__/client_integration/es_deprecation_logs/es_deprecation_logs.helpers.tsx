@@ -30,7 +30,7 @@ export const setupESDeprecationLogsPage = async (
   );
 
   // Wait for the initial render baseline (mount-time requests/async state).
-  await screen.findByTestId('overviewPageHeader');
+  await screen.findByTestId('overview');
 
   // Some steps perform mount-time async work (e.g. system indices migration status).
   // Wait for the step to settle into either complete or incomplete state to avoid act warnings.

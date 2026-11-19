@@ -11,13 +11,21 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { PackageInfo, UpgradePackagePolicyDryRunResponse } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
-import { useAuthz, useGetPackageInstallStatus, useInstallPackage } from '../../../../../hooks';
+import {
+  useAuthz,
+  useGetPackageInstallStatus,
+  useGetSettingsQuery,
+  useInstallPackage,
+} from '../../../../../hooks';
 
 import { getNumTransformAssets } from '../../../../../../../components/transform_install_as_current_user_callout';
 
 import { ConfirmPackageInstall } from './confirm_package_install';
 
 type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version' | 'assets'> & {
+  /** `assets` labels the button "Install {title} Assets" instead of "Install {title}" */
+  variant?: 'package' | 'assets';
+  'data-test-subj'?: string;
   disabled?: boolean;
   dryRunData?: UpgradePackagePolicyDryRunResponse | null;
   isUpgradingPackagePolicies?: boolean;
@@ -26,22 +34,38 @@ type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version' | 
   setIsUpgradingPackagePolicies?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 export function InstallButton(props: InstallationButtonProps) {
-  const { name, title, version, assets } = props;
+  const {
+    name,
+    title,
+    version,
+    assets,
+    variant = 'package',
+    'data-test-subj': dataTestSubj = 'installAssetsButton',
+  } = props;
 
-  const canInstallPackages = useAuthz().integrations.installPackages;
+  const authz = useAuthz();
+  const canInstallPackages = authz.integrations.installPackages;
   const installPackage = useInstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { status: installationStatus } = getPackageInstallStatus(name);
 
-  const numOfAssets = Object.entries(assets).reduce(
-    (acc, [serviceName, serviceNameValue]) =>
-      acc +
-      Object.entries(serviceNameValue || {}).reduce(
-        (acc2, [assetName, assetNameValue]) => acc2 + assetNameValue.length,
-        0
-      ),
-    0
-  );
+  const { data: settings } = useGetSettingsQuery({ enabled: authz.fleet.readSettings });
+  const integrationKnowledgeEnabled = Boolean(settings?.item.integration_knowledge_enabled);
+
+  const numOfKnowledgeBaseAssets = integrationKnowledgeEnabled
+    ? 0
+    : assets.elasticsearch?.knowledge_base?.length ?? 0;
+
+  const numOfAssets =
+    Object.entries(assets).reduce(
+      (acc, [serviceName, serviceNameValue]) =>
+        acc +
+        Object.entries(serviceNameValue || {}).reduce(
+          (acc2, [assetName, assetNameValue]) => acc2 + assetNameValue.length,
+          0
+        ),
+      0
+    ) - numOfKnowledgeBaseAssets;
   const numOfTransformAssets = getNumTransformAssets(assets);
 
   const isInstalling = installationStatus === InstallStatus.installing;
@@ -71,9 +95,27 @@ export function InstallButton(props: InstallationButtonProps) {
         iconType={'download'}
         isLoading={isInstalling}
         onClick={toggleInstallModal}
-        data-test-subj="installAssetsButton"
+        data-test-subj={dataTestSubj}
       >
-        {isInstalling ? (
+        {variant === 'assets' ? (
+          isInstalling ? (
+            <FormattedMessage
+              id="xpack.fleet.integrations.installPackage.installingAssetsButtonLabel"
+              defaultMessage="Installing {title} Assets"
+              values={{
+                title,
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.integrations.installPackage.installAssetsButtonLabel"
+              defaultMessage="Install {title} Assets"
+              values={{
+                title,
+              }}
+            />
+          )
+        ) : isInstalling ? (
           <FormattedMessage
             id="xpack.fleet.integrations.installPackage.installingPackageButtonLabel"
             defaultMessage="Installing {title}"

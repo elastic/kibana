@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getCaseStepDefinition } from './get_case';
+import { getCaseStepDefinition } from './simple_steps';
 // import { caseIdInputEditorHandlers } from './case_id_selection_handler';
 
 describe('getCaseStepDefinition', () => {
   it('returns a public step definition with expected metadata', () => {
     expect(getCaseStepDefinition.id).toBe('cases.getCase');
-    expect(getCaseStepDefinition.category).toBe('kibana');
+    expect(getCaseStepDefinition.category).toBe('kibana.cases');
     expect(getCaseStepDefinition.documentation?.examples?.length).toBeGreaterThan(0);
   });
 

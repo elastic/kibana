@@ -7,8 +7,7 @@
 
 import React from 'react';
 import type { ComponentProps } from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, fireEvent } from '@testing-library/react';
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { GaugeTicksPositions, GaugeColorModes } from '@kbn/expression-gauge-plugin/common';
@@ -97,13 +96,11 @@ describe('GaugeDimensionEditor', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('toggles dynamic coloring when the band colors switch is clicked', async () => {
-    const user = userEvent.setup();
-
+  it('toggles dynamic coloring when the band colors switch is clicked', () => {
     renderGaugeDimensionEditor();
 
     const switchElement = screen.getByTestId('lnsDynamicColoringGaugeSwitch');
-    await user.click(switchElement);
+    fireEvent.click(switchElement);
 
     expect(mockSetState).toHaveBeenCalledWith(
       expect.objectContaining({

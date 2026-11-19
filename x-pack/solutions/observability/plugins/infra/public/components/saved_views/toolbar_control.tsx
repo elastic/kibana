@@ -106,6 +106,9 @@ export function SavedViewsToolbarControls<TSingleSavedViewState extends SavedVie
     <>
       <EuiPopover
         data-test-subj="savedViews-popover"
+        aria-label={i18n.translate('xpack.infra.savedView.popoverAriaLabel', {
+          defaultMessage: 'Saved views',
+        })}
         button={
           <EuiButton
             size="s"
@@ -114,7 +117,7 @@ export function SavedViewsToolbarControls<TSingleSavedViewState extends SavedVie
               isFetchingCurrentView ? 'loading' : 'loaded'
             }`}
             buttonRef={openPopoverButtonRef}
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             color="text"
             isLoading={isFetchingCurrentView}
@@ -130,7 +133,7 @@ export function SavedViewsToolbarControls<TSingleSavedViewState extends SavedVie
         closePopover={closePopover}
         anchorPosition="leftCenter"
       >
-        <EuiListGroup flush={true}>
+        <EuiListGroup>
           <EuiListGroupItem
             data-test-subj="savedViews-manageViews"
             iconType="indexSettings"

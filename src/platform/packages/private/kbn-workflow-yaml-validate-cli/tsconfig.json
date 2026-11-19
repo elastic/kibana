@@ -1,0 +1,26 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/tooling-log",
+    "@kbn/repo-info",
+    "@kbn/workflows-yaml",
+    "@kbn/workflows-library",
+    "@kbn/workflows",
+    "@kbn/workflow-step-schema-cli"
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}

@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFilterButton, EuiFilterGroup, EuiPopover, EuiSelectable } from '@elastic/eui';
 
@@ -80,8 +81,11 @@ export function FilterListButton<T extends string>({ onChange, filters }: Props<
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
         data-test-subj="filterList"
+        aria-label={i18n.translate('xpack.idxMgmt.indexTemplatesList.filterPopoverAriaLabel', {
+          defaultMessage: 'View filters',
+        })}
       >
         <EuiSelectable
           allowExclusions

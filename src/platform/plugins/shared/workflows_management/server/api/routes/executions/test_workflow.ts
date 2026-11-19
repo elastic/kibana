@@ -9,14 +9,15 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
-import { preprocessAlertInputs } from './utils/preprocess_alert_inputs';
+import { preprocessTriggerInputs } from './utils/preprocess_trigger_inputs';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTE_SECURITY } from '../utils/route_security';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerTestWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
+export function registerTestWorkflowRoute(deps: RouteDependencies) {
+  const { router, api, logger, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/test',
@@ -52,7 +53,7 @@ export function registerTestWorkflowRoute({ router, api, logger, spaces }: Route
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { workflowId, workflowYaml, inputs: rawInputs } = request.body;
 
@@ -66,15 +67,9 @@ export function registerTestWorkflowRoute({ router, api, logger, spaces }: Route
 
           const spaceId = spaces.getSpaceId(request);
 
-          let inputs = rawInputs;
-          const event = rawInputs.event as
-            | { triggerType?: string; alertIds?: unknown[] }
-            | undefined;
-          const hasAlertTrigger =
-            event?.triggerType === 'alert' && event?.alertIds && event.alertIds.length > 0;
-          if (hasAlertTrigger) {
-            inputs = await preprocessAlertInputs(inputs, context, spaceId, logger);
-          }
+          // Safe to call unconditionally: each preprocessing step no-ops for trigger types it
+          // does not handle, and for selections that are already expanded.
+          const inputs = await preprocessTriggerInputs(rawInputs, context, spaceId, logger);
 
           const workflowExecutionId = await api.testWorkflow({
             workflowId,
@@ -84,9 +79,26 @@ export function registerTestWorkflowRoute({ router, api, logger, spaces }: Route
             request,
           });
 
+          audit.logWorkflowTest(request, {
+            workflowExecutionId,
+            workflowId,
+          });
+
           return response.ok({ body: { workflowExecutionId } });
         } catch (error) {
-          return handleRouteError(response, error);
+          audit.logWorkflowTest(request, {
+            workflowExecutionId: '',
+            workflowId: request.body.workflowId,
+            error,
+          });
+          return handleRouteError(response, error, {
+            logger,
+            logContext: {
+              route: 'POST /api/workflows/test',
+              workflowId: request.body.workflowId,
+              spaceId: spaces.getSpaceId(request),
+            },
+          });
         }
       })
     );

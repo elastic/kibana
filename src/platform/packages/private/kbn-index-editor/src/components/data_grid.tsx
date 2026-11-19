@@ -8,11 +8,16 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { EsqlSource } from '@kbn/data-source';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
-import type { CustomCellRenderer, CustomGridColumnsConfiguration } from '@kbn/unified-data-table';
+import type {
+  CustomCellRenderer,
+  CustomGridColumnsConfiguration,
+  SortOrder,
+} from '@kbn/unified-data-table';
 import {
   DataLoadingState,
   UnifiedDataTable,
@@ -22,8 +27,9 @@ import type { RestorableStateProviderApi } from '@kbn/restorable-state';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection, isEqual } from 'lodash';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getColumnHeaderRenderer } from './grid_custom_renderers/column_header_renderer';
@@ -39,6 +45,7 @@ interface ESQLDataGridProps {
   rows: DataTableRecord[];
   dataView: DataView;
   columns: DatatableColumn[];
+  dataSource: EsqlSource | undefined;
   flyoutType?: 'overlay' | 'push';
   initialColumns?: DatatableColumn[];
   initialRowHeight?: number;
@@ -109,16 +116,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     setActiveColumns(renderedColumns);
   }
 
-  const columnsMeta = useMemo(() => {
-    return props.columns.reduce((acc, column) => {
-      acc[column.id] = {
-        type: column.meta?.type,
-        esType: column.meta?.esType ?? column.meta?.type,
-      };
-      return acc;
-    }, {} as DataTableColumnsMeta);
-  }, [props.columns]);
-
   const services = useMemo(() => {
     return {
       data,
@@ -132,10 +129,32 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [data, theme, uiSettings, notifications?.toasts, dataViewFieldEditor, fieldFormats, storage]);
 
   const onValueChange = useCallback(
-    (docId: string, update: any) => {
-      // make a call to update the doc with the new value
-      indexUpdateService.updateDoc(docId, update);
-      // update rows to reflect the change
+    (docId: string, update: Record<string, unknown>) => {
+      indexUpdateService.updateDoc(docId, update, props.columns);
+    },
+    [indexUpdateService, props.columns]
+  );
+
+  const onSort = useCallback(
+    (sort: SortOrder[]) => {
+      indexUpdateService.setSort(sort);
+    },
+    [indexUpdateService]
+  );
+
+  // Highlight rows with unsaved additions/edits. They keep their current position because sorting
+  // is performed server-side and unsaved values do not participate in it.
+  const getRowIndicator = useCallback(
+    (row: DataTableRecord, euiThemeComputed: EuiThemeComputed) => {
+      if (!indexUpdateService.isDirtyRow(row.id)) {
+        return undefined;
+      }
+      return {
+        color: euiThemeComputed.colors.warning,
+        label: i18n.translate('indexEditor.flyout.grid.unsavedRowIndicator', {
+          defaultMessage: 'Unsaved changes',
+        }),
+      };
     },
     [indexUpdateService]
   );
@@ -169,8 +188,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       (acc, columnName, columnIndex) => {
         const isSavedColumn = !!props.dataView.fields.getByName(columnName);
         const editMode = editingColumnIndex === columnIndex;
-        const columnType = columnsMeta[columnName]?.esType;
-        const isUnsupportedESQLType = columnsMeta[columnName]?.type === KBN_FIELD_TYPES.UNKNOWN;
+        const columnMeta = props.columns.find(({ id }) => id === columnName)?.meta;
+        const columnType = columnMeta?.esType ?? columnMeta?.type;
+        const isUnsupportedESQLType = columnMeta?.type === KBN_FIELD_TYPES.UNKNOWN;
         acc[columnName] = memoize(
           getColumnHeaderRenderer(
             columnName,
@@ -193,7 +213,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     renderedColumns,
     props.dataView.fields,
     editingColumnIndex,
-    columnsMeta,
+    props.columns,
     indexUpdateService,
     indexEditorTelemetryService,
   ]);
@@ -246,14 +266,14 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       rowAdditionalLeadingControls={leadingControlColumns}
       columns={renderedColumns}
       rows={rows}
-      columnsMeta={columnsMeta}
+      dataSource={props.dataSource}
       services={services}
       enableInTableSearch={false}
       showKeyboardShortcuts={false}
       externalCustomRenderers={externalCustomRenderers}
       renderCellPopover={indexUpdateService.canEditIndex ? renderCellPopover : undefined}
-      isPlainRecord
-      isSortEnabled={false} // Sort is temporarily disabled, see https://github.com/elastic/kibana/issues/235070
+      isSortEnabled={true}
+      isInMemorySortEnabled={false}
       showMultiFields={false}
       showColumnTokens
       showTimeCol
@@ -269,6 +289,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       onSetColumns={setActiveColumns}
       onUpdateRowsPerPage={setRowsPerPage}
       sort={sortOrder}
+      onSort={onSort}
+      getRowIndicator={getRowIndicator}
       ariaLabelledBy="lookupIndexDataGrid"
       maxDocFieldsDisplayed={100}
       showFullScreenButton={false}

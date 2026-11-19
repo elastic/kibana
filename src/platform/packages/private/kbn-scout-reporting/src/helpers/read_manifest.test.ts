@@ -9,14 +9,34 @@
 
 import path from 'path';
 import fs from 'fs';
+import { findPackageForPath } from '@kbn/repo-packages';
+import { REPO_ROOT } from '@kbn/repo-info';
 import {
   getKibanaModuleData,
   getKibanaModulePath,
   readKibanaModuleManifest,
 } from './read_manifest';
 
+jest.mock('@kbn/repo-packages', () => ({
+  ...jest.requireActual('@kbn/repo-packages'),
+  findPackageForPath: jest.fn(),
+}));
+
 describe('read_manifest', () => {
   describe('getKibanaModulePath', () => {
+    it('resolves build tests to the owning dev module manifest', () => {
+      const configPath = path.join(
+        REPO_ROOT,
+        'src/dev/build/test/scout_fips/api/playwright.config.ts'
+      );
+      jest.mocked(findPackageForPath).mockReturnValueOnce({
+        directory: 'src/dev',
+      } as ReturnType<typeof findPackageForPath>);
+
+      expect(getKibanaModulePath(configPath)).toBe(path.join(REPO_ROOT, 'src/dev/kibana.jsonc'));
+      expect(findPackageForPath).toHaveBeenCalledWith(REPO_ROOT, configPath);
+    });
+
     it('should resolve the manifest path correctly for a valid Scout config path (plugin)', () => {
       const configPath = path.join(
         path.sep,
@@ -150,6 +170,41 @@ describe('read_manifest', () => {
       expect(() => readKibanaModuleManifest(pluginFilePath)).toThrow(
         /Invalid JSON format in manifest file/
       );
+    });
+
+    it('should normalize a string owner to an array', () => {
+      const fileContent = `
+        {
+          "id": "@kbn/example-plugin",
+          "type": "plugin",
+          "group": "platform",
+          "visibility": "private",
+          "owner": "@elastic/kibana-core",
+          "plugin": { "id": "examplePlugin" }
+        }
+      `;
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(fileContent);
+
+      const result = readKibanaModuleManifest(pluginFilePath);
+      expect(result.owner).toEqual(['@elastic/kibana-core']);
+    });
+
+    it('should default owner to empty array when missing', () => {
+      const fileContent = `
+        {
+          "id": "@kbn/example-plugin",
+          "type": "plugin",
+          "group": "platform",
+          "visibility": "private",
+          "plugin": { "id": "examplePlugin" }
+        }
+      `;
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(fileContent);
+
+      const result = readKibanaModuleManifest(pluginFilePath);
+      expect(result.owner).toEqual([]);
     });
 
     it('should throw an error for missing required fields', () => {

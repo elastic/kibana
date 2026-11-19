@@ -93,8 +93,9 @@ export const EmptyThumbnail = ({
         >
           <EuiIcon
             data-test-subj="stepScreenshotNotAvailable"
-            type="eyeClosed"
+            type="eyeSlash"
             color={euiTheme.colors.textDisabled}
+            aria-hidden={true}
           />
 
           {unavailableMessage ? (

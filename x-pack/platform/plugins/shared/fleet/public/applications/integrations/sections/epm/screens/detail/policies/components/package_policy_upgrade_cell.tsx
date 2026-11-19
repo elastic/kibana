@@ -15,13 +15,22 @@ import type { AgentPolicy, InMemoryPackagePolicy } from '../../../../../../types
 import { useLink, useAuthz } from '../../../../../../hooks';
 import { PendingUpgradeReviewStatus } from '../../../installed_integrations/components/pending_upgrade_review_status';
 
+import { useAgentlessPolicyUpgrade } from './use_agentless_policy_upgrade';
+
 export const PackagePolicyUpgradeCell: React.FC<{
   packagePolicy: InMemoryPackagePolicy;
   agentPolicies: AgentPolicy[];
   from?: string;
-}> = ({ packagePolicy, agentPolicies, from = 'integrations-policy-list' }) => {
+  // Refetch callback used only for the agentless upgrade path (agentless row +
+  // `disableAgentlessLegacyAPI`), so the deployments table refreshes after the upgrade.
+  onUpgraded?: () => void;
+}> = ({ packagePolicy, agentPolicies, from = 'integrations-policy-list', onUpgraded }) => {
   const { getHref } = useLink();
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+  const { isAgentlessUpgrade, openModal, confirmModal } = useAgentlessPolicyUpgrade({
+    packagePolicy,
+    onUpgraded,
+  });
 
   if (agentPolicies.length === 0 || !packagePolicy.hasUpgrade) {
     return null;
@@ -41,6 +50,12 @@ export const PackagePolicyUpgradeCell: React.FC<{
         </EuiFlexItem>
       );
     }
+    return null;
+  }
+
+  // The upgrade page of an agent-based policy edits it, which only the onboarding flow may do for a
+  // policy managed by a cloud onboarding instance. A managed integration upgrades in place.
+  if (packagePolicy.onboarding_deployment_id && !isAgentlessUpgrade) {
     return null;
   }
 
@@ -65,10 +80,14 @@ export const PackagePolicyUpgradeCell: React.FC<{
         <EuiButton
           size="s"
           minWidth="0"
-          href={`${getHref('upgrade_package_policy', {
-            policyId: agentPolicies[0].id,
-            packagePolicyId: packagePolicy.id,
-          })}?from=${from}`}
+          {...(isAgentlessUpgrade
+            ? { onClick: openModal }
+            : {
+                href: `${getHref('upgrade_package_policy', {
+                  policyId: agentPolicies[0].id,
+                  packagePolicyId: packagePolicy.id,
+                })}?from=${from}`,
+              })}
           data-test-subj="integrationPolicyUpgradeBtn"
           isDisabled={!canWriteIntegrationPolicies}
         >
@@ -78,6 +97,7 @@ export const PackagePolicyUpgradeCell: React.FC<{
           />
         </EuiButton>
       </EuiFlexItem>
+      {confirmModal}
     </>
   );
 };

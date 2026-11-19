@@ -9,6 +9,22 @@
 
 import type { Duration } from 'moment';
 import type { Stream } from 'stream';
+import {
+  savedObjectId,
+  savedObjectType,
+  savedObjectVersion,
+  spaceId,
+  displayName,
+  description,
+  searchFilter,
+  aggregation,
+  querySortField,
+  urlString,
+  pemCertificate,
+  version,
+  boundedString,
+  unboundedString,
+} from './src/helpers';
 
 import type { ByteSizeValue } from './src/byte_size_value';
 import type { Reference } from './src/references';
@@ -60,15 +76,40 @@ import {
   URIType,
   StreamType,
   Lazy,
+  setLazyConfigSchemaDisabled,
 } from './src/types';
 
 export type { AnyType, ConditionalType, TypeOf, Props, SchemaStructureEntry, NullableProps };
-export { ObjectType, Type };
+export { ObjectType, Type, setLazyConfigSchemaDisabled };
 export type { SchemaValidationOptions } from './src/types';
 export { ByteSizeValue } from './src/byte_size_value';
 export { SchemaTypeError, ValidationError } from './src/errors';
 export { isConfigSchema } from './src/typeguards';
-export { offeringBasedSchema } from './src/helpers';
+export {
+  offeringBasedSchema,
+  savedObjectId,
+  savedObjectType,
+  savedObjectVersion,
+  spaceId,
+  displayName,
+  description,
+  searchFilter,
+  aggregation,
+  querySortField,
+  urlString,
+  pemCertificate,
+  version,
+  boundedString,
+  unboundedString,
+} from './src/helpers';
+export type {
+  SchemaHelper,
+  StringWarnOptions,
+  UnboundedStringOptions,
+  BoundedStringHelper,
+  BoundedStringOptions,
+  BoundedStringWarnOptions,
+} from './src/helpers';
 
 function any(options?: TypeOptions<any>) {
   return new AnyType(options);
@@ -153,6 +194,88 @@ function recordOf<K extends string, V>(
   return new RecordOfType(keyType, valueType, options);
 }
 
+function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q>(
+  types: [
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>,
+    Type<K>,
+    Type<L>,
+    Type<M>,
+    Type<N>,
+    Type<O>,
+    Type<P>,
+    Type<Q>
+  ],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q>
+): Type<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q>;
+function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(
+  types: [
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>,
+    Type<K>,
+    Type<L>,
+    Type<M>,
+    Type<N>,
+    Type<O>,
+    Type<P>
+  ],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P>
+): Type<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P>;
+function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O>(
+  types: [
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>,
+    Type<K>,
+    Type<L>,
+    Type<M>,
+    Type<N>,
+    Type<O>
+  ],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O>
+): Type<A | B | C | D | E | F | G | H | I | J | K | L | M | N | O>;
+function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M, N>(
+  types: [
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>,
+    Type<K>,
+    Type<L>,
+    Type<M>,
+    Type<N>
+  ],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K | L | M | N>
+): Type<A | B | C | D | E | F | G | H | I | J | K | L | M | N>;
 function oneOf<A, B, C, D, E, F, G, H, I, J, K, L, M>(
   types: [
     Type<A>,
@@ -687,6 +810,20 @@ export const schema = {
   recordOf,
   stream,
   siblingRef,
+  savedObjectId,
+  savedObjectType,
+  savedObjectVersion,
+  spaceId,
+  displayName,
+  description,
+  searchFilter,
+  aggregation,
+  querySortField,
+  urlString,
+  pemCertificate,
+  version,
+  boundedString,
+  unboundedString,
   string,
   uri,
 };
@@ -701,9 +838,13 @@ import {
   META_FIELD_X_OAS_DEPRECATED,
   META_FIELD_X_OAS_MAX_LENGTH,
   META_FIELD_X_OAS_MIN_LENGTH,
+  META_FIELD_X_OAS_PLANNED_MAX_LENGTH,
+  META_FIELD_X_OAS_PLANNED_MIN_LENGTH,
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
   META_FIELD_X_OAS_DISCRIMINATOR,
   META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE,
+  X_KIBANA_PLANNED_MAX_LENGTH,
+  X_KIBANA_PLANNED_MIN_LENGTH,
 } from './src/oas_meta_fields';
 
 export const metaFields = Object.freeze({
@@ -714,7 +855,11 @@ export const metaFields = Object.freeze({
   META_FIELD_X_OAS_DEPRECATED,
   META_FIELD_X_OAS_MAX_LENGTH,
   META_FIELD_X_OAS_MIN_LENGTH,
+  META_FIELD_X_OAS_PLANNED_MAX_LENGTH,
+  META_FIELD_X_OAS_PLANNED_MIN_LENGTH,
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
   META_FIELD_X_OAS_DISCRIMINATOR,
   META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE,
+  X_KIBANA_PLANNED_MAX_LENGTH,
+  X_KIBANA_PLANNED_MIN_LENGTH,
 });

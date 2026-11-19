@@ -6,13 +6,20 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { escapeQuotes } from '@kbn/es-query';
 import { keyBy } from 'lodash';
 
 import { packageHasNoPolicyTemplates } from '../../../common/services/policy_template';
-import type { NewPackagePolicy, RegistryStream, UpdatePackagePolicy } from '../../../common';
+import type {
+  NewPackagePolicy,
+  PackagePolicyConfigRecordEntry,
+  RegistryStream,
+  UpdatePackagePolicy,
+} from '../../../common';
 import { SO_SEARCH_LIMIT } from '../../../common';
 import {
   doesPackageHaveIntegrations,
+  getInputEffectiveName,
   getNormalizedDataStreams,
   getNormalizedInputs,
 } from '../../../common/services';
@@ -25,10 +32,12 @@ import type {
   SecretReference,
   SecretPath,
 } from '../../types';
+import { PackagePolicyRequestError } from '../../errors';
 import { appContextService } from '../app_context';
 import { packagePolicyService } from '../package_policy';
 
 import { createSecrets, deleteSecrets } from './common';
+import { findFleetPoliciesUsingSecrets } from './fleet_policies';
 
 /**
  * Given a new package policy, extracts any secrets, creates them in Elasticsearch,
@@ -55,12 +64,19 @@ export async function extractAndWriteSecrets(opts: {
   const secretsToCreate = secretPaths.filter(
     (secretPath) => !!secretPath.value.value && !secretPath.value.value.isSecretRef
   );
+  // Vars that already carry a secret ref (e.g. reusing the credentials of a sibling policy) are
+  // left in place; they must still be tracked so deleting the sibling does not delete the secret.
+  const providedSecretRefs = secretPaths.filter(
+    (secretPath) => !!secretPath.value.value?.isSecretRef
+  );
 
   const hasCloudConnectorSecretReferences =
     packagePolicy.supports_cloud_connector &&
     packagePolicy.cloud_connector_id &&
     cloudConnectorsSecretReferences.length;
 
+  // The refs of a cloud connector belong to the connector, which may have just been created and
+  // is not referenced by any package policy yet: they are accepted as they are.
   if (hasCloudConnectorSecretReferences) {
     return { packagePolicy, secretReferences: cloudConnectorsSecretReferences };
   }
@@ -85,8 +101,35 @@ export async function extractAndWriteSecrets(opts: {
         }
         return [...acc, { id: secret.id }];
       }, []),
+      ...providedSecretRefs.flatMap((secretPath) =>
+        secretPath.value.value.ids
+          ? secretPath.value.value.ids.map((id: string) => ({ id }))
+          : [{ id: secretPath.value.value.id }]
+      ),
     ],
   };
+}
+
+/**
+ * A request may carry refs to existing secrets (to reuse the credentials of a sibling policy).
+ * Secret ids are not credentials of their own, so a ref is only accepted when a package policy the
+ * caller can see already references that secret: this stops a request from pointing a policy at
+ * an arbitrary secret id.
+ */
+export async function assertSecretIdsReusable(soClient: SavedObjectsClientContract, ids: string[]) {
+  if (ids.length === 0) return;
+
+  const referenced = new Set(
+    (await findPackagePoliciesUsingSecrets({ soClient, ids })).map(({ id }) => id)
+  );
+  const unusable = ids.filter((id) => !referenced.has(id));
+  if (unusable.length > 0) {
+    throw new PackagePolicyRequestError(
+      `Cannot reuse secret reference(s) [${unusable.join(
+        ', '
+      )}]: they are not referenced by a package policy you can access`
+    );
+  }
 }
 
 /**
@@ -183,33 +226,89 @@ export async function extractAndUpdateSecrets(opts: {
 }
 
 /**
- * Given a list of secret ids, checks to see if they are still referenced by any
- * package policies, and if not, deletes them.
+ * Given a list of secret ids, checks whether they are still referenced by any
+ * package policy saved object OR by any compiled .fleet-policies document, and
+ * deletes only those that are provably unreferenced by either source.
+ *
+ * Fails closed: if we cannot determine whether a compiled policy references a
+ * secret (e.g. agentPolicyIds is not provided, ES is unreachable, or deployment
+ * was async), the secret is kept rather than deleted. A leaked secret is
+ * recoverable; deleting a referenced one crashes fleet-server for the entire
+ * deployment (elastic/fleet-server#7536).
+ *
+ * agentPolicyIds should be the union of all agent policy ids associated with the
+ * package policies whose secrets are being cleaned up. Omitting it causes the
+ * .fleet-policies check to be skipped and all candidates to be kept.
  */
 export async function deleteSecretsIfNotReferenced(opts: {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   ids: string[];
+  agentPolicyIds?: string[];
+  // When true, skip the compiled .fleet-policies check (the caller guarantees those docs are
+  // already removed). The package-policy SO check still runs to guard against shared secrets.
+  skipCompiledPolicyCheck?: boolean;
+  // When true, look for package policies referencing the secrets in every Space. Secrets are
+  // global, so a policy in another Space can reference one; `soClient` must then be unscoped.
+  checkAllSpaces?: boolean;
 }): Promise<void> {
-  const { esClient, soClient, ids } = opts;
+  const { esClient, soClient, ids, agentPolicyIds, skipCompiledPolicyCheck, checkAllSpaces } = opts;
   const logger = appContextService.getLogger();
+
   const packagePoliciesUsingSecrets = await findPackagePoliciesUsingSecrets({
     soClient,
     ids,
+    ...(checkAllSpaces ? { spaceId: '*' } : {}),
   });
 
   if (packagePoliciesUsingSecrets.length) {
     packagePoliciesUsingSecrets.forEach(({ id, policyIds }) => {
       logger.debug(
-        `Not deleting secret with id ${id} is still in use by package policies: ${policyIds.join(
+        `Not deleting secret with id ${id} — still referenced by package policies: ${policyIds.join(
           ', '
         )}`
       );
     });
   }
 
+  let compiledPolicyReferencedIds = new Set<string>();
+
+  if (!skipCompiledPolicyCheck) {
+    // Check compiled .fleet-policies documents. These are what fleet-server actually reads;
+    // a compiled doc can reference a secret that no live package policy SO does (e.g. an
+    // older revision_idx still in the index). Fails closed: if the check cannot complete,
+    // we keep all candidates rather than risk deleting a referenced secret.
+    const { referencedIds, checkFailed } = await findFleetPoliciesUsingSecrets({
+      esClient,
+      ids,
+      agentPolicyIds: agentPolicyIds ?? [],
+    });
+
+    if (checkFailed) {
+      logger.warn(
+        `[deleteSecretsIfNotReferenced] Could not verify .fleet-policies references for secrets [${ids.join(
+          ', '
+        )}] — skipping deletion to avoid removing a referenced secret.`
+      );
+      return;
+    }
+
+    compiledPolicyReferencedIds = referencedIds;
+  }
+
+  const skippedByCompiledPolicy = ids.filter((id) => compiledPolicyReferencedIds.has(id));
+  for (const id of skippedByCompiledPolicy) {
+    logger.debug(
+      `Not deleting secret with id ${id} — still referenced by a compiled .fleet-policies document.`
+    );
+  }
+
   const secretsToDelete = ids.filter((id) => {
-    return !packagePoliciesUsingSecrets.some((packagePolicy) => packagePolicy.id === id);
+    const referencedBySO = packagePoliciesUsingSecrets.some(
+      (packagePolicy) => packagePolicy.id === id
+    );
+    const referencedByCompiledPolicy = compiledPolicyReferencedIds.has(id);
+    return !referencedBySO && !referencedByCompiledPolicy;
   });
 
   if (!secretsToDelete.length) {
@@ -230,12 +329,17 @@ export async function deleteSecretsIfNotReferenced(opts: {
 export async function findPackagePoliciesUsingSecrets(opts: {
   soClient: SavedObjectsClientContract;
   ids: string[];
+  /** Pass '*' with an unscoped client to look across all Spaces; defaults to the client's Space. */
+  spaceId?: string;
 }): Promise<Array<{ id: string; policyIds: string[] }>> {
-  const { soClient, ids } = opts;
+  const { soClient, ids, spaceId } = opts;
   const packagePolicies = await packagePolicyService.list(soClient, {
-    kuery: `ingest-package-policies.secret_references.id: (${ids.join(' or ')})`,
+    kuery: `ingest-package-policies.secret_references.id: (${ids
+      .map((id) => `"${escapeQuotes(id)}"`)
+      .join(' or ')})`,
     perPage: SO_SEARCH_LIMIT,
     page: 1,
+    ...(spaceId ? { spaceId } : {}),
   });
 
   if (!packagePolicies.total) {
@@ -276,6 +380,15 @@ export async function findPackagePoliciesUsingSecrets(opts: {
   return res;
 }
 
+const secretIds = (ref: { id?: string; ids?: string[] } | undefined): string[] =>
+  ref?.ids ?? (ref?.id ? [ref.id] : []);
+
+function sameSecretIds(a: unknown, b: unknown): boolean {
+  const aIds = secretIds(a as { id?: string; ids?: string[] });
+  const bIds = secretIds(b as { id?: string; ids?: string[] });
+  return aIds.length === bIds.length && aIds.every((id) => bIds.includes(id));
+}
+
 export function diffSecretPaths(
   oldPaths: SecretPath[],
   newPaths: SecretPath[]
@@ -291,15 +404,25 @@ export function diffSecretPaths(
     }
 
     const newPath = newPathsByPath[oldPath.path.join('.')];
-    if (newPath && newPath.value.value) {
-      const newValue = newPath.value?.value;
-      if (!newValue?.isSecretRef) {
-        toCreate.push(newPath);
-        toDelete.push(oldPath);
-      } else {
-        noChange.push(newPath);
-      }
+    if (newPath) {
       delete newPathsByPath[oldPath.path.join('.')];
+      if (newPath.value.value) {
+        if (!newPath.value.value.isSecretRef) {
+          toCreate.push(newPath);
+          toDelete.push(oldPath);
+        } else {
+          noChange.push(newPath);
+          // The var now points at a different secret (e.g. several policies were switched to one
+          // shared secret): the old one is no longer used by this policy and may be unreferenced.
+          // It is only a candidate; deletion still checks that no other policy references it.
+          if (!sameSecretIds(oldPath.value.value, newPath.value.value)) {
+            toDelete.push(oldPath);
+          }
+        }
+      } else {
+        // value explicitly cleared (null/undefined) — old secret must be deleted
+        toDelete.push(oldPath);
+      }
     }
   }
 
@@ -333,6 +456,13 @@ function isSecretVar(varDef: RegistryVarsEntry) {
   return varDef.secret === true;
 }
 
+// A var's value can already be a secret reference even if the current package spec
+// no longer marks it `secret: true` (e.g. the var was dropped from a newer package version).
+// Such values must still be treated as secret paths so their underlying secrets get cleaned up.
+function isSecretRefValue(configEntry: PackagePolicyConfigRecordEntry) {
+  return !!configEntry?.value?.isSecretRef;
+}
+
 function containsSecretVar(vars?: RegistryVarsEntry[]) {
   return vars?.some(isSecretVar);
 }
@@ -345,8 +475,8 @@ function _getPackageLevelSecretPaths(
   const packageSecretVarsByName = keyBy(packageSecretVars, 'name');
   const packageVars = Object.entries(packagePolicy.vars || {});
 
-  return packageVars.reduce((vars, [name, configEntry], i) => {
-    if (packageSecretVarsByName[name]) {
+  return packageVars.reduce((vars, [name, configEntry]) => {
+    if (packageSecretVarsByName[name] || isSecretRefValue(configEntry)) {
       vars.push({
         value: configEntry,
         path: ['vars', name],
@@ -379,7 +509,10 @@ function _getInputSecretPaths(
     const inputVars = Object.entries(input.vars || {});
     if (inputVars.length) {
       inputVars.forEach(([name, configEntry]) => {
-        if (inputSecretVarDefsByPolicyTemplateAndType[inputKey]?.[name]) {
+        if (
+          inputSecretVarDefsByPolicyTemplateAndType[inputKey]?.[name] ||
+          isSecretRefValue(configEntry)
+        ) {
           currentInputVarPaths.push({
             path: ['inputs', inputIndex.toString(), 'vars', name],
             value: configEntry,
@@ -391,24 +524,24 @@ function _getInputSecretPaths(
     if (input.streams.length) {
       input.streams.forEach((stream, streamIndex) => {
         const streamVarDefs =
-          streamSecretVarDefsByDatasetAndInput[`${stream.data_stream.dataset}-${input.type}`];
-        if (streamVarDefs && Object.keys(streamVarDefs).length) {
-          Object.entries(stream.vars || {}).forEach(([name, configEntry]) => {
-            if (streamVarDefs[name]) {
-              currentInputVarPaths.push({
-                path: [
-                  'inputs',
-                  inputIndex.toString(),
-                  'streams',
-                  streamIndex.toString(),
-                  'vars',
-                  name,
-                ],
-                value: configEntry,
-              });
-            }
-          });
-        }
+          streamSecretVarDefsByDatasetAndInput[
+            `${stream.data_stream.dataset}-${getInputEffectiveName(input)}`
+          ] || {};
+        Object.entries(stream.vars || {}).forEach(([name, configEntry]) => {
+          if (streamVarDefs[name] || isSecretRefValue(configEntry)) {
+            currentInputVarPaths.push({
+              path: [
+                'inputs',
+                inputIndex.toString(),
+                'streams',
+                streamIndex.toString(),
+                'vars',
+                name,
+              ],
+              value: configEntry,
+            });
+          }
+        });
       });
     }
 

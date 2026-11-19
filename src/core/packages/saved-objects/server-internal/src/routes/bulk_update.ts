@@ -7,9 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  MAX_SAVED_OBJECT_ID_LENGTH,
+  MAX_SAVED_OBJECT_NAME_LENGTH,
+  MAX_SAVED_OBJECT_NAMESPACE_LENGTH,
+  MAX_SAVED_OBJECT_REFERENCES_PER_OBJECT,
+  MAX_SAVED_OBJECT_TYPE_LENGTH,
+  MAX_SAVED_OBJECT_VERSION_LENGTH,
+  MAX_SAVED_OBJECTS_PER_BULK_REQUEST,
+} from '@kbn/core-saved-objects-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
@@ -37,9 +47,15 @@ export const registerBulkUpdateRoute = (
       path: '/_bulk_update',
       options: {
         summary: `Update saved objects`,
+        description: `WARNING: This API is deprecated. This is a legacy Saved Objects API and may be removed in a future version of Kibana.
+
+Updates multiple Kibana saved objects in a single request.
+
+For transferring or backing up saved objects, prefer the import and export APIs (\`POST /api/saved_objects/_import\` and \`POST /api/saved_objects/_export\`).`,
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,
+        oasOperationObject: () => path.resolve(__dirname, './bulk_update.examples.yaml'),
       },
       security: {
         authz: {
@@ -50,23 +66,28 @@ export const registerBulkUpdateRoute = (
       validate: {
         body: schema.arrayOf(
           schema.object({
-            type: schema.string(),
-            id: schema.string(),
-            attributes: schema.recordOf(schema.string(), schema.any()),
-            version: schema.maybe(schema.string()),
+            type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+            id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
+            attributes: schema.recordOf(
+              schema.string({ maxLength: MAX_SAVED_OBJECT_NAME_LENGTH }),
+              schema.any()
+            ),
+            version: schema.maybe(schema.string({ maxLength: MAX_SAVED_OBJECT_VERSION_LENGTH })),
             references: schema.maybe(
               schema.arrayOf(
                 schema.object({
-                  name: schema.string(),
-                  type: schema.string(),
-                  id: schema.string(),
+                  name: schema.string({ maxLength: MAX_SAVED_OBJECT_NAME_LENGTH }),
+                  type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+                  id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
                 }),
-                { maxSize: 1000 }
+                { maxSize: MAX_SAVED_OBJECT_REFERENCES_PER_OBJECT }
               )
             ),
-            namespace: schema.maybe(schema.string({ minLength: 1 })),
+            namespace: schema.maybe(
+              schema.string({ maxLength: MAX_SAVED_OBJECT_NAMESPACE_LENGTH, minLength: 1 })
+            ),
           }),
-          { maxSize: 10_000 }
+          { maxSize: MAX_SAVED_OBJECTS_PER_BULK_REQUEST }
         ),
       },
     },

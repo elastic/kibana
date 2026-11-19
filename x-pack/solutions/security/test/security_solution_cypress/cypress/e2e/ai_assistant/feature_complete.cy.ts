@@ -7,14 +7,16 @@
 
 import { AI_ASSISTANT_BUTTON } from '../../screens/ai_assistant';
 import { login } from '../../tasks/login';
+import { setPreferredChatExperienceToClassic } from '../../tasks/api_calls/kibana_advanced_settings';
 import { visitGetStartedPage } from '../../tasks/navigation';
 
 describe('App Features for Security Complete', { tags: ['@serverless'] }, () => {
   beforeEach(() => {
     login();
+    setPreferredChatExperienceToClassic();
   });
 
-  it('should have have AI Assistant available', () => {
+  it('should have AI Assistant available', () => {
     visitGetStartedPage();
     cy.get(AI_ASSISTANT_BUTTON).should('be.visible');
   });

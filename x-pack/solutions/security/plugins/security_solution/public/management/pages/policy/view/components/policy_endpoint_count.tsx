@@ -44,8 +44,8 @@ export const PolicyEndpointCount = memo<
           path: policyListPath,
         },
       ],
-      label: i18n.translate('xpack.securitySolution.policy.backToPolicyList', {
-        defaultMessage: 'Back to policy list',
+      label: i18n.translate('xpack.securitySolution.policy.list.appHeaderBackLabel', {
+        defaultMessage: 'Policies',
       }),
       href: getAppUrl({ path: policyListPath }),
     };
@@ -68,7 +68,6 @@ export const PolicyEndpointCount = memo<
     );
   }
   return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink href={toRouteUrl} data-test-subj={dataTestSubj} onClick={clickHandler} {...otherProps}>
       {children}
     </EuiLink>

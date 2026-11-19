@@ -1,0 +1,72 @@
+{
+    "10.8.0": [
+      {
+        "name": "system",
+        "version": "1.54.0",
+        "internal": false,
+        "keep_policies_up_to_date": true,
+        "verification_status": "verified",
+        "install_started_at": "2026-01-01T00:00:00.000Z",
+        "install_version": "1.54.0",
+        "install_status": "installed",
+        "install_source": "registry",
+        "dependencies": [
+            {
+            "name": "dep_package",
+            "version": "1.0.0"
+            }
+        ],
+        "installed_es": [
+          {
+            "id": "logs-system.syslog-1.54.0",
+            "type": "index_template"
+          }
+        ],
+        "installed_kibana": [],
+        "installed_kibana_space_id": "default",
+        "previous_version": "1.53.0",
+        "is_dependency_of": [
+            {
+            "name": "parent",
+            "version": "1.0.0"
+            }
+        ],
+        "installed_as_dependency": true
+      }
+    ],
+    "10.9.0": [
+      {
+        "name": "system",
+        "version": "1.54.0",
+        "internal": false,
+        "keep_policies_up_to_date": true,
+        "verification_status": "verified",
+        "install_started_at": "2026-01-01T00:00:00.000Z",
+        "install_version": "1.54.0",
+        "install_status": "installed",
+        "install_source": "registry",
+        "dependencies": [
+            {
+            "name": "dep_package",
+            "version": "1.0.0"
+            }
+        ],
+        "installed_es": [
+          {
+            "id": "logs-system.syslog-1.54.0",
+            "type": "index_template"
+          }
+        ],
+        "installed_kibana": [],
+        "installed_kibana_space_id": "default",
+        "previous_version": "1.53.0",
+        "is_dependency_of": [
+            {
+            "name": "parent",
+            "version": "1.0.0"
+            }
+        ],
+        "installed_as_dependency": true
+      }
+    ]
+  }

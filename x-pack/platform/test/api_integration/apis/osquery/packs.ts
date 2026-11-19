@@ -391,6 +391,277 @@ export default function ({ getService }: FtrProviderContext) {
       ).to.be(singleLineQuery);
     });
 
+    describe('created_by attribution', () => {
+      it('user-created pack records the creating user', async () => {
+        const createResponse = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+          .send({
+            name: `Attribution-UserPack-${Date.now()}`,
+            description: 'Test user attribution',
+            enabled: false,
+            queries: { q1: { query: 'select 1;', interval: 3600 } },
+          })
+          .expect(200);
+
+        const { data } = createResponse.body;
+        expect(data.created_by).to.be.ok();
+        expect(data.created_by).to.be('elastic');
+        expect(data.updated_by).to.be('elastic');
+
+        // Duplicate the user-created pack
+        const copyResponse = await withOsqueryHeaders(
+          supertest.post(`/api/osquery/packs/${data.saved_object_id}/copy`)
+        ).expect(200);
+
+        const copy = copyResponse.body.data;
+        expect(copy.created_by).to.be('elastic');
+        expect(copy.updated_by).to.be('elastic');
+        expect(copy.name).to.contain('Attribution-UserPack');
+
+        // Clean up
+        await withOsqueryHeaders(
+          supertest.delete(`/api/osquery/packs/${copy.saved_object_id}`)
+        ).expect(200);
+        await withOsqueryHeaders(
+          supertest.delete(`/api/osquery/packs/${data.saved_object_id}`)
+        ).expect(200);
+      });
+
+      it('prebuilt packs have "elastic" as created_by after asset install', async () => {
+        // Trigger asset install/update
+        await supertest
+          .post('/internal/osquery/assets/update')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        // Find all packs and look for prebuilt ones
+        const findResponse = await withOsqueryHeaders(
+          supertest.get('/api/osquery/packs?pageSize=100')
+        ).expect(200);
+
+        // Prebuilt packs should have created_by = 'elastic'
+        const prebuiltPacks = findResponse.body.data.filter(
+          (p: { read_only: boolean }) => p.read_only
+        );
+
+        expect(prebuiltPacks.length).to.be.greaterThan(0);
+        for (const pack of prebuiltPacks) {
+          expect(pack.created_by).to.be('elastic');
+          expect(pack.updated_by).to.be('elastic');
+        }
+      });
+
+      it('duplicating a prebuilt pack produces a mutable copy with valid attribution', async () => {
+        // Trigger asset install
+        await supertest
+          .post('/internal/osquery/assets/update')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        // Find a prebuilt pack
+        const findResponse = await withOsqueryHeaders(
+          supertest.get('/api/osquery/packs?pageSize=100')
+        ).expect(200);
+
+        const prebuiltPacks = findResponse.body.data.filter(
+          (p: { read_only: boolean }) => p.read_only
+        );
+        expect(prebuiltPacks.length).to.be.greaterThan(0);
+        const prebuiltPack = prebuiltPacks[0];
+
+        // Copy the prebuilt pack
+        const copyResponse = await withOsqueryHeaders(
+          supertest.post(`/api/osquery/packs/${prebuiltPack.saved_object_id}/copy`)
+        ).expect(200);
+
+        const copy = copyResponse.body.data;
+
+        // The copy uses getUserInfo() (dynamic resolution), not hardcoded 'elastic'.
+        // In FTR the test user is 'elastic', so we can only verify attribution is present.
+        expect(copy.created_by).to.be.a('string');
+        expect(copy.updated_by).to.be.a('string');
+        expect(copy.created_by).to.not.be.empty();
+
+        // The copy should NOT be read_only
+        expect(copy.read_only).to.not.be(true);
+
+        // Clean up
+        await withOsqueryHeaders(
+          supertest.delete(`/api/osquery/packs/${copy.saved_object_id}`)
+        ).expect(200);
+      });
+
+      it('users endpoint does not produce duplicate entries', async () => {
+        const response = await supertest
+          .get('/internal/osquery/packs/users')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        const usernames = response.body.data.map((c: { created_by: string }) => c.created_by);
+        const uniqueUsernames = [...new Set(usernames)];
+        expect(uniqueUsernames.length).to.be(usernames.length);
+      });
+    });
+
+    describe('policy_ids validation', () => {
+      it('deduplicates duplicate policy_ids and returns 200', async () => {
+        const createResponse = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+          .send({
+            name: `DuplicatePolicyTest-${Date.now()}`,
+            description: 'Test deduplication',
+            enabled: false,
+            policy_ids: [hostedPolicy.id, hostedPolicy.id],
+            queries: { q1: { query: 'select 1;', interval: 3600 } },
+          })
+          .expect(200);
+
+        const { data } = createResponse.body;
+        expect(data).to.be.ok();
+        expect(data.saved_object_id).to.be.ok();
+
+        // Verify via read that policy_ids is deduplicated
+        const readResponse = await withOsqueryHeaders(
+          supertest.get(`/api/osquery/packs/${data.saved_object_id}`)
+        ).expect(200);
+
+        expect(readResponse.body.data.policy_ids).to.be.an(Array);
+        expect(readResponse.body.data.policy_ids.length).to.be(1);
+        expect(readResponse.body.data.policy_ids[0]).to.be(hostedPolicy.id);
+
+        // Clean up
+        await withOsqueryHeaders(
+          supertest.delete(`/api/osquery/packs/${data.saved_object_id}`)
+        ).expect(200);
+      });
+
+      it('returns 400 for a single non-existent policy_id', async () => {
+        const nonExistentId = 'non-existent-policy-id-12345';
+        const response = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+          .send({
+            name: `NonExistentPolicyTest-${Date.now()}`,
+            description: 'Test non-existent policy',
+            enabled: false,
+            policy_ids: [nonExistentId],
+            queries: { q1: { query: 'select 1;', interval: 3600 } },
+          })
+          .expect(400);
+
+        expect(response.body.message).to.contain(nonExistentId);
+      });
+
+      it('returns 400 for mixed valid/invalid policy_ids', async () => {
+        const nonExistentId = 'invalid-policy-id-67890';
+        const response = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+          .send({
+            name: `MixedPolicyTest-${Date.now()}`,
+            description: 'Test mixed policies',
+            enabled: false,
+            policy_ids: [hostedPolicy.id, nonExistentId],
+            queries: { q1: { query: 'select 1;', interval: 3600 } },
+          })
+          .expect(400);
+
+        expect(response.body.message).to.contain(nonExistentId);
+      });
+    });
+
+    describe('shards propagation', () => {
+      let shardPackId: string | undefined;
+
+      afterEach(async () => {
+        if (shardPackId) {
+          await withOsqueryHeaders(supertest.delete(`/api/osquery/packs/${shardPackId}`)).ok(
+            () => true
+          );
+          shardPackId = undefined;
+        }
+      });
+
+      it('propagates pack shards to Fleet policy packs config', async () => {
+        const shardPackName = `ShardPack-${Date.now()}`;
+        const shardValue = 25;
+
+        const createResponse = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+          .send({
+            name: shardPackName,
+            description: 'Test pack shards propagation',
+            enabled: true,
+            policy_ids: [hostedPolicy.id],
+            shards: { [hostedPolicy.id]: shardValue },
+            queries: { q1: { query: 'select 1;', interval: 3600 } },
+          })
+          .expect(200);
+
+        shardPackId = createResponse.body.data.saved_object_id;
+        expect(shardPackId).to.be.ok();
+
+        const readResponse = await withOsqueryHeaders(
+          supertest.get(`/api/osquery/packs/${shardPackId}`)
+        ).expect(200);
+        expect(readResponse.body.data.shards).to.be.an('object');
+        expect(readResponse.body.data.shards[hostedPolicy.id]).to.be(shardValue);
+
+        const {
+          body: {
+            item: { inputs },
+          },
+        } = await supertest
+          .get(`/api/fleet/package_policies/${packagePolicyId}`)
+          .set('kbn-xsrf', 'true')
+          .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion);
+
+        expect(inputs[0].config.osquery.value.packs[`default--${shardPackName}`]).to.have.property(
+          'shard',
+          shardValue
+        );
+      });
+
+      // Exclusion semantics: shards[policyId] = 0 means the pack runs on 0% of the
+      // policy's agents. The Fleet policy config preserves `shard: 0` (not omitted,
+      // not defaulted to 100 — see `policyShards[id] ?? 100` in create_pack_route).
+      // Replaces coverage from the retired packs_integration.cy.ts describe that
+      // exercised a 0% shard field on OSQUERY_POLICY.
+      it('persists a 0% shard value for policy exclusion', async () => {
+        const shardPackName = `ShardPackZero-${Date.now()}`;
+
+        const createResponse = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+          .send({
+            name: shardPackName,
+            description: 'Test pack with 0% shard (policy exclusion)',
+            enabled: true,
+            policy_ids: [hostedPolicy.id],
+            shards: { [hostedPolicy.id]: 0 },
+            queries: { q1: { query: 'select 1;', interval: 3600 } },
+          })
+          .expect(200);
+
+        shardPackId = createResponse.body.data.saved_object_id;
+        expect(shardPackId).to.be.ok();
+
+        const readResponse = await withOsqueryHeaders(
+          supertest.get(`/api/osquery/packs/${shardPackId}`)
+        ).expect(200);
+        expect(readResponse.body.data.shards).to.be.an('object');
+        expect(readResponse.body.data.shards[hostedPolicy.id]).to.be(0);
+
+        const {
+          body: {
+            item: { inputs },
+          },
+        } = await supertest
+          .get(`/api/fleet/package_policies/${packagePolicyId}`)
+          .set('kbn-xsrf', 'true')
+          .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion);
+
+        expect(inputs[0].config.osquery.value.packs[`default--${shardPackName}`]).to.have.property(
+          'shard',
+          0
+        );
+      });
+    });
+
     describe('404 for non-existent resources', () => {
       it('returns 404 when reading a non-existent pack', async () => {
         await withOsqueryHeaders(supertest.get('/api/osquery/packs/non-existent-id')).expect(404);

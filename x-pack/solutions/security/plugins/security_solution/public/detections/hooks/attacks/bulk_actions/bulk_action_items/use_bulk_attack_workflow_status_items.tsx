@@ -7,16 +7,17 @@
 
 import { useCallback, useMemo } from 'react';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
+import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
 
 import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
+import { ATTACK_STATUS_ACTION_IDS } from '../../../../../common/constants/action_ids';
 import type { AlertWorkflowStatus } from '../../../../../common/types';
 import type { AlertClosingReason } from '../../../../../../common/types';
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../../common/types';
 import { useAttacksPrivileges } from '../use_attacks_privileges';
 import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detection_alert_ids';
 import { useApplyAttackWorkflowStatus } from '../apply_actions/use_apply_attack_workflow_status';
-import { useBulkAlertClosingReasonItems } from '../../../../../common/components/toolbar/bulk_actions/use_bulk_alert_closing_reason_items';
 import * as i18n from '../translations';
 import type { AttackContentPanelConfig, BulkAttackActionItems } from '../types';
 
@@ -62,7 +63,21 @@ export const useBulkAttackWorkflowStatusItems = ({
   );
 
   const onSubmitCloseReason = useCallback(
-    async ({ alertItems, reason }: { alertItems: TimelineItem[]; reason?: AlertClosingReason }) => {
+    async ({
+      alertItems,
+      reason,
+      closePopoverMenu,
+    }: {
+      alertItems: TimelineItem[];
+      reason?: AlertClosingReason;
+      closePopoverMenu: () => void;
+    }) => {
+      // Close the popover immediately on submit so the closing-reason sub-panel does not
+      // remain open while the request is in flight. Mirrors the assignees flow in
+      // `useBulkAttackAssigneesItems` (`renderContent.onSubmit` calls `closePopoverMenu()`
+      // before applying assignees).
+      closePopoverMenu();
+
       const attackIds = alertItems.map((item) => item._id);
       const relatedAlertIds = extractRelatedDetectionAlertIds(alertItems);
 
@@ -79,7 +94,8 @@ export const useBulkAttackWorkflowStatusItems = ({
   );
 
   const { item: alertClosingReasonItem, panels: alertClosingReasonPanels } =
-    useBulkAlertClosingReasonItems({
+    useBulkClosingReasonItems({
+      isEnabled: (hasIndexWrite && hasAttackIndexWrite) ?? false,
       onSubmitCloseReason,
       buttonLabel: i18n.CLOSE_ATTACK_BUTTON_MESSAGE,
     });
@@ -96,8 +112,8 @@ export const useBulkAttackWorkflowStatusItems = ({
     if (currentStatus !== FILTER_OPEN) {
       items.push({
         label: i18n.BULK_ACTION_OPEN_SELECTED,
-        key: 'open-attack-status',
-        'data-test-subj': 'open-attack-status',
+        key: ATTACK_STATUS_ACTION_IDS.markAsOpen,
+        'data-test-subj': ATTACK_STATUS_ACTION_IDS.markAsOpen,
         onClick: handleStatusUpdate(FILTER_OPEN as AlertWorkflowStatus),
         disableOnQuery: true,
       });
@@ -107,7 +123,7 @@ export const useBulkAttackWorkflowStatusItems = ({
     if (currentStatus !== FILTER_ACKNOWLEDGED) {
       items.push({
         label: i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED,
-        key: 'acknowledge-attack-status',
+        key: ATTACK_STATUS_ACTION_IDS.markAsAcknowledged,
         'data-test-subj': 'acknowledged-attack-status',
         onClick: handleStatusUpdate(FILTER_ACKNOWLEDGED as AlertWorkflowStatus),
         disableOnQuery: true,
@@ -118,7 +134,7 @@ export const useBulkAttackWorkflowStatusItems = ({
     if (currentStatus !== FILTER_CLOSED) {
       items.push({
         label: alertClosingReasonItem?.label ?? i18n.BULK_ACTION_CLOSE_SELECTED,
-        key: alertClosingReasonItem?.key ?? 'closed-attack-status',
+        key: alertClosingReasonItem?.key ?? ATTACK_STATUS_ACTION_IDS.markAsClosed,
         'data-test-subj': alertClosingReasonItem?.['data-test-subj'],
         panel: alertClosingReasonItem?.panel,
         disableOnQuery: true,

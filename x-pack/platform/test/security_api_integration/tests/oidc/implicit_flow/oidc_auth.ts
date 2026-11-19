@@ -7,10 +7,11 @@
 
 import { JSDOM } from 'jsdom';
 import type { Cookie } from 'tough-cookie';
-import { parse as parseCookie } from 'tough-cookie';
 import { format as formatURL } from 'url';
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 import {
   createTokens,
   getStateAndNonce,
@@ -30,6 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
       beforeEach(async () => {
         const handshakeResponse = await supertest
           .post('/internal/security/login')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .set('kbn-xsrf', 'xxx')
           .send({
             providerType: 'oidc',
@@ -39,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+        handshakeCookie = findSessionCookie(handshakeResponse.headers['set-cookie']);
         stateAndNonce = getStateAndNonce(handshakeResponse.body.location);
       });
 
@@ -146,9 +148,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         const cookies = oidcAuthenticationResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        const sessionCookie = parseCookie(cookies[0])!;
+        const sessionCookie = findSessionCookie(cookies);
         expect(sessionCookie.key).to.be('sid');
         expect(sessionCookie.value).to.not.be.empty();
         expect(sessionCookie.path).to.be('/');

@@ -1,4 +1,4 @@
-require('@kbn/babel-register').install();
+require('@kbn/swc-register').install();
 
 module.exports = {
   root: true,
@@ -6,7 +6,4 @@ module.exports = {
     '@kbn/eslint-config',
     'plugin:@elastic/eui/recommended'
   ],
-  rules: {
-    '@kbn/eslint/require-license-header': 'off',
-  },
 };

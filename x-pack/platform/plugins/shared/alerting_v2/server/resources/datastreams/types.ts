@@ -1,0 +1,32 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  IndicesDataStreamLifecycleWithRollover,
+  IngestProcessorContainer,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { MappingsDefinition } from '@kbn/es-mappings';
+
+export interface IngestPipelineDefinition {
+  id: string;
+  version: number;
+  processors: IngestProcessorContainer[];
+}
+
+export interface ResourceDefinition {
+  key: string;
+  dataStreamName: string;
+  version: number;
+  mappings: MappingsDefinition;
+  lifecycle: IndicesDataStreamLifecycleWithRollover;
+  /**
+   * Applies `lifecycle` to the existing data stream on every startup, for lifecycles that change
+   * through config rather than a version bump. A failure blocks initialization.
+   */
+  manageLifecycle?: boolean;
+  finalPipeline: IngestPipelineDefinition;
+}

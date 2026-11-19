@@ -104,7 +104,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
       <EuiFlyoutBody>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="addDataApp" size="xl" />
+            <EuiIcon type="addDataApp" size="xl" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="xs">

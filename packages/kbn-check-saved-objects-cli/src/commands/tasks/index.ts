@@ -8,7 +8,6 @@
  */
 
 export { getSnapshots } from './get_snapshots';
-export { validateNewTypes } from './validate_new_types';
-export { validateUpdatedTypes } from './validate_updated_types';
 export { automatedRollbackTests } from './automated_rollback_tests';
-export { checkRemovedTypes } from './check_removed_types';
+export { validateSOChanges } from './validate_so_changes';
+export { validateTestFlow } from './validate_test_flow';

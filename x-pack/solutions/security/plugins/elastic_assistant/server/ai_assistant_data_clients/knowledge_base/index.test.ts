@@ -524,7 +524,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       });
       await expect(
         assistantKnowledgeBaseDataClient.getRequiredKnowledgeBaseDocumentEntries()
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
       );
     });
@@ -589,9 +589,9 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
   describe('getAssistantTools', () => {
     it('should return structured tools for relevant index entries', async () => {
-      IndexPatternsFetcher.prototype.getIndexPatternsWithMatches = jest
+      IndexPatternsFetcher.prototype.getIndexPatternMatches = jest
         .fn()
-        .mockResolvedValue(['test']);
+        .mockResolvedValue({ matchedIndexPatterns: ['test'] });
       esClientMock.search.mockReturnValue(
         // @ts-expect-error not full response interface
         getKnowledgeBaseEntrySearchEsMock('index')

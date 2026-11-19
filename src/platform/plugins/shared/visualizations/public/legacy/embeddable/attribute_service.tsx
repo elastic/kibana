@@ -21,6 +21,7 @@ import type {
   VisualizeByValueInput,
   VisualizeSavedObjectAttributes,
 } from './visualize_embeddable';
+import { hasLibraryItemWithTitle } from '../../utils/saved_objects_utils';
 
 /**
  * The attribute service is a shared, generic service that embeddables can use to provide the functionality
@@ -42,7 +43,6 @@ export interface AttributeServiceOptions {
     attributes: VisualizeSavedObjectAttributes,
     savedObjectId?: string
   ) => Promise<{ id?: string } | { error: Error }>;
-  checkForDuplicateTitle: (props: OnSaveProps) => Promise<boolean>;
   unwrapMethod?: (savedObjectId: string) => Promise<AttributeServiceUnwrapResult>;
 }
 
@@ -129,7 +129,6 @@ export class AttributeService {
     }
     return new Promise<VisualizeByReferenceInput>((resolve, reject) => {
       const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
-        await this.options.checkForDuplicateTitle(props);
         try {
           const newAttributes = { ...(input as VisualizeByValueInput)[ATTRIBUTE_SERVICE_KEY] };
           newAttributes.title = props.newTitle;
@@ -152,8 +151,10 @@ export class AttributeService {
       if (saveOptions && (saveOptions as { showSaveModal: boolean }).showSaveModal) {
         showSaveModal(
           <SavedObjectSaveModalWithSaveResult
+            hasLibraryItemWithTitle={hasLibraryItemWithTitle}
             onSave={onSave}
             onClose={() => {}}
+            lastSavedTitle={''}
             title={get(
               saveOptions,
               'saveModalTitle',

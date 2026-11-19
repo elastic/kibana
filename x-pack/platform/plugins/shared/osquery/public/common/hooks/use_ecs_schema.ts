@@ -11,7 +11,7 @@ import { API_VERSIONS, ECS_SCHEMA_API_ROUTE } from '../../../common/constants';
 import type { EcsSchemaResponse, EcsField } from '../../../common/types/schema';
 import { useKibana } from '../lib/kibana';
 // Static path required by webpack — must match FALLBACK_ECS_VERSION in common/constants.ts
-import fallbackEcsSchemaJson from '../schemas/ecs/v9.2.0.json';
+import fallbackEcsSchemaJson from '../../../common/schemas/ecs/v9.2.0.json';
 
 let fallbackEcsSchema: EcsField[] | null = null;
 const getFallbackEcsSchema = (): EcsField[] => {

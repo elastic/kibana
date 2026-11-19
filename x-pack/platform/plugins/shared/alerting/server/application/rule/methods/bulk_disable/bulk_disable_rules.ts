@@ -7,11 +7,13 @@
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObjectsBulkUpdateObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
 import pMap from 'p-map';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
@@ -27,6 +29,7 @@ import {
   untrackRuleAlerts,
   updateMeta,
   bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
   migrateLegacyLastRunOutcomeMsg,
 } from '../../../../rules_client/lib';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
@@ -40,6 +43,7 @@ import { ruleDomainSchema } from '../../schemas';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type { RuleParams, RuleDomain } from '../../types';
 import { bulkDisableRulesSo } from '../../../../data/rule';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 export const bulkDisableRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -74,7 +78,11 @@ export const bulkDisableRules = async <Params extends RuleParams>(
         action: 'DISABLE',
         logger: context.logger,
         bulkOperation: (filterKueryNode: KueryNode | null) =>
-          bulkDisableRulesWithOCC(context, { filter: filterKueryNode, untrack }),
+          bulkDisableRulesWithOCC(context, {
+            filter: filterKueryNode,
+            untrack,
+            totalNumOfRules: total,
+          }),
         filter: kueryNodeFilterWithAuth,
       })
   );
@@ -91,30 +99,35 @@ export const bulkDisableRules = async <Params extends RuleParams>(
     tryToRemoveTasks({ taskIdsToDelete, logger: context.logger, taskManager: context.taskManager }),
   ]);
 
-  const disabledRules = rules.map(({ id, attributes, references }) => {
-    // TODO (http-versioning): alertTypeId should never be null, but we need to
-    // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
-    // when we are doing the bulk disable and this should fix itself
-    const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
-    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
-      attributes as RawRule,
-      {
-        id,
-        logger: context.logger,
-        ruleType,
-        references,
-        omitGeneratedValues: false,
-      },
-      (connectorId: string) => actionsClient.isSystemAction(connectorId)
-    );
+  const disabledRules = await withSpan(
+    { name: 'bulkDisableRules.toRuleDomain', type: 'rules' },
+    async () =>
+      rules.map(({ id, attributes, references }) => {
+        // TODO (http-versioning): alertTypeId should never be null, but we need to
+        // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
+        // when we are doing the bulk disable and this should fix itself
+        const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+        const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
+          attributes as RawRule,
+          {
+            id,
+            logger: context.logger,
+            ruleType,
+            references,
+          },
+          (connectorId: string) => actionsClient.isSystemAction(connectorId)
+        );
 
-    try {
-      ruleDomainSchema.validate(ruleDomain);
-    } catch (e) {
-      context.logger.warn(`Error validating bulk disabled rule domain object for id: ${id}, ${e}`);
-    }
-    return ruleDomain;
-  });
+        try {
+          ruleDomainSchema.validate(ruleDomain);
+        } catch (e) {
+          context.logger.warn(
+            `Error validating bulk disabled rule domain object for id: ${id}, ${e}`
+          );
+        }
+        return ruleDomain;
+      })
+  );
 
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
   const disabledPublicRules = disabledRules.map((rule: RuleDomain<Params>) => {
@@ -128,10 +141,12 @@ const bulkDisableRulesWithOCC = async (
   context: RulesClientContext,
   {
     filter,
-    untrack = false,
+    untrack,
+    totalNumOfRules,
   }: {
     filter: KueryNode | null;
     untrack: boolean;
+    totalNumOfRules: number;
   }
 ) => {
   const rulesFinder = await withSpan(
@@ -151,13 +166,19 @@ const bulkDisableRulesWithOCC = async (
   const rulesToDisable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
+  const migratedRuleIds = new Set<string>();
   const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
 
   await withSpan(
     { name: 'Get rules, collect them and their attributes', type: 'rules' },
     async () => {
       for await (const response of rulesFinder.find()) {
-        await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
+        const migratedIds = await bulkMigrateLegacyActions({
+          context,
+          rules: response.saved_objects,
+        });
+        migratedIds.forEach((id) => migratedRuleIds.add(id));
         await pMap(response.saved_objects, async (rule) => {
           const ruleName = rule.attributes.name;
 
@@ -180,6 +201,7 @@ const bulkDisableRulesWithOCC = async (
                   ? rule.attributes.scheduledTaskId
                   : null,
               updatedBy: username,
+              updatedByProfileUid: profileUid,
               updatedAt: new Date().toISOString(),
               ...(castedAttributes.lastRun
                 ? { lastRun: migrateLegacyLastRunOutcomeMsg(castedAttributes.lastRun) }
@@ -230,7 +252,6 @@ const bulkDisableRulesWithOCC = async (
   // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
   // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
   // bulk_disable, bulk_enable, etc. to fix this cast
-
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
     () =>
@@ -241,13 +262,29 @@ const bulkDisableRulesWithOCC = async (
       })
   );
 
+  await logRuleChanges({
+    ruleSOs: result.saved_objects,
+    encryptedFieldsMap: new Map(
+      rulesToDisable.map(({ id, attributes }) => [
+        id,
+        { apiKey: attributes.apiKey ?? null, uiamApiKey: attributes.uiamApiKey ?? null },
+      ])
+    ),
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleDisable,
+      metadata: { bulkCount: totalNumOfRules },
+    },
+  });
+
   const taskIdsToDisable: string[] = [];
   const taskIdsToDelete: string[] = [];
   const taskIdsToClearState: string[] = [];
   const disabledRules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+  const savedMigratedRuleIds: string[] = [];
 
   result.saved_objects.forEach((rule) => {
-    if (rule.error === undefined) {
+    if (!isSavedObjectErrorResult(rule)) {
       if (rule.attributes.scheduledTaskId) {
         if (rule.attributes.scheduledTaskId !== rule.id) {
           taskIdsToDelete.push(rule.attributes.scheduledTaskId);
@@ -262,6 +299,9 @@ const bulkDisableRulesWithOCC = async (
         }
       }
       disabledRules.push(rule);
+      if (migratedRuleIds.has(rule.id)) {
+        savedMigratedRuleIds.push(rule.id);
+      }
     } else {
       errors.push({
         message: rule.error.message ?? 'n/a',
@@ -273,6 +313,9 @@ const bulkDisableRulesWithOCC = async (
       });
     }
   });
+
+  // Legacy actions are deleted only once the rules carrying them are saved, so a conflict can be retried
+  await deleteLegacyActionsForRules(context, savedMigratedRuleIds);
 
   return {
     errors,

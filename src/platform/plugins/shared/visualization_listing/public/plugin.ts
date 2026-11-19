@@ -8,7 +8,6 @@
  */
 
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { DashboardSetup, DashboardListingTab } from '@kbn/dashboard-plugin/public';
@@ -19,7 +18,6 @@ import type { VisualizationListingPageServices } from './get_table_list';
 
 export interface VisualizationListingStartDependencies {
   visualizations: VisualizationsStart;
-  contentManagement: ContentManagementPublicStart;
   embeddable: EmbeddableStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
@@ -46,10 +44,11 @@ export class VisualizationListingPlugin
     core: CoreSetup<VisualizationListingStartDependencies>,
     dependencies: SetupDependencies
   ) {
+    const tabTitle = i18n.translate('visualizationListing.listingViewTitle', {
+      defaultMessage: 'Visualizations',
+    });
     const visualizationsTabConfig: DashboardListingTab = {
-      title: i18n.translate('visualizationListing.listingViewTitle', {
-        defaultMessage: 'Visualizations',
-      }),
+      title: tabTitle,
       id: 'visualizations',
       getTableList: async (props: TableListTabParentProps) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
@@ -57,7 +56,6 @@ export class VisualizationListingPlugin
         const services: VisualizationListingPageServices = {
           core: coreStart,
           visualizations: pluginsStart.visualizations,
-          contentManagement: pluginsStart.contentManagement,
           embeddable: pluginsStart.embeddable,
           savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi,
         };
@@ -70,6 +68,18 @@ export class VisualizationListingPlugin
           defaultMessage: 'Visualize library',
         }),
         visibleIn: ['globalSearch'],
+      },
+      createAction: {
+        order: 1,
+        label: i18n.translate('visualizationListing.createVisualizationButtonLabel', {
+          defaultMessage: 'Create visualization',
+        }),
+        iconType: 'chartBarVertical',
+        create: async (path: string) => {
+          const [coreStart, pluginsStart] = await core.getStartServices();
+          const { showNewVisModalFromDashboard } = await import('./get_table_list');
+          showNewVisModalFromDashboard(coreStart, pluginsStart, tabTitle, path);
+        },
       },
     };
 

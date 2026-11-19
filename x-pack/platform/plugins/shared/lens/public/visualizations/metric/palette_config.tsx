@@ -8,7 +8,10 @@
 import type { RequiredPaletteParamTypes } from '@kbn/coloring';
 import { KbnPalette } from '@kbn/palettes';
 import type { SecondaryTrend, SecondaryTrendType } from '@kbn/lens-common';
-import { LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR } from '@kbn/lens-common';
+import {
+  LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
+  LENS_METRIC_DEFAULT_COLOR_STEPS,
+} from '@kbn/lens-common';
 import { defaultPaletteParams as sharedDefaultParams } from '../../shared_components';
 
 export const RANGE_MIN = 0;
@@ -17,8 +20,7 @@ export const defaultPercentagePaletteParams: RequiredPaletteParamTypes = {
   ...sharedDefaultParams,
   name: 'status',
   rangeType: 'percent',
-  steps: 3,
-  maxSteps: 5,
+  steps: LENS_METRIC_DEFAULT_COLOR_STEPS,
   continuity: 'all',
   colorStops: [],
   stops: [],
@@ -30,8 +32,7 @@ export const defaultNumberPaletteParams: RequiredPaletteParamTypes = {
   rangeType: 'number',
   rangeMin: -Infinity,
   rangeMax: Infinity,
-  steps: 3,
-  maxSteps: 5,
+  steps: LENS_METRIC_DEFAULT_COLOR_STEPS,
   continuity: 'all',
   colorStops: [],
   stops: [],

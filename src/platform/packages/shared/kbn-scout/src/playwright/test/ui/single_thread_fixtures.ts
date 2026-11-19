@@ -35,12 +35,14 @@ import {
   validateTagsFixture,
   persistentContextFixture,
   perfTrackerFixture,
+  networkFixture,
 } from '../../fixtures/scope/test';
 import type {
   BrowserAuthFixture,
   ScoutPage,
   PageObjects,
   PerfTrackerFixture,
+  NetworkFixture,
 } from '../../fixtures/scope/test';
 export type { ScoutPage, PageObjects, BrowserAuthFixture } from '../../fixtures/scope/test';
 export type { ApiServicesFixture, LighthouseAuditOptions } from '../../fixtures/scope/worker';
@@ -58,6 +60,7 @@ export const scoutFixtures = mergeTests(
   browserAuthFixture,
   scoutPageFixture,
   pageObjectsFixture,
+  networkFixture,
   validateTagsFixture,
   // performance fixtures
   perfTrackerFixture
@@ -67,6 +70,7 @@ export interface ScoutTestFixtures {
   browserAuth: BrowserAuthFixture;
   page: ScoutPage;
   pageObjects: PageObjects;
+  network: NetworkFixture;
   perfTracker: PerfTrackerFixture;
 }
 
@@ -80,6 +84,7 @@ export interface ScoutWorkerFixtures extends ApiServicesFixture {
   linkedProject: LinkedProjectFixture;
   uiSettings: UiSettingsFixture;
   apiServices: ApiServicesFixture;
+  isSnapshotBuild: boolean;
 }
 
 export const lighthouseFixtures = mergeTests(

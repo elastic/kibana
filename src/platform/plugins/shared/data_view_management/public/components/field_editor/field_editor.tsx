@@ -15,7 +15,6 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCode,
   EuiConfirmModal,
   EuiFieldNumber,
@@ -51,6 +50,7 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import { context as contextType } from '@kbn/kibana-react-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import {
   getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,
@@ -284,7 +284,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         helpText={
           this.isDuplicateName() ? (
             <span>
-              <EuiIcon type="warning" color="warning" size="s" />
+              <EuiIcon type="warning" color="warning" size="s" aria-hidden={true} />
               &nbsp;
               <FormattedMessage
                 id="indexPatternManagement.mappingConflictLabel.mappingConflictDetail"
@@ -346,7 +346,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         helpText={
           isDeprecatedLang ? (
             <span>
-              <EuiIcon type="warning" color="warning" size="s" />
+              <EuiIcon type="warning" color="warning" size="s" aria-hidden={true} />
               &nbsp;
               <strong>
                 <FormattedMessage
@@ -473,23 +473,22 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     return (
       <div>
         <EuiSpacer size="m" />
-        <EuiCallOut
-          color="warning"
-          iconType="warning"
+        <KbnWarningCallout
           title={
             <FormattedMessage
               id="indexPatternManagement.fieldTypeConflict"
               defaultMessage="Field type conflict"
             />
           }
-          size="s"
-        >
-          <FormattedMessage
-            id="indexPatternManagement.multiTypeLabelDesc"
-            defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions.
+          text={
+            <FormattedMessage
+              id="indexPatternManagement.multiTypeLabelDesc"
+              defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions.
           The indices per type are as follows:"
-          />
-        </EuiCallOut>
+            />
+          }
+          size="s"
+        />
         <EuiSpacer size="m" />
         <EuiBasicTable
           items={items}

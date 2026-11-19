@@ -12,7 +12,7 @@ export const verticalBarChart: ElementFactory = () => ({
   displayName: 'Vertical bar chart',
   type: 'chart',
   help: 'A customizable vertical bar chart',
-  icon: 'visBarVertical',
+  icon: 'chartBarVertical',
   expression: `kibana
 | selectFilter
 | demodata

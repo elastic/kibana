@@ -18,8 +18,8 @@ import type { networkModel } from '../../store';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import {
   autonomousSystemRenderer,
-  hostIdRenderer,
-  hostNameRenderer,
+  HostIdRenderer,
+  HostNameRenderer,
   locationRenderer,
   reputationRenderer,
   whoisRenderer,
@@ -55,7 +55,6 @@ export interface IpOverviewProps {
   type: networkModel.NetworkType;
   indexPatterns: string[];
   jobNameById: Record<string, string | undefined>;
-  isFlyoutOpen?: boolean;
 }
 
 export const IpOverview = React.memo<IpOverviewProps>(
@@ -75,7 +74,6 @@ export const IpOverview = React.memo<IpOverviewProps>(
     scopeId,
     indexPatterns,
     jobNameById,
-    isFlyoutOpen = false,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -147,27 +145,25 @@ export const IpOverview = React.memo<IpOverviewProps>(
         {
           title: i18n.HOST_ID,
           description:
-            typeData && data.host
-              ? hostIdRenderer({
-                  host: data.host,
-                  ipFilter: ip,
-                  contextID,
-                  scopeId,
-                  isFlyoutOpen,
-                })
-              : getEmptyTagValue(),
+            typeData && data.host ? (
+              <HostIdRenderer
+                host={data.host}
+                ipFilter={ip}
+                contextID={contextID}
+                scopeId={scopeId}
+              />
+            ) : (
+              getEmptyTagValue()
+            ),
         },
         {
           title: i18n.HOST_NAME,
           description:
-            typeData && data.host
-              ? hostNameRenderer({
-                  scopeId,
-                  host: data.host,
-                  ipFilter: ip,
-                  isFlyoutOpen,
-                })
-              : getEmptyTagValue(),
+            typeData && data.host ? (
+              <HostNameRenderer scopeId={scopeId} host={data.host} ipFilter={ip} />
+            ) : (
+              getEmptyTagValue()
+            ),
         },
       ],
       [

@@ -6,23 +6,35 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import {
   CommentChildren,
   INDICATOR_FEED_NAME_TEST_ID,
   INDICATOR_NAME_TEST_ID,
   INDICATOR_TYPE_TEST_ID,
 } from './comment_children';
-import type { IndicatorAttachmentMetadata } from '../utils/attachments';
+import type { IndicatorAttachmentMetadata } from '..';
 import { TestProvidersComponent } from '../../../../threat_intelligence/mocks/test_providers';
 import { useIndicatorById } from '../hooks/use_indicator_by_id';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { generateMockFileIndicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { LOADING_LOGO_TEST_ID } from './test_ids';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 jest.mock('../hooks/use_indicator_by_id');
+jest.mock('../../../../flyout_v2/use_flyout_api');
 
 describe('attachment_children initComponent', () => {
+  let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    flyoutApi = createFlyoutApiMock();
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+  });
+
   it('should render the basic values', () => {
     const id: string = 'abc123';
     const metadata: IndicatorAttachmentMetadata = {
@@ -65,5 +77,33 @@ describe('attachment_children initComponent', () => {
       </TestProvidersComponent>
     );
     expect(getByTestId(LOADING_LOGO_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should open the IOC flyout when the indicator is defined', () => {
+    const id: string = 'abc123';
+    const metadata: IndicatorAttachmentMetadata = {
+      indicatorName: 'indicatorName',
+      indicatorFeedName: 'indicatorFeedName',
+      indicatorType: 'indicatorType',
+    };
+    const indicator = generateMockFileIndicator();
+
+    (useIndicatorById as jest.MockedFunction<typeof useIndicatorById>).mockReturnValue({
+      indicator,
+      isLoading: false,
+    });
+
+    const { getByTestId } = render(
+      <TestProvidersComponent>
+        <CommentChildren id={id} metadata={metadata} />
+      </TestProvidersComponent>
+    );
+
+    fireEvent.click(getByTestId(INDICATOR_NAME_TEST_ID));
+
+    expect(flyoutApi.openIocFlyout).toHaveBeenCalledWith({
+      indicator,
+      origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
+    });
   });
 });

@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/canvas-plugin",
   "owner": [
-    "@elastic/kibana-presentation"
+    "@elastic/kibana-dashboards"
   ],
   "group": "platform",
   "visibility": "private",
@@ -23,7 +23,6 @@
       "expressions",
       "features",
       "inspector",
-      "presentationUtil",
       "uiActions",
       "share",
       "contentManagement",
@@ -38,10 +37,10 @@
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
-      "lens",
       "maps",
       "fieldFormats",
-      "savedSearch"
+      "savedSearch",
+      "presentationUtil"
     ]
   }
 }

@@ -60,6 +60,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
   );
 
   const [isFirstLoad, setIsFirstLoad] = React.useState(true);
+  const [hasInvalidProxySearch, setHasInvalidProxySearch] = useState(false);
   const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(
     'disabled'
   );
@@ -265,6 +266,9 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
               data-test-subj="editDownloadSourcesFlyout.proxyIdInput"
               {...inputs.proxyIdInput.props}
               onChange={(options) => inputs.proxyIdInput.setValue(options?.[0]?.value ?? '')}
+              onSearchChange={(value, hasMatchingOptions) => {
+                setHasInvalidProxySearch(!!value && !hasMatchingOptions);
+              }}
               selectedOptions={
                 inputs.proxyIdInput.value !== ''
                   ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput.value)
@@ -272,6 +276,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
               }
               options={proxiesOptions}
               singleSelection={{ asPlainText: true }}
+              isInvalid={hasInvalidProxySearch}
               isDisabled={inputs.proxyIdInput.props.disabled}
               isClearable={true}
               placeholder={i18n.translate(
@@ -293,6 +298,28 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
                 <FormattedMessage
                   id="xpack.fleet.settings.editDownloadSourcesFlyout.defaultSwitchLabel"
                   defaultMessage="Make this host the default for all agent policies."
+                />
+              }
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            fullWidth
+            {...inputs.reserveDiskspaceInput.formRowProps}
+            helpText={
+              <FormattedMessage
+                id="xpack.fleet.settings.editDownloadSourcesFlyout.reserveDiskspaceHelpText"
+                defaultMessage="Before an upgrade, agents reserve disk space for the new agent package so the upgrade fails early if there isn't enough space. Applies to agent policies that use this host as their primary agent binary source. Turn off if this causes upgrade issues."
+              />
+            }
+          >
+            <EuiSwitch
+              data-test-subj="editDownloadSourcesFlyout.reserveDiskspaceSwitch"
+              {...inputs.reserveDiskspaceInput.props}
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editDownloadSourcesFlyout.reserveDiskspaceSwitchLabel"
+                  defaultMessage="Reserve disk space before upgrading agents"
                 />
               }
             />
@@ -325,7 +352,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
             <EuiButton
               fill
               isLoading={form.isLoading}
-              isDisabled={form.isDisabled}
+              isDisabled={form.isDisabled || hasInvalidProxySearch}
               onClick={form.submit}
               data-test-subj="editDownloadSourcesFlyout.submitBtn"
             >

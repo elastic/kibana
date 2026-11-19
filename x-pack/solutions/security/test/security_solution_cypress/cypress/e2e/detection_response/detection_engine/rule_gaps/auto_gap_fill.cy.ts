@@ -9,6 +9,7 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import {
   GAP_AUTO_FILL_STATUS_BADGE,
   RULE_GAPS_OVERVIEW_PANEL,
+  RULE_SETTINGS_BUTTON,
   RULE_SETTINGS_ENABLE_SWITCH,
   RULE_SETTINGS_MODAL,
   RULE_SETTINGS_SAVE_BUTTON,
@@ -22,14 +23,25 @@ import { TOOLTIP } from '../../../../screens/common';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
   deleteGapAutoFillScheduler,
+  enableGapAutoFillScheduler,
   getGapAutoFillSchedulerApi,
 } from '../../../../tasks/api_calls/gaps';
 import { RULES_MONITORING_TAB } from '../../../../screens/alerts_detection_rules';
-import { login } from '../../../../tasks/login';
+import { login, loginWithUser } from '../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getCustomQueryRuleParams } from '../../../../objects/rule';
 import { getGapAutoFillLogsTableRows } from '../../../../tasks/rule_details';
+import { visit } from '../../../../tasks/navigation';
+import { RULES_URL } from '../../../../urls/navigation';
+import {
+  createUsersAndRoles,
+  deleteUsersAndRoles,
+  rulesReadManagementSettingsAllUser,
+  rulesReadManagementSettingsAll,
+  rulesAllManagementSettingsUserNoneUser,
+  rulesAllManagementSettingsUserNone,
+} from '../../../../tasks/privileges';
 
 const visitMonitoringTab = () => {
   visitRulesManagementTable();
@@ -63,7 +75,7 @@ const ensureAutoGapFillEnabledViaUi = () => {
 
       cy.get(RULE_SETTINGS_ENABLE_SWITCH).click();
       cy.get(RULE_SETTINGS_SAVE_BUTTON).click();
-      cy.contains(TOASTER_BODY, 'Auto gap fill settings updated successfully');
+      cy.contains(TOASTER_BODY, 'Rule settings updated successfully');
       cy.get(RULE_SETTINGS_MODAL).should('not.exist');
       cy.waitUntil(() =>
         getGapAutoFillSchedulerApi().then(
@@ -73,16 +85,20 @@ const ensureAutoGapFillEnabledViaUi = () => {
     });
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/246571
-describe.skip(
+describe(
   'Rule gaps auto fill status',
   {
     tags: ['@ess'],
   },
   () => {
     describe('Platinum user flows', () => {
+      const rbacRolesToCreate = [rulesReadManagementSettingsAll];
+      const rbacUsersToCreate = [rulesReadManagementSettingsAllUser];
+
       beforeEach(() => {
-        login();
+        deleteUsersAndRoles(rbacUsersToCreate, rbacRolesToCreate);
+        createUsersAndRoles(rbacUsersToCreate, rbacRolesToCreate);
+        loginWithUser(rulesReadManagementSettingsAllUser);
         deleteAlertsAndRules();
         deleteGapAutoFillScheduler();
         createRule(
@@ -102,7 +118,7 @@ describe.skip(
         cy.get(RULE_SETTINGS_MODAL).should('exist');
         cy.get(RULE_SETTINGS_ENABLE_SWITCH).should('have.attr', 'aria-checked', 'true').click();
         cy.get(RULE_SETTINGS_SAVE_BUTTON).should('not.be.disabled').click();
-        cy.contains(TOASTER_BODY, 'Auto gap fill settings updated successfully');
+        cy.contains(TOASTER_BODY, 'Rule settings updated successfully');
         cy.get(RULE_SETTINGS_MODAL).should('not.exist');
 
         cy.waitUntil(() =>
@@ -160,11 +176,20 @@ describe.skip(
           // Verify that after filtering, rows have the expected status in the status column
           getGapAutoFillLogsTableRows()
             .should('exist')
-            .each(($row) => {
-              cy.wrap($row).find('td').eq(1).contains('No gaps');
+            .each((_row, index) => {
+              getGapAutoFillLogsTableRows()
+                .eq(index)
+                .find('td')
+                .eq(1)
+                .should('contain.text', 'No gaps');
 
               // Verify tooltip appears on hover and contains the expected text
-              cy.wrap($row).find('td').eq(1).find('.euiBadge').realHover();
+              getGapAutoFillLogsTableRows()
+                .eq(index)
+                .find('td')
+                .eq(1)
+                .find('.euiBadge')
+                .realHover();
 
               // Check that the tooltip is visible and contains the expected message
               cy.get(TOOLTIP)
@@ -182,8 +207,11 @@ describe.skip(
         createRule(
           getCustomQueryRuleParams({ rule_id: '1', name: 'Rule 1', interval: '1m', from: 'now-1m' })
         );
-        login();
-        ensureAutoGapFillEnabledViaUi();
+        // Set up via API so the browser only ever loads the app once, as the read-only user.
+        // Rendering the app as an admin and then swapping the session cookie to another user
+        // left a live page polling with a stale session, which intermittently produced a blank
+        // page on the next visit (https://github.com/elastic/kibana/issues/275080).
+        enableGapAutoFillScheduler();
         login(ROLES.t1_analyst);
       });
 
@@ -192,8 +220,7 @@ describe.skip(
       });
 
       it('shows the modal but disables edits for users without CRUD permissions', () => {
-        visitRulesManagementTable();
-        cy.get(RULES_MONITORING_TAB).click();
+        visitMonitoringTab();
 
         cy.get(GAP_AUTO_FILL_STATUS_BADGE).click();
         cy.get(RULE_SETTINGS_MODAL).should('exist');
@@ -203,3 +230,43 @@ describe.skip(
     });
   }
 );
+
+describe('Auto gap fill RBAC', { tags: ['@ess'] }, () => {
+  const rbacRolesToCreate = [rulesReadManagementSettingsAll, rulesAllManagementSettingsUserNone];
+  const rbacUsersToCreate = [
+    rulesReadManagementSettingsAllUser,
+    rulesAllManagementSettingsUserNoneUser,
+  ];
+
+  before(() => {
+    deleteAlertsAndRules();
+    deleteGapAutoFillScheduler();
+    deleteUsersAndRoles(rbacUsersToCreate, rbacRolesToCreate);
+    createUsersAndRoles(rbacUsersToCreate, rbacRolesToCreate);
+    createRule(
+      getCustomQueryRuleParams({
+        rule_id: '1',
+        name: 'Rule 1',
+        interval: '1m',
+        from: 'now-1m',
+      })
+    );
+  });
+
+  after(() => {
+    deleteGapAutoFillScheduler();
+    deleteUsersAndRoles(rbacUsersToCreate, rbacRolesToCreate);
+    deleteAlertsAndRules();
+  });
+
+  describe('User with rules.all no rulesManagementSettings', () => {
+    beforeEach(() => {
+      loginWithUser(rulesAllManagementSettingsUserNoneUser);
+      visit(RULES_URL);
+    });
+
+    it('does not show the settings button', () => {
+      cy.get(RULE_SETTINGS_BUTTON).should('not.exist');
+    });
+  });
+});

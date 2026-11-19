@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { WellKnownWorkflowTriggerSource } from '@kbn/workflows';
+
+/** Whose credentials a workflow execution runs with. */
+export type WorkflowExecutionRunAs = 'service_account' | 'user';
+
 /**
  * Base parameters for all workflow execution telemetry events
  */
@@ -24,13 +29,44 @@ export interface BaseWorkflowExecutionTelemetryParams {
    */
   spaceId: string;
   /**
-   * How the workflow was triggered: 'manual', 'scheduled', 'alert', or 'workflow-step' for sub-workflows.
+   * How the workflow was triggered: built-in sources, 'workflow-step' for sub-workflows, or 'event' for event-driven trigger ids.
    */
-  triggerType: 'manual' | 'scheduled' | 'alert' | 'workflow-step';
+  triggerType: WellKnownWorkflowTriggerSource | 'event';
+  /**
+   * Registered event trigger id when triggerType is 'event' (e.g. cases.caseCreated).
+   * Omitted for built-in trigger types.
+   */
+  eventTriggerId?: string;
   /**
    * Whether this is a test run
    */
   isTestRun: boolean;
+  /**
+   * Whether this execution belongs to a managed workflow
+   */
+  isManaged: boolean;
+  /**
+   * Owning plugin for managed workflow executions
+   */
+  managedBy?: string;
+  /**
+   * Registered managed workflow definition ID, when this execution came from one
+   */
+  originManagedWorkflowId?: string;
+  /**
+   * Registered managed workflow definition version, when this execution came from one
+   */
+  managedVersion?: number;
+  /**
+   * Whose credentials the execution runs with: 'service_account' when it is bound to a service
+   * account, 'user' when it runs as the user or API key that triggered or scheduled it.
+   */
+  runAs: WorkflowExecutionRunAs;
+  /**
+   * Whether the service account came from the parent workflow rather than this workflow's own
+   * `settings.run_as`. Only present when runAs is 'service_account'.
+   */
+  runAsInherited?: boolean;
   /**
    * The alert rule ID if triggered by alert. Only present when triggerType is 'alert'.
    */
@@ -50,6 +86,73 @@ export interface BaseWorkflowExecutionTelemetryParams {
    * Only present for sub-workflow executions when recorded on the execution context.
    */
   parentWorkflowInvocation?: 'sync' | 'async';
+  /**
+   * Every ancestor of a sub-workflow execution, root first and direct parent last, each with how it
+   * invoked the next run down. The last hop matches parentWorkflowId and parentWorkflowInvocation.
+   * Omitted for a top-level execution, and for a sub-workflow execution whose chain started before
+   * the chain was recorded.
+   */
+  executionChain?: Array<{
+    executionId: string;
+    invocation: 'sync' | 'async';
+    workflowId: string;
+  }>;
+  /**
+   * Event-chain depth for runs scheduled via event-driven emits.
+   * Not sub-workflow composition; omitted when absent.
+   */
+  eventChainDepth?: number;
+  /**
+   * Total LLM input (prompt) tokens used by token-reporting steps in this execution.
+   */
+  inputTokensUsed?: number;
+  /**
+   * Total LLM output (completion) tokens used by token-reporting steps in this execution.
+   */
+  outputTokensUsed?: number;
+  /**
+   * Total cached input tokens reused by token-reporting steps in this execution.
+   * This is a subset of inputTokensUsed.
+   */
+  cachedTokensUsed?: number;
+  /**
+   * Total LLM tokens used by token-reporting steps in this execution.
+   * This is inputTokensUsed + outputTokensUsed.
+   */
+  totalTokensUsed?: number;
+  /**
+   * Per-step counterpart to the `*TokensUsed` totals above: one entry per
+   * token-reporting step, carrying its resolved connector. Omitted when no step
+   * reported usage.
+   */
+  aiStepsUsage?: Array<{
+    stepId: string;
+    connectorId?: string;
+    inputTokens: number;
+    outputTokens: number;
+    cachedTokens: number;
+    totalTokens: number;
+  }>;
+}
+
+/** Output size statistics derived from WorkflowExecutionState. */
+export interface OutputSizeStats {
+  totalBytes: number;
+  stepCount: number;
+}
+
+/** Telemetry fields for output size metrics, shared across terminal event types. */
+export interface OutputSizeTelemetryFields {
+  /**
+   * Total output size in bytes across all steps with recorded sizes.
+   * Only includes atomic steps measured by Layer 2 enforcement.
+   */
+  totalOutputSizeBytes?: number;
+  /**
+   * Average output size per step in bytes.
+   * Computed from steps with recorded sizes only.
+   */
+  averageOutputSizeBytes?: number;
 }
 
 /**
@@ -68,12 +171,38 @@ export enum WorkflowExecutionTelemetryEventTypes {
    * When a workflow execution is cancelled
    */
   WorkflowExecutionCancelled = 'workflows_execution_workflow_cancelled',
+  /**
+   * When an event-driven run is marked skipped at task runtime because execution was disabled after scheduling.
+   */
+  EventDrivenExecutionSuppressed = 'workflows_event_driven_execution_suppressed',
+  /**
+   * When a trigger event is dispatched (emitEvent called) and workflows are resolved/scheduled.
+   */
+  TriggerEventDispatched = 'workflows_trigger_event_dispatched',
+}
+
+/**
+ * Event-driven execution was skipped in runWorkflow after a task was already scheduled (operator kill switch flipped).
+ *
+ * Omits composition fields (`compositionDepth`, `parentWorkflowId`, `parentWorkflowInvocation`, `executionChain`):
+ * suppression is for event-driven executions, not sub-workflow composition. Includes optional `eventChainDepth` when
+ * persisted on the execution.
+ */
+export interface EventDrivenExecutionSuppressedParams
+  extends Omit<
+    BaseWorkflowExecutionTelemetryParams,
+    'compositionDepth' | 'parentWorkflowId' | 'parentWorkflowInvocation' | 'executionChain'
+  > {
+  eventName: string;
+  logTriggerEventsEnabled: boolean;
 }
 
 /**
  * Parameters for workflow execution completed event
  */
-export interface WorkflowExecutionCompletedParams extends BaseWorkflowExecutionTelemetryParams {
+export interface WorkflowExecutionCompletedParams
+  extends BaseWorkflowExecutionTelemetryParams,
+    OutputSizeTelemetryFields {
   eventName: string;
   /**
    * Timestamp when the execution started (ISO string)
@@ -165,6 +294,11 @@ export interface WorkflowExecutionCompletedParams extends BaseWorkflowExecutionT
    */
   queueDelayMs?: number | null;
   /**
+   * Time from event dispatch to workflow execution start in milliseconds.
+   * Only present for event-driven executions when dispatch metadata is available.
+   */
+  emitToStartMs?: number;
+  /**
    * Whether the workflow execution timed out
    */
   timedOut: boolean;
@@ -197,7 +331,9 @@ export interface WorkflowExecutionCompletedParams extends BaseWorkflowExecutionT
 /**
  * Parameters for workflow execution failed event
  */
-export interface WorkflowExecutionFailedParams extends BaseWorkflowExecutionTelemetryParams {
+export interface WorkflowExecutionFailedParams
+  extends BaseWorkflowExecutionTelemetryParams,
+    OutputSizeTelemetryFields {
   eventName: string;
   /**
    * Timestamp when the execution started (ISO string)
@@ -301,6 +437,11 @@ export interface WorkflowExecutionFailedParams extends BaseWorkflowExecutionTele
    */
   queueDelayMs?: number | null;
   /**
+   * Time from event dispatch to workflow execution start in milliseconds.
+   * Only present for event-driven executions when dispatch metadata is available.
+   */
+  emitToStartMs?: number;
+  /**
    * Whether the workflow execution timed out
    */
   timedOut: boolean;
@@ -333,7 +474,9 @@ export interface WorkflowExecutionFailedParams extends BaseWorkflowExecutionTele
 /**
  * Parameters for workflow execution cancelled event
  */
-export interface WorkflowExecutionCancelledParams extends BaseWorkflowExecutionTelemetryParams {
+export interface WorkflowExecutionCancelledParams
+  extends BaseWorkflowExecutionTelemetryParams,
+    OutputSizeTelemetryFields {
   eventName: string;
   /**
    * Timestamp when the execution started (ISO string)
@@ -425,6 +568,11 @@ export interface WorkflowExecutionCancelledParams extends BaseWorkflowExecutionT
    */
   queueDelayMs?: number | null;
   /**
+   * Time from event dispatch to workflow execution start in milliseconds.
+   * Only present for event-driven executions when dispatch metadata is available.
+   */
+  emitToStartMs?: number;
+  /**
    * Whether the workflow execution timed out
    */
   timedOut: boolean;
@@ -455,12 +603,41 @@ export interface WorkflowExecutionCancelledParams extends BaseWorkflowExecutionT
 }
 
 /**
+ * Telemetry event dispatched when emitEvent is called and trigger subscriptions are resolved.
+ */
+export interface TriggerEventDispatchedParams {
+  eventName: string;
+  triggerId: string;
+  executionEnabled: boolean;
+  logEventsEnabled: boolean;
+  eventChainDepth: number;
+  eventId: string;
+  sourceExecutionId?: string;
+  auditOnly: boolean;
+  subscriberResolutionMs?: number;
+  subscribedCount: number;
+  disabledCount: number;
+  connectorIdMismatchCount: number;
+  kqlFalseCount: number;
+  kqlErrorCount: number;
+  matchedCount: number;
+  depthSkippedCount: number;
+  workflowEventsIgnoreSkippedCount: number;
+  workflowEventsCycleSkippedCount: number;
+  scheduledAttemptCount: number;
+  scheduledSuccessCount: number;
+  scheduledFailureCount: number;
+}
+
+/**
  * Union type of all workflow execution telemetry event parameters
  */
 export type WorkflowExecutionTelemetryEventParams =
   | WorkflowExecutionCompletedParams
   | WorkflowExecutionFailedParams
-  | WorkflowExecutionCancelledParams;
+  | WorkflowExecutionCancelledParams
+  | EventDrivenExecutionSuppressedParams
+  | TriggerEventDispatchedParams;
 
 /**
  * Maps each workflow execution event type to its corresponding params type.
@@ -470,4 +647,6 @@ export interface WorkflowExecutionTelemetryEventsMap {
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted]: WorkflowExecutionCompletedParams;
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed]: WorkflowExecutionFailedParams;
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled]: WorkflowExecutionCancelledParams;
+  [WorkflowExecutionTelemetryEventTypes.EventDrivenExecutionSuppressed]: EventDrivenExecutionSuppressedParams;
+  [WorkflowExecutionTelemetryEventTypes.TriggerEventDispatched]: TriggerEventDispatchedParams;
 }

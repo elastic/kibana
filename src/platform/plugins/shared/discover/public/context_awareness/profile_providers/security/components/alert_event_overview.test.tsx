@@ -87,6 +87,44 @@ describe('AlertEventOverview', () => {
 
       expect(screen.getByTestId('exploreSecurity').getAttribute('href')).toBe('test-url');
     });
+
+    test('should not render the reason section for non-alert events', () => {
+      const localMockHit = {
+        flattened: {
+          ...mockRow,
+          'event.kind': 'event',
+        },
+      } as unknown as DataTableRecord;
+
+      render(<AlertEventOverview hit={localMockHit} dataView={mockDataView} />);
+      expect(screen.queryByTestId('expandableHeader-Reason')).toBeNull();
+      expect(screen.queryByTestId('expandableContent-Reason')).toBeNull();
+      expect(screen.getByTestId('eventOverview')).toBeVisible();
+    });
+
+    test('should hide the explore button for a remote (CCS) alert without kibana.alert.url', () => {
+      const remoteHitWithoutAlertUrl = {
+        flattened: {
+          ...mockRow,
+          'kibana.alert.url': undefined,
+          _index: 'remote-cluster:.alerts-security.alerts-default',
+        },
+      } as unknown as DataTableRecord;
+      render(<AlertEventOverview hit={remoteHitWithoutAlertUrl} dataView={mockDataView} />);
+      expect(screen.queryByTestId('exploreSecurity')).toBeNull();
+    });
+
+    test('should show the explore button for a remote (CCS) alert that has kibana.alert.url', () => {
+      const remoteHitWithAlertUrl = {
+        flattened: {
+          ...mockRow,
+          _index: 'remote-cluster:.alerts-security.alerts-default',
+        },
+      } as unknown as DataTableRecord;
+      render(<AlertEventOverview hit={remoteHitWithAlertUrl} dataView={mockDataView} />);
+      expect(screen.getByTestId('exploreSecurity')).toBeVisible();
+      expect(screen.getByTestId('exploreSecurity').getAttribute('href')).toBe('test-url');
+    });
   });
 
   describe('data', () => {
@@ -109,6 +147,7 @@ describe('AlertEventOverview', () => {
           ...mockRow,
           'event.kind': 'event',
           'event.category': 'process',
+          'kibana.alert.url': undefined,
         },
       } as unknown as DataTableRecord;
       render(<AlertEventOverview hit={localMockHit} dataView={mockDataView} />);

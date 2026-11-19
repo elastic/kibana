@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { type AggFieldNamePair, EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import type { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
+import type { IndicesOptions } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
 const OVER_FIELD_EXAMPLES_COUNT = 40;
@@ -45,7 +45,8 @@ export function newJobPopulationChartProvider({ asCurrentUser }: IScopedClusterC
     aggFieldNamePairs: AggFieldNamePair[],
     splitFieldName: string | null,
     runtimeMappings: RuntimeMappings | undefined,
-    indicesOptions: IndicesOptions | undefined
+    indicesOptions: IndicesOptions | undefined,
+    projectRouting: string | undefined
   ) {
     const json: object = getPopulationSearchJsonFromConfig(
       indexPatternTitle,
@@ -57,7 +58,8 @@ export function newJobPopulationChartProvider({ asCurrentUser }: IScopedClusterC
       aggFieldNamePairs,
       splitFieldName,
       runtimeMappings,
-      indicesOptions
+      indicesOptions,
+      projectRouting
     );
 
     const body = await asCurrentUser.search(json, { maxRetries: 0 });
@@ -141,7 +143,8 @@ function getPopulationSearchJsonFromConfig(
   aggFieldNamePairs: AggFieldNamePair[],
   splitFieldName: string | null,
   runtimeMappings: RuntimeMappings | undefined,
-  indicesOptions: IndicesOptions | undefined
+  indicesOptions: IndicesOptions | undefined,
+  projectRouting: string | undefined
 ): object {
   const json = {
     index: indexPatternTitle,
@@ -166,6 +169,7 @@ function getPopulationSearchJsonFromConfig(
       ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
     },
     ...(indicesOptions ?? {}),
+    ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
   };
 
   if (query.bool === undefined) {

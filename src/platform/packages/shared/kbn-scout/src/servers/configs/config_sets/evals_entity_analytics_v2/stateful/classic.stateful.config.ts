@@ -19,7 +19,7 @@ import type { ScoutServerConfig } from '../../../../../types';
  *
  * Note: Requires entity store V2 to be initialised before running. Use the populate
  * script from security-documents-generator to seed entities:
- *   yarn start organization-quick && yarn start generate-entity-maintainers-data --quick
+ *   pnpm start organization-quick && pnpm start generate-entity-maintainers-data --quick
  */
 export const servers: ScoutServerConfig = {
   ...evalsTracingConfig,
@@ -27,7 +27,6 @@ export const servers: ScoutServerConfig = {
     ...evalsTracingConfig.kbnTestServer,
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
-      '--xpack.evals.enabled=true',
       '--xpack.actions.responseTimeout=120s',
       '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
       `--uiSettings.overrides.agentBuilder:experimentalFeatures=true`,

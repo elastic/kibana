@@ -22,8 +22,8 @@ import type { EuiListGroupProps } from '@elastic/eui';
 export function SectionTitle({ children }: { children?: ReactNode }) {
   return (
     <>
-      <EuiText size={'s'} grow={false}>
-        <h5>{children}</h5>
+      <EuiText size={'xs'} grow={false}>
+        <strong>{children}</strong>
       </EuiText>
       <EuiSpacer size={'xs'} />
     </>
@@ -43,7 +43,7 @@ export function SectionSubtitle({ children }: { children?: ReactNode }) {
 
 export function SectionLinks({ children, ...props }: { children?: ReactNode } & EuiListGroupProps) {
   return (
-    <EuiListGroup {...props} size={'s'} color={'primary'} flush={true} bordered={false}>
+    <EuiListGroup {...props} color={'primary'} bordered={false}>
       {children}
     </EuiListGroup>
   );
@@ -65,7 +65,7 @@ export function SectionLink({ ...props }: SectionLinkProps) {
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem>
-        <EuiListGroupItem style={{ padding: 0 }} size={'xs'} {...props} />
+        <EuiListGroupItem style={{ padding: 0 }} {...props} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

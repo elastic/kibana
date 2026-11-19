@@ -20,7 +20,7 @@ Scan Cypress source code for these patterns before migration. Each indicates a r
 
 - **Look for:** Tests with no `afterEach`/`after` cleanup; `esArchiverLoad` without unload; API resources created but never deleted; global mutable state.
 - **Why:** Cypress runs each spec in a clean browser. Scout shares the environment across specs in a worker — leftover data causes cascading failures.
-- **Scout approach:** Explicit cleanup in `afterAll`/`afterEach`, defensive cleanup in `beforeAll`, unique identifiers per worker (`scoutSpace.id`).
+- **Scout approach:** Explicit cleanup in `afterAll`/`afterEach`, unique identifiers per worker (`scoutSpace.id`), and targeted idempotent cleanup in `beforeAll` only for deterministic leftovers from interrupted runs. Never use broad catch-all cleanup in `beforeAll`.
 
 ### Force interactions
 
@@ -37,11 +37,15 @@ Scan Cypress source code for these patterns before migration. Each indicates a r
 
 ## High — Likely to cause issues
 
-### `cy.intercept()` + `cy.wait('@alias')` as sync points
+### `cy.intercept()` and `cy.wait('@alias')`
 
-- **Look for:** `cy.intercept('GET|POST', '/api/...').as('alias')` followed by `cy.wait('@alias')`
-- **Why:** Playwright doesn't have Cypress-style request interception for synchronization. Direct ports using `page.waitForResponse()` are fragile.
-- **Scout approach:** Wait for UI state instead: `expect(locator).toBeVisible()`, `expect.poll()`, or data-loading indicators.
+- **Look for:** `cy.intercept('GET|POST', '/api/...').as('alias')` followed by `cy.wait('@alias')`.
+- **Why:** The Cypress pair can represent three different concerns that need different Scout replacements: mocking a route, synchronizing with UI work, or asserting an API contract.
+- **Scout approach:**
+  - Route mock or stub: use `page.route()` in a dedicated `fixtures/mocks.ts` helper.
+  - Synchronization only: wait for the resulting UI state with a locator assertion, component-specific loaded signal, or `expect.poll()`.
+  - API request/response contract: move the assertion to a Scout API test.
+  - Response-driven UI behavior with no stable UI signal: use `page.waitForResponse()` narrowly and start the wait before the triggering action.
 
 ### `recurse()` or retry loops
 

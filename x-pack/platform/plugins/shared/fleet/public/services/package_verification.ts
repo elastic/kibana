@@ -28,3 +28,12 @@ export function isPackageUnverified(
 
 export const isVerificationError = (err?: FleetErrorResponse | RequestError) =>
   err && 'attributes' in err && err.attributes?.type === 'verification_failed';
+
+export const isAssetVerificationError = (err?: FleetErrorResponse | RequestError) =>
+  err && 'attributes' in err && err.attributes?.type === 'package_assets_verification_failed';
+
+export const isBreakingChangesNotAcknowledgedError = (err?: FleetErrorResponse | RequestError) =>
+  err && 'attributes' in err && err.attributes?.type === 'breaking_changes_not_acknowledged';
+
+export const getMissingAssetsFromError = (err?: FleetErrorResponse | RequestError) =>
+  (err && 'attributes' in err && err.attributes?.missing_assets) || undefined;

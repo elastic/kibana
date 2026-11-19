@@ -9,7 +9,7 @@ import type { TooltipInfo } from '@elastic/charts';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { getServiceNodeName } from '../../../../../common/service_nodes';
 import type { TimeFormatter } from '../../../../../common/utils/formatters';
 import { asTransactionRate } from '../../../../../common/utils/formatters';
@@ -170,7 +170,7 @@ export function CustomTooltip(props: TooltipInfo & { latencyFormatter: TimeForma
         <SingleInstanceCustomTooltip {...props} />
       )}
       <div style={{ padding: euiTheme.size.xs }}>
-        <EuiIcon type="filter" /> {clickToFilterDescription}
+        <EuiIcon type="filter" aria-hidden={true} /> {clickToFilterDescription}
       </div>
     </div>
   );

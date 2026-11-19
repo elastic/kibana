@@ -13,6 +13,7 @@ export type {
   UnifiedHistogramAdapters,
   UnifiedHistogramVisContext,
   UnifiedHistogramFetchParamsExternal,
+  UnifiedHistogramLensActionsOptions,
 } from './types';
 export { UnifiedHistogramFetchStatus, UnifiedHistogramExternalVisContextStatus } from './types';
 
@@ -35,16 +36,7 @@ export {
   type UnifiedHistogramPartialLayoutProps,
 } from './hooks/use_unified_histogram';
 
-export { useStableCallback } from './hooks/use_stable_callback';
-
 export type { UnifiedHistogramState } from './services/state_service';
 
-export {
-  getChartHidden,
-  getTopPanelHeight,
-  getBreakdownField,
-  setChartHidden,
-  setTopPanelHeight,
-  setBreakdownField,
-} from './utils/local_storage_utils';
 export { canImportVisContext } from './utils/external_vis_context';
+export { resolveBreakdownField } from './utils/resolve_breakdown_field';

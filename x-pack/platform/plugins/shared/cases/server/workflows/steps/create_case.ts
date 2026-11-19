@@ -15,7 +15,7 @@ import {
 } from '../../../common/workflows/steps/create_case';
 import type { CasesClient } from '../../client';
 
-import { createCasesStepHandler } from './utils';
+import { createCasesStepHandler, safeParseCaseForWorkflowOutput } from './utils';
 import {
   getInitialCaseValue,
   type GetInitialCaseValueArgs,
@@ -32,7 +32,14 @@ export const createCaseStepDefinition = (
       CreateCaseStepConfig,
       CreateCaseStepOutput['case']
     >(getCasesClient, async (casesClient, input, config) => {
-      let enrichedInput = getInitialCaseValue(input as GetInitialCaseValueArgs);
+      const rawInput = input as GetInitialCaseValueArgs;
+      let enrichedInput = getInitialCaseValue(rawInput);
+      // Omit extractObservables when the caller did not provide it so the server can apply the
+      // space-config default (precedence: explicit → template → space config → autoExtractDefault → false).
+      if (rawInput.settings?.extractObservables === undefined) {
+        const { extractObservables: _omitted, ...settingsWithoutExtract } = enrichedInput.settings;
+        enrichedInput = { ...enrichedInput, settings: settingsWithoutExtract };
+      }
 
       // If a connector was provided, make sure to resolve its config and add it to the input.
       if (config['connector-id']) {
@@ -57,6 +64,9 @@ export const createCaseStepDefinition = (
       }
 
       const createdCase = await casesClient.cases.create(enrichedInput);
-      return createCaseStepCommonDefinition.outputSchema.shape.case.parse(createdCase);
+      return safeParseCaseForWorkflowOutput(
+        createCaseStepCommonDefinition.outputSchema.shape.case,
+        createdCase
+      );
     }),
   });

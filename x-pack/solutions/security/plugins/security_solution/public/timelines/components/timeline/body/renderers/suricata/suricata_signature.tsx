@@ -7,7 +7,6 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 import { GoogleLink } from '../../../../../../common/components/links';
 import { CellActionsRenderer } from '../../../../../../common/components/cell_actions/cell_actions_renderer';
 import { TokensFlexItem } from '../helpers';
@@ -15,24 +14,6 @@ import { getBeginningTokens } from './suricata_links';
 
 export const SURICATA_SIGNATURE_FIELD_NAME = 'suricata.eve.alert.signature';
 export const SURICATA_SIGNATURE_ID_FIELD_NAME = 'suricata.eve.alert.signature_id';
-
-const SignatureFlexItem = styled(EuiFlexItem)`
-  min-width: 77px;
-`;
-
-SignatureFlexItem.displayName = 'SignatureFlexItem';
-
-const Badge = styled(EuiBadge)`
-  vertical-align: top;
-` as unknown as typeof EuiBadge;
-
-Badge.displayName = 'Badge';
-
-const LinkFlexItem = styled(EuiFlexItem)`
-  margin-left: 6px;
-`;
-
-LinkFlexItem.displayName = 'LinkFlexItem';
 
 export const Tokens = React.memo<{ tokens: string[] }>(({ tokens }) => (
   <>
@@ -53,17 +34,17 @@ export const SignatureId = React.memo<{
   signatureId: number;
 }>(({ scopeId, signatureId }) => {
   return (
-    <SignatureFlexItem grow={false}>
+    <EuiFlexItem grow={false} css={{ minWidth: '77px' }}>
       <CellActionsRenderer
         field={SURICATA_SIGNATURE_ID_FIELD_NAME}
         value={signatureId}
         scopeId={scopeId}
       >
-        <Badge iconType="number" color="hollow" title="">
+        <EuiBadge iconType="number" color="hollow" title="" css={{ verticalAlign: 'top' }}>
           {signatureId}
-        </Badge>
+        </EuiBadge>
       </CellActionsRenderer>
-    </SignatureFlexItem>
+    </EuiFlexItem>
   );
 });
 
@@ -80,7 +61,7 @@ export const SuricataSignature = React.memo<{
     <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
       <SignatureId scopeId={scopeId} signatureId={signatureId} />
       <Tokens tokens={tokens} />
-      <LinkFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={{ marginLeft: '6px' }}>
         <CellActionsRenderer
           data-test-subj="signature-link"
           field={SURICATA_SIGNATURE_FIELD_NAME}
@@ -94,7 +75,7 @@ export const SuricataSignature = React.memo<{
             </GoogleLink>
           </div>
         </CellActionsRenderer>
-      </LinkFlexItem>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 });

@@ -48,7 +48,7 @@ export {
 export {
   MOCK_USER_PROFILES,
   MOCK_USER_PROFILES_MAP,
-  mockUserProfileServices,
+  mockContentListUserProfilesServices,
 } from './user_profiles';
 
 // Services

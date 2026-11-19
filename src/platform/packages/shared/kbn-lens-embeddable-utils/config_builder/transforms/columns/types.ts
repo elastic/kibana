@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AsCodeDataViewSpec } from '@kbn/as-code-data-views-schema';
 import type {
   CountIndexPatternColumn,
   CardinalityIndexPatternColumn,
@@ -83,7 +84,10 @@ export interface APIDataView {
 export interface APIAdHocDataView {
   type: 'adHocDataView';
   index: string;
+  name?: string;
   timeFieldName: string | undefined;
   dataSourceType?: string;
   esqlQuery?: string;
+  allowHidden?: boolean;
+  fieldSettings?: AsCodeDataViewSpec['field_settings'];
 }

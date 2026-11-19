@@ -118,4 +118,35 @@ describe('createLoghubGenerator', () => {
       expect(secondBatch[0]['@timestamp']).toBe(expectedTimestamp);
     });
   });
+
+  describe('uniform_interval', () => {
+    beforeEach(() => {
+      system = {
+        name: 'DenseTimestamps',
+        readme: '',
+        logLines: ['0', '1', '2', '3'],
+        templates: [],
+      };
+      log = new ToolingLog();
+    });
+
+    it('spaces documents by targetRpm instead of source timestamp density', () => {
+      const generator = createLoghubGenerator({
+        system,
+        parser,
+        log,
+        targetRpm: 120,
+        streamType: 'wired',
+        timestampLayout: 'uniform_interval',
+      });
+
+      const startTime = 1_000_000;
+      expect(generator.next(startTime)).toHaveLength(1);
+      expect(generator.next(startTime + 499)).toHaveLength(0);
+
+      const secondBatch = generator.next(startTime + 500);
+      expect(secondBatch).toHaveLength(1);
+      expect(secondBatch[0]['@timestamp']).toBe(startTime + 500);
+    });
+  });
 });

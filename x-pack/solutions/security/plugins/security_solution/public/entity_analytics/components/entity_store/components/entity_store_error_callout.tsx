@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EngineDescriptor } from '../../../../../common/api/entity_analytics/entity_store';
+import type { EngineDescriptor } from '@kbn/entity-store/common';
 
 export const EntityStoreErrorCallout: React.FC<{ engine?: EngineDescriptor; size?: 's' | 'm' }> = ({
   engine,
@@ -32,7 +32,7 @@ export const EntityStoreErrorCallout: React.FC<{ engine?: EngineDescriptor; size
   }
 
   return (
-    <EuiCallOut title={title} color="danger" iconType="alert" size={size}>
+    <EuiCallOut title={title} color="danger" iconType="warning" size={size}>
       <p>{engine.error.message}</p>
     </EuiCallOut>
   );

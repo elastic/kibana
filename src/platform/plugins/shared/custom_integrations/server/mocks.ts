@@ -13,6 +13,7 @@ function createCustomIntegrationsSetup(): jest.Mocked<CustomIntegrationsPluginSe
   const mock: jest.Mocked<CustomIntegrationsPluginSetup> = {
     registerCustomIntegration: jest.fn(),
     getAppendCustomIntegrations: jest.fn(),
+    registerDeferredIntegrations: jest.fn(),
   };
 
   return mock;

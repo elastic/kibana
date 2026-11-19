@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore } from 'redux-toolkit-v1';
 import { workflowDetailMiddleware } from './workflow_detail/middleware';
 import { ignoredActions, ignoredPaths, workflowDetailReducer } from './workflow_detail/slice';
 import type { WorkflowsServices } from '../../../types';

@@ -14,16 +14,25 @@ import { MockRouter } from '../../__mocks__/router.mock';
 import { InferenceFeatureRegistry } from '../inference_feature_registry';
 import { defineInferenceFeaturesRoutes } from './inference_features';
 
+const makeContext = (uiSettingsGet: jest.Mock): jest.Mocked<RequestHandlerContext> =>
+  ({
+    core: Promise.resolve({
+      uiSettings: { client: { get: uiSettingsGet } },
+    }),
+  } as unknown as jest.Mocked<RequestHandlerContext>);
+
 describe('Inference Features API', () => {
   const mockLogger = loggingSystemMock.createLogger().get();
   let mockRouter: MockRouter;
   let featureRegistry: InferenceFeatureRegistry;
+  let uiSettingsGet: jest.Mock;
   let context: jest.Mocked<RequestHandlerContext>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     featureRegistry = new InferenceFeatureRegistry(mockLogger);
-    context = {} as jest.Mocked<RequestHandlerContext>;
+    uiSettingsGet = jest.fn().mockRejectedValue(new Error('setting not found'));
+    context = makeContext(uiSettingsGet);
   });
 
   describe('GET /internal/search_inference_endpoints/features', () => {
@@ -50,7 +59,7 @@ describe('Inference Features API', () => {
       });
     });
 
-    it('should return registered features', async () => {
+    it('should return registered features with no visibilityCondition', async () => {
       featureRegistry.register({
         featureId: 'agent_builder_general',
         featureName: 'Agent Builder — General Models',
@@ -77,7 +86,46 @@ describe('Inference Features API', () => {
       });
     });
 
-    it('should return multiple features with parent-child relationships', async () => {
+    it('should return recommended endpoint ids and their parameters for entries registered with model parameters', async () => {
+      featureRegistry.register({
+        featureId: 'agent_builder_general',
+        featureName: 'Agent Builder — General Models',
+        featureDescription: 'Large, capable models for agent reasoning.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [
+          { id: 'gemini-3.0-pro', parameters: { reasoning: { effort: 'low' } } },
+          'claude-sonnet-4.6',
+        ],
+      });
+
+      await mockRouter.callRoute({});
+
+      const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
+      expect(body.features[0].recommendedEndpoints).toEqual([
+        'gemini-3.0-pro',
+        'claude-sonnet-4.6',
+      ]);
+      expect(body.features[0].recommendedEndpointParameters).toEqual({
+        'gemini-3.0-pro': { reasoning: { effort: 'low' } },
+      });
+    });
+
+    it('should omit recommended endpoint parameters when no entry declares them', async () => {
+      featureRegistry.register({
+        featureId: 'agent_builder_general',
+        featureName: 'Agent Builder — General Models',
+        featureDescription: 'Large, capable models for agent reasoning.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: ['gemini-3.0-pro'],
+      });
+
+      await mockRouter.callRoute({});
+
+      const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
+      expect(body.features[0]).not.toHaveProperty('recommendedEndpointParameters');
+    });
+
+    it('should return multiple features with parent-child relationships when no conditions', async () => {
       featureRegistry.register({
         featureId: 'agent_builder',
         featureName: 'Agent Builder',
@@ -107,6 +155,134 @@ describe('Inference Features API', () => {
           maxNumberOfEndpoints: 3,
         })
       );
+    });
+
+    it('should include a feature whose visibilityCondition matches the current uiSetting', async () => {
+      uiSettingsGet.mockResolvedValue('classic');
+
+      featureRegistry.register({
+        featureId: 'security',
+        featureName: 'Security',
+        featureDescription: 'Security group.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
+      featureRegistry.register({
+        featureId: 'elastic_assistant',
+        parentFeatureId: 'security',
+        featureName: 'AI Assistant for Security',
+        featureDescription: 'Chat model.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+        visibilityCondition: { key: 'aiAssistant:preferredChatExperience', value: 'classic' },
+      });
+
+      await mockRouter.callRoute({});
+
+      const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
+      expect(body.features.map((f) => f.featureId)).toEqual(['security', 'elastic_assistant']);
+    });
+
+    it('should exclude a feature whose visibilityCondition does not match', async () => {
+      uiSettingsGet.mockResolvedValue('agent');
+
+      featureRegistry.register({
+        featureId: 'security',
+        featureName: 'Security',
+        featureDescription: 'Security group.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
+      featureRegistry.register({
+        featureId: 'elastic_assistant',
+        parentFeatureId: 'security',
+        featureName: 'AI Assistant for Security',
+        featureDescription: 'Chat model.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+        visibilityCondition: { key: 'aiAssistant:preferredChatExperience', value: 'classic' },
+      });
+
+      await mockRouter.callRoute({});
+
+      const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
+      expect(body.features.map((f) => f.featureId)).toEqual(['security']);
+    });
+
+    it('should exclude hidden features and keep visible ones', async () => {
+      featureRegistry.register({
+        featureId: 'visible_feature',
+        featureName: 'Visible',
+        featureDescription: 'Shown on Feature settings.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: ['gemini-3.0-pro'],
+      });
+      featureRegistry.register({
+        featureId: 'hidden_feature',
+        featureName: 'Hidden',
+        featureDescription: 'Not shown on Feature settings.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: ['claude-sonnet-4.6'],
+        isHidden: true,
+      });
+
+      await mockRouter.callRoute({});
+
+      const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
+      expect(body.features.map((f) => f.featureId)).toEqual(['visible_feature']);
+    });
+
+    it('should fail open and include the feature when uiSettings.get throws', async () => {
+      uiSettingsGet.mockRejectedValue(new Error('uiSettings unavailable'));
+
+      featureRegistry.register({
+        featureId: 'elastic_assistant',
+        featureName: 'AI Assistant for Security',
+        featureDescription: 'Chat model.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+        visibilityCondition: { key: 'aiAssistant:preferredChatExperience', value: 'classic' },
+      });
+
+      await mockRouter.callRoute({});
+
+      const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
+      expect(body.features.map((f) => f.featureId)).toEqual(['elastic_assistant']);
+    });
+
+    it('reads each unique uiSetting key only once even when multiple features share it', async () => {
+      uiSettingsGet.mockResolvedValue('classic');
+
+      featureRegistry.register({
+        featureId: 'first',
+        featureName: 'First',
+        featureDescription: 'First.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+        visibilityCondition: { key: 'shared_key', value: 'classic' },
+      });
+      featureRegistry.register({
+        featureId: 'second',
+        featureName: 'Second',
+        featureDescription: 'Second.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+        visibilityCondition: { key: 'shared_key', value: 'classic' },
+      });
+      featureRegistry.register({
+        featureId: 'third',
+        featureName: 'Third',
+        featureDescription: 'Third.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+        visibilityCondition: { key: 'other_key', value: 'classic' },
+      });
+
+      await mockRouter.callRoute({});
+
+      expect(uiSettingsGet).toHaveBeenCalledTimes(2);
+      expect(uiSettingsGet).toHaveBeenCalledWith('shared_key');
+      expect(uiSettingsGet).toHaveBeenCalledWith('other_key');
     });
   });
 });

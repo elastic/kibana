@@ -10,14 +10,14 @@ import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
 import type { CaseUI } from '../../containers/types';
-import type { CasePostRequest, ObservablePost } from '../../../common/types/api';
+import type { CasePostRequest } from '../../../common/types/api';
 import type { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
 import { useApplication } from '../../common/lib/kibana/use_application';
-import { useBulkPostObservables } from '../../containers/use_bulk_post_observables';
 import { useAttachEventsEBT } from '../../analytics/use_attach_events_ebt';
+import { useTemplateAppliedOnCreateEBT } from '../../analytics/templates/use_template_apply_ebt';
 
 export interface UseSubmitCaseProps {
   afterCaseCreated?: (
@@ -26,14 +26,14 @@ export interface UseSubmitCaseProps {
   ) => Promise<void>;
   onSuccess?: (theCase: CaseUI) => void;
   attachments?: CaseAttachmentsWithoutOwner;
-  observables?: ObservablePost[];
+  getAttachments?: (owner: string) => CaseAttachmentsWithoutOwner;
 }
 
 export type UseSubmitCaseValue = ReturnType<typeof useSubmitCase>;
 
 export const useSubmitCase = ({
   attachments,
-  observables,
+  getAttachments,
   afterCaseCreated,
   onSuccess,
 }: UseSubmitCaseProps) => {
@@ -41,35 +41,41 @@ export const useSubmitCase = ({
   const { mutateAsync: postCase, isLoading: isPostingCase } = usePostCase();
   const { mutateAsync: createAttachments, isLoading: isCreatingAttachments } =
     useCreateAttachments();
-  const { mutateAsync: bulkPostObservables, isLoading: isPostingObservables } =
-    useBulkPostObservables();
   const { mutateAsync: pushCaseToExternalService, isLoading: isPushingToExternalService } =
     usePostPushToService();
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
   const trackAttachEvents = useAttachEventsEBT();
+  const reportTemplateAppliedOnCreate = useTemplateAppliedOnCreateEBT();
 
   const submitCase = useCallback(
     async (data: CasePostRequest, isValid: boolean) => {
       if (isValid) {
-        startTransaction({ appId, attachments });
-
         const theCase = await postCase({
           request: data,
         });
 
-        if (theCase && Array.isArray(attachments) && attachments.length > 0) {
-          await createAttachments({
-            caseId: theCase.id,
-            caseOwner: theCase.owner,
-            attachments,
-          });
+        if (theCase) {
+          // Read the template off the created case, not off the request, so the event reflects what
+          // the server stored. Reported before the attachment and connector work, because the case
+          // already exists and a later attachment failure must not lose the event.
+          if (theCase.template) {
+            reportTemplateAppliedOnCreate({ entryPoint: 'create_form' });
+          }
 
-          trackAttachEvents(window.location.pathname, attachments);
-        }
+          const resolvedAttachments = getAttachments
+            ? getAttachments(theCase.owner)
+            : attachments ?? [];
 
-        if (theCase && Array.isArray(observables) && observables.length > 0) {
-          if (data.settings.extractObservables) {
-            await bulkPostObservables({ caseId: theCase.id, observables });
+          startTransaction({ appId, attachments: resolvedAttachments });
+
+          if (resolvedAttachments.length > 0) {
+            await createAttachments({
+              caseId: theCase.id,
+              caseOwner: theCase.owner,
+              attachments: resolvedAttachments,
+            });
+
+            trackAttachEvents(window.location.pathname, resolvedAttachments);
           }
         }
 
@@ -101,20 +107,19 @@ export const useSubmitCase = ({
       startTransaction,
       appId,
       attachments,
+      getAttachments,
       postCase,
-      observables,
       afterCaseCreated,
       onSuccess,
       createAttachments,
       trackAttachEvents,
-      bulkPostObservables,
+      reportTemplateAppliedOnCreate,
       pushCaseToExternalService,
     ]
   );
 
   return {
     submitCase,
-    isSubmitting:
-      isPostingCase || isCreatingAttachments || isPostingObservables || isPushingToExternalService,
+    isSubmitting: isPostingCase || isCreatingAttachments || isPushingToExternalService,
   };
 };

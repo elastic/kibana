@@ -77,6 +77,7 @@ export function taskRunner(
     return {
       async run() {
         let totalInvalidated = 0;
+        let missingApiKeyRetries = { ...state.missing_api_key_retries };
         try {
           const [{ savedObjects, security: securityCore }, { encryptedSavedObjects, security }] =
             await coreStartServices;
@@ -89,11 +90,12 @@ export function taskRunner(
             includedHiddenTypes: [API_KEY_PENDING_INVALIDATION_TYPE],
           });
 
-          totalInvalidated = await runInvalidate({
+          const result = await runInvalidate({
             encryptedSavedObjectsClient,
             invalidateApiKeyFn: security?.authc.apiKeys.invalidateAsInternalUser,
             invalidateUiamApiKeyFn: securityCore.authc.apiKeys.uiam?.invalidate,
             logger,
+            missingApiKeyRetries,
             removalDelay: config.invalidateApiKeysTask.removalDelay,
             savedObjectsClient,
             savedObjectType: API_KEY_PENDING_INVALIDATION_TYPE,
@@ -106,12 +108,29 @@ export function taskRunner(
                 type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
                 apiKeyAttributePath: `${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE}.attributes.apiKeyId`,
               },
+              // A UIAM key is queued for invalidation under its own id in the pending SO's
+              // `apiKeyId`, but pending jobs record that id in `uiamApiKeyId`, so the paths above
+              // can never match it. Each path is queried separately and the in-use hits are
+              // unioned, so adding these can only move a key from "invalidate" to "in use":
+              // objects predating the field (or written by an older node mid-rolling-upgrade)
+              // simply keep today's behavior instead of becoming newly at risk.
+              {
+                type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+                apiKeyAttributePath: `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.uiamApiKeyId`,
+              },
+              {
+                type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+                apiKeyAttributePath: `${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE}.attributes.uiamApiKeyId`,
+              },
             ],
           });
+          totalInvalidated = result.totalInvalidated;
+          missingApiKeyRetries = result.missingApiKeyRetries;
 
           const updatedState: LatestTaskStateSchema = {
             runs: (state.runs || 0) + 1,
             total_invalidated: totalInvalidated,
+            missing_api_key_retries: missingApiKeyRetries,
           };
           return {
             state: updatedState,
@@ -124,6 +143,7 @@ export function taskRunner(
           const updatedState: LatestTaskStateSchema = {
             runs: state.runs + 1,
             total_invalidated: totalInvalidated,
+            missing_api_key_retries: missingApiKeyRetries,
           };
           return {
             state: updatedState,

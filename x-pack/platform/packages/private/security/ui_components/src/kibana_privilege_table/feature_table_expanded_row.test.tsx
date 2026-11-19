@@ -13,9 +13,14 @@ import {
   createKibanaPrivileges,
   kibanaFeatures,
 } from '@kbn/security-role-management-model/src/__fixtures__';
-import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
+import {
+  findTestSubject,
+  mountWithIntl,
+  renderWithKibanaRenderContext,
+} from '@kbn/test-jest-helpers';
 
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
+import { NO_PRIVILEGE_VALUE } from '../constants';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
@@ -409,5 +414,45 @@ describe('FeatureTableExpandedRow', () => {
     // Make sure sub-feature customization toggle retained its checked state.
     customizeToggle = findTestSubject(wrapper, 'customizeSubFeaturePrivileges');
     expect(customizeToggle.props()['aria-checked']).toBe(true);
+  });
+
+  // `FeatureTable` asserts that an empty role grants no sub-feature privileges, but its helper
+  // skips any group whose selection is `none`, so it cannot tell "None is selected" apart from
+  // "nothing is selected". This asserts the None button is the one actually pressed.
+  it('presses None in every mutually exclusive sub-feature group when the role grants no privileges', () => {
+    const role = createRole([
+      {
+        base: [],
+        feature: {},
+        spaces: ['foo'],
+      },
+    ]);
+
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+    const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+    const feature = kibanaPrivileges.getSecuredFeature('with_sub_features');
+
+    const { container } = renderWithKibanaRenderContext(
+      <FeatureTableExpandedRow
+        feature={feature}
+        privilegeIndex={0}
+        privilegeCalculator={calculator}
+        selectedFeaturePrivileges={[]}
+        onChange={jest.fn()}
+        licenseAllowsSubFeatPrivCustomization={true}
+        allSpacesSelected={false}
+      />
+    );
+
+    const mutexGroups = container.querySelectorAll(
+      '[data-test-subj~="mutexSubFeaturePrivilegeControl"]'
+    );
+
+    expect(mutexGroups.length).toBeGreaterThan(0);
+    mutexGroups.forEach((group) => {
+      const pressed = group.querySelector('[aria-pressed="true"]');
+
+      expect(pressed?.getAttribute('data-test-subj')).toBe(NO_PRIVILEGE_VALUE);
+    });
   });
 });

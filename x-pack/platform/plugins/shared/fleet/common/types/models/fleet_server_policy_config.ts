@@ -6,7 +6,7 @@
  */
 import type { ValueOf } from '..';
 
-import type { SOSecret } from './secret';
+import type { SOSecretOrNull } from './secret';
 
 export const clientAuth = {
   Optional: 'optional',
@@ -21,6 +21,8 @@ export interface NewFleetServerHost {
   is_default: boolean;
   is_preconfigured: boolean;
   is_internal?: boolean;
+  /** Fields that are allowed to be changed at runtime, bypassing the preconfiguration guard. */
+  allow_edit?: string[];
   proxy_id?: string | null;
   ssl?: {
     certificate_authorities?: string[];
@@ -36,9 +38,9 @@ export interface NewFleetServerHost {
   } | null;
   secrets?: {
     ssl?: {
-      key?: SOSecret;
-      es_key?: SOSecret;
-      agent_key?: SOSecret;
+      key?: SOSecretOrNull;
+      es_key?: SOSecretOrNull;
+      agent_key?: SOSecretOrNull;
     };
   };
 }

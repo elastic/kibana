@@ -3,19 +3,22 @@
 exports[`kpiUniquePrivateIpsDestinationMetricLensAttributes should render 1`] = `
 Object {
   "description": "",
-  "references": Array [
-    Object {
-      "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-current-indexpattern",
-      "type": "index-pattern",
-    },
-    Object {
-      "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-cea37c70-8f91-43bf-b9fe-72d8c049f6a3",
-      "type": "index-pattern",
-    },
-  ],
+  "references": Array [],
   "state": Object {
+    "adHocDataViews": Object {
+      "security-solution-my-test": Object {
+        "allowHidden": false,
+        "allowNoIndex": false,
+        "fieldAttrs": Object {},
+        "fieldFormats": Object {},
+        "id": "security-solution-my-test",
+        "managed": false,
+        "name": "Default Security Data View",
+        "runtimeFieldMap": Object {},
+        "sourceFilters": Array [],
+        "title": "auditbeat-mytest-*",
+      },
+    },
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
@@ -108,6 +111,7 @@ Object {
           "negate": false,
           "params": Array [
             "auditbeat-mytest-*",
+            "*:auditbeat-mytest-*",
           ],
           "type": "phrases",
         },
@@ -118,6 +122,11 @@ Object {
               Object {
                 "match_phrase": Object {
                   "_index": "auditbeat-mytest-*",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "_index": "*:auditbeat-mytest-*",
                 },
               },
             ],
@@ -140,6 +149,18 @@ Object {
             "host.id": "123",
           },
         },
+      },
+    ],
+    "internalReferences": Array [
+      Object {
+        "id": "security-solution-my-test",
+        "name": "indexpattern-datasource-current-indexpattern",
+        "type": "index-pattern",
+      },
+      Object {
+        "id": "security-solution-my-test",
+        "name": "indexpattern-datasource-layer-cea37c70-8f91-43bf-b9fe-72d8c049f6a3",
+        "type": "index-pattern",
       },
     ],
     "query": Object {

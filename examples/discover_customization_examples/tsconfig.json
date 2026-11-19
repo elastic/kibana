@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../typings/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "test/scout_examples/**/*",
+    "../../typings/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/discover-plugin",
@@ -16,6 +22,7 @@
     "@kbn/content-management-utils",
     "@kbn/control-group-renderer",
     "@kbn/i18n",
+    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }

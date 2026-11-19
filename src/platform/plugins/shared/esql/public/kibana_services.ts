@@ -16,6 +16,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { EsqlPluginStart } from './plugin';
 
 export let core: CoreStart;
@@ -27,6 +28,7 @@ export interface ServiceDeps {
   uiActions: UiActionsStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
+  cps?: CPSPluginStart;
   esql: EsqlPluginStart;
   docLinks: DocLinksStart;
   kql: KqlPluginStart;
@@ -66,7 +68,8 @@ export const setKibanaServices = (
   uiActions: UiActionsStart,
   kql: KqlPluginStart,
   fieldsMetadata?: FieldsMetadataPublicStart,
-  usageCollection?: UsageCollectionStart
+  usageCollection?: UsageCollectionStart,
+  cps?: CPSPluginStart
 ) => {
   core = kibanaCore;
   servicesReady$.next({
@@ -76,6 +79,7 @@ export const setKibanaServices = (
     uiActions,
     fieldsMetadata,
     usageCollection,
+    cps,
     docLinks: core.docLinks,
     esql,
     kql,

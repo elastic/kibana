@@ -20,9 +20,25 @@ interface GenerateBuiltInStepSnippetOptions {
   withStepsSection?: boolean;
 }
 
+const getOutputPlaceholder = (type: string | undefined): unknown => {
+  switch (type) {
+    case 'number':
+    case 'integer':
+      return 0;
+    case 'boolean':
+      return false;
+    case 'object':
+      return {};
+    case 'array':
+      return [];
+    default:
+      return 'value';
+  }
+};
+
 /**
  * Generates a YAML snippet for a built-in workflow step based on the specified type.
- * @param stepType - The type of built-in step ('foreach', 'if', 'parallel', 'merge', 'http', 'wait', 'workflow.output', 'workflow.fail', etc.)
+ * @param stepType - The type of built-in step ('foreach', 'if', 'parallel', 'http', 'wait', 'workflow.output', 'workflow.fail', etc.)
  * @param options - Configuration options for snippet generation
  * @param options.full - Whether to include the full YAML structure with step name and type prefix
  * @param options.withStepsSection - Whether to include the "steps:" section
@@ -87,12 +103,6 @@ export function generateBuiltInStepSnippet(
         ],
       };
       break;
-    case 'merge':
-      parameters = {
-        sources: ['branch-1', 'branch-2'],
-        steps: [{ name: 'merge-step', type: '# Add step type here' }],
-      };
-      break;
     case 'data.set':
       parameters = {
         with: {
@@ -111,6 +121,16 @@ export function generateBuiltInStepSnippet(
         with: { message: 'User action is required' },
       };
       break;
+    case 'waitForApproval':
+      parameters = {
+        timeout: '24h',
+        with: {
+          message: 'Your approval is required to continue',
+          approveLabel: 'Approve',
+          rejectLabel: 'Decline',
+        },
+      };
+      break;
     case 'workflow.execute':
     case 'workflow.executeAsync':
       parameters = {
@@ -121,7 +141,8 @@ export function generateBuiltInStepSnippet(
       };
       break;
     case 'workflow.output': {
-      const withBlock: Record<string, string> = {};
+      // Plain values, not Monaco tabstops: the actions menu inserts this text as-is.
+      const withBlock: Record<string, unknown> = {};
       const normalized = normalizeFieldsToJsonSchema(workflowOutputs);
       if (normalized?.properties && Object.keys(normalized.properties).length > 0) {
         for (const [name, propSchema] of Object.entries(normalized.properties)) {
@@ -129,19 +150,19 @@ export function generateBuiltInStepSnippet(
             propSchema && typeof propSchema === 'object' && 'type' in propSchema
               ? (propSchema as { type?: string }).type
               : undefined;
-          const placeholder = type === 'string' ? '"${1:value}"' : '${1:value}';
-          withBlock[name] = placeholder;
+          withBlock[name] = getOutputPlaceholder(type);
         }
       } else {
-        withBlock.output_name = '${1:value}';
+        withBlock.result = '{{ steps.previous_step.output }}';
       }
       parameters = { with: withBlock };
       break;
     }
     case 'workflow.fail':
       parameters = {
-        with: { message: '${1:Error message}' },
+        with: { message: 'Workflow failed' },
       };
+      break;
     case 'loop.break':
     case 'loop.continue':
       parameters = {};

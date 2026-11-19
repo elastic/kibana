@@ -1,0 +1,30 @@
+format_version: 3.0.0
+name: test_otel_dynamic
+title: Test OTel Dynamic Signal Types
+description: >-
+  Test package for verifying OTel routing when dynamic_signal_types is true.
+  Simulates OTLP / Kafka-style input packages where the source system is unknown;
+  Fleet still emits data_stream.dataset in generated OTTL (defaults from this manifest).
+type: input
+version: 1.0.0
+license: basic
+categories: []
+policy_templates:
+  - name: otlpreceiver
+    title: OTLP Receiver
+    description: Collect telemetry via OTLP (logs, metrics, traces).
+    input: otelcol
+    dynamic_signal_types: true
+    template_path: input.yml.hbs
+    vars:
+      - name: data_stream.dataset
+        required: true
+        default: generic
+        title: Dataset name
+        description: >
+          Set the name for your dataset. Defaults to generic which routes all signals
+          to the shared generic data streams. Override to isolate this package's data
+          into named data streams.
+        type: text
+owner:
+  github: elastic/fleet

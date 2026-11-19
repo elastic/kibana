@@ -6,4 +6,10 @@
  */
 
 export type { BrowserChatEvent } from './events';
-export type { EventsServiceStartContract } from './contract';
+export type {
+  EventsServiceStartContract,
+  ChatUiEventsContract,
+  ActiveConversation,
+} from './contract';
+export { filterApiStateChanges } from './filter_api_state_changes';
+export type { ApiStateChangesOptions } from './filter_api_state_changes';

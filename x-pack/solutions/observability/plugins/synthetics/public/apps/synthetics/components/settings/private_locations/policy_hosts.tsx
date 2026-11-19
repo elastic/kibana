@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
-import { useSelector } from 'react-redux';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { useSelector } from 'react-redux-v7';
 import type { EuiSuperSelectProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -21,38 +21,46 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { AgentPolicyCallout } from './agent_policy_callout';
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { selectAgentPolicies } from '../../../state/agent_policies';
+import { selectLocationMonitors } from '../../../state/settings';
 
 export const AGENT_POLICY_FIELD_NAME = 'agentPolicyId';
 
 export const PolicyHostsField = ({
   privateLocations,
-  isDisabled,
+  privateLocationToEdit,
 }: {
   privateLocations: PrivateLocation[];
-  isDisabled?: boolean;
+  privateLocationToEdit?: PrivateLocation;
 }) => {
   const { data } = useSelector(selectAgentPolicies);
+  const { locationMonitors } = useSelector(selectLocationMonitors);
   const { basePath } = useSyntheticsSettingsContext();
 
   const {
     control,
     formState: { isSubmitted },
     trigger,
-    getValues,
   } = useFormContext<PrivateLocation>();
   const { isTouched, error } = control.getFieldState(AGENT_POLICY_FIELD_NAME);
   const showFieldInvalid = (isSubmitted || isTouched) && !!error;
-  const selectedPolicyId = getValues(AGENT_POLICY_FIELD_NAME);
+  const selectedPolicyId = useWatch({ control, name: AGENT_POLICY_FIELD_NAME });
 
   const selectedPolicy = data?.find((item) => item.id === selectedPolicyId);
+  const isAgentPolicyChanged =
+    privateLocationToEdit !== undefined && selectedPolicyId !== privateLocationToEdit.agentPolicyId;
+  const monitorCount =
+    locationMonitors?.find(({ id }) => id === privateLocationToEdit?.id)?.count ?? 0;
 
   const policyHostsOptions = data?.map((item) => {
-    const hasLocation = privateLocations.find((location) => location.agentPolicyId === item.id);
+    const hasLocation = privateLocations.find(
+      (location) => location.agentPolicyId === item.id && location.id !== privateLocationToEdit?.id
+    );
     return {
       disabled: Boolean(hasLocation),
       value: item.id,
@@ -130,14 +138,11 @@ export const PolicyHostsField = ({
           rules={{ required: true }}
           render={({ field }) => (
             <SuperSelect
-              disabled={isDisabled}
               fullWidth
               aria-label={SELECT_POLICY_HOSTS}
               placeholder={SELECT_POLICY_HOSTS}
               valueOfSelected={field.value}
-              itemLayoutAlign="top"
               popoverProps={{ repositionOnScroll: true }}
-              hasDividers
               isInvalid={showFieldInvalid}
               options={policyHostsOptions ?? []}
               {...field}
@@ -149,10 +154,35 @@ export const PolicyHostsField = ({
         />
       </EuiFormRow>
       <EuiSpacer />
+      {isAgentPolicyChanged && monitorCount > 0 && (
+        <>
+          <KbnWarningCallout
+            data-test-subj="syntheticsAgentPolicyChangeCallout"
+            title={AGENT_POLICY_CHANGE_TITLE}
+            size="s"
+          >
+            <p>
+              {i18n.translate('xpack.synthetics.monitorManagement.agentPolicyChange.description', {
+                defaultMessage:
+                  '{count, plural, one {# monitor} other {# monitors}} will be redeployed to the new agent policy. They stop running on the current agents and resume once agents on the new policy pick them up.',
+                values: { count: monitorCount },
+              })}
+            </p>
+          </KbnWarningCallout>
+          <EuiSpacer />
+        </>
+      )}
       {selectedPolicy?.agents === 0 && <AgentPolicyCallout />}
     </>
   );
 };
+
+const AGENT_POLICY_CHANGE_TITLE = i18n.translate(
+  'xpack.synthetics.monitorManagement.agentPolicyChange.title',
+  {
+    defaultMessage: 'Changing the agent policy',
+  }
+);
 
 const AGENTS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.agentsLabel', {
   defaultMessage: 'Agents: ',
@@ -165,7 +195,8 @@ const SELECT_POLICY_HOSTS = i18n.translate('xpack.synthetics.monitorManagement.s
 const SELECT_POLICY_HOSTS_HELP_TEXT = i18n.translate(
   'xpack.synthetics.monitorManagement.selectPolicyHost.helpText',
   {
-    defaultMessage: 'We recommend using a single Elastic agent per agent policy.',
+    defaultMessage:
+      'Classic locations use one Elastic Agent per policy. Scalable locations can enroll several agents on the same policy.',
   }
 );
 

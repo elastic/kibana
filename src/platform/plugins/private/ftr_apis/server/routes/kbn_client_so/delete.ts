@@ -22,7 +22,9 @@ export const registerDeleteRoute = (router: IRouter) => {
       },
       validate: {
         params: schema.object({
+          // codeql[js/kibana/unbounded-string-in-schema] FTR test-only API, input from test code not end users
           type: schema.string(),
+          // codeql[js/kibana/unbounded-string-in-schema] FTR test-only API, input from test code not end users
           id: schema.string(),
         }),
       },

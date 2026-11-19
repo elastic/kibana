@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { getOrResolveObject } from '../../common/utils';
+import { mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema } from '../builtin_workflow_input_definitions';
 
 export function getWorkflowJsonSchema(zodSchema: z.ZodType): z.core.JSONSchema.JSONSchema | null {
   try {
@@ -40,7 +41,7 @@ export function getWorkflowJsonSchema(zodSchema: z.ZodType): z.core.JSONSchema.J
       }
     }
 
-    return z.toJSONSchema(schemaToConvert, {
+    const jsonSchema = z.toJSONSchema(schemaToConvert, {
       target: 'draft-7',
       unrepresentable: 'any', // do not throw an error for unrepresentable types
       reused: 'ref', // using ref reduces the size of the schema 4x
@@ -50,10 +51,82 @@ export function getWorkflowJsonSchema(zodSchema: z.ZodType): z.core.JSONSchema.J
         setMarkdownDescriptionIfSyntaxDetected(ctx);
       },
     });
+
+    return mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema(
+      stripNestedSchemaIds(jsonSchema) as z.core.JSONSchema.JSONSchema
+    );
   } catch (error) {
     // console.error('Error generating JSON schema from YAML schema:', error);
     return null;
   }
+}
+
+/**
+ * Some JSON Schema consumers resolve relative `$ref` values against the nearest `$id` scope.
+ * After migrating to Zod v4, nested schemas can contain generated refs like `#/definitions/__schemaN`.
+ * If a nested object also has `$id`, those refs may resolve from that nested scope ("from id ...")
+ * instead of the root schema and break validation or tooling.
+ *
+ * We strip non-root `$id` fields so draft-7 root-level `definitions` refs stay resolvable.
+ */
+function stripNestedSchemaIds(node: unknown, isRoot = true): unknown {
+  if (node === null || typeof node !== 'object') {
+    return node;
+  }
+
+  if (Array.isArray(node)) {
+    return node.map((item) => stripNestedSchemaIds(item, false));
+  }
+
+  const schemaObject = node as Record<string, unknown>;
+  const result: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(schemaObject)) {
+    if (isRoot || key !== '$id') {
+      result[key] = stripNestedSchemaIds(value, false);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Wraps each step union alternative in an `if` on its `type` literal so yaml-language-server skips
+ * non-matching alternatives instead of fully validating each of them; nested steps (e.g.
+ * `on-failure.fallback`) otherwise make editor validation and completion take seconds.
+ * MODIFIES the jsonSchema in place.
+ */
+export function guardStepUnionAlternativesByType(jsonSchema: z.core.JSONSchema.JSONSchema): void {
+  const resolve = (node: unknown) =>
+    getOrResolveObject<z.core.JSONSchema.JSONSchema>(node, jsonSchema) ?? undefined;
+
+  const getRequiredTypeLiteral = (alternative: unknown): string | undefined => {
+    const alternativeSchema = resolve(alternative);
+    if (!alternativeSchema?.required?.includes('type')) {
+      return undefined;
+    }
+    const literal = resolve(alternativeSchema.properties?.type)?.const;
+    return typeof literal === 'string' ? literal : undefined;
+  };
+
+  const stepUnion = resolve(resolve(resolve(jsonSchema)?.properties?.steps)?.items);
+  const unionKey = stepUnion?.oneOf ? 'oneOf' : 'anyOf';
+  const alternatives = stepUnion?.[unionKey];
+  if (!stepUnion || !alternatives) {
+    return;
+  }
+
+  stepUnion[unionKey] = alternatives.map((alternative) => {
+    const typeLiteral = getRequiredTypeLiteral(alternative);
+    if (typeLiteral === undefined) {
+      return alternative;
+    }
+    return {
+      if: { properties: { type: { const: typeLiteral } }, required: ['type'] },
+      then: alternative,
+      else: false,
+    };
+  });
 }
 
 // this function MODIFIES the jsonSchema in place

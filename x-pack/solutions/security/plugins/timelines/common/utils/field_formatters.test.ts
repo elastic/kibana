@@ -6,7 +6,7 @@
  */
 
 import { eventDetailsFormattedFields, eventHit } from '@kbn/securitysolution-t-grid';
-import type { EventHit } from '../search_strategy';
+import type { EventHit } from '@kbn/securitysolution-timeline-search-strategy';
 import { getDataFromFieldsHits } from './field_formatters';
 
 describe('Events Details Helpers', () => {
@@ -16,6 +16,21 @@ describe('Events Details Helpers', () => {
     it('happy path', () => {
       const result = getDataFromFieldsHits(fields);
       expect(result).toEqual(resultFields);
+    });
+    it('handles geo fields with undefined values', () => {
+      const result = getDataFromFieldsHits({
+        'source.geo.location': undefined,
+      } as unknown as EventHit['fields']);
+
+      expect(result).toEqual([
+        {
+          category: 'source',
+          field: 'source.geo.location',
+          values: [],
+          originalValue: [],
+          isObjectArray: true,
+        },
+      ]);
     });
     it('lets get weird', () => {
       const whackFields = {
@@ -192,6 +207,49 @@ describe('Events Details Helpers', () => {
 
       const result = getDataFromFieldsHits(ruleParameterFields);
       expect(result).toMatchObject(ruleParametersResultFields);
+    });
+
+    it('keeps flattened object array fields as a single stringified entry', () => {
+      const cpsScopeFields = {
+        'kibana.cps_scope.expression': ['_alias:*'],
+        'kibana.cps_scope.linked_projects': [
+          {
+            id: 'fedcba65432109876543210987654321',
+            alias: 'linked_local_project',
+            type: 'security',
+          },
+          {
+            id: 'fedcba65432109876543210987654320',
+            alias: 'linked_local_project2',
+            type: 'security',
+          },
+        ],
+      };
+
+      const result = getDataFromFieldsHits(cpsScopeFields);
+
+      expect(result).toEqual([
+        {
+          category: 'kibana',
+          field: 'kibana.cps_scope.expression',
+          values: ['_alias:*'],
+          originalValue: ['_alias:*'],
+          isObjectArray: false,
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.cps_scope.linked_projects',
+          values: [
+            '{"id":"fedcba65432109876543210987654321","alias":"linked_local_project","type":"security"}',
+            '{"id":"fedcba65432109876543210987654320","alias":"linked_local_project2","type":"security"}',
+          ],
+          originalValue: [
+            '{"id":"fedcba65432109876543210987654321","alias":"linked_local_project","type":"security"}',
+            '{"id":"fedcba65432109876543210987654320","alias":"linked_local_project2","type":"security"}',
+          ],
+          isObjectArray: true,
+        },
+      ]);
     });
 
     it('get data from threat enrichments', () => {

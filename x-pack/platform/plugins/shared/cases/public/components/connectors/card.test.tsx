@@ -23,7 +23,7 @@ describe('ConnectorCard ', () => {
           isLoading={false}
         />
       )
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 
   it('shows the loading skeleton if loading', () => {

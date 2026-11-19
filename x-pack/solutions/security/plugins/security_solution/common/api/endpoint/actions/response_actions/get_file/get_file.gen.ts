@@ -14,27 +14,59 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-import { BaseActionSchema } from '../../../model/schema/common.gen';
+import {
+  ResponseActionCreateSuccessResponse,
+  BaseActionSchema,
+} from '../../../model/schema/common.gen';
 
-export type GetFileRouteRequestBody = z.infer<typeof GetFileRouteRequestBody>;
-export const GetFileRouteRequestBody = BaseActionSchema.merge(
-  z.object({
-    parameters: z.object({
-      path: z.string(),
-    }),
-  })
+export const GetFileRouteRequestBody = lazySchema(() =>
+  BaseActionSchema.merge(
+    z.object({
+      parameters: z.object({
+        /**
+         * The full file path to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both.
+         */
+        path: z
+          .string()
+          .min(1)
+          .max(4096)
+          .optional()
+          .describe(
+            'The full file path to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both.'
+          ),
+        /**
+         * The list of file paths to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both. Valid for the Elastic Defend Endpoint agent type only, and requires an Endpoint that supports the `get_file_multi_path` capability.
+         */
+        paths: z
+          .array(z.string().min(1).max(4096))
+          .min(1)
+          .max(100)
+          .optional()
+          .describe(
+            'The list of file paths to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both. Valid for the Elastic Defend Endpoint agent type only, and requires an Endpoint that supports the `get_file_multi_path` capability.'
+          ),
+        /**
+         * Read a file locked by the OS from a volume snapshot. Endpoint on Windows only.
+         */
+        force: z
+          .boolean()
+          .optional()
+          .describe(
+            'Read a file locked by the OS from a volume snapshot. Endpoint on Windows only.'
+          ),
+      }),
+    })
+  )
 );
+export type GetFileRouteRequestBody = z.infer<typeof GetFileRouteRequestBody>;
 
-export type GetFileRouteResponse = z.infer<typeof GetFileRouteResponse>;
-export const GetFileRouteResponse = z.object({});
-
+export const EndpointGetFileActionRequestBody = lazySchema(() => GetFileRouteRequestBody);
 export type EndpointGetFileActionRequestBody = z.infer<typeof EndpointGetFileActionRequestBody>;
-export const EndpointGetFileActionRequestBody = GetFileRouteRequestBody;
 export type EndpointGetFileActionRequestBodyInput = z.input<
   typeof EndpointGetFileActionRequestBody
 >;
 
+export const EndpointGetFileActionResponse = lazySchema(() => ResponseActionCreateSuccessResponse);
 export type EndpointGetFileActionResponse = z.infer<typeof EndpointGetFileActionResponse>;
-export const EndpointGetFileActionResponse = GetFileRouteResponse;

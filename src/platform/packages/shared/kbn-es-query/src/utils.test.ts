@@ -7,40 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isCCSRemoteIndexName } from './utils';
+import { isNonLocalIndexName } from './utils';
 
 describe('util tests', () => {
-  describe('isCCSRemoteIndexName', () => {
+  describe('isNonLocalIndexName', () => {
     it('should not validate empty string', () => {
-      expect(isCCSRemoteIndexName('')).toBe(false);
+      expect(isNonLocalIndexName('')).toBe(false);
     });
 
     it('should not validate date math expression', () => {
-      expect(isCCSRemoteIndexName('<logstash-{now/d-2d}>')).toBe(false);
+      expect(isNonLocalIndexName('<logstash-{now/d-2d}>')).toBe(false);
     });
 
     it('should not validate date math expression with negation', () => {
-      expect(isCCSRemoteIndexName('-<logstash-{now/d-2d}>')).toBe(false);
+      expect(isNonLocalIndexName('-<logstash-{now/d-2d}>')).toBe(false);
     });
 
     it('should not validate invalid prefix', () => {
-      expect(isCCSRemoteIndexName(':logstash-{now/d-2d}')).toBe(false);
+      expect(isNonLocalIndexName(':logstash-{now/d-2d}')).toBe(false);
     });
 
     it('should validate CCS pattern', () => {
-      expect(isCCSRemoteIndexName('*:logstash-{now/d-2d}')).toBe(true);
+      expect(isNonLocalIndexName('*:logstash-{now/d-2d}')).toBe(true);
     });
 
     it('should not validate selector with wildcard', () => {
-      expect(isCCSRemoteIndexName('my-data-stream::*')).toBe(false);
+      expect(isNonLocalIndexName('my-data-stream::*')).toBe(false);
     });
 
     it('should not validate index name with selector', () => {
-      expect(isCCSRemoteIndexName('my-data-stream::failures')).toBe(false);
+      expect(isNonLocalIndexName('my-data-stream::failures')).toBe(false);
     });
 
     it('should not validate wildcard with selector', () => {
-      expect(isCCSRemoteIndexName('-logs-*::data')).toBe(false);
+      expect(isNonLocalIndexName('-logs-*::data')).toBe(false);
     });
   });
 });

@@ -12,8 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { EuiButton, EuiComboBox, EuiEmptyPrompt, EuiFormRow } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { useMlKibana } from '../application/contexts/kibana';
-import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlApi } from '../application/services/ml_api_service';
 import { ALL_JOBS_SELECTION } from '../../common/constants/alerts';
 import { LoadingIndicator } from '../application/components/loading_indicator';
@@ -167,7 +167,6 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
     toasts,
   ]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const onSelectionChange: EuiComboBoxProps<string>['onChange'] = useCallback(
     (async (selectionUpdate) => {
       if (selectionUpdate.some((selectedOption) => selectedOption.value === ALL_JOBS_SELECTION)) {
@@ -200,7 +199,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
         ...(selectedGroupIds.length > 0 ? { groupIds: selectedGroupIds } : {}),
       });
     }) as Exclude<EuiComboBoxProps<string>['onChange'], undefined>,
-    [jobIds, groupIds, defaultOptions, createJobUrl]
+    [jobIds, groupIds, defaultOptions, createJobUrl, navigateToUrl, onChange]
   );
 
   useEffect(() => {

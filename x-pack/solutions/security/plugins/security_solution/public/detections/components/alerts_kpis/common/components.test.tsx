@@ -5,14 +5,13 @@
  * 2.0.
  */
 
+import { matchers as emotionMatchers } from '@emotion/jest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
-import 'jest-styled-components';
+expect.extend(emotionMatchers);
 
 import { TestProviders } from '../../../../common/mock';
 import { KpiPanel, StackByComboBox } from './components';
-import * as i18n from './translations';
 import { useStackByFields } from './hooks';
 
 jest.mock('./hooks');
@@ -101,6 +100,24 @@ describe('components', () => {
 
       expect(screen.getByTestId('test')).toHaveStyleRule('overflow-y', 'auto');
     });
+
+    test('it does NOT forward the `$overflowY` and `$toggleStatus` props to the DOM', () => {
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      render(
+        <TestProviders>
+          <KpiPanel data-test-subj="test" $overflowY="auto" $toggleStatus={true}>
+            {'test'}
+          </KpiPanel>
+        </TestProviders>
+      );
+
+      const loggedArgs = consoleErrorSpy.mock.calls.flat();
+      consoleErrorSpy.mockRestore();
+
+      expect(loggedArgs).not.toContain('$overflowY');
+      expect(loggedArgs).not.toContain('$toggleStatus');
+    });
   });
 
   describe('StackByComboBox', () => {
@@ -108,7 +125,7 @@ describe('components', () => {
       const onSelect = jest.fn();
       const optionToSelect = 'agent.hostname';
 
-      render(
+      const { getByTestId } = render(
         <TestProviders>
           <StackByComboBox
             data-test-subj="stackByComboBox"
@@ -122,17 +139,17 @@ describe('components', () => {
         </TestProviders>
       );
 
-      const comboBox = screen.getByRole('combobox', { name: i18n.STACK_BY_ARIA_LABEL });
+      const comboBox = getByTestId('comboBoxSearchInput');
       comboBox.focus(); // display the combo box options
 
       const option = await screen.findByText(optionToSelect);
       fireEvent.click(option);
 
-      expect(onSelect).toBeCalledWith(optionToSelect);
+      expect(onSelect).toHaveBeenCalledWith(optionToSelect);
     });
 
     test('it does NOT disable the combo box by default', () => {
-      render(
+      const { getByTestId } = render(
         <TestProviders>
           <StackByComboBox
             data-test-subj="stackByComboBox"
@@ -142,13 +159,12 @@ describe('components', () => {
         </TestProviders>
       );
 
-      expect(screen.getByRole('combobox', { name: i18n.STACK_BY_ARIA_LABEL })).not.toHaveAttribute(
-        'disabled'
-      );
+      const comboBox = getByTestId('comboBoxSearchInput');
+      expect(comboBox).not.toHaveAttribute('disabled');
     });
 
     test('it disables the combo box when `isDisabled` is true', () => {
-      render(
+      const { getByTestId } = render(
         <TestProviders>
           <StackByComboBox
             data-test-subj="stackByComboBox"
@@ -159,15 +175,14 @@ describe('components', () => {
         </TestProviders>
       );
 
-      expect(screen.getByRole('combobox', { name: i18n.STACK_BY_ARIA_LABEL })).toHaveAttribute(
-        'disabled'
-      );
+      const comboBox = getByTestId('comboBoxSearchInput');
+      expect(comboBox).toHaveAttribute('disabled');
     });
 
     test('overrides the default accessible name via the `aria-label` prop when provided', () => {
       const customAccessibleName = 'custom';
 
-      render(
+      const { getByTestId } = render(
         <TestProviders>
           <StackByComboBox
             aria-label={customAccessibleName}
@@ -179,13 +194,16 @@ describe('components', () => {
         </TestProviders>
       );
 
-      expect(screen.getByRole('combobox', { name: customAccessibleName })).toBeInTheDocument();
+      expect(getByTestId('comboBoxSearchInput')).toHaveAttribute(
+        'aria-label',
+        customAccessibleName
+      );
     });
 
     test('it renders the default label', () => {
       const defaultLabel = 'Stack by';
 
-      render(
+      const { getByTestId } = render(
         <TestProviders>
           <StackByComboBox
             data-test-subj="stackByComboBox"
@@ -195,13 +213,13 @@ describe('components', () => {
         </TestProviders>
       );
 
-      expect(screen.getByLabelText(defaultLabel)).toBeInTheDocument();
+      expect(getByTestId('stackByComboBox')).toHaveTextContent(defaultLabel);
     });
 
     test('it overrides the default label when `prepend` is specified', () => {
       const prepend = 'Group by';
 
-      render(
+      const { getByTestId } = render(
         <TestProviders>
           <StackByComboBox
             data-test-subj="stackByComboBox"
@@ -212,7 +230,7 @@ describe('components', () => {
         </TestProviders>
       );
 
-      expect(screen.getByLabelText(prepend)).toBeInTheDocument();
+      expect(getByTestId('stackByComboBox')).toHaveTextContent(prepend);
     });
   });
 });

@@ -6,10 +6,12 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { gapReasonType } from '@kbn/alerting-plugin/common/constants/gap_reason';
 import {
   DETECTION_ENGINE_RULES_URL_FIND,
   MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
   MAX_RULES_WITH_GAPS_TO_FETCH,
+  EXCLUDED_GAP_REASONS_KEY,
 } from '../../../../../../../common/constants';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { requestContextMock, requestMock, serverMock } from '../../../../routes/__mocks__';
@@ -116,6 +118,9 @@ describe('Find rules route', () => {
     const gapEndDate = '2025-01-02T00:00:00.000Z';
 
     test('calls getGapFilteredRuleIds with correct parameters', async () => {
+      const excludedReasons = [gapReasonType.RULE_DISABLED];
+      context.core.uiSettings.client.get.mockResolvedValue(excludedReasons);
+
       mockGetGapFilteredRuleIds.mockResolvedValue({
         ruleIds: ['rule-1', 'rule-2'],
         truncated: false,
@@ -138,6 +143,7 @@ describe('Find rules route', () => {
 
       await server.inject(request, requestContextMock.convertContext(context));
 
+      expect(context.core.uiSettings.client.get).toHaveBeenCalledWith(EXCLUDED_GAP_REASONS_KEY);
       expect(mockGetGapFilteredRuleIds).toHaveBeenCalledWith({
         rulesClient: expect.anything(),
         gapRange: {
@@ -149,7 +155,9 @@ describe('Find rules route', () => {
         filter: 'alert.attributes.name: test',
         sortField: 'enabled',
         sortOrder: 'desc',
+        excludedReasons,
       });
+      expect(mockGetGapFilteredRuleIds.mock.calls[0]?.[0].excludedReasons).toBe(excludedReasons);
     });
 
     test('returns empty response when no rules have gaps', async () => {

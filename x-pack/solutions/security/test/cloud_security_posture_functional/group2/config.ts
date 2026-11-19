@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const baseConfig = await readConfigFile(require.resolve('../group1/config.ts'));
+  const baseConfig = await readConfigFile(require.resolve('../config.base.ts'));
+
   return {
     ...baseConfig.getAll(),
-    testFiles: [resolve(__dirname, './pages')],
+    testFiles: [require.resolve('.')],
+    security: {
+      ...baseConfig.get('security'),
+      cookieLogin: false, // tests rely on localStorage column state between steps; loginByCookie clears it
+    },
     junit: {
-      reportName: 'X-Pack Cloud Security Posture Functional Tests - Group 2',
+      reportName: 'X-Pack Cloud Security Posture Functional Tests - Group 2 (Findings)',
     },
   };
 }

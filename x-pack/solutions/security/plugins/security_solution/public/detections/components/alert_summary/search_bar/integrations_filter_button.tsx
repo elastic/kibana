@@ -33,6 +33,13 @@ const INTEGRATIONS_BUTTON = i18n.translate(
   }
 );
 
+const INTEGRATIONS_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.alertSummary.integrations.popoverAriaLabel',
+  {
+    defaultMessage: 'Integrations filter',
+  }
+);
+
 export interface IntegrationFilterButtonProps {
   /**
    * List of integrations the user can select or deselect
@@ -97,7 +104,7 @@ export const IntegrationFilterButton = memo(({ integrations }: IntegrationFilter
       `}
       data-test-subj={INTEGRATION_BUTTON_TEST_ID}
       hasActiveFilters={!!items.find((item) => item.checked === 'on')}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       isSelected={isPopoverOpen}
       numActiveFilters={items.filter((item) => item.checked === 'on').length}
       numFilters={items.filter((item) => item.checked !== 'off').length}
@@ -110,6 +117,7 @@ export const IntegrationFilterButton = memo(({ integrations }: IntegrationFilter
   return (
     <EuiFilterGroup compressed={true}>
       <EuiPopover
+        aria-label={INTEGRATIONS_POPOVER_ARIA_LABEL}
         button={button}
         closePopover={togglePopover}
         id={filterGroupPopoverId}

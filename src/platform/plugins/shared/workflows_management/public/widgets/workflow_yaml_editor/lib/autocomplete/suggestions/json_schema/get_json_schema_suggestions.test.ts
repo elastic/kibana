@@ -40,10 +40,15 @@ describe('getJsonSchemaSuggestions', () => {
       yamlLineCounter: null,
       scalarType: null,
       isInLiquidBlock: false,
+      isInTriggerConditionField: false,
+      triggerConditionDefinition: undefined,
       isInTriggersContext: false,
       isInScheduledTriggerWithBlock: false,
       isInStepsContext: false,
       isInWorkflowInputsContext: false,
+      isInEsqlQueryField: false,
+      esqlRegion: null,
+      esqlOffsetInQuery: null,
       dynamicConnectorTypes: null,
       workflows: {
         workflows: {},
@@ -51,6 +56,7 @@ describe('getJsonSchemaSuggestions', () => {
       },
       workflowDefinition: null,
       currentWorkflowId: null,
+      isCurrentWorkflowManaged: false,
       model: {} as any,
       position: {
         lineNumber: 1,
@@ -66,15 +72,20 @@ describe('getJsonSchemaSuggestions', () => {
         '        - '
       );
       context.workflowDefinition = {
-        inputs: {
-          type: 'object',
-          properties: {
-            status: {
-              type: 'string',
-              enum: ['active', 'inactive', 'pending'],
+        triggers: [
+          {
+            type: 'manual',
+            inputs: {
+              type: 'object',
+              properties: {
+                status: {
+                  type: 'string',
+                  enum: ['active', 'inactive', 'pending'],
+                },
+              },
             },
           },
-        },
+        ],
       } as any;
 
       const suggestions = getJsonSchemaSuggestions(context);
@@ -160,15 +171,20 @@ describe('getJsonSchemaSuggestions', () => {
       context.position = { lineNumber: 3, column: 7 } as any;
 
       context.workflowDefinition = {
-        inputs: {
-          type: 'object',
-          properties: {
-            status: {
-              type: 'string',
-              enum: ['active', 'inactive', 'pending'],
+        triggers: [
+          {
+            type: 'manual',
+            inputs: {
+              type: 'object',
+              properties: {
+                status: {
+                  type: 'string',
+                  enum: ['active', 'inactive', 'pending'],
+                },
+              },
             },
           },
-        },
+        ],
       } as any;
 
       const suggestions = getJsonSchemaSuggestions(context);
@@ -182,15 +198,20 @@ describe('getJsonSchemaSuggestions', () => {
         '        - '
       );
       context.workflowDefinition = {
-        inputs: {
-          type: 'object',
-          properties: {
-            priority: {
-              type: 'integer',
-              enum: [1, 2, 3],
+        triggers: [
+          {
+            type: 'manual',
+            inputs: {
+              type: 'object',
+              properties: {
+                priority: {
+                  type: 'integer',
+                  enum: [1, 2, 3],
+                },
+              },
             },
           },
-        },
+        ],
       } as any;
 
       const suggestions = getJsonSchemaSuggestions(context);
@@ -206,15 +227,20 @@ describe('getJsonSchemaSuggestions', () => {
         '        - '
       );
       context.workflowDefinition = {
-        inputs: {
-          type: 'object',
-          properties: {
-            status: {
-              type: 'string',
-              enum: ['active'],
+        triggers: [
+          {
+            type: 'manual',
+            inputs: {
+              type: 'object',
+              properties: {
+                status: {
+                  type: 'string',
+                  enum: ['active'],
+                },
+              },
             },
           },
-        },
+        ],
       } as any;
 
       const suggestions = getJsonSchemaSuggestions(context);
@@ -236,14 +262,19 @@ describe('getJsonSchemaSuggestions', () => {
     it('should return empty when property has no enum values', () => {
       const context = createMockContext(['inputs', 'properties', 'name', 'enum', 0], '        - ');
       context.workflowDefinition = {
-        inputs: {
-          type: 'object',
-          properties: {
-            name: {
-              type: 'string',
+        triggers: [
+          {
+            type: 'manual',
+            inputs: {
+              type: 'object',
+              properties: {
+                name: {
+                  type: 'string',
+                },
+              },
             },
           },
-        },
+        ],
       } as any;
 
       const suggestions = getJsonSchemaSuggestions(context);
@@ -283,15 +314,20 @@ describe('getJsonSchemaSuggestions', () => {
         '        active' // no "- " prefix
       );
       context.workflowDefinition = {
-        inputs: {
-          type: 'object',
-          properties: {
-            status: {
-              type: 'string',
-              enum: ['active'],
+        triggers: [
+          {
+            type: 'manual',
+            inputs: {
+              type: 'object',
+              properties: {
+                status: {
+                  type: 'string',
+                  enum: ['active'],
+                },
+              },
             },
           },
-        },
+        ],
       } as any;
 
       const suggestions = getJsonSchemaSuggestions(context);

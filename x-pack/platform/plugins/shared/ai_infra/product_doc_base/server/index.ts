@@ -13,7 +13,6 @@ import type {
   ProductDocBaseSetupDependencies,
   ProductDocBaseStartDependencies,
 } from './types';
-import { ProductDocBasePlugin } from './plugin';
 
 export { config } from './config';
 
@@ -31,5 +30,6 @@ export const plugin: PluginInitializer<
   ProductDocBaseSetupDependencies,
   ProductDocBaseStartDependencies
 > = async (pluginInitializerContext: PluginInitializerContext<ProductDocBaseConfig>) => {
+  const { ProductDocBasePlugin } = await import('./plugin');
   return new ProductDocBasePlugin(pluginInitializerContext);
 };

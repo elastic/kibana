@@ -11,6 +11,7 @@ import React from 'react';
 import { EuiSwitch } from '@elastic/eui';
 
 export interface FlyoutOwnFocusSwitchProps {
+  title: string;
   flyoutOwnFocus: boolean;
   onChange: (ownFocus: boolean) => void;
   label?: string;
@@ -21,6 +22,7 @@ export interface FlyoutOwnFocusSwitchProps {
  * Shared switch component for toggling the ownFocus behavior of flyouts
  */
 export const FlyoutOwnFocusSwitch: React.FC<FlyoutOwnFocusSwitchProps> = ({
+  title,
   flyoutOwnFocus,
   onChange,
   label = 'Own Focus',
@@ -28,6 +30,7 @@ export const FlyoutOwnFocusSwitch: React.FC<FlyoutOwnFocusSwitchProps> = ({
 }) => {
   return (
     <EuiSwitch
+      data-test-subj={`flyoutOwnFocusSwitch-${title}`}
       label={label}
       checked={flyoutOwnFocus}
       onChange={(e) => onChange(e.target.checked)}

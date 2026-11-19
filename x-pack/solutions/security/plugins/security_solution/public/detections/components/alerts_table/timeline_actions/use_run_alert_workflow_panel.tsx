@@ -5,154 +5,139 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiButton, EuiPanel, EuiFlexGroup } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
-  useRunWorkflow,
+  RunWorkflowPanel,
   useWorkflowsCapabilities,
   useWorkflowsUIEnabledSetting,
-  WorkflowSelector,
 } from '@kbn/workflows-ui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { RunWorkflowResponseDto } from '@kbn/workflows';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
-import type { AlertTriggerInput } from '@kbn/workflows-management-plugin/common/types/alert_types';
-import type { RenderingService } from '@kbn/core-rendering-browser';
-import { Loader } from '../../../../common/components/loader';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import type { WorkflowListItemDto } from '@kbn/workflows';
+import type { WorkflowSelectorVisibility } from '@kbn/workflows-ui';
+import { SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import type { CaseAttachmentWorkflowTarget } from '@kbn/cases-plugin/public';
+import {
+  useCaseAttachmentWorkflowRouting,
+  useCaseAttachmentWorkflowRun,
+} from '@kbn/cases-plugin/public';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
+import { RUN_ALERT_WORKFLOW_ACTION_ID } from '../../../../common/constants/action_ids';
 import * as i18n from '../translations';
+import {
+  getRunWorkflowTelemetry,
+  type RunWorkflowTelemetrySurface,
+} from '../../../../common/lib/telemetry/run_workflow_telemetry';
+
+// Server-side: include managed workflows tagged for the rule_action selector (e.g. the alert
+// analysis workflow). Module-scoped so the object reference is stable across renders.
+const ALERT_WORKFLOW_VISIBILITY: WorkflowSelectorVisibility = { selectors: ['rule_action'] };
+
+// Client-side: of the server-returned set, further narrow to unmanaged workflows (always shown)
+// and managed workflows that declare an alert trigger. Module-scoped for stable reference.
+const isAlertWorkflow = (w: WorkflowListItemDto) =>
+  !w.managed || (w.definition?.triggers ?? []).some((t) => t.type === 'alert');
+
+// Sort alert-trigger workflows to the top. Module-scoped so the reference is stable across renders.
+const sortAlertWorkflow = (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
+  Number((b.definition?.triggers ?? []).some((t) => t.type === 'alert')) -
+  Number((a.definition?.triggers ?? []).some((t) => t.type === 'alert'));
 
 export interface AlertWorkflowsPanelProps {
-  /** Array and alert ids and their respective indices */
+  /** Array of alert ids and their respective indices */
   alertIds: {
     _id: string;
     _index: string;
   }[];
   onClose: () => void;
+  /** Optional callback invoked when workflow execution is triggered. */
+  onExecute?: () => void;
+  /**
+   * When set, the panel was opened from a single-alert row action. The executor routes through
+   * the Cases API with a `cases.attachment` origin so the run appears in the case activity feed.
+   * Absent for bulk actions (even a single-alert bulk selection uses `cases.attachments`).
+   * Outside a case the value is ignored — the panel falls back to the generic Workflows API.
+   * Inside a case where Cases runs are unavailable, the menu hooks do not render this panel.
+   */
+  originAlertId?: string;
+  /**
+   * The case attachment type the ids in `alertIds` are stored as. Defaults to the alert type;
+   * surfaces that reuse this panel for another document kind — the attacks table, for instance —
+   * must declare their own type, otherwise the Cases API looks the ids up against the wrong
+   * attachments and reports that they do not belong to the case.
+   */
+  attachmentType?: string;
+  /** Surface reported with the run telemetry outside a case. Defaults to `alert`. */
+  telemetrySurface?: Extract<RunWorkflowTelemetrySurface, 'alert' | 'attack'>;
+  /** Reports the run as a bulk run outside a case. Bulk actions set it. */
+  isBulk?: boolean;
 }
 
 /** A panel that lets users select and execute a workflow against one or more alerts. **/
-export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelProps) => {
-  const {
-    services: { application, rendering },
-  } = useKibana<{ application: ApplicationStart; rendering: RenderingService }>();
-  const { addSuccess: workflowTriggerSuccess, addError: workflowTriggerFailed } = useAppToasts();
+export const AlertWorkflowsPanel = ({
+  alertIds,
+  onClose,
+  onExecute,
+  originAlertId,
+  attachmentType = SECURITY_ALERT_ATTACHMENT_TYPE,
+  telemetrySurface = 'alert',
+  isBulk = false,
+}: AlertWorkflowsPanelProps) => {
+  // When rendered inside a case's attachment surface, route through the Cases API so the run
+  // is authorized, audited, and recorded in the case activity feed. Outside a case the panel
+  // falls back to its built-in executor (generic Workflows API) when `runWorkflow` is undefined.
+  const target = useMemo(
+    (): CaseAttachmentWorkflowTarget =>
+      originAlertId !== undefined
+        ? { attachmentId: originAlertId }
+        : { attachmentIds: alertIds.map(({ _id }) => _id) },
+    [alertIds, originAlertId]
+  );
+  const fallbackTelemetry = useMemo(
+    () =>
+      getRunWorkflowTelemetry({
+        surface: telemetrySurface,
+        isBulk,
+        itemCount: alertIds.length,
+      }),
+    [alertIds.length, isBulk, telemetrySurface]
+  );
+  const { runWorkflow, showSuccessToast, telemetry } = useCaseAttachmentWorkflowRun({
+    attachmentType,
+    target,
+    fallbackTelemetry,
+  });
 
-  const runWorkflow = useRunWorkflow();
-  const [selectedId, setSelectedId] = React.useState<string>('');
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
-
-  const handleExecuteClick = useCallback(() => {
-    if (!selectedId) return;
-    setIsLoading(true);
-
-    const inputsPayload: AlertTriggerInput = {
+  const inputs = useMemo(
+    () => ({
       event: {
-        triggerType: 'alert',
+        triggerType: 'alert' as const,
         alertIds,
       },
-    };
-
-    runWorkflow.mutate(
-      {
-        id: selectedId,
-        inputs: { ...inputsPayload },
-      },
-      {
-        onSuccess: (data: RunWorkflowResponseDto) => {
-          workflowTriggerSuccess({
-            title: i18n.WORKFLOW_START_SUCCESS_TOAST,
-            ...(rendering && {
-              text: toMountPoint(
-                <EuiFlexGroup justifyContent={'flexEnd'}>
-                  <EuiButton
-                    size="s"
-                    onClick={() => {
-                      application.navigateToApp(WORKFLOWS_APP_ID, {
-                        openInNewTab: true,
-                        path: `${selectedId}?executionId=${data.workflowExecutionId}`,
-                      });
-                    }}
-                  >
-                    {i18n.WORKFLOW_START_SUCCESS_BUTTON}
-                  </EuiButton>
-                </EuiFlexGroup>,
-                rendering
-              ),
-            }),
-          });
-        },
-        onError: (err) => {
-          workflowTriggerFailed(err, {
-            title: i18n.WORKFLOW_START_FAILED_TOAST,
-          });
-        },
-        onSettled: () => {
-          setIsLoading(false);
-          onClose();
-        },
-      }
-    );
-  }, [
-    application,
-    selectedId,
-    runWorkflow,
-    workflowTriggerSuccess,
-    workflowTriggerFailed,
-    rendering,
-    onClose,
-    alertIds,
-  ]);
-
-  const workflowSelector = useMemo(
-    () => (
-      <WorkflowSelector
-        config={{
-          sortFunction: (workflows) =>
-            workflows.sort((a, b) => {
-              const enabledDiff = Number(b.enabled) - Number(a.enabled);
-              if (enabledDiff !== 0) return enabledDiff;
-
-              const aHasAlert = a.definition?.triggers?.some((t) => t.type === 'alert');
-              const bHasAlert = b.definition?.triggers?.some((t) => t.type === 'alert');
-              if (aHasAlert && !bHasAlert) return -1;
-              if (!aHasAlert && bHasAlert) return 1;
-              return 0;
-            }),
-        }}
-        selectedWorkflowId={selectedId || undefined}
-        onWorkflowChange={setSelectedId}
-      />
-    ),
-    [selectedId]
+    }),
+    [alertIds]
   );
 
   return (
-    <>
-      <EuiPanel>{isLoading ? <Loader>{workflowSelector}</Loader> : workflowSelector}</EuiPanel>
-      <EuiButton
-        data-test-subj="execute-alert-workflow-button"
-        fullWidth
-        size="s"
-        onClick={handleExecuteClick}
-        disabled={!selectedId || isLoading}
-      >
-        {i18n.RUN_WORKFLOW_BUTTON}
-      </EuiButton>
-    </>
+    <RunWorkflowPanel
+      inputs={inputs}
+      runWorkflow={runWorkflow}
+      showSuccessToast={showSuccessToast}
+      telemetry={telemetry}
+      visibility={ALERT_WORKFLOW_VISIBILITY}
+      sortWorkflow={sortAlertWorkflow}
+      filterWorkflow={isAlertWorkflow}
+      onClose={onClose}
+      onExecute={onExecute}
+    />
   );
 };
 
 export const RUN_WORKFLOW_PANEL_ID = 'RUN_WORKFLOW_PANEL_ID';
 export const RUN_WORKFLOW_BULK_PANEL_ID = 'BULK_RUN_WORKFLOW_PANEL_ID';
-
+export const RUN_WORKFLOWS_PANEL_WIDTH = 400;
 export interface UseRunAlertWorkflowPanelProps {
   /** ECS document for the selected alert row. */
   ecsRowData: Ecs;
@@ -173,9 +158,11 @@ export const useRunAlertWorkflowPanel = ({
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   const { hasIndexWrite } = useAlertsPrivileges();
+  // Inside a case, only offer the action when the run can be recorded on the case.
+  const caseRouting = useCaseAttachmentWorkflowRouting();
   const canRunWorkflow = useMemo(
-    () => hasIndexWrite && workflowUIEnabled && canExecuteWorkflow,
-    [hasIndexWrite, workflowUIEnabled, canExecuteWorkflow]
+    () => hasIndexWrite && workflowUIEnabled && canExecuteWorkflow && caseRouting !== 'unavailable',
+    [hasIndexWrite, workflowUIEnabled, canExecuteWorkflow, caseRouting]
   );
 
   const runWorkflowMenuItem: AlertTableContextMenuItem[] = useMemo(
@@ -183,8 +170,7 @@ export const useRunAlertWorkflowPanel = ({
       {
         'aria-label': i18n.CONTEXT_MENU_RUN_WORKFLOW,
         'data-test-subj': 'run-workflow-action',
-        key: 'run-workflow-action',
-        size: 's',
+        key: RUN_ALERT_WORKFLOW_ACTION_ID,
         name: i18n.CONTEXT_MENU_RUN_WORKFLOW,
         panel: RUN_WORKFLOW_PANEL_ID,
       },
@@ -198,10 +184,12 @@ export const useRunAlertWorkflowPanel = ({
         id: RUN_WORKFLOW_PANEL_ID,
         title: i18n.SELECT_WORKFLOW_PANEL_TITLE,
         'data-test-subj': 'alert-workflow-context-menu-panel',
+        width: RUN_WORKFLOWS_PANEL_WIDTH,
         content: (
           <AlertWorkflowsPanel
             alertIds={[{ _id: ecsRowData._id, _index: ecsRowData._index ?? '' }]}
             onClose={closePopover}
+            originAlertId={ecsRowData._id}
           />
         ),
       },

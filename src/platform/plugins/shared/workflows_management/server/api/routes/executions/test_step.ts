@@ -13,9 +13,10 @@ import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTE_SECURITY } from '../utils/route_security';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerTestStepRoute({ router, api, spaces }: RouteDependencies) {
+export function registerTestStepRoute(deps: RouteDependencies) {
+  const { router, api, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/step/test',
@@ -41,6 +42,11 @@ export function registerTestStepRoute({ router, api, spaces }: RouteDependencies
               workflowId: schema.maybe(
                 schema.string({ meta: { description: 'ID of the workflow containing the step.' } })
               ),
+              executionContext: schema.maybe(
+                schema.recordOf(schema.string(), schema.any(), {
+                  meta: { description: 'Execution context for the step execution.' },
+                })
+              ),
               contextOverride: schema.recordOf(schema.string(), schema.any(), {
                 meta: { description: 'Context overrides for the step execution.' },
               }),
@@ -51,19 +57,31 @@ export function registerTestStepRoute({ router, api, spaces }: RouteDependencies
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const spaceId = spaces.getSpaceId(request);
           const workflowExecutionId = await api.testStep(
             request.body.workflowYaml,
             request.body.stepId,
             request.body.workflowId,
+            request.body.executionContext,
             request.body.contextOverride,
             spaceId,
             request
           );
+          audit.logWorkflowStepTest(request, {
+            stepId: request.body.stepId,
+            workflowExecutionId,
+            workflowId: request.body.workflowId,
+          });
           return response.ok({ body: { workflowExecutionId } });
         } catch (error) {
+          audit.logWorkflowStepTest(request, {
+            stepId: request.body.stepId,
+            workflowExecutionId: '',
+            workflowId: request.body.workflowId,
+            error,
+          });
           return handleRouteError(response, error);
         }
       })

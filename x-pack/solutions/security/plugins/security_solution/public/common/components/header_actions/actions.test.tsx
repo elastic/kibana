@@ -6,16 +6,26 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { mockTimelineData, mockTimelineModel, TestProviders } from '../../mock';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { licenseService } from '../../hooks/use_license';
 import type { ActionsComponentProps } from './actions';
 import { Actions } from './actions';
 import { useIsAnalyzerEnabled } from '../../../detections/hooks/use_is_analyzer_enabled';
+import { AlertContextMenu } from '../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../flyout_v2/use_flyout_api.mock';
 
+jest.mock(
+  '../../../detections/components/alerts_table/timeline_actions/alert_context_menu',
+  () => ({
+    AlertContextMenu: jest.fn(() => null),
+  })
+);
 jest.mock('../../hooks/use_selector');
 jest.mock('../../../detections/hooks/use_is_analyzer_enabled');
+jest.mock('../../../flyout_v2/use_flyout_api');
 jest.mock('../../hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
@@ -50,9 +60,13 @@ const defaultProps: ActionsComponentProps = {
 };
 
 describe('Actions', () => {
+  let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
+
   beforeEach(() => {
     jest.clearAllMocks();
     (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+    flyoutApi = createFlyoutApiMock();
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
   });
 
   describe('expand icon', () => {
@@ -202,6 +216,46 @@ describe('Actions', () => {
   });
 
   describe('alert context menu', () => {
+    describe('more actions button', () => {
+      beforeEach(() => {
+        jest.mocked(AlertContextMenu).mockClear();
+      });
+
+      it('should not mark the document as remote when it is local', () => {
+        render(
+          <TestProviders>
+            <Actions {...defaultProps} />
+          </TestProviders>
+        );
+
+        expect(jest.mocked(AlertContextMenu)).toHaveBeenCalledWith(
+          expect.objectContaining({ isRemoteDocument: false }),
+          expect.anything()
+        );
+      });
+
+      it('should mark the document as remote when the index is non-local', () => {
+        const props = {
+          ...defaultProps,
+          ecsData: {
+            ...mockTimelineData[0].ecs,
+            _index: 'remote_cluster:.ds-logs-endpoint.events.process-default',
+          },
+        };
+
+        render(
+          <TestProviders>
+            <Actions {...props} />
+          </TestProviders>
+        );
+
+        expect(jest.mocked(AlertContextMenu)).toHaveBeenCalledWith(
+          expect.objectContaining({ isRemoteDocument: true }),
+          expect.anything()
+        );
+      });
+    });
+
     describe('analyzer icon', () => {
       it('should render', () => {
         (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
@@ -225,6 +279,22 @@ describe('Actions', () => {
         );
 
         expect(queryByTestId('view-in-analyzer')).not.toBeInTheDocument();
+      });
+
+      it('should open the new analyzer flyout', () => {
+        (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
+
+        const { getByTestId } = render(
+          <TestProviders>
+            <Actions {...defaultProps} />
+          </TestProviders>
+        );
+
+        fireEvent.click(getByTestId('view-in-analyzer'));
+
+        expect(flyoutApi.openAnalyzer).toHaveBeenCalledWith(
+          expect.objectContaining({ hit: defaultProps.hit })
+        );
       });
     });
 
@@ -279,6 +349,36 @@ describe('Actions', () => {
         );
 
         expect(queryByTestId('session-view-button')).not.toBeInTheDocument();
+      });
+
+      const sessionViewProps = {
+        ...defaultProps,
+        ecsData: {
+          ...mockTimelineData[0].ecs,
+          event: { kind: ['alert'] },
+          agent: { type: ['endpoint'] },
+          process: {
+            entry_leader: { entity_id: ['test_id'], start: ['2022-05-08T13:44:00.13Z'] },
+          },
+          _index: '.ds-logs-endpoint.events.process-default',
+        },
+      };
+
+      it('should open the new session view flyout', () => {
+        const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+        licenseServiceMock.isEnterprise.mockReturnValue(true);
+
+        const { getByTestId } = render(
+          <TestProviders>
+            <Actions {...sessionViewProps} />
+          </TestProviders>
+        );
+
+        fireEvent.click(getByTestId('session-view-button'));
+
+        expect(flyoutApi.openSessionView).toHaveBeenCalledWith(
+          expect.objectContaining({ hit: defaultProps.hit })
+        );
       });
     });
   });

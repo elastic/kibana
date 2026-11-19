@@ -5,13 +5,32 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-test.describe('custom branding', { tag: '@local-stateful-classic' }, () => {
+const CUSTOM_BRANDING_KEYS = [
+  'xpackCustomBranding:pageTitle',
+  'xpackCustomBranding:logo',
+  'xpackCustomBranding:customizedLogo',
+] as const;
+
+test.describe('custom branding', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.customBrandingSettings.navigateToGlobalSettings();
+  });
+
+  // These settings live on the global config saved object and persist across
+  // suites sharing the same Kibana instance, so reset them after each test.
+  test.afterEach(async ({ kbnClient }) => {
+    for (const key of CUSTOM_BRANDING_KEYS) {
+      await kbnClient.request({
+        description: `reset global ui setting ${key}`,
+        path: `/api/kibana/global_settings/${encodeURIComponent(key)}`,
+        method: 'DELETE',
+      });
+    }
   });
 
   test('should allow setting custom page title through advanced settings', async ({

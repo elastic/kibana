@@ -25,6 +25,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/kibana-react-plugin",
     "@kbn/core",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/announcement-banner"
   ]
 }

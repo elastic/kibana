@@ -30,6 +30,7 @@ interface BaseConfig {
 // Restore configuration
 export interface RestoreConfig extends BaseConfig {
   indices?: string[];
+  indexSettings?: Record<string, unknown>;
   /**
    * Optional index rename during restore. This is useful to restore into a
    * temporary location to avoid clobbering existing indices.
@@ -48,7 +49,21 @@ export interface RestoreConfig extends BaseConfig {
 // Replay configuration
 export interface ReplayConfig extends BaseConfig {
   patterns: string[];
+  indexSettings?: Record<string, unknown>;
   concurrency?: number;
+  /** Predicate that determines whether a given destination index should use an inline
+   * Painless script instead of the ingest pipeline for timestamp transformation. Return
+   * `true` for destinations whose index templates are managed externally and reject
+   * explicit pipelines in bulk/reindex requests. */
+  shouldUseInlineScript?: (destIndex: string) => boolean;
+  /** Called after temp indices are restored, before reindexing to final destinations. */
+  beforeReindex?: (params: {
+    esClient: Client;
+    log: ToolingLog;
+    originalIndices: string[];
+    restoredIndices: string[];
+    destinationIndices: string[];
+  }) => Promise<void>;
 }
 
 // Create configuration

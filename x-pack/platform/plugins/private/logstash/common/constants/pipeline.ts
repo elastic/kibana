@@ -11,3 +11,8 @@ export const PIPELINE = {
     OTHER: 'file_or_command_line_interface_or_pipelines_yml',
   },
 };
+
+/**
+ * Maximum allowed length for the pipeline description field.
+ */
+export const MAX_PIPELINE_DESCRIPTION_LENGTH = 1024;

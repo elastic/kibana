@@ -72,7 +72,7 @@ export const PipelinesJSONConfigurations: React.FC = () => {
             <EuiNotificationBadge size="m">{pipelineNames.length}</EuiNotificationBadge>
           )
         }
-        iconType="visVega"
+        iconType="code"
       >
         <EuiFormRow
           fullWidth

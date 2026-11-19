@@ -1,4 +1,5 @@
 summary: The create data view API returns a JSON object that contains details about the new data view.
+description: The response includes the full data view specification, including auto-generated fields such as the unique identifier and version.
 value:
   {
     "data_view": {

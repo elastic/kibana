@@ -8,11 +8,20 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-export const uptimeTLSRuleParamsSchema = schema.object({
-  stackVersion: schema.maybe(schema.string()),
-  search: schema.maybe(schema.string()),
-  certExpirationThreshold: schema.maybe(schema.number()),
-  certAgeThreshold: schema.maybe(schema.number()),
-});
+export const uptimeTLSRuleParamsSchema = schema.object(
+  {
+    stackVersion: schema.maybe(schema.string()),
+    search: schema.maybe(schema.string()),
+    certExpirationThreshold: schema.maybe(schema.number()),
+    certAgeThreshold: schema.maybe(schema.number()),
+  },
+  {
+    meta: {
+      title: 'Uptime TLS Rule Params',
+      description:
+        'The parameters for the uptime tls rule. These parameters are appropriate when `rule_type_id` is `xpack.uptime.alerts.tlsCertificate`.',
+    },
+  }
+);
 
 export type UptimeTLSRuleParams = TypeOf<typeof uptimeTLSRuleParamsSchema>;

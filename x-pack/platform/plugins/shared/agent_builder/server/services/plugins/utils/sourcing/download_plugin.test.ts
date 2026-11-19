@@ -48,7 +48,6 @@ describe('parsePluginFromFile', () => {
       manifest: { name: 'test-plugin' },
       skills: [],
       unmanagedAssets: {
-        commands: [],
         agents: [],
         hooks: [],
         mcp_servers: [],

@@ -5,20 +5,134 @@
  * 2.0.
  */
 
-import { AddEditMonitorAPI } from './add_monitor_api';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { AddEditMonitorAPI, isPackagePolicyConflictFailure } from './add_monitor_api';
+import { InvalidNamespaceError } from './invalid_namespace_error';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { SyntheticsService } from '../../../synthetics_service/synthetics_service';
+import { ServiceManagedLocations } from '../../../synthetics_service/service_managed_locations';
 import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
+import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
+import { DeleteMonitorAPI } from '../services/delete_monitor_api';
+
+describe('isPackagePolicyConflictFailure', () => {
+  it('matches Fleet bulkCreate saved-object 409 payloads', () => {
+    expect(
+      isPackagePolicyConflictFailure({
+        statusCode: 409,
+        error: 'Conflict',
+        message: 'Saved object [fleet-package-policies/mon-1-loc-1] conflict',
+      })
+    ).toBe(true);
+  });
+
+  it('matches decorated conflict Errors', () => {
+    expect(
+      isPackagePolicyConflictFailure(
+        SavedObjectsErrorHelpers.createConflictError('fleet-package-policies', 'mon-1-loc-1')
+      )
+    ).toBe(true);
+  });
+
+  it('ignores non-conflict failures', () => {
+    expect(isPackagePolicyConflictFailure(new Error('boom'))).toBe(false);
+    expect(isPackagePolicyConflictFailure({ statusCode: 500, error: 'Error' })).toBe(false);
+    expect(isPackagePolicyConflictFailure(undefined)).toBe(false);
+  });
+});
 
 describe('AddNewMonitorsPublicAPI', () => {
+  describe('revertMonitorIfCreated', () => {
+    const buildApi = (get: jest.Mock) =>
+      new AddEditMonitorAPI({
+        server: { logger: { error: jest.fn() } },
+        spaceId: 'default',
+        monitorConfigRepository: { get },
+      } as any);
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('does not delete policies when a conflicting existing monitor owns the id', async () => {
+      const bulkDelete = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkDelete')
+        .mockResolvedValue(undefined);
+      const api = buildApi(jest.fn().mockResolvedValue({ id: 'monitor-1' }));
+
+      await api.revertMonitorIfCreated({
+        newMonitorId: 'monitor-1',
+        packagePolicyIds: ['monitor-1-location-1'],
+        soCreated: false,
+      });
+
+      expect(bulkDelete).not.toHaveBeenCalled();
+    });
+
+    it('deletes deterministic orphan policies when no monitor owns the id', async () => {
+      const bulkDelete = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkDelete')
+        .mockResolvedValue(undefined);
+      const api = buildApi(jest.fn().mockResolvedValue(null));
+
+      await api.revertMonitorIfCreated({
+        newMonitorId: 'monitor-1',
+        packagePolicyIds: ['monitor-1-location-1'],
+        soCreated: false,
+      });
+
+      expect(bulkDelete).toHaveBeenCalledWith({
+        policyIdsToDelete: ['monitor-1-location-1'],
+        spaceId: 'default',
+      });
+    });
+
+    it('does not delete policies when the monitor SO was created and revert fails', async () => {
+      const bulkDelete = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkDelete')
+        .mockResolvedValue(undefined);
+      jest.spyOn(DeleteMonitorAPI.prototype, 'execute').mockRejectedValue(new Error('forbidden'));
+      const api = buildApi(jest.fn().mockResolvedValue({ id: 'monitor-1' }));
+
+      await api.revertMonitorIfCreated({
+        newMonitorId: 'monitor-1',
+        packagePolicyIds: ['monitor-1-location-1'],
+        soCreated: true,
+      });
+
+      expect(bulkDelete).not.toHaveBeenCalled();
+    });
+
+    it('deletes the monitor and its policies via DeleteMonitorAPI when the monitor SO was created', async () => {
+      const bulkDelete = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkDelete')
+        .mockResolvedValue(undefined);
+      const deleteMonitorExecute = jest
+        .spyOn(DeleteMonitorAPI.prototype, 'execute')
+        .mockResolvedValue(undefined as any);
+      const api = buildApi(jest.fn().mockResolvedValue({ id: 'monitor-1' }));
+
+      await api.revertMonitorIfCreated({
+        newMonitorId: 'monitor-1',
+        packagePolicyIds: ['monitor-1-location-1'],
+        soCreated: true,
+      });
+
+      // The full monitor delete (which tears down its Fleet package policies
+      // too) owns cleanup here; the direct package-policy bulkDelete path is
+      // only for orphan policies from a create that never reached the SO.
+      expect(deleteMonitorExecute).toHaveBeenCalledWith({ monitorIds: ['monitor-1'] });
+      expect(bulkDelete).not.toHaveBeenCalled();
+    });
+  });
+
   it('should normalize schedule', async function () {
-    const syntheticsService = new SyntheticsService({
+    const serviceManagedLocations = new ServiceManagedLocations({
       config: {
         enabled: true,
       },
     } as any);
     const api = new AddEditMonitorAPI({
-      syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+      syntheticsMonitorClient: new SyntheticsMonitorClient(serviceManagedLocations, {} as any),
       request: {
         body: {},
       },
@@ -53,11 +167,11 @@ describe('AddNewMonitorsPublicAPI', () => {
   });
 
   describe('normalizeMonitor defaults', () => {
-    const syntheticsService = new SyntheticsService({
+    const serviceManagedLocations = new ServiceManagedLocations({
       config: {},
     } as any);
     const api = new AddEditMonitorAPI({
-      syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+      syntheticsMonitorClient: new SyntheticsMonitorClient(serviceManagedLocations, {} as any),
       request: {
         body: {},
       },
@@ -179,12 +293,31 @@ describe('AddNewMonitorsPublicAPI', () => {
         ipv4: true,
         ipv6: true,
         journey_id: '',
+        kerberos: {
+          enabled: false,
+          auth_type: 'password',
+          username: '',
+          password: '',
+          keytab: '',
+          config_path: '',
+          krb5_conf: '',
+          realm: '',
+          service_name: '',
+          enable_krb5_fast: false,
+        },
         locations: [],
         max_attempts: 2,
         max_redirects: '0',
         mode: 'any',
         name: undefined,
         namespace: 'default',
+        ntlm: {
+          enabled: false,
+          username: '',
+          password: '',
+          domain: '',
+          workstation: '',
+        },
         origin: 'ui',
         params: '',
         password: '',
@@ -232,6 +365,7 @@ describe('AddNewMonitorsPublicAPI', () => {
         hash: '',
         id: '',
         ignore_https_errors: false,
+        certificate_error_spki_allowlist: [],
         journey_id: '',
         locations: [],
         max_attempts: 2,
@@ -269,6 +403,181 @@ describe('AddNewMonitorsPublicAPI', () => {
         maintenance_windows: [],
         spaces: [],
       });
+    });
+  });
+
+  describe('getMonitorNamespace', () => {
+    const buildApi = (spaceId: string) =>
+      new AddEditMonitorAPI({
+        routeContext: { spaceId },
+        spaceId,
+      } as any);
+
+    it('falls back to the Kibana space namespace when namespace is not explicitly provided', () => {
+      const api = buildApi('test-space');
+      expect(api.getMonitorNamespace('default', false)).toBe('test_space');
+    });
+
+    it('honors an explicitly provided "default" namespace', () => {
+      const api = buildApi('test-space');
+      expect(api.getMonitorNamespace('default', true)).toBe('default');
+    });
+
+    it('honors a custom namespace regardless of whether it was explicitly provided', () => {
+      const api = buildApi('test-space');
+      expect(api.getMonitorNamespace('custom', false)).toBe('custom');
+      expect(api.getMonitorNamespace('custom', true)).toBe('custom');
+    });
+
+    it('throws when the resolved namespace is invalid', () => {
+      const api = buildApi('test-space');
+      expect(() => api.getMonitorNamespace('UPPER_CASE', true)).toThrow(InvalidNamespaceError);
+      expect(() => api.getMonitorNamespace('UPPER_CASE', true)).toThrow(/namespace is invalid/);
+    });
+  });
+
+  describe('hydrateMonitorFields namespace resolution', () => {
+    const buildApi = (
+      spaceId: string,
+      body: Record<string, unknown>,
+      gettingStarted = false,
+      preserveNamespace = false
+    ) => {
+      const request = {
+        query: {
+          ...(gettingStarted ? { gettingStarted } : {}),
+          ...(preserveNamespace ? { preserve_namespace: preserveNamespace } : {}),
+        },
+        body,
+      };
+      return new AddEditMonitorAPI({
+        routeContext: { spaceId, request },
+        spaceId,
+        request,
+      } as any);
+    };
+
+    it('resolves omitted namespace to the Kibana space namespace', () => {
+      const api = buildApi('test-space', { type: 'http' });
+      const result = api.hydrateMonitorFields({
+        newMonitorId: 'id-1',
+        normalizedMonitor: { namespace: 'default' } as any,
+      });
+      expect(result.namespace).toBe('test_space');
+    });
+
+    it('preserves an explicitly provided "default" namespace', () => {
+      const api = buildApi('test-space', { type: 'http', namespace: 'default' });
+      const result = api.hydrateMonitorFields({
+        newMonitorId: 'id-1',
+        normalizedMonitor: { namespace: 'default' } as any,
+      });
+      expect(result.namespace).toBe('default');
+    });
+
+    it('keeps the namespace as sent with preserve_namespace', () => {
+      const api = buildApi('test-space', { type: 'http' }, false, true);
+      const result = api.hydrateMonitorFields({
+        newMonitorId: 'id-1',
+        normalizedMonitor: { namespace: 'default' } as any,
+      });
+      expect(result.namespace).toBe('default');
+    });
+
+    it('rejects an invalid namespace with preserve_namespace', () => {
+      const api = buildApi('test-space', { type: 'http', namespace: '' }, false, true);
+      expect(() =>
+        api.hydrateMonitorFields({
+          newMonitorId: 'id-1',
+          normalizedMonitor: { namespace: '' } as any,
+        })
+      ).toThrow(/namespace is invalid/);
+    });
+
+    it('derives the namespace from the space for the Getting Started flow', () => {
+      const api = buildApi('test-space', { type: 'browser', namespace: 'default' }, true);
+      const result = api.hydrateMonitorFields({
+        newMonitorId: 'id-1',
+        normalizedMonitor: { namespace: 'default' } as any,
+      });
+      expect(result.namespace).toBe('test_space');
+    });
+  });
+
+  describe('normalizeMonitor - maintenance windows', () => {
+    const buildApi = (maintenanceWindows: Array<{ id: string; title: string }>) => {
+      const serviceManagedLocations = new ServiceManagedLocations({ config: {} } as any);
+      const syntheticsMonitorClient = new SyntheticsMonitorClient(
+        serviceManagedLocations,
+        {} as any
+      );
+      syntheticsMonitorClient.getMaintenanceWindows = jest
+        .fn()
+        .mockResolvedValue(maintenanceWindows);
+      return {
+        api: new AddEditMonitorAPI({
+          spaceId: 'default',
+          syntheticsMonitorClient,
+          request: { body: {} },
+        } as any),
+        maintenanceWindows,
+        getMaintenanceWindows: syntheticsMonitorClient.getMaintenanceWindows,
+      };
+    };
+
+    it('resolves maintenance window names to ids', async () => {
+      const { api, maintenanceWindows, getMaintenanceWindows } = buildApi([
+        { id: 'mw-1', title: 'Weekend window' },
+      ]);
+      const result = await api.normalizeMonitor(
+        { type: 'http', maintenance_windows: ['Weekend window'] } as any,
+        {} as any,
+        undefined,
+        maintenanceWindows as any
+      );
+      expect(result.maintenance_windows).toEqual(['mw-1']);
+      expect(getMaintenanceWindows).not.toHaveBeenCalled();
+    });
+
+    it('keeps valid maintenance window ids', async () => {
+      const { api, maintenanceWindows } = buildApi([{ id: 'mw-1', title: 'Weekend window' }]);
+      const result = await api.normalizeMonitor(
+        { type: 'http', maintenance_windows: ['mw-1'] } as any,
+        {} as any,
+        undefined,
+        maintenanceWindows as any
+      );
+      expect(result.maintenance_windows).toEqual(['mw-1']);
+    });
+
+    it('throws for an unresolved reference', async () => {
+      const { api, maintenanceWindows } = buildApi([{ id: 'mw-1', title: 'Weekend window' }]);
+      await expect(
+        api.normalizeMonitor(
+          { type: 'http', maintenance_windows: ['nope'] } as any,
+          {} as any,
+          undefined,
+          maintenanceWindows as any
+        )
+      ).rejects.toThrow(/nope/);
+    });
+
+    it('throws when maintenance windows are unavailable', async () => {
+      const { api, maintenanceWindows } = buildApi([]);
+      await expect(
+        api.normalizeMonitor(
+          { type: 'http', maintenance_windows: ['mw-1'] } as any,
+          {} as any,
+          undefined,
+          maintenanceWindows as any
+        )
+      ).rejects.toThrow(/mw-1/);
+    });
+
+    it('does not fetch maintenance windows when none are referenced', async () => {
+      const { api, getMaintenanceWindows } = buildApi([]);
+      await api.normalizeMonitor({ type: 'http' } as any, {} as any);
+      expect(getMaintenanceWindows).not.toHaveBeenCalled();
     });
   });
 

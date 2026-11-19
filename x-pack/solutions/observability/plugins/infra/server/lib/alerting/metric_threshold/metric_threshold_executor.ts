@@ -13,6 +13,10 @@ import {
   ALERT_GROUPING,
   ALERT_INDEX_PATTERN,
   ALERT_REASON,
+  ALERT_SEVERITY,
+  ALERT_SEVERITY_CRITICAL,
+  ALERT_SEVERITY_WARNING,
+  type AlertSeverity,
 } from '@kbn/rule-data-utils';
 import { castArray, isEqual } from 'lodash';
 import type {
@@ -20,7 +24,7 @@ import type {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
-import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
+import { parseDuration, RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import type { RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import type { TimeUnitChar } from '@kbn/observability-plugin/common';
@@ -34,9 +38,11 @@ import {
   type Group,
   getFormattedGroups,
 } from '@kbn/alerting-rule-utils';
+import type { DataViewBase } from '@kbn/es-query';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
-import { AlertStates } from '../../../../common/alerting/metrics';
+import { Aggregators, AlertStates } from '../../../../common/alerting/metrics';
+import type { MetricExpressionParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import type { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import {
@@ -60,7 +66,9 @@ import { getEvaluationValues, getThresholds } from '../common/get_values';
 import type { EvaluatedRuleParams, Evaluation } from './lib/evaluate_rule';
 import { evaluateRule } from './lib/evaluate_rule';
 import type { MissingGroupsRecord } from './lib/check_missing_group';
+import { shouldTrackMissingGroups } from './lib/should_track_missing_groups';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
+import { isCustom } from './lib/metric_expression_params';
 
 export type MetricThresholdAlert = Omit<
   ObservabilityMetricsAlert,
@@ -133,7 +141,7 @@ export const createMetricThresholdExecutor =
       startedAt,
       executionId,
       spaceId,
-      rule: { id: ruleId },
+      rule: { id: ruleId, schedule },
     } = options;
 
     const { criteria } = params;
@@ -177,6 +185,7 @@ export const createMetricThresholdExecutor =
           [ALERT_GROUP]: groups,
           [ALERT_GROUPING]: grouping?.unflatten,
           [ALERT_INDEX_PATTERN]: metricAlias,
+          [ALERT_SEVERITY]: ACTION_GROUP_TO_SEVERITY[actionGroup],
           ...flattenAdditionalContext(additionalContext),
           ...getEcsGroupsFromFlattenGrouping(grouping?.flatten),
         },
@@ -245,9 +254,10 @@ export const createMetricThresholdExecutor =
       }
     }
 
-    // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
-    const alertOnGroupDisappear =
-      _alertOnGroupDisappear !== false && params.noDataBehavior !== 'recover';
+    const alertOnGroupDisappear = shouldTrackMissingGroups(
+      params.noDataBehavior,
+      _alertOnGroupDisappear
+    );
 
     const config = source.configuration;
     const compositeSize = libs.configuration.alerting.metric_threshold.group_by_page_size;
@@ -264,6 +274,23 @@ export const createMetricThresholdExecutor =
           )
         : [];
 
+    let dataView: DataViewBase | undefined;
+    if (shouldCreateDataView(criteria)) {
+      const dataViewsService = await services.getDataViews();
+      try {
+        const fields = await dataViewsService.getFieldsForWildcard({
+          pattern: config.metricAlias,
+          allowNoIndex: true,
+        });
+        dataView = {
+          title: config.metricAlias,
+          fields,
+        };
+      } catch (e) {
+        // ignore — dataView stays undefined and toElasticsearchQuery degrades gracefully
+      }
+    }
+
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
@@ -271,9 +298,11 @@ export const createMetricThresholdExecutor =
       compositeSize,
       alertOnGroupDisappear,
       logger,
+      dataView,
       state.lastRunTimestamp,
       { end: startedAt.valueOf() },
-      convertStringsToMissingGroupsRecord(previousMissingGroups)
+      convertStringsToMissingGroupsRecord(previousMissingGroups),
+      parseDuration(schedule.interval)
     );
 
     const resultGroupSet = new Set<string>();
@@ -400,9 +429,8 @@ export const createMetricThresholdExecutor =
             : {}
           : {};
 
-        additionalContext.tags = Array.from(
-          new Set([...(additionalContext.tags ?? []), ...options.rule.tags])
-        );
+        const contextTags = [additionalContext.tags ?? []].flat();
+        additionalContext.tags = Array.from(new Set([...contextTags, ...options.rule.tags]));
 
         const evaluationValues = getEvaluationValues<Evaluation>(alertResults, group);
         const thresholds = getThresholds<any>(criteria);
@@ -514,7 +542,7 @@ export const createMetricThresholdExecutor =
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
         originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS.id,
         originalAlertStateWasWARNING: originalActionGroup === WARNING_ACTIONS.id,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        // eslint-disable-next-line @kbn/compat/typescript-naming-convention
         originalAlertStateWasNO_DATA: originalActionGroup === NO_DATA_ACTIONS.id,
         ...additionalContext,
       });
@@ -553,6 +581,13 @@ export const NO_DATA_ACTIONS = {
   }),
 };
 
+// No_Data has no entry: it's an availability state, not a severity tier, so
+// `kibana.alert.severity` is left unset for those alerts.
+const ACTION_GROUP_TO_SEVERITY: Record<string, AlertSeverity | undefined> = {
+  [FIRED_ACTIONS.id]: ALERT_SEVERITY_CRITICAL,
+  [WARNING_ACTIONS.id]: ALERT_SEVERITY_WARNING,
+};
+
 const translateActionGroupToAlertState = (
   actionGroupId: string | undefined
 ): string | undefined => {
@@ -575,6 +610,17 @@ const mapToConditionsLookup = (
     result[`condition${i}`] = value;
     return result;
   }, {} as Record<string, unknown>);
+
+const shouldCreateDataView = (criteria: MetricExpressionParams[]) =>
+  criteria.some((criterion) => {
+    if (!isCustom(criterion)) {
+      return false;
+    }
+
+    return criterion.customMetrics.some(
+      (customMetric) => customMetric.aggType === Aggregators.COUNT && customMetric.filter != null
+    );
+  });
 
 const formatAlertResult = <AlertResult>(
   alertResult: {

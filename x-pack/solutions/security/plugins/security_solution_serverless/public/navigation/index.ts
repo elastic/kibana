@@ -5,14 +5,22 @@
  * 2.0.
  */
 
+import type { Subscription } from 'rxjs';
 import type { SecurityProductTypes } from '../../common/config';
 import type { Services } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
 import { registerSolutionNavigation } from './navigation';
 import { enableManagementCardsLanding } from './management_cards';
+import { subscribeDashboardOnlyLanding } from './redirect_dashboard_only_landing';
 
-export const startNavigation = (services: Services, productTypes: SecurityProductTypes) => {
+export const startNavigation = (
+  services: Services,
+  productTypes: SecurityProductTypes
+): Subscription => {
+  const landingSubscription = subscribeDashboardOnlyLanding(services);
   registerSolutionNavigation(services, productTypes);
-  enableManagementCardsLanding(services);
   subscribeBreadcrumbs(services);
+  const managementSubscription = enableManagementCardsLanding(services);
+  landingSubscription.add(managementSubscription);
+  return landingSubscription;
 };

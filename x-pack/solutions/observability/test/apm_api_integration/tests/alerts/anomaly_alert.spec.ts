@@ -36,17 +36,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       const spikeStart = moment().subtract(2, 'hours').valueOf();
       const spikeEnd = moment().subtract(1, 'hours').valueOf();
+      const dropStart = moment().subtract(2, 'hours').valueOf();
 
       before(async () => {
         const serviceA = apm
           .service({ name: 'foo', environment: 'production', agentName: 'java' })
           .instance('a');
+        const serviceDrop = apm
+          .service({ name: 'bar', environment: 'production', agentName: 'java' })
+          .instance('b');
 
         const events = timerange(start, end)
           .interval('1m')
           .rate(1)
           .generator((timestamp) => {
             const isInSpike = timestamp >= spikeStart && timestamp < spikeEnd;
+            const isDropped = timestamp >= dropStart;
             const count = isInSpike ? 4 : 1;
             const duration = isInSpike ? 5000 : 100;
             const outcome = isInSpike ? 'failure' : 'success';
@@ -59,6 +64,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .duration(duration)
                   .outcome(outcome)
               ),
+              ...(isDropped
+                ? []
+                : [
+                    serviceDrop
+                      .transaction({ transactionName: 'tx' })
+                      .timestamp(timestamp)
+                      .duration(100)
+                      .success(),
+                  ]),
             ];
           });
 
@@ -109,6 +123,44 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const score = alerts[0]['kibana.alert.evaluation.value'];
           expect(alerts[0]['kibana.alert.reason']).to.be(
             `warning latency anomaly with a score of ${score}, was detected in the last 5 hrs for foo.`
+          );
+        });
+      });
+
+      describe('with ml jobs for low transaction count', () => {
+        let createdRule: Awaited<ReturnType<typeof createApmRule>>;
+
+        before(async () => {
+          createdRule = await createApmRule({
+            supertest,
+            name: 'Low transaction count anomaly | service-bar',
+            params: {
+              environment: 'production',
+              serviceName: 'bar',
+              windowSize: 5,
+              windowUnit: 'h',
+              anomalySeverityType: ML_ANOMALY_SEVERITY.WARNING,
+              anomalyDetectorTypes: [AnomalyDetectorType.txLowCount],
+            },
+            ruleTypeId: ApmRuleType.Anomaly,
+          });
+        });
+
+        it('checks if alert is active', async () => {
+          const ruleStatus = await waitForActiveRule({
+            ruleId: createdRule.id,
+            supertest,
+            logger,
+          });
+          expect(ruleStatus).to.be('active');
+        });
+
+        it('produces an alert with the correct reason', async () => {
+          const alerts = await waitForAlertsForRule({ es, ruleId: createdRule.id });
+
+          const score = alerts[0]['kibana.alert.evaluation.value'];
+          expect(alerts[0]['kibana.alert.reason']).to.be(
+            `warning low transaction count anomaly with a score of ${score}, was detected in the last 5 hrs for bar.`
           );
         });
       });

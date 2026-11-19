@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { AnalyticsServiceStart } from '@kbn/core/server';
+import { reportIndexEditorError } from '../report_error';
 import {
   INDEX_EDITOR_FLYOUT_OPENED_EVENT_TYPE,
   INDEX_EDITOR_SAVE_SUBMITTED_EVENT_TYPE,
@@ -37,8 +38,10 @@ export class IndexEditorTelemetryService {
     try {
       this._analytics.reportEvent(eventType, eventData);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('Failed to report telemetry event', error);
+      reportIndexEditorError(error, {
+        errorType: 'TelemetryEvent',
+        labels: { event_type: eventType },
+      });
     }
   }
 

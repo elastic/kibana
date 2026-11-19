@@ -7,6 +7,7 @@
 
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_PROJECT_ROUTING, LOCAL_PROJECT_ROUTING } from '../../../common/project_routings';
 import { oneMinute, twoMinute } from '../fixtures/duration';
 import {
   createAPMTransactionErrorRateIndicator,
@@ -163,6 +164,7 @@ describe('APM Transaction Error Rate Transform Generator', () => {
         frequency: oneMinute(),
         syncDelay: twoMinute(),
         preventInitialBackfill: true,
+        preventCrossProjectSearch: false,
       },
     });
 
@@ -177,6 +179,60 @@ describe('APM Transaction Error Rate Transform Generator', () => {
           gte: 'now-240s/m', // 1m + 2m + 60s
         },
       },
+    });
+  });
+
+  describe('project_routing', () => {
+    const cpsGenerator = new ApmTransactionErrorRateTransformGenerator(
+      SPACE_ID,
+      dataViewsService,
+      true,
+      true
+    );
+
+    const sloWithSettings = (settings: {
+      projectRoutings?: string | null;
+      preventCrossProjectSearch?: boolean;
+    }) => {
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
+      return {
+        ...slo,
+        settings: {
+          syncDelay: slo.settings.syncDelay,
+          frequency: slo.settings.frequency,
+          preventInitialBackfill: slo.settings.preventInitialBackfill,
+          ...settings,
+        },
+      };
+    };
+
+    it('uses origin routing for legacy preventCrossProjectSearch true', async () => {
+      const transform = await cpsGenerator.getTransformParams(
+        sloWithSettings({ preventCrossProjectSearch: true })
+      );
+      expect(transform.source.project_routing).toBe(LOCAL_PROJECT_ROUTING);
+    });
+
+    it('uses all-projects routing when both routing fields are unset', async () => {
+      const transform = await cpsGenerator.getTransformParams(sloWithSettings({}));
+      expect(transform.source.project_routing).toBe(ALL_PROJECT_ROUTING);
+    });
+
+    it('uses all-projects routing when preventCrossProjectSearch is false', async () => {
+      const transform = await cpsGenerator.getTransformParams(
+        sloWithSettings({ preventCrossProjectSearch: false })
+      );
+      expect(transform.source.project_routing).toBe(ALL_PROJECT_ROUTING);
+    });
+
+    it('lets stored projectRoutings win', async () => {
+      const transform = await cpsGenerator.getTransformParams(
+        sloWithSettings({
+          projectRoutings: '_id:p1 AND _id:p2',
+          preventCrossProjectSearch: true,
+        })
+      );
+      expect(transform.source.project_routing).toBe('_id:p1 AND _id:p2');
     });
   });
 });

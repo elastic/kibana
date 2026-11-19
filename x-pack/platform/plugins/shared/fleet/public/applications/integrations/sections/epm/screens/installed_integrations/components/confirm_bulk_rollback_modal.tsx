@@ -6,9 +6,10 @@
  */
 
 import React, { useState } from 'react';
-import { EuiCallOut, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { InstalledPackageUIPackageListItem } from '../types';
 
@@ -72,25 +73,24 @@ export const ConfirmBulkRollbackModal: React.FunctionComponent<{
         }
       }}
     >
-      <EuiCallOut
-        color="warning"
-        iconType="info"
+      <KbnWarningCallout
         title={i18n.translate('xpack.fleet.installedIntegrations.bulkRollbackModal.calloutTitle', {
           defaultMessage: 'This action impacts all integration policies and assets.',
         })}
-      >
-        {isSingleItem ? (
-          <FormattedMessage
-            id="xpack.fleet.installedIntegrations.bulkRollbackModal.calloutContentSingleItem"
-            defaultMessage="The integration will be rolled back to the previous version including assets and integration policies. Agents using the integration will receive the policy change."
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.fleet.installedIntegrations.bulkRollbackModal.calloutContent"
-            defaultMessage="All integrations will be rolled back to the previous version including assets and integration policies. Agents using the integrations will receive the policy change."
-          />
-        )}
-      </EuiCallOut>
+        text={
+          isSingleItem ? (
+            <FormattedMessage
+              id="xpack.fleet.installedIntegrations.bulkRollbackModal.calloutContentSingleItem"
+              defaultMessage="The integration will be rolled back to the previous version including assets and integration policies. Agents using the integration will receive the policy change."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.installedIntegrations.bulkRollbackModal.calloutContent"
+              defaultMessage="All integrations will be rolled back to the previous version including assets and integration policies. Agents using the integrations will receive the policy change."
+            />
+          )
+        }
+      />
     </EuiConfirmModal>
   );
 };

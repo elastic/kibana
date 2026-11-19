@@ -6,7 +6,8 @@
  */
 
 import type { EuiButtonColor } from '@elastic/eui';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
+import { AiButton, type AiButtonIconType } from '@kbn/shared-ux-ai-components';
 import React, { memo, useCallback } from 'react';
 import type { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
 import type { AgentBuilderAddToChatTelemetry } from '../hooks/use_report_add_to_chat';
@@ -33,6 +34,16 @@ export interface NewAgentBuilderAttachmentProps {
    */
   disabled?: boolean;
   /**
+   * Optionally override the button text.
+   * @default 'Add to chat'
+   */
+  label?: string;
+  /**
+   * Icon shown beside the label.
+   * @default 'productAgent'
+   */
+  iconType?: AiButtonIconType;
+  /**
    * Telemetry data for tracking "Add to Chat" clicks
    */
   telemetry?: AgentBuilderAddToChatTelemetry;
@@ -47,6 +58,8 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
   onClick,
   size = 'm',
   disabled = false,
+  label,
+  iconType = 'productAgent',
   telemetry: telemetryData,
 }: NewAgentBuilderAttachmentProps) {
   const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled, hasValidAgentBuilderLicense } =
@@ -58,6 +71,7 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
       reportAddToChatClick({
         pathway: telemetryData.pathway,
         attachments: telemetryData.attachments,
+        item_count: telemetryData.item_count,
       });
     }
     onClick();
@@ -65,31 +79,24 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
 
   const isDisabled = disabled || !hasValidAgentBuilderLicense;
   const shouldShowLicenseTooltip = !hasValidAgentBuilderLicense;
+  const buttonLabel = label ?? i18n.ADD_TO_CHAT;
 
   if (!hasAgentBuilderPrivilege || !isAgentChatExperienceEnabled) {
     return null;
   }
 
   const button = (
-    <EuiButtonEmpty
-      aria-label={i18n.ADD_TO_CHAT}
-      color={color}
+    <AiButton
+      aria-label={buttonLabel}
+      variant="empty"
       data-test-subj="newAgentBuilderAttachment"
       onClick={handleClick}
       size={size}
-      disabled={isDisabled}
+      iconType={iconType}
+      isDisabled={isDisabled}
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiIcon
-            type="productAgent"
-            color={color === 'primary' ? 'default' : color}
-            aria-hidden={true}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{i18n.ADD_TO_CHAT}</EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiButtonEmpty>
+      {buttonLabel}
+    </AiButton>
   );
 
   if (!shouldShowLicenseTooltip) {
@@ -97,8 +104,6 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
   }
 
   return (
-    <EuiToolTip content={i18n.UPGRADE_TO_ENTERPRISE_TO_USE_AGENT_BUILDER_CHAT}>
-      <span>{button}</span>
-    </EuiToolTip>
+    <EuiToolTip content={i18n.UPGRADE_TO_ENTERPRISE_TO_USE_AGENT_BUILDER_CHAT}>{button}</EuiToolTip>
   );
 });

@@ -467,7 +467,7 @@ describe('translateClassicStreamPipelineActions', () => {
       } as ActionsByType);
     });
 
-    it('upserts only the pipeline if a processors is added', async () => {
+    it('also adds update_default_ingest_pipeline for the new data stream when a processor is added', async () => {
       const actionsByType = emptyActionsByType();
       actionsByType.append_processor_to_ingest_pipeline.push({
         type: 'append_processor_to_ingest_pipeline',
@@ -560,6 +560,15 @@ describe('translateClassicStreamPipelineActions', () => {
                 description:
                   'Streams managed pipeline to connect Classic streams to the Streams layer',
               },
+            },
+          },
+        ],
+        update_default_ingest_pipeline: [
+          {
+            type: 'update_default_ingest_pipeline',
+            request: {
+              name: 'my-other-datastream',
+              pipeline: 'my-template-pipeline',
             },
           },
         ],
@@ -657,6 +666,15 @@ describe('translateClassicStreamPipelineActions', () => {
                 description:
                   'Streams managed pipeline to connect Classic streams to the Streams layer',
               },
+            },
+          },
+        ],
+        update_default_ingest_pipeline: [
+          {
+            type: 'update_default_ingest_pipeline',
+            request: {
+              name: 'my-other-datastream',
+              pipeline: 'my-template-pipeline',
             },
           },
         ],
@@ -1044,10 +1062,8 @@ function emptyActionsByType(): ActionsByType {
     upsert_dot_streams_document: [],
     delete_dot_streams_document: [],
     update_data_stream_mappings: [],
-    delete_queries: [],
     unlink_assets: [],
     unlink_systems: [],
-    unlink_features: [],
     update_ingest_settings: [],
     update_failure_store: [],
     upsert_esql_view: [],

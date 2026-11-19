@@ -10,9 +10,6 @@ import type { EndpointManagementPageMap } from './page_reference';
 import { getEndpointManagementPageMap } from './page_reference';
 import type { UserAuthzAccessLevel } from './types';
 import { getNoPrivilegesPage } from './common';
-import { loadPage } from '../tasks/common';
-import { APP_PATH } from '../../../../common';
-import { getEndpointDetailsPath } from '../../common/routing';
 
 interface ListRowOptions {
   endpointId?: string;
@@ -90,11 +87,4 @@ export const getUnIsolateActionMenuItem = (): Cypress.Chainable => {
 
 export const getConsoleActionMenuItem = (): Cypress.Chainable => {
   return cy.getByTestSubj('tableRowActionsMenuPanel').findByTestSubj('console');
-};
-
-export const navigateToEndpointPolicyResponse = (endpointAgentId: string): void => {
-  loadPage(
-    APP_PATH +
-      getEndpointDetailsPath({ name: 'endpointPolicyResponse', selected_endpoint: endpointAgentId })
-  );
 };

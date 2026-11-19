@@ -19,11 +19,20 @@ export function RedirectDependenciesToDependenciesInventory({
   const query = qs.parse(location.search);
 
   const normalizedPathname = location.pathname.replace(/\/$/, '');
-  if (normalizedPathname === '/dependencies' && !('dependencyName' in query)) {
+
+  // `/dependencies/*` detail routes require `dependencyName` (inherited from the
+  // `/dependencies` parent); without it they crash on params validation, so fall
+  // back to the inventory. The inventory itself does not require it.
+  const isDependencyDetailRoute =
+    normalizedPathname === '/dependencies' ||
+    (normalizedPathname.startsWith('/dependencies/') &&
+      normalizedPathname !== '/dependencies/inventory');
+
+  if (isDependencyDetailRoute && typeof query?.dependencyName !== 'string') {
     return (
       <Redirect
         to={qs.stringifyUrl({
-          url: location.pathname + '/inventory',
+          url: '/dependencies/inventory',
           query,
         })}
       />

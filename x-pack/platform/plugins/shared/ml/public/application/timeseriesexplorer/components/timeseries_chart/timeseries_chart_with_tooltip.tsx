@@ -9,17 +9,20 @@ import type { FC } from 'react';
 import React, { useEffect, useState, useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Annotation } from '@kbn/ml-common-types/annotations';
 import { MlTooltipComponent } from '../../../components/chart_tooltip';
 import { TimeseriesChart } from './timeseries_chart';
-import type { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../../common/constants/search';
-import type { Annotation } from '../../../../../common/types/annotations';
 import { useMlKibana, useNotifications } from '../../../contexts/kibana';
 import { useTimeBucketsService } from '../../../util/time_buckets_service';
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import type { SourceIndicesWithGeoFields } from '../../../explorer/explorer_utils';
+import type { CustomRuleEditorSource } from '../../../../../common/constants/usage_collection';
+
 interface TimeSeriesChartWithTooltipsProps {
   bounds: any;
   detectorIndex: number;
@@ -38,6 +41,9 @@ interface TimeSeriesChartWithTooltipsProps {
     interval: string;
   };
   sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
+  telemetrySource: CustomRuleEditorSource;
+  /** When set, a panel cancel aborts the annotations request started for this chart. */
+  requestCancellationManager?: RequestCancellationManager;
 }
 export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> = ({
   bounds,
@@ -57,6 +63,8 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
     interval: 'second',
   },
   sourceIndicesWithGeoFields,
+  telemetrySource,
+  requestCancellationManager,
 }) => {
   const { toasts: toastNotifications } = useNotifications();
   const {
@@ -85,7 +93,18 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
   const mlTimeBucketsService = useTimeBucketsService();
 
   useEffect(() => {
-    let unmounted = false;
+    const abortController = new AbortController();
+    const cancellationSignal = requestCancellationManager?.signal;
+    const signal = cancellationSignal
+      ? AbortSignal.any([abortController.signal, cancellationSignal])
+      : abortController.signal;
+
+    if (signal.aborted) {
+      return () => {
+        abortController.abort();
+      };
+    }
+
     const entities = getControlsForDetector(detectorIndex, selectedEntities, selectedJob);
     const nonBlankEntities = Array.isArray(entities)
       ? entities.filter((entity) => entity.fieldValue !== null)
@@ -110,13 +129,18 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
           maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
           detectorIndex,
           entities: nonBlankEntities,
+          signal,
         });
-        if (!unmounted) {
-          if (Array.isArray(resp.annotations[jobId])) {
-            setAnnotationData(resp.annotations[jobId]);
-          }
+        if (signal.aborted) {
+          return;
+        }
+        if (Array.isArray(resp.annotations[jobId])) {
+          setAnnotationData(resp.annotations[jobId]);
         }
       } catch (error) {
+        if (signal.aborted || (error instanceof Error && error.name === 'AbortError')) {
+          return;
+        }
         showAnnotationErrorToastNotification(error);
       }
     };
@@ -124,7 +148,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
     loadAnnotations(selectedJob.job_id);
 
     return () => {
-      unmounted = true;
+      abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -134,6 +158,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
     selectedEntities,
     bounds,
     contextAggregationInterval,
+    requestCancellationManager,
   ]);
 
   if (chartProps.svgHeight) {
@@ -160,6 +185,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
             tooltipService={tooltipService}
             tableData={tableData}
             sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+            telemetrySource={telemetrySource}
           />
         )}
       </MlTooltipComponent>

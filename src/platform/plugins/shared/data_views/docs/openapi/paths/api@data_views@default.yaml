@@ -1,8 +1,19 @@
 get:
   summary: Get the default data view
   operationId: getDefaultDataViewDefault
+  description: >
+    Retrieve the identifier of the default data view for the current Kibana space.
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X GET "${KIBANA_URL}/api/data_views/default" \
+          -H "Authorization: ApiKey ${API_KEY}"
+    - lang: Console
+      source: |
+        GET kbn://api/data_views/default
   responses:
     '200':
       description: Indicates a successful call.
@@ -22,11 +33,30 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            getDefaultDataViewBadRequest:
+              $ref: '../components/examples/error_400_response.yaml'
 post:
   summary: Set the default data view
   operationId: setDefaultDatailViewDefault
+  description: >
+    Set the default data view for the current Kibana space.
+    The default data view is used as a fallback when no specific data view is selected.
   tags:
     - data views
+  x-codeSamples:
+    - lang: curl
+      source: |
+        curl \
+          -X POST "${KIBANA_URL}/api/data_views/default" \
+          -H "Authorization: ApiKey ${API_KEY}" \
+          -H "kbn-xsrf: true" \
+          -H "Content-Type: application/json" \
+          -d '{"data_view_id":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","force":true}'
+    - lang: Console
+      source: |
+        POST kbn://api/data_views/default
+        {"data_view_id":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","force":true}
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
   requestBody:
@@ -62,9 +92,15 @@ post:
             properties:
               acknowledged:
                 type: boolean
+          examples:
+            setDefaultDataViewResponse:
+              $ref: '../components/examples/set_default_data_view_response.yaml'
     '400':
       description: Bad request
       content:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            setDefaultDataViewBadRequest:
+              $ref: '../components/examples/error_400_response.yaml'

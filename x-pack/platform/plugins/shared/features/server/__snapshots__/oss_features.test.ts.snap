@@ -1080,6 +1080,11 @@ exports[`buildOSSFeatures with a basic license returns the dashboard feature aug
 Array [
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "dashboard",
+        ],
+      },
       "alerting": Object {
         "alert": Object {
           "all": Array [],
@@ -1157,6 +1162,8 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "links",
+          "markdown",
           "query",
           "url",
           "search-session",
@@ -1168,9 +1175,9 @@ Array [
           "canvas-workpad",
           "event-annotation-group",
           "lens",
-          "links",
           "map",
           "tag",
+          "vega",
         ],
       },
       "ui": Array [
@@ -1186,6 +1193,11 @@ Array [
   },
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "dashboard",
+        ],
+      },
       "api": Array [
         "bulkGetUserProfiles",
         "dashboardUsageStats",
@@ -1241,6 +1253,8 @@ Array [
           "map",
           "dashboard",
           "tag",
+          "markdown",
+          "vega",
           "query",
         ],
       },
@@ -1257,6 +1271,11 @@ exports[`buildOSSFeatures with a basic license returns the dashboard_v2 feature 
 Array [
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "dashboard",
+        ],
+      },
       "alerting": Object {
         "alert": Object {
           "all": Array [],
@@ -1302,6 +1321,8 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "links",
+          "markdown",
           "url",
           "search-session",
         ],
@@ -1312,9 +1333,9 @@ Array [
           "canvas-workpad",
           "event-annotation-group",
           "lens",
-          "links",
           "map",
           "tag",
+          "vega",
         ],
       },
       "ui": Array [
@@ -1329,6 +1350,11 @@ Array [
   },
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "dashboard",
+        ],
+      },
       "api": Array [
         "bulkGetUserProfiles",
         "dashboardUsageStats",
@@ -1353,6 +1379,8 @@ Array [
           "map",
           "dashboard",
           "tag",
+          "markdown",
+          "vega",
         ],
       },
       "ui": Array [
@@ -1933,6 +1961,11 @@ exports[`buildOSSFeatures with a basic license returns the visualize feature aug
 Array [
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "visualization",
+        ],
+      },
       "alerting": Object {
         "alert": Object {
           "all": Array [],
@@ -2005,6 +2038,7 @@ Array [
         "all": Array [
           "visualization",
           "lens",
+          "vega",
           "query",
           "url",
         ],
@@ -2026,6 +2060,11 @@ Array [
   },
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "visualization",
+        ],
+      },
       "api": Array [
         "savedQuery:read",
       ],
@@ -2074,6 +2113,7 @@ Array [
           "search",
           "visualization",
           "lens",
+          "vega",
           "tag",
           "query",
         ],
@@ -2091,6 +2131,11 @@ exports[`buildOSSFeatures with a basic license returns the visualize_v2 feature 
 Array [
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "visualization",
+        ],
+      },
       "alerting": Object {
         "alert": Object {
           "all": Array [],
@@ -2130,6 +2175,7 @@ Array [
         "all": Array [
           "visualization",
           "lens",
+          "vega",
           "url",
         ],
         "read": Array [
@@ -2149,6 +2195,11 @@ Array [
   },
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "visualization",
+        ],
+      },
       "api": Array [],
       "app": Array [
         "visualize",
@@ -2165,6 +2216,7 @@ Array [
           "search",
           "visualization",
           "lens",
+          "vega",
           "tag",
         ],
       },
@@ -2235,6 +2287,11 @@ exports[`buildOSSFeatures with a enterprise license returns the dashboard featur
 Array [
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "dashboard",
+        ],
+      },
       "alerting": Object {
         "alert": Object {
           "all": Array [],
@@ -2312,6 +2369,8 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "links",
+          "markdown",
           "query",
           "url",
           "search-session",
@@ -2323,9 +2382,9 @@ Array [
           "canvas-workpad",
           "event-annotation-group",
           "lens",
-          "links",
           "map",
           "tag",
+          "vega",
         ],
       },
       "ui": Array [
@@ -2341,6 +2400,11 @@ Array [
   },
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "dashboard",
+        ],
+      },
       "api": Array [
         "bulkGetUserProfiles",
         "dashboardUsageStats",
@@ -2396,6 +2460,8 @@ Array [
           "map",
           "dashboard",
           "tag",
+          "markdown",
+          "vega",
           "query",
         ],
       },
@@ -2412,6 +2478,11 @@ exports[`buildOSSFeatures with a enterprise license returns the dashboard_v2 fea
 Array [
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "dashboard",
+        ],
+      },
       "alerting": Object {
         "alert": Object {
           "all": Array [],
@@ -2457,6 +2528,8 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
+          "links",
+          "markdown",
           "url",
           "search-session",
         ],
@@ -2467,9 +2540,9 @@ Array [
           "canvas-workpad",
           "event-annotation-group",
           "lens",
-          "links",
           "map",
           "tag",
+          "vega",
         ],
       },
       "ui": Array [
@@ -2484,6 +2557,11 @@ Array [
   },
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "dashboard",
+        ],
+      },
       "api": Array [
         "bulkGetUserProfiles",
         "dashboardUsageStats",
@@ -2508,6 +2586,8 @@ Array [
           "map",
           "dashboard",
           "tag",
+          "markdown",
+          "vega",
         ],
       },
       "ui": Array [
@@ -3088,6 +3168,11 @@ exports[`buildOSSFeatures with a enterprise license returns the visualize featur
 Array [
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "visualization",
+        ],
+      },
       "alerting": Object {
         "alert": Object {
           "all": Array [],
@@ -3160,6 +3245,7 @@ Array [
         "all": Array [
           "visualization",
           "lens",
+          "vega",
           "query",
           "url",
         ],
@@ -3181,6 +3267,11 @@ Array [
   },
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "visualization",
+        ],
+      },
       "api": Array [
         "savedQuery:read",
       ],
@@ -3229,6 +3320,7 @@ Array [
           "search",
           "visualization",
           "lens",
+          "vega",
           "tag",
           "query",
         ],
@@ -3246,6 +3338,11 @@ exports[`buildOSSFeatures with a enterprise license returns the visualize_v2 fea
 Array [
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "visualization",
+        ],
+      },
       "alerting": Object {
         "alert": Object {
           "all": Array [],
@@ -3285,6 +3382,7 @@ Array [
         "all": Array [
           "visualization",
           "lens",
+          "vega",
           "url",
         ],
         "read": Array [
@@ -3304,6 +3402,11 @@ Array [
   },
   Object {
     "privilege": Object {
+      "aiIndex": Object {
+        "read": Array [
+          "visualization",
+        ],
+      },
       "api": Array [],
       "app": Array [
         "visualize",
@@ -3320,6 +3423,7 @@ Array [
           "search",
           "visualization",
           "lens",
+          "vega",
           "tag",
         ],
       },

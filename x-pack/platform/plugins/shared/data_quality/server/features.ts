@@ -77,11 +77,12 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
   app: [PLUGIN_ID],
   alerting: [degradedDocsAlertingFeatures],
   management: {
-    insightsAndAlerting: ['triggersActions'],
+    insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
   },
   privileges: {
     all: {
       app: [PLUGIN_ID],
+      api: ['bulkGetUserProfiles'],
       savedObject: {
         all: [],
         read: [],
@@ -96,7 +97,7 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
         },
       },
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
     },
     read: {

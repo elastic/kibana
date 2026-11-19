@@ -12,8 +12,6 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import {
   EuiButtonIcon,
-  EuiButton,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,10 +19,13 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ProgressControls } from '@kbn/aiops-components';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { cancelStream, startStream } from '@kbn/ml-response-stream/client';
+import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import {
   clearAllRowState,
   setGroupResults,
@@ -51,6 +52,7 @@ import { fetchFieldCandidates } from '@kbn/aiops-log-rate-analysis/state/log_rat
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
+import { useIsInteractive } from '../../hooks/use_is_interactive';
 
 import {
   getGroupTableItems,
@@ -92,6 +94,14 @@ interface LogRateAnalysisResultsProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
+  /** Optional manager used by dashboard panels to cancel in-flight and pending requests */
+  requestCancellationManager?: RequestCancellationManager;
+  /**
+   * Changes when the dashboard Refresh button runs. Stays put across the panel's first render,
+   * unlike the reload observable's initial subscription.
+   */
+  lastReloadRequestTime?: number;
+  parentApi?: unknown;
 }
 
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
@@ -99,6 +109,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   searchQuery,
   barColorOverride,
   barHighlightColorOverride,
+  requestCancellationManager,
+  lastReloadRequestTime,
+  parentApi,
 }) => {
   const { analytics, http, embeddingOrigin, cps } = useAiopsAppContext();
   const { dataView } = useDataSource();
@@ -124,8 +137,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   // to be able to track it across rerenders.
   const analysisStartTime = useRef<number | undefined>(window.performance.now());
   const abortCtrl = useRef(new AbortController());
+  const restartAnalysisRef = useRef<() => void>(() => {});
   const previousSearchQuery = useRef(searchQuery);
-
   const [overrides, setOverrides] = useState<AiopsLogRateAnalysisSchema['overrides'] | undefined>(
     undefined
   );
@@ -162,6 +175,45 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     abortCtrl.current.abort();
     dispatch(cancelStream());
   }
+
+  // Propagates cancellations from the dashboard panel. Aborting the stream request alone
+  // isn't enough, `cancelStream` also marks the stream as no longer running.
+  // `startLoad` aborts with `REPLACED` and installs a new signal; keep listening to that
+  // signal so a later refresh can still cancel the stream. A user cancel leaves the signal aborted.
+  // The analysis is started again from `lastReloadRequestTime`, which updates after `startLoad`.
+  useEffect(() => {
+    const manager = requestCancellationManager;
+    if (!manager) return;
+
+    let activeSignal = manager.signal;
+
+    const onAbort = () => {
+      abortCtrl.current.abort();
+      const replaced = activeSignal.reason === AbortReason.REPLACED;
+      dispatch(cancelStream());
+      if (!replaced) {
+        return;
+      }
+
+      const nextSignal = manager.signal;
+      if (nextSignal !== activeSignal && !nextSignal.aborted) {
+        activeSignal = nextSignal;
+        activeSignal.addEventListener('abort', onAbort, { once: true });
+      }
+    };
+
+    if (activeSignal.aborted) {
+      if (activeSignal.reason !== AbortReason.REPLACED) {
+        onAbort();
+      }
+      return;
+    }
+
+    activeSignal.addEventListener('abort', onAbort, { once: true });
+    return () => {
+      activeSignal.removeEventListener('abort', onAbort);
+    };
+  }, [requestCancellationManager, dispatch]);
 
   useEffect(() => {
     if (!isRunning) {
@@ -213,6 +265,18 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   // significant items on analysis refresh.
   function startHandler(continueAnalysis = false, resetGroupButton = true) {
     if (!continueAnalysis) {
+      // An explicit restart by the user lifts a previous cancellation of the panel.
+      requestCancellationManager?.resumeAfterCancellation();
+    } else if (requestCancellationManager?.signal.aborted) {
+      // The panel was cancelled, don't automatically continue the analysis.
+      return;
+    }
+
+    if (abortCtrl.current.signal.aborted) {
+      abortCtrl.current = new AbortController();
+    }
+
+    if (!continueAnalysis) {
       dispatch(resetResults());
       setOverrides({
         remainingKeywordFieldCandidates: keywordFieldCandidates.filter(
@@ -241,6 +305,25 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     setShouldStart(true);
   }
 
+  restartAnalysisRef.current = () => startHandler(false);
+
+  // Dashboard refresh updates this after `startLoad` has installed the new signal.
+  // Restarting here (rather than inside the abort listener) also covers a refresh that
+  // follows a cancel, where the aborted signal is replaced without a new abort event.
+  const lastReloadOnMount = useRef(lastReloadRequestTime);
+  useEffect(() => {
+    if (!requestCancellationManager || lastReloadRequestTime === undefined) {
+      return;
+    }
+    if (lastReloadRequestTime === lastReloadOnMount.current) {
+      return;
+    }
+    if (requestCancellationManager.signal.aborted) {
+      return;
+    }
+    restartAnalysisRef.current();
+  }, [lastReloadRequestTime, requestCancellationManager]);
+
   const startParams = useMemo(() => {
     if (!chartWindowParameters || !earliest || !latest) {
       return undefined;
@@ -258,8 +341,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         // TODO Handle data view without time fields.
         timeFieldName: dataView.timeFieldName ?? '',
         index: dataView.getIndexPattern(),
-        // Temporarily disable grouping until https://github.com/elastic/kibana/issues/232849 is resolved.
-        grouping: false,
+        grouping: true,
         flushFix: true,
         // If analysis type is `spike`, pass on window parameters as is,
         // if it's `dip`, swap baseline and deviation.
@@ -288,7 +370,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 
   useEffect(() => {
     if (shouldStart && startParams) {
-      dispatch(startStream(startParams));
+      if (!requestCancellationManager?.signal.aborted) {
+        dispatch(startStream(startParams));
+      }
       setShouldStart(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -297,7 +381,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   // On mount, fetch field candidates first. Once they are populated,
   // the actual analysis will be triggered.
   useEffect(() => {
-    if (startParams) {
+    if (startParams && !requestCancellationManager?.signal.aborted) {
       dispatch(fetchFieldCandidates(startParams));
       dispatch(setCurrentAnalysisType(analysisType));
       dispatch(setCurrentAnalysisWindowParameters(chartWindowParameters));
@@ -337,6 +421,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   const foundGroups = groupTableItems.length > 0 && groupItemCount > 0;
 
   const isAnalysisControlsDisabled = embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.CASES;
+  const isInteractive = useIsInteractive(parentApi);
 
   return (
     <div data-test-subj="aiopsLogRateAnalysisResults">
@@ -354,7 +439,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       >
         <>
           {embeddingOrigin !== AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD && (
-            <LogRateAnalysisOptions foundGroups={foundGroups} />
+            <LogRateAnalysisOptions foundGroups={foundGroups} isInteractive={isInteractive} />
           )}
           {embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD && (
             <EuiFlexItem grow={false}>
@@ -368,6 +453,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
                   data-test-subj="aiopsLogRateAnalysisOptionsButton"
                   iconType="controls"
                   onClick={onEmbeddableOptionsClickHandler}
+                  isDisabled={!isInteractive}
                   aria-label={i18n.translate('xpack.aiops.logRateAnalysis.optionsButtonAriaLabel', {
                     defaultMessage: 'Analysis options',
                   })}
@@ -382,7 +468,11 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup alignItems="center" gutterSize="s">
-            <LogRateAnalysisOptions foundGroups={foundGroups} growFirstItem={true} />
+            <LogRateAnalysisOptions
+              foundGroups={foundGroups}
+              growFirstItem={true}
+              isInteractive={isInteractive}
+            />
           </EuiFlexGroup>
         </>
       )}
@@ -390,50 +480,47 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       {errors.length > 0 ? (
         <>
           <EuiSpacer size="xs" />
-          <EuiCallOut
+          <KbnWarningCallout
+            size="s"
             announceOnMount={false}
             title={i18n.translate('xpack.aiops.analysis.errorCallOutTitle', {
               defaultMessage:
                 'The following {errorCount, plural, one {error} other {errors}} occurred running the analysis.',
               values: { errorCount: errors.length },
             })}
-            color="warning"
-            iconType="warning"
-            size="s"
+            text={errors.length === 1 ? errors[0] : undefined}
+            actionProps={
+              overrides !== undefined
+                ? {
+                    primary: {
+                      'data-test-subj': 'aiopsLogRateAnalysisResultsTryToContinueAnalysisButton',
+                      onClick: () => startHandler(true),
+                      children: (
+                        <FormattedMessage
+                          id="xpack.aiops.logRateAnalysis.page.tryToContinueAnalysisButtonText"
+                          defaultMessage="Try to continue analysis"
+                        />
+                      ),
+                    },
+                  }
+                : undefined
+            }
           >
-            <EuiText size="s">
-              {errors.length === 1 ? (
-                <p>{errors[0]}</p>
-              ) : (
-                <ul>
-                  {errors.map((e, i) => (
-                    <li key={i}>{e}</li>
-                  ))}
-                </ul>
-              )}
-              {overrides !== undefined ? (
-                <p>
-                  <EuiButton
-                    data-test-subj="aiopsLogRateAnalysisResultsTryToContinueAnalysisButton"
-                    size="s"
-                    onClick={() => startHandler(true)}
-                  >
-                    <FormattedMessage
-                      id="xpack.aiops.logRateAnalysis.page.tryToContinueAnalysisButtonText"
-                      defaultMessage="Try to continue analysis"
-                    />
-                  </EuiButton>
-                </p>
-              ) : null}
-            </EuiText>
-          </EuiCallOut>
+            {errors.length > 1 && (
+              <ul>
+                {errors.map((e, i) => (
+                  <li key={i}>{e}</li>
+                ))}
+              </ul>
+            )}
+          </KbnWarningCallout>
           <EuiSpacer size="xs" />
         </>
       ) : null}
       {showLogRateAnalysisResultsTable && groupResults && foundGroups && (
         <>
           <EuiSpacer size="xs" />
-          <EuiText size="xs">{groupResults ? groupResultsHelpMessage : undefined}</EuiText>
+          <EuiText size="xs">{groupResultsHelpMessage}</EuiText>
         </>
       )}
       <EuiSpacer size="s" />
@@ -480,6 +567,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             searchQuery={searchQuery}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
+            parentApi={parentApi}
           />
         ) : null}
         {showLogRateAnalysisResultsTable && !groupResults ? (
@@ -488,6 +576,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             searchQuery={searchQuery}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
+            parentApi={parentApi}
           />
         ) : null}
       </div>

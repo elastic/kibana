@@ -9,9 +9,9 @@ import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { EuiFlexGrid } from '@elastic/eui';
 import { MLOverviewCard } from './overview_ml_page';
-import { ML_PAGES } from '../../locator';
 
 export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean; cardTitleSize?: 's' | 'xs' }> = ({
   isEsqlEnabled,
@@ -47,7 +47,7 @@ export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean; cardTitleSize?: 's
     <MLOverviewCard
       layout="horizontal"
       iconType="chartTagCloud"
-      path="/data_drift_index_select"
+      path="/data_drift"
       title={
         <FormattedMessage
           id="xpack.ml.datavisualizer.selector.selectDataDriftTitle"
@@ -85,16 +85,16 @@ export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean; cardTitleSize?: 's
     <MLOverviewCard
       iconType="tableDensityHigh"
       layout="horizontal"
-      path="/datavisualizer_index_select"
+      path={`/${ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER}`}
       title={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewTitle', {
         defaultMessage: 'Data view',
       })}
       titleSize={cardTitleSize}
-      description={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewTitle', {
+      description={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewDescription', {
         defaultMessage: 'Analyze data, its shape, and statistical metadata from a data view.',
       })}
       buttonLabel={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewButtonLabel', {
-        defaultMessage: 'Select data view',
+        defaultMessage: 'Open data visualizer',
       })}
       cardDataTestSubj="mlDataVisualizerCardIndexData"
       buttonDataTestSubj="mlDataVisualizerSelectIndexButton"

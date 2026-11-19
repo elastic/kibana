@@ -5,24 +5,32 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   AttackDiscoveryApiAlert,
   CreateAttackDiscoveryAlertsParams,
 } from '@kbn/elastic-assistant-common';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_EXECUTION_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
+import {
+  ALERT_ATTACK_DISCOVERY_ALERT_IDS,
+  ALERT_ATTACK_DISCOVERY_API_CONFIG,
+} from '@kbn/attack-discovery-schedules-common';
 import { transformToAlertDocuments } from '../transforms/transform_to_alert_documents';
 import { getCreatedDocumentIds } from './get_created_document_ids';
 import { getCreatedAttackDiscoveryAlerts } from './get_created_attack_discovery_alerts';
+import { validateAlertDocuments } from './validate_alert_documents';
+
+import { updateAlertsWithAttackIds } from '../../schedules/register_schedule/update_alerts_with_attack_ids';
 
 interface CreateAttackDiscoveryAlerts {
   adhocAttackDiscoveryDataClient: IRuleDataClient;
   authenticatedUser: AuthenticatedUser;
   createAttackDiscoveryAlertsParams: CreateAttackDiscoveryAlertsParams;
+  esClient: ElasticsearchClient;
   logger: Logger;
   spaceId: string;
 }
@@ -33,9 +41,18 @@ export const createAttackDiscoveryAlerts = async ({
   adhocAttackDiscoveryDataClient,
   authenticatedUser,
   createAttackDiscoveryAlertsParams,
+  esClient,
   logger,
   spaceId,
 }: CreateAttackDiscoveryAlerts): Promise<AttackDiscoveryApiAlert[]> => {
+  const traceId = `[trace: ${createAttackDiscoveryAlertsParams.generationUuid}]`;
+  logger.debug(
+    () =>
+      `[PERSIST] createAttackDiscoveryAlerts called with ${
+        createAttackDiscoveryAlertsParams.attackDiscoveries?.length ?? 0
+      } discoveries ${traceId}`
+  );
+
   const attackDiscoveryAlertsIndex = adhocAttackDiscoveryDataClient.indexNameWithNamespace(spaceId);
   const readDataClient = adhocAttackDiscoveryDataClient.getReader({ namespace: spaceId });
   const writeDataClient = await adhocAttackDiscoveryDataClient.getWriter({ namespace: spaceId });
@@ -49,14 +66,60 @@ export const createAttackDiscoveryAlerts = async ({
     spaceId,
   });
 
+  logger.debug(
+    () =>
+      `[PERSIST] transformToAlertDocuments returned ${alertDocuments.length} documents ${traceId}`
+  );
+
   if (isEmpty(alertDocuments)) {
-    logger.debug(
-      () =>
-        `No Attack discovery alerts to create for index ${attackDiscoveryAlertsIndex} in createAttackDiscoveryAlerts`
+    logger.warn(
+      `[PERSIST] No Attack discovery alerts to create for index ${attackDiscoveryAlertsIndex} - transformToAlertDocuments returned empty ${traceId}`
     );
 
     return [];
   }
+
+  // Validate all documents before writing
+  logger.debug(() => `Validating ${alertDocuments.length} attack discovery alert documents`);
+  const validationResult = validateAlertDocuments(alertDocuments);
+
+  if (!validationResult.isValid) {
+    const validationErrors = validationResult.errors
+      .map(
+        (error) =>
+          `Document ${error.documentId}: missing fields [${error.missingFields.join(', ')}]`
+      )
+      .join('\n  ');
+
+    logger.error(
+      `Validation failed for ${validationResult.errors.length} of ${alertDocuments.length} attack discovery alert documents:\n  ${validationErrors}`
+    );
+
+    throw new Error(
+      `Cannot create attack discovery alerts: ${validationResult.errors.length} documents failed validation. Missing required fields. See logs for details.`
+    );
+  }
+
+  logger.debug(
+    () => `All ${alertDocuments.length} attack discovery alert documents passed validation`
+  );
+
+  // Log document structure for debugging
+  alertDocuments.forEach((doc, index) => {
+    logger.debug(
+      () =>
+        `Document ${index + 1}/${alertDocuments.length} structure: ` +
+        `timestamp=${doc['@timestamp']}, ` +
+        `execution_uuid=${doc[ALERT_RULE_EXECUTION_UUID]}, ` +
+        `api_config.name=${doc[ALERT_ATTACK_DISCOVERY_API_CONFIG]?.name}, ` +
+        `api_config.connector_id=${doc[ALERT_ATTACK_DISCOVERY_API_CONFIG]?.connector_id}, ` +
+        `alertIds=${
+          Array.isArray(doc[ALERT_ATTACK_DISCOVERY_ALERT_IDS])
+            ? doc[ALERT_ATTACK_DISCOVERY_ALERT_IDS].length
+            : 'not-array'
+        }`
+    );
+  });
 
   const alertIds = alertDocuments.map(
     (alertDocument) => alertDocument[ALERT_UUID] ?? DEBUG_LOG_ID_PLACEHOLDER
@@ -108,6 +171,29 @@ export const createAttackDiscoveryAlerts = async ({
       const allErrorDetails = errorDetails.join(', ');
       throw new Error(`Failed to bulk insert Attack discovery alerts ${allErrorDetails}`);
     }
+
+    // Build a map of underlying detection alert IDs to the newly created ad-hoc attack discovery alert IDs.
+    // This allows us to link the detection alerts back to the attack discovery alerts that group them.
+    const alertIdToAttackIdsMap: Record<string, string[]> = {};
+    for (const alertDocument of alertDocuments) {
+      const alertDocId = alertDocument[ALERT_UUID];
+      if (alertDocId) {
+        const underlyingAlertIds =
+          (alertDocument[ALERT_ATTACK_DISCOVERY_ALERT_IDS] as string[]) ?? [];
+        for (const alertId of underlyingAlertIds) {
+          alertIdToAttackIdsMap[alertId] = alertIdToAttackIdsMap[alertId] ?? [];
+          alertIdToAttackIdsMap[alertId].push(alertDocId);
+        }
+      }
+    }
+
+    // Update the underlying detection alerts with the new ad-hoc attack discovery alert IDs.
+    // This ensures that the detection alerts are properly linked to the ad-hoc attacks they belong to.
+    await updateAlertsWithAttackIds({
+      esClient,
+      alertIdToAttackIdsMap,
+      spaceId,
+    });
 
     logger.debug(
       () =>

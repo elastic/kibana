@@ -12,6 +12,7 @@ import { contentManagementMock } from '@kbn/content-management-plugin/public/moc
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -52,9 +53,6 @@ const triggersActionsUiStartMock = {
       )),
       getRuleTagFilter: jest.fn(() => <div data-test-subj="rule-tag-filter">mocked component</div>),
       getRulesList: jest.fn(() => <div data-test-subj="rules-list">mocked component</div>),
-      getRulesSettingsLink: jest.fn(() => (
-        <div data-test-subj="rules-settings-link">mocked component</div>
-      )),
       ruleTypeRegistry: {
         has: jest.fn(),
         register: jest.fn(),
@@ -92,6 +90,7 @@ export const observabilityPublicPluginsStartMock = {
       dataViews: dataViewPluginMocks.createStartContract(),
       discover: null,
       lens: lensPluginMock.createStartContract(),
+      licensing: licensingMock.createStart(),
       logsDataAccess: logsDataAccessPluginMock.createStartContract(),
       observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
       share: sharePluginMock.createStartContract(),

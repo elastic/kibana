@@ -5,14 +5,14 @@
  * 2.0.
  */
 import pMap from 'p-map';
-import { type CoreSetup, type ElasticsearchClient, type Logger } from '@kbn/core/server';
+import semverGt from 'semver/functions/gt';
+import type { CoreSetup, ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
 import type { DiscoveryDataset } from '../../common/types';
@@ -26,12 +26,14 @@ import { getInstalledPackages } from '../services/epm/packages';
 import { getPrereleaseFromSettings } from '../services/epm/packages/get_prerelease_setting';
 
 export const TYPE = 'fleet:auto-install-content-packages-task';
-export const VERSION = '1.0.3';
+export const VERSION = '1.1.0';
 const TITLE = 'Fleet Auto Install Content Packages Task';
 const SCOPE = ['fleet'];
-const DEFAULT_INTERVAL = '10m';
+const DEFAULT_INTERVAL = '1m';
 const TIMEOUT = '5m';
 const CONTENT_PACKAGES_CACHE_TTL = 1000 * 60 * 60; // 1 hour
+
+export const AUTO_INSTALL_CONTENT_PACKAGES_TASK_ID = `${TYPE}:${VERSION}`;
 
 interface AutoInstallContentPackagesTaskConfig {
   taskInterval?: string;
@@ -61,6 +63,7 @@ export class AutoInstallContentPackagesTask {
   private discoveryMap?: DiscoveryMap;
   private discoveryMapLastFetched: number = 0;
   private lastPrerelease: boolean = false;
+  private lastDatasetsWithDataCount?: number;
 
   constructor(setupContract: AutoInstallContentPackagesTaskSetupContract) {
     const { core, taskManager, logFactory, config } = setupContract;
@@ -114,7 +117,7 @@ export class AutoInstallContentPackagesTask {
   };
 
   private get taskId(): string {
-    return `${TYPE}:${VERSION}`;
+    return AUTO_INSTALL_CONTENT_PACKAGES_TASK_ID;
   }
 
   private endRun(msg: string = '') {
@@ -179,7 +182,22 @@ export class AutoInstallContentPackagesTask {
         {} as { [name: string]: string }
       );
 
-      const packagesToInstall = await this.getPackagesToInstall(esClient, installedPackagesMap);
+      const rolledBackPackages = new Set<string>(
+        installedPackages.items.filter((pkg) => pkg.rolledBack).map((pkg) => pkg.name)
+      );
+      if (rolledBackPackages.size > 0) {
+        this.logger.info(
+          `[AutoInstallContentPackagesTask] Skipping rolled-back packages: ${[
+            ...rolledBackPackages,
+          ].join(', ')}`
+        );
+      }
+
+      const packagesToInstall = await this.getPackagesToInstall(
+        esClient,
+        installedPackagesMap,
+        rolledBackPackages
+      );
       if (packagesToInstall.length > 0) {
         this.logger.info(
           `[AutoInstallContentPackagesTask] Content packages to install: ${packagesToInstall
@@ -228,13 +246,16 @@ export class AutoInstallContentPackagesTask {
 
   private async getPackagesToInstall(
     esClient: ElasticsearchClient,
-    installedPackagesMap: { [name: string]: string }
+    installedPackagesMap: { [name: string]: string },
+    rolledBackPackages: Set<string> = new Set()
   ) {
     const discoveryMapWithNotInstalledPackages: DiscoveryMap = Object.entries(
       this.discoveryMap!
     ).reduce((acc, [dataset, mapValue]) => {
       const packages = mapValue.packages.filter(
-        (pkg) => !installedPackagesMap[pkg.name] || installedPackagesMap[pkg.name] !== pkg.version
+        (pkg) =>
+          !rolledBackPackages.has(pkg.name) &&
+          (!installedPackagesMap[pkg.name] || semverGt(pkg.version, installedPackagesMap[pkg.name]))
       );
       if (packages.length > 0) {
         acc[dataset] = { packages };
@@ -251,7 +272,8 @@ export class AutoInstallContentPackagesTask {
         if (
           mapValue.packages.every(
             (pkg) =>
-              installedPackagesMap[pkg.name] && installedPackagesMap[pkg.name] === pkg.version
+              installedPackagesMap[pkg.name] &&
+              !semverGt(pkg.version, installedPackagesMap[pkg.name])
           )
         ) {
           acc.push(dataset);
@@ -275,7 +297,7 @@ export class AutoInstallContentPackagesTask {
 
       if (hasData) {
         for (const { name, version } of packages) {
-          if (!installedPackagesMap[name] || installedPackagesMap[name] !== version) {
+          if (!installedPackagesMap[name] || semverGt(version, installedPackagesMap[name])) {
             packagesToInstall[name] = version;
           }
         }
@@ -288,13 +310,19 @@ export class AutoInstallContentPackagesTask {
     esClient: ElasticsearchClient,
     datasetsOfInstalledContentPackages: string[]
   ): Promise<string[]> {
-    const allFleetDataStreams = await dataStreamService.getAllFleetDataStreams(esClient);
-    const datasetsWithData: string[] = allFleetDataStreams
-      .map((dataStream: any) => dataStream.name.split('-')[1])
-      .filter((dataset) => !datasetsOfInstalledContentPackages.includes(dataset));
-    this.logger.info(
-      `[AutoInstallContentPackagesTask] Found datasets with data: ${datasetsWithData.join(', ')}`
-    );
+    const installedSet = new Set(datasetsOfInstalledContentPackages);
+    const allDataStreamNames = await dataStreamService.getAllFleetDataStreamNames(esClient);
+    const datasetsWithData = [
+      ...new Set(allDataStreamNames.map((name) => name.split('-')[1])),
+    ].filter((dataset) => !installedSet.has(dataset));
+    const count = datasetsWithData.length;
+    const message = `[AutoInstallContentPackagesTask] Found ${count} datasets with data`;
+    if (this.lastDatasetsWithDataCount !== count) {
+      this.logger.info(message);
+    } else {
+      this.logger.debug(message);
+    }
+    this.lastDatasetsWithDataCount = count;
     return datasetsWithData;
   }
 

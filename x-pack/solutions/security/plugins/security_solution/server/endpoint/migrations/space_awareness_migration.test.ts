@@ -20,7 +20,7 @@ import {
   buildPerPolicyTag,
   buildSpaceOwnerIdTag,
 } from '../../../common/endpoint/service/artifacts/utils';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import { applyEsClientSearchMock } from '../mocks/utils.mock';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
@@ -142,9 +142,19 @@ describe('Space awareness migration', () => {
             'endpoint_event_filters',
             'endpoint_host_isolation_exceptions',
             'endpoint_blocklists',
+            'endpoint_custom_yara_signatures',
           ],
-          namespaceType: ['agnostic', 'agnostic', 'agnostic', 'agnostic', 'agnostic', 'agnostic'],
+          namespaceType: [
+            'agnostic',
+            'agnostic',
+            'agnostic',
+            'agnostic',
+            'agnostic',
+            'agnostic',
+            'agnostic',
+          ],
           filter: [
+            `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
             `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
             `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
             `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
