@@ -828,6 +828,35 @@ describe('config validation', () => {
     });
   });
 
+  describe('catalog.enabled', () => {
+    test('defaults to false', () => {
+      expect(configSchema.validate({}, { dev: false }).catalog.enabled).toBe(false);
+      expect(configSchema.validate({}, { dev: true }).catalog.enabled).toBe(false);
+    });
+
+    test('accepts true in development mode', () => {
+      const result = configSchema.validate({ catalog: { enabled: true } }, { dev: true });
+      expect(result.catalog.enabled).toBe(true);
+    });
+
+    test('accepts false in production mode', () => {
+      const result = configSchema.validate({ catalog: { enabled: false } }, { dev: false });
+      expect(result.catalog.enabled).toBe(false);
+    });
+
+    test('rejects true in production mode', () => {
+      expect(() => configSchema.validate({ catalog: { enabled: true } }, { dev: false })).toThrow(
+        '[catalog.enabled]: expected value to equal [false]'
+      );
+    });
+
+    test('rejects true when the dev context is not provided', () => {
+      expect(() => configSchema.validate({ catalog: { enabled: true } })).toThrow(
+        '[catalog.enabled]: expected value to equal [false]'
+      );
+    });
+  });
+
   describe('relay.url', () => {
     test('accepts an https URL in production mode', () => {
       const result = configSchema.validate(
