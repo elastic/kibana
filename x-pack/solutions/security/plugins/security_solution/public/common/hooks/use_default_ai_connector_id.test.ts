@@ -225,15 +225,18 @@ describe('useDefaultAIConnectorId', () => {
       });
     });
 
-    it('should not look anything up when no default is configured', () => {
-      mockSettingsGet.mockReturnValue('NO_DEFAULT_CONNECTOR');
+    it.each(['NO_DEFAULT_CONNECTOR', 'NO_DEFAULT_MODEL'])(
+      'should not look anything up when the setting is %s',
+      (sentinel) => {
+        mockSettingsGet.mockReturnValue(sentinel);
 
-      renderHook(() => useDefaultAIConnectorId());
+        renderHook(() => useDefaultAIConnectorId());
 
-      expect(mockUseResolveConnectorAlias).toHaveBeenCalledWith({
-        connectorId: 'NO_DEFAULT_CONNECTOR',
-        enabled: false,
-      });
-    });
+        expect(mockUseResolveConnectorAlias).toHaveBeenCalledWith({
+          connectorId: sentinel,
+          enabled: false,
+        });
+      }
+    );
   });
 });

@@ -13,8 +13,8 @@ import { ALERT_AI_SUMMARY_INFERENCE_FEATURE_ID } from '../../../common/constants
 import { useKibana } from '../lib/kibana';
 import { useResolveConnectorAlias } from './use_resolve_connector_alias';
 
-// Value of the default connector setting when no default is configured.
-const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
+// Values of the default connector setting when no default is configured or AI is disabled.
+const NO_DEFAULT_SETTING_VALUES: readonly string[] = ['NO_DEFAULT_CONNECTOR', 'NO_DEFAULT_MODEL'];
 
 /**
  * Resolves the default AI connector id for the alert AI summary from the server-side model list,
@@ -42,7 +42,7 @@ export const useDefaultAIConnectorId = () => {
   const needsAliasLookup =
     !!connectors &&
     !!defaultSetting &&
-    defaultSetting !== NO_DEFAULT_CONNECTOR &&
+    !NO_DEFAULT_SETTING_VALUES.includes(defaultSetting) &&
     !connectors.some(({ id }) => id === defaultSetting);
 
   const { resolvedConnectorId, isResolving } = useResolveConnectorAlias({
