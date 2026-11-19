@@ -51,6 +51,33 @@ describe('Card', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
+  it('does not add button semantics to the card wrapper', () => {
+    render(<Card {...defaultProps} onClick={jest.fn()} />);
+
+    const card = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title');
+    expect(card).not.toHaveAttribute('role');
+    expect(card).not.toHaveAttribute('aria-pressed');
+    expect(card).not.toHaveAttribute('aria-current');
+    expect(card.querySelectorAll('button')).toHaveLength(1);
+  });
+
+  it('marks the selected card with aria-current', () => {
+    render(<Card {...defaultProps} onClick={jest.fn()} isSelected />);
+
+    const card = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title');
+    expect(card).toHaveAttribute('aria-current', 'true');
+    expect(card).not.toHaveAttribute('aria-pressed');
+    expect(card).not.toHaveAttribute('role');
+  });
+
+  it('does not set aria-current on a non-interactive card', () => {
+    render(<Card {...defaultProps} />);
+
+    const card = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title');
+    expect(card).not.toHaveAttribute('aria-current');
+    expect(card).not.toHaveAttribute('aria-pressed');
+  });
+
   it('does not call onClick when isDisabled is true', () => {
     const onClick = jest.fn();
     render(<Card {...defaultProps} onClick={onClick} isDisabled />);
