@@ -12,8 +12,10 @@ import {
   TRIAGE_WIDE_KEY_TAG_PREFIX,
 } from '../../alert_triage/constants';
 import {
+  JEV_AUDIT_TAG,
   JEV_LANE_TAG_PREFIX,
   JEV_VERDICT_TAG,
+  isJevAuditSample,
   type JevFirstLineMode,
 } from '../../alert_triage/jev_first_line';
 import { hashKey } from '../../alert_triage/key_tags';
@@ -316,6 +318,76 @@ describe('triage Jev first line step', () => {
         add[0].startsWith(TRIAGE_STRICT_KEY_TAG_PREFIX)
       );
       expect(keyCalls.map(({ ids }) => ids)).toEqual([['b1'], ['b2']]);
+    });
+  });
+
+  describe('the audit sample', () => {
+    const ids = Array.from({ length: 500 }, (_unused, i) => `alert-${i}`);
+    const sampled = ids.filter((id) => isJevAuditSample(id));
+    const auditId = sampled[0];
+    const plainId = ids.find((id) => !isJevAuditSample(id)) as string;
+
+    it('analyzes a sample of the benign lane anyway: it keeps its lane tag, gets the audit tag and no verdict, and no key tags', async () => {
+      const { run, tagCalls } = setup({
+        alerts: [
+          [auditId, registryAlert('BENIGN-1')],
+          [plainId, registryAlert('BENIGN-2', 'rule-1', 2)],
+        ],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ scored: 2, lane_benign: 2, applied: 1, audit_sampled: 1 });
+      const calls = tagCalls();
+      expect(calls).toContainEqual({
+        ids: [auditId],
+        add: [`${JEV_LANE_TAG_PREFIX}benign`, JEV_AUDIT_TAG],
+      });
+      const verdictIds = calls
+        .filter(({ add }) => add.includes('az:false_positive'))
+        .flatMap(({ ids: tagged }) => tagged);
+      expect(verdictIds).toEqual([plainId]);
+      const keyTagged = calls
+        .filter(({ add }) => add[0].startsWith(TRIAGE_STRICT_KEY_TAG_PREFIX))
+        .flatMap(({ ids: tagged }) => tagged);
+      expect(keyTagged).not.toContain(auditId);
+    });
+
+    it('samples only the benign lane: an alert of the attack or middle lane never gets the audit tag', async () => {
+      const { run, tagCalls } = setup({
+        alerts: [
+          [sampled[0], registryAlert('ATTACK-1')],
+          [sampled[1], registryAlert('MIDDLE-1', 'rule-1', 2)],
+        ],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ lane_attack: 1, lane_middle: 1, audit_sampled: 0 });
+      expect(tagCalls().flatMap(({ add }) => add)).not.toContain(JEV_AUDIT_TAG);
+    });
+
+    it('does not sample in shadow mode, where no alert takes a verdict', async () => {
+      const { run, tagCalls } = setup({
+        mode: 'shadow',
+        alerts: [[auditId, registryAlert('BENIGN-1')]],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ lane_benign: 1, audit_sampled: 0 });
+      expect(tagCalls().flatMap(({ add }) => add)).not.toContain(JEV_AUDIT_TAG);
+    });
+
+    it('does not count a sample whose tag cannot be written', async () => {
+      const { run } = setup({
+        alerts: [[auditId, registryAlert('BENIGN-1')]],
+        tagFailsFor: `${JEV_LANE_TAG_PREFIX}benign`,
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ scored: 0, audit_sampled: 0, tag_failures: 1 });
     });
   });
 

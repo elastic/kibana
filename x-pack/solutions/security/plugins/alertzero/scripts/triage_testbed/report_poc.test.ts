@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { JEV_LANE_TAG_PREFIX, JEV_VERDICT_TAG } from '../../server/alert_triage/jev_first_line';
+import {
+  JEV_AUDIT_TAG,
+  JEV_LANE_TAG_PREFIX,
+  JEV_VERDICT_TAG,
+} from '../../server/alert_triage/jev_first_line';
 import {
   TRIAGE_CACHE_AUDIT_TAG_PREFIX,
   TRIAGE_CACHE_REUSE_TAG_PREFIX,
@@ -163,6 +167,44 @@ describe('buildPocSection', () => {
       middle: { alerts: 1, truePositive: 1, falsePositive: 0 },
     });
     expect(section.jev.applied).toBe(0);
+  });
+
+  it('compares the model verdict of a Jev audit alert with Jev, and counts the attacks that Jev missed', () => {
+    const section = buildPocSection({
+      alerts: [
+        // The model agrees with Jev, and the alert is harmless.
+        alert('a1', [`${JEV_LANE_TAG_PREFIX}benign`, JEV_AUDIT_TAG, 'az:false_positive']),
+        // The model finds an attack that Jev put in the benign lane.
+        alert('a2', [`${JEV_LANE_TAG_PREFIX}benign`, JEV_AUDIT_TAG, 'az:true_positive']),
+        // An attack in the sample that the model has not analyzed yet is still a Jev miss.
+        alert('a3', [`${JEV_LANE_TAG_PREFIX}benign`, JEV_AUDIT_TAG]),
+        // The model is wrong: it calls an attack harmless.
+        alert('a4', [`${JEV_LANE_TAG_PREFIX}benign`, JEV_AUDIT_TAG, 'az:false_positive']),
+        // Not in the sample: Jev applied its verdict.
+        alert('j1', [`${JEV_LANE_TAG_PREFIX}benign`, 'az:false_positive', JEV_VERDICT_TAG]),
+      ],
+      truth: truthOf({
+        a1: 'false_positive',
+        a2: 'true_positive',
+        a3: 'true_positive',
+        a4: 'true_positive',
+        j1: 'false_positive',
+      }),
+      records: [],
+      verdictsPerHour: null,
+    });
+
+    expect(section.jev.audit).toEqual({
+      sampled: 4,
+      attacksInSample: 3,
+      compared: 3,
+      agreedWithJev: 2,
+      agreedWithJevShare: 0.6667,
+      modelWrongAgainstTruth: 1,
+    });
+    // The audit alerts are verdicts of the model, not of Jev.
+    expect(section.bySource.jev.verdicts).toBe(1);
+    expect(section.bySource.model.verdicts).toBe(3);
   });
 
   it('says in one sentence where the verdicts came from', () => {

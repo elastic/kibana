@@ -19,8 +19,10 @@ import {
 } from '../../alert_triage/constants';
 import { hashCandidates } from '../../alert_triage/fp_decisions';
 import {
+  JEV_AUDIT_TAG,
   JEV_LANE_TAG_PREFIX,
   JEV_VERDICT_TAG,
+  isJevAuditSample,
   isJevEligible,
   jevBatchInput,
   jevBatchQuestions,
@@ -65,6 +67,7 @@ const NOTHING = {
   lane_attack: 0,
   lane_middle: 0,
   applied: 0,
+  audit_sampled: 0,
   calls: 0,
   failed_calls: 0,
   tag_failures: 0,
@@ -202,18 +205,29 @@ export const getTriageJevFirstLineStepDefinition = ({
               const ids = [...lanes].filter(([, value]) => value === lane).map(([id]) => id);
               if (ids.length === 0) continue;
               const apply = mode === 'on' && lane === 'benign';
-              const tagged = await tag(ids, [
+              const laneTag = `${JEV_LANE_TAG_PREFIX}${lane}`;
+              // In `on` a small sample of the benign lane keeps its lane tag and gets no verdict, so that the model decides.
+              const audit = apply ? ids.filter((id) => isJevAuditSample(id)) : [];
+              const auditIds = new Set(audit);
+              const decided = ids.filter((id) => !auditIds.has(id));
+              if (audit.length > 0 && (await tag(audit, [laneTag, JEV_AUDIT_TAG]))) {
+                totals.scored += audit.length;
+                totals.lane_benign += audit.length;
+                totals.audit_sampled += audit.length;
+              }
+              if (decided.length === 0) continue;
+              const tagged = await tag(decided, [
                 ...(apply ? ['az:false_positive', JEV_VERDICT_TAG] : []),
-                `${JEV_LANE_TAG_PREFIX}${lane}`,
+                laneTag,
               ]);
               if (!tagged) continue;
-              totals.scored += ids.length;
-              totals[`lane_${lane}`] += ids.length;
+              totals.scored += decided.length;
+              totals[`lane_${lane}`] += decided.length;
               if (!apply) continue;
-              totals.applied += ids.length;
+              totals.applied += decided.length;
               // The key tags that a batch would have written, one call for each key, so that grouping and decisions read them.
               const byKey = new Map<string, string[]>();
-              for (const id of ids) {
+              for (const id of decided) {
                 const hash = strictHashes.get(id);
                 if (hash !== undefined) byKey.set(hash, [...(byKey.get(hash) ?? []), id]);
               }

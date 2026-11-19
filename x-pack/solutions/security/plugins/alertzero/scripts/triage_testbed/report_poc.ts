@@ -15,7 +15,11 @@
  * verdict can be compared with the record) and the Jev lanes (`az:jev_lane:<lane>`) against the truth.
  */
 
-import { JEV_LANE_TAG_PREFIX, JEV_VERDICT_TAG } from '../../server/alert_triage/jev_first_line';
+import {
+  JEV_AUDIT_TAG,
+  JEV_LANE_TAG_PREFIX,
+  JEV_VERDICT_TAG,
+} from '../../server/alert_triage/jev_first_line';
 import {
   TRIAGE_CACHE_AUDIT_TAG_PREFIX,
   TRIAGE_CACHE_REUSE_TAG_PREFIX,
@@ -69,6 +73,21 @@ export interface PocSection {
     applied: number;
     appliedTruePositives: number;
     appliedTruePositiveShare: number | null;
+    /**
+     * The audit sample: alerts of the benign lane that were analyzed anyway (`az:jev_audit`). Jev would have called them harmless.
+     * `attacksInSample` is read from the truth, so it counts the alerts that Jev missed even when the model has not analyzed them.
+     */
+    audit: {
+      sampled: number;
+      attacksInSample: number;
+      /** Sampled alerts that got a model verdict. */
+      compared: number;
+      /** Of those, the model verdicts that agree with Jev (a false positive verdict). */
+      agreedWithJev: number;
+      agreedWithJevShare: number | null;
+      /** Model verdicts on the sample that differ from the truth. An inconclusive verdict is not counted. */
+      modelWrongAgainstTruth: number;
+    };
   };
 }
 
@@ -124,6 +143,13 @@ export const buildPocSection = ({
   };
   let verdictsOutsideBuildingBlocks = 0;
   let verdictsAll = 0;
+  const jevAudit = {
+    sampled: 0,
+    attacksInSample: 0,
+    compared: 0,
+    agreedWithJev: 0,
+    modelWrongAgainstTruth: 0,
+  };
 
   for (const alert of alerts) {
     const verdict = alert.tags.map((tag) => VERDICT_BY_TAG[tag]).find(Boolean);
@@ -137,6 +163,18 @@ export const buildPocSection = ({
       entry.alerts++;
       if (known.verdict === 'true_positive') entry.truePositive++;
       else entry.falsePositive++;
+    }
+
+    if (alert.tags.includes(JEV_AUDIT_TAG)) {
+      jevAudit.sampled++;
+      if (known?.verdict === 'true_positive') jevAudit.attacksInSample++;
+      if (verdict !== undefined) {
+        jevAudit.compared++;
+        if (verdict === 'false_positive') jevAudit.agreedWithJev++;
+        if (known !== undefined && verdict !== 'inconclusive' && verdict !== known.verdict) {
+          jevAudit.modelWrongAgainstTruth++;
+        }
+      }
     }
 
     if (verdict === undefined || known === undefined) continue;
@@ -183,6 +221,10 @@ export const buildPocSection = ({
         bySource.jev.truePositivesGotFalsePositive,
         bySource.jev.verdicts
       ),
+      audit: {
+        ...jevAudit,
+        agreedWithJevShare: share(jevAudit.agreedWithJev, jevAudit.compared),
+      },
     },
   };
 };
@@ -202,7 +244,13 @@ export const pocNote = (section: PocSection): string => {
     nonBuildingBlock.perHour ?? 'n/a'
   } per hour). Audit: ${audit.agreedWithRecord} of ${
     audit.compared
-  } fresh verdicts agree with their record (${percent(audit.agreedWithRecordShare)}).`;
+  } fresh verdicts agree with their record (${percent(
+    audit.agreedWithRecordShare
+  )}). Jev audit sample: ${jev.audit.sampled} alerts of the benign lane analyzed anyway, ${
+    jev.audit.attacksInSample
+  } of them attacks, the model agrees with Jev on ${jev.audit.agreedWithJev} of ${
+    jev.audit.compared
+  }.`;
 };
 
 const nearestRank = (values: readonly number[], q: number): number | null => {

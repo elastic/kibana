@@ -6,7 +6,9 @@
  */
 
 import {
+  JEV_AUDIT_SHARE,
   JEV_BATCH_SIZE,
+  isJevAuditSample,
   isJevEligible,
   jevBatchInput,
   jevBatchQuestions,
@@ -15,6 +17,7 @@ import {
   readJevScores,
   toJevFirstLineMode,
 } from './jev_first_line';
+import { isAuditSample } from './verdict_cache';
 
 const registryDoc = (extra: Record<string, unknown> = {}): Record<string, unknown> => ({
   '@timestamp': '2026-11-15T10:00:00.000Z',
@@ -189,6 +192,37 @@ describe('isJevEligible', () => {
       })
     ).toBe(false);
     expect(isJevEligible({ 'kibana.alert.rule.uuid': 'r' })).toBe(false);
+  });
+});
+
+describe('isJevAuditSample', () => {
+  const ids = Array.from({ length: 20000 }, (_unused, i) => `alert-${i}`);
+
+  it('chooses about the audit share of the alerts', () => {
+    const share = ids.filter((id) => isJevAuditSample(id)).length / ids.length;
+
+    expect(JEV_AUDIT_SHARE).toBe(0.05);
+    expect(share).toBeGreaterThan(0.04);
+    expect(share).toBeLessThan(0.06);
+  });
+
+  it('gives the same answer for the same alert on every sweep', () => {
+    expect(ids.slice(0, 200).map((id) => isJevAuditSample(id))).toEqual(
+      ids.slice(0, 200).map((id) => isJevAuditSample(id))
+    );
+  });
+
+  it('is not the sample of the verdict cache audit, so that the two audits cover different alerts', () => {
+    const jevSample = ids.filter((id) => isJevAuditSample(id));
+    const cacheSample = new Set(ids.filter((id) => isAuditSample(id)));
+
+    expect(jevSample.some((id) => !cacheSample.has(id))).toBe(true);
+    expect(jevSample.filter((id) => cacheSample.has(id)).length).toBeLessThan(jevSample.length / 2);
+  });
+
+  it('chooses none at a share of 0 and all at a share of 1', () => {
+    expect(ids.slice(0, 100).some((id) => isJevAuditSample(id, 0))).toBe(false);
+    expect(ids.slice(0, 100).every((id) => isJevAuditSample(id, 1))).toBe(true);
   });
 });
 

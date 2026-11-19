@@ -21,6 +21,7 @@
 
 import { ALERT_ANALYSIS_FIELDS } from '@kbn/workflows/managed';
 import { buildPatternKeys, describePatternKey, getField } from './pattern_key';
+import { isAuditSample } from './verdict_cache';
 
 /** The switch of the Jev first line. Every value except `shadow` and `on` reads as `off`. */
 export const JEV_FIRST_LINE_FLAG = 'alertzero.triageJevFirstLine';
@@ -38,6 +39,22 @@ export const JEV_LANE_TAG_PREFIX = 'az:jev_lane:';
 
 /** The tag of an alert that took a false positive verdict from Jev (`on` mode). */
 export const JEV_VERDICT_TAG = 'az:jev_verdict';
+
+/**
+ * The tag of an alert of the benign lane that is analyzed anyway (the audit sample, `on` mode). It keeps its lane tag and gets no
+ * verdict from Jev, so the model decides. A report compares the model verdict with the lane, and so measures how often Jev is wrong.
+ */
+export const JEV_AUDIT_TAG = 'az:jev_audit';
+
+/** Share of the alerts of the benign lane that are analyzed anyway. */
+export const JEV_AUDIT_SHARE = 0.05;
+
+/**
+ * Whether an alert of the benign lane is in the audit sample. A hash of the alert id decides, so it is the same on every sweep and
+ * needs no state. The id is salted, so that it is not the same sample as the audit sample of the verdict cache.
+ */
+export const isJevAuditSample = (alertId: string, share: number = JEV_AUDIT_SHARE): boolean =>
+  isAuditSample(`jev:${alertId}`, share);
 
 export type JevLane = 'benign' | 'attack' | 'middle';
 

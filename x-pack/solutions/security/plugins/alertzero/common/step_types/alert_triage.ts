@@ -391,6 +391,11 @@ const jevFirstLineOutputSchema = lazySchema(() =>
       .describe(
         'In `on` mode: alerts of the benign lane that took a false positive verdict and skip analysis.'
       ),
+    audit_sampled: z
+      .number()
+      .describe(
+        'In `on` mode: alerts of the benign lane that are analyzed anyway (the audit sample). They are counted in `lane_benign` and `scored`, not in `applied`.'
+      ),
     calls: z.number().describe('Calls to the model, without the retries.'),
     failed_calls: z
       .number()
