@@ -8,10 +8,10 @@
  */
 
 import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
-import { ControlValuesSource } from '@kbn/controls-constants';
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import { dataViewsService } from '../../../services/kibana_services';
+import type { ValuesSourceFetchPlan } from '../types';
 import { minMax$ } from './min_max';
 
 const mockGetESQLSingleColumnValues = jest.fn();
@@ -31,7 +31,7 @@ jest.mock('../../../../common/options_list/get_esql_single_column_values', () =>
   };
 });
 
-describe('minMax$ of a field of an ES|QL source', () => {
+describe('minMax$ with an ES|QL fetch plan', () => {
   const field: FilterableField = { name: 'bytes', type: 'number', aggregatable: true };
   const esqlSource: FilterableSource = {
     kind: 'esql',
@@ -43,18 +43,14 @@ describe('minMax$ of a field of an ES|QL source', () => {
   };
   const column = { name: 'bytes', type: 'long' };
 
-  const run = ({
-    valuesSource = ControlValuesSource.FIELD,
-    esqlQuery,
-  }: { valuesSource?: ControlValuesSource; esqlQuery?: string } = {}) =>
+  const run = (valuesSourceFetchPlan: ValuesSourceFetchPlan | undefined) =>
     firstValueFrom(
       minMax$({
         controlFetch$: of({} as FetchContext),
         dataSources$: new BehaviorSubject([esqlSource]),
         fieldName$: new BehaviorSubject<string | undefined>('bytes'),
         useGlobalFilters$: new BehaviorSubject<boolean | undefined>(true),
-        esqlQuery$: new BehaviorSubject<string | undefined>(esqlQuery),
-        valuesSource$: new BehaviorSubject<ControlValuesSource | undefined>(valuesSource),
+        valuesSourceFetchPlan$: new BehaviorSubject(valuesSourceFetchPlan),
         setIsLoading: jest.fn(),
       }).minMax$
     );
@@ -64,14 +60,17 @@ describe('minMax$ of a field of an ES|QL source', () => {
     dataViewsService.get = jest.fn();
   });
 
-  it('takes the bounds from the values of a query on the FROM target, as for a query of the user', async () => {
+  it('takes the bounds from the values of the query of the plan, with no data view', async () => {
     mockGetESQLSingleColumnValues.mockResolvedValue({
       values: [40, 5, 90],
       column,
       indexPattern: 'logs-*',
     });
 
-    expect(await run()).toEqual({ min: 5, max: 90 });
+    expect(await run({ fetchMode: 'esql', query: 'FROM logs-*\n| STATS BY bytes' })).toEqual({
+      min: 5,
+      max: 90,
+    });
     expect(mockGetESQLSingleColumnValues).toHaveBeenCalledWith(
       expect.objectContaining({
         query: 'FROM logs-*\n| STATS BY bytes',
@@ -81,20 +80,13 @@ describe('minMax$ of a field of an ES|QL source', () => {
     expect(dataViewsService.get).not.toHaveBeenCalled();
   });
 
-  it('runs the query of the user, not a generated one, when the values come from a query', async () => {
-    mockGetESQLSingleColumnValues.mockResolvedValue({
-      values: [1, 2],
-      column,
-      indexPattern: 'logs-*',
-    });
+  it('has no bounds, and runs nothing, for an ES|QL plan without a query', async () => {
+    expect(await run({ fetchMode: 'esql' })).toEqual({ min: undefined, max: undefined });
+    expect(mockGetESQLSingleColumnValues).not.toHaveBeenCalled();
+  });
 
-    await run({
-      valuesSource: ControlValuesSource.ESQL,
-      esqlQuery: 'FROM logs-* | STATS BY bytes | LIMIT 5',
-    });
-
-    expect(mockGetESQLSingleColumnValues).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM logs-* | STATS BY bytes | LIMIT 5' })
-    );
+  it('has no bounds, and runs nothing, until the plan is known', async () => {
+    expect(await run(undefined)).toEqual({ min: undefined, max: undefined });
+    expect(mockGetESQLSingleColumnValues).not.toHaveBeenCalled();
   });
 });

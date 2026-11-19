@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlValuesSource } from '@kbn/controls-constants';
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { FetchContext } from '@kbn/presentation-publishing';
-import { buildOptionsListFetchBody } from './build_options_list_fetch_body';
+import { buildDslFetchBody } from './build_options_list_fetch_body';
 
-describe('buildOptionsListFetchBody', () => {
+describe('buildDslFetchBody', () => {
   const fieldSpec = { name: 'host', type: 'string', searchable: true, aggregatable: true };
   const runtimeFieldMap = { day: { type: 'keyword' as const } };
   const dataViewSource: FilterableSource = {
@@ -30,9 +29,8 @@ describe('buildOptionsListFetchBody', () => {
   };
 
   it('asks the title of the data view with the spec of the field and the runtime fields', () => {
-    const result = buildOptionsListFetchBody({
-      valuesSource: ControlValuesSource.FIELD,
-      dataSources: [dataViewSource],
+    const result = buildDslFetchBody({
+      dataSource: dataViewSource,
       field: dataViewField,
       fetchContext: { isReload: false, projectRouting: '_alias:*' } as FetchContext,
       useGlobalFilters: true,

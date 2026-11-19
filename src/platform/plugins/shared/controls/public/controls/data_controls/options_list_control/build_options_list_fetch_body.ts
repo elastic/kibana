@@ -39,7 +39,7 @@ export type BuildOptionsListFetchBodyResult =
       response: OptionsListSuccessResponse | Pick<OptionsListSuccessResponse, 'suggestions'>;
     };
 
-type SharedFetchBodyArgs = {
+interface SharedFetchBodyArgs {
   dataSource?: FilterableSource;
   fetchContext: FetchContext;
   useGlobalFilters: boolean | undefined;
@@ -48,7 +48,7 @@ type SharedFetchBodyArgs = {
   searchTechnique: OptionsListSearchTechnique;
   selectedOptions: OptionsListSelection[];
   ignoreValidations: boolean | undefined;
-};
+}
 
 export function buildEsqlFetchBody({
   esqlQuery,

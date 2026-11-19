@@ -10,7 +10,7 @@
 import type { Filter } from '@kbn/es-query';
 import type { FilterableSource } from '@kbn/data-source';
 import { dataViewsService } from '../../../services/kibana_services';
-import { hasNoResults } from './has_no_results';
+import { hasNoEsqlResults } from './has_no_results';
 
 const mockGetESQLSingleColumnValues = jest.fn();
 jest.mock('../../../../common/options_list/get_esql_single_column_values', () => {
@@ -28,7 +28,7 @@ jest.mock('../../../../common/options_list/get_esql_single_column_values', () =>
   };
 });
 
-describe('hasNoResults of a field of an ES|QL source', () => {
+describe('hasNoEsqlResults', () => {
   const esqlSource: FilterableSource = {
     kind: 'esql',
     id: 'dataset-id',
@@ -41,11 +41,10 @@ describe('hasNoResults of a field of an ES|QL source', () => {
     meta: { type: 'range', key: 'bytes', params: { gte: 1, lte: 5 } },
     query: { range: { bytes: { gte: 1, lte: 5 } } },
   } as unknown as Filter;
-  const field = { name: 'bytes', type: 'number' };
   const request = () => ({
     abortSignal: new AbortController().signal,
     dataSource: esqlSource,
-    field,
+    esqlQuery: 'FROM logs-*\n| STATS BY bytes',
     rangeFilter,
   });
   const column = { name: 'bytes', type: 'long' };
@@ -62,7 +61,7 @@ describe('hasNoResults of a field of an ES|QL source', () => {
       indexPattern: 'logs-*',
     });
 
-    expect(await hasNoResults(request())).toBe(false);
+    expect(await hasNoEsqlResults(request())).toBe(false);
     expect(mockGetESQLSingleColumnValues).toHaveBeenCalledWith(
       expect.objectContaining({
         query: 'FROM logs-*\n| STATS BY bytes\n| LIMIT 1',
@@ -79,13 +78,13 @@ describe('hasNoResults of a field of an ES|QL source', () => {
   it('is true when the range has no values', async () => {
     mockGetESQLSingleColumnValues.mockResolvedValue({ values: [], column, indexPattern: 'logs-*' });
 
-    expect(await hasNoResults(request())).toBe(true);
+    expect(await hasNoEsqlResults(request())).toBe(true);
   });
 
   it('fails with the error of a failed query', async () => {
     const error = new Error('query failed');
     mockGetESQLSingleColumnValues.mockResolvedValue({ errors: [error] });
 
-    await expect(hasNoResults(request())).rejects.toBe(error);
+    await expect(hasNoEsqlResults(request())).rejects.toBe(error);
   });
 });

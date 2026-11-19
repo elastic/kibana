@@ -8,7 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { BehaviorSubject, first, skip } from 'rxjs';
+import { BehaviorSubject, filter, first, firstValueFrom, skip } from 'rxjs';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { dataViewsService } from '../../services/kibana_services';
@@ -16,6 +16,7 @@ import { initializeDataControlManager } from './data_control_manager';
 import { initializeStateManager } from '@kbn/presentation-publishing';
 import { ControlValuesSource, DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
+import { getDataViewIdFromESQLQuery } from '../utils/get_data_view_id_from_esql_query';
 
 const mockGetESQLSingleColumnValues = jest.fn();
 jest.mock('../../../common/options_list/get_esql_single_column_values', () => {
@@ -44,6 +45,16 @@ describe('initializeDataControlManager', () => {
   };
 
   dataViewsService.get = async (id: string): Promise<DataView> => {
+    if (id === 'esqlDatasetId') {
+      return {
+        kind: 'esql',
+        id,
+        title: 'logs-*,logs=archive',
+        fields: [],
+        getFieldByName: (name: string) => ({ name, type: 'string' }),
+        isTimeBased: () => false,
+      } as unknown as DataView;
+    }
     if (id !== 'myDataViewId' && id !== 'noFormatterSourceId') {
       throw new Error(`Simulated error: no data view found for id ${id}`);
     }
@@ -334,6 +345,53 @@ describe('initializeDataControlManager', () => {
 
       expect(dataControlManager.api.fieldName$.value).toBe('myFieldName');
       expect(dataControlManager.api.dataViewId$.value).toBe('myDataViewId');
+    });
+  });
+
+  describe('valuesSourceFetchPlan$', () => {
+    const initializeManager = (state: Partial<DataControlState>) =>
+      initializeDataControlManager({
+        controlId: 'myControlId',
+        controlType: 'myControlType',
+        state: { ...dataControlState, ...state },
+        editorStateManager: initializeStateManager({}, {}),
+        parentApi: {},
+        typeDisplayName: 'My Control Type',
+      });
+    const planOf = (manager: Awaited<ReturnType<typeof initializeManager>>) =>
+      firstValueFrom(manager.api.valuesSourceFetchPlan$.pipe(filter(Boolean)));
+
+    it('is a DSL request for a field of a data view', async () => {
+      expect(await planOf(await initializeManager({}))).toEqual({ fetchMode: 'dsl' });
+    });
+
+    it('is a generated ES|QL query on the FROM target for a field of an ES|QL source', async () => {
+      const manager = await initializeManager({ data_view_id: 'esqlDatasetId' });
+
+      expect(await planOf(manager)).toEqual({
+        fetchMode: 'esql',
+        query: 'FROM logs-*, "logs=archive"\n| STATS BY myFieldName',
+      });
+    });
+
+    it('is the query of the user, never a generated one, when the values come from a query', async () => {
+      (getDataViewIdFromESQLQuery as jest.Mock).mockResolvedValueOnce('esqlDatasetId');
+      const manager = await initializeManager({
+        values_source: ControlValuesSource.ESQL,
+        esql_query: 'FROM logs-* | STATS BY host',
+      });
+
+      expect(await planOf(manager)).toEqual({
+        fetchMode: 'esql',
+        query: 'FROM logs-* | STATS BY host',
+      });
+    });
+
+    it('is not known while the data source cannot be loaded', async () => {
+      const manager = await initializeManager({ data_view_id: 'notGonnaFindMeDataViewId' });
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(manager.api.valuesSourceFetchPlan$.value).toBeUndefined();
     });
   });
 });

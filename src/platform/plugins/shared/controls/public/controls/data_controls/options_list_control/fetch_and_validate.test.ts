@@ -9,10 +9,10 @@
 
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { ControlValuesSource } from '@kbn/controls-constants';
 
 import { coreServices } from '../../../services/kibana_services';
 import { setStubKibanaServices } from '../../../services/mocks';
+import type { ValuesSourceFetchPlan } from '../types';
 import { fetchAndValidate$ } from './fetch_and_validate';
 
 const phraseFilter = (field: string, value: string) =>
@@ -44,8 +44,10 @@ const buildApi = ({
     debouncedSearchString: new BehaviorSubject<string>(''),
     dataSources$: new BehaviorSubject<unknown>(undefined),
     field$: new BehaviorSubject<unknown>(undefined),
-    esqlQuery$: new BehaviorSubject<string>('FROM logs | KEEP host'),
-    valuesSource$: new BehaviorSubject<ControlValuesSource>(ControlValuesSource.ESQL),
+    valuesSourceFetchPlan$: new BehaviorSubject<ValuesSourceFetchPlan | undefined>({
+      fetchMode: 'esql',
+      query: 'FROM logs | KEEP host',
+    }),
     useGlobalFilters$: new BehaviorSubject<boolean>(true),
     ignoreValidations$: new BehaviorSubject<boolean>(false),
   } as any;
@@ -106,24 +108,12 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
     subscription.unsubscribe();
   }, 10000);
 
-  it('asks the query of a field of an ES|QL source, as a query of the user', async () => {
+  it('does not fetch until the fetch plan is known', async () => {
     const api = buildApi({
       filters$: new BehaviorSubject<unknown>([]),
       parentQuery$: new BehaviorSubject<unknown>(undefined),
     });
-    const field = { name: 'host', type: 'string', aggregatable: true };
-    api.valuesSource$.next(ControlValuesSource.FIELD);
-    api.dataSources$.next([
-      {
-        kind: 'esql',
-        id: 'dataset-id',
-        title: 'logs-*',
-        fields: [field],
-        getFieldByName: () => field,
-        isTimeBased: () => false,
-      },
-    ]);
-    api.field$.next(field);
+    api.valuesSourceFetchPlan$.next(undefined);
 
     const { suggestions$ } = fetchAndValidate$({
       api,
@@ -131,51 +121,15 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
       runPastTimeout$: new BehaviorSubject<boolean>(false) as any,
       selectedOptions$: new BehaviorSubject<unknown[]>([]) as any,
       searchTechnique$: new BehaviorSubject<'wildcard' | 'prefix' | 'exact'>('wildcard') as any,
-      sort$: new BehaviorSubject<unknown>({ by: '_key', direction: 'asc' }) as any,
+      sort$: new BehaviorSubject<unknown>({ by: '_count', direction: 'desc' }) as any,
     });
-    const subscription = suggestions$.subscribe(() => {});
+    const emitted: unknown[] = [];
+    const subscription = suggestions$.subscribe((result) => emitted.push(result));
 
     await new Promise((resolve) => setTimeout(resolve, 200));
 
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
-    expect(JSON.parse(fetchSpy.mock.calls[0][1].body)).toMatchObject({
-      kind: 'esql',
-      esql: 'FROM logs-*\n| STATS BY host',
-    });
-    subscription.unsubscribe();
-  }, 10000);
-
-  it('asks the query of the user, not a generated one, when the values come from a query', async () => {
-    const api = buildApi({
-      filters$: new BehaviorSubject<unknown>([]),
-      parentQuery$: new BehaviorSubject<unknown>(undefined),
-    });
-    const field = { name: 'host', type: 'string', aggregatable: true };
-    api.dataSources$.next([
-      {
-        kind: 'esql',
-        id: 'dataset-id',
-        title: 'logs-*',
-        fields: [field],
-        getFieldByName: () => field,
-        isTimeBased: () => false,
-      },
-    ]);
-    api.field$.next(field);
-
-    const { suggestions$ } = fetchAndValidate$({
-      api,
-      requestSize$: new BehaviorSubject<number>(10) as any,
-      runPastTimeout$: new BehaviorSubject<boolean>(false) as any,
-      selectedOptions$: new BehaviorSubject<unknown[]>([]) as any,
-      searchTechnique$: new BehaviorSubject<'wildcard' | 'prefix' | 'exact'>('wildcard') as any,
-      sort$: new BehaviorSubject<unknown>({ by: '_key', direction: 'asc' }) as any,
-    });
-    const subscription = suggestions$.subscribe(() => {});
-
-    await new Promise((resolve) => setTimeout(resolve, 200));
-
-    expect(JSON.parse(fetchSpy.mock.calls[0][1].body).esql).toBe('FROM logs | KEEP host');
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(emitted).toEqual([{ suggestions: [], totalCardinality: 0, isPartial: false }]);
     subscription.unsubscribe();
   }, 10000);
 
