@@ -97,7 +97,7 @@ export async function removeDeniedAgentPolicyOverrides(esClient: ElasticsearchCl
         logger.error(
           `Failed to remove disallowed overrides from agent policy [${id}]: ${error.message}`
         );
-        await scheduleRedeploy(policySoClient, esClient, id);
+        await scheduleRedeployIfSaved(policySoClient, esClient, id);
       }
     },
     { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
@@ -108,13 +108,20 @@ export async function removeDeniedAgentPolicyOverrides(esClient: ElasticsearchCl
  * The update may have saved the cleaned overrides and then failed to deploy; the next run would
  * skip that policy, leaving the stale deployed revision. Schedule a deploy through the task
  * manager, which retries. The revision is bumped because agents ignore a redeploy of the same one.
+ *
+ * Only done when the stored overrides are clean, which confirms the save went through. Otherwise
+ * the next setup retries the whole cleanup, and bumping here would redeploy on every run.
  */
-async function scheduleRedeploy(
+async function scheduleRedeployIfSaved(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   id: string
 ) {
   try {
+    const current = await agentPolicyService.get(soClient, id, false);
+    if (!current || sanitizeAgentPolicyOverrides(current.overrides ?? {}).removedKeys.length > 0) {
+      return;
+    }
     await agentPolicyService.bumpRevision(soClient, esClient, id, { asyncDeploy: true });
   } catch (error) {
     appContextService

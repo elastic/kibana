@@ -61,6 +61,16 @@ const mockStoredPolicies = (
   } as any);
 };
 
+// Makes `get` return the denied keys on the first read of a policy and clean overrides after it,
+// as when the update saved the cleanup and then failed. Keyed by id, as policies run concurrently.
+const mockCleanedAfterFirstRead = (deniedOverrides: Record<string, Record<string, any>>) => {
+  const reads: Record<string, number> = {};
+  mockedGet.mockImplementation(async (_soClient, id) => {
+    reads[id] = (reads[id] ?? 0) + 1;
+    return { id, overrides: reads[id] === 1 ? deniedOverrides[id] : {} } as any;
+  });
+};
+
 describe('removeDeniedAgentPolicyOverrides', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -224,12 +234,18 @@ describe('removeDeniedAgentPolicyOverrides', () => {
     expect(mockedBumpRevision).not.toHaveBeenCalled();
   });
 
-  it('keeps going, logs an error and schedules a redeploy when a policy update fails', async () => {
+  it('keeps going, logs an error and schedules a redeploy when the cleanup was saved but deploying failed', async () => {
     mockStoredPolicies(soClient, [
       { id: 'policy-1', namespaces: ['default'], overrides: { receivers: {} } },
       { id: 'policy-2', namespaces: ['default'], overrides: { exporters: {} } },
     ]);
-    mockedUpdate.mockRejectedValueOnce(new Error('boom'));
+    mockCleanedAfterFirstRead({ 'policy-1': { receivers: {} }, 'policy-2': { exporters: {} } });
+    mockedUpdate.mockImplementation(async (_soClient, _esClient, id) => {
+      if (id === 'policy-1') {
+        throw new Error('boom');
+      }
+      return {} as any;
+    });
 
     await expect(removeDeniedAgentPolicyOverrides(esClient)).resolves.toBeUndefined();
 
@@ -241,10 +257,36 @@ describe('removeDeniedAgentPolicyOverrides', () => {
     });
   });
 
+  it('does not schedule a redeploy when the cleanup was not saved', async () => {
+    mockStoredPolicies(soClient, [
+      { id: 'policy-1', namespaces: ['default'], overrides: { receivers: {} } },
+    ]);
+    // Every read still sees the denied keys, e.g. an update pre-check threw before saving
+    mockedUpdate.mockRejectedValue(new Error('callback failed'));
+
+    await removeDeniedAgentPolicyOverrides(esClient);
+
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('callback failed'));
+    expect(mockedBumpRevision).not.toHaveBeenCalled();
+  });
+
+  it('does not schedule a redeploy when re-reading the policy fails', async () => {
+    mockStoredPolicies(soClient, [
+      { id: 'policy-1', namespaces: ['default'], overrides: { receivers: {} } },
+    ]);
+    mockedGet.mockRejectedValue(new Error('not found'));
+
+    await removeDeniedAgentPolicyOverrides(esClient);
+
+    expect(mockedUpdate).not.toHaveBeenCalled();
+    expect(mockedBumpRevision).not.toHaveBeenCalled();
+  });
+
   it('only logs when scheduling the redeploy fails too', async () => {
     mockStoredPolicies(soClient, [
       { id: 'policy-1', namespaces: ['default'], overrides: { receivers: {} } },
     ]);
+    mockCleanedAfterFirstRead({ 'policy-1': { receivers: {} } });
     mockedUpdate.mockRejectedValue(new Error('deploy failed'));
     mockedBumpRevision.mockRejectedValue(new Error('no task manager'));
 
