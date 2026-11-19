@@ -268,7 +268,7 @@ describe('WorkersService', () => {
       );
     });
 
-    it('does not enable the worker when the agent cannot be stored', async () => {
+    it('reports the update as unavailable, not a thrown 500, when the agent cannot be stored', async () => {
       const harness = createPersistentHarness();
       const requireAgentForSpace = jest.fn(async () => {
         throw new Error('agent store unavailable');
@@ -283,7 +283,40 @@ describe('WorkersService', () => {
             'space-a',
             request
           )
-      ).rejects.toThrow('agent store unavailable');
+      ).resolves.toEqual({ outcome: 'unavailable' });
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('reports a settings-only save on an already-enabled worker as unavailable when the agent cannot be stored', async () => {
+      const harness = createPersistentHarness();
+      const installEnabled = await harness
+        .createService()
+        .update(
+          RULE_TUNING,
+          { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+          'space-a',
+          request
+        );
+      if (installEnabled.outcome !== 'updated') {
+        throw new Error('Expected the worker to install enabled');
+      }
+      const revision = installEnabled.response.worker.settingsRevision;
+
+      const requireAgentForSpace = jest.fn(async () => {
+        throw new Error('agent store unavailable');
+      });
+      harness.updateWorkflow.mockClear();
+
+      await expect(
+        harness
+          .createService(undefined, undefined, { requireAgentForSpace })
+          .update(
+            RULE_TUNING,
+            { settings: { serviceAccountId: 'sa-2' }, settingsRevision: revision },
+            'space-a',
+            request
+          )
+      ).resolves.toEqual({ outcome: 'unavailable' });
       expect(harness.updateWorkflow).not.toHaveBeenCalled();
     });
 

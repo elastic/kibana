@@ -437,10 +437,20 @@ export class WorkersService {
     }
 
     try {
-      // An API enable can come before any list ensured the shared agent, and a Worker enabled
-      // without it fails every run, so a failed ensure refuses the enable.
+      // A worker that is on runs as the shared agent, which any earlier list only ensured
+      // best-effort, and a worker enabled without it fails every run: a failed ensure refuses
+      // the save as transient so the caller can retry.
       if (nextEnabled) {
-        await this.requireAgent(spaceId);
+        try {
+          await this.requireAgent(spaceId);
+        } catch (err) {
+          this.logger.warn(
+            `Failed to ensure the shared agent in space "${spaceId}" before a worker update: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
+          return { outcome: 'unavailable' };
+        }
       }
 
       if (pendingSettingsValues) {
