@@ -87,10 +87,14 @@ describe('getBuildFlavorCspConfig', () => {
         getBuildFlavorCspConfig('traditional', configured)
       );
 
-      expect(header).toContain(`default-src 'self' assets.example.test`);
-      expect(header).toContain(`font-src 'self' data:`);
-      expect(header).toContain(`img-src 'self' data: blob: https: http:`);
-      expect(header).toContain(`media-src 'self' kibana.estccdn.com`);
+      expect(header.split('; ')).toEqual(
+        expect.arrayContaining([
+          `default-src 'self' assets.example.test`,
+          `font-src 'self' data:`,
+          `img-src 'self' data: blob: https: http:`,
+          `media-src 'self' kibana.estccdn.com`,
+        ])
+      );
     });
   });
 });
