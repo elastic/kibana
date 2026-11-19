@@ -406,6 +406,46 @@ describe('nightshift-investigations scout hook', () => {
       }
     );
 
+    describe('shell override of the profile key', () => {
+      const override = {
+        NIGHTSHIFT_ES_URL_OVERRIDE: 'https://override.example.com',
+        NIGHTSHIFT_ES_API_KEY_OVERRIDE: 'override-key',
+      };
+
+      it('beats the profile block, which the plain shell variables never do', () => {
+        const { output } = runHook(PROFILE, {
+          ...override,
+          NIGHTSHIFT_ES_URL: 'https://shell.example.com',
+          NIGHTSHIFT_ES_API_KEY: 'shell-key',
+        });
+        expect(output.env).toMatchObject({
+          NIGHTSHIFT_CONNECTOR_SET: 'default',
+          NIGHTSHIFT_ES_URL: 'https://override.example.com',
+          NIGHTSHIFT_ES_API_KEY: 'override-key',
+        });
+      });
+
+      it.each<Record<string, string>>([
+        { NIGHTSHIFT_ES_URL_OVERRIDE: 'https://override.example.com' },
+        { NIGHTSHIFT_ES_API_KEY_OVERRIDE: 'SECRET_OVERRIDE_KEY' },
+      ])('rejects an incomplete override %j without echoing credentials', (env) => {
+        const { status, stderr } = runHook(PROFILE, env);
+        expect(status).toBe(1);
+        expect(stderr).toContain('must be set together');
+        expect(stderr).not.toContain('SECRET_OVERRIDE_KEY');
+      });
+
+      it('still rejects embedded URL credentials', () => {
+        const { status, stderr } = runHook(PROFILE, {
+          NIGHTSHIFT_ES_URL_OVERRIDE: 'https://elastic:SECRET_PASSWORD@es.example.com',
+          NIGHTSHIFT_ES_API_KEY_OVERRIDE: 'override-key',
+        });
+        expect(status).toBe(1);
+        expect(stderr).toContain('Elasticsearch URL must not embed credentials');
+        expect(stderr).not.toContain('SECRET_PASSWORD');
+      });
+    });
+
     it.each<Record<string, string>>([
       { NIGHTSHIFT_ES_URL: 'https://shell.example.com' },
       { NIGHTSHIFT_ES_API_KEY: 'SECRET_SHELL_KEY' },

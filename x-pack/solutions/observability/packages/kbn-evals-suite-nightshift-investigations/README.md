@@ -282,6 +282,7 @@ that scores it and the CI shard that runs it:
 | ------------------- | ---------------------------- | --------------- | --------------------------------- |
 | `golden`            | `customer0-golden`           | investigation   | `ns-investigation-golden-2710`    |
 | `connector-elastic` | `customer0-connector-probes` | connector-probe | `nightshift/ns-connector-elastic` |
+| `recovery`          | none yet (opt-in)            | recovery        | `ns-recovery-round-1811`          |
 
 Golden cuts are named `ns-investigation-golden-DDMM`, after the cut date: `2710` is 27 October.
 CI runs one pinned cut, so PR, weekly and daily scores share a baseline, and a newer cut on the
@@ -321,6 +322,37 @@ Both datasets query the Customer-0 cluster live, so they run with the `default`
 without a connector the investigations would run without telemetry and score low instead of
 failing.
 
+### Alert-recovery rounds
+
+`ns-recovery-round-1811` scores the round that follows an alert's recovery, so a change to the
+recovery prompt can be compared on the same cases. Each example holds the investigation's earlier
+round (`input.question` and `input.prior_response`), optionally that round's tool calls with bounded
+results (`input.prior_steps`, each `{ tool_id, params, result, note? }`), and the alert's identifiers
+(`input.alert`);
+[`compose.ts`](evals/recovery/compose.ts) builds the recovery prompt from the branch under test
+when the run starts, so the stored dataset never pins a prompt. The earlier round (request, numbered
+steps, answer) goes to the investigator as `context.earlier_round`, because it does not fit in the
+start route's 10,000-character message; the eval cannot write a native two-round conversation. The `customer0-recovery` tag holds
+the agent to evidence from within an hour of the recovery instead of the alert's timestamp.
+
+The examples hold customer telemetry, so they are not in the repository. Register or refresh the
+dataset by running the eval once with the examples file, and score it later without the file:
+
+```bash
+# register (upserts the dataset under its name)
+NIGHTSHIFT_DATASETS=recovery NIGHTSHIFT_RECOVERY_EXAMPLES_FILE=/path/to/ns-recovery-round-1811.json \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
+
+# score the stored dataset
+NIGHTSHIFT_DATASETS=recovery \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 3 \
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
+```
+
+The cases carry no reference answers, so the reference-based RCA judges skip them; the run is
+scored on execution success, tool-call health and the judges that need none.
+
 ## Connector sets
 
 Evals start the investigator the way production does: with a set of saved connectors, listed for
@@ -359,6 +391,7 @@ Profile values take precedence over these shell fallbacks, which replace the for
 | ----------------------- | --------------------------------------------------------------------------------- |
 | `NIGHTSHIFT_ES_URL`     | Elasticsearch endpoint, without embedded credentials. Requires the API key below. |
 | `NIGHTSHIFT_ES_API_KEY` | Encoded restricted API key, without the `ApiKey` prefix. Requires the URL above.  |
+| `NIGHTSHIFT_ES_URL_OVERRIDE`, `NIGHTSHIFT_ES_API_KEY_OVERRIDE` | Set both to use your own endpoint and key for one run instead of the profile's `nightshift.telemetry` block, which the plain variables above never override. Stop the Scout stack first, since it reads the key only when it starts. |
 
 A `readableIndices` field left in Vault is ignored.
 

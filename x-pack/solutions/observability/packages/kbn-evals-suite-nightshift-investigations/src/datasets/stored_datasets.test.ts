@@ -49,6 +49,10 @@ describe('stored dataset config', () => {
   it('maps each CI shard to its stored datasets', () => {
     expect(storedDatasetIdsForShard('customer0-golden')).toEqual(['golden']);
     expect(storedDatasetIdsForShard('customer0-connector-probes')).toEqual(['connector-elastic']);
+    expect(storedDatasetIdsForShard('customer0-recovery')).toEqual(['recovery']);
+    expect(storedDatasetIdsForShard('customer0-recovery-production')).toEqual([
+      'recovery-production',
+    ]);
     expect(storedDatasetIdsForShard('orcabench')).toEqual([]);
     expect(storedDatasetIdsForShard(undefined)).toEqual([]);
   });
@@ -58,6 +62,16 @@ describe('stored dataset config', () => {
       selectStoredDatasets('investigation', ['connector-elastic', 'golden']).map(({ id }) => id)
     ).toEqual(['golden']);
     expect(selectStoredDatasets('connector-probe', ['golden'])).toEqual([]);
+  });
+
+  it('scores the recovery dataset with the recovery eval and requires its tag', () => {
+    expect(selectStoredDatasets('recovery', ['golden', 'recovery'])).toEqual([
+      expect.objectContaining({ id: 'recovery', name: 'ns-recovery-round-1811' }),
+    ]);
+    expect(selectStoredDatasets('investigation', ['recovery'])).toEqual([]);
+    expect(STORED_DATASETS.find(({ id }) => id === 'recovery')?.requiredTags).toEqual([
+      'customer0-recovery',
+    ]);
   });
 
   it('pins a golden cut and requires its customer0 tag, so the retrospective guardrail applies', () => {

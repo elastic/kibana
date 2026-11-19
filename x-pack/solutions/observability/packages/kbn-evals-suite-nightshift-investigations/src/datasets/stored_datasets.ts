@@ -6,7 +6,11 @@
  */
 
 /** Which eval scores a stored dataset, and so which spec file registers it. */
-export type StoredDatasetEval = 'investigation' | 'connector-probe';
+export type StoredDatasetEval =
+  | 'investigation'
+  | 'connector-probe'
+  | 'recovery'
+  | 'recovery-production';
 
 /**
  * A dataset stored on the evaluations cluster, by its exact `name`. `id` names it in
@@ -38,6 +42,25 @@ export const STORED_DATASETS: readonly StoredDataset[] = [
     eval: 'connector-probe',
     shard: 'customer0-connector-probes',
     name: 'nightshift/ns-connector-elastic',
+  },
+  {
+    id: 'recovery',
+    eval: 'recovery',
+    // Opt-in until a CI shard runs it: `NIGHTSHIFT_DATASETS=recovery`.
+    shard: 'customer0-recovery',
+    // Its examples are the file of this name next to the recovery spec.
+    name: 'ns-recovery-round-1811',
+    // getDatasetCustomContext holds these to the recovery's time instead of the alert's.
+    requiredTags: ['customer0-recovery'],
+  },
+  {
+    id: 'recovery-production',
+    eval: 'recovery-production',
+    // Replays what the production agent did on these recoveries; no investigation runs.
+    // Opt-in: `NIGHTSHIFT_DATASETS=recovery-production`.
+    shard: 'customer0-recovery-production',
+    name: 'ns-recovery-production-1811',
+    requiredTags: ['customer0-recovery'],
   },
 ];
 

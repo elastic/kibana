@@ -28,6 +28,14 @@ export const CUSTOMER0_CUSTOM_CONTEXT: readonly string[] = [
 export const RETROSPECTIVE_GUARDRAIL_CONTEXT =
   "Evaluation guardrail: this alert fired in the past and has since been resolved. Investigate it as if it is the alert's timestamp now, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the alert's timestamp. Do not read human discussion of this incident (Slack or chat threads, including replies under the alert, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the alert's timestamp. Code, commits, deploys and config changes from before the alert are fair game.";
 
+/**
+ * Recovery cases replay the round that follows an alert's recovery. The recovery is in the past, so
+ * the agent is held to the evidence that existed within an hour of it, which keeps a later
+ * re-fire or fix out of the verdict while leaving the alert's whole lifetime in reach.
+ */
+export const RECOVERY_GUARDRAIL_CONTEXT =
+  "Evaluation guardrail: this alert recovered in the past. Treat the recovery's timestamp as the present, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the recovery; the alert's whole earlier lifetime and history stay readable. Do not read human discussion of this incident (Slack or chat threads, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the recovery. Code, commits, deploys and config changes from before the recovery are fair game.";
+
 /** ORCA's environment is built on the upstream demo at this commit (paper, Appendix I). */
 export const ORCA_DEMO_COMMIT = 'fc77a6cbc0bf36ff52f21e4d59fa7b8a0f5d6733';
 
@@ -51,6 +59,9 @@ export const getDatasetCustomContext = ({
   name: string;
   tags?: readonly string[];
 }): readonly string[] => {
+  if (tags.includes('customer0-recovery')) {
+    return [...CUSTOMER0_CUSTOM_CONTEXT, RECOVERY_GUARDRAIL_CONTEXT];
+  }
   if (name.startsWith('nightshift/customer0') || tags.includes('customer0')) {
     return [...CUSTOMER0_CUSTOM_CONTEXT, RETROSPECTIVE_GUARDRAIL_CONTEXT];
   }

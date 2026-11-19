@@ -21,6 +21,9 @@ const {
   storedDatasetIds,
 } = resolveEvalSelection();
 const runStoredInvestigations = selectStoredDatasets('investigation', storedDatasetIds).length > 0;
+const runStoredRecovery = selectStoredDatasets('recovery', storedDatasetIds).length > 0;
+const runRecoveryProduction =
+  selectStoredDatasets('recovery-production', storedDatasetIds).length > 0;
 const runStoredConnectorProbes =
   selectStoredDatasets('connector-probe', storedDatasetIds).length > 0;
 
@@ -28,7 +31,7 @@ export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
   timeout: runReinforcement
     ? 70 * 60_000
-    : runInvestigations || runStoredInvestigations
+    : runInvestigations || runStoredInvestigations || runStoredRecovery
     ? 45 * 60_000
     : 10 * 60_000,
   concurrency: 16,
@@ -36,6 +39,8 @@ export default createPlaywrightEvalsConfig({
     ...(runInvestigations ? [] : ['**/investigation/investigation.spec.ts']),
     ...(runOrca ? [] : ['**/investigation/orcabench.spec.ts']),
     ...(runStoredInvestigations ? [] : ['**/investigation/stored.spec.ts']),
+    ...(runStoredRecovery ? [] : ['**/recovery/stored.spec.ts']),
+    ...(runRecoveryProduction ? [] : ['**/recovery/production.spec.ts']),
     ...(runConnectorProbes ? [] : ['**/connector_probe/connector_probe.spec.ts']),
     ...(runStoredConnectorProbes ? [] : ['**/connector_probe/stored.spec.ts']),
     ...(runWikiOptimize ? [] : ['**/wiki_optimize/**']),

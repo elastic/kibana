@@ -225,6 +225,9 @@ export const waitForInvestigationToEnd = async (
 };
 
 /** Runs a manual investigation and retains a bounded report with references to its full evidence. */
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 export const runInvestigation = async (
   fetch: HttpHandler,
   example: InvestigationExample,
@@ -246,6 +249,8 @@ export const runInvestigation = async (
         body: JSON.stringify({
           subject: { type: 'manual' },
           message: example.input.question,
+          // An example may carry what does not fit in the message, such as an earlier round.
+          ...(isRecord(example.input.context) ? { context: example.input.context } : {}),
           connector_id: connector.id,
         }),
       }

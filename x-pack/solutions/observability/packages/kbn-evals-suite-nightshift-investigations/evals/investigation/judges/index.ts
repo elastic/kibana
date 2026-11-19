@@ -61,7 +61,7 @@ export const MEMORIES_CITED_EVALUATOR = 'memories_cited_in_answer';
 
 type InvestigationEvaluator = Evaluator<InvestigationExample, InvestigationTaskOutput>;
 
-interface JudgeDeps {
+export interface JudgeDeps {
   inferenceClient: BoundInferenceClient;
   evaluationConnector: EvalConnector;
   log: ToolingLog;
@@ -82,7 +82,7 @@ const NO_TRAJECTORY_EXPLANATION =
   'No tool-call trajectory was captured for this run, so what the agent accessed cannot be judged.';
 
 /** Model attribution matching the built-in `evaluators` fixture (`toScoreModel(...)`). */
-const getModelFactory = (evaluationConnector: EvalConnector) => () => {
+export const getModelFactory = (evaluationConnector: EvalConnector) => () => {
   const model = buildModelFromConnector(evaluationConnector);
   if (!model.id) return undefined;
   return {
@@ -101,7 +101,7 @@ const getModelFactory = (evaluationConnector: EvalConnector) => () => {
  * LLM evaluators, which get the same span via `executeUntilValid` → `withActiveInferenceSpan`.
  * Without this wrap the judge model call emits no queryable `gen_ai` span.
  */
-const invokeJudge = async <TArgs>(
+export const invokeJudge = async <TArgs>(
   { inferenceClient, log }: Pick<JudgeDeps, 'inferenceClient' | 'log'>,
   name: string,
   prompt: Parameters<BoundInferenceClient['prompt']>[0]['prompt'],

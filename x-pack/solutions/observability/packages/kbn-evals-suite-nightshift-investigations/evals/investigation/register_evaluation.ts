@@ -8,7 +8,9 @@
 import { expect } from '@playwright/test';
 import pMap from 'p-map';
 import { tags } from '@kbn/evals';
-import type { EvaluationDataset, EvalsClient } from '@kbn/evals';
+import type { EvalConnector, EvaluationDataset, EvalsClient, Evaluator } from '@kbn/evals';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import { evaluate } from '../../src/evaluate';
 import { restoreKnowledge } from '../../src/knowledge/restore_knowledge';
@@ -59,6 +61,8 @@ export const registerInvestigationEvaluation = ({
   bundledSynthetic: bundledSyntheticDataset = !process.env.NIGHTSHIFT_EXAMPLES_FILE &&
     !process.env.NIGHTSHIFT_DATASET_NAME,
   metadata: experimentMetadata = {},
+  prepareExample = (example) => example,
+  extraEvaluators = () => [],
   // Experiment ids come from the build, suite, model and this name, so datasets that can run in one
   // build need distinct names or their scores merge.
   experimentName = orca
@@ -73,6 +77,14 @@ export const registerInvestigationEvaluation = ({
   orca?: boolean;
   bundledSynthetic?: boolean;
   metadata?: Record<string, string | number>;
+  /** Turns a stored example into the one the investigation runs, e.g. to compose its prompt when the run starts. */
+  prepareExample?: (example: InvestigationExample) => InvestigationExample;
+  /** Evaluators scored in addition to the investigation judges, built with the run's judge connection. */
+  extraEvaluators?: (deps: {
+    inferenceClient: BoundInferenceClient;
+    evaluationConnector: EvalConnector;
+    log: ToolingLog;
+  }) => Array<Evaluator<InvestigationExample, InvestigationTaskOutput>>;
   experimentName?: string;
 }): void => {
   evaluate.describe(`Nightshift investigations: ${name}`, { tag: suiteTags }, () => {
@@ -122,6 +134,7 @@ export const registerInvestigationEvaluation = ({
           ...(orca ? createOrcaEvaluators(judgeDeps) : []),
           executionSuccessEvaluator,
           ...efficiencyEvaluators,
+          ...extraEvaluators(judgeDeps),
         ];
         const evaluatorsByName = new Map(evaluators.map((each) => [each.name, each]));
         assertScoresWithinQueryLimit({
@@ -239,7 +252,7 @@ export const registerInvestigationEvaluation = ({
           await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: bundledSynthetic });
           experimentResults = await runExperiment({
             runConcurrency: concurrency,
-            task: (example) => runInvestigation(fetch, example, connector),
+            task: (example) => runInvestigation(fetch, prepareExample(example), connector),
           });
         }
         const [experiment] = experimentResults;
