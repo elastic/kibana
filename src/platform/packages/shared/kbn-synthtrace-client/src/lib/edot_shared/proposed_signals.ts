@@ -14,9 +14,6 @@ export const EVENT_SESSION_START = 'session.start';
 export const EVENT_SESSION_END = 'session.end';
 export const EVENT_APP_START = 'elastic.app.start';
 export const EVENT_SCREEN_CLICK = 'app.screen.click';
-export const EVENT_WIDGET_CLICK = 'app.widget.click';
-// A handled error, as the OpenTelemetry conventions name exceptions in logs
-export const EVENT_EXCEPTION = 'exception';
 
 export const SPAN_SCREEN_LOAD = 'elastic.screen.load';
 

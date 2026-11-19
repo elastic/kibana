@@ -1085,6 +1085,10 @@ export const parseDigitalExperienceScenarioOpts = (
 
 const MS_PER_MINUTE = 60_000;
 
+/** When the session `index` of a rate of `perMinute` sessions starts, by absolute time. */
+export const sessionTimeOf = (index: number, perMinute: number): number =>
+  Math.ceil(((index + 1) * MS_PER_MINUTE) / perMinute) - 1;
+
 /** The number of events of a per-minute rate that start in `[from, to)`, counted from the epoch. */
 const countInWindow = (perMinute: number, from: number, to: number): number =>
   Math.floor((perMinute * to) / MS_PER_MINUTE) - Math.floor((perMinute * from) / MS_PER_MINUTE);
@@ -1195,7 +1199,6 @@ export const generateOngoingPerMinute = <TFields extends Fields>(
   const to = range.to.getTime();
   // The same numbering and times as generatePerMinute, by absolute time
   const indexAt = (time: number) => Math.floor((perMinute * time) / MS_PER_MINUTE);
-  const timeOf = (index: number) => Math.ceil(((index + 1) * MS_PER_MINUTE) / perMinute) - 1;
 
   return range.interval('1s').generator<TFields>((windowStart, _index, { stepMilliseconds }) => {
     const windowEnd = Math.min(windowStart + stepMilliseconds, to);
@@ -1212,7 +1215,7 @@ export const generateOngoingPerMinute = <TFields extends Fields>(
 
     while (state.nextIndex < indexAt(windowEnd)) {
       const index = state.nextIndex++;
-      const start = timeOf(index);
+      const start = sessionTimeOf(index, perMinute);
       const events = create({ time: start, index, after: windowStart })
         .map((event) => ({ time: releaseTime(event), event }))
         .sort((a, b) => a.time - b.time);

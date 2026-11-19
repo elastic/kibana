@@ -389,7 +389,6 @@ describe('digital experience mobile apps', () => {
         from: from ?? timeRange.from.getTime(),
         scale,
         platform: 'both',
-        withManualSpans: false,
         seed: 'digital-experience-native-test',
       }).flatMap((generator) =>
         Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
@@ -514,7 +513,6 @@ describe('digital experience mobile apps', () => {
         from: FROM,
         scale: 1,
         platform: 'both',
-        withManualSpans: false,
         seed: 'digital-experience-native-test',
         apps: [reactNativeApp],
       }).flatMap((generator) =>
@@ -576,6 +574,46 @@ describe('digital experience mobile apps', () => {
       });
     });
 
+    it('points session.previous_id only to sessions the run has written', () => {
+      // Longer than an installation cycle, so that the installations come back
+      const run = timerange(range.from, new Date(FROM + 2 * 60 * 60_000));
+      const starts = logsOf(collectNative(run, 0.25)).filter(
+        ({ event_name: eventName }) => eventName === EVENT_SESSION_START
+      );
+      const sessionIds = new Set(starts.map(({ attributes }) => attributes?.['session.id']));
+      const previousIds = starts.flatMap(({ attributes }) =>
+        attributes?.['session.previous_id'] ? [attributes['session.previous_id']] : []
+      );
+
+      expect(previousIds.length).toBeGreaterThan(0);
+      expect(previousIds.length).toBeLessThan(starts.length);
+      previousIds.forEach((previousId) => expect(sessionIds).toContain(previousId));
+    });
+
+    it('runs the newest version everywhere for a rollout without hours', () => {
+      const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
+      const [newest, ...older] = app.versions;
+      const immediate = {
+        ...app,
+        versions: [{ ...newest, rollout: { initialAdoption: 0, hours: 0 } }, ...older],
+      };
+      const versions = new Set(
+        logsOf(
+          generateEdotNativeSessions(range, {
+            environment: 'test',
+            from: FROM,
+            scale: 1,
+            platform: 'both',
+            seed: 'digital-experience-native-test',
+            apps: [immediate],
+          }).flatMap((generator) =>
+            Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
+          )
+        ).map(({ resource }) => resource?.attributes?.['service.version'])
+      );
+      expect(versions).toEqual(new Set([newest.serviceVersion]));
+    });
+
     it('rejects a rollout of a version other than the newest', () => {
       const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
       const [newest, previous, ...older] = app.versions;
@@ -593,7 +631,6 @@ describe('digital experience mobile apps', () => {
           from: FROM,
           scale: 1,
           platform: 'both',
-          withManualSpans: false,
           seed: 'digital-experience-native-test',
           apps: [olderRollout],
         })

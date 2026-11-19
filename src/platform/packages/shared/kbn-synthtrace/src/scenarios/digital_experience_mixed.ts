@@ -95,7 +95,6 @@ const scenario: Scenario<OtelDocument | ApmFields> = async ({ scenarioOpts, logg
           scale: opts.scale,
           seed: opts.seed,
           platform: ALL_MOBILE_PLATFORMS,
-          withManualSpans: false,
           environment: ENVIRONMENT,
           from,
         })

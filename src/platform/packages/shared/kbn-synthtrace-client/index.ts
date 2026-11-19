@@ -98,7 +98,11 @@ export {
   type NetworkConnection,
   type NetworkConnectionType,
 } from './src/lib/edot_react_native';
-export { EVENT_APP_CRASH } from './src/lib/edot_shared/constants';
+export {
+  EVENT_APP_CRASH,
+  EVENT_EXCEPTION,
+  EVENT_WIDGET_CLICK,
+} from './src/lib/edot_shared/constants';
 export {
   ATTR_APP_START_DURATION,
   ATTR_ERROR_KIND,
@@ -108,11 +112,9 @@ export {
   ERROR_KIND_ANR,
   ERROR_KIND_HANG,
   EVENT_APP_START,
-  EVENT_EXCEPTION,
   EVENT_SCREEN_CLICK,
   EVENT_SESSION_END,
   EVENT_SESSION_START,
-  EVENT_WIDGET_CLICK,
   SPAN_SCREEN_LOAD,
   START_TYPE_COLD,
   START_TYPE_WARM,

@@ -32,6 +32,7 @@ import {
   parseScale,
   parseSeed,
   randomUuid,
+  sessionTimeOf,
   type OngoingSessionStore,
 } from './digital_experience_apps';
 
@@ -698,17 +699,24 @@ const NATIVE_SCENARIO_OPT_KEYS: ReadonlyArray<keyof DigitalExperienceMobileScena
  * Parses `--scenarioOpts` for `digital_experience_mobile_native`, which takes `platform`, `scale`
  * and `seed`, and defaults the seed to the run's `from`.
  */
+/** The options of the native scenario, which writes no manual spans. */
+export type DigitalExperienceNativeScenarioOpts = Omit<
+  DigitalExperienceMobileScenarioOpts,
+  'withManualSpans'
+>;
+
 export const parseDigitalExperienceNativeScenarioOpts = (
   opts: Record<string, unknown> | undefined,
   from: number
-): DigitalExperienceMobileScenarioOpts => {
+): DigitalExperienceNativeScenarioOpts => {
   const unknownKeys = Object.keys(opts ?? {}).filter(
     (key) => !NATIVE_SCENARIO_OPT_KEYS.some((allowed) => allowed === key)
   );
   if (unknownKeys.length) {
     throw new Error(`Unknown scenarioOpts: ${unknownKeys.join(', ')}`);
   }
-  return { ...parseDigitalExperienceMobileScenarioOpts(opts, from), withManualSpans: false };
+  const { withManualSpans, ...nativeOpts } = parseDigitalExperienceMobileScenarioOpts(opts, from);
+  return nativeOpts;
 };
 
 /**
@@ -790,10 +798,13 @@ const pickInstalledVersion = (
     return pickVersion(random, versions);
   }
   const { initialAdoption, hours } = rollout;
-  const progress = Math.min(
-    initialAdoption + ((1 - initialAdoption) * Math.max(elapsed, 0)) / (hours * HOUR_MS),
-    1
-  );
+  const progress =
+    hours <= 0
+      ? 1
+      : Math.min(
+          initialAdoption + ((1 - initialAdoption) * Math.max(elapsed, 0)) / (hours * HOUR_MS),
+          1
+        );
   return random() < progress ? 0 : 1 + pickVersion(random, older);
 };
 
@@ -865,11 +876,12 @@ export const generateEdotReactNativeSessions = (
  */
 export const generateEdotNativeSessions = (
   range: Timerange,
-  opts: GenerateSessionsOpts
+  opts: Omit<GenerateSessionsOpts, 'withManualSpans'>
 ): Array<SynthtraceGenerator<EdotReactNativeDocument>> =>
   generateSessions(range, {
     ...opts,
     apps: (opts.apps ?? DIGITAL_EXPERIENCE_NATIVE_APPS).map((app) => ({ ...app, native: true })),
+    withManualSpans: false,
     proposedSignals: true,
   });
 
@@ -970,10 +982,12 @@ const generateSessions = (
         const network: NetworkConnection = onCellular
           ? networks[Math.floor(networkPick * networks.length)]
           : { type: 'wifi' };
-        // The session before this one on the same installation
+        // The session before this one on the same installation, if the run has it: native sessions
+        // start at their time, and those that started before `from` aren't written
+        const previousIndex = index - installations;
         const previousSessionId =
-          proposedSignals && index >= installations
-            ? randomUuid(createSeededRandom(`${seed}:${serviceName}:${index - installations}`))
+          proposedSignals && previousIndex >= 0 && sessionTimeOf(previousIndex, perMinute) >= from
+            ? randomUuid(createSeededRandom(`${seed}:${serviceName}:${previousIndex}`))
             : undefined;
         return edotReactNative.session({
           client: app.client(profile, { installationId, sessionId, deviceId, network }),

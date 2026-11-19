@@ -13,8 +13,8 @@
  * changes in the SDKs, only the generator changes.
  *
  * Data shape (OTel-native, no APM enrichment):
- * - `logs-generic.otel-default`: `session.start` (with `session.previous_id` from the second
- *   session of an installation on), `session.end`, `elastic.app.start` (`start.type` cold or warm,
+ * - `logs-generic.otel-default`: `session.start` (with `session.previous_id` when the run has the
+ *   installation's previous session), `session.end`, `elastic.app.start` (`start.type` cold or warm,
  *   `elastic.app.start.duration` in ms), `app.screen.click`, `app.widget.click`, `app.crash`
  *   (reported on the next launch, with the crash time), WARN `exception` events of handled errors,
  *   and ERROR logs of ANRs (`elastic.error.kind: anr`, Android) and hangs (`hang`, iOS)

@@ -26,3 +26,7 @@ export const SEVERITY_FATAL = 21;
 
 // The OpenTelemetry semantic conventions event of an app crash
 export const EVENT_APP_CRASH = 'app.crash';
+// An exception, as the OpenTelemetry semantic conventions name it in logs and span events
+export const EVENT_EXCEPTION = 'exception';
+// A tap on a widget, which EDOT React Native already records
+export const EVENT_WIDGET_CLICK = 'app.widget.click';

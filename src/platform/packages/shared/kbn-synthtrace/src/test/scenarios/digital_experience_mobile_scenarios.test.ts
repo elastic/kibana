@@ -161,12 +161,13 @@ describe('digital experience mobile scenarios', () => {
 
   describe('digital_experience_mobile_native', () => {
     const from = new Date('2026-10-16T12:00:00.000Z').getTime();
-    const to = from + 30 * MINUTE_MS;
+    // Longer than a cycle of the installations, so that sessions have a previous session in the run
+    const to = from + 120 * MINUTE_MS;
     const SERVICES = ['trailmap-android', 'ride-ios', 'transit-companion'];
     let docs: OtelDocument[];
 
     beforeAll(async () => {
-      docs = await run(native, { scenarioOpts: { seed: 'native' }, from, to });
+      docs = await run(native, { scenarioOpts: { seed: 'native', scale: 0.25 }, from, to });
     });
 
     const sessionIdOf = (doc: OtelDocument) => {
@@ -271,7 +272,7 @@ describe('digital experience mobile scenarios', () => {
     });
 
     it('writes one platform only when asked to, and rejects options it does not know', async () => {
-      const scenarioOpts = { seed: 'native', platform: 'ios' };
+      const scenarioOpts = { seed: 'native', platform: 'ios', scale: 0.25 };
       const ios = await run(native, { scenarioOpts, from, to });
       expect(new Set(ios.map((doc) => resourceOf(doc)['os.type']).filter(Boolean))).toEqual(
         new Set(['darwin'])

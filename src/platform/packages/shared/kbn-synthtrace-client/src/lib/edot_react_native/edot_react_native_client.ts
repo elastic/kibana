@@ -13,6 +13,8 @@ import {
   LOGS_INDEX,
   SEVERITY_ERROR,
   SEVERITY_FATAL,
+  EVENT_EXCEPTION,
+  EVENT_WIDGET_CLICK,
   SEVERITY_WARN,
   TRACES_INDEX,
 } from '../edot_shared/constants';
@@ -25,16 +27,14 @@ import {
   ATTR_SESSION_PREVIOUS_ID,
   ATTR_START_TYPE,
   EVENT_APP_START,
-  EVENT_EXCEPTION,
   EVENT_SCREEN_CLICK,
   EVENT_SESSION_END,
   EVENT_SESSION_START,
-  EVENT_WIDGET_CLICK,
   SPAN_SCREEN_LOAD,
   type AppStartType,
   type FreezeKind,
 } from '../edot_shared/proposed_signals';
-import { asFloat } from '../edot_browser/as_float';
+import { asFloat } from '../edot_shared/as_float';
 import type { MobilePlatform } from './device_profiles';
 import type { EdotAndroidClient } from './edot_android_client';
 import type { EdotIosClient } from './edot_ios_client';

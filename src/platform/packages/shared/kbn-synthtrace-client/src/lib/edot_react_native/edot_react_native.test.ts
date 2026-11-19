@@ -25,15 +25,14 @@ import {
   ERROR_KIND_ANR,
   ERROR_KIND_HANG,
   EVENT_APP_START,
-  EVENT_EXCEPTION,
   EVENT_SCREEN_CLICK,
   EVENT_SESSION_END,
   EVENT_SESSION_START,
-  EVENT_WIDGET_CLICK,
   SPAN_SCREEN_LOAD,
   START_TYPE_COLD,
   START_TYPE_WARM,
 } from '../edot_shared/proposed_signals';
+import { EVENT_EXCEPTION, EVENT_WIDGET_CLICK } from '../edot_shared/constants';
 import {
   edotReactNative,
   type EdotReactNativeAppModel,
