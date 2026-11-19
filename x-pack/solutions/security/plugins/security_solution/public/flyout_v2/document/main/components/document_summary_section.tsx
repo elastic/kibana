@@ -14,8 +14,7 @@ import { DocumentSummaryOptionsMenu } from './document_summary_options_menu';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useDefaultAIConnectorId } from '../../../../common/hooks/use_default_ai_connector_id';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
-import { useExpandSection } from '../../../shared/hooks/use_expand_section';
-import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
+import { useOverviewSectionExpanded } from '../../../shared/hooks/use_overview_section_expanded';
 import { useAnonymizationToggle } from '../hooks/use_anonymization_toggle';
 
 export const DOCUMENT_SUMMARY_SECTION_TEST_ID = 'document-flyout-ai-summary-section';
@@ -84,9 +83,8 @@ export const DocumentSummarySection = memo(
       [documentId, getPromptContext]
     );
 
-    const expanded = useExpandSection({
-      storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
-      title: LOCAL_STORAGE_SECTION_KEY,
+    const [expanded, setExpanded] = useOverviewSectionExpanded({
+      sectionId: LOCAL_STORAGE_SECTION_KEY,
       defaultValue: true,
     });
 
@@ -116,7 +114,7 @@ export const DocumentSummarySection = memo(
         data-test-subj={dataTestSubj}
         expanded={expanded}
         gutterSize="none"
-        localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
+        onExpandedChange={setExpanded}
         sectionId={LOCAL_STORAGE_SECTION_KEY}
         title={
           <>

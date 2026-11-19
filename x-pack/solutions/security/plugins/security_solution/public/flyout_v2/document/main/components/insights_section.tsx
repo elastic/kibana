@@ -12,10 +12,9 @@ import { useFlyoutApi } from '../../../use_flyout_api';
 import { type CellActionRenderer } from '../../../shared/components/cell_actions';
 import { EventKind } from '../constants/event_kinds';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
-import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
-import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { useOverviewSectionExpanded } from '../../../shared/hooks/use_overview_section_expanded';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { CorrelationsOverview } from './correlations_overview';
 import { PrevalenceOverview } from './prevalence_overview';
@@ -57,9 +56,8 @@ export const InsightsSection = memo(
       openAttackFlyoutAsChild,
     } = useFlyoutApi();
 
-    const expanded = useExpandSection({
-      storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
-      title: LOCAL_STORAGE_SECTION_KEY,
+    const [expanded, setExpanded] = useOverviewSectionExpanded({
+      sectionId: LOCAL_STORAGE_SECTION_KEY,
       defaultValue: true,
     });
 
@@ -135,7 +133,7 @@ export const InsightsSection = memo(
         data-test-subj={INSIGHTS_SECTION_TEST_ID}
         expanded={expanded}
         gutterSize="m"
-        localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
+        onExpandedChange={setExpanded}
         sectionId={LOCAL_STORAGE_SECTION_KEY}
         title={INSIGHTS_SECTION_TITLE}
       >

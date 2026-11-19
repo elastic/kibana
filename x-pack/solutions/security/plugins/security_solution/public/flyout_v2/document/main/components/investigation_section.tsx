@@ -12,10 +12,9 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { EventKind } from '../constants/event_kinds';
-import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
-import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { useOverviewSectionExpanded } from '../../../shared/hooks/use_overview_section_expanded';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { InvestigationGuide } from './investigation_guide';
@@ -103,9 +102,8 @@ export const InvestigationSection = memo(
       [hit, documentIndexName]
     );
 
-    const expanded = useExpandSection({
-      storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
-      title: LOCAL_STORAGE_SECTION_KEY,
+    const [expanded, setExpanded] = useOverviewSectionExpanded({
+      sectionId: LOCAL_STORAGE_SECTION_KEY,
       defaultValue: true,
     });
 
@@ -176,7 +174,7 @@ export const InvestigationSection = memo(
         data-test-subj={INVESTIGATION_SECTION_TEST_ID}
         expanded={expanded}
         gutterSize="s"
-        localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
+        onExpandedChange={setExpanded}
         sectionId={LOCAL_STORAGE_SECTION_KEY}
         title={INVESTIGATION_SECTION_TITLE}
       >

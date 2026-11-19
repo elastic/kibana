@@ -20,6 +20,8 @@ import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
+import { useUserSetting } from '../../../common/user_settings/use_user_setting';
+import { USER_SETTINGS_KEYS } from '../../../../common/user_settings/keys';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
@@ -116,11 +118,19 @@ export const DocumentFlyout = memo(
     const { hasAlertsRead, loading } = useAlertsPrivileges();
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
     // The Table and JSON tabs are only available in Security Solution, not in Discover.
-    // The selected tab is persisted to localStorage.
+    // POC: the selected tab is persisted per user (User Storage). The old localStorage value is
+    // imported once and then removed.
+    const [persistedTabId, setPersistedTabId] = useUserSetting<string>(
+      USER_SETTINGS_KEYS.FLYOUT_SELECTED_TAB,
+      '',
+      { legacyLocalStorageKey: FLYOUT_STORAGE_KEYS.SELECTED_TAB }
+    );
     const { selectedTabId, setSelectedTabId } = useTabs<DocumentFlyoutTabId>({
       validTabIds: VALID_TAB_IDS,
       storageKey: FLYOUT_STORAGE_KEYS.SELECTED_TAB,
       flyoutType: FLYOUT_TYPE.DOCUMENT,
+      persistedTabId,
+      onPersistTabId: setPersistedTabId,
     });
 
     // The rule flyout is keyed by the rule UUID, but the table/highlighted fields display the rule

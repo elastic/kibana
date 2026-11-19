@@ -10,10 +10,9 @@ import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import React, { memo, useCallback, useMemo } from 'react';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID, EVENT_KIND } from '@kbn/rule-data-utils';
 import { EventKind } from '../constants/event_kinds';
-import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
-import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { useOverviewSectionExpanded } from '../../../shared/hooks/use_overview_section_expanded';
 import { isEcsAllowedValue } from '../utils/event_utils';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import {
@@ -73,9 +72,8 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
     }
   }, [openRuleFlyout, ruleId, ruleName]);
 
-  const expanded = useExpandSection({
-    storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
-    title: LOCAL_STORAGE_SECTION_KEY,
+  const [expanded, setExpanded] = useOverviewSectionExpanded({
+    sectionId: LOCAL_STORAGE_SECTION_KEY,
     defaultValue: true,
   });
 
@@ -84,7 +82,7 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
       data-test-subj={ABOUT_SECTION_TEST_ID}
       expanded={expanded}
       gutterSize="none"
-      localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
+      onExpandedChange={setExpanded}
       sectionId={LOCAL_STORAGE_SECTION_KEY}
       title={ABOUT_SECTION_TITLE}
     >

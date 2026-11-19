@@ -12,8 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
-import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
-import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { useOverviewSectionExpanded } from '../../../shared/hooks/use_overview_section_expanded';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { EventKind } from '../constants/event_kinds';
 import { RESPONSE_BUTTON_TEST_ID, RESPONSE_SECTION_TEST_ID } from './test_ids';
@@ -44,9 +43,8 @@ export const ResponseSectionContent = memo<ResponseSectionContentProps>(
     );
     const isRemoteDocument = useMemo(() => isNonLocalIndexName(indexName), [indexName]);
 
-    const expanded = useExpandSection({
-      storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
-      title: KEY,
+    const [expanded, setExpanded] = useOverviewSectionExpanded({
+      sectionId: KEY,
       defaultValue: false,
     });
     const isAlert = useMemo(
@@ -67,7 +65,7 @@ export const ResponseSectionContent = memo<ResponseSectionContentProps>(
             defaultMessage="Response"
           />
         }
-        localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
+        onExpandedChange={setExpanded}
         sectionId={KEY}
         data-test-subj={RESPONSE_SECTION_TEST_ID}
       >

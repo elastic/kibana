@@ -34,6 +34,7 @@ import {
   SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
+import { useAlertsTableConfigurationStorage } from '../../../common/user_settings/use_alerts_table_configuration_storage';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
@@ -189,6 +190,8 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
 }) => {
   const { id } = tablePropsOverrides;
   const { services: kibanaServices } = useKibana();
+  // POC: persist the table configuration (columns, sort) per user instead of in localStorage
+  const configurationStorage = useAlertsTableConfigurationStorage();
   const {
     data,
     http,
@@ -639,6 +642,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
               ref={alertsTableRef}
               // Stores separate configuration based on the view of the table
               id={id ?? `detection-engine-alert-table-${tableType}-${tableView}`}
+              configurationStorage={configurationStorage}
               ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}
               consumers={ALERT_TABLE_CONSUMERS}
               projectRouting={PROJECT_ROUTING.ORIGIN}
