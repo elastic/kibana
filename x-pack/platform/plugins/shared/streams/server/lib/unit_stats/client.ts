@@ -19,6 +19,7 @@ import {
   UNIT_STATS_REQUEST_TIMEOUT_MS,
 } from './constants';
 import { getDestinationAuthFailures, getNoAuthFailures } from './destination_auth_failures';
+import { getDestinationDeliverySeries } from './destination_delivery_series';
 import { toSearchError } from './errors/search_errors';
 import { mostActionableFailure, STATS_ERROR_CODE, UnitStatsError } from './errors/unit_stats_error';
 import { toRows, type EsqlRow } from './mappers/esql_rows';
@@ -28,6 +29,7 @@ import {
   noDestinationStats,
   withAuthFailures,
 } from './mappers/map_destination_stats_result';
+import { withDeliverySeries } from './mappers/map_delivery_series';
 import { mapProcessorStatsRows, noProcessorStats } from './mappers/map_processor_stats_result';
 import { mapSourceStatsRows, noSourceStats } from './mappers/map_source_stats_result';
 import {
@@ -261,35 +263,60 @@ export class UnitStatsClient {
 
       // The failed rate of each parent result decides which destinations to ask about their auth
       // failures. A destination type whose queries fail is logged once, and its destinations keep
-      // their other stats, with the error beside them and no failure rates.
-      const { failures, failedGroups } = await getDestinationAuthFailures({
-        runQuery: (query) => this.runQuery(query),
-        baseParams,
-        destinations,
-        parentResults: results,
-      });
-      const failureErrors = Object.fromEntries(
-        failedGroups.flatMap(({ types, ids: failedIds, error }) => {
-          const failedWhat = `destination ${types.join(', ')} authentication and authorization`;
+      // their other stats, with the error beside them and no failure rates. The delivery series is
+      // for the destinations that ask for it, and does not depend on the rest, so it runs beside.
+      const [authFailures, deliverySeries] = await Promise.all([
+        getDestinationAuthFailures({
+          runQuery: (query) => this.runQuery(query),
+          baseParams,
+          destinations,
+          parentResults: results,
+        }),
+        getDestinationDeliverySeries({
+          runQuery: (query) => this.runQuery(query),
+          baseParams,
+          destinations: destinations.filter(({ include }) => include?.delivery_series),
+          bucketMs,
+        }),
+      ]);
+      const { failures } = authFailures;
+      const { series } = deliverySeries;
+      const toGroupErrors = (
+        groups: Array<{ types: string[]; ids: string[]; error: unknown }>,
+        about: string
+      ) =>
+        groups.flatMap(({ types, ids: failedIds, error }) => {
+          const failedWhat = `destination ${types.join(', ')} ${about}`;
           const failure = toSearchError(error, failedWhat);
           this.logFailure(failure, { unitId: baseParams.unitId, what: failedWhat });
 
-          return failedIds.map((id) => [id, failure.toStatsError()]);
-        })
-      );
+          return failedIds.map((id) => [id, failure.toStatsError()] as const);
+        });
+      // A destination has one error, and the later entry wins, so the one about the failures comes
+      // last: it is the one that hides rates.
+      const failureErrors = Object.fromEntries([
+        ...toGroupErrors(deliverySeries.failedGroups, 'delivery series'),
+        ...toGroupErrors(authFailures.failedGroups, 'authentication and authorization'),
+      ]);
 
       return {
         results: Object.fromEntries(
-          destinations.map(({ id, type }) => [
-            id,
-            {
-              ...withAuthFailures(
-                results[id],
-                Object.hasOwn(failures, id) ? failures[id] : getNoAuthFailures(type)
-              ),
-              ...(Object.hasOwn(failureErrors, id) ? { error: failureErrors[id] } : {}),
-            },
-          ])
+          destinations.map(({ id, type }) => {
+            const withFailures = withAuthFailures(
+              results[id],
+              Object.hasOwn(failures, id) ? failures[id] : getNoAuthFailures(type)
+            );
+
+            return [
+              id,
+              {
+                ...(Object.hasOwn(series, id)
+                  ? withDeliverySeries(withFailures, series[id])
+                  : withFailures),
+                ...(Object.hasOwn(failureErrors, id) ? { error: failureErrors[id] } : {}),
+              },
+            ];
+          })
         ),
       };
     } catch (error) {

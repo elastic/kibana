@@ -1,5 +1,5 @@
 {
-  "sha1": "b28feb8ae9df954275d696dcc82a356b380461d8",
+  "sha1": "7037a49e20d43a59c408cbe0ab6a078bacdc3e13",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -103,7 +103,7 @@
       }
     },
     {
-      "id": "752be1b1bae5fc6-91eb63f0bdcb98d",
+      "id": "752be1b1bae5fc6-4590381fe97c9e7",
       "title": "Hunt Watch - index scope and worker coverage across projects keeps an absent concrete name in the list instead of blocking the scope",
       "expectedStatus": "passed",
       "tags": [
