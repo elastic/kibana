@@ -21,6 +21,8 @@ export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{a
 export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
 export const AI_INDEX_KI_BY_ID_PATH = `${AI_INDEX_KI_LIST_PATH}/{kiId}`;
 export const AI_INDEX_KI_RESTORE_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_restore`;
+export const AI_INDEX_SPEND_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/spend`;
+export const SPACE_SPEND_PATH = `${INTERNAL_API_PATH}/spend`;
 /**
  * A static segment wins over `{kiId}`, so `GET` can't read a KI whose id is exactly `_groups`.
  * `PATCH`, `DELETE` and `_restore` still reach it.

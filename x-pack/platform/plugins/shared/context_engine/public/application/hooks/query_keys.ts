@@ -83,6 +83,9 @@ export const contextEngineQueryKeys = {
     all: () => ['context_engine', 'dreaming_templates', 'all'] as const,
     detail: (id: string) => ['context_engine', 'dreaming_templates', id] as const,
   },
+  spend: {
+    aiIndex: (aiIndexId: string) => ['context_engine', 'spend', 'ai_index', aiIndexId] as const,
+  },
   connectors: {
     list: () => ['context_engine', 'connectors', 'list'] as const,
     types: () => ['context_engine', 'connectors', 'types'] as const,

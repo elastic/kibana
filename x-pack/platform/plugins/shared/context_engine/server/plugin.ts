@@ -33,6 +33,8 @@ import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerSignalRoutes } from './routes/signals';
+import { registerSpendRoutes } from './routes/spend';
+import { SpendService, createPriceCatalog, createWorkflowExecutionsSpendSource } from './spend';
 import type {
   FeedbackAnalysisScheduleService,
   WorkflowEnablementApi,
@@ -60,6 +62,9 @@ import { resolveSpaceId } from './utils/resolve_space_id';
 
 /** Must match the `pluginId` on the managed workflow definition. */
 const CONTEXT_ENGINE_WORKFLOW_OWNER = 'contextEngine';
+
+/** Public Elastic Cloud host serving the inference price catalog, used outside Elastic Cloud. */
+const DEFAULT_PRICE_CATALOG_BASE_URL = 'https://cloud.elastic.co';
 
 export class ContextEnginePlugin
   implements
@@ -89,6 +94,8 @@ export class ContextEnginePlugin
   private isGlobalMemoryEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private readonly aiIndexChanges: AiIndexChangeNotifier;
+  private spendService?: SpendService;
+  private priceCatalogBaseUrl = DEFAULT_PRICE_CATALOG_BASE_URL;
   private analyticsService?: ContextEngineAnalyticsService;
   private workflowsManagementApiPromise: Promise<
     (DeleteWorkflowsApi & KiVerifierWorkflowRunner & DreamingWorkflowsApi) | undefined
@@ -224,6 +231,13 @@ export class ContextEnginePlugin
       return this.createImprovementsService(esClient, spaceId);
     };
 
+    const getSpendService = () => {
+      if (!this.spendService) {
+        throw new Error('Spend service not available — plugin has not started');
+      }
+      return this.spendService;
+    };
+
     const getScheduleService = () => {
       if (!this.scheduleService) {
         throw new Error('Schedule service not available — plugin has not started');
@@ -350,6 +364,17 @@ export class ContextEnginePlugin
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
 
+    this.priceCatalogBaseUrl = setupDeps.cloud?.baseUrl ?? DEFAULT_PRICE_CATALOG_BASE_URL;
+    registerSpendRoutes({
+      router,
+      logger: this.logger.get('spend'),
+      getSpendService,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+    });
+
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
     };
@@ -419,6 +444,18 @@ export class ContextEnginePlugin
       logger: this.logger.get('signals'),
     });
     const signalsService = this.signalsService;
+
+    const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
+    this.spendService = new SpendService({
+      aiIndexService,
+      priceCatalog: createPriceCatalog({
+        fetchFn: (url, init) => fetch(url, init),
+        baseUrl: this.priceCatalogBaseUrl,
+        logger: this.logger.get('spend', 'pricing'),
+      }),
+      sources: [createWorkflowExecutionsSpendSource({ getEsClient: () => internalEsClient })],
+      logger: this.logger.get('spend'),
+    });
 
     const improvementsLogger = this.logger.get('improvements');
     this.createImprovementsService = (esClient: ElasticsearchClient, spaceId: string) =>

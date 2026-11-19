@@ -141,6 +141,10 @@ const mockUseMemoryEnabled = jest.mocked(useMemoryEnabled);
 const mockUseAiIndexDreaming = jest.mocked(useAiIndexDreaming);
 const preferenceDreaming = { enabled: true, facts: [{ type: 'preference' }] };
 
+jest.mock('../hooks/use_ai_index_spend', () => ({
+  useAiIndexSpend: () => ({ spend: undefined, isLoading: true, error: undefined }),
+}));
+
 jest.mock('../hooks/use_signals', () => ({
   useSignals: () => ({
     signals: [],

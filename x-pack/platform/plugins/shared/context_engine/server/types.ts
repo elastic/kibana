@@ -6,6 +6,7 @@
  */
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -69,6 +70,8 @@ export interface ContextEngineSetupDependencies {
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  /** Provides the base URL of the Elastic price catalog used to price EIS usage. */
+  cloud?: CloudSetup;
   /** Optional in the manifest; without it a feedback analysis schedule cannot be enabled. */
   workflowsManagement?: { management: WorkflowEnablementApi };
   usageCollection?: UsageCollectionSetup;

@@ -717,6 +717,20 @@ describe('AiIndexService', () => {
     });
   });
 
+  describe('listSpendTargets', () => {
+    it('returns the workflow automations of every AI index in the space', async () => {
+      mockSearchHits(
+        storedHit(aiIndexDocument),
+        storedHit({ ...aiIndexDocument, id: 'other', automations: [] }, { id: 'other' })
+      );
+
+      await expect(service.listSpendTargets(DEFAULT_SPACE)).resolves.toEqual([
+        { id: 'customer_support', automationWorkflowIds: ['nightly-refresh'] },
+        { id: 'other', automationWorkflowIds: [] },
+      ]);
+    });
+  });
+
   describe('setFeedbackAnalysis', () => {
     const feedbackAnalysis = {
       enabled: true,
