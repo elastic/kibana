@@ -157,8 +157,9 @@ interface IrMetricSpec {
 }
 
 /**
- * Wraps metric computation into an Evaluator, handling extractor errors and
- * missing ground truth uniformly ({ score: null, label: 'skipped' }).
+ * Wraps metric computation into an Evaluator. Extractor failures yield
+ * { score: null, label: 'error' }; missing ground truth yields
+ * { score: null, label: 'skipped' }.
  */
 function createIrMetricEvaluator<TOutput, TReferenceOutput>(
   config: IrEvaluatorConfig<TOutput, TReferenceOutput>,

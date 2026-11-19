@@ -769,7 +769,7 @@ export interface ExperimentDetailEvaluatorStat {
     min: number;
     max: number;
     count: number;
-    /** Score documents with a null score; excluded from the other stats. */
+    /** Scores labelled 'error' (null score because evaluation failed); excluded from the other stats. */
     error_count: number;
   };
 }

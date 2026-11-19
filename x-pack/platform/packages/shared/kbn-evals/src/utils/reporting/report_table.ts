@@ -296,9 +296,6 @@ export function createTable(
     // Errored runs are excluded from stats.count, but they still ran: count them too so a
     // fully errored dataset shows its real run total instead of 0 (and partially errored
     // datasets don't render fractional example counts when repetitions > 1).
-    // Errored runs are excluded from stats.count, but they still ran: count them too so a
-    // fully errored dataset shows its real run total instead of 0 (and partially errored
-    // datasets don't render fractional example counts when repetitions > 1).
     return Math.max(...datasetStats.map((s) => s.stats.count + (s.stats.errorCount ?? 0)));
   };
 

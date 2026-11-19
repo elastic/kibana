@@ -117,8 +117,6 @@ export function createEsqlEquivalenceEvaluator({
         const message = error instanceof Error ? error.message : String(error);
         // The ingest API caps `evaluator.explanation` at 4096 characters; returning a longer
         // one here would reject the whole score document instead of recording the failure.
-        // The ingest API caps `evaluator.explanation` at 4096 characters; returning a longer
-        // one here would reject the whole score document instead of recording the failure.
         const explanation = `ES|QL equivalence analysis failed: ${message}`.slice(0, 4096);
         return {
           score: null,
