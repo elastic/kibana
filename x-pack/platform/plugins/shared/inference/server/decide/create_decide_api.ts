@@ -133,8 +133,13 @@ export function createDecideApi({
 
     return withActiveInferenceSpan(
       'Decide',
-      { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM' } },
-      async (span) => {
+      {
+        attributes: {
+          [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
+          'elastic.decision.inference_id': options.inferenceId,
+        },
+      },
+      async () => {
         const startedAt = Date.now();
 
         try {
@@ -157,8 +162,6 @@ export function createDecideApi({
             options: { ...options, input: masked.input },
             questions: masked.questions,
           });
-
-          span?.setAttributes({ 'elastic.decision.inference_id': options.inferenceId });
 
           logger.debug(
             () =>
