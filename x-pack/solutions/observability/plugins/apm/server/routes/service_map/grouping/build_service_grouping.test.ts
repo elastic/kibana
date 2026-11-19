@@ -160,4 +160,83 @@ describe('buildServiceGrouping', () => {
       );
     });
   });
+
+  describe('by kubernetes.namespace', () => {
+    const estate = syntheticEstate({ teams: 30, servicesPerTeam: 20, sharedServices: 2, seed: 5 });
+    const services = [...estate.services].sort(compareNames);
+    const teamNumberOf = (service: string) => {
+      const team = estate.teamOf.get(service);
+      return team?.startsWith('team-') ? Number(team.slice('team-'.length)) : undefined;
+    };
+    // a Kubernetes namespace holds two teams, so it groups services unlike service.namespace
+    const kubernetesNamespaceOf = (service: string) => {
+      const team = teamNumberOf(service);
+      return team === undefined ? undefined : `k8s-${Math.floor(team / 2)}`;
+    };
+    const serviceNamespaceOf = (service: string) =>
+      service === 'shared-0' ? 'platform' : estate.teamOf.get(service);
+    const build = (attributes: ServiceGroupingAttributes) =>
+      buildServiceGrouping({ callGraph: callGraphOf(estate), spans: [], services, attributes });
+    const grouping = build(
+      Object.fromEntries(
+        services.map((service) => [
+          service,
+          {
+            serviceNamespace: serviceNamespaceOf(service),
+            kubernetesNamespace: kubernetesNamespaceOf(service),
+          },
+        ])
+      )
+    );
+    const firstOfTeam = (team: string) => {
+      const found = services.find((service) => estate.teamOf.get(service) === team);
+      if (!found) {
+        throw new Error(`${team} has no services`);
+      }
+      return found;
+    };
+    const teamTwo = firstOfTeam('team-2');
+    const teamThree = firstOfTeam('team-3');
+
+    it('groups services by their Kubernetes namespace, apart from their service.namespace', () => {
+      expect(grouping?.strategies.map(({ source }) => source)).toEqual([
+        'calls',
+        'service.namespace',
+        'kubernetes.namespace',
+      ]);
+      for (const service of [teamTwo, teamThree]) {
+        expect(groupOf(grouping, services, 'kubernetes.namespace', service)?.id).toBe(
+          'kubernetes.namespace:k8s-1'
+        );
+      }
+      expect(groupOf(grouping, services, 'service.namespace', teamTwo)?.id).not.toBe(
+        groupOf(grouping, services, 'service.namespace', teamThree)?.id
+      );
+    });
+
+    it('puts a service with no Kubernetes namespace in the group with none, whatever its service.namespace', () => {
+      expect(groupOf(grouping, services, 'service.namespace', 'shared-0')?.id).toBe(
+        'service.namespace:platform'
+      );
+      expect(groupOf(grouping, services, 'kubernetes.namespace', 'shared-0')?.kind).toBe(
+        'noAttribute'
+      );
+    });
+
+    it('leaves out only the strategy whose attribute no service sets', () => {
+      const onlyKubernetes = build(
+        Object.fromEntries(
+          services.map((service) => [
+            service,
+            { kubernetesNamespace: kubernetesNamespaceOf(service) },
+          ])
+        )
+      );
+
+      expect(onlyKubernetes?.strategies.map(({ source }) => source)).toEqual([
+        'calls',
+        'kubernetes.namespace',
+      ]);
+    });
+  });
 });
