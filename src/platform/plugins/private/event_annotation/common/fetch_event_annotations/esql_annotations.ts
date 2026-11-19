@@ -80,8 +80,9 @@ export const toEsqlAnnotationDatatable = ({
     if (
       bounds &&
       (moment(time).isAfter(bounds.to) || moment(endTime ?? time).isBefore(bounds.from))
-    )
+    ) {
       continue;
+    }
 
     const timebucket = moment(
       roundDateToESInterval(
@@ -138,6 +139,8 @@ export const toEsqlAnnotationDatatable = ({
   ]);
 };
 
+// ES|QL date columns arrive as ISO 8601 strings or epoch milliseconds; strict parsing skips any
+// other string instead of letting moment guess a date from it.
 const parseTimestamp = (value: unknown): number | undefined => {
   if (typeof value !== 'number' && typeof value !== 'string') return undefined;
   const date = typeof value === 'number' ? moment(value) : moment(value, moment.ISO_8601, true);
