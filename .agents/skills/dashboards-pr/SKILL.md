@@ -117,32 +117,9 @@ Required whenever there's behavior someone can observe, including agent behavior
 - **Verify:** always write numbered steps to see the fix or the new feature on this branch. Make the setup concrete: sample data set, data view, chart type, setting or advanced setting. End with the expected result in user terms, e.g. "the legend keeps the same color after reordering".
 - About three to six steps per list, derived from the issue and the diff. If a step can't be inferred (specific data, a license level, a feature flag), ask instead of guessing. List the steps you inferred but didn't verify in chat, not in the body.
 
-## Collapsed sections
-
-Each collapsed section is a visible `## Title` heading followed by a `<details>` block whose one-line summary is useful without expanding:
-
-```markdown
-## Identify risks
-
-<details>
-<summary>Medium: agent tool contract changes with no fallback</summary>
-
-...
-
-</details>
-```
-
-Keep `<summary>` to plain text. An `<h2>` inside it gets GitHub's fixed heading margins, which leave large gaps between stacked blocks.
-
-Summary lines:
-
-- **Review notes:** the groups it contains, e.g. "Where to start, intended behavior, extra changes, open items".
-- **Checklist:** the count first, then why the unchecked items don't apply, e.g. "4 of 8 checked. The others don't apply: no UI text, user docs, config keys or functional tests changed". If an unchecked item does apply, name it: "4 of 8 checked. Flaky Test Runner still to run; the others don't apply".
-- **Identify risks:** the level and the main risk, e.g. "Medium: agent tool contract changes with no fallback".
-
 ## Review notes
 
-Written for human and AI reviewers alike: intent the diff can't show. The only place code names and small snippets are allowed. Use these `####` groups, in this order, and leave out any that would be empty:
+Written for human and AI reviewers alike: intent the diff can't show. The only place code names and small snippets are allowed. Its `<summary>` lists the groups it contains. Use these `####` groups, in this order, and leave out any that would be empty:
 
 - **Start here:** one sentence naming the one or two files to read first.
 - **Intended behavior:** decisions, trade-offs, and deliberate behavior changes that would otherwise be flagged as bugs.
@@ -159,9 +136,10 @@ Formatting:
 
 ## Checklist and risks
 
-- Build `## Checklist` and `## Identify risks` from the template as described in references/conventions.md ("Checklist source"), collapsed as above.
+- Build `## Checklist` and `## Identify risks` from the template as described in references/conventions.md ("Checklist source"), collapsed as in its skeleton.
 - Tick only what's verified in the session, confirmed by the user, carried over from the author's ticks, or evident from the diff and labels.
-- Fill in risks honestly: level, what could go wrong, and why it's acceptable or how it's mitigated.
+- Checklist `<summary>`: the count first, then why the unchecked items don't apply, e.g. "4 of 8 checked. The others don't apply: no UI text, user docs, config keys or functional tests changed". If an unchecked item does apply, name it: "4 of 8 checked. Flaky Test Runner still to run; the others don't apply".
+- Fill in risks honestly: level, what could go wrong, and why it's acceptable or how it's mitigated. The `<summary>` gives the level and the main risk, e.g. "Medium: agent tool contract changes with no fallback".
 
 ## Before showing the draft
 

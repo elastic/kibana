@@ -89,6 +89,8 @@ Fixes https://github.com/elastic/kibana/issues/N
 </details>
 ```
 
+Every collapsed section keeps its visible `##` heading, and its `<summary>` is one line of plain text that is useful without expanding. An `<h2>` inside `<summary>` gets GitHub's fixed heading margins, which leave large gaps between stacked blocks.
+
 ## Checklist source
 
 Read `.github/PULL_REQUEST_TEMPLATE.md` on every run, so the description tracks the current template. Copy every item under `### Checklist` verbatim (including links), as a `- [ ]` / `- [x]` list. For `### Identify risks`, replace the template's checkboxes with prose: severity, what could go wrong, and the mitigation. Leave out the template's HTML comments and instructional sentences ("Check the PR satisfies following conditions.").
