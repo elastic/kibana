@@ -74,17 +74,20 @@ describe('AdvancedSection', () => {
     );
   });
 
-  it('does not render the Index Management link when indexManagementHref is undefined', () => {
+  it('renders the backing index as plain text when indexManagementHref is undefined', () => {
     renderSection(undefined);
 
-    expect(screen.queryByTestId('contextAiIndexSettingsBackingIndexLink')).not.toBeInTheDocument();
+    const backingIndex = screen.getByTestId('contextAiIndexSettingsBackingIndexName');
+    expect(backingIndex).toHaveTextContent('ai-index-ds-my-ai-index');
+    expect(backingIndex.tagName).not.toBe('A');
   });
 
-  it('renders the Index Management link with href when indexManagementHref is set', () => {
+  it('renders the backing index as a link when indexManagementHref is set', () => {
     renderSection('/app/management/data/index_management');
 
-    const link = screen.getByTestId('contextAiIndexSettingsBackingIndexLink');
+    const link = screen.getByTestId('contextAiIndexSettingsBackingIndexName');
     expect(link).toHaveAttribute('href', '/app/management/data/index_management');
+    expect(link).toHaveTextContent('ai-index-ds-my-ai-index');
   });
 
   it('opens the delete modal when Delete is clicked', () => {

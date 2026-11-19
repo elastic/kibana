@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCode, EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
@@ -67,27 +67,19 @@ export const AdvancedSection = ({ aiIndex, indexManagementHref }: AdvancedSectio
           />
         }
       >
-        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
-          <EuiFlexItem grow={false}>
-            <EuiCode data-test-subj="contextAiIndexSettingsBackingIndexName">
-              {aiIndex.dest.value}
-            </EuiCode>
-          </EuiFlexItem>
-          {indexManagementHref !== undefined && (
-            <EuiFlexItem grow={false}>
-              <EuiLink
-                external
-                href={indexManagementHref}
-                data-test-subj="contextAiIndexSettingsBackingIndexLink"
-              >
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.settings.backingIndex.openInIndexManagement"
-                  defaultMessage="Open in Index Management"
-                />
-              </EuiLink>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        {indexManagementHref !== undefined ? (
+          <EuiLink
+            external
+            href={indexManagementHref}
+            data-test-subj="contextAiIndexSettingsBackingIndexName"
+          >
+            {aiIndex.dest.value}
+          </EuiLink>
+        ) : (
+          <EuiText size="s" data-test-subj="contextAiIndexSettingsBackingIndexName">
+            <span>{aiIndex.dest.value}</span>
+          </EuiText>
+        )}
       </SettingsRow>
       <SettingsRow
         data-test-subj="contextAiIndexSettingsDelete"

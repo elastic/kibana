@@ -55,6 +55,7 @@ const renderTab = (
         <SettingsTab
           isLoading={false}
           aiIndex={undefined}
+          aiIndexId="tickets"
           onSaved={jest.fn()}
           isAutomationsUnlocked={false}
           indexManagementHref={undefined}

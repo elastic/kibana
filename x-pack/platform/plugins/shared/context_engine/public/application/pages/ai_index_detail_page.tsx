@@ -16,6 +16,7 @@ import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import {
   AiIndexCreatedCallout,
+  AutomationsLockedDescription,
   AutomationsPanel,
   ConnectAgentPanel,
   LockedSectionPanel,
@@ -310,12 +311,7 @@ export const AiIndexDetailPage = () => {
               defaultMessage="Automations"
             />
           }
-          description={
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.automations.lockedBody"
-              defaultMessage="Add a source in the Sources tab to unlock automations."
-            />
-          }
+          description={<AutomationsLockedDescription aiIndexId={resolvedAiIndexId} />}
         />
       )}
       <EuiSpacer size="m" />
@@ -376,6 +372,7 @@ export const AiIndexDetailPage = () => {
         <SettingsTab
           isLoading={isLoading}
           aiIndex={aiIndex}
+          aiIndexId={resolvedAiIndexId}
           onSaved={refetch}
           isAutomationsUnlocked={showAutomationsPanel}
           indexManagementHref={indexManagementHref}

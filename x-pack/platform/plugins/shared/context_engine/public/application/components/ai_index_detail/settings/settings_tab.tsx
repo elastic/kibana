@@ -17,6 +17,7 @@ import { GeneralSection } from './general_section';
 interface SettingsTabProps {
   isLoading: boolean;
   aiIndex: GetAiIndexResponse | undefined;
+  aiIndexId: string;
   onSaved: () => void;
   isAutomationsUnlocked: boolean;
   indexManagementHref: string | undefined;
@@ -25,6 +26,7 @@ interface SettingsTabProps {
 export const SettingsTab = ({
   isLoading,
   aiIndex,
+  aiIndexId,
   onSaved,
   isAutomationsUnlocked,
   indexManagementHref,
@@ -44,6 +46,7 @@ export const SettingsTab = ({
       <AutomationsSection
         isLoading={isLoading}
         aiIndex={aiIndex}
+        aiIndexId={aiIndexId}
         onSaved={onSaved}
         isUnlocked={isAutomationsUnlocked}
       />
