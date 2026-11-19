@@ -69,9 +69,11 @@ import type {
 } from './state_machines/destinations_state_machine';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-// The index name takes the spare width, down to a minimum, and truncates with a tooltip showing
-// the full name. Stat columns keep a fixed width and never wrap.
+// The index name takes the spare width and grows to fit the name, with a tooltip showing the full
+// name; when the table is wider than its container it scrolls sideways. Stat columns keep a fixed
+// width and never wrap.
 const NAME_COLUMN_MIN_WIDTH = '100px';
+const NAME_COLUMN_MAX_WIDTH = '250px';
 const STAT_COLUMN_WIDTH = '120px';
 const truncateStyles = css`
   ${euiTextTruncate()}
@@ -265,6 +267,7 @@ export const DestinationIndicesTable = ({
         sortable: true,
         truncateText: true,
         minWidth: NAME_COLUMN_MIN_WIDTH,
+        maxWidth: NAME_COLUMN_MAX_WIDTH,
         render: (name: string) => (
           <EuiToolTip
             content={name}
@@ -537,7 +540,8 @@ export const DestinationIndicesTable = ({
       <EuiBasicTable
         compressed
         responsiveBreakpoint={false}
-        tableLayout="fixed"
+        tableLayout="auto"
+        scrollableInline
         tableCaption={i18n.translate('xpack.streams.destinations.indices.tableCaption', {
           defaultMessage: 'Indices targeted by this destination',
         })}
