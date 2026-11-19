@@ -17,6 +17,7 @@ import { FEATURES_QUERY_KEY } from '../query_keys';
 
 const ERROR_REFETCH_INTERVAL_MS = 60_000;
 // Report one outage until every failing polling observer recovers or unmounts.
+// Scope tracking to each query client so independent app instances do not suppress each other.
 const failedPollingObservers = new WeakMap<QueryClient, Set<string>>();
 
 export const useStreamFeatures = (
@@ -97,7 +98,6 @@ export const useStreamFeatures = (
 
       return Math.max(refetchInterval, ERROR_REFETCH_INTERVAL_MS);
     },
-    refetchIntervalInBackground: false,
   });
 
   const allFeatures = useMemo(
