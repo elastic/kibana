@@ -110,8 +110,9 @@ export const EditCustomContentFlyout = ({
   });
 
   const queriesToSave = useMemo(() => getRunnableQueries(draftQueries), [draftQueries]);
-  // Same notion of "a query" as the ES|QL section, so exactly one of the two starts open.
+  // A blank draft is not a query. A new panel has neither, so both sections start open.
   const hasQuery = draftQueries.some(({ text }) => text.trim().length > 0);
+  const hasTemplate = draftTemplate.trim().length > 0;
 
   const handleGenerateWithChat = useCallback(() => {
     getTelemetry().trackGenerateWithChatClicked({
@@ -366,6 +367,7 @@ export const EditCustomContentFlyout = ({
                 renderError={renderError}
                 emptyQueryPosition={emptyQueryPosition}
                 esqlVariables={esqlVariables}
+                initialIsOpen={hasQuery || !hasTemplate}
               />
             </div>
           )}

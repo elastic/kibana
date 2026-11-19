@@ -76,6 +76,11 @@ describe('EsqlDataSection', () => {
       render(<EsqlDataSection {...defaultProps} queries={[draft(1, '   ')]} />);
       expect(esqlToggle()).toHaveAttribute('aria-expanded', 'false');
     });
+
+    it('starts open when asked to, even with a blank query', () => {
+      render(<EsqlDataSection {...defaultProps} queries={[draft(1, '')]} initialIsOpen={true} />);
+      expect(esqlToggle()).toHaveAttribute('aria-expanded', 'true');
+    });
   });
 
   describe('with a single query', () => {
