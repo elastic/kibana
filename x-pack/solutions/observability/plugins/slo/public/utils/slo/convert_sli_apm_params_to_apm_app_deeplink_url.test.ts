@@ -44,13 +44,14 @@ describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
     ['environment', (url: URL) => url.searchParams.get('environment'), 'ENVIRONMENT_ALL'],
     ['transactionType', (url: URL) => url.searchParams.get('transactionType'), ''],
     ['service', (url: URL) => url.pathname, '/app/apm/services/*/overview'],
-    ['transactionName', (url: URL) => url.searchParams.get('kuery'), DEFAULT_PARAMS.filter],
+    ['transactionName', (url: URL) => url.searchParams.get('kuery'), `(${DEFAULT_PARAMS.filter})`],
   ])('maps %s set to ALL_VALUE', (param, pick, expected) => {
     expect(pick(toUrl({ [param]: ALL_VALUE }))).toBe(expected);
   });
 
   it.each([
     ['an empty KQL string filter', '', 'transaction.name : "bazName"'],
+    ['a whitespace-only KQL string filter', '  ', 'transaction.name : "bazName"'],
     [
       'a kqlWithFilters filter (kqlQuery only, filter pills dropped)',
       {

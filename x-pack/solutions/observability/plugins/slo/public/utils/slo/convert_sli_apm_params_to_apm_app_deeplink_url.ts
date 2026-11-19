@@ -55,8 +55,11 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(
     kueryParams.push(`transaction.name : "${transactionName}"`);
   }
   // The APM app only accepts a KQL string, so filter pills (`filters`) can't be forwarded
-  const filterKuery = is(kqlWithFiltersSchema, filter) ? filter.kqlQuery : filter;
-  const filterIndex = filterKuery ? kueryParams.push(filterKuery) - 1 : -1;
+  const filterKuery = (is(kqlWithFiltersSchema, filter) ? filter.kqlQuery : filter)?.trim();
+  if (filterKuery) {
+    // Parenthesize the user KQL so `or` clauses don't escape the `and` scoping clauses
+    kueryParams.push(`(${filterKuery})`);
+  }
 
   const groupings = slo.groupings ?? {};
 
@@ -66,11 +69,6 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(
         kueryParams.push(`${field} : "${value}"`);
       }
     });
-  }
-
-  // Parenthesize the user KQL so `or` clauses don't escape the `and` scoping clauses
-  if (filterIndex >= 0 && kueryParams.length > 1) {
-    kueryParams[filterIndex] = `(${kueryParams[filterIndex]})`;
   }
 
   if (kueryParams.length > 0) {
