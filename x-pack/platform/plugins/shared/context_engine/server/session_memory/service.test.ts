@@ -79,6 +79,7 @@ describe('createSessionMemoryService', () => {
       expect(esClient.index).toHaveBeenCalledWith({
         index: SESSION_MEMORY_DATA_STREAM,
         op_type: 'create',
+        require_data_stream: true,
         document: {
           '@timestamp': NOW.toISOString(),
           id: result.id,
@@ -171,6 +172,7 @@ describe('createSessionMemoryService', () => {
         { id: 'memory-3', outcome: 'not_found' },
       ]);
       expect(esClient.bulk).toHaveBeenCalledWith({
+        require_data_stream: true,
         operations: [
           { create: { _index: SESSION_MEMORY_DATA_STREAM } },
           {

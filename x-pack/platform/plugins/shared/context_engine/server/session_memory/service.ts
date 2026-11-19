@@ -70,6 +70,7 @@ export const createSessionMemoryService = (
     await esClient.index<StoredMemoryRevision>({
       index: SESSION_MEMORY_DATA_STREAM,
       op_type: 'create',
+      require_data_stream: true,
       document: {
         '@timestamp': new Date().toISOString(),
         id,
@@ -137,6 +138,7 @@ export const createSessionMemoryService = (
     const errorsById = new Map<string, string>();
     if (tombstones.length > 0) {
       const { items } = await esClient.bulk<StoredTombstone>({
+        require_data_stream: true,
         operations: tombstones.flatMap((tombstone) => [
           { create: { _index: SESSION_MEMORY_DATA_STREAM } },
           tombstone,
