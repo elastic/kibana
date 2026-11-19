@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import * as eventTypes from './events';
 import {
   agentBuilderKnowledgeIndicatorCreatedEventType,
   agentToolEventCreateEventType,
@@ -24,6 +25,10 @@ import {
 const isOptional = (field: { _meta?: { optional?: boolean } }) => field._meta?.optional === true;
 
 describe('EBT event types', () => {
+  it.each(Object.values(eventTypes))('$eventType has the nightshift- prefix', ({ eventType }) => {
+    expect(eventType).toMatch(/^nightshift-[a-z]+(-[a-z]+)*$/);
+  });
+
   it.each([
     agentBuilderKnowledgeIndicatorCreatedEventType,
     agentToolEventCreateEventType,

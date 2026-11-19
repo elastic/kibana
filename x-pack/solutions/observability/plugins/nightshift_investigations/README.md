@@ -151,10 +151,11 @@ are absent when no alert triggered the run:
 - `source_kind`: `significant_events`, `elastic_configured` when the alert has a rule, otherwise
   `external`. An external sender may also use `internal` as its source, so use this field to split
   rule alerts from external ones.
-- `fingerprint`: for Significant Events, the `event_id`, which joins to the `significant-events-*`
-  events. Otherwise `sha256(space_id:source:rule_id:group_hash)` from `toAlertFingerprint`, with an
-  empty `rule_id` for external alerts, because a rule's `group_hash` is only unique within the rule.
-  Any other event about the same alert series must derive it with the same function.
+- `fingerprint`: for Significant Events, the `event_id`, which joins to the alert events of the
+  `significant_events` plugin (`nightshift-agent-tool-event-*`, `nightshift-event-status-changed`).
+  Otherwise `sha256(space_id:source:rule_id:group_hash)` from `toAlertFingerprint`, with an empty
+  `rule_id` for external alerts, because a rule's `group_hash` is only unique within the rule. Any
+  other event about the same alert series must derive it with the same function.
 
 `trigger_type` on the started event separates automatic from manual runs. No alert title, message,
 tag, or other customer alert content is sent. The skipped event also carries `event_id`, the
