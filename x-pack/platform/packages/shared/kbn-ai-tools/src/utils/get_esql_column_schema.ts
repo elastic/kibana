@@ -13,7 +13,7 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { columnPath } from './esql_categorize';
 
 const NO_FIELDS_SENTINEL = '<no-fields>';
-// What NULLIFY reports for a requested column that no index maps.
+// NULLIFY's type for a requested column that no index maps; set by mappings, not values.
 const UNMAPPED_COLUMN_TYPE = 'null';
 
 const isTracedEsClient = (
