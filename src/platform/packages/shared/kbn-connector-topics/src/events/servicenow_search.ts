@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import { lazySchema, z } from '@kbn/zod/v4';
 
 const SERVICENOW_ID_MAX = 128;
@@ -105,71 +104,30 @@ const ChangeApprovalStateChangedEventSchema = lazySchema(() =>
 
 export const servicenowSearchIncidentCreated = {
   name: 'servicenow_search.incident_created' as const,
-  title: i18n.translate('connectorTopics.servicenowSearch.incidentCreated.title', {
-    defaultMessage: 'Incident created',
-  }),
-  description: i18n.translate('connectorTopics.servicenowSearch.incidentCreated.description', {
-    defaultMessage: 'An incident was created.',
-  }),
   eventSchema: IncidentCreatedEventSchema,
 };
 
 export const servicenowSearchIncidentUpdated = {
   name: 'servicenow_search.incident_updated' as const,
-  title: i18n.translate('connectorTopics.servicenowSearch.incidentUpdated.title', {
-    defaultMessage: 'Incident updated',
-  }),
-  description: i18n.translate('connectorTopics.servicenowSearch.incidentUpdated.description', {
-    defaultMessage:
-      'An incident record changed. Changed fields include previous and current values when ServiceNow sends them.',
-  }),
   eventSchema: IncidentUpdatedEventSchema,
 };
 
 export const servicenowSearchIncidentResolved = {
   name: 'servicenow_search.incident_resolved' as const,
-  title: i18n.translate('connectorTopics.servicenowSearch.incidentResolved.title', {
-    defaultMessage: 'Incident resolved or closed',
-  }),
-  description: i18n.translate('connectorTopics.servicenowSearch.incidentResolved.description', {
-    defaultMessage:
-      'An incident was resolved or closed. The resulting state is included, with resolution details when ServiceNow sends them.',
-  }),
   eventSchema: IncidentResolvedEventSchema,
 };
 
 export const servicenowSearchCommentAdded = {
   name: 'servicenow_search.comment_added' as const,
-  title: i18n.translate('connectorTopics.servicenowSearch.commentAdded.title', {
-    defaultMessage: 'Comment added',
-  }),
-  description: i18n.translate('connectorTopics.servicenowSearch.commentAdded.description', {
-    defaultMessage: 'A public comment was added to a record.',
-  }),
   eventSchema: JournalEventSchema,
 };
 
 export const servicenowSearchWorkNoteAdded = {
   name: 'servicenow_search.work_note_added' as const,
-  title: i18n.translate('connectorTopics.servicenowSearch.workNoteAdded.title', {
-    defaultMessage: 'Work note added',
-  }),
-  description: i18n.translate('connectorTopics.servicenowSearch.workNoteAdded.description', {
-    defaultMessage: 'An internal work note was added to a record.',
-  }),
   eventSchema: JournalEventSchema,
 };
 
 export const servicenowSearchChangeApprovalStateChanged = {
   name: 'servicenow_search.change_approval_state_changed' as const,
-  title: i18n.translate('connectorTopics.servicenowSearch.changeApprovalStateChanged.title', {
-    defaultMessage: 'Change approval state changed',
-  }),
-  description: i18n.translate(
-    'connectorTopics.servicenowSearch.changeApprovalStateChanged.description',
-    {
-      defaultMessage: 'The approval state of a change request changed.',
-    }
-  ),
   eventSchema: ChangeApprovalStateChangedEventSchema,
 };

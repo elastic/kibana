@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import { lazySchema, z } from '@kbn/zod/v4';
 
 const identifier = () => z.number().int().nonnegative();
@@ -236,96 +235,40 @@ const GithubCheckRunEventSchema = lazySchema(() =>
 
 export const githubIssues = {
   name: 'github.issues' as const,
-  title: i18n.translate('connectorTopics.github.issues.title', {
-    defaultMessage: 'Issue',
-  }),
-  description: i18n.translate('connectorTopics.github.issues.description', {
-    defaultMessage:
-      'An issue was opened, edited, reopened, closed, or otherwise changed. Filter with event.body.action.',
-  }),
   eventSchema: GithubIssuesEventSchema,
 };
 
 export const githubIssueComment = {
   name: 'github.issue_comment' as const,
-  title: i18n.translate('connectorTopics.github.issueComment.title', {
-    defaultMessage: 'Issue comment',
-  }),
-  description: i18n.translate('connectorTopics.github.issueComment.description', {
-    defaultMessage:
-      'An issue or pull request comment was created, edited, or deleted. Filter with event.body.action.',
-  }),
   eventSchema: GithubIssueCommentEventSchema,
 };
 
 export const githubPullRequest = {
   name: 'github.pull_request' as const,
-  title: i18n.translate('connectorTopics.github.pullRequest.title', {
-    defaultMessage: 'Pull request',
-  }),
-  description: i18n.translate('connectorTopics.github.pullRequest.description', {
-    defaultMessage:
-      'A pull request was opened, updated, reopened, or closed. Filter with event.body.action; updates use edited or synchronize. Check event.body.pull_request.merged to distinguish a merge from an unmerged close.',
-  }),
   eventSchema: GithubPullRequestEventSchema,
 };
 
 export const githubPullRequestReview = {
   name: 'github.pull_request_review' as const,
-  title: i18n.translate('connectorTopics.github.pullRequestReview.title', {
-    defaultMessage: 'Pull request review submitted',
-  }),
-  description: i18n.translate('connectorTopics.github.pullRequestReview.description', {
-    defaultMessage:
-      'A pull request review was submitted. The review state is available in event.body.review.state.',
-  }),
   eventSchema: GithubPullRequestReviewEventSchema,
 };
 
 export const githubPush = {
   name: 'github.push' as const,
-  title: i18n.translate('connectorTopics.github.push.title', {
-    defaultMessage: 'Push received',
-  }),
-  description: i18n.translate('connectorTopics.github.push.description', {
-    defaultMessage:
-      'Commits, a branch, or a tag were pushed. The ref and before and after commit IDs are available in the event body.',
-  }),
   eventSchema: GithubPushEventSchema,
 };
 
 export const githubRelease = {
   name: 'github.release' as const,
-  title: i18n.translate('connectorTopics.github.release.title', {
-    defaultMessage: 'Release published',
-  }),
-  description: i18n.translate('connectorTopics.github.release.description', {
-    defaultMessage:
-      'A release was published. The tag, release ID, and prerelease flag are available in event.body.release.',
-  }),
   eventSchema: GithubReleaseEventSchema,
 };
 
 export const githubDeploymentStatus = {
   name: 'github.deployment_status' as const,
-  title: i18n.translate('connectorTopics.github.deploymentStatus.title', {
-    defaultMessage: 'Deployment status changed',
-  }),
-  description: i18n.translate('connectorTopics.github.deploymentStatus.description', {
-    defaultMessage:
-      'A deployment status changed. Filter with event.body.deployment_status.state to select an outcome.',
-  }),
   eventSchema: GithubDeploymentStatusEventSchema,
 };
 
 export const githubCheckRun = {
   name: 'github.check_run' as const,
-  title: i18n.translate('connectorTopics.github.checkRun.title', {
-    defaultMessage: 'Check run completed',
-  }),
-  description: i18n.translate('connectorTopics.github.checkRun.description', {
-    defaultMessage:
-      'A check run completed. Filter with event.body.check_run.conclusion to select success, failure, or another outcome.',
-  }),
   eventSchema: GithubCheckRunEventSchema,
 };

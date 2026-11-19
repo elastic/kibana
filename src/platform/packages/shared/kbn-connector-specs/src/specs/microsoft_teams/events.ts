@@ -7,26 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  microsoftTeamsChannelCreated,
+  microsoftTeamsChannelMessage,
+  microsoftTeamsChatCreated,
+  microsoftTeamsChatMessage,
+  microsoftTeamsTeamMemberAdded,
+} from '@kbn/connector-topics';
 import { i18n } from '@kbn/i18n';
-import { z, lazySchema } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
-import type {
-  ConnectorIngressContext,
-  ConnectorSpecEvents,
-  EventPayload,
-  HandleEventsResult,
+import {
+  toConnectorSpecEvent,
+  type ConnectorIngressContext,
+  type ConnectorSpecEvents,
+  type EventPayload,
+  type HandleEventsResult,
 } from '../../connector_spec_events';
 import { MAX_HANDLE_EVENTS_CORRELATION_KEY_LENGTH } from '../../handle_events_result';
 import {
-  MICROSOFT_TEAMS_CHANNEL_CREATED_EVENT_ID,
   MICROSOFT_TEAMS_CHANNEL_CREATED_EVENT_KEY,
-  MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_ID,
   MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_KEY,
-  MICROSOFT_TEAMS_CHAT_CREATED_EVENT_ID,
   MICROSOFT_TEAMS_CHAT_CREATED_EVENT_KEY,
-  MICROSOFT_TEAMS_CHAT_MESSAGE_EVENT_ID,
   MICROSOFT_TEAMS_CHAT_MESSAGE_EVENT_KEY,
-  MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_ID,
   MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_KEY,
 } from './constants';
 
@@ -44,52 +46,6 @@ const RESOURCE_COLLECTIONS = new Set([
   'users',
 ]);
 const SKIP_RESOURCE_IDS = new Set(['getAllMessages', 'getAllChannels']);
-
-const teamsId = (description: string) => z.string().min(1).max(TEAMS_ID_MAX).describe(description);
-
-const optionalTeamsId = (description: string) => teamsId(description).optional();
-
-const tenantIdField = () => optionalTeamsId('Entra tenant id, when the notification includes one.');
-
-const ChannelMessageEventSchema = lazySchema(() =>
-  z.object({
-    team_id: teamsId('Team that owns the channel.'),
-    channel_id: teamsId('Channel the message was posted in.'),
-    message_id: teamsId('Id of the posted message.'),
-    tenant_id: tenantIdField(),
-  })
-);
-
-const ChatMessageEventSchema = lazySchema(() =>
-  z.object({
-    chat_id: teamsId('Chat the message was posted in.'),
-    message_id: teamsId('Id of the posted message.'),
-    tenant_id: tenantIdField(),
-  })
-);
-
-const ChannelCreatedEventSchema = lazySchema(() =>
-  z.object({
-    team_id: teamsId('Team the channel was created in.'),
-    channel_id: teamsId('Id of the created channel.'),
-    tenant_id: tenantIdField(),
-  })
-);
-
-const ChatCreatedEventSchema = lazySchema(() =>
-  z.object({
-    chat_id: teamsId('Id of the created chat.'),
-    tenant_id: tenantIdField(),
-  })
-);
-
-const TeamMemberAddedEventSchema = lazySchema(() =>
-  z.object({
-    team_id: teamsId('Team the member was added to.'),
-    user_id: teamsId('Entra user id of the added member.'),
-    tenant_id: tenantIdField(),
-  })
-);
 
 interface NamedTeamsEvent {
   readonly eventId: string;
@@ -241,7 +197,7 @@ const classifyNotification = (item: Record<string, unknown>): NamedTeamsEvent | 
     const messageId = ids.replies ?? ids.messages ?? readId(item.resourceData.id);
     if (ids.teams !== undefined && ids.channels !== undefined && messageId !== undefined) {
       return {
-        eventId: MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_ID,
+        eventId: microsoftTeamsChannelMessage.name,
         payload: withTenant(item, {
           team_id: ids.teams,
           channel_id: ids.channels,
@@ -251,7 +207,7 @@ const classifyNotification = (item: Record<string, unknown>): NamedTeamsEvent | 
     }
     if (ids.chats !== undefined && messageId !== undefined) {
       return {
-        eventId: MICROSOFT_TEAMS_CHAT_MESSAGE_EVENT_ID,
+        eventId: microsoftTeamsChatMessage.name,
         payload: withTenant(item, { chat_id: ids.chats, message_id: messageId }),
       };
     }
@@ -260,7 +216,7 @@ const classifyNotification = (item: Record<string, unknown>): NamedTeamsEvent | 
 
   if (typeName === 'channel' && ids.teams !== undefined && ids.channels !== undefined) {
     return {
-      eventId: MICROSOFT_TEAMS_CHANNEL_CREATED_EVENT_ID,
+      eventId: microsoftTeamsChannelCreated.name,
       payload: withTenant(item, { team_id: ids.teams, channel_id: ids.channels }),
     };
   }
@@ -272,7 +228,7 @@ const classifyNotification = (item: Record<string, unknown>): NamedTeamsEvent | 
     ids.members === undefined
   ) {
     return {
-      eventId: MICROSOFT_TEAMS_CHAT_CREATED_EVENT_ID,
+      eventId: microsoftTeamsChatCreated.name,
       payload: withTenant(item, { chat_id: ids.chats }),
     };
   }
@@ -290,7 +246,7 @@ const classifyNotification = (item: Record<string, unknown>): NamedTeamsEvent | 
       return undefined;
     }
     return {
-      eventId: MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_ID,
+      eventId: microsoftTeamsTeamMemberAdded.name,
       payload: withTenant(item, { team_id: ids.teams, user_id: userId }),
     };
   }
@@ -369,22 +325,22 @@ const handleMicrosoftTeamsEvents = async (
 
 export const microsoftTeamsEvents: ConnectorSpecEvents = {
   definitions: {
-    [MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_KEY]: {
-      eventId: MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_ID,
-      title: i18n.translate('connectorSpecs.microsoftTeams.events.channelMessage.title', {
-        defaultMessage: 'Channel message posted',
-      }),
-      description: i18n.translate(
-        'connectorSpecs.microsoftTeams.events.channelMessage.description',
-        {
-          defaultMessage:
-            'A message was posted in a Teams channel. The event includes the team, channel, and message ids. For a reply, message_id is the reply. Message content is not included.',
-        }
-      ),
-      eventSchema: ChannelMessageEventSchema,
-    },
-    [MICROSOFT_TEAMS_CHAT_MESSAGE_EVENT_KEY]: {
-      eventId: MICROSOFT_TEAMS_CHAT_MESSAGE_EVENT_ID,
+    [MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_KEY]: toConnectorSpecEvent(
+      microsoftTeamsChannelMessage,
+      {
+        title: i18n.translate('connectorSpecs.microsoftTeams.events.channelMessage.title', {
+          defaultMessage: 'Channel message posted',
+        }),
+        description: i18n.translate(
+          'connectorSpecs.microsoftTeams.events.channelMessage.description',
+          {
+            defaultMessage:
+              'A message was posted in a Teams channel. The event includes the team, channel, and message ids. For a reply, message_id is the reply. Message content is not included.',
+          }
+        ),
+      }
+    ),
+    [MICROSOFT_TEAMS_CHAT_MESSAGE_EVENT_KEY]: toConnectorSpecEvent(microsoftTeamsChatMessage, {
       title: i18n.translate('connectorSpecs.microsoftTeams.events.chatMessage.title', {
         defaultMessage: 'Chat message received',
       }),
@@ -392,40 +348,39 @@ export const microsoftTeamsEvents: ConnectorSpecEvents = {
         defaultMessage:
           'A message was posted in a Teams chat. The event includes the chat and message ids. Message content is not included.',
       }),
-      eventSchema: ChatMessageEventSchema,
-    },
-    [MICROSOFT_TEAMS_CHANNEL_CREATED_EVENT_KEY]: {
-      eventId: MICROSOFT_TEAMS_CHANNEL_CREATED_EVENT_ID,
-      title: i18n.translate('connectorSpecs.microsoftTeams.events.channelCreated.title', {
-        defaultMessage: 'Channel created',
-      }),
-      description: i18n.translate(
-        'connectorSpecs.microsoftTeams.events.channelCreated.description',
-        { defaultMessage: 'A channel was created in a team.' }
-      ),
-      eventSchema: ChannelCreatedEventSchema,
-    },
-    [MICROSOFT_TEAMS_CHAT_CREATED_EVENT_KEY]: {
-      eventId: MICROSOFT_TEAMS_CHAT_CREATED_EVENT_ID,
+    }),
+    [MICROSOFT_TEAMS_CHANNEL_CREATED_EVENT_KEY]: toConnectorSpecEvent(
+      microsoftTeamsChannelCreated,
+      {
+        title: i18n.translate('connectorSpecs.microsoftTeams.events.channelCreated.title', {
+          defaultMessage: 'Channel created',
+        }),
+        description: i18n.translate(
+          'connectorSpecs.microsoftTeams.events.channelCreated.description',
+          { defaultMessage: 'A channel was created in a team.' }
+        ),
+      }
+    ),
+    [MICROSOFT_TEAMS_CHAT_CREATED_EVENT_KEY]: toConnectorSpecEvent(microsoftTeamsChatCreated, {
       title: i18n.translate('connectorSpecs.microsoftTeams.events.chatCreated.title', {
         defaultMessage: 'Chat created',
       }),
       description: i18n.translate('connectorSpecs.microsoftTeams.events.chatCreated.description', {
         defaultMessage: 'A Teams chat was created.',
       }),
-      eventSchema: ChatCreatedEventSchema,
-    },
-    [MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_KEY]: {
-      eventId: MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_ID,
-      title: i18n.translate('connectorSpecs.microsoftTeams.events.teamMemberAdded.title', {
-        defaultMessage: 'Team member added',
-      }),
-      description: i18n.translate(
-        'connectorSpecs.microsoftTeams.events.teamMemberAdded.description',
-        { defaultMessage: 'A user was added to a team.' }
-      ),
-      eventSchema: TeamMemberAddedEventSchema,
-    },
+    }),
+    [MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_KEY]: toConnectorSpecEvent(
+      microsoftTeamsTeamMemberAdded,
+      {
+        title: i18n.translate('connectorSpecs.microsoftTeams.events.teamMemberAdded.title', {
+          defaultMessage: 'Team member added',
+        }),
+        description: i18n.translate(
+          'connectorSpecs.microsoftTeams.events.teamMemberAdded.description',
+          { defaultMessage: 'A user was added to a team.' }
+        ),
+      }
+    ),
   },
   handleEvents: handleMicrosoftTeamsEvents,
 };

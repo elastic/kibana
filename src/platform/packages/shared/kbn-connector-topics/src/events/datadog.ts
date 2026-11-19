@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import { lazySchema, z } from '@kbn/zod/v4';
 
 const DatadogAlertEventSchema = lazySchema(() =>
@@ -37,11 +36,5 @@ const DatadogAlertEventSchema = lazySchema(() =>
 
 export const datadogAlert = {
   name: 'datadog.alert' as const,
-  title: i18n.translate('connectorTopics.datadog.alert.title', {
-    defaultMessage: 'Alert',
-  }),
-  description: i18n.translate('connectorTopics.datadog.alert.description', {
-    defaultMessage: 'A Datadog alert webhook payload was accepted on the connector ingest URL.',
-  }),
   eventSchema: DatadogAlertEventSchema,
 };

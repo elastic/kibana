@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import { lazySchema, z } from '@kbn/zod/v4';
 
 const SLACK_EVENT_ID_MAX = 128;
@@ -217,113 +216,50 @@ const SlackHitlActionEventSchema = lazySchema(() =>
 
 export const slack2Message = {
   name: 'slack2.message' as const,
-  title: i18n.translate('connectorTopics.slack2.message.title', {
-    defaultMessage: 'Message posted',
-  }),
-  description: i18n.translate('connectorTopics.slack2.message.description', {
-    defaultMessage:
-      'A message was posted in Slack. Subtype and bot or app identity are included when Slack sends them.',
-  }),
   eventSchema: SlackMessageEventSchema,
 };
 
 export const slack2AppMention = {
   name: 'slack2.app_mention' as const,
-  title: i18n.translate('connectorTopics.slack2.appMention.title', {
-    defaultMessage: 'App mentioned',
-  }),
-  description: i18n.translate('connectorTopics.slack2.appMention.description', {
-    defaultMessage: 'The Slack app was mentioned in a channel.',
-  }),
   eventSchema: SlackAppMentionEventSchema,
 };
 
 export const slack2ReactionAdded = {
   name: 'slack2.reaction_added' as const,
-  title: i18n.translate('connectorTopics.slack2.reactionAdded.title', {
-    defaultMessage: 'Reaction added',
-  }),
-  description: i18n.translate('connectorTopics.slack2.reactionAdded.description', {
-    defaultMessage: 'A reaction was added to a Slack message.',
-  }),
   eventSchema: SlackReactionAddedEventSchema,
 };
 
 export const slack2FileShared = {
   name: 'slack2.file_shared' as const,
-  title: i18n.translate('connectorTopics.slack2.fileShared.title', {
-    defaultMessage: 'File shared',
-  }),
-  description: i18n.translate('connectorTopics.slack2.fileShared.description', {
-    defaultMessage: 'A file was shared in Slack.',
-  }),
   eventSchema: SlackFileSharedEventSchema,
 };
 
 export const slack2FilePublic = {
   name: 'slack2.file_public' as const,
-  title: i18n.translate('connectorTopics.slack2.filePublic.title', {
-    defaultMessage: 'File made public',
-  }),
-  description: i18n.translate('connectorTopics.slack2.filePublic.description', {
-    defaultMessage: 'A Slack file was made public.',
-  }),
   eventSchema: SlackFilePublicEventSchema,
 };
 
 export const slack2ChannelCreated = {
   name: 'slack2.channel_created' as const,
-  title: i18n.translate('connectorTopics.slack2.channelCreated.title', {
-    defaultMessage: 'Public channel created',
-  }),
-  description: i18n.translate('connectorTopics.slack2.channelCreated.description', {
-    defaultMessage: 'A public Slack channel was created.',
-  }),
   eventSchema: SlackChannelCreatedEventSchema,
 };
 
 export const slack2TeamJoin = {
   name: 'slack2.team_join' as const,
-  title: i18n.translate('connectorTopics.slack2.teamJoin.title', {
-    defaultMessage: 'User joined workspace',
-  }),
-  description: i18n.translate('connectorTopics.slack2.teamJoin.description', {
-    defaultMessage: 'A user joined the Slack workspace.',
-  }),
   eventSchema: SlackTeamJoinEventSchema,
 };
 
 export const slack2MemberJoinedChannel = {
   name: 'slack2.member_joined_channel' as const,
-  title: i18n.translate('connectorTopics.slack2.memberJoinedChannel.title', {
-    defaultMessage: 'User joined channel',
-  }),
-  description: i18n.translate('connectorTopics.slack2.memberJoinedChannel.description', {
-    defaultMessage: 'A user joined a Slack channel.',
-  }),
   eventSchema: SlackMemberJoinedChannelEventSchema,
 };
 
 export const slack2SlashCommand = {
   name: 'slack2.slash_command' as const,
-  title: i18n.translate('connectorTopics.slack2.slashCommand.title', {
-    defaultMessage: 'Slash command',
-  }),
-  description: i18n.translate('connectorTopics.slack2.slashCommand.description', {
-    defaultMessage:
-      'A Slack slash command was invoked. Reply by posting a message to the response URL.',
-  }),
   eventSchema: SlackSlashCommandEventSchema,
 };
 
 export const slack2HitlAction = {
   name: 'slack2.hitl_action' as const,
-  title: i18n.translate('connectorTopics.slack2.hitlAction.title', {
-    defaultMessage: 'Workflow HITL action',
-  }),
-  description: i18n.translate('connectorTopics.slack2.hitlAction.description', {
-    defaultMessage:
-      'A human-in-the-loop Approve, Decline, or Submit control was used in Slack. Resumes a paused workflow; not intended as a workflow start trigger.',
-  }),
   eventSchema: SlackHitlActionEventSchema,
 };

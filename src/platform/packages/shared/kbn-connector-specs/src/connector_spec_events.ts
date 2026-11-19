@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ConnectorEventTopicDefinition } from '@kbn/connector-topics';
 import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
 import type { HandleEventsResult } from './handle_events_result';
@@ -53,6 +54,17 @@ export interface EventDefinition {
   readonly description: string;
   readonly eventSchema: z.ZodObject;
 }
+
+/** Maps a topic's event id and spoke schema onto a spec event. Title and description stay on the spec. */
+export const toConnectorSpecEvent = <TSchema extends z.ZodObject, TName extends string>(
+  definition: ConnectorEventTopicDefinition<TSchema, TName>,
+  presentation: { readonly title: string; readonly description: string }
+): EventDefinition => ({
+  eventId: definition.name,
+  title: presentation.title,
+  description: presentation.description,
+  eventSchema: definition.eventSchema,
+});
 
 /**
  * Spoke events contract.

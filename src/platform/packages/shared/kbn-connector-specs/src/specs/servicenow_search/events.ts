@@ -7,26 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
-import { z, lazySchema } from '@kbn/zod/v4';
+import {
+  servicenowSearchChangeApprovalStateChanged,
+  servicenowSearchCommentAdded,
+  servicenowSearchIncidentCreated,
+  servicenowSearchIncidentResolved,
+  servicenowSearchIncidentUpdated,
+  servicenowSearchWorkNoteAdded,
+} from '@kbn/connector-topics';
+import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
-import type {
-  ConnectorIngressContext,
-  ConnectorSpecEvents,
-  HandleEventsResult,
+import {
+  toConnectorSpecEvent,
+  type ConnectorIngressContext,
+  type ConnectorSpecEvents,
+  type HandleEventsResult,
 } from '../../connector_spec_events';
 import { MAX_HANDLE_EVENTS_CORRELATION_KEY_LENGTH } from '../../handle_events_result';
 import {
-  SERVICENOW_CHANGE_APPROVAL_STATE_CHANGED_EVENT_ID,
   SERVICENOW_CHANGE_APPROVAL_STATE_CHANGED_EVENT_KEY,
-  SERVICENOW_COMMENT_ADDED_EVENT_ID,
   SERVICENOW_COMMENT_ADDED_EVENT_KEY,
-  SERVICENOW_INCIDENT_CREATED_EVENT_ID,
   SERVICENOW_INCIDENT_CREATED_EVENT_KEY,
-  SERVICENOW_INCIDENT_RESOLVED_EVENT_ID,
   SERVICENOW_INCIDENT_RESOLVED_EVENT_KEY,
-  SERVICENOW_INCIDENT_UPDATED_EVENT_ID,
   SERVICENOW_INCIDENT_UPDATED_EVENT_KEY,
   SERVICENOW_OCCURRENCE_CHANGE_APPROVAL_STATE_CHANGED,
   SERVICENOW_OCCURRENCE_COMMENT_ADDED,
@@ -34,7 +37,6 @@ import {
   SERVICENOW_OCCURRENCE_INCIDENT_RESOLVED,
   SERVICENOW_OCCURRENCE_INCIDENT_UPDATED,
   SERVICENOW_OCCURRENCE_WORK_NOTE_ADDED,
-  SERVICENOW_WORK_NOTE_ADDED_EVENT_ID,
   SERVICENOW_WORK_NOTE_ADDED_EVENT_KEY,
 } from './constants';
 
@@ -43,94 +45,6 @@ const SERVICENOW_VALUE_MAX = 1024;
 const SERVICENOW_TEXT_MAX = 40_000;
 const SERVICENOW_CHANGED_FIELDS_MAX = 20;
 const SERVICENOW_OCCURRENCE_MAX = 64;
-
-const snId = (description: string) =>
-  z.string().min(1).max(SERVICENOW_ID_MAX).describe(description);
-
-const optionalSnId = (description: string) => snId(description).optional();
-
-const optionalSnValue = (description: string) =>
-  z.string().min(1).max(SERVICENOW_VALUE_MAX).optional().describe(description);
-
-const ChangedFieldSchema = lazySchema(() =>
-  z.object({
-    field: snId('Name of the field that changed.'),
-    previous: z
-      .string()
-      .max(SERVICENOW_VALUE_MAX)
-      .optional()
-      .describe('Previous value, when ServiceNow sent one.'),
-    current: z
-      .string()
-      .max(SERVICENOW_VALUE_MAX)
-      .optional()
-      .describe('Current value, when ServiceNow sent one.'),
-  })
-);
-
-const IncidentCreatedEventSchema = lazySchema(() =>
-  z.object({
-    table: snId('ServiceNow table of the record, such as incident.'),
-    sys_id: snId('sys_id of the record.'),
-    number: snId('Record number, such as INC0010001.'),
-    summary: optionalSnValue('Short description of the record.'),
-    state: optionalSnValue('State value.'),
-    priority: optionalSnValue('Priority value.'),
-    assignment_group: optionalSnId('sys_id of the assignment group.'),
-    assigned_to: optionalSnId('sys_id of the assigned user.'),
-  })
-);
-
-const IncidentUpdatedEventSchema = lazySchema(() =>
-  z.object({
-    table: snId('ServiceNow table of the record, such as incident.'),
-    sys_id: snId('sys_id of the record.'),
-    number: optionalSnId('Record number, such as INC0010001.'),
-    changed_fields: z
-      .array(ChangedFieldSchema)
-      .max(SERVICENOW_CHANGED_FIELDS_MAX)
-      .optional()
-      .describe('Fields that changed, with previous and current values when ServiceNow sent them.'),
-  })
-);
-
-const IncidentResolvedEventSchema = lazySchema(() =>
-  z.object({
-    table: snId('ServiceNow table of the record, such as incident.'),
-    sys_id: snId('sys_id of the record.'),
-    state: z.string().min(1).max(SERVICENOW_VALUE_MAX).describe('Resulting state value.'),
-    number: optionalSnId('Record number, such as INC0010001.'),
-    close_code: optionalSnValue('Resolution code, when ServiceNow sent one.'),
-    close_notes: z
-      .string()
-      .min(1)
-      .max(SERVICENOW_TEXT_MAX)
-      .optional()
-      .describe('Resolution notes, when ServiceNow sent them.'),
-  })
-);
-
-const JournalEventSchema = lazySchema(() =>
-  z.object({
-    table: snId('Table of the parent record, such as incident.'),
-    sys_id: snId('sys_id of the parent record.'),
-    journal_entry_id: snId('sys_id of the journal entry.'),
-    author: z.string().min(1).max(SERVICENOW_VALUE_MAX).describe('Author of the journal entry.'),
-    text: z.string().min(1).max(SERVICENOW_TEXT_MAX).describe('Journal entry text.'),
-    number: optionalSnId('Number of the parent record, when ServiceNow sent one.'),
-    timestamp: optionalSnValue('When the journal entry was written.'),
-  })
-);
-
-const ChangeApprovalStateChangedEventSchema = lazySchema(() =>
-  z.object({
-    change_request_id: snId('sys_id of the change request.'),
-    approval_id: snId('sys_id of the approval record.'),
-    state: z.string().min(1).max(SERVICENOW_VALUE_MAX).describe('Current approval state.'),
-    approver: optionalSnId('sys_id of the approver.'),
-    previous_state: optionalSnValue('Previous approval state, when ServiceNow sent one.'),
-  })
-);
 
 interface ChangedField {
   readonly field: string;
@@ -310,7 +224,7 @@ const parseIncidentCreated = (
     return undefined;
   }
   return {
-    eventId: SERVICENOW_INCIDENT_CREATED_EVENT_ID,
+    eventId: servicenowSearchIncidentCreated.name,
     correlationKey: incidentCorrelationKey(body, sysId, SERVICENOW_OCCURRENCE_INCIDENT_CREATED),
     payload: omitUndefined({
       table,
@@ -336,7 +250,7 @@ const parseIncidentUpdated = (
   }
   const changedFields = readChangedFields(body.changed_fields, notes);
   return {
-    eventId: SERVICENOW_INCIDENT_UPDATED_EVENT_ID,
+    eventId: servicenowSearchIncidentUpdated.name,
     correlationKey: incidentCorrelationKey(body, sysId, SERVICENOW_OCCURRENCE_INCIDENT_UPDATED),
     payload: {
       ...omitUndefined({
@@ -360,7 +274,7 @@ const parseIncidentResolved = (
     return undefined;
   }
   return {
-    eventId: SERVICENOW_INCIDENT_RESOLVED_EVENT_ID,
+    eventId: servicenowSearchIncidentResolved.name,
     correlationKey: incidentCorrelationKey(body, sysId, SERVICENOW_OCCURRENCE_INCIDENT_RESOLVED),
     payload: omitUndefined({
       table,
@@ -418,7 +332,7 @@ const parseChangeApproval = (
     return undefined;
   }
   return {
-    eventId: SERVICENOW_CHANGE_APPROVAL_STATE_CHANGED_EVENT_ID,
+    eventId: servicenowSearchChangeApprovalStateChanged.name,
     correlationKey: boundedCorrelationKey(`${approvalId}:${state}`),
     payload: omitUndefined({
       change_request_id: changeRequestId,
@@ -438,9 +352,9 @@ const parseByOccurrence: Record<
   [SERVICENOW_OCCURRENCE_INCIDENT_UPDATED]: parseIncidentUpdated,
   [SERVICENOW_OCCURRENCE_INCIDENT_RESOLVED]: parseIncidentResolved,
   [SERVICENOW_OCCURRENCE_COMMENT_ADDED]: (body, notes) =>
-    parseJournal(body, SERVICENOW_COMMENT_ADDED_EVENT_ID, notes),
+    parseJournal(body, servicenowSearchCommentAdded.name, notes),
   [SERVICENOW_OCCURRENCE_WORK_NOTE_ADDED]: (body, notes) =>
-    parseJournal(body, SERVICENOW_WORK_NOTE_ADDED_EVENT_ID, notes),
+    parseJournal(body, servicenowSearchWorkNoteAdded.name, notes),
   [SERVICENOW_OCCURRENCE_CHANGE_APPROVAL_STATE_CHANGED]: parseChangeApproval,
 };
 
@@ -481,8 +395,7 @@ const handleServicenowEvents = async (
 
 export const servicenowSearchEvents: ConnectorSpecEvents = {
   definitions: {
-    [SERVICENOW_INCIDENT_CREATED_EVENT_KEY]: {
-      eventId: SERVICENOW_INCIDENT_CREATED_EVENT_ID,
+    [SERVICENOW_INCIDENT_CREATED_EVENT_KEY]: toConnectorSpecEvent(servicenowSearchIncidentCreated, {
       title: i18n.translate('connectorSpecs.servicenowSearch.events.incidentCreated.title', {
         defaultMessage: 'Incident created',
       }),
@@ -492,10 +405,8 @@ export const servicenowSearchEvents: ConnectorSpecEvents = {
           defaultMessage: 'An incident was created.',
         }
       ),
-      eventSchema: IncidentCreatedEventSchema,
-    },
-    [SERVICENOW_INCIDENT_UPDATED_EVENT_KEY]: {
-      eventId: SERVICENOW_INCIDENT_UPDATED_EVENT_ID,
+    }),
+    [SERVICENOW_INCIDENT_UPDATED_EVENT_KEY]: toConnectorSpecEvent(servicenowSearchIncidentUpdated, {
       title: i18n.translate('connectorSpecs.servicenowSearch.events.incidentUpdated.title', {
         defaultMessage: 'Incident updated',
       }),
@@ -506,24 +417,23 @@ export const servicenowSearchEvents: ConnectorSpecEvents = {
             'An incident record changed. Changed fields include previous and current values when ServiceNow sends them.',
         }
       ),
-      eventSchema: IncidentUpdatedEventSchema,
-    },
-    [SERVICENOW_INCIDENT_RESOLVED_EVENT_KEY]: {
-      eventId: SERVICENOW_INCIDENT_RESOLVED_EVENT_ID,
-      title: i18n.translate('connectorSpecs.servicenowSearch.events.incidentResolved.title', {
-        defaultMessage: 'Incident resolved or closed',
-      }),
-      description: i18n.translate(
-        'connectorSpecs.servicenowSearch.events.incidentResolved.description',
-        {
-          defaultMessage:
-            'An incident was resolved or closed. The resulting state is included, with resolution details when ServiceNow sends them.',
-        }
-      ),
-      eventSchema: IncidentResolvedEventSchema,
-    },
-    [SERVICENOW_COMMENT_ADDED_EVENT_KEY]: {
-      eventId: SERVICENOW_COMMENT_ADDED_EVENT_ID,
+    }),
+    [SERVICENOW_INCIDENT_RESOLVED_EVENT_KEY]: toConnectorSpecEvent(
+      servicenowSearchIncidentResolved,
+      {
+        title: i18n.translate('connectorSpecs.servicenowSearch.events.incidentResolved.title', {
+          defaultMessage: 'Incident resolved or closed',
+        }),
+        description: i18n.translate(
+          'connectorSpecs.servicenowSearch.events.incidentResolved.description',
+          {
+            defaultMessage:
+              'An incident was resolved or closed. The resulting state is included, with resolution details when ServiceNow sends them.',
+          }
+        ),
+      }
+    ),
+    [SERVICENOW_COMMENT_ADDED_EVENT_KEY]: toConnectorSpecEvent(servicenowSearchCommentAdded, {
       title: i18n.translate('connectorSpecs.servicenowSearch.events.commentAdded.title', {
         defaultMessage: 'Comment added',
       }),
@@ -533,10 +443,8 @@ export const servicenowSearchEvents: ConnectorSpecEvents = {
           defaultMessage: 'A public comment was added to a record.',
         }
       ),
-      eventSchema: JournalEventSchema,
-    },
-    [SERVICENOW_WORK_NOTE_ADDED_EVENT_KEY]: {
-      eventId: SERVICENOW_WORK_NOTE_ADDED_EVENT_ID,
+    }),
+    [SERVICENOW_WORK_NOTE_ADDED_EVENT_KEY]: toConnectorSpecEvent(servicenowSearchWorkNoteAdded, {
       title: i18n.translate('connectorSpecs.servicenowSearch.events.workNoteAdded.title', {
         defaultMessage: 'Work note added',
       }),
@@ -546,24 +454,24 @@ export const servicenowSearchEvents: ConnectorSpecEvents = {
           defaultMessage: 'An internal work note was added to a record.',
         }
       ),
-      eventSchema: JournalEventSchema,
-    },
-    [SERVICENOW_CHANGE_APPROVAL_STATE_CHANGED_EVENT_KEY]: {
-      eventId: SERVICENOW_CHANGE_APPROVAL_STATE_CHANGED_EVENT_ID,
-      title: i18n.translate(
-        'connectorSpecs.servicenowSearch.events.changeApprovalStateChanged.title',
-        {
-          defaultMessage: 'Change approval state changed',
-        }
-      ),
-      description: i18n.translate(
-        'connectorSpecs.servicenowSearch.events.changeApprovalStateChanged.description',
-        {
-          defaultMessage: 'The approval state of a change request changed.',
-        }
-      ),
-      eventSchema: ChangeApprovalStateChangedEventSchema,
-    },
+    }),
+    [SERVICENOW_CHANGE_APPROVAL_STATE_CHANGED_EVENT_KEY]: toConnectorSpecEvent(
+      servicenowSearchChangeApprovalStateChanged,
+      {
+        title: i18n.translate(
+          'connectorSpecs.servicenowSearch.events.changeApprovalStateChanged.title',
+          {
+            defaultMessage: 'Change approval state changed',
+          }
+        ),
+        description: i18n.translate(
+          'connectorSpecs.servicenowSearch.events.changeApprovalStateChanged.description',
+          {
+            defaultMessage: 'The approval state of a change request changed.',
+          }
+        ),
+      }
+    ),
   },
   handleEvents: handleServicenowEvents,
 };
