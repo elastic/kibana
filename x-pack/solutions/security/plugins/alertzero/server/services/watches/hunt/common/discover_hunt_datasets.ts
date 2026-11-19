@@ -146,6 +146,7 @@ export const discoverHuntDatasets = async ({
     throw err;
   }
 
+  const searchable = (stream: string) => !unsearchableStreams?.has(stream);
   const byPattern = new Map<string, DiscoveredDataset>();
   const clusterOf = new Map<DiscoveredDataset, string | undefined>();
   for (const name of dataStreamNames) {
@@ -195,14 +196,17 @@ export const discoverHuntDatasets = async ({
       entry.search_patterns = [entry.index_pattern];
       continue;
     }
-    if (entry.data_streams.length > MAX_NAMESPACE_PATTERNS_PER_DATASET) {
+    const searchableNamespaces = entry.data_streams.filter(searchable).length;
+    if (searchableNamespaces > MAX_NAMESPACE_PATTERNS_PER_DATASET) {
       entry.search_patterns = [entry.index_pattern];
       logger?.warn(
         `Hunt dataset discovery keeps ${entry.index_pattern} for ${
           entry.dataset
-        } despite sibling dataset(s) ${siblings.map((other) => other.dataset).join(', ')}: ${
-          entry.data_streams.length
-        } namespaces exceed the ${MAX_NAMESPACE_PATTERNS_PER_DATASET} per-namespace patterns a scope may carry`
+        } despite sibling dataset(s) ${siblings
+          .map((other) => other.dataset)
+          .join(
+            ', '
+          )}: ${searchableNamespaces} namespaces exceed the ${MAX_NAMESPACE_PATTERNS_PER_DATASET} per-namespace patterns a scope may carry`
       );
       continue;
     }
@@ -229,14 +233,14 @@ export const discoverHuntDatasets = async ({
     }
   }
 
-  const searchable = (stream: string) => !unsearchableStreams?.has(stream);
   return datasets
     .filter((entry) => entry.data_streams.some(searchable))
     .map((entry) => ({
       ...entry,
       data_streams: entry.data_streams.filter(searchable),
       search_patterns: entry.search_patterns.filter(
-        (pattern) => !unsearchableStreams?.has(pattern.replace(/\*$/, ''))
+        (pattern) =>
+          !entry.data_streams.some((stream) => !searchable(stream) && pattern === `${stream}*`)
       ),
     }))
     .sort((a, b) => a.index_pattern.localeCompare(b.index_pattern));
