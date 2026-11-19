@@ -95,7 +95,6 @@ export function AwaitingFiltersScreen() {
           title={title}
           body={body}
           titleSize="xs"
-          panelled={true}
           color="transparent"
           css={styles.widgetContainer}
         />
