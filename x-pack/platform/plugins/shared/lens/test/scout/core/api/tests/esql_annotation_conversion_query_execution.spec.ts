@@ -36,14 +36,17 @@ const INTERNAL_HEADERS = {
   [ELASTIC_HTTP_VERSION_HEADER]: '1',
 } as const;
 
-// Only the fields the converter reads; the full IndexPattern carries runtime field state.
+// Only the members the converter reads. The logstash archive has no runtime or scripted
+// fields, so the stub exposes none and the converter's data-view-only checks pass.
 const INDEX = 'logstash-*';
 const INDEX_PATTERNS = {
   logstash: {
     id: 'logstash',
     title: INDEX,
     timeFieldName: ANNOTATION_CONVERSION_TIME_FIELD,
-  } as IndexPattern,
+    fields: [],
+    getFieldByName: () => undefined,
+  } as unknown as IndexPattern,
 } as IndexPatternMap;
 
 const toQueryAnnotation = ({
