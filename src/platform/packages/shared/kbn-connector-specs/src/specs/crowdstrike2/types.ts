@@ -490,7 +490,14 @@ export const FindHostsByIndicatorInputSchema = lazySchema(() =>
         .max(253)
         .describe('Indicator value, for example a sha256 or a domain (at most 253 characters)'),
       limit: limitField(100, 'Page size (1-100, default 100)'),
-      offset: offsetField('Position of the first result (default 0); pass next_offset to continue'),
+      offset: z
+        .string()
+        .min(1)
+        .max(200)
+        .optional()
+        .describe(
+          'Paging cursor: the next_offset of the previous page (an opaque value such as 0:1450837263). Omit for the first page.'
+        ),
     })
     .refine((v) => isValidIndicatorValue(v.type, v.value), {
       message: 'The value does not match the indicator type.',
@@ -589,6 +596,22 @@ export const RtrRetrieveFileInputSchema = lazySchema(() =>
       .optional()
       .describe(
         'Queue for an offline host (default false); the result then has complete=false and no file'
+      ),
+    batch_get_cmd_req_id: z
+      .string()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe(
+        'batch_get_cmd_req_id of an earlier result with complete=false: keeps waiting for that file instead of starting a new collection'
+      ),
+    session_id: z
+      .string()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe(
+        'session_id of the same earlier result, used to download the file and then close the session'
       ),
   })
 );

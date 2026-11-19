@@ -575,6 +575,55 @@ describe('CrowdStrike Falcon connector', () => {
       );
       expect(result).toMatchObject({ resources: [AID, AID2], device_count: 2 });
     });
+
+    it('findHostsByIndicator keeps the device count on an empty page after the last one', async () => {
+      const { result, calls } = await run(
+        'findHostsByIndicator',
+        { type: 'sha256', value: SHA, offset: '0:1450837263' },
+        [
+          ok({ meta: { pagination: { limit: 2, offset: '' } }, resources: [] }),
+          ok({ resources: [{ id: SHA.toLowerCase(), device_count: 2 }] }),
+        ]
+      );
+      expect(calls()).toHaveLength(2);
+      expect(result).toMatchObject({ resources: [], device_count: 2, next_offset: null });
+    });
+
+    it('findHostsByIndicator pages with the cursor Falcon returns in meta.pagination.offset', async () => {
+      // Live US-2: this route ignores a numeric offset and returns an opaque cursor, empty on the last page.
+      const first = await run(
+        'findHostsByIndicator',
+        { type: 'domain', value: 'example.com', limit: 2 },
+        [
+          ok({
+            meta: { pagination: { limit: 2, offset: '0:1450837263' } },
+            resources: [AID, AID2],
+          }),
+          ok({ resources: [{ id: 'example.com', device_count: 4 }] }),
+        ]
+      );
+      expect(first.result).toMatchObject({ device_count: 4, next_offset: '0:1450837263' });
+
+      const last = await run(
+        'findHostsByIndicator',
+        { type: 'domain', value: 'example.com', limit: 2, offset: '0:1450837263' },
+        [
+          ok({ meta: { pagination: { limit: 2, offset: '' } }, resources: [AID, AID2] }),
+          ok({ resources: [{ id: 'example.com', device_count: 4 }] }),
+        ]
+      );
+      expect(last.calls()[0].url).toContain('offset=0%3A1450837263');
+      expect(last.result).toMatchObject({ resources: [AID, AID2], next_offset: null });
+    });
+
+    it('findHostsByIndicator takes the cursor as a string, not a numeric position', () => {
+      expect(
+        accepts('findHostsByIndicator', { type: 'domain', value: 'example.com', offset: '0:1' })
+      ).toBe(true);
+      expect(
+        accepts('findHostsByIndicator', { type: 'domain', value: 'example.com', offset: 2 })
+      ).toBe(false);
+    });
   });
 
   describe('Real Time Response', () => {

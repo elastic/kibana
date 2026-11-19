@@ -350,6 +350,16 @@ describe('CrowdStrike Falcon client', () => {
       );
     });
 
+    it("reports a response over Kibana's size limit as that, not as a connection failure", async () => {
+      const error = new AxiosError('maxContentLength size of 1048576 exceeded', 'ERR_BAD_RESPONSE');
+      const { ctx } = makeCtx([error]);
+      const failure = (await falconRequest(ctx, get()).catch((e: Error) => e)) as Error;
+      expect(failure.message).toBe(
+        'The response from api.crowdstrike.com is larger than Kibana allows (xpack.actions.maxResponseContentLength, 1mb by default). Request fewer items with a lower limit or fewer ids, or raise that setting.'
+      );
+      expect(failure.message).not.toContain('Could not reach');
+    });
+
     it('[C-http-policy] treats a redirect as an error instead of following it', async () => {
       const { ctx } = makeCtx([{ status: 302, headers: { location: 'https://evil.example' } }]);
       await expect(falconRequest(ctx, get())).rejects.toThrow('Status code: 302.');

@@ -677,17 +677,20 @@ describe('CrowdStrike Falcon V1 parity', () => {
           return { status: 201, headers: {}, data: rtrInit('test-batch-id').data };
         })
         .mockResolvedValueOnce({ status: 400, headers: {}, data: fail(400, 'Refresh failed').data })
+        .mockResolvedValueOnce({ status: 204, headers: {}, data: null })
         .mockResolvedValueOnce({ status: 201, headers: {}, data: rtrInit('new-batch-id').data })
         .mockResolvedValueOnce({ status: 201, headers: {}, data: rtrCommand().data });
       await expect(
         runBatchCommand(ctx, 'read_only', { endpoint_ids: [AID], command: 'ls' })
       ).rejects.toThrow('Refresh failed');
+      // V2 also closes the session the failed call opened, instead of leaving it to expire.
+      expect(sent()[2]).toMatchObject({ method: 'DELETE', params: { session_id: 's1' } });
       const result = await runBatchCommand(ctx, 'read_only', {
         endpoint_ids: [AID],
         command: 'ls',
       });
       expect(result.batch_id).toBe('new-batch-id');
-      expect(sent()[2].url).toContain('batch-init-session');
+      expect(sent()[3].url).toContain('batch-init-session');
     });
 
     it('[C-v1-095] a refresh reply for another batch does not poison the next call', async () => {
@@ -797,6 +800,7 @@ describe('CrowdStrike Falcon V1 parity', () => {
           return { status: 201, headers: {}, data: rtrInit('x').data };
         })
         .mockResolvedValueOnce({ status: 400, headers: {}, data: fail(400, 'Refresh failed').data })
+        .mockResolvedValueOnce({ status: 204, headers: {}, data: null })
         .mockResolvedValueOnce({
           status: 201,
           headers: {},
@@ -1157,6 +1161,7 @@ describe('CrowdStrike Falcon V1 parity', () => {
           return { status: 201, headers: {}, data: rtrInit('old').data };
         })
         .mockResolvedValueOnce({ status: 400, headers: {}, data: fail(400, 'Refresh failed').data })
+        .mockResolvedValueOnce({ status: 204, headers: {}, data: null })
         .mockResolvedValueOnce({ status: 201, headers: {}, data: rtrInit('fresh').data })
         .mockResolvedValueOnce({ status: 201, headers: {}, data: rtrCommand().data });
       const args = { endpoint_ids: [AID], command: 'ls' };

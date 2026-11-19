@@ -35,6 +35,9 @@ const requestTimeout = (seconds: number) => seconds * 1000 + RTR_TIMEOUT_MARGIN_
 
 const unique = (ids: string[]) => [...new Set(ids)];
 
+/** Session deletes sent at the same time when a batch is closed (a batch can hold 10,000 hosts). */
+const SESSION_DELETE_CONCURRENCY = 10;
+
 interface BatchSession {
   batchId: string;
   openedAt: number;
@@ -119,10 +122,11 @@ export const runBatchCommand = async (
       errors: [],
     };
   }
-  await keepBatchAlive(ctx, session, scope);
   let command: Record<string, Record<string, unknown>> = {};
   let errors: unknown[] = [];
   try {
+    // Inside the try: a failed refresh still closes the sessions the batch init opened.
+    await keepBatchAlive(ctx, session, scope);
     const response = await falconRequest(ctx, {
       method: 'POST',
       path: RTR_BATCH_COMMAND_PATHS[tier],
@@ -226,7 +230,14 @@ const closeBatchSessions = async (
       ? [host.session_id]
       : [];
   });
-  await Promise.all(unique(sessionIds).map((id) => deleteSession(ctx, id, scope)));
+  const ids = unique(sessionIds);
+  for (let start = 0; start < ids.length; start += SESSION_DELETE_CONCURRENCY) {
+    await Promise.all(
+      ids
+        .slice(start, start + SESSION_DELETE_CONCURRENCY)
+        .map((id) => deleteSession(ctx, id, scope))
+    );
+  }
 };
 
 /** The chunk marker Falcon returns with a chunk: a positive sequence_id while more output follows. */
@@ -356,14 +367,42 @@ export interface RetrievedFile {
 /**
  * Pulls one file from one host with RTR get and returns the archive Falcon packs it in (7z,
  * password `infected`), as base64. Files over 1 MiB fail with their sha256 instead. The host's
- * session is deleted afterwards, unless the file is still being prepared at the timeout.
+ * session is deleted afterwards, unless the file is still being prepared at the timeout. A call
+ * with the batch_get_cmd_req_id (and session_id) of such a result keeps waiting for the same file
+ * instead of starting a new collection.
  */
 export const retrieveFile = async (
   ctx: ActionContext,
-  input: { device_id: string; file_path: string; timeout?: number; queue_offline?: boolean }
+  input: {
+    device_id: string;
+    file_path: string;
+    timeout?: number;
+    queue_offline?: boolean;
+    batch_get_cmd_req_id?: string;
+    session_id?: string;
+  }
 ): Promise<RetrievedFile> => {
   const timeout = input.timeout ?? 60;
   const scope = SCOPES.rtrWrite;
+  if (input.batch_get_cmd_req_id) {
+    let resumed: RetrievedFile | undefined;
+    try {
+      resumed = await awaitFile(
+        ctx,
+        input,
+        input.batch_get_cmd_req_id,
+        input.session_id,
+        timeout,
+        scope
+      );
+      return resumed;
+    } finally {
+      const sessionId = resumed?.session_id ?? input.session_id;
+      if (resumed?.complete !== false && sessionId) {
+        await deleteSession(ctx, sessionId, scope);
+      }
+    }
+  }
   const session = await initBatchSession(ctx, [input.device_id], {
     timeout,
     queueOffline: input.queue_offline,
@@ -412,6 +451,24 @@ const getFile = async (
     throw new Error(`Real Time Response get was not accepted: ${falconMessage(sent.data)}`);
   }
   const sessionId = typeof hostResult?.session_id === 'string' ? hostResult.session_id : undefined;
+  return awaitFile(ctx, input, requestId, sessionId, timeout, scope, () =>
+    keepBatchAlive(ctx, session, scope)
+  );
+};
+
+/**
+ * Polls a batch get until the host's file is ready or the timeout passes, then downloads its
+ * archive. Returns complete: false with the ids to resume when the file is not ready yet.
+ */
+const awaitFile = async (
+  ctx: ActionContext,
+  input: { device_id: string; file_path: string },
+  requestId: string,
+  sessionId: string | undefined,
+  timeout: number,
+  scope: string,
+  beforeDownload?: () => Promise<void>
+): Promise<RetrievedFile> => {
   const deadline = timing.now() + timeout * 1000;
   let file;
   for (;;) {
@@ -438,7 +495,7 @@ const getFile = async (
     );
   }
   const fileName = baseName(file.name ?? input.file_path);
-  await keepBatchAlive(ctx, session, scope);
+  await beforeDownload?.();
   const content = await falconRequest<ArrayBuffer>(ctx, {
     method: 'GET',
     path: '/real-time-response/entities/extracted-file-contents/v1',

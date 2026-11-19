@@ -254,16 +254,36 @@ export const alertAndIocActions: ConnectorSpec['actions'] = {
     isTool: true,
     scope: 'read',
     description:
-      'Find the hosts that observed a sha256, md5, domain, ipv4 or ipv6 indicator. Returns device ids, device_count and next_offset.',
+      'Find the hosts that observed a sha256, md5, domain, ipv4 or ipv6 indicator. Returns device ids, device_count and next_offset (a cursor: pass it as offset for the next page).',
     input: FindHostsByIndicatorInputSchema,
     handler: async (ctx, input: FindHostsByIndicatorInput) => {
       const value = normalizeIndicator(input.type, input.value);
-      const page = await offsetPage(ctx, {
+      // This route pages with an opaque cursor in meta.pagination.offset (for example
+      // "0:1450837263") and ignores a numeric offset, so the cursor is passed through as is.
+      const response = await falconRequest(ctx, {
+        method: 'GET',
         path: '/iocs/queries/indicators/devices/v1',
         params: { type: input.type, value, limit: input.limit, offset: input.offset },
+        retryServerErrors: true,
+        allowNotFound: true,
         scope: SCOPES.iocHostsRead,
       });
-      if (page.resources.length === 0) {
+      const resources = response.status === 404 ? [] : resourcesOf(response.data);
+      const meta = response.data?.meta;
+      const cursor = meta?.pagination?.offset;
+      const page = {
+        resources,
+        meta,
+        errors: errorsOf(response.data),
+        next_offset:
+          resources.length > 0 && typeof cursor === 'string' && cursor && cursor !== input.offset
+            ? cursor
+            : null,
+      };
+      const total = meta?.pagination?.total;
+      // An empty page after the last one does not mean no host saw the indicator: only short-cut
+      // when Falcon reports no hosts at all (total 0, or an empty first page without a total).
+      if (resources.length === 0 && (total === 0 || (typeof total !== 'number' && !input.offset))) {
         return { ...page, device_count: 0, next_offset: null };
       }
       let deviceCount: unknown;
@@ -279,7 +299,6 @@ export const alertAndIocActions: ConnectorSpec['actions'] = {
       } catch (error) {
         ctx.log.debug(`Falcon device count lookup failed: ${(error as Error).message}`);
       }
-      const total = page.meta?.pagination?.total;
       return {
         ...page,
         device_count:
@@ -287,7 +306,7 @@ export const alertAndIocActions: ConnectorSpec['actions'] = {
             ? deviceCount
             : typeof total === 'number'
             ? total
-            : page.resources.length,
+            : resources.length,
       };
     },
   },

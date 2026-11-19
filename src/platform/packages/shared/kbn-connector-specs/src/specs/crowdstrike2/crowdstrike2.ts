@@ -100,7 +100,7 @@ export const Crowdstrike2: ConnectorSpec = {
               placeholder: 'https://api.crowdstrike.com/oauth2/token',
               helpText: i18n.translate('connectorSpecs.crowdstrike2.auth.tokenUrl.helpText', {
                 defaultMessage:
-                  'The API URL of your Falcon cloud followed by /oauth2/token, for example https://api.eu-1.crowdstrike.com/oauth2/token. It must be on the same host as the selected Falcon cloud.',
+                  'The API URL of your Falcon cloud followed by /oauth2/token, for example https://api.eu-1.crowdstrike.com/oauth2/token. Kibana sends the client ID and secret to this URL, so enter only your Falcon cloud token URL. Actions fail when it is not on the host of the selected Falcon cloud.',
               }),
             },
             clientId: {
@@ -145,6 +145,7 @@ export const Crowdstrike2: ConnectorSpec = {
     '- Lists return one page: continue with `offset: next_offset`, or `after: next_after` where offered; null means the last page.',
     "- FQL quotes values with single quotes, for example hostname:'web-01'; + is AND, a comma is OR.",
     '- Confirm with the user before any action that changes Falcon or a host: containHost, updateAlert, updateCase, the case tag actions, createScan.',
+    '- Confirm with the user before detonateUrl or detonateFile: a sandbox submission is billable, cannot be deleted, and sends the URL or file to Falcon Sandbox.',
     '- Change actions return `outcomes` per item: `requested`, `skipped` (already in that state) or `notFound`.',
     '- A 403 names the API client scope the action needs.',
   ].join('\n'),

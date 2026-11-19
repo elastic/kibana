@@ -18,12 +18,13 @@ const AID = '0123456789abcdef0123456789abcdef';
 
 // Not offered to agents: actions that run code or change the RTR library or quarantined files, that weaken
 // protection (an allow-listing IOC, custom IOA rules), that undo a response (lifting containment), change
-// host group policy assignment or delete detections, or kill a process.
+// host group policy assignment or delete detections, or kill a process; and rtrRetrieveFile, whose result is
+// the whole file archive as base64 (up to about 1.4 MB), too large for a model context and of no use to it.
 // Offered: containHost (protective, reversible by an analyst, the host keeps its Falcon cloud link),
 // updateAlert and updateCase (triage metadata, reversible, comments are additive), createScan (protective,
-// quarantine is opt-in and reversible), rtrRetrieveFile (read-only on the host, returns a password-protected
-// archive) and stopNgSiemSearch (only cancels a search job).
+// quarantine is opt-in and reversible) and stopNgSiemSearch (only cancels a search job).
 const NOT_FOR_AGENTS = [
+  'rtrRetrieveFile',
   'uploadRTRFile',
   'deleteRTRFile',
   'uploadRTRScript',
@@ -76,11 +77,16 @@ describe('CrowdStrike Falcon agent exposure and read retries', () => {
       'containHost',
       'updateCase',
       'createScan',
-      'rtrRetrieveFile',
       'stopNgSiemSearch',
     ]) {
       expect(Crowdstrike2.actions[name].isTool).toBe(true);
     }
+  });
+
+  it('tells agents to confirm sandbox submissions with the user', () => {
+    expect(Crowdstrike2.skill).toContain(
+      'Confirm with the user before detonateUrl or detonateFile'
+    );
   });
 
   it('tells agents that a detonation is called again with submission_id while it is not complete', () => {

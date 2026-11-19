@@ -29,7 +29,7 @@ API URL
 :   The HTTPS base URL of the Falcon API. Used only when the Falcon cloud is Custom. The host must be allowed by the {{kib}} `xpack.actions.allowedHosts` setting.
 
 Token URL
-:   The API URL of your Falcon cloud followed by `/oauth2/token`, for example `https://api.us-2.crowdstrike.com/oauth2/token`. It must be on the same host as the selected Falcon cloud; the connector refuses to send the credentials anywhere else.
+:   The API URL of your Falcon cloud followed by `/oauth2/token`, for example `https://api.us-2.crowdstrike.com/oauth2/token`. {{kib}} sends the client ID and secret to this URL to get an access token, so enter only the token URL of your Falcon cloud. When the token URL is not on the host of the selected Falcon cloud, every action fails with an error that names both hosts.
 
 Client ID
 :   The client ID of a Falcon API client.
@@ -103,7 +103,7 @@ The CrowdStrike Falcon connector exposes the following actions. List and search 
 :   Delete custom IOCs by ID, with an optional audit comment. An IOC that no longer exists is not an error: it is reported as `notFound` in `outcomes`, and the others as `requested`.
 
 `findHostsByIndicator`
-:   Find the hosts that observed an indicator, with the number of hosts.
+:   Find the hosts that observed an indicator, with the number of hosts. Falcon pages this list with an opaque cursor: `next_offset` is a string (for example `0:1450837263`); pass it as `offset` to get the next page. It is `null` on the last page.
 
 `listIOARules`
 :   List custom IOA rule groups with their rules, by FQL filter, free text and sort. A rule is identified by its `instance_id` (Falcon returns no rule `id`). A deleted rule stays in the group's `rules` with `deleted: true` and is removed from `rule_ids`.
@@ -135,8 +135,8 @@ The CrowdStrike Falcon connector exposes the following actions. List and search 
 `getRTRCloudScripts`
 :   List the custom RTR scripts in the Falcon cloud, for use with `runscript -CloudFile`.
 
-`rtrRetrieveFile`
-:   Collect one file (up to 1 MiB) from a host. Returns the archive Falcon produces as base64, with its name, SHA256 and size.
+`rtrRetrieveFile` _(not yet available)_
+:   Collect one file (up to 1 MiB) from a host. Returns the archive Falcon produces as base64, with its name, SHA256 and size. When the file is not ready within the timeout, the result has `complete: false` with `batch_get_cmd_req_id` and `session_id`; call the action again with the same `device_id` and `file_path` and those two values to keep waiting for the same file instead of starting a new collection.
 
 `rtrKillProcess` _(not yet available)_
 :   Kill a process on a host by process ID.
@@ -230,10 +230,13 @@ Earlier runscript commands
 :   The earlier connector ran `runscript` through Execute RTR command. In this connector, `executeRTRCommand` (read-only) accepts only read-only commands and rejects `runscript`. Use `batchActiveResponderExecuteRTR` or `batchAdminExecuteRTR` instead, for example with the command `runscript -CloudFile='<script name>'`, and use a connector whose API client holds that tier's scope.
 
 Real Time Response sessions
-:   Real Time Response sessions are opened and closed by the connector. Batch sessions, used by `executeRTRCommand`, `batchActiveResponderExecuteRTR`, `batchAdminExecuteRTR` and `rtrRetrieveFile`, open one session per host; the connector deletes each host's session when that host's command completes or fails (`rtrRetrieveFile`: when the file is returned or the action fails). Single-host sessions, used by `rtrKillProcess` and `rtrListProcesses`, are deleted when the command completes or fails. A session is kept when the command is still running at the timeout (so that its status can be read; `rtrRetrieveFile`: while the file is still being prepared) or when the host is offline and the command is queued for it (deleting the session would drop the queued command); Falcon closes a kept session after 10 minutes without activity. A failed delete is only logged and does not fail the action. The batch and session IDs in the results (`batch_id`, `session_id`) are for audit only; no action takes them as input.
+:   Real Time Response sessions are opened and closed by the connector. Batch sessions, used by `executeRTRCommand`, `batchActiveResponderExecuteRTR`, `batchAdminExecuteRTR` and `rtrRetrieveFile`, open one session per host; the connector deletes each host's session when that host's command completes or fails (`rtrRetrieveFile`: when the file is returned or the action fails). Single-host sessions, used by `rtrKillProcess` and `rtrListProcesses`, are deleted when the command completes or fails. A session is kept when the command is still running at the timeout (so that its status can be read; `rtrRetrieveFile`: while the file is still being prepared) or when the host is offline and the command is queued for it (deleting the session would drop the queued command); Falcon closes a kept session after 10 minutes without activity. A failed delete is only logged and does not fail the action. The batch and session IDs in the results (`batch_id`, `session_id`) are for audit only, except that `rtrRetrieveFile` takes back the `session_id` and `batch_get_cmd_req_id` of a result that was not complete. Sessions of a large batch are deleted 10 at a time.
 
 Real Time Response timeout
 :   Real Time Response commands wait 30 seconds by default (60 seconds for `rtrRetrieveFile`) and at most 300 seconds (Falcon's 5-minute maximum). A command that is still running at the timeout returns a request ID (`cloud_request_id`) per host; read its result with `getRTRCommandStatus`.
+
+Response size
+:   {{kib}} limits the size of a connector response (`xpack.actions.maxResponseContentLength`, 1 MB by default). Large pages, such as thousands of device records from `getAgentDetails` or many Next-Gen SIEM events, can exceed it; the action then fails with an error that says the response is too large. Request fewer items with a lower `limit` or fewer IDs, or raise the setting.
 
 Next-Gen SIEM search
 :   Next-Gen SIEM search uses the same client ID and secret as the other actions, but the API client also needs the **NGSIEM** scope (Read and Write), which is separate from the endpoint scopes; without it Falcon answers with an access-denied error that the connector reports with the scope name. A search runs in three steps: `startNgSiemSearch` with a CQL query and a time range returns a search ID; `getNgSiemSearchResults` returns `done: false` while the search runs, so repeat it with a wait of at least 2 seconds until `done` is `true`, then page the events with `offset` and `limit` (up to 1,000 per page); `stopNgSiemSearch` cancels a search that is no longer needed.

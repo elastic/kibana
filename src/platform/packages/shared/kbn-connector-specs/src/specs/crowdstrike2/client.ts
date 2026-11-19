@@ -206,6 +206,13 @@ const statusError = (
 
 const networkError = (error: unknown, url: string): Error => {
   const host = new URL(url).host;
+  // Kibana caps response bodies (xpack.actions.maxResponseContentLength, 1mb by default); axios then
+  // rejects the response with a maxContentLength error, which is not a connection problem.
+  if (/maxContentLength/i.test((error as Error)?.message ?? '')) {
+    return new Error(
+      `The response from ${host} is larger than Kibana allows (xpack.actions.maxResponseContentLength, 1mb by default). Request fewer items with a lower limit or fewer ids, or raise that setting.`
+    );
+  }
   if (isAxiosError(error)) {
     const cause = error.code === 'ECONNABORTED' ? 'timeout' : error.code ?? 'network error';
     return new Error(`Could not reach ${host}: ${cause} (${error.message})`);

@@ -570,5 +570,92 @@ describe('CrowdStrike Falcon Real Time Response', () => {
       expect(calls()[2]).toMatchObject({ method: 'DELETE', params: { session_id: 's1' } });
       expect(calls()).toHaveLength(3);
     });
+
+    it('resumes a timed-out retrieval by its batch_get_cmd_req_id without starting a new one', async () => {
+      const archive = Uint8Array.from(Buffer.from('7z-bytes'));
+      const { ctx, calls } = makeCtx([
+        ready(12),
+        { data: archive.buffer },
+        { status: 204, data: null },
+      ]);
+      const result = await retrieveFile(ctx, {
+        device_id: AID,
+        file_path: 'C:\\a\\b.txt',
+        batch_get_cmd_req_id: 'bgc-1',
+        session_id: 's1',
+      });
+      expect(result).toMatchObject({
+        complete: true,
+        session_id: 's1',
+        batch_get_cmd_req_id: 'bgc-1',
+        sha256: SHA,
+        content_base64: Buffer.from('7z-bytes').toString('base64'),
+      });
+      expect(calls().map((c) => `${c.method} ${c.url.replace(BASE, '')}`)).toEqual([
+        'GET /combined/batch-get-command/v1',
+        'GET /entities/extracted-file-contents/v1',
+        'DELETE /entities/sessions/v1',
+      ]);
+      expect(calls()[0].params).toEqual({ batch_get_cmd_req_id: 'bgc-1', timeout: 60 });
+      expect(calls()[2].params).toEqual({ session_id: 's1' });
+    });
+
+    it('keeps the session when a resumed retrieval is still not ready', async () => {
+      const notReady = { data: { resources: {} } };
+      const { ctx, calls } = makeCtx(Array(10).fill(notReady));
+      await expect(
+        retrieveFile(ctx, {
+          device_id: AID,
+          file_path: 'C:\\x',
+          timeout: 5,
+          batch_get_cmd_req_id: 'bgc-1',
+          session_id: 's1',
+        })
+      ).resolves.toEqual({ complete: false, session_id: 's1', batch_get_cmd_req_id: 'bgc-1' });
+      expect(calls().some((c) => c.method === 'DELETE' || c.method === 'POST')).toBe(false);
+    });
+  });
+
+  describe('closing batch sessions', () => {
+    it('deletes the sessions of a large batch at most 10 at a time', async () => {
+      const ids = Array.from({ length: 25 }, (_, i) => i.toString(16).padStart(32, '0'));
+      const hosts = Object.fromEntries(
+        ids.map((id, i) => [id, { session_id: `s${i}`, errors: [] }])
+      );
+      const combined = Object.fromEntries(
+        ids.map((id, i) => [
+          id,
+          { session_id: `s${i}`, complete: true, stdout: '', stderr: '', errors: [] },
+        ])
+      );
+      let inFlight = 0;
+      let peak = 0;
+      const { ctx, request } = makeCtx([]);
+      request.mockImplementation(async (config: { url: string; method: string }) => {
+        if (config.url.endsWith('/batch-init-session/v1')) {
+          return {
+            status: 201,
+            headers: {},
+            data: { batch_id: 'b', resources: hosts, errors: [] },
+          };
+        }
+        if (config.url.endsWith('/batch-command/v1')) {
+          return {
+            status: 201,
+            headers: {},
+            data: { combined: { resources: combined }, errors: [] },
+          };
+        }
+        inFlight += 1;
+        peak = Math.max(peak, inFlight);
+        await new Promise((resolve) => setImmediate(resolve));
+        inFlight -= 1;
+        return { status: 204, headers: {}, data: null };
+      });
+      await runBatchCommand(ctx, 'read_only', { endpoint_ids: ids, command: 'ls' });
+      const deletes = request.mock.calls.filter(([config]) => config.method === 'DELETE');
+      expect(deletes).toHaveLength(25);
+      expect(peak).toBe(10);
+    });
   });
 });

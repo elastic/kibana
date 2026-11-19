@@ -70,10 +70,11 @@ export const rtrActions: ConnectorSpec['actions'] = {
       ),
   },
   rtrRetrieveFile: {
-    isTool: true,
+    // Not offered to agents: the result is the whole archive as base64 (up to about 1.4 MB).
+    isTool: false,
     scope: 'write',
     description:
-      'Collect one file, up to 1 MiB, from a host. Returns a 7z archive with the password infected as base64, with its sha256.',
+      'Collect one file, up to 1 MiB, from a host. Returns a 7z archive with the password infected as base64, with its sha256. When the result has complete: false, call again with the same device_id and the returned batch_get_cmd_req_id to keep waiting for the file.',
     input: RtrRetrieveFileInputSchema,
     handler: async (ctx, input: RtrRetrieveFileInput) => retrieveFile(ctx, input),
   },
