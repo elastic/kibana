@@ -812,10 +812,16 @@ const interactWithPage = (
   ctx: SessionContext,
   document: DocumentState,
   { page, from, end: slotEnd }: PageView
-): { events: EdotBrowserEvent[]; clickTimes: number[]; exceptionTimes: number[] } => {
+): {
+  events: EdotBrowserEvent[];
+  clickTimes: number[];
+  repeatedClickTimes: number[];
+  exceptionTimes: number[];
+} => {
   const { client, site, health, random, reportExceptions, frustrationRandom } = ctx;
   const events: EdotBrowserEvent[] = [];
   const clickTimes: number[] = [];
+  const repeatedClickTimes: number[] = [];
   // Uncaught exceptions come from failed requests as well as from the page itself
   const exceptions: PageException[] = [];
   const onException =
@@ -839,6 +845,7 @@ const interactWithPage = (
       ? rageBurst(frustrationRandom, health, clickTime, slotEnd)
       : [clickTime];
     clickTimes.push(...burst);
+    repeatedClickTimes.push(...burst.slice(1));
     events.push(...burst.map((time) => client.click({ ...target, pageX, pageY }).timestamp(time)));
     const deadDraw = frustrationRandom?.() ?? 1;
     clicks.push({
@@ -873,7 +880,12 @@ const interactWithPage = (
     events.push(...frustrationEvents(ctx, toUrl(site, page.path), clicks, exceptions));
   }
 
-  return { events, clickTimes, exceptionTimes: exceptions.map(({ time }) => time) };
+  return {
+    events,
+    clickTimes,
+    repeatedClickTimes,
+    exceptionTimes: exceptions.map(({ time }) => time),
+  };
 };
 
 interface PageClick {
@@ -913,9 +925,14 @@ const rageBurst = (
   const times = [clickTime];
   const count = 3 + Math.floor(countDraw * 5);
   while (times.length < count) {
-    times.push(Math.min(times[times.length - 1] + Math.floor(between(random, 80, 300)), slotEnd));
+    const time = times[times.length - 1] + Math.floor(between(random, 80, 300));
+    // The user navigated away before repeating the click
+    if (time > slotEnd) {
+      break;
+    }
+    times.push(time);
   }
-  return times;
+  return times.length >= 3 ? times : [clickTime];
 };
 
 const frustrationEvents = (
@@ -1050,6 +1067,7 @@ const simulateDocument = (
       start: loadView.start,
       end: hiddenAt,
       clickTimes,
+      repeatedClickTimes: visits.flatMap((visit) => visit.repeatedClickTimes),
       exceptionTimes: visits.flatMap((visit) => visit.exceptionTimes),
     },
   };
@@ -1068,6 +1086,8 @@ export interface EdotBrowserSessionDocument {
   /** When the document was hidden, right before the next one loaded. */
   end: number;
   clickTimes: number[];
+  /** The clicks of `clickTimes` that repeat the previous click on the same element, in rage clicks. */
+  repeatedClickTimes?: number[];
   exceptionTimes: number[];
 }
 

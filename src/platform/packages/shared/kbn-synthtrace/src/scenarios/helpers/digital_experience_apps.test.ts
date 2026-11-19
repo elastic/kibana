@@ -428,7 +428,10 @@ describe('digital experience apps', () => {
               Number(other['@timestamp']) < Number(doc['@timestamp']) + count * 300
           );
           expect(count).toBeGreaterThanOrEqual(3);
-          expect(burst.length).toBeGreaterThanOrEqual(count);
+          // Each click at a time of its own, even right before the user navigates away
+          expect(new Set(burst.map((click) => click['@timestamp'])).size).toBeGreaterThanOrEqual(
+            count
+          );
         });
       });
 

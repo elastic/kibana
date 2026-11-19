@@ -96,8 +96,9 @@
  * - dead clicks are clicks that fire no request
  * - error clicks are clicks followed by an uncaught exception within a second, or by the failure
  *   of the request they fired, and carry its `exception.type` and `exception.message`
- * - the slower and more erroring the app, the more of them: 1% of clicks are rage clicks and 2%
- *   dead clicks in a healthy app, 10% and 12% in a critical one
+ * - the slower and more erroring the app, the more of them: a click turns into a rage click with a
+ *   probability of 1% in a healthy app and 10% in a critical one, before its repeats are added,
+ *   and a click that fires no request is dead with a probability of 2% and 12%
  *
  * Scenario options:
  * - withSessionId (boolean, default: true): write `attributes.session.id`, with the tab ID
