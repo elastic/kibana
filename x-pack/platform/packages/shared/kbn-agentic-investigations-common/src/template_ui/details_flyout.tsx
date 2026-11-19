@@ -200,6 +200,7 @@ export const useInvestigationDetailsFlyout = (
         statusNode,
         severityNode,
         assigneesNode,
+        assigneeUids: investigation.assignees,
       }),
     },
     footer: {

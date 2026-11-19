@@ -446,6 +446,7 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     // Without a picker the assignees block renders a read-only avatar, not "Unassigned".
     expect(await screen.findByTestId('headerBlocks')).toHaveTextContent('Assignees');
     expect(screen.queryByText('Unassigned')).not.toBeInTheDocument();
+    expect(screen.queryByText('None')).not.toBeInTheDocument();
   });
 });
 
