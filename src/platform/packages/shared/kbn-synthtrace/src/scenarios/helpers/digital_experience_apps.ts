@@ -1153,8 +1153,6 @@ interface OngoingSessions<TFields extends Fields> {
   /** The index of the next session to start. */
   nextIndex: number;
   sessions: Array<OngoingSession<TFields>>;
-  /** The configuration the next sessions start with. */
-  configuration?: string;
 }
 
 /**
@@ -1185,17 +1183,10 @@ export const generateOngoingPerMinute = <TFields extends Fields>(
     maxDuration,
     create,
     releaseTime = getTimestamp,
-    configuration,
   }: {
     store: OngoingSessionStore<TFields>;
     key: string;
     maxDuration: number;
-    /**
-     * Identifies what `create` generates sessions from, e.g. an app's definition. When it changes
-     * between windows that follow each other, the sessions in progress keep what they started with,
-     * and the sessions of the new configuration start with the window, at its rate.
-     */
-    configuration?: string;
     /** When the event is sent, e.g. a crash reported on the next launch, if not its `@timestamp`. */
     releaseTime?: (event: Serializable<TFields>) => number;
     create: (session: {
@@ -1212,19 +1203,15 @@ export const generateOngoingPerMinute = <TFields extends Fields>(
   return range.interval('1s').generator<TFields>((windowStart, _index, { stepMilliseconds }) => {
     const windowEnd = Math.min(windowStart + stepMilliseconds, to);
     const previous = store.get(key);
-    const restarted: OngoingSessions<TFields> = {
-      end: windowStart,
-      // One more than needed, in case rounding puts a session's time on the other side
-      nextIndex: Math.max(indexAt(windowStart - maxDuration) - 1, 0),
-      sessions: [],
-      configuration,
-    };
     const state: OngoingSessions<TFields> =
-      previous?.end !== windowStart
-        ? restarted
-        : previous.configuration === configuration
+      previous?.end === windowStart
         ? previous
-        : { ...previous, nextIndex: indexAt(windowStart), configuration };
+        : {
+            end: windowStart,
+            // One more than needed, in case rounding puts a session's time on the other side
+            nextIndex: Math.max(indexAt(windowStart - maxDuration) - 1, 0),
+            sessions: [],
+          };
 
     while (state.nextIndex < indexAt(windowEnd)) {
       const index = state.nextIndex++;

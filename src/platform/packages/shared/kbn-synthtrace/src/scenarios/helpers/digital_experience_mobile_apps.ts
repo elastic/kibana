@@ -1014,9 +1014,9 @@ const generateSessions = (
       if (proposedSignals) {
         return generateOngoingPerMinute(range, perMinute, {
           store: ongoingNativeSessions,
-          key: `${runKey}:${serviceName}`,
-          // Sessions in progress keep the app they started with when the app changes
-          configuration: appDigests[appIndex],
+          // Each app keeps its own sessions in progress, even apps that share a service name. A
+          // run's apps don't change between its batches: a changed app starts over.
+          key: `${runKey}:${serviceName}:${appDigests[appIndex]}`,
           maxDuration: MAX_NATIVE_SESSION_MS,
           releaseTime: sentAt,
           // A session that started before the run is left out whole
