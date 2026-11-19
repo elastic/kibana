@@ -736,12 +736,7 @@ export class CaseCommentModel {
 
   public async encodeWithComments(): Promise<Case> {
     try {
-      // The encoded case's `comments` array must be complete: consumers derive counts from
-      // `comments.length` (e.g. the agent builder case card's `totalAttachments`). A single
-      // page only carries `perPage` saved objects even though `total` reports the full count,
-      // so a case with more comments than one page holds would undercount. Keep fetching
-      // pages until the accumulated objects match `total`.
-      const firstPage = await this.params.services.caseService.getAllCaseComments({
+      const comments = await this.params.services.caseService.getAllCaseComments({
         id: this.caseInfo.id,
         options: {
           fields: [],
@@ -749,23 +744,6 @@ export class CaseCommentModel {
           perPage: MAX_DOCS_PER_PAGE,
         },
       });
-      const savedObjects = [...firstPage.saved_objects];
-      const pages = Math.ceil(firstPage.total / firstPage.per_page);
-      for (let page = 2; page <= pages; page++) {
-        const nextPage = await this.params.services.caseService.getAllCaseComments({
-          id: this.caseInfo.id,
-          options: {
-            fields: [],
-            page,
-            perPage: MAX_DOCS_PER_PAGE,
-          },
-        });
-        savedObjects.push(...nextPage.saved_objects);
-      }
-      const comments: SavedObjectsFindResponse<AttachmentAttributesV2> = {
-        ...firstPage,
-        saved_objects: savedObjects,
-      };
       const totalAlerts =
         countAlertsForID({
           comments: comments as SavedObjectsFindResponse<AttachmentAttributes>,
