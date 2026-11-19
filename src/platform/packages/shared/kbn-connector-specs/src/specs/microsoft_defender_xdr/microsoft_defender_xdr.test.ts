@@ -80,12 +80,17 @@ describe('MicrosoftDefenderXdr auth', () => {
     expect(oauthType?.defaults?.scope).toBe('https://graph.microsoft.com/.default');
   });
 
-  it('hides the scope field on client secret auth', () => {
+  it('exposes the scope field with help text on client secret auth', () => {
     const oauthType = (MicrosoftDefenderXdr.auth?.types ?? [])
       .filter(isAuthTypeDef)
       .find((t) => t.type === 'oauth_client_credentials');
-    expect((oauthType?.overrides?.meta as Record<string, unknown>)?.scope).toMatchObject({
-      hidden: true,
+    const scopeMeta = (oauthType?.overrides?.meta as Record<string, unknown>)?.scope as Record<
+      string,
+      unknown
+    >;
+    expect(scopeMeta).toMatchObject({
+      label: expect.any(String),
+      helpText: expect.stringContaining('GCC High'),
     });
   });
 });

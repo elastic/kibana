@@ -111,13 +111,26 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
       {
         type: 'oauth_client_credentials',
         defaults: {
-          // All Defender XDR operations use the Graph API scope; hidden because
-          // users should not change it.
           scope: 'https://graph.microsoft.com/.default',
         },
         overrides: {
           meta: {
-            scope: { hidden: true },
+            scope: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftDefenderXdr.auth.scope.label',
+                { defaultMessage: 'OAuth scope' }
+              ),
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftDefenderXdr.auth.scope.helpText',
+                {
+                  defaultMessage:
+                    'Use "https://graph.microsoft.com/.default" for Commercial, ' +
+                    '"https://graph.microsoft.us/.default" for GCC High, ' +
+                    'or "https://dod-graph.microsoft.us/.default" for DoD. ' +
+                    'Must match the cloud environment selected above.',
+                }
+              ),
+            },
             tokenUrl: {
               label: i18n.translate(
                 'core.kibanaConnectorSpecs.microsoftDefenderXdr.auth.tokenUrl.label',
@@ -145,7 +158,22 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         },
         overrides: {
           meta: {
-            scope: { hidden: true },
+            scope: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftDefenderXdr.auth.cert.scope.label',
+                { defaultMessage: 'OAuth scope' }
+              ),
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftDefenderXdr.auth.cert.scope.helpText',
+                {
+                  defaultMessage:
+                    'Use "https://graph.microsoft.com/.default" for Commercial, ' +
+                    '"https://graph.microsoft.us/.default" for GCC High, ' +
+                    'or "https://dod-graph.microsoft.us/.default" for DoD. ' +
+                    'Must match the cloud environment selected above.',
+                }
+              ),
+            },
             algorithm: { hidden: true },
             certificateBinding: { hidden: true },
             keyId: { hidden: true },
@@ -239,8 +267,8 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
       scope: 'read',
       description:
         'Retrieve full details for a single Microsoft Defender XDR incident by its numeric ID, ' +
-        'including all related alerts, evidence, and affected assets. ' +
-        'Each alert in the response includes device evidence with mdeDeviceId fields that can be passed to the Microsoft Defender for Endpoint connector.',
+        'including all related alerts and affected assets. ' +
+        'Each alert in the response includes an evidence array with device evidence containing mdeDeviceId fields that can be passed to the Microsoft Defender for Endpoint connector.',
       input: GetIncidentInputSchema,
       handler: async (ctx, input: GetIncidentInput) => {
         const base = graphBase(ctx.config?.cloud as Cloud | undefined);
@@ -673,8 +701,8 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'Retrieve passive DNS records for a hostname or IP address from Microsoft Defender Threat Intelligence. ' +
-        'Returns historical DNS resolution data showing what IPs a domain resolved to, or what domains resolved to an IP. ' +
+        'Retrieve forward passive DNS records for a hostname from Microsoft Defender Threat Intelligence. ' +
+        'Returns historical DNS resolution data showing what IPs a domain resolved to. ' +
         'Use to pivot across attacker infrastructure during threat hunting or attribution investigations. ' +
         'Requires the ThreatIntelligence.Read.All Graph permission.',
       input: GetThreatIntelHostInputSchema,
@@ -787,8 +815,8 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
     '- Set the Token URL to: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/token`.',
     '',
     '### Device ID handoff to Microsoft Defender for Endpoint',
-    '- `getIncident` and `getAlert` responses include `evidence` arrays. Device evidence items contain',
-    '  `mdeDeviceId` (the Defender for Endpoint machine ID) and `deviceDnsName`.',
+    '- `getAlert` responses include a top-level `evidence` array. `getIncident` responses nest evidence under `alerts[].evidence`.',
+    '  Device evidence items contain `mdeDeviceId` (the Defender for Endpoint machine ID) and `deviceDnsName`.',
     '- Pass `mdeDeviceId` to the Microsoft Defender for Endpoint connector to trigger isolate, scan, or live-response actions.',
     '',
     '### Typical usage patterns',
@@ -799,14 +827,12 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
     '- **Add an audit note to an alert**: call `addAlertComment` with the alert ID and a triage note.',
     '- **Triage an alert independently**: call `updateAlert` with `status: "inProgress"` before the incident is fully classified.',
     '- **Resolve an alert**: call `updateAlert` with `status: "resolved"`, `classification`, and `determination`.',
-    '- **Merge duplicate incidents**: call `mergeIncidents` with the IDs of related incidents; the first ID becomes the surviving incident.',
     '- **Hunt for threats**: call `runHuntingQuery` with a KQL query such as ' +
       '`DeviceEvents | where ActionType == "ProcessCreated" | limit 10`.',
     '- **Audit detection rules**: call `listDetectionRules` to see what custom detections are active.',
-    '- **Deploy a detection**: call `createDetectionRule` with a KQL query and alert template to automate future hunting.',
     '- **Enrich a suspicious host**: call `getThreatIntelHostReputation` to get a score and classification, ' +
       'then `getThreatIntelHost` for full threat actor and malware associations.',
-    '- **Pivot on infrastructure**: call `getPassiveDnsRecords` to find related IPs/domains via historical DNS.',
+    '- **Pivot on infrastructure**: call `getPassiveDnsRecords` to find what IPs a domain resolved to via historical DNS.',
     '- **Look up domain registration**: call `getWhoisRecord` to identify the registrant and registration date.',
     '- **Report on security posture**: call `listSecureScores` to retrieve the latest Microsoft Secure Score snapshot.',
     '',
@@ -814,7 +840,7 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
     '- Incidents aggregate related alerts. Use `getIncident` with `$expand=alerts` to see alerts grouped by incident.',
     '- Advanced hunting covers up to 30 days of data; queries respect your Defender XDR retention settings.',
     "- OData `$filter` expressions use single quotes for string values: `severity eq 'high'`.",
-    '- Custom detection rules require the `CustomDetectionsAlert.ReadWrite.All` Graph permission.',
+    '- Custom detection rules require the `CustomDetection.ReadWrite.All` Graph permission.',
     '- Threat Intelligence actions require the `ThreatIntelligence.Read.All` permission and a Defender XDR or Microsoft Threat Intelligence license.',
     '- `mergeIncidents` is irreversible — verify incident IDs before calling.',
   ].join('\n'),

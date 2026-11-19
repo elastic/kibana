@@ -52,7 +52,7 @@ The following actions are available for the Microsoft Defender XDR connector.
 | `getIncident` | Incident management | `incidentId` | — | `SecurityIncident.ReadWrite.All` |
 | `updateIncident` | Incident management | `incidentId` + at least one field | `status`, `assignedTo`, `classification`, `determination`, `severity`, `customTags`, `comment` | `SecurityIncident.ReadWrite.All` |
 | `addIncidentComment` | Incident management | `incidentId`, `comment` | — | `SecurityIncident.ReadWrite.All` |
-| `mergeIncidents` | Incident management | `incidentIds` (≥ 2 IDs) | `comment` | `SecurityIncident.ReadWrite.All` |
+| `mergeIncidents` _(not yet available as an agent tool)_ | Incident management | `incidentIds` (≥ 2 IDs) | `comment` | `SecurityIncident.ReadWrite.All` |
 | `listAlerts` | Alert management | — | `filter`, `top`, `skip` | `SecurityAlert.ReadWrite.All` |
 | `getAlert` | Alert management | `alertId` | — | `SecurityAlert.ReadWrite.All` |
 | `updateAlert` | Alert management | `alertId` + at least one field | `status`, `assignedTo`, `classification`, `determination`, `severity` | `SecurityAlert.ReadWrite.All` |
@@ -60,9 +60,9 @@ The following actions are available for the Microsoft Defender XDR connector.
 | `runHuntingQuery` | Advanced hunting | `query` | `timespan` | `ThreatHunting.Read.All` |
 | `listDetectionRules` | Custom detection rules | — | `top`, `skip` | `CustomDetection.ReadWrite.All` |
 | `getDetectionRule` | Custom detection rules | `ruleId` | — | `CustomDetection.ReadWrite.All` |
-| `createDetectionRule` | Custom detection rules | `displayName`, `queryText`, `period`, `alertTemplate` | `isEnabled` | `CustomDetection.ReadWrite.All` |
-| `updateDetectionRule` | Custom detection rules | `ruleId` + at least one field | `displayName`, `isEnabled`, `queryText`, `period`, `alertTemplate` | `CustomDetection.ReadWrite.All` |
-| `deleteDetectionRule` | Custom detection rules | `ruleId` | — | `CustomDetection.ReadWrite.All` |
+| `createDetectionRule` _(not yet available as an agent tool)_ | Custom detection rules | `displayName`, `queryText`, `period`, `alertTemplate` | `isEnabled` | `CustomDetection.ReadWrite.All` |
+| `updateDetectionRule` _(not yet available as an agent tool)_ | Custom detection rules | `ruleId` + at least one field | `displayName`, `isEnabled`, `queryText`, `period`, `alertTemplate` | `CustomDetection.ReadWrite.All` |
+| `deleteDetectionRule` _(not yet available as an agent tool)_ | Custom detection rules | `ruleId` | — | `CustomDetection.ReadWrite.All` |
 | `getThreatIntelHost` | Threat intelligence | `host` | — | `ThreatIntelligence.Read.All` |
 | `getThreatIntelHostReputation` | Threat intelligence | `host` | — | `ThreatIntelligence.Read.All` |
 | `getPassiveDnsRecords` | Threat intelligence | `host` | — | `ThreatIntelligence.Read.All` |
@@ -131,7 +131,7 @@ The following actions are available for the Microsoft Defender XDR connector.
 :   Returns the MDTI reputation score and classification for a hostname or IP address. The score ranges from 0–100 (higher = more malicious). Classification is one of `malicious`, `suspicious`, `neutral`, or `benign`, with the rules that influenced the score.
 
 `getPassiveDnsRecords`
-:   Retrieves historical passive DNS records for a hostname or IP address from MDTI — showing what IPs a domain resolved to, or what domains resolved to an IP. Use to pivot across attacker infrastructure during threat hunting or attribution investigations.
+:   Retrieves forward passive DNS records for a hostname from MDTI — showing what IPs a domain resolved to. Use to pivot across attacker infrastructure during threat hunting or attribution investigations.
 
 `getWhoisRecord`
 :   Retrieves WHOIS registration data for a domain from MDTI. Returns registrar, registrant contact details, name servers, registration and expiry dates, and abuse contact. Use to attribute domains to known threat actors or identify recently registered infrastructure.
@@ -143,7 +143,7 @@ The following actions are available for the Microsoft Defender XDR connector.
 
 ## Device identifier handoff [microsoft-defender-xdr-device-handoff]
 
-The `getIncident` and `getAlert` responses include an `evidence` array. Items of type `#microsoft.graph.security.deviceEvidence` contain:
+The `getAlert` response includes a top-level `evidence` array. The `getIncident` response (with `$expand=alerts`) nests evidence under each alert in `alerts[].evidence`. Items of type `#microsoft.graph.security.deviceEvidence` contain:
 
 - `mdeDeviceId` — the Microsoft Defender for Endpoint machine ID
 - `deviceDnsName` — the device hostname
