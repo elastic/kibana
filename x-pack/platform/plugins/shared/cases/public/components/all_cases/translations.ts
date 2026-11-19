@@ -185,6 +185,14 @@ export const KPI_METRIC_ANALYTICS_DISABLED = i18n.translate(
   }
 );
 
+export const HIDE_KPI_METRICS = i18n.translate('xpack.cases.casesStats.hideKpiMetrics', {
+  defaultMessage: 'Hide metrics',
+});
+
+export const SHOW_KPI_METRICS = i18n.translate('xpack.cases.casesStats.showKpiMetrics', {
+  defaultMessage: 'Show metrics',
+});
+
 export const KPI_METRIC_UNKNOWN = i18n.translate('xpack.cases.casesStats.kpiMetricUnknown', {
   defaultMessage: 'This metric is not available.',
 });

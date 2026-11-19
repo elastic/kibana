@@ -95,6 +95,67 @@ describe('Cases metrics', () => {
       expect(screen.queryByTestId('cases-kpi-tiles')).not.toBeInTheDocument();
     });
 
+    describe('collapse', () => {
+      const kpiProps = {
+        ...props,
+        kpiMetrics: [customMetric('m1')],
+        kpiResults: [{ id: 'm1', type: 'value', format: 'number', value: 1 } as KpiMetricResult],
+        isAnalyticsEnabled: true,
+      };
+
+      beforeEach(() => {
+        localStorage.clear();
+      });
+
+      it('hides and shows the tiles with the control', async () => {
+        renderWithTestingProviders(<CasesMetrics {...kpiProps} />);
+
+        const toggle = await screen.findByTestId('cases-kpi-tiles-toggle');
+        expect(toggle).toHaveTextContent('Hide metrics');
+        expect(toggle).toHaveAttribute('aria-expanded', 'true');
+        expect(toggle).toHaveAttribute('aria-controls');
+
+        await userEvent.click(toggle);
+
+        expect(screen.queryByTestId('cases-kpi-tiles')).not.toBeInTheDocument();
+        expect(screen.getByTestId('cases-kpi-tiles-toggle')).toHaveTextContent('Show metrics');
+        expect(screen.getByTestId('cases-kpi-tiles-toggle')).toHaveAttribute(
+          'aria-expanded',
+          'false'
+        );
+
+        await userEvent.click(screen.getByTestId('cases-kpi-tiles-toggle'));
+
+        expect(await screen.findByTestId('cases-kpi-tiles')).toBeInTheDocument();
+      });
+
+      it('keeps the choice after a remount', async () => {
+        const { unmount } = renderWithTestingProviders(<CasesMetrics {...kpiProps} />);
+
+        await userEvent.click(await screen.findByTestId('cases-kpi-tiles-toggle'));
+        unmount();
+
+        renderWithTestingProviders(<CasesMetrics {...kpiProps} />);
+
+        expect(await screen.findByTestId('cases-kpi-tiles-toggle')).toHaveTextContent(
+          'Show metrics'
+        );
+        expect(screen.queryByTestId('cases-kpi-tiles')).not.toBeInTheDocument();
+      });
+
+      it('has no control with no saved list', () => {
+        renderWithTestingProviders(<CasesMetrics {...props} />);
+
+        expect(screen.queryByTestId('cases-kpi-tiles-toggle')).not.toBeInTheDocument();
+      });
+
+      it('has no control with an empty list', () => {
+        renderWithTestingProviders(<CasesMetrics {...props} kpiMetrics={[]} />);
+
+        expect(screen.queryByTestId('cases-kpi-tiles-toggle')).not.toBeInTheDocument();
+      });
+    });
+
     it('renders 8 tiles from the saved list', async () => {
       const kpiMetrics = Array.from({ length: 8 }, (_, index) => customMetric(`m${index}`));
       const kpiResults: KpiMetricResult[] = kpiMetrics.map(({ id }, index) => ({

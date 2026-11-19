@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiButtonEmpty,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,9 +17,10 @@ import {
   EuiPanel,
   EuiStat,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import prettyMilliseconds from 'pretty-ms';
-import { isAnalyticsPredefinedKpiMetric } from '../../../../common/constants';
+import { LOCAL_STORAGE_KEYS, isAnalyticsPredefinedKpiMetric } from '../../../../common/constants';
 import type { KpiMetricResult } from '../../../../common/types/api';
 import type {
   CustomKpiMetricConfiguration,
@@ -26,12 +28,15 @@ import type {
   KpiMetricConfiguration,
 } from '../../../../common/types/domain';
 import { CaseStatuses } from '../../../../common/types/domain';
+import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import { StatusStats } from '../../status/status_stats';
 import { statuses } from '../../status/config';
 import {
   ATTC_DESCRIPTION,
   ATTC_STAT,
   ATTC_STAT_INFO_ARIA_LABEL,
+  HIDE_KPI_METRICS,
+  SHOW_KPI_METRICS,
   KPI_METRIC_ANALYTICS_DISABLED,
   KPI_METRIC_ALERT_ACKNOWLEDGE_ASSIGNED_HINT,
   KPI_METRIC_ALERT_ACKNOWLEDGE_HINT,
@@ -223,6 +228,16 @@ const CasesMetricsComponent: React.FC<CasesMetricsProps> = (props) => {
   const { countOpenCases, countInProgressCases, countClosedCases, mttr, isLoading, kpiMetrics } =
     props;
   const { euiTheme } = useEuiTheme();
+  const tilesId = useGeneratedHtmlId({ prefix: 'casesKpiTiles' });
+  const [tilesDisplay, setTilesDisplay] = useCasesLocalStorage<'expanded' | 'collapsed'>(
+    LOCAL_STORAGE_KEYS.casesKpiTilesDisplay,
+    'expanded'
+  );
+  const isExpanded = tilesDisplay !== 'collapsed';
+  const toggleTiles = useCallback(
+    () => setTilesDisplay(isExpanded ? 'collapsed' : 'expanded'),
+    [isExpanded, setTilesDisplay]
+  );
 
   const mttrValue = useMemo(
     () => (mttr != null ? prettyMilliseconds(mttr * MTTR_MULTIPLIER, PRETTY_MS_OPTIONS) : '-'),
@@ -243,28 +258,46 @@ const CasesMetricsComponent: React.FC<CasesMetricsProps> = (props) => {
 
     return (
       <EuiPanel hasBorder paddingSize="m" grow={false} css={panelStyles}>
-        <EuiFlexGrid columns={KPI_TILES_PER_ROW} data-test-subj="cases-kpi-tiles">
-          {kpiMetrics.map((metric) => (
-            <EuiFlexItem key={metric.id}>
-              {metric.kind === 'custom' && metric.groupBy != null ? (
-                <KpiBreakdownTile
-                  {...getBreakdownTileValues(metric, props)}
-                  direction={metric.direction}
-                  dateHint={getDateHint(metric)}
-                  dataTestSubj={`cases-kpi-tile-${metric.id}`}
-                />
-              ) : (
-                <KpiMetricTile
-                  {...getKpiTileValues(metric, props)}
-                  threshold={metric.threshold}
-                  direction={metric.direction}
-                  dateHint={getDateHint(metric)}
-                  dataTestSubj={`cases-kpi-tile-${metric.id}`}
-                />
-              )}
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
+        <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+              onClick={toggleTiles}
+              aria-expanded={isExpanded}
+              aria-controls={tilesId}
+              data-test-subj="cases-kpi-tiles-toggle"
+            >
+              {isExpanded ? HIDE_KPI_METRICS : SHOW_KPI_METRICS}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <div id={tilesId}>
+          {isExpanded && (
+            <EuiFlexGrid columns={KPI_TILES_PER_ROW} data-test-subj="cases-kpi-tiles">
+              {kpiMetrics.map((metric) => (
+                <EuiFlexItem key={metric.id}>
+                  {metric.kind === 'custom' && metric.groupBy != null ? (
+                    <KpiBreakdownTile
+                      {...getBreakdownTileValues(metric, props)}
+                      direction={metric.direction}
+                      dateHint={getDateHint(metric)}
+                      dataTestSubj={`cases-kpi-tile-${metric.id}`}
+                    />
+                  ) : (
+                    <KpiMetricTile
+                      {...getKpiTileValues(metric, props)}
+                      threshold={metric.threshold}
+                      direction={metric.direction}
+                      dateHint={getDateHint(metric)}
+                      dataTestSubj={`cases-kpi-tile-${metric.id}`}
+                    />
+                  )}
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGrid>
+          )}
+        </div>
       </EuiPanel>
     );
   }
