@@ -64,7 +64,7 @@ const toQueryAnnotation = ({
 });
 
 const convertAnnotation = (annotation: QueryPointEventAnnotationConfig) => {
-  const state = convertQueryAnnotationsToEsql(
+  const conversion = convertQueryAnnotationsToEsql(
     {
       layers: [
         {
@@ -77,10 +77,13 @@ const convertAnnotation = (annotation: QueryPointEventAnnotationConfig) => {
       ],
     },
     INDEX_PATTERNS
-  ) as { layers: Array<{ annotations: EsqlEventAnnotationConfig[] }> } | undefined;
-  if (!state) {
-    throw new Error('Expected the annotation to be convertible');
+  );
+  if (!conversion.ok) {
+    throw new Error(`Expected the annotation to be convertible, got: ${conversion.reason}`);
   }
+  const state = conversion.state as {
+    layers: Array<{ annotations: EsqlEventAnnotationConfig[] }>;
+  };
   return state.layers[0].annotations[0];
 };
 

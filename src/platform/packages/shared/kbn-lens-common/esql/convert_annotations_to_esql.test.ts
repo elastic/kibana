@@ -88,32 +88,35 @@ describe('convertQueryAnnotationsToEsql', () => {
     };
 
     expect(convertQueryAnnotationsToEsql(state, indexPatterns)).toEqual({
-      legend: {},
-      layers: [
-        dataLayer,
-        annotationLayer([
-          manualAnnotation,
-          {
-            id: 'deployments',
-            type: 'esql',
-            key: { type: 'point_in_time' },
-            query: {
-              esql: 'FROM logs-* | WHERE KQL("""event.action: "deploy"""") | KEEP `event.created`, `service.version`, `service.name` | SORT `event.created` DESC | LIMIT 1000',
+      ok: true,
+      state: {
+        legend: {},
+        layers: [
+          dataLayer,
+          annotationLayer([
+            manualAnnotation,
+            {
+              id: 'deployments',
+              type: 'esql',
+              key: { type: 'point_in_time' },
+              query: {
+                esql: 'FROM logs-* | WHERE KQL("""event.action: "deploy"""") | KEEP `event.created`, `service.version`, `service.name` | SORT `event.created` DESC | LIMIT 1000',
+              },
+              timeField: 'event.created',
+              timeColumn: 'event.created',
+              textColumn: 'service.version',
+              extraColumns: ['service.name', 'service.version'],
+              label: 'Deployments',
+              color: '#E7664C',
+              icon: 'flag',
+              lineStyle: 'dashed',
+              lineWidth: 2,
+              textVisibility: true,
+              isHidden: false,
             },
-            timeField: 'event.created',
-            timeColumn: 'event.created',
-            textColumn: 'service.version',
-            extraColumns: ['service.name', 'service.version'],
-            label: 'Deployments',
-            color: '#E7664C',
-            icon: 'flag',
-            lineStyle: 'dashed',
-            lineWidth: 2,
-            textVisibility: true,
-            isHidden: false,
-          },
-        ]),
-      ],
+          ]),
+        ],
+      },
     });
   });
 
@@ -121,26 +124,42 @@ describe('convertQueryAnnotationsToEsql', () => {
     [
       'global filters apply to the layer',
       annotationLayer([queryAnnotation], { ignoreGlobalFilters: false }),
+      'global_filters_not_supported',
     ],
     [
       'its data view is not loaded',
       annotationLayer([queryAnnotation], { indexPatternId: 'missing' }),
+      'data_view_not_found',
     ],
     [
       'no time field can be resolved',
       annotationLayer([{ ...queryAnnotation, timeField: undefined }], { indexPatternId: 'noTime' }),
+      'time_field_not_found',
     ],
-  ])('rejects a layer when %s', (_, layer) => {
+  ])('rejects a layer when %s', (_, layer, reason) => {
     const patterns = {
       ...indexPatterns,
       noTime: { id: 'noTime', title: 'no-time' } as IndexPattern,
     };
-    expect(convertQueryAnnotationsToEsql({ layers: [layer] }, patterns)).toBeUndefined();
+    expect(convertQueryAnnotationsToEsql({ layers: [layer] }, patterns)).toEqual({
+      ok: false,
+      reason,
+    });
+  });
+
+  it('reports a filter in an unsupported query language as not convertible', () => {
+    const layer = annotationLayer([
+      { ...queryAnnotation, filter: { type: 'kibana_query', query: 'a = 1', language: 'sql' } },
+    ]);
+    expect(convertQueryAnnotationsToEsql({ layers: [layer] }, indexPatterns)).toEqual({
+      ok: false,
+      reason: 'filter_not_convertible',
+    });
   });
 
   it('accepts manual-only layers that apply global filters', () => {
     const state = { layers: [annotationLayer([manualAnnotation], { ignoreGlobalFilters: false })] };
-    expect(convertQueryAnnotationsToEsql(state, indexPatterns)).toEqual(state);
+    expect(convertQueryAnnotationsToEsql(state, indexPatterns)).toEqual({ ok: true, state });
   });
 });
 
@@ -175,16 +194,19 @@ describe('convertQueryAnnotationsToEsql Lucene filters on data view only fields'
     );
 
   it('does not convert when the filter references the field', () => {
-    expect(convertLuceneFilter('host:web-1')).toBeUndefined();
+    expect(convertLuceneFilter('host:web-1')).toEqual({
+      ok: false,
+      reason: 'data_view_only_field_not_supported',
+    });
   });
 
   it('also does not convert when the field name only appears inside another token', () => {
     // Known limitation: substring matching is conservative without a Lucene field extractor.
-    expect(convertLuceneFilter('hostname:web-1')).toBeUndefined();
+    expect(convertLuceneFilter('hostname:web-1').ok).toBe(false);
   });
 
   it('converts when the filter does not contain the field name', () => {
-    expect(convertLuceneFilter('service.name:web-1')).not.toBeUndefined();
+    expect(convertLuceneFilter('service.name:web-1').ok).toBe(true);
   });
 });
 
@@ -230,7 +252,11 @@ describe('annotation conversion case matrix (query assertions)', () => {
 
   for (const conversionCase of buildAnnotationConversionCases({ index: MATRIX_INDEX })) {
     it(`converts: ${conversionCase.description}`, () => {
-      const state = convertMatrixAnnotation(conversionCase.annotation) as {
+      const conversion = convertMatrixAnnotation(conversionCase.annotation);
+      if (!conversion.ok) {
+        throw new Error(`Expected a conversion, got: ${conversion.reason}`);
+      }
+      const state = conversion.state as {
         layers: Array<{ annotations: EsqlEventAnnotationConfig[] }>;
       };
       const [converted] = state.layers[0].annotations;
@@ -245,7 +271,7 @@ describe('annotation conversion case matrix (query assertions)', () => {
 
   for (const nonConvertibleCase of buildAnnotationNonConvertibleCases()) {
     it(`does not convert: ${nonConvertibleCase.description}`, () => {
-      expect(convertMatrixAnnotation(nonConvertibleCase.annotation)).toBeUndefined();
+      expect(convertMatrixAnnotation(nonConvertibleCase.annotation).ok).toBe(false);
     });
   }
 });

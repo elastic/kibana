@@ -310,13 +310,15 @@ export const useEsqlConversionCheck = (
       ? [...convertibleDataLayers, trendlineResult.layer]
       : convertibleDataLayers;
 
-    const visualizationState = convertQueryAnnotationsToEsql(
+    // The specific reason is not surfaced yet: all annotation failures share one tooltip.
+    const annotationsConversion = convertQueryAnnotationsToEsql(
       visualization.state,
       framePublicAPI.dataViews.indexPatterns
     );
-    if (visualizationState === undefined) {
+    if (!annotationsConversion.ok) {
       return getEsqlConversionDisabledSettings('query_annotations_not_supported');
     }
+    const visualizationState = annotationsConversion.state;
 
     const newAttributes = convertFormBasedToTextBasedLayer({
       layersToConvert,

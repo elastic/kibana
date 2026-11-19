@@ -29,9 +29,28 @@ interface AnnotationLayerShape {
   annotations?: EventAnnotationConfig[];
 }
 
+export type AnnotationConversionFailureReason =
+  | 'global_filters_not_supported'
+  | 'data_view_not_found'
+  | 'time_field_not_found'
+  | 'filter_not_convertible'
+  | 'data_view_only_field_not_supported';
+
+export type QueryAnnotationsConversionResult =
+  | { ok: true; state: unknown }
+  | { ok: false; reason: AnnotationConversionFailureReason };
+
+type LayerConversionResult =
+  | { ok: true; layer: unknown }
+  | { ok: false; reason: AnnotationConversionFailureReason };
+
+type AnnotationConversionResult =
+  | { ok: true; annotation: EsqlEventAnnotationConfig }
+  | { ok: false; reason: AnnotationConversionFailureReason };
+
 /**
  * Converts DSL query annotations to ES|QL annotations that query the same index pattern.
- * Returns undefined when a layer cannot be converted without changing what it shows.
+ * Fails with a reason when a layer cannot be converted without changing what it shows.
  *
  * The visualization state is probed structurally because ES|QL conversion is
  * visualization-agnostic.
@@ -39,42 +58,54 @@ interface AnnotationLayerShape {
 export const convertQueryAnnotationsToEsql = (
   visualizationState: unknown,
   indexPatterns: IndexPatternMap
-): unknown | undefined => {
+): QueryAnnotationsConversionResult => {
   const layers = (visualizationState as { layers?: unknown })?.layers;
   if (!Array.isArray(layers)) {
-    return visualizationState;
+    return { ok: true, state: visualizationState };
   }
 
   const convertedLayers: unknown[] = [];
   for (const layer of layers as AnnotationLayerShape[]) {
-    const queryAnnotations = layer?.annotations?.filter(isQueryAnnotationConfig) ?? [];
-    if (layer?.layerType !== LENS_LAYER_TYPES.ANNOTATIONS || queryAnnotations.length === 0) {
-      convertedLayers.push(layer);
+    const result = convertAnnotationLayer(layer, indexPatterns);
+    if (!result.ok) {
+      return result;
+    }
+    convertedLayers.push(result.layer);
+  }
+  return { ok: true, state: { ...(visualizationState as object), layers: convertedLayers } };
+};
+
+const convertAnnotationLayer = (
+  layer: AnnotationLayerShape,
+  indexPatterns: IndexPatternMap
+): LayerConversionResult => {
+  if (layer?.layerType !== LENS_LAYER_TYPES.ANNOTATIONS) {
+    return { ok: true, layer };
+  }
+
+  const annotations: EventAnnotationConfig[] = [];
+  let hasQueryAnnotation = false;
+  for (const annotation of layer.annotations ?? []) {
+    if (!isQueryAnnotationConfig(annotation)) {
+      annotations.push(annotation);
       continue;
     }
+    hasQueryAnnotation = true;
     // ES|QL annotations ignore global filters, so converting would change what is shown.
     if (layer.ignoreGlobalFilters === false) {
-      return undefined;
+      return { ok: false, reason: 'global_filters_not_supported' };
     }
     const indexPattern = layer.indexPatternId ? indexPatterns[layer.indexPatternId] : undefined;
     if (!indexPattern) {
-      return undefined;
+      return { ok: false, reason: 'data_view_not_found' };
     }
-    const annotations: EventAnnotationConfig[] = [];
-    for (const annotation of layer.annotations ?? []) {
-      if (!isQueryAnnotationConfig(annotation)) {
-        annotations.push(annotation);
-        continue;
-      }
-      const converted = toEsqlAnnotation(annotation, indexPattern);
-      if (!converted) {
-        return undefined;
-      }
-      annotations.push(converted);
+    const converted = toEsqlAnnotation(annotation, indexPattern);
+    if (!converted.ok) {
+      return converted;
     }
-    convertedLayers.push({ ...layer, annotations });
+    annotations.push(converted.annotation);
   }
-  return { ...(visualizationState as object), layers: convertedLayers };
+  return { ok: true, layer: hasQueryAnnotation ? { ...layer, annotations } : layer };
 };
 
 // ES|QL only sees mapped fields; data view runtime and scripted fields would be missing columns.
@@ -127,25 +158,25 @@ const filterUsesDataViewOnlyField = (
 const toEsqlAnnotation = (
   annotation: QueryPointEventAnnotationConfig,
   indexPattern: IndexPattern
-): EsqlEventAnnotationConfig | undefined => {
+): AnnotationConversionResult => {
   const timeField = annotation.timeField || indexPattern.timeFieldName;
   if (!timeField) {
-    return undefined;
+    return { ok: false, reason: 'time_field_not_found' };
   }
   // The filter is unset until a newly switched query annotation receives its first query
   const condition = convertQueryToESQLExpression(annotation.filter);
   if (annotation.filter?.query && !condition) {
-    return undefined;
+    return { ok: false, reason: 'filter_not_convertible' };
   }
   if (filterUsesDataViewOnlyField(annotation.filter, indexPattern)) {
-    return undefined;
+    return { ok: false, reason: 'data_view_only_field_not_supported' };
   }
   const textField = annotation.textVisibility ? annotation.textField : undefined;
   const keptFields = [
     ...new Set([timeField, ...(textField ? [textField] : []), ...(annotation.extraFields ?? [])]),
   ];
   if (keptFields.some((fieldName) => isDataViewOnlyField(indexPattern, fieldName))) {
-    return undefined;
+    return { ok: false, reason: 'data_view_only_field_not_supported' };
   }
   const query = [
     // Same source escaping as the data-layer conversion in generate_esql_query.ts
@@ -170,20 +201,23 @@ const toEsqlAnnotation = (
     extraFields,
   } = annotation;
   return {
-    id,
-    key,
-    label,
-    color,
-    isHidden,
-    icon,
-    lineStyle,
-    lineWidth,
-    textVisibility,
-    type: 'esql',
-    query: { esql: query },
-    timeField,
-    timeColumn: timeField,
-    ...(textField ? { textColumn: textField } : {}),
-    ...(extraFields?.length ? { extraColumns: extraFields } : {}),
+    ok: true,
+    annotation: {
+      id,
+      key,
+      label,
+      color,
+      isHidden,
+      icon,
+      lineStyle,
+      lineWidth,
+      textVisibility,
+      type: 'esql',
+      query: { esql: query },
+      timeField,
+      timeColumn: timeField,
+      ...(textField ? { textColumn: textField } : {}),
+      ...(extraFields?.length ? { extraColumns: extraFields } : {}),
+    },
   };
 };
