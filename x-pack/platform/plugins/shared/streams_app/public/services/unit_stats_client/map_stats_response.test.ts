@@ -9,7 +9,7 @@ import type { StreamsUnit } from '@kbn/streams-schema';
 import { streamsUnitStatsResponseSchema } from '@kbn/streams-schema';
 import { STATS_FIXTURE_RESPONSES } from './fixture_unit_stats_client';
 import type { StatsFixtureScenario } from './fixture_unit_stats_client';
-import { mapStatsResponse } from './map_stats_response';
+import { EMPTY_DESTINATION_FAILED, mapStatsResponse } from './map_stats_response';
 
 const destination = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'destination', id });
 const processor = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'processor', id });
@@ -43,7 +43,7 @@ describe('mapStatsResponse', () => {
       stats: {
         eventsRate: 3700,
         eventsTotal: 3330000,
-        failedRate: 0,
+        failed: { total: { rate: 0, unit: '{item}', percentage: null } },
         latencyAverage: 0.012,
         series: { bucketMs: 300000 },
       },
@@ -118,7 +118,12 @@ describe('mapStatsResponse', () => {
 
     expect(result.destinations['es-prod']).toMatchObject({
       status: 'noData',
-      stats: { eventsRate: null, eventsTotal: null, failedRate: null, latencyAverage: null },
+      stats: {
+        eventsRate: null,
+        eventsTotal: null,
+        failed: EMPTY_DESTINATION_FAILED,
+        latencyAverage: null,
+      },
     });
     expect(result.destinations['es-dev'].status).toBe('noData');
     expect(result.processors['uppercase-message']).toEqual({
@@ -136,6 +141,135 @@ describe('mapStatsResponse', () => {
       error: STATS_FIXTURE_RESPONSES.partial.components.destinations['es-dev'].error,
     });
     expect(result.processors['uppercase-message'].status).toBe('ready');
+  });
+
+  describe('failure stats of a destination', () => {
+    it('maps the total and both classes with their units, and the percentage as a number', () => {
+      const { stats } = map('authFailures', [destination('es-dev')]).destinations['es-dev'];
+
+      expect(stats.failed.total).toEqual({ rate: 2.4, unit: '{item}', percentage: 57.1 });
+      expect(stats.failed.authentication).toEqual({
+        rate: 0.5,
+        unit: '{item}',
+        percentage: 11.9,
+        breakdown: [],
+      });
+      expect(stats.failed.authorization).toEqual({
+        rate: 1.9,
+        unit: '{item}',
+        percentage: 45.2,
+        breakdown: [
+          {
+            collection: 'logs-generic.otel-default',
+            reason: 'security_exception',
+            rate: 1.1,
+            unit: '{item}',
+            percentage: 26.2,
+          },
+          {
+            collection: 'logs-nginx.access-default',
+            reason: 'security_exception',
+            rate: 0.5,
+            unit: '{item}',
+            percentage: 11.9,
+          },
+          {
+            collection: 'metrics-system.cpu-default',
+            reason: 'security_exception',
+            rate: 0.3,
+            unit: '{item}',
+            percentage: 7.1,
+          },
+        ],
+      });
+    });
+
+    it('keeps the unit of an S3 destination in requests, and a null collection', () => {
+      const { stats } = map('s3Failures', [destination('s3-test')]).destinations['s3-test'];
+
+      // The incoming rate stays in items. Only the failures are upload attempts.
+      expect(stats.eventsRate).toBe(0.28);
+      expect(stats.failed.total).toEqual({ rate: 0.44, unit: '{request}', percentage: 100 });
+      expect(stats.failed.authentication.breakdown).toEqual([
+        {
+          collection: null,
+          reason: 'SignatureDoesNotMatch',
+          rate: 0.44,
+          unit: '{request}',
+          percentage: 100,
+        },
+      ]);
+      expect(stats.failed.authorization).toEqual({
+        rate: 0,
+        unit: '{request}',
+        percentage: 0,
+        breakdown: [],
+      });
+    });
+
+    it('maps the delivery series with its unit and the window of the response, which it does not repeat', () => {
+      const { stats } = map('authFailures', [destination('es-dev')]).destinations['es-dev'];
+      const { window } = STATS_FIXTURE_RESPONSES.authFailures.meta;
+
+      expect(stats.failed.series).toEqual({
+        bucketMs: 30_000,
+        unit: '{item}',
+        window,
+        points: expect.any(Array),
+      });
+      const [first, ...rest] = stats.failed.series?.points ?? [];
+      expect(first).toEqual({
+        start: window.start,
+        total: 40,
+        failed: 0,
+        authentication: 0,
+        authorization: 0,
+      });
+      expect(rest.at(-1)).toEqual(
+        expect.objectContaining({ total: 40, authentication: 5, authorization: 18 })
+      );
+    });
+
+    it('keeps the unit of an S3 series in requests', () => {
+      const { stats } = map('s3Failures', [destination('s3-test')]).destinations['s3-test'];
+
+      expect(stats.failed.series?.unit).toBe('{request}');
+    });
+
+    it('has no series for a destination that the response sends none for', () => {
+      const { stats } = map('authFailures', [destination('es-prod')]).destinations['es-prod'];
+
+      expect(stats.failed.series).toBeUndefined();
+    });
+
+    it('keeps a rate and a percentage of 0 as values, and a null as no data', () => {
+      const { failed } = map('s3Failures', [destination('s3-test')]).destinations['s3-test'].stats;
+      const { failed: none } = map('noData', [destination('es-prod')]).destinations['es-prod']
+        .stats;
+
+      expect(failed.authorization.rate).toBe(0);
+      expect(failed.authorization.percentage).toBe(0);
+      expect(none.authentication.rate).toBeNull();
+      expect(none.authentication.percentage).toBeNull();
+    });
+
+    it('is ready with the failures and no error, so a refused destination is not an error', () => {
+      const result = map('authFailures', [destination('es-dev')]).destinations['es-dev'];
+
+      expect(result.status).toBe('ready');
+      expect(result.error).toBeUndefined();
+    });
+
+    it('keeps real values next to an error, with no failure rates', () => {
+      const result = map('partialFailure', [destination('es-dev')]).destinations['es-dev'];
+
+      expect(result).toMatchObject({
+        status: 'ready',
+        error: { code: 'error' },
+        stats: { eventsRate: 4.2, failed: { total: { rate: 2.4 } } },
+      });
+      expect(result.stats.failed.authentication).toEqual(EMPTY_DESTINATION_FAILED.authentication);
+    });
   });
 
   describe('a component with an error and values', () => {
@@ -222,7 +356,12 @@ describe('mapStatsResponse', () => {
 
     expect(result.destinations['es-missing']).toMatchObject({
       status: 'noData',
-      stats: { eventsRate: null, eventsTotal: null, failedRate: null, latencyAverage: null },
+      stats: {
+        eventsRate: null,
+        eventsTotal: null,
+        failed: EMPTY_DESTINATION_FAILED,
+        latencyAverage: null,
+      },
     });
     expect(result.processors['missing-processor']).toEqual({
       status: 'noData',

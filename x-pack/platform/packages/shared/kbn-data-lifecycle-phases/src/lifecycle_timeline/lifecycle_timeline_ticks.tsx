@@ -17,7 +17,7 @@ import type {
 export interface LifecycleTimelineTicksProps {
   ticks: LifecycleTimelineTick[];
   grid: LifecycleTimelineGrid;
-  /** Shown at the end of the last tick's column. */
+  /** Shown at the end of the last tick's column. Leave it out for no label and no line at the end. */
   endLabel?: LifecycleTimelineEndLabel;
   testSubjPrefix?: string;
 }
@@ -37,7 +37,13 @@ export const LifecycleTimelineTicks = ({
     <div css={styles.ticks} aria-hidden={true}>
       {ticks.map(({ id, label, gridColumn, isInvalid, 'data-test-subj': tickTestSubj }, index) => (
         <div key={id} css={{ gridColumn }}>
-          <div css={[styles.tickLine, index === 0 && styles.firstTickLine]} />
+          <div
+            css={[
+              styles.tickLine,
+              index === 0 && styles.firstTickLine,
+              index === lastIndex && endLabel === undefined && styles.openEndTickLine,
+            ]}
+          />
           <EuiFlexGroup
             justifyContent="spaceBetween"
             gutterSize="none"

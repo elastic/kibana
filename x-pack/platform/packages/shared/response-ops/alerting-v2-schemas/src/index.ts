@@ -14,6 +14,7 @@ export {
   durationSchema,
   entityIdSchema,
   ENTITY_ID_NOTE,
+  ACTION_POLICY_ID_NOTE,
   groupHashSchema,
   seriesIdSchema,
   tagsResponseSchema,

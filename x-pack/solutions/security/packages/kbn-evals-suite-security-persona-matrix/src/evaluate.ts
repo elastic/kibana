@@ -32,7 +32,19 @@ export const evaluate = base.extend<
     { scope: 'worker' },
   ],
   evaluateDataset: [
-    ({ chatClient, evaluators, executorClient, traceEsClient, log, fetch }, use) => {
+    (
+      {
+        chatClient,
+        evaluators,
+        executorClient,
+        traceEsClient,
+        log,
+        fetch,
+        inferenceClient,
+        evaluationConnector,
+      },
+      use
+    ) => {
       use(
         createEvaluatePersonaMatrixDataset({
           chatClient,
@@ -41,6 +53,9 @@ export const evaluate = base.extend<
           traceEsClient,
           log,
           fetch,
+          evaluationInferenceClient: inferenceClient.bindTo({
+            connectorId: evaluationConnector.id,
+          }),
         })
       );
     },
