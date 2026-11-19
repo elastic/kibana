@@ -64,8 +64,8 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
   renderEscalationModal?: (props: EscalationModalRenderProps) => React.ReactNode;
   /**
    * Loads the provider and hooks the caller adds to the details flyout, such as the privilege
-   * check for "Open an escalation". Called with the flyout's own module, the first time a flyout
-   * opens.
+   * check for "Open an escalation". Loaded together with the flyout's own module, the first time
+   * a flyout opens.
    */
   loadDetailsFlyoutContext?: () => Promise<InvestigationDetailsFlyoutContext>;
   /**
@@ -236,8 +236,8 @@ export interface RegisterEscalationTemplateUIOptions {
   renderLinkedInvestigations?: RenderLinkedInvestigations;
   /**
    * Loads the provider and hooks the caller adds to the details flyout, such as the attachment
-   * sync the header shows a spinner for. Called with the flyout's own module, the first time a
-   * flyout opens.
+   * sync the header shows a spinner for. Loaded together with the flyout's own module, the first
+   * time a flyout opens.
    */
   loadDetailsFlyoutContext?: () => Promise<EscalationDetailsFlyoutContext>;
   /**
