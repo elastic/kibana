@@ -15,10 +15,12 @@ import {
   SIEM_MIGRATIONS_DASHBOARDS_PATH,
   SIEM_MIGRATIONS_LANDING_PATH,
   SIEM_MIGRATIONS_RULES_PATH,
+  SIEM_MIGRATIONS_WORKFLOWS_PATH,
   SecurityPageName,
 } from '../../common/constants';
 import { MigrationDashboardsPage } from './dashboards/pages';
 import { MigrationRulesPage } from './rules/pages';
+import { MigrationWorkflowsPage } from './workflows/pages';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { MigrationsLandingPage } from './landing';
@@ -78,11 +80,27 @@ const SiemMigrationsDashboardsRoutes = () => {
   );
 };
 
+const SiemMigrationsWorkflowsRoutes = () => {
+  return (
+    <PluginTemplateWrapper>
+      <SecurityRoutePageWrapper pageName={SecurityPageName.siemMigrationsWorkflows}>
+        <Routes>
+          <Route
+            path={`${SIEM_MIGRATIONS_WORKFLOWS_PATH}/:migrationId?`}
+            component={MigrationWorkflowsPage}
+          />
+        </Routes>
+      </SecurityRoutePageWrapper>
+    </PluginTemplateWrapper>
+  );
+};
+
 export const getSiemMigrationsRoutes = (
   experimentalFeatures: ExperimentalFeatures
 ): SecuritySubPluginRoutes => {
   const isSiemMigrationsEnabled = !experimentalFeatures.siemMigrationsDisabled;
   const isAutomaticDashboardsMigrationEnabled = experimentalFeatures.automaticDashboardsMigration;
+  const isTinesWorkflowsMigrationEnabled = experimentalFeatures.tinesWorkflowsMigration;
   return [
     ...(isSiemMigrationsEnabled
       ? [
@@ -105,6 +123,14 @@ export const getSiemMigrationsRoutes = (
           {
             path: SIEM_MIGRATIONS_DASHBOARDS_PATH,
             component: SiemMigrationsDashboardsRoutes,
+          },
+        ]
+      : []),
+    ...(isSiemMigrationsEnabled && isTinesWorkflowsMigrationEnabled
+      ? [
+          {
+            path: SIEM_MIGRATIONS_WORKFLOWS_PATH,
+            component: SiemMigrationsWorkflowsRoutes,
           },
         ]
       : []),
