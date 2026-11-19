@@ -13,6 +13,8 @@ export type HealthProfileName = 'healthy' | 'slow' | 'erroring' | 'critical';
 export interface Distribution {
   median: number;
   sigma: number;
+  /** Caps the samples, e.g. so that a session has a known maximum duration. */
+  max?: number;
 }
 
 const gaussian = (random: () => number) => {
@@ -21,6 +23,6 @@ const gaussian = (random: () => number) => {
 };
 
 export const sample = (
-  { median, sigma }: Distribution,
+  { median, sigma, max = Infinity }: Distribution,
   random: () => number = Math.random
-): number => median * Math.exp(sigma * gaussian(random));
+): number => Math.min(median * Math.exp(sigma * gaussian(random)), max);

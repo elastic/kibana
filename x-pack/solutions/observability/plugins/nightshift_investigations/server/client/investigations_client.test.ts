@@ -2067,7 +2067,6 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     ExecutionStatus.QUEUED,
     ExecutionStatus.WAITING,
     ExecutionStatus.COMPLETED,
-    ExecutionStatus.CANCELLED,
   ])('rejects %s as an unsuccessful terminal run', async (status) => {
     withExecution({ status });
     await expect(makeClient().getUnsuccessfulRun('exec-1')).rejects.toThrow(
@@ -2075,7 +2074,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     );
   });
 
-  it.each([ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT])(
+  it.each([ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT, ExecutionStatus.CANCELLED])(
     'validates the original execution and binding for %s',
     async (status) => {
       withExecution({ status });
@@ -2391,7 +2390,19 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
   });
 
-  it.each([ExecutionStatus.COMPLETED, ExecutionStatus.CANCELLED, ExecutionStatus.TIMED_OUT])(
+  it('records a cancelled run as a failure', async () => {
+    withExecution({ status: ExecutionStatus.CANCELLED });
+    await expect(
+      makeClient().ensureForFailure('inv-1', 'exec-1', 'Investigation was stopped')
+    ).resolves.toBe('inv-1');
+    expect(conversations.addEvents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        events: [expect.objectContaining({ type: 'investigation_run_failed' })],
+      })
+    );
+  });
+
+  it.each([ExecutionStatus.COMPLETED, ExecutionStatus.TIMED_OUT])(
     'recovers timed-out runs while rejecting other terminal outcomes (%s)',
     async (status) => {
       withExecution({ status });

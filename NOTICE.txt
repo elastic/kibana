@@ -158,6 +158,16 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
+The ORCA grader port in @kbn/evals-suite-nightshift-investigations (`orca/check_prediction.ts`)
+is adapted from the ORCA benchmark's verifier `check_prediction.py`
+(https://github.com/ORCA-bench/ORCA-bench), from "ORCA: How Ready Are Language Model Agents for
+Oncall?" by Albert Gong, Kyuseong Choi, Abhineet Agarwal, Jason Schechner, Ryan Huang, Raj
+Agrawal, Anish Agarwal and Raaz Dwivedi (arXiv:2607.28545).
+Copyright 2026 Traversal, Inc.
+Licensed under the Apache License, Version 2.0, https://www.apache.org/licenses/LICENSE-2.0
+Changes: ported from Python to TypeScript with its prompts, schemas and scoring unchanged.
+
+---
 This code includes a copy of the `normalize-path`
 https://github.com/jonschlinkert/normalize-path/blob/52c3a95ebebc2d98c1ad7606cbafa7e658656899/index.js
 
