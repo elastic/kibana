@@ -1483,7 +1483,7 @@ describe('crawlSite', () => {
       await waitUntil(() => getPageRequests().length === BULK_SIZE + 10);
       await letCrawlRun();
       let isDone = false;
-      crawling.then(() => {
+      void crawling.then(() => {
         isDone = true;
       });
       await letCrawlRun();

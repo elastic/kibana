@@ -922,7 +922,7 @@ describe('registerWebCrawlTask', () => {
         storage.update.mockReturnValueOnce(slowWrite.promise);
         const { outcome } = await startRun();
         let isSettled = false;
-        outcome.then(() => {
+        void outcome.then(() => {
           isSettled = true;
         });
 

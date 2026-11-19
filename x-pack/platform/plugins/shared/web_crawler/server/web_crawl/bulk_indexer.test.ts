@@ -223,7 +223,7 @@ describe('createBulkIndexer', () => {
     });
 
     it(`never runs more than ${MAX_CONCURRENT_BULKS} requests side by side`, async () => {
-      addAll(toDocuments(1 + BULK_SIZE * (MAX_CONCURRENT_BULKS + 1)));
+      void addAll(toDocuments(1 + BULK_SIZE * (MAX_CONCURRENT_BULKS + 1)));
       await flushPromises();
 
       expect(esClient.bulk).toHaveBeenCalledTimes(MAX_CONCURRENT_BULKS);
@@ -242,7 +242,7 @@ describe('createBulkIndexer', () => {
 
     it(`never puts more than ${BULK_SIZE} documents in one request, and sends each document once`, async () => {
       const documents = toDocuments(1 + BULK_SIZE * 2 + 7);
-      addAll(documents);
+      void addAll(documents);
       answerBulks();
       pendingBulks.forEach(({ succeed }) => succeed());
 
@@ -529,7 +529,7 @@ describe('createBulkIndexer', () => {
     });
 
     it(`sends a large backlog ${MAX_CONCURRENT_BULKS} requests at a time`, async () => {
-      addAll(toDocuments(1 + BULK_SIZE * 2 + MAX_BUFFERED_DOCUMENTS + 5));
+      void addAll(toDocuments(1 + BULK_SIZE * 2 + MAX_BUFFERED_DOCUMENTS + 5));
       await flushPromises();
       expect(esClient.bulk).toHaveBeenCalledTimes(MAX_CONCURRENT_BULKS);
 
