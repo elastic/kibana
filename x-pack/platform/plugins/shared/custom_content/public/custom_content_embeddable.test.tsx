@@ -46,6 +46,7 @@ let capturedComponentProps:
   | undefined;
 
 const mockExecuteTriggerActions = jest.fn();
+const mockAddError = jest.fn();
 
 jest.mock('@kbn/custom-content-renderer', () => ({
   CustomContentComponent: (props: {
@@ -139,7 +140,7 @@ jest.mock('@kbn/esql-utils', () => ({
 jest.mock('./services', () => ({
   getServices: () => ({
     agentBuilder: mockAgentBuilder,
-    core: { http: {} },
+    core: { http: {}, notifications: { toasts: { addError: mockAddError } } },
     search: jest.fn(),
     uiActions: { executeTriggerActions: mockExecuteTriggerActions },
     filterManager: { getAppFilters: () => [] },
@@ -538,6 +539,27 @@ describe('customContentEmbeddableFactory', () => {
         ],
         embeddable: expect.objectContaining({ uuid: 'test-uuid' }),
       });
+    });
+
+    it('tells the user when applying the filter fails, instead of rejecting unhandled', async () => {
+      mockExecuteTriggerActions.mockRejectedValueOnce(new Error('trigger failed'));
+      const { embeddable } = await buildEmbeddable(baseState);
+      await waitFor(() => expect(embeddable.api.dataSources$.getValue()).toBeDefined());
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () =>
+        capturedComponentProps?.onInteraction?.({
+          action: 'filter',
+          field: 'host.name',
+          value: 'a',
+          negate: false,
+        })
+      );
+
+      expect(mockAddError).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'trigger failed' }),
+        { title: 'Could not apply the filter' }
+      );
     });
 
     it('applies nothing for a field none of the panel data sources has', async () => {

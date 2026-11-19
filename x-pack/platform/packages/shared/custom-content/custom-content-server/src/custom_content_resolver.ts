@@ -135,7 +135,7 @@ function formatSampleTable(columns: Array<{ name: string }>, rows: unknown[][]):
 }
 
 const INTERACTION_GUIDANCE = `CLICK TO FILTER — add this ONLY when the request asks for it (for example "click a host to filter the dashboard"). Never add it on your own.
-An element can filter the whole dashboard when it is clicked. Declare it with data attributes on a <button> (or a <div> or <span>), never on an <a>, which loses them:
+An element can filter the whole dashboard when it is clicked. Declare it with data attributes on a <button>, never on a <div>, a <span> or an <a>: only a button can be used with the keyboard, and an <a> loses the attributes:
   <button data-cc-action="filter" data-cc-field="host" data-cc-value="{{ row["host"].value }}">{{ row["host"].value }}</button>
 - data-cc-action is always "filter".
 - data-cc-field is the exact name of a column that a query returns UNCHANGED from a field of the index: a plain field in the BY clause (\`BY host\`) or read as it is. Never a column that is renamed (\`BY h = host\`, RENAME), computed (EVAL) or aggregated (COUNT, SUM, AVG, ...): those are not fields of the index, so the click would do nothing. When no column fits what the user wants to filter on, do not add a filter element.

@@ -81,4 +81,9 @@ export class CustomContentPanelPage {
   getPanelIframe() {
     return this.panel.frameLocator('iframe');
   }
+
+  /** Clicks a button of the panel's content, found by its accessible name. */
+  async clickPanelButton(name: string) {
+    await this.getPanelIframe().getByRole('button', { name, exact: true }).click();
+  }
 }

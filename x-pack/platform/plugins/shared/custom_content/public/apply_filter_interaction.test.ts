@@ -6,6 +6,7 @@
  */
 
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
+import { fillTemplateDatasets } from '@kbn/custom-content-renderer';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { Filter } from '@kbn/es-query';
@@ -76,12 +77,53 @@ describe('buildInteractionFilters', () => {
     expect(build(interaction('bytes', 'ten'), [logs])).toEqual([]);
   });
 
-  it.each([' ', '0x10', '1e3', '-', '1.', 'Infinity'])(
+  it.each([' ', '0x10', '-', '1.', 'Infinity', '1e', 'e5', '1e999'])(
     'does not coerce %p into a number for a number field',
     (value) => {
       expect(build(interaction('bytes', value), [logs])).toEqual([]);
     }
   );
+
+  it.each([
+    ['1e-7', 1e-7],
+    ['1e+21', 1e21],
+    ['-1.2e-7', -1.2e-7],
+    ['12.5', 12.5],
+  ])('accepts the number %s as Liquid prints it', (value, expected) => {
+    expect(build(interaction('bytes', value), [logs])[0].query).toEqual({
+      match_phrase: { bytes: expected },
+    });
+  });
+
+  it('filters on a number that a template renders as scientific notation', async () => {
+    // The path of a click: a cell goes through Liquid into the attribute, and the host reads it back.
+    const html = await fillTemplateDatasets(
+      '<button data-cc-value="{{ rows[0].bytes.value }}"></button>',
+      [{ columns: [{ name: 'bytes', type: 'double' }], rows: [[0.0000001]] }]
+    );
+    const rendered = new DOMParser()
+      .parseFromString(html, 'text/html')
+      .querySelector('button')
+      ?.getAttribute('data-cc-value');
+    expect(rendered).toBe('1e-7');
+    expect(build(interaction('bytes', rendered!), [logs])[0].query).toEqual({
+      match_phrase: { bytes: 1e-7 },
+    });
+  });
+
+  it('uses the first source that can take the value when several have the field', () => {
+    const numericStatus = createSource('numbers', [
+      { name: 'status', type: 'number', filterable: true },
+    ]);
+    const keywordStatus = createSource('keywords', [
+      { name: 'status', type: 'string', filterable: true },
+    ]);
+    const [filter] = build(interaction('status', 'ok'), [numericStatus, keywordStatus]);
+    expect(filter.meta.index).toBe('keywords');
+    expect(build(interaction('status', '5'), [numericStatus, keywordStatus])[0].meta.index).toBe(
+      'numbers'
+    );
+  });
 
   it.each(['message', 'scripted', 'missing'])('refuses %s', (field) => {
     expect(build(interaction(field, 'a'), [logs])).toEqual([]);

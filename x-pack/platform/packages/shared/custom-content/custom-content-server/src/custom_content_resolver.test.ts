@@ -96,6 +96,9 @@ describe('createCustomContentTemplateResolver — system prompt selection', () =
     expect(withData).toContain('data-cc-action="filter"');
     expect(withData).toContain('ONLY when the request asks for it');
     expect(withData).toContain('UNCHANGED from a field of the index');
+    // A <div> or <span> cannot take the keyboard, so only a button is offered.
+    expect(withData).toContain('on a <button>, never on a <div>, a <span> or an <a>');
+    expect(withData).not.toContain('(or a <div> or <span>)');
     expect(withoutData).not.toContain('CLICK TO FILTER');
   });
 

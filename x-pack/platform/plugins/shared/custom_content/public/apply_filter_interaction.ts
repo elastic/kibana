@@ -12,7 +12,8 @@ import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { FilterInteraction } from '@kbn/custom-content-renderer';
 import type { InteractionHost } from './interaction_host';
 
-const PLAIN_NUMBER = /^-?\d+(\.\d+)?$/;
+// What a number looks like once Liquid has printed it: `1e-7` and `1e+21` as well as `12.5`.
+const PLAIN_NUMBER = /^-?\d+(\.\d+)?([eE][+-]?\d+)?$/;
 
 /**
  * Builds the filters a template asked for, the way Discover does: `generateFilters` from the data
@@ -34,16 +35,27 @@ export const buildInteractionFilters = (
   // `DataViewBase` a source is, so the same code serves both.
   const isFilterableField = ({ name, filterable, scripted }: FilterableSource['fields'][number]) =>
     name === field && filterable === true && !scripted;
-  const source = dataSources.find(({ fields }) => fields.some(isFilterableField));
-  const sourceField = source?.fields.find(isFilterableField);
-  if (!source || !sourceField) return [];
 
-  // `Number()` alone would turn " " into 0 and "0x10" or "1e3" into other numbers.
-  if (sourceField.type === 'number' && !PLAIN_NUMBER.test(value)) return [];
-  const filterValue = sourceField.type === 'number' ? Number(value) : value;
-  if (typeof filterValue === 'number' && !Number.isFinite(filterValue)) return [];
+  // The click does not say which query it came from, so every source with the field is tried, in
+  // order, and the first that can take the value wins: `status` can be a number in one query and a
+  // keyword in another.
+  for (const source of dataSources) {
+    const sourceField = source.fields.find(isFilterableField);
+    const filterValue = sourceField && toFieldValue(sourceField.type, value);
+    if (sourceField && filterValue !== undefined) {
+      return generateFilters(filterManager, sourceField, filterValue, negate ? '-' : '+', source);
+    }
+  }
+  return [];
+};
 
-  return generateFilters(filterManager, sourceField, filterValue, negate ? '-' : '+', source);
+/** The value as the field holds it: text stays text, a number is parsed, and a bad number is none. */
+const toFieldValue = (type: string | undefined, value: string): string | number | undefined => {
+  if (type !== 'number') return value;
+  // `Number()` alone would turn " " into 0 and "0x10" into 16.
+  if (!PLAIN_NUMBER.test(value)) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
 };
 
 /** Applies the filters through the platform trigger, so the dashboard decides what happens to them. */
