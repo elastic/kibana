@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TransportResult, estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { resolveIndexPatterns } from './resolve_index_patterns';
 
@@ -17,9 +17,7 @@ describe('resolveIndexPatterns', () => {
   } as unknown as estypes.FieldCapsResponse['fields'];
 
   const mockFieldCaps = (indices: string | string[]) => {
-    esClient.fieldCaps.mockResolvedValue({
-      body: { indices, fields },
-    } as unknown as TransportResult<estypes.FieldCapsResponse>);
+    esClient.fieldCaps.mockResponse({ indices, fields } as unknown as estypes.FieldCapsResponse);
   };
 
   const resolve = (indexPatterns: string[], runtimeMappings?: estypes.MappingRuntimeFields) =>
@@ -80,9 +78,10 @@ describe('resolveIndexPatterns', () => {
   });
 
   it('returns no matched indices when nothing matches', async () => {
-    esClient.fieldCaps.mockResolvedValue({
-      body: { indices: [], fields: {} },
-    } as unknown as TransportResult<estypes.FieldCapsResponse>);
+    esClient.fieldCaps.mockResponse({
+      indices: [],
+      fields: {},
+    } as unknown as estypes.FieldCapsResponse);
 
     const result = await resolve(['missing-*']);
 
