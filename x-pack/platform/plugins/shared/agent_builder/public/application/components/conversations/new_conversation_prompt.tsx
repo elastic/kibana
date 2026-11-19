@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { css, keyframes } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ConversationInput } from './conversation_input/conversation_input';
-import { ConversationStarters } from './conversation_starters';
+import { ConversationStartersList, useConversationStarters } from './conversation_starters';
 import {
   conversationElementPaddingStyles,
   conversationElementWidthStyles,
@@ -176,6 +176,8 @@ export const NewConversationPrompt: React.FC<{}> = () => {
   const [sizerEl, setSizerEl] = useState<HTMLSpanElement | null>(null);
   const fitsOnOneLine = useNowrapFitsContainer(headingEl, sizerEl);
   const wrapAndCenter = !fitsOnOneLine;
+  const { starters, onSelect, isDisabled } = useConversationStarters();
+  const hasStarters = starters.length > 0;
 
   const greeting = greetingMessage ?? (
     <>
@@ -215,16 +217,31 @@ export const NewConversationPrompt: React.FC<{}> = () => {
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}
-        css={[conversationElementWidthStyles, conversationElementPaddingStyles, inputPaddingStyles]}
+        css={[
+          conversationElementWidthStyles,
+          conversationElementPaddingStyles,
+          !hasStarters && inputPaddingStyles,
+        ]}
       >
         <ConversationInput />
       </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        css={[conversationElementWidthStyles, conversationElementPaddingStyles, inputPaddingStyles]}
-      >
-        <ConversationStarters />
-      </EuiFlexItem>
+      {hasStarters && (
+        <EuiFlexItem
+          grow={false}
+          css={[
+            conversationElementWidthStyles,
+            conversationElementPaddingStyles,
+            inputPaddingStyles,
+          ]}
+        >
+          <ConversationStartersList
+            starters={starters}
+            onSelect={onSelect}
+            isDisabled={isDisabled}
+            isStacked={isEmbeddedContext}
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

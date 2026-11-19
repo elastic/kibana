@@ -184,6 +184,29 @@ describe('Agent Routes - experimental access-control gate', () => {
       expect(mockCreate).toHaveBeenCalledWith(createBody);
       expect(result).toMatchObject({ type: 'ok', body: mockProfile });
     });
+
+    it('passes conversation_starters to service.create and returns them', async () => {
+      const handler = getCreateHandler();
+      expect(handler).toBeDefined();
+
+      const conversationStarters = ['first', 'second'];
+      mockCreate.mockResolvedValue({ ...mockProfile, conversation_starters: conversationStarters });
+
+      const result = await handler!(
+        createMockContext(false),
+        { body: { ...createBody, conversation_starters: conversationStarters } },
+        mockResponse
+      );
+
+      expect(mockCreate).toHaveBeenCalledWith({
+        ...createBody,
+        conversation_starters: conversationStarters,
+      });
+      expect(result).toMatchObject({
+        type: 'ok',
+        body: { conversation_starters: conversationStarters },
+      });
+    });
   });
 
   describe('PUT /agents/{id} (update)', () => {
@@ -220,6 +243,34 @@ describe('Agent Routes - experimental access-control gate', () => {
 
       expect(mockUpdate).toHaveBeenCalledWith('agent-1', { name: 'Updated Name' });
       expect(result).toMatchObject({ type: 'ok', body: mockProfile });
+    });
+
+    it('passes conversation_starters to service.update', async () => {
+      const handler = getUpdateHandler();
+      expect(handler).toBeDefined();
+
+      await handler!(
+        createMockContext(false),
+        { params: { id: 'agent-1' }, body: { conversation_starters: ['first', 'second'] } },
+        mockResponse
+      );
+
+      expect(mockUpdate).toHaveBeenCalledWith('agent-1', {
+        conversation_starters: ['first', 'second'],
+      });
+    });
+
+    it('passes an empty conversation_starters list to service.update to remove all starters', async () => {
+      const handler = getUpdateHandler();
+      expect(handler).toBeDefined();
+
+      await handler!(
+        createMockContext(false),
+        { params: { id: 'agent-1' }, body: { conversation_starters: [] } },
+        mockResponse
+      );
+
+      expect(mockUpdate).toHaveBeenCalledWith('agent-1', { conversation_starters: [] });
     });
   });
 });

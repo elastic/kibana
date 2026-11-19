@@ -25,8 +25,15 @@ jest.mock('./conversation_input/conversation_input', () => ({
   ConversationInput: () => <div data-test-subj="mockConversationInput" />,
 }));
 
+const mockUseConversationStarters = jest.fn();
+const mockStartersListProps = jest.fn();
+
 jest.mock('./conversation_starters', () => ({
-  ConversationStarters: () => <div data-test-subj="mockConversationStarters" />,
+  useConversationStarters: () => mockUseConversationStarters(),
+  ConversationStartersList: (props: unknown) => {
+    mockStartersListProps(props);
+    return <div data-test-subj="mockConversationStarters" />;
+  },
 }));
 
 jest.mock('./use_typewriter_loop', () => ({
@@ -64,6 +71,11 @@ describe('NewConversationPrompt', () => {
       },
     } as never);
     mockedUseNowrapFitsContainer.mockReturnValue(true);
+    mockUseConversationStarters.mockReturnValue({
+      starters: ['first'],
+      onSelect: jest.fn(),
+      isDisabled: false,
+    });
   });
 
   it('renders the static greeting and typed capability slot', async () => {
@@ -82,6 +94,37 @@ describe('NewConversationPrompt', () => {
     render(<NewConversationPrompt />, { wrapper });
 
     expect(await screen.findByTestId('mockConversationStarters')).toBeInTheDocument();
+  });
+
+  it('shows the starters in a row on the full screen and stacked in the flyout', async () => {
+    render(<NewConversationPrompt />, { wrapper });
+    await screen.findByTestId('mockConversationStarters');
+    expect(mockStartersListProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isStacked: false })
+    );
+
+    mockedUseConversationContext.mockReturnValue({
+      isEmbeddedContext: true,
+      conversationActions: {} as never,
+    });
+    render(<NewConversationPrompt />, { wrapper });
+
+    expect(mockStartersListProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isStacked: true })
+    );
+  });
+
+  it('renders no conversation starters when there are none', async () => {
+    mockUseConversationStarters.mockReturnValue({
+      starters: [],
+      onSelect: jest.fn(),
+      isDisabled: false,
+    });
+
+    render(<NewConversationPrompt />, { wrapper });
+
+    expect(await screen.findByTestId('mockConversationInput')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockConversationStarters')).not.toBeInTheDocument();
   });
 
   it('renders Observability capability messages for oblt spaces', async () => {
