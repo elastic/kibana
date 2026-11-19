@@ -1126,6 +1126,26 @@ describe('decidePackageReport', () => {
       expect(result.proposals[0].comment).toContain('Held back');
     });
 
+    it('mints no process action for exited processes but still counts them toward isolate', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          hosts: [withMemdump],
+          processSelectors: [
+            selector({ ...ps1, exitedAt: '2026-09-26T10:02:00.000Z' }),
+            selector({ ...rundll, exitedAt: '2026-09-26T10:05:00.000Z' }),
+          ],
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const executable = result.proposals.filter((p) => p.actionWorkflowId);
+      expect(kinds(executable)).toEqual([ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID]);
+      expect(executable[0].comment).toContain('Rule: multiple suspicious processes');
+      const recommendation = result.proposals.find((p) => !p.actionWorkflowId);
+      expect(recommendation?.comment).toContain('exited at 2026-09-26T10:02:00.000Z');
+      expect(recommendation?.comment).toContain('exited at 2026-09-26T10:05:00.000Z');
+    });
+
     it('mints isolate on a confirmed lateral-movement sub-technique with one process', () => {
       const result = decidePackageReport({
         conversationId,

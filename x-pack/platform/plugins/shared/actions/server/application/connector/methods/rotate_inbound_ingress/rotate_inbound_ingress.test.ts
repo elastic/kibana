@@ -6,6 +6,7 @@
  */
 
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { computeTokenHmac } from '@kbn/crypto';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
@@ -25,7 +26,6 @@ import type { ActionsClientContext } from '../../../../actions_client';
 import { actionExecutorMock } from '../../../../lib/action_executor.mock';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { computeIngestTokenHash } from '../../../../inbound/compute_ingest_token_hash';
 import { parseIngestToken } from '../../../../inbound/ingress_credential';
 import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
 import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
@@ -169,11 +169,7 @@ describe('rotateInboundIngress', () => {
     expect(created?.[1]).toEqual(
       expect.objectContaining({
         connectorId: 'connector-id',
-        ingestTokenHash: computeIngestTokenHash({
-          connectorId: 'connector-id',
-          spaceId: 'default',
-          token: result.ingestToken,
-        }),
+        ingestTokenHash: computeTokenHmac(result.ingestToken, 'connector-id', 'default'),
       })
     );
     expect(created?.[2]).toEqual(

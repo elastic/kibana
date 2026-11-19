@@ -95,6 +95,9 @@ const toServers = (servers: unknown): OperationServer[] | undefined => {
           {
             default: String(fallback),
             enum: Array.isArray(values) ? values.map(String) : undefined,
+            ...(isRecord(variable) && variable['x-path-parameter'] === true
+              ? { pathParameter: true as const }
+              : {}),
           },
         ];
       })
@@ -120,8 +123,12 @@ const toCredential = (scheme: Record<string, unknown>): Credential | undefined =
 
 // The `name=value` pairs of an `x-ms-paths` key, decoded as `URL.searchParams` decodes a
 // request's. Bare tokens such as `flat` in `/{containerName}?restype=container&comp=list&flat`
-// only tell keys apart for AutoRest: clients never send them.
-const toFixedQuery = (path: string): FixedQueryParameter[] | undefined => {
+// only tell keys apart for AutoRest: clients never send them. Pairs named in `optional` may be
+// left out of a request.
+const toFixedQuery = (
+  path: string,
+  optional: readonly unknown[] = []
+): FixedQueryParameter[] | undefined => {
   const start = path.indexOf('?');
   if (start === -1) {
     return undefined;
@@ -133,6 +140,7 @@ const toFixedQuery = (path: string): FixedQueryParameter[] | undefined => {
   const fixed = [...new URLSearchParams(pairs.join('&'))].map(([name, value]) => ({
     name,
     value,
+    ...(optional.includes(name) ? { optional: true as const } : {}),
   }));
   return fixed.length > 0 ? fixed : undefined;
 };
@@ -245,7 +253,6 @@ export const loadOperations = (input: OpenApiDocument, source?: string): Contrac
 
   return pathItems.flatMap(({ path, node, in: container }) => {
     const field = toPathItemFields(node, appendPointer(container, path));
-    const fixedQuery = toFixedQuery(path);
     const itemParameters = field('parameters');
     const inheritedParameters = toParameters(itemParameters.value, itemParameters.pointer);
     const itemServers = toServers(field('servers').value);
@@ -259,6 +266,12 @@ export const loadOperations = (input: OpenApiDocument, source?: string): Contrac
         pointer: appendPointer(additional.pointer, method),
       })),
     ];
+
+    const fixedQueryOf = (operation: Record<string, unknown>) => {
+      const optional = operation['x-optional-fixed-query'];
+      const fixedQuery = toFixedQuery(path, Array.isArray(optional) ? optional : []);
+      return fixedQuery ? { fixedQuery } : {};
+    };
 
     return operations.flatMap(({ method, value: operation, pointer }): ContractOperation[] => {
       if (!isRecord(operation)) {
@@ -285,7 +298,7 @@ export const loadOperations = (input: OpenApiDocument, source?: string): Contrac
               : `${method.toUpperCase()} ${path}`,
           method,
           path,
-          ...(fixedQuery ? { fixedQuery } : {}),
+          ...fixedQueryOf(operation),
           servers: toServers(operation.servers) ?? itemServers ?? rootServers,
           parameters: [...inherited, ...ownParameters],
           requestBody: body && {

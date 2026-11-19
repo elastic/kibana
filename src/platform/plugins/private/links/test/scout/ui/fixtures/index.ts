@@ -26,7 +26,7 @@ export const test = baseTest.extend<LinksTestFixtures, ScoutWorkerFixtures>({
   ) => {
     await use({
       ...pageObjects,
-      linksPanel: createLazyPageObject(LinksPanel, page),
+      linksPanel: createLazyPageObject(LinksPanel, page, pageObjects.dashboard),
     });
   },
 });

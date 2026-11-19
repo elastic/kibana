@@ -9,9 +9,17 @@ import type { Logger, LogMeta } from '@kbn/core/server';
 
 export type ScopedLogger = Pick<Logger, 'debug' | 'info' | 'warn' | 'error'>;
 
-export const withLogContext = (logger: ScopedLogger, context: string): ScopedLogger => ({
-  debug: (message: string, meta?: LogMeta) => logger.debug(`${context} ${message}`, meta),
-  info: (message: string, meta?: LogMeta) => logger.info(`${context} ${message}`, meta),
-  warn: (message: string, meta?: LogMeta) => logger.warn(`${context} ${message}`, meta),
-  error: (message: string, meta?: LogMeta) => logger.error(`${context} ${message}`, meta),
+export const withLogContext = (
+  logger: ScopedLogger,
+  context: string,
+  contextMeta?: LogMeta
+): ScopedLogger => ({
+  debug: (message: string, meta?: LogMeta) =>
+    logger.debug(`${context} ${message}`, contextMeta ? { ...contextMeta, ...meta } : meta),
+  info: (message: string, meta?: LogMeta) =>
+    logger.info(`${context} ${message}`, contextMeta ? { ...contextMeta, ...meta } : meta),
+  warn: (message: string, meta?: LogMeta) =>
+    logger.warn(`${context} ${message}`, contextMeta ? { ...contextMeta, ...meta } : meta),
+  error: (message: string, meta?: LogMeta) =>
+    logger.error(`${context} ${message}`, contextMeta ? { ...contextMeta, ...meta } : meta),
 });

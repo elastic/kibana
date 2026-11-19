@@ -106,7 +106,7 @@ export const OnlineEvalScoresTable: React.FC<OnlineEvalScoresTableProps> = ({
           return (
             <EuiButton
               size="s"
-              iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
+              iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
               onClick={() => {
                 setExpandedRows((previous) => {
                   if (rowId in previous) {

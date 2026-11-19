@@ -31,7 +31,7 @@ import { kubernetesSessionsHeaders } from './constants';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export const KubernetesContainer = React.memo(() => {
-  const { kubernetesSecurity, uiSettings } = useKibana().services;
+  const { kubernetesSecurity, uiSettings, docLinks } = useKibana().services;
 
   const { from, to } = useGlobalTime();
   const { dataView } = useDataView();
@@ -104,9 +104,10 @@ export const KubernetesContainer = React.memo(() => {
         back={back}
         description={description}
         menu={menu}
+        docLink={docLinks.links.securitySolution.kubernetesDashboard}
       />
     ),
-    [back]
+    [back, docLinks]
   );
 
   return (

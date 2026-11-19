@@ -5,20 +5,38 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { ComponentType } from 'react';
 import { GroupedAttachmentRow } from '@kbn/agentic-investigations-common';
-import type { FlyoutGroupedAttachmentRendererProps } from '@kbn/agentic-investigations-common';
+import type {
+  FlyoutGroupedAttachmentRendererProps,
+  GroupedAttachmentRowAction,
+} from '@kbn/agentic-investigations-common';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { buildAlertsPagePath } from '@kbn/securitysolution-alerts-page-url';
+import {
+  buildAlertsPagePath,
+  MAX_ALERTS_PAGE_PATH_LENGTH,
+} from '@kbn/securitysolution-alerts-page-url';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
-import { ALERTS_PATH, APP_UI_ID, DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
+import {
+  ALERTS_PATH,
+  APP_UI_ID,
+  DEFAULT_ALERTS_INDEX,
+  DEFAULT_DATA_VIEW_ID,
+} from '../../../../common/constants';
 import { FLYOUT_DESCRIPTOR_KIND } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
-import { ALERT_SUBTITLE, FlyoutRow, alertsTitle, useSpaceId } from '../grouped_attachments';
+import {
+  ALERT_SUBTITLE,
+  ALERTS_FALLBACK_TITLE,
+  FlyoutRow,
+  alertsTitle,
+  useSpaceId,
+} from '../grouped_attachments';
 import { collectAlerts } from './collect_alerts';
 import { useAlertRuleName } from './use_alert_rule_name';
+import { useTaggedAlertsCount } from './use_tagged_alerts_count';
 
 export interface AlertsGroupRendererDeps {
   application: ApplicationStart;
@@ -66,13 +84,18 @@ export const createAlertsGroupRenderer = ({
 }: AlertsGroupRendererDeps): ComponentType<FlyoutGroupedAttachmentRendererProps> => {
   const AlertsGroupRenderer = ({ attachments }: FlyoutGroupedAttachmentRendererProps) => {
     const spaceId = useSpaceId(getSpaceId);
-    const { ids, descriptors, names, createdAt } = collectAlerts(attachments);
+    // collectAlerts builds new arrays on every call, and the tag count searches whenever they change.
+    const { ids, tags, descriptors, names, createdAt } = useMemo(
+      () => collectAlerts(attachments),
+      [attachments]
+    );
+    const taggedCount = useTaggedAlertsCount({ alertIds: ids, tags, createdAt, spaceId, search });
 
-    if (!spaceId || ids.length === 0) {
+    if (!spaceId || (ids.length === 0 && tags.length === 0)) {
       return null;
     }
 
-    if (ids.length === 1) {
+    if (ids.length === 1 && tags.length === 0) {
       const [id] = ids;
       const descriptor = descriptors.get(id) ?? {
         kind: FLYOUT_DESCRIPTOR_KIND.documentFromPattern,
@@ -93,18 +116,32 @@ export const createAlertsGroupRenderer = ({
       );
     }
 
-    // Pass the alerts path directly. Without the Alerts privilege that deep link
-    // is omitted, and getUrlForApp would leave the Security app root.
-    const href = application.getUrlForApp(APP_UI_ID, {
-      path: `${ALERTS_PATH}${buildAlertsPagePath(ids, createdAt ?? new Date().toISOString())}`,
-    });
+    const count = tags.length > 0 ? taggedCount : ids.length;
+
+    const path = buildAlertsPagePath(
+      ids,
+      createdAt ?? new Date().toISOString(),
+      // The Alerts page opens on the Security default data view of the space.
+      { tags, dataViewId: `${DEFAULT_DATA_VIEW_ID}-${spaceId}` }
+    );
+
+    // Past this length the page could refuse the link's URL, so the row only counts the alerts.
+    const action: GroupedAttachmentRowAction | undefined =
+      path.length > MAX_ALERTS_PAGE_PATH_LENGTH
+        ? undefined
+        : {
+            kind: 'page',
+            // Pass the alerts path directly. Without the Alerts privilege that deep link
+            // is omitted, and getUrlForApp would leave the Security app root.
+            href: application.getUrlForApp(APP_UI_ID, { path: `${ALERTS_PATH}${path}` }),
+          };
 
     return (
       <GroupedAttachmentRow
         iconType="warning"
         iconColor="danger"
-        title={alertsTitle(ids.length)}
-        action={{ kind: 'page', href }}
+        title={count === undefined ? ALERTS_FALLBACK_TITLE : alertsTitle(count)}
+        action={action}
       />
     );
   };

@@ -17,7 +17,7 @@ import type { ScoutServerConfig } from '../../../../../types';
 // we can call in our tests.
 const pluginPath = `--plugin-path=${resolve(
   REPO_ROOT,
-  'x-pack/platform/test/security_functional/plugins/test_endpoints'
+  'x-pack/platform/test_plugins/security_functional/plugins/test_endpoints'
 )}`;
 
 export const servers: ScoutServerConfig = {

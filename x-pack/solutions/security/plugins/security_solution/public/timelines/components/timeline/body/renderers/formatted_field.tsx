@@ -153,7 +153,6 @@ const FormattedFieldValueComponent: React.FC<{
     return (
       <HostName
         Component={Component}
-        contextId={contextId}
         isButton={isButton}
         onClick={onClick}
         title={title}
@@ -172,7 +171,6 @@ const FormattedFieldValueComponent: React.FC<{
     return (
       <UserName
         Component={Component}
-        contextId={contextId}
         isButton={isButton}
         onClick={onClick}
         title={title}

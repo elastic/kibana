@@ -39,10 +39,6 @@ import {
 import { withRestorableState } from '../../../restorable_state';
 import type { FlyoutState } from '../../../restorable_state';
 
-jest.mock('./hooks/use_fetch_exemplars', () => ({
-  useFetchExemplars: jest.fn(() => undefined),
-}));
-
 jest.mock('@kbn/discover-utils', () => {
   const {
     METRICS_GRID_HISTOGRAM_PERCENTILES,
@@ -145,7 +141,6 @@ describe('MetricsGrid', () => {
     services,
     actions,
     isTabSelected: true,
-    isComponentVisible: true,
   };
 
   const renderMetricsGrid = (props: Partial<MetricsGridProps> = {}) => {
@@ -1411,11 +1406,11 @@ describe('MetricsGrid', () => {
           lensConfig: expect.objectContaining({
             chartType: 'heatmap',
             title: histogramItem.metricName,
+            ySort: 'desc',
             dataset: {
-              esql: expect.stringMatching(
-                /BUCKET\(latency\.exp, 10, 1, 9\)[\s\S]*SORT bucket DESC/
-              ),
+              esql: expect.stringMatching(/BUCKET\(latency\.exp, 10, 1, 9\)/),
             },
+            color: expect.objectContaining({ type: 'dynamic', steps: expect.any(Array) }),
           }),
         }),
         expect.anything()

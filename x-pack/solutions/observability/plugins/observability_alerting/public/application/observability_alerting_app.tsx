@@ -24,12 +24,14 @@ import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
-import type { EpisodeAction, EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
-import { closeAddToCaseModal, createAddToCaseAction } from '@kbn/alerting-v2-episodes-ui/actions';
+import type { EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
+import { closeAddToCaseModal } from '@kbn/alerting-v2-episodes-ui/actions';
 import { EuiPageSection } from '@elastic/eui';
 import { ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
-import { OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
-import { AlertingNavPromo } from '@kbn/observability-plugin/public';
+import {
+  AlertingNavPromo,
+  createObservabilityEpisodeActions,
+} from '@kbn/observability-plugin/public';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
@@ -39,34 +41,19 @@ import {
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
 import type { ObservabilityAlertingCases } from '../types';
-import { createInvestigateEpisodeAction } from '../actions/investigate_episode_action';
 import { useInvestigateEpisodeHeaderMenuItems } from '../actions/use_investigate_episode_header_menu_items';
 import {
   getObservabilityRulesTabVisibility,
   hasObservabilityAlertingCapabilities,
 } from './has_observability_alerting_privilege';
 
-const createObservabilityEpisodeActions = (
-  cases: ObservabilityAlertingCases | undefined,
-  { rendering }: EpisodeActionsDeps
-): EpisodeAction[] => [
-  createInvestigateEpisodeAction(),
-  ...(cases
-    ? [
-        createAddToCaseAction({
-          cases: cases.service,
-          owner: OBSERVABILITY_OWNER,
-          rendering,
-          kibanaServices: cases.kibanaServices,
-        }),
-      ]
-    : []),
-];
-
 interface ObservabilityAlertingAppProps {
   coreStart: CoreStart;
   alertingVTwo: AlertingV2PublicStart;
-  triggersActionsUi: Pick<TriggersAndActionsUIPublicPluginStart, 'getClassicRulesPage'>;
+  triggersActionsUi: Pick<
+    TriggersAndActionsUIPublicPluginStart,
+    'getClassicRulesPage' | 'getAlertFormatter'
+  >;
   cases?: ObservabilityAlertingCases;
   ObservabilityPageTemplate: ObservabilitySharedPluginStart['navigation']['PageTemplate'];
   history: ScopedHistory;
@@ -204,9 +191,11 @@ export const ObservabilityAlertingApp = ({
     v2RulesTabNewBadge
   );
 
+  const { getAlertFormatter } = triggersActionsUi;
   const createActions = useCallback(
-    (deps: EpisodeActionsDeps) => createObservabilityEpisodeActions(cases, deps),
-    [cases]
+    (deps: EpisodeActionsDeps) =>
+      createObservabilityEpisodeActions({ cases, getAlertFormatter }, deps),
+    [cases, getAlertFormatter]
   );
 
   const privilegeCheck: PrivilegeCheck = useCallback(

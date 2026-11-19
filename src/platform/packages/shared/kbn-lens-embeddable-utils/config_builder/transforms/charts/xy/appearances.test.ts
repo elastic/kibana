@@ -231,4 +231,65 @@ describe('XY Appearances Transforms', () => {
     expect(result.pointVisibility).toBeUndefined();
     expect(result.hideEndzones).toBe(true);
   });
+
+  it('should not store fitting when converting a bar-only API config to state', () => {
+    const result = convertStylingToStateFormat(
+      { fitting: { type: 'linear', emphasize: true, extend: 'zero' } },
+      ['bar', 'bar_stacked']
+    );
+    expect(result).not.toHaveProperty('fittingFunction');
+    expect(result).not.toHaveProperty('emphasizeFitting');
+    expect(result).not.toHaveProperty('endValue');
+  });
+
+  it.each<[string, SeriesType[]]>([
+    ['line layers', ['line']],
+    ['area layers', ['area']],
+    ['area and bar layers', ['area_stacked', 'bar']],
+  ])(
+    'should store fitting when converting an API config with %s to state',
+    (_name, seriesTypes) => {
+      const result = convertStylingToStateFormat(
+        { fitting: { type: 'linear', emphasize: true, extend: 'zero' } },
+        seriesTypes
+      );
+      expect(result.fittingFunction).toBe('Linear');
+      expect(result.emphasizeFitting).toBe(true);
+      expect(result.endValue).toBe('Zero');
+    }
+  );
+
+  it('should not store bar settings when converting a line-only API config to state', () => {
+    const result = convertStylingToStateFormat(
+      { bars: { minimum_height: 3, data_labels: { visible: true } } },
+      ['line']
+    );
+    expect(result).not.toHaveProperty('minBarHeight');
+    expect(result).not.toHaveProperty('valueLabels');
+  });
+
+  it('should not store bar settings when converting an area-only API config to state', () => {
+    const result = convertStylingToStateFormat(
+      { bars: { minimum_height: 3, data_labels: { visible: true } } },
+      ['area', 'area_stacked']
+    );
+    expect(result).not.toHaveProperty('minBarHeight');
+    expect(result).not.toHaveProperty('valueLabels');
+  });
+
+  it.each<[string, SeriesType[]]>([
+    ['bar layers', ['bar']],
+    ['horizontal stacked bar layers', ['bar_horizontal_stacked']],
+    ['line and percentage bar layers', ['line', 'bar_percentage_stacked']],
+  ])(
+    'should store bar settings when converting an API config with %s to state',
+    (_name, seriesTypes) => {
+      const result = convertStylingToStateFormat(
+        { bars: { minimum_height: 3, data_labels: { visible: true } } },
+        seriesTypes
+      );
+      expect(result.minBarHeight).toBe(3);
+      expect(result.valueLabels).toBe('show');
+    }
+  );
 });

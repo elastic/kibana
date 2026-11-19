@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiIllustration, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiIllustration, EuiSpacer } from '@elastic/eui';
 import { cloudRocketDeploy } from '@elastic/eui-illustrations';
 import { AnnouncementBanner } from '@kbn/announcement-banner';
 import { useHomeConfig, useStorageKey, useTelemetryId } from '../context';
@@ -16,10 +16,9 @@ const BANNER_DISMISSED_KEY_SUFFIX = 'banner.dismissed';
 
 interface HomePageBannerProps {
   hasData: boolean;
-  isLoading: boolean;
 }
 
-export const HomePageBanner = ({ hasData, isLoading }: HomePageBannerProps) => {
+export const HomePageBanner = ({ hasData }: HomePageBannerProps) => {
   const { banner } = useHomeConfig();
   const getStorageKey = useStorageKey();
   const getTelemetryId = useTelemetryId();
@@ -34,15 +33,6 @@ export const HomePageBanner = ({ hasData, isLoading }: HomePageBannerProps) => {
 
   if (!banner) {
     return null;
-  }
-
-  if (isLoading) {
-    return (
-      <>
-        <EuiSpacer size="xxl" />
-        <EuiLoadingSpinner size="m" />
-      </>
-    );
   }
 
   if (hasData || isDismissed) {

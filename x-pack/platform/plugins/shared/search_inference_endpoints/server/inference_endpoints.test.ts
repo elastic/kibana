@@ -565,6 +565,46 @@ describe('getForFeature', () => {
       expect(result.endpoints[0]).not.toHaveProperty('parameters');
     });
 
+    it('returns the stored SO override parameters instead of the declared parameters', async () => {
+      const highEffort = { reasoning: { effort: 'high' as const } };
+      registry.register(
+        createValidFeature({
+          featureId: 'f1',
+          recommendedEndpoints: [{ id: 'rec1', parameters: lowEffort }],
+        })
+      );
+      const result = await getForFeature(
+        registry,
+        createSoClient([{ feature_id: 'f1', endpoints: [{ id: 'rec1', parameters: highEffort }] }]),
+        createGetConnectorById(['rec1']),
+        'f1',
+        logger
+      );
+      expect(result).toEqual({
+        endpoints: [{ ...createConnector('rec1'), parameters: highEffort }],
+        warnings: [],
+        soEntryFound: true,
+      });
+    });
+
+    it('returns the stored parent SO override parameters for a child', async () => {
+      const storedParameters = { reasoning: { effort: 'high' as const } };
+      registry.register(createValidFeature({ featureId: 'parent' }));
+      registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
+      const result = await getForFeature(
+        registry,
+        createSoClient([
+          { feature_id: 'parent', endpoints: [{ id: 'so_ep', parameters: storedParameters }] },
+        ]),
+        createGetConnectorById(['so_ep']),
+        'child',
+        logger
+      );
+      expect(result.endpoints).toEqual([
+        { ...createConnector('so_ep'), parameters: storedParameters },
+      ]);
+    });
+
     it('returns a parent SO override resolved for a child without the declared parameters', async () => {
       registry.register(
         createValidFeature({

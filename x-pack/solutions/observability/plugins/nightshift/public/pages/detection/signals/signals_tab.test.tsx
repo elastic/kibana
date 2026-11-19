@@ -19,14 +19,17 @@ import { SignalsTab } from './signals_tab';
 const mockAddWarning = jest.fn();
 const mockTimeRangeChange = jest.fn();
 
-jest.mock('../../../common/format_timestamp', () => ({
-  ...jest.requireActual('../../../common/format_timestamp'),
+jest.mock('../../../hooks/use_format_timestamp', () => ({
+  ...jest.requireActual('../../../hooks/use_format_timestamp'),
   useFormatTimestamp: () => (timestamp: string) => timestamp,
 }));
 jest.mock('../../../components/entities/detection/detection_details_flyout', () => ({
   DetectionDetailsFlyout: ({ detection }: { detection: Detection }) => (
     <div data-test-subj="detectionDetailsFlyoutStub">{detection.rule_name}</div>
   ),
+}));
+jest.mock('../../../components/ui/time_range_picker', () => ({
+  NightshiftTimeRangePicker: () => <div data-test-subj="detectionTimeRangePickerStub" />,
 }));
 jest.mock('../../../data/detections/use_detection_by_id');
 jest.mock('../../../data/detections/use_detections_list');

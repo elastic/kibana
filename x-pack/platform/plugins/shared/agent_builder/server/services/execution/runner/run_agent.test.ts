@@ -83,6 +83,24 @@ describe('runAgent', () => {
     expect(agentClient.get).toHaveBeenCalledWith(params.agentId, { access: 'use' });
   });
 
+  it('resolves the agent for the service account a bound run executes as', async () => {
+    runnerDeps.runAs = { type: 'service_account', serviceAccountId: 'kibana/sa-1' };
+    runnerManager = new RunnerManager(runnerDeps);
+
+    await runAgent({
+      agentExecutionParams: {
+        agentId: 'test-agent',
+        agentParams: { nextInput: { message: 'bar' } },
+      },
+      parentManager: runnerManager,
+    });
+
+    expect(agentClient.get).toHaveBeenCalledWith('test-agent', {
+      access: 'use',
+      runAs: 'kibana/sa-1',
+    });
+  });
+
   it('records the agent name on the run context stack', async () => {
     const createChild = jest.spyOn(runnerManager, 'createChild');
 

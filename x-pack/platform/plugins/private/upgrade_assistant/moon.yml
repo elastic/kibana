@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/core-doc-links-browser-mocks'
   - '@kbn/scout'
   - '@kbn/ui-callout'
+  - '@kbn/std'
 tags:
   - plugin
   - prod
@@ -64,6 +65,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - test/scout/**/*
+    - test/scout_upgrade_assistant/**/*
     - test/scout_upgrade_assistant_integration/**/*
     - public/**/*.json
     - server/**/*.json

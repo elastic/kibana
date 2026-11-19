@@ -9,6 +9,8 @@
 
 const isDot = (event: KeyboardEvent): boolean => event.code === 'Period' || event.key === '.';
 
+const isComma = (event: KeyboardEvent): boolean => event.code === 'Comma' || event.key === ',';
+
 /**
  * Check if Escape key was pressed.
  *
@@ -42,6 +44,15 @@ export const isDeleteKey = (event: KeyboardEvent): boolean =>
  */
 export const isMeasureShortcut = (event: KeyboardEvent) =>
   (event.metaKey || event.ctrlKey) && isDot(event);
+
+/**
+ * Check if the keyboard event corresponds to the font inspect shortcut (Meta/Ctrl + ,).
+ *
+ * @param event - The keyboard event.
+ * @returns Whether the font inspect shortcut was triggered.
+ */
+export const isFontInspectShortcut = (event: KeyboardEvent) =>
+  (event.metaKey || event.ctrlKey) && isComma(event);
 
 /**
  * Check if the keyboard event corresponds to the duplicate shortcut (Meta/Ctrl + D).

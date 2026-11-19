@@ -129,14 +129,14 @@
     "muteMonitor": [
       {
         "method": "post",
-        "path": "/api/v1/monitor/1/mute",
+        "path": "/api/v1/monitor/{monitor_id}/mute",
         "reason": "Monitor mute is not in Datadog's v1 spec, which only documents host mute and downtimes (POST /api/v2/downtime, used by scheduleDowntime); see https://github.com/elastic/kibana/issues/296084"
       }
     ],
     "unmuteMonitor": [
       {
         "method": "post",
-        "path": "/api/v1/monitor/1/unmute",
+        "path": "/api/v1/monitor/{monitor_id}/unmute",
         "reason": "Monitor unmute is not in Datadog's v1 spec, which only documents host mute and downtimes (POST /api/v2/downtime, used by scheduleDowntime); see https://github.com/elastic/kibana/issues/296084"
       }
     ]

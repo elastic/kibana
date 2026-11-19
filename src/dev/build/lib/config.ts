@@ -289,6 +289,10 @@ export class Config {
     return Boolean(this.buildOptions.tarZstd);
   }
 
+  shouldSkipDockerImageArchive() {
+    return Boolean(this.buildOptions.skipDockerImageArchive);
+  }
+
   shouldForceNodePointerCompression() {
     return Boolean(this.buildOptions.forceNodePointerCompression);
   }

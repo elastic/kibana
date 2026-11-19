@@ -9,6 +9,8 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { AppMenu, type Locator, type ScoutPage } from '@kbn/scout';
 import path from 'path';
 
+const APP_LOAD_TIMEOUT_MS = 60_000;
+
 interface PipelineForm {
   name: string;
   description: string;
@@ -22,7 +24,15 @@ export class IngestPipelinesPage {
   public readonly navigationBlockConfirmModal: Locator;
   public readonly geoipEmptyListPrompt: Locator;
   public readonly deleteManagedAssetsCallout: Locator;
-  private readonly createPipelineDropdown: Locator;
+  public readonly emptyListPrompt: Locator;
+  public readonly configurePipelineHeader: Locator;
+  public readonly createPipelineDropdown: Locator;
+  public readonly editPipelineButton: Locator;
+  public readonly detailsPanelFooter: Locator;
+  public readonly missingCustomPipelineCallout: Locator;
+  public readonly createCustomPipelineButton: Locator;
+  public readonly createFormNameField: Locator;
+  private readonly addProcessorButton: Locator;
   private readonly createNewPipelineButton: Locator;
   private readonly createPipelineFromCsvButton: Locator;
   private readonly nameFieldInput: Locator;
@@ -64,7 +74,15 @@ export class IngestPipelinesPage {
     this.navigationBlockConfirmModal = this.page.testSubj.locator('navigationBlockConfirmModal');
     this.geoipEmptyListPrompt = this.page.testSubj.locator('geoipEmptyListPrompt');
     this.deleteManagedAssetsCallout = this.page.testSubj.locator('deleteManagedAssetsCallout');
+    this.emptyListPrompt = this.page.getByTestId('emptyList');
+    this.configurePipelineHeader = this.page.getByTestId('configurePipelineHeader');
+    this.addProcessorButton = this.page.getByTestId('addProcessorButton');
     this.createPipelineDropdown = this.page.testSubj.locator('createPipelineDropdown');
+    this.editPipelineButton = this.page.testSubj.locator('editPipelineButton');
+    this.detailsPanelFooter = this.page.testSubj.locator('detailsPanelFooter');
+    this.missingCustomPipelineCallout = this.page.testSubj.locator('missingCustomPipeline');
+    this.createCustomPipelineButton = this.page.testSubj.locator('createCustomPipeline');
+    this.createFormNameField = this.page.testSubj.locator('nameField');
     this.createNewPipelineButton = this.page.testSubj.locator('createNewPipeline');
     this.createPipelineFromCsvButton = this.page.testSubj.locator('createPipelineFromCsv');
     this.nameFieldInput = this.page.testSubj.locator('nameField').locator('input');
@@ -82,7 +100,7 @@ export class IngestPipelinesPage {
     this.detailsPanelTitle = this.page.testSubj.locator('detailsPanelTitle');
     this.tablePaginationPopoverButton = this.page.testSubj.locator('tablePaginationPopoverButton');
     this.tablePagination50Rows = this.page.testSubj.locator('tablePagination-50-rows');
-    this.logo = this.page.testSubj.locator('logo');
+    this.logo = this.page.getByTestId('logo').or(this.page.getByTestId('nav-header-logo'));
     this.filtersDropdown = this.page.testSubj.locator('filtersDropdown');
     this.managedFilter = this.page.testSubj.locator('managedFilter');
     this.actionsPopoverButton = this.page.testSubj.locator('actionsPopoverButton');
@@ -102,7 +120,29 @@ export class IngestPipelinesPage {
 
   async goto() {
     await this.page.gotoApp('management/ingest/ingest_pipelines');
-    await this.appTitle.waitFor({ timeout: 60_000 });
+    await this.appTitle.waitFor({ timeout: APP_LOAD_TIMEOUT_MS });
+  }
+
+  async gotoSubPath(subPath: string) {
+    await this.page.gotoApp(`management/ingest/ingest_pipelines/${subPath}`);
+    await this.appTitle.waitFor({ timeout: APP_LOAD_TIMEOUT_MS });
+  }
+
+  async openPipelineFlyoutFromUrl(pipelineName: string) {
+    await this.page.goto(`${this.page.url()}?pipeline=${encodeURIComponent(pipelineName)}`);
+    await this.detailsFlyout.waitFor();
+  }
+
+  pipelineTableRow(pipelineName: string) {
+    return this.pipelineTableRows.filter({ hasText: pipelineName });
+  }
+
+  pipelineRowSelectionCheckbox(pipelineName: string) {
+    return this.pipelineTableRow(pipelineName).getByRole('checkbox');
+  }
+
+  pipelineRowEditAction(pipelineName: string) {
+    return this.pipelineTableRow(pipelineName).getByRole('button', { name: 'Edit this pipeline' });
   }
 
   async sectionHeadingText() {
@@ -122,6 +162,17 @@ export class IngestPipelinesPage {
 
     await this.submitButton.click();
     await this.detailsFlyout.waitFor();
+  }
+
+  async openCreateForm() {
+    await this.createPipelineDropdown.click();
+    await this.createNewPipelineButton.click();
+    await this.nameFieldInput.waitFor();
+  }
+
+  async openAddProcessorFlyout() {
+    await this.addProcessorButton.click();
+    await this.configurePipelineHeader.waitFor();
   }
 
   async createPipelineFromCsv({ name }: { name: string }) {

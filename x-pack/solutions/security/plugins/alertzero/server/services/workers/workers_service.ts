@@ -713,6 +713,7 @@ export class WorkersService {
       settingsRevision,
       // `installed` is any document at this id, including a user workflow that is not ours.
       workflowId: status.installed && status.status !== 'not_managed' ? status.workflowId : null,
+      workflowOutdated: status.status === 'drifted',
       blockingReasons,
       skills: projectSkillsFromDefinition(definition, agentLookupCallback),
     };

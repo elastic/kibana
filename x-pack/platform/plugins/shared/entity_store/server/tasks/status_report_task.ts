@@ -40,7 +40,7 @@ import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution
 
 const config = TasksConfig[EntityStoreTaskType.enum.statusReport];
 
-const getStatusReportTaskId = (namespace: string): string => `${config.type}:${namespace}`;
+export const getStatusReportTaskId = (namespace: string): string => `${config.type}:${namespace}`;
 
 const SOURCE_TERMS_SIZE = 100;
 const MISSING_SOURCE = 'unknown';

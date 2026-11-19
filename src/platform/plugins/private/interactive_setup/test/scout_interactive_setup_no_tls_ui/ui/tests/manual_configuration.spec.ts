@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import {
@@ -15,17 +16,14 @@ import {
   SETUP_COMPLETION_TIMEOUT_MS,
   SETUP_SPEC_TIMEOUT_MS,
 } from '../../../helpers/constants';
-import { isFipsEnabled } from '../../../helpers/fips';
 import { getVerificationCode, waitForKibanaToBoot } from '../../../helpers/setup_state';
 import { test } from '../fixtures';
 
 test.describe(
   'Interactive setup - manual configuration without TLS',
-  { tag: ['@local-stateful-classic'] },
+  // Interactive setup reconfigures Kibana's crypto and reboots, which FIPS mode doesn't support.
+  { tag: ['@local-stateful-classic', tags.limit.except.fips] },
   () => {
-    // Interactive setup reconfigures Kibana's crypto and reboots — unsupported under FIPS (pre-migration 'skipFIPS').
-    test.skip(isFipsEnabled, 'Interactive setup is not supported under FIPS');
-
     test('configures Kibana against a cluster without TLS', async ({
       pageObjects,
       apiClient,

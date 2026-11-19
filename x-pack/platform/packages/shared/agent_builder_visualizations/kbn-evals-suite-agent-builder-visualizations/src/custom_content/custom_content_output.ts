@@ -7,6 +7,10 @@
 
 import type { Conversation } from '@kbn/agent-builder-common';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import {
+  CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID,
+  CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID,
+} from '@kbn/custom-content-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -15,7 +19,7 @@ import { extractVisualizations, type ExtractedVisualization } from '../extract_v
 
 /** A custom content panel as stored in the visualization attachment. */
 export interface StoredCustomContent {
-  /** Absent for a static panel. */
+  /** The main query, the one the template reads as `rows`. Absent for a static panel. */
   esql?: string;
   template?: string;
   height?: number;
@@ -50,6 +54,8 @@ export interface CustomContentTaskOutput {
   toolIds: string[];
   /** Tool ids of the follow-up turn alone; undefined for a single-turn example. */
   followUpToolIds?: string[];
+  /** What the follow-up turn passed to the tools that build custom content, as short lines. */
+  followUpToolArgs?: string[];
   /** The stored panel in the shape the low-score log prints, whichever attachment holds it. */
   visualizations: ExtractedVisualization[];
   /** Renderers of other visualizations the agent created instead (`lens`, `vega`). */
@@ -65,8 +71,11 @@ export const toStoredCustomContent = (data: unknown): StoredCustomContent | unde
   if (!isRecord(data) || data.renderer !== 'custom_content') {
     return undefined;
   }
-  const { esql, visualization } = data;
+  const { visualization } = data;
   const stored: StoredCustomContent = {};
+  // A list since a panel can have several queries, a string in attachments saved before that. As
+  // for a dashboard panel, the evaluators judge the first one, the one the template reads as `rows`.
+  const [esql] = Array.isArray(data.esql) ? data.esql : [data.esql];
   if (typeof esql === 'string' && esql.trim().length > 0) {
     stored.esql = esql;
   }
@@ -108,7 +117,6 @@ export const readStoredCustomContent = (
   };
 };
 
-const GENERATE_DASHBOARD_TOOL_ID = 'platform.dashboard.generate_dashboard';
 const CUSTOM_CONTENT_PANEL_TYPE = 'custom_content';
 
 /**
@@ -119,7 +127,7 @@ export const getLastWrittenDashboardId = (
   steps: Array<Record<string, unknown>> | undefined
 ): string | undefined => {
   for (const step of [...(steps ?? [])].reverse()) {
-    if (step.type !== 'tool_call' || step.tool_id !== GENERATE_DASHBOARD_TOOL_ID) {
+    if (step.type !== 'tool_call' || step.tool_id !== CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID) {
       continue;
     }
     for (const result of Array.isArray(step.results) ? step.results : []) {
@@ -250,6 +258,68 @@ export const findStoredPanel = (
   }
   return { versionCount: 0, storedIn: 'none' };
 };
+
+const CREATE_VISUALIZATION_TOOL_ID = 'platform.core.create_visualization';
+const PROMPT_EXCERPT_LENGTH = 80;
+
+const flag = (value: unknown): string =>
+  value === undefined || value === null ? 'unset' : String(value);
+
+const count = (value: unknown): string => (Array.isArray(value) ? String(value.length) : 'unset');
+
+const excerpt = (value: unknown): string =>
+  typeof value === 'string' ? JSON.stringify(value.slice(0, PROMPT_EXCERPT_LENGTH)) : 'unset';
+
+/**
+ * Summarizes what each tool call of these steps passed for a custom content panel: how many data
+ * queries and whether it removed them all, never the queries themselves. It tells an agent that
+ * left out `dataQueries` from one that passed them and still got no query.
+ */
+export const getCustomContentToolArgs = (
+  steps: Array<Record<string, unknown>> | undefined
+): string[] =>
+  (steps ?? []).flatMap((step) => {
+    if (step.type !== 'tool_call' || !isRecord(step.params)) {
+      return [];
+    }
+    const { params } = step;
+    const toolId = String(step.tool_id);
+
+    if (toolId === CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID && Array.isArray(params.panels)) {
+      return params.panels.flatMap((item: unknown) =>
+        isRecord(item) && isRecord(item.content) && item.content.renderer === 'custom_content'
+          ? [
+              `${toolId} panel ${String(item.id)}: dataQueries=${count(
+                item.content.dataQueries
+              )} removeAllQueries=${flag(item.content.removeAllQueries)} query=${excerpt(
+                item.content.query
+              )}`,
+            ]
+          : []
+      );
+    }
+
+    if (toolId === CREATE_VISUALIZATION_TOOL_ID && isRecord(params.target)) {
+      const { target } = params;
+      return target.type === 'custom_content' || target.type === 'attachment'
+        ? [
+            `${toolId} ${String(target.type)}: dataQueries=${count(
+              target.dataQueries
+            )} removeAllQueries=${flag(target.removeAllQueries)} query=${excerpt(params.query)}`,
+          ]
+        : [];
+    }
+
+    if (toolId.includes(CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID)) {
+      return [
+        `${toolId}: dataQueries=${count(params.dataQueries)} removeAllQueries=${flag(
+          params.removeAllQueries
+        )} prompt=${excerpt(params.prompt)}`,
+      ];
+    }
+
+    return [];
+  });
 
 const TEMPLATE_EXCERPT_LENGTH = 200;
 

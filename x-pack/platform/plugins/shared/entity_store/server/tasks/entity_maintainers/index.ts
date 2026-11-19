@@ -114,12 +114,18 @@ export function registerEntityMaintainerTask({
             title,
             description,
             timeout: effectiveTimeout,
-            createTaskRunner: ({ taskInstance, signal, fakeRequest }) => ({
+            createTaskRunner: ({
+              taskInstance,
+              signal,
+              fakeRequest,
+              setCustomTaskRunEventFields,
+            }) => ({
               run: async () =>
                 coreStart.executionContext.withContext(
                   buildEaExecutionContext(
                     EA_EXECUTION_CONTEXT_NAMES.ENTITY_MAINTAINERS_TASK,
-                    taskInstance.id
+                    taskInstance.id,
+                    id
                   ),
                   async () => {
                     const status = taskInstance.state;
@@ -145,6 +151,7 @@ export function registerEntityMaintainerTask({
                     }
 
                     const result = await executeMaintainerRun({
+                      setCustomTaskRunEventFields,
                       status,
                       request: fakeRequest,
                       taskId: taskInstance.id,

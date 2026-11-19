@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { getTaskCost } from './get_task_cost';
 import type { ConcreteTaskInstance } from '../../task';
-import { TaskCost, InstanceTaskCost } from '../../task';
+import { TaskCost } from '../../task';
 import { TaskTypeDictionary } from '../../task_type_dictionary';
 import { mockLogger } from '../../test_utils';
 
@@ -54,7 +54,7 @@ describe('getTaskCost', () => {
   it('returns instance cost when set', () => {
     const task = mockInstance({
       taskType: 'limitedTaskTypeWithCost',
-      cost: InstanceTaskCost.ExtraLarge,
+      cost: TaskCost.ExtraLarge,
     });
     expect(getTaskCost(task, taskDefinitions)).toBe(TaskCost.ExtraLarge);
   });
@@ -72,17 +72,8 @@ describe('getTaskCost', () => {
   it('returns instance cost when set for type without definition cost', () => {
     const task = mockInstance({
       taskType: 'taskType1',
-      cost: InstanceTaskCost.ExtraLarge,
+      cost: TaskCost.ExtraLarge,
     });
     expect(getTaskCost(task, taskDefinitions)).toBe(TaskCost.ExtraLarge);
-  });
-
-  it('ensure unknown task size is supported', () => {
-    const task = mockInstance({
-      taskType: 'taskType1',
-      // simulate unknown cost from a newer Kibana
-      cost: 'HUGE' as InstanceTaskCost,
-    });
-    expect(getTaskCost(task, taskDefinitions)).toBe(TaskCost.Normal);
   });
 });

@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { PROXY_URL_REGEX } from '../../../common/constants';
+import { FLEET_SCHEMA_NAME_MAX_LENGTH } from '../../constants';
 
 function validateUrl(value: string) {
   if (!value.match(PROXY_URL_REGEX)) {
@@ -23,11 +24,15 @@ export const ProxyHeadersSchema = schema.oneOf([
 ]);
 
 export const FleetProxySchema = schema.object({
-  id: schema.string(),
+  id: schema.savedObjectId.warn({ minLength: 0, label: 'fleet.proxies.id' }),
   url: schema.string({
     validate: validateUrl,
   }),
-  name: schema.string(),
+  name: schema.displayName.warn({
+    minLength: 0,
+    maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+    label: 'fleet.proxies.name',
+  }),
   proxy_headers: schema.maybe(ProxyHeadersSchema),
   certificate_authorities: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   certificate: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
@@ -37,7 +42,7 @@ export const FleetProxySchema = schema.object({
 
 export const PostFleetProxyRequestSchema = {
   body: FleetProxySchema.extends({
-    id: schema.maybe(schema.string()),
+    id: schema.maybe(schema.savedObjectId.warn({ minLength: 0, label: 'fleet.proxies.create.id' })),
   }),
 };
 
@@ -47,10 +52,20 @@ export const FleetProxyResponseSchema = schema.object({
 
 export const PutFleetProxyRequestSchema = {
   params: schema.object({
-    itemId: schema.string({ meta: { description: 'The ID of the proxy' } }),
+    itemId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.proxies.update.itemId',
+      meta: { description: 'The ID of the proxy' },
+    }),
   }),
   body: schema.object({
-    name: schema.maybe(schema.string()),
+    name: schema.maybe(
+      schema.displayName.warn({
+        minLength: 0,
+        maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+        label: 'fleet.proxies.update.name',
+      })
+    ),
     url: schema.maybe(schema.string({ validate: validateUrl })),
     proxy_headers: schema.maybe(ProxyHeadersSchema),
     certificate_authorities: schema.nullable(schema.string()),
@@ -61,6 +76,10 @@ export const PutFleetProxyRequestSchema = {
 
 export const GetOneFleetProxyRequestSchema = {
   params: schema.object({
-    itemId: schema.string({ meta: { description: 'The ID of the proxy' } }),
+    itemId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.proxies.get.itemId',
+      meta: { description: 'The ID of the proxy' },
+    }),
   }),
 };

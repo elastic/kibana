@@ -193,19 +193,15 @@ export type ChatCompleteOptions = {
 /**
  * Options used to call the {@link FeatureChatCompleteAPI}.
  *
- * The model, `temperature` and `reasoning` come from the feature's configured endpoints,
+ * The model and `reasoning` come from the feature's configured endpoints,
  * so they cannot be passed.
  */
-export type FeatureChatCompleteOptions = Omit<
-  ChatCompleteOptions,
-  'connectorId' | 'temperature' | 'reasoning'
-> & {
+export type FeatureChatCompleteOptions = Omit<ChatCompleteOptions, 'connectorId' | 'reasoning'> & {
   /**
    * The ID of a `chat_completion` feature registered with the inference feature registry.
    */
   featureId: string;
   connectorId?: never;
-  temperature?: never;
   reasoning?: never;
 };
 

@@ -11,6 +11,7 @@ import {
   getProcessingNodeProcessors,
   getProcessingSlotTelemetry,
   getSharedProcessorIds,
+  isSlotSaved,
   type DraftProcessor,
   type ProcessingDraftResult,
 } from './unit_processing';
@@ -372,6 +373,65 @@ describe('getSharedProcessorIds', () => {
   it('lists nothing when only the slot itself applies its processors', () => {
     expect(getSharedProcessorIds(routedUnit(), routeSlot('main', 0))).toEqual(new Set());
     expect(getSharedProcessorIds(sharedUnit(), pipelineSlot('missing'))).toEqual(new Set());
+  });
+});
+
+describe('isSlotSaved', () => {
+  type Routes = Extract<
+    Unit['unit']['pipelines'][number]['config'][number],
+    { name: 'routes' }
+  >['value'];
+
+  const unitWithRoutes = (routes: Routes): Unit =>
+    baseUnit([
+      {
+        id: 'main',
+        supported_telemetry: ['logs'],
+        config: [
+          { name: 'sources', value: ['src'] },
+          { name: 'routes', value: routes },
+        ],
+      },
+    ]);
+
+  const PROD_ROUTE = { when: 'env == "prod"', processors: ['tag'], destinations: ['es'] };
+  const DEV_ROUTE = { when: 'env == "dev"', processors: ['tag'], destinations: ['other'] };
+  const saved = () => unitWithRoutes([PROD_ROUTE, DEV_ROUTE]);
+
+  it('is the same slot for a pipeline slot, whatever routes changed', () => {
+    expect(isSlotSaved(saved(), unitWithRoutes([DEV_ROUTE]), pipelineSlot('main'))).toBe(true);
+  });
+
+  it('is the same slot for a route that both units have at that position', () => {
+    expect(isSlotSaved(saved(), saved(), routeSlot('main', 0))).toBe(true);
+    expect(isSlotSaved(saved(), saved(), routeSlot('main', 1))).toBe(true);
+  });
+
+  it('is the same slot when only the processors of the route changed', () => {
+    const staged = unitWithRoutes([{ ...PROD_ROUTE, processors: ['tag', 'enrich'] }, DEV_ROUTE]);
+
+    expect(isSlotSaved(saved(), staged, routeSlot('main', 0))).toBe(true);
+  });
+
+  it('is another slot for a route that moved up when the route before it was removed', () => {
+    const staged = unitWithRoutes([DEV_ROUTE]);
+
+    // Staged position 0 is the dev route, and the saved route at position 0 is the prod route.
+    expect(isSlotSaved(saved(), staged, routeSlot('main', 0))).toBe(false);
+  });
+
+  it('is another slot for a position that the staged unit no longer has', () => {
+    expect(isSlotSaved(saved(), unitWithRoutes([PROD_ROUTE]), routeSlot('main', 1))).toBe(false);
+  });
+
+  it('is another slot for a route that sends records to a different destination', () => {
+    const staged = unitWithRoutes([{ ...PROD_ROUTE, destinations: ['other'] }, DEV_ROUTE]);
+
+    expect(isSlotSaved(saved(), staged, routeSlot('main', 0))).toBe(false);
+  });
+
+  it('is another slot for a pipeline that only one unit has', () => {
+    expect(isSlotSaved(saved(), directUnit(), routeSlot('main', 0))).toBe(false);
   });
 });
 

@@ -239,22 +239,7 @@ export const createStartServicesMock = (
     },
     telemetry: createTelemetryServiceMock(),
     theme: themeServiceMock.createSetupContract(),
-    timelines: {
-      getLastUpdated: jest.fn(),
-      getFieldBrowser: jest.fn(),
-      getHoverActions: jest.fn().mockReturnValue({
-        getAddToTimelineButton: jest.fn(),
-      }),
-      getUseAddToTimeline: jest.fn().mockReturnValue(
-        jest.fn().mockReturnValue({
-          startDragToTimeline: jest.fn(),
-          beginDrag: jest.fn(),
-          dragLocation: jest.fn(),
-          endDrag: jest.fn(),
-          cancelDrag: jest.fn(),
-        })
-      ),
-    },
+    timelines: {},
     osquery: {
       OsqueryResults: jest.fn().mockReturnValue(null),
       fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
