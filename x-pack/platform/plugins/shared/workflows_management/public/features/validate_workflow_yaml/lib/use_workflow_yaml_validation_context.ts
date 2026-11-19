@@ -15,6 +15,7 @@ import type {
 import { useGetPropertyHandler } from './property_handlers/use_get_property_handler';
 import { createWorkflowContextRegistry } from '../../../../common/lib/create_workflow_context_registry';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
+import { useServiceAccountDirectory } from '../../../entities/service_accounts';
 import {
   selectConnectorsLoadState,
   selectWorkflow,
@@ -60,6 +61,7 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
   const esqlCallbacksRef = useRef(esqlCallbacks);
   esqlCallbacksRef.current = esqlCallbacks;
   const getPropertyHandler = useGetPropertyHandler();
+  const serviceAccountDirectory = useServiceAccountDirectory();
 
   return useMemo(
     () => ({
@@ -75,6 +77,7 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
       }),
       workflows,
       isManaged,
+      lookupServiceAccount: serviceAccountDirectory.lookup,
       getPropertyHandler,
       esqlCallbacks: esqlCallbacksRef.current,
     }),
@@ -84,6 +87,7 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
       connectorsLoadState,
       getPropertyHandler,
       registry,
+      serviceAccountDirectory,
       workflows,
       isManaged,
     ]
