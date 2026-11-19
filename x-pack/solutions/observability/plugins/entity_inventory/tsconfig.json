@@ -3,11 +3,12 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "server/**/*", "test/scout*/**/*"],
+  "include": ["common/**/*", "server/**/*", "test/integration_tests/**/*", "test/scout*/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/core-security-server",
+    "@kbn/core-test-helpers-kbn-server",
     "@kbn/config-schema",
     "@kbn/entity-store",
     "@kbn/es-types",
