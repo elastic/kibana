@@ -45,7 +45,9 @@ const toResult = (id: string, item: BulkResponseItem | undefined): SaveEventResu
   if (!error) {
     return { id, status: 'created' };
   }
-  return { id, status: 'failed', error: error.reason ?? error.type };
+  const reason = error.reason ?? error.type;
+  const cause = error.caused_by?.reason;
+  return { id, status: 'failed', error: cause ? `${reason}: ${cause}` : reason };
 };
 
 /** `esClient` must send the product origin that system data streams require, as core's clients do. */
