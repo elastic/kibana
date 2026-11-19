@@ -35,6 +35,8 @@ export const listRequestBodySchema = lazySchema(() =>
       from: instantParam,
       to: instantParam,
       limit: listLimitParam,
+      // Also count the active alerts of each entity; read by `_list`, ignored by `_plan`.
+      includeAlertCounts: z.boolean().default(false),
     })
     .strict()
     .refine(isFromEarlierThanTo, dateRangeRefinement)

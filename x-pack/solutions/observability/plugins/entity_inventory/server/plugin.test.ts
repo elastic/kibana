@@ -39,11 +39,12 @@ describe('EntityInventoryPlugin routes', () => {
 
   const setUpWithStartDependencies = () => {
     const getEntityDefinitionsClient = jest.fn().mockReturnValue({ list: jest.fn() });
+    const getSpaceId = jest.fn().mockReturnValue('my-space');
     const core = coreMock.createSetup();
     const coreStart = coreMock.createStart();
     core.getStartServices.mockResolvedValue([
       coreStart,
-      { entityStore: { getEntityDefinitionsClient } },
+      { entityStore: { getEntityDefinitionsClient }, spaces: { spacesService: { getSpaceId } } },
       undefined,
     ]);
     const { plugin } = buildPlugin();
@@ -58,6 +59,7 @@ describe('EntityInventoryPlugin routes', () => {
     return {
       coreStart,
       getEntityDefinitionsClient,
+      getSpaceId,
       getInventoryService: dependencies.getInventoryService,
     };
   };
@@ -86,6 +88,15 @@ describe('EntityInventoryPlugin routes', () => {
     await getInventoryService(request);
 
     expect(getEntityDefinitionsClient).toHaveBeenCalledWith(request);
+  });
+
+  it('resolves the space of the request for the service', async () => {
+    const { getSpaceId, getInventoryService } = setUpWithStartDependencies();
+    const request = httpServerMock.createKibanaRequest();
+
+    await getInventoryService(request);
+
+    expect(getSpaceId).toHaveBeenCalledWith(request);
   });
 
   it('queries Elasticsearch as the requesting user', async () => {

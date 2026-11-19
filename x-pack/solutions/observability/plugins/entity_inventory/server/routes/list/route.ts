@@ -35,6 +35,7 @@ export const listRoute = createEntityInventoryServerRoute({
       type: path.type,
       window: { from: body.from, to: body.to },
       limit: body.limit,
+      includeAlertCounts: body.includeAlertCounts,
       signal: createAbortSignal(request.events.aborted$),
     });
   },

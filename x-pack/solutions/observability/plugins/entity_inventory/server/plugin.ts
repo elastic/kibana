@@ -77,11 +77,12 @@ export class EntityInventoryPlugin
   private createInventoryService =
     (core: CoreSetup<EntityInventoryStartDependencies, EntityInventoryPluginStart>) =>
     async (request: KibanaRequest): Promise<InventoryService> => {
-      const [coreStart, { entityStore }] = await core.getStartServices();
+      const [coreStart, { entityStore, spaces }] = await core.getStartServices();
       return new InventoryService(
         entityStore.getEntityDefinitionsClient(request),
         coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
-        this.logger
+        this.logger,
+        spaces.spacesService.getSpaceId(request)
       );
     };
 
