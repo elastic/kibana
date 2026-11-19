@@ -47,6 +47,7 @@ export const createWorkflowMigrationsDataClientMock = () => ({
 export const createWorkflowMigrationsTaskClientMock = () => ({
   start: jest.fn().mockResolvedValue({ exists: true, started: true }),
   stop: jest.fn().mockResolvedValue({ exists: true, stopped: true }),
+  isMigrationRunning: jest.fn().mockReturnValue(false),
   updateToRetry: jest.fn().mockResolvedValue({ updated: true }),
   getStats: jest.fn().mockResolvedValue({
     id: 'mig-1',

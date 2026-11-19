@@ -7,11 +7,13 @@
 
 import expect from 'expect';
 import pRetry from 'p-retry';
-import { FAIL_TRANSLATION_TITLE } from '@kbn/security-solution-plugin/server/lib/siem_migrations/workflows/task/agent/constants';
 import type { TinesStoryExport } from '@kbn/security-solution-plugin/common/siem_migrations/model/vendor/workflows/tines.gen';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { createConnector, deleteConnector } from '../../../../detections_response/utils/connectors';
-import { deleteAllWorkflowMigrations } from '../../../utils/es_queries_workflows';
+import {
+  deleteAllWorkflowMigrations,
+  markWorkflowFailed,
+} from '../../../utils/es_queries_workflows';
 import { tinesStoryExport } from '../../../utils/workflow_mocks';
 import { workflowMigrationRouteFactory } from '../../../utils/workflows';
 
@@ -111,11 +113,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('retries only the failed workflow', async () => {
+      const retriedTitle = 'Send notification';
       const createResponse = await workflowMigrationRoutes.create({});
       const migrationId = createResponse.body.migration_id;
       await workflowMigrationRoutes.addTinesWorkflowsToMigration({
         migrationId,
-        body: [tinesStoryExport, storyNamed(FAIL_TRANSLATION_TITLE)],
+        body: [tinesStoryExport, storyNamed(retriedTitle)],
       });
 
       await workflowMigrationRoutes.start({
@@ -129,11 +132,14 @@ export default ({ getService }: FtrProviderContext) => {
         (workflow) => workflow.original_workflow.title === 'Receive alert'
       );
       const failed = workflows.body.data.find(
-        (workflow) => workflow.original_workflow.title === FAIL_TRANSLATION_TITLE
+        (workflow) => workflow.original_workflow.title === retriedTitle
       );
       expect(translated?.status).toBe('completed');
       expect(translated?.translation_result).toBe('full');
-      expect(failed?.status).toBe('failed');
+      if (!failed?.id) {
+        throw new Error(`expected a stored workflow named ${retriedTitle}`);
+      }
+      await markWorkflowFailed({ es, migrationId, workflowId: failed.id });
       const translatedAt = translated?.comments?.[0]?.created_at;
 
       const retryResponse = await workflowMigrationRoutes.start({
@@ -148,19 +154,20 @@ export default ({ getService }: FtrProviderContext) => {
         (workflow) => workflow.original_workflow.title === 'Receive alert'
       );
       const failedAfter = workflowsAfter.body.data.find(
-        (workflow) => workflow.original_workflow.title === FAIL_TRANSLATION_TITLE
+        (workflow) => workflow.original_workflow.title === retriedTitle
       );
       expect(translatedAfter?.status).toBe('completed');
       expect(translatedAfter?.comments?.[0]?.created_at).toEqual(translatedAt);
-      expect(failedAfter?.status).toBe('failed');
+      expect(failedAfter?.status).toBe('completed');
+      expect(failedAfter?.translation_result).toBe('full');
 
       const stats = await workflowMigrationRoutes.stats({ migrationId });
       expect(stats.body.items).toEqual({
         total: 2,
         pending: 0,
         processing: 0,
-        completed: 1,
-        failed: 1,
+        completed: 2,
+        failed: 0,
       });
     });
 

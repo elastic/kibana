@@ -11,8 +11,8 @@ import {
   SIEM_MIGRATIONS_ASSISTANT_USER,
 } from '../../../../../../common/siem_migrations/constants';
 import type { OriginalWorkflow } from '../../../../../../common/siem_migrations/model/workflow_migration.gen';
-import { BLOCK_TRANSLATION_TITLE, FAIL_TRANSLATION_TITLE } from './constants';
-import { getWorkflowMigrationAgent } from './graph';
+import { getWorkflowMigrationAgent, PLACEHOLDER_TRANSLATION_DELAY_MS } from './graph';
+import * as placeholderNode from './nodes/placeholder';
 
 const originalWorkflow = (title: string): OriginalWorkflow => ({
   id: 'story-1',
@@ -26,11 +26,20 @@ const originalWorkflow = (title: string): OriginalWorkflow => ({
 describe('getWorkflowMigrationAgent', () => {
   const agent = getWorkflowMigrationAgent({ modelName: 'test-model' });
 
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
   it('returns a full placeholder translation without calling a model', async () => {
-    const result = await agent.invoke({
+    jest.useFakeTimers();
+    const pending = agent.invoke({
       id: 'workflow-1',
       original_workflow: originalWorkflow('Receive alert'),
     });
+    await jest.advanceTimersByTimeAsync(PLACEHOLDER_TRANSLATION_DELAY_MS);
+
+    const result = await pending;
 
     expect(result.translation_result).toBe(MigrationTranslationResult.FULL);
     expect(result.elastic_workflow).toEqual({
@@ -47,26 +56,32 @@ describe('getWorkflowMigrationAgent', () => {
     ]);
   });
 
-  it('fails translation when the original title is fail-translation', async () => {
+  it('fails translation when the placeholder node returns an error', async () => {
+    jest
+      .spyOn(placeholderNode, 'placeholderNoOpNode')
+      .mockRejectedValueOnce(new Error('Dummy translation failed'));
+
     await expect(
       agent.invoke({
         id: 'workflow-1',
-        original_workflow: originalWorkflow(FAIL_TRANSLATION_TITLE),
+        original_workflow: originalWorkflow('Receive alert'),
       })
     ).rejects.toThrow('Dummy translation failed');
   });
 
-  it('waits until abort when the original title is block-translation', async () => {
+  it('rejects with AbortError when the translation is aborted during the wait', async () => {
+    jest.useFakeTimers();
     const abortController = new AbortController();
     const pending = agent.invoke(
       {
         id: 'workflow-1',
-        original_workflow: originalWorkflow(BLOCK_TRANSLATION_TITLE),
+        original_workflow: originalWorkflow('Receive alert'),
       },
       { signal: abortController.signal }
     );
+    const assertion = expect(pending).rejects.toBeInstanceOf(AbortError);
     abortController.abort();
 
-    await expect(pending).rejects.toBeInstanceOf(AbortError);
+    await assertion;
   });
 });

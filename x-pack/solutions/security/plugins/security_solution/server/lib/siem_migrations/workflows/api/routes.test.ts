@@ -233,6 +233,25 @@ describe('workflow migration routes', () => {
       expect(response.status).toEqual(500);
     });
 
+    it('returns 409 when deleting a running migration', async () => {
+      clients.siemWorkflowMigrationsClient.task.isMigrationRunning.mockReturnValueOnce(true);
+      registerSiemWorkflowMigrationsDeleteRoute(server.router, logger);
+      const response = await server.inject(
+        requestMock.create({
+          method: 'delete',
+          path: SIEM_WORKFLOW_MIGRATION_PATH,
+          params: { migration_id: 'mig-1' },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(clients.siemWorkflowMigrationsClient.data.deleteMigration).not.toHaveBeenCalled();
+      expect(response.status).toEqual(409);
+      expect(response.body).toEqual(
+        'A running workflow migration cannot be deleted. Please stop the migration first and try again'
+      );
+    });
+
     it('stores a Tines story as a workflow document', async () => {
       registerSiemWorkflowMigrationsCreateTinesWorkflowsRoute(server.router, logger);
       const response = await invokeHandler(

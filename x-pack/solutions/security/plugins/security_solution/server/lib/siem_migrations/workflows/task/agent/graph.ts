@@ -9,13 +9,16 @@ import type { RunnableConfig } from '@langchain/core/runnables';
 import { AbortError } from '@kbn/kibana-utils-plugin/server';
 import { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import { generateAssistantComment } from '../../../common/task/util/comments';
-import { BLOCK_TRANSLATION_TITLE, FAIL_TRANSLATION_TITLE } from './constants';
+import * as placeholderNode from './nodes/placeholder';
 import type {
   MigrateWorkflowConfigSchema,
   WorkflowMigrationAgent,
   WorkflowMigrationTaskInput,
   WorkflowMigrationTaskOutput,
 } from './types';
+
+/** How long the placeholder waits so a stop request can abort it. */
+export const PLACEHOLDER_TRANSLATION_DELAY_MS = 3_000;
 
 const quoteYaml = (value: string): string => JSON.stringify(value);
 
@@ -35,23 +38,25 @@ const buildPlaceholderWorkflowYaml = (title: string): string =>
     `      message: ${quoteYaml(`Placeholder translation for ${title}`)}`,
   ].join('\n');
 
-const waitForAbort = (signal: AbortSignal | undefined): Promise<never> =>
-  new Promise((_, reject) => {
-    if (!signal) {
-      reject(new Error('Missing abort signal'));
+const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
+  new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new AbortError());
       return;
     }
-    const fail = () => reject(new AbortError());
-    if (signal.aborted) {
-      fail();
-      return;
-    }
-    signal.addEventListener('abort', fail, { once: true });
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(new AbortError());
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener('abort', onAbort);
+      resolve();
+    }, ms);
+    signal?.addEventListener('abort', onAbort, { once: true });
   });
 
 /**
  * Placeholder translation graph. It records the selected model name and does not call the model.
- * `block-translation` and `fail-translation` titles exist so stop and retry can be tested without an LLM.
  */
 export const getWorkflowMigrationAgent = ({
   modelName,
@@ -62,12 +67,8 @@ export const getWorkflowMigrationAgent = ({
     input: WorkflowMigrationTaskInput,
     config?: RunnableConfig<MigrateWorkflowConfigSchema>
   ): Promise<WorkflowMigrationTaskOutput> => {
-    if (input.original_workflow.title === BLOCK_TRANSLATION_TITLE) {
-      await waitForAbort(config?.signal);
-    }
-    if (input.original_workflow.title === FAIL_TRANSLATION_TITLE) {
-      throw new Error('Dummy translation failed');
-    }
+    await placeholderNode.placeholderNoOpNode();
+    await sleep(PLACEHOLDER_TRANSLATION_DELAY_MS, config?.signal);
 
     const modelLabel =
       modelName && modelName.length > 0 ? modelName : 'the connector default model';

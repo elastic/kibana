@@ -61,12 +61,13 @@ describe('WorkflowMigrationsDataWorkflowsClient', () => {
             filter: { term: { status: SiemMigrationStatus.COMPLETED } },
             aggs: {
               result: { terms: { field: 'translation_result' } },
-              installable: { filter: dsl.isInstalled() },
+              installable: { filter: dsl.isInstallable() },
             },
           },
           failed: { filter: { term: { status: SiemMigrationStatus.FAILED } } },
         },
         _source: false,
+        track_total_hits: true,
       });
       expect(result).toEqual({
         id: 'migration-1',

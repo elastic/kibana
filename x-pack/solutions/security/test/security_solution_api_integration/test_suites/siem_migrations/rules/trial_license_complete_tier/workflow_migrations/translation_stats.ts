@@ -7,11 +7,13 @@
 
 import expect from 'expect';
 import pRetry from 'p-retry';
-import { FAIL_TRANSLATION_TITLE } from '@kbn/security-solution-plugin/server/lib/siem_migrations/workflows/task/agent/constants';
 import type { TinesStoryExport } from '@kbn/security-solution-plugin/common/siem_migrations/model/vendor/workflows/tines.gen';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { createConnector, deleteConnector } from '../../../../detections_response/utils/connectors';
-import { deleteAllWorkflowMigrations } from '../../../utils/es_queries_workflows';
+import {
+  deleteAllWorkflowMigrations,
+  markWorkflowFailed,
+} from '../../../utils/es_queries_workflows';
 import { tinesStoryExport } from '../../../utils/workflow_mocks';
 import { workflowMigrationRouteFactory } from '../../../utils/workflows';
 
@@ -27,10 +29,10 @@ const MOCK_BEDROCK_CONNECTOR = {
   },
 };
 
-const failingStory: TinesStoryExport = {
+const secondStory: TinesStoryExport = {
   ...tinesStoryExport,
-  name: FAIL_TRANSLATION_TITLE,
-  guid: 'story-fail-translation',
+  name: 'Send notification',
+  guid: 'story-send-notification',
 };
 
 export default ({ getService }: FtrProviderContext) => {
@@ -66,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
       const migrationId = createResponse.body.migration_id;
       await workflowMigrationRoutes.addTinesWorkflowsToMigration({
         migrationId,
-        body: [tinesStoryExport, failingStory],
+        body: [tinesStoryExport, secondStory],
       });
 
       const before = await workflowMigrationRoutes.translationStats({ migrationId });
@@ -94,6 +96,15 @@ export default ({ getService }: FtrProviderContext) => {
         { retries: 10, minTimeout: 500 }
       );
 
+      const workflows = await workflowMigrationRoutes.getWorkflows({ migrationId });
+      const failedWorkflow = workflows.body.data.find(
+        (workflow) => workflow.original_workflow.title === secondStory.name
+      );
+      if (!failedWorkflow?.id) {
+        throw new Error(`expected a stored workflow named ${secondStory.name}`);
+      }
+      await markWorkflowFailed({ es, migrationId, workflowId: failedWorkflow.id });
+
       const after = await workflowMigrationRoutes.translationStats({ migrationId });
       expect(after.body).toEqual(
         expect.objectContaining({
@@ -103,7 +114,7 @@ export default ({ getService }: FtrProviderContext) => {
             success: {
               total: 1,
               result: { full: 1, partial: 0, untranslatable: 0 },
-              installable: 0,
+              installable: 1,
             },
             failed: 1,
           },

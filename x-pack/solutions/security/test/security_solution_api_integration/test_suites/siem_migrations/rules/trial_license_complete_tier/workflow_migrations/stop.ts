@@ -7,8 +7,6 @@
 
 import expect from 'expect';
 import pRetry from 'p-retry';
-import { BLOCK_TRANSLATION_TITLE } from '@kbn/security-solution-plugin/server/lib/siem_migrations/workflows/task/agent/constants';
-import type { TinesStoryExport } from '@kbn/security-solution-plugin/common/siem_migrations/model/vendor/workflows/tines.gen';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { createConnector, deleteConnector } from '../../../../detections_response/utils/connectors';
 import { deleteAllWorkflowMigrations } from '../../../utils/es_queries_workflows';
@@ -25,12 +23,6 @@ const MOCK_BEDROCK_CONNECTOR = {
     accessKey: 'mock-access-key',
     secret: 'mock-secret-key',
   },
-};
-
-const blockingStory: TinesStoryExport = {
-  ...tinesStoryExport,
-  name: BLOCK_TRANSLATION_TITLE,
-  guid: 'story-block-translation',
 };
 
 export default ({ getService }: FtrProviderContext) => {
@@ -66,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
       migrationId = createResponse.body.migration_id;
       await workflowMigrationRoutes.addTinesWorkflowsToMigration({
         migrationId,
-        body: [blockingStory],
+        body: [tinesStoryExport],
       });
 
       const startResponse = await workflowMigrationRoutes.start({
@@ -82,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
             throw new Error(`expected running, received ${stats.body.status}`);
           }
         },
-        { retries: 10, minTimeout: 200 }
+        { retries: 20, minTimeout: 100, factor: 1 }
       );
 
       const stopResponse = await workflowMigrationRoutes.stop({ migrationId });

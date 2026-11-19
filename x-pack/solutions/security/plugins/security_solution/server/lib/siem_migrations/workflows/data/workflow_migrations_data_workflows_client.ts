@@ -39,13 +39,13 @@ export class WorkflowMigrationsDataWorkflowsClient extends SiemMigrationsDataIte
         filter: { term: { status: SiemMigrationStatus.COMPLETED } },
         aggs: {
           result: { terms: { field: 'translation_result' } },
-          installable: { filter: dsl.isInstalled() },
+          installable: { filter: dsl.isInstallable() },
         },
       },
       failed: { filter: { term: { status: SiemMigrationStatus.FAILED } } },
     };
     const result = await this.esClient
-      .search({ index, query, aggregations, _source: false })
+      .search({ index, query, aggregations, _source: false, track_total_hits: true })
       .catch((error) => {
         this.logger.error(`Error getting workflow migrations stats: ${error.message}`);
         throw error;
@@ -86,6 +86,9 @@ export class WorkflowMigrationsDataWorkflowsClient extends SiemMigrationsDataIte
 
     if (filters.installed != null) {
       filter.push(filters.installed ? dsl.isInstalled() : dsl.isNotInstalled());
+    }
+    if (filters.installable != null) {
+      filter.push(filters.installable ? dsl.isInstallable() : dsl.isNotInstallable());
     }
 
     return { bool: { filter } };
