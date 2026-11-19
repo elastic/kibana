@@ -28,7 +28,11 @@ import { esql } from '@elastic/esql';
 
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import { getFailureTooltip, getFailureTooltipText } from '@kbn/lens-common';
+import {
+  CONVERTED_ANNOTATION_QUERY_LIMIT,
+  getFailureTooltip,
+  getFailureTooltipText,
+} from '@kbn/lens-common';
 import { layerTypes } from '../../..';
 
 import type { ConvertibleLayer, LayerType } from './esql_conversion_types';
@@ -215,6 +219,10 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
   // layers. The table summarizes the outcome instead of offering selections that cannot be
   // honored: every data layer must convert, while annotation and reference-line layers remain
   // in their existing datasource.
+  // An annotation layer is only convertible when it has query annotations to convert.
+  const hasConvertedQueryAnnotations = layers.some(
+    (layer) => layer.type === layerTypes.ANNOTATIONS && layer.isConvertibleToEsql
+  );
   const isConfirmButtonEnabled =
     dataLayers.length > 0 && dataLayers.every((layer) => layer.isConvertibleToEsql);
 
@@ -256,6 +264,21 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
           defaultMessage: `Once you save the chart after converting to ES|QL, you can't switch back.`,
         })}
       />
+
+      {hasConvertedQueryAnnotations ? (
+        <>
+          <EuiSpacer size="s" />
+          <KbnWarningCallout
+            size="s"
+            data-test-subj="lnsConvertToEsqlAnnotationLimitWarning"
+            title={i18n.translate('xpack.lens.config.queryAnnotationLimitWarningTitle', {
+              defaultMessage:
+                'Converted annotation queries return at most the {limit} most recent events. Charts with more matching events can show fewer annotations than before.',
+              values: { limit: CONVERTED_ANNOTATION_QUERY_LIMIT },
+            })}
+          />
+        </>
+      ) : null}
 
       <EuiSpacer size="l" />
 
