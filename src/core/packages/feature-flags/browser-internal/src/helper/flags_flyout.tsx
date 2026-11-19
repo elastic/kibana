@@ -8,12 +8,14 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { css } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonGroup,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCode,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
@@ -21,13 +23,14 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiIcon,
   EuiInMemoryTable,
   EuiLoadingSpinner,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
@@ -73,8 +76,12 @@ export interface FlagsFlyoutProps {
   onClose: () => void;
 }
 
-/** Keep the identifier on one line so a narrow flyout scrolls instead of covering it. */
-const flagNameStyle = css`
+const valueInputWrapperStyle = css`
+  width: 120px;
+`;
+
+/** Keep the values on one line so a narrow flyout scrolls instead of covering it. */
+const noWrapStyle = css`
   white-space: nowrap;
 `;
 
@@ -106,6 +113,22 @@ function evaluationValues(flags: TrackedFlagEvaluation[] | undefined): Record<st
   return values;
 }
 
+const SAVED_INDICATOR_DURATION_MS = 1400;
+const fadeInOut = keyframes`
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+`;
+
 export function FlagsFlyout({
   http,
   refreshFlags,
@@ -117,10 +140,23 @@ export function FlagsFlyout({
   const [forbidden, setForbidden] = useState(false);
   const [overridesUnavailable, setOverridesUnavailable] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
-  const [busyKey, setBusyKey] = useState<string | undefined>();
+  // flag key -> save sequence number, so a repeat save restarts the indicator animation
+  const [savedKeys, setSavedKeys] = useState<ReadonlyMap<string, number>>(new Map());
+
+  /** Briefly marks a flag as saved so a changed value is visible even when nothing else moves. */
+  const markSaved = useCallback((flagKey: string) => {
+    setSavedKeys((current) => new Map(current).set(flagKey, (current.get(flagKey) ?? 0) + 1));
+  }, []);
+
+  const clearSaved = useCallback((flagKey: string) => {
+    setSavedKeys((current) => {
+      const next = new Map(current);
+      next.delete(flagKey);
+      return next;
+    });
+  }, []);
 
   const load = useCallback(async () => {
-    setLoading(true);
     setErrorMessage(undefined);
     const [snapshotResult, overridesResult] = await Promise.allSettled([
       http.post<OfrepBulkResponse>(OFREP_BULK_PATH, { body: JSON.stringify({}) }),
@@ -179,13 +215,13 @@ export function FlagsFlyout({
 
   const saveOverride = useCallback(
     async (flagKey: string, value: FeatureFlagValue) => {
-      setBusyKey(flagKey);
       try {
         await http.put(buildPath(`${FEATURE_FLAGS_OVERRIDES_API_PATH}/{flagKey}`, { flagKey }), {
           body: JSON.stringify({ value }),
         });
         await refreshFlags();
         await load();
+        markSaved(flagKey);
       } catch (error) {
         setErrorMessage(
           isForbidden(error)
@@ -196,35 +232,30 @@ export function FlagsFlyout({
                 defaultMessage: 'The override could not be saved.',
               })
         );
-      } finally {
-        setBusyKey(undefined);
       }
     },
-    [http, load, refreshFlags]
+    [http, load, markSaved, refreshFlags]
   );
 
   const resetOverride = useCallback(
     async (flagKey: string) => {
-      setBusyKey(flagKey);
       try {
         await http.delete(buildPath(`${FEATURE_FLAGS_OVERRIDES_API_PATH}/{flagKey}`, { flagKey }));
         await refreshFlags();
         await load();
+        markSaved(flagKey);
       } catch {
         setErrorMessage(
           i18n.translate('core.featureFlags.helper.resetFailedErrorMessage', {
             defaultMessage: 'The override could not be removed.',
           })
         );
-      } finally {
-        setBusyKey(undefined);
       }
     },
-    [http, load, refreshFlags]
+    [http, load, markSaved, refreshFlags]
   );
 
   const clearAll = useCallback(async () => {
-    setBusyKey('*');
     try {
       await http.delete(FEATURE_FLAGS_OVERRIDES_API_PATH);
       await refreshFlags();
@@ -235,8 +266,6 @@ export function FlagsFlyout({
           defaultMessage: 'Runtime overrides could not be cleared.',
         })
       );
-    } finally {
-      setBusyKey(undefined);
     }
   }, [http, load, refreshFlags]);
 
@@ -247,7 +276,7 @@ export function FlagsFlyout({
       sortable: true,
       minWidth: '12rem',
       render: (key: string) => (
-        <EuiText size="s" css={flagNameStyle}>
+        <EuiText size="s" css={noWrapStyle}>
           {key}
         </EuiText>
       ),
@@ -256,6 +285,7 @@ export function FlagsFlyout({
       field: 'type',
       name: i18n.translate('core.featureFlags.helper.typeColumnLabel', { defaultMessage: 'Type' }),
       width: '90px',
+      minWidth: '90px',
       sortable: true,
     },
     {
@@ -264,35 +294,73 @@ export function FlagsFlyout({
         defaultMessage: 'Source',
       }),
       width: '150px',
+      minWidth: '150px',
       sortable: true,
       render: (source: FeatureFlagSource) => (
         <EuiBadge color={sourceColor[source]}>{sourceLabel(source)}</EuiBadge>
       ),
     },
-    {
-      field: 'value',
-      name: i18n.translate('core.featureFlags.helper.valueColumnLabel', {
-        defaultMessage: 'Evaluated value',
-      }),
-      width: '160px',
-      render: (value: FeatureFlagValue) => <EuiText size="s">{String(value)}</EuiText>,
-    },
   ];
 
-  if (!forbidden) {
+  const valueColumnName = i18n.translate('core.featureFlags.helper.valueColumnLabel', {
+    defaultMessage: 'Value',
+  });
+
+  if (forbidden) {
     columns.push({
-      name: i18n.translate('core.featureFlags.helper.overrideColumnLabel', {
-        defaultMessage: 'Override',
-      }),
-      width: '280px',
+      field: 'value',
+      name: valueColumnName,
+      width: '1px',
+      render: (value: FeatureFlagValue) => (
+        <EuiCode css={noWrapStyle}>{JSON.stringify(value)}</EuiCode>
+      ),
+    });
+  } else {
+    columns.push({
+      name: valueColumnName,
+      width: '1px',
       render: (row: FlagRow) => (
         <OverrideEditor
           row={row}
-          disabled={busyKey !== undefined}
+          savedSequence={savedKeys.get(row.key)}
+          onSavedAnimationEnd={() => clearSaved(row.key)}
           onSave={(value) => saveOverride(row.key, value)}
-          onReset={() => resetOverride(row.key)}
         />
       ),
+    });
+    columns.push({
+      name: i18n.translate('core.featureFlags.helper.actionsColumnLabel', {
+        defaultMessage: 'Actions',
+      }),
+      width: '1px',
+      align: 'center',
+      render: (row: FlagRow) => {
+        if (!row.hasRuntimeOverride) {
+          return null;
+        }
+        const resetLabel = i18n.translate('core.featureFlags.helper.resetOverrideAriaLabel', {
+          defaultMessage: 'Remove override for {flagKey}',
+          values: { flagKey: row.key },
+        });
+        return (
+          <EuiToolTip
+            content={i18n.translate('core.featureFlags.helper.clearOverrideTooltip', {
+              defaultMessage: 'Clear override',
+            })}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="eraser"
+              color="danger"
+              aria-label={resetLabel}
+              onClick={() => {
+                void resetOverride(row.key);
+              }}
+              data-test-subj={`featureFlagsHelperReset-${row.key}`}
+            />
+          </EuiToolTip>
+        );
+      },
     });
   }
 
@@ -391,8 +459,6 @@ export function FlagsFlyout({
                     onClick={() => {
                       void clearAll();
                     }}
-                    isLoading={busyKey === '*'}
-                    isDisabled={busyKey !== undefined && busyKey !== '*'}
                     data-test-subj="featureFlagsHelperClearAll"
                   >
                     <FormattedMessage
@@ -407,7 +473,6 @@ export function FlagsFlyout({
                   onClick={() => {
                     void refreshFlags().then(load);
                   }}
-                  isDisabled={busyKey !== undefined}
                   data-test-subj="featureFlagsHelperRefresh"
                 >
                   <FormattedMessage
@@ -447,7 +512,7 @@ function sourceLabel(source: FeatureFlagSource): string {
 
 function isSaveableOverride(
   type: FlagRow['type'],
-  draft: FeatureFlagValue | ''
+  draft: FeatureFlagValue
 ): draft is FeatureFlagValue {
   if (type === 'number') {
     return typeof draft === 'number' && Number.isFinite(draft);
@@ -457,60 +522,58 @@ function isSaveableOverride(
 
 function OverrideEditor({
   row,
-  disabled,
+  savedSequence,
+  onSavedAnimationEnd,
   onSave,
-  onReset,
 }: {
   row: FlagRow;
-  disabled: boolean;
+  savedSequence: number | undefined;
+  onSavedAnimationEnd: () => void;
   onSave: (value: FeatureFlagValue) => void;
-  onReset: () => void;
 }) {
-  const [draft, setDraft] = useState<FeatureFlagValue | ''>(row.draft);
+  const { euiTheme } = useEuiTheme();
+  const [draft, setDraft] = useState<FeatureFlagValue>(row.draft);
   useEffect(() => {
     setDraft(row.draft);
   }, [row.draft, row.key]);
 
-  const unchanged = Object.is(draft, row.draft);
-  const saveLabel = i18n.translate('core.featureFlags.helper.saveOverrideAriaLabel', {
-    defaultMessage: 'Save override for {flagKey}',
-    values: { flagKey: row.key },
-  });
-  const resetLabel = i18n.translate('core.featureFlags.helper.resetOverrideAriaLabel', {
-    defaultMessage: 'Remove override for {flagKey}',
-    values: { flagKey: row.key },
-  });
+  const commit = (value: FeatureFlagValue, isExplicit: boolean = false) => {
+    const needsOverride = (row.type === 'boolean' || isExplicit) && !row.hasRuntimeOverride;
+    if (!isSaveableOverride(row.type, value)) {
+      // invalid, revert to previous value
+      setDraft(row.draft);
+      return;
+    }
+    if (Object.is(value, row.draft) && !needsOverride) {
+      return;
+    }
+    onSave(value);
+  };
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <FlagValueEditor row={row} draft={draft} disabled={disabled} onChange={setDraft} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={saveLabel} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="check"
-            aria-label={saveLabel}
-            onClick={() => {
-              if (isSaveableOverride(row.type, draft)) {
-                onSave(draft);
-              }
-            }}
-            isDisabled={disabled || unchanged || !isSaveableOverride(row.type, draft)}
-            data-test-subj={`featureFlagsHelperSave-${row.key}`}
+    <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+      <FlagValueEditor row={row} draft={draft} onChange={setDraft} onCommit={commit} />
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          flex-shrink: 0;
+          width: ${euiTheme.size.base};
+          margin-inline-start: ${euiTheme.size.xs};
+        `}
+      >
+        {savedSequence !== undefined && (
+          <EuiIcon
+            key={savedSequence}
+            type="check"
+            color={euiTheme.colors.vis.euiColorVis2}
+            css={css`
+              animation: ${fadeInOut} ${SAVED_INDICATOR_DURATION_MS}ms ease-in-out forwards;
+            `}
+            onAnimationEnd={onSavedAnimationEnd}
+            data-test-subj={`featureFlagsHelperSavedCheck-${row.key}`}
+            aria-hidden={true}
           />
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={resetLabel} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="eraser"
-            aria-label={resetLabel}
-            onClick={onReset}
-            isDisabled={disabled || !row.hasRuntimeOverride}
-            data-test-subj={`featureFlagsHelperReset-${row.key}`}
-          />
-        </EuiToolTip>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -519,69 +582,99 @@ function OverrideEditor({
 function FlagValueEditor({
   row,
   draft,
-  disabled,
   onChange,
+  onCommit,
 }: {
   row: FlagRow;
   draft: FeatureFlagValue;
-  disabled: boolean;
-  onChange: (value: FeatureFlagValue | '') => void;
+  onChange: (value: FeatureFlagValue) => void;
+  onCommit: (value: FeatureFlagValue, isExplicit?: boolean) => void;
 }) {
+  const commitOnEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      onCommit(draft, true);
+    }
+  };
+
   if (row.type === 'boolean') {
     return (
-      <EuiSwitch
-        label={i18n.translate('core.featureFlags.helper.booleanOverrideLabel', {
+      <EuiButtonGroup
+        legend={i18n.translate('core.featureFlags.helper.booleanOverrideLabel', {
           defaultMessage: 'Override {flagKey}',
           values: { flagKey: row.key },
         })}
-        showLabel={false}
-        checked={draft === true}
-        disabled={disabled}
-        compressed
-        onChange={(event) => onChange(event.target.checked)}
+        variant="selection"
+        type="single"
+        buttonSize="s"
+        wrap={false}
+        idSelected={draft === true ? `${row.key}-true` : `${row.key}-false`}
+        onChange={(id) => {
+          const next = id === `${row.key}-true`;
+          onChange(next);
+          onCommit(next);
+        }}
         data-test-subj={`featureFlagsHelperValue-${row.key}`}
-      />
+      >
+        <EuiButton
+          id={`${row.key}-true`}
+          data-test-subj={`featureFlagsHelperValue-${row.key}-true`}
+        >
+          true
+        </EuiButton>
+        <EuiButton
+          id={`${row.key}-false`}
+          data-test-subj={`featureFlagsHelperValue-${row.key}-false`}
+        >
+          false
+        </EuiButton>
+      </EuiButtonGroup>
     );
   }
 
   if (row.type === 'number') {
     return (
-      <EuiFieldNumber
-        compressed
-        value={typeof draft === 'number' ? draft : ''}
-        disabled={disabled}
-        aria-label={i18n.translate('core.featureFlags.helper.numberOverrideAriaLabel', {
-          defaultMessage: 'Override value for {flagKey}',
-          values: { flagKey: row.key },
-        })}
-        onChange={(event) => {
-          const next = event.target.value;
-          if (next === '') {
-            onChange('');
-            return;
-          }
-          const parsed = Number(next);
-          if (!Number.isNaN(parsed)) {
-            onChange(parsed);
-          }
-        }}
-        data-test-subj={`featureFlagsHelperValue-${row.key}`}
-      />
+      <EuiFlexItem grow={false} css={valueInputWrapperStyle}>
+        <EuiFieldNumber
+          compressed
+          value={typeof draft === 'number' ? draft : ''}
+          aria-label={i18n.translate('core.featureFlags.helper.numberOverrideAriaLabel', {
+            defaultMessage: 'Override value for {flagKey}',
+            values: { flagKey: row.key },
+          })}
+          onChange={(event) => {
+            const next = event.target.value;
+            if (next === '') {
+              onChange('');
+              return;
+            }
+            const parsed = Number(next);
+            if (!Number.isNaN(parsed)) {
+              onChange(parsed);
+            }
+          }}
+          onBlur={() => onCommit(draft)}
+          onKeyDown={commitOnEnter}
+          data-test-subj={`featureFlagsHelperValue-${row.key}`}
+        />
+      </EuiFlexItem>
     );
   }
 
   return (
-    <EuiFieldText
-      compressed
-      value={typeof draft === 'string' ? draft : String(draft)}
-      disabled={disabled}
-      maxLength={5000}
-      aria-label={i18n.translate('core.featureFlags.helper.stringOverrideAriaLabel', {
-        defaultMessage: 'Override value for {flagKey}',
-        values: { flagKey: row.key },
-      })}
-      onChange={(event) => onChange(event.target.value)}
-      data-test-subj={`featureFlagsHelperValue-${row.key}`}
-    />
+    <EuiFlexItem grow={false} css={valueInputWrapperStyle}>
+      <EuiFieldText
+        compressed
+        value={typeof draft === 'string' ? draft : String(draft)}
+        maxLength={5000}
+        aria-label={i18n.translate('core.featureFlags.helper.stringOverrideAriaLabel', {
+          defaultMessage: 'Override value for {flagKey}',
+          values: { flagKey: row.key },
+        })}
+        onChange={(event) => onChange(event.target.value)}
+        onBlur={() => onCommit(draft)}
+        onKeyDown={commitOnEnter}
+        data-test-subj={`featureFlagsHelperValue-${row.key}`}
+      />
+    </EuiFlexItem>
   );
 }

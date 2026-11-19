@@ -100,22 +100,20 @@ describe('FlagsFlyout', () => {
     const { refreshFlags } = renderFlyout(http);
     await screen.findByText('bool.flag');
 
-    await userEvent.click(screen.getByTestId('featureFlagsHelperValue-bool.flag'));
-    await userEvent.click(screen.getByTestId('featureFlagsHelperSave-bool.flag'));
+    await userEvent.click(screen.getByTestId('featureFlagsHelperValue-bool.flag-true'));
     await waitFor(() => expect(http.put).toHaveBeenCalledTimes(1));
+    expect(await screen.findByTestId('featureFlagsHelperSavedCheck-bool.flag')).toBeInTheDocument();
     await screen.findByTestId('featureFlagsHelperValue-number.flag');
 
     const numberField = screen.getByTestId('featureFlagsHelperValue-number.flag');
     await userEvent.clear(numberField);
-    await userEvent.type(numberField, '8');
-    await userEvent.click(screen.getByTestId('featureFlagsHelperSave-number.flag'));
+    await userEvent.type(numberField, '8{Enter}');
     await waitFor(() => expect(http.put).toHaveBeenCalledTimes(2));
     await screen.findByTestId('featureFlagsHelperValue-string.flag');
 
     const stringField = screen.getByTestId('featureFlagsHelperValue-string.flag');
     await userEvent.clear(stringField);
-    await userEvent.type(stringField, 'new');
-    await userEvent.click(screen.getByTestId('featureFlagsHelperSave-string.flag'));
+    await userEvent.type(stringField, 'new{Enter}');
 
     expect(http.put).toHaveBeenCalledWith('/internal/feature-flags/overrides/bool.flag', {
       body: JSON.stringify({ value: true }),
@@ -127,6 +125,76 @@ describe('FlagsFlyout', () => {
       body: JSON.stringify({ value: 'new' }),
     });
     expect(refreshFlags).toHaveBeenCalled();
+  });
+
+  test('clicking the current boolean value creates an override only when none exists', async () => {
+    const http = createHttp();
+    http.post.mockResolvedValue({
+      flags: [
+        { key: 'plain.flag', value: false },
+        { key: 'overridden.flag', value: true },
+      ],
+    });
+    http.get.mockResolvedValue({
+      runtimeOverrides: { 'overridden.flag': true },
+      configOverrides: {},
+    });
+    http.put.mockResolvedValue({ ok: true });
+    renderFlyout(http);
+    await screen.findByText('plain.flag');
+
+    await userEvent.click(screen.getByTestId('featureFlagsHelperValue-overridden.flag-true'));
+    expect(http.put).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByTestId('featureFlagsHelperValue-plain.flag-false'));
+    await waitFor(() => expect(http.put).toHaveBeenCalledTimes(1));
+    expect(http.put).toHaveBeenCalledWith('/internal/feature-flags/overrides/plain.flag', {
+      body: JSON.stringify({ value: false }),
+    });
+  });
+
+  test('pressing Enter on an unchanged input creates an override only when none exists', async () => {
+    const http = createHttp();
+    http.post.mockResolvedValue({
+      flags: [
+        { key: 'plain.flag', value: 'same' },
+        { key: 'overridden.flag', value: 'kept' },
+      ],
+    });
+    http.get.mockResolvedValue({
+      runtimeOverrides: { 'overridden.flag': 'kept' },
+      configOverrides: {},
+    });
+    http.put.mockResolvedValue({ ok: true });
+    renderFlyout(http);
+    const plain = await screen.findByTestId('featureFlagsHelperValue-plain.flag');
+    const overridden = screen.getByTestId('featureFlagsHelperValue-overridden.flag');
+
+    await userEvent.type(overridden, '{Enter}');
+    await userEvent.click(plain);
+    await userEvent.tab();
+    expect(http.put).not.toHaveBeenCalled();
+
+    await userEvent.type(plain, '{Enter}');
+    await waitFor(() => expect(http.put).toHaveBeenCalledTimes(1));
+    expect(http.put).toHaveBeenCalledWith('/internal/feature-flags/overrides/plain.flag', {
+      body: JSON.stringify({ value: 'same' }),
+    });
+  });
+
+  test('reverts a number override to the stored value when it is emptied', async () => {
+    const http = createHttp();
+    http.post.mockResolvedValue({ flags: [{ key: 'number.flag', value: 3 }] });
+    http.get.mockResolvedValue({ runtimeOverrides: {}, configOverrides: {} });
+    renderFlyout(http);
+    const numberField = await screen.findByTestId('featureFlagsHelperValue-number.flag');
+
+    await userEvent.clear(numberField);
+    expect(numberField).toHaveValue(null);
+    await userEvent.tab();
+
+    await waitFor(() => expect(numberField).toHaveValue(3));
+    expect(http.put).not.toHaveBeenCalled();
   });
 
   test('stays read-only when the overrides endpoint refuses the user', async () => {
