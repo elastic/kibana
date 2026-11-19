@@ -80,26 +80,23 @@ describe('resolveChatCompletionReasoning', () => {
     ).toBeUndefined();
   });
 
-  it('skips the default when the endpoint advertises levels without none', () => {
-    expect(
-      resolveChatCompletionReasoning({
-        hasNativeTools: true,
-        model: 'openai-gpt-6-astra',
-        supportedEffortLevels: ['xhigh', 'high', 'medium', 'low'],
-      })
-    ).toBeUndefined();
+  it('skips the default for EIS', () => {
+    for (const model of ['openai-gpt-5.6-terra', 'openai-gpt-6-luna', 'openai-gpt-6-astra']) {
+      expect(
+        resolveChatCompletionReasoning({ hasNativeTools: true, model, isEis: true })
+      ).toBeUndefined();
+    }
   });
 
-  it('applies the default when the endpoint advertises none or no levels', () => {
-    for (const supportedEffortLevels of [['medium', 'none'], [], undefined]) {
-      expect(
-        resolveChatCompletionReasoning({
-          hasNativeTools: true,
-          model: 'openai-gpt-6-luna',
-          supportedEffortLevels,
-        })
-      ).toEqual({ effort: 'none' });
-    }
+  it('returns the caller-provided reasoning for EIS', () => {
+    expect(
+      resolveChatCompletionReasoning({
+        reasoning: { effort: 'low' },
+        hasNativeTools: true,
+        model: 'openai-gpt-6-luna',
+        isEis: true,
+      })
+    ).toEqual({ effort: 'low' });
   });
 
   it('keeps an explicit none effort when tools are present', () => {

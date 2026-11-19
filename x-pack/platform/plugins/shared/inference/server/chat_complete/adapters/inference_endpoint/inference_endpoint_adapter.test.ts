@@ -492,7 +492,7 @@ describe('inferenceEndpointAdapter', () => {
       );
     });
 
-    it('omits the reasoning default when the endpoint does not advertise the none effort level', () => {
+    it('omits the reasoning default for EIS endpoints', () => {
       executorMock.invoke.mockResolvedValue(
         observableIntoEventSourceStream(of({ choices: [], usage: null }), logger)
       );
@@ -501,8 +501,8 @@ describe('inferenceEndpointAdapter', () => {
         .chatComplete({
           ...defaultArgs,
           messages: [{ role: MessageRole.User, content: 'question' }],
-          endpointModelId: 'openai-gpt-6-astra',
-          supportedReasoningEffortLevels: ['xhigh', 'high', 'medium', 'low'],
+          endpointModelId: 'openai-gpt-5.6-terra',
+          provider: InferenceEndpointProvider.Elastic,
           tools: {
             foo: { description: 'my tool' },
           },

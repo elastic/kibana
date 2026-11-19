@@ -586,6 +586,35 @@ describe('openAIAdapter', () => {
         expect(getRequest().body.reasoning_effort).toBe('none');
       });
 
+      it('falls back to the Azure deployment name', () => {
+        executorMock.getConnector.mockReturnValue({
+          ...connector,
+          config: {
+            apiProvider: 'Azure OpenAI',
+            apiUrl:
+              'https://my-resource.openai.azure.com/openai/deployments/gpt-5.6-terra/chat/completions?api-version=2026-06-01',
+          },
+        });
+
+        openAIAdapter.chatComplete({ ...defaultArgs, messages, tools }).subscribe(noop);
+
+        expect(getRequest().body.reasoning_effort).toBe('none');
+      });
+
+      it('ignores the deployment name for non-Azure providers', () => {
+        executorMock.getConnector.mockReturnValue({
+          ...connector,
+          config: {
+            apiProvider: 'Other',
+            apiUrl: 'https://example.com/openai/deployments/gpt-5.6-terra/chat/completions',
+          },
+        });
+
+        openAIAdapter.chatComplete({ ...defaultArgs, messages, tools }).subscribe(noop);
+
+        expect(getRequest().body).not.toHaveProperty('reasoning_effort');
+      });
+
       it('omits reasoning_effort for models that do not require it', () => {
         openAIAdapter
           .chatComplete({ ...defaultArgs, messages, tools, modelName: 'gpt-5.4' })

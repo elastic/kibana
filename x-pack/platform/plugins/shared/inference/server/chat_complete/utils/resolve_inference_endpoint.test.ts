@@ -43,29 +43,6 @@ describe('resolveInferenceEndpoint', () => {
     });
   });
 
-  it('returns the reasoning effort levels advertised by the endpoint', async () => {
-    mockInferenceGet.mockResolvedValue({
-      endpoints: [
-        {
-          inference_id: '.openai-gpt-6-astra-chat_completion',
-          task_type: 'chat_completion',
-          service: 'elastic',
-          service_settings: { model_id: 'openai-gpt-6-astra' },
-          metadata: {
-            capabilities: { reasoning: { supported_effort_levels: ['high', 'low'] } },
-          },
-        },
-      ],
-    });
-
-    const result = await resolveInferenceEndpoint({
-      inferenceId: '.openai-gpt-6-astra-chat_completion',
-      esClient,
-    });
-
-    expect(result.supportedReasoningEffortLevels).toEqual(['high', 'low']);
-  });
-
   it('falls back to model field when model_id is not present', async () => {
     mockInferenceGet.mockResolvedValue({
       endpoints: [

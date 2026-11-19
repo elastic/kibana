@@ -602,7 +602,6 @@ async function resolveInferenceEndpointContext({
         ...options,
         executor,
         endpointModelId: endpointMeta.modelId,
-        supportedReasoningEffortLevels: endpointMeta.supportedReasoningEffortLevels,
         provider: endpointMeta.provider,
       }),
   };

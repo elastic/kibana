@@ -11,6 +11,7 @@ import { defer, identity } from 'rxjs';
 import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
+  InferenceConnector,
 } from '@kbn/inference-common';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import type { InferenceConnectorAdapter } from '../../types';
@@ -25,13 +26,22 @@ import {
   ensureToolsWhenHistoryHasToolUse,
   pickConnectorTelemetryForConnector,
 } from '../../utils';
-import type { OpenAIRequest } from './types';
+import { OpenAiProviderType, type OpenAIRequest } from './types';
 import { messagesToOpenAI, toolsToOpenAI, toolChoiceToOpenAI } from './to_openai';
 import { processOpenAIStream } from './process_openai_stream';
 import { processOpenAIResponse } from './process_openai_response';
 import { emitTokenCountEstimateIfMissing } from './emit_token_count_if_missing';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
 import { resolveOpenAIReasoningEffort } from '../../utils/resolve_chat_completion_reasoning';
+
+// Azure connectors carry the model only as the deployment name in the URL.
+const getAzureDeploymentName = (connector: InferenceConnector): string | undefined => {
+  const { apiProvider, apiUrl } = connector.config ?? {};
+  if (apiProvider !== OpenAiProviderType.AzureAi || typeof apiUrl !== 'string') {
+    return undefined;
+  }
+  return /\/deployments\/([^/?#]+)/.exec(apiUrl)?.[1];
+};
 
 export const openAIAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -79,7 +89,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       const modelId = modelName ?? connector.config?.defaultModel;
       const reasoningEffort = resolveOpenAIReasoningEffort({
         hasNativeTools: hasTools,
-        model: modelId,
+        model: modelId ?? getAzureDeploymentName(connector),
       });
 
       request = {
