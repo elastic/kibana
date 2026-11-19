@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AxiosInstance, AxiosResponse } from 'axios';
+import type { AxiosInstance, AxiosResponse, AxiosStatic } from 'axios';
 import axios, { AxiosError } from 'axios';
 import { Agent as HttpsAgent } from 'https';
 import { HttpProxyAgent } from 'http-proxy-agent';
@@ -27,7 +27,13 @@ const TestUrl = 'https://elastic.co/foo/bar/baz';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 let configurationUtilities = actionsConfigMock.create();
-jest.mock('axios');
+jest.mock('axios', () => {
+  const originalAxios = jest.requireActual('axios');
+  const mock = jest.createMockFromModule('axios') as jest.Mocked<AxiosStatic>;
+  mock.isAxiosError = originalAxios.isAxiosError;
+  mock.AxiosError = originalAxios.AxiosError;
+  return mock;
+});
 const axiosMock = axios as unknown as jest.Mock;
 
 describe('addTimeZoneToDate', () => {
@@ -110,11 +116,10 @@ describe('request', () => {
 
   test('adds request body bytes from request header on a failed', async () => {
     const contentLength = 12;
-    axiosMock.mockImplementation(
-      () =>
-        new AxiosError('failed', '500', undefined, {
-          headers: { 'Content-Length': contentLength },
-        })
+    axiosMock.mockRejectedValue(
+      new AxiosError('failed', '500', undefined, {
+        getHeader: () => contentLength,
+      })
     );
     const connectorUsageCollector = new ConnectorUsageCollector({
       logger,
