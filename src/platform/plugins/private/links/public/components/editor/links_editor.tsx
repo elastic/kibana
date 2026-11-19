@@ -181,6 +181,17 @@ export const LinksEditor = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={styles.bodyStyles}>
+        {panelSettingsApi && panelSettings.state ? (
+          <>
+            <PanelSettingsFlyoutSections
+              api={panelSettingsApi}
+              state={panelSettings.state}
+              updateState={panelSettings.updateState}
+              isFirstInFlyoutBody
+            />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
         <EuiForm fullWidth>
           <EuiFormRow label={LinksStrings.editor.panelEditor.getLayoutSettingsTitle()}>
             <EuiButtonGroup
@@ -243,16 +254,6 @@ export const LinksEditor = ({
             </div>
           </EuiFormRow>
         </EuiForm>
-        {panelSettingsApi && panelSettings.state ? (
-          <>
-            <EuiSpacer size="m" />
-            <PanelSettingsFlyoutSections
-              api={panelSettingsApi}
-              state={panelSettings.state}
-              updateState={panelSettings.updateState}
-            />
-          </>
-        ) : null}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">

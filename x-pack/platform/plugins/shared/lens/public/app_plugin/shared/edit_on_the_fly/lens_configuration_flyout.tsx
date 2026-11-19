@@ -126,6 +126,7 @@ export function LensEditConfigurationFlyout({
     globalTimeRange
   );
   const applyPanelSettings = panelSettings.apply;
+  const hasPanelSettings = Boolean(panelSettingsApi && panelSettings.state);
 
   const attributesChanged = useMemo<boolean>(() => {
     if (isNewPanel) return true;
@@ -600,6 +601,10 @@ export function LensEditConfigurationFlyout({
                   pointer-events: auto;
                 }
               }
+              /* The first section sits right below the flyout header, which already separates it */
+              > :first-child {
+                border-block-start: none;
+              }
               /* Advanced options nested accordion should not scroll independently */
               .lnsIndexPatternDimensionEditor-advancedOptions {
                 .euiAccordion__childWrapper {
@@ -611,8 +616,30 @@ export function LensEditConfigurationFlyout({
             direction="column"
             gutterSize="none"
           >
-            {/* Container for ES|QL editor - fixed height, doesn't grow */}
-            <EuiFlexItem grow={false}>
+            {/* Title and description, and panel options, come first */}
+            {panelSettingsApi && panelSettings.state ? (
+              <PanelSettingsAccordions
+                api={panelSettingsApi}
+                state={panelSettings.state}
+                updateState={panelSettings.updateState}
+                fallbackTimeRange={globalTimeRange}
+                sectionCss={css`
+                  padding: 0 ${euiTheme.euiTheme.size.base};
+                `}
+              />
+            ) : null}
+            {/* Container for ES|QL editor - fixed height, doesn't grow.
+                Below the panel settings, it starts the divider above the visualization parameters */}
+            <EuiFlexItem
+              grow={false}
+              css={
+                hasPanelSettings
+                  ? css`
+                      border-top: ${euiTheme.euiTheme.border.thin};
+                    `
+                  : undefined
+              }
+            >
               <EuiFlexGroup
                 css={css`
                   > * {
@@ -700,18 +727,6 @@ export function LensEditConfigurationFlyout({
                 </div>
               </EuiAccordion>
             </EuiFlexItem>
-
-            {panelSettingsApi && panelSettings.state ? (
-              <PanelSettingsAccordions
-                api={panelSettingsApi}
-                state={panelSettings.state}
-                updateState={panelSettings.updateState}
-                fallbackTimeRange={globalTimeRange}
-                sectionCss={css`
-                  padding: 0 ${euiTheme.euiTheme.size.base};
-                `}
-              />
-            ) : null}
           </EuiFlexGroup>
           {isModalVisible && esqlConvertAttributes ? (
             <ConvertToEsqlModal

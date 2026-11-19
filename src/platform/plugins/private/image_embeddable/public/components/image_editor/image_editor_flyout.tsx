@@ -144,6 +144,17 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        {props.panelSettingsApi && panelSettings.state ? (
+          <>
+            <PanelSettingsFlyoutSections
+              api={props.panelSettingsApi}
+              state={panelSettings.state}
+              updateState={panelSettings.updateState}
+              isFirstInFlyoutBody
+            />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
         <EuiTabs size="s" bottomBorder={false}>
           <EuiTab onClick={() => setSrcType('file')} isSelected={srcType === 'file'}>
             <FormattedMessage
@@ -399,16 +410,6 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             }}
           />
         </EuiFormRow>
-        {props.panelSettingsApi && panelSettings.state ? (
-          <>
-            <EuiSpacer size="m" />
-            <PanelSettingsFlyoutSections
-              api={props.panelSettingsApi}
-              state={panelSettings.state}
-              updateState={panelSettings.updateState}
-            />
-          </>
-        ) : null}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
