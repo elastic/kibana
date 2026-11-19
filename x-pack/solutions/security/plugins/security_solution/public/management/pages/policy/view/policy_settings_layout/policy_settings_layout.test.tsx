@@ -85,7 +85,7 @@ describe('When rendering PolicySettingsLayout', () => {
      */
     const makeMinimalUpdates = async () => {
       const { getByTestId } = renderResult;
-      await userEvent.click(getByTestId(testSubj.perOsMalware.enableDisableSwitch));
+      await userEvent.click(getByTestId(testSubj.malware.enableDisableSwitch));
     };
 
     /**
@@ -99,7 +99,7 @@ describe('When rendering PolicySettingsLayout', () => {
       const allOses = ['windows', 'mac', 'linux'] as const;
 
       // Turn off malware for every OS (the master toggle covers all three at once)
-      await userEvent.click(getByTestId(testSubj.perOsMalware.enableDisableSwitch));
+      await userEvent.click(getByTestId(testSubj.malware.enableDisableSwitch));
       for (const os of allOses) {
         set(policySettings, `${os}.malware.mode`, ProtectionModes.off);
         set(policySettings, `${os}.malware.blocklist`, false);
@@ -110,14 +110,14 @@ describe('When rendering PolicySettingsLayout', () => {
       set(policySettings, 'windows.antivirus_registration.enabled', false);
 
       // Turn off Malicious behavior protection for every OS
-      await userEvent.click(getByTestId(testSubj.perOsBehaviour.enableDisableSwitch));
+      await userEvent.click(getByTestId(testSubj.behaviour.enableDisableSwitch));
       for (const os of allOses) {
         set(policySettings, `${os}.behavior_protection.mode`, ProtectionModes.off);
         set(policySettings, `${os}.popup.behavior_protection.enabled`, false);
       }
 
       // Set Windows Ransomware User Notification message
-      const messageInput = getByTestId(testSubj.perOsRansomware.windows.notifyCustomMessage);
+      const messageInput = getByTestId(testSubj.ransomware.windows.notifyCustomMessage);
       await userEvent.clear(messageInput);
       await userEvent.paste('foo message');
       set(policySettings, 'windows.popup.ransomware.message', 'foo message');

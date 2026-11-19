@@ -14,8 +14,8 @@ import { login } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 
 const formTestSubj = getPolicySettingsFormTestSubjects('endpointPolicyForm');
-const perOsMalware = formTestSubj.perOsMalware;
-const perOsMemory = formTestSubj.perOsMemory;
+const malware = formTestSubj.malware;
+const memory = formTestSubj.memory;
 const DETECT_LABEL = 'Detect';
 
 const loadSettingsUrl = (policyId: string) =>
@@ -68,26 +68,26 @@ describe(
       }
     });
 
-    // The other three Cypress cases live in RTL: per_os/per_os_malware_protections_card.test.tsx
-    // (cross-OS isolation) and per_os/per_os_ransomware_protection_card.test.tsx (Linux row
+    // The other three Cypress cases live in RTL: malware_protections_card.test.tsx
+    // (cross-OS isolation) and ransomware_protection_card.test.tsx (Linux row
     // shown/hidden behind the linuxRansomwareProtection flag). These stay because
     // save-plus-reload persistence needs a real stack.
     it('persists Windows Detect across save and reload without changing other OSs', () => {
       loadSettingsUrl(policy.id);
-      cy.getByTestSubj(perOsMalware.mac.modeSelect)
+      cy.getByTestSubj(malware.mac.modeSelect)
         .invoke('text')
         .then((macBefore) => {
-          cy.getByTestSubj(perOsMalware.linux.modeSelect)
+          cy.getByTestSubj(malware.linux.modeSelect)
             .invoke('text')
             .then((linuxBefore) => {
-              selectOsProtectionMode(perOsMalware.windows.modeSelect, DETECT_LABEL);
+              selectOsProtectionMode(malware.windows.modeSelect, DETECT_LABEL);
               savePolicyForm();
               loadSettingsUrl(policy.id);
-              expectModeSelectValue(perOsMalware.windows.modeSelect, DETECT_LABEL);
-              cy.getByTestSubj(perOsMalware.mac.modeSelect).should(($el) => {
+              expectModeSelectValue(malware.windows.modeSelect, DETECT_LABEL);
+              cy.getByTestSubj(malware.mac.modeSelect).should(($el) => {
                 expect($el.text().trim()).to.eq(macBefore.trim());
               });
-              cy.getByTestSubj(perOsMalware.linux.modeSelect).should(($el) => {
+              cy.getByTestSubj(malware.linux.modeSelect).should(($el) => {
                 expect($el.text().trim()).to.eq(linuxBefore.trim());
               });
             });
@@ -95,19 +95,15 @@ describe(
     });
 
     it('persists a Windows custom YARA signatures change across save and reload without changing other OSs', () => {
-      const windowsSwitch = perOsMemory.windows.customYaraSignaturesEnableDisableSwitch;
-      const macSwitch = perOsMemory.mac.customYaraSignaturesEnableDisableSwitch;
-      const linuxSwitch = perOsMemory.linux.customYaraSignaturesEnableDisableSwitch;
+      const windowsSwitch = memory.windows.customYaraSignaturesEnableDisableSwitch;
+      const macSwitch = memory.mac.customYaraSignaturesEnableDisableSwitch;
+      const linuxSwitch = memory.linux.customYaraSignaturesEnableDisableSwitch;
 
       loadSettingsUrl(policy.id);
       // A policy created without a preset has every protection off, so memory threat starts
       // disabled and the custom YARA signatures switches are hidden.
-      cy.getByTestSubj(perOsMemory.enableDisableSwitch).should(
-        'have.attr',
-        'aria-checked',
-        'false'
-      );
-      cy.getByTestSubj(perOsMemory.enableDisableSwitch).click();
+      cy.getByTestSubj(memory.enableDisableSwitch).should('have.attr', 'aria-checked', 'false');
+      cy.getByTestSubj(memory.enableDisableSwitch).click();
       for (const osSwitch of [windowsSwitch, macSwitch, linuxSwitch]) {
         cy.getByTestSubj(osSwitch).should('have.attr', 'aria-checked', 'true');
       }

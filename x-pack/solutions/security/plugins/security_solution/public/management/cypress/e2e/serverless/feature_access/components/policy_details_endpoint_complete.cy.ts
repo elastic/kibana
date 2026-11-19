@@ -69,7 +69,7 @@ describe(
     });
 
     it(`should not display upselling section for custom notification`, () => {
-      const testData = ['perOsMalware', 'perOsRansomware', 'perOsMemory', 'perOsBehaviour'];
+      const testData = ['malware', 'ransomware', 'memory', 'behaviour'];
 
       loadPage(`${APP_POLICIES_PATH}/${policyId}/settings`);
 
