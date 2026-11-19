@@ -7,9 +7,10 @@
 
 export { AiIndexCreatedCallout } from './ai_index_created_callout';
 export { AutomationRow } from './automation_row';
+export { AutomationsLockedDescription } from './automations_locked_description';
 export { AutomationsPanel } from './automations_panel';
+export { AutomationsSection } from './automations_section';
 export { ConnectAgentPanel } from './connect_agent_panel';
-export { DreamingPanel } from './dreaming_panel';
 export { LockedSectionPanel } from './locked_section_panel';
 export { ManageAutomationsLink } from './manage_automations_link';
 export { OverviewPlaceholderPanel } from './overview_placeholder_panel';
