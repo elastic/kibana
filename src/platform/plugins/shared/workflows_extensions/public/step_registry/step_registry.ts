@@ -36,7 +36,7 @@ export class PublicStepRegistry {
   >(definitionOrLoader: PublicStepDefinitionOrLoader<Input, Output, Config>): void {
     if (typeof definitionOrLoader === 'function') {
       this.pending.push(async () => {
-        definitionOrLoader()
+        await definitionOrLoader()
           .then((definition) => {
             if (definition) {
               this.addToRegistry(definition);

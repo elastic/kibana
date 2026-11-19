@@ -8,6 +8,14 @@
 /** `otel` is EDOT Browser data, `classic` is data written by the RUM agent. */
 export type ApplicationSource = 'otel' | 'classic';
 
+/**
+ * The tabs of an application's page, in display order. The Overview is the page at the
+ * application's own path; the others are below it, named after the tab.
+ */
+export const APPLICATION_TAB_IDS = ['overview', 'sessions', 'errors', 'network'] as const;
+
+export type ApplicationTabId = (typeof APPLICATION_TAB_IDS)[number];
+
 /** Share of samples per rating, each between 0 and 1; the three add up to 1. */
 export interface VitalRatings {
   good: number;
@@ -107,8 +115,24 @@ export interface TimeSeriesPoint {
   count: number;
 }
 
+/** The width of a histogram bucket: seconds, or a calendar day, week, month or year. */
+export interface HistogramInterval {
+  value: number;
+  unit: 's' | 'd' | 'w' | 'M' | 'y';
+}
+
+/** The buckets of a histogram response: their width and the time range they cover. */
+export interface HistogramBuckets {
+  /** The width of every bucket. */
+  interval: HistogramInterval;
+  /** The queried time range in epoch milliseconds, which the edge buckets may cover only part of. */
+  start: number;
+  end: number;
+}
+
 /** Both sources use the same buckets; a source that isn't queried has none. */
 export interface PageLoadsOverTime {
   otel: TimeSeriesPoint[];
   classic: TimeSeriesPoint[];
+  histogram: HistogramBuckets;
 }

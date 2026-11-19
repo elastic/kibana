@@ -99,8 +99,6 @@ steps:
         type: kibana.getCaseDefaultSpace
         with:
           caseId: "{{steps.find_similar_case_id.output}}"
-          fetcher:
-            skip_ssl_verification: true
       - name: update_case_tag
         type: kibana.updateCaseDefaultSpace
         with:
@@ -110,8 +108,6 @@ steps:
                 - new-alert
                 - automatic
               version: "{{steps.get_case_to_update.version}}"
-              fetcher:
-                skip_ssl_verification: true
       - name: loop_trough_alerts_to_update
         type: foreach
         foreach: "{{event.alerts | json}}"
@@ -127,15 +123,11 @@ steps:
                 name: "{{foreach.item.signal.rule.name}}"
               type: alert
               caseId: "{{steps.find_similar_case_id.output}}"
-              fetcher:
-                skip_ssl_verification: true
           - name: update_alert_statuss
             type: kibana.SetAlertsStatus
             with:
               status: "in-progress"
               signal_ids: ["{{foreach.item._id}}"]
-              fetcher:
-                skip_ssl_verification: true
   - name: create_new_case
     type: if
     condition: 'steps.find_similar_case_id.output: ""'
@@ -220,8 +212,6 @@ steps:
           tags:
             - Automatic
           title: "{{steps.create_case_title.output}}"
-          fetcher:
-            skip_ssl_verification: true
       - name: esql_get_case_id
         type: elasticsearch.esql.query
         with:
@@ -246,15 +236,11 @@ steps:
                 name: "{{foreach.item.signal.rule.name}}"
               type: alert
               caseId: "{{steps.kibana_createCaseDefaultSpace_step.output.id}}"
-              fetcher:
-                skip_ssl_verification: true
           - name: update_alert_status
             type: kibana.SetAlertsStatus
             with:
               status: "in-progress"
               signal_ids: ["{{foreach.item._id}}"]
-              fetcher:
-                  skip_ssl_verification: true
       - name: email_step
         type: email
         connector-id: Gmail
