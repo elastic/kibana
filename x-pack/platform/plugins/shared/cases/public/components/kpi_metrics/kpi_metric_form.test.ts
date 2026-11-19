@@ -8,6 +8,7 @@
 import type { KpiMetricRequest } from '../../../common/types/api';
 import type { KpiMetricThresholdUnit } from '../../../common/types/domain';
 import {
+  isAlertMetric,
   isDurationMetric,
   toKpiMetricFormState,
   toKpiMetricRequest,
@@ -244,6 +245,77 @@ describe('kpi metric form', () => {
       expect(toKpiMetricRequest(toKpiMetricFormState(closedDateMetric), closedDateMetric)).toEqual(
         closedDateMetric
       );
+    });
+  });
+
+  describe('acknowledge trigger', () => {
+    const alertMetric: Extract<KpiMetricRequest, { kind: 'predefined' }> = {
+      id: 'metric-1',
+      kind: 'predefined',
+      predefinedId: 'alert_time_to_acknowledge_avg',
+      display: 'value',
+    };
+
+    it('reads the saved trigger and saves the same request', () => {
+      const metric = { ...alertMetric, acknowledgeTrigger: 'assigned' as const };
+      const state = toKpiMetricFormState(metric);
+
+      expect(state.acknowledgeTrigger).toBe('assigned');
+      expect(toKpiMetricRequest(state, metric)).toEqual(metric);
+    });
+
+    it('saves a metric with no trigger again with no field', () => {
+      expect(toKpiMetricRequest(toKpiMetricFormState(alertMetric), alertMetric)).toEqual(
+        alertMetric
+      );
+    });
+
+    it('writes the trigger when the admin selects another one', () => {
+      const state = {
+        ...toKpiMetricFormState(alertMetric),
+        acknowledgeTrigger: 'in_progress' as const,
+      };
+
+      expect(toKpiMetricRequest(state, alertMetric)).toEqual({
+        ...alertMetric,
+        acknowledgeTrigger: 'in_progress',
+      });
+    });
+
+    it('keeps the saved trigger when the admin selects the default again', () => {
+      const metric = { ...alertMetric, acknowledgeTrigger: 'assigned' as const };
+      const state = {
+        ...toKpiMetricFormState(metric),
+        acknowledgeTrigger: 'assigned_or_in_progress' as const,
+      };
+
+      expect(toKpiMetricRequest(state, metric)).toEqual({
+        ...metric,
+        acknowledgeTrigger: 'assigned_or_in_progress',
+      });
+    });
+
+    it('keeps the other saved options of the alert metric', () => {
+      const metric = {
+        ...alertMetric,
+        aggregateBy: 'case' as const,
+        dateBasis: 'case_closed_at' as const,
+        caseQuery: 'case.category: "IR"',
+      };
+
+      expect(toKpiMetricRequest(toKpiMetricFormState(metric), metric)).toEqual(metric);
+    });
+
+    it('writes no trigger for a metric that is not an alert metric', () => {
+      const openCases: KpiMetricRequest = {
+        kind: 'predefined',
+        predefinedId: 'open_cases',
+        display: 'value',
+      };
+      const state = { ...toKpiMetricFormState(openCases), acknowledgeTrigger: 'assigned' as const };
+
+      expect(isAlertMetric(state)).toBe(false);
+      expect(toKpiMetricRequest(state, openCases)).toEqual(openCases);
     });
   });
 });

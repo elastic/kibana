@@ -204,6 +204,22 @@ export const KPI_METRIC_ALERT_ACKNOWLEDGE_HINT = i18n.translate(
   }
 );
 
+export const KPI_METRIC_ALERT_ACKNOWLEDGE_ASSIGNED_HINT = i18n.translate(
+  'xpack.cases.casesStats.kpiMetricAlertAcknowledgeAssignedHint',
+  {
+    defaultMessage:
+      'Time from the alert start to the first assignment after the alert was added to the case. Alerts that are not acknowledged yet are not counted. Reopened cases are not handled separately.',
+  }
+);
+
+export const KPI_METRIC_ALERT_ACKNOWLEDGE_IN_PROGRESS_HINT = i18n.translate(
+  'xpack.cases.casesStats.kpiMetricAlertAcknowledgeInProgressHint',
+  {
+    defaultMessage:
+      'Time from the alert start to the first In progress status after the alert was added to the case. Alerts that are not acknowledged yet are not counted. Reopened cases are not handled separately.',
+  }
+);
+
 export const KPI_METRIC_DURATION_MINUTES = (value: string) =>
   i18n.translate('xpack.cases.casesStats.kpiMetricDurationMinutes', {
     values: { value },

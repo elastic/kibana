@@ -15,10 +15,12 @@ import {
   PREDEFINED_KPI_METRIC_IDS,
   getKpiField,
   getPredefinedKpiMetric,
+  isAnalyticsPredefinedKpiMetric,
 } from '../../../common/constants';
 import type { KpiMetricRequest } from '../../../common/types/api';
 import { isKpiExtendedKeywordField } from '../../../common/utils/kpi_metrics';
 import type {
+  KpiAcknowledgeTrigger,
   KpiMetricAggregationType,
   KpiMetricDateField,
   KpiMetricDirection,
@@ -52,7 +54,13 @@ export interface KpiMetricFormState {
    */
   groupByField: string;
   groupBySize: string;
+  /**
+   * The acknowledge trigger of an alert metric
+   */
+  acknowledgeTrigger: KpiAcknowledgeTrigger;
 }
+
+export const DEFAULT_ACKNOWLEDGE_TRIGGER: KpiAcknowledgeTrigger = 'assigned_or_in_progress';
 
 export interface KpiMetricFormErrors {
   label?: string;
@@ -68,6 +76,9 @@ export interface KpiMetricFormErrors {
  */
 export const getGroupByFieldOptions = (index: KpiMetricIndex): string[] =>
   KPI_FIELD_CATALOG[index].filter(({ type }) => type === 'keyword').map(({ field }) => field);
+
+export const isAlertMetric = ({ kind, predefinedId }: KpiMetricFormState): boolean =>
+  kind === 'predefined' && isAnalyticsPredefinedKpiMetric(predefinedId);
 
 export const isBreakdownMetric = (state: KpiMetricFormState): boolean =>
   state.kind === 'custom' && state.aggregationType === 'count' && state.groupByField !== '';
@@ -181,6 +192,7 @@ export const toKpiMetricFormState = (metric?: KpiMetricRequest | null): KpiMetri
     direction: metric?.direction ?? 'none',
     groupByField: '',
     groupBySize: String(DEFAULT_KPI_BREAKDOWN_SIZE),
+    acknowledgeTrigger: DEFAULT_ACKNOWLEDGE_TRIGGER,
   };
 
   if (metric == null) {
@@ -189,7 +201,12 @@ export const toKpiMetricFormState = (metric?: KpiMetricRequest | null): KpiMetri
 
   if (metric.kind === 'predefined') {
     return withThreshold(
-      { ...base, kind: 'predefined', predefinedId: metric.predefinedId },
+      {
+        ...base,
+        kind: 'predefined',
+        predefinedId: metric.predefinedId,
+        acknowledgeTrigger: metric.acknowledgeTrigger ?? DEFAULT_ACKNOWLEDGE_TRIGGER,
+      },
       metric.threshold
     );
   }
@@ -273,6 +290,34 @@ const toThreshold = (state: KpiMetricFormState): KpiMetricThreshold | undefined 
 };
 
 /**
+ * Returns the options of an alert metric. The trigger is written when it is not the default, or when the
+ * saved metric already had it. The other saved options stay as they are, because this form does not edit them.
+ */
+const toAlertOptions = (
+  state: KpiMetricFormState,
+  existing?: KpiMetricRequest | null
+): Partial<Extract<KpiMetricRequest, { kind: 'predefined' }>> => {
+  if (!isAlertMetric(state)) {
+    return {};
+  }
+
+  const saved =
+    existing?.kind === 'predefined' && existing.predefinedId === state.predefinedId
+      ? existing
+      : undefined;
+
+  return {
+    ...(saved?.aggregateBy != null && { aggregateBy: saved.aggregateBy }),
+    ...(saved?.dateBasis != null && { dateBasis: saved.dateBasis }),
+    ...(saved?.caseQuery != null && { caseQuery: saved.caseQuery }),
+    ...((saved?.acknowledgeTrigger != null ||
+      state.acknowledgeTrigger !== DEFAULT_ACKNOWLEDGE_TRIGGER) && {
+      acknowledgeTrigger: state.acknowledgeTrigger,
+    }),
+  };
+};
+
+/**
  * Builds the request metric from the form. Keeps the id and the display of an edited metric.
  * A breakdown has no percent and no threshold.
  */
@@ -290,7 +335,12 @@ export const toKpiMetricRequest = (
   };
 
   if (state.kind === 'predefined') {
-    return { ...base, kind: 'predefined', predefinedId: state.predefinedId };
+    return {
+      ...base,
+      kind: 'predefined',
+      predefinedId: state.predefinedId,
+      ...toAlertOptions(state, existing),
+    };
   }
 
   return {

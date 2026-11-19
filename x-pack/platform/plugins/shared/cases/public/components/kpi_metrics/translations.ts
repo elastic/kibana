@@ -320,6 +320,39 @@ export const PREVIEW_BREAKDOWN = (values: string) =>
     defaultMessage: 'Values for the last 30 days: {values}',
   });
 
+export const ACKNOWLEDGE_TRIGGER = i18n.translate('xpack.cases.kpiMetrics.acknowledgeTrigger', {
+  defaultMessage: 'Acknowledged when',
+});
+
+export const ACKNOWLEDGE_TRIGGER_HELP = i18n.translate(
+  'xpack.cases.kpiMetrics.acknowledgeTriggerHelp',
+  {
+    defaultMessage:
+      'The event after the alert was added to the case that ends the time to acknowledge.',
+  }
+);
+
+export const ACKNOWLEDGE_TRIGGER_ASSIGNED = i18n.translate(
+  'xpack.cases.kpiMetrics.acknowledgeTriggerAssigned',
+  {
+    defaultMessage: 'The case is assigned',
+  }
+);
+
+export const ACKNOWLEDGE_TRIGGER_IN_PROGRESS = i18n.translate(
+  'xpack.cases.kpiMetrics.acknowledgeTriggerInProgress',
+  {
+    defaultMessage: 'The case status is In progress',
+  }
+);
+
+export const ACKNOWLEDGE_TRIGGER_ASSIGNED_OR_IN_PROGRESS = i18n.translate(
+  'xpack.cases.kpiMetrics.acknowledgeTriggerAssignedOrInProgress',
+  {
+    defaultMessage: 'The case is assigned or In progress (the first of the two)',
+  }
+);
+
 export const PREDEFINED_LABELS: Record<string, string> = {
   open_cases: i18n.translate('xpack.cases.kpiMetrics.predefinedOpenCases', {
     defaultMessage: 'Open cases',

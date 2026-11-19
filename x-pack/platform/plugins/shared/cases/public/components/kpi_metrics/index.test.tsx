@@ -393,6 +393,46 @@ describe('KpiMetricsSettings', () => {
       expect(onSave).not.toHaveBeenCalled();
     });
 
+    it('shows the acknowledge trigger only for an alert metric', async () => {
+      const alertMetric = {
+        id: 'alert-1',
+        kind: 'predefined' as const,
+        predefinedId: 'alert_time_to_acknowledge_avg',
+        display: 'value' as const,
+      };
+      renderWithTestingProviders(
+        <KpiMetricsSettings kpiMetrics={[alertMetric]} isLoading={false} onSave={onSave} />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.selectOptions(
+        await screen.findByTestId('kpi-metric-acknowledge-trigger'),
+        'assigned'
+      );
+      await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+      await waitFor(() =>
+        expect(onSave).toHaveBeenCalledWith([{ ...alertMetric, acknowledgeTrigger: 'assigned' }])
+      );
+    });
+
+    it('does not show the acknowledge trigger for a case search metric', async () => {
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          kpiMetrics={[
+            { id: 'open-1', kind: 'predefined', predefinedId: 'open_cases', display: 'value' },
+          ]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+
+      expect(await screen.findByTestId('kpi-metric-predefined-id')).toBeInTheDocument();
+      expect(screen.queryByTestId('kpi-metric-acknowledge-trigger')).not.toBeInTheDocument();
+    });
+
     it('shows a duration in the unit of the threshold', async () => {
       jest.spyOn(api, 'previewKpiMetric').mockResolvedValue({
         id: 'preview',

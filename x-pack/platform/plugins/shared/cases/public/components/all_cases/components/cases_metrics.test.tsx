@@ -257,6 +257,33 @@ describe('Cases metrics', () => {
       ).toBeInTheDocument();
     });
 
+    it.each([
+      ['assigned' as const, /first assignment after the alert was added/],
+      ['in_progress' as const, /first In progress status after the alert was added/],
+      ['assigned_or_in_progress' as const, /first assignment or In progress status/],
+    ])('shows the text of the trigger %s in the info icon', async (acknowledgeTrigger, text) => {
+      renderWithTestingProviders(
+        <CasesMetrics
+          {...props}
+          kpiMetrics={[
+            {
+              id: 'tta',
+              kind: 'predefined',
+              predefinedId: 'alert_time_to_acknowledge_avg',
+              display: 'value',
+              acknowledgeTrigger,
+            },
+          ]}
+          kpiResults={[{ id: 'tta', type: 'value', format: 'duration', value: 101 }]}
+          isAnalyticsEnabled={true}
+        />
+      );
+
+      await userEvent.hover(await screen.findByTestId('cases-kpi-tile-tta-date-hint'));
+
+      expect(await screen.findByText(text)).toBeInTheDocument();
+    });
+
     it('shows the date hint for a custom tile with the closed date', async () => {
       const closedDateMetric: CustomKpiMetricConfiguration = {
         id: 'c1',

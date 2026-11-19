@@ -41,6 +41,7 @@ import type {
   KpiMetricResult,
 } from '../../../common/types/api';
 import type {
+  KpiAcknowledgeTrigger,
   KpiMetricAggregationType,
   KpiMetricDateField,
   KpiMetricThresholdUnit,
@@ -62,6 +63,7 @@ import type {
 import {
   getFieldOptions,
   getGroupByFieldOptions,
+  isAlertMetric,
   isBreakdownMetric,
   isDurationMetric,
   toKpiMetricFormState,
@@ -110,6 +112,16 @@ const THRESHOLD_UNIT_OPTIONS: Array<{ value: KpiMetricThresholdUnit; text: strin
 
 const toThresholdUnit = (value: string): KpiMetricThresholdUnit =>
   THRESHOLD_UNIT_OPTIONS.find((option) => option.value === value)?.value ?? 'h';
+
+const ACKNOWLEDGE_TRIGGER_OPTIONS: Array<{ value: KpiAcknowledgeTrigger; text: string }> = [
+  { value: 'assigned_or_in_progress', text: i18n.ACKNOWLEDGE_TRIGGER_ASSIGNED_OR_IN_PROGRESS },
+  { value: 'assigned', text: i18n.ACKNOWLEDGE_TRIGGER_ASSIGNED },
+  { value: 'in_progress', text: i18n.ACKNOWLEDGE_TRIGGER_IN_PROGRESS },
+];
+
+const toAcknowledgeTrigger = (value: string): KpiAcknowledgeTrigger =>
+  ACKNOWLEDGE_TRIGGER_OPTIONS.find((option) => option.value === value)?.value ??
+  'assigned_or_in_progress';
 
 const DIRECTION_OPTIONS: Array<{ value: DirectionOption; text: string }> = [
   { value: 'none', text: i18n.DIRECTION_NONE },
@@ -208,6 +220,19 @@ const KpiMetricGroupByRows: React.FC<KpiMetricRowsProps> = ({
   );
 };
 KpiMetricGroupByRows.displayName = 'KpiMetricGroupByRows';
+
+const KpiMetricAlertOptionRows: React.FC<KpiMetricRowsProps> = ({ state, update }) => (
+  <EuiFormRow label={i18n.ACKNOWLEDGE_TRIGGER} helpText={i18n.ACKNOWLEDGE_TRIGGER_HELP} fullWidth>
+    <EuiSelect
+      fullWidth
+      options={ACKNOWLEDGE_TRIGGER_OPTIONS}
+      value={state.acknowledgeTrigger}
+      onChange={(e) => update({ acknowledgeTrigger: toAcknowledgeTrigger(e.target.value) })}
+      data-test-subj="kpi-metric-acknowledge-trigger"
+    />
+  </EuiFormRow>
+);
+KpiMetricAlertOptionRows.displayName = 'KpiMetricAlertOptionRows';
 
 const KpiMetricThresholdRows: React.FC<KpiMetricRowsProps> = ({
   state,
@@ -527,6 +552,15 @@ const KpiMetricFlyoutComponent: React.FC<KpiMetricFlyoutProps> = ({
               </EuiFlexGroup>
             </EuiFormRow>
           </>
+        )}
+
+        {isAlertMetric(state) && (
+          <KpiMetricAlertOptionRows
+            state={state}
+            errors={errors}
+            showErrors={showErrors}
+            update={update}
+          />
         )}
 
         {!isBreakdown && (

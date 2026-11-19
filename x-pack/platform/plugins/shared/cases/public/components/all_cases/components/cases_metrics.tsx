@@ -32,7 +32,9 @@ import {
   ATTC_STAT,
   ATTC_STAT_INFO_ARIA_LABEL,
   KPI_METRIC_ANALYTICS_DISABLED,
+  KPI_METRIC_ALERT_ACKNOWLEDGE_ASSIGNED_HINT,
   KPI_METRIC_ALERT_ACKNOWLEDGE_HINT,
+  KPI_METRIC_ALERT_ACKNOWLEDGE_IN_PROGRESS_HINT,
   KPI_METRIC_CLOSED_DATE_HINT,
   KPI_METRIC_UNKNOWN,
 } from '../translations';
@@ -171,9 +173,17 @@ const getDateHint = (metric: KpiMetricConfiguration): string | undefined => {
     return metric.dateField === 'closed_at' ? KPI_METRIC_CLOSED_DATE_HINT : undefined;
   }
 
-  return isAnalyticsPredefinedKpiMetric(metric.predefinedId)
-    ? KPI_METRIC_ALERT_ACKNOWLEDGE_HINT
-    : undefined;
+  if (!isAnalyticsPredefinedKpiMetric(metric.predefinedId)) {
+    return;
+  }
+
+  if (metric.acknowledgeTrigger === 'assigned') {
+    return KPI_METRIC_ALERT_ACKNOWLEDGE_ASSIGNED_HINT;
+  }
+
+  return metric.acknowledgeTrigger === 'in_progress'
+    ? KPI_METRIC_ALERT_ACKNOWLEDGE_IN_PROGRESS_HINT
+    : KPI_METRIC_ALERT_ACKNOWLEDGE_HINT;
 };
 
 const getKpiTileValues = (
