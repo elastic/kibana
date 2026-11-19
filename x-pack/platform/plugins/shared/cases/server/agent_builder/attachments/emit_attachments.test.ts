@@ -401,7 +401,8 @@ describe('toCaseAttachmentData', () => {
     const withEmptyComments = { ...buildCase(), comments: [] } as unknown as Case;
 
     expect(toCaseAttachmentData(withComments).totalAttachments).toBe(2);
-    expect(toCaseAttachmentData(withEmptyComments).totalAttachments).toBe(0);
+    // Cases loaded without comments come back with `comments: []` (flattenCaseSavedObject default).
+    expect(toCaseAttachmentData(withEmptyComments)).not.toHaveProperty('totalAttachments');
     expect(toCaseAttachmentData(buildCase())).not.toHaveProperty('totalAttachments');
   });
 

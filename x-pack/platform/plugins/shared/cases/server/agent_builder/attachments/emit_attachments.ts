@@ -38,11 +38,15 @@ export const toCaseAttachmentData = (theCase: Case, url?: string | null): CaseAt
   total_observables: theCase.total_observables ?? null,
   url: url ?? null,
   connector_name: theCase.connector?.name ?? null,
-  // Same count the UI sets on "Add to chat". Only known when the case was loaded with its
-  // comments (attachment write steps); otherwise `emitCaseAttachment` keeps the stored value.
-  // The write response carries at most one comments page, so the count caps at MAX_DOCS_PER_PAGE
-  // (the ES result window) — the same ceiling as the UI's own fetch; exact below it.
-  ...(theCase.comments && { totalAttachments: theCase.comments.length }),
+  // Same count the UI sets on "Add to chat". `flattenCaseSavedObject` defaults `comments` to []
+  // for cases loaded without them, so only a non-empty list (attachment write steps) is a real
+  // count; otherwise `emitCaseAttachment` keeps the stored value. The write response carries at
+  // most one comments page, so the count caps at MAX_DOCS_PER_PAGE (the ES result window), the
+  // same ceiling as the UI's own fetch.
+  ...(theCase.comments &&
+    theCase.comments.length > 0 && {
+      totalAttachments: theCase.comments.length,
+    }),
 });
 
 /**
