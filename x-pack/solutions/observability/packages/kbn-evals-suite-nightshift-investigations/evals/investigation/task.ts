@@ -33,6 +33,9 @@ export const STILL_IN_PROGRESS_ERROR_PREFIX = 'Investigation was still in progre
 export const ROUND_FAILED_ERROR_PREFIX = 'Investigation round failed: ';
 export const UNPERSISTED_CONVERSATION_ERROR =
   'Investigation conversation still had an unfinished round after polling';
+/** A finished investigation whose conversation never showed a round: the harness's failure. */
+export const MISSING_CONVERSATION_ERROR_PREFIX =
+  'Investigation finished but its conversation had no rounds after ';
 const MAX_PERSISTED_REPORT_BYTES = 512 * 1024;
 const POLL_INTERVAL_MS = 1000;
 /** How many polls a finished investigation's conversation gets to persist its rounds. */
@@ -287,9 +290,15 @@ export const runInvestigation = async (
       output.workflow_status = 'running';
       if (Date.now() - started > timeoutMs) {
         const minutes = timeoutMs / 60_000;
-        const waited = investigation
+        // Only a run the agent was still working on timed out; a finished one whose conversation
+        // never persisted is a harness failure, which ORCA leaves unscored rather than scoring 0.
+        const agentStillWorking =
+          investigation?.in_progress || Boolean(conversation?.rounds.length);
+        const waited = !investigation
+          ? `Investigation was not created within ${minutes} minutes`
+          : agentStillWorking
           ? `${STILL_IN_PROGRESS_ERROR_PREFIX}${minutes} minutes`
-          : `Investigation was not created within ${minutes} minutes`;
+          : `${MISSING_CONVERSATION_ERROR_PREFIX}${minutes} minutes`;
         throw new Error(
           lastTransient ? `${waited}. Last read failed: ${errorMessage(lastTransient)}` : waited
         );
@@ -327,6 +336,11 @@ export const runInvestigation = async (
       );
     }
     if (!conversation) throw new Error('Investigation conversation has no persisted rounds');
+    // The timeout's missing-conversation error stood only until a round could be read: the rounds
+    // now say whether the agent failed, ended without a conclusion, or finished.
+    if (output.execution_error?.startsWith(MISSING_CONVERSATION_ERROR_PREFIX)) {
+      delete output.execution_error;
+    }
     if (!investigation.in_progress && !isPersisted(conversation)) {
       output.execution_error = UNPERSISTED_CONVERSATION_ERROR;
     }

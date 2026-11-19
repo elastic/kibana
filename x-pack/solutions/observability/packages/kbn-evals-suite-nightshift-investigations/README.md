@@ -1062,8 +1062,9 @@ is `n/a` for report fidelity. A failure of the harness, which the paper would ha
 `unscored` (null) and left out: an investigation that was never created, a round aborted from
 outside, a conversation that did not persist, a structured report too large to keep its
 hypotheses, or a `report.md` that could not be written or was cut at its bound. `execution_success`
-counts all of these, so quote it, and the number of unscored runs, next to any ORCA rate. A run
-that ended without a verdict but recorded hypotheses gets a report written from them and is scored.
+counts the first three. The eval also fails when fewer than 80% of the reports it tried to write
+can be graded, and before any investigation when a task's event has no rubric. Quote
+`execution_success`, and the number of unscored runs, next to any ORCA rate. A run that ended without a verdict but recorded hypotheses gets a report written from them and is scored.
 A task without `orca_expected`, the 10 private medium tasks of the sampled 50, is `n/a`.
 
 **Earlier scores.** Before the port, accuracy and hallucination came from our own flag extraction
