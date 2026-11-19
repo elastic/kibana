@@ -17,10 +17,15 @@ import { module } from '..';
 import { AvailabilityService } from '../lib/availability/availability_service';
 import type { AlertingServerStart } from '@kbn/alerting-v2-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { DetectionEngineSystemClient } from '../lib/engine/es_client_tokens';
+import {
+  DetectionEngineSystemClient,
+  DetectionEngineDataClient,
+} from '../lib/engine/es_client_tokens';
+import { EngineRunner } from '../lib/engine/run_engine';
+import { EnabledSources, RunContext } from '../lib/engine/tokens';
 import { SpaceRunLock } from '../lib/engine/space_run_lock';
-import { DetectionStateClient, detectionStateSavedObjectType } from '../lib/state';
 import { DetectionSignalStore } from '../lib/signals/signal_store';
+import { DetectionStateClient, detectionStateSavedObjectType } from '../lib/state';
 import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
 import { DetectionAccountService } from '../lib/service_account/detection_account';
 import { DetectionSetupService } from '../lib/service_account/setup_service';
@@ -56,6 +61,14 @@ function createContainer() {
     .bind(PluginInitializer('env'))
     .toConstantValue(coreMock.createPluginInitializerContext().env);
   container.bind(PluginStart('licensing')).toConstantValue(licensingMock.createStart());
+  // What the `_tick` route binds for each tick.
+  container
+    .bind(RunContext)
+    .toConstantValue({ spaceId: 'default', runId: 'run-1', scheduledMinute: 0 });
+  container.bind(EnabledSources).toConstantValue({ list: async () => [] });
+  container
+    .bind(DetectionEngineDataClient)
+    .toConstantValue(core.elasticsearch.client.asInternalUser);
   container.load(module);
 
   return { container, core, coreSetup, alerting };
@@ -78,6 +91,7 @@ describe('module', () => {
 
     container.get(AvailabilityService);
     container.get(StrategyCatalog);
+    container.get(EngineRunner);
     container.get(DetectionSignalStore);
     container.get(DetectionStateClient);
     container.get(SpaceRunLock);
