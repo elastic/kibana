@@ -902,8 +902,10 @@ node scripts/synthtrace agent_config --live
 
 These scenarios generate browser and mobile Real User Monitoring data for Digital Experience. EDOT Browser data is OTel-native, as stored by the Elasticsearch exporter, with no APM enrichment:
 
-- `logs-generic.otel-default`: `browser.navigation`, `browser.navigation_timing`, `browser.resource_timing`, `browser.web_vital` (LCP, INP, CLS, FCP, TTFB), `browser.user_action.click` and `exception` events
-- `traces-generic.otel-default`: fetch/XHR `CLIENT` spans
+- `logs-browser.otel-default`: `browser.navigation`, `browser.navigation_timing`, `browser.resource_timing`, `browser.web_vital` (LCP, INP, CLS, FCP, TTFB), `browser.user_action.click`, `browser.frustration.*` and `exception` events
+- `traces-browser.otel-default`: fetch/XHR `CLIENT` spans
+
+EDOT Browser data has a dataset of its own, as proposed in elastic/observability-dev#6361, so that its index can be sorted by session. `digital_experience_browser` and `digital_experience_mixed` install the `synthtrace-logs-browser.otel` and `synthtrace-traces-browser.otel` index templates, built from the cluster's `logs-otel@template` and `traces-otel@template`, which sort them by `service.name`, `session.id` and `@timestamp` (latest first). In code and Scout tests, call `otelEsClient.installBrowserIndexTemplates()` for the same sort; without it, the data streams take the OTel templates' host and time sort. A data stream created before the templates keeps its sort until it rolls over. EDOT React Native data stays in `logs-generic.otel-default` and `traces-generic.otel-default`.
 
 Non-zero timings and web vital values always have a fractional part, so dynamic mapping types them as `float`. Like EDOT Browser, timings of phases that didn't happen are written as `0`.
 
@@ -917,6 +919,8 @@ The data is written through the `otelEsClient`, which indexes documents as-is. I
 - `includeRawAttribution` (boolean, default `false`): writes the web-vitals attribution as a JSON string body on `browser.web_vital` events, as the web-vitals instrumentation does when its experimental `includeRawAttribution` option is on.
 - `environments` (boolean, default `false`): spreads every app over its own environments, with their share of the traffic, instead of the single `Synthtrace: <scenario>` environment. See `digital_experience_browser` for the environments of each app. In `digital_experience_mixed`, the classic RUM app then runs in `production`.
 - `edgeCases` (boolean, default `false`): adds what is far from the usual to the browser apps, to see how the views cope with it: URLs of thousands of characters, stack traces of dozens of frames and one over 8,191 characters, errors with no type, with no stack trace and with an empty one, more than 100 distinct stack traces for one app, browsers that EDOT Browser can't identify, and clicks with no selector. The mobile apps of `digital_experience_mixed` don't have any.
+- `signedInRate` (number from 0 to 1, default each app's share, see `digital_experience_browser`): share of the browser sessions with a signed-in user in every app. With `withSessionId=false`, every session is anonymous.
+- `frustration` (boolean, default `true`): reports rage, dead and error clicks in the browser sessions, like EDOT Browser does by default. With `withSessionId=false`, there are none.
 - `scale` (number, default `1`): multiplies the number of sessions per minute of every app. Fractions of a session add up over time, so a scale below 1 thins out every app in proportion.
 - `seed` (string or number, default the start of the run, `--from` in milliseconds): makes the data reproducible. Every session, with its session, trace and span IDs, browser, page views and events, derives from the seed, its app and its number since the epoch, so the same seed generates the same sessions at the same times, however the time range is split into batches, workers or live batches. The scenarios log the seed they use. Without a seed, runs that start at a different time generate different data, while runs with the same absolute `--from` generate the same sessions. `digital_experience_mixed` generates the browser and mobile apps from the same default seed, so don't run it together with `digital_experience_browser` or `digital_experience_mobile` in one synthtrace invocation. Sessions are spread evenly over time. The classic RUM page loads of `digital_experience_mixed` take their timings from the seed too, but not their document IDs.
 
@@ -947,6 +951,10 @@ The data is shaped to fill the views of the Digital Experience application detai
 
 With session IDs, most sessions are a single visit in a new tab. About 15% are a second visit to a session that is still running, in the same tab or in another one. Another 15% come back after the previous session expired: the tab kept sending background requests with `browser.tab.id` but no `session.id`, and the new session points to the expired one with `session.previous_id`. Each session has one `session.start` log. Earlier visits can be up to an hour and a half before the end of their session, so at the start of a run, where data before `--from` is cut off, some sessions have no `session.start` and some `session.previous_id` values point to nothing.
 
+A share of the sessions has a signed-in user, written the way EDOT Browser's `setUser()` ([elastic-otel-rum-js#125](https://github.com/elastic/elastic-otel-rum-js/pull/125)) writes it on every log and span: `attributes.user.id`, `user.email` and `user.full_name` (some users have no email or name), and `elastic.user.account` in `support-center-web` and `docs-web`, the B2B apps. The share is 35% of the sessions of `storefront-web`, 80% of `checkout-web`, 20% of `media-portal-web`, 75% of `support-center-web` and 10% of `docs-web`. Users come back, a few of them for most of the sessions of an app, and about a fifth of the signed-in sessions start anonymous and sign in on their second page load. A tab keeps its user once its session expires, so the session that follows is signed in from the start.
+
+Clicks that show a user struggling are reported the way EDOT Browser's frustration detection ([elastic-otel-rum-js#191](https://github.com/elastic/elastic-otel-rum-js/pull/191)) reports them: `browser.frustration.rage_click`, `dead_click` and `error_click` logs with the clicked element's `browser.css_selector`, `browser.tag_name`, `browser.page.x` and `.y`, and `url.full`, timestamped with the first click. Rage clicks repeat a click 3 to 7 times, each within 300 ms of the previous one (the repeated clicks are `browser.user_action.click` logs too), and carry `browser.frustration.click_count`. Dead clicks fire no request. Error clicks are followed by an uncaught exception within a second, or by the failure of the request they fired, and carry its `exception.type` and `exception.message`. The worse the app's health, the more of them: a click turns into a rage click with a probability of 1% in a healthy app and 10% in a critical one, before its repeats are added, and a click that fires no request is dead with a probability of 2% and 12%.
+
 **Usage:**
 
 ```sh
@@ -956,6 +964,7 @@ node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scen
 node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts environments=true
 node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts edgeCases=true,scale=3
 node scripts/synthtrace digital_experience_browser --from=2026-10-16T12:00:00Z --to=2026-10-16T13:00:00Z --scenarioOpts seed=my-seed
+node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts signedInRate=1
 ```
 
 #### `digital_experience_mixed`

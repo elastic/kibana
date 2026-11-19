@@ -58,6 +58,7 @@ export {
   edotBrowser,
   type BrowserProfileId,
   type EdotBrowserClientOptions,
+  type EdotBrowserUser,
   type EdotBrowserDocument,
   type EdotBrowserEvent,
   type EdotBrowserExceptionTemplate,
