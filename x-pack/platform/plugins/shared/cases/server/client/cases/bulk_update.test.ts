@@ -40,6 +40,12 @@ import { Operations } from '../../authorization';
 import type { UserActionEvent } from '../../services/user_actions/types';
 import { bulkUpdate, getOperationsToAuthorize } from './bulk_update';
 
+const makeUserAction = (id: string) =>
+  ({
+    id,
+    parameters: { attributes: { type: 'title', payload: { title: id } } },
+  } as unknown as UserActionEvent);
+
 describe('update', () => {
   const cases = {
     cases: [
@@ -254,6 +260,111 @@ describe('update', () => {
         },
         expect.anything()
       );
+    });
+
+    it('skips user actions and notifications when a concurrent update wins the write', async () => {
+      clientArgs.services.userActionService.creator.buildUserActions.mockReturnValueOnce({
+        [mockCases[0].id]: [makeUserAction('ua-1')],
+      });
+      clientArgs.services.userActionService.creator.addSyncedAlertsCountToUserActions.mockImplementationOnce(
+        ({ userActionsDict }) => userActionsDict
+      );
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [
+          {
+            id: mockCases[0].id,
+            type: 'cases',
+            error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+          },
+        ],
+      } as unknown as Awaited<ReturnType<typeof clientArgs.services.caseService.patchCases>>);
+
+      await expect(bulkUpdate(cases, clientArgs, casesClientMock)).resolves.toEqual([]);
+
+      expect(
+        clientArgs.services.userActionService.creator.bulkCreateUpdateCase
+      ).toHaveBeenCalledWith({ builtUserActions: [] });
+      expect(clientArgs.services.notificationService.bulkNotifyAssignees).toHaveBeenCalledWith([]);
+    });
+
+    it('keeps the user actions of a case that was written when a duplicate entry of it conflicted', async () => {
+      const userAction = makeUserAction('user-action');
+      clientArgs.services.userActionService.creator.buildUserActions.mockReturnValueOnce({
+        [mockCases[0].id]: [userAction],
+      });
+      clientArgs.services.userActionService.creator.addSyncedAlertsCountToUserActions.mockImplementationOnce(
+        ({ userActionsDict }) => userActionsDict
+      );
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [
+          { ...mockCases[0], attributes: { title: 'first' } },
+          {
+            id: mockCases[0].id,
+            type: 'cases',
+            error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+          },
+        ],
+      } as unknown as Awaited<ReturnType<typeof clientArgs.services.caseService.patchCases>>);
+
+      const res = await bulkUpdate(
+        {
+          cases: [
+            { id: mockCases[0].id, version: mockCases[0].version ?? '', title: 'first' },
+            { id: mockCases[0].id, version: mockCases[0].version ?? '', title: 'second' },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(res).toHaveLength(1);
+      expect(
+        clientArgs.services.userActionService.creator.bulkCreateUpdateCase
+      ).toHaveBeenCalledWith({
+        builtUserActions: [userAction],
+      });
+    });
+
+    it('drops the user actions of a case whose write conflicted while another case was written', async () => {
+      const secondCase = { ...mockCases[1] };
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [mockCases[0], secondCase],
+      });
+      clientArgs.services.userActionService.creator.buildUserActions.mockReturnValueOnce({
+        [mockCases[0].id]: [makeUserAction('ua-1')],
+        [secondCase.id]: [makeUserAction('ua-2')],
+      });
+      clientArgs.services.userActionService.creator.addSyncedAlertsCountToUserActions.mockImplementationOnce(
+        ({ userActionsDict }) => userActionsDict
+      );
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [
+          { ...mockCases[0], attributes: { title: 'first' } },
+          {
+            id: secondCase.id,
+            type: 'cases',
+            error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+          },
+        ],
+      } as unknown as Awaited<ReturnType<typeof clientArgs.services.caseService.patchCases>>);
+
+      const res = await bulkUpdate(
+        {
+          cases: [
+            { id: mockCases[0].id, version: mockCases[0].version ?? '', title: 'first' },
+            { id: secondCase.id, version: secondCase.version ?? '', title: 'second' },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(res.map(({ id }) => id)).toEqual([mockCases[0].id]);
+      expect(
+        clientArgs.services.userActionService.creator.bulkCreateUpdateCase
+      ).toHaveBeenCalledWith({
+        builtUserActions: [makeUserAction('ua-1')],
+      });
     });
 
     it('does not notify if the case does not exist', async () => {

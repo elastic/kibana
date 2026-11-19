@@ -992,11 +992,36 @@ export const bulkUpdate = async (
 
     const updatedCases = await patchCases({ caseService, patchCasesPayload });
 
+    // Saved objects reports per-case failures (e.g. a 409 version conflict caused by a concurrent
+    // update) as error entries instead of throwing. Those cases were not written, so they must not
+    // trigger alert syncs, user actions or notifications.
+    const failedCaseResults = updatedCases.saved_objects.filter(isSavedObjectErrorResult);
+
+    // A case id can appear more than once in a request. Only treat an id as failed when none of its
+    // entries was persisted, otherwise the user actions of a case that was written would be dropped.
+    const persistedCaseIds = new Set(
+      updatedCases.saved_objects.reduce<Array<string>>((persistedArr, updatedCase) => {
+        if (!isSavedObjectErrorResult(updatedCase)) {
+          persistedArr.push(updatedCase.id);
+        }
+        return persistedArr;
+      }, [])
+    );
+    const failedCaseIds = new Set(
+      failedCaseResults.reduce<Array<string>>((failedArr, failedCase) => {
+        if (!persistedCaseIds.has(failedCase.id)) {
+          failedArr.push(failedCase.id);
+        }
+        return failedArr;
+      }, [])
+    );
+
     // If a status update occurred and the case is synced then we need to update all alerts' status
     // attached to the case to the new status.
     const casesWithStatusChangedAndSynced = casesToUpdate.filter(({ updateReq, originalCase }) => {
       return (
         originalCase != null &&
+        !failedCaseIds.has(updateReq.id) &&
         updateReq.status != null &&
         originalCase.attributes.status !== updateReq.status &&
         originalCase.attributes.settings.syncAlerts
@@ -1008,6 +1033,7 @@ export const bulkUpdate = async (
     const casesWithSyncSettingChangedToOn = casesToUpdate.filter(({ updateReq, originalCase }) => {
       return (
         originalCase != null &&
+        !failedCaseIds.has(updateReq.id) &&
         updateReq.settings?.syncAlerts != null &&
         originalCase.attributes.settings.syncAlerts !== updateReq.settings.syncAlerts &&
         updateReq.settings.syncAlerts
@@ -1021,6 +1047,15 @@ export const bulkUpdate = async (
       caseService,
       alertsService,
     });
+
+    if (userActionsDict != null && failedCaseIds.size > 0) {
+      userActionsDict = Object.entries(userActionsDict).reduce((actionsDict, [caseId, entry]) => {
+        if (!failedCaseIds.has(caseId)) {
+          actionsDict[caseId] = entry;
+        }
+        return actionsDict;
+      }, {} as typeof userActionsDict);
+    }
 
     userActionsDict = userActionService.creator.addSyncedAlertsCountToUserActions({
       userActionsDict,
