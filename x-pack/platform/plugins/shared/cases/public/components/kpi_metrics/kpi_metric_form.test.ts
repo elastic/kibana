@@ -324,6 +324,21 @@ describe('kpi metric form', () => {
       ).toEqual({ ...alertMetric, aggregateBy: 'alert' });
     });
 
+    it('reads the date basis and writes it only when it is not the default or was saved', () => {
+      const state = toKpiMetricFormState(alertMetric);
+
+      expect(state.dateBasis).toBe('attached_at');
+      expect(toKpiMetricRequest(state, alertMetric)).toEqual(alertMetric);
+      expect(toKpiMetricRequest({ ...state, dateBasis: 'case_closed_at' }, alertMetric)).toEqual({
+        ...alertMetric,
+        dateBasis: 'case_closed_at',
+      });
+
+      const saved = { ...alertMetric, dateBasis: 'case_closed_at' as const };
+
+      expect(toKpiMetricRequest(toKpiMetricFormState(saved), saved)).toEqual(saved);
+    });
+
     it('writes no trigger for a metric that is not an alert metric', () => {
       const openCases: KpiMetricRequest = {
         kind: 'predefined',

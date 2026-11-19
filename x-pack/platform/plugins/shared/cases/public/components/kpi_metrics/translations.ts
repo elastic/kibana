@@ -353,6 +353,26 @@ export const ACKNOWLEDGE_TRIGGER_ASSIGNED_OR_IN_PROGRESS = i18n.translate(
   }
 );
 
+export const DATE_BASIS = i18n.translate('xpack.cases.kpiMetrics.dateBasis', {
+  defaultMessage: 'Date range applies to',
+});
+
+export const DATE_BASIS_HELP = i18n.translate('xpack.cases.kpiMetrics.dateBasisHelp', {
+  defaultMessage:
+    'The case close date counts only the cases that closed in the selected range. Open cases are not counted.',
+});
+
+export const DATE_BASIS_ATTACHED_AT = i18n.translate('xpack.cases.kpiMetrics.dateBasisAttachedAt', {
+  defaultMessage: 'Alert added date',
+});
+
+export const DATE_BASIS_CASE_CLOSED_AT = i18n.translate(
+  'xpack.cases.kpiMetrics.dateBasisCaseClosedAt',
+  {
+    defaultMessage: 'Case close date',
+  }
+);
+
 export const AGGREGATE_BY_CASE = i18n.translate('xpack.cases.kpiMetrics.aggregateByCase', {
   defaultMessage: 'Count each case once',
 });

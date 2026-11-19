@@ -192,7 +192,8 @@ export const KPI_METRIC_UNKNOWN = i18n.translate('xpack.cases.casesStats.kpiMetr
 export const KPI_METRIC_CLOSED_DATE_HINT = i18n.translate(
   'xpack.cases.casesStats.kpiMetricClosedDateHint',
   {
-    defaultMessage: 'Filtered by closed date. The case table uses the created date.',
+    defaultMessage:
+      'Filtered by the case close date. Open cases are not counted. The case table uses the created date.',
   }
 );
 

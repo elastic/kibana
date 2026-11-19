@@ -21,6 +21,9 @@ import { getKpiChangeColor, getKpiChangePercent, getKpiThresholdColor } from './
 
 jest.mock('pretty-ms', () => jest.fn().mockReturnValue('2ms'));
 
+const CLOSE_DATE_TEXT =
+  'Filtered by the case close date. Open cases are not counted. The case table uses the created date.';
+
 describe('Cases metrics', () => {
   const props = {
     countOpenCases: 20,
@@ -284,6 +287,49 @@ describe('Cases metrics', () => {
       expect(await screen.findByText(text)).toBeInTheDocument();
     });
 
+    it('shows the same close date sentence on a custom tile and on an alert tile', async () => {
+      renderWithTestingProviders(
+        <CasesMetrics
+          {...props}
+          kpiMetrics={[
+            {
+              id: 'c1',
+              kind: 'custom',
+              label: 'Time to resolve',
+              index: 'cases',
+              query: '',
+              display: 'value',
+              dateField: 'closed_at',
+            },
+            {
+              id: 'tta',
+              kind: 'predefined',
+              predefinedId: 'alert_time_to_acknowledge_avg',
+              display: 'value',
+              dateBasis: 'case_closed_at',
+            },
+          ]}
+          kpiResults={[
+            { id: 'c1', type: 'value', format: 'duration', value: 101 },
+            { id: 'tta', type: 'value', format: 'duration', value: 101 },
+          ]}
+          isAnalyticsEnabled={true}
+        />
+      );
+
+      await userEvent.hover(await screen.findByTestId('cases-kpi-tile-c1-date-hint'));
+      expect(await screen.findByText(CLOSE_DATE_TEXT)).toBeInTheDocument();
+      await userEvent.unhover(screen.getByTestId('cases-kpi-tile-c1-date-hint'));
+
+      await userEvent.hover(screen.getByTestId('cases-kpi-tile-tta-date-hint'));
+      expect(
+        await screen.findByText(
+          (content) =>
+            content.includes('first assignment or In progress') && content.endsWith(CLOSE_DATE_TEXT)
+        )
+      ).toBeInTheDocument();
+    });
+
     it('adds the sentence that each case counts once to the info icon', async () => {
       renderWithTestingProviders(
         <CasesMetrics
@@ -329,9 +375,7 @@ describe('Cases metrics', () => {
 
       await userEvent.hover(await screen.findByTestId('cases-kpi-tile-c1-date-hint'));
 
-      expect(
-        await screen.findByText('Filtered by closed date. The case table uses the created date.')
-      ).toBeInTheDocument();
+      expect(await screen.findByText(CLOSE_DATE_TEXT)).toBeInTheDocument();
     });
 
     it('shows no date hint for a tile with the default date', async () => {

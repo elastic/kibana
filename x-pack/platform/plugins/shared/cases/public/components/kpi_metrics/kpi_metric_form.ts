@@ -22,6 +22,7 @@ import { isKpiExtendedKeywordField } from '../../../common/utils/kpi_metrics';
 import type {
   KpiAcknowledgeTrigger,
   KpiAggregateBy,
+  KpiDateBasis,
   KpiMetricAggregationType,
   KpiMetricDateField,
   KpiMetricDirection,
@@ -63,10 +64,15 @@ export interface KpiMetricFormState {
    * The value of an alert metric for each alert or for each case
    */
   aggregateBy: KpiAggregateBy;
+  /**
+   * The date that the date range of an alert metric applies to
+   */
+  dateBasis: KpiDateBasis;
 }
 
 export const DEFAULT_ACKNOWLEDGE_TRIGGER: KpiAcknowledgeTrigger = 'assigned_or_in_progress';
 export const DEFAULT_AGGREGATE_BY: KpiAggregateBy = 'alert';
+export const DEFAULT_DATE_BASIS: KpiDateBasis = 'attached_at';
 
 export interface KpiMetricFormErrors {
   label?: string;
@@ -181,6 +187,18 @@ const withThreshold = (
   };
 };
 
+const toPredefinedFormState = (
+  base: KpiMetricFormState,
+  metric: Extract<KpiMetricRequest, { kind: 'predefined' }>
+): KpiMetricFormState => ({
+  ...base,
+  kind: 'predefined',
+  predefinedId: metric.predefinedId,
+  acknowledgeTrigger: metric.acknowledgeTrigger ?? DEFAULT_ACKNOWLEDGE_TRIGGER,
+  aggregateBy: metric.aggregateBy ?? DEFAULT_AGGREGATE_BY,
+  dateBasis: metric.dateBasis ?? DEFAULT_DATE_BASIS,
+});
+
 export const toKpiMetricFormState = (metric?: KpiMetricRequest | null): KpiMetricFormState => {
   const base: KpiMetricFormState = {
     kind: 'custom',
@@ -200,6 +218,7 @@ export const toKpiMetricFormState = (metric?: KpiMetricRequest | null): KpiMetri
     groupBySize: String(DEFAULT_KPI_BREAKDOWN_SIZE),
     acknowledgeTrigger: DEFAULT_ACKNOWLEDGE_TRIGGER,
     aggregateBy: DEFAULT_AGGREGATE_BY,
+    dateBasis: DEFAULT_DATE_BASIS,
   };
 
   if (metric == null) {
@@ -207,16 +226,7 @@ export const toKpiMetricFormState = (metric?: KpiMetricRequest | null): KpiMetri
   }
 
   if (metric.kind === 'predefined') {
-    return withThreshold(
-      {
-        ...base,
-        kind: 'predefined',
-        predefinedId: metric.predefinedId,
-        acknowledgeTrigger: metric.acknowledgeTrigger ?? DEFAULT_ACKNOWLEDGE_TRIGGER,
-        aggregateBy: metric.aggregateBy ?? DEFAULT_AGGREGATE_BY,
-      },
-      metric.threshold
-    );
+    return withThreshold(toPredefinedFormState(base, metric), metric.threshold);
   }
 
   return withThreshold(
@@ -298,8 +308,8 @@ const toThreshold = (state: KpiMetricFormState): KpiMetricThreshold | undefined 
 };
 
 /**
- * Returns the options of an alert metric. The trigger and the per-case mode are written when they are not the
- * default, or when the saved metric already had them. The other saved options stay as they are,
+ * Returns the options of an alert metric. The trigger, the per-case mode, and the date basis are written when
+ * they are not the default, or when the saved metric already had them. The other saved options stay as they are,
  * because this form does not edit them.
  */
 const toAlertOptions = (
@@ -319,7 +329,9 @@ const toAlertOptions = (
     ...((saved?.aggregateBy != null || state.aggregateBy !== DEFAULT_AGGREGATE_BY) && {
       aggregateBy: state.aggregateBy,
     }),
-    ...(saved?.dateBasis != null && { dateBasis: saved.dateBasis }),
+    ...((saved?.dateBasis != null || state.dateBasis !== DEFAULT_DATE_BASIS) && {
+      dateBasis: state.dateBasis,
+    }),
     ...(saved?.caseQuery != null && { caseQuery: saved.caseQuery }),
     ...((saved?.acknowledgeTrigger != null ||
       state.acknowledgeTrigger !== DEFAULT_ACKNOWLEDGE_TRIGGER) && {

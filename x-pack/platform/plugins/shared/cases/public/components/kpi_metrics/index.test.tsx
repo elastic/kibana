@@ -436,6 +436,29 @@ describe('KpiMetricsSettings', () => {
       );
     });
 
+    it('saves the close date basis of an alert metric', async () => {
+      const alertMetric = {
+        id: 'alert-1',
+        kind: 'predefined' as const,
+        predefinedId: 'alert_time_to_acknowledge_avg',
+        display: 'value' as const,
+      };
+      renderWithTestingProviders(
+        <KpiMetricsSettings kpiMetrics={[alertMetric]} isLoading={false} onSave={onSave} />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.selectOptions(
+        await screen.findByTestId('kpi-metric-date-basis'),
+        'case_closed_at'
+      );
+      await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+      await waitFor(() =>
+        expect(onSave).toHaveBeenCalledWith([{ ...alertMetric, dateBasis: 'case_closed_at' }])
+      );
+    });
+
     it('does not show the acknowledge trigger for a case search metric', async () => {
       renderWithTestingProviders(
         <KpiMetricsSettings
@@ -452,6 +475,7 @@ describe('KpiMetricsSettings', () => {
       expect(await screen.findByTestId('kpi-metric-predefined-id')).toBeInTheDocument();
       expect(screen.queryByTestId('kpi-metric-acknowledge-trigger')).not.toBeInTheDocument();
       expect(screen.queryByTestId('kpi-metric-aggregate-by-case')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('kpi-metric-date-basis')).not.toBeInTheDocument();
     });
 
     it('shows a duration in the unit of the threshold', async () => {

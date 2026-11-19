@@ -189,9 +189,11 @@ const getDateHint = (metric: KpiMetricConfiguration): string | undefined => {
     return;
   }
 
-  const rule = getAcknowledgeRuleHint(metric.acknowledgeTrigger);
-
-  return metric.aggregateBy === 'case' ? `${rule} ${KPI_METRIC_ALERT_EACH_CASE_ONCE_HINT}` : rule;
+  return [
+    getAcknowledgeRuleHint(metric.acknowledgeTrigger),
+    ...(metric.aggregateBy === 'case' ? [KPI_METRIC_ALERT_EACH_CASE_ONCE_HINT] : []),
+    ...(metric.dateBasis === 'case_closed_at' ? [KPI_METRIC_CLOSED_DATE_HINT] : []),
+  ].join(' ');
 };
 
 const getKpiTileValues = (

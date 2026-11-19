@@ -42,6 +42,7 @@ import type {
 } from '../../../common/types/api';
 import type {
   KpiAcknowledgeTrigger,
+  KpiDateBasis,
   KpiMetricAggregationType,
   KpiMetricDateField,
   KpiMetricThresholdUnit,
@@ -118,6 +119,14 @@ const ACKNOWLEDGE_TRIGGER_OPTIONS: Array<{ value: KpiAcknowledgeTrigger; text: s
   { value: 'assigned', text: i18n.ACKNOWLEDGE_TRIGGER_ASSIGNED },
   { value: 'in_progress', text: i18n.ACKNOWLEDGE_TRIGGER_IN_PROGRESS },
 ];
+
+const DATE_BASIS_OPTIONS: Array<{ value: KpiDateBasis; text: string }> = [
+  { value: 'attached_at', text: i18n.DATE_BASIS_ATTACHED_AT },
+  { value: 'case_closed_at', text: i18n.DATE_BASIS_CASE_CLOSED_AT },
+];
+
+const toDateBasis = (value: string): KpiDateBasis =>
+  DATE_BASIS_OPTIONS.find((option) => option.value === value)?.value ?? 'attached_at';
 
 const toAcknowledgeTrigger = (value: string): KpiAcknowledgeTrigger =>
   ACKNOWLEDGE_TRIGGER_OPTIONS.find((option) => option.value === value)?.value ??
@@ -230,6 +239,15 @@ const KpiMetricAlertOptionRows: React.FC<KpiMetricRowsProps> = ({ state, update 
         value={state.acknowledgeTrigger}
         onChange={(e) => update({ acknowledgeTrigger: toAcknowledgeTrigger(e.target.value) })}
         data-test-subj="kpi-metric-acknowledge-trigger"
+      />
+    </EuiFormRow>
+    <EuiFormRow label={i18n.DATE_BASIS} helpText={i18n.DATE_BASIS_HELP} fullWidth>
+      <EuiSelect
+        fullWidth
+        options={DATE_BASIS_OPTIONS}
+        value={state.dateBasis}
+        onChange={(e) => update({ dateBasis: toDateBasis(e.target.value) })}
+        data-test-subj="kpi-metric-date-basis"
       />
     </EuiFormRow>
     <EuiFormRow fullWidth helpText={i18n.AGGREGATE_BY_CASE_HELP}>
