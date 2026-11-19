@@ -10,8 +10,8 @@
 import { scopeKey, type JudgedScope } from './judged_scope';
 
 /**
- * How the test did in a build across its attempts: `recovered` when it failed, then passed on a
- * retry, and `failed` when it failed every attempt.
+ * How the test did in a build, over its in-run and Buildkite retries: `passed` when no attempt
+ * failed, `recovered` when a retry passed after a failure, `failed` when every attempt failed.
  */
 export type BuildOutcome = 'passed' | 'recovered' | 'failed';
 
