@@ -64,6 +64,7 @@ import {
   arePinnedPanelLayoutsEqual,
 } from '../../../common/dashboard_state/layout/are_layouts_equal';
 import { deserializeLayout } from '../../../common/dashboard_state/layout/deserialize_layout';
+import { initializeApplyingChildState } from './applying_child_state';
 import { initializeGridLayout } from './grid_layout';
 import {
   getLayoutBottomRow,
@@ -90,7 +91,7 @@ export function initializeLayoutManager(
   // --------------------------------------------------------------------------------------
   // Set up panel state manager
   // --------------------------------------------------------------------------------------
-  const applyingChildState$ = new BehaviorSubject<boolean>(false);
+  const { applyingChildState$, setApplyingChildStateWhile } = initializeApplyingChildState();
   const children$ = new BehaviorSubject<DashboardChildren>({});
   const { layout: initialLayout, childState: initialChildState } = deserializeLayout(
     initialPanels,
@@ -131,10 +132,8 @@ export function initializeLayoutManager(
   let lastSavedLayout = initialLayout;
   let lastSavedChildState = initialChildState;
 
-  const resetLayout = async (state: DashboardState) => {
-    try {
-      applyingChildState$.next(true);
-
+  const resetLayout = (state: DashboardState) =>
+    setApplyingChildStateWhile(async () => {
       const { layout: layoutToApply, childState: childStateToApply } = deserializeLayout(
         state.panels,
         state.pinned_panels
@@ -153,10 +152,7 @@ export function initializeLayoutManager(
         }
       }
       await Promise.all(setStatePromises);
-    } finally {
-      applyingChildState$.next(false);
-    }
-  };
+    });
 
   /**
    * When panels are removed from the layout (e.g. a section with panels is deleted, layout is reset),
@@ -289,10 +285,7 @@ export function initializeLayoutManager(
     }
 
     if (applyStatePromises.length) {
-      applyingChildState$.next(true);
-      void Promise.allSettled(applyStatePromises).then(() => {
-        applyingChildState$.next(false);
-      });
+      void setApplyingChildStateWhile(() => Promise.allSettled(applyStatePromises));
     }
 
     if (anchorId) {
@@ -393,9 +386,8 @@ export function initializeLayoutManager(
 
   const removePanel = (uuid: string) => removePanels([uuid]);
 
-  const replacePanel = async (idToRemove: string, panelPackage: PanelPackage) => {
-    try {
-      applyingChildState$.next(true);
+  const replacePanel = (idToRemove: string, panelPackage: PanelPackage) =>
+    setApplyingChildStateWhile(async () => {
       const existingGridData = layout$.value.panels[idToRemove]?.grid;
       const existingPinnedPanelData = layout$.value.pinnedPanels[idToRemove];
       if (!existingGridData && !existingPinnedPanelData) throw new PanelNotFoundError();
@@ -413,10 +405,7 @@ export function initializeLayoutManager(
         const newPanel = await addPinnedPanel(panelPackage, prevLayoutState);
         return newPanel.uuid;
       }
-    } finally {
-      applyingChildState$.next(false);
-    }
-  };
+    });
 
   const duplicatePanel = async (uuidToDuplicate: string) => {
     const layoutItemToDuplicate = layout$.value.panels[uuidToDuplicate];
