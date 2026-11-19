@@ -152,6 +152,7 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
     };
     const mustNot = step.with?.query?.bool?.must_not ?? [];
     // enrich_workflow_rejected is the current value, workflow_v4_rejected the legacy one.
+    // Object form is what the editor's ES connector schema requires for a boolean term.
     expect(mustNot).toEqual(
       expect.arrayContaining([
         {
@@ -159,7 +160,7 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
             'lineage.extraction_method': ['enrich_workflow_rejected', 'workflow_v4_rejected'],
           },
         },
-        { term: { 'extracted.gate.is_intelligence': false } },
+        { term: { 'extracted.gate.is_intelligence': { value: false } } },
       ])
     );
   });
@@ -187,6 +188,7 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
     };
     const mustNot = step.with?.query?.bool?.must_not ?? [];
     // enrich_workflow_rejected is the current value, workflow_v4_rejected the legacy one.
+    // Object form is what the editor's ES connector schema requires for a boolean term.
     expect(mustNot).toEqual(
       expect.arrayContaining([
         {
@@ -194,7 +196,7 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
             'lineage.extraction_method': ['enrich_workflow_rejected', 'workflow_v4_rejected'],
           },
         },
-        { term: { 'extracted.gate.is_intelligence': false } },
+        { term: { 'extracted.gate.is_intelligence': { value: false } } },
       ])
     );
   });

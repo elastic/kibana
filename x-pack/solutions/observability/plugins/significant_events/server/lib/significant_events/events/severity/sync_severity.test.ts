@@ -27,7 +27,12 @@ type Outcome = 'updated' | 'unchanged' | 'superseded' | 'not_found' | 'closed';
 
 const available = (entries: Array<[string, Row['severity']]>) => ({
   status: 'available',
-  outcomes: new Map(entries.map(([eventId, severity]) => [eventId, { severity }])),
+  outcomes: new Map(
+    entries.map(([eventId, severity]) => [
+      eventId,
+      { severity, episodeId: `episode-of-${eventId}` },
+    ])
+  ),
 });
 const unavailable = (reason: string) => ({ status: 'unavailable', reason });
 const staleRows = (prefix: string, count: number): Row[] =>
@@ -38,7 +43,7 @@ const staleRows = (prefix: string, count: number): Row[] =>
 
 const setup = (syncSeverity: jest.Mock = jest.fn().mockResolvedValue('updated' as Outcome)) => {
   const eventClient = {
-    findEpisodeIdsByEventIds: jest.fn(),
+    findCurrentEpisodeIdsByEventIds: jest.fn(),
     findEventIdsByEpisodeIds: jest.fn(),
     syncSeverity,
   };
@@ -79,6 +84,18 @@ describe('createSeveritySync', () => {
 
       expect(rows.map(({ severity }) => severity)).toEqual(['critical', 'low', 'high']);
       expect(syncSeverity).not.toHaveBeenCalled();
+    });
+
+    it('keeps the stored severity of a reopened event whose only investigation is on an earlier episode', async () => {
+      // The loader reads the current episode only, so an earlier episode's investigation is no outcome.
+      mockLoadInvestigationOutcomes.mockResolvedValue(available([]));
+      const { reconcile } = setup();
+
+      const rows = await reconcile([
+        { event_id: 'event-1', severity: 'high', status: ALERT_EPISODE_STATUS.ACTIVE },
+      ]);
+
+      expect(rows.map(({ severity }) => severity)).toEqual(['high']);
     });
 
     it('keeps the stored severity of a closed event and does not read its investigation', async () => {
@@ -175,8 +192,25 @@ describe('createSeveritySync', () => {
       });
 
       expect(result).toBe(outcome);
-      expect(syncSeverity).toHaveBeenCalledWith({ eventId: 'event-1', severity: 'high' });
-      expect(syncSeverity).toHaveBeenCalledWith({ eventId: 'event-9', severity: 'low' });
+      expect(syncSeverity).toHaveBeenCalledWith({
+        eventId: 'event-1',
+        severity: 'high',
+        episodeId: 'episode-of-event-1',
+      });
+      expect(syncSeverity).toHaveBeenCalledWith({
+        eventId: 'event-9',
+        severity: 'low',
+        episodeId: 'episode-of-event-9',
+      });
+    });
+
+    it('writes nothing for a reopened event whose only investigation is on an earlier episode', async () => {
+      mockLoadInvestigationOutcomes.mockResolvedValue(available([]));
+      const { severitySync, syncSeverity, eventClient } = setup();
+
+      await severitySync.syncEvents({ request, eventClient, eventIds: ['event-1'] });
+
+      expect(syncSeverity).not.toHaveBeenCalled();
     });
 
     it('tries every event when one write fails, then throws that error', async () => {
@@ -196,7 +230,11 @@ describe('createSeveritySync', () => {
         severitySync.syncEvents({ request, eventClient, eventIds: ['event-1', 'event-2'] })
       ).rejects.toThrow('boom');
 
-      expect(syncSeverity).toHaveBeenCalledWith({ eventId: 'event-2', severity: 'low' });
+      expect(syncSeverity).toHaveBeenCalledWith({
+        eventId: 'event-2',
+        severity: 'low',
+        episodeId: 'episode-of-event-2',
+      });
     });
 
     it('writes nothing and returns the reason when the investigations are unavailable', async () => {

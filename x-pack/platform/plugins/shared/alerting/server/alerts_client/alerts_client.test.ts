@@ -16,6 +16,7 @@ import type { AlertsFilter, RuleAlertData } from '../types';
 import { DEFAULT_FLAPPING_SETTINGS, RecoveredActionGroup } from '../types';
 import {
   ALERT_ACTION_GROUP,
+  ALERT_CASE_IDS,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_DURATION,
   ALERT_END,
@@ -49,6 +50,7 @@ import {
   ALERT_TRACKED,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   EVENT_ACTION,
   EVENT_KIND,
   SPACE_IDS,
@@ -1053,6 +1055,75 @@ describe('Alerts Client', () => {
             request: fakeRequest,
             ruleTypeCategory: 'test',
             spaceId: 'space1',
+          });
+        });
+
+        test('should reactivate the recovered alert doc of an alert that task state still has as active', async () => {
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 1 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: getRecoveredIndexedAlertDoc({
+                    [ALERT_UUID]: 'abc',
+                    [ALERT_WORKFLOW_STATUS]: 'acknowledged',
+                    [ALERT_WORKFLOW_TAGS]: ['investigating'],
+                    [ALERT_CASE_IDS]: ['case-1'],
+                  }),
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              '1': trackedAlert1Raw,
+            },
+          });
+
+          alertsClient.factory().create('1').scheduleActions('default');
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          expect(clusterClient.bulk).toHaveBeenCalledWith({
+            index: '.alerts-test.alerts-default',
+            refresh: 'wait_for',
+            require_alias: !useDataStreamForAlerts,
+            body: [
+              {
+                index: {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  if_seq_no: 41,
+                  if_primary_term: 665,
+                  require_alias: false,
+                },
+              },
+              getOngoingIndexedAlertDoc({
+                [ALERT_UUID]: 'abc',
+                [ALERT_STATE_NAMESPACE]: { foo: true },
+                [ALERT_WORKFLOW_STATUS]: 'acknowledged',
+                [ALERT_WORKFLOW_TAGS]: ['investigating'],
+                [ALERT_CASE_IDS]: ['case-1'],
+              }),
+            ],
           });
         });
 
