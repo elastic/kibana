@@ -41,6 +41,7 @@ jest.mock('@elastic/eui', () => {
 });
 
 const ERROR_BODY = 'Something went wrong while loading this conversation.';
+const NO_SUMMARY_BODY = 'There is no summary for this conversation.';
 
 /** The hosts render the content inside a frame, which shows its loading state while a module loads. */
 const FrameWrapper = ({ children }: PropsWithChildren) => (
@@ -606,13 +607,15 @@ describe('ConversationDetailsFlyoutContent', () => {
     renderContent(createService({}), createConversation({ template_id: undefined }));
 
     expect(screen.getByRole('heading', { name: 'Summary' })).toBeInTheDocument();
-    expect(screen.getByText(ERROR_BODY)).toBeInTheDocument();
+    expect(screen.getByText(NO_SUMMARY_BODY)).toBeInTheDocument();
+    expect(screen.queryByText(ERROR_BODY)).not.toBeInTheDocument();
   });
 
-  it('shows the error state for a template that registers no details flyout and no tabs', () => {
+  it('shows the no-summary message for a template that registers no details flyout and no tabs', () => {
     renderContent(createService({}));
 
-    expect(screen.getByText(ERROR_BODY)).toBeInTheDocument();
+    expect(screen.getByText(NO_SUMMARY_BODY)).toBeInTheDocument();
+    expect(screen.queryByText(ERROR_BODY)).not.toBeInTheDocument();
   });
 
   it('shows the tabs of a template that registers no details flyout', () => {

@@ -10,7 +10,7 @@ import type { ComponentType, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import { FlyoutTemplate } from '@kbn/flyout-template';
-import type { FlyoutTemplateProps } from '@kbn/flyout-template';
+import type { FlyoutBodyCalloutLevel, FlyoutTemplateProps } from '@kbn/flyout-template';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type {
@@ -36,6 +36,13 @@ export const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetai
 const ERROR_BODY = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.errorBody', {
   defaultMessage: 'Something went wrong while loading this conversation.',
 });
+
+const NO_SUMMARY_BODY = i18n.translate(
+  'xpack.agentBuilder.conversationDetailsFlyout.noSummaryBody',
+  {
+    defaultMessage: 'There is no summary for this conversation.',
+  }
+);
 
 const TAB_BAR_LABEL = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.tabBarLabel', {
   defaultMessage: 'Summary tabs',
@@ -84,13 +91,29 @@ const LoadingDeclaration = ({ onClose }: { onClose: () => void }) => (
   </FlyoutTemplate>
 );
 
-const ErrorDeclaration = ({ onClose }: { onClose: () => void }) => (
+const MessageDeclaration = ({
+  onClose,
+  level,
+  title,
+}: {
+  onClose: () => void;
+  level: FlyoutBodyCalloutLevel;
+  title: string;
+}) => (
   <FlyoutTemplate onClose={onClose}>
     <FlyoutTemplate.Header title={FLYOUT_TITLE} data-test-subj={TEST_SUBJ.header} />
     <FlyoutTemplate.Body data-test-subj={TEST_SUBJ.body}>
-      <FlyoutTemplate.Body.Callout level="danger" title={ERROR_BODY} />
+      <FlyoutTemplate.Body.Callout level={level} title={title} />
     </FlyoutTemplate.Body>
   </FlyoutTemplate>
+);
+
+const ErrorDeclaration = ({ onClose }: { onClose: () => void }) => (
+  <MessageDeclaration onClose={onClose} level="danger" title={ERROR_BODY} />
+);
+
+const NoSummaryDeclaration = ({ onClose }: { onClose: () => void }) => (
+  <MessageDeclaration onClose={onClose} level="info" title={NO_SUMMARY_BODY} />
 );
 
 interface DetailsTemplateProps extends ConversationTemplateDetailsFlyoutRenderProps {
@@ -289,7 +312,7 @@ export const ConversationDetailsFlyoutContent = ({
   }
 
   if (tabs.length === 0) {
-    return <ErrorDeclaration onClose={onClose} />;
+    return <NoSummaryDeclaration onClose={onClose} />;
   }
 
   return (
