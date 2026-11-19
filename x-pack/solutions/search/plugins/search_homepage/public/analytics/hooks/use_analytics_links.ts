@@ -23,6 +23,7 @@ import type {
   DiscoverESQLLocatorParams,
 } from '@kbn/discover-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
+import { useWebCrawlFlyout } from '../components/shared/web_crawl_flyout_context';
 import {
   ANALYTICS_AGENT_SESSION_TAG,
   ANALYTICS_TELEMETRY_PREFIX,
@@ -75,6 +76,7 @@ export const useAnalyticsLinks = (): AnalyticsLinks => {
     usageCollection,
   } = useKibana().services;
   const { capabilities } = application;
+  const webCrawlFlyout = useWebCrawlFlyout();
 
   const canUseIntegrations = capabilities.fleet?.read === true;
   const canUseDiscover = capabilities.discover_v2?.show === true;
@@ -144,6 +146,8 @@ export const useAnalyticsLinks = (): AnalyticsLinks => {
           return indexManagementLocator !== undefined;
         case 'apiTutorial':
           return isEmbeddedConsoleAvailable();
+        case 'webCrawl':
+          return webCrawlFlyout.isAvailable;
         default:
           return true;
       }
@@ -158,7 +162,7 @@ export const useAnalyticsLinks = (): AnalyticsLinks => {
       navigateToIntegrations(INTEGRATIONS_BROWSE_PATH);
     };
 
-    const openSource = ({ id, target }: AnalyticsSource): void => {
+    const openSource = ({ id, target }: AnalyticsSource, opener?: HTMLElement | null): void => {
       reportClick(`open_source_${id}`);
       switch (target.type) {
         case 'fileUpload':
@@ -185,6 +189,9 @@ export const useAnalyticsLinks = (): AnalyticsLinks => {
           return;
         case 'externalUrl':
           window.open(target.url, '_blank', 'noopener,noreferrer');
+          return;
+        case 'webCrawl':
+          webCrawlFlyout.open(opener);
           return;
         default:
           navigateToIntegrations(getIntegrationsPath(target));
@@ -333,5 +340,6 @@ export const useAnalyticsLinks = (): AnalyticsLinks => {
     notifications,
     share,
     usageCollection,
+    webCrawlFlyout,
   ]);
 };

@@ -37,6 +37,8 @@ interface SourcesFlyoutProps {
     AnalyticsLinks,
     'canUseIntegrations' | 'isSourceAvailable' | 'openSource' | 'browseIntegrations'
   >;
+  /** The control that opened the flyout, which a source that opens a dialog returns the focus to. */
+  getOpener?: () => HTMLElement | null;
   onClose: () => void;
 }
 
@@ -45,6 +47,7 @@ export const SourcesFlyout = ({
   page,
   audience,
   links,
+  getOpener,
   onClose,
 }: SourcesFlyoutProps): React.JSX.Element => {
   const titleId = useGeneratedHtmlId({ prefix: 'analyticsSourcesFlyoutTitle' });
@@ -147,9 +150,10 @@ export const SourcesFlyout = ({
                       source={source}
                       canUseIntegrations={links.canUseIntegrations}
                       onSelect={(selectedSource) => {
+                        const opener = getOpener?.();
                         // The embedded Console opens underneath the flyout's mask.
                         onClose();
-                        links.openSource(selectedSource);
+                        links.openSource(selectedSource, opener);
                       }}
                     />
                   </EuiFlexItem>

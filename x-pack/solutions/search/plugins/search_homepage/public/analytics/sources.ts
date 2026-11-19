@@ -78,21 +78,25 @@ export const getAnalyticsSourceGroups = (
   );
 };
 
-const FEATURED_SOURCE_IDS: readonly string[] = ['api', 'fileUpload'];
+const LEADING_FEATURED_SOURCE_IDS: readonly string[] = ['api', 'fileUpload'];
+const TRAILING_FEATURED_SOURCE_IDS: readonly string[] = ['webCrawl'];
 
 /**
  * The ways in shown before the full list is disclosed, in display order: two sources that suit any
- * data, then the event sources as a list of their own.
+ * data, the event sources as a list of their own, then the website crawl for search content. A
+ * source is only shown where it is available.
  */
 export const getFeaturedAnalyticsEntries = (): readonly AnalyticsFeaturedEntry[] => {
   const sources = getAnalyticsSources();
-
-  return [
-    ...FEATURED_SOURCE_IDS.flatMap((featuredId) =>
+  const toEntries = (featuredIds: readonly string[]): AnalyticsFeaturedEntry[] =>
+    featuredIds.flatMap((featuredId) =>
       sources
         .filter(({ id }) => id === featuredId)
         .map((source): AnalyticsFeaturedEntry => ({ kind: 'source', source }))
-    ),
+    );
+
+  return [
+    ...toEntries(LEADING_FEATURED_SOURCE_IDS),
     {
       kind: 'sourceList',
       list: {
@@ -108,6 +112,7 @@ export const getFeaturedAnalyticsEntries = (): readonly AnalyticsFeaturedEntry[]
         audience: 'events',
       },
     },
+    ...toEntries(TRAILING_FEATURED_SOURCE_IDS),
   ];
 };
 
@@ -237,14 +242,27 @@ export const getAnalyticsSources = (): readonly AnalyticsSource[] => [
     target: { type: 'sampleDataDirectory' },
   },
   {
-    id: 'webCrawler',
+    id: 'webCrawl',
     group: 'search',
-    title: i18n.translate('xpack.searchHomepage.analytics.sources.webCrawler.title', {
+    title: i18n.translate('xpack.searchHomepage.analytics.sources.webCrawl.title', {
+      defaultMessage: 'Crawl a website',
+    }),
+    description: i18n.translate('xpack.searchHomepage.analytics.sources.webCrawl.description', {
+      defaultMessage: 'Enter a URL and index its pages for search.',
+    }),
+    iconType: 'globe',
+    target: { type: 'webCrawl' },
+  },
+  {
+    id: 'openWebCrawler',
+    group: 'search',
+    title: i18n.translate('xpack.searchHomepage.analytics.sources.openWebCrawler.title', {
       defaultMessage: 'Elastic Open Web Crawler',
     }),
-    description: i18n.translate('xpack.searchHomepage.analytics.sources.webCrawler.description', {
-      defaultMessage: 'Crawl websites and index their pages. Opens on GitHub.',
-    }),
+    description: i18n.translate(
+      'xpack.searchHomepage.analytics.sources.openWebCrawler.description',
+      { defaultMessage: 'Run the open source crawler yourself for larger sites. Opens on GitHub.' }
+    ),
     iconType: 'archive',
     target: { type: 'externalUrl', url: WEB_CRAWLER_URL },
   },

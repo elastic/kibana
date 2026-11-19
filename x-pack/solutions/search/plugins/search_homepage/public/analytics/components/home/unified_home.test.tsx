@@ -298,6 +298,7 @@ describe('UnifiedHomePage', () => {
         'analyticsHomeFeaturedSource-api',
         'analyticsHomeFeaturedSource-fileUpload',
         'analyticsHomeFeaturedSource-eventStream',
+        'analyticsHomeFeaturedSource-webCrawl',
         'analyticsHomeMoreSources',
         'analyticsHomeTrySampleEvents',
       ]);
@@ -332,7 +333,8 @@ describe('UnifiedHomePage', () => {
           .getAllByRole('button')
           .map((tile) => tile.dataset.testSubj)
       ).toEqual([
-        'analyticsHomeFlyoutSource-webCrawler',
+        'analyticsHomeFlyoutSource-webCrawl',
+        'analyticsHomeFlyoutSource-openWebCrawler',
         'analyticsHomeFlyoutSource-apiTutorial',
         'analyticsHomeFlyoutSource-createIndex',
       ]);
@@ -360,21 +362,23 @@ describe('UnifiedHomePage', () => {
       expectOnlyView('analyticsHomeNoData');
     });
 
-    it('offers the three featured ways in and keeps the rest out of the page', () => {
+    it('offers the featured ways in and keeps the rest out of the page', () => {
       const { links } = setup();
 
       expect(
         screen
           .getAllByTestId(/^analyticsHomeFeaturedSource-/)
           .map((tile) => tile.dataset.testSubj?.replace('analyticsHomeFeaturedSource-', ''))
-      ).toEqual(['api', 'fileUpload', 'eventStream']);
+      ).toEqual(['api', 'fileUpload', 'eventStream', 'webCrawl']);
       expect(screen.queryByTestId('analyticsHomeSourcesFlyout')).not.toBeInTheDocument();
       expect(screen.getByTestId('analyticsHomeNoData')).not.toHaveTextContent('within seconds');
       expect(screen.queryByTestId('analyticsHomeExploreAskAgent')).not.toBeInTheDocument();
 
-      fireEvent.click(screen.getByTestId('analyticsHomeFeaturedSource-api'));
+      const api = screen.getByTestId('analyticsHomeFeaturedSource-api');
+      fireEvent.click(api);
       expect(links.openSource).toHaveBeenCalledWith(
-        getAnalyticsSources().find(({ id }) => id === 'api')
+        getAnalyticsSources().find(({ id }) => id === 'api'),
+        api
       );
     });
 
@@ -420,9 +424,7 @@ describe('UnifiedHomePage', () => {
         expect(screen.getByTestId('analyticsHomeFlyoutSource-httpEndpoint')).toBeInTheDocument();
         expect(screen.getByTestId('analyticsHomeFlyoutSource-s3')).toBeInTheDocument();
         expect(screen.queryByTestId('analyticsHomeSourceGroup-search')).not.toBeInTheDocument();
-        expect(
-          screen.queryByTestId('analyticsHomeFlyoutSource-webCrawler')
-        ).not.toBeInTheDocument();
+        expect(screen.queryByTestId('analyticsHomeFlyoutSource-webCrawl')).not.toBeInTheDocument();
       });
 
       it('opens Kafka from the list and closes the flyout', () => {
@@ -435,7 +437,8 @@ describe('UnifiedHomePage', () => {
           expect.objectContaining({
             id: 'kafka',
             target: { type: 'integrationSearch', searchTerm: 'kafka' },
-          })
+          }),
+          getTile()
         );
         expect(screen.queryByTestId('analyticsHomeSourcesFlyout')).not.toBeInTheDocument();
       });
@@ -524,7 +527,10 @@ describe('UnifiedHomePage', () => {
       const fileUpload = screen.getByTestId('analyticsHomeFeaturedSource-fileUpload');
       expect(fileUpload).not.toHaveAttribute('aria-disabled');
       fireEvent.click(fileUpload);
-      expect(links.openSource).toHaveBeenCalledWith(expect.objectContaining({ id: 'fileUpload' }));
+      expect(links.openSource).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'fileUpload' }),
+        fileUpload
+      );
 
       fireEvent.click(screen.getByTestId('analyticsHomeMoreSources'));
       const kafka = screen.getByTestId('analyticsHomeFlyoutSource-kafka');
@@ -544,11 +550,74 @@ describe('UnifiedHomePage', () => {
     it('closes the flyout when a source is opened from it', () => {
       const { links } = setup();
 
-      fireEvent.click(screen.getByTestId('analyticsHomeMoreSources'));
+      const moreSources = screen.getByTestId('analyticsHomeMoreSources');
+      fireEvent.click(moreSources);
       fireEvent.click(screen.getByTestId('analyticsHomeFlyoutSource-api'));
 
-      expect(links.openSource).toHaveBeenCalledWith(expect.objectContaining({ id: 'api' }));
+      expect(links.openSource).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'api' }),
+        moreSources
+      );
       expect(screen.queryByTestId('analyticsHomeSourcesFlyout')).not.toBeInTheDocument();
+    });
+
+    describe('website crawl tile', () => {
+      const getTile = (): HTMLElement => screen.getByTestId('analyticsHomeFeaturedSource-webCrawl');
+      const withoutWebCrawl = (): AnalyticsLinks =>
+        createLinksMock({
+          isSourceAvailable: jest.fn(({ target }) => target.type !== 'webCrawl'),
+        });
+
+      it('is a button that announces the dialog it opens and says what it is for', () => {
+        setup();
+
+        const tile = getTile();
+        expect(tile.tagName).toBe('BUTTON');
+        expect(tile).toHaveAttribute('aria-haspopup', 'dialog');
+        expect(tile).toHaveTextContent('Crawl a website');
+        expect(tile).toHaveTextContent('Enter a URL and index its pages for search.');
+      });
+
+      it('opens the crawl, handing over the tile for the focus to return to', () => {
+        const { links } = setup();
+
+        fireEvent.click(getTile());
+
+        expect(links.openSource).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'webCrawl', target: { type: 'webCrawl' } }),
+          getTile()
+        );
+      });
+
+      it('is left out, with three tiles in the row, where the crawl is unavailable', () => {
+        setup({ links: withoutWebCrawl() });
+
+        expect(
+          screen
+            .getAllByTestId(/^analyticsHomeFeaturedSource-/)
+            .map((tile) => tile.dataset.testSubj?.replace('analyticsHomeFeaturedSource-', ''))
+        ).toEqual(['api', 'fileUpload', 'eventStream']);
+
+        fireEvent.click(screen.getByTestId('analyticsHomeMoreSources'));
+        expect(screen.queryByTestId('analyticsHomeFlyoutSource-webCrawl')).not.toBeInTheDocument();
+        expect(screen.getByTestId('analyticsHomeFlyoutSource-openWebCrawler')).toBeInTheDocument();
+      });
+
+      it('opens from "More sources" too, handing over the button that listed the sources', () => {
+        const { links } = setup();
+        const moreSources = screen.getByTestId('analyticsHomeMoreSources');
+
+        fireEvent.click(moreSources);
+        const listed = screen.getByTestId('analyticsHomeFlyoutSource-webCrawl');
+        expect(listed).toHaveAttribute('aria-haspopup', 'dialog');
+        fireEvent.click(listed);
+
+        expect(screen.queryByTestId('analyticsHomeSourcesFlyout')).not.toBeInTheDocument();
+        expect(links.openSource).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'webCrawl' }),
+          moreSources
+        );
+      });
     });
 
     it('installs the sample events and re-reads the cluster state', async () => {

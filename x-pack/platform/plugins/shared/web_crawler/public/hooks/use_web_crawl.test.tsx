@@ -93,6 +93,28 @@ describe('useWebCrawl', () => {
     expect(result.current.startErrorMessage).toBeUndefined();
   });
 
+  it('forgets a stored crawl that no longer exists', async () => {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(CRAWL_ID));
+    http.get.mockRejectedValue(createHttpError('Crawl [crawl-1] not found', 404));
+
+    renderWebCrawl();
+
+    await waitFor(() => expect(window.localStorage.getItem(STORAGE_KEY)).toBe('null'));
+    expect(http.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps a stored crawl whose status could not be read', async () => {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(CRAWL_ID));
+    http.get.mockRejectedValue(createHttpError('Failed to read the web crawl', 500));
+
+    const { result } = renderWebCrawl();
+
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(1));
+    await new Promise((resolve) => setTimeout(resolve, SETTLE_MS));
+    expect(result.current.crawl).toBeUndefined();
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBe(JSON.stringify(CRAWL_ID));
+  });
+
   it('starts a crawl, persists its id and exposes it before its first status request resolves', async () => {
     const startedCrawl = createWebCrawl({ maxDepth: 3, maxDocuments: 250 });
     http.post.mockResolvedValue(startedCrawl);

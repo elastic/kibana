@@ -111,7 +111,8 @@ describe('analytics sources', () => {
 
   it('offers content connectors nowhere and keeps the other search content sources', () => {
     expect(sources.filter(({ group }) => group === 'search').map(({ id }) => id)).toEqual([
-      'webCrawler',
+      'webCrawl',
+      'openWebCrawler',
       'apiTutorial',
       'createIndex',
     ]);
@@ -131,10 +132,21 @@ describe('analytics sources', () => {
         'apiTutorial',
       ])
     );
-    expect(sources.find(({ id }) => id === 'webCrawler')?.target).toEqual({
+    expect(sources.find(({ id }) => id === 'openWebCrawler')?.target).toEqual({
       type: 'externalUrl',
       url: 'https://github.com/elastic/crawler',
     });
+  });
+
+  it('offers the website crawl as a form on the page, as search content', () => {
+    expect(sources.find(({ id }) => id === 'webCrawl')).toEqual(
+      expect.objectContaining({
+        group: 'search',
+        title: 'Crawl a website',
+        description: 'Enter a URL and index its pages for search.',
+        target: { type: 'webCrawl' },
+      })
+    );
   });
 
   it('places every source in a known group', () => {
@@ -147,11 +159,11 @@ describe('analytics sources', () => {
 describe('getFeaturedAnalyticsEntries', () => {
   const featured = getFeaturedAnalyticsEntries();
 
-  it('features two sources for any data, then the event sources as a list', () => {
+  it('features two sources for any data, the event sources as a list, then the website crawl', () => {
     expect(
       featured.map((entry) => (entry.kind === 'source' ? entry.source.id : entry.list.id))
-    ).toEqual(['api', 'fileUpload', 'eventStream']);
-    expect(featured.map(({ kind }) => kind)).toEqual(['source', 'source', 'sourceList']);
+    ).toEqual(['api', 'fileUpload', 'eventStream', 'webCrawl']);
+    expect(featured.map(({ kind }) => kind)).toEqual(['source', 'source', 'sourceList', 'source']);
   });
 
   it('features sources from the catalog as they are', () => {

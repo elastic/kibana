@@ -8,6 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import type { FormEvent } from 'react';
 import {
+  EuiAccordion,
   EuiButton,
   EuiFieldNumber,
   EuiFieldText,
@@ -15,6 +16,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -25,6 +27,7 @@ import {
 } from '../../common/constants';
 import type { WebCrawlStartRequest } from '../../common/types';
 import { useTelemetryId } from '../context';
+import type { WebCrawlOptionsDisplay } from '../types';
 import {
   arePathPrefixesValid,
   isCrawlableUrl,
@@ -56,11 +59,20 @@ interface WebCrawlFormProps {
   isStarting: boolean;
   /** The server's answer to the last submission, when it refused it. */
   errorMessage?: string;
+  /** `collapsed` leaves the URL in view and keeps every other field behind one disclosure. */
+  optionsDisplay?: WebCrawlOptionsDisplay;
 }
 
 /** Takes the URL and limits of a crawl. Several crawls can run at once, so it stays enabled while they do. */
-export const WebCrawlForm = ({ onSubmit, isStarting, errorMessage }: WebCrawlFormProps) => {
+export const WebCrawlForm = ({
+  onSubmit,
+  isStarting,
+  errorMessage,
+  optionsDisplay = 'inline',
+}: WebCrawlFormProps) => {
   const getTelemetryId = useTelemetryId();
+  const optionsAccordionId = useGeneratedHtmlId({ prefix: 'webCrawlOptions' });
+  const [areOptionsOpen, setAreOptionsOpen] = useState(false);
   const [url, setUrl] = useState('');
   const [isUrlInvalid, setIsUrlInvalid] = useState(false);
   const [maxDepth, setMaxDepth] = useState(WEB_CRAWL_DEFAULT_MAX_DEPTH);
@@ -114,53 +126,11 @@ export const WebCrawlForm = ({ onSubmit, isStarting, errorMessage }: WebCrawlFor
     isMaxDepthInvalid || isMaxDocumentsInvalid ? INVALID_LIMITS_MESSAGE : undefined;
   const pathsError = hasInvalidPaths ? INVALID_PATHS_MESSAGE : undefined;
   const error = isUrlInvalid ? INVALID_URL_MESSAGE : limitsError ?? pathsError ?? errorMessage;
+  const hasInvalidOptions =
+    isMaxDepthInvalid || isMaxDocumentsInvalid || hasInvalidPaths || hasInvalidTargets;
 
-  return (
-    <form onSubmit={handleSubmit} noValidate>
-      <EuiFormRow
-        fullWidth
-        label={URL_LABEL}
-        helpText={i18n.translate('xpack.webCrawler.panel.helpText', {
-          defaultMessage:
-            "Follows the site's links and sitemap, respects its robots.txt, and indexes the pages for full-text and semantic search.",
-        })}
-        isInvalid={error !== undefined}
-        error={error}
-      >
-        <EuiFlexGroup gutterSize="s" responsive={false}>
-          <EuiFlexItem>
-            <EuiFieldText
-              fullWidth
-              compressed
-              icon="globe"
-              placeholder="https://example.com"
-              aria-label={URL_LABEL}
-              value={url}
-              onChange={(event) => {
-                setUrl(event.target.value);
-                setIsUrlInvalid(false);
-              }}
-              isInvalid={isUrlInvalid}
-              disabled={isStarting}
-              data-test-subj="webCrawlUrl"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              type="submit"
-              size="s"
-              isLoading={isStarting}
-              data-test-subj="webCrawlSubmit"
-              data-telemetry-id={getTelemetryId('webCrawl-start')}
-            >
-              {i18n.translate('xpack.webCrawler.panel.submit', {
-                defaultMessage: 'Crawl',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
-      <EuiSpacer size="s" />
+  const options = (
+    <>
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFieldNumber
@@ -218,6 +188,77 @@ export const WebCrawlForm = ({ onSubmit, isStarting, errorMessage }: WebCrawlFor
       />
       <EuiSpacer size="s" />
       <WebCrawlTargets compressed fields={targetFields} isDisabled={isStarting} />
+    </>
+  );
+
+  return (
+    <form onSubmit={handleSubmit} noValidate>
+      <EuiFormRow
+        fullWidth
+        label={URL_LABEL}
+        helpText={i18n.translate('xpack.webCrawler.panel.helpText', {
+          defaultMessage:
+            "Follows the site's links and sitemap, respects its robots.txt, and indexes the pages for full-text and semantic search.",
+        })}
+        isInvalid={error !== undefined}
+        error={error}
+      >
+        <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexItem>
+            <EuiFieldText
+              fullWidth
+              compressed
+              icon="globe"
+              placeholder="https://example.com"
+              aria-label={URL_LABEL}
+              value={url}
+              onChange={(event) => {
+                setUrl(event.target.value);
+                setIsUrlInvalid(false);
+              }}
+              isInvalid={isUrlInvalid}
+              disabled={isStarting}
+              data-test-subj="webCrawlUrl"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              type="submit"
+              size="s"
+              isLoading={isStarting}
+              data-test-subj="webCrawlSubmit"
+              data-telemetry-id={getTelemetryId('webCrawl-start')}
+            >
+              {i18n.translate('xpack.webCrawler.panel.submit', {
+                defaultMessage: 'Crawl',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
+      <EuiSpacer size="s" />
+      {optionsDisplay === 'collapsed' ? (
+        <EuiAccordion
+          id={optionsAccordionId}
+          buttonContent={i18n.translate('xpack.webCrawler.panel.advancedOptions', {
+            defaultMessage: 'Advanced options',
+          })}
+          paddingSize="s"
+          // An invalid field stays in view: its error is what explains why the crawl cannot start.
+          forceState={areOptionsOpen || hasInvalidOptions ? 'open' : 'closed'}
+          onToggle={(isOpening) => {
+            if (isOpening || !hasInvalidOptions) {
+              setAreOptionsOpen(isOpening);
+            }
+          }}
+          data-test-subj="webCrawlAdvancedOptions"
+          data-telemetry-id={getTelemetryId('webCrawl-advancedOptions')}
+        >
+          {options}
+        </EuiAccordion>
+      ) : (
+        options
+      )}
     </form>
   );
 };

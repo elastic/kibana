@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { of } from 'rxjs';
 import { createMemoryHistory } from 'history';
@@ -15,6 +17,8 @@ import { useKibana } from '../../hooks/use_kibana';
 import { buildBulkApiExample } from '../bulk_api_example';
 import { buildSearchRequestExample } from '../search_request_example';
 import { GENERATED_PANELS } from '../components/shared/test_helpers';
+import type { WebCrawlFlyoutApi } from '../components/shared/web_crawl_flyout_context';
+import { WebCrawlFlyoutContext } from '../components/shared/web_crawl_flyout_context';
 import { getAnalyticsSources } from '../sources';
 import type { AnalyticsEventSource, AnalyticsSource, AnalyticsSourceTarget } from '../types';
 import { getIntegrationsPath, useAnalyticsLinks } from './use_analytics_links';
@@ -71,6 +75,7 @@ describe('useAnalyticsLinks', () => {
     hasLocators = true,
     isEmbeddedConsoleAvailable = true,
     dataFederationHref,
+    webCrawlFlyout,
   }: {
     capabilities?: Record<string, Record<string, boolean>>;
     chatExperience?: AIChatExperience;
@@ -78,6 +83,7 @@ describe('useAnalyticsLinks', () => {
     hasLocators?: boolean;
     isEmbeddedConsoleAvailable?: boolean;
     dataFederationHref?: string;
+    webCrawlFlyout?: WebCrawlFlyoutApi;
   } = {}) => {
     const core = coreMock.createStart();
     const navigate = jest.fn().mockResolvedValue(undefined);
@@ -115,7 +121,16 @@ describe('useAnalyticsLinks', () => {
       },
     });
 
-    const { result } = renderHook(() => useAnalyticsLinks());
+    const { result } = renderHook(() => useAnalyticsLinks(), {
+      wrapper: ({ children }: PropsWithChildren) =>
+        webCrawlFlyout === undefined
+          ? React.createElement(React.Fragment, null, children)
+          : React.createElement(
+              WebCrawlFlyoutContext.Provider,
+              { value: webCrawlFlyout },
+              children
+            ),
+    });
 
     return {
       links: result.current,
@@ -142,7 +157,9 @@ describe('useAnalyticsLinks', () => {
     const windowOpen = jest.spyOn(window, 'open').mockReturnValue(null);
     const { links, application, navigate, openEmbeddedConsole } = setup();
 
-    for (const source of getAnalyticsSources()) {
+    // The website crawl opens on the page, and only where its flyout is provided.
+    const sources = getAnalyticsSources().filter(({ target }) => target.type !== 'webCrawl');
+    for (const source of sources) {
       expect(links.isSourceAvailable(source)).toBe(true);
       links.openSource(source);
     }
@@ -155,7 +172,34 @@ describe('useAnalyticsLinks', () => {
         navigate.mock.calls.length +
         openEmbeddedConsole.mock.calls.length +
         windowOpen.mock.calls.length
-    ).toBe(getAnalyticsSources().length);
+    ).toBe(sources.length);
+  });
+
+  describe('website crawl', () => {
+    const webCrawlSource = sourceWithTarget({ type: 'webCrawl' });
+
+    it('is unavailable and opens nothing where no crawl flyout is provided', () => {
+      const windowOpen = jest.spyOn(window, 'open').mockReturnValue(null);
+      const { links, application } = setup();
+
+      expect(links.isSourceAvailable(webCrawlSource)).toBe(false);
+      links.openSource(webCrawlSource);
+
+      expect(application.navigateToApp).not.toHaveBeenCalled();
+      expect(windowOpen).not.toHaveBeenCalled();
+    });
+
+    it('opens the crawl flyout and hands it the control that asked', () => {
+      const open = jest.fn();
+      const { links, application } = setup({ webCrawlFlyout: { isAvailable: true, open } });
+      const opener = document.createElement('button');
+
+      expect(links.isSourceAvailable(webCrawlSource)).toBe(true);
+      links.openSource(webCrawlSource, opener);
+
+      expect(open).toHaveBeenCalledWith(opener);
+      expect(application.navigateToApp).not.toHaveBeenCalled();
+    });
   });
 
   it('opens the search content sources where they live', async () => {

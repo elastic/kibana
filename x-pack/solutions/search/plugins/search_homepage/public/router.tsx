@@ -15,6 +15,7 @@ import {
   LEGACY_ANALYTICS_HOME_PATH,
   LEGACY_ANALYTICS_ONBOARDING_PATH,
 } from './analytics/constants';
+import { WebCrawlFlyoutProvider } from './analytics/components/shared/web_crawl_flyout';
 import { storePreferredJourney } from './analytics/hooks/use_analytics_preferences';
 import { WEB_CRAWLS_ROUTE } from './home_config';
 
@@ -50,23 +51,25 @@ const LegacyAnalyticsRedirect = ({ to }: { to: string }): React.JSX.Element => {
  * is no route per journey and no first-visit redirect.
  */
 export const HomepageRouter = (): React.JSX.Element => (
-  <Suspense fallback={null}>
-    <Routes>
-      <Route exact path={GUIDED_SETUP_PATH}>
-        <GuidedSetupPage />
-      </Route>
-      <Route exact path={LEGACY_ANALYTICS_ONBOARDING_PATH}>
-        <LegacyAnalyticsRedirect to={GUIDED_SETUP_PATH} />
-      </Route>
-      <Route exact path={LEGACY_ANALYTICS_HOME_PATH}>
-        <LegacyAnalyticsRedirect to={HOME_PATH} />
-      </Route>
-      <Route exact path={WEB_CRAWLS_ROUTE}>
-        <SearchWebCrawlsPage />
-      </Route>
-      <Route>
-        <UnifiedHomePage />
-      </Route>
-    </Routes>
-  </Suspense>
+  <WebCrawlFlyoutProvider>
+    <Suspense fallback={null}>
+      <Routes>
+        <Route exact path={GUIDED_SETUP_PATH}>
+          <GuidedSetupPage />
+        </Route>
+        <Route exact path={LEGACY_ANALYTICS_ONBOARDING_PATH}>
+          <LegacyAnalyticsRedirect to={GUIDED_SETUP_PATH} />
+        </Route>
+        <Route exact path={LEGACY_ANALYTICS_HOME_PATH}>
+          <LegacyAnalyticsRedirect to={HOME_PATH} />
+        </Route>
+        <Route exact path={WEB_CRAWLS_ROUTE}>
+          <SearchWebCrawlsPage />
+        </Route>
+        <Route>
+          <UnifiedHomePage />
+        </Route>
+      </Routes>
+    </Suspense>
+  </WebCrawlFlyoutProvider>
 );

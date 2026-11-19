@@ -31,9 +31,17 @@ interface WebCrawlerHostProps {
   storageKeyPrefix: string;
 }
 
+/** Where the form shows the fields besides the URL: beside it, or behind one disclosure. */
+export type WebCrawlOptionsDisplay = 'inline' | 'collapsed';
+
 export interface WebCrawlPanelProps extends WebCrawlerHostProps {
   /** Opens the host's route for `WebCrawlsPage`. Omit it to leave the panel without that link. */
   onManageWebCrawls?: () => void;
+  /**
+   * `collapsed` leaves only the URL in view, for hosts with little room, and keeps the limits,
+   * path rules and targets behind an "Advanced options" disclosure. Defaults to `inline`.
+   */
+  optionsDisplay?: WebCrawlOptionsDisplay;
 }
 
 export interface WebCrawlsPageProps extends WebCrawlerHostProps {

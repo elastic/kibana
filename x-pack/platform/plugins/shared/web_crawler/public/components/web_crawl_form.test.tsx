@@ -21,7 +21,13 @@ const INVALID_URLS_MESSAGE = 'Enter up to 20 URLs that start with http:// or htt
 describe('WebCrawlForm', () => {
   const onSubmit = jest.fn();
 
-  const renderForm = (props: { isStarting?: boolean; errorMessage?: string } = {}) =>
+  const renderForm = (
+    props: {
+      isStarting?: boolean;
+      errorMessage?: string;
+      optionsDisplay?: 'inline' | 'collapsed';
+    } = {}
+  ) =>
     renderWithWebCrawlerContext(<WebCrawlForm onSubmit={onSubmit} isStarting={false} {...props} />);
 
   const getUrlInput = () => screen.getByTestId('webCrawlUrl');
@@ -138,6 +144,82 @@ describe('WebCrawlForm', () => {
     expect(screen.getByText(INVALID_URL_MESSAGE)).toBeInTheDocument();
     expect(screen.queryByText(/Max depth must be a whole number/)).not.toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  describe('options display', () => {
+    const getOptions = () => screen.getByTestId('webCrawlAdvancedOptions');
+    const getOptionsToggle = () => screen.getByRole('button', { name: 'Advanced options' });
+
+    it('shows every field beside the URL by default, with no disclosure', () => {
+      renderForm();
+
+      expect(screen.queryByTestId('webCrawlAdvancedOptions')).not.toBeInTheDocument();
+      expect(getMaxDepthInput()).toBeVisible();
+      expect(getMaxDocumentsInput()).toBeVisible();
+      expect(getIncludePathsInput()).toBeVisible();
+    });
+
+    it('keeps everything but the URL behind a closed disclosure when collapsed', () => {
+      renderForm({ optionsDisplay: 'collapsed' });
+
+      expect(getUrlInput()).toBeVisible();
+      expect(getSubmitButton()).toBeVisible();
+      expect(getOptionsToggle()).toHaveAttribute('aria-expanded', 'false');
+      expect(getOptions()).toContainElement(getMaxDepthInput());
+      expect(getOptions()).toContainElement(getMaxDocumentsInput());
+      expect(getOptions()).toContainElement(getIncludePathsInput());
+      expect(getOptions()).toContainElement(getExcludePathsInput());
+      expect(getOptions()).toContainElement(getIndexNameInput());
+    });
+
+    it('submits the URL with the default limits while the options stay closed', () => {
+      renderForm({ optionsDisplay: 'collapsed' });
+
+      fireEvent.change(getUrlInput(), { target: { value: 'https://example.com' } });
+      fireEvent.click(getSubmitButton());
+
+      expect(onSubmit).toHaveBeenCalledWith({
+        url: 'https://example.com',
+        maxDepth: 2,
+        maxDocuments: 500,
+        includePaths: [],
+        excludePaths: [],
+        indexName: undefined,
+        seedUrls: [],
+        sitemapUrls: [],
+      });
+      expect(getOptionsToggle()).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('opens and closes the options, and submits what was entered in them', () => {
+      renderForm({ optionsDisplay: 'collapsed' });
+
+      fireEvent.click(getOptionsToggle());
+      expect(getOptionsToggle()).toHaveAttribute('aria-expanded', 'true');
+
+      fireEvent.change(getMaxDocumentsInput(), { target: { value: '25' } });
+      fireEvent.click(getOptionsToggle());
+      expect(getOptionsToggle()).toHaveAttribute('aria-expanded', 'false');
+
+      fireEvent.change(getUrlInput(), { target: { value: 'https://example.com' } });
+      fireEvent.click(getSubmitButton());
+
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ maxDocuments: 25 }));
+    });
+
+    it('keeps the options open while one of them is invalid', () => {
+      renderForm({ optionsDisplay: 'collapsed' });
+
+      fireEvent.click(getOptionsToggle());
+      fireEvent.change(getMaxDocumentsInput(), { target: { value: '0' } });
+      fireEvent.click(getOptionsToggle());
+
+      expect(getOptionsToggle()).toHaveAttribute('aria-expanded', 'true');
+
+      fireEvent.change(getUrlInput(), { target: { value: 'https://example.com' } });
+      fireEvent.click(getSubmitButton());
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
   });
 
   describe('path rules', () => {

@@ -65,7 +65,7 @@ const STATUS_ICONS = {
 
 export const WebCrawlPanel = () => {
   const { share } = useWebCrawlerServices();
-  const { onManageWebCrawls } = useWebCrawlerConfig();
+  const { onManageWebCrawls, optionsDisplay } = useWebCrawlerConfig();
   const getTelemetryId = useTelemetryId();
   const { crawl, startCrawl, isStarting, startErrorMessage } = useWebCrawl();
 
@@ -83,6 +83,7 @@ export const WebCrawlPanel = () => {
         onSubmit={startCrawl}
         isStarting={isStarting}
         errorMessage={startErrorMessage}
+        optionsDisplay={optionsDisplay}
       />
       {crawl && (
         <>

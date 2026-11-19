@@ -19,7 +19,8 @@ interface SourceTileProps {
   placement: 'Featured' | 'Flyout';
   source: AnalyticsSource;
   canUseIntegrations: boolean;
-  onSelect: (source: AnalyticsSource) => void;
+  /** Receives the tile's button, so that a source that opens a dialog can hand the focus back. */
+  onSelect: (source: AnalyticsSource, button: HTMLButtonElement) => void;
 }
 
 /** One event source the user can connect; integration sources explain themselves when unavailable. */
@@ -41,7 +42,8 @@ export const SourceTile = ({
       description={source.description}
       iconType={source.iconType}
       isDisabled={isDisabled}
-      onClick={() => onSelect(source)}
+      opensDialog={source.target.type === 'webCrawl'}
+      onClick={(button) => onSelect(source, button)}
     />
   );
 

@@ -37,6 +37,12 @@ export const useWebCrawl = () => {
       http.get<WebCrawl>(WEB_CRAWL_PATH.replace('{id}', encodeURIComponent(crawlId ?? ''))),
     enabled: crawlId !== null,
     retry: false,
+    // A crawl that was deleted, or that the user may no longer see, is not asked for again.
+    onError: (error) => {
+      if (error.body?.statusCode === 404) {
+        setCrawlId(null);
+      }
+    },
     refetchInterval: (data) => (data?.status === 'running' ? WEB_CRAWL_POLL_INTERVAL_MS : false),
   });
 

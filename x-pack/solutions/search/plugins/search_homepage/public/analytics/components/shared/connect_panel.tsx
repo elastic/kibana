@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGrid,
@@ -53,9 +53,20 @@ export const ConnectPanel = ({
   sampleData,
   onSampleInstalled,
 }: ConnectPanelProps): React.JSX.Element => {
-  const featuredEntries = useMemo(() => getFeaturedAnalyticsEntries(), []);
+  const { isSourceAvailable } = links;
+  const featuredEntries = useMemo(
+    () =>
+      getFeaturedAnalyticsEntries().filter(
+        (entry) => entry.kind !== 'source' || isSourceAvailable(entry.source)
+      ),
+    [isSourceAvailable]
+  );
   const [openSourceList, setOpenSourceList] = useState<AnalyticsSourceList>();
   const sourceListOpenerRef = useRef<HTMLButtonElement | null>(null);
+  const getSourceListOpener = useCallback(
+    (): HTMLElement | null => sourceListOpenerRef.current,
+    []
+  );
 
   const closeSourceList = (): void => {
     setOpenSourceList(undefined);
@@ -80,7 +91,7 @@ export const ConnectPanel = ({
           <EuiSpacer size="m" />
         </>
       )}
-      <EuiFlexGrid columns={3} gutterSize="m">
+      <EuiFlexGrid columns={featuredEntries.length > 3 ? 4 : 3} gutterSize="m">
         {featuredEntries.map((entry) =>
           entry.kind === 'source' ? (
             <EuiFlexItem key={entry.source.id}>
@@ -116,6 +127,7 @@ export const ConnectPanel = ({
           page={page}
           audience={openSourceList.audience}
           links={links}
+          getOpener={getSourceListOpener}
           onClose={closeSourceList}
         />
       )}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import type { AnalyticsLinks, AnalyticsSourceAudience } from '../../types';
 import type { AnalyticsPageId } from './page_ids';
@@ -36,7 +36,10 @@ export const AddSourceButton = ({
   links,
 }: AddSourceButtonProps): React.JSX.Element => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const getOpener = useCallback((): HTMLElement | null => buttonRef.current, []);
   const buttonProps = {
+    buttonRef,
     iconType: 'plusCircle',
     onClick: () => setIsFlyoutOpen(true),
     'data-test-subj': getPageTestSubj(page, name),
@@ -58,6 +61,7 @@ export const AddSourceButton = ({
           page={page}
           audience={audience}
           links={links}
+          getOpener={getOpener}
           onClose={() => setIsFlyoutOpen(false)}
         />
       )}

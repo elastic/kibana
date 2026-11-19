@@ -27,6 +27,7 @@ import {
   createWebCrawl,
   renderWithWebCrawlerContext,
 } from '../test_utils';
+import type { WebCrawlPanelProps } from '../types';
 import { WebCrawlPanel } from './web_crawl_panel';
 import { INVALID_PATHS_MESSAGE } from './web_crawl_path_rules';
 
@@ -42,12 +43,15 @@ describe('WebCrawlPanel', () => {
   const share = sharePluginMock.createStartContract();
   const getLocator = jest.spyOn(share.url.locators, 'get');
 
-  const renderPanel = (onManageWebCrawls?: () => void) =>
+  const renderPanel = (
+    onManageWebCrawls?: () => void,
+    optionsDisplay?: WebCrawlPanelProps['optionsDisplay']
+  ) =>
     renderWithWebCrawlerContext(
       <QueryClientProvider client={createTestQueryClient()}>
         <WebCrawlPanel />
       </QueryClientProvider>,
-      { services: { http, share }, config: { onManageWebCrawls } }
+      { services: { http, share }, config: { onManageWebCrawls, optionsDisplay } }
     );
 
   const renderWithStoredCrawl = async (crawl: WebCrawl) => {
@@ -165,6 +169,55 @@ describe('WebCrawlPanel', () => {
     expect(screen.getByRole('textbox', { name: 'More start URLs' })).toBe(getSeedUrlsInput());
     expect(screen.getByRole('textbox', { name: 'Sitemap URLs' })).toBe(getSitemapUrlsInput());
     expect(screen.getByRole('button', { name: 'Crawl' })).toBe(getSubmitButton());
+  });
+
+  describe('collapsed options', () => {
+    it('shows the limits beside the URL unless the host asks otherwise', () => {
+      renderPanel();
+
+      expect(screen.queryByTestId('webCrawlAdvancedOptions')).not.toBeInTheDocument();
+      expect(getMaxDocumentsInput()).toBeVisible();
+    });
+
+    it('starts a crawl from the URL alone, with the default limits, and shows its status', async () => {
+      http.post.mockResolvedValue(createWebCrawl());
+      http.get.mockResolvedValue(createWebCrawl({ documentsCount: 3 }));
+      renderPanel(undefined, 'collapsed');
+
+      expect(screen.getByRole('button', { name: 'Advanced options' })).toHaveAttribute(
+        'aria-expanded',
+        'false'
+      );
+      fireEvent.change(getUrlInput(), { target: { value: 'https://example.com' } });
+      fireEvent.click(getSubmitButton());
+
+      await waitFor(() =>
+        expectStartRequest({
+          url: 'https://example.com',
+          maxDepth: WEB_CRAWL_DEFAULT_MAX_DEPTH,
+          maxDocuments: WEB_CRAWL_DEFAULT_MAX_DOCUMENTS,
+        })
+      );
+      expect(await screen.findByTestId('webCrawlStatus')).toBeInTheDocument();
+    });
+
+    it("shows the server's refusal next to the URL while the options stay closed", async () => {
+      http.post.mockRejectedValue(
+        createHttpError('No document_extraction inference endpoint is available')
+      );
+      renderPanel(undefined, 'collapsed');
+
+      fireEvent.change(getUrlInput(), { target: { value: 'https://example.com' } });
+      fireEvent.click(getSubmitButton());
+
+      expect(
+        await screen.findByText('No document_extraction inference endpoint is available')
+      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Advanced options' })).toHaveAttribute(
+        'aria-expanded',
+        'false'
+      );
+    });
   });
 
   describe('validation', () => {

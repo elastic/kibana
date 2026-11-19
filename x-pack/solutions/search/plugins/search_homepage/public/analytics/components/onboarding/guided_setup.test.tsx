@@ -278,6 +278,7 @@ describe('GuidedSetupPage', () => {
         'analyticsOnboardingFeaturedSource-api',
         'analyticsOnboardingFeaturedSource-fileUpload',
         'analyticsOnboardingFeaturedSource-eventStream',
+        'analyticsOnboardingFeaturedSource-webCrawl',
         'analyticsOnboardingMoreSources',
         'analyticsOnboardingTrySampleEvents',
       ]);
@@ -428,10 +429,14 @@ describe('GuidedSetupPage', () => {
     it('shares the connect panel with the home page', () => {
       const { links } = setup();
 
-      expect(screen.getAllByTestId(/^analyticsOnboardingFeaturedSource-/)).toHaveLength(3);
+      expect(screen.getAllByTestId(/^analyticsOnboardingFeaturedSource-/)).toHaveLength(4);
 
-      fireEvent.click(screen.getByTestId('analyticsOnboardingFeaturedSource-fileUpload'));
-      expect(links.openSource).toHaveBeenCalledWith(expect.objectContaining({ id: 'fileUpload' }));
+      const fileUpload = screen.getByTestId('analyticsOnboardingFeaturedSource-fileUpload');
+      fireEvent.click(fileUpload);
+      expect(links.openSource).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'fileUpload' }),
+        fileUpload
+      );
 
       fireEvent.click(screen.getByTestId('analyticsOnboardingMoreSources'));
       for (const { id } of getAnalyticsSourceGroups()) {
@@ -460,8 +465,39 @@ describe('GuidedSetupPage', () => {
       ]);
 
       fireEvent.click(screen.getByTestId('analyticsOnboardingFlyoutSource-kafka'));
-      expect(links.openSource).toHaveBeenCalledWith(expect.objectContaining({ id: 'kafka' }));
+      expect(links.openSource).toHaveBeenCalledWith(expect.objectContaining({ id: 'kafka' }), tile);
       expect(screen.queryByTestId('analyticsOnboardingSourcesFlyout')).not.toBeInTheDocument();
+    });
+
+    it('opens the website crawl from its tile, handing over the tile for the focus to return to', () => {
+      const { links } = setup();
+      const tile = screen.getByTestId('analyticsOnboardingFeaturedSource-webCrawl');
+
+      expect(tile).toHaveAttribute('aria-haspopup', 'dialog');
+      fireEvent.click(tile);
+
+      expect(links.openSource).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'webCrawl', target: { type: 'webCrawl' } }),
+        tile
+      );
+    });
+
+    it('leaves the website crawl out where it is unavailable', () => {
+      setup({
+        links: createLinksMock({
+          isSourceAvailable: jest.fn(({ target }) => target.type !== 'webCrawl'),
+        }),
+      });
+
+      expect(
+        screen
+          .getAllByTestId(/^analyticsOnboardingFeaturedSource-/)
+          .map((featured) => featured.dataset.testSubj)
+      ).toEqual([
+        'analyticsOnboardingFeaturedSource-api',
+        'analyticsOnboardingFeaturedSource-fileUpload',
+        'analyticsOnboardingFeaturedSource-eventStream',
+      ]);
     });
 
     it('offers the next step when events are detected', () => {

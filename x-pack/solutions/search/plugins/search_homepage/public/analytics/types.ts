@@ -66,7 +66,9 @@ export type AnalyticsSourceTarget =
   | { type: 'createIndex' }
   /** The search basics API tutorial, opened in the embedded Console. */
   | { type: 'apiTutorial' }
-  | { type: 'sampleDataDirectory' };
+  | { type: 'sampleDataDirectory' }
+  /** The form that crawls a website, opened on this page; needs the web crawler plugin. */
+  | { type: 'webCrawl' };
 
 export interface AnalyticsSource {
   id: string;
@@ -121,7 +123,8 @@ export interface AnalyticsLinks {
   canOpenIndices: boolean;
   /** Whether the place a source links to exists in this deployment. */
   isSourceAvailable: (source: AnalyticsSource) => boolean;
-  openSource: (source: AnalyticsSource) => void;
+  /** `opener` is the control that asked, which gets the focus back from a source that opens a dialog. */
+  openSource: (source: AnalyticsSource, opener?: HTMLElement | null) => void;
   browseIntegrations: () => void;
   /** Opens Discover in ES|QL mode; with no query, Discover's default ES|QL query is used. */
   openDiscover: (esql?: string) => void;

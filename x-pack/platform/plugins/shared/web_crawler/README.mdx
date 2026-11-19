@@ -15,7 +15,8 @@ crawl and the page that manages crawls.
 
 It does not register an application. Hosting plugins render the components inside their own app and
 route. Today `elasticsearchHome` renders the form in its "Add data" section for hosts that opt in,
-and `search_homepage` mounts the page and links it from the side nav under Data management.
+and `search_homepage` mounts the page and links it from the side nav under Data management, and
+renders the form, reduced to the URL, in a flyout of its ingest gate.
 
 The plugin is enabled by default, but `config/serverless.yml` sets `xpack.webCrawler.enabled: false`,
 so serverless project types that crawl have to re-enable it in their own `serverless.<project>.yml`.
@@ -29,7 +30,7 @@ identity as props.
 
 | Component | Props |
 | --- | --- |
-| `WebCrawlPanel` | `telemetryPrefix`, `storageKeyPrefix`, and optionally `onManageWebCrawls`, which opens the host's route for `WebCrawlsPage` and adds a link to it. |
+| `WebCrawlPanel` | `telemetryPrefix`, `storageKeyPrefix`, and optionally `onManageWebCrawls`, which opens the host's route for `WebCrawlsPage` and adds a link to it, and `optionsDisplay`, where `collapsed` leaves only the URL in view and keeps the limits, path rules and targets behind an "Advanced options" disclosure. |
 | `WebCrawlsPage` | `telemetryPrefix`, `storageKeyPrefix`, and optionally `solutionNav`, the host's side nav under the classic chrome style, and `onNavigateHome`, for the page's back link. |
 
 `telemetryPrefix` namespaces the `data-telemetry-id` of every element the components render.
