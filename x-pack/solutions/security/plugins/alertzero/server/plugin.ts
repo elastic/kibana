@@ -52,7 +52,7 @@ import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
-import { ALERTZERO_AI_INDICES, ATTACK_FINGERPRINT_AI_INDEX_ID } from './context_engine/ai_indices';
+import { ALERTZERO_AI_INDICES, type AlertZeroAiIndexId } from './context_engine/ai_index_registry';
 import { registerAiIndices } from './context_engine/register_ai_indices';
 import {
   installSpaceScopedIndexTemplates,
@@ -158,20 +158,15 @@ export class AlertZeroPlugin
   };
 
   /** Unset when the config kill switch is off; every index is then writable. */
-  private aiIndexWriteGates?: AiIndexWriteGates;
+  private aiIndexWriteGates?: AiIndexWriteGates<AlertZeroAiIndexId>;
 
-  private readonly isAiIndexWritable = (aiIndexId: string): boolean =>
+  private readonly isAiIndexWritable = (aiIndexId: AlertZeroAiIndexId): boolean =>
     this.aiIndexWriteGates?.isWritable(aiIndexId) ?? true;
 
-  private readonly alertZeroStartContract = (): AlertZeroPluginStart => {
-    const plugin = this;
-    return {
-      registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
-      get attackFingerprintWritesAllowed() {
-        return plugin.isAiIndexWritable(ATTACK_FINGERPRINT_AI_INDEX_ID);
-      },
-    };
-  };
+  private readonly alertZeroStartContract = (): AlertZeroPluginStart => ({
+    registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
+    isAiIndexWritable: this.isAiIndexWritable,
+  });
 
   setup(
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPluginStart>,

@@ -3280,17 +3280,10 @@ x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analy
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/hunt.schema.yaml @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/hunt.gen.ts @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/worker_settings/hunt_watch.ts @elastic/security-investigations
-/x-pack/solutions/security/packages/kbn-alertzero-common/threat_intel_mapping.ts @elastic/security-investigations
-/x-pack/solutions/security/packages/kbn-alertzero-common/threat_intel_mapping.test.ts @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/common/hunt_coordinator_result_attachment_schema.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/common/hunt_technique_limit.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/common/sse_view/is_executable_hunt_query.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/common/sse_view/is_executable_hunt_query.test.ts @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/common/step_types/package_report.ts @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/common/step_types/package_report.test.ts @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/public/hooks/hunt @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/public/pages/watches/components/hunt_index_coverage_callout.tsx @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/public/pages/watches/components/hunt_index_coverage_callout.test.tsx @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/public/pages/watches/components/threat_intel_supply_section.tsx @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/public/pages/watches/components/threat_intel_supply_section.test.tsx @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/server/agent_builder/attachments/hunt_coordinator_result.ts @elastic/security-investigations

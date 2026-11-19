@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { ALERTZERO_AI_INDICES } from './ai_indices';
+import { ALERTZERO_AI_INDICES } from './ai_index_registry';
 import { installSpaceScopedIndexTemplates } from './write_gate';
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));

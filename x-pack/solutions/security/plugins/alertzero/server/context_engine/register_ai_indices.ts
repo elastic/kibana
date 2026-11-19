@@ -7,7 +7,7 @@
 
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import { getAiIndexDest } from '@kbn/context-engine-plugin/common/ai_index_dest';
-import { ALERTZERO_AI_INDICES, type AlertZeroAiIndex } from './ai_indices';
+import { ALERTZERO_AI_INDICES, type AlertZeroAiIndex } from './ai_index_registry';
 
 /** Registers each AI index as managed, so Context Engine resolves it in every space. */
 export const registerAiIndices = ({

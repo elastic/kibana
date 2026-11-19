@@ -8,28 +8,28 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { getAiIndexDest } from '@kbn/context-engine-plugin/common/ai_index_dest';
-import type { AlertZeroAiIndex } from './ai_indices';
+import type { AlertZeroAiIndex } from './ai_index_registry';
 import { ensureSpaceScopedIndexTemplate } from './ensure_space_scoped_index';
 
-export interface AiIndexWriteGates {
+export interface AiIndexWriteGates<TId extends string> {
   /**
    * False while a space-scoped index's template install is in flight, and after it fails, so
    * nothing auto-creates the index without the nested mapping. True for any other index.
    */
-  isWritable: (aiIndexId: string) => boolean;
+  isWritable: (aiIndexId: TId) => boolean;
 }
 
 /** `start` cannot return a promise, so callers read `isWritable` as it changes. */
-export const installSpaceScopedIndexTemplates = ({
+export const installSpaceScopedIndexTemplates = <TId extends string>({
   aiIndices,
   esClient,
   logger,
 }: {
-  aiIndices: readonly AlertZeroAiIndex[];
+  aiIndices: ReadonlyArray<AlertZeroAiIndex<TId>>;
   esClient: ElasticsearchClient;
   logger: Logger;
-}): AiIndexWriteGates => {
-  const writable = new Map<string, boolean>();
+}): AiIndexWriteGates<TId> => {
+  const writable = new Map<TId, boolean>();
   for (const { id, spaceScopedTemplate } of aiIndices) {
     if (spaceScopedTemplate === undefined) {
       continue;
