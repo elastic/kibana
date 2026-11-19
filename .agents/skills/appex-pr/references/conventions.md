@@ -104,8 +104,9 @@ For breaking HTTP API or contract changes, and for deprecations, add visible `##
 
 Suggest, in chat (never inside the body):
 
-- one `release_note:*`: `release_note:fix` for a fix users can see; `release_note:feature` for something new; `release_note:enhancement` for improving something existing; `release_note:breaking` or `release_note:deprecation` for changes that need `## Impact` and `## Action`; `release_note:plugin_api_changes` for plugin API changes; `release_note:skip` only if users won't notice the change;
+- one `release_note:*` type: `release_note:fix` for a fix users can see; `release_note:feature` for something new; `release_note:enhancement` for improving something existing; `release_note:breaking` or `release_note:deprecation` for changes that need `## Impact` and `## Action`; `release_note:skip` only if users won't notice the change;
+- for plugin API changes, `release_note:plugin_api_changes` as well, next to the type label, never instead of it;
 - one `backport:*` (`backport:skip`, `backport:version` with the version labels, e.g. `v9.7.0`);
 - `Team:*` and `Feature:*`, taken from the issue's labels when present, otherwise from the owners of the touched files (`kibana.jsonc` `owner`, `.github/CODEOWNERS`).
 
-In Update mode, apply labels with `gh pr edit --add-label` only after approval; otherwise list them for the user to add. When an approved update changes the `release_note:*` or `backport:*` type, remove the old label in the same command with `--remove-label`, since a PR must carry exactly one of each.
+In Update mode, apply labels with `gh pr edit --add-label` only after approval; otherwise list them for the user to add. When an approved update changes the `release_note:*` type or the `backport:*` label, remove the old label in the same command with `--remove-label`, since a PR must carry exactly one of each.
