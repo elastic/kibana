@@ -44,15 +44,14 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
 
   const intentStyles = css`
     min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: anywhere;
   `;
 
-  // the tool badge can be truncated (EuiBadge renders an ellipsis), but never takes more than half of the row
   const badgeItemStyles = css`
-    min-width: 0;
-    max-width: 50%;
+    display: block;
+    white-space: normal;
+    overflow-wrap: anywhere;
   `;
 
   const statusItemStyles = css`
@@ -65,14 +64,16 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
       title={`${toolBadgeToolLabel}: ${step.tool_id}`}
       data-test-subj="agentBuilderToolCallBadge"
     >
-      <strong
-        css={css`
-          font-weight: ${euiTheme.font.weight.bold};
-        `}
-      >
-        {toolBadgeToolLabel}
-      </strong>
-      : {step.tool_id}
+      <span css={badgeItemStyles}>
+        <strong
+          css={css`
+            font-weight: ${euiTheme.font.weight.bold};
+          `}
+        >
+          {toolBadgeToolLabel}
+        </strong>
+        : {step.tool_id}
+      </span>
     </EuiBadge>
   );
 
@@ -85,39 +86,25 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
         role="status"
         aria-label={toolCallAriaLabel}
       >
-        {step.intent ? (
-          <EuiFlexItem
-            grow={false}
-            css={intentStyles}
-            title={step.intent}
-            data-test-subj="agentBuilderToolCallIntent"
-          >
+        {step.intent?.trim() ? (
+          <EuiFlexItem grow={false} css={intentStyles} data-test-subj="agentBuilderToolCallIntent">
             {step.intent}
           </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem grow={false} css={badgeItemStyles}>
-          {toolBadge}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} css={statusItemStyles}>
-          <span css={suffixStyles}>
-            {hasResults ? (
-              <FormattedMessage
-                id="xpack.agentBuilder.eventSteps.steps.toolCall.ran"
-                defaultMessage="ran"
-              />
-            ) : isAborted ? (
+        ) : (
+          <EuiFlexItem grow={false} css={intentStyles}>
+            {toolBadge}
+          </EuiFlexItem>
+        )}
+        {isAborted && !hasResults && (
+          <EuiFlexItem grow={false} css={statusItemStyles}>
+            <span css={suffixStyles}>
               <FormattedMessage
                 id="xpack.agentBuilder.eventSteps.steps.toolCall.stopped"
                 defaultMessage="stopped"
               />
-            ) : (
-              <FormattedMessage
-                id="xpack.agentBuilder.eventSteps.steps.toolCall.running"
-                defaultMessage="running…"
-              />
-            )}
-          </span>
-        </EuiFlexItem>
+            </span>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );
