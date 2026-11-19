@@ -23,25 +23,38 @@ interface DiscoveredEisModel {
 
 const EIS_MODELS_PATH = resolve(REPO_ROOT, 'target/eis_models.json');
 
-/**
- * Returns the discovered EIS models to smoke test: those tagged `kibana-connector`, excluding
- * `efficient` and `ocr-only` models. Returns [] when `target/eis_models.json` is missing or invalid.
- */
-export const getAgentBuilderSmokeEisModels = (): DiscoveredEisModel[] => {
+const readDiscoveredEisModels = (): DiscoveredEisModel[] => {
   try {
     const { models }: { models?: DiscoveredEisModel[] } = JSON.parse(
       readFileSync(EIS_MODELS_PATH, 'utf8')
     );
-
-    return (models ?? []).filter(({ metadata }) => {
-      const properties = metadata?.heuristics?.properties ?? [];
-      return (
-        properties.includes('kibana-connector') &&
-        !properties.includes('efficient') &&
-        !properties.includes('ocr-only')
-      );
-    });
+    return models ?? [];
   } catch {
     return [];
   }
+};
+
+/**
+ * Discovered EIS models tagged `kibana-connector`, excluding `efficient` and `ocr-only`.
+ * Returns [] when the artifact is missing; throws when it lists models but none qualify.
+ */
+export const getAgentBuilderSmokeEisModels = (): DiscoveredEisModel[] => {
+  const discovered = readDiscoveredEisModels();
+
+  const eligible = discovered.filter(({ metadata }) => {
+    const properties = metadata?.heuristics?.properties ?? [];
+    return (
+      properties.includes('kibana-connector') &&
+      !properties.includes('efficient') &&
+      !properties.includes('ocr-only')
+    );
+  });
+
+  if (discovered.length > 0 && eligible.length === 0) {
+    throw new Error(
+      `None of the ${discovered.length} EIS models in ${EIS_MODELS_PATH} are tagged "kibana-connector"`
+    );
+  }
+
+  return eligible;
 };

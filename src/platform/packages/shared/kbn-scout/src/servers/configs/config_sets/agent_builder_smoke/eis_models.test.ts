@@ -41,6 +41,18 @@ describe('getAgentBuilderSmokeEisModels', () => {
     expect(getAgentBuilderSmokeEisModels()).toEqual([eligible]);
   });
 
+  it('throws when discovery found models but none are eligible', () => {
+    jest
+      .mocked(readFileSync)
+      .mockReturnValueOnce(
+        JSON.stringify({ models: [model('untagged'), model('other', ['other'])] })
+      );
+
+    expect(() => getAgentBuilderSmokeEisModels()).toThrow(
+      'None of the 2 EIS models in /repo/target/eis_models.json are tagged "kibana-connector"'
+    );
+  });
+
   it('returns an empty list when discovery has not run', () => {
     jest.mocked(readFileSync).mockImplementationOnce(() => {
       throw new Error('ENOENT');
