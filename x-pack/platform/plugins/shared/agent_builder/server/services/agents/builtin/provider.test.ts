@@ -37,6 +37,14 @@ describe('toInternalDefinition', () => {
     expect(internal.type).toBe('investigation');
   });
 
+  it('passes the declared conversation starters through', async () => {
+    const internal = await convert({
+      ...baseDefinition,
+      conversation_starters: ['first', 'second'],
+    });
+    expect(internal.conversation_starters).toEqual(['first', 'second']);
+  });
+
   it('keeps the auto-approval defaults declared by the definition', async () => {
     const approvals = { auto_approved_apis: { elasticsearch: ['indices.delete'] } };
     const internal = await convert({

@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import { css, keyframes } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ConversationInput } from './conversation_input/conversation_input';
+import { ConversationStarters } from './conversation_starters';
 import {
   conversationElementPaddingStyles,
   conversationElementWidthStyles,
@@ -217,6 +218,12 @@ export const NewConversationPrompt: React.FC<{}> = () => {
         css={[conversationElementWidthStyles, conversationElementPaddingStyles, inputPaddingStyles]}
       >
         <ConversationInput />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+        css={[conversationElementWidthStyles, conversationElementPaddingStyles, inputPaddingStyles]}
+      >
+        <ConversationStarters />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

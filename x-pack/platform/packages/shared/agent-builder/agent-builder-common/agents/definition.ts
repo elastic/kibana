@@ -96,6 +96,12 @@ export interface AgentDefinition {
    */
   labels?: string[];
   /**
+   * Optional conversation starters shown on the new conversation empty state.
+   * Plain text, at most {@link MAX_CONVERSATION_STARTERS} are shown. An empty list means the
+   * agent has no starters.
+   */
+  conversation_starters?: string[];
+  /**
    * Optional avatar eui icon for built-in agents
    */
   avatar_icon?: string;

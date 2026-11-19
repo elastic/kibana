@@ -15,6 +15,8 @@ import {
   agentIdMaxLength,
   AGENT_NAME_MAX_LENGTH,
   AGENT_DESCRIPTION_MAX_LENGTH,
+  MAX_CONVERSATION_STARTERS,
+  CONVERSATION_STARTER_MAX_LENGTH,
 } from '@kbn/agent-builder-common';
 import { MAX_AI_INDEX_ID_LENGTH } from '@kbn/context-engine-plugin/common/constants';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
@@ -36,6 +38,19 @@ import type {
 } from '../../common/http_api/agents';
 import type { AgentBuilderHandlerContext } from '../request_handler_context';
 import { asError } from '../utils/as_error';
+
+const conversationStartersSchema = (description: string) =>
+  schema.arrayOf(
+    schema.string({
+      minLength: 1,
+      maxLength: CONVERSATION_STARTER_MAX_LENGTH,
+      meta: { description: 'Text of a conversation starter.' },
+    }),
+    {
+      maxSize: MAX_CONVERSATION_STARTERS,
+      meta: { description },
+    }
+  );
 
 const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   schema.object(
@@ -409,6 +424,11 @@ export function registerAgentRoutes({
                   }
                 )
               ),
+              conversation_starters: schema.maybe(
+                conversationStartersSchema(
+                  'Optional conversation starters shown on the new conversation empty state. At most 3 are shown.'
+                )
+              ),
               access_control: schema.maybe(ACCESS_CONTROL_MODE_ONLY_SCHEMA),
               configuration: schema.object(
                 {
@@ -559,6 +579,11 @@ export function registerAgentRoutes({
                   {
                     meta: { description: 'Updated labels for categorizing and organizing agents.' },
                   }
+                )
+              ),
+              conversation_starters: schema.maybe(
+                conversationStartersSchema(
+                  'Updated conversation starters. An empty list removes all starters.'
                 )
               ),
               access_control: schema.maybe(ACCESS_CONTROL_MODE_ONLY_SCHEMA),

@@ -25,6 +25,10 @@ jest.mock('./conversation_input/conversation_input', () => ({
   ConversationInput: () => <div data-test-subj="mockConversationInput" />,
 }));
 
+jest.mock('./conversation_starters', () => ({
+  ConversationStarters: () => <div data-test-subj="mockConversationStarters" />,
+}));
+
 jest.mock('./use_typewriter_loop', () => ({
   useTypewriterLoop: ({ messages, enabled }: { messages: readonly string[]; enabled: boolean }) =>
     enabled && messages.length > 0 ? messages[0] : '',
@@ -72,6 +76,12 @@ describe('NewConversationPrompt', () => {
       );
     });
     expect(screen.getByTestId('mockConversationInput')).toBeInTheDocument();
+  });
+
+  it('renders the conversation starters', async () => {
+    render(<NewConversationPrompt />, { wrapper });
+
+    expect(await screen.findByTestId('mockConversationStarters')).toBeInTheDocument();
   });
 
   it('renders Observability capability messages for oblt spaces', async () => {

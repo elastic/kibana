@@ -43,6 +43,8 @@ export {
   agentIdMaxLength,
   AGENT_NAME_MAX_LENGTH,
   AGENT_DESCRIPTION_MAX_LENGTH,
+  MAX_CONVERSATION_STARTERS,
+  CONVERSATION_STARTER_MAX_LENGTH,
   validateAgentId,
 } from './agent_ids';
 export { SELF_AGENT_ID } from './constants';

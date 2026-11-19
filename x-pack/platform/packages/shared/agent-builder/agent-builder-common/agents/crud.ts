@@ -35,7 +35,10 @@ export type AgentCreateRequest = Omit<
 };
 
 export type AgentUpdateRequest = Partial<
-  Pick<AgentDefinition, 'name' | 'description' | 'labels' | 'avatar_color' | 'avatar_symbol'>
+  Pick<
+    AgentDefinition,
+    'name' | 'description' | 'labels' | 'avatar_color' | 'avatar_symbol' | 'conversation_starters'
+  >
 > & {
   access_control?: Pick<AgentAccessControl, 'access_mode'>;
   configuration?: Partial<AgentConfigurationInput>;

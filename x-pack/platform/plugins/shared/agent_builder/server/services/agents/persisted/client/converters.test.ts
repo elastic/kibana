@@ -204,6 +204,24 @@ describe('fromEs', () => {
     expect(definition.configuration.ai_indices).toBeUndefined();
   });
 
+  it('converts conversation_starters from the document', () => {
+    const document = getSampleDoc();
+    document._source!.conversation_starters = ['first', 'second'];
+
+    expect(fromEs(document).conversation_starters).toEqual(['first', 'second']);
+  });
+
+  it('keeps an empty conversation_starters list', () => {
+    const document = getSampleDoc();
+    document._source!.conversation_starters = [];
+
+    expect(fromEs(document).conversation_starters).toEqual([]);
+  });
+
+  it('leaves conversation_starters unset when the document has none', () => {
+    expect(fromEs(getSampleDoc()).conversation_starters).toBeUndefined();
+  });
+
   it('returns stored approvals normalized', () => {
     const document = getSampleDoc();
     document._source!.config!.approvals = {
@@ -456,6 +474,25 @@ describe('createRequestToEs', () => {
     expect(docProperties.config!.ai_indices).toEqual(['ai-index-1', 'ai-index-2']);
   });
 
+  it('persists conversation_starters', () => {
+    const createRequest: AgentCreateRequest = {
+      id: 'id',
+      name: 'name',
+      description: 'description',
+      conversation_starters: ['first', 'second'],
+      configuration: { tools: [] },
+    };
+
+    const docProperties = createRequestToEs({
+      profile: createRequest,
+      user: { id: 'user-id', username: 'test-user' },
+      space: 'space',
+      creationDate: new Date(),
+    });
+
+    expect(docProperties.conversation_starters).toEqual(['first', 'second']);
+  });
+
   describe('approvals', () => {
     const convert = (approvals: AgentCreateRequest['configuration']['approvals']) =>
       createRequestToEs({
@@ -590,6 +627,50 @@ describe('createRequestToEs', () => {
 });
 
 describe('updateRequestToEs', () => {
+  describe('conversation_starters', () => {
+    const getCurrentProps = (conversationStarters?: string[]): AgentProperties => ({
+      id: 'id',
+      type: AgentType.chat,
+      name: 'name',
+      description: 'description',
+      space: 'space',
+      conversation_starters: conversationStarters,
+      config: { tools: [] },
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+      created_by_id: 'test-user-id',
+      created_by_name: 'test-user',
+      created_at: creationDate,
+      updated_at: updateDate,
+    });
+
+    const update = (currentProps: AgentProperties, request: AgentUpdateRequest) =>
+      updateRequestToEs({
+        agentId: 'id',
+        currentProps,
+        update: request,
+        updateDate: new Date(),
+        user: testUser,
+      });
+
+    it('replaces the stored conversation_starters', () => {
+      const result = update(getCurrentProps(['old']), { conversation_starters: ['new'] });
+
+      expect(result.conversation_starters).toEqual(['new']);
+    });
+
+    it('keeps the stored conversation_starters when the update omits them', () => {
+      const result = update(getCurrentProps(['old']), { name: 'new name' });
+
+      expect(result.conversation_starters).toEqual(['old']);
+    });
+
+    it('stores an empty list to remove all conversation_starters', () => {
+      const result = update(getCurrentProps(['old']), { conversation_starters: [] });
+
+      expect(result.conversation_starters).toEqual([]);
+    });
+  });
+
   it('migrates legacy document with configuration field to new config field', () => {
     const newUpdateDate = new Date();
 
