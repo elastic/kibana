@@ -167,7 +167,7 @@ Formatting:
 
 Check each item and fix any miss before step 6:
 
-- Title follows references/conventions.md: `[Area]` prefix, present-tense verb, sentence case, at most about 70 characters, no issue number or code names.
+- Title follows references/conventions.md: `[Area]` prefix, starts with an action verb, sentence case, under 80 characters, no issue number or code names.
 - The `Fixes` / `Closes` / `Part of` line uses a full issue URL and the right keyword.
 - Visible prose is about 150 words or less; count it.
 - The problem and the solution use UI names; code names appear only in Review notes.

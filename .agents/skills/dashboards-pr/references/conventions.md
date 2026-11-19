@@ -2,13 +2,13 @@
 
 ## Title
 
-- **Format:** `[Area] Short human sentence`. It must read as a release note: Kibana uses the title when there's no `## Release note` section.
+- **Format:** `[Area] Short human sentence`. It must read as a release note: Kibana uses the title without the `[Area]` prefix when there's no `## Release note` section.
 - **Area:** the user-facing feature name, matching the `Feature:*` label where one exists: `[Lens]`, `[Dashboard]`, `[Controls]`, `[Maps]`, `[ES|QL]`, `[Dashboards in Chat]`. Chain two only when it narrows the scope, as in `[Lens][Datatable]`.
-- **Sentence:** present-tense verb, sentence case, no trailing period, about 70 characters at most.
+- **Sentence:** start with an action verb such as Add, Fix, Improve, Show or Prevent, and say where the change is. Present tense, sentence case, no trailing period, under 80 characters.
 - **Fixes:** describe the symptom the user saw, not the code fix: `Fix missing city dots on the Dark basemap`, not `Namespace zoom-function sprite ids`.
 - **Features:** describe what users can now do.
 - **Leave out:** issue numbers, Conventional Commit prefixes (`fix:`, `feat:`), file or function names.
-- **Examples:** `[Links] Fix link settings not persisting`, `[Lens] Fit line charts by default`, `[kbn-grid-layout] Smoother scrolling`.
+- **Examples:** `[Links] Fix link settings not persisting`, `[Lens] Fit line charts by default`.
 - **When rewriting:** propose a new title only if the current one breaks these rules, and show the old one next to it.
 
 ## Body order
