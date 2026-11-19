@@ -243,11 +243,28 @@ const toPlainToken = (token: string): string => {
   return SLACK_BROADCASTS.has(target) ? `@${target.slice(1)}` : '';
 };
 
+const SLACK_CODE_SPAN = /(```[\s\S]*?```|`[^`\n]+`)/;
+
+/** Bold, italic and strikethrough pairs, matched only at word edges so `5*3` and `snake_case` stay. */
+const SLACK_EMPHASIS = [
+  /(^|[\s(*_~])\*([^\s*](?:[^*\n]*[^\s*])?)\*(?=$|[\s).,!?:;*_~])/g,
+  /(^|[\s(*_~])_([^\s_](?:[^_\n]*[^\s_])?)_(?=$|[\s).,!?:;*_~])/g,
+  /(^|[\s(*_~])~([^\s~](?:[^~\n]*[^\s~])?)~(?=$|[\s).,!?:;*_~])/g,
+];
+
+const stripEmphasis = (text: string): string =>
+  text
+    .split(SLACK_CODE_SPAN)
+    .map((segment, index) =>
+      index % 2 === 1
+        ? segment
+        : SLACK_EMPHASIS.reduce((result, pattern) => result.replace(pattern, '$1$2'), segment)
+    )
+    .join('');
+
 /** Slack markup as one readable line; ids Slack sends without a name are dropped. */
 export const toSlackPlainText = (text: string | undefined): string =>
-  (text ?? '')
-    .replace(/<([^<>]*)>/g, (_, token: string) => toPlainToken(token))
-    .replace(/(^|[\s(])\*([^*\n]+)\*(?=$|[\s).,!?:;])/g, '$1$2')
+  stripEmphasis((text ?? '').replace(/<([^<>]*)>/g, (_, token: string) => toPlainToken(token)))
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&amp;/g, '&')

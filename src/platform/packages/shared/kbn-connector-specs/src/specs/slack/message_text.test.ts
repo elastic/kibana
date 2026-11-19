@@ -332,6 +332,13 @@ describe('toSlackPlainText', () => {
     ['an id without a name dropped', '<@U1> why is checkout slow?', 'why is checkout slow?'],
     ['a broadcast', '<!here> disk full', '@here disk full'],
     ['bold markers and entities undone', '*CRITICAL:* 5*3 &lt;b&gt; &amp;', 'CRITICAL: 5*3 <b> &'],
+    [
+      'italic and strikethrough markers undone',
+      '_Disk full_ on ~db-1~ (*_nested_*)',
+      'Disk full on db-1 (nested)',
+    ],
+    ['identifiers kept', 'checkout_service_v2 is ~2x slower', 'checkout_service_v2 is ~2x slower'],
+    ['code spans kept as written', 'run `kill *_x_*` now', 'run `kill *_x_*` now'],
     ['whitespace collapsed', 'a\n\n  b', 'a b'],
   ])('reads %s', (_, text, expected) => {
     expect(toSlackPlainText(text)).toBe(expected);
