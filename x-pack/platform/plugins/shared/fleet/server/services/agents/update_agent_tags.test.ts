@@ -366,6 +366,57 @@ describe('update_agent_tags', () => {
     expect(agentAction?.document.agents.length).toEqual(3);
   });
 
+  it('should record every agent the update by query updated, read from its task', async () => {
+    esClient.updateByQuery.mockReset();
+    esClient.updateByQuery.mockResolvedValue({ task: 'node1:42' } as any);
+    esClient.tasks.get.mockResolvedValue({
+      completed: true,
+      task: {},
+      response: { failures: [], updated: 5, version_conflicts: 0, total: 5 },
+    } as any);
+
+    await updateTagsBatch(
+      soClient,
+      esClient,
+      [{ id: 'agent1' } as Agent],
+      {},
+      { tagsToAdd: [], tagsToRemove: ['old'], kuery: '', total: 5 }
+    );
+
+    // the update runs as a task, so a slow update is waited for instead of timing out the request
+    expect(esClient.updateByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ wait_for_completion: false })
+    );
+    expect(esClient.tasks.get).toHaveBeenCalledWith(
+      expect.objectContaining({ task_id: 'node1:42' })
+    );
+    const agentAction = esClient.create.mock.calls[0][0] as any;
+    expect(agentAction?.document.agents.length).toEqual(5);
+  });
+
+  it('should throw and not write an action document if the update by query task failed', async () => {
+    esClient.updateByQuery.mockReset();
+    esClient.updateByQuery.mockResolvedValue({ task: 'node1:42' } as any);
+    esClient.tasks.get.mockResolvedValue({
+      completed: true,
+      task: {},
+      error: { type: 'security_exception', reason: 'not allowed' },
+    } as any);
+
+    await expect(
+      updateTagsBatch(
+        soClient,
+        esClient,
+        [{ id: 'agent1' } as Agent],
+        {},
+        { tagsToAdd: ['new'], tagsToRemove: [], kuery: '', total: 1 }
+      )
+    ).rejects.toThrow(/Caught error while batch updating tags: .*security_exception/);
+
+    // no action document is written for a batch whose outcome is not known
+    expect(esClient.create).not.toHaveBeenCalled();
+  });
+
   it('should run add tags async when actioning more agents than batch size', async () => {
     esClient.search.mockResolvedValue({
       hits: {
