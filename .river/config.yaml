@@ -29,3 +29,7 @@ services:
 babysit:
   checks:
     - kibana-ci
+
+network:
+  allowed:
+    - news.ycombinator.com
