@@ -39,6 +39,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.reporting.roles.enabled=false', // Reporting access control is implemented by sub-feature application privileges
         // for testing set buffer duration to 0 to immediately flush counters into saved objects.
         '--usageCollection.usageCounters.bufferDuration=0',
+        ...findTestPluginPaths(
+          path.resolve(__dirname, '../../test_plugins/response_ops/reporting_api_integration')
+        ),
       ],
     },
   };

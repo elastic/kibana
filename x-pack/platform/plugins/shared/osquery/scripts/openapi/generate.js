@@ -13,7 +13,7 @@ const { REPO_ROOT } = require('@kbn/repo-info');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { join, resolve } = require('path');
 
-const OSQUERY_ROOT = resolve(__dirname, '../..');
+const OSQUERY_ROOT = resolve(__dirname, '../../../../../packages/private');
 
 (async () => {
   await generate({

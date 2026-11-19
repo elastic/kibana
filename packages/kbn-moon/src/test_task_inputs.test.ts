@@ -199,7 +199,7 @@ if (process.env.MOON_FIXTURE_ARGS_OUTPUT) fs.appendFileSync(process.env.MOON_FIX
   it('selects the child project for a nested Jest config', async () => {
     const targets = await getAffectedMoonJestTargets({
       changedFilesJson: JSON.stringify({
-        files: ['x-pack/platform/test/alerting_api_integration/packages/helpers/jest.config.js'],
+        files: ['x-pack/platform/packages/shared/test/response_ops/alerting-api-integration-helpers/jest.config.js'],
       }),
     });
     expect(targets).toContain('@kbn/alerting-api-integration-helpers:jest');
