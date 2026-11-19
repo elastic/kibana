@@ -17,6 +17,7 @@ import {
   ResizableLayoutMode,
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
+import { useMovableContent } from '../../../hooks/use_movable_content';
 
 /** The width of the sessions list, in pixels, kept across visits. */
 const RAIL_WIDTH_STORAGE_KEY = 'digitalExperience.sessionDetail.railWidthPx';
@@ -76,55 +77,59 @@ export function SessionSplitView({
     [railWidth]
   );
 
-  if (placement === 'hidden') {
-    return <>{children}</>;
-  }
+  // Mounted once whatever the placement, so that moving the list or turning it into a flyout
+  // doesn't load either of them again, nor lose the filters and rows the user opened.
+  const session = useMovableContent(children);
+  const list = useMovableContent(placement === 'hidden' ? null : rail);
 
-  if (placement === 'flyout') {
-    return (
-      <>
-        {children}
-        <EuiFlyout
-          type="push"
-          ownFocus={false}
-          paddingSize="none"
-          hideCloseButton
-          resizable
-          size={railWidth}
-          minWidth={MIN_RAIL_WIDTH}
-          onResize={setRailWidth}
-          onClose={onHideRail}
-          aria-label={FLYOUT_LABEL}
-          data-test-subj="digitalExperienceSessionsFlyout"
-        >
-          {rail}
-        </EuiFlyout>
-      </>
-    );
-  }
-
-  const railSide = placement;
   return (
-    <div
-      css={containerCss}
-      data-test-subj="digitalExperienceSessionSplitView"
-      data-rail-side={railSide}
-    >
-      <ResizableLayout
-        mode={ResizableLayoutMode.Resizable}
-        direction={ResizableLayoutDirection.Horizontal}
-        // The list keeps its width when the window resizes; the session takes the rest.
-        fixedPanel={rail}
-        fixedPanelSize={railWidth}
-        fixedPanelOrder={
-          railSide === 'right' ? ResizableLayoutOrder.End : ResizableLayoutOrder.Start
-        }
-        minFixedPanelSize={MIN_RAIL_WIDTH}
-        flexPanel={children}
-        minFlexPanelSize={MIN_DETAIL_WIDTH}
-        onFixedPanelSizeChange={setRailWidth}
-        data-test-subj="digitalExperienceSessionSplit"
-      />
-    </div>
+    <>
+      {session.portal}
+      {list.portal}
+      {placement === 'hidden' && session.slot}
+      {placement === 'flyout' && (
+        <>
+          {session.slot}
+          <EuiFlyout
+            type="push"
+            ownFocus={false}
+            paddingSize="none"
+            hideCloseButton
+            resizable
+            size={railWidth}
+            minWidth={MIN_RAIL_WIDTH}
+            onResize={setRailWidth}
+            onClose={onHideRail}
+            aria-label={FLYOUT_LABEL}
+            data-test-subj="digitalExperienceSessionsFlyout"
+          >
+            {list.slot}
+          </EuiFlyout>
+        </>
+      )}
+      {(placement === 'left' || placement === 'right') && (
+        <div
+          css={containerCss}
+          data-test-subj="digitalExperienceSessionSplitView"
+          data-rail-side={placement}
+        >
+          <ResizableLayout
+            mode={ResizableLayoutMode.Resizable}
+            direction={ResizableLayoutDirection.Horizontal}
+            // The list keeps its width when the window resizes; the session takes the rest.
+            fixedPanel={list.slot}
+            fixedPanelSize={railWidth}
+            fixedPanelOrder={
+              placement === 'right' ? ResizableLayoutOrder.End : ResizableLayoutOrder.Start
+            }
+            minFixedPanelSize={MIN_RAIL_WIDTH}
+            flexPanel={session.slot}
+            minFlexPanelSize={MIN_DETAIL_WIDTH}
+            onFixedPanelSizeChange={setRailWidth}
+            data-test-subj="digitalExperienceSessionSplit"
+          />
+        </div>
+      )}
+    </>
   );
 }

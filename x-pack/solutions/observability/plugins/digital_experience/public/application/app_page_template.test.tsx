@@ -5,13 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
+import React, { useEffect } from 'react';
+import { act, render } from '@testing-library/react';
 import type { DigitalExperienceStartDeps } from '../types';
 import { AppPageTemplate } from './app_page_template';
 import { SideNavProvider, useHideSideNav } from './side_nav_context';
 
-jest.mock('@kbn/typed-react-router-config', () => ({ RouteRenderer: () => null }));
+const mockPageMounted = jest.fn();
+function MockRouteRenderer() {
+  useEffect(() => {
+    mockPageMounted();
+  }, []);
+  return <div data-test-subj="page" />;
+}
+jest.mock('@kbn/typed-react-router-config', () => ({
+  RouteRenderer: () => <MockRouteRenderer />,
+}));
 
 const mockChrome = {
   getChromeStyle: jest.fn(() => 'classic'),
@@ -24,7 +33,12 @@ jest.mock('../hooks/use_kibana_services', () => ({
 const pageTemplateProps = jest.fn();
 const PageTemplate = ((props: { hideSolutionNav?: boolean; children?: React.ReactNode }) => {
   pageTemplateProps(props);
-  return <>{props.children}</>;
+  // Like the real template, which is another component with and without the navigation.
+  return props.hideSolutionNav ? (
+    <section>{props.children}</section>
+  ) : (
+    <main>{props.children}</main>
+  );
 }) as unknown as DigitalExperienceStartDeps['observabilityShared']['navigation']['PageTemplate'];
 
 /** A page that takes the navigation's width, like a session with the sessions list beside it. */
@@ -57,5 +71,28 @@ describe('AppPageTemplate', () => {
     );
 
     expect(hideSolutionNav()).toBe(true);
+  });
+
+  it('keeps the page mounted when the navigation goes away and comes back', () => {
+    let setHidden: (hidden: boolean) => void = () => {};
+    function Toggle() {
+      const [hidden, set] = React.useState(false);
+      setHidden = set;
+      return hidden ? <PageHidingTheNav /> : null;
+    }
+    const { container } = render(
+      <SideNavProvider>
+        <AppPageTemplate PageTemplate={PageTemplate} />
+        <Toggle />
+      </SideNavProvider>
+    );
+    expect(container.querySelector('main [data-test-subj="page"]')).not.toBeNull();
+
+    act(() => setHidden(true));
+    expect(container.querySelector('section [data-test-subj="page"]')).not.toBeNull();
+
+    act(() => setHidden(false));
+    expect(container.querySelector('main [data-test-subj="page"]')).not.toBeNull();
+    expect(mockPageMounted).toHaveBeenCalledTimes(1);
   });
 });

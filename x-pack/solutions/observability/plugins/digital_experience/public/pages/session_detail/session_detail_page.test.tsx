@@ -793,6 +793,24 @@ describe('SessionDetailPage', () => {
     mockChrome.getChromeStyle.mockReturnValue('classic');
   });
 
+  it('keeps the list and the session as they are when the list moves, or becomes a flyout', async () => {
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+    const search = (await screen.findByTestId(
+      'digitalExperienceSessionsRailSearch'
+    )) as HTMLInputElement;
+
+    await openSessionsListMenu();
+    fireEvent.click(screen.getByTestId('digitalExperienceSessionsListPlacement-right'));
+    fireEvent.click(screen.getByTestId('digitalExperienceSessionsRailFlyoutToggle'));
+    await screen.findByTestId('digitalExperienceSessionsFlyout');
+
+    // The same input, not a new one, and neither request has run again.
+    expect(screen.getByTestId('digitalExperienceSessionsRailSearch')).toBe(search);
+    expect(mockDetail).toHaveBeenCalledTimes(1);
+    expect(mockList).toHaveBeenCalledTimes(1);
+  });
+
   it('shows the list on the left for a choice stored before it could move', async () => {
     window.localStorage.setItem('digitalExperience.sessionDetail.rail', '"open"');
     mockDetail.mockResolvedValue(detail());
