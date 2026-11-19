@@ -27,6 +27,7 @@ import { Controller, useFieldArray, useFormContext, useFormState, useWatch } fro
 import {
   aggValueToLabel,
   CUSTOM_METRIC_AGGREGATION_OPTIONS,
+  matchAggregationOption,
 } from '../../../helpers/aggregation_options';
 import { createOptionsFromFields } from '../../../helpers/create_options';
 import type { CreateSLOForm } from '../../../types';
@@ -197,6 +198,7 @@ export function MetricIndicator({
                               : []
                           }
                           options={CUSTOM_METRIC_AGGREGATION_OPTIONS}
+                          optionMatcher={matchAggregationOption}
                         />
                       )}
                     />

@@ -10,7 +10,11 @@ import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { AGGREGATION_OPTIONS, aggValueToLabel } from '../../../helpers/aggregation_options';
+import {
+  AGGREGATION_OPTIONS,
+  aggValueToLabel,
+  matchAggregationOption,
+} from '../../../helpers/aggregation_options';
 import { createOptionsFromFields } from '../../../helpers/create_options';
 import { useFormValues } from '../../../hooks/use_form_values';
 import type { CreateSLOForm } from '../../../types';
@@ -116,6 +120,7 @@ export function MetricInput({
                     : []
                 }
                 options={AGGREGATION_OPTIONS}
+                optionMatcher={matchAggregationOption}
               />
             </EuiFormRow>
           )}

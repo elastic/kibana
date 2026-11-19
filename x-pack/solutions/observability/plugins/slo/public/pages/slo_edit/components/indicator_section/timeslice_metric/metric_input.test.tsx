@@ -77,4 +77,24 @@ describe('<MetricInput />', () => {
 
     expect(await getFieldOptionLabels()).toEqual(['latency.number', 'service.name']);
   });
+
+  it.each([
+    ['std_dev', 'Std. Deviation'],
+    ['deviation', 'Std. Deviation'],
+  ])('finds aggregations by value or label when searching "%s"', async (search, expected) => {
+    renderMetricInput('avg');
+
+    // Replace the selected "Average" plain-text value with the search
+    await userEvent.type(screen.getByRole('combobox', { name: 'Select an aggregation' }), search, {
+      initialSelectionStart: 0,
+      initialSelectionEnd: 'Average'.length,
+    });
+    const listbox = await screen.findByRole('listbox');
+
+    expect(
+      within(listbox)
+        .getAllByRole('option')
+        .map((option) => option.textContent ?? '')
+    ).toEqual([expected]);
+  });
 });
