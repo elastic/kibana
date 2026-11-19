@@ -15,7 +15,7 @@ interface UseAiIndexResult {
   aiIndex: GetAiIndexResponse | undefined;
   isLoading: boolean;
   error: Error | undefined;
-  refetch: () => void;
+  refetch: () => Promise<unknown>;
 }
 
 /**

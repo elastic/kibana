@@ -30,7 +30,7 @@ export type AlertOutcomeBenignClassificationOutput = z.infer<
 export const alertOutcomeBenignClassificationPrompt = createPrompt({
   name: 'nightshift_alert_outcome_benign_classification',
   description:
-    'Grades whether a Nightshift investigation classified its alert as benign or actionable the way its recovery confirmed',
+    'Grades whether a nightshift investigation classified its alert as benign or actionable the way its recovery confirmed',
   input: lazySchema(() =>
     z.object({
       confirmed_root_cause: z.string().max(MAX_JUDGE_TEXT_LENGTH),

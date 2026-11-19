@@ -10,7 +10,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { isValidTraceId } from '@opentelemetry/api';
 import pRetry from 'p-retry';
 import type { Direction } from '@kbn/evals-common';
-import type { Evaluator } from '../../types';
+import type { EvaluationResult, Evaluator } from '../../types';
 
 // The trace id OpenTelemetry's no-op tracer hands out when no tracer provider is registered.
 const NOOP_TRACE_ID = '00000000000000000000000000000000';
@@ -20,7 +20,7 @@ const NOOP_TRACE_ID_EXPLANATION =
   'Configure TRACING_EXPORTERS (e.g. run with --export-profile local) and make sure an OTLP collector ' +
   'is listening before running the suite.';
 
-interface EsqlResponse {
+export interface EsqlResponse {
   columns: Array<{ name: string; type: string }>;
   values: any[][];
 }
@@ -31,7 +31,8 @@ const NOT_REPORTED = Symbol('notReported');
 
 export interface TraceBasedEvaluatorConfig {
   name: string;
-  buildQuery: (traceId: string) => string;
+  // Runs on every attempt, so a query that depends on the cluster mapping sees fields indexed since.
+  buildQuery: (traceId: string) => string | Promise<string>;
   extractResult: (response: EsqlResponse) => number | null;
   // Optional validation for the extracted result. Return false to signal the trace data looks incomplete, which triggers a retry
   isResultValid?: (result: number | null) => boolean;
@@ -45,6 +46,11 @@ export interface TraceBasedEvaluatorConfig {
     buildQuery: (traceId: string) => string;
     isTraceComplete: (response: EsqlResponse) => boolean;
   };
+  // For queries grouped with BY, no rows means no matching spans yet rather than a failed query,
+  // so it ends like an ungrouped query's null row: retried, then potentially incomplete.
+  emptyResponseIsIncomplete?: boolean;
+  // Context attached to a scored or unreported result, e.g. why it could not be scored.
+  describeResult?: (response: EsqlResponse) => Pick<EvaluationResult, 'explanation' | 'metadata'>;
   /**
    * Whether a higher score is an improvement (`maximize`), a lower score is
    * an improvement (`minimize`), or the score cannot be compared across arms
@@ -69,7 +75,9 @@ export function createTraceBasedEvaluator({
     isResultValid,
     isNotReported,
     notReportedProbe,
+    describeResult,
     direction,
+    emptyResponseIsIncomplete,
   } = config;
 
   return {
@@ -108,6 +116,9 @@ export function createTraceBasedEvaluator({
       }
 
       let lastResult: number | null | undefined;
+      let lastResponse: EsqlResponse | undefined;
+      // The response `lastResult` came from, so an incomplete result is described consistently.
+      let lastResultResponse: EsqlResponse | undefined;
 
       async function runQuery(query: string): Promise<EsqlResponse> {
         return (await traceEsClient.esql.query({ query })) as unknown as EsqlResponse;
@@ -138,18 +149,23 @@ export function createTraceBasedEvaluator({
       }
 
       async function fetchStats(): Promise<number | typeof NOT_REPORTED> {
-        const query = buildQuery(traceId);
+        lastResponse = undefined;
 
         let response: EsqlResponse;
         try {
-          response = await runQuery(query);
+          response = await runQuery(await buildQuery(traceId));
         } catch (error) {
           return probeNotReported(error);
         }
+        lastResponse = response;
 
         const { values } = response;
 
         if (!values || values.length === 0) {
+          if (emptyResponseIsIncomplete && lastResult === undefined) {
+            lastResult = null;
+            lastResultResponse = response;
+          }
           throw new Error(`No data found for trace`);
         }
 
@@ -159,6 +175,7 @@ export function createTraceBasedEvaluator({
 
         const result = extractResult(response);
         lastResult = result;
+        lastResultResponse = response;
 
         const valid = isResultValid ? isResultValid(result) : result !== null;
         if (!valid) {
@@ -181,16 +198,20 @@ export function createTraceBasedEvaluator({
           },
         });
 
+        const description = lastResponse && describeResult?.(lastResponse);
+
         if (score === NOT_REPORTED) {
           return {
             score: null,
             label: 'unavailable',
             explanation: `${name} was not reported for trace ${traceId}`,
+            ...description,
           };
         }
 
         return {
           score,
+          ...description,
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
@@ -201,11 +222,15 @@ export function createTraceBasedEvaluator({
           log.warning(
             `${name} returning potentially incomplete result for trace ${traceId}: ${lastResult} (${errorMessage})`
           );
+          const description = lastResultResponse && describeResult?.(lastResultResponse);
+          const incompleteExplanation = `${name} may be based on incomplete trace data`;
           return {
             score: lastResult,
             label: 'potentially_incomplete',
-            explanation: `${name} may be based on incomplete trace data`,
-            metadata: { incomplete: true },
+            explanation: description?.explanation
+              ? `${incompleteExplanation}. ${description.explanation}`
+              : incompleteExplanation,
+            metadata: { ...description?.metadata, incomplete: true },
           };
         }
 

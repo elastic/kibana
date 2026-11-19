@@ -49,7 +49,7 @@ import type {
   TaskRunAsContext,
   TaskTypeGroup,
 } from '../task';
-import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
+import { isFailedRunResult, TaskStatus, TaskCost } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import {
   createTaskRunError,
@@ -305,8 +305,7 @@ export class TaskManagerRunner implements TaskRunner {
    *  Effective cost for this task (instance override, then definition, then Normal).
    */
   public get cost(): number {
-    const instanceCost = getTaskCostFromInstance(this.instance.task.cost);
-    return instanceCost ?? this.definition?.cost ?? TaskCost.Normal;
+    return this.instance.task.cost ?? this.definition?.cost ?? TaskCost.Normal;
   }
 
   /**

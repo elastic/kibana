@@ -11,7 +11,6 @@ import {
   type BlastRadiusEntry,
   type CausalFeature,
   type SignalEntry,
-  type SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { toRuleEvent } from './to_rule_event';
@@ -63,11 +62,6 @@ const BLAST_RADIUS_ENTRY: BlastRadiusEntry = {
   source_id: 'logs.test',
 };
 
-const INVESTIGATION: SignificantEventInvestigation = {
-  workflow_execution_id: 'wf-exec-1',
-  started_at: '2026-01-01T01:00:00.000Z',
-};
-
 describe('toRuleEvent', () => {
   describe('complete output shape', () => {
     it('maps a minimal event to the full CreateAlertEventData shape', () => {
@@ -101,7 +95,6 @@ describe('toRuleEvent', () => {
         signals: [SIGNAL],
         causal_features: [CAUSAL_FEATURE],
         blast_radius: [BLAST_RADIUS_ENTRY],
-        investigations: [INVESTIGATION],
         workflow_execution_id: 'wf-1',
         conversation_id: 'conv-1',
       });
@@ -124,7 +117,6 @@ describe('toRuleEvent', () => {
           signals: [SIGNAL],
           causal_features: [CAUSAL_FEATURE],
           blast_radius: [BLAST_RADIUS_ENTRY],
-          investigations: [INVESTIGATION],
           workflow_execution_id: 'wf-1',
           conversation_id: 'conv-1',
         },
@@ -151,7 +143,6 @@ describe('toRuleEvent', () => {
         signals: [SIGNAL],
         causal_features: [CAUSAL_FEATURE],
         blast_radius: [BLAST_RADIUS_ENTRY],
-        investigations: [INVESTIGATION],
         workflow_execution_id: 'wf-exec-0',
         conversation_id: 'conv-1',
       });
@@ -244,7 +235,6 @@ describe('toRuleEvent', () => {
         'signals',
         'causal_features',
         'blast_radius',
-        'investigations',
         'workflow_execution_id',
         'conversation_id',
       ]) {
@@ -271,21 +261,18 @@ describe('toRuleEvent', () => {
       const signals: SignalEntry[] = [SIGNAL];
       const causalFeatures: CausalFeature[] = [CAUSAL_FEATURE];
       const blastRadius: BlastRadiusEntry[] = [BLAST_RADIUS_ENTRY];
-      const investigations: SignificantEventInvestigation[] = [INVESTIGATION];
 
       const data = getEventData(
         createSignificantEvent({
           signals,
           causal_features: causalFeatures,
           blast_radius: blastRadius,
-          investigations,
         })
       );
 
       expect(data.signals).toEqual(signals);
       expect(data.causal_features).toEqual(causalFeatures);
       expect(data.blast_radius).toEqual(blastRadius);
-      expect(data.investigations).toEqual(investigations);
     });
 
     it('has exactly the required keys for a minimal event', () => {
@@ -303,7 +290,6 @@ describe('toRuleEvent', () => {
           signals: [SIGNAL],
           causal_features: [CAUSAL_FEATURE],
           blast_radius: [BLAST_RADIUS_ENTRY],
-          investigations: [INVESTIGATION],
           workflow_execution_id: 'wf-1',
           conversation_id: 'conv-1',
         })
@@ -316,7 +302,6 @@ describe('toRuleEvent', () => {
           'confidence',
           'conversation_id',
           'event_id',
-          'investigations',
           'rule_name',
           'signals',
           'source_ids',
@@ -336,7 +321,6 @@ describe('toRuleEvent', () => {
           signals: [SIGNAL],
           causal_features: [CAUSAL_FEATURE],
           blast_radius: [BLAST_RADIUS_ENTRY],
-          investigations: [INVESTIGATION],
           workflow_execution_id: 'wf-1',
           conversation_id: 'conv-1',
         })

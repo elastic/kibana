@@ -121,13 +121,18 @@ const mockServiceAccount = ({
     data: pending ? undefined : { serviceAccountsEnabled, canModifyBoundWorkflows },
   });
 
-const renderStep = (automations: Automation[] = [], onInvestigationClick = jest.fn()) =>
+const renderStep = (
+  automations: Automation[] = [],
+  onInvestigationClick = jest.fn(),
+  isInvestigationSelected = false
+) =>
   render(
     <I18nProvider>
       <OnboardingAutomationStep
         investigation={investigation}
         automations={automations}
         automationsAvailable
+        isInvestigationSelected={isInvestigationSelected}
         onInvestigationClick={onInvestigationClick}
       />
     </I18nProvider>
@@ -166,6 +171,12 @@ describe('OnboardingAutomationStep', () => {
 
     fireEvent.click(screen.getByTestId('nightshiftOnboardingCreateAutomation'));
     expect(screen.getByTestId('createAutomationFlyout')).toBeInTheDocument();
+  });
+
+  it('disables the view results button while the investigation is open', () => {
+    renderStep([], jest.fn(), true);
+
+    expect(screen.getByTestId('nightshiftOnboardingTrialInvestigationOpen')).toBeDisabled();
   });
 
   it('lists a saved automation beside a card to add another, and opens its overview', () => {

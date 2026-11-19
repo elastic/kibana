@@ -25,6 +25,7 @@ import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import type { AppMenuExtensionParams } from '../../../../../context_awareness';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { alertingV2PluginMock } from '@kbn/alerting-v2-plugin/public/mocks';
 import type { DiscoverServices } from '../../../../../build_services';
 import { internalStateActions } from '../../../state_management/redux';
 
@@ -277,13 +278,8 @@ describe('getAlertsAppMenuItem', () => {
       const createRuleOptionsFlyoutMock = jest.fn(() => null);
       const services = createDiscoverServicesMock();
       services.alertingVTwo = {
+        ...alertingV2PluginMock.createStartContract(),
         CreateRuleOptionsFlyout: createRuleOptionsFlyoutMock,
-        RulesPage: jest.fn(() => null),
-        RuleLibraryPage: jest.fn(() => null),
-        EpisodesPage: jest.fn(() => null),
-        ActionPoliciesPage: jest.fn(() => null),
-        ExecutionHistoryPage: jest.fn(() => null),
-        createAlertingV2HostApp: jest.fn(),
       };
       const { createRuleOptionsAppMenuItem } = await setupCreateRuleOptionsMenuItem({
         services,

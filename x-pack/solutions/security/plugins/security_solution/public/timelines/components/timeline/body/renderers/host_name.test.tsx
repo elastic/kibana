@@ -38,7 +38,6 @@ describe('HostName', () => {
 
   const props = {
     fieldName: 'host.name',
-    contextId: 'test-context-id',
     eventId: 'test-event-id',
     fieldType: 'keyword',
     isAggregatable: true,

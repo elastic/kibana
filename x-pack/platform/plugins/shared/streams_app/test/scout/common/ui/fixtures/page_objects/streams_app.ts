@@ -91,6 +91,8 @@ export class StreamsApp {
   public readonly streamsAddSourceButton;
   public readonly streamsDestinationsTable;
   public readonly streamsDestinationsSearch;
+  public readonly newExperienceCallout;
+  public readonly newExperienceCalloutOpenMapButton;
   private readonly appMenu: AppMenu;
 
   constructor(private readonly page: ScoutPage) {
@@ -176,6 +178,10 @@ export class StreamsApp {
     this.streamsAddSourceButton = this.page.testSubj.locator('streamsAddSourceButton');
     this.streamsDestinationsTable = this.page.testSubj.locator('streamsDestinationsTable');
     this.streamsDestinationsSearch = this.page.testSubj.locator('streamsDestinationsSearch');
+    this.newExperienceCallout = this.page.testSubj.locator('streamsNewExperienceCallout');
+    this.newExperienceCalloutOpenMapButton = this.page.testSubj.locator(
+      'streamsNewExperienceCalloutOpenMap'
+    );
   }
 
   // Scoped to the toast list: core's screen reader announcer repeats every toast's text page-wide.
@@ -239,6 +245,10 @@ export class StreamsApp {
 
   getStreamsLayoutTab(tabName: string) {
     return this.page.testSubj.locator(`streamsLayoutTab-${tabName}`);
+  }
+
+  async dismissNewExperienceCallout() {
+    await this.newExperienceCallout.getByTestId('euiDismissCalloutButton').click();
   }
 
   async clickStreamsLayoutTab(tabName: string) {
