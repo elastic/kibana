@@ -28,6 +28,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { KpiMetricIndex } from '../../../common/constants';
 import {
   KPI_FIELD_CATALOG,
@@ -44,11 +45,13 @@ import type {
   KpiMetricDateField,
   KpiMetricThresholdUnit,
 } from '../../../common/types/domain';
+import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { usePreviewKpiMetric } from '../../containers/use_preview_kpi_metric';
 import { formatKpiMetricValue } from '../all_cases/components/kpi_metric_tile';
 import {
   formatKpiBreakdownSummary,
   getKpiBreakdownRows,
+  getKpiBreakdownUserIds,
 } from '../all_cases/components/kpi_breakdown_tile';
 import type {
   DirectionOption,
@@ -116,10 +119,11 @@ const DIRECTION_OPTIONS: Array<{ value: DirectionOption; text: string }> = [
 
 const getPreviewText = (
   result: Exclude<KpiMetricResult, KpiMetricErrorResult>,
-  unit?: KpiMetricThresholdUnit
+  unit?: KpiMetricThresholdUnit,
+  userProfiles?: Map<string, UserProfileWithAvatar>
 ): string =>
   result.type === 'breakdown'
-    ? i18n.PREVIEW_BREAKDOWN(formatKpiBreakdownSummary(getKpiBreakdownRows(result)))
+    ? i18n.PREVIEW_BREAKDOWN(formatKpiBreakdownSummary(getKpiBreakdownRows(result, userProfiles)))
     : i18n.PREVIEW_VALUE(formatKpiMetricValue(result.value, result.format, unit));
 
 interface KpiMetricRowsProps {
@@ -295,6 +299,9 @@ const KpiMetricFlyoutComponent: React.FC<KpiMetricFlyoutProps> = ({
     isLoading: isPreviewLoading,
     reset: resetPreview,
   } = usePreviewKpiMetric();
+
+  const previewUids = useMemo(() => getKpiBreakdownUserIds(previewResult), [previewResult]);
+  const { data: previewUserProfiles } = useBulkGetUserProfiles({ uids: previewUids });
 
   const errors = useMemo(() => validateKpiMetricForm(state), [state]);
   const hasErrors = Object.keys(errors).length > 0;
@@ -512,7 +519,7 @@ const KpiMetricFlyoutComponent: React.FC<KpiMetricFlyoutProps> = ({
                       </EuiText>
                     ) : (
                       <EuiText size="s" data-test-subj="kpi-metric-preview-value">
-                        {getPreviewText(previewResult, previewUnit)}
+                        {getPreviewText(previewResult, previewUnit, previewUserProfiles)}
                       </EuiText>
                     )}
                   </EuiFlexItem>

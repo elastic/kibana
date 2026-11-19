@@ -11,9 +11,14 @@ import userEvent from '@testing-library/user-event';
 import type { CustomKpiMetricConfiguration } from '../../../common/types/domain';
 import { noCasesSettingsPermission, renderWithTestingProviders } from '../../common/mock';
 import * as api from '../../containers/api';
+import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
+import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { KpiMetricsSettings } from '.';
 
 jest.mock('../../containers/api');
+jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
+
+const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 
 const customMetric = (id: string): CustomKpiMetricConfiguration => ({
   id,
@@ -29,6 +34,7 @@ describe('KpiMetricsSettings', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useBulkGetUserProfilesMock.mockReturnValue({ data: new Map() });
   });
 
   it('shows the four default metrics when no list is saved', async () => {
@@ -414,6 +420,46 @@ describe('KpiMetricsSettings', () => {
       await userEvent.click(await screen.findByTestId('kpi-metric-test-query'));
 
       expect(await screen.findByTestId('kpi-metric-preview-value')).toHaveTextContent('40 h');
+    });
+
+    it('shows the assignee names in the breakdown preview', async () => {
+      const [profile] = userProfiles;
+      useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
+      jest.spyOn(api, 'previewKpiMetric').mockResolvedValue({
+        id: 'preview',
+        type: 'breakdown',
+        field: 'case.assignees.uid',
+        total: 5,
+        buckets: [
+          { key: profile.uid, count: 3 },
+          { key: 'unknown-uid', count: 2 },
+        ],
+        otherCount: 0,
+        missingCount: 0,
+      });
+
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          kpiMetrics={[
+            {
+              ...customMetric('a'),
+              groupBy: { field: 'case.assignees.uid', size: 5 },
+            },
+          ]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.click(await screen.findByTestId('kpi-metric-test-query'));
+
+      const preview = await screen.findByTestId('kpi-metric-preview-value');
+      expect(preview).toHaveTextContent('Damaged Raccoon 3');
+      expect(preview).toHaveTextContent('unknown-uid 2');
+      expect(useBulkGetUserProfilesMock).toHaveBeenLastCalledWith({
+        uids: [profile.uid, 'unknown-uid'],
+      });
     });
 
     it('shows the error of the unsaved metric', async () => {

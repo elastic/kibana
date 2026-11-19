@@ -15,7 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { KpiMetricBreakdownResult } from '../../../../common/types/api';
+import type { KpiMetricBreakdownResult, KpiMetricResult } from '../../../../common/types/api';
 import type { KpiMetricDirection } from '../../../../common/types/domain';
 import { CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
@@ -116,6 +116,11 @@ export const getKpiBreakdownRows = (
 /**
  * Formats the rows of a breakdown as one line, for example "Critical 12, High 10".
  */
+export const getKpiBreakdownUserIds = (result?: KpiMetricResult): string[] =>
+  result?.type === 'breakdown' && result.field === ASSIGNEE_UID_FIELD
+    ? result.buckets.map(({ key }) => key)
+    : [];
+
 export const formatKpiBreakdownSummary = (rows: KpiBreakdownRow[]): string =>
   rows.map(({ label, count }) => `${label} ${formatKpiMetricValue(count, 'number')}`).join(', ');
 
@@ -183,10 +188,7 @@ const KpiBreakdownTileComponent: React.FC<KpiBreakdownTileProps> = ({
   dateHint,
   dataTestSubj,
 }) => {
-  const uids = useMemo(
-    () => (result?.field === ASSIGNEE_UID_FIELD ? result.buckets.map(({ key }) => key) : []),
-    [result]
-  );
+  const uids = useMemo(() => getKpiBreakdownUserIds(result), [result]);
   const { data: userProfiles } = useBulkGetUserProfiles({ uids });
   const rows = useMemo(
     () => (result != null ? getKpiBreakdownRows(result, userProfiles) : []),
