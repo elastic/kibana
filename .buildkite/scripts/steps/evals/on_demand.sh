@@ -15,6 +15,13 @@ if ! command -v buildkite-agent >/dev/null 2>&1; then
   exit 1
 fi
 
+# The suite only honours "1" (persona_rubric_evaluator.ts), so normalise before it is written
+# into the YAML below: a stray quote in a free-text value would fail the whole upload.
+persona_rubric_judge=""
+if [[ "$(printf '%s' "${PERSONA_MATRIX_RUBRIC_JUDGE:-}" | tr -d '[:space:]')" == "1" ]]; then
+  persona_rubric_judge="1"
+fi
+
 FANOUT_PIPELINE_FILE="$(mktemp -t kbn-evals-on-demand.XXXXXX.yml)"
 trap 'rm -f "$FANOUT_PIPELINE_FILE"' EXIT
 echo "steps:" >"$FANOUT_PIPELINE_FILE"
@@ -48,7 +55,7 @@ for raw_suite in "${requested_suites[@]}"; do
       EVAL_GREP: "${EVAL_GREP:-}"
       EVAL_REPETITIONS: "${EVAL_REPETITIONS:-}"
       EVAL_CONCURRENCY: "${EVAL_CONCURRENCY:-}"
-      PERSONA_MATRIX_RUBRIC_JUDGE: "${PERSONA_MATRIX_RUBRIC_JUDGE:-}"
+      PERSONA_MATRIX_RUBRIC_JUDGE: "${persona_rubric_judge}"
       KIBANA_BUILD_ID: "${KIBANA_BUILD_ID:-}"
     timeout_in_minutes: ${EVAL_STEP_TIMEOUT_IN_MINUTES:-120}
     agents:

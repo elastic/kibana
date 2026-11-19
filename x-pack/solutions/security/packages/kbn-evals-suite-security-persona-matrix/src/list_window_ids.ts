@@ -33,7 +33,9 @@ export const listWindowIds = async (
   window: { start: string; end: string }
 ): Promise<string[]> => {
   const ids: string[] = [];
-  const { id: pitId } = await esClient.openPointInTime({ index, keep_alive: PIT_KEEP_ALIVE });
+  // ES may return a new PIT id on any search (the final empty page included); the next
+  // page and the close must use the latest one.
+  let { id: pitId } = await esClient.openPointInTime({ index, keep_alive: PIT_KEEP_ALIVE });
   try {
     let searchAfter: string[] | undefined;
     for (;;) {
@@ -44,6 +46,7 @@ export const listWindowIds = async (
         ...(searchAfter ? { search_after: searchAfter } : {}),
         query: { range: { '@timestamp': { gte: window.start, lt: window.end } } },
       });
+      if (response.pit_id) pitId = response.pit_id;
       const hits = response.hits?.hits ?? [];
       if (hits.length === 0) break;
       const last = hits[hits.length - 1];
