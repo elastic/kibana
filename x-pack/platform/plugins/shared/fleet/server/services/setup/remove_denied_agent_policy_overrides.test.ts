@@ -38,7 +38,8 @@ const mockStoredPolicies = (
           namespaces,
           type: 'fleet-agent-policies',
           references: [],
-          attributes: { overrides },
+          // As with `fields: ['overrides']`: no `attributes` at all when the policy has no overrides.
+          attributes: overrides === undefined ? undefined : { overrides },
         })),
         total: policies.length,
         per_page: 1000,

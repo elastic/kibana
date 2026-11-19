@@ -50,7 +50,8 @@ export async function removeDeniedAgentPolicyOverrides(esClient: ElasticsearchCl
   try {
     for await (const result of finder.find()) {
       for (const so of result.saved_objects) {
-        if (!so.attributes.overrides) {
+        // With `fields`, a policy without `overrides` comes back with no `attributes` at all.
+        if (!so.attributes?.overrides) {
           continue;
         }
         const { overrides, removedKeys } = sanitizeAgentPolicyOverrides(so.attributes.overrides);

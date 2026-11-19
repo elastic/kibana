@@ -204,13 +204,12 @@ export default function (providerContext: FtrProviderContext) {
           refresh: 'wait_for',
         });
 
-        // A setup call joins a setup already in progress (e.g. Kibana's startup setup), which may have
-        // scanned the policies before they were seeded above: call it again until one runs after.
-        await retry.try(async () => {
-          await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'xxxx').expect(200);
-          const { body } = await supertest.get(`/api/fleet/agent_policies/${policyId}`).expect(200);
-          expect(body.item.overrides).to.eql(ALLOWED_OVERRIDES);
-        });
+        const { body } = await supertest
+          .post('/api/fleet/setup')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        // The cleanup is non-fatal for setup, so its errors only show up here.
+        expect(JSON.stringify(body.nonFatalErrors)).not.to.contain('overrides');
       });
 
       it('should remove the denied keys from the stored policy', async () => {
