@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { PerOsPolicySettingsForm } from './per_os/per_os_policy_settings_form';
+export { PolicySettingsForm } from './policy_settings_form';

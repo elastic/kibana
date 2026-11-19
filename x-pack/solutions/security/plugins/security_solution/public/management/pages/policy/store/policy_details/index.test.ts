@@ -210,7 +210,7 @@ describe('policy details: ', () => {
 
       // `policyConfig`'s `linux` section (selectors/policy_settings_selectors.ts) has no
       // `ransomware` key in its object literal at all -- Linux ransomware is only editable
-      // through the per-OS form. Because the key is genuinely absent (not set to `undefined`),
+      // through the policy form. Because the key is genuinely absent (not set to `undefined`),
       // the reducer's `{ ...currentOsPolicy, ...newSettings }` merge leaves the existing
       // `linux.ransomware` branch untouched. If the selector ever added an unconditional
       // `ransomware: linux.ransomware`, an absent branch would become an explicit `undefined`

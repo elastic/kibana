@@ -17,245 +17,239 @@ export const getPolicySettingsFormTestSubjects = (
   formTopLevelTestSubj: string = 'endpointPolicyForm'
 ) => {
   const genTestSubj = createTestSubjGenerator(formTopLevelTestSubj);
-  const perOsMalwareTestSubj = genTestSubj.withPrefix('perOsMalware');
-  const perOsAttackSurfaceTestSubj = genTestSubj.withPrefix('perOsAttackSurface');
-  const perOsRansomwareTestSubj = genTestSubj.withPrefix('perOsRansomware');
-  const perOsMemoryTestSubj = genTestSubj.withPrefix('perOsMemory');
-  const perOsBehaviourTestSubj = genTestSubj.withPrefix('perOsBehaviour');
+  const malwareTestSubj = genTestSubj.withPrefix('malware');
+  const attackSurfaceTestSubj = genTestSubj.withPrefix('attackSurface');
+  const ransomwareTestSubj = genTestSubj.withPrefix('ransomware');
+  const memoryTestSubj = genTestSubj.withPrefix('memory');
+  const behaviourTestSubj = genTestSubj.withPrefix('behaviour');
   const advancedSectionTestSubj = genTestSubj.withPrefix('advancedSection');
-  const perOsEventCollectionTestSubj = genTestSubj.withPrefix('perOsEventCollection');
-  const perOsAntivirusRegistrationTestSubj = genTestSubj.withPrefix('perOsAntivirusRegistration');
-  const perOsDeviceControlTestSubj = genTestSubj.withPrefix('perOsDeviceControl');
-  const perOsAiDataCollectionTestSubj = genTestSubj.withPrefix('perOsAiDataCollection');
+  const eventCollectionTestSubj = genTestSubj.withPrefix('eventCollection');
+  const antivirusRegistrationTestSubj = genTestSubj.withPrefix('antivirusRegistration');
+  const deviceControlTestSubj = genTestSubj.withPrefix('deviceControl');
+  const aiDataCollectionTestSubj = genTestSubj.withPrefix('aiDataCollection');
 
   return {
     form: genTestSubj(),
 
-    perOsMalware: {
-      card: perOsMalwareTestSubj(),
-      enableDisableSwitch: perOsMalwareTestSubj('enableDisableSwitch'),
+    malware: {
+      card: malwareTestSubj(),
+      enableDisableSwitch: malwareTestSubj('enableDisableSwitch'),
       windows: {
-        row: perOsMalwareTestSubj('windows'),
-        modeSelect: perOsMalwareTestSubj('windows-mode'),
-        blocklistSwitch: perOsMalwareTestSubj('windows-blocklist-enableDisableSwitch'),
-        onWriteScanSwitch: perOsMalwareTestSubj('windows-onWriteScan-enableDisableSwitch'),
-        notifyUserCheckbox: perOsMalwareTestSubj('windows-notifyUser-checkbox'),
-        notifyCustomMessage: perOsMalwareTestSubj('windows-notifyUser-customMessage'),
+        row: malwareTestSubj('windows'),
+        modeSelect: malwareTestSubj('windows-mode'),
+        blocklistSwitch: malwareTestSubj('windows-blocklist-enableDisableSwitch'),
+        onWriteScanSwitch: malwareTestSubj('windows-onWriteScan-enableDisableSwitch'),
+        notifyUserCheckbox: malwareTestSubj('windows-notifyUser-checkbox'),
+        notifyCustomMessage: malwareTestSubj('windows-notifyUser-customMessage'),
       },
       mac: {
-        row: perOsMalwareTestSubj('mac'),
-        modeSelect: perOsMalwareTestSubj('mac-mode'),
-        blocklistSwitch: perOsMalwareTestSubj('mac-blocklist-enableDisableSwitch'),
-        onWriteScanSwitch: perOsMalwareTestSubj('mac-onWriteScan-enableDisableSwitch'),
-        notifyUserCheckbox: perOsMalwareTestSubj('mac-notifyUser-checkbox'),
-        notifyCustomMessage: perOsMalwareTestSubj('mac-notifyUser-customMessage'),
+        row: malwareTestSubj('mac'),
+        modeSelect: malwareTestSubj('mac-mode'),
+        blocklistSwitch: malwareTestSubj('mac-blocklist-enableDisableSwitch'),
+        onWriteScanSwitch: malwareTestSubj('mac-onWriteScan-enableDisableSwitch'),
+        notifyUserCheckbox: malwareTestSubj('mac-notifyUser-checkbox'),
+        notifyCustomMessage: malwareTestSubj('mac-notifyUser-customMessage'),
       },
       linux: {
-        row: perOsMalwareTestSubj('linux'),
-        modeSelect: perOsMalwareTestSubj('linux-mode'),
-        blocklistSwitch: perOsMalwareTestSubj('linux-blocklist-enableDisableSwitch'),
-        onWriteScanSwitch: perOsMalwareTestSubj('linux-onWriteScan-enableDisableSwitch'),
-        notifyUserCheckbox: perOsMalwareTestSubj('linux-notifyUser-checkbox'),
-        notifyCustomMessage: perOsMalwareTestSubj('linux-notifyUser-customMessage'),
+        row: malwareTestSubj('linux'),
+        modeSelect: malwareTestSubj('linux-mode'),
+        blocklistSwitch: malwareTestSubj('linux-blocklist-enableDisableSwitch'),
+        onWriteScanSwitch: malwareTestSubj('linux-onWriteScan-enableDisableSwitch'),
+        notifyUserCheckbox: malwareTestSubj('linux-notifyUser-checkbox'),
+        notifyCustomMessage: malwareTestSubj('linux-notifyUser-customMessage'),
       },
     },
-    perOsAttackSurface: {
-      card: perOsAttackSurfaceTestSubj(),
-      lockedCard: perOsAttackSurfaceTestSubj('locked'),
-      lockedCardTitle: perOsAttackSurfaceTestSubj('locked-title'),
+    attackSurface: {
+      card: attackSurfaceTestSubj(),
+      lockedCard: attackSurfaceTestSubj('locked'),
+      lockedCardTitle: attackSurfaceTestSubj('locked-title'),
       windows: {
-        row: perOsAttackSurfaceTestSubj('windows'),
-        enableDisableSwitch: perOsAttackSurfaceTestSubj('windows-enableDisableSwitch'),
-        switchLabel: perOsAttackSurfaceTestSubj('windows-switchLabel'),
-        registryCredentialHardeningSwitch: perOsAttackSurfaceTestSubj(
+        row: attackSurfaceTestSubj('windows'),
+        enableDisableSwitch: attackSurfaceTestSubj('windows-enableDisableSwitch'),
+        switchLabel: attackSurfaceTestSubj('windows-switchLabel'),
+        registryCredentialHardeningSwitch: attackSurfaceTestSubj(
           'windows-registryCredentialHardeningSwitch'
         ),
-        registryCredentialHardeningSwitchLabel: perOsAttackSurfaceTestSubj(
+        registryCredentialHardeningSwitchLabel: attackSurfaceTestSubj(
           'windows-registryCredentialHardeningSwitchLabel'
         ),
-        registryCredentialHardeningTooltipIcon: perOsAttackSurfaceTestSubj(
+        registryCredentialHardeningTooltipIcon: attackSurfaceTestSubj(
           'windows-registryCredentialHardeningTooltipIcon'
         ),
       },
     },
-    perOsRansomware: {
-      card: perOsRansomwareTestSubj(),
-      lockedCard: perOsRansomwareTestSubj('locked'),
-      lockedCardTitle: perOsRansomwareTestSubj('locked-title'),
-      enableDisableSwitch: perOsRansomwareTestSubj('enableDisableSwitch'),
+    ransomware: {
+      card: ransomwareTestSubj(),
+      lockedCard: ransomwareTestSubj('locked'),
+      lockedCardTitle: ransomwareTestSubj('locked-title'),
+      enableDisableSwitch: ransomwareTestSubj('enableDisableSwitch'),
       windows: {
-        row: perOsRansomwareTestSubj('windows'),
-        modeSelect: perOsRansomwareTestSubj('windows-mode'),
-        notifyUserCheckbox: perOsRansomwareTestSubj('windows-notifyUser-checkbox'),
-        notifyCustomMessage: perOsRansomwareTestSubj('windows-notifyUser-customMessage'),
-        notifyTooltipIcon: perOsRansomwareTestSubj('windows-notifyUser-tooltipIcon'),
-        notifySupportedVersion: perOsRansomwareTestSubj('windows-notifyUser-supportedVersion'),
+        row: ransomwareTestSubj('windows'),
+        modeSelect: ransomwareTestSubj('windows-mode'),
+        notifyUserCheckbox: ransomwareTestSubj('windows-notifyUser-checkbox'),
+        notifyCustomMessage: ransomwareTestSubj('windows-notifyUser-customMessage'),
+        notifyTooltipIcon: ransomwareTestSubj('windows-notifyUser-tooltipIcon'),
+        notifySupportedVersion: ransomwareTestSubj('windows-notifyUser-supportedVersion'),
       },
       mac: {
-        row: perOsRansomwareTestSubj('mac'),
-        modeSelect: perOsRansomwareTestSubj('mac-mode'),
-        notifyUserCheckbox: perOsRansomwareTestSubj('mac-notifyUser-checkbox'),
-        notifyCustomMessage: perOsRansomwareTestSubj('mac-notifyUser-customMessage'),
-        notifyTooltipIcon: perOsRansomwareTestSubj('mac-notifyUser-tooltipIcon'),
-        notifySupportedVersion: perOsRansomwareTestSubj('mac-notifyUser-supportedVersion'),
+        row: ransomwareTestSubj('mac'),
+        modeSelect: ransomwareTestSubj('mac-mode'),
+        notifyUserCheckbox: ransomwareTestSubj('mac-notifyUser-checkbox'),
+        notifyCustomMessage: ransomwareTestSubj('mac-notifyUser-customMessage'),
+        notifyTooltipIcon: ransomwareTestSubj('mac-notifyUser-tooltipIcon'),
+        notifySupportedVersion: ransomwareTestSubj('mac-notifyUser-supportedVersion'),
       },
       linux: {
-        row: perOsRansomwareTestSubj('linux'),
-        modeSelect: perOsRansomwareTestSubj('linux-mode'),
-        notifyUserCheckbox: perOsRansomwareTestSubj('linux-notifyUser-checkbox'),
-        notifyCustomMessage: perOsRansomwareTestSubj('linux-notifyUser-customMessage'),
-        notifyTooltipIcon: perOsRansomwareTestSubj('linux-notifyUser-tooltipIcon'),
-        notifySupportedVersion: perOsRansomwareTestSubj('linux-notifyUser-supportedVersion'),
+        row: ransomwareTestSubj('linux'),
+        modeSelect: ransomwareTestSubj('linux-mode'),
+        notifyUserCheckbox: ransomwareTestSubj('linux-notifyUser-checkbox'),
+        notifyCustomMessage: ransomwareTestSubj('linux-notifyUser-customMessage'),
+        notifyTooltipIcon: ransomwareTestSubj('linux-notifyUser-tooltipIcon'),
+        notifySupportedVersion: ransomwareTestSubj('linux-notifyUser-supportedVersion'),
       },
     },
-    perOsMemory: {
-      card: perOsMemoryTestSubj(),
-      lockedCard: perOsMemoryTestSubj('locked'),
-      lockedCardTitle: perOsMemoryTestSubj('locked-title'),
-      enableDisableSwitch: perOsMemoryTestSubj('enableDisableSwitch'),
+    memory: {
+      card: memoryTestSubj(),
+      lockedCard: memoryTestSubj('locked'),
+      lockedCardTitle: memoryTestSubj('locked-title'),
+      enableDisableSwitch: memoryTestSubj('enableDisableSwitch'),
       windows: {
-        row: perOsMemoryTestSubj('windows'),
-        modeSelect: perOsMemoryTestSubj('windows-mode'),
-        notifyUserCheckbox: perOsMemoryTestSubj('windows-notifyUser-checkbox'),
-        customYaraSignatures: perOsMemoryTestSubj('windows-customYaraSignatures'),
-        customYaraSignaturesEnableDisableSwitch: perOsMemoryTestSubj(
+        row: memoryTestSubj('windows'),
+        modeSelect: memoryTestSubj('windows-mode'),
+        notifyUserCheckbox: memoryTestSubj('windows-notifyUser-checkbox'),
+        customYaraSignatures: memoryTestSubj('windows-customYaraSignatures'),
+        customYaraSignaturesEnableDisableSwitch: memoryTestSubj(
           'windows-customYaraSignatures-enableDisableSwitch'
         ),
-        customYaraSignaturesTooltipIcon: perOsMemoryTestSubj(
-          'windows-customYaraSignatures-tooltipIcon'
-        ),
+        customYaraSignaturesTooltipIcon: memoryTestSubj('windows-customYaraSignatures-tooltipIcon'),
       },
       mac: {
-        row: perOsMemoryTestSubj('mac'),
-        modeSelect: perOsMemoryTestSubj('mac-mode'),
-        notifyUserCheckbox: perOsMemoryTestSubj('mac-notifyUser-checkbox'),
-        customYaraSignatures: perOsMemoryTestSubj('mac-customYaraSignatures'),
-        customYaraSignaturesEnableDisableSwitch: perOsMemoryTestSubj(
+        row: memoryTestSubj('mac'),
+        modeSelect: memoryTestSubj('mac-mode'),
+        notifyUserCheckbox: memoryTestSubj('mac-notifyUser-checkbox'),
+        customYaraSignatures: memoryTestSubj('mac-customYaraSignatures'),
+        customYaraSignaturesEnableDisableSwitch: memoryTestSubj(
           'mac-customYaraSignatures-enableDisableSwitch'
         ),
-        customYaraSignaturesTooltipIcon: perOsMemoryTestSubj(
-          'mac-customYaraSignatures-tooltipIcon'
-        ),
+        customYaraSignaturesTooltipIcon: memoryTestSubj('mac-customYaraSignatures-tooltipIcon'),
       },
       linux: {
-        row: perOsMemoryTestSubj('linux'),
-        modeSelect: perOsMemoryTestSubj('linux-mode'),
-        notifyUserCheckbox: perOsMemoryTestSubj('linux-notifyUser-checkbox'),
-        customYaraSignatures: perOsMemoryTestSubj('linux-customYaraSignatures'),
-        customYaraSignaturesEnableDisableSwitch: perOsMemoryTestSubj(
+        row: memoryTestSubj('linux'),
+        modeSelect: memoryTestSubj('linux-mode'),
+        notifyUserCheckbox: memoryTestSubj('linux-notifyUser-checkbox'),
+        customYaraSignatures: memoryTestSubj('linux-customYaraSignatures'),
+        customYaraSignaturesEnableDisableSwitch: memoryTestSubj(
           'linux-customYaraSignatures-enableDisableSwitch'
         ),
-        customYaraSignaturesTooltipIcon: perOsMemoryTestSubj(
-          'linux-customYaraSignatures-tooltipIcon'
-        ),
+        customYaraSignaturesTooltipIcon: memoryTestSubj('linux-customYaraSignatures-tooltipIcon'),
       },
     },
-    perOsBehaviour: {
-      card: perOsBehaviourTestSubj(),
-      lockedCard: perOsBehaviourTestSubj('locked'),
-      lockedCardTitle: perOsBehaviourTestSubj('locked-title'),
-      enableDisableSwitch: perOsBehaviourTestSubj('enableDisableSwitch'),
+    behaviour: {
+      card: behaviourTestSubj(),
+      lockedCard: behaviourTestSubj('locked'),
+      lockedCardTitle: behaviourTestSubj('locked-title'),
+      enableDisableSwitch: behaviourTestSubj('enableDisableSwitch'),
       windows: {
-        row: perOsBehaviourTestSubj('windows'),
-        modeSelect: perOsBehaviourTestSubj('windows-mode'),
-        reputationServiceCheckbox: perOsBehaviourTestSubj('windows-reputationService-checkbox'),
-        notifyUserCheckbox: perOsBehaviourTestSubj('windows-notifyUser-checkbox'),
-        notifyCustomMessage: perOsBehaviourTestSubj('windows-notifyUser-customMessage'),
+        row: behaviourTestSubj('windows'),
+        modeSelect: behaviourTestSubj('windows-mode'),
+        reputationServiceCheckbox: behaviourTestSubj('windows-reputationService-checkbox'),
+        notifyUserCheckbox: behaviourTestSubj('windows-notifyUser-checkbox'),
+        notifyCustomMessage: behaviourTestSubj('windows-notifyUser-customMessage'),
       },
       mac: {
-        row: perOsBehaviourTestSubj('mac'),
-        modeSelect: perOsBehaviourTestSubj('mac-mode'),
-        reputationServiceCheckbox: perOsBehaviourTestSubj('mac-reputationService-checkbox'),
-        notifyUserCheckbox: perOsBehaviourTestSubj('mac-notifyUser-checkbox'),
-        notifyCustomMessage: perOsBehaviourTestSubj('mac-notifyUser-customMessage'),
+        row: behaviourTestSubj('mac'),
+        modeSelect: behaviourTestSubj('mac-mode'),
+        reputationServiceCheckbox: behaviourTestSubj('mac-reputationService-checkbox'),
+        notifyUserCheckbox: behaviourTestSubj('mac-notifyUser-checkbox'),
+        notifyCustomMessage: behaviourTestSubj('mac-notifyUser-customMessage'),
       },
       linux: {
-        row: perOsBehaviourTestSubj('linux'),
-        modeSelect: perOsBehaviourTestSubj('linux-mode'),
-        reputationServiceCheckbox: perOsBehaviourTestSubj('linux-reputationService-checkbox'),
-        notifyUserCheckbox: perOsBehaviourTestSubj('linux-notifyUser-checkbox'),
-        notifyCustomMessage: perOsBehaviourTestSubj('linux-notifyUser-customMessage'),
+        row: behaviourTestSubj('linux'),
+        modeSelect: behaviourTestSubj('linux-mode'),
+        reputationServiceCheckbox: behaviourTestSubj('linux-reputationService-checkbox'),
+        notifyUserCheckbox: behaviourTestSubj('linux-notifyUser-checkbox'),
+        notifyCustomMessage: behaviourTestSubj('linux-notifyUser-customMessage'),
       },
     },
-    perOsEventCollection: {
-      card: perOsEventCollectionTestSubj(),
+    eventCollection: {
+      card: eventCollectionTestSubj(),
       windows: {
-        row: perOsEventCollectionTestSubj('windows'),
-        optionsContainer: perOsEventCollectionTestSubj('windows-options'),
-        credentialsCheckbox: perOsEventCollectionTestSubj('windows-credential_access'),
-        dllCheckbox: perOsEventCollectionTestSubj('windows-dll_and_driver_load'),
-        dnsCheckbox: perOsEventCollectionTestSubj('windows-dns'),
-        fileCheckbox: perOsEventCollectionTestSubj('windows-file'),
-        networkCheckbox: perOsEventCollectionTestSubj('windows-network'),
-        processCheckbox: perOsEventCollectionTestSubj('windows-process'),
-        registryCheckbox: perOsEventCollectionTestSubj('windows-registry'),
-        securityCheckbox: perOsEventCollectionTestSubj('windows-security'),
+        row: eventCollectionTestSubj('windows'),
+        optionsContainer: eventCollectionTestSubj('windows-options'),
+        credentialsCheckbox: eventCollectionTestSubj('windows-credential_access'),
+        dllCheckbox: eventCollectionTestSubj('windows-dll_and_driver_load'),
+        dnsCheckbox: eventCollectionTestSubj('windows-dns'),
+        fileCheckbox: eventCollectionTestSubj('windows-file'),
+        networkCheckbox: eventCollectionTestSubj('windows-network'),
+        processCheckbox: eventCollectionTestSubj('windows-process'),
+        registryCheckbox: eventCollectionTestSubj('windows-registry'),
+        securityCheckbox: eventCollectionTestSubj('windows-security'),
       },
       mac: {
-        row: perOsEventCollectionTestSubj('mac'),
-        optionsContainer: perOsEventCollectionTestSubj('mac-options'),
-        dnsCheckbox: perOsEventCollectionTestSubj('mac-dns'),
-        fileCheckbox: perOsEventCollectionTestSubj('mac-file'),
-        networkCheckbox: perOsEventCollectionTestSubj('mac-network'),
-        processCheckbox: perOsEventCollectionTestSubj('mac-process'),
-        securityCheckbox: perOsEventCollectionTestSubj('mac-security'),
+        row: eventCollectionTestSubj('mac'),
+        optionsContainer: eventCollectionTestSubj('mac-options'),
+        dnsCheckbox: eventCollectionTestSubj('mac-dns'),
+        fileCheckbox: eventCollectionTestSubj('mac-file'),
+        networkCheckbox: eventCollectionTestSubj('mac-network'),
+        processCheckbox: eventCollectionTestSubj('mac-process'),
+        securityCheckbox: eventCollectionTestSubj('mac-security'),
       },
       linux: {
-        row: perOsEventCollectionTestSubj('linux'),
-        optionsContainer: perOsEventCollectionTestSubj('linux-options'),
-        dnsCheckbox: perOsEventCollectionTestSubj('linux-dns'),
-        fileCheckbox: perOsEventCollectionTestSubj('linux-file'),
-        networkCheckbox: perOsEventCollectionTestSubj('linux-network'),
-        processCheckbox: perOsEventCollectionTestSubj('linux-process'),
-        sessionDataCheckbox: perOsEventCollectionTestSubj('linux-session_data'),
-        captureTerminalCheckbox: perOsEventCollectionTestSubj('linux-tty_io'),
+        row: eventCollectionTestSubj('linux'),
+        optionsContainer: eventCollectionTestSubj('linux-options'),
+        dnsCheckbox: eventCollectionTestSubj('linux-dns'),
+        fileCheckbox: eventCollectionTestSubj('linux-file'),
+        networkCheckbox: eventCollectionTestSubj('linux-network'),
+        processCheckbox: eventCollectionTestSubj('linux-process'),
+        sessionDataCheckbox: eventCollectionTestSubj('linux-session_data'),
+        captureTerminalCheckbox: eventCollectionTestSubj('linux-tty_io'),
       },
     },
-    perOsAntivirusRegistration: {
-      card: perOsAntivirusRegistrationTestSubj(),
+    antivirusRegistration: {
+      card: antivirusRegistrationTestSubj(),
       windows: {
-        row: perOsAntivirusRegistrationTestSubj('windows'),
-        modeSelect: perOsAntivirusRegistrationTestSubj('windows-mode'),
+        row: antivirusRegistrationTestSubj('windows'),
+        modeSelect: antivirusRegistrationTestSubj('windows-mode'),
       },
     },
-    perOsDeviceControl: {
-      card: perOsDeviceControlTestSubj(),
-      lockedCard: perOsDeviceControlTestSubj('locked'),
-      lockedCardTitle: perOsDeviceControlTestSubj('locked-title'),
-      enableDisableSwitch: perOsDeviceControlTestSubj('enableDisableSwitch'),
+    deviceControl: {
+      card: deviceControlTestSubj(),
+      lockedCard: deviceControlTestSubj('locked'),
+      lockedCardTitle: deviceControlTestSubj('locked-title'),
+      enableDisableSwitch: deviceControlTestSubj('enableDisableSwitch'),
       windows: {
-        row: perOsDeviceControlTestSubj('windows'),
-        accessLevelSelect: perOsDeviceControlTestSubj('windows-accessLevel'),
-        notifyUser: perOsDeviceControlTestSubj('windows-notifyUser'),
-        notifyUserCheckbox: perOsDeviceControlTestSubj('windows-notifyUser-checkbox'),
-        notifyCustomMessage: perOsDeviceControlTestSubj('windows-notifyUser-customMessage'),
+        row: deviceControlTestSubj('windows'),
+        accessLevelSelect: deviceControlTestSubj('windows-accessLevel'),
+        notifyUser: deviceControlTestSubj('windows-notifyUser'),
+        notifyUserCheckbox: deviceControlTestSubj('windows-notifyUser-checkbox'),
+        notifyCustomMessage: deviceControlTestSubj('windows-notifyUser-customMessage'),
       },
       mac: {
-        row: perOsDeviceControlTestSubj('mac'),
-        accessLevelSelect: perOsDeviceControlTestSubj('mac-accessLevel'),
-        notifyUser: perOsDeviceControlTestSubj('mac-notifyUser'),
-        notifyUserCheckbox: perOsDeviceControlTestSubj('mac-notifyUser-checkbox'),
-        notifyCustomMessage: perOsDeviceControlTestSubj('mac-notifyUser-customMessage'),
+        row: deviceControlTestSubj('mac'),
+        accessLevelSelect: deviceControlTestSubj('mac-accessLevel'),
+        notifyUser: deviceControlTestSubj('mac-notifyUser'),
+        notifyUserCheckbox: deviceControlTestSubj('mac-notifyUser-checkbox'),
+        notifyCustomMessage: deviceControlTestSubj('mac-notifyUser-customMessage'),
       },
     },
-    perOsAiDataCollection: {
-      card: perOsAiDataCollectionTestSubj(),
-      technicalPreviewBadge: perOsAiDataCollectionTestSubj('technicalPreviewBadge'),
-      supportedVersion: perOsAiDataCollectionTestSubj('supportedVersion'),
+    aiDataCollection: {
+      card: aiDataCollectionTestSubj(),
+      technicalPreviewBadge: aiDataCollectionTestSubj('technicalPreviewBadge'),
+      supportedVersion: aiDataCollectionTestSubj('supportedVersion'),
       windows: {
-        row: perOsAiDataCollectionTestSubj('windows'),
-        enableDisableSwitch: perOsAiDataCollectionTestSubj('windows-enableDisableSwitch'),
-        switchLabel: perOsAiDataCollectionTestSubj('windows-switchLabel'),
+        row: aiDataCollectionTestSubj('windows'),
+        enableDisableSwitch: aiDataCollectionTestSubj('windows-enableDisableSwitch'),
+        switchLabel: aiDataCollectionTestSubj('windows-switchLabel'),
       },
       mac: {
-        row: perOsAiDataCollectionTestSubj('mac'),
-        enableDisableSwitch: perOsAiDataCollectionTestSubj('mac-enableDisableSwitch'),
-        switchLabel: perOsAiDataCollectionTestSubj('mac-switchLabel'),
+        row: aiDataCollectionTestSubj('mac'),
+        enableDisableSwitch: aiDataCollectionTestSubj('mac-enableDisableSwitch'),
+        switchLabel: aiDataCollectionTestSubj('mac-switchLabel'),
       },
       linux: {
-        row: perOsAiDataCollectionTestSubj('linux'),
-        enableDisableSwitch: perOsAiDataCollectionTestSubj('linux-enableDisableSwitch'),
-        switchLabel: perOsAiDataCollectionTestSubj('linux-switchLabel'),
+        row: aiDataCollectionTestSubj('linux'),
+        enableDisableSwitch: aiDataCollectionTestSubj('linux-enableDisableSwitch'),
+        switchLabel: aiDataCollectionTestSubj('linux-switchLabel'),
       },
     },
     advancedSection: {
