@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import type { TimeRange } from '../../../../../common/entity_analytics/home/constants';
 import type { SignalCardData, SignalCardId } from './data';
 import { SignalCard } from './signal_card';
 import { SIGNAL_CARDS_TOUR_ANCHOR_TEST_ID } from '../product_tour/constants';
@@ -29,6 +30,8 @@ export interface SignalCardsProps {
   activeTile: SignalCardId | null;
   /** Card values for the current page filters — see `getSignalCards`. */
   cards: SignalCardData[];
+  /** The selected range; each tile's change compares with the range just before it. */
+  timeRange: TimeRange;
   onFilterForCard: (cardId: SignalCardId) => void;
   /** Kept for MetricChartsPanel wiring; cards are whole-card toggles in v.5. */
   onFilterOutCard?: (cardId: SignalCardId) => void;
@@ -81,7 +84,12 @@ const layoutCappedGridCss = ({
  * Needs-attention metrics in a capped wrapping grid (6 across, stepping down to 3 / 2 / 1).
  * Each card toggles an in-page table filter; selection stays on the card itself.
  */
-export const SignalCards: React.FC<SignalCardsProps> = ({ activeTile, cards, onFilterForCard }) => {
+export const SignalCards: React.FC<SignalCardsProps> = ({
+  activeTile,
+  cards,
+  timeRange,
+  onFilterForCard,
+}) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -122,6 +130,7 @@ export const SignalCards: React.FC<SignalCardsProps> = ({ activeTile, cards, onF
               <SignalCard
                 card={card}
                 selected={selected}
+                timeRange={timeRange}
                 onToggle={() => onFilterForCard(card.id)}
               />
               {index === 0 && (

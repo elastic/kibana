@@ -11,10 +11,27 @@ import Path from 'path';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   getArtifactsFolderUsage,
+  isInArtifactsFolder,
   logArtifactsFolderUsage,
   purgeArtifactsFolder,
   removeArtifactFile,
 } from './artifacts_folder';
+
+describe('isInArtifactsFolder', () => {
+  it('accepts files inside the folder only', () => {
+    expect(isInArtifactsFolder('/data/ai-kb-artifacts', '/data/ai-kb-artifacts/a.zip')).toBe(true);
+    expect(isInArtifactsFolder('/data/ai-kb-artifacts', '/data/ai-kb-artifacts/../a.zip')).toBe(
+      false
+    );
+    expect(isInArtifactsFolder('/data/ai-kb-artifacts', '/data/ai-kb-artifacts')).toBe(false);
+    expect(isInArtifactsFolder('/data/ai-kb-artifacts', '/data/ai-kb-artifacts-other/a.zip')).toBe(
+      false
+    );
+    expect(
+      isInArtifactsFolder('/data/ai-kb-artifacts', '/opt/kibana/target/bundled_artifacts/a.zip')
+    ).toBe(false);
+  });
+});
 
 describe('artifacts folder utils', () => {
   let folder: string;

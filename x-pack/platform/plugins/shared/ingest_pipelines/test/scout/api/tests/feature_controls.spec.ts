@@ -22,10 +22,34 @@ apiTest.describe('Ingest pipelines feature controls', { tag: tags.stateful.class
     ],
   };
 
+  const readPipelineOnly = {
+    elasticsearch: { cluster: ['read_pipeline'] },
+    kibana: [{ base: [], feature: { advancedSettings: ['read'] }, spaces: ['*'] }],
+  };
+
   const clusterManage = {
     elasticsearch: { cluster: ['manage'] },
     kibana: [{ base: [], feature: { advancedSettings: ['read'] }, spaces: ['*'] }],
   };
+
+  apiTest(
+    'user with only read_pipeline can access ingest_pipelines management section',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser(readPipelineOnly);
+      const response = await apiClient.post(testData.CAPABILITIES_API_PATH, {
+        headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
+        body: { applications: [] },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.management.ingest.ingest_pipelines).toBe(true);
+      expect(response.body.ingest_pipelines).toStrictEqual({
+        read: true,
+        manage: false,
+        manageProcessors: false,
+      });
+    }
+  );
 
   apiTest(
     'kibana admin without ingest privileges cannot access ingest_pipelines management section',
@@ -39,6 +63,7 @@ apiTest.describe('Ingest pipelines feature controls', { tag: tags.stateful.class
       expect(response).toHaveStatusCode(200);
       expect(response.body.management.ingest.ingest_pipelines).toBe(false);
       expect(response.body.ingest_pipelines).toStrictEqual({
+        read: false,
         manage: false,
         manageProcessors: false,
       });
@@ -57,6 +82,7 @@ apiTest.describe('Ingest pipelines feature controls', { tag: tags.stateful.class
       expect(response).toHaveStatusCode(200);
       expect(response.body.management.ingest.ingest_pipelines).toBe(true);
       expect(response.body.ingest_pipelines).toStrictEqual({
+        read: true,
         manage: true,
         manageProcessors: false,
       });
@@ -75,6 +101,7 @@ apiTest.describe('Ingest pipelines feature controls', { tag: tags.stateful.class
       expect(response).toHaveStatusCode(200);
       expect(response.body.management.ingest.ingest_pipelines).toBe(true);
       expect(response.body.ingest_pipelines).toStrictEqual({
+        read: true,
         manage: true,
         manageProcessors: true,
       });

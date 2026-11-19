@@ -14,7 +14,7 @@ time (the Kibana inbox UI, a Slack action, the agent-builder execution view, and
 raw API all resolve the **same** `source_id`). Today the respond flow in
 `x-pack/platform/plugins/shared/inbox/server/routes/actions/respond_to_action.ts` →
 `InboxActionRegistry.respondTo` → `createWorkflowsInboxProvider.respond`
-(`src/platform/plugins/shared/workflows_management/server/inbox/workflows_inbox_provider.ts`)
+(`x-pack/platform/plugins/shared/workflows_management/server/inbox/workflows_inbox_provider.ts`)
 guards against **stale** responses and now prevents a **concurrent** loser from
 scheduling a second resume:
 
@@ -124,7 +124,7 @@ Replace the current `Promise<boolean>` with a structured result when loser attem
 recorded:
 
 ```ts
-// src/platform/plugins/shared/workflows_management/server/services/workflow_execution_query_service.ts
+// x-pack/platform/plugins/shared/workflows_management/server/services/workflow_execution_query_service.ts
 export interface MarkStepAsRespondedResult {
   /** False when the step doc was not found (already terminated / wrong space). */
   updated: boolean;

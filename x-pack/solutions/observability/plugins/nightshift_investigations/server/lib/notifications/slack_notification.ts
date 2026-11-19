@@ -9,7 +9,7 @@ import type { JsonObject } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
 import { InvalidNotificationDestinationError } from '../../client/errors';
 import type { NotificationHandler } from './notification_delivery';
-import { renderInvestigationSlackMessage } from './format_investigation_slack_message';
+import { renderInvestigationSlackMessage } from './investigation_slack_composition';
 
 const slackNotificationParamsSchema = z.strictObject({
   channel: z.string().min(1).max(500),
@@ -39,11 +39,13 @@ export const slackNotificationHandler: NotificationHandler = {
     phase,
     reason,
     messageTs: editedMessageTs,
+    runtime,
   }) => {
     const { channel, thread_ts: threadTs } = parseSlackNotificationParams(
       notificationDestination.params
     );
     const { text, blocks } = renderInvestigationSlackMessage({
+      runtime,
       investigation,
       url,
       phase,

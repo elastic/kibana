@@ -400,6 +400,56 @@ describe('dataMapStepDefinition', () => {
       expect(result.error).toBeDefined();
       expect(result.error?.message).toContain('Expected items to be an array or object');
     });
+
+    it('should error when aborted', async () => {
+      const controller = new AbortController();
+      controller.abort();
+      const context = {
+        ...createMockContext({ items: [{ id: 1 }] }, { fields: { id: '{{ item.id }}' } }),
+        abortSignal: controller.signal,
+      };
+      const result = await dataMapStepDefinition.handler(context);
+
+      expect(result.error?.message).toBe('Operation was aborted');
+    });
+
+    describe('when cancelled while mapping', () => {
+      afterEach(() => {
+        jest.restoreAllMocks();
+      });
+
+      it('should stop before mapping the remaining items', async () => {
+        // Every clock read is past the yield budget, so the handler yields on each item.
+        let now = 1e12;
+        jest.spyOn(performance, 'now').mockImplementation(() => (now += 30));
+
+        const controller = new AbortController();
+        const items = Array.from({ length: 100 }, (_, id) => ({ id }));
+        const baseContext = createMockContext({ items }, { fields: { id: '{{ item.id }}' } });
+        let renderedCount = 0;
+        const context = {
+          ...baseContext,
+          abortSignal: controller.signal,
+          contextManager: {
+            ...baseContext.contextManager,
+            createTemplateRenderer:
+              () =>
+              <T>(value: T, additionalContext?: Record<string, unknown>): T => {
+                renderedCount++;
+                if (renderedCount === 10) {
+                  setImmediate(() => controller.abort());
+                }
+                return baseContext.contextManager.renderInputTemplate(value, additionalContext);
+              },
+          },
+        };
+
+        const result = await dataMapStepDefinition.handler(context);
+
+        expect(result.error?.message).toBe('Operation was aborted');
+        expect(renderedCount).toBe(10);
+      });
+    });
   });
 
   describe('$map recursive mapping', () => {

@@ -5,10 +5,11 @@
  * 2.0.
  */
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
+import moment from 'moment';
 import userEvent from '@testing-library/user-event';
 
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { MockFormWrapperComponent } from '../test_utils';
 import { AdditionalFormFields } from './additional_form_fields';
@@ -130,5 +131,78 @@ describe('AdditionalFormFields', () => {
     fireEvent.change(comboBox, { target: { value: 'Description' } });
     expect(screen.queryByText('Description (read-only)')).not.toBeInTheDocument();
     expect(screen.getByText('Description (not read-only)')).toBeInTheDocument();
+  });
+
+  describe('saved values', () => {
+    // In the mocked connector metadata, `test_select` and `test_multi_select` both mark
+    // 110 ("Option 2") as the default; 100 is "Option 1".
+    const AdditionalFieldsValue = () => {
+      const [{ fields }] = useFormData<{ fields?: { additionalFields?: string } }>({
+        watch: 'fields.additionalFields',
+      });
+      return <span data-test-subj="additionalFieldsValue">{fields?.additionalFields}</span>;
+    };
+
+    const renderWithSavedFields = (additionalFields: string) =>
+      renderWithTestingProviders(
+        <MockFormWrapperComponent fields={{ additionalFields }}>
+          <UseField
+            path="fields.additionalFields"
+            component={AdditionalFormFields}
+            componentProps={{
+              isInSidebarForm: false,
+              connector: {
+                id: 'resilient-1',
+                name: 'Resilient',
+                connector_type_id: '.resilient',
+              },
+            }}
+          />
+          <AdditionalFieldsValue />
+        </MockFormWrapperComponent>
+      );
+
+    it('should show the connector default when a field is added without a saved value', async () => {
+      renderWithSavedFields('');
+
+      const comboBox = screen.getByTestId('comboBoxSearchInput');
+      await userEvent.click(comboBox);
+      fireEvent.change(comboBox, { target: { value: 'Test select' } });
+      fireEvent.click(await screen.findByRole('option', { name: 'Test select' }));
+
+      expect(await screen.findByTestId('resilientAdditionalField-test_select')).toHaveValue('110');
+    });
+
+    it('should show the saved select value instead of the connector default', async () => {
+      renderWithSavedFields(JSON.stringify({ test_select: 100 }));
+
+      expect(await screen.findByTestId('resilientAdditionalField-test_select')).toHaveValue('100');
+    });
+
+    it('should show the saved multiselect values instead of the connector defaults', async () => {
+      renderWithSavedFields(JSON.stringify({ test_multi_select: [100] }));
+
+      const selected = within(
+        await screen.findByTestId('resilientAdditionalField-test_multi_select')
+      ).getAllByTestId('euiComboBoxPill');
+      expect(selected.map((pill) => pill.textContent)).toEqual(['Option 1']);
+    });
+
+    it('should show the saved date instead of the current date', async () => {
+      const saved = moment('2020-01-15T12:00:00Z');
+      renderWithSavedFields(JSON.stringify({ test_date_picker: saved.valueOf() }));
+
+      const datePicker = await screen.findByTestId('resilientAdditionalField-test_date_picker');
+      expect(within(datePicker).getByRole('textbox')).toHaveValue(saved.format('MM/DD/YYYY'));
+    });
+
+    it('should keep the saved additional fields value unchanged when nothing is edited', async () => {
+      const saved = JSON.stringify({ test_select: 100, test_multi_select: [100] });
+      renderWithSavedFields(saved);
+
+      await screen.findByTestId('resilientAdditionalField-test_select');
+
+      expect(screen.getByTestId('additionalFieldsValue')).toHaveTextContent(saved);
+    });
   });
 });

@@ -51,10 +51,17 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
       // check for in-flight read request (deduplication)
       const inflightRead = this.sharedUserProvidedCache.getInflightRead(this.namespace);
       if (inflightRead) {
-        this.log.debug(
-          `[UiSettings] getUserProvided using existing in-flight read for namespace=${this.namespace}`
-        );
-        return this.applyOverrides(await inflightRead);
+        try {
+          this.log.debug(
+            `[UiSettings] getUserProvided using existing in-flight read for namespace=${this.namespace}`
+          );
+          return this.applyOverrides(await inflightRead);
+        } catch {
+          // The in-flight read belongs to another caller, so this caller reads with its own client.
+          this.log.debug(
+            `[UiSettings] getUserProvided in-flight read failed for namespace=${this.namespace}; reading with this caller`
+          );
+        }
       }
 
       const sharedCached = this.sharedUserProvidedCache.get(this.namespace);
@@ -78,7 +85,16 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
       this.sharedUserProvidedCache?.setInflightRead(this.namespace, promise);
     }
 
-    return this.applyOverrides(await promise);
+    try {
+      return this.applyOverrides(await promise);
+    } catch (error) {
+      // A 403 or an unavailable Elasticsearch resolves to defaults for this caller only.
+      // The shared promise still rejects, so anyone waiting on it reads again.
+      if (this.isIgnorableError(error)) {
+        return this.applyOverrides({});
+      }
+      throw error;
+    }
   }
 
   private applyOverrides<T = unknown>(userProvided: UserProvided<T>): UserProvided<T> {
@@ -228,10 +244,6 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
         }
 
         return failedUpgradeAttributes;
-      }
-
-      if (this.isIgnorableError(error)) {
-        return {};
       }
 
       throw error;

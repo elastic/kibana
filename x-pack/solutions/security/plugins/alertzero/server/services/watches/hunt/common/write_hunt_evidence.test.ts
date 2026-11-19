@@ -7,7 +7,13 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { MAX_HUNT_TECHNIQUE_IDS } from './hunt_technique_limit';
-import { deriveLastHuntStatus, shouldStampHunt, writeHuntEvidence } from './write_hunt_evidence';
+import {
+  countsTowardRetryBound,
+  deriveLastHuntStatus,
+  MAX_HUNT_RETRY_ATTEMPTS,
+  shouldStampHunt,
+  writeHuntEvidence,
+} from './write_hunt_evidence';
 import type { WriteHuntEvidenceParams } from './write_hunt_evidence';
 
 describe('deriveLastHuntStatus', () => {
@@ -56,9 +62,42 @@ describe('shouldStampHunt', () => {
   });
 });
 
+describe('countsTowardRetryBound', () => {
+  it.each([
+    ['query_ungrounded'],
+    ['quote_ungrounded'],
+    ['query_out_of_scope'],
+    ['generation_failed'],
+    ['execute_failed'],
+  ] as const)('counts a run with a gap that can repeat on the same report (%s)', (reason) => {
+    expect(countsTowardRetryBound([reason])).toBe(true);
+  });
+
+  it('does not count a run whose retryable gaps all came from the environment', () => {
+    expect(
+      countsTowardRetryBound([
+        'index_unavailable',
+        'search_partial',
+        'catalog_unavailable',
+        'extraction_pending',
+      ])
+    ).toBe(false);
+  });
+
+  it('counts a run that mixes an environment gap with one that can repeat', () => {
+    expect(countsTowardRetryBound(['index_unavailable', 'generation_failed'])).toBe(true);
+  });
+
+  it.each([[undefined], [[]]])('counts when no reasons arrived (%p)', (reasons) => {
+    expect(countsTowardRetryBound(reasons)).toBe(true);
+  });
+});
+
 describe('writeHuntEvidence', () => {
   const logger = loggingSystemMock.createLogger();
-  const makeEsClient = (stored?: Array<{ space_id: string; coverage_pending: boolean }>) => ({
+  const makeEsClient = (
+    stored?: Array<{ space_id: string; coverage_pending: boolean; hunt_retry_count?: number }>
+  ) => ({
     update: jest.fn().mockResolvedValue(stored ? { get: { _source: { evidence: stored } } } : {}),
   });
   const write = (esClient: ReturnType<typeof makeEsClient>, params: WriteHuntEvidenceParams) =>
@@ -206,8 +245,8 @@ describe('writeHuntEvidence', () => {
         searched_technique_ids: ['T1001'],
       })
     );
-    // The script applies the stamp keys only under `params.stamp`, or when the cap settled the run.
-    expect(script.source).toMatch(/if \(params\.stamp \|\| settledByCap\)/);
+    // The script applies the stamp keys only under `params.stamp`, or when a bound settled the run.
+    expect(script.source).toMatch(/if \(params\.stamp \|\| settledByCap \|\| settledByRetries\)/);
   });
 
   it('writes nothing for a retryable run with no hit that searched nothing', async () => {
@@ -295,7 +334,10 @@ describe('writeHuntEvidence', () => {
     expect(script.source).toContain(
       "boolean keepHit = !params.replayed_whole_report && el.coverage_pending == true && el.last_hunt_status == 'hit' && params.last_hunt_status != 'hit';"
     );
-    expect(script.source).toMatch(/if \(!keepHit\) \{[^}]*last_hunt_status[^}]*last_hunt_run_id/s);
+    expect(script.source).toContain('boolean keepResult = keepHit ||');
+    expect(script.source).toMatch(
+      /if \(!keepResult\) \{[^}]*last_hunt_status[^}]*last_hunt_run_id/s
+    );
     expect(script.params.last_hunt_status).toBe('clean');
   });
 
@@ -337,7 +379,65 @@ describe('writeHuntEvidence', () => {
     expect(script.params.stamp).toBe(false);
     expect(script.params.last_hunt_status).toBe('incomplete');
     expect(script.source).toContain('boolean settledByCap = params.coverage_pending && !pending;');
-    expect(script.source).toContain('if (params.stamp || settledByCap) {');
+    expect(script.source).toContain('if (params.stamp || settledByCap || settledByRetries) {');
+  });
+
+  it('sends the retry bound, which the script uses to retire a report that never settles', async () => {
+    const esClient = makeEsClient();
+
+    await write(esClient, {
+      spaceId: 'default',
+      reportId: 'report-1',
+      runId: 'run-1',
+      hasConfirmedHit: false,
+      completeness: 'incomplete_retryable',
+      totalHits: 0,
+      searchedTechniqueIds: ['T1001'],
+    });
+
+    const [{ script }] = esClient.update.mock.calls[0];
+    expect(script.params.max_retries).toBe(MAX_HUNT_RETRY_ATTEMPTS);
+    expect(script.source).toContain('boolean settledByRetries = retries >= params.max_retries;');
+  });
+
+  it('warns when the retry bound retired a report that wanted to continue', async () => {
+    const esClient = makeEsClient([
+      { space_id: 'default', coverage_pending: false, hunt_retry_count: MAX_HUNT_RETRY_ATTEMPTS },
+    ]);
+
+    await write(esClient, {
+      spaceId: 'default',
+      reportId: 'report-1',
+      runId: 'run-1',
+      hasConfirmedHit: false,
+      completeness: 'incomplete_retryable',
+      totalHits: 0,
+      searchedTechniqueIds: ['T1001'],
+    });
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('retired as incomplete'));
+  });
+
+  it('names the last run retryable gaps in the retirement warning', async () => {
+    const esClient = makeEsClient([
+      { space_id: 'default', coverage_pending: false, hunt_retry_count: MAX_HUNT_RETRY_ATTEMPTS },
+    ]);
+
+    await write(esClient, {
+      spaceId: 'default',
+      reportId: 'report-1',
+      runId: 'run-1',
+      hasConfirmedHit: false,
+      completeness: 'incomplete_retryable',
+      totalHits: 0,
+      searchedTechniqueIds: ['T1001'],
+      retryableReasons: ['query_ungrounded', 'index_unavailable'],
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining("Last run's retryable gaps: query_ungrounded, index_unavailable.")
+    );
   });
 
   describe('a manual replay of the whole report', () => {
@@ -463,7 +563,7 @@ describe('writeHuntEvidence', () => {
   it('warns when the cap settled a run that wanted to continue', async () => {
     const esClient = makeEsClient([{ space_id: 'default', coverage_pending: false }]);
 
-    await write(esClient, {
+    const result = await write(esClient, {
       spaceId: 'default',
       reportId: 'report-1',
       runId: 'run-1',
@@ -473,12 +573,13 @@ describe('writeHuntEvidence', () => {
       searchedTechniqueIds: ['T1001'],
     });
 
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('report-1'));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('coverage was settled'));
+    expect(result).toEqual({ settledByCap: true });
   });
 
   it('does not warn when the run is still pending, or when it never wanted to continue', async () => {
     const pending = makeEsClient([{ space_id: 'default', coverage_pending: true }]);
-    await write(pending, {
+    const stillPending = await write(pending, {
       spaceId: 'default',
       reportId: 'report-1',
       runId: 'run-1',
@@ -489,7 +590,7 @@ describe('writeHuntEvidence', () => {
     });
 
     const done = makeEsClient([{ space_id: 'default', coverage_pending: false }]);
-    await write(done, {
+    const finished = await write(done, {
       spaceId: 'default',
       reportId: 'report-1',
       runId: 'run-2',
@@ -500,5 +601,7 @@ describe('writeHuntEvidence', () => {
     });
 
     expect(logger.warn).not.toHaveBeenCalled();
+    expect(stillPending).toEqual({ settledByCap: false });
+    expect(finished).toEqual({ settledByCap: false });
   });
 });

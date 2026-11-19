@@ -1,0 +1,126 @@
+{
+  "operations": {
+    "assignIssue": [
+      {
+        "method": "patch",
+        "path": "/api/projects/{project_id}/error_tracking/issues/{id}/assign/",
+        "source": "v1"
+      }
+    ],
+    "createAnnotation": [
+      {
+        "method": "post",
+        "path": "/api/projects/{project_id}/annotations/",
+        "source": "v1"
+      }
+    ],
+    "createExternalReference": [
+      {
+        "method": "post",
+        "path": "/api/projects/{project_id}/error_tracking/external_references/",
+        "source": "v1"
+      }
+    ],
+    "getFeatureFlag": [
+      {
+        "method": "get",
+        "path": "/api/projects/{project_id}/feature_flags/{id}/",
+        "source": "v1"
+      }
+    ],
+    "getIssue": [
+      {
+        "method": "get",
+        "path": "/api/projects/{project_id}/error_tracking/issues/{id}/",
+        "source": "v1"
+      }
+    ],
+    "listFeatureFlags": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "results"
+          },
+          "style": "offset"
+        },
+        "path": "/api/projects/{project_id}/feature_flags/",
+        "source": "v1"
+      }
+    ],
+    "listIssues": [
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 10,
+          "request": {
+            "in": "body",
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "results"
+          },
+          "style": "offset"
+        },
+        "path": "/api/projects/{project_id}/error_tracking/query/issues/",
+        "source": "v1"
+      }
+    ],
+    "listSessionRecordings": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "results"
+          },
+          "style": "offset"
+        },
+        "path": "/api/projects/{project_id}/session_recordings/",
+        "source": "v1"
+      }
+    ],
+    "runQuery": [
+      {
+        "method": "post",
+        "path": "/api/projects/{project_id}/query/",
+        "source": "v1"
+      }
+    ],
+    "updateFeatureFlag": [
+      {
+        "method": "get",
+        "path": "/api/projects/{project_id}/feature_flags/{id}/",
+        "source": "v1"
+      },
+      {
+        "method": "patch",
+        "path": "/api/projects/{project_id}/feature_flags/{id}/",
+        "source": "v1"
+      }
+    ],
+    "updateIssueStatus": [
+      {
+        "method": "patch",
+        "path": "/api/projects/{project_id}/error_tracking/issues/{id}/",
+        "source": "v1"
+      }
+    ]
+  },
+  "sources": {
+    "v1": {
+      "apiVersion": "1.0.0",
+      "fetchedAt": "2026-10-07T20:49:11.980Z",
+      "format": "openapi",
+      "url": "https://us.posthog.com/api/schema/"
+    }
+  }
+}

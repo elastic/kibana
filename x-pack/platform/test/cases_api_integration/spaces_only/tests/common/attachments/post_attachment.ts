@@ -9,7 +9,11 @@ import expect from '@kbn/expect';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { postCaseReq } from '../../../../common/lib/mock';
+import {
+  buildUnifiedAlertReq,
+  postCaseReq,
+  postUnifiedAlertReq,
+} from '../../../../common/lib/mock';
 import {
   createCase,
   addAttachmentV2,
@@ -77,6 +81,50 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(response.message).to.contain(
         'The data field is nested too deeply. The maximum depth is 30.'
       );
+    });
+
+    it('returns a 409 when every alert id is already on the case', async () => {
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
+      await addAttachmentV2({
+        supertest: supertestWithoutAuth,
+        caseId: postedCase.id,
+        params: postUnifiedAlertReq,
+        auth: authSpace1,
+      });
+
+      const response = (await addAttachmentV2({
+        supertest: supertestWithoutAuth,
+        caseId: postedCase.id,
+        params: postUnifiedAlertReq,
+        auth: authSpace1,
+        expectedHttpCode: 409,
+      })) as unknown as { message: string };
+
+      expect(response.message).to.be(
+        `Every id in the request is already attached to case ${postedCase.id}.`
+      );
+    });
+
+    it('creates an attachment with only the new ids on a partial duplicate', async () => {
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
+      await addAttachmentV2({
+        supertest: supertestWithoutAuth,
+        caseId: postedCase.id,
+        params: postUnifiedAlertReq,
+        auth: authSpace1,
+      });
+
+      const attachment = await addAttachmentV2({
+        supertest: supertestWithoutAuth,
+        caseId: postedCase.id,
+        params: buildUnifiedAlertReq('securitySolutionFixture', {
+          alertId: ['test-id', 'test-id-2'],
+          index: ['test-index', 'test-index-2'],
+        }),
+        auth: authSpace1,
+      });
+
+      expect('attachmentId' in attachment && attachment.attachmentId).to.eql(['test-id-2']);
     });
   });
 };

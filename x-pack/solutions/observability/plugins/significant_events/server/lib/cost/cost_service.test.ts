@@ -9,8 +9,10 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   NIGHTSHIFT_DISCOVERY_USAGE_ID,
+  NIGHTSHIFT_INVESTIGATION_DECISION_TREE_USAGE_ID,
   NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
   NIGHTSHIFT_INVESTIGATION_USAGE_ID,
+  NIGHTSHIFT_INVESTIGATION_WIKI_USAGE_ID,
   NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
   NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
   NIGHTSHIFT_USAGE_PARENT_ID,
@@ -43,6 +45,8 @@ const KNOWN_FEATURE_IDS = [
   NIGHTSHIFT_DISCOVERY_USAGE_ID,
   NIGHTSHIFT_INVESTIGATION_USAGE_ID,
   NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
+  NIGHTSHIFT_INVESTIGATION_WIKI_USAGE_ID,
+  NIGHTSHIFT_INVESTIGATION_DECISION_TREE_USAGE_ID,
   NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
   NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
 ] as const;
@@ -185,7 +189,7 @@ describe('calculateSignificantEventsCost', () => {
     expect(result.month.periodEnd).toBe(PERIOD_END);
   });
 
-  it('filters on the parent feature id and maps all 5 feature IDs onto three groups', async () => {
+  it('filters on the parent feature id and maps all 7 feature IDs onto three groups', async () => {
     const features: Record<string, ReturnType<typeof featureBucket>> = {};
     for (const featureId of KNOWN_FEATURE_IDS) {
       features[featureId] = featureBucket({
@@ -272,7 +276,7 @@ describe('calculateSignificantEventsCost', () => {
           },
         },
       });
-      return { aggregations: aggregations({ total: 50, features }) };
+      return { aggregations: aggregations({ total: 70, features }) };
     });
 
     const result = await calculate({ esClient });
@@ -284,7 +288,7 @@ describe('calculateSignificantEventsCost', () => {
     ]);
     expect(result.today.groups.find((group) => group.group === 'discovery')?.totalTokens).toBe(10);
     expect(result.today.groups.find((group) => group.group === 'investigation')?.totalTokens).toBe(
-      20
+      40
     );
     expect(result.today.groups.find((group) => group.group === 'ki_extraction')?.totalTokens).toBe(
       20
@@ -296,7 +300,7 @@ describe('calculateSignificantEventsCost', () => {
       aggregations: aggregations({
         total: 25,
         features: {
-          [NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID]: featureBucket({
+          [NIGHTSHIFT_INVESTIGATION_DECISION_TREE_USAGE_ID]: featureBucket({
             featureTotal: 25,
             models: [modelBucket({ key: SONNET, total: 25, prompt: 25 })],
           }),

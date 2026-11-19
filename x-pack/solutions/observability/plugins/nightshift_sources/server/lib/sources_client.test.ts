@@ -118,6 +118,13 @@ const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
 
   soClient.find.mockResolvedValue(emptyFind);
   dataEsClient.esql.query.mockResponse(withColumns);
+  dataEsClient.security.hasPrivileges.mockResolvedValue({
+    username: 'marco',
+    has_all_requested: true,
+    cluster: {},
+    index: {},
+    application: {},
+  });
 
   return {
     client,

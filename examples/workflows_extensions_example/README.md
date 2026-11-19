@@ -137,7 +137,7 @@ steps:
 
 - **`system-` prefix** is reserved for managed workflow IDs; user-created workflows cannot use it.
 - **`yamlTemplate(values)`** enables install-time parameterization; `values` are persisted and reused on upgrades.
-- **`versionStrategy: 'auto'`** means the platform re-installs the workflow on startup when the template changes.
+- **`versionStrategy: 'auto'`** means the platform re-installs the workflow on startup when its rendered YAML changes.
 - **`enablement: 'restorable'`** preserves user-toggled enabled state across managed updates.
 - **`spaceId`** is mandatory — use `'*'` (the global space constant) for workflows visible from every space.
 
@@ -180,7 +180,7 @@ authorized rebinding, rejection of unauthorized installation/rebinding/removal, 
 
 ```sh
 nvm use
-node scripts/scout run-tests --arch serverless --domain search --config src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/playwright.config.ts
+node scripts/scout run-tests --arch serverless --domain search --config x-pack/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/playwright.config.ts
 ```
 
 The `service_accounts` server configuration loads this example on local UIAM and stateful Elasticsearch.
@@ -194,5 +194,5 @@ not validate `kibana.request` authentication or automatic startup provisioning.
 
 2. **Handler Function**: The handler receives validated input and the step execution runtime context, and returns output conforming to the output schema.
 
-3. **Metadata Registration**: The public plugin registers UI metadata that helps users understand and use the step in the workflow editor.
+3. **Metadata Registration**: The public plugin registers UI metadata that helps users understand and use the step in the workflow editor. This registration is required: without it the editor rejects the step as an unknown type, even though the server can run it. See [Server and Client Registration Check](../../src/platform/plugins/shared/workflows_extensions/dev_docs/STEPS.md#server-and-client-registration-check).
 

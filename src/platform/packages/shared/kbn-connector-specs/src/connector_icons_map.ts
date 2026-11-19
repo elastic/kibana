@@ -174,6 +174,7 @@ export const ConnectorIconsMap: Map<
         import(/* webpackChunkName: "connectorIconGoogleCalendar" */ './specs/google_calendar/icon')
     ),
   ],
+  ['.aws', lazy(() => import(/* webpackChunkName: "connectorIconAws" */ './specs/aws/icon'))],
   [
     '.aws_lambda',
     lazy(() => import(/* webpackChunkName: "connectorIconAwsLambda" */ './specs/aws_lambda/icon')),
@@ -334,6 +335,10 @@ export const ConnectorIconsMap: Map<
   [
     '.aws_x_ray',
     lazy(() => import(/* webpackChunkName: "connectorIconawsxray" */ './specs/aws_x_ray/icon')),
+  ],
+  [
+    '.aws_ssm',
+    lazy(() => import(/* webpackChunkName: "connectorIconAwsSsm" */ './specs/aws_ssm/icon')),
   ],
   [
     '.prometheus',

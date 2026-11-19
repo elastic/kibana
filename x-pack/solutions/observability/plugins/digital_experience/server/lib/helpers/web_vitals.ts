@@ -14,7 +14,7 @@ import type {
   WebVitals,
 } from '../../../common/types/applications';
 import type { PercentilesAggregation } from './aggregations';
-import { getP75, p75Of } from './aggregations';
+import { getPercentile, p75Of } from './aggregations';
 
 // Elasticsearch parses the bound as the field's type, so a float 0.1 is still up to 0.1.
 const upTo = (field: string, threshold: number) => ({
@@ -57,13 +57,13 @@ const toRatings = ({
 };
 
 export const toDurationVital = (aggregation: VitalAggregation): DurationVital => ({
-  p75Ms: getP75(aggregation.p75),
+  p75Ms: getPercentile(aggregation.p75),
   sampleCount: aggregation.doc_count,
   ratings: toRatings(aggregation),
 });
 
 export const toScoreVital = (aggregation: VitalAggregation): ScoreVital => ({
-  p75: getP75(aggregation.p75),
+  p75: getPercentile(aggregation.p75),
   sampleCount: aggregation.doc_count,
   ratings: toRatings(aggregation),
 });

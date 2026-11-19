@@ -15906,8 +15906,34 @@ if (sourceFilePath === 'authorization.ts') {
         expect(discoverV2?.hidden).not.to.be(true);
         expect(dashboardV2?.category?.id).to.be('securitySolution');
         expect(discoverV2?.category?.id).to.be('securitySolution');
-        expect(discoverV2?.order).to.be(1101);
-        expect(dashboardV2?.order).to.be(1102);
+        // This suite runs on the Complete tier, where `serverless.security.complete.yml` places them
+        // after the AlertZero and Agent Builder features.
+        expect(discoverV2?.order).to.be(1108);
+        expect(dashboardV2?.order).to.be(1109);
+      });
+
+      it('places AlertZero, Agentic investigations and Proposals under Security in role management', async () => {
+        const { body } = await supertestWithoutAuth
+          .get('/api/features')
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(adminCredentials)
+          .expect(200);
+
+        const features = body as Array<{
+          id: string;
+          hidden?: boolean;
+          order?: number;
+          category?: { id: string };
+        }>;
+        const expectedOrder = { alertzero: 1101, agenticInvestigations: 1102, proposals: 1103 };
+
+        for (const [featureId, order] of Object.entries(expectedOrder)) {
+          const feature = features.find(({ id }) => id === featureId);
+          expect(feature).not.to.be(undefined);
+          expect(feature?.hidden).not.to.be(true);
+          expect(feature?.category?.id).to.be('securitySolution');
+          expect(feature?.order).to.be(order);
+        }
       });
 
       it('does not expose alerting v2 feature privileges', async () => {

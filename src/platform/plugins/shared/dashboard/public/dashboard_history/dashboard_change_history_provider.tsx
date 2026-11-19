@@ -7,23 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 
+import type { ChangeHistoryProviderProps } from '@kbn/change-history-ui';
 import { ChangeHistoryModal, ChangeHistoryProvider } from '@kbn/change-history-ui';
 import { i18n } from '@kbn/i18n';
 
+import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { coreServices } from '../services/kibana_services';
 import { createDashboardChangeHistoryAdapter } from './dashboard_change_history_adapter';
 import { renderDashboardChangeHistoryBadge } from './dashboard_change_history_badge';
-import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
-
-// the preview embeds a second dashboard renderer, so only load it once a change is previewed
-const LazyDashboardPreview = lazy(async () => {
-  const { DashboardPreview } = await import('./dashboard_preview');
-  return { default: DashboardPreview };
-});
+import { DashboardChangeHistoryView } from './dashboard_change_history_view';
 
 export interface DashboardChangeHistoryProviderProps {
   children: React.ReactNode;
@@ -64,27 +60,53 @@ export const DashboardChangeHistoryProvider = ({
     [dashboardApi]
   );
 
+  // renders the nChanges string as a link that triggers the comparison view
+  const renderChanges = useCallback<NonNullable<ChangeHistoryProviderProps['renderChanges']>>(
+    ({ item, nChanges, requestCompareToPrevious }) =>
+      item.metadata?.version === 1 || !requestCompareToPrevious ? (
+        nChanges // version 1 has nothing to compare to (and compare may be unavailable) so don't make it a button
+      ) : (
+        <EuiButtonEmpty
+          data-test-subj="changeHistoryItemChanges"
+          size={'xs'}
+          flush={'both'}
+          onClick={(event: React.MouseEvent) => {
+            event.stopPropagation(); // the compare request already selects this row
+            requestCompareToPrevious();
+          }}
+        >
+          {nChanges}
+        </EuiButtonEmpty>
+      ),
+    []
+  );
+
+  // renders the dashboard preview, or the JSON comparison when the user requested one
+  const renderPreview = useCallback<NonNullable<ChangeHistoryProviderProps['renderPreview']>>(
+    (props) => (
+      <DashboardChangeHistoryView
+        previewProps={props}
+        setPreviewTitle={setPreviewTitle}
+        inheritedTimeRange={dashboardApi?.timeRange$.getValue()}
+      />
+    ),
+    [dashboardApi]
+  );
+
   return (
     <ChangeHistoryProvider
       objectId={dashboardId}
       adapter={adapter}
-      renderPreview={(props) => (
-        <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
-          <LazyDashboardPreview
-            {...props}
-            setPreviewTitle={setPreviewTitle}
-            inheritedTimeRange={dashboardApi?.timeRange$.getValue()}
-          />
-        </Suspense>
-      )}
+      renderPreview={renderPreview}
       renderBadge={renderDashboardChangeHistoryBadge}
+      renderChanges={renderChanges}
       labels={{
         previewBackLabel: i18n.translate('dashboard.changeHistory.backToDashboard', {
           defaultMessage: 'Back to dashboard',
         }),
         previewTitle,
       }}
-      features={{ compare: false, restore: true, unsavedChanges: hasUnsavedChanges }}
+      features={{ compare: true, restore: true, unsavedChanges: hasUnsavedChanges }}
       permissions={{ canRestore: !dashboardApi.isManaged }}
       scope={scope}
       analytics={analytics}

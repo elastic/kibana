@@ -26,7 +26,10 @@ import {
   ADD_TO_CASE_EPISODE_ACTION_ID,
   closeAddToCaseModal,
 } from '@kbn/alerting-v2-episodes-ui/actions';
-import { INVESTIGATE_EPISODE_ACTION_ID } from '../actions/investigate_episode_action';
+import {
+  INVESTIGATE_EPISODE_ACTION_ID,
+  VIEW_V1_ALERT_IN_APP_ACTION_ID,
+} from '@kbn/observability-plugin/public';
 import { ObservabilityAlertingApp } from './observability_alerting_app';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
@@ -38,6 +41,13 @@ import {
 } from '../constants';
 
 jest.mock('@kbn/observability-plugin/public', () => ({
+  ...jest.requireActual(
+    '@kbn/observability-plugin/public/episode_actions/create_observability_episode_actions'
+  ),
+  ...jest.requireActual(
+    '@kbn/observability-plugin/public/episode_actions/investigate_episode_action'
+  ),
+  ...jest.requireActual('@kbn/observability-plugin/public/episode_actions/view_in_app'),
   AlertingNavPromo: () => <div data-test-subj="alertingNavPromo" />,
 }));
 
@@ -110,6 +120,7 @@ const mockAlertingVTwo = {
       {...(manageRulesHref ? { 'data-manage-rules-href': manageRulesHref } : {})}
     />
   ),
+  AlertsProvider: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
   ActionPoliciesPage: ({ hostApp, privilegeCheck }: AlertingV2PageProps) => (
     <Placeholder
       name={`actionPoliciesPage:${hostApp?.actionPolicies?.app ?? 'none'}`}
@@ -146,6 +157,7 @@ const mockTriggersActionsUi = {
       <HostTabs tabs={tabs} />
     </>
   )),
+  getAlertFormatter: jest.fn(),
 };
 
 const v1RulesCapabilities = {
@@ -231,13 +243,13 @@ describe('ObservabilityAlertingApp', () => {
     });
   });
 
-  it('provides only the investigate action when the cases plugin is unavailable', async () => {
+  it('provides the investigate and view in app actions when the cases plugin is unavailable', async () => {
     const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_ALERTS_PATH);
 
     await waitFor(() => {
       expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toHaveAttribute(
         'data-action-ids',
-        INVESTIGATE_EPISODE_ACTION_ID
+        `${INVESTIGATE_EPISODE_ACTION_ID},${VIEW_V1_ALERT_IN_APP_ACTION_ID}`
       );
     });
   });
@@ -258,7 +270,7 @@ describe('ObservabilityAlertingApp', () => {
     await waitFor(() => {
       expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toHaveAttribute(
         'data-action-ids',
-        `${INVESTIGATE_EPISODE_ACTION_ID},${ADD_TO_CASE_EPISODE_ACTION_ID}`
+        `${INVESTIGATE_EPISODE_ACTION_ID},${VIEW_V1_ALERT_IN_APP_ACTION_ID},${ADD_TO_CASE_EPISODE_ACTION_ID}`
       );
     });
   });

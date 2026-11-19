@@ -7,6 +7,7 @@
 
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
 import type { TimeRange } from '@kbn/agent-builder-common';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { EffortLevels } from '@kbn/agent-builder-common';
 import type { ModelProvider, ScopedModel } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
@@ -21,6 +22,8 @@ import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
 import { createRequestDocumentationPromptNoResource } from './prompts';
 import { withPromqlKeyword } from './promql_keyword';
+
+export const DEFAULT_EXECUTION_TIMEOUT_MS = 30_000;
 
 export class GenerateEsqlNoDataError extends Error {
   readonly code = 'NO_DATA' as const;
@@ -109,6 +112,12 @@ export interface GenerateEsqlOptions {
    * */
   maxRetries?: number;
   /**
+   * How long, in milliseconds, a generated query may run before it is given up on. Applies to
+   * every execution of the generation loop.
+   * Defaults to {@link DEFAULT_EXECUTION_TIMEOUT_MS} (30 seconds).
+   */
+  executionTimeoutMs?: number;
+  /**
    * Maximum row limit to use in generated ES|QL queries.
    */
   rowLimit?: number;
@@ -118,6 +127,8 @@ export interface GenerateEsqlOptions {
    * Defaults to last 24 hours if not provided.
    */
   timeRange?: TimeRange;
+  /** The values of the dashboard controls a query may refer to (`?name`), bound when a candidate is executed. */
+  esqlVariables?: ESQLControlVariable[];
   /**
    * If true, omits the instruction to use named parameters (?_tstart, ?_tend)
    * for time range filtering in generated queries.
@@ -150,8 +161,10 @@ export const generateEsql = async ({
   additionalInstructions,
   additionalContext,
   maxRetries = 3,
+  executionTimeoutMs = DEFAULT_EXECUTION_TIMEOUT_MS,
   rowLimit,
   timeRange: inputTimeRange,
+  esqlVariables,
   disableNamedParams,
   includeDatasets = false,
   includeViews = false,
@@ -268,6 +281,8 @@ export const generateEsql = async ({
             rowLimit,
             disableNamedParams,
             timeRange,
+            esqlVariables,
+            executionTimeoutMs,
             // Empty when index is known — graph runs request_documentation in-graph with resource context.
             actions: precomputedDocAction ? [precomputedDocAction] : [],
           },

@@ -218,7 +218,7 @@ export const withoutRecordedSubjects = (
       !recorded.some(({ subjectType, subjectId }) => subjectType === type && subjectId === id)
   );
 
-const FOLLOW_UP_PREAMBLE =
+export const FOLLOW_UP_PREAMBLE =
   'This continues the investigation in this conversation. Build on your previous findings, check whether the new information changes them, and update the investigation with your tools.';
 
 /**

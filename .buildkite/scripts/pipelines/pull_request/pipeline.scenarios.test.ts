@@ -52,6 +52,10 @@ jest.mock('./pre_build.ts', () => ({
   runPreBuild: mockRunPreBuild,
 }));
 
+jest.mock('./frequent_cancellations_tip.ts', () => ({
+  postFrequentCancellationsTip: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock('../../../pipelines/evals/eval_pipeline.ts', () => ({
   getEvalTriggerStep: mockGetEvalTriggerStep,
 }));
@@ -119,6 +123,10 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'response ops path',
     changedFiles: ['x-pack/platform/plugins/shared/alerting/server/index.ts'],
+  },
+  {
+    name: 'alerting_v2 path',
+    changedFiles: ['x-pack/platform/plugins/shared/alerting_v2/server/index.ts'],
   },
   {
     name: 'response ops step definition path',
@@ -271,7 +279,7 @@ const SCENARIOS: Scenario[] = [
   },
   {
     name: 'workflows schema path',
-    changedFiles: ['src/platform/plugins/shared/workflows_management/common/schema/index.ts'],
+    changedFiles: ['x-pack/platform/plugins/shared/workflows_management/common/schema/index.ts'],
   },
   {
     name: 'workflows oom testing step definition path',
@@ -282,6 +290,14 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'storybooks definition path',
     changedFiles: ['.buildkite/pipeline-utils/step-library/steps/storybooks.ts'],
+  },
+  {
+    name: 'kbn handlebars definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/kbn_handlebars.ts'],
+  },
+  {
+    name: 'prompt changes definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/prompt_changes.ts'],
   },
   { name: 'storybook toolchain package affected', affectedPackages: ['@kbn/storybook'] },
   {
@@ -315,8 +331,8 @@ const SCENARIOS: Scenario[] = [
   },
   { name: 'cloud image', labels: ['ci:build-cloud-image'] },
   { name: 'cloud fips image', labels: ['ci:build-cloud-fips-image'] },
-  { name: 'cloud deploy', labels: ['ci:deploy-cloud'] },
-  { name: 'cloud image with deploy label', labels: ['ci:build-cloud-image', 'ci:deploy-cloud'] },
+  { name: 'cloud deploy', labels: ['ci:cloud-deploy'] },
+  { name: 'cloud image with deploy label', labels: ['ci:build-cloud-image', 'ci:cloud-deploy'] },
   { name: 'docker fips', labels: ['ci:build-docker-fips'] },
   { name: 'entity store performance', labels: ['ci:entity-store-performance'] },
   { name: 'project deploy on main', labels: ['ci:project-deploy-security'], targetBranch: 'main' },

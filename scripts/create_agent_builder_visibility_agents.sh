@@ -16,13 +16,13 @@ API="${KIBANA_URL}/api/agent_builder/agents"
 base_payload() {
   local id="$1"
   local name="$2"
-  local visibility="$3"
+  local access_mode="$3"
   cat <<EOF
 {
   "id": "${id}",
   "name": "${name}",
-  "description": "Agent with ${visibility} visibility (created by script).",
-  "visibility": "${visibility}",
+  "description": "Agent with ${access_mode} access mode (created by script).",
+  "access_control": { "access_mode": "${access_mode}" },
   "configuration": {
     "tools": [{ "tool_ids": ["*"] }]
   }
@@ -33,10 +33,10 @@ EOF
 create_agent() {
   local id="$1"
   local name="$2"
-  local visibility="$3"
+  local access_mode="$3"
   local payload
-  payload="$(base_payload "$id" "$name" "$visibility")"
-  echo "Creating agent: $name (visibility: $visibility) ..."
+  payload="$(base_payload "$id" "$name" "$access_mode")"
+  echo "Creating agent: $name (access_mode: $access_mode) ..."
   response="$(kibana_curl -s -w "\n%{http_code}" -X POST "$API" \
     -H "Content-Type: application/json" \
     -d "$payload")"
@@ -46,7 +46,7 @@ create_agent() {
     echo "Failed to create $name (HTTP $http_code): $body" >&2
     return 1
   fi
-  echo "Created: $name (id: $id, visibility: $visibility)"
+  echo "Created: $name (id: $id, access_mode: $access_mode)"
 }
 
 create_agent "agent-visibility-shared" "Agent (Shared)" "shared"
