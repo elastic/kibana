@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AxiosInstance } from 'axios';
+import type { AxiosInstance, AxiosResponse } from 'axios';
 import axios, { AxiosError } from 'axios';
 import { Agent as HttpsAgent } from 'https';
 import { HttpProxyAgent } from 'http-proxy-agent';
@@ -469,6 +469,73 @@ describe('request', () => {
         Authorization: 'Bearer my_token',
       },
       beforeRedirect: expect.any(Function),
+    });
+  });
+
+  describe('network-level errors', () => {
+    test.each([
+      ['ENOTFOUND', 'getaddrinfo ENOTFOUND example.invalid', 'The hostname could not be resolved'],
+      ['EAI_AGAIN', 'getaddrinfo EAI_AGAIN example.invalid', 'The hostname could not be resolved'],
+      [
+        'ECONNREFUSED',
+        'connect ECONNREFUSED 127.0.0.1:55555',
+        'The connection could not be established',
+      ],
+      ['ETIMEDOUT', 'connect ETIMEDOUT 10.0.0.1:443', 'The connection could not be established'],
+      [
+        'EHOSTUNREACH',
+        'connect EHOSTUNREACH 10.0.0.1:443',
+        'The connection could not be established',
+      ],
+      [
+        'ENETUNREACH',
+        'connect ENETUNREACH 10.0.0.1:443',
+        'The connection could not be established',
+      ],
+      [
+        'ECONNRESET',
+        'read ECONNRESET',
+        'The connection was interrupted before a response was received',
+      ],
+      ['EPIPE', 'write EPIPE', 'The connection was interrupted before a response was received'],
+      [
+        'ECONNABORTED',
+        'timeout of 1000ms exceeded',
+        'The request timed out waiting for a response',
+      ],
+    ])('describes %s errors and keeps the original details', async (code, message, description) => {
+      const cause = Object.assign(new Error(message), { code });
+      const axiosError = Object.assign(new AxiosError(message, code), { cause });
+      axiosMock.mockRejectedValue(axiosError);
+
+      const error = await request({
+        axios,
+        url: '/test',
+        logger,
+        configurationUtilities,
+      }).catch((e) => e);
+
+      expect(error).toBe(axiosError);
+      expect(error.message).toBe(`${description} (${message})`);
+      expect(error.code).toBe(code);
+      expect(error.cause).toBe(cause);
+    });
+
+    test('does not alter the message of errors that have a response', async () => {
+      axiosMock.mockRejectedValue(
+        new AxiosError('failed', 'ECONNRESET', undefined, undefined, {
+          status: 500,
+        } as AxiosResponse)
+      );
+
+      const error = await request({
+        axios,
+        url: '/test',
+        logger,
+        configurationUtilities,
+      }).catch((e) => e);
+
+      expect(error.message).toBe('failed');
     });
   });
 });
