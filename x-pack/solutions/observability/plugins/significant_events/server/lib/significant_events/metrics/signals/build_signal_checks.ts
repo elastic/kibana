@@ -7,14 +7,7 @@
 
 import type { Feature } from '@kbn/significant-events-schema';
 import { toFromSourceQuery } from '@kbn/nightshift-shared';
-import {
-  conditionToESQL,
-  isAndCondition,
-  isFilterCondition,
-  isNotCondition,
-  isOrCondition,
-  type Condition,
-} from '@kbn/streamlang';
+import { conditionToESQL, type Condition } from '@kbn/streamlang';
 import { quoteEsqlString } from '../entity_rows/helpers';
 import { WORKLOAD_OWNER_DERIVATION } from '../kubernetes/workloads';
 import type { SignalFieldPresence } from './check_signal_fields';
@@ -54,74 +47,61 @@ export const getApplicableSignalTemplates = (
   );
 };
 
-const isNamedClusterScope = (condition: Condition): boolean =>
-  isFilterCondition(condition) &&
-  condition.field === CLUSTER_FIELD &&
-  'eq' in condition &&
-  typeof condition.eq === 'string';
-
-const isMissingClusterScope = (condition: Condition): boolean =>
-  isNotCondition(condition) &&
-  isFilterCondition(condition.not) &&
-  condition.not.field === CLUSTER_FIELD &&
-  'exists' in condition.not &&
-  condition.not.exists === true;
-
-const findClusterScope = (condition: Condition): Condition | undefined => {
-  if (isNamedClusterScope(condition) || isMissingClusterScope(condition)) {
-    return condition;
-  }
-  if (isAndCondition(condition)) {
-    return condition.and.map(findClusterScope).find((scope) => scope !== undefined);
-  }
-  if (isOrCondition(condition)) {
-    return condition.or.map(findClusterScope).find((scope) => scope !== undefined);
-  }
-};
-
-const getNamedCluster = (scope: Condition | undefined): string | undefined => {
-  if (
-    scope &&
-    isFilterCondition(scope) &&
-    scope.field === CLUSTER_FIELD &&
-    'eq' in scope &&
-    typeof scope.eq === 'string'
-  ) {
-    return scope.eq;
-  }
-};
-
-const hasFieldForScope = (
+const hasVariantFieldsInCluster = (
   fieldPresence: readonly SignalFieldPresence[],
   variant: SignalTemplateVariant,
-  scope: Condition | undefined
-): boolean => {
-  const namedCluster = getNamedCluster(scope);
-  return fieldPresence.some(({ dataset, cluster, fields }) => {
-    if (
-      dataset !== variant.dataset ||
-      !getSignalVariantFields(variant).every((field) => fields.has(field))
-    ) {
-      return false;
+  cluster: string | undefined
+): boolean =>
+  fieldPresence.some(
+    (presence) =>
+      presence.cluster === cluster &&
+      presence.dataset === variant.dataset &&
+      getSignalVariantFields(variant).every((field) => presence.fields.has(field))
+  );
+
+/** Picks one variant per cluster (OTel first) and returns the clusters each variant won. */
+const assignVariantsToClusters = (
+  template: SignalTemplate,
+  fieldPresence: readonly SignalFieldPresence[]
+): Array<{ variant: SignalTemplateVariant; clusters: Array<string | undefined> }> => {
+  const preferredVariants = [...template.variants].sort(
+    (left, right) => Number(right.schema === 'otel') - Number(left.schema === 'otel')
+  );
+  const clustersByVariant = new Map<SignalTemplateVariant, Array<string | undefined>>();
+  for (const cluster of new Set(fieldPresence.map((presence) => presence.cluster))) {
+    const variant = preferredVariants.find((candidate) =>
+      hasVariantFieldsInCluster(fieldPresence, candidate, cluster)
+    );
+    if (variant) {
+      clustersByVariant.set(variant, [...(clustersByVariant.get(variant) ?? []), cluster]);
     }
-    if (namedCluster !== undefined) {
-      return cluster === namedCluster;
-    }
-    if (scope && isMissingClusterScope(scope)) {
-      return cluster === undefined;
-    }
-    return true;
+  }
+  return preferredVariants.flatMap((variant) => {
+    const clusters = clustersByVariant.get(variant);
+    return clusters ? [{ variant, clusters }] : [];
   });
 };
 
-const selectVariant = (
-  template: SignalTemplate,
-  fieldPresence: readonly SignalFieldPresence[],
-  scope: Condition | undefined
-): SignalTemplateVariant | undefined =>
-  [...template.variants]
-    .sort((left, right) => Number(right.schema === 'otel') - Number(left.schema === 'otel'))
-    .find((variant) => hasFieldForScope(fieldPresence, variant, scope));
+// Comparisons render as COALESCE(..., FALSE), so the NOT keeps rows without a cluster name.
+const buildClusterExclusion = (
+  clusters: ReadonlyArray<string | undefined>
+): Condition | undefined => {
+  const names = clusters.filter((cluster): cluster is string => cluster !== undefined);
+  const excludeNamed: Condition | undefined =
+    names.length === 0
+      ? undefined
+      : {
+          not:
+            names.length === 1
+              ? { field: CLUSTER_FIELD, eq: names[0] }
+              : { or: names.map((name) => ({ field: CLUSTER_FIELD, eq: name })) },
+        };
+  if (!clusters.includes(undefined)) {
+    return excludeNamed;
+  }
+  const requireCluster: Condition = { field: CLUSTER_FIELD, exists: true };
+  return excludeNamed ? { and: [requireCluster, excludeNamed] } : requireCluster;
+};
 
 const getBreakdown = (feature: MetricsTypeKnowledgeIndicator): string[] | undefined => {
   const breakdown = feature.properties.breakdown;
@@ -237,7 +217,7 @@ const buildEsqlPreview = ({
   ].filter((filter): filter is string => filter !== undefined);
   const workloadKind = getWorkloadKind(subtype);
   const resolvedBreakdown = workloadKind
-    ? ['kubernetes.namespace', 'workload']
+    ? [CLUSTER_FIELD, 'kubernetes.namespace', 'workload']
     : [...breakdown, ...(variant.additionalBreakdown ?? [])];
   const workloadPipeline = workloadKind
     ? `${WORKLOAD_OWNER_DERIVATION}
@@ -274,7 +254,6 @@ export const buildSignalChecks = ({
     const applicableTemplates = templates.filter(({ subtypes }) =>
       subtypes.includes(typeKI.subtype)
     );
-    const scope = findClusterScope(typeKI.filter);
     const breakdown = getBreakdown(typeKI);
     for (const template of applicableTemplates) {
       if (!breakdown || breakdown.length === 0) {
@@ -286,39 +265,45 @@ export const buildSignalChecks = ({
         });
         continue;
       }
-      const variant = selectVariant(template, fieldPresence, scope);
-      if (!variant) {
+      const assignments = assignVariantsToClusters(template, fieldPresence);
+      if (assignments.length === 0) {
         skipped.push({
           signal: template.signal,
           type_ki_id: typeKI.id,
           subtype: typeKI.subtype,
-          reason: 'No ECS or OTel template field has data for this scope in the last hour.',
+          reason: 'No ECS or OTel template field has data in the last hour.',
         });
         continue;
       }
-      const { breakdown: resolvedBreakdown, esqlPreview } = buildEsqlPreview({
-        esql,
-        subtype: typeKI.subtype,
-        scope,
-        breakdown,
-        window: template.window,
-        variant,
-      });
-      checks.push({
-        signal: template.signal,
-        type_ki_id: typeKI.id,
-        subtype: typeKI.subtype,
-        schema: variant.schema,
-        dataset: variant.dataset,
-        field: variant.field,
-        scope,
-        breakdown: resolvedBreakdown,
-        formula: variant.formula,
-        window: template.window,
-        direction: variant.direction,
-        threshold: variant.threshold,
-        source: variant.source,
-        esql_preview: esqlPreview,
+      // A cluster won by an earlier variant is excluded from later ones, so no cluster is counted twice.
+      assignments.forEach(({ variant }, index) => {
+        const scope = buildClusterExclusion(
+          assignments.slice(0, index).flatMap(({ clusters }) => clusters)
+        );
+        const { breakdown: resolvedBreakdown, esqlPreview } = buildEsqlPreview({
+          esql,
+          subtype: typeKI.subtype,
+          scope,
+          breakdown,
+          window: template.window,
+          variant,
+        });
+        checks.push({
+          signal: template.signal,
+          type_ki_id: typeKI.id,
+          subtype: typeKI.subtype,
+          schema: variant.schema,
+          dataset: variant.dataset,
+          field: variant.field,
+          ...(scope ? { scope } : {}),
+          breakdown: resolvedBreakdown,
+          formula: variant.formula,
+          window: template.window,
+          direction: variant.direction,
+          threshold: variant.threshold,
+          source: variant.source,
+          esql_preview: esqlPreview,
+        });
       });
     }
   }

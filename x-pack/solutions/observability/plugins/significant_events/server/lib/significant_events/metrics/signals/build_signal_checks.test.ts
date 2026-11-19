@@ -17,17 +17,12 @@ const createTypeKI = ({
   id,
   subtype,
   breakdown,
-  cluster,
 }: {
   id: string;
   subtype: string;
   breakdown: string[];
-  cluster?: string;
 }): MetricsTypeKnowledgeIndicator => {
-  const filter: Condition =
-    cluster === undefined
-      ? { always: {} }
-      : { and: [{ field: 'orchestrator.cluster.name', eq: cluster }] };
+  const filter: Condition = { field: 'data_stream.dataset', eq: 'kubernetes.container' };
   const feature: MetricsTypeKnowledgeIndicator = {
     id,
     uuid: `${id}-uuid`,
@@ -44,13 +39,13 @@ const createTypeKI = ({
 
 const getBreakdown = (subtype: string): string[] => {
   if (subtype === 'k8s.namespace') {
-    return ['kubernetes.namespace'];
+    return ['orchestrator.cluster.name', 'kubernetes.namespace'];
   }
   if (subtype.startsWith('k8s.') && subtype !== 'k8s.node') {
-    return ['kubernetes.namespace', 'kubernetes.deployment.name'];
+    return ['orchestrator.cluster.name', 'kubernetes.namespace', 'kubernetes.deployment.name'];
   }
   if (subtype === 'k8s.node') {
-    return ['kubernetes.node.name'];
+    return ['orchestrator.cluster.name', 'kubernetes.node.name'];
   }
   return [subtype === 'host' ? 'host.name' : 'service.name'];
 };
@@ -90,7 +85,7 @@ describe('buildSignalChecks', () => {
     ]);
   });
 
-  it('selects ECS or OTel from field data in each cluster', () => {
+  it('picks ECS or OTel per cluster inside one source and counts each cluster once', () => {
     const cpuTemplate = SIGNAL_TEMPLATES.find(
       ({ signal }) => signal === 'k8s.container.cpu_vs_limit'
     );
@@ -98,60 +93,60 @@ describe('buildSignalChecks', () => {
       throw new Error('Container CPU template is missing');
     }
     const [ecs, otel] = cpuTemplate.variants;
-    const typeKIs = [
-      createTypeKI({
-        id: 'k8s.deployments:cluster-a',
-        subtype: 'k8s.deployment',
-        breakdown: ['kubernetes.namespace', 'kubernetes.deployment.name'],
-        cluster: 'cluster-a',
-      }),
-      createTypeKI({
-        id: 'k8s.deployments:cluster-b',
-        subtype: 'k8s.deployment',
-        breakdown: ['kubernetes.namespace', 'kubernetes.deployment.name'],
-        cluster: 'cluster-b',
-      }),
-    ];
 
     const { checks } = buildSignalChecks({
       esql: 'FROM metrics-*',
-      typeKIs,
+      typeKIs: [
+        createTypeKI({
+          id: 'k8s.deployments:source-id',
+          subtype: 'k8s.deployment',
+          breakdown: getBreakdown('k8s.deployment'),
+        }),
+      ],
       templates: [cpuTemplate],
-      fieldPresence: [createPresence(ecs, 'cluster-a'), createPresence(otel, 'cluster-b')],
+      fieldPresence: [
+        createPresence(ecs, 'cluster-a'),
+        createPresence(ecs, 'cluster-b'),
+        createPresence(otel, 'cluster-b'),
+      ],
     });
 
-    expect(checks.map(({ type_ki_id: id, schema }) => ({ id, schema }))).toEqual([
-      { id: 'k8s.deployments:cluster-a', schema: 'ecs' },
-      { id: 'k8s.deployments:cluster-b', schema: 'otel' },
+    expect(checks.map(({ type_ki_id: id, schema, scope }) => ({ id, schema, scope }))).toEqual([
+      { id: 'k8s.deployments:source-id', schema: 'otel', scope: undefined },
+      {
+        id: 'k8s.deployments:source-id',
+        schema: 'ecs',
+        scope: { not: { field: 'orchestrator.cluster.name', eq: 'cluster-b' } },
+      },
     ]);
   });
 
-  it('builds a host CPU check for a Kubernetes node KI', () => {
+  it('runs host checks on the Hosts KI only', () => {
     const cpuTemplate = SIGNAL_TEMPLATES.find(({ signal }) => signal === 'host.cpu.utilization');
     if (!cpuTemplate) {
       throw new Error('Host CPU template is missing');
     }
     const [ecs] = cpuTemplate.variants;
-    const typeKI = createTypeKI({
-      id: 'k8s.nodes:cluster-a',
-      subtype: 'k8s.node',
-      breakdown: ['kubernetes.node.name'],
-      cluster: 'cluster-a',
-    });
 
     const { checks } = buildSignalChecks({
       esql: 'FROM metrics-*',
-      typeKIs: [typeKI],
+      typeKIs: [
+        createTypeKI({ id: 'hosts:source-id', subtype: 'host', breakdown: ['host.name'] }),
+        createTypeKI({
+          id: 'k8s.nodes:source-id',
+          subtype: 'k8s.node',
+          breakdown: getBreakdown('k8s.node'),
+        }),
+      ],
       templates: [cpuTemplate],
       fieldPresence: [createPresence(ecs, 'cluster-a')],
     });
 
     expect(checks).toEqual([
       expect.objectContaining({
-        signal: 'host.cpu.utilization',
-        schema: 'ecs',
-        breakdown: ['kubernetes.node.name'],
-        esql_preview: expect.stringContaining('BY kubernetes.node.name'),
+        type_ki_id: 'hosts:source-id',
+        breakdown: ['host.name'],
+        esql_preview: expect.stringContaining('BY host.name'),
       }),
     ]);
   });
@@ -181,10 +176,9 @@ describe('buildSignalChecks', () => {
       esql: 'FROM metrics-*',
       typeKIs: [
         createTypeKI({
-          id: 'k8s.nodes:cluster-a',
+          id: 'k8s.nodes:source-id',
           subtype: 'k8s.node',
-          breakdown: ['kubernetes.node.name'],
-          cluster: 'cluster-a',
+          breakdown: getBreakdown('k8s.node'),
         }),
       ],
       templates: [filesystemTemplate],
@@ -198,9 +192,8 @@ describe('buildSignalChecks', () => {
 
   it('renders ES|QL previews that parse for every template variant', () => {
     const checks = SIGNAL_TEMPLATES.flatMap((template: SignalTemplate) =>
-      template.variants.flatMap((variant, index) => {
+      template.variants.flatMap((variant) => {
         const [subtype] = template.subtypes;
-        const cluster = subtype.startsWith('k8s.') ? `cluster-${index}` : undefined;
         return buildSignalChecks({
           esql: 'FROM metrics-*',
           typeKIs: [
@@ -208,11 +201,10 @@ describe('buildSignalChecks', () => {
               id: `${template.signal}:${variant.schema}`,
               subtype,
               breakdown: getBreakdown(subtype),
-              cluster,
             }),
           ],
           templates: [template],
-          fieldPresence: [createPresence(variant, cluster)],
+          fieldPresence: [createPresence(variant, 'cluster-a')],
         }).checks;
       })
     );
@@ -236,10 +228,9 @@ describe('buildSignalChecks', () => {
     }
     const [ecs] = cpuTemplate.variants;
     const typeKI = createTypeKI({
-      id: 'k8s.deployments:cluster-a',
+      id: 'k8s.deployments:source-id',
       subtype: 'k8s.deployment',
-      breakdown: ['kubernetes.namespace', 'kubernetes.deployment.name'],
-      cluster: 'cluster-a',
+      breakdown: getBreakdown('k8s.deployment'),
     });
 
     const { checks } = buildSignalChecks({
@@ -250,10 +241,13 @@ describe('buildSignalChecks', () => {
     });
     const [check] = checks;
 
-    expect(check.breakdown).toEqual(['kubernetes.namespace', 'workload']);
+    expect(check.breakdown).toEqual([
+      'orchestrator.cluster.name',
+      'kubernetes.namespace',
+      'workload',
+    ]);
     expect(check.esql_preview).toContain(
-      'STATS signal_value = AVG(kubernetes.container.cpu.usage.limit.pct) BY kubernetes.namespace, workload'
+      'BY orchestrator.cluster.name, kubernetes.namespace, workload'
     );
-    expect(check.esql_preview).not.toContain('BY kubernetes.namespace, kubernetes.deployment.name');
   });
 });

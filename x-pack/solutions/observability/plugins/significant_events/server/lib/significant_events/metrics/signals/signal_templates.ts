@@ -338,7 +338,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
   // system/kibana/alerting_rule_template/system-cpu-utilization.json L15-L18.
   {
     signal: 'host.cpu.utilization',
-    subtypes: ['host', 'k8s.node'],
+    subtypes: ['host'],
     window: '5 minutes',
     variants: [
       {
@@ -373,7 +373,7 @@ export const SIGNAL_TEMPLATES: readonly SignalTemplate[] = [
   // system/kibana/alerting_rule_template/system-memory-utilization.json L15-L18.
   {
     signal: 'host.memory.utilization',
-    subtypes: ['host', 'k8s.node'],
+    subtypes: ['host'],
     window: '5 minutes',
     variants: [
       {
