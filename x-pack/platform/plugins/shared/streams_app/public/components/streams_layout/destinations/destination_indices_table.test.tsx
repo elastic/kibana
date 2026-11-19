@@ -21,6 +21,10 @@ jest.mock('../../../hooks/use_time_range', () => ({
 jest.mock('../../../hooks/use_unit_id', () => ({
   useUnitId: () => 'unit-1',
 }));
+const mockCanManage = jest.fn(() => true);
+jest.mock('../../../hooks/use_streams_privileges', () => ({
+  useStreamsPrivileges: () => ({ v2: { manage: mockCanManage() } }),
+}));
 
 const mapRoute = [
   '/v2/unit/{unitId}/{tab}',
@@ -52,6 +56,7 @@ describe('DestinationIndicesTable without indices', () => {
   beforeEach(() => {
     mockRouterLink.mockClear();
     mockRouterPush.mockClear();
+    mockCanManage.mockReturnValue(true);
   });
 
   it('keeps the write scope text when a source is connected', () => {
@@ -89,6 +94,16 @@ describe('DestinationIndicesTable without indices', () => {
 
     expect(screen.getByTestId('streamsDestinationIndicesEmpty')).toHaveTextContent(
       'No sources are connected to this destination yet. Connect one to start sending data.'
+    );
+    expect(screen.queryByTestId('streamsDestinationIndicesMapLink')).not.toBeInTheDocument();
+  });
+
+  it('does not ask read-only users to connect a source', () => {
+    mockCanManage.mockReturnValue(false);
+    renderWithoutIndices({ hasConnectedSource: false, showMapLink: true });
+
+    expect(screen.getByTestId('streamsDestinationIndicesEmpty')).toHaveTextContent(
+      /^No sources are connected to this destination yet\.$/
     );
     expect(screen.queryByTestId('streamsDestinationIndicesMapLink')).not.toBeInTheDocument();
   });

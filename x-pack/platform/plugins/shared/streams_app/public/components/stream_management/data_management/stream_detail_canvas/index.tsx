@@ -64,6 +64,7 @@ import { applyLayout, getConnectedNodeIds } from './layout';
 import { getGraphNodeIds, syncCanvasNodeMetadata, syncCanvasEdgeData } from './sync_graph_nodes';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
+import { useStagedSourceConnectedDestinationIds } from './use_staged_source_connected_destination_ids';
 import { useSyncStatsWithSavedUnit } from './use_sync_stats_with_saved_unit';
 import { IndexInspectFlyout } from '../../../index_inspect/index_inspect_flyout';
 import type { IndexInspectTabId } from '../../../index_inspect/types';
@@ -111,7 +112,6 @@ import {
   connectedDestinations,
   getSourceDisplaySignals,
   getUnitSources,
-  sourceConnectedDestinationIds,
   withUnitSources,
 } from '../../../streams_layout/sources/source_models';
 import { CreateSourceModal } from '../../../streams_layout/sources/create_source_modal';
@@ -303,6 +303,7 @@ function StreamsCanvasInner() {
       ),
     [savedUnit]
   );
+  const stagedSourceConnectedDestinationIds = useStagedSourceConnectedDestinationIds();
 
   const graph = useMemo<ClassicCanvasGraph>(() => {
     const { processingNodes, routingNodes, edges } = buildUnitCanvasGraph(
@@ -1002,9 +1003,7 @@ function StreamsCanvasInner() {
                   }
                   indicesStatus={resolvedIndicesStatus}
                   indicesError={resolvedIndicesError}
-                  hasConnectedSource={sourceConnectedDestinationIds(unitDefinition).has(
-                    flyoutDestination.id
-                  )}
+                  hasConnectedSource={stagedSourceConnectedDestinationIds.has(flyoutDestination.id)}
                   destinationDetailRef={destinationsController.destinationDetailRefs.get(
                     flyoutDestination.id
                   )}

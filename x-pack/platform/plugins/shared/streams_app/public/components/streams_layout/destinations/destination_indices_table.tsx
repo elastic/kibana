@@ -50,6 +50,7 @@ import {
   STORAGE_COLUMN_HEADER,
 } from '../../stream_list_view/translations';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUnitId } from '../../../hooks/use_unit_id';
 import { SourceFilter, type SourceFilterOption } from '../sources/source_filter';
@@ -160,7 +161,7 @@ interface DestinationIndicesTableProps {
   showToolbar?: boolean;
 }
 
-const MapLink = () => {
+const MapLink = ({ children }: { children: React.ReactNode }) => {
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
   const unitId = useUnitId();
@@ -178,10 +179,7 @@ const MapLink = () => {
       }}
       data-test-subj="streamsDestinationIndicesMapLink"
     >
-      <FormattedMessage
-        id="xpack.streams.destinations.indices.mapLinkLabel"
-        defaultMessage="the Map"
-      />
+      {children}
     </EuiLink>
   );
 };
@@ -190,6 +188,10 @@ const EmptyIndicesMessage = ({
   hasConnectedSource,
   showMapLink,
 }: Pick<DestinationIndicesTableProps, 'hasConnectedSource' | 'showMapLink'>) => {
+  const {
+    v2: { manage: canManage },
+  } = useStreamsPrivileges();
+
   if (hasConnectedSource) {
     return (
       <FormattedMessage
@@ -198,12 +200,20 @@ const EmptyIndicesMessage = ({
       />
     );
   }
+  if (!canManage) {
+    return (
+      <FormattedMessage
+        id="xpack.streams.destinations.indices.noConnectedSourcesReadOnlyDescription"
+        defaultMessage="No sources are connected to this destination yet."
+      />
+    );
+  }
   if (showMapLink) {
     return (
       <FormattedMessage
         id="xpack.streams.destinations.indices.noConnectedSourcesWithMapLinkDescription"
-        defaultMessage="No sources are connected to this destination yet. Connect one on {mapLink} to start sending data."
-        values={{ mapLink: <MapLink /> }}
+        defaultMessage="No sources are connected to this destination yet. Connect one on <mapLink>the Map</mapLink> to start sending data."
+        values={{ mapLink: (...chunks: React.ReactNode[]) => <MapLink>{chunks}</MapLink> }}
       />
     );
   }
