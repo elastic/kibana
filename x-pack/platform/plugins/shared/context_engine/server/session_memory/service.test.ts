@@ -133,6 +133,7 @@ describe('createSessionMemoryService', () => {
       expect(esClient.search).toHaveBeenCalledWith({
         index: SESSION_MEMORY_DATA_STREAM,
         ignore_unavailable: true,
+        allow_partial_search_results: false,
         query: {
           bool: {
             filter: [
@@ -171,6 +172,9 @@ describe('createSessionMemoryService', () => {
         { id: 'memory-2', outcome: 'already_forgotten' },
         { id: 'memory-3', outcome: 'not_found' },
       ]);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ allow_partial_search_results: false })
+      );
       expect(esClient.bulk).toHaveBeenCalledWith({
         require_data_stream: true,
         operations: [

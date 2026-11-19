@@ -86,9 +86,12 @@ export const createSessionMemoryService = (
   },
 
   get: async (scope, id) => {
+    // A failed shard could hold the newest revision, a tombstone included, so a partial result is
+    // an error rather than an older answer.
     const response = await esClient.search<StoredSessionMemory>({
       index: SESSION_MEMORY_DATA_STREAM,
       ignore_unavailable: true,
+      allow_partial_search_results: false,
       query: { bool: { filter: [{ term: { id } }, ...scopeFilter(scope)] } },
       sort: [{ '@timestamp': 'desc' }],
       size: 1,
@@ -122,6 +125,7 @@ export const createSessionMemoryService = (
     const response = await esClient.search<StoredSessionMemory>({
       index: SESSION_MEMORY_DATA_STREAM,
       ignore_unavailable: true,
+      allow_partial_search_results: false,
       query: { bool: { filter: [{ terms: { id: uniqueIds } }, ...scopeFilter(scope)] } },
       collapse: { field: 'id' },
       sort: [{ '@timestamp': 'desc' }],
