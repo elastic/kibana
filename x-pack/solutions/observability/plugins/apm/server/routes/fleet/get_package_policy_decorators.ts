@@ -10,7 +10,7 @@ import { cloneDeep, get } from 'lodash';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AgentConfiguration } from '../../../common/agent_configuration/configuration_types';
 import { AGENT_NAME } from '../../../common/es_fields/apm';
-import type { ArtifactSourceMap } from './source_maps';
+import type { ArtifactSourceMapMetadata } from './source_maps';
 
 // agent config
 export const AGENT_CONFIG_PATH = `inputs[0].config['apm-server'].value.agent_config`;
@@ -48,7 +48,7 @@ export function getPackagePolicyWithSourceMap({
   artifacts,
 }: {
   packagePolicy: NewPackagePolicy;
-  artifacts: ArtifactSourceMap[];
+  artifacts: ArtifactSourceMapMetadata[];
 }): NewPackagePolicy {
   const packagePolicyClone = cloneDeep(packagePolicy);
 
