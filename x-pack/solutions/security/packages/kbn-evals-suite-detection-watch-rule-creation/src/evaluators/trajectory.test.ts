@@ -224,11 +224,11 @@ describe('createTrajectoryEvaluators', () => {
     }
   });
 
-  it('scores null with label unavailable on every series when spans are unreachable', async () => {
+  it('scores null with label error — so error_count counts it — on every series when spans are unreachable', async () => {
     const { client } = esReturning([]);
     for (const r of await evaluateAll(client, result())) {
       expect(r.score).toBeNull();
-      expect(r.label).toBe('unavailable');
+      expect(r.label).toBe('error');
     }
   });
 
