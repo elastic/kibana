@@ -11,6 +11,7 @@ import {
   emitCaseAttachment,
   emitFromStepResult,
   injectAttachmentIds,
+  pendingAttachmentUpdateLocks,
   toCaseAttachmentData,
 } from './emit_attachments';
 import { createCaseAttachmentType } from './case_attachment_type';
@@ -359,6 +360,86 @@ describe('emitCaseAttachment', () => {
       url: 'https://example.com/case/c1',
       totalAttachments: 3,
     });
+  });
+
+  it('does not lose a fresh totalAttachments when a parallel emit without one updates the same attachment', async () => {
+    const manager = buildRealManager();
+    const { id } = await manager.add({
+      type: CASE_ATTACHMENT_TYPE,
+      data: {
+        ...toCaseAttachmentData(buildCase('c1'), 'https://example.com/case/c1'),
+        totalAttachments: 3,
+      },
+    });
+
+    await Promise.all([
+      emitCaseAttachment(manager.forToolCall('write-step'), {
+        ...toCaseAttachmentData(buildCase('c1')),
+        totalAttachments: 5,
+      }),
+      emitCaseAttachment(manager.forToolCall('read-step'), {
+        ...toCaseAttachmentData(buildCase('c1')),
+        total_observables: 2,
+      }),
+    ]);
+
+    const [active] = manager.getActive();
+    expect(active.id).toBe(id);
+    expect(getLatestVersion(active)?.data).toMatchObject({
+      totalAttachments: 5,
+      url: 'https://example.com/case/c1',
+    });
+  });
+
+  it('does not lose a fresh totalAttachments in either arrival order', async () => {
+    const manager = buildRealManager();
+    await manager.add({
+      type: CASE_ATTACHMENT_TYPE,
+      data: { ...toCaseAttachmentData(buildCase('c1')), totalAttachments: 3 },
+    });
+
+    await Promise.all([
+      emitCaseAttachment(manager.forToolCall('read-step'), {
+        ...toCaseAttachmentData(buildCase('c1')),
+        total_observables: 2,
+      }),
+      emitCaseAttachment(manager.forToolCall('write-step'), {
+        ...toCaseAttachmentData(buildCase('c1')),
+        totalAttachments: 5,
+      }),
+    ]);
+
+    expect(getLatestVersion(manager.getActive()[0])?.data).toMatchObject({ totalAttachments: 5 });
+  });
+
+  it('releases the per-attachment lock when an update fails and leaves no entries behind', async () => {
+    const manager = buildRealManager();
+    const { id } = await manager.add({
+      type: CASE_ATTACHMENT_TYPE,
+      data: { ...toCaseAttachmentData(buildCase('c1')), totalAttachments: 3 },
+    });
+    const failing = manager.forToolCall('failing');
+    jest.spyOn(failing, 'update').mockRejectedValueOnce(new Error('boom'));
+
+    const results = await Promise.allSettled([
+      emitCaseAttachment(failing, toCaseAttachmentData(buildCase('c1'))),
+      emitCaseAttachment(manager.forToolCall('ok'), {
+        ...toCaseAttachmentData(buildCase('c1')),
+        totalAttachments: 5,
+      }),
+    ]);
+    const later = await emitCaseAttachment(manager.forToolCall('later'), {
+      ...toCaseAttachmentData(buildCase('c1')),
+      total_observables: 4,
+    });
+
+    expect(results.map(({ status }) => status)).toEqual(['rejected', 'fulfilled']);
+    expect(later).toBe(id);
+    expect(getLatestVersion(manager.getActive()[0])?.data).toMatchObject({
+      total_observables: 4,
+      totalAttachments: 5,
+    });
+    expect(pendingAttachmentUpdateLocks()).toBe(0);
   });
 
   it('does not block later emits for the case when an add through another tool call view failed', async () => {

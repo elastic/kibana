@@ -93,26 +93,56 @@ const findCaseAttachments = (
     return latestData?.id === caseId;
   });
 
-const updateCaseAttachment = async (
+// `update` awaits validation before it pushes the new version, so two tool calls updating the same
+// attachment through different `forToolCall` views would each carry forward the same stale
+// `previous` and the later write would drop the earlier one's fresh `totalAttachments`. Attachment
+// ids are uuids unique per conversation store, so one module-level queue per id is enough; the
+// entry is deleted once its tail settles.
+const attachmentUpdateQueues = new Map<string, Promise<unknown>>();
+
+/** Test-only: number of held per-attachment update locks. Do not use in production code. */
+export const pendingAttachmentUpdateLocks = (): number => attachmentUpdateQueues.size;
+
+const withAttachmentUpdateLock = async <T>(id: string, run: () => Promise<T>): Promise<T> => {
+  const previous = attachmentUpdateQueues.get(id) ?? Promise.resolve();
+  const current = previous.then(run);
+  const tail = current.then(
+    () => undefined,
+    () => undefined
+  );
+  attachmentUpdateQueues.set(id, tail);
+  try {
+    return await current;
+  } finally {
+    if (attachmentUpdateQueues.get(id) === tail) {
+      attachmentUpdateQueues.delete(id);
+    }
+  }
+};
+
+const updateCaseAttachment = (
   attachments: ToolHandlerContext['attachments'],
-  existing: VersionedAttachment,
+  id: string,
   data: CaseAttachmentData,
   description: string
-): Promise<string> => {
-  // `update` replaces the whole version's data. The UI ("Add to chat") supplies
-  // `totalAttachments` and `url`, which server-side emits don't know: carry them forward.
-  const previous = getLatestVersion(existing)?.data as Partial<CaseAttachmentData> | undefined;
-  const totalAttachments = data.totalAttachments ?? previous?.totalAttachments;
-  await attachments.update(existing.id, {
-    data: {
-      ...data,
-      url: data.url ?? previous?.url ?? null,
-      ...(totalAttachments !== undefined && { totalAttachments }),
-    },
-    description,
+): Promise<string> =>
+  withAttachmentUpdateLock(id, async () => {
+    // `update` replaces the whole version's data. The UI ("Add to chat") supplies
+    // `totalAttachments` and `url`, which server-side emits don't know: carry them forward from
+    // the latest state read inside the lock, not from a snapshot taken before waiting for it.
+    const current = attachments.getActive().find((attachment) => attachment.id === id);
+    const previous = current && (getLatestVersion(current)?.data as Partial<CaseAttachmentData>);
+    const totalAttachments = data.totalAttachments ?? previous?.totalAttachments;
+    await attachments.update(id, {
+      data: {
+        ...data,
+        url: data.url ?? previous?.url ?? null,
+        ...(totalAttachments !== undefined && { totalAttachments }),
+      },
+      description,
+    });
+    return id;
   });
-  return existing.id;
-};
 
 export const emitCaseAttachment = async (
   attachments: ToolHandlerContext['attachments'],
@@ -122,7 +152,7 @@ export const emitCaseAttachment = async (
   const resolvedDescription = description ?? `Case: ${data.title}`;
   const [existing] = findCaseAttachments(attachments, data.id);
   if (existing) {
-    return updateCaseAttachment(attachments, existing, data, resolvedDescription);
+    return updateCaseAttachment(attachments, existing.id, data, resolvedDescription);
   }
 
   const added = await attachments.add({
@@ -143,7 +173,7 @@ export const emitCaseAttachment = async (
   attachments.permanentDelete(added.id);
   // Drop the loser's add/delete changes so the transient duplicate is never surfaced as events.
   attachments.drainChanges(({ attachment_id: changedId }) => changedId === added.id);
-  return updateCaseAttachment(attachments, winner, data, resolvedDescription);
+  return updateCaseAttachment(attachments, winner.id, data, resolvedDescription);
 };
 
 export const emitCasesAttachment = async (
