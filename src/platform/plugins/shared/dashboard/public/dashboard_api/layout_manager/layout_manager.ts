@@ -112,8 +112,8 @@ export function initializeLayoutManager(
     }
   });
 
-  /** Observable that publishes `true` when all children APIs are available */
-  const childrenLoading$ = combineLatest([children$, layout$, viewModeManager.api.viewMode$]).pipe(
+  /** Publishes `true` while some rendered children's APIs haven't registered yet */
+  const childApisPending$ = combineLatest([children$, layout$, viewModeManager.api.viewMode$]).pipe(
     map(([children, layout, viewMode]) => {
       const renderedPanelCount = Object.keys(layout.panels).filter((uuid) => {
         const sectionId = layout.panels[uuid].grid.sectionId;
@@ -540,7 +540,7 @@ export function initializeLayoutManager(
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       gridLayout$,
-      childrenLoading$,
+      childApisPending$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
 
