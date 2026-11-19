@@ -6,10 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Entity } from './fake_entities';
 import { entityAlertBadgePresentation } from './entity_alert_badge';
+import { AlertStatusBadge } from './alert_status_badge';
 import {
   findK8sInventoryEntityByContext,
   getK8sPopoverContext,
@@ -78,7 +79,7 @@ const ContextActionRow = ({
   readonly borderWidth: string;
   readonly showTopBorder: boolean;
 }) => {
-  const { color, tooltip } = entityAlertBadgePresentation(targetEntity);
+  const { color, tooltip, inMaintenance } = entityAlertBadgePresentation(targetEntity);
   const actionLabel = seeContextActionLabel(entry.key);
 
   return (
@@ -122,9 +123,12 @@ const ContextActionRow = ({
         <EuiIcon type="arrowRight" size="m" color="text" aria-hidden />
         <span style={{ flex: 1, minWidth: 0 }}>{actionLabel}</span>
       </span>
-      <EuiToolTip content={tooltip} disableScreenReaderOutput>
-        <EuiBadge color={color}>{entry.value}</EuiBadge>
-      </EuiToolTip>
+      <AlertStatusBadge
+        color={color}
+        label={entry.value}
+        tooltip={tooltip}
+        showMaintenanceIcon={inMaintenance > 0}
+      />
     </button>
   );
 };

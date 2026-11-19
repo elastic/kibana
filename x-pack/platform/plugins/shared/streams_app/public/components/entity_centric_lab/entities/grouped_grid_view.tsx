@@ -68,6 +68,7 @@ import {
 import type { Entity, EntityCategoryId } from './fake_entities';
 import {
   getCategoryDescriptor,
+  categoriesIncludingAws,
   getVisibleEntityCategories,
   isCategoryHiddenInElasticOn,
 } from './fake_entities';
@@ -171,6 +172,8 @@ import {
   formatInventoryAlertRatioLabel,
   formatInventoryNavCount,
 } from './inventory_nav_count_format';
+import { AlertStatusBadge } from './alert_status_badge';
+import { entityTypeLogo } from './entity_type_logo';
 import {
   resolveHexTileRelatedFilterActions,
   type HexTileRelatedFilterApplyArgs,
@@ -537,9 +540,11 @@ const RelatedActionInventoryBadge = ({
       }
     );
     return (
-      <EuiToolTip content={tooltip} disableScreenReaderOutput>
-        <EuiBadge color="danger">{label}</EuiBadge>
-      </EuiToolTip>
+      <AlertStatusBadge
+        color="danger"
+        label={label}
+        tooltip={tooltip}
+      />
     );
   }
   const tooltip = i18n.translate(
@@ -1236,7 +1241,10 @@ const MetricTileTooltip = ({
                   <EuiIcon type="arrowRight" size="m" color="text" aria-hidden />
                   <span style={{ flex: 1, minWidth: 0 }}>{action.label}</span>
                 </span>
-                <RelatedActionInventoryBadge total={action.total} alerting={action.alerting} />
+                <RelatedActionInventoryBadge
+                  total={action.total}
+                  alerting={action.alerting}
+                />
               </button>
             ))}
           </div>
@@ -3205,22 +3213,19 @@ const AlertCountBadge = ({ entities }: { readonly entities: readonly Entity[] })
     [entities]
   );
   if (alertCount === 0) return null;
+  const tooltip = i18n.translate('xpack.streams.entityCentricLab.hexMap.alertCountTooltip', {
+    defaultMessage:
+      '{count} {count, plural, one {entity} other {entities}} with active alerts',
+    values: { count: alertCount },
+  });
   return (
     <EuiFlexItem grow={false}>
-      <EuiToolTip
-        content={i18n.translate(
-          'xpack.streams.entityCentricLab.hexMap.alertCountTooltip',
-          {
-            defaultMessage:
-              '{count} {count, plural, one {entity} other {entities}} with active alerts',
-            values: { count: alertCount },
-          }
-        )}
-      >
-        <EuiBadge color="danger">
-          {alertCount.toLocaleString()}
-        </EuiBadge>
-      </EuiToolTip>
+      <AlertStatusBadge
+        color="danger"
+        label={alertCount.toLocaleString()}
+        tooltip={tooltip}
+        dataTestSubj="entityCentricLabHexAlertCountBadge"
+      />
     </EuiFlexItem>
   );
 };
@@ -3247,16 +3252,18 @@ const CategoryHeader = ({
   entities?: readonly Entity[];
 }) => {
   const descriptor = getCategoryDescriptor(category);
+  const heading = label ?? descriptor?.label ?? category;
+  const icon = entityTypeLogo(heading) ?? descriptor?.icon;
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      {descriptor?.icon ? (
+      {icon ? (
         <EuiFlexItem grow={false}>
-          <EuiIcon type={descriptor.icon} size="m" aria-hidden />
+          <EuiIcon type={icon} size="m" aria-hidden />
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
-          <h4>{label ?? descriptor?.label ?? category}</h4>
+          <h4>{heading}</h4>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -3307,6 +3314,8 @@ interface SubTypeRowProps {
    */
   readonly bucketKey: BucketKey;
   readonly label: string;
+  /** Provider logo when the label is a short cloud service name such as "Functions". */
+  readonly icon?: string;
   readonly entities: readonly Entity[];
   readonly onSelectEntity: (entityName: string) => void;
 }
@@ -3319,7 +3328,7 @@ interface SubTypeRowProps {
  * row per non-K8s entity `.type`) so the two layouts stay
  * pixel-identical.
  */
-const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowProps) => {
+const SubTypeRow = ({ bucketKey, label, icon, entities, onSelectEntity }: SubTypeRowProps) => {
   const paletteEnabled = useContext(PaletteColoringEnabledContext);
   const [isOpen, setIsOpen] = useState(true);
   const { selection, setSelection } = useBucketMetricSelection(bucketKey);
@@ -3361,6 +3370,7 @@ const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowPr
     paletteActive && (coloring.type === 'gradient' || hasCustomStepRules(coloring, metric.id))
       ? coloring
       : null;
+  const typeLogo = entityTypeLogo(label) ?? icon;
   return (
     <div data-test-subj={`entityCentricLabBucket-${bucketKey}`}>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
@@ -3375,6 +3385,11 @@ const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowPr
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            {typeLogo ? (
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={typeLogo} size="m" aria-hidden />
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem grow={false}>
               <EuiTitle size="xxs">
                 <h4>{label}</h4>
@@ -3814,6 +3829,7 @@ const CloudProviderCard = ({
                 <SubTypeRow
                   bucketKey={bucketKeyFor('cloud', group.service.entityType)}
                   label={group.service.label}
+                  icon={provider.icon}
                   entities={group.rows}
                   onSelectEntity={onSelectEntity}
                 />
@@ -3920,6 +3936,7 @@ const CloudGroupedCards = ({
                     <SubTypeRow
                       bucketKey={bucketKeyFor('cloud', service.entityType)}
                       label={service.label}
+                      icon={group.provider.icon}
                       entities={serviceRows}
                       onSelectEntity={onSelectEntity}
                     />
@@ -3994,6 +4011,7 @@ const CloudGroupedCards = ({
                       <SubTypeRow
                         bucketKey={bucketKeyFor('cloud', service.entityType)}
                         label={service.label}
+                        icon={group.provider.icon}
                         entities={serviceRows}
                         onSelectEntity={onSelectEntity}
                       />
@@ -4141,6 +4159,7 @@ const CategoryCardInner = ({
   // On a category-scoped page, show the entity *type* instead of the
   // category in the header row (e.g. "Postgres 3" instead of "Databases 3").
   const typeLabel = hideHeader ? (entities[0]?.type ?? categoryLabel) : undefined;
+  const typeLogo = entityTypeLogo(typeLabel);
 
   const headerRow = (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
@@ -4155,6 +4174,11 @@ const CategoryCardInner = ({
       </EuiFlexItem>
       {hideHeader ? (
         <>
+          {typeLogo ? (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={typeLogo} size="m" aria-hidden />
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={false}>
             <EuiTitle size="xxs">
               <h5>{typeLabel}</h5>
@@ -4753,7 +4777,10 @@ export const GroupedGridView = ({
     }
     // ElasticOn (`enablePaletteColoring`) hides infra-parked categories
     // such as APM Services so they cannot reappear as a hex-map row.
-    return getVisibleEntityCategories(enablePaletteColoring)
+    return categoriesIncludingAws(
+      getVisibleEntityCategories(enablePaletteColoring),
+      effectiveEntities
+    )
       .map((descriptor) => ({
         category: descriptor.id,
         rows: buckets.get(descriptor.id) ?? [],

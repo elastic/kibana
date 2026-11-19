@@ -558,6 +558,8 @@ export interface EntityNavCounts {
   readonly byCategory: Readonly<Partial<Record<string, number>>>;
   readonly alertingAll: number;
   readonly alertingByCategory: Readonly<Partial<Record<string, number>>>;
+  readonly maintenanceAll: number;
+  readonly maintenanceByCategory: Readonly<Partial<Record<string, number>>>;
 }
 
 const EMPTY_ENTITY_NAV_COUNTS: EntityNavCounts = {
@@ -565,6 +567,8 @@ const EMPTY_ENTITY_NAV_COUNTS: EntityNavCounts = {
   byCategory: {},
   alertingAll: 0,
   alertingByCategory: {},
+  maintenanceAll: 0,
+  maintenanceByCategory: {},
 };
 
 interface EntityNavCountsSharedState {
@@ -584,3 +588,38 @@ const getEntityNavCountsState = (): EntityNavCountsSharedState => {
 /** RxJS stream of inventoriable entity counts for left-nav labels. */
 export const getEntityNavCounts$ = (): Observable<EntityNavCounts> =>
   getEntityNavCountsState().subject.asObservable();
+
+// ---------------------------------------------------------------------------
+// AWS Re-invent nav variant (mirrors streams_app aws_nav_variant.ts)
+// ---------------------------------------------------------------------------
+
+/** Must match `AWS_NAV_VARIANT_GLOBAL_KEY` in streams_app `aws_nav_variant.ts`. */
+const AWS_NAV_VARIANT_GLOBAL_KEY = '__kbnEntityCentricLabAwsNav$__';
+const AWS_NAV_VARIANT_STORAGE_KEY = 'elasticOn_v_awsReinvent';
+
+const readAwsReinventEnabled = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  try {
+    return window.localStorage.getItem(AWS_NAV_VARIANT_STORAGE_KEY) === 'on';
+  } catch {
+    return false;
+  }
+};
+
+interface AwsNavVariantSharedState {
+  readonly subject: BehaviorSubject<boolean>;
+}
+
+const getAwsNavVariantState = (): AwsNavVariantSharedState => {
+  const root = globalThis as unknown as Record<string, AwsNavVariantSharedState | undefined>;
+  let state = root[AWS_NAV_VARIANT_GLOBAL_KEY];
+  if (!state) {
+    state = { subject: new BehaviorSubject<boolean>(readAwsReinventEnabled()) };
+    root[AWS_NAV_VARIANT_GLOBAL_KEY] = state;
+  }
+  return state;
+};
+
+/** RxJS stream of the AWS Re-invent left-nav section flag. */
+export const getAwsReinventEnabled$ = (): Observable<boolean> =>
+  getAwsNavVariantState().subject.asObservable();

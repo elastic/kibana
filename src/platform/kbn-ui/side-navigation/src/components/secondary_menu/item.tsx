@@ -57,6 +57,7 @@ export const SecondaryMenuItemComponent = ({
   notificationCount,
   notificationHref,
   inventoryCount,
+  maintenanceCount,
   testSubjPrefix,
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
@@ -83,7 +84,7 @@ export const SecondaryMenuItemComponent = ({
       justify-content: ${iconSide === 'left' ? 'flex-start' : 'space-between'};
     }
 
-    svg:not(.euiBetaBadge__icon) {
+    svg:not(.euiBetaBadge__icon):not([data-icon-type='bellSlash']) {
       color: ${iconSide === 'right' ? euiTheme.colors.textDisabled : 'inherit'};
     }
 
@@ -157,6 +158,7 @@ export const SecondaryMenuItemComponent = ({
         inventoryCount={inventoryCount}
         notificationCount={notificationCount}
         notificationHref={notificationHref}
+        maintenanceCount={maintenanceCount}
       />
     </div>
   );

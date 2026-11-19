@@ -63,6 +63,8 @@ export const NavCountBadges = ({
   inventoryCount?: number;
   notificationCount?: number;
   notificationHref?: string;
+  /** Kept so callers can still pass it. Maintenance is shown only in the flyout alerts table. */
+  maintenanceCount?: number;
 }): JSX.Element | null => {
   const hasInventory =
     typeof inventoryCount === 'number' && Number.isFinite(inventoryCount);

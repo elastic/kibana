@@ -89,9 +89,10 @@ const PROVIDER_LABEL: Record<string, string> = Object.fromEntries(
 );
 
 /** Canonical display order for categories — mirrors the left nav / hex view. */
-const CATEGORY_CANONICAL_ORDER: ReadonlyMap<string, number> = new Map(
-  ENTITY_CATEGORIES.map((cat, idx) => [cat.label, idx])
-);
+const CATEGORY_CANONICAL_ORDER: ReadonlyMap<string, number> = new Map([
+  ['AWS', -1],
+  ...ENTITY_CATEGORIES.map((cat, idx) => [cat.label, idx] as const),
+]);
 
 const ALERT_GROUP_LABELS = {
   firing: i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.alerts.firing', {

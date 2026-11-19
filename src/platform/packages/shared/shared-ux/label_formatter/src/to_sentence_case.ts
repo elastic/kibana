@@ -51,9 +51,11 @@ const TITLE_CASE_GLOSSARY = [
   'V2 Alerting Preview',
   'Ingest Hub',
   'Elastic Inference',
+  'AWS',
   'AWS EC2',
   'AWS Lambda',
   'AWS RDS',
+  'EC2 instances',
   'AI/ML',
   'APM Services',
 ] as const;

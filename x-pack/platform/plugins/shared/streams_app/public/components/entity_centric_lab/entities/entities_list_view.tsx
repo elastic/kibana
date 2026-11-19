@@ -28,15 +28,19 @@ import {
   useEntityDisplayName,
 } from '@kbn/entity-centric-lab-flyout';
 import type { Entity, EntityCategoryId, EntityHealth } from './fake_entities';
+import { entityAlertBadgePresentation } from './entity_alert_badge';
+import { AlertStatusBadge } from './alert_status_badge';
 import {
   HEALTH_RANK,
   getCategoryDescriptor,
+  categoriesIncludingAws,
   getVisibleEntityCategories,
   isCategoryHiddenInElasticOn,
 } from './fake_entities';
 import { labThings } from '../lab_terminology';
 import { readPageSizeForTable, writePageSizeForTable } from './storage_keys';
 import { CLOUD_PROVIDERS, type CloudProviderDescriptor } from './cloud_providers';
+import { entityTypeLogo } from './entity_type_logo';
 import { EntityDataGridSection } from './entities_data_grid';
 import type { K8sCellFilterTarget } from './k8s_inventory_cell_filter';
 import { DEFAULT_LIST_DENSITY, type ListDensity } from './list_density';
@@ -191,25 +195,39 @@ const useColumns = (
               values: { name: row.name },
             }
           );
+          const presentation = entityAlertBadgePresentation(row);
           if (!row.alerts) {
             return (
-              <EuiBadge color="hollow" onClick={openAlerts} onClickAriaLabel={ariaLabel}>
-                N/A
-              </EuiBadge>
+              <AlertStatusBadge
+                color="hollow"
+                label="N/A"
+                tooltip={presentation.tooltip}
+                onClick={openAlerts}
+                onClickAriaLabel={ariaLabel}
+              />
             );
           }
           const { total, active } = row.alerts;
           if (active > 0) {
             return (
-              <EuiBadge color="danger" onClick={openAlerts} onClickAriaLabel={ariaLabel}>
-                {`Alerting (${active}/${total})`}
-              </EuiBadge>
+              <AlertStatusBadge
+                color="danger"
+                label={`Alerting (${active}/${total})`}
+                tooltip={presentation.tooltip}
+                showMaintenanceIcon={presentation.inMaintenance > 0}
+                onClick={openAlerts}
+                onClickAriaLabel={ariaLabel}
+              />
             );
           }
           return (
-            <EuiBadge color="success" onClick={openAlerts} onClickAriaLabel={ariaLabel}>
-              {`OK (${total}/${total})`}
-            </EuiBadge>
+            <AlertStatusBadge
+              color="success"
+              label={`OK (${total}/${total})`}
+              tooltip={presentation.tooltip}
+              onClick={openAlerts}
+              onClickAriaLabel={ariaLabel}
+            />
           );
         },
       },
@@ -481,11 +499,16 @@ const SectionHeader = ({
 }) => {
   const descriptor = getCategoryDescriptor(category);
   const heading = nested && subTypeLabel ? subTypeLabel : descriptor?.label ?? category;
+  const cloudServiceIcon = CLOUD_PROVIDERS.find((provider) =>
+    provider.services.some((service) => service.label === heading)
+  )?.icon;
+  const icon =
+    entityTypeLogo(heading) ?? cloudServiceIcon ?? (!nested ? descriptor?.icon : undefined);
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      {descriptor?.icon && !nested ? (
+      {icon ? (
         <EuiFlexItem grow={false}>
-          <EuiIcon type={descriptor.icon} size="m" aria-hidden />
+          <EuiIcon type={icon} size="m" aria-hidden />
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>
@@ -672,8 +695,15 @@ const GroupSectionHeader = ({
   label: string;
   total: number;
   alertsCount: number;
-}) => (
+}) => {
+  const logo = entityTypeLogo(label);
+  return (
   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    {logo ? (
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={logo} size="m" aria-hidden />
+      </EuiFlexItem>
+    ) : null}
     <EuiFlexItem grow={false}>
       <EuiTitle size="xs">
         <h3>{label}</h3>
@@ -699,7 +729,8 @@ const GroupSectionHeader = ({
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-);
+  );
+};
 
 /** Level-2 sub-group header (smaller) for 3-field custom grouping. */
 const SubGroupSectionHeader = ({
@@ -710,8 +741,15 @@ const SubGroupSectionHeader = ({
   label: string;
   total: number;
   alertsCount: number;
-}) => (
+}) => {
+  const logo = entityTypeLogo(label);
+  return (
   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    {logo ? (
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={logo} size="m" aria-hidden />
+      </EuiFlexItem>
+    ) : null}
     <EuiFlexItem grow={false}>
       <EuiTitle size="xs">
         <h4>{label}</h4>
@@ -737,7 +775,8 @@ const SubGroupSectionHeader = ({
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-);
+  );
+};
 
 const KubernetesSectionHeader = ({
   total,
@@ -962,7 +1001,10 @@ export const EntitiesListView = ({
     }
 
     const result: ListItem[] = [];
-    for (const descriptor of getVisibleEntityCategories(enableColumnSettings)) {
+    for (const descriptor of categoriesIncludingAws(
+      getVisibleEntityCategories(enableColumnSettings),
+      effectiveEntities
+    )) {
       const rows = buckets.get(descriptor.id);
       if (!rows || rows.length === 0) continue;
       if (descriptor.id === 'kubernetes') {

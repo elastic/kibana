@@ -8,13 +8,17 @@
  */
 
 export { EntityFlyout } from './src/entity_flyout';
+export { AwsEc2Icon, AwsLambdaIcon, AwsS3Icon, awsServiceIcon } from './src/aws_service_icons';
+export type { AwsServiceIconComponent } from './src/aws_service_icons';
+export { entityTypeLogo } from './src/entity_type_logo';
+export type { EntityTypeIcon } from './src/entity_type_logo';
 
 // Individual tab components — exported so the full-page detail view
 // (streams_app) can reuse them outside the flyout shell.
 export { OverviewTab } from './src/overview_tab';
 export { MetricsTab } from './src/metrics_tab';
 export { LogsTab } from './src/logs_tab';
-export { AlertsTab, AlertsNotConfiguredPrompt } from './src/alerts_tab';
+export { AlertsTab, AlertsNotConfiguredPrompt, AlertNotificationsCell } from './src/alerts_tab';
 export { RelationshipsTab } from './src/relationships_tab';
 export { TracesTab } from './src/traces_tab';
 export { ProfilingTab } from './src/profiling_tab';
@@ -66,6 +70,7 @@ export type {
   LogRow,
   LogSeverity,
   AlertRow,
+  AlertNotificationSuppression,
   AlertsTabData,
   RelatedEntity,
   RelatedEntityHealth,

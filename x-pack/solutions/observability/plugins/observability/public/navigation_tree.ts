@@ -22,6 +22,7 @@ import {
   getSavedViews$,
   getSavedViewsExpanded$,
   getEntityNavCounts$,
+  getAwsReinventEnabled$,
   buildSavedViewInventoryQuerySuffix,
   maybeAutoExpandSavedViewsForActiveView,
   SAVED_VIEWS_COLLAPSED_LIMIT,
@@ -75,7 +76,15 @@ function createNavTree({
   integrationsSearchQuery = '',
   savedViews = [],
   savedViewsExpanded = false,
-  entityNavCounts = { all: 0, byCategory: {}, alertingAll: 0, alertingByCategory: {} },
+  entityNavCounts = {
+    all: 0,
+    byCategory: {},
+    alertingAll: 0,
+    alertingByCategory: {},
+    maintenanceAll: 0,
+    maintenanceByCategory: {},
+  },
+  awsReinventEnabled = false,
   toAbsoluteHref = (path: string) => path,
 }: {
   streamsAvailable?: boolean;
@@ -106,6 +115,8 @@ function createNavTree({
   savedViewsExpanded?: boolean;
   // Inventoriable entity counts for left-nav labels (All resources (N), …).
   entityNavCounts?: EntityNavCounts;
+  /** ElasticOn variant: group EC2, Lambda, and S3 under an AWS nav section. */
+  awsReinventEnabled?: boolean;
   // Free-text nav filter for the super-short-term integrations panel; matches
   // integration names across both the starred and installed lists.
   integrationsSearchQuery?: string;
@@ -639,21 +650,28 @@ function createNavTree({
     if (!navCountsReady) return undefined;
     return entityNavCounts.alertingByCategory[categoryId] ?? 0;
   };
+  const categoryMaintenanceCount = (categoryId: string): number | undefined => {
+    if (!navCountsReady) return undefined;
+    return entityNavCounts.maintenanceByCategory[categoryId] ?? 0;
+  };
 
   /** Right-aligned nav badge: hollow total, or danger alerting/total with alert filter link. */
   const inventoryNavBadgeProps = (
     path: string,
     total: number | undefined,
-    alerting: number | undefined
+    alerting: number | undefined,
+    maintenance: number | undefined
   ) => {
     if (total == null || !Number.isFinite(total)) return {};
     const alertCount = alerting ?? 0;
+    const maintenanceCount = maintenance ?? 0;
     return {
       inventoryCount: total,
       ...(alertCount > 0
         ? {
             notificationCount: alertCount,
             notificationHref: toAbsoluteHref(`${path}?alertsFilter=active`),
+            ...(maintenanceCount > 0 ? { maintenanceCount } : {}),
           }
         : {}),
     };
@@ -674,7 +692,8 @@ function createNavTree({
         ...inventoryNavBadgeProps(
           '/app/streams/entities',
           navCountsReady ? entityNavCounts.all : undefined,
-          navCountsReady ? entityNavCounts.alertingAll : undefined
+          navCountsReady ? entityNavCounts.alertingAll : undefined,
+          navCountsReady ? entityNavCounts.maintenanceAll : undefined
         ),
         getIsActive: categoryGetIsActive('/app/streams/entities', true),
       },
@@ -693,7 +712,8 @@ function createNavTree({
       ...inventoryNavBadgeProps(
         '/app/streams/entities/hosts',
         categoryCount('hosts'),
-        categoryAlertingCount('hosts')
+        categoryAlertingCount('hosts'),
+        categoryMaintenanceCount('hosts')
       ),
       getIsActive: categoryGetIsActive('/app/streams/entities/hosts'),
     },
@@ -706,7 +726,8 @@ function createNavTree({
       ...inventoryNavBadgeProps(
         '/app/streams/entities/kubernetes',
         categoryCount('kubernetes'),
-        categoryAlertingCount('kubernetes')
+        categoryAlertingCount('kubernetes'),
+        categoryMaintenanceCount('kubernetes')
       ),
       getIsActive: categoryGetIsActive('/app/streams/entities/kubernetes'),
     },
@@ -719,7 +740,8 @@ function createNavTree({
       ...inventoryNavBadgeProps(
         '/app/streams/entities/databases',
         categoryCount('databases'),
-        categoryAlertingCount('databases')
+        categoryAlertingCount('databases'),
+        categoryMaintenanceCount('databases')
       ),
       getIsActive: categoryGetIsActive('/app/streams/entities/databases'),
     },
@@ -732,7 +754,8 @@ function createNavTree({
       ...inventoryNavBadgeProps(
         '/app/streams/entities/storage',
         categoryCount('storage'),
-        categoryAlertingCount('storage')
+        categoryAlertingCount('storage'),
+        categoryMaintenanceCount('storage')
       ),
       getIsActive: categoryGetIsActive('/app/streams/entities/storage'),
     },
@@ -745,7 +768,8 @@ function createNavTree({
       ...inventoryNavBadgeProps(
         '/app/streams/entities/functions',
         categoryCount('functions'),
-        categoryAlertingCount('functions')
+        categoryAlertingCount('functions'),
+        categoryMaintenanceCount('functions')
       ),
       getIsActive: categoryGetIsActive('/app/streams/entities/functions'),
     },
@@ -761,7 +785,8 @@ function createNavTree({
       ...inventoryNavBadgeProps(
         '/app/streams/entities/networking',
         categoryCount('networking'),
-        categoryAlertingCount('networking')
+        categoryAlertingCount('networking'),
+        categoryMaintenanceCount('networking')
       ),
       getIsActive: categoryGetIsActive('/app/streams/entities/networking'),
     },
@@ -777,7 +802,8 @@ function createNavTree({
       ...inventoryNavBadgeProps(
         '/app/streams/entities/middlewares',
         categoryCount('middlewares'),
-        categoryAlertingCount('middlewares')
+        categoryAlertingCount('middlewares'),
+        categoryMaintenanceCount('middlewares')
       ),
       getIsActive: categoryGetIsActive('/app/streams/entities/middlewares'),
     },
@@ -790,7 +816,8 @@ function createNavTree({
       ...inventoryNavBadgeProps(
         '/app/streams/entities/llms',
         categoryCount('llms'),
-        categoryAlertingCount('llms')
+        categoryAlertingCount('llms'),
+        categoryMaintenanceCount('llms')
       ),
       getIsActive: categoryGetIsActive('/app/streams/entities/llms'),
     },
@@ -803,7 +830,8 @@ function createNavTree({
       ...inventoryNavBadgeProps(
         '/app/streams/entities/other',
         categoryCount('other'),
-        categoryAlertingCount('other')
+        categoryAlertingCount('other'),
+        categoryMaintenanceCount('other')
       ),
       getIsActive: categoryGetIsActive('/app/streams/entities/other'),
     },
@@ -821,7 +849,8 @@ function createNavTree({
       ...inventoryNavBadgeProps(
         '/app/streams/entities/services',
         categoryCount('services'),
-        categoryAlertingCount('services')
+        categoryAlertingCount('services'),
+        categoryMaintenanceCount('services')
       ),
       getIsActive: categoryGetIsActive('/app/streams/entities/services'),
     },
@@ -977,6 +1006,21 @@ function createNavTree({
     ...latestCategoryChildrenBottom,
   ];
 
+  // AWS Re-invent: one flat nav entry, first among the categories. The
+  // EC2 / S3 / Lambda types are groups on that page, not nav children.
+  const awsNavTitle = i18n.translate('xpack.observability.obltNav.elasticOn.aws', {
+    defaultMessage: 'AWS',
+  });
+  const awsNavNode =
+    elasticOnEnabled && awsReinventEnabled && matchesLatestSearch(awsNavTitle)
+      ? {
+          id: 'entityCentricLab-awsReinvent',
+          link: 'streams:entitiesCloudAws' as const,
+          title: awsNavTitle,
+          getIsActive: categoryGetIsActive('/app/streams/entities/cloud/aws'),
+        }
+      : null;
+
   const entitiesPanelChildren = superShortTermMode
     ? superShortTermPanelChildren
     : infraShortTermMode
@@ -998,7 +1042,9 @@ function createNavTree({
         // Cloud provider filter lives on the Cloud page itself.
         ...(savedViewsSection ? [savedViewsSection] : []),
         ...(latestEntitiesAllSection.children.length > 0 ? [latestEntitiesAllSection] : []),
-        ...(elasticOnCategoryChildren.length > 0 ? [{ children: elasticOnCategoryChildren }] : []),
+        ...(awsNavNode || elasticOnCategoryChildren.length > 0
+          ? [{ children: [...(awsNavNode ? [awsNavNode] : []), ...elasticOnCategoryChildren] }]
+          : []),
         ...(isPhase1Nav ? [] : [manageEntityTypesSection]),
       ]
     : latestEnabled
@@ -1937,6 +1983,7 @@ export const createDefinition = (
       getSavedViewsExpanded$(),
       // ElasticOn / Latest: inventoriable entity counts for left-nav labels.
       getEntityNavCounts$(),
+      getAwsReinventEnabled$(),
     ]).pipe(
       map(
         ([
@@ -1950,6 +1997,7 @@ export const createDefinition = (
           savedViews,
           savedViewsExpanded,
           entityNavCounts,
+          awsReinventEnabled,
         ]) =>
           createNavTree({
             streamsAvailable: status === 'enabled',
@@ -1971,6 +2019,7 @@ export const createDefinition = (
             savedViews,
             savedViewsExpanded,
             entityNavCounts,
+            awsReinventEnabled,
             installedIntegrations: getInstalledIntegrations(),
             // Chrome requires nav `href`s to be absolute URLs; prepend the origin
             // to the basePath-qualified app path.

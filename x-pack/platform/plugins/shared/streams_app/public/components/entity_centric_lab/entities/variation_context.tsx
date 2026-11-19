@@ -20,6 +20,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type PropsWithChildren,
@@ -123,6 +124,17 @@ export const VariationProvider = ({ children }: PropsWithChildren<{}>) => {
   // so writes trigger re-renders instantly.
   const [selections, setSelections] = useState<Record<string, string>>(readFromStorage);
 
+  // Nav counts may already be published. Re-apply the variant so badges stay
+  // hidden until "Left nav badges" is turned on.
+  useEffect(() => {
+    void import('./entity_nav_counts').then(({ refreshEntityNavCounts }) => {
+      refreshEntityNavCounts();
+    });
+    void import('./aws_nav_variant').then(({ publishAwsNavVariant }) => {
+      publishAwsNavVariant();
+    });
+  }, []);
+
   const get = useCallback(
     (dimensionId: string): string => {
       if (selections[dimensionId]) return selections[dimensionId];
@@ -145,6 +157,19 @@ export const VariationProvider = ({ children }: PropsWithChildren<{}>) => {
           next[dimensionId] = optionId;
         }
         writeToStorage(dimensionId, optionId, prev);
+        if (dimensionId === 'navBadges') {
+          void import('./entity_nav_counts').then(({ refreshEntityNavCounts }) => {
+            refreshEntityNavCounts();
+          });
+        }
+        if (dimensionId === 'awsReinvent') {
+          void import('./aws_nav_variant').then(({ publishAwsNavVariant }) => {
+            publishAwsNavVariant();
+          });
+          void import('./entity_nav_counts').then(({ refreshEntityNavCounts }) => {
+            refreshEntityNavCounts();
+          });
+        }
         // When the phase changes, clear persisted state that is
         // phase-specific so the UI re-defaults cleanly:
         //   - bucket metric selections (Alerts vs Health default)

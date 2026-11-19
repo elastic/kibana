@@ -15,6 +15,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { readAwsReinventEnabled } from './aws_nav_variant';
 import type { DataVariation } from './variation_registry';
 import {
   buildFakeEntities,
@@ -37,6 +38,12 @@ export interface EntityNavCounts {
    */
   readonly alertingAll: number;
   readonly alertingByCategory: Readonly<Partial<Record<EntityCategoryId, number>>>;
+  /**
+   * Resources that have an active alert inside a maintenance window.
+   * Still counted in {@link alertingAll}.
+   */
+  readonly maintenanceAll: number;
+  readonly maintenanceByCategory: Readonly<Partial<Record<EntityCategoryId, number>>>;
 }
 
 const EMPTY_COUNTS: EntityNavCounts = {
@@ -44,6 +51,8 @@ const EMPTY_COUNTS: EntityNavCounts = {
   byCategory: {},
   alertingAll: 0,
   alertingByCategory: {},
+  maintenanceAll: 0,
+  maintenanceByCategory: {},
 };
 
 interface SharedState {
@@ -78,27 +87,55 @@ export const countsFromDataset = (
   }
 
   const alertingByCategory: Partial<Record<EntityCategoryId, number>> = {};
+  const maintenanceByCategory: Partial<Record<EntityCategoryId, number>> = {};
   let alertingAll = 0;
+  let maintenanceAll = 0;
   for (const entity of dataset.entities) {
     if ((entity.alerts?.active ?? 0) <= 0) continue;
     alertingByCategory[entity.category] = (alertingByCategory[entity.category] ?? 0) + 1;
+    const inMaintenance = (entity.alerts?.inMaintenance ?? 0) > 0;
+    if (inMaintenance) {
+      maintenanceByCategory[entity.category] = (maintenanceByCategory[entity.category] ?? 0) + 1;
+    }
     if (excludeHiddenFromAll && ELASTICON_HIDDEN_CATEGORY_IDS.has(entity.category)) {
       continue;
     }
     alertingAll += 1;
+    if (inMaintenance) maintenanceAll += 1;
   }
 
-  return { all, byCategory, alertingAll, alertingByCategory };
+  return {
+    all,
+    byCategory,
+    alertingAll,
+    alertingByCategory,
+    maintenanceAll,
+    maintenanceByCategory,
+  };
 };
 
 export const publishEntityNavCounts = (counts: EntityNavCounts): void => {
   getSharedState().subject.next(counts);
 };
 
+const readNavBadgesEnabled = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  try {
+    return window.localStorage.getItem('elasticOn_v_navBadges') === 'on';
+  } catch {
+    return false;
+  }
+};
+
 export const publishEntityNavCountsFromDataset = (
   dataset: FakeEntitiesDataset,
   options?: { readonly excludeHiddenFromAll?: boolean }
 ): void => {
+  // Off by default. The variant selector persists `on` under elasticOn_v_navBadges.
+  if (!readNavBadgesEnabled()) {
+    publishEntityNavCounts(EMPTY_COUNTS);
+    return;
+  }
   publishEntityNavCounts(countsFromDataset(dataset, options));
 };
 
@@ -115,8 +152,32 @@ const readDataProfile = (): DataVariation => {
   return 'default';
 };
 
+/**
+ * AWS Re-invent moves EC2, Lambda, and S3 out of Hosts, Functions, and
+ * Storage. Nav totals follow that, so Hosts no longer counts EC2.
+ */
+const relocateAwsForNavCounts = (dataset: FakeEntitiesDataset): FakeEntitiesDataset => {
+  const entities = dataset.entities.map((entity) =>
+    entity.provider === 'aws' ? { ...entity, category: 'aws' as const } : entity
+  );
+  const totals = new Map<EntityCategoryId, number>();
+  for (const entity of entities) {
+    totals.set(entity.category, (totals.get(entity.category) ?? 0) + 1);
+  }
+  return {
+    ...dataset,
+    entities,
+    categoryCounts: dataset.categoryCounts.map((entry) =>
+      entry.category === 'kubernetes' ? entry : { ...entry, total: totals.get(entry.category) ?? 0 }
+    ),
+  };
+};
+
 /** Rebuild + publish counts for the current data profile (nav cold start). */
 export const refreshEntityNavCounts = (): void => {
   const dataset = buildFakeEntities(readDataProfile());
-  publishEntityNavCountsFromDataset(dataset, { excludeHiddenFromAll: true });
+  publishEntityNavCountsFromDataset(
+    readAwsReinventEnabled() ? relocateAwsForNavCounts(dataset) : dataset,
+    { excludeHiddenFromAll: true }
+  );
 };

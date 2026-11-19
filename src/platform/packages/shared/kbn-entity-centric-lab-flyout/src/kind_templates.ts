@@ -4099,7 +4099,7 @@ const buildCloudEc2Template = (
   h: EntityHealthVariant
 ): { overview: EntityOverview; tabs: EntityTabsData } => {
   const tags: EntityTag[] = [
-    { label: 'cloud', color: 'hollow' },
+    { label: 'Hosts', color: 'hollow' },
     { label: 'AWS EC2 Instance', color: 'hollow' },
     healthTag(h),
     { label: 'Production', color: 'hollow' },
@@ -4335,7 +4335,7 @@ const buildCloudLambdaTemplate = (
   h: EntityHealthVariant
 ): { overview: EntityOverview; tabs: EntityTabsData } => {
   const tags: EntityTag[] = [
-    { label: 'cloud', color: 'hollow' },
+    { label: 'Functions', color: 'hollow' },
     { label: 'AWS Lambda function', color: 'hollow' },
     healthTag(h),
     { label: 'Production', color: 'hollow' },
@@ -4571,7 +4571,7 @@ const buildCloudS3Template = (
   h: EntityHealthVariant
 ): { overview: EntityOverview; tabs: EntityTabsData } => {
   const tags: EntityTag[] = [
-    { label: 'cloud', color: 'hollow' },
+    { label: 'Storage', color: 'hollow' },
     { label: 'AWS S3 bucket', color: 'hollow' },
     healthTag(h),
     { label: 'Production', color: 'hollow' },

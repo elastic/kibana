@@ -244,7 +244,7 @@ const SummaryMetricCard = ({
           position: absolute;
           top: ${layout.padPx}px;
           left: ${layout.padPx + 2}px;
-          right: calc(${euiTheme.size.m} + ${euiTheme.size.xxs});
+          right: calc(${euiTheme.size.m} + ${euiTheme.size.xs} + ${euiTheme.size.xxs});
           z-index: 1;
           display: flex;
           align-items: baseline;

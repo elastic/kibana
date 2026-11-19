@@ -42,6 +42,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useEntityDisplayName } from '@kbn/entity-centric-lab-flyout';
 import type { Entity, EntityCategoryId, EntityHealth } from './fake_entities';
+import { entityAlertBadgePresentation } from './entity_alert_badge';
+import { AlertStatusBadge } from './alert_status_badge';
 import { HEALTH_RANK, getCategoryDescriptor } from './fake_entities';
 import { useVariation } from './variation_context';
 import type { PhaseVariation } from './variation_registry';
@@ -114,12 +116,6 @@ const HEALTH_LABEL: Record<EntityHealth, string> = {
   unhealthy: i18n.translate('xpack.streams.entityCentricLab.entities.grid.health.unhealthy', {
     defaultMessage: 'Unhealthy',
   }),
-};
-
-const ALERT_BADGE_COLOR: Record<string, 'danger' | 'success' | 'hollow'> = {
-  active: 'danger',
-  clear: 'success',
-  na: 'hollow',
 };
 
 const ALERT_SORT_RANK: Record<string, number> = { active: 0, na: 1, clear: 2 };
@@ -1061,10 +1057,14 @@ export const EntityDataGridSection = ({
               {HEALTH_LABEL[entity.health]}
             </EuiBadge>
           );
-        case 'alerts':
+        case 'alerts': {
+          const presentation = entityAlertBadgePresentation(entity);
           return (
-            <EuiBadge
-              color={ALERT_BADGE_COLOR[alertStatusId(entity)] ?? 'hollow'}
+            <AlertStatusBadge
+              color={presentation.color}
+              label={alertBadgeLabel(entity)}
+              tooltip={presentation.tooltip}
+              showMaintenanceIcon={presentation.inMaintenance > 0}
               onClick={() => (onSelectEntityAlerts ?? onSelectEntity)(entity.name)}
               onClickAriaLabel={i18n.translate(
                 'xpack.streams.entityCentricLab.entities.datagrid.alertsBadge.ariaLabel',
@@ -1073,10 +1073,9 @@ export const EntityDataGridSection = ({
                   values: { name: entity.name },
                 }
               )}
-            >
-              {alertBadgeLabel(entity)}
-            </EuiBadge>
+            />
           );
+        }
         case 'application':
         case 'environment':
         case 'team':

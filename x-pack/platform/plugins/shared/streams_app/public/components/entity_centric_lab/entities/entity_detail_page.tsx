@@ -103,6 +103,10 @@ import {
   enrichK8sFlyoutOverviewDetails,
 } from './flyout_k8s_related_resources';
 import { buildFakeEntities, getCategoryDescriptor } from './fake_entities';
+import { awsReinventHeaderBadges } from './cloud_providers';
+import { entityTypeLogo } from './entity_type_logo';
+import { entityAlertBadgePresentation, entityInMaintenanceCount } from './entity_alert_badge';
+import { AlertStatusBadge } from './alert_status_badge';
 import { VariationProvider, useVariation } from './variation_context';
 import { VariationSwitcher } from './variation_switcher';
 import type { DataVariation } from './variation_registry';
@@ -308,12 +312,23 @@ const PageTabContent = ({
  * Compute the Phase 1 alerts badge from an entity's `alerts` field.
  */
 const computeChildAlertsBadge = (
-  entity: { alerts?: { total: number; active: number } } | undefined
-): { label: string; color: string } | undefined => {
+  entity: { alerts?: { total: number; active: number; inMaintenance?: number } } | undefined
+): { label: string; color: string; tooltip?: string; showMaintenanceIcon?: boolean } | undefined => {
   if (!entity) return undefined;
+  const presentation = entityAlertBadgePresentation(entity);
+  const maintenance =
+    presentation.inMaintenance > 0
+      ? { tooltip: presentation.tooltip, showMaintenanceIcon: true as const }
+      : {};
   if (!entity.alerts) return { label: 'N/A', color: 'hollow' };
-  const { total, active } = entity.alerts;
-  if (active > 0) return { label: `${active} active alert${active > 1 ? 's' : ''}`, color: 'danger' };
+  const { active } = entity.alerts;
+  if (active > 0) {
+    return {
+      label: `${active} active alert${active > 1 ? 's' : ''}`,
+      color: 'danger',
+      ...maintenance,
+    };
+  }
   return { label: '0 active alerts', color: 'success' };
 };
 
@@ -354,6 +369,7 @@ const EntityDetailPageInner = () => {
   const dashboardStyleVariation = useVariation('dashboardStyle') as 'embedded' | 'list' | 'listWithPreview';
   const showDashboardThumbnails = useVariation('dashboardThumbnails') === 'show';
   const isPhase1 = phaseVariation === 'phase1';
+  const awsReinventOn = useVariation('awsReinvent') === 'on';
 
   const listDensity = useMemo(() => {
     if (typeof window === 'undefined') return DEFAULT_LIST_DENSITY;
@@ -413,33 +429,59 @@ const EntityDetailPageInner = () => {
   );
   const alertsActiveOverride = inventoryAlertsActiveOverride(entity);
   const tabsData = useMemo(
-    () => buildFakeEntityTabsData(entityName, entityType, entityHealth, alertsActiveOverride),
-    [entityName, entityType, entityHealth, alertsActiveOverride]
+    () =>
+      buildFakeEntityTabsData(
+        entityName,
+        entityType,
+        entityHealth,
+        alertsActiveOverride,
+        entity ? entityInMaintenanceCount(entity) : undefined
+      ),
+    [entityName, entityType, entityHealth, alertsActiveOverride, entity]
   );
 
   const displayName = useEntityDisplayName(entityName, entityType);
 
   // Badge order — Phase 1: category → type → alerts → rest (matches flyout).
   // Non-Phase-1: lead with the health indicator badge.
+  const headerBadgeLabels = awsReinventOn ? awsReinventHeaderBadges(entityType) : undefined;
   const orderedTags = useMemo(() => {
+    let headerSlots = 0;
+    const sourceTags = headerBadgeLabels
+      ? overview.tags.map((tag) => {
+          if (HEALTH_TAG_LABELS.has(tag.label) || headerSlots >= 2) return tag;
+          const label = headerSlots === 0 ? headerBadgeLabels.category : headerBadgeLabels.type;
+          headerSlots += 1;
+          return { ...tag, label };
+        })
+      : overview.tags;
     if (isPhase1) {
-      const withoutHealth = overview.tags.filter((tag) => !HEALTH_TAG_LABELS.has(tag.label));
+      const withoutHealth = sourceTags.filter((tag) => !HEALTH_TAG_LABELS.has(tag.label));
       const primary = withoutHealth.slice(0, 2);
       const rest = withoutHealth.slice(2);
       if (entity?.alerts) {
         const { active } = entity.alerts;
+        const presentation = entityAlertBadgePresentation(entity);
+        const maintenance =
+          presentation.inMaintenance > 0
+            ? { tooltip: presentation.tooltip, showMaintenanceIcon: true }
+            : {};
         const alertTag = active > 0
-          ? { label: `${active} active alert${active > 1 ? 's' : ''}`, color: 'danger' }
+          ? {
+              label: `${active} active alert${active > 1 ? 's' : ''}`,
+              color: 'danger',
+              ...maintenance,
+            }
           : { label: '0 active alerts', color: 'success' };
         return [...primary, alertTag, ...rest];
       }
       return [...primary, { label: 'N/A', color: 'hollow' }, ...rest];
     }
-    const healthIndex = overview.tags.findIndex((tag) => HEALTH_TAG_LABELS.has(tag.label));
-    if (healthIndex <= 0) return overview.tags;
-    const rest = overview.tags.filter((_, index) => index !== healthIndex);
-    return [overview.tags[healthIndex], ...rest];
-  }, [overview.tags, isPhase1, entity]);
+    const healthIndex = sourceTags.findIndex((tag) => HEALTH_TAG_LABELS.has(tag.label));
+    if (healthIndex <= 0) return sourceTags;
+    const rest = sourceTags.filter((_, index) => index !== healthIndex);
+    return [sourceTags[healthIndex], ...rest];
+  }, [overview.tags, isPhase1, entity, headerBadgeLabels]);
 
   const visibleTagCount = isPhase1 ? VISIBLE_TAG_COUNT_PHASE1 : orderedTags.length;
   const visibleTags = orderedTags.slice(0, visibleTagCount);
@@ -1147,7 +1189,14 @@ const EntityDetailPageInner = () => {
               </EuiFlexItem>
               {entity?.category ? (
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={getCategoryDescriptor(entity.category)?.icon ?? 'package'} size="l" />
+                  <EuiIcon
+                    type={
+                      entityTypeLogo(entity.type) ??
+                      getCategoryDescriptor(entity.category)?.icon ??
+                      'package'
+                    }
+                    size="l"
+                  />
                 </EuiFlexItem>
               ) : null}
               <EuiFlexItem grow={false}>{displayName}</EuiFlexItem>
@@ -1210,7 +1259,16 @@ const EntityDetailPageInner = () => {
           <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
             {visibleTags.map((tag) => (
               <EuiFlexItem grow={false} key={tag.label}>
-                <EuiBadge color={tag.color}>{tag.label}</EuiBadge>
+                {'tooltip' in tag && tag.tooltip ? (
+                  <AlertStatusBadge
+                    color={tag.color}
+                    label={tag.label}
+                    tooltip={tag.tooltip}
+                    showMaintenanceIcon={'showMaintenanceIcon' in tag && tag.showMaintenanceIcon}
+                  />
+                ) : (
+                  <EuiBadge color={tag.color}>{tag.label}</EuiBadge>
+                )}
               </EuiFlexItem>
             ))}
             {podPhaseBadge ? (
@@ -1254,7 +1312,18 @@ const EntityDetailPageInner = () => {
                   >
                     {overflowTags.map((tag) => (
                       <EuiFlexItem grow={false} key={tag.label}>
-                        <EuiBadge color={tag.color}>{tag.label}</EuiBadge>
+                        {'tooltip' in tag && tag.tooltip ? (
+                          <AlertStatusBadge
+                            color={tag.color}
+                            label={tag.label}
+                            tooltip={tag.tooltip}
+                            showMaintenanceIcon={
+                              'showMaintenanceIcon' in tag && tag.showMaintenanceIcon
+                            }
+                          />
+                        ) : (
+                          <EuiBadge color={tag.color}>{tag.label}</EuiBadge>
+                        )}
                       </EuiFlexItem>
                     ))}
                   </EuiFlexGroup>
@@ -1319,6 +1388,7 @@ const EntityDetailPageInner = () => {
           entityName={childEntityName}
           entityType={childEntityType}
           entityHealth={childEntityHealth}
+          headerBadgeLabels={awsReinventOn ? awsReinventHeaderBadges(childEntityType) : undefined}
           region={childEntityRegion}
           hostedApmServiceNames={childHostedApmServiceNames}
           onClose={closeChildEntity}
@@ -1327,6 +1397,7 @@ const EntityDetailPageInner = () => {
           hideHealthBadge={isPhase1}
           alertsBadge={isPhase1 ? computeChildAlertsBadge(childEntity) : undefined}
           alertsActiveCount={inventoryAlertsActiveOverride(childEntity)}
+          alertsInMaintenance={entityInMaintenanceCount(childEntity)}
           podPhaseBadge={podPhaseBadgeForEntity(childEntity)}
           timeRange={{ from: rangeFrom, to: rangeTo }}
           hideAiSummary={isPhase1}

@@ -9,7 +9,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,11 +25,22 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { Axis, Chart, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
 import {
+  AlertNotificationsCell,
   AlertsNotConfiguredPrompt,
   formatIncidentTick,
   useEntityFlyoutServices,
 } from '@kbn/entity-centric-lab-flyout';
 import type { AlertRow, AlertsTabData } from '@kbn/entity-centric-lab-flyout';
+
+/** Lets Rule name and Reason wrap inside the fixed table layout. */
+const wrappingCellCss = css`
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+`;
 
 export interface StreamsElasticOnAlertsTabProps {
   readonly alerts: AlertsTabData;
@@ -111,6 +121,20 @@ export const StreamsElasticOnAlertsTab = ({
         render: (status: AlertRow['status']) => <EuiBadge color="danger">{status}</EuiBadge>,
       },
       {
+        field: 'notificationSuppression',
+        name: i18n.translate('entityCentricLabFlyout.flyout.alerts.columns.notifications', {
+          defaultMessage: 'Notifications & actions',
+        }),
+        width: '200px',
+        render: (_value: AlertRow['notificationSuppression'], row: AlertRow) => (
+          <AlertNotificationsCell
+            row={row}
+            textSize={density === 'compact' ? 'xs' : 's'}
+            entityName={entityName}
+          />
+        ),
+      },
+      {
         field: 'triggeredAt',
         name: i18n.translate('entityCentricLabFlyout.flyout.alerts.columns.triggered', {
           defaultMessage: 'Triggered',
@@ -123,16 +147,37 @@ export const StreamsElasticOnAlertsTab = ({
         name: i18n.translate('entityCentricLabFlyout.flyout.alerts.columns.ruleName', {
           defaultMessage: 'Rule name',
         }),
+        truncateText: false,
+        valign: 'top',
         render: (ruleName: string, row: AlertRow) => (
-          <EuiButtonEmpty
-            flush="left"
-            size="s"
-            color="primary"
-            data-test-subj="streamsElasticOnAlertsRuleLink"
-            onClick={() => openRuleRow(row)}
-          >
-            {ruleName}
-          </EuiButtonEmpty>
+          <span css={wrappingCellCss}>
+            <EuiText size={density === 'compact' ? 'xs' : 's'}>
+              <a
+                role="button"
+                tabIndex={0}
+                data-test-subj="streamsElasticOnAlertsRuleLink"
+                css={css`
+                  color: ${euiTheme.colors.primaryText};
+                  cursor: pointer;
+                  white-space: normal;
+                  overflow-wrap: break-word;
+                  word-break: break-word;
+                  &:hover {
+                    text-decoration: underline;
+                  }
+                `}
+                onClick={(event) => {
+                  event.preventDefault();
+                  openRuleRow(row);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') openRuleRow(row);
+                }}
+              >
+                {ruleName}
+              </a>
+            </EuiText>
+          </span>
         ),
       },
       {
@@ -140,23 +185,40 @@ export const StreamsElasticOnAlertsTab = ({
         name: i18n.translate('entityCentricLabFlyout.flyout.alerts.columns.reason', {
           defaultMessage: 'Reason',
         }),
+        truncateText: false,
+        valign: 'top',
         render: (reason: string, row: AlertRow) => (
-          <EuiButtonEmpty flush="left" size="s" color="primary" onClick={() => openAlertRow(row)}>
-            <EuiText
-              size={density === 'compact' ? 'xs' : 's'}
-              css={css`
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-              `}
-            >
-              {reason}
+          <span css={wrappingCellCss}>
+            <EuiText size={density === 'compact' ? 'xs' : 's'}>
+              <a
+                role="button"
+                tabIndex={0}
+                css={css`
+                  color: ${euiTheme.colors.primaryText};
+                  cursor: pointer;
+                  white-space: normal;
+                  overflow-wrap: break-word;
+                  word-break: break-word;
+                  &:hover {
+                    text-decoration: underline;
+                  }
+                `}
+                onClick={(event) => {
+                  event.preventDefault();
+                  openAlertRow(row);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') openAlertRow(row);
+                }}
+              >
+                {reason}
+              </a>
             </EuiText>
-          </EuiButtonEmpty>
+          </span>
         ),
       },
     ],
-    [openAlertRow, openRuleRow, density]
+    [openAlertRow, openRuleRow, density, euiTheme, entityName]
   );
 
   const activePercent =

@@ -169,6 +169,7 @@ export const toNavigationItems = (
         notificationCount: child.notificationCount,
         notificationHref: child.notificationHref,
         inventoryCount: child.inventoryCount,
+        maintenanceCount: child.maintenanceCount,
       };
     };
 
@@ -245,6 +246,7 @@ export const toNavigationItems = (
               label: child.title && toSentenceCase(child.title),
               items: secondaryItems,
               ...(subGroups.length > 0 ? { subGroups } : {}),
+              ...(child.sideNavDivider === false ? { divider: false } : {}),
             };
           })
         ).filter((section) => section.items.length > 0 || (section.subGroups?.length ?? 0) > 0); // Filter out empty sections;

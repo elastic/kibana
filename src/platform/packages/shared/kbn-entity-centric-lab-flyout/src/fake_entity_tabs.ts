@@ -83,12 +83,20 @@ export interface LogRow {
   readonly severity: LogSeverity;
 }
 
+/** Why notifications and actions are off for an alert that is still active. */
+export type AlertNotificationSuppression = 'snoozed' | 'maintenanceWindow';
+
 export interface AlertRow {
   readonly id: string;
   readonly status: 'Active';
   readonly triggeredAt: string;
   readonly ruleName: string;
   readonly reason: string;
+  /**
+   * Empty or omitted means notifications and actions are enabled.
+   * A row can be both snoozed and inside a maintenance window.
+   */
+  readonly notificationSuppression?: readonly AlertNotificationSuppression[];
 }
 
 export interface AlertsTabData {
@@ -296,15 +304,44 @@ const series = (id: string, label: string, ys: readonly number[]) => ({
  *      llm) tinted by `entityHealth` (healthy / atRisk / unhealthy).
  *   3. Generic fallback — last-resort mock, mostly never reached.
  */
+const stampMaintenanceWindows = (
+  tabs: EntityTabsData,
+  inMaintenance: number | undefined
+): EntityTabsData => {
+  const count = inMaintenance ?? 0;
+  if (count <= 0 || tabs.alerts.details.length === 0) return tabs;
+  const length = tabs.alerts.details.length;
+  const capped = Math.min(count, length);
+  // The next row is snoozed, so the few entities in a window also show that reason.
+  // When every row is already in a window, the last row carries both reasons.
+  const snoozeIndex = capped < length ? capped : length - 1;
+  return {
+    ...tabs,
+    alerts: {
+      ...tabs.alerts,
+      details: tabs.alerts.details.map((row, index) => {
+        const notificationSuppression: AlertNotificationSuppression[] = [];
+        if (index < capped) notificationSuppression.push('maintenanceWindow');
+        if (index === snoozeIndex) notificationSuppression.push('snoozed');
+        return notificationSuppression.length > 0
+          ? { ...row, notificationSuppression }
+          : row;
+      }),
+    },
+  };
+};
+
 export const buildFakeEntityTabsData = (
   entityName: string,
   entityType?: string,
   entityHealth?: string,
-  alertsActiveOverride?: AlertsActiveOverride
+  alertsActiveOverride?: AlertsActiveOverride,
+  /** Active alerts inside a maintenance window. Stamped onto the first N rows. */
+  inMaintenance?: number
 ): EntityTabsData => {
   const storyTabs = getStoryTabsData(entityName);
   if (storyTabs) {
-    return storyTabs;
+    return stampMaintenanceWindows(storyTabs, inMaintenance);
   }
   const kind: EntityKind | undefined = entityTypeToKind(entityType) ?? inferEntityKind(entityName);
   // Same chaos-mode override as `buildFakeEntityOverview` — flips the
@@ -323,9 +360,9 @@ export const buildFakeEntityTabsData = (
     alertsActiveOverride
   );
   if (kindTemplate) {
-    return kindTemplate.tabs;
+    return stampMaintenanceWindows(kindTemplate.tabs, inMaintenance);
   }
-  return buildGenericEntityTabsData(entityName);
+  return stampMaintenanceWindows(buildGenericEntityTabsData(entityName), inMaintenance);
 };
 
 const buildGenericEntityTabsData = (entityName: string): EntityTabsData => ({

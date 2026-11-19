@@ -69,6 +69,7 @@ import {
   buildEntityFlyoutInitialMessage,
 } from './build_entity_flyout_attachment';
 import type { EntityKind } from './kind_templates';
+import { entityTypeLogo, type EntityTypeIcon } from './entity_type_logo';
 import { entityTypeToKind, inferEntityKind, normalizeEntityHealth } from './kind_templates';
 import {
   entityShowsHostRuntimeFlyoutTabs,
@@ -193,7 +194,14 @@ interface EntityFlyoutProps {
    * {@link hideHealthBadge} is true. Rendered as a single `EuiBadge` in
    * the position normally occupied by the health badge.
    */
-  readonly alertsBadge?: { label: string; color: string };
+  readonly alertsBadge?: {
+    label: string;
+    color: string;
+    /** Hover copy. When set, replaces the default "View Alerts tab" tip. */
+    tooltip?: string;
+    /** Bell-off mark: at least one active alert is in a maintenance window. */
+    showMaintenanceIcon?: boolean;
+  };
   /**
    * Optional override for the Alerts tab counter badge and tab content.
    * When `null`, the entity has no alert rules configured (inventory `na`).
@@ -201,6 +209,17 @@ interface EntityFlyoutProps {
    * When omitted, kind-template demo data is used.
    */
   readonly alertsActiveCount?: number | null;
+  /**
+   * How many of {@link alertsActiveCount} are inside a maintenance window.
+   * Stamped onto the first N rows of the Alerts tab.
+   */
+  readonly alertsInMaintenance?: number;
+  /**
+   * Replaces the category and type header badges. The AWS Re-invent variant
+   * uses this so EC2 / Lambda / S3 read as AWS plus their type name. When
+   * omitted, the kind template badges are shown (Hosts, Functions, Storage).
+   */
+  readonly headerBadgeLabels?: { readonly category: string; readonly type: string };
   /**
    * Kubernetes pod phase badge (Running / Pending / …). When provided, replaces
    * the default demo "Running" chip so the flyout matches the hex map.
@@ -362,7 +381,12 @@ const KIND_CATEGORY_ICON: Record<EntityKind, string> = {
  * map to their functional category (Functions → `function`, Storage →
  * `folderOpen`, Networking → `globe`) instead of the generic cloud icon.
  */
-const resolveEntityIcon = (kind: EntityKind | undefined, entityType?: string): string => {
+const resolveEntityIcon = (
+  kind: EntityKind | undefined,
+  entityType?: string
+): EntityTypeIcon => {
+  const typeIcon = entityTypeLogo(entityType);
+  if (typeIcon) return typeIcon;
   // Cloud sub-categories override the generic cloud icon.
   if (kind === 'cloud' && entityType) {
     const t = entityType.toLowerCase();
@@ -517,6 +541,8 @@ export const EntityFlyout = ({
   hideHealthBadge = false,
   alertsBadge,
   alertsActiveCount,
+  alertsInMaintenance,
+  headerBadgeLabels,
   podPhaseBadge,
   hideAiSummary = false,
   hideOwnership = false,
@@ -635,8 +661,17 @@ export const EntityFlyout = ({
   // with overflow collapsed behind a clickable "+ N more" badge after
   // the first four.
   const orderedTags = useMemo(() => {
+    let headerSlots = 0;
+    const sourceTags = headerBadgeLabels
+      ? overview.tags.map((tag) => {
+          if (HEALTH_TAG_LABELS.has(tag.label) || headerSlots >= 2) return tag;
+          const label = headerSlots === 0 ? headerBadgeLabels.category : headerBadgeLabels.type;
+          headerSlots += 1;
+          return { ...tag, label };
+        })
+      : overview.tags;
     if (hideHealthBadge) {
-      const withoutHealth = overview.tags.filter((tag) => !HEALTH_TAG_LABELS.has(tag.label));
+      const withoutHealth = sourceTags.filter((tag) => !HEALTH_TAG_LABELS.has(tag.label));
       // First two tags are category & type (per kind_templates order).
       const primary = withoutHealth.slice(0, 2);
       const rest = withoutHealth.slice(2);
@@ -645,11 +680,11 @@ export const EntityFlyout = ({
       }
       return [...primary, ...rest];
     }
-    const healthIndex = overview.tags.findIndex((tag) => HEALTH_TAG_LABELS.has(tag.label));
-    if (healthIndex <= 0) return overview.tags;
-    const rest = overview.tags.filter((_, index) => index !== healthIndex);
-    return [overview.tags[healthIndex], ...rest];
-  }, [overview.tags, hideHealthBadge, alertsBadge]);
+    const healthIndex = sourceTags.findIndex((tag) => HEALTH_TAG_LABELS.has(tag.label));
+    if (healthIndex <= 0) return sourceTags;
+    const rest = sourceTags.filter((_, index) => index !== healthIndex);
+    return [sourceTags[healthIndex], ...rest];
+  }, [overview.tags, hideHealthBadge, alertsBadge, headerBadgeLabels]);
   // Phase 1: show up to 4 badges inline; the rest collapse into "+N".
   const VISIBLE_TAG_COUNT = hideHealthBadge ? 4 : orderedTags.length;
   const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);
@@ -657,8 +692,15 @@ export const EntityFlyout = ({
   const overflowTags = orderedTags.slice(VISIBLE_TAG_COUNT);
   const overflowCount = overflowTags.length;
   const tabsData = useMemo(
-    () => buildFakeEntityTabsData(entityName, entityType, effectiveHealth, alertsActiveCount),
-    [entityName, entityType, effectiveHealth, alertsActiveCount]
+    () =>
+      buildFakeEntityTabsData(
+        entityName,
+        entityType,
+        effectiveHealth,
+        alertsActiveCount,
+        alertsInMaintenance
+      ),
+    [entityName, entityType, effectiveHealth, alertsActiveCount, alertsInMaintenance]
   );
 
   // Resolved label honoured everywhere the entity reads as text. The
@@ -1216,7 +1258,7 @@ export const EntityFlyout = ({
               }
             : {})}
         >
-          {tag.label}
+          <span>{tag.label}</span>
         </EuiBadge>
       );
       if (!navigateToAlerts) {
@@ -1224,15 +1266,19 @@ export const EntityFlyout = ({
       }
       return (
         <EuiToolTip
-          content={i18n.translate('entityCentricLabFlyout.flyout.headerAlertsBadgeTooltip', {
-            defaultMessage: 'View Alerts tab',
-          })}
+          content={
+            alertsBadge?.tooltip ??
+            i18n.translate('entityCentricLabFlyout.flyout.headerAlertsBadgeTooltip', {
+              defaultMessage: 'View Alerts tab',
+            })
+          }
         >
           {badge}
         </EuiToolTip>
       );
     },
     [
+      alertsBadge,
       headerAlertsBadgeClickable,
       isHeaderAlertsBadge,
       selectTab,

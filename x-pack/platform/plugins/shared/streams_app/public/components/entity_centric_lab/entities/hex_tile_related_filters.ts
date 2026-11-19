@@ -31,12 +31,15 @@ export interface HexTileRelatedFilterAction {
   readonly total: number;
   /** Resources with at least one active alert (same semantics as left nav). */
   readonly alerting: number;
+  /** Resources whose active alerts include at least one in a maintenance window. */
+  readonly inMaintenance: number;
   readonly apply: HexTileRelatedFilterApplyArgs;
 }
 
 export interface HexTileRelatedTargetSummary {
   readonly total: number;
   readonly alerting: number;
+  readonly inMaintenance: number;
 }
 
 /** Inventory rows that match a related-resource preset (same rules as page filters). */
@@ -70,12 +73,16 @@ export const summarizeHexTileRelatedTargets = (
 ): HexTileRelatedTargetSummary => {
   const matches = resolveHexTileRelatedTargetEntities(inventory, apply);
   let alerting = 0;
+  let inMaintenance = 0;
   for (const entity of matches) {
     if ((entity.alerts?.active ?? 0) > 0) {
       alerting += 1;
+      if ((entity.alerts?.inMaintenance ?? 0) > 0) {
+        inMaintenance += 1;
+      }
     }
   }
-  return { total: matches.length, alerting };
+  return { total: matches.length, alerting, inMaintenance };
 };
 
 const clusterFromEntity = (entity: Entity): string | undefined => {
@@ -86,7 +93,10 @@ const clusterFromEntity = (entity: Entity): string | undefined => {
   return fromAttrs || undefined;
 };
 
-type RelatedActionDraft = Omit<HexTileRelatedFilterAction, 'total' | 'alerting'>;
+type RelatedActionDraft = Omit<
+  HexTileRelatedFilterAction,
+  'total' | 'alerting' | 'inMaintenance'
+>;
 
 const withRelatedCounts = (
   inventory: readonly Entity[],
@@ -94,8 +104,11 @@ const withRelatedCounts = (
 ): readonly HexTileRelatedFilterAction[] =>
   drafts
     .map((draft) => {
-      const { total, alerting } = summarizeHexTileRelatedTargets(inventory, draft.apply);
-      return { ...draft, total, alerting };
+      const { total, alerting, inMaintenance } = summarizeHexTileRelatedTargets(
+        inventory,
+        draft.apply
+      );
+      return { ...draft, total, alerting, inMaintenance };
     })
     .filter((action) => action.total > 0);
 

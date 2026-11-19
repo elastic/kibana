@@ -219,6 +219,49 @@ export const FLYOUT_PRESENTATION_DIMENSION: VariationDimension = {
   ],
 };
 
+export type NavBadgesVariation = 'off' | 'on';
+
+export type AwsReinventVariation = 'off' | 'on';
+
+/** One AWS entry in the left nav. That page groups by the three AWS types. */
+export const AWS_REINVENT_DIMENSION: VariationDimension = {
+  id: 'awsReinvent',
+  label: 'AWS Re-invent',
+  defaultOption: 'off',
+  options: [
+    {
+      id: 'off',
+      label: 'Off',
+      description: 'AWS resources stay in Hosts, Functions, and Storage',
+    },
+    {
+      id: 'on',
+      label: 'On',
+      description:
+        'One AWS entry in the left nav. That page groups by type: EC2 instances, S3 buckets, Lambda functions',
+    },
+  ],
+};
+
+/** Inventory and alert counts on the Observability left-nav links. */
+export const NAV_BADGES_DIMENSION: VariationDimension = {
+  id: 'navBadges',
+  label: 'Left nav badges',
+  defaultOption: 'off',
+  options: [
+    {
+      id: 'off',
+      label: 'Off',
+      description: 'Hide entity and alert counts on the Inventory links',
+    },
+    {
+      id: 'on',
+      label: 'On',
+      description: 'Show entity totals and active-alert counts in the left navigation',
+    },
+  ],
+};
+
 export const DASHBOARD_THUMBNAILS_DIMENSION: VariationDimension = {
   id: 'dashboardThumbnails',
   label: 'Dashboard thumbnails',
@@ -245,6 +288,8 @@ export const VARIATION_DIMENSIONS: readonly VariationDimension[] = [
   DETAIL_DIMENSION,
   FLYOUT_PRESENTATION_DIMENSION,
   TABLE_STYLE_DIMENSION,
+  NAV_BADGES_DIMENSION,
+  AWS_REINVENT_DIMENSION,
   DASHBOARD_STYLE_DIMENSION,
   DASHBOARD_THUMBNAILS_DIMENSION,
 ];

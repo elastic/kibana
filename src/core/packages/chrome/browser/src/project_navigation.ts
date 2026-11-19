@@ -173,6 +173,19 @@ interface NodeDefinitionBase {
    * beside {@link notificationCount} when both are set.
    */
   inventoryCount?: number;
+
+  /**
+   * (optional) Of {@link notificationCount}, how many resources have an active
+   * alert inside a maintenance window. The side nav keeps the danger badge and
+   * adds a bell-off mark plus hover copy.
+   */
+  maintenanceCount?: number;
+
+  /**
+   * (optional) When this node is a side-nav section, skip the horizontal rule
+   * drawn under it. Defaults to showing the rule.
+   */
+  sideNavDivider?: boolean;
 }
 
 /** @public */

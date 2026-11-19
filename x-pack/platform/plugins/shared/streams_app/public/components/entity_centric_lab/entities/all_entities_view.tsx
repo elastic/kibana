@@ -123,7 +123,14 @@ import type {
   Entity,
   EntityCategoryId,
 } from './fake_entities';
-import { getCloudProvider, getCloudService, type CloudProviderId } from './cloud_providers';
+import {
+  AWS_REINVENT_TYPE_ORDER,
+  awsReinventHeaderBadges,
+  awsReinventTypeLabel,
+  getCloudProvider,
+  getCloudService,
+  type CloudProviderId,
+} from './cloud_providers';
 import { useCloudHierarchyEnabled } from './use_cloud_hierarchy';
 import {
   EMPTY_EXTRA_FILTERS,
@@ -131,6 +138,7 @@ import {
   TAG_KEYS,
   getVisibleTagKeys,
   buildFakeEntities,
+  categoriesIncludingAws,
   getCategoryDescriptor,
   getCategoryExtraFilters,
   getExtraFacets,
@@ -166,6 +174,7 @@ import {
   type AlertsFilterId,
 } from './entity_alerts_filter';
 import { InventorySummaryCards } from './inventory_summary_cards';
+import { entityAlertBadgePresentation, entityInMaintenanceCount } from './entity_alert_badge';
 import { EntityGroupByControls } from './entity_group_by_controls';
 import { labThing, labThings, labThingsLabel } from '../lab_terminology';
 import { VariationProvider, useVariation, useVariationContext } from './variation_context';
@@ -635,8 +644,13 @@ const inventoryAlertsActiveOverride = (entity: Entity | undefined): number | nul
 
 const computeAlertsBadge = (
   entity: Entity | undefined
-): { label: string; color: string } | undefined => {
+): { label: string; color: string; tooltip?: string; showMaintenanceIcon?: boolean } | undefined => {
   if (!entity) return undefined;
+  const presentation = entityAlertBadgePresentation(entity);
+  const maintenance =
+    presentation.inMaintenance > 0
+      ? { tooltip: presentation.tooltip, showMaintenanceIcon: true }
+      : {};
   if (!entity.alerts) {
     return { label: 'No alert set up', color: 'hollow' };
   }
@@ -645,6 +659,7 @@ const computeAlertsBadge = (
     return {
       label: `${active} active alert${active === 1 ? '' : 's'}`,
       color: 'danger',
+      ...maintenance,
     };
   }
   return { label: '0 active alerts', color: 'success' };
@@ -1105,6 +1120,7 @@ const AllEntitiesViewInner = ({
   const showAddDataEmptyPrompt =
     isElasticOn && (dataVariation === 'empty' || isDemoEmptyCategoryPage);
   const tableStyleVariation = useVariation('tableStyle') as TableStyleVariation;
+  const awsReinventOn = useVariation('awsReinvent') === 'on';
   const dashboardStyleVariation = useVariation('dashboardStyle') as
     | 'embedded'
     | 'list'
@@ -1314,8 +1330,29 @@ const AllEntitiesViewInner = ({
     if (isElasticOn) {
       list = list.filter((entity) => !isCategoryHiddenInElasticOn(entity.category));
     }
+    // AWS Re-invent relocates EC2, Lambda, and S3 out of Hosts, Functions,
+    // and Storage. They stay on the AWS page and on All entities, grouped
+    // as AWS, and their type names are the ones used there.
+    if (isElasticOn && awsReinventOn) {
+      if (categoryScope && (categoryScope as string) !== 'cloud') {
+        list = list.filter((entity) => entity.provider !== 'aws');
+      } else {
+        list = list.map((entity) => {
+          if (entity.provider !== 'aws') return entity;
+          const label = awsReinventTypeLabel(entity.type);
+          return { ...entity, category: 'aws' as const, type: label, subType: label };
+        });
+      }
+    }
     return list;
-  }, [dataset.entities, categoryScope, cloudProviderScope, cloudServiceScope, isElasticOn]);
+  }, [
+    dataset.entities,
+    categoryScope,
+    cloudProviderScope,
+    cloudServiceScope,
+    isElasticOn,
+    awsReinventOn,
+  ]);
   // Match the left-nav category slice: routed scope wins; on All resources
   // the category combo applies the same narrowing (Cloud → `provider` set).
   const effectiveInventoryEntities = useMemo(() => {
@@ -1492,10 +1529,37 @@ const AllEntitiesViewInner = ({
     return activeGroupByFields;
   }, [isElasticOn, groupBy, activeGroupByFields, categoryScope]);
 
+  // AWS page, variant on: list keeps Category (AWS) above Type. The hex
+  // map stays on the three types, since the page is already the AWS section.
+  const awsTypesDirect =
+    isElasticOn && awsReinventOn && cloudProviderScope === 'aws' && !cloudServiceScope;
+  const showAwsTypeGroups = awsTypesDirect && isDefaultGroupBy(groupBy);
+  const viewGroupByFields = useMemo(() => {
+    if (!awsReinventOn) return groupByFields;
+    return groupByFields.map((field) => {
+      if (field.id !== 'type' || !field.canonicalOrder) return field;
+      const canonicalOrder = new Map(field.canonicalOrder);
+      for (const [label, index] of AWS_REINVENT_TYPE_ORDER) {
+        canonicalOrder.set(label, index);
+      }
+      return { ...field, canonicalOrder };
+    });
+  }, [awsReinventOn, groupByFields]);
+  const viewGroupBy = groupBy;
+  const awsListGroupBy = viewGroupByFields.filter(
+    (field) => field.id === 'category' || field.id === 'type'
+  );
+  const viewCustomGroupBy = showAwsTypeGroups
+    ? viewGroupByFields.filter((field) => field.id === 'type')
+    : customGroupBy;
+
   // ---------------------------------------------------------------------------
   // Top-level Category filter — derived values (state lives above for search).
   // ---------------------------------------------------------------------------
-  const visibleCategories = useMemo(() => getVisibleEntityCategories(isElasticOn), [isElasticOn]);
+  const visibleCategories = useMemo(
+    () => categoriesIncludingAws(getVisibleEntityCategories(isElasticOn), scopedEntities),
+    [isElasticOn, scopedEntities]
+  );
   const categoriesWithEntities = useMemo(() => {
     const present = new Set(scopedEntities.map((e) => e.category));
     return visibleCategories.filter((c) => present.has(c.id));
@@ -3500,7 +3564,8 @@ const AllEntitiesViewInner = ({
                                       ? isPhase1
                                         ? 'os:linux AND type:host'
                                         : 'os:linux AND health:unhealthy'
-                                      : effectiveCategoryScope === 'cloud'
+                                      : effectiveCategoryScope === 'cloud' &&
+                                        cloudProviderScope !== 'aws'
                                       ? isPhase1
                                         ? 'cloud.provider:aws'
                                         : 'cloud.provider:aws AND health:unhealthy'
@@ -3810,7 +3875,7 @@ const AllEntitiesViewInner = ({
                         ) : null}
                         <EuiFlexItem grow={false}>
                           <EntityGroupByControls
-                            fields={groupByFields}
+                            fields={viewGroupByFields}
                             groupBy={groupBy}
                             onChange={setGroupBy}
                             lockedFieldIds={categoryScope ? ['category'] : []}
@@ -3850,7 +3915,7 @@ const AllEntitiesViewInner = ({
                         groupCloudByProvider={false}
                         enablePaletteColoring={isElasticOn}
                         refreshTick={refreshTick}
-                        customGroupBy={customGroupBy}
+                        customGroupBy={viewCustomGroupBy}
                         hideCategoryHeader={!!categoryScope}
                         density={listDensity}
                         onHexTileFilterFor={handleHexTileFilterFor}
@@ -3878,8 +3943,8 @@ const AllEntitiesViewInner = ({
                         entities={filteredEntities}
                         onSelectEntity={openEntity}
                         onSelectEntityAlerts={openEntityOnAlertsTab}
-                        groupByFields={groupByFields}
-                        activeGroupBy={groupBy}
+                        groupByFields={viewGroupByFields}
+                        activeGroupBy={viewGroupBy}
                         refreshTick={refreshTick}
                         categoryScope={categoryScope}
                         density={listDensity}
@@ -3895,8 +3960,8 @@ const AllEntitiesViewInner = ({
                         groupCloudByProvider={false}
                         enableColumnSettings={isElasticOn}
                         refreshTick={refreshTick}
-                        customGroupBy={customGroupBy}
-                        hideCategoryHeader={!!categoryScope}
+                        customGroupBy={showAwsTypeGroups ? awsListGroupBy : viewCustomGroupBy}
+                        hideCategoryHeader={!!categoryScope && !awsTypesDirect}
                         density={listDensity}
                         onK8sCellFilter={
                           enableK8sAddToFilterActions ? handleK8sInventoryCellFilter : undefined
@@ -4117,6 +4182,9 @@ const AllEntitiesViewInner = ({
                   entityName={selectedEntityName}
                   entityType={selectedEntityType}
                   entityHealth={selectedEntityHealth}
+                  headerBadgeLabels={
+                    awsReinventOn ? awsReinventHeaderBadges(selectedEntityType) : undefined
+                  }
                   region={selectedEntityRegion}
                   onClose={closeEntity}
                   onSelectEntity={openChildEntity}
@@ -4135,6 +4203,7 @@ const AllEntitiesViewInner = ({
                   alertsActiveCount={
                     isPhase1 ? inventoryAlertsActiveOverride(selectedEntity) : undefined
                   }
+                  alertsInMaintenance={entityInMaintenanceCount(selectedEntity)}
                   podPhaseBadge={podPhaseBadgeForEntity(selectedEntity)}
                   timeRange={flyoutTimeRange}
                   hideAiSummary={isPhase1}
@@ -4161,6 +4230,9 @@ const AllEntitiesViewInner = ({
                     entityName={childEntityName}
                     entityType={childEntityType}
                     entityHealth={childEntityHealth}
+                    headerBadgeLabels={
+                      awsReinventOn ? awsReinventHeaderBadges(childEntityType) : undefined
+                    }
                     region={childEntityRegion}
                     hostedApmServiceNames={childHostedApmServiceNames}
                     onClose={closeChildEntity}
@@ -4175,6 +4247,7 @@ const AllEntitiesViewInner = ({
                     alertsActiveCount={
                       isPhase1 ? inventoryAlertsActiveOverride(childEntity) : undefined
                     }
+                    alertsInMaintenance={entityInMaintenanceCount(childEntity)}
                     podPhaseBadge={podPhaseBadgeForEntity(childEntity)}
                     timeRange={flyoutTimeRange}
                     onTimeRangeChange={handleFlyoutTimeRangeChange}

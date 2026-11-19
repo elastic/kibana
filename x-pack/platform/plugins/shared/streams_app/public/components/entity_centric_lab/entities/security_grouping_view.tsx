@@ -26,6 +26,7 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -35,6 +36,8 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Entity, EntityCategoryId } from './fake_entities';
+import { AlertStatusBadge } from './alert_status_badge';
+import { entityTypeLogo } from './entity_type_logo';
 import { EntityDataGridSection } from './entities_data_grid';
 import type { K8sCellFilterTarget } from './k8s_inventory_cell_filter';
 import { DEFAULT_LIST_DENSITY, type ListDensity } from './list_density';
@@ -168,6 +171,32 @@ const childAccordionCss = (borderThin: string) => css`
   }
 `;
 
+const GroupLabel = ({
+  label,
+  heading,
+  titleSize,
+}: {
+  label: string;
+  heading: 'h4' | 'h5';
+  titleSize: 'xs' | 'xxs';
+}) => {
+  const logo = entityTypeLogo(label);
+  const title = heading === 'h4' ? <h4>{label}</h4> : <h5>{label}</h5>;
+  if (!logo) {
+    return <EuiTitle size={titleSize}>{title}</EuiTitle>;
+  }
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={logo} size="m" aria-hidden />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size={titleSize}>{title}</EuiTitle>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 // ---------------------------------------------------------------------------
 // Badges
 // ---------------------------------------------------------------------------
@@ -178,7 +207,19 @@ const AccordionBadges = ({
 }: {
   entityCount: number;
   alertingCount: number;
-}) => (
+}) => {
+  const tooltip =
+    alertingCount > 0
+      ? i18n.translate(
+          'xpack.streams.entityCentricLab.securityGrouping.stats.alertsTooltip',
+          {
+            defaultMessage:
+              '{count, plural, one {# entity} other {# entities}} with active alerts',
+            values: { count: alertingCount },
+          }
+        )
+      : undefined;
+  return (
   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -207,12 +248,17 @@ const AccordionBadges = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color={alertingCount > 0 ? 'danger' : 'hollow'}>{alertingCount.toLocaleString()}</EuiBadge>
+          <AlertStatusBadge
+            color={alertingCount > 0 ? 'danger' : 'hollow'}
+            label={alertingCount.toLocaleString()}
+            tooltip={tooltip}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
   </EuiFlexGroup>
-);
+  );
+};
 
 // ---------------------------------------------------------------------------
 // Child (level-2) accordion — e.g. "K8s pod" inside "Kubernetes"
@@ -253,9 +299,7 @@ const ChildAccordion = ({
       id={accordionId}
       initialIsOpen
       buttonContent={
-        <EuiTitle size="xxs">
-          <h5>{bucket.label}</h5>
-        </EuiTitle>
+        <GroupLabel label={bucket.label} heading="h5" titleSize="xxs" />
       }
       extraAction={
         <AccordionBadges
@@ -434,9 +478,7 @@ const GroupAccordion = ({
       initialIsOpen
       className="groupingAccordionForm"
       buttonContent={
-        <EuiTitle size="xs">
-          <h4>{bucket.label}</h4>
-        </EuiTitle>
+        <GroupLabel label={bucket.label} heading="h4" titleSize="xs" />
       }
       extraAction={
         <AccordionBadges

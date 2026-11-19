@@ -52,6 +52,11 @@ export interface SecondaryMenuItem {
    */
   inventoryCount?: number;
   /**
+   * (optional) Of {@link notificationCount}, how many have an active alert in a
+   * maintenance window. Renders a bell-off mark on the danger badge.
+   */
+  maintenanceCount?: number;
+  /**
    * (optional) Whether the link opens in a new tab.
    */
   isExternal?: boolean;
@@ -101,6 +106,10 @@ export interface SecondaryMenuSection {
    * further.
    */
   subGroups?: SecondaryMenuSubGroup[];
+  /**
+   * (optional) Draw the horizontal rule under this section. Defaults to true.
+   */
+  divider?: boolean;
 }
 
 /**

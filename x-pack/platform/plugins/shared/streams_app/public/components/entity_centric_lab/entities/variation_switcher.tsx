@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.21';
+export const PROTOTYPE_VERSION = '1.22';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-11-19',
+    summary:
+      'AWS Re-invent nav, type logos on inventory and flyouts, and Notifications & actions in the alerts table.',
+    details:
+      'AWS Re-invent (default Off) adds one AWS left-nav entry. That page locks group-by to Entity category (1) then Entity type (2), and lists EC2 instances, S3 buckets, and Lambda functions under AWS. AWS also appears in the entity categories filter. EC2, S3, and Lambda use architecture service marks; the AWS category keeps the AWS logo. List, hex, and flyout headers show a type logo when one exists (shared Kubernetes logo, product logos, and glyphs for OpenAI, Anthropic, Vault, Jenkins, and Custom worker). Flyout alerts rename the column to Notifications & actions: Enabled, or Disabled with a struck bell and a hover popover for snooze or maintenance window. Maintenance stays in that table. Left nav badges remain a variation, default Off. Bump to v1.22.',
+  },
   {
     date: '2026-11-05',
     summary: 'Infrastructure notices use the current Kibana banner and callout layout.',

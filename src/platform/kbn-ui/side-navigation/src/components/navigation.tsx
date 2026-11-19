@@ -201,7 +201,11 @@ export const Navigation = ({
                           );
 
                           return (
-                            <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
+                            <SideNav.SecondaryMenu.Section
+                              key={section.id}
+                              label={section.label}
+                              divider={section.divider !== false}
+                            >
                               {section.items.map((subItem, subItemIndex) => {
                                 const isFirstSubItem =
                                   sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
@@ -423,7 +427,11 @@ export const Navigation = ({
                             (s) => s.items.length > 0
                           );
                           return (
-                            <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
+                            <SideNav.SecondaryMenu.Section
+                              key={section.id}
+                              label={section.label}
+                              divider={section.divider !== false}
+                            >
                               {section.items.map((subItem, subItemIndex) => {
                                 const isFirstSubItem =
                                   sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
@@ -494,6 +502,7 @@ export const Navigation = ({
                     key={section.id}
                     label={section.label}
                     action={getSectionAction?.(section.id)}
+                    divider={section.divider !== false}
                   >
                     {section.items.map((subItem, subItemIndex) => {
                       const isFirstItem =

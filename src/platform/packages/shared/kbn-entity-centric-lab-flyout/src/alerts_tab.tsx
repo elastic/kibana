@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -16,7 +16,9 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPanel,
+  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -29,7 +31,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { Axis, Chart, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
 import { useEntityFlyoutServices } from './services_context';
-import type { AlertRow, AlertsTabData } from './fake_entity_tabs';
+import type { AlertNotificationSuppression, AlertRow, AlertsTabData } from './fake_entity_tabs';
 import { alertRowToStableRuleUuid } from './alert_row_ids';
 import { formatIncidentTick } from './time_domain';
 
@@ -39,6 +41,264 @@ interface AlertsTabProps {
 }
 
 const CREATE_ALERT_RULE_TYPE_ID = 'observability.rules.custom_threshold';
+
+const popoverActionsCss = css`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+`;
+
+/** Extends the hover target across the gap between the label and the portaled panel. */
+const popoverHoverPadCss = css`
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -36px;
+  }
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+`;
+
+const stopPopoverClick = (event: React.MouseEvent) => {
+  event.preventDefault();
+  event.stopPropagation();
+};
+
+/**
+ * Click popover for a disabled row. Layout follows the three cases:
+ * snoozed, maintenance window, or both.
+ */
+const NotificationsSuppressedPopover = ({
+  row,
+  reasons,
+  entityName,
+  onClose,
+}: {
+  readonly row: AlertRow;
+  readonly reasons: readonly AlertNotificationSuppression[];
+  readonly entityName?: string;
+  readonly onClose: () => void;
+}) => {
+  const hasSnooze = reasons.includes('snoozed');
+  const hasMaintenance = reasons.includes('maintenanceWindow');
+  const both = hasSnooze && hasMaintenance;
+  const snoozeCopy = both
+    ? i18n.translate('entityCentricLabFlyout.flyout.alerts.notifications.snoozedShort', {
+        defaultMessage: 'Snoozed until 3:00 PM by Nicolas.',
+      })
+    : i18n.translate('entityCentricLabFlyout.flyout.alerts.notifications.snoozed', {
+        defaultMessage: 'Snoozed until 3:00 PM by Nicolas. Applies to the {entityName} series.',
+        values: { entityName: entityName ?? row.ruleName },
+      });
+  const maintenanceCopy = both
+    ? i18n.translate('entityCentricLabFlyout.flyout.alerts.notifications.maintenanceShort', {
+        defaultMessage: 'Maintenance window: Weekly patching, ends 4:00 AM.',
+      })
+    : i18n.translate('entityCentricLabFlyout.flyout.alerts.notifications.maintenanceWindow', {
+        defaultMessage:
+          'Maintenance window: Weekly patching, ends 4:00 AM. No notifications on start or recovery for alerts that began in this window.',
+      });
+
+  return (
+    <div data-test-subj="entityCentricLabAlertsNotificationsPopover" style={{ width: 240 }}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="bellSlash" size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="s">
+            <strong>
+              {i18n.translate('entityCentricLabFlyout.flyout.alerts.notifications.suppressedTitle', {
+                defaultMessage: 'Actions suppressed',
+              })}
+            </strong>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="cross"
+            iconSize="s"
+            size="xs"
+            color="text"
+            aria-label={i18n.translate(
+              'entityCentricLabFlyout.flyout.alerts.notifications.closePopover',
+              { defaultMessage: 'Close' }
+            )}
+            onClick={onClose}
+            data-test-subj="entityCentricLabAlertsNotificationsPopoverClose"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {hasSnooze ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="s">{snoozeCopy}</EuiText>
+          <EuiSpacer size="s" />
+          <div css={popoverActionsCss}>
+            <EuiButton size="s" color="text" onClick={stopPopoverClick}>
+              {i18n.translate('entityCentricLabFlyout.flyout.alerts.notifications.unsnooze', {
+                defaultMessage: 'Unsnooze',
+              })}
+            </EuiButton>
+            {both ? null : (
+              <EuiButton size="s" color="text" onClick={stopPopoverClick}>
+                {i18n.translate('entityCentricLabFlyout.flyout.alerts.notifications.editSnooze', {
+                  defaultMessage: 'Edit snooze',
+                })}
+              </EuiButton>
+            )}
+          </div>
+        </>
+      ) : null}
+      {hasMaintenance ? (
+        <>
+          <EuiSpacer size={both ? 'm' : 's'} />
+          <EuiText size="s">{maintenanceCopy}</EuiText>
+          <EuiSpacer size="s" />
+          <div css={popoverActionsCss}>
+            <EuiButton size="s" color="text" onClick={stopPopoverClick}>
+              {i18n.translate('entityCentricLabFlyout.flyout.alerts.notifications.viewWindow', {
+                defaultMessage: 'View window',
+              })}
+            </EuiButton>
+            {both ? null : (
+              <EuiButton size="s" color="text" onClick={stopPopoverClick}>
+                {i18n.translate('entityCentricLabFlyout.flyout.alerts.notifications.editWindow', {
+                  defaultMessage: 'Edit window',
+                })}
+              </EuiButton>
+            )}
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
+};
+
+const HOVER_CLOSE_DELAY_MS = 400;
+
+/**
+ * Notifications & actions cell. Disabled carries a struck bell. Hovering it
+ * opens the suppression popover for snooze, a maintenance window, or both.
+ */
+export const AlertNotificationsCell = ({
+  row,
+  textSize,
+  entityName,
+}: {
+  readonly row: AlertRow;
+  readonly textSize: 'xs' | 's';
+  readonly entityName?: string;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const closeTimer = useRef<number | undefined>(undefined);
+  const panelNode = useRef<HTMLElement | null>(null);
+  const clearCloseTimer = () => {
+    if (closeTimer.current === undefined) return;
+    window.clearTimeout(closeTimer.current);
+    closeTimer.current = undefined;
+  };
+  const openPopover = () => {
+    clearCloseTimer();
+    setIsOpen(true);
+  };
+  const scheduleClose = () => {
+    clearCloseTimer();
+    closeTimer.current = window.setTimeout(() => setIsOpen(false), HOVER_CLOSE_DELAY_MS);
+  };
+  const closeNow = () => {
+    clearCloseTimer();
+    setIsOpen(false);
+  };
+  useEffect(() => clearCloseTimer, []);
+  const reasons = row.notificationSuppression ?? [];
+  if (reasons.length === 0) {
+    return (
+      <EuiText
+        size={textSize}
+        color="subdued"
+        data-test-subj="entityCentricLabAlertsNotificationsEnabled"
+      >
+        {i18n.translate('entityCentricLabFlyout.flyout.alerts.notifications.enabled', {
+          defaultMessage: 'Enabled',
+        })}
+      </EuiText>
+    );
+  }
+  return (
+    <EuiPopover
+      isOpen={isOpen}
+      closePopover={closeNow}
+      panelPaddingSize="m"
+      anchorPosition="downLeft"
+      panelRef={(node) => {
+        panelNode.current = node;
+      }}
+      panelProps={{
+        onMouseEnter: openPopover,
+        onMouseLeave: scheduleClose,
+      }}
+      button={
+        <button
+          type="button"
+          data-test-subj="entityCentricLabAlertsNotificationsDisabled"
+          aria-expanded={isOpen}
+          aria-label={i18n.translate(
+            'entityCentricLabFlyout.flyout.alerts.notifications.disabledAriaLabel',
+            { defaultMessage: 'Disabled. Show why notifications and actions are suppressed' }
+          )}
+          onMouseEnter={openPopover}
+          onMouseLeave={scheduleClose}
+          onFocus={openPopover}
+          onBlur={(event) => {
+            const next = event.relatedTarget;
+            if (!(next instanceof Node) || panelNode.current?.contains(next)) return;
+            scheduleClose();
+          }}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 4,
+            padding: 0,
+            border: 'none',
+            background: 'transparent',
+            color: 'var(--euiTextSubduedColor)',
+            fontSize: textSize === 'xs' ? 12 : 14,
+            cursor: 'pointer',
+          }}
+        >
+          <EuiIcon type="bellSlash" size="s" color="inherit" aria-hidden />
+          {i18n.translate('entityCentricLabFlyout.flyout.alerts.notifications.disabled', {
+            defaultMessage: 'Disabled',
+          })}
+        </button>
+      }
+    >
+      <div css={popoverHoverPadCss} onMouseEnter={openPopover} onMouseLeave={scheduleClose}>
+        <NotificationsSuppressedPopover
+          row={row}
+          reasons={reasons}
+          entityName={entityName}
+          onClose={closeNow}
+        />
+      </div>
+    </EuiPopover>
+  );
+};
+
+/** Lets Rule name and Reason wrap inside the fixed table layout. */
+const wrappingCellCss = css`
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+`;
 
 /** App path under the current Kibana base path, opened from a flyout link. */
 const kibanaAppHref = (appPath: string): string => {
@@ -190,6 +450,20 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
         render: (status: AlertRow['status']) => <EuiBadge color="danger">{status}</EuiBadge>,
       },
       {
+        field: 'notificationSuppression',
+        name: i18n.translate('entityCentricLabFlyout.flyout.alerts.columns.notifications', {
+          defaultMessage: 'Notifications & actions',
+        }),
+        width: '200px',
+        render: (_value: AlertRow['notificationSuppression'], row: AlertRow) => (
+          <AlertNotificationsCell
+            row={row}
+            textSize={density === 'compact' ? 'xs' : 's'}
+            entityName={entityName}
+          />
+        ),
+      },
+      {
         field: 'triggeredAt',
         name: i18n.translate('entityCentricLabFlyout.flyout.alerts.columns.triggered', {
           defaultMessage: 'Triggered',
@@ -202,26 +476,33 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
         name: i18n.translate('entityCentricLabFlyout.flyout.alerts.columns.ruleName', {
           defaultMessage: 'Rule name',
         }),
+        truncateText: false,
+        valign: 'top',
         render: (ruleName: string, row: AlertRow) => (
-          <EuiText size={density === 'compact' ? 'xs' : 's'}>
-            <a
-              role="button"
-              tabIndex={0}
-              data-test-subj="entityCentricLabAlertsRuleLink"
-              css={css`
-                color: ${euiTheme.colors.primaryText};
-                cursor: pointer;
-                &:hover { text-decoration: underline; }
-              `}
-              onClick={(event) => {
-                event.preventDefault();
-                openRuleRow(row);
-              }}
-              onKeyDown={(event) => { if (event.key === 'Enter') openRuleRow(row); }}
-            >
-              {ruleName}
-            </a>
-          </EuiText>
+          <span css={wrappingCellCss}>
+            <EuiText size={density === 'compact' ? 'xs' : 's'}>
+              <a
+                role="button"
+                tabIndex={0}
+                data-test-subj="entityCentricLabAlertsRuleLink"
+                css={css`
+                  color: ${euiTheme.colors.primaryText};
+                  cursor: pointer;
+                  white-space: normal;
+                  overflow-wrap: break-word;
+                  word-break: break-word;
+                  &:hover { text-decoration: underline; }
+                `}
+                onClick={(event) => {
+                  event.preventDefault();
+                  openRuleRow(row);
+                }}
+                onKeyDown={(event) => { if (event.key === 'Enter') openRuleRow(row); }}
+              >
+                {ruleName}
+              </a>
+            </EuiText>
+          </span>
         ),
       },
       {
@@ -229,36 +510,36 @@ export const AlertsTab = ({ alerts, entityName }: AlertsTabProps) => {
         name: i18n.translate('entityCentricLabFlyout.flyout.alerts.columns.reason', {
           defaultMessage: 'Reason',
         }),
+        truncateText: false,
+        valign: 'top',
         render: (reason: string, row: AlertRow) => (
-          <EuiText
-            size={density === 'compact' ? 'xs' : 's'}
-            css={css`
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-            `}
-          >
-            <a
-              role="button"
-              tabIndex={0}
-              css={css`
-                color: ${euiTheme.colors.primaryText};
-                cursor: pointer;
-                &:hover { text-decoration: underline; }
-              `}
-              onClick={(event) => {
-                event.preventDefault();
-                openAlertRow(row);
-              }}
-              onKeyDown={(event) => { if (event.key === 'Enter') openAlertRow(row); }}
-            >
-              {reason}
-            </a>
-          </EuiText>
+          <span css={wrappingCellCss}>
+            <EuiText size={density === 'compact' ? 'xs' : 's'}>
+              <a
+                role="button"
+                tabIndex={0}
+                css={css`
+                  color: ${euiTheme.colors.primaryText};
+                  cursor: pointer;
+                  white-space: normal;
+                  overflow-wrap: break-word;
+                  word-break: break-word;
+                  &:hover { text-decoration: underline; }
+                `}
+                onClick={(event) => {
+                  event.preventDefault();
+                  openAlertRow(row);
+                }}
+                onKeyDown={(event) => { if (event.key === 'Enter') openAlertRow(row); }}
+              >
+                {reason}
+              </a>
+            </EuiText>
+          </span>
         ),
       },
     ],
-    [openAlertRow, openRuleRow, density]
+    [openAlertRow, openRuleRow, density, euiTheme, entityName]
   );
 
   const activePercent =

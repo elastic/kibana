@@ -31,6 +31,9 @@ export type EntityCategoryId =
   | 'networking'
   | 'middlewares'
   | 'llms'
+  // AWS Re-invent only. Not a nav category — those entities move here
+  // from Hosts, Functions, and Storage so they are not listed twice.
+  | 'aws'
   // Catch-all bucket for entity types whose `category` field doesn't
   // match any of the canonical labels above (user-typed via the
   // wizard's "+ Create new category", legacy seed values, …). Lives
@@ -111,8 +114,26 @@ export const getVisibleEntityCategories = (
     ? ENTITY_CATEGORIES.filter((category) => !isCategoryHiddenInElasticOn(category.id))
     : ENTITY_CATEGORIES;
 
+/** Inventory grouping label for relocated AWS entities. Not a left-nav category. */
+export const AWS_CATEGORY_DESCRIPTOR: EntityCategoryDescriptor = {
+  id: 'aws',
+  label: 'AWS',
+  icon: 'logoAWS',
+};
+
 export const getCategoryDescriptor = (id: EntityCategoryId): EntityCategoryDescriptor | undefined =>
-  ENTITY_CATEGORIES.find((category) => category.id === id);
+  id === 'aws'
+    ? AWS_CATEGORY_DESCRIPTOR
+    : ENTITY_CATEGORIES.find((category) => category.id === id);
+
+/** Prepend AWS when the current entity slice has relocated AWS resources. */
+export const categoriesIncludingAws = (
+  categories: readonly EntityCategoryDescriptor[],
+  entities: readonly { readonly category: EntityCategoryId }[]
+): readonly EntityCategoryDescriptor[] =>
+  entities.some((entity) => entity.category === 'aws')
+    ? [AWS_CATEGORY_DESCRIPTOR, ...categories]
+    : categories;
 
 /**
  * Type-narrowing guard for route params, where the category segment is a
@@ -261,6 +282,12 @@ export interface Entity {
   readonly alerts?: {
     readonly total: number;
     readonly active: number;
+    /**
+     * How many of {@link active} are inside a maintenance window.
+     * Those alerts are still firing; notifications and actions for those are paused.
+     * Always `<= active`. Omitted means none.
+     */
+    readonly inMaintenance?: number;
   };
 }
 
@@ -508,11 +535,17 @@ const withAvailabilityZone = (
  * `payflow_story.ts`. The hash below would otherwise mark some of these
  * "no alert set up" or "0 active" while the flyout still shows the incident.
  */
-const STORY_ENTITY_ALERTS: Record<string, { readonly total: number; readonly active: number }> = {
-  'payments-service': { total: 4, active: 4 },
-  'checkout-service': { total: 2, active: 2 },
-  'payments-pod-7f9b2': { total: 3, active: 3 },
-  'node-prod-eu-04': { total: 2, active: 2 },
+const STORY_ENTITY_ALERTS: Record<
+  string,
+  { readonly total: number; readonly active: number; readonly inMaintenance: number }
+> = {
+  'payments-service': { total: 4, active: 4, inMaintenance: 0 },
+  'checkout-service': { total: 2, active: 2, inMaintenance: 0 },
+  // A handful of maintenance-window examples, not a slice of the fleet.
+  // Mix (some paused), all paused, and one host so both categories show it.
+  'payments-pod-7f9b2': { total: 3, active: 3, inMaintenance: 1 },
+  'node-prod-eu-04': { total: 2, active: 2, inMaintenance: 2 },
+  'host-eu-prod-01': { total: 3, active: 2, inMaintenance: 1 },
 };
 
 /**
@@ -524,7 +557,7 @@ const STORY_ENTITY_ALERTS: Record<string, { readonly total: number; readonly act
 const buildAlerts = (
   name: string,
   health: EntityHealth
-): { total: number; active: number } | undefined => {
+): { total: number; active: number; inMaintenance: number } | undefined => {
   const pinned = STORY_ENTITY_ALERTS[name];
   if (pinned) return pinned;
   const h = stableHash(`alerts-${name}`) % 100;
@@ -541,23 +574,35 @@ const buildAlerts = (
   const total = (stableHash(`alerts-total-${name}`) % 7) + 1; // 1–7 rules
   if (h < activeMax) {
     const active = (stableHash(`alerts-active-${name}`) % total) + 1; // 1–total firing
-    return { total, active };
+    return { total, active, inMaintenance: 0 };
   }
-  return { total, active: 0 }; // all clear
+  return { total, active: 0, inMaintenance: 0 }; // all clear
 };
 
 /** Categories kept alert-quiet in the ElasticOn demo (nav + inventory). */
 const NO_ACTIVE_ALERT_CATEGORIES = new Set<EntityCategoryId>(['databases', 'storage']);
 
+/**
+ * Maintenance windows are a Hosts and Kubernetes signal only, and only on
+ * the few entities pinned in {@link STORY_ENTITY_ALERTS}. Everyone else
+ * stays at zero so the demo shows the idea without covering the inventory.
+ */
+const MAINTENANCE_WINDOW_CATEGORIES = new Set<EntityCategoryId>(['hosts', 'kubernetes']);
+
 const alertsForCategory = (
   category: EntityCategoryId,
   name: string,
   health: EntityHealth
-): { total: number; active: number } | undefined => {
+): { total: number; active: number; inMaintenance: number } | undefined => {
   const alerts = buildAlerts(name, health);
-  if (!NO_ACTIVE_ALERT_CATEGORIES.has(category)) return alerts;
   if (!alerts) return alerts;
-  return { total: alerts.total, active: 0 };
+  if (NO_ACTIVE_ALERT_CATEGORIES.has(category)) {
+    return { total: alerts.total, active: 0, inMaintenance: 0 };
+  }
+  if (!MAINTENANCE_WINDOW_CATEGORIES.has(category)) {
+    return { ...alerts, inMaintenance: 0 };
+  }
+  return alerts;
 };
 
 // Deterministically seed the extra, category-specific attributes (e.g. a

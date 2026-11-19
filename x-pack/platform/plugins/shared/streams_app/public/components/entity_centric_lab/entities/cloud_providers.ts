@@ -199,6 +199,40 @@ export const isKnownCloudServiceId = (providerId: string, serviceId: string): bo
  * cloud entities by provider without relying on the seeded `provider`
  * field being present on every record.
  */
+/**
+ * Type names shown on the AWS page when the AWS Re-invent variant is on.
+ * Keyed by the seeded `Entity.type`. Order is the group order on that page.
+ */
+const AWS_REINVENT_TYPE_LABELS: Readonly<Record<string, string>> = {
+  'AWS EC2 Instance': 'EC2 instances',
+  'AWS S3 bucket': 'S3 buckets',
+  'AWS Lambda function': 'Lambda functions',
+};
+
+export const AWS_REINVENT_TYPE_ORDER: ReadonlyMap<string, number> = new Map([
+  ['EC2 instances', 0],
+  ['S3 buckets', 1],
+  ['Lambda functions', 2],
+]);
+
+export const awsReinventTypeLabel = (entityType: string): string =>
+  AWS_REINVENT_TYPE_LABELS[entityType] ?? entityType;
+
+/**
+ * Header badges for an AWS resource while AWS Re-invent is on.
+ * Returns undefined for every other type, including the same resources
+ * when the caller leaves the variant off.
+ */
+export const awsReinventHeaderBadges = (
+  entityType: string | undefined
+): { readonly category: string; readonly type: string } | undefined => {
+  if (!entityType) return undefined;
+  const type = AWS_REINVENT_TYPE_LABELS[entityType];
+  if (type) return { category: 'AWS', type };
+  const alreadyRelocated = Object.values(AWS_REINVENT_TYPE_LABELS).includes(entityType);
+  return alreadyRelocated ? { category: 'AWS', type: entityType } : undefined;
+};
+
 export const getProviderIdForEntityType = (entityType: string): CloudProviderId | undefined => {
   for (const provider of CLOUD_PROVIDERS) {
     if (provider.services.some((service) => service.entityType === entityType)) {

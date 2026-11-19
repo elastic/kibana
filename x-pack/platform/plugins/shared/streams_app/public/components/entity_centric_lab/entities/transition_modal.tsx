@@ -195,7 +195,7 @@ const TransitionModal = ({ onSwitch, onDismiss }: TransitionModalProps) => {
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onDismiss} size="s">
-              Don&apos;t show this again
+              Cancel
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

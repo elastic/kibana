@@ -20,12 +20,18 @@ export interface SecondaryMenuSectionProps {
    * settings cog). Only shown when the section has a header (a `label`).
    */
   action?: ReactNode;
+  /**
+   * Horizontal rule under the section. Omitted on the last section either way.
+   * @default true
+   */
+  divider?: boolean;
 }
 
 export const SecondaryMenuSectionComponent = ({
   children,
   label,
   action,
+  divider = true,
 }: SecondaryMenuSectionProps): JSX.Element => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme, highContrastMode } = euiThemeContext;
@@ -35,28 +41,29 @@ export const SecondaryMenuSectionComponent = ({
   const secondaryMenuWrapperStyles = css`
     padding: ${euiTheme.size.m};
     position: relative;
-
-    &:not(:last-child) {
-      ${highContrastMode
+    ${divider
+      ? highContrastMode
         ? `
+      &:not(:last-child) {
         border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.border.color};
         margin-left: ${euiTheme.size.m};
         margin-right: ${euiTheme.size.m};
         padding-left: 0;
         padding-right: 0;
-      `
+      }
+    `
         : `
-        &::after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: ${euiTheme.size.m};
-          right: ${euiTheme.size.m};
-          height: ${euiTheme.border.width.thin};
-          background-color: ${euiTheme.colors.borderBaseSubdued};
-        }
-      `}
-    }
+      &:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: ${euiTheme.size.m};
+        right: ${euiTheme.size.m};
+        height: ${euiTheme.border.width.thin};
+        background-color: ${euiTheme.colors.borderBaseSubdued};
+      }
+    `
+      : ''}
   `;
 
   const labelStyles = css`

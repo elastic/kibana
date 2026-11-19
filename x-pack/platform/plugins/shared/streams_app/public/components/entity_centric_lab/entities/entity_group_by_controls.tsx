@@ -54,7 +54,7 @@ const GroupByInfoTip = () => (
     anchorProps={{
       onClick: stopGroupByInfoClick,
       onMouseDown: stopGroupByInfoClick,
-      style: { display: 'inline-flex', marginLeft: 4, verticalAlign: 'middle' },
+      style: { display: 'inline-flex', marginLeft: 8, verticalAlign: 'middle' },
       'data-test-subj': 'entityCentricLabGroupByInfo',
     }}
   />

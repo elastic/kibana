@@ -46,6 +46,8 @@ export interface SecondaryMenuItem {
   notificationHref?: string;
   /** Optional inventoried resource total (hollow badge). */
   inventoryCount?: number;
+  /** Of notificationCount, how many have an active alert in a maintenance window. */
+  maintenanceCount?: number;
   /** If true, opens link in a new tab with an external icon. */
   isExternal?: boolean;
 }
@@ -75,6 +77,8 @@ export interface SecondaryMenuSection {
   label?: string;
   /** Optional named sub-groups rendered below the section's flat items. */
   subGroups?: SecondaryMenuSubGroup[];
+  /** Draw the horizontal rule under this section. Defaults to true. */
+  divider?: boolean;
 }
 
 /**
