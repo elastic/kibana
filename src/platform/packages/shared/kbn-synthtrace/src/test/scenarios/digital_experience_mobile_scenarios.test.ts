@@ -251,6 +251,8 @@ describe('digital experience mobile scenarios', () => {
       expect(servers.length).toBeGreaterThan(0);
       const orphans = servers.filter((server) => {
         expect(SERVICES).not.toContain(serviceOf(server));
+        // A crash can lose the client span, but its ID stays on the backend span
+        expect(server.parent_span_id).toEqual(expect.stringMatching(/^[0-9a-f]{16}$/));
         const parent = clientSpans.get(String(server.parent_span_id));
         if (parent) {
           expect(parent.trace_id).toBe(server.trace_id);

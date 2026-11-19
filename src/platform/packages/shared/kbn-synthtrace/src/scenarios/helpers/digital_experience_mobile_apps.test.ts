@@ -634,12 +634,14 @@ describe('digital experience mobile apps', () => {
       ).toEqual(new Set([newest.serviceVersion]));
     });
 
-    it('does not carry sessions in progress over to a different configuration of an app', () => {
+    it('keeps sessions in progress on their app when the app changes between batches', () => {
       const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
-      const withVersion = (serviceVersion: string) => ({
+      const withVersion = (serviceVersion: string, sessionsPerMinute: number) => ({
         ...app,
+        sessionsPerMinute,
         versions: [{ ...app.versions[0], serviceVersion, rollout: undefined }],
       });
+      const batchStart = FROM + 5 * 60_000;
       const batch = (from: number, apps: DigitalExperienceMobileApp[]) =>
         logsOf(
           generateEdotNativeSessions(timerange(new Date(from), new Date(from + 5 * 60_000)), {
@@ -647,19 +649,42 @@ describe('digital experience mobile apps', () => {
             from: FROM,
             scale: 1,
             platform: 'both',
-            seed: 'digital-experience-native-test',
+            seed: 'digital-experience-native-configuration',
             apps,
           }).flatMap((generator) =>
             Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
           )
         );
-      const versionsOf = (batchLogs: OtelLogDocument[]) =>
-        new Set(batchLogs.map(({ resource }) => resource?.attributes?.['service.version']));
+      const versionOf = ({ resource }: OtelLogDocument) =>
+        resource?.attributes?.['service.version'];
 
-      // Batches that follow each other, as in live mode, of apps that differ in their versions
-      expect(versionsOf(batch(FROM, [withVersion('9.1.0')]))).toEqual(new Set(['9.1.0']));
-      const next = batch(FROM + 5 * 60_000, [withVersion('9.2.0')]);
-      expect(versionsOf(next)).toEqual(new Set(['9.2.0']));
+      // Batches that follow each other, as in live mode, of an app that changes version and rate
+      const first = batch(FROM, [withVersion('9.1.0', app.sessionsPerMinute)]);
+      const next = batch(batchStart, [withVersion('9.2.0', app.sessionsPerMinute + 1)]);
+
+      const versionsBySession = new Map<unknown, Set<unknown>>();
+      [...first, ...next].forEach((doc) => {
+        const sessionId = doc.attributes?.['session.id'];
+        if (sessionId) {
+          versionsBySession.set(
+            sessionId,
+            (versionsBySession.get(sessionId) ?? new Set()).add(versionOf(doc))
+          );
+        }
+      });
+      versionsBySession.forEach((versions) => expect(versions.size).toBe(1));
+      // No session shows up halfway: each has its start in one of the batches
+      const started = new Set(
+        [...first, ...next]
+          .filter(({ event_name: eventName }) => eventName === EVENT_SESSION_START)
+          .map(({ attributes }) => attributes?.['session.id'])
+      );
+      versionsBySession.forEach((_versions, sessionId) => expect(started).toContain(sessionId));
+      // Sessions that started before the change carry on, and the new ones start at the new rate
+      expect(next.filter((doc) => versionOf(doc) === '9.1.0').length).toBeGreaterThan(0);
+      const starts = next.filter(({ event_name: eventName }) => eventName === EVENT_SESSION_START);
+      starts.forEach((start) => expect(versionOf(start)).toBe('9.2.0'));
+      expect(starts).toHaveLength((app.sessionsPerMinute + 1) * 5);
     });
 
     it('rejects a rollout of a version other than the newest', () => {

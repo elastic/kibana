@@ -1014,9 +1014,9 @@ const generateSessions = (
       if (proposedSignals) {
         return generateOngoingPerMinute(range, perMinute, {
           store: ongoingNativeSessions,
-          // The sessions in progress depend on the whole app, e.g. its rate, so apps that differ
-          // can't share them
-          key: `${runKey}:${serviceName}:${appDigests[appIndex]}`,
+          key: `${runKey}:${serviceName}`,
+          // Sessions in progress keep the app they started with when the app changes
+          configuration: appDigests[appIndex],
           maxDuration: MAX_NATIVE_SESSION_MS,
           releaseTime: sentAt,
           // A session that started before the run is left out whole
