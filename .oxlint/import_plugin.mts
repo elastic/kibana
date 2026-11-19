@@ -208,7 +208,7 @@ export const importPluginOverrides: OxlintOverride[] = [
       'x-pack/platform/test/security_functional',
       'x-pack/platform/plugins/shared/spaces',
       'x-pack/platform/test/spaces_api_integration',
-      'src/platform/plugins/shared/workflows_management',
+      'x-pack/platform/plugins/shared/workflows_management',
       'x-pack/platform/plugins/shared/workflows_execution_engine',
       'src/platform/plugins/shared/workflows_extensions',
       'src/platform/packages/shared/kbn-workflows',
@@ -298,8 +298,8 @@ export const importPluginOverrides: OxlintOverride[] = [
   {
     // Workflows front end and common files
     files: inDirs([
-      'src/platform/plugins/shared/workflows_management/public',
-      'src/platform/plugins/shared/workflows_management/common',
+      'x-pack/platform/plugins/shared/workflows_management/public',
+      'x-pack/platform/plugins/shared/workflows_management/common',
       'src/platform/plugins/shared/workflows_extensions/public',
       'src/platform/plugins/shared/workflows_extensions/common',
       'src/platform/packages/shared/kbn-workflows',

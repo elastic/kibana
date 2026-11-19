@@ -4212,7 +4212,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-workflows-library
       '@kbn/workflows-management-plugin':
         specifier: workspace:*
-        version: link:src/platform/plugins/shared/workflows_management
+        version: link:x-pack/platform/plugins/shared/workflows_management
       '@kbn/workflows-topics':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-workflows-topics
@@ -8873,7 +8873,7 @@ importers:
 
   src/platform/plugins/shared/workflows_extensions: {}
 
-  src/platform/plugins/shared/workflows_management: {}
+  x-pack/platform/plugins/shared/workflows_management: {}
 
   src/platform/test: {}
 
