@@ -99,15 +99,15 @@ export interface MenuItem {
    */
   badgeType?: BadgeType;
   /**
-   * (optional) Secondary menu sections shown in the expanded side panel.
-   * Also used as popover content when `popoverSections` is omitted.
+   * (optional) Secondary menu structural sections shown in the expanded side panel.
+   * Also used as popover content.
    */
   sections?: SecondaryMenuSection[];
   /**
-   * (optional) Secondary menu sections shown in the hover popover only.
-   * Does not open the expanded side panel. Not shown in More.
+   * (optional) Supplementary sections appended to the hover popover and, when `sections` are set,
+   * the expanded side panel. Does not open the expanded side panel. Not shown in More.
    */
-  popoverSections?: SecondaryMenuSection[];
+  supplementarySections?: SecondaryMenuSection[];
 }
 
 /**
