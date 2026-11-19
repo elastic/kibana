@@ -10,6 +10,7 @@
 import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getRegisteredEsqlDataView, type DataSource, type EsqlSource } from '@kbn/data-source';
+import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
@@ -44,6 +45,8 @@ interface TabRuntimeState {
   dataStateContainer?: DiscoverDataStateContainer;
   customizationService?: ConnectedCustomizationService;
   unifiedHistogramConfig: UnifiedHistogramConfig;
+  /** Fields reported by a custom chart section as the only ones it can use as a breakdown. */
+  chartBreakdownFieldNames: string[];
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
   cascadedDocumentsFetcher: CascadedDocumentsFetcher;
@@ -61,7 +64,7 @@ type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
 
 export type ReactiveTabRuntimeState = ReactiveRuntimeState<
   TabRuntimeState,
-  'currentDataSource' | 'cascadedLeafDataSource'
+  'currentDataSource' | 'cascadedLeafDataSource' | 'chartBreakdownFieldNames'
 >;
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
@@ -122,6 +125,7 @@ export const createTabRuntimeState = ({
       localStorageKeyPrefix: undefined,
       layoutPropsMap: initialValues?.unifiedHistogramLayoutPropsMap ?? {},
     }),
+    chartBreakdownFieldNames$: new BehaviorSubject<string[] | undefined>(undefined),
     scopedProfilesManager$: new BehaviorSubject(scopedProfilesManager),
     scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
     cascadedDocumentsFetcher$: new BehaviorSubject(cascadedDocumentsFetcher),
@@ -136,6 +140,24 @@ export const useRuntimeState = <T,>(stateSubject$: BehaviorSubject<T>) =>
 
 export const selectTabRuntimeState = (runtimeStateManager: RuntimeStateManager, tabId: string) =>
   runtimeStateManager.tabs.byId[tabId];
+
+/** Sets the breakdown fields reported by the tab's custom chart section, if the tab still exists. */
+export const setTabChartBreakdownFieldNames = (
+  runtimeStateManager: RuntimeStateManager,
+  tabId: string,
+  fieldNames: string[] | undefined
+) => {
+  // A closed tab's runtime state is removed before its chart section unmounts
+  const tabRuntimeState: ReactiveTabRuntimeState | undefined = selectTabRuntimeState(
+    runtimeStateManager,
+    tabId
+  );
+  const chartBreakdownFieldNames$ = tabRuntimeState?.chartBreakdownFieldNames$;
+
+  if (chartBreakdownFieldNames$ && !isEqual(chartBreakdownFieldNames$.getValue(), fieldNames)) {
+    chartBreakdownFieldNames$.next(fieldNames);
+  }
+};
 
 // Queries with the same id share one registry entry, which another tab can unregister while this
 // one is still on that source. The shim published with the source is kept per source instance, so it survives that.
