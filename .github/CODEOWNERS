@@ -2191,6 +2191,7 @@ x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/s
 /x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/config.ts @elastic/search-ml-ux
 /x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/ml/ @elastic/search-ml-ux
 /x-pack/platform/test/screenshot_creation/apps/ml_docs @elastic/search-ml-ux
+/x-pack/platform/test/screenshot_creation/services/ml_docs_transform @elastic/search-ml-ux
 /x-pack/solutions/**/test/serverless/**/test_suites/ml/ @elastic/search-ml-ux
 
 # Security Machine Learning
@@ -2203,9 +2204,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/functional/apps/aiops @elastic/search-ml-ux
 /x-pack/platform/test/fixtures/es_archives/large_arrays @elastic/search-ml-ux # Assigned per usages
 /x-pack/platform/test/functional/services/aiops @elastic/search-ml-ux
-
-# Transforms maintained by the Kibana Management team.
-/x-pack/platform/test/functional/services/transform @elastic/kibana-management
+/x-pack/platform/test/functional/services/ace_editor.ts @elastic/search-ml-ux # Assigned per usages
 
 /x-pack/dev-tools @elastic/kibana-operations
 /catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
@@ -2843,7 +2842,6 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 
 # Management Experience - Deployment Management
 /src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-core @elastic/kibana-discover # Assigned per Scout saved_objects_management import suites
-/x-pack/platform/test/functional/services/ace_editor.ts @elastic/kibana-management
 /x-pack/platform/test/stack_functional_integration/apps/ccs @elastic/kibana-discover
 /x-pack/platform/test/functional/services/data_stream.ts @elastic/kibana-dashboards
 /x-pack/platform/test/functional/page_objects/index_management_page.ts @elastic/kibana-management

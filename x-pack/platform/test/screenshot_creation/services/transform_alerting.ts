@@ -6,13 +6,21 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
-export function TransformAlertingProvider({ getService }: FtrProviderContext) {
+export function TransformAlertingProvider({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
+  const pageObjects = getPageObjects(['common']);
+
   return {
+    async navigateToRules() {
+      await pageObjects.common.navigateToApp('rules');
+      await testSubjects.click('rulesTab');
+      await testSubjects.existOrFail('rulesList');
+    },
+
     async selectTransformAlertType() {
       await retry.tryForTime(5000, async () => {
         await testSubjects.click('transform_health-SelectOption');

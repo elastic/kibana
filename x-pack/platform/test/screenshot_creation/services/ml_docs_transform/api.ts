@@ -12,13 +12,9 @@ import type { TransformState } from '@kbn/transform-plugin/common/constants';
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import type { TransformStats } from '@kbn/transform-plugin/common/types/transform_stats';
 
-import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
-import type { PostTransformsUpdateRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/update_transforms';
-import type { TransformPivotConfig } from '@kbn/transform-plugin/common/types/transform';
-import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-export async function asyncForEach(array: any[], callback: Function) {
+async function asyncForEach(array: any[], callback: Function) {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array);
   }
@@ -39,26 +35,6 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
           responseBody
         )}'`
       );
-    },
-
-    async createIndices(
-      indices: string,
-      params: Omit<IndicesCreateRequest, 'index'> = {} as NonNullable<
-        Omit<IndicesCreateRequest, 'index'>
-      >
-    ) {
-      log.debug(`Creating indices: '${indices}'...`);
-      if ((await es.indices.exists({ index: indices, allow_no_indices: false })) === true) {
-        log.debug(`Indices '${indices}' already exist. Nothing to create.`);
-        return;
-      }
-
-      const createResponse = await es.indices.create({ index: indices, ...params });
-      expect(createResponse)
-        .to.have.property('acknowledged')
-        .eql(true, 'Response for create request indices should be acknowledged.');
-
-      await this.waitForIndicesToExist(indices, `expected ${indices} to be created`);
     },
 
     async deleteIndices(indices: string, skipWaitForIndicesNotToExist?: boolean) {
@@ -82,16 +58,6 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       if (!skipWaitForIndicesNotToExist) {
         await this.waitForIndicesNotToExist(indices, `expected indices '${indices}' to be deleted`);
       }
-    },
-
-    async waitForIndicesToExist(indices: string, errorMsg?: string) {
-      await retry.tryForTime(30 * 1000, async () => {
-        if ((await es.indices.exists({ index: indices, allow_no_indices: false })) === true) {
-          return true;
-        } else {
-          throw new Error(errorMsg || `indices '${indices}' should exist`);
-        }
-      });
     },
 
     async waitForIndicesNotToExist(indices: string, errorMsg?: string) {
@@ -197,29 +163,10 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async getTransformList(size: number = 10): Promise<GetTransformsResponseSchema> {
-      const { body, status } = await esSupertest.get(`/_transform`);
-      this.assertResponseStatusCode(200, status, body);
-
-      return body as GetTransformsResponseSchema;
-    },
-
     async getTransform(transformId: string, expectedCode = 200) {
       const response = await esSupertest.get(`/_transform/${transformId}`);
       this.assertResponseStatusCode(expectedCode, response.status, response.body);
       return response;
-    },
-
-    async updateTransform(
-      transformId: string,
-      updates: Partial<PostTransformsUpdateRequestSchema>
-    ): Promise<TransformPivotConfig> {
-      const { body, status } = await esSupertest
-        .post(`/_transform/${transformId}/_update`)
-        .send(updates);
-      this.assertResponseStatusCode(200, status, body);
-
-      return body as TransformPivotConfig;
     },
 
     async createTransform(
@@ -286,21 +233,6 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       if (assertSuccess) {
         this.assertResponseStatusCode(200, status, body);
       }
-    },
-
-    async scheduleTransform(transformId: string, assertSuccess = true) {
-      log.debug(`Scheduling now transform '${transformId}' ...`);
-      const { body, status } = await esSupertest.post(`/_transform/${transformId}/_schedule_now`);
-
-      if (assertSuccess) {
-        this.assertResponseStatusCode(200, status, body);
-      }
-    },
-
-    async stopTransform(transformId: string) {
-      log.debug(`Stopping transform '${transformId}' ...`);
-      const { body, status } = await esSupertest.post(`/_transform/${transformId}/_stop`);
-      this.assertResponseStatusCode(200, status, body);
     },
 
     async createAndRunTransform(
