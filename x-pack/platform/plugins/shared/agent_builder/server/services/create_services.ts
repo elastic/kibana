@@ -306,6 +306,7 @@ export class ServiceManager {
       providers: createDecisionProviders({
         config: this.config.decisionModel,
         inference,
+        elasticsearch,
         createModelProvider: createModelProviderFactory({
           inference,
           trackingService,
