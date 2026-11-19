@@ -260,10 +260,14 @@ export const HTTP_REQUEST_EVALS = `is_http_request = COALESCE(${KIND} == ${escap
 )}, false) AND ${HTTP_REQUEST_METHOD} IS NOT NULL,
        no_response = COALESCE(${STATUS_CODE} == ${escapeStringValue(SPAN_STATUS_ERROR)}, false)`;
 
-/** The requests with a known outcome, and the failed ones, as the applications list counts them. */
+/**
+ * The requests with a known outcome, and the failed ones, as the applications list counts them.
+ * A filter already counts null as false: a `COALESCE` of the status made the mobile query 3x
+ * slower, as it filters every column of the page for each event without a status.
+ */
 export const HTTP_REQUEST_CONDITIONS = {
   http_request_count: `is_http_request AND (${HTTP_RESPONSE_STATUS_CODE} IS NOT NULL OR no_response)`,
-  http_failed_request_count: `is_http_request AND (COALESCE(${HTTP_RESPONSE_STATUS_CODE} >= 400, false) OR no_response)`,
+  http_failed_request_count: `is_http_request AND (${HTTP_RESPONSE_STATUS_CODE} >= 400 OR no_response)`,
 };
 
 export const HTTP_REQUEST_STATS: Stat[] = Object.entries(HTTP_REQUEST_CONDITIONS).map(
