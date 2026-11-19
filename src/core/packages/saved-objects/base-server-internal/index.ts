@@ -21,7 +21,7 @@ export {
   type SavedObjectsTypeMappingDefinitions,
   type IndexMappingMigrationStateMeta,
 } from './src/mappings';
-export { SavedObjectsSerializer, readStoredAcl } from './src/serialization';
+export { SavedObjectsSerializer, readAclFromRawSource } from './src/serialization';
 export { SavedObjectsTypeValidator } from './src/validation';
 export {
   decodeRequestVersion,

@@ -8,4 +8,4 @@
  */
 
 export { SavedObjectsSerializer } from './serializer';
-export { readStoredAcl } from './acl';
+export { readAclFromRawSource } from './acl';

@@ -22,7 +22,7 @@ import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-object
 import {
   decodeRequestVersion,
   encodeHitVersion,
-  readStoredAcl,
+  readAclFromRawSource,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { projectAcl } from './acl';
 
@@ -139,7 +139,7 @@ export function getSavedObjectFromSource<T>(
     ];
   }
 
-  const acl = readStoredAcl(doc._source);
+  const acl = readAclFromRawSource(doc._source);
   return projectAcl(
     {
       id,

@@ -18,6 +18,6 @@ import { normalizeAclSource, type StoredAcl } from '@kbn/ols';
  * @param source The raw document source, with every root key, not only `acl`.
  * @returns The stored ACL, or `undefined` when the document has none.
  */
-export const readStoredAcl = (
+export const readAclFromRawSource = (
   source: Readonly<Record<string, unknown>> | undefined
 ): StoredAcl | undefined => normalizeAclSource(source);

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readStoredAcl } from './acl';
+import { readAclFromRawSource } from './acl';
 
-describe('readStoredAcl', () => {
+describe('readAclFromRawSource', () => {
   it('reads the ACL from the `acl` object, dotted root keys, and arrays', () => {
     expect(
-      readStoredAcl({
+      readAclFromRawSource({
         type: 'dashboard',
         acl: { version: 1, owner: { type: 'user' }, entries: [{ type: 'user', id: ['a', 'b'] }] },
         'acl.owner.id': 'u_owner',
@@ -32,6 +32,6 @@ describe('readStoredAcl', () => {
     ['an empty ACL', { acl: {} }],
     ['a null ACL', { acl: null }],
   ])('returns undefined for %s', (_, source) => {
-    expect(readStoredAcl(source)).toBeUndefined();
+    expect(readAclFromRawSource(source)).toBeUndefined();
   });
 });

@@ -14,7 +14,10 @@ import {
   type SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { decodeRequestVersion, readStoredAcl } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  decodeRequestVersion,
+  readAclFromRawSource,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type {
   SavedObjectAccessControl,
   SavedObjectsCreateOptions,
@@ -159,7 +162,7 @@ export const performCreate = async <T>(
   // An overwrite keeps the stored ACL. Callers cannot set an ACL through create. The preflight
   // reads only multi-namespace objects, so an overwrite of any other object carries no ACL: a type
   // that stores ACLs has to be multi-namespace until those overwrites read the existing document.
-  const existingAcl = readStoredAcl(preflightResult?.existingDocument?._source);
+  const existingAcl = readAclFromRawSource(preflightResult?.existingDocument?._source);
   const migrated = migrationHelper.migrateInputDocument({
     id,
     type,

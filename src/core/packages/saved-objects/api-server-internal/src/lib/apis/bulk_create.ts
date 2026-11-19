@@ -16,7 +16,7 @@ import {
   type SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { readStoredAcl } from '@kbn/core-saved-objects-base-server-internal';
+import { readAclFromRawSource } from '@kbn/core-saved-objects-base-server-internal';
 import type { StoredAcl } from '@kbn/ols';
 import {
   type SavedObjectsCreateOptions,
@@ -279,7 +279,7 @@ export const performBulkCreate = async <T>(
           // preflight reads only multi-namespace objects, so an overwrite of any other object (the
           // branch below) carries no ACL: a type that stores ACLs has to be multi-namespace until
           // those overwrites read the existing document.
-          existingAcl = readStoredAcl(existingDocument?._source);
+          existingAcl = readAclFromRawSource(existingDocument?._source);
         } else {
           if (registry.isSingleNamespace(object.type)) {
             savedObjectNamespace = initialNamespaces
