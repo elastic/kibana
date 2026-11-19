@@ -4,7 +4,7 @@
     - 'src/platform/packages/shared/deeplinks/workflows/**/*.*'
     - 'src/platform/packages/shared/kbn-workflows/**/*.*'
     - 'src/platform/packages/shared/kbn-workflows-ui/**/*.*'
-    - 'src/platform/plugins/shared/workflows_execution_engine/**/*.*'
+    - 'x-pack/platform/plugins/shared/workflows_execution_engine/**/*.*'
     - 'src/platform/plugins/shared/workflows_extensions/**/*.*'
     - 'src/platform/plugins/shared/workflows_management/**/*.*'
     - 'src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/**/*.*'

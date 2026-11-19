@@ -246,7 +246,11 @@ export interface ConversationClient {
   patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>,
-    options: ConversationWriteOptions & { access?: ConversationAccess; activity?: ActivityContext }
+    options: ConversationWriteOptions & {
+      access?: ConversationAccess;
+      activity?: ActivityContext;
+      refresh?: Refresh;
+    }
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
   getUser(): CurrentUser;
   getAuthor(
@@ -1607,7 +1611,12 @@ class ConversationClientImpl implements ConversationClient {
       access = 'converse',
       source,
       activity,
-    }: ConversationWriteOptions & { access?: ConversationAccess; activity?: ActivityContext }
+      refresh,
+    }: ConversationWriteOptions & {
+      access?: ConversationAccess;
+      activity?: ActivityContext;
+      refresh?: Refresh;
+    }
   ): Promise<{ conversation: Conversation; changedFields: string[] }> {
     let changedFields: string[] = [];
     const envelope = this.activityEnvelope(activity);
@@ -1616,6 +1625,7 @@ class ConversationClientImpl implements ConversationClient {
       conversationId,
       access,
       source,
+      refresh,
       fields: (current) => {
         if (!current.template_id) {
           throw createBadRequestError(

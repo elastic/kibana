@@ -6,33 +6,24 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { RedirectTo } from '../redirect_to';
-import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { defaultStreamsLayoutTab } from './tab_ids';
-import { useShowClassicTab } from './use_show_classic_tab';
 
-/** Replaces an entry URL with Classic or the Map once the classic-stream check has settled. */
+/** Replaces an entry URL with Classic for users with Streams access, otherwise the Map. */
 export function RedirectToDefaultLayoutTab() {
   const params = useStreamsAppParams('/v2/unit/{unitId}', true);
   const unitId = params?.path.unitId ?? STREAMS_DEFAULT_UNIT_ID;
-  const { loading, showClassic } = useShowClassicTab();
-
-  if (loading) {
-    return (
-      <StreamsAppPageTemplate.EmptyPrompt
-        data-test-subj="streamsClassicTabLoading"
-        icon={<EuiLoadingSpinner size="xl" />}
-      />
-    );
-  }
+  const {
+    access: { legacy },
+  } = useStreamsPrivileges();
 
   return (
     <RedirectTo
       path="/v2/unit/{unitId}/{tab}"
-      params={{ path: { unitId, tab: defaultStreamsLayoutTab(showClassic) } }}
+      params={{ path: { unitId, tab: defaultStreamsLayoutTab(legacy) } }}
     />
   );
 }

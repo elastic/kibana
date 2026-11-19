@@ -71,10 +71,6 @@ export const predefinedStepTypes = [
     displayName: 'Parallel',
   },
   {
-    actionTypeId: 'merge',
-    displayName: 'Merge',
-  },
-  {
     actionTypeId: 'wait',
     displayName: 'Wait',
   },

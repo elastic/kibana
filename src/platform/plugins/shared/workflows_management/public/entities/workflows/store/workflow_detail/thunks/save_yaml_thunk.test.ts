@@ -133,6 +133,28 @@ describe('saveYamlThunk', () => {
       expect(result.type).toBe('detail/saveYamlThunk/rejected');
       expect(result.payload).toBe('Update failed');
     });
+
+    it('saves the given YAML to the given workflow', async () => {
+      mockWorkflowApi.updateWorkflow.mockResolvedValue(undefined as any);
+      mockLoadWorkflowThunk.mockImplementation((() => async () => {}) as any);
+
+      await store.dispatch(
+        saveYamlThunk({ id: 'test-workflow-1', yamlString: 'name: Checked\nsteps: []' })
+      );
+
+      expect(mockWorkflowApi.updateWorkflow).toHaveBeenCalledWith('test-workflow-1', {
+        yaml: 'name: Checked\nsteps: []',
+      });
+    });
+
+    it('saves nothing when another workflow is open', async () => {
+      const result = await store.dispatch(
+        saveYamlThunk({ id: 'test-workflow-a', yamlString: 'name: Checked\nsteps: []' })
+      );
+
+      expect(mockWorkflowApi.updateWorkflow).not.toHaveBeenCalled();
+      expect(result.type).toBe('detail/saveYamlThunk/rejected');
+    });
   });
 
   describe('when creating new workflow', () => {

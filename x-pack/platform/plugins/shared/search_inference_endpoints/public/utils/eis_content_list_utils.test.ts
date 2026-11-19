@@ -19,8 +19,13 @@ import {
   getItemModelId,
   toGroupedModel,
 } from './eis_content_list_utils';
-import type { GroupedModel } from './eis_utils';
+import * as eisUtils from './eis_utils';
+import type { GroupedModel, TaskTypeCategory } from './eis_utils';
 import { EisModelStatus } from '../../common/types';
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 const model = (
   modelName: string,
@@ -125,6 +130,28 @@ describe('createEisFindItems', () => {
   it('sorts type in descending order', async () => {
     const { items } = await findItems(
       findParams({ sort: { field: EIS_TYPE_SORT_FIELD, direction: 'desc' } })
+    );
+
+    expect(items.map((item) => toGroupedModel(item).categories.join(', '))).toEqual([
+      'Rerank',
+      'Generative',
+      'Embedding',
+    ]);
+  });
+
+  it('sorts type by the translated label instead of the category key', async () => {
+    const translatedLabels: Record<TaskTypeCategory, string> = {
+      Embedding: 'Zulu',
+      Generative: 'Mike',
+      Rerank: 'Alpha',
+      Decision: 'Bravo',
+    };
+    jest
+      .spyOn(eisUtils, 'getTaskTypeCategoryLabel')
+      .mockImplementation((category) => translatedLabels[category]);
+
+    const { items } = await findItems(
+      findParams({ sort: { field: EIS_TYPE_SORT_FIELD, direction: 'asc' } })
     );
 
     expect(items.map((item) => toGroupedModel(item).categories.join(', '))).toEqual([
@@ -438,6 +465,7 @@ describe('createEisFieldDefinitions', () => {
     expect(category.resolveIdToDisplay('Rerank')).toBe('Rerank');
     expect(category.resolveDisplayToId('embedding')).toBe('Embedding');
     expect(category.resolveFuzzyDisplayToIds?.('rer')).toEqual(['Rerank']);
+    expect(category.resolveDisplayToId('decision')).toBe('Decision');
   });
 
   it('resolves region option labels to the flyout keys', () => {

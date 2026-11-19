@@ -177,6 +177,11 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
       capabilities.push('memdump_raw');
     }
 
+    // v9.7.0 introduced `get-file` support for multiple paths (`parameters.paths`)
+    if (gte(agentVersion, '9.7.0')) {
+      capabilities.push('get_file_multi_path');
+    }
+
     // v9.7.0 introduced `get-file --force` capability (Windows only)
     if (gte(agentVersion, '9.7.0') && (hostOs.platform ?? '').toLowerCase() === 'windows') {
       capabilities.push('get_file_force');

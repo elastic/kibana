@@ -8,45 +8,11 @@
  */
 
 import type { ConnectorDrift, DriftReportEntry } from './detect_drift';
+import { DRIFT_ISSUE_LABEL } from './drift_issue_marker';
+import { drifted, healthy } from './drift_fixtures';
+import { renderDriftIssue } from './drift_issue';
 import type { DriftIssue, IssueTracker, SurfaceDriftOptions } from './surface_drift';
-import {
-  DRIFT_ISSUE_LABEL,
-  renderDriftIssue,
-  renderRefreshPr,
-  surfaceDrift,
-} from './surface_drift';
-
-const healthy: ConnectorDrift = {
-  connector: '.acme',
-  sources: { main: { status: 'unchanged' } },
-  operationsChanged: false,
-  snapshotProblems: [],
-  latestProblems: [],
-  verdict: 'healthy',
-  overlayFindings: [],
-  outcome: 'none',
-};
-
-const drifted: ConnectorDrift = {
-  ...healthy,
-  sources: {
-    main: {
-      status: 'changed',
-      changes: [
-        {
-          kind: 'breaking',
-          id: 'request-parameter-max-decreased',
-          text: 'decreased the max of `limit` to 50',
-          operation: 'GET /items',
-        },
-        { kind: 'non-breaking', id: 'response-optional-property-added', text: 'added `title`' },
-      ],
-    },
-  },
-  latestProblems: ['search: GET /items: limit must be <= 50'],
-  verdict: 'vendor-drift',
-  outcome: 'issue',
-};
+import { renderRefreshPr, surfaceDrift } from './surface_drift';
 
 const refreshable: ConnectorDrift = {
   ...healthy,
@@ -67,8 +33,14 @@ const createTracker = (initial: DriftIssue[] = []) => {
   const comments: Array<[number, string]> = [];
   const tracker: IssueTracker = {
     list: jest.fn(async () => issues),
-    create: jest.fn(async ({ body }) => {
-      const issue: DriftIssue = { number: 100 + issues.length, state: 'open', body, url: 'url' };
+    create: jest.fn(async ({ title, body }) => {
+      const issue: DriftIssue = {
+        number: 100 + issues.length,
+        state: 'open',
+        title,
+        body,
+        url: 'url',
+      };
       issues.push(issue);
       return issue;
     }),
@@ -103,7 +75,10 @@ const surface = (
 const issueOf = (drift: ConnectorDrift, number: number, state: 'open' | 'closed'): DriftIssue => ({
   number,
   state,
-  body: renderDriftIssue(drift, ['elastic/response-ops']).body,
+  ...renderDriftIssue(drift, {
+    owners: ['elastic/response-ops'],
+    buildUrl: 'https://buildkite.com/build/1',
+  }),
   url: `url/${number}`,
 });
 
@@ -117,11 +92,12 @@ describe('surfaceDrift', () => {
     ]);
     expect(tracker.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: '[Connector validation] Vendor API drift in .acme',
+        title: '[Connectors][Validation] `.acme`: 1 action needs attention',
         labels: [DRIFT_ISSUE_LABEL],
       })
     );
     expect(issues[0].body).toContain('cc @elastic/response-ops');
+    expect(issues[0].body).toContain('([build](https://buildkite.com/build/1))');
   });
 
   it('files no duplicate on the next run with the same findings', async () => {
@@ -134,14 +110,44 @@ describe('surfaceDrift', () => {
     expect(tracker.update).not.toHaveBeenCalled();
   });
 
-  it('updates the open issue and comments when the findings change', async () => {
+  it('refreshes when the issue was last checked without commenting, when only that changed', async () => {
     const { tracker, issues, comments } = createTracker([issueOf(drifted, 7, 'open')]);
-    const changed: ConnectorDrift = { ...drifted, latestProblems: ['another problem'] };
+    const nextWeek: ConnectorDrift = { ...drifted, checkedAt: '2026-11-23T06:00:00.000Z' };
+
+    const { actions } = await surface([nextWeek], tracker, {
+      buildUrl: 'https://buildkite.com/build/2',
+    });
+
+    expect(actions[0]).toMatchObject({ action: 'unchanged', issue: { number: 7 } });
+    expect(comments).toEqual([]);
+    expect(issues[0].body).toContain('2026-11-23 ([build](https://buildkite.com/build/2))');
+  });
+
+  it('updates the open issue, its title included, and comments when the findings change', async () => {
+    const { tracker, issues, comments } = createTracker([issueOf(drifted, 7, 'open')]);
+    const changed: ConnectorDrift = {
+      ...drifted,
+      actions: drifted.actions?.map((action) => ({
+        ...action,
+        latestProblems: ['another problem'],
+      })),
+    };
     const { actions } = await surface([changed], tracker);
 
     expect(actions[0]).toMatchObject({ action: 'updated', issue: { number: 7 } });
     expect(issues[0].body).toContain('another problem');
+    expect(issues[0].title).toBe('[Connectors][Validation] `.acme`: 2 actions need attention');
     expect(comments).toEqual([[7, expect.stringContaining('https://buildkite.com/build/1')]]);
+  });
+
+  it('updates the issue when only its title differs', async () => {
+    const { tracker, issues } = createTracker([
+      { ...issueOf(drifted, 7, 'open'), title: '[Connector validation] Vendor API drift in .acme' },
+    ]);
+    const { actions } = await surface([drifted], tracker);
+
+    expect(actions[0].action).toBe('updated');
+    expect(issues[0].title).toBe('[Connectors][Validation] `.acme`: 1 action needs attention');
   });
 
   it('reopens a closed issue when the connector drifts again', async () => {
@@ -198,7 +204,7 @@ describe('surfaceDrift', () => {
 
   it('ignores labelled issues without a marker and closed issues of removed connectors', async () => {
     const { tracker } = createTracker([
-      { number: 3, state: 'open', body: 'Filed by hand', url: 'url' },
+      { number: 3, state: 'open', title: 'By hand', body: 'Filed by hand', url: 'url' },
       issueOf({ ...drifted, connector: '.removed' }, 7, 'closed'),
     ]);
     const { actions } = await surface([], tracker);
@@ -208,9 +214,7 @@ describe('surfaceDrift', () => {
   });
 
   it('leaves the issues of other connectors alone', async () => {
-    const { tracker } = createTracker([
-      { number: 3, state: 'open', body: renderDriftIssue(refreshable, []).body, url: 'url' },
-    ]);
+    const { tracker } = createTracker([issueOf(refreshable, 3, 'open')]);
     const { actions } = await surface([healthy], tracker);
 
     expect(actions[0].action).toBe('none');
@@ -261,43 +265,7 @@ describe('surfaceDrift', () => {
   });
 });
 
-describe('renderDriftIssue', () => {
-  it('reports the two-mock result, the classified changes and how to reproduce', () => {
-    const { body } = renderDriftIssue(drifted, []);
-
-    expect(body).toContain('**Two-mock result:** vendor drift');
-    expect(body).toContain(
-      '- `GET /items`: decreased the max of `limit` to 50 (`request-parameter-max-decreased`)'
-    );
-    expect(body).toContain('<details><summary>1 non-breaking change(s)</summary>');
-    expect(body).toContain('- search: GET /items: limit must be <= 50');
-    expect(body).toContain('node scripts/connector_vendor_api --drift --connector acme');
-    expect(body).toContain('`/update-connector acme <this issue>`');
-    expect(body).not.toContain('cc ');
-  });
-
-  it('reports unreachable sources and caps long change lists', () => {
-    const many = Array.from({ length: 40 }, (_, index) => ({
-      kind: 'breaking' as const,
-      id: 'api-removed',
-      text: `removed ${index}`,
-    }));
-    const { body } = renderDriftIssue(
-      {
-        ...drifted,
-        sources: {
-          main: { status: 'changed', changes: many },
-          extra: { status: 'unreachable', error: '404 Not Found' },
-        },
-      },
-      []
-    );
-
-    expect(body).toContain('- …and 10 more');
-    expect(body).toContain('#### `extra`: unreachable');
-    expect(body).toContain('`404 Not Found`');
-  });
-});
+// Sentry's spec moved `/api/0` from its paths into its server URL, which an overlay correction
 
 describe('renderRefreshPr', () => {
   it('lists the changes per connector', () => {

@@ -111,6 +111,23 @@ describe('test useSavedSearch message generators', () => {
       interceptedWarnings: [searchResponseIncompleteWarningLocalCluster],
     });
   });
+  test('sendLoadingMoreFinishedMsg replaces warnings with those of the new page instead of accumulating', () => {
+    const initialWarning = searchResponseIncompleteWarningLocalCluster;
+    // `showWarnings` reports every retained request again on each page, with new callbacks
+    const repeatedWarning = { ...initialWarning, openInInspector: jest.fn() };
+    const documents$ = new BehaviorSubject<DataDocumentsMsg>({
+      fetchStatus: FetchStatus.LOADING_MORE,
+      result: [],
+      interceptedWarnings: [initialWarning],
+    });
+
+    sendLoadingMoreFinishedMsg(documents$, {
+      moreRecords: [],
+      interceptedWarnings: [repeatedWarning],
+    });
+
+    expect(documents$.getValue().interceptedWarnings).toEqual([repeatedWarning]);
+  });
   test('sendLoadingMoreFinishedMsg after an exception', (done) => {
     const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
     const initialRecords = [records[0], records[1]];
@@ -124,7 +141,7 @@ describe('test useSavedSearch message generators', () => {
       if (value.fetchStatus !== FetchStatus.LOADING_MORE) {
         expect(value.fetchStatus).toBe(FetchStatus.COMPLETE);
         expect(value.result).toBe(initialRecords);
-        expect(value.interceptedWarnings).toBeUndefined();
+        expect(value.interceptedWarnings).toHaveLength(1);
         done();
       }
     });

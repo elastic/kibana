@@ -10,6 +10,13 @@
 // Where the Elasticsearch exporter of an EDOT Collector stores OTel-native logs and spans
 export const LOGS_INDEX = 'logs-generic.otel-default';
 export const TRACES_INDEX = 'traces-generic.otel-default';
+// EDOT Browser data has a dataset of its own (elastic/observability-dev#6361), so that its index can
+// be sorted by session without slowing the queries of the shared `generic` data streams
+export const BROWSER_LOGS_INDEX = 'logs-browser.otel-default';
+export const BROWSER_TRACES_INDEX = 'traces-browser.otel-default';
+// Session replay of EDOT Browser has a data stream of its own: the dataset is `rum.replay`, to which
+// the exporter appends `.otel`
+export const REPLAY_INDEX = 'logs-rum.replay.otel-default';
 
 // https://opentelemetry.io/docs/specs/otel/logs/data-model/#field-severitynumber
 export const SEVERITY_INFO = 9;
