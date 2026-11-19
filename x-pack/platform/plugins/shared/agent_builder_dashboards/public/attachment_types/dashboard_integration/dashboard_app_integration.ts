@@ -71,6 +71,11 @@ export interface DashboardAppIntegrationParams {
 
 type JobOutcome = ApplyAttachmentOutcome | undefined;
 
+const STAGE_DASHBOARD_ERROR_TITLE = i18n.translate(
+  'xpack.agentBuilderDashboards.dashboardIntegration.stageDashboardErrorToastTitle',
+  { defaultMessage: "Couldn't add the dashboard to the chat" }
+);
+
 export const registerDashboardAppIntegration = ({
   agentBuilder,
   api,
@@ -92,7 +97,7 @@ export const registerDashboardAppIntegration = ({
   // a dashboard that can't be linked, e.g. a managed one, is staged as a new attachment every time
   const isLinkable = () => canWriteDashboards && canApplyAgentChangesInPlace(api);
 
-  const reconcile = async (): Promise<JobOutcome> => {
+  const stageOpenDashboard = () => {
     const linkable = isLinkable();
     const dashboardId = linkable ? api.savedObjectId$.getValue() : undefined;
     const dashboardAttachment = linkable
@@ -104,7 +109,7 @@ export const registerDashboardAppIntegration = ({
       draftAttachmentId: draftAttachmentId.current,
     });
     if (!attachmentId) {
-      return undefined;
+      return;
     }
     if (!linkable) {
       unlinkedStagedAttachmentIds.add(attachmentId);
@@ -114,6 +119,15 @@ export const registerDashboardAppIntegration = ({
       origin: dashboardId,
       data: dashboardStateToAttachmentData(api.getSerializedState().attributes),
     });
+  };
+
+  // never throws, since a throw would end the integration
+  const reconcile = async (): Promise<JobOutcome> => {
+    try {
+      stageOpenDashboard();
+    } catch (error) {
+      toasts.addError(error, { title: STAGE_DASHBOARD_ERROR_TITLE });
+    }
     return undefined;
   };
 
