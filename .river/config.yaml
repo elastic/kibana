@@ -23,3 +23,9 @@ services:
     ready: |
       until curl -sf -o /dev/null http://localhost:5601/api/status; do sleep 5; done
       curl -sf -o /dev/null http://localhost:5601/login
+
+# River repairs failures of these checks on pull requests labelled
+# `river:babysit`.
+babysit:
+  checks:
+    - kibana-ci
