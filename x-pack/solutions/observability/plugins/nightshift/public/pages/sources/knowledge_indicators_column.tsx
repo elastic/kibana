@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { EuiI18nNumber, EuiText } from '@elastic/eui';
+import { EuiI18nNumber, EuiIconTip, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
 import type { SignificantEventsWorkflowStatusResult } from '@kbn/significant-events-schema';
 import React from 'react';
 import { useStreamFeatures } from '../../data/knowledge_indicators/use_stream_features';
+import { getFormattedError } from '../../common/errors';
 
 const KI_COUNT_POLL_INTERVAL_MS = 10_000;
 
@@ -25,9 +27,15 @@ export function KnowledgeIndicatorsColumn({
   streamOnboardingResult,
   isAwaitingRun,
 }: KnowledgeIndicatorsColumnProps) {
-  const { features } = useStreamFeatures(sourceId, [streamOnboardingResult], {
+  const { features, error } = useStreamFeatures(sourceId, [streamOnboardingResult], {
     refetchInterval: KI_COUNT_POLL_INTERVAL_MS,
   });
+  const errorMessage = error
+    ? i18n.translate('xpack.nightshift.sources.knowledgeIndicatorsColumn.refreshErrorTooltip', {
+        defaultMessage: 'Could not refresh the KI feature count: {message}',
+        values: { message: getFormattedError(error).message },
+      })
+    : undefined;
 
   return (
     <EuiText
@@ -38,6 +46,18 @@ export function KnowledgeIndicatorsColumn({
       `}
     >
       {!isAwaitingRun && features.length ? <EuiI18nNumber value={features.length} /> : '—'}
+      {errorMessage && (
+        <>
+          {' '}
+          <EuiIconTip
+            type="warning"
+            color="warning"
+            content={errorMessage}
+            aria-label={errorMessage}
+            disableScreenReaderOutput
+          />
+        </>
+      )}
     </EuiText>
   );
 }
