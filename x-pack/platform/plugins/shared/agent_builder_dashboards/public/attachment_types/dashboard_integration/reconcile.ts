@@ -5,7 +5,44 @@
  * 2.0.
  */
 
-import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type {
+  DashboardAttachment,
+  DashboardAttachmentData,
+} from '@kbn/agent-builder-dashboards-common/types';
+import {
+  getComparableAttachmentState,
+  getComparableDashboardState,
+} from '@kbn/agent-builder-dashboards-common';
+
+/** Compares two dashboard states with the comparators each panel's embeddable definition provides. */
+export type AreDashboardStatesEqual = DashboardStart['areEqual'];
+
+/**
+ * Whether the dashboard shows the attachment data, that is whether applying it would change
+ * nothing under the comparators each panel's embeddable definition provides.
+ */
+export const isAttachmentShownInDashboard = async ({
+  areEqual,
+  dashboardState,
+  data,
+}: {
+  areEqual: AreDashboardStatesEqual;
+  dashboardState: DashboardState;
+  data: DashboardAttachmentData;
+}): Promise<boolean> => {
+  const comparableState = getComparableDashboardState(dashboardState);
+  const attachmentState = getComparableAttachmentState(data);
+  const { refresh_interval: refreshInterval } = comparableState;
+  // applying an attachment without a refresh interval keeps the dashboard's own
+  const baseline =
+    attachmentState.refresh_interval || !refreshInterval
+      ? attachmentState
+      : { ...attachmentState, refresh_interval: refreshInterval };
+  // a failed comparison can't establish that the dashboard shows the attachment
+  return areEqual(baseline, comparableState).catch(() => false);
+};
 
 /**
  * The attachment the open dashboard stands for: the one whose origin is the dashboard, which for an

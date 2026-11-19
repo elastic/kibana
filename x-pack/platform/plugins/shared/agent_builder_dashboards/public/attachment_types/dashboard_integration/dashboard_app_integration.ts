@@ -28,7 +28,13 @@ import {
   UNSAVED_CHANGES_DEBOUNCE,
 } from '@kbn/presentation-publishing';
 import { createChatAdapter } from './chat_adapter';
-import { findDashboardAttachment, isOpenDashboardUpdate, reconcileStaging } from './reconcile';
+import {
+  findDashboardAttachment,
+  isAttachmentShownInDashboard,
+  isOpenDashboardUpdate,
+  reconcileStaging,
+  type AreDashboardStatesEqual,
+} from './reconcile';
 import {
   APPLY_AGENT_CHANGES_ERROR_TITLE,
   applyAttachment,
@@ -52,6 +58,7 @@ export const MANUAL_CHANGES_DEBOUNCE_MS =
 export interface DashboardAppIntegrationParams {
   agentBuilder: AgentBuilderPluginStart;
   api: DashboardApi;
+  areEqual: AreDashboardStatesEqual;
   canWriteDashboards: boolean;
   dashboardLocator?: DashboardLocator;
   toasts: NotificationsStart['toasts'];
@@ -79,6 +86,7 @@ const STAGE_DASHBOARD_ERROR_TITLE = i18n.translate(
 export const registerDashboardAppIntegration = ({
   agentBuilder,
   api,
+  areEqual,
   canWriteDashboards,
   dashboardLocator,
   toasts,
@@ -97,7 +105,7 @@ export const registerDashboardAppIntegration = ({
   // a dashboard that can't be linked, e.g. a managed one, is staged as a new attachment every time
   const isLinkable = () => canWriteDashboards && canApplyAgentChangesInPlace(api);
 
-  const stageOpenDashboard = () => {
+  const stageOpenDashboard = async () => {
     const linkable = isLinkable();
     const dashboardId = linkable ? api.savedObjectId$.getValue() : undefined;
     const dashboardAttachment = linkable
@@ -111,20 +119,33 @@ export const registerDashboardAppIntegration = ({
     if (!attachmentId) {
       return;
     }
+    const { attributes: dashboardState } = api.getSerializedState();
+    // the conversation already has what the dashboard shows, e.g. the agent's applied changes
+    if (
+      dashboardAttachment &&
+      (await isAttachmentShownInDashboard({
+        areEqual,
+        dashboardState,
+        data: dashboardAttachment.data,
+      }))
+    ) {
+      chat.unstage(attachmentId);
+      return;
+    }
     if (!linkable) {
       unlinkedStagedAttachmentIds.add(attachmentId);
     }
     chat.stage({
       id: attachmentId,
       origin: dashboardId,
-      data: dashboardStateToAttachmentData(api.getSerializedState().attributes),
+      data: dashboardStateToAttachmentData(dashboardState),
     });
   };
 
   // never throws, since a throw would end the integration
   const reconcile = async (): Promise<JobOutcome> => {
     try {
-      stageOpenDashboard();
+      await stageOpenDashboard();
     } catch (error) {
       toasts.addError(error, { title: STAGE_DASHBOARD_ERROR_TITLE });
     }

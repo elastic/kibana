@@ -136,6 +136,7 @@ describe('registerDashboardAppIntegration', () => {
   let updateAttachmentOrigin: jest.Mock;
   let getUpdateOrigin: jest.Mock;
   let checkSavedDashboardExist: jest.Mock;
+  let areEqual: jest.Mock;
   let draftAttachmentId: IdGenerator;
   let emitConversationChange: (change: {
     id?: string;
@@ -167,6 +168,7 @@ describe('registerDashboardAppIntegration', () => {
         updateAttachmentOrigin('conversation-1', attachmentId, origin)
     );
     checkSavedDashboardExist = jest.fn().mockResolvedValue(true);
+    areEqual = jest.fn().mockResolvedValue(false);
     let currentDraftAttachmentId = 'draft-attachment-id-1';
     draftAttachmentId = {
       get current() {
@@ -218,6 +220,7 @@ describe('registerDashboardAppIntegration', () => {
     cleanup = registerDashboardAppIntegration({
       agentBuilder,
       api: mockApi as unknown as DashboardApi,
+      areEqual,
       canWriteDashboards,
       dashboardLocator,
       toasts,
@@ -235,7 +238,7 @@ describe('registerDashboardAppIntegration', () => {
       id: 'conversation-1',
       attachments: [createVersionedAttachment(attachment)],
     });
-    jest.runOnlyPendingTimers();
+    await jest.runOnlyPendingTimersAsync();
     addAttachment.mockClear();
 
     simulateManualEdit();
@@ -370,7 +373,7 @@ describe('registerDashboardAppIntegration', () => {
         ),
       ],
     });
-    jest.runOnlyPendingTimers();
+    await jest.runOnlyPendingTimersAsync();
     addAttachment.mockClear();
 
     simulateManualEdit();
@@ -452,7 +455,7 @@ describe('registerDashboardAppIntegration', () => {
       attachments: [createVersionedAttachment(attachment)],
     });
 
-    jest.runOnlyPendingTimers();
+    await jest.runOnlyPendingTimersAsync();
     addAttachment.mockClear();
     simulateManualEdit();
     await jest.advanceTimersByTimeAsync(MANUAL_CHANGES_DEBOUNCE_MS);
@@ -564,7 +567,7 @@ describe('registerDashboardAppIntegration', () => {
     mockApi.savedObjectId$.next('dashboard-1');
     register();
     emitConversationChange({});
-    jest.runOnlyPendingTimers();
+    await jest.runOnlyPendingTimersAsync();
     addAttachment.mockClear();
     mockApi.getSerializedState.mockReturnValue({ attributes: { title: 'Edited', panels: [] } });
 
@@ -599,6 +602,47 @@ describe('registerDashboardAppIntegration', () => {
     expect(addAttachment).toHaveBeenLastCalledWith(
       expect.objectContaining({ id: 'draft-attachment-id-1' })
     );
+  });
+
+  it("doesn't stage the agent's changes once they're applied to the dashboard", async () => {
+    const attachment = createDashboardAttachment({ origin: 'dashboard-1' });
+    mockApi.savedObjectId$.next('dashboard-1');
+    register();
+    emitConversationChange({
+      id: 'conversation-1',
+      attachments: [createVersionedAttachment(attachment)],
+    });
+    await jest.runOnlyPendingTimersAsync();
+    addAttachment.mockClear();
+    areEqual.mockResolvedValue(true);
+
+    emitDashboardUpdated(attachment);
+    await flushPromises();
+    simulateDashboardStateChange();
+    await jest.advanceTimersByTimeAsync(MANUAL_CHANGES_DEBOUNCE_MS);
+
+    expect(mockApi.setState).toHaveBeenCalled();
+    expect(addAttachment).not.toHaveBeenCalled();
+  });
+
+  it('removes the staged dashboard once it shows its attachment again', async () => {
+    const attachment = createDashboardAttachment({ origin: 'dashboard-1' });
+    mockApi.savedObjectId$.next('dashboard-1');
+    register();
+    emitConversationChange({
+      id: 'conversation-1',
+      attachments: [createVersionedAttachment(attachment)],
+    });
+    await jest.runOnlyPendingTimersAsync();
+    expect(addAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'dashboard-attachment-id' })
+    );
+
+    areEqual.mockResolvedValue(true);
+    simulateDashboardStateChange();
+    await jest.advanceTimersByTimeAsync(MANUAL_CHANGES_DEBOUNCE_MS);
+
+    expect(removeAttachment).toHaveBeenCalledWith('dashboard-attachment-id');
   });
 
   it('keeps the staged dashboard in the chat input when the user leaves the dashboard', () => {

@@ -106,6 +106,7 @@ export const registerDashboardAttachmentUiDefinition = ({
                 createDashboardAppIntegration$({
                   agentBuilder,
                   api,
+                  areEqual: dashboardPlugin.areEqual,
                   canWriteDashboards,
                   dashboardLocator,
                   toasts,

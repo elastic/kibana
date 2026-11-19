@@ -206,6 +206,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     const dashboardPlugin: DashboardStart = {
       dashboardAppClientApi$,
       findDashboardsService,
+      areEqual: jest.fn().mockResolvedValue(false),
     } as unknown as DashboardStart;
 
     const data = dataPluginMock.createStartContract();
@@ -328,6 +329,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       dashboardPlugin: {
         dashboardAppClientApi$,
         findDashboardsService,
+        areEqual: jest.fn().mockResolvedValue(false),
       } as unknown as DashboardStart,
       data: dataPluginMock.createStartContract(),
       unifiedSearch: {

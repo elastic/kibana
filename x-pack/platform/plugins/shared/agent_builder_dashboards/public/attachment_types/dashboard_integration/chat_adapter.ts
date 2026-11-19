@@ -43,6 +43,8 @@ export interface ChatAdapter {
   dashboardUpdates$: Observable<DashboardAttachment>;
   /** Stages the attachment in the chat input, replacing the attachment it staged before. */
   stage: (attachment: Omit<DashboardAttachment, 'type'>) => void;
+  /** Removes the attachment from the chat input when it is the one staged. */
+  unstage: (attachmentId: string) => void;
   /** Persists the attachment's origin, keeping the rendered conversation in sync. */
   updateOrigin: (
     attachmentId: string,
@@ -117,6 +119,13 @@ export const createChatAdapter = ({
       }
       stagedAttachmentId = id;
       agentBuilder.addAttachment({ id, origin, type: DASHBOARD_ATTACHMENT_TYPE, data });
+    },
+    unstage: (attachmentId) => {
+      if (stagedAttachmentId !== attachmentId) {
+        return;
+      }
+      agentBuilder.removeAttachment(attachmentId);
+      stagedAttachmentId = undefined;
     },
     updateOrigin: (attachmentId, origin) => getUpdateOrigin(attachmentId)?.(origin),
   };
