@@ -652,7 +652,7 @@ describe('MaintenanceWindowClient - update', () => {
         },
       });
     }).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Error validating update maintenance window data - invalid scope - Expected \\"(\\", \\"{\\", value, whitespace but end of input found.
+      "Error validating update maintenance window data - invalid scope - Expected \\"(\\", \\"{\\", NOT, value, whitespace but end of input found.
       invalid: 
       ---------^"
     `);
