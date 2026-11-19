@@ -93,7 +93,7 @@ describe('Patterns numeric column widths', () => {
     expect(getConfiguration(undefined, { columns: { Pattern: { width: 300 } } })).toEqual({});
   });
 
-  it('preserves a resized width and restores the compact default after reset', () => {
+  it('preserves a resized width and uses automatic sizing after reset', () => {
     const resizedSettings = onResizeGridColumn({ columnId: 'events', width: 280 }, undefined);
     expect(getConfiguration(undefined, resizedSettings).events).toBeUndefined();
 
@@ -102,7 +102,7 @@ describe('Patterns numeric column widths', () => {
       resizedSettings
     );
     const configuration = getConfiguration(undefined, resetSettings);
-    expect(configuration.events({ column: { id: 'events' } }).initialWidth).toBe(150);
+    expect(configuration.events).toBeUndefined();
     expect(configuration.average({ column: { id: 'average' } }).initialWidth).toBe(150);
     expect(configuration.Pattern).toBeUndefined();
     expect(getConfiguration(['events'], resetSettings)).toEqual({});

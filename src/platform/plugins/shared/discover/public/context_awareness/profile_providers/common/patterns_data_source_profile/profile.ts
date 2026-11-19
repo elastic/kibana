@@ -57,7 +57,7 @@ export const createPatternsDataSourceProfileProvider = (
           if (
             context.patternColumns.includes(name) ||
             dataSource.getColumn(name)?.type !== 'number' ||
-            settings?.columns?.[name]?.width
+            settings?.columns?.[name] !== undefined
           ) {
             continue;
           }
