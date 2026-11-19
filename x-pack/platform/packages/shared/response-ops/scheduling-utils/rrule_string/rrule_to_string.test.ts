@@ -7,8 +7,8 @@
 
 import { Frequency } from '@kbn/rrule';
 import type { Rrule } from '@kbn/response-ops-scheduling-types';
-import { transformRruleToRruleString } from './v1';
-import { transformRruleStringToRrule } from '../string_to_rrule/v1';
+import { transformRruleToRruleString } from './rrule_to_string';
+import { transformRruleStringToRrule } from './string_to_rrule';
 
 describe('transformRruleToRruleString', () => {
   it('serializes a rrule with a dtstart in a timezone', () => {

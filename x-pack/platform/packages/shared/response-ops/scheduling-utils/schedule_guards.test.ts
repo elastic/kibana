@@ -6,8 +6,8 @@
  */
 
 import { Frequency } from '@kbn/rrule';
-import type { Schedule } from './schedule_types';
-import { isIntervalSchedule, isRruleSchedule } from './utils';
+import type { Schedule } from '@kbn/response-ops-scheduling-types';
+import { isIntervalSchedule, isRruleSchedule } from './schedule_guards';
 
 const mockIntervalSchedule = { interval: '5m' } as Schedule;
 const mockRruleSchedule = {

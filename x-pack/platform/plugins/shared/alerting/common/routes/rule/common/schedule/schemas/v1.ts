@@ -6,11 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { rruleStringSchemaV1 } from '@kbn/response-ops-schedule-schema';
 import {
-  rruleStringSchemaV1,
   RRULE_STRING_DESCRIPTION,
   RRULE_STRING_MAX_LENGTH,
-} from '@kbn/response-ops-schedule-schema';
+} from '@kbn/response-ops-scheduling-utils';
 import { validateDurationV1 } from '../../../validation';
 
 const INTERVAL_DESCRIPTION = 'The interval is specified in seconds, minutes, hours, or days.';

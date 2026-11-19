@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorType } from '@kbn/actions-plugin/server';
-import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-utils';
 import { validateHours } from '../../routes/lib/validate_hours';
 import type { RawRule } from '../../types';
 import { RuleNotifyWhen } from '../../types';

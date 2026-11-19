@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-utils';
 import type { RuleSchedule, RuleAction, ThrottledActions } from '../../../../common';
 import { parseDuration, RuleNotifyWhenTypeValues } from '../../../../common';
 

@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { cloneDeep } from 'lodash';
 import type { SavedObjectsFindResult } from '@kbn/core/server';
-import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-utils';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { UntypedNormalizedRuleType } from '../../../../rule_type_registry';
 import { updateRuleInMemory } from '../../../../rules_client/common/bulk_edit';

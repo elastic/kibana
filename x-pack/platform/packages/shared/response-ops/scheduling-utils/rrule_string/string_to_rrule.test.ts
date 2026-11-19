@@ -6,7 +6,7 @@
  */
 
 import { Frequency } from '@kbn/rrule';
-import { parseRruleString, transformRruleStringToRrule } from './v1';
+import { parseRruleString, transformRruleStringToRrule } from './string_to_rrule';
 
 describe('parseRruleString', () => {
   describe('valid strings', () => {

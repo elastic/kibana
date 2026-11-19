@@ -20,7 +20,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/rrule'
   - '@kbn/datemath'
-  - '@kbn/response-ops-scheduling-types'
+  - '@kbn/response-ops-scheduling-utils'
 tags:
   - shared-common
   - package

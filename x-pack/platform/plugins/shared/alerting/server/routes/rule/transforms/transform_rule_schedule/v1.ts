@@ -6,11 +6,11 @@
  */
 
 import type { Schedule } from '@kbn/response-ops-scheduling-types';
-import { isRruleSchedule } from '@kbn/response-ops-scheduling-types';
 import {
-  transformRruleStringToRruleV1,
-  transformRruleToRruleStringV1,
-} from '@kbn/response-ops-schedule-schema';
+  isRruleSchedule,
+  transformRruleStringToRrule,
+  transformRruleToRruleString,
+} from '@kbn/response-ops-scheduling-utils';
 import type {
   RuleScheduleRequestV1,
   RuleScheduleResponseV1,
@@ -21,7 +21,7 @@ import type {
  */
 export const transformRuleScheduleRequest = (schedule: RuleScheduleRequestV1): Schedule =>
   'rrule' in schedule
-    ? { rrule: transformRruleStringToRruleV1(schedule.rrule) }
+    ? { rrule: transformRruleStringToRrule(schedule.rrule) }
     : { interval: schedule.interval };
 
 /**
@@ -29,5 +29,5 @@ export const transformRuleScheduleRequest = (schedule: RuleScheduleRequestV1): S
  */
 export const transformRuleScheduleResponse = (schedule: Schedule): RuleScheduleResponseV1 =>
   isRruleSchedule(schedule)
-    ? { rrule: transformRruleToRruleStringV1(schedule.rrule) }
+    ? { rrule: transformRruleToRruleString(schedule.rrule) }
     : { interval: schedule.interval };

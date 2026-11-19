@@ -6,8 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RRULE_STRING_DESCRIPTION, RRULE_STRING_MAX_LENGTH } from '../constants';
-import { parseRruleString } from '../transforms/string_to_rrule/v1';
+import {
+  parseRruleString,
+  RRULE_STRING_DESCRIPTION,
+  RRULE_STRING_MAX_LENGTH,
+} from '@kbn/response-ops-scheduling-utils';
 
 export const rruleStringSchema = schema.string({
   minLength: 1,

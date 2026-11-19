@@ -3253,6 +3253,9 @@ importers:
       '@kbn/response-ops-scheduling-types':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/response-ops/scheduling-types
+      '@kbn/response-ops-scheduling-utils':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/response-ops/scheduling-utils
       '@kbn/response-stream-plugin':
         specifier: workspace:*
         version: link:examples/response_stream
@@ -9376,6 +9379,8 @@ importers:
   x-pack/platform/packages/shared/response-ops/schedule-schema: {}
 
   x-pack/platform/packages/shared/response-ops/scheduling-types: {}
+
+  x-pack/platform/packages/shared/response-ops/scheduling-utils: {}
 
   x-pack/platform/packages/shared/response-ops/yaml-rule-editor: {}
 

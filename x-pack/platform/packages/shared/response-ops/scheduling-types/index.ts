@@ -16,5 +16,3 @@ export type {
   RruleDaily,
   RruleHourly,
 } from './schedule_types';
-
-export { isIntervalSchedule, isRruleSchedule } from './utils';
