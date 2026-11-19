@@ -6,7 +6,7 @@
  */
 
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
-import type { TimeRange } from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
 import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import { buildAlertBasedTilesQuery } from './entities_with_alerts_query';
 import { buildEntitiesWithAnomaliesCountQuery } from './entities_with_anomalies_query';
