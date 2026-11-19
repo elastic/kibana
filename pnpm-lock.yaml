@@ -4197,7 +4197,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-workflows
       '@kbn/workflows-execution-engine':
         specifier: workspace:*
-        version: link:src/platform/plugins/shared/workflows_execution_engine
+        version: link:x-pack/platform/plugins/shared/workflows_execution_engine
       '@kbn/workflows-extensions':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/workflows_extensions
@@ -8872,7 +8872,7 @@ importers:
 
   src/platform/plugins/shared/visualizations: {}
 
-  src/platform/plugins/shared/workflows_execution_engine: {}
+  x-pack/platform/plugins/shared/workflows_execution_engine: {}
 
   src/platform/plugins/shared/workflows_extensions: {}
 

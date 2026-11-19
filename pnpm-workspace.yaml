@@ -1166,7 +1166,7 @@ packages:
   - 'src/platform/plugins/shared/vis_types/timeseries'
   - 'src/platform/plugins/shared/visualization_listing'
   - 'src/platform/plugins/shared/visualizations'
-  - 'src/platform/plugins/shared/workflows_execution_engine'
+  - 'x-pack/platform/plugins/shared/workflows_execution_engine'
   - 'src/platform/plugins/shared/workflows_extensions'
   - 'src/platform/plugins/shared/workflows_management'
   - 'src/platform/test'
