@@ -48,7 +48,11 @@ import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeInlineEditingApi } from './initialize_inline_editing_api';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import type { SearchEmbeddableApi, SearchEmbeddablePanelApiState } from './types';
-import { deserializeState, serializeState } from './utils/serialization_utils';
+import {
+  deserializeState,
+  getPanelTableSettings,
+  serializeState,
+} from './utils/serialization_utils';
 import { createInMemoryContextAwarenessToolkit } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
@@ -87,6 +91,8 @@ export const getSearchEmbeddableFactory = ({
         serializedState: initialState,
         discoverServices,
       });
+      // The last state the dashboard applied, which the panel's table settings are serialized against
+      let latestRuntimeState = runtimeState;
 
       /** One Discover context awareness */
       const solutionNavId =
@@ -105,7 +111,7 @@ export const getSearchEmbeddableFactory = ({
       );
       const selectedTabId$ = new BehaviorSubject<string | undefined>(runtimeState.selectedTabId);
 
-      const tabs = runtimeState.tabs ?? [];
+      const tabs = [...(runtimeState.tabs ?? [])];
 
       const defaultState = { selected_tab_id: tabs[0]?.id };
 
@@ -130,9 +136,8 @@ export const getSearchEmbeddableFactory = ({
 
       const serialize = (savedObjectId?: string) =>
         serializeState({
-          uuid,
-          initialState: runtimeState,
-          savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
+          runtimeState: latestRuntimeState,
+          tableSettings: getPanelTableSettings(searchEmbeddable.stateManager),
           serializeTitles: titleManager.getLatestState,
           serializeTimeRange: timeRangeManager.getLatestState,
           serializeDynamicActions: drilldownsManager.getLatestState,
@@ -178,14 +183,22 @@ export const getSearchEmbeddableFactory = ({
         ),
         getComparators: () => {
           const isByValue = !savedObjectId$.getValue();
+          const selectedTabId = selectedTabId$.getValue();
           const shouldSkipTabComparators =
-            isTabDeleted(selectedTabId$.getValue(), tabs) || inlineEditingApi.isEditing();
+            isTabDeleted(selectedTabId, tabs) || inlineEditingApi.isEditing();
+          const selectedSessionTab = latestRuntimeState.tabs?.find(
+            ({ id }) => id === selectedTabId
+          )?.tab;
 
           return {
             ...drilldownsManager.comparators,
             ...titleComparators,
             ...timeRangeComparators,
-            ...getDiscoverSessionEmbeddableComparators(isByValue, shouldSkipTabComparators),
+            ...getDiscoverSessionEmbeddableComparators(
+              isByValue,
+              shouldSkipTabComparators,
+              selectedSessionTab
+            ),
             nonPersistedDisplayOptions: 'skip',
           };
         },
@@ -199,6 +212,8 @@ export const getSearchEmbeddableFactory = ({
             discoverServices,
           });
 
+          latestRuntimeState = nextRuntimeState;
+          tabs.splice(0, tabs.length, ...(nextRuntimeState.tabs ?? []));
           selectedTabId$.next(nextRuntimeState.selectedTabId);
           await searchEmbeddable.reinitializeState(nextRuntimeState);
           inlineEditingApi.stopInlineEditing();
