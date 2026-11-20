@@ -58,12 +58,8 @@ const SCOPE_BADGE_COLORS: Record<ActionScope, string> = {
 
 const MODE_ALL = 'all';
 const MODE_CUSTOM = 'custom';
-const MODE_NONE = 'none';
 
-type SelectionMode = typeof MODE_ALL | typeof MODE_CUSTOM | typeof MODE_NONE;
-export type ConnectorActionSelectionMode = SelectionMode;
-
-const MODE_OPTIONS: Array<{ id: SelectionMode; label: string }> = [
+const MODE_OPTIONS = [
   {
     id: MODE_ALL,
     label: i18n.translate('alertsUIShared.connectorActionSelector.modeAll', {
@@ -76,63 +72,25 @@ const MODE_OPTIONS: Array<{ id: SelectionMode; label: string }> = [
       defaultMessage: 'Custom',
     }),
   },
-  {
-    id: MODE_NONE,
-    label: i18n.translate('alertsUIShared.connectorActionSelector.modeNone', {
-      defaultMessage: 'None',
-    }),
-  },
 ];
 
 export interface ConnectorActionSelectorProps {
   value: string[] | null;
   onChange: (value: string[] | null) => void;
-  /** Called when the user picks All, Custom, or None. */
-  onModeChange?: (mode: ConnectorActionSelectionMode) => void;
   actions: ConnectorActionDef[];
   readOnly?: boolean;
-  /** Shows a None mode that saves an empty selection, turning every action off. */
-  allowNone?: boolean;
   errorMessage?: string;
 }
 
-// null = "all actions" sentinel; serializer strips it before saving. [] in None mode = no actions.
+// null = "all actions" sentinel; serializer strips it before saving.
 export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = ({
   value: rawSelected,
   onChange,
-  onModeChange,
   actions,
   readOnly = false,
-  allowNone = false,
   errorMessage,
 }) => {
-  // [] also means "Custom with nothing checked yet", so None is tracked as its own mode.
-  const [isNoneMode, setIsNoneMode] = useState(
-    allowNone && Array.isArray(rawSelected) && rawSelected.length === 0
-  );
-  // Set before this component emits an empty Custom selection, so the sync below can tell
-  // it apart from an empty selection set from outside (for example by the auth type).
-  const isInternalChangeRef = useRef(false);
-  useEffect(() => {
-    const isInternalChange = isInternalChangeRef.current;
-    isInternalChangeRef.current = false;
-    if (rawSelected === null) {
-      setIsNoneMode(false);
-    } else if (
-      allowNone &&
-      !isInternalChange &&
-      Array.isArray(rawSelected) &&
-      rawSelected.length === 0
-    ) {
-      setIsNoneMode(true);
-    }
-  }, [allowNone, rawSelected]);
   const isAll = rawSelected === null;
-  const mode: SelectionMode = isAll ? MODE_ALL : isNoneMode ? MODE_NONE : MODE_CUSTOM;
-  const modeOptions = useMemo(
-    () => (allowNone ? MODE_OPTIONS : MODE_OPTIONS.filter(({ id }) => id !== MODE_NONE)),
-    [allowNone]
-  );
 
   const allActionNames = useMemo(() => actions.map((a) => a.name), [actions]);
 
@@ -210,26 +168,19 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
   const currentPageActionsRef = useRef(currentPageActions);
   currentPageActionsRef.current = currentPageActions;
 
-  const handleModeChange = useCallback(
-    (nextMode: SelectionMode) => {
-      setSearchText('');
-      setPageIndex(0);
-      setScopeFilters([]);
+  const handleModeChange = useCallback(() => {
+    setSearchText('');
+    setPageIndex(0);
+    setScopeFilters([]);
+    if (isAll) {
+      onChange(previousSpecificRef.current ?? defaultReadActionNames);
+    } else {
       if (Array.isArray(rawSelected) && rawSelected.length > 0) {
         previousSpecificRef.current = rawSelected;
       }
-      setIsNoneMode(nextMode === MODE_NONE);
-      if (nextMode === MODE_ALL) {
-        onChange(null);
-      } else if (nextMode === MODE_NONE) {
-        onChange([]);
-      } else {
-        onChange(previousSpecificRef.current ?? defaultReadActionNames);
-      }
-      onModeChange?.(nextMode);
-    },
-    [onChange, onModeChange, rawSelected, defaultReadActionNames]
-  );
+      onChange(null);
+    }
+  }, [isAll, onChange, rawSelected, defaultReadActionNames]);
 
   const handleSelectionChange = useCallback(
     (newItems: ConnectorActionDef[]) => {
@@ -243,7 +194,6 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
       const offPageSelected = (rawSelectedRef.current ?? []).filter(
         (n) => !currentPageNames.has(n)
       );
-      isInternalChangeRef.current = true;
       onChange([...offPageSelected, ...newItems.map((a) => a.name)]);
     },
     [actions.length, onChange]
@@ -254,10 +204,7 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
     onChange([...allActionNames]);
   }, [allActionNames, onChange]);
 
-  const handleClearSelection = useCallback(() => {
-    isInternalChangeRef.current = true;
-    onChange([]);
-  }, [onChange]);
+  const handleClearSelection = useCallback(() => onChange([]), [onChange]);
 
   // Restrict to current page: getDerivedStateFromProps fires onSelectionChange for
   // any selected item absent from items, which would wipe off-page selections.
@@ -412,10 +359,10 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
             legend={i18n.translate('alertsUIShared.connectorActionSelector.modeLegend', {
               defaultMessage: 'Action selection mode',
             })}
-            options={modeOptions}
-            idSelected={mode}
+            options={MODE_OPTIONS}
+            idSelected={isAll ? MODE_ALL : MODE_CUSTOM}
             onChange={(id) => {
-              if (id !== mode) handleModeChange(id as SelectionMode);
+              if ((id === MODE_ALL) !== isAll) handleModeChange();
             }}
             buttonSize="compressed"
             isDisabled={readOnly}
@@ -424,16 +371,7 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {mode === MODE_NONE ? (
-        <>
-          <EuiSpacer size="xs" />
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('alertsUIShared.connectorActionSelector.noActionsHint', {
-              defaultMessage: 'No actions are available.',
-            })}
-          </EuiText>
-        </>
-      ) : isAll ? (
+      {isAll ? (
         <>
           <EuiSpacer size="xs" />
           <EuiText size="xs" color="subdued">
@@ -531,7 +469,6 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
                         setPageIndex(page.index);
                       }
                     }
-                    isInternalChangeRef.current = true;
                     onChange(selectionToRestore);
                   }}
                   pagination={{

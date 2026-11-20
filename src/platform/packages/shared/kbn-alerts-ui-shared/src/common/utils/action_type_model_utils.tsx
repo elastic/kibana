@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { lazy, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { lazy, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionType } from '@kbn/actions-types';
 import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
 import {
-  connectorSpecHasEvents,
   getConnectorSpec,
   isDualConnectorSpec,
   isInboundOnlyConnectorSpec,
@@ -22,16 +21,8 @@ import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { fromConnectorSpecSchema, narrowSecretsSchemaForAuthMode } from '@kbn/connector-specs';
 import type { ConnectorZodSchema } from '@kbn/connector-specs';
 import { getMeta, setMeta } from '@kbn/connector-specs';
-import {
-  UseField,
-  useFormContext,
-  useFormData,
-  type FieldHook,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  ConnectorActionSelector,
-  type ConnectorActionSelectionMode,
-} from '../components/connector_action_selector';
+import { UseField, type FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { ConnectorActionSelector } from '../components/connector_action_selector';
 import type {
   ConnectorActionDef,
   ConnectorSpecResponse,
@@ -168,14 +159,8 @@ export function transformSpecToActionTypeModel(
       }
       const connectorZodSchema: ConnectorZodSchema = parsedZodSchema;
       const specActions = spec.actions ?? [];
-      // Connectors that receive inbound events stay useful with every action turned off.
-      const allowNoActions = registeredSpec !== undefined && connectorSpecHasEvents(registeredSpec);
-      // First auth type that carries credentials, used when actions are turned back on.
       const authTypeIds = (registeredSpec?.auth?.types ?? []).map((authTypeDef) =>
         typeof authTypeDef === 'string' ? authTypeDef : authTypeDef.type
-      );
-      const credentialedAuthTypeId = authTypeIds.find(
-        (authTypeId) => authTypeId !== NO_AUTH_TYPE_ID
       );
 
       // Dual connectors that also offer no authentication get an Outbound switch, which is the
@@ -184,7 +169,7 @@ export function transformSpecToActionTypeModel(
         registeredSpec !== undefined &&
         isDualConnectorSpec(registeredSpec) &&
         authTypeIds.includes(NO_AUTH_TYPE_ID) &&
-        credentialedAuthTypeId !== undefined
+        authTypeIds.some((authTypeId) => authTypeId !== NO_AUTH_TYPE_ID)
       ) {
         hideAuthTypeInPicker(connectorZodSchema, NO_AUTH_TYPE_ID);
       }
@@ -198,47 +183,15 @@ export function transformSpecToActionTypeModel(
         field: FieldHook<string[] | null>;
         actions: ConnectorActionDef[];
         readOnly?: boolean;
-      }) => {
-        const [{ secrets }] = useFormData<{ secrets?: { authType?: string } }>({
-          watch: ['secrets.authType'],
-        });
-        const authType = secrets?.authType;
-        const previousAuthTypeRef = useRef(authType);
-        const { setFieldValue } = useFormContext();
-        const { setValue } = field;
-
-        // No authentication can only receive events, so choosing it turns every action off.
-        // Choosing another auth type leaves the actions as they are.
-        useEffect(() => {
-          const previousAuthType = previousAuthTypeRef.current;
-          previousAuthTypeRef.current = authType;
-          if (allowNoActions && previousAuthType !== authType && authType === NO_AUTH_TYPE_ID) {
-            setValue([]);
-          }
-        }, [authType, setValue]);
-
-        // Turning actions back on needs credentials, so it moves off No authentication.
-        const handleModeChange = useCallback(
-          (mode: ConnectorActionSelectionMode) => {
-            if (mode !== 'none' && authType === NO_AUTH_TYPE_ID && credentialedAuthTypeId) {
-              setFieldValue('secrets.authType', credentialedAuthTypeId);
-            }
-          },
-          [authType, setFieldValue]
-        );
-
-        return (
-          <ConnectorActionSelector
-            value={field.value ?? null}
-            onChange={field.setValue}
-            onModeChange={handleModeChange}
-            actions={actions}
-            readOnly={readOnly}
-            allowNone={allowNoActions}
-            errorMessage={field.errors[0]?.message}
-          />
-        );
-      };
+      }) => (
+        <ConnectorActionSelector
+          value={field.value ?? null}
+          onChange={field.setValue}
+          actions={actions}
+          readOnly={readOnly}
+          errorMessage={field.errors[0]?.message}
+        />
+      );
 
       function SpecConnectorFormFields({ readOnly, isEdit, authMode }: ActionConnectorFieldsProps) {
         const narrowedSchema = useMemo(
@@ -266,8 +219,11 @@ export function transformSpecToActionTypeModel(
                 defaultValue: null,
                 validations: [
                   {
-                    validator: ({ value }) =>
-                      !allowNoActions && Array.isArray(value) && (value as string[]).length === 0
+                    // With Run actions off (no authentication), the form saves no actions on purpose.
+                    validator: ({ value, form }) =>
+                      form.getFields()['secrets.authType']?.value !== NO_AUTH_TYPE_ID &&
+                      Array.isArray(value) &&
+                      (value as string[]).length === 0
                         ? {
                             message: i18n.translate(
                               'alertsUIShared.connectorActionSelector.emptySelectionError',
