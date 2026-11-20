@@ -231,6 +231,20 @@ describe('RulesClient', () => {
       );
     });
 
+    it('persists and returns the reason', async () => {
+      const client = createClient();
+      const reason = { template: 'CPU on {{host.name}} is high: {{avg_cpu}}' };
+
+      const res = await client.createRule({
+        data: { ...baseCreateData, id: 'rule-id-1', reason },
+      });
+
+      expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+        expect.objectContaining({ attrs: expect.objectContaining({ reason }) }),
+      ]);
+      expect(res.reason).toEqual(reason);
+    });
+
     it('stores the server-provided template without returning it', async () => {
       const client = createClient();
 
@@ -585,6 +599,32 @@ describe('RulesClient', () => {
           metadata: expect.objectContaining({ name: 'from-so' }),
         })
       );
+    });
+
+    it('persists and returns the reason of each rule', async () => {
+      const client = createClient();
+      mockBulkCreateEcho();
+      getRuleExecutorTaskIdMock.mockImplementation(
+        ({ ruleId }: { ruleId: string }) => `task:${ruleId}`
+      );
+      const reason = { template: 'CPU on {{host.name}} is high: {{avg_cpu}}' };
+
+      const res = await client.bulkCreateRules({
+        items: [
+          { ...baseCreateData, id: 'rule-a', metadata: { name: 'rule-a' }, reason },
+          { ...baseCreateData, id: 'rule-b', metadata: { name: 'rule-b' } },
+        ],
+      });
+
+      expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+        expect.objectContaining({ id: 'rule-a', attrs: expect.objectContaining({ reason }) }),
+        expect.objectContaining({
+          id: 'rule-b',
+          attrs: expect.not.objectContaining({ reason: expect.anything() }),
+        }),
+      ]);
+      expect(res.items[0].reason).toEqual(reason);
+      expect(res.items[1].reason).toBeUndefined();
     });
 
     it('does not schedule tasks when every rule is disabled', async () => {
@@ -1008,6 +1048,33 @@ describe('RulesClient', () => {
         version: 'WzEsMV0=',
         references: [],
       });
+    });
+
+    it.each([
+      [
+        'replaces the stored reason',
+        { reason: { template: 'new reason' } },
+        { template: 'new reason' },
+      ],
+      ['clears the stored reason when it is null', { reason: null }, undefined],
+      [
+        'preserves the stored reason when it is omitted',
+        { schedule: { every: '5m' } },
+        { template: 'old reason {{host.name}}' },
+      ],
+    ])('%s', async (_name, data, expectedReason) => {
+      const client = createClient();
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        attributes: { ...baseSoAttrs, reason: { template: 'old reason {{host.name}}' } },
+        version: 'WzEsMV0=',
+        id: 'rule-id-1',
+      });
+
+      const res = await client.updateRule({ id: 'rule-id-1', data });
+
+      const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
+      expect(attrs.reason).toEqual(expectedReason);
+      expect(res.reason).toEqual(expectedReason);
     });
 
     it('does not schedule the executor task when updating a disabled rule', async () => {
