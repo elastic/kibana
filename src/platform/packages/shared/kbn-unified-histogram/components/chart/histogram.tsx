@@ -39,6 +39,7 @@ export interface HistogramProps {
   disabledActions?: LensEmbeddableInput['disabledActions'];
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
+  onAnnotationClick?: LensEmbeddableInput['onAnnotationClick'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
   onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
 }
@@ -66,6 +67,7 @@ export function Histogram({
   disabledActions,
   onFilter,
   onBrushEnd,
+  onAnnotationClick,
   withDefaultActions,
   onApiAvailable,
   abortController,
@@ -133,6 +135,7 @@ export function Histogram({
           disabledActions={disabledActions}
           onFilter={onFilter}
           onBrushEnd={onBrushEnd}
+          onAnnotationClick={onAnnotationClick}
           withDefaultActions={withDefaultActions}
           onApiAvailable={onApiAvailable}
         />

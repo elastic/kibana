@@ -10,7 +10,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public/types';
@@ -27,7 +27,8 @@ export function createFlyout(
   data: DataPublicPluginStart,
   dashboardService: DashboardStart,
   lens?: LensPublicStart,
-  cps?: CPSPluginStart
+  cps?: CPSPluginStart,
+  flyoutOptions?: OverlayFlyoutOpenOptions
 ): Promise<void> {
   const { http, overlays, ...startServices } = coreStart;
 
@@ -66,6 +67,7 @@ export function createFlyout(
           ownFocus: true,
           onClose: onFlyoutClose,
           size: '35vw',
+          ...flyoutOptions,
         }
       );
     } catch (error) {

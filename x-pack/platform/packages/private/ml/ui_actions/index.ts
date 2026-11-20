@@ -8,7 +8,17 @@
 export {
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION,
   UPDATE_AD_JOBS_PROJECT_ROUTING_ACTION,
+  SUGGEST_AD_JOBS_ACTION,
+  DISCOVER_AD_MANAGEMENT_ACTION,
+  DISCOVER_AD_ANOMALIES_ACTION,
+  DISCOVER_AD_ANOMALY_ACTION,
+  type DiscoverADManagementContext,
+  type DiscoverADAnomaliesContext,
+  type DiscoverADAnomalyContext,
+  type DiscoverADAnomalyRange,
+  type DiscoverADJobSelection,
   type CreateCategorizationADJobContext,
+  type SuggestADJobsContext,
   type UpdateADJobsProjectRoutingContext,
 } from './src/ml/ui_actions';
 

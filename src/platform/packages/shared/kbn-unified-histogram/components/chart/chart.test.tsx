@@ -26,12 +26,25 @@ import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_
 import { UnifiedHistogramChart, type UnifiedHistogramChartProps } from './chart';
 import { lensSaveModalComponentMock, unifiedHistogramServicesMock } from '../../__mocks__/services';
 import userEvent from '@testing-library/user-event';
+import type { UnifiedHistogramAnomalyJobSelection } from './hooks/use_anomaly_ranges';
 
 jest.mock('./hooks/use_edit_visualization', () => ({
   useEditVisualization: () => mockUseEditVisualization,
 }));
 
 let mockUseEditVisualization: jest.Mock | undefined = jest.fn();
+
+jest.mock('./hooks/use_discover_ad_management', () => ({
+  useDiscoverAdManagement: () => mockOnSuggestAdJobs,
+}));
+
+let mockOnSuggestAdJobs: jest.Mock | undefined;
+
+jest.mock('./hooks/use_anomaly_ranges', () => ({
+  useAnomalyRanges: () => ({ overlay: undefined, jobSelection: mockAnomalyJobSelection }),
+}));
+
+let mockAnomalyJobSelection: UnifiedHistogramAnomalyJobSelection | undefined;
 const mockedSearchSourceInstanceMockFetch$ = jest.mocked(searchSourceInstanceMock.fetch$);
 
 interface MountComponentProps {
@@ -428,5 +441,58 @@ describe('Chart', () => {
       | undefined;
     expect(firstCall).toBeDefined();
     expect(firstCall![0].initialInput.attributes.title).toBe('');
+  });
+
+  describe('anomaly detection', () => {
+    beforeEach(() => {
+      mockOnSuggestAdJobs = jest.fn();
+      mockAnomalyJobSelection = undefined;
+    });
+
+    afterAll(() => {
+      mockOnSuggestAdJobs = undefined;
+      mockAnomalyJobSelection = undefined;
+    });
+
+    it('offers anomaly detection without the anomalies toggle when no job is selected', async () => {
+      await mountComponent();
+
+      expect(screen.getByTestId('unifiedHistogramSuggestAdJobs')).toBeVisible();
+      expect(screen.queryByTestId('unifiedHistogramShowAnomalies')).not.toBeInTheDocument();
+    });
+
+    it('hides the anomalies of the selected job', async () => {
+      const user = userEvent.setup();
+      const setShowAnomalies = jest.fn();
+      mockAnomalyJobSelection = { jobId: 'job-a', showAnomalies: true, setShowAnomalies };
+      await mountComponent();
+
+      await user.click(screen.getByRole('button', { name: 'Hide anomalies' }));
+
+      expect(setShowAnomalies).toHaveBeenCalledWith(false);
+    });
+
+    it('shows the anomalies of the selected job', async () => {
+      const user = userEvent.setup();
+      const setShowAnomalies = jest.fn();
+      mockAnomalyJobSelection = { jobId: 'job-a', showAnomalies: false, setShowAnomalies };
+      await mountComponent();
+
+      await user.click(screen.getByRole('button', { name: 'Show anomalies' }));
+
+      expect(setShowAnomalies).toHaveBeenCalledWith(true);
+    });
+
+    it('offers no anomaly controls when the chart is hidden', async () => {
+      mockAnomalyJobSelection = {
+        jobId: 'job-a',
+        showAnomalies: true,
+        setShowAnomalies: jest.fn(),
+      };
+      await mountComponent({ chartHidden: true });
+
+      expect(screen.queryByTestId('unifiedHistogramSuggestAdJobs')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedHistogramShowAnomalies')).not.toBeInTheDocument();
+    });
   });
 });
