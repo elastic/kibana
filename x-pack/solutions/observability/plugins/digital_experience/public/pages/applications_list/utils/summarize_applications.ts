@@ -86,7 +86,7 @@ export const sessionsOfSource = (
 
 /** Page loads over time of one source, or of both added up when no source is selected. */
 export const pageLoadsOfSources = (
-  pageLoadsOverTime: PageLoadsOverTime,
+  pageLoadsOverTime: Pick<PageLoadsOverTime, ApplicationSource>,
   source: ApplicationSource | undefined
 ): TimeSeriesPoint[] => {
   if (source) {

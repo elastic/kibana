@@ -251,7 +251,8 @@ describe('reporting mode string fields report violations under their label', () 
     expect(reportStringLengthViolation).toHaveBeenCalledWith({
       helper,
       library: 'config-schema',
-      maxLength,
+      bound: 'max',
+      limit: maxLength,
       length: expect.any(Number),
       label,
     });

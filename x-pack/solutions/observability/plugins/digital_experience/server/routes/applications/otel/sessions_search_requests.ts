@@ -44,6 +44,7 @@ export const sessionsSearch = ({
   start,
   end,
   environment,
+  histogram,
 }: SearchParams): estypes.SearchRequest & {
   index: string;
   size: number;
@@ -107,7 +108,8 @@ export const sessionsSearch = ({
             filter: startedInRange,
             aggs: {
               pageLoadsOverTime: {
-                date_histogram: dateHistogram(start, end, 'start_time').date_histogram,
+                date_histogram: dateHistogram({ start, end, histogram, field: 'start_time' })
+                  .date_histogram,
                 aggs: { pageLoads: sumOf('page_load_count') },
               },
             },

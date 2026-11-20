@@ -830,6 +830,7 @@ export interface DocLinks {
     readonly limitationsKnownIssues: string;
     readonly learnMore: string;
     readonly aiAssistant: string;
+    readonly replaceKnowledgeBaseContent: string;
   };
   readonly applicationConnections: {
     readonly oauthClients: string;

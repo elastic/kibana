@@ -35,7 +35,7 @@ export const createCustomContentPanelResolver = ({
     const { nlQuery, dataQueries, removeAllQueries, existingPanel, resolveEsqlVariables } = request;
     try {
       const existing = existingPanel?.config as CustomContentState | undefined;
-      const { esqlQueries, template } = await buildCustomContentConfig({
+      const { esqlQueries, template, height } = await buildCustomContentConfig({
         nlQuery,
         dataQueries,
         removeAllQueries,
@@ -56,6 +56,7 @@ export const createCustomContentPanelResolver = ({
             template,
           },
         },
+        heightHint: height,
       };
     } catch (error) {
       return { type: 'failure', error: getErrorMessage(error) };
