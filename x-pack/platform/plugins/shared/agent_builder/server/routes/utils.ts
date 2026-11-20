@@ -31,15 +31,11 @@ export const getSSEResponseHeaders = (): Record<string, string> => ({
   'X-Accel-Buffering': 'no',
 });
 
-export const getConnectorSubActions = ({
-  actionTypeId,
-  selectedActions,
-  specProvider,
-}: {
-  actionTypeId: string;
-  selectedActions?: SelectedActions;
-  specProvider: ConnectorSpecSummaryProvider;
-}): ConnectorSubAction[] => {
+export const getConnectorSubActions = (
+  specProvider: ConnectorSpecSummaryProvider,
+  actionTypeId: string,
+  selectedActions?: SelectedActions
+): ConnectorSubAction[] => {
   const spec = specProvider.getSpec(actionTypeId);
   if (!spec) return [];
 
@@ -68,10 +64,10 @@ export const toConnectorItem = (
     config: connector.config,
     authMode: connector.authMode,
     oauthStatus: options.oauthStatus,
-    subActions: getConnectorSubActions({
-      actionTypeId: connector.actionTypeId,
-      selectedActions,
-      specProvider: options.specProvider,
-    }),
+    subActions: getConnectorSubActions(
+      options.specProvider,
+      connector.actionTypeId,
+      selectedActions
+    ),
   };
 };

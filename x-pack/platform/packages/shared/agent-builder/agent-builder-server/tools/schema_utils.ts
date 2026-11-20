@@ -40,7 +40,14 @@ export function describeSchema(jsonSchema: Record<string, unknown>): FieldDescri
   }));
 }
 
-const formatFieldsForLlm = (fields: FieldDescription[]): string => {
+/**
+ * Formats a serialized JSON Schema into a multi-line parameter summary string for LLM consumption.
+ *
+ * Example output:
+ *   "- query (string, required): Search query to find messages\n- inChannel (string, optional): Channel name"
+ */
+export function formatSchemaForLlm(jsonSchema: Record<string, unknown>): string {
+  const fields = describeSchema(jsonSchema);
   if (fields.length === 0) {
     return 'No parameters';
   }
@@ -52,9 +59,4 @@ const formatFieldsForLlm = (fields: FieldDescription[]): string => {
       return `- ${field.name} (${field.type}, ${requiredLabel})${desc}`;
     })
     .join('\n');
-};
-
-/** Formats a serialized JSON Schema into a multi-line parameter summary string for the LLM. */
-export function formatSchemaForLlm(jsonSchema: Record<string, unknown>): string {
-  return formatFieldsForLlm(describeSchema(jsonSchema));
 }

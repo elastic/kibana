@@ -929,10 +929,7 @@ export class ActionsPlugin
         return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
       },
       getAllTypes: actionTypeRegistry!.getAllTypes.bind(actionTypeRegistry),
-      listTypes: (
-        featureId?: string,
-        options?: { includeSpecSummary?: boolean; typeId?: string }
-      ) => {
+      listTypes: (featureId, options) => {
         return this.actionTypeRegistry!.list({ featureId, exposeValidation: true, ...options });
       },
       getActionsAuthorizationWithRequest(request: KibanaRequest) {

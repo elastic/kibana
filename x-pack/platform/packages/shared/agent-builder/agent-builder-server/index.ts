@@ -255,8 +255,6 @@ export type {
   ConnectorDetail,
 } from './agent_connectors';
 export type {
-  ConnectorSpecActionDetailInfo,
-  ConnectorSpecActionInfo,
   ConnectorSpecDetailInfo,
   ConnectorSpecInfo,
   ConnectorSpecProvider,

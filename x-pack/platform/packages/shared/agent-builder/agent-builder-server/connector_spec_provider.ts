@@ -27,10 +27,6 @@ export type ConnectorSpecInfo = Pick<
   'id' | 'displayName' | 'description' | 'isTechnicalPreview' | 'authTypeIds' | 'actions'
 >;
 
-export type ConnectorSpecActionInfo = ConnectorSpecActionSummary;
-
-export type ConnectorSpecActionDetailInfo = ConnectorSpecActionDetail;
-
 export type ConnectorSpecDetailInfo = Pick<
   ConnectorSpecDetail,
   'id' | 'displayName' | 'description' | 'isTechnicalPreview' | 'authTypeIds' | 'skill' | 'actions'
@@ -108,11 +104,11 @@ export interface SpecActionsStart {
 export interface SpecActionsClient {
   getConnectorSpec(options: {
     id: string;
-  }): Promise<{ skill?: string; actions: ConnectorSpecActionDetailInfo[] }>;
+  }): Promise<{ skill?: string; actions: ConnectorSpecActionDetail[] }>;
 }
 
 /** Summary provider backed by the actions plugin; needs no request, so crawls can use it. */
-export const createActionsStartConnectorSpecSummaryProvider = (
+const createActionsStartConnectorSpecSummaryProvider = (
   actionsStart: SpecActionsStart
 ): ConnectorSpecSummaryProvider => ({
   getSpec: (connectorTypeId) =>
@@ -186,7 +182,7 @@ export function createConnectorSpecProvider({
  * Actions an agent can call (`isTool`), narrowed to the instance's `selectedActions` when set.
  * Pass `requireDescription` to drop actions without a description.
  */
-export const filterSpecActionsBySelection = <T extends ConnectorSpecActionInfo>(
+export const filterSpecActionsBySelection = <T extends ConnectorSpecActionSummary>(
   actions: T[],
   selectedActions: SelectedActions,
   options?: { requireDescription?: boolean }
