@@ -18,6 +18,9 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/notification_center
 dependsOn:
   - '@kbn/core'
+  - '@kbn/core-di'
+  - '@kbn/core-di-server'
+  - '@kbn/core-di-mocks'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/dev-cli-errors'
   - '@kbn/dev-cli-runner'

@@ -6,7 +6,10 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { inject, injectable } from 'inversify';
+import { Logger } from '@kbn/core-di';
+import { InternalElasticsearchClient } from '@kbn/core-di-server';
+import type { ElasticsearchClient, Logger as ILogger } from '@kbn/core/server';
 import {
   notificationQueryParamsSchema,
   notificationReadSchema,
@@ -27,11 +30,6 @@ import { isReadAt, type NotificationReadState } from './read_state';
  * task on expired notifications should keep real volumes well under it.
  */
 export const NOTIFICATION_QUERY_RESULT_LIMIT = 1000;
-
-export interface NotificationQueryDeps {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-}
 
 /**
  * These doc-level filters are applied to the query before collapsing duplicates.
@@ -57,70 +55,77 @@ const buildFilters = (params: NotificationQueryParamsParsed): QueryDslQueryConta
   return filters;
 };
 
-/**
- * Fetch the notification list
- * - Return only the newest doc per `notification_id`, collapse duplicates.
- * - Filter by namespace, type and time-range
- * - Sort by newest first.
- * - Annotate results with read state if provided (headless consumers don't have a read state)
- */
-export const queryNotifications = async (
-  deps: NotificationQueryDeps,
-  params: NotificationQueryParams = {},
-  readState?: NotificationReadState | Promise<NotificationReadState | undefined>
-): Promise<NotificationQueryResult> => {
-  const { esClient, logger } = deps;
-  const validated = notificationQueryParamsSchema.parse(params);
+/** Reads the notification list out of the backing data stream. */
+@injectable()
+export class NotificationQueryService {
+  constructor(
+    @inject(InternalElasticsearchClient) private readonly esClient: ElasticsearchClient,
+    @inject(Logger) private readonly logger: ILogger
+  ) {}
 
-  // Over-fetch by one collapse group so a full page is distinguishable from a truncated one
-  const [response, resolvedReadState] = await Promise.all([
-    esClient.search<Notification>({
-      index: NOTIFICATION_DATA_STREAM_NAME,
-      // Elasticsearch creates the stream from its descriptor on the first submitted
-      // notification, so until a producer writes one there is no index to read.
-      ignore_unavailable: true,
-      query: { bool: { filter: buildFilters(validated) } },
-      collapse: { field: 'notification_id' },
-      sort: [{ '@timestamp': 'desc' }, { notification_id: 'asc' }],
-      size: NOTIFICATION_QUERY_RESULT_LIMIT + 1,
-      track_total_hits: false,
-    }),
-    readState,
-  ]);
+  /**
+   * Fetch the notification list
+   * - Return only the newest doc per `notification_id`, collapse duplicates.
+   * - Filter by namespace, type and time-range
+   * - Sort by newest first.
+   * - Annotate results with read state if provided (headless consumers don't have a read state)
+   */
+  public async query(
+    params: NotificationQueryParams = {},
+    readState?: NotificationReadState | Promise<NotificationReadState | undefined>
+  ): Promise<NotificationQueryResult> {
+    const validated = notificationQueryParamsSchema.parse(params);
 
-  const truncated = response.hits.hits.length > NOTIFICATION_QUERY_RESULT_LIMIT;
-  const hits = response.hits.hits.slice(0, NOTIFICATION_QUERY_RESULT_LIMIT);
+    // Over-fetch by one collapse group so a full page is distinguishable from a truncated one
+    const [response, resolvedReadState] = await Promise.all([
+      this.esClient.search<Notification>({
+        index: NOTIFICATION_DATA_STREAM_NAME,
+        // Elasticsearch creates the stream from its descriptor on the first submitted
+        // notification, so until a producer writes one there is no index to read.
+        ignore_unavailable: true,
+        query: { bool: { filter: buildFilters(validated) } },
+        collapse: { field: 'notification_id' },
+        sort: [{ '@timestamp': 'desc' }, { notification_id: 'asc' }],
+        size: NOTIFICATION_QUERY_RESULT_LIMIT + 1,
+        track_total_hits: false,
+      }),
+      readState,
+    ]);
 
-  const items: NotificationListItem[] = [];
-  const malformedIds: string[] = [];
-  for (const hit of hits) {
-    const parsed = notificationReadSchema.safeParse(hit._source);
-    if (!parsed.success) {
-      malformedIds.push(hit._id ?? 'unknown');
-      continue;
+    const truncated = response.hits.hits.length > NOTIFICATION_QUERY_RESULT_LIMIT;
+    const hits = response.hits.hits.slice(0, NOTIFICATION_QUERY_RESULT_LIMIT);
+
+    const items: NotificationListItem[] = [];
+    const malformedIds: string[] = [];
+    for (const hit of hits) {
+      const parsed = notificationReadSchema.safeParse(hit._source);
+      if (!parsed.success) {
+        malformedIds.push(hit._id ?? 'unknown');
+        continue;
+      }
+      const notification = parsed.data;
+      items.push(
+        resolvedReadState
+          ? {
+              ...notification,
+              isRead: isReadAt(
+                resolvedReadState,
+                notification.notification_id,
+                notification['@timestamp']
+              ),
+            }
+          : notification
+      );
     }
-    const notification = parsed.data;
-    items.push(
-      resolvedReadState
-        ? {
-            ...notification,
-            isRead: isReadAt(
-              resolvedReadState,
-              notification.notification_id,
-              notification['@timestamp']
-            ),
-          }
-        : notification
-    );
-  }
 
-  if (malformedIds.length) {
-    logger.debug(
-      `Dropped ${malformedIds.length} malformed notification docs. Sample: ${malformedIds
-        .slice(0, 10)
-        .join(', ')}`
-    );
-  }
+    if (malformedIds.length) {
+      this.logger.debug(
+        `Dropped ${malformedIds.length} malformed notification docs. Sample: ${malformedIds
+          .slice(0, 10)
+          .join(', ')}`
+      );
+    }
 
-  return { items, truncated };
-};
+    return { items, truncated };
+  }
+}

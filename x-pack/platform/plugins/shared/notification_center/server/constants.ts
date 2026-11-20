@@ -5,20 +5,6 @@
  * 2.0.
  */
 
-import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
-import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from '../types';
-
-export type NotificationCenterCoreSetup = CoreSetup<
-  NotificationCenterStartDependencies,
-  NotificationCenterPluginStart
->;
-
-export interface NotificationRouteDeps {
-  router: IRouter;
-  core: NotificationCenterCoreSetup;
-  logger: Logger;
-}
-
 /**
  * v1 has no per-notification authorization, notifications are broadcast to every
  * authenticated user, and read-state reads/writes are scoped to the user's own

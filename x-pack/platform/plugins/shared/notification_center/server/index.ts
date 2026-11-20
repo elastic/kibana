@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { PluginConfigDescriptor, PluginInitializer } from '@kbn/core/server';
+import { KibanaContainerModule } from '@kbn/core-di';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { configSchema, type NotificationCenterConfig } from './config';
-import type {
-  NotificationCenterPluginSetup,
-  NotificationCenterPluginStart,
-  NotificationCenterSetupDependencies,
-  NotificationCenterStartDependencies,
-} from './types';
+import { bindContract } from './setup/bind_contract';
+import { bindRoutes } from './setup/bind_routes';
+import { bindServices } from './setup/bind_services';
+import { bindTasks } from './setup/bind_tasks';
 
 export type {
   NotificationCenterPluginSetup,
@@ -25,12 +24,12 @@ export const config: PluginConfigDescriptor<NotificationCenterConfig> = {
   schema: configSchema,
 };
 
-export const plugin: PluginInitializer<
-  NotificationCenterPluginSetup,
-  NotificationCenterPluginStart,
-  NotificationCenterSetupDependencies,
-  NotificationCenterStartDependencies
-> = async (initializerContext) => {
-  const { NotificationCenterPlugin } = await import('./plugin');
-  return new NotificationCenterPlugin(initializerContext);
-};
+// core gates the plugin on xpack.notificationCenter.enabled
+const pluginModule = new KibanaContainerModule((options) => {
+  bindServices(options);
+  bindRoutes(options);
+  bindTasks(options);
+  bindContract(options);
+});
+
+export { pluginModule as module };
