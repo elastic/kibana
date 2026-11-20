@@ -23,12 +23,16 @@ import { useAppHeadingTitle } from './app_heading_title';
 const OVERVIEW_DOC_LINK = 'https://www.elastic.co/docs/alertzero';
 const SET_UP_DOC_LINK = 'https://www.elastic.co/docs/alertzero/set-up';
 
+const setBreadcrumbs = jest.fn();
+
 const coreStartStub = {
   docLinks: {
     links: {
       securitySolution: { alertZero: { overview: OVERVIEW_DOC_LINK, setUp: SET_UP_DOC_LINK } },
     },
   },
+  application: { getUrlForApp: (appId: string) => `/app/${appId}` },
+  chrome: { setBreadcrumbs },
 } as unknown as CoreStart;
 
 const makeChromeWithFeedback = (openFeedback?: () => void) => {
@@ -131,6 +135,45 @@ describe('AppChromeLayout overflow', () => {
     unmount();
     renderAt('/watches');
     expect(screen.queryByTestId('appHeaderTitle')).not.toBeInTheDocument();
+  });
+});
+
+describe('AppChromeLayout breadcrumbs', () => {
+  beforeEach(() => {
+    setBreadcrumbs.mockClear();
+  });
+
+  const renderAt = (pathname: string) =>
+    render(
+      <KibanaContextProvider services={coreStartStub}>
+        <MockChromeContextProvider chrome={makeChromeWithFeedback(jest.fn())}>
+          <EuiProvider>
+            <Router history={createMemoryHistory({ initialEntries: [pathname] })}>
+              <AppChromeLayout>content</AppChromeLayout>
+            </Router>
+          </EuiProvider>
+        </MockChromeContextProvider>
+      </KibanaContextProvider>
+    );
+
+  it('should set Security > AlertZero when on the landing page', () => {
+    renderAt('/');
+    expect(setBreadcrumbs).toHaveBeenLastCalledWith([
+      { text: 'Security', href: '/app/securitySolutionUI' },
+      { text: 'AlertZero' },
+    ]);
+  });
+
+  it.each([
+    ['/escalations', 'Escalations'],
+    ['/watches/system-security-watch-floor', 'Watches'],
+  ])('should link back to AlertZero when on %s', (path, sectionTitle) => {
+    renderAt(path);
+    expect(setBreadcrumbs).toHaveBeenLastCalledWith([
+      { text: 'Security', href: '/app/securitySolutionUI' },
+      { text: 'AlertZero', href: '/app/alertzero' },
+      { text: sectionTitle },
+    ]);
   });
 });
 

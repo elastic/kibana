@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppHeaderView } from '@kbn/app-header';
 import { css } from '@emotion/react';
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
+import type { ApplicationStart, ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { SECURITY_UI_APP_ID } from '@kbn/security-solution-navigation';
+import { ALERTZERO_APP_ID } from '../../../common/constants';
 import {
   useAlertZeroDocumentationLink,
   type AlertZeroDocumentationPage,
 } from '../../hooks/use_alertzero_documentation_link';
 import { AppHeadingDocLinkContext } from './app_heading_doc_link';
 import { AppHeadingTitleContext } from './app_heading_title';
-import { BRAND_TITLE, NAV_ESCALATIONS } from './translations';
+import { BRAND_TITLE, NAV_ESCALATIONS, NAV_WATCHES, SECURITY_BREADCRUMB } from './translations';
 
 /**
  * Routes that rely on the chrome's application scroll container (`#kbnChromeLayoutApplication`).
@@ -41,6 +45,28 @@ const CHROME_SCROLLED_EXACT_ROUTES = ['', '/'];
 const matchesRoute = (pathname: string, prefixes: string[]) =>
   prefixes.some((prefix) => pathname.startsWith(prefix));
 
+const getSectionTitle = (pathname: string): string | undefined => {
+  if (matchesRoute(pathname, ['/escalations'])) return NAV_ESCALATIONS;
+  if (matchesRoute(pathname, ['/watches'])) return NAV_WATCHES;
+  return undefined;
+};
+
+/**
+ * Breadcrumbs for the Classic header. The Security solution nav builds its own from the nav tree
+ * and only merges in breadcrumbs that carry a `deepLinkId`, so these leave it unchanged.
+ */
+const getBreadcrumbs = (
+  pathname: string,
+  getUrlForApp: ApplicationStart['getUrlForApp']
+): ChromeBreadcrumb[] => {
+  const sectionTitle = getSectionTitle(pathname);
+  return [
+    { text: SECURITY_BREADCRUMB, href: getUrlForApp(SECURITY_UI_APP_ID) },
+    { text: BRAND_TITLE, ...(sectionTitle && { href: getUrlForApp(ALERTZERO_APP_ID) }) },
+    ...(sectionTitle ? [{ text: sectionTitle }] : []),
+  ];
+};
+
 interface AppChromeLayoutProps {
   children: React.ReactNode;
 }
@@ -52,6 +78,9 @@ interface AppChromeLayoutProps {
 export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) => {
   const { euiTheme } = useEuiTheme();
   const { pathname } = useLocation();
+  const {
+    services: { application, chrome },
+  } = useKibana<CoreStart>();
   // Set by a page through `useAppHeadingTitle`. Overrides the route's title while it's mounted.
   const [pageTitle, setPageTitle] = useState<string | undefined>();
   // Set by a page through `useAppHeadingDocLink`. `/` hosts both onboarding and Proposed actions,
@@ -63,8 +92,11 @@ export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) =>
   const isChromeScrolled = isWatchesShell || CHROME_SCROLLED_EXACT_ROUTES.includes(pathname);
   const overflow = isChromeScrolled ? 'visible' : 'auto';
   const hideAppHeading = isWatchesShell;
-  const appHeadingTitle =
-    pageTitle ?? (matchesRoute(pathname, ['/escalations']) ? NAV_ESCALATIONS : BRAND_TITLE);
+  const appHeadingTitle = pageTitle ?? getSectionTitle(pathname) ?? BRAND_TITLE;
+
+  useEffect(() => {
+    chrome.setBreadcrumbs(getBreadcrumbs(pathname, application.getUrlForApp));
+  }, [application, chrome, pathname]);
 
   return (
     <AppHeadingTitleContext.Provider value={setPageTitle}>
