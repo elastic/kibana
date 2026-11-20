@@ -2043,15 +2043,6 @@
       "enabled": true
     },
     {
-      "groupName": "react-window-infinite-loader",
-      "matchDepNames": ["react-window-infinite-loader", "@types/react-window-infinite-loader"],
-      "reviewers": ["team:nightshift-sre-agent-team"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["ci:all-cypress-suites", "Team:obs-signals-logs"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "form-data",
       "matchDepNames": ["form-data"],
       "reviewers": ["team:nightshift-sre-agent-team"],
