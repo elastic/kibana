@@ -37,7 +37,7 @@ const forgetBodySchema = schema.object({
       validate: validateNonBlank,
       meta: {
         description:
-          "The user the memories are about. Defaults to the caller's user profile. Naming another user needs `contextEngine:manage_memory`. A memory of any other user is reported as `not_found`.",
+          "The user the memories belong to. Omit this field to use the caller's user profile. Naming another user requires `contextEngine:manage_memory`. Memories of any other user return `not_found`.",
       },
     })
   ),
@@ -50,7 +50,7 @@ const forgetBodySchema = schema.object({
     {
       minSize: 1,
       maxSize: MAX_SESSION_MEMORY_FORGET_IDS,
-      meta: { description: 'The ids of the memories to forget. Duplicates are collapsed.' },
+      meta: { description: 'The ids of the memories to forget. The route collapses duplicates.' },
     }
   ),
 });
@@ -105,7 +105,7 @@ const auditFailureForResult = (
   }
 };
 
-/** Registers the public session memory routes (`POST /api/context_engine/memory/_forget`). */
+/** Registers the public `POST /api/context_engine/memory/_forget` route. */
 export const registerSessionMemoryRoutes = ({
   router,
   getSpaces,
@@ -122,10 +122,10 @@ export const registerSessionMemoryRoutes = ({
       access: 'public',
       summary: 'Forget session memories',
       description: [
-        "Requires the `contextEngine:write` privilege. Without `user_id` the route forgets the caller's own memories, and a caller without a user profile gets a 403. Naming another user in `user_id` also needs `contextEngine:manage_memory`.",
-        'Forgets session memories by id, for that user. A memory of another user or in another space is reported as `not_found`, as if it did not exist.',
-        'The memory stops being returned, but its revisions are kept until retention removes them. If Elasticsearch rejects a tombstone, that entry is returned as `failed` with its `error` and can be retried.',
-        'Each unique memory id writes one `memory_forget` audit event. Forgetting still works when memory is turned off.',
+        "Requires the `contextEngine:write` privilege. Without `user_id`, the route forgets the caller's own memories, and a caller without a user profile gets a 403. Naming another user in `user_id` also requires `contextEngine:manage_memory`.",
+        'Forgets session memories by id for that user. The route reports a memory of another user or another space as `not_found`, so it does not reveal whether the memory exists.',
+        'Forgetting writes a tombstone so reads stop returning the memory, while Elasticsearch keeps its revisions until retention removes them. If Elasticsearch rejects a tombstone, the route returns `failed` with `error` and the caller can retry that id.',
+        'The route writes one `memory_forget` audit event per unique memory id. Forgetting still works when memory is turned off.',
         'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).',
         CONTEXT_ENGINE_DOCS_NOTE,
       ].join('\n\n'),

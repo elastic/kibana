@@ -24,8 +24,8 @@ responses:
                 - id: 0d4e8a91-6c2b-4f3a-8d15-9b7e1c5a2f44
                   outcome: not_found
           failedForgetResponseExample:
-            summary: "A memory failed to forget"
-            description: "One memory was forgotten and the other tombstone was rejected by Elasticsearch"
+            summary: "Failed to forget a memory"
+            description: "One memory was forgotten and Elasticsearch rejected the other tombstone"
             value:
               results:
                 - id: 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
@@ -39,7 +39,7 @@ responses:
         examples:
           manageMemoryRequiredExample:
             summary: "Missing manage memory privilege"
-            description: "The request names another user in user_id and the caller lacks the manage memory privilege"
+            description: "The request names another user in `user_id` and the caller lacks the manage memory privilege"
             value:
               statusCode: 403
               error: Forbidden

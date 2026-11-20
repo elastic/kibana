@@ -370,32 +370,32 @@ POST /api/context_engine/memory/_forget
 { "ids": ["7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10"] }
 ```
 
-`ids` takes 1 to 100 ids and duplicates are collapsed. Forgetting writes a tombstone and
+`ids` takes 1 to 100 ids, and the route collapses duplicates. Forgetting writes a tombstone and
 keeps the memory's revisions until retention removes them.
 
 The response lists one outcome per unique id, in request order: `forgotten`,
-`already_forgotten`, `not_found`, or `failed` (with `error` when Elasticsearch rejects the
-tombstone).
+`already_forgotten`, `not_found`, or `failed`. A `failed` entry includes `error` when
+Elasticsearch rejects the tombstone.
 
-The space comes from the request URL. A memory of another user or in another space is
-reported as `not_found`, so the route never reveals that it exists. The route is gated by
-`contextEngine:enabled` (404 while it is off) but not by the memory setting, so forgetting
-still works after memory is turned off.
+The space comes from the request URL. The route reports a memory of another user or another
+space as `not_found`, so it never reveals that the memory exists. It returns 404 while
+`contextEngine:enabled` is off, and does not check the memory setting, so forgetting still
+works after memory is turned off.
 
 ### Privileges and audit
 
-The route needs `contextEngine:write`. Without `user_id` it forgets the
-caller's own memories, and a caller without a user profile gets a 403.
+The route requires `contextEngine:write`. Without `user_id`, it forgets the caller's own
+memories. A caller without a user profile gets a 403.
 
-Naming another user in `user_id` also needs `contextEngine:manage_memory`, which is not
-part of All, so an administrator grants it explicitly. Without it the request gets a 403,
-and every id is audited as a failure. A mismatch between `user_id` and a memory's owner
-reads as `not_found`.
+Naming another user in `user_id` also requires `contextEngine:manage_memory`. That privilege
+is not part of All, so an administrator must grant it. Without it, the request gets a 403
+and the route audits every id as a failure. When `user_id` does not match a memory's owner,
+the route returns `not_found`.
 
-Each unique id writes one `memory_forget` audit event. The event records the
+The route writes one `memory_forget` audit event per unique id. Each event records the
 authenticated actor in `user.*`, the memory's owner in `user.target.id`, and the memory in
-`kibana.saved_object`. Rejected requests, `not_found`, `failed`, and Elasticsearch errors are
-recorded as failures.
+`kibana.saved_object`. The route records rejected requests, `not_found`, `failed`, and
+Elasticsearch errors as failures.
 
 ## Improvements
 
