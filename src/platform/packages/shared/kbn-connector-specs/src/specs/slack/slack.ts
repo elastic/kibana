@@ -289,6 +289,16 @@ export const Slack: ConnectorSpec = {
           }),
         },
       },
+      {
+        // For connectors that only receive events.
+        type: 'none',
+        defaults: {},
+        overrides: {
+          label: i18n.translate('connectorSpecs.slack.auth.none.label', {
+            defaultMessage: 'No authentication (receive events only)',
+          }),
+        },
+      },
     ],
   },
 
