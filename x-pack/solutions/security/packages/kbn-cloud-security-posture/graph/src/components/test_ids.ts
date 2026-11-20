@@ -47,6 +47,12 @@ export const GRAPH_CONTROLS_ZOOM_OUT_ID = `${GRAPH_INVESTIGATION_TEST_ID}ZoomOut
 export const GRAPH_CONTROLS_CENTER_ID = `${GRAPH_INVESTIGATION_TEST_ID}Center` as const;
 export const GRAPH_CONTROLS_FIT_VIEW_ID = `${GRAPH_INVESTIGATION_TEST_ID}FitView` as const;
 export const GRAPH_CONTROLS_LAYERS_ID = `${GRAPH_INVESTIGATION_TEST_ID}Layers` as const;
+export const GRAPH_CONTROLS_KEYBOARD_SHORTCUTS_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}KeyboardShortcuts` as const;
+export const GRAPH_KEYBOARD_SHORTCUTS_PANEL_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}KeyboardShortcutsPanel` as const;
+export const GRAPH_KEYBOARD_SHORTCUTS_PANEL_CLOSE_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}KeyboardShortcutsPanelClose` as const;
 
 export const GRAPH_ID = `${GRAPH_INVESTIGATION_TEST_ID}Graph` as const;
 export const GRAPH_ENTITY_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}EntityNode` as const;

@@ -12,6 +12,7 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { action } from '@storybook/addon-actions';
 import { Controls as ControlsComponent, type ControlsProps } from './controls';
 import { LayersPanel } from './layers_panel';
+import { KeyboardShortcutsPanel } from './keyboard_shortcuts_panel';
 import { DEFAULT_GRAPH_DISPLAY_OPTIONS } from '../graph/graph_display_options_context';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 
@@ -83,4 +84,20 @@ const LayersPanelDemo = () => {
 /** Standalone Layers panel — shows all toggleable fields and keeps state locally. */
 export const Layers: StoryObj = {
   render: () => <LayersPanelDemo />,
+};
+
+/** Standalone Keyboard shortcuts panel. */
+export const KeyboardShortcuts: StoryObj = {
+  render: () => (
+    <div
+      css={css`
+        display: inline-block;
+        border: 1px solid #d3dae6;
+        border-radius: 6px;
+        overflow: hidden;
+      `}
+    >
+      <KeyboardShortcutsPanel onClose={action('onClose')} />
+    </div>
+  ),
 };

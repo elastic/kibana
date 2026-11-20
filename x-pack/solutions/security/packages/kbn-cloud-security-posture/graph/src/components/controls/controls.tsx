@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { type ReactFlowState, useStore, useReactFlow, type FitViewOptions } from '@xyflow/react';
+import { type ReactFlowState, useStore, type FitViewOptions } from '@xyflow/react';
 import {
   GRAPH_CONTROLS_FIT_VIEW_ID,
   GRAPH_CONTROLS_CENTER_ID,
@@ -27,6 +27,7 @@ import {
 } from '../test_ids';
 import fitToViewIcon from '../../assets/icons/fit_to_view.svg';
 import type { NodeViewModel } from '../types';
+import { useGraphViewportActions } from './use_graph_viewport_actions';
 
 const selector = (s: ReactFlowState) => ({
   minZoomReached: s.transform[2] <= s.minZoom,
@@ -78,36 +79,31 @@ export const Controls = ({
   ...props
 }: ControlsProps) => {
   const { euiTheme } = useEuiTheme();
-  const { zoomIn, zoomOut, fitView } = useReactFlow();
+  const { zoomIn, zoomOut, fitView, center, canCenter } = useGraphViewportActions({
+    fitViewOptions,
+    nodeIdsToCenterOn,
+  });
   const { maxZoomReached, minZoomReached } = useStore(selector);
 
-  // Memoize a sanitized list of node ids filtering out undefined/null, empty and whitespace strings
-  // Converts ['node1', 'node2'] into [{ id: 'node1' }, { id: 'node2' }]
-  const sanitizedNodeIds = useMemo(
-    () =>
-      (nodeIdsToCenterOn ?? []).filter((id) => id && id.trim().length > 0).map((id) => ({ id })),
-    [nodeIdsToCenterOn]
-  );
-
   const onZoomInHandler = useCallback(() => {
-    zoomIn({ duration: fitViewOptions?.duration });
+    zoomIn();
     onZoomIn?.();
-  }, [fitViewOptions?.duration, zoomIn, onZoomIn]);
+  }, [zoomIn, onZoomIn]);
 
   const onZoomOutHandler = useCallback(() => {
-    zoomOut({ duration: fitViewOptions?.duration });
+    zoomOut();
     onZoomOut?.();
-  }, [fitViewOptions?.duration, zoomOut, onZoomOut]);
+  }, [zoomOut, onZoomOut]);
 
   const onFitViewHandler = useCallback(() => {
-    fitView(fitViewOptions);
+    fitView();
     onFitView?.();
-  }, [fitViewOptions, fitView, onFitView]);
+  }, [fitView, onFitView]);
 
   const onCenterHandler = useCallback(() => {
-    fitView({ ...fitViewOptions, nodes: sanitizedNodeIds });
+    center();
     onCenter?.();
-  }, [fitViewOptions, fitView, onCenter, sanitizedNodeIds]);
+  }, [center, onCenter]);
 
   const btnCss = css`
     border-radius: 0;
@@ -119,7 +115,7 @@ export const Controls = ({
     background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
 
-  const showCenter = sanitizedNodeIds.length > 0;
+  const showCenter = canCenter;
 
   if (!showZoom && !showCenter && !showFitView) {
     return null;

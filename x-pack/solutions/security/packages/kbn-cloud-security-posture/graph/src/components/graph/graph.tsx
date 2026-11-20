@@ -43,12 +43,19 @@ import '@xyflow/react/dist/style.css';
 import { GlobalGraphStyles } from './styles';
 import { Controls } from '../controls/controls';
 import { LayersPanel } from '../controls/layers_panel';
+import { KeyboardShortcutsPanel } from '../controls/keyboard_shortcuts_panel';
+import { GraphKeyboardShortcuts } from '../controls/graph_keyboard_shortcuts';
+import { GRAPH_KEYBOARD_SHORTCUTS } from '../controls/keyboard_shortcuts';
 import {
   GraphDisplayOptionsContext,
   DEFAULT_GRAPH_DISPLAY_OPTIONS,
   type GraphDisplayOptions,
 } from './graph_display_options_context';
-import { GRAPH_CONTROLS_LAYERS_ID, GRAPH_ID } from '../test_ids';
+import {
+  GRAPH_CONTROLS_KEYBOARD_SHORTCUTS_ID,
+  GRAPH_CONTROLS_LAYERS_ID,
+  GRAPH_ID,
+} from '../test_ids';
 
 export interface GraphProps extends CommonProps {
   /**
@@ -87,6 +94,11 @@ export interface GraphProps extends CommonProps {
    * - Returning list of existent node ids will center the graph on those nodes
    */
   onCenterGraphAfterRefresh?: (newNodes: NodeViewModel[]) => 'fit-view' | string[] | void;
+  /**
+   * Callback invoked by the "Open search" keyboard shortcut in interactive graphs.
+   * When undefined, the shortcut is disabled and hidden from the keyboard shortcuts panel.
+   */
+  onToggleSearch?: () => void;
 }
 
 const nodeTypes = {
@@ -107,6 +119,11 @@ const fitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
 const LayersLabel = i18n.translate('securitySolutionPackages.csp.graph.controls.layers', {
   defaultMessage: 'Layers',
 });
+
+const KeyboardShortcutsLabel = i18n.translate(
+  'securitySolutionPackages.csp.graph.controls.keyboardShortcuts',
+  { defaultMessage: 'Keyboard shortcuts' }
+);
 
 const nonInteractiveFitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
   ...fitViewOptions,
@@ -136,6 +153,7 @@ export const Graph = memo<GraphProps>(
     showMinimap = false,
     children,
     onCenterGraphAfterRefresh,
+    onToggleSearch,
     ...rest
   }: GraphProps) => {
     const { euiTheme } = useEuiTheme();
@@ -153,6 +171,21 @@ export const Graph = memo<GraphProps>(
       event: { ...DEFAULT_GRAPH_DISPLAY_OPTIONS.event, ...storedDisplayOptions?.event },
     };
     const [isLayersPanelOpen, setIsLayersPanelOpen] = useState(false);
+    const [isKeyboardShortcutsPanelOpen, setIsKeyboardShortcutsPanelOpen] = useState(false);
+    const graphRootRef = useRef<HTMLDivElement | null>(null);
+    const layersPanelRef = useRef<HTMLElement | null>(null);
+    const keyboardShortcutsPanelRef = useRef<HTMLElement | null>(null);
+    const ownPanelRefs = useMemo(() => [layersPanelRef, keyboardShortcutsPanelRef], []);
+    const setLayersPanelRef = useCallback((node: HTMLElement | null) => {
+      layersPanelRef.current = node;
+    }, []);
+    const setKeyboardShortcutsPanelRef = useCallback((node: HTMLElement | null) => {
+      keyboardShortcutsPanelRef.current = node;
+    }, []);
+    const toggleDisplayOptions = useCallback(() => {
+      setIsKeyboardShortcutsPanelOpen(false);
+      setIsLayersPanelOpen((prev) => !prev);
+    }, []);
     const setDisplayOptions = (opts: GraphDisplayOptions) => setStoredDisplayOptions(opts);
     const fitViewRef = useRef<FitView<Node<NodeViewModel>> | null>(null);
     const currNodesRef = useRef<NodeViewModel[]>([]);
@@ -190,6 +223,16 @@ export const Graph = memo<GraphProps>(
     const originNodeIds = useMemo(
       () => nodes.filter((node) => node.isOrigin || node.isOriginAlert).map((node) => node.id),
       [nodes]
+    );
+
+    const availableKeyboardShortcuts = useMemo(
+      () =>
+        GRAPH_KEYBOARD_SHORTCUTS.filter(
+          ({ id }) =>
+            (id !== 'openSearch' || onToggleSearch !== undefined) &&
+            (id !== 'centerGraph' || originNodeIds.length > 0)
+        ),
+      [onToggleSearch, originNodeIds.length]
     );
 
     useEffect(() => {
@@ -305,7 +348,7 @@ export const Graph = memo<GraphProps>(
 
     return (
       <GraphDisplayOptionsContext.Provider value={displayOptions}>
-        <div {...rest}>
+        <div ref={graphRootRef} {...rest}>
           <SvgDefsMarker />
           <ReactFlow
             key={reactFlowKey}
@@ -345,6 +388,17 @@ export const Graph = memo<GraphProps>(
               </Panel>
             )}
             {interactive && (
+              <GraphKeyboardShortcuts
+                enabled={isGraphInteractive && !isLocked}
+                graphRootRef={graphRootRef}
+                ownPanelRefs={ownPanelRefs}
+                fitViewOptions={fitViewOptions}
+                nodeIdsToCenterOn={originNodeIds}
+                onToggleSearch={onToggleSearch}
+                onToggleDisplayOptions={toggleDisplayOptions}
+              />
+            )}
+            {interactive && (
               <Panel position="bottom-center">
                 <EuiFlexGroup
                   direction="row"
@@ -357,11 +411,50 @@ export const Graph = memo<GraphProps>(
                 >
                   <EuiFlexItem grow={false}>
                     <EuiPopover
+                      aria-label={KeyboardShortcutsLabel}
+                      isOpen={isKeyboardShortcutsPanelOpen}
+                      closePopover={() => setIsKeyboardShortcutsPanelOpen(false)}
+                      anchorPosition="upCenter"
+                      panelPaddingSize="none"
+                      panelRef={setKeyboardShortcutsPanelRef}
+                      button={
+                        <EuiToolTip content={KeyboardShortcutsLabel} disableScreenReaderOutput>
+                          <EuiButtonIcon
+                            iconType="keyboard"
+                            aria-label={KeyboardShortcutsLabel}
+                            size="m"
+                            color={isKeyboardShortcutsPanelOpen ? 'primary' : 'text'}
+                            data-test-subj={GRAPH_CONTROLS_KEYBOARD_SHORTCUTS_ID}
+                            css={css`
+                              border-radius: ${euiTheme.border.radius.medium};
+                            `}
+                            onClick={() => setIsKeyboardShortcutsPanelOpen((prev) => !prev)}
+                          />
+                        </EuiToolTip>
+                      }
+                    >
+                      <KeyboardShortcutsPanel
+                        onClose={() => setIsKeyboardShortcutsPanelOpen(false)}
+                        shortcuts={availableKeyboardShortcuts}
+                      />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    grow={false}
+                    css={css`
+                      width: ${euiTheme.border.width.thin};
+                      margin: ${euiTheme.size.s} 0;
+                      background-color: ${euiTheme.border.color};
+                    `}
+                  />
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
                       aria-label={LayersLabel}
                       isOpen={isLayersPanelOpen}
                       closePopover={() => setIsLayersPanelOpen(false)}
                       anchorPosition="upCenter"
                       panelPaddingSize="none"
+                      panelRef={setLayersPanelRef}
                       button={
                         <EuiToolTip content={LayersLabel} disableScreenReaderOutput>
                           <EuiButtonIcon
