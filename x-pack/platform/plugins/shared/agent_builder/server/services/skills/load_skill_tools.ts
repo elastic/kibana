@@ -82,7 +82,12 @@ export const loadSkillTools = async ({
       : [];
 
   const tools = [...inlineExecutableTools, ...registryExecutableTools];
-  await toolManager.addTools({ type: ToolManagerToolType.dynamic, tools });
+  await toolManager.addTools({
+    type: ToolManagerToolType.dynamic,
+    source: 'skills',
+    tools,
+    logger,
+  });
   const dynamicTools = await Promise.all(tools.map(renderDynamicToolDefinition));
   const result: LoadSkillToolsResult = {
     loadedToolIds: tools.map(({ id }) => id),

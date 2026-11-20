@@ -17,7 +17,6 @@ import type {
   AttachmentStateManager,
 } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentsService, ToolManager } from '@kbn/agent-builder-server/runner';
-import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import { pickTools } from './select_tools';
 
 /**
@@ -98,7 +97,7 @@ const announcedVersions = (
   return announced;
 };
 
-export interface AttachmentBoundToolsOptions {
+export interface AttachmentDynamicToolsOptions {
   attachmentStateManager: AttachmentStateManager;
   attachmentsService: AttachmentsService;
   formatContext: AttachmentFormatContext;
@@ -121,14 +120,14 @@ export interface AttachmentBoundToolsOptions {
  *   was resolved. An event's bound definitions come from the version it announces, not the latest
  *   one, and a type tool is described once, by the first prepared event of a type declaring it, so
  *   the event renders the same on every prompt build.
- * - `sync` keeps the tools of the active attachments registered as dynamic tools: it registers the
- *   tools bound to the attachments active now and the tools of their types, and removes the ones
- *   registered before that are no longer available (a deleted attachment, a version replaced by one
- *   binding fewer tools, the last attachment of a type gone).
+ * - `sync` keeps the tools of the active attachments registered as dynamic tools: it gives the tool
+ *   manager the tools bound to the attachments active now and the tools of their types, and the
+ *   tool manager removes the ones it was given before that are no longer available (a deleted
+ *   attachment, a version replaced by one binding fewer tools, the last attachment of a type gone).
  *
  * A type tool the agent already has in its native tool list stays native: it is left out of both.
  */
-export class AttachmentBoundTools {
+export class AttachmentDynamicTools {
   /** The bound tools of each attachment version, resolved once. */
   private readonly tools = new Map<string, Promise<ExecutableTool[]>>();
   /**
@@ -144,12 +143,10 @@ export class AttachmentBoundTools {
   private readonly renderedTypeDefinitions = new Map<string, DynamicToolDefinition[]>();
   /** The attachment version (by key) whose event describes each type tool, by tool id. */
   private readonly typeToolOwners = new Map<string, string>();
-  /** The ids of the tools `sync` registered last. */
-  private registeredIds = new Set<string>();
   /** The attachment versions the events given to `prepare` announced, by key. */
   private readonly announced = new Set<string>();
 
-  constructor(private readonly options: AttachmentBoundToolsOptions) {}
+  constructor(private readonly options: AttachmentDynamicToolsOptions) {}
 
   /** Resolves the definitions of the events that carry them; call before rendering the events. */
   async prepare(events: readonly AttachmentTimelineEvent[]): Promise<void> {
@@ -246,8 +243,8 @@ export class AttachmentBoundTools {
   }
 
   /**
-   * Registers the tools the active attachments make available and removes the ones no longer
-   * available.
+   * Makes the dynamic tools of the attachments the ones the active attachments make available
+   * now: the tool manager registers them and removes the ones no longer available.
    */
   async sync(toolManager: ToolManager): Promise<void> {
     const active = this.options.attachmentStateManager.getActive();
@@ -270,10 +267,7 @@ export class AttachmentBoundTools {
     const inlineTools = boundTools.flat().map((tool) => ({ ...tool, origin: ToolOrigin.inline }));
     // `Promise.all` keeps the attachment order, so on an id clash the last attachment's tool wins
     const tools = registryTools.values().toArray().concat(inlineTools);
-    const ids = new Set(tools.map((tool) => tool.id));
-    toolManager.removeDynamicTools([...this.registeredIds].filter((id) => !ids.has(id)));
-    await toolManager.addTools({ type: ToolManagerToolType.dynamic, tools });
-    this.registeredIds = ids;
+    toolManager.syncDynamicTools({ source: 'attachments', tools, logger: this.options.logger });
   }
 
   private resolve(attachmentId: string, version: number): Promise<ExecutableTool[]> {

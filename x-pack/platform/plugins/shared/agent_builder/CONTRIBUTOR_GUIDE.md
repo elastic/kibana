@@ -469,7 +469,8 @@ Adding an attachment therefore never changes the agent's native tool list.
   Deleting an attachment, or updating it to a version that binds fewer tools, makes the dropped tools
   uncallable from the next model call. Type tools are dropped with the last active attachment of the type.
 - Bound tool ids are not scoped to the attachment: when two active attachments bind the same tool id, the
-  last one wins, and a bound tool wins over a type tool with the same id.
+  last one wins, and a bound tool wins over a type tool with the same id. Both cases log a warning naming
+  the tool id.
 
 #### `getAgentDescription` — describing inline rendering to the agent
 

@@ -208,6 +208,7 @@ export const createToolManagerMock = (): ToolManagerMock => {
     hasExecutableTool: jest.fn().mockReturnValue(false),
     getDynamicToolIds: jest.fn(),
     removeDynamicTools: jest.fn(),
+    syncDynamicTools: jest.fn(),
     getSummarizer: jest.fn(),
     getDynamicTool: jest.fn(),
     hasDynamicTool: jest.fn().mockReturnValue(false),

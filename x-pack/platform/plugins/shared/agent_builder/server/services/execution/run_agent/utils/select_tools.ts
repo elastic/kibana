@@ -62,7 +62,7 @@ export const selectTools = async ({
 
   // Only the five generic attachment tools are gated. The tools an attachment type declares
   // (getTools) and the ones bound to one attachment (getBoundedTools) are dynamic tools, registered
-  // apart as attachments come and go, see `AttachmentBoundTools`.
+  // apart as attachments come and go, see `AttachmentDynamicTools`.
   const versionedAttachmentTools = capabilities.attachmentTools
     ? createVersionedAttachmentTools({ attachmentsService, formatContext, runner })
     : [];

@@ -312,6 +312,7 @@ describe('ToolManager', () => {
       });
       await toolManager.addTools({
         type: ToolManagerToolType.dynamic,
+        source: 'skills',
         tools: createMockExecutableTool('dynamic-1'),
       });
 
@@ -383,6 +384,7 @@ describe('ToolManager', () => {
 
       await toolManager.addTools({
         type: ToolManagerToolType.dynamic,
+        source: 'skills',
         tools: ids.map((id) => createMockExecutableTool(id)),
       });
 
@@ -397,6 +399,7 @@ describe('ToolManager', () => {
       });
       await toolManager.addTools({
         type: ToolManagerToolType.dynamic,
+        source: 'skills',
         tools: createMockExecutableTool('dynamic-tool'),
       });
 
@@ -682,15 +685,15 @@ describe('ToolManager', () => {
 
   describe('dynamic tool registry', () => {
     const addDynamic = (tools: ExecutableToolWithOrigin[]) =>
-      toolManager.addTools({ type: ToolManagerToolType.dynamic, tools });
+      toolManager.addTools({ type: ToolManagerToolType.dynamic, source: 'skills', tools });
 
     it('registers tools without binding them to the model', async () => {
       const tool = createMockExecutableTool('dynamic-1');
 
       await addDynamic([tool]);
 
-      expect(toolManager.listDynamicTools()).toEqual([tool]);
-      expect(toolManager.getDynamicTool('dynamic-1')).toBe(tool);
+      expect(toolManager.listDynamicTools()).toEqual([{ ...tool, source: 'skills' }]);
+      expect(toolManager.getDynamicTool('dynamic-1')).toEqual({ ...tool, source: 'skills' });
       expect(toolManager.list()).toEqual([]);
     });
 
@@ -716,7 +719,7 @@ describe('ToolManager', () => {
 
       await addDynamic([shadowed, dynamic]);
 
-      expect(toolManager.listDynamicTools()).toEqual([dynamic]);
+      expect(toolManager.listDynamicTools()).toEqual([{ ...dynamic, source: 'skills' }]);
       expect(toolManager.getDynamicTool('native-1')).toBeUndefined();
       expect(toolManager.getExecutable('native-1')?.description).toBe('Test tool');
     });
@@ -727,7 +730,7 @@ describe('ToolManager', () => {
 
       await addDynamic([second]);
 
-      expect(toolManager.listDynamicTools()).toEqual([second]);
+      expect(toolManager.listDynamicTools()).toEqual([{ ...second, source: 'skills' }]);
     });
 
     it('resolves executable, meta and summarizer from the registry when not bound natively', async () => {
@@ -738,7 +741,7 @@ describe('ToolManager', () => {
       };
       await addDynamic([tool]);
 
-      expect(toolManager.getExecutable('dynamic-1')).toBe(tool);
+      expect(toolManager.getExecutable('dynamic-1')).toEqual({ ...tool, source: 'skills' });
       expect(toolManager.getToolMeta('dynamic-1')).toEqual({
         origin: ToolOrigin.inline,
         type: 'builtin',
@@ -811,6 +814,7 @@ describe('ToolManager', () => {
     it('applies the registered inner tool budget to a tagged return', async () => {
       await toolManager.addTools({
         type: ToolManagerToolType.dynamic,
+        source: 'skills',
         tools: { ...createMockExecutableTool('inner.tool'), maxResultTokens: Infinity },
       });
 
@@ -827,6 +831,7 @@ describe('ToolManager', () => {
     it('names the inner tool in the recovery path of a truncated tagged return', async () => {
       await toolManager.addTools({
         type: ToolManagerToolType.dynamic,
+        source: 'skills',
         tools: createMockExecutableTool('inner.tool'),
       });
 
@@ -910,6 +915,7 @@ describe('ToolManager', () => {
     it('is false for a dynamic tool', async () => {
       await toolManager.addTools({
         type: ToolManagerToolType.dynamic,
+        source: 'skills',
         tools: [createMockExecutableTool('dynamic-1')],
       });
 
@@ -925,6 +931,7 @@ describe('ToolManager', () => {
     const addDynamic = (id: string) =>
       toolManager.addTools({
         type: ToolManagerToolType.dynamic,
+        source: 'skills',
         tools: [createMockExecutableTool(id)],
       });
 
@@ -956,6 +963,208 @@ describe('ToolManager', () => {
 
     it('is false for an unknown id', () => {
       expect(toolManager.hasDynamicTool('unknown')).toBe(false);
+    });
+  });
+
+  describe('addTools - dynamic tool id clashes', () => {
+    it('warns when two tools of a batch share an id, and keeps the last', async () => {
+      const logger = loggerMock.create();
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.dynamic,
+        source: 'skills',
+        tools: [
+          createMockExecutableTool('shared', 'first'),
+          createMockExecutableTool('other'),
+          createMockExecutableTool('shared', 'second'),
+        ],
+        logger,
+      });
+
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Dynamic tool "shared" is provided more than once by skills: the last one wins'
+      );
+      expect(toolManager.getDynamicTool('shared')?.description).toBe('second');
+    });
+
+    it('logs at debug level, without a warning, when an id is skipped because it is bound natively', async () => {
+      const logger = loggerMock.create();
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: createMockExecutableTool('native-1'),
+        logger: mockLogger,
+      });
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.dynamic,
+        source: 'skills',
+        tools: [createMockExecutableTool('native-1'), createMockExecutableTool('dynamic-1')],
+        logger,
+      });
+
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Dynamic tool "native-1" provided by skills is skipped: the agent has a tool with this id in its tool list'
+      );
+    });
+
+    it('does not warn when a later call registers an id again', async () => {
+      const logger = loggerMock.create();
+      const add = (description: string) =>
+        toolManager.addTools({
+          type: ToolManagerToolType.dynamic,
+          source: 'skills',
+          tools: [createMockExecutableTool('dynamic-1', description)],
+          logger,
+        });
+      await add('first');
+
+      await add('second');
+
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(toolManager.getDynamicTool('dynamic-1')?.description).toBe('second');
+    });
+
+    it('registers clashing tools without a logger', async () => {
+      await toolManager.addTools({
+        type: ToolManagerToolType.dynamic,
+        source: 'skills',
+        tools: [
+          createMockExecutableTool('shared', 'first'),
+          createMockExecutableTool('shared', 'second'),
+        ],
+      });
+
+      expect(toolManager.getDynamicTool('shared')?.description).toBe('second');
+    });
+  });
+
+  describe('syncDynamicTools', () => {
+    const syncAttachments = (
+      tools: ExecutableToolWithOrigin[],
+      logger?: ReturnType<typeof loggerMock.create>
+    ) => toolManager.syncDynamicTools({ source: 'attachments', tools, logger });
+
+    const addSkillTools = (tools: ExecutableToolWithOrigin[]) =>
+      toolManager.addTools({ type: ToolManagerToolType.dynamic, source: 'skills', tools });
+
+    it('registers the tools of the source', () => {
+      const tools = [createMockExecutableTool('a-1'), createMockExecutableTool('a-2')];
+
+      syncAttachments(tools);
+
+      expect(toolManager.listDynamicTools()).toEqual(
+        tools.map((tool) => ({ ...tool, source: 'attachments' }))
+      );
+    });
+
+    it('removes the tools the source registered before and no longer provides', () => {
+      syncAttachments([createMockExecutableTool('a-1'), createMockExecutableTool('a-2')]);
+
+      syncAttachments([createMockExecutableTool('a-2')]);
+
+      expect(toolManager.getDynamicToolIds()).toEqual(['a-2']);
+    });
+
+    it('replaces a tool the source provides again', () => {
+      syncAttachments([createMockExecutableTool('a-1', 'first')]);
+
+      syncAttachments([createMockExecutableTool('a-1', 'second')]);
+
+      expect(toolManager.getDynamicTool('a-1')?.description).toBe('second');
+    });
+
+    it('leaves the tools of another source in place', async () => {
+      await addSkillTools([createMockExecutableTool('s-1')]);
+      syncAttachments([createMockExecutableTool('a-1')]);
+
+      syncAttachments([]);
+
+      expect(toolManager.getDynamicToolIds()).toEqual(['s-1']);
+    });
+
+    it('takes over an id another source registered: the last to register it wins', async () => {
+      await addSkillTools([createMockExecutableTool('shared', 'from a skill')]);
+
+      syncAttachments([createMockExecutableTool('shared', 'from an attachment')]);
+
+      expect(toolManager.getDynamicTool('shared')?.description).toBe('from an attachment');
+    });
+
+    it('removes an id it took over once it no longer provides it', async () => {
+      await addSkillTools([createMockExecutableTool('shared', 'from a skill')]);
+      syncAttachments([createMockExecutableTool('shared', 'from an attachment')]);
+
+      syncAttachments([]);
+
+      // not handed back to the skill: the tool is unavailable until a skill registers it again
+      expect(toolManager.hasDynamicTool('shared')).toBe(false);
+    });
+
+    it('does not remove an id another source took over', async () => {
+      syncAttachments([createMockExecutableTool('shared', 'from an attachment')]);
+      await addSkillTools([createMockExecutableTool('shared', 'from a skill')]);
+
+      syncAttachments([]);
+
+      expect(toolManager.getDynamicTool('shared')?.description).toBe('from a skill');
+    });
+
+    it('skips ids bound natively', async () => {
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: createMockExecutableTool('native-1'),
+        logger: mockLogger,
+      });
+
+      syncAttachments([createMockExecutableTool('native-1'), createMockExecutableTool('a-1')]);
+
+      expect(toolManager.getDynamicToolIds()).toEqual(['a-1']);
+    });
+
+    it('warns when two of the tools share an id, and keeps the last', () => {
+      const logger = loggerMock.create();
+
+      syncAttachments(
+        [createMockExecutableTool('shared', 'first'), createMockExecutableTool('shared', 'second')],
+        logger
+      );
+
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Dynamic tool "shared" is provided more than once by attachments: the last one wins'
+      );
+      expect(toolManager.getDynamicTool('shared')?.description).toBe('second');
+    });
+
+    it('logs at debug level, without a warning, when an id is skipped because it is bound natively', async () => {
+      const logger = loggerMock.create();
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: createMockExecutableTool('native-1'),
+        logger: mockLogger,
+      });
+
+      syncAttachments([createMockExecutableTool('native-1')], logger);
+
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Dynamic tool "native-1" provided by attachments is skipped: the agent has a tool with this id in its tool list'
+      );
+    });
+
+    it('does not warn when it provides the same tools again, nor when it takes over an id', async () => {
+      const logger = loggerMock.create();
+      await addSkillTools([createMockExecutableTool('shared')]);
+      const tools = [createMockExecutableTool('shared'), createMockExecutableTool('a-1')];
+      syncAttachments(tools, logger);
+
+      syncAttachments(tools, logger);
+
+      expect(logger.warn).not.toHaveBeenCalled();
     });
   });
 });

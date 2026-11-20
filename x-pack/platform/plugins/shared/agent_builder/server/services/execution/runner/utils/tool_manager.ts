@@ -19,10 +19,11 @@ import type {
   ToolManager as IToolManager,
   ToolName,
   AddToolInput,
-  ExecutableToolWithOrigin,
   ExecutableToolInput,
   BrowserToolInput,
+  DynamicTool,
   DynamicToolInput,
+  SyncDynamicToolsInput,
 } from '@kbn/agent-builder-server/runner/tool_manager';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner/tool_manager';
 import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
@@ -111,6 +112,20 @@ export class ToolManager implements IToolManager {
   }
 
   /**
+   * Makes the dynamic tools of a source the given ones: registers them and removes the ones the
+   * source registered before and no longer provides.
+   */
+  public syncDynamicTools({ source, tools, logger }: SyncDynamicToolsInput): void {
+    const registeredIds = this.registerDynamicTools({ source, tools, logger });
+    // Only the ids the source still owns: another source may have registered one since
+    const droppedIds = this.dynamicToolRegistry
+      .list()
+      .filter((tool) => tool.source === source && !registeredIds.has(tool.id))
+      .map(({ id }) => id);
+    this.removeDynamicTools(droppedIds);
+  }
+
+  /**
    * Lists the tools bound to the model (not the dynamic tools).
    * @returns an array of the natively bound tools
    */
@@ -155,7 +170,7 @@ export class ToolManager implements IToolManager {
     return this.getExecutable(toolId)?.summarizeToolReturn;
   }
 
-  public getDynamicTool(toolId: string): ExecutableToolWithOrigin | undefined {
+  public getDynamicTool(toolId: string): DynamicTool | undefined {
     return this.dynamicToolRegistry.get(toolId);
   }
 
@@ -163,7 +178,7 @@ export class ToolManager implements IToolManager {
     return this.dynamicToolRegistry.has(toolId);
   }
 
-  public listDynamicTools(): ExecutableToolWithOrigin[] {
+  public listDynamicTools(): DynamicTool[] {
     return this.dynamicToolRegistry.list();
   }
 
@@ -231,10 +246,33 @@ export class ToolManager implements IToolManager {
     };
   }
 
-  private addDynamicTools(input: DynamicToolInput): void {
-    const tools = Array.isArray(input.tools) ? input.tools : [input.tools];
-    // ids bound natively are skipped: the model calls those directly
-    this.dynamicToolRegistry.register(tools.filter((tool) => !this.hasExecutableTool(tool.id)));
-    return;
+  private addDynamicTools({ source, tools, logger }: DynamicToolInput): void {
+    this.registerDynamicTools({ source, tools: Array.isArray(tools) ? tools : [tools], logger });
+  }
+
+  /**
+   * Registers the tools with the source on each and returns the ids that landed in the registry.
+   * An id given twice keeps its last tool; an id another source registered is taken over.
+   */
+  private registerDynamicTools({ source, tools, logger }: SyncDynamicToolsInput): Set<string> {
+    const registered = new Map<string, DynamicTool>();
+    for (const tool of tools) {
+      if (this.hasExecutableTool(tool.id)) {
+        // ids bound natively are skipped: the model calls those directly. Not a warning: skills
+        // commonly list tools the agent already has
+        logger?.debug(
+          `Dynamic tool "${tool.id}" provided by ${source} is skipped: the agent has a tool with this id in its tool list`
+        );
+      } else {
+        if (registered.has(tool.id)) {
+          logger?.warn(
+            `Dynamic tool "${tool.id}" is provided more than once by ${source}: the last one wins`
+          );
+        }
+        registered.set(tool.id, { ...tool, source });
+      }
+    }
+    this.dynamicToolRegistry.register(registered.values().toArray());
+    return new Set(registered.keys());
   }
 }

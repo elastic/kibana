@@ -58,7 +58,7 @@ import {
 import type { PreviousRoundInfo } from './utils/context_management';
 import { createSummarizationTransformer } from './utils/tool_summarization';
 import { buildResumeAnchors, pausedItems, type PausedItem } from './utils/attachment_placement';
-import { AttachmentBoundTools } from './utils/attachment_bound_tools';
+import { AttachmentDynamicTools } from './utils/attachment_dynamic_tools';
 import { describedDynamicToolIds } from './utils/described_dynamic_tools';
 import { sourceEvents } from '../../conversation/client/source_events';
 import {
@@ -256,7 +256,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const pendingRound = pendingTurn?.compatRound;
   // The tools an attachment makes available are announced by its events.
   const attachmentFormatContext = { request, spaceId: context.spaceId };
-  const attachmentBoundTools = new AttachmentBoundTools({
+  const attachmentDynamicTools = new AttachmentDynamicTools({
     attachmentStateManager: context.attachmentStateManager,
     attachmentsService: attachments,
     formatContext: attachmentFormatContext,
@@ -282,8 +282,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     // are callable from the next model call, which renders their definitions. The tools of a
     // deleted or replaced version stop being callable.
     onToolCallEvents: async (attachmentEvents) => {
-      await attachmentBoundTools.prepare(attachmentEvents);
-      await attachmentBoundTools.sync(toolManager);
+      await attachmentDynamicTools.prepare(attachmentEvents);
+      await attachmentDynamicTools.sync(toolManager);
     },
   });
   // Everything recorded so far came from the incoming message's attachments.
@@ -326,7 +326,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   // Resolve the definitions of the attachment events that are about to be rendered: the history's
   // but those the summary hides, then the incoming message's.
-  await attachmentBoundTools.prepare([
+  await attachmentDynamicTools.prepare([
     ...visibleAttachmentEvents({
       events: processedConversation.timeline,
       entries: historyEntries,
@@ -339,7 +339,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }),
     ...chatInputEvents,
   ]);
-  processedConversation.boundToolDefinitions = (event) => attachmentBoundTools.get(event);
+  processedConversation.boundToolDefinitions = (event) => attachmentDynamicTools.get(event);
   // A conversation stored before attachment events existed carries its attachments on its
   // messages: no event renders their definitions, so a notice ahead of the history does. The
   // events of the run reach `prepare`, so resolving at render time reflects them.
@@ -348,7 +348,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     ...chatInputEvents,
   ];
   processedConversation.unannouncedBoundToolDefinitions = () =>
-    attachmentBoundTools.unannouncedDefinitions(storedAttachmentEvents);
+    attachmentDynamicTools.unannouncedDefinitions(storedAttachmentEvents);
 
   // Started before the tool setup so a 'first' hook overlaps it, as the skill selection below does.
   const cycleHooks = new CycleHookRuntime({
@@ -381,7 +381,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     const previousDynamicToolIds = (conversation?.state?.dynamic_tool_ids ?? []).filter((id) =>
       describedToolIds.has(id)
     );
-    const { staticTools, dynamicTools } = await selectTools({
+    const { staticTools, dynamicTools: dynamicSkillsTools } = await selectTools({
       conversation: processedConversation,
       previousDynamicToolIds,
       filteredSkills,
@@ -446,9 +446,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     });
 
     // Then the dynamic tools, reachable only through `execute_dynamic_tool`: the restored ones,
-    // then the ones bound to the active attachments (last wins on an id clash)
-    await toolManager.addTools({ type: ToolManagerToolType.dynamic, tools: dynamicTools });
-    await attachmentBoundTools.sync(toolManager);
+    // which are the tools of the skills loaded in earlier rounds, then the ones of the active
+    // attachments (last wins on an id clash)
+    await toolManager.addTools({
+      type: ToolManagerToolType.dynamic,
+      source: 'skills',
+      tools: dynamicSkillsTools,
+      logger,
+    });
+    await attachmentDynamicTools.sync(toolManager);
 
     const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
 

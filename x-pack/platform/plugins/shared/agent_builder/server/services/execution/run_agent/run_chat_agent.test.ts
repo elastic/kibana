@@ -48,7 +48,7 @@ import { RunAttachmentEvents } from './run_attachment_events';
 import { registerInternalTools } from './tools/register_internal_tools';
 import { createPromptFactory } from './prompts';
 import { createImageResolver } from './utils/image_resolver';
-import { AttachmentBoundTools } from './utils/attachment_bound_tools';
+import { AttachmentDynamicTools } from './utils/attachment_dynamic_tools';
 import { describedDynamicToolIds } from './utils/described_dynamic_tools';
 import { RunTracker } from './run_tracker';
 import { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
@@ -80,14 +80,14 @@ jest.mock('./utils/image_resolver', () => ({
 }));
 
 // One instance per run; `mock`-prefixed so the hoisted factory below may close over it.
-const mockAttachmentBoundTools = {
+const mockAttachmentDynamicTools = {
   prepare: jest.fn(),
   get: jest.fn(),
   unannouncedDefinitions: jest.fn().mockResolvedValue([]),
   sync: jest.fn(),
 };
-jest.mock('./utils/attachment_bound_tools', () => ({
-  AttachmentBoundTools: jest.fn(() => mockAttachmentBoundTools),
+jest.mock('./utils/attachment_dynamic_tools', () => ({
+  AttachmentDynamicTools: jest.fn(() => mockAttachmentDynamicTools),
 }));
 
 jest.mock('./utils/described_dynamic_tools', () => ({
@@ -202,14 +202,17 @@ describe('runDefaultAgentMode', () => {
       tools: [{ ...browserApiTools[0], origin: ToolOrigin.internal }],
     });
 
-    // Dynamic tools are added afterwards, behind execute_dynamic_tool
+    // Dynamic tools are added afterwards, behind execute_dynamic_tool: the restored ones are the
+    // tools of the skills loaded in earlier rounds
     expect(context.toolManager.addTools).toHaveBeenNthCalledWith(3, {
       type: ToolManagerToolType.dynamic,
+      source: 'skills',
       tools: dynamicTools,
+      logger: context.logger,
     });
     // then the tools bound to the active attachments are synced into the registry
-    expect(mockAttachmentBoundTools.sync).toHaveBeenCalledWith(context.toolManager);
-    expect(mockAttachmentBoundTools.sync.mock.invocationCallOrder[0]).toBeGreaterThan(
+    expect(mockAttachmentDynamicTools.sync).toHaveBeenCalledWith(context.toolManager);
+    expect(mockAttachmentDynamicTools.sync.mock.invocationCallOrder[0]).toBeGreaterThan(
       context.toolManager.addTools.mock.invocationCallOrder[2]
     );
   });
@@ -1653,7 +1656,9 @@ describe('runDefaultAgentMode', () => {
 
       expect(context.toolManager.addTools).toHaveBeenNthCalledWith(3, {
         type: ToolManagerToolType.dynamic,
+        source: 'skills',
         tools: dynamicTools,
+        logger: context.logger,
       });
     });
   });
@@ -1724,15 +1729,15 @@ describe('runDefaultAgentMode restored dynamic tools', () => {
 });
 
 describe('runDefaultAgentMode attachment bound tools', () => {
-  const AttachmentBoundToolsMock = AttachmentBoundTools as jest.MockedClass<
-    typeof AttachmentBoundTools
+  const AttachmentDynamicToolsMock = AttachmentDynamicTools as jest.MockedClass<
+    typeof AttachmentDynamicTools
   >;
   const definition: DynamicToolDefinition = {
     tool_id: 'bound.tool',
     description: 'Fetch the host',
     parameters: { type: 'object', properties: {} },
   };
-  const { prepare, get, sync } = mockAttachmentBoundTools;
+  const { prepare, get, sync } = mockAttachmentDynamicTools;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -1782,7 +1787,7 @@ describe('runDefaultAgentMode attachment bound tools', () => {
       timeline: [noteEvent, timelineEvent],
     });
 
-    expect(AttachmentBoundToolsMock).toHaveBeenCalledWith({
+    expect(AttachmentDynamicToolsMock).toHaveBeenCalledWith({
       attachmentStateManager: context.attachmentStateManager,
       attachmentsService: context.attachments,
       formatContext: { request: context.request, spaceId: context.spaceId },
@@ -1810,7 +1815,7 @@ describe('runDefaultAgentMode attachment bound tools', () => {
   it('resolves the definitions of the attachments no event announces when asked', async () => {
     const timelineEvent = attachmentEventFixture({ id: 'att' });
     const legacyDefinition: DynamicToolDefinition = { ...definition, tool_id: 'legacy.bound' };
-    mockAttachmentBoundTools.unannouncedDefinitions.mockResolvedValueOnce([legacyDefinition]);
+    mockAttachmentDynamicTools.unannouncedDefinitions.mockResolvedValueOnce([legacyDefinition]);
 
     const { processedConversation } = await run({ timeline: [timelineEvent] });
 
@@ -1818,7 +1823,7 @@ describe('runDefaultAgentMode attachment bound tools', () => {
     expect(await processedConversation.unannouncedBoundToolDefinitions?.()).toEqual([
       legacyDefinition,
     ]);
-    expect(mockAttachmentBoundTools.unannouncedDefinitions).toHaveBeenCalledWith([
+    expect(mockAttachmentDynamicTools.unannouncedDefinitions).toHaveBeenCalledWith([
       timelineEvent,
       expect.objectContaining({ data: expect.objectContaining({ source: 'chat_input' }) }),
     ]);
@@ -1836,7 +1841,7 @@ describe('runDefaultAgentMode attachment bound tools', () => {
 
   it('tells the attachment tools which tool ids the tool manager binds natively', async () => {
     const { context } = await run();
-    const [{ isNativeTool }] = AttachmentBoundToolsMock.mock.calls[0];
+    const [{ isNativeTool }] = AttachmentDynamicToolsMock.mock.calls[0];
     context.toolManager.hasExecutableTool.mockImplementation(
       (toolId: string) => toolId === 'native.tool'
     );

@@ -9,9 +9,8 @@ import { z } from '@kbn/zod/v4';
 import type { AttachmentTimelineEvent } from '@kbn/agent-builder-common';
 import { TimelineEventType, ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import type { ExecutableTool } from '@kbn/agent-builder-server';
-import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import { createToolProviderMock } from '../../../../test_utils';
-import { AttachmentBoundTools, resolveAttachmentBoundTools } from './attachment_bound_tools';
+import { AttachmentDynamicTools, resolveAttachmentBoundTools } from './attachment_dynamic_tools';
 
 const formatContext = { request: {} as any, spaceId: 'default' };
 
@@ -148,11 +147,10 @@ const addedEvent = (version = 1) =>
   createEvent(TimelineEventType.attachmentAdded, { current_version: version, render_inline: true });
 
 const createToolManager = () => ({
-  addTools: jest.fn().mockResolvedValue(undefined),
-  removeDynamicTools: jest.fn(),
+  syncDynamicTools: jest.fn(),
 });
 
-describe('AttachmentBoundTools', () => {
+describe('AttachmentDynamicTools', () => {
   /** `records` is what the state manager knows, `active` the subset it reports active. */
   const setup = ({
     records = [createAttachment()],
@@ -173,7 +171,7 @@ describe('AttachmentBoundTools', () => {
       getAttachmentRecord: jest.fn((id: string) => records.find((record) => record.id === id)),
       getActive: jest.fn(() => active),
     };
-    const boundTools = new AttachmentBoundTools({
+    const dynamicTools = new AttachmentDynamicTools({
       attachmentStateManager: attachmentStateManager as any,
       attachmentsService: service,
       formatContext,
@@ -181,17 +179,17 @@ describe('AttachmentBoundTools', () => {
       isNativeTool,
       logger: logger as any,
     });
-    return { boundTools, attachmentStateManager, toolManager: createToolManager() };
+    return { dynamicTools, attachmentStateManager, toolManager: createToolManager() };
   };
 
   describe('definitions', () => {
     it('renders the definitions of an added event', async () => {
-      const { boundTools } = setup();
+      const { dynamicTools } = setup();
       const event = addedEvent(1);
 
-      await boundTools.prepare([event]);
+      await dynamicTools.prepare([event]);
 
-      expect(boundTools.get(event)).toEqual([
+      expect(dynamicTools.get(event)).toEqual([
         {
           tool_id: 'bound.tool',
           description: 'for first',
@@ -201,7 +199,7 @@ describe('AttachmentBoundTools', () => {
     });
 
     it('renders restored and updated events too', async () => {
-      const { boundTools } = setup();
+      const { dynamicTools } = setup();
       const restored = createEvent(TimelineEventType.attachmentRestored, { current_version: 2 });
       const updated = createEvent(TimelineEventType.attachmentUpdated, {
         previous_version: 1,
@@ -209,14 +207,14 @@ describe('AttachmentBoundTools', () => {
         render_inline: true,
       });
 
-      await boundTools.prepare([restored, updated]);
+      await dynamicTools.prepare([restored, updated]);
 
-      expect(boundTools.get(restored)?.[0].description).toBe('for second');
-      expect(boundTools.get(updated)?.[0].description).toBe('for second');
+      expect(dynamicTools.get(restored)?.[0].description).toBe('for second');
+      expect(dynamicTools.get(updated)?.[0].description).toBe('for second');
     });
 
     it('renders each event from the version it announces, not the latest', async () => {
-      const { boundTools } = setup();
+      const { dynamicTools } = setup();
       const first = addedEvent(1);
       const second = createEvent(TimelineEventType.attachmentUpdated, {
         previous_version: 1,
@@ -224,60 +222,60 @@ describe('AttachmentBoundTools', () => {
         render_inline: true,
       });
 
-      await boundTools.prepare([first, second]);
+      await dynamicTools.prepare([first, second]);
 
-      expect(boundTools.get(first)?.[0].description).toBe('for first');
-      expect(boundTools.get(second)?.[0].description).toBe('for second');
+      expect(dynamicTools.get(first)?.[0].description).toBe('for first');
+      expect(dynamicTools.get(second)?.[0].description).toBe('for second');
     });
 
     it('carries no definitions on a deleted event', async () => {
       const { service, format } = createAttachmentsService();
-      const { boundTools } = setup({ service });
+      const { dynamicTools } = setup({ service });
       const deleted = createEvent(TimelineEventType.attachmentDeleted, { hard_delete: false });
 
-      await boundTools.prepare([deleted]);
+      await dynamicTools.prepare([deleted]);
 
-      expect(boundTools.get(deleted)).toBeUndefined();
+      expect(dynamicTools.get(deleted)).toBeUndefined();
       expect(format).not.toHaveBeenCalled();
     });
 
     it('carries no definitions when the attachment record is gone', async () => {
-      const { boundTools } = setup({ records: [] });
+      const { dynamicTools } = setup({ records: [] });
       const event = addedEvent(1);
 
-      await boundTools.prepare([event]);
+      await dynamicTools.prepare([event]);
 
-      expect(boundTools.get(event)).toBeUndefined();
+      expect(dynamicTools.get(event)).toBeUndefined();
     });
 
     it('carries no definitions when the attachment binds no tools', async () => {
       const { service, format } = createAttachmentsService();
       format.mockResolvedValue({ getBoundedTools: async () => [] });
-      const { boundTools } = setup({ service });
+      const { dynamicTools } = setup({ service });
       const event = addedEvent(1);
 
-      await boundTools.prepare([event]);
+      await dynamicTools.prepare([event]);
 
-      expect(boundTools.get(event)).toBeUndefined();
+      expect(dynamicTools.get(event)).toBeUndefined();
     });
 
     it('carries no definitions for an event that was not prepared', () => {
-      const { boundTools } = setup();
+      const { dynamicTools } = setup();
 
-      expect(boundTools.get(addedEvent(1))).toBeUndefined();
+      expect(dynamicTools.get(addedEvent(1))).toBeUndefined();
     });
 
     it('formats an attachment version once, however often it is prepared', async () => {
       const { service, format } = createAttachmentsService();
-      const { boundTools } = setup({ service });
+      const { dynamicTools } = setup({ service });
       const event = addedEvent(1);
       const restored = createEvent(TimelineEventType.attachmentRestored, { current_version: 1 });
 
-      await boundTools.prepare([event, restored]);
-      await boundTools.prepare([event]);
+      await dynamicTools.prepare([event, restored]);
+      await dynamicTools.prepare([event]);
 
       expect(format).toHaveBeenCalledTimes(1);
-      expect(boundTools.get(restored)).toEqual(boundTools.get(event));
+      expect(dynamicTools.get(restored)).toEqual(dynamicTools.get(event));
     });
 
     it('leaves out a tool whose definition cannot be rendered, keeping the others', async () => {
@@ -295,12 +293,12 @@ describe('AttachmentBoundTools', () => {
         tool.id === 'broken.tool' ? broken : createExecutableTool(tool.id)
       );
       const logger = { warn: jest.fn() };
-      const { boundTools } = setup({ service, logger });
+      const { dynamicTools } = setup({ service, logger });
       const event = addedEvent(1);
 
-      await boundTools.prepare([event]);
+      await dynamicTools.prepare([event]);
 
-      expect(boundTools.get(event)?.map((definition) => definition.tool_id)).toEqual([
+      expect(dynamicTools.get(event)?.map((definition) => definition.tool_id)).toEqual([
         'bound.tool',
       ]);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('broken.tool'));
@@ -314,28 +312,29 @@ describe('AttachmentBoundTools', () => {
           throw new Error('no schema');
         },
       }));
-      const { boundTools } = setup({ service });
+      const { dynamicTools } = setup({ service });
       const event = addedEvent(1);
 
-      await boundTools.prepare([event]);
+      await dynamicTools.prepare([event]);
 
-      expect(boundTools.get(event)).toBeUndefined();
+      expect(dynamicTools.get(event)).toBeUndefined();
     });
   });
 
   describe('sync', () => {
     const registeredIds = (toolManager: ReturnType<typeof createToolManager>) =>
-      toolManager.addTools.mock.calls.at(-1)?.[0].tools.map((tool: { id: string }) => tool.id);
+      toolManager.syncDynamicTools.mock.calls
+        .at(-1)?.[0]
+        .tools.map((tool: { id: string }) => tool.id);
 
-    it('registers the tools of the active attachments, each at its current version, as inline dynamic tools', async () => {
+    it('syncs the tools of the active attachments, each at its current version, as inline dynamic tools', async () => {
       const other = { ...createAttachment(), id: 'a-2', current_version: 1 };
-      const { boundTools, toolManager } = setup({ records: [createAttachment(), other] });
+      const { dynamicTools, toolManager } = setup({ records: [createAttachment(), other] });
 
-      await boundTools.sync(toolManager as any);
+      await dynamicTools.sync(toolManager as any);
 
-      expect(toolManager.removeDynamicTools).toHaveBeenCalledWith([]);
-      expect(toolManager.addTools).toHaveBeenCalledWith({
-        type: ToolManagerToolType.dynamic,
+      expect(toolManager.syncDynamicTools).toHaveBeenCalledWith({
+        source: 'attachments',
         tools: [
           // a-1 is at version 2 ("second"), a-2 at version 1 ("first")
           expect.objectContaining({ description: 'for second', origin: ToolOrigin.inline }),
@@ -344,47 +343,46 @@ describe('AttachmentBoundTools', () => {
       });
     });
 
-    it('registers nothing without active attachments', async () => {
-      const { boundTools, toolManager } = setup({ active: [] });
+    it('passes its logger, for the tool manager to warn about id clashes', async () => {
+      const logger = { warn: jest.fn() };
+      const { dynamicTools, toolManager } = setup({ logger });
 
-      await boundTools.sync(toolManager as any);
+      await dynamicTools.sync(toolManager as any);
+
+      expect(toolManager.syncDynamicTools).toHaveBeenCalledWith(
+        expect.objectContaining({ source: 'attachments', logger })
+      );
+    });
+
+    it('syncs no tools without active attachments', async () => {
+      const { dynamicTools, toolManager } = setup({ active: [] });
+
+      await dynamicTools.sync(toolManager as any);
 
       expect(registeredIds(toolManager)).toEqual([]);
     });
 
-    it('removes the tools it registered before that are no longer bound', async () => {
+    it('syncs only the tools bound now, so the tool manager removes the ones no longer bound', async () => {
       const attachment = createAttachment();
-      const { boundTools, toolManager, attachmentStateManager } = setup({
+      const { dynamicTools, toolManager, attachmentStateManager } = setup({
         records: [attachment],
       });
-      await boundTools.sync(toolManager as any);
+      await dynamicTools.sync(toolManager as any);
       // the attachment was deleted
       attachmentStateManager.getActive.mockReturnValue([]);
 
-      await boundTools.sync(toolManager as any);
+      await dynamicTools.sync(toolManager as any);
 
-      expect(toolManager.removeDynamicTools).toHaveBeenLastCalledWith(['bound.tool']);
       expect(registeredIds(toolManager)).toEqual([]);
-    });
-
-    it('does not remove a tool again once it is gone', async () => {
-      const { boundTools, toolManager, attachmentStateManager } = setup();
-      await boundTools.sync(toolManager as any);
-      attachmentStateManager.getActive.mockReturnValue([]);
-      await boundTools.sync(toolManager as any);
-
-      await boundTools.sync(toolManager as any);
-
-      expect(toolManager.removeDynamicTools).toHaveBeenLastCalledWith([]);
     });
 
     it('reuses the tools resolved for the definitions, formatting each version once', async () => {
       const { service, format } = createAttachmentsService();
-      const { boundTools, toolManager } = setup({ service });
+      const { dynamicTools, toolManager } = setup({ service });
 
-      await boundTools.prepare([addedEvent(2)]);
-      await boundTools.sync(toolManager as any);
-      await boundTools.sync(toolManager as any);
+      await dynamicTools.prepare([addedEvent(2)]);
+      await dynamicTools.sync(toolManager as any);
+      await dynamicTools.sync(toolManager as any);
 
       expect(format).toHaveBeenCalledTimes(1);
       expect(registeredIds(toolManager)).toEqual(['bound.tool']);
@@ -393,9 +391,9 @@ describe('AttachmentBoundTools', () => {
 
   describe('unannouncedDefinitions', () => {
     it('renders the definitions of the active attachments no event announces', async () => {
-      const { boundTools } = setup();
+      const { dynamicTools } = setup();
 
-      const definitions = await boundTools.unannouncedDefinitions([]);
+      const definitions = await dynamicTools.unannouncedDefinitions([]);
 
       // a-1 is at version 2
       expect(definitions).toEqual([
@@ -404,20 +402,20 @@ describe('AttachmentBoundTools', () => {
     });
 
     it('leaves out an attachment an event announces at its current version', async () => {
-      const { boundTools } = setup();
+      const { dynamicTools } = setup();
       const updated = createEvent(TimelineEventType.attachmentUpdated, {
         previous_version: 1,
         current_version: 2,
         render_inline: true,
       });
 
-      expect(await boundTools.unannouncedDefinitions([updated])).toEqual([]);
+      expect(await dynamicTools.unannouncedDefinitions([updated])).toEqual([]);
     });
 
     it('keeps an attachment only announced at an older version', async () => {
-      const { boundTools } = setup();
+      const { dynamicTools } = setup();
 
-      const definitions = await boundTools.unannouncedDefinitions([addedEvent(1)]);
+      const definitions = await dynamicTools.unannouncedDefinitions([addedEvent(1)]);
 
       expect(definitions.map((definition) => definition.description)).toEqual(['for second']);
     });
@@ -425,25 +423,25 @@ describe('AttachmentBoundTools', () => {
     it('leaves out an attachment that binds no tools', async () => {
       const { service, format } = createAttachmentsService();
       format.mockResolvedValue({ getBoundedTools: async () => [] });
-      const { boundTools } = setup({ service });
+      const { dynamicTools } = setup({ service });
 
-      expect(await boundTools.unannouncedDefinitions([])).toEqual([]);
+      expect(await dynamicTools.unannouncedDefinitions([])).toEqual([]);
     });
 
     it('reuses the definitions prepare rendered', async () => {
       const { service, format } = createAttachmentsService();
-      const { boundTools } = setup({ service });
-      await boundTools.prepare([addedEvent(2)]);
+      const { dynamicTools } = setup({ service });
+      await dynamicTools.prepare([addedEvent(2)]);
 
-      await boundTools.unannouncedDefinitions([]);
+      await dynamicTools.unannouncedDefinitions([]);
 
       expect(format).toHaveBeenCalledTimes(1);
     });
 
     it('counts the versions prepare saw during the run as announced', async () => {
-      const { boundTools } = setup();
+      const { dynamicTools } = setup();
       // the run updates the attachment to version 2 and prepares the event
-      await boundTools.prepare([
+      await dynamicTools.prepare([
         createEvent(TimelineEventType.attachmentUpdated, {
           previous_version: 1,
           current_version: 2,
@@ -451,13 +449,13 @@ describe('AttachmentBoundTools', () => {
         }),
       ]);
 
-      expect(await boundTools.unannouncedDefinitions([addedEvent(1)])).toEqual([]);
+      expect(await dynamicTools.unannouncedDefinitions([addedEvent(1)])).toEqual([]);
     });
 
     it('reflects the attachments active when resolved, not when constructed', async () => {
       const active = [createAttachment()];
-      const { boundTools } = setup({ active });
-      const resolve = () => boundTools.unannouncedDefinitions([]);
+      const { dynamicTools } = setup({ active });
+      const resolve = () => dynamicTools.unannouncedDefinitions([]);
       expect(await resolve()).toHaveLength(1);
 
       // the run deletes the attachment
@@ -514,19 +512,19 @@ describe('AttachmentBoundTools', () => {
       definitions?.map((definition) => definition.tool_id);
 
     const lastRegistered = (toolManager: ReturnType<typeof createToolManager>) =>
-      toolManager.addTools.mock.calls.at(-1)?.[0].tools;
+      toolManager.syncDynamicTools.mock.calls.at(-1)?.[0].tools;
 
     describe('definitions', () => {
       it('describes the tools of a type on the first event of the type, after its bound tools', async () => {
-        const { boundTools } = setupTypeTools({
+        const { dynamicTools } = setupTypeTools({
           records: [createAttachment(), createSecondAttachment()],
         });
         const first = addedEvent(1);
         const second = secondAddedEvent();
 
-        await boundTools.prepare([first, second]);
+        await dynamicTools.prepare([first, second]);
 
-        expect(boundTools.get(first)).toEqual([
+        expect(dynamicTools.get(first)).toEqual([
           expect.objectContaining({ tool_id: 'bound.tool' }),
           {
             tool_id: 'text.type_tool',
@@ -534,25 +532,25 @@ describe('AttachmentBoundTools', () => {
             parameters: expect.objectContaining({ type: 'object' }),
           },
         ]);
-        expect(definitionIds(boundTools.get(second))).toEqual(['bound.tool']);
+        expect(definitionIds(dynamicTools.get(second))).toEqual(['bound.tool']);
       });
 
       it('keeps a type tool on the event that described it first on later prepares', async () => {
-        const { boundTools } = setupTypeTools({
+        const { dynamicTools } = setupTypeTools({
           records: [createAttachment(), createSecondAttachment()],
         });
         const first = addedEvent(1);
         const second = secondAddedEvent();
-        await boundTools.prepare([first]);
+        await dynamicTools.prepare([first]);
 
-        await boundTools.prepare([second, first]);
+        await dynamicTools.prepare([second, first]);
 
-        expect(definitionIds(boundTools.get(first))).toEqual(['bound.tool', 'text.type_tool']);
-        expect(definitionIds(boundTools.get(second))).toEqual(['bound.tool']);
+        expect(definitionIds(dynamicTools.get(first))).toEqual(['bound.tool', 'text.type_tool']);
+        expect(definitionIds(dynamicTools.get(second))).toEqual(['bound.tool']);
       });
 
       it('describes a tool two types declare once, on the first event of either type', async () => {
-        const { boundTools } = setupTypeTools({
+        const { dynamicTools } = setupTypeTools({
           typeTools: { text: ['shared.tool'], other: ['shared.tool', 'other.tool'] },
           registryToolIds: ['shared.tool', 'other.tool'],
           records: [createAttachment(), createSecondAttachment('other')],
@@ -560,55 +558,55 @@ describe('AttachmentBoundTools', () => {
         const first = addedEvent(1);
         const second = secondAddedEvent('other');
 
-        await boundTools.prepare([first, second]);
+        await dynamicTools.prepare([first, second]);
 
-        expect(definitionIds(boundTools.get(first))).toEqual(['bound.tool', 'shared.tool']);
-        expect(definitionIds(boundTools.get(second))).toEqual(['bound.tool', 'other.tool']);
+        expect(definitionIds(dynamicTools.get(first))).toEqual(['bound.tool', 'shared.tool']);
+        expect(definitionIds(dynamicTools.get(second))).toEqual(['bound.tool', 'other.tool']);
       });
 
       it('leaves out a declared tool the registry does not have', async () => {
-        const { boundTools } = setupTypeTools({ registryToolIds: [] });
+        const { dynamicTools } = setupTypeTools({ registryToolIds: [] });
         const event = addedEvent(1);
 
-        await boundTools.prepare([event]);
+        await dynamicTools.prepare([event]);
 
-        expect(definitionIds(boundTools.get(event))).toEqual(['bound.tool']);
+        expect(definitionIds(dynamicTools.get(event))).toEqual(['bound.tool']);
       });
 
       it('resolves the tools of a type once, however many attachments and calls', async () => {
-        const { boundTools, toolManager, toolProvider } = setupTypeTools({
+        const { dynamicTools, toolManager, toolProvider } = setupTypeTools({
           records: [createAttachment(), createSecondAttachment()],
         });
 
-        await boundTools.prepare([addedEvent(1), secondAddedEvent()]);
-        await boundTools.sync(toolManager as any);
-        await boundTools.sync(toolManager as any);
-        await boundTools.unannouncedDefinitions([]);
+        await dynamicTools.prepare([addedEvent(1), secondAddedEvent()]);
+        await dynamicTools.sync(toolManager as any);
+        await dynamicTools.sync(toolManager as any);
+        await dynamicTools.unannouncedDefinitions([]);
 
         expect(toolProvider.list).toHaveBeenCalledTimes(1);
         expect(toolProvider.list).toHaveBeenCalledWith({ request: formatContext.request });
       });
 
       it('does not ask the registry for a type that declares no tools', async () => {
-        const { boundTools, toolManager, toolProvider } = setupTypeTools({ typeTools: {} });
+        const { dynamicTools, toolManager, toolProvider } = setupTypeTools({ typeTools: {} });
 
-        await boundTools.prepare([addedEvent(1)]);
-        await boundTools.sync(toolManager as any);
+        await dynamicTools.prepare([addedEvent(1)]);
+        await dynamicTools.sync(toolManager as any);
 
         expect(toolProvider.list).not.toHaveBeenCalled();
       });
     });
 
     describe('sync', () => {
-      it('registers the tools of the active types once per type, as registry dynamic tools', async () => {
-        const { boundTools, toolManager } = setupTypeTools({
+      it('syncs the tools of the active types once per type, as registry dynamic tools', async () => {
+        const { dynamicTools, toolManager } = setupTypeTools({
           records: [createAttachment(), createSecondAttachment()],
         });
 
-        await boundTools.sync(toolManager as any);
+        await dynamicTools.sync(toolManager as any);
 
-        expect(toolManager.addTools).toHaveBeenCalledWith({
-          type: ToolManagerToolType.dynamic,
+        expect(toolManager.syncDynamicTools).toHaveBeenCalledWith({
+          source: 'attachments',
           tools: [
             expect.objectContaining({ id: 'text.type_tool', origin: ToolOrigin.registry }),
             expect.objectContaining({ id: 'bound.tool', origin: ToolOrigin.inline }),
@@ -617,14 +615,14 @@ describe('AttachmentBoundTools', () => {
         });
       });
 
-      it('registers a tool several types declare once', async () => {
-        const { boundTools, toolManager } = setupTypeTools({
+      it('syncs a tool several types declare once', async () => {
+        const { dynamicTools, toolManager } = setupTypeTools({
           typeTools: { text: ['shared.tool'], other: ['shared.tool', 'other.tool'] },
           registryToolIds: ['shared.tool', 'other.tool'],
           records: [createAttachment(), createSecondAttachment('other')],
         });
 
-        await boundTools.sync(toolManager as any);
+        await dynamicTools.sync(toolManager as any);
 
         expect(
           lastRegistered(toolManager)
@@ -637,36 +635,34 @@ describe('AttachmentBoundTools', () => {
 
       it('keeps the tools of a type while one of its attachments is active', async () => {
         const second = createSecondAttachment();
-        const { boundTools, toolManager, attachmentStateManager } = setupTypeTools({
+        const { dynamicTools, toolManager, attachmentStateManager } = setupTypeTools({
           records: [createAttachment(), second],
         });
-        await boundTools.sync(toolManager as any);
+        await dynamicTools.sync(toolManager as any);
         // the first attachment was deleted
         attachmentStateManager.getActive.mockReturnValue([second]);
 
-        await boundTools.sync(toolManager as any);
+        await dynamicTools.sync(toolManager as any);
 
-        expect(toolManager.removeDynamicTools).toHaveBeenLastCalledWith([]);
         expect(lastRegistered(toolManager)).toEqual([
           expect.objectContaining({ id: 'text.type_tool' }),
           expect.objectContaining({ id: 'bound.tool' }),
         ]);
       });
 
-      it('removes the tools of a type when its last attachment goes', async () => {
+      it('no longer syncs the tools of a type when its last attachment goes', async () => {
         const first = createAttachment();
-        const { boundTools, toolManager, attachmentStateManager } = setupTypeTools({
+        const { dynamicTools, toolManager, attachmentStateManager } = setupTypeTools({
           typeTools: { text: ['text.type_tool'], other: ['other.type_tool'] },
           registryToolIds: ['text.type_tool', 'other.type_tool'],
           records: [first, createSecondAttachment('other')],
         });
-        await boundTools.sync(toolManager as any);
+        await dynamicTools.sync(toolManager as any);
         // the only attachment of type `other` was deleted
         attachmentStateManager.getActive.mockReturnValue([first]);
 
-        await boundTools.sync(toolManager as any);
+        await dynamicTools.sync(toolManager as any);
 
-        expect(toolManager.removeDynamicTools).toHaveBeenLastCalledWith(['other.type_tool']);
         expect(lastRegistered(toolManager)).toEqual([
           expect.objectContaining({ id: 'text.type_tool' }),
           expect.objectContaining({ id: 'bound.tool' }),
@@ -676,38 +672,38 @@ describe('AttachmentBoundTools', () => {
 
     describe('unannouncedDefinitions', () => {
       it('includes the tools of the active types no prepared event describes', async () => {
-        const { boundTools } = setupTypeTools();
+        const { dynamicTools } = setupTypeTools();
 
-        const definitions = await boundTools.unannouncedDefinitions([]);
+        const definitions = await dynamicTools.unannouncedDefinitions([]);
 
         expect(definitionIds(definitions)).toEqual(['bound.tool', 'text.type_tool']);
       });
 
       it('includes a type tool once however many active attachments declare it', async () => {
-        const { boundTools } = setupTypeTools({
+        const { dynamicTools } = setupTypeTools({
           records: [createAttachment(), createSecondAttachment()],
         });
 
-        const definitions = await boundTools.unannouncedDefinitions([]);
+        const definitions = await dynamicTools.unannouncedDefinitions([]);
 
         expect(definitionIds(definitions)).toEqual(['bound.tool', 'bound.tool', 'text.type_tool']);
       });
 
       it('leaves out the type tools a prepared event describes', async () => {
-        const { boundTools } = setupTypeTools();
-        await boundTools.prepare([addedEvent(2)]);
+        const { dynamicTools } = setupTypeTools();
+        await dynamicTools.prepare([addedEvent(2)]);
 
-        expect(await boundTools.unannouncedDefinitions([])).toEqual([]);
+        expect(await dynamicTools.unannouncedDefinitions([])).toEqual([]);
       });
 
       it('does not take over describing a type tool: a later event still does', async () => {
-        const { boundTools } = setupTypeTools();
+        const { dynamicTools } = setupTypeTools();
         const event = addedEvent(2);
-        await boundTools.unannouncedDefinitions([]);
+        await dynamicTools.unannouncedDefinitions([]);
 
-        await boundTools.prepare([event]);
+        await dynamicTools.prepare([event]);
 
-        expect(definitionIds(boundTools.get(event))).toEqual(['bound.tool', 'text.type_tool']);
+        expect(definitionIds(dynamicTools.get(event))).toEqual(['bound.tool', 'text.type_tool']);
       });
     });
 
@@ -721,40 +717,40 @@ describe('AttachmentBoundTools', () => {
         });
 
       it('leaves a native tool out of the definitions of the event', async () => {
-        const { boundTools } = setupNativeTool();
+        const { dynamicTools } = setupNativeTool();
         const event = addedEvent(1);
 
-        await boundTools.prepare([event]);
+        await dynamicTools.prepare([event]);
 
-        expect(definitionIds(boundTools.get(event))).toEqual(['bound.tool', 'text.type_tool']);
+        expect(definitionIds(dynamicTools.get(event))).toEqual(['bound.tool', 'text.type_tool']);
       });
 
       it('carries no definitions when every tool of the type is native', async () => {
-        const { boundTools, format } = setupTypeTools({ nativeToolIds: ['text.type_tool'] });
+        const { dynamicTools, format } = setupTypeTools({ nativeToolIds: ['text.type_tool'] });
         format.mockResolvedValue({ getBoundedTools: async () => [] });
         const event = addedEvent(1);
 
-        await boundTools.prepare([event]);
+        await dynamicTools.prepare([event]);
 
-        expect(boundTools.get(event)).toBeUndefined();
+        expect(dynamicTools.get(event)).toBeUndefined();
       });
 
       it('tells native tools apart when the definitions are read, not when they are prepared', async () => {
         // the events are prepared before the run adds its native tools
         const nativeToolIds: string[] = [];
-        const { boundTools } = setupTypeTools({ nativeToolIds });
+        const { dynamicTools } = setupTypeTools({ nativeToolIds });
         const event = addedEvent(1);
-        await boundTools.prepare([event]);
+        await dynamicTools.prepare([event]);
 
         nativeToolIds.push('text.type_tool');
 
-        expect(definitionIds(boundTools.get(event))).toEqual(['bound.tool']);
+        expect(definitionIds(dynamicTools.get(event))).toEqual(['bound.tool']);
       });
 
       it('does not register a native tool as a dynamic tool', async () => {
-        const { boundTools, toolManager } = setupNativeTool();
+        const { dynamicTools, toolManager } = setupNativeTool();
 
-        await boundTools.sync(toolManager as any);
+        await dynamicTools.sync(toolManager as any);
 
         expect(lastRegistered(toolManager)).toEqual([
           expect.objectContaining({ id: 'text.type_tool' }),
@@ -763,9 +759,9 @@ describe('AttachmentBoundTools', () => {
       });
 
       it('leaves a native tool out of the definitions no event describes', async () => {
-        const { boundTools } = setupNativeTool();
+        const { dynamicTools } = setupNativeTool();
 
-        const definitions = await boundTools.unannouncedDefinitions([]);
+        const definitions = await dynamicTools.unannouncedDefinitions([]);
 
         expect(definitionIds(definitions)).toEqual(['bound.tool', 'text.type_tool']);
       });

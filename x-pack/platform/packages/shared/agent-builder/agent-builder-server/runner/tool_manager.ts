@@ -34,14 +34,30 @@ export interface BrowserToolInput {
   tools: BrowserToolWithOrigin | BrowserToolWithOrigin[];
 }
 
+/** What provides a dynamic tool: the active attachments, or the skills the agent loaded. */
+export type DynamicToolSource = 'attachments' | 'skills';
+
+/** A registered dynamic tool, with the source that registered it last. */
+export type DynamicTool = ExecutableToolWithOrigin & { source?: DynamicToolSource };
+
 /**
  * Tools reachable only through the `execute_dynamic_tool` meta-tool. They are not bound to the
  * model, so `list()` does not include them; their definitions are written into the transcript
- * instead. No LangChain conversion happens, hence no logger.
+ * instead.
  */
 export interface DynamicToolInput {
   type: ToolManagerToolType.dynamic;
+  /** The source providing the tools; it owns their ids until another source registers them. */
+  source: DynamicToolSource;
   tools: ExecutableToolWithOrigin | ExecutableToolWithOrigin[];
+  logger?: Logger;
+}
+
+/** The dynamic tools a source provides now, replacing the ones it provided before. */
+export interface SyncDynamicToolsInput {
+  source: DynamicToolSource;
+  tools: ExecutableToolWithOrigin[];
+  logger?: Logger;
 }
 
 export type AddToolInput = ExecutableToolInput | BrowserToolInput | DynamicToolInput;
@@ -69,11 +85,19 @@ export interface ToolManager {
    * Adds tools to the tool manager.
    * Supports executable tools, browser API tools and dynamic tools. A dynamic tool is reachable
    * only through the `execute_dynamic_tool` meta-tool: adding an id again replaces the previous
-   * entry, and ids already bound natively are skipped, as the model calls those directly. Use
-   * `getDynamicTool` to tell which ids landed in the registry.
+   * entry, whichever source registered it, and ids already bound natively are skipped, as the
+   * model calls those directly. Use `getDynamicTool` to tell which ids landed in the registry.
    * @param input - The tool input configuration (executable, browser or dynamic)
    */
   addTools(input: AddToolInput): Promise<void>;
+
+  /**
+   * Makes the dynamic tools of a source the given ones: registers them as `addTools` does, and
+   * removes the ones the source registered before and no longer provides. Tools of other sources
+   * stay. An id another source registered since is no longer the source's to remove; an id the
+   * source took over from another one is removed with the rest, not handed back.
+   */
+  syncDynamicTools(input: SyncDynamicToolsInput): void;
 
   /**
    * Removes tools added with a `DynamicToolInput`, so they are no longer reachable through
@@ -122,7 +146,7 @@ export interface ToolManager {
    * Returns a tool added with a `dynamic` input, or `undefined` for natively bound and unknown
    * ids.
    */
-  getDynamicTool(toolId: string): ExecutableToolWithOrigin | undefined;
+  getDynamicTool(toolId: string): DynamicTool | undefined;
 
   /**
    * Whether a tool added with a `dynamic` input is registered under the given internal id. False
@@ -133,7 +157,7 @@ export interface ToolManager {
   /**
    * Lists the tools added with a `dynamic` input.
    */
-  listDynamicTools(): ExecutableToolWithOrigin[];
+  listDynamicTools(): DynamicTool[];
 
   /**
    * Gets the summarizer function for a tool by its internal tool ID.

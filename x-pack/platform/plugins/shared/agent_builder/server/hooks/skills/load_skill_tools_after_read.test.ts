@@ -201,6 +201,8 @@ describe('createLoadSkillToolsAfterRead', () => {
       expect(toolHandlerContext.skills.convertSkillTool).toHaveBeenCalledWith(inlineTool);
       expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith({
         type: ToolManagerToolType.dynamic,
+        source: 'skills',
+        logger: toolHandlerContext.logger,
         tools: [{ ...convertedTool, origin: ToolOrigin.inline }],
       });
     });
@@ -223,6 +225,8 @@ describe('createLoadSkillToolsAfterRead', () => {
       expect(skill.getRegistryTools).toHaveBeenCalled();
       expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith({
         type: ToolManagerToolType.dynamic,
+        source: 'skills',
+        logger: toolHandlerContext.logger,
         tools: [{ ...registryTool, origin: ToolOrigin.registry }],
       });
     });
@@ -248,6 +252,8 @@ describe('createLoadSkillToolsAfterRead', () => {
 
       expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith({
         type: ToolManagerToolType.dynamic,
+        source: 'skills',
+        logger: toolHandlerContext.logger,
         tools: [
           { ...convertedInline, origin: ToolOrigin.inline },
           { ...registryTool, origin: ToolOrigin.registry },
@@ -270,6 +276,8 @@ describe('createLoadSkillToolsAfterRead', () => {
 
       expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith({
         type: ToolManagerToolType.dynamic,
+        source: 'skills',
+        logger: toolHandlerContext.logger,
         tools: [],
       });
     });
@@ -572,6 +580,8 @@ describe('createLoadSkillToolsAfterRead', () => {
       expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledTimes(1);
       expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith({
         type: ToolManagerToolType.dynamic,
+        source: 'skills',
+        logger: toolHandlerContext.logger,
         tools: [{ ...convertedInline, origin: ToolOrigin.inline }],
       });
       expect(hookResult).toEqual({

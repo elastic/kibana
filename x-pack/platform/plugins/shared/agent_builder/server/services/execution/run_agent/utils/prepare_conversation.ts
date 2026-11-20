@@ -65,7 +65,7 @@ export interface ProcessedConversation {
   describeAttachmentType?: (type: string) => string | undefined;
   /**
    * The definitions of the tools an attachment event makes available through
-   * `execute_dynamic_tool`, resolved before rendering (see `AttachmentBoundTools`). Set by the
+   * `execute_dynamic_tool`, resolved before rendering (see `AttachmentDynamicTools`). Set by the
    * chat agent run; absent on the paths that do not render attachment events.
    */
   boundToolDefinitions?: (event: AttachmentTimelineEvent) => DynamicToolDefinition[] | undefined;

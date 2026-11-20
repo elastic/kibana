@@ -205,6 +205,7 @@ describe('load_skill tool', () => {
 
     const dynamicToolsInput = {
       type: ToolManagerToolType.dynamic,
+      source: 'skills',
       tools: [
         { ...convertedInline, origin: ToolOrigin.inline },
         { ...registryTool, origin: ToolOrigin.registry },
@@ -226,7 +227,10 @@ describe('load_skill tool', () => {
       const result = await callHandler(tool, { skill: 'my-skill' }, ctx);
 
       expect(ctx.toolManager.addTools).toHaveBeenCalledTimes(1);
-      expect(ctx.toolManager.addTools).toHaveBeenCalledWith(dynamicToolsInput);
+      expect(ctx.toolManager.addTools).toHaveBeenCalledWith({
+        ...dynamicToolsInput,
+        logger: ctx.logger,
+      });
       expect((result.results[0] as any).data).toMatchObject({
         loaded_tools: ['inline-1', 'registry-1'],
         dynamic_tools: [
