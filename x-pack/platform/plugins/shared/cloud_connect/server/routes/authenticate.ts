@@ -20,8 +20,7 @@ import {
   describeCloudApiError,
   getCloudApiErrorUrl,
   getCloudApiUnauthorizedMessage,
-  getCloudApiUnreachableMessage,
-  isCloudApiNetworkError,
+  getCloudApiUnreachableErrorMessage,
 } from '../services/cloud_api_errors';
 
 const bodySchema = schema.object({
@@ -192,11 +191,12 @@ export const registerAuthenticateRoute = ({
           { error }
         );
 
-        if (isCloudApiNetworkError(error)) {
+        const unreachableMessage = getCloudApiUnreachableErrorMessage(error, cloudApiUrl);
+        if (unreachableMessage) {
           return response.customError({
             statusCode: 502,
             body: {
-              message: getCloudApiUnreachableMessage(getCloudApiErrorUrl(error, cloudApiUrl)),
+              message: unreachableMessage,
               attributes: { code: CLOUD_API_UNREACHABLE },
             },
           });

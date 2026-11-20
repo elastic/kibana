@@ -484,6 +484,7 @@ describe('Authentication Routes', () => {
         isAxiosError: true,
         code: 'ECONNRESET',
         message: 'Client network socket disconnected before secure TLS connection was established',
+        request: {},
         config: {
           baseURL: 'https://cloud.elastic.co/api/v1',
           url: '/cloud-connected/clusters?create_api_key=true',
@@ -506,6 +507,54 @@ describe('Authentication Routes', () => {
         expect.stringContaining('ECONNRESET: Client network socket disconnected'),
         expect.anything()
       );
+    });
+
+    it('should return 502 with CLOUD_API_UNREACHABLE when a proxy asks for authentication', async () => {
+      mockCloudConnectInstance.validateApiKeyScope.mockResolvedValue({
+        isClusterScoped: true,
+        hasValidScope: true,
+        clusterId: 'cluster-123',
+      });
+      mockCloudConnectInstance.getClusterDetails.mockRejectedValue({
+        isAxiosError: true,
+        message: 'Request failed with status code 407',
+        request: {},
+        response: { status: 407 },
+        config: {
+          baseURL: 'https://cloud.elastic.co/api/v1',
+          url: '/cloud-connected/clusters/cluster-123',
+        },
+      });
+
+      mockRequest = { body: { apiKey: 'some-key' } };
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 502,
+        body: {
+          message:
+            'A proxy between Kibana and Elastic Cloud rejected the request to https://cloud.elastic.co/api/v1/cloud-connected/clusters/cluster-123 (HTTP 407 Proxy Authentication Required). Check the proxy credentials configured for the Kibana server.',
+          attributes: { code: 'CLOUD_API_UNREACHABLE' },
+        },
+      });
+    });
+
+    it('should not report request setup errors as unreachable', async () => {
+      mockCloudConnectInstance.validateApiKeyScope.mockRejectedValue({
+        isAxiosError: true,
+        code: 'ERR_BAD_REQUEST',
+        message: 'Unsupported protocol ftp:',
+      });
+
+      mockRequest = { body: { apiKey: 'some-key' } };
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'An error occurred while authenticating with Cloud Connect' },
+      });
     });
 
     it('should return 500 for general errors', async () => {

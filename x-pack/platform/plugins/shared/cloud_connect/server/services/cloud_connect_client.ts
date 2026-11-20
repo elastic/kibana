@@ -20,8 +20,7 @@ import { CLOUD_API_UNREACHABLE } from '../../common/constants';
 import {
   describeCloudApiError,
   getCloudApiUnauthorizedMessage,
-  getCloudApiUnreachableMessage,
-  isCloudApiNetworkError,
+  getCloudApiUnreachableErrorMessage,
 } from './cloud_api_errors';
 
 export class CloudConnectClient {
@@ -97,12 +96,13 @@ export class CloudConnectClient {
         { error }
       );
 
-      if (isCloudApiNetworkError(error)) {
+      const unreachableMessage = getCloudApiUnreachableErrorMessage(error, url);
+      if (unreachableMessage) {
         return {
           isClusterScoped: false,
           hasValidScope: false,
           errorCode: CLOUD_API_UNREACHABLE,
-          errorMessage: getCloudApiUnreachableMessage(url),
+          errorMessage: unreachableMessage,
         };
       }
 

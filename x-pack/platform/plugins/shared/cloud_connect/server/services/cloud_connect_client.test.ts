@@ -47,6 +47,7 @@ describe('CloudConnectClient', () => {
           code: 'ECONNRESET',
           message:
             'Client network socket disconnected before secure TLS connection was established',
+          request: {},
         })
       );
 
@@ -66,12 +67,49 @@ describe('CloudConnectClient', () => {
 
     it('treats timeouts as unreachable', async () => {
       mockGet.mockRejectedValue(
-        createAxiosError({ code: 'ECONNABORTED', message: 'timeout of 30000ms exceeded' })
+        createAxiosError({
+          code: 'ECONNABORTED',
+          message: 'timeout of 30000ms exceeded',
+          request: {},
+        })
       );
 
       const result = await client.validateApiKeyScope('some-key');
 
       expect(result.errorCode).toBe(CLOUD_API_UNREACHABLE);
+    });
+
+    it('does not blame the network for errors raised before the request is sent', async () => {
+      mockGet.mockRejectedValue(
+        createAxiosError({ code: 'ERR_BAD_REQUEST', message: 'Unsupported protocol ftp:' })
+      );
+
+      const result = await client.validateApiKeyScope('some-key');
+
+      expect(result).toEqual({
+        isClusterScoped: false,
+        hasValidScope: false,
+        errorMessage: 'Unsupported protocol ftp:',
+      });
+    });
+
+    it('reports a proxy authentication failure (407) as unreachable', async () => {
+      mockGet.mockRejectedValue(
+        createAxiosError({
+          message: 'Request failed with status code 407',
+          request: {},
+          response: { status: 407 },
+        })
+      );
+
+      const result = await client.validateApiKeyScope('some-key');
+
+      expect(result).toEqual({
+        isClusterScoped: false,
+        hasValidScope: false,
+        errorCode: CLOUD_API_UNREACHABLE,
+        errorMessage: `A proxy between Kibana and Elastic Cloud rejected the request to ${VALIDATE_URL} (HTTP 407 Proxy Authentication Required). Check the proxy credentials configured for the Kibana server.`,
+      });
     });
 
     it('mentions a possible proxy on 401', async () => {
