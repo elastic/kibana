@@ -140,7 +140,13 @@
         "source": "v1"
       }
     ],
-    "getSitePageContents": [],
+    "getSitePageContents": [
+      {
+        "method": "get",
+        "path": "/sites/{site-id}/pages/{page-id}/microsoft.graph.sitePage",
+        "source": "v1"
+      }
+    ],
     "getSitePages": [
       {
         "method": "get",
@@ -194,13 +200,6 @@
         "method": "get",
         "path": "/sites/{site}/_layouts/15/download.aspx",
         "reason": "A pre-authenticated @microsoft.graph.downloadUrl on the tenant's *.sharepoint.com host, not a Microsoft Graph operation; Graph returns it on driveItems for downloading without Graph credentials (https://learn.microsoft.com/en-us/graph/api/resources/driveitem?view=graph-rest-1.0#instance-attributes)."
-      }
-    ],
-    "getSitePageContents": [
-      {
-        "method": "get",
-        "path": "/v1.0/sites/{site-id}/pages/{page-id}/microsoft.graph.sitePage",
-        "reason": "Documented as GET /sites/{site-id}/pages/{page-id}/microsoft.graph.sitePage (https://learn.microsoft.com/en-us/graph/api/sitepage-get?view=graph-rest-1.0); the spec only has it with the namespace alias, as .../graph.sitePage. An overlay copy cannot be used, as the snapshot does not keep microsoft.graph.sitePage, which no recorded operation of the published spec references."
       }
     ]
   }

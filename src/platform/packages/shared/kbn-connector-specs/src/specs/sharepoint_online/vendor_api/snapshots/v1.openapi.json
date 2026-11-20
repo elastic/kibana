@@ -1585,7 +1585,8 @@
                 "#microsoft.graph.driveItem": "#/components/schemas/microsoft.graph.driveItem",
                 "#microsoft.graph.list": "#/components/schemas/microsoft.graph.list",
                 "#microsoft.graph.listItem": "#/components/schemas/microsoft.graph.listItem",
-                "#microsoft.graph.site": "#/components/schemas/microsoft.graph.site"
+                "#microsoft.graph.site": "#/components/schemas/microsoft.graph.site",
+                "#microsoft.graph.sitePage": "#/components/schemas/microsoft.graph.sitePage"
               },
               "propertyName": "@odata.type"
             },
@@ -1745,6 +1746,9 @@
           },
           {
             "discriminator": {
+              "mapping": {
+                "#microsoft.graph.sitePage": "#/components/schemas/microsoft.graph.sitePage"
+              },
               "propertyName": "@odata.type"
             },
             "properties": {
@@ -2428,6 +2432,42 @@
               "@odata.type"
             ],
             "title": "callTranscript",
+            "type": "object"
+          }
+        ]
+      },
+      "microsoft.graph.canvasLayout": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/microsoft.graph.entity"
+          },
+          {
+            "properties": {
+              "@odata.type": {
+                "type": "string"
+              },
+              "horizontalSections": {
+                "items": {
+                  "$ref": "#/components/schemas/microsoft.graph.horizontalSection"
+                },
+                "type": "array"
+              },
+              "verticalSection": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/microsoft.graph.verticalSection"
+                  },
+                  {
+                    "nullable": true,
+                    "type": "object"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "@odata.type"
+            ],
+            "title": "canvasLayout",
             "type": "object"
           }
         ]
@@ -6922,6 +6962,7 @@
             "#microsoft.graph.calendarPermission": "#/components/schemas/microsoft.graph.calendarPermission",
             "#microsoft.graph.callRecording": "#/components/schemas/microsoft.graph.callRecording",
             "#microsoft.graph.callTranscript": "#/components/schemas/microsoft.graph.callTranscript",
+            "#microsoft.graph.canvasLayout": "#/components/schemas/microsoft.graph.canvasLayout",
             "#microsoft.graph.changeTrackedEntity": "#/components/schemas/microsoft.graph.changeTrackedEntity",
             "#microsoft.graph.channel": "#/components/schemas/microsoft.graph.channel",
             "#microsoft.graph.chat": "#/components/schemas/microsoft.graph.chat",
@@ -6967,6 +7008,8 @@
             "#microsoft.graph.group": "#/components/schemas/microsoft.graph.group",
             "#microsoft.graph.groupLifecyclePolicy": "#/components/schemas/microsoft.graph.groupLifecyclePolicy",
             "#microsoft.graph.groupSetting": "#/components/schemas/microsoft.graph.groupSetting",
+            "#microsoft.graph.horizontalSection": "#/components/schemas/microsoft.graph.horizontalSection",
+            "#microsoft.graph.horizontalSectionColumn": "#/components/schemas/microsoft.graph.horizontalSectionColumn",
             "#microsoft.graph.inferenceClassification": "#/components/schemas/microsoft.graph.inferenceClassification",
             "#microsoft.graph.inferenceClassificationOverride": "#/components/schemas/microsoft.graph.inferenceClassificationOverride",
             "#microsoft.graph.itemActivity": "#/components/schemas/microsoft.graph.itemActivity",
@@ -7058,6 +7101,7 @@
             "#microsoft.graph.singleValueExtendedProperty": "#/components/schemas/microsoft.graph.singleValueExtendedProperty",
             "#microsoft.graph.singleValueLegacyExtendedProperty": "#/components/schemas/microsoft.graph.singleValueLegacyExtendedProperty",
             "#microsoft.graph.site": "#/components/schemas/microsoft.graph.site",
+            "#microsoft.graph.sitePage": "#/components/schemas/microsoft.graph.sitePage",
             "#microsoft.graph.softwareOathAuthenticationMethod": "#/components/schemas/microsoft.graph.softwareOathAuthenticationMethod",
             "#microsoft.graph.storageQuotaBreakdown": "#/components/schemas/microsoft.graph.storageQuotaBreakdown",
             "#microsoft.graph.subscription": "#/components/schemas/microsoft.graph.subscription",
@@ -7103,6 +7147,8 @@
             "#microsoft.graph.userSolutionRoot": "#/components/schemas/microsoft.graph.userSolutionRoot",
             "#microsoft.graph.userStorage": "#/components/schemas/microsoft.graph.userStorage",
             "#microsoft.graph.userTeamwork": "#/components/schemas/microsoft.graph.userTeamwork",
+            "#microsoft.graph.verticalSection": "#/components/schemas/microsoft.graph.verticalSection",
+            "#microsoft.graph.webPart": "#/components/schemas/microsoft.graph.webPart",
             "#microsoft.graph.windowsDeviceMalwareState": "#/components/schemas/microsoft.graph.windowsDeviceMalwareState",
             "#microsoft.graph.windowsHelloForBusinessAuthenticationMethod": "#/components/schemas/microsoft.graph.windowsHelloForBusinessAuthenticationMethod",
             "#microsoft.graph.windowsProtectionState": "#/components/schemas/microsoft.graph.windowsProtectionState",
@@ -8580,6 +8626,99 @@
         ],
         "title": "hashes",
         "type": "object"
+      },
+      "microsoft.graph.horizontalSection": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/microsoft.graph.entity"
+          },
+          {
+            "properties": {
+              "@odata.type": {
+                "type": "string"
+              },
+              "columns": {
+                "items": {
+                  "$ref": "#/components/schemas/microsoft.graph.horizontalSectionColumn"
+                },
+                "type": "array"
+              },
+              "emphasis": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/microsoft.graph.sectionEmphasisType"
+                  },
+                  {
+                    "nullable": true,
+                    "type": "object"
+                  }
+                ]
+              },
+              "layout": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/microsoft.graph.horizontalSectionLayoutType"
+                  },
+                  {
+                    "nullable": true,
+                    "type": "object"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "@odata.type"
+            ],
+            "title": "horizontalSection",
+            "type": "object"
+          }
+        ]
+      },
+      "microsoft.graph.horizontalSectionColumn": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/microsoft.graph.entity"
+          },
+          {
+            "properties": {
+              "@odata.type": {
+                "type": "string"
+              },
+              "webparts": {
+                "items": {
+                  "$ref": "#/components/schemas/microsoft.graph.webPart"
+                },
+                "type": "array"
+              },
+              "width": {
+                "format": "int32",
+                "maximum": 2147483647,
+                "minimum": -2147483648,
+                "nullable": true,
+                "type": "number"
+              }
+            },
+            "required": [
+              "@odata.type"
+            ],
+            "title": "horizontalSectionColumn",
+            "type": "object"
+          }
+        ]
+      },
+      "microsoft.graph.horizontalSectionLayoutType": {
+        "enum": [
+          "none",
+          "oneColumn",
+          "twoColumns",
+          "threeColumns",
+          "oneThirdLeftColumn",
+          "oneThirdRightColumn",
+          "fullWidth",
+          "unknownFutureValue"
+        ],
+        "title": "horizontalSectionLayoutType",
+        "type": "string"
       },
       "microsoft.graph.hyperlinkOrPictureColumn": {
         "properties": {
@@ -11678,6 +11817,26 @@
         "title": "messageRulePredicates",
         "type": "object"
       },
+      "microsoft.graph.metaDataKeyStringPair": {
+        "properties": {
+          "@odata.type": {
+            "type": "string"
+          },
+          "key": {
+            "nullable": true,
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "@odata.type"
+        ],
+        "title": "metaDataKeyStringPair",
+        "type": "object"
+      },
       "microsoft.graph.microsoftAuthenticatorAuthenticationMethod": {
         "allOf": [
           {
@@ -13667,6 +13826,16 @@
         ],
         "title": "pageLinks",
         "type": "object"
+      },
+      "microsoft.graph.pagePromotionType": {
+        "enum": [
+          "microsoftReserved",
+          "page",
+          "newsPost",
+          "unknownFutureValue"
+        ],
+        "title": "pagePromotionType",
+        "type": "string"
       },
       "microsoft.graph.passkeyType": {
         "enum": [
@@ -18078,6 +18247,39 @@
         "title": "quota",
         "type": "object"
       },
+      "microsoft.graph.reactionsFacet": {
+        "properties": {
+          "@odata.type": {
+            "type": "string"
+          },
+          "commentCount": {
+            "format": "int32",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "nullable": true,
+            "type": "number"
+          },
+          "likeCount": {
+            "format": "int32",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "nullable": true,
+            "type": "number"
+          },
+          "shareCount": {
+            "format": "int32",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "@odata.type"
+        ],
+        "title": "reactionsFacet",
+        "type": "object"
+      },
       "microsoft.graph.recipient": {
         "discriminator": {
           "mapping": {
@@ -19607,6 +19809,17 @@
         "title": "searchResult",
         "type": "object"
       },
+      "microsoft.graph.sectionEmphasisType": {
+        "enum": [
+          "none",
+          "neutral",
+          "soft",
+          "strong",
+          "unknownFutureValue"
+        ],
+        "title": "sectionEmphasisType",
+        "type": "string"
+      },
       "microsoft.graph.sectionGroup": {
         "allOf": [
           {
@@ -19836,6 +20049,42 @@
             "type": "object"
           }
         ]
+      },
+      "microsoft.graph.serverProcessedContent": {
+        "properties": {
+          "@odata.type": {
+            "type": "string"
+          },
+          "htmlStrings": {
+            "items": {
+              "$ref": "#/components/schemas/microsoft.graph.metaDataKeyStringPair"
+            },
+            "type": "array"
+          },
+          "imageSources": {
+            "items": {
+              "$ref": "#/components/schemas/microsoft.graph.metaDataKeyStringPair"
+            },
+            "type": "array"
+          },
+          "links": {
+            "items": {
+              "$ref": "#/components/schemas/microsoft.graph.metaDataKeyStringPair"
+            },
+            "type": "array"
+          },
+          "searchablePlainTexts": {
+            "items": {
+              "$ref": "#/components/schemas/microsoft.graph.metaDataKeyStringPair"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "@odata.type"
+        ],
+        "title": "serverProcessedContent",
+        "type": "object"
       },
       "microsoft.graph.servicePlanInfo": {
         "properties": {
@@ -20982,6 +21231,87 @@
         ],
         "title": "Collection of site",
         "type": "object"
+      },
+      "microsoft.graph.sitePage": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/microsoft.graph.baseSitePage"
+          },
+          {
+            "properties": {
+              "@odata.type": {
+                "type": "string"
+              },
+              "canvasLayout": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/microsoft.graph.canvasLayout"
+                  },
+                  {
+                    "nullable": true,
+                    "type": "object"
+                  }
+                ]
+              },
+              "promotionKind": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/microsoft.graph.pagePromotionType"
+                  },
+                  {
+                    "nullable": true,
+                    "type": "object"
+                  }
+                ]
+              },
+              "reactions": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/microsoft.graph.reactionsFacet"
+                  },
+                  {
+                    "nullable": true,
+                    "type": "object"
+                  }
+                ]
+              },
+              "showComments": {
+                "nullable": true,
+                "type": "boolean"
+              },
+              "showRecommendedPages": {
+                "nullable": true,
+                "type": "boolean"
+              },
+              "thumbnailWebUrl": {
+                "nullable": true,
+                "type": "string"
+              },
+              "titleArea": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/microsoft.graph.titleArea"
+                  },
+                  {
+                    "nullable": true,
+                    "type": "object"
+                  }
+                ]
+              },
+              "webParts": {
+                "items": {
+                  "$ref": "#/components/schemas/microsoft.graph.webPart"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "@odata.type"
+            ],
+            "title": "sitePage",
+            "type": "object"
+          }
+        ]
       },
       "microsoft.graph.sizeRange": {
         "properties": {
@@ -23618,6 +23948,99 @@
         "title": "timeZoneBase",
         "type": "object"
       },
+      "microsoft.graph.titleArea": {
+        "properties": {
+          "@odata.type": {
+            "type": "string"
+          },
+          "alternativeText": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enableGradientEffect": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "imageWebUrl": {
+            "nullable": true,
+            "type": "string"
+          },
+          "layout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/microsoft.graph.titleAreaLayoutType"
+              },
+              {
+                "nullable": true,
+                "type": "object"
+              }
+            ]
+          },
+          "serverProcessedContent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/microsoft.graph.serverProcessedContent"
+              },
+              {
+                "nullable": true,
+                "type": "object"
+              }
+            ]
+          },
+          "showAuthor": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "showPublishedDate": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "showTextBlockAboveTitle": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "textAboveTitle": {
+            "nullable": true,
+            "type": "string"
+          },
+          "textAlignment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/microsoft.graph.titleAreaTextAlignmentType"
+              },
+              {
+                "nullable": true,
+                "type": "object"
+              }
+            ]
+          }
+        },
+        "required": [
+          "@odata.type"
+        ],
+        "title": "titleArea",
+        "type": "object"
+      },
+      "microsoft.graph.titleAreaLayoutType": {
+        "enum": [
+          "imageAndTitle",
+          "plain",
+          "colorBlock",
+          "overlap",
+          "unknownFutureValue"
+        ],
+        "title": "titleAreaLayoutType",
+        "type": "string"
+      },
+      "microsoft.graph.titleAreaTextAlignmentType": {
+        "enum": [
+          "left",
+          "center",
+          "unknownFutureValue"
+        ],
+        "title": "titleAreaTextAlignmentType",
+        "type": "string"
+      },
       "microsoft.graph.todo": {
         "allOf": [
           {
@@ -25495,6 +25918,42 @@
         "title": "userWorkLocation",
         "type": "object"
       },
+      "microsoft.graph.verticalSection": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/microsoft.graph.entity"
+          },
+          {
+            "properties": {
+              "@odata.type": {
+                "type": "string"
+              },
+              "emphasis": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/microsoft.graph.sectionEmphasisType"
+                  },
+                  {
+                    "nullable": true,
+                    "type": "object"
+                  }
+                ]
+              },
+              "webparts": {
+                "items": {
+                  "$ref": "#/components/schemas/microsoft.graph.webPart"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "@odata.type"
+            ],
+            "title": "verticalSection",
+            "type": "object"
+          }
+        ]
+      },
       "microsoft.graph.video": {
         "properties": {
           "@odata.type": {
@@ -25672,6 +26131,28 @@
         ],
         "title": "watermarkProtectionValues",
         "type": "object"
+      },
+      "microsoft.graph.webPart": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/microsoft.graph.entity"
+          },
+          {
+            "discriminator": {
+              "propertyName": "@odata.type"
+            },
+            "properties": {
+              "@odata.type": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "@odata.type"
+            ],
+            "title": "webPart",
+            "type": "object"
+          }
+        ]
       },
       "microsoft.graph.webauthnAuthenticationExtensionsClientOutputs": {
         "properties": {
