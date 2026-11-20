@@ -7,6 +7,7 @@
 
 import type { ComparisonResult } from '@kbn/evals-common';
 import { formatCompareReport } from './compare_report';
+import { applyHolmCorrection } from './holm_correction';
 
 const side = (mean: number) => ({ mean, used: 10, missing: 0, stability: null });
 
@@ -140,6 +141,53 @@ describe('formatCompareReport', () => {
     expect(tableOutput).toContain('-0.50');
   });
 
+  it('flags a difference whose rank test and mean disagree as mixed', () => {
+    const { tableOutput } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results: [
+        { ...makeResult({ evaluatorName: 'Conflicted', target: side(0.6) }), effectSign: 1 },
+        { ...makeResult({ evaluatorName: 'Neutral', direction: 'neutral' }), effectSign: -1 },
+        makeResult({ evaluatorName: 'Agreeing' }),
+      ],
+    });
+
+    const rowFor = (name: string) => tableOutput.split('\n').find((line) => line.includes(name));
+    expect(rowFor('Conflicted')).toContain('-0.10 (mixed)');
+    expect(rowFor('Neutral')).not.toContain('(mixed)');
+    expect(rowFor('Agreeing')).not.toContain('(mixed)');
+  });
+
+  it('does not flag a non-significant disagreement as mixed', () => {
+    const { tableOutput } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results: [
+        {
+          ...makeResult({ evaluatorName: 'Noise', target: side(0.6), pValue: 0.4 }),
+          effectSign: 1,
+        },
+      ],
+    });
+
+    const row = tableOutput.split('\n').find((line) => line.includes('Noise'));
+    expect(row).toContain('-0.10');
+    expect(row).not.toContain('(mixed)');
+  });
+
+  it('labels a NaN p-value as n/a, not as not significant', () => {
+    const { tableOutput, significantCount } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results: [makeResult({ evaluatorName: 'Degenerate', pValue: NaN })],
+    });
+
+    const row = tableOutput.split('\n').find((line) => line.includes('Degenerate'));
+    expect(row).toContain('n/a');
+    expect(row).not.toMatch(/\bno\b/);
+    expect(significantCount).toBe(0);
+  });
+
   it('warns about rows with uneven repetitions and marks their N', () => {
     const { header, tableOutput } = formatCompareReport({
       targetExperimentId: 'experiment-1',
@@ -233,5 +281,44 @@ describe('formatCompareReport', () => {
 
     expect(tableOutput).toContain('(4 target only, 1 baseline only)');
     expect(tableOutput).toContain('McNemar');
+  });
+
+  it('adds an adjusted p-value column and counts significance on it when corrected', () => {
+    const results = Array.from({ length: 10 }, (_, i) =>
+      makeResult({ evaluatorName: `Eval${i}`, pValue: i === 0 ? 0.03 : 0.9 })
+    );
+
+    const raw = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results,
+    });
+    const corrected = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results: applyHolmCorrection(results),
+    });
+
+    expect(raw.significantCount).toBe(1);
+    expect(raw.tableOutput).not.toContain('Adj. p-value');
+    expect(corrected.significantCount).toBe(0);
+    expect(corrected.tableOutput).toContain('Adj. p-value');
+    expect(corrected.header[2]).toContain('Holm-Bonferroni adjusted p < 0.05');
+  });
+
+  it('sizes the Holm family by rows with a finite p-value, not by every row', () => {
+    const results = [
+      makeResult({ evaluatorName: 'A', pValue: 0.01 }),
+      makeResult({ evaluatorName: 'B', pValue: 0.5 }),
+      makeResult({ evaluatorName: 'C', pValue: null }),
+    ];
+
+    const report = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results: applyHolmCorrection(results),
+    });
+
+    expect(report.header[2]).toContain('across 2 comparisons');
   });
 });
