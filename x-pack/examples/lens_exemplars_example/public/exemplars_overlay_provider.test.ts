@@ -85,6 +85,22 @@ describe('exemplars overlay provider', () => {
       );
     });
 
+    it('does not simulate when STATS is only nested in FORK', () => {
+      expect(
+        getExemplarsQuery(
+          'FROM logs | FORK (STATS value = AVG(bytes) BY bucket = BUCKET(@timestamp, 50)) (LIMIT 10) | SORT bucket'
+        )
+      ).toBeUndefined();
+    });
+
+    it('does not simulate when a command before STATS can drop the timestamp', () => {
+      expect(
+        getExemplarsQuery(
+          'FROM logs | RENAME @timestamp AS ts | STATS value = AVG(bytes) BY bucket = BUCKET(ts, 50)'
+        )
+      ).toBeUndefined();
+    });
+
     it('returns undefined without an aggregated field', () => {
       expect(getExemplarsQuery('FROM logs | STATS COUNT(*)')).toBeUndefined();
     });

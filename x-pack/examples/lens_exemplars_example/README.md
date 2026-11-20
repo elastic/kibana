@@ -16,6 +16,9 @@ or the Discover histogram. It matches on the `executionContext.type` each surfac
 
 - On `TS` metrics queries it fetches real exemplars with the ES|QL `SET exemplars` setting.
 - On any other query it simulates exemplars with the largest raw samples of the aggregated field.
+  The samples keep the `FROM`, `WHERE` and `EVAL` commands before the top-level `STATS`, so they
+  match the chart's filters. Queries with other commands before `STATS`, or with `STATS` only
+  inside `FORK`, get no simulated exemplars.
 
 Clicking an exemplar opens its fields in a flyout. The plugin opens it with
 `core.overlays.openFlyout`, so it works on dashboards and in Discover too, not only in this app.

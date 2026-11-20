@@ -75,12 +75,14 @@ export interface LensXYPointsOverlay {
   /** On time charts, must read a timestamp in milliseconds. */
   readonly xAccessor: LensXYOverlayAccessor;
   readonly yAccessor: LensXYOverlayAccessor;
+  /** True when the owning provider has an `onPointClick` callback. */
+  readonly clickable: boolean;
 }
 
 export type LensXYOverlay = LensXYPointsOverlay;
 
-/** Overlay as returned by a provider; Lens adds the owning provider and layer ids. */
-export type LensXYOverlayData = Omit<LensXYOverlay, 'providerId' | 'layerId'>;
+/** Overlay as returned by a provider; Lens adds the owning provider and layer ids, and whether points are clickable. */
+export type LensXYOverlayData = Omit<LensXYOverlay, 'providerId' | 'layerId' | 'clickable'>;
 
 export interface LensXYOverlayPointClickEvent {
   readonly providerId: string;

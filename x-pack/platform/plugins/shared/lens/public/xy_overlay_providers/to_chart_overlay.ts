@@ -20,6 +20,7 @@ export const toChartOverlay = ({
   data,
   xAccessor,
   yAccessor,
+  clickable,
 }: LensXYOverlay): XYOverlay => ({
   type,
   id: providerId,
@@ -28,4 +29,5 @@ export const toChartOverlay = ({
   data,
   xAccessor,
   yAccessor,
+  clickable,
 });

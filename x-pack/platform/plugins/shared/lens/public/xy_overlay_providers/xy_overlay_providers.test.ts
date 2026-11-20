@@ -212,9 +212,21 @@ describe('Lens XY overlay providers', () => {
           data: exemplarsTable.rows,
           xAccessor: '@timestamp',
           yAccessor: 'value',
+          clickable: false,
         },
       ]);
       expect(overlays[0].data[0]).toBe(exemplarsTable.rows[0]);
+    });
+
+    it('marks the overlay clickable only when its provider handles clicks', async () => {
+      const { overlays } = await runActiveProviders({
+        activeProviders: [
+          { provider: createExemplarsOverlayProvider({ onPointClick: jest.fn() }), layer },
+        ],
+        ...createRunContext(jest.fn().mockResolvedValue(exemplarsTable)),
+      });
+
+      expect(overlays[0].clickable).toBe(true);
     });
 
     it('isolates a failing provider from the others', async () => {

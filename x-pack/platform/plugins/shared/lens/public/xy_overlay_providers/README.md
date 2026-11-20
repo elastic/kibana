@@ -113,8 +113,8 @@ which are ISO strings, need a function such as `(row) => Date.parse(String(row['
 Points are bound to the Y axis of the layer they were fetched for, and use the same X and Y scales as
 the layer. The overlay is dropped if that layer isn't drawn or has a categorical X axis. On histogram
 layers, such as date histograms, each point moves to the start of the bucket that contains it, so
-the bars keep their width. Points before the first bucket are dropped. `onPointClick` still gets the
-original row.
+the bars keep their width. Points outside every drawn bucket, such as points in an empty bucket or
+before the first bucket, are dropped. `onPointClick` still gets the original row.
 
 Lens draws at most 1,000 points per overlay. Extra points are dropped, and the chart shows a warning
 badge. Query only what you plan to draw.
@@ -124,7 +124,9 @@ badge. Query only what you plan to draw.
 Optional. Called when the user clicks a point of the provider's overlay, with `providerId`, `layerId`
 and `datum`: the clicked row, the same object the provider returned in `data`. Put everything the
 click needs in the row, so the provider doesn't have to keep state between `fetchOverlay` and the
-click. Clicks aren't dispatched when the host disables the chart's triggers.
+click. Clicks aren't dispatched when the host disables the chart's triggers. When a click hits both
+an overlay point and a bar or line point, the overlay gets it. Without `onPointClick`, the click
+goes to the chart and applies its filter as usual.
 
 Open UI through core services, for example `core.overlays.openFlyout`, so it works on every surface
 and not only inside your own app.

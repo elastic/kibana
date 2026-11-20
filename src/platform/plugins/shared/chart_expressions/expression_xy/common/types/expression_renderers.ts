@@ -35,6 +35,8 @@ export interface XYPointsOverlay {
   readonly data: XYOverlayDatum[];
   readonly xAccessor: XYOverlayAccessor;
   readonly yAccessor: XYOverlayAccessor;
+  /** Whether a click on a point is handled; only then does it take priority over the base series. */
+  readonly clickable: boolean;
 }
 
 export type XYOverlay = XYPointsOverlay;

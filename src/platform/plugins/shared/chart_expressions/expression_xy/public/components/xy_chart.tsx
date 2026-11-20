@@ -1160,6 +1160,7 @@ export function XYChart({
                 yAxesConfiguration={yAxesConfiguration}
                 dataLayers={dataLayers}
                 defaultXScaleType={defaultXScaleType}
+                xInterval={xDomain?.minInterval}
               />
             ) : null}
             {referenceLineLayers.length ? (

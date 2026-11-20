@@ -47,11 +47,24 @@ interface ExemplarsQuery {
   readonly simulated: boolean;
 }
 
-/** The commands before the first `STATS`, so the samples go through the same filters as the chart. */
-const getPreAggregationQuery = (esql: string): string => {
+/** Commands that filter or add columns without dropping `@timestamp`, so samples can be read the same way. */
+const SAMPLEABLE_COMMANDS: ReadonlySet<string> = new Set(['from', 'where', 'eval']);
+
+/**
+ * The commands before the top-level `STATS`, so the samples go through the same filters as the chart.
+ * `undefined` when the aggregation is nested (e.g. in `FORK`) or follows commands the samples can't go through.
+ */
+const getPreAggregationQuery = (esql: string): string | undefined => {
   const { root } = Parser.parse(esql);
   const statsIndex = root.commands.findIndex(({ name }) => name === 'stats');
-  return BasicPrettyPrinter.print({ ...root, commands: root.commands.slice(0, statsIndex) });
+  const preAggregationCommands = root.commands.slice(0, Math.max(statsIndex, 0));
+  if (
+    statsIndex < 1 ||
+    !preAggregationCommands.every(({ name }) => SAMPLEABLE_COMMANDS.has(name))
+  ) {
+    return undefined;
+  }
+  return BasicPrettyPrinter.print({ ...root, commands: preAggregationCommands });
 };
 
 /**
@@ -64,12 +77,13 @@ export const getExemplarsQuery = (esql: string): ExemplarsQuery | undefined => {
     return { esql: `SET exemplars={"limit": ${EXEMPLARS_LIMIT}};\n${esql}`, simulated: false };
   }
   const [, field] = esql.match(AGGREGATED_FIELD_REGEX) ?? [];
-  if (!field) {
+  const preAggregationQuery = getPreAggregationQuery(esql);
+  if (!field || !preAggregationQuery) {
     return undefined;
   }
   return {
     esql: [
-      getPreAggregationQuery(esql),
+      preAggregationQuery,
       `WHERE ${field} IS NOT NULL`,
       `SORT ${field} DESC`,
       `LIMIT ${SIMULATED_EXEMPLARS_LIMIT}`,

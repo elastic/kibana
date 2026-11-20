@@ -36,6 +36,7 @@ const overlay: XYOverlay = {
   data: [point],
   xAccessor: '@timestamp',
   yAccessor: 'value',
+  clickable: true,
 };
 
 const yAxesConfiguration: GroupsConfiguration = [
@@ -96,32 +97,55 @@ describe('overlay points', () => {
     ]);
   });
 
-  it('snaps points to the bucket that contains them on histogram layers', () => {
-    const points = [500, 1500, 2999, 3500, Number.NaN].map((timestamp) => ({
-      '@timestamp': timestamp,
-      value: 1,
-    }));
-    const histogramLayer = createLayer({
-      isHistogram: true,
-      table: {
-        type: 'datatable',
-        rows: [{ timestamp: 3000 }, { timestamp: 1000 }, { timestamp: 2000 }],
-        columns: [
-          { id: 'timestamp', name: 'timestamp', meta: { type: 'date' } },
-          { id: 'avg', name: 'avg', meta: { type: 'number', params: { id: 'number' } } },
-        ],
-      },
+  describe('on histogram layers', () => {
+    const createHistogramLayer = (bucketStarts: number[]) =>
+      createLayer({
+        isHistogram: true,
+        table: {
+          type: 'datatable',
+          rows: bucketStarts.map((timestamp) => ({ timestamp })),
+          columns: [
+            { id: 'timestamp', name: 'timestamp', meta: { type: 'date' } },
+            { id: 'avg', name: 'avg', meta: { type: 'number', params: { id: 'number' } } },
+          ],
+        },
+      });
+
+    const snap = (bucketStarts: number[], timestamps: number[], xInterval?: number) => {
+      const [{ data, xAccessor }] = getOverlaySeriesConfigs(
+        [{ ...overlay, data: timestamps.map((timestamp) => ({ '@timestamp': timestamp })) }],
+        yAxesConfiguration,
+        [createHistogramLayer(bucketStarts)],
+        XScaleTypes.TIME,
+        xInterval
+      );
+      return data.map((datum) => [
+        datum['@timestamp'],
+        typeof xAccessor === 'function' ? xAccessor(datum) : undefined,
+      ]);
+    };
+
+    it('snaps points to the bucket that contains them', () => {
+      expect(snap([3000, 1000, 2000], [500, 1500, 2999, 3500, Number.NaN])).toEqual([
+        [1500, 1000],
+        [2999, 2000],
+        [3500, 3000],
+      ]);
     });
 
-    const [{ data, xAccessor }] = getOverlaySeriesConfigs(
-      [{ ...overlay, data: points }],
-      yAxesConfiguration,
-      [histogramLayer],
-      XScaleTypes.TIME
-    );
+    it('drops points in empty buckets and after the last drawn bucket', () => {
+      expect(snap([1000, 3000], [1500, 2500, 3500, 4100], 1000)).toEqual([
+        [1500, 1000],
+        [3500, 3000],
+      ]);
+    });
 
-    expect(data).toEqual([points[1], points[2], points[3]]);
-    expect(typeof xAccessor === 'function' && data.map(xAccessor)).toEqual([1000, 2000, 3000]);
+    it('keeps points in adjacent buckets longer than the interval, like calendar months', () => {
+      expect(snap([0, 31, 59], [30, 58], 28)).toEqual([
+        [30, 0],
+        [58, 31],
+      ]);
+    });
   });
 
   it('follows the scale type of the Y axis', () => {
@@ -187,6 +211,16 @@ describe('overlay points', () => {
     );
 
     expect(clicked?.datum).toBe(point);
+  });
+
+  it('leaves the click to regular series when the overlay is not clickable', () => {
+    const passive = { ...overlay, clickable: false };
+    expect(
+      getClickedOverlayPoint(
+        [passive],
+        [createHit('some-data-series', {}), createHit(getOverlaySpecId(passive), point)]
+      )
+    ).toBeUndefined();
   });
 
   it('ignores clicks on regular series', () => {

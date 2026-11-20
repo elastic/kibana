@@ -98,6 +98,7 @@ export const runActiveProviders = async ({
       data: data.slice(0, MAX_XY_OVERLAY_POINTS),
       providerId: provider.id,
       layerId: layer.layerId,
+      clickable: provider.onPointClick !== undefined,
     });
   });
 

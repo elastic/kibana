@@ -21,6 +21,7 @@ describe('toChartOverlay', () => {
       data: [row],
       xAccessor,
       yAccessor: 'value',
+      clickable: true,
     };
 
     const chartOverlay = toChartOverlay(overlay);
@@ -33,6 +34,7 @@ describe('toChartOverlay', () => {
       data: [row],
       xAccessor,
       yAccessor: 'value',
+      clickable: true,
     });
     expect(chartOverlay.data[0]).toBe(row);
   });
