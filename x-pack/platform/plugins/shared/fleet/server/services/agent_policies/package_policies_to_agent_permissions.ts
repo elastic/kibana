@@ -27,6 +27,7 @@ import {
 import { appContextService } from '../app_context';
 
 import { getNormalizedDataStreams } from '../../../common/services';
+import { isAgentlessIntegration } from '../../../common/services/agentless_policy_helper';
 
 import type {
   FullAgentPolicyOutputPermissions,
@@ -354,7 +355,7 @@ export function storedPackagePoliciesToAgentPermissions(
       packagePolicy.id,
       maybeAddAdditionalPackagePoliciesPermissions(
         packagePolicy,
-        maybeAddAgentlessPermissions(packagePolicy, {
+        maybeAddAgentlessPermissions(packagePolicy, pkg, {
           indices: dataStreamsForPermissions.map((ds) => getDataStreamPrivileges(ds, namespace)),
           ...clusterRoleDescriptor,
         })
@@ -475,9 +476,13 @@ function universalProfilingPermissions(
 
 function maybeAddAgentlessPermissions(
   packagePolicy: PackagePolicy,
+  pkg: PackageInfo,
   existing: SecurityRoleDescriptor
 ): SecurityRoleDescriptor {
-  if (!packagePolicy.supports_agentless) {
+  // Grant agentless index permissions only when the package is actually agentless-eligible, not
+  // when the stored flag alone says so. The flag can be set on an ineligible package through a
+  // write path that skips the package-policy service validation, so re-check eligibility here.
+  if (!packagePolicy.supports_agentless || !isAgentlessIntegration(pkg)) {
     return existing;
   }
   existing.indices!.push({

@@ -1072,6 +1072,10 @@ export const getSavedObjectTypes = (
       name: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: false,
+      // Package policies are only ever created or changed through Fleet's own routes, which run
+      // validation the generic saved objects HTTP APIs do not. Keep this legacy type off the HTTP
+      // APIs to match the current package-policy type.
+      hiddenFromHttpApis: true,
       namespaceType: 'agnostic',
       management: {
         importableAndExportable: false,
@@ -1407,6 +1411,10 @@ export const getSavedObjectTypes = (
       name: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: false,
+      // Only Fleet's own routes may create or change a package policy: they run validation (e.g.
+      // deployment-mode eligibility) that the generic saved objects HTTP APIs do not. Keep the
+      // type readable by Fleet's server-side SO client while removing it from the HTTP APIs.
+      hiddenFromHttpApis: true,
       namespaceType: 'multiple',
       management: {
         importableAndExportable: false,

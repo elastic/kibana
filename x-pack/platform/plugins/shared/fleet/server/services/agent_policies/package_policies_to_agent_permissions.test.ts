@@ -441,6 +441,71 @@ packageInfoCache.set('non_dynamic_pkg-1.0.0', {
   assets: { kibana: {}, elasticsearch: {} },
 });
 
+// Package that is NOT agentless-eligible (no policy template enables the agentless deployment mode).
+packageInfoCache.set('non_agentless_pkg-1.0.0', {
+  format_version: '2.7.0',
+  name: 'non_agentless_pkg',
+  title: 'Non Agentless Package',
+  version: '1.0.0',
+  type: 'integration',
+  release: 'ga',
+  policy_templates: [
+    {
+      name: 'logs',
+      title: 'Logs',
+      description: 'Collect logs.',
+      inputs: [{ type: 'logfile', title: 'Logs', description: 'Collect logs.' }],
+    },
+  ],
+  data_streams: [
+    {
+      type: 'logs',
+      dataset: 'non_agentless_pkg.logs',
+      title: 'Logs',
+      release: 'ga',
+      package: 'non_agentless_pkg',
+      path: 'logs',
+      streams: [],
+    },
+  ],
+  latestVersion: '1.0.0',
+  status: 'not_installed',
+  assets: { kibana: {}, elasticsearch: {} },
+} as any);
+
+// Package that IS agentless-eligible (a policy template enables the agentless deployment mode).
+packageInfoCache.set('agentless_pkg-1.0.0', {
+  format_version: '2.7.0',
+  name: 'agentless_pkg',
+  title: 'Agentless Package',
+  version: '1.0.0',
+  type: 'integration',
+  release: 'ga',
+  policy_templates: [
+    {
+      name: 'agentless',
+      title: 'Agentless',
+      description: 'Agentless-eligible template.',
+      deployment_modes: { agentless: { enabled: true } },
+      inputs: [{ type: 'logfile', title: 'Logs', description: 'Collect logs.' }],
+    },
+  ],
+  data_streams: [
+    {
+      type: 'logs',
+      dataset: 'agentless_pkg.logs',
+      title: 'Logs',
+      release: 'ga',
+      package: 'agentless_pkg',
+      path: 'logs',
+      streams: [],
+    },
+  ],
+  latestVersion: '1.0.0',
+  status: 'not_installed',
+  assets: { kibana: {}, elasticsearch: {} },
+} as any);
+
 describe('storedPackagePoliciesToAgentPermissions()', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
@@ -524,6 +589,56 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           },
         ],
       },
+    });
+  });
+
+  describe('agentless permissions', () => {
+    const buildAgentlessPackagePolicy = (pkgName: string): PackagePolicy =>
+      ({
+        id: `package-policy-${pkgName}`,
+        name: 'agentless-test-policy',
+        namespace: 'test',
+        enabled: true,
+        supports_agentless: true,
+        package: { name: pkgName, version: '1.0.0', title: pkgName },
+        inputs: [
+          {
+            type: 'logfile',
+            enabled: true,
+            streams: [
+              {
+                id: 'logfile',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: `${pkgName}.logs` },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      } as PackagePolicy);
+
+    it('does NOT grant agentless-* permissions when the package is not agentless-eligible', async () => {
+      const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildAgentlessPackagePolicy('non_agentless_pkg'),
+      ]);
+
+      const indices = permissions?.['package-policy-non_agentless_pkg']?.indices ?? [];
+      expect(indices.some((index: any) => index.names?.includes('agentless-*'))).toBe(false);
+    });
+
+    it('grants agentless-* permissions when the package is agentless-eligible', async () => {
+      const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildAgentlessPackagePolicy('agentless_pkg'),
+      ]);
+
+      const indices = permissions?.['package-policy-agentless_pkg']?.indices ?? [];
+      expect(indices.some((index: any) => index.names?.includes('agentless-*'))).toBe(true);
     });
   });
 
