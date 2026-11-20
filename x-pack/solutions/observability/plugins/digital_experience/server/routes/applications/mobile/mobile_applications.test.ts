@@ -7,22 +7,9 @@
 
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { getMobileApplications } from './get_mobile_applications';
-import { applicationsQuery, isMobileSdkName, latestReleasesQuery } from './queries';
+import { applicationsQuery, latestReleasesQuery } from './queries';
 import { toApplication } from './to_application';
 import type { MobileApplicationRow } from './to_application';
-
-describe('isMobileSdkName', () => {
-  it.each(['android', 'iOS'])('detects the %s SDK, which React Native apps run on', (name) => {
-    expect(isMobileSdkName(name)).toBe(true);
-  });
-
-  it.each(['webjs', 'java', 'swift', 'nodejs', '', undefined, null])(
-    'does not detect %p, so backend Java and Swift services are not mobile',
-    (name) => {
-      expect(isMobileSdkName(name)).toBe(false);
-    }
-  );
-});
 
 describe('applicationsQuery', () => {
   const { query } = applicationsQuery().toRequest();
@@ -32,10 +19,8 @@ describe('applicationsQuery', () => {
     expect(query).toContain('exceptions = COUNT(`attributes.exception.type`)');
   });
 
-  it('takes the platforms from the SDK name, so iPads, which report `os.name: iPadOS`, count as iOS', () => {
-    expect(query).toContain('platforms = VALUES(`resource.attributes.telemetry.sdk.name`)');
-    expect(query).not.toContain('os.name');
-    expect(query).not.toContain('telemetry.sdk.language');
+  it('has a row per application and platform, so a React Native app has one on each', () => {
+    expect(query).toContain('BY `service.name`, platform');
   });
 });
 
@@ -44,9 +29,9 @@ describe('latestReleasesQuery', () => {
     const { query } = latestReleasesQuery(['shop-mobile', 'a"b']).toRequest();
 
     expect(query).toContain('| WHERE `service.name` IN ("shop-mobile", "a\\"b")');
-    expect(query).toContain('BY `service.name`, release = `service.version`');
+    expect(query).toContain('BY `service.name`, platform, release = `service.version`');
     expect(query).toContain(
-      '| STATS latest_release = TOP(sessions, 1, "desc", release) BY `service.name`'
+      '| STATS latest_release = TOP(sessions, 1, "desc", release) BY `service.name`, platform'
     );
   });
 });
@@ -57,16 +42,16 @@ describe('toApplication', () => {
     sessions: 10,
     users: 4,
     exceptions: 5,
-    platforms: ['android', 'iOS'],
+    platform: 'ios',
     last_seen: '2021-01-18T12:00:00.000Z',
   };
 
   it('maps the row metrics', () => {
     expect(toApplication(row, { environments: [], latest: '2.0.0' })).toEqual({
       serviceName: 'shop-mobile',
-      source: 'mobile',
+      source: 'otel',
+      platform: 'ios',
       environments: [],
-      platforms: ['android', 'ios'],
       latestRelease: '2.0.0',
       sessions: { count: 10 },
       users: { count: 4 },
@@ -123,7 +108,7 @@ describe('getMobileApplications', () => {
             sessions: 3,
             users: 2,
             exceptions: 1,
-            platforms: 'android',
+            platform: 'android',
             last_seen: '2021-01-18T12:00:00.000Z',
           },
         ],
@@ -135,7 +120,11 @@ describe('getMobileApplications', () => {
         ],
       })
       .mockResolvedValueOnce({
-        hits: [{ 'service.name': 'trailmap-android', latest_release: '1.0.0' }],
+        hits: [
+          { 'service.name': 'trailmap-android', platform: 'android', latest_release: '1.0.0' },
+          // The same name on another platform has its own latest release.
+          { 'service.name': 'trailmap-android', platform: 'ios', latest_release: '9.0.0' },
+        ],
       });
 
     const result = await getMobileApplications({ esClient: clientWith(esqlCall), ...range });
@@ -145,7 +134,7 @@ describe('getMobileApplications', () => {
       expect.objectContaining({
         serviceName: 'trailmap-android',
         latestRelease: '1.0.0',
-        platforms: ['android'],
+        platform: 'android',
         errorRate: 1 / 3,
       }),
     ]);

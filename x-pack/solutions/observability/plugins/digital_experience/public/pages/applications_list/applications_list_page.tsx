@@ -32,12 +32,16 @@ import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import { APPLICATION_SOURCE } from '../../../common/application_source';
+import {
+  APPLICATION_PLATFORM,
+  APPLICATION_SOURCE,
+  isMobilePlatform,
+} from '../../../common/application_source';
 import type {
   ApplicationSource,
+  MobileAvailability,
   PageLoadsOverTime,
   VitalRatings,
-  WebApplicationSource,
 } from '../../../common/types/applications';
 import type { CoreWebVital, VitalRating } from '../../../common/core_web_vitals';
 import { CORE_WEB_VITAL, getVitalRating } from '../../../common/core_web_vitals';
@@ -45,6 +49,7 @@ import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../../common/feature';
 import { ApplicationsSummaryPanel } from './components/applications_summary_panel';
 import { PageLoadsChart } from './components/page_loads_chart';
 import { SourceFilter } from './components/source_filter';
+import { PlatformFilter } from './components/platform_filter';
 import { ColumnSelector } from '../../components/column_selector';
 import { EnvironmentFilter } from '../../components/environment_filter';
 import { formatVital, RATING_COLORS, RATING_LABELS } from '../../utils/web_vitals';
@@ -59,6 +64,7 @@ import { useDigitalExperienceRouter } from '../../hooks/use_digital_experience_r
 import { useEnvironment } from '../../hooks/use_environment';
 import { useListQuery } from '../../hooks/use_list_query';
 import { useSourceFilter } from '../../hooks/use_source_filter';
+import { usePlatformFilter } from '../../hooks/use_platform_filter';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import type { Formatters } from '../../hooks/use_formatters';
 import { useFormatters } from '../../hooks/use_formatters';
@@ -343,63 +349,56 @@ const NoApplicationsInEnvironmentPrompt = ({
 const sourceNames = (sources: ApplicationSource[]): string =>
   sources.map((source) => SOURCE_LABELS[source]).join(', ');
 
-/** Web sources are in the totals and the chart; mobile only has its table. */
-const UnavailableSourcesCallOut = ({ sources }: { sources: ApplicationSource[] }) => {
-  const webSources = sources.filter((source) => source !== APPLICATION_SOURCE.mobile);
-  return (
-    <>
-      {webSources.length > 0 && (
-        <KbnWarningCallout
-          data-test-subj="digitalExperienceUnavailableSources"
-          size="s"
-          title={i18n.translate('xpack.digitalExperience.applications.unavailableSources', {
-            defaultMessage:
-              "Could not load the {sources} data, so it's missing from the applications, totals and chart.",
-            values: { sources: sourceNames(webSources) },
-          })}
-        />
-      )}
-      {sources.includes(APPLICATION_SOURCE.mobile) && (
-        <KbnWarningCallout
-          data-test-subj="digitalExperienceUnavailableMobile"
-          size="s"
-          title={i18n.translate('xpack.digitalExperience.applications.unavailableMobile', {
-            defaultMessage:
-              'Could not load the mobile data, so the mobile applications are missing.',
-          })}
-        />
-      )}
-    </>
-  );
-};
+const UnavailableSourcesCallOut = ({ sources }: { sources: ApplicationSource[] }) => (
+  <KbnWarningCallout
+    data-test-subj="digitalExperienceUnavailableSources"
+    size="s"
+    title={i18n.translate('xpack.digitalExperience.applications.unavailableSources', {
+      defaultMessage:
+        "Could not load the {sources} data, so it's missing from the applications, totals and chart.",
+      values: { sources: sourceNames(sources) },
+    })}
+  />
+);
 
-const PartiallyAvailableSourcesCallOut = ({ sources }: { sources: ApplicationSource[] }) => {
-  const webSources = sources.filter((source) => source !== APPLICATION_SOURCE.mobile);
-  return (
-    <>
-      {webSources.length > 0 && (
-        <KbnWarningCallout
-          data-test-subj="digitalExperiencePartiallyAvailableSources"
-          size="s"
-          title={i18n.translate('xpack.digitalExperience.applications.partiallyAvailableSources', {
-            defaultMessage:
-              "You can't read all of the {sources} indices, so the applications, totals and chart may be incomplete. Ask an administrator for read access to them.",
-            values: { sources: sourceNames(webSources) },
-          })}
-        />
-      )}
-      {sources.includes(APPLICATION_SOURCE.mobile) && (
-        <KbnWarningCallout
-          data-test-subj="digitalExperiencePartiallyAvailableMobile"
-          size="s"
-          title={i18n.translate('xpack.digitalExperience.applications.partiallyAvailableMobile', {
-            defaultMessage:
-              "You can't read all of the mobile indices, so the mobile applications may be incomplete. Ask an administrator for read access to them.",
-          })}
-        />
-      )}
-    </>
-  );
+const PartiallyAvailableSourcesCallOut = ({ sources }: { sources: ApplicationSource[] }) => (
+  <KbnWarningCallout
+    data-test-subj="digitalExperiencePartiallyAvailableSources"
+    size="s"
+    title={i18n.translate('xpack.digitalExperience.applications.partiallyAvailableSources', {
+      defaultMessage:
+        "You can't read all of the {sources} indices, so the applications, totals and chart may be incomplete. Ask an administrator for read access to them.",
+      values: { sources: sourceNames(sources) },
+    })}
+  />
+);
+
+/** Mobile applications are in their own table only, not in the totals or the chart. */
+const MobileAvailabilityCallOut = ({ availability }: { availability: MobileAvailability }) => {
+  if (availability === 'unavailable') {
+    return (
+      <KbnWarningCallout
+        data-test-subj="digitalExperienceUnavailableMobile"
+        size="s"
+        title={i18n.translate('xpack.digitalExperience.applications.unavailableMobile', {
+          defaultMessage: 'Could not load the mobile data, so the mobile applications are missing.',
+        })}
+      />
+    );
+  }
+  if (availability === 'partial') {
+    return (
+      <KbnWarningCallout
+        data-test-subj="digitalExperiencePartiallyAvailableMobile"
+        size="s"
+        title={i18n.translate('xpack.digitalExperience.applications.partiallyAvailableMobile', {
+          defaultMessage:
+            "You can't read all of the mobile indices, so the mobile applications may be incomplete. Ask an administrator for read access to them.",
+        })}
+      />
+    );
+  }
+  return null;
 };
 
 const MOBILE_UNAVAILABLE_TITLE = i18n.translate(
@@ -465,7 +464,7 @@ const HIDDEN_BY_DEFAULT: OptionalColumnId[] = ['fcp', 'ttfb', 'jsErrors'];
 
 const HIDDEN_COLUMNS_STORAGE_KEY = 'xpack.digitalExperience.applications.hiddenColumns';
 
-const NO_PAGE_LOADS: Pick<PageLoadsOverTime, WebApplicationSource> = { otel: [], classic: [] };
+const NO_PAGE_LOADS: Pick<PageLoadsOverTime, ApplicationSource> = { otel: [], classic: [] };
 
 export function ApplicationsListPage() {
   const { application, ux } = useKibanaServices();
@@ -474,6 +473,7 @@ export function ApplicationsListPage() {
   const formatters = useFormatters();
   const { environment, setEnvironment } = useEnvironment();
   const { sourceFilter, setSourceFilter } = useSourceFilter();
+  const { platformFilter, setPlatformFilter } = usePlatformFilter();
   const listQuery = useListQuery();
   const [search, setSearch] = useState('');
   const searchTerm = search.trim();
@@ -500,18 +500,26 @@ export function ApplicationsListPage() {
   // Nothing has been fetched before the first request starts.
   const isLoading = loading || (!response && !error);
 
-  // Serverless has no ux plugin and no Classic RUM data, so its filter offers EDOT Browser and
-  // Mobile only; a Classic RUM source in the URL is ignored there, so it can't hide every row.
-  const hasClassicSource = ux !== undefined;
-  const selectedSource =
-    sourceFilter === APPLICATION_SOURCE.classic && !hasClassicSource ? undefined : sourceFilter;
-  const isMobileSelected = selectedSource === APPLICATION_SOURCE.mobile;
+  // Serverless has no ux plugin and no Classic RUM data; known on the first render, so the filter
+  // row doesn't change once the data loads.
+  const canFilterBySource = ux !== undefined;
+  // A source in the URL is ignored where the filter isn't shown, so it can't hide every row.
+  const selectedSource = canFilterBySource ? sourceFilter : undefined;
+  // Mobile applications are EDOT data, so Classic RUM has none, and they aren't the browser's.
+  const isMobilePlatformSelected = isMobilePlatform(platformFilter);
+  const showsMobile =
+    selectedSource !== APPLICATION_SOURCE.classic &&
+    platformFilter !== APPLICATION_PLATFORM.browser;
   const mobileItems = useMemo(
     () =>
-      selectedSource === undefined || isMobileSelected
-        ? mobileApplicationsMatching({ applications: response?.applications ?? [], search })
+      showsMobile
+        ? mobileApplicationsMatching({
+            applications: response?.applications ?? [],
+            search,
+            platform: isMobilePlatform(platformFilter) ? platformFilter : undefined,
+          })
         : [],
-    [response, selectedSource, isMobileSelected, search]
+    [response, showsMobile, platformFilter, search]
   );
 
   const items = useMemo(
@@ -548,6 +556,7 @@ export function ApplicationsListPage() {
   );
   const unavailableSources = response?.unavailableSources ?? [];
   const partiallyAvailableSources = response?.partiallyAvailableSources ?? [];
+  const mobileAvailability = response?.mobileAvailability ?? 'complete';
 
   const { visibleColumns, setVisibleColumns } = useVisibleColumns({
     storageKey: HIDDEN_COLUMNS_STORAGE_KEY,
@@ -597,7 +606,7 @@ export function ApplicationsListPage() {
       return loadingOrError;
     }
     // The mobile search failed while the others loaded: a retry, not the setup docs.
-    if (response?.unavailableSources.includes(APPLICATION_SOURCE.mobile)) {
+    if (mobileAvailability === 'unavailable') {
       return (
         <LoadErrorPrompt
           data-test-subj="digitalExperienceMobileApplicationsError"
@@ -609,7 +618,7 @@ export function ApplicationsListPage() {
         />
       );
     }
-    if (response?.applications.some(({ source }) => source === APPLICATION_SOURCE.mobile)) {
+    if (response?.applications.some(({ platform }) => isMobilePlatform(platform))) {
       return NO_MATCHES_MESSAGE;
     }
     if (environment) {
@@ -625,8 +634,8 @@ export function ApplicationsListPage() {
   };
 
   // The mobile table shows alone with the Mobile source, and below the web one with every source.
-  const showsWebTable = !isMobileSelected && (items.length > 0 || mobileItems.length === 0);
-  const showsMobileTable = isMobileSelected || mobileItems.length > 0;
+  const showsWebTable = !isMobilePlatformSelected && (items.length > 0 || mobileItems.length === 0);
+  const showsMobileTable = isMobilePlatformSelected || mobileItems.length > 0;
 
   const columns = useMemo<Array<EuiBasicTableColumn<ApplicationRow>>>(() => {
     const applicationColumn: EuiBasicTableColumn<ApplicationRow> = {
@@ -791,7 +800,13 @@ export function ApplicationsListPage() {
             <EuiSpacer size="m" />
           </>
         )}
-        {!isMobileSelected && (
+        {mobileAvailability !== 'complete' && showsMobile && (
+          <>
+            <MobileAvailabilityCallOut availability={mobileAvailability} />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {!isMobilePlatformSelected && (
           <>
             <ApplicationsSummaryPanel summary={summary} isLoading={isLoading} />
             <EuiSpacer size="m" />
@@ -814,11 +829,10 @@ export function ApplicationsListPage() {
                 onChange={setEnvironment}
                 isLoading={isLoading}
               />
-              <SourceFilter
-                selected={selectedSource}
-                onChange={setSourceFilter}
-                hasClassicSource={hasClassicSource}
-              />
+              {canFilterBySource && (
+                <SourceFilter selected={sourceFilter} onChange={setSourceFilter} />
+              )}
+              <PlatformFilter selected={platformFilter} onChange={setPlatformFilter} />
             </EuiFilterGroup>
           </EuiFlexItem>
           <EuiFlexItem>

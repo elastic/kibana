@@ -30,6 +30,7 @@ export const DIGITAL_EXPERIENCE_LOCATOR_QUERY_KEYS = [
   'environment',
   'source',
   'sourceFilter',
+  'platformFilter',
   'platform',
   'release',
   'filters',

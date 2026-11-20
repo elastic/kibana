@@ -40,7 +40,6 @@ const KPIS: MobileKpisResponse = {
   users: { value: 4, previous: 4, delta: 0 },
   crashFreeSessions: NO_VALUE,
   errorRate: { value: 0.5, previous: 0.25, delta: 0.25 },
-  platforms: ['android', 'ios'],
   releases: ['2.0.0', '1.9.0'],
   environments: ['production'],
   bucket: 'hour',
@@ -50,10 +49,10 @@ const KPIS: MobileKpisResponse = {
 const fetch = jest.fn();
 const updateUrlQuery = jest.fn();
 
-const mockParams = (query: { platform?: 'android' | 'ios'; release?: string } = {}) =>
+const mockParams = (query: { release?: string } = {}) =>
   jest.mocked(useDigitalExperienceParams).mockReturnValue({
     path: { serviceName: 'shop-mobile' },
-    query: { source: 'mobile', ...query },
+    query: { source: 'otel', platform: 'ios', ...query },
   } as unknown as ReturnType<typeof useDigitalExperienceParams>);
 
 const filterProps = (testSubj: string) =>
@@ -64,7 +63,7 @@ const filterProps = (testSubj: string) =>
     .pop();
 
 const renderPage = () =>
-  render(<MobileOverview serviceName="shop-mobile" />, { wrapper: EuiProvider });
+  render(<MobileOverview serviceName="shop-mobile" platform="ios" />, { wrapper: EuiProvider });
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -114,8 +113,8 @@ describe('MobileOverview', () => {
     );
   });
 
-  it('queries the KPIs with the platform and release from the URL', async () => {
-    mockParams({ platform: 'ios', release: '2.0.0' });
+  it("queries the KPIs of the page's platform, with the release from the URL", async () => {
+    mockParams({ release: '2.0.0' });
     renderPage();
 
     await waitFor(() =>
@@ -141,16 +140,23 @@ describe('MobileOverview', () => {
     expect(props?.selected).toBe('0.9.0');
   });
 
-  it('puts the selected platform in the URL, and removes it for all platforms', async () => {
+  it('puts the selected release in the URL, and removes it for all releases', async () => {
     renderPage();
     await screen.findByTestId('digitalExperienceMobileKpis');
 
-    const props = filterProps('digitalExperienceMobilePlatformFilter');
-    props?.onChange('ios');
+    const props = filterProps('digitalExperienceMobileReleaseFilter');
+    props?.onChange('2.0.0');
     props?.onChange('all');
 
-    expect(updateUrlQuery).toHaveBeenNthCalledWith(1, { platform: 'ios' });
-    expect(updateUrlQuery).toHaveBeenNthCalledWith(2, { platform: undefined });
+    expect(updateUrlQuery).toHaveBeenNthCalledWith(1, { release: '2.0.0' });
+    expect(updateUrlQuery).toHaveBeenNthCalledWith(2, { release: undefined });
+  });
+
+  it('has no platform filter, as the page is of one platform', async () => {
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    expect(filterProps('digitalExperienceMobilePlatformFilter')).toBeUndefined();
   });
 
   it('shows the previous period on every KPI with Compare on', async () => {

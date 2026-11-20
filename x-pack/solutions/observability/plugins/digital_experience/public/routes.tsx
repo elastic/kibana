@@ -11,8 +11,8 @@ import type { RouteMap } from '@kbn/typed-react-router-config';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import {
   applicationSourceRt,
+  applicationPlatformRt,
   DEFAULT_APPLICATION_SOURCE,
-  mobilePlatformRt,
 } from './utils/application_source';
 import { DigitalExperienceLayout } from './application/digital_experience_layout';
 import { useDigitalExperienceParams } from './hooks/use_digital_experience_params';
@@ -26,9 +26,16 @@ import { sessionsListQueryRt } from './utils/sessions_list_query';
 function ApplicationRoute({ tab }: { tab: ApplicationTabId }) {
   const {
     path: { serviceName },
-    query: { source },
+    query: { source, platform },
   } = useDigitalExperienceParams('/{serviceName}');
-  return <ApplicationPage serviceName={serviceName} source={source} selectedTab={tab} />;
+  return (
+    <ApplicationPage
+      serviceName={serviceName}
+      source={source}
+      platform={platform}
+      selectedTab={tab}
+    />
+  );
 }
 
 function SessionDetailRoute() {
@@ -50,6 +57,7 @@ const digitalExperienceRoutes = {
         rangeTo: t.string,
         environment: t.string,
         sourceFilter: applicationSourceRt,
+        platformFilter: applicationPlatformRt,
         // The Overview's filters, percentile and KQL.
         ...overviewQueryProps,
       }),
@@ -61,8 +69,9 @@ const digitalExperienceRoutes = {
           path: t.type({ serviceName: t.string }),
           query: t.intersection([
             t.type({ source: applicationSourceRt }),
-            // The mobile page's platform and release filters.
-            t.partial({ platform: mobilePlatformRt, release: t.string }),
+            // An EDOT application's platform, whose mobile ones have the mobile page (the browser,
+            // when unset), and the mobile page's release filter.
+            t.partial({ platform: applicationPlatformRt, release: t.string }),
           ]),
         }),
         // Links without a source open the Classic Overview.

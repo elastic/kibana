@@ -26,11 +26,8 @@ export const OTEL_TRACES_INDEX = 'traces-*.otel-*';
 /** `telemetry.sdk.language` of the browser SDKs; the OTel indices also hold backend services. */
 export const BROWSER_SDK_LANGUAGE = 'webjs';
 
-/**
- * `resource.attributes.telemetry.sdk.name` of the mobile SDKs. Not `telemetry.sdk.language`: `java`
- * also matches backend services in the same indices.
- */
-export const MOBILE_SDK_NAMES = ['android', 'iOS'] as const;
+/** `telemetry.distro.name` of the Elastic distributions, EDOT Android and iOS included. */
+export const ELASTIC_DISTRO_NAME = 'elastic';
 
 /**
  * An attribute as stored in the OTel indices, e.g. `attributes.session.id`. Queries can use the

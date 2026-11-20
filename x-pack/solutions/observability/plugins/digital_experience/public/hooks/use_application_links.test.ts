@@ -57,20 +57,20 @@ const mockRouteQuery = (query: Record<string, string>) =>
   } as unknown as ReturnType<typeof useDigitalExperienceParams>);
 
 describe('useApplicationLinks', () => {
-  it("keeps the mobile page's platform and release, as the route validated them", () => {
-    mockSearch('?source=mobile&platform=ios&release=2.0.0');
-    mockRouteQuery({ source: 'mobile', platform: 'ios', release: '2.0.0' });
+  it("keeps a mobile application's platform and release, as the route validated them", () => {
+    mockSearch('?source=otel&platform=ios&release=2.0.0');
+    mockRouteQuery({ source: 'otel', platform: 'ios', release: '2.0.0' });
 
-    const { result } = renderHook(() => useApplicationLinks('shop-mobile', 'mobile'));
+    const { result } = renderHook(() => useApplicationLinks('shop-mobile', 'otel'));
 
     expect(result.current.overviewHref).toBe(
-      '/app/digital_experience/shop-mobile?platform=ios&rangeFrom=now-15m&rangeTo=now&release=2.0.0&source=mobile'
+      '/app/digital_experience/shop-mobile?platform=ios&rangeFrom=now-15m&rangeTo=now&release=2.0.0&source=otel'
     );
   });
 
-  it('leaves the mobile filters out of the links of a web application', () => {
-    mockSearch('?source=otel&platform=ios&release=2.0.0');
-    mockRouteQuery({ source: 'otel', platform: 'ios', release: '2.0.0' });
+  it('leaves the platform and release out of the links of a browser application', () => {
+    mockSearch('?source=otel&platform=browser&release=2.0.0');
+    mockRouteQuery({ source: 'otel', platform: 'browser', release: '2.0.0' });
 
     const { result } = renderHook(() => useApplicationLinks('shop', 'otel'));
 

@@ -26,13 +26,12 @@ export const withReleaseCounts = (query: ComposerQuery, limit: number): Composer
     .pipe`LIMIT ${limit}`;
 
 /**
- * Each application's release with the most sessions, one row per application, so no cut on
- * releases can leave an application without one.
+ * Each application's release with the most sessions on each platform, one row per application and
+ * platform, so no cut on releases can leave one without.
  */
 export const withLatestReleases = (query: ComposerQuery): ComposerQuery =>
   query.pipe`WHERE ${mobileColumn('serviceVersion')} IS NOT NULL`
     .pipe`STATS sessions = COUNT_DISTINCT(${mobileColumn('sessionId')})
-      BY ${mobileColumn('serviceName')}, release = ${mobileColumn('serviceVersion')}`
-    .pipe`STATS latest_release = TOP(sessions, 1, "desc", release) BY ${mobileColumn(
-    'serviceName'
-  )}`;
+      BY ${mobileColumn('serviceName')}, platform, release = ${mobileColumn('serviceVersion')}`
+    .pipe`STATS latest_release = TOP(sessions, 1, "desc", release)
+      BY ${mobileColumn('serviceName')}, platform`;

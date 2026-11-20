@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { castArray, compact, uniq } from 'lodash';
-import { MOBILE_FIELDS, PLATFORM_BY_SDK_NAME } from '../../../common/mobile_panel';
-import type { MobilePlatform } from '../../../common/types/applications';
+import { compact, uniq } from 'lodash';
+import { MOBILE_FIELDS } from '../../../common/mobile_panel';
 import { MAX_ENVIRONMENTS } from '../constants';
 import { withNotDefined } from '../helpers/environment';
 
@@ -28,17 +27,6 @@ export interface PlatformRow {
   sdk_name: string | null;
   docs: number;
 }
-
-/** The platforms of `telemetry.sdk.name` values, sorted and without repeats; other SDKs are left out. */
-export const toPlatforms = (
-  sdkNames: string | Array<string | null | undefined> | null | undefined
-): MobilePlatform[] =>
-  uniq(
-    compact(castArray(sdkNames)).flatMap((sdkName): MobilePlatform[] => {
-      const platform = PLATFORM_BY_SDK_NAME[sdkName.toLowerCase()];
-      return platform ? [platform] : [];
-    })
-  ).sort();
 
 /** The releases of rows, in their order. */
 export const toReleases = (rows: ReleaseRow[]): string[] =>

@@ -12,7 +12,7 @@ import qs from 'query-string';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../common/feature';
 import type { OverviewFilters } from '../../common/overview_filters';
 import { encodeOverviewFilters } from '../../common/overview_filters_param';
-import { APPLICATION_SOURCE } from '../../common/application_source';
+import { isMobilePlatform } from '../../common/application_source';
 import type { ApplicationSource } from '../../common/types/applications';
 import { SHARED_FILTER_NAMES } from '../utils/overview_filters_query';
 import type { SessionsListUrlQuery } from '../utils/sessions_list_query';
@@ -84,8 +84,8 @@ export const useApplicationLinks = (
       ...listQuery,
       ...pick(urlQuery, OVERVIEW_QUERY_KEYS),
       ...(filters ? { filters } : {}),
-      // The mobile page's platform and release filters.
-      ...(source === APPLICATION_SOURCE.mobile ? { platform, release: release || undefined } : {}),
+      // A mobile application's platform, which gives it the mobile page, and its release filter.
+      ...(isMobilePlatform(platform) ? { platform, release: release || undefined } : {}),
       source,
     };
     const query = { ...listQuery, ...sharedFilters, source };

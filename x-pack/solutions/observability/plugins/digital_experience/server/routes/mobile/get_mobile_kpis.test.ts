@@ -21,7 +21,7 @@ describe('getMobileKpis', () => {
 
     const kpis = await getMobileKpis({
       esClient: clientWith(esqlCall),
-      filters: { serviceName: 'shop-mobile' },
+      filters: { serviceName: 'shop-mobile', platform: 'android' },
       start: 0,
       end: HOUR,
     });
@@ -30,7 +30,7 @@ describe('getMobileKpis', () => {
     expect(kpis.errorRate.value).toBeNull();
   });
 
-  it('compares the period with the previous one and lists the picker options', async () => {
+  it('compares the period with the previous one on the platform, and lists the picker options', async () => {
     const esqlCall = jest
       .fn()
       .mockResolvedValueOnce({ hits: [{ docs: 20, sessions: 4, users: 2, exceptions: 2 }] })
@@ -39,12 +39,6 @@ describe('getMobileKpis', () => {
         hits: [
           { sessions: 4, release: '1.0.0' },
           { sessions: 3, release: '1.1.0' },
-        ],
-      })
-      .mockResolvedValueOnce({
-        hits: [
-          { docs: 10, sdk_name: 'iOS' },
-          { docs: 10, sdk_name: 'android' },
         ],
       })
       .mockResolvedValueOnce({ hits: [{ docs: 20, 'service.environment': 'production' }] });
@@ -64,7 +58,6 @@ describe('getMobileKpis', () => {
         users: { value: 2, previous: 2, delta: 0 },
         crashFreeSessions: { value: null, previous: null, delta: null },
         errorRate: { value: 0.5, previous: 0, delta: 0.5 },
-        platforms: ['android', 'ios'],
         releases: ['1.0.0', '1.1.0'],
         environments: ['production'],
         bucket: 'hour',
@@ -77,9 +70,9 @@ describe('getMobileKpis', () => {
     });
     // The routes send the values as params; Discover gets them in the query.
     expect(currentRequest.params).toEqual([{ service_name: 'shop-mobile' }]);
-    expect(currentRequest.query).toContain('`service.name` == ?service_name');
+    expect(currentRequest.query).toContain('`service.name` == ?service_name AND platform == "ios"');
     expect(kpis.esql).toContain('`service.name` == "shop-mobile"');
-    expect(kpis.esql).toContain('`resource.attributes.telemetry.sdk.name` == "iOS"');
+    expect(kpis.esql).toContain('platform == "ios"');
     expect(kpis.esql).toContain('`service.environment` == "production"');
   });
 });

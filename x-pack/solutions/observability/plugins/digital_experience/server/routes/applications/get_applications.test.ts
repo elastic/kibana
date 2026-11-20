@@ -10,8 +10,10 @@ import { forbidden } from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type {
   ApplicationSummary,
+  MobileApplicationSummary,
+  MobilePlatform,
   TimeSeriesPoint,
-  WebApplicationSource,
+  ApplicationSource,
   WebApplicationSummary,
 } from '../../../common/types/applications';
 import { getApplications as getApplicationsWithHistogram } from './get_applications';
@@ -24,11 +26,12 @@ const getApplications = (
 
 const app = (
   serviceName: string,
-  source: WebApplicationSource,
+  source: ApplicationSource,
   pageLoads: number
 ): WebApplicationSummary => ({
   serviceName,
   source,
+  platform: 'browser',
   environments: [],
   pageLoads: { count: pageLoads },
   sessions: null,
@@ -271,6 +274,70 @@ describe('getApplications', () => {
     const response = await getApplications({ getOtelApplications, logger });
 
     expect(response.applications).toEqual([app('shop', 'otel', 1)]);
+  });
+
+  describe('mobile applications', () => {
+    const mobileApp = (
+      serviceName: string,
+      platform: MobilePlatform,
+      sessions: number
+    ): MobileApplicationSummary => ({
+      serviceName,
+      source: 'otel',
+      platform,
+      environments: [],
+      latestRelease: null,
+      sessions: { count: sessions },
+      users: { count: 1 },
+      crashFreeSessions: { value: null, previous: null, delta: null },
+      errorRate: null,
+      lastSeen: null,
+    });
+
+    it('lists them after the web rows, by sessions, with their EDOT source', async () => {
+      const { applications, mobileAvailability } = await getApplications({
+        getOtelApplications: async () => result([app('shop', 'otel', 5)]),
+        getMobileApplications: async () => ({
+          applications: [mobileApp('shop', 'ios', 1), mobileApp('shop', 'android', 9)],
+          environments: [],
+        }),
+        logger,
+      });
+
+      expect(
+        applications.map(
+          ({ serviceName, source, platform }) => `${serviceName}:${source}:${platform}`
+        )
+      ).toEqual(['shop:otel:browser', 'shop:otel:android', 'shop:otel:ios']);
+      expect(mobileAvailability).toBe('complete');
+    });
+
+    it('reports them unavailable, not a source, when their search fails', async () => {
+      const response = await getApplications({
+        getOtelApplications: async () => result([app('shop', 'otel', 5)]),
+        getMobileApplications: async () => {
+          throw new Error('security_exception');
+        },
+        logger,
+      });
+
+      expect(response.mobileAvailability).toBe('unavailable');
+      expect(response.unavailableSources).toEqual([]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Could not load the mobile applications')
+      );
+    });
+
+    it('reports them partial when the user can read only some of the OTel indices', async () => {
+      const { mobileAvailability } = await getApplications({
+        getOtelApplications: async () => result([app('shop', 'otel', 5)]),
+        getMobileApplications: async () => ({ applications: [], environments: [] }),
+        hasPartialMobileAccess: async () => true,
+        logger,
+      });
+
+      expect(mobileAvailability).toBe('partial');
+    });
   });
 
   it('returns the other source when one fails', async () => {

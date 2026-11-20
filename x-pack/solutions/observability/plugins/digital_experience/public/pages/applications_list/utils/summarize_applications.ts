@@ -8,13 +8,13 @@
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
 import { CORE_WEB_VITAL, getVitalRating } from '../../../../common/core_web_vitals';
 import type {
-  ApplicationSource,
   ApplicationSummary,
   PageLoadsOverTime,
   TimeSeriesPoint,
-  WebApplicationSource,
+  ApplicationSource,
   WebApplicationSummary,
 } from '../../../../common/types/applications';
+import { isWebApplication } from './filter_applications';
 
 export interface ApplicationsSummary {
   applications: number;
@@ -60,10 +60,7 @@ export const summarizeApplications = (
   allApplications: ApplicationSummary[]
 ): ApplicationsSummary => {
   // Mobile applications have no page loads, vitals or HTTP requests to total.
-  const applications = allApplications.filter(
-    (application): application is WebApplicationSummary =>
-      application.source !== APPLICATION_SOURCE.mobile
-  );
+  const applications = allApplications.filter(isWebApplication);
   const total = (count: (application: WebApplicationSummary) => number) =>
     applications.reduce((sum, application) => sum + count(application), 0);
 
@@ -91,19 +88,13 @@ export const summarizeApplications = (
 export const sessionsOfSource = (
   sessionsOverTime: TimeSeriesPoint[] | null,
   source: ApplicationSource | undefined
-): TimeSeriesPoint[] | null =>
-  source === APPLICATION_SOURCE.classic || source === APPLICATION_SOURCE.mobile
-    ? null
-    : sessionsOverTime;
+): TimeSeriesPoint[] | null => (source === APPLICATION_SOURCE.classic ? null : sessionsOverTime);
 
 /** Page loads over time of one source, or of both added up when no source is selected. */
 export const pageLoadsOfSources = (
-  pageLoadsOverTime: Pick<PageLoadsOverTime, WebApplicationSource>,
+  pageLoadsOverTime: Pick<PageLoadsOverTime, ApplicationSource>,
   source: ApplicationSource | undefined
 ): TimeSeriesPoint[] => {
-  if (source === APPLICATION_SOURCE.mobile) {
-    return [];
-  }
   if (source) {
     return pageLoadsOverTime[source];
   }

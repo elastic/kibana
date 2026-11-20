@@ -11,7 +11,7 @@ import type { ApplicationsResponse } from '../../../../common/types/applications
 import type { MobileKpisResponse } from '../../../../common/types/mobile';
 import { EXPECTED_MOBILE_ROWS, MOBILE_APPS } from '../../common/fixtures/mobile_data';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
-import { findApplication, testData } from '../fixtures';
+import { findMobileApplication, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
 const { APPLICATIONS_IN_TIME_RANGE_PATH, COMMON_HEADERS, TIME_RANGE } = testData;
@@ -29,7 +29,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'returns the mobile applications with their metrics, sorted by sessions',
+      'returns a row per mobile application and platform, with EDOT as their source',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
 
@@ -39,78 +39,73 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        const { applications } = response.body as ApplicationsResponse;
-        const reactNative = findApplication(applications, MOBILE_APPS.reactNative, 'mobile');
-        const android = findApplication(applications, MOBILE_APPS.android, 'mobile');
-        expect(reactNative).toMatchObject({
-          ...EXPECTED_MOBILE_ROWS[MOBILE_APPS.reactNative],
-          // A crash isn't defined yet, so there is not enough data.
-          crashFreeSessions: { value: null, previous: null, delta: null },
-        });
-        expect(android).toMatchObject(EXPECTED_MOBILE_ROWS[MOBILE_APPS.android]);
-
-        const mobileNames = applications
-          .filter(({ source }) => source === 'mobile')
-          .map(({ serviceName }) => serviceName);
-        expect(mobileNames.indexOf(MOBILE_APPS.reactNative)).toBeLessThan(
-          mobileNames.indexOf(MOBILE_APPS.android)
-        );
+        const { applications, mobileAvailability } = response.body as ApplicationsResponse;
+        expect(mobileAvailability).toBe('complete');
+        for (const expected of EXPECTED_MOBILE_ROWS) {
+          expect(
+            findMobileApplication(applications, expected.serviceName, expected.platform)
+          ).toMatchObject({
+            ...expected,
+            source: 'otel',
+            // A crash isn't defined yet, so there is not enough data.
+            crashFreeSessions: { value: null, previous: null, delta: null },
+          });
+        }
       }
     );
 
-    apiTest('never lists a backend Java service as mobile', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
-
-      const response = await apiClient.get(APPLICATIONS_IN_TIME_RANGE_PATH, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
-
-      const { applications } = response.body as ApplicationsResponse;
-      expect(applications.some(({ serviceName }) => serviceName === MOBILE_APPS.backendJava)).toBe(
-        false
-      );
-    });
-
     apiTest(
-      'answers the KPIs of a mobile application, with one release for every build of it',
+      'never lists a backend Java service, nor EDOT Browser on an iPhone, as mobile',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
-        const kpisPath = (query: Record<string, string> = {}) =>
-          `internal/digital_experience/mobile_applications/${encodeURIComponent(
-            MOBILE_APPS.reactNative
-          )}/kpis?${new URLSearchParams({
-            start: TIME_RANGE.rangeFrom,
-            end: TIME_RANGE.rangeTo,
-            ...query,
-          })}`;
-        const getKpis = async (query?: Record<string, string>) => {
-          const response = await apiClient.get(kpisPath(query), {
-            headers: { ...COMMON_HEADERS, ...cookieHeader },
-            responseType: 'json',
-          });
+
+        const response = await apiClient.get(APPLICATIONS_IN_TIME_RANGE_PATH, {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        const { applications } = response.body as ApplicationsResponse;
+        const mobileNames = applications
+          .filter(({ platform }) => platform !== 'browser')
+          .map(({ serviceName }) => serviceName);
+        expect(mobileNames).not.toContain(MOBILE_APPS.backendJava);
+        expect(mobileNames).not.toContain(MOBILE_APPS.browserOnIphone);
+      }
+    );
+
+    apiTest(
+      'answers the KPIs of a mobile application on one platform, iPadOS counted as iOS',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+        const getKpis = async (query: Record<string, string>) => {
+          const response = await apiClient.get(
+            `internal/digital_experience/mobile_applications/${encodeURIComponent(
+              MOBILE_APPS.reactNative
+            )}/kpis?${new URLSearchParams({
+              start: TIME_RANGE.rangeFrom,
+              end: TIME_RANGE.rangeTo,
+              ...query,
+            })}`,
+            { headers: { ...COMMON_HEADERS, ...cookieHeader }, responseType: 'json' }
+          );
           expect(response).toHaveStatusCode(200);
           return response.body as MobileKpisResponse;
         };
 
-        // One release on both platforms, whatever their builds (`app.build_id`).
-        const all = await getKpis();
-        expect(all).toMatchObject({
+        expect(await getKpis({ platform: 'android' })).toMatchObject({
           hasData: true,
-          sessions: { value: 3 },
-          users: { value: 2 },
-          platforms: ['android', 'ios'],
+          sessions: { value: 2 },
+          users: { value: 1 },
+          errorRate: { value: 0.5 },
           releases: ['1.0.0'],
         });
-
-        const release = await getKpis({ release: '1.0.0' });
-        expect(release.sessions.value).toBe(3);
-
-        const ios = await getKpis({ platform: 'ios' });
-        expect(ios.sessions.value).toBe(1);
-
-        const otherRelease = await getKpis({ release: '9.9.9' });
-        expect(otherRelease.hasData).toBe(false);
+        expect(await getKpis({ platform: 'ios' })).toMatchObject({
+          hasData: true,
+          sessions: { value: 2 },
+          users: { value: 2 },
+        });
+        expect((await getKpis({ platform: 'ios', release: '1.0.0' })).sessions.value).toBe(2);
+        expect((await getKpis({ platform: 'ios', release: '9.9.9' })).hasData).toBe(false);
       }
     );
   }

@@ -7,6 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -32,16 +33,11 @@ import { useDiscoverHref } from '../../../hooks/use_discover_href';
 import { useEnvironment } from '../../../hooks/use_environment';
 import { useFormatters } from '../../../hooks/use_formatters';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { PLATFORM_LABELS } from '../../../labels';
-import { mobilePlatformRt } from '../../../utils/application_source';
 import { toTimeRangeQuery } from '../../../utils/time_range_query';
+import { MOBILE_PLATFORM_ICONS, PLATFORM_LABELS } from '../../../labels';
 import { MobilePanel } from './mobile_panel';
 
 const ALL = 'all';
-
-const ALL_PLATFORMS_LABEL = i18n.translate('xpack.digitalExperience.mobile.filter.allPlatforms', {
-  defaultMessage: 'All platforms',
-});
 
 const ALL_RELEASES_LABEL = i18n.translate('xpack.digitalExperience.mobile.filter.allReleases', {
   defaultMessage: 'All releases',
@@ -104,19 +100,27 @@ const NO_DATA_BODY = i18n.translate('xpack.digitalExperience.mobile.empty.body',
     'There is no data from EDOT Android or EDOT iOS for this application in the selected time range and filters. Try a wider time range, or instrument the application.',
 });
 
-/** The mobile application page: filters, the KPI row and the sections the sibling issues fill. */
-export function MobileOverview({ serviceName }: { serviceName: string }) {
+/**
+ * The mobile application page of one platform: filters, the KPI row and the sections the sibling
+ * issues fill.
+ */
+export function MobileOverview({
+  serviceName,
+  platform,
+}: {
+  serviceName: string;
+  platform: MobilePlatform;
+}) {
   const apiClient = useApiClient();
   const { timeRange } = useTimeRange();
   const { environment, setEnvironment } = useEnvironment();
   const { formatNumber, formatPercent } = useFormatters();
-  // In the URL, so a reload or a shared link keeps them.
+  // In the URL, so a reload or a shared link keeps it.
   const {
-    query: { platform, release: releaseParam },
+    query: { release: releaseParam },
   } = useDigitalExperienceParams('/{serviceName}');
   const release = releaseParam || undefined;
   const updateUrlQuery = useUpdateUrlQuery();
-  const setPlatform = (value: MobilePlatform | undefined) => updateUrlQuery({ platform: value });
   const setRelease = (value: string | undefined) => updateUrlQuery({ release: value });
   const [isComparing, setIsComparing] = useState(false);
 
@@ -143,13 +147,6 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
     to: timeRange.rangeTo,
   });
 
-  const platformOptions = useMemo(
-    () => [
-      { value: ALL, label: ALL_PLATFORMS_LABEL },
-      ...(kpis?.platforms ?? []).map((value) => ({ value, label: PLATFORM_LABELS[value] })),
-    ],
-    [kpis?.platforms]
-  );
   const releaseOptions = useMemo(
     () => [
       { value: ALL, label: ALL_RELEASES_LABEL },
@@ -177,23 +174,21 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
     <>
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
         <EuiFlexItem grow={false}>
+          <EuiBadge
+            data-test-subj="digitalExperienceMobilePagePlatform"
+            iconType={MOBILE_PLATFORM_ICONS[platform]}
+            color="hollow"
+          >
+            {PLATFORM_LABELS[platform]}
+          </EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiFilterGroup>
             <EnvironmentFilter
               environments={kpis?.environments ?? []}
               selected={environment}
               onChange={setEnvironment}
               isLoading={isLoading}
-            />
-            <SingleSelectFilter
-              data-test-subj="digitalExperienceMobilePlatformFilter"
-              ebtElement={MOBILE_APPLICATION_EBT_ELEMENTS.PLATFORM_FILTER}
-              label={i18n.translate('xpack.digitalExperience.mobile.filter.platform', {
-                defaultMessage: 'Platform',
-              })}
-              options={platformOptions}
-              selected={platform ?? ALL}
-              isActive={platform !== undefined}
-              onChange={(value) => setPlatform(mobilePlatformRt.is(value) ? value : undefined)}
             />
             <SingleSelectFilter
               data-test-subj="digitalExperienceMobileReleaseFilter"

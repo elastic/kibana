@@ -12,9 +12,10 @@ import { EuiEmptyPrompt, EuiLoadingLogo, EuiPageSection } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import { APPLICATION_SOURCE } from '../../../common/application_source';
+import { APPLICATION_SOURCE, isMobilePlatform } from '../../../common/application_source';
 import {
   APPLICATION_TAB_IDS,
+  type ApplicationPlatform,
   type ApplicationSource,
   type ApplicationTabId,
 } from '../../../common/types/applications';
@@ -53,8 +54,8 @@ const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
  * Errors, network, sessions and reports are read from EDOT Browser data only; Classic RUM applications have
  * the ux plugin's dashboard as their Overview.
  */
-const tabsOf = (source: ApplicationSource): readonly ApplicationTabId[] =>
-  source === APPLICATION_SOURCE.otel ? APPLICATION_TAB_IDS : ['overview'];
+const tabsOf = (source: ApplicationSource, isMobile: boolean): readonly ApplicationTabId[] =>
+  source === APPLICATION_SOURCE.otel && !isMobile ? APPLICATION_TAB_IDS : ['overview'];
 const sessionsUnavailablePrompt = (
   <EuiEmptyPrompt
     data-test-subj="digitalExperienceSessionsUnavailable"
@@ -148,12 +149,18 @@ function ClassicRumOverview({ serviceName }: { serviceName: string }) {
 export function ApplicationPage({
   serviceName,
   source,
+  platform,
   selectedTab,
 }: {
   serviceName: string;
   source: ApplicationSource;
+  /** An EDOT application's platform, the browser when unset; mobile ones have the mobile page. */
+  platform?: ApplicationPlatform;
   selectedTab: ApplicationTabId;
 }) {
+  // Mobile applications are EDOT data: their platform, not their source, gives them the mobile page.
+  const mobilePlatform =
+    source === APPLICATION_SOURCE.otel && isMobilePlatform(platform) ? platform : undefined;
   const applicationsHref = useApplicationsHref();
   const history = useHistory();
   const { overviewHref, overviewPath, errorsHref, networkHref, reportsHref, sessionsHref } =
@@ -162,7 +169,7 @@ export function ApplicationPage({
   // Classic RUM only has the Overview (and Sessions' unavailable prompt), and mobile only its
   // Overview; any other tab's URL is replaced by the Overview's.
   const isUnsupportedTab =
-    source === APPLICATION_SOURCE.mobile
+    mobilePlatform !== undefined
       ? selectedTab !== 'overview'
       : selectedTab !== 'sessions' && !tabsOf(source).includes(selectedTab);
   useEffect(() => {
@@ -184,8 +191,10 @@ export function ApplicationPage({
   ]);
 
   const renderOverview = () => {
-    if (source === APPLICATION_SOURCE.mobile) {
-      return withPagePadding(<MobileOverview serviceName={serviceName} />);
+    if (mobilePlatform) {
+      return withPagePadding(
+        <MobileOverview serviceName={serviceName} platform={mobilePlatform} />
+      );
     }
     return source === APPLICATION_SOURCE.otel ? (
       withPagePadding(<OtelOverview serviceName={serviceName} />)
@@ -227,7 +236,7 @@ export function ApplicationPage({
         title={serviceName}
         back={{ href: applicationsHref, label: APPLICATIONS_LABEL }}
         share={shareAction}
-        tabs={tabsOf(source).map((id) => ({
+        tabs={tabsOf(source, mobilePlatform !== undefined).map((id) => ({
           id,
           label: APPLICATION_TAB_LABELS[id],
           isSelected: id === selectedTab,

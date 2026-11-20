@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toEnvironments, toPlatforms, toReleases } from './rows';
+import { toEnvironments, toReleases } from './rows';
 import type { EnvironmentRow, ReleaseRow } from './rows';
 
 // A column every row has null for is dropped from the response, so rows can miss any value.
@@ -17,15 +17,6 @@ describe('toReleases', () => {
     expect(
       toReleases(releaseRows([{ release: '1.1.0' }, { release: '1.0.0' }, { release: null }]))
     ).toEqual(['1.1.0', '1.0.0']);
-  });
-});
-
-describe('toPlatforms', () => {
-  it('sorts the platforms of one or many SDK names and leaves out others', () => {
-    expect(toPlatforms(['iOS', 'android', 'java'])).toEqual(['android', 'ios']);
-    expect(toPlatforms('iOS')).toEqual(['ios']);
-    expect(toPlatforms(null)).toEqual([]);
-    expect(toPlatforms(['android', null, undefined])).toEqual(['android']);
   });
 });
 

@@ -39,36 +39,40 @@ test.describe('Digital Experience mobile applications', { tag: DIGITAL_EXPERIENC
     page,
     pageObjects: { digitalExperience },
   }) => {
-    await test.step('lists mobile rows with platforms, release, sessions and crash-free sessions', async () => {
-      await digitalExperience.gotoApplications({ ...TIME_RANGE, sourceFilter: 'mobile' });
+    await test.step('lists a row per platform, with its release, sessions and crash-free sessions', async () => {
+      await digitalExperience.gotoApplications({ ...TIME_RANGE, platformFilter: 'ios' });
 
       const table = page.getByTestId('digitalExperienceMobileApplicationsTable');
       await expect(table).toBeVisible();
       const row = table.getByRole('row').filter({ hasText: MOBILE_APPS.reactNative });
-      await expect(row.getByTestId('digitalExperienceMobilePlatforms')).toBeVisible();
+      await expect(row).toHaveCount(1);
+      await expect(row.getByTestId('digitalExperienceMobilePlatform')).toHaveText('iOS');
       await expect(row.getByTestId('digitalExperienceMobileLatestRelease')).toHaveText('1.0.0');
-      await expect(row.getByTestId('digitalExperienceMobileSessions')).toHaveText('3');
+      // An iPhone and an iPad session: iPadOS counts as iOS.
+      await expect(row.getByTestId('digitalExperienceMobileSessions')).toHaveText('2');
       await expect(row.getByTestId('digitalExperienceMobileCrashFree')).toHaveText(
         'Not enough data'
       );
       await expect(table.getByText(MOBILE_APPS.backendJava)).toBeHidden();
+      await expect(table.getByText(MOBILE_APPS.browserOnIphone)).toBeHidden();
     });
 
-    await test.step('opens the mobile page, which keeps its source on reload', async () => {
+    await test.step('opens the iOS page, which keeps its EDOT source and platform on reload', async () => {
       await page
         .getByTestId('digitalExperienceMobileApplicationLink')
         .filter({ hasText: MOBILE_APPS.reactNative })
         .click();
 
-      await expect(page).toHaveURL(/source=mobile/);
+      await expect(page).toHaveURL(/platform=ios/);
+      await expect(page).toHaveURL(/source=otel/);
       await expect(page.getByTestId('digitalExperienceMobileKpis')).toBeVisible();
       await page.reload();
-      await expect(page).toHaveURL(/source=mobile/);
+      await expect(page).toHaveURL(/platform=ios/);
       await expect(page.getByTestId('digitalExperienceMobileKpis')).toBeVisible();
     });
 
     await test.step('shows the KPI row and every section', async () => {
-      await expect(page.getByTestId('digitalExperienceMobileKpiSessionsValue')).toHaveText('3');
+      await expect(page.getByTestId('digitalExperienceMobileKpiSessionsValue')).toHaveText('2');
       await expect(page.getByTestId('digitalExperienceMobileKpiUsersValue')).toHaveText('2');
       await expect(page.getByTestId('digitalExperienceMobileKpiCrashFreeValue')).toHaveText(
         'Not enough data'
@@ -94,7 +98,8 @@ test.describe('Digital Experience mobile applications', { tag: DIGITAL_EXPERIENC
   }) => {
     await digitalExperience.gotoApplication(MOBILE_APPS.noData, {
       ...TIME_RANGE,
-      source: 'mobile',
+      source: 'otel',
+      platform: 'android',
     });
 
     await expect(page.getByTestId('digitalExperienceMobileEmpty')).toBeVisible();

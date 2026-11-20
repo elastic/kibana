@@ -63,6 +63,7 @@ describe('getClassicApplications', () => {
         {
           serviceName: 'shop',
           source: 'classic',
+          platform: 'browser',
           environments: ['production'],
           pageLoads: { count: 40 },
           sessions: null,

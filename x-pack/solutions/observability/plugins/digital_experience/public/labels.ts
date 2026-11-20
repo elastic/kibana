@@ -7,7 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { SESSIONS_LOOKBACK_DAYS } from '../common/sessions';
-import type { ApplicationSource, MobilePlatform } from '../common/types/applications';
+import type {
+  ApplicationPlatform,
+  ApplicationSource,
+  MobilePlatform,
+} from '../common/types/applications';
 
 export const DIGITAL_EXPERIENCE_LABEL = i18n.translate('xpack.digitalExperience.label', {
   defaultMessage: 'Digital experience',
@@ -75,9 +79,6 @@ export const SOURCE_LABELS: Record<ApplicationSource, string> = {
   classic: i18n.translate('xpack.digitalExperience.applications.source.classic', {
     defaultMessage: 'Classic RUM',
   }),
-  mobile: i18n.translate('xpack.digitalExperience.applications.source.mobile', {
-    defaultMessage: 'Mobile',
-  }),
 };
 
 export const ANONYMOUS_USER = i18n.translate(
@@ -91,7 +92,16 @@ export const UNKNOWN_PAGE = i18n.translate(
   { defaultMessage: 'Unknown page' }
 );
 
-export const PLATFORM_LABELS: Record<MobilePlatform, string> = {
+/** The icon of each mobile platform. */
+export const MOBILE_PLATFORM_ICONS: Record<MobilePlatform, string> = {
+  android: 'logoAndroid',
+  ios: 'logoApple',
+};
+
+export const PLATFORM_LABELS: Record<ApplicationPlatform, string> = {
+  browser: i18n.translate('xpack.digitalExperience.platform.browser', {
+    defaultMessage: 'Browser',
+  }),
   android: i18n.translate('xpack.digitalExperience.mobile.platform.android', {
     defaultMessage: 'Android',
   }),

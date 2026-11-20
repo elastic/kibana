@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { MOBILE_FIELDS } from '../../../../common/mobile_panel';
 import { runMobileEsql, timeFilter } from '../../../lib/mobile/esql';
 import { toEnvironments } from '../../../lib/mobile/rows';
 import type { EnvironmentRow } from '../../../lib/mobile/rows';
-import { SEARCH_SPAN_NAMES } from '../constants';
+import { MOBILE_SEARCH_SPAN_NAME } from '../constants';
 import type { SourceApplications } from '../types';
 import { applicationsQuery, environmentsQuery, latestReleasesQuery } from './queries';
 import { toApplication } from './to_application';
@@ -21,8 +22,13 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 interface LatestReleaseRow {
   [MOBILE_FIELDS.serviceName]: string;
+  platform: string;
   latest_release: string | null;
 }
+
+/** An application on a platform, as the rows of both queries name it. */
+const applicationKey = (row: { [MOBILE_FIELDS.serviceName]: string; platform: string }) =>
+  `${row[MOBILE_FIELDS.serviceName]}\u0000${row.platform}`;
 
 export interface GetMobileApplicationsParams {
   esClient: TracedElasticsearchClient;
@@ -55,7 +61,7 @@ const searchMobileApplications = async ({
 
   // Only for the listed applications, so each gets its latest release whatever the cap; that of
   // the last 24 hours of the range.
-  const serviceNames = applicationRows.map((row) => row[MOBILE_FIELDS.serviceName]);
+  const serviceNames = uniq(applicationRows.map((row) => row[MOBILE_FIELDS.serviceName]));
   const releaseRows =
     serviceNames.length > 0
       ? await runMobileEsql<LatestReleaseRow>(
@@ -65,15 +71,15 @@ const searchMobileApplications = async ({
           timeFilter(Math.max(start, end - DAY_MS), end, environment)
         )
       : [];
-  const latestByService = new Map(
-    releaseRows.map((row) => [row[MOBILE_FIELDS.serviceName], row.latest_release ?? null])
+  const latestByApplication = new Map(
+    releaseRows.map((row) => [applicationKey(row), row.latest_release ?? null])
   );
 
   return {
     applications: applicationRows.map((row) =>
       toApplication(row, {
         environments: [],
-        latest: latestByService.get(row[MOBILE_FIELDS.serviceName]) ?? null,
+        latest: latestByApplication.get(applicationKey(row)) ?? null,
       })
     ),
     environments: toEnvironments(environmentRows),
@@ -84,4 +90,4 @@ const searchMobileApplications = async ({
 export const getMobileApplications = (
   params: GetMobileApplicationsParams
 ): Promise<SourceApplications> =>
-  withSpan(SEARCH_SPAN_NAMES.mobile, () => searchMobileApplications(params));
+  withSpan(MOBILE_SEARCH_SPAN_NAME, () => searchMobileApplications(params));

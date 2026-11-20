@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-/** The sources of web applications: `otel` is EDOT Browser data, `classic` is the RUM agent's. */
-export type WebApplicationSource = 'otel' | 'classic';
+/**
+ * The data model of an application: `otel` is EDOT data (Browser, Android and iOS), `classic` is
+ * the RUM agent's.
+ */
+export type ApplicationSource = 'otel' | 'classic';
 
-/** `mobile` is EDOT Android and iOS data, React Native included. */
-export type ApplicationSource = WebApplicationSource | 'mobile';
-
-/** The mobile platforms, told apart by `telemetry.sdk.name`. */
+/** The mobile platforms, from the resource `os.name` of the EDOT Android and iOS data. */
 export const MOBILE_PLATFORMS = ['android', 'ios'] as const;
 
 export type MobilePlatform = (typeof MOBILE_PLATFORMS)[number];
+
+/** Where an application runs: a browser, or a mobile platform. */
+export const APPLICATION_PLATFORMS = ['browser', ...MOBILE_PLATFORMS] as const;
+
+export type ApplicationPlatform = (typeof APPLICATION_PLATFORMS)[number];
 
 /**
  * The tabs of an application's page, in display order. The Overview is the page at the
@@ -76,7 +81,8 @@ export interface HttpRequests {
 /** One web application of one source, over the requested time range and environment. */
 export interface WebApplicationSummary {
   serviceName: string;
-  source: WebApplicationSource;
+  source: ApplicationSource;
+  platform: 'browser';
   /** Environments the application reported in the time range, up to 10; empty when none is set. */
   environments: string[];
   pageLoads: { count: number };
@@ -106,14 +112,17 @@ export interface ComparedValue {
   delta: number | null;
 }
 
-/** One mobile application (EDOT Android and iOS, React Native on top), keyed on `service.name`. */
+/**
+ * One mobile application on one platform (EDOT Android or iOS, React Native on top), keyed on
+ * `service.name` and the platform, so a React Native app has a row per platform.
+ */
 export interface MobileApplicationSummary {
   serviceName: string;
-  source: 'mobile';
+  /** EDOT data, as mobile applications are OpenTelemetry only. */
+  source: 'otel';
+  platform: MobilePlatform;
   environments: string[];
-  /** Platforms the application reported, sorted. */
-  platforms: MobilePlatform[];
-  /** Normalized `service.version` with the most sessions in the last 24 hours, `null` if none. */
+  /** `service.version` with the most sessions in the last 24 hours, `null` if none. */
   latestRelease: string | null;
   sessions: { count: number };
   /** Distinct `app.installation.id`. */
@@ -150,7 +159,15 @@ export interface ApplicationsResponse {
    * when none. A source in `unavailableSources` is never listed here.
    */
   partiallyAvailableSources: ApplicationSource[];
+  /**
+   * Whether the mobile applications loaded: `unavailable` when their search failed while others
+   * loaded, `partial` when the user can't read every OTel index, else `complete`. Apart from the
+   * sources, as mobile applications are EDOT (`otel`) data on a mobile platform.
+   */
+  mobileAvailability: MobileAvailability;
 }
+
+export type MobileAvailability = 'complete' | 'partial' | 'unavailable';
 
 /** The documents in one bucket of a histogram over the time range. */
 export interface TimeSeriesPoint {

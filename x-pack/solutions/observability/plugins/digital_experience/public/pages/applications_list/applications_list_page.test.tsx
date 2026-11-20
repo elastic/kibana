@@ -17,24 +17,34 @@ import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useDigitalExperienceRouter } from '../../hooks/use_digital_experience_router';
 import { digitalExperienceRouter } from '../../routes';
-import type { ApplicationSummary, WebApplicationSummary } from '../../../common/types/applications';
+import type {
+  ApplicationPlatform,
+  ApplicationSummary,
+  MobileAvailability,
+  MobileApplicationSummary,
+  MobilePlatform,
+  WebApplicationSummary,
+} from '../../../common/types/applications';
 import { TimeRangePicker } from '../../components/time_range_picker';
 import { EnvironmentFilter } from '../../components/environment_filter';
 import { SourceFilter } from './components/source_filter';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useSourceFilter } from '../../hooks/use_source_filter';
+import { usePlatformFilter } from '../../hooks/use_platform_filter';
 import { createUiSettingsMock } from '../../test_utils/ui_settings_mock';
 
 jest.mock('../../hooks/use_kibana_services');
 jest.mock('../../hooks/use_time_range');
 jest.mock('../../hooks/use_environment');
 jest.mock('../../hooks/use_source_filter');
+jest.mock('../../hooks/use_platform_filter');
 jest.mock('../../hooks/use_digital_experience_router');
 jest.mock('../../components/time_range_picker', () => ({ TimeRangePicker: jest.fn(() => null) }));
 jest.mock('../../components/environment_filter', () => ({
   EnvironmentFilter: jest.fn(() => null),
 }));
 jest.mock('./components/source_filter', () => ({ SourceFilter: jest.fn(() => null) }));
+jest.mock('./components/platform_filter', () => ({ PlatformFilter: jest.fn(() => null) }));
 
 const timeRange = { rangeFrom: 'now-15m', rangeTo: 'now' };
 
@@ -59,6 +69,9 @@ const setSourceFilter = jest.fn();
 
 const mockSourceFilter = (sourceFilter?: ApplicationSummary['source']) =>
   jest.mocked(useSourceFilter).mockReturnValue({ sourceFilter, setSourceFilter });
+
+const mockPlatformFilter = (platformFilter?: ApplicationPlatform) =>
+  jest.mocked(usePlatformFilter).mockReturnValue({ platformFilter, setPlatformFilter: jest.fn() });
 
 const SAMPLES = 5;
 
@@ -92,6 +105,7 @@ const app = ({
 }> = {}): WebApplicationSummary => ({
   serviceName,
   source,
+  platform: 'browser',
   environments: [],
   pageLoads: { count: pageLoads },
   sessions: sessions === null ? null : { count: sessions },
@@ -115,7 +129,8 @@ const respondWith = (
   environments: string[] = [],
   unavailableSources: Array<ApplicationSummary['source']> = [],
   sessionsOverTime: Array<{ timestamp: number; count: number }> | null = null,
-  partiallyAvailableSources: Array<ApplicationSummary['source']> = []
+  partiallyAvailableSources: Array<ApplicationSummary['source']> = [],
+  mobileAvailability: MobileAvailability = 'complete'
 ) =>
   mockFetch.mockResolvedValue({
     applications,
@@ -128,6 +143,7 @@ const respondWith = (
     },
     sessionsOverTime,
     partiallyAvailableSources,
+    mobileAvailability,
   });
 
 // `isServerless` leaves out the ux plugin, as serverless does.
@@ -162,14 +178,15 @@ beforeEach(() => {
   mockTimeRange(timeRange);
   mockEnvironment();
   mockSourceFilter();
+  mockPlatformFilter();
   jest.mocked(useDigitalExperienceRouter).mockReturnValue(digitalExperienceRouter);
 });
 
-const mobileApp = (): ApplicationSummary => ({
+const mobileApp = (platform: MobilePlatform = 'android'): MobileApplicationSummary => ({
   serviceName: 'shop-mobile',
-  source: 'mobile',
+  source: 'otel',
+  platform,
   environments: [],
-  platforms: ['android', 'ios'],
   latestRelease: '1.2.3',
   sessions: { count: 7 },
   users: { count: 3 },
@@ -179,11 +196,12 @@ const mobileApp = (): ApplicationSummary => ({
 });
 
 describe('ApplicationsListPage mobile applications', () => {
-  it('lists the mobile applications in their own table', async () => {
-    respondWith([mobileApp()]);
+  it('lists them in their own table, linked to the page of their platform', async () => {
+    respondWith([mobileApp('ios')]);
     renderPage();
 
     expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
+    expect(screen.getByTestId('digitalExperienceMobilePlatform')).toHaveTextContent('iOS');
     expect(screen.getByTestId('digitalExperienceMobileLatestRelease')).toHaveTextContent('1.2.3');
     expect(screen.getByTestId('digitalExperienceMobileSessions')).toHaveTextContent('7');
     expect(screen.getByTestId('digitalExperienceMobileCrashFree')).toHaveTextContent(
@@ -191,39 +209,73 @@ describe('ApplicationsListPage mobile applications', () => {
     );
     expect(screen.getByTestId('digitalExperienceMobileApplicationLink')).toHaveAttribute(
       'href',
-      '/app/digital_experience/shop-mobile?rangeFrom=now-15m&rangeTo=now&source=mobile'
+      '/app/digital_experience/shop-mobile?platform=ios&rangeFrom=now-15m&rangeTo=now&source=otel'
     );
   });
 
-  it('links to the mobile setup docs, not EDOT Browser, with the Mobile source and no mobile data', async () => {
-    mockSourceFilter('mobile');
+  it('has a row per platform for a React Native app', async () => {
+    respondWith([mobileApp('android'), mobileApp('ios')]);
+    renderPage();
+
+    expect(await screen.findAllByTestId('digitalExperienceMobileApplicationLink')).toHaveLength(2);
+  });
+
+  it('shows only the rows of a mobile platform, without the web table', async () => {
+    mockPlatformFilter('ios');
+    respondWith([
+      app({ serviceName: 'web-app', source: 'otel', pageLoads: 5 }),
+      mobileApp('android'),
+      mobileApp('ios'),
+    ]);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
+    expect(screen.getAllByTestId('digitalExperienceMobileApplicationLink')).toHaveLength(1);
+    expect(screen.queryByTestId('digitalExperienceApplicationsTable')).toBeNull();
+    expect(screen.queryByText('web-app')).toBeNull();
+  });
+
+  it('shows none with the browser or the Classic RUM source, which have no mobile data', async () => {
+    respondWith([app({ serviceName: 'web-app', source: 'otel', pageLoads: 5 }), mobileApp()]);
+    mockPlatformFilter('browser');
+    const { unmount } = renderPage();
+    expect(await screen.findByTestId('digitalExperienceApplicationsTable')).toBeVisible();
+    expect(screen.queryByTestId('digitalExperienceMobileApplicationsTable')).toBeNull();
+    unmount();
+
+    mockPlatformFilter();
+    mockSourceFilter('classic');
+    renderPage();
+    expect(await screen.findByTestId('digitalExperienceApplicationsTable')).toBeVisible();
+    expect(screen.queryByTestId('digitalExperienceMobileApplicationsTable')).toBeNull();
+  });
+
+  it('links to the mobile setup docs, not EDOT Browser, on a mobile platform without data', async () => {
+    mockPlatformFilter('android');
     respondWith([app({ serviceName: 'web-app', source: 'otel', pageLoads: 5 })]);
     renderPage();
 
     expect(await screen.findByTestId('digitalExperienceMobileApplicationsEmpty')).toBeVisible();
     expect(screen.getByTestId('digitalExperienceMobileAndroidDocsLink')).toBeVisible();
     expect(screen.queryByTestId('digitalExperienceApplicationsDocsLink')).toBeNull();
-    expect(screen.queryByTestId('digitalExperienceApplicationsTable')).toBeNull();
   });
 
-  it('offers a retry, not the setup docs, when only the mobile source failed', async () => {
-    mockSourceFilter('mobile');
-    respondWith([app({ serviceName: 'web-app', source: 'otel', pageLoads: 5 })], [], ['mobile']);
+  it('offers a retry, not the setup docs, when only the mobile search failed', async () => {
+    mockPlatformFilter('android');
+    respondWith(
+      [app({ serviceName: 'web-app', source: 'otel', pageLoads: 5 })],
+      [],
+      [],
+      null,
+      [],
+      'unavailable'
+    );
     renderPage();
 
     expect(await screen.findByTestId('digitalExperienceMobileApplicationsError')).toBeVisible();
     expect(screen.getByTestId('digitalExperienceMobileApplicationsRetry')).toBeVisible();
+    expect(screen.getByTestId('digitalExperienceUnavailableMobile')).toBeVisible();
     expect(screen.queryByTestId('digitalExperienceMobileApplicationsEmpty')).toBeNull();
-  });
-
-  it('shows only the mobile table with the Mobile source', async () => {
-    mockSourceFilter('mobile');
-    respondWith([app({ serviceName: 'web-app', source: 'otel', pageLoads: 5 }), mobileApp()]);
-    renderPage();
-
-    expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
-    expect(screen.queryByTestId('digitalExperienceApplicationsTable')).toBeNull();
-    expect(screen.queryByText('web-app')).toBeNull();
   });
 });
 
@@ -528,7 +580,7 @@ describe('ApplicationsListPage', () => {
     expect(screen.getByTestId('digitalExperienceSummary-sessions')).toHaveTextContent('—');
   });
 
-  it('ignores a Classic RUM source in the URL on serverless, which has no Classic RUM data', async () => {
+  it('ignores a source in the URL where the source filter is not shown', async () => {
     mockSourceFilter('classic');
     respondWith([app({ serviceName: 'shop', source: 'otel' })]);
     renderPage({ isServerless: true });
@@ -646,15 +698,12 @@ describe('ApplicationsListPage', () => {
     expect(setSourceFilter).toHaveBeenCalledWith('otel');
   });
 
-  it('leaves Classic RUM out of the source filter on serverless, which has no Classic RUM data', async () => {
+  it('has no source filter on serverless, which has no Classic RUM data', async () => {
     respondWith([app({ source: 'otel' })]);
     renderPage({ isServerless: true });
     await screen.findByTestId('digitalExperienceApplicationLink');
 
-    expect(SourceFilter).toHaveBeenLastCalledWith(
-      expect.objectContaining({ hasClassicSource: false }),
-      expect.anything()
-    );
+    expect(SourceFilter).not.toHaveBeenCalled();
   });
 
   it('searches the names, and says when nothing matches', async () => {

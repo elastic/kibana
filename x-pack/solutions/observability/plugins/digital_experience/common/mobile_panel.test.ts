@@ -6,7 +6,6 @@
  */
 
 import {
-  PLATFORM_BY_SDK_NAME,
   getMobileTimeBucket,
   getPreviousPeriod,
   mobileDocuments,
@@ -42,21 +41,30 @@ describe('toComparedValue', () => {
   });
 });
 
-describe('PLATFORM_BY_SDK_NAME', () => {
-  it('is the platform of each lower-cased SDK name', () => {
-    expect(PLATFORM_BY_SDK_NAME).toEqual({ android: 'android', ios: 'ios' });
-  });
-});
-
 describe('mobileDocuments', () => {
-  it('reads unmapped fields as null, then keeps the mobile SDKs, not the SDK language', () => {
-    const { query } = mobileDocuments().toRequest();
+  const { query } = mobileDocuments().toRequest();
 
+  it('reads unmapped fields as null', () => {
     expect(query).toMatch(
       /^SET unmapped_fields = "nullify"; FROM traces-\*\.otel-\*, logs-\*\.otel-\*/
     );
-    expect(query).toContain('`resource.attributes.telemetry.sdk.name` IN ("android", "iOS")');
-    expect(query).not.toContain('sdk.language');
+  });
+
+  it('keeps the Elastic distribution on a mobile os.name, iPadOS included', () => {
+    expect(query).toContain('`resource.attributes.telemetry.distro.name` == "elastic"');
+    expect(query).toContain('`resource.attributes.os.name` IN ("Android", "iOS", "iPadOS")');
+  });
+
+  it('leaves out EDOT Browser, which reports the device OS too, e.g. iOS on an iPhone', () => {
+    expect(query).toContain('COALESCE(`telemetry.sdk.language`, "") != "webjs"');
+  });
+
+  it('derives the platform from os.name, not from os.type or telemetry.sdk.*', () => {
+    expect(query).toContain(
+      'EVAL platform = CASE(`resource.attributes.os.name` IN ("Android"), "android", "ios")'
+    );
+    expect(query).not.toContain('os.type');
+    expect(query).not.toContain('telemetry.sdk.name');
   });
 });
 
@@ -66,11 +74,9 @@ describe('mobilePanelQuery', () => {
       mobilePanelQuery({ serviceName: 'shop-mobile', platform: 'ios', release: '1.2.3' })
     ).toRequest();
 
-    expect(query).toContain('`service.name` == ?service_name');
-    expect(query).toContain('`resource.attributes.telemetry.sdk.name` == "iOS"');
+    expect(query).toContain('`service.name` == ?service_name AND platform == "ios"');
     expect(query).toContain('`service.version` == ?release');
     expect(query).toContain('sessions = COUNT_DISTINCT(`attributes.session.id`)');
-    expect(query).not.toContain('os.name');
     expect(params).toEqual([{ service_name: 'shop-mobile' }, { release: '1.2.3' }]);
   });
 });
@@ -106,7 +112,7 @@ describe('mobilePanelDiscoverEsql', () => {
     );
 
     expect(query).toContain('`service.name` == "a\\"b\\nc"');
-    expect(query).toContain('`resource.attributes.telemetry.sdk.name` == "android"');
+    expect(query).toContain('platform == "android"');
     expect(query).toContain('`service.version` == "2.0.0"');
     expect(query).toContain('`service.environment` == "production"');
     expect(query).toContain('BUCKET(@timestamp, 1 day)');

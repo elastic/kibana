@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComparedValue, MobilePlatform } from './applications';
+import type { ComparedValue } from './applications';
 
 /** The KPI row of a mobile application's page, each value against the previous period. */
 export interface MobileKpisResponse {
@@ -17,9 +17,7 @@ export interface MobileKpisResponse {
   crashFreeSessions: ComparedValue;
   /** Exceptions per session. */
   errorRate: ComparedValue;
-  /** Platforms the application reported in the time range, whatever the platform filter. */
-  platforms: MobilePlatform[];
-  /** Normalized releases in the time range, whatever the release filter, most sessions first. */
+  /** Releases on the platform in the time range, whatever the release filter, most sessions first. */
   releases: string[];
   /** Environments in the time range, whatever the environment filter. */
   environments: string[];

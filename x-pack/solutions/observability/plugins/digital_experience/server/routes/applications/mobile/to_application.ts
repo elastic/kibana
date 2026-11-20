@@ -7,8 +7,10 @@
 
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
 import { MOBILE_FIELDS } from '../../../../common/mobile_panel';
-import type { MobileApplicationSummary } from '../../../../common/types/applications';
-import { toPlatforms } from '../../../lib/mobile/rows';
+import type {
+  MobileApplicationSummary,
+  MobilePlatform,
+} from '../../../../common/types/applications';
 
 /** One row of `applicationsQuery`. */
 export interface MobileApplicationRow {
@@ -16,7 +18,7 @@ export interface MobileApplicationRow {
   sessions: number;
   users: number;
   exceptions: number;
-  platforms: string | string[] | null;
+  platform: MobilePlatform;
   last_seen: string | null;
 }
 
@@ -25,12 +27,12 @@ export const toApplication = (
   row: MobileApplicationRow,
   { environments, latest }: { environments: string[]; latest: string | null }
 ): MobileApplicationSummary => {
-  const { sessions = 0, users = 0, exceptions = 0, platforms, last_seen: lastSeen } = row;
+  const { sessions = 0, users = 0, exceptions = 0, platform, last_seen: lastSeen } = row;
   return {
     serviceName: row[MOBILE_FIELDS.serviceName],
-    source: APPLICATION_SOURCE.mobile,
+    source: APPLICATION_SOURCE.otel,
+    platform,
     environments,
-    platforms: toPlatforms(platforms),
     latestRelease: latest,
     sessions: { count: sessions },
     users: { count: users },

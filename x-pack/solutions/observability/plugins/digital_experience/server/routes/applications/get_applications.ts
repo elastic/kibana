@@ -8,15 +8,15 @@
 import { forbidden, internal } from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { APPLICATION_SOURCE } from '../../../common/application_source';
+import { APPLICATION_PLATFORM, APPLICATION_SOURCE } from '../../../common/application_source';
 import type {
   ApplicationSource,
   ApplicationSummary,
   ApplicationsResponse,
   HistogramBuckets,
   PageLoadsOverTime,
+  MobileAvailability,
   TimeSeriesPoint,
-  WebApplicationSource,
 } from '../../../common/types/applications';
 import { sortEnvironments } from '../../lib/helpers/environment';
 import { describeError, isAccessDenied } from '../../lib/helpers/errors';
@@ -46,13 +46,16 @@ const LOAD_FAILED_MESSAGE = i18n.translate('xpack.digitalExperience.applications
   defaultMessage: 'Could not load the applications. Check the Kibana server logs for details.',
 });
 
+/** A failed search: of a source, or of the mobile applications. */
 interface SourceFailure {
-  source: ApplicationSource;
+  /** The source, or `mobile` for the mobile applications, which are EDOT data. */
+  name: string;
+  source?: ApplicationSource;
   error: unknown;
 }
 
-const describeFailure = ({ source, error }: SourceFailure): string =>
-  `Could not load the ${source} applications: ${describeError(error)}`;
+const describeFailure = ({ name, error }: SourceFailure): string =>
+  `Could not load the ${name} applications: ${describeError(error)}`;
 
 /** The client error hides the Elasticsearch details, which name the user, roles and indices. */
 const toClientError = (failures: SourceFailure[]) =>
@@ -62,11 +65,14 @@ const toClientError = (failures: SourceFailure[]) =>
 
 /** Web rows sort by page loads and mobile rows by sessions; web rows come first. */
 const byActivityThenName = (a: ApplicationSummary, b: ApplicationSummary): number => {
-  if (a.source === 'mobile' && b.source === 'mobile') {
+  if (a.platform !== APPLICATION_PLATFORM.browser && b.platform !== APPLICATION_PLATFORM.browser) {
     return b.sessions.count - a.sessions.count || a.serviceName.localeCompare(b.serviceName);
   }
-  if (a.source === 'mobile' || b.source === 'mobile') {
-    return a.source === 'mobile' ? 1 : -1;
+  if (a.platform !== APPLICATION_PLATFORM.browser) {
+    return 1;
+  }
+  if (b.platform !== APPLICATION_PLATFORM.browser) {
+    return -1;
   }
   return b.pageLoads.count - a.pageLoads.count || a.serviceName.localeCompare(b.serviceName);
 };
@@ -105,7 +111,7 @@ export const getApplications = async ({
   logger: Logger;
 }): Promise<ApplicationsResponse> => {
   const webSources: Array<{
-    source: WebApplicationSource;
+    source: ApplicationSource;
     fetch: WebApplicationsFetcher;
     checkAccess?: AccessCheck;
   }> = [
@@ -141,7 +147,7 @@ export const getApplications = async ({
   webSettled.forEach(({ result, isPartial }, index) => {
     const { source } = webSources[index];
     if (result.status === 'rejected') {
-      failures.push({ source, error: result.reason });
+      failures.push({ name: source, source, error: result.reason });
       return;
     }
     const { value } = result;
@@ -157,27 +163,30 @@ export const getApplications = async ({
     }
   });
   // Mobile has no page loads or sessions over time: the chart stays web-only.
+  let mobileAvailability: MobileAvailability = 'complete';
+  const mobileFailures: SourceFailure[] = [];
   if (mobileSettled?.result.status === 'fulfilled') {
     loaded.push(mobileSettled.result.value);
-    if (mobileSettled.isPartial) {
-      partiallyAvailableSources.push(APPLICATION_SOURCE.mobile);
-    }
+    mobileAvailability = mobileSettled.isPartial ? 'partial' : 'complete';
   } else if (mobileSettled) {
-    failures.push({ source: APPLICATION_SOURCE.mobile, error: mobileSettled.result.reason });
+    mobileAvailability = 'unavailable';
+    mobileFailures.push({ name: 'mobile', error: mobileSettled.result.reason });
   }
 
+  const allFailures = [...failures, ...mobileFailures];
   if (loaded.length === 0) {
-    failures.forEach((failure) => logger.error(describeFailure(failure)));
-    throw toClientError(failures);
+    allFailures.forEach((failure) => logger.error(describeFailure(failure)));
+    throw toClientError(allFailures);
   }
-  failures.forEach((failure) => logger.warn(describeFailure(failure)));
+  allFailures.forEach((failure) => logger.warn(describeFailure(failure)));
 
   return {
     applications: loaded.flatMap(({ applications }) => applications).sort(byActivityThenName),
     environments: sortEnvironments(loaded.flatMap(({ environments }) => environments)),
     pageLoadsOverTime,
     sessionsOverTime,
-    unavailableSources: failures.map(({ source }) => source),
+    unavailableSources: failures.flatMap(({ source }) => (source ? [source] : [])),
     partiallyAvailableSources,
+    mobileAvailability,
   };
 };

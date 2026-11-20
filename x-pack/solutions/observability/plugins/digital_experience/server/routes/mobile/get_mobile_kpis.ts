@@ -9,7 +9,6 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import {
   getMobileTimeBucket,
   getPreviousPeriod,
-  mobileColumn,
   mobilePanelDiscoverEsql,
   mobilePanelQuery,
   toComparedValue,
@@ -19,8 +18,8 @@ import type { MobilePanelFilters } from '../../../common/mobile_panel';
 import type { MobileKpisResponse } from '../../../common/types/mobile';
 import { runMobileEsql, timeFilter } from '../../lib/mobile/esql';
 import { withEnvironmentCounts, withReleaseCounts } from '../../lib/mobile/queries';
-import { toEnvironments, toPlatforms, toReleases } from '../../lib/mobile/rows';
-import type { EnvironmentRow, PlatformRow, ReleaseRow } from '../../lib/mobile/rows';
+import { toEnvironments, toReleases } from '../../lib/mobile/rows';
+import type { EnvironmentRow, ReleaseRow } from '../../lib/mobile/rows';
 
 export interface GetMobileKpisParams {
   esClient: TracedElasticsearchClient;
@@ -53,11 +52,11 @@ export const getMobileKpis = async ({
 }: GetMobileKpisParams): Promise<MobileKpisResponse> => {
   const previous = getPreviousPeriod(start, end);
   const bucket = getMobileTimeBucket(start, end);
-  const { platform, release, ...application } = filters;
+  const { release, ...application } = filters;
   const statsQuery = withKpiStats(mobilePanelQuery(filters));
 
-  // The pickers list what the application reported, whatever the platform and release filters.
-  const [[current], [before], releaseRows, platformRows, environmentRows] = await Promise.all([
+  // The pickers list what the application reported on the platform, whatever the release filter.
+  const [[current], [before], releaseRows, environmentRows] = await Promise.all([
     runMobileEsql<KpiRow>(
       esClient,
       'get_mobile_kpis',
@@ -76,14 +75,6 @@ export const getMobileKpis = async ({
       withReleaseCounts(mobilePanelQuery(application), MAX_RELEASE_ROWS),
       timeFilter(start, end, environment)
     ),
-    runMobileEsql<PlatformRow>(
-      esClient,
-      'get_mobile_platforms',
-      mobilePanelQuery(application).pipe`STATS docs = COUNT(*) BY sdk_name = ${mobileColumn(
-        'sdkName'
-      )}`,
-      timeFilter(start, end, environment)
-    ),
     runMobileEsql<EnvironmentRow>(
       esClient,
       'get_mobile_application_environments',
@@ -99,7 +90,6 @@ export const getMobileKpis = async ({
     // A crash isn't defined yet (#64) and session start doesn't reach the SDKs: not enough data.
     crashFreeSessions: toComparedValue(null, null),
     errorRate: toComparedValue(errorRateOf(current), errorRateOf(before)),
-    platforms: toPlatforms(platformRows.map(({ sdk_name: sdkName }) => sdkName)),
     releases: toReleases(releaseRows),
     environments: toEnvironments(environmentRows),
     bucket,

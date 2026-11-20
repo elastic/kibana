@@ -9,10 +9,12 @@ import { renderHook } from '@testing-library/react';
 import type { ApplicationSource } from '../../common/types/applications';
 import { useEnvironment } from './use_environment';
 import { useListQuery } from './use_list_query';
+import { usePlatformFilter } from './use_platform_filter';
 import { useSourceFilter } from './use_source_filter';
 import { useTimeRange } from './use_time_range';
 
 jest.mock('./use_environment');
+jest.mock('./use_platform_filter');
 jest.mock('./use_source_filter');
 jest.mock('./use_time_range');
 
@@ -27,6 +29,9 @@ const mockQuery = ({
     .mockReturnValue({ timeRange, isTimeRangeInUrl: true, setTimeRange: jest.fn() });
   jest.mocked(useEnvironment).mockReturnValue({ environment, setEnvironment: jest.fn() });
   jest.mocked(useSourceFilter).mockReturnValue({ sourceFilter, setSourceFilter: jest.fn() });
+  jest
+    .mocked(usePlatformFilter)
+    .mockReturnValue({ platformFilter: undefined, setPlatformFilter: jest.fn() });
 };
 
 describe('useListQuery', () => {

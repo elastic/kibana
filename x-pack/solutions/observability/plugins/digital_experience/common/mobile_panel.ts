@@ -12,9 +12,12 @@ import {
   RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  TELEMETRY_SDK_LANGUAGE,
 } from '@kbn/apm-types';
+import { APPLICATION_PLATFORM } from './application_source';
 import {
-  MOBILE_SDK_NAMES,
+  BROWSER_SDK_LANGUAGE,
+  ELASTIC_DISTRO_NAME,
   OTEL_LOGS_INDEX,
   OTEL_TRACES_INDEX,
   attributeField,
@@ -27,7 +30,9 @@ const DAY_MS = 24 * HOUR_MS;
 
 /** The fields the mobile queries read, as stored in the OTel indices. */
 export const MOBILE_FIELDS = {
-  sdkName: resourceAttributeField('telemetry.sdk.name'),
+  distroName: resourceAttributeField('telemetry.distro.name'),
+  osName: resourceAttributeField('os.name'),
+  sdkLanguage: TELEMETRY_SDK_LANGUAGE,
   serviceName: SERVICE_NAME,
   serviceVersion: 'service.version',
   sessionId: attributeField('session.id'),
@@ -43,24 +48,21 @@ export const mobileColumn = (field: keyof typeof MOBILE_FIELDS) => esql.col(MOBI
 /** The filters every mobile panel applies, besides the time range and the environment. */
 export interface MobilePanelFilters {
   serviceName: string;
-  platform?: MobilePlatform;
+  platform: MobilePlatform;
   /** A release, as the SDKs send it in `service.version`; the build is in `app.build_id`. */
   release?: string;
 }
 
-/** The `telemetry.sdk.name` of each platform; `os.name` isn't used, as iPads report `iPadOS`. */
-export const SDK_NAME_BY_PLATFORM: Readonly<Record<MobilePlatform, string>> = {
-  android: 'android',
-  ios: 'iOS',
+/**
+ * The resource `os.name` of each platform. Not `os.type`, which can't tell them apart (Android
+ * sends `linux`, iOS `darwin`), nor `telemetry.sdk.*`, which carries the upstream SDKs' values.
+ */
+export const OS_NAMES_BY_PLATFORM: Readonly<Record<MobilePlatform, readonly string[]>> = {
+  android: ['Android'],
+  ios: ['iOS', 'iPadOS'],
 };
 
-/** The platform of each `telemetry.sdk.name`, lower-cased. */
-export const PLATFORM_BY_SDK_NAME: Readonly<Record<string, MobilePlatform>> = Object.fromEntries(
-  Object.entries(SDK_NAME_BY_PLATFORM).map(([platform, sdkName]) => [
-    sdkName.toLowerCase(),
-    platform as MobilePlatform,
-  ])
-);
+const MOBILE_OS_NAMES = Object.values(OS_NAMES_BY_PLATFORM).flat();
 
 /** Hourly up to 24 hours, daily from there on (7 to 30 days in practice). */
 export const getMobileTimeBucket = (startMs: number, endMs: number): 'hour' | 'day' =>
@@ -92,13 +94,20 @@ export const inValues = (field: keyof typeof MOBILE_FIELDS, values: readonly str
   ]);
 
 /**
- * The mobile SDK documents of the OTel indices: `telemetry.sdk.name`, as `telemetry.sdk.language`
- * also matches backend services. Fields no index maps read as `null` instead of failing the query,
- * e.g. `exception.type` where no app ever threw, or every field without mobile data.
+ * The EDOT Android and iOS documents of the OTel indices, each with its `platform`: the Elastic
+ * distribution on a mobile `os.name`. EDOT Browser is an Elastic distribution too, and reports the
+ * device's OS (e.g. `iOS` on an iPhone), so its `webjs` documents are left out. Fields no index maps
+ * read as `null` instead of failing the query, e.g. `exception.type` where no app ever threw.
  */
 export const mobileDocuments = (): ComposerQuery =>
   esql.from(OTEL_TRACES_INDEX, OTEL_LOGS_INDEX).addSetCommand('unmapped_fields', 'nullify')
-    .pipe`WHERE ${inValues('sdkName', MOBILE_SDK_NAMES)}`;
+    .pipe`WHERE ${mobileColumn('distroName')} == ${ELASTIC_DISTRO_NAME}`.pipe`WHERE ${inValues(
+    'osName',
+    MOBILE_OS_NAMES
+  )}`.pipe`WHERE COALESCE(${mobileColumn('sdkLanguage')}, "") != ${BROWSER_SDK_LANGUAGE}`
+    .pipe`EVAL platform = CASE(${inValues('osName', OS_NAMES_BY_PLATFORM.android)}, ${
+    APPLICATION_PLATFORM.android
+  }, ${APPLICATION_PLATFORM.ios})`;
 
 /**
  * The documents of a mobile panel, filtered; the time range and environment are applied apart.
@@ -107,10 +116,7 @@ export const mobileDocuments = (): ComposerQuery =>
 export const mobilePanelQuery = ({ serviceName, platform, release }: MobilePanelFilters) => {
   let query = mobileDocuments().pipe`WHERE ${mobileColumn('serviceName')} == ${{
     service_name: serviceName,
-  }}`;
-  if (platform) {
-    query = query.pipe`WHERE ${mobileColumn('sdkName')} == ${SDK_NAME_BY_PLATFORM[platform]}`;
-  }
+  }} AND platform == ${platform}`;
   if (release) {
     query = query.pipe`WHERE ${mobileColumn('serviceVersion')} == ${{ release }}`;
   }

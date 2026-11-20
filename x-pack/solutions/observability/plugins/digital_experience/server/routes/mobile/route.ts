@@ -38,7 +38,7 @@ export const mobileRouteRepository = createDigitalExperienceServerRoute({
       query: z
         .object({
           ...timeRangeShape(),
-          platform: z.enum(MOBILE_PLATFORMS).optional(),
+          platform: z.enum(MOBILE_PLATFORMS),
           release: z.string().min(1).max(MAX_RELEASE_LENGTH).optional(),
         })
         .refine(isStartBeforeEnd, START_AFTER_END_ISSUE),

@@ -326,7 +326,9 @@ describe('ApplicationPage', () => {
     (tab) => {
       useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
 
-      render(<ApplicationPage serviceName="my-app" source="mobile" selectedTab={tab} />);
+      render(
+        <ApplicationPage serviceName="my-app" source="otel" platform="android" selectedTab={tab} />
+      );
 
       expect(historyReplace).toHaveBeenCalledWith('/my-app?source=classic');
       expect(screen.queryByTestId('digitalExperienceSessionsUnavailable')).not.toBeInTheDocument();

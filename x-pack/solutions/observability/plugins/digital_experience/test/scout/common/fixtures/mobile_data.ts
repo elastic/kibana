@@ -13,21 +13,24 @@ const INDEX = 'logs-generic.otel-default';
 const TIMESTAMP = '2021-01-18T12:30:00.000Z';
 
 /**
- * Mobile applications as `digital_experience_mobile` (synthtrace) writes them, in miniature: a
- * React Native app on both platforms, an Android app and a backend Java service that must never
- * show up as mobile.
+ * Mobile applications as EDOT Android and iOS send them, in miniature: the Elastic distribution
+ * (`telemetry.distro.name: elastic`) on a mobile `os.name`, with the upstream `telemetry.sdk.*`.
+ * A React Native app on Android, iOS and iPadOS, an Android app, and two services that must never
+ * show up as mobile: a backend Java service, and EDOT Browser on an iPhone, which is the Elastic
+ * distribution on `os.name: iOS` too.
  */
 export const MOBILE_APPS = {
   reactNative: 'scout-shop-mobile',
   android: 'scout-trailmap-android',
   backendJava: 'scout-backend-java',
+  browserOnIphone: 'scout-browser-on-iphone',
   /** In no data at all, for the empty state. */
   noData: 'scout-no-mobile-data',
 } as const;
 
 interface MobileDocument {
   serviceName: string;
-  sdkName: string;
+  distroName?: string;
   sdkLanguage: string;
   osName?: string;
   version: string;
@@ -38,33 +41,42 @@ interface MobileDocument {
   exception?: boolean;
 }
 
+const EDOT_MOBILE = { distroName: 'elastic', version: '1.0.0' };
+
 const MOBILE_DOCUMENTS: MobileDocument[] = [
   // React Native, Android: `versionName` as the release, `versionCode` as the build.
   ...['rn-a-1', 'rn-a-2'].map((sessionId, index) => ({
+    ...EDOT_MOBILE,
     serviceName: MOBILE_APPS.reactNative,
-    sdkName: 'android',
     sdkLanguage: 'java',
     osName: 'Android',
-    version: '1.0.0',
     buildId: '10',
     installationId: 'installation-rn-android',
     sessionId,
     exception: index === 0,
   })),
-  // React Native, iOS: the same release, with its own build number.
+  // React Native on an iPhone and an iPad: the same release, the iOS platform both.
   {
+    ...EDOT_MOBILE,
     serviceName: MOBILE_APPS.reactNative,
-    sdkName: 'iOS',
     sdkLanguage: 'swift',
     osName: 'iOS',
-    version: '1.0.0',
     buildId: '5',
-    installationId: 'installation-rn-ios',
+    installationId: 'installation-rn-iphone',
     sessionId: 'RN-I-1',
   },
   {
+    ...EDOT_MOBILE,
+    serviceName: MOBILE_APPS.reactNative,
+    sdkLanguage: 'swift',
+    osName: 'iPadOS',
+    buildId: '5',
+    installationId: 'installation-rn-ipad',
+    sessionId: 'RN-I-2',
+  },
+  {
+    ...EDOT_MOBILE,
     serviceName: MOBILE_APPS.android,
-    sdkName: 'android',
     sdkLanguage: 'java',
     osName: 'Android',
     version: '2.1.0',
@@ -73,10 +85,18 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
   },
   {
     serviceName: MOBILE_APPS.backendJava,
-    sdkName: 'opentelemetry',
     sdkLanguage: 'java',
+    osName: 'Linux',
     version: '9.9.9',
     sessionId: 'backend-1',
+  },
+  {
+    serviceName: MOBILE_APPS.browserOnIphone,
+    distroName: 'elastic',
+    sdkLanguage: 'webjs',
+    osName: 'iOS',
+    version: '3.0.0',
+    sessionId: 'browser-1',
   },
 ];
 
@@ -90,7 +110,8 @@ const documents = MOBILE_DOCUMENTS.map((doc, index) => ({
         'service.name': doc.serviceName,
         'service.version': doc.version,
         ...(doc.buildId ? { 'app.build_id': doc.buildId } : {}),
-        'telemetry.sdk.name': doc.sdkName,
+        ...(doc.distroName ? { 'telemetry.distro.name': doc.distroName } : {}),
+        'telemetry.sdk.name': 'opentelemetry',
         'telemetry.sdk.language': doc.sdkLanguage,
         ...(doc.osName ? { 'os.name': doc.osName } : {}),
         ...(doc.installationId ? { 'app.installation.id': doc.installationId } : {}),
@@ -103,23 +124,34 @@ const documents = MOBILE_DOCUMENTS.map((doc, index) => ({
   },
 }));
 
-/** What the applications route should answer for each mobile application in `TIME_RANGE`. */
-export const EXPECTED_MOBILE_ROWS = {
-  [MOBILE_APPS.reactNative]: {
-    platforms: ['android', 'ios'],
+/** What the applications route should answer for each mobile application and platform. */
+export const EXPECTED_MOBILE_ROWS = [
+  {
+    serviceName: MOBILE_APPS.reactNative,
+    platform: 'android',
     latestRelease: '1.0.0',
-    sessions: { count: 3 },
-    users: { count: 2 },
-    errorRate: 1 / 3,
+    sessions: { count: 2 },
+    users: { count: 1 },
+    errorRate: 0.5,
   },
-  [MOBILE_APPS.android]: {
-    platforms: ['android'],
+  {
+    // iPadOS counts as iOS.
+    serviceName: MOBILE_APPS.reactNative,
+    platform: 'ios',
+    latestRelease: '1.0.0',
+    sessions: { count: 2 },
+    users: { count: 2 },
+    errorRate: 0,
+  },
+  {
+    serviceName: MOBILE_APPS.android,
+    platform: 'android',
     latestRelease: '2.1.0',
     sessions: { count: 1 },
     users: { count: 1 },
     errorRate: 0,
   },
-} as const;
+] as const;
 
 /** Deletes the mobile documents by their ids, leaving the rest of the data stream. */
 export const deleteMobileData = async (esClient: EsClient): Promise<void> => {

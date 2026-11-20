@@ -20,15 +20,17 @@ jest.mock('./application/digital_experience_layout', () => ({
   DigitalExperienceLayout: () => <Outlet />,
 }));
 jest.mock('./pages/application_details/application_page', () => ({
-  ApplicationPage: ({ source }: { source: string }) => (
-    <div data-test-subj="applicationPage">{source}</div>
+  ApplicationPage: ({ source, platform }: { source: string; platform?: string }) => (
+    <div data-test-subj="applicationPage">{`${source}:${platform}`}</div>
   ),
 }));
 
 const renderRoute = () => {
   jest.mocked(useKibanaServices).mockReturnValue({} as ReturnType<typeof useKibanaServices>);
   jest.mocked(useDigitalExperienceRouter).mockReturnValue(digitalExperienceRouter);
-  const history = createMemoryHistory({ initialEntries: ['/shop-mobile?source=mobile'] });
+  const history = createMemoryHistory({
+    initialEntries: ['/shop-mobile?source=otel&platform=ios'],
+  });
   render(
     <RouterProvider
       history={history}
@@ -41,10 +43,10 @@ const renderRoute = () => {
 };
 
 describe('the mobile application route', () => {
-  it('opens the mobile page and keeps the mobile source in the URL', async () => {
+  it('gives the page the EDOT source and the mobile platform, and keeps both in the URL', async () => {
     const history = renderRoute();
 
-    expect(await screen.findByTestId('applicationPage')).toHaveTextContent('mobile');
-    expect(history.location.search).toBe('?source=mobile');
+    expect(await screen.findByTestId('applicationPage')).toHaveTextContent('otel:ios');
+    expect(history.location.search).toBe('?source=otel&platform=ios');
   });
 });

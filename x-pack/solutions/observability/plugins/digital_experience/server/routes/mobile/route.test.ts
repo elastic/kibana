@@ -22,7 +22,6 @@ const RESPONSE: MobileKpisResponse = {
   users: { value: 3, previous: 3, delta: 0 },
   crashFreeSessions: { value: null, previous: null, delta: null },
   errorRate: { value: 0.5, previous: null, delta: null },
-  platforms: ['android', 'ios'],
   releases: ['1.2.3'],
   environments: ['production'],
   bucket: 'hour',
@@ -90,11 +89,16 @@ describe('mobile KPIs route', () => {
       shape: { query: { safeParse: (query: unknown) => { success: boolean } } };
     };
     const isValid = (query: Record<string, string>) =>
-      schema.shape.query.safeParse({ start: START, end: END, ...query }).success;
+      schema.shape.query.safeParse({ start: START, end: END, platform: 'android', ...query })
+        .success;
 
-    it('accepts the platforms and a release', () => {
+    it('accepts a platform and a release', () => {
       expect(isValid({ platform: 'android', release: '1.2.3' })).toBe(true);
       expect(isValid({ platform: 'ios' })).toBe(true);
+    });
+
+    it('requires the platform, as a page is of one', () => {
+      expect(schema.shape.query.safeParse({ start: START, end: END }).success).toBe(false);
     });
 
     it('rejects a range that starts after it ends, an unknown platform and a too long release', () => {

@@ -32,44 +32,56 @@ Serverless Logs Essentials hides the feature (`xpack.features.overrides`), as th
 
 ## Mobile applications
 
-A third source, `mobile`, lists EDOT Android and EDOT iOS applications (and React Native apps, which
-run on both). It ships with the rest of Digital Experience, behind `digitalExperience.enabled` only,
+EDOT Android and EDOT iOS applications (and React Native apps, which run on both) are listed with
+the others. They ship with the rest of Digital Experience, behind `digitalExperience.enabled` only,
 on serverless and stateful.
 
-- **Detection:** `resource.attributes.telemetry.sdk.name IN ("android", "iOS")` over
-  `traces-*.otel-*,logs-*.otel-*`. Not `telemetry.sdk.language`: it is `java` / `swift`, and `java`
-  also matches backend services in the same streams. EDOT Android and EDOT iOS set these values, and
-  EDOT React Native keeps the native SDK's.
-- **Key:** one application per `service.name`, across platforms; the row shows an icon per platform.
-  The platform comes from `telemetry.sdk.name`, not `os.name`, which is `iPadOS` on iPads.
+- **Source and platform:** `source` is the data model, `otel` or `classic`. Mobile applications
+  are OpenTelemetry only, so they are `otel`; what sets them apart is their `platform` (`browser`,
+  `android` or `ios`), which web applications have as `browser`.
+- **Identity:** the Elastic distribution, `resource.attributes.telemetry.distro.name: elastic`
+  (elastic/rum-dev#106), on a mobile resource `os.name`: `Android`, `iOS` or `iPadOS`, over
+  `traces-*.otel-*,logs-*.otel-*`. Not `os.type`, which can't tell the platforms apart (Android
+  sends `linux`, iOS `darwin`), nor `telemetry.sdk.*`, which carries the upstream SDKs' values.
+  EDOT Browser is the Elastic distribution too and reports the device's OS, e.g. `iOS` on an
+  iPhone, so its documents (`telemetry.sdk.language: webjs`) are left out.
+- **Platform:** `android` for `os.name: Android`, `ios` for `iOS` and `iPadOS`.
+- **Key:** one row per `service.name` and platform, so a React Native app has a row on each.
+- **Framework:** React Native will be marked by `elastic.app.framework.name`, pending the SDK team's
+  review of the names; nothing reads it yet.
 - **Row metrics** (ES|QL, `server/routes/applications/mobile/`): sessions (distinct `session.id`),
   users (distinct `app.installation.id`), error rate (exceptions per session), last seen, and the
   latest release. Rows are sorted by sessions and capped at 1,000. Crash-free sessions is `null`
   ("Not enough data") until a crash is defined and session start reaches the SDKs.
-- **Queries:** every mobile ES|QL query starts with `SET unmapped_fields = "NULLIFY"`, as the
-  session summaries do: a field no index maps, e.g. `exception.type` on a cluster whose apps never
-  threw, reads as `null` (and counts 0) instead of failing the query. Values from the request go in as
-  named `params`; only the Discover query, which takes no params, has them escaped into its text.
-  Results must be complete (`allow_partial_results: false`), and periods are half-open, so a
-  period and the one before it never share a document.
+- **Queries:** built with the `@elastic/esql` composer (`common/mobile_panel.ts`,
+  `server/lib/mobile/queries.ts`) and run through the plugin's traced Elasticsearch client, one APM
+  span per query, with typed rows (`transform: 'plain'`). Every query sets `unmapped_fields` to
+  `nullify`: a field no index maps, e.g. `exception.type` on a cluster whose apps never threw, reads
+  as `null` (and counts 0) instead of failing the query. Values from the request are named params;
+  the Discover query, which takes no params, has them inlined by `inlineParams()`. Results must be
+  complete (`allow_partial_results: false`), and periods are half-open, so a period and the one
+  before it never share a document.
 - **Releases:** the release is `service.version` as the SDKs send it: Android's `versionName` and
   iOS's short version, with the build (`versionCode`, `CFBundleVersion`) in `app.build_id`. It isn't
   rewritten at query time; a version that carries its build would need fixing in the SDK or at
   ingest. The latest release is each application's release with the most sessions in the last 24
   hours of the time range, picked per application in ES|QL (`TOP`), so no row limit drops one.
-- **Applications list:** mobile rows have their own table (platforms, latest release, sessions, users,
-  crash-free sessions, error rate, last seen) below the web table, or alone with the Mobile source
-  filter, where it links to the EDOT Android and iOS docs without mobile data. The page loads chart
+- **Applications list:** mobile rows have their own table (platform, latest release, sessions,
+  users, crash-free sessions, error rate, last seen) below the web table. A Platform filter
+  (`platformFilter`) shows the browser's rows, or one mobile platform's alone, where it links to the
+  EDOT Android and iOS docs without mobile data. The Classic RUM source has no mobile rows. A failed
+  or partial mobile search is reported in `mobileAvailability`, apart from the sources. The page loads chart
   and summary stay web-only. The environment picker lists both environment fields and "Not defined".
-- **Application page** (`/{serviceName}?source=mobile`): environment, platform and release filters
-  (all three in the URL, so a reload or a shared link keeps them), a
+- **Application page** (`/{serviceName}?source=otel&platform=android|ios`), one per platform:
+  environment and release filters (in the URL, so a reload or a shared link keeps them), a
   Compare toggle, a KPI row (sessions, users, crash-free sessions, error rate) and empty sections
   (Health summary, Release health, Stability, Users and engagement, Performance, Views) for the
   sibling issues to fill. Every KPI uses `MobilePanel`: current value with its change against the
   previous period of equal length, the Compare overlay, a tooltip with the calculation and a Discover
   link with the same ES|QL and filters (`common/mobile_panel.ts`). The time bucket is hourly up to
   24 hours and daily above. Without mobile data it links to the EDOT Android and iOS setup docs.
-- **Route:** `GET /internal/digital_experience/mobile_applications/{serviceName}/kpis`.
+- **Route:** `GET /internal/digital_experience/mobile_applications/{serviceName}/kpis`, with a
+  required `platform`.
 
 ## Pages
 

@@ -36,23 +36,19 @@ import type { Formatters } from '../../../hooks/use_formatters';
 import {
   LAST_SEEN_LABEL,
   NOT_ENOUGH_DATA_LABEL,
+  MOBILE_PLATFORM_ICONS,
   PLATFORM_LABELS,
   SESSIONS_LABEL,
   percentagePointsLabel,
 } from '../../../labels';
 import { applicationColumnPreset, metricColumnPreset } from '../../../utils/column_presets';
 
-const PLATFORM_ICONS: Record<MobilePlatform, string> = {
-  android: 'logoAndroid',
-  ios: 'logoApple',
-};
-
 const columnNames = {
   application: i18n.translate('xpack.digitalExperience.applications.mobile.applicationColumn', {
     defaultMessage: 'Mobile application',
   }),
-  platforms: i18n.translate('xpack.digitalExperience.applications.mobile.platformsColumn', {
-    defaultMessage: 'Platforms',
+  platform: i18n.translate('xpack.digitalExperience.applications.mobile.platformColumn', {
+    defaultMessage: 'Platform',
   }),
   latestRelease: i18n.translate('xpack.digitalExperience.applications.mobile.latestReleaseColumn', {
     defaultMessage: 'Latest release',
@@ -67,6 +63,10 @@ const columnNames = {
     defaultMessage: 'Error rate',
   }),
 };
+
+/** A React Native app has a row per platform, so the name alone isn't unique. */
+const getRowId = ({ serviceName, platform }: MobileApplicationSummary) =>
+  `${platform}:${serviceName}`;
 
 const SORT_BY_SESSIONS = { sort: { field: 'sessions.count', direction: 'desc' } } as const;
 
@@ -111,7 +111,7 @@ export function MobileApplicationsTable({
         name: columnNames.application,
         ...applicationColumnPreset<MobileApplicationSummary>(),
         sortable: true,
-        render: (serviceName: string) => (
+        render: (serviceName: string, { platform }: MobileApplicationSummary) => (
           <EuiLink
             data-test-subj="digitalExperienceMobileApplicationLink"
             {...getEbtProps({
@@ -122,7 +122,8 @@ export function MobileApplicationsTable({
             href={application.getUrlForApp(DIGITAL_EXPERIENCE_FEATURE_ID, {
               path: router.link('/{serviceName}', {
                 path: { serviceName },
-                query: { ...listQuery, source: APPLICATION_SOURCE.mobile },
+                // EDOT data on a mobile platform, which opens the mobile page.
+                query: { ...listQuery, source: APPLICATION_SOURCE.otel, platform },
               }),
             })}
           >
@@ -131,23 +132,21 @@ export function MobileApplicationsTable({
         ),
       },
       {
-        field: 'platforms',
-        name: columnNames.platforms,
-        render: (platforms: MobilePlatform[]) => (
+        field: 'platform',
+        name: columnNames.platform,
+        sortable: true,
+        render: (platform: MobilePlatform) => (
           <EuiFlexGroup
-            data-test-subj="digitalExperienceMobilePlatforms"
+            data-test-subj="digitalExperienceMobilePlatform"
+            data-platform={platform}
             gutterSize="s"
+            alignItems="center"
             responsive={false}
           >
-            {platforms.map((platform) => (
-              <EuiFlexItem grow={false} key={platform}>
-                <EuiIcon
-                  type={PLATFORM_ICONS[platform]}
-                  title={PLATFORM_LABELS[platform]}
-                  aria-label={PLATFORM_LABELS[platform]}
-                />
-              </EuiFlexItem>
-            ))}
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={MOBILE_PLATFORM_ICONS[platform]} aria-hidden={true} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{PLATFORM_LABELS[platform]}</EuiFlexItem>
           </EuiFlexGroup>
         ),
       },
@@ -213,7 +212,7 @@ export function MobileApplicationsTable({
       data-test-subj="digitalExperienceMobileApplicationsTable"
       tableCaption={columnNames.application}
       items={items}
-      itemId="serviceName"
+      itemId={getRowId}
       columns={columns}
       tableLayout="auto"
       scrollableInline

@@ -53,8 +53,7 @@ test.describe(
         await expect(
           digitalExperience.applicationsTable.rows.filter({ hasText: 'Classic RUM' })
         ).toHaveCount(0);
-        // Serverless has no Classic RUM, but still filters EDOT Browser and Mobile.
-        await expect(digitalExperience.sourceFilter).toBeVisible();
+        await expect(digitalExperience.sourceFilter).toBeHidden();
       });
 
       await test.step('opens the EDOT Browser Overview from an EDOT Browser row', async () => {

@@ -59,6 +59,7 @@ const runHandler = ({
     applications: unknown[];
     environments: string[];
     partiallyAvailableSources: string[];
+    mobileAvailability: string;
   }>;
   const result = handler({
     params: { query },
@@ -98,9 +99,9 @@ describe('GET /internal/digital_experience/applications', () => {
       applications: [
         {
           serviceName: 'shop-mobile',
-          source: 'mobile',
+          source: 'otel',
+          platform: 'android',
           environments: [],
-          platforms: ['android'],
           latestRelease: '1.0.0',
           sessions: { count: 3 },
           users: { count: 2 },
@@ -231,7 +232,9 @@ describe('GET /internal/digital_experience/applications', () => {
     ]);
     expect(classicCheck.ignoredPatterns).toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
     expect(getApmIndices).toHaveBeenCalledTimes(1);
-    expect(response.partiallyAvailableSources).toEqual(['otel', 'classic', 'mobile']);
+    expect(response.partiallyAvailableSources).toEqual(['otel', 'classic']);
+    // Mobile applications read the same OTel indices, but aren't a source.
+    expect(response.mobileAvailability).toBe('partial');
   });
 
   it('only checks the OTel access, which mobile shares, on serverless', async () => {
