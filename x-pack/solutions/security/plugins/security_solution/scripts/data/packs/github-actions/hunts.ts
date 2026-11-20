@@ -39,7 +39,7 @@ export const hunts: Hunt[] = [
         source: { ip: '192.0.2.10' },
         user: {
           name: 'platform-admin',
-          email: 'platform-admin@corp.example',
+          email: 'platform-admin@corp.example.cloud',
           full_name: 'Platform Admin',
         },
         organization: { name: 'corp-example' },
@@ -88,7 +88,7 @@ export const hunts: Hunt[] = [
         source: { ip: '192.0.2.10' },
         user: {
           name: 'platform-admin',
-          email: 'platform-admin@corp.example',
+          email: 'platform-admin@corp.example.cloud',
           full_name: 'Platform Admin',
         },
         organization: { name: 'corp-example' },

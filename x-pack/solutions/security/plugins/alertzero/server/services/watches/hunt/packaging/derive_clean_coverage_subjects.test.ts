@@ -45,7 +45,7 @@ const reportContext: ReportHuntContext = {
   iocs: [
     { type: 'ip', value: '203.0.113.60' },
     { type: 'ip', value: '203.0.113.61' },
-    { type: 'email', value: 'signin-watch@lab-demo.test' },
+    { type: 'email', value: 'signin-watch@lab-demo.seedbench.dev' },
   ],
   vendor: 'Amazon',
   bodyText: 'Analysts observed repeated console sign-in failures.',
@@ -106,7 +106,7 @@ describe('deriveCleanCoverageSubjects', () => {
 
   it('follows the quote with the report title, techniques, indicators, and vendor', () => {
     expect(deriveCleanCoverageSubjects(defaultArgs)[0].threatSummary).toContain(
-      'Techniques: T1110.003\nIndicators: ip: 203.0.113.60, ip: 203.0.113.61, email: signin-watch@lab-demo.test\nVendor/product: Amazon'
+      'Techniques: T1110.003\nIndicators: ip: 203.0.113.60, ip: 203.0.113.61, email: signin-watch@lab-demo.seedbench.dev\nVendor/product: Amazon'
     );
   });
 

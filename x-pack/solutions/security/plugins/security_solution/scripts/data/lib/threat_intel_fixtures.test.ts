@@ -756,7 +756,7 @@ describe('aws-iam-clean scenario', () => {
       expect(doc.extracted?.iocs).toEqual([
         { type: 'ip', value: '203.0.113.60', defanged: '203[.]0[.]113[.]60' },
         { type: 'ip', value: '203.0.113.61', defanged: '203[.]0[.]113[.]61' },
-        { type: 'email', value: 'signin-watch@lab-demo.test' },
+        { type: 'email', value: 'signin-watch@lab-demo.seedbench.dev' },
       ]);
       expect(doc.extracted?.threat_actors).toBeUndefined();
       expect(doc.extracted?.diamond).toBeUndefined();

@@ -70,7 +70,7 @@ Optional `data_generator.ground_truth` is **not** written in this MVP (tags are 
 
 Do not conflate with unrelated `elastic-security-sample-data` installers.
 
-Vendored fixtures still use documentation identities (`@corp.example`, `192.0.2.x`) on purpose. Those are sanitized content, not generator ownership markers.
+Vendored fixtures still use synthetic identities (`@corp.example.cloud`, `192.0.2.x`) on purpose. Email identities sit on a real TLD (not `.example` or `.test`) so the placeholder-email rule never treats a seeded address as an example address. Those are sanitized content, not generator ownership markers.
 
 ## Entity catalog + graph enrichment
 
@@ -84,7 +84,7 @@ Vendored fixtures still use documentation identities (`@corp.example`, `192.0.2.
 
 Episode fixtures under `scripts/data/episodes/**` and pack content under `scripts/data/packs/**` are **vendored / authored** artifacts:
 
-- Synthetic identities (`@corp.example`, `192.0.2.x`)
+- Synthetic identities (`@corp.example.cloud`, `192.0.2.x`); email domains must have a real TLD and must not be placeholder addresses
 - Do not update casually
 - Pack provenance records `upstreamCommit` + `upstreamScenarioId` pointing at [elastic/security-data-generator-app](https://github.com/elastic/security-data-generator-app) (SHA only, no verbatim copy)
 
