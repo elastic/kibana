@@ -9,6 +9,7 @@ import { timeoutSignal } from '@kbn/std';
 import Fs from 'fs';
 import Path from 'path';
 import type { FlagsReader } from '@kbn/dev-cli-runner';
+import type { ToolingLog } from '@kbn/tooling-log';
 import {
   KBN_EVALS_VAULT_PATHS,
   KBN_EVALS_VAULT_CONFIG_FIELD,
@@ -25,7 +26,7 @@ export const VAULT_CONFIG_DIR = 'x-pack/platform/packages/shared/kbn-evals/scrip
 
 /**
  * Virtual profile: load golden-cluster config from dev Vault at runtime (no config file).
- * Use with `--datasets-profile dev-vault` or `--profile dev-vault`.
+ * Use with `--evaluations-kbn-profile dev-vault` or `--profile dev-vault`.
  */
 export const DEV_VAULT_PROFILE = 'dev-vault';
 
@@ -50,13 +51,80 @@ export const probeHttp = async (url: string): Promise<boolean> => {
   }
 };
 
+interface ProfileFlagNames {
+  current: string;
+  deprecated: string;
+}
+
+const EVALUATIONS_KBN_PROFILE_FLAGS: ProfileFlagNames = {
+  current: 'evaluations-kbn-profile',
+  deprecated: 'datasets-profile',
+};
+
+const TRACING_PROFILE_FLAGS: ProfileFlagNames = {
+  current: 'tracing-profile',
+  deprecated: 'export-profile',
+};
+
+const readProfileFlag = (
+  flagsReader: FlagsReader,
+  { current, deprecated }: ProfileFlagNames
+): string | undefined => flagsReader.string(current) ?? flagsReader.string(deprecated);
+
+/**
+ * The profile for the Kibana that stores datasets and scores and serves experiment results
+ * (`--evaluations-kbn-profile`, or the deprecated `--datasets-profile`).
+ */
+export const readEvaluationsKbnProfile = (flagsReader: FlagsReader): string | undefined =>
+  readProfileFlag(flagsReader, EVALUATIONS_KBN_PROFILE_FLAGS);
+
+/**
+ * The profile for tracing: where traces are exported and which Elasticsearch trace evaluators
+ * query (`--tracing-profile`, or the deprecated `--export-profile`).
+ */
+export const readTracingProfile = (flagsReader: FlagsReader): string | undefined =>
+  readProfileFlag(flagsReader, TRACING_PROFILE_FLAGS);
+
+const warnOnDeprecatedFlag = (
+  flagsReader: FlagsReader,
+  log: ToolingLog,
+  { current, deprecated }: ProfileFlagNames
+): void => {
+  const deprecatedValue = flagsReader.string(deprecated);
+  if (deprecatedValue === undefined) return;
+
+  const currentValue = flagsReader.string(current);
+  const isIgnored = currentValue !== undefined && currentValue !== deprecatedValue;
+  log.warning(
+    isIgnored
+      ? `--${deprecated} is deprecated and ignored because --${current} is also set. Use --${current}.`
+      : `--${deprecated} is deprecated. Use --${current} instead.`
+  );
+};
+
+/** Logs one warning for each deprecated profile flag that was passed. Call it once per command. */
+export const warnOnDeprecatedProfileFlags = (flagsReader: FlagsReader, log: ToolingLog): void => {
+  warnOnDeprecatedFlag(flagsReader, log, EVALUATIONS_KBN_PROFILE_FLAGS);
+  warnOnDeprecatedFlag(flagsReader, log, TRACING_PROFILE_FLAGS);
+};
+
+/** The `Profiles:` line that `start`, `run` and `red-team` log, labelled with the flag names. */
+export const formatProfilesSummary = ({
+  evaluationsKbnProfile,
+  tracingProfile,
+}: {
+  evaluationsKbnProfile?: string;
+  tracingProfile?: string;
+}): string =>
+  `evaluations-kbn=${evaluationsKbnProfile ?? 'config'} tracing=${tracingProfile ?? 'none'}`;
+
 export const isExportProfileImplicitLocal = (
   flagsReader: FlagsReader,
-  exportProfile?: string
+  tracingProfile?: string
 ): boolean => {
-  if (exportProfile !== 'local') return false;
+  if (tracingProfile !== 'local') return false;
   const hasExplicitExport = Boolean(
-    flagsReader.string('export-profile') ?? flagsReader.string('profile')
+    readTracingProfile(flagsReader) ?? flagsReader.string('profile')
   );
   return !hasExplicitExport;
 };
@@ -218,6 +286,10 @@ export const resolveDefaultJudgeConnectorId = (
   return isNonEmptyString(value) && !isPlaceholder(value) ? value : undefined;
 };
 
+/**
+ * Env for the Kibana behind `--evaluations-kbn-profile`: `EVAL_KBN_URL` and `EVAL_KBN_API_KEY`
+ * (where datasets and scores are stored and read back), plus `GCS_CREDENTIALS` when the profile has them.
+ */
 export const envFromDatasetsProfile = (
   repoRoot: string,
   profile?: string
@@ -238,13 +310,17 @@ export const envFromDatasetsProfile = (
   return next;
 };
 
+/**
+ * Env for `--tracing-profile`: `TRACING_ES_URL` and `TRACING_ES_API_KEY` (where trace evaluators
+ * query), `TRACING_EXPORTERS` (where traces are exported), plus `GCS_CREDENTIALS` when present.
+ */
 export const envFromExportProfile = (
   repoRoot: string,
   profile?: string,
   options?: { defaultTracingExporters?: boolean }
 ): Record<string, string> => {
-  // Critical safety/ergonomics: don't implicitly use config.json as an export profile.
-  // Export profile must be explicitly selected (e.g. `local`, `ci`, `config`).
+  // Critical safety/ergonomics: don't implicitly use config.json as a tracing profile.
+  // Tracing profile must be explicitly selected (e.g. `local`, `ci`, `config`).
   if (!profile) return {};
 
   const cfg = loadVaultConfig(repoRoot, profile);

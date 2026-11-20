@@ -6,13 +6,20 @@
  */
 
 import Os from 'os';
+import { FlagsReader, getFlags } from '@kbn/dev-cli-runner';
+import { ToolingLog } from '@kbn/tooling-log';
 import { safeExec } from './utils';
 import {
+  formatProfilesSummary,
+  isExportProfileImplicitLocal,
   probeHttp,
+  readEvaluationsKbnProfile,
   readSuiteSecretFromDevVault,
+  readTracingProfile,
   readVaultConfigFromDevVault,
   resetDevVaultConfigCache,
   resolveDefaultJudgeConnectorId,
+  warnOnDeprecatedProfileFlags,
 } from './profiles';
 
 jest.mock('./utils', () => ({
@@ -208,5 +215,91 @@ describe('probeHttp', () => {
     globalThis.fetch = jest.fn().mockRejectedValue(new Error('offline')) as typeof fetch;
 
     await expect(probeHttp('http://es.example')).resolves.toBe(false);
+  });
+});
+
+const profileFlagOptions = {
+  string: [
+    'profile',
+    'datasets-profile',
+    'export-profile',
+    'evaluations-kbn-profile',
+    'tracing-profile',
+  ],
+};
+const readProfileFlags = (argv: string[]): FlagsReader =>
+  new FlagsReader(getFlags(argv, profileFlagOptions));
+
+describe.each([
+  {
+    reader: readEvaluationsKbnProfile,
+    readerName: 'readEvaluationsKbnProfile',
+    newFlag: '--evaluations-kbn-profile',
+    oldFlag: '--datasets-profile',
+  },
+  {
+    reader: readTracingProfile,
+    readerName: 'readTracingProfile',
+    newFlag: '--tracing-profile',
+    oldFlag: '--export-profile',
+  },
+])('$readerName', ({ reader, newFlag, oldFlag }) => {
+  it('reads the new flag, falls back to the deprecated one, and prefers the new one', () => {
+    expect(reader(readProfileFlags([newFlag, 'new']))).toBe('new');
+    expect(reader(readProfileFlags([oldFlag, 'old']))).toBe('old');
+    expect(reader(readProfileFlags([oldFlag, 'old', newFlag, 'new']))).toBe('new');
+    expect(reader(readProfileFlags([]))).toBeUndefined();
+  });
+});
+
+describe('warnOnDeprecatedProfileFlags', () => {
+  const setup = (argv: string[]) => {
+    const log = new ToolingLog();
+    const warning = jest.spyOn(log, 'warning').mockImplementation(() => undefined);
+    warnOnDeprecatedProfileFlags(readProfileFlags(argv), log);
+    return warning;
+  };
+
+  it('stays quiet for the new flags and for --profile', () => {
+    expect(
+      setup(['--profile', 'local', '--evaluations-kbn-profile', 'a', '--tracing-profile', 'b'])
+    ).not.toHaveBeenCalled();
+  });
+
+  it('warns once per deprecated flag, naming its replacement', () => {
+    const warning = setup(['--datasets-profile', 'a', '--export-profile', 'b']);
+
+    expect(warning).toHaveBeenCalledTimes(2);
+    const messages = warning.mock.calls.map(([message]) => String(message));
+    expect(messages[0]).toContain('--datasets-profile');
+    expect(messages[0]).toContain('--evaluations-kbn-profile');
+    expect(messages[1]).toContain('--export-profile');
+    expect(messages[1]).toContain('--tracing-profile');
+  });
+
+  it('says the deprecated flag is ignored when the new one is passed with another value', () => {
+    const warning = setup(['--export-profile', 'old', '--tracing-profile', 'new']);
+
+    expect(warning).toHaveBeenCalledTimes(1);
+    expect(String(warning.mock.calls[0][0])).toContain('ignored');
+  });
+});
+
+describe('formatProfilesSummary', () => {
+  it('names each profile after the flag that sets it, with defaults when unset', () => {
+    expect(formatProfilesSummary({ evaluationsKbnProfile: 'scout', tracingProfile: 'scout' })).toBe(
+      'evaluations-kbn=scout tracing=scout'
+    );
+    expect(formatProfilesSummary({})).toBe('evaluations-kbn=config tracing=none');
+  });
+});
+
+describe('isExportProfileImplicitLocal', () => {
+  it('is true for the auto-selected local tracing profile', () => {
+    expect(isExportProfileImplicitLocal(readProfileFlags([]), 'local')).toBe(true);
+  });
+
+  it.each(['--tracing-profile', '--export-profile'])('is false when %s was passed', (flag) => {
+    expect(isExportProfileImplicitLocal(readProfileFlags([flag, 'local']), 'local')).toBe(false);
   });
 });
