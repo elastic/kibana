@@ -127,5 +127,11 @@ export const registerWorkflowSteps = (
         (m) => m.aesopCaptureDatasetStepDefinition
       )
     );
+
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./aesop_collect_failures/aesop_collect_failures_step').then(
+        (m) => m.aesopCollectFailuresStepDefinition
+      )
+    );
   }
 };

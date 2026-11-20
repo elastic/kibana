@@ -29,6 +29,7 @@ import { getAlertEntitiesStepDefinition } from './get_alert_entities_step';
 import { matchAttackFingerprintsStepDefinition } from './match_attack_fingerprints';
 import { aesopSelectWinnerStepDefinition } from './aesop_select_winner';
 import { aesopCaptureDatasetStepDefinition } from './aesop_capture_dataset';
+import { aesopCollectFailuresStepDefinition } from './aesop_collect_failures';
 
 const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
 
@@ -40,7 +41,7 @@ describe('registerWorkflowSteps (server)', () => {
       experimentalFeatures: { aesopPrototypeEnabled: true },
     });
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(23);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(24);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       renderAlertNarrativeStepDefinition
     );
@@ -105,6 +106,9 @@ describe('registerWorkflowSteps (server)', () => {
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       aesopCaptureDatasetStepDefinition
     );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      aesopCollectFailuresStepDefinition
+    );
   });
 
   it('does not register the AESOP steps when the prototype is disabled', () => {
@@ -120,6 +124,9 @@ describe('registerWorkflowSteps (server)', () => {
     );
     expect(workflowsExtensions.registerStepDefinition).not.toHaveBeenCalledWith(
       aesopCaptureDatasetStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).not.toHaveBeenCalledWith(
+      aesopCollectFailuresStepDefinition
     );
   });
 });

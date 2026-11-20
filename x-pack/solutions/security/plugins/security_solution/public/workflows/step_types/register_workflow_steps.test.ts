@@ -31,6 +31,7 @@ import { getAlertEntitiesStepDefinition } from './get_alert_entities_step/get_al
 import { matchAttackFingerprintsStepDefinition } from './match_attack_fingerprints/match_attack_fingerprints_step';
 import { aesopSelectWinnerStepDefinition } from './aesop_select_winner/aesop_select_winner_step';
 import { aesopCaptureDatasetStepDefinition } from './aesop_capture_dataset/aesop_capture_dataset_step';
+import { aesopCollectFailuresStepDefinition } from './aesop_collect_failures/aesop_collect_failures_step';
 
 type StepLoader = () => Promise<PublicStepDefinition | undefined>;
 
@@ -55,7 +56,7 @@ describe('registerWorkflowSteps (public)', () => {
 
     registerWorkflowSteps(workflowsExtensions, enabled);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(23);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(24);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(expect.any(Function));
   });
 
@@ -88,6 +89,7 @@ describe('registerWorkflowSteps (public)', () => {
       loader21,
       loader22,
       loader23,
+      loader24,
     ] = getStepLoaders(workflowsExtensions);
 
     await expect(loader1()).resolves.toBe(renderAlertNarrativeStepDefinition);
@@ -113,6 +115,7 @@ describe('registerWorkflowSteps (public)', () => {
     await expect(loader21()).resolves.toBe(matchAttackFingerprintsStepDefinition);
     await expect(loader22()).resolves.toBe(aesopSelectWinnerStepDefinition);
     await expect(loader23()).resolves.toBe(aesopCaptureDatasetStepDefinition);
+    await expect(loader24()).resolves.toBe(aesopCollectFailuresStepDefinition);
   });
 
   it('does not register the AESOP steps when the prototype is disabled', async () => {
@@ -126,5 +129,6 @@ describe('registerWorkflowSteps (public)', () => {
     const loaded = await Promise.all(getStepLoaders(workflowsExtensions).map((load) => load()));
     expect(loaded).not.toContain(aesopSelectWinnerStepDefinition);
     expect(loaded).not.toContain(aesopCaptureDatasetStepDefinition);
+    expect(loaded).not.toContain(aesopCollectFailuresStepDefinition);
   });
 });
