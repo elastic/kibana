@@ -6,7 +6,7 @@
  */
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type {
   DashboardAttachment,
   DashboardAttachmentData,
@@ -15,6 +15,7 @@ import {
   getComparableAttachmentState,
   getComparableDashboardState,
 } from '@kbn/agent-builder-dashboards-common';
+import { canApplyAgentChangesInPlace } from './show_attachment';
 
 /** Compares two dashboard states with the comparators each panel's embeddable definition provides. */
 export type AreDashboardStatesEqual = DashboardStart['areEqual'];
@@ -44,18 +45,40 @@ export const isAttachmentShownInDashboard = async ({
   return areEqual(baseline, comparableState).catch(() => false);
 };
 
+export interface DashboardAttachmentLink<TAttachment> {
+  /** Whether the agent's changes to the dashboard's attachment apply to the open dashboard. */
+  linkable: boolean;
+  /** The origin to stage the dashboard with: its saved id, `undefined` when unsaved or not linkable. */
+  origin: string | undefined;
+  /** The conversation's attachment the dashboard stands for, if any. */
+  attachment: TAttachment | undefined;
+}
+
 /**
- * The attachment the open dashboard stands for: the one whose origin is the dashboard, which for an
- * unsaved dashboard is one without an origin.
+ * Links the open dashboard to the conversation attachment it stands for: the one whose origin is
+ * the dashboard, which for an unsaved dashboard is one without an origin. A dashboard the agent's
+ * changes can't be applied to, e.g. a managed one or one the user can't write, is never linked:
+ * it is staged without an origin, as a new attachment every time.
  */
-export const findDashboardAttachment = <TAttachment extends DashboardAttachment>({
+export const resolveDashboardAttachmentLink = <TAttachment extends { origin?: string }>({
+  api,
+  canWriteDashboards,
   attachments,
-  dashboardId,
 }: {
-  attachments: TAttachment[];
-  /** The saved id of the dashboard, `undefined` for an unsaved one. */
-  dashboardId: string | undefined;
-}): TAttachment | undefined => attachments.find(({ origin }) => origin === dashboardId);
+  api: DashboardApi;
+  canWriteDashboards: boolean;
+  attachments: readonly TAttachment[];
+}): DashboardAttachmentLink<TAttachment> => {
+  if (!canWriteDashboards || !canApplyAgentChangesInPlace(api)) {
+    return { linkable: false, origin: undefined, attachment: undefined };
+  }
+  const origin = api.savedObjectId$.getValue();
+  return {
+    linkable: true,
+    origin,
+    attachment: attachments.find((attachment) => attachment.origin === origin),
+  };
+};
 
 /**
  * The id the chat input stages the open dashboard under: its attachment, or a new attachment when

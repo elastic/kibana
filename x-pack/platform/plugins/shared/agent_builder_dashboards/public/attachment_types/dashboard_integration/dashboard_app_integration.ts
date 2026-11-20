@@ -33,16 +33,15 @@ import {
 import { createChatAdapter } from './chat_adapter';
 import { getPanelIds, getRelabelledPanelPointers, type PanelPointer } from './panel_pointer_labels';
 import {
-  findDashboardAttachment,
   isAttachmentShownInDashboard,
   isOpenDashboardUpdate,
   reconcileStaging,
+  resolveDashboardAttachmentLink,
   type AreDashboardStatesEqual,
 } from './reconcile';
 import {
   APPLY_AGENT_CHANGES_ERROR_TITLE,
   applyAttachment,
-  canApplyAgentChangesInPlace,
   type ApplyAttachmentOutcome,
 } from './show_attachment';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
@@ -121,9 +120,6 @@ export const registerDashboardAppIntegration = ({
   // conversation started here, so switching back to an earlier conversation still finds its own.
   const unlinkedStagedAttachmentIds = new Set<string>();
 
-  // a dashboard that can't be linked, e.g. a managed one, is staged as a new attachment every time
-  const isLinkable = () => canWriteDashboards && canApplyAgentChangesInPlace(api);
-
   const unstageRemovedPanelPointers = (dashboardData: DashboardAttachmentData) => {
     const panelIds = new Set(getPanelIds(dashboardData));
     chat.unstagePanelPointers({
@@ -136,11 +132,15 @@ export const registerDashboardAppIntegration = ({
   const stageOpenDashboard = async () => {
     const { attributes: dashboardState } = api.getSerializedState();
     const dashboardData = dashboardStateToAttachmentData(dashboardState);
-    const linkable = isLinkable();
-    const dashboardId = linkable ? api.savedObjectId$.getValue() : undefined;
-    const dashboardAttachment = linkable
-      ? findDashboardAttachment({ attachments: attachments ?? [], dashboardId })
-      : undefined;
+    const {
+      linkable,
+      origin,
+      attachment: dashboardAttachment,
+    } = resolveDashboardAttachmentLink({
+      api,
+      canWriteDashboards,
+      attachments: attachments ?? [],
+    });
     const attachmentId = reconcileStaging({
       dashboardAttachmentId: dashboardAttachment?.id,
       isNewConversation: !conversationId,
@@ -175,7 +175,7 @@ export const registerDashboardAppIntegration = ({
     if (!linkable) {
       unlinkedStagedAttachmentIds.add(attachmentId);
     }
-    chat.stage({ id: attachmentId, origin: dashboardId, data: dashboardData });
+    chat.stage({ id: attachmentId, origin, data: dashboardData });
     // pointer pills keep the name the panel has on the dashboard
     const relabelledPointers = getRelabelledPanelPointers({
       dashboardData,

@@ -34,10 +34,18 @@ const pointerId = (dashboardAttachmentId: string) =>
 const createDashboardApi = ({
   viewMode = 'edit',
   unsaved = false,
+  managed = false,
   panels = [],
-}: { viewMode?: string; unsaved?: boolean; panels?: unknown[] } = {}): DashboardApi =>
+}: {
+  viewMode?: string;
+  unsaved?: boolean;
+  managed?: boolean;
+  panels?: unknown[];
+} = {}): DashboardApi =>
   ({
     viewMode$: new BehaviorSubject(viewMode),
+    isEditableByUser: true,
+    isManaged: managed,
     savedObjectId$: new BehaviorSubject<string | undefined>(unsaved ? undefined : 'dash-1'),
     getSerializedState: () => ({ attributes: { title: 'Test', panels } }),
   } as unknown as DashboardApi);
@@ -307,6 +315,30 @@ describe('createRefineWithChatAction', () => {
       expect(addAttachment).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({ id: DRAFT_ID, type: DASHBOARD_ATTACHMENT_TYPE, origin: 'dash-1' })
+      );
+      expect(addAttachment).toHaveBeenNthCalledWith(2, expectedPointer(DRAFT_ID));
+      expect(reportEvent).toHaveBeenCalledWith(
+        DASHBOARD_PANEL_REFINE_WITH_CHAT_CLICKED,
+        expect.objectContaining({ chat_state: 'staged_attachment' })
+      );
+    });
+
+    it('stages a managed dashboard without an origin instead of pointing at its attachment', async () => {
+      const { action, dashboardApi, addAttachment, reportEvent } = createAction({
+        dashboardApi: createDashboardApi({ managed: true }),
+        active: activeConversation([linkedDashboardAttachment('dash-1')]),
+      });
+
+      await execute(action, createEmbeddable({ parentApi: dashboardApi }));
+
+      expect(addAttachment).toHaveBeenCalledTimes(2);
+      expect(addAttachment).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          id: DRAFT_ID,
+          type: DASHBOARD_ATTACHMENT_TYPE,
+          origin: undefined,
+        })
       );
       expect(addAttachment).toHaveBeenNthCalledWith(2, expectedPointer(DRAFT_ID));
       expect(reportEvent).toHaveBeenCalledWith(

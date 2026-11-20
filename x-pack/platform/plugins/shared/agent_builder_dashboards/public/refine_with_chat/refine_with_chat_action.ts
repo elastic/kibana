@@ -10,7 +10,6 @@ import { firstValueFrom, map, skip } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
-import type { Conversation } from '@kbn/agent-builder-common';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   DASHBOARD_PANEL_ATTACHMENT_TYPE,
@@ -45,6 +44,7 @@ import {
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { getDashboardsSkillBadge } from '../../common';
 import type { CanvasDashboard, CanvasDashboardRegistry, IdGenerator } from '../attachment_types';
+import { resolveDashboardAttachmentLink } from '../attachment_types/dashboard_integration/reconcile';
 import { reportRefineWithChatClicked, type RefineWithChatChatState } from '../telemetry';
 
 /**
@@ -118,18 +118,6 @@ const getPanelLabel = (embeddable: HasUniqueId, dashboardData: DashboardAttachme
   return (title || derived || typeDisplayName || '').slice(0, DASHBOARD_PANEL_LABEL_MAX_LENGTH);
 };
 
-/**
- * Mirrors the dashboard app integration: the linked attachment is the one whose origin equals the
- * dashboard's saved object id, including an origin-less attachment for an unsaved dashboard.
- */
-const findLinkedDashboardAttachmentId = (
-  conversation: Conversation | undefined,
-  dashboardId: string | undefined
-): string | undefined =>
-  conversation?.attachments?.find(
-    (attachment) => isDashboardAttachment(attachment) && attachment.origin === dashboardId
-  )?.id;
-
 export const createRefineWithChatAction = (
   deps: RefineWithChatActionDeps
 ): ActionDefinition<RefineWithChatActionContext> => {
@@ -170,7 +158,6 @@ export const createRefineWithChatAction = (
       }
       const { dashboardApi, canvasDashboard } = panelDashboard;
 
-      const dashboardId = dashboardApi.savedObjectId$.getValue();
       const dashboardData = dashboardStateToAttachmentData(
         dashboardApi.getSerializedState().attributes
       );
@@ -181,11 +168,14 @@ export const createRefineWithChatAction = (
         reportRefineWithChatClicked(analytics, {
           panel_type: panelType,
           chat_state: chatState,
-          is_saved_dashboard: Boolean(dashboardId),
+          is_saved_dashboard: Boolean(dashboardApi.savedObjectId$.getValue()),
         });
-      const buildDashboardAttachment = (id: string): PendingDashboardAttachment => ({
+      const buildDashboardAttachment = (
+        id: string,
+        origin: string | undefined
+      ): PendingDashboardAttachment => ({
         id,
-        origin: dashboardId,
+        origin,
         type: DASHBOARD_ATTACHMENT_TYPE,
         data: dashboardData,
       });
@@ -212,6 +202,13 @@ export const createRefineWithChatAction = (
       }
 
       const activeConversation = await firstValueFrom(agentBuilder.events.ui.activeConversation$);
+      // the same link the dashboard app integration stages the dashboard with
+      const { origin, attachment: linkedAttachment } = resolveDashboardAttachmentLink({
+        api: dashboardApi,
+        canWriteDashboards,
+        attachments:
+          activeConversation?.conversation?.attachments?.filter(isDashboardAttachment) ?? [],
+      });
 
       // No chat surface is bound: open a new conversation with the dashboard and the pointer.
       if (!activeConversation) {
@@ -222,7 +219,7 @@ export const createRefineWithChatAction = (
           initialMessage: REFINE_WITH_CHAT_INITIAL_MESSAGE,
           autoSendInitialMessage: false,
           attachments: [
-            buildDashboardAttachment(draftAttachmentId.current),
+            buildDashboardAttachment(draftAttachmentId.current, origin),
             buildPanelPointer(draftAttachmentId.current),
           ],
         });
@@ -230,20 +227,16 @@ export const createRefineWithChatAction = (
       }
 
       // The sidebar is open: point at the dashboard attachment already linked to this dashboard.
-      const linkedDashboardAttachmentId = findLinkedDashboardAttachmentId(
-        activeConversation.conversation,
-        dashboardId
-      );
-      if (linkedDashboardAttachmentId) {
+      if (linkedAttachment) {
         reportClicked('linked_attachment');
-        agentBuilder.addAttachment(buildPanelPointer(linkedDashboardAttachmentId));
+        agentBuilder.addAttachment(buildPanelPointer(linkedAttachment.id));
         return;
       }
 
-      // New conversation, or an unsaved dashboard that the sidebar integration did not attach:
-      // stage the dashboard under the draft id (merging with any staged copy) and point at it.
+      // New conversation, or a dashboard the sidebar integration did not attach, e.g. an unlinkable
+      // one: stage the dashboard under the draft id (merging with any staged copy) and point at it.
       reportClicked('staged_attachment');
-      agentBuilder.addAttachment(buildDashboardAttachment(draftAttachmentId.current));
+      agentBuilder.addAttachment(buildDashboardAttachment(draftAttachmentId.current, origin));
       agentBuilder.addAttachment(buildPanelPointer(draftAttachmentId.current));
     },
   };
