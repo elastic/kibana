@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { IconSparkles } from '../../../../../../../common/icons/sparkles';
 import { START_WORKFLOW_MIGRATION_CARD_TITLE } from '../../../../../../../siem_migrations/workflows/components/status_panels/translations';
 import { OnboardingCardId } from '../../../../../../constants';
 import type { OnboardingCardConfig } from '../../../../../../types';
@@ -17,7 +16,7 @@ export const startWorkflowMigrationCardConfig: OnboardingCardConfig<StartWorkflo
   {
     id: OnboardingCardId.siemMigrationsWorkflows,
     title: START_WORKFLOW_MIGRATION_CARD_TITLE,
-    icon: IconSparkles,
+    icon: 'workflow',
     experimentalFlagRequired: 'tinesWorkflowsMigration',
     Component: React.lazy(
       () =>

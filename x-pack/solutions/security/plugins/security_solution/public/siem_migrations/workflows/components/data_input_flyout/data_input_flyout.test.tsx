@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { WorkflowMigrationDataInputFlyout } from './data_input_flyout';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
@@ -82,6 +82,48 @@ describe('WorkflowMigrationDataInputFlyout', () => {
 
     expect(screen.getByTestId('migrationNameInput')).toBeInTheDocument();
     expect(screen.getByTestId('tinesStoriesFilePicker')).toBeInTheDocument();
+  });
+
+  it('should show the upload step as the current step with its sub-steps', () => {
+    renderFlyout();
+
+    expect(screen.getByTestId('workflowsUploadStepNumber')).toHaveTextContent(/Current step is 1/);
+    expect(screen.getByTestId('migrationsSubSteps')).toBeInTheDocument();
+  });
+
+  it('should complete the migration name sub-step when the name is saved', () => {
+    renderFlyout();
+    const subSteps = within(screen.getByTestId('migrationsSubSteps'));
+    expect(subSteps.queryByText(/Step 1 is complete/)).not.toBeInTheDocument();
+
+    fireEvent.blur(screen.getByTestId('migrationNameInput'));
+
+    expect(subSteps.getByText(/Step 1 is complete/)).toBeInTheDocument();
+  });
+
+  it('should complete and collapse the upload step once the migration is created', async () => {
+    renderFlyout();
+
+    await uploadStory();
+
+    await waitFor(() =>
+      expect(screen.getByTestId('workflowsUploadStepNumber')).toHaveTextContent(
+        /Step 1 is complete/
+      )
+    );
+    expect(screen.queryByTestId('migrationsSubSteps')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('tinesStoriesFilePicker')).not.toBeInTheDocument();
+  });
+
+  it('should keep the upload step open when the migration cannot be created', async () => {
+    mockCreateWorkflowMigration.mockRejectedValue(new Error('boom'));
+    renderFlyout();
+
+    await uploadStory();
+
+    await waitFor(() => expect(mockAddError).toHaveBeenCalled());
+    expect(screen.getByTestId('workflowsUploadStepNumber')).toHaveTextContent(/Current step is 1/);
+    expect(screen.getByTestId('migrationsSubSteps')).toBeInTheDocument();
   });
 
   it('should prefill the migration name with the current user name', () => {

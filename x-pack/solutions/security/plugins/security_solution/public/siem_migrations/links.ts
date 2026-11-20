@@ -28,7 +28,6 @@ import type { LinkItem } from '../common/links/types';
 import { IconDashboards } from '../common/icons/dashboards';
 import { IconRules } from '../common/icons/rules';
 import { IconAgent } from '../common/icons/agent';
-import { IconSparkles } from '../common/icons/sparkles';
 
 const WORKFLOWS_READ_CAPABILITY = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}.${WorkflowsManagementUiActions.read}`;
 
@@ -98,7 +97,7 @@ const subLinks: LinkItem[] = [
           'Migrate your workflows to Elastic Workflows using AI powered Automatic migration.',
       }
     ),
-    landingIcon: IconSparkles,
+    landingIcon: 'workflow',
     path: SIEM_MIGRATIONS_WORKFLOWS_PATH,
     // Same requirements as the `minimum` capabilities level of the workflow migrations service
     capabilities: [

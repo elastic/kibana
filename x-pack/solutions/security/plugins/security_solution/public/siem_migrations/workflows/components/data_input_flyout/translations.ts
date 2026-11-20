@@ -12,6 +12,11 @@ export const DATA_INPUT_FLYOUT_TITLE = i18n.translate(
   { defaultMessage: 'Upload Tines stories' }
 );
 
+export const DATA_INPUT_FLYOUT_UPLOAD_STEP_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.dataInputFlyout.uploadStep.title',
+  { defaultMessage: 'Upload Tines stories to migrate' }
+);
+
 export const DATA_INPUT_FLYOUT_UPLOAD_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.workflows.dataInputFlyout.upload.title',
   { defaultMessage: 'Upload stories' }
