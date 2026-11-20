@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MaybePromise } from '@kbn/utility-types';
-import { UnauthorizedError } from '@kbn/es-errors';
-import type { SetAuthHeaders } from '@kbn/core-http-server';
+import type { MaybePromise } from '@kbn/utility-types';
+import type { UnauthorizedError } from '@kbn/es-errors';
+import type { Headers, SetAuthHeaders } from '@kbn/core-http-server';
 import { isRealRequest } from '@kbn/core-http-router-server-internal';
 import type {
   ScopeableRequest,
@@ -22,7 +22,8 @@ import type {
 
 /** @internal */
 export type InternalUnauthorizedErrorHandler = (
-  error: UnauthorizedError
+  error: UnauthorizedError,
+  authHeaders?: Headers
 ) => MaybePromise<UnauthorizedErrorHandlerResult>;
 
 /** @internal */
@@ -54,13 +55,16 @@ export const createInternalErrorHandler = ({
   if (!isRealRequest(request)) {
     return notHandledInternalErrorHandler;
   }
-  return async (error) => {
+  return async (error, authHeaders) => {
     try {
       const handler = getHandler();
       if (!handler) {
         return toolkit.notHandled();
       }
-      const result = await handler({ request, error }, toolkit);
+      const result = await handler(
+        { request, error, ...(authHeaders && { authHeaders }) },
+        toolkit
+      );
       if (isRetryResult(result)) {
         setAuthHeaders(request, result.authHeaders);
       }

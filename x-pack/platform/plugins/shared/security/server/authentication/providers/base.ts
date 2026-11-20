@@ -47,6 +47,17 @@ export interface AuthenticationProviderOptions {
  */
 export type AuthenticationProviderSpecificOptions = Record<string, unknown>;
 
+/** Options for a full authentication check of an existing session. */
+export interface AuthenticationOptions {
+  /**
+   * Authenticator sets this after it confirms that the request uses the supplied session.
+   * Core already copied the session token into the request's Authorization header.
+   * The owning provider must contact Elasticsearch, even on minimal-authentication routes.
+   * Request headers stay unchanged. Without these options, normal HTTP rules apply.
+   */
+  reauthenticate: boolean;
+}
+
 /**
  * Name of the Elastic Cloud built-in SSO realm.
  */
@@ -98,10 +109,16 @@ export abstract class BaseAuthenticationProvider {
   /**
    * Performs request authentication based on the session created during login or other information
    * associated with the request (e.g. `Authorization` HTTP header).
+   * Normal authentication honors incoming HTTP credentials. During session renewal, the owning
+   * provider checks the supplied session with Elasticsearch without changing the request headers.
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
    */
-  abstract authenticate(request: KibanaRequest, state?: unknown): Promise<AuthenticationResult>;
+  abstract authenticate(
+    request: KibanaRequest,
+    state?: unknown,
+    options?: AuthenticationOptions
+  ): Promise<AuthenticationResult>;
 
   /**
    * Invalidates user session associated with the request.

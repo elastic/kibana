@@ -30,7 +30,7 @@ export class HTTPAuthorizationHeader {
    * @param [headerName] Optional name of the HTTP header to extract authentication information from. By default, the
    * authentication information is extracted from the `Authorization` HTTP header.
    */
-  static parseFromRequest(request: KibanaRequest, headerName = 'authorization') {
+  static parseFromRequest(request: Pick<KibanaRequest, 'headers'>, headerName = 'authorization') {
     const authorizationHeaderValue = request.headers[headerName.toLowerCase()];
     if (!authorizationHeaderValue || typeof authorizationHeaderValue !== 'string') {
       return null;
