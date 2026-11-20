@@ -211,7 +211,7 @@ export function OnboardingFirstInvestigationStep({
                 size="s"
                 iconType="refresh"
                 isLoading={retry.isLoading}
-                onClick={() => retry.mutate()}
+                onClick={() => retry.start()}
                 data-test-subj="nightshiftOnboardingRetryButton"
               >
                 {i18n.translate('xpack.nightshift.onboarding.investigate.retryButton', {

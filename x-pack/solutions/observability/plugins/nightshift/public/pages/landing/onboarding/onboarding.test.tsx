@@ -7,9 +7,12 @@
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
+import type { OnboardingSuggestionsExecution } from '@kbn/nightshift-investigations-plugin/common';
+import { useIsAssigningAgentConnectors } from '../../../data/sandbox_connectors/use_agent_connectors';
 import { useConnectorsByType } from '../../../data/sandbox_connectors/use_connectors_by_type';
 import { useOnboarding } from './use_onboarding';
 import { NightshiftOnboarding } from './onboarding';
@@ -20,16 +23,24 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 const mockStartSuggestions = jest.fn();
+const mockRefetchOnboarding = jest.fn();
+const mockAddError = jest.fn();
 
 jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: () => ({ services: { http: { basePath: { get: () => '/s/onboarding-test' } } } }),
+  useKibana: () => ({
+    services: {
+      http: { basePath: { get: () => '/s/onboarding-test' } },
+      nightshiftInvestigations: { investigationsClient: { fetch: mockStartSuggestions } },
+      notifications: { toasts: { addError: mockAddError } },
+    },
+  }),
 }));
 jest.mock('../../../components/ui/flyout_share_url_button', () => ({
   useFlyoutShareUrlCustomAction: () => ({}),
 }));
 jest.mock('./use_onboarding', () => ({
+  ...jest.requireActual('./use_onboarding'),
   useOnboarding: jest.fn(),
-  useStartOnboardingSuggestions: () => ({ mutate: mockStartSuggestions, isLoading: false }),
 }));
 jest.mock('../../../data/service_accounts/use_investigator_service_account', () => ({
   useInvestigatorServiceAccount: () => ({ data: {} }),
@@ -37,6 +48,9 @@ jest.mock('../../../data/service_accounts/use_investigator_service_account', () 
 }));
 jest.mock('../../../data/sandbox_connectors/use_connectors_by_type', () => ({
   useConnectorsByType: jest.fn(),
+}));
+jest.mock('../../../data/sandbox_connectors/use_agent_connectors', () => ({
+  useIsAssigningAgentConnectors: jest.fn(),
 }));
 jest.mock('../../../data/automations/use_automations', () => ({
   useFetchAutomations: () => ({
@@ -82,24 +96,32 @@ const mockConnectors = (
     error: null,
   });
 
-/** The space is enabled; with `explored`, a first-investigations run exists. */
-const mockOnboarding = ({ explored = false }: { explored?: boolean } = {}) =>
+const existingExecution: OnboardingSuggestionsExecution = {
+  execution_id: 'exec-1',
+  status: 'succeeded',
+};
+
+const mockOnboarding = (execution?: OnboardingSuggestionsExecution) =>
   (useOnboarding as jest.Mock).mockReturnValue({
-    data: {
-      agent_installed: true,
-      ...(explored && { execution: { execution_id: 'exec-1', status: 'completed' } }),
-    },
+    data: { agent_installed: true, execution },
     isInitialLoading: false,
+    refetch: mockRefetchOnboarding,
   });
 
-const renderOnboarding = (latestInvestigation?: InvestigationSummary) =>
-  render(
-    <I18nProvider>
-      <MemoryRouter>
-        <NightshiftOnboarding onFinish={jest.fn()} latestInvestigation={latestInvestigation} />
-      </MemoryRouter>
-    </I18nProvider>
+const renderOnboarding = (latestInvestigation?: InvestigationSummary) => {
+  const queryClient = new QueryClient({ logger: { ...console, error: jest.fn() } });
+  const view = () => (
+    <QueryClientProvider client={queryClient}>
+      <I18nProvider>
+        <MemoryRouter>
+          <NightshiftOnboarding onFinish={jest.fn()} latestInvestigation={latestInvestigation} />
+        </MemoryRouter>
+      </I18nProvider>
+    </QueryClientProvider>
   );
+  const { rerender, ...result } = render(view());
+  return { ...result, rerender: () => rerender(view()) };
+};
 
 const currentStep = () =>
   STEP_IDS.find(
@@ -114,7 +136,12 @@ describe('NightshiftOnboarding', () => {
   beforeEach(() => {
     window.localStorage.clear();
     mockOnboarding();
-    mockStartSuggestions.mockReset();
+    mockStartSuggestions.mockReset().mockResolvedValue({ execution_id: 'exec-2' });
+    mockRefetchOnboarding.mockReset().mockResolvedValue({
+      data: { agent_installed: true, execution: { ...existingExecution, needs_refresh: false } },
+    });
+    mockAddError.mockClear();
+    jest.mocked(useIsAssigningAgentConnectors).mockReturnValue(false);
   });
 
   it('keeps the intro banner dismissed on reload', () => {
@@ -206,13 +233,13 @@ describe('NightshiftOnboarding', () => {
       ).toHaveTextContent('Proceed');
     });
 
-    it('starts looking for first investigations either way', () => {
+    it('starts looking for first investigations when the step is skipped', async () => {
       mockConnectors({ '.new_relic': 1, '.github': 0 });
 
       goToSources();
       fireEvent.click(screen.getByTestId('nightshiftOnboardingConnectSourcesProceedButton'));
 
-      expect(mockStartSuggestions).toHaveBeenCalledTimes(1);
+      await waitFor(() => expect(mockStartSuggestions).toHaveBeenCalledTimes(1));
     });
 
     it('links back to Add data instead of offering a Back button', () => {
@@ -242,7 +269,7 @@ describe('NightshiftOnboarding', () => {
 
   describe('while suggestions are shown, before any investigation', () => {
     beforeEach(() => {
-      mockOnboarding({ explored: true });
+      mockOnboarding(existingExecution);
       mockConnectors({ '.new_relic': 1, '.github': 0 });
     });
 
@@ -253,7 +280,7 @@ describe('NightshiftOnboarding', () => {
       expect(linkedSteps()).toEqual(['addData', 'connectSources']);
     });
 
-    it('links back to Try first investigation from a detour', () => {
+    it('returns to the existing suggestions from a detour when assignments are unchanged', async () => {
       renderOnboarding();
 
       fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-connectSources'));
@@ -265,7 +292,60 @@ describe('NightshiftOnboarding', () => {
       expect(linkedSteps()).toEqual(['connectSources', 'investigate']);
 
       fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-investigate'));
+      await waitFor(() => expect(currentStep()).toBe('investigate'));
+      expect(mockStartSuggestions).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['connectSources', 'nightshiftOnboardingConnectSourcesProceedButton'],
+      ['addData', 'nightshiftOnboardingStepLink-investigate'],
+    ])('refreshes stale suggestions when returning from %s', async (sourceStep, returnAction) => {
+      mockRefetchOnboarding.mockResolvedValue({
+        data: { agent_installed: true, execution: { ...existingExecution, needs_refresh: true } },
+      });
+      const { rerender } = renderOnboarding();
+      fireEvent.click(screen.getByTestId(`nightshiftOnboardingStepLink-${sourceStep}`));
+
+      fireEvent.click(screen.getByTestId(returnAction));
+
+      await waitFor(() => expect(mockStartSuggestions).toHaveBeenCalledTimes(1));
+      mockOnboarding({ execution_id: 'exec-2', status: 'running' });
+      rerender();
       expect(currentStep()).toBe('investigate');
+      expect(stepsCard()).toHaveTextContent('Analyzing your data');
+    });
+
+    it('blocks both return actions until a connector assignment has settled', () => {
+      jest.mocked(useIsAssigningAgentConnectors).mockReturnValue(true);
+      const { rerender } = renderOnboarding();
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-connectSources'));
+      const proceed = screen.getByTestId('nightshiftOnboardingConnectSourcesProceedButton');
+      const shortcut = screen.getByTestId('nightshiftOnboardingStepLink-investigate');
+
+      expect(proceed).toBeDisabled();
+      expect(shortcut).toBeDisabled();
+
+      jest.mocked(useIsAssigningAgentConnectors).mockReturnValue(false);
+      rerender();
+      expect(proceed).toBeEnabled();
+      expect(shortcut).toBeEnabled();
+    });
+
+    it('keeps the source step available to retry after a refresh check fails', async () => {
+      const error = new Error('Could not check onboarding');
+      mockRefetchOnboarding.mockRejectedValueOnce(error);
+      renderOnboarding();
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-connectSources'));
+      const proceed = screen.getByTestId('nightshiftOnboardingConnectSourcesProceedButton');
+
+      fireEvent.click(proceed);
+
+      await waitFor(() => expect(mockAddError).toHaveBeenCalledWith(error, expect.any(Object)));
+      expect(currentStep()).toBe('connectSources');
+      await waitFor(() => expect(proceed).toBeEnabled());
+      fireEvent.click(proceed);
+      await waitFor(() => expect(currentStep()).toBe('investigate'));
+      expect(mockStartSuggestions).not.toHaveBeenCalled();
     });
   });
 
@@ -273,7 +353,7 @@ describe('NightshiftOnboarding', () => {
     const investigation = { id: 'inv-1' } as InvestigationSummary;
 
     beforeEach(() => {
-      mockOnboarding({ explored: true });
+      mockOnboarding(existingExecution);
       mockConnectors({ '.new_relic': 1, '.github': 0 });
     });
 

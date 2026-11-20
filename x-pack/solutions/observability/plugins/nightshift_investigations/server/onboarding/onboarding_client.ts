@@ -15,6 +15,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type {
   EnableOnboardingResponse,
   GetOnboardingResponse,
@@ -33,6 +34,10 @@ import {
 import { parseSuggestions } from './parse_suggestions';
 
 export { OnboardingUnavailableError };
+
+const connectorSnapshotSchema = lazySchema(() =>
+  z.object({ nightshiftOnboardingConnectorIds: z.array(z.string()) })
+);
 
 export interface OnboardingClientDeps {
   workflowsManagement?: WorkflowsServerPluginSetup;
@@ -74,7 +79,19 @@ const toStatus = (status: string): OnboardingSuggestionsStatus => {
   return status === 'completed' ? 'succeeded' : 'failed';
 };
 
-const toExecutionResponse = (execution: WorkflowExecutionDto): OnboardingSuggestionsExecution => {
+const needsRefresh = (execution: WorkflowExecutionDto, assignedIds: Set<string>): boolean => {
+  const snapshot = connectorSnapshotSchema.safeParse(execution.context?.metadata);
+  if (!snapshot.success) return true;
+  const previousIds = new Set(snapshot.data.nightshiftOnboardingConnectorIds);
+  return (
+    previousIds.size !== assignedIds.size || [...assignedIds].some((id) => !previousIds.has(id))
+  );
+};
+
+const toExecutionResponse = (
+  execution: WorkflowExecutionDto,
+  assignedIds: Set<string> | undefined
+): OnboardingSuggestionsExecution => {
   const status = toStatus(execution.status);
   const output = (execution.context?.output ?? {}) as { suggestions?: unknown };
   return {
@@ -83,6 +100,7 @@ const toExecutionResponse = (execution: WorkflowExecutionDto): OnboardingSuggest
     started_at: execution.startedAt,
     finished_at: status === 'running' ? undefined : execution.finishedAt,
     error: execution.error?.message,
+    ...(assignedIds && { needs_refresh: needsRefresh(execution, assignedIds) }),
     suggestions: status === 'succeeded' ? parseSuggestions(output) : undefined,
   };
 };
@@ -121,6 +139,22 @@ export const createOnboardingClient = ({
     }
   };
 
+  const getAssignedConnectorIds = async (
+    request: KibanaRequest
+  ): Promise<Set<string> | undefined> => {
+    const { agentBuilder } = getDeps();
+    if (!agentBuilder) return;
+    try {
+      const registry = await agentBuilder.agents.getRegistry({ request });
+      const agent = await registry.get(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
+      return new Set(agent.configuration.connector_ids);
+    } catch (error) {
+      logger.warn(
+        `Could not read the investigation agent's connectors: ${(error as Error).message}`
+      );
+    }
+  };
+
   return {
     get: async (request) => {
       const agentInstalled = await isAgentInstalled(request);
@@ -144,9 +178,11 @@ export const createOnboardingClient = ({
         omitStepExecutions: true,
         request,
       });
+      const assignedIds =
+        execution && agentInstalled ? await getAssignedConnectorIds(request) : undefined;
       return {
         agent_installed: agentInstalled,
-        ...(execution ? { execution: toExecutionResponse(execution) } : {}),
+        ...(execution ? { execution: toExecutionResponse(execution, assignedIds) } : {}),
       };
     },
 
@@ -236,12 +272,14 @@ export const createOnboardingClient = ({
       if (!workflow?.definition) {
         throw new OnboardingUnavailableError('The onboarding workflow is not installed');
       }
+      const assignedIds = await getAssignedConnectorIds(request);
       const executionId = await management.runWorkflow(
         { ...workflow, definition: workflow.definition },
         spaceId,
         {},
         request,
-        'nightshift-onboarding'
+        'nightshift-onboarding',
+        assignedIds && { nightshiftOnboardingConnectorIds: [...assignedIds] }
       );
       logger.info(`Started onboarding suggestions, execution_id=${executionId}`);
       return { execution_id: executionId };

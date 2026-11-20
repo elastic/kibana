@@ -18,6 +18,7 @@ export interface OnboardingStepState {
   status: OnboardingStepStatus;
   /** Makes the step title a link to that step. */
   onClick?: () => void;
+  isDisabled?: boolean;
   /** Short line under the step title. */
   hint?: string;
 }
@@ -76,7 +77,7 @@ export function OnboardingStepsCard({
         `}
       >
         {ONBOARDING_STEP_IDS.map((stepId, index) => {
-          const { status, onClick, hint } = steps[stepId];
+          const { status, onClick, isDisabled, hint } = steps[stepId];
           const isComplete = status === 'complete';
           const isCurrent = status === 'current';
           const isLast = index === ONBOARDING_STEP_IDS.length - 1;
@@ -160,6 +161,7 @@ export function OnboardingStepsCard({
                     <EuiLink
                       color="text"
                       onClick={onClick}
+                      disabled={isDisabled}
                       data-test-subj={`nightshiftOnboardingStepLink-${stepId}`}
                     >
                       {title}
