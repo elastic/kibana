@@ -51,6 +51,53 @@ const upsertPanelSchema = lazySchema(() =>
   })
 );
 
+const upsertOptionsSchema = lazySchema(() =>
+  z.looseObject({
+    hide_panel_titles: z.boolean().optional().describe('Hide panel titles. Defaults to false.'),
+    hide_panel_borders: z.boolean().optional().describe('Hide panel borders. Defaults to false.'),
+    use_margins: z
+      .boolean()
+      .optional()
+      .describe('Separate panels with a margin. Defaults to true.'),
+    sync_colors: z
+      .boolean()
+      .optional()
+      .describe('Synchronize colors across panels that share a data source. Defaults to false.'),
+    sync_tooltips: z
+      .boolean()
+      .optional()
+      .describe('Synchronize tooltips across panels. Defaults to false.'),
+    sync_cursor: z
+      .boolean()
+      .optional()
+      .describe('Synchronize the cursor position across panels. Defaults to true.'),
+    auto_apply_filters: z
+      .boolean()
+      .optional()
+      .describe(
+        'When false, control filter changes apply only after the user clicks the update button. Defaults to true.'
+      ),
+  })
+);
+
+// Browsers store timer delays as 32-bit signed integers; a longer interval overflows and the
+// dashboard refreshes continuously.
+const MAX_REFRESH_INTERVAL_MS = 2_147_483_647;
+
+const upsertRefreshIntervalSchema = lazySchema(() =>
+  z.object({
+    pause: z.boolean().describe('false runs auto-refresh, true pauses it.'),
+    value: z
+      .number()
+      .int()
+      .min(1000)
+      .max(MAX_REFRESH_INTERVAL_MS)
+      .describe(
+        'Interval in milliseconds, e.g. 30000 for 30 seconds. Values below the deployment minimum (5 seconds on serverless) run at that minimum.'
+      ),
+  })
+);
+
 /**
  * The desired changes to a dashboard, keyed by id: dashboard fields, and sections, panels and
  * controls to create or update, and ids to remove.
@@ -70,6 +117,22 @@ export const upsertDashboardSchema = lazySchema(() =>
       .optional()
       .describe(
         'Set ONLY when the user asks for a time window (e.g. "last 7 days"); otherwise omit it and a data-aware default is applied. The screen context time range is not a request unless the user refers to it. Use Kibana date math or ISO 8601, e.g. { from: "now-7d", to: "now" } or { from: "2024-05-20T00:00:00.000Z", to: "2024-05-24T23:59:59.999Z", mode: "absolute" }.'
+      ),
+    options: upsertOptionsSchema
+      .optional()
+      .describe(
+        'Display and behavior settings. Set ONLY the keys the user asks to change; the other keys keep their current values.'
+      ),
+    refresh_interval: upsertRefreshIntervalSchema
+      .optional()
+      .describe(
+        'Auto-refresh. Set ONLY when the user asks, e.g. "refresh every 30 seconds" is { pause: false, value: 30000 }. Saved only together with a time range. Replaces the current setting.'
+      ),
+    esql_approximation: z
+      .boolean()
+      .optional()
+      .describe(
+        'Fast mode: ES|QL panels with STATS run with approximate, faster results. Set ONLY when the user asks. false turns it off.'
       ),
     sections: z
       .array(upsertSectionSchema)
