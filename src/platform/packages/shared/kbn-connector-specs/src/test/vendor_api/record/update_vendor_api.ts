@@ -48,6 +48,7 @@ import {
   snapshotFile,
 } from '../spec/load_vendor_specs';
 import { parseSpecText } from '../spec/parse_spec_text';
+import type { ProtocolSpec } from '../spec/protocol_sources';
 import {
   loadProtocolSpec,
   parseProtocolSnapshot,
@@ -102,6 +103,8 @@ export interface UpdateVendorApiResult {
   readonly otherProblems: readonly DriftProblem[];
   /** The specs the actions were recorded against, by source, without the overlay. */
   readonly specs: Readonly<Record<string, OpenApiDocument>>;
+  /** The GraphQL and MCP specs the actions were recorded against, by source. */
+  readonly protocols: Readonly<Record<string, ProtocolSpec>>;
   /**
    * The zero-based indexes of the overlay actions that match nothing in any source; only
    * assessed when every source was fetched, as a snapshot lacks what the connector doesn't call.
@@ -529,6 +532,7 @@ export const updateVendorApi = async ({
     ),
     otherProblems: [...otherProblems.values()],
     specs: raw,
+    protocols,
     staleOverlayActions,
     ...(recording.fieldUse ? { fieldUse: recording.fieldUse } : {}),
     ...(recording.untracked ? { untracked: recording.untracked } : {}),

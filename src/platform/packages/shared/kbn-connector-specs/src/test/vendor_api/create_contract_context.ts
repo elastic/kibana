@@ -29,6 +29,8 @@ import type {
 import { getSchemaForAuthType } from '../../lib';
 import type { FieldUse } from './field_use';
 import { markReturned, recordSentFields, trackFieldUse } from './field_use';
+import { trackGraphQLFieldUse } from './graphql_field_use';
+import { isGraphQLOperation, matchedOperationOf } from './matched_operation';
 
 export interface ContractContextOptions extends EmulatorOptions {
   readonly connector: ConnectorSpec;
@@ -167,6 +169,20 @@ const parseJsonBody = (data: unknown): unknown => {
   } catch {
     return undefined;
   }
+};
+
+// A GraphQL request carries its query in the body of a POST, and in the URL of a GET, with the
+// variables as JSON.
+const graphQLRequestOf = (method: string | undefined, body: unknown, url: URL): unknown => {
+  if (method?.toLowerCase() !== 'get') {
+    return body;
+  }
+  const variables = url.searchParams.get('variables');
+  return {
+    query: url.searchParams.get('query') ?? undefined,
+    operationName: url.searchParams.get('operationName') ?? undefined,
+    variables: variables === null ? undefined : parseJsonBody(variables),
+  };
 };
 
 // Not a jest mock, so the vendor API recorder can run outside jest.
@@ -308,10 +324,25 @@ export const createContractContext = async ({
       return response;
     }
     // The operation this very request matched, recorded while it was in flight.
-    const matched =
-      response.request instanceof Request ? matchedOf.get(response.request) : undefined;
-    if (!matched || !('method' in matched)) {
+    const matched = matchedOperationOf(
+      response.request instanceof Request ? matchedOf.get(response.request) : undefined
+    );
+    if (!matched) {
       return response;
+    }
+    // A GraphQL response answers each root field the query selects, under its alias.
+    if (isGraphQLOperation(matched)) {
+      const request = graphQLRequestOf(
+        response.config.method,
+        parseJsonBody(response.config.data),
+        new URL(client.getUri(response.config))
+      );
+      return {
+        ...response,
+        data: trackGraphQLFieldUse(response.data, request, (field) =>
+          trackFields({ ...field, source: matched.source })
+        ),
+      };
     }
     const use = trackFields(matched);
     recordSentFields(parseJsonBody(response.config.data), use);

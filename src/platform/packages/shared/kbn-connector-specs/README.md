@@ -748,6 +748,12 @@ node scripts/connector_vendor_api --connector databricks --source docs=https://d
 
 The pages are converted to OpenAPI with `convertMarkdownReference`, and recorded, projected and snapshotted like any other source. A prefix that selects no page fails the run, as the vendor may have moved the group. `--inspect` takes `--format` and `--pages` too, and adds them to the manifest with the source.
 
+GraphQL APIs are recorded against their schema: `--format name=graphql` marks the source, whose URL is the schema as SDL or as the result of an introspection query, and `--endpoint name=url` names the URLs the API answers queries at, which the schema doesn't. Both are kept in `manifest.json`:
+
+```sh
+node scripts/connector_vendor_api --connector monday_com --source "v2=https://api.monday.com/v2/get_schema?format=sdl" --format v2=graphql --endpoint v2=https://api.monday.com/v2
+```
+
 The folder holds:
 
 - `manifest.json`: the sources and the operations each action calls.
@@ -817,7 +823,7 @@ Other handler errors, auth types that can't be used against the contract mock, a
 }
 ```
 
-- `sources`: one entry per vendor spec. `format` is what the vendor publishes (`openapi`, `swagger`, `discovery` or `smithy`, or the template of a Markdown reference, whose `url` is its `llms.txt` index and `pages` the URL prefixes fetched). `apiVersion` is the spec's `info.version`; Markdown references have none. `fetchedAt` only changes when the snapshot changes. An optional `note`, written by hand and kept on updates, explains an unusual source, such as a vendor test fixture.
+- `sources`: one entry per vendor spec. `format` is what the vendor publishes (`openapi`, `swagger`, `discovery`, `smithy` or `graphql`, whose `endpoints` are the URLs it answers queries at, or the template of a Markdown reference, whose `url` is its `llms.txt` index and `pages` the URL prefixes fetched). `apiVersion` is the spec's `info.version`; Markdown references have none. `fetchedAt` only changes when the snapshot changes. An optional `note`, written by hand and kept on updates, explains an unusual source, such as a vendor test fixture.
 - `operations`: per action, the operations its runs matched, by source, lowercase method and path template, sorted.
 - `pagination`: how an operation pages, as the contract mock takes it (see the `@kbn/connector-emulate` README), or `"none"` for one that returns everything at once. Operations look like they return a collection when they take a cursor, offset or page parameter, a page size next to an array in the response, or return a bare array. For those without one, the script proposes a descriptor from `x-speakeasy-pagination`, `x-ms-pageable` or parameter and field names, and warns so it gets reviewed; when it can't, it fails until one is declared. Declared descriptors are kept on every run.
 - `unmatched`: per action, requests that match no operation in any source, with the reason that's expected. A `{name}` path segment matches any value, as the generated inputs vary. A request that matches nothing and isn't listed fails the script.
@@ -858,6 +864,7 @@ node scripts/connector_vendor_api --connector monday_com \
 ```
 
 - A `graphql` source's URL serves SDL or an introspection result, and an `mcp` source's serves a `tools/list` result, wrapped in JSON-RPC or not. The URL is only read with `GET`, so a server that needs an introspection request or an MCP session, or credentials, is captured once and served from a file.
+- GraphQL sources take no overlay corrections or pagination declarations yet.
 - `--inspect` skips these sources, as it reads OpenAPI operations.
 - A `read` action may call GraphQL queries and MCP tools annotated `readOnlyHint`. Anything else needs a `{ "name": "..." }` entry in the action's `queries` in `fixtures.json`, which says it changes no vendor state.
 - `--drift` classifies changes to the operations the connector calls, as `oasdiff` does for OpenAPI. A response that widens is breaking, as a connector reading it may not handle the new value: for GraphQL a new value of an enum a response can hold, or a new union member (`findSchemaChanges`), and for MCP a new output enum value. New optional input is non-breaking, as is a new value of an enum only requests send. An MCP tool losing its `readOnlyHint` is breaking, as read actions may only call read-only tools. Any other change to an MCP schema, such as a tighter bound, is treated as breaking.
@@ -876,6 +883,7 @@ For each connector it:
 - fetches every source in `manifest.json` (a source that doesn't load is reported as unreachable);
 - records the actions against the committed snapshots and against the latest specs, with the overlay applied, as a refresh would, but in a temporary copy of the folder;
 - compares each regenerated snapshot with the committed one and classifies the changes with [`oasdiff`](https://github.com/oasdiff/oasdiff) `changelog`. The binary is `OASDIFF_BIN`, else `oasdiff` on the `PATH`, as for `@kbn/api-contracts`; Kibana's CI agents have it. A response that widens (a new enum value, a longer string) is breaking, since a connector reading the field may not handle it; deprecations are their own kind;
+- compares each GraphQL schema, cut down to the root fields the manifest records, with its committed snapshot using `graphql-js`'s schema changes, plus newly deprecated root fields, arguments and fields. Each change names its schema coordinate (`Item.name`) and is attributed to the root fields whose request or response reaches it, with the change ids `oasdiff` uses. An action's field use and its queries' selections are resolved to coordinates, so a changed field only concerns the actions that read, select or send it;
 - reports overlay actions that no longer match the latest specs.
 
 Each connector in the JSON report gets a `verdict`: `healthy`, `vendor-drift` (the actions pass against the snapshots but not the latest specs), `kibana-regression` (they fail against the snapshots already) or `unknown` (a spec didn't load). Its `outcome` says what to do: `none`, `refresh` (only non-breaking changes, or the actions now call other operations, and everything passes; a run with `--refresh` updates the artifacts) or `issue` (anything breaking, deprecated, unreachable, unclassified without `oasdiff`, failing, or a stale overlay action). A new `info.version` alone changes nothing, since some vendors bump it on every deploy.

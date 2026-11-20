@@ -108,6 +108,13 @@ export const loadProtocolSpec = async (
   return { format, sdl: normalizeSdl(sdl), endpoints };
 };
 
+/**
+ * A snapshot's schema. Vendor schemas apply directives they don't define, so SDL is built without
+ * validating it, as `normalizeSdl` does.
+ */
+export const buildSnapshotSchema = (sdl: string): GraphQLSchema =>
+  buildSchema(sdl, { assumeValidSDL: true });
+
 /** The spec a committed snapshot holds. */
 export const parseProtocolSnapshot = (
   format: ProtocolFormat,
