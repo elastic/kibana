@@ -15,6 +15,7 @@ import type { IconType } from '@elastic/eui';
 import {
   connectorSpecHasEvents,
   getConnectorSpec,
+  isDualConnectorSpec,
   isInboundOnlyConnectorSpec,
 } from '@kbn/connector-specs';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
@@ -117,6 +118,21 @@ function getIconFromSpec(spec: ConnectorSpecResponse): IconType {
 
 const NO_AUTH_TYPE_ID = 'none';
 
+/** Marks one auth type option so the form's auth picker does not offer it. */
+const hideAuthTypeInPicker = (schema: ConnectorZodSchema, authTypeId: string): void => {
+  const { secrets } = schema.shape;
+  if (!('options' in secrets)) {
+    return;
+  }
+  for (const option of secrets.options) {
+    const authTypeField = (option as { shape?: Record<string, { value?: unknown }> }).shape
+      ?.authType;
+    if (authTypeField?.value === authTypeId) {
+      setMeta(option, { ...getMeta(option), hideInPicker: true });
+    }
+  }
+};
+
 /**
  * Transforms a ConnectorSpecResponse into an ActionTypeModel.
  *
@@ -155,9 +171,23 @@ export function transformSpecToActionTypeModel(
       // Connectors that receive inbound events stay useful with every action turned off.
       const allowNoActions = registeredSpec !== undefined && connectorSpecHasEvents(registeredSpec);
       // First auth type that carries credentials, used when actions are turned back on.
-      const credentialedAuthTypeId = (registeredSpec?.auth?.types ?? [])
-        .map((authTypeDef) => (typeof authTypeDef === 'string' ? authTypeDef : authTypeDef.type))
-        .find((authTypeId) => authTypeId !== NO_AUTH_TYPE_ID);
+      const authTypeIds = (registeredSpec?.auth?.types ?? []).map((authTypeDef) =>
+        typeof authTypeDef === 'string' ? authTypeDef : authTypeDef.type
+      );
+      const credentialedAuthTypeId = authTypeIds.find(
+        (authTypeId) => authTypeId !== NO_AUTH_TYPE_ID
+      );
+
+      // Dual connectors that also offer no authentication get an Outbound switch, which is the
+      // only way to choose it. Leave No authentication out of the auth picker for them.
+      if (
+        registeredSpec !== undefined &&
+        isDualConnectorSpec(registeredSpec) &&
+        authTypeIds.includes(NO_AUTH_TYPE_ID) &&
+        credentialedAuthTypeId !== undefined
+      ) {
+        hideAuthTypeInPicker(connectorZodSchema, NO_AUTH_TYPE_ID);
+      }
 
       // Bridges UseField's FieldHook API to ConnectorActionSelector's value/onChange props.
       const ConnectorActionSelectorField = ({

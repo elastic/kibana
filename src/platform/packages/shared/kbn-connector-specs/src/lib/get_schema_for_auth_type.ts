@@ -34,7 +34,6 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
   let labelOverride: string | undefined;
   let isRecommendedOverride: boolean | undefined;
   let isLegacyOverride: boolean | undefined;
-  let hideInPickerOverride: boolean | undefined;
   let supportsSandboxOverride: boolean | undefined;
 
   if (isString(authTypeDef)) {
@@ -48,7 +47,6 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     labelOverride = def.overrides?.label;
     isRecommendedOverride = def.isRecommended;
     isLegacyOverride = def.isLegacy;
-    hideInPickerOverride = def.hideInPicker;
     supportsSandboxOverride = def.supportsSandbox;
   }
 
@@ -113,7 +111,6 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     ...(labelOverride !== undefined ? { label: labelOverride } : {}),
     ...(isRecommendedOverride !== undefined ? { isRecommended: isRecommendedOverride } : {}),
     ...(isLegacyOverride !== undefined ? { isLegacy: isLegacyOverride } : {}),
-    ...(hideInPickerOverride !== undefined ? { hideInPicker: hideInPickerOverride } : {}),
     ...(supportsSandboxOverride !== undefined ? { supportsSandbox: supportsSandboxOverride } : {}),
     ...(isKibanaManagedAuthTypeId(authTypeId) ? { isKibanaManaged: true } : {}),
   };

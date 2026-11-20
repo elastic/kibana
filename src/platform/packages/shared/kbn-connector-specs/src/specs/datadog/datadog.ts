@@ -195,9 +195,8 @@ export const Datadog: ConnectorSpec = {
         },
       },
       {
-        // For connectors that only receive events. Set by the Outbound switch, not the picker.
+        // For connectors that only receive events.
         type: 'none',
-        hideInPicker: true,
         defaults: {},
         overrides: {
           label: i18n.translate('connectorSpecs.datadog.auth.none.label', {
