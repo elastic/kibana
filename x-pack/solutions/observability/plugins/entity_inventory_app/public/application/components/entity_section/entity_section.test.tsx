@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -14,6 +14,8 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import type { InventoryType } from '@kbn/entity-inventory-plugin/common';
 import { HOST_TYPE_FIXTURE } from '../../../__fixtures__/inventory_data';
+import { installIntersectionObserverMock } from '../../../__fixtures__/intersection_observer_mock';
+import type { IntersectionObserverMockControls } from '../../../__fixtures__/intersection_observer_mock';
 import { createScenarioEntityInventoryApiClient } from '../../../__fixtures__/inventory_scenarios';
 import type { FixtureScenario } from '../../../__fixtures__/inventory_scenarios';
 import { createAppServicesMock } from '../../../mocks';
@@ -51,7 +53,7 @@ const renderSection = ({
     </I18nProvider>
   );
   const { rerender, unmount } = render(section);
-  return { rerenderSection: () => rerender(section), unmount };
+  return { rerenderSection: () => rerender(section), unmount, inventoryApi };
 };
 
 describe('EntitySection', () => {
@@ -92,6 +94,58 @@ describe('EntitySection', () => {
       renderSection({ scenario: 'normal', onTruncatedChange });
 
       expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+      expect(onTruncatedChange).not.toHaveBeenCalled();
+    });
+  });
+  describe('loading when near the viewport', () => {
+    let observer: IntersectionObserverMockControls;
+
+    beforeEach(() => {
+      observer = installIntersectionObserverMock();
+    });
+
+    afterEach(() => {
+      observer.restore();
+    });
+
+    it('does not request its list, and shows the skeleton with no count, until it is near the viewport', async () => {
+      const { inventoryApi } = renderSection({ scenario: 'normal', onTruncatedChange: jest.fn() });
+      const getEntities = jest.spyOn(inventoryApi, 'getEntities');
+
+      expect(await screen.findByTestId('entityInventoryTableSkeleton')).toBeInTheDocument();
+      expect(screen.queryByTestId('entityInventoryTypeSectionCount')).not.toBeInTheDocument();
+      expect(getEntities).not.toHaveBeenCalled();
+    });
+
+    it('requests its list once when it comes near the viewport, and shows the count', async () => {
+      const { inventoryApi } = renderSection({ scenario: 'normal', onTruncatedChange: jest.fn() });
+      const getEntities = jest.spyOn(inventoryApi, 'getEntities');
+
+      act(() => observer.setIntersecting(screen.getByTestId('entityInventoryTypeSection'), true));
+
+      expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+      expect(screen.getByTestId('entityInventoryTypeSectionCount')).toBeInTheDocument();
+      expect(getEntities).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps its list, without another request, when it scrolls out of range and back', async () => {
+      const { inventoryApi } = renderSection({ scenario: 'normal', onTruncatedChange: jest.fn() });
+      const getEntities = jest.spyOn(inventoryApi, 'getEntities');
+      const section = screen.getByTestId('entityInventoryTypeSection');
+      act(() => observer.setIntersecting(section, true));
+      expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+
+      act(() => observer.setIntersecting(section, false));
+      act(() => observer.setIntersecting(section, true));
+
+      expect(screen.getByTestId('entityInventoryTable')).toBeInTheDocument();
+      expect(getEntities).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports no truncation while it has not loaded', () => {
+      const onTruncatedChange = jest.fn();
+      renderSection({ scenario: 'truncated', onTruncatedChange });
+
       expect(onTruncatedChange).not.toHaveBeenCalled();
     });
   });
