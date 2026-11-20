@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const START_WORKFLOW_MIGRATION_CARD_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.workflows.startMigration.title',
-  { defaultMessage: 'Migrate your Tines stories to Elastic Workflows' }
+  { defaultMessage: 'Migrate your existing workflows to Elastic' }
 );
 
 export const START_WORKFLOW_MIGRATION_CARD_UPLOAD_TITLE = i18n.translate(
