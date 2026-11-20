@@ -290,9 +290,10 @@ export function formatMarkdownCompareReport({
       formatOutcome(result, significanceThreshold, regressionGate).endsWith(NOT_GATED_SUFFIX)
     );
     if (regressionGate && hasUngatedRegression) {
-      lines.push(
-        `_Regression (not gated)_: fewer than ${regressionGate.minPairs} pairs or outside \`--regression-evaluators\`, so it cannot fail the regression gate.`
-      );
+      const reasons = regressionGate.evaluators
+        ? `fewer than ${regressionGate.minPairs} pairs or outside \`--regression-evaluators\``
+        : `fewer than ${regressionGate.minPairs} pairs`;
+      lines.push(`_Regression (not gated)_: ${reasons}, so it cannot fail the regression gate.`);
       lines.push('');
     }
   }

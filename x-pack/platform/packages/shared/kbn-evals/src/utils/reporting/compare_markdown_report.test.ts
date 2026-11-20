@@ -373,7 +373,10 @@ describe('formatMarkdownCompareReport', () => {
   describe('regression gate annotations', () => {
     const regressed = (overrides: Partial<ComparisonResult> = {}) =>
       makeResult({ target: side(0.6), baseline: side(0.8), pValue: 0.01, ...overrides });
-    const NOT_GATED_LEGEND = '_Regression (not gated)_: fewer than 10 pairs';
+    const NOT_GATED_LEGEND_MIN_PAIRS =
+      '_Regression (not gated)_: fewer than 10 pairs, so it cannot fail the regression gate.';
+    const NOT_GATED_LEGEND_WITH_EVALUATORS =
+      '_Regression (not gated)_: fewer than 10 pairs or outside `--regression-evaluators`, so it cannot fail the regression gate.';
     const rowFor = (output: string, evaluatorName: string) =>
       output.split('\n').find((l) => l.includes(`| ${evaluatorName} |`));
 
@@ -390,7 +393,8 @@ describe('formatMarkdownCompareReport', () => {
 
       expect(rowFor(output, 'Small')).toContain('| Regression (not gated) |');
       expect(rowFor(output, 'Exact')).toContain('| Regression |');
-      expect(output).toContain(NOT_GATED_LEGEND);
+      expect(output).toContain(NOT_GATED_LEGEND_MIN_PAIRS);
+      expect(output).not.toContain('--regression-evaluators');
     });
 
     it('marks a regression outside --regression-evaluators as not gated', () => {
@@ -408,7 +412,7 @@ describe('formatMarkdownCompareReport', () => {
       expect(rowFor(output, 'Gated')).toContain('| Regression |');
       expect(rowFor(output, 'Ignored')).toContain('| Regression (not gated) |');
       expect(rowFor(output, 'Better')).toContain('| Improvement |');
-      expect(output).toContain(NOT_GATED_LEGEND);
+      expect(output).toContain(NOT_GATED_LEGEND_WITH_EVALUATORS);
     });
 
     it('adds no legend when every regression is gated', () => {
