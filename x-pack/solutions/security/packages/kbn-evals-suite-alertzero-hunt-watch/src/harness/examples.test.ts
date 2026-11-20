@@ -106,6 +106,26 @@ describe('buildExamples', () => {
   });
 });
 
+describe('toRunRecord conversation ids', () => {
+  it("records the hunt's Investigation conversation as the run's agent conversation", () => {
+    const record = toRunRecord(spec('R-ioc[0]'), 'E0', 'id', cleanRun, 'conv-1');
+    expect(record.agentConversationIds).toEqual(['conv-1']);
+    expect(record.run).toBe(cleanRun);
+  });
+
+  it('records it on an INVALID cell too, so a failed hunt is still costed', () => {
+    expect(
+      toInvalidRecord(spec('R-ioc[0]'), 'E0', 'id', 'no output', 'conv-1').agentConversationIds
+    ).toEqual(['conv-1']);
+  });
+
+  it('omits the field when the hunt child carried no conversation id', () => {
+    expect(toRunRecord(spec('R-ioc[0]'), 'E0', 'id', cleanRun)).not.toHaveProperty(
+      'agentConversationIds'
+    );
+  });
+});
+
 describe('INVALID cells score null on every evaluator', () => {
   const evalAll = async (record: HuntRunRecord, failures: ControlFailure[] = []) => {
     const records = fullRecords();

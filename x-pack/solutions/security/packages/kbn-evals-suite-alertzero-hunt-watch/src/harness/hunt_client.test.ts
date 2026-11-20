@@ -44,7 +44,12 @@ const makeServer = ({
   children,
 }: {
   sweepStatuses?: string[];
-  children: Array<{ executionId: string; reportId: string; output?: unknown }>;
+  children: Array<{
+    executionId: string;
+    reportId: string;
+    output?: unknown;
+    conversationId?: string;
+  }>;
 }) => {
   const requests: Req[] = [];
   let sweepPolls = 0;
@@ -74,7 +79,16 @@ const makeServer = ({
       return {
         data: {
           status: 'completed',
-          context: full ? { inputs: { reportId: child.reportId } } : undefined,
+          context: full
+            ? {
+                inputs: {
+                  reportId: child.reportId,
+                  ...(child.conversationId && {
+                    investigationConversationId: child.conversationId,
+                  }),
+                },
+              }
+            : undefined,
           // Real shape (current main): `run_hunt_coordinator` returns only the async run
           // envelope; the coordinator body arrives through the `read_hunt_result` step,
           // which runs once per poll iteration — earlier reads see `running`, and only
@@ -183,6 +197,31 @@ describe('HuntWatchClient.runHunts', () => {
     expect(childReads).toHaveLength(2);
     for (const r of childReads)
       expect(r.query).toEqual({ includeInput: true, includeOutput: true });
+  });
+
+  it("keeps each hunt's Investigation conversation id, the key its model-call cost joins on", async () => {
+    const { client } = makeServer({
+      children: [
+        {
+          executionId: 'c1',
+          reportId: 'rep-1',
+          output: coordinatorOutput('d1'),
+          conversationId: 'conv-1',
+        },
+        { executionId: 'c2', reportId: 'rep-2', output: coordinatorOutput('d2') },
+      ],
+    });
+    const { conversationIds } = await client.runHunts(['rep-1', 'rep-2']);
+    expect([...conversationIds]).toEqual([['rep-1', 'conv-1']]);
+  });
+
+  it('keeps the conversation id of a hunt that left no output, so its cost still joins', async () => {
+    const { client } = makeServer({
+      children: [{ executionId: 'c1', reportId: 'rep-1', conversationId: 'conv-1' }],
+    });
+    const { runs, conversationIds } = await client.runHunts(['rep-1']);
+    expect(runs.has('rep-1')).toBe(false);
+    expect(conversationIds.get('rep-1')).toBe('conv-1');
   });
 
   it('B8: a sweep that reports `completed` is read immediately, not polled to the deadline', async () => {

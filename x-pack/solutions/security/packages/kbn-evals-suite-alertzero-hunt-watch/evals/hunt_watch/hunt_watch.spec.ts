@@ -137,9 +137,8 @@ evaluate(
           ingestedReportIds.push(reportId);
         }
 
-        const { runs, invalidBatches, sweepStatusByReport } = await huntWatchClient.runHunts(
-          reportIds,
-          {
+        const { runs, conversationIds, invalidBatches, sweepStatusByReport } =
+          await huntWatchClient.runHunts(reportIds, {
             onCandidates: (batch, response) => {
               if (response.ids.length !== batch.length || response.skipped.length > 0) {
                 log.error(
@@ -149,8 +148,7 @@ evaluate(
                 );
               }
             },
-          }
-        );
+          });
 
         // Per-batch route assertion (design v6 §4a): a violation invalidates the batch's cells.
         const batchOf = new Map<string, (typeof invalidBatches)[number]>();
@@ -168,8 +166,9 @@ evaluate(
         specs.forEach((spec, i) => {
           const reportId = reportIds[i];
           const run = runs.get(reportId);
+          const conversationId = conversationIds.get(reportId);
           if (run) {
-            records.push(toRunRecord(spec, phase, reportId, run));
+            records.push(toRunRecord(spec, phase, reportId, run, conversationId));
           } else if (batchOf.has(reportId)) {
             records.push(toInvalidRecord(spec, phase, reportId, 'per-batch candidates violation'));
           } else {
@@ -178,7 +177,8 @@ evaluate(
                 spec,
                 phase,
                 reportId,
-                missingOutputReason(reportId, sweepStatusByReport.get(reportId))
+                missingOutputReason(reportId, sweepStatusByReport.get(reportId)),
+                conversationId
               )
             );
           }

@@ -32,6 +32,13 @@ export interface HuntRunRecord {
   tier1HitIds: string[];
   tier2HitIds: string[];
   tier1MatchedIocs?: Array<{ value: string; hitIds: string[] }>;
+  /**
+   * The Investigation conversation the hunt ran under. Lands in the score doc's
+   * `task.output.agentConversationIds`, the key cost tooling uses to join the
+   * hunt's chat spans (tagged `gen_ai.conversation.id`) to this cell, INVALID
+   * cells included.
+   */
+  agentConversationIds?: string[];
 }
 
 /** Control failures that make a cell INVALID (C1/C2/C3a and per-batch route violations). */

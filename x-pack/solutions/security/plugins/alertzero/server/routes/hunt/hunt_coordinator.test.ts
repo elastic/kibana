@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { context as otelContext, propagation } from '@opentelemetry/api';
+import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
+import { CONVERSATION_ID_BAGGAGE_KEY } from '@kbn/inference-tracing';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -412,6 +415,61 @@ describe('registerHuntCoordinatorRoute', () => {
       run_id: minted,
       state: 'running',
       result_attachment_id: `hunt-coordinator-result-${minted}`,
+    });
+  });
+
+  describe('trace baggage', () => {
+    const contextManager = new AsyncHooksContextManager();
+
+    beforeAll(() => {
+      otelContext.setGlobalContextManager(contextManager);
+      contextManager.enable();
+    });
+
+    afterAll(() => {
+      contextManager.disable();
+      otelContext.disable();
+    });
+
+    it('runs the coordinator under the Investigation conversation id, so its model calls link to the report', async () => {
+      let seen: string | undefined;
+      huntCoordinatorMock.mockImplementation(async () => {
+        // Read after an await: the job is detached, so the id must outlive the first tick.
+        await Promise.resolve();
+        seen = propagation
+          .getBaggage(otelContext.active())
+          ?.getEntry(CONVERSATION_ID_BAGGAGE_KEY)?.value;
+        return coordinatorResult;
+      });
+      const { handler, context } = makeDeps();
+
+      await handler(context, requestFor(), httpServerMock.createResponseFactory());
+      await flushJob();
+
+      expect(seen).toBe('conv-1');
+    });
+
+    // Guards against swapping in a fresh createBaggage(), which would drop the eval execution id.
+    it('keeps the baggage the request already carries', async () => {
+      let seen: string | undefined;
+      huntCoordinatorMock.mockImplementation(async () => {
+        seen = propagation
+          .getBaggage(otelContext.active())
+          ?.getEntry('kibana.evals.execution_id')?.value;
+        return coordinatorResult;
+      });
+      const { handler, context } = makeDeps();
+      const parent = propagation.setBaggage(
+        otelContext.active(),
+        propagation.createBaggage({ 'kibana.evals.execution_id': { value: 'exec-1' } })
+      );
+
+      await otelContext.with(parent, () =>
+        handler(context, requestFor(), httpServerMock.createResponseFactory())
+      );
+      await flushJob();
+
+      expect(seen).toBe('exec-1');
     });
   });
 

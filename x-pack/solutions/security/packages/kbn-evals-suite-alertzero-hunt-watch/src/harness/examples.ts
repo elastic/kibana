@@ -28,7 +28,8 @@ export const toRunRecord = (
     Pick<ReportSpec, 'runKey' | 'reportClass'>,
   phase: Phase,
   reportId: string,
-  run: CoordinatorRun
+  run: CoordinatorRun,
+  conversationId?: string
 ): HuntRunRecord => ({
   runKey: spec.runKey,
   phase,
@@ -46,6 +47,7 @@ export const toRunRecord = (
     value: m.value,
     hitIds: (m.hits ?? []).map((x) => x._id),
   })),
+  ...(conversationId && { agentConversationIds: [conversationId] }),
 });
 
 /**
@@ -56,7 +58,8 @@ export const toInvalidRecord = (
   spec: Pick<ReportSpec, 'runKey' | 'reportClass' | 'sampleBase'>,
   phase: Phase,
   reportId: string | undefined,
-  reason: string
+  reason: string,
+  conversationId?: string
 ): HuntRunRecord => ({
   runKey: spec.runKey,
   phase,
@@ -68,6 +71,7 @@ export const toInvalidRecord = (
   tier1HitIds: [],
   tier2HitIds: [],
   tier1MatchedIocs: [],
+  ...(conversationId && { agentConversationIds: [conversationId] }),
 });
 
 /** Hit ids whose concrete index backs no seeded stream (design v6 §6). */

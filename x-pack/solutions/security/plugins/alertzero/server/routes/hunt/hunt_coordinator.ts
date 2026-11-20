@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { context as otelContext, propagation } from '@opentelemetry/api';
 import type { Logger } from '@kbn/core/server';
 import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
+import { CONVERSATION_ID_BAGGAGE_KEY } from '@kbn/inference-tracing';
 import { isAttachmentNotFoundError } from '@kbn/agent-builder-common';
 import type { HuntCoordinatorResponse, HuntCoordinatorResult } from '@kbn/alertzero-common';
 import {
@@ -43,6 +45,20 @@ export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinato
 
 /** Safe message for failed envelopes; the real error is logged only. */
 const FAILED_MESSAGE = 'Hunt coordinator failed';
+
+/**
+ * Runs `fn` with the Investigation conversation id in the trace baggage. Inference spans copy it
+ * to `gen_ai.conversation.id`, which is the only link from a hunt's model calls back to its
+ * report: each root model call starts its own trace, so the route's trace id does not join them.
+ */
+const withConversationBaggage = <T>(conversationId: string, fn: () => T): T => {
+  const ctx = otelContext.active();
+  const baggage = (propagation.getBaggage(ctx) ?? propagation.createBaggage()).setEntry(
+    CONVERSATION_ID_BAGGAGE_KEY,
+    { value: conversationId }
+  );
+  return otelContext.with(propagation.setBaggage(ctx, baggage), fn);
+};
 
 /** Detached Tier 1 + Tier 2 run; writes only the hidden result attachment. */
 const runHuntCoordinatorJob = async ({
@@ -262,32 +278,34 @@ export const registerHuntCoordinatorRoute = ({
             logger,
           });
 
-          void runHuntCoordinatorJob({
-            clients: { esClient, reportsEsClient, mitreDataClient },
-            models,
-            logger,
-            params: {
-              report_id,
-              spaceId,
-              text,
-              iocs,
-              techniques,
-              time_range,
-              size,
-              max_assets,
-              llm_confidence_threshold,
-              tier2_when,
-              max_tier2_sample_events,
-              trigger,
-              indexPatterns,
-              policySkippedPatterns: policySkipped,
-              crossProjectSearch: isCpsEnabled(),
-              run_id: runId,
-            },
-            attachmentsClient,
-            conversationId,
-            attachmentId,
-          });
+          void withConversationBaggage(conversationId, () =>
+            runHuntCoordinatorJob({
+              clients: { esClient, reportsEsClient, mitreDataClient },
+              models,
+              logger,
+              params: {
+                report_id,
+                spaceId,
+                text,
+                iocs,
+                techniques,
+                time_range,
+                size,
+                max_assets,
+                llm_confidence_threshold,
+                tier2_when,
+                max_tier2_sample_events,
+                trigger,
+                indexPatterns,
+                policySkippedPatterns: policySkipped,
+                crossProjectSearch: isCpsEnabled(),
+                run_id: runId,
+              },
+              attachmentsClient,
+              conversationId,
+              attachmentId,
+            })
+          );
 
           const body: HuntCoordinatorResponse = {
             run_id: runId,

@@ -206,6 +206,8 @@ export class HuntWatchClient {
     }: { onCandidates?: (batch: string[], response: CandidatesResponse) => void } = {}
   ): Promise<{
     runs: Map<string, CoordinatorRun>;
+    /** Investigation conversation id per report, kept even when the hunt left no output. */
+    conversationIds: Map<string, string>;
     invalidBatches: Array<{ batch: string[]; response: CandidatesResponse }>;
     /**
      * Terminal status of the sweep that covered each report. A report without a
@@ -215,6 +217,7 @@ export class HuntWatchClient {
     sweepStatusByReport: Map<string, string>;
   }> {
     const runs = new Map<string, CoordinatorRun>();
+    const conversationIds = new Map<string, string>();
     const sweepStatusByReport = new Map<string, string>();
     const invalidBatches: Array<{ batch: string[]; response: CandidatesResponse }> = [];
 
@@ -227,17 +230,20 @@ export class HuntWatchClient {
       const perBatchOk = candidatesMatchBatch(batch, candidates);
       if (perBatchOk) {
         const sweep = await this.triggerSweep(batch);
-        const { runs: sweepRuns, status } = await this.readSweepCoordinatorOutputs(
-          sweep.executionId
-        );
+        const {
+          runs: sweepRuns,
+          conversationIds: sweepConversationIds,
+          status,
+        } = await this.readSweepCoordinatorOutputs(sweep.executionId);
         for (const [reportId, run] of sweepRuns) runs.set(reportId, run);
+        for (const [reportId, id] of sweepConversationIds) conversationIds.set(reportId, id);
         for (const reportId of batch) sweepStatusByReport.set(reportId, status);
       } else {
         invalidBatches.push({ batch, response: candidates });
       }
     }
 
-    return { runs, invalidBatches, sweepStatusByReport };
+    return { runs, conversationIds, invalidBatches, sweepStatusByReport };
   }
 
   /** Manual Worker trigger with reportIds: the bypass path (design v1 §4). */
@@ -301,17 +307,22 @@ export class HuntWatchClient {
    * returns only a run envelope and the body is read back by the
    * `read_hunt_result` step; the report id is the child's
    * `context.inputs.reportId` (passed by the Worker as
-   * `reportId: "{{ foreach.item }}"`).
+   * `reportId: "{{ foreach.item }}"`). The child's
+   * `context.inputs.investigationConversationId` is returned per report, with
+   * or without an output.
    *
    * A child with no readable coordinator output is absent from the returned
    * map; the caller records that report as INVALID.
    */
-  private async readSweepCoordinatorOutputs(
-    sweepExecutionId: string
-  ): Promise<{ runs: Map<string, CoordinatorRun>; status: string }> {
+  private async readSweepCoordinatorOutputs(sweepExecutionId: string): Promise<{
+    runs: Map<string, CoordinatorRun>;
+    conversationIds: Map<string, string>;
+    status: string;
+  }> {
     const sweep = await this.waitForSweep(sweepExecutionId);
     const status = typeof sweep.status === 'string' ? sweep.status : 'unknown';
     const runs = new Map<string, CoordinatorRun>();
+    const conversationIds = new Map<string, string>();
 
     const childrenResponse = await this.kbnClient.request<Array<Record<string, unknown>>>({
       path: `/api/workflows/executions/${encodeURIComponent(sweepExecutionId)}/children`,
@@ -331,12 +342,17 @@ export class HuntWatchClient {
       const context = isRecord(execution.context) ? execution.context : undefined;
       const inputs = isRecord(context?.inputs) ? context?.inputs : undefined;
       const reportId = typeof inputs?.reportId === 'string' ? inputs.reportId : undefined;
+      const conversationId =
+        typeof inputs?.investigationConversationId === 'string'
+          ? inputs.investigationConversationId
+          : undefined;
+      if (reportId !== undefined && conversationId) conversationIds.set(reportId, conversationId);
       const steps = Array.isArray(execution.stepExecutions) ? execution.stepExecutions : [];
       const output = readHuntResultOutput(steps);
       if (reportId !== undefined && isCoordinatorResult(output)) {
         runs.set(reportId, wireToCoordinatorRun(output));
       }
     }
-    return { runs, status };
+    return { runs, conversationIds, status };
   }
 }
