@@ -110,7 +110,7 @@ node scripts/evals run --suite streams --space-ids marketing,sales
 
 #### Deprecated flag names
 
-`--datasets-profile` and `--export-profile` are deprecated aliases for `--evaluations-kbn-profile` and `--tracing-profile`. They still work and print a warning; if both an old and a new flag are passed, the new one wins. The re-run command printed by `start` and `run` uses the new names.
+`--datasets-profile` and `--export-profile` are deprecated aliases for `--evaluations-kbn-profile` and `--tracing-profile`. They still work and print a warning; if both an old and a new flag are passed, the new one wins. The re-run command printed by `start` uses the new names.
 
 #### Example: golden datasets + local export
 
