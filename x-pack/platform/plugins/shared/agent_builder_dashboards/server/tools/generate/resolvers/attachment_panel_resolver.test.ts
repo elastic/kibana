@@ -170,7 +170,7 @@ describe('createAttachmentPanelResolver', () => {
 });
 
 describe('createAttachmentPanelResolver with dashboard panel pointers', () => {
-  const pointerId = 'platform.dashboard.panel-panel-1';
+  const pointerId = 'platform.dashboard.panel-dashboard-1-panel-1';
   const dashboardPanel = {
     type: 'lens',
     id: 'panel-1',

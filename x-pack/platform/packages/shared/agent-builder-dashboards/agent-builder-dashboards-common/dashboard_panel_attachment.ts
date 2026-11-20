@@ -43,10 +43,16 @@ export type PendingDashboardPanelAttachment = AttachmentInput<
 
 /**
  * Deterministic attachment id for a panel pointer, so re-sending the same panel replaces the
- * previous pointer instead of adding a duplicate, and tools can find it without a lookup.
+ * previous pointer instead of adding a duplicate, and tools can find it without a lookup. It names
+ * the dashboard attachment too, since copies of a dashboard share their panel ids.
  */
-export const getDashboardPanelAttachmentId = (panelId: string): string =>
-  `${DASHBOARD_PANEL_ATTACHMENT_TYPE}-${panelId}`;
+export const getDashboardPanelAttachmentId = ({
+  dashboardAttachmentId,
+  panelId,
+}: {
+  dashboardAttachmentId: string;
+  panelId: string;
+}): string => `${DASHBOARD_PANEL_ATTACHMENT_TYPE}-${dashboardAttachmentId}-${panelId}`;
 
 export const isDashboardPanelAttachment = (
   attachment: VersionedAttachment

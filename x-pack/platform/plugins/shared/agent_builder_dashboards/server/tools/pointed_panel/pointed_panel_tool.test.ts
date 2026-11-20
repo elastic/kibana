@@ -20,7 +20,10 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { dashboardTools } from '../../../common';
 import { createPointedPanelTool } from './pointed_panel_tool';
 
-const POINTER_ID = getDashboardPanelAttachmentId('panel-1');
+const POINTER_ID = getDashboardPanelAttachmentId({
+  dashboardAttachmentId: 'dashboard-1',
+  panelId: 'panel-1',
+});
 const grid = { x: 0, y: 0, w: 24, h: 15 };
 
 const pointer = (panelId = 'panel-1', dashboardAttachmentId = 'dashboard-1') => ({

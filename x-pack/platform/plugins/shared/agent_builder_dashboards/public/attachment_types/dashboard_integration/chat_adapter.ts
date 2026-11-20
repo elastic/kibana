@@ -56,8 +56,11 @@ export interface ChatAdapter {
   unstage: (attachmentId: string) => void;
   /** Stages the panel pointer in the chat input, replacing the one with the same id. */
   stagePanelPointer: (pointer: PanelPointer) => void;
-  /** Removes the pointers to these panels from the chat input. Sent pointers stay. */
-  unstagePanelPointers: (panelIds: readonly string[]) => void;
+  /** Removes the pointers to these panels of these dashboard attachments from the chat input. Sent pointers stay. */
+  unstagePanelPointers: (pointers: {
+    dashboardAttachmentIds: Iterable<string>;
+    panelIds: Iterable<string>;
+  }) => void;
   /** Persists the attachment's origin, keeping the rendered conversation in sync. */
   updateOrigin: (
     attachmentId: string,
@@ -157,9 +160,14 @@ export const createChatAdapter = ({
     stagePanelPointer: ({ id, data }) => {
       agentBuilder.addAttachment({ id, type: DASHBOARD_PANEL_ATTACHMENT_TYPE, data });
     },
-    unstagePanelPointers: (panelIds) => {
-      for (const panelId of panelIds) {
-        agentBuilder.removeAttachment(getDashboardPanelAttachmentId(panelId));
+    unstagePanelPointers: ({ dashboardAttachmentIds, panelIds }) => {
+      const panelIdList = [...panelIds];
+      for (const dashboardAttachmentId of new Set(dashboardAttachmentIds)) {
+        for (const panelId of panelIdList) {
+          agentBuilder.removeAttachment(
+            getDashboardPanelAttachmentId({ dashboardAttachmentId, panelId })
+          );
+        }
       }
     },
     updateOrigin: (attachmentId, origin) => getUpdateOrigin(attachmentId)?.(origin),

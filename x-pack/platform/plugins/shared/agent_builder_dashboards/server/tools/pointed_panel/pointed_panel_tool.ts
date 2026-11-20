@@ -49,7 +49,7 @@ const pointedPanelSchema = lazySchema(() =>
       .string()
       .max(256)
       .describe(
-        `Id of the ${DASHBOARD_PANEL_ATTACHMENT_TYPE} pointer attachment naming the panel, e.g. "${DASHBOARD_PANEL_ATTACHMENT_TYPE}-<panelId>".`
+        `Id of the ${DASHBOARD_PANEL_ATTACHMENT_TYPE} pointer attachment naming the panel.`
       ),
     action: z
       .enum(['read', 'show'])

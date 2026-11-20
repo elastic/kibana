@@ -16,7 +16,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { registerDashboardPanelAttachmentUiDefinition } from './dashboard_panel_ui_definition';
 
 const pointer = (label: string, panelType: string): DashboardPanelAttachment => ({
-  id: 'platform.dashboard.panel-panel-1',
+  id: 'platform.dashboard.panel-dashboard-1-panel-1',
   type: DASHBOARD_PANEL_ATTACHMENT_TYPE,
   data: {
     dashboard_attachment_id: 'dashboard-attachment-1',

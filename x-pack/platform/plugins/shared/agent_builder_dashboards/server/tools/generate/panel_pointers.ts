@@ -30,7 +30,8 @@ interface RefreshDashboardPanelPointersParams {
 /**
  * Keeps panel pointer attachments in step with the panels they name: after an upsert changes a
  * panel's title, or the measure an untitled chart is named after, the pointer's label follows.
- * Pointers use a deterministic id, so no lookup by type is needed. Pointers to removed panels are
+ * Pointers use a deterministic id per dashboard attachment and panel, so no lookup by type is
+ * needed and pointers to other dashboards are never touched. Pointers to removed panels are
  * left alone; their text already tells the agent to check that the panel still exists.
  */
 export const refreshDashboardPanelPointers = async ({
@@ -41,7 +42,9 @@ export const refreshDashboardPanelPointers = async ({
   logger,
 }: RefreshDashboardPanelPointersParams): Promise<void> => {
   for (const panelId of new Set(updatedIds)) {
-    const pointer = attachments.getAttachmentRecord(getDashboardPanelAttachmentId(panelId));
+    const pointer = attachments.getAttachmentRecord(
+      getDashboardPanelAttachmentId({ dashboardAttachmentId, panelId })
+    );
     if (!pointer || !isDashboardPanelAttachment(pointer) || pointer.active === false) {
       continue;
     }
@@ -51,13 +54,7 @@ export const refreshDashboardPanelPointers = async ({
     const label = panel
       ? getPanelLabel(panel)?.slice(0, DASHBOARD_PANEL_LABEL_MAX_LENGTH)
       : undefined;
-    if (
-      !panel ||
-      !latestVersion ||
-      latestVersion.data.dashboard_attachment_id !== dashboardAttachmentId ||
-      !label ||
-      label === latestVersion.data.label
-    ) {
+    if (!panel || !latestVersion || !label || label === latestVersion.data.label) {
       continue;
     }
 

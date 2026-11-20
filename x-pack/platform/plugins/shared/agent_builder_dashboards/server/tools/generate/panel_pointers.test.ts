@@ -16,7 +16,10 @@ import {
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { refreshDashboardPanelPointers } from './panel_pointers';
 
-const pointerId = getDashboardPanelAttachmentId('panel-1');
+const pointerId = getDashboardPanelAttachmentId({
+  dashboardAttachmentId: 'dashboard-attachment-1',
+  panelId: 'panel-1',
+});
 
 const pointerRecord = ({
   label = 'Old title',

@@ -192,7 +192,7 @@ export const createRefineWithChatAction = (
       const buildPanelPointer = (
         dashboardAttachmentId: string
       ): PendingDashboardPanelAttachment => ({
-        id: getDashboardPanelAttachmentId(embeddable.uuid),
+        id: getDashboardPanelAttachmentId({ dashboardAttachmentId, panelId: embeddable.uuid }),
         type: DASHBOARD_PANEL_ATTACHMENT_TYPE,
         data: {
           dashboard_attachment_id: dashboardAttachmentId,

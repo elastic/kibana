@@ -112,7 +112,9 @@ export const registerDashboardAppIntegration = ({
   let attachments: Array<DashboardAttachment & { version?: number }> | undefined;
   let conversationId: string | undefined;
   let panelPointers: PanelPointer[] = [];
-  // panels a pointer may have been staged for, so the pointers of removed panels can be unstaged
+  // the dashboard attachments and panels a pointer may have been staged for, so pointers can be
+  // unstaged when their panel is removed or the user leaves the dashboard
+  const pointedDashboardAttachmentIds = new Set<string>();
   let knownPanelIds = new Set<string>();
   // Attachments staged from this dashboard without an origin, because agent changes to a dashboard
   // the user can't edit open in a new dashboard, which the origin then follows on save. One per
@@ -122,19 +124,18 @@ export const registerDashboardAppIntegration = ({
   // a dashboard that can't be linked, e.g. a managed one, is staged as a new attachment every time
   const isLinkable = () => canWriteDashboards && canApplyAgentChangesInPlace(api);
 
-  const getDashboardData = () =>
-    dashboardStateToAttachmentData(api.getSerializedState().attributes);
-
   const unstageRemovedPanelPointers = (dashboardData: DashboardAttachmentData) => {
     const panelIds = new Set(getPanelIds(dashboardData));
-    chat.unstagePanelPointers([...knownPanelIds].filter((panelId) => !panelIds.has(panelId)));
+    chat.unstagePanelPointers({
+      dashboardAttachmentIds: pointedDashboardAttachmentIds,
+      panelIds: [...knownPanelIds].filter((panelId) => !panelIds.has(panelId)),
+    });
     knownPanelIds = panelIds;
   };
 
   const stageOpenDashboard = async () => {
     const { attributes: dashboardState } = api.getSerializedState();
     const dashboardData = dashboardStateToAttachmentData(dashboardState);
-    unstageRemovedPanelPointers(dashboardData);
     const linkable = isLinkable();
     const dashboardId = linkable ? api.savedObjectId$.getValue() : undefined;
     const dashboardAttachment = linkable
@@ -145,6 +146,12 @@ export const registerDashboardAppIntegration = ({
       isNewConversation: !conversationId,
       draftAttachmentId: draftAttachmentId.current,
     });
+    for (const id of [dashboardAttachment?.id, attachmentId]) {
+      if (id) {
+        pointedDashboardAttachmentIds.add(id);
+      }
+    }
+    unstageRemovedPanelPointers(dashboardData);
     const isShown = dashboardAttachment
       ? await isAttachmentShownInDashboard({
           areEqual,
@@ -305,7 +312,10 @@ export const registerDashboardAppIntegration = ({
     otherDashboardUpdateNotifier.removeAll();
     // the pointers of a dashboard the user left are no longer context for their next message;
     // pointers already sent stay in the conversation
-    chat.unstagePanelPointers([...new Set([...knownPanelIds, ...getPanelIds(getDashboardData())])]);
+    chat.unstagePanelPointers({
+      dashboardAttachmentIds: [...pointedDashboardAttachmentIds, draftAttachmentId.current],
+      panelIds: knownPanelIds,
+    });
   };
 };
 

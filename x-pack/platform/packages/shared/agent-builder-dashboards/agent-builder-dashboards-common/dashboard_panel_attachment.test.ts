@@ -49,9 +49,17 @@ describe('dashboardPanelAttachmentDataSchema', () => {
 });
 
 describe('getDashboardPanelAttachmentId', () => {
-  it('derives a deterministic id from the panel id', () => {
-    expect(getDashboardPanelAttachmentId('panel-1')).toBe(
-      `${DASHBOARD_PANEL_ATTACHMENT_TYPE}-panel-1`
+  it('derives a deterministic id from the dashboard attachment and panel ids', () => {
+    expect(
+      getDashboardPanelAttachmentId({ dashboardAttachmentId: 'dashboard-1', panelId: 'panel-1' })
+    ).toBe(`${DASHBOARD_PANEL_ATTACHMENT_TYPE}-dashboard-1-panel-1`);
+  });
+
+  it('differs between copies of a dashboard that share panel ids', () => {
+    expect(
+      getDashboardPanelAttachmentId({ dashboardAttachmentId: 'dashboard-1', panelId: 'panel-1' })
+    ).not.toBe(
+      getDashboardPanelAttachmentId({ dashboardAttachmentId: 'dashboard-2', panelId: 'panel-1' })
     );
   });
 });

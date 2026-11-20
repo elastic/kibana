@@ -21,7 +21,10 @@ const createPointer = (
   label: string,
   pointerDashboardAttachmentId = dashboardAttachmentId
 ): PanelPointer => ({
-  id: getDashboardPanelAttachmentId(panelId),
+  id: getDashboardPanelAttachmentId({
+    dashboardAttachmentId: pointerDashboardAttachmentId,
+    panelId,
+  }),
   data: {
     dashboard_attachment_id: pointerDashboardAttachmentId,
     panel_id: panelId,

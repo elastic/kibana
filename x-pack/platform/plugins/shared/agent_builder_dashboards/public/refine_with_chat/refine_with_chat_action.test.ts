@@ -28,7 +28,8 @@ import {
 } from './refine_with_chat_action';
 
 const DRAFT_ID = 'draft-attachment-id';
-const POINTER_ID = getDashboardPanelAttachmentId('panel-1');
+const pointerId = (dashboardAttachmentId: string) =>
+  getDashboardPanelAttachmentId({ dashboardAttachmentId, panelId: 'panel-1' });
 
 const createDashboardApi = ({
   viewMode = 'edit',
@@ -79,7 +80,7 @@ const activeConversation = (attachments: VersionedAttachment[] = []): ActiveConv
 });
 
 const expectedPointer = (dashboardAttachmentId: string, label = 'CPU usage') => ({
-  id: POINTER_ID,
+  id: pointerId(dashboardAttachmentId),
   type: DASHBOARD_PANEL_ATTACHMENT_TYPE,
   data: {
     dashboard_attachment_id: dashboardAttachmentId,
