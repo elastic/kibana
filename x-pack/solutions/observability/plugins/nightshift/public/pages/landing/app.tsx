@@ -143,8 +143,6 @@ export function NightshiftApp({
     areSeverityCountsStale,
     hasSeverityCountsError,
     activeInvestigationCount,
-    hasOpenInvestigationsInSpace,
-    areSpaceInvestigationsLoading,
     isInitialLoading,
     isFetching,
     totalCount,
@@ -156,16 +154,6 @@ export function NightshiftApp({
     updatedBefore: updatedWindow.updatedBefore,
   });
   const queryClient = useQueryClient();
-
-  // Hide search + time range only when the space has no open investigations at all. A narrow
-  // window that empties the list must keep both — the time filter caused that empty state.
-  // Show while the space probe loads so we do not flash-hide when older investigations exist.
-  // Keep mounted when a search is active (including no-match) so clearing does not drop focus.
-  const showInvestigationsFilters =
-    Boolean(searchQuery) ||
-    Boolean(debouncedSearchQuery) ||
-    hasOpenInvestigationsInSpace ||
-    areSpaceInvestigationsLoading;
 
   // A tile scrolls to its section, so it is only actionable while the list is rendering that
   // section — which the list, not the count, decides.
@@ -420,8 +408,7 @@ export function NightshiftApp({
   }
 
   const fatalError = sections.find((section) => section.error)?.error ?? null;
-  // 404 means the investigations API is missing on this deployment — always say so, even when a
-  // failed space probe would otherwise keep the filter row (and a Retry) mounted.
+  // 404 means the investigations API is missing on this deployment.
   if (allFailed && isHttpNotFoundError(fatalError)) {
     return (
       <EuiCallOut
@@ -436,11 +423,6 @@ export function NightshiftApp({
         })}
       />
     );
-  }
-  // A failed load with an active search must keep the filters mounted so the query can be cleared
-  // (Retry alone would resend the same rejected term). Without a search, keep the full-page error.
-  if (allFailed && !showInvestigationsFilters) {
-    return <LoadingErrorCallout onRetry={refetchAll} />;
   }
 
   return (
@@ -474,38 +456,35 @@ export function NightshiftApp({
         </>
       )}
 
-      {showInvestigationsFilters && (
-        <>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-            <EuiFlexItem grow>
-              <EuiFieldSearch
-                data-test-subj="nightshiftInvestigationsSearchInput"
-                placeholder={i18n.translate('xpack.nightshift.investigations.searchPlaceholder', {
-                  defaultMessage: 'Search',
-                })}
-                value={searchQuery ?? ''}
-                onChange={handleSearchChange}
-                maxLength={MAX_INVESTIGATIONS_SEARCH_LENGTH}
-                isClearable
-                fullWidth
-                compressed
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <NightshiftTimeRangePicker
-                start={timeRange.from}
-                end={timeRange.to}
-                onChange={({ start, end }) => setTimeRange({ from: start, to: end })}
-                showRefreshButton
-                onRefresh={refreshWindow}
-                data-test-subj="nightshiftInvestigationsTimeRangePicker"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+      {/* Always show search + time range (including refresh) so an empty list stays recoverable. */}
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+        <EuiFlexItem grow>
+          <EuiFieldSearch
+            data-test-subj="nightshiftInvestigationsSearchInput"
+            placeholder={i18n.translate('xpack.nightshift.investigations.searchPlaceholder', {
+              defaultMessage: 'Search',
+            })}
+            value={searchQuery ?? ''}
+            onChange={handleSearchChange}
+            maxLength={MAX_INVESTIGATIONS_SEARCH_LENGTH}
+            isClearable
+            fullWidth
+            compressed
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <NightshiftTimeRangePicker
+            start={timeRange.from}
+            end={timeRange.to}
+            onChange={({ start, end }) => setTimeRange({ from: start, to: end })}
+            showRefreshButton
+            onRefresh={refreshWindow}
+            data-test-subj="nightshiftInvestigationsTimeRangePicker"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-          <EuiSpacer size="l" />
-        </>
-      )}
+      <EuiSpacer size="l" />
 
       {allFailed ? (
         <LoadingErrorCallout onRetry={refetchAll} />

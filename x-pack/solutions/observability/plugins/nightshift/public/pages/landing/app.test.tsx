@@ -134,8 +134,6 @@ function setSections({
   sections,
   hasActiveInvestigations = false,
   activeInvestigationCount,
-  hasOpenInvestigationsInSpace,
-  areSpaceInvestigationsLoading = false,
   isInitialLoading = false,
   isFetching = false,
   areSeverityCountsLoading = false,
@@ -144,9 +142,6 @@ function setSections({
   sections: InvestigationSectionState[];
   hasActiveInvestigations?: boolean;
   activeInvestigationCount?: number;
-  /** Defaults to whether the mocked sections hold any rows (window or not). */
-  hasOpenInvestigationsInSpace?: boolean;
-  areSpaceInvestigationsLoading?: boolean;
   isInitialLoading?: boolean;
   isFetching?: boolean;
   areSeverityCountsLoading?: boolean;
@@ -175,8 +170,6 @@ function setSections({
     hasSeverityCountsError,
     hasActiveInvestigations: hasActiveInvestigations || resolvedActiveCount > 0,
     activeInvestigationCount: resolvedActiveCount,
-    hasOpenInvestigationsInSpace: hasOpenInvestigationsInSpace ?? totalCount > 0,
-    areSpaceInvestigationsLoading,
     isInitialLoading,
     isFetching,
     totalCount,
@@ -514,26 +507,8 @@ describe('NightshiftApp', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows a single empty state when there are no investigations', () => {
-    setSections({ sections: defaultSections(), hasOpenInvestigationsInSpace: false });
-
-    renderApp();
-
-    expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
-      'No open investigations'
-    );
-    expect(screen.queryByTestId('nightshiftInvestigationsSearchInput')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftInvestigationsTimeRangePicker')).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('nightshiftInvestigationSection-in-progress')
-    ).not.toBeInTheDocument();
-  });
-
-  it('keeps search and time range when the window is empty but the space has investigations', () => {
-    setSections({
-      sections: defaultSections(),
-      hasOpenInvestigationsInSpace: true,
-    });
+  it('shows a single empty state when there are no investigations, with filters still available', () => {
+    setSections({ sections: defaultSections() });
 
     renderApp();
 
@@ -542,6 +517,9 @@ describe('NightshiftApp', () => {
     );
     expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftInvestigationsTimeRangePicker')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('nightshiftInvestigationSection-in-progress')
+    ).not.toBeInTheDocument();
   });
 
   it('keeps filters mounted when clearing an empty-result query', () => {
@@ -552,14 +530,13 @@ describe('NightshiftApp', () => {
           'in-progress': { investigations: [investigation], total: 1 },
         }),
         hasActiveInvestigations: true,
-        hasOpenInvestigationsInSpace: true,
       });
       renderApp();
 
       fireEvent.change(screen.getByTestId('nightshiftInvestigationsSearchInput'), {
         target: { value: 'zzz' },
       });
-      setSections({ sections: defaultSections(), hasOpenInvestigationsInSpace: true });
+      setSections({ sections: defaultSections() });
 
       act(() => {
         jest.advanceTimersByTime(300);
@@ -569,13 +546,11 @@ describe('NightshiftApp', () => {
       );
 
       const searchInput = screen.getByTestId('nightshiftInvestigationsSearchInput');
-      // Leave window totals empty so visibility cannot ride on totalCount.
       fireEvent.change(searchInput, { target: { value: '' } });
       act(() => {
         jest.advanceTimersByTime(300);
       });
 
-      // Filter row must stay mounted through the clear debounce (not gated on window totals).
       expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toBeInTheDocument();
       expect(screen.getByTestId('nightshiftInvestigationsTimeRangePicker')).toBeInTheDocument();
     } finally {
@@ -594,7 +569,6 @@ describe('NightshiftApp', () => {
         low: { error },
         'not-rated': { error },
       }),
-      hasOpenInvestigationsInSpace: false,
     });
 
     renderApp({ initialEntries: ['/?q=broken'] });
@@ -610,7 +584,6 @@ describe('NightshiftApp', () => {
         'in-progress': { investigations: [investigation], total: 1 },
       }),
       hasActiveInvestigations: true,
-      hasOpenInvestigationsInSpace: true,
     });
 
     renderApp({ initialEntries: [`/?q=${'a'.repeat(300)}`] });
@@ -627,7 +600,6 @@ describe('NightshiftApp', () => {
         'in-progress': { investigations: [investigation], total: 1 },
       }),
       hasActiveInvestigations: true,
-      hasOpenInvestigationsInSpace: true,
     });
 
     // Leading spaces push the real term past the max if truncated before trimming.
@@ -647,7 +619,6 @@ describe('NightshiftApp', () => {
         'in-progress': { investigations: [investigation], total: 1 },
       }),
       hasActiveInvestigations: true,
-      hasOpenInvestigationsInSpace: true,
     });
 
     // 255 BMP chars + emoji (2 UTF-16 units) → naive slice(0, 256) leaves a high surrogate.
@@ -674,8 +645,6 @@ describe('NightshiftApp', () => {
         low: { error: notFoundError },
         'not-rated': { error: notFoundError },
       }),
-      // Probe failure keeps this true; unavailable must still win over filters + Retry.
-      hasOpenInvestigationsInSpace: true,
     });
 
     renderApp();

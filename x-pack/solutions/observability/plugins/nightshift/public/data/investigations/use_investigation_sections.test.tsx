@@ -138,72 +138,6 @@ describe('useInvestigationSections', () => {
     );
   });
 
-  it('reports whether the space has open investigations outside the landing window', async () => {
-    const { result } = renderSections({
-      query: 'checkout',
-      updatedAfter: '2026-01-01T00:00:00.000Z',
-      updatedBefore: '2026-01-02T00:00:00.000Z',
-    });
-
-    await waitFor(() => expect(result.current.areSpaceInvestigationsLoading).toBe(false));
-    expect(result.current.hasOpenInvestigationsInSpace).toBe(true);
-
-    const spaceProbeCall = httpGet.mock.calls.find(
-      ([url, options]) =>
-        String(url) === '/internal/investigations/investigations' &&
-        (options as { query?: { per_page?: number } } | undefined)?.query?.per_page === 1
-    );
-    expect(spaceProbeCall).toBeDefined();
-    const probeQuery = (spaceProbeCall![1] as { query: Record<string, unknown> }).query;
-    expect(probeQuery).toEqual({
-      status: 'open',
-      page: 1,
-      per_page: 1,
-      sort_field: 'updated_at',
-      sort_order: 'desc',
-    });
-    expect(probeQuery).not.toHaveProperty('query');
-    expect(probeQuery).not.toHaveProperty('updated_after');
-    expect(probeQuery).not.toHaveProperty('updated_before');
-  });
-
-  it('keeps hasOpenInvestigationsInSpace true when the space probe fails', async () => {
-    httpGet.mockImplementation((url: string) => {
-      if (String(url).includes('_severity_counts')) {
-        return Promise.resolve({ critical: 0, high: 0, medium: 0, low: 0 });
-      }
-      if (String(url) === '/internal/investigations/investigations') {
-        return Promise.reject(new Error('probe failed'));
-      }
-      return Promise.resolve({
-        results: [],
-        pagination: { total: 0, page: 1, per_page: 1 },
-      });
-    });
-
-    const { result } = renderSections();
-
-    await waitFor(() => expect(result.current.areSpaceInvestigationsLoading).toBe(false));
-    expect(result.current.hasOpenInvestigationsInSpace).toBe(true);
-  });
-
-  it('sets hasOpenInvestigationsInSpace false only after a successful empty probe', async () => {
-    httpGet.mockImplementation((url: string) => {
-      if (String(url).includes('_severity_counts')) {
-        return Promise.resolve({ critical: 0, high: 0, medium: 0, low: 0 });
-      }
-      return Promise.resolve({
-        results: [],
-        pagination: { total: 0, page: 1, per_page: 1 },
-      });
-    });
-
-    const { result } = renderSections();
-
-    await waitFor(() => expect(result.current.areSpaceInvestigationsLoading).toBe(false));
-    expect(result.current.hasOpenInvestigationsInSpace).toBe(false);
-  });
-
   it('fetches in progress, then each severity tier, then the investigations without a severity', () => {
     const { result } = renderSections({ query: 'checkout' });
 
@@ -315,8 +249,7 @@ describe('useInvestigationSections', () => {
 
     await waitFor(() => expect(result.current.severityCounts.critical).toBe(3));
     expect(result.current.unfilteredSeverityCounts).toEqual(result.current.severityCounts);
-    // Window severity counts + space-wide open-investigation probe.
-    expect(httpGet).toHaveBeenCalledTimes(2);
+    expect(httpGet).toHaveBeenCalledTimes(1);
   });
 
   it('falls back to filtered counts when the no-search baseline fails', async () => {
@@ -500,7 +433,6 @@ describe('useInvestigationSections', () => {
     expect(refetchBySeverity.medium).toHaveBeenCalledTimes(1);
     expect(refetchBySeverity.low).toHaveBeenCalledTimes(1);
     expect(refetchBySeverity.none).toHaveBeenCalledTimes(1);
-    // Severity counts + space-wide open-investigation probe.
-    await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
   });
 });

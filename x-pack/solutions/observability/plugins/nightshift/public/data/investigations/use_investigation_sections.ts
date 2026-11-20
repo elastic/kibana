@@ -11,13 +11,11 @@ import type { Severity, SeverityCounts } from '@kbn/nightshift-investigations-pl
 import type {
   InvestigationSeverityCounts,
   InvestigationSummary,
-  ListInvestigationsResponse,
 } from '@kbn/agentic-investigations-plugin/common';
 import { useStatusSignal } from '@kbn/agentic-investigations-plugin/public';
 import {
   SHARED_INVESTIGATIONS_API_VERSION,
   SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL,
-  SHARED_INVESTIGATIONS_URL,
 } from './shared_investigations_api';
 import { useKibana } from '../../hooks/use_kibana';
 import {
@@ -33,9 +31,6 @@ import {
  * refetched on the edge where work leaves this section instead.
  */
 const IN_PROGRESS_REFETCH_INTERVAL_MS = 5_000;
-
-/** How long the space-wide open-investigation probe stays fresh. */
-const SPACE_OPEN_INVESTIGATIONS_STALE_TIME_MS = 30_000;
 
 /**
  * `not-rated` holds the investigations nothing works on that have no severity: the agent did not
@@ -66,14 +61,6 @@ export interface InvestigationSectionsResult {
   hasActiveInvestigations: boolean;
   /** Running investigations per the API total (not capped by the in-progress page size). */
   activeInvestigationCount: number;
-  /**
-   * False only after a successful space-wide probe confirms there are no open investigations.
-   * True while loading, on probe error, or when at least one open investigation exists — so a
-   * failed probe cannot hide filters while the list may still show rows.
-   */
-  hasOpenInvestigationsInSpace: boolean;
-  /** True until the space-wide open-investigation probe has settled. */
-  areSpaceInvestigationsLoading: boolean;
   isInitialLoading: boolean;
   isFetching: boolean;
   /** Investigations matching the current filters, each counted once: the sections are disjoint. */
@@ -154,28 +141,6 @@ export const useInvestigationSections = ({
     ...(updatedAfter ? { updated_after: updatedAfter } : {}),
     ...(updatedBefore ? { updated_before: updatedBefore } : {}),
   };
-
-  // Existence across the whole space, ignoring the landing time window — so filters stay when a
-  // narrow range empties the list but older open investigations still exist.
-  const spaceOpenInvestigationsQuery = useQuery({
-    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'spaceOpenInvestigations'],
-    enabled: agenticInvestigations != null,
-    queryFn: async ({ signal }) => {
-      const response = await http.get<ListInvestigationsResponse>(SHARED_INVESTIGATIONS_URL, {
-        version: SHARED_INVESTIGATIONS_API_VERSION,
-        query: {
-          status: 'open',
-          page: 1,
-          per_page: 1,
-          sort_field: 'updated_at',
-          sort_order: 'desc',
-        },
-        signal,
-      });
-      return response.pagination.total > 0;
-    },
-    staleTime: SPACE_OPEN_INVESTIGATIONS_STALE_TIME_MS,
-  });
 
   // A running investigation starts at medium and its severity can still change, so it is not
   // counted under a tier until it finishes — same as the sections below. Open-only so tiles,
@@ -321,8 +286,6 @@ export const useInvestigationSections = ({
     return severityCounts;
   }, [hasSearchQuery, severityCounts, unfilteredSeverityCountsQuery.data]);
 
-  const { refetch: refetchSpaceOpenInvestigations } = spaceOpenInvestigationsQuery;
-
   const refetchAll = useCallback(() => {
     for (const section of sections) {
       section.refetch();
@@ -331,14 +294,7 @@ export const useInvestigationSections = ({
     if (hasSearchQuery) {
       void refetchUnfilteredSeverityCounts();
     }
-    void refetchSpaceOpenInvestigations();
-  }, [
-    sections,
-    refetchSeverityCounts,
-    hasSearchQuery,
-    refetchUnfilteredSeverityCounts,
-    refetchSpaceOpenInvestigations,
-  ]);
+  }, [sections, refetchSeverityCounts, hasSearchQuery, refetchUnfilteredSeverityCounts]);
 
   // Status toggles in the investigation flyout run on an isolated QueryClient, so closing a
   // finished investigation would not invalidate this page's open-only lists/counts otherwise.
@@ -355,9 +311,6 @@ export const useInvestigationSections = ({
     hasSeverityCountsError: severityCountsQuery.isError,
     hasActiveInvestigations,
     activeInvestigationCount,
-    // Treat unknown (loading / error) as "keep filters"; only a successful empty probe hides them.
-    hasOpenInvestigationsInSpace: spaceOpenInvestigationsQuery.data !== false,
-    areSpaceInvestigationsLoading: spaceOpenInvestigationsQuery.isInitialLoading,
     isInitialLoading: sections.some((section) => section.isInitialLoading),
     isFetching: sections.some((section) => section.isFetching),
     totalCount: sections.reduce((sum, section) => sum + section.total, 0),
