@@ -1171,6 +1171,20 @@ describe('start machine learning jobs action', () => {
     });
     expect(failed).toBe('b: no ML node;');
   });
+
+  it('reads the reason from an Elasticsearch error body', () => {
+    const failed = render(action.step('resolve_started').with?.failed, {
+      inputs: { actionInput: { job_ids: ['a'] } },
+      steps: {
+        start_datafeeds: {
+          output: {
+            'datafeed-a': { started: false, error: { error: { reason: 'no mappings' } } },
+          },
+        },
+      },
+    });
+    expect(failed).toBe('a: no mappings;');
+  });
 });
 
 describe('disable rule action', () => {

@@ -182,7 +182,8 @@ steps:
       failed: >-
         {%- for job in inputs.actionInput.job_ids -%}
         {%- assign datafeed = 'datafeed-' | append: job -%}
-        {%- if steps.start_datafeeds.output[datafeed].started != true -%}{{ job }}: {{ steps.start_datafeeds.output[datafeed].error | default: 'not started' }}; {% endif -%}
+        {%- assign error = steps.start_datafeeds.output[datafeed].error -%}
+        {%- if steps.start_datafeeds.output[datafeed].started != true -%}{{ job }}: {{ error.error.reason | default: error.reason | default: error | default: 'not started' }}; {% endif -%}
         {%- endfor -%}
 
   - name: fail_not_started
