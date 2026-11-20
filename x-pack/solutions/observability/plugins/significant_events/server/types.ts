@@ -17,6 +17,7 @@ import type {
   RelayClientContract,
 } from '@kbn/actions-plugin/server';
 import type { CoreStart, Logger } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
   AgentBuilderSmlPluginSetup,
@@ -56,10 +57,11 @@ export interface SignificantEventsServerStart {
   /**
    * Reads the knowledge indicators of one space as the internal user. It takes a space, not a
    * request, because no user's privileges are checked: the caller decides which sources it may
-   * read. To hear about changes, subscribe a workflow to the
+   * read. Brand the space with `asSpaceId` so an empty or wildcard id never reads as a space with
+   * no knowledge indicators. To hear about changes, subscribe a workflow to the
    * `significant-events.knowledgeIndicatorsChanged` trigger.
    */
-  getKnowledgeIndicatorReader: (params: { spaceId: string }) => KnowledgeIndicatorReader;
+  getKnowledgeIndicatorReader: (params: { spaceId: SpaceId }) => KnowledgeIndicatorReader;
 }
 
 export interface SignificantEventsPluginSetupDependencies {
