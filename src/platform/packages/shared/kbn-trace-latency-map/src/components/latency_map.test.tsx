@@ -1148,6 +1148,18 @@ describe('LatencyMap', () => {
       expect(screen.getByTestId('traceLatencyMapAnnouncement')).toHaveTextContent(/20 spans/);
     });
 
+    it('reads out under the legend, which stays where it is', async () => {
+      renderMap({ selection: geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 }) });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      press(layer, 'ArrowRight');
+      const legend = screen.getByTestId('traceLatencyMapLegend');
+      const details = screen.getByTestId('traceLatencyMapCellDetails');
+      // The readout is the legend's following sibling, so its coming and going moves
+      // nothing above it.
+      expect(legend.compareDocumentPosition(details)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
     it('reads out the whole region while Shift extends it: what Enter would commit', async () => {
       renderMap({ selection: geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 }) });
       const layer = await getLayer();

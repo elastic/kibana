@@ -858,9 +858,6 @@ export function LatencyMap({
             />
           )}
         </div>
-        {keyboardCell && (
-          <CellDetails {...keyboardCell} unit={unit} sampled={sampled} timeZone={timeZone} />
-        )}
         <EuiScreenReaderOnly>
           <div aria-live="polite" data-test-subj="traceLatencyMapAnnouncement">
             {keyboardCell
@@ -969,6 +966,14 @@ export function LatencyMap({
         <>
           <EuiSpacer size="xs" />
           <LatencyMapLegend colors={colors} unit={unit} />
+        </>
+      )}
+      {/* Under the legend, which stays where it is: the readout is the only thing that
+          appears and goes with the cursor, and nothing renders below it. */}
+      {keyboardCell && (
+        <>
+          <EuiSpacer size="xs" />
+          <CellDetails {...keyboardCell} unit={unit} sampled={sampled} timeZone={timeZone} />
         </>
       )}
     </div>
