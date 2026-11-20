@@ -15,6 +15,8 @@ import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
 import { getExposedConfigKeys } from '@kbn/core-plugins-server-internal/src/create_browser_config';
 import { filterUiPlugins } from '@kbn/core-rendering-server-internal/src/filter_ui_plugins';
+import { getPackages } from '@kbn/repo-packages';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 const EXPOSED_CONFIG_SETTINGS_ERROR = `Actual config settings exposed to the browser do not match the list defined in this test.
 This assertion fails if extra settings are present and/or expected settings are missing.
@@ -132,12 +134,9 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   'vis_type_vislib.readOnly (boolean?|never)',
   'vis_type_xy.readOnly (boolean?|never)',
   'vis_type_vega.enableExternalUrls (boolean?)',
-  'workflowsManagement.pages.enabled (boolean?)',
-  'xpack.actions.auth.ears.enableExperimental (boolean?)',
   'xpack.actions.auth.ears.enabled (boolean?)',
   'xpack.actions.email.domain_allowlist (array?)',
   'xpack.actions.email.services.enabled (array?)',
-  'xpack.actions.inboundEvents.enabled (boolean?)',
   'xpack.actions.webhook.ssl.pfx.enabled (boolean?)',
   'xpack.apm.serviceMapEnabled (boolean?)',
   'xpack.apm.ui.enabled (boolean?)',
@@ -157,13 +156,11 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   'xpack.apm.serverless.enabled (true?|never)',
   'xpack.observability_onboarding.serverless.enabled (true?|never)',
   'xpack.cases.attachments.enabled (boolean?)',
-  'xpack.cases.chat.enabled (boolean?)',
   'xpack.cases.files.allowedMimeTypes (array?)',
   'xpack.cases.files.maxSize (number?)',
   'xpack.cases.markdownPlugins.lens (boolean?)',
   'xpack.cases.stack.enabled (boolean?)',
   'xpack.cases.incrementalId.enabled (boolean?)',
-  'xpack.cases.runWorkflows.enabled (boolean?)',
   'xpack.cases.templates.enabled (boolean?)',
   'xpack.ccr.ui.enabled (boolean?)',
   'xpack.cloud.base_url (string?)',
@@ -181,8 +178,6 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   'xpack.cloud.organization_id (string?)',
   'xpack.cloud.organization_url (string?)',
   'xpack.cloud.billing_url (string?)',
-  'xpack.cloud.create_deployment_url (string?)',
-  'xpack.cloud.create_project_url (string?|never)',
   'xpack.cloud.isSaasContainer (boolean?)',
   'xpack.cloud.profile_url (string?)',
   'xpack.cloud.performance_url (string?)',
@@ -192,13 +187,10 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   // can't be used to infer urls or customer id from the outside
   'xpack.cloud.serverless.project_id (string?)',
   'xpack.cloud.serverless.project_name (string?)',
-  'xpack.cloud.serverless.project_type (observability?|security?|search?|vectordb?)',
   'xpack.cloud.serverless.product_tier (never|complete?|essentials?|search_ai_lake?|logs_essentials?)',
   'xpack.cloud.serverless.orchestrator_target (string?)',
   'xpack.cloud.serverless.in_trial (boolean?)',
   'xpack.cloud.onboarding.default_solution (string?)',
-  'xpack.cloud.managed_otlp.url (string?)',
-  'xpack.cloud.region (string?)',
   'xpack.contentConnectors.ui.enabled (boolean?)',
   'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean?)',
   'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean?)',
@@ -216,7 +208,6 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   'xpack.fleet.integrationsHomeOverride (string?)',
   'xpack.fleet.prereleaseEnabledByDefault (boolean?)',
   'xpack.fleet.hideDashboards (boolean?)',
-  'xpack.fleet.installIntegrationsKnowledge (boolean?)',
   'xpack.fleet.isAirGapped (boolean?)',
   'xpack.global_search.search_timeout (duration?)',
   'xpack.global_search_bar.input_max_limit (number?)',
@@ -250,9 +241,6 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   'xpack.index_management.enableMappingsSourceFieldSection (boolean?|never)',
   'xpack.index_management.dev.enableSemanticText (boolean?)',
   'xpack.index_management.enableFailureStoreRetentionDisabling (boolean?|never)',
-  'xpack.index_management.enableIndexMode (boolean?|never)',
-  'xpack.index_management.enableVectorCount (boolean?|never)',
-  'xpack.index_management.showManagedDataStreamsByDefault (boolean?|never)',
   'xpack.intercepts.enabled (boolean?)',
   'xpack.license_management.ui.enabled (boolean?)',
   'xpack.maps.preserveDrawingBuffer (boolean?)',
@@ -288,15 +276,11 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   'xpack.security.showNavLinks (boolean?)',
   'xpack.security.ui.roleMappingManagementEnabled (boolean?|never)',
   'xpack.security.ui.userManagementEnabled (boolean?|never)',
-  'xpack.security.uiam.enabled (boolean?|never)',
   'xpack.security.roleManagementEnabled (boolean?|never)',
-  'xpack.security.serviceAccounts.enabled (boolean?)',
   'xpack.spaces.maxSpaces (number?)',
   'xpack.spaces.allowFeatureVisibility (false|boolean?)',
   'xpack.spaces.allowSolutionVisibility (false|boolean?)',
-  'xpack.spaces.initialSolutionSetup.enabled (boolean?|false?)',
   'xpack.securitySolution.enableExperimental (array?)',
-  'xpack.securitySolution.entityAnalytics.alertEntityIdBackfill.enabled (boolean?)',
   'xpack.securitySolution.prebuiltRulesPackageVersion (string?)',
   'xpack.securitySolution.offeringSettings (record?)',
   'xpack.securitySolution.entityAnalytics.assetCriticality.csvUpload.errorRetries (number?)',
@@ -308,8 +292,6 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   'xpack.securitySolution.entityAnalytics.monitoring.privileges.users.csvUpload.maxBulkRequestBodySizeBytes (number?)',
   'xpack.securitySolution.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed (number?)',
   'xpack.securitySolution.entityAnalytics.riskEngine.alertSampleSizePerShard (number?)',
-  'xpack.securitySolution.entityAnalytics.riskEngine.esqlProfiling (boolean?)',
-  'xpack.securitySolution.entityAnalytics.riskEngine.esqlProfilingInterval (number?)',
   'xpack.snapshot_restore.slm_ui.enabled (boolean?)',
   'xpack.snapshot_restore.ui.enabled (boolean?)',
   'xpack.stack_connectors.enableExperimental (array?)',
@@ -325,7 +307,6 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean?)',
   'xpack.upgrade_assistant.featureSet.migrateDataStreams (boolean?)',
   'xpack.upgrade_assistant.ui.enabled (boolean?)',
-  'xpack.synthetics.secretConnections.enabled (boolean?)',
   'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean?)',
   'xpack.observability.unsafe.alertDetails.logs.enabled (boolean?)',
   'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean?)',
@@ -358,28 +339,13 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   // temporary feature flag, to be removed when cps is released
   'cps.cpsEnabled (boolean?|never)',
 
-  'xpack.agenticInvestigations.escalations.enabled (boolean?)',
-  'xpack.aiAnonymizationSettings.patternTester.enabled (boolean?)',
-  'xpack.alerting_v2.rules.minimumScheduleInterval (string?)',
-  'xpack.alertzero.enabled (boolean?)',
   'xpack.automatic_import.enableExperimental (array?)',
   'xpack.cloud_connect.cloudUrl (string?)',
-  'xpack.dataFederation.awsCloudFormationTemplateUrl (string?)',
-  'xpack.dataFederation.enableAzureDataSourceType (boolean?)',
-  'xpack.dataFederation.enableFederatedIdentityAuth (boolean?)',
-  'xpack.dataFederation.enableGoogleCloudStorageDataSourceType (boolean?)',
-  'xpack.dataFederation.enabled (boolean?)',
-  'xpack.dataFederation.workloadIdentityIssuerUrl (string?)',
-  'xpack.mitreAttack.managedSourceEnabled (boolean?)',
 
   /**
    * Plugins below are disabled by default. They are listed because this test force-enables every plugin.
    */
   'xpack.dataUsage.enableExperimental (array?)',
-  'xpack.entityInventoryApp.timeRangeLimit.disabled (boolean?)',
-  'xpack.evals.enabled (boolean?)',
-  'xpack.evals.mode (runtime?|full?)',
-  'xpack.inbox.enabled (boolean?)',
   'xpack.reporting.csv.maxRows (number?)',
   'xpack.reporting.csv.scroll.duration (string?)',
   'xpack.reporting.csv.scroll.size (number?)',
@@ -399,8 +365,23 @@ const EXPECTED_EXPOSED_CONFIG_KEYS = [
   'xpack.securitySolutionServerless.enableExperimental (array?)',
   'xpack.securitySolutionServerless.inaccessibleApps (array?)',
   'xpack.securitySolutionServerless.productTypes (array?)',
-  'xpack.serverless.plugin.developer.projectSwitcher.currentType (security|observability|search|vectordb)',
   'xpack.serverless.plugin.developer.projectSwitcher.enabled (boolean?)',
+  // Keys present on this branch that differ from the main branch list.
+  'developer_toolbar.enabled (boolean?|false?)',
+  'inspect_component.enabled (boolean?|false?)',
+  'xpack.actions.ears.enabled (boolean?)',
+  'xpack.cloud.serverless.project_type (observability?|security?|search?|workplaceai?)',
+  'xpack.cloud_integrations.experiments.launch_darkly.client_id (string)',
+  'xpack.cloud_integrations.experiments.launch_darkly.client_log_level (none?|error?|warn?|info?|debug?)',
+  'xpack.cloud_integrations.experiments.metadata_refresh_interval (duration?)',
+  'xpack.searchPlayground.ui.enabled (boolean?)',
+  'xpack.serverless.plugin.developer.projectSwitcher.currentType (security|observability|search|workplaceai)',
+  'xpack.slo.experimental.compositeSlo.enabled (boolean?)',
+  'xpack.timelines.enableExperimental (array?)',
+  'xpack.uptime.experimental.ccs.enabled (boolean?)',
+  'xpack.workplaceAIApp.ears.allow_insecure (boolean?)',
+  'xpack.workplaceAIApp.ears.ui_enabled (boolean?)',
+  'xpack.workplaceAIApp.ears.url (string?)',
 ];
 
 /**
@@ -416,9 +397,7 @@ const EXPECTED_ANONYMOUS_EXPOSED_CONFIG_KEYS = [
   'xpack.security.showNavLinks (boolean?)',
   'xpack.security.ui.roleMappingManagementEnabled (boolean?|never)',
   'xpack.security.ui.userManagementEnabled (boolean?|never)',
-  'xpack.security.uiam.enabled (boolean?|never)',
   'xpack.security.roleManagementEnabled (boolean?|never)',
-  'xpack.security.serviceAccounts.enabled (boolean?)',
 
   'telemetry.allowChangingOptInStatus (boolean?)',
   'telemetry.appendServerlessChannelsSuffix (true?|false?)',
@@ -455,6 +434,12 @@ const EXPECTED_ANONYMOUS_EXPOSED_CONFIG_KEYS = [
  */
 const EXPECTED_PREBOOT_EXPOSED_CONFIG_KEYS: readonly string[] = [];
 
+const devOnlyPluginIds = new Set(
+  getPackages(REPO_ROOT)
+    .filter((pkg) => pkg.isPlugin() && pkg.isDevOnly())
+    .map((pkg) => pkg.manifest.plugin.id)
+);
+
 if (getFips() === 0) {
   describe('config keys exposed to the browser', () => {
     let root: Root;
@@ -468,7 +453,8 @@ if (getFips() === 0) {
 
       set(settings, PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH, true);
 
-      // `dev: false` leaves out the dev-only plugins, which never run in production.
+      // Dev-only plugins never run in production. Filter them below because this branch's
+      // force-enable setting still includes them during plugin discovery.
       // Plugin discovery happens during preboot, so we don't need to set up any plugins.
       root = createRootWithCorePlugins(settings, {
         basePath: false,
@@ -501,7 +487,16 @@ if (getFips() === 0) {
       // eslint-disable-next-line dot-notation
       const configDescriptors = root['server']['plugins']['pluginConfigDescriptors'];
       const exposedConfigKeys: string[] = [];
-      for (const [pluginId, { configPath }] of filterUiPlugins({ uiPlugins, isAnonymousPage })) {
+      const productionUiPlugins = {
+        ...uiPlugins,
+        public: new Map(
+          [...uiPlugins.public].filter(([pluginId]) => !devOnlyPluginIds.has(pluginId))
+        ),
+      };
+      for (const [pluginId, { configPath }] of filterUiPlugins({
+        uiPlugins: productionUiPlugins,
+        isAnonymousPage,
+      })) {
         const configDescriptor = configDescriptors.get(pluginId);
         if (!configDescriptor) {
           continue;
