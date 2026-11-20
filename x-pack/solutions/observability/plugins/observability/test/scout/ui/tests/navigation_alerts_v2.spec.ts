@@ -183,6 +183,12 @@ test.describe(
       });
     });
 
+    // Login plus opening Observability does not fit in the default 60s when the
+    // node is slow. Fixture setup still uses that default.
+    test.beforeEach(() => {
+      test.setTimeout(120_000);
+    });
+
     test.afterAll(async ({ scoutSpace, kbnClient }) => {
       await unsetAlertingV2EnabledSetting(kbnClient);
       await scoutSpace.uiSettings.unset(ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID);
@@ -548,6 +554,70 @@ test.describe(
         { browserAuth, pageObjects, kbnClient, scoutSpace },
         observabilityAlertingNavRole({ uptime: ['all'] }),
         [PANEL_LINKS.alerts, PANEL_LINKS.rulesV1]
+      );
+    });
+
+    test('hides Rules and Alerts when the user only has Actions and Connectors read', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ actions: ['read'] }),
+        []
+      );
+    });
+
+    test('hides Rules and Alerts when the user only has Classic Rules Settings read', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ rulesSettings: ['read'] }),
+        []
+      );
+    });
+
+    test('shows Alerts and classic Rules when the user has Stack Rules read', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+      config,
+    }) => {
+      // `stackAlerts` is hidden in serverless Observability (`stackAlerts.hidden`),
+      // so the privilege cannot be granted and the Alerting panel never renders.
+      test.skip(Boolean(config.serverless), 'Stack Rules are hidden in serverless Observability');
+
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ stackAlerts: ['read'] }),
+        [PANEL_LINKS.alerts, PANEL_LINKS.rulesV1]
+      );
+    });
+
+    test('hides Alerts and Rules when the user only has security rules read', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+      config,
+    }) => {
+      // The Security rules feature is not registered in the Observability serverless project.
+      test.skip(
+        Boolean(config.serverless),
+        'Security rules are not part of serverless Observability'
+      );
+
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ securitySolutionRulesV4: ['read'] }),
+        []
       );
     });
 

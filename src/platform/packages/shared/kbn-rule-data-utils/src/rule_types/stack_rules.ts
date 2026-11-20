@@ -9,6 +9,9 @@
 
 export const STACK_ALERTS_FEATURE_ID = 'stackAlerts';
 export const STACK_ALERTS_ONLY_FEATURE_ID = 'stackAlertsOnly';
+
+/** UI capability `hasClassicRulesReadCapability` reads on the Stack Rules feature. */
+export const STACK_ALERTS_SHOW_UI_CAPABILITY = 'show';
 export const ES_QUERY_ID = '.es-query';
 export const INDEX_THRESHOLD_ID = '.index-threshold';
 export const GEO_CONTAINMENT_ID = '.geo-containment';

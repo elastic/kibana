@@ -235,14 +235,20 @@ export const ObservabilityAlertingApp = ({
         </Route>
         <Route path={OBSERVABILITY_ALERTING_RULES_V1_PATH}>
           <EuiPageSection paddingSize="m">
-            <ClassicRulesV1Route
-              coreStart={coreStart}
-              getClassicRulesPage={triggersActionsUi.getClassicRulesPage}
-              history={history}
-              setBreadcrumbs={setBreadcrumbs}
-              tabs={rulesV1Tabs}
-              showClassicBadge={hasV2Rules}
-            />
+            {/* Universal-only users belong on Universal. Everyone else gets the classic
+                page, which already explains missing access. Classic rules have no single read privilege. */}
+            {rulesTabVisibility.showV2 && !rulesTabVisibility.showV1 ? (
+              <Redirect to={OBSERVABILITY_ALERTING_RULES_V2_PATH} />
+            ) : (
+              <ClassicRulesV1Route
+                coreStart={coreStart}
+                getClassicRulesPage={triggersActionsUi.getClassicRulesPage}
+                history={history}
+                setBreadcrumbs={setBreadcrumbs}
+                tabs={rulesV1Tabs}
+                showClassicBadge={hasV2Rules}
+              />
+            )}
           </EuiPageSection>
         </Route>
         <Route path={OBSERVABILITY_ALERTING_RULES_V2_PATH}>

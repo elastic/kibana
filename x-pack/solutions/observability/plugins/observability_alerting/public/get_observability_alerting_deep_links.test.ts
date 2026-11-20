@@ -19,7 +19,7 @@ import { getObservabilityAlertingDeepLinks } from './get_observability_alerting_
 const SEARCHABLE: AppDeepLinkLocations[] = ['globalSearch', 'projectSideNav'];
 const ALERTS: AppDeepLinkLocations[] = [...SEARCHABLE, 'classicSideNav'];
 
-const capabilities = (features: Record<string, Record<string, boolean>>): Capabilities =>
+const capabilities = (features: Record<string, unknown>): Capabilities =>
   ({
     navLinks: {},
     management: {},
@@ -129,6 +129,55 @@ describe('getObservabilityAlertingDeepLinks', () => {
         [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
       });
+    });
+
+    it('offers Alerts and Rules V1 to a stack rules user', () => {
+      expect(visibleInById(capabilities({ stackAlerts: { show: true } }))).toEqual({
+        [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: SEARCHABLE,
+        [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: SEARCHABLE,
+        [OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]: [],
+        [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
+        [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
+        [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
+      });
+    });
+
+    it('hides Alerts and Rules V1 from a security rules user', () => {
+      const visibleIn = visibleInById(
+        capabilities({ securitySolutionRulesV4: { read_rules: true }, siem: { show: true } })
+      );
+
+      expect(visibleIn[OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]).toEqual([]);
+      expect(visibleIn[OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]).toEqual([]);
+    });
+
+    it('hides Alerts and Rules V1 from an Actions and Connectors user', () => {
+      const visibleIn = visibleInById(
+        capabilities({
+          actions: { show: true },
+          rulesSettings: { show: true },
+          management: {
+            insightsAndAlerting: {
+              triggersActionsRules: true,
+              triggersActionsAlerts: true,
+              triggersActionsConnectors: true,
+            },
+          },
+        })
+      );
+
+      expect(visibleIn[OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]).toEqual([]);
+      expect(visibleIn[OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]).toEqual([]);
+    });
+
+    it.each([
+      ['data set quality', { dataQuality: { show: true } }],
+      ['the machine learning app', { navLinks: { ml: true } }],
+      ['stack alerts only', { stackAlertsOnly: { show: true } }],
+    ])('offers Alerts in search and the project side nav for %s', (_label, features) => {
+      expect(
+        visibleInById(capabilities(features))[OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]
+      ).toEqual(SEARCHABLE);
     });
 
     it('offers Alerts and Rules V1 to a v1 apm navLink user', () => {
