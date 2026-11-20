@@ -454,4 +454,11 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+
+  [
+    '.crowdstrike2',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconcrowdstrike2" */ './specs/crowdstrike2/icon')
+    ),
+  ],
 ]);

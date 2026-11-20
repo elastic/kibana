@@ -90,6 +90,7 @@
 - [AbuseIPDB](/reference/connectors-kibana/abuseipdb-action-type.md): Check IP reputation and report abusive IPs.
 - [AlienVault OTX](/reference/connectors-kibana/alienvault-otx-action-type.md): Retrieve community-driven threat intelligence.
 - [Censys](/reference/connectors-kibana/censys-action-type.md): Enrich hosts, web properties, and certificates, submit assets for rescanning, and run CensEye threat-hunting jobs.
+- [CrowdStrike Falcon](/reference/connectors-kibana/crowdstrike2-action-type.md): Triage alerts, look up and contain hosts, run Real Time Response, manage IOCs, and check reputation and sandbox verdicts.
 - [Google Threat Intelligence](/reference/connectors-kibana/google-threat-intelligence-action-type.md): Search threat collections and IOC streams, enrich IP, domain, URL, and file indicators, and scan URLs.
 - [GreyNoise](/reference/connectors-kibana/greynoise-action-type.md): Detect and classify Internet scanning noise.
 - [MISP](/reference/connectors-kibana/misp-action-type.md): Search attributes and events, check indicators and warninglists, and write sightings, events, attributes, and tags back to MISP.

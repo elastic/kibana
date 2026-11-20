@@ -1,0 +1,721 @@
+{
+  "operations": {
+    "addCaseTags": [
+      {
+        "method": "post",
+        "path": "/cases/entities/case-tags/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
+        "path": "/cases/entities/cases/v2",
+        "source": "falcon"
+      }
+    ],
+    "addHostGroupMembers": [
+      {
+        "method": "post",
+        "path": "/devices/entities/host-group-actions/v1",
+        "source": "falcon"
+      }
+    ],
+    "applyQuarantineFileAction": [
+      {
+        "method": "patch",
+        "path": "/quarantine/entities/quarantined-files/v1",
+        "source": "falcon"
+      }
+    ],
+    "batchActiveResponderExecuteRTR": [
+      {
+        "method": "post",
+        "path": "/real-time-response/combined/batch-active-responder-command/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
+        "path": "/real-time-response/combined/batch-init-session/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "delete",
+        "path": "/real-time-response/entities/sessions/v1",
+        "source": "falcon"
+      }
+    ],
+    "batchAdminExecuteRTR": [
+      {
+        "method": "post",
+        "path": "/real-time-response/combined/batch-admin-command/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
+        "path": "/real-time-response/combined/batch-init-session/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "delete",
+        "path": "/real-time-response/entities/sessions/v1",
+        "source": "falcon"
+      }
+    ],
+    "containHost": [
+      {
+        "method": "post",
+        "path": "/devices/entities/devices-actions/v2",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
+        "path": "/devices/entities/devices/v2",
+        "source": "falcon"
+      }
+    ],
+    "createIOARule": [
+      {
+        "method": "post",
+        "path": "/ioarules/entities/rules/v1",
+        "source": "falcon"
+      }
+    ],
+    "createScan": [
+      {
+        "method": "post",
+        "path": "/ods/entities/scans/v1",
+        "source": "falcon"
+      }
+    ],
+    "deleteIOARule": [
+      {
+        "method": "delete",
+        "path": "/ioarules/entities/rules/v1",
+        "source": "falcon"
+      }
+    ],
+    "deleteIOC": [
+      {
+        "method": "delete",
+        "path": "/iocs/entities/indicators/v1",
+        "source": "falcon"
+      }
+    ],
+    "deleteRTRFile": [
+      {
+        "method": "delete",
+        "path": "/real-time-response/entities/put-files/v1",
+        "source": "falcon"
+      }
+    ],
+    "deleteRTRScript": [
+      {
+        "method": "delete",
+        "path": "/real-time-response/entities/scripts/v1",
+        "source": "falcon"
+      }
+    ],
+    "detonateFile": [
+      {
+        "method": "get",
+        "path": "/falconx/entities/report-summaries/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "get",
+        "path": "/falconx/entities/submissions/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
+        "path": "/falconx/entities/submissions/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
+        "path": "/samples/entities/samples/v3",
+        "source": "falcon"
+      }
+    ],
+    "detonateUrl": [
+      {
+        "method": "get",
+        "path": "/falconx/entities/report-summaries/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "get",
+        "path": "/falconx/entities/submissions/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
+        "path": "/falconx/entities/submissions/v1",
+        "source": "falcon"
+      }
+    ],
+    "executeRTRCommand": [
+      {
+        "method": "post",
+        "path": "/real-time-response/combined/batch-command/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
+        "path": "/real-time-response/combined/batch-init-session/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "delete",
+        "path": "/real-time-response/entities/sessions/v1",
+        "source": "falcon"
+      }
+    ],
+    "findHostsByIndicator": [
+      {
+        "method": "get",
+        "path": "/iocs/aggregates/indicators/device-count/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "end": "missing",
+          "request": {
+            "cursorParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "resources",
+            "nextPath": "meta.pagination.offset"
+          },
+          "style": "cursor"
+        },
+        "path": "/iocs/queries/indicators/devices/v1",
+        "source": "falcon"
+      }
+    ],
+    "getAgentDetails": [
+      {
+        "method": "post",
+        "path": "/devices/entities/devices/v2",
+        "source": "falcon"
+      }
+    ],
+    "getAgentOnlineStatus": [
+      {
+        "method": "get",
+        "path": "/devices/entities/online-state/v1",
+        "source": "falcon"
+      }
+    ],
+    "getAlertDetails": [
+      {
+        "method": "post",
+        "path": "/alerts/entities/alerts/v2",
+        "source": "falcon"
+      }
+    ],
+    "getCaseDetails": [
+      {
+        "method": "post",
+        "path": "/cases/entities/cases/v2",
+        "source": "falcon"
+      }
+    ],
+    "getFileReputation": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "resources",
+            "totalPath": "meta.pagination.total"
+          },
+          "style": "offset"
+        },
+        "path": "/intel/combined/indicators/v1",
+        "source": "falcon"
+      }
+    ],
+    "getNgSiemSearchResults": [
+      {
+        "method": "get",
+        "path": "/humio/api/v1/repositories/{repository}/queryjobs/{id}",
+        "source": "falcon"
+      }
+    ],
+    "getRTRCloudScripts": [
+      {
+        "method": "get",
+        "path": "/real-time-response/entities/scripts/v2",
+        "source": "falcon"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "resources",
+            "totalPath": "meta.pagination.total"
+          },
+          "style": "offset"
+        },
+        "path": "/real-time-response/queries/scripts/v1",
+        "source": "falcon"
+      }
+    ],
+    "getRTRCommandStatus": [
+      {
+        "method": "get",
+        "path": "/real-time-response/entities/active-responder-command/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "get",
+        "path": "/real-time-response/entities/admin-command/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "get",
+        "path": "/real-time-response/entities/command/v1",
+        "source": "falcon"
+      }
+    ],
+    "getScanResults": [
+      {
+        "method": "get",
+        "path": "/ods/entities/malicious-files/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "get",
+        "path": "/ods/entities/scans/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "resources",
+            "totalPath": "meta.pagination.total"
+          },
+          "style": "offset"
+        },
+        "path": "/ods/queries/malicious-files/v1",
+        "source": "falcon"
+      }
+    ],
+    "getUrlReputation": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "resources",
+            "totalPath": "meta.pagination.total"
+          },
+          "style": "offset"
+        },
+        "path": "/intel/combined/indicators/v1",
+        "source": "falcon"
+      }
+    ],
+    "liftContainment": [
+      {
+        "method": "post",
+        "path": "/devices/entities/devices-actions/v2",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
+        "path": "/devices/entities/devices/v2",
+        "source": "falcon"
+      }
+    ],
+    "listHostGroups": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "resources",
+            "totalPath": "meta.pagination.total"
+          },
+          "style": "offset"
+        },
+        "path": "/devices/combined/host-groups/v1",
+        "source": "falcon"
+      }
+    ],
+    "listIOARules": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "resources",
+            "totalPath": "meta.pagination.total"
+          },
+          "style": "offset"
+        },
+        "path": "/ioarules/queries/rule-groups-full/v1",
+        "source": "falcon"
+      }
+    ],
+    "listQuarantinedFiles": [
+      {
+        "method": "post",
+        "path": "/quarantine/entities/quarantined-files/GET/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "resources",
+            "totalPath": "meta.pagination.total"
+          },
+          "style": "offset"
+        },
+        "path": "/quarantine/queries/quarantined-files/v1",
+        "source": "falcon"
+      }
+    ],
+    "listRTRFiles": [
+      {
+        "method": "get",
+        "path": "/real-time-response/entities/put-files/v2",
+        "source": "falcon"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "resources",
+            "totalPath": "meta.pagination.total"
+          },
+          "style": "offset"
+        },
+        "path": "/real-time-response/queries/put-files/v1",
+        "source": "falcon"
+      }
+    ],
+    "removeCaseTags": [
+      {
+        "method": "delete",
+        "path": "/cases/entities/case-tags/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
+        "path": "/cases/entities/cases/v2",
+        "source": "falcon"
+      }
+    ],
+    "removeHostGroupMembers": [
+      {
+        "method": "post",
+        "path": "/devices/entities/host-group-actions/v1",
+        "source": "falcon"
+      }
+    ],
+    "rtrKillProcess": [
+      {
+        "method": "get",
+        "path": "/real-time-response/entities/active-responder-command/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
+        "path": "/real-time-response/entities/active-responder-command/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "delete",
+        "path": "/real-time-response/entities/sessions/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
+        "path": "/real-time-response/entities/sessions/v1",
+        "source": "falcon"
+      }
+    ],
+    "rtrListProcesses": [
+      {
+        "method": "get",
+        "path": "/real-time-response/entities/command/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
+        "path": "/real-time-response/entities/command/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "delete",
+        "path": "/real-time-response/entities/sessions/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
+        "path": "/real-time-response/entities/sessions/v1",
+        "source": "falcon"
+      }
+    ],
+    "rtrRetrieveFile": [
+      {
+        "method": "get",
+        "path": "/real-time-response/combined/batch-get-command/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
+        "path": "/real-time-response/combined/batch-get-command/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "post",
+        "path": "/real-time-response/combined/batch-init-session/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/real-time-response/entities/extracted-file-contents/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "delete",
+        "path": "/real-time-response/entities/sessions/v1",
+        "source": "falcon"
+      }
+    ],
+    "searchAlerts": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "resources",
+            "totalPath": "meta.pagination.total"
+          },
+          "style": "offset"
+        },
+        "path": "/alerts/queries/alerts/v2",
+        "source": "falcon"
+      }
+    ],
+    "searchCases": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "resources",
+            "totalPath": "meta.pagination.total"
+          },
+          "style": "offset"
+        },
+        "path": "/cases/queries/cases/v1",
+        "source": "falcon"
+      }
+    ],
+    "searchDevices": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "resources",
+            "totalPath": "meta.pagination.total"
+          },
+          "style": "offset"
+        },
+        "path": "/devices/queries/devices/v1",
+        "source": "falcon"
+      }
+    ],
+    "searchIOAExclusions": [
+      {
+        "method": "get",
+        "path": "/exclusions/entities/ss-ioa-exclusions/v2",
+        "source": "falcon"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "resources",
+            "totalPath": "meta.pagination.total"
+          },
+          "style": "offset"
+        },
+        "path": "/exclusions/queries/ss-ioa-exclusions/v2",
+        "source": "falcon"
+      }
+    ],
+    "searchIOCs": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "resources",
+            "totalPath": "meta.pagination.total"
+          },
+          "style": "offset"
+        },
+        "path": "/iocs/combined/indicator/v1",
+        "source": "falcon"
+      }
+    ],
+    "spotlightSearchVulnerability": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "end": "missing",
+          "request": {
+            "cursorParam": "after",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "resources",
+            "nextPath": "meta.pagination.after"
+          },
+          "style": "cursor"
+        },
+        "path": "/spotlight/combined/vulnerabilities/v1",
+        "source": "falcon"
+      }
+    ],
+    "startNgSiemSearch": [
+      {
+        "method": "post",
+        "path": "/humio/api/v1/repositories/{repository}/queryjobs",
+        "source": "falcon"
+      }
+    ],
+    "stopNgSiemSearch": [
+      {
+        "method": "delete",
+        "path": "/humio/api/v1/repositories/{repository}/queryjobs/{id}",
+        "source": "falcon"
+      }
+    ],
+    "updateAlert": [
+      {
+        "method": "patch",
+        "path": "/alerts/entities/alerts/v3",
+        "source": "falcon"
+      }
+    ],
+    "updateCase": [
+      {
+        "method": "patch",
+        "path": "/cases/entities/cases/v2",
+        "source": "falcon"
+      }
+    ],
+    "updateIOARule": [
+      {
+        "method": "get",
+        "path": "/ioarules/entities/rule-groups/v1",
+        "source": "falcon"
+      },
+      {
+        "method": "patch",
+        "path": "/ioarules/entities/rules/v2",
+        "source": "falcon"
+      }
+    ],
+    "uploadIOC": [
+      {
+        "method": "post",
+        "path": "/iocs/entities/indicators/v1",
+        "source": "falcon"
+      }
+    ],
+    "uploadRTRFile": [
+      {
+        "method": "post",
+        "path": "/real-time-response/entities/put-files/v2",
+        "source": "falcon"
+      }
+    ],
+    "uploadRTRScript": [
+      {
+        "method": "post",
+        "path": "/real-time-response/entities/scripts/v2",
+        "source": "falcon"
+      }
+    ]
+  },
+  "sources": {
+    "falcon": {
+      "apiVersion": "2026-11-20T00:00:07Z",
+      "fetchedAt": "2026-11-20T12:57:00.000Z",
+      "format": "swagger",
+      "note": "Exported from the Falcon console's API documentation (Swagger 2.0, 'CrowdStrike API Specification', US-2 cloud), which is login-gated and has no public URL, so the source URL is a placeholder and the drift check cannot refetch it. The export was normalised before trimming: 896 references to response, parameter and schema objects the export does not define (all in operations the connector does not call) were removed, and 15 regular expressions that JavaScript cannot parse were dropped. Every Falcon cloud serves the same API from its own host; overlay.yaml lists them. A trimmed snapshot was requested by the Kibana reviewers.",
+      "url": "https://assets.falcon.us-2.crowdstrike.com/support/api/swagger-us2.json"
+    }
+  }
+}
