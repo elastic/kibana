@@ -11,9 +11,9 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { registerSessionMemoryRoutes } from './session_memory';
 import {
+  MAX_MEMORY_ID_LENGTH,
+  MAX_MEMORY_USER_ID_LENGTH,
   MAX_SESSION_MEMORY_FORGET_IDS,
-  MAX_SESSION_MEMORY_ID_LENGTH,
-  MAX_SESSION_MEMORY_USER_ID_LENGTH,
   SESSION_MEMORY_FORGET_PATH,
 } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
@@ -27,7 +27,7 @@ interface RegisteredRoute {
     options: { availability: unknown };
   };
   handler: RequestHandler;
-  validate: { request: { body: Type<unknown> } };
+  validate: { request: { body: Type<Record<string, unknown>> } };
 }
 
 describe('session memory routes', () => {
@@ -37,6 +37,7 @@ describe('session memory routes', () => {
   let auditLog: jest.Mock;
   let service: jest.Mocked<SessionMemoryService>;
   let callerUserId: string | null;
+  let getProfileId: jest.Mock<Promise<string | null>>;
   let authzResult: Record<string, boolean>;
 
   const createContext = () =>
@@ -46,25 +47,28 @@ describe('session memory routes', () => {
           client: { get: jest.fn().mockImplementation(async () => featureFlagEnabled) },
         },
         security: { audit: { logger: { log: auditLog } } },
-        userProfile: { getCurrentProfileId: jest.fn(async () => callerUserId) },
+        userProfile: { getCurrentProfileId: getProfileId },
       }),
     } as unknown as Parameters<RequestHandler>[0]);
+
+  const validateBody = (body: unknown) => route.validate.request.body.validate(body);
 
   const callRoute = (body: Record<string, unknown>) =>
     route.handler(
       createContext(),
-      Object.assign(httpServerMock.createKibanaRequest({ body }), { authzResult }),
+      Object.assign(httpServerMock.createKibanaRequest({ body: validateBody(body) }), {
+        authzResult,
+      }),
       response
     );
-
-  const validateBody = (body: unknown) => route.validate.request.body.validate(body);
 
   const auditedEvents = () => auditLog.mock.calls.map(([event]) => event);
 
   beforeEach(() => {
     featureFlagEnabled = true;
     callerUserId = 'jdoe';
-    authzResult = { [apiPrivileges.manageMemory]: false };
+    getProfileId = jest.fn(async () => callerUserId);
+    authzResult = {};
     auditLog = jest.fn();
     response = httpServerMock.createResponseFactory();
     service = {
@@ -120,7 +124,7 @@ describe('session memory routes', () => {
 
   describe('whose memory', () => {
     it('forgets the memories of the caller when user_id is missing', async () => {
-      service.forget.mockResolvedValue({ a: 'forgotten' });
+      service.forget.mockResolvedValue([{ id: 'a', outcome: 'forgotten' }]);
 
       await callRoute({ ids: ['a'] });
 
@@ -128,13 +132,30 @@ describe('session memory routes', () => {
       expect(response.ok).toHaveBeenCalledTimes(1);
     });
 
-    it('returns 403 when user_id is missing and the caller has no profile', async () => {
+    it('returns 403 and audits every unique id when user_id is missing and caller has no profile', async () => {
       callerUserId = null;
 
-      await callRoute({ ids: ['a'] });
+      await callRoute({ ids: ['a', 'b', 'a'] });
 
-      expect(response.forbidden).toHaveBeenCalledTimes(1);
+      expect(response.forbidden).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining('The caller has no user profile') },
+      });
       expect(service.forget).not.toHaveBeenCalled();
+      expect(auditedEvents()).toEqual([
+        expect.objectContaining({
+          message: 'Failed attempt to forget session memory [id=a]',
+          event: expect.objectContaining({ action: 'memory_forget', outcome: 'failure' }),
+          error: expect.objectContaining({ code: 'Forbidden' }),
+          kibana: { saved_object: { type: 'session_memory', id: 'a' } },
+        }),
+        expect.objectContaining({
+          message: 'Failed attempt to forget session memory [id=b]',
+          event: expect.objectContaining({ action: 'memory_forget', outcome: 'failure' }),
+          error: expect.objectContaining({ code: 'Forbidden' }),
+          kibana: { saved_object: { type: 'session_memory', id: 'b' } },
+        }),
+      ]);
+      expect(auditedEvents()[0]).not.toHaveProperty('user');
     });
 
     it('returns 403 and audits the attempt when user_id names another user without manage memory', async () => {
@@ -146,38 +167,63 @@ describe('session memory routes', () => {
       expect(service.forget).not.toHaveBeenCalled();
       expect(auditedEvents()).toEqual([
         expect.objectContaining({
-          event: expect.objectContaining({ outcome: 'failure' }),
+          event: expect.objectContaining({ action: 'memory_forget', outcome: 'failure' }),
+          error: expect.objectContaining({
+            code: 'Forbidden',
+            message: expect.stringContaining(apiPrivileges.manageMemory),
+          }),
           user: { target: { id: 'other' } },
           kibana: { saved_object: { type: 'session_memory', id: 'a' } },
         }),
         expect.objectContaining({
-          event: expect.objectContaining({ outcome: 'failure' }),
+          event: expect.objectContaining({ action: 'memory_forget', outcome: 'failure' }),
+          error: expect.objectContaining({ code: 'Forbidden' }),
           kibana: { saved_object: { type: 'session_memory', id: 'b' } },
         }),
       ]);
     });
 
-    it('forgets the memories of another user with manage memory', async () => {
+    it('forgets the memories of another user with manage memory even when caller has no profile', async () => {
+      callerUserId = null;
       authzResult = { [apiPrivileges.manageMemory]: true };
-      service.forget.mockResolvedValue({ a: 'forgotten' });
+      service.forget.mockResolvedValue([{ id: 'a', outcome: 'forgotten' }]);
 
       await callRoute({ user_id: 'other', ids: ['a'] });
 
       expect(service.forget).toHaveBeenCalledWith({ space: 'marketing', userId: 'other' }, ['a']);
       expect(response.ok).toHaveBeenCalledTimes(1);
     });
+
+    it('audits and rethrows when resolving the caller profile fails', async () => {
+      getProfileId.mockRejectedValueOnce(new Error('profile activation failed'));
+
+      await expect(callRoute({ ids: ['a'] })).rejects.toThrow('profile activation failed');
+      expect(auditedEvents()).toEqual([
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'memory_forget', outcome: 'failure' }),
+          error: { code: 'Error', message: 'profile activation failed' },
+          kibana: { saved_object: { type: 'session_memory', id: 'a' } },
+        }),
+      ]);
+    });
   });
 
   describe('forgetting', () => {
     it('forgets in the request space for the body user and answers in request order, without duplicates', async () => {
-      service.forget.mockResolvedValue({ b: 'forgotten', 2: 'already_forgotten', a: 'not_found' });
+      service.forget.mockResolvedValue([
+        { id: 'b', outcome: 'forgotten' },
+        { id: '2', outcome: 'already_forgotten' },
+        { id: 'a', outcome: 'not_found' },
+        { id: 'd', outcome: 'failed', error: 'index_read_only_allow_delete_block' },
+      ]);
 
-      await callRoute({ user_id: 'jdoe', ids: ['b', '2', 'a', 'b'] });
+      await callRoute({ user_id: 'jdoe', ids: ['b', '2', 'a', 'd', 'b'] });
 
       expect(service.forget).toHaveBeenCalledWith({ space: 'marketing', userId: 'jdoe' }, [
         'b',
         '2',
         'a',
+        'd',
       ]);
       expect(response.ok).toHaveBeenCalledWith({
         body: {
@@ -185,37 +231,46 @@ describe('session memory routes', () => {
             { id: 'b', outcome: 'forgotten' },
             { id: '2', outcome: 'already_forgotten' },
             { id: 'a', outcome: 'not_found' },
+            { id: 'd', outcome: 'failed', error: 'index_read_only_allow_delete_block' },
           ],
         },
       });
     });
 
-    it('audits each memory once, recording whose memory it was', async () => {
-      service.forget.mockResolvedValue({
-        a: 'forgotten',
-        b: 'already_forgotten',
-        c: 'not_found',
-      });
+    it('audits each memory once, recording not_found and failed outcomes as failures', async () => {
+      service.forget.mockResolvedValue([
+        { id: 'a', outcome: 'forgotten' },
+        { id: 'b', outcome: 'already_forgotten' },
+        { id: 'c', outcome: 'not_found' },
+        { id: 'd', outcome: 'failed', error: 'tombstone rejected' },
+      ]);
 
-      await callRoute({ user_id: 'jdoe', ids: ['a', 'b', 'c', 'a'] });
+      await callRoute({ user_id: 'jdoe', ids: ['a', 'b', 'c', 'd', 'a'] });
 
       expect(auditedEvents()).toEqual([
         expect.objectContaining({
           message: 'User has forgotten session memory [id=a] of user [id=jdoe]',
-          event: expect.objectContaining({ action: 'session_memory_forget', outcome: 'success' }),
+          event: expect.objectContaining({ action: 'memory_forget', outcome: 'success' }),
           user: { target: { id: 'jdoe' } },
           kibana: { saved_object: { type: 'session_memory', id: 'a' } },
         }),
         expect.objectContaining({
           kibana: { saved_object: { type: 'session_memory', id: 'b' } },
-          event: expect.objectContaining({ outcome: 'success' }),
+          event: expect.objectContaining({ action: 'memory_forget', outcome: 'success' }),
         }),
         expect.objectContaining({
           message: 'Failed attempt to forget session memory [id=c] of user [id=jdoe]',
-          event: expect.objectContaining({ outcome: 'failure' }),
+          event: expect.objectContaining({ action: 'memory_forget', outcome: 'failure' }),
           error: expect.objectContaining({ code: 'not_found' }),
           user: { target: { id: 'jdoe' } },
           kibana: { saved_object: { type: 'session_memory', id: 'c' } },
+        }),
+        expect.objectContaining({
+          message: 'Failed attempt to forget session memory [id=d] of user [id=jdoe]',
+          event: expect.objectContaining({ action: 'memory_forget', outcome: 'failure' }),
+          error: { code: 'failed', message: 'tombstone rejected' },
+          user: { target: { id: 'jdoe' } },
+          kibana: { saved_object: { type: 'session_memory', id: 'd' } },
         }),
       ]);
     });
@@ -230,12 +285,12 @@ describe('session memory routes', () => {
     expect(response.ok).not.toHaveBeenCalled();
     expect(auditedEvents()).toEqual([
       expect.objectContaining({
-        event: expect.objectContaining({ outcome: 'failure' }),
+        event: expect.objectContaining({ action: 'memory_forget', outcome: 'failure' }),
         error: { code: 'Error', message: 'shard unavailable' },
         kibana: { saved_object: { type: 'session_memory', id: 'a' } },
       }),
       expect.objectContaining({
-        event: expect.objectContaining({ outcome: 'failure' }),
+        event: expect.objectContaining({ action: 'memory_forget', outcome: 'failure' }),
         error: { code: 'Error', message: 'shard unavailable' },
         kibana: { saved_object: { type: 'session_memory', id: 'b' } },
       }),
@@ -264,12 +319,11 @@ describe('session memory routes', () => {
         },
       ],
       ['an empty user_id', { user_id: '', ids: ['a'] }],
-      [
-        'an over-long user_id',
-        { user_id: 'u'.repeat(MAX_SESSION_MEMORY_USER_ID_LENGTH + 1), ids: ['a'] },
-      ],
+      ['a blank user_id', { user_id: '   ', ids: ['a'] }],
+      ['an over-long user_id', { user_id: 'u'.repeat(MAX_MEMORY_USER_ID_LENGTH + 1), ids: ['a'] }],
       ['an empty id', { user_id: 'jdoe', ids: [''] }],
-      ['an over-long id', { user_id: 'jdoe', ids: ['i'.repeat(MAX_SESSION_MEMORY_ID_LENGTH + 1)] }],
+      ['a blank id', { user_id: 'jdoe', ids: ['  '] }],
+      ['an over-long id', { user_id: 'jdoe', ids: ['i'.repeat(MAX_MEMORY_ID_LENGTH + 1)] }],
     ])('rejects %s', (_name, body) => {
       expect(() => validateBody(body)).toThrow();
     });
@@ -277,9 +331,9 @@ describe('session memory routes', () => {
     it('accepts the largest allowed request', () => {
       expect(() =>
         validateBody({
-          user_id: 'u'.repeat(MAX_SESSION_MEMORY_USER_ID_LENGTH),
+          user_id: 'u'.repeat(MAX_MEMORY_USER_ID_LENGTH),
           ids: Array.from({ length: MAX_SESSION_MEMORY_FORGET_IDS }, () =>
-            'i'.repeat(MAX_SESSION_MEMORY_ID_LENGTH)
+            'i'.repeat(MAX_MEMORY_ID_LENGTH)
           ),
         })
       ).not.toThrow();

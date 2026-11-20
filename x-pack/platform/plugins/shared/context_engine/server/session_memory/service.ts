@@ -6,11 +6,27 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { BulkResponse, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ErrorCause, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { MAX_SESSION_MEMORY_FORGET_IDS } from '../../common/constants';
 import { SESSION_MEMORY_DATA_STREAM } from './data_streams';
-import type { ForgetOutcome } from '../../common/http_api/session_memory';
-import type { SessionMemoryScope, SessionMemoryService, StoredSessionMemory } from './types';
+import type {
+  ForgetResult,
+  SessionMemoryScope,
+  SessionMemoryService,
+  StoredMemoryRevision,
+  StoredSessionMemory,
+  StoredTombstone,
+} from './types';
+
+const assertScope = ({ space, userId }: SessionMemoryScope): void => {
+  if (space.trim() === '') {
+    throw new Error('Session memory scope requires a non-empty space');
+  }
+  if (userId.trim() === '') {
+    throw new Error('Session memory scope requires a non-empty userId');
+  }
+};
 
 // Every read and delete goes through this filter, so a memory in another space or of another user
 // behaves exactly like one that does not exist.
@@ -19,17 +35,15 @@ const scopeFilter = ({ space, userId }: SessionMemoryScope): QueryDslQueryContai
   { term: { user_id: userId } },
 ];
 
-const ignoreMissingStream = { ignore_unavailable: true };
-
-// The bulk API reports rejected documents in the response instead of throwing.
-const throwOnBulkErrors = (response: BulkResponse): void => {
-  const error = response.items.find((item) => item.create?.error)?.create?.error;
-  if (error) {
-    throw new Error(`Failed to write to session memory: ${error.reason ?? error.type}`);
-  }
+const toErrorMessage = ({ type, reason, caused_by: cause }: ErrorCause): string => {
+  const message = reason ?? type;
+  return cause?.reason ? `${message}: ${cause.reason}` : message;
 };
 
-const toTombstone = (latest: StoredSessionMemory, timestamp: string): StoredSessionMemory => ({
+const isTombstone = (revision: StoredSessionMemory): revision is StoredTombstone =>
+  revision.deleted_at !== undefined;
+
+const toTombstone = (latest: StoredMemoryRevision, timestamp: string): StoredTombstone => ({
   '@timestamp': timestamp,
   id: latest.id,
   space: latest.space,
@@ -39,11 +53,18 @@ const toTombstone = (latest: StoredSessionMemory, timestamp: string): StoredSess
   deleted_at: timestamp,
 });
 
-const getForgetOutcome = (latest: StoredSessionMemory | undefined): ForgetOutcome => {
-  if (!latest) {
-    return 'not_found';
+const toForgetResult = (
+  id: string,
+  latest: StoredSessionMemory | undefined,
+  error: string | undefined
+): ForgetResult => {
+  if (error !== undefined) {
+    return { id, outcome: 'failed', error };
   }
-  return latest.deleted_at === undefined ? 'forgotten' : 'already_forgotten';
+  if (!latest) {
+    return { id, outcome: 'not_found' };
+  }
+  return { id, outcome: isTombstone(latest) ? 'already_forgotten' : 'forgotten' };
 };
 
 /**
@@ -53,11 +74,14 @@ const getForgetOutcome = (latest: StoredSessionMemory | undefined): ForgetOutcom
 export const createSessionMemoryService = (
   esClient: ElasticsearchClient
 ): SessionMemoryService => ({
-  remember: async ({ space, userId }, input) => {
+  remember: async (scope, input) => {
+    assertScope(scope);
+    const { space, userId } = scope;
     const { id = randomUUID(), sessionId, content, aiIndexIds = [], attributes = {} } = input;
-    await esClient.index<StoredSessionMemory>({
+    await esClient.index<StoredMemoryRevision>({
       index: SESSION_MEMORY_DATA_STREAM,
       op_type: 'create',
+      require_data_stream: true,
       document: {
         '@timestamp': new Date().toISOString(),
         id,
@@ -73,15 +97,19 @@ export const createSessionMemoryService = (
   },
 
   get: async (scope, id) => {
+    assertScope(scope);
+    // A failed shard could hold the newest revision, a tombstone included, so a partial result is
+    // an error rather than an older answer.
     const response = await esClient.search<StoredSessionMemory>({
       index: SESSION_MEMORY_DATA_STREAM,
-      ...ignoreMissingStream,
+      ignore_unavailable: true,
+      allow_partial_search_results: false,
       query: { bool: { filter: [{ term: { id } }, ...scopeFilter(scope)] } },
       sort: [{ '@timestamp': 'desc' }],
       size: 1,
     });
     const latest = response.hits.hits[0]?._source;
-    if (latest?.content === undefined) {
+    if (!latest || isTombstone(latest)) {
       return undefined;
     }
     return {
@@ -96,16 +124,21 @@ export const createSessionMemoryService = (
   },
 
   forget: async (scope, ids) => {
+    assertScope(scope);
     const uniqueIds = [...new Set(ids)];
     if (uniqueIds.length === 0) {
-      return {};
+      return [];
+    }
+    if (uniqueIds.length > MAX_SESSION_MEMORY_FORGET_IDS) {
+      throw new Error(`Cannot forget more than ${MAX_SESSION_MEMORY_FORGET_IDS} memories at once`);
     }
 
     // Collapse to the latest revision of each memory before looking at tombstones. Filtering out
     // tombstones in the query instead would surface an older revision of a forgotten memory.
     const response = await esClient.search<StoredSessionMemory>({
       index: SESSION_MEMORY_DATA_STREAM,
-      ...ignoreMissingStream,
+      ignore_unavailable: true,
+      allow_partial_search_results: false,
       query: { bool: { filter: [{ terms: { id: uniqueIds } }, ...scopeFilter(scope)] } },
       collapse: { field: 'id' },
       sort: [{ '@timestamp': 'desc' }],
@@ -116,19 +149,25 @@ export const createSessionMemoryService = (
 
     const timestamp = new Date().toISOString();
     const tombstones = latestRevisions
-      .filter((latest) => latest.deleted_at === undefined)
+      .filter((latest): latest is StoredMemoryRevision => !isTombstone(latest))
       .map((latest) => toTombstone(latest, timestamp));
+    // The bulk API reports a rejected tombstone in its item instead of throwing, and keeps the order.
+    const errorsById = new Map<string, string>();
     if (tombstones.length > 0) {
-      throwOnBulkErrors(
-        await esClient.bulk<StoredSessionMemory>({
-          operations: tombstones.flatMap((tombstone) => [
-            { create: { _index: SESSION_MEMORY_DATA_STREAM } },
-            tombstone,
-          ]),
-        })
-      );
+      const { items } = await esClient.bulk<StoredTombstone>({
+        require_data_stream: true,
+        operations: tombstones.flatMap((tombstone) => [
+          { create: { _index: SESSION_MEMORY_DATA_STREAM } },
+          tombstone,
+        ]),
+      });
+      items.forEach(({ create }, index) => {
+        if (create?.error) {
+          errorsById.set(tombstones[index].id, toErrorMessage(create.error));
+        }
+      });
     }
 
-    return Object.fromEntries(uniqueIds.map((id) => [id, getForgetOutcome(latestById.get(id))]));
+    return uniqueIds.map((id) => toForgetResult(id, latestById.get(id), errorsById.get(id)));
   },
 });

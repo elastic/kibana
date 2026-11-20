@@ -9,6 +9,7 @@ import {
   parseIntervalMinutes,
   parseRelativeFromMinutes,
   validateAbsoluteSignalWindow,
+  validateNonBlank,
   validateFeedbackAnalysisInterval,
   validateRelativeSignalWindow,
   validateSignalWindowCoversInterval,
@@ -71,6 +72,17 @@ describe('validateRelativeSignalWindow', () => {
 
   it('rejects anything else', () => {
     expect(validateRelativeSignalWindow('30d')).toMatch(/date math relative to now/);
+  });
+});
+
+describe('validateNonBlank', () => {
+  it('accepts strings with non-whitespace characters', () => {
+    expect(validateNonBlank('abc')).toBeUndefined();
+    expect(validateNonBlank(' a ')).toBeUndefined();
+  });
+
+  it.each(['', ' ', '\t\n'])('rejects %j', (value) => {
+    expect(validateNonBlank(value)).toBe('must not be blank');
   });
 });
 

@@ -11,42 +11,48 @@ import type { IRouter } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   AI_INDEX_API_VERSION,
+  MAX_MEMORY_ID_LENGTH,
+  MAX_MEMORY_USER_ID_LENGTH,
   MAX_SESSION_MEMORY_FORGET_IDS,
-  MAX_SESSION_MEMORY_ID_LENGTH,
-  MAX_SESSION_MEMORY_USER_ID_LENGTH,
   SESSION_MEMORY_FORGET_PATH,
 } from '../../common/constants';
-import type { ForgetSessionMemoriesResponse } from '../../common/http_api/session_memory';
-import { SessionMemoryAuditAction, sessionMemoryAuditEvent } from '../audit/audit_events';
+import type {
+  ForgetSessionMemoriesResponse,
+  ForgetSessionMemoryResult,
+} from '../../common/http_api/session_memory';
+import { validateNonBlank } from '../../common/validation';
+import { sessionMemoryForgetAuditEvent } from '../audit/audit_events';
 import type { SessionMemoryService } from '../session_memory/types';
 import { resolveSpaceId } from '../utils/resolve_space_id';
-import {
-  MANAGE_MEMORY_REQUIRED_MESSAGE,
-  MEMORY_WRITE_SECURITY,
-  canActOnUserMemory,
-} from './memory_user';
+import { CONTEXT_ENGINE_DOCS_NOTE } from './constants';
+import { MEMORY_WRITE_SECURITY, resolveMemoryUser, toError } from './memory_user';
 import { errorResponseSchema } from './schemas/ai_indices_schema';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
-
-const NO_PROFILE_MESSAGE =
-  'The caller has no user profile, so there is no memory of its own to forget. Set `user_id`, log in to Kibana once to create a profile, or use an API key whose owner has one.';
 
 const forgetBodySchema = schema.object({
   user_id: schema.maybe(
     schema.string({
       minLength: 1,
-      maxLength: MAX_SESSION_MEMORY_USER_ID_LENGTH,
+      maxLength: MAX_MEMORY_USER_ID_LENGTH,
+      validate: validateNonBlank,
       meta: {
         description:
           "The user the memories are about. Defaults to the caller's user profile. Naming another user needs `contextEngine:manage_memory`. A memory of any other user is reported as `not_found`.",
       },
     })
   ),
-  ids: schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_SESSION_MEMORY_ID_LENGTH }), {
-    minSize: 1,
-    maxSize: MAX_SESSION_MEMORY_FORGET_IDS,
-    meta: { description: 'The ids of the memories to forget. Duplicates are collapsed.' },
-  }),
+  ids: schema.arrayOf(
+    schema.string({
+      minLength: 1,
+      maxLength: MAX_MEMORY_ID_LENGTH,
+      validate: validateNonBlank,
+    }),
+    {
+      minSize: 1,
+      maxSize: MAX_SESSION_MEMORY_FORGET_IDS,
+      meta: { description: 'The ids of the memories to forget. Duplicates are collapsed.' },
+    }
+  ),
 });
 
 const forgetResponseSchema = () =>
@@ -55,11 +61,22 @@ const forgetResponseSchema = () =>
       results: schema.arrayOf(
         schema.object({
           id: schema.string({ meta: { description: 'The memory id.' } }),
-          outcome: schema.oneOf([
-            schema.literal('forgotten'),
-            schema.literal('already_forgotten'),
-            schema.literal('not_found'),
-          ]),
+          outcome: schema.oneOf(
+            [
+              schema.literal('forgotten'),
+              schema.literal('already_forgotten'),
+              schema.literal('not_found'),
+              schema.literal('failed'),
+            ],
+            { meta: { description: 'What happened to the memory.' } }
+          ),
+          error: schema.maybe(
+            schema.string({
+              meta: {
+                description: 'Why the tombstone failed when `outcome` is `failed`.',
+              },
+            })
+          ),
         }),
         {
           maxSize: MAX_SESSION_MEMORY_FORGET_IDS,
@@ -70,6 +87,25 @@ const forgetResponseSchema = () =>
     { meta: { description: 'The outcome for every requested memory.' } }
   );
 
+const auditFailureForResult = (
+  result: ForgetSessionMemoryResult
+): 'not_found' | Error | undefined => {
+  switch (result.outcome) {
+    case 'forgotten':
+    case 'already_forgotten':
+      return undefined;
+    case 'not_found':
+      return 'not_found';
+    case 'failed':
+      return Object.assign(new Error(result.error), { name: 'failed' });
+    default: {
+      const exhaustive: never = result;
+      throw new Error(`Unsupported forget result: ${JSON.stringify(exhaustive)}`);
+    }
+  }
+};
+
+/** Registers the public session memory routes (`POST /api/context_engine/memory/_forget`). */
 export const registerSessionMemoryRoutes = ({
   router,
   getSpaces,
@@ -88,9 +124,10 @@ export const registerSessionMemoryRoutes = ({
       description: [
         "Requires the `contextEngine:write` privilege. Without `user_id` the route forgets the caller's own memories, and a caller without a user profile gets a 403. Naming another user in `user_id` also needs `contextEngine:manage_memory`.",
         'Forgets session memories by id, for that user. A memory of another user or in another space is reported as `not_found`, as if it did not exist.',
-        'The memory stops being returned, but its revisions are kept until retention removes them.',
-        'Each memory is audited. Forgetting still works when memory is turned off.',
+        'The memory stops being returned, but its revisions are kept until retention removes them. If Elasticsearch rejects a tombstone, that entry is returned as `failed` with its `error` and can be retried.',
+        'Each unique memory id writes one `memory_forget` audit event. Forgetting still works when memory is turned off.',
         'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).',
+        CONTEXT_ENGINE_DOCS_NOTE,
       ].join('\n\n'),
       options: {
         tags: ['oas-tag:context engine'],
@@ -124,51 +161,51 @@ export const registerSessionMemoryRoutes = ({
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const { user_id: requestedUserId, ids } = request.body;
-        const action = SessionMemoryAuditAction.FORGET;
         const uniqueIds = [...new Set(ids)];
         const { security, userProfile } = await ctx.core;
         const auditLogger = security.audit.logger;
-        const callerUserId = (await userProfile.getCurrentProfileId()) ?? undefined;
-        const userId = requestedUserId ?? callerUserId;
+        let targetUserId: string | undefined = requestedUserId;
 
-        if (userId === undefined) {
-          return response.forbidden({ body: { message: NO_PROFILE_MESSAGE } });
-        }
-
-        if (!canActOnUserMemory(request, userId, callerUserId)) {
-          const failure = Object.assign(new Error(MANAGE_MEMORY_REQUIRED_MESSAGE), {
-            name: 'Forbidden',
-          });
+        const auditAll = (failure: Error) => {
           uniqueIds.forEach((memoryId) =>
-            auditLogger.log(
-              sessionMemoryAuditEvent({ action, memoryId, targetUserId: userId, failure })
-            )
+            auditLogger.log(sessionMemoryForgetAuditEvent({ memoryId, targetUserId, failure }))
           );
-          return response.forbidden({ body: { message: MANAGE_MEMORY_REQUIRED_MESSAGE } });
+        };
+
+        let resolvedUser: Awaited<ReturnType<typeof resolveMemoryUser>>;
+        try {
+          resolvedUser = await resolveMemoryUser({ request, userProfile, requestedUserId });
+        } catch (error) {
+          auditAll(toError(error));
+          throw error;
+        }
+        targetUserId = resolvedUser.userId;
+
+        if (!resolvedUser.ok) {
+          auditAll(resolvedUser.error);
+          return response.forbidden({ body: { message: resolvedUser.error.message } });
         }
 
-        const scope = { space: resolveSpaceId(await getSpaces(), request), userId };
+        const scope = {
+          space: resolveSpaceId(await getSpaces(), request),
+          userId: resolvedUser.userId,
+        };
 
         let body: ForgetSessionMemoriesResponse;
         try {
-          const outcomes = await (await getSessionMemoryService()).forget(scope, uniqueIds);
-          body = { results: uniqueIds.map((id) => ({ id, outcome: outcomes[id] })) };
+          const results = await (await getSessionMemoryService()).forget(scope, uniqueIds);
+          body = { results };
         } catch (error) {
-          uniqueIds.forEach((memoryId) =>
-            auditLogger.log(
-              sessionMemoryAuditEvent({ action, memoryId, targetUserId: userId, failure: error })
-            )
-          );
+          auditAll(toError(error));
           throw error;
         }
 
-        body.results.forEach(({ id: memoryId, outcome }) =>
+        body.results.forEach((result) =>
           auditLogger.log(
-            sessionMemoryAuditEvent({
-              action,
-              memoryId,
-              targetUserId: userId,
-              failure: outcome === 'not_found' ? 'not_found' : undefined,
+            sessionMemoryForgetAuditEvent({
+              memoryId: result.id,
+              targetUserId: resolvedUser.userId,
+              failure: auditFailureForResult(result),
             })
           )
         );

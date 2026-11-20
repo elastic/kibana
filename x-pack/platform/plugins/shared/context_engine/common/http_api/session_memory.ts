@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-export type ForgetOutcome = 'forgotten' | 'already_forgotten' | 'not_found';
+export type ForgetSessionMemoryResult =
+  | { id: string; outcome: 'forgotten' | 'already_forgotten' | 'not_found' }
+  | { id: string; outcome: 'failed'; error: string };
 
 export interface ForgetSessionMemoriesResponse {
-  results: Array<{ id: string; outcome: ForgetOutcome }>;
+  results: ForgetSessionMemoryResult[];
 }

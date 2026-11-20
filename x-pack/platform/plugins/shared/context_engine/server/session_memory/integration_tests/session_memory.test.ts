@@ -10,7 +10,11 @@ import { createEsClientForTesting, createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import { SESSION_MEMORY_DATA_STREAM } from '../data_streams';
 import { createSessionMemoryService } from '../service';
-import type { SessionMemoryService, StoredSessionMemory } from '../types';
+import type { SessionMemoryService, StoredMemoryRevision, StoredTombstone } from '../types';
+
+// Writing `content` runs semantic_text inference, which the test cluster's basic license does not
+// allow. Revisions are seeded without it, which is enough for forget, since forget never reads it.
+type SeededRevision = Omit<StoredMemoryRevision, 'content'>;
 
 describe('session memory', () => {
   jest.setTimeout(180_000);
@@ -24,9 +28,7 @@ describe('session memory', () => {
   const refresh = () =>
     esClient.indices.refresh({ index: SESSION_MEMORY_DATA_STREAM, ignore_unavailable: true });
 
-  // Writing `content` runs semantic_text inference, which the test cluster's basic license does not
-  // allow. Memories are seeded without content, which is enough for forget.
-  const seed = async (...documents: StoredSessionMemory[]) => {
+  const seed = async (...documents: Array<SeededRevision | StoredTombstone>) => {
     const response = await esClient.bulk({
       operations: documents.flatMap((document) => [
         { create: { _index: SESSION_MEMORY_DATA_STREAM } },
@@ -38,7 +40,7 @@ describe('session memory', () => {
   };
 
   // Seeded revisions predate every timestamp the service writes.
-  const revision = (id: string, timestamp: string, scope = jdoe): StoredSessionMemory => ({
+  const revision = (id: string, timestamp: string, scope = jdoe): SeededRevision => ({
     '@timestamp': timestamp,
     id,
     space: scope.space,
@@ -73,7 +75,9 @@ describe('session memory', () => {
   });
 
   it('finds nothing before Elasticsearch creates the stream', async () => {
-    await expect(service.forget(jdoe, ['missing'])).resolves.toEqual({ missing: 'not_found' });
+    await expect(service.forget(jdoe, ['missing'])).resolves.toEqual([
+      { id: 'missing', outcome: 'not_found' },
+    ]);
   });
 
   it('hides a memory from other users and other spaces', async () => {
@@ -81,16 +85,16 @@ describe('session memory', () => {
 
     const otherUser = { space: 'default', userId: 'asmith' };
     const otherSpace = { space: 'marketing', userId: 'jdoe' };
-    await expect(service.forget(otherUser, ['isolated'])).resolves.toEqual({
-      isolated: 'not_found',
-    });
-    await expect(service.forget(otherSpace, ['isolated'])).resolves.toEqual({
-      isolated: 'not_found',
-    });
+    await expect(service.forget(otherUser, ['isolated'])).resolves.toEqual([
+      { id: 'isolated', outcome: 'not_found' },
+    ]);
+    await expect(service.forget(otherSpace, ['isolated'])).resolves.toEqual([
+      { id: 'isolated', outcome: 'not_found' },
+    ]);
 
-    await expect(service.forget(jdoe, ['isolated'])).resolves.toEqual({
-      isolated: 'forgotten',
-    });
+    await expect(service.forget(jdoe, ['isolated'])).resolves.toEqual([
+      { id: 'isolated', outcome: 'forgotten' },
+    ]);
   });
 
   it('forgets each memory by its latest revision and reports every id', async () => {
@@ -104,15 +108,17 @@ describe('session memory', () => {
       }
     );
 
-    await expect(service.forget(jdoe, ['live', 'forgotten', 'unknown'])).resolves.toEqual({
-      live: 'forgotten',
-      forgotten: 'already_forgotten',
-      unknown: 'not_found',
-    });
+    await expect(service.forget(jdoe, ['live', 'forgotten', 'unknown'])).resolves.toEqual([
+      { id: 'live', outcome: 'forgotten' },
+      { id: 'forgotten', outcome: 'already_forgotten' },
+      { id: 'unknown', outcome: 'not_found' },
+    ]);
     await refresh();
 
     expect(await countRevisions('live')).toBe(3);
     expect(await countRevisions('forgotten')).toBe(2);
-    await expect(service.forget(jdoe, ['live'])).resolves.toEqual({ live: 'already_forgotten' });
+    await expect(service.forget(jdoe, ['live'])).resolves.toEqual([
+      { id: 'live', outcome: 'already_forgotten' },
+    ]);
   });
 });

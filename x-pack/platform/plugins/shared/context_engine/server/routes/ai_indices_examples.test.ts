@@ -99,16 +99,22 @@ const examplesOf = ({ content }: ExampleMediaType) =>
     ([name, { value }]) => [name, value] as const
   );
 
-const codeSampleRequest = ({ lang, source }: CodeSample) => {
-  const requestLine =
-    lang === 'curl' ? /-X (\w+) "https:\/\/\$\{KIBANA_URL\}([^"?]+)/ : /^(\w+) kbn:([^\s?]+)/;
-  const [, method, path] = requestLine.exec(source) ?? [];
-  return `${method} ${path}`;
-};
-
 const codeSampleBody = ({ lang, source }: CodeSample) =>
   JSON.parse(
     lang === 'curl' ? /-d '([\s\S]*)'/.exec(source)?.[1] ?? '' : source.slice(source.indexOf('\n'))
+  );
+
+const codeSampleRequest = ({ lang, source }: CodeSample) => {
+  const match =
+    lang === 'curl'
+      ? /-X (\w+) "https:\/\/\$\{KIBANA_URL\}(\/[^"?]*)/.exec(source)
+      : /^(\w+) kbn:(\/[^\s?]*)/.exec(source);
+  return match ? `${match[1]} ${match[2]}` : undefined;
+};
+
+const routePattern = (route: string) =>
+  new RegExp(
+    `^${route.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\\{[^}]+\\\}/g, '[^/]+')}$`
   );
 
 describe('route examples', () => {
@@ -157,10 +163,12 @@ describe('route examples', () => {
       );
     }
 
-    const routePattern = new RegExp(`^${route.replace(/\{\w+\}/g, '[^/]+')}$`);
-    it.each(examples['x-codeSamples'] ?? [])('$lang code sample calls the route', (sample) => {
-      expect(codeSampleRequest(sample)).toMatch(routePattern);
-    });
+    it.each(examples['x-codeSamples'] ?? [])(
+      '$lang code sample targets the route method and path',
+      (sample) => {
+        expect(codeSampleRequest(sample)).toMatch(routePattern(route));
+      }
+    );
 
     if (examples.requestBody) {
       const [[, requestExample]] = examplesOf(examples.requestBody);

@@ -315,43 +315,6 @@ To make a new connector eligible, add `'contextEngine'` to the
 `supportedFeatureIds` list on the connector spec (in `kbn-connector-specs`).
 No changes to the Context Engine plugin are required.
 
-## Session memory
-
-Context Engine can forget session memories over HTTP. The route is public and experimental:
-
-```
-POST /api/context_engine/memory/_forget
-```
-
-```json
-{ "ids": ["7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10"] }
-```
-
-`ids` takes 1 to 100 ids and duplicates are collapsed. Forgetting writes a tombstone and
-keeps the memory's revisions until retention removes them.
-
-The response lists one outcome per unique id, in request order: `forgotten`,
-`already_forgotten`, or `not_found`.
-
-The space comes from the request URL. A memory of another user or in another space is
-reported as `not_found`, so the route never reveals that it exists. The route is gated by
-`contextEngine:enabled` (404 while it is off) but not by the memory setting, so forgetting
-still works after memory is turned off.
-
-### Privileges and audit
-
-The route needs `contextEngine:write`. Without `user_id` it forgets the
-caller's own memories, and a caller without a user profile gets a 403.
-
-Naming another user in `user_id` also needs `contextEngine:manage_memory`, which is not
-part of All, so an administrator grants it explicitly. Without it the request gets a 403,
-and every id is audited as a failure. A mismatch between `user_id` and a memory's owner
-reads as `not_found`.
-
-Each unique id writes one `session_memory_forget` audit event. The event records the
-authenticated actor in `user.*`, the memory's owner in `user.target.id`, and the memory in
-`kibana.saved_object`. `not_found` and Elasticsearch errors are recorded as failures.
-
 ## Signals
 
 Signals are observations classified from Agent Builder traces and stored in the
@@ -394,6 +357,45 @@ rounds.
 
 The round filter depends on the agent calling `load_skill`; an agent carrying
 the same guidance in its instructions goes unmarked.
+
+## Session memory
+
+Context Engine can forget session memories over HTTP. The route is public and experimental:
+
+```
+POST /api/context_engine/memory/_forget
+```
+
+```json
+{ "ids": ["7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10"] }
+```
+
+`ids` takes 1 to 100 ids and duplicates are collapsed. Forgetting writes a tombstone and
+keeps the memory's revisions until retention removes them.
+
+The response lists one outcome per unique id, in request order: `forgotten`,
+`already_forgotten`, `not_found`, or `failed` (with `error` when Elasticsearch rejects the
+tombstone).
+
+The space comes from the request URL. A memory of another user or in another space is
+reported as `not_found`, so the route never reveals that it exists. The route is gated by
+`contextEngine:enabled` (404 while it is off) but not by the memory setting, so forgetting
+still works after memory is turned off.
+
+### Privileges and audit
+
+The route needs `contextEngine:write`. Without `user_id` it forgets the
+caller's own memories, and a caller without a user profile gets a 403.
+
+Naming another user in `user_id` also needs `contextEngine:manage_memory`, which is not
+part of All, so an administrator grants it explicitly. Without it the request gets a 403,
+and every id is audited as a failure. A mismatch between `user_id` and a memory's owner
+reads as `not_found`.
+
+Each unique id writes one `memory_forget` audit event. The event records the
+authenticated actor in `user.*`, the memory's owner in `user.target.id`, and the memory in
+`kibana.saved_object`. Rejected requests, `not_found`, `failed`, and Elasticsearch errors are
+recorded as failures.
 
 ## Improvements
 
