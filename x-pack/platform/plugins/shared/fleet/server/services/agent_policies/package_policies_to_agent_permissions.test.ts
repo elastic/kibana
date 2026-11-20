@@ -785,7 +785,11 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         buildMixedInputsPackagePolicy(true),
       ]);
 
-      expect(hasAgentlessGrant(permissions?.['package-policy-mixed_mode_pkg'])).toBe(false);
+      const descriptor = permissions?.['package-policy-mixed_mode_pkg'];
+      expect(hasAgentlessGrant(descriptor)).toBe(false);
+      // The eligible input's normal data-stream grant must still be present, so withholding the
+      // agentless grant does not also drop the whole descriptor and block ingestion.
+      expectNormalGrant(descriptor, 'mixed_mode_pkg');
     });
 
     it('grants agentless-* permissions when the only non-eligible input is disabled', async () => {
