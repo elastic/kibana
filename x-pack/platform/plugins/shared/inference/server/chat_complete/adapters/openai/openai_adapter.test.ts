@@ -586,13 +586,14 @@ describe('openAIAdapter', () => {
         expect(getRequest().body.reasoning_effort).toBe('none');
       });
 
-      it('falls back to the Azure deployment name', () => {
+      it('uses the model configured on an Azure connector', () => {
         executorMock.getConnector.mockReturnValue({
           ...connector,
           config: {
             apiProvider: 'Azure OpenAI',
             apiUrl:
-              'https://my-resource.openai.azure.com/openai/deployments/gpt-5.6-terra/chat/completions?api-version=2026-06-01',
+              'https://my-resource.openai.azure.com/openai/deployments/production-chat/chat/completions?api-version=2026-06-01',
+            defaultModel: 'gpt-6-luna',
           },
         });
 
@@ -601,12 +602,13 @@ describe('openAIAdapter', () => {
         expect(getRequest().body.reasoning_effort).toBe('none');
       });
 
-      it('ignores the deployment name for non-Azure providers', () => {
+      it('does not infer the model from the Azure deployment name', () => {
         executorMock.getConnector.mockReturnValue({
           ...connector,
           config: {
-            apiProvider: 'Other',
-            apiUrl: 'https://example.com/openai/deployments/gpt-5.6-terra/chat/completions',
+            apiProvider: 'Azure OpenAI',
+            apiUrl:
+              'https://my-resource.openai.azure.com/openai/deployments/gpt-6-luna-prod/chat/completions?api-version=2026-06-01',
           },
         });
 
