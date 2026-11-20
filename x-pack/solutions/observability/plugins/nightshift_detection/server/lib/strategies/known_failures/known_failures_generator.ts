@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import { sortBy } from 'lodash';
 import type { RuleRow } from '../../rules/managed_rule_reader';
 import type { DetectionSignalGenerator, GenerateResult, GeneratorContext } from '../types';
 import { KNOWN_FAILURES_STRATEGY_ID } from './constants';
 import { getKnownFailureRuleId, getUnwatchableReason } from './known_failure_rule';
+import { resolveEntity } from './resolve_entity';
 import { toReading, type ActiveKnownFailure } from './to_reading';
 
 /**
@@ -22,9 +24,34 @@ import { toReading, type ActiveKnownFailure } from './to_reading';
 export class KnownFailuresGenerator implements DetectionSignalGenerator {
   public async generate(context: GeneratorContext): Promise<GenerateResult> {
     const active = await readActiveFailures(context);
-    const readings = active.flatMap((failure) => toReading(failure) ?? []);
+    if (active.length === 0) {
+      return { readings: [], notes: [], truncated: false };
+    }
 
-    return { readings, notes: [], truncated: false };
+    // One read for every source with an active failure, instead of one per failure.
+    const features = await context.knowledge.listFeatures({
+      sourceIds: uniq(active.map(({ knowledgeIndicator }) => knowledgeIndicator.source_id)),
+      types: ['entity'],
+    });
+    const results = active.map((failure) => ({
+      failure,
+      reading: toReading({
+        ...failure,
+        entity: resolveEntity({ knowledgeIndicator: failure.knowledgeIndicator, features }),
+        cpsEnabled: context.cpsEnabled,
+      }),
+    }));
+
+    return {
+      readings: results.flatMap(({ reading }) => reading ?? []),
+      notes: results
+        .filter(({ reading }) => reading === undefined)
+        .map(
+          ({ failure }) =>
+            `rule [${failure.row.rule_id}] wrote a row without the Known failures columns`
+        ),
+      truncated: false,
+    };
   }
 }
 

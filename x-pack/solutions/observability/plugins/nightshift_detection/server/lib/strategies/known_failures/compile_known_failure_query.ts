@@ -79,6 +79,33 @@ export function compileKnownFailureQuery({
     // Joined with a new line, so a KI that ends in a `//` comment cannot swallow the next pipe.
   ].join('\n| ');
 
-  // Elasticsearch rejects the setting when cross-project search is off, so it goes in only when on.
+  return withProjectRouting({ query, cpsEnabled });
+}
+
+/**
+ * The knowledge indicator's own query over `[from, to)`, with literal timestamps, so the judge can
+ * run it later and see the documents that made the count rise.
+ */
+export function compileEvidenceQuery({
+  esql,
+  from,
+  to,
+  cpsEnabled,
+}: {
+  esql: string;
+  /** Epoch milliseconds. */
+  from: number;
+  /** Epoch milliseconds. */
+  to: number;
+  cpsEnabled: boolean;
+}): string {
+  const query = `${esql.trim()}\n| WHERE @timestamp >= "${new Date(
+    from
+  ).toISOString()}" AND @timestamp < "${new Date(to).toISOString()}"`;
+  return withProjectRouting({ query, cpsEnabled });
+}
+
+// Elasticsearch rejects the setting when cross-project search is off, so it goes in only when on.
+function withProjectRouting({ query, cpsEnabled }: { query: string; cpsEnabled: boolean }) {
   return cpsEnabled ? `SET project_routing="${PROJECT_ROUTING_ALL}";\n${query}` : query;
 }
