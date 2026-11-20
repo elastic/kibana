@@ -48,10 +48,15 @@ apiTest.describe('get_module: list and filter', { tag: '@local-stateful-classic'
 
       expect(res).toHaveStatusCode(200);
       expect(Array.isArray(res.body)).toBe(true);
-      const responseModuleIds = (res.body as Array<{ id: string }>).map((m) => m.id);
+      const responseModules = res.body as Array<{ id: string; tags?: string[] }>;
+      const responseModuleIds = responseModules.map((m) => m.id);
       expect(responseModuleIds.filter((id) => SECURITY_MODULE_IDS.includes(id))).toStrictEqual(
         SECURITY_MODULE_IDS
       );
+      // neighbouring configs may add security-tagged modules, but nothing untagged may leak
+      expect(
+        responseModules.filter((m) => !m.tags?.includes('security')).map((m) => m.id)
+      ).toStrictEqual([]);
     }
   );
 
