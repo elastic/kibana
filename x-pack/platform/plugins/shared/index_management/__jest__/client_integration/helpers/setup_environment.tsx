@@ -40,6 +40,7 @@ import { MAJOR_VERSION } from '../../../common';
 import type { AppDependencies } from '../../../public/application/app_context';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { httpService } from '../../../public/application/services/http';
+import { createDataMock } from '../../../public/application/services/search.mock';
 import { breadcrumbService } from '../../../public/application/services/breadcrumbs';
 import { documentationService } from '../../../public/application/services/documentation';
 import { NotificationService } from '../../../public/application/services/notification';
@@ -108,6 +109,7 @@ const createAppDependencies = (httpSetup: HttpSetup): AppDependencies => {
       share: sharePluginMock.createStartContract(),
       cloud: cloudMock.createSetup(),
       reindexService: { reindexService: new ReindexService(httpSetup) },
+      data: createDataMock(httpSetup),
     },
     // Default stateful configuration
     config: {

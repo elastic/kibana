@@ -7,12 +7,27 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
-import type { IndicesStatsResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  EsqlQueryResponse,
+  IndicesStatsResponse,
+  SearchHit,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ReindexService } from '@kbn/reindex-service-plugin/public';
+import { lastValueFrom } from 'rxjs';
+import { useQuery } from '@kbn/react-query';
+import { ES_SEARCH_STRATEGY, ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import type {
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchGeneric,
+} from '@kbn/search-types';
 import {
   API_BASE_PATH,
+  DEFAULT_DOCUMENT_PAGE_SIZE,
   INTERNAL_API_BASE_PATH,
   UIM_UPDATE_SETTINGS,
   UIM_INDEX_CLEAR_CACHE,
@@ -53,6 +68,9 @@ import type { FieldFromIndicesRequest } from '../../../common';
 import type { Fields } from '../components/mappings_editor/types';
 import type { UserStartPrivilegesResponse } from '../../../server/lib/types';
 import { indexDataEnricher } from '../../services';
+import { buildIndexDocCountQuery, toIndexDocCounts } from '../../../common/lib';
+
+type IndexDocCountRequest = IKibanaSearchRequest<{ query: string; allow_partial_results: boolean }>;
 
 interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
@@ -606,13 +624,25 @@ export function loadIndex(indexName: string) {
   });
 }
 
-export async function loadIndexDocCount(indexName: string) {
-  return sendRequest<Record<string, number>>({
-    path: `${INTERNAL_API_BASE_PATH}/index_doc_count`,
-    method: 'post',
-    body: { indexNames: [indexName] },
-  });
-}
+export const fetchIndexDocCounts = async (
+  search: ISearchGeneric,
+  indexNames: string[],
+  signal?: AbortSignal
+): Promise<Record<string, number>> => {
+  const { rawResponse } = await lastValueFrom(
+    search<IndexDocCountRequest, IKibanaSearchResponse<EsqlQueryResponse>>(
+      {
+        params: {
+          query: buildIndexDocCountQuery(indexNames),
+          // return partial results instead of failing the whole request when some shards are unavailable
+          allow_partial_results: true,
+        },
+      },
+      { abortSignal: signal, strategy: ESQL_SEARCH_STRATEGY }
+    )
+  );
+  return toIndexDocCounts(rawResponse, indexNames);
+};
 
 export async function loadIndexVectorCount(indexName: string) {
   return sendRequest<{ vectorCount: number | null }>({
@@ -653,10 +683,31 @@ export function createIndex(indexName: string, indexMode?: string) {
   });
 }
 
-export function useLoadIndexDocumentsSample(indexName: string) {
-  return useRequest<{ results: SearchHit[] }>({
-    path: `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(indexName)}/sample`,
-    method: 'get',
+export function useLoadIndexDocumentsSample(search: ISearchGeneric, indexName: string) {
+  return useQuery<{ results: SearchHit[] }, Error>({
+    queryKey: ['indexDocumentsSample', indexName],
+    queryFn: async ({ signal }) => {
+      const { rawResponse } = await lastValueFrom(
+        search<IEsSearchRequest, IEsSearchResponse>(
+          {
+            params: {
+              index: indexName,
+              size: DEFAULT_DOCUMENT_PAGE_SIZE,
+              track_total_hits: false,
+              _source: {
+                includes: ['*', '_inference_fields'],
+              },
+              fields: ['*'],
+              sort: [{ _doc: { order: 'desc' } }],
+            },
+          },
+          { abortSignal: signal, strategy: ES_SEARCH_STRATEGY }
+        )
+      );
+      return { results: rawResponse.hits.hits };
+    },
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 }
 

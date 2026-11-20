@@ -30,6 +30,7 @@ import { breadcrumbService } from '../../public/application/services/breadcrumbs
 import { UiMetricService } from '../../public/application/services/ui_metric';
 import { NotificationService } from '../../public/application/services/notification';
 import { httpService } from '../../public/application/services/http';
+import { createDataMock } from '../../public/application/services/search.mock';
 import { setUiMetricService } from '../../public/application/services/api';
 import { indexManagementStore } from '../../public/application/store';
 import { setExtensionsService } from '../../public/application/store/selectors/extension_service';
@@ -206,6 +207,7 @@ export const renderIndexApp = async (options?: {
     },
     plugins: {
       reindexService: {},
+      data: createDataMock(httpSetup),
     },
     url: urlServiceMock,
     // Default stateful configuration
