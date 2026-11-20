@@ -11,14 +11,14 @@
  * Remainder after dividing two numbers. If at least one array of numbers is passed into the function, the function will be applied index-wise to each element.
  * @param {(number|number[])} a dividend, a number or an array of numbers
  * @param {(number|number[])} b divisor, a number or an array of numbers, `b` != 0
- * @return {(number|number[])} The remainder of `a` divided by `b` if both are numbers. Returns an array with the the remainders applied index-wise to each element if `a` or `b` is an array.
+ * @return {(number|number[])} The remainder of `a` divided by `b` if both are numbers. Returns an array with the remainders applied index-wise to each element if `a` or `b` is an array. If `a` is a number and `b` is an array that contains 0, the result for that element is `NaN`.
  * @throws `'Array length mismatch'` if `a` and `b` are arrays with different lengths
- * - `'Cannot divide by 0'` if `b` equals 0 or contains 0
+ * - `'Cannot divide by 0'` if `b` is 0, or if `a` and `b` are both arrays and `b` contains 0
  * @example
  * mod(10, 7) // returns 3
  * mod([11, 22, 33, 44], 10) // returns [1, 2, 3, 4]
  * mod(100, [3, 7, 11, 23]) // returns [1, 2, 1, 8]
- * mod([14, 42, 65, 108], [5, 4, 14, 2]) // returns [5, 2, 9, 0]
+ * mod([14, 42, 65, 108], [5, 4, 14, 2]) // returns [4, 2, 9, 0]
  */
 
 function mod(a, b) {

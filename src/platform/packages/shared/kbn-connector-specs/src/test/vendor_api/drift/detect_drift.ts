@@ -56,8 +56,11 @@ export interface SpecChange {
 }
 
 export interface SourceDrift {
-  /** `unreachable` when the latest spec couldn't be fetched or loaded. */
-  readonly status: 'unchanged' | 'changed' | 'unreachable';
+  /**
+   * `unreachable` when the latest spec couldn't be fetched or loaded, and `pinned` for a captured
+   * source, which has no latest to compare with until someone captures it again with credentials.
+   */
+  readonly status: 'unchanged' | 'changed' | 'unreachable' | 'pinned';
   readonly error?: string;
   /** For changed sources; undefined when no `oasdiff` was available to classify them. */
   readonly changes?: readonly SpecChange[];
@@ -461,7 +464,11 @@ const compareWithLatest = async ({
     );
     const refreshed = await readOptional(path.join(copy, MANIFEST));
     const sources: Record<string, SourceDrift> = {};
-    for (const [name, { format }] of Object.entries(manifest.sources)) {
+    for (const [name, { format, captured }] of Object.entries(manifest.sources)) {
+      if (captured) {
+        sources[name] = { status: 'pinned' };
+        continue;
+      }
       const [committed, current] = await Promise.all(
         [directory, copy].map((root) => readOptional(path.join(root, snapshotFile(name, format))))
       );
@@ -565,9 +572,21 @@ export const detectDrift = async ({
   const sources: Record<string, SourceDrift> = {};
   for (const [name, source] of Object.entries(manifest.sources)) {
     const { url } = source;
+    if (source.captured) {
+      // Fetching it would only answer 401, which is not news; it is refreshed by capturing it
+      // again. It is reported even when another source can't be fetched.
+      sources[name] = { status: 'pinned' };
+      continue;
+    }
     try {
       await (isProtocolFormat(source.format)
-        ? loadProtocolSpec(url, fetchOnce, source.format, source.endpoints ?? [])
+        ? loadProtocolSpec({
+            url,
+            fetchText: fetchOnce,
+            format: source.format,
+            endpoints: source.endpoints ?? [],
+            tools: source.tools,
+          })
         : loadVendorSpec(url, fetchOnce, source));
     } catch (error) {
       log.warning(
@@ -577,10 +596,9 @@ export const detectDrift = async ({
     }
   }
 
-  const latest =
-    Object.keys(sources).length === 0
-      ? await compareWithLatest({ connector, directory, manifest, fetchText: fetchOnce, now, diff })
-      : undefined;
+  const latest = Object.values(sources).some(({ status }) => status === 'unreachable')
+    ? undefined
+    : await compareWithLatest({ connector, directory, manifest, fetchText: fetchOnce, now, diff });
 
   const latestSpecs = latest?.result?.specs;
   const overlayText = await readOptional(path.join(directory, OVERLAY));

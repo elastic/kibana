@@ -137,6 +137,52 @@ describe('Markdown reference sources', () => {
   });
 });
 
+describe('MCP sources', () => {
+  const withSource = (source: Record<string, unknown>) =>
+    JSON.stringify({
+      ...manifest,
+      sources: { mcp: { fetchedAt: '2026-10-07T00:00:00Z', ...source } },
+    });
+
+  const mcp = {
+    format: 'mcp',
+    url: 'https://vendor.example.com/toolsnaps/',
+    endpoints: ['https://vendor.example.com/mcp'],
+  };
+
+  it('accepts the tool documents a vendor publishes one per tool', () => {
+    const json = withSource({ ...mcp, tools: ['get_me.json', 'search.json'] });
+
+    expect(parseManifest(json).sources.mcp.tools).toEqual(['get_me.json', 'search.json']);
+  });
+
+  it('rejects tools on other sources, and an empty list of tools', () => {
+    expect(() =>
+      parseManifest(
+        withSource({
+          format: 'graphql',
+          url: 'https://x.com/schema.graphql',
+          endpoints: ['https://x.com/graphql'],
+          tools: ['a.json'],
+        })
+      )
+    ).toThrow('only applies to MCP sources');
+    expect(() => parseManifest(withSource({ ...mcp, tools: [] }))).toThrow();
+  });
+
+  it('accepts a captured source, which needs a note saying what capturing it took', () => {
+    const note = 'The server answers initialize with 401; captured with a developer token.';
+
+    expect(parseManifest(withSource({ ...mcp, captured: true, note })).sources.mcp).toMatchObject({
+      captured: true,
+      note,
+    });
+    expect(() => parseManifest(withSource({ ...mcp, captured: true }))).toThrow(
+      /A captured source needs a/
+    );
+  });
+});
+
 describe('fixtures', () => {
   it('converts response overrides to mock fixtures', () => {
     const fixtures = vendorApiFixturesSchema.parse({
