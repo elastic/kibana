@@ -32,6 +32,14 @@ import { maybe } from '../../../common/utils/maybe';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 const MAX_NUM_SPANS = 1000;
+// Safety limits mirroring the service-map trace-id lookups (see fetch_exit_span_samples.ts) so a
+// pathological query degrades to partial results instead of a hard 500 on the ES client timeout.
+const TERMINATE_AFTER = 1_000_000;
+const QUERY_TIMEOUT = '60s';
+// A parent transaction can start slightly before the child span that falls inside the selected
+// window, so the transaction lookup extends the range backwards to avoid dropping legitimate
+// parents while still bounding the scan.
+const TRANSACTION_LOOKBACK = 5 * 60 * 1000;
 
 export async function getTopDependencySpans({
   apmEventClient,
@@ -71,6 +79,8 @@ export async function getTopDependencySpans({
         events: [ProcessorEvent.span, ProcessorEvent.transaction],
       },
       track_total_hits: false,
+      terminate_after: TERMINATE_AFTER,
+      timeout: QUERY_TIMEOUT,
       size: MAX_NUM_SPANS,
       query: {
         bool: {
@@ -110,24 +120,39 @@ export async function getTopDependencySpans({
     TRANSACTION_NAME,
   ] as const);
 
-  const transactions = (
-    await apmEventClient.search('get_transactions_for_dependency_spans', {
-      apm: {
-        events: [ProcessorEvent.transaction],
-      },
-      track_total_hits: false,
-      size: traceIds.length,
-      query: {
-        bool: {
-          filter: [...termsQuery(TRACE_ID, ...traceIds), { exists: { field: TRANSACTION_ID } }],
-        },
-      },
-      fields: txRequiredFields,
-      sort: {
-        '@timestamp': 'desc',
-      },
-    })
-  ).hits.hits.map((hit) => accessKnownApmEventFields(hit.fields).requireFields(txRequiredFields));
+  // Short-circuit when there are no spans: an empty `terms` query would scan every transaction
+  // index for nothing.
+  const transactions = traceIds.length
+    ? (
+        await apmEventClient.search('get_transactions_for_dependency_spans', {
+          apm: {
+            events: [ProcessorEvent.transaction],
+          },
+          track_total_hits: false,
+          terminate_after: TERMINATE_AFTER,
+          timeout: QUERY_TIMEOUT,
+          size: traceIds.length,
+          query: {
+            bool: {
+              // Bound the transaction lookup by the (slightly extended) time range. Without this
+              // the search scans every transaction data stream and times out on wide ranges with
+              // large `traces-*` datasets, returning a 500.
+              filter: [
+                ...rangeQuery(start - TRANSACTION_LOOKBACK, end),
+                ...termsQuery(TRACE_ID, ...traceIds),
+                { exists: { field: TRANSACTION_ID } },
+              ],
+            },
+          },
+          fields: txRequiredFields,
+          sort: {
+            '@timestamp': 'desc',
+          },
+        })
+      ).hits.hits.map((hit) =>
+        accessKnownApmEventFields(hit.fields).requireFields(txRequiredFields)
+      )
+    : [];
 
   const transactionsByTraceId = keyBy(transactions, (transaction) => transaction[TRACE_ID]);
 
