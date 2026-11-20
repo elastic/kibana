@@ -37,7 +37,7 @@ const forgetBodySchema = schema.object({
       validate: validateNonBlank,
       meta: {
         description:
-          "The Kibana user profile UID that the memories belong to. Omit this field to use the caller's user profile. Naming another user requires `contextEngine:manage_memory`. Memories of any other user return `not_found`.",
+          "The Kibana user profile UID that the memories belong to. Omit this field to use the caller's user profile. Naming another user requires `contextEngine:manage_memory`.",
       },
     })
   ),
