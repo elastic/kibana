@@ -131,7 +131,7 @@ export const fromStoredSearchAndTable = (
     : {
         ...apiTab,
         ...(sampleSize && { sample_size: Math.max(10, sampleSize) }),
-        ...(query && { query: fromStoredClassicQuery(migrateLegacyQuery(query)) }),
+        ...(query !== undefined && { query: fromStoredClassicQuery(migrateLegacyQuery(query)) }),
         filters: fromStoredFilters(filter) ?? [],
         data_source: fromStoredDataView(index),
         view_mode: viewMode ?? VIEW_MODE.DOCUMENT_LEVEL,
