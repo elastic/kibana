@@ -14,7 +14,13 @@ import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-st
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { buildEntityNameFilter, type ServiceItem } from '../../../../../common/search_strategy';
 import { EntityType } from '../../../../../common/entity_analytics/types';
-import { FLYOUT_ORIGIN, FLYOUT_TYPE, type FlyoutOrigin } from '../../../../common/lib/telemetry';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_TYPE,
+  type FlyoutOrigin,
+  type GraphEntryPoint,
+} from '../../../../common/lib/telemetry';
+import { getGraphEntryPoint } from '../../../shared/utils/get_graph_entry_point';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
@@ -40,14 +46,11 @@ import {
   buildRiskScoreStateFromEntityRecord,
   getHeaderRiskLevel,
 } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
-import { isEntityGroupView } from '../../../../flyout/entity_details/shared/entity_store_group_utils';
-import {
-  useEntityPanelTabs,
-  TABLE_TAB_ID,
-} from '../../../../flyout/entity_details/shared/hooks/use_entity_panel_tabs';
-import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
-import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
-import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
+import { isEntityGroupView } from '../../shared/utils/entity_store_group_utils';
+import { useEntityPanelTabs, TABLE_TAB_ID } from '../../shared/hooks/use_entity_panel_tabs';
+import { EntityPanelHeaderTabs } from '../../shared/components/entity_panel_tabs';
+import { EntityStoreTableTab } from '../../shared/components/entity_store_table_tab';
+import { EntitySummaryGrid } from '../../shared/components/entity_summary_grid';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { Header } from './header';
 import { Content } from './content';
@@ -82,6 +85,11 @@ export interface ServiceProps {
   scopeId?: string;
   /** Stable identifier for the service panel context (defaults to `scopeId` or a static fallback). */
   contextID?: string;
+  /**
+   * Where the graph reached from this flyout was opened from (e.g. the AI chat attachment). Used by
+   * the graph preview and the graph view it opens; defaults to the entity flyout entry point.
+   */
+  graphEntryPoint?: GraphEntryPoint;
 }
 
 const FIRST_RECORD_PAGINATION = {
@@ -103,6 +111,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
   mode: requestedMode = 'single',
   scopeId = '',
   contextID,
+  graphEntryPoint,
 }) {
   const { services } = useKibana();
   const { uiSettings } = services;
@@ -134,6 +143,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
+  const entryPoint = graphEntryPoint ?? getGraphEntryPoint({ mode: 'entity' });
   const safeContextID = contextID ?? scopeId ?? 'service-panel';
   const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
 
@@ -366,6 +376,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             title: serviceName,
             flyoutType: FLYOUT_TYPE.SERVICE,
             origin: FLYOUT_ORIGIN.VISUALIZATIONS_GRAPH,
+            entryPoint,
           });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -395,6 +406,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
       onShowService,
       onShowRelatedEntityFromGraph,
       onShowRelatedEntityFromResolution,
+      entryPoint,
     ]
   );
 
@@ -456,6 +468,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             hideHeaderIcons
             riskScoreQueryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
             isGroupView={isGroupView}
+            graphEntryPoint={entryPoint}
           />
         )}
       </EuiFlyoutBody>

@@ -255,6 +255,64 @@ describe('ensurePreconfiguredDownloadSources', () => {
     expect(mockedDownloadSourceService.update).not.toHaveBeenCalled();
   });
 
+  describe('reserve_diskspace', () => {
+    const baseSource = {
+      id: 'ds-1',
+      name: 'My Source',
+      host: 'https://example.com',
+      is_default: false,
+      is_preconfigured: true,
+    };
+
+    const mockExisting = (existingSource: Record<string, unknown>) => {
+      mockedDownloadSourceService.list.mockResolvedValue({
+        items: [existingSource as any],
+        total: 1,
+        page: 1,
+        perPage: 10,
+      });
+      mockedDownloadSourceService.update.mockResolvedValue(undefined as any);
+    };
+
+    it('should update and bump policies when reserve_diskspace changes', async () => {
+      mockExisting(baseSource);
+
+      await ensurePreconfiguredDownloadSources(soClient, esClient, [
+        { ...baseSource, reserve_diskspace: false },
+      ]);
+
+      expect(mockedDownloadSourceService.update).toHaveBeenCalledWith(
+        soClient,
+        esClient,
+        'ds-1',
+        expect.objectContaining({ reserve_diskspace: false })
+      );
+      expect(mockedAgentPolicyService.bumpAllAgentPoliciesForDownloadSource).toHaveBeenCalled();
+    });
+
+    it('should treat unset reserve_diskspace as enabled', async () => {
+      mockExisting({ ...baseSource, reserve_diskspace: true });
+
+      await ensurePreconfiguredDownloadSources(soClient, esClient, [baseSource]);
+
+      expect(mockedDownloadSourceService.update).not.toHaveBeenCalled();
+    });
+
+    it('should reset reserve_diskspace to enabled when removed from the config', async () => {
+      mockExisting({ ...baseSource, reserve_diskspace: false });
+
+      await ensurePreconfiguredDownloadSources(soClient, esClient, [baseSource]);
+
+      expect(mockedDownloadSourceService.update).toHaveBeenCalledWith(
+        soClient,
+        esClient,
+        'ds-1',
+        expect.objectContaining({ reserve_diskspace: true })
+      );
+      expect(mockedAgentPolicyService.bumpAllAgentPoliciesForDownloadSource).toHaveBeenCalled();
+    });
+  });
+
   it('should delete a removed preconfigured source when not referenced by any agent policy', async () => {
     const existingSource = {
       id: 'ds-removed',

@@ -1,0 +1,51 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type YAML from 'yaml';
+import { isScalar } from 'yaml';
+import type { monaco } from '@kbn/monaco';
+import {
+  getScalarValueAtOffset,
+  isDynamicValue,
+  isLiquidTagValue,
+  isVariableValue,
+} from '@kbn/workflows-yaml';
+
+export function filterMonacoYamlMarkers(
+  markers: monaco.editor.IMarkerData[],
+  editorModel: monaco.editor.ITextModel,
+  yamlDocument: YAML.Document | null
+): monaco.editor.IMarkerData[] {
+  return markers.filter((marker) => {
+    if (marker.source && marker.source.startsWith('yaml-schema:') && yamlDocument) {
+      try {
+        const markerOffset = editorModel.getOffsetAt({
+          lineNumber: marker.startLineNumber,
+          column: marker.startColumn,
+        });
+
+        const scalarNode = getScalarValueAtOffset(yamlDocument, markerOffset);
+        if (
+          scalarNode &&
+          isScalar(scalarNode) &&
+          (isDynamicValue(scalarNode.value) ||
+            isVariableValue(scalarNode.value) ||
+            isLiquidTagValue(scalarNode.value))
+        ) {
+          // Filter out markers with dynamic values, variable values, or Liquid tags
+          // (e.g. ${{ }}, {{ }}, {% ... %}, {%- ... -%}) as we cannot reliably validate them statically
+          return false;
+        }
+      } catch (error) {
+        // If we can't determine the value at marker position, keep the marker
+        return true;
+      }
+    }
+    // Keep other markers (e.g. schema validation errors)
+    return true;
+  });
+}

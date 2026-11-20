@@ -1,5 +1,17 @@
 # Significant Events workflow telemetry
 
+## Event names
+
+Every EBT event type of this plugin is `nightshift-<name>` in kebab-case, the prefix shared with
+the `nightshift_investigations` and `nightshift_sources` events; give a new event the same prefix.
+Kibana versions before the rename sent the same events as `significant-events-<name>` (for example
+`significant-events-detection-scan` for `nightshift-detection-scan`). Those rows keep the old name,
+so a query that spans the rename has to match both. The rename swapped only the prefix, so the five
+queries-generation and discovery events, whose old names doubled it
+(`significant-events-significant-events-discovery-started`), keep an inner `significant-events`
+segment (`nightshift-significant-events-discovery-started`). That segment is intentional: it keeps
+the old-to-new mapping one to one.
+
 ## Workflow execution identity
 
 `workflow_execution_id` is the canonical run field on Significant Events EBT events. It is the
@@ -16,15 +28,10 @@ Events carry the field when a managed workflow produced them and omit it for int
 invocations. One workflow path also omits it: an agent bound to a service account other than the
 workflow's runs on Task Manager under a new request, which carries no execution context, so the
 tools it calls report no `workflow_execution_id`. Standalone operations continue to emit telemetry.
-`execution_id` on `onboarding-scheduled` and `discovery-triggered` is a deprecated alias. `run_id`
-remains the feature-identification operation ID and equals `workflow_execution_id` when a workflow
-invokes the operation.
-
-On `agent-tool-event-investigation-attach`, `workflow_execution_id` identifies the workflow that
-invoked the tool and `investigation_id` identifies the attached investigation (its Agent Builder
-conversation). Before this release, `workflow_execution_id` on that event held the attached
-investigation ID. The meaning changed rather than gaining an alias, so split historical rows on the
-release that shipped `investigation_id`.
+`execution_id` on `nightshift-onboarding-scheduled` and
+`nightshift-significant-events-discovery-triggered` is a deprecated alias. `run_id` remains the
+feature-identification operation ID and equals `workflow_execution_id` when a workflow invokes the
+operation.
 
 ## How the pipeline connects
 
@@ -58,10 +65,9 @@ runs. Reusing one execution ID would conflate distinct runs. Thread the pipeline
    `detection_workflow_execution_ids`.
 4. Join an investigation to the run that wrote the alert version it was triggered for through
    `source_workflow_execution_id`, and to the significant event through `event_id`. The discovery
-   run that created the event is the earliest `events-write` row with that `event_id`.
-5. Use `investigation_id` to join attachment events to
-   `nightshift-investigation-started.investigation_id`. This identifies the investigation, not one
-   of its Workflow Engine runs.
+   run that created the event is the earliest write-event row with that `event_id`, under either
+   `nightshift-agent-tool-event-write` or its pre-rename
+   `significant-events-agent-tool-event-write` name.
 
 An alert automation resolves the alert it was triggered for, and when the alert is a significant
 event the Nightshift trigger step reads `workflow_execution_id` from the alert event `data` and
@@ -81,27 +87,25 @@ stages to one cycle.
 
 ## Joins
 
-Significant Events event types below drop their `significant-events-` prefix.
-
 | From | To | Join |
 | --- | --- | --- |
 | Any Significant Events row | Workflow Engine terminal event | `workflow_execution_id = workflowExecutionId` |
 | Child workflow | Its ancestors | Terminal event `executionChain`, root first and direct parent last |
-| `features-identified`, `queries-generated` | Onboarding run | `parent_workflow_execution_id` (absent when the child runs on its own) |
-| `events-write` (discovery) | Detection runs it consumed | `detection_workflow_execution_ids` contains the detection run's `workflow_execution_id` |
+| `nightshift-features-identified`, `nightshift-significant-events-queries-generated` | Onboarding run | `parent_workflow_execution_id` (absent when the child runs on its own) |
+| `nightshift-agent-tool-event-write` or pre-rename `significant-events-agent-tool-event-write` (discovery) | Detection runs it consumed | `detection_workflow_execution_ids` contains the detection run's `workflow_execution_id` |
 | `nightshift-investigation-started` | Run that wrote the triggering alert version | `source_workflow_execution_id` = that run's `workflow_execution_id` |
 | `nightshift-investigation-started` | Significant event | `event_id` |
-| `nightshift-investigation-started` | Discovery run that created the event | `event_id` = earliest `events-write.event_id`, then its `workflow_execution_id` |
-| `agent-tool-event-investigation-attach` | Investigation | `investigation_id` = `nightshift-investigation-started.investigation_id` |
+| `nightshift-investigation-started` | Discovery run that created the event | `event_id` = earliest new- or old-name write event's `event_id`, then its `workflow_execution_id` |
 | Detection or discovery | Onboarding | `source_id` / `source_ids` only; KIs are shared across onboarding runs |
 
-`parent_workflow_execution_id` joins to `onboarding-scheduled.workflow_execution_id` only for
-onboarding started through the API. Continuous onboarding starts onboarding with
-`workflow.executeAsync` and emits no `onboarding-scheduled` event, so join those children to the
-onboarding run's terminal event instead.
+`parent_workflow_execution_id` joins to `nightshift-onboarding-scheduled.workflow_execution_id` only
+for onboarding started through the API. Continuous onboarding starts onboarding with
+`workflow.executeAsync` and emits no `nightshift-onboarding-scheduled` event, so join those children
+to the onboarding run's terminal event instead.
 
-`detection-scan` belongs to the detection workflow, not to discovery. In the scheduled path the two
-share no ancestor, and `detection_workflow_execution_ids` is the only link between them.
+`nightshift-detection-scan` belongs to the detection workflow, not to discovery. In the scheduled
+path the two share no ancestor, and `detection_workflow_execution_ids` is the only link between
+them.
 
 A manual investigation trigger sends no `source_workflow_execution_id`. The investigation lifecycle
 workflow triggers (`nightshift-investigations.started`, `.completed`, `.failed`) carry the
@@ -114,9 +118,7 @@ the triggers do not. Trigger payloads are not exported as EBT; use
 
 Each `.rule-events` version stores, in `workflow_execution_id`, the execution of the workflow that
 wrote it. A standalone write (UI, interactive agent) clears the prior producer ID; a
-workflow-driven write, including stale-event cleanup, replaces it. Attaching an investigation
-stamps the attaching workflow's execution; the investigation's own ID lives only in
-`investigations[]`.
+workflow-driven write, including stale-event cleanup, replaces it.
 
 ## Tracing an investigation back to its detections
 
@@ -132,7 +134,10 @@ discovery_writes AS (
   FROM nightshift_ebt_events AS w
   JOIN investigation AS i
     ON w.event_id = i.event_id
-  WHERE w.event_type = 'significant-events-agent-tool-event-write'
+  WHERE w.event_type IN (
+    'significant-events-agent-tool-event-write',
+    'nightshift-agent-tool-event-write'
+  )
 )
 SELECT d.workflow_execution_id AS discovery_run,
        detection_run,

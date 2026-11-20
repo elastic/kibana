@@ -96,6 +96,7 @@ const createParams = (
     prependTitle: '',
     updateGithub: true,
     perTestIssues: true,
+    suiteIssueComments: false,
     indexInEs: true,
     reportUpdate: true,
     bkMeta: {},
@@ -204,8 +205,8 @@ describe('processJUnitReports one-failure-per-report (bail behavior)', () => {
   });
 });
 
-describe('processJUnitReports with issue creation off', () => {
-  it('updates tracked failures but opens no issue for new ones', async () => {
+describe('processJUnitReports with per-test issues off', () => {
+  it('neither updates per-test issues, left for suite issues to replace, nor opens new ones', async () => {
     const failures = [makeFailure(0), makeFailure(1)];
     getFailures.mockReturnValue(failures);
     const { params } = createParams([createExistingIssue(failures[0])]);
@@ -213,9 +214,29 @@ describe('processJUnitReports with issue creation off', () => {
 
     await processJUnitReports(['report.xml'], params);
 
-    expect(updateFailureIssue).toHaveBeenCalledTimes(1);
+    expect(updateFailureIssue).not.toHaveBeenCalled();
     expect(createFailureIssue).not.toHaveBeenCalled();
-    expect(failures[1].failureCount).toBe(0);
+    expect(failures.map(({ githubIssue, failureCount }) => [githubIssue, failureCount])).toEqual([
+      [undefined, 0],
+      [undefined, 0],
+    ]);
+  });
+
+  it('still records failures on suite issues', async () => {
+    const failures = [makeFailure(0)];
+    getFailures.mockReturnValue(failures);
+    const suiteIssue = createSuiteIssue(failures[0]);
+    const { params } = createParams(
+      [createExistingIssue(failures[0])],
+      [[failures[0], suiteIssue]]
+    );
+    params.perTestIssues = false;
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(updateSuiteIssue).toHaveBeenCalledTimes(1);
+    expect(updateFailureIssue).not.toHaveBeenCalled();
+    expect(failures[0].githubIssue).toBe(suiteIssue.github.htmlUrl);
   });
 
   it('still indexes every failure and hands them to the file reporter', async () => {
@@ -245,8 +266,9 @@ describe('processJUnitReports flaky suite issues', () => {
     await processJUnitReports(['report.xml'], params);
 
     expect(updateSuiteIssue).toHaveBeenCalledTimes(1);
-    expect(updateSuiteIssue.mock.calls[0][1]).toBe(suiteIssue);
-    expect(updateSuiteIssue.mock.calls[0][5]).toBe(failures[0]);
+    expect(updateSuiteIssue.mock.calls[0][0]).toBe(suiteIssue);
+    // the consistent failure check of the job posts breaks on it
+    expect(updateSuiteIssue.mock.calls[0][2]).toBeUndefined();
     expect(updateFailureIssue).not.toHaveBeenCalled();
     expect(failures[0].githubIssue).toBe('https://github.com/issues/7');
     expect(failures[0].failureCount).toBe(5);
@@ -255,6 +277,22 @@ describe('processJUnitReports flaky suite issues', () => {
     // the suite-tracked failure does not use up the one new issue per report
     expect(createFailureIssue).toHaveBeenCalledTimes(1);
     expect(createFailureIssue.mock.calls[0][1]).toBe(failures[1]);
+  });
+
+  it('comments on the suite issue about the failure in a job without the consistent failure check', async () => {
+    const failures = [makeFailure(0)];
+    getFailures.mockReturnValue(failures);
+    const suiteIssue = createSuiteIssue(failures[0]);
+    const { params } = createParams([], [[failures[0], suiteIssue]]);
+
+    await processJUnitReports(['report.xml'], { ...params, suiteIssueComments: true });
+
+    expect(updateSuiteIssue.mock.calls[0][2]).toEqual({
+      buildUrl: 'https://build-url',
+      branch: 'main',
+      pipeline: 'kibana-on-merge',
+      failure: failures[0],
+    });
   });
 
   it('shows the count the suite issue had without bumping it when GitHub updates are off', async () => {
@@ -274,7 +312,7 @@ describe('processJUnitReports flaky suite issues', () => {
     expect(failures[0].failureCount).toBe(4);
     // nothing was written, so the second failure of the suite counts from the same body
     expect(suiteIssue.github.body).toBe('suite body');
-    expect(updateSuiteIssue.mock.calls[1][1].github.body).toBe('suite body');
+    expect(updateSuiteIssue.mock.calls[1][0].github.body).toBe('suite body');
   });
 });
 
@@ -331,6 +369,100 @@ describe('processJUnitReports cascading failures', () => {
 
     expect(reportFailuresToEs.mock.calls[0][1]).toHaveLength(3);
     expect(reportFailuresToFile.mock.calls[0][1]).toHaveLength(3);
+  });
+});
+
+describe('processJUnitReports same-error failures', () => {
+  const makeSameErrorFailure = (i: number, overrides: Partial<TestFailure> = {}): TestFailure => ({
+    ...makeFailure(i),
+    failure: `Error: expected 200 "OK", got 500 "Internal Server Error"\n    at Test._assertStatus (a.ts:${i}:1)`,
+    testType: 'ftr',
+    ...overrides,
+  });
+
+  it('opens one new issue for the first failure when none of the group is tracked', async () => {
+    const failures = [0, 1, 2].map((i) => makeSameErrorFailure(i));
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams();
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(createFailureIssue).toHaveBeenCalledTimes(1);
+    expect(createFailureIssue.mock.calls[0][1]).toBe(failures[0]);
+  });
+
+  it('still updates the tracked issues of every failure in the group', async () => {
+    const failures = [0, 1, 2].map((i) => makeSameErrorFailure(i));
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams(failures.map(createExistingIssue));
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(updateFailureIssue).toHaveBeenCalledTimes(3);
+    expect(createFailureIssue).not.toHaveBeenCalled();
+  });
+
+  it('opens no new issue when another test in the group is tracked', async () => {
+    const failures = [0, 1, 2].map((i) => makeSameErrorFailure(i));
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams([createExistingIssue(failures[2])]);
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(updateFailureIssue).toHaveBeenCalledTimes(1);
+    expect(updateFailureIssue.mock.calls[0][5]).toBe(failures[2]);
+    expect(createFailureIssue).not.toHaveBeenCalled();
+  });
+
+  it('opens no new issue when another test in the group is tracked by a flaky suite issue', async () => {
+    const failures = [0, 1, 2].map((i) => makeSameErrorFailure(i));
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams([], [[failures[2], createSuiteIssue(failures[2])]]);
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(createFailureIssue).not.toHaveBeenCalled();
+  });
+
+  it('does not take the new-issue slot from a failure with a different error', async () => {
+    const failures = [...[0, 1, 2].map((i) => makeSameErrorFailure(i)), makeFailure(3)];
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams([createExistingIssue(failures[1])]);
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(createFailureIssue).toHaveBeenCalledTimes(1);
+    expect(createFailureIssue.mock.calls[0][1]).toBe(failures[3]);
+  });
+
+  it('leaves failures alone when only two share an error', async () => {
+    const failures = [0, 1].map((i) => makeSameErrorFailure(i));
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams();
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(failures.some(({ sameErrorAs }) => sameErrorAs)).toBe(false);
+  });
+
+  it('does not count duplicate classname+name entries toward the threshold', async () => {
+    const failures = [makeSameErrorFailure(0), makeSameErrorFailure(0), makeSameErrorFailure(1)];
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams();
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(failures.some(({ sameErrorAs }) => sameErrorAs)).toBe(false);
+  });
+
+  it('only applies to FTR failures', async () => {
+    const failures = [0, 1, 2].map((i) => makeSameErrorFailure(i, { testType: 'jest' }));
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams();
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(failures.some(({ sameErrorAs }) => sameErrorAs)).toBe(false);
   });
 });
 

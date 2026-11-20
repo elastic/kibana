@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import type { DatasetQualityDetailsController } from '../../controller/dataset_quality_details';
 import type { DatasetQualityStartDeps } from '../../types';
 import type { ITelemetryClient } from '../../services/telemetry';

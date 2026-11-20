@@ -13,8 +13,8 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { VEGA_API_PATH, commonRouteConfig, PUBLIC_API_VERSION } from '../constants';
-import { isVegaApiEnabled } from '../is_vega_api_enabled';
+import { VEGA_API_PATH, VEGA_API_VERSION } from '../../../common/constants';
+import { commonRouteConfig } from '../constants';
 import { create } from './create';
 import { createRequestBodySchema, createResponseBodySchema } from './schemas';
 
@@ -32,7 +32,7 @@ export const registerCreateRoute = (
 
   createRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: VEGA_API_VERSION,
       options: {
         oasOperationObject: async () =>
           (await import('../oas_examples')).createVegaOASOperationObject,
@@ -60,10 +60,6 @@ export const registerCreateRoute = (
     },
     async (ctx, req, res) =>
       telemetryHandler(req, { usageCounter }, async () => {
-        const { core } = await ctx.resolve(['core']);
-        if (!(await isVegaApiEnabled(core.featureFlags))) {
-          return res.notFound();
-        }
         try {
           const result = await create(ctx, req.body);
           return res.created({ body: result });

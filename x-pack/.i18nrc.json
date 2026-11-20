@@ -168,6 +168,7 @@
     "xpack.searchNavigation": "solutions/search/plugins/search_navigation",
     "xpack.searchInferenceEndpoints": "platform/plugins/shared/search_inference_endpoints",
     "xpack.searchAssistant": "solutions/search/plugins/search_assistant",
+    "xpack.searchBoost": "platform/plugins/private/search_boost",
     "xpack.searchProfiler": "platform/plugins/shared/searchprofiler",
     "xpack.security": [
       "platform/plugins/shared/security",

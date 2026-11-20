@@ -14,6 +14,7 @@ export {
   durationSchema,
   entityIdSchema,
   ENTITY_ID_NOTE,
+  ACTION_POLICY_ID_NOTE,
   groupHashSchema,
   seriesIdSchema,
   tagsResponseSchema,
@@ -48,7 +49,10 @@ export * from './action_policy_test_schema';
 export * from './action_policy_routing_tags_schema';
 export * from './match_rules_schema';
 export * from './severity';
+export * from './alert_event_schema';
+export * from './alert_events_mappings';
 export * from './create_alert_event_data_schema';
+export * from './create_signal_event_data_schema';
 export * from './rule_template_schema';
 export * from './suggest_user_profile_response_schema';
 export type { MatcherContext, MatcherContextFieldDescriptor } from './matcher_context';

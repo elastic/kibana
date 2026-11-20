@@ -58,18 +58,26 @@ export {
   edotBrowser,
   type BrowserProfileId,
   type EdotBrowserClientOptions,
+  type EdotBrowserUser,
   type EdotBrowserDocument,
   type EdotBrowserEvent,
   type EdotBrowserExceptionTemplate,
   type EdotBrowserPage,
+  type EdotBrowserReplayOptions,
+  type EdotBrowserReplayVisit,
   type EdotBrowserResource,
+  type EdotBrowserSessionDocument,
   type EdotBrowserSite,
   type EdotBrowserStackFrame,
   type EdotBrowserSpanDocument,
   type HealthProfileName,
+  type ReplaySize,
 } from './src/lib/edot_browser';
 export {
   edotReactNative,
+  MOBILE_SPAN_KIND,
+  MOBILE_PLATFORM,
+  MOBILE_PLATFORMS,
   type DeviceProfile,
   type DeviceProfileId,
   type EdotAndroidClient,
@@ -91,4 +99,29 @@ export {
   type NetworkConnection,
   type NetworkConnectionType,
 } from './src/lib/edot_react_native';
-export { syntheticsMonitor, type SyntheticsMonitorDocument } from './src/lib/synthetics';
+export {
+  EVENT_APP_CRASH,
+  EVENT_EXCEPTION,
+  EVENT_WIDGET_CLICK,
+} from './src/lib/edot_shared/constants';
+export {
+  ATTR_APP_START_DURATION,
+  ATTR_ERROR_KIND,
+  ATTR_SCREEN_NAME,
+  ATTR_SESSION_PREVIOUS_ID,
+  ATTR_START_TYPE,
+  ERROR_KIND_ANR,
+  ERROR_KIND_HANG,
+  EVENT_APP_START,
+  EVENT_SCREEN_CLICK,
+  EVENT_SESSION_END,
+  EVENT_SESSION_START,
+  SPAN_SCREEN_LOAD,
+  START_TYPE_COLD,
+  START_TYPE_WARM,
+} from './src/lib/edot_shared/proposed_signals';
+export {
+  syntheticsMonitor,
+  type BrowserJourneyStep,
+  type SyntheticsMonitorDocument,
+} from './src/lib/synthetics';

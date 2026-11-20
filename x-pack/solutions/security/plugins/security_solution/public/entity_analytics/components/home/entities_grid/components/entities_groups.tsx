@@ -31,7 +31,8 @@ import {
 } from '../queries/resolved_entities';
 import { useResolvedValueGroups } from '../hooks/use_resolved_value_groups';
 import { useEntityFilterOverrides } from '../hooks/use_entity_grid_data';
-import type { RowsMode, SortDir, TimeRange } from '../common';
+import type { TimeRange } from '../../queries/time_range';
+import type { RowsMode, SortDir } from '../common';
 import type { CellHandlers } from './entities_cell_renderer';
 import type { RowActions } from './cells/row_actions_cell';
 

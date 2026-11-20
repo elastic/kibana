@@ -15,6 +15,7 @@
     "@kbn/cases-components",
     "@kbn/cases-plugin",
     "@kbn/core-spaces-common",
+    "@kbn/elastic-assistant-common",
     "@kbn/entity-store",
     "@kbn/es",
     "@kbn/fleet-plugin",
@@ -36,7 +37,7 @@
     "@kbn/alertzero-common",
     "@kbn/proposals-common",
     "@kbn/evals-suite-attack-discovery-agent-builder",
-    "@kbn/inference-common",
-    "@kbn/deeplinks-security"
+    "@kbn/deeplinks-security",
+    "@kbn/inference-common"
   ]
 }
