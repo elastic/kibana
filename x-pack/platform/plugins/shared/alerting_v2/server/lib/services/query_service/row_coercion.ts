@@ -60,7 +60,7 @@ export const coerceRow = (row: EsqlRow, dateColumns?: ReadonlySet<string>): Esql
  * strings today; only the streaming path, which must match Arrow format, opts in.
  */
 export const toRows = <T = EsqlRow>(
-  response: EsqlQueryResponse,
+  response: Pick<EsqlQueryResponse, 'columns' | 'values'>,
   { normalizeDates = false }: { normalizeDates?: boolean } = {}
 ): T[] => {
   const columnNames = response.columns.map((column) => column.name);

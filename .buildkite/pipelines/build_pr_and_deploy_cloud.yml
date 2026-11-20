@@ -75,6 +75,9 @@ steps:
 
       - command: .buildkite/scripts/steps/cloud/deploy.sh
         label: 'Deploy to Cloud'
+        # Temporary (rna-program#1312): 1 GB Kibana for the ES|QL format sweep. Do not merge.
+        env:
+          KIBANA_MEMORY_SIZE: 1024
         agents:
           provider: gcp
           image: family/kibana-ubuntu-2404

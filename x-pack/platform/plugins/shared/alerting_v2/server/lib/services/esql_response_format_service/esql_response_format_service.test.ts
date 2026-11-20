@@ -11,6 +11,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { ESQL_RESPONSE_FORMAT_FEATURE_FLAG } from '../../../../common/feature_flags';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { createLoggerService } from '../logger_service/logger_service.mock';
+import { DEFAULT_ESQL_RESPONSE_FORMAT } from '../query_service/formats';
 import { arrowFormat } from '../query_service/formats/arrow_format';
 import { jsonFormat } from '../query_service/formats/json_format';
 import { EsqlResponseFormatService } from './esql_response_format_service';
@@ -31,7 +32,7 @@ describe('EsqlResponseFormatService', () => {
 
     expect(featureFlags.getStringValue$).toHaveBeenCalledWith(
       ESQL_RESPONSE_FORMAT_FEATURE_FLAG,
-      'json'
+      DEFAULT_ESQL_RESPONSE_FORMAT.name
     );
   });
 
@@ -55,7 +56,7 @@ describe('EsqlResponseFormatService', () => {
   it('falls back to the default format and warns on an unregistered variation', () => {
     const { service, mockLogger } = setup(new BehaviorSubject('csv'));
 
-    expect(service.get()).toBe(jsonFormat);
+    expect(service.get()).toBe(DEFAULT_ESQL_RESPONSE_FORMAT);
     expect(mockLogger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Unknown ES|QL response format "csv"'),
       {
@@ -71,7 +72,7 @@ describe('EsqlResponseFormatService', () => {
     const flagValue$ = new BehaviorSubject('csv');
     const { service } = setup(flagValue$);
 
-    expect(service.get()).toBe(jsonFormat);
+    expect(service.get()).toBe(DEFAULT_ESQL_RESPONSE_FORMAT);
 
     flagValue$.next('arrow');
 

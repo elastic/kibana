@@ -77,11 +77,11 @@ fi
 echo "--- Create Deployment"
 CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
 if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; then
-  # Stack monitoring (shipped to the deployment itself) and verbose logging are part of the
-  # create request, so Cloud applies them in the initial plan instead of two follow-up plans.
+  # Stack monitoring (shipped to the deployment itself) is part of the
+  # create request, so Cloud applies it in the initial plan instead of a follow-up plan.
+  # Temporary (rna-program#1312): verbose logging removed for the ES|QL format sweep. Do not merge.
   jq --slurpfile monitoring .buildkite/scripts/steps/cloud/stack_monitoring.json '
     .settings.observability = $monitoring[0].settings.observability |
-    .resources.kibana[0].plan.kibana.user_settings_yaml = "logging.root.level: all" |
     .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
     .resources.elasticsearch[0].plan.elasticsearch.docker_image = "'$ELASTICSEARCH_CLOUD_IMAGE'" |
     .name = "'$CLOUD_DEPLOYMENT_NAME'" |

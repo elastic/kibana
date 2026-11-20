@@ -7,6 +7,7 @@
 
 import { arrowFormat } from './arrow_format';
 import { jsonFormat } from './json_format';
+import { ndjsonFormat } from './ndjson_format';
 import {
   DEFAULT_ESQL_RESPONSE_FORMAT,
   ESQL_RESPONSE_FORMAT_NAMES,
@@ -15,16 +16,17 @@ import {
 
 describe('ES|QL response format registry', () => {
   it('lists every registered format name', () => {
-    expect(ESQL_RESPONSE_FORMAT_NAMES).toEqual(['json', 'arrow']);
+    expect(ESQL_RESPONSE_FORMAT_NAMES).toEqual(['json', 'arrow', 'ndjson']);
   });
 
-  it('defaults to json', () => {
-    expect(DEFAULT_ESQL_RESPONSE_FORMAT).toBe(jsonFormat);
+  it('defaults to ndjson', () => {
+    expect(DEFAULT_ESQL_RESPONSE_FORMAT).toBe(ndjsonFormat);
   });
 
   it('resolves each registered name to its format', () => {
     expect(findEsqlResponseFormat('json')).toBe(jsonFormat);
     expect(findEsqlResponseFormat('arrow')).toBe(arrowFormat);
+    expect(findEsqlResponseFormat('ndjson')).toBe(ndjsonFormat);
   });
 
   it('returns undefined for an unregistered name', () => {
