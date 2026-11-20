@@ -64,6 +64,8 @@ export async function updateAgentTags(
     if (nsAndKuery) {
       filters.push(nsAndKuery);
     }
+    // Keep in line with `retrySkipsUpdatedAgents`: only these two updates leave out, on a retry,
+    // the agents that were already updated.
     if (tagsToAdd.length === 1 && tagsToRemove.length === 0) {
       filters.push(`(NOT (tags:${tagsToAdd[0]}))`);
     } else if (tagsToRemove.length === 1 && tagsToAdd.length === 0) {
