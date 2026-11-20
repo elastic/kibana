@@ -26,6 +26,19 @@ describe('isHuntEligibleIoc', () => {
     }
   );
 
+  it.each([undefined, 'uncertain', 'discriminating'])(
+    'returns false for a placeholder email at tier %s',
+    (tier) => {
+      expect(isHuntEligibleIoc({ type: 'email', value: 'test@test.com', tier })).toBe(false);
+    }
+  );
+
+  it('keeps a real-domain email at uncertain eligible', () => {
+    expect(
+      isHuntEligibleIoc({ type: 'email', value: 'actor@malicious.org', tier: 'uncertain' })
+    ).toBe(true);
+  });
+
   it('returns false when deferred_unreviewed is true even for a promotable tier', () => {
     expect(
       isHuntEligibleIoc({
