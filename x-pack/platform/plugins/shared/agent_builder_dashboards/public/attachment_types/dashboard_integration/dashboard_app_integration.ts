@@ -31,8 +31,8 @@ import {
   UNSAVED_CHANGES_DEBOUNCE,
 } from '@kbn/presentation-publishing';
 import { createChatAdapter } from './chat_adapter';
-import { getPanelIds, getRelabelledPanelPointers, type PanelPointer } from './panel_pointer_labels';
 import {
+  getPanelIds,
   isAttachmentShownInDashboard,
   isOpenDashboardUpdate,
   reconcileStaging,
@@ -110,7 +110,6 @@ export const registerDashboardAppIntegration = ({
   // agent updates carry no version until the conversation that has them is published
   let attachments: Array<DashboardAttachment & { version?: number }> | undefined;
   let conversationId: string | undefined;
-  let panelPointers: PanelPointer[] = [];
   // the dashboard attachments and panels a pointer may have been staged for, so pointers can be
   // unstaged when their panel is removed or the user leaves the dashboard
   const pointedDashboardAttachmentIds = new Set<string>();
@@ -176,15 +175,6 @@ export const registerDashboardAppIntegration = ({
       unlinkedStagedAttachmentIds.add(attachmentId);
     }
     chat.stage({ id: attachmentId, origin, data: dashboardData });
-    // pointer pills keep the name the panel has on the dashboard
-    const relabelledPointers = getRelabelledPanelPointers({
-      dashboardData,
-      dashboardAttachmentId: dashboardAttachment?.id,
-      pointers: panelPointers,
-    });
-    for (const pointer of relabelledPointers) {
-      chat.stagePanelPointer(pointer);
-    }
   };
 
   // never throws, since a throw would end the integration
@@ -258,7 +248,6 @@ export const registerDashboardAppIntegration = ({
     tap((change) => {
       attachments = change?.attachments;
       conversationId = change?.conversationId;
-      panelPointers = change?.panelPointers ?? [];
     }),
     // a new conversation is published again while its first message is sent, before it gets its
     // id, so it needs the dashboard only once

@@ -9,7 +9,8 @@ import {
   DASHBOARD_ATTACHMENT_TYPE,
   type DashboardAttachment,
 } from '@kbn/agent-builder-dashboards-common';
-import { isOpenDashboardUpdate } from './reconcile';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { getPanelIds, isOpenDashboardUpdate } from './reconcile';
 
 const buildAttachment = (origin?: string): DashboardAttachment => ({
   id: 'attachment-1',
@@ -45,5 +46,31 @@ describe('isOpenDashboardUpdate', () => {
         isStagedFromDashboard: (attachmentId) => stagedAttachmentIds.includes(attachmentId),
       })
     ).toBe(expected);
+  });
+});
+
+describe('getPanelIds', () => {
+  it('returns the ids of top-level panels and panels inside sections', () => {
+    const lensPanel = (id: string) => ({
+      type: LENS_EMBEDDABLE_TYPE,
+      id,
+      grid: { x: 0, y: 0, w: 24, h: 15 },
+      config: { type: 'metric' },
+    });
+    const data = {
+      title: 'Dashboard',
+      panels: [
+        lensPanel('panel-1'),
+        {
+          id: 'section-1',
+          title: 'Section',
+          collapsed: false,
+          grid: { y: 0 },
+          panels: [lensPanel('panel-2')],
+        },
+      ],
+    } as unknown as DashboardAttachment['data'];
+
+    expect(getPanelIds(data)).toEqual(['panel-1', 'panel-2']);
   });
 });

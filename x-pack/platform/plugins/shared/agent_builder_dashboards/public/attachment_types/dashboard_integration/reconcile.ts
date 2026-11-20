@@ -14,6 +14,7 @@ import type {
 import {
   getComparableAttachmentState,
   getComparableDashboardState,
+  isSection,
 } from '@kbn/agent-builder-dashboards-common';
 import { canApplyAgentChangesInPlace } from './show_attachment';
 
@@ -79,6 +80,10 @@ export const resolveDashboardAttachmentLink = <TAttachment extends { origin?: st
     attachment: attachments.find((attachment) => attachment.origin === origin),
   };
 };
+
+/** The ids of the dashboard's panels, including the ones inside sections. */
+export const getPanelIds = ({ panels }: DashboardAttachmentData): string[] =>
+  panels.flatMap((widget) => (isSection(widget) ? widget.panels : [widget])).map(({ id }) => id);
 
 /**
  * The id the chat input stages the open dashboard under: its attachment, or a new attachment when
