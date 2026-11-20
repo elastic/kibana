@@ -446,7 +446,7 @@ describe('createTransport', () => {
         transport.request(
           { method: 'GET', path: '/' },
           {
-            headers: { authorization: 'Bearer explicit-override' },
+            headers: { Authorization: 'Bearer explicit-override' },
           }
         )
       ).rejects.toBe(error);
@@ -455,6 +455,15 @@ describe('createTransport', () => {
         authorization: 'Bearer explicit-override',
         'x-client-authentication': 'original-secret',
       });
+      expect(transportRequestMock).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({
+          headers: {
+            authorization: 'Bearer explicit-override',
+            'x-client-authentication': 'original-secret',
+          },
+        })
+      );
     });
 
     it('retries the call if the handler returns `retry` and return result from the retry', async () => {
