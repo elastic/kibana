@@ -15,6 +15,8 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { NIGHTSHIFT_INVESTIGATION_DECISION_TREE_USAGE_ID } from '@kbn/nightshift-shared';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { usesDecisionTrees } from '../agents/agent_policy';
+import { isAlertRecoveryRound } from '../client/build_investigation_message';
+import { ALERT_RECOVERED_FOLLOW_UP } from '../client/investigations_client';
 import {
   extractAccessedTreeIdsFromRounds,
   roundsBefore,
@@ -119,8 +121,8 @@ export const decisionTreePrepareStepDefinition = ({
       'Builds the closing reinforcement message for a completed investigation round: the decision ' +
       'trees available to edit, the learnings already on file, and the turn script. A follow-up ' +
       'round only edits the trees of its own investigation, and is skipped when there are none. ' +
-      'A follow-up that has trees gets one LLM causal check: only a cause the investigation data ' +
-      'shows reinforces a path.',
+      'Every follow-up gets one LLM causal check: only a cause the investigation data shows ' +
+      'reinforces a path, and online evals grades the first round against it.',
     inputSchema: z.object({
       prompt: investigationRoundInputsSchema.prompt.optional(),
       response: investigationRoundInputsSchema.response.optional(),
@@ -173,6 +175,10 @@ export const decisionTreePrepareStepDefinition = ({
         .enum(['initial_investigation', 'feedback_reinforcement'])
         .describe('Whether this round seeds the trees or follows up on them.'),
       skipped: z.boolean().describe('True when this round is not eligible for reinforcement.'),
+      round_kind: z
+        .enum(['initial', 'follow_up', 'alert_recovery'])
+        .optional()
+        .describe('What kind of round this is, once the investigation has been read.'),
       causal_check: z
         .object({
           is_feedback: z.boolean().describe('The human message speaks to the root cause.'),
@@ -183,7 +189,7 @@ export const decisionTreePrepareStepDefinition = ({
           learning: z.string().describe('What the human taught the investigator.'),
         })
         .optional()
-        .describe('For a follow-up with trees to edit: what its causal check found.'),
+        .describe('For a follow-up: what its causal check found, whether or not it has trees.'),
     }),
     handler: async (context) => {
       const {
@@ -245,10 +251,15 @@ export const decisionTreePrepareStepDefinition = ({
       const rounds = conversation?.rounds ?? [];
       const earlierRounds = roundsBefore(rounds, roundId);
       const isFollowUp = earlierRounds.length > 0;
+      // The hook has no run context, so a recovery is told by the message the client wrote for it.
+      const roundKind = resolveRound(
+        { rounds },
+        {
+          roundId,
+          followUp: isAlertRecoveryRound(prompt) ? ALERT_RECOVERED_FOLLOW_UP : undefined,
+        }
+      )?.roundKind;
       const savedCurrentRound = rounds.find((round) => round.id === roundId);
-      const roundResolution = isFollowUp
-        ? resolveRound({ rounds, attachments: conversation?.attachments }, { roundId })
-        : undefined;
       const roundToolCalls = withToolResults(
         (toolCalls ?? []) as InvestigationToolCall[],
         toolResults ?? []
@@ -347,24 +358,11 @@ export const decisionTreePrepareStepDefinition = ({
             : {}),
           tree_count: treeCount,
           opened_tree_count: openedTreeCount,
-          ...(roundResolution ? { recorder_outcome: roundResolution.outcome } : {}),
-          ...(roundResolution?.hasConfirmedCause !== undefined
-            ? { recorder_has_confirmed_cause: roundResolution.hasConfirmedCause }
-            : {}),
           ...(durationMs !== undefined ? { duration_ms: durationMs } : {}),
           ...(errorCode ? { error_code: errorCode } : {}),
         };
 
         span?.setAttribute('nightshift.causal_check.outcome', outcome);
-        if (roundResolution) {
-          span?.setAttribute('nightshift.causal_check.recorder_outcome', roundResolution.outcome);
-          if (roundResolution.hasConfirmedCause !== undefined) {
-            span?.setAttribute(
-              'nightshift.causal_check.recorder_has_confirmed_cause',
-              roundResolution.hasConfirmedCause
-            );
-          }
-        }
         if (verdict) {
           span?.setAttribute('nightshift.causal_check.is_feedback', verdict.isFeedback);
           span?.setAttribute('nightshift.causal_check.confirmed', verdict.causalConfirmed);
@@ -396,7 +394,6 @@ export const decisionTreePrepareStepDefinition = ({
             (verdict
               ? ` feedback=${verdict.isFeedback} confirmed=${verdict.causalConfirmed}`
               : '') +
-            (roundResolution ? ` recorder=${roundResolution.outcome}` : '') +
             ` trees=${treeCount}`;
           logger.info(message, { tags: CAUSAL_CHECK_LOG_TAGS, labels: { ...event } });
           context.logger.info(message);
@@ -434,26 +431,20 @@ export const decisionTreePrepareStepDefinition = ({
           });
           if (res.skipped) {
             span?.setAttribute('nightshift.skipped', true);
-            if (isFollowUp) {
-              recordCausalCheckTelemetry({
-                span,
-                outcome: 'skipped_no_trees',
-                treeCount: 0,
-                openedTreeCount: 0,
-              });
-            }
-            return res;
+          } else {
+            span?.setAttribute('nightshift.tree_count', res.treeCount);
+            span?.setAttribute('nightshift.turn_kind', res.turnKind);
+            span?.setAttribute('nightshift.opened_tree_ids', JSON.stringify(res.openedTreeIds));
           }
-          span?.setAttribute('nightshift.tree_count', res.treeCount);
-          span?.setAttribute('nightshift.turn_kind', res.turnKind);
-          span?.setAttribute('nightshift.opened_tree_ids', JSON.stringify(res.openedTreeIds));
           if (isFollowUp) {
+            const treeCount = res.skipped ? 0 : res.treeCount;
+            const openedTreeCount = res.skipped ? 0 : res.openedTreeIds.length;
             if (causalCheckAttempt?.status === 'failed') {
               recordCausalCheckTelemetry({
                 span,
                 outcome: 'failed',
-                treeCount: res.treeCount,
-                openedTreeCount: res.openedTreeIds.length,
+                treeCount,
+                openedTreeCount,
                 durationMs: causalCheckAttempt.durationMs,
                 errorCode: causalCheckAttempt.errorCode,
                 error: causalCheckAttempt.error,
@@ -462,8 +453,8 @@ export const decisionTreePrepareStepDefinition = ({
               recordCausalCheckTelemetry({
                 span,
                 outcome: outcomeFromVerdict(res.verdict),
-                treeCount: res.treeCount,
-                openedTreeCount: res.openedTreeIds.length,
+                treeCount,
+                openedTreeCount,
                 verdict: res.verdict,
                 durationMs:
                   causalCheckAttempt?.status === 'completed'
@@ -475,8 +466,21 @@ export const decisionTreePrepareStepDefinition = ({
           return res;
         }
       );
+      const causalCheckOutput = turn.verdict
+        ? {
+            causal_check: {
+              is_feedback: turn.verdict.isFeedback,
+              causal_confirmed: turn.verdict.causalConfirmed,
+              causal_summary: turn.verdict.causalSummary,
+              learning: turn.verdict.learning,
+            },
+          }
+        : {};
+      const roundKindOutput = roundKind ? { round_kind: roundKind } : {};
       if (turn.skipped) {
-        return skippedOutput;
+        return {
+          output: { ...skippedOutput.output, ...roundKindOutput, ...causalCheckOutput },
+        };
       }
 
       return {
@@ -485,17 +489,9 @@ export const decisionTreePrepareStepDefinition = ({
           tree_count: turn.treeCount,
           turn_kind: turn.turnKind,
           skipped: false,
+          ...roundKindOutput,
           ...(turn.openedTreeIds.length > 0 ? { opened_ids: turn.openedTreeIds } : {}),
-          ...(turn.verdict
-            ? {
-                causal_check: {
-                  is_feedback: turn.verdict.isFeedback,
-                  causal_confirmed: turn.verdict.causalConfirmed,
-                  causal_summary: turn.verdict.causalSummary,
-                  learning: turn.verdict.learning,
-                },
-              }
-            : {}),
+          ...causalCheckOutput,
         },
       };
     },

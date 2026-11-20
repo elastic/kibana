@@ -48,9 +48,8 @@ export {
   resolveRound,
   type InvestigationRoundKind,
   type ResolvableConversation,
-  type RootCauseChange,
   type RoundResolution,
-} from './round_outcome';
+} from './round_kind';
 
 export {
   APPLIED_WRITE_STORES,

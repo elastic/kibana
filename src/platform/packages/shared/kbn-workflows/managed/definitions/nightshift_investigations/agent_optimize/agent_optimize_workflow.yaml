@@ -181,6 +181,27 @@ steps:
       tool_calls: '${{ inputs.tool_calls }}'
       tool_results: '${{ inputs.tool_results }}'
 
+  # A human follow-up whose causal check confirmed the root cause is ground truth: the first
+  # round's report is graded against it. Alert recoveries are graded by the online evals
+  # workflow instead. Runs before reinforcement, whose failures stop the workflow. The step
+  # reports its own failures and honours the online evals kill switch.
+  - name: score_follow_up_online_evals
+    type: nightshift.onlineEvals.score
+    if: "${{ steps.prepare_turn.output.round_kind == 'follow_up' and steps.prepare_turn.output.causal_check.causal_confirmed == true and steps.prepare_turn.output.causal_check.causal_summary != '' }}"
+    on-failure:
+      continue: true
+    timeout: 120s
+    with:
+      investigation_id: '{{ inputs.conversation_id }}'
+      round_id: '{{ inputs.round_id }}'
+      round_kind: follow_up
+      graded_report: first_round
+      evaluator_set: reference_based
+      evaluators:
+        - name: nightshift_alert_outcome_rca_accuracy
+      confirmed_root_cause: '${{ steps.prepare_turn.output.causal_check.causal_summary }}'
+      round_trace_id: '${{ inputs.round_trace_id }}'
+
   # Mirrors the investigation and reinforcement workflows: the reinforcement agent runs on
   # the model the round used, with `connector_id` still the strict override for a manual run.
   - name: resolve_model

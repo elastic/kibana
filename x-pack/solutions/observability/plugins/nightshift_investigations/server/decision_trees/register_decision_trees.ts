@@ -107,7 +107,8 @@ export const hydrateDecisionTreeWorkspace = async ({
  *
  * A first round edits the trees it opened, or seeds a new one. A follow-up only edits the
  * investigation's own trees: the ones opened in any of its rounds and the ones its earlier
- * reinforcement wrote. With none, it is skipped, so a follow-up never seeds a tree.
+ * reinforcement wrote. With none, it is skipped, so a follow-up never seeds a tree; its causal
+ * check still runs, since online evals grades the first round against a confirmed cause.
  */
 export const prepareReinforcementTurn = async ({
   turnKind,
@@ -135,8 +136,8 @@ export const prepareReinforcementTurn = async ({
   signal?: AbortSignal;
   toolCalls?: InvestigationToolCall[];
   /**
-   * The follow-up's causal check. Called only when a follow-up has trees to edit, so a round that
-   * reinforces nothing costs no model call. Without it, a follow-up extends and claims no cause.
+   * The follow-up's causal check, called for every follow-up. Without it, a follow-up extends and
+   * claims no cause.
    */
   checkCausal?: () => Promise<CausalCheckResult>;
 }): Promise<
@@ -149,7 +150,7 @@ export const prepareReinforcementTurn = async ({
       /** Set for a follow-up: what its causal check found. */
       verdict?: CausalCheckResult;
     }
-  | { skipped: true }
+  | { skipped: true; verdict?: CausalCheckResult }
 > => {
   const treeStore = createDecisionTreeStore({ esClient, logger, spaceId, signal });
   const isFollowUp = turnKind === 'feedback_reinforcement';
@@ -167,14 +168,14 @@ export const prepareReinforcementTurn = async ({
   const editable = trees.filter(
     (tree) => tree.status !== 'archived' && investigationTreeIds.has(tree.tree_id)
   );
+  const verdict = isFollowUp ? (checkCausal ? await checkCausal() : NO_CAUSAL_VERDICT) : undefined;
   if (isFollowUp && editable.length === 0) {
     logger.info(
       `Skipped decision tree reinforcement for a follow-up round of "${investigationId}": it has no decision tree to build on`
     );
-    return { skipped: true };
+    return { skipped: true, ...(verdict ? { verdict } : {}) };
   }
 
-  const verdict = isFollowUp ? (checkCausal ? await checkCausal() : NO_CAUSAL_VERDICT) : undefined;
   const message = buildReinforcementPrompt({
     trees: editable,
     learnings,

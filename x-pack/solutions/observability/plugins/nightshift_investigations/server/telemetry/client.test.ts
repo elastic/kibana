@@ -119,8 +119,6 @@ describe('NightshiftTelemetryClient', () => {
       has_learning: true,
       tree_count: 1,
       opened_tree_count: 1,
-      recorder_outcome: 'found' as const,
-      recorder_has_confirmed_cause: true,
       duration_ms: 1450,
     };
     client.reportDecisionTreeCausalCheck(event);

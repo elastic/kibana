@@ -9,11 +9,7 @@ import { HYPOTHESES_ATTACHMENT_TYPE } from '@kbn/agentic-investigations-plugin/c
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { isAlertRecoveryRound } from '../client/build_investigation_message';
 import { renderToolCalls } from '../wiki/optimize';
-import {
-  toolCallsFromRoundSteps,
-  type RawRoundStep,
-  type ResolvableConversation,
-} from '../investigation_round';
+import { toolCallsFromRoundSteps, type RawRoundStep } from '../investigation_round';
 import type { InvestigationToolCall } from './accessed_trees';
 
 const MAX_MESSAGE_CHARS = 6_000;
@@ -46,6 +42,12 @@ export interface EarlierRound {
   response?: { message?: string };
   steps: readonly unknown[];
 }
+
+/** The conversation's attachments, as Agent Builder returns them. */
+type ConversationAttachments = ReadonlyArray<{
+  type: string;
+  versions: ReadonlyArray<{ created_at: string; data: unknown }>;
+}>;
 
 export type RunCausalCheck = (transcript: string) => Promise<CausalCheckResult>;
 
@@ -93,7 +95,7 @@ const truncate = (text: string | undefined, max: number): string => {
 
 /** The hypotheses as the findings recorder left them when the next round started. */
 const hypothesesBefore = (
-  attachments: ResolvableConversation['attachments'],
+  attachments: ConversationAttachments | undefined,
   time: number
 ): string | undefined => {
   const versions = (attachments ?? [])
@@ -116,7 +118,7 @@ const hypothesesBefore = (
 
 const renderEarlierRounds = (
   rounds: readonly EarlierRound[],
-  attachments: ResolvableConversation['attachments'],
+  attachments: ConversationAttachments | undefined,
   latestStartedAt?: number
 ): string => {
   const sections = rounds.map((round, index) => {
@@ -163,7 +165,7 @@ export const buildCausalCheckTranscript = ({
   toolCalls,
 }: {
   earlierRounds: readonly EarlierRound[];
-  attachments?: ResolvableConversation['attachments'];
+  attachments?: ConversationAttachments;
   /**
    * When the follow-up started; hypotheses written after it belong to it, not to earlier rounds.
    * When absent (the round is not saved yet), the last earlier round omits its hypotheses snapshot
