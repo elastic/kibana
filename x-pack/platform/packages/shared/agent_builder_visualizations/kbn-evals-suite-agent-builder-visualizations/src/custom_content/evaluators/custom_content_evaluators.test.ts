@@ -493,12 +493,12 @@ describe('Custom Content Edit', () => {
       evaluator,
       editOutput(before, {
         followUpToolIds: ['platform.dashboard.generate_dashboard'],
-        followUpToolArgs: ['generate_dashboard panel p1: hasData=unset'],
+        followUpToolArgs: ['generate_dashboard panel p1: dataQueries=unset'],
       }),
       data
     );
     expect(result.metadata).toMatchObject({
-      followUpToolArgs: ['generate_dashboard panel p1: hasData=unset'],
+      followUpToolArgs: ['generate_dashboard panel p1: dataQueries=unset'],
     });
   });
 

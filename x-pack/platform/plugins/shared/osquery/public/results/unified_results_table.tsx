@@ -22,6 +22,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
   UnifiedDataTableSettings,
   UnifiedDataTableRestorableState,
+  SortOrder,
 } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState, DataGridDensity } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -182,6 +183,10 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const [sortingColumns, setSortingColumns] = useState<
     Array<{ id: string; direction: 'asc' | 'desc' }>
   >([{ id: 'agent.name', direction: Direction.asc }]);
+  const gridSort = useMemo<SortOrder[]>(
+    () => sortingColumns.map((col) => [col.id, col.direction]),
+    [sortingColumns]
+  );
 
   const ecsMappingColumns = useMemo(() => keys(ecsMapping || {}), [ecsMapping]);
 
@@ -625,7 +630,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                   setExpandedDoc={setExpandedDoc}
                   renderDocumentView={renderDocumentView}
                   externalCustomRenderers={externalCustomRenderers}
-                  sort={sortingColumns.map((col) => [col.id, col.direction])}
+                  sort={gridSort}
                   onSort={handleSort}
                   onSetColumns={handleSetColumns}
                   onResize={handleResize}

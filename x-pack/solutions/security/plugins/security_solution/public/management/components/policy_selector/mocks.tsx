@@ -6,7 +6,7 @@
  */
 
 import type { RenderResult } from '@testing-library/react';
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 import { act, fireEvent, waitFor } from '@testing-library/react';
 import { createTestSubjGenerator } from '../../mocks/utils';
 

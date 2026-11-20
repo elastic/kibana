@@ -51,7 +51,7 @@ export class ApplyAlreadyNotifiedStep implements DispatcherStep {
 
     const responses = await Promise.all(
       getAlreadyNotifiedQueries(groups).map((request) =>
-        this.queryService.executeQueryRows<AlreadyNotifiedRecord>({
+        this.queryService.executeQuery<AlreadyNotifiedRecord>({
           query: request.query,
           filter: { range: { '@timestamp': { gte } } },
           abortSignal: signal,

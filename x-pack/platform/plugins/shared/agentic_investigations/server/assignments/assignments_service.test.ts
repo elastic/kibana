@@ -112,7 +112,7 @@ describe('AssignmentsService.assign', () => {
     expect(client.patchMetadata).toHaveBeenCalledWith(
       'conv-1',
       { assignees: ['user-1'] },
-      { access: 'converse' }
+      { access: 'converse', refresh: 'wait_for' }
     );
   });
 
@@ -153,7 +153,7 @@ describe('AssignmentsService.assign', () => {
     expect(client.patchMetadata).toHaveBeenCalledWith(
       'conv-1',
       { assignees: ['user-b', 'user-c'] },
-      { access: 'converse' }
+      { access: 'converse', refresh: 'wait_for' }
     );
     expect(client.removeAccessControlEntries).toHaveBeenCalledWith(
       'conv-1',

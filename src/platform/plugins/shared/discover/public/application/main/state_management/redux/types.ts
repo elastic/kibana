@@ -57,6 +57,7 @@ export interface InternalStateDataRequestParams {
   timeRangeRelative: TimeRange | undefined;
   searchSessionId: string | undefined;
   isSearchSessionRestored: boolean;
+  replayCacheLastFetched?: string;
 }
 
 export interface TabStateGlobalState {

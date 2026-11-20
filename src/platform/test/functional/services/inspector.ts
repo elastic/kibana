@@ -279,9 +279,8 @@ export class InspectorService extends FtrService {
 
   public async getTableDataWithId(tableTestSubj: string): Promise<string[][]> {
     const chooserDataTestId = 'inspectorTableChooser';
-    if (!(await this.testSubjects.exists(chooserDataTestId))) {
-      return [];
-    }
+    // The chooser renders only after every table registers, so an instant probe races the data.
+    await this.testSubjects.existOrFail(chooserDataTestId, { timeout: 20_000 });
 
     return await this.retry.try(async () => {
       await this.testSubjects.click(chooserDataTestId);

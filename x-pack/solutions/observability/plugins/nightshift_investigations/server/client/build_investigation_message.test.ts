@@ -11,8 +11,10 @@ import {
   type V2AlertSnapshot,
 } from '../../common';
 import {
+  ALERT_OUTCOME_POLICY,
   buildAlertRecoveredFollowUpMessage,
   buildInvestigationMessage,
+  isAlertRecoveryRound,
 } from './build_investigation_message';
 
 /** What the client does at the boundary, reduced to accepted-or-not for these cases. */
@@ -349,6 +351,64 @@ describe('buildInvestigationMessage with a mixed alert array', () => {
   });
 });
 
+describe('buildInvestigationMessage with a v2 alert without a rule', () => {
+  const base: V2AlertSnapshot = {
+    alert_version: 'v2',
+    id: 'episode-1',
+    group_hash: 'hash-1',
+    status: 'active',
+    start: '2026-08-24T12:00:00.000Z',
+  };
+
+  it('names the episode from its rule name', () => {
+    const message = buildInvestigationMessage({
+      alerts: [{ ...base, source: 'elastic.significant_events', rule_name: 'Ad hoc' }],
+    });
+
+    expect(message).toContain(
+      'Alerting v2 episode episode-1 (elastic.significant_events, "Ad hoc") is active'
+    );
+    expect(message).not.toContain('of rule');
+    expect(message).not.toContain('the id above');
+  });
+
+  it('describes the episode by its id alone', () => {
+    const message = buildInvestigationMessage({ alerts: [base] });
+
+    expect(message).toContain('Alerting v2 episode episode-1 is active');
+    expect(message).not.toContain('of rule');
+  });
+});
+
+describe('buildInvestigationMessage with a significant event alert', () => {
+  const v2: V2AlertSnapshot = {
+    alert_version: 'v2',
+    id: 'episode-1',
+    group_hash: 'hash-1',
+    status: 'active',
+    start: '2026-08-24T12:00:00.000Z',
+  };
+
+  it('names the event id and how to read it', () => {
+    const message = buildInvestigationMessage({
+      alerts: [{ ...v2, source: 'elastic.significant_events', data: { event_id: 'evt-42' } }],
+    });
+
+    expect(message).toContain('significant event (event id evt-42)');
+    expect(message).toContain('sig_events.event_search');
+    expect(message).not.toContain('not a classic one');
+  });
+
+  it('keeps the generic v2 wording for other sources', () => {
+    const message = buildInvestigationMessage({
+      alerts: [{ ...v2, source: 'custom.source', data: { event_id: 'evt-42' } }],
+    });
+
+    expect(message).toContain('not a classic one');
+    expect(message).not.toContain('significant event');
+  });
+});
+
 describe('buildAlertRecoveredFollowUpMessage', () => {
   const baseRecovery = {
     alertUuid: 'alert-uuid-1',
@@ -378,7 +438,20 @@ describe('buildAlertRecoveredFollowUpMessage', () => {
     );
   });
 
-  it('asks the agent to use all available signals to reassess the root cause', () => {
+  it('names a rule-less alert by its id and leaves out the rule identifiers', () => {
+    const message = buildAlertRecoveredFollowUpMessage({
+      alertUuid: 'episode-1',
+      alertId: 'group-hash',
+      recoveredAt: '2026-08-24T12:15:30.000Z',
+    });
+
+    expect(message).toContain(
+      'Alert "episode-1" (UUID episode-1, instance "group-hash") transitioned to recovered at 2026-08-24T12:15:30.000Z.'
+    );
+    expect(message).not.toContain('rule undefined');
+  });
+
+  it('asks the agent to use all available signals and the alert-outcome policy to reassess the root cause', () => {
     const message = buildAlertRecoveredFollowUpMessage(baseRecovery);
 
     expect(message).toContain(
@@ -386,10 +459,21 @@ describe('buildAlertRecoveredFollowUpMessage', () => {
         "Use this recovery to verify or refute the investigation's root cause:",
         '',
         '1. Examine all available signals before, during, and after the recovery: metrics, logs, traces, topology, deployments, rollbacks, code and configuration changes, operational actions, and relevant discussions or incident records.',
-        '2. Determine what resolved the alert, or state that it is unknown. Test the existing hypotheses against what changed near recovery. If an expected fix or rollback did not happen—or the alert only cleared because load dropped, a transient condition passed, or the rule was snoozed, muted, or in a maintenance window—do not treat recovery alone as confirmation. Lower the confidence of or dismiss hypotheses contradicted by the evidence.',
-        "3. State whether the investigated root cause is confirmed, partly supported, contradicted, or unresolved, and update the investigation's hypotheses accordingly.",
+        '2. Determine what resolved the alert, or state that it is unknown. Test the existing hypotheses against what changed near recovery. If an expected fix or rollback did not happen—or the alert only cleared because load dropped, a transient condition passed, or the rule was snoozed, muted, or in a maintenance window—do not treat recovery alone as confirmation. In your reply, lower the confidence of or dismiss hypotheses contradicted by the evidence.',
+        '3. Recovery gives you the alert\'s whole lifetime, so a cause that was unknown when it fired may be identifiable now. Before you answer "unknown" or "unresolved", run these checks yourself instead of listing them as next steps, and for each say what you ran and what it returned, or why you could not run it: (a) why the alerting system closed the alert: the rule\'s execution record and the alert\'s state transitions around the recovery time, and whether the rule\'s query still matched at that moment; (b) every earlier episode of this rule and entity: whether starts, ends, and durations repeat at a fixed clock time or interval, which points to a scheduled process, rotation, or rollover to find; (c) deploy, rollback, configuration, feature-flag, and incident-tracker changes around both the onset and the recovery; (d) request-level evidence of the failure itself, such as traces, transactions, or error logs from the service that serves it, not only aggregate metrics or a stream shared with other deployments; (e) whether the alert re-opened. If the rule has not been evaluated again yet, say the re-fire is unknown rather than predicting it. Name any source you could not reach and the access that would close the gap. A cause you cannot evidence stays unresolved; thoroughness is not a reason to guess.',
+        '4. State whether the investigated root cause is confirmed, partially supported but incomplete, contradicted, or unresolved.',
+        '5. State whether the alert needed remediation, such as a rollback, configuration change, or code fix, or was benign: noise, a transient condition that ended on its own, or an expected artifact. Say so if it is unknown.',
+        '',
+        ALERT_OUTCOME_POLICY,
       ].join('\n')
     );
+    expect(ALERT_OUTCOME_POLICY).toContain('<alert_outcome_policy>');
+    expect(ALERT_OUTCOME_POLICY).toContain(
+      'In your reply, update or downgrade hypotheses to match the outcome evidence.'
+    );
+    expect(ALERT_OUTCOME_POLICY).toContain('"Verdict: <one allowed verdict>"');
+    expect(isAlertRecoveryRound(message)).toBe(true);
+    expect(isAlertRecoveryRound('Why is checkout slow?')).toBe(false);
   });
 
   it('omits the times it was not given', () => {

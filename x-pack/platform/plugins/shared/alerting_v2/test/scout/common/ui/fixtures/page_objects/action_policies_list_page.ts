@@ -12,7 +12,7 @@ import type { AlertingMountConfig } from './alerting_mount_config';
 /**
  * Drives the Action Policies list page. Exposes the write affordances gated by
  * the `actionPolicies` write capability (create button, row edit/actions,
- * details-flyout Take action button) so specs can assert they are visible for
+ * details-flyout Take action menu items) so specs can assert they are visible for
  * editors and hidden for read-only users.
  */
 export class ActionPoliciesListPage {
@@ -20,7 +20,7 @@ export class ActionPoliciesListPage {
   public readonly createButton: Locator;
   /** Details flyout container; a privilege-independent anchor that it opened. */
   public readonly detailsFlyout: Locator;
-  /** "Take action" button inside the details flyout footer; hidden for read-only users. */
+  /** "Take action" button inside the details flyout footer. */
   public readonly detailsFlyoutTakeActionButton: Locator;
   /** Content list toolbar search box. */
   private readonly searchBox: Locator;

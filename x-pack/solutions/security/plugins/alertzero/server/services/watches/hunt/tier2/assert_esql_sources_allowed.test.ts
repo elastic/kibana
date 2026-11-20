@@ -170,4 +170,37 @@ describe('assertEsqlSourcesAllowed', () => {
       ).toEqual({ ok: true });
     });
   });
+
+  describe('exclusions in FROM', () => {
+    it('lets an exclusion narrow an allowed source without an allowlist entry', () => {
+      expect(
+        assertEsqlSourcesAllowed('FROM logs-aws.cloudtrail-*, -*secret* | LIMIT 1', allowed)
+      ).toEqual({ ok: true });
+    });
+
+    it('still refuses a source outside the allowlist next to an exclusion', () => {
+      expect(
+        assertEsqlSourcesAllowed('FROM .kibana-*, -*secret* | LIMIT 1', allowed)
+      ).toMatchObject({ ok: false });
+    });
+
+    it('judges each part of a quoted multi-target source on its own', () => {
+      expect(
+        assertEsqlSourcesAllowed('FROM logs-aws.*, "-unused*,private-*" | LIMIT 1', allowed)
+      ).toMatchObject({ ok: false });
+      expect(assertEsqlSourcesAllowed('FROM "logs-aws.*,-unused*" | LIMIT 1', allowed)).toEqual({
+        ok: true,
+      });
+      expect(
+        assertEsqlSourcesAllowed('FROM "logs-aws.*,private-*" | LIMIT 1', allowed)
+      ).toMatchObject({ ok: false });
+    });
+
+    it('refuses a FROM that names nothing but exclusions', () => {
+      expect(assertEsqlSourcesAllowed('FROM -*secret* | LIMIT 1', allowed)).toEqual({
+        ok: false,
+        reason: 'FROM has no sources',
+      });
+    });
+  });
 });

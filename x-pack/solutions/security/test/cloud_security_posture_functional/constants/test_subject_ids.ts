@@ -6,8 +6,6 @@
  */
 
 export const testSubjectIds = {
-  PREVIEW_SECTION_TEST_ID: 'previewSection',
-  PREVIEW_SECTION_HEADER_TEST_ID: 'previewSectionBannerText',
   EVENTS_TABLE_ROW_CSS_SELECTOR: '[data-test-subj="events-viewer-panel"] .euiDataGridRow',
   VISUALIZATIONS_SECTION_HEADER_TEST_ID: 'securitySolutionFlyoutVisualizationsHeader',
   VISUALIZATIONS_SECTION_CONTENT_TEST_ID: 'securitySolutionFlyoutVisualizationsContent',
@@ -17,7 +15,7 @@ export const testSubjectIds = {
   GRAPH_PREVIEW_TITLE_LINK_TEST_ID: 'securitySolutionFlyoutGraphPreviewTitleLink',
   NODE_EXPAND_BUTTON_TEST_ID: 'cloudSecurityGraphNodeExpandButton',
   GRAPH_INVESTIGATION_TEST_ID: 'cloudSecurityGraphGraphInvestigation',
-  GRAPH_GROUPED_NODE_TEST_ID: 'label-node-stacked-shape',
+  GRAPH_GROUPED_NODE_TEST_ID: 'event-node-stacked-shape',
   GRAPH_NODE_EXPAND_POPOVER_TEST_ID: 'cloudSecurityGraphGraphInvestigationGraphNodeExpandPopover',
   GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID:
     'cloudSecurityGraphGraphInvestigationExploreRelatedEntities',
@@ -31,10 +29,10 @@ export const testSubjectIds = {
     'cloudSecurityGraphGraphInvestigationShowGroupedEntities',
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID:
     'cloudSecurityGraphGraphInvestigationShowEntityRelationships',
-  GRAPH_LABEL_EXPAND_POPOVER_TEST_ID: 'cloudSecurityGraphGraphInvestigationGraphLabelExpandPopover',
-  GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID:
+  GRAPH_EVENT_EXPAND_POPOVER_TEST_ID: 'cloudSecurityGraphGraphInvestigationGraphEventExpandPopover',
+  GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID:
     'cloudSecurityGraphGraphInvestigationShowEventsWithThisAction',
-  GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID:
+  GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID:
     'cloudSecurityGraphGraphInvestigationShowEventDetails',
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID: 'cloudSecurityGraphGraphInvestigationToggleSearch',
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID:
@@ -47,7 +45,6 @@ export const testSubjectIds = {
   GRAPH_IPS_POPOVER_CONTENT_ID: 'cloudSecurityGraphGraphInvestigationIpsPopoverContent',
   GRAPH_IPS_POPOVER_IP_ID: 'cloudSecurityGraphGraphInvestigationIpsPopoverId',
   GRAPH_IPS_POPOVER_IP_LINK_ID: 'cloudSecurityGraphGraphInvestigationIpsPopoverIpLink',
-  PREVIEW_SECTION_BANNER_PANEL: 'previewSectionBannerPanel',
   GENERIC_ENTITY_PANEL_HEADER_TEST_ID: 'generic-panel-header',
   HOST_PANEL_HEADER_TEST_ID: 'host-panel-header',
   USER_PANEL_HEADER_TEST_ID: 'user-panel-header',
@@ -62,5 +59,8 @@ export const testSubjectIds = {
   GROUPED_ITEM_TARGET_TEST_ID: 'GraphGroupedNodePreviewPanelGroupedItemTarget',
   GROUPED_ITEM_ACTIONS_POPOVER_PANEL_TEST_ID:
     'GraphGroupedNodePreviewPanelGroupedItemActionsPopoverPanel',
-  PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID: 'previewSectionCloseButton',
+  GROUPED_NODE_PREVIEW_PANEL_CONTENT_BODY_TEST_ID: 'GraphGroupedNodePreviewPanelContentBody',
+  CHILD_DOCUMENT_FLYOUT_TEST_ID: 'securitySolutionFlyoutChildDocumentFlyout',
+  NETWORK_FLYOUT_HEADER_TEXT_TEST_ID: 'network-details-flyout-headerText',
+  FLYOUT_CLOSE_BUTTON_TEST_ID: 'euiFlyoutCloseButton',
 };

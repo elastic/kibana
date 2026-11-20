@@ -28,7 +28,6 @@ export function createSloPipelineAssertions(esClient: Client): SloPipelineAssert
         },
         {
           timeoutMs: 40_000,
-          intervalMs: 3000,
           label: `Wait for pipeline ${pipelineId} to be deleted`,
         }
       );
@@ -51,7 +50,6 @@ export function createSloPipelineAssertions(esClient: Client): SloPipelineAssert
         },
         {
           timeoutMs: 40_000,
-          intervalMs: 3000,
           label: `Wait for pipeline ${pipelineId} to exist`,
         }
       );

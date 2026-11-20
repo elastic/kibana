@@ -34,8 +34,9 @@ import type {
  * The line is whether a later run could plausibly cover the same technique. A technique
  * that is not in the catalog, input this run truncated, and rows it could not interpret
  * all stay final: those reproduce. Retries are not bounded here, because a bound needs an
- * attempt count kept alongside the report, which is state the caller recording hunt
- * outcomes owns rather than this run. The one bound there is: a technique an earlier run left
+ * attempt count kept alongside the report: `writeHuntEvidence` keeps it and retires a report
+ * that stays retryable for `MAX_HUNT_RETRY_ATTEMPTS` runs, not counting runs whose retryable
+ * gaps all came from the environment. The one bound here is: a technique an earlier run left
  * pending and this run's extraction did not return gets no further run (`finalTechniqueIds`).
  */
 const RETRYABLE_REASONS: ReadonlySet<HuntIncompleteReason> = new Set<HuntIncompleteReason>([
@@ -66,6 +67,24 @@ export const isRetryableIncompleteReason = (reason: HuntIncompleteReason): boole
 export const FINAL_WHEN_NOTHING_SEARCHABLE: ReadonlySet<HuntIncompleteReason> =
   new Set<HuntIncompleteReason>(['query_ungrounded']);
 
+interface HuntCompletenessContext {
+  /** Reasons that are deterministic for this particular run; see `FINAL_WHEN_NOTHING_SEARCHABLE`. */
+  treatAsFinal?: ReadonlySet<HuntIncompleteReason>;
+  /**
+   * Techniques this run gives up on: a gap that names one is final, whatever its reason. The
+   * gap is still reported; it just no longer keeps the report eligible for another run.
+   */
+  finalTechniqueIds?: ReadonlySet<string>;
+}
+
+const keepsReportRetryable = (
+  { reason, technique_id: techniqueId }: HuntIncompleteness,
+  { treatAsFinal, finalTechniqueIds }: HuntCompletenessContext
+): boolean =>
+  isRetryableIncompleteReason(reason) &&
+  !treatAsFinal?.has(reason) &&
+  !(techniqueId !== undefined && finalTechniqueIds?.has(techniqueId));
+
 /**
  * Collapses a run's coverage gaps into the one value a caller decides on.
  *
@@ -75,29 +94,25 @@ export const FINAL_WHEN_NOTHING_SEARCHABLE: ReadonlySet<HuntIncompleteReason> =
  */
 export const huntCompletenessOf = (
   gaps: readonly HuntIncompleteness[],
-  {
-    treatAsFinal,
-    finalTechniqueIds,
-  }: {
-    /** Reasons that are deterministic for this particular run; see `FINAL_WHEN_NOTHING_SEARCHABLE`. */
-    treatAsFinal?: ReadonlySet<HuntIncompleteReason>;
-    /**
-     * Techniques this run gives up on: a gap that names one is final, whatever its reason. The
-     * gap is still reported; it just no longer keeps the report eligible for another run.
-     */
-    finalTechniqueIds?: ReadonlySet<string>;
-  } = {}
+  context: HuntCompletenessContext = {}
 ): HuntCompleteness => {
   if (gaps.length === 0) return 'complete';
-  return gaps.some(
-    ({ reason, technique_id: techniqueId }) =>
-      isRetryableIncompleteReason(reason) &&
-      !treatAsFinal?.has(reason) &&
-      !(techniqueId !== undefined && finalTechniqueIds?.has(techniqueId))
-  )
+  return gaps.some((gap) => keepsReportRetryable(gap, context))
     ? 'incomplete_retryable'
     : 'incomplete_final';
 };
+
+/**
+ * The distinct reasons of the gaps that keep the report retryable, judged in the same context as
+ * {@link huntCompletenessOf}. A reason name alone is not enough: the same reason is final for a
+ * technique this run gave up on.
+ */
+export const retryableReasonsOf = (
+  gaps: readonly HuntIncompleteness[],
+  context: HuntCompletenessContext = {}
+): HuntIncompleteReason[] => [
+  ...new Set(gaps.filter((gap) => keepsReportRetryable(gap, context)).map(({ reason }) => reason)),
+];
 
 /**
  * Whether the report stays eligible for a later run. Deliberately true for

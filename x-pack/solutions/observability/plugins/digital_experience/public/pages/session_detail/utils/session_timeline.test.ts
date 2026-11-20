@@ -8,9 +8,10 @@
 import {
   emptyWebVitals,
   type SessionPageVisit,
+  type SessionRequest,
   type SessionTimelineEvent,
 } from '../../../../common/sessions';
-import { formatOffset, layoutWaterfall } from './session_timeline';
+import { formatOffset, groupEventsByVisit, layoutWaterfall } from './session_timeline';
 
 const START = '2026-10-20T10:00:00.000Z';
 const at = (offsetMs: number) => new Date(Date.parse(START) + offsetMs).toISOString();
@@ -24,6 +25,7 @@ const visit = (page: string, startMs: number, durationMs: number): SessionPageVi
   clickCount: 0,
   errorCount: 0,
   webVitals: emptyWebVitals(),
+  load: null,
 });
 
 const event = (
@@ -35,11 +37,91 @@ const event = (
   name,
   timestamp: at(offsetMs),
   offsetMs,
-  durationMs: null,
   page: null,
   detail: null,
+  stacktrace: null,
   traceId: null,
   spanId: null,
+});
+
+describe('groupEventsByVisit', () => {
+  const visits = [visit('/', 0, 10_000), visit('/cart', 10_000, 5_000)];
+
+  it('puts each event in the visit it happened in', () => {
+    const groups = groupEventsByVisit(visits, [
+      event('page_view', 0),
+      event('click', 4_000),
+      event('page_view', 10_000),
+      event('error', 12_000),
+      event('web_vital', 14_000),
+    ]);
+
+    expect(
+      groups.map(({ visit: { page }, events }) => [page, events.map(({ kind }) => kind)])
+    ).toEqual([
+      ['/', ['page_view', 'click']],
+      ['/cart', ['page_view', 'error', 'web_vital']],
+    ]);
+  });
+
+  it('puts a late web vital on the page it measured, where the visit counts it', () => {
+    const groups = groupEventsByVisit(visits, [
+      // Settled when `/` was left, so it arrives during `/cart`, naming `/`.
+      { ...event('web_vital', 11_000, 'LCP'), page: '/' },
+      { ...event('web_vital', 12_000, 'CLS'), page: '/cart' },
+      event('web_vital', 13_000, 'INP'),
+      // A page with no visit before it stays with the open one.
+      { ...event('web_vital', 14_000, 'FCP'), page: '/checkout' },
+    ]);
+
+    expect(
+      groups.map(({ visit: { page }, events }) => [page, events.map(({ name }) => name)])
+    ).toEqual([
+      ['/', ['LCP']],
+      ['/cart', ['CLS', 'INP', 'FCP']],
+    ]);
+  });
+
+  it('puts events before the first visit in it', () => {
+    const [first] = groupEventsByVisit(visits, [event('click', -2_000)]);
+    expect(first.events.map(({ kind }) => kind)).toEqual(['click']);
+  });
+
+  it('puts each request in the visit the API attributed it to', () => {
+    const request = (url: string, visitIndex: number): SessionRequest => ({
+      url,
+      initiatorType: 'script',
+      method: null,
+      statusCode: null,
+      failed: false,
+      startTime: START,
+      durationMs: 10,
+      phases: null,
+      timingWithheld: false,
+      cached: false,
+      transferSize: null,
+      decodedBodySize: null,
+      renderBlocking: false,
+      protocol: null,
+      traceId: null,
+      spanId: null,
+      visitIndex,
+    });
+    const groups = groupEventsByVisit(
+      visits,
+      [],
+      [request('/app.js', 0), request('/api/cart', 1), request('/lost', 5)]
+    );
+
+    expect(groups.map(({ requests }) => requests.map(({ url }) => url))).toEqual([
+      ['/app.js'],
+      ['/api/cart'],
+    ]);
+  });
+
+  it('returns no groups without page visits', () => {
+    expect(groupEventsByVisit([], [event('click', 0)])).toEqual([]);
+  });
 });
 
 describe('layoutWaterfall', () => {

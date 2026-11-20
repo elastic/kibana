@@ -68,6 +68,30 @@ describe('followUpRecoveredAlertStepDefinition', () => {
     });
   });
 
+  it('accepts null rule fields from a rule-less alert', async () => {
+    const followUpRecoveredAlert = jest.fn().mockResolvedValue(undefined);
+    const { definition } = createDefinition(followUpRecoveredAlert);
+
+    await definition.handler(
+      createContext({
+        ...INPUT,
+        rule_id: null,
+        rule_name: null,
+        rule_type_id: null,
+        rule_tags: null,
+      })
+    );
+
+    expect(followUpRecoveredAlert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ruleId: undefined,
+        ruleName: undefined,
+        ruleTypeId: undefined,
+        ruleTags: undefined,
+      })
+    );
+  });
+
   it('reports a skip when no open investigation holds the alert', async () => {
     const { definition } = createDefinition(jest.fn().mockResolvedValue(undefined));
 

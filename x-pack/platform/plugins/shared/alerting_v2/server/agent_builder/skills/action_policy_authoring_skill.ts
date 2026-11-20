@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server/availability';
 import {
   ACTION_POLICY_AUTHORING_SKILL_ID,
+  ALERTING_API_IDS,
   ALERTING_TOOL_IDS,
   ALERTING_V2_ENABLED_SETTING_ID,
 } from '@kbn/alerting-v2-constants';
 import { attachActionPolicyTool } from '../tools/attach_action_policy';
 import type { AttachActionPolicyToolDeps } from '../tools/attach_action_policy';
-import { findActionPoliciesTool } from '../tools/find_action_policies';
-import type { FindActionPoliciesToolDeps } from '../tools/find_action_policies';
+import type { LinkRuleAndActionPolicyToolDeps } from '../tools/link_rule_and_action_policy';
+import { linkRuleAndActionPolicyTool } from '../tools/link_rule_and_action_policy';
 import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import {
@@ -43,8 +45,8 @@ export {
 };
 
 type ActionPolicyAuthoringSkillDeps = ManageActionPolicyToolDeps &
-  FindActionPoliciesToolDeps &
-  AttachActionPolicyToolDeps & {
+  AttachActionPolicyToolDeps &
+  LinkRuleAndActionPolicyToolDeps & {
     availability: AvailabilityConfig;
   };
 
@@ -127,11 +129,16 @@ An action policy is a **space-scoped saved object** that controls how alerts are
 
 ## Action Policy Discovery
 
-When a user asks about existing action policies:
-- Search with ${
-      ALERTING_TOOL_IDS.findActionPolicies
-    }, using keywords like the policy name. Omit \`search\` for a broad listing and page with \`page\` and \`perPage\`.
-- Summarize matches: name, enabled/disabled, destination count, matcher snippet, grouping mode.
+When a user asks about existing action policies, read them with the Kibana API tools:
+- To list or search, call ${internalTools.describeApi} for \`${
+      ALERTING_API_IDS.listActionPolicies
+    }\` to confirm its params, then call ${internalTools.executeApi} with \`target: "kibana"\`.
+- Use \`search\` with keywords from the user's request; it matches the policy name and description only. For exact conditions use \`filter\` (KQL on \`id\`, \`name\`, \`description\`, \`enabled\`). For a broad listing, omit both. Page with \`page\` and \`per_page\`, and keep \`per_page\` small: the API returns full policy objects.
+- To read a single policy, call ${internalTools.executeApi} for \`${
+      ALERTING_API_IDS.getActionPolicy
+    }\` with the policy \`id\`.
+- Summarize matches in plain language: name, enabled/disabled, destination count, matcher snippet, grouping mode.
+- Do **not** attach policies by default when only listing or comparing.
 - To inspect or edit a saved policy, attach it with ${
       ALERTING_TOOL_IDS.attachActionPolicy
     } using the policy \`id\`.
@@ -149,7 +156,9 @@ For a new policy, start with \`set_metadata\` (name required), then \`set_destin
 
 For an existing policy, pass the \`actionPolicyAttachmentId\` and only include the operations for the requested changes.
 
-See the [action-policy-matchers reference](./references/action-policy-matchers.md) when choosing matcher fields. To scope a policy to one rule, use a shared routing tag on both the rule's \`routing_tags\` and \`matcher.tags\` — the \`matcher\` field in the operations table below shows the shape but does not expand its \`tags\`/\`expression\` sub-fields; consult the matchers reference for the full API. For whether to scope to one rule or many, consult [single-rule action policies](./references/action-policy-single-rule.md) or [multi-rule action policies](./references/action-policy-multi-rule.md).
+See the [action-policy-matchers reference](./references/action-policy-matchers.md) when choosing matcher fields. To scope a policy to one rule, call \`${
+      ALERTING_TOOL_IDS.linkRuleAndActionPolicy
+    }\` instead of setting tags by hand — the \`matcher\` field in the operations table below shows the shape but does not expand its \`tags\`/\`expression\` sub-fields; consult the matchers reference for the full API. For whether to scope to one rule or many, consult [single-rule action policies](./references/action-policy-single-rule.md) or [multi-rule action policies](./references/action-policy-multi-rule.md).
 
 ${generateActionPolicyOperationsDoc()}
 
@@ -214,6 +223,11 @@ Then create the action policy from the matching reference above and render it:
 where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${
       ALERTING_TOOL_IDS.manageActionPolicy
     } tool result.
+If you call \`${
+      ALERTING_TOOL_IDS.linkRuleAndActionPolicy
+    }\` for this policy, render both the rule and the policy with the \`ruleAttachment.version\` and \`actionPolicyAttachment.version\` from the link tool result instead of the versions from \`manage_rule\` / ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    }: those do not include the routing tag, and saving them would persist an untagged rule or a catch-all policy. When the link result has \`alreadyLinked: true\`, it has no versions: keep the ones you already have.
 
 ## Save Order Reminder
 
@@ -221,9 +235,11 @@ An action policy only requires its destination **workflows** to be saved first. 
 
 After rendering the attachments, remind the user to save the workflow before the action policy.
 
-Policies are linked to rules only by \`matcher.tags\`, matched against the rule's \`metadata.routing_tags\`. If a tag in the policy's \`matcher.tags\` is carried by a rule attachment in the conversation that is still unsaved, remind the user that the rule has not been saved yet. Explain that unless another saved rule already carries that routing tag, the policy will not match any alerts until the rule is saved. Do not search for or fetch other rules to check this.
+Policies are linked to rules only by \`matcher.tags\`, matched against the rule's \`metadata.routing_tags\`. If a tag in the policy's \`matcher.tags\` is carried by a rule attachment in the conversation that is still unsaved, remind the user that the rule has not been saved yet. Explain that unless another saved rule already carries that routing tag, the policy will not match any alerts until the rule is saved. Do not search for or fetch other rules to check this. Do not add this reminder for catch-all policies, for policies that route only by \`matcher.expression\`, or when the policy's tags are not on the unsaved rule.
 
-Do not add this reminder for catch-all policies, for policies that route only by \`matcher.expression\`, or when the policy's tags are not on the unsaved rule.
+Before calling \`${
+      ALERTING_TOOL_IDS.linkRuleAndActionPolicy
+    }\` on a policy that is already saved and has no \`matcher.tags\`, explain to the user that linking narrows the policy to that rule and other rules will stop notifying through it once saved. For a saved catch-all (no \`matcher.expression\` either) it applies to every rule today; for a saved expression-only policy the KQL stays and the new tag restricts it to this rule. If the tool result has \`warnings\`, relay them.
 
 ## Customization Hints
 
@@ -237,7 +253,9 @@ After creating the defaults, briefly mention:
 ## When to Load References
 
 ### Single-rule Action Policies
-When notifying on one specific rule (link via a shared routing tag on both the rule's \`routing_tags\` and \`matcher.tags\`), consult the [action-policy-single-rule reference](./references/action-policy-single-rule.md).
+When notifying on one specific rule (link it with \`${
+      ALERTING_TOOL_IDS.linkRuleAndActionPolicy
+    }\`, never by setting tags by hand), consult the [action-policy-single-rule reference](./references/action-policy-single-rule.md).
 
 ### Multi-rule Action Policies
 When the user wants one policy across several rules, a catch-all, or routing by tag/severity, consult the [action-policy-multi-rule reference](./references/action-policy-multi-rule.md).
@@ -264,7 +282,7 @@ When the user asks how a notification gets from a rule firing to email/Slack, co
 When choosing Liquid variables for a notification workflow, including query-specific \`alert.data.*\` fields, consult the [workflow-dispatch-payload reference](./references/workflow-dispatch-payload.md).`,
     getInlineTools: () => [
       manageActionPolicyTool(deps),
-      findActionPoliciesTool(deps),
       attachActionPolicyTool(deps),
+      linkRuleAndActionPolicyTool(deps),
     ],
   });

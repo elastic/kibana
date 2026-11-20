@@ -6,6 +6,7 @@
  */
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { AlertDocumentsTooLargeError } from '@kbn/workflows-management-plugin/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { TM_DELAY_LIMIT_MS } from '../../alert_triage/constants';
 import { LOADED_ALERT_FIELDS } from '../../alert_triage/loaded_alert_fields';
@@ -201,59 +202,50 @@ describe('triage plan sweep step', () => {
 });
 
 describe('triage load alerts step', () => {
-  it('loads the batch documents with _id and _index, as Alert Analysis takes them', async () => {
-    const callKibanaApi = jest.fn().mockResolvedValue({
-      status: 200,
-      headers: {},
-      body: {
-        hits: {
-          hits: [
-            {
-              _id: 'a-1',
-              _index: '.alerts-security.alerts-default',
-              _source: { '@timestamp': 't', 'kibana.alert.rule.uuid': 'rule-a' },
-            },
-          ],
-        },
+  const request = { id: 'fake-request' };
+  const createLoaderContext = (input: Record<string, unknown>) =>
+    ({
+      input,
+      contextManager: {
+        getFakeRequest: () => request,
+        getContext: () => ({ workflow: { spaceId: 'team-a' } }),
       },
+      logger: { warn: jest.fn() },
+    } as unknown as StepHandlerContext<unknown, unknown>);
+  const loadWith = (loadAlertDocuments: jest.Mock) =>
+    getTriageLoadAlertsStepDefinition({
+      getWorkflowsManagement: () => ({ loadAlertDocuments }),
+    }).handler(createLoaderContext({ alert_ids: ['a-1', 'a-2'] }));
+
+  it('loads the batch through the shared workflows loader, as the requesting user in the execution space', async () => {
+    const loadAlertDocuments = jest
+      .fn()
+      .mockResolvedValue({ alerts: [{ _id: 'a-1', _index: 'idx' }], missingIds: ['a-2'] });
+
+    const { output } = await loadWith(loadAlertDocuments);
+
+    expect(loadAlertDocuments).toHaveBeenCalledWith({
+      request,
+      alerts: { ids: ['a-1', 'a-2'], index: '.alerts-security.alerts-team-a' },
+      sourceIncludes: LOADED_ALERT_FIELDS,
+      maxBytes: 9 * 1024 * 1024,
     });
-
-    const { output } = await getTriageLoadAlertsStepDefinition().handler(
-      createContext({ alert_ids: ['a-1', 'a-2'] }, callKibanaApi)
-    );
-
     expect(output).toEqual({
-      alerts: [
-        {
-          '@timestamp': 't',
-          // Alert Analysis requires the nested shape, not the index's flat dotted keys.
-          kibana: { alert: { rule: { uuid: 'rule-a' } } },
-          _id: 'a-1',
-          _index: '.alerts-security.alerts-default',
-        },
-      ],
+      alerts: [{ _id: 'a-1', _index: 'idx' }],
       // An alert deleted between planning and the batch is reported, not silently dropped.
       missing_alert_ids: ['a-2'],
-    });
-    expect(callKibanaApi.mock.calls[0][0].body).toEqual({
-      size: 2,
-      query: { ids: { values: ['a-1', 'a-2'] } },
-      _source: LOADED_ALERT_FIELDS,
     });
   });
 
   it.each([
-    ['a response over the size cap', 'CallKibanaApiResponseTooLargeError', 'StepSizeLimitExceeded'],
-    ['any other failure', 'Error', 'ApiError'],
-  ])('reports %s as %s', async (_label, name, type) => {
-    const error = Object.assign(new Error('failed'), { name });
-    const callKibanaApi = jest.fn().mockRejectedValue(error);
-
-    await expect(
-      getTriageLoadAlertsStepDefinition().handler(
-        createContext({ alert_ids: ['a-1'] }, callKibanaApi)
-      )
-    ).rejects.toMatchObject({ type });
+    [
+      'documents over the byte cap',
+      new AlertDocumentsTooLargeError(10, 20),
+      'StepSizeLimitExceeded',
+    ],
+    ['any other failure', new Error('failed'), 'ApiError'],
+  ])('reports %s as %s', async (_label, error, type) => {
+    await expect(loadWith(jest.fn().mockRejectedValue(error))).rejects.toMatchObject({ type });
   });
 });
 

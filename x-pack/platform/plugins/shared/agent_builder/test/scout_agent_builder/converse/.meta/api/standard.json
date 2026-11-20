@@ -1,5 +1,5 @@
 {
-  "sha1": "dcce18cc43b0c1794b08d9b74f3cf4f6a5ddd23b",
+  "sha1": "697efb630540a2004178e2424b41ba25954a1423",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -417,6 +417,34 @@
       }
     },
     {
+      "id": "e9606a9aa91a5bc-73f3822592377a9",
+      "title": "Agent Builder — hooks of an agent bound to a service account completes the round after a bound hook workflow pauses and resumes as the account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_hooks_api.spec.ts",
+        "line": 265,
+        "column": 20
+      }
+    },
+    {
+      "id": "e9606a9aa91a5bc-68fb9915782a267",
+      "title": "Agent Builder — hooks of an agent bound to a service account keeps the account's identity when a user approves a bound hook workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_hooks_api.spec.ts",
+        "line": 269,
+        "column": 7
+      }
+    },
+    {
       "id": "84f452e8da9aae3-83fed8ff3b9d10d",
       "title": "Agent Builder — chat API converse (/api/chat) user message sync requests persist context for the next model request",
       "expectedStatus": "passed",
@@ -556,7 +584,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 114,
+        "line": 113,
         "column": 7
       }
     },
@@ -572,7 +600,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 187,
+        "line": 186,
         "column": 13
       }
     },
@@ -588,7 +616,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 243,
+        "line": 242,
         "column": 17
       }
     },
@@ -604,7 +632,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 260,
+        "line": 259,
         "column": 13
       }
     },
@@ -620,7 +648,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 278,
+        "line": 277,
         "column": 23
       }
     },
@@ -892,8 +920,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 138,
-        "column": 23
+        "line": 156,
+        "column": 15
+      }
+    },
+    {
+      "id": "69411a87481f950-2bc1448cfa29b28",
+      "title": "Agent Builder - converse callback API retries round_complete after the Retry-After delay when the receiver answers 429",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 247,
+        "column": 14
       }
     },
     {
@@ -908,8 +952,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 225,
-        "column": 14
+        "line": 292,
+        "column": 15
       }
     },
     {
@@ -924,8 +968,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 268,
-        "column": 14
+        "line": 345,
+        "column": 21
       }
     },
     {
@@ -940,8 +984,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 365,
-        "column": 15
+        "line": 438,
+        "column": 23
       }
     },
     {
@@ -956,8 +1000,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 397,
-        "column": 18
+        "line": 477,
+        "column": 16
       }
     },
     {
@@ -972,8 +1016,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 439,
-        "column": 19
+        "line": 516,
+        "column": 24
       }
     },
     {
@@ -988,8 +1032,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 505,
-        "column": 18
+        "line": 580,
+        "column": 23
       }
     },
     {
@@ -1004,8 +1048,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 568,
-        "column": 12
+        "line": 645,
+        "column": 29
       }
     },
     {
@@ -1020,8 +1064,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 628,
-        "column": 28
+        "line": 703,
+        "column": 40
       }
     },
     {
@@ -1036,8 +1080,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 668,
-        "column": 15
+        "line": 600,
+        "column": 27
       }
     },
     {

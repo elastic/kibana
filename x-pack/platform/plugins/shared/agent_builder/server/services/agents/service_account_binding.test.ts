@@ -245,8 +245,15 @@ describe('unbindDeletedAgent', () => {
 });
 
 describe('resolveAgentWorkloads', () => {
-  const createStorage = (hits: Array<{ _source: Partial<AgentProperties> }>) => {
-    const search = jest.fn().mockResolvedValue({ hits: { hits } });
+  const createStorage = (
+    hits: Array<{ _source: Partial<AgentProperties> }>,
+    { timedOut = false, total = 1, failed = 0 } = {}
+  ) => {
+    const search = jest.fn().mockResolvedValue({
+      timed_out: timedOut,
+      _shards: { total, successful: total - failed, failed },
+      hits: { hits },
+    });
     return { storage: { getClient: () => ({ search }) } as unknown as AgentProfileStorage, search };
   };
 
@@ -256,10 +263,12 @@ describe('resolveAgentWorkloads', () => {
     expect(search).not.toHaveBeenCalled();
   });
 
-  it('maps each workload to its agent title and page, in order', async () => {
-    const { storage } = createStorage([
+  it('reports each workload present or missing, in order, with one search', async () => {
+    const signal = new AbortController().signal;
+    const { storage, search } = createStorage([
       { _source: { id: 'agent-2', name: 'Second', space: 'default' } },
       { _source: { id: 'agent-1', name: 'First', space: 'other' } },
+      { _source: { id: 'agent-3', name: ' ', space: 'other' } },
     ]);
 
     await expect(
@@ -267,14 +276,83 @@ describe('resolveAgentWorkloads', () => {
         storage,
         workloads: [
           { workloadId: 'agent-1', spaceId: 'other' },
-          { workloadId: 'missing', spaceId: 'default' },
+          { workloadId: 'gone', spaceId: 'default' },
+          { workloadId: 'agent-2', spaceId: 'default' },
+          { workloadId: 'agent-1', spaceId: 'other' },
+          { workloadId: 'agent-3', spaceId: 'other' },
+        ],
+        signal,
+      })
+    ).resolves.toEqual([
+      { status: 'present', title: 'First', path: '/app/agent_builder/agents/agent-1/overview' },
+      { status: 'missing' },
+      { status: 'present', title: 'Second', path: '/app/agent_builder/agents/agent-2/overview' },
+      { status: 'present', title: 'First', path: '/app/agent_builder/agents/agent-1/overview' },
+      { status: 'present', path: '/app/agent_builder/agents/agent-3/overview' },
+    ]);
+    expect(search).toHaveBeenCalledTimes(1);
+    expect(search).toHaveBeenCalledWith(expect.objectContaining({ size: 4 }), { signal });
+  });
+
+  it('counts an agent stored without a space as in the default space', async () => {
+    const { storage } = createStorage([{ _source: { id: 'agent-1', name: 'Legacy' } }]);
+
+    await expect(
+      resolveAgentWorkloads({
+        storage,
+        workloads: [
+          { workloadId: 'agent-1', spaceId: 'default' },
+          { workloadId: 'agent-1', spaceId: 'other' },
+        ],
+      })
+    ).resolves.toEqual([
+      { status: 'present', title: 'Legacy', path: '/app/agent_builder/agents/agent-1/overview' },
+      { status: 'missing' },
+    ]);
+  });
+
+  it.each([
+    ['some shards failed', { failed: 1, total: 2 }],
+    ['the search timed out', { timedOut: true }],
+    ['there was no index to search', { total: 0 }],
+  ])('reports every workload unknown when %s', async (_, shards) => {
+    const { storage } = createStorage(
+      [{ _source: { id: 'agent-1', name: 'First', space: 'default' } }],
+      shards
+    );
+
+    await expect(
+      resolveAgentWorkloads({
+        storage,
+        workloads: [
+          { workloadId: 'agent-1', spaceId: 'default' },
+          { workloadId: 'gone', spaceId: 'default' },
+        ],
+      })
+    ).resolves.toEqual([{ status: 'unknown' }, { status: 'unknown' }]);
+  });
+
+  it('reports an unanswered workload unknown when the hits fill the page', async () => {
+    const { storage } = createStorage([
+      { _source: { id: 'agent-1', name: 'First', space: 'default' } },
+      { _source: { id: 'agent-1', name: 'First copy', space: 'default' } },
+    ]);
+
+    await expect(
+      resolveAgentWorkloads({
+        storage,
+        workloads: [
+          { workloadId: 'agent-1', spaceId: 'default' },
           { workloadId: 'agent-2', spaceId: 'default' },
         ],
       })
     ).resolves.toEqual([
-      { title: 'First', path: '/app/agent_builder/agents/agent-1/overview' },
-      undefined,
-      { title: 'Second', path: '/app/agent_builder/agents/agent-2/overview' },
+      {
+        status: 'present',
+        title: 'First copy',
+        path: '/app/agent_builder/agents/agent-1/overview',
+      },
+      { status: 'unknown' },
     ]);
   });
 });

@@ -21,7 +21,12 @@ import { useHistory } from 'react-router-dom';
 
 import { useLink } from '../../../../../hooks';
 
-export const CreateNewIntegrationButton: React.FC = () => {
+export const CreateNewIntegrationButton: React.FC<{
+  /** Offers the AI create action (Automatic Import all). */
+  canCreate: boolean;
+  /** Offers the upload package action (Fleet upload packages privilege). */
+  canUpload: boolean;
+}> = ({ canCreate, canUpload }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { getAbsolutePath } = useLink();
   const history = useHistory();
@@ -37,6 +42,41 @@ export const CreateNewIntegrationButton: React.FC = () => {
     history.push('/upload');
   }, [history]);
 
+  const createLabel = i18n.translate('xpack.fleet.epmList.createNewIntegrationButton', {
+    defaultMessage: 'Create new integration',
+  });
+  const uploadLabel = i18n.translate('xpack.fleet.epmList.uploadIntegrationPackageButton', {
+    defaultMessage: 'Upload integration package',
+  });
+
+  if (!canCreate) {
+    return canUpload ? (
+      <EuiButton
+        fill
+        size="s"
+        iconType="upload"
+        onClick={() => onUploadClick()}
+        data-test-subj="uploadIntegrationPackageBtn"
+      >
+        {uploadLabel}
+      </EuiButton>
+    ) : null;
+  }
+
+  if (!canUpload) {
+    return (
+      <EuiButton
+        fill
+        size="s"
+        iconType="plusCircle"
+        onClick={() => onCreateClick()}
+        data-test-subj="createNewIntegrationBtn"
+      >
+        {createLabel}
+      </EuiButton>
+    );
+  }
+
   return (
     <EuiFlexGroup gutterSize="none" responsive={false} alignItems="stretch">
       <EuiFlexItem grow={false}>
@@ -48,9 +88,7 @@ export const CreateNewIntegrationButton: React.FC = () => {
           style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0, height: 40 }}
           data-test-subj="createNewIntegrationBtn"
         >
-          {i18n.translate('xpack.fleet.epmList.createNewIntegrationButton', {
-            defaultMessage: 'Create new integration',
-          })}
+          {createLabel}
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ display: 'flex' }}>
@@ -103,9 +141,7 @@ export const CreateNewIntegrationButton: React.FC = () => {
                 }}
                 data-test-subj="uploadIntegrationPackageBtn"
               >
-                {i18n.translate('xpack.fleet.epmList.uploadIntegrationPackageButton', {
-                  defaultMessage: 'Upload integration package',
-                })}
+                {uploadLabel}
               </EuiContextMenuItem>,
             ]}
           />

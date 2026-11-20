@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { notFound } from '@hapi/boom';
 import type { NightshiftFeaturePrivilege } from '../../utils/test_helpers';
 import {
   createMockToolContext,
@@ -29,7 +30,7 @@ describe('source_update tool', () => {
   });
 
   const createTool = ({
-    featurePrivilege = 'all',
+    featurePrivilege = 'all_and_manage_engines',
     update = jest.fn(),
     setEnabled = jest.fn(),
     maintenanceState = 'enabled',
@@ -40,18 +41,33 @@ describe('source_update tool', () => {
     setEnabled?: jest.Mock;
     maintenanceState?: SignificantEventsMaintenanceState;
     getState?: jest.Mock;
-  }) =>
-    createSourceUpdateTool({
-      ...createSourceToolDeps({
-        featurePrivilege,
-        sourcesClient: {
-          list: jest.fn().mockResolvedValue({ sources: [checkout], total: 1 }),
-          update,
-          setEnabled,
-        },
-      }),
-      maintenanceService: { getState },
+  }) => createToolWithDeps({ featurePrivilege, update, setEnabled, getState }).tool;
+
+  const createToolWithDeps = ({
+    featurePrivilege = 'all_and_manage_engines',
+    update = jest.fn(),
+    setEnabled = jest.fn(),
+    getState = jest.fn().mockResolvedValue('enabled'),
+  }: {
+    featurePrivilege?: NightshiftFeaturePrivilege;
+    update?: jest.Mock;
+    setEnabled?: jest.Mock;
+    getState?: jest.Mock;
+  }) => {
+    const deps = createSourceToolDeps({
+      featurePrivilege,
+      sourcesClient: {
+        list: jest.fn().mockResolvedValue({ sources: [checkout], total: 1 }),
+        update,
+        setEnabled,
+      },
     });
+    return {
+      tool: createSourceUpdateTool({ ...deps, maintenanceService: { getState } }),
+      logger: deps.logger,
+      telemetry: deps.telemetry,
+    };
+  };
 
   beforeEach(() => {
     jest.mocked(assertSignificantEventsAccess).mockReset().mockResolvedValue(undefined);
@@ -186,11 +202,53 @@ describe('source_update tool', () => {
     });
   });
 
-  it('does not change a source without the Nightshift manage privilege', async () => {
+  it('reports a failed enabled change even though the call returns the saved changes', async () => {
+    const { tool, logger, telemetry } = createToolWithDeps({
+      update: jest.fn().mockResolvedValue({ ...checkout, title: 'Checkout v2' }),
+      setEnabled: jest.fn().mockRejectedValue(new Error('rules could not be aligned')),
+    });
+
+    const result = await tool.handler(
+      { source: 'checkout', title: 'Checkout v2', enabled: false },
+      createMockToolContext()
+    );
+
+    expect(result).toMatchObject({ results: [{ type: 'other' }] });
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to update source: setting enabled failed')
+    );
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledTimes(1);
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
+      expect.objectContaining({ error_code: 'internal_error', input_rejected: false }),
+      expect.anything()
+    );
+  });
+
+  it('never treats a failed enabled change as a refused call', async () => {
+    const { tool, logger, telemetry } = createToolWithDeps({
+      update: jest.fn().mockResolvedValue({ ...checkout, title: 'Checkout v2' }),
+      setEnabled: jest.fn().mockRejectedValue(notFound('Source not found')),
+    });
+
+    await tool.handler(
+      { source: 'checkout', title: 'Checkout v2', enabled: false },
+      createMockToolContext()
+    );
+
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to update source: setting enabled failed')
+    );
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
+      expect.objectContaining({ error_code: 'not_found', input_rejected: false }),
+      expect.anything()
+    );
+  });
+
+  it('does not change a source without the Nightshift manage and configure privileges', async () => {
     const update = jest.fn();
     const setEnabled = jest.fn();
 
-    const result = await createTool({ featurePrivilege: 'read', update, setEnabled }).handler(
+    const result = await createTool({ featurePrivilege: 'all', update, setEnabled }).handler(
       { source: 'checkout', title: 'Checkout v2', enabled: false },
       createMockToolContext()
     );
@@ -201,7 +259,11 @@ describe('source_update tool', () => {
       results: [
         {
           type: 'error',
-          data: { message: expect.stringContaining('requires the Nightshift manage privilege') },
+          data: {
+            message: expect.stringContaining(
+              'requires the nightshift manage and nightshift configure privileges'
+            ),
+          },
         },
       ],
     });

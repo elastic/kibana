@@ -374,7 +374,8 @@ export const groupAlertsBy = (field: string) => {
 };
 
 export const closeFirstGroupedAlerts = () => {
-  cy.get(TAKE_ACTION_GROUPED_ALERTS_BTN).first().click();
+  // Scroll to the center so a sticky page header, like the rule details one, does not cover the button.
+  cy.get(TAKE_ACTION_GROUPED_ALERTS_BTN).first().click({ scrollBehavior: 'center' });
   cy.get(CLOSE_ALERT_BTN).click();
   selectAndConfirmClosingReason();
 };
@@ -417,6 +418,9 @@ export const clickAlertsHistogramLegendFilterFor = (ruleName: string) => {
 const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
   // To clear focus
   cy.get('body').type('{esc}');
+  // `click()` doesn't move the real mouse, so it can still be on the cell from a previous action.
+  // Move it away so the hover below triggers the cell's `:hover` state again.
+  cy.get('body').realHover({ position: 'topLeft', scrollBehavior: false });
   cy.get(propertySelector).eq(rowIndex).should('be.visible');
   cy.get(propertySelector).eq(rowIndex).realHover();
   cy.get(actionSelector).first().should('be.visible');

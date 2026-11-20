@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import type { AlertsFilter } from '@kbn/alerting-plugin/common/rule';
-import type { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
+import type {
+  RetryService,
+  SupertestWithoutAuthProviderType,
+} from '@kbn/ftr-common-functional-services';
 import type { SnoozeBody } from '@kbn/alerting-plugin/common/routes/rule/apis/snooze';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { Space, User } from '../types';
 import type { ObjectRemover } from './object_remover';
+import type { TaskManagerUtils } from './task_manager_utils';
 import { getUrlPrefix } from './space_test_utils';
 import { getTestRuleData } from './get_test_rule_data';
 
@@ -578,6 +583,24 @@ export class AlertUtils {
     return await request.send();
   }
 
+  // `_run_soon` soft-fails with a 200 ("Rule is already running") and queues nothing if it lands
+  // before the rule's previous run releases its task, so wait for idle first and require a 204.
+  // Task Manager can also reclaim an idle-but-due task between the idle check and this POST, so
+  // the whole sequence is retried rather than just the idle wait.
+  public async runSoonWhenIdle(
+    ruleId: string,
+    retry: RetryService,
+    taskManagerUtils: TaskManagerUtils
+  ) {
+    return await retry.try(async () => {
+      await taskManagerUtils.waitForIdle(ruleId);
+
+      const response = await this.runSoon(ruleId);
+      expect(response.status).to.eql(204);
+      return response;
+    });
+  }
+
   public async createInternallyManagedRule(objectRemover?: ObjectRemover) {
     let request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/api/alerting/rule`)
@@ -861,8 +884,8 @@ function getAlwaysFiringRuleWithSystemAction(reference: string) {
          * connector adapter. Setting it here it will lead to a 400 error by the
          * rules API as only the connector adapter can set the injected property.
          *
-         * Adapter: x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
-         * Connector type: x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/action_types.ts
+         * Adapter: x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/connector_adapters.ts
+         * Connector type: x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/action_types.ts
          */
         params: { myParam: 'param from rule action', index: ES_TEST_INDEX_NAME, reference },
       },

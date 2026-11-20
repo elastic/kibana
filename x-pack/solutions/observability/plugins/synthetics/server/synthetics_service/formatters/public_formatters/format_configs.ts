@@ -25,9 +25,12 @@ import type {
   TLSFields,
 } from '../../../../common/runtime_types';
 import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
+import { SCHEDULE_INTERVAL_FIELD } from '../../../../common/lib/schedule_to_time';
 import { publicFormatters } from '.';
 
 const UI_KEYS_TO_SKIP = [
+  // Derived from `schedule` for querying saved objects, not part of the service config.
+  SCHEDULE_INTERVAL_FIELD,
   ConfigKey.JOURNEY_ID,
   ConfigKey.PROJECT_ID,
   ConfigKey.METADATA,

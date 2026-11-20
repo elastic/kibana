@@ -82,14 +82,14 @@ describe('<Graph />', () => {
       });
     });
 
-    it('should render hexagon node', async () => {
+    it('should render entity node', async () => {
       const { container } = renderGraphPreview({
         nodes: [
           {
             id: '1',
             label: 'Node 1',
             color: 'primary',
-            shape: 'hexagon',
+            kind: 'entity',
           },
         ],
         edges: [],
@@ -103,14 +103,14 @@ describe('<Graph />', () => {
       });
     });
 
-    it('should render label node', async () => {
+    it('should render event node', async () => {
       const { container } = renderGraphPreview({
         nodes: [
           {
             id: '2',
             label: 'Node 2',
             color: 'primary',
-            shape: 'label',
+            kind: 'event',
           },
         ],
         edges: [],
@@ -130,7 +130,7 @@ describe('<Graph />', () => {
           {
             id: 'rel1',
             label: 'Owns',
-            shape: 'relationship',
+            kind: 'relationship',
           },
         ],
         edges: [],
@@ -151,13 +151,13 @@ describe('<Graph />', () => {
             id: '1',
             label: 'Node 1',
             color: 'primary',
-            shape: 'hexagon',
+            kind: 'entity',
           },
           {
             id: '2',
             label: 'Node 2',
             color: 'primary',
-            shape: 'label',
+            kind: 'event',
           },
         ],
         edges: [
@@ -195,19 +195,19 @@ describe('<Graph />', () => {
         id: 'entity1',
         label: 'Entity Node 1',
         color: 'primary',
-        shape: 'hexagon',
+        kind: 'entity',
       },
       {
         id: 'label1',
         label: 'Label Node',
         color: 'primary',
-        shape: 'label',
+        kind: 'event',
       },
       {
         id: 'entity2',
         label: 'Entity Node 2',
         color: 'primary',
-        shape: 'ellipse',
+        kind: 'entity',
       },
     ];
 
@@ -304,7 +304,7 @@ describe('<Graph />', () => {
           id: 'newEntity1',
           label: 'New Entity 1',
           color: 'danger',
-          shape: 'pentagon',
+          kind: 'entity',
         },
       ];
 
@@ -363,7 +363,7 @@ describe('<Graph />', () => {
           id: 'newEntity1',
           label: 'New Entity 1',
           color: 'danger',
-          shape: 'pentagon',
+          kind: 'entity',
         },
       ];
 
@@ -421,7 +421,7 @@ describe('<Graph />', () => {
           id: 'newEntity1',
           label: 'New Entity 1',
           color: 'danger',
-          shape: 'pentagon',
+          kind: 'entity',
         },
       ];
 
@@ -477,7 +477,7 @@ describe('<Graph />', () => {
           id: 'newEntity1',
           label: 'New Entity 1',
           color: 'danger',
-          shape: 'pentagon',
+          kind: 'entity',
         },
       ];
 
@@ -531,7 +531,7 @@ describe('<Graph />', () => {
           id: 'newEntity1',
           label: 'New Entity 1',
           color: 'danger',
-          shape: 'pentagon',
+          kind: 'entity',
         },
       ];
 
@@ -582,7 +582,7 @@ describe('<Graph />', () => {
           id: 'newEntity1',
           label: 'New Entity 1',
           color: 'danger',
-          shape: 'pentagon',
+          kind: 'entity',
         },
       ];
 
@@ -604,17 +604,17 @@ describe('<Graph />', () => {
     it('should center on origin relationship nodes for entity origin scenario', async () => {
       const props = {
         nodes: [
-          { id: 'originEntity', label: 'Origin Entity', color: 'primary', shape: 'ellipse' },
-          { id: 'target1', label: 'Target 1', color: 'primary', shape: 'hexagon' },
-          { id: 'target2', label: 'Target 2', color: 'primary', shape: 'rectangle' },
-          { id: 'rel-owns', label: 'Owns', shape: 'relationship', isOrigin: true },
+          { id: 'originEntity', label: 'Origin Entity', color: 'primary', kind: 'entity' },
+          { id: 'target1', label: 'Target 1', color: 'primary', kind: 'entity' },
+          { id: 'target2', label: 'Target 2', color: 'primary', kind: 'entity' },
+          { id: 'rel-owns', label: 'Owns', kind: 'relationship', isOrigin: true },
           {
             id: 'rel-communicates',
             label: 'Communicates with',
-            shape: 'relationship',
+            kind: 'relationship',
             isOrigin: true,
           },
-          { id: 'rel-depends', label: 'Depends on', shape: 'relationship' },
+          { id: 'rel-depends', label: 'Depends on', kind: 'relationship' },
         ] as NodeViewModel[],
         edges: [
           { id: 'e1', source: 'originEntity', target: 'rel-owns', color: 'primary' },
@@ -637,7 +637,7 @@ describe('<Graph />', () => {
       });
 
       const newNodes: NodeViewModel[] = [
-        { id: 'target1a', label: 'Target 1a', color: 'primary', shape: 'diamond' },
+        { id: 'target1a', label: 'Target 1a', color: 'primary', kind: 'entity' },
       ];
 
       rerender(
@@ -689,7 +689,7 @@ describe('<Graph />', () => {
           id: 'newEntity1',
           label: 'New Entity 1',
           color: 'danger',
-          shape: 'pentagon',
+          kind: 'entity',
         },
       ];
 
@@ -718,13 +718,13 @@ describe('<Graph />', () => {
         id: 'entity1',
         label: 'Entity Node',
         color: 'primary',
-        shape: 'hexagon',
+        kind: 'entity',
       },
       {
         id: 'label1',
         label: 'Label Node',
         color: 'primary',
-        shape: 'label',
+        kind: 'event',
       },
     ];
 
@@ -806,7 +806,7 @@ describe('<Graph />', () => {
         {
           id: 'rel1',
           label: 'Owns',
-          shape: 'relationship',
+          kind: 'relationship',
         },
       ];
 
@@ -826,7 +826,7 @@ describe('<Graph />', () => {
 
   describe('layers panel', () => {
     const layersPanelNodes: NodeViewModel[] = [
-      { id: 'entity1', label: 'Entity', color: 'primary', shape: 'hexagon' },
+      { id: 'entity1', label: 'Entity', color: 'primary', kind: 'entity' },
     ];
 
     afterEach(() => {

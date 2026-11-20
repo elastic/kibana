@@ -12,19 +12,20 @@ import {
 } from '../../services/logger_service/logger_service';
 import type { EbtServiceContract } from '../../services/ebt_service/ebt_service';
 import { EbtServiceToken } from '../../services/ebt_service/tokens';
-import type { RuleEbtEventType } from '../../telemetry/rule_ebt_schema';
+import type { RuleEbtEventType } from '../../telemetry/rules/rule_ebt_schema';
 import {
   buildRuleChangedEventData,
   RULE_EBT_EVENT_TYPE_BY_OPERATION,
   RULE_OPERATIONS,
   type RuleOperation,
-} from '../../telemetry/rule_ebt_event';
+} from '../../telemetry/rules/rule_ebt_event';
 import {
   AlertingDomainEventBusToken,
   type AlertingDomainEvent,
   type AlertingPublisherContext,
 } from '../domain_events';
 import type { EventBus, Subscription } from '../event_bus';
+import { BaseEventBusSubscriber } from '../base_event_bus_subscriber';
 import type { RuleEvent } from '../rule_event_publisher/events';
 
 type ReportedRuleEvent = Extract<RuleEvent, { type: RuleOperation }>;
@@ -45,44 +46,22 @@ const eventTypeByOperation: Partial<Record<RuleOperation, RuleEbtEventType>> =
  * come from the rule are omitted.
  */
 @injectable()
-export class RuleTelemetrySubscriber {
-  #subscriptions: Subscription[] = [];
-
-  private readonly logger: LoggerServiceContract;
-
+export class RuleTelemetrySubscriber extends BaseEventBusSubscriber {
   constructor(
     @inject(AlertingDomainEventBusToken)
-    private readonly bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
+    bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
     @inject(EbtServiceToken) private readonly ebtService: EbtServiceContract,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
-    this.logger = loggerService.forSubsystem('events');
+    super(bus, loggerService.forSubsystem('events'));
   }
 
-  public start(): void {
-    if (this.#subscriptions.length > 0) {
-      this.logger.debug({
-        message: () => 'Subscriber start called more than once; ignoring',
-      });
-
-      return;
-    }
-
-    for (const eventType of RULE_OPERATIONS) {
-      this.#subscriptions.push(
-        this.bus.subscribe<ReportedRuleEvent>(eventType, (event, context) =>
-          this.#reportRuleChanged(event, context)
-        )
-      );
-    }
-  }
-
-  public stop(): void {
-    for (const subscription of this.#subscriptions) {
-      subscription.unsubscribe();
-    }
-
-    this.#subscriptions = [];
+  protected createSubscriptions(
+    bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>
+  ): Subscription[] {
+    return RULE_OPERATIONS.map((eventType) =>
+      bus.subscribe(eventType, (event, context) => this.#reportRuleChanged(event, context))
+    );
   }
 
   #reportRuleChanged(event: ReportedRuleEvent, { origin }: AlertingPublisherContext): void {
@@ -92,11 +71,6 @@ export class RuleTelemetrySubscriber {
       return;
     }
 
-    const { ruleId, rule, templateId } = payload;
-
-    this.ebtService.reportEvent(
-      eventType,
-      buildRuleChangedEventData(rule, origin, ruleId, templateId)
-    );
+    this.ebtService.reportEvent(eventType, buildRuleChangedEventData(operation, payload, origin));
   }
 }
