@@ -515,9 +515,7 @@ describe('NightshiftApp', () => {
       'No open investigations'
     );
     expect(screen.queryByTestId('nightshiftInvestigationsSearchInput')).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('nightshiftInvestigationsTimeRangePicker')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationsTimeRangePicker')).not.toBeInTheDocument();
     expect(
       screen.queryByTestId('nightshiftInvestigationSection-in-progress')
     ).not.toBeInTheDocument();
