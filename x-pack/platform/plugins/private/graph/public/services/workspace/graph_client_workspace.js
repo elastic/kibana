@@ -34,77 +34,11 @@ let searcher = function (indexName, request, responseHandler) {
     .then(responseHandler);
 };
 
-// ====== Undo operations =============
-
-function AddNodeOperation(node, owner) {
-  const self = this;
-  const vm = owner;
-  self.node = node;
-  self.undo = function () {
-    vm.arrRemove(vm.nodes, self.node);
-    vm.arrRemove(vm.selectedNodes, self.node);
-    self.node.isSelected = false;
-
-    delete vm.nodesMap[self.node.id];
-  };
-  self.redo = function () {
-    vm.nodes.push(self.node);
-    vm.nodesMap[self.node.id] = self.node;
-  };
-}
-
-function AddEdgeOperation(edge, owner) {
-  const self = this;
-  const vm = owner;
-  self.edge = edge;
-  self.undo = function () {
-    vm.arrRemove(vm.edges, self.edge);
-    delete vm.edgesMap[self.edge.id];
-  };
-  self.redo = function () {
-    vm.edges.push(self.edge);
-    vm.edgesMap[self.edge.id] = self.edge;
-  };
-}
-
-function ReverseOperation(operation) {
-  const self = this;
-  const reverseOperation = operation;
-  self.undo = reverseOperation.redo;
-  self.redo = reverseOperation.undo;
-}
-
-function GroupOperation(receiver, orphan) {
-  const self = this;
-  self.receiver = receiver;
-  self.orphan = orphan;
-  self.undo = function () {
-    self.orphan.parent = undefined;
-  };
-  self.redo = function () {
-    self.orphan.parent = self.receiver;
-  };
-}
-
-function UnGroupOperation(parent, child) {
-  const self = this;
-  self.parent = parent;
-  self.child = child;
-  self.undo = function () {
-    self.child.parent = self.parent;
-  };
-  self.redo = function () {
-    self.child.parent = undefined;
-  };
-}
-
 // The main constructor for our GraphWorkspace
 function GraphWorkspace(options) {
   const self = this;
   this.blocklistedNodes = [];
   this.options = options;
-  this.undoLog = [];
-  this.redoLog = [];
   this.selectedNodes = [];
   this.selectedEdges = [];
 
@@ -131,36 +65,6 @@ function GraphWorkspace(options) {
     searcher = options.searchProxy;
   }
 
-  this.addUndoLogEntry = function (undoOperations) {
-    self.undoLog.push(undoOperations);
-    if (self.undoLog.length > 50) {
-      //Remove the oldest
-      self.undoLog.splice(0, 1);
-    }
-    self.redoLog = [];
-  };
-
-  this.undo = function () {
-    const lastOps = this.undoLog.pop();
-    if (lastOps) {
-      this.stopLayout();
-      this.redoLog.push(lastOps);
-      lastOps.forEach((ops) => ops.undo());
-      this.runLayout();
-      self.topologyChangeHandler?.();
-    }
-  };
-  this.redo = function () {
-    const lastOps = this.redoLog.pop();
-    if (lastOps) {
-      this.stopLayout();
-      this.undoLog.push(lastOps);
-      lastOps.forEach((ops) => ops.redo());
-      this.runLayout();
-      self.topologyChangeHandler?.();
-    }
-  };
-
   //Determines if 2 nodes are connected via an edge
   this.areLinked = function (a, b) {
     if (a === b) return true;
@@ -176,13 +80,6 @@ function GraphWorkspace(options) {
   };
 
   //======== Selection functions ========
-
-  this.selectNode = function (node) {
-    node.isSelected = true;
-    if (self.selectedNodes.indexOf(node) < 0) {
-      self.selectedNodes.push(node);
-    }
-  };
 
   this.addEdgeToSelection = function (edge) {
     edge.isSelected = true;
@@ -203,37 +100,6 @@ function GraphWorkspace(options) {
 
   this.getEdgeSelection = () => [...self.selectedEdges];
 
-  this.deleteSelection = function () {
-    let allAndGrouped = self.returnUnpackedGroupeds(self.selectedNodes);
-
-    // Nothing selected so process all nodes
-    if (allAndGrouped.length === 0) {
-      allAndGrouped = self.nodes.slice(0);
-    }
-
-    const undoOperations = [];
-    allAndGrouped.forEach((node) => {
-      //We set selected to false because despite being deleted, node objects sit in an undo log
-      node.isSelected = false;
-      delete self.nodesMap[node.id];
-      undoOperations.push(new ReverseOperation(new AddNodeOperation(node, self)));
-    });
-    self.arrRemoveAll(self.nodes, allAndGrouped);
-    self.arrRemoveAll(self.selectedNodes, allAndGrouped);
-
-    const danglingEdges = self.edges.filter(function (edge) {
-      return self.nodes.indexOf(edge.source) < 0 || self.nodes.indexOf(edge.target) < 0;
-    });
-    danglingEdges.forEach((edge) => {
-      delete self.edgesMap[edge.id];
-      undoOperations.push(new ReverseOperation(new AddEdgeOperation(edge, self)));
-    });
-    self.addUndoLogEntry(undoOperations);
-    self.arrRemoveAll(self.edges, danglingEdges);
-    self.runLayout();
-    self.topologyChangeHandler?.();
-  };
-
   this.selectNone = function () {
     self.selectedNodes.forEach((node) => {
       node.isSelected = false;
@@ -248,22 +114,6 @@ function GraphWorkspace(options) {
 
   this.getAllSelectedNodes = function () {
     return this.returnUnpackedGroupeds(self.selectedNodes);
-  };
-
-  this.getSelectionsThatAreGrouped = function () {
-    const result = [];
-    self.selectedNodes.forEach((node) => {
-      if (node.numChildren > 0) {
-        result.push(node);
-      }
-    });
-    return result;
-  };
-
-  this.ungroupSelection = function () {
-    self.getSelectionsThatAreGrouped().forEach((node) => {
-      self.ungroup(node);
-    });
   };
 
   this.toggleNodeSelection = function (node) {
@@ -317,29 +167,6 @@ function GraphWorkspace(options) {
   };
 
   // ======= Miscellaneous functions
-  /**
-   * @type void
-   */
-  this.clearGraph = function () {
-    this.stopLayout();
-    this.nodes = [];
-    this.edges = [];
-    this.undoLog = [];
-    this.redoLog = [];
-    this.nodesMap = {};
-    this.edgesMap = {};
-    this.blocklistedNodes = [];
-    this.selectedNodes = [];
-    this.selectedEdges = [];
-    this.lastResponse = null;
-  };
-
-  this.arrRemoveAll = function remove(arr, items) {
-    for (let i = items.length; i--; ) {
-      self.arrRemove(arr, items[i]);
-    }
-  };
-
   this.arrRemove = function remove(arr, item) {
     for (let i = arr.length; i--; ) {
       if (arr[i] === item) {
@@ -520,106 +347,6 @@ function GraphWorkspace(options) {
     this.force.start();
   };
 
-  //========Grouping functions==========
-
-  //Merges all selected nodes into node
-  this.groupSelections = function (node) {
-    const ops = [];
-    self.nodes.forEach(function (otherNode) {
-      if (otherNode !== node && otherNode.isSelected && otherNode.parent === undefined) {
-        otherNode.parent = node;
-        otherNode.isSelected = false;
-        self.arrRemove(self.selectedNodes, otherNode);
-        ops.push(new GroupOperation(node, otherNode));
-      }
-    });
-    self.selectNone();
-    self.selectNode(node);
-    self.addUndoLogEntry(ops);
-    self.runLayout();
-    self.topologyChangeHandler?.();
-  };
-
-  this.mergeNeighbours = function (node) {
-    const neighbours = self.getNeighbours(node);
-    const ops = [];
-    neighbours.forEach(function (otherNode) {
-      if (otherNode !== node && otherNode.parent === undefined) {
-        otherNode.parent = node;
-        otherNode.isSelected = false;
-        self.arrRemove(self.selectedNodes, otherNode);
-        ops.push(new GroupOperation(node, otherNode));
-      }
-    });
-    self.addUndoLogEntry(ops);
-    self.runLayout();
-    self.topologyChangeHandler?.();
-  };
-
-  this.mergeSelections = function (targetNode) {
-    if (!targetNode) {
-      console.log('Error - merge called on undefined target');
-      return;
-    }
-    const selClone = self.selectedNodes.slice();
-    const ops = [];
-    selClone.forEach(function (otherNode) {
-      if (otherNode !== targetNode && otherNode.parent === undefined) {
-        otherNode.parent = targetNode;
-        otherNode.isSelected = false;
-        self.arrRemove(self.selectedNodes, otherNode);
-        ops.push(new GroupOperation(targetNode, otherNode));
-      }
-    });
-    self.addUndoLogEntry(ops);
-    self.runLayout();
-    self.topologyChangeHandler?.();
-  };
-
-  this.ungroup = function (node) {
-    const ops = [];
-    self.nodes.forEach(function (other) {
-      if (other.parent === node) {
-        other.parent = undefined;
-        ops.push(new UnGroupOperation(node, other));
-      }
-    });
-    self.addUndoLogEntry(ops);
-    self.runLayout();
-    self.topologyChangeHandler?.();
-  };
-
-  this.unblockNode = function (node) {
-    self.arrRemove(self.blocklistedNodes, node);
-    self.topologyChangeHandler?.();
-  };
-
-  this.unblockAll = function () {
-    self.arrRemoveAll(self.blocklistedNodes, self.blocklistedNodes);
-    self.topologyChangeHandler?.();
-  };
-
-  this.blocklistSelection = function () {
-    const selection = self.getAllSelectedNodes();
-    const danglingEdges = [];
-    self.edges.forEach(function (edge) {
-      if (selection.indexOf(edge.source) >= 0 || selection.indexOf(edge.target) >= 0) {
-        delete self.edgesMap[edge.id];
-        danglingEdges.push(edge);
-      }
-    });
-    selection.forEach((node) => {
-      delete self.nodesMap[node.id];
-      self.blocklistedNodes.push(node);
-      node.isSelected = false;
-    });
-    self.arrRemoveAll(self.nodes, selection);
-    self.arrRemoveAll(self.edges, danglingEdges);
-    self.selectedNodes = [];
-    self.runLayout();
-    self.topologyChangeHandler?.();
-  };
-
   // A "simple search" operation that requires no parameters from the client.
   // Performs numHops hops pulling in field-specific number of terms each time
   this.simpleSearch = function (searchTerm, fieldsChoice, numHops) {
@@ -733,12 +460,12 @@ function GraphWorkspace(options) {
 
   //=======  Adds new nodes retrieved from an elasticsearch search ========
   this.mergeGraph = function (newData) {
+    self.options.graphMergeStarted?.();
     this.stopLayout();
 
     if (!newData.nodes) {
       newData.nodes = [];
     }
-    const lastOps = [];
 
     // === Commented out - not sure it was obvious to users what various circle sizes meant
     // var minCircleSize = 5;
@@ -789,7 +516,6 @@ function GraphWorkspace(options) {
       node.scaledSize = 15;
       node.seqNumber = this.seqNumber++;
       this.nodes.push(node);
-      lastOps.push(new AddNodeOperation(node, self));
       this.nodesMap[node.id] = node;
     });
 
@@ -823,28 +549,10 @@ function GraphWorkspace(options) {
 
       this.edgesMap[newEdge.id] = newEdge;
       this.edges.push(newEdge);
-      lastOps.push(new AddEdgeOperation(newEdge, self));
     });
-
-    if (lastOps.length > 0) {
-      self.addUndoLogEntry(lastOps);
-    }
 
     // Layout must initialize edge.topSrc/topTarget before the topology callback snapshots their IDs.
     this.runLayout();
-    self.topologyChangeHandler?.();
-  };
-
-  this.mergeIds = function (parentId, childId) {
-    const parent = self.getNode(parentId);
-    const child = self.getNode(childId);
-    if (child.isSelected) {
-      child.isSelected = false;
-      self.arrRemove(self.selectedNodes, child);
-    }
-    child.parent = parent;
-    self.addUndoLogEntry([new GroupOperation(parent, child)]);
-    self.runLayout();
     self.topologyChangeHandler?.();
   };
 
