@@ -180,10 +180,11 @@ export const fetchEventsAndScopedAlerts = async (
 
       // An alert is raised after the process event that caused it, so it can be newer than every event of its
       // session. Nothing bounds the alerts from above on the last page of the session (a short forward page),
-      // and a backward page covers everything up to its cursor, which can be newer than its last event.
+      // and a backward page holds the events up to its cursor, so it covers the alerts up to its cursor, which
+      // can be newer than its last event.
       if (forward && events.length < size) {
         alertsRange = [range[0]];
-      } else if (!forward && cursor && new Date(cursor) > new Date(range[1])) {
+      } else if (!forward && cursor) {
         alertsRange = [range[0], cursor];
       } else {
         alertsRange = range;

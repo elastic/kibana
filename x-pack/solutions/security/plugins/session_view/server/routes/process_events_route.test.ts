@@ -168,9 +168,8 @@ describe('process_events_route.ts', () => {
         expect(range).toEqual({ gte: firstTimestamp, lte: cursor });
       });
 
-      it('stops a backward page at its last event when the cursor is not newer', async () => {
-        // a backward page holds events up to its cursor, so the cursor is at or after its last event
-        const range = await fetchAndGetAlertsRange(lastTimestamp, false);
+      it('keeps the range of the events for a backward page without a cursor', async () => {
+        const range = await fetchAndGetAlertsRange(undefined, false);
 
         expect(range).toEqual({ gte: firstTimestamp, lte: lastTimestamp });
       });
