@@ -57,11 +57,10 @@ describe('persistenceLoop', () => {
 
     const loopPromise = persistenceLoop(params, abortController.signal);
 
-    // Flush is synchronous (0 ms delay), so after one tick it's waiting on the 500 ms interval.
-    // Advance timers a little, then abort.
-    jest.advanceTimersByTime(100);
+    // Flush resolves at 0 ms, so after 100 ms the loop is waiting on the 500 ms interval.
+    await jest.advanceTimersByTimeAsync(100);
     abortController.abort();
-    jest.advanceTimersByTime(500);
+    await jest.advanceTimersByTimeAsync(500);
 
     await expect(loopPromise).resolves.toBeUndefined();
   });
@@ -71,13 +70,14 @@ describe('persistenceLoop', () => {
     const params = makeParams({ isExecuting: true });
 
     const loopPromise = persistenceLoop(params, abortController.signal);
+    await jest.advanceTimersByTimeAsync(0);
 
     expect(params.eventQueue.flush).toHaveBeenCalledWith({
       signal: params.signal,
     });
 
     abortController.abort();
-    jest.advanceTimersByTime(500);
+    await jest.advanceTimersByTimeAsync(500);
 
     await expect(loopPromise).resolves.toBeUndefined();
   });
@@ -98,11 +98,11 @@ describe('persistenceLoop', () => {
     const loopPromise = persistenceLoop(params, abortController.signal);
 
     // Fire abort while flush is in progress (before the 50 ms resolve)
-    jest.advanceTimersByTime(10);
+    await jest.advanceTimersByTimeAsync(10);
     abortController.abort();
 
     // Let flush complete and the loop settle
-    jest.advanceTimersByTime(500);
+    await jest.advanceTimersByTimeAsync(500);
     await loopPromise;
 
     // Give Node.js one more microtask tick to surface any unhandled rejection
