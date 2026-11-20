@@ -81,8 +81,9 @@ const createInvestigationConfig = (
       ...safeTracing.kbnTestServer,
       serverArgs: [
         ...safeTracing.kbnTestServer.serverArgs,
-        // Allow sixteen investigation workflows plus five background tasks.
-        '--xpack.task_manager.capacity=21',
+        // Sixteen investigation workflows plus the knowledge materialize tasks they queue; at 21
+        // those tasks wait past the 120s hook timeout once knowledge is enabled.
+        '--xpack.task_manager.capacity=42',
         '--xpack.nightshift_investigations.enabled=true',
         // Investigations only run as the Nightshift agent service account.
         '--xpack.security.serviceAccounts.enabled=true',
