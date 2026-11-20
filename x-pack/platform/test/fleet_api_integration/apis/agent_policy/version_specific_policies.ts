@@ -437,6 +437,18 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         agentPolicyId = agentPolicyResponse.item.id;
 
+        // Enroll the agent before adding the package policy, so the one-shot reassignment task it
+        // schedules finds the agent. The periodic task is disabled in this config.
+        await fleetAndAgents.generateAgent(
+          'online',
+          agentId,
+          agentPolicyId,
+          previousMinorVersion,
+          undefined,
+          undefined,
+          true
+        );
+
         const { body: packagePolicyResponse } = await supertest
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
@@ -480,16 +492,6 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true })
           .expect(200);
-
-        await fleetAndAgents.generateAgent(
-          'online',
-          agentId,
-          agentPolicyId,
-          previousMinorVersion,
-          undefined,
-          undefined,
-          true
-        );
       });
 
       after(async () => {
@@ -509,10 +511,10 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         expect(before.item.has_agent_version_conditions).to.eql(true);
         expect(Object.keys(await getInputsForVersions()).length).to.be.greaterThan(0);
-        // Let the agent settle on its version-specific policy first, otherwise the reassignment
-        // to it can race with the reassignment back to the base policy that the upgrade triggers.
+        // Wait for the reassignment task to move the agent to its version-specific policy, so it
+        // can't race with the reassignment back to the base policy that the upgrade triggers.
         await retry.tryForTime(20000, async () => {
-          expect(await getAgentPolicyId()).to.contain('#');
+          expect(await getAgentPolicyId()).to.eql(`${agentPolicyId}#${previousMinor}`);
         });
 
         const { body: upgradeResponse } = await supertest
