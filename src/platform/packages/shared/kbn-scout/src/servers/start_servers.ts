@@ -21,7 +21,7 @@ import { ensureDefaultSpaceNPRE } from './ensure_default_space_npre';
 import { runDockerServers } from './run_docker_servers';
 import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
-import { registerServerShutdown } from './server_shutdown';
+import { registerServerShutdown, shutdownServers } from './server_shutdown';
 
 export async function startServers(log: ToolingLog, options: StartServerOptions) {
   const runStartTime = Date.now();
@@ -39,13 +39,29 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     const config = await loadServersConfig(options.testTarget, log, configRootDir);
     const pwGrepTag = getPlaywrightGrepTag(options.testTarget);
 
+    // Stops whatever backing service is up at the time: the docker servers first, Elasticsearch
+    // too once it has started. `once`, so the exit hook, an early exit and the normal shutdown
+    // cannot run it twice.
+    let shutdownBackingServices: () => Promise<void> = async () => {};
+
+    // A backing service died on its own (e.g. the registry container got OOM-killed). Kibana
+    // would keep serving against it, so take everything down instead.
+    const onEarlyExit = (msg: string) => {
+      log.error(msg);
+      process.exitCode = 1;
+      shutdownServers(procs, shutdownBackingServices).catch((error) => log.error(error));
+    };
+
     // Docker-backed services (e.g. the Fleet package registry) must be up before Kibana boots,
     // otherwise Fleet setup falls back to retrying against a registry that is not there yet.
-    const stopDockerServers = await runDockerServers({ config, log });
+    const stopDockerServers = await runDockerServers({ config, log, onEarlyExit });
+    shutdownBackingServices = once(stopDockerServers);
 
-    let shutdownEs: () => Promise<void>;
+    let removeShutdownHook = () => {};
+    let startupError: unknown;
+
     try {
-      shutdownEs = once(
+      const shutdownEs = once(
         await runElasticsearch({
           config,
           log,
@@ -54,57 +70,71 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
           logsDir: options.logsDir,
         })
       );
-    } catch (error) {
-      await stopDockerServers();
-      throw error;
-    }
+      shutdownBackingServices = once(async () => {
+        try {
+          await shutdownEs();
+        } finally {
+          await stopDockerServers();
+        }
+      });
+      removeShutdownHook = registerServerShutdown(procs, shutdownBackingServices);
 
-    const shutdownBackingServices = once(async () => {
-      try {
-        await shutdownEs();
-      } finally {
-        await stopDockerServers();
+      await ensureDefaultSpaceNPRE(config, log);
+
+      await runKibanaServer({
+        procs,
+        config,
+        installDir: options.installDir,
+        extraKbnOpts: getExtraKbnOpts(options.installDir, config.get('serverless')),
+      });
+
+      reportTime(runStartTime, 'ready', {
+        success: true,
+        ...options,
+      });
+
+      // wait for 5 seconds of silence before logging the
+      // success message so that it doesn't get buried
+      await silence(log, 5000);
+
+      // Pre-create Elasticsearch Security indexes after server startup. Skipped for `prebootOnly`
+      // config sets: Kibana is deliberately held in the `preboot` stage, so it serves no SAML
+      // endpoints to authenticate against.
+      if (!config.get('prebootOnly')) {
+        await preCreateSecurityIndexesViaSamlAuth(config, log);
       }
-    });
 
-    const removeShutdownHook = registerServerShutdown(procs, shutdownBackingServices);
-
-    await ensureDefaultSpaceNPRE(config, log);
-
-    await runKibanaServer({
-      procs,
-      config,
-      installDir: options.installDir,
-      extraKbnOpts: getExtraKbnOpts(options.installDir, config.get('serverless')),
-    });
-
-    reportTime(runStartTime, 'ready', {
-      success: true,
-      ...options,
-    });
-
-    // wait for 5 seconds of silence before logging the
-    // success message so that it doesn't get buried
-    await silence(log, 5000);
-
-    // Pre-create Elasticsearch Security indexes after server startup. Skipped for `prebootOnly`
-    // config sets: Kibana is deliberately held in the `preboot` stage, so it serves no SAML
-    // endpoints to authenticate against.
-    if (!config.get('prebootOnly')) {
-      await preCreateSecurityIndexesViaSamlAuth(config, log);
-    }
-
-    log.success(
-      '\n\n' +
-        dedent`
+      log.success(
+        '\n\n' +
+          dedent`
           Elasticsearch and Kibana are ready for functional testing.
           Use 'node scripts/playwright test --project local --grep ${pwGrepTag} --config <path_to_Playwright.config.ts>' to run tests'
         ` +
-        '\n\n'
-    );
+          '\n\n'
+      );
 
-    await procs.waitForAllToStop();
-    await shutdownBackingServices();
+      await procs.waitForAllToStop();
+    } catch (error) {
+      startupError = error;
+    }
+
+    // Whatever failed, do not leave a detached container holding its port for the next run.
+    let shutdownError: unknown;
+    try {
+      await shutdownBackingServices();
+    } catch (error) {
+      shutdownError = error;
+    }
     removeShutdownHook();
+
+    if (startupError !== undefined) {
+      if (shutdownError !== undefined) {
+        log.error(`shutdown after a failed start also failed: ${shutdownError}`);
+      }
+      throw startupError;
+    }
+    if (shutdownError !== undefined) {
+      throw shutdownError;
+    }
   });
 }

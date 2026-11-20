@@ -24,7 +24,14 @@ interface FakeDocker {
   exitContainer: (code: number) => void;
 }
 
-function fakeDocker({ cached }: { cached: boolean }): FakeDocker {
+function fakeDocker({
+  cached,
+  killError,
+}: {
+  cached: boolean;
+  /** Make `docker kill` fail with this message, e.g. because the container already exited. */
+  killError?: string;
+}): FakeDocker {
   const calls: string[][] = [];
   const stdout = new PassThrough();
   const stderr = new PassThrough();
@@ -58,7 +65,7 @@ function fakeDocker({ cached }: { cached: boolean }): FakeDocker {
       case 'kill':
         stdout.end();
         stderr.end();
-        return Promise.resolve({ stdout: '' });
+        return killError ? Promise.reject(new Error(killError)) : Promise.resolve({ stdout: '' });
       default:
         throw new Error(`unexpected docker call: ${args.join(' ')}`);
     }
@@ -157,15 +164,34 @@ describe('runDockerServer', () => {
     expect(dockerCall(docker.calls, 'rm')).toEqual([['rm', 'container-1']]);
   });
 
-  it('fails fast when the container exits before the readiness line', async () => {
+  it('fails fast when the container exits before the readiness line, without calling onUnexpectedExit', async () => {
     const docker = fakeDocker({ cached: true });
+    const onUnexpectedExit = jest.fn();
 
-    const pending = runDockerServer({ ...server, waitForLogLineTimeoutMs: 60_000 }, { log });
+    const pending = runDockerServer(
+      { ...server, waitForLogLineTimeoutMs: 60_000 },
+      { log, onUnexpectedExit }
+    );
     await new Promise((resolve) => setImmediate(resolve));
     docker.exitContainer(1);
 
     await expect(pending).rejects.toThrow('unexpectedly exitted with code 1');
     expect(dockerCall(docker.calls, 'kill')).toEqual([['kill', 'container-1']]);
+    expect(onUnexpectedExit).not.toHaveBeenCalled();
+  });
+
+  it('still removes a container that had already exited when stop() runs', async () => {
+    const docker = fakeDocker({ cached: true, killError: 'Container container-1 is not running' });
+
+    const pending = runDockerServer(server, { log });
+    await new Promise((resolve) => setImmediate(resolve));
+    docker.stdout.write('package manifests loaded\n');
+    const running = await pending;
+
+    await running.stop();
+
+    expect(dockerCall(docker.calls, 'kill')).toEqual([['kill', 'container-1']]);
+    expect(dockerCall(docker.calls, 'rm')).toEqual([['rm', 'container-1']]);
   });
 
   it('stop() kills the container once and keeps it on CI', async () => {

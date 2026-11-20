@@ -10,7 +10,7 @@
 import Url from 'url';
 import execa from 'execa';
 import * as Rx from 'rxjs';
-import { filter, map, take } from 'rxjs';
+import { filter, map, take, takeUntil } from 'rxjs';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { DockerServer, DockerServerSpec } from './define_docker_servers_config';
 import { observeContainerLogs } from './container_logs';
@@ -112,7 +112,8 @@ function firstWithTimeout<T>(
 async function waitUntilReady(
   server: DockerServer,
   logLine$: Rx.Observable<string>,
-  log: ToolingLog
+  log: ToolingLog,
+  abort$: Rx.Observable<void>
 ): Promise<void> {
   const { name, waitFor, waitForLogLine, waitForLogLineTimeoutMs } = server;
 
@@ -134,6 +135,7 @@ async function waitUntilReady(
     return;
   }
 
+  // `abort$` tears the wait down (its timers included) when the caller gives up on the container.
   await Rx.lastValueFrom(
     Rx.merge(
       waitFor === undefined
@@ -154,8 +156,20 @@ async function waitUntilReady(
             `didn't find a log line matching "${waitForLogLine}"`,
             waitForLogLineTimeoutMs
           )
-    )
+    ).pipe(takeUntil(abort$)),
+    { defaultValue: undefined }
   );
+}
+
+/** `docker kill` / `docker rm` on a container that is already gone is not an error here. */
+function ignoreGoneContainer(containerId: string, error: unknown) {
+  const message = (error as { message?: string })?.message ?? '';
+  if (
+    !message.includes(`Container ${containerId} is not running`) &&
+    !message.includes(`No such container: ${containerId}`)
+  ) {
+    throw error;
+  }
 }
 
 /**
@@ -178,6 +192,8 @@ export async function runDockerServer(
 
   const containerId = await dockerRun(server, log);
   let stopped = false;
+  let starting = true;
+  const abort$ = new Rx.Subject<void>();
 
   // push the logs from the container to our logger, and expose an observable of those lines
   const logLine$ = observeContainerLogs(name, containerId, log);
@@ -196,7 +212,10 @@ export async function runDockerServer(
       log.error(`[docker:${name}] Error ensuring that the container is running`);
       log.error(error);
       rejectOnExit(error);
-      onUnexpectedExit?.(error);
+      // while starting, the rejection above already reports it to the caller
+      if (!starting) {
+        onUnexpectedExit?.(error);
+      }
     },
   });
 
@@ -206,20 +225,22 @@ export async function runDockerServer(
     }
     stopped = true;
     runningSub.unsubscribe();
+    abort$.next();
+    abort$.complete();
 
     try {
       await execa('docker', ['kill', containerId]);
-      // we don't remove the containers on CI because removing them causes the
-      // network list to be updated and aborts all in-flight requests in Chrome
-      if (!process.env.CI) {
-        await execa('docker', ['rm', containerId]);
-      }
     } catch (error) {
-      if (
-        !error?.message?.includes(`Container ${containerId} is not running`) &&
-        !error?.message?.includes(`No such container: ${containerId}`)
-      ) {
-        throw error;
+      ignoreGoneContainer(containerId, error);
+    }
+    // we don't remove the containers on CI because removing them causes the
+    // network list to be updated and aborts all in-flight requests in Chrome.
+    // Outside CI remove it even if it had already exited, so crashes leave nothing behind.
+    if (!process.env.CI) {
+      try {
+        await execa('docker', ['rm', containerId]);
+      } catch (error) {
+        ignoreGoneContainer(containerId, error);
       }
     }
 
@@ -231,12 +252,14 @@ export async function runDockerServer(
   };
 
   try {
-    // a container that dies before the readiness line fails here, not after the wait timeout
-    await Promise.race([waitUntilReady(server, logLine$, log), exited]);
+    // a container that dies before the readiness line fails here, not after the wait timeout;
+    // `stop()` aborts the wait so its timers do not keep the process alive
+    await Promise.race([waitUntilReady(server, logLine$, log, abort$), exited]);
   } catch (error) {
     await stop();
     throw error;
   }
+  starting = false;
 
   log.info(`[docker:${name}] ready at ${server.url}`);
 
