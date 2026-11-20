@@ -101,6 +101,12 @@ export interface SavedObjectsTableState {
   hasCustomBranding: boolean;
 }
 
+const DEFAULT_SORT: SavedObjectsTableState['sort'] = { field: 'updated_at', direction: 'desc' };
+
+// Without an explicit sort, results with query text are ranked by relevance.
+const getDefaultSort = (queryText?: string): SavedObjectsTableState['sort'] =>
+  queryText ? undefined : DEFAULT_SORT;
+
 const unableFindSavedObjectsNotificationMessage = i18n.translate(
   'savedObjectsManagement.objectsTable.unableFindSavedObjectsNotificationMessage',
   { defaultMessage: 'Unable find saved objects' }
@@ -120,20 +126,19 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   constructor(props: SavedObjectsTableProps) {
     super(props);
 
+    const activeQuery = props.initialQuery ?? Query.parse('');
+
     this.state = {
       totalCount: 0,
       page: 0,
       perPage: props.perPageConfig || 50,
-      sort: {
-        field: 'updated_at',
-        direction: 'desc',
-      },
+      sort: getDefaultSort(parseQuery(activeQuery, props.allowedTypes).queryText),
       savedObjects: [],
       savedObjectCounts: props.allowedTypes.reduce((typeToCountMap, type) => {
         typeToCountMap[type.name] = 0;
         return typeToCountMap;
       }, {} as Record<string, number>),
-      activeQuery: props.initialQuery ?? Query.parse(''),
+      activeQuery,
       selectedSavedObjects: [],
       isShowingImportFlyout: false,
       isSearching: true,
@@ -244,6 +249,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
     const findOptions: FindQueryHTTP = {
       search: queryText ? `${queryText}*` : undefined,
+      defaultSearchOperator: 'AND',
       perPage,
       page: page + 1,
       type: searchTypes,
@@ -363,11 +369,17 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   onQueryChange = ({ query }: { query: Query }) => {
     // TODO: Use isSameQuery to compare new query with state.activeQuery to avoid re-fetching the
     // same data we already have.
+    const { allowedTypes } = this.props;
+    const { activeQuery, sort } = this.state;
+    const { queryText } = parseQuery(query, allowedTypes);
+    const queryTextChanged = queryText !== parseQuery(activeQuery, allowedTypes).queryText;
+
     this.setState(
       {
         activeQuery: query,
         page: 0, // Reset this on each query change
         selectedSavedObjects: [],
+        sort: queryTextChanged ? getDefaultSort(queryText) : sort,
       },
       () => {
         this.fetchAllSavedObjects();
