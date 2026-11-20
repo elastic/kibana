@@ -68,6 +68,14 @@ describe('OverviewStatCards', () => {
     );
   });
 
+  it('formats large counts for the locale', () => {
+    renderCards({ knowledgeDocumentsCount: 12345 });
+
+    expect(screen.getByTestId('contextOverviewStatCardValue-knowledgeDocuments')).toHaveTextContent(
+      '12,345'
+    );
+  });
+
   it('mentions memories in the knowledge documents caption while memory is on', () => {
     renderCards({ isMemoryEnabled: true });
 

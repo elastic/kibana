@@ -22,6 +22,13 @@ jest.mock('../../hooks/use_latest_workflow_execution', () => ({
   useLatestWorkflowExecution: (...args: unknown[]) => mockLatestExecution(...args),
 }));
 
+const mockRefreshKnowledgeDocumentsAfterRun = jest.fn();
+
+jest.mock('../../hooks/use_refresh_knowledge_documents_after_run', () => ({
+  useRefreshKnowledgeDocumentsAfterRun: (...args: unknown[]) =>
+    mockRefreshKnowledgeDocumentsAfterRun(...args),
+}));
+
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
@@ -377,6 +384,18 @@ describe('AutomationRow', () => {
         'href',
         '/app/workflows/workflow-value-id?tab=executions&executionId=run-1'
       );
+    });
+
+    it('refreshes the knowledge documents of its AI index when the run ends', () => {
+      mockLatestExecution.mockReturnValue({
+        execution: { id: 'run-1', status: 'running', startedAt: new Date().toISOString() },
+        activeExecutionId: 'run-1',
+        isRunning: true,
+        isLoading: false,
+      });
+      renderAutomationRow({ ...runnable, aiIndexId: 'my-index' });
+
+      expect(mockRefreshKnowledgeDocumentsAfterRun).toHaveBeenLastCalledWith('my-index', true);
     });
 
     it('shows the running spinner to users who cannot run workflows', () => {

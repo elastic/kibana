@@ -25,6 +25,7 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
 import {
   CONTEXT_ENGINE_PATHS,
@@ -565,7 +566,12 @@ describe('AiIndexDetailPage', () => {
 
     expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('contextAutomationsManageInSettingsLink'));
+    const manageLink = screen.getByTestId('contextAutomationsManageInSettingsLink');
+    expect(manageLink).toHaveAttribute(
+      'data-ebt-action',
+      CONTEXT_ENGINE_UI_EBT.action.automations.MANAGE_IN_SETTINGS
+    );
+    fireEvent.click(manageLink);
 
     expect(services.application.navigateToApp).toHaveBeenCalledWith(
       CONTEXT_ENGINE_APP_ID,

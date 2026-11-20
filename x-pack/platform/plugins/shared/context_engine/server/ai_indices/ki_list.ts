@@ -587,6 +587,8 @@ export const getKiHistogram = async (
   const response = await esClient.esql.query({
     query: histogramQuery,
     params: [{ from }, { to }],
+    // A shard failure must fail the chart, not undercount days.
+    allow_partial_results: false,
   });
 
   const counts = new Map(

@@ -1296,7 +1296,12 @@ describe('getKiHistogram', () => {
     expect(buckets[1]).toEqual({ date: '2026-10-23', count: 0 });
     expect(buckets[29]).toEqual({ date: '2026-11-20', count: 3 });
 
-    const { query: text, params } = query.mock.calls[1][0];
+    const {
+      query: text,
+      params,
+      allow_partial_results: allowPartialResults,
+    } = query.mock.calls[1][0];
+    expect(allowPartialResults).toBe(false);
     expect(text).toContain('first_seen = MIN(@timestamp)');
     expect(text).toContain('| WHERE ki_status IN ("active", "expired")\n');
     // A KI without any revision timestamp still counts by its updated_at.

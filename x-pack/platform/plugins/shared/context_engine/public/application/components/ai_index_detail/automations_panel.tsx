@@ -285,6 +285,7 @@ export const AutomationsPanel = ({
               return (
                 <React.Fragment key={automation.value}>
                   <AutomationRow
+                    aiIndexId={aiIndex?.id}
                     automation={automation}
                     workflowSummary={summary}
                     editHref={application.getUrlForApp(WORKFLOWS_APP_ID, {

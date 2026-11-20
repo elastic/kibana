@@ -7,10 +7,13 @@
 
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ExecutionStatus } from '@kbn/workflows';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useFailedAutomationRuns } from './use_failed_automation_runs';
-import { useLatestWorkflowExecution } from './use_latest_workflow_execution';
+import {
+  latestWorkflowExecutionQueryKey,
+  useLatestWorkflowExecution,
+} from './use_latest_workflow_execution';
 
 const mockGetWorkflowExecutions = jest.fn();
 
@@ -86,6 +89,29 @@ describe('useFailedAutomationRuns', () => {
 
     await waitFor(() => {
       expect(result.current.map(({ workflowId }) => workflowId)).toEqual(['wf-failed']);
+    });
+  });
+
+  it('drops a failed run when refreshing its latest run fails', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+      logger: silentLogger,
+    });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    const { result } = renderHook(() => useFailedAutomationRuns(['wf-failed']), { wrapper });
+    await waitFor(() => {
+      expect(result.current).toHaveLength(1);
+    });
+
+    mockGetWorkflowExecutions.mockRejectedValue(new Error('boom'));
+    await act(async () => {
+      await queryClient.refetchQueries({ queryKey: latestWorkflowExecutionQueryKey('wf-failed') });
+    });
+
+    await waitFor(() => {
+      expect(result.current).toEqual([]);
     });
   });
 

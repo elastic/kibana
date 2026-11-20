@@ -46,7 +46,12 @@ export const useFailedAutomationRuns = (
   });
 
   return uniqueWorkflowIds.flatMap((workflowId, index) => {
-    const execution = results[index]?.data?.execution;
+    const result = results[index];
+    // A failed refresh keeps the old data. Like the automation row, don't show it as current.
+    if (result?.isError) {
+      return [];
+    }
+    const execution = result?.data?.execution;
     return execution && FAILED_STATUSES.has(execution.status) ? [{ workflowId, execution }] : [];
   });
 };

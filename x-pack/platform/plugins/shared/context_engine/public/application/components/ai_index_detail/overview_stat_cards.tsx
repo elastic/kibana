@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import { FormattedNumber } from '@kbn/i18n-react';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import React from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
@@ -73,7 +74,9 @@ const OverviewStatCard = ({
         <EuiSkeletonTitle size="m" />
       ) : (
         <EuiTitle size="m">
-          <p data-test-subj={`contextOverviewStatCardValue-${id}`}>{value}</p>
+          <p data-test-subj={`contextOverviewStatCardValue-${id}`}>
+            {typeof value === 'number' ? <FormattedNumber value={value} /> : value}
+          </p>
         </EuiTitle>
       )}
       <EuiSpacer size="xs" />
