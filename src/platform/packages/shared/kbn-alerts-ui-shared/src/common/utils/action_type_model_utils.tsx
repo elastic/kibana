@@ -12,7 +12,11 @@ import { i18n } from '@kbn/i18n';
 import type { ActionType } from '@kbn/actions-types';
 import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
-import { getConnectorSpec, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
+import {
+  connectorSpecHasEvents,
+  getConnectorSpec,
+  isInboundOnlyConnectorSpec,
+} from '@kbn/connector-specs';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { fromConnectorSpecSchema, narrowSecretsSchemaForAuthMode } from '@kbn/connector-specs';
 import type { ConnectorZodSchema } from '@kbn/connector-specs';
@@ -138,6 +142,8 @@ export function transformSpecToActionTypeModel(
       }
       const connectorZodSchema: ConnectorZodSchema = parsedZodSchema;
       const specActions = spec.actions ?? [];
+      // Connectors that receive inbound events stay useful with every action turned off.
+      const allowNoActions = registeredSpec !== undefined && connectorSpecHasEvents(registeredSpec);
 
       // Bridges UseField's FieldHook API to ConnectorActionSelector's value/onChange props.
       const ConnectorActionSelectorField = ({
@@ -154,6 +160,7 @@ export function transformSpecToActionTypeModel(
           onChange={field.setValue}
           actions={actions}
           readOnly={readOnly}
+          allowNone={allowNoActions}
           errorMessage={field.errors[0]?.message}
         />
       );
@@ -185,7 +192,7 @@ export function transformSpecToActionTypeModel(
                 validations: [
                   {
                     validator: ({ value }) =>
-                      Array.isArray(value) && (value as string[]).length === 0
+                      !allowNoActions && Array.isArray(value) && (value as string[]).length === 0
                         ? {
                             message: i18n.translate(
                               'alertsUIShared.connectorActionSelector.emptySelectionError',

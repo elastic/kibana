@@ -58,8 +58,11 @@ const SCOPE_BADGE_COLORS: Record<ActionScope, string> = {
 
 const MODE_ALL = 'all';
 const MODE_CUSTOM = 'custom';
+const MODE_NONE = 'none';
 
-const MODE_OPTIONS = [
+type SelectionMode = typeof MODE_ALL | typeof MODE_CUSTOM | typeof MODE_NONE;
+
+const MODE_OPTIONS: Array<{ id: SelectionMode; label: string }> = [
   {
     id: MODE_ALL,
     label: i18n.translate('alertsUIShared.connectorActionSelector.modeAll', {
@@ -72,6 +75,12 @@ const MODE_OPTIONS = [
       defaultMessage: 'Custom',
     }),
   },
+  {
+    id: MODE_NONE,
+    label: i18n.translate('alertsUIShared.connectorActionSelector.modeNone', {
+      defaultMessage: 'None',
+    }),
+  },
 ];
 
 export interface ConnectorActionSelectorProps {
@@ -79,18 +88,30 @@ export interface ConnectorActionSelectorProps {
   onChange: (value: string[] | null) => void;
   actions: ConnectorActionDef[];
   readOnly?: boolean;
+  /** Shows a None mode that saves an empty selection, turning every action off. */
+  allowNone?: boolean;
   errorMessage?: string;
 }
 
-// null = "all actions" sentinel; serializer strips it before saving.
+// null = "all actions" sentinel; serializer strips it before saving. [] in None mode = no actions.
 export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = ({
   value: rawSelected,
   onChange,
   actions,
   readOnly = false,
+  allowNone = false,
   errorMessage,
 }) => {
+  // [] also means "Custom with nothing checked yet", so None is tracked as its own mode.
+  const [isNoneMode, setIsNoneMode] = useState(
+    allowNone && Array.isArray(rawSelected) && rawSelected.length === 0
+  );
   const isAll = rawSelected === null;
+  const mode: SelectionMode = isAll ? MODE_ALL : isNoneMode ? MODE_NONE : MODE_CUSTOM;
+  const modeOptions = useMemo(
+    () => (allowNone ? MODE_OPTIONS : MODE_OPTIONS.filter(({ id }) => id !== MODE_NONE)),
+    [allowNone]
+  );
 
   const allActionNames = useMemo(() => actions.map((a) => a.name), [actions]);
 
@@ -168,19 +189,25 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
   const currentPageActionsRef = useRef(currentPageActions);
   currentPageActionsRef.current = currentPageActions;
 
-  const handleModeChange = useCallback(() => {
-    setSearchText('');
-    setPageIndex(0);
-    setScopeFilters([]);
-    if (isAll) {
-      onChange(previousSpecificRef.current ?? defaultReadActionNames);
-    } else {
+  const handleModeChange = useCallback(
+    (nextMode: SelectionMode) => {
+      setSearchText('');
+      setPageIndex(0);
+      setScopeFilters([]);
       if (Array.isArray(rawSelected) && rawSelected.length > 0) {
         previousSpecificRef.current = rawSelected;
       }
-      onChange(null);
-    }
-  }, [isAll, onChange, rawSelected, defaultReadActionNames]);
+      setIsNoneMode(nextMode === MODE_NONE);
+      if (nextMode === MODE_ALL) {
+        onChange(null);
+      } else if (nextMode === MODE_NONE) {
+        onChange([]);
+      } else {
+        onChange(previousSpecificRef.current ?? defaultReadActionNames);
+      }
+    },
+    [onChange, rawSelected, defaultReadActionNames]
+  );
 
   const handleSelectionChange = useCallback(
     (newItems: ConnectorActionDef[]) => {
@@ -359,10 +386,10 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
             legend={i18n.translate('alertsUIShared.connectorActionSelector.modeLegend', {
               defaultMessage: 'Action selection mode',
             })}
-            options={MODE_OPTIONS}
-            idSelected={isAll ? MODE_ALL : MODE_CUSTOM}
+            options={modeOptions}
+            idSelected={mode}
             onChange={(id) => {
-              if ((id === MODE_ALL) !== isAll) handleModeChange();
+              if (id !== mode) handleModeChange(id as SelectionMode);
             }}
             buttonSize="compressed"
             isDisabled={readOnly}
@@ -371,7 +398,16 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isAll ? (
+      {mode === MODE_NONE ? (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('alertsUIShared.connectorActionSelector.noActionsHint', {
+              defaultMessage: 'No actions are available. The connector only receives events.',
+            })}
+          </EuiText>
+        </>
+      ) : isAll ? (
         <>
           <EuiSpacer size="xs" />
           <EuiText size="xs" color="subdued">
