@@ -129,7 +129,7 @@
       {
         "method": "get",
         "path": "/rec/download/{token}",
-        "reason": "Recording files are downloaded from the download_url a recording lists, on zoom.us rather than api.zoom.us, which no Zoom OpenAPI spec describes; see https://developers.zoom.us/docs/api/using-zoom-apis/#download-url"
+        "reason": "Recording files are downloaded from the download_url a recording lists, on zoom.us rather than api.zoom.us, which no Zoom OpenAPI spec describes; see https://developers.zoom.us/docs/api/using-zoom-apis/#download-url. It is the action's only request, so leaving it unmatched hides no other call."
       }
     ]
   }

@@ -199,7 +199,7 @@
       {
         "method": "get",
         "path": "/sites/{site}/_layouts/15/download.aspx",
-        "reason": "A pre-authenticated @microsoft.graph.downloadUrl on the tenant's *.sharepoint.com host, not a Microsoft Graph operation; Graph returns it on driveItems for downloading without Graph credentials (https://learn.microsoft.com/en-us/graph/api/resources/driveitem?view=graph-rest-1.0#instance-attributes)."
+        "reason": "A pre-authenticated @microsoft.graph.downloadUrl on the tenant's *.sharepoint.com host, not a Microsoft Graph operation; Graph returns it on driveItems for downloading without Graph credentials (https://learn.microsoft.com/en-us/graph/api/resources/driveitem?view=graph-rest-1.0#instance-attributes). It is the action's only request, so leaving it unmatched hides no other call."
       }
     ]
   }
