@@ -30,21 +30,25 @@ import {
   wrapRowsInDatatable,
 } from './utils';
 
-export const toEsqlAnnotationDatatable = ({
+interface AnnotationColumns {
+  timeColumn: DatatableColumn;
+  endTimeColumn: DatatableColumn | undefined;
+  extraColumns: DatatableColumn[];
+}
+
+// Independent queries may reuse aliases with different types and formatters.
+const toFieldId = ({ annotationId, name }: { annotationId: string; name: string }): string =>
+  JSON.stringify([annotationId, name]);
+
+// Column problems are configuration errors and fail the chart, like missing fields on DSL
+// query annotations. Row problems are skipped, like documents without the time field.
+const resolveAnnotationColumns = ({
   annotation,
   datatable,
-  interval,
-  timezone,
-  timeRange,
 }: {
   annotation: EsqlEventAnnotationOutput;
   datatable: Datatable;
-  interval: string;
-  timezone: string;
-  timeRange: TimeRange;
-}): Datatable => {
-  // Column problems are configuration errors and fail the chart, like missing fields on DSL
-  // query annotations. Row problems are skipped, like documents without the time field.
+}): AnnotationColumns => {
   const findColumn = (name: string, dateOnly = false): DatatableColumn => {
     const column = datatable.columns.find((candidate) => candidate.name === name);
     if (!column || (dateOnly && column.meta.type !== 'date')) {
@@ -58,17 +62,35 @@ export const toEsqlAnnotationDatatable = ({
     }
     return column;
   };
-  const timeColumn = findColumn(annotation.timeColumn, true);
-  const endTimeColumn = annotation.endTimeColumn
-    ? findColumn(annotation.endTimeColumn, true)
-    : undefined;
   const extraNames = new Set([
     ...(annotation.extraColumns ?? []),
     ...(annotation.textColumn ? [annotation.textColumn] : []),
   ]);
-  const extraColumns = [...extraNames].map((name) => findColumn(name));
-  // Independent queries may reuse aliases with different types and formatters.
-  const fieldId = (name: string) => JSON.stringify([annotation.id, name]);
+  return {
+    timeColumn: findColumn(annotation.timeColumn, true),
+    endTimeColumn: annotation.endTimeColumn
+      ? findColumn(annotation.endTimeColumn, true)
+      : undefined,
+    extraColumns: [...extraNames].map((name) => findColumn(name)),
+  };
+};
+
+// Rows with an unparseable time, an end before the start, or outside the time range are skipped.
+const toAnnotationRows = ({
+  annotation,
+  datatable,
+  columns: { timeColumn, endTimeColumn, extraColumns },
+  interval,
+  timezone,
+  timeRange,
+}: {
+  annotation: EsqlEventAnnotationOutput;
+  datatable: Datatable;
+  columns: AnnotationColumns;
+  interval: string;
+  timezone: string;
+  timeRange: TimeRange;
+}): DatatableRow[] => {
   const bounds = toAbsoluteDates(timeRange);
   const rows: DatatableRow[] = [];
 
@@ -87,7 +109,6 @@ export const toEsqlAnnotationDatatable = ({
       continue;
     }
 
-    const timebucket = toTimebucket({ time, interval, timezone });
     rows.push({
       id: endTime ? `${annotation.id}:${index}` : annotation.id,
       type: endTime ? 'range' : 'point',
@@ -102,19 +123,27 @@ export const toEsqlAnnotationDatatable = ({
           }),
       label: annotation.label,
       color: annotation.color,
-      timebucket,
-      ...(annotation.textColumn ? { textField: fieldId(annotation.textColumn) } : {}),
+      timebucket: toTimebucket({ time, interval, timezone }),
+      ...(annotation.textColumn
+        ? { textField: toFieldId({ annotationId: annotation.id, name: annotation.textColumn }) }
+        : {}),
       ...Object.fromEntries(
-        extraColumns.map((column) => [`field:${fieldId(column.name)}`, row[column.id]])
+        extraColumns.map((column) => [
+          `field:${toFieldId({ annotationId: annotation.id, name: column.name })}`,
+          row[column.id],
+        ])
       ),
     });
   }
+  return rows;
+};
 
-  // Ranges and points are limited separately per start bucket, so many ranges cannot hide points.
+// Ranges and points are limited separately per start bucket, so many ranges cannot hide points.
+const limitRowsPerBucket = (rows: DatatableRow[]): DatatableRow[] => {
   const limitedRows: DatatableRow[] = [];
   const lastKeptRowPerBucket = new Map<string, DatatableRow>();
   const countPerBucket = new Map<string, number>();
-  for (const row of rows.sort(sortByTime)) {
+  for (const row of [...rows].sort(sortByTime)) {
     const bucketKey = `${row.type}:${row.timebucket}`;
     const count = (countPerBucket.get(bucketKey) ?? 0) + 1;
     countPerBucket.set(bucketKey, count);
@@ -128,10 +157,31 @@ export const toEsqlAnnotationDatatable = ({
       lastKeptRow.skippedCount = count - ANNOTATIONS_PER_BUCKET;
     }
   }
+  return limitedRows;
+};
 
-  return wrapRowsInDatatable(limitedRows, [
+export const toEsqlAnnotationDatatable = ({
+  annotation,
+  datatable,
+  interval,
+  timezone,
+  timeRange,
+}: {
+  annotation: EsqlEventAnnotationOutput;
+  datatable: Datatable;
+  interval: string;
+  timezone: string;
+  timeRange: TimeRange;
+}): Datatable => {
+  const columns = resolveAnnotationColumns({ annotation, datatable });
+  const rows = toAnnotationRows({ annotation, datatable, columns, interval, timezone, timeRange });
+
+  return wrapRowsInDatatable(limitRowsPerBucket(rows), [
     ...annotationColumns,
-    ...extraColumns.map((column) => ({ ...column, id: `field:${fieldId(column.name)}` })),
+    ...columns.extraColumns.map((column) => ({
+      ...column,
+      id: `field:${toFieldId({ annotationId: annotation.id, name: column.name })}`,
+    })),
   ]);
 };
 
