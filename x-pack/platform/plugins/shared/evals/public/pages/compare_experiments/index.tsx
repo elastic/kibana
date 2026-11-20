@@ -198,7 +198,7 @@ const ExperimentHeader: React.FC<{
   const { data: experimentData, isLoading } = useEvaluationExperiment(experimentId, executionId);
 
   const branch = experimentData?.git_branch;
-  const timestamp = experimentData?.timestamp;
+  const lastScoreAt = experimentData?.last_score_at;
   const taskModel = experimentData?.task_model?.id;
   const evaluatorModels = experimentData?.evaluator_models ?? [];
   const suiteId =
@@ -246,10 +246,10 @@ const ExperimentHeader: React.FC<{
             <EuiText size="s">{branch}</EuiText>
           </EuiFlexItem>
         )}
-        {timestamp && (
+        {lastScoreAt && (
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
-              {new Date(timestamp).toLocaleString()}
+              {new Date(lastScoreAt).toLocaleString()}
             </EuiText>
           </EuiFlexItem>
         )}
