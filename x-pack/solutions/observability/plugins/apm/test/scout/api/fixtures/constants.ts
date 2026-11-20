@@ -85,6 +85,12 @@ export const SERVICE_MAP_GROUPING_NOT_CONNECTED = [
 export const SERVICE_MAP_GROUPING_TEAM_NAMESPACES = SERVICE_MAP_GROUPING_TEAMS.map(
   (_, team) => `grouping-team-${team}`
 );
+/**
+ * A team service that also runs more transactions with a blank `service.namespace` and
+ * `kubernetes.namespace` than with its own. Blank values don't count, so it still sits with its team
+ * in both groupings.
+ */
+export const SERVICE_MAP_GROUPING_MOSTLY_BLANK_NAMESPACE = SERVICE_MAP_GROUPING_TEAMS[0][15];
 /** The platform services' `service.namespace`: shared by calls, they still have a namespace. */
 export const SERVICE_MAP_GROUPING_PLATFORM_NAMESPACE = 'grouping-platform';
 /** Services that set no `service.namespace`, with calls (the gateway) and without. */

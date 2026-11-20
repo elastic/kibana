@@ -221,8 +221,12 @@ describe('getServiceGroupingAttributes', () => {
       services: {
         terms: { field: 'service.name', size: 2 },
         aggs: {
-          service_namespace: { terms: { field: 'service.namespace', size: 1 } },
-          kubernetes_namespace: { terms: { field: 'kubernetes.namespace', size: 1 } },
+          service_namespace: {
+            terms: { field: 'service.namespace', size: 1, exclude: expect.any(String) },
+          },
+          kubernetes_namespace: {
+            terms: { field: 'kubernetes.namespace', size: 1, exclude: expect.any(String) },
+          },
         },
       },
     });

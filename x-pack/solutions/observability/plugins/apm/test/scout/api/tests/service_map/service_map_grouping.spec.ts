@@ -152,6 +152,7 @@ apiTest.describe(
           'service.namespace'
         );
 
+        // the team service with mostly blank namespaces still sits with its team
         expect(membersByGroupId).toStrictEqual({
           ...Object.fromEntries(
             SERVICE_MAP_GROUPING_TEAMS.map((members, team) => [
@@ -185,6 +186,7 @@ apiTest.describe(
           const id = `kubernetes.namespace:${SERVICE_MAP_GROUPING_TEAM_KUBERNETES_NAMESPACES[team]}`;
           teamsByNamespace[id] = sorted([...(teamsByNamespace[id] ?? []), ...members]);
         });
+        // the team service with mostly blank namespaces still sits with its team
         expect(membersByGroupId).toStrictEqual({
           ...teamsByNamespace,
           [`kubernetes.namespace:${SERVICE_MAP_GROUPING_GATEWAY_KUBERNETES_NAMESPACE}`]: [

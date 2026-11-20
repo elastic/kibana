@@ -35,6 +35,12 @@ export interface ServiceGroupingAttributeValues {
 /** Labels for each service, keyed by `service.name`, to group services by attribute. */
 export type ServiceGroupingAttributes = Record<string, ServiceGroupingAttributeValues>;
 
+/**
+ * A blank value, empty or only ASCII whitespace, as a Lucene regular expression, which matches the
+ * whole value.
+ */
+const BLANK_VALUE_PATTERN = '[ \t\n\r]*';
+
 interface SavedGroupServicesBucket {
   services?: { buckets?: Array<{ key?: string | number }> };
 }
@@ -77,9 +83,10 @@ export async function getServiceGroupingAttributes(
 
 /**
  * Reads both namespaces of the given services from transaction events, as metric rollups do not
- * carry them. One value per field per service. A service with neither namespace is still listed.
- * A blank value, empty or only whitespace, counts as none, so every service without a namespace
- * is grouped alike. Other values are kept as stored, without trimming.
+ * carry them. One value per field per service: its most frequent. A service with neither namespace
+ * is still listed. A blank value, empty or only whitespace, counts as none: it is left out before
+ * the most frequent value is picked, so like a missing value it never wins over a real one. Other
+ * values are kept as stored, without trimming.
  *
  * The names stand in for the map's search bar and filters, which already chose them. Those can
  * target fields transaction events do not carry, so applying them again would drop services.
@@ -128,8 +135,12 @@ async function getNamespaceAttributes({
       services: {
         terms: { field: SERVICE_NAME, size: services.length },
         aggs: {
-          service_namespace: { terms: { field: SERVICE_NAMESPACE, size: 1 } },
-          kubernetes_namespace: { terms: { field: KUBERNETES_NAMESPACE, size: 1 } },
+          service_namespace: {
+            terms: { field: SERVICE_NAMESPACE, size: 1, exclude: BLANK_VALUE_PATTERN },
+          },
+          kubernetes_namespace: {
+            terms: { field: KUBERNETES_NAMESPACE, size: 1, exclude: BLANK_VALUE_PATTERN },
+          },
         },
       },
     },
@@ -147,7 +158,11 @@ async function getNamespaceAttributes({
   return namespacesByService;
 }
 
-/** The namespace as stored, or `undefined` when there is none or it is blank. */
+/**
+ * The namespace as stored, or `undefined` when there is none or it is blank. The query already
+ * leaves out blank values, except those made of whitespace outside ASCII, which
+ * `BLANK_VALUE_PATTERN` does not match.
+ */
 function namespaceValue(key: string | number | undefined): string | undefined {
   const value = key == null ? undefined : String(key);
   return value?.trim() ? value : undefined;
