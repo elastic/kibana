@@ -11,18 +11,13 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { getAiIndexDest } from '@kbn/context-engine-plugin/common/ai_index_dest';
-import { ATTACK_FINGERPRINT_AI_INDEX_ID } from './register_investigations_ai_index';
-
-const FINGERPRINT_INDEX = getAiIndexDest('index', ATTACK_FINGERPRINT_AI_INDEX_ID).value;
 
 /**
- * The `ai-index-idx` template matches this index and does not map the space privilege as
- * `nested`. A template for this exact name, at a higher priority, is what the worker's first
+ * The `ai-index-idx` template matches every AI index and does not map the space privilege as
+ * `nested`. A template for the exact index name, at a higher priority, is what the worker's first
  * write uses when Elasticsearch auto-creates the index.
  */
 const BASE_INDEX_TEMPLATE = 'ai-index-idx';
-const FINGERPRINT_INDEX_TEMPLATE = 'security-attack-fingerprint';
 const FALLBACK_TEMPLATE_PRIORITY = 501;
 const FALLBACK_COMPOSED_OF = ['ai-index@mappings'] as const;
 
@@ -30,7 +25,7 @@ const FALLBACK_COMPOSED_OF = ['ai-index@mappings'] as const;
  * `permissions.kibana.privileges` has to be `nested` or Context Engine's space filter
  * ignores it and every space can read the document.
  */
-export const FINGERPRINT_INDEX_MAPPINGS: MappingTypeMapping = {
+export const SPACE_SCOPED_INDEX_MAPPINGS: MappingTypeMapping = {
   properties: {
     permissions: {
       type: 'object',
@@ -109,28 +104,34 @@ const readBaseTemplate = async (esClient: ElasticsearchClient): Promise<BaseTemp
   }
 };
 
-const fingerprintMappings = (baseProperties: MappingTypeMapping['properties']) => ({
+const spaceScopedMappings = (baseProperties: MappingTypeMapping['properties']) => ({
   properties: {
     ...baseProperties,
-    ...FINGERPRINT_INDEX_MAPPINGS.properties,
+    ...SPACE_SCOPED_INDEX_MAPPINGS.properties,
   },
 });
 
+export interface SpaceScopedIndex {
+  indexName: string;
+  templateName: string;
+  logLabel: string;
+}
+
 /**
- * Installs the fingerprint index template. `kibana_system` can manage index templates and
- * cannot create this index or change its mapping, so an existing index with the wrong
- * mapping has to be recreated. The worker's first write then auto-creates it from this template.
+ * Installs the template that maps the space privilege as `nested`. `kibana_system` cannot create
+ * the index or change its mapping, so the first write must auto-create it from this template; on
+ * `false` it must not.
  */
-/** True when the fingerprint template is installed. A false result must not auto-create the index. */
-export const ensureFingerprintIndexMapping = async (
+export const ensureSpaceScopedIndexTemplate = async (
   esClient: ElasticsearchClient,
-  logger: Logger
+  logger: Logger,
+  { indexName, templateName, logLabel }: SpaceScopedIndex
 ): Promise<boolean> => {
   const base = await readBaseTemplate(esClient);
   try {
     await esClient.indices.putIndexTemplate({
-      name: FINGERPRINT_INDEX_TEMPLATE,
-      index_patterns: [FINGERPRINT_INDEX],
+      name: templateName,
+      index_patterns: [indexName],
       priority: base.priority,
       composed_of: base.composedOf,
       // `ai-index@custom` is optional. Without the base template's ignore list,
@@ -140,21 +141,21 @@ export const ensureFingerprintIndexMapping = async (
         : { ignore_missing_component_templates: base.ignoreMissingComponentTemplates }),
       template: {
         ...(base.settings === undefined ? {} : { settings: base.settings }),
-        mappings: fingerprintMappings(base.properties),
+        mappings: spaceScopedMappings(base.properties),
       },
     });
   } catch (error) {
-    logger.warn(`Attack fingerprint index template was not installed: ${errorText(error)}`);
+    logger.warn(`${logLabel} index template was not installed: ${errorText(error)}`);
     return false;
   }
 
   try {
-    const exists = await esClient.indices.exists({ index: FINGERPRINT_INDEX });
+    const exists = await esClient.indices.exists({ index: indexName });
     if (exists !== true) {
       return true;
     }
 
-    const response = await esClient.indices.getMapping({ index: FINGERPRINT_INDEX });
+    const response = await esClient.indices.getMapping({ index: indexName });
     const current = Object.values(response)[0]?.mappings as Record<string, unknown> | undefined;
     const type = privilegesType(current);
     if (type === 'nested') {
@@ -166,11 +167,11 @@ export const ensureFingerprintIndexMapping = async (
         ? 'has no nested permissions.kibana.privileges mapping'
         : `maps permissions.kibana.privileges as ${type}`;
     logger.warn(
-      `Attack fingerprint index ${FINGERPRINT_INDEX} ${detail}. ` +
+      `${logLabel} index ${indexName} ${detail}. ` +
         'Context Engine cannot space-scope that field until the index is recreated.'
     );
   } catch (error) {
-    logger.warn(`Attack fingerprint index mapping was not read: ${errorText(error)}`);
+    logger.warn(`${logLabel} index mapping was not read: ${errorText(error)}`);
   }
   return true;
 };

@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { ensureFingerprintIndexMapping } from './ensure_fingerprint_index';
+import { ensureSpaceScopedIndexTemplate } from './ensure_space_scoped_index';
 
 const logger = {
   warn: jest.fn(),
@@ -27,6 +27,12 @@ const baseTemplate = {
   },
 };
 
+const fingerprintIndex = {
+  indexName: 'ai-index-idx-security-attack-fingerprints',
+  templateName: 'security-attack-fingerprint',
+  logLabel: 'Attack fingerprint',
+};
+
 const createClient = () => {
   const esClient = {
     indices: {
@@ -41,7 +47,7 @@ const createClient = () => {
   return esClient;
 };
 
-describe('ensureFingerprintIndexMapping', () => {
+describe('ensureSpaceScopedIndexTemplate', () => {
   beforeEach(() => {
     jest.mocked(logger.warn).mockClear();
   });
@@ -49,7 +55,11 @@ describe('ensureFingerprintIndexMapping', () => {
   it('installs a higher-priority template with the nested space privilege', async () => {
     const esClient = createClient();
 
-    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+    await ensureSpaceScopedIndexTemplate(
+      esClient as unknown as ElasticsearchClient,
+      logger,
+      fingerprintIndex
+    );
 
     expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith({
       name: 'security-attack-fingerprint',
@@ -89,7 +99,11 @@ describe('ensureFingerprintIndexMapping', () => {
   it('does not create the index', async () => {
     const esClient = createClient();
 
-    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+    await ensureSpaceScopedIndexTemplate(
+      esClient as unknown as ElasticsearchClient,
+      logger,
+      fingerprintIndex
+    );
 
     expect(esClient.indices.create).not.toHaveBeenCalled();
   });
@@ -109,7 +123,11 @@ describe('ensureFingerprintIndexMapping', () => {
       },
     });
 
-    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+    await ensureSpaceScopedIndexTemplate(
+      esClient as unknown as ElasticsearchClient,
+      logger,
+      fingerprintIndex
+    );
 
     expect(esClient.indices.putMapping).not.toHaveBeenCalled();
   });
@@ -129,7 +147,11 @@ describe('ensureFingerprintIndexMapping', () => {
       },
     });
 
-    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+    await ensureSpaceScopedIndexTemplate(
+      esClient as unknown as ElasticsearchClient,
+      logger,
+      fingerprintIndex
+    );
 
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('until the index is recreated')
@@ -151,7 +173,11 @@ describe('ensureFingerprintIndexMapping', () => {
       },
     });
 
-    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+    await ensureSpaceScopedIndexTemplate(
+      esClient as unknown as ElasticsearchClient,
+      logger,
+      fingerprintIndex
+    );
 
     expect(logger.warn).not.toHaveBeenCalled();
   });
@@ -160,7 +186,11 @@ describe('ensureFingerprintIndexMapping', () => {
     const esClient = createClient();
     esClient.indices.putIndexTemplate.mockRejectedValue(new Error('security_exception'));
 
-    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+    await ensureSpaceScopedIndexTemplate(
+      esClient as unknown as ElasticsearchClient,
+      logger,
+      fingerprintIndex
+    );
 
     expect(logger.warn).toHaveBeenCalledWith(
       'Attack fingerprint index template was not installed: security_exception'
@@ -181,7 +211,11 @@ describe('ensureFingerprintIndexMapping', () => {
       ],
     });
 
-    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+    await ensureSpaceScopedIndexTemplate(
+      esClient as unknown as ElasticsearchClient,
+      logger,
+      fingerprintIndex
+    );
 
     expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -205,7 +239,11 @@ describe('ensureFingerprintIndexMapping', () => {
       ],
     });
 
-    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+    await ensureSpaceScopedIndexTemplate(
+      esClient as unknown as ElasticsearchClient,
+      logger,
+      fingerprintIndex
+    );
 
     expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -219,7 +257,11 @@ describe('ensureFingerprintIndexMapping', () => {
     const esClient = createClient();
     esClient.indices.getIndexTemplate.mockRejectedValue(new Error('not found'));
 
-    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+    await ensureSpaceScopedIndexTemplate(
+      esClient as unknown as ElasticsearchClient,
+      logger,
+      fingerprintIndex
+    );
 
     expect(
       esClient.indices.putIndexTemplate.mock.calls[0][0].ignore_missing_component_templates
@@ -230,7 +272,11 @@ describe('ensureFingerprintIndexMapping', () => {
     const esClient = createClient();
     esClient.indices.getIndexTemplate.mockRejectedValue(new Error('not found'));
 
-    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+    await ensureSpaceScopedIndexTemplate(
+      esClient as unknown as ElasticsearchClient,
+      logger,
+      fingerprintIndex
+    );
 
     expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
