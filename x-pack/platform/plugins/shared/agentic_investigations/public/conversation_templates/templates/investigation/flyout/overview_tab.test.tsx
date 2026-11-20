@@ -104,14 +104,18 @@ describe('InvestigationOverview', () => {
     );
   });
 
-  it('shows the automation that started the investigation as a "via" line under the trigger', () => {
+  it('shows the automation a subject came through as a "via" line under the trigger', () => {
     mockUseInvestigation.mockReturnValue({
       data: {
         ...investigation,
-        metadata: {
-          ...investigation.metadata,
-          automation: { id: 'automation-1', name: 'Payments alerts' },
-        },
+        subjects: [
+          {
+            type: 'alert',
+            id: 'alert-1',
+            automation: { id: 'automation-1', name: 'Payments alerts' },
+            created_at: 'x',
+          },
+        ],
       },
     });
 

@@ -9,7 +9,7 @@ import type { ConversationTemplate } from '@kbn/agent-builder-common';
 
 export const investigationTemplate: ConversationTemplate = {
   id: 'investigation',
-  version: 6,
+  version: 5,
   name: 'Investigation',
   description: 'Use for investigations',
   fields: {
@@ -60,20 +60,6 @@ export const investigationTemplate: ConversationTemplate = {
       input_type: 'TEXT_ARRAY',
       required: false,
       description: 'Workflow executions that have worked on this investigation.',
-    },
-    automation_id: {
-      input_type: 'TEXT',
-      required: false,
-      description:
-        'The automation that started the investigation. Set when it starts; do not change.',
-      max_length: 500,
-    },
-    automation_name: {
-      input_type: 'TEXT',
-      required: false,
-      description:
-        'Name of the automation that started the investigation, as it was when it started. Do not change.',
-      max_length: 500,
     },
   },
 };

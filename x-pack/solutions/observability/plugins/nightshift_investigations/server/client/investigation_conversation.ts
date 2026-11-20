@@ -89,28 +89,6 @@ export const findInvestigationConversation = async (
   return conversation ? toInvestigationConversation(conversation, false) : undefined;
 };
 
-/** The automation that starts an investigation, as recorded on its conversation. */
-export interface InvestigationAutomation {
-  id: string;
-  name: string;
-}
-
-// The investigation template's limits for these fields; a longer value would fail the creating write.
-const MAX_AUTOMATION_ID_LENGTH = 500;
-const MAX_AUTOMATION_NAME_LENGTH = 500;
-
-/**
- * The conversation metadata that records the automation that started an investigation. The name
- * is a snapshot: renaming the automation later does not change it.
- */
-export const toAutomationMetadata = ({
-  id,
-  name,
-}: InvestigationAutomation): Record<string, string> => ({
-  automation_id: id.slice(0, MAX_AUTOMATION_ID_LENGTH),
-  automation_name: name.slice(0, MAX_AUTOMATION_NAME_LENGTH),
-});
-
 /** Severity a new investigation starts at, until the investigating agent rates it. */
 export const INITIAL_INVESTIGATION_SEVERITY = 'medium' as const;
 
@@ -128,7 +106,6 @@ export const getOrCreateInvestigationConversation = async ({
   conversations,
   id,
   workflowExecutionId,
-  metadata,
   beforeCreate,
 }: {
   conversations: ConversationPublicClient;
@@ -138,8 +115,6 @@ export const getOrCreateInvestigationConversation = async ({
    * in progress between its creation and the run being recorded on it.
    */
   workflowExecutionId?: string;
-  /** Further metadata recorded in the creating write, such as `toAutomationMetadata`. */
-  metadata?: Record<string, string>;
   beforeCreate?: () => Promise<void>;
 }): Promise<InvestigationConversation> => {
   const existing = await findInvestigationConversation(conversations, id);
@@ -155,7 +130,6 @@ export const getOrCreateInvestigationConversation = async ({
         agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
         templateId: INVESTIGATION_TEMPLATE_ID,
         metadata: {
-          ...metadata,
           // A starting rating, so the severity shows (and can be changed) from the beginning;
           // the agent re-rates it from its findings when it concludes.
           severity: INITIAL_INVESTIGATION_SEVERITY,

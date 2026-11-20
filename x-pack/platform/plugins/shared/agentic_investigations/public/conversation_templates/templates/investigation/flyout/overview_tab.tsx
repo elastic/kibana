@@ -40,11 +40,9 @@ export const toOverviewSections = (
       impact.entities.length > 0);
   const hypotheses = investigation?.hypotheses?.hypotheses ?? [];
   const conclusion = readMetadataString(investigation?.metadata.verdict) ?? fallbackVerdict;
-  const automation = investigation?.metadata.automation;
 
   return {
-    subjects:
-      subjects.length > 0 ? <SubjectList subjects={subjects} automation={automation} /> : undefined,
+    subjects: subjects.length > 0 ? <SubjectList subjects={subjects} /> : undefined,
     impact: hasImpact ? (
       <ImpactContent
         summary={impact.summary}

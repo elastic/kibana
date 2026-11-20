@@ -15,6 +15,7 @@ import type {
   InvestigationSubjectTriggerType,
   InvestigationSubjectType,
   SlackThreadSubject,
+  SubjectAutomation,
 } from '../subjects/subject';
 import {
   DEFAULT_INVESTIGATIONS_PAGE_SIZE,
@@ -106,12 +107,6 @@ export const listInvestigationsQuerySchema = investigationFiltersSchema
 export type ListInvestigationsQueryInput = z.input<typeof listInvestigationsQuerySchema>;
 export type ListInvestigationsQuery = z.output<typeof listInvestigationsQuerySchema>;
 
-/** The automation that started an investigation, as it was named when it started. */
-export interface InvestigationAutomation {
-  id: string;
-  name: string;
-}
-
 /** The investigation template fields this API reads. A missing status reads as open. */
 export interface InvestigationMetadata {
   status: InvestigationMetadataStatus;
@@ -122,8 +117,6 @@ export interface InvestigationMetadata {
   verdict?: string;
   /** User profile uids of the assignees. Absent when nobody is assigned. */
   assignees?: string[];
-  /** The automation that started the investigation. Absent for investigations that no automation started. */
-  automation?: InvestigationAutomation;
 }
 
 /** What the investigation is about, one entry per subject. */
@@ -132,6 +125,8 @@ export interface InvestigationSubjectResponse {
   id: string;
   summary?: string;
   trigger_type?: InvestigationSubjectTriggerType;
+  /** The automation the subject triggered the investigation through. Absent without one. */
+  automation?: SubjectAutomation;
   snapshot?: AlertSubjectSnapshot;
   slack?: SlackThreadSubject;
   created_at: string;

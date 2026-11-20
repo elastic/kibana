@@ -708,16 +708,12 @@ export const toMetadata = (
   const summary = optionalText(metadata?.summary);
   const verdict = optionalText(metadata?.verdict);
   const assignees = optionalTextList(metadata?.assignees);
-  const automationId = optionalText(metadata?.automation_id);
-  const automationName = optionalText(metadata?.automation_name);
   return {
     status: metadata?.status === 'closed' ? 'closed' : 'open',
     ...(isInvestigationSeverity(severity) && { severity }),
     ...(summary !== undefined && { summary }),
     ...(verdict !== undefined && { verdict }),
     ...(assignees !== undefined && { assignees }),
-    ...(automationId !== undefined &&
-      automationName !== undefined && { automation: { id: automationId, name: automationName } }),
   };
 };
 
@@ -754,6 +750,7 @@ const toSubjectResponse = (subject: InvestigationSubject): InvestigationSubjectR
   id: subject.subjectId,
   ...(subject.summary !== undefined && { summary: subject.summary }),
   ...(subject.triggerType !== undefined && { trigger_type: subject.triggerType }),
+  ...(subject.automation !== undefined && { automation: subject.automation }),
   ...(subject.snapshot !== undefined && { snapshot: subject.snapshot }),
   ...(subject.slack !== undefined && { slack: subject.slack }),
   created_at: subject.createdAt,

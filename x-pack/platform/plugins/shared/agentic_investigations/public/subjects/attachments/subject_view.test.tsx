@@ -12,7 +12,6 @@ import { EuiProvider } from '@elastic/eui';
 import type { ApplicationStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
-import type { InvestigationAutomation } from '../../../common/investigations/investigation';
 import type { InvestigationSubject } from '../../../common/subjects/subject';
 import { createSubjectAttachmentRenderer } from './subject_attachment_definition';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -259,6 +258,17 @@ describe('SubjectView presentation', () => {
       'Trigger · Significant event'
     );
   });
+
+  it('shows the automation its document records as a "via" line', () => {
+    renderView({
+      ...base,
+      subjectType: 'alert',
+      subjectId: 'alert-1',
+      automation: { id: 'automation-1', name: 'Payments alerts' },
+    });
+
+    expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent('via Payments alerts');
+  });
 });
 
 describe('SubjectView alert flyout', () => {
@@ -432,16 +442,12 @@ const alertSubject = (id: string): SubjectRowData => ({
   },
 });
 
-const renderList = (
-  subjects: SubjectRowData[],
-  services: SubjectServices = {},
-  automation?: InvestigationAutomation
-) =>
+const renderList = (subjects: SubjectRowData[], services: SubjectServices = {}) =>
   render(
     <EuiProvider>
       <I18nProvider>
         <KibanaContextProvider services={services}>
-          <SubjectList subjects={subjects} automation={automation} />
+          <SubjectList subjects={subjects} />
         </KibanaContextProvider>
       </I18nProvider>
     </EuiProvider>
@@ -450,6 +456,7 @@ const renderList = (
 describe('SubjectList', () => {
   describe('with the automation that started the investigation', () => {
     const automation = { id: 'automation-1', name: 'Payments alerts' };
+    const viaAutomation = (subject: SubjectRowData): SubjectRowData => ({ ...subject, automation });
     const getUrlForApp = jest.fn(
       (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
     );
@@ -459,7 +466,7 @@ describe('SubjectList', () => {
     beforeEach(() => jest.clearAllMocks());
 
     it('adds a "via" line under the trigger that links to the automation', () => {
-      renderList([alertSubject('a-1')], { application }, automation);
+      renderList([viaAutomation(alertSubject('a-1'))], { application });
 
       // The trigger row keeps its own line; the automation is a further line below it.
       expect(screen.getByTestId('investigationSubject-alert')).toHaveTextContent(
@@ -475,7 +482,7 @@ describe('SubjectList', () => {
     });
 
     it('adds it under the "N alerts" row too, once', () => {
-      renderList([alertSubject('a-1'), alertSubject('a-2')], { application }, automation);
+      renderList([alertSubject('a-1'), alertSubject('a-2')].map(viaAutomation), { application });
 
       expect(screen.getAllByTestId('investigationSubjectVia')).toHaveLength(1);
       expect(screen.getByTestId('investigationSubject-alerts')).not.toContainElement(
@@ -484,7 +491,7 @@ describe('SubjectList', () => {
     });
 
     it('opens the automation inside Kibana, and leaves a modified click to the browser', () => {
-      renderList([alertSubject('a-1')], { application }, automation);
+      renderList([viaAutomation(alertSubject('a-1'))], { application });
       const link = screen.getByTestId('investigationSubjectViaLink');
 
       fireEvent.click(link);
@@ -498,7 +505,9 @@ describe('SubjectList', () => {
     });
 
     it('escapes the automation id in the link', () => {
-      renderList([alertSubject('a-1')], { application }, { id: 'a/b?c', name: 'Odd' });
+      renderList([{ ...alertSubject('a-1'), automation: { id: 'a/b?c', name: 'Odd' } }], {
+        application,
+      });
 
       expect(screen.getByTestId('investigationSubjectViaLink')).toHaveAttribute(
         'href',
@@ -507,7 +516,7 @@ describe('SubjectList', () => {
     });
 
     it('shows the name without a link when the application service is missing', () => {
-      renderList([alertSubject('a-1')], {}, automation);
+      renderList([viaAutomation(alertSubject('a-1'))], {});
 
       expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent(
         'via Payments alerts'
@@ -515,7 +524,7 @@ describe('SubjectList', () => {
       expect(screen.queryByTestId('investigationSubjectViaLink')).not.toBeInTheDocument();
     });
 
-    it('shows no "via" line without an automation', () => {
+    it('shows no "via" line for a subject without an automation', () => {
       renderList([alertSubject('a-1')], { application });
 
       expect(screen.queryByTestId('investigationSubjectVia')).not.toBeInTheDocument();

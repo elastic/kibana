@@ -31,7 +31,7 @@ import { SubjectClaimsService } from '../../subjects/services/subject_claims_ser
 import { subjectDocumentId, SubjectsService } from '../../subjects/services/subjects_service';
 import type { SubjectClaimDocument, SubjectDocument } from '../../subjects/storage/subject_storage';
 import type { InProgressResolver } from './in_progress';
-import { InvestigationsQueryService, toMetadata } from './investigations_query_service';
+import { InvestigationsQueryService } from './investigations_query_service';
 
 const request = httpServerMock.createKibanaRequest();
 const SPACE_ID = 'default';
@@ -162,31 +162,6 @@ const isAttachmentLookup = (filter: KueryNode): boolean =>
 const searchFilter = (client: { search: jest.Mock }): string =>
   toKqlExpression(client.search.mock.calls[0][0].filter as KueryNode);
 
-describe('toMetadata', () => {
-  it('reads the automation that started the investigation', () => {
-    expect(
-      toMetadata({
-        status: 'open',
-        automation_id: 'automation-1',
-        automation_name: 'Payments alerts',
-      })
-    ).toEqual({
-      status: 'open',
-      automation: { id: 'automation-1', name: 'Payments alerts' },
-    });
-  });
-
-  it('leaves the automation out when it is missing or incomplete', () => {
-    expect(toMetadata({ status: 'open' })).toEqual({ status: 'open' });
-    expect(toMetadata({ status: 'open', automation_id: 'automation-1' })).toEqual({
-      status: 'open',
-    });
-    expect(toMetadata({ status: 'open', automation_name: '', automation_id: 'a' })).toEqual({
-      status: 'open',
-    });
-  });
-});
-
 describe('InvestigationsQueryService', () => {
   describe('get', () => {
     it('joins the conversation with its subjects, impact, hypotheses, and in-progress state', async () => {
@@ -200,7 +175,11 @@ describe('InvestigationsQueryService', () => {
       const { service, client, inProgress } = setup({
         subjects: [
           subject('conv-1', 'alert-2', { createdAt: '2026-01-02T00:00:00.000Z' }),
-          subject('conv-1', 'alert-1', { triggerType: 'automatic', summary: 'High latency' }),
+          subject('conv-1', 'alert-1', {
+            triggerType: 'automatic',
+            summary: 'High latency',
+            automation: { id: 'automation-1', name: 'Payments alerts' },
+          }),
         ],
         impacts: [impact('conv-1')],
         hypotheses,
@@ -250,6 +229,7 @@ describe('InvestigationsQueryService', () => {
             id: 'alert-1',
             summary: 'High latency',
             trigger_type: 'automatic',
+            automation: { id: 'automation-1', name: 'Payments alerts' },
             created_at: '2026-01-01T00:00:00.000Z',
           },
           { type: 'alert', id: 'alert-2', created_at: '2026-01-02T00:00:00.000Z' },

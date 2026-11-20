@@ -106,7 +106,6 @@ import {
   findInvestigationConversation,
   findInvestigationConversations,
   getOrCreateInvestigationConversation,
-  toAutomationMetadata,
   type InvestigationConversation,
 } from './investigation_conversation';
 import {
@@ -115,6 +114,7 @@ import {
   toSlackThreadKey,
   toSlackThreadPermalink,
   toStartSubjects,
+  toSubjectAutomation,
   toSubjectKeys,
   withoutRecordedSubjects,
   type WorkflowSubjectInput,
@@ -127,16 +127,6 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 function asString(v: unknown): string | undefined {
   return typeof v === 'string' ? v || undefined : undefined;
 }
-
-/** The automation a run's start recorded in its input context; none for a follow-up. */
-const toAutomationMetadataFromContext = (context: unknown): Record<string, string> | undefined => {
-  if (!isPlainObject(context)) {
-    return undefined;
-  }
-  const id = asString(context.nightshift_automation_id);
-  const name = asString(context.nightshift_automation_name);
-  return id && name ? toAutomationMetadata({ id, name }) : undefined;
-};
 
 function asLifecycleCorrelationId(v: unknown): string | undefined {
   const value = asString(v)?.trim();
@@ -565,7 +555,7 @@ export class NightshiftInvestigationsClient {
     }: {
       automationBudget?: AutomationBudget;
       automationId?: string;
-      /** Recorded on a new investigation, so it shows what started it. */
+      /** Recorded on the subjects of a new investigation, so they show what triggered them. */
       automationName?: string;
       entryPoint: InvestigationEntryPoint;
     }
@@ -619,6 +609,7 @@ export class NightshiftInvestigationsClient {
       triggerType: trigger_type,
       investigationId: newInvestigationId,
       slackThread,
+      automation: toSubjectAutomation({ id: automationId, name: automationName }),
     });
 
     const conversations = await agentBuilder.conversations.getScopedClient({
@@ -633,7 +624,6 @@ export class NightshiftInvestigationsClient {
     let investigationId: string;
     let isFollowUp: boolean;
     let executionId: string;
-    let automationMetadata: Record<string, string> | undefined;
     let claimedNew = false;
     // A start that fails before its workflow launches runs nothing, so it gives its slots back and
     // drops the claims it took: a retry then opens a new investigation, and is charged for it.
@@ -688,12 +678,6 @@ export class NightshiftInvestigationsClient {
             newAlerts: alerts.filter(({ id }) => newAlertIds.has(id)),
           })
         : prepared.message;
-      // Only the investigation's first round records the automation: a follow-up (or a recovery
-      // round) must neither overwrite it nor duplicate it.
-      automationMetadata =
-        !isFollowUp && automationId && automationName
-          ? toAutomationMetadata({ id: automationId, name: automationName })
-          : undefined;
       const inputs = {
         message: buildInvestigationRoundMessage({
           message: roundMessage,
@@ -712,8 +696,6 @@ export class NightshiftInvestigationsClient {
         context: {
           ...prepared.context,
           nightshift_automation_id: automationId,
-          // The run's `_ensure` step creates the conversation when this start has not yet.
-          nightshift_automation_name: automationMetadata?.automation_name,
           is_follow_up: isFollowUp,
           source: resolvedSubject.type,
           [`${resolvedSubject.type}_id`]: resolvedSubject.id,
@@ -733,12 +715,7 @@ export class NightshiftInvestigationsClient {
     }
 
     if (!isFollowUp) {
-      await this.createAcceptedInvestigation({
-        conversations,
-        investigationId,
-        executionId,
-        metadata: automationMetadata,
-      });
+      await this.createAcceptedInvestigation({ conversations, investigationId, executionId });
     }
 
     const correlation = correlationFromContext(prepared.context);
@@ -780,12 +757,10 @@ export class NightshiftInvestigationsClient {
     conversations,
     investigationId,
     executionId,
-    metadata,
   }: {
     conversations: ConversationPublicClient;
     investigationId: string;
     executionId: string;
-    metadata?: Record<string, string>;
   }): Promise<void> {
     try {
       // Records the run in the creating write. If the run's `_ensure` step created the
@@ -794,7 +769,6 @@ export class NightshiftInvestigationsClient {
         conversations,
         id: investigationId,
         workflowExecutionId: executionId,
-        metadata,
       });
     } catch (error) {
       this.logger.warn(
@@ -1095,7 +1069,6 @@ export class NightshiftInvestigationsClient {
       conversations,
       id: investigationId,
       workflowExecutionId: executionId,
-      metadata: toAutomationMetadataFromContext(inputs?.context),
       // A raw workflow can fail before ensuring its agent, which conversation creation requires.
       ...(!reopen
         ? {

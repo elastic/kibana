@@ -47,6 +47,27 @@ describe('alertSubjectSnapshotSchema', () => {
 });
 
 describe('investigationSubjectInputSchema', () => {
+  it('takes an optional automation with a bounded id and name', () => {
+    const alert = { type: 'alert', id: 'alert-1' };
+
+    expect(investigationSubjectInputSchema.safeParse(alert).success).toBe(true);
+    expect(
+      investigationSubjectInputSchema.safeParse({
+        ...alert,
+        automation: { id: 'automation-1', name: 'Payments alerts' },
+      }).success
+    ).toBe(true);
+    for (const automation of [
+      { id: 'automation-1' },
+      { id: '', name: 'Payments alerts' },
+      { id: 'automation-1', name: 'n'.repeat(501) },
+    ]) {
+      expect(investigationSubjectInputSchema.safeParse({ ...alert, automation }).success).toBe(
+        false
+      );
+    }
+  });
+
   it('accepts each subject type with its own fields', () => {
     for (const input of [
       { type: 'alert', id: 'alert-1', triggerType: 'automatic', snapshot: nightshiftSnapshot },

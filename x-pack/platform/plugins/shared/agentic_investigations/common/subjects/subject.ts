@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_EVIDENCE_TEXT_LENGTH } from '../evidence/evidence';
 import { userSchema } from '../user';
 import {
@@ -19,6 +19,7 @@ import {
 const MAX_ID_LENGTH = 256;
 const MAX_TIMESTAMP_LENGTH = 64;
 const MAX_URL_LENGTH = 2048;
+const MAX_AUTOMATION_NAME_LENGTH = 500;
 const MAX_SNAPSHOT_KEYS = 50;
 const MAX_SNAPSHOT_KEY_LENGTH = 128;
 /** Serialized size bound on a snapshot, whose open fields (rule parameters, grouping) are opaque. */
@@ -111,6 +112,19 @@ export const slackThreadSubjectSchema = z.object({
 });
 export type SlackThreadSubject = z.infer<typeof slackThreadSubjectSchema>;
 
+/**
+ * The automation a subject triggered an investigation through. Optional: only an automation's
+ * start records one, and a subject recorded without it simply has none. The name is as it was
+ * when the investigation started.
+ */
+export const subjectAutomationSchema = lazySchema(() =>
+  z.object({
+    id: z.string().min(1).max(MAX_ID_LENGTH),
+    name: z.string().min(1).max(MAX_AUTOMATION_NAME_LENGTH),
+  })
+);
+export type SubjectAutomation = z.infer<typeof subjectAutomationSchema>;
+
 /** Identifies a subject across investigations: the lookup and claim key. */
 export const investigationSubjectKeySchema = z.object({
   type: investigationSubjectTypeSchema,
@@ -123,20 +137,23 @@ export type InvestigationSubjectKey = z.infer<typeof investigationSubjectKeySche
  * Slack threads. A later write for the same subject replaces the fields it sends and keeps the
  * rest; `slack` is merged field by field, so a writer can add `status_message_ts` alone.
  */
-export const investigationSubjectInputSchema = investigationSubjectKeySchema
-  .extend({
-    /** What the subject is about: an event title, the question asked. Plain text. */
-    summary: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
-    triggerType: investigationSubjectTriggerTypeSchema.optional(),
-    snapshot: alertSubjectSnapshotSchema.optional(),
-    slack: slackThreadSubjectSchema.optional(),
-  })
-  .refine(({ type, snapshot }) => snapshot === undefined || type === 'alert', {
-    message: 'snapshot is only allowed on alert subjects',
-  })
-  .refine(({ type, slack }) => slack === undefined || type === 'slack_thread', {
-    message: 'slack is only allowed on slack_thread subjects',
-  });
+export const investigationSubjectInputSchema = lazySchema(() =>
+  investigationSubjectKeySchema
+    .extend({
+      /** What the subject is about: an event title, the question asked. Plain text. */
+      summary: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
+      triggerType: investigationSubjectTriggerTypeSchema.optional(),
+      automation: subjectAutomationSchema.optional(),
+      snapshot: alertSubjectSnapshotSchema.optional(),
+      slack: slackThreadSubjectSchema.optional(),
+    })
+    .refine(({ type, snapshot }) => snapshot === undefined || type === 'alert', {
+      message: 'snapshot is only allowed on alert subjects',
+    })
+    .refine(({ type, slack }) => slack === undefined || type === 'slack_thread', {
+      message: 'slack is only allowed on slack_thread subjects',
+    })
+);
 export type InvestigationSubjectInput = z.infer<typeof investigationSubjectInputSchema>;
 
 export const investigationSubjectInputsSchema = z
@@ -148,18 +165,21 @@ export const investigationSubjectInputsSchema = z
  * Stored subject document. `subjectType` and `subjectId` name the subject; `id` is the document
  * (and attachment) id, a hash of space, conversation, subject type, and subject id.
  */
-export const investigationSubjectSchema = z.object({
-  id: z.string().max(MAX_ID_LENGTH),
-  spaceId: z.string().max(MAX_ID_LENGTH),
-  conversationId: z.string().max(MAX_ID_LENGTH),
-  subjectType: investigationSubjectTypeSchema,
-  subjectId: z.string().min(1).max(MAX_SUBJECT_ID_LENGTH),
-  summary: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
-  triggerType: investigationSubjectTriggerTypeSchema.optional(),
-  snapshot: alertSubjectSnapshotSchema.optional(),
-  slack: slackThreadSubjectSchema.optional(),
-  createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
-  createdBy: userSchema.optional(),
-  updatedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
-});
+export const investigationSubjectSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(MAX_ID_LENGTH),
+    spaceId: z.string().max(MAX_ID_LENGTH),
+    conversationId: z.string().max(MAX_ID_LENGTH),
+    subjectType: investigationSubjectTypeSchema,
+    subjectId: z.string().min(1).max(MAX_SUBJECT_ID_LENGTH),
+    summary: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
+    triggerType: investigationSubjectTriggerTypeSchema.optional(),
+    automation: subjectAutomationSchema.optional(),
+    snapshot: alertSubjectSnapshotSchema.optional(),
+    slack: slackThreadSubjectSchema.optional(),
+    createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
+    createdBy: userSchema.optional(),
+    updatedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+  })
+);
 export type InvestigationSubject = z.infer<typeof investigationSubjectSchema>;

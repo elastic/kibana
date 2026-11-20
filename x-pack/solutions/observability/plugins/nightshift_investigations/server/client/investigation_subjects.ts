@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { buildSlackThreadUrl } from '@kbn/connector-specs';
 import {
   INVESTIGATION_SUBJECT_TRIGGER_TYPES,
@@ -17,6 +17,7 @@ import {
 import type {
   InvestigationSubject as StoredInvestigationSubject,
   InvestigationSubjectKey,
+  SubjectAutomation,
 } from '@kbn/agentic-investigations-plugin/common';
 import type {
   InvestigationAlertSnapshot,
@@ -38,6 +39,9 @@ export { toSlackThreadKey };
 
 const MAX_SLACK_FIELD_LENGTH = 256;
 const MAX_SLACK_PERMALINK_LENGTH = 2048;
+// The limits of the subject document's `automation`; a longer value would fail the subject write.
+const MAX_AUTOMATION_ID_LENGTH = 256;
+const MAX_AUTOMATION_NAME_LENGTH = 500;
 
 /**
  * A subject the start path hands to the investigation workflow in `inputs.subjects`, recorded on
@@ -45,21 +49,29 @@ const MAX_SLACK_PERMALINK_LENGTH = 2048;
  * creation of the conversation, so subjects are only ever recorded there. Agentic investigations
  * validates these again when it stores them.
  */
-export const workflowSubjectInputSchema = z.object({
-  type: z.enum(INVESTIGATION_SUBJECT_TYPES),
-  id: z.string().min(1).max(MAX_SUBJECT_ID_LENGTH),
-  summary: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
-  triggerType: z.enum(INVESTIGATION_SUBJECT_TRIGGER_TYPES).optional(),
-  snapshot: investigationAlertSnapshotSchema.optional(),
-  slack: z
-    .object({
-      channel: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH),
-      thread_ts: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH),
-      status_message_ts: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH).optional(),
-      permalink: z.string().max(MAX_SLACK_PERMALINK_LENGTH).optional(),
-    })
-    .optional(),
-});
+export const workflowSubjectInputSchema = lazySchema(() =>
+  z.object({
+    type: z.enum(INVESTIGATION_SUBJECT_TYPES),
+    id: z.string().min(1).max(MAX_SUBJECT_ID_LENGTH),
+    summary: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
+    triggerType: z.enum(INVESTIGATION_SUBJECT_TRIGGER_TYPES).optional(),
+    automation: z
+      .object({
+        id: z.string().min(1).max(MAX_AUTOMATION_ID_LENGTH),
+        name: z.string().min(1).max(MAX_AUTOMATION_NAME_LENGTH),
+      })
+      .optional(),
+    snapshot: investigationAlertSnapshotSchema.optional(),
+    slack: z
+      .object({
+        channel: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH),
+        thread_ts: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH),
+        status_message_ts: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH).optional(),
+        permalink: z.string().max(MAX_SLACK_PERMALINK_LENGTH).optional(),
+      })
+      .optional(),
+  })
+);
 
 export type WorkflowSubjectInput = z.infer<typeof workflowSubjectInputSchema>;
 
@@ -81,14 +93,28 @@ export const toSlackThreadPermalink = (
 const isPlaceholderManualSubject = ({ type, id }: Pick<InvestigationSubject, 'type' | 'id'>) =>
   type === 'manual' && id === DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID;
 
+/** The automation a start came through, cut to what a subject records; none when it has no name. */
+export const toSubjectAutomation = ({
+  id,
+  name,
+}: {
+  id?: string;
+  name?: string;
+}): SubjectAutomation | undefined =>
+  id && name
+    ? { id: id.slice(0, MAX_AUTOMATION_ID_LENGTH), name: name.slice(0, MAX_AUTOMATION_NAME_LENGTH) }
+    : undefined;
+
 const withSlackThread = ({
   primary,
   slackThread,
   triggerType,
+  automation,
 }: {
   primary: WorkflowSubjectInput;
   slackThread?: SlackThreadReference;
   triggerType: InvestigationTriggerType;
+  automation?: SubjectAutomation;
 }): { primary: WorkflowSubjectInput; thread: WorkflowSubjectInput[] } => {
   if (!slackThread) {
     return { primary, thread: [] };
@@ -100,7 +126,10 @@ const withSlackThread = ({
   if (primary.type === 'slack_thread' && primary.id === id) {
     return { primary: { ...primary, slack }, thread: [] };
   }
-  return { primary, thread: [{ type: 'slack_thread', id, triggerType, slack }] };
+  return {
+    primary,
+    thread: [{ type: 'slack_thread', id, triggerType, ...(automation && { automation }), slack }],
+  };
 };
 
 /**
@@ -108,7 +137,8 @@ const withSlackThread = ({
  * per alert snapshot, each carrying its snapshot. A manual investigation without a subject id is
  * recorded under the investigation's own id, so it never matches another investigation. A start
  * about a Slack thread also records the thread, which is how a reply or mention in it finds the
- * investigation; when the thread is the named subject, it is recorded once.
+ * investigation; when the thread is the named subject, it is recorded once. A start that an
+ * automation made records the automation on each of them.
  */
 export const toStartSubjects = ({
   subject,
@@ -116,12 +146,14 @@ export const toStartSubjects = ({
   triggerType,
   investigationId,
   slackThread,
+  automation,
 }: {
   subject: InvestigationSubject;
   alerts?: InvestigationAlertSnapshot[];
   triggerType: InvestigationTriggerType;
   investigationId: string;
   slackThread?: SlackThreadReference;
+  automation?: SubjectAutomation;
 }): WorkflowSubjectInput[] => {
   const summary = truncateSummary(subject.summary);
   const { primary, thread } = withSlackThread({
@@ -129,10 +161,12 @@ export const toStartSubjects = ({
       type: subject.type,
       id: isPlaceholderManualSubject(subject) ? investigationId : subject.id,
       triggerType,
+      ...(automation && { automation }),
       ...(summary ? { summary } : {}),
     },
     slackThread,
     triggerType,
+    automation,
   });
 
   if (subject.type !== 'alert') {
@@ -144,6 +178,7 @@ export const toStartSubjects = ({
       type: 'alert',
       id: snapshot.id,
       triggerType,
+      ...(automation && { automation }),
       snapshot,
       ...(snapshot.id === subject.id && summary ? { summary } : {}),
     })

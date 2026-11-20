@@ -18,10 +18,10 @@ import {
   euiTextTruncate,
   useEuiTheme,
 } from '@elastic/eui';
-import type { InvestigationAutomation } from '../../../common/investigations/investigation';
 import type {
   InvestigationSubject,
   InvestigationSubjectType,
+  SubjectAutomation,
 } from '../../../common/subjects/subject';
 import type { InvestigationAttachmentContentProps } from '../../investigation_attachments';
 import { getSubjectDisplayType, getSubjectTitle, type SubjectRowData } from './subject_title';
@@ -277,7 +277,7 @@ const CompactRow = ({
  * The automation a trigger came through, as a line under the trigger's row: "via <automation>",
  * the automation opening in the Nightshift app. It sits outside the row, which is a link itself.
  */
-const ViaAutomation: React.FC<{ automation: InvestigationAutomation }> = ({
+const ViaAutomation: React.FC<{ automation: SubjectAutomation }> = ({
   automation: { id, name },
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -346,12 +346,10 @@ const getSubjectDescription = (subject: SubjectRowData, isNested: boolean): Reac
  * The row links where `useSubjectLink` says (the subject's page, else its own link); without a
  * link it is plain text.
  */
-export const SubjectRow: React.FC<{
-  subject: SubjectRowData;
-  isNested?: boolean;
-  /** The automation the subject triggered the investigation through; shown as a "via" line. */
-  automation?: InvestigationAutomation;
-}> = ({ subject, isNested = false, automation }) => {
+export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean }> = ({
+  subject,
+  isNested = false,
+}) => {
   const { href, onClick: onLinkClick, isExternal } = useSubjectLink(subject);
   const {
     onClick: onRowClick,
@@ -359,6 +357,7 @@ export const SubjectRow: React.FC<{
     canOpenFlyout,
   } = useSubjectFlyout(subject, href, { onLinkClick });
   const displayType = getSubjectDisplayType(subject);
+  const { automation } = subject;
 
   return (
     <>
@@ -375,7 +374,7 @@ export const SubjectRow: React.FC<{
           isNested={isNested}
           data-test-subj={`investigationSubject-${subject.type}`}
         />
-        {automation && <ViaAutomation automation={automation} />}
+        {automation && !isNested && <ViaAutomation automation={automation} />}
       </div>
       {flyout}
     </>
@@ -388,12 +387,11 @@ const subjectKey = ({ type, id }: SubjectRowData): string => `${type}:${id}`;
  * The alerts an investigation is about, as one "N alerts" row that opens the alerts list filtered
  * to them. Without that list (alerting v2 not available) the row lists the alerts inline instead.
  */
-const AlertsSubjectRows: React.FC<{
-  alerts: SubjectRowData[];
-  automation?: InvestigationAutomation;
-}> = ({ alerts, automation }) => {
+const AlertsSubjectRows: React.FC<{ alerts: SubjectRowData[] }> = ({ alerts }) => {
   const { href } = useAlertsListLink(alerts);
   const [isExpanded, setIsExpanded] = useState(false);
+  // The alerts of one investigation come through the same automation: the first one names it.
+  const [{ automation }] = alerts;
 
   return (
     <>
@@ -420,13 +418,12 @@ const AlertsSubjectRows: React.FC<{
 
 /**
  * An investigation's subjects in one bordered list. Several alerts collapse into one "N alerts"
- * row, which opens the alerts list filtered to them. When an automation started the investigation,
- * each row says so in a "via <automation>" line.
+ * row, which opens the alerts list filtered to them. A subject that an automation triggered the
+ * investigation through says so in a "via <automation>" line under its row.
  */
-export const SubjectList: React.FC<{
-  subjects: SubjectRowData[];
-  automation?: InvestigationAutomation;
-}> = ({ subjects: allSubjects, automation }) => {
+export const SubjectList: React.FC<{ subjects: SubjectRowData[] }> = ({
+  subjects: allSubjects,
+}) => {
   const { euiTheme } = useEuiTheme();
   const subjects = useMemo(
     () =>
@@ -441,14 +438,14 @@ export const SubjectList: React.FC<{
     const firstAlert = alerts.length > 1 ? alerts[0] : undefined;
     return subjects.flatMap((subject) => {
       if (firstAlert === undefined || subject.type !== 'alert') {
-        return [<SubjectRow key={subjectKey(subject)} subject={subject} automation={automation} />];
+        return [<SubjectRow key={subjectKey(subject)} subject={subject} />];
       }
       if (subject !== firstAlert) {
         return [];
       }
-      return [<AlertsSubjectRows key="alerts" alerts={alerts} automation={automation} />];
+      return [<AlertsSubjectRows key="alerts" alerts={alerts} />];
     });
-  }, [subjects, alerts, automation]);
+  }, [subjects, alerts]);
 
   return (
     <EuiPanel
@@ -470,5 +467,9 @@ export const SubjectList: React.FC<{
 
 /** An investigation subject, the same compact row inline in the chat and in the details flyout. */
 export const SubjectView: React.FC<InvestigationAttachmentContentProps<InvestigationSubject>> = ({
-  document: { subjectType, subjectId, summary, snapshot, slack },
-}) => <SubjectRow subject={{ type: subjectType, id: subjectId, summary, snapshot, slack }} />;
+  document: { subjectType, subjectId, summary, automation, snapshot, slack },
+}) => (
+  <SubjectRow
+    subject={{ type: subjectType, id: subjectId, summary, automation, snapshot, slack }}
+  />
+);

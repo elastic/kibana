@@ -1473,6 +1473,63 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     });
   const runInputs = () => mockManagement.runWorkflow.mock.calls[0][2];
 
+  describe('records the automation that started a new investigation on its subjects', () => {
+    const startFromAutomation = () =>
+      makeClient().start(
+        {
+          subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'automatic',
+          context: { alerts: [makeAlert('alert-1')] },
+        },
+        {
+          automationId: 'automation-1',
+          automationName: 'Payments alerts',
+          entryPoint: 'automation',
+        }
+      );
+
+    it('in the subjects the run records', async () => {
+      await startFromAutomation();
+
+      expect(runInputs().subjects).toEqual([
+        expect.objectContaining({
+          id: 'alert-1',
+          automation: { id: 'automation-1', name: 'Payments alerts' },
+        }),
+      ]);
+    });
+
+    it('not for a start no automation made', async () => {
+      await startAlerts('alert-1');
+
+      expect(runInputs().subjects[0]).not.toHaveProperty('automation');
+    });
+
+    it('only on the subjects a follow-up adds, never on the ones already recorded', async () => {
+      agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-recent' }]);
+      withConversations(makeConversation({ id: 'inv-recent' }));
+      subjectsClient.listByConversationIds.mockResolvedValue([
+        makeStoredSubject({ conversationId: 'inv-recent', subjectId: 'alert-1' }),
+      ]);
+
+      await makeClient().start(
+        {
+          subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'automatic',
+          context: { alerts: [makeAlert('alert-1'), makeAlert('alert-3')] },
+        },
+        { automationId: 'automation-2', automationName: 'Other', entryPoint: 'automation' }
+      );
+
+      expect(runInputs().subjects).toEqual([
+        expect.objectContaining({
+          id: 'alert-3',
+          automation: { id: 'automation-2', name: 'Other' },
+        }),
+      ]);
+    });
+  });
+
   beforeEach(() => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-1');
@@ -1522,64 +1579,6 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     expect(mockManagement.runWorkflow.mock.invocationCallOrder[0]).toBeLessThan(
       conversations.create.mock.invocationCallOrder[0]
     );
-  });
-
-  describe('records the automation that started a new investigation', () => {
-    const startFromAutomation = () =>
-      makeClient().start(
-        {
-          subject: { type: 'alert', id: 'alert-1' },
-          trigger_type: 'automatic',
-          context: { alerts: [makeAlert('alert-1')] },
-        },
-        {
-          automationId: 'automation-1',
-          automationName: 'Payments alerts',
-          entryPoint: 'automation',
-        }
-      );
-
-    it('in the creating write and in the run input, for the run that ensures the conversation', async () => {
-      await startFromAutomation();
-
-      expect(conversations.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          metadata: {
-            automation_id: 'automation-1',
-            automation_name: 'Payments alerts',
-            severity: 'medium',
-            workflow_execution_ids: ['exec-1'],
-          },
-        })
-      );
-      expect(runInputs().context).toMatchObject({
-        nightshift_automation_id: 'automation-1',
-        nightshift_automation_name: 'Payments alerts',
-      });
-    });
-
-    it('not for an investigation no automation started', async () => {
-      await startAlerts('alert-1');
-
-      expect(conversations.create.mock.calls[0][0].metadata).toEqual({
-        severity: 'medium',
-        workflow_execution_ids: ['exec-1'],
-      });
-      expect(runInputs().context.nightshift_automation_name).toBeUndefined();
-    });
-
-    it('not for a follow-up, which creates no conversation and carries no automation to the run', async () => {
-      subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-pending' });
-
-      await startFromAutomation();
-
-      expect(conversations.create).not.toHaveBeenCalled();
-      expect(runInputs().context).toMatchObject({
-        is_follow_up: true,
-        nightshift_automation_id: 'automation-1',
-      });
-      expect(runInputs().context.nightshift_automation_name).toBeUndefined();
-    });
   });
 
   it('does not record the run again when the workflow created the conversation first', async () => {
@@ -2187,49 +2186,6 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       /only run as the nightshift service account/
     );
     expect(conversations.create).not.toHaveBeenCalled();
-  });
-
-  it('records the automation that started the investigation when the run creates the conversation', async () => {
-    withExecution({
-      inputs: {
-        investigation_id: 'inv-1',
-        subjects,
-        context: {
-          nightshift_automation_id: 'automation-1',
-          nightshift_automation_name: 'Payments alerts',
-        },
-      },
-    });
-
-    await makeClient().ensureOrCreate('inv-1', 'exec-1');
-
-    expect(conversations.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        metadata: {
-          automation_id: 'automation-1',
-          automation_name: 'Payments alerts',
-          severity: 'medium',
-          workflow_execution_ids: ['exec-1'],
-        },
-      })
-    );
-  });
-
-  it('records no automation for a run that carries no automation name', async () => {
-    withExecution({
-      inputs: {
-        investigation_id: 'inv-1',
-        subjects,
-        context: { nightshift_automation_id: 'automation-1' },
-      },
-    });
-
-    await makeClient().ensureOrCreate('inv-1', 'exec-1');
-
-    expect(conversations.create.mock.calls[0][0].metadata).toEqual({
-      severity: 'medium',
-      workflow_execution_ids: ['exec-1'],
-    });
   });
 
   it('creates the investigation conversation and records the run subjects', async () => {
