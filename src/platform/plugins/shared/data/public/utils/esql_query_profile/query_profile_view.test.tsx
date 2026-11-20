@@ -34,17 +34,20 @@ const profile = {
       operators: [
         {
           operator: 'LuceneSourceOperator',
+          plan_node_id: 'from',
           status: { process_nanos: 60_000_000, rows_received: 10, rows_emitted: 10 },
         },
         {
           operator: 'HashAggregationOperator',
+          plan_node_id: 'stats',
           status: { hash_nanos: 30_000_000 },
         },
         {
           operator: 'TopNOperator',
+          plan_node_id: 'sort',
           status: { receive_nanos: 10_000_000 },
         },
-        { operator: 'ExchangeSinkOperator', status: { rows_received: 5 } },
+        { operator: 'ExchangeSinkOperator', plan_node_id: 'sink', status: { rows_received: 5 } },
       ],
     },
     {
@@ -59,6 +62,26 @@ const profile = {
         ],
       },
       operators: [{ operator: 'ExchangeSourceOperator', status: { rows_emitted: 5 } }],
+    },
+  ],
+  plans: [
+    {
+      description: 'data',
+      node_name: 'node-a',
+      plan: 'ExchangeSinkExec',
+      // The commands of QUERY, as Elasticsearch reports where each plan node came from.
+      plan_json: {
+        id: 'sink',
+        source: { line: null, column: null, text: null, view: null },
+        children: [
+          { id: 'from', source: { line: 1, column: 1, text: 'FROM logs', view: null } },
+          {
+            id: 'stats',
+            source: { line: 3, column: 3, text: 'STATS c = COUNT(*) BY a', view: null },
+          },
+          { id: 'sort', source: { line: 4, column: 3, text: 'SORT c DESC', view: null } },
+        ],
+      },
     },
   ],
 };
@@ -346,6 +369,42 @@ describe('QueryProfileView', () => {
       expect(
         await screen.findByText('This profile did not include timing for individual drivers.')
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('by command', () => {
+    it('shows each command of the query with its share of the operator time', async () => {
+      renderProfileOf(QUERY, search);
+
+      await userEvent.click(await screen.findByTestId('esqlQueryProfileByCommandTab'));
+
+      const commands = await screen.findAllByTestId('esqlQueryProfileCommand');
+      expect(commands).toHaveLength(4);
+      expect(commands[0]).toHaveTextContent('FROM logs');
+      expect(commands[0]).toHaveTextContent('60%');
+      expect(commands[2]).toHaveTextContent('STATS c = COUNT(*) BY a');
+      expect(commands[2]).toHaveTextContent('30%');
+      expect(commands[3]).toHaveTextContent('10%');
+      expect(commands[1]).toHaveTextContent('No operator of its own');
+    });
+
+    it('goes back to the timeline', async () => {
+      renderProfileOf(QUERY, search);
+
+      await userEvent.click(await screen.findByTestId('esqlQueryProfileByCommandTab'));
+      expect(await screen.findByTestId('esqlQueryProfileByCommand')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('esqlQueryProfileTimelineTab'));
+
+      expect(await screen.findByTestId('esqlQueryProfileTimeline')).toBeInTheDocument();
+      expect(screen.queryByTestId('esqlQueryProfileByCommand')).not.toBeInTheDocument();
+    });
+
+    it('has no tab when the profile does not tie operators to commands, as with older Elasticsearch', async () => {
+      renderProfileOf('FROM untimed', search);
+
+      await screen.findByTestId('esqlQueryProfileDuration');
+      expect(screen.queryByTestId('esqlQueryProfileByCommandTab')).not.toBeInTheDocument();
     });
   });
 });

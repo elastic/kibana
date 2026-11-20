@@ -61,6 +61,7 @@ describe('aggregateEsqlProfile', () => {
     expect(reader.rowsReceived).toBe(400);
     expect(reader.rowsEmitted).toBe(150);
     expect(reader.share).toBe(1);
+    expect(reader.drivers).toHaveLength(2);
     expect(view.hasTimeline).toBe(false);
     expect(view.timeline).toEqual({ drivers: [] });
   });
@@ -96,6 +97,7 @@ describe('aggregateEsqlProfile', () => {
       planningPhases: [],
       driverCount: 0,
       operators: [],
+      planNodeSources: {},
       hasTimeline: false,
       timeline: { drivers: [] },
     });

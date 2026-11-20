@@ -10,6 +10,7 @@
 import type { EsqlProfileDriver, EsqlQueryProfile } from '@kbn/es-types';
 import type {
   AggregatedOperator,
+  AggregatedOperatorDriver,
   OperatorMeasures,
   PlanningPhase,
   QueryProfileTimeline,
@@ -20,10 +21,12 @@ import type {
 } from './types';
 import { PHASE_NANOS_FIELDS, PLANNING_PHASE_IDS, PROCESS_NANOS_FIELD } from './profile_schema';
 import { isRecord } from '../shared/json_helpers';
+import { readPlanNodeSources } from './plan_node_sources';
 import { spanMillis } from '../shared/time_span';
 
 interface OperatorAccumulator extends OperatorMeasures {
   operator: string;
+  drivers: AggregatedOperatorDriver[];
 }
 
 /** Shortens `ValuesSourceReaderOperator[fields = [body]]` to a title plus the bracketed detail. */
@@ -53,7 +56,7 @@ export function aggregateEsqlProfile(profile: unknown): QueryProfileView {
 
   const drivers = parsed?.drivers ?? [];
   const readings = drivers.map(readOperatorReadings);
-  const operators = aggregateOperators(readings);
+  const operators = aggregateOperators(drivers, readings);
   const timeline = readTimeline(parsed, drivers, readings);
 
   return {
@@ -63,6 +66,7 @@ export function aggregateEsqlProfile(profile: unknown): QueryProfileView {
     planningPhases: readPlanningPhases(parsed),
     driverCount: drivers.length,
     operators,
+    planNodeSources: readPlanNodeSources(parsed?.plans ?? []),
     hasTimeline: timeline.drivers.length > 0,
     timeline,
   };
@@ -94,6 +98,7 @@ function readPlanningPhases(profile: EsqlQueryProfile | undefined): PlanningPhas
 /** What one operator of a driver reported, with its time and rows read out of its status. */
 interface OperatorReading extends OperatorMeasures {
   operator: string;
+  planNodeId?: string;
   rawStatus: Record<string, unknown>;
 }
 
@@ -108,6 +113,7 @@ function readOperatorReadings(driver: EsqlProfileDriver): OperatorReading[] {
     return [
       {
         operator: entry.operator,
+        planNodeId: entry.plan_node_id,
         processNanos: reportedNanos ?? 0,
         timeReported: reportedNanos !== undefined,
         rowsReceived: readFinite(status.rows_received) ?? 0,
@@ -127,10 +133,13 @@ function readOperatorNanos(status: Record<string, unknown>): number | undefined 
   return phases.length > 0 ? phases.reduce((sum, nanos) => sum + nanos, 0) : undefined;
 }
 
-function aggregateOperators(readingsByDriver: OperatorReading[][]): AggregatedOperator[] {
+function aggregateOperators(
+  drivers: EsqlProfileDriver[],
+  readingsByDriver: OperatorReading[][]
+): AggregatedOperator[] {
   const byOperator = new Map<string, OperatorAccumulator>();
 
-  readingsByDriver.forEach((readings) => {
+  readingsByDriver.forEach((readings, index) => {
     readings.forEach(({ operator, ...reading }) => {
       const current: OperatorAccumulator = byOperator.get(operator) ?? {
         operator,
@@ -138,12 +147,19 @@ function aggregateOperators(readingsByDriver: OperatorReading[][]): AggregatedOp
         timeReported: false,
         rowsReceived: 0,
         rowsEmitted: 0,
+        drivers: [],
       };
 
       current.processNanos += reading.processNanos;
       current.timeReported = current.timeReported || reading.timeReported;
       current.rowsReceived += reading.rowsReceived;
       current.rowsEmitted += reading.rowsEmitted;
+      current.drivers.push({
+        nodeName: drivers[index].node_name,
+        planNodeId: reading.planNodeId,
+        processNanos: reading.processNanos,
+        timeReported: reading.timeReported,
+      });
       byOperator.set(operator, current);
     });
   });
@@ -169,6 +185,7 @@ function toAggregatedOperator(
     share: shareOf(operator.processNanos, totalProcessNanos),
     rowsReceived: operator.rowsReceived,
     rowsEmitted: operator.rowsEmitted,
+    drivers: operator.drivers,
   };
 }
 
@@ -246,7 +263,7 @@ function countSleeps(driver: EsqlProfileDriver): number {
 function readDriverOperators(readings: OperatorReading[]): TimelineOperator[] {
   const totalProcessNanos = readings.reduce((sum, reading) => sum + reading.processNanos, 0);
 
-  return readings.map((reading) => ({
+  return readings.map(({ planNodeId, ...reading }) => ({
     ...reading,
     ...formatOperatorLabel(reading.operator),
     share: shareOf(reading.processNanos, totalProcessNanos),
@@ -254,7 +271,7 @@ function readDriverOperators(readings: OperatorReading[]): TimelineOperator[] {
 }
 
 /** A part of a total, from 0 to 1, with no total meaning no share. */
-function shareOf(nanos: number, totalNanos: number): number {
+export function shareOf(nanos: number, totalNanos: number): number {
   return totalNanos > 0 ? nanos / totalNanos : 0;
 }
 
