@@ -10,7 +10,7 @@ import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mock
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { createTransitionStrategyFactory } from './strategies/strategy_resolver.mock';
-import { DirectorService } from './director';
+import { DirectorService, type DirectorServiceContract } from './director';
 
 export function createDirectorService(): {
   directorService: DirectorService;
@@ -25,5 +25,17 @@ export function createDirectorService(): {
   return {
     directorService,
     mockEsClient,
+  };
+}
+
+/**
+ * Fully-stubbed {@link DirectorServiceContract} for tests that only care about
+ * what a consumer does with the director's result (e.g. `DirectorStep`). For
+ * tests that need the real transition computation, use
+ * {@link createDirectorService} instead.
+ */
+export function createMockDirectorService(): jest.Mocked<DirectorServiceContract> {
+  return {
+    run: jest.fn(),
   };
 }

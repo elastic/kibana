@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ContentList } from '@kbn/content-list';
 
 interface ListLayoutProps {
@@ -27,14 +27,17 @@ export const ListLayout = ({
   'data-test-subj': dataTestSubj,
   children,
 }: ListLayoutProps) => (
-  <>
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem>{toolbar}</EuiFlexItem>
-      {toolbarAppend && <EuiFlexItem grow={false}>{toolbarAppend}</EuiFlexItem>}
-    </EuiFlexGroup>
-    <EuiSpacer size="m" />
-    <ContentList emptyState={emptyState} data-test-subj={dataTestSubj}>
-      {children}
-    </ContentList>
-  </>
+  <EuiFlexGroup direction="column" gutterSize="m">
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem>{toolbar}</EuiFlexItem>
+        {toolbarAppend && <EuiFlexItem grow={false}>{toolbarAppend}</EuiFlexItem>}
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <ContentList emptyState={emptyState} data-test-subj={dataTestSubj}>
+        {children}
+      </ContentList>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 );
