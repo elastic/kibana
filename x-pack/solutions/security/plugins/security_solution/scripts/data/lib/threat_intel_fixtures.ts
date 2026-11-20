@@ -780,7 +780,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         'for console principals treasury-ops, ap-clerk-02, and payroll-batch, one guess per ' +
         'principal per hour, from two source IP addresses: 203[.]0[.]113[.]60 (203.0.113.60) ' +
         'and 203[.]0[.]113[.]61 (203.0.113.61). Direct sign-in questions to ' +
-        'signin-watch@lab-demo.seedbench.dev. No lockout was triggered and the console does not ' +
+        'signin-watch@lab-demo.elastic.dev. No lockout was triggered and the console does not ' +
         'enforce a second factor, so hunters should filter directly on the exact event name ' +
         'ConsoleLogin with a failed outcome, not by service or category. This maps to ATT&CK ' +
         'T1110.003 (password spraying).',
@@ -792,7 +792,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             'eu-central-1. ConsoleLogin failures repeat hourly for console principals ' +
             'treasury-ops, ap-clerk-02, and payroll-batch from two source IP addresses: ' +
             '203[.]0[.]113[.]60 (203.0.113.60) and 203[.]0[.]113[.]61 (203.0.113.61). Direct ' +
-            'sign-in questions to signin-watch@lab-demo.seedbench.dev. Hunters should filter on the ' +
+            'sign-in questions to signin-watch@lab-demo.elastic.dev. Hunters should filter on the ' +
             'exact event name ConsoleLogin with a failed outcome, not by service or category. ' +
             'Maps to ATT&CK T1110.003.',
         },
@@ -803,7 +803,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             '210987654321 continue to target console principals treasury-ops, ap-clerk-02, ' +
             'and payroll-batch. The two source IP addresses observed are ' +
             '203[.]0[.]113[.]60 (203.0.113.60) and 203[.]0[.]113[.]61 (203.0.113.61); contact ' +
-            'signin-watch@lab-demo.seedbench.dev with fresh sign-in reports. Filter on the exact event ' +
+            'signin-watch@lab-demo.elastic.dev with fresh sign-in reports. Filter on the exact event ' +
             'name ConsoleLogin with a failed outcome, not by service or category, to hunt the ' +
             'T1110.003 pattern.',
         },
@@ -814,7 +814,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             'and ap-clerk-02, plus payroll-batch, on AWS account 210987654321 (eu-central-1). ' +
             'ConsoleLogin failed repeatedly from source IP addresses 203[.]0[.]113[.]60 ' +
             '(203.0.113.60) and 203[.]0[.]113[.]61 (203.0.113.61); reach ' +
-            'signin-watch@lab-demo.seedbench.dev with sign-in questions. Filter directly on the exact ' +
+            'signin-watch@lab-demo.elastic.dev with sign-in questions. Filter directly on the exact ' +
             'event name ConsoleLogin with a failed outcome, never by service or category. ' +
             'ATT&CK T1110.003.',
         },
@@ -825,7 +825,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             'T1110.003 activity keeps failing ConsoleLogin sign-ins for console principals ' +
             'treasury-ops, ap-clerk-02, and payroll-batch from 203[.]0[.]113[.]60 ' +
             '(203.0.113.60) and 203[.]0[.]113[.]61 (203.0.113.61). Send sign-in reports to ' +
-            'signin-watch@lab-demo.seedbench.dev. Hunt the exact event name ConsoleLogin with a failed ' +
+            'signin-watch@lab-demo.elastic.dev. Hunt the exact event name ConsoleLogin with a failed ' +
             'outcome, not by service or category.',
         },
       ],
@@ -839,7 +839,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
         // query. Seed addresses need a real TLD so the placeholder-email rule never matches them.
         { type: 'ip', value: '203.0.113.60', defanged: '203[.]0[.]113[.]60' },
         { type: 'ip', value: '203.0.113.61', defanged: '203[.]0[.]113[.]61' },
-        { type: 'email', value: 'signin-watch@lab-demo.seedbench.dev' },
+        { type: 'email', value: 'signin-watch@lab-demo.elastic.dev' },
       ],
       narrative: [
         '210987654321',

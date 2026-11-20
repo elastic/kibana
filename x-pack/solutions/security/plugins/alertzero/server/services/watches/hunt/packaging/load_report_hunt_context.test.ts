@@ -40,7 +40,7 @@ describe('loadReportHuntContext', () => {
           { type: 'ip', value: '203.0.113.60' },
           { type: 'ip' },
           { value: 'orphan' },
-          { type: 'email', value: 'signin-watch@lab-demo.seedbench.dev' },
+          { type: 'email', value: 'signin-watch@lab-demo.elastic.dev' },
         ],
         vulnerability: { vendor: ' Amazon ', product: 'IAM' },
       },
@@ -62,7 +62,7 @@ describe('loadReportHuntContext', () => {
     it('returns only the IOCs that carry both a type and a value', async () => {
       expect((await load(fullSource))?.iocs).toEqual([
         { type: 'ip', value: '203.0.113.60' },
-        { type: 'email', value: 'signin-watch@lab-demo.seedbench.dev' },
+        { type: 'email', value: 'signin-watch@lab-demo.elastic.dev' },
       ]);
     });
 
@@ -84,7 +84,7 @@ describe('loadReportHuntContext', () => {
                   tier: 'uncertain',
                   deferred_unreviewed: true,
                 },
-                { type: 'email', value: 'ok@lab-demo.seedbench.dev', tier: 'contextual' },
+                { type: 'email', value: 'ok@lab-demo.elastic.dev', tier: 'contextual' },
               ],
             },
           })
@@ -92,7 +92,7 @@ describe('loadReportHuntContext', () => {
       ).toEqual([
         { type: 'ip', value: '203.0.113.60' },
         { type: 'hash', value: 'a'.repeat(64) },
-        { type: 'email', value: 'ok@lab-demo.seedbench.dev' },
+        { type: 'email', value: 'ok@lab-demo.elastic.dev' },
       ]);
     });
 
