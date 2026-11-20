@@ -24,8 +24,6 @@ import { ExperimentsListPage } from './pages/experiments_list';
 import { DatasetsListPage } from './pages/datasets_list';
 import { OnlineEvalsListPage } from './pages/online_evals_list';
 import { OnlineEvalDetailPage } from './pages/online_eval_detail';
-import { REVIEW_QUEUES_PATH, ReviewQueuesListPage } from './pages/review_queues_list';
-import { ReviewQueueDetailPage } from './pages/review_queue_detail';
 
 const ExperimentDetailPage = React.lazy(async () => {
   const mod = await import('./pages/experiment_detail');
@@ -77,10 +75,6 @@ const datasetsTabLabel = i18n.translate('xpack.evals.navigation.datasets', {
 
 const evaluatorsTabLabel = i18n.translate('xpack.evals.navigation.evaluators', {
   defaultMessage: 'Evaluators',
-});
-
-const reviewTabLabel = i18n.translate('xpack.evals.navigation.review', {
-  defaultMessage: 'Review',
 });
 
 const remotesTabLabel = i18n.translate('xpack.evals.navigation.remotes', {
@@ -157,18 +151,6 @@ const getBreadcrumbs = ({
   const datasetsHref = getHref(DATASETS_PATH);
   const tracingHref = getHref(TRACING_PATH);
   const onlineHref = getHref(ONLINE_PATH);
-  const reviewHref = getHref(REVIEW_QUEUES_PATH);
-
-  if (pathname.startsWith(`${REVIEW_QUEUES_PATH}/`)) {
-    return [
-      { text: reviewTabLabel, href: reviewHref },
-      { text: decodeURIComponent(pathname.split('/')[2]) },
-    ];
-  }
-
-  if (pathname === REVIEW_QUEUES_PATH) {
-    return [{ text: reviewTabLabel }];
-  }
 
   if (pathname.startsWith(`${TRACING_PATH}/`)) {
     const parts = pathname.split('/').filter(Boolean);
@@ -241,9 +223,7 @@ const EvalsNavigation: React.FC = () => {
   const isEvaluatorsSelected = pathname.startsWith(EVALUATORS_PATH);
   const isRemotesSelected = pathname.startsWith(REMOTES_PATH);
   const isOnlineSelected = pathname.startsWith(ONLINE_PATH);
-  const isReviewSelected = pathname.startsWith(REVIEW_QUEUES_PATH);
   const isExperimentsSelected =
-    !isReviewSelected &&
     !isTracingSelected &&
     !isDatasetsSelected &&
     !isEvaluatorsSelected &&
@@ -261,9 +241,6 @@ const EvalsNavigation: React.FC = () => {
         </EuiTab>
         <EuiTab isSelected={isEvaluatorsSelected} onClick={() => history.push(EVALUATORS_PATH)}>
           {evaluatorsTabLabel}
-        </EuiTab>
-        <EuiTab isSelected={isReviewSelected} onClick={() => history.push(REVIEW_QUEUES_PATH)}>
-          {reviewTabLabel}
         </EuiTab>
         <EuiTab isSelected={isTracingSelected} onClick={() => history.push(TRACING_PATH)}>
           {tracingTabLabel}
@@ -325,8 +302,6 @@ export const EvalsApp: React.FC<{
               <Route path="/experiments/:experimentId" component={ExperimentDetailPage} />
               <Route exact path={TRACING_PATH} component={TracingProjectsListPage} />
               <Route exact path="/tracing/:projectName" component={TracingProjectDetailPage} />
-              <Route exact path={REVIEW_QUEUES_PATH} component={ReviewQueuesListPage} />
-              <Route exact path="/review/:queueId" component={ReviewQueueDetailPage} />
               <Route exact path={ONLINE_PATH} component={OnlineEvalsListPage} />
               <Route exact path="/online/:workflowId" component={OnlineEvalDetailPage} />
             </Routes>

@@ -71,7 +71,7 @@ const buildWorkflow = (
 
 describe('OnlineEvalsListPage', () => {
   beforeEach(() => {
-    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true, canReview: true });
+    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true });
     mockedUseModelConnectors.mockReturnValue({
       connectors: [{ id: 'connector-1', name: 'Judge connector' }],
       isLoading: false,
@@ -234,11 +234,7 @@ describe('OnlineEvalsListPage', () => {
   });
 
   it('shows privilege warning callout when manage permission is missing', () => {
-    mockedUseEvalsPermissions.mockReturnValue({
-      canRead: true,
-      canManage: false,
-      canReview: false,
-    });
+    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: false });
     mockedUseOnlineEvalWorkflows.mockReturnValue({
       data: {
         page: 1,
@@ -262,7 +258,7 @@ describe('OnlineEvalsListPage', () => {
   });
 
   it('does not show privilege warning callout when manage permission exists', () => {
-    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true, canReview: true });
+    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true });
     mockedUseOnlineEvalWorkflows.mockReturnValue({
       data: {
         page: 1,

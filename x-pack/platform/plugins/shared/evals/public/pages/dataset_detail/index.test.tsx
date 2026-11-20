@@ -100,7 +100,7 @@ const renderPage = () => {
 
 describe('DatasetDetailPage dataset actions', () => {
   beforeEach(() => {
-    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true, canReview: true });
+    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true });
     mockedUseDataset.mockReturnValue({
       data: {
         id: 'dataset-1',
@@ -148,11 +148,7 @@ describe('DatasetDetailPage dataset actions', () => {
   });
 
   it('does not render the copy button without manage privilege', () => {
-    mockedUseEvalsPermissions.mockReturnValue({
-      canRead: true,
-      canManage: false,
-      canReview: false,
-    });
+    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: false });
 
     renderPage();
 
@@ -168,11 +164,7 @@ describe('DatasetDetailPage dataset actions', () => {
   });
 
   it('does not render the import button without manage privilege', () => {
-    mockedUseEvalsPermissions.mockReturnValue({
-      canRead: true,
-      canManage: false,
-      canReview: false,
-    });
+    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: false });
 
     renderPage();
 

@@ -100,7 +100,7 @@ describe('OnlineEvalDetailPage', () => {
       },
     } as unknown as ReturnType<typeof useKibana>);
 
-    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true, canReview: true });
+    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true });
     mockedUseActiveSpaceId.mockReturnValue({ spaceId: 'space-a', isLoading: false });
     mockedUseEvalsTraceFetcher.mockReturnValue(jest.fn());
     mockedUseOnlineEvalWorkflow.mockReturnValue({
@@ -299,11 +299,7 @@ describe('OnlineEvalDetailPage', () => {
   });
 
   it('disables editing and shows lock callout when user cannot manage', async () => {
-    mockedUseEvalsPermissions.mockReturnValue({
-      canRead: true,
-      canManage: false,
-      canReview: false,
-    });
+    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: false });
 
     renderPage();
 

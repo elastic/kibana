@@ -58,7 +58,7 @@ const renderPage = () => {
 describe('DatasetsListPage dataset actions', () => {
   beforeEach(() => {
     mockedUseKibana.mockReturnValue({ services: {} } as ReturnType<typeof useKibana>);
-    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true, canReview: true });
+    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true });
     mockedUseAccessibleSpaces.mockReturnValue({
       isEnabled: false,
       isLoading: false,
@@ -99,11 +99,7 @@ describe('DatasetsListPage dataset actions', () => {
   });
 
   it('does not render the copy button without manage privilege', () => {
-    mockedUseEvalsPermissions.mockReturnValue({
-      canRead: true,
-      canManage: false,
-      canReview: false,
-    });
+    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: false });
 
     renderPage();
 
@@ -119,11 +115,7 @@ describe('DatasetsListPage dataset actions', () => {
   });
 
   it('does not render the import button without manage privilege', () => {
-    mockedUseEvalsPermissions.mockReturnValue({
-      canRead: true,
-      canManage: false,
-      canReview: false,
-    });
+    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: false });
 
     renderPage();
 
