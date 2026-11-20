@@ -42,6 +42,7 @@ apiTest.describe(
             }
           );
           expectRecovery(response, { keys: 2, identities: 5, username: user.body.username });
+          expect(response.body.secondSnapshotExpired).toBe(true);
         }
       );
     }

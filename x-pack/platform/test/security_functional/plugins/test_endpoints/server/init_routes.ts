@@ -583,14 +583,23 @@ export function initRoutes(
       security: {
         authz: {
           enabled: false,
-          reason: 'Test endpoint removing a task created by an authentication test',
+          reason:
+            'Test endpoint checks the manage_security Elasticsearch privilege before removing a task',
         },
       },
       validate: {
         params: schema.object({ taskId: schema.string({ minLength: 1, maxLength: 128 }) }),
       },
     },
-    async (_context, request, response) => {
+    async (context, request, response) => {
+      const { elasticsearch } = await context.core;
+      const privileges = await elasticsearch.client.asCurrentUser.security.hasPrivileges({
+        cluster: ['manage_security'],
+      });
+      if (!privileges.has_all_requested) {
+        return response.forbidden({ body: { message: 'manage_security is required.' } });
+      }
+
       const [, { taskManager }] = await core.getStartServices();
       const { taskId } = request.params;
       try {
