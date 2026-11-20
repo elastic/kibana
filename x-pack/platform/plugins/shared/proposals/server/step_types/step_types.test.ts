@@ -575,7 +575,8 @@ describe('proposals.updateProposal step', () => {
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'proposal-1', status: 'succeeded' }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { linkActionExecution: true }
     );
     expect(result.output).toEqual({
       proposalId: 'proposal-1',
@@ -591,7 +592,9 @@ describe('proposals.updateProposal step', () => {
       createContext({ proposalId: 'proposal-1', status: 'succeeded' })
     );
 
-    expect(update).toHaveBeenCalledWith(expect.anything(), SPACE_ID, CALLER);
+    expect(update).toHaveBeenCalledWith(expect.anything(), SPACE_ID, CALLER, {
+      linkActionExecution: true,
+    });
   });
 
   it('should resolve the decider from the execution request, not the passed username', async () => {
@@ -613,7 +616,8 @@ describe('proposals.updateProposal step', () => {
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ decidedBy: resolvedUser }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 
@@ -642,7 +646,8 @@ describe('proposals.updateProposal step', () => {
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ decidedBy: workerUser, decisionMode: 'auto' }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 
@@ -669,7 +674,8 @@ describe('proposals.updateProposal step', () => {
         decisionMode: 'manual',
       }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 
@@ -693,7 +699,8 @@ describe('proposals.updateProposal step', () => {
         decidedBy: { username: 'analyst', fullName: null, email: null },
       }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 
@@ -707,7 +714,8 @@ describe('proposals.updateProposal step', () => {
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ decidedBy: undefined, decisionMode: undefined }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { linkActionExecution: true }
     );
     expect(resolveUser).not.toHaveBeenCalled();
     expect(resolveWorkerUser).not.toHaveBeenCalled();
@@ -739,7 +747,8 @@ describe('proposals.updateProposal step', () => {
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ executionError: 'action exploded' }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 

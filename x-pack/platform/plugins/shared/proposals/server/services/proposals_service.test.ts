@@ -1620,7 +1620,8 @@ describe('ProposalsService', () => {
         const proposal = await service.update(
           { id: 'proposal-1', status: 'succeeded' },
           SPACE_ID,
-          caller
+          caller,
+          { linkActionExecution: true }
         );
 
         expect(workflowsApi.getChildWorkflowExecutions).toHaveBeenCalledWith(
@@ -1636,6 +1637,20 @@ describe('ProposalsService', () => {
         );
       });
 
+      it('looks nothing up unless asked to link the action execution', async () => {
+        const storage = createStorage(executing());
+        const { service, workflowsApi } = createService(storage);
+
+        const proposal = await service.update(
+          { id: 'proposal-1', status: 'succeeded' },
+          SPACE_ID,
+          caller
+        );
+
+        expect(workflowsApi.getChildWorkflowExecutions).not.toHaveBeenCalled();
+        expect(proposal.actionExecutionId).toBeUndefined();
+      });
+
       it('looks nothing up for an update that does not settle the action', async () => {
         const storage = createStorage(baseDocument());
         const { service, workflowsApi } = createService(storage);
@@ -1643,7 +1658,8 @@ describe('ProposalsService', () => {
         await service.update(
           { id: 'proposal-1', decision: 'approved', status: 'executing' },
           SPACE_ID,
-          caller
+          caller,
+          { linkActionExecution: true }
         );
 
         expect(workflowsApi.getChildWorkflowExecutions).not.toHaveBeenCalled();
@@ -1657,7 +1673,8 @@ describe('ProposalsService', () => {
         const proposal = await service.update(
           { id: 'proposal-1', status: 'failed', executionError: 'boom' },
           SPACE_ID,
-          caller
+          caller,
+          { linkActionExecution: true }
         );
 
         expect(proposal.status).toBe('failed');

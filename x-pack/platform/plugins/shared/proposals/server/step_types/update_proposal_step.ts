@@ -83,7 +83,9 @@ export const getUpdateProposalStepDefinition = ({
             workflowId: workflowContext.workflow.id,
             executionId: workflowContext.execution.id,
             request,
-          }
+          },
+          // This step runs in the gate's resolve run, whose direct child is the action.
+          { linkActionExecution: true }
         );
 
         return {

@@ -108,15 +108,21 @@ export interface UpdateProposalParams {
   executionError?: string;
 }
 
-/**
- * The workflow run writing a gate update, as whoever it runs as. When the update settles an
- * action (`succeeded`/`failed`), the action's own execution is looked up among this run's
- * children and stamped as `actionExecutionId`.
- */
+/** The workflow run writing a gate update, as whoever it runs as. */
 export interface ProposalUpdateCaller {
   workflowId: string;
   executionId: string;
   request: KibanaRequest;
+}
+
+export interface ProposalUpdateOptions {
+  /**
+   * Look up the action's own execution among the caller's children and stamp it as
+   * `actionExecutionId` when this update settles the action (`succeeded`/`failed`). Only for the
+   * gate's resolve run, which executes the action as a direct child: any other caller could
+   * link an unrelated run of the same workflow.
+   */
+  linkActionExecution?: boolean;
 }
 
 export interface ProposalsServiceDeps {
@@ -727,7 +733,8 @@ export class ProposalsService {
   async update(
     params: UpdateProposalParams,
     spaceId: string,
-    caller: ProposalUpdateCaller
+    caller: ProposalUpdateCaller,
+    { linkActionExecution = false }: ProposalUpdateOptions = {}
   ): Promise<Proposal> {
     const stored = await this.load(params.id, spaceId);
 
@@ -742,12 +749,9 @@ export class ProposalsService {
       );
     }
 
-    const actionExecutionId = await this.findActionExecutionId(
-      stored.proposal,
-      params.status,
-      caller,
-      spaceId
-    );
+    const actionExecutionId = linkActionExecution
+      ? await this.findActionExecutionId(stored.proposal, params.status, caller, spaceId)
+      : undefined;
     return this.applyUpdate(stored, { ...params, actionExecutionId });
   }
 
