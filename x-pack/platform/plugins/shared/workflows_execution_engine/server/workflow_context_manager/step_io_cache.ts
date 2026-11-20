@@ -12,11 +12,13 @@ import { safeOutputSize } from '../step/errors';
 
 export type StepIoType = 'input' | 'output';
 
-// LRUCache<V> constrains V extends {}, which excludes null.
-// Box the value so null outputs are stored without violating the constraint.
-// get() returns undefined (cache miss) vs null (cached null output) correctly.
-interface CacheEntry {
+/**
+ * Cached IO value stamped with the step-execution id that produced it.
+ * A hit is valid only when `executionId` matches the requested execution.
+ */
+export interface StepIoCacheEntry {
   value: JsonValue | null;
+  executionId: string;
 }
 
 // lru-cache only accepts positive integer sizes; unmeasured or empty values count as 1 byte.
@@ -24,16 +26,12 @@ const toValidSize = (bytes: number | null | undefined): number =>
   bytes != null && Number.isFinite(bytes) ? Math.max(1, Math.ceil(bytes)) : 1;
 
 /**
- * Byte-bounded LRU cache for step IO.
- *
- * Owns the key scheme (`${type}_${stepExecutionId}`) so raw key strings never
- * appear outside this class. Callers work with `(id, type)` pairs.
- *
- * Currently only outputs are cached (inputs go to state only). Caching inputs
- * later requires no API change — just remove the guard in `StepIoService.write`.
+ * Byte-bounded LRU for step IO. Keys are opaque strings supplied by
+ * {@link StepIoService} (composed as `type` + accessibility `contextId`).
+ * Entries carry `executionId` so a hit can be validated against the request.
  */
 export class StepIoCache {
-  private readonly lru: LRUCache<string, CacheEntry>;
+  private readonly lru: LRUCache<string, StepIoCacheEntry>;
 
   /**
    * @param maxBytes Byte budget. `Infinity` means no eviction. `0` (or less) keeps
@@ -49,7 +47,7 @@ export class StepIoCache {
     this.lru = new LRUCache({
       maxSize,
       // Fallback size used when the caller does not supply an explicit byte count.
-      sizeCalculation: (entry: CacheEntry) => toValidSize(safeOutputSize(entry.value)),
+      sizeCalculation: (entry: StepIoCacheEntry) => toValidSize(safeOutputSize(entry.value)),
       dispose: cacheLogger
         ? (_entry, key, reason) => {
             if (reason === 'evict') {
@@ -62,8 +60,8 @@ export class StepIoCache {
     });
   }
 
-  public get(id: string, type: StepIoType): JsonValue | null | undefined {
-    return this.lru.get(`${type}_${id}`)?.value;
+  public get(key: string): StepIoCacheEntry | undefined {
+    return this.lru.get(key);
   }
 
   /**
@@ -71,20 +69,16 @@ export class StepIoCache {
    * (caller already knows the size, avoids a redundant JSON.stringify).
    * When omitted, `sizeCalculation` measures the entry automatically.
    */
-  public set(id: string, type: StepIoType, value: JsonValue | null, bytes?: number): void {
-    this.lru.set(
-      `${type}_${id}`,
-      { value },
-      bytes !== undefined ? { size: toValidSize(bytes) } : undefined
-    );
+  public set(key: string, entry: StepIoCacheEntry, bytes?: number): void {
+    this.lru.set(key, entry, bytes !== undefined ? { size: toValidSize(bytes) } : undefined);
   }
 
-  public has(id: string, type: StepIoType): boolean {
-    return this.lru.has(`${type}_${id}`);
+  public has(key: string): boolean {
+    return this.lru.has(key);
   }
 
-  public delete(id: string, type: StepIoType): void {
-    this.lru.delete(`${type}_${id}`);
+  public delete(key: string): void {
+    this.lru.delete(key);
   }
 
   public get totalBytes(): number {

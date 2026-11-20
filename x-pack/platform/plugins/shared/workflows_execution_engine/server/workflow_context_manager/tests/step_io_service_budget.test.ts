@@ -5,9 +5,16 @@
  * 2.0.
  */
 
+import type { JsonValue } from '@kbn/utility-types';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
+import type { StepIoRef } from '../step_io_service';
 import { StepIoService } from '../step_io_service';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
+
+const ref = (executionId: string): StepIoRef => ({ executionId, contextId: executionId });
+
+const readOutputs = (service: StepIoService, ids: string[]) =>
+  service.readBatch({ type: 'output', refs: ids.map(ref) });
 
 const buildService = (maxBytes: number, docs: Array<{ id: string; output: unknown }>) => {
   const stepRepository = {
@@ -27,9 +34,9 @@ describe('StepIoService cache budget', () => {
     const docs = ['a', 'b', 'c', 'd', 'e', 'f'].map((id) => ({ id, output }));
     const { service, stepRepository } = buildService(45, docs);
 
-    const batch = await service.readBatch(
-      docs.map((doc) => doc.id),
-      'output'
+    const batch = await readOutputs(
+      service,
+      docs.map((doc) => doc.id)
     );
 
     for (const doc of docs) {
@@ -37,9 +44,9 @@ describe('StepIoService cache budget', () => {
     }
 
     stepRepository.getStepExecutionsByIds.mockClear();
-    await service.readBatch(
-      docs.map((doc) => doc.id),
-      'output'
+    await readOutputs(
+      service,
+      docs.map((doc) => doc.id)
     );
     const refetched = stepRepository.getStepExecutionsByIds.mock.calls[0]?.[0] ?? [];
     expect(refetched.length).toBeGreaterThan(0);
@@ -50,10 +57,10 @@ describe('StepIoService cache budget', () => {
     const output = { v: 'a'.repeat(30) };
     const { service, stepRepository } = buildService(45, [{ id: 'a', output }]);
 
-    expect((await service.readBatch(['a'], 'output')).get('a')).toEqual(output);
+    expect((await readOutputs(service, ['a'])).get('a')).toEqual(output);
 
     stepRepository.getStepExecutionsByIds.mockClear();
-    await service.readBatch(['a'], 'output');
+    await readOutputs(service, ['a']);
 
     expect(stepRepository.getStepExecutionsByIds).toHaveBeenCalledWith(['a'], ['id', 'output']);
   });
@@ -61,10 +68,10 @@ describe('StepIoService cache budget', () => {
   it('returns an output that cannot fit and fetches it again afterwards', async () => {
     const { service, stepRepository } = buildService(0, [{ id: 'a', output: { v: 1 } }]);
 
-    expect((await service.readBatch(['a'], 'output')).get('a')).toEqual({ v: 1 });
+    expect((await readOutputs(service, ['a'])).get('a')).toEqual({ v: 1 });
 
     stepRepository.getStepExecutionsByIds.mockClear();
-    await service.readBatch(['a'], 'output');
+    await readOutputs(service, ['a']);
 
     expect(stepRepository.getStepExecutionsByIds).toHaveBeenCalledWith(['a'], ['id', 'output']);
   });
@@ -72,19 +79,36 @@ describe('StepIoService cache budget', () => {
   it('keeps an empty output that fits the budget', async () => {
     const { service, stepRepository } = buildService(100, [{ id: 'a', output: null }]);
 
-    expect((await service.readBatch(['a'], 'output')).get('a')).toBeNull();
+    expect((await readOutputs(service, ['a'])).get('a')).toBeNull();
 
     stepRepository.getStepExecutionsByIds.mockClear();
-    expect((await service.readBatch(['a'], 'output')).get('a')).toBeNull();
+    expect((await readOutputs(service, ['a'])).get('a')).toBeNull();
     expect(stepRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
   });
 
   it('reports execution-wide output sizes regardless of eviction', () => {
     const { service } = buildService(100, []);
 
-    service.write('a', 'output', { v: 1 }, 90);
-    service.write('b', 'output', { v: 2 }, 90);
-    service.write('c', 'output', { v: 3 });
+    service.write({
+      executionId: 'a',
+      contextId: 'a',
+      type: 'output',
+      value: { v: 1 } as JsonValue,
+      sizeBytes: 90,
+    });
+    service.write({
+      executionId: 'b',
+      contextId: 'b',
+      type: 'output',
+      value: { v: 2 } as JsonValue,
+      sizeBytes: 90,
+    });
+    service.write({
+      executionId: 'c',
+      contextId: 'c',
+      type: 'output',
+      value: { v: 3 } as JsonValue,
+    });
 
     expect(service.getOutputSizeStats()).toEqual({ totalBytes: 180, stepCount: 2 });
   });

@@ -18,6 +18,27 @@ export type { StepIoType } from './step_io_cache';
 
 export type StepIoBatchValue = JsonValue | SerializedError | null;
 
+/** Durable id + accessibility id for a step IO read or write. */
+export interface StepIoRef {
+  /** Step-execution id used for state / Elasticsearch. */
+  executionId: string;
+  /** Accessibility id (step + parallel lineage); service composes the LRU key with `type`. */
+  contextId: string;
+}
+
+export interface StepIoWriteArgs {
+  executionId: string;
+  contextId: string;
+  type: 'input' | 'output';
+  value: JsonValue | null;
+  sizeBytes?: number;
+}
+
+export interface StepIoReadBatchArgs {
+  type: 'input' | 'output' | 'error';
+  refs: ReadonlyArray<StepIoRef>;
+}
+
 export interface StepIoServiceInit {
   stepRepository: StepExecutionRepository;
   state: WorkflowExecutionState;
@@ -30,22 +51,14 @@ export interface StepIoServiceInit {
  * Read-only IO surface used by node implementations and the context manager.
  */
 export interface StepIoReader {
-  readBatch(
-    ids: readonly string[],
-    type: 'input' | 'output' | 'error'
-  ): Promise<ReadonlyMap<string, StepIoBatchValue>>;
+  readBatch(args: StepIoReadBatchArgs): Promise<ReadonlyMap<string, StepIoBatchValue>>;
 }
 
 /**
  * Reader + write surface used by the per-step runtime.
  */
 export interface StepIoWriter extends StepIoReader {
-  write(
-    stepExecutionId: string,
-    type: 'input' | 'output',
-    value: JsonValue | null,
-    sizeBytes?: number
-  ): void;
+  write(args: StepIoWriteArgs): void;
 }
 
 /**
@@ -55,13 +68,21 @@ export interface StepIoLifecycle {
   getOutputSizeStats(): OutputSizeStats;
 }
 
+/** Composes the opaque LRU key from IO type and accessibility context id. */
+export const composeStepIoCacheKey = (
+  type: 'input' | 'output' | 'error',
+  contextId: string
+): string => `${type}:${contextId}`;
+
 /**
  * Owns the read cache for step outputs and routes IO reads/writes between
  * the LRU cache and `WorkflowExecutionState`.
  *
- * `readBatch` is the only fetch. Outputs that fit stay in the LRU. Outputs
- * that do not fit exist only in the returned map. Flush is
- * `WorkflowExecutionState`'s responsibility.
+ * Callers supply `executionId` (storage) and `contextId` (accessibility).
+ * The service composes the LRU key as `type` + `contextId` and does not
+ * derive `contextId` from metadata. This PR admits outputs only.
+ *
+ * `readBatch` is the only fetch. Flush is `WorkflowExecutionState`'s responsibility.
  */
 export class StepIoService implements StepIoWriter, StepIoLifecycle {
   /** An output is cached only when it is at most this fraction of the cache budget. */
@@ -83,23 +104,22 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
   /**
    * Returns every requested value. Resident values come back with no
-   * Elasticsearch call: outputs from the LRU or execution state, inputs from
+   * Elasticsearch call: outputs from the live map or LRU, inputs from
    * state, errors from the step execution. One `getStepExecutionsByIds` covers
    * the misses. A value evicted by a later insert in the same batch is still
-   * in the returned map.
+   * in the returned map. Map keys are `executionId`.
    */
   public async readBatch(
-    ids: readonly string[],
-    type: 'input' | 'output' | 'error'
+    args: StepIoReadBatchArgs
   ): Promise<ReadonlyMap<string, StepIoBatchValue>> {
-    const uniqueIds = this.uniqueIds(ids);
-    if (type === 'error') {
-      return this.readErrorBatch(uniqueIds);
+    const refs = this.uniqueRefs(args.refs);
+    if (args.type === 'error') {
+      return this.readErrorBatch(refs);
     }
-    if (type === 'input') {
-      return this.readInputBatch(uniqueIds);
+    if (args.type === 'input') {
+      return this.readInputBatch(refs);
     }
-    return this.readOutputBatch(uniqueIds);
+    return this.readOutputBatch(refs);
   }
 
   // ----- IO writes ----------------------------------------------------------
@@ -108,15 +128,10 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * Writes a step's input or output.
    *
    * - Both types are written to `WorkflowExecutionState` for persistence.
-   * - Only `output` is written to the LRU cache. Inputs are served from state.
+   * - Only `output` is admitted to the LRU (key = `type` + `contextId`).
    */
-  public write(
-    stepExecutionId: string,
-    type: 'input' | 'output',
-    value: JsonValue | null,
-    sizeBytes?: number
-  ): void {
-    this.state.setStepIo(stepExecutionId, { [type]: value });
+  public write({ executionId, contextId, type, value, sizeBytes }: StepIoWriteArgs): void {
+    this.state.setStepIo(executionId, { [type]: value });
     if (type === 'input') {
       return;
     }
@@ -127,13 +142,14 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
         : undefined;
     const sizeForCache = measuredBytes ?? safeOutputSize(value) ?? undefined;
     if (measuredBytes !== undefined) {
-      this.measuredTotalBytes += measuredBytes - (this.measuredSizes.get(stepExecutionId) ?? 0);
-      this.measuredSizes.set(stepExecutionId, measuredBytes);
+      this.measuredTotalBytes += measuredBytes - (this.measuredSizes.get(executionId) ?? 0);
+      this.measuredSizes.set(executionId, measuredBytes);
     }
+    const cacheKey = composeStepIoCacheKey(type, contextId);
     if (this.outputFitsCache(sizeForCache)) {
-      this.cache.set(stepExecutionId, 'output', value, sizeForCache);
+      this.cache.set(cacheKey, { value, executionId }, sizeForCache);
     } else {
-      this.cache.delete(stepExecutionId, 'output');
+      this.cache.delete(cacheKey);
     }
   }
 
@@ -157,33 +173,43 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     };
   }
 
-  private uniqueIds(ids: readonly string[]): string[] {
+  private uniqueRefs(refs: ReadonlyArray<StepIoRef>): StepIoRef[] {
     const seen = new Set<string>();
-    const unique: string[] = [];
-    for (const id of ids) {
-      if (!seen.has(id)) {
-        seen.add(id);
-        unique.push(id);
+    const unique: StepIoRef[] = [];
+    for (const ref of refs) {
+      if (!seen.has(ref.executionId)) {
+        seen.add(ref.executionId);
+        unique.push(ref);
       }
     }
     return unique;
   }
 
+  /** Cache hit only when the entry was produced by this execution id. */
+  private getCachedOutput(contextId: string, executionId: string): JsonValue | null | undefined {
+    const entry = this.cache.get(composeStepIoCacheKey('output', contextId));
+    if (entry === undefined || entry.executionId !== executionId) {
+      return undefined;
+    }
+    return entry.value;
+  }
+
   private async readOutputBatch(
-    ids: readonly string[]
+    refs: readonly StepIoRef[]
   ): Promise<ReadonlyMap<string, JsonValue | null>> {
     const result = new Map<string, JsonValue | null>();
-    const missing: string[] = [];
-    for (const id of ids) {
-      const cached = this.cache.get(id, 'output');
-      if (cached !== undefined) {
-        result.set(id, cached);
+    const missing: StepIoRef[] = [];
+    // Live before cache so an unflushed write wins over a stamped LRU entry.
+    for (const { executionId, contextId } of refs) {
+      const live = this.state.getStepIo(executionId, 'output');
+      if (live !== undefined) {
+        result.set(executionId, live);
       } else {
-        const live = this.state.getStepIo(id, 'output');
-        if (live !== undefined) {
-          result.set(id, live);
+        const cached = this.getCachedOutput(contextId, executionId);
+        if (cached !== undefined) {
+          result.set(executionId, cached);
         } else {
-          missing.push(id);
+          missing.push({ executionId, contextId });
         }
       }
     }
@@ -193,21 +219,25 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
     // Values already in the map stay there even if this fetch evicts them.
     const captured = new Map(result);
-    const docs = await this.stepRepository.getStepExecutionsByIds(missing, ['id', 'output']);
-    const fetched = this.retainFetchedOutputs(docs);
+    const contextByExecutionId = new Map(missing.map((ref) => [ref.executionId, ref.contextId]));
+    const docs = await this.stepRepository.getStepExecutionsByIds(
+      missing.map((ref) => ref.executionId),
+      ['id', 'output']
+    );
+    const fetched = this.retainFetchedOutputs(docs, contextByExecutionId);
 
-    for (const id of ids) {
-      const live = this.state.getStepIo(id, 'output');
+    for (const { executionId, contextId } of refs) {
+      const live = this.state.getStepIo(executionId, 'output');
       if (live !== undefined) {
-        result.set(id, live);
+        result.set(executionId, live);
       } else {
-        const cached = this.cache.get(id, 'output');
+        const cached = this.getCachedOutput(contextId, executionId);
         if (cached !== undefined) {
-          result.set(id, cached);
-        } else if (fetched.has(id)) {
-          result.set(id, fetched.get(id) ?? null);
-        } else if (captured.has(id)) {
-          result.set(id, captured.get(id) ?? null);
+          result.set(executionId, cached);
+        } else if (fetched.has(executionId)) {
+          result.set(executionId, fetched.get(executionId) ?? null);
+        } else if (captured.has(executionId)) {
+          result.set(executionId, captured.get(executionId) ?? null);
         }
       }
     }
@@ -220,14 +250,18 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * a flush may already have removed a newer write from state.
    */
   private retainFetchedOutputs(
-    docs: ReadonlyArray<{ id: string; output?: JsonValue | null }>
+    docs: ReadonlyArray<{ id: string; output?: JsonValue | null }>,
+    contextByExecutionId: ReadonlyMap<string, string>
   ): Map<string, JsonValue | null> {
     const fetched = new Map<string, JsonValue | null>();
     for (const doc of docs) {
       if (this.state.getStepIo(doc.id, 'output') === undefined) {
-        const cached = this.cache.get(doc.id, 'output');
-        if (cached !== undefined) {
-          fetched.set(doc.id, cached);
+        const contextId = contextByExecutionId.get(doc.id);
+        if (contextId !== undefined) {
+          const cached = this.getCachedOutput(contextId, doc.id);
+          if (cached !== undefined) {
+            fetched.set(doc.id, cached);
+          }
         }
       }
     }
@@ -239,8 +273,16 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
           this.measuredSizes.set(doc.id, size);
           this.measuredTotalBytes += size;
         }
-        if (this.outputFitsCache(size)) {
-          this.cache.set(doc.id, 'output', output, size);
+        const contextId = contextByExecutionId.get(doc.id);
+        if (contextId !== undefined && this.outputFitsCache(size)) {
+          this.cache.set(
+            composeStepIoCacheKey('output', contextId),
+            {
+              value: output,
+              executionId: doc.id,
+            },
+            size
+          );
         }
         fetched.set(doc.id, output);
       }
@@ -250,16 +292,19 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
   /** Fetches inputs that state dropped after flush (finished steps). */
   private async readInputBatch(
-    ids: readonly string[]
+    refs: readonly StepIoRef[]
   ): Promise<ReadonlyMap<string, JsonValue | null>> {
     const result = new Map<string, JsonValue | null>();
     const missing: string[] = [];
-    for (const id of ids) {
-      const live = this.state.getStepIo(id, 'input');
+    for (const { executionId } of refs) {
+      const live = this.state.getStepIo(executionId, 'input');
       if (live !== undefined) {
-        result.set(id, live);
-      } else if (this.state.getStepExecution(id) !== undefined && this.state.isInputEvicted(id)) {
-        missing.push(id);
+        result.set(executionId, live);
+      } else if (
+        this.state.getStepExecution(executionId) !== undefined &&
+        this.state.isInputEvicted(executionId)
+      ) {
+        missing.push(executionId);
       }
     }
     if (missing.length === 0) {
@@ -280,16 +325,16 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * Executions that are not loaded are fetched once.
    */
   private async readErrorBatch(
-    ids: readonly string[]
+    refs: readonly StepIoRef[]
   ): Promise<ReadonlyMap<string, SerializedError | null>> {
     const result = new Map<string, SerializedError | null>();
     const missing: string[] = [];
-    for (const id of ids) {
-      const execution = this.state.getStepExecution(id);
+    for (const { executionId } of refs) {
+      const execution = this.state.getStepExecution(executionId);
       if (execution) {
-        result.set(id, execution.error ?? null);
+        result.set(executionId, execution.error ?? null);
       } else {
-        missing.push(id);
+        missing.push(executionId);
       }
     }
     if (missing.length === 0) {

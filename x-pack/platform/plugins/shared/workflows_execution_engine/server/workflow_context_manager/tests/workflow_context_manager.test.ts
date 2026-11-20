@@ -147,19 +147,24 @@ describe('WorkflowContextManager', () => {
       return value === undefined ? undefined : (value as never);
     });
     const stepIoService = {
-      readBatch: jest.fn(async (ids: readonly string[], type: 'input' | 'output' | 'error') => {
-        const values = new Map<string, unknown>();
-        for (const id of ids) {
-          if (type === 'error') {
-            const error = workflowExecutionState.getStepExecution(id)?.error;
-            if (error !== undefined) values.set(id, error);
-          } else {
-            const value = readIo(id, type);
-            if (value !== undefined) values.set(id, value);
+      readBatch: jest.fn(
+        async (args: {
+          type: 'input' | 'output' | 'error';
+          refs: ReadonlyArray<{ executionId: string; contextId: string }>;
+        }) => {
+          const values = new Map<string, unknown>();
+          for (const { executionId } of args.refs) {
+            if (args.type === 'error') {
+              const error = workflowExecutionState.getStepExecution(executionId)?.error;
+              if (error !== undefined) values.set(executionId, error);
+            } else {
+              const value = readIo(executionId, args.type);
+              if (value !== undefined) values.set(executionId, value);
+            }
           }
+          return values;
         }
-        return values;
-      }),
+      ),
       write: jest.fn(),
       getOutputSizeStats: jest.fn(() => ({ totalBytes: 0, stepCount: 0 })),
     } as unknown as StepIoService;
@@ -1077,13 +1082,13 @@ describe('WorkflowContextManager', () => {
         expect(context.steps.outerForeachStep).toEqual(
           expect.objectContaining({
             output: { result: 'outerOutput' },
-            input: { foreach: JSON.stringify(outerItems) },
             item: outerItems[outerCurrentIndex],
             items: outerItems,
             index: outerCurrentIndex,
             total: outerItems.length,
           })
         );
+        expect(context.steps.outerForeachStep).not.toHaveProperty('input');
       });
     });
 
@@ -2159,13 +2164,16 @@ describe('WorkflowContextManager', () => {
     });
 
     // prepareContext asks resolveRehydrationTargets for the ids, then fetches
-    // them with readBatch. This node has no predecessors, so both batches are empty.
-    it('fetches the resolved output and input ids with readBatch', async () => {
+    // outputs with readBatch. This node has no predecessors, so the batch is empty.
+    it('fetches the resolved output refs with readBatch', async () => {
       await testContainer.underTest.prepareContext();
 
-      // step_a has no predecessors and no scope-stack frames → empty output and input ID sets.
-      expect(testContainer.stepIoService.readBatch).toHaveBeenCalledWith([], 'output');
-      expect(testContainer.stepIoService.readBatch).toHaveBeenCalledWith([], 'input');
+      // step_a has no predecessors and no scope-stack frames → empty output refs.
+      expect(testContainer.stepIoService.readBatch).toHaveBeenCalledWith({
+        type: 'output',
+        refs: [],
+      });
+      expect(testContainer.stepIoService.readBatch).toHaveBeenCalledTimes(1);
     });
 
     it('serves the same context until the node ends', async () => {
@@ -2190,13 +2198,18 @@ describe('WorkflowContextManager', () => {
 
       const output = 'oversized-token';
       const stepIoService = {
-        readBatch: jest.fn(async (ids: readonly string[], type: 'input' | 'output' | 'error') => {
-          const values = new Map<string, unknown>();
-          if (type === 'output' && ids.includes('exec-step-a')) {
-            values.set('exec-step-a', output);
+        readBatch: jest.fn(
+          async (args: {
+            type: 'input' | 'output' | 'error';
+            refs: ReadonlyArray<{ executionId: string; contextId: string }>;
+          }) => {
+            const values = new Map<string, unknown>();
+            if (args.type === 'output' && args.refs.some((r) => r.executionId === 'exec-step-a')) {
+              values.set('exec-step-a', output);
+            }
+            return values;
           }
-          return values;
-        }),
+        ),
       } as unknown as StepIoService;
       const workflowExecutionState = {
         getWorkflowExecution: jest.fn().mockReturnValue({
@@ -2212,7 +2225,7 @@ describe('WorkflowContextManager', () => {
         getDataSetStepExecutionCount: jest.fn().mockReturnValue(0),
         getStepIoVersion: jest.fn().mockReturnValue(0),
         getLatestStepExecution: jest.fn((stepId: string) =>
-          stepId === 'step_a' ? { id: 'exec-step-a', stepId: 'step_a' } : undefined
+          stepId === 'step_a' ? { id: 'exec-step-a', stepId: 'step_a', scopeStack: [] } : undefined
         ),
       } as unknown as WorkflowExecutionState;
 
@@ -2231,7 +2244,10 @@ describe('WorkflowContextManager', () => {
 
       await underTest.prepareContext();
 
-      expect(stepIoService.readBatch).toHaveBeenCalledWith(['exec-step-a'], 'output');
+      expect(stepIoService.readBatch).toHaveBeenCalledWith({
+        type: 'output',
+        refs: [{ executionId: 'exec-step-a', contextId: 'step_a' }],
+      });
       expect(underTest.renderValueAccordingToContext('{{ steps.step_a.output }}')).toBe(output);
     });
 
@@ -2258,13 +2274,18 @@ describe('WorkflowContextManager', () => {
 
       let ioVersion = 0;
       const stepIoService = {
-        readBatch: jest.fn(async (ids: readonly string[], type: 'input' | 'output' | 'error') => {
-          const values = new Map<string, unknown>();
-          if (type === 'output' && ids.includes('exec-set')) {
-            values.set('exec-set', { connector_id: 'conn-123' });
+        readBatch: jest.fn(
+          async (args: {
+            type: 'input' | 'output' | 'error';
+            refs: ReadonlyArray<{ executionId: string; contextId: string }>;
+          }) => {
+            const values = new Map<string, unknown>();
+            if (args.type === 'output' && args.refs.some((r) => r.executionId === 'exec-set')) {
+              values.set('exec-set', { connector_id: 'conn-123' });
+            }
+            return values;
           }
-          return values;
-        }),
+        ),
       } as unknown as StepIoService;
       const workflowExecutionState = {
         getWorkflowExecution: jest.fn().mockReturnValue({
@@ -2276,7 +2297,9 @@ describe('WorkflowContextManager', () => {
           workflowDefinition: variableWorkflow,
           scopeStack: [],
         }),
-        getDataSetStepExecutions: jest.fn().mockReturnValue([{ id: 'exec-set' }]),
+        getDataSetStepExecutions: jest
+          .fn()
+          .mockReturnValue([{ id: 'exec-set', stepId: 'set_var', scopeStack: [] }]),
         getDataSetStepExecutionCount: jest.fn().mockReturnValue(1),
         getStepIoVersion: jest.fn(() => ioVersion),
         getStepIo: jest.fn().mockReturnValue(undefined),
@@ -2324,11 +2347,13 @@ describe('WorkflowContextManager', () => {
           workflowDefinition: workflow,
           scopeStack: [],
         }),
-        getDataSetStepExecutions: jest.fn().mockReturnValue([{ id: 'exec-set' }]),
+        getDataSetStepExecutions: jest
+          .fn()
+          .mockReturnValue([{ id: 'exec-set', stepId: 'set_var', scopeStack: [] }]),
         getDataSetStepExecutionCount: jest.fn().mockReturnValue(1),
         getStepIoVersion: jest.fn().mockReturnValue(0),
         getLatestStepExecution: jest.fn((stepId: string) =>
-          stepId === 'producer' ? { id: 'exec-producer', stepId } : undefined
+          stepId === 'producer' ? { id: 'exec-producer', stepId, scopeStack: [] } : undefined
         ),
         getStepExecution: jest.fn(),
         getAllStepExecutions: jest.fn().mockReturnValue([]),
@@ -2349,10 +2374,13 @@ describe('WorkflowContextManager', () => {
 
       await underTest.prepareContext('{{ steps.producer.output }} == {{ variables.flag }}');
 
-      expect(stepIoService.readBatch).toHaveBeenCalledWith(
-        expect.arrayContaining(['exec-producer', 'exec-set']),
-        'output'
-      );
+      expect(stepIoService.readBatch).toHaveBeenCalledWith({
+        type: 'output',
+        refs: expect.arrayContaining([
+          { executionId: 'exec-producer', contextId: 'producer' },
+          { executionId: 'exec-set', contextId: 'set_var' },
+        ]),
+      });
     });
   });
 

@@ -16,6 +16,7 @@ import type {
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
+import { buildStepIoContextId } from './parallel_branch_scope';
 import type { StepIoBatchValue, StepIoService } from './step_io_service';
 import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
@@ -168,13 +169,20 @@ export class StepExecutionRuntime {
     return new ExecutionError(error as SerializedError);
   }
 
+  private stepIoContextId(): string {
+    return buildStepIoContextId(this.node.stepId, this.stackFrames);
+  }
+
   private async readCurrent(
     type: 'input' | 'output' | 'error'
   ): Promise<StepIoBatchValue | undefined> {
     if (!this.stepExecutionExists()) {
       return undefined;
     }
-    const values = await this.stepIoService.readBatch([this.stepExecutionId], type);
+    const values = await this.stepIoService.readBatch({
+      type,
+      refs: [{ executionId: this.stepExecutionId, contextId: this.stepIoContextId() }],
+    });
     if (!values.has(this.stepExecutionId)) {
       return undefined;
     }
@@ -216,7 +224,12 @@ export class StepExecutionRuntime {
   }
 
   public setInput(input: Record<string, unknown>): void {
-    this.stepIoService.write(this.stepExecutionId, 'input', input as JsonValue);
+    this.stepIoService.write({
+      executionId: this.stepExecutionId,
+      contextId: this.stepIoContextId(),
+      type: 'input',
+      value: input as JsonValue,
+    });
     if (this.isInputRecorded) {
       return;
     }
@@ -278,12 +291,13 @@ export class StepExecutionRuntime {
       ...(usage ? { usage } : {}),
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
-    this.stepIoService.write(
-      this.stepExecutionId,
-      'output',
-      (stepOutput ?? null) as JsonValue | null,
-      sizeBytes
-    );
+    this.stepIoService.write({
+      executionId: this.stepExecutionId,
+      contextId: this.stepIoContextId(),
+      type: 'output',
+      value: (stepOutput ?? null) as JsonValue | null,
+      sizeBytes,
+    });
     this.logStepComplete({
       id: this.stepExecutionId,
       status: ExecutionStatus.COMPLETED,
@@ -343,11 +357,12 @@ export class StepExecutionRuntime {
       ...(usage ? { usage } : {}),
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
-    this.stepIoService.write(
-      this.stepExecutionId,
-      'output',
-      partialOutput !== undefined ? (partialOutput as JsonValue) : null
-    );
+    this.stepIoService.write({
+      executionId: this.stepExecutionId,
+      contextId: this.stepIoContextId(),
+      type: 'output',
+      value: partialOutput !== undefined ? (partialOutput as JsonValue) : null,
+    });
     this.logStepFail(executionError);
   }
 
@@ -385,7 +400,12 @@ export class StepExecutionRuntime {
       error: serializedError,
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
-    this.stepIoService.write(this.stepExecutionId, 'output', null);
+    this.stepIoService.write({
+      executionId: this.stepExecutionId,
+      contextId: this.stepIoContextId(),
+      type: 'output',
+      value: null,
+    });
     this.logStepFail(executionError);
   }
 

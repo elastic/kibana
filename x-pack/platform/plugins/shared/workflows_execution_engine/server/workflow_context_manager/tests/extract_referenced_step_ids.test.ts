@@ -259,13 +259,10 @@ describe('analyzeConditionString', () => {
     );
   });
 
-  it('marks variables and a step input', () => {
+  it('marks variables references', () => {
     expect(analyzeConditionString('{{ variables.connector_id }} == "abc"')).toMatchObject({
       stepIds: new Set(),
       mayReferenceVariables: true,
     });
-    expect(analyzeConditionString('{{ steps.producer.input.message }}').inputStepIds).toEqual(
-      new Set(['producer'])
-    );
   });
 });

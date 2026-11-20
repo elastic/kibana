@@ -28,36 +28,47 @@ function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoSe
   const inputs = new Map<string, JsonValue>();
   const outputs = new Map<string, JsonValue | null>();
   const sizes = new Map<string, number>();
-  const write = (
-    id: string,
-    type: 'input' | 'output',
-    value: JsonValue | null,
-    sizeBytes?: number
-  ) => {
+  const write = (args: {
+    executionId: string;
+    contextId: string;
+    type: 'input' | 'output';
+    value: JsonValue | null;
+    sizeBytes?: number;
+  }) => {
+    const { executionId, type, value, sizeBytes } = args;
     if (type === 'input') {
       if (value != null) {
-        inputs.set(id, value);
+        inputs.set(executionId, value);
       }
       return;
     }
-    outputs.set(id, value);
+    outputs.set(executionId, value);
     if (sizeBytes !== undefined && Number.isFinite(sizeBytes) && sizeBytes >= 0) {
-      sizes.set(id, sizeBytes);
+      sizes.set(executionId, sizeBytes);
     }
   };
   return {
-    readBatch: jest.fn(async (ids: readonly string[], type: 'input' | 'output' | 'error') => {
-      const values = new Map<string, unknown>();
-      for (const id of ids) {
-        if (type === 'input' && inputs.has(id)) values.set(id, inputs.get(id));
-        if (type === 'output' && outputs.has(id)) values.set(id, outputs.get(id));
-        if (type === 'error') {
-          const error = state.getStepExecution(id)?.error;
-          if (error !== undefined) values.set(id, error);
+    readBatch: jest.fn(
+      async (args: {
+        type: 'input' | 'output' | 'error';
+        refs: ReadonlyArray<{ executionId: string; contextId: string }>;
+      }) => {
+        const values = new Map<string, unknown>();
+        for (const { executionId } of args.refs) {
+          if (args.type === 'input' && inputs.has(executionId)) {
+            values.set(executionId, inputs.get(executionId));
+          }
+          if (args.type === 'output' && outputs.has(executionId)) {
+            values.set(executionId, outputs.get(executionId));
+          }
+          if (args.type === 'error') {
+            const error = state.getStepExecution(executionId)?.error;
+            if (error !== undefined) values.set(executionId, error);
+          }
         }
+        return values;
       }
-      return values;
-    }),
+    ),
     write: jest.fn(write),
     getOutputSizeStats: jest.fn(() => {
       let totalBytes = 0;
@@ -203,7 +214,10 @@ describe('StepExecutionRuntime', () => {
 
       underTest.setInput({ message: 'hi' });
 
-      const inputs = await stepIoService.readBatch([fakeStepExecutionId], 'input');
+      const inputs = await stepIoService.readBatch({
+        type: 'input',
+        refs: [{ executionId: fakeStepExecutionId, contextId: 'fakeStepId1' }],
+      });
       expect(inputs.get(fakeStepExecutionId)).toEqual({ message: 'hi' });
       expect(underTest.isInputRecorded).toBe(true);
       expect(underTest.getCurrentStepState()).toEqual({
@@ -253,17 +267,28 @@ describe('StepExecutionRuntime', () => {
         error: { type: 'Error', message: 'Fake error' },
       } as Partial<EsWorkflowStepExecution>);
       // IO lives in the service now — seed it through the passthrough mock.
-      stepIoService.write(fakeStepExecutionId, 'input', {});
-      stepIoService.write(fakeStepExecutionId, 'output', { success: true, data: {} });
+      stepIoService.write({
+        executionId: fakeStepExecutionId,
+        contextId: 'fakeStepId1',
+        type: 'input',
+        value: {},
+      });
+      stepIoService.write({
+        executionId: fakeStepExecutionId,
+        contextId: 'fakeStepId1',
+        type: 'output',
+        value: { success: true, data: {} },
+      });
 
       await expect(underTest.getCurrentStepInput()).resolves.toEqual({});
       await expect(underTest.getCurrentStepOutput()).resolves.toEqual({ success: true, data: {} });
       await expect(underTest.getCurrentStepError()).resolves.toEqual(
         new ExecutionError({ type: 'Error', message: 'Fake error' })
       );
-      expect(stepIoService.readBatch).toHaveBeenCalledWith([fakeStepExecutionId], 'input');
-      expect(stepIoService.readBatch).toHaveBeenCalledWith([fakeStepExecutionId], 'output');
-      expect(stepIoService.readBatch).toHaveBeenCalledWith([fakeStepExecutionId], 'error');
+      const ioRef = { executionId: fakeStepExecutionId, contextId: 'fakeStepId1' };
+      expect(stepIoService.readBatch).toHaveBeenCalledWith({ type: 'input', refs: [ioRef] });
+      expect(stepIoService.readBatch).toHaveBeenCalledWith({ type: 'output', refs: [ioRef] });
+      expect(stepIoService.readBatch).toHaveBeenCalledWith({ type: 'error', refs: [ioRef] });
     });
 
     it('returns undefined for a missing step execution', async () => {

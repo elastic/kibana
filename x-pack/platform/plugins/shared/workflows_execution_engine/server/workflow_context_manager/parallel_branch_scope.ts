@@ -53,3 +53,28 @@ export const areParallelBranchesCompatible = (
   }
   return true;
 };
+
+/**
+ * Accessibility id for step IO cache addressing: the step name plus parallel
+ * branch lineage. Foreach/while/retry attempt `scopeId`s are omitted so sequential
+ * loop iterations share one id. `getParallelBranchScopes` keeps those ids in its
+ * `fanOut` path for sibling filtering — do not reuse it here.
+ *
+ * Examples: `process`; `process|fanOut=parallel_1|branch=0`.
+ */
+export const buildStepIoContextId = (
+  stepId: string,
+  stackFrames: readonly StackFrame[]
+): string => {
+  const parts: string[] = [stepId];
+  const path: string[] = [];
+  for (const frame of stackFrames) {
+    for (const scope of frame.nestedScopes) {
+      if (scope.nodeType === 'enter-parallel') {
+        parts.push(`fanOut=${[...path, scope.nodeId].join('/')}`, `branch=${scope.scopeId ?? ''}`);
+      }
+      path.push(scope.nodeId);
+    }
+  }
+  return parts.join('|');
+};
