@@ -9,7 +9,7 @@
 
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { euiFontSize, mathWithUnits } from '@elastic/eui';
+import { euiFontSize, euiScreenReaderOnly, mathWithUnits } from '@elastic/eui';
 
 export const DEFAULT_DATA_GRID_ROW_HEIGHT = 34;
 
@@ -20,6 +20,7 @@ export const getDataGridStyles = (themeContext: UseEuiTheme) => {
   const cellOutlineBorderRadius = mathWithUnits(euiTheme.border.radius.inline, (size) => size / 2);
 
   return {
+    tabGuard: css(euiScreenReaderOnly()),
     grid: css({
       position: 'relative',
       overflow: 'auto',

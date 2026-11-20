@@ -28,6 +28,8 @@ import type {
   ConversationRoundStep,
   RoundInput,
   BackgroundExecutionState,
+  DeliveredMessageStepData,
+  InterimAnswerStepData,
   SubagentRosterEntry,
   SubstitutionStepData,
 } from './conversation';
@@ -62,6 +64,8 @@ export enum ChatEventType {
   compactionStarted = 'compaction_started',
   compactionCompleted = 'compaction_completed',
   backgroundAgentComplete = 'background_agent_complete',
+  messageDelivered = 'message_delivered',
+  interimAnswer = 'interim_answer',
   subagentRosterUpdated = 'subagent_roster_updated',
   userQuestionAsked = 'user_question_asked',
   userQuestionAnswered = 'user_question_answered',
@@ -553,6 +557,42 @@ export const isBackgroundAgentCompleteEvent = (
   return event.type === ChatEventType.backgroundAgentComplete;
 };
 
+export type MessageDeliveredEventData = DeliveredMessageStepData;
+
+export type MessageDeliveredEvent = ChatEventBase<
+  ChatEventType.messageDelivered,
+  MessageDeliveredEventData
+>;
+
+export const createMessageDeliveredEvent = (
+  data: MessageDeliveredEventData
+): MessageDeliveredEvent => ({
+  type: ChatEventType.messageDelivered,
+  data,
+});
+
+export const isMessageDeliveredEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is MessageDeliveredEvent => {
+  return event.type === ChatEventType.messageDelivered;
+};
+
+/** Moves the current answer into a step; subsequent chunks start a new answer. */
+export type InterimAnswerEventData = InterimAnswerStepData;
+
+export type InterimAnswerEvent = ChatEventBase<ChatEventType.interimAnswer, InterimAnswerEventData>;
+
+export const createInterimAnswerEvent = (data: InterimAnswerEventData): InterimAnswerEvent => ({
+  type: ChatEventType.interimAnswer,
+  data,
+});
+
+export const isInterimAnswerEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is InterimAnswerEvent => {
+  return event.type === ChatEventType.interimAnswer;
+};
+
 export interface SubagentRosterUpdatedEventData {
   /** Full active roster at time of emission. */
   roster: SubagentRosterEntry[];
@@ -644,6 +684,8 @@ export type ChatAgentEvent =
   | CompactionStartedEvent
   | CompactionCompletedEvent
   | BackgroundAgentCompleteEvent
+  | MessageDeliveredEvent
+  | InterimAnswerEvent
   | SubagentRosterUpdatedEvent
   | SubstitutionAppliedEvent
   | UserQuestionAskedEvent
