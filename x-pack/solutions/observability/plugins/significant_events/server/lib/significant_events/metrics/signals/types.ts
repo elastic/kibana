@@ -95,7 +95,6 @@ export interface SignalMeasurement {
 
 export interface SignalClusterExclusion {
   names: string[];
-  unclustered: boolean;
 }
 
 export interface SignalCheck {

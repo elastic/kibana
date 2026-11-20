@@ -34,12 +34,10 @@ const buildVariantFilter = (variants: readonly SignalTemplateVariant[]): string 
   return clauses.length === 1 ? clauses[0] : `(${clauses.join(' OR ')})`;
 };
 
-const renderClusterExclusion = ({ names, unclustered }: SignalClusterExclusion): string[] => [
-  ...(names.length > 0
+const renderClusterExclusion = ({ names }: SignalClusterExclusion): string[] =>
+  names.length > 0
     ? [`NOT COALESCE(${CLUSTER_FIELD} IN (${names.map(quoteEsqlString).join(', ')}), FALSE)`]
-    : []),
-  ...(unclustered ? [`${CLUSTER_FIELD} IS NOT NULL`] : []),
-];
+    : [];
 
 // Averages each variant per group and uses the first eligible schema.
 const renderMergedAverage = (

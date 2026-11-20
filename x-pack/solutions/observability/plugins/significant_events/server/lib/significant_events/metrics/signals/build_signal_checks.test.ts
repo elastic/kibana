@@ -167,11 +167,11 @@ describe('buildSignalChecks', () => {
     ).toEqual([
       {
         schema: 'otel',
-        excludedClusters: { names: ['cluster-a'], unclustered: false },
+        excludedClusters: { names: ['cluster-a'] },
       },
       {
         schema: 'ecs',
-        excludedClusters: { names: ['cluster-b'], unclustered: false },
+        excludedClusters: { names: ['cluster-b'] },
       },
     ]);
     expect(preferredChecks[0].esql_preview).toContain(
@@ -201,11 +201,11 @@ describe('buildSignalChecks', () => {
     ).toEqual([
       {
         schema: 'otel',
-        excludedClusters: { names: ['cluster-a'], unclustered: false },
+        excludedClusters: { names: ['cluster-a'] },
       },
       {
         schema: 'ecs',
-        excludedClusters: { names: ['cluster-b'], unclustered: false },
+        excludedClusters: { names: ['cluster-b'] },
       },
     ]);
     expect(checks[0].esql_preview).toContain(
@@ -214,6 +214,20 @@ describe('buildSignalChecks', () => {
     expect(checks[1].esql_preview).toContain(
       'NOT COALESCE(orchestrator.cluster.name IN ("cluster-b"), FALSE)'
     );
+  });
+
+  it('keeps unclustered rows in every schema check', () => {
+    const template = getTemplate('k8s.container.restarts');
+    const ecs = getVariant(template, 'ecs');
+    const otel = getVariant(template, 'otel');
+
+    const { checks } = build(['k8s.deployment'], template, [
+      createPresence(ecs),
+      createPresence(otel),
+    ]);
+
+    expect(checks.map(({ measurements }) => measurements[0].schema)).toEqual(['otel', 'ecs']);
+    expect(checks.every(({ excluded_clusters: excludedClusters }) => !excludedClusters)).toBe(true);
   });
 
   it('does not exclude clusters when field presence is truncated', () => {

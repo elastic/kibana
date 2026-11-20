@@ -53,13 +53,26 @@ const canMergePerEntity = ([first, ...rest]: readonly SignalTemplateVariant[]): 
       variant.minimumSampleCount === first.minimumSampleCount
   );
 
-/** Picks one variant per cluster, OpenTelemetry first, and returns the clusters each variant won. */
+/** Picks one variant per named cluster, OpenTelemetry first, and keeps unclustered variants. */
 const assignVariantsToClusters = (
   variants: readonly SignalTemplateVariant[],
   fieldPresence: readonly SignalFieldPresence[]
-): Array<{ variant: SignalTemplateVariant; clusters: Array<string | undefined> }> => {
-  const clustersByVariant = new Map<SignalTemplateVariant, Array<string | undefined>>();
+): Array<{ variant: SignalTemplateVariant; clusters: string[] }> => {
+  const clustersByVariant = new Map<SignalTemplateVariant, string[]>();
   for (const cluster of new Set(fieldPresence.map((presence) => presence.cluster))) {
+    if (cluster === undefined) {
+      // Rows without a cluster stay in every check; choosing per entity at run time is planned for the follow up PR.
+      for (const variant of variants) {
+        if (
+          fieldPresence.some(
+            (presence) => presence.cluster === undefined && hasVariantFields(presence, variant)
+          )
+        ) {
+          clustersByVariant.set(variant, clustersByVariant.get(variant) ?? []);
+        }
+      }
+      continue;
+    }
     // Prefer complete signal context, then fall back to the fields required to run.
     const variant =
       variants.find((candidate) =>
@@ -85,14 +98,11 @@ const assignVariantsToClusters = (
   });
 };
 
-const buildClusterExclusion = (
-  clusters: ReadonlyArray<string | undefined>
-): SignalClusterExclusion | undefined => {
+const buildClusterExclusion = (clusters: readonly string[]): SignalClusterExclusion | undefined => {
   if (clusters.length === 0) {
     return undefined;
   }
-  const names = clusters.filter((cluster): cluster is string => cluster !== undefined);
-  return { names, unclustered: clusters.includes(undefined) };
+  return { names: [...clusters] };
 };
 
 /**
