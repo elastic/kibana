@@ -164,11 +164,13 @@ describe('createThreatAttachmentType', () => {
   });
 
   describe('getAgentDescription', () => {
-    it('documents the by-reference semantics', () => {
+    it('documents the by-reference semantics and what the rendered card shows', () => {
       const description = attachmentType.getAgentDescription?.();
 
       expect(description).toContain('by-reference');
       expect(description).toContain('report_id');
+      expect(description).toContain('Rendering this attachment inline displays the threat report');
+      expect(description).toContain('those not hunted set apart');
     });
   });
 

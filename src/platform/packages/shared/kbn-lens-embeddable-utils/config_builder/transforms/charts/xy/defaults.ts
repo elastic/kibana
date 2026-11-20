@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LENS_XY_HIDE_ENDZONES_DEFAULT } from '@kbn/lens-common';
 import type { SeriesType } from '@kbn/lens-common';
+
 import type { ColorMappingCategoricalType } from '../../../schema/color';
 import { DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../../schema/color';
 
@@ -20,7 +22,8 @@ import { DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../../schema/color';
  * chart definition that does not depend on runtime defaults.
  */
 
-export const DEFAULT_PARTIAL_BUCKETS_VISIBLE = false;
+// Derived from the runtime default so API-created charts match editor defaults
+export const DEFAULT_PARTIAL_BUCKETS_VISIBLE = !LENS_XY_HIDE_ENDZONES_DEFAULT;
 export const DEFAULT_CURRENT_TIME_MARKER_VISIBLE = false;
 export const DEFAULT_DATA_LABELS_VISIBLE = false;
 export const DEFAULT_POINTS_VISIBILITY = 'auto' as const;
