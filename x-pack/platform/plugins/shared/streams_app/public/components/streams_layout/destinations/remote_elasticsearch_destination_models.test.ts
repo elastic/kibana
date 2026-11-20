@@ -29,6 +29,7 @@ describe('getRemoteIndexBySignal', () => {
         logsIndex: 'a',
         metricsIndex: 'b',
         tracesIndex: 'c',
+        docsIndex: 'd',
       })
     ).toEqual({});
   });
@@ -40,58 +41,99 @@ describe('getRemoteIndexBySignal', () => {
         logsIndex: '  my-logs ',
         metricsIndex: '   ',
         tracesIndex: 'my-traces',
+        docsIndex: ' my-docs ',
       })
-    ).toEqual({ logs: 'my-logs', traces: 'my-traces' });
+    ).toEqual({ logs: 'my-logs', traces: 'my-traces', docs: 'my-docs' });
   });
 });
 
 describe('createRemoteElasticsearchUnitDestination', () => {
-  it('auto: endpoint and credential only, all signals', () => {
+  it('auto: endpoint and credential only, all signals including docs', () => {
     const node = createRemoteElasticsearchUnitDestination({
       ...base,
       auto: true,
       logsIndex: '',
       metricsIndex: '',
       tracesIndex: '',
+      docsIndex: '',
     });
     expect(node).toEqual({
       id: 'central',
       name: 'Central',
       type: REMOTE_ELASTICSEARCH_TYPE,
-      supported_telemetry: ['logs', 'metrics', 'traces'],
+      supported_telemetry: ['logs', 'metrics', 'traces', 'docs'],
       config: [endpointEntry, credentialEntry],
     });
   });
 
-  it('fixed, same raw name on every filled signal: one unscoped index', () => {
+  it('fixed, one signal: a telemetry-scoped index', () => {
     const node = createRemoteElasticsearchUnitDestination({
       ...base,
       auto: false,
-      logsIndex: 'shared-idx',
-      metricsIndex: 'shared-idx',
+      logsIndex: 'logs-billing.otel-default',
+      metricsIndex: '',
       tracesIndex: '',
+      docsIndex: '',
     });
-    expect(node.supported_telemetry).toEqual(['logs', 'metrics']);
+    expect(node.supported_telemetry).toEqual(['logs']);
     expect(node.config).toEqual([
       endpointEntry,
-      { name: 'index', value: 'shared-idx' },
+      { name: 'index', value: 'logs-billing.otel-default', telemetry: ['logs'] },
       credentialEntry,
     ]);
   });
 
-  it('fixed, different names: one scoped index per filled signal', () => {
+  it('fixed: one telemetry-scoped index per filled signal', () => {
     const node = createRemoteElasticsearchUnitDestination({
       ...base,
       auto: false,
-      logsIndex: 'a',
+      logsIndex: 'logs-billing.otel-default',
       metricsIndex: '',
-      tracesIndex: 'b',
+      tracesIndex: 'traces-billing.otel-prod',
+      docsIndex: '',
     });
     expect(node.supported_telemetry).toEqual(['logs', 'traces']);
     expect(node.config).toEqual([
       endpointEntry,
-      { name: 'index', value: 'a', telemetry: ['logs'] },
-      { name: 'index', value: 'b', telemetry: ['traces'] },
+      { name: 'index', value: 'logs-billing.otel-default', telemetry: ['logs'] },
+      { name: 'index', value: 'traces-billing.otel-prod', telemetry: ['traces'] },
+      credentialEntry,
+    ]);
+  });
+
+  it('fixed, OTel signals plus docs: docs gets its own scoped entry', () => {
+    const node = createRemoteElasticsearchUnitDestination({
+      ...base,
+      auto: false,
+      logsIndex: 'logs-billing.otel-default',
+      metricsIndex: 'metrics-billing.otel-default',
+      tracesIndex: 'traces-billing.otel-default',
+      docsIndex: 'accounting-2026',
+    });
+    expect(node.supported_telemetry).toEqual(['logs', 'metrics', 'traces', 'docs']);
+    expect(node.config).toEqual([
+      endpointEntry,
+      { name: 'index', value: 'logs-billing.otel-default', telemetry: ['logs'] },
+      { name: 'index', value: 'metrics-billing.otel-default', telemetry: ['metrics'] },
+      { name: 'index', value: 'traces-billing.otel-default', telemetry: ['traces'] },
+      { name: 'index', value: 'accounting-2026', telemetry: ['docs'] },
+      credentialEntry,
+    ]);
+  });
+
+  it('fixed, docs only: one docs-scoped index', () => {
+    const node = createRemoteElasticsearchUnitDestination({
+      ...base,
+      auto: false,
+      logsIndex: '',
+      metricsIndex: '',
+      tracesIndex: '',
+      docsIndex: ' accounting-2026 ',
+    });
+    expect(node.supported_telemetry).toEqual(['docs']);
+    expect(node.config).toEqual([
+      endpointEntry,
+      { name: 'index', value: 'accounting-2026', telemetry: ['docs'] },
       credentialEntry,
     ]);
   });
@@ -200,6 +242,7 @@ describe('remote Elasticsearch view model', () => {
       logsIndex: '',
       metricsIndex: '',
       tracesIndex: '',
+      docsIndex: '',
     });
     expect(node.description).toBe('Prod cluster');
     expect(toDestinationViewModel(node)?.description).toBe('Prod cluster');
@@ -218,16 +261,38 @@ describe('remote Elasticsearch view model', () => {
   });
 
   it.each([
-    ['auto', { auto: true, logsIndex: '', metricsIndex: '', tracesIndex: '' }, {}],
+    ['auto', { auto: true, logsIndex: '', metricsIndex: '', tracesIndex: '', docsIndex: '' }, {}],
     [
-      'one name',
-      { auto: false, logsIndex: 'shared-idx', metricsIndex: 'shared-idx', tracesIndex: '' },
-      { logs: 'shared-idx', metrics: 'shared-idx' },
+      'one signal',
+      { auto: false, logsIndex: 'logs-a.otel-b', metricsIndex: '', tracesIndex: '', docsIndex: '' },
+      { logs: 'logs-a.otel-b' },
     ],
     [
-      'different names',
-      { auto: false, logsIndex: 'logs-a-b', metricsIndex: '', tracesIndex: 'traces-a-b' },
-      { logs: 'logs-a-b', traces: 'traces-a-b' },
+      'two signals',
+      {
+        auto: false,
+        logsIndex: 'logs-a.otel-b',
+        metricsIndex: '',
+        tracesIndex: 'traces-a.otel-b',
+        docsIndex: '',
+      },
+      { logs: 'logs-a.otel-b', traces: 'traces-a.otel-b' },
+    ],
+    [
+      'OTel signals plus docs',
+      {
+        auto: false,
+        logsIndex: 'logs-a.otel-b',
+        metricsIndex: 'metrics-a.otel-b',
+        tracesIndex: 'traces-a.otel-b',
+        docsIndex: 'accounting-2026',
+      },
+      {
+        logs: 'logs-a.otel-b',
+        metrics: 'metrics-a.otel-b',
+        traces: 'traces-a.otel-b',
+        docs: 'accounting-2026',
+      },
     ],
   ])('reads back what the builder saved (%s)', (_, form, indexBySignal) => {
     const viewModel = toDestinationViewModel(

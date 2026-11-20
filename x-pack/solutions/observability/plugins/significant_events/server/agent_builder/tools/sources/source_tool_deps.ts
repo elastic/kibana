@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
+import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../../routes/types';
 import type { SignificantEventsServer } from '../../../types';
 
@@ -15,6 +16,7 @@ export interface SourceToolDeps {
   getScopedClients: GetScopedClients;
   server: SignificantEventsServer;
   logger: Logger;
+  telemetry: EbtTelemetryClient;
 }
 
 /** The part of the maintenance service the source tools read to tell whether the space is paused. */

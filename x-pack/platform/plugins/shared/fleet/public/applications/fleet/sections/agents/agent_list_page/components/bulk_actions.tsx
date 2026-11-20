@@ -14,6 +14,7 @@ import type { Agent, AgentPolicy } from '../../../../types';
 import {
   AgentReassignAgentPolicyModal,
   AgentRemoveCollectorModal,
+  AgentForceUnenrollModal,
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
   HierarchicalActionsMenu,
@@ -52,6 +53,8 @@ export interface Props {
   sortOrder?: 'asc' | 'desc';
   unsupportedMigrateAgents: Agent[];
   unsupportedPrivilegeLevelChangeAgents: Agent[];
+  /** Whether a manually selected agent runs Fleet Server; always false for a query selection. */
+  selectionHasFleetServer: boolean;
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
@@ -68,6 +71,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   sortOrder,
   unsupportedMigrateAgents,
   unsupportedPrivilegeLevelChangeAgents,
+  selectionHasFleetServer,
 }) => {
   const licenseService = useLicense();
   const authz = useAuthz();
@@ -86,6 +90,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   // Actions states
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState<boolean>(false);
+  const [isForceUnenrollModalOpen, setIsForceUnenrollModalOpen] = useState<boolean>(false);
   const [upgradeModalState, setUpgradeModalState] = useState({
     isOpen: false,
     isScheduled: false,
@@ -428,6 +433,23 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             },
             'data-test-subj': 'agentBulkActionsUnenroll',
           },
+          {
+            id: 'force-unenroll',
+            name: (
+              <FormattedMessage
+                id="xpack.fleet.agentBulkActions.forceUnenrollAgents"
+                defaultMessage="Force unenroll {agentCount, plural, one {# agent} other {# agents}}"
+                values={{ agentCount }}
+              />
+            ),
+            icon: 'crossCircle',
+            iconColor: 'danger',
+            disabled: !authz.fleet.allAgents,
+            onClick: () => {
+              setIsForceUnenrollModalOpen(true);
+            },
+            'data-test-subj': 'agentBulkActionsForceUnenroll',
+          },
         ],
       },
     ];
@@ -471,8 +493,22 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           <AgentUnenrollAgentModal
             agents={agents}
             agentCount={agentCount}
+            hasFleetServer={selectionHasFleetServer}
             onClose={() => {
               setIsUnenrollModalOpen(false);
+              refreshAgents({ refreshTags: true });
+            }}
+          />
+        </EuiPortal>
+      )}
+      {isForceUnenrollModalOpen && (
+        <EuiPortal>
+          <AgentForceUnenrollModal
+            agents={agents}
+            agentCount={agentCount}
+            hasFleetServer={selectionHasFleetServer}
+            onClose={() => {
+              setIsForceUnenrollModalOpen(false);
               refreshAgents({ refreshTags: true });
             }}
           />

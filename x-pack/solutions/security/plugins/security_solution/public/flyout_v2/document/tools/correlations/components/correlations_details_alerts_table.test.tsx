@@ -8,7 +8,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
   type CorrelationsCustomTableColumn,
   CorrelationsDetailsAlertsTable,
@@ -16,15 +15,12 @@ import {
 import { getColumns } from '../utils/get_columns';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
-import { mockFlyoutApi } from '../../../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import { mockContextValue } from '../../../../../flyout/document_details/shared/mocks/mock_context';
-import { RULE_PREVIEW_BANNER, RulePreviewPanelKey } from '../../../../../flyout/rule_details/right';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 jest.mock('../hooks/use_paginated_alerts');
 jest.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../common/hooks/is_in_security_app');
 jest.mock('../../../../../common/components/user_privileges', () => ({
   useUserPrivileges: () => ({
@@ -48,11 +44,9 @@ const mockOnShowAlert = jest.fn();
 const renderCorrelationsTable = ({
   scopeId = mockContextValue.scopeId,
   columns,
-  useLegacyExpandableFlyout = true,
 }: {
   scopeId?: string;
   columns?: Array<CorrelationsCustomTableColumn>;
-  useLegacyExpandableFlyout?: boolean;
 } = {}) =>
   render(
     <TestProviders>
@@ -66,10 +60,8 @@ const renderCorrelationsTable = ({
         columns={
           columns ??
           getColumns({
-            scopeId,
             dataTestSubj: TEST_ID,
             onShowAlert: mockOnShowAlert,
-            useLegacyExpandableFlyout,
           })
         }
       />
@@ -81,7 +73,6 @@ describe('CorrelationsDetailsAlertsTable', () => {
     useAlertsPrivilegesMock.mockReturnValue({
       hasAlertsRead: true,
     });
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     jest.mocked(useIsInSecurityApp).mockReturnValue(true);
     jest.mocked(usePaginatedAlerts).mockReturnValue({
       setPagination: jest.fn(),
@@ -151,31 +142,15 @@ describe('CorrelationsDetailsAlertsTable', () => {
     expect(mockOnShowAlert).toHaveBeenCalledWith('1', 'index', 'Alert: Rule1');
   });
 
-  it('opens rule preview when isRulePreview is false', () => {
-    const { getAllByTestId } = renderCorrelationsTable({ useLegacyExpandableFlyout: true });
-
-    expect(getAllByTestId(`${TEST_ID}RulePreview`).length).toBe(2);
-
-    getAllByTestId(`${TEST_ID}RulePreview`)[0].click();
-    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-      id: RulePreviewPanelKey,
-      params: {
-        ruleId: 'uuid1',
-        banner: RULE_PREVIEW_BANNER,
-        isPreviewMode: true,
-      },
-    });
+  it('renders rule links', () => {
+    const { getAllByTestId } = renderCorrelationsTable();
+    expect(getAllByTestId(`${TEST_ID}RuleLink`).length).toBe(2);
   });
 
   it('does not render InvestigateInTimeline button when not in Security Solution', () => {
     jest.mocked(useIsInSecurityApp).mockReturnValue(false);
     const { queryByTestId } = renderCorrelationsTable();
     expect(queryByTestId(`${TEST_ID}InvestigateInTimeline`)).not.toBeInTheDocument();
-  });
-
-  it('does not render preview link when isRulePreview is true', () => {
-    const { queryByTestId } = renderCorrelationsTable({ scopeId: TableId.rulePreview });
-    expect(queryByTestId(`${TEST_ID}RulePreview`)).not.toBeInTheDocument();
   });
 
   it('renders custom columns when columns prop is provided', () => {

@@ -7,7 +7,8 @@
 
 import { ENTITY_ID_COLUMN } from '../generator';
 import type { OutputColumn } from '../generator';
-import type { ESQLValue, InventoryRow, MergeResult, PlanResult } from './types';
+import type { ESQLValue, InventoryRow } from '../../../common';
+import type { MergeResult, PlanResult } from './types';
 import { hasValue, isNewer, lastSeenInstant } from './utils';
 
 // Column names are authored data and may be `constructor` or `__proto__`, so the accumulator is a

@@ -1,0 +1,90 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import type {
+  CoreStart,
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  SecurityServiceStart,
+} from '@kbn/core/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  IWorkflowLogsQueryService,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
+  WorkflowsExecutionEnginePluginStart,
+} from '@kbn/workflows-execution-engine/server';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+
+import type { IWorkflowChangeHistoryService } from './workflow_change_history_types';
+import type { WorkflowExecutionQueryService } from './workflow_execution_query_service';
+import type { WorkflowValidationService } from './workflow_validation_service';
+import type { WorkflowPagesSystemClient } from '../pages/workflow_pages_system_client';
+import type { WorkflowStorage } from '../storage/workflow_storage';
+import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
+
+/** Core deps shared by all services that access workflow storage. */
+export interface WorkflowStorageDeps {
+  logger: Logger;
+  workflowStorage: WorkflowStorage;
+}
+
+/** Deps for WorkflowCrudService (CRUD + deletion + disable-all). */
+export interface WorkflowCrudDeps extends WorkflowStorageDeps {
+  authz?: { checkPrivilegesWithRequest: CheckPrivilegesWithRequest };
+  getSpaceId: (request: KibanaRequest) => string;
+  getServiceAccountBindings: () => WorkflowsExecutionEnginePluginStart['serviceAccountBindings'];
+  getSecurity: () => SecurityServiceStart | undefined;
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
+  getTaskScheduler: () => WorkflowTaskScheduler | null;
+  executionQueryService: WorkflowExecutionQueryService;
+  validationService: WorkflowValidationService;
+  getCoreStart: () => CoreStart;
+  changeHistoryService: IWorkflowChangeHistoryService;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+  stepExecutionsDataClient: StepExecutionsDataClient;
+  /** Keeps the `workflow-page` saved objects in step with the page triggers. */
+  pagesSystemClient?: WorkflowPagesSystemClient;
+}
+
+/** Deps for WorkflowSearchService. */
+export interface WorkflowSearchDeps extends WorkflowStorageDeps {
+  esClient: ElasticsearchClient;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+}
+
+/** Deps for WorkflowExecutionQueryService. */
+export interface WorkflowExecutionQueryDeps {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+  stepExecutionsDataClient: StepExecutionsDataClient;
+  workflowEventLoggerService: IWorkflowLogsQueryService;
+}
+
+/** Deps for WorkflowValidationService. */
+export interface WorkflowValidationDeps {
+  /** Required plugin dependency, so it is always present once start has run. */
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  getActionsClient: () => Promise<IUnsecuredActionsClient>;
+  getActionsClientWithRequest: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
+  getCoreStart: () => CoreStart;
+  licensing: LicensingPluginStart;
+  logger: Logger;
+  /** Reads the workflows with these ids that the request may see, for their outputs. */
+  getWorkflowsForOutputs: (
+    ids: string[],
+    spaceId: string,
+    request: KibanaRequest
+  ) => Promise<Array<{ id: string; name?: string; definition?: unknown }>>;
+  /** `workflowsManagement.pages.enabled`. Without it, `type: page` fails like an unknown trigger. */
+  pagesEnabled: boolean;
+}

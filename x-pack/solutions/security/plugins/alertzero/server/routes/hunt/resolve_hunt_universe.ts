@@ -7,6 +7,8 @@
 
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { SECURITY_SOLUTION_DEFAULT_INDEX_ID } from '@kbn/management-settings-ids';
+import type { HuntUniverse } from '../../services/watches/hunt/common/partition_hunt_universe';
+import { partitionHuntUniverse } from '../../services/watches/hunt/common/partition_hunt_universe';
 
 /** The universe a hunt falls back to when the default data view setting is unusable. */
 export const FALLBACK_HUNT_UNIVERSE: readonly string[] = ['logs-*'];
@@ -29,13 +31,18 @@ const isPatternList = (value: string[] | undefined): value is string[] =>
  * missing, not an array of patterns, empty, or unreadable, so a misconfigured space still
  * hunts the streams Fleet integrations write rather than nothing.
  *
+ * Positive entries whose index name is dot-prefixed (hidden and alerts indices) are split off
+ * into `policySkipped` and never searched. A valid setting that names only such entries is
+ * returned as is, without the fallback, so `patterns` can hold no positive entry.
+ *
  * The read lives in the routes, not the service: the service takes the list as a parameter
  * and tests inject it directly.
  */
 export const resolveHuntUniverse = async (
   context: HuntUniverseContext,
-  logger: Logger
-): Promise<string[]> => {
+  logger: Logger,
+  crossProjectSearch: boolean
+): Promise<HuntUniverse> => {
   const { uiSettings } = await context.core;
   let configured: string[] | undefined;
   try {
@@ -51,14 +58,23 @@ export const resolveHuntUniverse = async (
         ', '
       )} instead: ${err instanceof Error ? err.message : String(err)}`
     );
-    return [...FALLBACK_HUNT_UNIVERSE];
+    return { patterns: [...FALLBACK_HUNT_UNIVERSE], policySkipped: [] };
   }
-  if (isPatternList(configured)) return configured.map((pattern) => pattern.trim());
+  // Elasticsearch splits a multi-target expression on commas whatever the array boundaries
+  // were, so a comma-joined entry is read as the entries it holds. Otherwise a hidden name
+  // inside one would pass the policy split below as part of a longer string.
+  const entries = isPatternList(configured)
+    ? configured
+        .flatMap((pattern) => pattern.split(','))
+        .map((entry) => entry.trim())
+        .filter((entry) => entry.length > 0)
+    : [];
+  if (entries.length > 0) return partitionHuntUniverse(entries, crossProjectSearch);
 
   logger.warn(
     `${SECURITY_SOLUTION_DEFAULT_INDEX_ID} is missing or not a list of index patterns; hunting ${FALLBACK_HUNT_UNIVERSE.join(
       ', '
     )} instead`
   );
-  return [...FALLBACK_HUNT_UNIVERSE];
+  return { patterns: [...FALLBACK_HUNT_UNIVERSE], policySkipped: [] };
 };

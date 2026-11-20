@@ -13,4 +13,9 @@ export type {
   CallbackConversationResolverContext,
   CallbackTransportDefinition,
 } from './types';
-export { CallbackDeliveryError, isCallbackDeliveryError, throwIfNotDelivered } from './errors';
+export {
+  CallbackDeliveryError,
+  isCallbackDeliveryError,
+  parseRetryAfterMs,
+  throwIfNotDelivered,
+} from './errors';
