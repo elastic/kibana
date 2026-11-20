@@ -29,9 +29,8 @@ jest.mock('../../../../../common/components/link_to');
 
 const hoverTooltipAnchor = async (container: HTMLElement) => {
   const anchor = container.querySelector('.euiToolTipAnchor');
-  if (anchor) {
-    await userEvent.hover(anchor);
-  }
+  expect(anchor).not.toBeNull();
+  await userEvent.hover(anchor as Element);
 };
 
 describe('Events', () => {
@@ -47,7 +46,7 @@ describe('Events', () => {
         />
       </TestProviders>
     );
-    expect(container.textContent).not.toEqual('');
+    expect(container.textContent).toEqual('Nov 5, 2018 @ 19:03:25.937');
   });
 
   test('it renders a localized date tooltip for a field type of date that has a valid timestamp', async () => {

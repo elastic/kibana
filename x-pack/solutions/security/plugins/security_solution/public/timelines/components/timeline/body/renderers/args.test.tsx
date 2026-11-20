@@ -68,7 +68,7 @@ describe('Args', () => {
           />
         </TestProviders>
       );
-      expect(container).toHaveTextContent(/^$/);
+      expect(container.textContent).toEqual('');
     });
 
     test('it returns an empty string when both args and process title are null', () => {
@@ -83,7 +83,7 @@ describe('Args', () => {
           />
         </TestProviders>
       );
-      expect(container).toHaveTextContent(/^$/);
+      expect(container.textContent).toEqual('');
     });
 
     test('it returns an empty string when args is an empty array, and title is an empty string', () => {
@@ -98,7 +98,7 @@ describe('Args', () => {
           />
         </TestProviders>
       );
-      expect(container).toHaveTextContent(/^$/);
+      expect(container.textContent).toEqual('');
     });
 
     test('it returns args when args are provided, and process title is NOT provided', () => {
@@ -113,7 +113,7 @@ describe('Args', () => {
           />
         </TestProviders>
       );
-      expect(container).toHaveTextContent('arg1arg2arg3');
+      expect(container.textContent).toEqual('arg1arg2arg3');
     });
 
     test('it returns process title when process title is provided, and args is NOT provided', () => {
@@ -128,7 +128,7 @@ describe('Args', () => {
           />
         </TestProviders>
       );
-      expect(container).toHaveTextContent('process-title-1');
+      expect(container.textContent).toEqual('process-title-1');
     });
 
     test('it returns both args and process title, when both are provided', () => {
@@ -143,7 +143,7 @@ describe('Args', () => {
           />
         </TestProviders>
       );
-      expect(container).toHaveTextContent('arg1arg2arg3process-title-1');
+      expect(container.textContent).toEqual('arg1arg2arg3process-title-1');
     });
 
     test('should passing correct scopeId to cell actions', () => {

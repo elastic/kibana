@@ -67,7 +67,7 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(container.textContent).toBe('');
+      expect(container).toBeEmptyDOMElement();
     });
   });
 

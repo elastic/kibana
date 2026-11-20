@@ -165,9 +165,6 @@ describe('StatefulOpenTimeline', () => {
       </TestProviders>
     );
 
-  const getSelectAllCheckbox = (container: HTMLElement) =>
-    container.querySelector<HTMLInputElement>('input.euiCheckbox__input') as HTMLInputElement;
-
   test('it has the expected initial state', () => {
     renderOpenTimeline();
 
@@ -176,7 +173,7 @@ describe('StatefulOpenTimeline', () => {
     expect(screen.getByTestId('only-favorites-toggle')).toHaveAttribute('aria-pressed', 'false');
     expect(screen.getByTestId('search-bar')).toHaveValue('');
     expect(document.querySelector('th[aria-sort="descending"]')).toHaveTextContent('Last modified');
-    expect(document.querySelector('.euiCommentEvent__headerUsername')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('note-comment-list')).not.toBeInTheDocument();
   });
 
   describe("Template timelines' tab", () => {
@@ -250,12 +247,13 @@ describe('StatefulOpenTimeline', () => {
 
       renderOpenTimeline({ isModal: true });
 
+      fireEvent.click(
+        screen.getByTestId(
+          `open-timeline-modal-body-${TimelineTabsStyle.filter}-${TimelineTypeEnum.template}`
+        )
+      );
+
       await waitFor(() => {
-        fireEvent.click(
-          screen.getByTestId(
-            `open-timeline-modal-body-${TimelineTabsStyle.filter}-${TimelineTypeEnum.template}`
-          )
-        );
         expect(mockHistory.length).toEqual(0);
       });
     });
@@ -317,13 +315,12 @@ describe('StatefulOpenTimeline', () => {
     test.skip('it invokes addTimelinesToFavorites with the selected timelines when the button is clicked', async () => {
       const addTimelinesToFavorites = jest.fn();
 
-      const { container } = renderOpenTimeline();
+      renderOpenTimeline();
+
+      fireEvent.click(screen.getByTestId('checkboxSelectAll'));
+      fireEvent.click(screen.getByTestId('favorite-selected'));
 
       await waitFor(() => {
-        fireEvent.click(getSelectAllCheckbox(container));
-
-        fireEvent.click(screen.getByTestId('favorite-selected'));
-
         expect(addTimelinesToFavorites).toHaveBeenCalledWith([
           'saved-timeline-11',
           'saved-timeline-10',
@@ -355,9 +352,9 @@ describe('StatefulOpenTimeline', () => {
 
   describe('#onSelectionChange', () => {
     test('it updates the selection state when timelines are selected', async () => {
-      const { container } = renderOpenTimeline();
+      renderOpenTimeline();
 
-      fireEvent.click(getSelectAllCheckbox(container));
+      fireEvent.click(screen.getByTestId('checkboxSelectAll'));
 
       await waitFor(() => {
         // 13 because we did mock 13 timelines in the query
@@ -409,27 +406,21 @@ describe('StatefulOpenTimeline', () => {
     };
 
     test('it updates the itemIdToExpandedNotesRowMap state when the user clicks the expand notes button', async () => {
-      const { container } = renderOpenTimeline({}, createMockStore(mockStateWithTimeline));
+      renderOpenTimeline({}, createMockStore(mockStateWithTimeline));
 
-      expect(container.querySelector('.euiCommentEvent__headerUsername')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('note-comment-list')).not.toBeInTheDocument();
 
       fireEvent.click(screen.getAllByTestId('expand-notes')[0]);
 
-      await waitFor(() => {
-        expect(container.querySelector('.euiCommentEvent__headerUsername')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('note-comment-list')).toBeInTheDocument();
     });
 
     test('it renders the expanded notes when the expand button is clicked', async () => {
-      const { container } = renderOpenTimeline({}, createMockStore(mockStateWithTimeline));
+      renderOpenTimeline({}, createMockStore(mockStateWithTimeline));
 
       fireEvent.click(screen.getAllByTestId('expand-notes')[0]);
 
-      await waitFor(() => {
-        expect(container.querySelector('.euiCommentEvent__headerUsername')).toHaveTextContent(
-          'elastic'
-        );
-      });
+      expect(await screen.findByTestId('note-comment-list')).toHaveTextContent('elastic');
     });
 
     test('it has the expected initial state for openTimeline - templateTimelineFilter', () => {
@@ -451,10 +442,10 @@ describe('StatefulOpenTimeline', () => {
 
   describe('#resetSelectionState', () => {
     test('when the user deletes selected timelines, resetSelectionState is invoked to clear the selection state', async () => {
-      const { container } = renderOpenTimeline();
+      renderOpenTimeline();
 
       expect(screen.getByTestId('selected-count')).toHaveTextContent('Selected 0 Timelines');
-      fireEvent.click(getSelectAllCheckbox(container));
+      fireEvent.click(screen.getByTestId('checkboxSelectAll'));
       await waitFor(() => {
         expect(screen.getByTestId('selected-count')).toHaveTextContent('Selected 13 Timelines');
       });
@@ -472,13 +463,11 @@ describe('StatefulOpenTimeline', () => {
   test('it invokes onOpenTimeline with the expected parameters when the hyperlink is clicked', async () => {
     renderOpenTimeline();
 
-    await waitFor(() => {
-      fireEvent.click(
-        screen.getByTestId(
-          `timeline-title-${mockOpenTimelineQueryResults.timeline[0].savedObjectId}`
-        )
-      );
+    fireEvent.click(
+      screen.getByTestId(`timeline-title-${mockOpenTimelineQueryResults.timeline[0].savedObjectId}`)
+    );
 
+    await waitFor(() => {
       expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
         mockOpenTimelineQueryResults.timeline[0].savedObjectId
       );

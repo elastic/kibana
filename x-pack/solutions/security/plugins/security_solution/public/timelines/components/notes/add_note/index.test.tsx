@@ -141,20 +141,6 @@ describe('AddNote', () => {
     expect(associateNote).toHaveBeenCalled();
   });
 
-  // test('it invokes getNewNoteId when the Add Note button is clicked', () => {
-  //   const getNewNoteId = jest.fn();
-  //   const testProps = {
-  //     ...props,
-  //     getNewNoteId,
-  //   };
-
-  //   render(<AddNote {...testProps} />);
-
-  //   wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
-
-  //   expect(getNewNoteId).toHaveBeenCalled();
-  // });
-
   test('it invokes updateNewNote when the Add Note button is clicked', () => {
     const updateNewNote = jest.fn();
     const testProps = {

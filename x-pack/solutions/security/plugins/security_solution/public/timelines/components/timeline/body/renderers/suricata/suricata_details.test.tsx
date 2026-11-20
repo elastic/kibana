@@ -47,7 +47,7 @@ describe('SuricataDetails', () => {
         </TestProviders>
       );
       await waitFor(() => expect(screen.getByTestId('suricataRefs')).toBeInTheDocument());
-      const removeEuiIconText = removeExternalLinkText(container.textContent ?? '').replaceAll(
+      const removeEuiIconText = removeExternalLinkText(container.textContent).replaceAll(
         'External link',
         ''
       );

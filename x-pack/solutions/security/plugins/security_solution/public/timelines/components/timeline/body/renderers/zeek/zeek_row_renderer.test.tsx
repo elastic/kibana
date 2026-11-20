@@ -36,9 +36,9 @@ describe('zeek_row_renderer', () => {
     zeek = cloneDeep(mockTimelineData[13].ecs);
   });
 
-  test('renders the row content for a non-zeek datum', () => {
+  test('renders the row details for a zeek datum', () => {
     const children = zeekRowRenderer.renderRow({
-      data: nonZeek,
+      data: zeek,
       scopeId: TimelineId.test,
     });
 
@@ -47,7 +47,10 @@ describe('zeek_row_renderer', () => {
         <span>{children}</span>
       </TestProviders>
     );
-    expect(container).not.toBeEmptyDOMElement();
+
+    expect(container).toHaveTextContent('Connection attempt rejected');
+    expect(container).toHaveTextContent('185.176.26.101:44059');
+    expect(container).toHaveTextContent('207.154.238.205:11568');
   });
 
   test('should return false if not a zeek datum', () => {
@@ -69,7 +72,7 @@ describe('zeek_row_renderer', () => {
       </TestProviders>
     );
 
-    const extractEuiIconText = removeExternalLinkText(container.textContent ?? '').replaceAll(
+    const extractEuiIconText = removeExternalLinkText(container.textContent).replaceAll(
       'External link',
       ''
     );
