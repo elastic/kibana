@@ -39,6 +39,22 @@ import { resolveChatCompletionReasoning } from '../../utils/resolve_chat_complet
 import { sanitizeToolSchemasForVertex } from '../../utils/sanitize_tool_schemas_for_vertex';
 import type { InferenceEndpointRequest } from './types';
 
+/**
+ * Gemini rejects JSON Schema keywords outside its OpenAPI subset (for example `const`)
+ * whether it is reached through a Vertex AI endpoint or through EIS, where the endpoint's
+ * service is `elastic` and only the model id identifies Gemini.
+ */
+const isGeminiEndpoint = ({
+  provider,
+  modelId,
+}: {
+  provider?: string;
+  modelId?: string;
+}): boolean =>
+  provider === InferenceEndpointProvider.GoogleVertexAI ||
+  (provider === InferenceEndpointProvider.Elastic &&
+    (modelId?.toLowerCase().startsWith('google-') ?? false));
+
 export interface InferenceEndpointAdapterChatCompleteOptions {
   executor: InferenceEndpointExecutor;
   messages: Message[];
@@ -111,10 +127,9 @@ export const inferenceEndpointAdapter = {
 
     const useSimulatedFunctionCalling = functionCalling === 'simulated';
 
-    const sanitizedTools =
-      provider === InferenceEndpointProvider.GoogleVertexAI
-        ? sanitizeToolSchemasForVertex(tools)
-        : tools;
+    const sanitizedTools = isGeminiEndpoint({ provider, modelId: endpointModelId ?? modelName })
+      ? sanitizeToolSchemasForVertex(tools)
+      : tools;
 
     const request = createEndpointRequest({
       system,
