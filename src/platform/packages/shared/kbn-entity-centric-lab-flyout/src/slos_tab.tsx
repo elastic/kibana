@@ -178,7 +178,7 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
                     defaultMessage: 'Total SLOs',
                   })}
                 </EuiText>
-                <EuiTitle size="xxs">
+                <EuiTitle size="s">
                   <span>{slos.slos.length}</span>
                 </EuiTitle>
               </EuiFlexItem>
@@ -197,7 +197,7 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
                     defaultMessage: 'Breaching',
                   })}
                 </EuiText>
-                <EuiTitle size="xxs">
+                <EuiTitle size="s">
                   <span>{breachingCount}</span>
                 </EuiTitle>
               </EuiFlexItem>
@@ -220,7 +220,7 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
                     defaultMessage: 'Degrading',
                   })}
                 </EuiText>
-                <EuiTitle size="xxs">
+                <EuiTitle size="s">
                   <span>{degradingCount}</span>
                 </EuiTitle>
               </EuiFlexItem>

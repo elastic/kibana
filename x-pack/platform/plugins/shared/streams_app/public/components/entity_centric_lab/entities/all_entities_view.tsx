@@ -196,7 +196,7 @@ import addDataPageImage from './assets/add_data_page.png';
 import { OldExperiencePage, consumeTourFlag } from './transition_modal';
 import { SecurityGroupingView } from './security_grouping_view';
 import {
-  DEFAULT_GROUP_BY,
+  defaultGroupByForScope,
   getGroupByFields,
   isCategoryTypeGroupBy,
   resolveGroupByFields,
@@ -255,11 +255,15 @@ import {
 import { StreamsElasticOnAlertsTab } from './streams_elastic_on_alerts_tab';
 import {
   CATEGORY_TAB_STORAGE_KEY,
-  GROUP_BY_STORAGE_KEY,
+  GROUP_BY_BY_SCOPE_STORAGE_KEY,
   LIST_DENSITY_STORAGE_KEY,
   PAGE_SIZE_CHANGE_EVENT,
-  TAG_FILTERS_STORAGE_KEY,
-  VIEW_MODE_STORAGE_KEY,
+  VIEW_MODE_BY_SCOPE_STORAGE_KEY,
+  inventoryPreferenceScopeKey,
+  readInventoryFiltersBlob,
+  readScopedPreference,
+  writeInventoryFiltersBlob,
+  writeScopedPreference,
   readPageSizes,
   writePageSizes,
 } from './storage_keys';
@@ -299,57 +303,61 @@ const isViewMode = (value: unknown): value is ViewMode =>
   value === 'grid' || value === 'list' || value === 'geomap';
 
 /**
- * Phase 1 inventory landing: list view, grouped by Category.
- * Applied once per full page load so a stale localStorage choice (hex
- * map, other groupings) does not stick, while changing the view and
- * walking the left nav still persists until the next reload.
+ * Remember a value per inventory page. Switching left-nav category reads
+ * that page's slot; a page with no stored choice uses `read`'s fallback.
+ * The scope check during render covers a param change that does not remount
+ * this view (Hosts → Kubernetes share one route component).
  */
-const PHASE1_DEFAULT_GROUP_BY: readonly GroupByFieldId[] = DEFAULT_GROUP_BY;
-
-let phase1InventoryDefaultsApplied = false;
-let phase1InventoryDefaultsNeedStateSync = false;
-
-const applyPhase1InventoryDefaultsToStorage = (): void => {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, 'list');
-    window.localStorage.setItem(GROUP_BY_STORAGE_KEY, JSON.stringify(PHASE1_DEFAULT_GROUP_BY));
-  } catch {
-    // Storage blocked — the in-memory sync below still sets the layout.
+const useScopedStoredState = <T,>(
+  scopeKey: string,
+  read: (scope: string) => T,
+  write: (scope: string, value: T) => void
+): [T, (next: T | ((prev: T) => T)) => void] => {
+  const [activeScope, setActiveScope] = useState(scopeKey);
+  const [value, setValue] = useState<T>(() => read(scopeKey));
+  // Handlers created on the first page (`[]` deps) keep calling this setter
+  // after a left-nav change that does not remount the view. Read the scope
+  // at write time so those updates land on the page that is open now.
+  const scopeRef = useRef(scopeKey);
+  const writeRef = useRef(write);
+  scopeRef.current = scopeKey;
+  writeRef.current = write;
+  if (activeScope !== scopeKey) {
+    setActiveScope(scopeKey);
+    setValue(read(scopeKey));
   }
+  const setValueAndPersist = useCallback((next: T | ((prev: T) => T)) => {
+    setValue((prev) => {
+      const resolved = typeof next === 'function' ? (next as (prev: T) => T)(prev) : next;
+      writeRef.current(scopeRef.current, resolved);
+      return resolved;
+    });
+  }, []);
+  return [value, setValueAndPersist];
+};
+
+const readStoredViewMode = (scope: string, fallback: ViewMode): ViewMode => {
+  const raw = readScopedPreference(VIEW_MODE_BY_SCOPE_STORAGE_KEY, scope);
+  return isViewMode(raw) ? raw : fallback;
+};
+
+const writeStoredViewMode = (scope: string, mode: ViewMode): void => {
+  writeScopedPreference(VIEW_MODE_BY_SCOPE_STORAGE_KEY, scope, mode);
 };
 
 /**
- * View-mode state that survives navigation between the cross-category
- * page (`/entities`) and the per-category pages (`/entities/hosts`,
- * `/entities/kubernetes`, ...). Both surfaces remount `AllEntitiesView`
- * on every nav, so plain `useState` would reset to `'grid'` each time
- * — instead we hydrate from localStorage on first render and persist
- * on every change. No cross-bundle/tab sync needed; the user is always
- * in one tab when they click around.
+ * List / hex for this inventory page only. Kubernetes can stay on the hex
+ * map while Hosts stays on the list.
  */
-const useEntitiesViewMode = (): [ViewMode, (next: ViewMode) => void] => {
-  const [viewMode, setViewModeState] = useState<ViewMode>(() => {
-    if (typeof window === 'undefined') return 'grid';
-    try {
-      const raw = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY);
-      return isViewMode(raw) ? raw : 'grid';
-    } catch {
-      return 'grid';
-    }
-  });
-  const setViewMode = useCallback((next: ViewMode) => {
-    setViewModeState(next);
-    if (typeof window === 'undefined') return;
-    try {
-      window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, next);
-    } catch {
-      // Storage blocked / quota exceeded — keep the in-memory value so
-      // the current session still works; the preference just won't
-      // persist across navigation.
-    }
+const useEntitiesViewMode = (
+  scopeKey: string,
+  fallback: ViewMode
+): [ViewMode, (next: ViewMode) => void] => {
+  const read = useCallback((scope: string) => readStoredViewMode(scope, fallback), [fallback]);
+  const write = useCallback((scope: string, mode: ViewMode) => {
+    writeStoredViewMode(scope, mode);
   }, []);
-  return [viewMode, setViewMode];
+  return useScopedStoredState(scopeKey, read, write);
 };
 
 /**
@@ -408,15 +416,10 @@ const usePageSizes = (): [Record<string, number>, (next: Record<string, number>)
   return [pageSizes, setPageSizesAndPersist];
 };
 
-// --- Category-tab + tag-filter persistence ---------------------------
+// --- Category-tab persistence ----------------------------------------
 //
-// Both the Overview/Inventory tab choice and the tag filter selection
-// need to survive the left-nav walk between categories (Kubernetes →
-// Hosts → Databases → …). Each of those routes remounts
-// `AllEntitiesView`, so plain `useState` would reset the tab to
-// "Overview" and clear the filters every time. Same pattern as
-// `useEntitiesViewMode`: hydrate lazily from `localStorage` on first
-// render, write on every change, no cross-tab sync.
+// The Overview/Inventory tab is a personal preference shared across
+// categories. Filters are not: each inventory page keeps its own set.
 
 const isCategoryTab = (value: unknown): value is CategoryTab =>
   value === 'inventory' || value === 'monitoring';
@@ -445,108 +448,223 @@ const useCategoryTab = (): [CategoryTab, (next: CategoryTab) => void] => {
 };
 
 /**
- * Narrow an arbitrary parsed JSON value to {@link ActiveTagFilters}.
- * Guards against every failure mode we've hit in practice (missing
- * keys, non-array values, non-string items, dropped fields after a
- * schema bump) so a corrupt `localStorage` payload from a prior lab
- * session can never crash the tab.
+ * Filters for one inventory page (All entities, Kubernetes, Hosts, …).
+ * Each left-nav page keeps its own copy so leaving and coming back
+ * restores the search, chips, and facet selections.
  */
-const parseStoredTagFilters = (raw: string | null): ActiveTagFilters => {
-  if (!raw) return EMPTY_TAG_FILTERS;
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object') return EMPTY_TAG_FILTERS;
-    const source = parsed as Record<string, unknown>;
-    const next: Record<string, readonly string[]> = {};
-    for (const key of TAG_KEYS) {
-      const value = source[key];
-      next[key] =
-        Array.isArray(value) && value.every((entry) => typeof entry === 'string')
-          ? (value as readonly string[])
-          : [];
-    }
-    return next as ActiveTagFilters;
-  } catch {
-    return EMPTY_TAG_FILTERS;
-  }
+interface InventoryPageFilters {
+  readonly search: string;
+  readonly tagFilters: ActiveTagFilters;
+  readonly extraFilters: ActiveExtraFilters;
+  readonly queryFilters: Filter[];
+  readonly categoryFilter: string;
+  readonly alertsFilter: AlertsFilterId;
+  readonly k8sResourceType: KubernetesResourceType;
+  readonly k8sCluster: string;
+  readonly k8sNamespace: string;
+  readonly k8sDeployment: string;
+  readonly k8sNode: string;
+  readonly cloudProviderFilter: string;
+  readonly categoryTypeFilter: string;
+}
+
+const DEFAULT_INVENTORY_FILTERS: InventoryPageFilters = {
+  search: '',
+  tagFilters: EMPTY_TAG_FILTERS,
+  extraFilters: EMPTY_EXTRA_FILTERS,
+  queryFilters: [],
+  categoryFilter: CATEGORY_FILTER_ALL,
+  alertsFilter: ALERTS_FILTER_ALL,
+  k8sResourceType: KUBERNETES_RESOURCE_TYPE_ALL,
+  k8sCluster: KUBERNETES_FILTER_ALL,
+  k8sNamespace: KUBERNETES_FILTER_ALL,
+  k8sDeployment: KUBERNETES_FILTER_ALL,
+  k8sNode: KUBERNETES_FILTER_ALL,
+  cloudProviderFilter: CLOUD_PROVIDER_FILTER_ALL,
+  categoryTypeFilter: CATEGORY_RESOURCE_TYPE_ALL,
 };
 
-const useEntitiesTagFilters = (): [
-  ActiveTagFilters,
-  React.Dispatch<React.SetStateAction<ActiveTagFilters>>
-] => {
-  const [filters, setFiltersState] = useState<ActiveTagFilters>(() => {
-    if (typeof window === 'undefined') return EMPTY_TAG_FILTERS;
-    try {
-      return parseStoredTagFilters(window.localStorage.getItem(TAG_FILTERS_STORAGE_KEY));
-    } catch {
-      return EMPTY_TAG_FILTERS;
+const stringListRecord = (raw: unknown): Record<string, readonly string[]> | undefined => {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+  const next: Record<string, readonly string[]> = {};
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (Array.isArray(value) && value.every((entry) => typeof entry === 'string')) {
+      next[key] = value as readonly string[];
     }
-  });
-  const setFilters: React.Dispatch<React.SetStateAction<ActiveTagFilters>> = useCallback((next) => {
-    setFiltersState((prev) => {
-      const resolved = typeof next === 'function' ? next(prev) : next;
-      if (typeof window !== 'undefined') {
-        try {
-          window.localStorage.setItem(TAG_FILTERS_STORAGE_KEY, JSON.stringify(resolved));
-        } catch {
-          // Storage failure — same trade-off as above.
-        }
-      }
-      return resolved;
-    });
-  }, []);
-  return [filters, setFilters];
+  }
+  return next;
+};
+
+const parseTagFiltersValue = (raw: unknown): ActiveTagFilters => {
+  const source = stringListRecord(raw);
+  if (!source) return EMPTY_TAG_FILTERS;
+  const next: Record<string, readonly string[]> = {};
+  for (const key of TAG_KEYS) {
+    next[key] = source[key] ?? [];
+  }
+  return next as ActiveTagFilters;
+};
+
+const parseAlertsFilterValue = (raw: unknown): AlertsFilterId =>
+  raw === 'all' || raw === 'active' || raw === 'no_setup' || raw === 'no_active'
+    ? raw
+    : ALERTS_FILTER_ALL;
+
+const readInventoryPageFilters = (scope: string): InventoryPageFilters => {
+  const blob = readInventoryFiltersBlob(scope);
+  if (!blob) return DEFAULT_INVENTORY_FILTERS;
+  const asString = (value: unknown, fallback: string): string =>
+    typeof value === 'string' ? value : fallback;
+  return {
+    search: asString(blob.search, ''),
+    tagFilters: parseTagFiltersValue(blob.tagFilters),
+    extraFilters: stringListRecord(blob.extraFilters) ?? EMPTY_EXTRA_FILTERS,
+    queryFilters: Array.isArray(blob.queryFilters) ? (blob.queryFilters as Filter[]) : [],
+    categoryFilter: asString(blob.categoryFilter, CATEGORY_FILTER_ALL),
+    alertsFilter: parseAlertsFilterValue(blob.alertsFilter),
+    k8sResourceType: asString(blob.k8sResourceType, KUBERNETES_RESOURCE_TYPE_ALL),
+    k8sCluster: asString(blob.k8sCluster, KUBERNETES_FILTER_ALL),
+    k8sNamespace: asString(blob.k8sNamespace, KUBERNETES_FILTER_ALL),
+    k8sDeployment: asString(blob.k8sDeployment, KUBERNETES_FILTER_ALL),
+    k8sNode: asString(blob.k8sNode, KUBERNETES_FILTER_ALL),
+    cloudProviderFilter: asString(blob.cloudProviderFilter, CLOUD_PROVIDER_FILTER_ALL),
+    categoryTypeFilter: asString(blob.categoryTypeFilter, CATEGORY_RESOURCE_TYPE_ALL),
+  };
+};
+
+const writeInventoryPageFilters = (scope: string, filters: InventoryPageFilters): void => {
+  writeInventoryFiltersBlob(scope, { ...filters });
+};
+
+const useInventoryPageFilters = (scopeKey: string) => {
+  const [filters, setFilters] = useScopedStoredState(
+    scopeKey,
+    readInventoryPageFilters,
+    writeInventoryPageFilters
+  );
+  const patch = useCallback(
+    (partial: Partial<InventoryPageFilters>) => {
+      setFilters((prev) => ({ ...prev, ...partial }));
+    },
+    [setFilters]
+  );
+  const setSearch = useCallback((next: string) => patch({ search: next }), [patch]);
+  const setActiveTagFilters: React.Dispatch<React.SetStateAction<ActiveTagFilters>> = useCallback(
+    (next) => {
+      setFilters((prev) => ({
+        ...prev,
+        tagFilters: typeof next === 'function' ? next(prev.tagFilters) : next,
+      }));
+    },
+    [setFilters]
+  );
+  const setActiveExtraFilters: React.Dispatch<React.SetStateAction<ActiveExtraFilters>> =
+    useCallback(
+      (next) => {
+        setFilters((prev) => ({
+          ...prev,
+          extraFilters: typeof next === 'function' ? next(prev.extraFilters) : next,
+        }));
+      },
+      [setFilters]
+    );
+  const setLabFilters = useCallback(
+    (next: Filter[]) => patch({ queryFilters: next }),
+    [patch]
+  );
+  const setCategoryFilter = useCallback(
+    (next: string) => patch({ categoryFilter: next }),
+    [patch]
+  );
+  const setAlertsFilter = useCallback(
+    (next: AlertsFilterId) => patch({ alertsFilter: next }),
+    [patch]
+  );
+  const setK8sResourceType = useCallback(
+    (next: KubernetesResourceType) => patch({ k8sResourceType: next }),
+    [patch]
+  );
+  const setK8sClusterFilter = useCallback((next: string) => patch({ k8sCluster: next }), [patch]);
+  const setK8sNamespaceFilter = useCallback(
+    (next: string) => patch({ k8sNamespace: next }),
+    [patch]
+  );
+  const setK8sDeploymentFilter = useCallback(
+    (next: string) => patch({ k8sDeployment: next }),
+    [patch]
+  );
+  const setK8sNodeFilter = useCallback((next: string) => patch({ k8sNode: next }), [patch]);
+  const setCloudProviderFilter = useCallback(
+    (next: string) => patch({ cloudProviderFilter: next }),
+    [patch]
+  );
+  const setCategoryTypeFilter = useCallback(
+    (next: string) => patch({ categoryTypeFilter: next }),
+    [patch]
+  );
+  return {
+    search: filters.search,
+    setSearch,
+    activeTagFilters: filters.tagFilters,
+    setActiveTagFilters,
+    activeExtraFilters: filters.extraFilters,
+    setActiveExtraFilters,
+    labFilters: filters.queryFilters,
+    setLabFilters,
+    categoryFilter: filters.categoryFilter,
+    setCategoryFilter,
+    alertsFilter: filters.alertsFilter,
+    setAlertsFilter,
+    k8sResourceType: filters.k8sResourceType,
+    setK8sResourceType,
+    k8sClusterFilter: filters.k8sCluster,
+    setK8sClusterFilter,
+    k8sNamespaceFilter: filters.k8sNamespace,
+    setK8sNamespaceFilter,
+    k8sDeploymentFilter: filters.k8sDeployment,
+    setK8sDeploymentFilter,
+    k8sNodeFilter: filters.k8sNode,
+    setK8sNodeFilter,
+    cloudProviderFilter: filters.cloudProviderFilter,
+    setCloudProviderFilter,
+    categoryTypeFilter: filters.categoryTypeFilter,
+    setCategoryTypeFilter,
+  };
 };
 
 // --- Group-by persistence (ElasticOn) -------------------------------
 //
-// Same lazy-hydrate-from-localStorage pattern as the view mode / tag
-// filters so a chosen grouping survives the left-nav walk between
-// categories. Mirrored in `use_saved_views.ts` (GROUP_BY_STORAGE_KEY)
-// so `applyViewToStorage` can write it synchronously before a route
-// change — both import from `storage_keys.ts`.
+// Stored per inventory page, same scope as the list / hex choice.
+// `applyViewToStorage` writes the destination page's slot before a
+// route change. A page that has never been customised falls back to
+// Category, except Kubernetes, which falls back to Category then Entity type.
 
 const MAX_STORED_GROUPINGS = 3;
 
-const parseStoredGroupBy = (raw: string | null): GroupByFieldId[] => {
-  if (!raw) return [...DEFAULT_GROUP_BY];
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.every((item) => typeof item === 'string')) {
-      const ids = (parsed as GroupByFieldId[]).slice(0, MAX_STORED_GROUPINGS);
-      // The old default was Category → Type. Treat that stored selection as
-      // the new Category-only default so a reload doesn't keep the extra level.
-      if (isCategoryTypeGroupBy(ids)) return [...DEFAULT_GROUP_BY];
-      return ids;
-    }
-  } catch {
-    // fall through
+const parseStoredGroupByValue = (raw: unknown, scope: string): GroupByFieldId[] => {
+  if (Array.isArray(raw) && raw.every((item) => typeof item === 'string')) {
+    // Keep an explicit choice, including an empty array ("ungrouped").
+    // Only a missing value falls back to that page's default.
+    return (raw as GroupByFieldId[]).slice(0, MAX_STORED_GROUPINGS);
   }
-  return [...DEFAULT_GROUP_BY];
+  return [...defaultGroupByForScope(scope)];
 };
 
-const useEntitiesGroupBy = (): [GroupByFieldId[], (next: GroupByFieldId[]) => void] => {
-  const [groupBy, setGroupByState] = useState<GroupByFieldId[]>(() => {
-    if (typeof window === 'undefined') return [...DEFAULT_GROUP_BY];
-    try {
-      const next = parseStoredGroupBy(window.localStorage.getItem(GROUP_BY_STORAGE_KEY));
-      window.localStorage.setItem(GROUP_BY_STORAGE_KEY, JSON.stringify(next));
-      return next;
-    } catch {
-      return [...DEFAULT_GROUP_BY];
-    }
-  });
-  const setGroupBy = useCallback((next: GroupByFieldId[]) => {
-    setGroupByState(next);
-    if (typeof window === 'undefined') return;
-    try {
-      window.localStorage.setItem(GROUP_BY_STORAGE_KEY, JSON.stringify(next));
-    } catch {
-      // Storage blocked — keep the in-memory value for this session.
-    }
+const readStoredGroupBy = (scope: string): GroupByFieldId[] =>
+  parseStoredGroupByValue(readScopedPreference(GROUP_BY_BY_SCOPE_STORAGE_KEY, scope), scope);
+
+const writeStoredGroupBy = (scope: string, next: GroupByFieldId[]): void => {
+  writeScopedPreference(GROUP_BY_BY_SCOPE_STORAGE_KEY, scope, next);
+};
+
+const useEntitiesGroupBy = (
+  scopeKey: string
+): [GroupByFieldId[], (next: GroupByFieldId[]) => void] => {
+  const read = useCallback((scope: string) => readStoredGroupBy(scope), []);
+  const write = useCallback((scope: string, next: GroupByFieldId[]) => {
+    writeStoredGroupBy(scope, next);
   }, []);
-  return [groupBy, setGroupBy];
+  return useScopedStoredState(scopeKey, read, write);
 };
 
 const VIEW_MODE_OPTIONS = [
@@ -1082,10 +1200,41 @@ const AllEntitiesViewInner = ({
     }
   }, [uiSettings]);
 
-  // Top-level category filter (All resources) — declared early so search
-  // field autocomplete can follow the same scope as K8s facet filters.
-  const [categoryFilter, setCategoryFilter] = useState<string>(CATEGORY_FILTER_ALL);
-  const [alertsFilter, setAlertsFilter] = useState<AlertsFilterId>(ALERTS_FILTER_ALL);
+  // Filters are stored per left-nav page (All entities, Kubernetes, …).
+  // Declared early so search autocomplete can follow the category chip.
+  const preferenceScopeKey = inventoryPreferenceScopeKey(
+    categoryScope,
+    cloudProviderScope,
+    cloudServiceScope
+  );
+  const {
+    search,
+    setSearch,
+    activeTagFilters,
+    setActiveTagFilters,
+    activeExtraFilters,
+    setActiveExtraFilters,
+    labFilters,
+    setLabFilters,
+    categoryFilter,
+    setCategoryFilter,
+    alertsFilter,
+    setAlertsFilter,
+    k8sResourceType,
+    setK8sResourceType,
+    k8sClusterFilter,
+    setK8sClusterFilter,
+    k8sNamespaceFilter,
+    setK8sNamespaceFilter,
+    k8sDeploymentFilter,
+    setK8sDeploymentFilter,
+    k8sNodeFilter,
+    setK8sNodeFilter,
+    cloudProviderFilter,
+    setCloudProviderFilter,
+    categoryTypeFilter,
+    setCategoryTypeFilter,
+  } = useInventoryPageFilters(preferenceScopeKey);
   const isCrossCategoryPage = !categoryScope && isElasticOn;
   const effectiveCategoryScope: EntityCategoryId | undefined =
     categoryScope ??
@@ -1098,8 +1247,6 @@ const AllEntitiesViewInner = ({
   // no backing index) powers autocomplete + "+ Add filter"; the KQL / filters
   // are evaluated against the seeded entities in-memory (see `entity_kql.ts`).
   const labDataView = useEntityLabDataView(isElasticOn, effectiveCategoryScope, isPhase1);
-  // "+ Add filter" chips (transient; not persisted with saved views yet).
-  const [labFilters, setLabFilters] = useState<Filter[]>([]);
   // Bumped on every (auto-)refresh to re-roll the fake metric readings so
   // the hex map visibly "lives". The grid consumes the tick to re-seed the
   // reading salt (see GroupedGridView), keeping tiles + tooltips consistent.
@@ -1127,6 +1274,7 @@ const AllEntitiesViewInner = ({
   const tableStyleVariation = useVariation('tableStyle') as TableStyleVariation;
   const awsReinventOn = useVariation('awsReinvent') === 'on';
   const showSummaryCards = useVariation('summaryCards') === 'on';
+  const showDensityPicker = useVariation('densityPicker') === 'on';
   const dashboardStyleVariation = useVariation('dashboardStyle') as
     | 'embedded'
     | 'list'
@@ -1399,14 +1547,6 @@ const AllEntitiesViewInner = ({
     () => getExtraFacets(effectiveInventoryEntities, extraFilterDefs),
     [effectiveInventoryEntities, extraFilterDefs]
   );
-  const [activeExtraFilters, setActiveExtraFilters] =
-    useState<ActiveExtraFilters>(EMPTY_EXTRA_FILTERS);
-  // Extra filters are category-specific, so clear them when the scope changes
-  // to avoid a selection from one category silently narrowing another.
-  useEffect(() => {
-    setActiveExtraFilters(EMPTY_EXTRA_FILTERS);
-  }, [effectiveCategoryScope, cloudProviderScope, cloudServiceScope]);
-
   const categoryDescriptor = categoryScope ? getCategoryDescriptor(categoryScope) : undefined;
   // Cloud provider / service descriptors resolved from the scope, used
   // to swap the page header (icon + label) to the provider logo and
@@ -1434,25 +1574,12 @@ const AllEntitiesViewInner = ({
   const [cloudHierarchyEnabled, setCloudHierarchyEnabled] = useCloudHierarchyEnabled();
   const isCloudScoped = categoryScope === 'cloud';
   const showCloudHierarchyToggle = isCloudScoped && !cloudServiceScope;
-  const [search, setSearch] = useState('');
-  // Tag filters persist across left-nav walks between categories —
-  // filtering by "team: payments" on Hosts and then jumping to
-  // Kubernetes keeps the same team filter applied, matching what the
-  // user expects when they're triaging one team's stack across
-  // categories. Search stays local (transient) because a specific-
-  // entity query is per-view, not a preference.
-  const [activeTagFilters, setActiveTagFilters] = useEntitiesTagFilters();
-  // Runs before the view-mode / group-by hooks hydrate so Phase 1 reads
-  // the demo defaults (list view, Type) instead of a stale choice.
-  useState(() => {
-    if (!isElasticOn || !isPhase1 || phase1InventoryDefaultsApplied) return 0;
-    applyPhase1InventoryDefaultsToStorage();
-    phase1InventoryDefaultsApplied = true;
-    phase1InventoryDefaultsNeedStateSync = true;
-    return 0;
-  });
-  const [viewMode, setViewMode] = useEntitiesViewMode();
+  // List / hex and group-by are stored for this page only. A category that
+  // has no stored choice lands on the Phase 1 defaults (list, Category).
+  const defaultViewMode: ViewMode = isElasticOn && isPhase1 ? 'list' : 'grid';
+  const [viewMode, setViewMode] = useEntitiesViewMode(preferenceScopeKey, defaultViewMode);
   const [listDensity, setListDensity] = useListDensity();
+  const effectiveListDensity = showDensityPicker ? listDensity : DEFAULT_LIST_DENSITY;
   const [pageSizes, setPageSizes] = usePageSizes();
 
   // Some tour steps are anchored to DOM elements that only render in
@@ -1473,7 +1600,7 @@ const AllEntitiesViewInner = ({
 
   // ElasticOn "Group by" (1–3 fields). Non-ElasticOn modes never surface the
   // control, so this stays at the Category default there.
-  const [groupBy, setGroupBy] = useEntitiesGroupBy();
+  const [groupBy, setGroupBy] = useEntitiesGroupBy(preferenceScopeKey);
 
   // "Group by" fields offered on this page (core + category-scoped attributes)
   // and the resolved defs for the active selection. `customGroupBy` is only set
@@ -1496,9 +1623,11 @@ const AllEntitiesViewInner = ({
     const validIds = new Set(groupByFields.map((f) => f.id));
     const sanitised = groupBy.filter((id) => validIds.has(id));
     if (sanitised.length !== groupBy.length) {
-      setGroupBy(sanitised.length > 0 ? sanitised : [...DEFAULT_GROUP_BY]);
+      setGroupBy(
+        sanitised.length > 0 ? sanitised : [...defaultGroupByForScope(preferenceScopeKey)]
+      );
     }
-  }, [groupBy, groupByFields, setGroupBy]);
+  }, [groupBy, groupByFields, preferenceScopeKey, setGroupBy]);
 
   const activeGroupByFields = useMemo(
     () => resolveGroupByFields(groupBy, groupByFields),
@@ -1575,13 +1704,6 @@ const AllEntitiesViewInner = ({
     isElasticOn;
   /** Cell "Filter for" and flyout "Add to filter" — same scope as K8s facet filters. */
   const enableK8sAddToFilterActions = showK8sFilters;
-  const [k8sResourceType, setK8sResourceType] = useState<KubernetesResourceType>(
-    KUBERNETES_RESOURCE_TYPE_ALL
-  );
-  const [k8sClusterFilter, setK8sClusterFilter] = useState<string>(KUBERNETES_FILTER_ALL);
-  const [k8sNamespaceFilter, setK8sNamespaceFilter] = useState<string>(KUBERNETES_FILTER_ALL);
-  const [k8sDeploymentFilter, setK8sDeploymentFilter] = useState<string>(KUBERNETES_FILTER_ALL);
-  const [k8sNodeFilter, setK8sNodeFilter] = useState<string>(KUBERNETES_FILTER_ALL);
 
   const k8sFilterVisibility = useMemo(
     () => resourceTypeFilterVisibility(k8sResourceType),
@@ -1703,7 +1825,6 @@ const AllEntitiesViewInner = ({
   // mirrors the K8s cluster filter (category route or All resources + Cloud).
   const isCloudCategoryPage =
     effectiveCategoryScope === 'cloud' && isElasticOn && !cloudProviderScope;
-  const [cloudProviderFilter, setCloudProviderFilter] = useState<string>(CLOUD_PROVIDER_FILTER_ALL);
 
   const handleCategoryFilterChange = useCallback((next: string) => {
     setCategoryFilter(next);
@@ -1719,7 +1840,6 @@ const AllEntitiesViewInner = ({
 
   // Generic category resource-type filter — shown on non-K8s category
   // pages that have 2+ distinct entity types (Hosts, Cloud, Networking, etc.).
-  const [categoryTypeFilter, setCategoryTypeFilter] = useState<string>(CATEGORY_RESOURCE_TYPE_ALL);
   const categoryTypeLabels = useMemo(() => {
     const scope = effectiveCategoryScope;
     if (!scope || scope === 'kubernetes' || !isElasticOn) return [];
@@ -1739,21 +1859,10 @@ const AllEntitiesViewInner = ({
   ]);
   const showCategoryTypeFilter = categoryTypeLabels.length >= 2;
 
-  // Reset category sub-filters when the effective inventory category changes.
-  const prevEffectiveCategoryScopeRef = useRef(effectiveCategoryScope);
-  useEffect(() => {
-    if (prevEffectiveCategoryScopeRef.current !== effectiveCategoryScope) {
-      prevEffectiveCategoryScopeRef.current = effectiveCategoryScope;
-      setCategoryTypeFilter(CATEGORY_RESOURCE_TYPE_ALL);
-      setCloudProviderFilter(CLOUD_PROVIDER_FILTER_ALL);
-    }
-  }, [effectiveCategoryScope]);
-
-  // Pending-search consumption: the `search` string can't ride the
-  // persisted-state pipeline (it's per-mount `useState`, not
-  // localStorage). When a saved-view apply required navigating between
-  // categories, `applyViewToStorage` parked the target search here —
-  // read it once on mount, apply it, and clear the slot.
+  // Saved-view navigation writes the destination page's filter blob and
+  // also parks the search here. A left-nav change that remounts this view
+  // consumes that search once so it wins over a blob written for a
+  // different apply.
   useEffect(() => {
     const pending = consumePendingSearch();
     if (pending !== null) setSearch(pending);
@@ -1858,48 +1967,23 @@ const AllEntitiesViewInner = ({
     () => (isLatest ? new URLSearchParams(location.search).get('loadView') : null),
     [isLatest, location.search]
   );
-  // Phase 1 landing: list view, every category, grouped by Category.
-  // The storage write above covers the first mount; this also catches a
-  // phase switch to Phase 1 after the persisted hooks have already hydrated.
-  useEffect(() => {
-    if (!isElasticOn || !isPhase1) {
-      if (!isPhase1) phase1InventoryDefaultsApplied = false;
-      return;
-    }
-    // Explicit saved view in the URL — apply that snapshot (incl. list vs hex)
-    // instead of forcing the Phase 1 demo defaults.
-    if (loadViewId) return;
-    if (phase1InventoryDefaultsApplied && !phase1InventoryDefaultsNeedStateSync) return;
-    applyPhase1InventoryDefaultsToStorage();
-    phase1InventoryDefaultsApplied = true;
-    phase1InventoryDefaultsNeedStateSync = false;
-    setViewMode('list');
-    // Left-nav alert badges deep-link with `?groupBy=alerts` — don't clobber that.
-    if (!new URLSearchParams(location.search).has('groupBy')) {
-      setGroupBy([...PHASE1_DEFAULT_GROUP_BY]);
-    }
-    setCategoryFilter(CATEGORY_FILTER_ALL);
-  }, [
-    isElasticOn,
-    isPhase1,
-    loadViewId,
-    setViewMode,
-    setGroupBy,
-    setCategoryFilter,
-    location.search,
-  ]);
-
   // Left-nav alert badges link here with `?groupBy=alerts` (comma-separated for more).
+  // Apply it to this page, then drop the param so the next category does not
+  // inherit the same grouping from a preserved query string.
   useEffect(() => {
-    const raw = new URLSearchParams(location.search).get('groupBy');
+    const params = new URLSearchParams(location.search);
+    const raw = params.get('groupBy');
     if (!raw) return;
     const ids = raw
       .split(',')
       .map((part) => part.trim())
       .filter((part): part is GroupByFieldId => part.length > 0);
-    if (ids.length === 0) return;
-    setGroupBy(ids);
-  }, [location.search, setGroupBy]);
+    if (ids.length > 0) {
+      setGroupBy(ids);
+    }
+    params.delete('groupBy');
+    history.replace({ ...location, search: params.toString() });
+  }, [history, location, setGroupBy]);
 
   // Left-nav alert bell: `?alertsFilter=active` (and other alert buckets).
   useEffect(() => {
@@ -1936,7 +2020,10 @@ const AllEntitiesViewInner = ({
       setSearch(state.search);
       setActiveExtraFilters(state.extraFilters ?? EMPTY_EXTRA_FILTERS);
       setLabFilters(state.queryFilters ?? []);
-      setGroupBy([...(state.groupBy ?? DEFAULT_GROUP_BY)]);
+      setGroupBy([
+        ...(state.groupBy ??
+          defaultGroupByForScope(state.category ?? preferenceScopeKey)),
+      ]);
       setPageSizes(state.pageSizes ?? {});
       setK8sResourceType(
         (state.k8sFilters?.resourceType as KubernetesResourceType | undefined) ??
@@ -1969,10 +2056,19 @@ const AllEntitiesViewInner = ({
     const state = readInventorySharePayloadFromSearch(location.search);
     if (!state) return;
     appliedInventoryPayloadRef.current = raw;
+    // Left-nav clicks can keep the previous page's `?inventory=` query.
+    // That snapshot belongs to another category — applying it would copy
+    // list/hex and group-by onto the page we just opened.
+    const payloadScope = inventoryPreferenceScopeKey(
+      state.category,
+      state.cloudProvider,
+      state.cloudService
+    );
+    if (payloadScope !== preferenceScopeKey) return;
     skipInventoryUrlSyncRef.current = true;
     applyViewStateSnapshot(state);
     skipInventoryUrlSyncRef.current = false;
-  }, [isLatest, location.search, applyViewStateSnapshot]);
+  }, [isLatest, location.search, applyViewStateSnapshot, preferenceScopeKey]);
 
   // Apply each `loadView` id exactly once. The setters below (category tab / tag
   // filters / view mode) already persist to localStorage, so we deliberately do
@@ -2895,7 +2991,7 @@ const AllEntitiesViewInner = ({
       charts,
       renderTabDashboard,
       resourceCopy: isElasticOn,
-      density: listDensity,
+      density: effectiveListDensity,
       enrichK8sFlyoutOverviewDetails: isElasticOn
         ? (
             entityName: string,
@@ -2977,7 +3073,7 @@ const AllEntitiesViewInner = ({
       charts,
       renderTabDashboard,
       isElasticOn,
-      listDensity,
+      effectiveListDensity,
       renderAlertDetailFlyout,
       onOpenAlertDetail,
       onOpenRuleDetail,
@@ -3482,7 +3578,7 @@ const AllEntitiesViewInner = ({
                         alertsFilter={alertsFilter}
                         onAlertsFilterChange={handleAlertsFilterChange}
                         charts={charts}
-                        density={listDensity}
+                        density={effectiveListDensity}
                       />
                       <EuiSpacer size="s" />
                     </>
@@ -3865,10 +3961,11 @@ const AllEntitiesViewInner = ({
                             />
                           </EuiTourStep>
                         </EuiFlexItem>
-                        {effectiveViewMode === 'list' || effectiveViewMode === 'grid' ? (
+                        {showDensityPicker &&
+                        (effectiveViewMode === 'list' || effectiveViewMode === 'grid') ? (
                           <EuiFlexItem grow={false}>
                             <ListDisplayOptionsPopover
-                              density={listDensity}
+                              density={effectiveListDensity}
                               onChange={setListDensity}
                             />
                           </EuiFlexItem>
@@ -3917,7 +4014,7 @@ const AllEntitiesViewInner = ({
                         refreshTick={refreshTick}
                         customGroupBy={viewCustomGroupBy}
                         hideCategoryHeader={!!categoryScope}
-                        density={listDensity}
+                        density={effectiveListDensity}
                         onHexTileFilterFor={handleHexTileFilterFor}
                         onHexTileRelatedFilter={
                           enableK8sAddToFilterActions ? handleHexTileRelatedFilter : undefined
@@ -3947,7 +4044,7 @@ const AllEntitiesViewInner = ({
                         activeGroupBy={viewGroupBy}
                         refreshTick={refreshTick}
                         categoryScope={categoryScope}
-                        density={listDensity}
+                        density={effectiveListDensity}
                         onK8sCellFilter={
                           enableK8sAddToFilterActions ? handleK8sInventoryCellFilter : undefined
                         }
@@ -3962,7 +4059,7 @@ const AllEntitiesViewInner = ({
                         refreshTick={refreshTick}
                         customGroupBy={showAwsTypeGroups ? awsListGroupBy : viewCustomGroupBy}
                         hideCategoryHeader={!!categoryScope && !awsTypesDirect}
-                        density={listDensity}
+                        density={effectiveListDensity}
                         onK8sCellFilter={
                           enableK8sAddToFilterActions ? handleK8sInventoryCellFilter : undefined
                         }
@@ -4104,10 +4201,11 @@ const AllEntitiesViewInner = ({
                         data-test-subj="entityCentricLabEntitiesViewModeToggle"
                       />
                     </EuiFlexItem>
-                    {effectiveViewMode === 'list' || effectiveViewMode === 'grid' ? (
+                    {showDensityPicker &&
+                    (effectiveViewMode === 'list' || effectiveViewMode === 'grid') ? (
                       <EuiFlexItem grow={false}>
                         <ListDisplayOptionsPopover
-                          density={listDensity}
+                          density={effectiveListDensity}
                           onChange={setListDensity}
                         />
                       </EuiFlexItem>
@@ -4135,7 +4233,7 @@ const AllEntitiesViewInner = ({
                         groupCloudByProvider={false}
                         enablePaletteColoring={isElasticOn}
                         refreshTick={refreshTick}
-                        density={listDensity}
+                        density={effectiveListDensity}
                         onHexTileFilterFor={handleHexTileFilterFor}
                         onHexTileRelatedFilter={
                           enableK8sAddToFilterActions ? handleHexTileRelatedFilter : undefined
@@ -4156,7 +4254,7 @@ const AllEntitiesViewInner = ({
                         onSelectEntity={openEntity}
                         onSelectEntityAlerts={openEntityOnAlertsTab}
                         groupCloudByProvider={false}
-                        density={listDensity}
+                        density={effectiveListDensity}
                         onK8sCellFilter={
                           enableK8sAddToFilterActions ? handleK8sInventoryCellFilter : undefined
                         }

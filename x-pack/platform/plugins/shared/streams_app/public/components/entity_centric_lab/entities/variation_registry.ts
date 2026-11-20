@@ -243,6 +243,27 @@ export const AWS_REINVENT_DIMENSION: VariationDimension = {
   ],
 };
 
+/** Compact / Normal / Expanded control in the inventory toolbar. */
+export type DensityPickerVariation = 'off' | 'on';
+
+export const DENSITY_PICKER_DIMENSION: VariationDimension = {
+  id: 'densityPicker',
+  label: 'Density picker',
+  defaultOption: 'off',
+  options: [
+    {
+      id: 'off',
+      label: 'Off',
+      description: 'Hide the density picker and use Normal density',
+    },
+    {
+      id: 'on',
+      label: 'On',
+      description: 'Show Compact, Normal, and Expanded in the inventory toolbar',
+    },
+  ],
+};
+
 /** Inventory summary cards above search and filters. */
 export type SummaryCardsVariation = 'off' | 'on';
 
@@ -311,6 +332,7 @@ export const VARIATION_DIMENSIONS: readonly VariationDimension[] = [
   TABLE_STYLE_DIMENSION,
   NAV_BADGES_DIMENSION,
   SUMMARY_CARDS_DIMENSION,
+  DENSITY_PICKER_DIMENSION,
   AWS_REINVENT_DIMENSION,
   DASHBOARD_STYLE_DIMENSION,
   DASHBOARD_THUMBNAILS_DIMENSION,

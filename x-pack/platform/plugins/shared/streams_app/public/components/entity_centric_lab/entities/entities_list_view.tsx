@@ -413,7 +413,7 @@ const CategorySectionHeader = ({
             <StatBadge
               label={i18n.translate(
                 'xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge',
-                { defaultMessage: 'Entities with alerts:' }
+                { defaultMessage: 'With active alerts:' }
               )}
               value={alertsCount}
               color={alertsCount > 0 ? 'danger' : 'hollow'}
@@ -468,7 +468,7 @@ const CloudProviderSectionHeader = ({
       <StatBadge
         label={i18n.translate(
           'xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge',
-          { defaultMessage: 'Entities with alerts:' }
+          { defaultMessage: 'With active alerts:' }
         )}
         value={alertsCount}
         color={alertsCount > 0 ? 'danger' : 'hollow'}
@@ -528,7 +528,7 @@ const SectionHeader = ({
         <StatBadge
           label={i18n.translate(
             'xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge',
-            { defaultMessage: 'Entities with alerts:' }
+            { defaultMessage: 'With active alerts:' }
           )}
           value={alertsCount}
           color={alertsCount > 0 ? 'danger' : 'hollow'}
@@ -721,7 +721,7 @@ const GroupSectionHeader = ({
       <StatBadge
         label={i18n.translate(
           'xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge',
-          { defaultMessage: 'Entities with alerts:' }
+          { defaultMessage: 'With active alerts:' }
         )}
         value={alertsCount}
         color={alertsCount > 0 ? 'danger' : 'hollow'}
@@ -767,7 +767,7 @@ const SubGroupSectionHeader = ({
       <StatBadge
         label={i18n.translate(
           'xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge',
-          { defaultMessage: 'Entities with alerts:' }
+          { defaultMessage: 'With active alerts:' }
         )}
         value={alertsCount}
         color={alertsCount > 0 ? 'danger' : 'hollow'}
@@ -822,7 +822,7 @@ const KubernetesSectionHeader = ({
             <StatBadge
               label={i18n.translate(
                 'xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge',
-                { defaultMessage: 'Entities with alerts:' }
+                { defaultMessage: 'With active alerts:' }
               )}
               value={alertsCount}
               color={alertsCount > 0 ? 'danger' : 'hollow'}

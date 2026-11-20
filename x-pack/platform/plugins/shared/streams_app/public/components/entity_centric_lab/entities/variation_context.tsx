@@ -26,7 +26,7 @@ import React, {
   type PropsWithChildren,
 } from 'react';
 
-import { GROUP_BY_STORAGE_KEY } from './storage_keys';
+import { GROUP_BY_BY_SCOPE_STORAGE_KEY, GROUP_BY_STORAGE_KEY } from './storage_keys';
 import {
   PHASE_DIMENSION,
   VARIATION_DIMENSIONS,
@@ -180,6 +180,7 @@ export const VariationProvider = ({ children }: PropsWithChildren<{}>) => {
           try {
             localStorage.removeItem('entityCentricLab.bucketMetricSelection.v4');
             localStorage.removeItem(GROUP_BY_STORAGE_KEY);
+            localStorage.removeItem(GROUP_BY_BY_SCOPE_STORAGE_KEY);
             localStorage.removeItem(`${STORAGE_PREFIX}dashboardStyle`);
             localStorage.removeItem(`${STORAGE_PREFIX}data`);
           } catch {

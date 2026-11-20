@@ -58,6 +58,16 @@ export interface GroupByFieldDef {
  */
 export const DEFAULT_GROUP_BY: readonly GroupByFieldId[] = ['category'];
 
+/**
+ * Kubernetes opens on Category, then Entity type. Other inventory pages stay
+ * on Category only until the user picks something else.
+ */
+export const KUBERNETES_DEFAULT_GROUP_BY: readonly GroupByFieldId[] = ['category', 'type'];
+
+/** Default grouping for one inventory page. `scope` is the page key (`kubernetes`, `hosts`, `all`). */
+export const defaultGroupByForScope = (scope?: string | null): readonly GroupByFieldId[] =>
+  scope === 'kubernetes' ? KUBERNETES_DEFAULT_GROUP_BY : DEFAULT_GROUP_BY;
+
 /** Previous default. Stored selections that still match this are migrated. */
 const LEGACY_DEFAULT_GROUP_BY: readonly GroupByFieldId[] = ['category', 'type'];
 

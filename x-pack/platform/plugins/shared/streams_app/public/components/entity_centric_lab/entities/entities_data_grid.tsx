@@ -863,7 +863,7 @@ const GridSectionHeader = ({
             <EuiText size="s">
               {i18n.translate(
                 'xpack.streams.entityCentricLab.entities.datagrid.resourcesWithAlertsLabel',
-                { defaultMessage: 'Entities with alerts:' }
+                { defaultMessage: 'With active alerts:' }
               )}
             </EuiText>
           </EuiFlexItem>

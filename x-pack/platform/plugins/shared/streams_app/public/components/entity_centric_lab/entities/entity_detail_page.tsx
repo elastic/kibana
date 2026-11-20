@@ -370,8 +370,10 @@ const EntityDetailPageInner = () => {
   const showDashboardThumbnails = useVariation('dashboardThumbnails') === 'show';
   const isPhase1 = phaseVariation === 'phase1';
   const awsReinventOn = useVariation('awsReinvent') === 'on';
+  const showDensityPicker = useVariation('densityPicker') === 'on';
 
   const listDensity = useMemo(() => {
+    if (!showDensityPicker) return DEFAULT_LIST_DENSITY;
     if (typeof window === 'undefined') return DEFAULT_LIST_DENSITY;
     try {
       const raw = window.localStorage.getItem(LIST_DENSITY_STORAGE_KEY);
@@ -379,7 +381,7 @@ const EntityDetailPageInner = () => {
     } catch {
       return DEFAULT_LIST_DENSITY;
     }
-  }, []);
+  }, [showDensityPicker]);
 
   const [dashboardPreview, setDashboardPreview] = useState<DashboardPreviewRequest | null>(null);
   const [alertDetailRequest, setAlertDetailRequest] =

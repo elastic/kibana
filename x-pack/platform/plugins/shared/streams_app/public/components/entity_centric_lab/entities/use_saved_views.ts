@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
 import type { ActiveExtraFilters, ActiveTagFilters, EntityCategoryId } from './fake_entities';
 import { EMPTY_TAG_FILTERS, TAG_KEYS, isKnownCategoryId } from './fake_entities';
-import { DEFAULT_GROUP_BY, type GroupByFieldId } from './entity_group_by';
+import { defaultGroupByForScope, type GroupByFieldId } from './entity_group_by';
 
 /**
  * Saved views for the entity-centric lab prototype.
@@ -164,10 +164,13 @@ const DEFAULT_APPLIED_SESSION_KEY = 'entityCentricLab.savedViews.defaultApplied.
 // mount to hydrate from stale storage.
 import {
   CATEGORY_TAB_STORAGE_KEY,
-  GROUP_BY_STORAGE_KEY,
+  GROUP_BY_BY_SCOPE_STORAGE_KEY,
   TAG_FILTERS_STORAGE_KEY,
-  VIEW_MODE_STORAGE_KEY,
+  VIEW_MODE_BY_SCOPE_STORAGE_KEY,
   DEFAULT_TABLE_PAGE_SIZE,
+  inventoryPreferenceScopeKey,
+  writeInventoryFiltersBlob,
+  writeScopedPreference,
   writePageSize,
   writePageSizes,
 } from './storage_keys';
@@ -739,7 +742,11 @@ const canonicalState = (state: SavedViewState) => ({
   // Absent group-by == the built-in default, so a legacy view (no field) and a
   // page at the default grouping compare equal and don't spuriously light the
   // "Modified" badge. Order is significant (level 1 vs 2), so don't sort.
-  groupBy: [...(state.groupBy && state.groupBy.length > 0 ? state.groupBy : DEFAULT_GROUP_BY)],
+  groupBy: [
+    ...(state.groupBy && state.groupBy.length > 0
+      ? state.groupBy
+      : defaultGroupByForScope(state.category)),
+  ],
   // Absent page-size == {@link DEFAULT_TABLE_PAGE_SIZE}, so a legacy view without
   // pageSize and a page at the default row count compare equal.
   pageSize: state.pageSize ?? DEFAULT_TABLE_PAGE_SIZE,
@@ -798,17 +805,37 @@ export const applyViewToStorage = (view: SavedView): void => {
   try {
     window.localStorage.setItem(CATEGORY_TAB_STORAGE_KEY, view.state.tab);
     window.localStorage.setItem(TAG_FILTERS_STORAGE_KEY, JSON.stringify(view.state.filters));
-    window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, view.state.viewMode);
-    window.localStorage.setItem(
-      GROUP_BY_STORAGE_KEY,
-      JSON.stringify([
-        ...(view.state.groupBy && view.state.groupBy.length > 0
-          ? view.state.groupBy
-          : DEFAULT_GROUP_BY),
-      ])
+    const preferenceScope = inventoryPreferenceScopeKey(
+      view.state.category,
+      view.state.cloudProvider,
+      view.state.cloudService
     );
+    writeScopedPreference(VIEW_MODE_BY_SCOPE_STORAGE_KEY, preferenceScope, view.state.viewMode);
+    writeScopedPreference(GROUP_BY_BY_SCOPE_STORAGE_KEY, preferenceScope, [
+      ...(view.state.groupBy && view.state.groupBy.length > 0
+        ? view.state.groupBy
+        : defaultGroupByForScope(view.state.category)),
+    ]);
     writePageSize(view.state.pageSize ?? DEFAULT_TABLE_PAGE_SIZE);
     writePageSizes(view.state.pageSizes ?? {});
+    // Same shape `readInventoryPageFilters` hydrates. Sentinels match the
+    // inventory page (`__all_categories__`, `__all__`, alerts `'all'`).
+    const k8s = view.state.k8sFilters;
+    writeInventoryFiltersBlob(preferenceScope, {
+      search: view.state.search,
+      tagFilters: view.state.filters,
+      extraFilters: view.state.extraFilters ?? {},
+      queryFilters: view.state.queryFilters ?? [],
+      categoryFilter: view.state.categoryFilter ?? '__all_categories__',
+      alertsFilter: 'all',
+      k8sResourceType: k8s?.resourceType ?? '__all__',
+      k8sCluster: k8s?.cluster ?? '__all__',
+      k8sNamespace: k8s?.namespace ?? '__all__',
+      k8sDeployment: k8s?.deployment ?? '__all__',
+      k8sNode: k8s?.node ?? '__all__',
+      cloudProviderFilter: view.state.cloudProviderFilter ?? '__all__',
+      categoryTypeFilter: view.state.categoryTypeFilter ?? '__all__',
+    });
   } catch {
     // Same trade-off as the other write helpers: the in-memory copy
     // still works for the current session; the view just won't survive

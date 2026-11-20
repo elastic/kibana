@@ -15,8 +15,80 @@
 
 export const CATEGORY_TAB_STORAGE_KEY = 'entityCentricLab.categoryTab.v1';
 export const TAG_FILTERS_STORAGE_KEY = 'entityCentricLab.entitiesTagFilters.v1';
+/**
+ * Legacy global view mode / group-by. Kept so a phase change can clear a
+ * value written before these preferences were stored per category.
+ */
 export const VIEW_MODE_STORAGE_KEY = 'entityCentricLab.entitiesViewMode.v1';
 export const GROUP_BY_STORAGE_KEY = 'entityCentricLab.entitiesGroupBy.v1';
+/** List / hex / geomap, keyed by {@link inventoryPreferenceScopeKey}. */
+export const VIEW_MODE_BY_SCOPE_STORAGE_KEY = 'entityCentricLab.entitiesViewModeByScope.v1';
+/** Group-by field ids, keyed by {@link inventoryPreferenceScopeKey}. */
+export const GROUP_BY_BY_SCOPE_STORAGE_KEY = 'entityCentricLab.entitiesGroupByByScope.v1';
+/**
+ * Search query, tag filters, extra facets, query-bar chips, category chip,
+ * alerts filter, and the Kubernetes / type filters for one inventory page.
+ */
+export const INVENTORY_FILTERS_BY_SCOPE_STORAGE_KEY =
+  'entityCentricLab.entitiesFiltersByScope.v1';
+
+/**
+ * Storage scope for inventory preferences that should not follow the user
+ * from one left-nav category to another. All entities is `all`. A category
+ * page is its id (`kubernetes`). A cloud provider or service page includes
+ * those segments so AWS does not share a slot with EC2.
+ */
+export const inventoryPreferenceScopeKey = (
+  category?: string | null,
+  cloudProvider?: string | null,
+  cloudService?: string | null
+): string => {
+  if (!category) return 'all';
+  if (cloudProvider && cloudService) return `${category}:${cloudProvider}:${cloudService}`;
+  if (cloudProvider) return `${category}:${cloudProvider}`;
+  return category;
+};
+
+const readPreferenceMap = (key: string): Record<string, unknown> => {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return {};
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    return parsed as Record<string, unknown>;
+  } catch {
+    return {};
+  }
+};
+
+/** Value stored for one inventory page, or `undefined` when that page has no choice yet. */
+export const readScopedPreference = (key: string, scope: string): unknown =>
+  readPreferenceMap(key)[scope];
+
+/** Merge one page's preference into the map. Other pages are left as they are. */
+export const writeScopedPreference = (key: string, scope: string, value: unknown): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    const map = readPreferenceMap(key);
+    map[scope] = value;
+    window.localStorage.setItem(key, JSON.stringify(map));
+  } catch {
+    // Storage blocked / quota exceeded.
+  }
+};
+
+/** Filter blob for one inventory page, or `undefined` when that page has none yet. */
+export const readInventoryFiltersBlob = (scope: string): Record<string, unknown> | undefined => {
+  const value = readScopedPreference(INVENTORY_FILTERS_BY_SCOPE_STORAGE_KEY, scope);
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  return value as Record<string, unknown>;
+};
+
+/** Replace one page's filter blob. Other pages are left as they are. */
+export const writeInventoryFiltersBlob = (scope: string, value: Record<string, unknown>): void => {
+  writeScopedPreference(INVENTORY_FILTERS_BY_SCOPE_STORAGE_KEY, scope, value);
+};
 /** Page-level Compact / Normal / Expanded density for list-view tables. */
 export const LIST_DENSITY_STORAGE_KEY = 'entityCentricLab.listDensity.v1';
 export const PAGE_SIZE_STORAGE_KEY = 'entityCentricLab.entitiesPageSize.v1';

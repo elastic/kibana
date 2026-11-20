@@ -24,6 +24,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -42,6 +43,7 @@ import { EntityDataGridSection } from './entities_data_grid';
 import type { K8sCellFilterTarget } from './k8s_inventory_cell_filter';
 import { DEFAULT_LIST_DENSITY, type ListDensity } from './list_density';
 import type { GroupByFieldDef } from './entity_group_by';
+import { labThings } from '../lab_terminology';
 import {
   KUBERNETES_FILTER_ALL,
   KUBERNETES_TYPE_CANONICAL_ORDER,
@@ -243,7 +245,7 @@ const AccordionBadges = ({
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
             {i18n.translate('xpack.streams.entityCentricLab.securityGrouping.stats.resourcesWithAlertsLabel', {
-              defaultMessage: 'Entities with alerts:',
+              defaultMessage: 'With active alerts:',
             })}
           </EuiText>
         </EuiFlexItem>
@@ -580,6 +582,39 @@ export const SecurityGroupingView = ({
     (name: string) => onSelectEntity(name),
     [onSelectEntity]
   );
+
+  if (entities.length === 0) {
+    return (
+      <EuiEmptyPrompt
+        iconType="filter"
+        data-test-subj="entityCentricLabSecurityGroupingEmpty"
+        title={
+          <h2>
+            {i18n.translate(
+              'xpack.streams.entityCentricLab.entities.securityGrouping.empty.title',
+              {
+                defaultMessage: 'No {things} match your filters',
+                values: { things: labThings(true) },
+              }
+            )}
+          </h2>
+        }
+        body={
+          <EuiText size="s" color="subdued">
+            <p>
+              {i18n.translate(
+                'xpack.streams.entityCentricLab.entities.securityGrouping.empty.body',
+                {
+                  defaultMessage: 'Try removing one or more filters to see {things}.',
+                  values: { things: labThings(true) },
+                }
+              )}
+            </p>
+          </EuiText>
+        }
+      />
+    );
+  }
 
   // Flat table when no grouping is selected — no section header.
   if (isUngrouped) {

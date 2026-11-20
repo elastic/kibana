@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.23';
+export const PROTOTYPE_VERSION = '1.24';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-11-20',
+    summary:
+      'Each inventory page keeps its own layout and filters. Kubernetes groups by category, then entity type.',
+    details:
+      'List or hex, group-by, search, and filters are stored for each left-nav page, so leaving Hosts and opening Kubernetes does not carry that page’s choices over. Other pages still open grouped by Entity category. Kubernetes opens grouped by Entity category, then Entity type. Filtering until nothing matches shows an empty state that asks you to remove filters. Flyout SLO counts use the same size as the process cards. Group headers say With active alerts. Density picker is a variation, off by default. Bump to v1.24.',
+  },
   {
     date: '2026-11-19',
     summary: 'Summary cards are a variation, and inventory groups by category only.',
