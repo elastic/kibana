@@ -15,7 +15,7 @@ import { isOperation } from '../../../types_guards';
 import { isDraggedField, isOperationFromTheSameGroup } from '../../../utils';
 import {
   canColumnBeDroppedInMetricDimension,
-  hasNumericColumn,
+  hasNumericMetricColumn,
   resolveTextBasedColumnType,
 } from '../utils';
 import { retrieveLayerColumnsFromCache } from '../fieldlist_cache';
@@ -63,7 +63,7 @@ export const getDropProps = (
       return { dropTypes: ['reorder'], nextLabel };
     }
 
-    const hasNumberColumn = hasNumericColumn(allColumns, activeColumns);
+    const hasNumberColumn = hasNumericMetricColumn(allColumns, activeColumns);
 
     const sourceFieldCanMoveToMetricDimension = canColumnBeDroppedInMetricDimension(
       hasNumberColumn,

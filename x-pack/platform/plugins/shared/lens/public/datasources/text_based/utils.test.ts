@@ -12,7 +12,8 @@ import {
   getAllColumns,
   canColumnBeUsedBeInMetricDimension,
   reconcileQueryColumns,
-  hasNumericColumn,
+  hasNumericMetricColumn,
+  operationFromColumn,
   resolveTextBasedColumnType,
   MAX_NUM_OF_COLUMNS,
 } from './utils';
@@ -439,23 +440,84 @@ describe('Text based languages utils', () => {
 
   describe('canColumnBeUsedBeInMetricDimension', () => {
     it('should return true if there are no numeric columns', async () => {
-      const flag = canColumnBeUsedBeInMetricDimension(false, 2, 'string');
+      const flag = canColumnBeUsedBeInMetricDimension(false, 2, {
+        dataType: 'string',
+        isBucketed: true,
+      });
       expect(flag).toBeTruthy();
     });
 
-    it('should return true if there are numeric columns and the selected type is number', async () => {
-      const flag = canColumnBeUsedBeInMetricDimension(true, 2, 'number');
+    it('should return true if there are numeric columns and the selected column is a numeric metric', async () => {
+      const flag = canColumnBeUsedBeInMetricDimension(true, 2, {
+        dataType: 'number',
+        isBucketed: false,
+      });
       expect(flag).toBeTruthy();
     });
 
     it('should return false if there are numeric columns and the selected type is non numeric', async () => {
-      const flag = canColumnBeUsedBeInMetricDimension(true, 2, 'date');
+      const flag = canColumnBeUsedBeInMetricDimension(true, 2, {
+        dataType: 'date',
+        isBucketed: true,
+      });
+      expect(flag).toBeFalsy();
+    });
+
+    it('should return false if there are numeric columns and the selected column is a numeric bucket', async () => {
+      const flag = canColumnBeUsedBeInMetricDimension(true, 2, {
+        dataType: 'number',
+        isBucketed: true,
+      });
       expect(flag).toBeFalsy();
     });
 
     it('should return true if there are many columns regardless of the types', async () => {
-      const flag = canColumnBeUsedBeInMetricDimension(true, MAX_NUM_OF_COLUMNS, 'date');
+      const flag = canColumnBeUsedBeInMetricDimension(true, MAX_NUM_OF_COLUMNS, {
+        dataType: 'date',
+        isBucketed: true,
+      });
       expect(flag).toBeTruthy();
+    });
+  });
+
+  describe('operationFromColumn', () => {
+    const numericBucketMeta = {
+      type: 'number',
+      esType: 'double',
+      esMeta: { bucket: { interval: 1000 } },
+    } satisfies DatatableColumn['meta'];
+
+    it('returns a metric for a plain number column', () => {
+      expect(operationFromColumn({ meta: { type: 'number' } })).toEqual({
+        dataType: 'number',
+        isBucketed: false,
+        scale: 'ratio',
+      });
+    });
+
+    it('returns an interval bucket for a number column with ES|QL bucket metadata', () => {
+      expect(operationFromColumn({ meta: numericBucketMeta })).toEqual({
+        dataType: 'number',
+        isBucketed: true,
+        scale: 'interval',
+      });
+    });
+
+    it('reads the bucket metadata from the activeData column when available', () => {
+      expect(
+        operationFromColumn(
+          { meta: { type: 'number' } },
+          { id: 'b', name: 'b', meta: numericBucketMeta }
+        )
+      ).toEqual({ dataType: 'number', isBucketed: true, scale: 'interval' });
+    });
+
+    it('returns an interval bucket for a date column', () => {
+      expect(operationFromColumn({ meta: { type: 'date' } })).toEqual({
+        dataType: 'date',
+        isBucketed: true,
+        scale: 'interval',
+      });
     });
   });
 
@@ -481,7 +543,7 @@ describe('Text based languages utils', () => {
     });
   });
 
-  describe('hasNumericColumn', () => {
+  describe('hasNumericMetricColumn', () => {
     const columns = [
       { columnId: 'a', fieldName: 'bytes', meta: { type: 'string' } },
       { columnId: 'b', fieldName: 'name', meta: { type: 'string' } },
@@ -491,11 +553,11 @@ describe('Text based languages utils', () => {
       const activeColumns = [
         { id: 'a', name: 'bytes', meta: { type: 'number' } },
       ] as DatatableColumn[];
-      expect(hasNumericColumn(columns, activeColumns)).toBe(true);
+      expect(hasNumericMetricColumn(columns, activeColumns)).toBe(true);
     });
 
     it('falls back to persisted meta.type when no activeData is present', () => {
-      expect(hasNumericColumn(columns)).toBe(false);
+      expect(hasNumericMetricColumn(columns)).toBe(false);
     });
 
     it('does not treat a persisted number as numeric when the overlay says otherwise', () => {
@@ -503,7 +565,18 @@ describe('Text based languages utils', () => {
         { columnId: 'a', fieldName: 'ts', meta: { type: 'number' } },
       ] satisfies TextBasedLayerColumn[];
       const activeColumns = [{ id: 'a', name: 'ts', meta: { type: 'date' } }] as DatatableColumn[];
-      expect(hasNumericColumn(persistedNumber, activeColumns)).toBe(false);
+      expect(hasNumericMetricColumn(persistedNumber, activeColumns)).toBe(false);
+    });
+
+    it('does not count numeric ES|QL bucket columns as metrics', () => {
+      const activeColumns = [
+        {
+          id: 'a',
+          name: 'b',
+          meta: { type: 'number', esMeta: { bucket: { interval: 1000 } } },
+        },
+      ] as DatatableColumn[];
+      expect(hasNumericMetricColumn(columns, activeColumns)).toBe(false);
     });
   });
 });
