@@ -360,6 +360,7 @@ const GroupAccordion = ({
   refreshTick,
   categoryScope,
   density,
+  showTypeColumn = false,
   onK8sCellFilter,
 }: {
   bucket: GroupBucket;
@@ -369,6 +370,8 @@ const GroupAccordion = ({
   refreshTick?: number;
   categoryScope?: EntityCategoryId;
   density: ListDensity;
+  /** Entity category is the only group-by field, so each table needs a Type column. */
+  showTypeColumn?: boolean;
   onK8sCellFilter?: (args: {
     readonly entity: Entity;
     readonly target: K8sCellFilterTarget;
@@ -518,6 +521,7 @@ const GroupAccordion = ({
           onSelectEntityAlerts={onSelectEntityAlerts}
           refreshTick={refreshTick}
           density={density}
+          showTypeColumn={showTypeColumn}
           onK8sCellFilter={onK8sCellFilter}
         />
       )}
@@ -562,6 +566,7 @@ export const SecurityGroupingView = ({
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const isUngrouped = activeGroupBy.length === 0;
+  const showTypeColumn = activeGroupBy.length === 1 && activeGroupBy[0] === 'category';
 
   const resolvedFields = useMemo(
     () =>
@@ -646,6 +651,7 @@ export const SecurityGroupingView = ({
             refreshTick={refreshTick}
             categoryScope={categoryScope}
             density={density}
+            showTypeColumn={showTypeColumn}
             onK8sCellFilter={onK8sCellFilter}
           />
           {index < buckets.length - 1 ? <EuiSpacer size="xs" /> : null}

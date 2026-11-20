@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.25';
+export const PROTOTYPE_VERSION = '1.26';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-11-20',
+    summary:
+      'AWS service marks on the hex map, and a Type column with its icon in the list.',
+    details:
+      'Hex groups on the AWS page show the EC2, S3, and Lambda marks beside the group title. The list Type column shows a small mark next to the label when that type has one. Grouping by Entity category only keeps the Type column on every table, including Databases. Bump to v1.26.',
+  },
   {
     date: '2026-11-20',
     summary:

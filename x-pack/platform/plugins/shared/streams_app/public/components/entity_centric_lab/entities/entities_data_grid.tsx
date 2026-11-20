@@ -43,6 +43,7 @@ import { i18n } from '@kbn/i18n';
 import { useEntityDisplayName } from '@kbn/entity-centric-lab-flyout';
 import type { Entity, EntityCategoryId, EntityHealth } from './fake_entities';
 import { entityAlertBadgePresentation } from './entity_alert_badge';
+import { entityTypeLogo } from './entity_type_logo';
 import { AlertStatusBadge } from './alert_status_badge';
 import { HEALTH_RANK, getCategoryDescriptor } from './fake_entities';
 import { useVariation } from './variation_context';
@@ -573,6 +574,18 @@ const NameCell = ({
 const categoryLabel = (category: EntityCategoryId): string =>
   getCategoryDescriptor(category)?.label ?? category;
 
+/** Type column: the label, with its mark when this type has one. */
+const TypeCell = ({ type }: { type: string }) => {
+  const logo = entityTypeLogo(type);
+  if (!logo) return <>{type}</>;
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+      <EuiIcon type={logo} size="s" aria-hidden />
+      <span>{type}</span>
+    </span>
+  );
+};
+
 /**
  * Tiny inline trend line drawn next to a numeric metric value. Auto-scales to
  * the series min/max; 1px of vertical padding keeps the stroke from clipping.
@@ -805,6 +818,12 @@ interface Props {
   /** Page-level density from Display options (not per-grid). */
   readonly density?: ListDensity;
   /**
+   * Group-by is Entity category only (or the flat table that remains when
+   * that grouping is stripped on a category page). Keep the Type column
+   * even when every row shares one type, such as Databases → Postgres.
+   */
+  readonly showTypeColumn?: boolean;
+  /**
    * Kubernetes inventory page: filter-for on hierarchy columns (and name on
    * cluster/namespace/node/deployment tables) via page facet dropdowns.
    */
@@ -891,6 +910,7 @@ export const EntityDataGridSection = ({
   refreshTick,
   borderless = false,
   density = DEFAULT_LIST_DENSITY,
+  showTypeColumn = false,
   onK8sCellFilter,
 }: Props) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
@@ -937,8 +957,17 @@ export const EntityDataGridSection = ({
   );
   const defaultVisibleIds = useMemo(() => {
     const ids = defaultVisibleIdsFor(bucketKey, isHomogeneous);
-    return isPhase1 ? ids.filter((id) => !PHASE1_HIDDEN_COLUMN_IDS.has(id)) : ids;
-  }, [bucketKey, isHomogeneous, isPhase1]);
+    const withType =
+      showTypeColumn && !ids.includes('type')
+        ? ids[0] === 'name'
+          ? [ids[0], 'type', ...ids.slice(1)]
+          : ['type', ...ids]
+        : ids;
+    return isPhase1 ? withType.filter((id) => !PHASE1_HIDDEN_COLUMN_IDS.has(id)) : withType;
+  }, [bucketKey, isHomogeneous, isPhase1, showTypeColumn]);
+  // A saved single-type layout (Databases → Postgres) omits Type. Category
+  // grouping needs its own slot so that layout does not hide the column.
+  const columnStorageKey = showTypeColumn && isHomogeneous ? `${bucketKey}:with-type` : bucketKey;
 
   const catalog = useMemo<CatalogColumn[]>(() => {
     const allColumns = [
@@ -956,7 +985,7 @@ export const EntityDataGridSection = ({
   const catalogIds = useMemo(() => catalog.map((column) => column.id), [catalog]);
 
   const { visibleColumns, setVisibleColumns, reset } = useColumnConfig(
-    bucketKey,
+    columnStorageKey,
     catalogIds,
     defaultVisibleIds
   );
@@ -1090,7 +1119,7 @@ export const EntityDataGridSection = ({
         case 'lastSeen':
           return entity.lastSeen;
         case 'type':
-          return entity.type;
+          return <TypeCell type={entity.type} />;
         case 'subType':
           return entity.subType ?? '—';
         case 'category':

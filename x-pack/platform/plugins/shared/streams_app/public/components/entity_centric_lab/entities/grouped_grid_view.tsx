@@ -4305,7 +4305,7 @@ const CustomGroupTiles = ({
   );
 };
 
-/** A simple section header for a custom-grouping bucket (no category icon). */
+/** Section header for a custom-grouping bucket. Type labels pick up their logo (EC2, S3, Lambda, …). */
 const GroupBucketHeader = ({
   label,
   total,
@@ -4318,8 +4318,15 @@ const GroupBucketHeader = ({
   size?: 'xs' | 'xxs';
   /** Entities in this group, used to compute alert count. */
   entities?: readonly Entity[];
-}) => (
+}) => {
+  const logo = entityTypeLogo(label);
+  return (
   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    {logo ? (
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={logo} size="m" aria-hidden />
+      </EuiFlexItem>
+    ) : null}
     <EuiFlexItem grow={false}>
       <EuiTitle size={size}>
         <h4>{label}</h4>
@@ -4330,7 +4337,8 @@ const GroupBucketHeader = ({
     </EuiFlexItem>
     {entities ? <AlertCountBadge entities={entities} /> : null}
   </EuiFlexGroup>
-);
+  );
+};
 
 /**
  * Derive the bucket key for a set of entities so custom-grouping buckets

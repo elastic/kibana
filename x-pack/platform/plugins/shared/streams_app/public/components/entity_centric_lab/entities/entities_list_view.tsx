@@ -864,6 +864,12 @@ export const EntitiesListView = ({
   // `undefined` keeps the built-in Category → Type layout; an empty array means
   // "no grouping" (one flat "All entities" table); 1–2 fields drive grouping.
   const useCustomGrouping = customGroupBy !== undefined;
+  // Category-only grouping (and the flat table left when a category page
+  // drops that redundant field) should name the type in every table.
+  const showTypeColumn =
+    customGroupBy !== undefined &&
+    (customGroupBy.length === 0 ||
+      (customGroupBy.length === 1 && customGroupBy[0].id === 'category'));
 
   // Subscribe to chaos-mode flips so PayFlow storyline rows can swap
   // their health between the seeded "unhealthy" and the rollback
@@ -1295,6 +1301,7 @@ export const EntitiesListView = ({
                 onSelectEntityAlerts={onSelectEntityAlerts}
                 refreshTick={refreshTick}
                 density={density}
+                showTypeColumn={showTypeColumn}
                 onK8sCellFilter={onK8sCellFilter}
               />
             ) : (
