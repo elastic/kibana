@@ -10,8 +10,8 @@ import type { RouteSecurity } from '@kbn/core-http-server';
 import { apiPrivileges } from '../../common/features';
 
 /**
- * Security for memory routes that write. `manage_memory` is checked but not required, so the
- * handler can allow the caller's own memory without it.
+ * Security for memory routes that write. Checks `manage_memory` without requiring it, so the
+ * handler allows callers to act on their own memory.
  */
 export const MEMORY_WRITE_SECURITY: RouteSecurity = {
   authz: {
@@ -23,7 +23,7 @@ export const MEMORY_WRITE_SECURITY: RouteSecurity = {
 export const MANAGE_MEMORY_REQUIRED_MESSAGE = `Acting on the memory of another user requires the [${apiPrivileges.manageMemory}] privilege.`;
 
 export const NO_PROFILE_MESSAGE =
-  'The caller has no user profile, so the request cannot be attributed to a user. Set `user_id`, log in to Kibana once to create a profile, or use an API key whose owner has one.';
+  'The caller has no user profile, so the request cannot be attributed to a user. Log in to Kibana once to create a profile, use an API key whose owner has one, or set `user_id` if you have the `contextEngine:manage_memory` privilege.';
 
 /** Creates an `Error` with `name: 'Forbidden'` for consistent audit logging. */
 export const forbiddenError = (message: string): Error =>
@@ -33,7 +33,10 @@ export const forbiddenError = (message: string): Error =>
 export const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
-/** Returns true if `userId` matches `callerUserId` or the request has `manage_memory`. */
+/**
+ * Returns whether the request may act on the memory of `userId`. Callers can act on their own
+ * memory and need `manage_memory` for another user.
+ */
 export const canActOnUserMemory = (
   request: KibanaRequest,
   userId: string,
@@ -46,8 +49,8 @@ export type ResolvedMemoryUser =
 
 /**
  * Resolves the target user for a memory write route and checks whether the caller may act on it.
- * Fails when the caller has no profile and omits `user_id`, or targets another user without
- * `contextEngine:manage_memory`.
+ * Fails when `user_id` is omitted and the caller has no profile, or when the caller targets
+ * another user without `contextEngine:manage_memory`.
  */
 export const resolveMemoryUser = async ({
   request,
