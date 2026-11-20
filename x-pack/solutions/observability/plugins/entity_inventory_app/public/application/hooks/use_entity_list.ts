@@ -31,7 +31,7 @@ export type EntityListResult = FetchResult<ListResponse>;
 export interface UseEntityListOptions {
   /**
    * Whether the list may be requested now. While false, nothing is requested, and a change of the
-   * range waits until it turns true. A list that was loaded keeps its rows meanwhile.
+   * range waits until it turns true. A list that was loaded keeps its rows until then.
    */
   enabled?: boolean;
 }
@@ -53,7 +53,7 @@ export const useEntityList = (
   const { dateRange, refreshToken } = useEntityInventorySearch();
 
   // The inputs of the last request this list was allowed to make. They follow the search only
-  // while `enabled`, so a disabled list neither starts a request nor drops its rows when the range
+  // while `enabled`, so a disabled list won't start a request or drop its rows when the range
   // changes, and it catches up with the search once it is enabled again.
   const [fetchInputs, setFetchInputs] = useState<FetchInputs | undefined>(
     enabled ? { dateRange, refreshToken } : undefined
