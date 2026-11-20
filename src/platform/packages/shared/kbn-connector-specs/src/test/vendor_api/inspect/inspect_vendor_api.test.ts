@@ -395,8 +395,9 @@ actions:
     expect(fetched).toEqual([SWAGGER_URL]);
     expect(warnings).toEqual([]);
     expect(output).toContain('/things');
+    // Recording tells Swagger from OpenAPI by itself, so the manifest needs no edit for it.
     expect(problems).toEqual([
-      `v1 is captured from ${SPEC_URL} in manifest.json. To capture it again from ${SWAGGER_URL}, delete its snapshot and record with --source v1=${SWAGGER_URL}. If ${SWAGGER_URL} is public, remove "captured" from v1 in manifest.json first, or drift checks will skip it. If it is another kind of document, also set "format" there and remove "pages", which recording would apply to it`,
+      `v1 is captured from ${SPEC_URL} in manifest.json. If ${SWAGGER_URL} also needs credentials, capture it from there: record with --source v1=${SWAGGER_URL} --capture v1=<file>. If it is public, also remove "captured" from v1, or drift checks skip it, and record with --source v1=${SWAGGER_URL}.`,
     ]);
   });
 
@@ -448,9 +449,26 @@ actions:
     it('does not read it as the kind of document the captured one was', async () => {
       await captured({ format: 'brave-markdown', pages: ['api/'] });
 
-      const { output } = await inspect({ sources: { v1: SWAGGER_URL }, directory });
+      const { output, problems } = await inspect({ sources: { v1: SWAGGER_URL }, directory });
 
       expect(output).toContain('/things');
+      expect(problems).toEqual([
+        expect.stringContaining(
+          `${SWAGGER_URL} is swagger, so first edit v1 in manifest.json: set "format" to "swagger", remove "pages".`
+        ),
+      ]);
+    });
+
+    it('says which GraphQL and MCP fields the replacement leaves behind', async () => {
+      await captured({ format: 'mcp', endpoints: ['https://mcp.example.com/mcp'] });
+
+      const { problems } = await inspect({ sources: { v1: SWAGGER_URL }, directory });
+
+      expect(problems).toEqual([
+        expect.stringContaining(
+          `${SWAGGER_URL} is swagger, so first edit v1 in manifest.json: set "format" to "swagger", remove "endpoints".`
+        ),
+      ]);
     });
   });
 

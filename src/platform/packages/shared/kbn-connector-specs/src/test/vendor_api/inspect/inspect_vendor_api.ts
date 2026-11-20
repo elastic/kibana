@@ -66,6 +66,60 @@ const titleOf = ({ info }: OpenApiDocument): string => {
   return [title, version].filter((part) => typeof part === 'string').join(' ');
 };
 
+interface CapturedReplacement {
+  readonly name: string;
+  readonly known: ManifestSource;
+  /** The URL inspected in place of the captured one. */
+  readonly url: string;
+  /** What that URL turned out to be. */
+  readonly format: ManifestSource['format'];
+  /** The `--pages` it was inspected with. */
+  readonly pages: readonly string[] | undefined;
+}
+
+/**
+ * How to record a captured source from the URL inspected in its place: capture it again from
+ * there, or, if the vendor now serves it publicly, record it as an ordinary source. Either way,
+ * the manifest first loses the fields a source of the new kind doesn't have.
+ */
+const describeCapturedReplacement = ({
+  name,
+  known,
+  url,
+  format,
+  pages,
+}: CapturedReplacement): string => {
+  const recordFlags = [
+    `--source ${name}=${url}`,
+    // `--format` can't name openapi, which is what a source without a format is.
+    ...(isMarkdownFormat(format) ? [`--format ${name}=${format}`] : []),
+    ...(pages ?? []).map((prefix) => `--pages ${name}=${prefix}`),
+  ].join(' ');
+  // Recording tells OpenAPI from Swagger by itself, and --format names a Markdown reference, so
+  // the manifest's format only has to change when it names a kind the replacement isn't.
+  const declaresOtherKind =
+    (isMarkdownFormat(known.format) || isProtocolFormat(known.format)) && !isMarkdownFormat(format);
+  const edits = [
+    ...(declaresOtherKind ? [`set "format" to "${format}"`] : []),
+    // Recording applies the manifest's pages when no --pages is given, and only to a Markdown
+    // reference, so they go unless the replacement is one inspected without --pages of its own.
+    ...(known.pages !== undefined && (!isMarkdownFormat(format) || pages === undefined)
+      ? ['remove "pages"']
+      : []),
+    // Only GraphQL and MCP sources have these, and --inspect only reads the other kinds.
+    ...(known.endpoints !== undefined ? ['remove "endpoints"'] : []),
+    ...(known.tools !== undefined ? ['remove "tools"'] : []),
+  ];
+  return [
+    `${name} is captured from ${known.url} in ${MANIFEST}.`,
+    ...(edits.length > 0
+      ? [`${url} is ${format}, so first edit ${name} in ${MANIFEST}: ${edits.join(', ')}.`]
+      : []),
+    `If ${url} also needs credentials, capture it from there: record with ${recordFlags} --capture ${name}=<file>.`,
+    `If it is public, also remove "captured" from ${name}, or drift checks skip it, and record with ${recordFlags}.`,
+  ].join(' ');
+};
+
 /**
  * Shows what vendor specs offer before a connector is written against them: the operations
  * they list, or for chosen operations everything an action needs to call one. Specs are
@@ -142,7 +196,7 @@ export const inspectVendorApi = async ({
     if (known && known.url !== url) {
       problems.push(
         known.captured
-          ? `${name} is captured from ${known.url} in ${MANIFEST}. To capture it again from ${url}, delete its snapshot and record with --source ${name}=${url}. If ${url} is public, remove "captured" from ${name} in ${MANIFEST} first, or drift checks will skip it. If it is another kind of document, also set "format" there and remove "pages", which recording would apply to it`
+          ? describeCapturedReplacement({ name, known, url, format, pages })
           : `${name} is ${known.url} in ${MANIFEST}; to move it, record with --source ${name}=${url}`
       );
     } else if (directory && !known) {
