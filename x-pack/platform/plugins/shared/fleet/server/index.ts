@@ -55,6 +55,11 @@ export type {
   FleetFileUpdatableFields,
 } from './services/files/types';
 
+export type {
+  SecretsServiceInterface,
+  SecretStorageFeature,
+} from './services/secrets/secrets_service';
+
 export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { FleetPlugin } = await import('./plugin');
   return new FleetPlugin(initializerContext);

@@ -35,6 +35,8 @@ function mapSettingsSO(settingsSo: SavedObject<SettingsSOAttributes>): Settings 
     download_source_auth_secret_storage_requirements_met:
       settingsSo.attributes.download_source_auth_secret_storage_requirements_met,
     otlp_output_requirements_met: settingsSo.attributes.otlp_output_requirements_met,
+    response_actions_export_secret_storage_requirements_met:
+      settingsSo.attributes.response_actions_export_secret_storage_requirements_met,
     has_seen_add_data_notice: settingsSo.attributes.has_seen_add_data_notice,
     prerelease_integrations_enabled: settingsSo.attributes.prerelease_integrations_enabled,
     use_space_awareness_migration_status:

@@ -21,6 +21,7 @@ export type FleetServerRequirementSettingsKey = Extract<
   | 'ssl_secret_storage_requirements_met'
   | 'download_source_auth_secret_storage_requirements_met'
   | 'otlp_output_requirements_met'
+  | 'response_actions_export_secret_storage_requirements_met'
 >;
 
 export interface FleetServerVersionRequirementOptions {

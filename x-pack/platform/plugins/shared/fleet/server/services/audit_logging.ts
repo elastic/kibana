@@ -5,10 +5,18 @@
  * 2.0.
  */
 
+import { AsyncLocalStorage } from 'async_hooks';
+
 import type { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
 
 import { appContextService } from './app_context';
 import { getRequestStore } from './request_store';
+
+const auditConsumerStore = new AsyncLocalStorage<string>();
+
+/** Runs `fn` so that every Fleet audit entry it writes records `consumer` as `labels.consumer`. */
+export const runWithAuditConsumer = <T>(consumer: string, fn: () => T): T =>
+  auditConsumerStore.run(consumer, fn);
 
 class AuditLoggingService {
   /**
@@ -31,7 +39,12 @@ class AuditLoggingService {
       auditLogger = securitySetup.audit.withoutRequest;
     }
 
-    auditLogger.log({ ...args, labels: { ...args.labels, application: 'elastic/fleet' } });
+    const consumer = auditConsumerStore.getStore();
+
+    auditLogger.log({
+      ...args,
+      labels: { ...args.labels, ...(consumer ? { consumer } : {}), application: 'elastic/fleet' },
+    });
   }
 
   /**

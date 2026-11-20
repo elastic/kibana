@@ -1,0 +1,277 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+
+import type { DeletedSecretResponse, Secret } from '../../../common/types';
+import {
+  RESPONSE_ACTIONS_EXPORT_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+  SECRETS_ENDPOINT_PATH,
+} from '../../constants';
+import { FleetError, isESClientError } from '../../errors';
+import { appContextService } from '../app_context';
+import { auditLoggingService, runWithAuditConsumer } from '../audit_logging';
+import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
+import type { FleetServerRequirementSettingsKey } from '../fleet_server/version_requirements';
+import { getRequestStore } from '../request_store';
+
+import {
+  isSecretStorageEnabledForFeature as isFleetSecretStorageEnabledForFeature,
+  writeSecretDeletedAuditLog,
+} from './common';
+import { findPackagePoliciesUsingSecrets } from './package_policies';
+
+/** Features that may store secrets through the Fleet secrets service. */
+export type SecretStorageFeature = 'response_actions_export';
+
+interface SecretStorageFeatureRequirements {
+  featureName: string;
+  minimumFleetServerVersion: string;
+  settingKey: FleetServerRequirementSettingsKey;
+}
+
+// The settings latch is sticky: raising a feature's minimum version needs a new settings key.
+const SECRET_STORAGE_FEATURES: Readonly<
+  Record<SecretStorageFeature, SecretStorageFeatureRequirements>
+> = {
+  response_actions_export: {
+    featureName: 'Response actions export secrets',
+    minimumFleetServerVersion: RESPONSE_ACTIONS_EXPORT_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+    settingKey: 'response_actions_export_secret_storage_requirements_met',
+  },
+};
+
+// `_fleet/secret` stores each secret under an Elasticsearch auto-generated document id:
+// a time-based UUID of 15 bytes, encoded as 20 characters of unpadded URL-safe base64.
+const SECRET_ID_PATTERN = /^[A-Za-z0-9_-]{20}$/;
+
+/** Throws when any id is not a well-formed Fleet secret id (only ids `createSecrets` returned can be deleted). */
+export const assertValidSecretIds = (ids: string[]): void => {
+  const invalidIdCount = ids.filter(
+    (id) => typeof id !== 'string' || !SECRET_ID_PATTERN.test(id)
+  ).length;
+  if (invalidIdCount > 0) {
+    throw new FleetError(
+      `Cannot delete ${invalidIdCount} malformed Fleet secret id(s): only ids returned by createSecrets can be deleted`
+    );
+  }
+};
+
+export interface SecretsServiceInterface {
+  /**
+   * Creates one Fleet secret per value. Returns `{ id }` in input order.
+   * All or nothing: on any failure, deletes the secrets this call created and throws.
+   */
+  createSecrets(values: string[]): Promise<Array<{ id: string }>>;
+  /**
+   * Deletes secrets by id. Callers may only pass ids returned by their own `createSecrets`.
+   * Throws before deleting anything when an id is malformed or still referenced by a current package policy.
+   * Unknown ids are reported as `deleted: false`; a 404 after a retried request as `deleted: true`.
+   */
+  deleteSecrets(ids: string[]): Promise<Array<{ id: string; deleted: boolean }>>;
+  /** True when all Fleet Servers support secrets for `feature` (always true when standalone). Fleet owns the key and version. */
+  isSecretStorageEnabledForFeature(feature: SecretStorageFeature): Promise<boolean>;
+}
+
+interface SecretsServiceOptions {
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  /** The user's request, for audit attribution. Omitted for background work. */
+  request?: KibanaRequest;
+  /** Calling feature, recorded in audit entries. */
+  consumer: string;
+}
+
+const deleteSecret = async (
+  esClient: ElasticsearchClient,
+  id: string
+): Promise<{ deleted: boolean; confirmed: boolean }> => {
+  const logger = appContextService.getLogger();
+  let attempts = 0;
+
+  try {
+    const { deleted }: DeletedSecretResponse = await retryTransientEsErrors(
+      () => {
+        attempts++;
+        return esClient.transport.request({
+          method: 'DELETE',
+          path: `${SECRETS_ENDPOINT_PATH}/${encodeURIComponent(id)}`,
+        });
+      },
+      { logger }
+    );
+
+    return { deleted, confirmed: deleted };
+  } catch (err) {
+    // A retried attempt, by Fleet or by the Elasticsearch client itself, may have deleted the secret before failing.
+    const retried = attempts > 1 || (isESClientError(err) && (err.meta.meta?.attempts ?? 0) > 0);
+
+    if (isESClientError(err) && err.meta.statusCode === 404) {
+      return { deleted: retried, confirmed: false };
+    }
+
+    // Only an Elasticsearch error response to the sole attempt proves the secret was not deleted.
+    const rejectedByElasticsearch =
+      !retried && isESClientError(err) && (err.meta.statusCode ?? 500) < 500;
+    if (!rejectedByElasticsearch) {
+      writeSecretDeletedAuditLog(id, { confirmed: false });
+    }
+
+    const msg = `Error deleting secrets: ${err}`;
+    logger.error(msg);
+    throw new FleetError(msg);
+  }
+};
+
+const createSecret = async (esClient: ElasticsearchClient, value: string): Promise<string> => {
+  try {
+    // `POST _fleet/secret` is not idempotent: retrying after a lost response would create a second
+    // secret, so this request is sent exactly once (neither Fleet nor the Elasticsearch client retries it).
+    const { id }: Secret = await esClient.transport.request(
+      { method: 'POST', path: SECRETS_ENDPOINT_PATH, body: { value } },
+      { maxRetries: 0 }
+    );
+    auditLoggingService.writeCustomAuditLog({
+      message: `secret created: ${id}`,
+      event: {
+        action: 'secret_create',
+        category: ['database'],
+        type: ['access'],
+        outcome: 'success',
+      },
+    });
+    return id;
+  } catch (err) {
+    // Only an Elasticsearch error response proves no secret was created.
+    const rejectedByElasticsearch = isESClientError(err) && (err.meta.statusCode ?? 500) < 500;
+    if (!rejectedByElasticsearch) {
+      auditLoggingService.writeCustomAuditLog({
+        message: 'secret possibly created',
+        event: {
+          action: 'secret_create',
+          category: ['database'],
+          type: ['access'],
+          outcome: 'unknown',
+        },
+      });
+    }
+    throw err;
+  }
+};
+
+/** Creates the Fleet secrets service for one consumer, optionally scoped to the user's request for auditing. */
+export const createSecretsService = ({
+  esClient,
+  soClient,
+  request,
+  consumer,
+}: SecretsServiceOptions): SecretsServiceInterface => {
+  if (!consumer) {
+    throw new FleetError('A consumer is required to use the Fleet secrets service');
+  }
+
+  const runInCallerContext = <T>(fn: () => Promise<T>): Promise<T> => {
+    const withConsumer = () => runWithAuditConsumer(consumer, fn);
+    return request ? getRequestStore().run(request, withConsumer) : withConsumer();
+  };
+
+  return {
+    createSecrets: (values) =>
+      runInCallerContext(async () => {
+        const logger = appContextService.getLogger();
+        const results = await Promise.allSettled(
+          values.map((value) => createSecret(esClient, value))
+        );
+
+        const isFulfilled = (
+          result: PromiseSettledResult<string>
+        ): result is PromiseFulfilledResult<string> => result.status === 'fulfilled';
+        const createdIds = results.filter(isFulfilled).map(({ value: id }) => id);
+
+        const firstRejection = results.find(
+          (result): result is PromiseRejectedResult => result.status === 'rejected'
+        );
+        if (!firstRejection) {
+          return createdIds.map((id) => ({ id }));
+        }
+
+        // Ids created by this call can't be referenced by a package policy yet, so unlike
+        // `deleteSecrets` this rollback skips the package-policy reference guard.
+        const rollbackResults = await Promise.allSettled(
+          createdIds.map(async (id) => {
+            const { deleted, confirmed } = await deleteSecret(esClient, id);
+            if (deleted) {
+              writeSecretDeletedAuditLog(id, { confirmed });
+            }
+          })
+        );
+        const undeletedIds = createdIds.filter(
+          (_id, index) => rollbackResults[index].status === 'rejected'
+        );
+        if (undeletedIds.length > 0) {
+          const idList = undeletedIds.join(', ');
+          logger.error(
+            `Failed to delete Fleet secret id(s) left over from a failed create: ${idList}`
+          );
+        }
+
+        const msg = `Error creating secrets: ${firstRejection.reason}`;
+        logger.error(msg);
+        throw new FleetError(msg);
+      }),
+
+    deleteSecrets: async (ids) => {
+      assertValidSecretIds(ids);
+
+      if (ids.length === 0) {
+        return [];
+      }
+
+      return runInCallerContext(async () => {
+        // Deleting a secret a package policy still references breaks Fleet Server (elastic/fleet-server#7536).
+        const referencedIds = (
+          await findPackagePoliciesUsingSecrets({ soClient, ids, spaceId: '*' })
+        ).map(({ id }) => id);
+        if (referencedIds.length > 0) {
+          throw new FleetError(
+            `Cannot delete ${
+              referencedIds.length
+            } Fleet secret id(s) still referenced by package policies: ${referencedIds.join(', ')}`
+          );
+        }
+
+        return Promise.all(
+          ids.map(async (id) => {
+            const { deleted, confirmed } = await deleteSecret(esClient, id);
+            if (deleted) {
+              writeSecretDeletedAuditLog(id, { confirmed });
+            }
+            return { id, deleted };
+          })
+        );
+      });
+    },
+
+    isSecretStorageEnabledForFeature: async (feature) => {
+      if (!Object.hasOwn(SECRET_STORAGE_FEATURES, feature)) {
+        throw new FleetError(`Unknown secret storage feature: ${feature}`);
+      }
+
+      return runInCallerContext(() =>
+        isFleetSecretStorageEnabledForFeature({
+          esClient,
+          soClient,
+          ...SECRET_STORAGE_FEATURES[feature],
+        })
+      );
+    },
+  };
+};

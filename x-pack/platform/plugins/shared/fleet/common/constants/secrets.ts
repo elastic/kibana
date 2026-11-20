@@ -12,3 +12,5 @@ export const OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION = '8.12.0';
 export const ACTION_SECRETS_MINIMUM_FLEET_SERVER_VERSION = '9.2.0';
 export const SSL_SECRETS_MINIMUM_FLEET_SERVER_VERSION = '9.3.0';
 export const DOWNLOAD_SOURCE_AUTH_SECRETS_MINIMUM_FLEET_SERVER_VERSION = '9.4.0';
+// fleet-server#8103 (secret substitution in pending actions) is fixed in 9.4.10, 9.5.7 and 9.6.0+; 9.5.0-9.5.6 are not.
+export const RESPONSE_ACTIONS_EXPORT_SECRETS_MINIMUM_FLEET_SERVER_VERSION = '9.6.0';
