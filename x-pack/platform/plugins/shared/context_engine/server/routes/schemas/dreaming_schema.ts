@@ -24,6 +24,7 @@ import {
 } from '../../../common/dreaming';
 import { validateDreamingInterval } from '../../../common/validation';
 const MAX_WORKFLOW_EXECUTION_ID_LENGTH = 256;
+const MAX_DREAMING_WORKFLOWS = 10;
 
 const validateType = (value: string): string | undefined =>
   DREAMING_TYPE_PATTERN.test(value)
@@ -169,7 +170,8 @@ const workflowIdsSchema = schema.arrayOf(
   schema.string({
     maxLength: MAX_DREAMING_WORKFLOW_ID_LENGTH,
     meta: { description: 'A dreaming workflow attached to the AI Index.' },
-  })
+  }),
+  { maxSize: MAX_DREAMING_WORKFLOWS }
 );
 
 export const dreamingResponseSchema = () =>
@@ -190,7 +192,13 @@ export const runDreamingResponseSchema = () =>
       schema.object({
         workflow_id: schema.string({ maxLength: MAX_DREAMING_WORKFLOW_ID_LENGTH }),
         execution_id: schema.string({ maxLength: MAX_WORKFLOW_EXECUTION_ID_LENGTH }),
-      })
+      }),
+      { maxSize: MAX_DREAMING_WORKFLOWS }
     ),
-    failed: schema.arrayOf(schema.string({ maxLength: MAX_DREAMING_WORKFLOW_ID_LENGTH })),
+    failed: schema.arrayOf(schema.string({ maxLength: MAX_DREAMING_WORKFLOW_ID_LENGTH }), {
+      maxSize: MAX_DREAMING_WORKFLOWS,
+    }),
+    skipped: schema.arrayOf(schema.string({ maxLength: MAX_DREAMING_WORKFLOW_ID_LENGTH }), {
+      maxSize: MAX_DREAMING_WORKFLOWS,
+    }),
   });

@@ -77,9 +77,10 @@ export const AutomationRow = ({
   const enabled = workflowSummary?.enabled;
   const definition = workflowSummary?.definition;
   const hasWorkflowDefinition = definition != null;
+  const awaitedExecutionIds = startedExecutionId === undefined ? undefined : [startedExecutionId];
   const latest = useLatestWorkflowExecution([automation.value], {
     enabled: hasWorkflowDefinition,
-    awaitedExecutionId: startedExecutionId,
+    awaitedExecutionIds,
     onAwaitedObserved: clearStartedExecutionId,
   });
   const executionWorkflowId = latest.workflowId ?? automation.value;

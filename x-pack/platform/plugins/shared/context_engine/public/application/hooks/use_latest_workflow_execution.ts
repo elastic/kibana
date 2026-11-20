@@ -50,18 +50,18 @@ const productionExecutionsParams: GetWorkflowExecutionsParams = {
 
 /**
  * Latest runs for workflows in list order. The first workflow with a run is shown.
- * `awaitedExecutionId` keeps running until that id appears on any listed workflow.
- * `onAwaitedObserved` fires when that id is seen in query results.
+ * `awaitedExecutionIds` keeps running until every listed id appears on some workflow query.
+ * `onAwaitedObserved` fires once all awaited ids are seen (keyed by joined ids).
  */
 export const useLatestWorkflowExecution = (
   workflowIds: readonly string[],
   {
     enabled = true,
-    awaitedExecutionId,
+    awaitedExecutionIds,
     onAwaitedObserved,
   }: {
     enabled?: boolean;
-    awaitedExecutionId?: string;
+    awaitedExecutionIds?: readonly string[];
     onAwaitedObserved?: () => void;
   } = {}
 ): LatestWorkflowExecution => {
@@ -71,6 +71,9 @@ export const useLatestWorkflowExecution = (
   const awaitingObservedRef = useRef(false);
   const onAwaitedObservedRef = useRef(onAwaitedObserved);
   onAwaitedObservedRef.current = onAwaitedObserved;
+
+  const awaitedIds = awaitedExecutionIds ?? [];
+  const hasAwaited = awaitedIds.length > 0;
 
   const queries = useQueries({
     queries: workflowIds.map((workflowId) => ({
@@ -90,27 +93,28 @@ export const useLatestWorkflowExecution = (
       },
       enabled: queriesEnabled,
       refetchInterval: (current: LatestWorkflowExecutionData | undefined) =>
-        current?.activeExecution ||
-        (awaitedExecutionId !== undefined && !awaitingObservedRef.current)
+        current?.activeExecution || (hasAwaited && !awaitingObservedRef.current)
           ? RUNNING_REFETCH_MS
           : IDLE_REFETCH_MS,
     })),
   });
 
   const awaitedObserved =
-    awaitedExecutionId !== undefined &&
-    queries.some(
-      ({ data }) =>
-        data?.execution?.id === awaitedExecutionId ||
-        data?.activeExecution?.id === awaitedExecutionId
+    hasAwaited &&
+    awaitedIds.every((awaitedId) =>
+      queries.some(
+        ({ data }) => data?.execution?.id === awaitedId || data?.activeExecution?.id === awaitedId
+      )
     );
-  awaitingObservedRef.current = awaitedExecutionId === undefined || awaitedObserved;
+  awaitingObservedRef.current = !hasAwaited || awaitedObserved;
+
+  const awaitedKey = awaitedIds.join(',');
 
   useEffect(() => {
     if (awaitedObserved) {
       onAwaitedObservedRef.current?.();
     }
-  }, [awaitedObserved, awaitedExecutionId]);
+  }, [awaitedObserved, awaitedKey]);
 
   if (!queriesEnabled) {
     return {
@@ -123,8 +127,17 @@ export const useLatestWorkflowExecution = (
     };
   }
 
-  const index = queries.findIndex(({ data }) => data === undefined || data.execution !== null);
-  const execution = index === -1 ? null : queries[index]?.data?.execution ?? undefined;
+  const index = queries.findIndex(
+    (query) => !query.isError && (query.data === undefined || query.data.execution !== null)
+  );
+
+  let execution: WorkflowExecutionListItemDto | null | undefined;
+  if (index === -1) {
+    execution = queries.some((query) => query.isError) ? undefined : null;
+  } else {
+    execution = queries[index]?.data?.execution ?? undefined;
+  }
+
   const activeExecutionId = queries.find(({ data }) => data?.activeExecution)?.data?.activeExecution
     ?.id;
 

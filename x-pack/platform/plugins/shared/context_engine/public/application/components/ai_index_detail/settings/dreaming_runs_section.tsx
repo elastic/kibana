@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiFormRow } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
@@ -16,6 +16,7 @@ import {
   isDreamingOn,
   type AiIndexDreamingConfig,
 } from '../../../../../common/dreaming';
+import { useCanWriteContextEngine } from '../../../hooks/use_can_write_context_engine';
 import { useRunDreaming } from '../../../hooks/use_run_dreaming';
 
 export interface DreamingRunsSectionProps {
@@ -23,6 +24,7 @@ export interface DreamingRunsSectionProps {
   savedDreaming: AiIndexDreamingConfig;
   latestIsRunning: boolean;
   isDirty: boolean;
+  onStarted: (executionIds: string[]) => void;
 }
 
 const runNowLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.runs.runNow', {
@@ -35,9 +37,14 @@ export const DreamingRunsSection = ({
   savedDreaming,
   latestIsRunning,
   isDirty,
+  onStarted,
 }: DreamingRunsSectionProps) => {
+  const canWrite = useCanWriteContextEngine();
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
-  const { runDreaming, isLoading: isRunLoading } = useRunDreaming();
+  const { runDreaming, isLoading: isRunLoading } = useRunDreaming({
+    onStarted: (response) =>
+      onStarted(response.executions.map(({ execution_id: executionId }) => executionId)),
+  });
 
   const isRunning = isRunLoading || latestIsRunning;
 
@@ -46,6 +53,14 @@ export const DreamingRunsSection = ({
       return i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.runs.disabledDirty', {
         defaultMessage: 'Save your changes first',
       });
+    }
+    if (!canWrite) {
+      return i18n.translate(
+        'xpack.contextEngine.aiIndexDetail.dreaming.runs.disabledNoWritePermission',
+        {
+          defaultMessage: 'You need Context Engine write access to run',
+        }
+      );
     }
     if (!canExecuteWorkflow) {
       return i18n.translate(
@@ -68,32 +83,24 @@ export const DreamingRunsSection = ({
     return undefined;
   })();
 
-  const runButton = (
-    <EuiButton
-      size="s"
-      iconType="play"
-      onClick={() => runDreaming(aiIndexId)}
-      isLoading={isRunning}
-      isDisabled={runDisabledReason !== undefined}
-      data-test-subj="contextAiIndexDreamingRunNow"
-      {...getEbtProps({
-        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDreamingPanel,
-        action: CONTEXT_ENGINE_UI_EBT.action.dreaming.RUN_NOW,
-      })}
-    >
-      {runNowLabel}
-    </EuiButton>
-  );
-
   return (
     <div data-test-subj="contextAiIndexDreamingRunsSection">
-      {runDisabledReason !== undefined ? (
-        <EuiToolTip content={runDisabledReason} disableScreenReaderOutput>
-          {runButton}
-        </EuiToolTip>
-      ) : (
-        runButton
-      )}
+      <EuiFormRow hasEmptyLabelSpace helpText={runDisabledReason}>
+        <EuiButton
+          size="s"
+          iconType="play"
+          onClick={() => runDreaming(aiIndexId)}
+          isLoading={isRunning}
+          isDisabled={runDisabledReason !== undefined}
+          data-test-subj="contextAiIndexDreamingRunNow"
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDreamingPanel,
+            action: CONTEXT_ENGINE_UI_EBT.action.dreaming.RUN_NOW,
+          })}
+        >
+          {runNowLabel}
+        </EuiButton>
+      </EuiFormRow>
     </div>
   );
 };

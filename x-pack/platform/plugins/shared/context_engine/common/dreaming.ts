@@ -133,6 +133,8 @@ export interface RunAiIndexDreamingResponse {
   executions: Array<{ workflow_id: string; execution_id: string }>;
   /** Ids of the workflows that failed to start. */
   failed: string[];
+  /** Ids of workflows skipped because a run was already in progress. */
+  skipped: string[];
 }
 
 /** The dreaming config of an AI index that never configured it. */

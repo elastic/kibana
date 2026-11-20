@@ -51,7 +51,9 @@ export const useRunDreaming = ({ onStarted }: UseRunDreamingOptions = {}): UseRu
     onSuccess: async (data) => {
       setIsRefetching(true);
       try {
-        const workflowIds = [...new Set(data.executions.map(({ workflow_id }) => workflow_id))];
+        const workflowIds = [
+          ...new Set([...data.executions.map(({ workflow_id }) => workflow_id), ...data.skipped]),
+        ];
         await Promise.all(
           workflowIds.map((workflowId) =>
             queryClient.refetchQueries({ queryKey: latestWorkflowExecutionQueryKey(workflowId) })
@@ -79,6 +81,18 @@ export const useRunDreaming = ({ onStarted }: UseRunDreamingOptions = {}): UseRu
             }
           ),
         });
+      }
+
+      if (data.executions.length === 0 && data.skipped.length > 0) {
+        notifications.toasts.addInfo({
+          title: i18n.translate(
+            'xpack.contextEngine.aiIndexDetail.dreaming.runs.alreadyRunningTitle',
+            {
+              defaultMessage: 'Dreaming is already running',
+            }
+          ),
+        });
+        return;
       }
 
       if (data.executions.length === 0) {

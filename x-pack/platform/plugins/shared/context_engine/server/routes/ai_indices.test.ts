@@ -3113,15 +3113,48 @@ describe('ai indices routes', () => {
       const runBody = {
         executions: [{ workflow_id: 'wf-dreaming', execution_id: 'exec-dreaming' }],
         failed: [],
+        skipped: [],
       };
+      const withWorkflowExecutePrivilege = {
+        [WorkflowsManagementApiActions.execute]: true,
+      };
+      const runRoute = (aiIndexId: string) =>
+        callRoute(
+          'POST',
+          AI_INDEX_DREAMING_RUN_PATH,
+          { params: { aiIndexId } },
+          withWorkflowExecutePrivilege
+        );
+
+      it('requires the context engine write and workflow execute privileges', () => {
+        expect(getRoute('POST', AI_INDEX_DREAMING_RUN_PATH).config.security).toEqual({
+          authz: {
+            requiredPrivileges: [apiPrivileges.writeContextEngine],
+            extendedPrivileges: [WorkflowsManagementApiActions.execute],
+          },
+        });
+      });
+
+      it('returns 403 without starting workflows when the workflow execute privilege is missing', async () => {
+        await callRoute(
+          'POST',
+          AI_INDEX_DREAMING_RUN_PATH,
+          { params: { aiIndexId: 'customer_support' } },
+          { [WorkflowsManagementApiActions.execute]: false }
+        );
+
+        expect(response.forbidden).toHaveBeenCalledWith({
+          body: { message: 'Missing privilege to execute workflows.' },
+        });
+        expect(aiIndexService.get).not.toHaveBeenCalled();
+        expect(dreamingScheduleService.run).not.toHaveBeenCalled();
+      });
 
       it('starts dreaming workflows and returns execution ids', async () => {
         aiIndexService.get.mockResolvedValue({ ...aiIndexItem, dreaming });
         dreamingScheduleService.run.mockResolvedValue(runBody);
 
-        await callRoute('POST', AI_INDEX_DREAMING_RUN_PATH, {
-          params: { aiIndexId: 'customer_support' },
-        });
+        await runRoute('customer_support');
 
         expect(dreamingScheduleService.run).toHaveBeenCalled();
         expect(response.ok).toHaveBeenCalledWith({ body: runBody });
@@ -3138,9 +3171,7 @@ describe('ai indices routes', () => {
           new DreamingNotSetUpError('customer_support')
         );
 
-        await callRoute('POST', AI_INDEX_DREAMING_RUN_PATH, {
-          params: { aiIndexId: 'customer_support' },
-        });
+        await runRoute('customer_support');
 
         expect(response.conflict).toHaveBeenCalled();
       });
@@ -3151,9 +3182,12 @@ describe('ai indices routes', () => {
           new DreamingRunNothingStartedError('customer_support')
         );
 
-        await callRoute('POST', AI_INDEX_DREAMING_RUN_PATH, {
-          params: { aiIndexId: 'customer_support' },
-        });
+        await callRoute(
+          'POST',
+          AI_INDEX_DREAMING_RUN_PATH,
+          { params: { aiIndexId: 'customer_support' } },
+          withWorkflowExecutePrivilege
+        );
 
         expect(response.conflict).toHaveBeenCalled();
       });
@@ -3161,7 +3195,12 @@ describe('ai indices routes', () => {
       it('returns 404 when the AI index does not exist', async () => {
         aiIndexService.get.mockRejectedValue(new AiIndexNotFoundError('missing'));
 
-        await callRoute('POST', AI_INDEX_DREAMING_RUN_PATH, { params: { aiIndexId: 'missing' } });
+        await callRoute(
+          'POST',
+          AI_INDEX_DREAMING_RUN_PATH,
+          { params: { aiIndexId: 'missing' } },
+          withWorkflowExecutePrivilege
+        );
 
         expect(response.notFound).toHaveBeenCalled();
       });

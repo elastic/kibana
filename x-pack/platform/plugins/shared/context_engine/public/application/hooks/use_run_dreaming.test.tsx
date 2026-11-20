@@ -18,6 +18,7 @@ import { useRunDreaming } from './use_run_dreaming';
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 const mockAddWarning = jest.fn();
+const mockAddInfo = jest.fn();
 
 type HttpError = IHttpFetchError<ResponseErrorBody>;
 
@@ -40,11 +41,13 @@ const renderUseRunDreaming = (options: { onStarted?: jest.Mock } = {}) => {
       },
     ],
     failed: [],
+    skipped: [],
   });
   core.application.getUrlForApp.mockReturnValue('/app/workflows/exec');
   core.notifications.toasts.addSuccess = mockAddSuccess;
   core.notifications.toasts.addError = mockAddError;
   core.notifications.toasts.addWarning = mockAddWarning;
+  core.notifications.toasts.addInfo = mockAddInfo;
 
   const queryClient = new QueryClient();
   jest.spyOn(queryClient, 'refetchQueries').mockResolvedValue(undefined);
@@ -99,6 +102,48 @@ describe('useRunDreaming', () => {
         },
       ],
       failed: [],
+      skipped: [],
+    });
+  });
+
+  it('shows an info toast when all workflows were skipped', async () => {
+    const core = coreMock.createStart();
+    core.http.post.mockResolvedValue({
+      executions: [],
+      failed: [],
+      skipped: [
+        'system-context-engine-dreaming-tickets-default',
+        'system-context-engine-trace-dreaming-tickets-default',
+      ],
+    });
+    core.notifications.toasts.addInfo = mockAddInfo;
+
+    const queryClient = new QueryClient();
+    jest.spyOn(queryClient, 'refetchQueries').mockResolvedValue(undefined);
+    const { result } = renderHook(() => useRunDreaming(), {
+      wrapper: ({ children }) => (
+        <I18nProvider>
+          <QueryClientProvider client={queryClient}>
+            <KibanaContextProvider services={core}>{children}</KibanaContextProvider>
+          </QueryClientProvider>
+        </I18nProvider>
+      ),
+    });
+
+    await act(async () => {
+      result.current.runDreaming('tickets');
+    });
+
+    await waitFor(() => expect(mockAddInfo).toHaveBeenCalled());
+
+    expect(mockAddInfo).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Dreaming is already running',
+      })
+    );
+    expect(mockAddSuccess).not.toHaveBeenCalled();
+    expect(queryClient.refetchQueries).toHaveBeenCalledWith({
+      queryKey: latestWorkflowExecutionQueryKey('system-context-engine-dreaming-tickets-default'),
     });
   });
 
@@ -134,10 +179,12 @@ describe('useRunDreaming', () => {
         },
       ],
       failed: ['system-context-engine-trace-dreaming-tickets-default'],
+      skipped: [],
     });
     core.application.getUrlForApp.mockReturnValue('/app/workflows/exec');
     core.notifications.toasts.addSuccess = mockAddSuccess;
     core.notifications.toasts.addWarning = mockAddWarning;
+    core.notifications.toasts.addInfo = mockAddInfo;
 
     const queryClient = new QueryClient();
     jest.spyOn(queryClient, 'refetchQueries').mockResolvedValue(undefined);

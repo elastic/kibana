@@ -20,7 +20,7 @@ const mockLatestExecution = jest.fn();
 
 interface LatestWorkflowExecutionHookOptions {
   enabled?: boolean;
-  awaitedExecutionId?: string;
+  awaitedExecutionIds?: readonly string[];
   onAwaitedObserved?: () => void;
 }
 
@@ -463,12 +463,12 @@ describe('AutomationRow', () => {
       expect(screen.queryByTestId('contextAutomationLastExecution')).not.toBeInTheDocument();
     });
 
-    it('clears awaitedExecutionId when the hook calls onAwaitedObserved', () => {
+    it('clears awaitedExecutionIds when the hook calls onAwaitedObserved', () => {
       mockLatestExecution.mockImplementation(
         (_workflowIds: string[], options?: LatestWorkflowExecutionHookOptions) => ({
           execution: undefined,
           activeExecutionId: undefined,
-          isRunning: options?.awaitedExecutionId !== undefined,
+          isRunning: (options?.awaitedExecutionIds?.length ?? 0) > 0,
           isLoading: false,
         })
       );
@@ -477,7 +477,7 @@ describe('AutomationRow', () => {
       fireEvent.click(screen.getByTestId('contextRunAutomationButton'));
 
       const optionsWithAwaited = getLatestHookOptions();
-      expect(optionsWithAwaited?.awaitedExecutionId).toBe('run-started-locally');
+      expect(optionsWithAwaited?.awaitedExecutionIds).toEqual(['run-started-locally']);
       expect(optionsWithAwaited?.onAwaitedObserved).toBeDefined();
       expect(screen.getByTestId('contextAutomationRunning')).toHaveAttribute(
         'href',
@@ -488,7 +488,7 @@ describe('AutomationRow', () => {
         optionsWithAwaited?.onAwaitedObserved?.();
       });
 
-      expect(getLatestHookOptions()?.awaitedExecutionId).toBeUndefined();
+      expect(getLatestHookOptions()?.awaitedExecutionIds).toBeUndefined();
       expect(screen.getByTestId('contextRunAutomationButton')).toBeInTheDocument();
     });
   });

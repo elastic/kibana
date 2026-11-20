@@ -31,7 +31,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnInfoCallout } from '@kbn/ui-callout';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   DEFAULT_DREAMING_INTERVAL,
   DREAMING_DISABLED,
@@ -131,6 +131,7 @@ interface DreamingEditorProps {
   dreaming: AiIndexDreamingConfig;
   workflowIds: readonly string[];
   latestExecution: LatestWorkflowExecution;
+  onStarted: (executionIds: string[]) => void;
 }
 
 const DreamingEditor = ({
@@ -138,6 +139,7 @@ const DreamingEditor = ({
   dreaming,
   workflowIds,
   latestExecution,
+  onStarted,
 }: DreamingEditorProps) => {
   const saved = useMemo(() => draftOf(dreaming), [dreaming]);
   const [edited, setEdited] = useState<DreamingConfigDraft>();
@@ -255,6 +257,7 @@ const DreamingEditor = ({
                   savedDreaming={dreaming}
                   latestIsRunning={latestExecution.isRunning}
                   isDirty={isDirty}
+                  onStarted={onStarted}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -356,8 +359,12 @@ export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
     workflowIds,
     isLoading,
   } = useAiIndexDreaming(aiIndex.id, { enabled: true });
+  const [startedExecutionIds, setStartedExecutionIds] = useState<string[]>();
+  const clearStartedExecutionIds = useCallback(() => setStartedExecutionIds(undefined), []);
   const latestExecution = useLatestWorkflowExecution(workflowIds, {
     enabled: workflowIds.length > 0,
+    awaitedExecutionIds: startedExecutionIds,
+    onAwaitedObserved: clearStartedExecutionIds,
   });
   const dreaming = savedDreaming ?? DREAMING_DISABLED;
   const isSetUp = dreaming.enabled || draftBuildsAnything(draftOf(dreaming));
@@ -374,6 +381,7 @@ export const DreamingPanel = ({ aiIndex }: DreamingPanelProps) => {
           dreaming={dreaming}
           workflowIds={workflowIds}
           latestExecution={latestExecution}
+          onStarted={setStartedExecutionIds}
         />
       );
     }

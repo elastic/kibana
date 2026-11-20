@@ -136,10 +136,11 @@ describe('getDreamingResponseSchema', () => {
 describe('runDreamingResponseSchema', () => {
   const schema = runDreamingResponseSchema();
 
-  it('accepts started executions and failures', () => {
+  it('accepts started executions, failures, and skipped workflows', () => {
     const body = {
       executions: [{ workflow_id: 'wf-1', execution_id: 'exec-1' }],
       failed: ['wf-2'],
+      skipped: ['wf-3'],
     };
     expect(schema.validate(body)).toEqual(body);
   });

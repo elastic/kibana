@@ -188,7 +188,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
             body: dreaming,
           });
           expect(putResponse).toHaveStatusCode(200);
-          expect(putResponse.body).toStrictEqual({ dreaming });
+          expect(putResponse.body).toStrictEqual({ dreaming, workflow_ids: [] });
         });
 
         await apiTest.step(
@@ -211,7 +211,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
               responseType: 'json',
             });
             expect(dreamingResponse).toHaveStatusCode(200);
-            expect(dreamingResponse.body).toStrictEqual({ dreaming });
+            expect(dreamingResponse.body).toStrictEqual({ dreaming, workflow_ids: [] });
           }
         );
       } finally {

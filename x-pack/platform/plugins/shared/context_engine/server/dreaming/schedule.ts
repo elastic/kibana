@@ -14,6 +14,8 @@ import {
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { ContextEngineDreamingWorkflowTemplateValues } from '@kbn/workflows/managed';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import {
   DEFAULT_DREAMING_INTERVAL,
@@ -38,6 +40,11 @@ export interface DreamingWorkflowsApi extends WorkflowEnablementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<void>;
+  getWorkflowExecution(
+    workflowExecutionId: string,
+    spaceId: string,
+    options: { includeOutput?: boolean; request: KibanaRequest }
+  ): Promise<WorkflowExecutionDto | null>;
 }
 
 const CANCELLED_RUN_RETRIES = 5;
@@ -120,7 +127,6 @@ const DREAMING_WORKFLOWS = [
     label: 'dreaming',
     workflowIdFor: dreamingWorkflowIdFor,
     attach: true,
-    runStage: 0,
   },
   {
     definitionId: CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
@@ -133,19 +139,17 @@ const DREAMING_WORKFLOWS = [
     label: 'trace dreaming',
     workflowIdFor: traceDreamingWorkflowIdFor,
     attach: true,
-    runStage: 0,
   },
   {
     definitionId: CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
     label: 'relationships',
     workflowIdFor: relationshipsWorkflowIdFor,
     attach: true,
-    runStage: 1,
   },
 ] as const;
 
 type DreamingWorkflow = (typeof DREAMING_WORKFLOWS)[number];
-type AttachedDreamingWorkflow = DreamingWorkflow & { attach: true; runStage: number };
+type AttachedDreamingWorkflow = DreamingWorkflow & { attach: true };
 
 export const createDreamingScheduleService = ({
   logger,
@@ -206,6 +210,38 @@ export const createDreamingScheduleService = ({
     (workflow): workflow is AttachedDreamingWorkflow => workflow.attach
   );
 
+  type StartWorkflowResult =
+    | RunAiIndexDreamingResponse['executions'][number]
+    | { failed: string }
+    | { skipped: string };
+
+  const classifyExecution = async ({
+    executionId,
+    workflowId,
+    spaceId,
+    request,
+  }: {
+    executionId: string;
+    workflowId: string;
+    spaceId: string;
+    request: KibanaRequest;
+  }): Promise<StartWorkflowResult> => {
+    const workflowsManagement = await getWorkflowsManagement();
+    if (!workflowsManagement) {
+      return { workflow_id: workflowId, execution_id: executionId };
+    }
+    const execution = await workflowsManagement.getWorkflowExecution(executionId, spaceId, {
+      request,
+    });
+    if (execution === null) {
+      return { workflow_id: workflowId, execution_id: executionId };
+    }
+    if (execution.status === ExecutionStatus.SKIPPED) {
+      return { skipped: workflowId };
+    }
+    return { workflow_id: workflowId, execution_id: executionId };
+  };
+
   const startWorkflow = async ({
     workflow,
     aiIndex,
@@ -216,7 +252,7 @@ export const createDreamingScheduleService = ({
     aiIndex: AiIndexItem;
     spaceId: string;
     request: KibanaRequest;
-  }): Promise<RunAiIndexDreamingResponse['executions'][number] | { failed: string }> => {
+  }): Promise<StartWorkflowResult> => {
     const workflowId = workflow.workflowIdFor(aiIndex.id, spaceId);
     try {
       const client = await getManagedWorkflowsClient();
@@ -224,7 +260,8 @@ export const createDreamingScheduleService = ({
         spaceId,
         workflowIdSuffix: managedWorkflowIdSuffixFor(aiIndex.id, spaceId),
       });
-      return { workflow_id: workflowId, execution_id: executionId };
+      const result = await classifyExecution({ executionId, workflowId, spaceId, request });
+      return result;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (isRunInProgressError(error)) {
@@ -311,24 +348,15 @@ export const createDreamingScheduleService = ({
         throw new DreamingNotSetUpError(aiIndex.id);
       }
 
-      const runStages = [...new Set(attachedWorkflows.map(({ runStage }) => runStage))].sort(
-        (left, right) => left - right
+      const results = await Promise.allSettled(
+        attachedWorkflows.map((workflow) => startWorkflow({ workflow, aiIndex, spaceId, request }))
       );
-      const stageResults: PromiseSettledResult<
-        RunAiIndexDreamingResponse['executions'][number] | { failed: string }
-      >[] = [];
-      for (const runStage of runStages) {
-        const workflows = attachedWorkflows.filter((workflow) => workflow.runStage === runStage);
-        const batch = await Promise.allSettled(
-          workflows.map((workflow) => startWorkflow({ workflow, aiIndex, spaceId, request }))
-        );
-        stageResults.push(...batch);
-      }
 
       const executions: RunAiIndexDreamingResponse['executions'] = [];
       const failed: string[] = [];
+      const skipped: string[] = [];
 
-      for (const result of stageResults) {
+      for (const result of results) {
         if (result.status === 'rejected') {
           log.warn(
             `Dreaming manual run failed for AI index '${aiIndex.id}': ${
@@ -340,16 +368,18 @@ export const createDreamingScheduleService = ({
         const value = result.value;
         if ('failed' in value) {
           failed.push(value.failed);
+        } else if ('skipped' in value) {
+          skipped.push(value.skipped);
         } else {
           executions.push(value);
         }
       }
 
-      if (executions.length === 0) {
+      if (executions.length === 0 && skipped.length === 0) {
         throw new DreamingRunNothingStartedError(aiIndex.id);
       }
 
-      return { executions, failed };
+      return { executions, failed, skipped };
     },
   };
 };

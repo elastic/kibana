@@ -14,6 +14,7 @@ import {
   CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
+import { ExecutionStatus } from '@kbn/workflows';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import type { AiIndexService } from '../ai_indices/service';
@@ -71,6 +72,7 @@ describe('createDreamingScheduleService', () => {
   let workflowsManagement: {
     updateWorkflow: jest.Mock;
     cancelAllActiveWorkflowExecutions: jest.Mock;
+    getWorkflowExecution: jest.Mock;
   };
   let aiIndexService: jest.Mocked<Pick<AiIndexService, 'addAutomation' | 'removeAutomation'>>;
   let request: KibanaRequest;
@@ -92,6 +94,7 @@ describe('createDreamingScheduleService', () => {
     workflowsManagement = {
       updateWorkflow: jest.fn().mockResolvedValue(undefined),
       cancelAllActiveWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
+      getWorkflowExecution: jest.fn().mockResolvedValue({ status: ExecutionStatus.RUNNING }),
     };
     aiIndexService = {
       addAutomation: jest.fn().mockResolvedValue('attached'),
@@ -441,6 +444,67 @@ describe('createDreamingScheduleService', () => {
           { workflow_id: relationshipsId, execution_id: 'exec-relationships' },
         ],
         failed: [traceId],
+        skipped: [],
+      });
+    });
+
+    it('puts concurrency-skipped runs in skipped instead of executions', async () => {
+      const dreamingId = dreamingWorkflowIdFor('support', SPACE);
+      const traceId = traceDreamingWorkflowIdFor('support', SPACE);
+      const relationshipsId = relationshipsWorkflowIdFor('support', SPACE);
+      client.execute
+        .mockResolvedValueOnce('exec-dreaming')
+        .mockResolvedValueOnce('exec-trace-skipped')
+        .mockResolvedValueOnce('exec-relationships');
+      workflowsManagement.getWorkflowExecution.mockImplementation(async (executionId: string) =>
+        executionId === 'exec-trace-skipped'
+          ? { status: ExecutionStatus.SKIPPED }
+          : { status: ExecutionStatus.RUNNING }
+      );
+
+      const result = await createService(workflowsManagement).run({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(workflowsManagement.getWorkflowExecution).toHaveBeenCalledWith(
+        'exec-trace-skipped',
+        SPACE,
+        { request }
+      );
+      expect(result).toEqual({
+        executions: [
+          { workflow_id: dreamingId, execution_id: 'exec-dreaming' },
+          { workflow_id: relationshipsId, execution_id: 'exec-relationships' },
+        ],
+        failed: [],
+        skipped: [traceId],
+      });
+    });
+
+    it('returns only skipped workflows when every run is skipped', async () => {
+      const dreamingId = dreamingWorkflowIdFor('support', SPACE);
+      const traceId = traceDreamingWorkflowIdFor('support', SPACE);
+      const relationshipsId = relationshipsWorkflowIdFor('support', SPACE);
+      client.execute
+        .mockResolvedValueOnce('exec-dreaming-skipped')
+        .mockResolvedValueOnce('exec-trace-skipped')
+        .mockResolvedValueOnce('exec-relationships-skipped');
+      workflowsManagement.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.SKIPPED,
+      });
+
+      const result = await createService(workflowsManagement).run({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(result).toEqual({
+        executions: [],
+        failed: [],
+        skipped: [dreamingId, traceId, relationshipsId],
       });
     });
 
@@ -454,6 +518,29 @@ describe('createDreamingScheduleService', () => {
           request,
         })
       ).rejects.toBeInstanceOf(DreamingRunNothingStartedError);
+    });
+
+    it('treats an execution as started when its status cannot be read yet', async () => {
+      const dreamingId = dreamingWorkflowIdFor('support', SPACE);
+      client.execute
+        .mockResolvedValueOnce('exec-dreaming')
+        .mockResolvedValueOnce('exec-trace')
+        .mockResolvedValueOnce('exec-relationships');
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(null);
+
+      const result = await createService(workflowsManagement).run({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(result.executions).toHaveLength(3);
+      expect(result.executions[0]).toEqual({
+        workflow_id: dreamingId,
+        execution_id: 'exec-dreaming',
+      });
+      expect(result.skipped).toEqual([]);
+      expect(result.failed).toEqual([]);
     });
   });
 });

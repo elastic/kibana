@@ -18,6 +18,7 @@ import type {
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { isResponseError } from '@kbn/es-errors';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import type { DeleteWorkflowsApi } from '../types';
 import {
@@ -157,6 +158,13 @@ const DELETE_SECURITY: RouteSecurity = {
   },
 };
 
+const RUN_DREAMING_SECURITY: RouteSecurity = {
+  authz: {
+    requiredPrivileges: [apiPrivileges.writeContextEngine],
+    extendedPrivileges: [...WorkflowsManagementOperationPrivileges.execute],
+  },
+};
+
 const CONTEXT_ENGINE_DISABLED_NOTE =
   'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).';
 
@@ -165,12 +173,16 @@ const CONTEXT_ENGINE_DOCS_NOTE =
 
 const CONTEXT_ENGINE_DISABLED_DESCRIPTION = 'Context Engine is turned off in this space.';
 
+const hasWorkflowPrivileges = (
+  request: KibanaRequest,
+  privileges: readonly WorkflowsManagementApiActions[]
+): boolean => privileges.every((privilege) => request.authzResult?.[privilege] === true);
+
 const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
-  WorkflowsManagementOperationPrivileges.delete.every(
-    (privilege) => request.authzResult?.[privilege] === true
-  );
+  hasWorkflowPrivileges(request, WorkflowsManagementOperationPrivileges.delete);
 
 const MEMORY_DISABLED_MESSAGE = 'Context Engine memory is turned off.';
+const RUN_DREAMING_FORBIDDEN_MESSAGE = 'Missing privilege to execute workflows.';
 
 const toPublicAiIndex = ({
   dreaming: _dreaming,
@@ -1284,7 +1296,7 @@ export const registerAiIndexRoutes = ({
   router.versioned
     .post({
       path: AI_INDEX_DREAMING_RUN_PATH,
-      security: WRITE_SECURITY,
+      security: RUN_DREAMING_SECURITY,
       access: 'internal',
       summary: 'Run dreaming workflows for an AI Index now',
       description:
@@ -1297,6 +1309,7 @@ export const registerAiIndexRoutes = ({
           request: { params: aiIndexIdParamsSchema },
           response: {
             200: { body: runDreamingResponseSchema },
+            403: { body: errorResponseSchema },
             404: { body: errorResponseSchema },
             409: { body: errorResponseSchema },
           },
@@ -1305,6 +1318,9 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         if (!(await isMemoryEnabled(request))) {
           return response.notFound({ body: { message: MEMORY_DISABLED_MESSAGE } });
+        }
+        if (!hasWorkflowPrivileges(request, WorkflowsManagementOperationPrivileges.execute)) {
+          return response.forbidden({ body: { message: RUN_DREAMING_FORBIDDEN_MESSAGE } });
         }
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;

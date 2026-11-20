@@ -32,7 +32,17 @@ export const DreamingLastRunStatus = ({
     services: { application },
   } = useKibana();
 
-  if (workflowIds.length === 0 || execution === undefined || execution === null) {
+  if (workflowIds.length === 0) {
+    return (
+      <WorkflowLastExecution hasExecution={false} data-test-subj="contextAiIndexDreamingLastRun" />
+    );
+  }
+
+  if (execution === undefined) {
+    return null;
+  }
+
+  if (execution === null) {
     return (
       <WorkflowLastExecution hasExecution={false} data-test-subj="contextAiIndexDreamingLastRun" />
     );

@@ -50,7 +50,7 @@ const renderLatest = (
   workflowIds: readonly string[] = ['wf-1'],
   options?: {
     enabled?: boolean;
-    awaitedExecutionId?: string;
+    awaitedExecutionIds?: readonly string[];
     onAwaitedObserved?: () => void;
   }
 ) => {
@@ -134,7 +134,7 @@ describe('useLatestWorkflowExecution', () => {
   it('keeps a just-started run as running until the query observes it', async () => {
     serveRuns({ latest: [{ id: 'run-1', status: ExecutionStatus.COMPLETED }], active: [] });
 
-    const { result } = renderLatest(['wf-1'], { awaitedExecutionId: 'run-2' });
+    const { result } = renderLatest(['wf-1'], { awaitedExecutionIds: ['run-2'] });
 
     await waitFor(() => expect(result.current.execution).toEqual(expect.anything()));
     expect(result.current.isRunning).toBe(true);
@@ -148,7 +148,7 @@ describe('useLatestWorkflowExecution', () => {
     });
 
     const { result } = renderLatest(['wf-1'], {
-      awaitedExecutionId: 'run-2',
+      awaitedExecutionIds: ['run-2'],
       onAwaitedObserved,
     });
 
@@ -163,7 +163,7 @@ describe('useLatestWorkflowExecution', () => {
     serveRuns({ latest: [{ id: 'run-1', status: ExecutionStatus.COMPLETED }], active: [] });
 
     const { result } = renderLatest(['wf-1'], {
-      awaitedExecutionId: 'run-2',
+      awaitedExecutionIds: ['run-2'],
       onAwaitedObserved,
     });
 
@@ -239,6 +239,80 @@ describe('useLatestWorkflowExecution', () => {
 
       await waitFor(() => expect(result.current.execution).toBeNull());
       expect(result.current.workflowId).toBeUndefined();
+    });
+
+    it('shows the second workflow when the first query failed', async () => {
+      mockGetWorkflowExecutions.mockImplementation(async (workflowId, query) => {
+        if (workflowId === 'wf-first') {
+          throw new Error('lookup failed');
+        }
+        const runs =
+          workflowId === 'wf-second'
+            ? {
+                latest: [{ id: 'run-2', status: ExecutionStatus.COMPLETED }],
+                active: [],
+              }
+            : { latest: [], active: [] };
+        return { results: query.statuses ? runs.active : runs.latest };
+      });
+
+      const { result } = renderLatest(['wf-first', 'wf-second']);
+
+      await waitFor(() =>
+        expect(result.current.execution).toEqual(expect.objectContaining({ id: 'run-2' }))
+      );
+      expect(result.current.workflowId).toBe('wf-second');
+      expect(result.current.isError).toBe(true);
+    });
+
+    it('leaves execution undefined when every query failed', async () => {
+      mockGetWorkflowExecutions.mockRejectedValue(new Error('lookup failed'));
+
+      const { result } = renderLatest(['wf-first', 'wf-second']);
+
+      await waitFor(() => expect(result.current.isError).toBe(true));
+      expect(result.current.execution).toBeUndefined();
+      expect(result.current.workflowId).toBeUndefined();
+    });
+
+    it('waits on the first workflow while its query is still pending', async () => {
+      mockGetWorkflowExecutions.mockImplementation((workflowId, query) => {
+        if (workflowId === 'wf-first') {
+          return new Promise(() => {});
+        }
+        const runs = {
+          latest: [{ id: 'run-2', status: ExecutionStatus.COMPLETED }],
+          active: [],
+        };
+        return Promise.resolve({ results: query.statuses ? runs.active : runs.latest });
+      });
+
+      const { result } = renderLatest(['wf-first', 'wf-second']);
+
+      await waitFor(() => expect(result.current.isLoading).toBe(true));
+      expect(result.current.execution).toBeUndefined();
+      expect(result.current.workflowId).toBeUndefined();
+    });
+
+    it('calls onAwaitedObserved only after every awaited id is seen', async () => {
+      const onAwaitedObserved = jest.fn();
+      serveRunsForWorkflow({
+        'wf-first': {
+          latest: [{ id: 'run-a', status: ExecutionStatus.COMPLETED }],
+          active: [],
+        },
+        'wf-second': {
+          latest: [{ id: 'run-b', status: ExecutionStatus.COMPLETED }],
+          active: [{ id: 'run-z', status: ExecutionStatus.RUNNING }],
+        },
+      });
+
+      renderLatest(['wf-first', 'wf-second'], {
+        awaitedExecutionIds: ['run-a', 'run-z'],
+        onAwaitedObserved,
+      });
+
+      await waitFor(() => expect(onAwaitedObserved).toHaveBeenCalledTimes(1));
     });
   });
 
