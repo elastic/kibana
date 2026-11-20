@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/content-list'
   - '@kbn/content-list-provider'
   - '@kbn/content-list-toolbar'
+  - '@kbn/data-lifecycle-phases'
 tags:
   - plugin
   - prod

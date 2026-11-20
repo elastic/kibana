@@ -8,7 +8,6 @@
 import {
   SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
   SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
@@ -29,7 +28,6 @@ import {
   agentBuilderKnowledgeIndicatorCreatedSchema,
   agentToolEventCreateSchema,
   agentToolEventSearchSchema,
-  agentToolEventStatusUpdateSchema,
   agentToolEventWriteSchema,
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
   detectionScanSchema,
@@ -65,11 +63,6 @@ const agentToolKiIdentificationStartedEventType = {
 const agentToolEventCreateEventType = {
   eventType: SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
   schema: agentToolEventCreateSchema,
-};
-
-const agentToolEventStatusUpdateEventType = {
-  eventType: SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
-  schema: agentToolEventStatusUpdateSchema,
 };
 
 const discoveryStartedEventType = {
@@ -128,7 +121,6 @@ export {
   agentBuilderKnowledgeIndicatorCreatedEventType,
   agentToolEventCreateEventType,
   agentToolEventSearchEventType,
-  agentToolEventStatusUpdateEventType,
   agentToolEventWriteEventType,
   agentToolKiIdentificationStartedEventType,
   detectionScanEventType,

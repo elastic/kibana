@@ -349,7 +349,13 @@ export class SecurityPlugin
       getServiceAccounts: () => this.serviceAccountsStart ?? null,
     });
 
-    registerSecurityUsageCollector({ usageCollection, config, license });
+    registerSecurityUsageCollector({
+      usageCollection,
+      config,
+      license,
+      logger: this.logger.get('usage'),
+      getServiceAccounts: () => this.serviceAccountsStart,
+    });
 
     const getCurrentUser = (request: KibanaRequest) =>
       this.getAuthentication().getCurrentUser(request);
@@ -521,18 +527,6 @@ export class SecurityPlugin
     });
     this.session = session;
 
-    this.userProfileStart = this.userProfileService.start({
-      clusterClient,
-      session,
-      getCurrentUser: core.security.authc.getCurrentUser,
-    });
-
-    // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.
-    const customLogoutURL =
-      this.initializerContext.env.packageInfo.buildFlavor === 'serverless'
-        ? cloud?.projectsUrl
-        : undefined;
-
     const config = this.getConfig();
 
     const { protocol, hostname, port } = core.http.getServerInfo();
@@ -551,6 +545,19 @@ export class SecurityPlugin
         })
       : undefined;
     this.uiam = uiam;
+
+    this.userProfileStart = this.userProfileService.start({
+      clusterClient,
+      session,
+      getCurrentUser: core.security.authc.getCurrentUser,
+      uiam,
+    });
+
+    // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.
+    const customLogoutURL =
+      this.initializerContext.env.packageInfo.buildFlavor === 'serverless'
+        ? cloud?.projectsUrl
+        : undefined;
 
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
