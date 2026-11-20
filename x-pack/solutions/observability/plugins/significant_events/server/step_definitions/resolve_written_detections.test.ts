@@ -85,7 +85,6 @@ describe('resolveWrittenDetectionsStepDefinition handler', () => {
   const run = async () => {
     const logger = loggerMock.create();
     const input = {
-      space_id: 'default',
       workflow_execution_id: 'execution-1',
       batch,
       reported_rule_uuids: ['rule-b'],
@@ -93,7 +92,10 @@ describe('resolveWrittenDetectionsStepDefinition handler', () => {
     const { output } = await resolveWrittenDetectionsStepDefinition({ logger }).handler({
       input,
       rawInput: input,
-      contextManager: { getScopedEsClient: jest.fn(() => esClient) },
+      contextManager: {
+        getContext: jest.fn(() => ({ workflow: { spaceId: 'execution-space' } })),
+        getScopedEsClient: jest.fn(() => esClient),
+      },
       abortSignal: new AbortController().signal,
     } as never);
     return { output, logger };
@@ -104,7 +106,7 @@ describe('resolveWrittenDetectionsStepDefinition handler', () => {
     (RuleEventsClient as jest.Mock).mockImplementation(() => ({ findDetectionsWrittenByRun }));
   });
 
-  it('looks up the run in the input space and stamps without warning', async () => {
+  it('looks up the run in the workflow execution space and stamps without warning', async () => {
     findDetectionsWrittenByRun.mockResolvedValue({
       pairs: [{ detection_id: 'detection-a', rule_uuid: 'rule-a' }],
       truncated: false,
@@ -112,7 +114,7 @@ describe('resolveWrittenDetectionsStepDefinition handler', () => {
 
     const { output, logger } = await run();
 
-    expect(RuleEventsClient).toHaveBeenCalledWith({ esClient, space: 'default' });
+    expect(RuleEventsClient).toHaveBeenCalledWith({ esClient, space: 'execution-space' });
     expect(findDetectionsWrittenByRun).toHaveBeenCalledWith({
       workflowExecutionId: 'execution-1',
       limit: MAX_RUN_VERSIONS,

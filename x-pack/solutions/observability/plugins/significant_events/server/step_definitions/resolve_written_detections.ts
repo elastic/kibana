@@ -21,7 +21,6 @@ const MAX_BATCH_ENTRIES = 1_000;
 
 const inputSchema = lazySchema(() =>
   z.object({
-    space_id: z.string().max(MAX_ID_LENGTH),
     workflow_execution_id: z.string().max(MAX_ID_LENGTH),
     batch: z.array(batchEntrySchema).max(MAX_BATCH_ENTRIES),
     reported_rule_uuids: z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_BATCH_ENTRIES),
@@ -93,12 +92,12 @@ export const resolveWrittenDetectionsStepDefinition = ({ logger }: { logger: Log
       const {
         batch,
         reported_rule_uuids: reportedRuleUuids,
-        space_id: spaceId,
         workflow_execution_id: workflowExecutionId,
       } = context.input;
+      const { workflow } = context.contextManager.getContext();
       const ruleEventsClient = new RuleEventsClient({
         esClient: context.contextManager.getScopedEsClient(),
-        space: spaceId,
+        space: workflow.spaceId,
       });
       let runWrittenPairs: WrittenDetectionPair[] = [];
       let truncated = false;

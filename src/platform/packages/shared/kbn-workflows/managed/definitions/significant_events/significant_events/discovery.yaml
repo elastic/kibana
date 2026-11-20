@@ -478,7 +478,6 @@ steps:
     type: significantEvents.resolveWrittenDetections
     if: '${{ steps.run_discovery_agent.error == null }}'
     with:
-      space_id: '{{ variables.spaceId }}'
       workflow_execution_id: '{{ execution.id }}'
       batch: '${{ steps.classify_detections.output.batch | default: [] }}'
       reported_rule_uuids: '${{ steps.compute_written_rule_uuids.output.written_rule_uuids | default: [] }}'
@@ -489,7 +488,7 @@ steps:
   - name: compute_stamp_rule_uuids
     type: data.set
     with:
-      stamp_rule_uuids: '${{ steps.resolve_written_detections.output.stamp_rule_uuids | default: [] }}'
+      stamp_rule_uuids: '${{ steps.resolve_written_detections.output.stamp_rule_uuids | default: steps.compute_written_rule_uuids.output.written_rule_uuids | default: [] }}'
 
   # Size must be computed separately — comparison operators cannot follow a filter chain.
   - name: count_written_rules

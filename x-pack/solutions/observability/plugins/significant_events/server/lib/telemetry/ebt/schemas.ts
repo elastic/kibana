@@ -662,7 +662,7 @@ const discoveryCompletedSchema: RootSchema<DiscoveryCompletedProps> = {
   held_back_count: optionalCount('Detections the classifier held back'),
   needs_agent_count: optionalCount('Detections the classifier routed to the agent'),
   written_rule_count: optionalCount(
-    'Distinct batch rules stamped as processed: derived from events written by this run plus validated agent-reported rules'
+    'Distinct batch rules selected for processed-marker stamping: derived from events written by this run plus validated agent-reported rules'
   ),
   unknown_reported_rule_count: optionalCount(
     'Reported rule uuids that were not in the discovery batch and were excluded from stamping'

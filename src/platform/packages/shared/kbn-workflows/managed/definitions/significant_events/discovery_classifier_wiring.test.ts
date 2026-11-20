@@ -118,6 +118,25 @@ describe('discovery workflow detection classifier wiring', () => {
       expect(resolve['on-failure']).toEqual({ continue: true });
     });
 
+    it('uses the workflow execution space rather than caller-provided step input', () => {
+      const resolve = requireStep('resolve_written_detections');
+
+      expect(resolve.with).not.toHaveProperty('space_id');
+    });
+
+    it('falls back to the validated agent report when resolving written detections has no output', () => {
+      const stampRuleUuids = requireStep('compute_stamp_rule_uuids').with?.stamp_rule_uuids;
+
+      expect(
+        evaluate(stampRuleUuids, {
+          steps: {
+            resolve_written_detections: { error: { message: 'unavailable' } },
+            compute_written_rule_uuids: { output: { written_rule_uuids: ['rule-A'] } },
+          },
+        })
+      ).toEqual(['rule-A']);
+    });
+
     it('reports the unknown reported rule count in the completed body', () => {
       const body = requireStep('report_discovery_completed').with?.body as Record<string, unknown>;
 
