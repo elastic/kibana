@@ -428,7 +428,7 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         graphRequest(ctx, 'post', '/security/rules/detectionRules', 'createDetectionRule', {
           body: {
             displayName: input.displayName,
-            isEnabled: input.isEnabled,
+            status: input.status,
             queryCondition: { queryText: input.queryText },
             schedule: { frequency: input.period },
             detectionAction: { alertTemplate: input.alertTemplate },
@@ -448,7 +448,7 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         const { ruleId, ...fields } = input;
         const body: Record<string, unknown> = {};
         if (fields.displayName !== undefined) body.displayName = fields.displayName;
-        if (fields.isEnabled !== undefined) body.isEnabled = fields.isEnabled;
+        if (fields.status !== undefined) body.status = fields.status;
         if (fields.queryText !== undefined) body.queryCondition = { queryText: fields.queryText };
         if (fields.period !== undefined) body.schedule = { frequency: fields.period };
         if (fields.alertTemplate !== undefined) body.detectionAction = { alertTemplate: fields.alertTemplate };

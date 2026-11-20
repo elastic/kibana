@@ -110,7 +110,7 @@ const AlertTemplateSchema = lazySchema(() =>
       .max(MAX_RULE_DESCRIPTION_LENGTH)
       .optional()
       .describe('Analyst recommendations when this alert fires.'),
-    mitreTechniques: z
+    tactics: z
       .array(z.string().min(1).max(20))
       .max(20)
       .optional()
@@ -125,7 +125,10 @@ export const CreateDetectionRuleInputSchema = lazySchema(() =>
       .min(1)
       .max(MAX_RULE_NAME_LENGTH)
       .describe('Unique display name for the custom detection rule.'),
-    isEnabled: z.boolean().default(true).describe('Whether the rule runs on its schedule.'),
+    status: z
+      .enum(['enabled', 'disabled'])
+      .default('enabled')
+      .describe("Whether the rule runs on its schedule: 'enabled' or 'disabled'."),
     queryText: z
       .string()
       .min(1)
@@ -159,7 +162,10 @@ export const UpdateDetectionRuleInputSchema = lazySchema(() =>
         .max(MAX_RULE_NAME_LENGTH)
         .optional()
         .describe('New display name for the rule.'),
-      isEnabled: z.boolean().optional().describe('Enable or disable the rule.'),
+      status: z
+        .enum(['enabled', 'disabled'])
+        .optional()
+        .describe("Enable or disable the rule: 'enabled' or 'disabled'."),
       queryText: z
         .string()
         .min(1)
@@ -174,7 +180,7 @@ export const UpdateDetectionRuleInputSchema = lazySchema(() =>
     .refine(
       (input) =>
         input.displayName !== undefined ||
-        input.isEnabled !== undefined ||
+        input.status !== undefined ||
         input.queryText !== undefined ||
         input.period !== undefined ||
         input.alertTemplate !== undefined,
@@ -211,7 +217,6 @@ const incidentDeterminationValues = [
   'securityTesting',
   'unwantedSoftware',
   'multiStagedAttack',
-  'compromisedUser',
   'compromisedAccount',
   'maliciousUserActivity',
   'phishing',

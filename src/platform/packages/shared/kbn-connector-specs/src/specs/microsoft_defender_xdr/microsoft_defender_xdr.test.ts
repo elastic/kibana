@@ -562,7 +562,7 @@ describe('createDetectionRule handler', () => {
     const action = MicrosoftDefenderXdr.actions?.createDetectionRule;
     const result = await action?.handler(ctx as never, {
       displayName: 'New Rule',
-      isEnabled: true,
+      status: 'enabled',
       queryText: 'DeviceEvents | limit 10',
       period: 'PT1H',
       alertTemplate: { title: 'Alert Title', severity: 'high' },
@@ -588,13 +588,13 @@ describe('createDetectionRule handler', () => {
 describe('updateDetectionRule handler', () => {
   it('calls PATCH /security/rules/detectionRules/{id} with only provided fields', async () => {
     const client = makeClient();
-    client.patch = jest.fn().mockResolvedValue({ data: { id: '42', isEnabled: false } });
+    client.patch = jest.fn().mockResolvedValue({ data: { id: '42', status: 'disabled' } });
     const ctx = makeCtx(client);
     const action = MicrosoftDefenderXdr.actions?.updateDetectionRule;
-    await action?.handler(ctx as never, { ruleId: '42', isEnabled: false });
+    await action?.handler(ctx as never, { ruleId: '42', status: 'disabled' });
     expect(client.patch).toHaveBeenCalledWith(
       expect.stringContaining('/security/rules/detectionRules/42'),
-      { isEnabled: false },
+      { status: 'disabled' },
       expect.any(Object)
     );
   });
