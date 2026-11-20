@@ -41,5 +41,10 @@ export const ONLY_MANAGE_BOOST_RULES_ROLE = roleWithClusterPrivileges([
   'manage_boost_rules',
 ]);
 
+export const SEARCH_BOOST_READ_WITHOUT_INDICES_ROLE: KibanaRole = {
+  elasticsearch: { cluster: ['read_boost_profiles', 'read_boost_rules'], indices: [] },
+  kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
+};
+
 export const ONLY_READ_BOOST_PROFILES_ROLE = roleWithClusterPrivileges(['read_boost_profiles']);
 export const ONLY_READ_BOOST_RULES_ROLE = roleWithClusterPrivileges(['read_boost_rules']);

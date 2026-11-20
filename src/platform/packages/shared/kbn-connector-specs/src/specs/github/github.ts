@@ -166,7 +166,8 @@ export const GithubConnector: ConnectorSpec = {
   },
 
   sandbox: {
-    hosts: ['api.github.com', 'api.githubcopilot.com'],
+    // github.com serves git over HTTPS, so `git clone` in the sandbox can authenticate with the token.
+    hosts: ['api.github.com', 'api.githubcopilot.com', 'github.com'],
     hostsFromConfig: ['serverUrl'],
   },
 
