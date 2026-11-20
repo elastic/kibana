@@ -7,7 +7,7 @@
 
 import { connectorSpecHasEvents, connectorsSpecs } from '@kbn/connector-specs';
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import { HITL_SLACK_ACTION_EVENT_ID } from '@kbn/workflows';
+import { slack2HitlAction } from '@kbn/connector-topics';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
 import { registerConnectorEventTriggers } from './register_connector_event_triggers';
@@ -116,7 +116,7 @@ describe('registerConnectorEventTriggers', () => {
       ([definition]: [ServerTriggerDefinition]) => definition.id
     );
     expect(registered).toContain('inboundWebhook.received');
-    expect(registered).not.toContain(HITL_SLACK_ACTION_EVENT_ID);
+    expect(registered).not.toContain(slack2HitlAction.name);
     expect(registered).toHaveLength(
       Object.values(connectorsSpecs).reduce((count, spec) => {
         if (!connectorSpecHasEvents(spec) || spec.events === undefined) {
@@ -125,7 +125,7 @@ describe('registerConnectorEventTriggers', () => {
         return (
           count +
           Object.values(spec.events.definitions).filter(
-            (eventDefinition) => eventDefinition.eventId !== HITL_SLACK_ACTION_EVENT_ID
+            (eventDefinition) => eventDefinition.eventId !== slack2HitlAction.name
           ).length
         );
       }, 0)

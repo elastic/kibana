@@ -7,9 +7,8 @@
 
 import { connectorSpecHasEvents, connectorsSpecs } from '@kbn/connector-specs';
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import { connectorEventSchema } from '@kbn/connector-topics';
+import { connectorEventSchema, slack2HitlAction } from '@kbn/connector-topics';
 import { i18n } from '@kbn/i18n';
-import { HITL_SLACK_ACTION_EVENT_ID } from '@kbn/workflows';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
 type ConnectorSpecWithEvents = ConnectorSpec & {
@@ -50,7 +49,7 @@ export const getConnectorEventTriggerDefinitions = ({
   return specs.filter(isConnectorSpecWithEvents).flatMap((spec) =>
     Object.values(spec.events.definitions)
       // HITL interactivity resumes a paused step; it must not start workflows.
-      .filter((eventDefinition) => eventDefinition.eventId !== HITL_SLACK_ACTION_EVENT_ID)
+      .filter((eventDefinition) => eventDefinition.eventId !== slack2HitlAction.name)
       .map((eventDefinition) => ({
         id: eventDefinition.eventId,
         title: formatConnectorEventTriggerTitle(spec.metadata.displayName, eventDefinition.title),
