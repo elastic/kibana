@@ -47,6 +47,7 @@ const androidAttributes = ({
   model: string;
   manufacturer: string;
 }): Record<string, string> => ({
+  'os.type': 'linux',
   'os.name': 'Android',
   'os.version': version,
   'os.description': `Android ${version}, API level ${apiLevel}, BUILD ${build}`,
