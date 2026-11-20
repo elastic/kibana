@@ -100,7 +100,6 @@ describe('mongodbClientType', () => {
         authSource: 'admin',
         serverSelectionTimeoutMS: 10_000,
         connectTimeoutMS: 10_000,
-        socketTimeoutMS: 30_000,
       });
       expect(mockConnect).toHaveBeenCalledTimes(1);
       expect(result).toBe(mockClientInstance);
