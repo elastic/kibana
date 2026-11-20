@@ -18,6 +18,7 @@ import {
   readLatestFinishedSweepIndexScope,
   sweepEvaluatedUniverse,
 } from './read_last_sweep_index_scope';
+import { HUNT_RESOLVE_INDEX_OPTIONS } from './hunt_resolve_index_options';
 import { readWorkerRole, uncoveredPatterns } from './role_pattern_coverage';
 import { unresolvedPatterns } from './resolve_index_scope';
 
@@ -44,6 +45,8 @@ interface ResolveWorkerIndexCoverageParams {
   request: KibanaRequest;
   spaceId: string;
   indexPatterns: string[];
+  /** Entries removed by policy (dot-prefixed names), reported as `policy_skipped`. */
+  policySkippedPatterns?: string[];
   /** Cross-project search is on: an unqualified pattern resolving only on a linked project is not missing. */
   crossProjectSearch?: boolean;
   workflowId: string | null;
@@ -67,6 +70,7 @@ export const resolveWorkerIndexCoverage = async ({
   request,
   spaceId,
   indexPatterns,
+  policySkippedPatterns = [],
   crossProjectSearch = false,
   workflowId,
   serviceAccountId,
@@ -77,19 +81,31 @@ export const resolveWorkerIndexCoverage = async ({
   const universe = indexPatterns.filter((pattern) => !isIndexExclusion(pattern));
   const base = {
     universe,
+    policy_skipped: policySkippedPatterns,
     service_account_id: serviceAccountId,
     role_name: roleName,
     account_label: getHuntAccountLabel({ serviceAccountId }),
     is_serverless: isServerless,
   };
 
+  // An empty name list would resolve every index, so there is nothing to ask Elasticsearch.
+  if (universe.length === 0) {
+    return {
+      ...base,
+      unreadable_by_worker: [],
+      missing_for_everyone: [],
+      source: 'unavailable',
+      unavailable_reason: 'empty_universe',
+      checked_at: null,
+    };
+  }
+
   let missingForEveryone: string[];
   try {
     // Same options as `resolveHuntScope`, so the caller's `missing` and the sweep's agree.
     const resolved = await esClient.indices.resolveIndex({
       name: indexPatterns,
-      allow_no_indices: true,
-      expand_wildcards: ['open'],
+      ...HUNT_RESOLVE_INDEX_OPTIONS,
     });
     missingForEveryone = unresolvedPatterns(universe, resolved, crossProjectSearch);
   } catch (err) {
