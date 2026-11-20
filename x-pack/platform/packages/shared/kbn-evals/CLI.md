@@ -231,7 +231,7 @@ node scripts/evals compare <run-id> --baseline-branch main --suite <suite-id> --
 | `--multiplicity-correction`    | Holm-Bonferroni adjust p-values across all comparisons in the run. On by default with `--fail-on-regression`, off otherwise (to match the evals UI) |
 | `--no-multiplicity-correction` | Judge significance on raw p-values, also under `--fail-on-regression` |
 
-Exit codes with `--fail-on-regression`: 0 = passed, 1 = usage or unexpected error (bad flags, Kibana unreachable, a failed request), 2 = inconclusive or not evaluated (no baseline, no scores or pairs, nothing checkable — too few pairs, no p-value, or too few pairs to reach significance after Holm — no evaluator matched), 3 = significant regression. See the [README](./README.md#14-comparing-experiments-and-gating-on-regressions) for details.
+Exit codes with `--fail-on-regression`: 0 = passed, 1 = usage or unexpected error (bad flags, Kibana unreachable, a failed request), 2 = inconclusive or not evaluated (no baseline, no scores or pairs, nothing checkable — too few pairs, no p-value (unless every pair is identical, which counts as checked and unchanged), or too few pairs to reach significance after Holm — no evaluator matched), 3 = significant regression. See the [README](./README.md#14-comparing-experiments-and-gating-on-regressions) for details.
 
 Rows marked `N*` have examples with a different number of valid repetitions in the two runs, or null scores. See the evals plugin README for the details.
 

@@ -338,6 +338,114 @@ describe('evaluateRegressionGate inconclusive outcomes', () => {
   });
 });
 
+describe('evaluateRegressionGate with identical pairs', () => {
+  const identical = (overrides: Partial<ComparisonResult> = {}) => ({
+    ...makeResult({
+      evaluatorName: 'Same',
+      target: side(0.5),
+      baseline: side(0.5),
+      pValue: null,
+      hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: null },
+      ...overrides,
+    }),
+    allPairsIdentical: true,
+  });
+
+  it('passes when every numeric row is identical in every pair', () => {
+    const decision = evaluateRegressionGate({ results: [identical()] });
+
+    expect(decision.status).toBe('passed');
+    expect(decision.tripped).toBe(false);
+    expect(decision.checked).toBe(1);
+    expect(decision.untestable).toEqual([]);
+    expect(decision.underpowered).toEqual([]);
+    expect(formatRegressionGateReport({ decision })).toContain(
+      '1 of 1 evaluator comparison(s) checked'
+    );
+  });
+
+  it('keeps a null-p row with equal means but non-identical pairs untestable', () => {
+    const decision = evaluateRegressionGate({
+      results: [
+        { ...identical(), allPairsIdentical: false },
+        { ...identical(), allPairsIdentical: undefined },
+      ],
+    });
+
+    expect(decision.status).toBe('inconclusive');
+    expect(decision.checked).toBe(0);
+    expect(decision.untestable).toHaveLength(2);
+  });
+
+  it('still trips on a real regression next to an identical row', () => {
+    const decision = evaluateRegressionGate({
+      results: applyHolmCorrection([
+        makeResult({ evaluatorName: 'Real', pValue: 0.001 }),
+        identical(),
+      ]),
+    });
+
+    expect(decision.status).toBe('tripped');
+    expect(decision.checked).toBe(2);
+    expect(decision.regressions.map(({ evaluatorName }) => evaluatorName)).toEqual(['Real']);
+    // The identical row has no p-value, so the family is one row and Holm leaves 0.001 alone.
+    expect(decision.regressions[0].adjustedPValue).toBeCloseTo(0.001, 10);
+  });
+
+  it('does not let an identical row push another row into underpowered', () => {
+    const decision = evaluateRegressionGate({
+      results: applyHolmCorrection([
+        makeResult({ evaluatorName: 'Small', sampleSize: 10, pValue: 0.5 }),
+        identical(),
+      ]),
+    });
+
+    expect(decision.status).toBe('passed');
+    expect(decision.checked).toBe(2);
+    expect(decision.underpowered).toEqual([]);
+  });
+
+  it('reports insufficient pairs, not checked, below --min-pairs', () => {
+    const decision = evaluateRegressionGate({ results: [identical({ sampleSize: 3 })] });
+
+    expect(decision.status).toBe('inconclusive');
+    expect(decision.checked).toBe(0);
+    expect(decision.insufficientPairs).toHaveLength(1);
+    expect(decision.untestable).toEqual([]);
+  });
+
+  it('leaves an identical pass/fail row on its McNemar p-value and the usual floor', () => {
+    const passFail = (sampleSize: number) => ({
+      ...makeResult({
+        evaluatorName: `PassFail${sampleSize}`,
+        sampleSize,
+        target: side(1),
+        baseline: side(1),
+        pValue: 1,
+        metricType: 'binary',
+        hypothesisTest: { id: 'mcnemar', method: 'exact', statistic: 0 },
+      }),
+      allPairsIdentical: true,
+    });
+
+    const decision = evaluateRegressionGate({ results: applyHolmCorrection([passFail(20)]) });
+    expect(decision.status).toBe('passed');
+    expect(decision.checked).toBe(1);
+
+    const family = applyHolmCorrection([
+      ...Array.from({ length: 39 }, (_, i) =>
+        makeResult({ evaluatorName: `E${i}`, sampleSize: 30, pValue: 0.5 })
+      ),
+      passFail(5),
+    ]);
+    expect(
+      evaluateRegressionGate({ results: family, minPairs: 5 }).underpowered.map(
+        ({ evaluatorName }) => evaluatorName
+      )
+    ).toEqual(['PassFail5']);
+  });
+});
+
 describe('formatRegressionGateReport', () => {
   it('lists each regression with delta, p-values, test and pair count', () => {
     const decision = evaluateRegressionGate({

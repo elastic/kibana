@@ -10,6 +10,7 @@ import { getEffectDirection } from './effect_direction';
 import type { WithEffectSign } from './effect_direction';
 import { getEffectivePValue, holmBonferroniAdjust } from './holm_correction';
 import type { CorrectableComparisonResult } from './holm_correction';
+import type { WithIdenticalPairs } from './identical_pairs';
 import { minimumReachablePValue } from './reachable_p_value';
 import { getTestLabel } from './test_label';
 
@@ -62,15 +63,18 @@ export interface RegressionGateDecision {
   status: RegressionGateStatus;
   tripped: boolean;
   /**
-   * Rows that were actually tested: in scope, directional, enough pairs, a usable p-value, and
-   * able to reach significance.
+   * Rows that were actually checked: in scope, directional, enough pairs, and either tested with a
+   * usable p-value that could reach significance or identical in every pair.
    */
   checked: number;
   /** In-scope directional rows the gate considered: checked plus every row it had to skip. */
   inScope: number;
   regressions: RegressionFinding[];
   insufficientPairs: InsufficientPairsFinding[];
-  /** Rows with enough pairs but a null or non-finite p-value, so no test result to judge. */
+  /**
+   * Rows with enough pairs but a null or non-finite p-value, so no test result to judge. Rows whose
+   * pairs are all identical are not here: they are checked and unchanged.
+   */
   untestable: UntestableFinding[];
   /**
    * Non-significant rows that could not have been significant whatever the scores: their test's
@@ -112,8 +116,9 @@ const bestReachableEffectivePValue = (
  * measured a change in the worse direction, and its effective (Holm-adjusted when applied)
  * p-value is below `significanceThreshold`. Significant rows where the test and the mean
  * disagree on the direction cannot trip and are not counted as checked, and neither are rows that
- * could not have reached significance at all. With no checked row the status is `inconclusive`,
- * never `passed`.
+ * could not have reached significance at all. A row whose pairs are all identical has no p-value
+ * (the paired test is undefined on all-zero differences) but is checked and unchanged, so it can
+ * never trip or be underpowered. With no checked row the status is `inconclusive`, never `passed`.
  */
 export const evaluateRegressionGate = ({
   results,
@@ -121,7 +126,7 @@ export const evaluateRegressionGate = ({
   minPairs = DEFAULT_REGRESSION_MIN_PAIRS,
   evaluators,
 }: {
-  results: ReadonlyArray<WithEffectSign<CorrectableComparisonResult>>;
+  results: ReadonlyArray<WithIdenticalPairs<WithEffectSign<CorrectableComparisonResult>>>;
   significanceThreshold?: number;
   minPairs?: number;
   evaluators?: readonly string[];
@@ -154,6 +159,15 @@ export const evaluateRegressionGate = ({
     }
 
     const pValue = toFinite(result.pValue);
+    // Nothing changed in any pair and the test has no p-value (numeric scores), so the row is
+    // never untestable or underpowered. A null-p row is already outside the Holm family, so it does
+    // not distort the other rows' adjusted p-values or reachable floors. Pass/fail rows keep their
+    // McNemar p = 1 and the usual floor handling.
+    if (pValue === null && result.allPairsIdentical === true) {
+      checked += 1;
+      continue;
+    }
+
     const effectivePValue = toFinite(getEffectivePValue(result));
     if (pValue === null || effectivePValue === null) {
       untestable.push({

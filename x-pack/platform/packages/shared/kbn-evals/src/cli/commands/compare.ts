@@ -20,6 +20,7 @@ import { formatCompareReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
 import { averageMatchedRepetitions } from '../../utils/reporting/average_repetitions';
 import { attachEffectSigns } from '../../utils/reporting/effect_direction';
+import { attachIdenticalPairs } from '../../utils/reporting/identical_pairs';
 import { applyHolmCorrection } from '../../utils/reporting/holm_correction';
 import { retestWilcoxonWithExactTies } from '../../utils/reporting/wilcoxon_ties';
 import {
@@ -455,8 +456,11 @@ export const compareCmd = {
     // Holm runs over every comparison in this run (all datasets x evaluators), so the family is
     // the full set of hypotheses the report shows. Gate scoping does not shrink it: the gate is
     // judged on the same adjusted p-values the report prints.
-    const results = attachEffectSigns(
-      multiplicityCorrection ? applyHolmCorrection(comparisonResults) : comparisonResults,
+    const results = attachIdenticalPairs(
+      attachEffectSigns(
+        multiplicityCorrection ? applyHolmCorrection(comparisonResults) : comparisonResults,
+        pairs
+      ),
       pairs
     );
 

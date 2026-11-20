@@ -169,8 +169,49 @@ describe('compareCmd exit codes', () => {
 
     const outcome = await runCompare([...GATE, '--regression-evaluators', 'groundedness,missing']);
 
-    // groundedness has only zero differences, so no usable p-value: nothing checked.
-    expect(outcome.exitCode).toBe(GATE_INCONCLUSIVE_EXIT_CODE);
+    // groundedness is identical in every pair: no p-value, but checked and unchanged.
+    expect(outcome).toEqual({ exitCode: 0 });
+  });
+
+  it('passes when a numeric evaluator is identical in every pair', async () => {
+    stubScores(
+      experiment(TARGET, () => 0.5),
+      experiment(BASELINE, () => 0.5)
+    );
+
+    expect(await runCompare(GATE)).toEqual({ exitCode: 0 });
+  });
+
+  it('stays inconclusive when the means are equal but the pairs differ', async () => {
+    // Alternating +0.2 / -0.2 against 0.5: equal means, and a symmetric rank sum, but not identical.
+    const swing = (sign: number) => (index: number) =>
+      0.5 + sign * 0.2 * (index % 2 === 0 ? 1 : -1);
+    stubScores(experiment(TARGET, swing(1)), experiment(BASELINE, swing(-1)));
+
+    expect((await runCompare(GATE)).exitCode).not.toBe(GATE_REGRESSION_EXIT_CODE);
+  });
+
+  it('trips on a real regression next to an identical numeric evaluator', async () => {
+    const named = (docs: EvaluationScoreDocument[], name: string) =>
+      docs.map((doc) => ({ ...doc, evaluator: { ...doc.evaluator, name } }));
+    stubScores(
+      [
+        ...regressedScores,
+        ...named(
+          experiment(TARGET, () => 0.5),
+          'groundedness'
+        ),
+      ],
+      [
+        ...baselineScores,
+        ...named(
+          experiment(BASELINE, () => 0.5),
+          'groundedness'
+        ),
+      ]
+    );
+
+    expect((await runCompare(GATE)).exitCode).toBe(GATE_REGRESSION_EXIT_CODE);
   });
 
   it('judges the gate on raw p-values with --no-multiplicity-correction', async () => {
@@ -245,9 +286,8 @@ describe('compareCmd exit codes', () => {
 
     // Averaging all 3 target repetitions would give 1/3 against 1 on every example and trip.
     // With the shared repetition every score is 1 on both sides, so the slice is binary and
-    // McNemar finds no discordant pair (p = 1). That is a checked, unchanged row: passed. An
-    // all-equal continuous slice (e.g. 0.5 against 0.5) has no p-value and exits inconclusive,
-    // as in the --regression-evaluators test above.
+    // McNemar finds no discordant pair (p = 1). That is a checked, unchanged row: passed, like
+    // an all-identical continuous slice (0.5 against 0.5), which has no p-value.
     expect(outcome).toEqual({ exitCode: 0 });
   });
 
