@@ -11,6 +11,8 @@
  * A cell with one repetition is `unmeasured`, not 0 or 1.
  */
 
+import { wilsonInterval, type ConfidenceInterval } from '@kbn/evals-common';
+
 export type ReliabilityStatus = 'unmeasured' | 'measured';
 
 export interface TrajectoryCell {
@@ -24,12 +26,6 @@ export interface TrajectoryCell {
   probeSource?: 'declared' | 'legacy-prefix';
   /** Final answer per repetition, index-aligned with `trails`. */
   answers?: string[];
-}
-
-/** Wilson score interval for a binomial proportion. */
-export interface ConfidenceInterval {
-  low: number;
-  high: number;
 }
 
 export interface TrajectoryAgreement {
@@ -114,27 +110,6 @@ const pairwiseMean = (trails: string[][], pairFn: (a: string[], b: string[]) => 
   }
   return n === 0 ? 0 : sum / n;
 };
-
-/** Wilson score interval at 95%, which stays within [0, 1] for small samples near 0. */
-export const wilsonInterval = (successes: number, total: number): ConfidenceInterval => {
-  if (total <= 0) {
-    return { low: 0, high: 1 };
-  }
-  const z = 1.96;
-  const p = successes / total;
-  const z2 = z * z;
-  const denom = 1 + z2 / total;
-  const centre = p + z2 / (2 * total);
-  const spread = z * Math.sqrt((p * (1 - p)) / total + z2 / (4 * total * total));
-  return {
-    low: Math.max(0, (centre - spread) / denom),
-    high: Math.min(1, (centre + spread) / denom),
-  };
-};
-
-/** True when two intervals overlap, i.e. the data cannot order the two rows. */
-export const intervalsOverlap = (a: ConfidenceInterval, b: ConfidenceInterval): boolean =>
-  a.low <= b.high && b.low <= a.high;
 
 /** Word-level similarity of two answers, using the same LCS ratio as paths. */
 export const answerSimilarity = (a: string, b: string): number => {

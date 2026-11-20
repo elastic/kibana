@@ -49,6 +49,25 @@ export {
 } from './impl/statistics';
 export type { PairedScore } from './impl/statistics';
 export {
+  wilsonInterval,
+  intervalsOverlap,
+  verdictPairingKey,
+  computeBinaryAgreement,
+  computeWeightedKappa,
+  computeKrippendorffAlpha,
+} from './impl/agreement';
+export type {
+  ConfidenceInterval,
+  VerdictPairingFields,
+  BinaryAgreement,
+  BinaryLabelPair,
+  KappaWeighting,
+  ScorePair,
+  WeightedKappaOptions,
+  AlphaMetric,
+  KrippendorffUnit,
+} from './impl/agreement';
+export {
   DEFAULT_JUDGE_SCORE_DIRECTION,
   getJudgeScoreDirection,
 } from './impl/judge_score_direction';
