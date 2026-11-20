@@ -179,6 +179,61 @@ describe('ServiceAccountCredentialStore', () => {
     });
   });
 
+  describe('#getCreatedAt', () => {
+    const CREATED_AT = '2026-08-21T00:00:00.000Z';
+
+    it('reads only the creation time, without decrypting', async () => {
+      client.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+            id: getCredentialId(SERVICE_ACCOUNT_ID),
+            references: [],
+            attributes: { createdAt: CREATED_AT },
+          },
+        ],
+      });
+
+      await expect(store.getCreatedAt(SERVICE_ACCOUNT_ID)).resolves.toBe(CREATED_AT);
+      expect(client.bulkGet).toHaveBeenCalledWith([
+        {
+          type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+          id: getCredentialId(SERVICE_ACCOUNT_ID),
+          fields: ['createdAt'],
+        },
+      ]);
+      expect(encryptedClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    it('resolves `null` when the account has no credential', async () => {
+      client.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+            id: getCredentialId(SERVICE_ACCOUNT_ID),
+            error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+          },
+        ],
+      });
+
+      await expect(store.getCreatedAt(SERVICE_ACCOUNT_ID)).resolves.toBeNull();
+    });
+
+    it('rejects when the document fails to read for any other reason', async () => {
+      client.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+            id: getCredentialId(SERVICE_ACCOUNT_ID),
+            error: { statusCode: 500, error: 'Internal Server Error', message: 'shard failure' },
+          },
+        ],
+      });
+
+      await expect(store.getCreatedAt(SERVICE_ACCOUNT_ID)).rejects.toThrow(/shard failure/);
+    });
+  });
+
   describe('#getDecrypted', () => {
     it('returns the decrypted attributes', async () => {
       encryptedClient.getDecryptedAsInternalUser.mockResolvedValue({

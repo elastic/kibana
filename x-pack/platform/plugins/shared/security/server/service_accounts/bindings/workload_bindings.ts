@@ -330,7 +330,9 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     params: ServiceAccountWorkloadCoordinates
   ): Promise<ServiceAccountSummary | null> {
     const binding = await this.getBinding(pluginId, params);
-    return binding ? await this.backend.getSummary(binding.serviceAccountId) : null;
+    return binding
+      ? await this.backend.getSummary(binding.serviceAccountId, { boundAt: binding.boundAt })
+      : null;
   }
 
   async withScopedRequest<T>(

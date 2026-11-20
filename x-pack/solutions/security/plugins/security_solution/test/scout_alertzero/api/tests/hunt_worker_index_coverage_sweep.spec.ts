@@ -33,6 +33,7 @@ const HUNT_WORKER_ID_FRAGMENT = 'hunt-continuous-threat-hunt';
 interface WorkerRow {
   id: string;
   workflowId: string | null;
+  workflowOutdated: boolean;
   state: string;
   stateReason?: string;
 }
@@ -132,10 +133,13 @@ apiTest.describe(
         headers: adminHeaders,
         responseType: 'json',
       });
-      const workflowId = (listed.body as { workers: WorkerRow[] }).workers.find(({ id }) =>
+      const installed = (listed.body as { workers: WorkerRow[] }).workers.find(({ id }) =>
         id.includes(HUNT_WORKER_ID_FRAGMENT)
-      )?.workflowId;
+      );
+      const workflowId = installed?.workflowId;
       expect(typeof workflowId).toBe('string');
+      // The copy was just installed from the current template, so it reads back as up to date.
+      expect(installed?.workflowOutdated).toBe(false);
 
       const gate = await waitForFinishedSweepGate({
         apiClient,

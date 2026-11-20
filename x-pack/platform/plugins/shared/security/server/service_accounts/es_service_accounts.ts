@@ -35,7 +35,7 @@ import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './bindin
 import { ensureClusterPrivilege } from './cluster_privilege';
 import { auditableName, parseCreateServiceAccountParams } from './create_params';
 import { ServiceAccountCredentialRefusedError } from './credential_refused_error';
-import { BINDING_CLOCK_SKEW_TOLERANCE_MS } from './credentials';
+import { isBoundBeforeCredential } from './credentials';
 import type { ServiceAccountCredentialStore } from './credentials';
 import { toDescriptionField } from './description_field';
 import {
@@ -57,6 +57,7 @@ import type {
   ListServiceAccountsParams,
   ServiceAccountLookup,
   ServiceAccountsBackend,
+  ServiceAccountSummaryBinding,
 } from './types';
 import type { SecurityLicense } from '../../common';
 import type {
@@ -745,9 +746,14 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
   /**
    * Reads the account as `kibana_system`, which can read service accounts but not their tokens.
-   * So `assumable` comes from the stored credential alone, the same as in {@link list}.
+   * So `assumable` comes from the stored credential alone, the same as in {@link list}. It is
+   * `false` when the exchange would refuse the binding because it predates the credential, or
+   * because Kibana cannot decrypt stored credentials.
    */
-  async getSummary(id: string): Promise<ServiceAccountSummary | null> {
+  async getSummary(
+    id: string,
+    { boundAt }: ServiceAccountSummaryBinding
+  ): Promise<ServiceAccountSummary | null> {
     const account = await this.readAccountAsInternalUser(id);
     if (!account) {
       return null;
@@ -756,7 +762,11 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     // `kibana_system` cannot read the account's tokens, so unlike `get` this cannot confirm that
     // the token Kibana minted still exists. The stored credential is the best answer available,
     // and the same one `list` gives.
-    const assumable = (await this.credentialStore.findExisting([id])).has(id);
+    const credentialCreatedAt = await this.credentialStore.getCreatedAt(id);
+    const assumable =
+      this.canEncrypt &&
+      credentialCreatedAt !== null &&
+      !isBoundBeforeCredential(boundAt, credentialCreatedAt);
     return { id: account.id, name: account.name, enabled: account.enabled, assumable };
   }
 
@@ -1143,10 +1153,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     // An account deleted and created again keeps its `{namespace}/{name}` id, so a binding left
     // over from the earlier account would otherwise run as the new one. Both timestamps are
     // authenticated, and one that does not parse is refused rather than waved through.
-    if (
-      boundAt !== undefined &&
-      !(Date.parse(credential.createdAt) <= Date.parse(boundAt) + BINDING_CLOCK_SKEW_TOLERANCE_MS)
-    ) {
+    if (boundAt !== undefined && isBoundBeforeCredential(boundAt, credential.createdAt)) {
       this.logger.error(
         `Refusing to exchange service account [${serviceAccountId}]: its workload was bound at ` +
           `[${boundAt}], before the account was created at [${credential.createdAt}]. Bind the ` +

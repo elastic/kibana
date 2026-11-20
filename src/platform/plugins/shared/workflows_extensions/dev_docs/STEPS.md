@@ -1220,6 +1220,8 @@ The test runs on stateful and on every serverless project type where workflows a
 
 CI runs it on every PR that changes a file defining or registering a step, in any plugin. Selective testing picks the changed files that contain, add or remove a line with `registerStepDefinition`, `createServerStepDefinition`, `createPollServerStepDefinition`, `createPublicStepDefinition` or `CommonStepDefinition`, see `.buildkite/scripts/steps/test/scout/scout_implicit_consumers.ts`.
 
+The test only checks the steps that are registered with the default configuration. A step behind an experimental flag, a feature flag or a UI setting that is off by default is registered on neither side, so the test can't check it yet. If your step is gated, use the same condition on both sides, and run the registration check locally in the PR that turns the flag on by default: that PR doesn't change any step file, so CI won't select the test for it.
+
 ### Running the Registration Check
 
 ```bash
