@@ -1015,9 +1015,9 @@ describe('schema structure with expandBranches', () => {
     ]);
   });
 
-  test('lists the nested keys of every discriminatedUnion case', () => {
+  test('lists the nested keys of every tagged oneOf case', () => {
     const unionSchema = schema.object({
-      auth: schema.discriminatedUnion('type', [
+      auth: schema.oneOf([
         schema.object({ type: schema.literal('basic'), username: schema.string() }),
         schema.object({ type: schema.literal('token'), token: schema.string() }),
       ]),
