@@ -19,9 +19,13 @@ export async function kibanaRequest(
   config: ConnectionConfig,
   method: string,
   path: string,
-  body?: unknown
+  body?: unknown,
+  {
+    timeoutMs = REQUEST_TIMEOUT_MS,
+    apiVersion = AI_INDEX_API_VERSION,
+  }: { timeoutMs?: number; apiVersion?: string } = {}
 ): Promise<{ status: number; data: unknown }> {
-  const deadline = timeoutSignal(REQUEST_TIMEOUT_MS);
+  const deadline = timeoutSignal(timeoutMs);
   try {
     let response: Response;
     try {
@@ -33,7 +37,7 @@ export async function kibanaRequest(
           Authorization: generateAuthHeader(config),
           'kbn-xsrf': 'true',
           'x-elastic-internal-origin': 'Kibana',
-          'elastic-api-version': AI_INDEX_API_VERSION,
+          'elastic-api-version': apiVersion,
         },
         ...(body ? { body: JSON.stringify(body) } : {}),
       });
@@ -41,7 +45,7 @@ export async function kibanaRequest(
       const name = err instanceof Error ? err.name : '';
       if (name === 'AbortError' || name === 'TimeoutError') {
         throw new Error(
-          `kibanaRequest: ${method} ${path} timed out after ${REQUEST_TIMEOUT_MS}ms — is Kibana reachable at ${config.kibanaUrl}?`
+          `kibanaRequest: ${method} ${path} timed out after ${timeoutMs}ms — is Kibana reachable at ${config.kibanaUrl}?`
         );
       }
       throw err;
