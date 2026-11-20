@@ -487,7 +487,7 @@ packageInfoCache.set('agentless_pkg-1.0.0', {
       title: 'Agentless',
       description: 'Agentless-eligible template.',
       deployment_modes: { agentless: { enabled: true } },
-      inputs: [{ type: 'logfile', title: 'Logs', description: 'Collect logs.' }],
+      inputs: [{ type: 'httpjson', title: 'HTTP JSON', description: 'Collect over HTTP.' }],
     },
   ],
   data_streams: [
@@ -497,6 +497,48 @@ packageInfoCache.set('agentless_pkg-1.0.0', {
       title: 'Logs',
       release: 'ga',
       package: 'agentless_pkg',
+      path: 'logs',
+      streams: [],
+    },
+  ],
+  latestVersion: '1.0.0',
+  status: 'not_installed',
+  assets: { kibana: {}, elasticsearch: {} },
+} as any);
+
+// Mixed-mode package: one template is agentless-eligible, another is default-only. The package is
+// agentless-eligible overall, but a policy whose enabled input belongs to the default-only template
+// is not a valid agentless deployment.
+packageInfoCache.set('mixed_mode_pkg-1.0.0', {
+  format_version: '2.7.0',
+  name: 'mixed_mode_pkg',
+  title: 'Mixed Mode Package',
+  version: '1.0.0',
+  type: 'integration',
+  release: 'ga',
+  policy_templates: [
+    {
+      name: 'agentless_tmpl',
+      title: 'Agentless',
+      description: 'Agentless-eligible template.',
+      deployment_modes: { agentless: { enabled: true } },
+      inputs: [{ type: 'httpjson', title: 'HTTP JSON', description: 'Collect over HTTP.' }],
+    },
+    {
+      name: 'default_tmpl',
+      title: 'Default only',
+      description: 'Default-only template.',
+      deployment_modes: { default: { enabled: true } },
+      inputs: [{ type: 'httpjson', title: 'HTTP JSON', description: 'Collect over HTTP.' }],
+    },
+  ],
+  data_streams: [
+    {
+      type: 'logs',
+      dataset: 'mixed_mode_pkg.logs',
+      title: 'Logs',
+      release: 'ga',
+      package: 'mixed_mode_pkg',
       path: 'logs',
       streams: [],
     },
@@ -595,7 +637,8 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
   describe('agentless permissions', () => {
     const buildAgentlessPackagePolicy = (
       pkgName: string,
-      supportsAgentless: boolean
+      supportsAgentless: boolean,
+      input: { type?: string; policyTemplate?: string } = {}
     ): PackagePolicy =>
       ({
         id: `package-policy-${pkgName}`,
@@ -606,11 +649,12 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         package: { name: pkgName, version: '1.0.0', title: pkgName },
         inputs: [
           {
-            type: 'logfile',
+            type: input.type ?? 'httpjson',
+            policy_template: input.policyTemplate,
             enabled: true,
             streams: [
               {
-                id: 'logfile',
+                id: 'stream-0',
                 enabled: true,
                 data_stream: { type: 'logs', dataset: `${pkgName}.logs` },
               },
@@ -629,6 +673,18 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     const hasAgentlessGrant = (descriptor: { indices?: Array<{ names?: string[] }> } | undefined) =>
       (descriptor?.indices ?? []).some((index) => index.names?.includes('agentless-*'));
 
+    const expectNormalGrant = (
+      descriptor: { indices?: Array<{ names?: string[] }> } | undefined,
+      pkgName: string
+    ) =>
+      // The normal data stream grant must survive so the integration keeps ingesting; a dropped
+      // descriptor would also report no agentless grant and hide a regression.
+      expect(descriptor?.indices).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ names: [`logs-${pkgName}.logs-test`] }),
+        ])
+      );
+
     it('does NOT grant agentless-* permissions when the package is not agentless-eligible, even with the flag set', async () => {
       const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
         buildAgentlessPackagePolicy('non_agentless_pkg', true),
@@ -636,18 +692,12 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
 
       const descriptor = permissions?.['package-policy-non_agentless_pkg'];
       expect(hasAgentlessGrant(descriptor)).toBe(false);
-      // The normal data stream grant must survive so the integration keeps ingesting; a dropped
-      // descriptor would also report no agentless grant and hide a regression.
-      expect(descriptor?.indices).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ names: ['logs-non_agentless_pkg.logs-test'] }),
-        ])
-      );
+      expectNormalGrant(descriptor, 'non_agentless_pkg');
     });
 
     it('grants agentless-* permissions when the package is agentless-eligible and the flag is set', async () => {
       const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
-        buildAgentlessPackagePolicy('agentless_pkg', true),
+        buildAgentlessPackagePolicy('agentless_pkg', true, { policyTemplate: 'agentless' }),
       ]);
 
       expect(hasAgentlessGrant(permissions?.['package-policy-agentless_pkg'])).toBe(true);
@@ -655,16 +705,34 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
 
     it('does NOT grant agentless-* permissions for an eligible package when the flag is not set', async () => {
       const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
-        buildAgentlessPackagePolicy('agentless_pkg', false),
+        buildAgentlessPackagePolicy('agentless_pkg', false, { policyTemplate: 'agentless' }),
       ]);
 
       const descriptor = permissions?.['package-policy-agentless_pkg'];
       expect(hasAgentlessGrant(descriptor)).toBe(false);
-      expect(descriptor?.indices).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ names: ['logs-agentless_pkg.logs-test'] }),
-        ])
-      );
+      expectNormalGrant(descriptor, 'agentless_pkg');
+    });
+
+    it('does NOT grant agentless-* permissions when the enabled input is not agentless-eligible, even if the package has an agentless template', async () => {
+      const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildAgentlessPackagePolicy('mixed_mode_pkg', true, {
+          policyTemplate: 'default_tmpl',
+        }),
+      ]);
+
+      const descriptor = permissions?.['package-policy-mixed_mode_pkg'];
+      expect(hasAgentlessGrant(descriptor)).toBe(false);
+      expectNormalGrant(descriptor, 'mixed_mode_pkg');
+    });
+
+    it('grants agentless-* permissions when the enabled input belongs to the agentless template', async () => {
+      const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildAgentlessPackagePolicy('mixed_mode_pkg', true, {
+          policyTemplate: 'agentless_tmpl',
+        }),
+      ]);
+
+      expect(hasAgentlessGrant(permissions?.['package-policy-mixed_mode_pkg'])).toBe(true);
     });
   });
 
