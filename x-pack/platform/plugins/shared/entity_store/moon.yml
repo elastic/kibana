@@ -58,6 +58,7 @@ dependsOn:
   - '@kbn/core-execution-context-common'
   - '@kbn/core-spaces-common'
   - '@kbn/workflows-execution-engine'
+  - '@kbn/core-logging-server-mocks'
 tags:
   - plugin
   - prod

@@ -133,6 +133,10 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/core-http-common'
   - '@kbn/workflows-ui'
+  - '@kbn/repo-info'
+  - '@kbn/core-user-profile-server'
+  - '@kbn/security-plugin-types-server'
+  - '@kbn/workflows-execution-engine'
 tags:
   - plugin
   - prod

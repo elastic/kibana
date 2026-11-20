@@ -54,6 +54,7 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/core-spaces-common'
   - '@kbn/alerting-plugin'
+  - '@kbn/core-logging-server-mocks'
 tags:
   - plugin
   - prod

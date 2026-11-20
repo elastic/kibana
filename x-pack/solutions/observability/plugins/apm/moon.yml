@@ -17,7 +17,6 @@ project:
   owner: '@elastic/obs-signals-traces-team'
   sourceRoot: x-pack/solutions/observability/plugins/apm
 dependsOn:
-  - '@kbn/stack-connectors-plugin'
   - '@kbn/synthtrace'
   - '@kbn/apm-embeddable-common'
   - '@kbn/core'

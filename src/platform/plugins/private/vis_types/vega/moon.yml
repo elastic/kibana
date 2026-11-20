@@ -61,6 +61,7 @@ dependsOn:
   - '@kbn/presentation-util'
   - '@kbn/zod'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/repo-info'
 tags:
   - plugin
   - prod

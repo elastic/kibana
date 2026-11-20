@@ -17,7 +17,6 @@ project:
   owner: '@elastic/kibana-management'
   sourceRoot: x-pack/platform/plugins/private/transform
 dependsOn:
-  - '@kbn/stack-connectors-plugin'
   - '@kbn/app-header'
   - '@kbn/core'
   - '@kbn/features-plugin'

@@ -17,7 +17,6 @@ project:
   owner: '@elastic/obs-signals-logs-team'
   sourceRoot: x-pack/solutions/observability/plugins/uptime
 dependsOn:
-  - '@kbn/stack-connectors-plugin'
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/i18n'

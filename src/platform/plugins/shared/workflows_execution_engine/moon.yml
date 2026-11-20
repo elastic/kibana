@@ -79,6 +79,7 @@ dependsOn:
   - '@kbn/elastic-assistant-common'
   - '@kbn/product-doc-base-plugin'
   - '@kbn/product-doc-common'
+  - '@kbn/core-ui-settings-common'
 tags:
   - plugin
   - prod

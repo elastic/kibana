@@ -71,16 +71,11 @@ dependsOn:
   - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-elasticsearch-server-mocks'
-  - '@kbn/core-saved-objects-api-server-internal'
-  - '@kbn/core-saved-objects-migration-server-internal'
   - '@kbn/core-logging-server-internal'
   - '@kbn/core-elasticsearch-server-internal'
-  - '@kbn/core-elasticsearch-client-server-internal'
   - '@kbn/core-execution-context-server'
-  - '@kbn/core-security-server-internal'
   - '@kbn/core-ui-settings-common'
   - '@kbn/core-ui-settings-server'
-  - '@kbn/core-ui-settings-server-internal'
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/apm-config-loader'
   - '@kbn/metrics-config'
@@ -89,6 +84,7 @@ dependsOn:
   - '@kbn/telemetry-config'
   - '@kbn/fs'
   - '@kbn/telemetry'
+  - '@kbn/telemetry-plugin'
 tags:
   - plugin
   - prod

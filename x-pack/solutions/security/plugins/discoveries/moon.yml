@@ -63,6 +63,7 @@ dependsOn:
   - '@kbn/core-elasticsearch-client-server-mocks'
   - '@kbn/core-ui-settings-server'
   - '@kbn/search-inference-endpoints'
+  - '@kbn/repo-info'
 tags:
   - plugin
   - prod

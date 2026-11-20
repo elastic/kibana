@@ -137,6 +137,7 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/zod-helpers'
   - '@kbn/as-code-dashboard-schema'
+  - '@kbn/logging-mocks'
 tags:
   - plugin
   - prod

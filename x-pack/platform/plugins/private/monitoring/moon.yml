@@ -17,8 +17,6 @@ project:
   owner: '@elastic/stack-monitoring'
   sourceRoot: x-pack/platform/plugins/private/monitoring
 dependsOn:
-  - '@kbn/stack-connectors-plugin'
-  - '@kbn/task-manager-plugin'
   - '@kbn/core'
   - '@kbn/data-plugin'
   - '@kbn/home-plugin'

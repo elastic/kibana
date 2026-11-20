@@ -17,7 +17,6 @@ project:
   owner: '@elastic/obs-signals-metrics-team'
   sourceRoot: x-pack/solutions/observability/plugins/infra
 dependsOn:
-  - '@kbn/task-manager-plugin'
   - '@kbn/synthtrace'
   - '@kbn/synthtrace-client'
   - '@kbn/core'
@@ -168,6 +167,7 @@ dependsOn:
   - '@kbn/apm-sources-access-plugin'
   - '@kbn/workflows-execution-engine'
   - '@kbn/workflows'
+  - '@kbn/task-manager-plugin'
 tags:
   - plugin
   - prod

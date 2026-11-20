@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/security-plugin-types-server'
   - '@kbn/workflows-extensions'
   - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/task-manager-plugin'
 tags:
   - plugin
   - prod

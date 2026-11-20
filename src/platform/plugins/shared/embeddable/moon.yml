@@ -54,6 +54,7 @@ dependsOn:
   - '@kbn/workflows-extensions'
   - '@kbn/core-feature-flags-server'
   - '@kbn/task-manager-plugin'
+  - '@kbn/repo-info'
 tags:
   - plugin
   - prod

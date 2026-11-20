@@ -28,6 +28,11 @@ dependsOn:
   - '@kbn/safer-lodash-set'
   - '@kbn/serverless'
   - '@kbn/core-test-helpers-kbn-server'
+  - '@kbn/core-elasticsearch-server-mocks'
+  - '@kbn/core-saved-objects-server-mocks'
+  - '@kbn/core-saved-objects-api-server-mocks'
+  - '@kbn/core-http-server-mocks'
+  - '@kbn/logging-mocks'
 tags:
   - plugin
   - prod

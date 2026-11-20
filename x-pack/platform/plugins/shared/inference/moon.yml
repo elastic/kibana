@@ -48,6 +48,9 @@ dependsOn:
   - '@kbn/anonymization-common'
   - '@kbn/utility-types'
   - '@kbn/management-settings-ids'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-elasticsearch-server-mocks'
+  - '@kbn/core-http-server-mocks'
 tags:
   - plugin
   - prod
