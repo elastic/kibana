@@ -14,8 +14,9 @@ jest.mock('../../../kibana_services', () => ({
 }));
 
 import React, { useState } from 'react';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { LayerControl } from './layer_control';
 
@@ -39,7 +40,7 @@ const Harness = ({ initialOpen }: { initialOpen: boolean }) => {
 
 describe('LayerControl focus management', () => {
   test('moves focus to the expand button after collapsing the panel', async () => {
-    render(<Harness initialOpen={true} />);
+    renderWithI18n(<Harness initialOpen={true} />);
 
     await userEvent.click(screen.getByRole('button', { name: 'Collapse layers panel' }));
 
@@ -47,7 +48,7 @@ describe('LayerControl focus management', () => {
   });
 
   test('moves focus to the collapse button after expanding the panel', async () => {
-    render(<Harness initialOpen={false} />);
+    renderWithI18n(<Harness initialOpen={false} />);
 
     await userEvent.click(screen.getByRole('button', { name: 'Expand layers panel' }));
 
@@ -55,7 +56,7 @@ describe('LayerControl focus management', () => {
   });
 
   test('does not steal focus on initial render', () => {
-    render(<Harness initialOpen={true} />);
+    renderWithI18n(<Harness initialOpen={true} />);
 
     expect(screen.getByRole('button', { name: 'Collapse layers panel' })).not.toHaveFocus();
   });
