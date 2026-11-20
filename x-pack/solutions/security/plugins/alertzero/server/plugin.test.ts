@@ -610,7 +610,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           solution,
           settingEnabled = true,
         }: {
-          solution?: 'security' | 'classic';
+          solution?: 'security' | 'classic' | 'oblt' | 'es';
           settingEnabled?: boolean;
         }) => {
           const coreSetup = coreMock.createSetup();
@@ -650,7 +650,17 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         });
 
         it.each([['classic' as const], [undefined]])(
-          'is off in a Classic space even with the setting on (%s)',
+          'uses the AlertZero setting in a Classic space (%s)',
+          async (solution) => {
+            const { enabled, uiSettingsClient } = await resolveOptIn({ solution });
+
+            expect(enabled).toBe(true);
+            expect(uiSettingsClient.get).toHaveBeenCalledWith(ALERTZERO_ENABLED_SETTING_ID);
+          }
+        );
+
+        it.each([['oblt' as const], ['es' as const]])(
+          'is off in a space with another solution view even with the setting on (%s)',
           async (solution) => {
             const { enabled, uiSettingsClient } = await resolveOptIn({ solution });
 
