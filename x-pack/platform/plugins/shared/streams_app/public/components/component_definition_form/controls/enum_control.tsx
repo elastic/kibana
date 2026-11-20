@@ -15,6 +15,8 @@ import type { FormValue } from '../values';
 
 const NONE_VALUE = '';
 
+const DESCRIBED_OPTIONS_MIN_WIDTH = 280;
+
 interface EnumControlProps {
   field: CatalogueEnumField;
   value: FormValue | undefined;
@@ -74,6 +76,7 @@ export function EnumControl({
       ...mapped,
     ];
   }, [allowEmpty, options]);
+  const hasDescriptions = options.some(({ description }) => Boolean(description));
 
   return (
     <EuiSuperSelect
@@ -83,6 +86,7 @@ export function EnumControl({
       fullWidth
       isInvalid={isInvalid}
       options={selectOptions}
+      popoverProps={hasDescriptions ? { panelMinWidth: DESCRIBED_OPTIONS_MIN_WIDTH } : undefined}
       valueOfSelected={value === undefined || value === null ? NONE_VALUE : String(value)}
       placeholder={field.ui?.placeholder}
       onChange={(selected) => {

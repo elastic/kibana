@@ -177,7 +177,11 @@ export function LiteralControl({
   }
 
   return (
-    <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="flexStart">
+    <EuiFlexGroup
+      gutterSize="xs"
+      responsive={false}
+      alignItems={kind === 'boolean' ? 'center' : 'flexStart'}
+    >
       <EuiFlexItem grow={false}>
         <EuiSelect
           compressed

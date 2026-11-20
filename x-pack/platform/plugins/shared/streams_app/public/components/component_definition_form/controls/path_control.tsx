@@ -36,10 +36,11 @@ interface PathFieldProps {
   value: FormValue | undefined;
   onChange: (value: FormValue | undefined) => void;
   scope: ObjectValue;
-  label: string;
-  helpText?: string;
+  label?: React.ReactNode;
+  helpText?: React.ReactNode;
   error?: string;
   labelAppend?: React.ReactNode;
+  compressed?: boolean;
 }
 
 const asString = (value: FormValue | undefined): string | undefined =>
@@ -47,7 +48,7 @@ const asString = (value: FormValue | undefined): string | undefined =>
 
 /**
  * A path picker in the style of the processing editor's field selector. Paths
- * are suggested from the catalogue path set for the sibling `location` or `context`.
+ * are suggested from the catalogue path set for the `location` or `context` of its scope.
  */
 export function PathField({
   field,
@@ -58,6 +59,7 @@ export function PathField({
   helpText,
   error,
   labelAppend,
+  compressed,
 }: PathFieldProps) {
   const { metadata, telemetry } = useDefinitionFormContext();
   const location = asString(scope[LOCATION_FIELD]);
@@ -91,9 +93,10 @@ export function PathField({
       suggestions={suggestions}
       showIcon
       fullWidth
+      compressed={compressed}
       isInvalid={error !== undefined}
       error={error}
-      dataTestSubj={`componentDefinitionFormPath-${field.name}`}
+      dataTestSubj={`componentDefinitionFormPath-${field.name ?? 'item'}`}
     />
   );
 }

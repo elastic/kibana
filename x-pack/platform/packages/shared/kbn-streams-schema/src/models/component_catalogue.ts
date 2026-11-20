@@ -253,6 +253,7 @@ export type CatalogueNamedFieldDefinition = CatalogueFieldDefinition & { name: s
 export interface CatalogueFieldGroup {
   id: string;
   label: string;
+  description?: string;
   order?: number;
   advanced?: boolean;
 }

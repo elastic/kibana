@@ -506,7 +506,7 @@ const toUnitDiagnostic = (value: unknown): UnitDiagnostic | undefined => {
     return undefined;
   }
 
-  const { severity, code, message, path, line } = value;
+  const { severity, code, message, path, line, details } = value;
 
   if (
     (severity !== 'error' && severity !== 'warning' && severity !== 'info') ||
@@ -522,5 +522,25 @@ const toUnitDiagnostic = (value: unknown): UnitDiagnostic | undefined => {
     message,
     ...(typeof path === 'string' ? { path } : {}),
     ...(typeof line === 'number' ? { line } : {}),
+    ...(isDiagnosticDetails(details) ? { details } : {}),
   };
 };
+
+const isDiagnosticDetail = (value: unknown): value is StreamsUnit.DiagnosticDetail => {
+  if (value === null || ['string', 'number', 'boolean'].includes(typeof value)) {
+    return true;
+  }
+  if (Array.isArray(value)) {
+    return value.every(isDiagnosticDetail);
+  }
+  return isRecord(value) && Object.values(value).every(isDiagnosticDetail);
+};
+
+/** The named values of a diagnostic; an empty object says nothing and is left out. */
+const isDiagnosticDetails = (
+  value: unknown
+): value is NonNullable<StreamsUnit.Diagnostic['details']> =>
+  isRecord(value) &&
+  !Array.isArray(value) &&
+  Object.keys(value).length > 0 &&
+  isDiagnosticDetail(value);

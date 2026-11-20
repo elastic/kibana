@@ -6,24 +6,24 @@
  */
 
 import React, { useCallback, useMemo, useRef } from 'react';
-import { EuiAccordion, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { useGeneratedHtmlId } from '@elastic/eui';
 import type {
   CatalogueComponentDefinition,
+  CatalogueFieldGroup,
   CatalogueMetadata,
   CatalogueSignal,
 } from '@kbn/streams-schema';
-import { FieldList } from './field_list';
+import { FieldSections } from './field_sections';
 import {
   DefinitionFormContext,
   type ComponentReferenceOption,
   type DefinitionFormContextValue,
 } from './form_context';
-import { layoutSections } from './layout';
-import { errorsUnder, joinPointer, type FieldErrors, type ObjectValue } from './values';
+import type { FieldErrors, ObjectValue } from './values';
 
 const NO_ERRORS: FieldErrors = {};
 const NO_REFS: readonly ComponentReferenceOption[] = [];
+const NO_GROUPS: readonly CatalogueFieldGroup[] = [];
 
 export interface ComponentDefinitionFormProps {
   definition: CatalogueComponentDefinition;
@@ -53,7 +53,6 @@ export function ComponentDefinitionForm({
   componentRefs = NO_REFS,
   onUnparsedInputChange,
 }: ComponentDefinitionFormProps) {
-  const { euiTheme } = useEuiTheme();
   const idPrefix = useGeneratedHtmlId({ prefix: `componentDefinitionForm-${definition.type}` });
   const unparsedControlIds = useRef(new Set<string>());
   const reportUnparsedInput = useCallback(
@@ -71,44 +70,16 @@ export function ComponentDefinitionForm({
     },
     [onUnparsedInputChange]
   );
+  const groups = definition.groups ?? NO_GROUPS;
   const context = useMemo<DefinitionFormContextValue>(
-    () => ({ metadata, telemetry, errors, componentRefs, idPrefix, reportUnparsedInput }),
-    [componentRefs, errors, idPrefix, metadata, reportUnparsedInput, telemetry]
+    () => ({ metadata, telemetry, errors, componentRefs, groups, idPrefix, reportUnparsedInput }),
+    [componentRefs, errors, groups, idPrefix, metadata, reportUnparsedInput, telemetry]
   );
-  const sections = useMemo(
-    () => layoutSections(definition.fields, definition.groups),
-    [definition.fields, definition.groups]
-  );
-  const groupBodyStyles = css`
-    border-left: ${euiTheme.border.thin};
-    margin-left: ${euiTheme.size.m};
-    padding-top: ${euiTheme.size.m};
-    padding-left: calc(${euiTheme.size.m} + ${euiTheme.size.xs});
-  `;
 
   return (
     <DefinitionFormContext.Provider value={context}>
       <div data-test-subj={`componentDefinitionForm-${definition.kind}-${definition.type}`}>
-        {sections.map(({ group, fields }) => {
-          const list = <FieldList fields={fields} value={values} onChange={onChange} pointer="" />;
-          if (!group) {
-            return <React.Fragment key="ungrouped">{list}</React.Fragment>;
-          }
-          const hasErrors = fields.some(({ name }) => errorsUnder(errors, joinPointer('', name)));
-          return (
-            <EuiAccordion
-              key={group.id}
-              id={`${idPrefix}-${group.id}`}
-              element="fieldset"
-              paddingSize="none"
-              buttonContent={group.label}
-              initialIsOpen={!group.advanced || hasErrors}
-              data-test-subj={`componentDefinitionFormGroup-${group.id}`}
-            >
-              <div css={groupBodyStyles}>{list}</div>
-            </EuiAccordion>
-          );
-        })}
+        <FieldSections fields={definition.fields} value={values} onChange={onChange} pointer="" />
       </div>
     </DefinitionFormContext.Provider>
   );

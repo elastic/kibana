@@ -521,6 +521,36 @@ describe('createConfigDistributorClient', () => {
       ).resolves.toEqual({ valid: false, diagnostics });
     });
 
+    it('keeps the details of a diagnostic and drops ones that are not named values', async () => {
+      const diagnostic = {
+        severity: 'error',
+        code: 'E028_INVALID_CONFIG_TYPE',
+        message: 'action is not one of the allowed values',
+      };
+      const details = { got: 'delete', allowed: ['upsert', 'update', 'insert'], limit: 3 };
+      const fetchImpl = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+        text: async () =>
+          JSON.stringify({
+            valid: false,
+            diagnostics: [
+              { ...diagnostic, details },
+              { ...diagnostic, details: {} },
+              { ...diagnostic, details: ['delete'] },
+              { ...diagnostic, details: 'delete' },
+            ],
+          }),
+      });
+
+      await expect(
+        createClient(fetchImpl).validateComponent({ kind: 'processor', component })
+      ).resolves.toEqual({
+        valid: false,
+        diagnostics: [{ ...diagnostic, details }, diagnostic, diagnostic, diagnostic],
+      });
+    });
+
     it('answers 502 when the distributor has no component validation route', async () => {
       const fetchImpl = jest
         .fn()

@@ -13,6 +13,7 @@ import { PathField } from './controls/path_control';
 import { FieldControl } from './field_control';
 import { labelOf, toControlId } from './field_helpers';
 import { useDefinitionFormContext } from './form_context';
+import { toRowChrome } from './row_chrome';
 import { joinPointer, type FormValue, type ObjectValue } from './values';
 
 interface FieldRowItemProps {
@@ -20,22 +21,29 @@ interface FieldRowItemProps {
   value: ObjectValue;
   pointer: string;
   onFieldChange: (name: string, fieldValue: FormValue | undefined) => void;
-  labelAppend?: React.ReactNode;
+  alternatives?: React.ReactNode;
+  compact?: boolean;
 }
 
-/** One field as a full-width form row: label, input, then the description as help text. */
 export function FieldRowItem({
   field,
   value,
   pointer,
   onFieldChange,
-  labelAppend,
+  alternatives,
+  compact,
 }: FieldRowItemProps) {
   const { telemetry, errors, idPrefix } = useDefinitionFormContext();
   const fieldPointer = joinPointer(pointer, field.name);
   const error = errors[fieldPointer];
   const required = isFieldRequired(field, value, telemetry);
   const onChange = (next: FormValue | undefined) => onFieldChange(field.name, next);
+  const { label, labelAppend, helpText } = toRowChrome({
+    label: labelOf(field),
+    description: field.description,
+    alternatives,
+    compact: compact && field.type !== 'boolean',
+  });
 
   if (field.type === 'path') {
     return (
@@ -44,8 +52,8 @@ export function FieldRowItem({
         value={value[field.name]}
         onChange={onChange}
         scope={value}
-        label={labelOf(field)}
-        helpText={field.description}
+        label={label}
+        helpText={helpText}
         error={error}
         labelAppend={labelAppend}
       />
@@ -55,9 +63,9 @@ export function FieldRowItem({
   return (
     <EuiFormRow
       fullWidth
-      label={field.type === 'boolean' ? undefined : labelOf(field)}
+      label={field.type === 'boolean' ? undefined : label}
       labelAppend={labelAppend}
-      helpText={field.description}
+      helpText={helpText}
       isInvalid={error !== undefined}
       error={error}
       id={toControlId(idPrefix, fieldPointer)}

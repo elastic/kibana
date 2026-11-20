@@ -43,7 +43,7 @@ export function StringControl({
     placeholder: field.ui?.placeholder,
     value: typeof value === 'string' ? value : '',
     css: codeStyles,
-    'data-test-subj': `componentDefinitionFormString-${field.name}`,
+    'data-test-subj': `componentDefinitionFormString-${field.name ?? 'item'}`,
   };
   if (field.ui?.multiline || (field.ui?.lines ?? 1) > 1) {
     return (

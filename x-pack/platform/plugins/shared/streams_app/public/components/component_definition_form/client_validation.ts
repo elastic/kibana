@@ -10,6 +10,7 @@ import { isEqual } from 'lodash';
 import type {
   CatalogueChoiceGroup,
   CatalogueFieldDefinition,
+  CatalogueMapField,
   CatalogueNamedFieldDefinition,
 } from '@kbn/streams-schema';
 import { resolveEnumOptions } from '../../services/component_catalogue';
@@ -70,6 +71,24 @@ const messages = {
   uniqueItems: i18n.translate('xpack.streams.componentDefinitionForm.validation.uniqueItems', {
     defaultMessage: 'Items must be unique',
   }),
+  minEntries: (count: number) =>
+    i18n.translate('xpack.streams.componentDefinitionForm.validation.minEntries', {
+      defaultMessage: 'Add at least {count, plural, one {# entry} other {# entries}}',
+      values: { count },
+    }),
+  maxEntries: (count: number) =>
+    i18n.translate('xpack.streams.componentDefinitionForm.validation.maxEntries', {
+      defaultMessage: 'Add at most {count, plural, one {# entry} other {# entries}}',
+      values: { count },
+    }),
+  keyRequired: i18n.translate('xpack.streams.componentDefinitionForm.validation.keyRequired', {
+    defaultMessage: 'Enter a key',
+  }),
+  keyPattern: (pattern: string) =>
+    i18n.translate('xpack.streams.componentDefinitionForm.validation.keyPattern', {
+      defaultMessage: 'The key must match the pattern {pattern}',
+      values: { pattern },
+    }),
   invalidOption: i18n.translate('xpack.streams.componentDefinitionForm.validation.invalidOption', {
     defaultMessage: 'Choose one of the available options',
   }),
@@ -104,13 +123,61 @@ export const validateItemScopes = (
   return errors;
 };
 
-const safeRegExp = (pattern: string): RegExp | undefined => {
-  try {
-    return new RegExp(pattern);
-  } catch {
-    return undefined;
+/** A value longer than this is left for the distributor, to keep a check quick. */
+const MAX_PATTERN_INPUT_LENGTH = 1024;
+
+/**
+ * A repeated group that itself repeats, such as `(a+)+`. The distributor matches in linear time,
+ * but this runtime backtracks, and on such a pattern a short value can take seconds.
+ */
+const NESTED_REPETITION = /\((?:[^()\\]|\\.)*[+*}](?:[^()\\]|\\.)*\)[+*{]/;
+
+const compiledPatterns = new Map<string, RegExp | null>();
+
+/** The pattern compiled for this runtime, or `null` when it is left for the distributor. */
+const compilePattern = (pattern: string): RegExp | null => {
+  const known = compiledPatterns.get(pattern);
+  if (known !== undefined) {
+    return known;
   }
+  let compiled: RegExp | null = null;
+  if (!NESTED_REPETITION.test(pattern)) {
+    try {
+      // Unicode mode turns down the syntax only the distributor knows, such as `\z`, instead of
+      // reading it as something else.
+      compiled = new RegExp(pattern, 'u');
+    } catch {
+      compiled = null;
+    }
+  }
+  compiledPatterns.set(pattern, compiled);
+  return compiled;
 };
+
+/**
+ * Whether the value matches a pattern of the catalogue. The patterns are written for the
+ * distributor, so one this runtime cannot check safely is left for the distributor.
+ */
+const matchesPattern = (pattern: string, value: string): boolean => {
+  if (value.length > MAX_PATTERN_INPUT_LENGTH) {
+    return true;
+  }
+  return compilePattern(pattern)?.test(value) ?? true;
+};
+
+/** What is wrong with the key of a map entry, if anything. */
+export const mapKeyError = (field: CatalogueMapField, key: string): string | undefined => {
+  if (key === '') {
+    return messages.keyRequired;
+  }
+  return field.key_pattern !== undefined && !matchesPattern(field.key_pattern, key)
+    ? messages.keyPattern(field.key_pattern)
+    : undefined;
+};
+
+/** A map without entries is not written, so a required one counts as missing. */
+const isEmptyMap = (field: CatalogueFieldDefinition, value: FormValue | undefined): boolean =>
+  field.type === 'map' && isObjectValue(value) && Object.keys(value).length === 0;
 
 const validateValue = (
   field: CatalogueFieldDefinition,
@@ -131,7 +198,7 @@ const validateValue = (
         errors[pointer] = messages.minLength(field.min_length);
       } else if (field.max_length !== undefined && value.length > field.max_length) {
         errors[pointer] = messages.maxLength(field.max_length);
-      } else if (field.pattern !== undefined && !safeRegExp(field.pattern)?.test(value)) {
+      } else if (field.pattern !== undefined && !matchesPattern(field.pattern, value)) {
         errors[pointer] = messages.pattern(field.pattern);
       }
       return;
@@ -172,13 +239,17 @@ const validateValue = (
         errors[pointer] = messages.maxItems(field.max_items);
       } else if (
         field.unique_items &&
-        value.some((item, index) => value.findIndex((other) => isEqual(other, item)) !== index)
+        value.some(
+          (item, index) =>
+            !isEmptyValue(item) && value.findIndex((other) => isEqual(other, item)) !== index
+        )
       ) {
         errors[pointer] = messages.uniqueItems;
       }
       value.forEach((item, index) => {
         const itemPointer = joinPointer(pointer, index);
-        if (field.items.type === 'object' && isEmptyValue(item)) {
+        // An empty row is not written, so it would go missing without a word once saved.
+        if (isEmptyValue(item)) {
           errors[itemPointer] = messages.required;
           return;
         }
@@ -186,13 +257,35 @@ const validateValue = (
       });
       return;
     }
-    case 'map':
-      if (isObjectValue(value)) {
-        for (const [key, item] of Object.entries(value)) {
-          validateValue(field.value_schema, item, joinPointer(pointer, key), context, errors);
+    case 'map': {
+      if (!isObjectValue(value)) {
+        return;
+      }
+      const entries = Object.entries(value);
+      // A map without entries is not written, so only a required one has to have some.
+      if (entries.length === 0) {
+        return;
+      }
+      if (field.min_entries !== undefined && entries.length < field.min_entries) {
+        errors[pointer] = messages.minEntries(field.min_entries);
+      } else if (field.max_entries !== undefined && entries.length > field.max_entries) {
+        errors[pointer] = messages.maxEntries(field.max_entries);
+      }
+      for (const [key, item] of entries) {
+        // A key has no pointer of its own; like the distributor, its error goes on the entry.
+        const entryPointer = joinPointer(pointer, key);
+        const keyError = mapKeyError(field, key);
+        if (keyError !== undefined) {
+          errors[entryPointer] = keyError;
+        } else if (isEmptyValue(item)) {
+          // As with a list row, an entry without a value is not written.
+          errors[entryPointer] = messages.required;
+        } else {
+          validateValue(field.value_schema, item, entryPointer, context, errors);
         }
       }
       return;
+    }
     default:
       return;
   }
@@ -219,7 +312,7 @@ export const validateObject = (
     const required =
       isFieldRequired(field, value, context.telemetry) ||
       findChoiceGroup(choiceGroups, field.name)?.min_selected === 1;
-    if (required && isEmptyValue(fieldValue)) {
+    if (required && (isEmptyValue(fieldValue) || isEmptyMap(field, fieldValue))) {
       errors[fieldPointer] = messages.required;
       continue;
     }

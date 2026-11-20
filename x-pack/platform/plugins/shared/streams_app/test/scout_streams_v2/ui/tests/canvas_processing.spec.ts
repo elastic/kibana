@@ -124,7 +124,7 @@ test.describe('Stream canvas - processing', { tag: tags.serverless.observability
 
     await expect(
       streams.processingFlyout.getByTestId('streamsProcessingFlyoutStepSummary')
-    ).toHaveText('upsert record.team = "core"');
+    ).toHaveText('upsert attributes.team = "core"');
 
     const saveRequest = page.waitForRequest(
       (request) =>
@@ -201,7 +201,7 @@ test.describe('Stream canvas - processing', { tag: tags.serverless.observability
           {
             severity: 'error',
             code: 'E028_INVALID_CONFIG_TYPE',
-            message: 'action must be one of upsert, update, insert, delete',
+            message: 'action must be one of upsert, update, insert',
           },
         ],
       },

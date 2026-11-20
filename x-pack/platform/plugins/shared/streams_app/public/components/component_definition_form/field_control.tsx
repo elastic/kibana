@@ -14,9 +14,10 @@ import { EnumControl } from './controls/enum_control';
 import { JsonValueControl } from './controls/json_value_control';
 import { LiteralControl } from './controls/literal_control';
 import { MapControl } from './controls/map_control';
+import { PathField } from './controls/path_control';
 import { StringControl } from './controls/string_control';
 import { labelOf, toControlId } from './field_helpers';
-import { FieldList } from './field_list';
+import { FieldSections } from './field_sections';
 import { useDefinitionFormContext } from './form_context';
 import { isObjectValue, type FormValue, type ObjectValue } from './values';
 
@@ -128,7 +129,7 @@ export function FieldControl({
     case 'object':
       return (
         <EuiPanel color="subdued" hasShadow={false} paddingSize="m">
-          <FieldList
+          <FieldSections
             fields={field.fields}
             choiceGroups={field.choice_groups}
             value={isObjectValue(value) ? value : {}}
@@ -137,10 +138,37 @@ export function FieldControl({
           />
         </EuiPanel>
       );
+    case 'path':
+      return (
+        <PathField
+          field={field}
+          value={value}
+          onChange={onChange}
+          scope={scope}
+          error={errors[pointer]}
+          compressed
+        />
+      );
     case 'array':
-      return <ArrayControl field={field} value={value} onChange={onChange} pointer={pointer} />;
+      return (
+        <ArrayControl
+          field={field}
+          value={value}
+          onChange={onChange}
+          pointer={pointer}
+          scope={scope}
+        />
+      );
     case 'map':
-      return <MapControl field={field} value={value} onChange={onChange} pointer={pointer} />;
+      return (
+        <MapControl
+          field={field}
+          value={value}
+          onChange={onChange}
+          pointer={pointer}
+          scope={scope}
+        />
+      );
     default:
       return (
         <JsonValueControl

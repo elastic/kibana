@@ -6,14 +6,21 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { omit } from 'lodash';
-import type { CatalogueChoiceGroup, CatalogueNamedFieldDefinition } from '@kbn/streams-schema';
+import type {
+  CatalogueChoiceGroup,
+  CatalogueNamedFieldDefinition,
+  CatalogueUiHints,
+  CatalogueUiWidth,
+} from '@kbn/streams-schema';
 import { ChoiceGroupItem } from './choice_group_item';
 import { applyChoice, findChoiceGroup, getSelectedChoice } from './choice_groups';
 import { isFieldAvailable } from './conditions';
 import { FieldRowItem } from './field_row_item';
 import { useDefinitionFormContext } from './form_context';
-import { orderFields } from './layout';
+import { layoutRows, orderFields } from './layout';
 import { createChoiceValue } from './serialize';
 import type { FormValue, ObjectValue } from './values';
 
@@ -25,9 +32,46 @@ interface FieldListProps {
   pointer: string;
 }
 
-/** Renders the fields of one object scope as stacked form rows. */
+/** What takes one place in a row: a field, or a choice group showing the member chosen in it. */
+interface Cell {
+  key: string;
+  field?: CatalogueNamedFieldDefinition;
+  group?: CatalogueChoiceGroup;
+  ui?: CatalogueUiHints;
+}
+
+const DEFAULT_WIDTH: CatalogueUiWidth = 'm';
+
+/** The share of a row each width takes, relative to the other cells of the row. */
+const WIDTH_SHARE: Record<CatalogueUiWidth, 1 | 2 | 3 | 4 | 5> = {
+  xs: 1,
+  s: 2,
+  m: 3,
+  l: 4,
+  xl: 5,
+  full: 5,
+};
+
+/** A cell narrower than this wraps onto the next line instead of squeezing its input. */
+const cellStyles = ({ euiTheme }: UseEuiTheme, width: CatalogueUiWidth) => {
+  if (width === 'full') {
+    return css`
+      flex-basis: 100%;
+    `;
+  }
+  const units = width === 'xs' ? 6 : width === 's' ? 8 : 10;
+  return css`
+    min-inline-size: calc(${euiTheme.size.base} * ${units});
+  `;
+};
+
+/**
+ * Renders the fields of one object scope as form rows. Fields that share a `ui.row` sit side by
+ * side, sharing the line in proportion to their `ui.width`.
+ */
 export function FieldList({ fields, choiceGroups, value, onChange, pointer }: FieldListProps) {
   const context = useDefinitionFormContext();
+  const euiThemeContext = useEuiTheme();
   const ordered = useMemo(() => orderFields(fields), [fields]);
 
   const onFieldChange = useCallback(
@@ -47,42 +91,87 @@ export function FieldList({ fields, choiceGroups, value, onChange, pointer }: Fi
     [context, fields, onChange, value]
   );
 
-  const renderedGroups = new Set<string>();
+  const seenGroups = new Set<string>();
+  const cells = ordered.flatMap((field): Cell[] => {
+    const group = findChoiceGroup(choiceGroups, field.name);
+    if (group) {
+      if (seenGroups.has(group.id)) {
+        return [];
+      }
+      seenGroups.add(group.id);
+      // The group is laid out as the member it shows, or its first one while none is chosen.
+      const shownName = getSelectedChoice(group, value) ?? group.fields[0];
+      const shown = fields.find(({ name }) => name === shownName) ?? field;
+      return [{ key: `group:${group.id}`, group, ui: shown.ui }];
+    }
+    return isFieldAvailable(field, value, context.telemetry)
+      ? [{ key: field.name, field, ui: field.ui }]
+      : [];
+  });
+
+  const renderCell = ({ field, group }: Cell, compact: boolean) => {
+    if (group) {
+      return (
+        <ChoiceGroupItem
+          group={group}
+          fields={fields}
+          value={value}
+          pointer={pointer}
+          selected={getSelectedChoice(group, value)}
+          onSelect={onSelect}
+          onFieldChange={onFieldChange}
+          compact={compact}
+        />
+      );
+    }
+    return field ? (
+      <FieldRowItem
+        field={field}
+        value={value}
+        pointer={pointer}
+        onFieldChange={onFieldChange}
+        compact={compact}
+      />
+    ) : null;
+  };
+
   return (
-    <>
-      {ordered.flatMap((field) => {
-        const group = findChoiceGroup(choiceGroups, field.name);
-        if (group) {
-          if (renderedGroups.has(group.id)) {
-            return [];
-          }
-          renderedGroups.add(group.id);
-          return [
-            <ChoiceGroupItem
-              key={`group:${group.id}`}
-              group={group}
-              fields={fields}
-              value={value}
-              pointer={pointer}
-              selected={getSelectedChoice(group, value)}
-              onSelect={onSelect}
-              onFieldChange={onFieldChange}
-            />,
-          ];
+    <EuiFlexGroup direction="column" gutterSize="m">
+      {layoutRows(cells).map((row) => {
+        const [first] = row.cells;
+        // A field alone on its line takes all of it, whatever width it asks for.
+        if (row.cells.length === 1) {
+          return (
+            <EuiFlexItem key={first.key} grow={false}>
+              {renderCell(first, false)}
+            </EuiFlexItem>
+          );
         }
-        if (!isFieldAvailable(field, value, context.telemetry)) {
-          return [];
-        }
-        return [
-          <FieldRowItem
-            key={field.name}
-            field={field}
-            value={value}
-            pointer={pointer}
-            onFieldChange={onFieldChange}
-          />,
-        ];
+        return (
+          <EuiFlexItem key={`row:${row.id}`} grow={false}>
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="flexStart"
+              responsive={false}
+              wrap
+              data-test-subj={`componentDefinitionFormFieldRow-${row.id}`}
+            >
+              {row.cells.map((cell) => {
+                const width = cell.ui?.width ?? DEFAULT_WIDTH;
+                return (
+                  <EuiFlexItem
+                    key={cell.key}
+                    grow={WIDTH_SHARE[width]}
+                    css={cellStyles(euiThemeContext, width)}
+                  >
+                    {renderCell(cell, true)}
+                  </EuiFlexItem>
+                );
+              })}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        );
       })}
-    </>
+    </EuiFlexGroup>
   );
 }

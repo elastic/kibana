@@ -11,12 +11,16 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormErrorText,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CatalogueMapField } from '@kbn/streams-schema';
+import { mapKeyError } from '../client_validation';
 import { FieldControl } from '../field_control';
+import { useDefinitionFormContext } from '../form_context';
+import { createInitialItem } from '../serialize';
 import { useRowKeys } from '../use_row_keys';
 import { isObjectValue, joinPointer, type FormValue, type ObjectValue } from '../values';
 import { RemoveButton } from './remove_button';
@@ -36,9 +40,7 @@ const rowsFromValue = (value: FormValue | undefined): MapRow[] =>
 const valueFromRows = (rows: readonly MapRow[]): ObjectValue => {
   const result: ObjectValue = {};
   for (const row of rows) {
-    if (row.value !== undefined) {
-      result[row.key] = row.value;
-    }
+    result[row.key] = row.value === undefined ? '' : row.value;
   }
   return result;
 };
@@ -48,9 +50,11 @@ interface MapControlProps {
   value: FormValue | undefined;
   onChange: (value: FormValue | undefined) => void;
   pointer: string;
+  scope: ObjectValue;
 }
 
-export function MapControl({ field, value, onChange, pointer }: MapControlProps) {
+export function MapControl({ field, value, onChange, pointer, scope }: MapControlProps) {
+  const context = useDefinitionFormContext();
   const [rows, setRows] = useState<MapRow[]>(() => rowsFromValue(value));
   const rowKeys = useRowKeys(rows.length);
   const canAdd = field.max_entries === undefined || rows.length < field.max_entries;
@@ -64,64 +68,83 @@ export function MapControl({ field, value, onChange, pointer }: MapControlProps)
     <div>
       {rows.length > 0 ? (
         <EuiPanel color="subdued" paddingSize="m" hasShadow={false}>
-          {rows.map((row, index) => (
-            <React.Fragment key={rowKeys.keys[index]}>
-              {index > 0 ? <EuiSpacer size="s" /> : null}
-              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="flexStart">
-                <EuiFlexItem grow={1}>
-                  <EuiFieldText
-                    compressed
-                    fullWidth
-                    aria-label={i18n.translate('xpack.streams.componentDefinitionForm.map.key', {
-                      defaultMessage: 'Key',
-                    })}
-                    value={row.key}
-                    onChange={(event) =>
-                      update(
-                        rows.map((current, position) =>
-                          position === index ? { ...current, key: event.target.value } : current
+          {rows.map((row, index) => {
+            const entryPointer = joinPointer(pointer, row.key);
+            const entryError = context.errors[entryPointer];
+            return (
+              <React.Fragment key={rowKeys.keys[index]}>
+                {index > 0 ? <EuiSpacer size="s" /> : null}
+                <EuiFlexGroup
+                  gutterSize="s"
+                  responsive={false}
+                  alignItems="flexStart"
+                  data-test-subj="componentDefinitionFormMapEntry"
+                >
+                  <EuiFlexItem grow={1}>
+                    <EuiFieldText
+                      compressed
+                      fullWidth
+                      aria-label={i18n.translate('xpack.streams.componentDefinitionForm.map.key', {
+                        defaultMessage: 'Key',
+                      })}
+                      // The entry's error is about its key or its value; only the first marks the key.
+                      isInvalid={
+                        entryError !== undefined && mapKeyError(field, row.key) !== undefined
+                      }
+                      value={row.key}
+                      onChange={(event) =>
+                        update(
+                          rows.map((current, position) =>
+                            position === index ? { ...current, key: event.target.value } : current
+                          )
                         )
-                      )
-                    }
-                    data-test-subj="componentDefinitionFormMapKey"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={2}>
-                  <FieldControl
-                    field={field.value_schema}
-                    value={row.value}
-                    onChange={(next) =>
-                      update(
-                        rows.map((current, position) =>
-                          position === index ? { ...current, value: next } : current
+                      }
+                      data-test-subj="componentDefinitionFormMapKey"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={2}>
+                    <FieldControl
+                      field={field.value_schema}
+                      value={row.value}
+                      onChange={(next) =>
+                        update(
+                          rows.map((current, position) =>
+                            position === index ? { ...current, value: next } : current
+                          )
                         )
-                      )
-                    }
-                    pointer={joinPointer(pointer, row.key)}
-                    scope={{}}
-                    required
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <RemoveButton
-                    label={removeEntryLabel}
-                    onClick={() => {
-                      rowKeys.remove(index);
-                      update(rows.filter((_, position) => position !== index));
-                    }}
-                    dataTestSubj="componentDefinitionFormMapRemove"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </React.Fragment>
-          ))}
+                      }
+                      pointer={entryPointer}
+                      scope={scope}
+                      required
+                    />
+                    {/* A path picker is a form row of its own and shows its error itself. */}
+                    {entryError !== undefined && field.value_schema.type !== 'path' ? (
+                      <EuiFormErrorText>{entryError}</EuiFormErrorText>
+                    ) : null}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <RemoveButton
+                      label={removeEntryLabel}
+                      onClick={() => {
+                        rowKeys.remove(index);
+                        update(rows.filter((_, position) => position !== index));
+                      }}
+                      dataTestSubj="componentDefinitionFormMapRemove"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </React.Fragment>
+            );
+          })}
         </EuiPanel>
       ) : null}
       <EuiButtonEmpty
         flush="left"
         size="s"
         isDisabled={!canAdd}
-        onClick={() => update([...rows, { key: '', value: undefined }])}
+        onClick={() =>
+          update([...rows, { key: '', value: createInitialItem(field.value_schema, context) }])
+        }
         data-test-subj={`componentDefinitionFormMapAdd-${field.name ?? 'entries'}`}
       >
         {i18n.translate('xpack.streams.componentDefinitionForm.map.add', {

@@ -27,12 +27,32 @@ export type CheckOutcome =
     }
   | { kind: 'failed'; message: string };
 
+const formatDetail = (value: StreamsUnit.DiagnosticDetail): string =>
+  typeof value === 'string' ? value : JSON.stringify(value);
+
+const DiagnosticDetails = ({ details }: { details: StreamsUnit.Diagnostic['details'] }) => {
+  const entries = Object.entries(details ?? {});
+  if (entries.length === 0) {
+    return null;
+  }
+  return (
+    <ul data-test-subj="streamsProcessingFlyoutEditorDiagnosticDetails">
+      {entries.map(([name, value]) => (
+        <li key={name}>
+          {name}: <code>{formatDetail(value)}</code>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
 const DiagnosticList = ({ diagnostics }: { diagnostics: StreamsUnit.Diagnostic[] }) => (
   <ul>
-    {diagnostics.map(({ code, message }, index) => (
+    {diagnostics.map(({ code, message, details }, index) => (
       <li key={`${code}-${index}`}>
         {code ? <strong>{code}: </strong> : null}
         {message}
+        <DiagnosticDetails details={details} />
       </li>
     ))}
   </ul>
