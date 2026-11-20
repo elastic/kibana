@@ -131,9 +131,11 @@ describe('AddConnectorFlyout', () => {
     expect(await screen.findByTestId('addConnectorFlyoutStub')).toBeInTheDocument();
     const props = (getAddConnectorFlyout.mock.calls as unknown as Array<[unknown]>)[0][0] as {
       initialConnector: { actionTypeId: string };
+      onTestConnector: unknown;
       onConnectorCreated: (connector: { id: string; name: string }) => void;
     };
     expect(props.initialConnector).toEqual({ actionTypeId: '.github' });
+    expect(props.onTestConnector).toEqual(expect.any(Function));
     props.onConnectorCreated({ id: 'gh', name: 'gh' });
     await waitFor(() =>
       expect(agents.addConnectorToAgent).toHaveBeenCalledWith({
