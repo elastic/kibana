@@ -254,18 +254,21 @@ export class HydrateAlertDataStep implements DispatcherStep {
         }
         processed += batch.length;
 
+        // Checked before encoding the widest row, which copies up to a response cap of data. A short
+        // batch (end of a chunk) may be cut before the widest rows of a full one.
+        const mayGrow =
+          batch.length === this.maxIdsPerQuery &&
+          batch.length < ESQL_QUERY_ROW_LIMIT &&
+          batch.length + 1 < smallestFailedBatchSize;
+        if (!mayGrow) continue;
+
         const widestRowBytes = widestRow ? encodedRowBytes(widestRow) : 0;
         // An empty response projects to Infinity, i.e. the row limit.
         const projectedSize = Math.min(
           ESQL_QUERY_ROW_LIMIT,
           Math.floor((BATCH_TARGET_SHARE * this.maxResponseSizeBytes) / widestRowBytes)
         );
-        // A short batch (end of a chunk) may be cut before the widest rows of a full one.
-        const canGrow =
-          batch.length === this.maxIdsPerQuery &&
-          projectedSize > batch.length &&
-          projectedSize < smallestFailedBatchSize;
-        if (canGrow) {
+        if (projectedSize > batch.length && projectedSize < smallestFailedBatchSize) {
           this.maxIdsPerQuery = projectedSize;
           logger.debug({
             message: () =>

@@ -567,6 +567,36 @@ describe('HydrateAlertDataStep', () => {
       });
 
       it.each([
+        ['a short batch', 1, false],
+        ['a full batch', 2, true],
+      ])(
+        'encodes the widest row only when the batch may grow: %s',
+        async (_, alertCount, encoded) => {
+          const { queryService, mockEsClient } = createQueryService();
+          const step = createStep(queryService, { maxResponseSize: '1mb' });
+          await learnTwoIdsPerQuery(step, mockEsClient);
+
+          const dataJson = dataJsonProjecting(4, 'ep-5');
+          mockEsClient.esql.query.mockResolvedValue(
+            createAlertDataResponse([{ alert_id: 'ep-5', data_json: dataJson }])
+          );
+          const stringify = jest.spyOn(JSON, 'stringify');
+          try {
+            await step.execute(
+              createDispatcherPipelineState({ dispatchable: alertsFrom(5, alertCount) }),
+              createLoggerService().loggerService
+            );
+            const encodedWidestRow = stringify.mock.calls.some(
+              ([value]) => Array.isArray(value) && value[1] === dataJson
+            );
+            expect(encodedWidestRow).toBe(encoded);
+          } finally {
+            stringify.mockRestore();
+          }
+        }
+      );
+
+      it.each([
         ['escaped quotes', '\\"'],
         ['non-ASCII text', 'é'],
       ])(
