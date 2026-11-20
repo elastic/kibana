@@ -9,7 +9,11 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import pRetry from 'p-retry';
 
 import type { Agent } from '../../types';
-import { AgentReassignmentError, FleetVersionConflictError } from '../../errors';
+import {
+  AgentReassignmentError,
+  FleetVersionConflictError,
+  UpdateByQueryCancelledError,
+} from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
@@ -117,7 +121,14 @@ export async function updateAgentTags(
       }),
     {
       onFailedAttempt: (error) => {
-        if (!(error instanceof FleetVersionConflictError)) {
+        // A cancelled update records nothing in this path, where a retry goes through every given
+        // agent again, so it is retried like a version conflict.
+        if (
+          !(
+            error instanceof FleetVersionConflictError ||
+            error instanceof UpdateByQueryCancelledError
+          )
+        ) {
           throw error;
         }
       },

@@ -478,6 +478,44 @@ describe('update_agent_tags', () => {
     });
   });
 
+  describe('a cancelled update by query, when updating agents by id', () => {
+    const task = (response: object) =>
+      ({ completed: true, task: {}, response: { failures: [], total: 2, ...response } } as any);
+
+    beforeEach(() => {
+      esClient.updateByQuery.mockReset();
+      esClient.updateByQuery.mockResolvedValue({ task: 'node1:42' } as any);
+    });
+
+    it('should retry the update, and record each agent once', async () => {
+      esClient.tasks.get
+        .mockResolvedValueOnce(
+          task({ updated: 1, version_conflicts: 0, canceled: 'by user request' })
+        )
+        .mockResolvedValueOnce(task({ updated: 2, version_conflicts: 0 }));
+
+      const res = await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['one'], []);
+
+      expect(esClient.updateByQuery).toHaveBeenCalledTimes(2);
+      expect(res).toEqual(expect.objectContaining({ updated: 2 }));
+      // the cancelled attempt recorded nothing, the retry went through every agent
+      expect(esClient.create).toHaveBeenCalledTimes(1);
+      expect((esClient.create.mock.calls[0][0] as any).document.agents.length).toEqual(2);
+    });
+
+    it('should not leave an action behind when every attempt is cancelled', async () => {
+      esClient.tasks.get.mockResolvedValue(
+        task({ updated: 1, version_conflicts: 0, canceled: 'by user request' })
+      );
+
+      await expect(
+        updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['one'], [])
+      ).rejects.toThrow(/cancelled .* after updating 1 of 2 agents/);
+
+      expect(esClient.create).not.toHaveBeenCalled();
+    });
+  });
+
   describe('retrySkipsUpdatedAgents', () => {
     it.each([
       [['a'], [], true],

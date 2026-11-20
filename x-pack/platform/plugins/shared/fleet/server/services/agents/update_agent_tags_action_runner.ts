@@ -15,7 +15,7 @@ import { AGENTS_INDEX } from '../../constants';
 
 import { appContextService } from '../app_context';
 
-import { FleetError, FleetVersionConflictError } from '../../errors';
+import { FleetError, FleetVersionConflictError, UpdateByQueryCancelledError } from '../../errors';
 
 import { ActionRunner } from './action_runner';
 
@@ -193,7 +193,7 @@ export async function updateTagsBatch(
     // Nothing is recorded for a cancelled update whose retry goes through these agents again: it
     // updates and records every one of them, so recording the ones updated here would count them
     // twice. The update is the same for an agent that was already updated.
-    throw new FleetError(cancelledMessage());
+    throw new UpdateByQueryCancelledError(cancelledMessage());
   }
 
   // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
@@ -288,7 +288,7 @@ export async function updateTagsBatch(
   if (res.canceled) {
     // The update was cancelled for running too long. The agents it did update are recorded above,
     // and the retry selects the rest, because the agents that were updated no longer match.
-    throw new FleetError(cancelledMessage());
+    throw new UpdateByQueryCancelledError(cancelledMessage());
   }
 
   return { actionId, updated: res.updated, took: res.took };
