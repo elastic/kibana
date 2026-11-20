@@ -50,7 +50,21 @@ export const loadMcpTools = async ({
   const documents = tools.map((tool) => ({ tool, href: new URL(tool, url).href }));
   const loaded = await mapConcurrently(
     documents,
-    async ({ tool, href }) => readMcpTool(await fetchText(href), tool),
+    async ({ tool, href }) => {
+      let text: string;
+      try {
+        text = await fetchText(href);
+      } catch (error) {
+        // The error alone often says only "404 Not Found"; name the document, so the manifest
+        // entry to fix is clear.
+        throw new Error(
+          `Couldn't fetch the tool document "${tool}" at ${href}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+      return readMcpTool(text, tool);
+    },
     CONCURRENCY
   );
   const byName = new Map<string, string>();

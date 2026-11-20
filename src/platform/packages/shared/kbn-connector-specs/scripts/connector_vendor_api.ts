@@ -151,8 +151,13 @@ run(
     }
 
     if (flagsReader.boolean('drift')) {
-      if (check || refresh || flagsReader.boolean('inspect') || Object.keys(sources).length > 0) {
-        throw createFlagError('--drift always fetches the latest specs and writes no artifacts');
+      const sourceFlagsGiven = [sources, formats, pages, endpoints, tools].some(
+        (flags) => Object.keys(flags).length > 0
+      );
+      if (check || refresh || flagsReader.boolean('inspect') || sourceFlagsGiven) {
+        throw createFlagError(
+          '--drift always fetches the latest specs of the manifest sources and writes no artifacts'
+        );
       }
       const driftedId = flagsReader.string('connector');
       const connectors = driftedId

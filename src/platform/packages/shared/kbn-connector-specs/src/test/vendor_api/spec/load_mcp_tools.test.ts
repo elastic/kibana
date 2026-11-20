@@ -69,6 +69,16 @@ describe('loadMcpTools', () => {
     ).rejects.toThrow('404 Not Found');
   });
 
+  it('names the document that could not be fetched, with its URL', async () => {
+    const fetchText = fetchFrom({ [`${BASE}get_me.json`]: toolDocument('get_me') });
+
+    await expect(
+      loadMcpTools({ url: BASE, tools: ['get_me.json', 'renamed.json'], fetchText })
+    ).rejects.toThrow(
+      `Couldn't fetch the tool document "renamed.json" at ${BASE}renamed.json: 404 Not Found`
+    );
+  });
+
   it('fails when two documents define the same tool', async () => {
     const fetchText = fetchFrom({
       [`${BASE}get_me.json`]: toolDocument('get_me'),
