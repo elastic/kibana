@@ -9,13 +9,15 @@
 
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public/actions';
-import type { FilterableField } from '@kbn/data-source';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { DataControlState } from '@kbn/controls-schemas';
 import type { CustomOptionsComponentProps } from '../controls/data_controls/types';
 
 export type CreateControlTypeContext<State extends DataControlState> = EmbeddableApiContext & {
   state: Partial<State>;
   controlId?: string;
+  /** The source of the control when it is not a data view that `data_view_id` can load */
+  source?: FilterableSource;
 };
 
 export type CreateControlTypeAction<State extends DataControlState = DataControlState> = Action<

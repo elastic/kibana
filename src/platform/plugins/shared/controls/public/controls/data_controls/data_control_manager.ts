@@ -120,8 +120,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
     rejectInitialDataSourceReady = reject;
   });
 
-  // The sources that the control derived from its own query, which `dataViewsService` does not have
-  const derivedSources = new Map<string, FilterableSource>();
   const dataSources$ = new BehaviorSubject<FilterableSource[] | undefined>(undefined);
   const field$ = new BehaviorSubject<FilterableField | undefined>(undefined);
   const defaultFieldFormatter = (toFormat: any) => String(toFormat);
@@ -131,8 +129,8 @@ export const initializeDataControlManager = async <EditorState extends object = 
     dataControlStateManager.api.valuesSource$,
   ])
     .pipe(
-      // Skip empty IDs only for ESQL controls so we don't fire a blocking "data view not found" error before the ID has been loaded
-      filter(([id, valuesSource]) => valuesSource !== ControlValuesSource.ESQL || Boolean(id)),
+      // The source of an ESQL control comes from its query, which is not always a data view that the id can load
+      filter(([, valuesSource]) => valuesSource !== ControlValuesSource.ESQL),
       tap(() => {
         filtersLoading$.next(true);
         if (blockingError$.value) {
@@ -142,9 +140,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       switchMap(async ([currentDataViewId]) => {
         let dataSource: FilterableSource | undefined;
         try {
-          dataSource =
-            derivedSources.get(currentDataViewId ?? '') ??
-            (await dataViewsService.get(currentDataViewId ?? ''));
+          dataSource = await dataViewsService.get(currentDataViewId ?? '');
           return { dataSource };
         } catch (error) {
           return { error };
@@ -250,6 +246,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
     ? parentApi.projectRouting$
     : new BehaviorSubject<string | undefined>(undefined);
 
+  let latestEsqlRun = 0;
   const esqlQueryDataSourceSubscription = combineLatest([
     dataControlStateManager.api.esqlQuery$,
     dataControlStateManager.api.valuesSource$,
@@ -265,6 +262,8 @@ export const initializeDataControlManager = async <EditorState extends object = 
     parentProjectRouting$,
   ]).subscribe(async ([query, valuesSource, esqlVariables]) => {
     if (valuesSource !== ControlValuesSource.ESQL) return;
+    // Only the latest run applies, as the query, the variables and the routing can change while one is pending
+    const run = ++latestEsqlRun;
     try {
       if (!query) {
         throw new Error(
@@ -274,6 +273,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
         );
       }
       const source = await getSourceFromESQLQuery(query, { parentApi });
+      if (run !== latestEsqlRun) return;
       if (!source.id) {
         throw new Error(
           i18n.translate('controls.dataControl.esqlDataViewDeriveFailed', {
@@ -282,8 +282,9 @@ export const initializeDataControlManager = async <EditorState extends object = 
         );
       }
 
-      derivedSources.set(source.id, source);
       dataControlStateManager.api.setDataViewId(source.id);
+      dataSources$.next([source]);
+      resolveInitialDataSourceReady(source);
       const result = await getESQLSingleColumnValues({
         query,
         search: dataService.search.search,
@@ -291,6 +292,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
         timeRange: dataService.query.timefilter.timefilter.getTime(),
         timezone: getControlsTimezone(),
       });
+      if (run !== latestEsqlRun) return;
       if (!getESQLSingleColumnValues.isSuccess(result)) {
         throw result.errors[0];
       }
@@ -300,6 +302,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
         setBlockingError(undefined);
       }
     } catch (e) {
+      if (run !== latestEsqlRun) return;
       setBlockingError(e);
       if (willHaveInitialFilter && getInitialFilter) rejectInitialDataSourceReady(e);
     }

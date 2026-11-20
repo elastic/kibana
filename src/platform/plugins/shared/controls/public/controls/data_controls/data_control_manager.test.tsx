@@ -431,4 +431,84 @@ describe('initializeDataControlManager', () => {
       expect(manager.api.valuesSourceFetchPlan$.value).toBeUndefined();
     });
   });
+
+  describe('source of an ES|QL values control', () => {
+    const esqlSourceOf = (id: string) => ({
+      kind: 'esql',
+      id,
+      title: 'logs-*',
+      fields: [],
+      getFieldByName: (name: string) => ({ name, type: 'string' }),
+      isTimeBased: () => false,
+    });
+    const savedEsqlState = {
+      ...dataControlState,
+      values_source: ControlValuesSource.ESQL,
+      esql_query: 'FROM logs-* | STATS BY myFieldName',
+    };
+    const {
+      data_view_id: _dataViewId,
+      field_name: _fieldName,
+      ...serializedEsqlState
+    } = savedEsqlState;
+    const initializeEsqlManager = () =>
+      initializeDataControlManager({
+        controlId: 'myControlId',
+        controlType: 'myControlType',
+        state: serializedEsqlState,
+        editorStateManager: initializeStateManager({}, {}),
+        parentApi: {},
+        typeDisplayName: 'My Control Type',
+      });
+
+    beforeEach(() => {
+      mockGetESQLSingleColumnValues.mockResolvedValue({
+        values: [],
+        column: { name: 'myFieldName', type: 'keyword' },
+        indexPattern: 'logs-*',
+      });
+    });
+
+    it('uses the source of the query that the editor saves, with the id that only the query can resolve', async () => {
+      const firstSource = esqlSourceOf('firstSourceId');
+      const secondSource = esqlSourceOf('secondSourceId');
+      (getSourceFromESQLQuery as jest.Mock)
+        .mockResolvedValueOnce(firstSource)
+        .mockResolvedValue(secondSource);
+      const manager = await initializeEsqlManager();
+      const errors: unknown[] = [];
+      manager.api.blockingError$.subscribe((error) => error && errors.push(error));
+      await firstValueFrom(manager.api.dataSources$.pipe(filter(Boolean)));
+      expect(manager.api.dataSources$.value?.[0]).toBe(firstSource);
+
+      // what the editor saves: the new query together with the id of the source that it derived
+      manager.reinitializeState({
+        ...manager.getLatestState(),
+        esql_query: 'FROM logs-* | STATS BY other',
+        data_view_id: 'secondSourceId',
+      } as DataControlState);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(manager.api.dataSources$.value?.[0]).toBe(secondSource);
+      // the id of a source that no data view has must not be looked up as a data view, even for a moment
+      expect(errors).toEqual([]);
+    });
+
+    it('applies only the latest query when an earlier one finishes last', async () => {
+      const firstSource = esqlSourceOf('firstSourceId');
+      const secondSource = esqlSourceOf('secondSourceId');
+      let resolveFirst: (source: unknown) => void = () => {};
+      (getSourceFromESQLQuery as jest.Mock)
+        .mockReturnValueOnce(new Promise((resolve) => (resolveFirst = resolve)))
+        .mockResolvedValue(secondSource);
+      const manager = await initializeEsqlManager();
+
+      manager.api.setEsqlQuery('FROM logs-* | STATS BY other');
+      await firstValueFrom(manager.api.dataSources$.pipe(filter(Boolean)));
+      resolveFirst(firstSource);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(manager.api.dataSources$.value?.[0]).toBe(secondSource);
+    });
+  });
 });

@@ -37,9 +37,12 @@ export const createOptionsListControlAction = (): CreateControlTypeAction<
       i18n.translate('controls.optionsList.action.displayName', {
         defaultMessage: 'Options list',
       }),
-    isCompatible: async ({ state: { data_view_id: dataViewId, field_name: fieldName } }) => {
-      if (!dataViewId || !fieldName) return false;
-      const dataView = await dataViewsService.get(dataViewId);
+    isCompatible: async ({
+      state: { data_view_id: dataViewId, field_name: fieldName },
+      source,
+    }) => {
+      const dataView = source ?? (dataViewId ? await dataViewsService.get(dataViewId) : undefined);
+      if (!dataView || !fieldName) return false;
       // ES|QL-source controls can sometimes pass a field name that omits a .keyword suffix, so try adding it before
       // declaring the field non-existent
       const field =

@@ -44,6 +44,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import { triggers } from '@kbn/ui-actions-plugin/public';
 import { CONTROL_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { ControlValuesSource, DEFAULT_CONTROL_VALUES_SOURCE } from '@kbn/controls-constants';
+import { isEsqlFilterableSource } from '@kbn/data-source';
 import type { FilterableSource } from '@kbn/data-source';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { PublishesESQLVariables } from '@kbn/esql-types';
@@ -109,9 +110,11 @@ const useControlActionRegistry = (): ControlActionRegistry => {
 const CompatibleControlTypesComponent = ({
   data_view_id,
   field_name,
+  source,
   selectedControlType: selectedAction,
   setSelectedControlType: setSelectedAction,
 }: Partial<DataControlEditorState> & {
+  source?: FilterableSource;
   selectedControlType?: string;
   setSelectedControlType: (type: string) => void;
 }) => {
@@ -123,8 +126,9 @@ const CompatibleControlTypesComponent = ({
       trigger: triggers[CONTROL_MENU_TRIGGER],
       embeddable: undefined, // parentApi isn't necessary for this
       state: { data_view_id, field_name },
+      source,
     }),
-    [data_view_id, field_name]
+    [data_view_id, field_name, source]
   );
 
   const sortedActionArray: CreateControlTypeAction[] = useMemo(() => {
@@ -266,6 +270,9 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   const selectedSource: FilterableSource | undefined = isESQLValuesSource
     ? esqlSource
     : selectedDataView;
+  const isEsqlSource = Boolean(
+    isESQLValuesSource && esqlSource && isEsqlFilterableSource(esqlSource)
+  );
 
   const CustomSettingsComponent = useMemo(() => {
     if (!selectedControlType) return;
@@ -311,9 +318,13 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         ...editorState,
         values_source: nextSource as ControlValuesSource,
         ...(nextEsqlQuery ? { esql_query: nextEsqlQuery } : {}),
+        // the source of a query that is an ES|QL source cannot be loaded as a data view in field mode
+        ...(nextSource === ControlValuesSource.FIELD && isEsqlSource
+          ? { data_view_id: undefined, field_name: undefined }
+          : {}),
       });
     },
-    [editorState, selectedSource]
+    [editorState, selectedSource, isEsqlSource]
   );
   const esqlQueryNeedsRunning = useMemo(
     () => !valuesSourceValid && isESQLValuesSource,
@@ -326,6 +337,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         trigger: triggers[CONTROL_MENU_TRIGGER],
         embeddable: undefined,
         state: { field_name: nextFieldName, data_view_id: editorState.data_view_id },
+        source: selectedSource,
       };
 
       /**
@@ -355,7 +367,13 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         setPanelTitle(newDefaultTitle);
       }
     },
-    [controlActionRegistry, editorState.data_view_id, editorState.title, selectedControlType]
+    [
+      controlActionRegistry,
+      editorState.data_view_id,
+      editorState.title,
+      selectedControlType,
+      selectedSource,
+    ]
   );
 
   return (
@@ -490,7 +508,8 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
             {/* wrapping in `div` so that focus gets passed properly to the form row */}
             <div>
               <CompatibleControlTypesComponent
-                data_view_id={editorState.data_view_id}
+                data_view_id={isESQLValuesSource ? undefined : editorState.data_view_id}
+                source={selectedSource}
                 field_name={editorState.field_name}
                 selectedControlType={selectedControlType}
                 setSelectedControlType={setSelectedControlType}
@@ -568,7 +587,8 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                     // the control already exists with the expected type, so just update it
                     onUpdate(transformedState ?? editorState);
                   }
-                  onSave(editorState.data_view_id);
+                  // the id of an ES|QL source is not the id of a data view that a next control can start from
+                  onSave(isEsqlSource ? undefined : editorState.data_view_id);
                 }}
               >
                 {DataControlEditorStrings.manageControl.getSaveChangesTitle()}

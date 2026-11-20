@@ -35,6 +35,23 @@ jest.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: () => <div data-test-subj="mock-esql-editor" />,
 }));
 
+const mockGetSourceFromESQLQuery = jest.fn();
+jest.mock('../../utils/get_source_from_esql_query', () => ({
+  getSourceFromESQLQuery: (...args: unknown[]) => mockGetSourceFromESQLQuery(...args),
+}));
+
+const mockGetESQLSingleColumnValues = jest.fn();
+jest.mock('../../../../common/options_list/get_esql_single_column_values', () => {
+  const fn = (...args: unknown[]) => mockGetESQLSingleColumnValues(...args);
+  fn.isSuccess = (result: unknown) => !!result && 'values' in (result as Record<string, unknown>);
+  fn.isMultiColumnError = (result: unknown) =>
+    !!result && 'columns' in (result as Record<string, unknown>);
+  fn.hasNoResults = (result: unknown) =>
+    fn.isSuccess(result) && !(result as { values: unknown[] }).values.length;
+  fn.isNumericResult = () => false;
+  return { getESQLSingleColumnValues: fn };
+});
+
 const mockDataView = createStubDataView({
   spec: {
     id: 'logstash-*',
@@ -95,11 +112,15 @@ describe('Data control editor', () => {
     controlId,
     controlType,
     initialDefaultPanelTitle,
+    onSave = () => {},
+    waitForDataView = true,
   }: {
     initialState?: Partial<DataControlState>;
     controlId?: string;
     controlType?: string;
     initialDefaultPanelTitle?: string;
+    onSave?: (dataViewId?: string) => void;
+    waitForDataView?: boolean;
   }) => {
     dataViewsService.get = jest.fn().mockResolvedValue(mockDataView);
     (uiActionsService as Writable<typeof uiActionsService>).getTriggerActions = jest
@@ -111,7 +132,7 @@ describe('Data control editor', () => {
         <DataControlEditor
           ariaLabelledBy="control-editor-title-input"
           onCancel={() => {}}
-          onSave={() => {}}
+          onSave={onSave}
           parentApi={dashboardApi}
           initialState={
             {
@@ -128,9 +149,11 @@ describe('Data control editor', () => {
       </I18nProvider>
     );
 
-    await waitFor(() => {
-      expect(dataViewsService.get).toHaveBeenCalledTimes(1);
-    });
+    if (waitForDataView) {
+      await waitFor(() => {
+        expect(dataViewsService.get).toHaveBeenCalledTimes(1);
+      });
+    }
 
     return controlEditor;
   };
@@ -232,6 +255,54 @@ describe('Data control editor', () => {
 
       // Toggling ES|QL on requires a successful query run before the control can be saved.
       expect(saveButton).toHaveAttribute('aria-disabled', 'true');
+    });
+  });
+
+  describe('control on a query that reads an ES|QL source', () => {
+    const esqlSource = {
+      kind: 'esql',
+      id: 'esql-dataset-id',
+      title: 'logs',
+      fields: [],
+      getFieldByName: (name: string) => ({ name, type: 'string', aggregatable: true }),
+      isTimeBased: () => false,
+    };
+
+    test('does not use the id of the source as a data view, neither in field mode nor for the next control', async () => {
+      mockGetSourceFromESQLQuery.mockResolvedValue(esqlSource);
+      mockGetESQLSingleColumnValues.mockResolvedValue({
+        values: ['linux'],
+        column: { name: 'os', type: 'keyword' },
+      });
+      const onSave = jest.fn();
+      const controlEditor = await mountComponent({
+        controlId: 'myControl',
+        controlType: 'optionsList',
+        initialState: {
+          values_source: ControlValuesSource.ESQL,
+          esql_query: 'FROM logs | STATS BY os',
+          field_name: 'os',
+          data_view_id: undefined,
+        } as Partial<DataControlState>,
+        onSave,
+        waitForDataView: false,
+      });
+      await waitFor(() => {
+        expect(controlEditor.getByTestId('control-editor-save')).toBeEnabled();
+      });
+
+      await act(async () => {
+        fireEvent.click(controlEditor.getByTestId('control-editor-save'));
+      });
+      // the next control starts from the last data view that was used, which this id is not
+      expect(onSave).toHaveBeenCalledWith(undefined);
+
+      (dataViewsService.get as jest.Mock).mockClear();
+      await act(async () => {
+        fireEvent.click(controlEditor.getByTestId('control-editor-input-dsl'));
+      });
+      // field mode starts without a data view, instead of loading the id of the source as one
+      expect(dataViewsService.get).not.toHaveBeenCalled();
     });
   });
 
