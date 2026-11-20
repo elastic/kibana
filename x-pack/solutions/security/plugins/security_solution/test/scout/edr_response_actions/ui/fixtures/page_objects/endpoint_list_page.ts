@@ -17,15 +17,22 @@ const ENDPOINTS_SEARCH_OPTION_LABEL = 'Assets / Endpoints / Endpoints';
  */
 export class EndpointListPage {
   readonly table: Locator;
+  readonly total: Locator;
   readonly respondMenuItem: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.table = this.page.testSubj.locator('endpointListTable');
+    this.total = this.page.testSubj.locator('endpointListTableTotal');
     this.respondMenuItem = this.page.testSubj.locator('console');
   }
 
-  async goto(): Promise<void> {
-    await this.page.gotoApp(ENDPOINTS_APP_PATH);
+  /** Opens the list; `query` is passed as the `sort_field` / `sort_direction` URL params. */
+  async goto(query?: { sortField: string; sortDirection: 'asc' | 'desc' }): Promise<void> {
+    await this.page.gotoApp(ENDPOINTS_APP_PATH, {
+      params: query
+        ? { sort_field: query.sortField, sort_direction: query.sortDirection }
+        : undefined,
+    });
     // Until the user privileges and the list init (metadata list, then the search-bar
     // fields) finish, the page shows "Loading Endpoint Management" and no table. On a
     // cold first load that took over the default 10s action timeout in CI.
@@ -55,6 +62,14 @@ export class EndpointListPage {
     return this.table.getByRole('row').filter({
       has: this.page.testSubj.locator('hostnameCellLink').filter({ hasText: hostname }),
     });
+  }
+
+  /**
+   * The sortable column header for `field`. EUI names it `tableHeaderCell_<field>_<column index>`;
+   * the prefix match keeps it independent of the column order.
+   */
+  sortableHeader(field: string): Locator {
+    return this.table.locator(`[data-test-subj^="tableHeaderCell_${field}_"]`);
   }
 
   agentStatusFor(hostname: string): Locator {
