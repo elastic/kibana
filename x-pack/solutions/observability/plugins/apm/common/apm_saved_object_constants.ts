@@ -12,3 +12,7 @@ export const APM_TELEMETRY_SAVED_OBJECT_ID = 'apm-telemetry';
 // APM Server schema
 export const APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE = 'apm-server-schema';
 export const APM_SERVER_SCHEMA_SAVED_OBJECT_ID = 'apm-server-schema';
+
+// Tail-based sampling (one document per project)
+export const TAIL_SAMPLING_SAVED_OBJECT_TYPE = 'tail-sampling';
+export const TAIL_SAMPLING_SAVED_OBJECT_ID = 'tail-sampling';
