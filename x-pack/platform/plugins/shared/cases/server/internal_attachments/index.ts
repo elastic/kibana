@@ -14,9 +14,13 @@ import {
   dashboardAttachmentType,
   mapAttachmentType,
   discoverSessionAttachmentType,
+  incidentTimelineEntryAttachmentType,
 } from '../attachment_framework/attachments';
 
-export const registerInternalAttachments = (unifiedRegistry: UnifiedAttachmentTypeRegistry) => {
+export const registerInternalAttachments = (
+  unifiedRegistry: UnifiedAttachmentTypeRegistry,
+  { incidentTimelineEnabled = false }: { incidentTimelineEnabled?: boolean } = {}
+) => {
   unifiedRegistry.register(fileAttachmentType);
   unifiedRegistry.register(lensAttachmentType);
   unifiedRegistry.register(commentAttachmentType);
@@ -24,4 +28,7 @@ export const registerInternalAttachments = (unifiedRegistry: UnifiedAttachmentTy
   unifiedRegistry.register(dashboardAttachmentType);
   unifiedRegistry.register(mapAttachmentType);
   unifiedRegistry.register(discoverSessionAttachmentType);
+  if (incidentTimelineEnabled) {
+    unifiedRegistry.register(incidentTimelineEntryAttachmentType);
+  }
 };
