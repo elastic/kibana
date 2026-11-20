@@ -56,7 +56,8 @@ on serverless and stateful.
   users (distinct `app.installation.id`), error rate (exceptions per session), last seen, and the
   latest release. Rows are sorted by sessions and capped at 1,000. Crash-free sessions is `null`
   ("Not enough data") until a crash is defined and session start reaches the SDKs.
-- **Queries:** built with the `@elastic/esql` composer (`common/mobile_panel.ts`,
+- **Queries:** built with the `@elastic/esql` composer (`common/mobile/`: the fields and computed
+  columns, the mobile documents, the filters, the KPIs and the Discover query; and
   `server/lib/mobile/queries.ts`) and run through the plugin's traced Elasticsearch client, one APM
   span per query, with typed rows (`transform: 'plain'`). Every query sets `unmapped_fields` to
   `nullify`: a field no index maps, e.g. `exception.type` on a cluster whose apps never threw, reads
@@ -86,7 +87,7 @@ on serverless and stateful.
   (Health summary, Release health, Stability, Users and engagement, Performance, Views) for the
   sibling issues to fill. Every KPI uses `MobilePanel`: current value with its change against the
   previous period of equal length, the Compare overlay, a tooltip with the calculation and a Discover
-  link with the same ES|QL and filters (`common/mobile_panel.ts`). The time bucket is hourly up to
+  link with the same ES|QL and filters (`common/mobile/discover.ts`). The time bucket is hourly up to
   24 hours and daily above. Without mobile data it links to the EDOT Android and iOS setup docs.
 - **Route:** `GET /internal/digital_experience/mobile_applications/{serviceName}/kpis`, with a
   optional `osName` and `release`. It also lists the OS names, platforms, releases (on the selected

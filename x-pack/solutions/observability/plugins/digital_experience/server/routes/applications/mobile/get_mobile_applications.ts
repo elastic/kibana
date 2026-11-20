@@ -7,7 +7,8 @@
 
 import { withSpan } from '@kbn/apm-utils';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { MOBILE_FIELDS } from '../../../../common/mobile_panel';
+import type { RESULT_COLUMNS } from '../../../../common/mobile/fields';
+import { MOBILE_FIELDS } from '../../../../common/mobile/fields';
 import { runMobileEsql, timeFilter } from '../../../lib/mobile/esql';
 import { toEnvironments } from '../../../lib/mobile/rows';
 import type { EnvironmentRow } from '../../../lib/mobile/rows';
@@ -21,7 +22,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 interface LatestReleaseRow {
   [MOBILE_FIELDS.serviceName]: string;
-  latest_release: string | null;
+  [RESULT_COLUMNS.latestRelease]: string | null;
 }
 
 export interface GetMobileApplicationsParams {

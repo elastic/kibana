@@ -7,7 +7,8 @@
 
 import { castArray, compact, sortBy, uniq } from 'lodash';
 import { isMobilePlatform } from '../../../common/application_source';
-import { MOBILE_FIELDS } from '../../../common/mobile_panel';
+import type { RESULT_COLUMNS } from '../../../common/mobile/fields';
+import { MOBILE_FIELDS } from '../../../common/mobile/fields';
 import type { MobilePlatform } from '../../../common/types/applications';
 import { MAX_ENVIRONMENTS } from '../constants';
 import { withNotDefined } from '../helpers/environment';
@@ -17,18 +18,18 @@ import { withNotDefined } from '../helpers/environment';
  * so any value can be missing.
  */
 export interface EnvironmentRow {
-  docs: number;
+  [RESULT_COLUMNS.docs]: number;
   [MOBILE_FIELDS.environment]: string | null;
   [MOBILE_FIELDS.environmentName]: string | null;
 }
 export interface ReleaseRow {
-  release: string | null;
-  sessions: number;
+  [RESULT_COLUMNS.release]: string | null;
+  [RESULT_COLUMNS.sessions]: number;
 }
 export interface OsRow {
-  os_name: string | null;
-  platform: string | null;
-  sessions: number;
+  [RESULT_COLUMNS.osName]: string | null;
+  [RESULT_COLUMNS.platform]: string | null;
+  [RESULT_COLUMNS.sessions]: number;
 }
 
 /** The platforms of `values`, sorted: a `VALUES` column is a single value when there is one. */

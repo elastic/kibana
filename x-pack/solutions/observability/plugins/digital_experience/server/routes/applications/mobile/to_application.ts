@@ -6,19 +6,20 @@
  */
 
 import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../../common/application_source';
-import { MOBILE_FIELDS } from '../../../../common/mobile_panel';
+import type { RESULT_COLUMNS } from '../../../../common/mobile/fields';
+import { MOBILE_FIELDS } from '../../../../common/mobile/fields';
 import type { MobileApplicationSummary } from '../../../../common/types/applications';
 import { toPlatforms } from '../../../lib/mobile/rows';
 
 /** One row of `applicationsQuery`. */
 export interface MobileApplicationRow {
   [MOBILE_FIELDS.serviceName]: string;
-  sessions: number;
-  users: number;
-  exceptions: number;
+  [RESULT_COLUMNS.sessions]: number;
+  [RESULT_COLUMNS.users]: number;
+  [RESULT_COLUMNS.exceptions]: number;
   /** One value when the application reported on one platform. */
-  platforms: string | string[] | null;
-  last_seen: string | null;
+  [RESULT_COLUMNS.platforms]: string | string[] | null;
+  [RESULT_COLUMNS.lastSeen]: string | null;
 }
 
 /** One row of `applicationsQuery` as an application of the list. */

@@ -6,15 +6,15 @@
  */
 
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import { mobilePanelDiscoverEsql } from '../../../common/mobile/discover';
+import { mobilePanelQuery, type MobilePanelFilters } from '../../../common/mobile/filters';
 import {
   getMobileTimeBucket,
   getPreviousPeriod,
-  mobilePanelDiscoverEsql,
-  mobilePanelQuery,
   toComparedValue,
   withKpiStats,
-} from '../../../common/mobile_panel';
-import type { MobilePanelFilters } from '../../../common/mobile_panel';
+  type KpiRow,
+} from '../../../common/mobile/kpis';
 import type { MobileKpisResponse } from '../../../common/types/mobile';
 import { runMobileEsql, timeFilter } from '../../lib/mobile/esql';
 import { withEnvironmentCounts, withOsCounts, withReleaseCounts } from '../../lib/mobile/queries';
@@ -31,13 +31,6 @@ export interface GetMobileKpisParams {
 
 /** Releases listed in the release picker. */
 const MAX_RELEASE_ROWS = 1000;
-
-interface KpiRow {
-  docs: number;
-  sessions: number;
-  users: number;
-  exceptions: number;
-}
 
 const errorRateOf = (row: KpiRow | undefined): number | null =>
   row?.sessions ? (row.exceptions ?? 0) / row.sessions : null;

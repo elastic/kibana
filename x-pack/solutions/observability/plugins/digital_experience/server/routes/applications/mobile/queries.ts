@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { ComposerQuery } from '@elastic/esql';
-import { inValues, mobileColumn, mobileDocuments } from '../../../../common/mobile_panel';
+import { esql, type ComposerQuery } from '@elastic/esql';
+import { mobileDocuments } from '../../../../common/mobile/documents';
+import { inValues, mobileColumn, resultColumn } from '../../../../common/mobile/fields';
+import { kpiStats } from '../../../../common/mobile/kpis';
 import { withEnvironmentCounts, withLatestReleases } from '../../../lib/mobile/queries';
 import { MAX_APPLICATIONS_PER_SOURCE } from '../constants';
 
@@ -16,14 +18,13 @@ import { MAX_APPLICATIONS_PER_SOURCE } from '../constants';
  * name no application, so they're left out.
  */
 export const applicationsQuery = (): ComposerQuery =>
-  mobileDocuments().pipe`WHERE ${mobileColumn('serviceName')} IS NOT NULL`
-    .pipe`STATS sessions = COUNT_DISTINCT(${mobileColumn('sessionId')}),
-      users = COUNT_DISTINCT(${mobileColumn('installationId')}),
-      exceptions = COUNT(${mobileColumn('exceptionType')}),
-      last_seen = MAX(@timestamp),
-      platforms = VALUES(platform)
-    BY ${mobileColumn('serviceName')}`.pipe`SORT sessions DESC, ${mobileColumn('serviceName')} ASC`
-    .pipe`LIMIT ${MAX_APPLICATIONS_PER_SOURCE}`;
+  mobileDocuments().pipe`WHERE ${mobileColumn('serviceName')} IS NOT NULL`.pipe`STATS ${[
+    ...kpiStats(),
+    esql.exp`${resultColumn('lastSeen')} = MAX(@timestamp)`,
+    esql.exp`${resultColumn('platforms')} = VALUES(${resultColumn('platform')})`,
+  ]} BY ${mobileColumn('serviceName')}`.pipe`SORT ${resultColumn('sessions')} DESC, ${mobileColumn(
+    'serviceName'
+  )} ASC`.pipe`LIMIT ${MAX_APPLICATIONS_PER_SOURCE}`;
 
 /**
  * The latest release, the one with the most sessions, of each of `serviceNames` on each platform
