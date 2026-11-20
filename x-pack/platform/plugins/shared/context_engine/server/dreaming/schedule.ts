@@ -14,8 +14,13 @@ import {
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { ContextEngineDreamingWorkflowTemplateValues } from '@kbn/workflows/managed';
-import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import type { WorkflowExecutionDto, WorkflowExecutionListDto } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  ExecutionStatusValues,
+  ExecutionType,
+  isTerminalStatus,
+} from '@kbn/workflows';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import {
   DEFAULT_DREAMING_INTERVAL,
@@ -33,6 +38,18 @@ import { DreamingNotSetUpError } from './dreaming_not_set_up_error';
 import { DreamingRunNothingStartedError } from './dreaming_run_nothing_started_error';
 import { managedWorkflowIdSuffixFor } from '../utils/managed_workflow_suffix';
 
+/** Params for listing workflow runs during a manual dreaming trigger. */
+export interface DreamingWorkflowExecutionsQuery {
+  workflowId: string;
+  statuses?: ExecutionStatus[];
+  executionTypes?: ExecutionType[];
+  omitStepRuns?: boolean;
+  size?: number;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+  request: KibanaRequest;
+}
+
 /** The workflows management API dreaming uses. */
 export interface DreamingWorkflowsApi extends WorkflowEnablementApi {
   cancelAllActiveWorkflowExecutions(
@@ -40,12 +57,20 @@ export interface DreamingWorkflowsApi extends WorkflowEnablementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<void>;
+  getWorkflowExecutions(
+    params: DreamingWorkflowExecutionsQuery,
+    spaceId: string
+  ): Promise<WorkflowExecutionListDto>;
   getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
     options: { includeOutput?: boolean; request: KibanaRequest }
   ): Promise<WorkflowExecutionDto | null>;
 }
+
+const NON_TERMINAL_EXECUTION_STATUSES = ExecutionStatusValues.filter(
+  (status) => !isTerminalStatus(status)
+);
 
 const CANCELLED_RUN_RETRIES = 5;
 const CANCELLED_RUN_RETRY_MS = 1000;
@@ -242,6 +267,26 @@ export const createDreamingScheduleService = ({
     return { workflow_id: workflowId, execution_id: executionId };
   };
 
+  const hasActiveProductionExecution = async (
+    workflowsManagement: DreamingWorkflowsApi,
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<boolean> => {
+    const active = await workflowsManagement.getWorkflowExecutions(
+      {
+        workflowId,
+        executionTypes: [ExecutionType.PRODUCTION],
+        statuses: NON_TERMINAL_EXECUTION_STATUSES,
+        omitStepRuns: true,
+        size: 1,
+        request,
+      },
+      spaceId
+    );
+    return active.results.length > 0;
+  };
+
   const startWorkflow = async ({
     workflow,
     aiIndex,
@@ -255,6 +300,24 @@ export const createDreamingScheduleService = ({
   }): Promise<StartWorkflowResult> => {
     const workflowId = workflow.workflowIdFor(aiIndex.id, spaceId);
     try {
+      const workflowsManagement = await getWorkflowsManagement();
+      if (workflowsManagement) {
+        try {
+          if (
+            await hasActiveProductionExecution(workflowsManagement, workflowId, spaceId, request)
+          ) {
+            return { skipped: workflowId };
+          }
+        } catch (precheckError) {
+          const message =
+            precheckError instanceof Error ? precheckError.message : String(precheckError);
+          log.debug(
+            () =>
+              `Could not check for an active dreaming run on '${workflowId}' before starting: ${message}`
+          );
+        }
+      }
+
       const client = await getManagedWorkflowsClient();
       const executionId = await client.execute(request, workflow.definitionId, {
         spaceId,

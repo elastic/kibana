@@ -21,11 +21,19 @@ jest.mock('../../../hooks/use_latest_workflow_execution', () => ({
   useLatestWorkflowExecution: jest.fn(() => ({
     execution: null,
     workflowId: undefined,
+    executions: [],
     isRunning: false,
     activeExecutionId: undefined,
     isError: false,
     isLoading: false,
   })),
+}));
+jest.mock('../../../hooks/use_workflow_summaries', () => ({
+  useWorkflowSummaries: () => ({
+    summaries: new Map(),
+    isLoading: false,
+    missingReadPrivilege: false,
+  }),
 }));
 jest.mock('../../../hooks/use_save_dreaming_config', () => ({ useSaveDreamingConfig: jest.fn() }));
 jest.mock('../../../hooks/use_dreaming_templates', () => ({ useDreamingTemplates: jest.fn() }));

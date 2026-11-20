@@ -14,9 +14,20 @@ import {
   type IconType,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { ExecutionStatus } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  ExecutionStatusValues,
+  isTerminalStatus,
+  type ExecutionStatusUnion,
+} from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+
+export interface WorkflowExecutionStatusDisplay {
+  type: IconType;
+  color: 'success' | 'danger' | 'subdued';
+  label: string;
+}
 
 interface WorkflowLastExecutionBaseProps {
   href?: string;
@@ -28,17 +39,17 @@ interface WorkflowLastExecutionBaseProps {
 export type WorkflowLastExecutionProps = WorkflowLastExecutionBaseProps &
   (
     | { hasExecution: false; status?: never; startedAt?: never }
-    | { hasExecution: true; status: string; startedAt?: string }
-    | { hasExecution?: never; status?: string; startedAt?: string }
+    | { hasExecution: true; status: ExecutionStatusUnion; startedAt?: string }
+    | { hasExecution?: never; status?: ExecutionStatusUnion; startedAt?: string }
   );
 
 const neverRunLabel = i18n.translate('xpack.contextEngine.workflowLastExecution.neverRun', {
   defaultMessage: 'Never run',
 });
 
-const workflowExecutionStatusIcon = (
-  status: string
-): { type: IconType; color: 'success' | 'danger' | 'subdued'; label: string } | undefined => {
+export const getWorkflowExecutionStatusIcon = (
+  status: ExecutionStatusUnion
+): WorkflowExecutionStatusDisplay | undefined => {
   switch (status) {
     case ExecutionStatus.COMPLETED:
       return {
@@ -85,6 +96,50 @@ const workflowExecutionStatusIcon = (
   }
 };
 
+const inProgressStatusDisplay = (): WorkflowExecutionStatusDisplay => ({
+  type: 'clock',
+  color: 'subdued',
+  label: i18n.translate('xpack.contextEngine.workflowLastExecution.status.inProgress', {
+    defaultMessage: 'In progress',
+  }),
+});
+
+const isNonTerminal = (status: ExecutionStatusUnion): boolean => {
+  const parsed = ExecutionStatusValues.find((value) => value === status);
+  return parsed !== undefined && !isTerminalStatus(parsed);
+};
+
+/** Icon, color, and label for a workflow execution status, including non-terminal runs. */
+export const getWorkflowExecutionStatusDisplay = (
+  status: ExecutionStatusUnion
+): WorkflowExecutionStatusDisplay | undefined => {
+  const terminal = getWorkflowExecutionStatusIcon(status);
+  if (terminal) {
+    return terminal;
+  }
+  if (isNonTerminal(status)) {
+    return inProgressStatusDisplay();
+  }
+  return undefined;
+};
+
+/** Lower rank is worse (failed/timed out are 0). */
+export const getWorkflowExecutionStatusWorstRank = (status: ExecutionStatusUnion): number => {
+  if (status === ExecutionStatus.FAILED || status === ExecutionStatus.TIMED_OUT) {
+    return 0;
+  }
+  if (status === ExecutionStatus.CANCELLED) {
+    return 1;
+  }
+  if (status === ExecutionStatus.SKIPPED) {
+    return 2;
+  }
+  if (isNonTerminal(status)) {
+    return 3;
+  }
+  return 4;
+};
+
 const hasNoExecution = (
   props: WorkflowLastExecutionProps
 ): props is WorkflowLastExecutionBaseProps & { hasExecution: false } =>
@@ -116,7 +171,7 @@ export const WorkflowLastExecution = (props: WorkflowLastExecutionProps) => {
     );
   }
 
-  const icon = status !== undefined ? workflowExecutionStatusIcon(status) : undefined;
+  const icon = status !== undefined ? getWorkflowExecutionStatusIcon(status) : undefined;
   const when = startedAt ? <FormattedRelative value={new Date(startedAt)} /> : icon?.label;
 
   if (when === undefined) {

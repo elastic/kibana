@@ -85,7 +85,7 @@ export const DreamingRunsSection = ({
 
   return (
     <div data-test-subj="contextAiIndexDreamingRunsSection">
-      <EuiFormRow hasEmptyLabelSpace helpText={runDisabledReason}>
+      <EuiFormRow display="rowCompressed" helpText={runDisabledReason}>
         <EuiButton
           size="s"
           iconType="play"

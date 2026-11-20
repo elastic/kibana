@@ -204,12 +204,12 @@ const DreamingEditor = ({
           css={{
             display: 'grid',
             gridTemplateColumns: isCompact ? '1fr' : 'auto 1fr',
-            alignItems: 'center',
+            alignItems: 'start',
             rowGap: euiTheme.size.s,
             columnGap: euiTheme.size.l,
           }}
         >
-          <div>
+          <div css={{ display: 'flex', alignItems: 'center', minHeight: euiTheme.size.xl }}>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
@@ -228,8 +228,9 @@ const DreamingEditor = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </div>
-          <div>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          {/* Spans the "Last run" row so help text and errors do not push it away from the toggle. */}
+          <div css={isCompact ? undefined : { gridRow: 'span 2' }}>
+            <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
               {enabled ? (
                 <EuiFlexItem grow={isCompact ? true : 4}>
                   <EuiFormRow
@@ -265,8 +266,8 @@ const DreamingEditor = ({
           <EuiText size="xs" color="subdued">
             <DreamingLastRunStatus
               workflowIds={workflowIds}
+              executions={latestExecution.executions}
               execution={latestExecution.execution}
-              workflowId={latestExecution.workflowId}
             />
           </EuiText>
         </div>

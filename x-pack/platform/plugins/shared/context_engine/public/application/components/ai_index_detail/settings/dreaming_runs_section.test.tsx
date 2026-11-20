@@ -12,8 +12,45 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { AiIndexDreamingConfig } from '../../../../../common/dreaming';
 import type { UseRunDreamingOptions } from '../../../hooks/use_run_dreaming';
+import type { WorkflowLatestExecution } from '../../../hooks/use_latest_workflow_execution';
+import type { WorkflowSummary } from '../../../hooks/use_workflow_summaries';
+import { useWorkflowSummaries } from '../../../hooks/use_workflow_summaries';
 import { DreamingLastRunStatus } from './dreaming_last_run_status';
 import { DreamingRunsSection } from './dreaming_runs_section';
+
+const DREAMING_WORKFLOW_ID = 'system-context-engine-dreaming-tickets';
+const TRACE_DREAMING_WORKFLOW_ID = 'system-context-engine-trace-dreaming-tickets';
+const RELATIONSHIPS_WORKFLOW_ID = 'system-context-engine-relationships-tickets';
+
+const WORKFLOW_SUMMARY_NAMES: Record<string, string> = {
+  [DREAMING_WORKFLOW_ID]: 'Tickets dreaming',
+  [TRACE_DREAMING_WORKFLOW_ID]: 'Tickets trace dreaming',
+  [RELATIONSHIPS_WORKFLOW_ID]: 'Tickets relationships',
+};
+
+jest.mock('../../../hooks/use_workflow_summaries', () => ({
+  useWorkflowSummaries: jest.fn(),
+}));
+
+const mockUseWorkflowSummaries = jest.mocked(useWorkflowSummaries);
+
+const dreamingExecutions = (
+  items: Array<Partial<WorkflowLatestExecution['execution']> & { workflowId: string }>
+): WorkflowLatestExecution[] =>
+  items.map((item) => ({
+    workflowId: item.workflowId,
+    execution: {
+      spaceId: 'default',
+      isTestRun: false,
+      error: null,
+      finishedAt: '2026-11-10T12:01:00.000Z',
+      duration: 60000,
+      workflowId: item.workflowId,
+      id: item.id ?? 'exec-1',
+      status: item.status ?? ExecutionStatus.COMPLETED,
+      startedAt: item.startedAt ?? '2026-11-10T12:00:00.000Z',
+    },
+  }));
 
 const runDreaming = jest.fn();
 let capturedUseRunDreamingOptions: UseRunDreamingOptions | undefined;
@@ -77,24 +114,41 @@ const renderSection = (
   );
 };
 
+const summariesForIds = (ids: string[]): Map<string, WorkflowSummary> =>
+  new Map(
+    ids.map((id) => [
+      id,
+      {
+        id,
+        name: WORKFLOW_SUMMARY_NAMES[id],
+      },
+    ])
+  );
+
 describe('DreamingRunsSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedUseRunDreamingOptions = undefined;
     mockUseCanWriteContextEngine.mockReturnValue(true);
     mockUseWorkflowsCapabilities.mockReturnValue({ canExecuteWorkflow: true });
+    mockUseWorkflowSummaries.mockImplementation((ids: string[]) => ({
+      summaries: summariesForIds(ids),
+      isLoading: false,
+      missingReadPrivilege: false,
+    }));
   });
 
-  it('shows never run when there are no workflow ids', () => {
+  it('renders nothing when there are no workflow ids', () => {
     render(
       <I18nProvider>
         <EuiProvider>
-          <DreamingLastRunStatus workflowIds={[]} execution={null} workflowId={undefined} />
+          <DreamingLastRunStatus workflowIds={[]} executions={[]} execution={null} />
         </EuiProvider>
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('contextAiIndexDreamingLastRun')).toHaveTextContent('Never run');
+    expect(screen.queryByTestId('contextAiIndexDreamingLastRun')).not.toBeInTheDocument();
+    expect(screen.queryByText('Never run')).not.toBeInTheDocument();
   });
 
   it('renders nothing while execution history is loading', () => {
@@ -102,9 +156,9 @@ describe('DreamingRunsSection', () => {
       <I18nProvider>
         <EuiProvider>
           <DreamingLastRunStatus
-            workflowIds={['system-context-engine-dreaming-tickets']}
+            workflowIds={[DREAMING_WORKFLOW_ID]}
+            executions={[]}
             execution={undefined}
-            workflowId={undefined}
           />
         </EuiProvider>
       </I18nProvider>
@@ -119,9 +173,9 @@ describe('DreamingRunsSection', () => {
       <I18nProvider>
         <EuiProvider>
           <DreamingLastRunStatus
-            workflowIds={['system-context-engine-dreaming-tickets']}
+            workflowIds={[DREAMING_WORKFLOW_ID]}
+            executions={[]}
             execution={null}
-            workflowId={undefined}
           />
         </EuiProvider>
       </I18nProvider>
@@ -130,27 +184,71 @@ describe('DreamingRunsSection', () => {
     expect(screen.getByTestId('contextAiIndexDreamingLastRun')).toHaveTextContent('Never run');
   });
 
-  it('links the last run to the workflows execution', () => {
+  it('puts last run time in the popover button and leaves no external execution link', () => {
     render(
       <I18nProvider>
         <EuiProvider>
           <DreamingLastRunStatus
-            workflowIds={['system-context-engine-dreaming-tickets']}
+            workflowIds={[DREAMING_WORKFLOW_ID]}
+            executions={dreamingExecutions([
+              {
+                workflowId: DREAMING_WORKFLOW_ID,
+                id: 'exec-99',
+                status: ExecutionStatus.COMPLETED,
+                startedAt: '2026-11-10T12:00:00.000Z',
+              },
+            ])}
             execution={{
               id: 'exec-99',
               status: ExecutionStatus.COMPLETED,
               startedAt: '2026-11-10T12:00:00.000Z',
             }}
-            workflowId="system-context-engine-dreaming-tickets"
           />
         </EuiProvider>
       </I18nProvider>
     );
 
+    const button = screen.getByTestId('contextAiIndexDreamingLastRunPopoverButton');
+    expect(button).toHaveTextContent('Succeeded');
+    expect(button).toHaveTextContent('last week');
+    expect(screen.queryByTestId('contextWorkflowLastExecutionLink')).not.toBeInTheDocument();
+
+    fireEvent.click(button);
+
+    expect(screen.getAllByTestId('contextWorkflowLastExecutionLink')).toHaveLength(1);
     expect(screen.getByTestId('contextWorkflowLastExecutionLink')).toHaveAttribute(
       'href',
       '/app/workflows/execution'
     );
+  });
+
+  it('opens the popover when the last run button is clicked', () => {
+    render(
+      <I18nProvider>
+        <EuiProvider>
+          <DreamingLastRunStatus
+            workflowIds={[DREAMING_WORKFLOW_ID]}
+            executions={dreamingExecutions([
+              {
+                workflowId: DREAMING_WORKFLOW_ID,
+                id: 'exec-99',
+                status: ExecutionStatus.COMPLETED,
+                startedAt: '2026-11-10T12:00:00.000Z',
+              },
+            ])}
+            execution={{
+              id: 'exec-99',
+              status: ExecutionStatus.COMPLETED,
+              startedAt: '2026-11-10T12:00:00.000Z',
+            }}
+          />
+        </EuiProvider>
+      </I18nProvider>
+    );
+
+    expect(screen.queryByTestId('contextAiIndexDreamingLastRunPopoverRow')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingLastRunPopoverButton'));
+    expect(screen.getByTestId('contextAiIndexDreamingLastRunPopoverRow')).toBeInTheDocument();
   });
 
   it('labels the last run time with "Last run"', () => {
@@ -158,13 +256,20 @@ describe('DreamingRunsSection', () => {
       <I18nProvider>
         <EuiProvider>
           <DreamingLastRunStatus
-            workflowIds={['system-context-engine-dreaming-tickets']}
+            workflowIds={[DREAMING_WORKFLOW_ID]}
+            executions={dreamingExecutions([
+              {
+                workflowId: DREAMING_WORKFLOW_ID,
+                id: 'exec-99',
+                status: ExecutionStatus.COMPLETED,
+                startedAt: '2026-11-10T12:00:00.000Z',
+              },
+            ])}
             execution={{
               id: 'exec-99',
               status: ExecutionStatus.COMPLETED,
               startedAt: '2026-11-10T12:00:00.000Z',
             }}
-            workflowId="system-context-engine-dreaming-tickets"
           />
         </EuiProvider>
       </I18nProvider>
@@ -178,9 +283,16 @@ describe('DreamingRunsSection', () => {
       <I18nProvider>
         <EuiProvider>
           <DreamingLastRunStatus
-            workflowIds={['system-context-engine-dreaming-tickets']}
+            workflowIds={[DREAMING_WORKFLOW_ID]}
+            executions={dreamingExecutions([
+              {
+                workflowId: DREAMING_WORKFLOW_ID,
+                id: 'exec-99',
+                status: ExecutionStatus.PENDING,
+                startedAt: '',
+              },
+            ])}
             execution={{ id: 'exec-99', status: ExecutionStatus.PENDING, startedAt: '' }}
-            workflowId="system-context-engine-dreaming-tickets"
           />
         </EuiProvider>
       </I18nProvider>
@@ -188,6 +300,135 @@ describe('DreamingRunsSection', () => {
 
     expect(screen.queryByTestId('contextAiIndexDreamingLastRun')).not.toBeInTheDocument();
     expect(screen.queryByText('Last run')).not.toBeInTheDocument();
+  });
+
+  it('shows the worst status across dreaming workflows', () => {
+    const executions = dreamingExecutions([
+      {
+        workflowId: DREAMING_WORKFLOW_ID,
+        id: 'exec-1',
+        status: ExecutionStatus.FAILED,
+        startedAt: '2026-11-09T12:00:00.000Z',
+      },
+      {
+        workflowId: TRACE_DREAMING_WORKFLOW_ID,
+        id: 'exec-2',
+        status: ExecutionStatus.COMPLETED,
+        startedAt: '2026-11-10T12:00:00.000Z',
+      },
+      {
+        workflowId: RELATIONSHIPS_WORKFLOW_ID,
+        id: 'exec-3',
+        status: ExecutionStatus.COMPLETED,
+        startedAt: '2026-11-08T12:00:00.000Z',
+      },
+    ]);
+
+    render(
+      <I18nProvider>
+        <EuiProvider>
+          <DreamingLastRunStatus
+            workflowIds={[
+              DREAMING_WORKFLOW_ID,
+              TRACE_DREAMING_WORKFLOW_ID,
+              RELATIONSHIPS_WORKFLOW_ID,
+            ]}
+            executions={executions}
+            execution={executions[1].execution}
+          />
+        </EuiProvider>
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('contextAiIndexDreamingLastRunStatus-failed')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDreamingLastRun')).toHaveTextContent('Failed');
+    expect(screen.getByTestId('contextAiIndexDreamingLastRunPopoverButton')).toHaveTextContent(
+      'Failed'
+    );
+    expect(screen.queryByTestId('contextWorkflowLastExecutionLink')).not.toBeInTheDocument();
+  });
+
+  it('lists all dreaming workflows in the popover', () => {
+    const executions = dreamingExecutions([
+      {
+        workflowId: DREAMING_WORKFLOW_ID,
+        id: 'exec-1',
+        status: ExecutionStatus.COMPLETED,
+        startedAt: '2026-11-08T12:00:00.000Z',
+      },
+      {
+        workflowId: TRACE_DREAMING_WORKFLOW_ID,
+        id: 'exec-2',
+        status: ExecutionStatus.COMPLETED,
+        startedAt: '2026-11-09T12:00:00.000Z',
+      },
+      {
+        workflowId: RELATIONSHIPS_WORKFLOW_ID,
+        id: 'exec-3',
+        status: ExecutionStatus.FAILED,
+        startedAt: '2026-11-10T12:00:00.000Z',
+      },
+    ]);
+
+    render(
+      <I18nProvider>
+        <EuiProvider>
+          <DreamingLastRunStatus
+            workflowIds={[
+              DREAMING_WORKFLOW_ID,
+              TRACE_DREAMING_WORKFLOW_ID,
+              RELATIONSHIPS_WORKFLOW_ID,
+            ]}
+            executions={executions}
+            execution={executions[2].execution}
+          />
+        </EuiProvider>
+      </I18nProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingLastRunPopoverButton'));
+
+    const rows = screen.getAllByTestId('contextAiIndexDreamingLastRunPopoverRow');
+    expect(rows).toHaveLength(3);
+    expect(screen.getByText(WORKFLOW_SUMMARY_NAMES[DREAMING_WORKFLOW_ID])).toBeInTheDocument();
+    expect(
+      screen.getByText(WORKFLOW_SUMMARY_NAMES[TRACE_DREAMING_WORKFLOW_ID])
+    ).toBeInTheDocument();
+    expect(screen.getByText(WORKFLOW_SUMMARY_NAMES[RELATIONSHIPS_WORKFLOW_ID])).toBeInTheDocument();
+  });
+
+  it('falls back to workflow id in popover rows when summary name is missing', () => {
+    mockUseWorkflowSummaries.mockImplementation(() => ({
+      summaries: new Map(),
+      isLoading: false,
+      missingReadPrivilege: false,
+    }));
+
+    render(
+      <I18nProvider>
+        <EuiProvider>
+          <DreamingLastRunStatus
+            workflowIds={[DREAMING_WORKFLOW_ID]}
+            executions={dreamingExecutions([
+              {
+                workflowId: DREAMING_WORKFLOW_ID,
+                id: 'exec-1',
+                status: ExecutionStatus.COMPLETED,
+                startedAt: '2026-11-10T12:00:00.000Z',
+              },
+            ])}
+            execution={{
+              id: 'exec-1',
+              status: ExecutionStatus.COMPLETED,
+              startedAt: '2026-11-10T12:00:00.000Z',
+            }}
+          />
+        </EuiProvider>
+      </I18nProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingLastRunPopoverButton'));
+    expect(screen.getByText(DREAMING_WORKFLOW_ID)).toBeInTheDocument();
   });
 
   it('starts dreaming when Run now is clicked', () => {

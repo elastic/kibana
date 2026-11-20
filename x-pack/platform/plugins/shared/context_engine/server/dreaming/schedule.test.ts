@@ -72,6 +72,7 @@ describe('createDreamingScheduleService', () => {
   let workflowsManagement: {
     updateWorkflow: jest.Mock;
     cancelAllActiveWorkflowExecutions: jest.Mock;
+    getWorkflowExecutions: jest.Mock;
     getWorkflowExecution: jest.Mock;
   };
   let aiIndexService: jest.Mocked<Pick<AiIndexService, 'addAutomation' | 'removeAutomation'>>;
@@ -94,6 +95,12 @@ describe('createDreamingScheduleService', () => {
     workflowsManagement = {
       updateWorkflow: jest.fn().mockResolvedValue(undefined),
       cancelAllActiveWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
+      getWorkflowExecutions: jest.fn().mockResolvedValue({
+        results: [],
+        total: 0,
+        page: 1,
+        size: 1,
+      }),
       getWorkflowExecution: jest.fn().mockResolvedValue({ status: ExecutionStatus.RUNNING }),
     };
     aiIndexService = {
@@ -483,16 +490,15 @@ describe('createDreamingScheduleService', () => {
       });
     });
 
-    it('returns only skipped workflows when every run is skipped', async () => {
+    it('returns only skipped workflows when every workflow already has an active run', async () => {
       const dreamingId = dreamingWorkflowIdFor('support', SPACE);
       const traceId = traceDreamingWorkflowIdFor('support', SPACE);
       const relationshipsId = relationshipsWorkflowIdFor('support', SPACE);
-      client.execute
-        .mockResolvedValueOnce('exec-dreaming-skipped')
-        .mockResolvedValueOnce('exec-trace-skipped')
-        .mockResolvedValueOnce('exec-relationships-skipped');
-      workflowsManagement.getWorkflowExecution.mockResolvedValue({
-        status: ExecutionStatus.SKIPPED,
+      workflowsManagement.getWorkflowExecutions.mockResolvedValue({
+        results: [{ id: 'active-exec', status: ExecutionStatus.RUNNING }],
+        total: 1,
+        page: 1,
+        size: 1,
       });
 
       const result = await createService(workflowsManagement).run({
@@ -501,10 +507,65 @@ describe('createDreamingScheduleService', () => {
         request,
       });
 
+      expect(client.execute).not.toHaveBeenCalled();
       expect(result).toEqual({
         executions: [],
         failed: [],
         skipped: [dreamingId, traceId, relationshipsId],
+      });
+    });
+
+    it('skips a workflow with an active run without calling execute', async () => {
+      const dreamingId = dreamingWorkflowIdFor('support', SPACE);
+      const traceId = traceDreamingWorkflowIdFor('support', SPACE);
+      const relationshipsId = relationshipsWorkflowIdFor('support', SPACE);
+      workflowsManagement.getWorkflowExecutions.mockImplementation(
+        async (params: { workflowId: string }) =>
+          params.workflowId === traceId
+            ? {
+                results: [{ id: 'trace-active', status: ExecutionStatus.RUNNING }],
+                total: 1,
+                page: 1,
+                size: 1,
+              }
+            : { results: [], total: 0, page: 1, size: 1 }
+      );
+      client.execute
+        .mockResolvedValueOnce('exec-dreaming')
+        .mockResolvedValueOnce('exec-relationships');
+
+      const result = await createService(workflowsManagement).run({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(client.execute).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({
+        executions: [
+          { workflow_id: dreamingId, execution_id: 'exec-dreaming' },
+          { workflow_id: relationshipsId, execution_id: 'exec-relationships' },
+        ],
+        failed: [],
+        skipped: [traceId],
+      });
+    });
+
+    it('still executes when the active-run lookup throws', async () => {
+      const dreamingId = dreamingWorkflowIdFor('support', SPACE);
+      workflowsManagement.getWorkflowExecutions.mockRejectedValue(new Error('lookup failed'));
+      client.execute.mockResolvedValue('exec-id');
+
+      const result = await createService(workflowsManagement).run({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(client.execute).toHaveBeenCalledTimes(3);
+      expect(result.executions[0]).toEqual({
+        workflow_id: dreamingId,
+        execution_id: 'exec-id',
       });
     });
 
