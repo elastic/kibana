@@ -966,8 +966,8 @@ describe('durable source revision reconciliation', () => {
       return harness;
     };
 
-    it('neither waits nor schedules while that run is going', async () => {
-      const { reconcile, onboardingClient, scheduleSourceOnboarding } = setupNewSource();
+    it('neither waits nor schedules while that run is going, and records nothing yet', async () => {
+      const { reconcile, state, onboardingClient, scheduleSourceOnboarding } = setupNewSource();
       const run = { ...runningExecution('source-slug'), startedAt: '2026-11-17T12:32:30.000Z' };
       onboardingClient.getLatestExecution.mockResolvedValue(run);
       onboardingClient.getNonTerminalExecutions.mockResolvedValue([run]);
@@ -975,6 +975,24 @@ describe('durable source revision reconciliation', () => {
       await expect(reconcile()).resolves.toBeUndefined();
 
       expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+      expect(state.onboardingReservedAt).toBeUndefined();
+    });
+
+    it('schedules on a later reconcile when the run it let go ended cancelled', async () => {
+      const { reconcile, onboardingClient, scheduleSourceOnboarding } = setupNewSource();
+      const run = { ...runningExecution('source-slug'), startedAt: '2026-11-17T12:32:30.000Z' };
+      onboardingClient.getLatestExecution.mockResolvedValue(run);
+      onboardingClient.getNonTerminalExecutions.mockResolvedValue([run]);
+      await reconcile();
+
+      onboardingClient.getLatestExecution.mockResolvedValue({
+        ...run,
+        status: ExecutionStatus.CANCELLED,
+      });
+      onboardingClient.getNonTerminalExecutions.mockResolvedValue([]);
+      await reconcile();
+
+      expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
     });
 
     it('does not schedule a second run once that run completed, and records it as the reservation', async () => {

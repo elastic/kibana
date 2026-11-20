@@ -250,13 +250,17 @@ export async function reconcileSourceRevision({
       ? undefined
       : await loadLatestExecution(sourceToSchedule);
     if (latestRun && isRunOfRevision(latestRun, sourceToSchedule.esql_updated_at)) {
-      // Recorded as the reservation, so later runs (a denied one, say) cannot make the source
-      // look unscheduled again, and the next sweeps skip this lookup.
-      await recordRunOfRevision({
-        source: sourceToSchedule,
-        sourceKnowledgeState,
-        startedAt: Date.parse(latestRun.startedAt),
-      });
+      // Recorded as the reservation only once it completed, so later runs (a denied one, say)
+      // cannot make the source look unscheduled again. A run that is going may still fail or be
+      // cancelled, and a reservation would then keep the query from ever being onboarded: it is
+      // looked at again on the next reconcile instead.
+      if (latestRun.status === ExecutionStatus.COMPLETED) {
+        await recordRunOfRevision({
+          source: sourceToSchedule,
+          sourceKnowledgeState,
+          startedAt: Date.parse(latestRun.startedAt),
+        });
+      }
       return;
     }
     const runningSources = await loadRunningSources(onboardingClient, request);

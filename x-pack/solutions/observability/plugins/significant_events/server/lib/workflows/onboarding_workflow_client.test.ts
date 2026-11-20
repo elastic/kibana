@@ -960,6 +960,42 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       expect(release).toHaveBeenCalledTimes(1);
     });
 
+    it('does not give a unit back again when a later cancel fails to read the run', async () => {
+      const release = jest.fn().mockResolvedValue(undefined);
+      const getWorkflowExecution = jest
+        .fn()
+        .mockResolvedValueOnce({
+          stepExecutions: [
+            budgetStep('check_budget', { allowed: true, limit: 3 }, '2026-11-17T12:00:00.000Z'),
+          ],
+        })
+        .mockRejectedValueOnce(new Error('search unavailable'))
+        .mockResolvedValue({
+          stepExecutions: [
+            budgetStep('check_budget', { allowed: true, limit: 3 }, '2026-11-17T12:00:00.000Z'),
+          ],
+        });
+      const { client } = createClient(
+        {
+          getWorkflowExecutions: jest.fn(async ({ workflowId }: { workflowId: string }) => ({
+            results:
+              workflowId === SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID
+                ? [{ id: 'logs', status: ExecutionStatus.RUNNING }]
+                : [],
+          })),
+          getWorkflowExecution,
+        },
+        { releaseExtractionQuota: release }
+      );
+      const identity = { sourceId: 'nginx-id', sourceSlug: 'nginx', request };
+
+      await client.cancelBySource(identity);
+      await client.cancelBySource(identity);
+      await client.cancelBySource(identity);
+
+      expect(release).toHaveBeenCalledTimes(1);
+    });
+
     it('still cancels the run when the release fails', async () => {
       const release = jest.fn().mockRejectedValue(new Error('saved objects unavailable'));
 

@@ -607,6 +607,8 @@ export class SignificantEventsKIsOnboardingClient {
     }
     await Promise.all(
       executions.map(async ({ id }) => {
+        let marked = false;
+        let released = false;
         try {
           const execution = await this.workflowExecutionService.getExecution({
             request,
@@ -618,12 +620,22 @@ export class SignificantEventsKIsOnboardingClient {
             execution && isCancelledOrGoing(execution) ? getConsumedExtractionDays(execution) : [];
           // Checked and marked with no await in between, so two calls cannot both release a run.
           // A run with nothing to release stays unmarked: a repeat cancel may find its step done.
-          if (days.length === 0 || !this.markExtractionReleased(id)) {
+          marked = days.length > 0 && this.markExtractionReleased(id);
+          if (!marked) {
             return;
           }
-          await Promise.all(days.map((date) => releaseExtractionQuota({ date })));
+          await Promise.all(
+            days.map(async (date) => {
+              await releaseExtractionQuota({ date });
+              released = true;
+            })
+          );
         } catch (error) {
-          this.releasedExtractionRunIds.delete(id);
+          // Only the call that marked the run may unmark it, and only while nothing was given
+          // back: an earlier call may have released it, and a retry would then release it twice.
+          if (marked && !released) {
+            this.releasedExtractionRunIds.delete(id);
+          }
           this.logger.warn(
             `Could not release the knowledge indicators extraction unit of cancelled execution ${id}: ${
               error instanceof Error ? error.message : String(error)
