@@ -135,7 +135,7 @@ const alertDocument = ({
       'kibana.alert.status': 'active',
       'kibana.alert.workflow_status': 'open',
       'kibana.alert.workflow_assignee_ids': [],
-      'kibana.alert.space_ids': [SPACE],
+      'kibana.space_ids': [SPACE],
       'kibana.alert.severity': severity,
       'kibana.alert.risk_score': RISK_SCORES[severity],
       'kibana.alert.reason': `${ruleName} on triage-fixture-host`,
