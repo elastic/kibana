@@ -23,6 +23,10 @@ describe('applicationsQuery', () => {
     expect(query).toContain('platforms = VALUES(platform)');
     expect(query).toMatch(/BY `service.name` \| SORT/);
   });
+
+  it('leaves out documents without a service name, which name no application', () => {
+    expect(query).toContain('WHERE `service.name` IS NOT NULL');
+  });
 });
 
 describe('latestReleasesQuery', () => {

@@ -62,6 +62,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
+        expect(response).toHaveStatusCode(200);
         const { applications } = response.body as ApplicationsResponse;
         const mobileNames = applications
           .filter(({ applicationType }) => applicationType === 'mobile')

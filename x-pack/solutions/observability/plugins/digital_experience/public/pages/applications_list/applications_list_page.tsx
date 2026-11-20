@@ -403,6 +403,17 @@ const MOBILE_UNAVAILABLE_ERROR = new Error(
   })
 );
 
+const WEB_UNAVAILABLE_TITLE = i18n.translate(
+  'xpack.digitalExperience.applications.webUnavailable.title',
+  { defaultMessage: 'Could not load the web applications' }
+);
+
+const WEB_UNAVAILABLE_ERROR = new Error(
+  i18n.translate('xpack.digitalExperience.applications.webUnavailable.body', {
+    defaultMessage: 'The web application data could not be read from every source.',
+  })
+);
+
 const NO_MOBILE_APPLICATIONS_TITLE = i18n.translate(
   'xpack.digitalExperience.applications.mobileEmpty.title',
   { defaultMessage: 'No mobile applications found' }
@@ -507,14 +518,19 @@ export function ApplicationsListPage() {
   const mobileAvailability = response?.mobileAvailability ?? 'complete';
   const hasWebApplications = response?.applications.some(isWebApplication) ?? false;
   const hasMobileApplications = response?.applications.some(isMobileApplication) ?? false;
-  // Web and mobile applications have their own tab, shown when both have data, when the mobile
-  // search failed so its retry stays reachable, or when the URL picks one.
+  const unavailableSources = response?.unavailableSources ?? [];
+  const hasWebFailures = unavailableSources.length > 0;
+  // Web and mobile applications have their own tab, shown when both have data or a failed search,
+  // so its warning and retry stay reachable, or when the URL picks one.
   const showsTabs =
     applicationType !== undefined ||
-    (hasWebApplications && (hasMobileApplications || mobileAvailability === 'unavailable'));
+    ((hasWebApplications || hasWebFailures) &&
+      (hasMobileApplications || mobileAvailability === 'unavailable'));
   const selectedType =
     applicationType ??
-    (!hasWebApplications && hasMobileApplications ? APPLICATION_TYPE.mobile : APPLICATION_TYPE.web);
+    (!hasWebApplications && !hasWebFailures && hasMobileApplications
+      ? APPLICATION_TYPE.mobile
+      : APPLICATION_TYPE.web);
   const isMobileTab = selectedType === APPLICATION_TYPE.mobile;
 
   const mobileItems = useMemo(
@@ -559,7 +575,6 @@ export function ApplicationsListPage() {
     () => sessionsOfSource(response?.sessionsOverTime ?? null, selectedSource),
     [response, selectedSource]
   );
-  const unavailableSources = response?.unavailableSources ?? [];
   const partiallyAvailableSources = response?.partiallyAvailableSources ?? [];
 
   const { visibleColumns, setVisibleColumns } = useVisibleColumns({
@@ -599,6 +614,19 @@ export function ApplicationsListPage() {
     }
     if (hasWebApplications) {
       return NO_MATCHES_MESSAGE;
+    }
+    // A web search failed while the others loaded: a retry, not the setup docs.
+    if (hasWebFailures) {
+      return (
+        <LoadErrorPrompt
+          data-test-subj="digitalExperienceWebApplicationsError"
+          retryDataTestSubj="digitalExperienceWebApplicationsRetry"
+          retryEbtElement={APPLICATIONS_LIST_EBT_ELEMENTS.RETRY}
+          title={WEB_UNAVAILABLE_TITLE}
+          error={WEB_UNAVAILABLE_ERROR}
+          onRetry={refresh}
+        />
+      );
     }
     return environment ? noApplicationsInEnvironmentPrompt : noApplicationsPrompt;
   };

@@ -35,7 +35,8 @@ import { toTimeRangeQuery } from '../../../utils/time_range_query';
 import { PlatformBadges } from '../../../components/platform_badges';
 import { MobilePanel } from './mobile_panel';
 
-const ALL = 'all';
+// Empty, which no OS or release reported in the data can be, so every reported value is selectable.
+const ALL = '';
 
 const ALL_RELEASES_LABEL = i18n.translate('xpack.digitalExperience.mobile.filter.allReleases', {
   defaultMessage: 'All releases',

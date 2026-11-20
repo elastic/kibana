@@ -138,7 +138,7 @@ describe('MobileOverview', () => {
     await screen.findByTestId('digitalExperienceMobileKpis');
 
     const props = filterProps('digitalExperienceMobileReleaseFilter');
-    expect(props?.options.map(({ value }) => value)).toEqual(['all', '0.9.0', '2.0.0', '1.9.0']);
+    expect(props?.options.map(({ value }) => value)).toEqual(['', '0.9.0', '2.0.0', '1.9.0']);
     expect(props?.selected).toBe('0.9.0');
   });
 
@@ -148,10 +148,21 @@ describe('MobileOverview', () => {
 
     const props = filterProps('digitalExperienceMobileReleaseFilter');
     props?.onChange('2.0.0');
-    props?.onChange('all');
+    props?.onChange('');
 
     expect(updateUrlQuery).toHaveBeenNthCalledWith(1, { release: '2.0.0' });
     expect(updateUrlQuery).toHaveBeenNthCalledWith(2, { release: undefined });
+  });
+
+  it('keeps a release named all selectable, apart from all releases', async () => {
+    mockParams({ release: 'all' });
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    const props = filterProps('digitalExperienceMobileReleaseFilter');
+    expect(props?.selected).toBe('all');
+    props?.onChange('all');
+    expect(updateUrlQuery).toHaveBeenCalledWith({ release: 'all' });
   });
 
   it('lists the OS names of the response, and keeps one in the URL', async () => {
@@ -160,9 +171,9 @@ describe('MobileOverview', () => {
     await screen.findByTestId('digitalExperienceMobileKpis');
 
     const props = filterProps('digitalExperienceMobileOsFilter');
-    expect(props?.options.map(({ value }) => value)).toEqual(['all', 'iOS', 'iPadOS', 'Android']);
+    expect(props?.options.map(({ value }) => value)).toEqual(['', 'iOS', 'iPadOS', 'Android']);
     expect(props?.selected).toBe('iPadOS');
-    props?.onChange('all');
+    props?.onChange('');
     expect(updateUrlQuery).toHaveBeenCalledWith({ osName: undefined });
   });
 

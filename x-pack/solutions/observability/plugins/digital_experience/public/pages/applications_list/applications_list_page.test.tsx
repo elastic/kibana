@@ -300,6 +300,17 @@ describe('ApplicationsListPage mobile applications', () => {
     expect(screen.getByTestId('digitalExperienceUnavailableMobile')).toBeVisible();
     expect(screen.queryByTestId('digitalExperienceMobileApplicationsEmpty')).toBeNull();
   });
+
+  it('keeps the tabs on the web tab, and offers a retry, when every web search failed', async () => {
+    respondWith([mobileApp()], [], ['otel', 'classic']);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceApplicationTypeTabs')).toBeVisible();
+    expect(screen.getByTestId('digitalExperienceUnavailableSources')).toBeVisible();
+    expect(screen.getByTestId('digitalExperienceWebApplicationsError')).toBeVisible();
+    expect(screen.getByTestId('digitalExperienceWebApplicationsRetry')).toBeVisible();
+    expect(screen.queryByTestId('digitalExperienceApplicationsEmpty')).toBeNull();
+  });
 });
 
 describe('ApplicationsListPage', () => {

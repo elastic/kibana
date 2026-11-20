@@ -12,10 +12,12 @@ import { MAX_APPLICATIONS_PER_SOURCE } from '../constants';
 
 /**
  * Sessions, users, exceptions and last seen per application, with the platforms it reported on,
- * most sessions first; a metric whose field no index maps is 0.
+ * most sessions first; a metric whose field no index maps is 0. Documents without a service name
+ * name no application, so they're left out.
  */
 export const applicationsQuery = (): ComposerQuery =>
-  mobileDocuments().pipe`STATS sessions = COUNT_DISTINCT(${mobileColumn('sessionId')}),
+  mobileDocuments().pipe`WHERE ${mobileColumn('serviceName')} IS NOT NULL`
+    .pipe`STATS sessions = COUNT_DISTINCT(${mobileColumn('sessionId')}),
       users = COUNT_DISTINCT(${mobileColumn('installationId')}),
       exceptions = COUNT(${mobileColumn('exceptionType')}),
       last_seen = MAX(@timestamp),
