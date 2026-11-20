@@ -5745,7 +5745,7 @@ describe('Package policy service', () => {
         });
       });
 
-      it('bumps the agent policies and removes secrets before throwing when clearing a stale cache failed', async () => {
+      it('bumps the agent policies before throwing when clearing a stale cache failed', async () => {
         const savedObjectsClient = createSavedObjectClientMock();
         const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
         setupSOClientMocks(savedObjectsClient);
@@ -5927,6 +5927,36 @@ describe('Package policy service', () => {
         } as any);
 
         expect(mockedSecretsModule.deleteSecretsIfNotReferenced).not.toHaveBeenCalled();
+      });
+
+      it('still deletes the old secrets before throwing when clearing a stale cache failed', async () => {
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const soClient = createSavedObjectClientMock();
+        buildUpdateSOMocks(soClient);
+        mockAgentPolicyGet();
+        mockedSecretsModule.isSecretStorageEnabled.mockResolvedValue(true);
+        mockedSecretsModule.extractAndUpdateSecrets.mockImplementation(
+          async ({ packagePolicyUpdate }) => ({
+            packagePolicyUpdate,
+            secretReferences: [],
+            secretsToDelete: [{ id: 'old-secret' }],
+          })
+        );
+        clearStaleInputsSpy.mockResolvedValue({
+          cleared: true,
+          failures: [{ id: createPackagePolicyMock().id, error: new Error('clear failed') }],
+        });
+
+        await expect(
+          packagePolicyService.update(
+            soClient,
+            esClient,
+            createPackagePolicyMock().id,
+            createPackagePolicyMock()
+          )
+        ).rejects.toThrow('clear failed');
+
+        expect(mockedSecretsModule.deleteSecretsIfNotReferenced).toHaveBeenCalled();
       });
 
       it('calls deleteSecretsIfNotReferenced only after bumpRevision resolves (ordering fix)', async () => {
@@ -7492,7 +7522,7 @@ describe('Package policy service', () => {
           ),
         }));
 
-        const { failedPolicies } = await packagePolicyService.bulkUpdate(
+        const { failedPolicies, updatedPolicies } = await packagePolicyService.bulkUpdate(
           savedObjectsClient,
           elasticsearchClient,
           policies.map(({ id, next }) => ({ ...generateAttributes(next), id })),
@@ -7508,6 +7538,7 @@ describe('Package policy service', () => {
             ),
           ],
           failedIds: failedPolicies.map(({ packagePolicy }) => packagePolicy.id),
+          updatedIds: (updatedPolicies ?? []).map(({ id }) => id),
         };
       };
 
@@ -7569,16 +7600,24 @@ describe('Package policy service', () => {
         }
       );
 
-      it('reports a failed cache clear per policy and still bumps the agent policies', async () => {
+      it('reports a failed cache clear per policy, keeps its peers, and still bumps the agent policies', async () => {
         clearStaleInputsSpy.mockResolvedValue({
           cleared: true,
-          failures: [{ id: 'package-policy-0', error: new Error('clear failed') }],
+          failures: [{ id: 'package-policy-1', error: new Error('clear failed') }],
         });
 
-        const { flags, failedIds } = await bulkUpdateAndGetUnchangedFlags([{}]);
+        // Return what was asked for, so the result shows which policies were passed on as updated.
+        const getByIDsSpy = jest
+          .spyOn(packagePolicyService, 'getByIDs')
+          .mockImplementation(async (_soClient, ids) => ids.map((id) => ({ id } as PackagePolicy)));
 
-        expect(failedIds).toEqual(['package-policy-0']);
-        // Without the cleared cache the flag would be true for this unchanged package policy.
+        const { flags, failedIds, updatedIds } = await bulkUpdateAndGetUnchangedFlags([{}, {}]);
+        getByIDsSpy.mockRestore();
+
+        // The policy that failed is reported once, and only as failed. Its peer stays updated.
+        expect(failedIds).toEqual(['package-policy-1']);
+        expect(updatedIds).toEqual(['package-policy-0']);
+        // Without the cleared cache the flag would be true for these unchanged package policies.
         expect(flags).toEqual([false]);
       });
 
@@ -7621,7 +7660,10 @@ describe('Package policy service', () => {
         'sets agentVersionConditionsUnchanged to $expected in a mixed batch when $when',
         async ({ batch, expected, failedIds }) => {
           const result = await bulkUpdateAndGetUnchangedFlags(batch);
-          expect(result).toEqual({ flags: [expected], failedIds });
+          expect({ flags: result.flags, failedIds: result.failedIds }).toEqual({
+            flags: [expected],
+            failedIds,
+          });
         }
       );
     });
@@ -17012,6 +17054,33 @@ describe('clearStaleInputsForVersions()', () => {
     expect(
       result.failures.map(({ id, error }: { id: string; error: Error }) => [id, error.message])
     ).toEqual([['b', 'Failed to clear inputs_for_versions of package policy [b]: Conflict']]);
+  });
+
+  it('retries a failed clear once with the fresh version and succeeds', async () => {
+    const soClient = makeSoClient({ a: { '9.5': [] } });
+    soClient.bulkUpdate
+      .mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'a',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            error: { statusCode: 409, error: 'Conflict', message: 'Conflict' },
+          },
+        ],
+      } as any)
+      .mockResolvedValueOnce({ saved_objects: [{ id: 'a', attributes: {} }] } as any);
+
+    const result = await clear(soClient, [
+      {
+        packagePolicyId: 'a',
+        packageInfo: noConditionPackageInfo,
+        assetsMap: noConditionAssetsMap,
+      },
+    ]);
+
+    expect(result).toEqual({ cleared: true, failures: [] });
+    expect(soClient.bulkGet).toHaveBeenCalledTimes(2);
+    expect(soClient.bulkUpdate).toHaveBeenCalledTimes(2);
   });
 
   it('does not write when no cache is stored', async () => {

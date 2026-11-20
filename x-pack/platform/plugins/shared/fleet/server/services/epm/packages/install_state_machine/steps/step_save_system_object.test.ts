@@ -129,6 +129,16 @@ describe('updateLatestExecutedState', () => {
       items: ['packagePolicy1', 'packagePolicy2'],
     } as any);
 
+    mockedPackagePolicyService.bulkUpgrade.mockResolvedValue([
+      { id: 'packagePolicy1', success: true },
+      {
+        id: 'packagePolicy2',
+        success: false,
+        statusCode: 500,
+        body: { message: 'clear failed' },
+      },
+    ] as any);
+
     await stepSaveSystemObject({
       savedObjectsClient: soClient,
       // @ts-ignore
@@ -182,6 +192,9 @@ describe('updateLatestExecutedState', () => {
       expect.any(Object),
       expect.any(Object),
       ['packagePolicy1', 'packagePolicy2']
+    );
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to upgrade 1 package policies of test-integration')
     );
   });
 

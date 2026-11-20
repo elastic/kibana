@@ -312,6 +312,9 @@ async function getPkgInfoAssetsMap({
   return packageInfosandAssetsMap;
 }
 
+// Attempts to clear a stale `inputs_for_versions`, see `clearStaleInputsForVersions`.
+const CLEAR_STALE_INPUTS_ATTEMPTS = 2;
+
 /**
  * Whether an update of `oldPackagePolicy` leaves the agent version conditions of its agent
  * policies (see `agentPolicyService.computeMinAgentVersionData`) unchanged.
@@ -995,46 +998,56 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       return { cleared: false, failures: [] };
     }
     const savedObjectType = await getPackagePolicySavedObjectType();
-    const { saved_objects: packagePolicySOs } = await soClient
-      .bulkGet<PackagePolicySOAttributes>(
-        withoutCondition.map(({ packagePolicyId }) => ({
-          type: savedObjectType,
-          id: packagePolicyId,
-          fields: ['inputs_for_versions'],
-        }))
-      )
-      .catch(
-        catchAndSetErrorStackTrace.withMessage(
-          'attempt to read inputs_for_versions of package policy saved objects failed'
+    let pendingIds = withoutCondition.map(({ packagePolicyId }) => packagePolicyId);
+    let clearedCount = 0;
+    let failedClears: Array<{ id: string; error: { message: string } }> = [];
+    // A failed clear is usually a version conflict with a concurrent edit, so retry it once, with
+    // the fresh version, before reporting it.
+    for (
+      let attempt = 0;
+      attempt < CLEAR_STALE_INPUTS_ATTEMPTS && pendingIds.length > 0;
+      attempt++
+    ) {
+      const { saved_objects: packagePolicySOs } = await soClient
+        .bulkGet<PackagePolicySOAttributes>(
+          pendingIds.map((id) => ({ type: savedObjectType, id, fields: ['inputs_for_versions'] }))
         )
+        .catch(
+          catchAndSetErrorStackTrace.withMessage(
+            'attempt to read inputs_for_versions of package policy saved objects failed'
+          )
+        );
+      const stale = packagePolicySOs.filter(
+        (so): so is SavedObject<PackagePolicySOAttributes> =>
+          !isSavedObjectErrorResult(so) &&
+          Object.keys(so.attributes?.inputs_for_versions ?? {}).length > 0
       );
-    const stale = packagePolicySOs.filter(
-      (so): so is SavedObject<PackagePolicySOAttributes> =>
-        !isSavedObjectErrorResult(so) &&
-        Object.keys(so.attributes?.inputs_for_versions ?? {}).length > 0
-    );
-    if (stale.length === 0) {
-      return { cleared: false, failures: [] };
+      if (stale.length === 0) {
+        failedClears = [];
+        break;
+      }
+      // Pass the version so a concurrent edit is not overwritten (conflicts show up as failed results).
+      const { saved_objects: clearResults } = await soClient
+        .bulkUpdate<PackagePolicySOAttributes>(
+          stale.map(({ id, version }) => ({
+            type: savedObjectType,
+            id,
+            attributes: { inputs_for_versions: {} },
+            version,
+          }))
+        )
+        .catch(
+          catchAndSetErrorStackTrace.withMessage(
+            'attempt to clear inputs_for_versions of package policy saved objects failed'
+          )
+        );
+      // Bulk operations report per object failures in the results instead of rejecting.
+      failedClears = clearResults.filter(isSavedObjectErrorResult);
+      clearedCount += stale.length - failedClears.length;
+      pendingIds = failedClears.map(({ id }) => id);
     }
-    // Pass the version so a concurrent edit is not overwritten (conflicts show up as failed results).
-    const { saved_objects: clearResults } = await soClient
-      .bulkUpdate<PackagePolicySOAttributes>(
-        stale.map(({ id, version }) => ({
-          type: savedObjectType,
-          id,
-          attributes: { inputs_for_versions: {} },
-          version,
-        }))
-      )
-      .catch(
-        catchAndSetErrorStackTrace.withMessage(
-          'attempt to clear inputs_for_versions of package policy saved objects failed'
-        )
-      );
-    // Bulk operations report per object failures in the results instead of rejecting.
-    const failedClears = clearResults.filter(isSavedObjectErrorResult);
     return {
-      cleared: failedClears.length < stale.length,
+      cleared: clearedCount > 0,
       failures: failedClears.map(({ id, error }) => ({
         id,
         error: new FleetError(
