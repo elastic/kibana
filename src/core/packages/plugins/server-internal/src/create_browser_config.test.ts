@@ -8,10 +8,16 @@
  */
 
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
-import { createBrowserConfig } from './create_browser_config';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { createBrowserConfig, getExposedConfigKeys } from './create_browser_config';
+import type { TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 
-describe('createBrowserConfig', () => {
+const getBrowserConfigAndExposedKeys = <T>(config: T, descriptor: PluginConfigDescriptor<T>) => ({
+  ...createBrowserConfig(config, descriptor),
+  exposedConfigKeys: getExposedConfigKeys(descriptor),
+});
+
+describe('createBrowserConfig and getExposedConfigKeys', () => {
   it('picks nothing by default', () => {
     const configSchema = schema.object({
       notExposed1: schema.string(),
@@ -31,7 +37,7 @@ describe('createBrowserConfig', () => {
       schema: configSchema,
     };
 
-    const result = createBrowserConfig(config, descriptor);
+    const result = getBrowserConfigAndExposedKeys(config, descriptor);
     expect(result).toEqual({ browserConfig: {}, exposedConfigKeys: {} });
   });
 
@@ -60,7 +66,7 @@ describe('createBrowserConfig', () => {
       },
     };
 
-    const result = createBrowserConfig(config, descriptor);
+    const result = getBrowserConfigAndExposedKeys(config, descriptor);
     expect(result).toEqual({
       browserConfig: {
         exposed1: '1',
@@ -101,7 +107,7 @@ describe('createBrowserConfig', () => {
       },
     };
 
-    const result = createBrowserConfig(config, descriptor);
+    const result = getBrowserConfigAndExposedKeys(config, descriptor);
     expect(result).toEqual({
       browserConfig: {
         exposed1: '1',
@@ -165,7 +171,7 @@ describe('createBrowserConfig', () => {
       },
     };
 
-    const result = createBrowserConfig(config, descriptor);
+    const result = getBrowserConfigAndExposedKeys(config, descriptor);
     expect(result).toEqual({
       browserConfig: {
         exposed1: '1',
@@ -188,5 +194,131 @@ describe('createBrowserConfig', () => {
         // notExposed5, notExposed6, notExposed7, and notExposed8 are not present
       },
     });
+  });
+
+  it('lists keys nested inside offering-based schemas', () => {
+    const configSchema = schema.object({
+      offering: offeringBasedSchema({
+        serverless: schema.object({
+          exposed1: schema.boolean({ defaultValue: false }),
+          notExposed2: schema.maybe(schema.string()),
+        }),
+      }),
+    });
+    const descriptor: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
+      schema: configSchema,
+      exposeToBrowser: {
+        offering: { exposed1: true },
+      },
+    };
+
+    const result = getBrowserConfigAndExposedKeys(
+      { offering: { exposed1: true, notExposed2: '2' } },
+      descriptor
+    );
+    expect(result).toEqual({
+      browserConfig: { offering: { exposed1: true } },
+      exposedConfigKeys: { 'offering.exposed1': 'boolean?|never' },
+    });
+  });
+
+  it('lists keys nested inside oneOf schemas', () => {
+    const configSchema = schema.object({
+      oneOf: schema.oneOf([
+        schema.object({ exposed1: schema.string(), notExposed2: schema.string() }),
+        schema.object({ exposed1: schema.number() }),
+      ]),
+    });
+    const descriptor: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
+      schema: configSchema,
+      exposeToBrowser: {
+        oneOf: { exposed1: true },
+      },
+    };
+
+    const result = getBrowserConfigAndExposedKeys(
+      { oneOf: { exposed1: '1', notExposed2: '2' } },
+      descriptor
+    );
+    expect(result).toEqual({
+      browserConfig: { oneOf: { exposed1: '1' } },
+      exposedConfigKeys: { 'oneOf.exposed1': 'string|number' },
+    });
+  });
+
+  it('lists a leaf branch that a partial selector picks keys from', () => {
+    const configSchema = schema.object({
+      settings: schema.conditional(
+        schema.contextRef('serverless'),
+        true,
+        schema.object({ enabled: schema.boolean() }),
+        schema.recordOf(schema.string(), schema.string())
+      ),
+    });
+    const descriptor: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
+      schema: configSchema,
+      exposeToBrowser: {
+        settings: { enabled: true },
+      },
+    };
+
+    const result = getBrowserConfigAndExposedKeys(
+      { settings: { enabled: 'from-record', other: 'value' } },
+      descriptor
+    );
+    expect(result).toEqual({
+      browserConfig: { settings: { enabled: 'from-record' } },
+      exposedConfigKeys: {
+        settings: 'record [selected: {"enabled":true}]',
+        'settings.enabled': 'boolean|never',
+      },
+    });
+
+    expect(getExposedConfigKeys({ ...descriptor, exposeToBrowser: { settings: true } })).toEqual({
+      settings: 'record',
+      'settings.enabled': 'boolean|never',
+    });
+    expect(
+      getExposedConfigKeys({ ...descriptor, exposeToBrowser: { settings: { other: true } } })
+    ).toEqual({ settings: 'record [selected: {"other":true}]' });
+    expect(
+      getExposedConfigKeys({
+        ...descriptor,
+        exposeToBrowser: { settings: { enabled: true, other: false } },
+      })
+    ).toEqual(result.exposedConfigKeys);
+    expect(
+      getExposedConfigKeys({
+        ...descriptor,
+        exposeToBrowser: { settings: { ä: true, z: true } },
+      })
+    ).toEqual({ settings: 'record [selected: {"z":true,"ä":true}]' });
+  });
+
+  it('distinguishes literal dots in schema keys from nested paths', () => {
+    const configSchema = schema.object({
+      'nested.key': schema.string(),
+      nested: schema.object({ key: schema.boolean() }),
+    });
+    const descriptor: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
+      schema: configSchema,
+      exposeToBrowser: { 'nested.key': true, nested: { key: true } },
+    };
+
+    expect(getExposedConfigKeys(descriptor)).toEqual({
+      'nested\\.key': 'string',
+      'nested.key': 'boolean',
+    });
+  });
+
+  it('lists nothing for a config schema without keys', () => {
+    const configSchema = schema.object({});
+    const descriptor: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
+      schema: configSchema,
+      exposeToBrowser: {},
+    };
+
+    const result = getBrowserConfigAndExposedKeys({}, descriptor);
+    expect(result).toEqual({ browserConfig: {}, exposedConfigKeys: {} });
   });
 });

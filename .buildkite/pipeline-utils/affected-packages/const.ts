@@ -54,3 +54,12 @@ export const CRITICAL_FILES_JEST_INTEGRATION_TESTS = [
   '.buildkite/pipeline-utils/affected-packages/**/*.{ts,js,sh}',
   '.buildkite/pipeline-utils/ci-stats/**/*.{ts,js}',
 ];
+
+// Dedicated integration configs that snapshot global registries fed by downstream plugins.
+// Those publishers sit upstream of these configs, so includeDownstream never marks them affected.
+export const ALWAYS_RUN_JEST_INTEGRATION_CONFIGS = [
+  'x-pack/platform/plugins/shared/alerting/server/registry_checks/jest.integration.config.js',
+  'x-pack/platform/plugins/shared/actions/server/registry_checks/jest.integration.config.js',
+  'x-pack/platform/plugins/shared/task_manager/server/registry_checks/jest.integration.config.js',
+  'src/core/packages/core/server/integration_tests/exposed_config_keys/jest.integration.config.js',
+];

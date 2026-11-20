@@ -80,6 +80,7 @@
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-http-resources-server",
     "@kbn/core-plugins-server-internal",
+    "@kbn/core-rendering-server-internal",
     "@kbn/core-root-server-internal",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-http-router-server-internal",
@@ -177,7 +178,8 @@
     "@kbn/core-pricing-browser",
     "@kbn/core-pricing-server-internal",
     "@kbn/core-pricing-common",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/repo-packages"
   ],
   "exclude": ["target/**/*"]
 }

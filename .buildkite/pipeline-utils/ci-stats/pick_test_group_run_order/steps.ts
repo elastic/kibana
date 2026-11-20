@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BuildkiteClient, BuildkiteGroupStep, BuildkiteStep } from '../../buildkite/index.ts';
+import type {
+  BuildkiteClient,
+  BuildkiteGroupStep,
+  BuildkiteStep,
+  BuildkiteWaitStep,
+} from '../../buildkite/index.ts';
 import {
   AGENT_DISK_GIB,
   RETRIES,

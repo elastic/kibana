@@ -19,6 +19,7 @@ import {
 } from './rendering_service.test.mocks';
 
 import { load } from 'cheerio';
+import { of } from 'rxjs';
 
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -31,6 +32,7 @@ import {
 import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
 import { RenderingService } from './rendering_service';
 import { AuthStatus } from '@kbn/core-http-server';
+import { PluginType, type DiscoveredPlugin } from '@kbn/core-base-common';
 
 const BUILD_DATE = '2023-05-15T23:12:09+0000';
 const INJECTED_METADATA = {
@@ -676,6 +678,54 @@ describe('RenderingService', () => {
     renderDarkModeTestCases(async () => {
       await service.preboot(mockRenderingPrebootDeps);
       return [(await service.setup(mockRenderingSetupDeps)).render, mockRenderingSetupDeps];
+    });
+    it('includes only anonymous-safe plugins on anonymous pages', async () => {
+      await service.preboot(mockRenderingPrebootDeps);
+      const render = (await service.setup(mockRenderingSetupDeps)).render;
+      const deps = mockRenderingSetupDeps;
+      const uiSettings = {
+        client: uiSettingsServiceMock.createClient(),
+        globalClient: uiSettingsServiceMock.createClient(),
+      };
+      const createPlugin = (id: string, enabledOnAnonymousPages: boolean): DiscoveredPlugin => ({
+        id,
+        configPath: [id],
+        type: PluginType.standard,
+        requiredPlugins: [],
+        optionalPlugins: [],
+        requiredBundles: [],
+        runtimePluginDependencies: [],
+        enabledOnAnonymousPages,
+      });
+      deps.uiPlugins.public.set('anonymousSafe', createPlugin('anonymousSafe', true));
+      deps.uiPlugins.public.set('authenticatedOnly', createPlugin('authenticatedOnly', false));
+      deps.uiPlugins.browserConfigs.set('anonymousSafe', of({ browserConfig: { marker: 'safe' } }));
+      deps.uiPlugins.browserConfigs.set(
+        'authenticatedOnly',
+        of({ browserConfig: { marker: 'authenticated' } })
+      );
+
+      try {
+        const anonymousPage = load(
+          await render(createKibanaRequest(), uiSettings, { isAnonymousPage: true })
+        );
+        const authenticatedPage = load(await render(createKibanaRequest(), uiSettings));
+        const pluginConfigs = (dom: ReturnType<typeof load>) =>
+          JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""').uiPlugins.map(
+            ({ id, config }: { id: string; config: { marker: string } }) => ({ id, config })
+          );
+
+        expect(pluginConfigs(anonymousPage)).toEqual([
+          { id: 'anonymousSafe', config: { marker: 'safe' } },
+        ]);
+        expect(pluginConfigs(authenticatedPage)).toEqual([
+          { id: 'anonymousSafe', config: { marker: 'safe' } },
+          { id: 'authenticatedOnly', config: { marker: 'authenticated' } },
+        ]);
+      } finally {
+        deps.uiPlugins.public.clear();
+        deps.uiPlugins.browserConfigs.clear();
+      }
     });
   });
 });

@@ -14,11 +14,10 @@ export const createBrowserConfig = <T = unknown>(
   descriptor: PluginConfigDescriptor<T>
 ) => {
   if (!descriptor.exposeToBrowser) {
-    return { browserConfig: {}, exposedConfigKeys: {} };
+    return { browserConfig: {} };
   }
   return {
     browserConfig: recursiveCreateConfig(config, descriptor.exposeToBrowser),
-    exposedConfigKeys: getExposedConfigKeys(descriptor),
   };
 };
 
@@ -40,35 +39,63 @@ const recursiveCreateConfig = <T = unknown>(
 
 /**
  * Given a plugin descriptor, this function returns an object that contains a flattened list of exposed config keys. This is used for a CI
- * check to ensure that consumers don't accidentally expose more config settings to the browser than intended.
+ * check (`exposed_config_keys.test.ts`) to ensure that consumers don't accidentally expose more config settings to the browser than intended.
+ * Rendering does not call it, so pages never walk the config schema.
  */
-function getExposedConfigKeys<T = unknown>(descriptor: PluginConfigDescriptor<T>) {
-  const schemaStructure = descriptor.schema.getSchemaStructure();
+export function getExposedConfigKeys<T = unknown>(
+  descriptor: PluginConfigDescriptor<T>
+): Record<string, string> {
+  const { exposeToBrowser, schema } = descriptor;
+  if (!exposeToBrowser) {
+    return {};
+  }
+  const schemaStructure = schema.getSchemaStructure({ expandBranches: true });
   const flattenedConfigSchema: Record<string, string> = {};
   for (const { path, type } of schemaStructure) {
-    if (checkIsPathExposed(path, descriptor.exposeToBrowser!)) {
-      flattenedConfigSchema[path.join('.')] = type;
+    const exposure = getPathExposure(path, exposeToBrowser);
+    if (exposure) {
+      const escapedPath = path.map((segment) =>
+        segment.replace(/\\/g, '\\\\').replace(/\./g, '\\.')
+      );
+      flattenedConfigSchema[escapedPath.join('.')] =
+        exposure === true ? type : `${type} [selected: ${serializeSelector(exposure)}]`;
     }
   }
   return flattenedConfigSchema;
 }
 
-function checkIsPathExposed<T = unknown>(
+/**
+ * A path whose descriptor is still an object when the path ends is a leaf (such as a record) that the descriptor
+ * picks keys from. Preserve that selector so changes to an opaque leaf are visible to the CI allow-list.
+ * The empty root path of a config schema with no keys holds nothing.
+ */
+function getPathExposure<T = unknown>(
   path: string[],
   descriptor: ExposedToBrowserDescriptor<T>
-) {
-  let isExposed = false;
+): boolean | ExposedToBrowserDescriptor<T> {
+  if (!path.length) {
+    return false;
+  }
   for (const key of path) {
-    // Traverse the path to see if it is exposed or not
     const exposedConfig = descriptor[key as keyof ExposedToBrowserDescriptor<T>];
     if (exposedConfig && typeof exposedConfig === 'object') {
       descriptor = exposedConfig;
       continue;
     }
-    if (exposedConfig === true) {
-      isExposed = true;
-    }
-    break;
+    return exposedConfig === true;
   }
-  return isExposed;
+  return descriptor;
+}
+
+function serializeSelector(selector: object): string {
+  return JSON.stringify(selector, (_key, value: unknown) => {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      return Object.fromEntries(
+        Object.entries(value)
+          .filter(([, selected]) => selected !== false)
+          .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
+      );
+    }
+    return value;
+  });
 }
