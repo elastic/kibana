@@ -9,10 +9,10 @@ applies_to:
 
 # Microsoft SQL Server connector [microsoft-sql-server-action-type]
 
-Use the Microsoft SQL Server connector to query tables, search rows, and explore schema in a SQL Server database from chat conversations. The connector also provides an **Execute SQL** action for statements that change data.
+Use the Microsoft SQL Server connector to query tables, search rows, and explore schema in a SQL Server database from chat conversations.
 
 ::::{note}
-This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
 ::::
 
 :::{include} _snippets/native-driver-memory-note.md
@@ -36,7 +36,7 @@ The connector can't be routed through an HTTP proxy. If `xpack.actions.proxyUrl`
 
 ## Get connection details [microsoft-sql-server-api-credentials]
 
-To collect the details you need:
+To collect the details you'll need to configure the connection:
 
 1. Confirm the server accepts SQL Server authentication (mixed mode) and listens on a TCP port that {{kib}} can reach.
 2. Create a SQL Server login and database user with the permissions you want {{kib}} to have (refer to [Database user permissions](#microsoft-sql-server-security)).
@@ -68,7 +68,7 @@ Username
 Password
 :   The password for the login.
 
-## Test connectors [microsoft-sql-server-action-configuration]
+### Test connectors [microsoft-sql-server-action-configuration]
 
 You can test connectors as you're creating or editing the connector in {{kib}}.
 
@@ -102,9 +102,11 @@ Search Rows
     - **maxRows** (optional): Maximum number of rows to return (1 to 1,000, default: 100).
     - **schema** (optional): The schema containing the table (default: `dbo`).
 
+<!-- Restore when workflow support is added.
 Execute SQL _(not yet available)_
 :   Run any T-SQL statement against the database. This action has no restrictions. You can run `INSERT`, `UPDATE`, `DELETE`, `DROP`, `EXEC`, and data definition language (DDL) statements. Use it only when you explicitly need a write or destructive operation. Reaching the output cap does not cancel the statement, but the request timeout still applies. If a call times out, don't assume that no changes were made. Only the first 1,000 output rows are returned. Not exposed to AI agents; becomes usable when workflow support is added. Prefer **Query** for read-only access.
     - **sql** (required): The statement to run.
+-->
 
 ## Database user permissions [microsoft-sql-server-security]
 
@@ -131,6 +133,7 @@ The **Query** action enforces read-only access in the connector by accepting onl
 The check in the connector is not a security guarantee. Prompt injection and similar techniques can bypass it. The only reliable protection is granting the login read-only permissions. Treat the check as defense in depth, not a substitute for least-privilege credentials.
 ::::
 
+<!-- Restore with the Execute SQL action when workflow support is added.
 The **Execute SQL** action bypasses these restrictions and can run any statement the login is allowed to run. Do not grant write permissions unless your use case requires them.
 
 ### Broader access
@@ -141,3 +144,4 @@ If your use case requires write access, grant the appropriate permissions and sc
 -- Example: allow reads and writes on one schema only
 GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::sales TO kibana_user;
 ```
+-->
