@@ -16,7 +16,8 @@ import {
   useResizeObserver,
 } from '@elastic/eui';
 import { createColumnHelper, metaHelper, tableFeatures, useTable } from '@tanstack/react-table';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import type { Range, Virtualizer } from '@tanstack/react-virtual';
+import { defaultRangeExtractor, useVirtualizer } from '@tanstack/react-virtual';
 
 import type { DataGridApi } from './data_grid_api';
 import { useDataGridAnnouncements } from './data_grid_announcements';
@@ -87,6 +88,8 @@ export const DataGrid = <TRow extends object>({
 
   const styles = useEuiMemoizedStyles(getDataGridStyles);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const startTabGuardRef = useRef<HTMLSpanElement>(null);
+  const endTabGuardRef = useRef<HTMLSpanElement>(null);
   const [headerRowGroupElement, setHeaderRowGroupElement] = useState<HTMLDivElement | null>(null);
   const { height: headerHeight } = useResizeObserver(headerRowGroupElement);
   const {
@@ -143,39 +146,33 @@ export const DataGrid = <TRow extends object>({
   );
   const estimateRowSize = useCallback(() => estimatedRowHeight, [estimatedRowHeight]);
 
-  const rowVirtualizer = useVirtualizer({
-    count: tableRows.length,
-    getScrollElement: () => scrollContainerRef.current,
-    estimateSize: estimateRowSize,
-    getItemKey: getVirtualItemKey,
-    overscan: rowOverscan,
-    scrollMargin: headerHeight,
-    scrollPaddingStart: headerHeight,
-    initialRect: { width: 0, height },
-  });
-  const virtualRows = rowVirtualizer.getVirtualItems();
-  const scrollToRow = useCallback(
-    (rowIndex: number): boolean => {
-      try {
-        const offset = rowVirtualizer.getOffsetForIndex(rowIndex, 'auto')?.[0];
-        if (offset === undefined) {
-          return false;
-        }
-        rowVirtualizer.scrollToOffset(offset);
-        return true;
-      } catch {
+  const rowVirtualizerRef = useRef<Virtualizer<HTMLDivElement, Element> | null>(null);
+  const scrollToRow = useCallback((rowIndex: number): boolean => {
+    const rowVirtualizer = rowVirtualizerRef.current;
+    if (!rowVirtualizer) {
+      return false;
+    }
+    try {
+      const offset = rowVirtualizer.getOffsetForIndex(rowIndex, 'auto')?.[0];
+      if (offset === undefined) {
         return false;
       }
-    },
-    [rowVirtualizer]
-  );
+      rowVirtualizer.scrollToOffset(offset);
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
 
   const {
     liveRegion,
+    contentEntryHint,
+    contentEntryHintId,
     announceCopySuccess,
     announceCopyFailure,
     announceCommandFailure,
     announceRowsBecameEmpty,
+    announceCellContentEntered,
   } = useDataGridAnnouncements();
   const focus = useDataGridFocus({
     rowIds,
@@ -185,6 +182,35 @@ export const DataGrid = <TRow extends object>({
     onCommandFailure: announceCommandFailure,
     onRowsBecameEmpty: announceRowsBecameEmpty,
   });
+
+  // Keeps the active row rendered while it is scrolled out of the virtual window, so the focused cell,
+  // or focused content inside it, never loses DOM focus to virtualization. Rows stay in index order,
+  // which keeps reading and copy order logical.
+  const activeRowIndex = focus.activeCell ? rowIds.indexOf(focus.activeCell.rowId) : -1;
+  const extractRowRange = useCallback(
+    (range: Range): number[] => {
+      const indexes = defaultRangeExtractor(range);
+      return activeRowIndex < 0 || indexes.includes(activeRowIndex)
+        ? indexes
+        : [...indexes, activeRowIndex].sort((first, second) => first - second);
+    },
+    [activeRowIndex]
+  );
+
+  const rowVirtualizer = useVirtualizer({
+    count: tableRows.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: estimateRowSize,
+    getItemKey: getVirtualItemKey,
+    overscan: rowOverscan,
+    rangeExtractor: extractRowRange,
+    scrollMargin: headerHeight,
+    scrollPaddingStart: headerHeight,
+    initialRect: { width: 0, height },
+  });
+  rowVirtualizerRef.current = rowVirtualizer;
+  const virtualRows = rowVirtualizer.getVirtualItems();
+
   useImperativeHandle(apiRef, () => focus.api, [focus.api]);
 
   const activeRowIsMounted = Boolean(
@@ -209,10 +235,6 @@ export const DataGrid = <TRow extends object>({
   );
   const onGridKeyDownCapture = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === keys.TAB) {
-        focus.releaseFocusOwnership();
-        return;
-      }
       if (event.target !== event.currentTarget || !focus.activeCell) {
         return;
       }
@@ -233,9 +255,43 @@ export const DataGrid = <TRow extends object>({
     [columnIds, focus, rowIds]
   );
 
+  // Redirects focus entering through a Tab guard to the logical tab stop. A guard focused by the Tab
+  // hand-off below keeps focus so that the browser's default Tab continues from it.
+  const onTabGuardFocus = useCallback(
+    ({ relatedTarget }: React.FocusEvent<HTMLSpanElement>) => {
+      if (relatedTarget && scrollContainerRef.current?.contains(relatedTarget)) {
+        return;
+      }
+      if (focus.activeCell) {
+        void focus.focusCell(focus.activeCell);
+        return;
+      }
+      scrollContainerRef.current?.focus();
+    },
+    [focus]
+  );
+
+  // Hands Tab and Shift+Tab to the matching guard, so that focusables rendered inside cells are
+  // never Tab stops. Tab already handled inside a cell's content, and events from consumer portals,
+  // are left alone.
+  const onGridKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    const { key, shiftKey, target, currentTarget } = event;
+    if (
+      key !== keys.TAB ||
+      event.defaultPrevented ||
+      !(target instanceof Node) ||
+      !currentTarget.contains(target)
+    ) {
+      return;
+    }
+    const guard = shiftKey ? startTabGuardRef.current : endTabGuardRef.current;
+    guard?.focus({ preventScroll: true });
+  }, []);
+
   return (
     <>
       <OverrideCopiedTabularContent>
+        <span ref={startTabGuardRef} tabIndex={0} css={styles.tabGuard} onFocus={onTabGuardFocus} />
         <div
           ref={scrollContainerRef}
           role="grid"
@@ -248,6 +304,7 @@ export const DataGrid = <TRow extends object>({
           style={{ blockSize: height, scrollPaddingBlockStart: headerHeight }}
           onFocus={onGridFocus}
           onKeyDownCapture={onGridKeyDownCapture}
+          onKeyDown={onGridKeyDown}
         >
           <div ref={setHeaderRowGroupElement} role="rowgroup" css={styles.headerRowGroup}>
             {headerGroups.map((headerGroup, headerGroupIndex) => (
@@ -329,6 +386,8 @@ export const DataGrid = <TRow extends object>({
                         activateFocusedCell={focus.activateFocusedCell}
                         announceCopySuccess={announceCopySuccess}
                         announceCopyFailure={announceCopyFailure}
+                        announceCellContentEntered={announceCellContentEntered}
+                        contentEntryHintId={contentEntryHintId}
                       />
                     );
                   })}
@@ -337,8 +396,10 @@ export const DataGrid = <TRow extends object>({
             })}
           </div>
         </div>
+        <span ref={endTabGuardRef} tabIndex={0} css={styles.tabGuard} onFocus={onTabGuardFocus} />
       </OverrideCopiedTabularContent>
       {liveRegion}
+      {contentEntryHint}
     </>
   );
 };
