@@ -47,6 +47,12 @@ export interface DestinationNodeData extends Record<string, unknown> {
   destinationId?: string;
   /** Decides whether the node shows stats. A node without it shows none. */
   destinationType?: DestinationViewModel['type'];
+  /**
+   * Whether a source feeds the destination in the saved unit. Stats describe what is deployed, so
+   * a destination without one shows no stats and is not requested. The staged state decides the
+   * subtitle, not this.
+   */
+  hasSavedSource: boolean;
   signals?: DestinationSignal[];
   indexCount?: number;
   targetedIndexNames?: string[];

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { InventoryCellValue } from '../../inventory_api/types';
+import type { ESQLValue } from '@kbn/entity-inventory-plugin/common';
 
 /** Formats a cell as text, or returns `null` when the cell has no value. */
-export const formatCellValue = (value: InventoryCellValue | undefined): string | null => {
+export const formatCellValue = (value: ESQLValue | undefined): string | null => {
   if (value === null || value === undefined) {
     return null;
   }

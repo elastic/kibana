@@ -177,6 +177,7 @@ class TaskHandlerImpl implements TaskHandler {
         events$,
         request,
         callbackDeliveryService: this.deps.callbackDeliveryService,
+        conversationService: this.deps.conversationService,
         surfacesService: this.deps.surfacesService,
         logger: this.logger,
       });

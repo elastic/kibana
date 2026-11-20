@@ -35,7 +35,7 @@ export {
   SIGNAL_VERDICTS,
   SEVERITY_OPTIONS,
   SEVERITY_CONTRACT_RULE,
-  UNCONFIRMED_EVENT_MAX_CONFIDENCE,
+  CONFIDENCE_CONTRACT_RULE,
   getSeverityLabel,
   type BlastRadiusEntry,
   type CausalFeature,
@@ -58,6 +58,7 @@ export {
   SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS,
   significantEventCloseReasonSchema,
   operatorFallbackAssessmentNote,
+  severitySyncAssessmentNote,
   MAX_DEACTIVATION_REASON_LENGTH,
   INACTIVE_SERIES_LOOKBACK_HOURS,
 } from './events';
