@@ -333,15 +333,16 @@ export function AiGradientBadge({
 
   // Own span (not `.euiBadge__text`): EuiBadge skips that wrapper for numeric `0`.
   // Drop AI-button label padding — EuiBadge already pads; the extra xs made counts too wide.
-  // Forced-colors: gradients drop out — fall back to CanvasText so the count stays visible.
+  // Forced-colors: gradients drop out. Use ButtonText — this badge sits in accordion buttons
+  // (ButtonFace), where CanvasText can fail contrast on hover/focus.
   const labelSpanCss = css`
     ${labelCss}
     padding: 0;
 
     @media (forced-colors: active) {
       background: none !important;
-      color: CanvasText !important;
-      -webkit-text-fill-color: CanvasText !important;
+      color: ButtonText !important;
+      -webkit-text-fill-color: ButtonText !important;
     }
   `;
 
@@ -361,7 +362,9 @@ export function AiGradientBadge({
           `,
         ]}
       >
-        <span css={labelSpanCss}>{children}</span>
+        <span data-test-subj="nightshiftAiGradientBadgeLabel" css={labelSpanCss}>
+          {children}
+        </span>
       </EuiBadge>
     </>
   );

@@ -89,6 +89,7 @@ export function HeroMark({ severity }: HeroMarkProps): React.ReactElement {
         >
           {/* Solid disc + knockout ring (page fill, not textGhost — ghost stays light in dark mode). */}
           <span
+            data-test-subj="nightshiftHeroMarkSeverityDotRing"
             css={css`
               background: ${dotColor};
               border-radius: 50%;

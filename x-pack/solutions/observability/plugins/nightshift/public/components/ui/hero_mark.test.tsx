@@ -21,14 +21,16 @@ function styleChunksForClass(className: string): string {
 }
 
 describe('HeroMark', () => {
-  it('uses the page surface for the severity-dot ring in dark mode, not textGhost', () => {
+  it('draws the severity-dot ring with a box-shadow using backgroundBasePlain in dark mode', () => {
     let backgroundBasePlain = '';
     let textGhost = '';
+    let borderWidthThick = '';
 
     const Probe = () => {
       const { euiTheme } = useEuiTheme();
       backgroundBasePlain = euiTheme.colors.backgroundBasePlain;
       textGhost = euiTheme.colors.textGhost;
+      borderWidthThick = euiTheme.border.width.thick;
       return <HeroMark severity="critical" />;
     };
 
@@ -38,12 +40,13 @@ describe('HeroMark', () => {
       </EuiProvider>
     );
 
-    const ring = screen.getByTestId('nightshiftHeroMarkSeverityDot').firstElementChild;
-    expect(ring).toBeInstanceOf(HTMLElement);
-    const ringStyles = styleChunksForClass((ring as HTMLElement).className);
+    const ring = screen.getByTestId('nightshiftHeroMarkSeverityDotRing');
+    const ringStyles = styleChunksForClass(ring.className);
+    const boxShadowMatch = ringStyles.match(/box-shadow:[^;]+/);
 
     expect(backgroundBasePlain).not.toBe(textGhost);
-    expect(ringStyles).toContain(backgroundBasePlain);
-    expect(ringStyles).not.toContain(textGhost);
+    expect(boxShadowMatch?.[0]).toContain(backgroundBasePlain);
+    expect(boxShadowMatch?.[0]).toContain(borderWidthThick);
+    expect(boxShadowMatch?.[0]).not.toContain(textGhost);
   });
 });
