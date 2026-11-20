@@ -76,6 +76,9 @@ export interface KibanaAsStreamOptions {
 
 const noop = () => undefined;
 
+const normalizeHeaders = (headers: IncomingHttpHeaders): IncomingHttpHeaders =>
+  Object.fromEntries(Object.entries(headers).map(([name, value]) => [name.toLowerCase(), value]));
+
 const isStreamBody = (body: unknown): body is NodeJS.ReadableStream => {
   return typeof body === 'object' && body !== null && !!isReadable(body as NodeJS.ReadableStream);
 };
@@ -157,7 +160,7 @@ export const createTransport = ({
     constructor(options: TransportOptions) {
       const { headers = {}, ...otherOptions } = options;
       super(otherOptions);
-      this.headers = headers;
+      this.headers = normalizeHeaders(headers);
     }
 
     async request(params: TransportRequestParams, options?: TransportRequestOptions) {
@@ -193,26 +196,29 @@ export const createTransport = ({
       // add stored headers to the options
       opts.headers = {
         ...this.headers,
-        ...options?.headers,
+        ...normalizeHeaders(options?.headers ?? {}),
       };
 
       onRequest({ scoped }, params, opts, logger);
+      // HTTP header names are case-insensitive. Normalize before sending so the renewal handler
+      // sees the same effective authorization value as Elasticsearch.
+      opts.headers = normalizeHeaders(opts.headers ?? {});
 
       const retryUnauthorizedRequest = async (error: UnauthorizedError) => {
         const unauthorizedErrorHandler = getUnauthorizedErrorHandler
           ? getUnauthorizedErrorHandler()
           : undefined;
         if (unauthorizedErrorHandler) {
-          const result = await unauthorizedErrorHandler(error);
+          const result = await unauthorizedErrorHandler(error, opts.headers);
           if (isRetryResult(result)) {
             this.headers = {
               ...this.headers,
-              ...result.authHeaders,
+              ...normalizeHeaders(result.authHeaders),
             };
             const retryOpts = { ...opts };
             retryOpts.headers = {
               ...this.headers,
-              ...options?.headers,
+              ...normalizeHeaders(options?.headers ?? {}),
             };
 
             const retryResponse = (await super.request(params, retryOpts)) as TransportResult<
