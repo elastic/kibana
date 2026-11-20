@@ -141,6 +141,7 @@ describe('buildMeasurementDefinitions', () => {
       'workload',
     ]);
     expect(definition.context_columns).toEqual(['worst_container']);
+    expect(definition.esql).toContain('| STATS container_value_0 = AVG(');
     expect(definition.esql).toContain(
       'BY orchestrator.cluster.name, kubernetes.namespace, workload, kubernetes.pod.name, kubernetes.container.name'
     );
@@ -160,8 +161,11 @@ describe('buildMeasurementDefinitions', () => {
 
     expect(previewQuery).toContain('| WHERE @timestamp >= NOW() - 15 minutes');
     expect(groupings).toHaveLength(3);
+    expect(groupings[0]).toMatch(/^minute = BUCKET\(@timestamp, 1 minute\), /);
     expect(
-      groupings.every((grouping) => grouping.startsWith('minute = BUCKET(@timestamp, 1 minute), '))
+      groupings
+        .slice(1)
+        .every((grouping) => grouping.startsWith('minute = BUCKET(minute, 1 minute), '))
     ).toBe(true);
     expect(previewQuery).toContain('| KEEP minute, ');
     expect(previewQuery).toContain('| LIMIT 10000');

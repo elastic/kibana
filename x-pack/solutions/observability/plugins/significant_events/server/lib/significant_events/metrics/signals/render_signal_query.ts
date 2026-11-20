@@ -205,7 +205,7 @@ const renderContainerAggregation = (
   );
   const containerValue = coalesce(variants.map((_, index) => `container_value_${index}`));
 
-  return `| INLINE STATS ${containerArms.join(',\n               ')}
+  return `| STATS ${containerArms.join(',\n        ')}
   BY ${[...entityFields, POD_FIELD, CONTAINER_FIELD].join(', ')}
 | EVAL container_value = ${containerValue},
        container = CONCAT(${POD_FIELD}, "/", ${CONTAINER_FIELD})
@@ -267,14 +267,21 @@ export const renderSignalQuery = ({
   };
 };
 
+const addPreviewBuckets = (esql: string): string => {
+  let groupingIndex = 0;
+  return esql.replace(/\n  BY /g, () => {
+    const timestampField = groupingIndex++ === 0 ? '@timestamp' : 'minute';
+    return `\n  BY minute = BUCKET(${timestampField}, 1 minute), `;
+  });
+};
+
 /** Adds the preview time range, minute buckets, and row limit to a stored query. */
 export const renderDefinitionPreviewQuery = (esql: string): string =>
-  `${esql
-    .replace(
+  `${addPreviewBuckets(
+    esql.replace(
       '| WHERE ',
       `| WHERE @timestamp >= NOW() - ${PREVIEW_WINDOW}
     AND `
     )
-    .replaceAll('\n  BY ', '\n  BY minute = BUCKET(@timestamp, 1 minute), ')
-    .replace('| KEEP ', '| KEEP minute, ')}
+  ).replace('| KEEP ', '| KEEP minute, ')}
 | LIMIT ${DEFINITION_PREVIEW_LIMIT}`;
