@@ -494,6 +494,32 @@ describe('summarizeSessions', () => {
     );
   });
 
+  it('stops querying and writing once Task Manager aborts the run', async () => {
+    const controller = new AbortController();
+    const esClient = setUp({ beforeSummary: async () => controller.abort() });
+    const answer = esClient.esql.query.getMockImplementation();
+    // As the Elasticsearch client does, a request rejects once its signal is aborted.
+    esClient.esql.query.mockImplementation((async (request, options) => {
+      const response = await answer?.(request, options);
+      options?.signal?.throwIfAborted();
+      return response;
+    }) as typeof esClient.esql.query);
+
+    await expect(
+      run(esClient, {
+        signal: controller.signal,
+        checkpoint: new Date(UNTIL - 3 * HOUR).toISOString(),
+      })
+    ).rejects.toMatchObject({ name: 'AbortError' });
+
+    expect(esClient.esql.query.mock.calls.map(([, options]) => options?.signal)).toEqual([
+      controller.signal,
+      controller.signal,
+      controller.signal,
+    ]);
+    expect(esClient.bulk).not.toHaveBeenCalled();
+  });
+
   it('keeps windows between a minute and a day', async () => {
     const esClient = setUp({ changed: () => 0 });
 
