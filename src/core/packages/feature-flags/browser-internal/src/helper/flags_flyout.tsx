@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { css, keyframes } from '@emotion/react';
 import {
   EuiBadge,
@@ -17,6 +17,7 @@ import {
   EuiButtonIcon,
   EuiCode,
   EuiFieldNumber,
+  EuiFieldSearch,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,6 +25,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiIcon,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -92,6 +94,34 @@ const sourceColor: Record<FeatureFlagSource, 'accent' | 'primary' | 'success' | 
   fallback: 'default',
 };
 
+const rowSaveFailedMessage = i18n.translate('core.featureFlags.helper.rowSaveFailedMessage', {
+  defaultMessage: 'Override failed to save.',
+});
+
+const rowResetFailedMessage = i18n.translate('core.featureFlags.helper.rowResetFailedMessage', {
+  defaultMessage: 'Override failed to clear.',
+});
+
+function saveFailedMessage(flagKey: string): ReactNode {
+  return (
+    <FormattedMessage
+      id="core.featureFlags.helper.saveFailedErrorMessage"
+      defaultMessage="The override for {flagKey} failed to save."
+      values={{ flagKey: <EuiCode>{flagKey}</EuiCode> }}
+    />
+  );
+}
+
+function resetFailedMessage(flagKey: string): ReactNode {
+  return (
+    <FormattedMessage
+      id="core.featureFlags.helper.resetFailedErrorMessage"
+      defaultMessage="The override for {flagKey} failed to clear."
+      values={{ flagKey: <EuiCode>{flagKey}</EuiCode> }}
+    />
+  );
+}
+
 function isForbidden(error: unknown): boolean {
   return (
     typeof error === 'object' &&
@@ -139,9 +169,55 @@ export function FlagsFlyout({
   const [loading, setLoading] = useState(true);
   const [forbidden, setForbidden] = useState(false);
   const [overridesUnavailable, setOverridesUnavailable] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | undefined>();
+  const [errorMessage, setErrorMessage] = useState<ReactNode>();
+  const [searchText, setSearchText] = useState('');
   // flag key -> save sequence number, so a repeat save restarts the indicator animation
+  // Flags with a save in progress. They show as runtime overrides before the server confirms.
+  const [savingKeys, setSavingKeys] = useState<ReadonlySet<string>>(new Set());
+  const setSaving = useCallback((flagKey: string, saving: boolean) => {
+    setSavingKeys((current) => {
+      if (current.has(flagKey) === saving) {
+        return current;
+      }
+      const next = new Set(current);
+      if (saving) {
+        next.add(flagKey);
+      } else {
+        next.delete(flagKey);
+      }
+      return next;
+    });
+  }, []);
   const [savedKeys, setSavedKeys] = useState<ReadonlyMap<string, number>>(new Map());
+
+  // Failed changes by flag key. Shown on the row until the flag changes again, or on clear/refresh.
+  const [rowErrors, setRowErrors] = useState<ReadonlyMap<string, ReactNode>>(new Map());
+  const setRowError = useCallback((flagKey: string, message: ReactNode | undefined) => {
+    setRowErrors((current) => {
+      if (message === undefined && !current.has(flagKey)) {
+        return current;
+      }
+      const next = new Map(current);
+      if (message === undefined) {
+        next.delete(flagKey);
+      } else {
+        next.set(flagKey, message);
+      }
+      return next;
+    });
+  }, []);
+  const clearRowErrors = useCallback(() => setRowErrors(new Map()), []);
+  /**
+   * Shows a failed change in the banner at the top, and on its row, where the flag is already
+   * clear from context so the row message can leave the name out.
+   */
+  const reportRowError = useCallback(
+    (flagKey: string, bannerMessage: ReactNode, rowMessage: ReactNode = bannerMessage) => {
+      setRowError(flagKey, rowMessage);
+      setErrorMessage(bannerMessage);
+    },
+    [setRowError]
+  );
 
   /** Briefly marks a flag as saved so a changed value is visible even when nothing else moves. */
   const markSaved = useCallback((flagKey: string) => {
@@ -156,106 +232,136 @@ export function FlagsFlyout({
     });
   }, []);
 
-  const load = useCallback(async () => {
-    setErrorMessage(undefined);
-    const [snapshotResult, overridesResult] = await Promise.allSettled([
-      http.post<OfrepBulkResponse>(OFREP_BULK_PATH, { body: JSON.stringify({}) }),
-      http.get<OverridesResponse>(FEATURE_FLAGS_OVERRIDES_API_PATH),
-    ]);
+  const latestLoad = useRef(0);
 
-    const snapshot =
-      snapshotResult.status === 'fulfilled' ? snapshotValues(snapshotResult.value) : {};
-    const overridesForbidden =
-      overridesResult.status === 'rejected' && isForbidden(overridesResult.reason);
+  const load = useCallback(
+    async (keepError: boolean = false) => {
+      latestLoad.current += 1;
+      const currentLoad = latestLoad.current;
+      if (!keepError) {
+        setErrorMessage(undefined);
+      }
+      const [snapshotResult, overridesResult] = await Promise.allSettled([
+        http.post<OfrepBulkResponse>(OFREP_BULK_PATH, { body: JSON.stringify({}) }),
+        http.get<OverridesResponse>(FEATURE_FLAGS_OVERRIDES_API_PATH),
+      ]);
 
-    if (overridesResult.status === 'rejected' && !overridesForbidden) {
-      setOverridesUnavailable(true);
-      setForbidden(false);
-      setRows([]);
-      setErrorMessage(
-        i18n.translate('core.featureFlags.helper.overridesLoadFailedErrorMessage', {
-          defaultMessage: 'Runtime overrides could not be loaded. Refresh to try again.',
+      // A newer load started while this one was in flight, so its result is stale.
+      if (currentLoad !== latestLoad.current) {
+        return;
+      }
+
+      const snapshot =
+        snapshotResult.status === 'fulfilled' ? snapshotValues(snapshotResult.value) : {};
+      const overridesForbidden =
+        overridesResult.status === 'rejected' && isForbidden(overridesResult.reason);
+
+      if (overridesResult.status === 'rejected' && !overridesForbidden) {
+        setOverridesUnavailable(true);
+        setForbidden(false);
+        setRows([]);
+        setErrorMessage(
+          i18n.translate('core.featureFlags.helper.overridesLoadFailedErrorMessage', {
+            defaultMessage: 'Runtime overrides could not be loaded. Refresh to try again.',
+          })
+        );
+        setLoading(false);
+        return;
+      }
+
+      const overrides: Partial<OverridesResponse> =
+        overridesResult.status === 'fulfilled' ? overridesResult.value : {};
+      setOverridesUnavailable(false);
+
+      if (snapshotResult.status === 'rejected' && !overridesForbidden) {
+        setErrorMessage(
+          i18n.translate('core.featureFlags.helper.loadFailedErrorMessage', {
+            defaultMessage: 'Feature flags could not be loaded.',
+          })
+        );
+      }
+
+      setForbidden(overridesForbidden);
+      setRows(
+        buildFlagRows({
+          snapshot,
+          runtimeOverrides: overrides.runtimeOverrides ?? {},
+          configOverrides: overrides.configOverrides ?? {},
+          // This tab's evaluation wins over another node's when the snapshot has no value.
+          evaluated: {
+            ...evaluationValues(overrides.evaluatedFlags),
+            ...evaluationValues(getBrowserEvaluations()),
+          },
         })
       );
       setLoading(false);
-      return;
-    }
-
-    const overrides: Partial<OverridesResponse> =
-      overridesResult.status === 'fulfilled' ? overridesResult.value : {};
-    setOverridesUnavailable(false);
-
-    if (snapshotResult.status === 'rejected' && !overridesForbidden) {
-      setErrorMessage(
-        i18n.translate('core.featureFlags.helper.loadFailedErrorMessage', {
-          defaultMessage: 'Feature flags could not be loaded.',
-        })
-      );
-    }
-
-    setForbidden(overridesForbidden);
-    setRows(
-      buildFlagRows({
-        snapshot,
-        runtimeOverrides: overrides.runtimeOverrides ?? {},
-        configOverrides: overrides.configOverrides ?? {},
-        // This tab's evaluation wins over another node's when the snapshot has no value.
-        evaluated: {
-          ...evaluationValues(overrides.evaluatedFlags),
-          ...evaluationValues(getBrowserEvaluations()),
-        },
-      })
-    );
-    setLoading(false);
-  }, [getBrowserEvaluations, http]);
+    },
+    [getBrowserEvaluations, http]
+  );
 
   useEffect(() => {
     void load();
   }, [load]);
 
-  const saveOverride = useCallback(
-    async (flagKey: string, value: FeatureFlagValue) => {
+  /** Stores one override. Resolves to whether the server accepted it. */
+  const persistOverride = useCallback(
+    async (flagKey: string, value: FeatureFlagValue): Promise<boolean> => {
+      setErrorMessage(undefined);
+      setRowError(flagKey, undefined);
       try {
         await http.put(buildPath(`${FEATURE_FLAGS_OVERRIDES_API_PATH}/{flagKey}`, { flagKey }), {
           body: JSON.stringify({ value }),
         });
-        await refreshFlags();
-        await load();
-        markSaved(flagKey);
+        return true;
       } catch (error) {
-        setErrorMessage(
+        reportRowError(
+          flagKey,
           isForbidden(error)
             ? i18n.translate('core.featureFlags.helper.superuserSaveErrorMessage', {
                 defaultMessage: 'Only a superuser can change runtime overrides.',
               })
-            : i18n.translate('core.featureFlags.helper.saveFailedErrorMessage', {
-                defaultMessage: 'The override could not be saved.',
-              })
+            : saveFailedMessage(flagKey),
+          isForbidden(error) ? undefined : rowSaveFailedMessage
         );
+        return false;
       }
     },
-    [http, load, markSaved, refreshFlags]
+    [http, reportRowError, setRowError]
+  );
+
+  /** Refreshes the flags and the table once a flag's saves have settled. */
+  const settleOverride = useCallback(
+    async (flagKey: string) => {
+      try {
+        await refreshFlags();
+        // Keep the message from a failed save that happened earlier in the same run.
+        await load(true);
+        markSaved(flagKey);
+      } catch {
+        reportRowError(flagKey, saveFailedMessage(flagKey), rowSaveFailedMessage);
+      }
+    },
+    [load, markSaved, refreshFlags, reportRowError]
   );
 
   const resetOverride = useCallback(
     async (flagKey: string) => {
+      setErrorMessage(undefined);
+      setRowError(flagKey, undefined);
       try {
         await http.delete(buildPath(`${FEATURE_FLAGS_OVERRIDES_API_PATH}/{flagKey}`, { flagKey }));
         await refreshFlags();
         await load();
         markSaved(flagKey);
       } catch {
-        setErrorMessage(
-          i18n.translate('core.featureFlags.helper.resetFailedErrorMessage', {
-            defaultMessage: 'The override could not be removed.',
-          })
-        );
+        reportRowError(flagKey, resetFailedMessage(flagKey), rowResetFailedMessage);
       }
     },
-    [http, load, markSaved, refreshFlags]
+    [http, load, markSaved, refreshFlags, reportRowError, setRowError]
   );
 
   const clearAll = useCallback(async () => {
+    clearRowErrors();
     try {
       await http.delete(FEATURE_FLAGS_OVERRIDES_API_PATH);
       await refreshFlags();
@@ -267,7 +373,16 @@ export function FlagsFlyout({
         })
       );
     }
-  }, [http, load, refreshFlags]);
+  }, [clearRowErrors, http, load, refreshFlags]);
+
+  const searchPlaceholder = i18n.translate('core.featureFlags.helper.searchPlaceholder', {
+    defaultMessage: 'Search flags',
+  });
+
+  const visibleRows = useMemo(() => {
+    const needle = searchText.trim().toLowerCase();
+    return needle ? rows.filter(({ key }) => key.toLowerCase().includes(needle)) : rows;
+  }, [searchText, rows]);
 
   const columns: Array<EuiBasicTableColumn<FlagRow>> = [
     {
@@ -296,9 +411,10 @@ export function FlagsFlyout({
       width: '150px',
       minWidth: '150px',
       sortable: true,
-      render: (source: FeatureFlagSource) => (
-        <EuiBadge color={sourceColor[source]}>{sourceLabel(source)}</EuiBadge>
-      ),
+      render: (source: FeatureFlagSource, row: FlagRow) => {
+        const shownSource = savingKeys.has(row.key) ? 'runtime' : source;
+        return <EuiBadge color={sourceColor[shownSource]}>{sourceLabel(shownSource)}</EuiBadge>;
+      },
     },
   ];
 
@@ -323,8 +439,11 @@ export function FlagsFlyout({
         <OverrideEditor
           row={row}
           savedSequence={savedKeys.get(row.key)}
+          error={rowErrors.get(row.key)}
           onSavedAnimationEnd={() => clearSaved(row.key)}
-          onSave={(value) => saveOverride(row.key, value)}
+          onPersist={(value) => persistOverride(row.key, value)}
+          onSettled={() => settleOverride(row.key)}
+          onSavingChange={(saving) => setSaving(row.key, saving)}
         />
       ),
     });
@@ -366,7 +485,7 @@ export function FlagsFlyout({
 
   return (
     <>
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2 id={FEATURE_FLAGS_HELPER_TITLE_ID}>
             <FormattedMessage
@@ -376,7 +495,8 @@ export function FlagsFlyout({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      {/* Outside the scrolling body, so it stays put while the table rows scroll. */}
+      <EuiFlyoutHeader hasBorder data-test-subj="featureFlagsHelperPinned">
         <KbnWarningCallout
           announceOnMount={false}
           size="s"
@@ -388,9 +508,9 @@ export function FlagsFlyout({
               'Saving an override changes the flag for every user. Other Kibana nodes pick it up within about 10 seconds.',
           })}
         />
-        <EuiSpacer size="m" />
         {forbidden && (
           <>
+            <EuiSpacer size="m" />
             <KbnDangerCallout
               announceOnMount={false}
               size="s"
@@ -403,36 +523,42 @@ export function FlagsFlyout({
                   'You can view flag values, but only a superuser can change runtime overrides.',
               })}
             />
-            <EuiSpacer size="m" />
           </>
         )}
         {errorMessage && (
           <>
-            <KbnDangerCallout announceOnMount={false} size="s" title={errorMessage} />
             <EuiSpacer size="m" />
+            <KbnDangerCallout announceOnMount={false} size="s" title={errorMessage} />
           </>
         )}
+        {!loading && !overridesUnavailable && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFieldSearch
+              fullWidth
+              value={searchText}
+              placeholder={searchPlaceholder}
+              aria-label={searchPlaceholder}
+              onChange={(event) => setSearchText(event.target.value)}
+              data-test-subj="featureFlagsHelperSearch"
+            />
+          </>
+        )}
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
         {loading ? (
           <EuiLoadingSpinner size="l" />
         ) : overridesUnavailable ? null : (
           <EuiInMemoryTable<FlagRow>
-            items={rows}
+            items={visibleRows}
             columns={columns}
             itemId="key"
             tableLayout="auto"
             scrollableInline
             stickyScrollbar
+            stickyHeader
             sorting={{ sort: { field: 'key', direction: 'asc' } }}
             pagination={{ pageSizeOptions: [25, 50, 100], initialPageSize: 50 }}
-            search={{
-              box: {
-                incremental: true,
-                placeholder: i18n.translate('core.featureFlags.helper.searchPlaceholder', {
-                  defaultMessage: 'Search flags',
-                }),
-                schema: true,
-              },
-            }}
             tableCaption={i18n.translate('core.featureFlags.helper.tableCaption', {
               defaultMessage: 'Feature flags and their evaluated values',
             })}
@@ -471,7 +597,8 @@ export function FlagsFlyout({
               <EuiFlexItem grow={false}>
                 <EuiButton
                   onClick={() => {
-                    void refreshFlags().then(load);
+                    clearRowErrors();
+                    void refreshFlags().then(() => load());
                   }}
                   data-test-subj="featureFlagsHelperRefresh"
                 >
@@ -523,13 +650,23 @@ function isSaveableOverride(
 function OverrideEditor({
   row,
   savedSequence,
+  error,
   onSavedAnimationEnd,
-  onSave,
+  onPersist,
+  onSettled,
+  onSavingChange,
 }: {
   row: FlagRow;
   savedSequence: number | undefined;
+  /** Why the last change to this flag failed. Shown in place of the saved check. */
+  error: ReactNode | undefined;
   onSavedAnimationEnd: () => void;
-  onSave: (value: FeatureFlagValue) => void;
+  /** Resolves to whether the server stored the override. */
+  onPersist: (value: FeatureFlagValue) => Promise<boolean>;
+  /** Called once a run of saves has finished, to refresh the flags and the table. */
+  onSettled: () => Promise<void>;
+  /** Reports when a run of saves starts and ends, so the row can show the pending override. */
+  onSavingChange: (saving: boolean) => void;
 }) {
   const { euiTheme } = useEuiTheme();
   const [draft, setDraft] = useState<FeatureFlagValue>(row.draft);
@@ -537,17 +674,76 @@ function OverrideEditor({
     setDraft(row.draft);
   }, [row.draft, row.key]);
 
-  const commit = (value: FeatureFlagValue, isExplicit: boolean = false) => {
-    const needsOverride = (row.type === 'boolean' || isExplicit) && !row.hasRuntimeOverride;
+  // Saves for one flag run one at a time. A newer choice made while one is in flight replaces any
+  // earlier queued choice, and an earlier save's result never touches the UI unless it matters:
+  // the table reloads once at the end, and a failure reverts to the last value the server accepted.
+  const isSaving = useRef(false);
+  const queuedValue = useRef<FeatureFlagValue | undefined>(undefined);
+  const requestedValue = useRef<FeatureFlagValue | undefined>(undefined);
+  const confirmedValue = useRef<FeatureFlagValue>(row.draft);
+  if (!isSaving.current) {
+    confirmedValue.current = row.draft;
+  }
+
+  const runSaves = async (first: FeatureFlagValue) => {
+    isSaving.current = true;
+    onSavingChange(true);
+    let next: FeatureFlagValue | undefined = first;
+    let savedAny = false;
+    let overrideExists = row.hasRuntimeOverride;
+    // A queued choice that matches what the server already accepted would be a duplicate request.
+    const takeQueued = () => {
+      const queued = queuedValue.current;
+      return overrideExists && Object.is(queued, confirmedValue.current) ? undefined : queued;
+    };
+    while (next !== undefined) {
+      while (next !== undefined) {
+        const value: FeatureFlagValue = next;
+        queuedValue.current = undefined;
+        const saved = await onPersist(value);
+        if (saved) {
+          confirmedValue.current = value;
+          overrideExists = true;
+          savedAny = true;
+        }
+        next = takeQueued();
+        if (!saved && next === undefined) {
+          // Nothing newer is waiting, so show the last value the server accepted.
+          setDraft(confirmedValue.current);
+        }
+      }
+      if (savedAny) {
+        savedAny = false;
+        await onSettled();
+      }
+      next = takeQueued();
+    }
+    requestedValue.current = undefined;
+    isSaving.current = false;
+    onSavingChange(false);
+  };
+
+  const commit = (value: FeatureFlagValue | '', isExplicit: boolean = false) => {
     if (!isSaveableOverride(row.type, value)) {
       // invalid, revert to previous value
-      setDraft(row.draft);
+      setDraft(isSaving.current ? confirmedValue.current : row.draft);
       return;
     }
+    // Enter followed by blur commits the same edit twice.
+    if (Object.is(requestedValue.current, value)) {
+      return;
+    }
+    if (isSaving.current) {
+      requestedValue.current = value;
+      queuedValue.current = value;
+      return;
+    }
+    const needsOverride = (row.type === 'boolean' || isExplicit) && !row.hasRuntimeOverride;
     if (Object.is(value, row.draft) && !needsOverride) {
       return;
     }
-    onSave(value);
+    requestedValue.current = value;
+    void runSaves(value);
   };
 
   return (
@@ -561,7 +757,18 @@ function OverrideEditor({
           margin-inline-start: ${euiTheme.size.xs};
         `}
       >
-        {savedSequence !== undefined && (
+        {error !== undefined && (
+          <EuiIconTip
+            type="warning"
+            color="danger"
+            content={error}
+            aria-label={i18n.translate('core.featureFlags.helper.changeFailedAriaLabel', {
+              defaultMessage: 'Change failed',
+            })}
+            iconProps={{ 'data-test-subj': `featureFlagsHelperError-${row.key}` }}
+          />
+        )}
+        {error === undefined && savedSequence !== undefined && (
           <EuiIcon
             key={savedSequence}
             type="check"

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import type { HttpSetup } from '@kbn/core-http-browser';
@@ -62,6 +62,24 @@ describe('FlagsFlyout', () => {
     expect(screen.getByText('Runtime override')).toBeInTheDocument();
     expect(screen.getByText('Config override')).toBeInTheDocument();
     expect(screen.getByText('Provider')).toBeInTheDocument();
+  });
+
+  test('filters the flags with the search box', async () => {
+    const http = createHttp();
+    http.post.mockResolvedValue({
+      flags: [
+        { key: 'alpha.flag', value: true },
+        { key: 'beta.flag', value: 'x' },
+      ],
+    });
+    http.get.mockResolvedValue({ runtimeOverrides: {}, configOverrides: {} });
+    renderFlyout(http);
+    await screen.findByText('alpha.flag');
+
+    await userEvent.type(screen.getByPlaceholderText('Search flags'), 'beta');
+
+    await waitFor(() => expect(screen.queryByText('alpha.flag')).not.toBeInTheDocument());
+    expect(screen.getByText('beta.flag')).toBeInTheDocument();
   });
 
   test('lists evaluated flags when the provider snapshot is empty', async () => {
@@ -125,6 +143,307 @@ describe('FlagsFlyout', () => {
       body: JSON.stringify({ value: 'new' }),
     });
     expect(refreshFlags).toHaveBeenCalled();
+  });
+
+  test('ignores a stale reload that finishes after a newer one', async () => {
+    const http = createHttp();
+    http.post.mockResolvedValue({
+      flags: [
+        { key: 'a.flag', value: false },
+        { key: 'b.flag', value: false },
+      ],
+    });
+    http.put.mockResolvedValue({ ok: true });
+    let resolveStale: (value: unknown) => void = () => {};
+    const stale = new Promise((resolve) => {
+      resolveStale = resolve;
+    });
+    http.get
+      .mockResolvedValueOnce({ runtimeOverrides: {}, configOverrides: {} })
+      // The reload after the first save is slow and will resolve last, with outdated data.
+      .mockReturnValueOnce(stale as never)
+      .mockResolvedValueOnce({
+        runtimeOverrides: { 'a.flag': true, 'b.flag': true },
+        configOverrides: {},
+      });
+    renderFlyout(http);
+    await screen.findByText('a.flag');
+
+    await userEvent.click(screen.getByTestId('featureFlagsHelperValue-a.flag-true'));
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
+    await userEvent.click(screen.getByTestId('featureFlagsHelperValue-b.flag-true'));
+    await waitFor(() => expect(screen.getAllByText('Runtime override')).toHaveLength(2));
+
+    await act(async () => {
+      resolveStale({ runtimeOverrides: {}, configOverrides: {} });
+    });
+
+    expect(screen.getAllByText('Runtime override')).toHaveLength(2);
+    expect(screen.queryByText('Fallback')).not.toBeInTheDocument();
+  });
+
+  test('restores the stored boolean selection when saving fails', async () => {
+    const http = createHttp();
+    http.post.mockResolvedValue({ flags: [{ key: 'bool.flag', value: false }] });
+    http.get.mockResolvedValue({ runtimeOverrides: {}, configOverrides: {} });
+    http.put.mockRejectedValue(new Error('nope'));
+    renderFlyout(http);
+    await screen.findByText('bool.flag');
+
+    await userEvent.click(screen.getByTestId('featureFlagsHelperValue-bool.flag-true'));
+
+    expect(await screen.findByTestId('featureFlagsHelperError-bool.flag')).toBeInTheDocument();
+    expect(await screen.findByText(/failed to save/)).toBeInTheDocument();
+    expect(screen.getByText('bool.flag', { selector: 'code' })).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByTestId('featureFlagsHelperValue-bool.flag-false')).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      )
+    );
+    expect(screen.getByTestId('featureFlagsHelperValue-bool.flag-true')).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+  });
+
+  test('does not submit the same edit twice when blurring after Enter', async () => {
+    const http = createHttp();
+    http.post.mockResolvedValue({ flags: [{ key: 'string.flag', value: 'old' }] });
+    http.put.mockResolvedValue({ ok: true });
+    let resolveReload: (value: unknown) => void = () => {};
+    const reload = new Promise((resolve) => {
+      resolveReload = resolve;
+    });
+    http.get
+      .mockResolvedValueOnce({ runtimeOverrides: {}, configOverrides: {} })
+      // Hold the post-save reload so the row still shows the old stored value on blur.
+      .mockReturnValueOnce(reload as never);
+    renderFlyout(http);
+    const field = await screen.findByTestId('featureFlagsHelperValue-string.flag');
+
+    await userEvent.clear(field);
+    await userEvent.type(field, 'new{Enter}');
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
+    await userEvent.tab();
+
+    expect(http.put).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      resolveReload({ runtimeOverrides: { 'string.flag': 'new' }, configOverrides: {} });
+    });
+  });
+
+  describe('rapid changes to one flag', () => {
+    const pressed = (value: 'true' | 'false') =>
+      screen.getByTestId(`featureFlagsHelperValue-a.flag-${value}`);
+
+    function setup() {
+      const http = createHttp();
+      http.post.mockResolvedValue({ flags: [{ key: 'a.flag', value: false }] });
+      const puts: Array<{ resolve: () => void; reject: () => void }> = [];
+      http.put.mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            puts.push({
+              resolve: () => resolve({ ok: true }),
+              reject: () => reject(new Error('x')),
+            });
+          }) as never
+      );
+      return { http, puts };
+    }
+
+    test('ignores the earlier request while a newer one is pending', async () => {
+      const { http, puts } = setup();
+      http.get
+        .mockResolvedValueOnce({ runtimeOverrides: {}, configOverrides: {} })
+        .mockResolvedValueOnce({ runtimeOverrides: { 'a.flag': false }, configOverrides: {} });
+      renderFlyout(http);
+      await screen.findByText('a.flag');
+
+      await userEvent.click(pressed('true'));
+      await userEvent.click(pressed('false'));
+      expect(http.put).toHaveBeenCalledTimes(1);
+
+      await act(async () => puts[0].resolve());
+      await waitFor(() => expect(http.put).toHaveBeenCalledTimes(2));
+      // The first save finished, but nothing reloads and the selection stays on the newer choice.
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(pressed('false')).toHaveAttribute('aria-pressed', 'true');
+
+      await act(async () => puts[1].resolve());
+      await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
+      expect(http.put).toHaveBeenNthCalledWith(2, '/internal/feature-flags/overrides/a.flag', {
+        body: JSON.stringify({ value: false }),
+      });
+      expect(pressed('false')).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    test('sends one request when the same option is clicked repeatedly', async () => {
+      const { http, puts } = setup();
+      http.get
+        .mockResolvedValueOnce({ runtimeOverrides: {}, configOverrides: {} })
+        .mockResolvedValue({ runtimeOverrides: { 'a.flag': true }, configOverrides: {} });
+      renderFlyout(http);
+      await screen.findByText('a.flag');
+
+      for (let click = 0; click < 5; click++) {
+        await userEvent.click(pressed('true'));
+      }
+      expect(http.put).toHaveBeenCalledTimes(1);
+
+      await act(async () => puts[0].resolve());
+      await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
+      await userEvent.click(pressed('true'));
+      expect(http.put).toHaveBeenCalledTimes(1);
+    });
+
+    test('skips a queued choice that matches what the server already accepted', async () => {
+      const { http, puts } = setup();
+      http.get
+        .mockResolvedValueOnce({ runtimeOverrides: {}, configOverrides: {} })
+        .mockResolvedValue({ runtimeOverrides: { 'a.flag': true }, configOverrides: {} });
+      renderFlyout(http);
+      await screen.findByText('a.flag');
+
+      await userEvent.click(pressed('true'));
+      await userEvent.click(pressed('false'));
+      await userEvent.click(pressed('true'));
+      await act(async () => puts[0].resolve());
+
+      await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
+      expect(http.put).toHaveBeenCalledTimes(1);
+      expect(pressed('true')).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    test('reverts to the earlier accepted value when the newer request fails', async () => {
+      const { http, puts } = setup();
+      http.get
+        .mockResolvedValueOnce({ runtimeOverrides: {}, configOverrides: {} })
+        .mockResolvedValueOnce({ runtimeOverrides: { 'a.flag': true }, configOverrides: {} });
+      renderFlyout(http);
+      await screen.findByText('a.flag');
+
+      await userEvent.click(pressed('true'));
+      await userEvent.click(pressed('false'));
+      await act(async () => puts[0].resolve());
+      await waitFor(() => expect(http.put).toHaveBeenCalledTimes(2));
+      await act(async () => puts[1].reject());
+
+      expect(await screen.findByTestId('featureFlagsHelperError-a.flag')).toBeInTheDocument();
+      expect(await screen.findByText(/failed to save/)).toBeInTheDocument();
+      expect(screen.getByText('a.flag', { selector: 'code' })).toBeInTheDocument();
+      await waitFor(() => expect(pressed('true')).toHaveAttribute('aria-pressed', 'true'));
+      expect(pressed('false')).toHaveAttribute('aria-pressed', 'false');
+    });
+  });
+
+  test('names the flag when clearing its override fails', async () => {
+    const http = createHttp();
+    http.post.mockResolvedValue({ flags: [{ key: 'bool.flag', value: true }] });
+    http.get.mockResolvedValue({
+      runtimeOverrides: { 'bool.flag': true },
+      configOverrides: {},
+    });
+    http.delete.mockRejectedValue(new Error('nope'));
+    renderFlyout(http);
+    await screen.findByText('bool.flag');
+
+    await userEvent.click(screen.getByTestId('featureFlagsHelperReset-bool.flag'));
+
+    expect(await screen.findByTestId('featureFlagsHelperError-bool.flag')).toBeInTheDocument();
+    expect(await screen.findByText(/failed to clear/)).toBeInTheDocument();
+    expect(screen.getByText('bool.flag', { selector: 'code' })).toBeInTheDocument();
+  });
+
+  describe('failed change indicator', () => {
+    function setup() {
+      const http = createHttp();
+      http.post.mockResolvedValue({ flags: [{ key: 'a.flag', value: false }] });
+      http.get.mockResolvedValue({ runtimeOverrides: {}, configOverrides: {} });
+      http.put.mockRejectedValueOnce(new Error('nope')).mockResolvedValue({ ok: true });
+      return http;
+    }
+
+    test('stays after a failure and clears when the flag changes again', async () => {
+      const http = setup();
+      renderFlyout(http);
+      await screen.findByText('a.flag');
+
+      await userEvent.click(screen.getByTestId('featureFlagsHelperValue-a.flag-true'));
+      expect(await screen.findByTestId('featureFlagsHelperError-a.flag')).toBeInTheDocument();
+      expect(screen.queryByTestId('featureFlagsHelperSavedCheck-a.flag')).not.toBeInTheDocument();
+      // The top banner shows the same failure, and hovering the icon shows it in a tooltip too.
+      expect(await screen.findByText(/failed to save/)).toBeInTheDocument();
+      await userEvent.hover(screen.getByTestId('featureFlagsHelperError-a.flag'));
+      // The tooltip drops the flag name, since the row already shows which flag it is.
+      expect(await screen.findByText('Override failed to save.')).toBeInTheDocument();
+      expect(screen.getAllByText(/failed to save/)).toHaveLength(2);
+
+      await userEvent.click(screen.getByTestId('featureFlagsHelperValue-a.flag-true'));
+      await waitFor(() =>
+        expect(screen.queryByTestId('featureFlagsHelperError-a.flag')).not.toBeInTheDocument()
+      );
+      expect(screen.queryByText(/failed to save/)).not.toBeInTheDocument();
+    });
+
+    test('clears on refresh', async () => {
+      const http = setup();
+      renderFlyout(http);
+      await screen.findByText('a.flag');
+
+      await userEvent.click(screen.getByTestId('featureFlagsHelperValue-a.flag-true'));
+      expect(await screen.findByTestId('featureFlagsHelperError-a.flag')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('featureFlagsHelperRefresh'));
+      await waitFor(() =>
+        expect(screen.queryByTestId('featureFlagsHelperError-a.flag')).not.toBeInTheDocument()
+      );
+    });
+  });
+
+  describe('pending override source', () => {
+    function setup() {
+      const http = createHttp();
+      http.post.mockResolvedValue({ flags: [{ key: 'a.flag', value: false }] });
+      http.get.mockResolvedValue({ runtimeOverrides: {}, configOverrides: {} });
+      let settle: { resolve: () => void; reject: () => void } = {
+        resolve: () => {},
+        reject: () => {},
+      };
+      http.put.mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            settle = { resolve: () => resolve({ ok: true }), reject: () => reject(new Error('x')) };
+          }) as never
+      );
+      return { http, getSettle: () => settle };
+    }
+
+    test('shows a runtime override while the request is pending', async () => {
+      const { http } = setup();
+      renderFlyout(http);
+      await screen.findByText('Provider');
+
+      await userEvent.click(screen.getByTestId('featureFlagsHelperValue-a.flag-true'));
+
+      expect(screen.getByText('Runtime override')).toBeInTheDocument();
+      expect(screen.queryByText('Provider')).not.toBeInTheDocument();
+      expect(http.get).toHaveBeenCalledTimes(1);
+    });
+
+    test('goes back to the previous source when the request fails', async () => {
+      const { http, getSettle } = setup();
+      renderFlyout(http);
+      await screen.findByText('Provider');
+
+      await userEvent.click(screen.getByTestId('featureFlagsHelperValue-a.flag-true'));
+      expect(screen.getByText('Runtime override')).toBeInTheDocument();
+      await act(async () => getSettle().reject());
+
+      expect(await screen.findByText('Provider')).toBeInTheDocument();
+      expect(screen.queryByText('Runtime override')).not.toBeInTheDocument();
+    });
   });
 
   test('clicking the current boolean value creates an override only when none exists', async () => {
