@@ -560,6 +560,30 @@ describe('ThreatQ', () => {
     });
   });
 
+  it('names the tags added and those left when a request fails partway through', async () => {
+    authenticatedApi()
+      .post('/api/indicators/123/tags', { name: 'Elastic triage' })
+      .reply(201, { total: 1, data: [{ id: 1, name: 'Elastic triage' }] })
+      .post('/api/indicators/123/tags', { name: 'EICAR' })
+      .reply(500, {});
+    await expect(
+      execute('addTags', {
+        objectType: 'indicators',
+        objectId: 123,
+        tags: ['Elastic triage', 'EICAR', 'Malware'],
+      })
+    ).rejects.toThrow(
+      'ThreatQ request failed (HTTP 500). Check the account permissions, input, and instance connection. Failed on tag "EICAR". Already added: "Elastic triage". Not added: "EICAR", "Malware".'
+    );
+  });
+
+  it('says that no tags were added when the first request fails', async () => {
+    authenticatedApi().post('/api/indicators/123/tags', { name: 'EICAR' }).reply(403, {});
+    await expect(
+      execute('addTags', { objectType: 'indicators', objectId: 123, tags: ['EICAR'] })
+    ).rejects.toThrow('Failed on tag "EICAR". No tags were added. Not added: "EICAR".');
+  });
+
   it('creates a custom object and supplies the configured default source', async () => {
     ctx.config = { url: origin, defaultSource: 'Elastic Security' };
     authenticatedApi()

@@ -388,16 +388,28 @@ export const ThreatQ: ConnectorSpec = {
       scope: 'write',
       input: AddTagsInputSchema,
       description:
-        'Add tags to an existing ThreatQ object, including custom object types. Use this to label investigation findings. Sends one request per tag. Returns total and the tag records.',
+        'Add tags to an existing ThreatQ object, including custom object types. Use this to label investigation findings. Sends one request per tag and, if one fails, reports the tags already added and those not. Returns total and the tag records.',
       handler: async (ctx, { objectType, objectId, tags }: AddTagsInput) => {
         // ThreatQ takes one tag, `{ "name": "Tag Name" }`, per request.
         const added: JsonValue[] = [];
-        for (const name of tags) {
-          const result = await request(ctx, {
-            method: 'POST',
-            url: `/${objectType}/${objectId}/tags`,
-            data: { name },
-          });
+        for (const [index, name] of tags.entries()) {
+          let result: JsonValue;
+          try {
+            result = await request(ctx, {
+              method: 'POST',
+              url: `/${objectType}/${objectId}/tags`,
+              data: { name },
+            });
+          } catch (error) {
+            // Earlier tags are already on the object, so say which, to keep a retry from sending them again.
+            const quoted = (names: readonly string[]) => names.map((tag) => `"${tag}"`).join(', ');
+            const done = tags.slice(0, index);
+            throw new Error(
+              `${error instanceof Error ? error.message : String(error)} Failed on tag "${name}". ${
+                done.length > 0 ? `Already added: ${quoted(done)}.` : 'No tags were added.'
+              } Not added: ${quoted(tags.slice(index))}.`
+            );
+          }
           const data =
             typeof result === 'object' && result !== null && !Array.isArray(result)
               ? result.data
@@ -489,7 +501,7 @@ export const ThreatQ: ConnectorSpec = {
   skill: [
     '## ThreatQ investigation',
     '',
-    'Search an alert indicator, then use getIndicator to read its score, status, attributes, and sources.',
+    'Search an alert indicator, then use getIndicator to read its score, status, attributes, and sources. The search actions do not return related objects; read those with getIndicator, getObject, or getRelatedObjects and their with parameter.',
     'Use getRelatedObjects to find linked indicators, events, or adversaries; use getObject to read each result.',
     'For report details, use report. For report searches, use the endpoint name supported by the instance (the API reference lists reports). The with relationship names vary by ThreatQ version and installed object definitions.',
     'Use the IDs returned by listIndicatorStatuses and listIndicatorTypes before creating or updating indicators.',
