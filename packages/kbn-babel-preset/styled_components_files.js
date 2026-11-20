@@ -265,7 +265,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]pages[\/\\]policy[\/\\]view[\/\\]ingest_manager_integration[\/\\]components[\/\\]link_with_icon.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]pages[\/\\]policy[\/\\]view[\/\\]ingest_manager_integration[\/\\]endpoint_package_custom_extension[\/\\]components[\/\\]styled_components.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]pages[\/\\]policy[\/\\]view[\/\\]ingest_manager_integration[\/\\]endpoint_policy_create_extension[\/\\]components[\/\\]help_text_with_padding.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]pages[\/\\]policy[\/\\]view[\/\\]policy_settings_form[\/\\]components[\/\\]event_collection_card.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]pages[\/\\]policy[\/\\]view[\/\\]policy_settings_form[\/\\]components[\/\\]setting_locked_card.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]pages[\/\\]policy[\/\\]view[\/\\]protection_updates[\/\\]protection_updates_layout.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]pages[\/\\]trusted_apps[\/\\]view[\/\\]components[\/\\]condition_group[\/\\]index.tsx/,
