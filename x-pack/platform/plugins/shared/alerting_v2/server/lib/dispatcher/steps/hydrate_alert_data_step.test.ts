@@ -28,7 +28,9 @@ import {
 } from '../fixtures/test_utils';
 import { createAlertDataResponse } from '../fixtures/dispatcher';
 
-const HYDRATION_MAX_RESPONSE_SIZE_BYTES = 50 * 1024 * 1024;
+const HYDRATION_MAX_RESPONSE_SIZE_BYTES = createDispatcherConfigService()
+  .get('dispatcher.run.hydration.maxResponseSize')
+  .getValueInBytes();
 const HYDRATION_TICK_BUDGET_BYTES =
   HYDRATION_TICK_BUDGET_RESPONSES * HYDRATION_MAX_RESPONSE_SIZE_BYTES;
 

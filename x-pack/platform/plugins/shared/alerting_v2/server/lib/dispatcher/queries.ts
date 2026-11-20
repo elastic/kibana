@@ -343,9 +343,14 @@ export const getLastNotifiedTimestampsQueries = (
 // Builds a single request without chunking: the caller must pass ids that fit the statement
 // budget, i.e. one chunk of `chunkInClauseLiterals` or a slice of it. Safe to concat: STATS
 // aggregates by alert_id.
+export interface TimestampBounds {
+  gte: string;
+  lte: string;
+}
+
 export const getAlertDataQuery = (
   alertIds: readonly string[],
-  { gte, lte }: { gte: string; lte: string }
+  { gte, lte }: TimestampBounds
 ): EsqlRequest => {
   return esql`FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source
       | WHERE type == ${ALERT_EVENT_TYPE}

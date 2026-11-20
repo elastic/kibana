@@ -10,7 +10,12 @@ import { inject, injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
-import { chunkInClauseLiterals, ESQL_QUERY_ROW_LIMIT, getAlertDataQuery } from '../queries';
+import {
+  chunkInClauseLiterals,
+  ESQL_QUERY_ROW_LIMIT,
+  getAlertDataQuery,
+  type TimestampBounds,
+} from '../queries';
 import { AlertScan, AlertTriage } from '../state';
 import type {
   Alert,
@@ -48,16 +53,11 @@ interface RawAlertData {
   data_json: string | null;
 }
 
-interface TimestampBounds {
-  gte: string;
-  lte: string;
-}
-
 interface FetchAlertDataResult {
   rows: RawAlertData[];
   oversizedAlertIds: string[];
-  /** Ids never queried because the tick budget was reached; a suffix of the input ids. */
-  deferredAlertIds: string[];
+  /** Number of leading ids queried; the rest were deferred because the tick budget was reached. */
+  processed: number;
 }
 
 @injectable()
@@ -103,7 +103,7 @@ export class HydrateAlertDataStep implements DispatcherStep {
     const bounds = computeTimestampBounds(triage.dispatchable);
     const { signal } = state.input;
 
-    const { rows, oversizedAlertIds, deferredAlertIds } = await this.fetchAlertData({
+    const { rows, oversizedAlertIds, processed } = await this.fetchAlertData({
       alertIds,
       firstSeriesSize,
       bounds,
@@ -111,29 +111,27 @@ export class HydrateAlertDataStep implements DispatcherStep {
       logger,
     });
 
-    const dataByAlertId = new Map<string, string | null>();
-    for (const row of rows) {
-      dataByAlertId.set(row.alert_id, row.data_json);
-    }
+    const dataByAlertId = new Map(
+      rows.map(({ alert_id: alertId, data_json: dataJson }) => [alertId, dataJson])
+    );
 
-    const requested = alertIds.length - deferredAlertIds.length;
     if (oversizedAlertIds.length > 0) {
       this.telemetry.recordOversizedAlertDataSkipped(oversizedAlertIds.length);
       logger.warn({
         code: ALERTING_LOG_CODES.HYDRATE_ALERT_DATA_STEP_OVERSIZED_DATA_SKIPPED,
         message: () =>
-          `${oversizedAlertIds.length} of ${requested} alerts have data larger than ` +
+          `${oversizedAlertIds.length} of ${processed} alerts have data larger than ` +
           `${this.maxResponseSizeBytes} bytes; their data will be absent ` +
           `(first alert ids: ${oversizedAlertIds.slice(0, LOGGED_OVERSIZED_ALERT_IDS).join(', ')})`,
       });
     }
 
-    const missing = requested - dataByAlertId.size - oversizedAlertIds.length;
+    const missing = processed - dataByAlertId.size - oversizedAlertIds.length;
     if (missing > 0) {
       logger.warn({
         code: ALERTING_LOG_CODES.HYDRATE_ALERT_DATA_STEP_MISSING_RULE_EVENTS_ROW,
         message: () =>
-          `${missing} of ${requested} alerts had no matching rule-events row; ` +
+          `${missing} of ${processed} alerts had no matching rule-events row; ` +
           `their data will be absent`,
       });
     }
@@ -144,17 +142,17 @@ export class HydrateAlertDataStep implements DispatcherStep {
       return { ...alert, data: parseAlertDataForMatching(raw) };
     };
 
-    if (deferredAlertIds.length === 0) {
+    if (processed === alertIds.length) {
       return { type: 'continue', data: { triage: triage.mapDispatchable(withData) } };
     }
 
     // `fire` / `suppress` / `unmatched` records are per series and hide the whole series from the
     // next scan, so a series is deferred whole: suppressed alerts and already-hydrated ones too.
-    const deferredIds = new Set(deferredAlertIds);
+    const deferredIds = new Set(alertIds.slice(processed));
     const deferredSeries = new Set(
       triage.dispatchable
         .filter(({ alert_id: alertId }) => deferredIds.has(alertId))
-        .map((alert) => suppressionSeriesKey(alert))
+        .map(suppressionSeriesKey)
     );
     const isDeferred = (alert: Alert): boolean => deferredSeries.has(suppressionSeriesKey(alert));
 
@@ -162,7 +160,7 @@ export class HydrateAlertDataStep implements DispatcherStep {
       code: ALERTING_LOG_CODES.HYDRATE_ALERT_DATA_STEP_TICK_BUDGET_REACHED,
       message: () =>
         `alert data reached the ${this.tickBudgetBytes} bytes tick budget; ` +
-        `${deferredSeries.size} series (${deferredAlertIds.length} of ${alertIds.length} ` +
+        `${deferredSeries.size} series (${alertIds.length - processed} of ${alertIds.length} ` +
         `dispatchable alerts not hydrated) deferred to the next tick`,
     });
 
@@ -178,9 +176,9 @@ export class HydrateAlertDataStep implements DispatcherStep {
   /**
    * Runs the hydration queries one at a time, in `alertIds` order. When a response exceeds
    * the response cap, the batch is halved and retried. After a full batch, the size grows to
-   * what its widest row projects to fit, but never back to a size that failed in this tick. The
-   * size carries over to the next tick. Once the next response could overflow the tick budget, the remaining
-   * ids are deferred, but never before the first series is complete, so every tick makes progress.
+   * what its widest row projects to fit, but never back to a size that failed in this tick. Once
+   * the next response could overflow the tick budget, the remaining ids are deferred, but never
+   * before the first series is complete, so every tick makes progress.
    */
   private async fetchAlertData({
     alertIds,
@@ -197,79 +195,82 @@ export class HydrateAlertDataStep implements DispatcherStep {
   }): Promise<FetchAlertDataResult> {
     const rows: RawAlertData[] = [];
     const oversizedAlertIds: string[] = [];
-    let chunkStart = 0;
+    let processed = 0;
     let hydratedBytes = 0;
     let smallestFailedBatchSize = Infinity;
 
     for (const chunk of chunkInClauseLiterals(alertIds)) {
-      let offset = 0;
-      while (offset < chunk.length) {
-        const processed = chunkStart + offset;
+      const chunkEnd = processed + chunk.length;
+      while (processed < chunkEnd) {
         const budgetReached = hydratedBytes + this.maxResponseSizeBytes > this.tickBudgetBytes;
         if (budgetReached && processed >= firstSeriesSize) {
-          return { rows, oversizedAlertIds, deferredAlertIds: alertIds.slice(processed) };
+          return { rows, oversizedAlertIds, processed };
         }
 
-        const batch = chunk.slice(offset, offset + this.maxIdsPerQuery);
+        const batch = alertIds.slice(
+          processed,
+          Math.min(processed + this.maxIdsPerQuery, chunkEnd)
+        );
+        let batchRows: RawAlertData[];
         try {
-          const batchRows = await this.queryService.executeQuery<RawAlertData>({
+          batchRows = await this.queryService.executeQuery<RawAlertData>({
             query: getAlertDataQuery(batch, bounds).query,
             abortSignal,
             maxResponseSize: this.maxResponseSizeBytes,
           });
-          let widestRowBytes = 0;
-          for (const row of batchRows) {
-            rows.push(row);
-            const rowBytes = row.data_json?.length ?? 0;
-            hydratedBytes += rowBytes;
-            widestRowBytes = Math.max(widestRowBytes, rowBytes);
-          }
-          offset += batch.length;
-
-          // A short batch (end of a chunk) may be cut before the widest rows of a full one.
-          const projectedSize =
-            widestRowBytes === 0
-              ? ESQL_QUERY_ROW_LIMIT
-              : Math.min(
-                  ESQL_QUERY_ROW_LIMIT,
-                  Math.floor((BATCH_TARGET_SHARE * this.maxResponseSizeBytes) / widestRowBytes)
-                );
-          const canGrow =
-            batch.length === this.maxIdsPerQuery &&
-            projectedSize > batch.length &&
-            projectedSize < smallestFailedBatchSize;
-          if (canGrow) {
-            this.maxIdsPerQuery = projectedSize;
-            logger.debug({
-              message: () =>
-                `Widest hydrated row was ${widestRowBytes} bytes; growing from ${batch.length} ` +
-                `to ${projectedSize} alerts per query`,
-            });
-          }
         } catch (error) {
           if (!isMaximumResponseSizeExceededError(error)) throw error;
 
           if (batch.length === 1) {
             oversizedAlertIds.push(batch[0]);
-            offset += 1;
+            processed += 1;
             // The failed sizes may all be due to this alert, so they no longer cap growth.
             smallestFailedBatchSize = Infinity;
             continue;
           }
 
+          const halvedSize = Math.ceil(batch.length / 2);
           smallestFailedBatchSize = Math.min(smallestFailedBatchSize, batch.length);
-          this.maxIdsPerQuery = Math.ceil(batch.length / 2);
+          this.maxIdsPerQuery = halvedSize;
           logger.debug({
             message: () =>
               `Hydration response for ${batch.length} alerts exceeded ` +
-              `${this.maxResponseSizeBytes} bytes; retrying with ${this.maxIdsPerQuery} alerts per query`,
+              `${this.maxResponseSizeBytes} bytes; retrying with ${halvedSize} alerts per query`,
+          });
+          continue;
+        }
+
+        let widestRowBytes = 0;
+        for (const row of batchRows) {
+          rows.push(row);
+          const rowBytes = row.data_json?.length ?? 0;
+          hydratedBytes += rowBytes;
+          widestRowBytes = Math.max(widestRowBytes, rowBytes);
+        }
+        processed += batch.length;
+
+        // Rows without data project to Infinity, i.e. the row limit.
+        const projectedSize = Math.min(
+          ESQL_QUERY_ROW_LIMIT,
+          Math.floor((BATCH_TARGET_SHARE * this.maxResponseSizeBytes) / widestRowBytes)
+        );
+        // A short batch (end of a chunk) may be cut before the widest rows of a full one.
+        const canGrow =
+          batch.length === this.maxIdsPerQuery &&
+          projectedSize > batch.length &&
+          projectedSize < smallestFailedBatchSize;
+        if (canGrow) {
+          this.maxIdsPerQuery = projectedSize;
+          logger.debug({
+            message: () =>
+              `Widest hydrated row was ${widestRowBytes} bytes; growing from ${batch.length} ` +
+              `to ${projectedSize} alerts per query`,
           });
         }
       }
-      chunkStart += chunk.length;
     }
 
-    return { rows, oversizedAlertIds, deferredAlertIds: [] };
+    return { rows, oversizedAlertIds, processed };
   }
 }
 
