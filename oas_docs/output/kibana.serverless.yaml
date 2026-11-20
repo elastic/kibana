@@ -120,6 +120,16 @@ tags:
 
       ² On July 13, 2026, a new version of this API released on Elastic Cloud Serverless and introduced breaking changes. Refer to the [Elastic Cloud Serverless release notes](https://www.elastic.co/docs/release-notes/cloud-serverless/breaking-changes).
 
+      ## Stability
+
+      | 9.4 | 9.5 | Serverless |
+      | --- | --- | --- |
+      | Experimental | Generally available ¹ | Generally available ² |
+
+      ¹ This version introduces breaking changes. Refer to the [Kibana release notes](https://www.elastic.co/docs/release-notes/kibana/breaking-changes).
+
+      ² On July 13, 2026, a new version of this API released on Elastic Cloud Serverless and introduced breaking changes. Refer to the [Elastic Cloud Serverless release notes](https://www.elastic.co/docs/release-notes/cloud-serverless/breaking-changes).
+
       ## Get started
 
       Before you begin:
@@ -742,6 +752,16 @@ tags:
 
       - Use this API to create reusable charts saved to the visualization library. You can then embed them in dashboards by referencing their ID from the [Dashboards API](../operation/operation-create-dashboard).
       - Use the [Dashboards API](../operation/operation-create-dashboard) when you want to define a complete dashboard in one request, or when you need ES|QL-based visualizations.
+
+      ## Stability
+
+      | 9.4 | 9.5 | Serverless |
+      | --- | --- | --- |
+      | Experimental | Generally available ¹ | Generally available ² |
+
+      ¹ This version introduces breaking changes. Refer to the [Kibana release notes](https://www.elastic.co/docs/release-notes/kibana/breaking-changes).
+
+      ² On July 13, 2026, a new version of this API released on Elastic Cloud Serverless and introduced breaking changes. Refer to the [Elastic Cloud Serverless release notes](https://www.elastic.co/docs/release-notes/cloud-serverless/breaking-changes).
 
       ## Stability
 
@@ -25598,14 +25618,7 @@ paths:
           name: product_name
   /api/dashboards:
     get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/dashboards</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Returns a paginated list of dashboards. Each result includes title, description, tags, and metadata, but not the full panel layout. Use `GET /api/dashboards/{id}` to retrieve the complete state.
+      description: Returns a paginated list of dashboards. Each result includes title, description, tags, and metadata, but not the full panel layout. Use `GET /api/dashboards/{id}` to retrieve the complete state.
       operationId: search-dashboards
       parameters:
         - description: The page of results to return.
@@ -25820,14 +25833,7 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/dashboards</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Creates a new dashboard and returns its ID, full state, and metadata.
+      description: Creates a new dashboard and returns its ID, full state, and metadata.
       operationId: create-dashboard
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -26229,14 +26235,7 @@ paths:
           name: product_name
   /api/dashboards/{id}:
     delete:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/dashboards/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Permanently deletes a dashboard by ID.
+      description: Permanently deletes a dashboard by ID.
       operationId: delete-dashboard
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -26280,14 +26279,7 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/dashboards/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Returns the complete state of a dashboard by ID.
+      description: Returns the complete state of a dashboard by ID.
       operationId: get-dashboard
       parameters:
         - description: The dashboard ID, as returned by the create or search endpoints.
@@ -26498,12 +26490,6 @@ paths:
           name: product_name
     put:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/dashboards/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Creates a new dashboard with the given ID if none exists, or replaces the complete state of an
         existing one.
 
@@ -143435,14 +143421,7 @@ paths:
           name: product_name
   /api/visualizations:
     get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/visualizations</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Returns a paginated list of Lens visualizations matching the optional `query` text.
+      description: Returns a paginated list of Lens visualizations matching the optional `query` text.
       operationId: search-visualizations
       parameters:
         - description: The saved object fields to include in each result. When omitted, all fields are returned.
@@ -143661,12 +143640,6 @@ paths:
           name: product_name
     post:
       description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/visualizations</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Creates a Lens visualization and saves it to the library.
 
         ES|QL visualizations cannot be created through this endpoint.
@@ -144043,14 +144016,7 @@ paths:
           name: product_name
   /api/visualizations/{id}:
     delete:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/visualizations/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Permanently deletes a Lens visualization. If the visualization is referenced by a dashboard panel, the panel shows an error after deletion.
+      description: Permanently deletes a Lens visualization. If the visualization is referenced by a dashboard panel, the panel shows an error after deletion.
       operationId: delete-visualization
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -144098,14 +144064,7 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/visualizations/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Returns a single Lens visualization by its ID.
+      description: Returns a single Lens visualization by its ID.
       operationId: get-visualization
       parameters:
         - description: The visualization identifier, as returned by the create or search endpoints.
@@ -144184,12 +144143,6 @@ paths:
           name: product_name
     put:
       description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/visualizations/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Replaces the full configuration of an existing Lens visualization. Partial updates are not supported.
         To make incremental changes, retrieve the visualization first, modify the fields you need, then send the complete object back.
 
