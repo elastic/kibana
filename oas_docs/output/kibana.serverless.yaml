@@ -68500,6 +68500,7 @@ paths:
           name: taskId
           required: true
           schema:
+            maxLength: 1024
             type: string
       requestBody:
         content:
@@ -181475,7 +181476,8 @@ components:
         groupings:
           additionalProperties:
             anyOf:
-              - type: string
+              - maxLength: 1024
+                type: string
               - type: number
           type: object
         id:

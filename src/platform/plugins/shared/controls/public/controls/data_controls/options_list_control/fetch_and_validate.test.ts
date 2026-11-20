@@ -9,10 +9,10 @@
 
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { ControlValuesSource } from '@kbn/controls-constants';
 
 import { coreServices } from '../../../services/kibana_services';
 import { setStubKibanaServices } from '../../../services/mocks';
+import type { ValuesSourceFetchPlan } from '../types';
 import { fetchAndValidate$ } from './fetch_and_validate';
 
 const phraseFilter = (field: string, value: string) =>
@@ -44,8 +44,10 @@ const buildApi = ({
     debouncedSearchString: new BehaviorSubject<string>(''),
     dataSources$: new BehaviorSubject<unknown>(undefined),
     field$: new BehaviorSubject<unknown>(undefined),
-    esqlQuery$: new BehaviorSubject<string>('FROM logs | KEEP host'),
-    valuesSource$: new BehaviorSubject<ControlValuesSource>(ControlValuesSource.ESQL),
+    valuesSourceFetchPlan$: new BehaviorSubject<ValuesSourceFetchPlan | undefined>({
+      fetchMode: 'esql',
+      query: 'FROM logs | KEEP host',
+    }),
     useGlobalFilters$: new BehaviorSubject<boolean>(true),
     ignoreValidations$: new BehaviorSubject<boolean>(false),
   } as any;
@@ -103,6 +105,40 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
     expect(secondBody.filter).toBeDefined();
     expect(JSON.stringify(secondBody.filter)).toContain('mainframe');
 
+    subscription.unsubscribe();
+  }, 10000);
+
+  it('waits for the fetch plan, and fetches with its query when it is published', async () => {
+    const api = buildApi({
+      filters$: new BehaviorSubject<unknown>([]),
+      parentQuery$: new BehaviorSubject<unknown>(undefined),
+    });
+    api.valuesSourceFetchPlan$.next(undefined);
+
+    const { suggestions$ } = fetchAndValidate$({
+      api,
+      requestSize$: new BehaviorSubject<number>(10) as any,
+      runPastTimeout$: new BehaviorSubject<boolean>(false) as any,
+      selectedOptions$: new BehaviorSubject<unknown[]>([]) as any,
+      searchTechnique$: new BehaviorSubject<'wildcard' | 'prefix' | 'exact'>('wildcard') as any,
+      sort$: new BehaviorSubject<unknown>({ by: '_count', direction: 'desc' }) as any,
+    });
+    const emitted: unknown[] = [];
+    const subscription = suggestions$.subscribe((result) => emitted.push(result));
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(emitted).toEqual([{ suggestions: [], totalCardinality: 0, isPartial: false }]);
+
+    api.valuesSourceFetchPlan$.next({ fetchMode: 'esql', query: 'FROM logs-*\n| STATS BY host' });
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(fetchSpy.mock.calls[0][1].body)).toMatchObject({
+      kind: 'esql',
+      esql: 'FROM logs-*\n| STATS BY host',
+    });
     subscription.unsubscribe();
   }, 10000);
 
