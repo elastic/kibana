@@ -639,7 +639,7 @@ describe('AutomationsPage', () => {
       renderPage();
 
       const alertRow = rowOf('Triage incoming alerts');
-      expect(within(alertRow).getByText('Alert triggered')).toBeVisible();
+      expect(within(alertRow).getByText('Alert')).toBeVisible();
       expect(within(alertRow).getByText('#payments-oncall')).toBeVisible();
       expect(alertRow.querySelector('time')).toHaveAttribute('datetime', lastRunAt);
 
@@ -649,7 +649,7 @@ describe('AutomationsPage', () => {
       expect(scheduleRow.getByText('No runs recorded')).toBeVisible();
 
       const slackRow = within(rowOf('Investigate Slack messages'));
-      expect(slackRow.getByText('Slack message')).toBeVisible();
+      expect(slackRow.getByText('Slack')).toBeVisible();
       expect(slackRow.getByText('Triggering Slack thread')).toBeVisible();
       expect(slackRow.getByText('No runs recorded')).toBeVisible();
     });
@@ -883,9 +883,9 @@ describe('AutomationsPage', () => {
       renderPage();
 
       fireEvent.click(screen.getByTestId('automationTriggerFilter'));
-      expect(await screen.findByRole('option', { name: /Alert triggered/ })).toBeInTheDocument();
+      expect(await screen.findByRole('option', { name: /Alert/ })).toBeInTheDocument();
       expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
-        'Alert triggered1',
+        'Alert1',
         'Scheduled1',
       ]);
       fireEvent.click(screen.getByRole('option', { name: /Scheduled/ }));

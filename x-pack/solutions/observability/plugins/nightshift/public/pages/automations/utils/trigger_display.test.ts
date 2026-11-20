@@ -10,7 +10,7 @@ import { getTriggerDisplay } from './trigger_display';
 describe('getTriggerDisplay', () => {
   it('maps each trigger row to its label and icon', () => {
     expect(getTriggerDisplay({ kind: 'alert' })).toEqual({
-      label: 'Alert triggered',
+      label: 'Alert',
       icon: 'logoElastic',
     });
     expect(getTriggerDisplay({ kind: 'schedule', schedulePreset: 'hourly' })).toEqual({
@@ -18,7 +18,7 @@ describe('getTriggerDisplay', () => {
       icon: 'calendar',
     });
     expect(getTriggerDisplay({ kind: 'slack', event: 'message' })).toEqual({
-      label: 'Slack message',
+      label: 'Slack',
       icon: 'logoSlack',
     });
   });

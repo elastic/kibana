@@ -47,7 +47,7 @@ describe('filter automations', () => {
       statuses: ['Enabled', 'Rate limited'],
       tags: ['oncall'],
       author: 'You',
-      triggers: ['Slack message'],
+      triggers: ['Slack'],
     });
     expect(
       getAutomationFacets(buildAutomation({ isEnabled: false }), { isRateLimited: false })
@@ -81,7 +81,7 @@ describe('filter automations', () => {
       matchesFilters(automation, facets, {
         ...EMPTY_FILTERS,
         tags: ['oncall'],
-        triggers: ['Slack message'],
+        triggers: ['Slack'],
       })
     ).toBe(true);
   });
