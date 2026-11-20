@@ -1,0 +1,182 @@
+{
+  "synthetic-cartOutage-on": {
+    "incident_time": "2026-04-20T10:15:30.123456+00:00",
+    "feature_flag": "cartOutage",
+    "description": "A made-up flag that makes the cart service drop requests — used only to test the port.",
+    "mechanism": "The flag routes `EmptyCart` to an unreachable store; checkout → cart times out.\nThe frontend then returns HTTP 504.",
+    "interaction": "Overlaps with `synthLatency` for ten minutes.",
+    "symptoms": {
+      "metrics": [
+        {
+          "metric_family": "rpc_server_duration",
+          "signal_layer": "root_cause",
+          "defining_labels": { "service": "cart", "rpc": "EmptyCart" },
+          "variants": [
+            {
+              "type": "p95",
+              "description": "Server-side latency of EmptyCart jumps to the timeout.",
+              "onset_offset_seconds": 12,
+              "query": "histogram_quantile(0.95, sum by (le) (rate(rpc_server_duration_bucket{service=\"cart\"}[1m])))"
+            },
+            {
+              "type": "rate",
+              "description": "",
+              "onset_offset_seconds": null,
+              "query": "sum(rate(rpc_server_duration_count{service=\"cart\"}[1m]))"
+            }
+          ]
+        },
+        {
+          "metric_family": "http_server_errors",
+          "signal_layer": "symptom",
+          "defining_labels": {},
+          "variants": [
+            {
+              "type": "rate",
+              "description": "Frontend 504s on POST /api/checkout.",
+              "onset_offset_seconds": 40,
+              "query": "sum(rate(http_server_errors_total{route=\"/api/checkout\"}[1m]))"
+            }
+          ]
+        },
+        {
+          "metric_family": "flag_evaluations",
+          "signal_layer": "meta",
+          "variants": [
+            {
+              "type": "count",
+              "onset_offset_seconds": 0,
+              "query": "sum(increase(feature_flag_evaluations_total{flag=\"cartOutage\"}[5m]))"
+            }
+          ]
+        },
+        {
+          "metric_family": "queue_depth",
+          "variants": [
+            {
+              "type": "gauge",
+              "description": "Unclassified, so it renders under Unknown.",
+              "onset_offset_seconds": 300,
+              "query": "max(queue_depth{service=\"cart\"})"
+            }
+          ]
+        },
+        {
+          "metric_family": "ignored_layer",
+          "signal_layer": "not_a_layer",
+          "variants": [{ "type": "rate", "onset_offset_seconds": 1, "query": "up" }]
+        },
+        {
+          "metric_family": "grpc_client_errors",
+          "signal_layer": "propagation",
+          "defining_labels": { "client": "checkout" },
+          "variants": []
+        }
+      ],
+      "logs": [
+        {
+          "name": "Cart store unreachable",
+          "count": 42,
+          "description": "Connection errors from the cart service.",
+          "cause": "The flag points the store at a host that does not exist.",
+          "source": "src/cart/src/services/CartService.cs:88",
+          "representative_attributes": {
+            "body": "Can't access cart storage. System.ApplicationException: wasn't able to connect",
+            "resource.service.name": "cart",
+            "err.stack": "System.ApplicationException: wasn't able to connect\n   at CartService.EmptyCart()\n   at Grpc.Handler.Invoke()",
+            "severity_text": "  error  "
+          },
+          "log_documents": [
+            {
+              "_index": "logs-otel-2026.04.20",
+              "_id": "abc123",
+              "@timestamp": "2026-04-20T10:15:42.000Z"
+            },
+            {
+              "_index": "logs-otel-2026.04.20",
+              "_id": "a-much-longer-document-identifier",
+              "@timestamp": "2026-04-20T10:16:01.500Z"
+            }
+          ]
+        },
+        {
+          "name": "Checkout retries",
+          "description": "",
+          "representative_attributes": { "resource.service.name": "checkout" }
+        }
+      ],
+      "traces": [
+        {
+          "name": "Checkout to cart timeout",
+          "count": 7,
+          "description": "PlaceOrder spans end in DEADLINE_EXCEEDED.",
+          "cause": "EmptyCart never returns.",
+          "call_chain": "frontend → checkout:PlaceOrder → cart:EmptyCart",
+          "smoking_gun": ["status=DEADLINE_EXCEEDED on cart:EmptyCart", "http.status_code=504 on frontend"],
+          "trace_documents": [
+            { "traceID": "4bf92f3577b34da6", "@timestamp": "2026-04-20T10:15:50Z", "user_action": "Place order" },
+            { "traceID": "a3ce929d0e0e4736", "@timestamp": "2026-04-20T10:17:02Z" }
+          ]
+        },
+        {
+          "name": "Unnamed cart spans",
+          "call_chain": "",
+          "smoking_gun": [],
+          "trace_documents": [{ "traceID": "00f067aa0ba902b7", "@timestamp": "2026-04-20T10:18:00Z" }]
+        }
+      ],
+      "frontend": [
+        {
+          "route": "POST /api/checkout",
+          "description": "Not rendered: the judge prompt leaves the frontend section out.",
+          "deterministic": true,
+          "source_line": 12
+        }
+      ]
+    }
+  },
+  "synthetic-synthLatency-50%": {
+    "incident_time": "2026-04-20T10:05:00+00:00",
+    "feature_flag": "synthLatency",
+    "description": "A made-up flag that adds latency to half of the ad requests.",
+    "mechanism": "Half of GetAds calls sleep for two seconds.",
+    "symptoms": {
+      "metrics": [
+        {
+          "metric_family": "rpc_server_duration",
+          "signal_layer": "root_cause",
+          "defining_labels": { "service": "ad" },
+          "variants": [
+            {
+              "type": "p99",
+              "description": "GetAds p99 rises to two seconds.",
+              "onset_offset_seconds": 5,
+              "query": "histogram_quantile(0.99, sum by (le) (rate(rpc_server_duration_bucket{service=\"ad\"}[1m])))"
+            }
+          ]
+        }
+      ],
+      "logs": [],
+      "traces": [
+        {
+          "name": "Slow GetAds",
+          "description": "Long GetAds spans.",
+          "call_chain": "frontend → ad:GetAds",
+          "smoking_gun": ["duration > 2s on ad:GetAds"],
+          "trace_documents": [
+            { "traceID": "1111111111111111", "@timestamp": "2026-04-20T10:05:10Z", "user_action": "Open home page" },
+            { "traceID": "2222222222222222", "@timestamp": "2026-04-20T10:06:10Z", "user_action": "" }
+          ]
+        }
+      ]
+    }
+  },
+  "synthetic-quietFlag-on": {
+    "incident_time": "2026-04-20T09:00:00+00:00",
+    "feature_flag": "quietFlag",
+    "description": "A made-up flag with no observable symptoms.",
+    "mechanism": "None observable.",
+    "interaction": "",
+    "symptoms": {}
+  }
+}

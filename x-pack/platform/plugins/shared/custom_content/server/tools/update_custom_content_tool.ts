@@ -36,7 +36,7 @@ const updateCustomContentSchema = customContentPanelUpdateSchema;
  * itself it invents remediations like asking the user to click the panel, which attaches nothing.
  */
 const NOT_ATTACHED_REMEDIATION =
-  `If this panel is on the dashboard attached to this conversation, do not ask the user for anything — edit it with \`${CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID}\` by listing the panel's id in \`panels\` with \`content: { source: "request", renderer: "custom_content" }\` plus the requested \`query\` and/or \`dataQueries\` (read the dashboard attachment to find the id; for a dashboard panel it is the same value as embeddable_id). ` +
+  `If this panel is on the dashboard attached to this conversation, do not ask the user for anything — edit it with \`${CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID}\` by listing the panel's id in \`panels\` with \`content: { type: "custom_content" }\` plus the requested \`query\` and/or \`dataQueries\` (read the dashboard attachment to find the id; for a dashboard panel it is the same value as embeddable_id). ` +
   'Only if no dashboard is attached, ask the user to open that panel\'s context menu, choose Edit, then "Refine with chat". Never suggest clicking the panel — that attaches nothing.';
 
 export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
@@ -61,7 +61,7 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
 - A panel can hold several queries (read by the template as \`queries[1]\`, \`queries[2]\`, … next to \`rows\`, the first query). In \`dataQueries\`, an entry with \`description\` regenerates the query at its position, one with \`esql\` replaces it, \`{}\` keeps it, and an entry past the current queries adds one. Queries not listed are kept. A description needs a \`prompt\` saying how the panel should now use the data.
 - Pass \`removeAllQueries: true\` to make the panel static, with no data. It cannot be combined with \`dataQueries\`.
 
-This tool only reaches panels whose context is attached to the conversation — that happens when the user picks "Refine with chat" on a panel. For any other custom content panel on the attached dashboard, use \`${CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID}\` instead, listing the panel's id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\` content; it targets the panel by id and needs no attachment.
+This tool only reaches panels whose context is attached to the conversation — that happens when the user picks "Refine with chat" on a panel. For any other custom content panel on the attached dashboard, use \`${CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID}\` instead, listing the panel's id in \`panels\` with \`type: "custom_content"\` content; it targets the panel by id and needs no attachment.
 
 On success this returns \`attachment_id\` and \`version\`. You MUST render the updated panel inline as the last part of your response by emitting \`<render_attachment id="{attachment_id}" version="{version}" />\` — without it the user cannot preview or step back through earlier versions of the panel.`,
   schema: updateCustomContentSchema,

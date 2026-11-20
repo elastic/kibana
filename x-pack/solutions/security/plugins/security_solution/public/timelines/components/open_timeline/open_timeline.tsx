@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import type { EuiBasicTable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type { ImportTimelineResult } from '../../../../common/api/timeline';
 import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 import { ImportDataModal } from '../../../common/components/import_data_modal';

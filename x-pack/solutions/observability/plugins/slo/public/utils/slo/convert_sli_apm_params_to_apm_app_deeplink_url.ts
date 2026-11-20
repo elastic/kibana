@@ -11,7 +11,7 @@ import {
   is,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
-  kqlQuerySchema,
+  kqlWithFiltersSchema,
 } from '@kbn/slo-schema';
 
 export function convertSliApmParamsToApmAppDeeplinkUrl(
@@ -50,12 +50,15 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(
     qs.append('rangeTo', 'now');
   }
 
-  const kueryParams = [];
+  const kueryParams: string[] = [];
   if (transactionName && transactionName !== ALL_VALUE) {
     kueryParams.push(`transaction.name : "${transactionName}"`);
   }
-  if (filter && is(kqlQuerySchema, filter) && filter.length > 0) {
-    kueryParams.push(filter);
+  // The APM app only accepts a KQL string, so filter pills (`filters`) can't be forwarded
+  const filterKuery = (is(kqlWithFiltersSchema, filter) ? filter.kqlQuery : filter)?.trim();
+  if (filterKuery) {
+    // Parenthesize the user KQL so `or` clauses don't escape the `and` scoping clauses
+    kueryParams.push(`(${filterKuery})`);
   }
 
   const groupings = slo.groupings ?? {};
