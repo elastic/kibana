@@ -10,6 +10,7 @@ import { toDescribedDefinition, toDescribedSchema } from '../describe_schema';
 import { getRegistries } from '../registry';
 import { getValidator } from '../validate_params';
 import { prepareApiRequest } from '../prepare_request';
+import { unvalidatedBodyApis } from '../unvalidated_body_apis';
 import { isRecord } from '../types';
 import type { ApiRegistryDefinition } from '../types';
 
@@ -197,19 +198,22 @@ describe('@elastic/schemas registries', () => {
   });
 
   describe('toDescribedSchema', () => {
-    it('leaves no cross-file reference in the described schema for any elasticsearch API', async () => {
-      const problems: string[] = [];
+    it.each<ApiTarget>(['elasticsearch', 'kibana'])(
+      'leaves no cross-file reference in the described schema for any %s API',
+      async (target) => {
+        const problems: string[] = [];
 
-      for (const { id, input } of await loadApiInputs('elasticsearch')) {
-        const { schema } = await toDescribedSchema('elasticsearch', input);
-        const unresolved = crossFileRefs(schema);
-        if (unresolved.length > 0) {
-          problems.push(`${id}: ${unresolved.join(', ')}`);
+        for (const { id, input } of await loadApiInputs(target)) {
+          const { schema } = await toDescribedSchema(target, input);
+          const unresolved = crossFileRefs(schema);
+          if (unresolved.length > 0) {
+            problems.push(`${id}: ${unresolved.join(', ')}`);
+          }
         }
-      }
 
-      expect(problems).toEqual([]);
-    });
+        expect(problems).toEqual([]);
+      }
+    );
 
     it('keeps the description a parameter hangs off its own reference', async () => {
       // Every `$ref` parameter on this API documents itself, so dropping the keys that sit
@@ -319,43 +323,46 @@ describe('@elastic/schemas registries', () => {
   });
 
   describe('toDescribedDefinition', () => {
-    it('describes every type stubbed by an elasticsearch API without leaking a cross-file reference', async () => {
-      const stubbedBy = new Map<string, ApiInput>();
+    it.each<ApiTarget>(['elasticsearch', 'kibana'])(
+      'describes every type the %s APIs stub without leaking a cross-file reference',
+      async (target) => {
+        const stubbedBy = new Map<string, ApiInput>();
 
-      for (const api of await loadApiInputs('elasticsearch')) {
-        const { expandableTypes } = await toDescribedSchema('elasticsearch', api.input);
-        for (const type of expandableTypes) {
-          if (!stubbedBy.has(type)) {
-            stubbedBy.set(type, api);
+        for (const api of await loadApiInputs(target)) {
+          const { expandableTypes } = await toDescribedSchema(target, api.input);
+          for (const type of expandableTypes) {
+            if (!stubbedBy.has(type)) {
+              stubbedBy.set(type, api);
+            }
           }
         }
+
+        const problems: string[] = [];
+
+        for (const [type, api] of stubbedBy) {
+          const described = await toDescribedDefinition(target, api.input, type);
+          if (!described) {
+            problems.push(`${type}: not found in the closure of "${api.id}"`);
+            continue;
+          }
+
+          const unresolved = crossFileRefs(described.schema);
+          if (unresolved.length > 0) {
+            problems.push(`${type}: unresolved ${unresolved.join(', ')}`);
+          }
+          if (containsKey(described.schema, 'x-found-in')) {
+            problems.push(`${type}: kept a routing annotation`);
+          }
+
+          const chars = JSON.stringify(described.schema).length;
+          if (chars > MAX_DESCRIBED_CHARS) {
+            problems.push(`${type}: ${chars}`);
+          }
+        }
+
+        expect(problems).toEqual([]);
       }
-
-      const problems: string[] = [];
-
-      for (const [type, api] of stubbedBy) {
-        const described = await toDescribedDefinition('elasticsearch', api.input, type);
-        if (!described) {
-          problems.push(`${type}: not found in the closure of "${api.id}"`);
-          continue;
-        }
-
-        const unresolved = crossFileRefs(described.schema);
-        if (unresolved.length > 0) {
-          problems.push(`${type}: unresolved ${unresolved.join(', ')}`);
-        }
-        if (containsKey(described.schema, 'x-found-in')) {
-          problems.push(`${type}: kept a routing annotation`);
-        }
-
-        const chars = JSON.stringify(described.schema).length;
-        if (chars > MAX_DESCRIBED_CHARS) {
-          problems.push(`${type}: ${chars}`);
-        }
-      }
-
-      expect(problems).toEqual([]);
-    });
+    );
 
     it('spells out the query types the search API only stubbed', async () => {
       const { elasticsearch } = await getRegistries();
@@ -506,6 +513,79 @@ describe('@elastic/schemas registries', () => {
           request: expect.objectContaining({ bulkBody: operations }),
         })
       );
+    });
+  });
+
+  describe('APIs with an unvalidated body', () => {
+    const nestedField = (depth: number): Record<string, unknown> =>
+      depth === 0
+        ? { type: 'keyword' }
+        : { type: 'object', properties: { field: nestedField(depth - 1) } };
+
+    it.each(unvalidatedBodyApis.elasticsearch)(
+      '%s is a known Elasticsearch API taking body params',
+      async (api) => {
+        const { elasticsearch } = await getRegistries();
+        const { definition } = await elasticsearch.loadApi(api);
+
+        expect(paramRoutings(definition.input).some(({ foundIn }) => foundIn === 'body')).toBe(
+          true
+        );
+      }
+    );
+
+    it('prepares a deeply nested mapping without validating it', async () => {
+      // Validating six levels against the mapping schema would take hours, so a regression shows
+      // up here as a timeout.
+      const template = { mappings: { properties: { field: nestedField(6) } } };
+      const prepared = await prepareApiRequest({
+        target: 'elasticsearch',
+        api: 'cluster.put_component_template',
+        params: { name: 'my-template', template },
+        spaceId: 'default',
+      });
+
+      expect(prepared).toEqual(
+        expect.objectContaining({
+          status: 'prepared',
+          request: expect.objectContaining({ body: { template } }),
+        })
+      );
+    });
+
+    it('still rejects an invalid query param and an unknown param', async () => {
+      const prepared = await prepareApiRequest({
+        target: 'elasticsearch',
+        api: 'cluster.put_component_template',
+        params: { name: 'my-template', template: {}, create: 'yes', mappings: {} },
+        spaceId: 'default',
+      });
+
+      expect(prepared).toEqual({
+        status: 'invalid_params',
+        errors: expect.arrayContaining([
+          expect.objectContaining({ path: '#/mappings' }),
+          expect.objectContaining({ path: '#/create' }),
+        ]),
+      });
+    });
+
+    it('still requires a required body param', async () => {
+      const prepared = await prepareApiRequest({
+        target: 'elasticsearch',
+        api: 'cluster.put_component_template',
+        params: { name: 'my-template' },
+        spaceId: 'default',
+      });
+
+      expect(prepared).toEqual({
+        status: 'invalid_params',
+        errors: [
+          expect.objectContaining({
+            message: expect.stringContaining('required property "template"'),
+          }),
+        ],
+      });
     });
   });
 });

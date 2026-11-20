@@ -32,12 +32,6 @@ export default createTestConfig({
     '--xpack.searchSynonyms.enabled=true',
   ],
   apps: {
-    serverlessConnectors: {
-      pathname: '/app/connectors',
-    },
-    searchPlayground: {
-      pathname: '/app/search_playground',
-    },
     searchInferenceEndpoints: {
       pathname: '/app/management/modelManagement/inference_endpoints',
     },

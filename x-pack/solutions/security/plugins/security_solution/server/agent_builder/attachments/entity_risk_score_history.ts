@@ -4,35 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
 import { SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID } from '../tools';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
-const scoreTypeSchema = z.enum(['base', 'resolution']);
+const scoreTypeSchema = lazySchema(() => z.enum(['base', 'resolution']));
 
-const riskScoreHistoryAttachmentEntrySchema = z.object({
-  '@timestamp': z.string().min(1),
-  calculated_score_norm: z.number(),
-  calculated_level: z.string().min(1),
-  calculated_score: z.number().optional(),
-  score_type: scoreTypeSchema.optional(),
-  category_1_score: z.number().optional(),
-  category_1_count: z.number().int().optional(),
-});
+const riskScoreHistoryAttachmentEntrySchema = lazySchema(() =>
+  z.object({
+    '@timestamp': z.string().min(1),
+    calculated_score_norm: z.number(),
+    calculated_level: z.string().min(1),
+    calculated_score: z.number().optional(),
+    score_type: scoreTypeSchema.optional(),
+    category_1_score: z.number().optional(),
+    category_1_count: z.number().int().optional(),
+  })
+);
 
-const entityRiskScoreHistoryAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  identifierType: IdentifierType,
-  identifier: z.string().min(1),
-  entityStoreId: z.string().min(1),
-  from: z.string().min(1),
-  to: z.string().min(1),
-  bucketInterval: z.string().min(1),
-  scoreType: scoreTypeSchema.optional(),
-  entries: z.array(riskScoreHistoryAttachmentEntrySchema),
-});
+const entityRiskScoreHistoryAttachmentDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    identifierType: IdentifierType,
+    identifier: z.string().min(1),
+    entityStoreId: z.string().min(1),
+    from: z.string().min(1),
+    to: z.string().min(1),
+    bucketInterval: z.string().min(1),
+    scoreType: scoreTypeSchema.optional(),
+    entries: z.array(riskScoreHistoryAttachmentEntrySchema),
+  })
+);
 
 type EntityRiskScoreHistoryAttachmentData = z.infer<
   typeof entityRiskScoreHistoryAttachmentDataSchema

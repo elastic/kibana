@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { AsCodeSavedDataView } from '@kbn/as-code-data-views-schema';
+import type { DataViewSpec } from '@kbn/data-views-types';
+import type { AsCodeSavedDataViewWithScriptedFields } from '@kbn/as-code-data-views-schema';
 import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_DATA_VIEW_SPEC_TYPE,
   type AsCodeDataView,
 } from '@kbn/as-code-data-views-schema';
-import { fromStoredFields } from './from_stored_fields';
+import { fromStoredFields, fromStoredScriptedFields } from './from_stored_fields';
 
 /**
  * Convert a stored search-source `index` value (saved object / serialized search source)
@@ -48,8 +48,15 @@ export function fromStoredDataView(
   };
 }
 
-export function fromStoredDataViewToAsCodeSavedSchema(index: DataViewSpec): AsCodeSavedDataView {
+export function fromStoredDataViewToAsCodeSavedSchema(
+  index: DataViewSpec
+): AsCodeSavedDataViewWithScriptedFields {
   if (!index.title) throw new Error('Cannot derive data view without `title`');
+  const scriptedFields = fromStoredScriptedFields(
+    index.fields,
+    index.fieldFormats,
+    index.fieldAttrs
+  );
   const fieldSettings = fromStoredFields(
     index.runtimeFieldMap,
     index.fieldFormats,
@@ -64,6 +71,7 @@ export function fromStoredDataViewToAsCodeSavedSchema(index: DataViewSpec): AsCo
     time_field: index.timeFieldName,
     allow_hidden_indices: index.allowHidden,
     field_settings: fieldSettings,
+    ...(scriptedFields && { scripted_fields: scriptedFields }),
     ...toAsCodeFieldFilters(index.sourceFilters),
   };
 }

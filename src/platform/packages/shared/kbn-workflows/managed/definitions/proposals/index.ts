@@ -8,3 +8,4 @@
  */
 
 export { CREATE_PROPOSAL_WORKFLOW, CREATE_PROPOSAL_WORKFLOW_ID } from './create_proposal';
+export { RESOLVE_PROPOSAL_WORKFLOW, RESOLVE_PROPOSAL_WORKFLOW_ID } from './resolve_proposal';

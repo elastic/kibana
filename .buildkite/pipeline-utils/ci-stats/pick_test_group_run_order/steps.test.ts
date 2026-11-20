@@ -12,7 +12,8 @@ jest.mock('#pipeline-utils', () => ({
 }));
 
 import {
-  buildFunctionalStepGroup,
+  buildFunctionalAggregateWaitStep,
+  buildFunctionalStepGroups,
   buildJestStep,
   registerCancelKeys,
   sortFunctionalGroups,
@@ -25,7 +26,7 @@ describe('buildJestStep', () => {
     label: 'Jest Tests',
     parallelism: 4,
     key: 'jest' as const,
-    agentDiskSize: 110,
+    agent: { queue: 'n2-8-spot', maxParallel: 7 },
     envFromLabels: { FOO: 'bar' },
     dependsOn: ['build'],
     retryCount: 2,
@@ -43,11 +44,23 @@ describe('buildJestStep', () => {
     expect(step.parallelism).toBe(4);
     expect(step.key).toBe('jest');
     expect(step.depends_on).toEqual(['build']);
-    expect(step.env).toEqual({ FOO: 'bar' });
+    expect(step.agents).toEqual({ queue: 'n2-8-spot', size: undefined });
+    expect(step.env).toEqual({ JEST_MAX_PARALLEL: '7', FOO: 'bar' });
     expect(step.retry.automatic).toEqual([
       { exit_status: '-1', limit: 3 },
       { exit_status: '*', limit: 2 },
     ]);
+  });
+
+  it('runs on the agent queue it is given, with that many config processes per job', () => {
+    const step = buildJestStep({
+      ...baseOpts,
+      agent: { queue: 'n2-4-spot', maxParallel: 1 },
+      agentDiskSize: 100,
+    }) as any;
+
+    expect(step.agents).toEqual({ queue: 'n2-4-spot', size: 100 });
+    expect(step.env.JEST_MAX_PARALLEL).toBe('1');
   });
 
   it('omits the wildcard retry when retryCount is 0', () => {
@@ -82,7 +95,7 @@ describe('sortFunctionalGroups', () => {
   });
 });
 
-describe('buildFunctionalStepGroup', () => {
+describe('buildFunctionalStepGroups', () => {
   const baseOpts = {
     command: 'scripts/run_ftr.sh',
     defaultQueue: 'default-q',
@@ -92,8 +105,8 @@ describe('buildFunctionalStepGroup', () => {
     retryCount: 1,
   };
 
-  it('returns undefined when there are no functional groups', () => {
-    expect(buildFunctionalStepGroup({ ...baseOpts, functionalGroups: [] })).toBeUndefined();
+  it('returns no groups when there are no functional groups', () => {
+    expect(buildFunctionalStepGroups({ ...baseOpts, functionalGroups: [] })).toEqual([]);
   });
 
   it('builds a group with sorted child steps and merged env', () => {
@@ -102,24 +115,51 @@ describe('buildFunctionalStepGroup', () => {
       { title: 'A', key: 'a', sortBy: 1, queue: 'q1' },
     ];
 
-    const step = buildFunctionalStepGroup({ ...baseOpts, functionalGroups: groups }) as any;
+    const [step] = buildFunctionalStepGroups({ ...baseOpts, functionalGroups: groups });
 
     expect(step.group).toBe('FTR Configs');
     expect(step.key).toBe('ftr-configs');
     expect(step.depends_on).toEqual(['build']);
     expect(step.steps.map((s: any) => s.key)).toEqual(['a', 'b']);
 
-    const first = step.steps[0];
-    expect(first.command).toBe('scripts/run_ftr.sh');
-    expect(first.env).toEqual({
-      FTR_CONFIG_GROUP_KEY: 'a',
-      FTR_EXTRA_ARGS: '--bail',
-      LABEL: 'v',
+    expect(step.steps[0]).toMatchObject({
+      command: 'scripts/run_ftr.sh',
+      env: {
+        FTR_CONFIG_GROUP_KEY: 'a',
+        FTR_EXTRA_ARGS: '--bail',
+        LABEL: 'v',
+      },
+      retry: {
+        automatic: [
+          { exit_status: '-1', limit: 3 },
+          { exit_status: '*', limit: 1 },
+        ],
+      },
     });
-    expect(first.retry.automatic).toEqual([
-      { exit_status: '-1', limit: 3 },
-      { exit_status: '*', limit: 1 },
-    ]);
+    expect(buildFunctionalAggregateWaitStep([step])).toBeUndefined();
+  });
+
+  it('splits more than 500 FTR jobs into uploads with unique group keys', () => {
+    const functionalGroups = Array.from({ length: 501 }, (_, index) => ({
+      title: `Config ${index}`,
+      key: `ftr_configs_${index}`,
+      sortBy: index,
+      queue: 'q1',
+    }));
+
+    const groups = buildFunctionalStepGroups({ ...baseOpts, functionalGroups });
+
+    expect(groups.map((group) => group.key)).toEqual(['ftr-configs-1', 'ftr-configs-2']);
+    expect(groups.map((group) => group.steps.length)).toEqual([400, 101]);
+    expect(buildFunctionalAggregateWaitStep(groups)).toEqual({
+      wait: null,
+      key: 'ftr-configs',
+      depends_on: ['ftr-configs-1', 'ftr-configs-2'],
+    });
+    expect(
+      groups.flatMap((group) => group.steps.map((step) => ('key' in step ? step.key : null)))
+    ).toEqual(functionalGroups.map((group) => group.key));
+    expect(groups.every((group) => group.depends_on === baseOpts.dependsOn)).toBe(true);
   });
 });
 

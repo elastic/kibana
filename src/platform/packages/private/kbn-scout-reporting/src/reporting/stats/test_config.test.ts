@@ -31,6 +31,135 @@ describe('ScoutTestConfigStatsEntrySchema', () => {
     expect(parsed.test_target.arch).toBe('stateful');
     expect(parsed.test_target.domain).toBe('classic');
   });
+
+  it('defaults target_attributes to an empty list', () => {
+    const parsed = ScoutTestConfigStatsEntrySchema.parse({
+      path: 'some/config.ts',
+      test_target: { location: 'local', arch: 'stateful', domain: 'classic' },
+      runCount: 5,
+      runtime: { avg: 100, median: 100, pc95th: 100, pc99th: 100, max: 100, estimate: 100 },
+    });
+
+    expect(parsed.target_attributes).toEqual([]);
+  });
+
+  it('keeps declared target_attributes', () => {
+    const parsed = ScoutTestConfigStatsEntrySchema.parse({
+      path: 'some/config.ts',
+      test_target: { location: 'local', arch: 'stateful', domain: 'classic' },
+      target_attributes: ['fips'],
+      runCount: 5,
+      runtime: { avg: 100, median: 100, pc95th: 100, pc99th: 100, max: 100, estimate: 100 },
+    });
+
+    expect(parsed.target_attributes).toEqual(['fips']);
+  });
+
+  it('rejects unknown target_attributes', () => {
+    expect(() =>
+      ScoutTestConfigStatsEntrySchema.parse({
+        path: 'some/config.ts',
+        test_target: { location: 'local', arch: 'stateful', domain: 'classic' },
+        target_attributes: ['quantum'],
+        runCount: 5,
+        runtime: { avg: 100, median: 100, pc95th: 100, pc99th: 100, max: 100, estimate: 100 },
+      })
+    ).toThrow();
+  });
+});
+
+describe('ScoutTestConfigStats.fromElasticsearch', () => {
+  const statsRecord = (overrides: Record<string, unknown> = {}) => ({
+    location: 'local',
+    arch: 'stateful',
+    domain: 'classic',
+    path: 'plugin/config.ts',
+    run_count: 10,
+    avg_ms: 5000,
+    max_ms: 9000,
+    median_ms: 4500,
+    p95_ms: 7000,
+    p99_ms: 8000,
+    ...overrides,
+  });
+
+  const esClientReturning = (records: Array<Record<string, unknown>>) => {
+    const esql = jest.fn().mockReturnValue({
+      toRecords: jest.fn().mockResolvedValue({ records }),
+    });
+    return { client: { helpers: { esql } } as never, esql };
+  };
+
+  const fetch = (client: never) =>
+    ScoutTestConfigStats.fromElasticsearch(client, {
+      configPaths: [],
+      lookbackDays: 1,
+      buildkite: {},
+    });
+
+  it('groups runtime statistics by target attribute set', async () => {
+    const { client, esql } = esClientReturning([
+      statsRecord({ target_attributes: null, p95_ms: 7000 }),
+      statsRecord({ target_attributes: 'fips', p95_ms: 12000 }),
+    ]);
+
+    const stats = await fetch(client);
+    const query = esql.mock.calls[0][0].query as string;
+
+    expect(query).toContain(
+      'EVAL target_attributes = MV_CONCAT(MV_SORT(test_run.target.attributes), ",")'
+    );
+    expect(query).toContain(
+      'BY test_run.config.file.path, test_run.target.type, test_run.target.mode, target_attributes'
+    );
+
+    expect(stats.data.configs).toHaveLength(2);
+    expect(stats.data.configs[0].target_attributes).toEqual([]);
+    expect(stats.data.configs[0].runtime.estimate).toBe(7000);
+    expect(stats.data.configs[1].target_attributes).toEqual(['fips']);
+    expect(stats.data.configs[1].runtime.estimate).toBe(12000);
+  });
+
+  it('drops records carrying attributes this branch does not know about', async () => {
+    const { client } = esClientReturning([
+      statsRecord({ target_attributes: 'quantum' }),
+      statsRecord({ target_attributes: 'fips' }),
+    ]);
+
+    const stats = await fetch(client);
+
+    expect(stats.data.configs).toHaveLength(1);
+    expect(stats.data.configs[0].target_attributes).toEqual(['fips']);
+  });
+
+  it('falls back to an attribute-blind query when the column is not mapped yet', async () => {
+    const unknownColumn = Object.assign(
+      new Error(
+        'verification_exception\n\tRoot causes:\n\t\tUnknown column [test_run.target.attributes]'
+      ),
+      { meta: { body: {} } }
+    );
+    const toRecords = jest
+      .fn()
+      .mockRejectedValueOnce(unknownColumn)
+      .mockResolvedValueOnce({ records: [statsRecord()] });
+    const esql = jest.fn().mockReturnValue({ toRecords });
+    const client = { helpers: { esql } } as never;
+
+    const stats = await fetch(client);
+
+    expect(esql).toHaveBeenCalledTimes(2);
+    expect(esql.mock.calls[1][0].query).not.toContain('target_attributes');
+    expect(stats.data.configs).toHaveLength(1);
+    expect(stats.data.configs[0].target_attributes).toEqual([]);
+  });
+
+  it('rethrows unrelated Elasticsearch errors', async () => {
+    const toRecords = jest.fn().mockRejectedValue(new Error('index_not_found_exception'));
+    const client = { helpers: { esql: jest.fn().mockReturnValue({ toRecords }) } } as never;
+
+    await expect(fetch(client)).rejects.toThrow('index_not_found_exception');
+  });
 });
 
 describe('ScoutTestConfigStats', () => {

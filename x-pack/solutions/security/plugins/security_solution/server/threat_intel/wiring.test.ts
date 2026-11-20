@@ -18,6 +18,7 @@ import {
   scheduleScrubReportContentTask,
 } from './tasks';
 import { registerThreatIntelWorkflowSteps } from './workflows/step_types';
+import { installThreatIntelManagedWorkflowsForSpaces } from '../workflows/security_managed_workflows';
 import { createThreatIntelRuntime, setupThreatIntel, startThreatIntel } from './wiring';
 
 // Explicit factories rather than automock: these are barrels, and automock does not
@@ -38,6 +39,7 @@ jest.mock('./setup/indicator_alias', () => ({
 }));
 jest.mock('../workflows/security_managed_workflows', () => ({
   reconcileThreatIntelAttributeWorkflowsForSpaces: jest.fn().mockResolvedValue(undefined),
+  installThreatIntelManagedWorkflowsForSpaces: jest.fn().mockResolvedValue(undefined),
 }));
 
 /**
@@ -73,6 +75,10 @@ describe('threat intel wiring', () => {
     (ensureThreatIntelBootstrap as jest.Mock).mockResolvedValue(undefined);
     (schedulePromoteThreatIndicatorsTask as jest.Mock).mockResolvedValue(undefined);
     (scheduleScrubReportContentTask as jest.Mock).mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   describe('alertzero off', () => {
@@ -229,10 +235,11 @@ describe('threat intel wiring', () => {
     });
 
     // Scheduling is gated on bootstrap: the tasks read and write the same indices, so
-    // a failed bootstrap means there is no schema for them to work against.
+    // a failed bootstrap means there is no schema for them to work against until recovery.
     it('does not schedule tasks when bootstrap fails', async () => {
       (ensureThreatIntelBootstrap as jest.Mock).mockRejectedValue(new Error('no cluster'));
       const runtime = createThreatIntelRuntime();
+      runtime.bootstrapBackgroundRetryMs = 60_000;
 
       startThreatIntel({
         alertZeroEnabled: true,
@@ -246,6 +253,78 @@ describe('threat intel wiring', () => {
       await new Promise(process.nextTick);
       expect(schedulePromoteThreatIndicatorsTask).not.toHaveBeenCalled();
       expect(scheduleScrubReportContentTask).not.toHaveBeenCalled();
+    });
+
+    it('retries bootstrap in the background and schedules tasks plus TI install on recovery', async () => {
+      jest.useFakeTimers();
+      (ensureThreatIntelBootstrap as jest.Mock)
+        .mockRejectedValueOnce(new Error('elser not ready'))
+        .mockResolvedValueOnce(undefined);
+      const runtime = createThreatIntelRuntime();
+      runtime.bootstrapBackgroundRetryMs = 5_000;
+
+      startThreatIntel({
+        alertZeroEnabled: true,
+        plugins: { taskManager: taskManager(), workflowsExtensions: {} } as never,
+        core: coreMock.createStart() as never,
+        logger: loggingSystemMock.createLogger(),
+        runtime,
+      });
+
+      await runtime.bootstrapReady.catch(() => undefined);
+      await Promise.resolve();
+      expect(schedulePromoteThreatIndicatorsTask).not.toHaveBeenCalled();
+      expect(installThreatIntelManagedWorkflowsForSpaces).not.toHaveBeenCalled();
+
+      await jest.advanceTimersByTimeAsync(5_000);
+      await Promise.resolve();
+      await Promise.resolve();
+
+      await expect(runtime.bootstrapReady).resolves.toBeUndefined();
+      expect(schedulePromoteThreatIndicatorsTask).toHaveBeenCalled();
+      expect(scheduleScrubReportContentTask).toHaveBeenCalled();
+      expect(installThreatIntelManagedWorkflowsForSpaces).toHaveBeenCalled();
+      jest.useRealTimers();
+    });
+
+    it('retries TI managed-workflow install when post-recovery install fails', async () => {
+      jest.useFakeTimers();
+      (ensureThreatIntelBootstrap as jest.Mock)
+        .mockRejectedValueOnce(new Error('elser not ready'))
+        .mockResolvedValue(undefined);
+      (installThreatIntelManagedWorkflowsForSpaces as jest.Mock)
+        .mockRejectedValueOnce(new Error('workflows unavailable'))
+        .mockResolvedValueOnce(undefined);
+      const runtime = createThreatIntelRuntime();
+      runtime.bootstrapBackgroundRetryMs = 5_000;
+
+      startThreatIntel({
+        alertZeroEnabled: true,
+        plugins: { taskManager: taskManager(), workflowsExtensions: {} } as never,
+        core: coreMock.createStart() as never,
+        logger: loggingSystemMock.createLogger(),
+        runtime,
+      });
+
+      await runtime.bootstrapReady.catch(() => undefined);
+      await Promise.resolve();
+
+      await jest.advanceTimersByTimeAsync(5_000);
+      await Promise.resolve();
+      await Promise.resolve();
+
+      await expect(runtime.bootstrapReady).resolves.toBeUndefined();
+      expect(schedulePromoteThreatIndicatorsTask).toHaveBeenCalledTimes(1);
+      expect(installThreatIntelManagedWorkflowsForSpaces).toHaveBeenCalledTimes(1);
+
+      await jest.advanceTimersByTimeAsync(5_000);
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(installThreatIntelManagedWorkflowsForSpaces).toHaveBeenCalledTimes(2);
+      // Bootstrap already recovered; do not re-run ensure on the install-only retry.
+      expect(ensureThreatIntelBootstrap).toHaveBeenCalledTimes(2);
+      jest.useRealTimers();
     });
   });
 

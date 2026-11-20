@@ -6,21 +6,12 @@
  */
 
 import type { SchemaOutput } from '../schema_output';
-import {
+import type {
   SyntheticsParamsReadonlyCodec,
-  SyntheticsParamsReadonlyCodecList,
   SyntheticsParamsCodec,
   DeleteParamsResponseCodec,
   SyntheticsParamRequestCodec,
-} from '../zod/synthetics_params';
-
-export {
-  SyntheticsParamsReadonlyCodec,
-  SyntheticsParamsReadonlyCodecList,
-  SyntheticsParamsCodec,
-  DeleteParamsResponseCodec,
-  SyntheticsParamRequestCodec,
-};
+} from '../schemas/synthetics_params';
 
 export type SyntheticsParamsReadonly = SchemaOutput<typeof SyntheticsParamsReadonlyCodec>;
 export type SyntheticsParams = SchemaOutput<typeof SyntheticsParamsCodec>;

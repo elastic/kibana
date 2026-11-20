@@ -9,8 +9,8 @@
 
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { buildDatatableFromTextBasedGrid } from './build_datatable_from_text_based_grid';
 import { getGridRequestId } from './get_grid_request_id';
 import { getEsqlDatatableFromDocuments } from './get_esql_datatable_from_documents';
@@ -28,7 +28,7 @@ describe('buildDatatableFromTextBasedGrid', () => {
       { id: 'type', name: 'type', meta: { type: 'string' } },
       { id: 'pvalue', name: 'pvalue', meta: { type: 'number' } },
     ];
-    const columnsMeta = getTextBasedColumnsMeta(originalColumns);
+    const resultDataSource = createMockEsqlSource([], originalColumns);
     const rowData = {
       avg_bytes: 14,
       host: 'web-1',
@@ -38,7 +38,7 @@ describe('buildDatatableFromTextBasedGrid', () => {
     };
     const rows = [asEsqlRow('1', rowData)];
 
-    const table = buildDatatableFromTextBasedGrid({ rows, columnsMeta });
+    const table = buildDatatableFromTextBasedGrid({ rows, resultDataSource });
 
     expect(table?.columns.map((column) => column.id)).toEqual(originalColumns.map((c) => c.id));
     expect(table?.columns.find((column) => column.id === 'avg_bytes')?.meta.type).toBe('number');
@@ -46,9 +46,13 @@ describe('buildDatatableFromTextBasedGrid', () => {
     expect(table?.rows[0]).toEqual(rows[0].raw);
   });
 
-  it('returns undefined when columnsMeta is missing or empty', () => {
-    expect(buildDatatableFromTextBasedGrid({ rows: [], columnsMeta: undefined })).toBeUndefined();
-    expect(buildDatatableFromTextBasedGrid({ rows: [], columnsMeta: {} })).toBeUndefined();
+  it('returns undefined when the result source is missing or has no columns', () => {
+    expect(
+      buildDatatableFromTextBasedGrid({ rows: [], resultDataSource: undefined })
+    ).toBeUndefined();
+    expect(
+      buildDatatableFromTextBasedGrid({ rows: [], resultDataSource: createMockEsqlSource() })
+    ).toBeUndefined();
   });
 });
 
@@ -69,11 +73,10 @@ describe('getEsqlDatatableFromDocuments', () => {
     const result = [asEsqlRow('1', { bucket: '2023-11-15T00:00:00.000Z' })];
 
     const { table } = getEsqlDatatableFromDocuments({
-      isEsqlMode: true,
       documentsValue: {
         fetchStatus: FetchStatus.COMPLETE,
         result,
-        esqlQueryColumns: columns,
+        dataSource: createMockEsqlSource([], columns),
       },
     });
 
@@ -85,10 +88,10 @@ describe('getEsqlDatatableFromDocuments', () => {
 
   it('does not supply a table while documents are still loading', () => {
     const { table } = getEsqlDatatableFromDocuments({
-      isEsqlMode: true,
       documentsValue: {
         fetchStatus: FetchStatus.LOADING,
         result: [],
+        dataSource: createMockEsqlSource([], []),
       },
     });
 

@@ -7,13 +7,9 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
-import type { SignalType } from '../../aws_service_matrix';
-import type { ServiceCategory } from '../../service_categories';
-import { CATEGORY_ORDER } from '../../service_categories';
+import type { AwsServiceMatrixEntry, SignalType } from '../../aws_service_matrix';
+import { isAgentBasedOnly } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-
-export type { ServiceCategory };
-export { CATEGORY_ORDER };
 
 export type SignalFilter = SignalType | 'all';
 
@@ -23,6 +19,7 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     setSelectedServiceIds,
     setDataFormat,
     awsServiceMatrix: rawMatrix,
+    deploymentMethod,
   } = useOnboardingFlow();
   const { selectedServiceIds, dataFormat } = servicesStep;
 
@@ -30,71 +27,40 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
 
   const [signalFilter, setSignalFilter] = useState<SignalFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | null>(null);
 
+  // One flat list, ordered by name so services with several variants (logs / metrics) sit together.
   const filteredServices = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return awsServiceMatrix.filter(
-      (s) =>
-        s.showInUI &&
-        (s.dataFormat ?? 'ecs') === dataFormat &&
-        (signalFilter === 'all' || s.signalTypes.includes(signalFilter)) &&
-        (q === '' || s.name.toLowerCase().includes(q))
-    );
-  }, [awsServiceMatrix, signalFilter, searchQuery, dataFormat]);
-
-  const categories = useMemo(() => {
-    const present = new Set(filteredServices.map((s) => s.category));
-    return CATEGORY_ORDER.filter((cat) => present.has(cat));
-  }, [filteredServices]);
-
-  // Derive the active category without a useEffect: if the selected category has been
-  // filtered out, fall back to the first available category.
-  const activeCategory =
-    selectedCategory && categories.includes(selectedCategory)
-      ? selectedCategory
-      : categories[0] ?? null;
-
-  const servicesInCategory = useMemo(
-    () => filteredServices.filter((s) => s.category === activeCategory),
-    [filteredServices, activeCategory]
-  );
-
-  const duplicateNamesInCategory = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const s of servicesInCategory) {
-      counts.set(s.name, (counts.get(s.name) ?? 0) + 1);
-    }
-    return new Set([...counts.entries()].filter(([, n]) => n > 1).map(([name]) => name));
-  }, [servicesInCategory]);
-
-  const selectedSet = useMemo(() => new Set(selectedServiceIds), [selectedServiceIds]);
-
-  // Signal-filtered but search-independent set: matches what "Select all" operates on,
-  // so total/selected in the badge stay reachable under the active signal filter.
-  const signalFilteredServices = useMemo(
-    () =>
-      awsServiceMatrix.filter(
+    return awsServiceMatrix
+      .filter(
         (s) =>
           s.showInUI &&
           (s.dataFormat ?? 'ecs') === dataFormat &&
-          (signalFilter === 'all' || s.signalTypes.includes(signalFilter))
-      ),
-    [awsServiceMatrix, signalFilter, dataFormat]
+          (signalFilter === 'all' || s.signalTypes.includes(signalFilter)) &&
+          (q === '' || s.name.toLowerCase().includes(q))
+      )
+      .sort((a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
+  }, [awsServiceMatrix, signalFilter, searchQuery, dataFormat]);
+
+  const duplicateNames = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const s of filteredServices) {
+      counts.set(s.name, (counts.get(s.name) ?? 0) + 1);
+    }
+    return new Set([...counts.entries()].filter(([, n]) => n > 1).map(([name]) => name));
+  }, [filteredServices]);
+
+  const selectedSet = useMemo(() => new Set(selectedServiceIds), [selectedServiceIds]);
+
+  const agentBasedOnlySelected = useMemo(
+    () => awsServiceMatrix?.filter((s) => selectedSet.has(s.id) && isAgentBasedOnly(s)) ?? [],
+    [awsServiceMatrix, selectedSet]
   );
 
-  const categoryStats = useMemo(() => {
-    const stats = new Map<ServiceCategory, { total: number; selected: number; preview: string }>();
-    for (const cat of categories) {
-      const catServices = signalFilteredServices.filter((s) => s.category === cat);
-      const total = catServices.length;
-      const selected = catServices.filter((s) => selectedSet.has(s.id)).length;
-      const uniqueNames = [...new Set(catServices.map((s) => s.name))];
-      const preview = uniqueNames.slice(0, 2).join(', ') + (uniqueNames.length > 2 ? ', ...' : '');
-      stats.set(cat, { total, selected, preview });
-    }
-    return stats;
-  }, [categories, signalFilteredServices, selectedSet]);
+  const ecfOnlySelected = useMemo(
+    () => awsServiceMatrix.filter((s) => selectedSet.has(s.id) && s.ecfOnly),
+    [awsServiceMatrix, selectedSet]
+  );
 
   const isReady = selectedServiceIds.length > 0;
 
@@ -108,20 +74,32 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     [selectedServiceIds, setSelectedServiceIds]
   );
 
-  const allInCategorySelected = useMemo(
-    () => servicesInCategory.length > 0 && servicesInCategory.every((s) => selectedSet.has(s.id)),
-    [servicesInCategory, selectedSet]
+  // Agent-based cannot deploy ECF-only services, so they cannot be selected while it is the method.
+  const isUnavailableForMethod = useCallback(
+    (service: AwsServiceMatrixEntry) =>
+      deploymentMethod === 'agent_based' && service.ecfOnly === true,
+    [deploymentMethod]
   );
 
-  const handleSelectAllInCategory = useCallback(() => {
-    const ids = servicesInCategory.map((s) => s.id);
-    setSelectedServiceIds([...new Set([...selectedServiceIds, ...ids])]);
-  }, [servicesInCategory, selectedServiceIds, setSelectedServiceIds]);
+  const selectableServices = useMemo(
+    () => filteredServices.filter((s) => !isUnavailableForMethod(s)),
+    [filteredServices, isUnavailableForMethod]
+  );
 
-  const handleDeselectAllInCategory = useCallback(() => {
-    const ids = new Set(servicesInCategory.map((s) => s.id));
+  const allVisibleSelected = useMemo(
+    () => selectableServices.length > 0 && selectableServices.every((s) => selectedSet.has(s.id)),
+    [selectableServices, selectedSet]
+  );
+
+  const handleSelectAllVisible = useCallback(() => {
+    const ids = selectableServices.map((s) => s.id);
+    setSelectedServiceIds([...new Set([...selectedServiceIds, ...ids])]);
+  }, [selectableServices, selectedServiceIds, setSelectedServiceIds]);
+
+  const handleDeselectAllVisible = useCallback(() => {
+    const ids = new Set(filteredServices.map((s) => s.id));
     setSelectedServiceIds(selectedServiceIds.filter((id) => !ids.has(id)));
-  }, [servicesInCategory, selectedServiceIds, setSelectedServiceIds]);
+  }, [filteredServices, selectedServiceIds, setSelectedServiceIds]);
 
   const handleNext = useCallback(() => {
     if (!isReady) return;
@@ -134,20 +112,18 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     searchQuery,
     setSearchQuery,
     filteredServices,
-    categories,
-    activeCategory,
-    setSelectedCategory,
-    servicesInCategory,
-    duplicateNamesInCategory,
+    duplicateNames,
     selectedSet,
-    categoryStats,
     isReady,
     handleToggle,
-    allInCategorySelected,
-    handleSelectAllInCategory,
-    handleDeselectAllInCategory,
+    allVisibleSelected,
+    handleSelectAllVisible,
+    handleDeselectAllVisible,
     handleNext,
     dataFormat,
     setDataFormat,
+    agentBasedOnlySelected,
+    ecfOnlySelected,
+    isUnavailableForMethod,
   };
 }

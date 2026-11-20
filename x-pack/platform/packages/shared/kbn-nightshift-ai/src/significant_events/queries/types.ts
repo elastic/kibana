@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-export const SIGNIFICANT_EVENT_TYPE_OPERATIONAL = 'operational' as const;
-export const SIGNIFICANT_EVENT_TYPE_CONFIGURATION = 'configuration' as const;
-export const SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH = 'resource_health' as const;
-export const SIGNIFICANT_EVENT_TYPE_ERROR = 'error' as const;
-export const SIGNIFICANT_EVENT_TYPE_SECURITY = 'security' as const;
-
-export type SignificantEventType =
-  | typeof SIGNIFICANT_EVENT_TYPE_OPERATIONAL
-  | typeof SIGNIFICANT_EVENT_TYPE_CONFIGURATION
-  | typeof SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH
-  | typeof SIGNIFICANT_EVENT_TYPE_ERROR
-  | typeof SIGNIFICANT_EVENT_TYPE_SECURITY;
+export {
+  SIGNIFICANT_EVENT_TYPE_OPERATIONAL,
+  SIGNIFICANT_EVENT_TYPE_CONFIGURATION,
+  SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH,
+  SIGNIFICANT_EVENT_TYPE_ERROR,
+  SIGNIFICANT_EVENT_TYPE_SECURITY,
+  SIGNIFICANT_EVENT_TYPES,
+  significantEventTypeSchema,
+  type SignificantEventType,
+} from '@kbn/significant-events-schema';

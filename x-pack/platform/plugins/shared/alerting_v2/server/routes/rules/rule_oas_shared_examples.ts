@@ -32,19 +32,18 @@ const SAMPLE_RULE_DATA = {
     name: 'Host CPU high',
     description: 'Alerts when average CPU usage exceeds a threshold.',
     tags: ['production', 'infra'],
+    routing_tags: ['sre-oncall'],
   },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  recovery_strategy: 'no_breach' as const,
   query: {
-    format: 'standalone' as const,
-    breach: {
-      query:
-        'FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name',
-    },
+    base: 'FROM metrics-* | STATS avg_cpu = AVG(host.cpu.usage) BY host.name',
+    breach: { segment: 'WHERE avg_cpu > 0.9' },
   },
+  recovery: { strategy: 'no_breach' as const },
+  no_data: { strategy: 'keep_last' as const },
   grouping: { fields: ['host.name'] },
-  state_transition: { pending_count: 1, recovering_count: 1 },
+  state_transition: { pending: { count: 1 }, recovering: { count: 1 } },
 };
 
 export const CREATE_RULE_REQUEST: CreateRuleDataInput = SAMPLE_RULE_DATA;
@@ -52,12 +51,8 @@ export const CREATE_RULE_REQUEST: CreateRuleDataInput = SAMPLE_RULE_DATA;
 export const RULE_RESPONSE: RuleResponse = {
   ...SAMPLE_RULE_DATA,
   id: 'rule-1',
-  version: 'WzAsMV0=',
+  version: 1,
   enabled: true,
-  metadata: {
-    ...SAMPLE_RULE_DATA.metadata,
-    version: 1,
-  },
   created_by: { profile_uid: 'u_elastic_0' },
   created_at: '2026-01-15T12:00:00.000Z',
   updated_by: { profile_uid: 'u_elastic_0' },
@@ -78,7 +73,7 @@ export const BULK_OPERATION_RESPONSE: BulkResponse = {
 };
 
 export const BULK_CREATE_RULES_REQUEST: BulkCreateRulesParams = {
-  rules: [
+  items: [
     SAMPLE_RULE_DATA,
     {
       ...SAMPLE_RULE_DATA,
@@ -93,7 +88,7 @@ export const BULK_CREATE_RULES_REQUEST: BulkCreateRulesParams = {
 };
 
 export const BULK_CREATE_RULES_RESPONSE: BulkCreateRulesResponse = {
-  rules: [
+  items: [
     RULE_RESPONSE,
     {
       ...RULE_RESPONSE,
@@ -122,9 +117,9 @@ export const INVALID_BULK_OPERATION_RESPONSE = invalidResponseExample({
 
 /** Shared 400 body for bulk create. */
 export const INVALID_BULK_CREATE_RULES_RESPONSE = invalidResponseExample({
-  summary: 'Request body is missing required rules',
-  message: 'rules: Required',
-  details: { errors: { rules: ['Required'] } },
+  summary: 'Request body is missing required items',
+  message: 'items: Required',
+  details: { errors: { items: ['Required'] } },
 });
 
 /** Shared 400 body for by-query bulk routes. */
@@ -185,7 +180,7 @@ export const MAX_SCHEDULES_PER_MINUTE_EXCEEDED_RESPONSE: OasExampleEntry = {
     code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
     error: 'Bad Request',
     message: `Rule schedule of "1m" would exceed the limit of 400 rule runs per minute`,
-    details: { interval: '1m', maxScheduledPerMinute: 400 },
+    details: { interval: '1m', max_scheduled_per_minute: 400 },
   } satisfies ErrorResponse,
 };
 

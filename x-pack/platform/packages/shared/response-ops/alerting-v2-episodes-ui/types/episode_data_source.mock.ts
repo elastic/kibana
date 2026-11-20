@@ -11,7 +11,9 @@ export const createTestEpisodeSource = (
   overrides: Partial<EpisodeDataSource> = {}
 ): EpisodeDataSource => ({
   id: 'test-source',
+  label: 'test-source',
   queryKeyPrefix: ['test-source'],
   fetchEpisodes: jest.fn().mockResolvedValue([]),
+  useWriteAccess: () => () => true,
   ...overrides,
 });

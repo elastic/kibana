@@ -19,7 +19,14 @@ import {
   type RoundCompleteEvent,
   type RoundInterruptedEvent,
 } from '@kbn/agent-builder-common';
-import { filterEventsNativeApiEvents, filterLegacyApiEvents } from './converse_helpers';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
+import type { ChatRequestBodyPayload } from '../../common/http_api/chat';
+import {
+  filterEventsNativeApiEvents,
+  filterLegacyApiEvents,
+  getConverseHelpers,
+} from './converse_helpers';
 
 const roundCompleteEvent: RoundCompleteEvent = {
   type: ChatEventType.roundComplete,
@@ -145,5 +152,38 @@ describe('converse_helpers filter operators', () => {
       TimelineEventType.executionFailed,
       TimelineEventType.executionAborted,
     ]);
+  });
+});
+
+describe('converse_helpers executeAgent', () => {
+  const executeAgentMock = jest.fn();
+  const executionService = { executeAgent: executeAgentMock } as unknown as AgentExecutionService;
+  const payload = { input: 'hello' } as ChatRequestBodyPayload;
+  const { executeAgent } = getConverseHelpers({ getInternalServices: jest.fn() });
+
+  beforeEach(() => {
+    executeAgentMock.mockReset();
+  });
+
+  it('requests an immediate claim for requests from the Kibana UI', async () => {
+    const request = httpServerMock.createKibanaRequest({
+      headers: { 'x-elastic-internal-origin': 'Kibana' },
+    });
+
+    await executeAgent({ payload, request, executionService });
+
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ requestImmediateClaim: true })
+    );
+  });
+
+  it('does not request an immediate claim for other requests', async () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    await executeAgent({ payload, request, executionService });
+
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ requestImmediateClaim: false })
+    );
   });
 });

@@ -6,16 +6,22 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AiIndexHttpItem, KiTypeCount } from '../../common/http_api/ai_indices';
+import type { AiIndexItem, KiTypeCount } from '../../common/http_api/ai_indices';
+import { MEMORY_KI_TYPES, takesMemories } from '../../common/memory';
 import { describeAiIndexAggregations } from './describe_aggregations';
 import { describeAiIndexFields } from './describe_fields';
-import { buildExampleQueries } from './example_queries';
+import { buildExampleQueries, EXCLUDE_MEMORY_KI_TYPES_FILTER } from './example_queries';
+import { buildMemoryExampleQueries } from './memory_example_queries';
 import type { AiIndexField, AiIndexTagCount } from './types';
+
+const MEMORY_KI_TYPE_SET: ReadonlySet<string> = new Set(MEMORY_KI_TYPES);
 
 export interface DescribeAiIndexParams {
   esClient: ElasticsearchClient;
-  aiIndex: AiIndexHttpItem;
+  aiIndex: AiIndexItem;
   spaceId: string;
+  userId?: string;
+  includeMemory: boolean;
 }
 
 const fieldLine = ({ path, type, searchable, aggregatable }: AiIndexField): string =>
@@ -25,10 +31,10 @@ const fieldLine = ({ path, type, searchable, aggregatable }: AiIndexField): stri
     ...(aggregatable ? ['aggregatable'] : []),
   ].join(', ');
 
-const headerSection = ({ id, description, dest }: AiIndexHttpItem): string[] => [
-  `AI index: ${id}`,
+const headerSection = ({ id, description, dest }: AiIndexItem): string[] => [
+  `AI-index registry ID: ${id}`,
   ...(description ? [description] : []),
-  `Query with ES|QL against: ${dest.value}`,
+  `Backing Elasticsearch target (use only in ES|QL queries): ${dest.value}`,
 ];
 
 const fieldsSection = (fields: AiIndexField[], omittedFieldCount: number): string[] => {
@@ -51,7 +57,9 @@ const countsSection = (heading: string, counts: Array<[key: string, count: numbe
 const kiTypeCountsSection = (counts: KiTypeCount[]): string[] =>
   countsSection(
     'Knowledge item types',
-    counts.map(({ type, count }) => [type, count])
+    counts
+      .filter(({ type }) => !MEMORY_KI_TYPE_SET.has(type))
+      .map(({ type, count }) => [type, count])
   );
 
 const tagCountsSection = (counts: AiIndexTagCount[]): string[] =>
@@ -60,9 +68,33 @@ const tagCountsSection = (counts: AiIndexTagCount[]): string[] =>
     counts.map(({ tag, count }) => [tag, count])
   );
 
-const exampleQueriesSection = (target: string): string[] => [
+const memorySection = (aiIndex: AiIndexItem, target: string): string[] => {
+  if (!takesMemories(aiIndex)) {
+    return [];
+  }
+
+  const { crossSession } = buildMemoryExampleQueries(target);
+
+  return [
+    'Memory',
+    'Memory writes are enabled for this AI-index registry entry.',
+    'Available memory types',
+    'memory.session',
+    'memory.session_fact',
+    'Use platform.context_engine.remember to write memory.',
+    'Use platform.context_engine.forget with a memory id to tombstone memory.',
+    'Unless the task specifically calls for memory, exclude memory types from ordinary KI retrieval:',
+    EXCLUDE_MEMORY_KI_TYPES_FILTER,
+    'For cross-session recall, search granular facts with hybrid retrieval:',
+    crossSession,
+    'Select the latest revision before filtering deleted or expired memories, or an older active data-stream revision can reappear.',
+    'References identify the source conversations.',
+  ];
+};
+
+const exampleQueriesSection = (dest: AiIndexItem['dest'], excludeMemory: boolean): string[] => [
   'Example queries (adapt field names for non-canonical indices)',
-  ...buildExampleQueries(target).flatMap(({ title, esql }) => ['', title, esql]),
+  ...buildExampleQueries(dest, { excludeMemory }).flatMap(({ title, esql }) => ['', title, esql]),
 ];
 
 /** One item per line; sections separated by a blank line; empty sections dropped. */
@@ -74,12 +106,14 @@ const renderSections = (sections: string[][]): string =>
 
 /**
  * Free-form context block for an agent: registry entry, what backing indices expose, and how to
- * query them. Read as current user; counts are space-filtered.
+ * query them. Read as current user; counts are space-filtered, and user-filtered when `userId` is set.
  */
 export const describeAiIndex = async ({
   esClient,
   aiIndex,
   spaceId,
+  userId,
+  includeMemory,
 }: DescribeAiIndexParams): Promise<string> => {
   const target = aiIndex.dest.value;
   const { fields, allFields, semanticFields, omittedFieldCount } = await describeAiIndexFields({
@@ -88,8 +122,9 @@ export const describeAiIndex = async ({
   });
   const { kiTypeCounts, tagCounts } = await describeAiIndexAggregations({
     esClient,
-    target,
+    dest: aiIndex.dest,
     spaceId,
+    userId,
     fields: allFields,
   });
 
@@ -99,6 +134,7 @@ export const describeAiIndex = async ({
     semanticFieldsSection(semanticFields),
     kiTypeCountsSection(kiTypeCounts),
     tagCountsSection(tagCounts),
-    exampleQueriesSection(target),
+    includeMemory ? memorySection(aiIndex, target) : [],
+    exampleQueriesSection(aiIndex.dest, includeMemory),
   ]);
 };

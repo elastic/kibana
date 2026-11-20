@@ -2,7 +2,7 @@
 
 exports[`LinkToApp component should render with href 1`] = `
 <a
-  class="euiLink emotion-euiLink-primary"
+  class="euiLink emotion-euiLink-text"
   href="/app/fleet"
   rel="noreferrer"
 >
@@ -12,7 +12,7 @@ exports[`LinkToApp component should render with href 1`] = `
 
 exports[`LinkToApp component should render with minimum input 1`] = `
 <button
-  class="euiLink emotion-euiLink-primary"
+  class="euiLink emotion-euiLink-text"
   type="button"
 >
   link

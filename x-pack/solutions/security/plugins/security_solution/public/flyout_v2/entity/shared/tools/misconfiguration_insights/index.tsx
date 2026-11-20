@@ -23,6 +23,7 @@ import { MisconfigurationFindingsDetailsTable } from '../../../../../cloud_secur
 import type { CloudPostureEntityIdentifier } from '../../../../../cloud_security_posture/components/entity_insight';
 import { MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
+import type { EntityViewMode } from '../../../../../../common/entity_analytics/entity_store/resolution_group';
 
 const TITLE = MISCONFIGURATION_INSIGHTS_TITLE;
 
@@ -44,6 +45,11 @@ export interface MisconfigurationInsightsProps {
   value: string;
   /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */
   entityId?: string;
+  /**
+   * Entity-store lookup mode of the originating entity flyout. In `resolved` mode the table also
+   * covers the entities that resolve to `entityId`. Defaults to `single`.
+   */
+  mode?: EntityViewMode;
   /** Opens the originating entity flyout as a child. */
   onShowEntity?: () => void;
 }
@@ -52,7 +58,7 @@ export interface MisconfigurationInsightsProps {
  * Tool flyout displaying CSP misconfiguration findings for an entity.
  */
 export const MisconfigurationInsights = memo(
-  ({ entityType, value, entityId, onShowEntity }: MisconfigurationInsightsProps) => {
+  ({ entityType, value, entityId, mode, onShowEntity }: MisconfigurationInsightsProps) => {
     const { openMisconfigurationFindingAsChild } = useFlyoutApi();
 
     const onShowFinding = useCallback(
@@ -84,6 +90,7 @@ export const MisconfigurationInsights = memo(
             value={value}
             entityId={entityId}
             entityType={entityType}
+            mode={mode}
             onShowFinding={onShowFinding}
           />
         </div>

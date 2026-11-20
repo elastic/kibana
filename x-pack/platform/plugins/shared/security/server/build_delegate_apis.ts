@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
 import type {
   CoreSecurityDelegateContract,
   GrantUiamAPIKeyParams,
@@ -21,12 +22,21 @@ import { createFakeRequestEnrichment } from './authentication/fake_request_enric
 import type { ServiceAccountsServiceStart } from './service_accounts';
 import type { Session } from './session_management';
 import { getPrintableSessionId } from './session_management';
+import type { UiamAuthorizationCheck, UiamServicePublic } from './uiam';
+import {
+  UIAM_BILLING_DETAILS_READ_ACTION,
+  UIAM_BILLING_DETAILS_RESOURCE_TYPE,
+  UIAM_ORGANIZATION_INVITATION_CREATE_ACTION,
+  UIAM_ORGANIZATION_INVITATION_RESOURCE_TYPE,
+} from './uiam';
 import type { UserProfileServiceStartInternal } from './user_profile';
 
 export const buildSecurityApi = ({
   getAuthc,
   getSession,
   getServiceAccounts,
+  getUiam,
+  organizationId,
   audit,
   config,
   logger,
@@ -34,11 +44,35 @@ export const buildSecurityApi = ({
   getAuthc: () => InternalAuthenticationServiceStart;
   getSession: () => Pick<Session, 'getSID'>;
   getServiceAccounts: () => ServiceAccountsServiceStart | null;
+  getUiam: () => Pick<UiamServicePublic, 'checkAuthorization'>;
+  /**
+   * The Cloud organization this Kibana belongs to, which scopes UIAM's organization resources.
+   * Required for the checks to run when UIAM is enabled.
+   */
+  organizationId?: string;
   audit: AuditServiceSetup;
   config: { uiam?: { enabled: boolean }; serviceAccounts?: { enabled: boolean } };
   logger: Logger;
 }): CoreSecurityDelegateContract => {
   const enrichment = createFakeRequestEnrichment(logger.get('fake-request-enrichment'));
+
+  // `async` so that a missing service or organization surfaces as a rejected promise rather than
+  // a synchronous throw, which callers of a promise-returning API would not expect.
+  const checkUiamAccess = async (request: KibanaRequest, action: string, resourceType: string) => {
+    // Without the organization UIAM would evaluate the check against no organization at all,
+    // which denies every customer role and would hide a misconfiguration behind a plain `false`.
+    if (!organizationId) {
+      throw new Error(
+        'Cloud organization access cannot be checked because Kibana is not configured with a Cloud organization.'
+      );
+    }
+    const check: UiamAuthorizationCheck = {
+      action,
+      resource: { type: resourceType, organization_id: organizationId },
+    };
+    const { permitted } = await getUiam().checkAuthorization(request, [check]);
+    return permitted;
+  };
 
   const requireServiceAccounts = () => {
     const serviceAccounts = getServiceAccounts();
@@ -48,15 +82,31 @@ export const buildSecurityApi = ({
     return serviceAccounts;
   };
 
+  const getCurrentUser: CoreSecurityDelegateContract['authc']['getCurrentUser'] = (request) => {
+    if (request.isFakeRequest) {
+      const override = enrichment.getOverride(request);
+      if (override) return override;
+    }
+    return getAuthc().getCurrentUser(request);
+  };
+
+  const getPrincipal: CoreSecurityDelegateContract['authc']['getPrincipal'] = (request) => {
+    // Fake requests never pass through the authenticator. Only the ones the service accounts
+    // backend minted are known without I/O. The enrichment override is deliberately not
+    // classified: it names the user a request acts for, not the credential (usually an API key)
+    // that Elasticsearch authenticates it with.
+    if (request.isFakeRequest) {
+      return getServiceAccounts()?.backend.getFakeRequestPrincipal(request) ?? null;
+    }
+
+    const user = getCurrentUser(request);
+    return user ? getAuthenticatedPrincipal(user) : null;
+  };
+
   return {
     authc: {
-      getCurrentUser: (request) => {
-        if (request.isFakeRequest) {
-          const override = enrichment.getOverride(request);
-          if (override) return override;
-        }
-        return getAuthc().getCurrentUser(request);
-      },
+      getCurrentUser,
+      getPrincipal,
       getRedactedSessionId: async (request) => {
         const sid = await getSession().getSID(request);
         return sid ? getPrintableSessionId(sid) : undefined;
@@ -92,6 +142,24 @@ export const buildSecurityApi = ({
           : null,
       },
     },
+    authz: {
+      uiam: config.uiam?.enabled
+        ? {
+            canViewBillingDetails: (request) =>
+              checkUiamAccess(
+                request,
+                UIAM_BILLING_DETAILS_READ_ACTION,
+                UIAM_BILLING_DETAILS_RESOURCE_TYPE
+              ),
+            canInviteOrganizationMembers: (request) =>
+              checkUiamAccess(
+                request,
+                UIAM_ORGANIZATION_INVITATION_CREATE_ACTION,
+                UIAM_ORGANIZATION_INVITATION_RESOURCE_TYPE
+              ),
+          }
+        : null,
+    },
     audit: {
       asScoped(request) {
         return audit.asScoped(request);
@@ -107,12 +175,16 @@ export const buildSecurityApi = ({
       // `async` so that a disabled feature surfaces as a rejected promise rather than a
       // synchronous throw, which callers of a promise-returning API would not expect.
       create: async (request, params) => requireServiceAccounts().backend.create(request, params),
+      delete: async (request, id, params) =>
+        requireServiceAccounts().management.delete(request, id, params),
       bindWorkload: async (pluginId, request, params) =>
         requireServiceAccounts().workloads.bindWorkload(pluginId, request, params),
       unbindWorkload: async (pluginId, request, params) =>
         requireServiceAccounts().workloads.unbindWorkload(pluginId, request, params),
       getWorkloadBinding: async (pluginId, params) =>
         requireServiceAccounts().workloads.getBinding(pluginId, params),
+      getWorkloadServiceAccountSummary: async (pluginId, params) =>
+        requireServiceAccounts().workloads.getServiceAccountSummary(pluginId, params),
       withScopedRequestForWorkload: async (pluginId, params, fn) =>
         requireServiceAccounts().workloads.withScopedRequest(pluginId, params, fn),
     },

@@ -15,12 +15,13 @@ import { EuiThemeProvider } from '@elastic/eui';
 import type { ComparisonControlsProps } from './comparison_controls';
 import { ComparisonControls } from './comparison_controls';
 import type { DocumentDiffMode } from './types';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 const renderComparisonControls = ({
-  isPlainRecord = false,
+  isEsql = false,
   forceShowAllFields = false,
 }: {
-  isPlainRecord?: ComparisonControlsProps['isPlainRecord'];
+  isEsql?: boolean;
   forceShowAllFields?: ComparisonControlsProps['forceShowAllFields'];
 } = {}) => {
   const selectedDocIds = ['0', '1', '2'];
@@ -37,7 +38,7 @@ const renderComparisonControls = ({
         <EuiThemeProvider>
           <IntlProvider locale="en">
             <ComparisonControls
-              isPlainRecord={isPlainRecord}
+              dataSource={isEsql ? createMockEsqlSource() : undefined}
               selectedDocIds={selectedDocIds}
               showDiff={showDiff}
               diffMode={diffMode}
@@ -71,9 +72,7 @@ const renderComparisonControls = ({
     screen.getByTestId('unifiedDataTableDiffOptionSwitch-showDiffDecorations');
   return {
     getComparisonCountDisplay: () =>
-      screen.getByText(
-        `Comparing ${selectedDocIds.length} ${isPlainRecord ? 'results' : 'documents'}`
-      ),
+      screen.getByText(`Comparing ${selectedDocIds.length} ${isEsql ? 'results' : 'documents'}`),
     getComparisonSettingsButton,
     clickComparisonSettingsButton: async () => await userEvent.click(getComparisonSettingsButton()),
     getShowDiffSwitch,
@@ -124,8 +123,8 @@ describe('ComparisonControls', () => {
     expect(result.getExitComparisonButton()).toBeInTheDocument();
   });
 
-  it('should render with isPlainRecord = true', () => {
-    const result = renderComparisonControls({ isPlainRecord: true });
+  it('should render results wording for an ES|QL source', () => {
+    const result = renderComparisonControls({ isEsql: true });
     expect(result.getComparisonCountDisplay()).toBeInTheDocument();
     expect(result.getComparisonSettingsButton()).toBeInTheDocument();
     expect(result.getExitComparisonButton()).toBeInTheDocument();

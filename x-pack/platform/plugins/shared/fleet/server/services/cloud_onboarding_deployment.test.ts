@@ -5,15 +5,32 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import {
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
-import type { CloudOnboardingDeploymentSOAttributes } from '../types/so_attributes';
+import type {
+  CloudOnboardingDeploymentSOAttributes,
+  PackagePolicySOAttributes,
+} from '../types/so_attributes';
 
+import { appContextService } from './app_context';
+import { auditLoggingService } from './audit_logging';
 import { cloudOnboardingDeploymentService } from './cloud_onboarding_deployment';
+import { getPackagePolicySavedObjectType } from './package_policy';
+
+jest.mock('./app_context');
+jest.mock('./audit_logging');
+jest.mock('./package_policy', () => ({ getPackagePolicySavedObjectType: jest.fn() }));
+
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+const mockedGetPackagePolicySavedObjectType =
+  getPackagePolicySavedObjectType as jest.MockedFunction<typeof getPackagePolicySavedObjectType>;
 
 function makeAttributes(
   overrides: Partial<CloudOnboardingDeploymentSOAttributes> = {}
@@ -54,11 +71,294 @@ function mockGetByType(
   });
 }
 
+function makePackagePolicySO(
+  id: string,
+  attributes: Partial<PackagePolicySOAttributes> = {},
+  version = 'v1'
+) {
+  return {
+    id,
+    type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    version,
+    references: [],
+    attributes: { package: { name: 'aws' }, ...attributes } as PackagePolicySOAttributes,
+  };
+}
+
+function makeMissingPackagePolicySO(id: string) {
+  return {
+    id,
+    type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    references: [],
+    attributes: undefined as unknown as PackagePolicySOAttributes,
+    error: { statusCode: 404, error: 'Not Found', message: 'not found' },
+  };
+}
+
 describe('cloudOnboardingDeploymentService', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     soClient = savedObjectsClientMock.create();
+    logger = loggingSystemMock.createLogger();
+    mockedAppContextService.getLogger.mockReturnValue(logger);
+    mockedGetPackagePolicySavedObjectType.mockResolvedValue(PACKAGE_POLICY_SAVED_OBJECT_TYPE);
+    soClient.find.mockResolvedValue({ saved_objects: [], total: 0, per_page: 0, page: 1 });
+    soClient.bulkGet.mockResolvedValue({ saved_objects: [] });
+    soClient.bulkUpdate.mockImplementation(async (objects) => ({
+      saved_objects: objects.map(({ id, type }) => ({ id, type, references: [], attributes: {} })),
+    }));
+  });
+
+  describe('package policy ownership', () => {
+    const stampsWritten = () =>
+      soClient.bulkUpdate.mock.calls.flatMap(([objects]) =>
+        objects.map(({ id, version, attributes }) => ({ id, version, attributes }))
+      );
+    // The policies currently stamped with the deployment.
+    const mockStamped = (policies: Array<ReturnType<typeof makePackagePolicySO>>) =>
+      soClient.find.mockResolvedValue({
+        saved_objects: policies.map((policy) => ({ ...policy, score: 0 })),
+        total: policies.length,
+        per_page: policies.length,
+        page: 1,
+      });
+    const mockUpdateWith = (attributes: CloudOnboardingDeploymentSOAttributes) => {
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', attributes));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', attributes));
+    };
+
+    it('stamps the package policies a new deployment owns', async () => {
+      const attrs = makeAttributes({ policyIdsByInstance: { cloudtrail: 'pp-1', elb: 'pp-2' } });
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', attrs));
+      mockGetByType(soClient, 'deploy-1', attrs);
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [makePackagePolicySO('pp-1'), makePackagePolicySO('pp-2')],
+      });
+
+      await cloudOnboardingDeploymentService.create(soClient, {
+        provider: 'aws',
+        connectorId: 'conn-1',
+        mechanisms: ['managed_integration'],
+        services: ['cloudtrail', 'elb_logs'],
+        policyIdsByInstance: { cloudtrail: 'pp-1', elb: 'pp-2' },
+      });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ type: PACKAGE_POLICY_SAVED_OBJECT_TYPE })
+      );
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { type: PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: 'pp-1' },
+        { type: PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: 'pp-2' },
+      ]);
+      expect(stampsWritten()).toEqual([
+        { id: 'pp-1', version: 'v1', attributes: { onboarding_deployment_id: 'deploy-1' } },
+        { id: 'pp-2', version: 'v1', attributes: { onboarding_deployment_id: 'deploy-1' } },
+      ]);
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'update',
+        id: 'pp-1',
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    });
+
+    it('does not read package policies when a new deployment owns none', async () => {
+      const attrs = makeAttributes();
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', attrs));
+      mockGetByType(soClient, 'deploy-1', attrs);
+
+      await cloudOnboardingDeploymentService.create(soClient, {
+        provider: 'aws',
+        connectorId: 'conn-1',
+        mechanisms: ['managed_integration'],
+        services: ['cloudtrail'],
+      });
+
+      expect(soClient.find).not.toHaveBeenCalled();
+      expect(soClient.bulkGet).not.toHaveBeenCalled();
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    it('stamps owned policies and clears the stamp of the stamped policies it no longer owns', async () => {
+      mockUpdateWith(
+        makeAttributes({ policyIdsByInstance: { cloudtrail: 'pp-1', guardduty: 'pp-3' } })
+      );
+      mockStamped([
+        makePackagePolicySO('pp-1', { onboarding_deployment_id: 'deploy-1' }),
+        makePackagePolicySO('pp-2', { onboarding_deployment_id: 'deploy-1' }, 'v2'),
+      ]);
+      soClient.bulkGet.mockResolvedValue({ saved_objects: [makePackagePolicySO('pp-3')] });
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        policyIdsByInstance: { cloudtrail: 'pp-1', guardduty: 'pp-3' },
+      });
+
+      // Only the owned policies that are not stamped yet are read.
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { type: PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: 'pp-3' },
+      ]);
+      expect(stampsWritten()).toEqual([
+        { id: 'pp-2', version: 'v2', attributes: { onboarding_deployment_id: null } },
+        { id: 'pp-3', version: 'v1', attributes: { onboarding_deployment_id: 'deploy-1' } },
+      ]);
+    });
+
+    it('retries a stamp that failed on an earlier write', async () => {
+      mockUpdateWith(makeAttributes({ packagePolicyIds: ['pp-1'] }));
+      soClient.bulkGet.mockResolvedValue({ saved_objects: [makePackagePolicySO('pp-1')] });
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'succeeded' });
+
+      expect(stampsWritten()).toEqual([
+        { id: 'pp-1', version: 'v1', attributes: { onboarding_deployment_id: 'deploy-1' } },
+      ]);
+    });
+
+    it('retries a clear that failed on an earlier write', async () => {
+      mockUpdateWith(makeAttributes());
+      mockStamped([makePackagePolicySO('pp-old', { onboarding_deployment_id: 'deploy-1' })]);
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'succeeded' });
+
+      expect(soClient.bulkGet).not.toHaveBeenCalled();
+      expect(stampsWritten()).toEqual([
+        { id: 'pp-old', version: 'v1', attributes: { onboarding_deployment_id: null } },
+      ]);
+    });
+
+    it('skips missing policies, previous revisions and policies of other deployments', async () => {
+      mockUpdateWith(makeAttributes({ packagePolicyIds: ['pp-missing', 'pp-prev', 'pp-other'] }));
+      mockStamped([
+        makePackagePolicySO('pp-1:prev', {
+          onboarding_deployment_id: 'deploy-1',
+          latest_revision: false,
+        }),
+      ]);
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          makeMissingPackagePolicySO('pp-missing'),
+          makePackagePolicySO('pp-prev', { latest_revision: false }),
+          makePackagePolicySO('pp-other', { onboarding_deployment_id: 'deploy-2' }),
+        ],
+      });
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        packagePolicyIds: ['pp-missing', 'pp-prev', 'pp-other'],
+      });
+
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('pp-other'));
+    });
+
+    it('does not stamp policies of other packages than those of the onboarding flow', async () => {
+      mockUpdateWith(
+        makeAttributes({ packagePolicyIds: ['pp-aws', 'pp-fleet-server', 'pp-nopkg'] })
+      );
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          makePackagePolicySO('pp-aws', { package: { name: 'aws_bedrock' } } as any),
+          makePackagePolicySO('pp-fleet-server', { package: { name: 'fleet_server' } } as any),
+          { ...makePackagePolicySO('pp-nopkg'), attributes: {} as PackagePolicySOAttributes },
+        ],
+      });
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'succeeded' });
+
+      expect(stampsWritten().map(({ id }) => id)).toEqual(['pp-aws']);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('pp-fleet-server'));
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('pp-nopkg'));
+    });
+
+    it('does not clear a policy a newer write of the deployment owns', async () => {
+      // This write read the deployment before a newer write added pp-new and stamped it.
+      soClient.get
+        .mockResolvedValueOnce(makeSOResponse('deploy-1', makeAttributes()))
+        .mockResolvedValue(
+          makeSOResponse('deploy-1', makeAttributes({ packagePolicyIds: ['pp-new'] }))
+        );
+      soClient.create.mockImplementation(async (_type, attributes) =>
+        makeSOResponse('deploy-1', attributes as CloudOnboardingDeploymentSOAttributes)
+      );
+      mockStamped([makePackagePolicySO('pp-new', { onboarding_deployment_id: 'deploy-1' })]);
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' });
+
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    it('changes the package policies with the client given for them, and only reads the deployment with the other', async () => {
+      const packagePolicySoClient = savedObjectsClientMock.create();
+      packagePolicySoClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 0,
+        page: 1,
+      });
+      packagePolicySoClient.bulkGet.mockResolvedValue({
+        saved_objects: [makePackagePolicySO('pp-1')],
+      });
+      packagePolicySoClient.bulkUpdate.mockImplementation(async (objects) => ({
+        saved_objects: objects.map(({ id, type }) => ({
+          id,
+          type,
+          references: [],
+          attributes: {},
+        })),
+      }));
+      mockUpdateWith(makeAttributes({ packagePolicyIds: ['pp-1'] }));
+
+      await cloudOnboardingDeploymentService.update(
+        soClient,
+        'deploy-1',
+        { status: 'succeeded' },
+        undefined,
+        packagePolicySoClient
+      );
+
+      expect(packagePolicySoClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(soClient.find).not.toHaveBeenCalled();
+      expect(soClient.bulkGet).not.toHaveBeenCalled();
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    it('does not fail the deployment write when stamping fails', async () => {
+      mockUpdateWith(makeAttributes({ packagePolicyIds: ['pp-1'] }));
+      soClient.find.mockRejectedValue(new Error('boom'));
+
+      const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        status: 'succeeded',
+      });
+
+      expect(result.id).toBe('deploy-1');
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
+    });
+
+    it('logs per-policy update errors, such as a version conflict, without failing', async () => {
+      mockUpdateWith(makeAttributes({ packagePolicyIds: ['pp-1'] }));
+      soClient.bulkGet.mockResolvedValue({ saved_objects: [makePackagePolicySO('pp-1')] });
+      soClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            ...makePackagePolicySO('pp-1'),
+            error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
+          },
+        ],
+      });
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'succeeded' });
+
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('version conflict'));
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).not.toHaveBeenCalled();
+    });
+
+    it('does not touch package policies when the deployment is deleted', async () => {
+      await cloudOnboardingDeploymentService.delete(soClient, 'deploy-1');
+
+      expect(soClient.find).not.toHaveBeenCalled();
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+    });
   });
 
   describe('create', () => {
@@ -146,6 +446,141 @@ describe('cloudOnboardingDeploymentService', () => {
       await expect(
         cloudOnboardingDeploymentService.getById(soClient, 'deploy-missing')
       ).rejects.toThrow('not found');
+    });
+  });
+
+  describe('list', () => {
+    const attributePath = (name: string) =>
+      `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.${name}`;
+
+    it('lists deployments newest first with their update time', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            ...makeSOResponse('deploy-1', makeAttributes({ packageNames: ['aws'] })),
+            updated_at: '2026-10-20T10:00:00.000Z',
+            score: 1,
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 20,
+      });
+
+      const result = await cloudOnboardingDeploymentService.list(soClient);
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+          sortField: 'updated_at',
+          sortOrder: 'desc',
+          page: 1,
+          perPage: 20,
+        })
+      );
+      expect(soClient.find.mock.calls[0][0].filter).toBeUndefined();
+      expect(result).toEqual({
+        items: [
+          expect.objectContaining({
+            id: 'deploy-1',
+            packageNames: ['aws'],
+            updatedAt: '2026-10-20T10:00:00.000Z',
+          }),
+        ],
+        total: 1,
+        page: 1,
+        perPage: 20,
+      });
+    });
+
+    it('filters by package name and provider and passes pagination through', async () => {
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 2, per_page: 5 });
+
+      const result = await cloudOnboardingDeploymentService.list(soClient, {
+        packageName: 'aws_bedrock',
+        provider: 'aws',
+        page: 2,
+        perPage: 5,
+      });
+
+      const { filter, page, perPage } = soClient.find.mock.calls[0][0];
+      expect(page).toBe(2);
+      expect(perPage).toBe(5);
+      expect(JSON.stringify(filter)).toContain(attributePath('packageNames'));
+      expect(JSON.stringify(filter)).toContain('aws_bedrock');
+      expect(JSON.stringify(filter)).toContain(attributePath('provider'));
+      expect(result).toEqual({ items: [], total: 0, page: 2, perPage: 5 });
+    });
+
+    it('lists a deployment saved before packageNames existed', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [{ ...makeSOResponse('old', makeAttributes()), score: 1 }],
+        total: 1,
+        page: 1,
+        per_page: 20,
+      });
+
+      const { items } = await cloudOnboardingDeploymentService.list(soClient, {
+        packageName: 'aws',
+      });
+
+      expect(items[0].packageNames).toBeUndefined();
+    });
+  });
+
+  describe('getCountsByPackage', () => {
+    const findResult = (buckets: Array<{ key: string; doc_count: number }>) =>
+      ({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+        aggregations: { by_package: { buckets } },
+      } as any);
+
+    it('counts the deployments of each package with a terms aggregation and no documents', async () => {
+      soClient.find.mockResolvedValue(
+        findResult([
+          { key: 'aws', doc_count: 3 },
+          { key: 'aws_bedrock', doc_count: 1 },
+        ])
+      );
+
+      const counts = await cloudOnboardingDeploymentService.getCountsByPackage(soClient);
+
+      expect(counts).toEqual({ aws: 3, aws_bedrock: 1 });
+      const options = soClient.find.mock.calls[0][0];
+      expect(options).toEqual(
+        expect.objectContaining({
+          type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+          perPage: 0,
+          aggs: {
+            by_package: {
+              terms: {
+                field: `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.packageNames`,
+                size: 1000,
+              },
+            },
+          },
+        })
+      );
+      expect(options.filter).toBeUndefined();
+    });
+
+    it('filters by provider', async () => {
+      soClient.find.mockResolvedValue(findResult([]));
+
+      await cloudOnboardingDeploymentService.getCountsByPackage(soClient, { provider: 'aws' });
+
+      expect(JSON.stringify(soClient.find.mock.calls[0][0].filter)).toContain(
+        `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.provider`
+      );
+    });
+
+    it('returns no counts without deployments', async () => {
+      soClient.find.mockResolvedValue({ ...findResult([]), aggregations: undefined });
+
+      expect(await cloudOnboardingDeploymentService.getCountsByPackage(soClient)).toEqual({});
     });
   });
 
@@ -248,6 +683,191 @@ describe('cloudOnboardingDeploymentService', () => {
     });
   });
 
+  describe('update — integration name and description', () => {
+    const writtenAttributes = () => soClient.create.mock.calls[0][1] as Record<string, unknown>;
+
+    it('stores a new name and description', async () => {
+      const existing = makeAttributes({});
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        integrationName: 'my-aws',
+        description: 'Production AWS',
+      });
+
+      expect(writtenAttributes()).toEqual(
+        expect.objectContaining({ integrationName: 'my-aws', description: 'Production AWS' })
+      );
+    });
+
+    it('keeps the stored description when an update does not mention it', async () => {
+      const existing = makeAttributes({ description: 'Production AWS' });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' });
+
+      expect(writtenAttributes()).toEqual(
+        expect.objectContaining({ description: 'Production AWS' })
+      );
+    });
+
+    it('removes the description when the update clears it with null', async () => {
+      const existing = makeAttributes({ description: 'Production AWS', integrationName: 'my-aws' });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { description: null });
+
+      // Not stored as null: the saved object schema has no null for it.
+      expect(writtenAttributes()).not.toHaveProperty('description');
+      expect(writtenAttributes()).toEqual(expect.objectContaining({ integrationName: 'my-aws' }));
+    });
+  });
+
+  describe('updatedBy', () => {
+    it('stores the user on create', async () => {
+      const attrs = makeAttributes({ updatedBy: 'elastic' });
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', attrs));
+      mockGetByType(soClient, 'deploy-1', attrs);
+
+      await cloudOnboardingDeploymentService.create(
+        soClient,
+        { provider: 'aws', mechanisms: ['managed_integration'], services: ['cloudtrail'] },
+        'elastic'
+      );
+
+      expect(soClient.create.mock.calls[0][1]).toEqual(
+        expect.objectContaining({ updatedBy: 'elastic' })
+      );
+    });
+
+    it('replaces the user on update and keeps the stored one without a user', async () => {
+      const existing = makeAttributes({ updatedBy: 'first' });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {}, 'second');
+      expect(soClient.create.mock.calls[0][1]).toEqual(
+        expect.objectContaining({ updatedBy: 'second' })
+      );
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {});
+      expect(soClient.create.mock.calls[1][1]).toEqual(
+        expect.objectContaining({ updatedBy: 'first' })
+      );
+    });
+  });
+
+  describe('update — namespace', () => {
+    const writtenAttributes = () => soClient.create.mock.calls[0][1] as Record<string, unknown>;
+
+    it('stores a new namespace', async () => {
+      const existing = makeAttributes({});
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { namespace: 'prod' });
+
+      expect(writtenAttributes()).toEqual(expect.objectContaining({ namespace: 'prod' }));
+    });
+
+    it('keeps the stored namespace when an update does not mention it', async () => {
+      const existing = makeAttributes({ namespace: 'prod' });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' });
+
+      expect(writtenAttributes()).toEqual(expect.objectContaining({ namespace: 'prod' }));
+    });
+
+    it('removes the namespace when the update clears it with null', async () => {
+      const existing = makeAttributes({ namespace: 'prod', integrationName: 'my-aws' });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { namespace: null });
+
+      // Not stored as null: the saved object schema has no null for it.
+      expect(writtenAttributes()).not.toHaveProperty('namespace');
+      expect(writtenAttributes()).toEqual(expect.objectContaining({ integrationName: 'my-aws' }));
+    });
+  });
+
+  describe('update — dedicatedNamespaceTemplates', () => {
+    const writtenAttributes = () => soClient.create.mock.calls[0][1] as Record<string, unknown>;
+
+    it('stores the switch turned on', async () => {
+      const existing = makeAttributes({});
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        dedicatedNamespaceTemplates: true,
+      });
+
+      expect(writtenAttributes()).toEqual(
+        expect.objectContaining({ dedicatedNamespaceTemplates: true })
+      );
+    });
+
+    it('keeps the stored value when an update does not mention it', async () => {
+      const existing = makeAttributes({ dedicatedNamespaceTemplates: true });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' });
+
+      expect(writtenAttributes()).toEqual(
+        expect.objectContaining({ dedicatedNamespaceTemplates: true })
+      );
+    });
+
+    it('turns the switch off with false', async () => {
+      const existing = makeAttributes({ dedicatedNamespaceTemplates: true });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        dedicatedNamespaceTemplates: false,
+      });
+
+      expect(writtenAttributes()).toEqual(
+        expect.objectContaining({ dedicatedNamespaceTemplates: false })
+      );
+    });
+  });
+
+  describe('update — policySettings', () => {
+    const writtenAttributes = () => soClient.create.mock.calls[0][1] as Record<string, unknown>;
+
+    it('replaces the stored settings, so a setting left out is removed', async () => {
+      const existing = makeAttributes({
+        policySettings: { output_id: 'logstash-1', other: 'x' },
+      });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        policySettings: { output_id: 'kafka-1' },
+      });
+
+      expect(writtenAttributes().policySettings).toEqual({ output_id: 'kafka-1' });
+    });
+
+    it('keeps the stored settings when an update does not mention them', async () => {
+      const existing = makeAttributes({ policySettings: { output_id: 'logstash-1' } });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' });
+
+      expect(writtenAttributes().policySettings).toEqual({ output_id: 'logstash-1' });
+    });
+  });
+
   describe('update — full-replace semantics', () => {
     it('removed serviceVars and policyIdsByInstance keys are absent from the written SO', async () => {
       // Initial record has stale keys that the update intentionally omits.
@@ -278,6 +898,195 @@ describe('cloudOnboardingDeploymentService', () => {
       expect(writtenAttrs?.policyIdsByInstance).not.toHaveProperty('removed_instance');
       expect(writtenAttrs?.serviceVars).toHaveProperty('cloudtrail');
       expect(writtenAttrs?.policyIdsByInstance).toHaveProperty('elb');
+    });
+  });
+
+  describe('update — optimistic concurrency', () => {
+    const conflict = () =>
+      SavedObjectsErrorHelpers.createConflictError(
+        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+        'deploy-1'
+      );
+
+    beforeEach(() => {
+      jest.spyOn(Math, 'random').mockReturnValue(0);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('writes with the version returned by the read', async () => {
+      const attrs = makeAttributes();
+      soClient.get.mockResolvedValue({ ...makeSOResponse('deploy-1', attrs), version: 'v1' });
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', attrs));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+        expect.anything(),
+        expect.objectContaining({ id: 'deploy-1', overwrite: true, version: 'v1' })
+      );
+    });
+
+    it('re-reads and re-applies the update over the fresh document after a conflict', async () => {
+      const stale = makeAttributes({ services: ['cloudtrail'] });
+      const fresh = makeAttributes({
+        services: ['cloudtrail'],
+        deploymentName: 'written-by-other',
+      });
+      soClient.get
+        .mockResolvedValueOnce({ ...makeSOResponse('deploy-1', stale), version: 'v1' })
+        .mockResolvedValueOnce({ ...makeSOResponse('deploy-1', fresh), version: 'v2' });
+      soClient.create
+        .mockRejectedValueOnce(conflict())
+        .mockImplementationOnce(async (_type, attributes) =>
+          makeSOResponse('deploy-1', attributes as CloudOnboardingDeploymentSOAttributes)
+        );
+
+      const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        status: 'deploying',
+      });
+
+      expect(soClient.create).toHaveBeenCalledTimes(2);
+      expect(soClient.create).toHaveBeenLastCalledWith(
+        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+        expect.objectContaining({ status: 'deploying', deploymentName: 'written-by-other' }),
+        expect.objectContaining({ version: 'v2' })
+      );
+      expect(result.status).toBe('deploying');
+      expect(result.deploymentName).toBe('written-by-other');
+    });
+
+    it('still drops stale record keys when retrying after a conflict', async () => {
+      const first = makeAttributes({ policyIdsByInstance: { a: 'p1', b: 'p2' } });
+      const second = makeAttributes({ policyIdsByInstance: { a: 'p1', b: 'p2', c: 'p3' } });
+      soClient.get
+        .mockResolvedValueOnce({ ...makeSOResponse('deploy-1', first), version: 'v1' })
+        .mockResolvedValueOnce({ ...makeSOResponse('deploy-1', second), version: 'v2' });
+      soClient.create
+        .mockRejectedValueOnce(conflict())
+        .mockResolvedValueOnce(makeSOResponse('deploy-1', second));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        policyIdsByInstance: { a: 'p1' },
+      });
+
+      expect(soClient.create.mock.calls[1][1]).toEqual(
+        expect.objectContaining({ policyIdsByInstance: { a: 'p1' } })
+      );
+    });
+
+    it('keeps the user on a retried write and returns when it was updated', async () => {
+      const attrs = makeAttributes({ updatedBy: 'first' });
+      soClient.get.mockResolvedValue({ ...makeSOResponse('deploy-1', attrs), version: 'v1' });
+      soClient.create
+        .mockRejectedValueOnce(conflict())
+        .mockImplementationOnce(async (_type, attributes) => ({
+          ...makeSOResponse('deploy-1', attributes as CloudOnboardingDeploymentSOAttributes),
+          updated_at: '2026-11-02T10:00:00.000Z',
+        }));
+
+      const result = await cloudOnboardingDeploymentService.update(
+        soClient,
+        'deploy-1',
+        { status: 'deploying' },
+        'second'
+      );
+
+      expect(soClient.create.mock.calls[1][1]).toEqual(
+        expect.objectContaining({ updatedBy: 'second' })
+      );
+      expect(result).toEqual(
+        expect.objectContaining({ updatedBy: 'second', updatedAt: '2026-11-02T10:00:00.000Z' })
+      );
+    });
+
+    it('throws the conflict error once attempts are exhausted', async () => {
+      soClient.get.mockResolvedValue({
+        ...makeSOResponse('deploy-1', makeAttributes()),
+        version: 'v1',
+      });
+      soClient.create.mockRejectedValue(conflict());
+
+      await expect(
+        cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' })
+      ).rejects.toThrow(/conflict/i);
+      expect(soClient.create).toHaveBeenCalledTimes(5);
+    });
+
+    it('does not retry non-conflict errors', async () => {
+      soClient.get.mockResolvedValue({
+        ...makeSOResponse('deploy-1', makeAttributes()),
+        version: 'v1',
+      });
+      soClient.create.mockRejectedValue(new Error('boom'));
+
+      await expect(
+        cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' })
+      ).rejects.toThrow('boom');
+      expect(soClient.create).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('instances', () => {
+    const original = {
+      instanceId: 'cloudtrail',
+      serviceId: 'cloudtrail',
+      name: 'AWS CloudTrail',
+      isDuplicate: false,
+    };
+    const duplicate = {
+      instanceId: 'cloudtrail__dup-1',
+      serviceId: 'cloudtrail',
+      name: 'CloudTrail prod',
+      isDuplicate: true,
+    };
+    const writtenAttributes = () =>
+      soClient.create.mock.calls.find((c) => c[2]?.overwrite)?.[1] as
+        | CloudOnboardingDeploymentSOAttributes
+        | undefined;
+
+    it('stores the instances given on create', async () => {
+      const input = {
+        provider: 'aws' as const,
+        mechanisms: ['agent_based' as const],
+        services: ['cloudtrail'],
+        instances: [original, duplicate],
+      };
+      soClient.create.mockResolvedValue(
+        makeSOResponse('deploy-1', makeAttributes({ connectorId: undefined, ...input }))
+      );
+
+      await cloudOnboardingDeploymentService.create(soClient, input);
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+        expect.objectContaining({ instances: [original, duplicate] })
+      );
+    });
+
+    it('replaces the stored instances on update, so a removed duplicate does not linger', async () => {
+      const initialAttrs = makeAttributes({ instances: [original, duplicate] });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', initialAttrs));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', initialAttrs));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        instances: [original],
+      });
+
+      expect(writtenAttributes()?.instances).toEqual([original]);
+    });
+
+    it('keeps the stored instances when an update does not mention them', async () => {
+      const initialAttrs = makeAttributes({ instances: [original, duplicate] });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', initialAttrs));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', initialAttrs));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' });
+
+      expect(writtenAttributes()?.instances).toEqual([original, duplicate]);
     });
   });
 
@@ -341,6 +1150,7 @@ describe('cloudOnboardingDeploymentService', () => {
       it('resets status to pending and increments attemptCount', async () => {
         const retriedAttrs = makeAttributes({ status: 'pending', attemptCount: 2 });
         soClient.get.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
+        soClient.create.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
           status: 'pending',
@@ -360,6 +1170,7 @@ describe('cloudOnboardingDeploymentService', () => {
         const serviceVars = { cloudtrail: { regions: ['us-east-1'] } };
         const retriedAttrs = makeAttributes({ status: 'pending', attemptCount: 2, serviceVars });
         soClient.get.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
+        soClient.create.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
           status: 'pending',
@@ -512,23 +1323,24 @@ describe('cloudOnboardingDeploymentService', () => {
     });
 
     describe('UC6: agent_based + cloudwatch_metrics', () => {
-      it('creates with agent_based mechanism, no packagePolicyIds, no agentPolicyId initially', async () => {
+      it('creates with agent_based mechanism, authMethod, no packagePolicyIds, no agentPolicyIds initially', async () => {
         const attrs = makeAttributes({
           mechanisms: ['agent_based'],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' } },
+          authMethod: 'assume_role',
           packagePolicyIds: undefined,
-          agentPolicyId: undefined,
+          agentPolicyIds: undefined,
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc6', attrs));
         mockGetByType(soClient, 'deploy-uc6', attrs);
 
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
-          connectorId: 'conn-6',
           mechanisms: ['agent_based'],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: { regions: ['us-east-1'], namespace: 'AWS/EC2' } },
+          authMethod: 'assume_role',
         });
 
         expect(soClient.create).toHaveBeenCalledWith(
@@ -537,35 +1349,36 @@ describe('cloudOnboardingDeploymentService', () => {
         );
         expect(result.status).toBe('pending');
         expect(result.mechanisms).toEqual(['agent_based']);
+        expect(result.authMethod).toBe('assume_role');
         expect(result.packagePolicyIds).toBeUndefined();
-        expect(result.agentPolicyId).toBeUndefined();
+        expect(result.agentPolicyIds).toBeUndefined();
       });
 
-      it('stores agentPolicyId after agent policy is selected via update', async () => {
+      it('stores agentPolicyIds after agent policies are selected via update', async () => {
         const updatedAttrs = makeAttributes({
           mechanisms: ['agent_based'],
           services: ['cloudwatch_metrics'],
-          agentPolicyId: 'agent-policy-123',
-          packagePolicyIds: ['pkg-policy-456'],
+          agentPolicyIds: ['agent-policy-123', 'agent-policy-456'],
+          packagePolicyIds: ['pkg-policy-789'],
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc6', updatedAttrs));
         soClient.get.mockResolvedValue(makeSOResponse('deploy-uc6', updatedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-uc6', {
-          agentPolicyId: 'agent-policy-123',
-          packagePolicyIds: ['pkg-policy-456'],
+          agentPolicyIds: ['agent-policy-123', 'agent-policy-456'],
+          packagePolicyIds: ['pkg-policy-789'],
         });
 
         expect(soClient.create).toHaveBeenCalledWith(
           CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
           expect.objectContaining({
-            agentPolicyId: 'agent-policy-123',
-            packagePolicyIds: ['pkg-policy-456'],
+            agentPolicyIds: ['agent-policy-123', 'agent-policy-456'],
+            packagePolicyIds: ['pkg-policy-789'],
           }),
           expect.objectContaining({ id: 'deploy-uc6', overwrite: true })
         );
-        expect(result.agentPolicyId).toBe('agent-policy-123');
-        expect(result.packagePolicyIds).toEqual(['pkg-policy-456']);
+        expect(result.agentPolicyIds).toEqual(['agent-policy-123', 'agent-policy-456']);
+        expect(result.packagePolicyIds).toEqual(['pkg-policy-789']);
       });
     });
   });

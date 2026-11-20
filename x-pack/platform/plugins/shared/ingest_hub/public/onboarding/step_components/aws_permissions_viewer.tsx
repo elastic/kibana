@@ -22,8 +22,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { IamPolicyDocument } from '../../../common/iam_policy_document';
-import type { ServiceIamPermissions } from '../../../common/iam_permissions_api';
+import type { IamPolicyDocument } from '../../../common/providers/aws/iam_policy_document';
+import type { ServiceIamPermissions } from '../../../common/providers/aws/iam_permissions_api';
 
 export const AWS_PERMISSIONS_VIEWER_TEST_SUBJ = 'awsPermissionsViewer';
 export const ALL_SERVICES_OPTION_VALUE = '__all__';

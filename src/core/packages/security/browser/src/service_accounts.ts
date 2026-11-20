@@ -26,10 +26,10 @@ export interface CoreServiceAccountsService {
   canCreate(): boolean;
 
   /**
-   * Create a service account whose privileges are bounded by those of the
-   * current user.
+   * Create a service account with the given roles, bounded by the privileges of the current
+   * user.
    *
-   * @param params The name for the new service account.
+   * @param params The name and roles for the new service account.
    */
   create(params: CreateServiceAccountParams): Promise<ServiceAccount>;
 }

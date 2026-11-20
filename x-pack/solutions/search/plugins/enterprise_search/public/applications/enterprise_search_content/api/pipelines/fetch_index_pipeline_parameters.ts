@@ -17,7 +17,9 @@ export interface FetchIndexPipelineParametersArgs {
 export type FetchIndexPipelineParametersResponse = IngestPipelineParams;
 
 export const fetchIndexPipelineParams = async ({ indexName }: FetchIndexPipelineParametersArgs) => {
-  const route = `/internal/enterprise_search/indices/${indexName}/pipeline_parameters`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(
+    indexName
+  )}/pipeline_parameters`;
 
   return await HttpLogic.values.http.get<FetchIndexPipelineParametersResponse>(route);
 };

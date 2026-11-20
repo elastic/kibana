@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { AttackDiscoveryApiAlert } from '@kbn/discoveries-schemas';
 import { isWorkflowsEnabled } from '@kbn/discoveries/impl/lib/helpers/is_workflows_enabled';
 import { ExecutionStatus, type WorkflowExecutionDto } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import type { DiscoveriesPluginStartDeps } from '../../../../types';
 import { extractPipelineValidationData } from '../../../../routes/get/pipeline_data/helpers/extract_pipeline_validation_data';
@@ -36,18 +36,20 @@ export interface WorkflowExecutionLookup {
   getWorkflowExecution: (
     executionId: string,
     spaceId: string,
-    options?: { includeInput?: boolean; includeOutput?: boolean }
+    options: { includeInput?: boolean; includeOutput?: boolean; request: KibanaRequest }
   ) => Promise<WorkflowExecutionDto | null>;
 }
 
-const inputSchema = z.object({
-  execution_uuid: z
-    .string()
-    .min(1)
-    .describe(
-      `The Attack Discovery generation \`execution_uuid\` returned by the \`security.attack-discovery.run\` workflow step. Use this to check whether a previously-started generation has completed and to retrieve its discoveries.`
-    ),
-});
+const inputSchema = lazySchema(() =>
+  z.object({
+    execution_uuid: z
+      .string()
+      .min(1)
+      .describe(
+        `The Attack Discovery generation \`execution_uuid\` returned by the \`security.attack-discovery.run\` workflow step. Use this to check whether a previously-started generation has completed and to retrieve its discoveries.`
+      ),
+  })
+);
 
 const buildResult = (
   partial: Partial<AttackDiscoveryStatusResult> & { execution_uuid: string }
@@ -95,7 +97,7 @@ export const getAttackDiscoveryStatusTool = ({
   description: `Look up the current status of an Attack Discovery generation by its \`execution_uuid\`. Returns one of \`succeeded\`, \`running\`, \`failed\`, or \`not_found\`. When succeeded, includes the validated \`attack_discoveries\` so the agent can emit insights JSON. When running, includes the current \`phase\` (alert_retrieval, generation, or validation). Use this to resume a slow-path generation that returned only an \`execution_uuid\` because it exceeded the run step's soft deadline, and whenever the user asks about the status of a previously-started generation.`,
   handler: async (args, context) => {
     const { execution_uuid: executionUuid } = args;
-    const { esClient, logger, spaceId } = context;
+    const { esClient, logger, spaceId, request } = context;
 
     try {
       // Kill-switch backstop: even though the skill is not registered when the
@@ -150,7 +152,7 @@ export const getAttackDiscoveryStatusTool = ({
         const validationExecution = await workflowExecutionLookup.getWorkflowExecution(
           tracking.validation.workflowRunId,
           spaceId,
-          { includeOutput: true }
+          { includeOutput: true, request }
         );
 
         if (validationExecution == null) {
@@ -223,7 +225,8 @@ export const getAttackDiscoveryStatusTool = ({
       if (tracking.generation != null) {
         const generationExecution = await workflowExecutionLookup.getWorkflowExecution(
           tracking.generation.workflowRunId,
-          spaceId
+          spaceId,
+          { request }
         );
 
         if (generationExecution != null && isFailedStatus(generationExecution.status)) {

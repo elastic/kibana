@@ -7,14 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getConfiguration } from '@kbn/apm-config-loader';
+import { getConfiguration, getKibanaName } from '@kbn/apm-config-loader';
 import { resources } from '@elastic/opentelemetry-node/sdk';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
 import {
   ATTR_SERVICE_INSTANCE_ID,
   ATTR_DEPLOYMENT_ENVIRONMENT_NAME,
+  ATTR_PROCESS_COMMAND_ARGS,
 } from '@opentelemetry/semantic-conventions/incubating';
 
+/**
+ * We are not interested in the CLI arguments, so this omits `process.command_args` and keeps only a count.
+ */
+const processDetector: resources.ResourceDetector = {
+  detect(config) {
+    const detected = resources.processDetector.detect(config);
+    const { [ATTR_PROCESS_COMMAND_ARGS]: commandArgs, ...attributes } = detected.attributes || {};
+    if (Array.isArray(commandArgs)) {
+      attributes['process.args_count'] = commandArgs.length;
+    }
+    return { attributes };
+  },
+};
 /**
  * Unified function to build the OpenTelemetry resource for all services.
  * @param serviceName The service name used to look up APM config (defaults to 'kibana').
@@ -27,7 +41,7 @@ export function buildOtelResources(serviceName: string = 'kibana') {
         resources.envDetector,
         resources.hostDetector,
         resources.osDetector,
-        resources.processDetector,
+        processDetector,
       ],
     })
     .merge(resources.resourceFromAttributes(deriveAttributesFromApmConfig(serviceName)));
@@ -43,6 +57,11 @@ export function buildOtelResources(serviceName: string = 'kibana') {
 const deriveAttributesFromApmConfig = (serviceName: string): Record<string, string> => {
   // telemetry.sdk.language is always known for this Node.js process.
   const attrs: Record<string, string> = { 'telemetry.sdk.language': 'nodejs' };
+
+  const kibanaName = getKibanaName();
+  if (kibanaName) {
+    attrs['kibana.name'] = kibanaName;
+  }
 
   // TODO: Since we are deprecating `elastic.apm.*` settings, we should provide a way to set these attributes in the `telemetry.*` config.
   const apmConfig = getConfiguration(serviceName);

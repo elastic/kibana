@@ -14,7 +14,7 @@ export const CONNECTOR_NAME = i18n.translate('connectors.jiraServiceManagement.t
 });
 
 export const MESSAGE_NON_EMPTY = i18n.translate(
-  'xpack.stackConnectors.jiraServiceManagement.nonEmptyMessageField',
+  'connectors.jiraServiceManagement.nonEmptyMessageField',
   {
     defaultMessage: 'must be populated with a value other than just whitespace',
   }

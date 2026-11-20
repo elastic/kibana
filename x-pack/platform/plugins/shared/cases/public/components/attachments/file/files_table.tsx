@@ -9,8 +9,19 @@ import React, { useCallback, useState } from 'react';
 import type { Pagination, EuiBasicTableProps } from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import { EuiBasicTable, EuiSkeletonText, EuiSpacer, EuiText, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiText,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
+import type { AttachmentRemovalOptions } from '../../../client/attachment_framework/types';
+import { RemoveSelectedAttachments } from '../common/remove_selected_attachments';
+import { useAttachmentSelection } from '../common/use_attachment_selection';
 import * as i18n from './translations';
 import { useFilesTableColumns } from './use_files_table_columns';
 import { FilePreview } from './file_preview';
@@ -34,10 +45,33 @@ interface FilesTableProps {
   items: FileJSON[];
   onChange: EuiBasicTableProps<FileJSON>['onChange'];
   pagination: Pagination;
+  onRemove?: (fileIds: string[], options?: AttachmentRemovalOptions) => void;
+  isRemoving?: boolean;
 }
 
-export const FilesTable = ({ caseId, items, pagination, onChange, isLoading }: FilesTableProps) => {
+const getFileId = ({ id }: FileJSON): string => id;
+
+export const FilesTable = ({
+  caseId,
+  items,
+  pagination,
+  onChange,
+  isLoading,
+  onRemove,
+  isRemoving,
+}: FilesTableProps) => {
   const { isPreviewVisible, showPreview, closePreview } = useFilePreview();
+
+  const { selection, selectedIds, clearSelection } = useAttachmentSelection({
+    items,
+    getId: getFileId,
+    enabled: onRemove != null,
+  });
+
+  const onRemoveSelected = useCallback(
+    () => onRemove?.(selectedIds, { onSuccess: clearSelection }),
+    [onRemove, selectedIds, clearSelection]
+  );
 
   const [selectedFile, setSelectedFile] = useState<FileJSON>();
 
@@ -63,16 +97,27 @@ export const FilesTable = ({ caseId, items, pagination, onChange, isLoading }: F
   ) : (
     <>
       {pagination.totalItemCount > 0 && (
-        <>
-          <EuiText size="xs" color="subdued" data-test-subj="cases-files-table-results-count">
-            {i18n.SHOWING_FILES(items.length)}
-          </EuiText>
-        </>
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued" data-test-subj="cases-files-table-results-count">
+              {i18n.SHOWING_FILES(items.length)}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <RemoveSelectedAttachments
+              count={selectedIds.length}
+              onRemove={onRemoveSelected}
+              isRemoving={isRemoving}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
       <EuiSpacer size="s" />
       <EuiBasicTable
         tableCaption={i18n.FILES_TABLE}
         items={items}
+        itemId="id"
+        selection={selection}
         rowHeader="name"
         columns={columns}
         pagination={pagination}

@@ -8,9 +8,15 @@
  */
 
 import { stringify } from 'yaml';
-import { z } from '@kbn/zod/v4';
-import { getWorkflowJsonSchema } from './get_workflow_json_schema';
+import { isoDateTime, z } from '@kbn/zod/v4';
+import { generateYamlSchemaFromConnectors } from './generate_yaml_schema_from_connectors';
+import {
+  getWorkflowJsonSchema,
+  guardStepUnionAlternativesByType,
+} from './get_workflow_json_schema';
 import { getValidateWithYamlLsp } from './test_utils/validate_with_yaml_lsp';
+import { getOrResolveObject } from '../../common/utils';
+import { getKibanaConnectors } from '../kibana';
 
 describe('getWorkflowJsonSchema', () => {
   it('should set `additionalProperties: {}` for loose objects', () => {
@@ -83,12 +89,41 @@ describe('getWorkflowJsonSchema', () => {
               id: expect.any(Object),
               policyId: expect.any(Object),
               groupKey: expect.any(Object),
-              episodes: expect.any(Object),
+              alerts: expect.any(Object),
             }),
+          }),
+          securityAlertAnalysisCallerAlerts: expect.objectContaining({
+            type: 'array',
+            maxItems: 1000,
           }),
         },
       },
     });
+  });
+});
+
+describe('guardStepUnionAlternativesByType', () => {
+  it('guards each step union alternative with an `if` on its `type` literal', () => {
+    const jsonSchema = getWorkflowJsonSchema(
+      generateYamlSchemaFromConnectors(getKibanaConnectors())
+    );
+    if (!jsonSchema) {
+      throw new Error('Expected a workflow JSON schema');
+    }
+    guardStepUnionAlternativesByType(jsonSchema);
+
+    const steps = jsonSchema.properties?.steps as z.core.JSONSchema.JSONSchema;
+    const stepUnion = getOrResolveObject<z.core.JSONSchema.JSONSchema>(steps.items, jsonSchema);
+    const alternatives = stepUnion?.oneOf ?? [];
+
+    expect(alternatives.length).toBeGreaterThan(1);
+    expect(alternatives).toEqual(
+      alternatives.map(() => ({
+        if: { properties: { type: { const: expect.any(String) } }, required: ['type'] },
+        then: expect.anything(),
+        else: false,
+      }))
+    );
   });
 });
 
@@ -188,6 +223,33 @@ describe('fixAdditionalPropertiesInSchema', () => {
         expect(isBrokenRef).toBe(false);
       }
     });
+  });
+});
+
+describe('isoDateTime fields', () => {
+  it('keeps date-time format and a pattern that enforces the datetime contract', () => {
+    const jsonSchema = getWorkflowJsonSchema(
+      z.object({
+        at: isoDateTime(),
+        atOffset: isoDateTime({ offset: true }),
+      })
+    );
+    const dateTimeField = { format: 'date-time', pattern: expect.any(String) };
+    expect(jsonSchema).toMatchObject({
+      properties: { at: dateTimeField, atOffset: dateTimeField },
+    });
+    const { at, atOffset } = (
+      jsonSchema as { properties: Record<'at' | 'atOffset', { pattern: string }> }
+    ).properties;
+
+    const atPattern = new RegExp(at.pattern);
+    expect(atPattern.test('2024-02-30T10:00Z')).toBe(false);
+    expect(atPattern.test('2024-01-01T10:00+02:00')).toBe(false);
+    expect(atPattern.test('2024-01-01T10:00Z')).toBe(true);
+
+    const offsetPattern = new RegExp(atOffset.pattern);
+    expect(offsetPattern.test('2024-02-30T10:00Z')).toBe(false);
+    expect(offsetPattern.test('2024-01-01T10:00Z')).toBe(true);
   });
 });
 

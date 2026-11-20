@@ -53,6 +53,24 @@ describe('useUncommonProcesses', () => {
     expect(mockSearch).toHaveBeenCalled();
   });
 
+  it('labels the search with the hosts page execution context', () => {
+    renderHook(() => useUncommonProcesses(props), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockUseSearchStrategy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-hosts_page',
+            id: 'uncommon_processes',
+          },
+        },
+      })
+    );
+  });
+
   it('does not run search when skip = true', () => {
     const localProps = {
       ...props,

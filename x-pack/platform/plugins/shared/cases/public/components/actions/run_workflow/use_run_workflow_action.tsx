@@ -48,9 +48,9 @@ export const useRunWorkflowAction = ({
     openModal,
     closeModal,
     runWorkflow,
+    telemetry,
     filterWorkflow,
     sortWorkflow,
-    showSuccessToast,
   } = useRunCasesWorkflow();
 
   const handleOpen = useCallback(
@@ -86,19 +86,11 @@ export const useRunWorkflowAction = ({
       runWorkflow,
       filterWorkflow,
       sortWorkflow,
-      showSuccessToast,
       onClose: closeModal,
       onExecutionSettled: onActionSuccess,
+      telemetry,
     }),
-    [
-      inputs,
-      runWorkflow,
-      filterWorkflow,
-      sortWorkflow,
-      showSuccessToast,
-      closeModal,
-      onActionSuccess,
-    ]
+    [inputs, runWorkflow, filterWorkflow, sortWorkflow, closeModal, onActionSuccess, telemetry]
   );
 
   return {

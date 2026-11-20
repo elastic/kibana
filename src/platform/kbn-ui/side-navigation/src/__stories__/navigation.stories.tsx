@@ -9,9 +9,10 @@
 
 import React, { useState } from 'react';
 import type { ComponentProps } from 'react';
-import { EuiSkipLink, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiSkipLink, useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import type { Meta, StoryFn, StoryObj } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import {
   APP_MAIN_SCROLL_CONTAINER_ID,
   ChromeLayout,
@@ -24,6 +25,7 @@ import { PRIMARY_MENU_FOOTER_ITEMS, PRIMARY_MENU_ITEMS } from '../mocks/observab
 import { Navigation } from '../components/navigation';
 import { usePreventLinkNavigation } from '../hooks/use_prevent_link_navigation';
 import { NAVIGATION_ROOT_SELECTOR, NAVIGATION_SELECTOR_PREFIX } from '../constants';
+import type { MenuItem } from '../../types';
 
 const styles = ({ euiTheme }: UseEuiTheme) => {
   const sidePanelClassName = `${NAVIGATION_SELECTOR_PREFIX}-sidePanel`;
@@ -50,6 +52,13 @@ const PreventLinkNavigation = (Story: StoryFn) => {
 
   return <Story />;
 };
+
+const FullHeightNavigation = (Story: StoryFn) => (
+  <>
+    <Global styles={styles} />
+    <Story />
+  </>
+);
 
 export default {
   title: 'Chrome/Navigation',
@@ -132,13 +141,13 @@ export const WithManyItems: StoryObj<PropsAndArgs> = {
         {
           id: 'extra_item_2',
           label: 'Extra Item 2',
-          iconType: 'stats',
+          iconType: 'chartLine',
           href: '/extra-2',
         },
         {
           id: 'extra_item_3',
           label: 'Extra Item 3',
-          iconType: 'help',
+          iconType: 'question',
           href: '/extra-3',
         },
       ],
@@ -262,6 +271,19 @@ export const WithLongSecondaryItemLabels: StoryObj<PropsAndArgs> = {
                   href: '/dashboards/long-alone',
                 },
                 {
+                  id: 'long-external',
+                  label: longLabel,
+                  href: '/dashboards/long-external',
+                  isExternal: true,
+                },
+                {
+                  id: 'long-external-beta',
+                  label: longLabel,
+                  href: '/dashboards/long-external-beta',
+                  isExternal: true,
+                  badgeType: 'beta',
+                },
+                {
                   id: 'short-new',
                   label: 'Overview',
                   href: '/dashboards/short-new',
@@ -277,6 +299,12 @@ export const WithLongSecondaryItemLabels: StoryObj<PropsAndArgs> = {
                   id: 'short-alone',
                   label: 'Alerts',
                   href: '/dashboards/short-alone',
+                },
+                {
+                  id: 'short-external',
+                  label: 'Traces',
+                  href: '/dashboards/short-external',
+                  isExternal: true,
                 },
               ],
             },
@@ -331,6 +359,222 @@ export const WithLongSecondaryItemLabels: StoryObj<PropsAndArgs> = {
         },
       ],
     },
+  },
+  render: (args) => <ControlledNavigation {...args} />,
+};
+
+export const WithLongPopoverItemLabels: StoryObj<PropsAndArgs> = {
+  ...WithLongSecondaryItemLabels,
+  name: 'Navigation with Long Popover Item Labels',
+  args: { ...WithLongSecondaryItemLabels.args, isCollapsed: true },
+};
+
+// Mirrors a user who hid most items: the More menu overflows the popover max height,
+// and Customize navigation stays pinned below the scrolling list.
+export const WithCustomizeNavigation: StoryObj<PropsAndArgs> = {
+  name: 'Navigation with Customize Navigation',
+  decorators: [
+    (Story) => {
+      return (
+        <>
+          <Global styles={styles} />
+          <Story />
+        </>
+      );
+    },
+  ],
+  args: {
+    items: {
+      primaryItems: PRIMARY_MENU_ITEMS.slice(0, 1),
+      footerItems: PRIMARY_MENU_FOOTER_ITEMS,
+      overflowItems: [
+        ...PRIMARY_MENU_ITEMS.slice(1),
+        ...Array.from({ length: 12 }, (_, index) => ({
+          id: `hidden_item_${index + 1}`,
+          label: `Hidden Item ${index + 1}`,
+          iconType: 'empty',
+          href: `/hidden-${index + 1}`,
+        })),
+      ],
+    },
+    onCustomizeNavigation: action('onCustomizeNavigation'),
+  },
+  render: (args) => <ControlledNavigation {...args} />,
+};
+
+const scrollableSecondaryItem = {
+  id: 'scrollable-secondary',
+  label: 'Dashboards',
+  iconType: 'dashboardApp',
+  href: '/scrollable-secondary',
+  sections: ['Recently viewed', 'Favorites', 'Shared with me'].map(
+    (sectionLabel, sectionIndex) => ({
+      id: `scrollable-section-${sectionIndex + 1}`,
+      label: sectionLabel,
+      items: Array.from({ length: 15 }, (_, itemIndex) => ({
+        id: `scrollable-section-${sectionIndex + 1}-item-${itemIndex + 1}`,
+        label: `${sectionLabel} dashboard ${itemIndex + 1}`,
+        href: `/scrollable-secondary/${sectionIndex + 1}/${itemIndex + 1}`,
+      })),
+    })
+  ),
+};
+
+const primaryItemsWithScrollableSecondary = [
+  scrollableSecondaryItem,
+  ...PRIMARY_MENU_ITEMS.filter((item) => item.id !== 'dashboards'),
+];
+
+// The secondary menu overflows the side panel (expanded) and the popover (collapsed)
+export const WithScrollableSecondaryMenu: StoryObj<PropsAndArgs> = {
+  name: 'Navigation with Scrollable Secondary Menu',
+  decorators: [FullHeightNavigation],
+  args: {
+    activeItemId: 'scrollable-section-1-item-1',
+    items: {
+      primaryItems: primaryItemsWithScrollableSecondary,
+      footerItems: PRIMARY_MENU_FOOTER_ITEMS,
+      overflowItems: [],
+    },
+  },
+  render: (args) => <ControlledNavigation {...args} />,
+};
+
+const dashboardTitles = (prefix: string, count: number) =>
+  Array.from({ length: count }, (_, index) => ({
+    id: `${prefix}-${index + 1}`,
+    label: `${prefix === 'starred' ? 'Starred' : 'Recent'} dashboard ${index + 1}`,
+    href: `/dashboards/${prefix}/${index + 1}`,
+  }));
+
+const supplementaryListsItem = {
+  id: 'supplementary-lists',
+  label: 'Dashboards',
+  iconType: 'dashboardApp',
+  href: '/dashboards',
+  supplementarySections: [
+    { id: 'starred', label: 'Starred', isPaginated: true, items: dashboardTitles('starred', 3) },
+    {
+      id: 'recentlyViewed',
+      label: 'Recently viewed',
+      isPaginated: true,
+      items: dashboardTitles('recent', 20),
+    },
+  ],
+} satisfies MenuItem;
+
+const primaryItemsWithSupplementaryLists = PRIMARY_MENU_ITEMS.flatMap((item) => {
+  if (item.id === 'dashboards') return [];
+  if (item.id === 'streams') return [supplementaryListsItem, item];
+  return [item];
+});
+
+// Supplementary lists with `isPaginated` page behind "Show more": 5, then 10 more per click.
+export const WithSupplementarySectionsOnPlainLink: StoryObj<PropsAndArgs> = {
+  name: 'Navigation with Supplementary Sections on a Plain Link',
+  decorators: [FullHeightNavigation],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A plain link has no structural sections, so its supplementary sections appear in the hover popover without opening a side panel. Reduce the viewport height to move Dashboards into More, where supplementary sections are not rendered.',
+      },
+    },
+  },
+  args: {
+    activeItemId: supplementaryListsItem.id,
+    items: {
+      primaryItems: primaryItemsWithSupplementaryLists,
+      footerItems: PRIMARY_MENU_FOOTER_ITEMS,
+      overflowItems: [],
+    },
+  },
+  render: (args) => <ControlledNavigation {...args} />,
+};
+
+const supplementaryPanelItem = {
+  id: 'resources',
+  label: 'Resources',
+  iconType: 'folderOpen',
+  href: '/resources/overview',
+  sections: [
+    {
+      id: 'resource-navigation',
+      label: 'Navigation',
+      items: [
+        { id: 'resources-overview', label: 'Overview', href: '/resources/overview' },
+        { id: 'resources-activity', label: 'Activity', href: '/resources/activity' },
+        { id: 'resources-templates', label: 'Templates', href: '/resources/templates' },
+      ],
+    },
+    {
+      id: 'resource-management',
+      label: 'Management',
+      items: [
+        { id: 'resources-settings', label: 'Settings', href: '/resources/settings' },
+        { id: 'resources-access', label: 'Access control', href: '/resources/access' },
+      ],
+    },
+  ],
+  supplementarySections: [
+    {
+      id: 'favorite-resources',
+      label: 'Favorites',
+      isPaginated: true,
+      items: Array.from({ length: 8 }, (_, index) => ({
+        id: `favorite-resource-${index + 1}`,
+        label: `Favorite resource ${index + 1}`,
+        href: `/resources/favorites/${index + 1}`,
+      })),
+    },
+    {
+      id: 'recent-resources',
+      label: 'Recently viewed',
+      isPaginated: true,
+      items: Array.from({ length: 20 }, (_, index) => ({
+        id: `recent-resource-${index + 1}`,
+        label: `Resource ${index + 1}`,
+        href: `/resources/${index + 1}`,
+      })),
+    },
+  ],
+} satisfies MenuItem;
+
+const GlobalSidePanelFooter = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      css={css`
+        padding: ${euiTheme.size.m};
+      `}
+    >
+      <EuiButton fill fullWidth iconType="controls" size="s">
+        Global side panel action
+      </EuiButton>
+    </div>
+  );
+};
+
+export const WithSupplementarySectionsInSidePanel: StoryObj<PropsAndArgs> = {
+  name: 'Navigation with Supplementary Sections in a Side Panel',
+  decorators: [FullHeightNavigation],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A panel opener renders regular navigation sections first, followed by two independently paginated supplementary sections. The fixed footer comes from the Navigation-level `sidePanelFooter` prop, is shared by every side panel, and is not part of the supplementary sections. Collapse the navigation to see the sections composed in its hover popover.',
+      },
+    },
+  },
+  args: {
+    activeItemId: 'resources-overview',
+    items: {
+      primaryItems: [supplementaryPanelItem, ...PRIMARY_MENU_ITEMS.slice(1)],
+      footerItems: PRIMARY_MENU_FOOTER_ITEMS,
+      overflowItems: [],
+    },
+    sidePanelFooter: <GlobalSidePanelFooter />,
   },
   render: (args) => <ControlledNavigation {...args} />,
 };

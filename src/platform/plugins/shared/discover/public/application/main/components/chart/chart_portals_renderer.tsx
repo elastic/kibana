@@ -30,6 +30,7 @@ import {
   type RuntimeStateManager,
   RuntimeStateProvider,
   selectTabRuntimeState,
+  setTabChartBreakdownFieldNames,
   internalStateActions,
   useInternalStateSelector,
   useInternalStateDispatch,
@@ -106,7 +107,7 @@ const UnifiedHistogramGuard = ({
     currentTabRuntimeState.scopedProfilesManager$
   );
   const currentScopedEbtManager = useRuntimeState(currentTabRuntimeState.scopedEbtManager$);
-  const currentDataView = useRuntimeState(currentTabRuntimeState.currentDataView$);
+  const currentDataSource = useRuntimeState(currentTabRuntimeState.currentDataSource$);
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
   const isInitialized = useRef(false);
 
@@ -114,7 +115,7 @@ const UnifiedHistogramGuard = ({
     (!isSelected && !isInitialized.current) ||
     !currentCustomizationService ||
     !currentDataStateContainer ||
-    !currentDataView
+    !currentDataSource
   ) {
     return null;
   }
@@ -124,7 +125,7 @@ const UnifiedHistogramGuard = ({
   return (
     <CurrentTabProvider currentTabId={tabId}>
       <DiscoverCustomizationProvider value={currentCustomizationService}>
-        <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
+        <RuntimeStateProvider currentDataSource={currentDataSource} adHocDataViews={adHocDataViews}>
           <ScopedServicesProvider
             scopedProfilesManager={currentScopedProfilesManager}
             scopedEBTManager={currentScopedEbtManager}
@@ -245,6 +246,13 @@ const CustomChartSectionWrapper = ({
     setUnifiedHistogramApi(api);
   }, [setUnifiedHistogramApi, api]);
 
+  const runtimeStateManager = useRuntimeStateManager();
+  const setBreakdownFieldNames = useCallback(
+    (fieldNames: string[] | undefined) =>
+      setTabChartBreakdownFieldNames(runtimeStateManager, currentTabId, fieldNames),
+    [runtimeStateManager, currentTabId]
+  );
+
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
     () => ({
       onTopPanelHeightChange: stateProps.onTopPanelHeightChange,
@@ -294,6 +302,7 @@ const CustomChartSectionWrapper = ({
         isTabSelected,
         ...unifiedHistogramProps,
         setLensRequestAdapter: api.setLensRequestAdapter,
+        setBreakdownFieldNames,
         initialState: metricsGridState,
         onInitialStateChange,
       })}

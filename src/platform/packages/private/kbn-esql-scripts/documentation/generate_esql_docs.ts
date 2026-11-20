@@ -17,6 +17,7 @@ import { functionDefinitions } from '@elastic/esql-definitions/functions';
 import { operatorDefinitions } from '@elastic/esql-definitions/operators';
 import { functionDocs } from '@elastic/esql-definitions/function-docs';
 import { operatorDocs } from '@elastic/esql-definitions/operator-docs';
+import type { GeneratedFile } from '../lib/generated_file';
 import { OUTPUT_DIR } from './constants';
 
 interface DocsSectionContent {
@@ -25,25 +26,22 @@ interface DocsSectionContent {
   license: MultipleLicenseInfo | undefined;
 }
 
-(function () {
-  try {
-    const functionTypes = [
-      { fnType: 'scalar', outputFile: 'scalar_functions.tsx' },
-      { fnType: 'agg', outputFile: 'aggregation_functions.tsx' },
-      { fnType: 'time_series_agg', outputFile: 'timeseries_aggregation_functions.tsx' },
-      { fnType: 'grouping', outputFile: 'grouping_functions.tsx' },
-      { fnType: 'operator', outputFile: 'operators.tsx' },
-    ];
+const FUNCTION_TYPES = [
+  { fnType: 'scalar', outputFile: 'scalar_functions.tsx' },
+  { fnType: 'agg', outputFile: 'aggregation_functions.tsx' },
+  { fnType: 'time_series_agg', outputFile: 'timeseries_aggregation_functions.tsx' },
+  { fnType: 'grouping', outputFile: 'grouping_functions.tsx' },
+  { fnType: 'operator', outputFile: 'operators.tsx' },
+] as const;
 
-    for (const { fnType, outputFile } of functionTypes) {
-      const docs = loadFunctionDocs(fnType);
-      writeFunctionDocs(docs, path.join(OUTPUT_DIR, outputFile));
-    }
-  } catch (error) {
-    process.stderr.write(`${error.stack ?? error.message}\n`);
-    process.exit(1);
-  }
-})();
+/**
+ * Renders the inline function and operator documentation consumed by `@kbn/language-documentation`.
+ * Each output file is also its own template: only its `items` array is regenerated.
+ */
+export const renderFunctionDocs = (): GeneratedFile[] =>
+  FUNCTION_TYPES.map(({ fnType, outputFile }) =>
+    renderFunctionDocsFile(loadFunctionDocs(fnType), path.join(OUTPUT_DIR, outputFile))
+  );
 
 function loadFunctionDocs(fnType: string): Map<string, DocsSectionContent> {
   const docs = new Map<string, DocsSectionContent>();
@@ -81,7 +79,10 @@ function loadFunctionDocs(fnType: string): Map<string, DocsSectionContent> {
   return docs;
 }
 
-function writeFunctionDocs(docsMap: Map<string, DocsSectionContent>, pathToDocsFile: string) {
+function renderFunctionDocsFile(
+  docsMap: Map<string, DocsSectionContent>,
+  pathToDocsFile: string
+): GeneratedFile {
   const codeStrings = Array.from(docsMap.entries()).map(([name, doc]) => {
     const defaultMessage = doc.description.replaceAll('`', '\\`').replace(/(\{[^}]*\})/g, "'$1'");
     return `
@@ -120,9 +121,7 @@ function writeFunctionDocs(docsMap: Map<string, DocsSectionContent>, pathToDocsF
     (codeString) => recast.parse(codeString).program.body[0].declarations[0].init
   );
 
-  const newFileContents = recast.print(ast);
-
-  fs.writeFileSync(pathToDocsFile, newFileContents.code);
+  return { path: pathToDocsFile, content: recast.print(ast).code };
 }
 
 /**

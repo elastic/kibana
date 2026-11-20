@@ -42,6 +42,30 @@ const toHistorySnapshotDateHour = (historySnapshotDate: Date): string => {
   return `${y}-${m}-${d}-${h}`;
 };
 
+/** Matches `.YYYY-MM-DD-HH` at the end of a history snapshot index name. */
+const HISTORY_SNAPSHOT_DATE_SUFFIX_RE = /\.(\d{4}-\d{2}-\d{2})-\d{2}$/;
+
+/**
+ * Returns the UTC calendar date (`YYYY-MM-DD`) encoded in a history snapshot index name.
+ * The hour suffix is ignored so retention can be applied at day fidelity.
+ */
+export const parseHistorySnapshotIndexDate = (indexName: string): string | undefined => {
+  const date = indexName.match(HISTORY_SNAPSHOT_DATE_SUFFIX_RE)?.[1];
+  if (!date) {
+    return undefined;
+  }
+  const [year, month, day] = date.split('-').map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+  if (
+    parsed.getUTCFullYear() !== year ||
+    parsed.getUTCMonth() !== month - 1 ||
+    parsed.getUTCDate() !== day
+  ) {
+    return undefined;
+  }
+  return date;
+};
+
 /**
  * Returns the history snapshot index name for a given namespace and date (with hour).
  * Format: .entities.v2.history.<namespace>.<YYYY-MM-DD>-<HH>

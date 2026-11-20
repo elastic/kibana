@@ -130,7 +130,7 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
       <EuiSpacer size="m" />
       <CasesContext owner={[]} permissions={casesPermissions!}>
         {jobsWithTimeRange.length === 0 ? (
-          <AnomalyDetectionEmptyState showDocsLink iconSize="m" />
+          <AnomalyDetectionEmptyState showDocsLink centered />
         ) : (
           <Explorer
             {...{

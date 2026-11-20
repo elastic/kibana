@@ -92,8 +92,58 @@ describe('cleanupAgentBasedPolicies', () => {
       currentPolicyIdsByInstance: {},
       selectedAgentPolicyIds: [],
     });
-    expect(mockDeletePackagePolicy).toHaveBeenCalledWith({ packagePolicyIds: ['policy-1'] });
-    expect(mockDeletePackagePolicy).toHaveBeenCalledWith({ packagePolicyIds: ['policy-2'] });
+    expect(mockDeletePackagePolicy).toHaveBeenCalledWith(
+      { packagePolicyIds: ['policy-1'] },
+      undefined
+    );
+    expect(mockDeletePackagePolicy).toHaveBeenCalledWith(
+      { packagePolicyIds: ['policy-2'] },
+      undefined
+    );
+  });
+
+  it('passes the onboarding deployment id so Fleet lets the flow delete the policies it manages', async () => {
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: {},
+      selectedAgentPolicyIds: [],
+      onboardingDeploymentId: 'deploy-1',
+    });
+    expect(mockDeletePackagePolicy).toHaveBeenCalledWith(
+      { packagePolicyIds: ['policy-1'] },
+      { onboarding_deployment_id: 'deploy-1' }
+    );
+  });
+
+  it.each([
+    ['an HTTP error', { error: new Error('Fleet 400') }],
+    [
+      'a failed delete in the response body',
+      { data: [{ id: 'policy-1', success: false, statusCode: 400, body: { message: 'no' } }] },
+    ],
+  ])('does not count a delete that resolves with %s as succeeded', async (_, response) => {
+    mockDeletePackagePolicy.mockResolvedValue(response);
+    const ops = await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: {},
+      selectedAgentPolicyIds: [],
+    });
+    expect(ops.toDelete).not.toContain('policy-1');
+  });
+
+  it('counts a delete of a policy that is already gone as succeeded', async () => {
+    mockDeletePackagePolicy.mockResolvedValue({
+      data: [{ id: 'policy-1', success: false, statusCode: 404, body: { message: 'not found' } }],
+    });
+    const ops = await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: {},
+      selectedAgentPolicyIds: [],
+    });
+    expect(ops.toDelete).toContain('policy-1');
   });
 
   it('swallows individual delete failures — does not reject the whole call', async () => {
@@ -178,10 +228,250 @@ describe('updateAgentBasedPolicy — payload shape', () => {
     });
     const payload = mockUpdatePackagePolicy.mock.calls[0][1];
     expect(payload.package).toEqual({ name: 'aws', version: '2.5.0' });
+    expect(mockUpdatePackagePolicy.mock.calls[0][2]).toEqual({ query: undefined });
     // Preserves existing policy's namespace (fetched via sendGetOnePackagePolicy).
     expect(payload.namespace).toBe('existing-ns');
     expect(payload.name).toBe('existing-policy-name');
     expect(payload.policy_ids).toEqual(['agent-policy-1', 'agent-policy-2']);
+  });
+
+  it('passes the onboarding deployment id so Fleet lets the flow update the policies it manages', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: [],
+      onboardingDeploymentId: 'deploy-1',
+    });
+    expect(mockUpdatePackagePolicy.mock.calls[0][2]).toEqual({
+      query: { onboarding_deployment_id: 'deploy-1' },
+    });
+  });
+
+  it('sends the namespace the instances now deploy into over the existing one', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      globalNamespace: 'prod',
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: ['agent-policy-1'],
+    });
+    expect(mockUpdatePackagePolicy.mock.calls[0][1].namespace).toBe('prod');
+  });
+
+  describe('output', () => {
+    const updateWithOutput = async (outputId: string | undefined) => {
+      mockGetPackageInfo.mockResolvedValue({
+        data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+      });
+      await cleanupAgentBasedPolicies({
+        ...BASE_OPTS,
+        policySettings: outputId === undefined ? {} : { output_id: outputId },
+        instances: [instance],
+        servicesMap: new Map([['vpcflow', vpcflow]]),
+        pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+        currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+        selectedAgentPolicyIds: ['agent-policy-1'],
+      });
+      return mockUpdatePackagePolicy.mock.calls[0][1];
+    };
+
+    it('sends the chosen output', async () => {
+      expect((await updateWithOutput('logstash-1')).output_id).toBe('logstash-1');
+    });
+
+    it('clears an override when the inherited output is chosen', async () => {
+      expect((await updateWithOutput('')).output_id).toBeNull();
+    });
+
+    it('leaves the policy output as it is when none was ever chosen', async () => {
+      expect(await updateWithOutput(undefined)).not.toHaveProperty('output_id');
+    });
+  });
+
+  describe('proxy URL', () => {
+    const updateWithProxy = async (proxyUrl: string | undefined) => {
+      mockGetPackageInfo.mockResolvedValue({
+        data: {
+          item: { version: '2.5.0', vars: [{ name: 'proxy_url' }], policy_templates: [] },
+        },
+      });
+      mockGetOnePackagePolicy.mockResolvedValue({
+        data: {
+          item: {
+            name: 'existing-policy-name',
+            namespace: 'existing-ns',
+            package: { version: '2.5.0' },
+            vars: { proxy_url: { value: 'http://old:3128' } },
+          },
+        },
+      });
+      await cleanupAgentBasedPolicies({
+        ...BASE_OPTS,
+        policySettings: proxyUrl === undefined ? {} : { proxy_url: proxyUrl },
+        instances: [instance],
+        servicesMap: new Map([['vpcflow', vpcflow]]),
+        pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+        currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+        selectedAgentPolicyIds: ['agent-policy-1'],
+      });
+      return mockUpdatePackagePolicy.mock.calls[0][1];
+    };
+
+    it('sends the new proxy over the one the policy has', async () => {
+      expect((await updateWithProxy('http://new:3128')).vars.proxy_url).toBe('http://new:3128');
+    });
+
+    it('clears the proxy with null, over the existing var that is merged in', async () => {
+      expect((await updateWithProxy('')).vars.proxy_url).toBeNull();
+    });
+
+    it('keeps the proxy of the policy when none was ever set', async () => {
+      expect((await updateWithProxy(undefined)).vars.proxy_url).toBe('http://old:3128');
+    });
+  });
+
+  it('prefers a duplicate’s own namespace over the global one', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    const duplicate = { ...makeInstance('vpcflow__dup-1', 'vpcflow'), isDuplicate: true };
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      globalNamespace: 'prod',
+      storedServiceVars: {
+        'vpcflow__dup-1': {
+          enabledDataStreams: ['vpcflow'],
+          varsByDataStream: {},
+          namespace: 'staging',
+        },
+      },
+      instances: [duplicate],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'vpcflow__dup-1': 'policy-1' },
+      selectedAgentPolicyIds: ['agent-policy-1'],
+    });
+    expect(mockUpdatePackagePolicy.mock.calls[0][1].namespace).toBe('staging');
+  });
+
+  it('keeps the stored secret keys when the form kept them (empty values), and replaces them together', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: {
+          version: '2.5.0',
+          vars: [{ name: 'access_key_id' }, { name: 'secret_access_key' }],
+          policy_templates: [],
+        },
+      },
+    });
+    mockGetOnePackagePolicy.mockResolvedValue({
+      data: {
+        item: {
+          name: 'existing-policy-name',
+          namespace: 'existing-ns',
+          package: { version: '2.5.0' },
+          vars: {
+            access_key_id: { value: { isSecretRef: true, id: 'ref-akid' } },
+            secret_access_key: { value: { isSecretRef: true, id: 'ref-secret' } },
+          },
+        },
+      },
+    });
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: [],
+      agentCredentials: { method: 'static_keys', access_key_id: '', secret_access_key: '' },
+    });
+    expect(mockUpdatePackagePolicy.mock.calls[0][1].vars).toEqual({
+      access_key_id: { isSecretRef: true, id: 'ref-akid' },
+      secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+    });
+
+    // Replaced together: both typed values are sent.
+    mockUpdatePackagePolicy.mockClear();
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: [],
+      agentCredentials: {
+        method: 'static_keys',
+        access_key_id: 'NEW-AKID',
+        secret_access_key: 'NEW',
+      },
+    });
+    expect(mockUpdatePackagePolicy.mock.calls[0][1].vars).toEqual({
+      access_key_id: 'NEW-AKID',
+      secret_access_key: 'NEW',
+    });
+
+    // Half of the set typed: the stored refs are kept for both, never a mismatched pair.
+    mockUpdatePackagePolicy.mockClear();
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: [],
+      agentCredentials: { method: 'static_keys', access_key_id: '', secret_access_key: 'NEW' },
+    });
+    expect(mockUpdatePackagePolicy.mock.calls[0][1].vars).toEqual({
+      access_key_id: { isSecretRef: true, id: 'ref-akid' },
+      secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+    });
+  });
+
+  it("prefers refs handed in (a secret an earlier policy just stored) over the policy's own", async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: { version: '2.5.0', vars: [{ name: 'secret_access_key' }], policy_templates: [] },
+      },
+    });
+    mockGetOnePackagePolicy.mockResolvedValue({
+      data: {
+        item: {
+          name: 'existing-policy-name',
+          namespace: 'existing-ns',
+          package: { version: '2.5.0' },
+          vars: { secret_access_key: { value: { isSecretRef: true, id: 'own-old-secret' } } },
+        },
+      },
+    });
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      authenticateAndDeployStep: {
+        existingSecretRefs: new Map([
+          ['secret_access_key', { isSecretRef: true as const, id: 'shared-new-secret' }],
+        ]),
+      } as never,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: [],
+      agentCredentials: { method: 'static_keys', access_key_id: '', secret_access_key: '' },
+    });
+    expect(mockUpdatePackagePolicy.mock.calls[0][1].vars).toEqual({
+      secret_access_key: { isSecretRef: true, id: 'shared-new-secret' },
+    });
   });
 
   it('includes enabled input for the surviving service', async () => {
@@ -232,5 +522,70 @@ describe('updateAgentBasedPolicy — payload shape', () => {
     const payload = mockUpdatePackagePolicy.mock.calls[0][1];
     expect(payload.inputs['vpcflow-aws-s3'].enabled).toBe(true);
     expect(payload.inputs['removed-svc-aws-s3']).toEqual({ enabled: false, streams: {} });
+  });
+});
+
+describe('cleanupAgentBasedPolicies — typed keys', () => {
+  const vpcflow = makeService('vpcflow');
+  const refs = {
+    access_key_id: { isSecretRef: true, id: 'ref-akid' },
+    secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+  };
+
+  it('stores typed keys once and has the other updated policies use that secret', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: {
+          version: '2.5.0',
+          vars: [{ name: 'access_key_id' }, { name: 'secret_access_key' }],
+          policy_templates: [],
+        },
+      },
+    });
+    const gets: Record<string, number> = {};
+    mockGetOnePackagePolicy.mockImplementation(async (policyId: string) => {
+      gets[policyId] = (gets[policyId] ?? 0) + 1;
+      // The first read is the update's own; later reads see the secret the first PUT stored.
+      return {
+        data: {
+          item: {
+            name: policyId,
+            namespace: 'default',
+            package: { version: '2.5.0' },
+            ...(gets[policyId] > 1
+              ? {
+                  vars: {
+                    access_key_id: { value: refs.access_key_id },
+                    secret_access_key: { value: refs.secret_access_key },
+                  },
+                }
+              : {}),
+          },
+        },
+      };
+    });
+
+    const ops = await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      selectedAgentPolicyIds: [],
+      hasTypedSecrets: true,
+      agentCredentials: {
+        method: 'static_keys',
+        access_key_id: 'AKID',
+        secret_access_key: 'SECRET',
+      } as never,
+      instances: [makeInstance('inst-b', 'vpcflow'), makeInstance('inst-d', 'vpcflow')],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1', 'inst-c': 'policy-2' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1', 'inst-d': 'policy-2' },
+    });
+
+    expect(mockUpdatePackagePolicy).toHaveBeenCalledTimes(2);
+    expect(mockUpdatePackagePolicy.mock.calls[0][1].vars).toEqual({
+      access_key_id: 'AKID',
+      secret_access_key: 'SECRET',
+    });
+    expect(mockUpdatePackagePolicy.mock.calls[1][1].vars).toEqual(refs);
+    expect(ops.sharedRefs?.get('access_key_id')).toEqual(refs.access_key_id);
   });
 });

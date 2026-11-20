@@ -5,7 +5,18 @@
  * 2.0.
  */
 
-import { fetchFromSource, fetchFromV2AndSource, settleFetch } from './fetch_from_sources';
+import {
+  EPISODE_SOURCE_FILTER_CLASSIC,
+  EPISODE_SOURCE_FILTER_UNIVERSAL,
+} from '@kbn/alerting-v2-common-queries';
+import { CLASSIC_EPISODE_SOURCE_ID } from '../classic_alerts/constants';
+import {
+  fetchFromSource,
+  fetchFromV2AndSource,
+  resolveEpisodeSourceQueries,
+  settleFetch,
+} from './fetch_from_sources';
+import { shouldSwallowFetchError } from './should_swallow_fetch_error';
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 
 describe('settleFetch', () => {
@@ -29,6 +40,60 @@ describe('settleFetch', () => {
     expect(result.results).toEqual([]);
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0].error).toEqual(new Error('nope'));
+  });
+
+  describe('expression ErrorLike rejections', () => {
+    const esqlSecurityError = {
+      name: 'EsError',
+      message: 'action [indices:data/read/esql] is unauthorized',
+      original: {
+        attributes: { error: { type: 'security_exception' } },
+      },
+    };
+
+    it('keeps the name, message and original error as the cause', async () => {
+      const {
+        errors: [{ error }],
+      } = await settleFetch('v2', async () => Promise.reject(esqlSecurityError));
+
+      expect(error).toBeInstanceOf(Error);
+      expect(error.name).toBe('EsError');
+      expect(error.message).toBe('action [indices:data/read/esql] is unauthorized');
+      expect(error.cause).toBe(esqlSecurityError);
+    });
+
+    it('is swallowed as a privilege error', async () => {
+      const {
+        errors: [{ error }],
+      } = await settleFetch('v2', async () => Promise.reject(esqlSecurityError));
+
+      expect(shouldSwallowFetchError(error)).toBe(true);
+    });
+
+    it('is still surfaced for non-privilege ES|QL errors', async () => {
+      const {
+        errors: [{ error }],
+      } = await settleFetch('v2', async () =>
+        Promise.reject({
+          name: 'EsError',
+          message: 'parsing error',
+          original: { attributes: { error: { type: 'parsing_exception' } } },
+        })
+      );
+
+      expect(error.message).toBe('parsing error');
+      expect(shouldSwallowFetchError(error)).toBe(false);
+    });
+
+    it('keeps AbortError names so aborted queries are swallowed', async () => {
+      const {
+        errors: [{ error }],
+      } = await settleFetch('v2', async () =>
+        Promise.reject({ name: 'AbortError', message: 'The user aborted a request.' })
+      );
+
+      expect(shouldSwallowFetchError(error)).toBe(true);
+    });
   });
 });
 
@@ -58,6 +123,69 @@ describe('fetchFromSource', () => {
       results: [],
       errors: [{ sourceId: 'test-source', error }],
     });
+  });
+});
+
+describe('resolveEpisodeSourceQueries', () => {
+  const source = createTestEpisodeSource();
+
+  it('queries both pipelines when the source filter is empty', () => {
+    expect(
+      resolveEpisodeSourceQueries({
+        sources: undefined,
+        queryV2Source: true,
+        additionalSource: source,
+      })
+    ).toEqual({ queryV2Source: true, additionalSource: source });
+  });
+
+  it('skips v2 when only Classic is selected', () => {
+    const classic = createTestEpisodeSource({ id: CLASSIC_EPISODE_SOURCE_ID });
+    expect(
+      resolveEpisodeSourceQueries({
+        sources: [EPISODE_SOURCE_FILTER_CLASSIC],
+        queryV2Source: true,
+        additionalSource: classic,
+      })
+    ).toEqual({ queryV2Source: false, additionalSource: classic });
+  });
+
+  it('keeps a non-classic additional source only when its own id is selected', () => {
+    const slo = createTestEpisodeSource({ id: 'slo' });
+    expect(
+      resolveEpisodeSourceQueries({
+        sources: ['slo'],
+        queryV2Source: true,
+        additionalSource: slo,
+      })
+    ).toEqual({ queryV2Source: true, additionalSource: slo });
+    expect(
+      resolveEpisodeSourceQueries({
+        sources: [EPISODE_SOURCE_FILTER_UNIVERSAL],
+        queryV2Source: true,
+        additionalSource: slo,
+      })
+    ).toEqual({ queryV2Source: true, additionalSource: undefined });
+  });
+
+  it('skips the classic source when the selection has no Classic id', () => {
+    expect(
+      resolveEpisodeSourceQueries({
+        sources: [EPISODE_SOURCE_FILTER_UNIVERSAL, 'zabbix'],
+        queryV2Source: true,
+        additionalSource: source,
+      })
+    ).toEqual({ queryV2Source: true, additionalSource: undefined });
+  });
+
+  it('keeps v2 skipped when the host cannot query it', () => {
+    expect(
+      resolveEpisodeSourceQueries({
+        sources: undefined,
+        queryV2Source: false,
+        additionalSource: source,
+      })
+    ).toEqual({ queryV2Source: false, additionalSource: source });
   });
 });
 
@@ -130,5 +258,26 @@ describe('fetchFromV2AndSource', () => {
       additional: [],
       errors: [],
     });
+  });
+
+  it('skips v2 and returns only additional data when queryV2Source is false', async () => {
+    const v2 = jest.fn();
+    const source = createTestEpisodeSource({
+      fetchKpis: jest.fn().mockResolvedValue({ alerts_count: 10 }),
+    });
+
+    await expect(
+      fetchFromV2AndSource({
+        v2,
+        source,
+        fromSource: (s) => s.fetchKpis?.({} as never),
+        queryV2Source: false,
+      })
+    ).resolves.toEqual({
+      v2: undefined,
+      additional: [{ alerts_count: 10 }],
+      errors: [],
+    });
+    expect(v2).not.toHaveBeenCalled();
   });
 });

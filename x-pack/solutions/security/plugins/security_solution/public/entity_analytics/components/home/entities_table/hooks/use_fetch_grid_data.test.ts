@@ -5,12 +5,21 @@
  * 2.0.
  */
 
+import React from 'react';
+import { renderHook, waitFor } from '@testing-library/react';
+import { of } from 'rxjs';
 import {
   buildInspectData,
   getEntitiesNextPageParam,
   getEntitiesQuery,
+  useFetchGridData,
 } from './use_fetch_grid_data';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { createReactQueryWrapper } from '../../../../../common/mock/create_react_query_wrapper';
+import { DataViewContext, type DataViewContextValue } from '..';
 import { MAX_ENTITIES_TO_LOAD } from '../constants';
+
+jest.mock('../../../../../common/lib/kibana');
 
 describe('buildInspectData', () => {
   const queryParams = {
@@ -105,5 +114,60 @@ describe('getEntitiesQuery', () => {
     const params = getEntitiesQuery(options, undefined, 'entities-latest-default');
 
     expect(params.index).toEqual(['entities-latest-default']);
+  });
+});
+
+describe('useFetchGridData', () => {
+  const mockSearch = jest.fn();
+
+  const createWrapper = (): React.FC<{ children: React.ReactNode }> => {
+    const QueryWrapper = createReactQueryWrapper();
+    const dataView = {
+      getIndexPattern: () => 'entities-latest-default',
+    } as unknown as DataViewContextValue['dataView'];
+    const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
+      React.createElement(
+        QueryWrapper,
+        null,
+        React.createElement(DataViewContext.Provider, { value: { dataView } }, children)
+      );
+    return Wrapper;
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        data: { search: { search: mockSearch } },
+        notifications: { toasts: { addError: jest.fn(), addDanger: jest.fn() } },
+      },
+    });
+  });
+
+  it('tags the entities search with the entities-table execution context', async () => {
+    mockSearch.mockReturnValue(of({ rawResponse: { hits: { total: 0, hits: [] } } }));
+
+    const { result } = renderHook(
+      () =>
+        useFetchGridData({
+          query: undefined,
+          sort: [['entity.name', 'asc']],
+          enabled: true,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(mockSearch).toHaveBeenCalledTimes(1);
+    expect(mockSearch.mock.calls[0][1]).toEqual({
+      executionContext: {
+        child: {
+          type: 'security_solution',
+          name: 'entity_analytics:home_page',
+          id: 'entities_table',
+        },
+      },
+    });
   });
 });

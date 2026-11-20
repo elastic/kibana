@@ -6,6 +6,7 @@
  */
 
 import type { Ad2IndexedRawEvent } from '@kbn/evals-suite-attack-discovery-agent-builder';
+import { asRecord, withFieldMessage } from '../../world';
 import type { EncodedPowershellIds } from './ids';
 
 const TP_WINWORD_PARENT = {
@@ -26,48 +27,6 @@ const FP_CCMEXEC_PARENT = {
   pid: 2188,
   executable: 'C:\\Windows\\CCM\\ccmexec.exe',
   code_signature: { status: 'trusted', subject_name: 'Microsoft Windows' },
-};
-
-const asRecord = (value: unknown): Record<string, unknown> =>
-  typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
-
-const hasCategory = (source: Record<string, unknown>, category: string): boolean => {
-  const categories = asRecord(source.event).category;
-  return Array.isArray(categories) && categories.includes(category);
-};
-
-/**
- * The registry's `message` narrates the TP chain ("WINWORD.EXE spawned…", "connected to
- * malicious-c2…"). Process, network, and file messages are rebuilt from the overlaid fields in
- * both twins, so the text matches the fields and does not differ in style between twins.
- */
-const withFieldMessage = (event: Ad2IndexedRawEvent): Ad2IndexedRawEvent => {
-  const process = asRecord(event.source.process);
-  const parent = asRecord(process.parent);
-  const destination = asRecord(event.source.destination);
-  if (hasCategory(event.source, 'network')) {
-    return {
-      ...event,
-      source: {
-        ...event.source,
-        message: `${process.name} connected to ${destination.domain} (${destination.ip}:${destination.port})`,
-      },
-    };
-  }
-  if (hasCategory(event.source, 'process')) {
-    return {
-      ...event,
-      source: { ...event.source, message: `${parent.name} started ${process.name}` },
-    };
-  }
-  if (hasCategory(event.source, 'file')) {
-    const file = asRecord(event.source.file);
-    return {
-      ...event,
-      source: { ...event.source, message: `${process.name} created ${file.path}` },
-    };
-  }
-  return event;
 };
 
 const FP_STEP3_SCRIPT = 'C:\\Windows\\CCM\\SystemTemp\\ComplianceScript.ps1';

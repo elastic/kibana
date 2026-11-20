@@ -79,6 +79,7 @@ const createServices = (): CommentsHostServices => ({
   navigateToPath: async (path) => action('navigateToPath')(path),
   getCurrentUser: async () => ({ username: 'demo' }),
   captureViewport: paintPlaceholder,
+  formatDate: (iso, options) => new Date(iso).toLocaleString(undefined, options),
   ignoreSelectors: ['#demoHostBar'],
 });
 

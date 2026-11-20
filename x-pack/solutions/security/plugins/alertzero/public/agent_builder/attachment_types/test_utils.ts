@@ -37,11 +37,12 @@ export const createMockShare = (): SharePluginStart =>
 /** Minimal AttachmentNavigationDeps stub shared by attachment renderer/definition tests. */
 export const createMockNavigation = <T extends object = {}>(
   overrides?: T
-): { spaceId: string } & T =>
+): { spaceId: string; prependPath: (path: string) => string } & T =>
   ({
     spaceId: 'default',
+    prependPath: (path: string) => path,
     ...overrides,
-  } as { spaceId: string } & T);
+  } as { spaceId: string; prependPath: (path: string) => string } & T);
 
 /** Builds a minimal typed Attachment fixture for a given attachment type id and data shape. */
 export const buildAttachment = <TType extends string, TData>(
@@ -49,3 +50,13 @@ export const buildAttachment = <TType extends string, TData>(
   data: TData,
   id = 'att-1'
 ): Attachment<TType, TData> => ({ id, type, data } as Attachment<TType, TData>);
+
+/** Builds the props an inline-content renderer expects, with an optional navigation override. */
+export const renderProps = <TType extends string, TData, TNav extends object>(
+  attachment: Attachment<TType, TData>,
+  navigation: TNav = createMockNavigation() as unknown as TNav
+) => ({
+  attachment,
+  navigation,
+  isSidebar: false,
+});

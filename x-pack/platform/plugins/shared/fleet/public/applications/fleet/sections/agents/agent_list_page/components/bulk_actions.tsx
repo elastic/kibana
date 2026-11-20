@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPortal } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ExperimentalFeaturesService } from '../../../../services';
@@ -14,12 +14,13 @@ import type { Agent, AgentPolicy } from '../../../../types';
 import {
   AgentReassignAgentPolicyModal,
   AgentRemoveCollectorModal,
+  AgentForceUnenrollModal,
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
   HierarchicalActionsMenu,
 } from '../../components';
 import type { MenuItem } from '../../components';
-import { useAuthz, useLicense, useStartServices } from '../../../../hooks';
+import { useAuthz, useLicense, useRestartAgentAction, useStartServices } from '../../../../hooks';
 import {
   LICENSE_FOR_SCHEDULE_UPGRADE,
   AGENTS_PREFIX,
@@ -31,6 +32,7 @@ import { AgentRequestDiagnosticsModal } from '../../components/agent_request_dia
 import { useExportCSV } from '../hooks/export_csv';
 import { AgentExportCSVModal } from '../../components/agent_export_csv_modal';
 import { AgentRollbackModal } from '../../components/agent_rollback_modal';
+import { AgentRestartModal } from '../../components/agent_restart_modal';
 
 import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
@@ -51,6 +53,8 @@ export interface Props {
   sortOrder?: 'asc' | 'desc';
   unsupportedMigrateAgents: Agent[];
   unsupportedPrivilegeLevelChangeAgents: Agent[];
+  /** Whether a manually selected agent runs Fleet Server; always false for a query selection. */
+  selectionHasFleetServer: boolean;
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
@@ -67,10 +71,12 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   sortOrder,
   unsupportedMigrateAgents,
   unsupportedPrivilegeLevelChangeAgents,
+  selectionHasFleetServer,
 }) => {
   const licenseService = useLicense();
   const authz = useAuthz();
   const { reporting } = useStartServices();
+  const { isRestartAgentActionEnabled } = useRestartAgentAction();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
   const doesLicenseAllowMigration = licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION);
   const doesLicenseAllowRollback = licenseService.hasAtLeast(LICENSE_FOR_AGENT_ROLLBACK);
@@ -84,6 +90,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   // Actions states
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState<boolean>(false);
+  const [isForceUnenrollModalOpen, setIsForceUnenrollModalOpen] = useState<boolean>(false);
   const [upgradeModalState, setUpgradeModalState] = useState({
     isOpen: false,
     isScheduled: false,
@@ -97,6 +104,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [isAgentPrivilegeChangeModalOpen, setIsAgentPrivilegeChangeModalOpen] =
     useState<boolean>(false);
   const [isRollbackModalOpen, setIsRollbackModalOpen] = useState<boolean>(false);
+  const [isRestartModalOpen, setIsRestartModalOpen] = useState<boolean>(false);
   const [isRemoveCollectorModalOpen, setIsRemoveCollectorModalOpen] = useState<boolean>(false);
 
   // update the query removing the "managed" agents in any state (unenrolled, offline, etc)
@@ -273,6 +281,33 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         },
         'data-test-subj': 'agentBulkActionsUpgrade',
       },
+      ...(isRestartAgentActionEnabled
+        ? [
+            {
+              id: 'restart',
+              name: (
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.fleet.agentBulkActions.restartAgents"
+                      defaultMessage="Restart {agentCount, plural, one {# agent} other {# agents}}"
+                      values={{ agentCount }}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge label="Beta" size="s" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ),
+              icon: 'refresh',
+              disabled: !authz.fleet.allAgents,
+              onClick: () => {
+                setIsRestartModalOpen(true);
+              },
+              'data-test-subj': 'agentBulkActionsRestart',
+            } as MenuItem,
+          ]
+        : []),
       // Upgrade management submenu
       {
         id: 'upgrade-management',
@@ -398,6 +433,23 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             },
             'data-test-subj': 'agentBulkActionsUnenroll',
           },
+          {
+            id: 'force-unenroll',
+            name: (
+              <FormattedMessage
+                id="xpack.fleet.agentBulkActions.forceUnenrollAgents"
+                defaultMessage="Force unenroll {agentCount, plural, one {# agent} other {# agents}}"
+                values={{ agentCount }}
+              />
+            ),
+            icon: 'crossCircle',
+            iconColor: 'danger',
+            disabled: !authz.fleet.allAgents,
+            onClick: () => {
+              setIsForceUnenrollModalOpen(true);
+            },
+            'data-test-subj': 'agentBulkActionsForceUnenroll',
+          },
         ],
       },
     ];
@@ -414,6 +466,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     isTagAddVisible,
     agents,
     exportMenuItem,
+    isRestartAgentActionEnabled,
   ]);
 
   const getSelectedTagsFromAgents = useMemo(
@@ -440,8 +493,22 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           <AgentUnenrollAgentModal
             agents={agents}
             agentCount={agentCount}
+            hasFleetServer={selectionHasFleetServer}
             onClose={() => {
               setIsUnenrollModalOpen(false);
+              refreshAgents({ refreshTags: true });
+            }}
+          />
+        </EuiPortal>
+      )}
+      {isForceUnenrollModalOpen && (
+        <EuiPortal>
+          <AgentForceUnenrollModal
+            agents={agents}
+            agentCount={agentCount}
+            hasFleetServer={selectionHasFleetServer}
+            onClose={() => {
+              setIsForceUnenrollModalOpen(false);
               refreshAgents({ refreshTags: true });
             }}
           />
@@ -555,6 +622,17 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             agentCount={agentCount}
             onClose={() => {
               setIsRollbackModalOpen(false);
+            }}
+          />
+        </EuiPortal>
+      )}
+      {isRestartModalOpen && (
+        <EuiPortal>
+          <AgentRestartModal
+            agents={agents}
+            agentCount={agentCount}
+            onClose={() => {
+              setIsRestartModalOpen(false);
             }}
           />
         </EuiPortal>

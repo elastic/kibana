@@ -8,11 +8,14 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import { DETECTIONS_DATA_STREAM } from '../../significant_events/detections/data_stream';
+import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../../knowledge_indicators/data_stream';
+import { GLOBAL_MAINTENANCE_WORKFLOW_IDS } from '../../maintenance/managed_workflow_targets';
 import { createManagedWorkflowsInstaller } from './managed_workflows_installer';
 
 // Significant events is gated solely by the availability flag now, so the installer always writes
-// the full set: 9 base workflows (via `installWorkflows`).
-const TOTAL_WORKFLOW_COUNT = 9;
+// the full global set (via `installWorkflows`). Derived so adding a workflow can't leave it stale.
+const TOTAL_WORKFLOW_COUNT = GLOBAL_MAINTENANCE_WORKFLOW_IDS.length;
 
 const createClientMock = () => {
   const client = {
@@ -32,19 +35,21 @@ const createInstaller = (
   overrides: Partial<Parameters<typeof createManagedWorkflowsInstaller>[0]> = {}
 ) => {
   const client = createClientMock();
+  const dataStreams = { initializeClient: jest.fn().mockResolvedValue({}) };
   const installer = createManagedWorkflowsInstaller({
     getClient: jest.fn().mockResolvedValue(client),
+    dataStreams,
     isAvailable: jest.fn().mockResolvedValue(true),
     logger: loggerMock.create(),
     ...overrides,
   });
-  return { client, installer };
+  return { client, dataStreams, installer };
 };
 
 describe('createManagedWorkflowsInstaller', () => {
   it('skips installation and never creates a client when availability is disabled', async () => {
     const getClient = jest.fn();
-    const { installer } = createInstaller({
+    const { dataStreams, installer } = createInstaller({
       getClient,
       isAvailable: jest.fn().mockResolvedValue(false),
     });
@@ -52,6 +57,28 @@ describe('createManagedWorkflowsInstaller', () => {
     await installer.install();
 
     expect(getClient).not.toHaveBeenCalled();
+    expect(dataStreams.initializeClient).not.toHaveBeenCalled();
+  });
+
+  it('creates the detections and knowledge indicators data streams before installing any workflow', async () => {
+    const { client, dataStreams, installer } = createInstaller();
+
+    await installer.install();
+
+    expect(dataStreams.initializeClient).toHaveBeenCalledWith(DETECTIONS_DATA_STREAM);
+    expect(dataStreams.initializeClient).toHaveBeenCalledWith(KNOWLEDGE_INDICATORS_DATA_STREAM);
+    expect(dataStreams.initializeClient.mock.invocationCallOrder[1]).toBeLessThan(
+      client.install.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('installs no workflow when the detections data stream cannot be created', async () => {
+    const { client, dataStreams, installer } = createInstaller();
+    dataStreams.initializeClient.mockRejectedValueOnce(new Error('data stream boom'));
+
+    await expect(installer.install()).rejects.toThrow('data stream boom');
+
+    expect(client.install).not.toHaveBeenCalled();
   });
 
   it('installs nothing while unavailable, then installs and reconciles once the flag flips on', async () => {

@@ -30,10 +30,11 @@ export type {
   BulkUpdateEntitiesResponse,
 } from './bulk_update_entities_api';
 
-/** Load the EUID API (euid, filter builders). Use when you need them; prefer useEntityStoreEuidApi() in React. */
+/** Load the EUID API (euid, getBuiltInEntityDefinition). Use when you need them; prefer useEntityStoreEuidApi() in React. */
 export const loadEuidApi = () =>
   import('./euid_browser').then((m) => ({
     euid: m.euid,
+    getBuiltInEntityDefinition: m.getBuiltInEntityDefinition,
   }));
 export { FF_ENABLE_ENTITY_STORE_V2, ENTITY_STORE_ROUTES } from '../common';
 

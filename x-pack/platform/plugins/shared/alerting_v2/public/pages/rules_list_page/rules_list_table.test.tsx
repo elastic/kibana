@@ -10,7 +10,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
 import { RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
+import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
 import { RulesListTable, type RulesListTableProps } from './rules_list_table';
+import { DEFAULT_VISIBLE_COLUMN_IDS } from './rules_list_columns';
 
 const mockRules = [
   {
@@ -19,7 +21,7 @@ const mockRules = [
     enabled: true,
     metadata: { name: 'Rule One', tags: ['prod'] },
     schedule: { every: '1m' },
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    query: { base: 'FROM logs-* | LIMIT 1' },
   },
   {
     id: 'rule-2',
@@ -27,7 +29,7 @@ const mockRules = [
     enabled: false,
     metadata: { name: 'Rule Two', tags: [] },
     schedule: { every: '5m' },
-    query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
+    query: { base: 'FROM metrics-*' },
   },
 ];
 
@@ -41,7 +43,7 @@ const mockRulesWithManyTags = [
       tags: ['new', 'rna', 'production', 'fix', 'this', 'tags', 'more', 'than', 'enough'],
     },
     schedule: { every: '1m' },
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    query: { base: 'FROM logs-* | LIMIT 1' },
   },
 ];
 
@@ -55,7 +57,22 @@ const mockRulesWithLongTags = [
       tags: ['this-is-a-very-long-tag-name-that-should-be-truncated'],
     },
     schedule: { every: '1m' },
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    query: { base: 'FROM logs-* | LIMIT 1' },
+  },
+];
+
+const mockRulesWithRoutingTags = [
+  {
+    id: 'rule-routing-tags',
+    kind: 'alert',
+    enabled: true,
+    metadata: {
+      name: 'Rule With Routing Tags',
+      tags: [],
+      routing_tags: ['team-a', 'team-b', 'team-c'],
+    },
+    schedule: { every: '1m' },
+    query: { base: 'FROM logs-* | LIMIT 1' },
   },
 ];
 
@@ -82,8 +99,7 @@ const defaultProps: RulesListTableProps = {
   onBulkDisable: jest.fn(),
   onBulkDelete: jest.fn(),
   onBulkUpdateApiKey: jest.fn(),
-  onNavigateToDetails: jest.fn(),
-  onExpand: jest.fn(),
+  onOpenSummary: jest.fn(),
   onQuickEdit: jest.fn(),
   onEdit: jest.fn(),
   onClone: jest.fn(),
@@ -92,15 +108,21 @@ const defaultProps: RulesListTableProps = {
   onUpdateApiKey: jest.fn(),
   onRun: jest.fn(),
   onTableChange: jest.fn(),
+  visibleColumnIds: [...DEFAULT_VISIBLE_COLUMN_IDS],
+  onVisibleColumnIdsChange: jest.fn(),
 };
 
 const renderTable = (overrides: Partial<RulesListTableProps> = {}) => {
   const props = { ...defaultProps, ...overrides };
-  return render(
+  const locators = createMockLocators();
+  const result = render(
     <I18nProvider>
-      <RulesListTable {...props} />
+      <MockLocatorProvider locators={locators}>
+        <RulesListTable {...props} />
+      </MockLocatorProvider>
     </I18nProvider>
   );
+  return { ...result, locators };
 };
 
 describe('RulesListTable', () => {
@@ -133,19 +155,23 @@ describe('RulesListTable', () => {
     it('renders a generic empty state when there are no rules', () => {
       renderTable({ items: [], totalItemCount: 0, search: '', hasActiveFilters: false });
 
-      expect(screen.getByText('No rules found.')).toBeInTheDocument();
+      expect(screen.getByText('No Universal rules found.')).toBeInTheDocument();
     });
 
     it('renders a search-specific empty state when no rules match', () => {
       renderTable({ items: [], totalItemCount: 0, search: 'prod' });
 
-      expect(screen.getByText('No rules match your search or filters.')).toBeInTheDocument();
+      expect(
+        screen.getByText('No Universal rules match your search or filters.')
+      ).toBeInTheDocument();
     });
 
     it('renders a filter-specific empty state when no rules match', () => {
       renderTable({ items: [], totalItemCount: 0, search: '', hasActiveFilters: true });
 
-      expect(screen.getByText('No rules match your search or filters.')).toBeInTheDocument();
+      expect(
+        screen.getByText('No Universal rules match your search or filters.')
+      ).toBeInTheDocument();
     });
 
     it('renders the Source column with extracted index pattern', () => {
@@ -200,20 +226,20 @@ describe('RulesListTable', () => {
       expect(screen.getByText('prod')).toBeInTheDocument();
     });
 
-    it('truncates tags to show only the first 1 and a +N badge for overflow', () => {
+    it('shows the first 2 tags and a +N badge for overflow', () => {
       renderTable({
         items: mockRulesWithManyTags as any,
         totalItemCount: 1,
       });
 
-      // First tag should be visible
       expect(screen.getByText('new')).toBeInTheDocument();
+      expect(screen.getByText('rna')).toBeInTheDocument();
 
-      // Remaining 8 tags should be hidden behind +8 badge
-      expect(screen.getByTestId('overflowTagsBadge')).toHaveTextContent('+8');
+      // Remaining 7 tags should be hidden behind +7 badge
+      expect(screen.getByTestId('overflowTagsBadge')).toHaveTextContent('+7');
 
       // Overflow tags should not be directly visible
-      expect(screen.queryByText('rna')).not.toBeInTheDocument();
+      expect(screen.queryByText('production')).not.toBeInTheDocument();
     });
 
     it('renders long tag text with native EuiBadge truncation', () => {
@@ -226,6 +252,51 @@ describe('RulesListTable', () => {
       expect(
         screen.getByText('this-is-a-very-long-tag-name-that-should-be-truncated')
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('routing tags column', () => {
+    it('renders the routing tags header with an info icon explaining them', async () => {
+      renderTable();
+
+      expect(screen.getByText('Routing tags')).toBeInTheDocument();
+
+      fireEvent.mouseOver(screen.getByTestId('routingTagsColumnInfoIcon'));
+
+      expect(
+        await screen.findByText(
+          'Action policies apply to a rule when they share at least one of its routing tags.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('shows the first 2 routing tags and a +N badge, like regular tags', () => {
+      renderTable({
+        items: mockRulesWithRoutingTags as any,
+        totalItemCount: 1,
+      });
+
+      expect(screen.getByTestId('routingTagsContainer')).toHaveTextContent('team-a');
+      expect(screen.getByTestId('routingTagsContainer')).toHaveTextContent('team-b');
+      expect(screen.getByTestId('overflowRoutingTagsBadge')).toHaveTextContent('+1');
+      expect(screen.queryByText('team-c')).not.toBeInTheDocument();
+    });
+
+    it('shows the overflowing routing tags in a tooltip', async () => {
+      renderTable({
+        items: mockRulesWithRoutingTags as any,
+        totalItemCount: 1,
+      });
+
+      fireEvent.mouseOver(screen.getByTestId('overflowRoutingTagsBadge'));
+
+      expect(await screen.findByText('team-c')).toBeInTheDocument();
+    });
+
+    it('renders an empty value for rules without routing tags', () => {
+      renderTable();
+
+      expect(screen.queryByTestId('routingTagsContainer')).not.toBeInTheDocument();
     });
   });
 
@@ -569,13 +640,47 @@ describe('RulesListTable', () => {
       expect(screen.getByTestId('ruleNameLink-rule-1')).toBeInTheDocument();
     });
 
-    it('calls onNavigateToDetails when rule name link is clicked', () => {
-      const onNavigateToDetails = jest.fn();
-      renderTable({ onNavigateToDetails });
+    it('calls onOpenSummary when rule name link is clicked', () => {
+      const onOpenSummary = jest.fn();
+      renderTable({ onOpenSummary });
 
       fireEvent.click(screen.getByTestId('ruleNameLink-rule-1'));
 
-      expect(onNavigateToDetails).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+      expect(onOpenSummary).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+
+    it('links View details to the rule details page and navigates in-app on click', async () => {
+      const {
+        locators: { rulesLocators },
+      } = renderTable();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      const viewDetails = await screen.findByTestId('viewRuleDetails-rule-1');
+      expect(viewDetails).toHaveAttribute('href', '/mock-locator-url');
+      expect(rulesLocators.getRedirectUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+
+      fireEvent.click(viewDetails);
+
+      expect(rulesLocators.navigateSync).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+      await waitFor(() =>
+        expect(screen.queryByTestId('viewRuleDetails-rule-1')).not.toBeInTheDocument()
+      );
+    });
+
+    it('does not resolve the details URL until the actions menu is opened', () => {
+      const {
+        locators: { rulesLocators },
+      } = renderTable();
+
+      expect(rulesLocators.getRedirectUrl).not.toHaveBeenCalled();
+    });
+
+    it('does not render an expand button', () => {
+      renderTable();
+
+      expect(screen.queryByTestId('expandRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('expandRule-rule-2')).not.toBeInTheDocument();
     });
   });
 
@@ -587,11 +692,20 @@ describe('RulesListTable', () => {
       expect(screen.queryByTestId('checkboxSelectRow-rule-1')).not.toBeInTheDocument();
     });
 
-    it('hides the quick edit and actions menu affordances', () => {
+    it('hides quick edit and keeps View details as a link to the rule details page', async () => {
       renderTable({ canWrite: false });
 
       expect(screen.queryByTestId('quickEditRule-rule-1')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      expect(await screen.findByTestId('viewRuleDetails-rule-1')).toHaveAttribute(
+        'href',
+        '/mock-locator-url'
+      );
+      expect(screen.queryByTestId('editRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cloneRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('deleteRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('runRule-rule-1')).not.toBeInTheDocument();
     });
 
     it('still shows View change history (a read action) without write actions', async () => {
@@ -624,29 +738,81 @@ describe('RulesListTable', () => {
       expect(screen.getByTestId('ruleEnabledBadge-rule-2')).toHaveTextContent('Disabled');
     });
 
-    it('keeps read-only affordances (name link, expand) available', () => {
+    it('keeps the rule name link available', () => {
       renderTable({ canWrite: false });
 
       expect(screen.getByTestId('ruleNameLink-rule-1')).toBeInTheDocument();
-      expect(screen.getByTestId('expandRule-rule-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('expandRule-rule-1')).not.toBeInTheDocument();
     });
   });
 
-  describe('expand button', () => {
-    it('renders an expand button for each row', () => {
-      renderTable();
+  describe('column visibility', () => {
+    const openColumnSelector = async () => {
+      fireEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
+      await screen.findByTestId('dataGridColumnSelectorSearch');
+    };
 
-      expect(screen.getByTestId('expandRule-rule-1')).toBeInTheDocument();
-      expect(screen.getByTestId('expandRule-rule-2')).toBeInTheDocument();
+    it('does not render headers for hidden columns', () => {
+      renderTable({ visibleColumnIds: ['kind'] });
+
+      expect(screen.queryByRole('columnheader', { name: /Source/ })).not.toBeInTheDocument();
+      expect(screen.getByRole('columnheader', { name: /Outcome/ })).toBeInTheDocument();
     });
 
-    it('calls onExpand with the row rule when the expand button is clicked', () => {
-      const onExpand = jest.fn();
-      renderTable({ onExpand });
+    it('renders optional columns in visibleColumnIds order', () => {
+      renderTable({ visibleColumnIds: ['kind', 'source'] });
 
-      fireEvent.click(screen.getByTestId('expandRule-rule-1'));
+      const headerTexts = screen
+        .getAllByRole('columnheader')
+        .map((header) => header.textContent ?? '');
+      const indexOf = (label: string) => headerTexts.findIndex((text) => text.includes(label));
 
-      expect(onExpand).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+      expect(indexOf('Outcome')).toBeLessThan(indexOf('Source'));
+    });
+
+    it('always renders the selection, name, and actions columns', () => {
+      renderTable({ visibleColumnIds: [] });
+
+      expect(screen.getByTestId('selectAllRulesOnPage')).toBeInTheDocument();
+      expect(screen.getByRole('columnheader', { name: /Name/ })).toBeInTheDocument();
+      expect(screen.getByRole('columnheader', { name: /Actions/ })).toBeInTheDocument();
+    });
+
+    it('lists every optional column in the selector, but not Name', async () => {
+      renderTable();
+      await openColumnSelector();
+
+      DEFAULT_VISIBLE_COLUMN_IDS.forEach((id) => {
+        expect(screen.getByTestId(`dataGridColumnSelectorColumnItem-${id}`)).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('dataGridColumnSelectorColumnItem-name')).not.toBeInTheDocument();
+    });
+
+    it('reports the remaining ids when a column is toggled off', async () => {
+      const onVisibleColumnIdsChange = jest.fn();
+      renderTable({ onVisibleColumnIdsChange });
+      await openColumnSelector();
+
+      fireEvent.click(screen.getByTestId('dataGridColumnSelectorToggleColumnVisibility-kind'));
+
+      expect(onVisibleColumnIdsChange).toHaveBeenCalledWith([
+        'source',
+        'tags',
+        'routingTags',
+        'enabled',
+      ]);
+    });
+
+    it('reports every id on Show all and none on Hide all', async () => {
+      const onVisibleColumnIdsChange = jest.fn();
+      renderTable({ visibleColumnIds: ['tags'], onVisibleColumnIdsChange });
+      await openColumnSelector();
+
+      fireEvent.click(screen.getByTestId('dataGridColumnSelectorShowAllButton'));
+      expect(onVisibleColumnIdsChange).toHaveBeenLastCalledWith([...DEFAULT_VISIBLE_COLUMN_IDS]);
+
+      fireEvent.click(screen.getByTestId('dataGridColumnSelectorHideAllButton'));
+      expect(onVisibleColumnIdsChange).toHaveBeenLastCalledWith([]);
     });
   });
 });

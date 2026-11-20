@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { VisualizationConfig } from './types';
 
 export interface GenerateEsqlAction {
   type: 'generate_esql';
   success: boolean;
   query?: string;
+  /** Result columns of the generated query, shown to the config author. */
+  columns?: EsqlEsqlColumnInfo[];
   error?: string;
 }
 
@@ -19,6 +22,8 @@ export interface GenerateConfigAction {
   success: boolean;
   config?: any; // Can be any shape - gets validated in ValidateConfigAction
   authoringNote?: string;
+  /** Raw model response, kept even when it fails to parse so a retry can repair it. */
+  response?: string;
   attempt: number;
   error?: string;
 }
@@ -30,6 +35,8 @@ export interface ValidateConfigAction {
   authoringNote?: string;
   attempt: number;
   error?: string;
+  /** Schema sections the validation error points at, shown on the retry. */
+  failingSchemaSections?: string[];
 }
 
 export type Action = GenerateEsqlAction | GenerateConfigAction | ValidateConfigAction;
@@ -48,8 +55,9 @@ export function isValidateConfigAction(action: Action): action is ValidateConfig
 
 // Node name constants
 export const GENERATE_ESQL_NODE = 'generate_esql_query';
+export const RESOLVE_COLUMNS_NODE = 'resolve_columns';
 export const GENERATE_CONFIG_NODE = 'generate_config';
 export const VALIDATE_CONFIG_NODE = 'validate_config';
 
 // Configuration constants
-export const MAX_RETRY_ATTEMPTS = 5;
+export const MAX_RETRY_ATTEMPTS = 3;

@@ -116,11 +116,15 @@ export const createAdGetJobInfoTool = (
         }
 
         case 'get_job_stats': {
-          // Space-filter via MlClient so a canGetJobs user cannot read stats for
-          // jobs that belong only to other Kibana Spaces.
+          // Space-filter via MlClient. Falling back to the raw internal-user ML client
+          // would bypass filterJobsForSpace and allow cross-Space job stat reads.
           const mlClient = buildMlClient?.(esClient, savedObjectsClient, request);
-          const statsApi = mlClient ?? ml;
-          const response = await statsApi.getJobStats(jobId ? { job_id: jobId } : {});
+          if (!mlClient) {
+            return {
+              results: [createErrorResult('ML client is unavailable — service not yet started')],
+            };
+          }
+          const response = await mlClient.getJobStats(jobId ? { job_id: jobId } : {});
           return { results: [{ type: ToolResultType.other, data: response }] };
         }
 

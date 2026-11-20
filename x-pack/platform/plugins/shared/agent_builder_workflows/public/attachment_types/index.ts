@@ -13,6 +13,7 @@ import {
   WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
 } from '@kbn/workflows/common/constants';
 import type { WorkflowsBaseTelemetry } from '@kbn/workflows-management-plugin/public';
+import type { WorkflowsUiServices } from '@kbn/workflows-ui';
 import { createWorkflowYamlAttachmentUiDefinition } from './workflow_yaml_attachment_renderer';
 import { workflowYamlDiffAttachmentUiDefinition } from './workflow_yaml_diff_attachment_renderer';
 
@@ -22,6 +23,7 @@ export const registerWorkflowAttachmentRenderers = (
     core: CoreStart;
     telemetry: WorkflowsBaseTelemetry;
     queryClient: QueryClient;
+    workflowsUiServices: WorkflowsUiServices;
   }
 ): void => {
   attachments.addAttachmentType(

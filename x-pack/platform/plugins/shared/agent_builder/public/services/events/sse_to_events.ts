@@ -14,14 +14,12 @@ import type {
   EventActor,
   ToolCallStep,
   TimelineEvent,
-  TodosStep,
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStepType,
   TimelineEventType,
   executionStepEventId,
   executionTerminatedEventId,
-  findTodosStep,
   isBackgroundAgentCompleteEvent,
   isCompactionCompletedEvent,
   isCompactionStartedEvent,
@@ -31,10 +29,12 @@ import {
   isExecutionTerminatedEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
+  isMessageDeliveredEvent,
+  isInterimAnswerEvent,
   isPromptRequestEvent,
   isReasoningEvent,
+  isSubstitutionAppliedEvent,
   isThinkingCompleteEvent,
-  isTodosUpdatedEvent,
   isToolCallEvent,
   isToolCallStep,
   isToolProgressEvent,
@@ -43,7 +43,10 @@ import {
   parseExecutionId,
 } from '@kbn/agent-builder-common';
 import {
+  createDeliveredMessageStep,
+  createInterimAnswerStep,
   createReasoningStep,
+  createSubstitutionStep,
   createToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 
@@ -279,6 +282,13 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
     );
   }
 
+  if (isInterimAnswerEvent(event)) {
+    // Reset the streaming buffer after preserving the interim answer.
+    return withStreamingEvent(
+      withAppendedStep({ ...state, message: '' }, createInterimAnswerStep(event.data))
+    );
+  }
+
   if (isMessageChunkEvent(event)) {
     return withStreamingEvent({ ...state, message: state.message + event.data.text_chunk });
   }
@@ -301,6 +311,7 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
         tool_id: event.data.tool_id,
         tool_call_group_id: event.data.tool_call_group_id,
         tool_origin: event.data.tool_origin,
+        intent: event.data.intent,
       })
     );
   }
@@ -339,7 +350,7 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
   if (isCompactionStartedEvent(event)) {
     const step: CompactionStep = {
       type: ConversationRoundStepType.compaction,
-      summarized_round_count: 0,
+      summarized_cycle_count: 0,
       token_count_before: event.data.token_count_before,
       token_count_after: 0,
     };
@@ -347,20 +358,28 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
   }
 
   if (isCompactionCompletedEvent(event)) {
-    const { token_count_after: tokenCountAfter, summarized_round_count: summarizedRoundCount } =
-      event.data;
+    const {
+      token_count_before: tokenCountBefore,
+      token_count_after: tokenCountAfter,
+      summarized_cycle_count: summarizedCycleCount,
+    } = event.data;
     // Patch the most recent compaction step - the one the matching `compaction_started` just added.
     for (let sequence = state.steps.length - 1; sequence >= 0; sequence--) {
       const step = state.steps[sequence];
       if (isCompactionStep(step)) {
         return withStepAt(state, sequence, {
           ...step,
+          token_count_before: tokenCountBefore,
           token_count_after: tokenCountAfter,
-          summarized_round_count: summarizedRoundCount,
+          summarized_cycle_count: summarizedCycleCount,
         });
       }
     }
     return state;
+  }
+
+  if (isSubstitutionAppliedEvent(event)) {
+    return withAppendedStep(state, createSubstitutionStep(event.data));
   }
 
   if (isBackgroundAgentCompleteEvent(event)) {
@@ -371,18 +390,8 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
     return withAppendedStep(state, step);
   }
 
-  if (isTodosUpdatedEvent(event)) {
-    const { todos } = event.data.data;
-    const existing = findTodosStep(state.steps);
-    if (existing) {
-      const sequence = state.steps.indexOf(existing);
-      return withStepAt(state, sequence, { ...existing, todos, carried_over: false });
-    }
-    return withAppendedStep(state, {
-      type: ConversationRoundStepType.updateTodos,
-      todos,
-    } as TodosStep);
+  if (isMessageDeliveredEvent(event)) {
+    return withAppendedStep(state, createDeliveredMessageStep(event.data));
   }
-
   return state;
 };

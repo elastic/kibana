@@ -56,7 +56,11 @@ test.describe('Sample data', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  test('flights dashboard renders visualizations correctly', async ({ page, kbnUrl }) => {
+  test('flights dashboard renders visualizations correctly', async ({
+    page,
+    kbnUrl,
+    pageObjects,
+  }) => {
     await page.goto(kbnUrl.get('/app/home#/tutorial_directory/sampleData'));
     await expect(page.testSubj.locator('launchSampleDataSetflights')).toBeVisible();
     await page.testSubj.locator('launchSampleDataSetflights').click();
@@ -81,7 +85,7 @@ test.describe('Sample data', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('controls are rendered', async () => {
-      await expect(page.testSubj.locator('control-frame')).toHaveCount(3);
+      await expect(pageObjects.controls.frames).toHaveCount(3);
     });
   });
 });

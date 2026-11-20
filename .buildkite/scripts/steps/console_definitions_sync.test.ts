@@ -15,7 +15,12 @@ import Path from 'path';
 const REPO_ROOT = Path.resolve(__dirname, '../../..');
 const SYNC_SCRIPT = Path.resolve(__dirname, 'console_definitions_sync.sh');
 const DOC_LINKS_SYNC_SCRIPT = Path.resolve(__dirname, 'kibana_api_doc_links_sync.sh');
+const REMINDER_SCRIPT = Path.resolve(__dirname, 'console_definitions/sync_reminder.sh');
 const PR_TITLE = '[Console] Update console definitions (main)';
+const PR_URL = 'https://github.com/elastic/kibana/pull/42';
+
+const readIfExists = (file: string) =>
+  fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : undefined;
 
 const writeExecutable = (file: string, content: string) => {
   fs.writeFileSync(file, content);
@@ -24,10 +29,14 @@ const writeExecutable = (file: string, content: string) => {
 
 const runSync = ({
   existingPr = false,
+  prListFails = false,
+  reminderMode = '',
   script = SYNC_SCRIPT,
   statusOutput = ' M src/platform/plugins/shared/console/server/lib/spec_definitions/json/generated/search.json',
 }: {
   existingPr?: boolean;
+  prListFails?: boolean;
+  reminderMode?: string;
   script?: string;
   statusOutput?: string;
 } = {}) => {
@@ -58,8 +67,15 @@ exit 0
     Path.resolve(fakeBin, 'gh'),
     `#!/usr/bin/env bash
 if [[ "\${1:-} \${2:-}" == "pr list" ]]; then
+  printf '%s\\n' "$*" > "\${TEST_ROOT}/pr-list-args"
+  if [[ "\${TEST_PR_LIST_FAILS}" == "true" ]]; then
+    echo "HTTP 401: Bad credentials" >&2
+    exit 1
+  fi
+  printf '%s\\t%s\\t%s\\n' "[Console] Update console definitions (9.6)" "https://github.com/elastic/kibana/pull/7" "kibanamachine"
+  printf '%s\\t%s\\t%s\\n' "\${TEST_PR_TITLE}" "https://github.com/elastic/kibana/pull/8" "someone-else"
   if [[ "\${TEST_EXISTING_PR}" == "true" ]]; then
-    echo "\${TEST_PR_TITLE}"
+    printf '%s\\t%s\\t%s\\n' "\${TEST_PR_TITLE}" "\${TEST_PR_URL}" "app/elastic-vault-github-plugin-prod"
   fi
   exit 0
 fi
@@ -79,6 +95,9 @@ exit 0
     Path.resolve(fakeBin, 'buildkite-agent'),
     `#!/usr/bin/env bash
 printf '%s\\n' "$*" > "\${TEST_ROOT}/buildkite-agent-args"
+if [[ "\${1:-} \${2:-}" == "pipeline upload" ]]; then
+  cp "\${3}" "\${TEST_ROOT}/uploaded-pipeline.yml"
+fi
 `
   );
 
@@ -91,10 +110,14 @@ printf '%s\\n' "$*" > "\${TEST_ROOT}/buildkite-agent-args"
       PARENT_DIR: parentDir,
       KIBANA_DIR: kibanaDir,
       BUILDKITE_BRANCH: 'main',
-      KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true',
+      ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true',
+      SLACK_NOTIFICATIONS_CHANNEL: '#kibana-management',
+      SYNC_REMINDER_MODE: reminderMode,
       TEST_ROOT: root,
       TEST_EXISTING_PR: String(existingPr),
+      TEST_PR_LIST_FAILS: String(prListFails),
       TEST_PR_TITLE: PR_TITLE,
+      TEST_PR_URL: PR_URL,
       TEST_STATUS_OUTPUT: statusOutput,
     },
   });
@@ -103,13 +126,14 @@ printf '%s\\n' "$*" > "\${TEST_ROOT}/buildkite-agent-args"
     cleanup: () => fs.rmSync(root, { force: true, recursive: true }),
     output: `${result.stdout}${result.stderr}`,
     status: result.status,
+    prListArgs: fs.existsSync(Path.resolve(root, 'pr-list-args'))
+      ? fs.readFileSync(Path.resolve(root, 'pr-list-args'), 'utf8')
+      : undefined,
     prCreateArgs: fs.existsSync(Path.resolve(root, 'pr-create-args'))
       ? fs.readFileSync(Path.resolve(root, 'pr-create-args'), 'utf8')
       : undefined,
     autoMergeCalled: fs.existsSync(Path.resolve(root, 'merge-called')),
-    buildkiteAgentArgs: fs.existsSync(Path.resolve(root, 'buildkite-agent-args'))
-      ? fs.readFileSync(Path.resolve(root, 'buildkite-agent-args'), 'utf8')
-      : undefined,
+    uploadedPipeline: readIfExists(Path.resolve(root, 'uploaded-pipeline.yml')),
   };
 };
 
@@ -148,7 +172,25 @@ describe('WHEN Console definitions are synchronized', () => {
       expect(result.status).toBe(0);
       expect(result.prCreateArgs).toBeUndefined();
       expect(result.autoMergeCalled).toBe(false);
-      expect(result.buildkiteAgentArgs).toContain('slack:console_defs_existing_pr:body');
+      expect(result.uploadedPipeline).toContain('key: "console_defs_existing_pr"');
+      expect(result.uploadedPipeline).toContain('- "#kibana-management"');
+      expect(result.uploadedPipeline).toContain(`<${PR_URL}|${PR_TITLE}> hasn't been merged yet`);
+      expect(result.uploadedPipeline).toContain('if: step.outcome == "passed"');
+      expect(result.prListArgs).toContain(`"${PR_TITLE}" in:title`);
+      expect(result.prListArgs).not.toContain('author:');
+      expect(result.prListArgs).toContain('--json title,url,author');
+      expect(result.prListArgs).toContain('"\\(.title)\\t\\(.url)\\t\\(.author.login)"');
+    } finally {
+      result.cleanup();
+    }
+  });
+
+  it('SHOULD fail without opening a PR when the existing-PR lookup fails', () => {
+    const result = runSync({ prListFails: true });
+    try {
+      expect(result.status).not.toBe(0);
+      expect(result.prCreateArgs).toBeUndefined();
+      expect(result.uploadedPipeline).toBeUndefined();
     } finally {
       result.cleanup();
     }
@@ -161,6 +203,64 @@ describe('WHEN Console definitions are synchronized', () => {
       expect(result.prCreateArgs).toContain('[Console] Update Kibana API doc links (main)');
       expect(result.prCreateArgs).toContain('--label backport:skip');
       expect(result.autoMergeCalled).toBe(true);
+    } finally {
+      result.cleanup();
+    }
+  });
+});
+
+describe('WHEN the Console definitions sync reminder runs', () => {
+  it('SHOULD ask for a review of the open PR in review mode', () => {
+    const result = runSync({ script: REMINDER_SCRIPT, reminderMode: 'review', existingPr: true });
+    try {
+      expect(result.status).toBe(0);
+      expect(result.uploadedPipeline).toContain('key: "console_defs_review_reminder"');
+      expect(result.uploadedPipeline).toContain(`<${PR_URL}|${PR_TITLE}> is still open`);
+    } finally {
+      result.cleanup();
+    }
+  });
+
+  it('SHOULD ask to merge or close the open PR in review_or_close mode', () => {
+    const result = runSync({
+      script: REMINDER_SCRIPT,
+      reminderMode: 'review_or_close',
+      existingPr: true,
+    });
+    try {
+      expect(result.status).toBe(0);
+      expect(result.uploadedPipeline).toContain('key: "console_defs_review_or_close_reminder"');
+      expect(result.uploadedPipeline).toContain('Please merge or close it');
+    } finally {
+      result.cleanup();
+    }
+  });
+
+  it('SHOULD ignore PRs whose title only partly matches or that another author opened', () => {
+    const result = runSync({ script: REMINDER_SCRIPT, reminderMode: 'review_or_close' });
+    try {
+      expect(result.status).toBe(0);
+      expect(result.uploadedPipeline).toBeUndefined();
+    } finally {
+      result.cleanup();
+    }
+  });
+
+  it('SHOULD fail when the PR lookup fails', () => {
+    const result = runSync({ script: REMINDER_SCRIPT, reminderMode: 'review', prListFails: true });
+    try {
+      expect(result.status).not.toBe(0);
+      expect(result.uploadedPipeline).toBeUndefined();
+    } finally {
+      result.cleanup();
+    }
+  });
+
+  it('SHOULD fail on an unknown mode', () => {
+    const result = runSync({ script: REMINDER_SCRIPT, reminderMode: 'remind', existingPr: true });
+    try {
+      expect(result.status).toBe(1);
+      expect(result.uploadedPipeline).toBeUndefined();
     } finally {
       result.cleanup();
     }

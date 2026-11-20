@@ -2,25 +2,7 @@
 
 exports[`Netflow renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c3 {
-  margin-right: 5px;
-}
-
-.c2 {
-  margin-right: 5px;
-}
-
-.c1 {
-  margin-right: 3px;
-  position: relative;
-  top: -1px;
-}
-
-.c0 {
-  margin-right: 10px;
-}
-
-<div
+  <div
     class="euiFlexGroup emotion-euiFlexGroup-wrap-none-center-center-column"
     data-test-subj="netflow-rows"
   >
@@ -32,7 +14,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
         data-test-subj="netflow-columns"
       >
         <div
-          class="euiFlexItem c0 emotion-euiFlexItem-growZero"
+          class="euiFlexItem exrv9020 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
         >
           <div
             class="euiFlexGroup emotion-euiFlexGroup-none-center-flexStart-column"
@@ -123,7 +105,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
           </div>
         </div>
         <div
-          class="euiFlexItem c0 emotion-euiFlexItem-growZero"
+          class="euiFlexItem exrv9020 emotion-euiFlexItem-growZero-EuiFlexItemMarginRight"
         >
           <div
             class="euiFlexGroup emotion-euiFlexGroup-none-center-flexStart-column"
@@ -146,7 +128,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       class="euiText emotion-euiText-xs"
                     >
                       <span
-                        class="c1"
+                        class="css-8e460u-TimeIcon e1w3gexs0"
                         data-euiicon-type="clock"
                       />
                       <span
@@ -181,7 +163,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       class="euiText emotion-euiText-xs"
                     >
                       <span
-                        class="c1"
+                        class="css-8e460u-TimeIcon e1w3gexs0"
                         data-euiicon-type="clock"
                       />
                       <span
@@ -212,7 +194,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       class="euiText emotion-euiText-xs"
                     >
                       <span
-                        class="c1"
+                        class="css-8e460u-TimeIcon e1w3gexs0"
                         data-euiicon-type="clock"
                       />
                       <span
@@ -498,7 +480,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <button
-                                      class="euiLink emotion-euiLink-primary"
+                                      class="euiLink emotion-euiLink-text"
                                       data-test-subj="network-details"
                                       type="button"
                                     >
@@ -528,7 +510,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                           class="css-p0iey-PortContainer equgoob1"
                                         >
                                           <a
-                                            class="euiLink emotion-euiLink-primary"
+                                            class="euiLink emotion-euiLink-text"
                                             data-test-subj="port-or-service-name-link"
                                             href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=9987"
                                             rel="noopener noreferrer"
@@ -989,7 +971,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <button
-                                      class="euiLink emotion-euiLink-primary"
+                                      class="euiLink emotion-euiLink-text"
                                       data-test-subj="network-details"
                                       type="button"
                                     >
@@ -1019,7 +1001,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                           class="css-p0iey-PortContainer equgoob1"
                                         >
                                           <a
-                                            class="euiLink emotion-euiLink-primary"
+                                            class="euiLink emotion-euiLink-text"
                                             data-test-subj="port-or-service-name-link"
                                             href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=80"
                                             rel="noopener noreferrer"
@@ -1269,12 +1251,12 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiBadge__text emotion-euiBadge__text"
                       >
                         <span
-                          class="c2"
+                          class="css-3esyjx-Ja3FingerprintLabel e15wdmre0"
                         >
                           ja3
                         </span>
                         <a
-                          class="euiLink emotion-euiLink-primary"
+                          class="euiLink emotion-euiLink-text"
                           data-test-subj="ja3-fingerprint-link"
                           href="https://sslbl.abuse.ch/ja3-fingerprints/tls.fingerprints.ja3.hash-value"
                           rel="noopener noreferrer"
@@ -1333,12 +1315,12 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiBadge__text emotion-euiBadge__text"
                       >
                         <span
-                          class="c3"
+                          class="css-zjolvq-FingerprintLabel e18pxs070"
                         >
                           client cert
                         </span>
                         <a
-                          class="euiLink emotion-euiLink-primary"
+                          class="euiLink emotion-euiLink-text"
                           data-test-subj="certificate-fingerprint-link"
                           href="https://sslbl.abuse.ch/ssl-certificates/sha1/tls.client_certificate.fingerprint.sha1-value"
                           rel="noopener noreferrer"
@@ -1397,12 +1379,12 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiBadge__text emotion-euiBadge__text"
                       >
                         <span
-                          class="c3"
+                          class="css-zjolvq-FingerprintLabel e18pxs070"
                         >
                           server cert
                         </span>
                         <a
-                          class="euiLink emotion-euiLink-primary"
+                          class="euiLink emotion-euiLink-text"
                           data-test-subj="certificate-fingerprint-link"
                           href="https://sslbl.abuse.ch/ssl-certificates/sha1/tls.server_certificate.fingerprint.sha1-value"
                           rel="noopener noreferrer"

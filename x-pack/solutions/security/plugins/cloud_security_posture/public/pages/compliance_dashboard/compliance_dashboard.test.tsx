@@ -21,7 +21,6 @@ import {
   KUBERNETES_DASHBOARD_CONTAINER,
   KUBERNETES_DASHBOARD_TAB,
   CLOUD_DASHBOARD_TAB,
-  CLOUD_POSTURE_DASHBOARD_PAGE_HEADER,
 } from './test_subjects';
 import { mockDashboardData } from './mock';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
@@ -36,6 +35,7 @@ import type { ComplianceDashboardDataV2 } from '../../../common/types_old';
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
 jest.mock('../../common/api/use_stats_api');
@@ -134,7 +134,7 @@ describe('<ComplianceDashboard />', () => {
     renderComplianceDashboardPage();
 
     expectIdsInDoc({
-      be: [PACKAGE_NOT_INSTALLED_TEST_SUBJECT, CLOUD_POSTURE_DASHBOARD_PAGE_HEADER],
+      be: [PACKAGE_NOT_INSTALLED_TEST_SUBJECT, APP_HEADER_TEST_SUBJECTS.title],
       notToBe: [
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,

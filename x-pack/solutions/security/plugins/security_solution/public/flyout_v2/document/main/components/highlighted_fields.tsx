@@ -11,7 +11,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel, EuiTitle } from 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { convertHighlightedFieldsToTableRow } from '../utils/highlighted_fields_helpers';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
 import type { OpenFlyoutLinkRenderer } from './highlighted_fields_cell';
@@ -19,7 +18,6 @@ import type { CellActionRenderer } from '../../../shared/components/cell_actions
 import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
 import { useHighlightedFields } from '../hooks/use_highlighted_fields';
 import { EditHighlightedFieldsButton } from './highlighted_fields_button';
-import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
 export interface HighlightedFieldsTableRow {
   /**
@@ -84,11 +82,6 @@ export interface HighlightedFieldsProps {
    */
   ancestorsIndexName?: string;
   /**
-   * If true, certain field values render as a PreviewLink opening a preview flyout.
-   * False by default — only enable where preview panels exist (old flyout).
-   */
-  showPreview?: boolean;
-  /**
    * Optional wrapper that renders a preview link for supported field types (e.g. IP).
    * Injected by the caller so each flyout context controls its own navigation.
    */
@@ -107,7 +100,6 @@ export const HighlightedFields = memo(
     renderCellActions,
     hideEditButton = false,
     ancestorsIndexName,
-    showPreview = false,
     renderFlyoutLink,
   }: HighlightedFieldsProps) => {
     const [isEditLoading, setIsEditLoading] = useState(false);
@@ -116,53 +108,6 @@ export const HighlightedFields = memo(
       hit,
       investigationFields,
     });
-
-    const euidApi = useEntityStoreEuidApi();
-    const hostDocumentIdentityFields = useMemo(
-      () => euidApi?.euid.getEntityIdentifiersFromDocument('host', hit.flattened) ?? null,
-      [euidApi?.euid, hit.flattened]
-    );
-    const userDocumentIdentityFields = useMemo(
-      () => euidApi?.euid.getEntityIdentifiersFromDocument('user', hit.flattened) ?? null,
-      [euidApi?.euid, hit.flattened]
-    );
-    const isHostEntity = hostDocumentIdentityFields != null;
-    const hostEuidFromDocument = useMemo(
-      () => euidApi?.euid.getEuidFromObject('host', hit.flattened),
-      [euidApi?.euid, hit.flattened]
-    );
-    const userEuidFromDocument = useMemo(
-      () => euidApi?.euid.getEuidFromObject('user', hit.flattened),
-      [euidApi?.euid, hit.flattened]
-    );
-    const hostEntityFromStore = useEntityFromStore({
-      entityId: hostEuidFromDocument,
-      identityFields: hostDocumentIdentityFields ?? undefined,
-      entityType: 'host',
-      skip: !isHostEntity,
-    });
-    const userEntityFromStore = useEntityFromStore({
-      entityId: userEuidFromDocument,
-      identityFields: userDocumentIdentityFields ?? undefined,
-      entityType: 'user',
-      skip: isHostEntity,
-    });
-    const entityId = useMemo(() => {
-      if (isHostEntity) {
-        return (
-          hostEntityFromStore.entityRecord?.entity?.id ?? hostDocumentIdentityFields?.['entity.id']
-        );
-      }
-      return (
-        userEntityFromStore.entityRecord?.entity?.id ?? userDocumentIdentityFields?.['entity.id']
-      );
-    }, [
-      isHostEntity,
-      hostDocumentIdentityFields,
-      userDocumentIdentityFields,
-      hostEntityFromStore.entityRecord,
-      userEntityFromStore.entityRecord,
-    ]);
 
     const items = useMemo(
       () =>
@@ -209,18 +154,14 @@ export const HighlightedFields = memo(
                   values={description.values}
                   field={description.field}
                   originalField={description.originalField}
-                  scopeId={description.scopeId}
-                  showPreview={showPreview}
-                  ancestorsIndexName={description.ancestorsIndexName}
                   hit={hit}
-                  entityId={entityId}
                   renderFlyoutLink={renderFlyoutLink}
                 />
               ),
             }),
         },
       ],
-      [renderCellActions, showPreview, hit, entityId, renderFlyoutLink]
+      [renderCellActions, hit, renderFlyoutLink]
     );
 
     return (

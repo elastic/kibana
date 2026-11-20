@@ -145,7 +145,7 @@ export const createMlChartsTool = (
 After the tool succeeds, render the chart inline by emitting:
 \`<render_attachment id="{attachment_id}" version="{version}" />\`
 
-The returned \`config\` in the result can also be forwarded to \`platform.dashboard.generate_dashboard\` if the user asks to add the chart to a dashboard (use \`source: "config"\` with the appropriate panel type).`,
+The returned \`config\` in the result can also be forwarded to \`platform.dashboard.generate_dashboard\` if the user asks to add the chart to a dashboard (use it as the panel \`config\`, with \`type\` set to \`ml_\` followed by the \`chart_type\`, e.g. \`ml_anomaly_swimlane\`).`,
   experimental: true,
   schema,
   handler: async (params, { esClient, savedObjectsClient, request, logger, attachments }) => {
@@ -195,6 +195,30 @@ The returned \`config\` in the result can also be forwarded to \`platform.dashbo
             results: [createErrorResult('view_by is required when swimlane_type is "viewBy".')],
           };
         }
+
+        // Verify job IDs/groups exist before creating the attachment, so a missing
+        // ID is rejected rather than silently producing an empty chart.
+        try {
+          const mlClient = buildMlClient?.(esClient, savedObjectsClient, request);
+          const jobsApi = mlClient ?? esClient.asCurrentUser.ml;
+          const jobResponse = await jobsApi.getJobs({ job_id: params.job_ids.join(',') });
+          if (!jobResponse.jobs?.length) {
+            const ids = params.job_ids.join(', ');
+            return {
+              results: [
+                createErrorResult(
+                  `anomaly_swimlane cannot render: no jobs found for job_ids: ${ids}`
+                ),
+              ],
+            };
+          }
+        } catch (fetchError) {
+          const msg = fetchError instanceof Error ? fetchError.message : String(fetchError);
+          return {
+            results: [createErrorResult(`anomaly_swimlane cannot render: ${msg}`)],
+          };
+        }
+
         attachmentType = ANOMALY_SWIMLANE_ATTACHMENT_TYPE;
         attachmentData = {
           job_ids: params.job_ids,
@@ -209,6 +233,29 @@ The returned \`config\` in the result can also be forwarded to \`platform.dashbo
         };
         description = `Anomaly swim lane: ${params.job_ids.join(', ')}`;
       } else if (chartType === 'anomaly_charts') {
+        // Verify job IDs/groups exist before creating the attachment, so a missing
+        // ID is rejected rather than silently producing an empty chart.
+        try {
+          const mlClient = buildMlClient?.(esClient, savedObjectsClient, request);
+          const jobsApi = mlClient ?? esClient.asCurrentUser.ml;
+          const jobResponse = await jobsApi.getJobs({ job_id: params.job_ids.join(',') });
+          if (!jobResponse.jobs?.length) {
+            const ids = params.job_ids.join(', ');
+            return {
+              results: [
+                createErrorResult(
+                  `anomaly_charts cannot render: no jobs found for job_ids: ${ids}`
+                ),
+              ],
+            };
+          }
+        } catch (fetchError) {
+          const msg = fetchError instanceof Error ? fetchError.message : String(fetchError);
+          return {
+            results: [createErrorResult(`anomaly_charts cannot render: ${msg}`)],
+          };
+        }
+
         const severityThresholds =
           params.severity_threshold != null
             ? buildAnomalyChartsThresholds(params.severity_threshold)

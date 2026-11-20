@@ -7,10 +7,11 @@
 
 import Boom from '@hapi/boom';
 import { inject, injectable } from 'inversify';
-import type { ChangeHistoryClient, ChangeHistoryDocument } from '@kbn/change-history';
+import type { ChangeHistoryDocument, IChangeHistoryClient } from '@kbn/change-history';
 import type {
   ListRuleChangeHistoryResponse,
   RuleChangeHistoryDetail,
+  RuleChangeHistorySnapshot,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
@@ -25,19 +26,25 @@ export interface ListRuleChangesArgs {
 }
 
 export interface GetRuleChangeArgs {
-  ruleId: string;
   eventId: string;
+}
+
+export interface RuleChangeSnapshot {
+  ruleId: string;
+  /** Stored as written by any Kibana version and not validated on read; parse before use. */
+  snapshot: RuleChangeHistorySnapshot;
 }
 
 export interface RuleChangesHistoryClientContract {
   listRuleChanges(args: ListRuleChangesArgs): Promise<ListRuleChangeHistoryResponse>;
   getRuleChange(args: GetRuleChangeArgs): Promise<RuleChangeHistoryDetail>;
+  getRuleSnapshot(args: GetRuleChangeArgs): Promise<RuleChangeSnapshot>;
 }
 
 @injectable()
 export class RuleChangesHistoryClient implements RuleChangesHistoryClientContract {
   constructor(
-    @inject(ChangeHistoryClientToken) private readonly changeHistory: ChangeHistoryClient,
+    @inject(ChangeHistoryClientToken) private readonly changeHistory: IChangeHistoryClient,
     @inject(RequestSpaceIdToken) private readonly spaceId: string
   ) {}
 
@@ -78,30 +85,10 @@ export class RuleChangesHistoryClient implements RuleChangesHistoryClientContrac
     };
   }
 
-  public async getRuleChange({
-    ruleId,
-    eventId,
-  }: GetRuleChangeArgs): Promise<RuleChangeHistoryDetail> {
-    this.assertInitialized();
+  public async getRuleChange({ eventId }: GetRuleChangeArgs): Promise<RuleChangeHistoryDetail> {
+    const document = await this.getRuleChangeDocument(eventId);
 
-    const { items } = await this.changeHistory.getHistory(
-      this.spaceId,
-      RULE_CHANGES_HISTORY_OBJECT_TYPE,
-      ruleId,
-      {
-        additionalFilters: [{ term: { 'event.id': eventId } }],
-        size: 1,
-      }
-    );
-
-    const document = items[0];
-    if (!document) {
-      throw Boom.notFound(`Rule change with event id "${eventId}" not found for rule "${ruleId}"`, {
-        code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND,
-        details: { rule_id: ruleId, event_id: eventId },
-      });
-    }
-
+    const ruleId = document.object.id;
     const [previous, newest] = await Promise.all([
       this.fetchPrevious(ruleId, document),
       this.fetchNewest(ruleId),
@@ -110,6 +97,32 @@ export class RuleChangesHistoryClient implements RuleChangesHistoryClientContrac
     return toDetail(document, previous, {
       isCurrent: newest?.event.id === eventId,
     });
+  }
+
+  public async getRuleSnapshot({ eventId }: GetRuleChangeArgs): Promise<RuleChangeSnapshot> {
+    const document = await this.getRuleChangeDocument(eventId);
+    return {
+      ruleId: document.object.id,
+      snapshot: document.object.snapshot as RuleChangeHistorySnapshot,
+    };
+  }
+
+  private async getRuleChangeDocument(eventId: string): Promise<ChangeHistoryDocument> {
+    this.assertInitialized();
+
+    // `eventId` is a UUID and already unique across objects and types, so the
+    // rule id is read from the document rather than supplied by the caller.
+    const document = await this.changeHistory.getEvent(this.spaceId, eventId);
+
+    // Other object types may share the module and dataset; they are not rule changes.
+    if (!document || document.object.type !== RULE_CHANGES_HISTORY_OBJECT_TYPE) {
+      throw Boom.notFound(`Rule change with event id "${eventId}" not found`, {
+        code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND,
+        details: { event_id: eventId },
+      });
+    }
+
+    return document;
   }
 
   private async fetchPrevious(

@@ -14,17 +14,6 @@ import { useAddIntegrationPath } from './hooks/use_add_integration_path';
 
 jest.mock('./hooks/use_add_integration_path');
 
-const mockNavigateToApp = jest.fn();
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: mockNavigateToApp,
-      },
-    },
-  }),
-}));
-
 describe('Initializing', () => {
   afterEach(() => {
     jest.resetAllMocks();

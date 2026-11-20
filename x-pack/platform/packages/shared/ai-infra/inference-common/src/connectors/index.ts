@@ -22,4 +22,10 @@ export {
   type RawInferenceConnector,
 } from './connectors';
 export { getModelDefinition } from './known_models';
-export { getContextWindowSize, contextWindowFromModelName } from './connector_capabilities';
+export {
+  getContextWindowSize,
+  contextWindowFromModelName,
+  getSupportedReasoningEffortLevels,
+  isTemplateRequiredConnector,
+  validateReasoningEffort,
+} from './connector_capabilities';

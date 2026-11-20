@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -19,12 +19,14 @@ import { createSiemMigrationAvailability } from '../common/availability';
 import { hasRuleMigrationPrivileges } from '../common/privileges';
 import { createToolErrorResult, createMissingPrivilegeError } from '../common/tool_results';
 import { SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID } from './tool_ids';
-import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_ids';
+import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_catalog';
 import { MigrationId } from '../common/schemas';
 
-const schema = z.object({
-  migration_id: MigrationId,
-});
+const schema = lazySchema(() =>
+  z.object({
+    migration_id: MigrationId,
+  })
+);
 
 const buildPath = (migrationId: string): string =>
   SIEM_RULE_MIGRATION_STOP_PATH.replace('{migration_id}', encodeURIComponent(migrationId));
@@ -52,7 +54,7 @@ export const stopRuleMigrationTool = (
 
 Returns { stopped: boolean }.
 
-See the ${RULE_MIGRATION_SKILLS.STOP} skill for the full workflow.`,
+See the ${RULE_MIGRATION_SKILLS.STOP.id} skill for the full workflow.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async ({ migration_id: migrationId }, { request }) => {

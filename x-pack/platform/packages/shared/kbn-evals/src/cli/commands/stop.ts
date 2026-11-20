@@ -13,6 +13,9 @@ export const stopCmd: Command<void> = {
   description: `
   Stop backgrounded eval services (EDOT collector, Scout server).
 
+  Docker containers started by these services (the EDOT collector, and the
+  serverless Elasticsearch and UIAM containers) are stopped and removed.
+
   With no arguments, stops all managed services.
   Pass --service to stop a specific one.
 

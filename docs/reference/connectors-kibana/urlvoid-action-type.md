@@ -9,6 +9,8 @@ applies_to:
 
 The URLVoid connector communicates with the URLVoid API to check domain and URL reputation using multi-engine scanning.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-urlvoid-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:

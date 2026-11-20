@@ -31,6 +31,7 @@ export const createAnnotationActions = ({
   registerLibraryAnnotationGroup,
   core,
   isSaveable,
+  isAnnotationLibrarySupported,
   eventAnnotationService,
   savedObjectsTagging,
   dataViews,
@@ -42,6 +43,7 @@ export const createAnnotationActions = ({
   registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
   core: CoreStart;
   isSaveable?: boolean;
+  isAnnotationLibrarySupported: boolean;
   eventAnnotationService: EventAnnotationServiceType;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   dataViews: DataViewsContract;
@@ -55,7 +57,11 @@ export const createAnnotationActions = ({
 
   // Linked annotations are auto-saved to library on Apply/Save, so the
   // explicit "Save to library" action is only offered for by-value layers.
-  if (savingToLibraryPermitted && !isByReferenceAnnotationsLayer(layer)) {
+  if (
+    savingToLibraryPermitted &&
+    isAnnotationLibrarySupported &&
+    !isByReferenceAnnotationsLayer(layer)
+  ) {
     actions.push(
       getSaveLayerAction({
         state,

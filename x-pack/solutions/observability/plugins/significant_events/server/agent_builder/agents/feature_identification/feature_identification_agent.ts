@@ -10,9 +10,10 @@ import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import { featuresPrompt } from '@kbn/nightshift-ai';
 import { FEATURE_IDENTIFICATION_SKILL_ID } from '../../skills/feature_identification';
+import { FEATURE_IDENTIFICATION_AGENT_ID } from '../../../../common/constants';
 import groundingInstructions from './instructions.md.text';
 
-export const FEATURE_IDENTIFICATION_AGENT_ID = 'significant-events.feature-identification';
+export { FEATURE_IDENTIFICATION_AGENT_ID };
 export const FEATURE_IDENTIFICATION_AGENT_TYPE_ID =
   'platform.sig_events.feature-identification-type';
 

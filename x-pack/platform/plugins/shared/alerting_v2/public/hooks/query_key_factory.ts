@@ -8,6 +8,7 @@
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
 import type { ListRuleExecutionsUiParams } from './use_fetch_rule_executions';
+import type { MatchRulesUiParams } from './use_fetch_matching_rules';
 
 export const ruleKeys = {
   all: ['rule'] as const,
@@ -20,14 +21,18 @@ export const ruleKeys = {
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }) => [...ruleKeys.lists(), filters] as const,
+  matchList: (params: MatchRulesUiParams) => [...ruleKeys.lists(), 'match', params] as const,
   details: () => [...ruleKeys.all, 'details'] as const,
   detail: (id: string) => [...ruleKeys.details(), id] as const,
   allTags: () => [...ruleKeys.all, 'tags'] as const,
   tags: (search?: string, kind?: string) => [...ruleKeys.allTags(), { search, kind }] as const,
+  routingTags: (search?: string) => [...ruleKeys.allTags(), 'routing', { search }] as const,
 };
 
 export const ruleTemplateKeys = {
   all: ['ruleTemplate'] as const,
+  allTags: () => [...ruleTemplateKeys.all, 'tags'] as const,
+  tags: (search?: string) => [...ruleTemplateKeys.allTags(), { search }] as const,
   lists: () => [...ruleTemplateKeys.all, 'list'] as const,
   list: (filters: {
     page: number;
@@ -43,6 +48,7 @@ export const workflowKeys = {
   all: ['workflow'] as const,
   details: () => [...workflowKeys.all, 'details'] as const,
   detail: (id: string) => [...workflowKeys.details(), id] as const,
+  execution: (executionId: string) => [...workflowKeys.all, 'execution', executionId] as const,
   searches: () => [...workflowKeys.all, 'search'] as const,
   search: (params: Pick<WorkflowsSearchParams, 'query' | 'tags'>) =>
     [...workflowKeys.searches(), params] as const,
@@ -57,6 +63,7 @@ export const matcherSuggestionKeys = {
 export const actionPolicyKeys = {
   all: ['actionPolicy'] as const,
   detail: (id: string) => [...actionPolicyKeys.all, 'detail', id] as const,
+  testPreview: (id: string) => [...actionPolicyKeys.all, 'testPreview', id] as const,
   lists: () => [...actionPolicyKeys.all, 'list'] as const,
   list: (filters: {
     page: number;
@@ -77,11 +84,11 @@ export const executionHistoryKeys = {
     perPage: number;
     search?: string;
     ruleIds?: string[];
-    outcome?: PolicyExecutionOutcomeFilter;
+    outcomes?: PolicyExecutionOutcomeFilter;
     episodeIds?: string[];
     from?: string;
     to?: string;
-    sort?: 'dispatchedAt';
+    sortField?: 'dispatchedAt';
     sortOrder?: 'asc' | 'desc';
   }) => [...executionHistoryKeys.all, 'list', filters] as const,
   newEventsSince: (
@@ -89,7 +96,7 @@ export const executionHistoryKeys = {
     filters: {
       search?: string;
       ruleIds?: string[];
-      outcome?: PolicyExecutionOutcomeFilter;
+      outcomes?: PolicyExecutionOutcomeFilter;
     } = {}
   ) => [...executionHistoryKeys.all, 'newEventsSince', since, filters] as const,
 };
@@ -98,6 +105,12 @@ export const ruleExecutionKeys = {
   all: ['ruleExecution'] as const,
   list: (filters: ListRuleExecutionsUiParams) =>
     [...ruleExecutionKeys.all, 'list', filters] as const,
+};
+
+export const sequenceBuilderKeys = {
+  all: ['sequenceBuilder'] as const,
+  editRule: (id: string) => [...sequenceBuilderKeys.all, 'editRule', id] as const,
+  ruleFetch: (ruleIds: string[]) => [...sequenceBuilderKeys.all, 'ruleFetch', ...ruleIds] as const,
 };
 
 export const userProfileKeys = {

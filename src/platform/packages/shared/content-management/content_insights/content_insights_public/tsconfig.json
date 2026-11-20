@@ -30,5 +30,7 @@
     "@kbn/charts-theme",
     "@kbn/logging",
     "@kbn/react-query",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-logging-server-mocks",
   ]
 }

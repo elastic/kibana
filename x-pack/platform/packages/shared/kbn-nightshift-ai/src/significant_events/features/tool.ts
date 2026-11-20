@@ -118,7 +118,7 @@ export function toFeatureForLlmContext(feature: Feature): LlmFeature {
 export function createGetStreamFeaturesTool<T extends string>(allowedTypes: readonly T[]) {
   return {
     description:
-      'Fetches extracted stream features for this stream. Supports optional filtering by type, confidence, and limit.',
+      'Fetches extracted source features for this source. Supports optional filtering by type, confidence, and limit.',
     schema: {
       type: 'object' as const,
       properties: {

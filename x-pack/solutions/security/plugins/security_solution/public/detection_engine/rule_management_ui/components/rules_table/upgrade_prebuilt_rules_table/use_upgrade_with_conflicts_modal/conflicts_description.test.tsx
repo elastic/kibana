@@ -169,7 +169,7 @@ describe('UpgradeConflictsDescription displays proper text when there are', () =
       'Use the rule update flyout to address auto-resolved conflicts. This is the safest option and gives you more control over the final update. Learn more(external, opens in a new tab or window)',
       'Click Update rules to bulk-update rules with auto-resolved conflicts and rules without conflicts.',
       'Only choose this option if you’re comfortable accepting the fixes Elastic suggested.',
-      'Auto-resolved conflicts include a rule type change for 2 unmodified rules. A rule type change can affect how the rule’s actions and exceptions are executed.',
+      'Auto-resolved conflicts include a rule type change for 2 unmodified rules. After updating, review your actions and exceptions, as some may need to be updated.',
     ].join('');
 
     expect(normalizeText(container.textContent)).toBe(normalizeText(expectedText));
@@ -190,7 +190,7 @@ describe('UpgradeConflictsDescription displays proper text when there are', () =
       'Rules with auto-resolved conflicts: 1 (1 unmodified rule with a rule type change)'
     );
     expect(normalizeText(container.textContent)).toContain(
-      'Auto-resolved conflicts include a rule type change for 1 unmodified rule. A rule type change can affect how the rule’s actions and exceptions are executed.'
+      'Auto-resolved conflicts include a rule type change for 1 unmodified rule. After updating, review your actions and exceptions, as some may need to be updated.'
     );
   });
 });

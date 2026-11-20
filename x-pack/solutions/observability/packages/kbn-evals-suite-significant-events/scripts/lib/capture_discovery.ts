@@ -11,7 +11,6 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { ConnectionConfig } from './get_connection_config';
 import { DISCOVERY_TIMEOUT_MS } from './constants';
 import {
-  configureModelSelectionSettings,
   persistDetectionsForSnapshot,
   persistDiscoveriesForSnapshot,
   triggerDiscovery,
@@ -40,11 +39,7 @@ export async function captureDiscoveryForScenario({
   scenarioId: string;
   timeoutMs?: number;
 }): Promise<CaptureDiscoveryResult> {
-  // Idempotent — ensures the discovery feature resolves to the requested connector
-  // (the otel-demo flow already configures it earlier).
-  await configureModelSelectionSettings(config, log, connectorId);
-
-  await triggerDiscovery(config, log);
+  await triggerDiscovery(config, log, connectorId);
   await waitForDiscovery(config, log, timeoutMs);
 
   const { index: discoveriesIndex, count: discoveriesCount } = await persistDiscoveriesForSnapshot(

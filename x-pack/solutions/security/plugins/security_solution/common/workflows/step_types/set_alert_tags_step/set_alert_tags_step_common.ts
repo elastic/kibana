@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
@@ -14,35 +14,41 @@ import { MAX_ALERT_ID_LENGTH, MAX_WORKFLOW_MESSAGE_LENGTH } from '../common/cons
 
 export const SetAlertTagsStepId = 'security.setAlertTags' as const;
 
-const tagsArray = z.array(AlertTag);
+const tagsArray = lazySchema(() => z.array(AlertTag));
 
-const alertIdsBase = z.object({
-  alert_ids: z
-    .union([
-      z.string().min(1).max(MAX_ALERT_ID_LENGTH),
-      z.array(z.string().min(1).max(MAX_ALERT_ID_LENGTH)).min(1),
-    ])
-    .describe('A single alert ID or a list of IDs to support bulk updates'),
-});
+const alertIdsBase = lazySchema(() =>
+  z.object({
+    alert_ids: z
+      .union([
+        z.string().min(1).max(MAX_ALERT_ID_LENGTH),
+        z.array(z.string().min(1).max(MAX_ALERT_ID_LENGTH)).min(1),
+      ])
+      .describe('A single alert ID or a list of IDs to support bulk updates'),
+  })
+);
 
 // `z.union` (not `.refine`) so the "at least one tags array" constraint lowers to JSON Schema
 // `anyOf` and surfaces in the editor — a top-level `.refine` is unwrapped before JSON Schema
 // generation. Follow-up: elastic/security-team#17984.
-export const setAlertTagsInputSchema = z.union([
-  alertIdsBase.extend({
-    tags_to_add: tagsArray.min(1).describe('Tags to add to the specified alerts'),
-    tags_to_remove: tagsArray.default([]).describe('Tags to remove from the specified alerts'),
-  }),
-  alertIdsBase.extend({
-    tags_to_add: tagsArray.default([]).describe('Tags to add to the specified alerts'),
-    tags_to_remove: tagsArray.min(1).describe('Tags to remove from the specified alerts'),
-  }),
-]);
+export const setAlertTagsInputSchema = lazySchema(() =>
+  z.union([
+    alertIdsBase.extend({
+      tags_to_add: tagsArray.min(1).describe('Tags to add to the specified alerts'),
+      tags_to_remove: tagsArray.default([]).describe('Tags to remove from the specified alerts'),
+    }),
+    alertIdsBase.extend({
+      tags_to_add: tagsArray.default([]).describe('Tags to add to the specified alerts'),
+      tags_to_remove: tagsArray.min(1).describe('Tags to remove from the specified alerts'),
+    }),
+  ])
+);
 
-export const setAlertTagsOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
-});
+export const setAlertTagsOutputSchema = lazySchema(() =>
+  z.object({
+    success: z.boolean(),
+    message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
+  })
+);
 
 export const setAlertTagsStepCommonDefinition: BaseStepDefinition<
   typeof setAlertTagsInputSchema,

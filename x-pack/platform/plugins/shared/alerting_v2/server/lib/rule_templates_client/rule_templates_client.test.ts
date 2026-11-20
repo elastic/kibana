@@ -8,11 +8,14 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
+import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { RulesClient } from '../rules_client';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { RuleTemplatesClient } from './rule_templates_client';
+import { buildRuleTemplateTagsAggregation } from './utils';
 
 const validTemplateAttributes = {
   engine: 'v2' as const,
@@ -27,12 +30,10 @@ const validTemplateAttributes = {
       every: '1m',
       lookback: '15m',
     },
-    state_transition: {
-      pending_count: 3,
-    },
-    recovery_strategy: 'no_breach' as const,
+    state_transition: { pending: { count: 3 } },
+    recovery: { strategy: 'no_breach' as const },
+    no_data: { strategy: 'ignore' as const },
     query: {
-      format: 'composed' as const,
       base: 'TS metrics-* | STATS restarts = MAX(k8s.container.restarts) BY k8s.pod.name',
       breach: {
         segment: 'WHERE restarts > 0 | SORT restarts DESC | LIMIT 50',
@@ -49,11 +50,78 @@ const createClient = (
   savedObjectsClient: SavedObjectsClientContract = savedObjectsClientMock.create()
 ) => {
   const { loggerService, mockLogger } = createLoggerService();
-  const client = new RuleTemplatesClient(savedObjectsClient, loggerService);
-  return { client, savedObjectsClient, loggerService, mockLogger };
+  const rulesClient = {
+    createRule: jest.fn(),
+    getRuleCountsByTemplateId: jest.fn().mockResolvedValue({}),
+  } as unknown as jest.Mocked<RulesClient>;
+  const client = new RuleTemplatesClient(savedObjectsClient, loggerService, rulesClient);
+  return { client, savedObjectsClient, loggerService, mockLogger, rulesClient };
 };
 
 describe('RuleTemplatesClient', () => {
+  describe('getTags', () => {
+    it('aggregates v2 template tags independently of list pagination', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 60,
+        page: 1,
+        per_page: 0,
+        aggregations: { tags: { buckets: [{ key: 'nginx' }, { key: 'infra' }] } },
+      });
+      const { client } = createClient(savedObjectsClient);
+
+      await expect(client.getTags()).resolves.toEqual(['nginx', 'infra']);
+      expect(savedObjectsClient.find).toHaveBeenCalledWith({
+        type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        filter: nodeBuilder.is(`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.engine`, 'v2'),
+        aggs: buildRuleTemplateTagsAggregation(),
+      });
+    });
+
+    it('forwards the search prefix to the aggregation builder', async () => {
+      const search = 'pro';
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+        aggregations: { tags: { buckets: [] } },
+      });
+      const { client } = createClient(savedObjectsClient);
+
+      await client.getTags({ search });
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          aggs: buildRuleTemplateTagsAggregation(search),
+        })
+      );
+    });
+
+    it('returns no tags when aggregations are absent', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+      });
+      const { client } = createClient(savedObjectsClient);
+      await expect(client.getTags()).resolves.toEqual([]);
+    });
+
+    it('propagates saved object failures', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.find.mockRejectedValue(new Error('Unavailable'));
+      const { client } = createClient(savedObjectsClient);
+
+      await expect(client.getTags()).rejects.toThrow('Unavailable');
+    });
+  });
+
   describe('findRuleTemplates', () => {
     it('returns transformed templates with default paging', async () => {
       const savedObjectsClient = savedObjectsClientMock.create();
@@ -86,10 +154,82 @@ describe('RuleTemplatesClient', () => {
         })
       );
       expect(result).toEqual({
-        items: [{ id: 'template-1', ...validTemplateAttributes }],
+        items: [{ id: 'template-1', ...validTemplateAttributes, rule_count: 0 }],
         total: 1,
         page: 1,
         per_page: 20,
+      });
+    });
+
+    describe('rule_count', () => {
+      const findResponse = (ids: string[]) => ({
+        saved_objects: ids.map((id) => ({
+          id,
+          type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+          attributes: validTemplateAttributes,
+          references: [],
+          score: 1,
+        })),
+        total: ids.length,
+        page: 1,
+        per_page: 20,
+      });
+
+      it('sets the number of rules created from each template, defaulting to 0', async () => {
+        const savedObjectsClient = savedObjectsClientMock.create();
+        savedObjectsClient.find.mockResolvedValue(findResponse(['template-1', 'template-2']));
+        const { client, rulesClient } = createClient(savedObjectsClient);
+        rulesClient.getRuleCountsByTemplateId.mockResolvedValue({ 'template-1': 3 });
+
+        const result = await client.findRuleTemplates();
+
+        expect(result.items.map(({ id, rule_count: ruleCount }) => [id, ruleCount])).toEqual([
+          ['template-1', 3],
+          ['template-2', 0],
+        ]);
+      });
+
+      it('counts rules once, for the templates on the page only', async () => {
+        const savedObjectsClient = savedObjectsClientMock.create();
+        savedObjectsClient.find.mockResolvedValue({
+          ...findResponse(['valid']),
+          saved_objects: [
+            ...findResponse(['valid']).saved_objects,
+            {
+              id: 'invalid',
+              type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+              attributes: { engine: 'v2', rule: { kind: 'alert' } },
+              references: [],
+              score: 1,
+            },
+          ],
+          total: 2,
+        });
+        const { client, rulesClient } = createClient(savedObjectsClient);
+
+        await client.findRuleTemplates();
+
+        expect(rulesClient.getRuleCountsByTemplateId).toHaveBeenCalledTimes(1);
+        expect(rulesClient.getRuleCountsByTemplateId).toHaveBeenCalledWith(['valid']);
+      });
+
+      it('lists the templates without rule_count and logs when counting the rules fails', async () => {
+        const savedObjectsClient = savedObjectsClientMock.create();
+        savedObjectsClient.find.mockResolvedValue(findResponse(['template-1']));
+        const { client, rulesClient, mockLogger } = createClient(savedObjectsClient);
+        rulesClient.getRuleCountsByTemplateId.mockRejectedValue(new Error('Unavailable'));
+
+        const result = await client.findRuleTemplates();
+
+        expect(result.items).toEqual([{ id: 'template-1', ...validTemplateAttributes }]);
+        expect(result.items[0]).not.toHaveProperty('rule_count');
+        expect(result.total).toBe(1);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          'Failed to count the rules created from each rule template',
+          expect.objectContaining({
+            labels: { code: ALERTING_LOG_CODES.RULE_TEMPLATE_RULE_COUNT_FAILED },
+          })
+        );
       });
     });
 
@@ -110,6 +250,7 @@ describe('RuleTemplatesClient', () => {
         sortField: 'tags',
         sortOrder: 'desc',
         tags: ['Kubernetes', 'production'],
+        excludedTags: ['deprecated'],
       });
 
       expect(savedObjectsClient.find).toHaveBeenCalledWith(
@@ -133,6 +274,13 @@ describe('RuleTemplatesClient', () => {
                 'production'
               ),
             ]),
+            nodeTypes.function.buildNode(
+              'not',
+              nodeBuilder.is(
+                `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.rule.metadata.tags`,
+                'deprecated'
+              )
+            ),
           ]),
         })
       );
@@ -254,6 +402,84 @@ describe('RuleTemplatesClient', () => {
             rule_template_id: 'classic-template',
           },
         })
+      );
+    });
+  });
+
+  describe('installRuleTemplate', () => {
+    const data = {
+      ...validTemplateAttributes.rule,
+      metadata: { name: 'Pod CrashLoopBackOff (edited)' },
+    } as CreateRuleData;
+    const createdRule = { id: 'rule-1' } as RuleResponse;
+
+    const clientWithTemplate = () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'template-1',
+        type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+        attributes: validTemplateAttributes,
+        references: [],
+      });
+      return createClient(savedObjectsClient);
+    };
+
+    it('creates the rule from the request body and records the template id', async () => {
+      const { client, rulesClient } = clientWithTemplate();
+      rulesClient.createRule.mockResolvedValue(createdRule);
+
+      await expect(client.installRuleTemplate({ id: 'template-1', data })).resolves.toBe(
+        createdRule
+      );
+
+      expect(rulesClient.createRule).toHaveBeenCalledTimes(1);
+      expect(rulesClient.createRule).toHaveBeenCalledWith({
+        data,
+        options: { template: { id: 'template-1' } },
+      });
+    });
+
+    it('does not create a rule when the template does not exist', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+          'missing'
+        )
+      );
+      const { client, rulesClient } = createClient(savedObjectsClient);
+
+      await expect(client.installRuleTemplate({ id: 'missing', data })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: { code: ALERTING_ERROR_CODES.RULE_TEMPLATE_NOT_FOUND },
+      });
+      expect(rulesClient.createRule).not.toHaveBeenCalled();
+    });
+
+    it('does not create a rule when the stored template is unusable', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'broken-template',
+        type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+        attributes: { engine: 'v2', rule: { kind: 'alert' } },
+        references: [],
+      });
+      const { client, rulesClient } = createClient(savedObjectsClient);
+
+      await expect(
+        client.installRuleTemplate({ id: 'broken-template', data })
+      ).rejects.toMatchObject({
+        data: { code: ALERTING_ERROR_CODES.RULE_TEMPLATE_NOT_FOUND },
+      });
+      expect(rulesClient.createRule).not.toHaveBeenCalled();
+    });
+
+    it('propagates rule creation failures', async () => {
+      const { client, rulesClient } = clientWithTemplate();
+      rulesClient.createRule.mockRejectedValue(new Error('Invalid rule'));
+
+      await expect(client.installRuleTemplate({ id: 'template-1', data })).rejects.toThrow(
+        'Invalid rule'
       );
     });
   });

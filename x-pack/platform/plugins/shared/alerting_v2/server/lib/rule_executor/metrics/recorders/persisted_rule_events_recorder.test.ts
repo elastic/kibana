@@ -33,7 +33,7 @@ describe('PersistedRuleEventsRecorder', () => {
   });
 
   const episodeEvent = (episodeId: string): AlertEvent =>
-    createAlertEvent({ type: 'alert', episode: { id: episodeId, status: 'active' } });
+    createAlertEvent({ type: 'alert', alert: { id: episodeId, status: 'active' } });
 
   beforeEach(() => {
     collector = new MetricCollectorImpl({ executionId: 'e', startedAt });
@@ -91,6 +91,7 @@ describe('PersistedRuleEventsRecorder', () => {
     expect(collector.snapshot().counters).toEqual({
       ruleEventsGenerated: 3,
       signalsGenerated: 3,
+      breachedEventsGenerated: 3,
     });
   });
 
@@ -110,6 +111,7 @@ describe('PersistedRuleEventsRecorder', () => {
 
     expect(collector.snapshot().counters).toEqual({
       ruleEventsGenerated: 2,
+      breachedEventsGenerated: 2,
     });
   });
 
@@ -137,6 +139,7 @@ describe('PersistedRuleEventsRecorder', () => {
     expect(collector.snapshot().counters).toEqual({
       ruleEventsGenerated: 3,
       signalsGenerated: 1,
+      breachedEventsGenerated: 3,
     });
   });
 
@@ -163,6 +166,7 @@ describe('PersistedRuleEventsRecorder', () => {
     expect(collector.snapshot().counters).toEqual({
       ruleEventsGenerated: 2,
       signalsGenerated: 2,
+      breachedEventsGenerated: 2,
     });
   });
 
@@ -186,6 +190,7 @@ describe('PersistedRuleEventsRecorder', () => {
     expect(collector.snapshot().counters).toEqual({
       ruleEventsGenerated: 3,
       newEpisodesGenerated: 2,
+      breachedEventsGenerated: 3,
     });
   });
 
@@ -212,6 +217,34 @@ describe('PersistedRuleEventsRecorder', () => {
     expect(collector.snapshot().counters).toEqual({
       ruleEventsGenerated: 1,
       newEpisodesGenerated: 1,
+      breachedEventsGenerated: 1,
+    });
+  });
+
+  it('counts a single-series run that shares one new episode id across rows as one episode', () => {
+    // A single-series (ungrouped) rule emits one rule event per returned row,
+    // all sharing one freshly opened episode id. That is one new episode, not
+    // one per row, so the counter must dedupe by episode id.
+    const row1 = episodeEvent('ep-ungrouped');
+    const row2 = episodeEvent('ep-ungrouped');
+    const row3 = episodeEvent('ep-ungrouped');
+
+    recorder.record(
+      collector,
+      buildContext({
+        state: createRulePipelineState({ newEpisodeIds: ['ep-ungrouped'] }),
+        meta: {
+          observations: {
+            bulkIndexResult: { attempted: 3, docs: [row1, row2, row3], errors: [] },
+          },
+        },
+      })
+    );
+
+    expect(collector.snapshot().counters).toEqual({
+      ruleEventsGenerated: 3,
+      newEpisodesGenerated: 1,
+      breachedEventsGenerated: 3,
     });
   });
 
@@ -233,6 +266,7 @@ describe('PersistedRuleEventsRecorder', () => {
     expect(collector.snapshot().counters).toEqual({
       ruleEventsGenerated: 1,
       signalsGenerated: 1,
+      breachedEventsGenerated: 1,
     });
   });
 
@@ -259,6 +293,108 @@ describe('PersistedRuleEventsRecorder', () => {
     expect(collector.snapshot().counters).toEqual({
       ruleEventsGenerated: 6,
       signalsGenerated: 6,
+      breachedEventsGenerated: 6,
+    });
+  });
+
+  it('partitions persisted docs by status into breached / recovered / no_data counters', () => {
+    const persisted = [
+      createAlertEvent({ type: 'alert', status: 'breached' }),
+      createAlertEvent({ type: 'alert', status: 'breached' }),
+      createAlertEvent({ type: 'alert', status: 'recovered' }),
+      createAlertEvent({ type: 'alert', status: 'no_data' }),
+    ];
+
+    recorder.record(
+      collector,
+      buildContext({
+        meta: {
+          observations: {
+            bulkIndexResult: { attempted: 4, docs: persisted, errors: [] },
+          },
+        },
+      })
+    );
+
+    expect(collector.snapshot().counters).toEqual({
+      ruleEventsGenerated: 4,
+      breachedEventsGenerated: 2,
+      recoveredEventsGenerated: 1,
+      noDataEventsGenerated: 1,
+    });
+  });
+
+  it('counts a doc with an unknown status in the total but in no status counter', () => {
+    const known = createAlertEvent({ type: 'alert', status: 'breached' });
+    const unknown = createAlertEvent({
+      type: 'alert',
+      // @ts-expect-error: this is a test case for an unknown status
+      status: 'something_unexpected',
+    });
+
+    recorder.record(
+      collector,
+      buildContext({
+        meta: {
+          observations: {
+            bulkIndexResult: { attempted: 2, docs: [known, unknown], errors: [] },
+          },
+        },
+      })
+    );
+
+    expect(collector.snapshot().counters).toEqual({
+      ruleEventsGenerated: 2,
+      breachedEventsGenerated: 1,
+    });
+  });
+
+  it('counts status only from persisted docs, ignoring what failed to index', () => {
+    const persistedRecovered = createAlertEvent({ type: 'alert', status: 'recovered' });
+    const failedRecovered = createAlertEvent({ type: 'alert', status: 'recovered' });
+
+    recorder.record(
+      collector,
+      buildContext({
+        meta: {
+          observations: {
+            bulkIndexResult: {
+              attempted: 2,
+              docs: [persistedRecovered],
+              errors: [rejection(failedRecovered)],
+            },
+          },
+        },
+      })
+    );
+
+    expect(collector.snapshot().counters).toEqual({
+      ruleEventsGenerated: 1,
+      recoveredEventsGenerated: 1,
+    });
+  });
+
+  it('counts a breached event regardless of whether it is a signal or an alert', () => {
+    const persisted = [
+      createAlertEvent({ type: 'signal', status: 'breached' }),
+      createAlertEvent({ type: 'alert', status: 'breached' }),
+    ];
+
+    recorder.record(
+      collector,
+      buildContext({
+        meta: {
+          observations: {
+            bulkIndexResult: { attempted: 2, docs: persisted, errors: [] },
+          },
+        },
+      })
+    );
+
+    expect(collector.snapshot().counters).toEqual({
+      ruleEventsGenerated: 2,
+      signalsGenerated: 1,
+      breachedEventsGenerated: 2,
     });
   });
 });

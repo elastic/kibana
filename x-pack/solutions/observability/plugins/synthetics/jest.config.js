@@ -6,9 +6,15 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/observability/plugins/synthetics'],
+  // The real entry point loads the whole observability_shared plugin (seconds per test file);
+  // tests get a shim that only exposes what synthetics uses.
+  moduleNameMapper: {
+    '^@kbn/observability-shared-plugin/public$':
+      '<rootDir>/x-pack/solutions/observability/plugins/synthetics/public/apps/synthetics/utils/testing/observability_shared_public_shim.ts',
+  },
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/observability/plugins/synthetics',
   coverageReporters: ['text', 'html'],

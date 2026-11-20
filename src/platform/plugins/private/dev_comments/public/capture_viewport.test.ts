@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { drawScrolledFields, preserveScroll } from './capture_viewport';
+import { COMMENTS_BUTTON_TEST_SUBJ, IGNORE_ATTR } from '@kbn/dev-comments';
+import { drawScrolledFields, isOmittedFromCapture, preserveScroll } from './capture_viewport';
 
 /**
  * What the library does with a node: a shallow clone, the children cloned into
@@ -32,6 +33,23 @@ const parse = (html: string): HTMLElement =>
   new DOMParser().parseFromString(html, 'text/html').body.firstElementChild as HTMLElement;
 
 describe('captureViewport', () => {
+  describe('isOmittedFromCapture', () => {
+    it("leaves out the layer's own UI, but keeps the toolbar comments button that sits among the host's", () => {
+      const layer = parse(`<div ${IGNORE_ATTR}="true"><div>panel</div></div>`);
+      const wrap = parse(
+        `<span ${IGNORE_ATTR}="true"><button data-test-subj="${COMMENTS_BUTTON_TEST_SUBJ}">Comment mode</button></span>`
+      );
+      const button = wrap.querySelector('button')!;
+      const page = parse(`<button type="button">Save</button>`);
+
+      expect(isOmittedFromCapture(layer)).toBe(true);
+      expect(isOmittedFromCapture(wrap)).toBe(false);
+      expect(isOmittedFromCapture(button)).toBe(false);
+      expect(isOmittedFromCapture(page)).toBe(false);
+      expect(isOmittedFromCapture(document.createTextNode('text'))).toBe(false);
+    });
+  });
+
   describe('preserveScroll', () => {
     it('shifts the children of a scrolled container by its offset and clips them, keeping their own transforms', () => {
       const original = parse(

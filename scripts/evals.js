@@ -195,7 +195,7 @@ function runFastCiMap(repoRoot, args) {
       entries.push({
         label: labels[j],
         suiteId: suite.id,
-        command: 'EVAL_CONNECTOR_ID=<connector-id> node scripts/evals run --suite ' + suite.id,
+        command: 'node scripts/evals run --suite ' + suite.id,
       });
     }
   }
@@ -227,13 +227,20 @@ var ENV_DOCS = [
   },
   {
     name: 'EVAL_CONNECTOR_ID',
-    description: 'Connector used for LLM-as-a-judge evaluators (required).',
+    description:
+      'Connector used for LLM-as-a-judge evaluators. Defaults to the profile\'s evaluationConnectorId (see the kbn-evals README, "Default judge").',
     example: 'EVAL_CONNECTOR_ID=bedrock-claude',
   },
   {
     name: 'EVAL_REPETITIONS',
     description: 'Overrides configured repetition count for evals.',
     example: 'EVAL_REPETITIONS=3',
+  },
+  {
+    name: 'EVAL_CONCURRENCY',
+    description:
+      'Overrides how many examples an experiment runs at once (default 5). A concurrency passed to runExperiment in the spec still wins.',
+    example: 'EVAL_CONCURRENCY=8',
   },
   {
     name: 'KBN_EVALS_SKIP_CONNECTOR_SETUP',

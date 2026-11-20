@@ -16,6 +16,8 @@ import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefi
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import { currentSuggestionMock } from '../../__mocks__/suggestions';
 import { lensAdaptersMock } from '../../__mocks__/lens_adapters';
+import { DataViewSource } from '@kbn/data-source';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { ChartConfigPanel } from './chart_config_panel';
 import type { UnifiedHistogramVisContext } from '../../types';
 import { UnifiedHistogramSuggestionType } from '../../types';
@@ -38,7 +40,7 @@ describe('ChartConfigPanel', () => {
           setIsFlyoutVisible: jest.fn(),
           onSuggestionContextChange: jest.fn(),
           onSuggestionContextEdit: jest.fn(),
-          isPlainRecord: true,
+          dataSource: createMockEsqlSource(),
           lensAdapters: lensAdaptersMock,
           query: {
             esql: 'from test',
@@ -71,7 +73,7 @@ describe('ChartConfigPanel', () => {
           setIsFlyoutVisible: jest.fn(),
           onSuggestionContextChange: jest.fn(),
           onSuggestionContextEdit: jest.fn(),
-          isPlainRecord: false,
+          dataSource: new DataViewSource(dataViewWithTimefieldMock),
           currentSuggestionContext: {
             suggestion: currentSuggestionMock,
             type: UnifiedHistogramSuggestionType.histogramForDataView,

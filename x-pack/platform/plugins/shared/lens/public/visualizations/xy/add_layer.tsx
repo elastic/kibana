@@ -18,9 +18,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { css } from '@emotion/react';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import type { AddLayerFunction, VisualizationLayerDescription } from '@kbn/lens-common';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
@@ -36,11 +38,15 @@ export interface AddLayerButtonProps {
   addLayer: AddLayerFunction<ExtraAppendLayerArg>;
   eventAnnotationService: EventAnnotationServiceType;
   isInlineEditing?: boolean;
+  /** Hides the annotation library option (ES|QL charts do not support data-view-based library groups) */
+  hideAnnotationLibrary?: boolean;
+  isEsqlChart?: boolean;
 }
 
 export enum AddLayerPanelType {
   main = 'main',
   selectAnnotationMethod = 'selectAnnotationMethod',
+  selectReferenceSource = 'selectReferenceSource',
   compatibleVisualizationTypes = 'compatibleVisualizationTypes',
 }
 
@@ -50,6 +56,8 @@ export function AddLayerButton({
   addLayer,
   eventAnnotationService,
   isInlineEditing,
+  hideAnnotationLibrary,
+  isEsqlChart,
 }: AddLayerButtonProps) {
   const [showLayersChoice, toggleLayersChoice] = useState(false);
 
@@ -63,7 +71,16 @@ export function AddLayerButton({
     toolTipContent,
   }: (typeof supportedLayers)[0]) => {
     return {
-      panel: AddLayerPanelType.selectAnnotationMethod,
+      // without the library option there is no annotation method to choose from,
+      // so add a new annotation layer directly
+      ...(hideAnnotationLibrary
+        ? {
+            onClick: () => {
+              addLayer(LayerTypes.ANNOTATIONS);
+              toggleLayersChoice(false);
+            },
+          }
+        : { panel: AddLayerPanelType.selectAnnotationMethod }),
       toolTipContent,
       disabled,
       name: (
@@ -168,6 +185,16 @@ export function AddLayerButton({
                   }
                   return dataPanel(props);
                 }
+                if (type === LayerTypes.REFERENCELINE && isEsqlChart) {
+                  return {
+                    panel: AddLayerPanelType.selectReferenceSource,
+                    toolTipContent,
+                    disabled,
+                    name: label,
+                    icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
+                    'data-test-subj': `lnsLayerAddButton-${type}`,
+                  };
+                }
                 return {
                   toolTipContent,
                   disabled,
@@ -180,6 +207,71 @@ export function AddLayerButton({
                   },
                 };
               }),
+            },
+            {
+              id: AddLayerPanelType.selectReferenceSource,
+              title: i18n.translate('xpack.lens.configPanel.selectReferenceSourceTitle', {
+                defaultMessage: 'Reference lines',
+              }),
+              width: 400,
+              items: [
+                {
+                  renderItem: () => (
+                    <EuiContextMenuItem
+                      icon="number"
+                      data-test-subj="lnsReferenceLineLayer_static"
+                      onClick={() => {
+                        addLayer(LayerTypes.REFERENCELINE, {
+                          ignoreInitialValues: false,
+                          datasourceId: LENS_DATASOURCE_ID.FORM_BASED,
+                        });
+                        toggleLayersChoice(false);
+                      }}
+                    >
+                      <EuiText size="s">
+                        <FormattedMessage
+                          id="xpack.lens.configPanel.staticReferenceLinesButtonLabel"
+                          defaultMessage="Static reference lines"
+                        />
+                      </EuiText>
+                      <EuiText size="xs" color="subdued">
+                        <FormattedMessage
+                          id="xpack.lens.configPanel.staticReferenceLinesDescription"
+                          defaultMessage="Set fixed values for budgets, targets, or thresholds."
+                        />
+                      </EuiText>
+                    </EuiContextMenuItem>
+                  ),
+                },
+                {
+                  renderItem: () => (
+                    <EuiContextMenuItem
+                      icon="code"
+                      data-test-subj="lnsReferenceLineLayer_esql"
+                      onClick={() => {
+                        addLayer(LayerTypes.REFERENCELINE, {
+                          ignoreInitialValues: true,
+                          datasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
+                        });
+                        toggleLayersChoice(false);
+                      }}
+                    >
+                      <EuiText size="s">
+                        <FormattedMessage
+                          id="xpack.lens.configPanel.esqlReferenceLinesButtonLabel"
+                          defaultMessage="ES|QL reference lines"
+                        />
+                      </EuiText>
+                      <EuiText size="xs" color="subdued">
+                        <FormattedMessage
+                          id="xpack.lens.configPanel.esqlReferenceLinesDescription"
+                          defaultMessage="Calculate thresholds using a separate ES|QL query."
+                        />
+                      </EuiText>
+                    </EuiContextMenuItem>
+                  ),
+                },
+              ],
             },
             {
               id: AddLayerPanelType.selectAnnotationMethod,
@@ -229,14 +321,11 @@ export function AddLayerButton({
                       icon={<EuiIcon type={t.icon} aria-hidden={true} />}
                       data-test-subj={`lnsXY_seriesType-${t.id}`}
                       onClick={() => {
-                        addLayer(
-                          LayerTypes.DATA,
-                          undefined,
-                          undefined,
-                          canInitializeWithSubtype
+                        addLayer(LayerTypes.DATA, {
+                          seriesType: canInitializeWithSubtype
                             ? firstLayerSubtype
-                            : (t.subtypes?.[0] as SeriesType)
-                        );
+                            : (t.subtypes?.[0] as SeriesType),
+                        });
                         toggleLayersChoice(false);
                       }}
                     >
@@ -261,7 +350,7 @@ export function AddLayerButton({
           eventAnnotationService={eventAnnotationService}
           isInlineEditing={isInlineEditing}
           addLayer={(extraArg) => {
-            addLayer(LayerTypes.ANNOTATIONS, extraArg);
+            addLayer(LayerTypes.ANNOTATIONS, { extraArg });
           }}
         />
       )}

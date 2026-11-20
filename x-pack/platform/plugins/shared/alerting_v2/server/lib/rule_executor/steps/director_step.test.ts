@@ -14,7 +14,8 @@ import {
   createAlertEvent,
   createRuleResponse,
 } from '../test_utils';
-import { createDirectorService } from '../../director/director.mock';
+import { createDirectorService, createMockDirectorService } from '../../director/director.mock';
+import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 
 describe('DirectorStep', () => {
   const createEmptyEsqlResponse = () => ({
@@ -24,6 +25,7 @@ describe('DirectorStep', () => {
       { name: 'last_episode_status', type: 'keyword' },
       { name: 'last_episode_status_count', type: 'long' },
       { name: 'last_episode_timestamp', type: 'date' },
+      { name: 'last_episode_phase_started_at', type: 'date' },
     ],
     values: [],
   });
@@ -70,6 +72,150 @@ describe('DirectorStep', () => {
     expect(result.type).toBe('continue');
 
     expect(result.state.newEpisodeIds).toHaveLength(2);
+  });
+
+  it('threads the batch status transitions on state for alertable rules', async () => {
+    const { directorService, mockEsClient } = createDirectorService();
+    const step = new DirectorStep(directorService);
+
+    // No previous episode state, so the event opens a new pending episode.
+    mockEsClient.esql.query.mockResolvedValue(createEmptyEsqlResponse());
+
+    const state = createRulePipelineState({
+      rule: createRuleResponse({ kind: 'alert' }),
+      alertEventsBatch: [createAlertEvent({ group_hash: 'hash-1' })],
+    });
+
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(result.state.alertStatusTransitions).toEqual([
+      {
+        groupHash: 'hash-1',
+        episodeId: result.state.alertEventsBatch?.[0].alert?.id,
+        previousStatus: null,
+        status: 'pending',
+      },
+    ]);
+  });
+
+  it('emits episode transition counters grouped by destination status', async () => {
+    const director = createMockDirectorService();
+    director.run.mockResolvedValue({
+      alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],
+      stats: {
+        newEpisodeIds: [],
+        statusTransitions: [
+          { groupHash: 'g1', episodeId: 'e1', previousStatus: 'inactive', status: 'active' },
+          { groupHash: 'g2', episodeId: 'e2', previousStatus: null, status: 'active' },
+          { groupHash: 'g3', episodeId: 'e3', previousStatus: 'active', status: 'recovering' },
+          { groupHash: 'g4', episodeId: 'e4', previousStatus: 'recovering', status: 'inactive' },
+          { groupHash: 'g5', episodeId: 'e5', previousStatus: 'inactive', status: 'pending' },
+        ],
+      },
+      previousAlertStateByGroupHash: new Map(),
+    });
+    const step = new DirectorStep(director);
+
+    const state = createRulePipelineState({
+      rule: createRuleResponse({ kind: 'alert' }),
+      alertEventsBatch: [createAlertEvent({ group_hash: 'hash-1' })],
+    });
+
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    // @ts-expect-error: meta is present on the result
+    expect(result.meta?.counters).toEqual({
+      [RULE_EXECUTION_COUNTERS.episodesTransitionedToActive]: 2,
+      [RULE_EXECUTION_COUNTERS.episodesTransitionedToRecovering]: 1,
+      [RULE_EXECUTION_COUNTERS.episodesTransitionedToInactive]: 1,
+      [RULE_EXECUTION_COUNTERS.episodesTransitionedToPending]: 1,
+    });
+  });
+
+  it('counts each (episode, status) transition once across batches of the same run', async () => {
+    const e1ToActive = {
+      groupHash: 'g1',
+      episodeId: 'e1',
+      previousStatus: 'inactive' as const,
+      status: 'active' as const,
+    };
+    const e2ToActive = {
+      groupHash: 'g2',
+      episodeId: 'e2',
+      previousStatus: 'inactive' as const,
+      status: 'active' as const,
+    };
+    const director = createMockDirectorService();
+    // Batch 1 opens `e1`. Batch 2 recomputes `e1` (a repeat) and surfaces `e2`
+    // for the first time. Batch 3 recomputes both (all repeats). The repeats
+    // must be skipped while a newly-arriving episode still counts, and a batch
+    // whose transitions were all already counted must emit nothing.
+    director.run
+      .mockResolvedValueOnce({
+        alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],
+        stats: { newEpisodeIds: [], statusTransitions: [e1ToActive] },
+        previousAlertStateByGroupHash: new Map(),
+      })
+      .mockResolvedValueOnce({
+        alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],
+        stats: { newEpisodeIds: [], statusTransitions: [e1ToActive, e2ToActive] },
+        previousAlertStateByGroupHash: new Map(),
+      })
+      .mockResolvedValueOnce({
+        alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],
+        stats: { newEpisodeIds: [], statusTransitions: [e1ToActive, e2ToActive] },
+        previousAlertStateByGroupHash: new Map(),
+      });
+    const step = new DirectorStep(director);
+
+    const batchState = createRulePipelineState({
+      rule: createRuleResponse({ kind: 'alert' }),
+      alertEventsBatch: [createAlertEvent({ group_hash: 'hash-1' })],
+    });
+
+    const [first, second, third] = await collectStreamResults(
+      step.executeStream(createPipelineStream([batchState, batchState, batchState]))
+    );
+
+    // @ts-expect-error: meta is present on the result
+    expect(first.meta?.counters).toEqual({
+      [RULE_EXECUTION_COUNTERS.episodesTransitionedToActive]: 1,
+    });
+    // Only `e2` counts in the second batch; the `e1` repeat is deduped.
+    // @ts-expect-error: meta is present on the result
+    expect(second.meta?.counters).toEqual({
+      [RULE_EXECUTION_COUNTERS.episodesTransitionedToActive]: 1,
+    });
+    // Every transition in the third batch was already counted, so it emits nothing.
+    // @ts-expect-error: meta is present on the result
+    expect(third.meta?.counters).toEqual({});
+  });
+
+  it('emits a counter for transitions to pending', async () => {
+    const director = createMockDirectorService();
+    director.run.mockResolvedValue({
+      alertEvents: [createAlertEvent({ group_hash: 'hash-1' })],
+      stats: {
+        newEpisodeIds: [],
+        statusTransitions: [
+          { groupHash: 'g1', episodeId: 'e1', previousStatus: null, status: 'pending' },
+        ],
+      },
+      previousAlertStateByGroupHash: new Map(),
+    });
+    const step = new DirectorStep(director);
+
+    const state = createRulePipelineState({
+      rule: createRuleResponse({ kind: 'alert' }),
+      alertEventsBatch: [createAlertEvent({ group_hash: 'hash-1' })],
+    });
+
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    // @ts-expect-error: meta is present on the result
+    expect(result.meta?.counters).toEqual({
+      [RULE_EXECUTION_COUNTERS.episodesTransitionedToPending]: 1,
+    });
   });
 
   it('skips episode tracking for signal rules', async () => {
@@ -157,5 +303,21 @@ describe('DirectorStep', () => {
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
+  });
+  it('threads the prior state the director loaded onto state.previousAlertStateByGroupHash', async () => {
+    const { directorService, mockEsClient } = createDirectorService();
+    const step = new DirectorStep(directorService);
+
+    mockEsClient.esql.query.mockResolvedValue(createEmptyEsqlResponse());
+
+    const state = createRulePipelineState({
+      rule: createRuleResponse({ kind: 'alert' }),
+      alertEventsBatch: [createAlertEvent({ group_hash: 'hash-1' })],
+    });
+
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(result.type).toBe('continue');
+    expect(result.state.previousAlertStateByGroupHash).toEqual(new Map());
   });
 });

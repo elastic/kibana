@@ -1,0 +1,152 @@
+{
+  "sha1": "00a39280bb25d606bee2e56e8180884e161d67e4",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "05b5ab071a3f4c7-dda554a65d55133",
+      "title": "Observability Alerting v2 Inbox investigation actions triggers investigation from inbox table row overflow menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
+        "line": 80,
+        "column": 34
+      }
+    },
+    {
+      "id": "05b5ab071a3f4c7-1c078edfd00472e",
+      "title": "Observability Alerting v2 Inbox investigation actions triggers investigation for a native v2 episode using its episode id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
+        "line": 133,
+        "column": 15
+      }
+    },
+    {
+      "id": "05b5ab071a3f4c7-9cda454a8e110cb",
+      "title": "Observability Alerting v2 Inbox investigation actions starts an investigation from Universal details and immediately offers View",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
+        "line": 151,
+        "column": 64
+      }
+    },
+    {
+      "id": "05b5ab071a3f4c7-07470bf31bf6646",
+      "title": "Observability Alerting v2 Inbox investigation actions views a finished investigation from Universal details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
+        "line": 203,
+        "column": 20
+      }
+    },
+    {
+      "id": "05b5ab071a3f4c7-ec03c268fe3540f",
+      "title": "Observability Alerting v2 Inbox investigation actions views a running investigation from Universal details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
+        "line": 203,
+        "column": 20
+      }
+    },
+    {
+      "id": "05b5ab071a3f4c7-fa1b97d24f214c5",
+      "title": "Observability Alerting v2 Inbox investigation actions opens a running investigation in a new tab from Universal details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
+        "line": 214,
+        "column": 15
+      }
+    },
+    {
+      "id": "05b5ab071a3f4c7-ab16fb72da8dc20",
+      "title": "Observability Alerting v2 Inbox investigation actions hides the Universal header investigation action when Nightshift is unavailable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
+        "line": 227,
+        "column": 5
+      }
+    },
+    {
+      "id": "05b5ab071a3f4c7-a21ca7ce7d1e607",
+      "title": "Observability Alerting v2 Inbox investigation actions triggers investigation from classic alert details flyout take action menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
+        "line": 236,
+        "column": 13
+      }
+    },
+    {
+      "id": "05b5ab071a3f4c7-bb6b8a7b9e6f6f2",
+      "title": "Observability Alerting v2 Inbox investigation actions shows investigating state while running and reveals re-investigate only after viewing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
+        "line": 263,
+        "column": 13
+      }
+    }
+  ]
+}

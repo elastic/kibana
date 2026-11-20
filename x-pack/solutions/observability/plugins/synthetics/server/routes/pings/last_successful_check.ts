@@ -10,9 +10,10 @@ import { queryNumber, optionalQueryString, routeId } from '../zod_query';
 import { getJourneyScreenshot } from '../../queries/get_journey_screenshot';
 import { getLastSuccessfulCheck } from '../../queries/get_last_successful_check';
 import type { Ping } from '../../../common/runtime_types';
-import { isFullScreenshot, isRefResult } from '../../../common/runtime_types';
+
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
+import { isFullScreenshot, isRefResult } from '../../../common/runtime_types/schemas/ping_guards';
 
 export const createLastSuccessfulCheckRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',

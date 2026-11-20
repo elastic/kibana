@@ -228,7 +228,7 @@ const unprocessedOtelErrorsRoute = createApmServerRoute({
   handler: async (resources): Promise<UnprocessedOtelErrorsResponse> => {
     const { params } = resources;
     const { serviceName } = params.path;
-    const { environment, kuery, start, end } = params.query;
+    const { environment, kuery, start, end, maxRows } = params.query;
 
     // This route reads log indices via logsDataAccess rather than APM event client.
     // logsDataAccess is a required APM plugin dependency, so createLogsClient always works here.
@@ -241,6 +241,7 @@ const unprocessedOtelErrorsRoute = createApmServerRoute({
       kuery,
       start,
       end,
+      maxRows,
     });
   },
 });

@@ -10,6 +10,7 @@ import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracer
 import type { Logger } from '@kbn/logging';
 import type { ChatAgentEvent } from '@kbn/agent-builder-common';
 import {
+  EventActorType,
   ChatEventType,
   ConversationRoundStepType,
   ToolOrigin,
@@ -78,12 +79,6 @@ describe('convertGraphEvents', () => {
           reasoning: 'group',
           tool_call_group_id: 'g',
         }),
-        stepUpdates.append({
-          type: ConversationRoundStepType.reasoning,
-          reasoning: 'why',
-          tool_call_id: 'c1',
-          tool_call_group_id: 'g',
-        }),
         stepUpdates.appendToolCall({
           type: ConversationRoundStepType.toolCall,
           tool_call_id: 'c1',
@@ -94,6 +89,7 @@ describe('convertGraphEvents', () => {
           tool_call_group_id: 'g',
           tool_origin: ToolOrigin.internal,
           tool_type: ToolType.builtin,
+          intent: 'Looking up q',
         }),
         stepUpdates.appendToolCall({
           type: ConversationRoundStepType.toolCall,
@@ -123,25 +119,20 @@ describe('convertGraphEvents', () => {
 
     expect(events.map((e) => e.type)).toEqual([
       ChatEventType.reasoning,
-      ChatEventType.reasoning,
       ChatEventType.toolCall,
       ChatEventType.browserToolCall,
     ]);
     expect(events[0].data).toEqual({ reasoning: 'group', tool_call_group_id: 'g' });
     expect(events[1].data).toEqual({
-      reasoning: 'why',
-      tool_call_id: 'c1',
-      tool_call_group_id: 'g',
-    });
-    expect(events[2].data).toEqual({
       tool_call_id: 'c1',
       tool_id: 'my.tool',
       params: { q: 1 },
       tool_call_group_id: 'g',
       tool_origin: ToolOrigin.internal,
       tool_type: ToolType.builtin,
+      intent: 'Looking up q',
     });
-    expect(events[3].data).toEqual({ tool_call_id: 'b1', tool_id: 'open', params: {} });
+    expect(events[2].data).toEqual({ tool_call_id: 'b1', tool_id: 'open', params: {} });
   });
 
   it('emits tool_result, prompt_request, user_question_asked and roster events from executeTool', async () => {
@@ -213,6 +204,69 @@ describe('convertGraphEvents', () => {
       }),
     ]);
     expect(events).toEqual([{ type: ChatEventType.backgroundAgentComplete, data: { execution } }]);
+  });
+
+  it('emits interim_answer then message_delivered from the check after the answer', async () => {
+    const delivered = {
+      event_id: 'e1',
+      author: { type: EventActorType.user, id: 'u1' },
+      is_run_owner: true,
+      message: 'use a table',
+      delivered_at: '2026-01-01T00:00:00.000Z',
+      cycle: 1,
+      after_answer: true,
+    };
+    const events = await collect([
+      chainEnd(steps.checkIncomingAfterAnswer, {
+        steps: [
+          stepUpdates.append({
+            type: ConversationRoundStepType.interimAnswer,
+            message: 'the first answer',
+          }),
+          stepUpdates.append({ type: ConversationRoundStepType.deliveredMessage, ...delivered }),
+        ],
+      }),
+    ]);
+    expect(events).toEqual([
+      { type: ChatEventType.interimAnswer, data: { message: 'the first answer' } },
+      { type: ChatEventType.messageDelivered, data: delivered },
+    ]);
+  });
+
+  it('emits substitution_applied for substitution appends, and nothing for a compaction request', async () => {
+    const substitution = {
+      substituted_tool_calls: [{ round_id: 'round-1', tool_call_id: 'c1' }],
+      trigger: 'intra_round' as const,
+      threshold_tokens: 1_000,
+    };
+    const events = await collect([
+      chainEnd(steps.contextManagement, {
+        compactionRequest: { trigger: 'proactive', tailCapTokens: 40_000, tokensBefore: 85_000 },
+      }),
+      chainEnd(steps.contextManagement, {
+        steps: [
+          stepUpdates.append({ type: ConversationRoundStepType.substitution, ...substitution }),
+        ],
+      }),
+      chainEnd(steps.contextManagement, {}),
+    ]);
+    expect(events).toEqual([{ type: ChatEventType.substitutionApplied, data: substitution }]);
+  });
+
+  it('emits compaction_completed from compactContext compaction appends', async () => {
+    const compaction = {
+      summarized_cycle_count: 2,
+      token_count_before: 85_000,
+      token_count_after: 20_000,
+    };
+    const events = await collect([
+      chainEnd(steps.compactContext, {
+        steps: [stepUpdates.append({ type: ConversationRoundStepType.compaction, ...compaction })],
+      }),
+      // a skipped compaction appends nothing
+      chainEnd(steps.compactContext, { compactionRequest: undefined }),
+    ]);
+    expect(events).toEqual([{ type: ChatEventType.compactionCompleted, data: compaction }]);
   });
 
   it('ignores node on_chain_end events from a nested run of the graph', async () => {

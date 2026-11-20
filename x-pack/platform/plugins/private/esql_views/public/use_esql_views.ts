@@ -105,9 +105,7 @@ export const useEsqlViews = (client: EsqlViewsClient) => {
     };
   }, [loadViews]);
 
-  const reload = useCallback(() => {
-    void loadViews();
-  }, [loadViews]);
+  const reload = useCallback(() => loadViews(), [loadViews]);
 
   return {
     ...state,

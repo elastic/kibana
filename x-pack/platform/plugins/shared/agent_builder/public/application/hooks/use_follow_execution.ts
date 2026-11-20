@@ -21,6 +21,10 @@ import {
   isToolProgressEvent,
   isRoundCompleteEvent,
   isBackgroundAgentCompleteEvent,
+  isInterimAnswerEvent,
+  isMessageDeliveredEvent,
+  createInterimAnswerStep,
+  createDeliveredMessageStep,
 } from '@kbn/agent-builder-common';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 
@@ -78,6 +82,7 @@ export const useFollowExecution = (executionId: string | null): UseFollowExecuti
                 params: event.data.params,
                 results: [],
                 tool_call_group_id: event.data.tool_call_group_id,
+                intent: event.data.intent,
               } as ToolCallStep,
             ]);
           } else if (isToolResultEvent(event)) {
@@ -122,6 +127,11 @@ export const useFollowExecution = (executionId: string | null): UseFollowExecuti
                 ...event.data.execution,
               } as ConversationRoundStep,
             ]);
+          } else if (isInterimAnswerEvent(event)) {
+            setSteps((prev) => [...prev, createInterimAnswerStep(event.data)]);
+            setStreamingMessage('');
+          } else if (isMessageDeliveredEvent(event)) {
+            setSteps((prev) => [...prev, createDeliveredMessageStep(event.data)]);
           } else if (isMessageChunkEvent(event)) {
             setStreamingMessage((prev) => prev + event.data.text_chunk);
           } else if (isMessageCompleteEvent(event)) {

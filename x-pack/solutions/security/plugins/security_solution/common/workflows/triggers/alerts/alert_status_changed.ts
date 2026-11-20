@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import {
   MAX_ALERTS_PER_TRIGGER,
@@ -48,18 +48,20 @@ steps:
           alertId: "{{ foreach.item }}"
 \`\`\``;
 
-const alertStatusChangedEventSchema = z.object({
-  alertIds: z
-    .array(z.string().min(1).max(MAX_ID_LENGTH))
-    .max(MAX_ALERTS_PER_TRIGGER)
-    .meta({ description: ALERT_STATUS_CHANGED_SCHEMA_ALERT_IDS_DESCRIPTION }),
-  status: workflowStatusEnum.meta({ description: TRIGGER_SCHEMA_STATUS_DESCRIPTION }),
-  previousStatuses: z
-    .array(previousStatusSchema)
-    .max(MAX_ALERTS_PER_TRIGGER)
-    .meta({ description: ALERT_STATUS_CHANGED_SCHEMA_PREVIOUS_STATUSES_DESCRIPTION }),
-  truncated: z.boolean().meta({ description: ALERT_STATUS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION }),
-});
+const alertStatusChangedEventSchema = lazySchema(() =>
+  z.object({
+    alertIds: z
+      .array(z.string().min(1).max(MAX_ID_LENGTH))
+      .max(MAX_ALERTS_PER_TRIGGER)
+      .meta({ description: ALERT_STATUS_CHANGED_SCHEMA_ALERT_IDS_DESCRIPTION }),
+    status: workflowStatusEnum.meta({ description: TRIGGER_SCHEMA_STATUS_DESCRIPTION }),
+    previousStatuses: z
+      .array(previousStatusSchema)
+      .max(MAX_ALERTS_PER_TRIGGER)
+      .meta({ description: ALERT_STATUS_CHANGED_SCHEMA_PREVIOUS_STATUSES_DESCRIPTION }),
+    truncated: z.boolean().meta({ description: ALERT_STATUS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION }),
+  })
+);
 
 export const alertStatusChangedTriggerDef: CommonTriggerDefinition = {
   id: AlertStatusChangedTriggerId,

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { IBasePath } from '@kbn/core-http-server';
 import { getSLOSummaryPipelineId, SLO_RESOURCES_VERSION } from '../../../common/constants';
@@ -19,26 +18,25 @@ export const getSummaryPipelineTemplate = (
   const errorBudgetEstimated =
     slo.budgetingMethod === 'occurrences' && slo.timeWindow.type === 'calendarAligned';
 
-  const optionalObjectiveTimesliceProcessors = timeslicesBudgetingMethodSchema.is(
-    slo.budgetingMethod
-  )
-    ? [
-        {
-          set: {
-            description: 'Set objective.timesliceTarget field',
-            field: 'slo.objective.timesliceTarget',
-            value: slo.objective.timesliceTarget,
+  const optionalObjectiveTimesliceProcessors =
+    slo.budgetingMethod === 'timeslices'
+      ? [
+          {
+            set: {
+              description: 'Set objective.timesliceTarget field',
+              field: 'slo.objective.timesliceTarget',
+              value: slo.objective.timesliceTarget,
+            },
           },
-        },
-        {
-          set: {
-            description: 'Set objective.timesliceWindow field',
-            field: 'slo.objective.timesliceWindow',
-            value: slo.objective.timesliceWindow!.format(),
+          {
+            set: {
+              description: 'Set objective.timesliceWindow field',
+              field: 'slo.objective.timesliceWindow',
+              value: slo.objective.timesliceWindow!.format(),
+            },
           },
-        },
-      ]
-    : [];
+        ]
+      : [];
 
   return {
     id: getSLOSummaryPipelineId(slo.id, slo.revision),
@@ -200,10 +198,11 @@ export const getSummaryPipelineTemplate = (
           description: 'Computes the last five minute burn rate value',
           lang: 'painless',
           params: {
-            isTimeslice: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod),
-            totalSlicesInRange: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
-              ? Math.floor(5 / slo.objective.timesliceWindow!.asMinutes())
-              : 0,
+            isTimeslice: slo.budgetingMethod === 'timeslices',
+            totalSlicesInRange:
+              slo.budgetingMethod === 'timeslices'
+                ? Math.floor(5 / slo.objective.timesliceWindow!.asMinutes())
+                : 0,
           },
           source: getBurnRateSource('fiveMinuteBurnRate'),
         },
@@ -213,10 +212,11 @@ export const getSummaryPipelineTemplate = (
           description: 'Computes the last hour burn rate value',
           lang: 'painless',
           params: {
-            isTimeslice: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod),
-            totalSlicesInRange: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
-              ? Math.floor(60 / slo.objective.timesliceWindow!.asMinutes())
-              : 0,
+            isTimeslice: slo.budgetingMethod === 'timeslices',
+            totalSlicesInRange:
+              slo.budgetingMethod === 'timeslices'
+                ? Math.floor(60 / slo.objective.timesliceWindow!.asMinutes())
+                : 0,
           },
           source: getBurnRateSource('oneHourBurnRate'),
         },
@@ -226,10 +226,11 @@ export const getSummaryPipelineTemplate = (
           description: 'Computes the last day burn rate value',
           lang: 'painless',
           params: {
-            isTimeslice: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod),
-            totalSlicesInRange: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
-              ? Math.floor(1440 / slo.objective.timesliceWindow!.asMinutes())
-              : 0,
+            isTimeslice: slo.budgetingMethod === 'timeslices',
+            totalSlicesInRange:
+              slo.budgetingMethod === 'timeslices'
+                ? Math.floor(1440 / slo.objective.timesliceWindow!.asMinutes())
+                : 0,
           },
           source: getBurnRateSource('oneDayBurnRate'),
         },

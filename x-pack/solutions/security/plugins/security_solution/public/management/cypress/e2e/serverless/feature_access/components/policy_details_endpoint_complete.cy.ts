@@ -69,25 +69,27 @@ describe(
     });
 
     it(`should not display upselling section for custom notification`, () => {
-      const testData = ['malware', 'ransomware', 'memory', 'behaviour'];
+      const testData = ['perOsMalware', 'perOsRansomware', 'perOsMemory', 'perOsBehaviour'];
 
       loadPage(`${APP_POLICIES_PATH}/${policyId}/settings`);
 
       testData.forEach((protection) => {
         cy.getByTestSubj(`endpointPolicyForm-${protection}`).within(() => {
           cy.getByTestSubj(`endpointPolicyForm-${protection}-enableDisableSwitch`).click();
-          // User should not see the locked card since the feature is available under Endpoint Complete tier
-          [
-            'endpointPolicy-customNotificationLockedCard-title',
-            'endpointPolicy-customNotificationLockedCard',
-            'endpointPolicy-customNotificationLockedCard-badge',
-          ].forEach((testSubj) => {
-            cy.getByTestSubj(testSubj).should('not.exist');
+          cy.getByTestSubj(`endpointPolicyForm-${protection}-windows`).within(() => {
+            // User should not see the locked card since the feature is available under Endpoint Complete tier
+            [
+              'endpointPolicy-customNotificationLockedCard-title',
+              'endpointPolicy-customNotificationLockedCard',
+              'endpointPolicy-customNotificationLockedCard-badge',
+            ].forEach((testSubj) => {
+              cy.getByTestSubj(testSubj).should('not.exist');
+            });
+            // User should see the custom notification section
+            cy.getByTestSubj(`endpointPolicyForm-${protection}-windows-notifyUser-customMessage`)
+              .should('exist')
+              .and('be.visible');
           });
-          // User should see the custom notification section
-          cy.getByTestSubj(`endpointPolicyForm-${protection}-notifyUser-customMessage`)
-            .should('exist')
-            .and('be.visible');
         });
       });
     });

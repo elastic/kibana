@@ -163,7 +163,7 @@ export const createSkillRegistry = ({
     },
 
     async list(options) {
-      const { type, includePlugins, ...listOptions } = options ?? {};
+      const { type, includePlugins, includeHidden, ...listOptions } = options ?? {};
       let results: InternalSkillDefinition[];
       if (type === 'built-in') {
         results = await builtinProvider.list(listOptions);
@@ -178,6 +178,9 @@ export const createSkillRegistry = ({
       }
       if (!includePlugins) {
         results = results.filter((skill) => !skill.plugin_id);
+      }
+      if (!includeHidden) {
+        results = results.filter((skill) => !skill.hidden);
       }
       return filterAvailable(results);
     },

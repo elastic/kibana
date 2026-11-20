@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import moment from 'moment';
+import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { z } from '@kbn/zod/v4';
 import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
@@ -31,6 +32,7 @@ import type {
 } from './plugin';
 import { ActionsPlugin } from './plugin';
 import {
+  ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG,
   AlertHistoryEsIndexConnectorId,
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
@@ -43,6 +45,7 @@ import {
   USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
 import { LeasePool } from './lib';
+import { defaultInboundEventsLimitConfigs } from './config';
 
 function getConfig(overrides = {}) {
   return {
@@ -81,7 +84,10 @@ function getConfig(overrides = {}) {
       enabled: false,
       maxBodyBytes: new ByteSizeValue(1024 * 1024),
       maxEmitted: 25,
+      ...defaultInboundEventsLimitConfigs,
     },
+    connectorSigningKeys: { enabled: false },
+    catalog: { enabled: false },
     ...overrides,
   };
 }
@@ -144,7 +150,10 @@ describe('Actions Plugin', () => {
           enabled: false,
           maxBodyBytes: new ByteSizeValue(1024 * 1024),
           maxEmitted: 25,
+          ...defaultInboundEventsLimitConfigs,
         },
+        connectorSigningKeys: { enabled: false },
+        catalog: { enabled: false },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -589,7 +598,10 @@ describe('Actions Plugin', () => {
           enabled: false,
           maxBodyBytes: new ByteSizeValue(1024 * 1024),
           maxEmitted: 25,
+          ...defaultInboundEventsLimitConfigs,
         },
+        connectorSigningKeys: { enabled: false },
+        catalog: { enabled: false },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -633,6 +645,30 @@ describe('Actions Plugin', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Action type \\"non-existing\\" is not registered."`
       );
+    });
+
+    describe('connector catalog feature flag', () => {
+      it('subscribes to the connector catalog feature flag with a false fallback', async () => {
+        await plugin.setup(coreSetup, pluginsSetup);
+        plugin.start(coreStart, pluginsStart);
+
+        expect(coreStart.featureFlags.getBooleanValue$).toHaveBeenCalledWith(
+          ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG,
+          false
+        );
+      });
+
+      it('unsubscribes from the connector catalog feature flag on stop', async () => {
+        const connectorCatalogEnabled$ = new BehaviorSubject(false);
+        coreStart.featureFlags.getBooleanValue$.mockReturnValue(connectorCatalogEnabled$);
+
+        await plugin.setup(coreSetup, pluginsSetup);
+        plugin.start(coreStart, pluginsStart);
+        expect(connectorCatalogEnabled$.observed).toBe(true);
+
+        plugin.stop();
+        expect(connectorCatalogEnabled$.observed).toBe(false);
+      });
     });
 
     describe('getActionsClientWithRequest()', () => {
@@ -946,6 +982,56 @@ describe('Actions Plugin', () => {
           expect(pluginStart.inMemoryConnectors[1].id).toBe(newDynamicConnector.id);
           expect(pluginStart.inMemoryConnectors[1].isPreconfigured).toBe(true);
           expect(pluginStart.inMemoryConnectors[1].isDynamic).toBe(true);
+        });
+        it('drops inbound events on a dynamic connector when inbound events are disabled', () => {
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-slack',
+            actionTypeId: '.slack2',
+            name: 'Slack',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+            isInboundEventsEnabled: true,
+          };
+          expect(pluginStart.registerDynamicConnector(newDynamicConnector)).toEqual(true);
+
+          expect(pluginStart.inMemoryConnectors[1]).not.toHaveProperty('isInboundEventsEnabled');
+        });
+        it('keeps inbound events on a dynamic connector when inbound events are enabled', async () => {
+          setup(
+            getConfig({
+              inboundEvents: {
+                enabled: true,
+                maxBodyBytes: new ByteSizeValue(1024 * 1024),
+                maxEmitted: 25,
+                ...defaultInboundEventsLimitConfigs,
+              },
+              connectorSigningKeys: { enabled: false },
+              catalog: { enabled: false },
+            })
+          );
+          const enabledPluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          enabledPluginSetup.registerType(serverLogConnectorType);
+          const enabledPluginStart = await plugin.start(coreStart, pluginsStart);
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-slack',
+            actionTypeId: '.slack2',
+            name: 'Slack',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+            isInboundEventsEnabled: true,
+          };
+
+          expect(enabledPluginStart.registerDynamicConnector(newDynamicConnector)).toEqual(true);
+
+          expect(enabledPluginStart.inMemoryConnectors[1].isInboundEventsEnabled).toBe(true);
         });
         it('should not allow adding a dynamic connector for an existing connector id', () => {
           const existingConnector = pluginStart.inMemoryConnectors[0];

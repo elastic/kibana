@@ -39,6 +39,30 @@ describe('test_config module', () => {
   });
 
   describe('testConfig.fromPath', () => {
+    it('registers build smoke tests as the dev package with the FIPS config set', () => {
+      jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+      const configPath = 'src/dev/build/test/scout_fips/api/playwright.config.ts';
+
+      expect(testConfig.fromPath(configPath)).toEqual({
+        path: configPath,
+        category: 'api',
+        type: 'standard',
+        namespace: undefined,
+        module: {
+          name: 'dev',
+          group: 'platform',
+          type: 'package',
+          visibility: 'private',
+          root: 'src/dev/build',
+        },
+        manifest: {
+          path: 'src/dev/build/test/scout_fips/.meta/api/standard.json',
+          ...dummyManifestProps,
+        },
+        server: { configSet: 'fips' },
+      });
+    });
+
     test.each([
       {
         basePath: 'src/platform',

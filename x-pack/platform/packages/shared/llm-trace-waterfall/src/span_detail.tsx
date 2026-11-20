@@ -20,7 +20,8 @@ import {
   type EuiTabbedContentTab,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { GenAiTab, getGenAiFields, hasGenAiData } from '@kbn/apm-ui-shared';
+import { getGenAiFields, hasGenAiData } from '@kbn/genai-common';
+import { GenAiTab } from '@kbn/apm-ui-shared';
 import { KeyValueTable } from '@kbn/key-value-metadata-table';
 import type { SpanNode } from './types';
 import { SPAN_COLORS, getSpanCategory } from './get_span_category';

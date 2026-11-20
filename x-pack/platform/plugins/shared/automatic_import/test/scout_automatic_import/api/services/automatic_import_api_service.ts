@@ -18,6 +18,7 @@ export interface AutoImportApiService {
     dataStreamId: string,
     dataStreamTitle: string
   ) => Promise<void>;
+  getDataStreamStatus: (integrationId: string, dataStreamId: string) => Promise<string | undefined>;
   deleteDataStream: (integrationId: string, dataStreamId: string) => Promise<void>;
   deleteIntegration: (integrationId: string) => Promise<void>;
   cleanupIntegrations: (integrationIds: string[]) => Promise<void>;
@@ -59,6 +60,19 @@ export function getAutoImportApiService(kbnClient: KbnClient): AutoImportApiServ
           ],
         },
       });
+    },
+
+    async getDataStreamStatus(integrationId, dataStreamId) {
+      const { data } = await kbnClient.request<{
+        integrationResponse: { dataStreams: Array<{ dataStreamId: string; status: string }> };
+      }>({
+        method: 'GET',
+        path: `${BASE_PATH}/${integrationId}`,
+        headers: VERSION_HEADER,
+      });
+      return data.integrationResponse.dataStreams.find(
+        (dataStream) => dataStream.dataStreamId === dataStreamId
+      )?.status;
     },
 
     async deleteDataStream(integrationId, dataStreamId) {

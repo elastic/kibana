@@ -19,6 +19,7 @@ export const DispatcherTaskDefinition: AlertingTaskDefinition<DispatcherTaskRunn
   taskType: DISPATCHER_TASK_TYPE,
   title: 'Alerting v2 dispatcher',
   timeout: DISPATCHER_TASK_TIMEOUT,
+  resolveTimeout: (configService) => configService.get('dispatcher.run.timeout'),
   maxAttempts: 1,
   paramsSchema: schema.object({}),
   stateSchemaByVersion,

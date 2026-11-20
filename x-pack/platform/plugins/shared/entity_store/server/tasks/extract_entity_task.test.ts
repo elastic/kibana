@@ -30,7 +30,9 @@ import {
   registerExtractEntityTasks,
 } from './extract_entity_task';
 import type * as types from '../types';
-import { EXTRACTION_MODE } from '../../common/domain/definitions/entity_schema';
+import type { EntityStoreCoreSetup } from '../types';
+import type { EntityType } from '../../common/domain/definitions/entity_schema';
+import { ALL_ENTITY_TYPES, EXTRACTION_MODE } from '../../common/domain/definitions/entity_schema';
 import { ENGINE_STATUS } from '../domain/constants';
 import { EngineDescriptorTypeName } from '../domain/saved_objects';
 import { entityStoreMetrics } from '../monitor/metrics';
@@ -148,7 +150,12 @@ describe('feature flag gates non-priority execution', () => {
       logger: loggerMock.create(),
       entityTypes: ['user'],
       core: {
-        getStartServices: jest.fn().mockResolvedValue([{ featureFlags: {} }]),
+        getStartServices: jest.fn().mockResolvedValue([
+          {
+            featureFlags: {},
+            executionContext: { withContext: jest.fn(<T>(_ctx: unknown, fn: () => T) => fn()) },
+          },
+        ]),
       } as unknown as types.EntityStoreCoreSetup,
       isServerless: false,
     });
@@ -235,7 +242,14 @@ describe('extract entity task metrics', () => {
       logger: loggerMock.create(),
       entityTypes: ['user'],
       core: {
-        getStartServices: jest.fn().mockResolvedValue([{ featureFlags: {} }]),
+        getStartServices: jest.fn().mockResolvedValue([
+          {
+            featureFlags: {},
+            executionContext: {
+              withContext: jest.fn().mockImplementation((_ctx: unknown, fn: () => unknown) => fn()),
+            },
+          },
+        ]),
       } as unknown as types.EntityStoreCoreSetup,
       isServerless: false,
     });
@@ -325,7 +339,12 @@ describe('non-priority task orphan cleanup', () => {
       logger: loggerMock.create(),
       entityTypes: ['user'],
       core: {
-        getStartServices: jest.fn().mockResolvedValue([{ featureFlags: {} }]),
+        getStartServices: jest.fn().mockResolvedValue([
+          {
+            featureFlags: {},
+            executionContext: { withContext: jest.fn(<T>(_ctx: unknown, fn: () => T) => fn()) },
+          },
+        ]),
       } as unknown as types.EntityStoreCoreSetup,
       isServerless: false,
     });
@@ -364,13 +383,17 @@ describe('bootstrapNonPriorityTask', () => {
     typeof createLogsExtractionClient
   >;
 
-  const makeDescriptorSo = (status: string, logExtractionConfig?: Record<string, unknown>) => ({
+  const makeDescriptorSo = (
+    status: string,
+    logExtractionConfig?: Record<string, unknown>,
+    nonPriorityStatus: string = ENGINE_STATUS.STARTED
+  ) => ({
     id: `${EngineDescriptorTypeName}-user-default`,
     type: EngineDescriptorTypeName,
     attributes: {
       type: 'user',
       status,
-      nonPriorityStatus: ENGINE_STATUS.STOPPED,
+      nonPriorityStatus,
       logExtractionConfig: logExtractionConfig ?? null,
       logExtractionState: {
         checkpointTimestamp: null,
@@ -395,11 +418,13 @@ describe('bootstrapNonPriorityTask', () => {
 
   const runPriorityTask = async ({
     engineStatus,
+    nonPriorityStatus = ENGINE_STATUS.STARTED,
     mergedFrequency = '1m',
     logExtractionConfig,
     globalStateOverrides = {},
   }: {
     engineStatus: string;
+    nonPriorityStatus?: string;
     mergedFrequency?: string;
     logExtractionConfig?: Record<string, unknown>;
     globalStateOverrides?: Record<string, unknown>;
@@ -419,7 +444,7 @@ describe('bootstrapNonPriorityTask', () => {
     const mockEnsureScheduled = jest.fn().mockResolvedValue(undefined);
     const soClient = savedObjectsClientMock.create();
     soClient.find.mockResolvedValue({
-      saved_objects: [makeDescriptorSo(engineStatus, logExtractionConfig)],
+      saved_objects: [makeDescriptorSo(engineStatus, logExtractionConfig, nonPriorityStatus)],
       total: 1,
       per_page: 10,
       page: 1,
@@ -444,6 +469,7 @@ describe('bootstrapNonPriorityTask', () => {
                 asScopedToNamespace: jest.fn().mockReturnValue(soClient),
               }),
             },
+            executionContext: { withContext: jest.fn(<T>(_ctx: unknown, fn: () => T) => fn()) },
           },
           { taskManager: { ensureScheduled: mockEnsureScheduled } },
         ]),
@@ -477,6 +503,16 @@ describe('bootstrapNonPriorityTask', () => {
     });
 
     expect(mockEnsureScheduled).toHaveBeenCalledTimes(1);
+  });
+
+  // The internal stop route removes only the non-priority task, so this tick must leave it gone.
+  it('does not schedule the non-priority task when only that process is stopped', async () => {
+    const { mockEnsureScheduled } = await runPriorityTask({
+      engineStatus: ENGINE_STATUS.STARTED,
+      nonPriorityStatus: ENGINE_STATUS.STOPPED,
+    });
+
+    expect(mockEnsureScheduled).not.toHaveBeenCalled();
   });
 
   it('uses the merged config frequency as the task schedule interval', async () => {
@@ -519,6 +555,100 @@ describe('bootstrapNonPriorityTask', () => {
       null,
       EXTRACTION_MODE.nonPriority,
       undefined
+    );
+  });
+});
+
+describe('registerExtractEntityTasks — execution context wrap', () => {
+  const runRegisteredTask = async (
+    entityType: EntityType,
+    taskTypePrefix = 'entity_store:v2:extract_entity_task'
+  ) => {
+    const mockIsDualProcessEnabled = isDualProcessEnabled as jest.MockedFunction<
+      typeof isDualProcessEnabled
+    >;
+    const mockCreateClient = createLogsExtractionClient as jest.MockedFunction<
+      typeof createLogsExtractionClient
+    >;
+
+    mockIsDualProcessEnabled.mockResolvedValue(false);
+    mockCreateClient.mockResolvedValue({
+      logsExtractionClient: {
+        extractLogs: jest.fn().mockResolvedValue({ success: true, isRemote: false, count: 0 }),
+        getMergedConfigForType: jest.fn().mockResolvedValue({ frequency: '1m' }),
+      },
+    } as unknown as Awaited<ReturnType<typeof createLogsExtractionClient>>);
+
+    const withContextSpy = jest.fn(<T>(_ctx: unknown, fn: () => T) => fn());
+    const core = {
+      getStartServices: jest
+        .fn()
+        .mockResolvedValue([
+          { featureFlags: {}, executionContext: { withContext: withContextSpy } },
+        ]),
+    } as unknown as EntityStoreCoreSetup;
+    const definitions: Record<string, { createTaskRunner: Function }> = {};
+    const taskManager = {
+      registerTaskDefinitions: (defs: Record<string, { createTaskRunner: Function }>) =>
+        Object.assign(definitions, defs),
+    } as unknown as TaskManagerSetupContract;
+    const logger = loggerMock.create();
+    (logger.get as jest.Mock) = jest.fn().mockReturnValue(logger);
+
+    registerExtractEntityTasks({
+      taskManager,
+      logger,
+      entityTypes: [entityType],
+      core,
+      isServerless: false,
+    });
+
+    const runner = definitions[`${taskTypePrefix}:${entityType}`].createTaskRunner({
+      taskInstance: { id: 'task-1', state: { namespace: 'default' } },
+      fakeRequest: {},
+      signal: new AbortController().signal,
+      executionUuid: 'run-1',
+      setCustomTaskRunEventFields: jest.fn(),
+    });
+
+    await runner.run();
+
+    return withContextSpy;
+  };
+
+  /** The entity type is part of the name, not only of the task instance id, so each type's
+   * extraction can be attributed by name alone. */
+  it.each(ALL_ENTITY_TYPES)(
+    'wraps the %s task in an execution context named after its entity type',
+    async (entityType) => {
+      const withContextSpy = await runRegisteredTask(entityType);
+
+      expect(withContextSpy).toHaveBeenCalledWith(
+        {
+          type: 'security_solution',
+          name: `entity_analytics:entity_store_extract_task:${entityType}`,
+          id: 'task-1',
+        },
+        expect.any(Function)
+      );
+    }
+  );
+
+  /** The non-priority task scans a different set of documents from the shared task for the same
+   * entity type, so the two must not share a name. */
+  it('names the non-priority task after its entity type and its mode', async () => {
+    const withContextSpy = await runRegisteredTask(
+      'user',
+      'entity_store:v2:extract_entity_non_priority_task'
+    );
+
+    expect(withContextSpy).toHaveBeenCalledWith(
+      {
+        type: 'security_solution',
+        name: 'entity_analytics:entity_store_extract_task:user:non_priority',
+        id: 'task-1',
+      },
+      expect.any(Function)
     );
   });
 });

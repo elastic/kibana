@@ -24,7 +24,16 @@ describe('describeAiIndexHandler', () => {
     await expect(describeAiIndexHandler({ deps, aiIndexId: 'runbooks', context })).resolves.toEqual(
       { response: '# AI index: runbooks' }
     );
-    expect(readService.describe).toHaveBeenCalledWith('runbooks');
+    expect(readService.describe).toHaveBeenCalledWith('runbooks', { userId: undefined });
+  });
+
+  it('passes the user scope through', async () => {
+    const { deps, readService } = createAiIndexToolDepsMock();
+    readService.describe.mockResolvedValue({ response: '# AI index: runbooks' });
+
+    await describeAiIndexHandler({ deps, aiIndexId: 'runbooks', userId: 'alice', context });
+
+    expect(readService.describe).toHaveBeenCalledWith('runbooks', { userId: 'alice' });
   });
 
   it('propagates a not-found error from the service', async () => {
@@ -33,6 +42,18 @@ describe('describeAiIndexHandler', () => {
 
     await expect(describeAiIndexHandler({ deps, aiIndexId: 'missing', context })).rejects.toThrow(
       "AI index 'missing' not found"
+    );
+  });
+
+  it('propagates a not-readable error from the service', async () => {
+    const { deps, readService } = createAiIndexToolDepsMock();
+    const error = Object.assign(new Error("AI index 'parks' is not readable: unauthorized"), {
+      name: 'AiIndexNotReadableError',
+    });
+    readService.describe.mockRejectedValue(error);
+
+    await expect(describeAiIndexHandler({ deps, aiIndexId: 'parks', context })).rejects.toThrow(
+      "AI index 'parks' is not readable"
     );
   });
 

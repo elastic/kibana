@@ -52,7 +52,7 @@ const createMockLogger = (): Logger =>
 
 describe('recover_esql end-to-end (real build_config + real graph)', () => {
   const events = {} as ToolEventEmitter;
-  const esClient = { asCurrentUser: {} } as IScopedClusterClient;
+  const esClient = { asCurrentUser: {}, asInternalUser: {} } as IScopedClusterClient;
 
   let logger: Logger;
   let invoke: jest.Mock;

@@ -18,10 +18,17 @@ export interface ArtifactListPageUrlParams {
   pageSize?: number;
   filter?: string;
   includedPolicies?: string;
-  show?: 'create' | 'edit' | 'import';
+  /** Only used when the page shows the Enabled column. Any value other than `enabled` or `disabled` is ignored. */
+  enabledStatus?: string;
+  show?: 'create' | 'edit' | 'view' | 'import';
   itemId?: string;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
+}
+
+/** Props for the artifact-specific body rendered under Definition in the view flyout. */
+export interface ArtifactViewModeComponentProps {
+  item: ExceptionListItemSchema;
 }
 
 export interface ArtifactFormComponentProps {

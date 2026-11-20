@@ -148,6 +148,10 @@ export interface SyntheticsPluginServices extends Partial<CoreStart> {
 export type ClientSetup = void;
 export type ClientStart = void;
 
+interface SyntheticsClientConfig {
+  secretConnections?: { enabled?: boolean };
+}
+
 export class SyntheticsPlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
 {
@@ -175,6 +179,8 @@ export class SyntheticsPlugin
         isDev: this.initContext.env.mode.dev,
         isServerless: this._isServerless,
         isCCSEnabled: !this._isServerless,
+        secretConnectionsEnabled:
+          this.initContext.config.get<SyntheticsClientConfig>().secretConnections?.enabled ?? true,
       });
     });
 
@@ -241,12 +247,18 @@ export class SyntheticsPlugin
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
     const { triggersActionsUi } = pluginsStart;
 
-    if (
-      coreStart.featureFlags.getBooleanValue(
+    let syntheticsCpsEnabled = OBSERVABILITY_SYNTHETICS_CPS_ENABLED_DEFAULT;
+    coreStart.featureFlags
+      .getBooleanValue$(
         OBSERVABILITY_SYNTHETICS_CPS_ENABLED_FEATURE_FLAG,
         OBSERVABILITY_SYNTHETICS_CPS_ENABLED_DEFAULT
       )
-    ) {
+      .subscribe((enabled) => {
+        syntheticsCpsEnabled = enabled;
+      })
+      .unsubscribe();
+
+    if (syntheticsCpsEnabled) {
       pluginsStart.cps?.cpsManager?.registerAppAccess(
         'synthetics',
         getSyntheticsProjectPickerAccess

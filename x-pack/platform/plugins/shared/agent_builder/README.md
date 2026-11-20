@@ -124,7 +124,7 @@ const { result } = await agentBuilder.tools.execute({
   toolParams: { someNumber: 9000 },
   request,
   approvals: {
-    autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.create' }],
+    autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.put_mapping' }],
   },
 });
 ```
@@ -146,7 +146,7 @@ input of the step:
 {
   "approvals": {
     "auto_approved_apis": {
-      "elasticsearch": ["indices.create", "indices.update_aliases"],
+      "elasticsearch": ["indices.put_mapping", "indices.update_aliases"],
       "kibana": ["alerting.delete-alerting-rule-id"]
     }
   }
@@ -157,6 +157,10 @@ In a conversation, the grant can widen when a delegating agent requests destruct
 sub-agent through `run_subagent`, and the user is asked once to approve them before it starts. That
 approval covers only the delegated execution, so a sub-agent can hold access the parent run was not
 configured with, though never more than the delegating user could exercise themselves.
+
+An agent can also store the grant as a default in `configuration.approvals`, either via API, from the
+auto-approved APIs section of the agent editor, or in a built-in agent's definition. Every run of the
+agent, including as a sub-agent, adds the stored defaults to the grant supplied by the caller.
 
 ### Error handling
 
@@ -188,6 +192,58 @@ Agents can be either built-in or user-defined.
 ### Registering a built-in agent
 
 Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and examples details.
+
+### Running an agent as a service account
+
+Where service accounts are enabled, an agent can be bound to a service account by the plugin
+that owns it, through the agent registry on the start contract:
+
+```ts
+const registry = await agentBuilder.agents.getRegistry({ request });
+await registry.setServiceAccount(agentId, 'kibana/my-account'); // `null` unbinds
+```
+
+The request must belong to a user with write access to the agent and the `manage_security`
+privilege, because Core creates the binding under that user. The binding is not part of the
+agent update request: there is no HTTP API for it until the UI manages it (tracked in
+[elastic/kibana#300118](https://github.com/elastic/kibana/issues/300118)), and the agent editor
+shows it read-only. The agent then runs every conversation with that account's permissions,
+whoever started it; the conversation owner and round authors stay the caller.
+
+- Binding, replacing or removing the account needs write access to the agent and the
+  Elasticsearch `manage_security` cluster privilege. Every edit of a bound agent, including its
+  access control, needs the same privilege, so the agent is read-only for everyone else.
+  The update permissions are reported as false on a bound agent for callers without
+  `manage_security`.
+- Chatting with a bound agent needs the `invoke_bound_agents` sub-feature privilege (included in
+  `all`). A caller without it is refused with a 403 and never falls back to their own identity.
+  Grant it to the service account the Slack relay or a workflow uses to call bound agents.
+- Bound runs execute through Task Manager with the account's short-lived token, minted by Core's
+  service account workload bindings. Core's binding is the authority: the agent only stores the
+  account id, so the dispatcher and the UI know it is bound, and a mismatch between the two fails
+  the run at mint. A request that already runs as the bound account (a workflow step or a parent
+  agent under the same account) runs the agent inline instead of nesting a second task.
+- The account holds no access to agents of its own. A run resolves the agent it was dispatched
+  for without consulting access control, since the caller's access was checked at dispatch, and
+  refuses to continue if the agent is no longer bound to that account. Anything else the run
+  looks up, such as sub-agents, is subject to the account's own access.
+
+**Residual risk.** The `manage_security` gate protects the agent document, not what it refers to.
+Everything a bound run executes beyond the agent itself runs with the account's permissions and
+is editable by people who hold neither `manage_security` nor `invoke_bound_agents`:
+
+- Pre-agent workflows: the agent's own `workflow_ids` are locked with the rest of its
+  configuration, but the workflow definitions are editable by anyone who can edit workflows, and
+  the space-wide pre-prompt workflows setting by anyone who can change advanced settings.
+- Sub-agents: an unbound sub-agent the agent calls runs as the account (the account needs `use`
+  access to it) and its definition is editable by its owner. A sub-agent bound to another account
+  runs in its own task as that account, which requires the first account to hold
+  `invoke_bound_agents`.
+- Tools: custom tools are editable by anyone who can edit tools, and a `*` tool selection picks
+  up tools created after the binding.
+
+Before binding an agent, check that its workflows, sub-agents and tools are managed by people you
+would trust with the account, and prefer an explicit tool list over `*`.
 
 ## Hooks
 

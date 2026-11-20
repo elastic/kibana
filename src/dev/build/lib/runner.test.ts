@@ -47,6 +47,7 @@ const setup = async () => {
     isRelease: true,
     targetAllPlatforms: true,
     targetServerlessPlatforms: false,
+    targetCloudPlatforms: false,
     skipServerless: false,
     versionQualifier: '-SNAPSHOT',
     dockerContextUseLocalArtifact: false,

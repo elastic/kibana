@@ -6,4 +6,5 @@
  */
 
 export { Impact } from './impact';
-export { investigationEntityIds } from './entity_ids';
+export { useEntityFilter } from './use_entity_filter';
+export type { ImpactPill, PagedImpactPills } from './impact_pills';

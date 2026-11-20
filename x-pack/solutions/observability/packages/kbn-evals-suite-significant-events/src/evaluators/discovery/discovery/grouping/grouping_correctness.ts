@@ -64,7 +64,7 @@ export const groupingCorrectnessEvaluator: DiscoveryEvaluator = {
       });
     }
     const expectedUniverse = new Set(expectedGroups.flat());
-    // The expected event set may intentionally omit valid standalone dismissed events, such as
+    // The expected event set may intentionally omit valid standalone inactive events, such as
     // unrelated positive detections. Score grouping only for rules in the declared expected
     // universe; scenario/status evaluators grade those additional dispositions separately.
     const actualGroupsRaw = events.map((event) => {

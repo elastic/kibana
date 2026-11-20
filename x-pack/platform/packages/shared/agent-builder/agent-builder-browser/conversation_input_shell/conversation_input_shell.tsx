@@ -11,11 +11,12 @@ import { useEuiShadow, useEuiShadowHover, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 const INPUT_MIN_HEIGHT = '150px';
-const AB_INPUT_RADIUS = 16;
+export const CONVERSATION_INPUT_SHELL_RADIUS = 16;
 
 export interface ConversationInputShellProps extends React.HTMLAttributes<HTMLDivElement> {
   isDisabled?: boolean;
   isCollapsed?: boolean;
+  suppressShadow?: boolean;
 }
 
 /**
@@ -30,46 +31,58 @@ export interface ConversationInputShellProps extends React.HTMLAttributes<HTMLDi
 export const ConversationInputShell = React.forwardRef<
   HTMLDivElement,
   PropsWithChildren<ConversationInputShellProps>
->(({ children, isDisabled = false, isCollapsed = false, className, ...rest }, ref) => {
-  const { euiTheme } = useEuiTheme();
-  const shadowS = useEuiShadow('s');
-  const shadowSHover = useEuiShadowHover('s');
-  const shadowXl = useEuiShadow('xl');
-  const shadowXlHover = useEuiShadowHover('xl');
+>(
+  (
+    {
+      children,
+      isDisabled = false,
+      isCollapsed = false,
+      suppressShadow = false,
+      className,
+      ...rest
+    },
+    ref
+  ) => {
+    const { euiTheme } = useEuiTheme();
+    const shadowS = useEuiShadow('s');
+    const shadowSHover = useEuiShadowHover('s');
+    const shadowXl = useEuiShadow('xl');
+    const shadowXlHover = useEuiShadowHover('xl');
 
-  const shellStyles = css`
-    border: ${euiTheme.border.thin};
-    border-radius: ${AB_INPUT_RADIUS}px;
-    border-color: ${euiTheme.colors.borderBaseSubdued};
-    background-color: ${isDisabled
-      ? euiTheme.colors.backgroundBaseDisabled
-      : euiTheme.colors.backgroundBasePlain};
-    min-height: ${isCollapsed ? '0' : INPUT_MIN_HEIGHT};
-    padding: ${euiTheme.size.base};
-    display: flex;
-    flex-direction: column;
-    gap: ${euiTheme.size.s};
-    align-items: stretch;
-    width: 100%;
-    transition: box-shadow 250ms, border-color 250ms, min-height 250ms ease-out;
-    ${shadowS}
-    &:hover {
-      ${shadowSHover}
-    }
-    &:focus-within[aria-disabled='false'] {
-      border-color: ${euiTheme.colors.primary};
-      ${shadowXl}
+    const shellStyles = css`
+      border: ${euiTheme.border.thin};
+      border-radius: ${CONVERSATION_INPUT_SHELL_RADIUS}px;
+      border-color: ${euiTheme.colors.borderBaseSubdued};
+      background-color: ${isDisabled
+        ? euiTheme.colors.backgroundBaseDisabled
+        : euiTheme.colors.backgroundBasePlain};
+      min-height: ${isCollapsed ? '0' : INPUT_MIN_HEIGHT};
+      padding: ${euiTheme.size.base};
+      display: flex;
+      flex-direction: column;
+      gap: ${euiTheme.size.s};
+      align-items: stretch;
+      width: 100%;
+      transition: box-shadow 250ms, border-color 250ms, min-height 250ms ease-out;
+      ${!suppressShadow && shadowS}
       &:hover {
-        ${shadowXlHover}
+        ${!suppressShadow && shadowSHover}
       }
-    }
-  `;
+      &:focus-within[aria-disabled='false'] {
+        border-color: ${euiTheme.colors.primary};
+        ${!suppressShadow && shadowXl}
+        &:hover {
+          ${!suppressShadow && shadowXlHover}
+        }
+      }
+    `;
 
-  return (
-    <div {...rest} css={shellStyles} ref={ref} className={className} aria-disabled={isDisabled}>
-      {children}
-    </div>
-  );
-});
+    return (
+      <div {...rest} css={shellStyles} ref={ref} className={className} aria-disabled={isDisabled}>
+        {children}
+      </div>
+    );
+  }
+);
 
 ConversationInputShell.displayName = 'ConversationInputShell';

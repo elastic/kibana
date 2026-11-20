@@ -27,7 +27,7 @@ describe('Customize panel action', () => {
       embeddable: {
         parentApi: {},
         viewMode$: new BehaviorSubject<ViewMode>('edit'),
-        dataViews$: new BehaviorSubject<DataView[] | undefined>(undefined),
+        dataSources$: new BehaviorSubject<DataView[] | undefined>(undefined),
         isCustomizable: true,
       },
     };

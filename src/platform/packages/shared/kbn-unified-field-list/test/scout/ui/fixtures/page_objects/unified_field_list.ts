@@ -137,6 +137,53 @@ export class UnifiedFieldList {
     return names;
   }
 
+  /**
+   * Moves a field within the "Selected fields" section using the keyboard
+   */
+  async reorderSelectedFieldWithKeyboard(
+    field: string,
+    direction: 'up' | 'down',
+    steps = 1
+  ): Promise<void> {
+    const selectedFieldNames = await this.getSidebarSectionFieldNames('selected');
+    const fieldIndex = selectedFieldNames.indexOf(field);
+    const targetField =
+      selectedFieldNames[direction === 'down' ? fieldIndex + steps : fieldIndex - steps];
+
+    if (fieldIndex === -1 || !targetField) {
+      throw new Error(`Unable to move the selected field "${field}" ${steps} step(s) ${direction}`);
+    }
+
+    const selectedSection = this.page.testSubj.locator(this.getSidebarSectionSelector('selected'));
+    await selectedSection
+      .locator(`li[data-attr-field="${field}"] [data-test-subj="domDragDrop-keyboardHandler"]`)
+      .focus();
+    await this.page.keyboard.press('Enter'); // start dragging
+    // arrow keys are ignored until the reorder group is armed, one render after the drop targets appear
+    await expect(selectedSection.getByTestId('domDragDrop-reorderableGroup')).toHaveAttribute(
+      'data-dnd-reorder-active',
+      'true'
+    );
+
+    for (let step = 0; step < steps; step++) {
+      await this.page.keyboard.press(direction === 'down' ? 'ArrowDown' : 'ArrowUp');
+    }
+
+    await this.page.keyboard.press('Enter'); // drop
+  }
+
+  /**
+   * Drags a field onto another field within the "Selected fields" section
+   */
+  async dragSelectedFieldOnto(field: string, targetField: string): Promise<void> {
+    const selectedSection = this.page.testSubj.locator(this.getSidebarSectionSelector('selected'));
+    const source = selectedSection.locator(
+      `li[data-attr-field="${field}"] [data-test-subj="field-${field}"]`
+    );
+    const target = selectedSection.locator(`li[data-attr-field="${targetField}"]`);
+    await source.dragTo(target);
+  }
+
   async waitUntilSidebarHasLoaded(): Promise<void> {
     await this.page.testSubj.waitForSelector('fieldListGroupedAvailableFields-countLoading', {
       state: 'hidden',

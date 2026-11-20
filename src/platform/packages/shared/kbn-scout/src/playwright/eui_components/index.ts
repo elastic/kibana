@@ -11,33 +11,20 @@
 // through the `page.components` factories. Re-exported here so `@kbn/scout` and
 // the solution Scout packages expose them under a single entry point.
 export {
+  EuiCallOutObject,
+  EuiColorPickerObject,
   EuiComboBoxObject,
   EuiDataGridObject,
+  EuiFieldSearchObject,
   EuiGlobalToastListObject,
+  EuiPaginationObject,
+  EuiSearchBarObject,
+  EuiSideNavObject,
   EuiSuperSelectObject,
   EuiSelectableObject,
   EuiBasicTableObject,
+  EuiTableObject,
   EuiDraggableObject,
-} from '@elastic/eui-test-helpers';
-
-import {
-  EuiAccordionSelectors,
-  EuiBasicTableSelectors,
-  EuiColorPickerSelectors,
-  EuiComboBoxSelectors,
-  EuiContextMenuSelectors,
-  EuiDataGridSelectors,
-  EuiDraggableSelectors,
-  EuiFilterButtonSelectors,
-  EuiFlyoutSelectors,
-  EuiModalSelectors,
-  EuiPopoverSelectors,
-  EuiRangeSelectors,
-  EuiSelectableSelectors,
-  EuiSuperSelectSelectors,
-  EuiGlobalToastListSelectors,
-  EuiToolTipSelectors,
-  EuiTreeViewSelectors,
 } from '@elastic/eui-test-helpers';
 
 /**
@@ -45,22 +32,4 @@ import {
  *
  * @example page.locator(euiSelectors.basicTable.ROW_SELECTOR)
  */
-export const euiSelectors = {
-  accordion: EuiAccordionSelectors,
-  basicTable: EuiBasicTableSelectors,
-  colorPicker: EuiColorPickerSelectors,
-  comboBox: EuiComboBoxSelectors,
-  contextMenu: EuiContextMenuSelectors,
-  dataGrid: EuiDataGridSelectors,
-  draggable: EuiDraggableSelectors,
-  filterButton: EuiFilterButtonSelectors,
-  flyout: EuiFlyoutSelectors,
-  modal: EuiModalSelectors,
-  popover: EuiPopoverSelectors,
-  range: EuiRangeSelectors,
-  selectable: EuiSelectableSelectors,
-  superSelect: EuiSuperSelectSelectors,
-  toast: EuiGlobalToastListSelectors,
-  toolTip: EuiToolTipSelectors,
-  treeView: EuiTreeViewSelectors,
-} as const;
+export { selectors as euiSelectors } from '@elastic/eui-test-helpers';

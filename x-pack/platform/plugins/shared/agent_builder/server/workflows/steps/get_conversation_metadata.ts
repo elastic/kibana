@@ -15,20 +15,12 @@ import type { ConversationStepDeps } from '../registry';
 
 export const getConversationMetadataStepDefinition = ({
   getConversationClient,
-  isExperimentalEnabled,
 }: ConversationStepDeps) =>
   createServerStepDefinition({
     ...getConversationMetadataStepCommonDefinition,
     handler: async (context: StepHandlerContext) => {
       try {
         const request = context.contextManager.getFakeRequest();
-        if (!(await isExperimentalEnabled(request))) {
-          return {
-            error: new Error(
-              'Conversation metadata steps require experimental features to be enabled'
-            ),
-          };
-        }
         const client = await getConversationClient(request);
         const input = context.input as GetConversationMetadataStepInput;
 

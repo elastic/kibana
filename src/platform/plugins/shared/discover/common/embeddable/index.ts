@@ -17,14 +17,13 @@ export {
 } from './search_embeddable_transforms';
 export {
   isDiscoverSessionEmbeddableByReferenceState,
-  isDiscoverSessionEsqlTab,
   isSearchEmbeddableLegacyPanelState,
 } from './type_guards';
 export {
+  fromStoredEmbeddableTab,
   fromStoredSearchEmbeddable,
   fromStoredSearchEmbeddableByRef,
   fromStoredSearchEmbeddableByValue,
   toStoredSearchEmbeddable,
   toStoredSearchEmbeddableByValue,
-  fromDiscoverSessionEmbeddableOverrides,
 } from './transform_utils';

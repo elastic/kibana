@@ -1,0 +1,104 @@
+openapi: 3.0.3
+info:
+  title: Tines Workflow Migration components
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    TinesAgent:
+      type: object
+      description: An agent in a Tines story export.
+      additionalProperties: true
+      required:
+        - type
+        - name
+        - guid
+      properties:
+        type:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: The Tines agent type.
+        name:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          description: The Tines agent name.
+        guid:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: The Tines agent guid.
+        disabled:
+          type: boolean
+          description: Whether the agent is disabled.
+        description:
+          type: string
+          nullable: true
+          maxLength: 10000
+          description: The agent description. Tines exports often set this to null.
+        options:
+          type: object
+          additionalProperties: true
+          description: Agent options. Tines exports include arbitrary option keys.
+
+    TinesLink:
+      type: object
+      description: A link between agents in a Tines story export.
+      additionalProperties: true
+      required:
+        - source
+        - receiver
+      properties:
+        source:
+          type: integer
+          minimum: 0
+          description: Index of the source agent.
+        receiver:
+          type: integer
+          minimum: 0
+          description: Index of the receiver agent.
+
+    TinesStoryExport:
+      type: object
+      description: A Tines story export JSON document.
+      additionalProperties: true
+      required:
+        - name
+        - agents
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          description: The story name.
+        description:
+          type: string
+          nullable: true
+          maxLength: 10000
+          description: The story description. Tines exports often set this to null.
+        guid:
+          type: string
+          maxLength: 256
+          description: The story guid.
+        tags:
+          type: array
+          maxItems: 100
+          description: Story tags.
+          items:
+            type: string
+            maxLength: 256
+        agents:
+          type: array
+          minItems: 1
+          maxItems: 5000
+          description: Agents in the story.
+          items:
+            $ref: '#/components/schemas/TinesAgent'
+        links:
+          type: array
+          maxItems: 20000
+          description: Links between agents.
+          items:
+            $ref: '#/components/schemas/TinesLink'

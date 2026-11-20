@@ -16,6 +16,14 @@ import {
 import { ENTITY_METADATA, getEntitiesAlias } from '../../../common/domain/entity_index';
 import { runWithSpan } from '../../telemetry/traces';
 import { searchRelationshipMetadata } from '../../infra/elasticsearch/relationships';
+import { clearRelationshipIdsByEntitySource } from '../../infra/elasticsearch';
+import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
+import { EntityStoreNotInstalledError } from '../errors';
+
+// Poll cadence for the background update-by-query behind `clearRelationshipIds`,
+// matching the history-snapshot client's settings for the same helper.
+const CLEAR_RELATIONSHIPS_POLL_INTERVAL_MS = 30 * 1000;
+const CLEAR_RELATIONSHIPS_POLL_MIN_INTERVAL_MS = 5 * 1000;
 
 interface ListRelationshipMetadataParams {
   entityId: string;
@@ -51,6 +59,12 @@ interface ListRelationshipMetadataResult {
   perPage: number;
 }
 
+interface ClearRelationshipIdsParams {
+  entitySource: string;
+  relationshipKey: string;
+  signal?: AbortSignal;
+}
+
 interface RelationshipsClientDependencies {
   logger: Logger;
   esClient: ElasticsearchClient;
@@ -58,15 +72,18 @@ interface RelationshipsClientDependencies {
 }
 
 /**
- * Read-side domain client for relationship records in the entity metadata
- * datastream. Reads filter by `event.action: relationship_observed`.
- * Writes go through the `EntityMetadataClient`.
+ * Domain client for entity relationships. Reads relationship records from the
+ * entity metadata datastream (filtered by `event.action: relationship_observed`);
+ * metadata writes go through the `EntityMetadataClient`. Also clears relationship
+ * ids on the latest entities index for snapshot-source maintainers.
  */
 export class RelationshipsClient {
+  private readonly logger: Logger;
   private readonly esClient: ElasticsearchClient;
   private readonly namespace: string;
 
   constructor(deps: RelationshipsClientDependencies) {
+    this.logger = deps.logger;
     this.esClient = deps.esClient;
     this.namespace = deps.namespace;
     this.initWithTracing();
@@ -109,6 +126,27 @@ export class RelationshipsClient {
 
     Object.defineProperty(this, 'getEarliestObservationByTarget', {
       value: tracedGetEarliestObservationByTarget,
+      configurable: true,
+      writable: true,
+    });
+
+    const baseClearRelationshipIds = this.clearRelationshipIds.bind(this);
+    const tracedClearRelationshipIds = (
+      params: ClearRelationshipIdsParams
+    ): Promise<{ updated: number; total: number }> =>
+      runWithSpan({
+        name: 'entityStore.relationships.clear_relationship_ids',
+        namespace,
+        attributes: {
+          'entity_store.relationships.operation': 'clear_relationship_ids',
+          'entity_store.entity_source': params.entitySource,
+          'entity_store.relationship_key': params.relationshipKey,
+        },
+        cb: () => baseClearRelationshipIds(params),
+      });
+
+    Object.defineProperty(this, 'clearRelationshipIds', {
+      value: tracedClearRelationshipIds,
       configurable: true,
       writable: true,
     });
@@ -180,5 +218,41 @@ export class RelationshipsClient {
     }
 
     return result;
+  }
+
+  /**
+   * Clears `entity.relationships.<relationshipKey>.ids` for every entity from
+   * `entitySource`. Intended for snapshot-source maintainers that repopulate the
+   * relationship from a full scan immediately afterwards.
+   *
+   * Runs as a background task and polls until it completes: this is a
+   * full-index mutation, so on a large tenant a synchronous update-by-query can
+   * exceed the client's request timeout and abandon the reset half-applied.
+   * `forever: true` defers to the caller's own budget (the maintainer's 1h task
+   * timeout) and to `signal` for cancellation.
+   */
+  public async clearRelationshipIds({
+    entitySource,
+    relationshipKey,
+    signal,
+  }: ClearRelationshipIdsParams): Promise<{ updated: number; total: number }> {
+    const index = await resolveLatestEntitiesIndexName(this.esClient, this.namespace);
+    const exists = await this.esClient.indices.exists({ index });
+    if (!exists) {
+      throw new EntityStoreNotInstalledError();
+    }
+
+    return clearRelationshipIdsByEntitySource(this.esClient, {
+      index,
+      entitySource,
+      relationshipKey,
+      signal,
+      waitForTask: {
+        logger: this.logger,
+        minTimeout: CLEAR_RELATIONSHIPS_POLL_MIN_INTERVAL_MS,
+        maxTimeout: CLEAR_RELATIONSHIPS_POLL_INTERVAL_MS,
+        forever: true,
+      },
+    });
   }
 }

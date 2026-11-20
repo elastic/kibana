@@ -18,6 +18,7 @@ import {
   useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
+import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
 /**
@@ -50,7 +51,7 @@ export const AttachmentEmptyState: React.FC<{
  * Section title row. `aside` renders right-aligned (counts, status badges, threshold tips),
  * `suffix` renders inline right after the title text (icon tips).
  */
-const SectionHeading: React.FC<{
+export const SectionHeading: React.FC<{
   children: React.ReactNode;
   suffix?: React.ReactNode;
   aside?: React.ReactNode;
@@ -175,6 +176,13 @@ export const TableFrame: React.FC<{ children: React.ReactNode; testSubj?: string
   );
 };
 
+/** Small subdued label used for inline key/value pairs (`Run id`, `Source report`). */
+export const InlineLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <EuiText size="xs" color="subdued" css={{ whiteSpace: 'nowrap' }}>
+    {children}
+  </EuiText>
+);
+
 /** Expands `<>…</>` wrappers so each badge becomes its own flex item and wraps independently. */
 const flattenChildren = (children: React.ReactNode): React.ReactNode[] =>
   React.Children.toArray(children).flatMap((child) =>
@@ -228,6 +236,54 @@ export const HollowBadgeList: React.FC<{
       );
     })}
   </EuiBadgeGroup>
+);
+
+/**
+ * Compact stat: subdued label on top, value below. Sized for dense analyst cards rather than
+ * dashboard KPIs (the value is body-size bold, not display-size).
+ */
+export const CompactStat: React.FC<{
+  title: React.ReactNode;
+  description: React.ReactNode;
+  emphasis?: 'default' | 'strong';
+}> = ({ title, description, emphasis = 'default' }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div>
+      <EuiText size="xs" color="subdued" css={{ whiteSpace: 'nowrap' }}>
+        {description}
+      </EuiText>
+      <EuiText
+        size={emphasis === 'strong' ? 'm' : 's'}
+        css={css`
+          font-weight: ${euiTheme.font.weight.semiBold};
+          overflow-wrap: anywhere;
+        `}
+      >
+        {title}
+      </EuiText>
+    </div>
+  );
+};
+
+/** Horizontal row of `CompactStat`s with a consistent gap. */
+export const StatRow: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <EuiFlexGroup gutterSize="xl" responsive={false} wrap>
+    {React.Children.map(children, (child, index) =>
+      child ? (
+        <EuiFlexItem grow={false} key={index}>
+          {child}
+        </EuiFlexItem>
+      ) : null
+    )}
+  </EuiFlexGroup>
+);
+
+export const DateTime: React.FC<{ value: string }> = ({ value }) => (
+  <>
+    <FormattedDate value={value} year="numeric" month="short" day="2-digit" />{' '}
+    <FormattedTime value={value} />
+  </>
 );
 
 /** Two-line clamp with tooltip-friendly overflow, for summaries inside tight cells. */

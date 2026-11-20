@@ -98,7 +98,7 @@ test.describe('Maps integration', { tag: tags.stateful.classic }, () => {
 
   test('allows to select tags for an existing map', async ({ page, pageObjects, kbnUrl }) => {
     await pageObjects.savedObjectsListing.clickItemLink('map', 'map 4 (tag-1)');
-    await pageObjects.maps.waitForRenderComplete();
+    await pageObjects.maps.waitForLayersToLoad();
 
     await pageObjects.maps.clickSaveButton();
     await pageObjects.tagManagement.selectSavedObjectTags('tag-3');

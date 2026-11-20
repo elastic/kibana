@@ -28,10 +28,6 @@ jest.mock('./tools/register_internal_tools', () => ({
   registerInternalTools: jest.fn(),
 }));
 
-jest.mock('./utils/create_result_transformer', () => ({
-  createResultTransformer: jest.fn(() => ({})),
-}));
-
 jest.mock('./utils/image_resolver', () => ({
   createImageResolver: jest.fn(() => jest.fn()),
 }));
@@ -74,7 +70,6 @@ describe('runDefaultAgentMode started from inside another graph node (sub-agent 
     context.toolManager.list.mockReturnValue([]);
     context.toolManager.getToolIdMapping.mockReturnValue(new Map([['my_tool', 'my.tool']]));
     context.toolManager.getDynamicToolIds.mockReturnValue([]);
-    jest.mocked(context.attachmentStateManager.getAccessedRefs).mockReturnValue([]);
     prepareConversationMock.mockResolvedValue({
       timeline: [],
       nextInput: { message: 'hello', attachments: [] },

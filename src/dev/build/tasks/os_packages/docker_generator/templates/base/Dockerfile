@@ -37,15 +37,16 @@ COPY {{artifactTarball}} /tmp/kibana.{{tarExt}}
 
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
-RUN tar \
-  --strip-components=1 \
-  {{#tarZstd}}-I zstd -xf{{/tarZstd}}{{^tarZstd}}-zxf{{/tarZstd}} /tmp/kibana.{{tarExt}}
-
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
 # OpenShift does this, for example.
 # REF: https://docs.openshift.org/latest/creating_images/guidelines.html
-RUN chmod -R g=u /usr/share/kibana
+# The chmod runs in the same layer as the extraction so overlayfs does not
+# copy every file up into a new layer just to change its mode.
+RUN tar \
+  --strip-components=1 \
+  {{#tarZstd}}-I zstd -xf{{/tarZstd}}{{^tarZstd}}-zxf{{/tarZstd}} /tmp/kibana.{{tarExt}} && \
+  chmod -R g=u /usr/share/kibana
 
 # Add an init process, check the checksum to make sure it's a match
 RUN set -e ; \

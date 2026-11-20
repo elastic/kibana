@@ -16,7 +16,7 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { RunTimeMappings } from '@kbn/securitysolution-timeline-search-strategy';
 import type { PageScope } from '../../../../data_view_manager/constants';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';

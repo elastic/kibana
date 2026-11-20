@@ -26,6 +26,8 @@ type GetPingsRouteRequest = z.infer<typeof getLatestTestRunRouteQuerySchema>;
 export const syntheticsGetLatestTestRunRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.LATEST_TEST_RUN,
+  // Public for the Synthetics UI; not a documented API.
+  options: { excludeFromOAS: true },
   validate: {},
   validation: {
     request: {

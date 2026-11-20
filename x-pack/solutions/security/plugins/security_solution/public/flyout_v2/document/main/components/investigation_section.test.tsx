@@ -24,9 +24,11 @@ import { EVENT_SOURCE_FIELD_DESCRIPTOR } from '../../../../common/components/eve
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 import {
+  CUSTOM_YARA_SIGNATURE_ENTRY_NAME_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { CustomYaraSignatureHighlightedFieldLink } from './custom_yara_signature_highlighted_field_link';
 import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
 import * as useFlyoutApiModule from '../../../use_flyout_api';
 
@@ -411,6 +413,35 @@ describe('InvestigationSection', () => {
     }) as React.ReactElement;
 
     expect(element.props.value).toBe('host-1');
+  });
+
+  it('wraps custom YARA signature fields in a CYS page link', () => {
+    mockUseExpandSection.mockReturnValue(true);
+    const cysHit = createMockHit({
+      'event.kind': 'signal',
+      'rule.custom_yara_signature.entry_id': '123-456',
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={cysHit} renderCellActions={mockRenderCellActions} />
+          </Router>
+        </Provider>
+      </IntlProvider>
+    );
+
+    const renderFlyoutLink = mockHighlightedFields.mock.calls[0][0].renderFlyoutLink;
+    const element = renderFlyoutLink!({
+      field: CUSTOM_YARA_SIGNATURE_ENTRY_NAME_FIELD_NAME,
+      value: 'User defined entry name',
+      hit: cysHit,
+      children: <span data-test-subj="cysChild" />,
+    }) as React.ReactElement;
+
+    expect(element.type).toBe(CustomYaraSignatureHighlightedFieldLink);
+    expect(element.props.hit).toBe(cysHit);
   });
 
   it('uses Security history key when opening flyout inside Security app', () => {

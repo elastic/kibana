@@ -10,22 +10,22 @@ import { mergeFeatureOverride, overrideInferenceFeature } from './inference_over
 
 const existing = [
   { feature_id: 'other_feature', endpoints: [{ id: 'other-endpoint' }] },
-  { feature_id: 'alertzero_reasoning', endpoints: [{ id: 'old-endpoint' }] },
+  { feature_id: 'alertzero_frontier', endpoints: [{ id: 'old-endpoint' }] },
 ];
 
 describe('mergeFeatureOverride', () => {
   it('returns the other features unchanged', () => {
-    expect(mergeFeatureOverride(existing, 'alertzero_reasoning', 'new-endpoint')[0]).toEqual(
+    expect(mergeFeatureOverride(existing, 'alertzero_frontier', 'new-endpoint')[0]).toEqual(
       existing[0]
     );
   });
 
   it('returns the feature routed only to the new endpoint', () => {
     expect(
-      mergeFeatureOverride(existing, 'alertzero_reasoning', 'new-endpoint').filter(
-        ({ feature_id: id }) => id === 'alertzero_reasoning'
+      mergeFeatureOverride(existing, 'alertzero_frontier', 'new-endpoint').filter(
+        ({ feature_id: id }) => id === 'alertzero_frontier'
       )
-    ).toEqual([{ feature_id: 'alertzero_reasoning', endpoints: [{ id: 'new-endpoint' }] }]);
+    ).toEqual([{ feature_id: 'alertzero_frontier', endpoints: [{ id: 'new-endpoint' }] }]);
   });
 });
 
@@ -41,7 +41,7 @@ describe('overrideInferenceFeature', () => {
   const override = () =>
     overrideInferenceFeature({
       fetch: fetch as unknown as HttpHandler,
-      featureId: 'alertzero_reasoning',
+      featureId: 'alertzero_frontier',
       endpointId: 'new-endpoint',
     });
 
@@ -53,7 +53,7 @@ describe('overrideInferenceFeature', () => {
   it('writes the merged features', async () => {
     await override();
     expect(putBodies()).toEqual([
-      { features: mergeFeatureOverride(existing, 'alertzero_reasoning', 'new-endpoint') },
+      { features: mergeFeatureOverride(existing, 'alertzero_frontier', 'new-endpoint') },
     ]);
   });
 

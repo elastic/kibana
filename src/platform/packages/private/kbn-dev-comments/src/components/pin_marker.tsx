@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 import { EuiIcon, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import { PIN_SIZE } from '../constants';
 
-/** Teardrop pin shape shared by the placed pins and the pending pin; a resolved comment's pin has a wider, green border. */
+/** Teardrop shape of the pins; a resolved comment's has a wider, green border. */
 export const pinShapeStyles = (
   euiTheme: UseEuiTheme['euiTheme'],
   { resolved = false }: { resolved?: boolean } = {}
@@ -26,8 +26,12 @@ export const pinShapeStyles = (
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 `;
 
-/** Non-interactive pin showing where the comment being written will be placed. */
-export const PinMarker = ({ x, y }: { x: number; y: number }) => {
+/** Where the comment being written will be pinned. */
+export const PinMarker = ({
+  x,
+  y,
+  ...attributes
+}: { x: number; y: number } & Record<string, unknown>) => {
   const { euiTheme } = useEuiTheme();
   return (
     <div
@@ -39,6 +43,7 @@ export const PinMarker = ({ x, y }: { x: number; y: number }) => {
         pointer-events: none;
       `}
       data-test-subj="devCommentsPendingPin"
+      {...attributes}
     >
       <span
         css={[

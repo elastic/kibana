@@ -7,6 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
+
+/** Workflow Template library template a new workflow was remixed from. */
+export interface WorkflowsCreateRouteTemplate {
+  slug: string;
+  version: string;
+}
+
 /**
  * `location.state` contract of the workflows app's create page
  * (`/app/workflows/create`). Any app can hand the editor its initial content
@@ -24,9 +32,19 @@
  * The state travels on the history entry rather than the URL, so it survives
  * back/forward navigation but is not shareable: a plain `/create` link seeds
  * the editor with the default YAML. Used by the Workflow Template Library's
- * "Remix with AI" action to open a rendered template in the editor.
+ * "Remix with AI" action to open a rendered template in the editor, and by the
+ * empty Workflows list to hand its prompt to the AI chat.
  */
 export interface WorkflowsCreateRouteState {
   /** Workflow YAML to seed the editor with, in place of the default. */
   initialYaml?: string;
+  /**
+   * Workflow Template library template `initialYaml` was rendered from, set by
+   * "Remix with AI". Saving the new workflow records it as the template origin.
+   */
+  template?: WorkflowsCreateRouteTemplate;
+  /** Prompt to send to the AI chat when the editor opens. */
+  initialAgentMessage?: string;
+  /** Attachments of that prompt (e.g. pasted images). */
+  initialAgentAttachments?: ConversationAttachment[];
 }

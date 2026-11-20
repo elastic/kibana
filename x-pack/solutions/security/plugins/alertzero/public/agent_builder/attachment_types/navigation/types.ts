@@ -6,9 +6,20 @@
  */
 
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 
 export interface AttachmentNavigationDeps {
   share?: SharePluginStart;
   /** Active Kibana space id; never empty. */
   spaceId: string;
+  /**
+   * `core.http.basePath.prepend`. Includes the `/s/{spaceId}` prefix when the
+   * user is in a non-default space, so Security alert-details paths resolve correctly.
+   */
+  prependPath: (path: string) => string;
+  /**
+   * `core.application.getUrlForApp`. Optional: when absent (e.g. tests that don't need
+   * Security entity-page links), host/user chips fall back to their Discover ES|QL link.
+   */
+  getUrlForApp?: ApplicationStart['getUrlForApp'];
 }

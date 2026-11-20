@@ -71,7 +71,7 @@ export const saveEvalExperimentTool = (
       const workflow = generateSavedWorkflowYaml(params);
 
       if (workflowId) {
-        const existing = await deps.workflowsApi.getWorkflow(workflowId, spaceId);
+        const existing = await deps.workflowsApi.getWorkflow(workflowId, spaceId, request);
         if (!isEvalsOwnedWorkflow(existing)) {
           return errorResult(`Workflow not found: ${workflowId}`);
         }

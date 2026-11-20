@@ -57,6 +57,7 @@ export function getBeforeSetup(
     uiSettingsServiceMock.createStartContract().asScopedToClient;
   rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
   rulesClientParams.getUserName.mockResolvedValue('elastic');
+  rulesClientParams.getProfileUid.mockResolvedValue(null);
   taskManager.runSoon.mockResolvedValue({ id: '', forced: false });
   taskManager.get.mockResolvedValue({
     id: 'task-123',

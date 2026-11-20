@@ -6,11 +6,15 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
-import { platformCoreTools } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, platformCoreTools } from '@kbn/agent-builder-common';
+import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import { resumeWorkflowExecutionTool } from './resume_workflow_execution';
 
 jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
+  ...jest.requireActual('@kbn/agent-builder-tools-base/workflows'),
   getExecutionState: jest.fn(),
 }));
 
@@ -24,10 +28,31 @@ describe('resumeWorkflowExecutionTool', () => {
     },
   });
 
+  const getSecurity = () => undefined;
+
+  // No live user and a direct API call by default, so the legacy cases resume without a prompt.
   const mockContext = {
     spaceId: 'default',
     request: {} as KibanaRequest,
+    executionMode: AgentExecutionMode.conversation,
+    interactivity: { enabled: false },
+    callContext: { toolCallId: 'tc-1', callSource: 'user' as const },
   };
+
+  const buildInteractiveContext = (
+    status: ConfirmationStatus = ConfirmationStatus.unprompted,
+    autoApprovedApis?: Array<{ target: 'kibana'; api: string }>
+  ) => ({
+    ...mockContext,
+    interactivity: { enabled: true, auto_approved_apis: autoApprovedApis },
+    callContext: { toolCallId: 'tc-1' },
+    prompts: {
+      checkConfirmationStatus: jest.fn().mockReturnValue({ status }),
+      askForConfirmation: jest.fn((definition) => ({
+        prompt: { type: 'confirmation', ...definition },
+      })),
+    },
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -36,13 +61,62 @@ describe('resumeWorkflowExecutionTool', () => {
   it('should have the correct tool id', () => {
     const tool = resumeWorkflowExecutionTool({
       workflowsManagement: createWorkflowsManagement() as any,
+      getSecurity,
     });
     expect(tool.id).toBe(platformCoreTools.resumeWorkflowExecution);
   });
 
+  it.each([false, true])(
+    'does not expose execution data without readExecution (execute allowed=%s)',
+    async (canExecute) => {
+      const wm = createWorkflowsManagement();
+      const atSpace = jest.fn(async (_spaceId, { kibana }: { kibana: string[] }) => ({
+        hasAllRequested: canExecute && !kibana.includes('api:workflowsManagement:readExecution'),
+      }));
+      const security = {
+        authz: {
+          actions: { api: { get: (action: string) => `api:${action}` } },
+          checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpace }),
+        },
+      } as unknown as SecurityPluginStart;
+      const tool = resumeWorkflowExecutionTool({
+        workflowsManagement: wm as unknown as WorkflowsServerPluginSetup,
+        getSecurity: () => security,
+      });
+
+      const result = await tool.handler(
+        { executionId: 'exec-1', input: {} },
+        mockContext as Parameters<typeof tool.handler>[1]
+      );
+
+      expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalledWith(mockContext.request);
+      expect(atSpace).toHaveBeenCalledWith('default', {
+        kibana: ['api:workflowsManagement:execute'],
+      });
+      expect(getExecutionState).not.toHaveBeenCalled();
+      if (canExecute) {
+        expect(wm.management.resumeWorkflowExecution).toHaveBeenCalledTimes(1);
+        expect(result).toMatchObject({
+          results: [
+            {
+              type: 'other',
+              data: {
+                resumed: true,
+                execution: { execution_id: 'exec-1', status: 'unknown' },
+              },
+            },
+          ],
+        });
+      } else {
+        expect(wm.management.resumeWorkflowExecution).not.toHaveBeenCalled();
+        expect(result).toMatchObject({ results: [{ type: 'error' }] });
+      }
+    }
+  );
+
   it('should call resumeWorkflowExecution with correct params', async () => {
     const wm = createWorkflowsManagement();
-    const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any });
+    const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any, getSecurity });
 
     getExecutionState.mockResolvedValue({
       execution_id: 'exec-1',
@@ -58,11 +132,17 @@ describe('resumeWorkflowExecutionTool', () => {
       mockContext.request,
       { channel: 'agent_builder' }
     );
+    expect(getExecutionState).toHaveBeenCalledWith({
+      executionId: 'exec-1',
+      spaceId: 'default',
+      workflowApi: wm.management,
+      request: mockContext.request,
+    });
   });
 
   it('should return resumed state on success', async () => {
     const wm = createWorkflowsManagement();
-    const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any });
+    const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any, getSecurity });
 
     const executionState = {
       execution_id: 'exec-1',
@@ -94,7 +174,7 @@ describe('resumeWorkflowExecutionTool', () => {
     wm.management.resumeWorkflowExecution.mockRejectedValue(
       new Error('Execution not in WAITING_FOR_INPUT status')
     );
-    const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any });
+    const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any, getSecurity });
 
     const result = await tool.handler({ executionId: 'exec-1', input: {} }, mockContext as any);
 
@@ -113,7 +193,7 @@ describe('resumeWorkflowExecutionTool', () => {
 
   it('should return resumed: true with fallback when state fetch throws after a successful resume', async () => {
     const wm = createWorkflowsManagement();
-    const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any });
+    const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any, getSecurity });
     getExecutionState.mockRejectedValue(new Error('timeout'));
 
     const result = await tool.handler(
@@ -137,7 +217,7 @@ describe('resumeWorkflowExecutionTool', () => {
 
   it('should handle null execution state after resume', async () => {
     const wm = createWorkflowsManagement();
-    const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any });
+    const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any, getSecurity });
     getExecutionState.mockResolvedValue(null);
 
     const result = await tool.handler(
@@ -155,6 +235,128 @@ describe('resumeWorkflowExecutionTool', () => {
           },
         },
       ],
+    });
+  });
+
+  describe('confirmation', () => {
+    it('always asks in a conversation and shows the workflow question and the input', async () => {
+      const wm = createWorkflowsManagement();
+      const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any, getSecurity });
+      getExecutionState.mockResolvedValue({
+        execution_id: 'exec-1',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        waiting_input: { step_execution_id: 's-1', message: 'Approve the purge?' },
+      });
+      const context = buildInteractiveContext();
+
+      const result = (await tool.handler(
+        { executionId: 'exec-1', input: { approved: true } },
+        context as any
+      )) as any;
+
+      expect(wm.management.resumeWorkflowExecution).not.toHaveBeenCalled();
+      expect(result.prompt.message).toContain('Approve the purge?');
+      expect(result.prompt.message).toContain('"approved": true');
+    });
+
+    it('resumes after the user accepts', async () => {
+      const wm = createWorkflowsManagement();
+      const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any, getSecurity });
+      getExecutionState.mockResolvedValue(null);
+
+      await tool.handler(
+        { executionId: 'exec-1', input: { approved: true } },
+        buildInteractiveContext(ConfirmationStatus.accepted) as any
+      );
+
+      expect(wm.management.resumeWorkflowExecution).toHaveBeenCalled();
+    });
+
+    it('binds the answer to the paused step and resumes that step', async () => {
+      const wm = createWorkflowsManagement();
+      const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any, getSecurity });
+      getExecutionState.mockResolvedValue({
+        execution_id: 'exec-1',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        waiting_input: { step_execution_id: 's-2' },
+      });
+      const context = buildInteractiveContext(ConfirmationStatus.accepted);
+
+      await tool.handler({ executionId: 'exec-1', input: { approved: true } }, context as any);
+
+      // A different paused step gives a different id, so an earlier answer does not apply.
+      expect(context.prompts.checkConfirmationStatus).toHaveBeenCalledWith(
+        `${platformCoreTools.resumeWorkflowExecution}.tc-1.s-2`
+      );
+      expect(wm.management.resumeWorkflowExecution).toHaveBeenCalledWith(
+        'exec-1',
+        'default',
+        { approved: true },
+        context.request,
+        { channel: 'agent_builder', stepExecutionId: 's-2' }
+      );
+      expect(getExecutionState).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not resume after the user declines', async () => {
+      const wm = createWorkflowsManagement();
+      const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any, getSecurity });
+
+      const result = (await tool.handler(
+        { executionId: 'exec-1', input: { approved: true } },
+        buildInteractiveContext(ConfirmationStatus.rejected) as any
+      )) as any;
+
+      expect(wm.management.resumeWorkflowExecution).not.toHaveBeenCalled();
+      expect(result.results[0].type).toBe('error');
+    });
+
+    it('skips the prompt when the run pre-approved the execute_api selector', async () => {
+      const wm = createWorkflowsManagement();
+      const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any, getSecurity });
+      getExecutionState.mockResolvedValue(null);
+      const context = buildInteractiveContext(ConfirmationStatus.unprompted, [
+        { target: 'kibana', api: 'workflows.post-workflows-executions-executionid-resume' },
+      ]);
+
+      await tool.handler({ executionId: 'exec-1', input: {} }, context as any);
+
+      expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
+      expect(wm.management.resumeWorkflowExecution).toHaveBeenCalled();
+    });
+  });
+  describe('with no live user', () => {
+    const agentContext = (autoApprovedApis?: Array<{ target: 'kibana'; api: string }>) => ({
+      ...mockContext,
+      interactivity: { enabled: false, auto_approved_apis: autoApprovedApis },
+      callContext: { toolCallId: 'tc-1', callSource: 'agent' as const },
+      prompts: { checkConfirmationStatus: jest.fn(), askForConfirmation: jest.fn() },
+    });
+
+    it('refuses an agent call that the run did not pre-approve', async () => {
+      const workflowsManagement = createWorkflowsManagement();
+      const tool = resumeWorkflowExecutionTool({ workflowsManagement, getSecurity } as any);
+
+      const result = (await tool.handler(
+        { executionId: 'exec-1', input: { approved: true } } as never,
+        agentContext() as never
+      )) as any;
+
+      expect(workflowsManagement.management.resumeWorkflowExecution).not.toHaveBeenCalled();
+      expect(result.results[0].type).toBe('error');
+      expect(JSON.stringify(result.results[0])).toContain('approvals.auto_approved_apis');
+    });
+
+    it('resumes an agent call when the run pre-approved workflows.*', async () => {
+      const workflowsManagement = createWorkflowsManagement();
+      const tool = resumeWorkflowExecutionTool({ workflowsManagement, getSecurity } as any);
+
+      await tool.handler(
+        { executionId: 'exec-1', input: { approved: true } } as never,
+        agentContext([{ target: 'kibana', api: 'workflows.*' }]) as never
+      );
+
+      expect(workflowsManagement.management.resumeWorkflowExecution).toHaveBeenCalled();
     });
   });
 });

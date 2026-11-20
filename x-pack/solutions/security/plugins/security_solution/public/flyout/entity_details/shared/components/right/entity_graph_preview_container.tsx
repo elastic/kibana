@@ -11,24 +11,41 @@ import {
   GraphPreviewPanel,
   type GraphPreviewPanelProps,
 } from '../../../../../flyout_v2/shared/components/graph_preview_panel';
+import { getGraphEntryPoint } from '../../../../../flyout_v2/shared/utils/get_graph_entry_point';
+import type { GraphEntryPoint } from '../../../../../common/lib/telemetry';
 import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
+import { getScopeFlyoutTimeRange } from '../../../../../entity_analytics/common/scope_time_ranges';
+
+const DEFAULT_PREVIEW_TIME_RANGE = { from: 'now-30d', to: 'now' } as const;
 
 export interface EntityGraphPreviewContainerProps
   extends Pick<GraphPreviewPanelProps, 'onShowGraph' | 'showIcon'> {
   /** Entity Store v2 entity ID (`entity.id`) to center the graph preview on. */
   entityId: string;
+  /** Scope the flyout was opened from; a scope that pins a time range replaces the 30-day default. */
+  scopeId?: string;
+  /** Where the entity flyout was opened from; defaults to the entity flyout entry point. */
+  entryPoint?: GraphEntryPoint;
 }
 
 export const EntityGraphPreviewContainer = memo(
-  ({ entityId, onShowGraph, showIcon }: EntityGraphPreviewContainerProps) => {
+  ({
+    entityId,
+    scopeId,
+    entryPoint: entryPointProp,
+    onShowGraph,
+    showIcon,
+  }: EntityGraphPreviewContainerProps) => {
     const shouldShowGraph = useShouldShowGraph();
+    const entryPoint = entryPointProp ?? getGraphEntryPoint({ mode: 'entity' });
+    const timeRange = getScopeFlyoutTimeRange(scopeId) ?? DEFAULT_PREVIEW_TIME_RANGE;
 
     const { isLoading, isError, data } = useFetchGraphData({
       req: {
         query: {
           entityIds: [{ id: entityId, isOrigin: true }],
-          start: 'now-30d',
-          end: 'now',
+          start: timeRange.from,
+          end: timeRange.to,
         },
       },
       options: {
@@ -39,6 +56,7 @@ export const EntityGraphPreviewContainer = memo(
 
     return (
       <GraphPreviewPanel
+        entryPoint={entryPoint}
         onShowGraph={onShowGraph}
         showIcon={showIcon}
         shouldShowGraph={shouldShowGraph}

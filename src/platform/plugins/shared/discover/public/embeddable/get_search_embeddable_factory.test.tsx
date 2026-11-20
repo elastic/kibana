@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -144,26 +144,35 @@ describe('saved search embeddable', () => {
 
   const createSearchFnMock = (nrOfHits: number) => {
     let resolveSearch = () => {};
-    const search = jest.fn(() => {
-      return new Observable((subscriber) => {
-        resolveSearch = () => {
-          subscriber.next(getSearchResponse(nrOfHits));
-          subscriber.complete();
-        };
-      });
-    });
+    const search = jest.fn(
+      () =>
+        new Promise((resolve) => {
+          resolveSearch = () => {
+            resolve({
+              rawResponse: getSearchResponse(nrOfHits).rawResponse,
+              pagination: {
+                hasNextPage: jest.fn().mockReturnValue(false),
+                nextPage: jest.fn(async () => null),
+              },
+            });
+          };
+        })
+    );
+    discoverServiceMock.data.search.dslPaginated =
+      search as unknown as typeof discoverServiceMock.data.search.dslPaginated;
     return { search, resolveSearch: () => resolveSearch() };
   };
 
   const createSearchErrorFnMock = (error: Error) => {
     let rejectSearch = () => {};
-    const search = jest.fn(() => {
-      return new Observable((subscriber) => {
-        rejectSearch = () => {
-          subscriber.error(error);
-        };
-      });
-    });
+    const search = jest.fn(
+      () =>
+        new Promise((_resolve, reject) => {
+          rejectSearch = () => reject(error);
+        })
+    );
+    discoverServiceMock.data.search.dslPaginated =
+      search as unknown as typeof discoverServiceMock.data.search.dslPaginated;
     return { search, rejectSearch: () => rejectSearch() };
   };
 
@@ -229,6 +238,95 @@ describe('saved search embeddable', () => {
         expect(discoverComponent.getByTestId('embeddedSavedSearchDocTable').textContent).toEqual(
           'No results found'
         );
+      });
+    });
+
+    describe('load more', () => {
+      const createHits = (ids: number[]) =>
+        ids.map((id) => ({
+          _id: `${id}`,
+          _index: 'the-data-view',
+          _source: { message: `message ${id}` },
+          sort: [id],
+        }));
+
+      const mockPaginatedSearch = ({
+        hasNextPage,
+        nextPage,
+        total,
+      }: {
+        hasNextPage: boolean;
+        nextPage: jest.Mock;
+        total: number;
+      }) => {
+        discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
+          rawResponse: { hits: { hits: createHits([1, 2]), total } },
+          pagination: { hasNextPage: jest.fn().mockReturnValue(hasNextPage), nextPage },
+        }) as unknown as typeof discoverServiceMock.data.search.dslPaginated;
+      };
+
+      const renderPanel = async () => {
+        runtimeState = getInitialRuntimeState();
+        const { Component, api } = await factory.buildEmbeddable({
+          initializeDrilldownsManager: mockInitializeDrilldownsManager,
+          initialState: { ref_id: 'id', overrides: {} },
+          finalizeApi: finalizeApiMock,
+          uuid,
+          parentApi: mockedDashboardApi,
+        });
+        await waitOneTick(); // wait for build to complete
+        const panel = render(<Component />);
+        // the footer shows while fewer rows than hits are loaded
+        await panel.findByTestId('unifiedDataTableFooter');
+        return { panel, api };
+      };
+
+      it('loads the next page from the Load more link', async () => {
+        const nextPage = jest.fn().mockResolvedValue({
+          rawResponse: { hits: { hits: createHits([3]), total: 3 } },
+          pagination: { hasNextPage: jest.fn().mockReturnValue(false), nextPage: jest.fn() },
+        });
+        mockPaginatedSearch({ hasNextPage: true, nextPage, total: 3 });
+        const { panel } = await renderPanel();
+
+        await userEvent.click(await panel.findByTestId('dscGridSampleSizeFetchMoreLink'));
+
+        await waitFor(() => expect(nextPage).toHaveBeenCalledTimes(1));
+        // every hit is loaded now, so there is nothing left to offer
+        await waitFor(() => {
+          expect(panel.queryByTestId('unifiedDataTableFooter')).not.toBeInTheDocument();
+        });
+      });
+
+      it('does not offer Load more when no next page can be loaded', async () => {
+        // The total counts more hits than can be loaded, e.g. hits on a failed shard
+        mockPaginatedSearch({ hasNextPage: false, nextPage: jest.fn(), total: 5 });
+
+        const { panel } = await renderPanel();
+
+        expect(panel.queryByTestId('dscGridSampleSizeFetchMoreLink')).not.toBeInTheDocument();
+      });
+
+      it('aborts the page that is loading when the panel requests are cancelled', async () => {
+        const nextPage = jest.fn().mockImplementation(
+          (options: { abortSignal: AbortSignal }) =>
+            new Promise((_resolve, reject) => {
+              options.abortSignal.addEventListener('abort', () => reject(new Error('aborted')));
+            })
+        );
+        mockPaginatedSearch({ hasNextPage: true, nextPage, total: 3 });
+        const { panel, api } = await renderPanel();
+
+        await userEvent.click(await panel.findByTestId('dscGridSampleSizeFetchMoreLink'));
+        await waitFor(() => expect(nextPage).toHaveBeenCalledTimes(1));
+        expect(api.dataLoading$.getValue()).toBe(true);
+
+        act(() => api.cancelRequests());
+
+        await waitFor(() => {
+          expect(nextPage.mock.calls[0][0].abortSignal.aborted).toBe(true);
+          expect(api.dataLoading$.getValue()).toBe(false);
+        });
       });
     });
 
@@ -418,6 +516,7 @@ describe('saved search embeddable', () => {
         });
 
         expect(api.savedSearch$.getValue().tabTypeState).toEqual(tabTypeState);
+        await waitOneTick(); // let the refetch triggered above settle before the next test
       });
     });
 
@@ -475,6 +574,54 @@ describe('saved search embeddable', () => {
       expect(api.esql$.getValue().length).toBeGreaterThan(0);
     });
 
+    it('should not restore the saved data view of an ES|QL panel', async () => {
+      const { search } = createSearchFnMock(1);
+      const esqlSearchSource = createSearchSourceMock(
+        { index: dataViewMock, query: { esql: 'FROM kibana_sample_data_logs | LIMIT 1' } },
+        undefined,
+        search
+      );
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: { serializedSearchSource: esqlSearchSource.getSerializedFields() },
+      });
+      const createSearchSource = jest
+        .fn()
+        .mockResolvedValueOnce(esqlSearchSource)
+        .mockResolvedValueOnce(createSearchSourceMock({}, undefined, search));
+      discoverServiceMock.data.search.searchSource.create = createSearchSource;
+
+      await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      const [serializedFields] = createSearchSource.mock.calls[0];
+      expect(serializedFields.query).toEqual({ esql: 'FROM kibana_sample_data_logs | LIMIT 1' });
+      expect(serializedFields).not.toHaveProperty('index');
+    });
+
+    it('should restore the saved data view of a classic panel', async () => {
+      const { search } = createSearchFnMock(1);
+      runtimeState = getInitialRuntimeState({ searchMock: search });
+      const createSearchSource = discoverServiceMock.data.search.searchSource.create as jest.Mock;
+
+      await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      expect(createSearchSource.mock.calls[0][0]).toHaveProperty('index', dataViewMock.id);
+    });
+
     it('should be empty for esql$ when the initial query is not an ES|QL query', async () => {
       const { search } = createSearchFnMock(1);
       runtimeState = getInitialRuntimeState({ searchMock: search });
@@ -489,6 +636,22 @@ describe('saved search embeddable', () => {
       await waitOneTick();
 
       expect(api.esql$.getValue()).toEqual([]);
+    });
+
+    it('should support JSON export', async () => {
+      const { search } = createSearchFnMock(1);
+      runtimeState = getInitialRuntimeState({ searchMock: search });
+
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      expect(api.supportsJsonExport).toBe(true);
     });
 
     it('should not provide inline editing overrides for by-value embeddables', async () => {

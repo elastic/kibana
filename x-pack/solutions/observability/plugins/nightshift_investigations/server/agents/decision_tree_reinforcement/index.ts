@@ -5,14 +5,22 @@
  * 2.0.
  */
 
+import type { AgentCapabilities } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
+import type { AgentBaseConfiguration, AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { buildReinforcementSystemPrompt } from '@kbn/nightshift-decision-trees';
-import { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+  getNightshiftBoundHookWorkflowId,
+} from '@kbn/workflows/managed';
+import { NIGHTSHIFT_AGENT_CAPABILITIES } from '../investigation';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../../tools/sandbox_bash/write_file_tool';
-import { DECISION_TREE_PROMPT_TOOLS, DECISION_TREE_TOOL_IDS } from '../../tools/decision_tree';
+import {
+  DECISION_TREE_PROMPT_TOOLS,
+  DECISION_TREE_SUBMIT_TOOL_ID,
+} from '../../tools/decision_tree';
 
 export const NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID =
   'significant-events.decision-tree-reinforcement';
@@ -35,26 +43,46 @@ export const DECISION_TREE_REINFORCEMENT_AGENT_DESCRIPTION =
   'into the existing tree for the symptom and recording what a human had to correct.';
 
 /**
+ * The reinforcement agent edits decision-tree files in the sandbox and submits one result, so it
+ * also drops the generic attachment tools, which the investigator and the assistant keep.
+ */
+const DECISION_TREE_REINFORCEMENT_CAPABILITIES: AgentCapabilities = {
+  ...NIGHTSHIFT_AGENT_CAPABILITIES,
+  attachment_tools: { enabled: false },
+};
+
+const getBaseConfiguration = (hydrateWorkflowId: string): AgentBaseConfiguration => ({
+  instructions: buildReinforcementSystemPrompt(DECISION_TREE_PROMPT_TOOLS),
+  skill_ids: [],
+  tools: [{ tool_ids: [...SANDBOX_FILE_TOOL_IDS, DECISION_TREE_SUBMIT_TOOL_ID] }],
+  enable_elastic_capabilities: false,
+  capabilities: DECISION_TREE_REINFORCEMENT_CAPABILITIES,
+  connector_ids: [],
+  // Hydration has to run inside this agent's own conversation: the sandbox workspace is
+  // namespaced per conversation, and this agent runs in a different one than the investigator.
+  workflow_ids: [hydrateWorkflowId],
+});
+
+/**
  * Builds the decision-tree reinforcement agent type. It runs after an investigation rather than
- * during one: the reinforce workflow hands it the round's transcript, its own beforeAgent hook
- * materializes the stored trees into `/workspace/decision-trees`, and it edits them with the
- * sandbox file tools before `submit_optimizer_result` validates and persists the result.
+ * during one: the reinforce step hands it the investigator's round as conversation history, its
+ * own beforeAgent hook materializes the stored trees into `/workspace/decision-trees`, and it
+ * edits them with the sandbox file tools before `nightshift_submit_optimizer_result` validates
+ * and persists the result. The learning tools are added per turn, on follow-up turns only.
  */
 export const getDecisionTreeReinforcementAgentType = (): AgentTypeDefinition => ({
   id: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_TYPE_ID,
   name: DECISION_TREE_REINFORCEMENT_AGENT_NAME,
   description: DECISION_TREE_REINFORCEMENT_AGENT_DESCRIPTION,
   avatar_icon: 'logoElastic',
-  baseConfiguration: {
-    instructions: buildReinforcementSystemPrompt(DECISION_TREE_PROMPT_TOOLS),
-    skill_ids: [],
-    tools: [{ tool_ids: [...SANDBOX_FILE_TOOL_IDS, ...DECISION_TREE_TOOL_IDS] }],
-    enable_elastic_capabilities: false,
-    connector_ids: [],
-    // Hydration has to run inside this agent's own conversation: the sandbox workspace is
-    // namespaced per conversation, and this agent runs in a different one than the investigator.
-    workflow_ids: [NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID],
-  },
+  // The hydrate hook is the space's bound entry point, so the configuration is per space.
+  baseConfiguration: async (ctx) =>
+    getBaseConfiguration(
+      getNightshiftBoundHookWorkflowId(
+        NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+        ctx.spaceId
+      )
+    ),
 });
 
 export const registerDecisionTreeReinforcementAgentType = (

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   allowHiddenIndicesSchema,
   fieldFiltersSchema,
@@ -21,6 +21,7 @@ import {
   savedPrimitiveRuntimeFieldSchema,
 } from '../runtime_fields/schema_saved_runtime_fields';
 import { fieldSettingsWithPopularitySchema } from '../field_settings/schema_field_settings';
+import { savedScriptedFieldSchema } from '../scripted_fields/schema_saved_scripted_fields';
 
 export const savedFieldSettingsSchema = z
   .union([
@@ -47,7 +48,14 @@ export const savedDataViewSpecSchema = z
     field_filters: fieldFiltersSchema,
     index_pattern: indexPatternSchema,
     time_field: timeFieldSchema,
-    field_settings: z.record(fieldSettingsFieldNameSchema, savedFieldSettingsSchema).optional(),
+    field_settings: z
+      .record(fieldSettingsFieldNameSchema, savedFieldSettingsSchema)
+      .optional()
+      .meta({
+        title: 'Field settings',
+        description:
+          'Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, format, or popularity. To define a runtime field, use the runtime field name and set `type`.',
+      }),
   })
   .strict()
   .meta({
@@ -56,3 +64,29 @@ export const savedDataViewSpecSchema = z
     description:
       'Defines an stored data source with a mandatory index pattern and optional settings like id, name, show hidden indices and field settings.',
   });
+
+/**
+ * Read-only variant of the saved data view spec that also exposes the deprecated scripted fields.
+ * Scripted fields can't be written through the as code API, so request bodies must keep using
+ * {@link savedDataViewSpecSchema}.
+ */
+export const savedDataViewSpecWithScriptedFieldsSchema = lazySchema(() =>
+  savedDataViewSpecSchema
+    .extend({
+      scripted_fields: z
+        .record(fieldSettingsFieldNameSchema, savedScriptedFieldSchema)
+        .optional()
+        .meta({
+          title: 'Scripted fields',
+          deprecated: true,
+          description:
+            'Deprecated scripted fields, keyed by field name. This property is read-only: it is only returned in responses, and sending it in a create or update request fails with a 400.',
+        }),
+    })
+    .strict()
+    .meta({
+      id: 'kbn-saved-data-view-spec-with-scripted-fields-schema',
+      title: 'Saved data view spec with scripted fields',
+      description: 'A stored data view, including its deprecated scripted fields when it has any.',
+    })
+);

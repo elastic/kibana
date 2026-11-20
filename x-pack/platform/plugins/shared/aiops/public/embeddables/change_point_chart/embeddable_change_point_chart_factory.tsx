@@ -11,6 +11,7 @@ import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { RequestCancellationManager } from '@kbn/ml-cancellable-search';
 import {
   apiHasExecutionContext,
   fetch$,
@@ -21,12 +22,14 @@ import {
   titleComparators,
   timeRangeComparators,
 } from '@kbn/presentation-publishing';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { initializeStateApi } from '@kbn/presentation-publishing';
 
 import fastIsEqual from 'fast-deep-equal';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, EMPTY, distinctUntilChanged, map, merge, skipWhile } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, EMPTY, distinctUntilChanged, map, merge, skip, skipWhile } from 'rxjs';
 import type { ChangePointChartEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
 import { getChangePointDetectionComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
@@ -58,10 +61,10 @@ export const getChangePointChartEmbeddableFactory = (
 
       const changePointManager = initializeChangePointControls(state);
 
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
+      const dataSources$ = new BehaviorSubject<DataView[] | undefined>([
         await pluginStart.data.dataViews.get(state.data_view_id),
       ]);
 
@@ -93,6 +96,8 @@ export const getChangePointChartEmbeddableFactory = (
           changePointManager.reinitializeState(nextState);
         },
       });
+
+      const requestCancellationManager = new RequestCancellationManager();
 
       const api = finalizeApi({
         ...timeRangeManager.api,
@@ -134,8 +139,24 @@ export const getChangePointChartEmbeddableFactory = (
         },
         dataLoading$,
         blockingError$,
-        dataViews$,
+        dataSources$,
+        cancelRequests: (reason?: AbortReason) => {
+          requestCancellationManager.cancel(reason);
+          // Without this the dashboard keeps showing the panel as loading, which keeps the
+          // cancel button visible and blocks `waitForPanelsToLoad$`.
+          dataLoading$.next(false);
+        },
       });
+
+      // Starting a new load lifts a previous cancellation. Besides `fetch$`, the panel
+      // refetches whenever one of its data inputs changes. `viewType` and `maxSeriesToPlot`
+      // only affect presentation and don't trigger a refetch, so they must not start a load.
+      const fetchSubscription = merge(
+        fetch$(api),
+        ...[api.dataViewId, api.fn, api.metricField, api.splitField, api.partitions].map(
+          (subject: Observable<unknown>) => subject.pipe(skip(1))
+        )
+      ).subscribe(() => requestCancellationManager.startLoad());
 
       const ChangePointDetectionComponent = getChangePointDetectionComponent(
         coreStart,
@@ -144,7 +165,11 @@ export const getChangePointChartEmbeddableFactory = (
 
       const onLoading = (v: boolean) => dataLoading$.next(v);
       const onRenderComplete = () => dataLoading$.next(false);
-      const onError = (error: Error) => blockingError$.next(error);
+      const onError = (error: Error) => {
+        // A cancellation is not a panel error
+        if (error?.name === 'AbortError') return;
+        blockingError$.next(error);
+      };
 
       return {
         api,
@@ -152,6 +177,10 @@ export const getChangePointChartEmbeddableFactory = (
           if (!apiHasExecutionContext(parentApi)) {
             throw new Error('Parent API does not have execution context');
           }
+
+          useEffect(() => {
+            return () => fetchSubscription.unsubscribe();
+          }, []);
 
           const [dataViewId, viewType, fn, metricField, splitField, maxSeriesToPlot, partitions] =
             useBatchedPublishingSubjects(
@@ -210,6 +239,8 @@ export const getChangePointChartEmbeddableFactory = (
               onError={onError}
               embeddingOrigin={embeddingOrigin}
               lastReloadRequestTime={lastReloadRequestTime}
+              requestCancellationManager={requestCancellationManager}
+              parentApi={parentApi}
             />
           );
         },

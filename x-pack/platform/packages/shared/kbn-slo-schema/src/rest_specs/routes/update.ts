@@ -4,43 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { indicatorSchema, timeWindowSchema } from '../../schema';
-import { allOrAnyStringOrArray } from '../../schema/common';
+import { z, lazySchema } from '@kbn/zod';
+import { indicatorSchema } from '../../schema/indicators';
 import {
+  artifactsWithIdSchema,
   budgetingMethodSchema,
+  groupBySchema,
   objectiveSchema,
   optionalSettingsSchema,
   sloDefinitionSchema,
   sloIdSchema,
   tagsSchema,
 } from '../../schema/slo';
+import { timeWindowSchema } from '../../schema/time_window';
 
-const updateSLOParamsSchema = t.type({
-  path: t.type({
-    id: sloIdSchema,
-  }),
-  body: t.partial({
-    name: t.string,
-    description: t.string,
-    indicator: indicatorSchema,
-    timeWindow: timeWindowSchema,
-    budgetingMethod: budgetingMethodSchema,
-    objective: objectiveSchema,
-    settings: optionalSettingsSchema,
-    tags: tagsSchema,
-    groupBy: allOrAnyStringOrArray,
-    artifacts: t.partial({
-      dashboards: t.array(t.type({ id: t.string })),
+const updateSLOParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      id: sloIdSchema,
     }),
-  }),
-});
+    body: z.object({
+      name: z.string().optional().describe('A name for the SLO.'),
+      description: z.string().optional().describe('A description for the SLO.'),
+      indicator: indicatorSchema.optional(),
+      timeWindow: timeWindowSchema.optional(),
+      budgetingMethod: budgetingMethodSchema.optional(),
+      objective: objectiveSchema.optional(),
+      settings: optionalSettingsSchema.optional().describe('Defines properties for SLO settings.'),
+      tags: tagsSchema.optional(),
+      groupBy: groupBySchema.optional(),
+      artifacts: artifactsWithIdSchema.optional(),
+    }),
+  })
+);
 
 const updateSLOResponseSchema = sloDefinitionSchema;
 
-type UpdateSLOInput = t.OutputOf<typeof updateSLOParamsSchema.props.body>;
-type UpdateSLOParams = t.TypeOf<typeof updateSLOParamsSchema.props.body>;
-type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
+type UpdateSLOInput = z.input<typeof updateSLOParamsSchema.shape.body>;
+type UpdateSLOParams = z.output<typeof updateSLOParamsSchema.shape.body>;
+type UpdateSLOResponse = z.input<typeof updateSLOResponseSchema>;
 
 export { updateSLOParamsSchema, updateSLOResponseSchema };
 export type { UpdateSLOInput, UpdateSLOParams, UpdateSLOResponse };

@@ -10,7 +10,7 @@
 import { cloneDeep } from 'lodash';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
-import { internalStateActions, selectTab, selectTabRuntimeState } from '..';
+import { getTabDataView, internalStateActions, selectTab, selectTabRuntimeState } from '..';
 import type { InternalStateStore } from '../internal_state';
 import { internalStateSlice } from '../internal_state';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
@@ -18,6 +18,10 @@ import * as tabsActions from './tabs';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
+import { createResolvedMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import { mockControlState } from '../../../../../__mocks__/esql_controls';
+import { DataSourceType } from '../../../../../../common/data_sources';
+import * as resolveEsqlSourceModule from '../../../data_fetching/resolve_esql_source';
 
 const markUnsavedTabs = (internalState: InternalStateStore, tabIds: string[]) =>
   internalState.dispatch(
@@ -29,11 +33,17 @@ const markUnsavedTabs = (internalState: InternalStateStore, tabIds: string[]) =>
 
 export const setup = async () => {
   const services = createDiscoverServicesMock();
-  const { internalState, runtimeStateManager, initializeTabs, initializeSingleTab, switchToTab } =
-    getDiscoverInternalStateMock({
-      services,
-      persistedDataViews: [dataViewWithTimefieldMock, dataViewWithNoTimefieldMock],
-    });
+  const {
+    internalState,
+    runtimeStateManager,
+    searchSessionManager,
+    initializeTabs,
+    initializeSingleTab,
+    switchToTab,
+  } = getDiscoverInternalStateMock({
+    services,
+    persistedDataViews: [dataViewWithTimefieldMock, dataViewWithNoTimefieldMock],
+  });
   const persistedTab1 = getPersistedTabMock({
     tabId: 'tab-1',
     dataView: dataViewWithTimefieldMock,
@@ -64,6 +74,7 @@ export const setup = async () => {
   return {
     internalState,
     runtimeStateManager,
+    searchSessionManager,
     services,
     persistedTab1,
     persistedTab2,
@@ -121,6 +132,7 @@ describe('resetDiscoverSession', () => {
     const {
       internalState,
       runtimeStateManager,
+      searchSessionManager,
       services,
       persistedTab1,
       persistedTab2,
@@ -129,6 +141,7 @@ describe('resetDiscoverSession', () => {
     } = await setup();
 
     jest.mocked(services.data.search.searchSource.create).mockClear();
+    const forgetTab = jest.spyOn(searchSessionManager, 'forgetTab');
 
     const tab1RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab1.id);
     const tab2RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab2.id);
@@ -165,14 +178,17 @@ describe('resetDiscoverSession', () => {
     expect(tab1.forceFetchOnSelect).toBe(false);
     expect(tab2.forceFetchOnSelect).toBe(true);
     expect(tab3.forceFetchOnSelect).toBe(true);
+    expect(forgetTab.mock.calls).toEqual([[persistedTab2.id], [persistedTab3.id]]);
 
-    expect(tab1RuntimeState.currentDataView$.getValue()).toBe(dataViewWithTimefieldMock);
-    expect(tab2RuntimeState.currentDataView$.getValue()).toBe(dataViewWithNoTimefieldMock);
-    expect(tab3RuntimeState.currentDataView$.getValue()).toBeUndefined();
+    expect(getTabDataView(tab1RuntimeState)).toBe(dataViewWithTimefieldMock);
+    expect(getTabDataView(tab2RuntimeState)).toBe(dataViewWithNoTimefieldMock);
+    expect(getTabDataView(tab3RuntimeState)).toBeUndefined();
   });
 
   it('should use provided discover session and next selected tab', async () => {
-    const { internalState, persistedTab2, persistedDiscoverSession } = await setup();
+    const { internalState, searchSessionManager, persistedTab2, persistedDiscoverSession } =
+      await setup();
+    const forgetTab = jest.spyOn(searchSessionManager, 'forgetTab');
 
     markUnsavedTabs(internalState, [persistedTab2.id]);
 
@@ -196,6 +212,7 @@ describe('resetDiscoverSession', () => {
 
     const refetchedTab = selectTab(internalState.getState(), persistedTab2.id);
     expect(refetchedTab.forceFetchOnSelect).toBe(false);
+    expect(forgetTab).not.toHaveBeenCalled();
   });
 
   it('should keep current tab runtime state available while replacing all session tabs', async () => {
@@ -246,5 +263,41 @@ describe('resetDiscoverSession', () => {
     expect(
       selectTabRuntimeState(runtimeStateManager, updatedDiscoverSession.tabs[0].id)
     ).toBeDefined();
+  });
+
+  it('resolves an ES|QL tab with its control variables', async () => {
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewWithTimefieldMock],
+    });
+    const persistedTab = getPersistedTabMock({
+      dataView: dataViewWithTimefieldMock,
+      services,
+      appStateOverrides: {
+        query: { esql: 'FROM logs-* | WHERE host == ?foo' },
+        dataSource: { type: DataSourceType.Esql },
+      },
+      attributesOverrides: { controlGroupState: mockControlState },
+    });
+    const resolveSpy = jest
+      .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
+      .mockResolvedValue(await createResolvedMockEsqlSource());
+
+    await toolkit.initializeTabs({
+      persistedDiscoverSession: createDiscoverSessionMock({ id: 'test-id', tabs: [persistedTab] }),
+    });
+    await toolkit.initializeSingleTab({ tabId: persistedTab.id, skipWaitForDataFetching: true });
+    resolveSpy.mockClear();
+
+    await toolkit.internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap();
+
+    expect(resolveSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esql: 'FROM logs-* | WHERE host == ?foo',
+        esqlVariables: [{ key: 'foo', type: 'values', value: 'bar' }],
+      })
+    );
+    resolveSpy.mockRestore();
   });
 });

@@ -61,18 +61,18 @@ jest.mock('../../../../common/hooks/use_space_id', () => ({
 }));
 
 jest.mock('../hooks/use_fetch_entity_details_highlights', () => ({
-  useFetchEntityDetailsHighlights: () => mockUseFetchEntityDetailsHighlights(),
+  useFetchEntityDetailsHighlights: (args: unknown) => mockUseFetchEntityDetailsHighlights(args),
 }));
 
 jest.mock('../hooks/use_fetch_persisted_ai_summary', () => ({
-  useFetchPersistedAiSummary: () => mockUseFetchPersistedAiSummary(),
+  useFetchPersistedAiSummary: (args: unknown) => mockUseFetchPersistedAiSummary(args),
 }));
 
 jest.mock('../../../../common/hooks/use_has_entity_highlights_license', () => ({
   useHasEntityHighlightsLicense: () => mockUseHasEntityHighlightsLicense(),
 }));
 
-jest.mock('../hooks/use_inference_connector_access', () => ({
+jest.mock('../../../hooks/use_inference_connector_access', () => ({
   useInferenceConnectorAccess: (params: unknown) => mockUseInferenceConnectorAccess(params),
 }));
 
@@ -486,6 +486,49 @@ describe('EntityHighlights', () => {
     expect(screen.queryByRole('button', { name: 'Generate' })).not.toBeInTheDocument();
   });
 
+  describe('while the entity store record is loading', () => {
+    it('skips the persisted-summary fetch and shows the loading skeleton instead of the empty state', () => {
+      render(<EntityHighlightsAccordion {...defaultProps} isEntityRecordLoading />, {
+        wrapper: TestProviders,
+      });
+
+      expect(mockUseFetchPersistedAiSummary).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: true })
+      );
+      expect(
+        screen.getByRole('progressbar', { name: /loading entity summary/i })
+      ).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Generate' })).not.toBeInTheDocument();
+      expect(screen.queryByTestId('entity-highlights-staleness-callout')).not.toBeInTheDocument();
+    });
+
+    it('does not fetch the persisted summary once the record has resolved', () => {
+      render(<EntityHighlightsAccordion {...defaultProps} />, { wrapper: TestProviders });
+
+      expect(mockUseFetchPersistedAiSummary).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: false })
+      );
+    });
+
+    it('hides the section for a user who cannot generate until the record has resolved', () => {
+      mockUseAssistantAvailability.mockReturnValue({
+        ...defaultAssistantAvailability,
+        hasAssistantPrivilege: false,
+        hasConnectorsReadPrivilege: false,
+      });
+      mockUseAgentBuilderAvailability.mockReturnValue({
+        ...defaultAgentBuilderAvailability,
+        hasAgentBuilderPrivilege: false,
+      });
+
+      render(<EntityHighlightsAccordion {...defaultProps} isEntityRecordLoading />, {
+        wrapper: TestProviders,
+      });
+
+      expect(screen.queryByTestId('entity-highlights-accordion')).not.toBeInTheDocument();
+    });
+  });
+
   it('keeps content mounted and shows a progress bar while the persisted summary refetches', () => {
     const mockAssistantResult = createAssistantResult({
       text: 'Summary stays visible during background refetch',
@@ -789,6 +832,83 @@ describe('EntityHighlights', () => {
 
       expect(mockFetchEntityHighlights).toHaveBeenCalled();
       expect(window.localStorage.getItem(dismissKey)).toBeNull();
+    });
+
+    describe('resolved mode', () => {
+      // Resolution-group risk matches the persisted snapshot (70) while the individual risk (90)
+      // drifts — only single mode should report staleness.
+      const groupEntityRecord = {
+        entity: {
+          risk: { calculated_score_norm: 90 },
+          relationships: { resolution: { risk: { calculated_score_norm: 70 } } },
+        },
+      } as unknown as Entity;
+      const resolvedDismissKey = `${dismissKey}.resolved`;
+
+      const renderResolved = (entityRecord: Entity = groupEntityRecord) => {
+        mockUseFetchPersistedAiSummary.mockReturnValue(stalePersistedSummary);
+        mockUseFetchEntityDetailsHighlights.mockReturnValue({
+          ...defaultFetchEntityDetailsHighlights,
+          result: createAssistantResult(),
+        });
+
+        return render(
+          <EntityHighlightsAccordion
+            {...defaultProps}
+            entityRecord={entityRecord}
+            mode="resolved"
+          />,
+          { wrapper: TestProviders }
+        );
+      };
+
+      it('defaults to single mode for the persisted-summary and generation hooks', () => {
+        renderStale();
+
+        expect(mockUseFetchPersistedAiSummary).toHaveBeenCalledWith(
+          expect.objectContaining({ entityIdentifier: 'test-user', mode: 'single' })
+        );
+        expect(mockUseFetchEntityDetailsHighlights).toHaveBeenCalledWith(
+          expect.objectContaining({ entityIdentifier: 'test-user', mode: 'single' })
+        );
+      });
+
+      it('forwards resolved mode to the persisted-summary and generation hooks', () => {
+        renderResolved();
+
+        expect(mockUseFetchPersistedAiSummary).toHaveBeenCalledWith(
+          expect.objectContaining({ entityIdentifier: 'test-user', mode: 'resolved' })
+        );
+        expect(mockUseFetchEntityDetailsHighlights).toHaveBeenCalledWith(
+          expect.objectContaining({
+            entityIdentifier: 'test-user',
+            mode: 'resolved',
+            entitySnapshot: { riskScoreNorm: 70 },
+          })
+        );
+      });
+
+      it('checks staleness against the resolution-group risk score', () => {
+        renderResolved();
+
+        expect(screen.queryByTestId('entity-highlights-staleness-callout')).not.toBeInTheDocument();
+      });
+
+      it('records staleness dismissals under a resolved-mode key', () => {
+        const driftedGroupRecord = {
+          entity: {
+            risk: { calculated_score_norm: 70 },
+            relationships: { resolution: { risk: { calculated_score_norm: 90 } } },
+          },
+        } as unknown as Entity;
+        renderResolved(driftedGroupRecord);
+
+        const callout = screen.getByTestId('entity-highlights-staleness-callout');
+        fireEvent.click(within(callout).getByLabelText('Dismiss this callout'));
+
+        expect(window.localStorage.getItem(resolvedDismissKey)).toBe('90');
+        expect(window.localStorage.getItem(dismissKey)).toBeNull();
+      });
     });
   });
 });

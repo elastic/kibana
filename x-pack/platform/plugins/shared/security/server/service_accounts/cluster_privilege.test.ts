@@ -45,18 +45,6 @@ describe('ensureClusterPrivilege', () => {
     expect(globally).toHaveBeenCalledWith({
       elasticsearch: { cluster: ['manage_security'], index: {} },
     });
-
-    await ensureClusterPrivilege({
-      request,
-      checkPrivilegesWithRequest,
-      logger,
-      privilege: 'read_security',
-      action: 'list service accounts',
-    });
-
-    expect(globally).toHaveBeenLastCalledWith({
-      elasticsearch: { cluster: ['read_security'], index: {} },
-    });
   });
 
   it('resolves quietly when the privilege is held', async () => {
@@ -80,7 +68,46 @@ describe('ensureClusterPrivilege', () => {
   it('propagates a failed privilege check rather than treating it as a refusal', async () => {
     globally.mockRejectedValue(new Error('cluster unavailable'));
 
-    await expect(check()).rejects.toThrowError('cluster unavailable');
+    await expect(check()).rejects.toThrow('cluster unavailable');
     expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  describe('onRefused', () => {
+    const checkWith = (onRefused: jest.Mock) =>
+      ensureClusterPrivilege({
+        request: httpServerMock.createKibanaRequest(),
+        checkPrivilegesWithRequest,
+        logger,
+        privilege: 'manage_security',
+        action: 'create a service account',
+        onRefused,
+      });
+
+    it('is called with the 403 that is then thrown', async () => {
+      globally.mockResolvedValue({ hasAllRequested: false });
+      const onRefused = jest.fn();
+
+      const rejection = await checkWith(onRefused).catch((e) => e);
+
+      expect(onRefused).toHaveBeenCalledTimes(1);
+      expect(onRefused).toHaveBeenCalledWith(rejection);
+      expect(rejection.output.statusCode).toBe(403);
+    });
+
+    it('is not called when the privilege is held', async () => {
+      const onRefused = jest.fn();
+
+      await checkWith(onRefused);
+
+      expect(onRefused).not.toHaveBeenCalled();
+    });
+
+    it('is not called when the check itself fails', async () => {
+      globally.mockRejectedValue(new Error('cluster unavailable'));
+      const onRefused = jest.fn();
+
+      await expect(checkWith(onRefused)).rejects.toThrow('cluster unavailable');
+      expect(onRefused).not.toHaveBeenCalled();
+    });
   });
 });

@@ -46,6 +46,8 @@ export function getExternals(): Record<string, string> {
     // Server-only URI parsing helper for the mongodb driver; loaded via
     // dynamic import alongside 'mongodb' above, same rationale.
     'mongodb-connection-string-url': 'commonjs mongodb-connection-string-url',
+    // Native SQL Server (TDS) driver — server-only, keep out of the browser bundle.
+    mssql: 'commonjs mssql',
     // Native MySQL driver — keep out of the browser bundle (mirrors webpack).
     mysql2: 'commonjs mysql2',
     'mysql2/promise': 'commonjs mysql2/promise',

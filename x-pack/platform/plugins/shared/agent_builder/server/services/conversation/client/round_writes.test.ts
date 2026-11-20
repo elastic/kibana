@@ -16,8 +16,10 @@ import {
   AgentBuilderErrorCode,
   ConversationRoundStatus,
   ConversationRoundStepType,
+  EventActorType,
   TimelineEventType,
   attachmentTools,
+  TimelineTriggerType,
 } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { createEmptyConversation, createRound } from '../../../test_utils';
@@ -38,7 +40,10 @@ describe('reconcileEvents', () => {
 
   /** A stored `exec_0` that failed: user_message, execution_started, execution_failed. */
   const failedBlock = (): TimelineEvent[] => [
-    userMessageEvent({ id: 'r1', input: { message: 'hi' }, started_at: T0 }, conversation),
+    userMessageEvent(
+      { id: 'r1::user_message', input: { message: 'hi' }, createdAt: T0 },
+      conversation
+    ),
     executionStartedEvent({ id: 'r1', started_at: T0 }, conversation),
     {
       id: 'r1::execution_failed',
@@ -68,7 +73,10 @@ describe('reconcileEvents', () => {
 
   it('preserves an in-progress round block (receipt-time user_message only)', () => {
     const stored = [
-      userMessageEvent({ id: 'r1', input: { message: 'hi' }, started_at: T0 }, conversation),
+      userMessageEvent(
+        { id: 'r1::user_message', input: { message: 'hi' }, createdAt: T0 },
+        conversation
+      ),
     ];
     const result = reconcile({ ...conversation, rounds: [], events: stored });
     expect(ids(result)).toEqual(['r1::user_message']);
@@ -78,6 +86,31 @@ describe('reconcileEvents', () => {
     const stored = roundToEvents(completedRound({ id: 'r1', started_at: T0 }), conversation);
     expect(stored.at(-1)!.id).toBe('r1::execution_terminated'); // fixture sanity
     expect(reconcile({ ...conversation, rounds: [], events: stored })).toEqual([]);
+  });
+
+  it('keeps the stored agent_message of a regenerated round, and its run keeps that trigger type', () => {
+    const r1 = completedRound({ id: 'r1', started_at: T0 });
+    const reportActor = { type: EventActorType.agent, id: 'child-agent', username: 'child-agent' };
+    const stored = roundToEvents(r1, conversation).map((event) =>
+      event.id === 'r1::user_message'
+        ? { ...event, type: TimelineEventType.agentMessage, actor: reportActor }
+        : event
+    );
+
+    const result = reconcile({ ...conversation, rounds: [r1], events: stored });
+
+    expect(result.find((event) => event.id === 'r1::user_message')).toMatchObject({
+      type: TimelineEventType.agentMessage,
+      actor: reportActor,
+    });
+    expect(result.find((event) => event.id === 'r1::execution_started')).toMatchObject({
+      data: { trigger_type: TimelineTriggerType.agentMessage },
+    });
+    expect(ids(result)).toEqual([
+      'r1::user_message',
+      'r1::execution_started',
+      'r1::execution_terminated',
+    ]);
   });
 
   it('regenerates an in-progress round that IS in rounds (unchanged behaviour)', () => {

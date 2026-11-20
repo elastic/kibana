@@ -15,7 +15,7 @@ export const registerMappingRoutes = ({ logger, router }: RouteDependencies) => 
       path: '/internal/serverless_search/mappings/{index_name}',
       validate: {
         params: schema.object({
-          index_name: schema.string(),
+          index_name: schema.string({ maxLength: 1024 }),
         }),
       },
       security: {

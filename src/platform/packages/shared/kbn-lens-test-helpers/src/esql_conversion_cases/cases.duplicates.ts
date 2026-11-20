@@ -116,11 +116,11 @@ export const buildDuplicateCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2', 'col3'],
       expected: {
         success: true,
-        esql: `${logsFrom} | ${logsWhere} | STATS AVG(bytes) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)`,
-        columnNames: ['AVG(bytes)', 'BUCKET(timestamp, 75, ?_tstart, ?_tend)'],
+        esql: `${logsFrom} | ${logsWhere} | STATS AVG(bytes) BY timestamp = BUCKET(timestamp, 75, ?_tstart, ?_tend)`,
+        columnNames: ['AVG(bytes)', 'timestamp'],
         expectedSourceIds: {
           'AVG(bytes)': ['col2', 'col3'],
-          'BUCKET(timestamp, 75, ?_tstart, ?_tend)': ['col1'],
+          timestamp: ['col1'],
         },
       },
     },
@@ -136,11 +136,11 @@ export const buildDuplicateCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2', 'col3'],
       expected: {
         success: true,
-        esql: `${logsFrom} | ${logsWhere} | STATS AVG(bytes) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)`,
-        columnNames: ['AVG(bytes)', 'BUCKET(timestamp, 75, ?_tstart, ?_tend)'],
+        esql: `${logsFrom} | ${logsWhere} | STATS AVG(bytes) BY timestamp = BUCKET(timestamp, 75, ?_tstart, ?_tend)`,
+        columnNames: ['AVG(bytes)', 'timestamp'],
         expectedSourceIds: {
           'AVG(bytes)': ['col3'],
-          'BUCKET(timestamp, 75, ?_tstart, ?_tend)': ['col1', 'col2'],
+          timestamp: ['col1', 'col2'],
         },
       },
     },

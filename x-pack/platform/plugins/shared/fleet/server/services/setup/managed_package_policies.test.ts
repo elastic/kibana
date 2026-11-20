@@ -38,6 +38,8 @@ describe('upgradeManagedPackagePolicies', () => {
   afterEach(() => {
     jest.clearAllMocks();
     jest.mocked(packagePolicyService.fetchAllItems).mockReset();
+    jest.mocked(packagePolicyService.getUpgradeDryRunDiff).mockReset();
+    jest.mocked(packagePolicyService.bulkUpgrade).mockReset();
   });
 
   it('should not upgrade policies for installed package', async () => {
@@ -48,7 +50,7 @@ describe('upgradeManagedPackagePolicies', () => {
 
     await upgradeManagedPackagePolicies(soClient, esClient, 'testpkg');
 
-    expect(packagePolicyService.upgrade).not.toHaveBeenCalled();
+    expect(packagePolicyService.bulkUpgrade).not.toHaveBeenCalled();
   });
 
   it('should upgrade policies for managed package', async () => {
@@ -82,6 +84,10 @@ describe('upgradeManagedPackagePolicies', () => {
       hasErrors: false,
     });
 
+    (packagePolicyService.bulkUpgrade as jest.Mock).mockResolvedValueOnce([
+      { id: 'managed-package-id', success: true },
+    ]);
+
     (getInstallation as jest.Mock).mockResolvedValueOnce({
       id: 'test-installation',
       version: '1.0.0',
@@ -93,14 +99,97 @@ describe('upgradeManagedPackagePolicies', () => {
       { packagePolicyId: 'managed-package-id', diff: [{ id: 'foo' }, { id: 'bar' }], errors: [] },
     ]);
 
-    expect(packagePolicyService.upgrade).toHaveBeenCalledWith(
+    expect(packagePolicyService.bulkUpgrade).toHaveBeenCalledWith(
       soClient,
       esClient,
-      'managed-package-id',
-      { force: true },
-      packagePolicy,
+      ['managed-package-id'],
+      { force: true, batchSize: 250 },
       '1.0.0'
     );
+  });
+
+  it('should upgrade a page in one bulk call, skipping policies with dry run conflicts', async () => {
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const soClient = savedObjectsClientMock.create();
+    const makePackagePolicy = (id: string) => ({
+      id,
+      inputs: {},
+      package: { name: 'managed-package', title: 'Managed Package', version: '0.0.1' },
+    });
+
+    (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValueOnce(
+      (async function* () {
+        yield [
+          makePackagePolicy('pp-1'),
+          makePackagePolicy('pp-conflict'),
+          makePackagePolicy('pp-2'),
+        ];
+        yield [makePackagePolicy('pp-3')];
+      })()
+    );
+    (packagePolicyService.getUpgradeDryRunDiff as jest.Mock).mockImplementation(
+      async (_so, id: string) =>
+        id === 'pp-conflict'
+          ? { diff: [{}, { errors: [{ message: 'Conflict' }] }], hasErrors: true }
+          : { diff: [], hasErrors: false }
+    );
+    (packagePolicyService.bulkUpgrade as jest.Mock).mockImplementation(
+      async (_so, _es, ids: string[]) => ids.map((id) => ({ id, success: id !== 'pp-2' }))
+    );
+    (getInstallation as jest.Mock).mockResolvedValueOnce({
+      id: 'test-installation',
+      version: '1.0.0',
+      keep_policies_up_to_date: true,
+    });
+
+    const results = await upgradeManagedPackagePolicies(soClient, esClient, 'pkgname');
+
+    expect(packagePolicyService.bulkUpgrade).toHaveBeenCalledTimes(2);
+    expect(packagePolicyService.bulkUpgrade).toHaveBeenNthCalledWith(
+      1,
+      soClient,
+      esClient,
+      ['pp-1', 'pp-2'],
+      expect.anything(),
+      '1.0.0'
+    );
+    expect(results.map(({ packagePolicyId, errors }) => [packagePolicyId, errors.length])).toEqual([
+      ['pp-conflict', 1],
+      ['pp-1', 0],
+      ['pp-2', 1],
+      ['pp-3', 0],
+    ]);
+  });
+
+  it('should record an error for every policy in the batch when the bulk upgrade throws', async () => {
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const soClient = savedObjectsClientMock.create();
+
+    (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValueOnce(
+      (async function* () {
+        yield [
+          {
+            id: 'pp-1',
+            inputs: {},
+            package: { name: 'managed-package', title: 'Managed Package', version: '0.0.1' },
+          },
+        ];
+      })()
+    );
+    (packagePolicyService.getUpgradeDryRunDiff as jest.Mock).mockResolvedValueOnce({
+      diff: [],
+      hasErrors: false,
+    });
+    (packagePolicyService.bulkUpgrade as jest.Mock).mockRejectedValueOnce(new Error('boom'));
+    (getInstallation as jest.Mock).mockResolvedValueOnce({
+      id: 'test-installation',
+      version: '1.0.0',
+      keep_policies_up_to_date: true,
+    });
+
+    const results = await upgradeManagedPackagePolicies(soClient, esClient, 'pkgname');
+
+    expect(results).toEqual([{ packagePolicyId: 'pp-1', diff: [], errors: [new Error('boom')] }]);
   });
 
   it('should not upgrade policy if newer than installed package version', async () => {
@@ -138,7 +227,7 @@ describe('upgradeManagedPackagePolicies', () => {
     await upgradeManagedPackagePolicies(soClient, esClient, 'pkgname');
 
     expect(packagePolicyService.getUpgradeDryRunDiff).not.toHaveBeenCalled();
-    expect(packagePolicyService.upgrade).not.toHaveBeenCalled();
+    expect(packagePolicyService.bulkUpgrade).not.toHaveBeenCalled();
   });
 
   describe('when dry run reports conflicts', () => {
@@ -211,7 +300,7 @@ describe('upgradeManagedPackagePolicies', () => {
         },
       ]);
 
-      expect(packagePolicyService.upgrade).not.toHaveBeenCalled();
+      expect(packagePolicyService.bulkUpgrade).not.toHaveBeenCalled();
     });
   });
 });

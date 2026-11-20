@@ -49,9 +49,15 @@ export const useNavigation = () => {
     [application]
   );
 
+  const navigateToMcpClientsList = useCallback(
+    () => navigateToAgentBuilderUrl(MCP_CLIENTS_LIST_PATH),
+    [navigateToAgentBuilderUrl]
+  );
+
   return {
     createAgentBuilderUrl,
     navigateToAgentBuilderUrl,
+    navigateToMcpClientsList,
     mcpClientsListUrl,
     mcpClientCreateUrl,
   };

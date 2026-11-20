@@ -510,6 +510,84 @@ describe('validateChangesExistingType', () => {
     });
   });
 
+  describe('update schema changes in an existing model version', () => {
+    const base = loadSnapshot('schema_only_change_in_latest_model_version.json').typeDefinitions
+      .task;
+    const registeredType: SavedObjectsType = {
+      name: 'task',
+      namespaceType: 'agnostic',
+      hidden: false,
+      mappings: { dynamic: false, properties: {} },
+      modelVersions: {},
+    };
+    const updateSchema = {
+      type: 'object',
+      keys: { taskType: { type: 'string' }, status: { type: 'string' } },
+    };
+    const withUpdate = (update?: Record<string, unknown>): MigrationInfoRecord => ({
+      ...base,
+      modelVersions: base.modelVersions.map((mv) =>
+        mv.version === '3' ? { ...mv, schemas: { ...mv.schemas, ...(update && { update }) } } : mv
+      ),
+    });
+    const validate = (from: MigrationInfoRecord, to: MigrationInfoRecord) =>
+      validateChangesExistingType({ from, to, registeredType, log });
+
+    it('does not report a schema change when neither side has an update schema', () => {
+      expect(() => validate(withUpdate(), withUpdate())).not.toThrow();
+      expect(log).not.toHaveBeenCalledWith(expect.stringContaining('Schema'));
+    });
+
+    it('allows adding an update schema to an existing model version', () => {
+      expect(() => validate(withUpdate(), withUpdate(updateSchema))).not.toThrow();
+      expect(log).toHaveBeenCalledWith(expect.stringContaining('WARNING'));
+    });
+
+    it('throws when a shipped update schema is removed', () => {
+      expect(() => validate(withUpdate(updateSchema), withUpdate())).toThrow(
+        /Breaking schema changes.*update schema removed from model version/s
+      );
+    });
+
+    it('throws when a field is removed from the update schema', () => {
+      const after = { type: 'object', keys: { taskType: { type: 'string' } } };
+      expect(() => validate(withUpdate(updateSchema), withUpdate(after))).toThrow(
+        /field 'status' removed from update schema/
+      );
+    });
+
+    it('throws when a field type changes in the update schema', () => {
+      const after = {
+        type: 'object',
+        keys: { taskType: { type: 'string' }, status: { type: 'number' } },
+      };
+      expect(() => validate(withUpdate(updateSchema), withUpdate(after))).toThrow(
+        /field 'status' type changed from 'string' to 'number' in update schema/
+      );
+    });
+
+    it('throws when a required field is added to the update schema', () => {
+      const after = {
+        type: 'object',
+        keys: { ...updateSchema.keys, partition: { type: 'string' } },
+      };
+      expect(() => validate(withUpdate(updateSchema), withUpdate(after))).toThrow(
+        /required field 'partition' added to update schema/
+      );
+    });
+
+    it('allows adding an optional field to the update schema', () => {
+      const after = {
+        type: 'object',
+        keys: {
+          ...updateSchema.keys,
+          partition: { type: 'string', flags: { presence: 'optional' } },
+        },
+      };
+      expect(() => validate(withUpdate(updateSchema), withUpdate(after))).not.toThrow();
+    });
+  });
+
   describe('schema-only changes in existing versions when adding a new model version', () => {
     // Scenario: a schema-only change was applied to model version 3 (approved by CI) and
     // a developer subsequently adds model version 4 in the same PR or a later one.

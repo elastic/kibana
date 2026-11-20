@@ -9,7 +9,7 @@
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiButton, EuiComboBox, EuiForm, EuiFormRow } from '@elastic/eui';
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { FieldSpec } from '@kbn/data-views-types';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 

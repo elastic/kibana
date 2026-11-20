@@ -174,6 +174,7 @@ export const ConnectorIconsMap: Map<
         import(/* webpackChunkName: "connectorIconGoogleCalendar" */ './specs/google_calendar/icon')
     ),
   ],
+  ['.aws', lazy(() => import(/* webpackChunkName: "connectorIconAws" */ './specs/aws/icon'))],
   [
     '.aws_lambda',
     lazy(() => import(/* webpackChunkName: "connectorIconAwsLambda" */ './specs/aws_lambda/icon')),
@@ -336,6 +337,10 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconawsxray" */ './specs/aws_x_ray/icon')),
   ],
   [
+    '.aws_ssm',
+    lazy(() => import(/* webpackChunkName: "connectorIconAwsSsm" */ './specs/aws_ssm/icon')),
+  ],
+  [
     '.prometheus',
     lazy(() => import(/* webpackChunkName: "connectorIconPrometheus" */ './specs/prometheus/icon')),
   ],
@@ -363,7 +368,6 @@ export const ConnectorIconsMap: Map<
     '.zabbix',
     lazy(() => import(/* webpackChunkName: "connectorIconZabbix" */ './specs/zabbix/icon')),
   ],
-
   ['.okta', lazy(() => import(/* webpackChunkName: "connectorIconOkta" */ './specs/okta/icon'))],
   [
     '.gcp_iam',
@@ -383,8 +387,24 @@ export const ConnectorIconsMap: Map<
     '.urlscan_io',
     lazy(() => import(/* webpackChunkName: "connectorIconUrlscanIo" */ './specs/urlscan_io/icon')),
   ],
-  ['.misp', lazy(() => import(/* webpackChunkName: "connectorIconMisp" */ './specs/misp/icon'))],
 
+  [
+    '.aws_eks',
+    lazy(() => import(/* webpackChunkName: "connectorIconAwsEks" */ './specs/aws_eks/icon')),
+  ],
+  [
+    '.google_gke',
+    lazy(() => import(/* webpackChunkName: "connectorIconGoogleGke" */ './specs/google_gke/icon')),
+  ],
+  [
+    '.bitbucket',
+    lazy(() => import(/* webpackChunkName: "connectorIconBitbucket" */ './specs/bitbucket/icon')),
+  ],
+  [
+    '.azure_aks',
+    lazy(() => import(/* webpackChunkName: "connectorIconAzureAks" */ './specs/azure_aks/icon')),
+  ],
+  ['.misp', lazy(() => import(/* webpackChunkName: "connectorIconMisp" */ './specs/misp/icon'))],
   [
     '.google_threat_intelligence',
     lazy(
@@ -394,9 +414,44 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
-
+  [
+    '.gitlab',
+    lazy(() => import(/* webpackChunkName: "connectorIconGitlab" */ './specs/gitlab/icon')),
+  ],
   [
     '.threatq',
     lazy(() => import(/* webpackChunkName: "connectorIconThreatQ" */ './specs/threatq/icon')),
+  ],
+  [
+    '.elasticsearch',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconelasticsearch" */ './specs/elasticsearch/icon')
+    ),
+  ],
+  [
+    '.azure_functions',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconazurefunctions" */ './specs/azure_functions/icon')
+    ),
+  ],
+
+  [
+    '.aws_rds',
+    lazy(() => import(/* webpackChunkName: "connectorIconAwsRds" */ './specs/aws_rds/icon')),
+  ],
+  [
+    '.azure_sql',
+    lazy(() => import(/* webpackChunkName: "connectorIconazuresql" */ './specs/azure_sql/icon')),
+  ],
+  [
+    '.solarwinds_platform',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconSolarWindsPlatform" */ './specs/solarwinds_platform/icon'
+        )
+    ),
   ],
 ]);

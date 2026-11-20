@@ -7,18 +7,29 @@
 
 import type { AiIndexType } from './http_api/ai_indices';
 
-export const publicApiPath = '/api/context_engine';
-export const internalApiPath = '/internal/context_engine';
+export const PUBLIC_API_PATH = '/api/context_engine';
+export const INTERNAL_API_PATH = '/internal/context_engine';
 
-export const aiIndexPath = `${publicApiPath}/ai_index`;
-export const aiIndexByIdPath = `${aiIndexPath}/{aiIndexId}`;
+export const AI_INDEX_PATH = `${PUBLIC_API_PATH}/ai_index`;
+export const AI_INDEX_BY_ID_PATH = `${AI_INDEX_PATH}/{aiIndexId}`;
 /** Id-less; ids cannot start with `_` (`AI_INDEX_ID_PATTERN`), so this never collides with `{aiIndexId}`. */
-export const aiIndexQueryPath = `${aiIndexPath}/_query`;
-export const aiIndexDescribePath = `${aiIndexByIdPath}/_describe`;
-export const aiIndexKiSummaryPath = `${internalApiPath}/ai_index/{aiIndexId}/ki_summary`;
-export const aiIndexFeedbackAnalysisPath = `${internalApiPath}/ai_index/{aiIndexId}/feedback_analysis`;
-export const aiIndexKiListPath = `${internalApiPath}/ai_index/{aiIndexId}/kis`;
-export const aiIndexKiByIdPath = `${aiIndexKiListPath}/{kiId}`;
+export const AI_INDEX_QUERY_PATH = `${AI_INDEX_PATH}/_query`;
+export const AI_INDEX_DESCRIBE_PATH = `${AI_INDEX_BY_ID_PATH}/_describe`;
+export const AI_INDEX_DREAMING_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/dreaming`;
+export const DREAMING_TEMPLATES_PATH = `${INTERNAL_API_PATH}/dreaming_templates`;
+export const AI_INDEX_KI_SUMMARY_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/ki_summary`;
+export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/feedback_analysis`;
+export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
+export const AI_INDEX_KI_BY_ID_PATH = `${AI_INDEX_KI_LIST_PATH}/{kiId}`;
+export const AI_INDEX_KI_RESTORE_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_restore`;
+/**
+ * A static segment wins over `{kiId}`, so `GET` can't read a KI whose id is exactly `_groups`.
+ * `PATCH`, `DELETE` and `_restore` still reach it.
+ */
+export const AI_INDEX_KI_GROUPS_PATH = `${AI_INDEX_KI_LIST_PATH}/_groups`;
+
+/** The most unique memory ids one forget call takes, which keeps its search under the result window. */
+export const MAX_SESSION_MEMORY_FORGET_IDS = 100;
 
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;
@@ -26,26 +37,27 @@ export const MAX_KI_PAGE_SIZE = 100;
 /** Page size for summary-only KI list requests, no rows. */
 export const KI_SUMMARY_PAGE_SIZE = 0;
 
+/** Default and maximum number of type groups in a KI groups response. */
+export const DEFAULT_KI_GROUPS = 5;
+export const MAX_KI_GROUPS = 10;
+/** The most types an `exclude_types` filter takes: the tile types plus the "Other" groups. */
+export const MAX_KI_EXCLUDE_TYPES = DEFAULT_KI_GROUPS + MAX_KI_GROUPS;
+/** Default and maximum number of preview rows per KI type group. */
+export const DEFAULT_KI_GROUP_PREVIEW_SIZE = 3;
+export const MAX_KI_GROUP_PREVIEW_SIZE = 50;
+
+/** Also the longest type that can form a group, since the client must be able to send it back. */
 export const MAX_KI_TYPE_FILTER_LENGTH = 256;
+export const MAX_KI_SEARCH_QUERY_LENGTH = 256;
+/** Max length of a Knowledge Indicator `content` field (bytes). */
+export const MAX_KI_CONTENT_LENGTH = 65536;
 
 /** Read-only Signals routes (internal): a preaggregated grouped list and a per-group fetch. */
-export const signalGroupsPath = `${internalApiPath}/signals/groups`;
-export const signalsPath = `${internalApiPath}/signals`;
+export const SIGNAL_GROUPS_PATH = `${INTERNAL_API_PATH}/signals/groups`;
+export const SIGNALS_PATH = `${INTERNAL_API_PATH}/signals`;
 
 /** Version of the internal Signals API, shared between route registration and the browser client. */
 export const SIGNALS_INTERNAL_API_VERSION = '1';
-
-/** Read-only internal route for searching data streams, backing the AI index trace picker. */
-export const dataStreamsSearchPath = `${internalApiPath}/data_streams`;
-
-/** Version of the internal data streams search API, shared between route registration and the browser client. */
-export const DATA_STREAMS_SEARCH_INTERNAL_API_VERSION = '1';
-
-/** Cap on the number of data streams returned by the search API (applied after filtering hidden/managed streams out). */
-export const MAX_DATA_STREAM_SEARCH_RESULTS = 50;
-
-/** Bound on the free-text `search` query param, to prevent unbounded-input DoS. */
-export const MAX_DATA_STREAM_SEARCH_LENGTH = 256;
 
 /** Max number of tag groups returned by the grouped Signals list. */
 export const MAX_SIGNAL_GROUPS = 100;
@@ -108,6 +120,7 @@ export const MAX_AI_INDEX_QUERY_LENGTH = 10000;
 export const MAX_AI_INDEX_QUERY_PARAMS = 100;
 export const MAX_AI_INDEX_QUERY_PARAM_KEY_LENGTH = 256;
 export const MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH = 4096;
+export const MAX_AI_INDEX_USER_ID_LENGTH = 256;
 
 /** Row limit the server always enforces; a larger trailing `LIMIT` in the query is capped to it. */
 export const DEFAULT_AI_INDEX_QUERY_LIMIT = 100;
