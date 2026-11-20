@@ -354,6 +354,7 @@ describe('human review queue routes', () => {
           queue('q-3', 'correctness', '1.9.0'),
           queue('q-4', 'tone', '2.0.0'),
         ],
+        total: 4,
       } as never);
       reviewClient.listItems.mockImplementation(async (queueId: string) => [
         reviewed(queueId, 'pass'),
@@ -371,31 +372,76 @@ describe('human review queue routes', () => {
       expect(reviewClient.listItems.mock.calls.map(([id]) => id)).toEqual(['q-1', 'q-2']);
       expect(response.payload).toMatchObject({
         evaluator_name: 'correctness',
+        version_line: 'major:2',
         version_major: 2,
         queue_count: 2,
+        truncated: false,
         binary: { n: 2 },
       });
     });
 
-    it('answers 400 when the version has no leading major number', async () => {
-      const { handlerFor, soClient, context } = setup();
+    it.each([
+      ['latest', ['q-1', 'q-2'], 'exact:latest'],
+      ['1.0.0', ['q-3', 'q-4'], 'major:1'],
+      ['1.9.1', ['q-3', 'q-4'], 'major:1'],
+    ])('pools version %p by its version line', async (version, expectedQueues, versionLine) => {
+      const { handlerFor, soClient, reviewClient, context } = setup();
+      const queue = (id: string, evaluatorVersion: string) => ({
+        id,
+        type: 'evals-review-queue',
+        attributes: {
+          ...queueAttributes,
+          evaluator_name: 'correctness',
+          evaluator_version: evaluatorVersion,
+        },
+      });
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          queue('q-1', 'latest'),
+          queue('q-2', 'latest'),
+          queue('q-3', '1.2.0'),
+          queue('q-4', '1.9.1'),
+          queue('q-5', '2.0.0'),
+        ],
+        total: 5,
+      } as never);
+      reviewClient.listItems.mockImplementation(async (queueId: string) => [
+        reviewed(queueId, 'pass'),
+      ]);
 
       const response = await handlerFor('get', EVALS_EVALUATOR_REVIEW_AGREEMENT_URL)(
         context as never,
         httpServerMock.createKibanaRequest({
           params: { name: 'correctness' },
-          query: { version: 'latest' },
+          query: { version },
         }),
         kibanaResponseFactory
       );
 
-      expect(response.status).toBe(400);
-      expect(soClient.find).not.toHaveBeenCalled();
+      expect(response.status).toBe(200);
+      expect(reviewClient.listItems.mock.calls.map(([id]) => id)).toEqual(expectedQueues);
+      expect(response.payload).toMatchObject({ version_line: versionLine });
+    });
+
+    it('flags the result truncated when more queues exist than were scanned', async () => {
+      const { handlerFor, soClient, context } = setup();
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 250 } as never);
+
+      const response = await handlerFor('get', EVALS_EVALUATOR_REVIEW_AGREEMENT_URL)(
+        context as never,
+        httpServerMock.createKibanaRequest({
+          params: { name: 'correctness' },
+          query: { version: '1.0.0' },
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(response.payload).toMatchObject({ truncated: true });
     });
 
     it('reports no agreement when no queue matches', async () => {
       const { handlerFor, soClient, context } = setup();
-      soClient.find.mockResolvedValue({ saved_objects: [] } as never);
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
 
       const response = await handlerFor('get', EVALS_EVALUATOR_REVIEW_AGREEMENT_URL)(
         context as never,

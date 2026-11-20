@@ -84,14 +84,19 @@ export interface ReviewQueueAgreement {
 }
 
 /**
- * Agreement pooled across the review queues of one evaluator that share a major version.
- * A major bump changes what the judge measures, so earlier labels stop counting toward it.
+ * Agreement pooled across the review queues of one evaluator that share a version line: the
+ * major for semver versions, the exact string otherwise. A major bump changes what the judge
+ * measures, so earlier labels stop counting toward it.
  */
 export interface EvaluatorReviewAgreement {
   evaluator_name: string;
+  /** `major:<n>` for semver versions, `exact:<version>` for any other version string. */
+  version_line: string;
   /** The major version the pooled queues share, or null when the version has no leading integer. */
   version_major: number | null;
   queue_count: number;
+  /** True when more queues exist than were scanned, so the pooled figures may be incomplete. */
+  truncated: boolean;
   binary: BinaryAgreement | null;
   ordinal: OrdinalAgreement | null;
 }

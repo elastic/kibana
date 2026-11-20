@@ -6,7 +6,12 @@
  */
 
 import type { ReviewItem } from '../../storage/reviews/review_client';
-import { computeItemsAgreement, computeQueueAgreement, majorVersionOf } from './queue_agreement';
+import {
+  computeItemsAgreement,
+  computeQueueAgreement,
+  majorVersionOf,
+  versionLineKey,
+} from './queue_agreement';
 
 const context = {
   queue_id: 'queue-1',
@@ -120,5 +125,24 @@ describe('majorVersionOf', () => {
 
   it.each(['latest', '', 'x.1.0'])('has no major for %p', (version) => {
     expect(majorVersionOf(version)).toBeUndefined();
+  });
+});
+
+describe('versionLineKey', () => {
+  it.each([
+    ['1.2.0', '1.9.1', true],
+    ['v2.0.0', '2.4.0', true],
+    ['1.0.0', '2.0.0', false],
+    ['latest', 'latest', true],
+    ['latest', ' latest ', true],
+    ['latest', '1.0.0', false],
+    ['latest', 'nightly', false],
+  ])('pools %p with %p: %p', (a, b, pooled) => {
+    expect(versionLineKey(a) === versionLineKey(b)).toBe(pooled);
+  });
+
+  it('keys semver by major and anything else by the exact trimmed string', () => {
+    expect(versionLineKey('2.3.1')).toBe('major:2');
+    expect(versionLineKey(' latest ')).toBe('exact:latest');
   });
 });

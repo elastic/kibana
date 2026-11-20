@@ -41,7 +41,12 @@ import { ReviewItemNotFoundError } from '../../storage/reviews/review_item_not_f
 import type { ReviewItem } from '../../storage/reviews/review_client';
 import type { RouteDependencies } from '../register_routes';
 import { getEsErrorLogDetails } from '../utils/get_es_error_log_details';
-import { computeItemsAgreement, computeQueueAgreement, majorVersionOf } from './queue_agreement';
+import {
+  computeItemsAgreement,
+  computeQueueAgreement,
+  majorVersionOf,
+  versionLineKey,
+} from './queue_agreement';
 import { sampleScores } from './sampler';
 
 const MAX_LISTED_QUEUES = 100;
@@ -412,7 +417,7 @@ export const registerReviewQueueRoutes = ({
       path: EVALS_EVALUATOR_REVIEW_AGREEMENT_URL,
       access: INTERNAL_API_ACCESS,
       security: reviewAuthz,
-      summary: 'Get judge-versus-human agreement for an evaluator, pooled within one major version',
+      summary: 'Get judge-versus-human agreement for an evaluator, pooled within one version line',
     })
     .addVersion(
       {
@@ -430,14 +435,7 @@ export const registerReviewQueueRoutes = ({
       },
       async (ctx, req, res) => {
         try {
-          const major = majorVersionOf(req.query.version);
-          if (major === undefined) {
-            return res.badRequest({
-              body: {
-                message: `"${req.query.version}" does not start with a major version number`,
-              },
-            });
-          }
+          const versionLine = versionLineKey(req.query.version);
           const spaceId = await resolveSpaceId(req);
           const evalsContext = await ctx.evals;
           const soClient = await getInternalReviewQueuesSoClient();
@@ -453,7 +451,7 @@ export const registerReviewQueueRoutes = ({
           const matching = found.saved_objects.filter(
             (so) =>
               so.attributes.evaluator_name === req.params.name &&
-              majorVersionOf(so.attributes.evaluator_version) === major
+              versionLineKey(so.attributes.evaluator_version) === versionLine
           );
           const reviews = evalsContext.reviewService.getClient({ spaceId });
           const items = (
@@ -461,8 +459,10 @@ export const registerReviewQueueRoutes = ({
           ).flat();
           const body: EvaluatorReviewAgreement = {
             evaluator_name: req.params.name,
-            version_major: major,
+            version_line: versionLine,
+            version_major: majorVersionOf(req.query.version) ?? null,
             queue_count: matching.length,
+            truncated: found.total > found.saved_objects.length,
             ...computeItemsAgreement(items),
           };
           return res.ok({ body });
