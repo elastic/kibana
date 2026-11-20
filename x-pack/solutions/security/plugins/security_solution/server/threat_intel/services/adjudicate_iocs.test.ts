@@ -526,3 +526,99 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(result.anchor_iocs).toHaveLength(capacity);
   });
 });
+
+describe('prose email candidates', () => {
+  const email = (value: string, overrides: Partial<ExtractedIoc> = {}): ExtractedIoc =>
+    candidate(value, {
+      type: 'email',
+      context: `The phishing sender was ${value} in this campaign.`,
+      ...overrides,
+    });
+
+  it('sends a prose email with context to review', () => {
+    const prepared = prepareIocAdjudication({ iocs: [email('actor@evil-corp.com')] });
+
+    expect(prepared.reviewable).toHaveLength(1);
+    expect(prepared.reviewable[0].ioc.type).toBe('email');
+  });
+
+  it.each([
+    ['defanged_source', 'discriminating'],
+    ['ioc_section', 'discriminating'],
+  ] as const)('keeps a %s email out of review and at its tier', (basis, tier) => {
+    const prepared = prepareIocAdjudication({
+      iocs: [email('actor@evil-corp.com', { tier, tier_heuristic: tier, tier_basis: basis })],
+    });
+    const result = reconcileIocAdjudication(prepared, new Set());
+
+    expect(prepared.reviewable).toHaveLength(0);
+    expect(prepared.deferredUnreviewed).toBe(0);
+    expect(result.iocs[0]).toEqual(expect.objectContaining({ tier, tier_basis: basis }));
+    expect(result.iocs[0].deferred_unreviewed).toBeUndefined();
+  });
+
+  it('keeps a placeholder email out of review at reference', () => {
+    const prepared = prepareIocAdjudication({
+      iocs: [
+        email('test@test.com', {
+          tier: 'reference',
+          tier_heuristic: 'reference',
+          tier_basis: 'placeholder_email',
+        }),
+      ],
+    });
+    const result = reconcileIocAdjudication(prepared, new Set());
+
+    expect(prepared.reviewable).toHaveLength(0);
+    expect(result.iocs[0]).toEqual(
+      expect.objectContaining({ tier: 'reference', tier_basis: 'placeholder_email' })
+    );
+  });
+
+  it('keeps an approved email uncertain with the prefixed basis and anchors it', () => {
+    const prepared = prepareIocAdjudication({ iocs: [email('actor@evil-corp.com')] });
+    const result = reconcileIocAdjudication(prepared, new Set([0]));
+
+    expect(result.iocs[0].tier).toBe('uncertain');
+    expect(result.iocs[0].tier_basis).toBe('semantic_indicator:uncertain_default');
+    expect(result.anchor_iocs.some((ioc) => ioc.value === 'actor@evil-corp.com')).toBe(true);
+  });
+
+  it('downgrades a rejected email to reference / semantic_reference and drops it from anchors', () => {
+    const prepared = prepareIocAdjudication({ iocs: [email('contact@cisa.dhs.gov')] });
+    const result = reconcileIocAdjudication(prepared, new Set());
+
+    expect(result.iocs[0].tier).toBe('reference');
+    expect(result.iocs[0].tier_basis).toBe('semantic_reference');
+    expect(result.anchor_iocs.some((ioc) => ioc.value === 'contact@cisa.dhs.gov')).toBe(false);
+  });
+
+  it('marks a degraded overflow rejection semantic_reference_degraded', () => {
+    const iocs = Array.from({ length: OVERFLOW_MAX_SEMANTIC_CANDIDATES }, (_, index) =>
+      email(`actor${index}@evil-corp.com`)
+    );
+    const second = boundIocAdjudicationForPayload(
+      boundIocAdjudicationForOverflow(prepareIocAdjudication({ iocs }))
+    );
+    const adjudicated = reconcileIocAdjudication(second, new Set());
+
+    expect(second.reviewable.length).toBeGreaterThan(0);
+    for (const entry of second.reviewable) {
+      expect(adjudicated.iocs[entry.originalIndex].tier_basis).toBe('semantic_reference_degraded');
+    }
+  });
+
+  it('defers an email past the batch budget and keeps it out of anchors', () => {
+    const capacity = MAX_SEMANTIC_CANDIDATES_PER_BATCH * MAX_SEMANTIC_REVIEW_BATCHES;
+    const iocs = Array.from({ length: capacity + 1 }, (_, index) =>
+      email(`actor${index}@evil-corp.com`)
+    );
+    const prepared = prepareIocAdjudication({ iocs });
+    const result = reconcileIocAdjudication(prepared, new Set());
+    const last = `actor${capacity}@evil-corp.com`;
+
+    expect(prepared.deferredUnreviewed).toBe(1);
+    expect(result.iocs[capacity].deferred_unreviewed).toBe(true);
+    expect(result.anchor_iocs.some((ioc) => ioc.value === last)).toBe(false);
+  });
+});

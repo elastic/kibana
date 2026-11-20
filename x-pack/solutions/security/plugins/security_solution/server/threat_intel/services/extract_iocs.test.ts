@@ -1846,6 +1846,48 @@ describe('extract_iocs — adjudication context window', () => {
     expect(ioc?.context).not.toContain('Checksum listed');
   });
 
+  it('emits a context window around an email candidate', () => {
+    const result = extractIocs({
+      text: 'The phishing sender was actor@evil-corp.com in this lure.',
+    });
+    const ioc = result.iocs.find((entry) => entry.type === 'email');
+
+    expect(ioc?.context).toContain('phishing sender');
+    expect(ioc?.context).toContain('actor@evil-corp.com');
+  });
+
+  it('prefers an email occurrence in an attribution sentence over a later contact footer', () => {
+    const email = 'actor@evil-corp.com';
+    const result = extractIocs({
+      text:
+        `The phishing lure was sent from ${email} to finance staff. ` +
+        `${'unrelated prose. '.repeat(40)}` +
+        `Questions about this report can go to ${email}.`,
+    });
+    const ioc = result.iocs.find((entry) => entry.type === 'email');
+
+    expect(ioc?.context).toContain('phishing lure');
+    expect(ioc?.context).not.toContain('Questions about this report');
+  });
+
+  it.each(['phishing', 'sender', 'sent from', 'spoofed', 'lure', 'ransom', 'extortion'])(
+    'treats %s as an email attribution cue',
+    (word) => {
+      const email = 'actor@evil-corp.com';
+      const result = extractIocs({
+        text:
+          `Header ${email} appears in an appendix. ` +
+          `${'unrelated prose. '.repeat(40)}` +
+          `The ${word} used ${email} here. ` +
+          `${'more unrelated prose. '.repeat(40)}` +
+          `Contact ${email} for questions.`,
+      });
+      const ioc = result.iocs.find((entry) => entry.type === 'email');
+
+      expect(ioc?.context).toContain(`The ${word} used`);
+    }
+  );
+
   it('does not attach a context window to non-url/domain/hash candidates', () => {
     const result = extractIocs({ text: 'C2 IP: 203.0.113.5' });
     const ioc = result.iocs.find((entry) => entry.type === 'ip' && entry.value === '203.0.113.5');
