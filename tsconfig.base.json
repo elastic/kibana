@@ -2293,6 +2293,8 @@
       "@kbn/restorable-state/*": ["./src/platform/packages/shared/kbn-restorable-state/*"],
       "@kbn/rison": ["./src/platform/packages/shared/kbn-rison"],
       "@kbn/rison/*": ["./src/platform/packages/shared/kbn-rison/*"],
+      "@kbn/rollout-gates-plugin": ["./src/platform/plugins/shared/rollout_gates"],
+      "@kbn/rollout-gates-plugin/*": ["./src/platform/plugins/shared/rollout_gates/*"],
       "@kbn/rollup": ["./x-pack/platform/packages/private/rollup"],
       "@kbn/rollup/*": ["./x-pack/platform/packages/private/rollup/*"],
       "@kbn/rollup-plugin": ["./x-pack/platform/plugins/private/rollup"],

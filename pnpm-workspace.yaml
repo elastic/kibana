@@ -1150,6 +1150,7 @@ packages:
   - 'src/platform/plugins/shared/newsfeed'
   - 'src/platform/plugins/shared/no_data_page'
   - 'src/platform/plugins/shared/presentation_util'
+  - 'src/platform/plugins/shared/rollout_gates'
   - 'src/platform/plugins/shared/saved_objects'
   - 'src/platform/plugins/shared/saved_objects_finder'
   - 'src/platform/plugins/shared/saved_objects_management'

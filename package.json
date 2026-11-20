@@ -1111,6 +1111,7 @@
     "@kbn/response-stream-plugin": "workspace:*",
     "@kbn/restorable-state": "workspace:*",
     "@kbn/rison": "workspace:*",
+    "@kbn/rollout-gates-plugin": "workspace:*",
     "@kbn/rollup": "workspace:*",
     "@kbn/rollup-plugin": "workspace:*",
     "@kbn/router-to-openapispec": "workspace:*",
