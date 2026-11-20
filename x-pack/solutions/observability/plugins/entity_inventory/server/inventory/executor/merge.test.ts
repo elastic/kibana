@@ -25,6 +25,7 @@ const plan = (index: number, indexPattern = `pattern-${index}`): QueryPlan => ({
   indexPattern,
   engine: 'FROM',
   attributes: [],
+  metrics: [],
 });
 
 const result = (index: number, rows: InventoryRow[], indexPattern?: string): PlanResult => ({
@@ -261,12 +262,13 @@ describe('mergeRows', () => {
 
   it('merges against columns built from a fixture', () => {
     const plans: QueryPlan[] = (k8sDeploymentFixture.dynamic?.sources ?? []).map(
-      ({ indexPattern, attributes = [] }, index) => ({
+      ({ indexPattern, attributes = [], metrics = [] }, index) => ({
         index,
         sourceIndex: index,
         indexPattern,
         engine: 'FROM',
         attributes,
+        metrics,
       })
     );
     const fixtureColumns = buildColumns(

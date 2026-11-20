@@ -16,6 +16,7 @@ const plan: QueryPlan = {
   indexPattern: 'p',
   engine: 'FROM',
   attributes: [],
+  metrics: [],
 };
 
 const result = (types: Record<string, string>): PlanResult => ({

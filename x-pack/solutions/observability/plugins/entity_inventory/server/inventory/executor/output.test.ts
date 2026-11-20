@@ -77,6 +77,7 @@ describe('summarizeResults', () => {
     indexPattern: 'p',
     engine: 'FROM',
     attributes: [],
+    metrics: [],
   };
   const result = (rowCount: number): PlanResult => ({
     plan,

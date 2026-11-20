@@ -96,7 +96,12 @@ const toQueryDiagnostic = (
 };
 
 const toResponseColumns = (columns: OutputColumn[]): InventoryTypeColumn[] =>
-  columns.map(({ name, kind }) => ({ name, kind }));
+  columns.map(({ name, kind, agg, unit }) => ({
+    name,
+    kind,
+    ...(agg !== undefined ? { agg } : {}),
+    ...(unit !== undefined ? { unit } : {}),
+  }));
 
 const restrictProvenance = (provenance: Provenance, rows: InventoryRow[]): Provenance =>
   Object.fromEntries(
@@ -326,7 +331,11 @@ export class InventoryService {
     const identityPlan = resolveIdentityPlan(definition);
     const columns = buildColumns(
       definition,
-      sources.map(({ attributes }, index) => ({ index, attributes: attributes ?? [] })),
+      sources.map(({ attributes, metrics }, index) => ({
+        index,
+        attributes: attributes ?? [],
+        metrics: metrics ?? [],
+      })),
       identityPlan
     );
     return {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DynamicAttribute } from '@kbn/entity-store/common';
+import type { DynamicAttribute, DynamicMetric } from '@kbn/entity-store/common';
 import type { NamedParams, QueryEngine } from '../../../common';
 
 /** What the probe found behind one source's pattern. */
@@ -15,8 +15,9 @@ export interface SourceProbe {
 }
 
 /**
- * The unit the generator queries: one source under one engine, with the source's filter and
- * attributes. Both plans of a source name the pattern exactly as the author wrote it.
+ * The unit the generator queries: one source under one engine, with the plan's filter (source
+ * and/or metric filter), attributes, and the metrics of this filter group. Both plans of a source
+ * name the pattern exactly as the author wrote it.
  */
 export interface QueryPlan {
   /** Position in plan order, 0-based; the stable key for provenance. */
@@ -24,10 +25,12 @@ export interface QueryPlan {
   /** The source of the definition the plan came from. */
   sourceIndex: number;
   indexPattern: string;
-  /** The plan's ES|QL filter; for now the source's own. */
+  /** Combined canonical source + metric-group filter, when either is set. */
   filter?: string;
   /** The source's attributes; every plan of a source carries them. */
   attributes: DynamicAttribute[];
+  /** Metrics of this filter group (empty when the source has none for the group). */
+  metrics: DynamicMetric[];
   /** `TS` reads the pattern's time-series indices, `FROM` every other index behind it. */
   engine: QueryEngine;
 }

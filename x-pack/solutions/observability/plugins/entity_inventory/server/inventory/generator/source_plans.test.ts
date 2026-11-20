@@ -39,6 +39,7 @@ describe('planSources', () => {
         sourceIndex: 0,
         indexPattern: 'metrics-kubeletstatsreceiver.otel-default',
         attributes: [{ name: 'cluster', field: 'orchestrator.cluster.name' }],
+        metrics: [],
         engine: 'TS',
       },
       {
@@ -46,6 +47,7 @@ describe('planSources', () => {
         sourceIndex: 0,
         indexPattern: 'metrics-kubeletstatsreceiver.otel-default',
         attributes: [{ name: 'cluster', field: 'orchestrator.cluster.name' }],
+        metrics: [],
         engine: 'FROM',
       },
       {
@@ -57,6 +59,7 @@ describe('planSources', () => {
           { name: 'cluster', field: 'orchestrator.cluster.name' },
           { name: 'paused', field: 'kubernetes.deployment.paused' },
         ],
+        metrics: [],
         engine: 'FROM',
       },
     ]);
@@ -86,7 +89,118 @@ describe('planSources', () => {
   it('gives a source without attributes an empty attribute list', () => {
     const [plan] = planSources(withSources([{ indexPattern: 'metrics-*' }]), [NO_TIME_SERIES]);
     expect(plan.attributes).toEqual([]);
+    expect(plan.metrics).toEqual([]);
     expect(plan).not.toHaveProperty('filter');
+  });
+
+  it('merges equivalent metric filters into one plan group after canonicalize', () => {
+    // Without canonicalize, `state=="idle"` and `state == "idle"` would be two groups (up to 4 plans).
+    const plans = planSources(
+      withSources([
+        {
+          indexPattern: 'metrics-otel-*',
+          filter: 'data_stream.dataset == "hostmetrics"',
+          attributes: [{ name: 'os', field: 'os.type' }],
+          metrics: [
+            {
+              name: 'system.memory.utilization',
+              field: 'system.memory.utilization',
+              agg: 'last',
+            },
+            {
+              name: 'system.cpu.utilization',
+              field: 'system.cpu.utilization',
+              agg: 'last',
+              filter: 'state=="idle"',
+              scale: -1,
+              offset: 1,
+            },
+          ],
+        },
+      ]),
+      [TIME_SERIES]
+    );
+
+    expect(
+      plans.map(({ engine, filter, metrics }) => ({
+        engine,
+        filter,
+        metricNames: metrics.map(({ name }) => name),
+      }))
+    ).toEqual([
+      {
+        engine: 'TS',
+        filter: 'data_stream.dataset == "hostmetrics"',
+        metricNames: ['system.memory.utilization'],
+      },
+      {
+        engine: 'FROM',
+        filter: 'data_stream.dataset == "hostmetrics"',
+        metricNames: ['system.memory.utilization'],
+      },
+      {
+        engine: 'TS',
+        filter: '(data_stream.dataset == "hostmetrics") AND (state == "idle")',
+        metricNames: ['system.cpu.utilization'],
+      },
+      {
+        engine: 'FROM',
+        filter: '(data_stream.dataset == "hostmetrics") AND (state == "idle")',
+        metricNames: ['system.cpu.utilization'],
+      },
+    ]);
+  });
+
+  it('treats state=="idle" and state == "idle" as one metric filter group', () => {
+    const plans = planSources(
+      withSources([
+        {
+          indexPattern: 'metrics-*',
+          metrics: [
+            {
+              name: 'cpu_a',
+              field: 'system.cpu.utilization',
+              agg: 'last',
+              filter: 'state=="idle"',
+            },
+            {
+              name: 'cpu_b',
+              field: 'system.cpu.total.norm.pct',
+              agg: 'last',
+              filter: 'state == "idle"',
+            },
+          ],
+        },
+      ]),
+      [NO_TIME_SERIES]
+    );
+    expect(plans).toHaveLength(1);
+    expect(plans[0].filter).toBe('state == "idle"');
+    expect(plans[0].metrics.map(({ name }) => name)).toEqual(['cpu_a', 'cpu_b']);
+  });
+
+  it('has no unfiltered plan when every metric carries a filter', () => {
+    const plans = planSources(
+      withSources([
+        {
+          indexPattern: 'metrics-*',
+          attributes: [{ name: 'os', field: 'os.type' }],
+          metrics: [
+            {
+              name: 'cpu',
+              field: 'system.cpu.utilization',
+              agg: 'last',
+              filter: 'state == "idle"',
+            },
+          ],
+        },
+      ]),
+      [NO_TIME_SERIES]
+    );
+    expect(plans).toHaveLength(1);
+    expect(plans[0].filter).toBe('state == "idle"');
+    expect(plans[0].attributes).toEqual([{ name: 'os', field: 'os.type' }]);
+    expect(plans[0].metrics).toHaveLength(1);
   });
 
   it('throws when the probes do not match the sources', () => {
