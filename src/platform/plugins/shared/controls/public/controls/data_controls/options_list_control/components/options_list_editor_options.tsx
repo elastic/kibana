@@ -68,6 +68,7 @@ const allSearchOptions = [
 export const OptionsListEditorOptions = ({
   initialState,
   field,
+  isPinned,
   updateState,
 }: CustomOptionsComponentProps<OptionsListDSLControlState>) => {
   const [singleSelect, setSingleSelect] = useState<boolean>(initialState.single_select ?? false);
@@ -138,26 +139,30 @@ export const OptionsListEditorOptions = ({
             }}
             name="selectionType"
           />
-          <EuiSpacer size="s" />
-          <EuiSwitch
-            compressed
-            label={
-              <ControlSettingTooltipLabel
-                label={singleSelect ? 'Make selection required' : 'Make selections required'}
-                tooltip={
-                  singleSelect
-                    ? 'Delay panel loading until a selection is made.'
-                    : 'Delay panel loading until at least one selection is made.'
+          {isPinned && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiSwitch
+                compressed
+                label={
+                  <ControlSettingTooltipLabel
+                    label={singleSelect ? 'Make selection required' : 'Make selections required'}
+                    tooltip={
+                      singleSelect
+                        ? 'Delay panel loading until a selection is made.'
+                        : 'Delay panel loading until at least one selection is made.'
+                    }
+                  />
                 }
+                checked={requiredSelections}
+                onChange={() => {
+                  setRequiredSelections(!requiredSelections);
+                  updateState({ required: !requiredSelections });
+                }}
+                data-test-subj={'dataControl__ignoreValidationsAdditionalSetting'}
               />
-            }
-            checked={requiredSelections}
-            onChange={() => {
-              setRequiredSelections(!requiredSelections);
-              updateState({ required: !requiredSelections });
-            }}
-            data-test-subj={'dataControl__ignoreValidationsAdditionalSetting'}
-          />
+            </>
+          )}
         </div>
       </EuiFormRow>
       {compatibleSearchTechniques.length > 1 && (

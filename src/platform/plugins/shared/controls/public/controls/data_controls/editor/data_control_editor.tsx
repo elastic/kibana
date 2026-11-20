@@ -44,7 +44,11 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import { triggers } from '@kbn/ui-actions-plugin/public';
 import { CONTROL_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { ControlValuesSource, DEFAULT_CONTROL_VALUES_SOURCE } from '@kbn/controls-constants';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import {
+  apiCanPinPanels,
+  apiHasPinnedPanels,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 import type { PublishesESQLVariables } from '@kbn/esql-types';
 import { type CreateControlTypeAction } from '../../../actions/control_panel_actions';
 import {
@@ -260,6 +264,15 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     };
   }, [editorState.data_view_id]);
 
+  // existing controls ask the parent; new controls are created pinned whenever the parent supports pinning
+  const isPinned = useMemo(
+    () =>
+      controlId
+        ? apiHasPinnedPanels(parentApi) && parentApi.panelIsPinned(controlId)
+        : apiCanPinPanels(parentApi),
+    [controlId, parentApi]
+  );
+
   const CustomSettingsComponent = useMemo(() => {
     if (!selectedControlType) return;
     const CustomSettings =
@@ -277,12 +290,20 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         <CustomSettings
           initialState={initialState}
           field={field}
+          isPinned={isPinned}
           updateState={(newState) => setEditorState({ ...editorState, ...newState })}
           setControlEditorValid={setControlOptionsValid}
         />
       </div>
     );
-  }, [selectedDataView, initialState, editorState, controlActionRegistry, selectedControlType]);
+  }, [
+    selectedDataView,
+    initialState,
+    editorState,
+    controlActionRegistry,
+    selectedControlType,
+    isPinned,
+  ]);
 
   const valuesSourceValid = useMemo(() => {
     if (isESQLValuesSource) return esqlQueryValidation;

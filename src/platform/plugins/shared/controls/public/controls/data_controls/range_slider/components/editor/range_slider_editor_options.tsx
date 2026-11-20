@@ -11,13 +11,14 @@ import { EuiFormRow, EuiFieldNumber, EuiSwitch } from '@elastic/eui';
 import React, { useState } from 'react';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
+import { ControlSettingTooltipLabel } from '../../../../../control_group/components/control_setting_tooltip_label';
 import { RangeSliderStrings } from '../../range_slider_strings';
 import type { CustomOptionsComponentProps } from '../../../types';
 import { CustomOptionsAdditionalSettings } from '../../../components';
-import { ControlSettingTooltipLabel } from '@kbn/controls-plugin/public/control_group/components/control_setting_tooltip_label';
 
 export const RangeSliderEditorOptions = ({
   initialState,
+  isPinned,
   updateState,
   setControlEditorValid,
 }: CustomOptionsComponentProps<RangeSliderControlState>) => {
@@ -28,25 +29,27 @@ export const RangeSliderEditorOptions = ({
 
   return (
     <>
-      <EuiFormRow
-        label={'Selections'}
-        data-test-subj="optionsListControl__selectionOptionsRadioGroup"
-      >
-        <EuiSwitch
-          compressed
-          label={
-            <ControlSettingTooltipLabel
-              label={'Make selections required'}
-              tooltip={'Delay panel loading until at least one selection is made.'}
-            />
-          }
-          checked={requiredSelections}
-          onChange={() => {
-            setRequiredSelections(!requiredSelections);
-          }}
-          data-test-subj={'dataControl__ignoreValidationsAdditionalSetting'}
-        />
-      </EuiFormRow>
+      {isPinned && (
+        <EuiFormRow
+          label={'Selections'}
+          data-test-subj="optionsListControl__selectionOptionsRadioGroup"
+        >
+          <EuiSwitch
+            compressed
+            label={
+              <ControlSettingTooltipLabel
+                label={'Make selections required'}
+                tooltip={'Delay panel loading until at least one selection is made.'}
+              />
+            }
+            checked={requiredSelections}
+            onChange={() => {
+              setRequiredSelections(!requiredSelections);
+            }}
+            data-test-subj={'dataControl__ignoreValidationsAdditionalSetting'}
+          />
+        </EuiFormRow>
+      )}
       <EuiFormRow fullWidth label={RangeSliderStrings.editor.getStepTitle()}>
         <EuiFieldNumber
           compressed

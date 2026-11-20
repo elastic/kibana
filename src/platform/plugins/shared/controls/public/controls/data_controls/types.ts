@@ -49,6 +49,8 @@ export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'
 export interface CustomOptionsComponentProps<State extends DataControlState = DataControlState> {
   initialState: Partial<State>;
   field?: DataViewField;
+  /** Whether the control is (or, when being created, will be) pinned. Some settings only apply to pinned controls. */
+  isPinned: boolean;
   updateState: (newState: Partial<State>) => void;
   setControlEditorValid: (valid: boolean) => void;
 }
