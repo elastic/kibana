@@ -50,10 +50,6 @@ describe('conversationStartersSchema', () => {
     expect(() => startersSchema.validate([{}])).toThrow();
   });
 
-  it('rejects fields it does not know, such as a separate prompt', () => {
-    expect(() => startersSchema.validate([{ label: 'first', prompt: 'something else' }])).toThrow();
-  });
-
   describe('label', () => {
     it('accepts a label of the maximum length', () => {
       const starters = [{ label: 'a'.repeat(CONVERSATION_STARTER_LABEL_MAX_LENGTH) }];

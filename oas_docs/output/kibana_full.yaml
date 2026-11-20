@@ -1811,13 +1811,8 @@ paths:
                     type: object
                     properties:
                       label:
-                        description: Short text shown on the conversation starter card.
+                        description: Short text shown on the conversation starter card, and sent as the message when it is clicked.
                         maxLength: 30
-                        minLength: 1
-                        type: string
-                      prompt:
-                        description: Message sent when the card is clicked. When omitted, the label is sent.
-                        maxLength: 1000
                         minLength: 1
                         type: string
                     required:
@@ -2393,13 +2388,8 @@ paths:
                     type: object
                     properties:
                       label:
-                        description: Short text shown on the conversation starter card.
+                        description: Short text shown on the conversation starter card, and sent as the message when it is clicked.
                         maxLength: 30
-                        minLength: 1
-                        type: string
-                      prompt:
-                        description: Message sent when the card is clicked. When omitted, the label is sent.
-                        maxLength: 1000
                         minLength: 1
                         type: string
                     required:

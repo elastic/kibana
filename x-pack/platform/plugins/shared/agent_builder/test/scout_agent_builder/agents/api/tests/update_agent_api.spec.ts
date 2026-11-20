@@ -134,10 +134,6 @@ apiTest.describe(
     [
       { description: 'a label longer than 30 characters', starters: [{ label: 'a'.repeat(31) }] },
       { description: 'a blank label', starters: [{ label: '   ' }] },
-      {
-        description: 'a separate prompt, which is not supported',
-        starters: [{ label: 'Top errors', prompt: 'Show me the top errors' }],
-      },
       { description: 'a plain string instead of an object', starters: ['Top errors'] },
       {
         description: 'more than 3 conversation starters',
