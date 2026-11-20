@@ -22,7 +22,7 @@ const VISIBLE_ROW_COUNT = 3;
 
 const mockMeasureElement = jest.fn();
 const mockGetOffsetForIndex = jest.fn();
-const mockScrollToOffset = jest.fn();
+const mockScrollToIndex = jest.fn();
 let mockScrollOffsetAvailable = true;
 let mockDelayVirtualMount = false;
 let mockPendingVirtualScrolls: Array<() => void> = [];
@@ -102,9 +102,8 @@ jest.mock('@tanstack/react-virtual', () => {
           mockGetOffsetForIndex(index, align);
           return mockScrollOffsetAvailable ? ([index * ROW_HEIGHT, align] as const) : undefined;
         },
-        scrollToOffset: (offset: number) => {
-          mockScrollToOffset(offset);
-          const index = Math.floor(offset / ROW_HEIGHT);
+        scrollToIndex: (index: number, scrollOptions: { align: string }) => {
+          mockScrollToIndex(index, scrollOptions);
           const commitScroll = () => setRequestedStart(Math.min(Math.max(index, 0), maximumStart));
           if (mockDelayVirtualMount) {
             mockPendingVirtualScrolls.push(commitScroll);
@@ -139,11 +138,11 @@ export const focusVisibleTestHarness = {
 export const virtualizerTestHarness = {
   measureElement: mockMeasureElement,
   getOffsetForIndex: mockGetOffsetForIndex,
-  scrollToOffset: mockScrollToOffset,
+  scrollToIndex: mockScrollToIndex,
   reset: (): void => {
     mockMeasureElement.mockReset();
     mockGetOffsetForIndex.mockReset();
-    mockScrollToOffset.mockReset();
+    mockScrollToIndex.mockReset();
     mockScrollOffsetAvailable = true;
     mockDelayVirtualMount = false;
     mockPendingVirtualScrolls = [];
@@ -158,7 +157,7 @@ export const virtualizerTestHarness = {
     mockScrollOffsetAvailable = true;
   },
   throwOnNextScroll: (): void => {
-    mockScrollToOffset.mockImplementationOnce(() => {
+    mockScrollToIndex.mockImplementationOnce(() => {
       throw new Error('virtualizer unavailable');
     });
   },

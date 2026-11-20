@@ -164,11 +164,12 @@ export const DataGrid = <TRow extends object>({
       return false;
     }
     try {
-      const offset = rowVirtualizer.getOffsetForIndex(rowIndex, 'auto')?.[0];
-      if (offset === undefined) {
+      if (rowVirtualizer.getOffsetForIndex(rowIndex, 'auto') === undefined) {
         return false;
       }
-      rowVirtualizer.scrollToOffset(offset);
+      // Scrolling to the index, not to its current offset, keeps the row in view while the rows
+      // before it are measured for the first time and change size.
+      rowVirtualizer.scrollToIndex(rowIndex, { align: 'auto' });
       return true;
     } catch {
       return false;
