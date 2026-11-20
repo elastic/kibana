@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, filter, first } from 'rxjs';
+import { BehaviorSubject, filter, first, merge, skip, take } from 'rxjs';
 import type { initializeFiltersManager } from './filters_manager';
 
 export function initializePauseFetchManager(
@@ -16,11 +16,19 @@ export function initializePauseFetchManager(
   const isFetchPaused$ = new BehaviorSubject<boolean>(true);
   const setFetchPaused = (paused: boolean) => isFetchPaused$.next(paused);
 
-  const initialFiltersSubscription = filtersManager.api.childFiltersLoading$
-    .pipe(
-      filter((loading) => !loading),
-      first()
-    )
+  // Don't unpause as soon as loading is done: the control filters show up a tick later,
+  // and we'd mistake them for a search change and start a new session.
+  const initialFiltersSubscription = merge(
+    // child filters are only pushed once loading finishes. If nothing is loading at start
+    // (e.g. no controls), they're never pushed, so unpause right away instead
+    filtersManager.api.childFiltersLoading$.pipe(
+      take(1),
+      filter((loading) => !loading)
+    ),
+    // child filters are pushed here a tick after they finish loading
+    filtersManager.api.unpublishedChildFilters$.pipe(skip(1))
+  )
+    .pipe(first())
     .subscribe(() => {
       setFetchPaused(false);
     });
