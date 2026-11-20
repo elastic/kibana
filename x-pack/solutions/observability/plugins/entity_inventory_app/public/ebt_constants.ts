@@ -17,6 +17,8 @@ export const ENTITY_INVENTORY_EBT_ACTIONS = {
   TOGGLE_PERFORMANCE_OVERLAY: 'togglePerformanceOverlay',
   /** Developer clears the recorded API calls of the performance overlay. */
   CLEAR_PERFORMANCE_HISTORY: 'clearPerformanceHistory',
+  /** Developer expands or collapses a probe or query row of the performance overlay. */
+  TOGGLE_PERFORMANCE_ROW: 'togglePerformanceRow',
 };
 
 /** EBT click `element` values: where in the entity inventory the click happened. */

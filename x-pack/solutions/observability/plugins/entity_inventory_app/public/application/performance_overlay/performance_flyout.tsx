@@ -6,8 +6,10 @@
  */
 
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -19,11 +21,12 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { ENTITY_INVENTORY_EBT_ACTIONS, ENTITY_INVENTORY_EBT_ELEMENTS } from '../../ebt_constants';
-import { formatMs } from './format';
+import { EMPTY_VALUE, formatMs, formatRequest } from './format';
 import { ListCallDetail } from './list_call_detail';
 import type { RecordedCall, RecordedCallStatus } from './performance_recorder';
 import {
@@ -42,16 +45,33 @@ const STATUS_COLORS: Readonly<Record<RecordedCallStatus, string>> = {
   aborted: 'subdued',
 };
 
+// About six compressed rows and the header before the history scrolls.
+const HISTORY_VISIBLE_ROWS = 7;
+
+const numberCss = css`
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+`;
+
 const HISTORY_TABLE_COLUMNS: Array<EuiBasicTableColumn<RecordedCall>> = [
   {
     field: 'startedAt',
     name: HISTORY_COLUMNS.time,
-    render: (startedAt: number) => new Date(startedAt).toLocaleTimeString(),
+    width: '112px',
+    render: (startedAt: number) => (
+      <span css={numberCss}>{new Date(startedAt).toLocaleTimeString()}</span>
+    ),
   },
-  { field: 'route', name: HISTORY_COLUMNS.route },
+  {
+    field: 'route',
+    name: HISTORY_COLUMNS.request,
+    truncateText: true,
+    render: (route: string) => formatRequest(route),
+  },
   {
     field: 'status',
     name: HISTORY_COLUMNS.status,
+    width: '96px',
     render: (status: RecordedCallStatus, { errorMessage }: RecordedCall) => (
       <EuiHealth color={STATUS_COLORS[status]} title={errorMessage ?? undefined}>
         {STATUS_LABELS[status]}
@@ -60,15 +80,29 @@ const HISTORY_TABLE_COLUMNS: Array<EuiBasicTableColumn<RecordedCall>> = [
   },
   {
     field: 'browserMs',
-    name: HISTORY_COLUMNS.browserMs,
+    name: HISTORY_COLUMNS.browser,
+    width: '88px',
     align: 'right',
-    render: (browserMs: number) => formatMs(browserMs),
+    render: (browserMs: number) => <span css={numberCss}>{formatMs(browserMs)}</span>,
   },
   {
     field: 'serverMs',
-    name: HISTORY_COLUMNS.serverMs,
+    name: HISTORY_COLUMNS.server,
+    width: '88px',
     align: 'right',
-    render: (serverMs: number | null) => formatMs(serverMs),
+    render: (serverMs: number | null) => <span css={numberCss}>{formatMs(serverMs)}</span>,
+  },
+  {
+    name: HISTORY_COLUMNS.errors,
+    width: '64px',
+    align: 'right',
+    render: ({ list }: RecordedCall) => {
+      if (list === null) {
+        return EMPTY_VALUE;
+      }
+      const { length } = list.errors;
+      return length > 0 ? <EuiBadge color="danger">{length}</EuiBadge> : length;
+    },
   },
 ];
 
@@ -80,11 +114,17 @@ export interface PerformanceFlyoutProps {
 
 /** The recent API calls, and the breakdown of the selected `_list` call (the latest by default). */
 export const PerformanceFlyout = ({ calls, onClear, onClose }: PerformanceFlyoutProps) => {
+  const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'entityInventoryPerformanceFlyoutTitle' });
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const selected =
     calls.find(({ id, list }) => id === selectedId && list !== null) ??
     calls.find(({ list }) => list !== null);
+
+  const historyCss = css`
+    max-height: calc(${euiTheme.size.xl} * ${HISTORY_VISIBLE_ROWS});
+    overflow-y: auto;
+  `;
 
   return (
     <EuiFlyout
@@ -118,31 +158,33 @@ export const PerformanceFlyout = ({ calls, onClear, onClose }: PerformanceFlyout
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {selected?.list ? (
-          <ListCallDetail call={selected} list={selected.list} />
+          <ListCallDetail key={selected.id} call={selected} list={selected.list} />
         ) : (
           <EuiText size="s" color="subdued">
             {NO_LIST_SELECTED}
           </EuiText>
         )}
         <EuiSpacer size="l" />
-        <EuiTitle size="xs">
+        <EuiTitle size="xxs">
           <h3>{HISTORY_TITLE}</h3>
         </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiBasicTable<RecordedCall>
-          tableCaption={HISTORY_TITLE}
-          items={[...calls]}
-          itemId="id"
-          columns={HISTORY_TABLE_COLUMNS}
-          noItemsMessage={NO_CALLS}
-          compressed
-          data-test-subj="entityInventoryPerformanceHistory"
-          rowProps={({ id, list }: RecordedCall) => ({
-            isSelected: id === selected?.id,
-            onClick: list ? () => setSelectedId(id) : undefined,
-            'data-test-subj': 'entityInventoryPerformanceHistoryRow',
-          })}
-        />
+        <EuiSpacer size="xs" />
+        <div css={historyCss}>
+          <EuiBasicTable<RecordedCall>
+            tableCaption={HISTORY_TITLE}
+            items={[...calls]}
+            itemId="id"
+            columns={HISTORY_TABLE_COLUMNS}
+            noItemsMessage={NO_CALLS}
+            compressed
+            data-test-subj="entityInventoryPerformanceHistory"
+            rowProps={({ id, list }: RecordedCall) => ({
+              isSelected: id === selected?.id,
+              onClick: list ? () => setSelectedId(id) : undefined,
+              'data-test-subj': 'entityInventoryPerformanceHistoryRow',
+            })}
+          />
+        </div>
       </EuiFlyoutBody>
     </EuiFlyout>
   );

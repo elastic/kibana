@@ -7,6 +7,7 @@
 
 import type { ListResponse } from '@kbn/entity-inventory-plugin/common';
 import {
+  ERRORS_FIXTURE,
   PROBES_FIXTURE,
   QUERIES_FIXTURE,
   TIMINGS_FIXTURE,
@@ -25,8 +26,8 @@ const LIST_RESPONSE: ListResponse = {
   queries: QUERIES_FIXTURE,
   probes: PROBES_FIXTURE,
   timings: TIMINGS_FIXTURE,
-  errors: [{ indexPattern: 'logs-*', status: 400, reason: 'Unknown column [host.name]' }],
-  unavailableColumns: [],
+  errors: ERRORS_FIXTURE,
+  unavailableColumns: [{ column: 'os', indexPattern: 'logs-*', field: 'host.os.name' }],
 };
 
 const REQUEST = { from: '2026-11-19T10:00:00.000Z', to: '2026-11-19T10:15:00.000Z' };
@@ -73,8 +74,9 @@ describe('withPerformanceRecording', () => {
           probes: PROBES_FIXTURE,
           timings: TIMINGS_FIXTURE,
           truncated: true,
+          errors: LIST_RESPONSE.errors,
+          unavailableColumns: LIST_RESPONSE.unavailableColumns,
           rowCount: 2,
-          errorCount: 1,
         },
       })
     );

@@ -20,14 +20,16 @@ const toListDiagnostics = ({
   truncated,
   rows,
   errors,
+  unavailableColumns,
 }: ListResponse): ListCallDiagnostics => ({
   took,
   queries,
   probes,
   timings,
   truncated,
+  errors,
+  unavailableColumns,
   rowCount: rows.length,
-  errorCount: errors.length,
 });
 
 const toErrorMessage = (error: unknown): string =>

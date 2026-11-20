@@ -9,6 +9,7 @@ import type {
   ListProbeDiagnostic,
   ListQueryDiagnostic,
   ListTimings,
+  SourceError,
 } from '@kbn/entity-inventory-plugin/common';
 
 const STATS = {
@@ -31,6 +32,23 @@ export const PROBES_FIXTURE: ListProbeDiagnostic[] = [
     outcome: 'time_series',
     wallMs: 4.25,
     took: 3,
+    error: null,
+  },
+  {
+    indexPattern: 'traces-*',
+    esql: 'TS traces-* | LIMIT 1',
+    params: [],
+    outcome: 'failed',
+    wallMs: 1.5,
+    took: null,
+    documentsFound: null,
+    valuesLoaded: null,
+    rowsEmitted: null,
+    cpuNanos: null,
+    driverNanos: null,
+    bytesRead: null,
+    shards: null,
+    isPartial: null,
     error: null,
   },
 ];
@@ -65,6 +83,12 @@ export const QUERIES_FIXTURE: ListQueryDiagnostic[] = [
     isPartial: null,
     error: { status: 400, reason: 'Unknown column [host.name]' },
   },
+];
+
+export const ERRORS_FIXTURE: SourceError[] = [
+  { indexPattern: 'logs-*', status: 400, reason: 'Unknown column [host.name]' },
+  { indexPattern: 'traces-*', status: null, reason: 'No index matches traces-*' },
+  { indexPattern: 'apm-*', status: 503, reason: 'Cluster unavailable' },
 ];
 
 export const TIMINGS_FIXTURE: ListTimings = {
