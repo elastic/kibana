@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { shallow, mount } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
 import { AuthSsh } from './auth_ssh';
 import { CellActionsRenderer } from '../../../../../../common/components/cell_actions/cell_actions_renderer';
@@ -26,8 +26,8 @@ describe('AuthSsh', () => {
     (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
   });
   describe('rendering', () => {
-    test('it renders against shallow snapshot', () => {
-      const wrapper = shallow(
+    test('it renders both the signature and the method', () => {
+      render(
         <AuthSsh
           scopeId="some_scope"
           contextId="[context-123]"
@@ -36,11 +36,12 @@ describe('AuthSsh', () => {
           sshMethod="[ssh-method]"
         />
       );
-      expect(wrapper).toMatchSnapshot();
+      expect(screen.getByText('[ssh-signature]')).toBeInTheDocument();
+      expect(screen.getByText('[ssh-method]')).toBeInTheDocument();
     });
 
     test('it returns null if sshSignature and sshMethod are both null', () => {
-      const wrapper = shallow(
+      const { container } = render(
         <AuthSsh
           scopeId="some_scope"
           contextId="[context-123]"
@@ -49,11 +50,11 @@ describe('AuthSsh', () => {
           sshMethod={null}
         />
       );
-      expect(wrapper.children().length).toEqual(0);
+      expect(container).toBeEmptyDOMElement();
     });
 
     test('it returns null if sshSignature and sshMethod are both undefined', () => {
-      const wrapper = shallow(
+      const { container } = render(
         <AuthSsh
           scopeId="some_scope"
           contextId="[context-123]"
@@ -62,11 +63,11 @@ describe('AuthSsh', () => {
           sshMethod={undefined}
         />
       );
-      expect(wrapper.children().length).toEqual(0);
+      expect(container).toBeEmptyDOMElement();
     });
 
     test('it returns null if sshSignature is null and sshMethod is undefined', () => {
-      const wrapper = shallow(
+      const { container } = render(
         <AuthSsh
           scopeId="some_scope"
           contextId="[context-123]"
@@ -75,11 +76,11 @@ describe('AuthSsh', () => {
           sshMethod={undefined}
         />
       );
-      expect(wrapper.children().length).toEqual(0);
+      expect(container).toBeEmptyDOMElement();
     });
 
     test('it returns null if sshSignature is undefined and sshMethod is null', () => {
-      const wrapper = shallow(
+      const { container } = render(
         <AuthSsh
           scopeId="some_scope"
           contextId="[context-123]"
@@ -88,11 +89,11 @@ describe('AuthSsh', () => {
           sshMethod={null}
         />
       );
-      expect(wrapper.children().length).toEqual(0);
+      expect(container).toBeEmptyDOMElement();
     });
 
     test('it returns sshSignature if sshMethod is null', () => {
-      const wrapper = shallow(
+      const { container } = render(
         <AuthSsh
           scopeId="some_scope"
           contextId="[context-123]"
@@ -101,11 +102,12 @@ describe('AuthSsh', () => {
           sshMethod={null}
         />
       );
-      expect(wrapper.find('DraggableBadge').prop('value')).toEqual('[sshSignature-1]');
+      expect(screen.getByText('[sshSignature-1]')).toBeInTheDocument();
+      expect(screen.getAllByTestId('mock-cell-action-renderer')).toHaveLength(1);
     });
 
     test('it returns sshMethod if sshSignature is null', () => {
-      const wrapper = shallow(
+      const { container } = render(
         <AuthSsh
           scopeId="some_scope"
           contextId="[context-123]"
@@ -114,11 +116,12 @@ describe('AuthSsh', () => {
           sshMethod="[sshMethod-1]"
         />
       );
-      expect(wrapper.find('DraggableBadge').prop('value')).toEqual('[sshMethod-1]');
+      expect(screen.getByText('[sshMethod-1]')).toBeInTheDocument();
+      expect(screen.getAllByTestId('mock-cell-action-renderer')).toHaveLength(1);
     });
 
     test('should passing correct scopeId to cell actions', () => {
-      mount(
+      render(
         <AuthSsh
           scopeId="some_scope"
           contextId="[context-123]"

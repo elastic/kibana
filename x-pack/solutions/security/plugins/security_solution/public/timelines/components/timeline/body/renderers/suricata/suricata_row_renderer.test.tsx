@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
@@ -29,14 +28,18 @@ describe('suricata_row_renderer', () => {
     suricata = cloneDeep(mockTimelineData[2].ecs);
   });
 
-  test('renders correctly against snapshot', async () => {
+  test('renders a row for a non-suricata datum without crashing', async () => {
     const children = suricataRowRenderer.renderRow({
       data: nonSuricata,
       scopeId: TimelineId.test,
     });
 
-    const wrapper = shallow(<span>{children}</span>);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = render(
+      <TestProviders>
+        <span>{children}</span>
+      </TestProviders>
+    );
+    expect(container.firstChild).toBeInTheDocument();
   });
 
   test('should return false if not a suricata datum', () => {

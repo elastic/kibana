@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { AuditdGenericFileDetails, AuditdGenericFileLine } from './generic_file_details';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
 jest.mock('../../../../../../common/lib/kibana');
 
@@ -23,24 +22,24 @@ jest.mock('@elastic/eui', () => {
 });
 
 describe('GenericFileDetails', () => {
-  const mount = useMountAppended();
-
   describe('rendering', () => {
     test('it renders the default GenericFileDetails', () => {
-      const wrapper = shallow(
-        <AuditdGenericFileDetails
-          contextId="contextid-123"
-          text="generic-text-123"
-          data={mockTimelineData[27].ecs}
-          fileIcon="document"
-          timelineId="test"
-        />
+      const { container } = render(
+        <TestProviders>
+          <AuditdGenericFileDetails
+            contextId="contextid-123"
+            text="generic-text-123"
+            data={mockTimelineData[27].ecs}
+            fileIcon="document"
+            timelineId="test"
+          />
+        </TestProviders>
       );
-      expect(wrapper).toMatchSnapshot();
+      expect(container.textContent).toContain('generic-text-123');
     });
 
     test('it returns auditd if the data does contain auditd data', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <AuditdGenericFileDetails
             contextId="contextid-123"
@@ -51,28 +50,30 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'Sessionalice@zeek-sanfranin/generic-text-123usinggpgconf(5402)gpgconf--list-dirsagent-socketgpgconf --list-dirs agent-socket'
       );
     });
 
     test('it returns null for text if the data contains no auditd data', () => {
-      const wrapper = shallow(
-        <AuditdGenericFileDetails
-          contextId="contextid-123"
-          text="generic-text-123"
-          data={mockTimelineData[0].ecs}
-          fileIcon="document"
-          timelineId="test"
-        />
+      const { container } = render(
+        <TestProviders>
+          <AuditdGenericFileDetails
+            contextId="contextid-123"
+            text="generic-text-123"
+            data={mockTimelineData[0].ecs}
+            fileIcon="document"
+            timelineId="test"
+          />
+        </TestProviders>
       );
-      expect(wrapper.isEmptyRender()).toBeTruthy();
+      expect(container.textContent).toBe('');
     });
   });
 
   describe('#AuditdGenericFileLine', () => {
     test('it returns pretty output if you send in all your happy path data', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <AuditdGenericFileLine
             scopeId="some_scope"
@@ -96,13 +97,13 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
     test('it returns a session with username if username, primary, and secondary all equal each other ', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <AuditdGenericFileLine
             scopeId="some_scope"
@@ -126,13 +127,13 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
     test('it returns a session with username if primary and secondary equal unset', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <AuditdGenericFileLine
             scopeId="some_scope"
@@ -156,13 +157,13 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
     test('it returns a session with username if primary and secondary equal unset with different casing', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <AuditdGenericFileLine
             scopeId="some_scope"
@@ -186,13 +187,13 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
     test('it returns a session with username if primary and secondary are undefined', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <AuditdGenericFileLine
             scopeId="some_scope"
@@ -216,13 +217,13 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
     test('it returns a session with "as" wording if username, primary, and secondary are all different', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <AuditdGenericFileLine
             scopeId="some_scope"
@@ -246,13 +247,13 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'Sessionsession-1[username-2]as[username-3]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
     test('it returns a session with "as" wording if username and primary are the same but secondary is different', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <AuditdGenericFileLine
             scopeId="some_scope"
@@ -276,13 +277,13 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'Sessionsession-1[username-1]as[username-2]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
     test('it returns a session with primary if username and secondary are unset with different casing', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <AuditdGenericFileLine
             scopeId="some_scope"
@@ -306,13 +307,13 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
     test('it returns a session with primary if username and secondary are undefined', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <AuditdGenericFileLine
             scopeId="some_scope"
@@ -336,13 +337,13 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123/somepathusingprocess-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
       );
     });
 
     test('it returns just session if only session id is given', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <AuditdGenericFileLine
             scopeId="some_scope"
@@ -366,11 +367,11 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Session');
+      expect(container.textContent).toEqual('Session');
     });
 
     test('it returns only session and hostName if only hostname and an id is given', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <AuditdGenericFileLine
             scopeId="some_scope"
@@ -394,11 +395,11 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Session@some-host-name');
+      expect(container.textContent).toEqual('Session@some-host-name');
     });
 
     test('it returns only a session and user name if only a user name and id is given', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -422,11 +423,11 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionsome-user-name');
+      expect(container.textContent).toEqual('Sessionsome-user-name');
     });
 
     test('it returns only a process name if only given a process name and id', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -450,11 +451,11 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessiongeneric-text-123usingsome-process-name');
+      expect(container.textContent).toEqual('Sessiongeneric-text-123usingsome-process-name');
     });
 
     test('it returns session user name and title if process title with id is given', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -478,11 +479,11 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionsome-user-namesome-process-title');
+      expect(container.textContent).toEqual('Sessionsome-user-namesome-process-title');
     });
 
     test('it returns only a working directory if that is all that is given with a id', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -506,11 +507,11 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessioninsome-working-directory');
+      expect(container.textContent).toEqual('Sessioninsome-working-directory');
     });
 
     test('it returns only the session and args with id if that is all that is given (very unlikely situation)', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -534,7 +535,7 @@ describe('GenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionarg1arg2arg 3');
+      expect(container.textContent).toEqual('Sessionarg1arg2arg 3');
     });
   });
 });

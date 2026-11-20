@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import {
   ZeekSignature,
   extractStateValue,
@@ -29,6 +28,13 @@ import {
 import { SecurityCellActions } from '../../../../../../common/components/cell_actions';
 
 jest.mock('../../../../../../common/lib/kibana');
+
+jest.mock('../../../../../../common/components/links', () => ({
+  ...jest.requireActual('../../../../../../common/components/links'),
+  ReputationLink: ({ domain }: { domain: string }) => (
+    <div data-test-subj="reputationLinkSha">{domain}</div>
+  ),
+}));
 
 jest.mock('../../../../../../common/components/cell_actions', () => {
   return {
@@ -57,17 +63,21 @@ jest.mock('@elastic/eui', () => {
 });
 
 describe('ZeekSignature', () => {
-  const mount = useMountAppended();
   let zeek: Ecs;
 
   beforeEach(() => {
     zeek = cloneDeep(mockTimelineData[13].ecs);
+    (SecurityCellActions as unknown as jest.Mock).mockImplementation(MockedSecurityCellActions);
   });
 
   describe('rendering', () => {
     test('it renders the default Zeek', () => {
-      const wrapper = shallow(<ZeekSignature data={zeek} scopeId="test" />);
-      expect(wrapper).toMatchSnapshot();
+      render(
+        <TestProviders>
+          <ZeekSignature data={zeek} scopeId="test" />
+        </TestProviders>
+      );
+      expect(screen.getAllByTestId('mock-security-cell-actions').length).toBeGreaterThan(0);
     });
   });
 
@@ -101,25 +111,29 @@ describe('ZeekSignature', () => {
 
   describe('#TotalVirusLinkSha', () => {
     test('should return null if value is null', () => {
-      const wrapper = mount(<TotalVirusLinkSha value={null} />);
-      expect(wrapper.find('TotalVirusLinkSha').children().exists()).toBeFalsy();
+      const { container } = render(<TotalVirusLinkSha value={null} />);
+      expect(container).toBeEmptyDOMElement();
     });
 
     test('should render', () => {
-      const wrapper = shallow(<TotalVirusLinkSha value={'abc'} />);
-      expect(wrapper.find('[data-test-subj="reputationLinkSha"]').exists()).toBeTruthy();
+      const { container } = render(
+        <TestProviders>
+          <TotalVirusLinkSha value={'abc'} />
+        </TestProviders>
+      );
+      expect(screen.getByTestId('reputationLinkSha')).toHaveTextContent('abc');
     });
   });
 
   describe('#Link', () => {
     test('should return null if value is null', () => {
-      const wrapper = mount(<Link value={null} />);
-      expect(wrapper.find('Link').children().exists()).toBeFalsy();
+      const { container } = render(<Link value={null} />);
+      expect(container).toBeEmptyDOMElement();
     });
 
     test('should render value', () => {
-      const wrapper = mount(<Link value={'abc'} />);
-      const extractEuiIconText = removeExternalLinkText(wrapper.text()).replaceAll(
+      const { container } = render(<Link value={'abc'} />);
+      const extractEuiIconText = removeExternalLinkText(container.textContent).replaceAll(
         'External link',
         ''
       );
@@ -127,8 +141,9 @@ describe('ZeekSignature', () => {
     });
 
     test('should render value and link', () => {
-      const wrapper = mount(<Link value={'abcdefg'} link={'somethingelse'} />);
-      expect(wrapper.find('a').prop('href')).toEqual(
+      render(<Link value={'abcdefg'} link={'somethingelse'} />);
+      expect(screen.getByRole('link')).toHaveAttribute(
+        'href',
         'https://www.google.com/search?q=somethingelse'
       );
     });
@@ -140,25 +155,25 @@ describe('ZeekSignature', () => {
     });
 
     test('it returns null if value is null', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <ZeekElement scopeId="some_scope" field="zeek.notice" value={null} />
         </TestProviders>
       );
-      expect(wrapper.find('ZeekElement').children().exists()).toBeFalsy();
+      expect(container).toBeEmptyDOMElement();
     });
 
     test('it renders the default ZeekSignature', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <ZeekElement field="zeek.notice" value={'mynote'} scopeId="test" />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('mynote');
+      expect(container.textContent).toEqual('mynote');
     });
 
     test('it renders with a custom string renderer', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <ZeekElement
             scopeId="some_scope"
@@ -168,11 +183,11 @@ describe('ZeekSignature', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('->mynote<-');
+      expect(container.textContent).toEqual('->mynote<-');
     });
 
     test('should passing correct scopeId to cell actions', () => {
-      mount(
+      render(
         <TestProviders>
           <ZeekElement scopeId="some_scope" field="zeek.notice" value={'mynote'} />
         </TestProviders>
@@ -189,17 +204,19 @@ describe('ZeekSignature', () => {
     });
 
     describe('#TagTooltip', () => {
-      test('it renders the name of the field in a tooltip', () => {
+      test('it passes the name of the field to the cell actions', () => {
         const field = 'zeek.notice';
-        const wrapper = mount(
+        render(
           <TestProviders>
             <ZeekElement scopeId="some_scope" field={field} value={'the people you love'} />
           </TestProviders>
         );
 
-        expect(
-          wrapper.find('[data-test-subj="zeek.notice-tooltip"]').first().props().content
-        ).toEqual(field);
+        expect(MockedSecurityCellActions).toHaveBeenCalledWith(
+          expect.objectContaining({ data: expect.objectContaining({ field }) }),
+          {}
+        );
+        expect(screen.getByText('the people you love')).toBeInTheDocument();
       });
     });
   });

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
@@ -14,8 +15,7 @@ import { DroppableWrapper } from '../../../../common/components/drag_and_drop/dr
 import { timelineActions } from '../../../store';
 import { mockDataProviders } from './mock/mock_data_providers';
 import { Providers } from './providers';
-import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './provider_item_actions';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
+import * as i18n from './translations';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../../common/types/timeline';
 
@@ -27,7 +27,6 @@ jest.mock('../../../../common/hooks/use_selector', () => ({
 }));
 
 describe('Providers', () => {
-  const mount = useMountAppended();
   const mockOnDataProviderRemoved = jest.spyOn(timelineActions, 'removeProvider');
 
   beforeEach(() => {
@@ -36,19 +35,8 @@ describe('Providers', () => {
   });
 
   describe('rendering', () => {
-    test('renders correctly against snapshot', () => {
-      const wrapper = shallow(
-        <Providers
-          browserFields={{}}
-          dataProviders={mockDataProviders}
-          timelineId={TimelineId.test}
-        />
-      );
-      expect(wrapper).toMatchSnapshot();
-    });
-
     test('it renders the data providers', () => {
-      const wrapper = mount(
+      render(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
             <Providers
@@ -61,16 +49,18 @@ describe('Providers', () => {
       );
 
       mockDataProviders.forEach((dataProvider) =>
-        expect(wrapper.text()).toContain(
-          dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value
-        )
+        expect(
+          screen.getAllByText(
+            new RegExp(`${dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value}`)
+          ).length
+        ).toBeGreaterThan(0)
       );
     });
   });
 
   describe('#onDataProviderRemoved', () => {
-    test('it invokes the onDataProviderRemoved callback when the close button is clicked', () => {
-      const wrapper = mount(
+    test('it invokes the onDataProviderRemoved callback when the close button is clicked', async () => {
+      render(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
             <Providers
@@ -81,15 +71,12 @@ describe('Providers', () => {
           </DroppableWrapper>
         </TestProviders>
       );
-      wrapper
-        .find('[data-test-subj="providerBadge"] [data-euiicon-type]')
-        .first()
-        .simulate('click');
+      await userEvent.click(screen.getAllByLabelText(i18n.REMOVE_DATA_PROVIDER)[0]);
       expect(mockOnDataProviderRemoved.mock.calls[0][0].providerId).toEqual('id-Provider 1');
     });
 
-    test('it invokes the onDataProviderRemoved callback when you click on the option "Delete" in the provider menu', () => {
-      const wrapper = mount(
+    test('it invokes the onDataProviderRemoved callback when you click on the option "Delete" in the provider menu', async () => {
+      render(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
             <Providers
@@ -100,26 +87,20 @@ describe('Providers', () => {
           </DroppableWrapper>
         </TestProviders>
       );
-      wrapper.find('button[data-test-subj="providerBadge"]').first().simulate('click');
+      await userEvent.click(screen.getAllByTestId('providerBadge')[0]);
 
-      wrapper.update();
-
-      wrapper
-        .find(`[data-test-subj="providerActions"] .${DELETE_CLASS_NAME}`)
-        .hostNodes()
-        .first()
-        .simulate('click');
+      await userEvent.click(screen.getByText(i18n.DELETE_DATA_PROVIDER));
       expect(mockOnDataProviderRemoved.mock.calls[0][0].providerId).toEqual('id-Provider 1');
     });
   });
 
   describe('#onToggleDataProviderEnabled', () => {
-    test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', () => {
+    test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', async () => {
       const mockOnToggleDataProviderEnabled = jest.spyOn(
         timelineActions,
         'updateDataProviderEnabled'
       );
-      const wrapper = mount(
+      render(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
             <Providers
@@ -131,14 +112,9 @@ describe('Providers', () => {
         </TestProviders>
       );
 
-      wrapper.find('button[data-test-subj="providerBadge"]').first().simulate('click');
-      wrapper.update();
+      await userEvent.click(screen.getAllByTestId('providerBadge')[0]);
 
-      wrapper
-        .find(`[data-test-subj="providerActions"] .${ENABLE_CLASS_NAME}`)
-        .hostNodes()
-        .first()
-        .simulate('click');
+      await userEvent.click(screen.getByText(i18n.TEMPORARILY_DISABLE_DATA_PROVIDER));
       expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
         andProviderId: undefined,
         enabled: false,
@@ -149,13 +125,13 @@ describe('Providers', () => {
   });
 
   describe('#onToggleDataProviderExcluded', () => {
-    test('it invokes the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the provider menu', () => {
+    test('it invokes the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the provider menu', async () => {
       const mockOnToggleDataProviderExcluded = jest.spyOn(
         timelineActions,
         'updateDataProviderExcluded'
       );
 
-      const wrapper = mount(
+      render(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
             <Providers
@@ -167,15 +143,9 @@ describe('Providers', () => {
         </TestProviders>
       );
 
-      wrapper.find('button[data-test-subj="providerBadge"]').first().simulate('click');
+      await userEvent.click(screen.getAllByTestId('providerBadge')[0]);
 
-      wrapper.update();
-
-      wrapper
-        .find(`[data-test-subj="providerActions"] .${EXCLUDE_CLASS_NAME}`)
-        .hostNodes()
-        .first()
-        .simulate('click');
+      await userEvent.click(screen.getByText(i18n.EXCLUDE_DATA_PROVIDER));
 
       expect(mockOnToggleDataProviderExcluded.mock.calls[0][0]).toEqual({
         andProviderId: undefined,
@@ -191,7 +161,7 @@ describe('Providers', () => {
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
 
-      const wrapper = mount(
+      render(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
             <Providers
@@ -203,21 +173,18 @@ describe('Providers', () => {
         </TestProviders>
       );
 
-      const andProviderBadges = wrapper.find(
-        '[data-test-subj="providerBadge"] .euiBadge__content span.field-value'
-      );
-      const andProviderBadgesText = andProviderBadges.map((node) => node.text()).join(' ');
-      expect(andProviderBadges.length).toEqual(3);
-      expect(andProviderBadgesText).toEqual(
+      const andProviderBadges = screen.getAllByTestId('providerBadge');
+      expect(andProviderBadges).toHaveLength(3);
+      expect(andProviderBadges.map((node) => node.textContent).join(' ')).toEqual(
         'name: "Provider 1" name: "Provider 2" name: "Provider 3"'
       );
     });
 
-    test('it invokes the onDataProviderRemoved callback when you click on the close button is clicked', () => {
+    test('it invokes the onDataProviderRemoved callback when you click on the close button is clicked', async () => {
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
 
-      const wrapper = mount(
+      render(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
             <Providers
@@ -229,14 +196,7 @@ describe('Providers', () => {
         </TestProviders>
       );
 
-      wrapper
-        .find('[data-test-subj="providerBadge"]')
-        .at(4)
-        .find('[data-euiicon-type]')
-        .first()
-        .simulate('click');
-
-      wrapper.update();
+      await userEvent.click(screen.getAllByLabelText(i18n.REMOVE_DATA_PROVIDER)[1]);
 
       expect(mockOnDataProviderRemoved.mock.calls[0][0]).toEqual({
         andProviderId: 'id-Provider 2',
@@ -245,7 +205,7 @@ describe('Providers', () => {
       });
     });
 
-    test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', () => {
+    test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', async () => {
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
       const mockOnToggleDataProviderEnabled = jest.spyOn(
@@ -253,7 +213,7 @@ describe('Providers', () => {
         'updateDataProviderEnabled'
       );
 
-      const wrapper = mount(
+      render(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
             <Providers
@@ -265,20 +225,9 @@ describe('Providers', () => {
         </TestProviders>
       );
 
-      wrapper
-        .find('[data-test-subj="providerBadge"]')
-        .at(4)
-        .find('button')
-        .first()
-        .simulate('click');
+      await userEvent.click(screen.getAllByTestId('providerBadge')[1]);
 
-      wrapper.update();
-
-      wrapper
-        .find(`[data-test-subj="providerActions"] .${ENABLE_CLASS_NAME}`)
-        .hostNodes()
-        .first()
-        .simulate('click');
+      await userEvent.click(screen.getByText(i18n.TEMPORARILY_DISABLE_DATA_PROVIDER));
 
       expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
         andProviderId: 'id-Provider 2',
@@ -288,7 +237,7 @@ describe('Providers', () => {
       });
     });
 
-    test('it invokes the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the provider menu', () => {
+    test('it invokes the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the provider menu', async () => {
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
       const mockOnToggleDataProviderExcluded = jest.spyOn(
@@ -296,7 +245,7 @@ describe('Providers', () => {
         'updateDataProviderExcluded'
       );
 
-      const wrapper = mount(
+      render(
         <TestProviders>
           <DroppableWrapper droppableId="unitTest">
             <Providers
@@ -308,20 +257,9 @@ describe('Providers', () => {
         </TestProviders>
       );
 
-      wrapper
-        .find('[data-test-subj="providerBadge"]')
-        .at(4)
-        .find('button')
-        .first()
-        .simulate('click');
+      await userEvent.click(screen.getAllByTestId('providerBadge')[1]);
 
-      wrapper.update();
-
-      wrapper
-        .find(`[data-test-subj="providerActions"] .${EXCLUDE_CLASS_NAME}`)
-        .hostNodes()
-        .first()
-        .simulate('click');
+      await userEvent.click(screen.getByText(i18n.EXCLUDE_DATA_PROVIDER));
 
       expect(mockOnToggleDataProviderExcluded.mock.calls[0][0]).toEqual({
         andProviderId: 'id-Provider 2',

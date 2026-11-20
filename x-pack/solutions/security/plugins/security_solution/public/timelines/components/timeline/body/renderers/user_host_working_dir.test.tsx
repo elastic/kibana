@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
 import { TestProviders } from '../../../../../common/mock';
 import { UserHostWorkingDir } from './user_host_working_dir';
-import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { SecurityCellActions } from '../../../../../common/components/cell_actions';
 
 jest.mock('../../../../../common/lib/kibana');
@@ -45,26 +44,28 @@ describe('UserHostWorkingDir', () => {
   beforeEach(() => {
     (SecurityCellActions as unknown as jest.Mock).mockImplementation(MockedSecurityCellActions);
   });
-  const mount = useMountAppended();
-
   describe('rendering', () => {
-    test('it renders against shallow snapshot', () => {
-      const wrapper = shallow(
-        <UserHostWorkingDir
-          scopeId="some_scope"
-          contextId="context-123"
-          eventId="event-123"
-          userDomain="[userDomain-123]"
-          userName="[userName-123]"
-          hostName="[hostName-123]"
-          workingDirectory="[working-directory-123]"
-        />
+    test('it renders all provided values', () => {
+      const { container } = render(
+        <TestProviders>
+          <UserHostWorkingDir
+            scopeId="some_scope"
+            contextId="context-123"
+            eventId="event-123"
+            userDomain="[userDomain-123]"
+            userName="[userName-123]"
+            hostName="[hostName-123]"
+            workingDirectory="[working-directory-123]"
+          />
+        </TestProviders>
       );
-      expect(wrapper).toMatchSnapshot();
+      expect(container.textContent).toEqual(
+        '[userName-123]\\[userDomain-123]@[hostName-123]in[working-directory-123]'
+      );
     });
 
     test('it returns null if userDomain, userName, hostName, and workingDirectory are all null', () => {
-      const wrapper = shallow(
+      const { container } = render(
         <UserHostWorkingDir
           scopeId="some_scope"
           contextId="context-123"
@@ -75,11 +76,11 @@ describe('UserHostWorkingDir', () => {
           workingDirectory={null}
         />
       );
-      expect(wrapper.isEmptyRender()).toBeTruthy();
+      expect(container).toBeEmptyDOMElement();
     });
 
     test('it returns null if userDomain, userName, hostName, and workingDirectory are all undefined', () => {
-      const wrapper = shallow(
+      const { container } = render(
         <UserHostWorkingDir
           scopeId="some_scope"
           contextId="context-123"
@@ -90,11 +91,11 @@ describe('UserHostWorkingDir', () => {
           workingDirectory={undefined}
         />
       );
-      expect(wrapper.isEmptyRender()).toBeTruthy();
+      expect(container).toBeEmptyDOMElement();
     });
 
     test('it returns userDomain if that is the only attribute defined', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -109,11 +110,11 @@ describe('UserHostWorkingDir', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('\\[user-domain-123]');
+      expect(container.textContent).toEqual('\\[user-domain-123]');
     });
 
     test('it returns userName if that is the only attribute defined', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -128,11 +129,11 @@ describe('UserHostWorkingDir', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('[user-name-123]');
+      expect(container.textContent).toEqual('[user-name-123]');
     });
 
     test('it returns hostName if that is the only attribute defined', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -147,11 +148,11 @@ describe('UserHostWorkingDir', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('[host-name-123]');
+      expect(container.textContent).toEqual('[host-name-123]');
     });
 
     test('it returns "in" + workingDirectory if that is the only attribute defined', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -166,11 +167,11 @@ describe('UserHostWorkingDir', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('in[working-directory-123]');
+      expect(container.textContent).toEqual('in[working-directory-123]');
     });
 
     test('it returns userName and workingDirectory', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -185,11 +186,11 @@ describe('UserHostWorkingDir', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('[user-name-123]in[working-directory-123]');
+      expect(container.textContent).toEqual('[user-name-123]in[working-directory-123]');
     });
 
     test('it returns hostName and workingDirectory', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -204,11 +205,11 @@ describe('UserHostWorkingDir', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('[host-name-123]in[working-directory-123]');
+      expect(container.textContent).toEqual('[host-name-123]in[working-directory-123]');
     });
 
     test('it returns userName, userDomain, hostName', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -223,11 +224,11 @@ describe('UserHostWorkingDir', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('[user-name-123]\\[user-domain-123]@[host-name-123]');
+      expect(container.textContent).toEqual('[user-name-123]\\[user-domain-123]@[host-name-123]');
     });
 
     test('it returns hostName and userName with the default hostNameSeparator "@", when hostNameSeparator is NOT specified as a prop', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -243,11 +244,11 @@ describe('UserHostWorkingDir', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('[user-name-123]@[host-name-123]');
+      expect(container.textContent).toEqual('[user-name-123]@[host-name-123]');
     });
 
     test('it returns hostName and userName with an overridden hostNameSeparator, when hostNameSeparator is specified as a prop', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -264,11 +265,11 @@ describe('UserHostWorkingDir', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('[user-name-123]custom separator[host-name-123]');
+      expect(container.textContent).toEqual('[user-name-123]custom separator[host-name-123]');
     });
 
     test('it renders `user.domain` field (by default) when userDomain is provided, and userDomainField is NOT specified as a prop', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -284,11 +285,11 @@ describe('UserHostWorkingDir', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="user.domain-tooltip"]').exists()).toBe(true);
+      expect(screen.getByTestId('render-content-user.domain')).toBeInTheDocument();
     });
 
     test('it renders with an overridden field name when userDomain is provided, and userDomainField is also specified as a prop', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -305,11 +306,11 @@ describe('UserHostWorkingDir', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="overridden.field.name-tooltip"]').exists()).toBe(true);
+      expect(screen.getByTestId('render-content-overridden.field.name')).toBeInTheDocument();
     });
 
     test('it renders a `user.name` field (by default) when userName is provided, and userNameField is NOT specified as a prop', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -325,11 +326,11 @@ describe('UserHostWorkingDir', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="user.name-tooltip"]').exists()).toBe(true);
+      expect(screen.getByTestId('render-content-user.name')).toBeInTheDocument();
     });
 
     test('it renders with an overridden field name when userName is provided, and userNameField is also specified as a prop', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -346,13 +347,11 @@ describe('UserHostWorkingDir', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="render-content-overridden.field.name"]').exists()).toBe(
-        true
-      );
+      expect(screen.getByTestId('render-content-overridden.field.name')).toBeInTheDocument();
     });
 
     test('should passing correct scopeId to cell actions', () => {
-      mount(
+      render(
         <TestProviders>
           <div>
             <UserHostWorkingDir
