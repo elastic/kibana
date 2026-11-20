@@ -39,6 +39,13 @@ import {
   formatShards,
 } from './format';
 import {
+  DETAIL_COLUMN_WIDTH,
+  ES_TIME_COLUMN_WIDTH,
+  PROBE_FILLER_WIDTH,
+  QUERY_COLUMN_WIDTHS,
+  STATUS_COLUMN_WIDTH,
+} from './column_widths';
+import {
   COLLAPSE_ROW,
   EXPAND_ROW,
   NO,
@@ -145,8 +152,8 @@ const RowDetail = ({ item, stats }: { item: Diagnostic; stats: DetailItem[] }) =
 interface DiagnosticTableProps<T extends Diagnostic> {
   caption: string;
   items: readonly T[];
-  /** Columns between the index pattern and the status. */
-  leadingColumns: Array<EuiBasicTableColumn<Row<T>>>;
+  /** The one column between the status and the ES time. */
+  detailColumn: EuiBasicTableColumn<Row<T>>;
   /** Columns after the ES time. */
   trailingColumns: Array<EuiBasicTableColumn<Row<T>>>;
   /** The stats shown only in the expanded row. */
@@ -159,7 +166,7 @@ interface DiagnosticTableProps<T extends Diagnostic> {
 const DiagnosticTable = <T extends Diagnostic>({
   caption,
   items,
-  leadingColumns,
+  detailColumn,
   trailingColumns,
   detailStats,
   rowStatus,
@@ -217,16 +224,16 @@ const DiagnosticTable = <T extends Diagnostic>({
         </EuiToolTip>
       ),
     },
-    ...leadingColumns,
     {
       name: TABLE_COLUMNS.status,
-      width: '72px',
+      width: STATUS_COLUMN_WIDTH,
       render: (item: Row<T>) => {
         const status = rowStatus(item);
         return status === null ? null : <RowStatusBadge status={status} />;
       },
     },
-    numericColumn<T>(STAT_LABELS.esTime, '80px', ({ took }) => formatMs(took)),
+    { ...detailColumn, width: DETAIL_COLUMN_WIDTH },
+    numericColumn<T>(STAT_LABELS.esTime, ES_TIME_COLUMN_WIDTH, ({ took }) => formatMs(took)),
     ...trailingColumns,
   ];
 
@@ -280,16 +287,22 @@ export const QueriesTable = ({ queries }: { queries: readonly ListQueryDiagnosti
   <DiagnosticTable<ListQueryDiagnostic>
     caption={SECTION_TITLES.queries}
     items={queries}
-    leadingColumns={[{ field: 'engine', name: TABLE_COLUMNS.engine, width: '64px' }]}
+    detailColumn={{ field: 'engine', name: TABLE_COLUMNS.engine }}
     trailingColumns={[
-      numericColumn<ListQueryDiagnostic>(STAT_LABELS.cpu, '88px', ({ cpuNanos }) =>
-        formatNanosAsMs(cpuNanos)
+      numericColumn<ListQueryDiagnostic>(
+        STAT_LABELS.cpu,
+        QUERY_COLUMN_WIDTHS.cpuTime,
+        ({ cpuNanos }) => formatNanosAsMs(cpuNanos)
       ),
-      numericColumn<ListQueryDiagnostic>(STAT_LABELS.documents, '96px', ({ documentsFound }) =>
-        formatCount(documentsFound, 'docs')
+      numericColumn<ListQueryDiagnostic>(
+        STAT_LABELS.documents,
+        QUERY_COLUMN_WIDTHS.docs,
+        ({ documentsFound }) => formatCount(documentsFound, 'docs')
       ),
-      numericColumn<ListQueryDiagnostic>(STAT_LABELS.rows, '80px', ({ rowCount }) =>
-        formatCount(rowCount, 'rows')
+      numericColumn<ListQueryDiagnostic>(
+        STAT_LABELS.rows,
+        QUERY_COLUMN_WIDTHS.rows,
+        ({ rowCount }) => formatCount(rowCount, 'rows')
       ),
     ]}
     detailStats={sharedDetailStats}
@@ -302,15 +315,12 @@ export const ProbesTable = ({ probes }: { probes: readonly ListProbeDiagnostic[]
   <DiagnosticTable<ListProbeDiagnostic>
     caption={SECTION_TITLES.probes}
     items={probes}
-    leadingColumns={[
-      {
-        field: 'outcome',
-        name: TABLE_COLUMNS.plans,
-        width: '88px',
-        render: (outcome: ProbeOutcomeKind) => <span css={nowrapCss}>{PROBE_PLANS[outcome]}</span>,
-      },
-    ]}
-    trailingColumns={[]}
+    detailColumn={{
+      field: 'outcome',
+      name: TABLE_COLUMNS.plans,
+      render: (outcome: ProbeOutcomeKind) => <span css={nowrapCss}>{PROBE_PLANS[outcome]}</span>,
+    }}
+    trailingColumns={[{ name: '', width: PROBE_FILLER_WIDTH, render: () => null }]}
     detailStats={(probe) => [
       { title: STAT_LABELS.cpu, description: formatNanosAsMs(probe.cpuNanos) },
       { title: STAT_LABELS.documents, description: formatCount(probe.documentsFound, 'docs') },
@@ -324,8 +334,8 @@ const ERROR_COLUMNS: Array<EuiBasicTableColumn<SourceError>> = [
   { field: 'indexPattern', name: TABLE_COLUMNS.indexPattern },
   {
     field: 'status',
-    name: TABLE_COLUMNS.status,
-    width: '72px',
+    name: TABLE_COLUMNS.httpStatus,
+    width: '96px',
     render: (status: number | null) => <Numeric>{status ?? EMPTY_VALUE}</Numeric>,
   },
   { field: 'reason', name: TABLE_COLUMNS.reason },

@@ -29,6 +29,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { ENTITY_INVENTORY_EBT_ACTIONS, ENTITY_INVENTORY_EBT_ELEMENTS } from '../../ebt_constants';
 import { EMPTY_VALUE, formatMs, formatRequest } from './format';
 import { ListCallDetail } from './list_call_detail';
+import { HISTORY_COLUMN_WIDTHS } from './column_widths';
 import type { RecordedCall, RecordedCallStatus } from './performance_recorder';
 import {
   CLEAR_BUTTON,
@@ -54,6 +55,16 @@ const numberCss = css`
   font-variant-numeric: tabular-nums;
 `;
 
+// A narrow flyout cuts a long request short instead of running it into the status.
+const requestLinkCss = css`
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+`;
+
 /** The history columns; a `_list` call's request selects it, from the keyboard too. */
 const historyColumns = (
   onSelect: (id: number) => void
@@ -61,7 +72,7 @@ const historyColumns = (
   {
     field: 'startedAt',
     name: HISTORY_COLUMNS.time,
-    width: '112px',
+    width: '96px',
     render: (startedAt: number) => (
       <span css={numberCss}>{new Date(startedAt).toLocaleTimeString()}</span>
     ),
@@ -73,6 +84,8 @@ const historyColumns = (
     render: (route: string, { id, list }: RecordedCall) =>
       list ? (
         <EuiLink
+          css={requestLinkCss}
+          title={formatRequest(route)}
           onClick={() => onSelect(id)}
           data-test-subj="entityInventoryPerformanceHistorySelect"
           {...getEbtProps({
@@ -89,7 +102,7 @@ const historyColumns = (
   {
     field: 'status',
     name: HISTORY_COLUMNS.status,
-    width: '96px',
+    width: HISTORY_COLUMN_WIDTHS.status,
     render: (status: RecordedCallStatus, { errorMessage }: RecordedCall) => (
       <EuiHealth color={STATUS_COLORS[status]} title={errorMessage ?? undefined}>
         {STATUS_LABELS[status]}
@@ -99,20 +112,20 @@ const historyColumns = (
   {
     field: 'browserMs',
     name: HISTORY_COLUMNS.browser,
-    width: '88px',
+    width: HISTORY_COLUMN_WIDTHS.browser,
     align: 'right',
     render: (browserMs: number) => <span css={numberCss}>{formatMs(browserMs)}</span>,
   },
   {
     field: 'serverMs',
     name: HISTORY_COLUMNS.server,
-    width: '88px',
+    width: HISTORY_COLUMN_WIDTHS.server,
     align: 'right',
     render: (serverMs: number | null) => <span css={numberCss}>{formatMs(serverMs)}</span>,
   },
   {
     name: HISTORY_COLUMNS.errors,
-    width: '64px',
+    width: HISTORY_COLUMN_WIDTHS.errors,
     align: 'right',
     render: ({ list }: RecordedCall) => {
       if (list === null) {

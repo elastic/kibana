@@ -187,8 +187,8 @@ describe('PerformanceOverlay', () => {
     ).toEqual([
       'Details',
       'Index pattern',
-      'Engine',
       'Status',
+      'Engine',
       'ES time',
       'CPU time',
       'Docs',
@@ -236,17 +236,21 @@ describe('PerformanceOverlay', () => {
       within(probes)
         .getAllByRole('columnheader')
         .map((th) => th.textContent)
-    ).toEqual(['Details', 'Index pattern', 'Plans', 'Status', 'ES time']);
-    expect(probeRows[0]).toHaveTextContent('metrics-*TS + FROMOK3.0 ms');
-    expect(probeRows[1]).toHaveTextContent('traces-*NoneFailed');
+    ).toEqual(['Details', 'Index pattern', 'Status', 'Plans', 'ES time', '']);
+    expect(probeRows[0]).toHaveTextContent('metrics-*OKTS + FROM3.0 ms');
+    expect(probeRows[1]).toHaveTextContent('traces-*FailedNone');
     // A verification error is the normal "no time-series index" answer, not a failure.
-    expect(probeRows[2]).toHaveTextContent('logs-appFROM onlyOK');
+    expect(probeRows[2]).toHaveTextContent('logs-appOKFROM only');
     expect(within(probes).queryByTestId('entityInventoryPerformanceRowDetail')).toBeNull();
 
     // The response's errors, as they came, directly above the queries.
-    const errorRows = within(screen.getByTestId('entityInventoryPerformanceErrors'))
-      .getAllByRole('row')
-      .slice(1);
+    const errorsSection = screen.getByTestId('entityInventoryPerformanceErrors');
+    expect(
+      within(errorsSection)
+        .getAllByRole('columnheader')
+        .map((th) => th.textContent)
+    ).toEqual(['Index pattern', 'HTTP status', 'Reason']);
+    const errorRows = within(errorsSection).getAllByRole('row').slice(1);
     expect(errorRows.map((row) => row.textContent)).toEqual([
       expect.stringMatching(/logs-\*.*400.*Unknown column \[host\.name\]/),
       expect.stringMatching(/traces-\*.*403.*security_exception/),

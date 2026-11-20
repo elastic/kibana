@@ -286,6 +286,9 @@ export const TABLE_COLUMNS = {
   status: i18n.translate('xpack.entityInventoryApp.performanceOverlay.column.status', {
     defaultMessage: 'Status',
   }),
+  httpStatus: i18n.translate('xpack.entityInventoryApp.performanceOverlay.column.httpStatus', {
+    defaultMessage: 'HTTP status',
+  }),
   column: i18n.translate('xpack.entityInventoryApp.performanceOverlay.column.column', {
     defaultMessage: 'Column',
   }),
