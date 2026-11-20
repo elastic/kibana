@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GetTypesResponse } from '../types';
+import type { GetTypesResponse } from '../../../common';
 import { createEntityInventoryServerRoute } from '../create_server_route';
 import { INTERIM_AUTHZ } from '../interim_authz';
 

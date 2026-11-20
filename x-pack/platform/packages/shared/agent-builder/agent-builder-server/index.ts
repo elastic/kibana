@@ -26,6 +26,7 @@ export type {
   LLmDescriptionHandlerParams,
   LlmDescriptionHandler,
   ModelProvider,
+  ModelSource,
   ScopedModel,
   ScopedRunner,
   ScopedRunToolFn,

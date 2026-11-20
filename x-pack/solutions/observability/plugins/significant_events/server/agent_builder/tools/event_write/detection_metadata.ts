@@ -61,7 +61,8 @@ export const fillDetectionMetadata = async <TItem extends WithInputSignals>({
       const detection = stored.get(signal.metadata.detection_id);
       if (detection && detection.rule_uuid !== signal.metadata.rule_uuid) {
         throw createBulkWriteValidationError(
-          `signals[${index}]: detection_id ${signal.metadata.detection_id} belongs to rule ${detection.rule_uuid}, not ${signal.metadata.rule_uuid}. Copy detection_id and rule_uuid from the same input detection.`
+          `signals[${index}]: detection_id ${signal.metadata.detection_id} belongs to rule ${detection.rule_uuid}, not ${signal.metadata.rule_uuid}. Copy detection_id and rule_uuid from the same input detection.`,
+          { reason: 'detection_rule_mismatch' }
         );
       }
       const filled = { ...signal, metadata: detection ? metadataOf(detection) : signal.metadata };
@@ -69,7 +70,8 @@ export const fillDetectionMetadata = async <TItem extends WithInputSignals>({
       if (!parsed.success) {
         const fields = parsed.error.issues.map(({ path }) => path.join('.')).join(', ');
         throw createBulkWriteValidationError(
-          `signals[${index}]: detection ${signal.metadata.detection_id} is not stored, so its metadata must be copied in full from the input detection (${fields}).`
+          `signals[${index}]: detection ${signal.metadata.detection_id} is not stored, so its metadata must be copied in full from the input detection (${fields}).`,
+          { reason: 'detection_not_stored' }
         );
       }
       return parsed.data;

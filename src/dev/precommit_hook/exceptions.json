@@ -142,6 +142,7 @@
     "x-pack/platform/test/fleet_api_integration/apis/fixtures/package_verification/packages/zips/wrong_key-1.0.0.zip": "'wrong_key-1.0.0.zip' should be snake_case",
     "x-pack/platform/test/fleet_api_integration/apis/fixtures/package_verification/packages/zips/wrong_key-1.0.0.zip.sig": "'wrong_key-1.0.0.zip.sig' should be snake_case",
     "x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/abnormal_security/1.12.0/data_stream/audit/fields/base-fields.yml": "'base-fields.yml' should be snake_case",
+    "x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/abnormal_security/1.12.1/data_stream/audit/fields/base-fields.yml": "'base-fields.yml' should be snake_case",
     "x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/all_assets/0.1.0/kibana/slo_template/nginx-availability.json": "'nginx-availability.json' should be snake_case",
     "x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/all_assets/0.2.0/kibana/slo_template/nginx-availability.json": "'nginx-availability.json' should be snake_case",
     "x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/apm/apm-8.7.0.zip": "'apm-8.7.0.zip' should be snake_case",
@@ -405,12 +406,9 @@
     "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customIncompatibleAntivirusEvaluator.test.ts": "'customIncompatibleAntivirusEvaluator.test.ts' should be snake_case",
     "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customIncompatibleAntivirusEvaluator.ts": "'customIncompatibleAntivirusEvaluator.ts' should be snake_case",
     "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customPolicyResponseFailureEvaluator.test.ts": "'customPolicyResponseFailureEvaluator.test.ts' should be snake_case",
-    "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customPolicyResponseFailureEvaluator.ts": "'customPolicyResponseFailureEvaluator.ts' should be snake_case",
-    "x-pack/solutions/security/test/security_solution_endpoint": "'security_solution_endpoint' should be kebab-case"
+    "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customPolicyResponseFailureEvaluator.ts": "'customPolicyResponseFailureEvaluator.ts' should be snake_case"
   },
   "@elastic/security-detection-engineering": {
-    "x-pack/solutions/security/test/security_solution_api_integration": "'security_solution_api_integration' should be kebab-case",
-    "x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response": "'detections_response' should be kebab-case",
     "x-pack/solutions/security/test/security_solution_cypress/cypress/fixtures/security_detection_engine_packages/mock-empty-security_detection_engine-99.0.0.zip": "'mock-empty-security_detection_engine-99.0.0.zip' should be snake_case",
     "x-pack/solutions/security/test/security_solution_cypress/cypress/fixtures/security_detection_engine_packages/mock-security_detection_engine-99.0.0.zip": "'mock-security_detection_engine-99.0.0.zip' should be snake_case"
   },
@@ -448,8 +446,8 @@
     "src/platform/packages/shared/deeplinks/agent_builder": "'agent_builder' should be kebab-case"
   },
   "@elastic/workflows-eng": {
-    "src/platform/plugins/shared/workflows_execution_engine/server/step/on_failure/fallback-step": "'fallback-step' should be snake_case",
-    "src/platform/plugins/shared/workflows_execution_engine/server/step/timeout_zone_step/step-level": "'step-level' should be snake_case",
-    "src/platform/plugins/shared/workflows_execution_engine/server/step/timeout_zone_step/workflow-level": "'workflow-level' should be snake_case"
+    "x-pack/platform/plugins/shared/workflows_execution_engine/server/step/on_failure/fallback-step": "'fallback-step' should be snake_case",
+    "x-pack/platform/plugins/shared/workflows_execution_engine/server/step/timeout_zone_step/step-level": "'step-level' should be snake_case",
+    "x-pack/platform/plugins/shared/workflows_execution_engine/server/step/timeout_zone_step/workflow-level": "'workflow-level' should be snake_case"
   }
 }

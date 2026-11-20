@@ -23,6 +23,7 @@ import type {
   ExecutionStatus,
   InteractivityConfig,
   SerializedExecutionError,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { HttpSelfService, KibanaRequest } from '@kbn/core-http-server';
@@ -30,6 +31,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type {
   ModelProvider,
+  ModelSource,
   ScopedRunner,
   ToolProvider,
   WritableToolResultStore,
@@ -39,6 +41,7 @@ import type {
   ConversationStateManager,
   SkillsService,
   PluginsService,
+  ConnectorSkillsService,
   RenderersService,
   ConversationEventTypesService,
   ToolManager,
@@ -60,6 +63,14 @@ import type { AgentRegistry } from './registry';
 export interface ConversationClient {
   /** True if a conversation with the given id exists in the current scope. */
   exists(conversationId: string): Promise<boolean>;
+  /** The conversation with the document version the steer drain compares `peekVersion` against. */
+  getWithVersion(
+    conversationId: string
+  ): Promise<{ conversation: Conversation; seqNo: number; primaryTerm: number }>;
+  /** The document version alone, for a cheap change probe. */
+  peekVersion(conversationId: string): Promise<{ seqNo: number; primaryTerm: number }>;
+  /** The user the client acts as; the run owner when the client runs an execution. */
+  getUser(): UserIdAndName;
   /**
    * Validates, serializes, and merges `updates` into the conversation metadata. Recorded as a
    * `metadata_updated` activity event attributed via `options.activity` (default: current user).
@@ -114,7 +125,8 @@ export interface ExecuteSubAgentParams {
   prompt: string;
   /** Set to run the sub-agent in the background. */
   background?: SubAgentBackgroundOptions;
-  connectorId?: string;
+  /** Model source the sub-agent runs on; undefined to let its own configuration decide. */
+  modelSource?: ModelSource;
   autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
@@ -131,7 +143,8 @@ export interface CreateSubAgentParams {
   /** Pre-allocated id for the child conversation (assigned by the caller). */
   conversationId: string;
   prompt: string;
-  connectorId?: string;
+  /** Model source the sub-agent runs on; undefined to let its own configuration decide. */
+  modelSource?: ModelSource;
   autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
@@ -144,7 +157,8 @@ export interface SendToSubAgentParams {
   conversationId: string;
   prompt: string;
   background?: SubAgentBackgroundOptions;
-  connectorId?: string;
+  /** Model source the sub-agent runs on; undefined to let its own configuration decide. */
+  modelSource?: ModelSource;
   abortSignal?: AbortSignal;
 }
 
@@ -263,9 +277,10 @@ export interface AgentHandlerContext {
    */
   deployment: DeploymentContext;
   /**
-   * The resolved connector ID for this execution, if any.
+   * The model source this execution runs on: an explicit connector or an inference feature.
+   * Undefined when the model comes from the Agent Builder default.
    */
-  defaultConnectorId?: string;
+  defaultModel?: ModelSource;
   /**
    * A cluster client scoped to the current user.
    * Can be used to access ES on behalf of either the current user or the system user.
@@ -327,6 +342,10 @@ export interface AgentHandlerContext {
    * Plugins service to resolve plugin-contributed skill IDs during execution.
    */
   plugins: PluginsService;
+  /**
+   * Resolves the skills contributed by the types of an agent's connectors.
+   */
+  connectorSkills: ConnectorSkillsService;
   /**
    * Tool manager to manage active tools for the agent.
    */

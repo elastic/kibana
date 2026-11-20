@@ -6,26 +6,28 @@
  */
 
 import {
-  SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_DISCOVERY_COMPLETED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_FEATURES_IDENTIFIED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
+  NIGHTSHIFT_EVENT_STATUS_CHANGED_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
+  NIGHTSHIFT_DETECTION_SCAN_EVENT_TYPE,
+  NIGHTSHIFT_DISCOVERY_COMPLETED_EVENT_TYPE,
+  NIGHTSHIFT_DISCOVERY_STARTED_EVENT_TYPE,
+  NIGHTSHIFT_DISCOVERY_TRIGGERED_EVENT_TYPE,
+  NIGHTSHIFT_FEATURES_IDENTIFIED_EVENT_TYPE,
+  NIGHTSHIFT_ONBOARDING_SCHEDULED_EVENT_TYPE,
+  NIGHTSHIFT_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_FAILED_EVENT_TYPE,
+  NIGHTSHIFT_KNOWLEDGE_INDICATORS_QUERIES_GENERATION_FAILED_EVENT_TYPE,
 } from './constants';
 import {
+  agentToolFailedSchema,
+  knowledgeIndicatorQueriesGenerationFailedSchema,
   agentBuilderKnowledgeIndicatorCreatedSchema,
   agentToolEventCreateSchema,
   agentToolEventSearchSchema,
-  agentToolEventStatusUpdateSchema,
   agentToolEventWriteSchema,
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
   detectionScanSchema,
@@ -39,80 +41,86 @@ import {
 } from './schemas';
 
 const knowledgeIndicatorEventsGeneratedEventType = {
-  eventType: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
+  eventType: NIGHTSHIFT_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
   schema: knowledgeIndicatorQueriesGeneratedSchema,
 };
 
 const knowledgeIndicatorFeaturesIdentifiedEventType = {
-  eventType: SIGNIFICANT_EVENTS_FEATURES_IDENTIFIED_EVENT_TYPE,
+  eventType: NIGHTSHIFT_FEATURES_IDENTIFIED_EVENT_TYPE,
   schema: knowledgeIndicatorFeaturesIdentifiedSchema,
 };
 
 const agentBuilderKnowledgeIndicatorCreatedEventType = {
-  eventType: SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+  eventType: NIGHTSHIFT_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
   schema: agentBuilderKnowledgeIndicatorCreatedSchema,
 };
 
 const agentToolKiIdentificationStartedEventType = {
-  eventType: SIGNIFICANT_EVENTS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
+  eventType: NIGHTSHIFT_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
   schema: agentToolKnowledgeIndicatorIdentificationStartedSchema,
 };
 
 const agentToolEventCreateEventType = {
-  eventType: SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
+  eventType: NIGHTSHIFT_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
   schema: agentToolEventCreateSchema,
 };
 
-const agentToolEventStatusUpdateEventType = {
-  eventType: SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
-  schema: agentToolEventStatusUpdateSchema,
-};
-
 const discoveryStartedEventType = {
-  eventType: SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE,
+  eventType: NIGHTSHIFT_DISCOVERY_STARTED_EVENT_TYPE,
   schema: discoveryStartedSchema,
 };
 
 const discoveryCompletedEventType = {
-  eventType: SIGNIFICANT_EVENTS_DISCOVERY_COMPLETED_EVENT_TYPE,
+  eventType: NIGHTSHIFT_DISCOVERY_COMPLETED_EVENT_TYPE,
   schema: discoveryCompletedSchema,
 };
 
 const eventStatusChangedEventType = {
-  eventType: SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE,
+  eventType: NIGHTSHIFT_EVENT_STATUS_CHANGED_EVENT_TYPE,
   schema: eventStatusChangedSchema,
 };
 
 const discoveryTriggeredEventType = {
-  eventType: SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
+  eventType: NIGHTSHIFT_DISCOVERY_TRIGGERED_EVENT_TYPE,
   schema: discoveryTriggeredSchema,
 };
 
 const detectionScanEventType = {
-  eventType: SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
+  eventType: NIGHTSHIFT_DETECTION_SCAN_EVENT_TYPE,
   schema: detectionScanSchema,
 };
 
 const onboardingScheduledEventType = {
-  eventType: SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
+  eventType: NIGHTSHIFT_ONBOARDING_SCHEDULED_EVENT_TYPE,
   schema: onboardingScheduledSchema,
 };
 
 const agentToolEventWriteEventType = {
-  eventType: SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
+  eventType: NIGHTSHIFT_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
   schema: agentToolEventWriteSchema,
 };
 
 const agentToolEventSearchEventType = {
-  eventType: SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
+  eventType: NIGHTSHIFT_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
   schema: agentToolEventSearchSchema,
 };
 
+const agentToolFailedEventType = {
+  eventType: NIGHTSHIFT_AGENT_TOOL_FAILED_EVENT_TYPE,
+  schema: agentToolFailedSchema,
+};
+
+const knowledgeIndicatorQueriesGenerationFailedEventType = {
+  eventType: NIGHTSHIFT_KNOWLEDGE_INDICATORS_QUERIES_GENERATION_FAILED_EVENT_TYPE,
+  schema: knowledgeIndicatorQueriesGenerationFailedSchema,
+};
+
 export {
+  agentToolFailedEventType,
+  knowledgeIndicatorQueriesGenerationFailedEventType,
   agentBuilderKnowledgeIndicatorCreatedEventType,
   agentToolEventCreateEventType,
   agentToolEventSearchEventType,
-  agentToolEventStatusUpdateEventType,
   agentToolEventWriteEventType,
   agentToolKiIdentificationStartedEventType,
   detectionScanEventType,

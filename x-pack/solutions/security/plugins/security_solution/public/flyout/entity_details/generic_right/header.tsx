@@ -95,7 +95,7 @@ enum GenericEntityType {
   container = 'container',
 }
 
-export const GenericEntityIconByType: Record<GenericEntityType | EntityType, IconType> = {
+const GenericEntityIconByType: Record<GenericEntityType | EntityType, IconType> = {
   ...EntityIconByType,
   container: 'container',
 };
