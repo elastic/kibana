@@ -48,7 +48,13 @@ describe('WorkflowMigrationTaskRunner', () => {
       taskRunner.prepareTaskInput(migrationWorkflow)
     ).resolves.toEqual({
       id: 'workflow-1',
-      original_workflow: migrationWorkflow.original_workflow,
+      original_workflow: {
+        id: 'story-1',
+        vendor: 'tines',
+        title: 'Receive alert',
+        description: 'Imported from Tines',
+        format: 'json',
+      },
     });
   });
 

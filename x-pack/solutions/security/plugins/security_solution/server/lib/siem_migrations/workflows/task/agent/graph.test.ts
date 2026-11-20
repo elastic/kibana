@@ -9,16 +9,15 @@ import {
   MigrationTranslationResult,
   SIEM_MIGRATIONS_ASSISTANT_USER,
 } from '../../../../../../common/siem_migrations/constants';
-import type { OriginalWorkflow } from '../../../../../../common/siem_migrations/model/workflow_migration.gen';
+import type { WorkflowMigrationGraphWorkflow } from './state';
 import { getWorkflowMigrationAgent } from './graph';
 import * as placeholderNode from './nodes/placeholder';
 
-const originalWorkflow = (title: string): OriginalWorkflow => ({
+const originalWorkflow = (title: string): WorkflowMigrationGraphWorkflow => ({
   id: 'story-1',
   vendor: 'tines',
   title,
   description: 'Imported from Tines',
-  data: '{}',
   format: 'json',
 });
 

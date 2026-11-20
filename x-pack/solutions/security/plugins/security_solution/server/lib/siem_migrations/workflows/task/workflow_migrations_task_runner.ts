@@ -71,9 +71,10 @@ export class WorkflowMigrationTaskRunner extends SiemMigrationTaskRunner<
   protected async prepareTaskInput(
     migrationWorkflow: StoredWorkflowMigrationWorkflow
   ): Promise<WorkflowMigrationTaskInput> {
+    const { id, vendor, title, description, format } = migrationWorkflow.original_workflow;
     return {
       id: migrationWorkflow.id,
-      original_workflow: migrationWorkflow.original_workflow,
+      original_workflow: { id, vendor, title, description, format },
     };
   }
 

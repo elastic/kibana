@@ -7,15 +7,12 @@
 
 import type { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import type { MigrationComments } from '../../../../../../common/siem_migrations/model/common.gen';
-import type {
-  ElasticWorkflow,
-  OriginalWorkflow,
-} from '../../../../../../common/siem_migrations/model/workflow_migration.gen';
-import type { migrateWorkflowState } from './state';
+import type { ElasticWorkflow } from '../../../../../../common/siem_migrations/model/workflow_migration.gen';
+import type { migrateWorkflowState, WorkflowMigrationGraphWorkflow } from './state';
 
 export interface WorkflowMigrationTaskInput {
   id: string;
-  original_workflow: OriginalWorkflow;
+  original_workflow: WorkflowMigrationGraphWorkflow;
 }
 
 export interface WorkflowMigrationTaskOutput {

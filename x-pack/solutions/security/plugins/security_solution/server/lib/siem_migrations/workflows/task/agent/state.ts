@@ -13,9 +13,12 @@ import type {
   OriginalWorkflow,
 } from '../../../../../../common/siem_migrations/model/workflow_migration.gen';
 
+/** Graph state omits the raw export so tracing callbacks do not receive it. */
+export type WorkflowMigrationGraphWorkflow = Omit<OriginalWorkflow, 'data'>;
+
 export const migrateWorkflowState = Annotation.Root({
   id: Annotation<string>(),
-  original_workflow: Annotation<OriginalWorkflow>(),
+  original_workflow: Annotation<WorkflowMigrationGraphWorkflow>(),
   elastic_workflow: Annotation<ElasticWorkflow>(),
   translation_result: Annotation<MigrationTranslationResult>(),
   comments: Annotation<MigrationComments>(),
