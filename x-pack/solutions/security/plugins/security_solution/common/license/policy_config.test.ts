@@ -336,6 +336,27 @@ describe('policy_config and licenses', () => {
       const valid = isEndpointPolicyValidForLicense(policy, Basic);
       expect(valid).toBeTruthy();
     });
+
+    it('does not throw when protection objects are missing from a partial policy config', () => {
+      // A malformed/partial policy value (e.g. submitted via the API) may omit
+      // nested protection objects entirely. The validator must not throw a
+      // TypeError when reading `.supported`/`.mode` off an undefined object.
+      const policy = policyFactory();
+      // Remove nested protection objects to simulate a partial config.
+      // Cast is intentional: this reproduces malformed runtime input.
+      delete (policy.windows as Partial<PolicyConfig['windows']>).ransomware;
+      delete (policy.mac as Partial<PolicyConfig['mac']>).ransomware;
+      delete (policy.windows as Partial<PolicyConfig['windows']>).memory_protection;
+      delete (policy.mac as Partial<PolicyConfig['mac']>).memory_protection;
+      delete (policy.linux as Partial<PolicyConfig['linux']>).memory_protection;
+      delete (policy.windows as Partial<PolicyConfig['windows']>).behavior_protection;
+      delete (policy.mac as Partial<PolicyConfig['mac']>).behavior_protection;
+      delete (policy.linux as Partial<PolicyConfig['linux']>).behavior_protection;
+
+      [Platinum, Enterprise, Gold, Basic, null].forEach((license) => {
+        expect(() => isEndpointPolicyValidForLicense(policy, license)).not.toThrow();
+      });
+    });
   });
 
   describe('unsetPolicyFeaturesAccordingToLicenseLevel', () => {
