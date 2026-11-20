@@ -9,8 +9,12 @@ import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { PluginStart } from '@kbn/core-di';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
-import type { EpisodeAction, EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
+import {
+  isDiscoverExtension,
+  type EpisodeDataSource,
+} from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
+import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import { OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from '@kbn/alerting-v2-episodes-ui/actions';
 import { useAdditionalEpisodesDataSource } from '@kbn/alerting-v2-episodes-ui/context/episode_data_source_context';
 import {
   useAlertHost,
@@ -18,6 +22,16 @@ import {
 } from '@kbn/alerting-v2-episodes-ui/context/alert_host_context';
 import { AlertingV2AlertsProvider } from './alerts_provider';
 import { CLASSIC_ALERTS_DATA_SOURCE } from '../alert_sources';
+
+const HOST_RULE_TYPE_ID = 'host.rule';
+
+const makeClassicEpisode = (ruleTypeId: string) =>
+  ({
+    'episode.id': 'alert-1',
+    supports_actions: false,
+    source_id: CLASSIC_ALERTS_DATA_SOURCE.id,
+    source_action_context: { alertUuid: 'alert-1', ruleTypeId },
+  } as unknown as AlertEpisode);
 
 jest.mock('@kbn/core-di-browser', () => ({
   ...jest.requireActual('@kbn/core-di-browser'),
@@ -119,42 +133,32 @@ describe('AlertingV2AlertsProvider', () => {
     expect(seen.dataSource).toBe(dataSource);
   });
 
-  it('appends host actions to the actions of whichever source is used', () => {
-    const sourceAction = { id: 'source-action' } as EpisodeAction;
-    const hostAction = { id: 'host-action' } as EpisodeAction;
-    const dataSource = {
-      id: 'security',
-      createActions: () => [sourceAction],
-    } as unknown as EpisodeDataSource;
+  it('merges host actions into whichever source is used', () => {
+    const dataSource = { id: 'security' } as unknown as EpisodeDataSource;
+    const createActions = jest.fn(() => []);
 
-    renderProvider({ dataSource, createActions: () => [hostAction] });
+    renderProvider({ dataSource, createActions });
 
-    expect(seen.dataSource?.createActions?.({} as EpisodeActionsDeps)).toEqual([
-      sourceAction,
-      hostAction,
-    ]);
+    expect(seen.dataSource).toEqual({ id: 'security', createActions });
   });
 
-  it('adds host Discover resolvers to the source resolvers, host winning per rule type', () => {
-    const sourceResolver = jest.fn();
-    const sourceSharedResolver = jest.fn();
-    const hostResolver = jest.fn();
-    const hostSharedResolver = jest.fn();
-    const dataSource = {
-      id: 'security',
-      discoverLinkResolvers: { 'source.rule': sourceResolver, 'shared.rule': sourceSharedResolver },
-    } as unknown as EpisodeDataSource;
+  it('adds host Discover resolvers to the default classic source', () => {
+    renderProvider({ discoverLinkResolvers: { [HOST_RULE_TYPE_ID]: jest.fn() } });
 
-    renderProvider({
-      dataSource,
-      discoverLinkResolvers: { 'host.rule': hostResolver, 'shared.rule': hostSharedResolver },
-    });
+    const extension = seen.dataSource?.actionExtensions
+      ?.filter(isDiscoverExtension)
+      .find(({ actionId }) => actionId === OPEN_IN_DISCOVER_EPISODE_ACTION_ID);
 
-    expect(seen.dataSource?.discoverLinkResolvers).toEqual({
-      'source.rule': sourceResolver,
-      'shared.rule': hostSharedResolver,
-      'host.rule': hostResolver,
-    });
+    expect(seen.dataSource?.id).toBe(CLASSIC_ALERTS_DATA_SOURCE.id);
+    expect(extension?.isCompatible(makeClassicEpisode(HOST_RULE_TYPE_ID))).toBe(true);
+  });
+
+  it('keeps a host-supplied source as is when the host also adds Discover resolvers', () => {
+    const dataSource = { id: 'security' } as unknown as EpisodeDataSource;
+
+    renderProvider({ dataSource, discoverLinkResolvers: { [HOST_RULE_TYPE_ID]: jest.fn() } });
+
+    expect(seen.dataSource).toBe(dataSource);
   });
 
   it('reports the write privilege to the alert components', () => {

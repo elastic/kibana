@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import { ES_QUERY_ID, STACK_MANAGEMENT_RULES_HOST } from '@kbn/rule-data-utils';
-import type { EpisodeActionsDeps } from '../actions/create_episode_actions';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { ALERT_RULE_TYPE_ID, ES_QUERY_ID, STACK_MANAGEMENT_RULES_HOST } from '@kbn/rule-data-utils';
+import { OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from '../actions/open_in_discover';
 import type { AlertEpisode } from '../queries/episodes_query';
-import type { EpisodeDataSource } from '../types/episode_data_source';
-import type { DataViewDiscoverLocatorParams } from '../utils/discover_href_for_alert';
+import { isDiscoverExtension, type EpisodeDataSource } from '../types/episode_data_source';
 import { CLASSIC_EPISODE_SOURCE_ID } from './constants';
 import { createClassicEpisodeSource } from './create_classic_episode_source';
-import { CLASSIC_OPEN_IN_DISCOVER_ACTION_ID } from './open_in_discover';
 import { useClassicWriteAccess } from './use_classic_write_access';
 import type { ClassicAlertActionContext } from './utils/map_alert';
+import { fetchClassicAlertById } from './apis/fetch_classic_alert_by_id';
+
+jest.mock('./apis/fetch_classic_alert_by_id');
+
+const fetchClassicAlertByIdMock = jest.mocked(fetchClassicAlertById);
 
 const HOST_RULE_TYPE_ID = 'host.rule';
 
@@ -50,22 +50,10 @@ const makeClassicEpisode = (ruleTypeId: string): AlertEpisode => {
   };
 };
 
-const getOpenInDiscoverAction = (
-  source: EpisodeDataSource,
-  additionalDataSource: EpisodeDataSource
-) => {
-  const deps = {
-    http: httpServiceMock.createStartContract(),
-    application: applicationServiceMock.createStartContract(),
-    notifications: notificationServiceMock.createStartContract(),
-    discoverLocator: sharePluginMock.createLocator<DataViewDiscoverLocatorParams>(),
-    additionalDataSource,
-  } as unknown as EpisodeActionsDeps;
-
-  return (source.createActions?.(deps) ?? []).find(
-    ({ id }) => id === CLASSIC_OPEN_IN_DISCOVER_ACTION_ID
-  );
-};
+const getDiscoverExtension = (source: EpisodeDataSource) =>
+  source.actionExtensions
+    ?.filter(isDiscoverExtension)
+    .find(({ actionId }) => actionId === OPEN_IN_DISCOVER_EPISODE_ACTION_ID);
 
 describe('createClassicEpisodeSource', () => {
   it('resolves write access through the classic write access hook', () => {
@@ -74,32 +62,46 @@ describe('createClassicEpisodeSource', () => {
     );
   });
 
-  describe('Open in Discover action', () => {
-    const source = createClassicEpisodeSource({ ruleTypeIds: ['test-type'] });
-
-    it('is offered for stack rule types when no host adds link resolvers', () => {
-      const action = getOpenInDiscoverAction(source, source);
-
-      expect(action?.isCompatible({ episodes: [makeClassicEpisode(ES_QUERY_ID)] })).toBe(true);
-      expect(action?.isCompatible({ episodes: [makeClassicEpisode(HOST_RULE_TYPE_ID)] })).toBe(
-        false
+  describe('Open in Discover', () => {
+    it('opens stack rule types in Discover when no host adds link resolvers', () => {
+      const extension = getDiscoverExtension(
+        createClassicEpisodeSource({ ruleTypeIds: ['test-type'] })
       );
+
+      expect(extension?.isCompatible(makeClassicEpisode(ES_QUERY_ID))).toBe(true);
+      expect(extension?.isCompatible(makeClassicEpisode(HOST_RULE_TYPE_ID))).toBe(false);
     });
 
-    it('is offered for rule types whose link resolvers the host merged into the source', () => {
-      const mergedSource: EpisodeDataSource = {
-        ...source,
-        discoverLinkResolvers: {
-          ...source.discoverLinkResolvers,
-          [HOST_RULE_TYPE_ID]: jest.fn(),
-        },
-      };
-      const action = getOpenInDiscoverAction(source, mergedSource);
-
-      expect(action?.isCompatible({ episodes: [makeClassicEpisode(HOST_RULE_TYPE_ID)] })).toBe(
-        true
+    it('opens rule types whose link resolvers the host adds in Discover', () => {
+      const extension = getDiscoverExtension(
+        createClassicEpisodeSource({
+          ruleTypeIds: ['test-type'],
+          discoverLinkResolvers: { [HOST_RULE_TYPE_ID]: jest.fn() },
+        })
       );
-      expect(action?.isCompatible({ episodes: [makeClassicEpisode(ES_QUERY_ID)] })).toBe(true);
+
+      expect(extension?.isCompatible(makeClassicEpisode(HOST_RULE_TYPE_ID))).toBe(true);
+      expect(extension?.isCompatible(makeClassicEpisode(ES_QUERY_ID))).toBe(true);
+    });
+
+    it('uses the host resolver over the stack resolver for the same rule type', async () => {
+      const alert = { [ALERT_RULE_TYPE_ID]: ES_QUERY_ID };
+      const target = { url: '/app/discover#/host' };
+      const hostResolver = jest.fn(() => target);
+      fetchClassicAlertByIdMock.mockResolvedValue(alert);
+      const extension = getDiscoverExtension(
+        createClassicEpisodeSource({
+          ruleTypeIds: ['test-type'],
+          discoverLinkResolvers: { [ES_QUERY_ID]: hostResolver },
+        })
+      );
+
+      await expect(
+        extension?.getDiscoverTarget(makeClassicEpisode(ES_QUERY_ID), {
+          http: httpServiceMock.createStartContract(),
+        })
+      ).resolves.toEqual(target);
+      expect(hostResolver).toHaveBeenCalledWith(alert);
     });
   });
 
