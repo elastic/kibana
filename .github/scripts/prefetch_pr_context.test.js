@@ -22,12 +22,14 @@ const comment = (login, association) => ({
   author_association: association,
 });
 
-test('keeps members, bots and the PR author; drops everyone else', () => {
+test('keeps members, known bots and the PR author; drops everyone else', () => {
   const comments = [
     comment('kibanamachine', 'MEMBER'),
     comment('maintainer', 'OWNER'),
     comment('collaborator', 'COLLABORATOR'),
     comment('infra-vault-gh-plugin-prod[bot]', 'CONTRIBUTOR'),
+    comment('github-actions[bot]', 'CONTRIBUTOR'),
+    comment('any-installed-app[bot]', 'NONE'),
     comment('pr-author', 'CONTRIBUTOR'),
     comment('drive-by', 'NONE'),
     comment('past-contributor', 'CONTRIBUTOR'),
@@ -42,8 +44,8 @@ test('keeps members, bots and the PR author; drops everyone else', () => {
   assert.deepEqual(kept, [
     'kibanamachine',
     'maintainer',
-    'collaborator',
     'infra-vault-gh-plugin-prod[bot]',
+    'github-actions[bot]',
     'pr-author',
   ]);
 });
