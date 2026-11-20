@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import type {
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   Plugin,
@@ -14,6 +16,7 @@ import type {
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { QueryClient } from '@kbn/react-query';
+import { hasSeenData } from '@kbn/search-shared-ui';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 
 import type {
@@ -48,6 +51,9 @@ export class SearchGettingStartedPlugin
   ): SearchGettingStartedPluginSetup {
     const queryClient = new QueryClient({});
     const kibanaVersion = this.kibanaVersion;
+    // Decided before the app renders: a deployment not known to hold data gets no chrome here either.
+    const getAppUpdate: AppUpdater = () => ({ hideChrome: !hasSeenData() });
+    const appUpdater$ = new BehaviorSubject<AppUpdater>(getAppUpdate);
     core.application.register({
       id: PLUGIN_ID,
       appRoute: PLUGIN_PATH,
@@ -55,6 +61,7 @@ export class SearchGettingStartedPlugin
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: 'logoElasticsearch',
       async mount({ element, history }: AppMountParameters) {
+        appUpdater$.next(getAppUpdate);
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
         docLinks.setDocLinks(coreStart.docLinks.links);
@@ -67,7 +74,8 @@ export class SearchGettingStartedPlugin
         return renderApp(coreStart, services, element, queryClient, kibanaVersion);
       },
       order: 1,
-      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
+      updater$: appUpdater$,
+      visibleIn: [],
     });
 
     return {};

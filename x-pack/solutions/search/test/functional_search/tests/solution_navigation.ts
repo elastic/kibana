@@ -73,14 +73,6 @@ export default function searchSolutionNavigation({
           pageTestSubject: 'dashboardLandingPage',
         },
         {
-          link: { deepLinkId: 'searchGettingStarted' },
-          pageTestSubject: 'gettingStartedHeader',
-        },
-        {
-          link: { deepLinkId: 'searchGettingStarted' },
-          pageTestSubject: 'gettingStartedHeader',
-        },
-        {
           link: { deepLinkId: 'dev_tools' },
           pageTestSubject: 'console',
         },
@@ -105,7 +97,6 @@ export default function searchSolutionNavigation({
           'discover',
           'dashboards',
           'machine_learning',
-          'search_getting_started',
           'dev_tools',
           'data_management',
           'stack_management',

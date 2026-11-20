@@ -33,7 +33,7 @@ test.describe(
       await expect(homepage.documentationLink).toHaveText(/Learn more about Elasticsearch/);
     });
 
-    test('directs an empty deployment to getting started from the banner', async ({
+    test('directs an empty deployment to the guided setup from the banner', async ({
       page,
       pageObjects,
     }) => {
@@ -43,7 +43,7 @@ test.describe(
       await expect(pageObjects.homepage.banner).toContainText('Get started with Elasticsearch');
       await pageObjects.homepage.bannerGetStartedButton.click();
 
-      await expect(page).toHaveURL(/getting_started/);
+      await expect(page).toHaveURL(/\/home\/get_started/);
     });
 
     test('drops the banner once the deployment holds data', async ({ page, pageObjects }) => {

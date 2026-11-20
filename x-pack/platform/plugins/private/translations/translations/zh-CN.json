@@ -52257,7 +52257,6 @@
     "xpack.searchInferenceEndpoints.taskType.ariaLabel": "任务类型选项",
     "xpack.searchNavigation.breadcrumbs.home.title": "Elasticsearch",
     "xpack.searchNavigation.classicNav.applicationsTitle": "构建",
-    "xpack.searchNavigation.classicNav.gettingStartedTitle": "入门",
     "xpack.searchNavigation.classicNav.homeTitle": "主页",
     "xpack.searchNavigation.classicNav.name": "Elasticsearch",
     "xpack.searchNavigation.classicNav.relevanceTitle": "相关性",

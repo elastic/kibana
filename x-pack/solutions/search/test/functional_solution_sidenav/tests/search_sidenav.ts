@@ -59,13 +59,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
 
-        // navigate to getting started page
-        await solutionNavigation.sidenav.clickLink({
-          deepLinkId: 'searchGettingStarted',
-        });
-        await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'searchGettingStarted',
-        });
         // navigate back to the home page using header logo
         await solutionNavigation.clickLogo();
         await solutionNavigation.sidenav.expectLinkActive({

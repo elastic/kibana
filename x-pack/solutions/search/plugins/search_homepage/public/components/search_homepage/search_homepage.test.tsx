@@ -50,6 +50,18 @@ describe('SearchHomepagePage', () => {
     expect(solutionNav).toBe(classicNav);
   });
 
+  it('opens the guided setup from the banner, not the superseded getting started app', () => {
+    renderPage();
+
+    const [[{ banner }]] = sharedHomePage.mock.calls;
+    banner?.onGetStarted();
+
+    expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+    expect(application.navigateToApp).toHaveBeenCalledWith('searchHomepage', {
+      path: '/get_started',
+    });
+  });
+
   it('sets the Home breadcrumb', () => {
     renderPage();
 

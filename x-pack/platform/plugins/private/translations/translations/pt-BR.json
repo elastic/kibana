@@ -52289,7 +52289,6 @@
     "xpack.searchInferenceEndpoints.taskType.ariaLabel": "Opções de tipo de tarefa",
     "xpack.searchNavigation.breadcrumbs.home.title": "Elasticsearch",
     "xpack.searchNavigation.classicNav.applicationsTitle": "Criar",
-    "xpack.searchNavigation.classicNav.gettingStartedTitle": "Para começar",
     "xpack.searchNavigation.classicNav.homeTitle": "Início",
     "xpack.searchNavigation.classicNav.name": "Elasticsearch",
     "xpack.searchNavigation.classicNav.relevanceTitle": "Relevância",

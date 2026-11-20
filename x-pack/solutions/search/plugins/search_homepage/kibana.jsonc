@@ -14,11 +14,19 @@
     ],
     "requiredPlugins": [
       "elasticsearchHome",
+      "share",
     ],
     "optionalPlugins": [
+      "agentBuilder",
+      "cloud",
       "console",
+      "home",
+      "licensing",
       "searchNavigation",
+      "spaces",
+      "uiActions",
       "usageCollection",
+      "webCrawler",
     ],
     "requiredBundles": [
       "kibanaReact"

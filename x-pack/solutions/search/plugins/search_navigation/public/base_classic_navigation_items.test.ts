@@ -8,6 +8,12 @@
 import { BaseClassicNavItems } from './base_classic_navigation_items';
 
 describe('BaseClassicNavItems', () => {
+  it('lists the home alone at the root, without the superseded getting started page', () => {
+    const rootSection = BaseClassicNavItems.find((item) => item.id === 'root');
+
+    expect(rootSection?.items?.map(({ id }) => id)).toEqual(['home']);
+  });
+
   it('includes the context engine nav item under Build', () => {
     const buildSection = BaseClassicNavItems.find((item) => item.id === 'build');
 

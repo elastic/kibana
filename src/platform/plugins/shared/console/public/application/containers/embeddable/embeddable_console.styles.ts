@@ -67,13 +67,15 @@ export const useStyles = () => {
 
     embeddableConsoleChromeProject: css`
       left: calc(
-        var(--euiCollapsibleNavOffset, 0) + ${layoutVar('application.content.left', '0px')}
+        var(--euiCollapsibleNavOffset, 0px) + ${layoutVar('application.content.left', '0px')}
       );
       border-radius: 0 0 ${euiTheme.border.radius.frame} ${euiTheme.border.radius.frame};
     `,
 
     embeddableConsoleChromeClassic: css`
-      left: calc(var(--kbnSolutionNavOffset, 0) + ${layoutVar('application.content.left', '0px')});
+      left: calc(
+        var(--kbnSolutionNavOffset, 0px) + ${layoutVar('application.content.left', '0px')}
+      );
       border-radius: 0;
     `,
 

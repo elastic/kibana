@@ -8,10 +8,13 @@
 import type { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { ElasticsearchHomePageProps } from '@kbn/elasticsearch-home/public';
+import { PLUGIN_ID } from '../common';
+import { GUIDED_SETUP_PATH } from './analytics/constants';
 
-const TELEMETRY_PREFIX = 'searchHomepage';
-const STORAGE_KEY_PREFIX = 'searchHomepage';
-const GETTING_STARTED_APP_ID = 'searchGettingStarted';
+export const TELEMETRY_PREFIX = 'searchHomepage';
+export const STORAGE_KEY_PREFIX = 'searchHomepage';
+export const WEB_CRAWLS_ROUTE = '/web_crawls';
+export const WEB_CRAWLS_DEEP_LINK_ID = 'webCrawls';
 const WEB_CRAWLER_URL = 'https://github.com/elastic/crawler';
 
 const AGENT_ONBOARDING_MESSAGE = '/elasticsearch-onboarding';
@@ -52,8 +55,10 @@ export const getSearchHomeConfig = ({
     buttonLabel: i18n.translate('xpack.searchHomepage.home.banner.button', {
       defaultMessage: 'Get started',
     }),
-    onGetStarted: () => application.navigateToApp(GETTING_STARTED_APP_ID),
+    onGetStarted: () => application.navigateToApp(PLUGIN_ID, { path: GUIDED_SETUP_PATH }),
   },
+  showWebCrawl: true,
+  onManageWebCrawls: () => application.navigateToApp(PLUGIN_ID, { path: WEB_CRAWLS_ROUTE }),
   addDataLinks: [
     {
       key: 'devTools',

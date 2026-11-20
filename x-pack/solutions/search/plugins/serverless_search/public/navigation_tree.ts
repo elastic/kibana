@@ -182,6 +182,7 @@ export function createNavigationTree({
               { link: 'management:ingest_pipelines', breadcrumbStatus: 'hidden' },
               { link: 'management:pipelines', breadcrumbStatus: 'hidden' },
               { link: 'management:content_connectors', breadcrumbStatus: 'hidden' },
+              { link: 'searchHomepage:webCrawls', breadcrumbStatus: 'hidden' },
             ],
             title: i18n.translate('xpack.serverlessSearch.nav.ingest.pipelines.title', {
               defaultMessage: 'Ingest',
@@ -204,11 +205,6 @@ export function createNavigationTree({
       },
     ],
     footer: [
-      {
-        id: 'search_getting_started',
-        icon: 'rocket',
-        link: 'searchGettingStarted',
-      },
       {
         id: 'dev_tools',
         title: i18n.translate('xpack.serverlessSearch.nav.developerTools', {

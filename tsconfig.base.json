@@ -3053,6 +3053,8 @@
       "@kbn/visualizations-plugin/*": ["./src/platform/plugins/shared/visualizations/*"],
       "@kbn/watcher-plugin": ["./x-pack/platform/plugins/private/watcher"],
       "@kbn/watcher-plugin/*": ["./x-pack/platform/plugins/private/watcher/*"],
+      "@kbn/web-crawler-plugin": ["./x-pack/platform/plugins/shared/web_crawler"],
+      "@kbn/web-crawler-plugin/*": ["./x-pack/platform/plugins/shared/web_crawler/*"],
       "@kbn/web-worker-stub": ["./packages/kbn-web-worker-stub"],
       "@kbn/web-worker-stub/*": ["./packages/kbn-web-worker-stub/*"],
       "@kbn/whereis-pkg-cli": ["./packages/kbn-whereis-pkg-cli"],

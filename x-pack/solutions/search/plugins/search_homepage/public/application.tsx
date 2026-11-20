@@ -12,6 +12,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { SearchHomepageServicesContextDeps } from './types';
 import { HomepageRouter } from './router';
 
@@ -22,14 +23,18 @@ export const renderApp = async (
 ) => {
   services.usageCollection?.reportUiCounter('searchHomepage', METRIC_TYPE.LOADED, 'opened_app');
 
+  const queryClient = new QueryClient();
+
   ReactDOM.render(
     core.rendering.addContext(
       <KibanaContextProvider services={{ ...core, ...services }}>
-        <I18nProvider>
-          <Router history={services.history}>
-            <HomepageRouter />
-          </Router>
-        </I18nProvider>
+        <QueryClientProvider client={queryClient}>
+          <I18nProvider>
+            <Router history={services.history}>
+              <HomepageRouter />
+            </Router>
+          </I18nProvider>
+        </QueryClientProvider>
       </KibanaContextProvider>
     ),
     element

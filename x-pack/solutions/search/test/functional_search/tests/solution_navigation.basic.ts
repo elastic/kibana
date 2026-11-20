@@ -74,14 +74,6 @@ export default function searchSolutionNavigation({
           pageTestSubject: 'agentBuilderWrapper',
         },
         {
-          link: { deepLinkId: 'searchGettingStarted' },
-          pageTestSubject: 'gettingStartedHeader',
-        },
-        {
-          link: { deepLinkId: 'searchGettingStarted' },
-          pageTestSubject: 'gettingStartedHeader',
-        },
-        {
           link: { deepLinkId: 'dev_tools' },
           pageTestSubject: 'console',
         },
@@ -107,7 +99,6 @@ export default function searchSolutionNavigation({
           'agent_builder',
           'workflows',
           'machine_learning',
-          'search_getting_started',
           'dev_tools',
           'data_management',
           'stack_management',

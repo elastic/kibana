@@ -9,59 +9,118 @@ import React from 'react';
 import { createMemoryHistory } from 'history';
 import { render, screen } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
-import { coreMock } from '@kbn/core/public/mocks';
 import { GETTING_STARTED_LOCALSTORAGE_KEY } from '@kbn/search-shared-ui';
-import { useKibana } from './hooks/use_kibana';
+import { ANALYTICS_PREFERENCES_STORAGE_KEY } from './analytics/constants';
 import { HomepageRouter } from './router';
 
-jest.mock('./hooks/use_kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('./components/search_homepage/search_homepage', () => ({
-  SearchHomepagePage: () => <div data-test-subj="searchHomepagePage" />,
+jest.mock('./analytics/components/home/unified_home', () => ({
+  UnifiedHomePage: () => <div data-test-subj="unifiedHomePage" />,
+}));
+jest.mock('./analytics/components/onboarding/guided_setup', () => ({
+  GuidedSetupPage: () => <div data-test-subj="guidedSetupPage" />,
 }));
 
-const mockUseKibana = useKibana as jest.Mock;
+const mockSetChromeHidden = jest.fn();
+jest.mock('./hooks/use_kibana', () => ({
+  useKibana: () => ({ services: { setChromeHidden: mockSetChromeHidden } }),
+}));
+
+jest.mock('./components/web_crawls/web_crawls', () => ({
+  SearchWebCrawlsPage: () => <div data-test-subj="searchWebCrawlsPage" />,
+}));
 
 describe('HomepageRouter', () => {
-  const { application } = coreMock.createStart();
-
-  const renderRouter = () =>
+  const renderRouter = (path = '/') => {
+    const history = createMemoryHistory({ initialEntries: [path] });
     render(
-      <Router history={createMemoryHistory()}>
+      <Router history={history}>
         <HomepageRouter />
       </Router>
     );
+    return history;
+  };
+
+  const getStoredJourney = (): string | undefined =>
+    JSON.parse(localStorage.getItem(ANALYTICS_PREFERENCES_STORAGE_KEY) ?? '{}').preferredJourney;
 
   beforeEach(() => {
-    jest.clearAllMocks();
     localStorage.clear();
-    mockUseKibana.mockReturnValue({ services: { application } });
   });
 
-  it('sends a first-time visitor to getting started without rendering the home page', () => {
-    renderRouter();
+  it('renders the home at the root', async () => {
+    const history = renderRouter();
 
-    expect(application.navigateToApp).toHaveBeenCalledWith('searchGettingStarted');
-    expect(screen.queryByTestId('searchHomepagePage')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('unifiedHomePage')).toBeInTheDocument();
+    expect(history.location.pathname).toBe('/');
+    expect(screen.queryByTestId('guidedSetupPage')).not.toBeInTheDocument();
   });
 
-  it('renders the home page once getting started has been visited in this browser', () => {
-    localStorage.setItem(GETTING_STARTED_LOCALSTORAGE_KEY, 'true');
+  it.each([undefined, 'true'])(
+    'renders the home whether or not getting started was visited (flag: %s)',
+    async (flag) => {
+      if (flag !== undefined) {
+        localStorage.setItem(GETTING_STARTED_LOCALSTORAGE_KEY, flag);
+      }
 
-    renderRouter();
+      const history = renderRouter();
 
-    expect(application.navigateToApp).not.toHaveBeenCalled();
-    expect(screen.getByTestId('searchHomepagePage')).toBeInTheDocument();
+      expect(await screen.findByTestId('unifiedHomePage')).toBeInTheDocument();
+      expect(history.location.pathname).toBe('/');
+      expect(getStoredJourney()).toBeUndefined();
+    }
+  );
+
+  it('renders the web crawls page on its route', async () => {
+    const history = renderRouter('/web_crawls');
+
+    expect(await screen.findByTestId('searchWebCrawlsPage')).toBeInTheDocument();
+    expect(history.location.pathname).toBe('/web_crawls');
+    expect(mockSetChromeHidden).toHaveBeenLastCalledWith(false);
+    expect(screen.queryByTestId('unifiedHomePage')).not.toBeInTheDocument();
   });
 
-  it('renders the home page without redirecting when local storage is unavailable', () => {
+  it('renders the home when local storage is unavailable', async () => {
     const getItem = jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('storage unavailable');
     });
 
     renderRouter();
 
-    expect(application.navigateToApp).not.toHaveBeenCalled();
-    expect(screen.getByTestId('searchHomepagePage')).toBeInTheDocument();
+    expect(await screen.findByTestId('unifiedHomePage')).toBeInTheDocument();
     getItem.mockRestore();
+  });
+
+  it('renders the guided setup', async () => {
+    const history = renderRouter('/get_started');
+
+    expect(await screen.findByTestId('guidedSetupPage')).toBeInTheDocument();
+    expect(history.location.pathname).toBe('/get_started');
+    expect(screen.queryByTestId('unifiedHomePage')).not.toBeInTheDocument();
+    expect(getStoredJourney()).toBeUndefined();
+  });
+
+  describe('legacy analytics routes', () => {
+    it('redirects the analytics home to the home and remembers the analytics journey', async () => {
+      const history = renderRouter('/analytics');
+
+      expect(await screen.findByTestId('unifiedHomePage')).toBeInTheDocument();
+      expect(history.location.pathname).toBe('/');
+      expect(getStoredJourney()).toBe('analytics');
+    });
+
+    it('redirects the analytics onboarding to the guided setup', async () => {
+      const history = renderRouter('/analytics/get_started');
+
+      expect(await screen.findByTestId('guidedSetupPage')).toBeInTheDocument();
+      expect(history.location.pathname).toBe('/get_started');
+      expect(getStoredJourney()).toBe('analytics');
+    });
+
+    it('keeps the home at paths below the old routes that never existed', async () => {
+      renderRouter('/analytics/unknown');
+
+      expect(await screen.findByTestId('unifiedHomePage')).toBeInTheDocument();
+      expect(getStoredJourney()).toBeUndefined();
+    });
   });
 });

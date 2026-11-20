@@ -290,6 +290,7 @@ export default function ({ getService }: FtrProviderContext) {
         'threat_intel:promote_threat_indicators',
         'threat_intel:scrub_report_content',
         'unusedUrlsCleanupTask',
+        'web_crawler:crawl',
         'workflow:resume',
         'workflow:run',
         'workflow:scheduled',

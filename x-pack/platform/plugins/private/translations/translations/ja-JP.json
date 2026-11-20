@@ -52272,7 +52272,6 @@
     "xpack.searchInferenceEndpoints.taskType.ariaLabel": "タスクタイプオプション",
     "xpack.searchNavigation.breadcrumbs.home.title": "Elasticsearch",
     "xpack.searchNavigation.classicNav.applicationsTitle": "ビルド",
-    "xpack.searchNavigation.classicNav.gettingStartedTitle": "開始する",
     "xpack.searchNavigation.classicNav.homeTitle": "ホーム",
     "xpack.searchNavigation.classicNav.name": "Elasticsearch",
     "xpack.searchNavigation.classicNav.relevanceTitle": "関連性",
