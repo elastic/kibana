@@ -9,7 +9,7 @@ on:
         description: How many days of findings to review
         required: false
         type: string
-        default: '7'
+        default: '28'
   # One proposal at a time: wait until the previous curator PR is merged or closed.
   skip-if-match: 'is:pr is:open label:flaky-fix-curator'
 
@@ -113,9 +113,6 @@ safe-outputs:
       version: '2.1.165'
   activation-comments: false
   report-failure-as-issue: false
-  # Preview only until the first proposals have been reviewed: the PR shows up in the run's
-  # step summary instead of being opened. Remove `staged` to open real PRs.
-  staged: true
   create-pull-request:
     draft: true
     max: 1
@@ -173,7 +170,7 @@ Prompt bodies and the guidelines are loaded at run time, so a merged change take
 1. **Read the findings.** Drop every finding with `lesson_type: none`. If none remain, call `noop` with the counts and stop.
 2. **Cluster what remains** by the guideline they cite and the lesson they state. Two findings belong together when a single instruction would have changed both outcomes, not merely because they share a framework or a team. Read the linked finding comments for the clusters you keep; the one-line `lesson` is a summary, the comment carries the evidence.
 3. **Qualify each cluster.** A cluster earns a proposal when:
-   - at least two findings support it, or one `high` confidence `did-not-hold` or `diagnosis` finding states a condition that generalizes beyond its test; and
+   - at least two findings with different root causes support it (fixes for the same race or defect in the same suite count once, however many PRs it took), or one `high` confidence `did-not-hold` or `diagnosis` finding states a condition that generalizes beyond its test; and
    - the instruction it calls for is not already in the target file (read the current file on `main`, do not rely on the quoted phrase alone); and
    - no curator PR in `curator-prs.json` already proposed it; and
    - the finding was recorded after the last commit to its target file (`instruction-changes.json`). A finding older than a change to the file it targets may be stale: the fixer that produced it was running the old text. Read those commits. If one of them addresses the lesson, drop the finding; if they touched something else, it still counts.

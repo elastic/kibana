@@ -25,7 +25,7 @@ export interface OnboardingVisibility {
   showOnboarding: boolean;
   /** The space's most recent investigation: the trial investigation of steps 2 and 3. */
   latestInvestigation?: InvestigationSummary;
-  /** "I'll do it later": hides onboarding in this space and browser (local storage). */
+  /** "Skip this step": hides onboarding in this space and browser (local storage). */
   dismiss: () => void;
 }
 
@@ -34,7 +34,7 @@ export interface OnboardingVisibility {
  * Without automations (feature flag off) it falls back to "the space has an investigation".
  *
  * An active session stays open after the first automation is created so the saved card and Done
- * button can appear; Done / "I'll do it later" call `dismiss`. Return visits with an automation
+ * button can appear; Done / "Skip this step" call `dismiss`. Return visits with an automation
  * still skip onboarding.
  */
 export const useOnboardingVisibility = ({

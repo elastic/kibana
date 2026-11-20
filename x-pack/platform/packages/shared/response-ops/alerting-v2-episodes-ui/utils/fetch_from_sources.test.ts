@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { fetchFromSource, fetchFromV2AndSource, settleFetch } from './fetch_from_sources';
+import {
+  EPISODE_SOURCE_FILTER_CLASSIC,
+  EPISODE_SOURCE_FILTER_UNIVERSAL,
+} from '@kbn/alerting-v2-common-queries';
+import { CLASSIC_EPISODE_SOURCE_ID } from '../classic_alerts/constants';
+import {
+  fetchFromSource,
+  fetchFromV2AndSource,
+  resolveEpisodeSourceQueries,
+  settleFetch,
+} from './fetch_from_sources';
 import { shouldSwallowFetchError } from './should_swallow_fetch_error';
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 
@@ -113,6 +123,69 @@ describe('fetchFromSource', () => {
       results: [],
       errors: [{ sourceId: 'test-source', error }],
     });
+  });
+});
+
+describe('resolveEpisodeSourceQueries', () => {
+  const source = createTestEpisodeSource();
+
+  it('queries both pipelines when the source filter is empty', () => {
+    expect(
+      resolveEpisodeSourceQueries({
+        sources: undefined,
+        queryV2Source: true,
+        additionalSource: source,
+      })
+    ).toEqual({ queryV2Source: true, additionalSource: source });
+  });
+
+  it('skips v2 when only Classic is selected', () => {
+    const classic = createTestEpisodeSource({ id: CLASSIC_EPISODE_SOURCE_ID });
+    expect(
+      resolveEpisodeSourceQueries({
+        sources: [EPISODE_SOURCE_FILTER_CLASSIC],
+        queryV2Source: true,
+        additionalSource: classic,
+      })
+    ).toEqual({ queryV2Source: false, additionalSource: classic });
+  });
+
+  it('keeps a non-classic additional source only when its own id is selected', () => {
+    const slo = createTestEpisodeSource({ id: 'slo' });
+    expect(
+      resolveEpisodeSourceQueries({
+        sources: ['slo'],
+        queryV2Source: true,
+        additionalSource: slo,
+      })
+    ).toEqual({ queryV2Source: true, additionalSource: slo });
+    expect(
+      resolveEpisodeSourceQueries({
+        sources: [EPISODE_SOURCE_FILTER_UNIVERSAL],
+        queryV2Source: true,
+        additionalSource: slo,
+      })
+    ).toEqual({ queryV2Source: true, additionalSource: undefined });
+  });
+
+  it('skips the classic source when the selection has no Classic id', () => {
+    expect(
+      resolveEpisodeSourceQueries({
+        sources: [EPISODE_SOURCE_FILTER_UNIVERSAL, 'zabbix'],
+        queryV2Source: true,
+        additionalSource: source,
+      })
+    ).toEqual({ queryV2Source: true, additionalSource: undefined });
+  });
+
+  it('keeps v2 skipped when the host cannot query it', () => {
+    expect(
+      resolveEpisodeSourceQueries({
+        sources: undefined,
+        queryV2Source: false,
+        additionalSource: source,
+      })
+    ).toEqual({ queryV2Source: false, additionalSource: source });
   });
 });
 

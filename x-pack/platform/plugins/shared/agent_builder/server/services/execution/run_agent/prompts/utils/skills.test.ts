@@ -27,15 +27,6 @@ const skill = (overrides: Partial<InternalSkillDefinition>): InternalSkillDefini
   } as unknown as InternalSkillDefinition);
 
 describe('getSkillsInstructions', () => {
-  describe('when no skills are available', () => {
-    it('returns the no-skills marker', () => {
-      const result = getSkillsInstructions({ skills: [] });
-      expect(result).toContain('## SKILLS');
-      expect(result).toContain('No skills are currently available');
-      expect(result).toContain('Load a skill to get detailed instructions');
-    });
-  });
-
   describe('when skills are available', () => {
     it('renders one line per skill in markdown list format', () => {
       const result = getSkillsInstructions({

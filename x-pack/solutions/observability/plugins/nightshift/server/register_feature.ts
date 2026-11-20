@@ -34,7 +34,7 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
   features.registerKibanaFeature({
     id: NIGHTSHIFT_FEATURE_ID,
     name: i18n.translate('xpack.nightshift.featureRegistry.featureName', {
-      defaultMessage: 'Nightshift',
+      defaultMessage: 'nightshift',
     }),
     order: 8700,
     category: DEFAULT_APP_CATEGORIES.observability,
@@ -95,7 +95,7 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
           'xpack.nightshift.featureRegistry.configureSubFeatureDescription',
           {
             defaultMessage:
-              'Pause activity, edit settings, manage limits, and create, edit, enable, disable or delete sources. Sources decide which indices the Nightshift service account reads, and the significant events and detections it finds are shown to everyone with Nightshift access in the space.',
+              'Pause activity, edit settings, manage limits, and create, edit, enable, disable or delete sources. Sources decide which indices the nightshift service account reads, and the significant events and detections it finds are shown to everyone with nightshift access in the space.',
           }
         ),
         privilegeGroups: [

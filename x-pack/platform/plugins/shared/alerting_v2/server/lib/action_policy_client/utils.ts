@@ -79,9 +79,10 @@ export const toPatchableActionPolicyData = (
  * entirely. The storage schema still accepts `null` so that documents written before this
  * convention keep validating, but nothing writes one.
  */
-const toStoredPolicyFields = (data: CreateActionPolicyData) => ({
+const toStoredPolicyFields = (data: CreateActionPolicyData & { enabled: boolean }) => ({
   name: data.name,
   description: data.description,
+  enabled: data.enabled,
   destinations: data.destinations,
   matcher: normalizeMatcher(data.matcher),
   grouping: data.grouping,
@@ -104,8 +105,7 @@ export const buildCreateActionPolicyAttributes = ({
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
-    ...toStoredPolicyFields(data),
-    enabled: true,
+    ...toStoredPolicyFields({ ...data, enabled: data.enabled ?? true }),
     ...toApiKeyAttributes(auth),
     createdBy,
     createdAt,
@@ -116,7 +116,8 @@ export const buildCreateActionPolicyAttributes = ({
 
 /**
  * Builds the complete next document from the already-merged and validated policy data. Server-owned
- * fields (`enabled`, `tags`, `snoozedUntil`, audit) are never patchable, so they come from storage.
+ * fields (`tags`, `snoozedUntil`, audit) are never patchable, so they come from storage. `enabled`
+ * is only set by a PUT body; a PATCH never carries it, so it falls back to storage.
  */
 export const buildUpdateActionPolicyAttributes = ({
   existing,
@@ -132,8 +133,7 @@ export const buildUpdateActionPolicyAttributes = ({
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
-    ...toStoredPolicyFields(data),
-    enabled: existing.enabled,
+    ...toStoredPolicyFields({ ...data, enabled: data.enabled ?? existing.enabled }),
     tags: existing.tags ?? undefined,
     snoozedUntil: existing.snoozedUntil ?? undefined,
     ...toApiKeyAttributes(auth),

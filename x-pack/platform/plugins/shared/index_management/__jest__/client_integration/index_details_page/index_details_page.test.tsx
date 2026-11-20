@@ -43,7 +43,7 @@ import {
 } from './mocks';
 import { setupEnvironment, WithAppDependencies } from '../helpers/setup_environment';
 import { esClientPath } from '../helpers/http_requests';
-import { renderIndexDetailsPage } from './index_details_page.helpers';
+import { renderIndexDetailsMappings, renderIndexDetailsPage } from './index_details_page.helpers';
 
 jest.mock('@kbn/code-editor');
 
@@ -74,6 +74,9 @@ describe('<IndexDetailsPage />', () => {
       indexDetailsSection: IndexDetailsSection.Settings,
       deps,
     });
+
+  const renderMappings = async (deps: Record<string, unknown> = {}) =>
+    renderIndexDetailsMappings({ httpSetup, deps });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -1448,8 +1451,7 @@ describe('<IndexDetailsPage />', () => {
 
     describe('Add a new field', () => {
       beforeEach(async () => {
-        await renderPage();
-        await clickMappingsTab();
+        await renderMappings();
         await user.click(screen.getByTestId('indexDetailsMappingsAddField'));
         await screen.findByTestId('indexDetailsMappingsPendingBlock');
         await screen.findByTestId('createFieldForm');
@@ -1602,7 +1604,7 @@ describe('<IndexDetailsPage />', () => {
           ],
         });
 
-        await renderPage(undefined, {
+        await renderMappings({
           docLinks: {
             links: {
               inferenceManagement: {
@@ -1638,7 +1640,6 @@ describe('<IndexDetailsPage />', () => {
           },
         });
 
-        await clickMappingsTab();
         await user.click(screen.getByTestId('indexDetailsMappingsAddField'));
         await screen.findByTestId('createFieldForm');
       };

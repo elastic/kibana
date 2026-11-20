@@ -106,6 +106,29 @@ describe('createProposalCreator', () => {
     );
   });
 
+  it('passes the discard-reason waiver through to the written to-do', async () => {
+    const { create, createDirectly } = setup();
+
+    await create({
+      ...input,
+      proposal: { ...input.proposal, category: 'todo', skipDiscardReason: true },
+    });
+
+    expect(createDirectly).toHaveBeenCalledWith(
+      expect.objectContaining({ skipDiscardReason: true }),
+      { spaceId: 'default', request }
+    );
+  });
+
+  it('leaves the waiver out when the caller says nothing about it', async () => {
+    const { create, createDirectly } = setup();
+
+    await create({ ...input, proposal: { ...input.proposal, category: 'todo' } });
+
+    const [params] = createDirectly.mock.calls[0];
+    expect(params).not.toHaveProperty('skipDiscardReason');
+  });
+
   it('drops an impact or confidence it does not recognize', async () => {
     const { create, createDirectly } = setup();
 

@@ -36,7 +36,7 @@ jest.mock('./sections/rule_form/rule_form_route', () => ({
   default: () => <div data-test-subj="ruleFormRoute" />,
 }));
 
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 

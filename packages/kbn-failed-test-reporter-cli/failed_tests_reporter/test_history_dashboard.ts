@@ -16,13 +16,8 @@ const LINK_LABEL = 'Test history: [passes and failures over time]';
 
 const risonString = (value: string): string => `'${value.replace(/!/g, '!!').replace(/'/g, "!'")}'`;
 
-/** Link an FTR, Jest, or Scout failure to its test history in the test-event stream. */
-export const testHistoryDashboardUrl = (
-  failure: TestFailure | ScoutTestFailureExtended
-): string | undefined => {
-  const testId = getScoutTestId(failure);
-  if (!testId) return;
-
+/** The test history dashboard of one test id, over the last 30 days. */
+export const testHistoryUrl = (testId: string): string => {
   const globalState = '(time:(from:now-30d,to:now))';
   const appState = `(query:(language:kuery,query:${risonString(
     `test.id : ${JSON.stringify(testId)}`
@@ -30,6 +25,14 @@ export const testHistoryDashboardUrl = (
   return `${DASHBOARD_URL}?_g=${encodeURIComponent(globalState)}&_a=${encodeURIComponent(
     appState
   )}`;
+};
+
+/** Link an FTR, Jest, Cypress or Scout failure to its test history in the test-event stream. */
+export const testHistoryDashboardUrl = (
+  failure: TestFailure | ScoutTestFailureExtended
+): string | undefined => {
+  const testId = getScoutTestId(failure);
+  return testId ? testHistoryUrl(testId) : undefined;
 };
 
 /** Insert or refresh the dashboard link before the issue's machine-readable metadata. */

@@ -1,5 +1,5 @@
 {
-  "sha1": "1e19cab658444331d0bd55d88811e30153055bd4",
+  "sha1": "4ec8c6602b7edc4bef7cb9c56cd7b16e1093063b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -25,26 +25,6 @@
       }
     },
     {
-      "id": "8de1b7599bb7a8f-fdd0fc5b3a85d0b",
-      "title": "Elasticsearch proxy authorization returns the Elasticsearch 403 for cluster APIs outside the role",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy_authz.spec.ts",
-        "line": 25,
-        "column": 81
-      }
-    },
-    {
       "id": "8de1b7599bb7a8f-a6563068d7bba06",
       "title": "Elasticsearch proxy authorization rejects unauthenticated requests",
       "expectedStatus": "passed",
@@ -60,8 +40,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy_authz.spec.ts",
-        "line": 31,
-        "column": 13
+        "line": 24,
+        "column": 44
       }
     },
     {
@@ -90,26 +70,6 @@
         "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy_product_origin.spec.ts",
         "line": 28,
         "column": 26
-      }
-    },
-    {
-      "id": "2f9e6b67667781d-d129f198fdf44f3",
-      "title": "Elasticsearch proxy root maps the proxy root to the Elasticsearch root",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy_root.spec.ts",
-        "line": 19,
-        "column": 11
       }
     },
     {
@@ -173,8 +133,8 @@
       }
     },
     {
-      "id": "d1f6fe1b7e01c45-1a117dedd80f2b8",
-      "title": "Elasticsearch proxy creates and searches documents through the proxy",
+      "id": "d1f6fe1b7e01c45-bec5ae65aa5dbff",
+      "title": "Elasticsearch proxy creates an index and reads its mapping through the proxy",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -188,13 +148,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy.spec.ts",
-        "line": 45,
-        "column": 27
+        "line": 33,
+        "column": 7
       }
     },
     {
-      "id": "d1f6fe1b7e01c45-bdc11254f24ad81",
-      "title": "Elasticsearch proxy accepts gzip-compressed ndjson bulk bodies",
+      "id": "d1f6fe1b7e01c45-c917fa8442d9278",
+      "title": "Elasticsearch proxy accepts gzip-compressed bodies",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -208,28 +168,28 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy.spec.ts",
-        "line": 60,
-        "column": 77
-      }
-    },
-    {
-      "id": "d1f6fe1b7e01c45-abd80ff053b407f",
-      "title": "Elasticsearch proxy keeps percent-encoded characters in document ids",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy.spec.ts",
-        "line": 68,
+        "line": 46,
         "column": 12
+      }
+    },
+    {
+      "id": "d1f6fe1b7e01c45-a449bc9b349606e",
+      "title": "Elasticsearch proxy keeps percent-encoded index lists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy.spec.ts",
+        "line": 59,
+        "column": 84
       }
     },
     {
@@ -248,7 +208,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy.spec.ts",
-        "line": 83,
+        "line": 63,
         "column": 12
       }
     },
@@ -268,27 +228,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy.spec.ts",
-        "line": 91,
-        "column": 63
-      }
-    },
-    {
-      "id": "d1f6fe1b7e01c45-a12e96dc27c69ca",
-      "title": "Elasticsearch proxy returns async ES|QL ids in headers for non-JSON formats",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy.spec.ts",
-        "line": 100,
+        "line": 74,
         "column": 12
       }
     },
@@ -308,8 +248,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy.spec.ts",
-        "line": 117,
-        "column": 7
+        "line": 79,
+        "column": 12
       }
     },
     {
@@ -328,8 +268,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy.spec.ts",
-        "line": 131,
-        "column": 12
+        "line": 96,
+        "column": 11
       }
     },
     {
@@ -348,8 +288,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy.spec.ts",
-        "line": 150,
-        "column": 73
+        "line": 103,
+        "column": 58
       }
     },
     {
@@ -368,8 +308,88 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy.spec.ts",
-        "line": 154,
-        "column": 95
+        "line": 107,
+        "column": 11
+      }
+    },
+    {
+      "id": "d1f6fe1b7e01c45-687d4083b96f451",
+      "title": "Elasticsearch proxy rejects blocked security APIs without calling Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy.spec.ts",
+        "line": 126,
+        "column": 64
+      }
+    },
+    {
+      "id": "d1f6fe1b7e01c45-fd92c6ae51e8d64",
+      "title": "Elasticsearch proxy rejects blocked APIs regardless of case and encoding without calling Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy.spec.ts",
+        "line": 126,
+        "column": 64
+      }
+    },
+    {
+      "id": "d1f6fe1b7e01c45-58e61a17ecb969a",
+      "title": "Elasticsearch proxy rejects APIs missing from the allowlist without calling Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy.spec.ts",
+        "line": 126,
+        "column": 64
+      }
+    },
+    {
+      "id": "d1f6fe1b7e01c45-e08de5787e229f5",
+      "title": "Elasticsearch proxy rejects the Elasticsearch root without calling Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/es_client/test/scout/api/tests/proxy.spec.ts",
+        "line": 126,
+        "column": 64
       }
     }
   ]
