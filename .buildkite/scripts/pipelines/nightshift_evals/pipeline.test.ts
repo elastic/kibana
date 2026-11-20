@@ -35,16 +35,16 @@ describe('nightshift_evals pipeline generation', () => {
     process.env = ORIGINAL_ENV;
   });
 
-  it('emits pre-build, the run and comment steps and a trailing post-build, without a Kibana build', async () => {
+  it('emits pre-build, the plan step and a trailing post-build, without a Kibana build', async () => {
     await importPipelineModule();
 
     expect(mockEmitPipeline).toHaveBeenCalledTimes(1);
     const yaml = emittedYaml();
     expect(yaml).toContain('pre_build.sh');
-    expect(yaml).toContain('run_task.sh');
-    expect(yaml).toContain('post_pr_comment.sh');
+    expect(yaml).toContain('plan_steps.sh');
+    // The task steps are uploaded by the plan step at run time.
+    expect(yaml).not.toContain('run_task.sh');
     expect(yaml).not.toContain('build_kibana.sh');
-    expect(yaml).not.toContain('plan_steps');
     expect(yaml).toContain('post_build.sh');
     expect(yaml).toContain('continue_on_failure: true');
   });
@@ -52,17 +52,6 @@ describe('nightshift_evals pipeline generation', () => {
   it('needs no labels in the environment', async () => {
     delete process.env.GITHUB_PR_LABELS;
     await importPipelineModule();
-    expect(emittedYaml()).toContain('run_task.sh');
-  });
-
-  it('runs on spot agents by default and on regular agents when EVAL_PREEMPTIBLE=0', async () => {
-    await importPipelineModule();
-    expect(emittedYaml()).toContain('preemptible: true');
-
-    jest.resetModules();
-    mockEmitPipeline.mockClear();
-    process.env.EVAL_PREEMPTIBLE = '0';
-    await importPipelineModule();
-    expect(emittedYaml()).not.toContain('preemptible: true');
+    expect(emittedYaml()).toContain('plan_steps.sh');
   });
 });

@@ -8,12 +8,13 @@
  */
 
 import { parse as yamlParse } from 'yaml';
+import type { NightshiftEvalTaskConfig } from './nightshift_evals_pipeline.ts';
 import {
   NIGHTSHIFT_EVAL_LABEL,
-  NIGHTSHIFT_EXPERIMENT,
   getNightshiftEvalSteps,
   getNightshiftEvalTriggerStep,
   isPreemptibleEnabled,
+  parseNightshiftTasks,
 } from './nightshift_evals_pipeline.ts';
 
 type Step = Record<string, any>;
@@ -36,7 +37,9 @@ describe('nightshift_evals_pipeline', () => {
   describe('getNightshiftEvalTriggerStep', () => {
     it('is null without the start label', () => {
       expect(getNightshiftEvalTriggerStep('')).toBeNull();
-      expect(getNightshiftEvalTriggerStep('evals:smoke-tests,models:eis/openai-gpt-5.4')).toBeNull();
+      expect(
+        getNightshiftEvalTriggerStep('evals:smoke-tests,models:eis/openai-gpt-5.4')
+      ).toBeNull();
     });
 
     it('matches the label exactly, not as a substring', () => {
@@ -57,21 +60,99 @@ describe('nightshift_evals_pipeline', () => {
     });
   });
 
-  describe('getNightshiftEvalSteps', () => {
-    const build = (preemptible = false) => parseSteps(getNightshiftEvalSteps({ preemptible }));
-    const { task, args, downloads, timeoutMinutes } = NIGHTSHIFT_EXPERIMENT;
+  describe('parseNightshiftTasks', () => {
+    const FILE = `
+tasks:
+  ki_feature_extraction:
+    args: [--dataset, orca-bench, --scenario, day-2026-04-19]
+    timeoutMinutes: 240
+    downloads:
+      - src: gs://bucket/snapshots
+        dest: snapshots/orca-bench/repository
+        recursive: true
+      - src: gs://bucket/manifest.json
+        dest: snapshots/orca-bench/manifest.json
+  other_task:
+    args: []
+`;
 
-    it('runs the hardcoded experiment with the default model', () => {
-      const [run] = build();
-      expect(run.command).toContain('run_task.sh');
-      expect(run.env.NIGHTSHIFT_EVAL_TASK).toBe(task);
-      expect(run.env.NIGHTSHIFT_EVAL_CONNECTOR_ID).toBe('');
-      expect(run.env.NIGHTSHIFT_EVAL_ARGS).toBe(args.join(' '));
-      expect(JSON.parse(run.env.NIGHTSHIFT_EVAL_DOWNLOADS)).toEqual(downloads);
-      expect(run.timeout_in_minutes).toBe(timeoutMinutes);
+    it('reads args, downloads and timeout per task', () => {
+      expect(parseNightshiftTasks(FILE)).toEqual({
+        ki_feature_extraction: {
+          args: ['--dataset', 'orca-bench', '--scenario', 'day-2026-04-19'],
+          timeoutMinutes: 240,
+          downloads: [
+            {
+              src: 'gs://bucket/snapshots',
+              dest: 'snapshots/orca-bench/repository',
+              recursive: true,
+            },
+            { src: 'gs://bucket/manifest.json', dest: 'snapshots/orca-bench/manifest.json' },
+          ],
+        },
+        other_task: { args: [], downloads: [], timeoutMinutes: undefined },
+      });
+    });
+
+    it.each([
+      ['an empty file', ''],
+      ['no tasks key', 'other: 1'],
+      ['an empty tasks map', 'tasks: {}'],
+      ['a task without args', 'tasks:\n  a:\n    timeoutMinutes: 5'],
+      [
+        'the old pr/weekly shape',
+        'tasks:\n  a:\n    pr:\n      args: [--x]\n    weekly:\n      args: []',
+      ],
+      ['an arg with whitespace', 'tasks:\n  a:\n    args: ["--scenario x"]'],
+      ['a bad task name', 'tasks:\n  "a b":\n    args: []'],
+      ['a bad timeout', 'tasks:\n  a:\n    args: []\n    timeoutMinutes: 0'],
+      [
+        'a non-gs download',
+        'tasks:\n  a:\n    args: []\n    downloads:\n      - src: https://x\n        dest: d',
+      ],
+      [
+        'a download outside the checkout',
+        'tasks:\n  a:\n    args: []\n    downloads:\n      - src: gs://b/x\n        dest: ../x',
+      ],
+      [
+        'an absolute download dest',
+        'tasks:\n  a:\n    args: []\n    downloads:\n      - src: gs://b/x\n        dest: /etc/x',
+      ],
+    ])('rejects %s', (_name, raw) => {
+      expect(() => parseNightshiftTasks(raw)).toThrow('ci/tasks.yaml');
+    });
+  });
+
+  describe('getNightshiftEvalSteps', () => {
+    const TASKS: Record<string, NightshiftEvalTaskConfig> = {
+      ki_feature_extraction: {
+        args: ['--dataset', 'orca-bench'],
+        downloads: [{ src: 'gs://bucket/x', dest: 'x' }],
+        timeoutMinutes: 240,
+      },
+      other_task: { args: [] },
+    };
+    const build = (preemptible = false) =>
+      parseSteps(getNightshiftEvalSteps({ tasks: TASKS, preemptible }));
+
+    it('runs one step per task with the default model', () => {
+      const [ki, other] = build();
+      expect(ki.key).toBe('nightshift-evals-ki_feature_extraction');
+      expect(ki.command).toContain('run_task.sh');
+      expect(ki.env.NIGHTSHIFT_EVAL_TASK).toBe('ki_feature_extraction');
+      expect(ki.env.NIGHTSHIFT_EVAL_CONNECTOR_ID).toBe('');
+      expect(ki.env.NIGHTSHIFT_EVAL_ARGS).toBe('--dataset orca-bench');
+      expect(JSON.parse(ki.env.NIGHTSHIFT_EVAL_DOWNLOADS)).toEqual(
+        TASKS.ki_feature_extraction.downloads
+      );
+      expect(ki.timeout_in_minutes).toBe(240);
       // The EIS key and the Vault config the run needs.
-      expect(run.env.KBN_EVALS).toBe('1');
-      expect(run.env.FTR_EIS_CCM).toBe('1');
+      expect(ki.env.KBN_EVALS).toBe('1');
+      expect(ki.env.FTR_EIS_CCM).toBe('1');
+
+      expect(other.env.NIGHTSHIFT_EVAL_ARGS).toBe('');
+      expect(JSON.parse(other.env.NIGHTSHIFT_EVAL_DOWNLOADS)).toEqual([]);
+      expect(other.timeout_in_minutes).toBe(90);
     });
 
     it('uses preemptible agents only when asked', () => {
@@ -87,12 +168,16 @@ describe('nightshift_evals_pipeline', () => {
       ]);
     });
 
-    it('posts the PR comment after the run, even when it failed', () => {
-      const [run, comment] = build();
+    it('posts the PR comment after every run, even when one failed', () => {
+      const steps = build();
+      const comment = steps[steps.length - 1];
       expect(comment.command).toContain('post_pr_comment.sh');
-      expect(comment.depends_on).toBe(run.key);
+      expect(comment.depends_on).toEqual([
+        'nightshift-evals-ki_feature_extraction',
+        'nightshift-evals-other_task',
+      ]);
       expect(comment.allow_dependency_failure).toBe(true);
-      expect(comment.env.NIGHTSHIFT_EVAL_TASKS).toBe(task);
+      expect(comment.env.NIGHTSHIFT_EVAL_TASKS).toBe('ki_feature_extraction,other_task');
     });
   });
 

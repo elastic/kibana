@@ -337,20 +337,20 @@ EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 
 #### Nightshift evals (`elastic/nightshift-evals`)
 
-A second, separate path runs one experiment from the `nightshift-evals` repo. It runs next to
-the suites above and does not change how they are selected. Kibana runs from source, so there
-is no Kibana build step.
+A second, separate path runs the tasks of the `nightshift-evals` repo. It runs next to the
+suites above and does not change how they are selected. Kibana runs from source, so there is
+no Kibana build step.
 
-Add the label `ci:nightshift-evals` to a PR to start it. The label configures nothing. The
-experiment is hardcoded in `NIGHTSHIFT_EXPERIMENT` in
-[`nightshift_evals_pipeline.ts`](../../../../../.buildkite/pipelines/nightshift_evals/nightshift_evals_pipeline.ts):
-the task, its flags, the GCS data it needs and the step timeout. It uses Kibana's default
-model. To change the experiment, edit that constant.
+Add the label `ci:nightshift-evals` to a PR to start it. The label configures nothing. The run
+executes every task listed in `ci/tasks.yaml` of `nightshift-evals` (branch `main`, or
+`NIGHTSHIFT_EVALS_REF` when set), one step per task, with Kibana's default model. Per task the
+file sets `args` (required: flags for `uv run eval <task>`), `downloads` (GCS data) and
+`timeoutMinutes`. To change what runs, change that file; no Kibana change is needed. A task
+without `args` fails the plan step, so an old file can not run every example.
 
 The result shows as a `nightshift-evals` commit status, a build annotation and a PR comment.
 The pipelines are `kibana-nightshift-evals-pr` and `kibana-nightshift-evals-weekly`
-(Sundays, 20:00 GMT). Both run the same experiment. `NIGHTSHIFT_EVALS_REF` sets the branch or
-SHA of nightshift-evals to clone (default `main`).
+(Sundays, 20:00 GMT). Both run the same tasks with the same flags.
 
 ---
 

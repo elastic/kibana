@@ -15,10 +15,6 @@
             }
         ] */
 
-import {
-  getNightshiftEvalSteps,
-  isPreemptibleEnabled,
-} from '../../../pipelines/nightshift_evals/nightshift_evals_pipeline.ts';
 import { emitPipeline } from '#pipeline-utils';
 import { postBuildSteps, renderSteps } from '#pipeline-utils/step-library';
 
@@ -38,15 +34,30 @@ const preBuildStep = [
   `          limit: 1`,
 ].join('\n');
 
-// The trailing `wait` must stay last: the steps above it finish before post-build runs.
+// The plan step needs the full checkout for node and the pipeline utils, and `GITHUB_TOKEN` plus
+// the Vault secrets that `KBN_EVALS` exposes, to clone nightshift-evals. It uploads the task steps.
+const planStep = [
+  `  - label: ':clipboard: Plan Nightshift Evals'`,
+  `    key: nightshift-evals-plan`,
+  `    depends_on: pre_build`,
+  `    command: bash .buildkite/scripts/steps/nightshift_evals/plan_steps.sh`,
+  `    timeout_in_minutes: 10`,
+  `    agents:`,
+  `      image: family/kibana-ubuntu-2404`,
+  `      imageProject: elastic-images-prod`,
+  `      provider: gcp`,
+  `      machineType: n2-standard-2`,
+].join('\n');
+
+// The trailing `wait` must stay last: the plan step uploads the task steps before it.
 const postludeSteps = renderSteps(postBuildSteps());
 
-// Shared by the PR and the weekly pipeline. The experiment is hardcoded, so there is no
-// label gate: starting the pipeline is the decision to run it.
+// Shared by the PR and the weekly pipeline. Which tasks run is decided by nightshift-evals'
+// `ci/tasks.yaml`, so there is no label gate: starting the pipeline is the decision to run it.
 emitPipeline([
   [`env:`, `  CI_STATS_DISABLE_PR_REPORT: 'true'`].join('\n'),
   'steps:',
   preBuildStep,
-  getNightshiftEvalSteps({ preemptible: isPreemptibleEnabled() }),
+  planStep,
   postludeSteps,
 ]);
