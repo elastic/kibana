@@ -14,6 +14,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import type { AddVersionOpts, VersionedRouteValidation } from '@kbn/core-http-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerAiIndexRoutes } from './ai_indices';
+import { registerSessionEventsRoutes } from './session_events';
 import { registerSessionMemoryRoutes } from './session_memory';
 
 interface ExampleMediaType {
@@ -77,6 +78,14 @@ registerAiIndexRoutes({
   getSpaces: jest.fn(),
 });
 
+registerSessionEventsRoutes({
+  router: routerCapturingRoutes,
+  getSpaces: jest.fn(),
+  getSessionEventsService: jest.fn(),
+  getAiIndexService: jest.fn(),
+  isMemoryEnabled: async () => false,
+});
+
 registerSessionMemoryRoutes({
   router: routerCapturingRoutes,
   getSpaces: jest.fn(),
@@ -119,7 +128,7 @@ const routePattern = (route: string) =>
 
 describe('route examples', () => {
   it('covers every route that links an example file', () => {
-    expect(routesWithExamples).toHaveLength(8);
+    expect(routesWithExamples).toHaveLength(9);
   });
 
   describe.each(routesWithExamples)('$route', ({ route, validation, examples, handler }) => {

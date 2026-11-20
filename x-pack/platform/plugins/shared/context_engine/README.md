@@ -358,6 +358,80 @@ rounds.
 The round filter depends on the agent calling `load_skill`; an agent carrying
 the same guidance in its instructions goes unmarked.
 
+## Session events
+
+Harnesses such as Agent Builder save what happens in an agent session over HTTP. The route
+is public and experimental:
+
+```
+POST /api/context_engine/memory/_save_event
+```
+
+```json
+{
+  "session_id": "3f9c2e1a-7b4d-4c8e-9a61-5d2f0b7e8c43",
+  "ai_index_ids": ["ops-memory"],
+  "events": [
+    { "id": "evt-001", "type": "user", "turn_id": "turn-1", "event_at": "2026-11-16T09:58:00.000Z", "content": "Why is checkout latency up?" },
+    { "id": "evt-002", "type": "tool", "turn_id": "turn-1", "event_at": "2026-11-16T09:58:32.000Z", "tool_call_id": "call-1", "tool_name": "search_logs", "status": "failed", "result": "Search timed out" }
+  ]
+}
+```
+
+Each event is one document in the `.context-engine-session-events` data stream, which
+Elasticsearch owns. Readers group turns by `turn_id`, so there is no call to close a turn.
+`type` is `user`, `assistant`, `reasoning`, `tool` or `meta`:
+
+- `user` needs `content`; `assistant` may have `content` and `tool_calls`. The `content` of
+  both is indexed for semantic search.
+- `reasoning` may have `content`, which is stored but not indexed.
+- `tool` needs `tool_call_id` and `tool_name`, and may have `status` (`successful`, `failed` or
+  `null`). A `null` or missing status is stored as `unknown`.
+- Every event needs `id`, `turn_id` and an ISO 8601 `event_at`, and may have a
+  non-negative integer `seq`.
+
+Any other field, such as a tool event's `result` or a tool call's `args`, is stored as sent in
+`raw`, whatever its JSON type, and never read. `content` must be a string because it is
+embedded, so a harness flattens content blocks into text first.
+
+A request takes 1 to 1,000 events and up to 10 MB. The route validates the request as a whole,
+so one bad event causes it to reject the request. The response has one result per event, in
+request order:
+
+- `created`: the event was saved.
+- `failed`: Elasticsearch rejected the event, for example when its content could not be
+  embedded. The reason is in `error`; resend the event to retry.
+
+Elasticsearch generates each document's `_id`, so a resent event is stored again. Readers drop
+duplicates by `session_id` and `id`, and a harness should send each event once and track what
+it has sent.
+
+The route runs synchronously, so a harness should send events in the background rather
+than make the agent wait. It is gated by `contextEngine:enabled` and by the memory setting,
+and returns 404 while either is off. The space comes from the request URL.
+
+### Privileges and audit
+
+The route needs `contextEngine:write`. Without `user_id`, the events belong to the caller's
+user profile, as core's `userProfile.getCurrentProfileId()` resolves it: the profile of a UI
+session, the API key owner's profile, or for basic authentication the profile Elasticsearch
+activates for those credentials. A caller without a profile, such as a service account or an
+API key whose owner never logged in to Kibana, gets a 403 unless it names `user_id`.
+
+Naming another user in `user_id` also needs `contextEngine:manage_memory`, for example on the
+API key of a harness that saves events for many users. It is not part of All, so an
+administrator grants it explicitly. Without it the request gets a 403.
+
+Each AI index in `ai_index_ids` must exist in the space, or the route returns 404. The caller
+needs the Elasticsearch `write` privilege on each backing index, checked with `has_privileges`,
+or the route returns 403. If any AI index fails, the route rejects the request and saves
+nothing.
+
+Each request writes one `memory_save_event` audit event. It records the user the events belong
+to in `user.target.id`, the session in `kibana.saved_object`, and how many events were saved
+and failed. It records rejected requests, failed writes, and batches where every event fails as
+failures. Core adds the caller, the space and the request id.
+
 ## Session memory
 
 Context Engine can forget session memories over HTTP. The route is public and experimental:

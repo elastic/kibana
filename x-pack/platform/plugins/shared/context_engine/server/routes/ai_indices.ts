@@ -128,7 +128,7 @@ import { dreamingConfigSchema, dreamingResponseSchema } from './schemas/dreaming
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiWriteTelemetry } from '../step_types/helpers';
 import { CONTEXT_ENGINE_DOCS_NOTE } from './constants';
-import { withContextEngineFeatureFlag } from './with_feature_flag';
+import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },
@@ -154,8 +154,6 @@ const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
   WorkflowsManagementOperationPrivileges.delete.every(
     (privilege) => request.authzResult?.[privilege] === true
   );
-
-const MEMORY_DISABLED_MESSAGE = 'Context Engine memory is turned off.';
 
 const toPublicAiIndex = ({
   dreaming: _dreaming,
@@ -349,7 +347,7 @@ export const registerAiIndexRoutes = ({
         const auditLogger = security.audit.logger;
         const { id, memory_enabled: _memoryEnabled, ...properties } = request.body;
         try {
-          await validateEsqlSources(properties.sources);
+          await validateEsqlSources(properties.sources, properties.dest);
           await validateConnectorSources({
             sources: properties.sources,
             actions: await getActions(),
@@ -441,7 +439,7 @@ export const registerAiIndexRoutes = ({
           const aiIndexService = getAiIndexService();
           const previous = await findAiIndex(aiIndexService, aiIndexId, spaceId);
           const { memory_enabled: _memoryEnabled, ...properties } = request.body;
-          await validateEsqlSources(properties.sources);
+          await validateEsqlSources(properties.sources, properties.dest);
           await validateConnectorSources({
             sources: properties.sources,
             actions: await getActions(),
