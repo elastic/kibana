@@ -15,6 +15,7 @@ import type {
   CasePostRequest,
   CaseResolveResponse,
   CasesSearchResponse,
+  CaseDeltaResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   SingleCaseMetricsResponse,
@@ -56,6 +57,7 @@ import {
   getCaseFindUserActionsUrl,
   getCaseConnectorsUrl,
   getCaseUsersUrl,
+  getCaseDeltaUrl,
   getCaseUserActionStatsUrl,
   getCustomFieldReplaceUrl,
   getCaseCreateObservableUrl,
@@ -265,6 +267,17 @@ export const findCaseUserActions = async (
     latestAttachments: convertAttachmentsToCamelCase(response.latestAttachments),
   };
 };
+
+export const getCaseDelta = async (
+  caseId: string,
+  since: string,
+  signal?: AbortSignal
+): Promise<CaseDeltaResponse> =>
+  KibanaServices.get().http.fetch<CaseDeltaResponse>(getCaseDeltaUrl(caseId), {
+    method: 'GET',
+    query: { since },
+    signal,
+  });
 
 export const getCaseUserActionsStats = async (
   caseId: string,
