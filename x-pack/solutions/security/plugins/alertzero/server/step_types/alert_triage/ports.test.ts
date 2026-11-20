@@ -739,7 +739,17 @@ describe('closeStillOpenAlertsAsFalsePositive', () => {
   });
 
   it('returns how many alerts it closed, fewer than asked when an analyst moved some on', async () => {
-    await expect(closeWith({ updated: 1, failures: [] }).run()).resolves.toBe(1);
+    await expect(closeWith({ updated: 1, failures: [] }).run()).resolves.toEqual({
+      updated: 1,
+      timedOut: false,
+    });
+  });
+
+  it('reports a close that timed out part way, which the route answers with a 200', async () => {
+    await expect(closeWith({ updated: 1, timed_out: true, failures: [] }).run()).resolves.toEqual({
+      updated: 1,
+      timedOut: true,
+    });
   });
 
   it('throws on a failure, so a partial close is never reported as done', async () => {

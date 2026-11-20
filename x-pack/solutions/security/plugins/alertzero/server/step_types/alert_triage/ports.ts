@@ -372,15 +372,17 @@ const assertCompleteSearch = ({ timed_out: timedOut, _shards: shards }: SearchCo
  * Closes the given alerts as false positives, but only those that are still `open` when the write
  * runs, so an alert an analyst acknowledged after the search is left alone. The status route cannot
  * check the previous status for ids, so this sends the ids and the status as one query. Returns how
- * many alerts were closed, which is less than the given count when some had moved on. Throws when
- * the update reports failures.
+ * many alerts were closed, which is less than the given count when some had moved on, and whether
+ * the update timed out part way, which the route reports as a 200. Throws when the update reports
+ * failures.
  */
 export const closeStillOpenAlertsAsFalsePositive = async (
   { callKibanaApi }: KibanaApi,
   alertIds: readonly string[]
-): Promise<number> => {
+): Promise<{ updated: number; timedOut: boolean }> => {
   const { body } = await callKibanaApi<{
     updated?: number;
+    timed_out?: boolean;
     version_conflicts?: number;
     failures?: unknown[];
   }>({
@@ -404,7 +406,7 @@ export const closeStillOpenAlertsAsFalsePositive = async (
       }, conflicts: ${body.version_conflicts ?? 0}, failures: ${failureCount})`
     );
   }
-  return body.updated ?? 0;
+  return { updated: body.updated ?? 0, timedOut: body.timed_out === true };
 };
 
 /**

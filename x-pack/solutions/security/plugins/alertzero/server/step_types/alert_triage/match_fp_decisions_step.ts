@@ -324,21 +324,31 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
                 add: [`${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${id}`],
                 remove: [],
               });
+              let timedOut = false;
               for (let from = 0; from < allowed.length; from += TAG_CHUNK_SIZE) {
                 const closing = allowed.slice(from, from + TAG_CHUNK_SIZE);
                 // The attempt counts against today's allowance before it is made: a close that
                 // fails half way may have closed alerts, and the next page must not close another
-                // full allowance of the same decision. A close that skipped alerts gives them back.
+                // full allowance of the same decision. A close that skipped alerts gives them back,
+                // unless it timed out, because then it may have written more than it reports.
                 room.set(id, (room.get(id) ?? 0) - closing.length);
-                const updated = await closeStillOpenAlertsAsFalsePositive(contextManager, closing);
+                const { updated, timedOut: chunkTimedOut } =
+                  await closeStillOpenAlertsAsFalsePositive(contextManager, closing);
                 totals.closed += updated;
-                room.set(id, (room.get(id) ?? 0) + closing.length - updated);
+                if (chunkTimedOut) timedOut = true;
+                else room.set(id, (room.get(id) ?? 0) + closing.length - updated);
+                // The alerts a timed-out close did not reach are released like the ones an analyst
+                // moved on, so the next sweep tries them again and only closed alerts get a note.
                 const moved = updated < closing.length ? await releaseMovedOn(id, closing) : [];
                 queueNotes(
                   id,
                   closing.filter((alertId) => !moved.includes(alertId)),
                   'closed'
                 );
+              }
+              if (timedOut) {
+                totals.close_failures++;
+                logger.warn(`Closing the alerts of decision ${id} timed out part way`);
               }
             } catch (error) {
               totals.close_failures++;

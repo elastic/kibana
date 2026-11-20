@@ -60,6 +60,7 @@ const setup = ({
   revokedDuringSweep = [],
   getError,
   runSpace = 'default',
+  closeTimedOut = false,
 }: {
   alerts: Array<[string, Record<string, unknown>]>;
   /** Stored decisions by document id. */
@@ -84,6 +85,8 @@ const setup = ({
   getError?: Error & { statusCode?: number };
   /** The space of the workflow run. */
   runSpace?: string;
+  /** The status route answers 200 but its update-by-query timed out part way. */
+  closeTimedOut?: boolean;
 }) => {
   const callKibanaApi = jest.fn(
     async ({ path, body }: { path: string; body?: Record<string, any> }) => {
@@ -109,7 +112,11 @@ const setup = ({
         if (closeError) throw closeError;
         const ids: string[] = body?.query.bool.filter[0].ids.values;
         return {
-          body: { updated: ids.filter((id) => !movedOn.includes(id)).length, failures: [] },
+          body: {
+            updated: ids.filter((id) => !movedOn.includes(id)).length,
+            timed_out: closeTimedOut,
+            failures: [],
+          },
         };
       }
       return { body: { updated: 1, timed_out: false, failures: [] } };
@@ -723,6 +730,64 @@ describe('triage match decisions step in on mode', () => {
     const { output } = await run();
 
     // One attempt on the first page; the second page finds the allowance used up.
+    expect(closes()).toHaveLength(1);
+    expect(output).toEqual(expect.objectContaining({ close_failures: 1, capped: 1 }));
+  });
+
+  it('counts a close that timed out part way as a failure, and releases the alerts it did not reach', async () => {
+    const { run, tags, notes } = setup({
+      mode: 'on',
+      movedOn: ['b'],
+      closeTimedOut: true,
+      alerts: [
+        ['a', source('C:\\x.exe')],
+        ['b', source('C:\\x.exe')],
+      ],
+      decisions: approved('C:\\x.exe'),
+    });
+
+    const { output } = await run();
+
+    expect(output).toEqual(expect.objectContaining({ closed: 1, close_failures: 1 }));
+    expect(tags().at(-1)).toEqual({
+      ids: ['b'],
+      tags: { tags_to_add: [], tags_to_remove: [`az:closed_by_decision:${idOf('C:\\x.exe')}`] },
+    });
+    expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
+  });
+
+  it('keeps the allowance a timed-out close used, since it may have closed more than it reports', async () => {
+    const { run, callKibanaApi, closes } = setup({
+      mode: 'on',
+      closedToday: 498,
+      movedOn: ['b'],
+      closeTimedOut: true,
+      alerts: [],
+      decisions: approved('C:\\x.exe'),
+    });
+    const inner = callKibanaApi.getMockImplementation()!;
+    const pages = [
+      [
+        ...['a', 'b'].map((_id, i) => ({ _id, _source: source('C:\\x.exe'), sort: [i, _id] })),
+        ...Array.from({ length: ALERT_FETCH_LIMIT - 2 }, (_unused, i) => ({
+          _id: `old${i}`,
+          _source: source(`C:\\other${i}.exe`),
+          sort: [i + 2, `u${i}`],
+        })),
+      ],
+      [{ _id: 'late', _source: source('C:\\x.exe'), sort: [1, 'z'] }],
+    ];
+    callKibanaApi.mockImplementation(async (params: { path: string; body?: Record<string, any> }) =>
+      params.path.endsWith('/signals/search') &&
+      params.body?.size !== 0 &&
+      !params.body?.query?.bool?.filter?.[0]?.ids
+        ? { body: { hits: { hits: pages.shift() ?? [] } } }
+        : inner(params)
+    );
+
+    const { output } = await run();
+
+    // The close reported 1 of 2, but timed out, so the unused slot is not given back for 'late'.
     expect(closes()).toHaveLength(1);
     expect(output).toEqual(expect.objectContaining({ close_failures: 1, capped: 1 }));
   });
