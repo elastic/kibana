@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { readFileSync } from 'fs';
 import { Agent } from 'undici';
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type {
   CreateUiamOAuthClientParams,
@@ -25,6 +25,10 @@ import type {
   GrantUiamAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
 
+import {
+  getUiamClientAuthentication,
+  type UiamClientAuthentication,
+} from './get_client_authentication';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
@@ -144,26 +148,11 @@ export interface UiamServicePublic {
   getAuthenticationHeaders(accessToken: string): Record<string, string>;
 
   /**
-<<<<<<< HEAD
-   * Returns the Elasticsearch client authentication information with the shared secret value. This is to be used with
-   * `client_authentication` option in Elasticsearch client.
-   */
-  getClientAuthentication(): ClientAuthentication;
-=======
-   * Returns the header(s) a trusted loopback caller stamps on a real HTTP request that carries an
-   * internal UIAM (`essu_`) credential, so the ES cluster client re-attaches the shared secret on
-   * its behalf. Carries a non-reversible HMAC of the shared secret (never the secret itself), bound
-   * to `credential` so it authorizes that credential only.
-   */
-  getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader): Record<string, string>;
-
-  /**
    * Returns client authentication for Elasticsearch's `client_authentication` option.
    * Preserves client authentication supplied with a UIAM bearer token, or uses Kibana's own value.
    * @param request Optional request or stored headers for the current credential.
    */
   getClientAuthentication(request?: Pick<KibanaRequest, 'headers'>): ClientAuthentication;
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
 
   /**
    * Refreshes the UIAM user session and returns new access and refresh session tokens.
@@ -188,7 +177,8 @@ export interface UiamServicePublic {
    */
   grantApiKey(
     authorization: HTTPAuthorizationHeader,
-    params: GrantUiamAPIKeyParams
+    params: GrantUiamAPIKeyParams,
+    clientAuthentication?: UiamClientAuthentication
   ): Promise<GrantUiamApiKeyResponse>;
 
   /**
@@ -353,10 +343,6 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.getClientAuthentication}.
    */
-<<<<<<< HEAD
-  getClientAuthentication(): ClientAuthentication {
-    return { scheme: 'SharedSecret', value: this.#config.sharedSecret };
-=======
   getClientAuthentication(request?: Pick<KibanaRequest, 'headers'>): ClientAuthentication {
     const suppliedSharedSecret = request
       ? getUiamClientAuthentication(request)?.sharedSecret
@@ -365,7 +351,6 @@ export class UiamService implements UiamServicePublic {
       scheme: 'SharedSecret',
       value: suppliedSharedSecret ?? this.#config.sharedSecret,
     };
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
   }
 
   /**
@@ -474,7 +459,11 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.grantApiKey}.
    */
-  async grantApiKey(authorization: HTTPAuthorizationHeader, params: GrantUiamAPIKeyParams) {
+  async grantApiKey(
+    authorization: HTTPAuthorizationHeader,
+    params: GrantUiamAPIKeyParams,
+    clientAuthentication?: UiamClientAuthentication
+  ) {
     this.#logger.debug(
       `Attempting to grant API key using authorization scheme: ${authorization.scheme}`
     );
@@ -501,7 +490,8 @@ export class UiamService implements UiamServicePublic {
           headers: {
             'Content-Type': 'application/json',
             'User-Agent': this.#userAgentHeader,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            [ES_CLIENT_AUTHENTICATION_HEADER]:
+              clientAuthentication?.sharedSecret ?? this.#config.sharedSecret,
             Authorization: authorization.toString(),
           },
           body: JSON.stringify(body),

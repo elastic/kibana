@@ -368,8 +368,6 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
   cmdParams: [],
 };
 
-<<<<<<< HEAD
-=======
 const TOKEN_EXPIRATION_PATTERN = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/;
 const TOKEN_EXPIRATION_MIN_SECONDS = 60;
 
@@ -411,17 +409,12 @@ export interface GetUiamContainersOptions {
   accessTokenExpiration?: string;
 }
 
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
 /**
  * Returns the list of UIAM containers to run.
  * When `includeOAuth` is true, includes the UIAM OAuth container.
  */
 export function getUiamContainers({
   includeOAuth = false,
-<<<<<<< HEAD
-}: { includeOAuth?: boolean } = {}): UiamContainer[] {
-  return includeOAuth ? [...UIAM_BASE_CONTAINERS, UIAM_OAUTH_CONTAINER] : [...UIAM_BASE_CONTAINERS];
-=======
   ephemeralTokenExpiration,
   accessTokenExpiration,
 }: GetUiamContainersOptions = {}): UiamContainer[] {
@@ -441,7 +434,7 @@ export function getUiamContainers({
   }
 
   return containers.map((container) =>
-    container.name === UIAM_CONTAINER_NAME
+    container.name === 'uiam'
       ? {
           ...container,
           params: [
@@ -456,7 +449,6 @@ export function getUiamContainers({
         }
       : container
   );
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
 }
 
 /** @deprecated Use {@link getUiamContainers} instead */

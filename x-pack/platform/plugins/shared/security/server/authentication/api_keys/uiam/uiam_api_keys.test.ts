@@ -61,23 +61,12 @@ describe('UiamAPIKeys', () => {
       revokeOAuthConnection: jest.fn(),
     };
 
-<<<<<<< HEAD
-=======
-    // Defaults to a session-authenticated user, which is not an API key and therefore still needs
-    // Kibana's client authentication.
-    mockGetCurrentUser = jest.fn().mockReturnValue(mockAuthenticatedUser() as AuthenticatedUser);
     authenticator = authenticatorMock.create();
-    authenticator.getCurrentUser = mockGetCurrentUser;
-
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
     uiamApiKeys = new UiamAPIKeys({
       logger,
       license: mockLicense,
       uiam: mockUiam,
-<<<<<<< HEAD
-=======
       authenticator,
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
     });
   });
 
@@ -222,7 +211,8 @@ describe('UiamAPIKeys', () => {
         {
           name: 'test-key',
           expiration: '7d',
-        }
+        },
+        undefined
       );
 
       expect(logger.debug).toHaveBeenCalledWith('Trying to grant an API key');
@@ -254,7 +244,8 @@ describe('UiamAPIKeys', () => {
         }),
         {
           name: 'test-key',
-        }
+        },
+        undefined
       );
     });
 
@@ -309,7 +300,8 @@ describe('UiamAPIKeys', () => {
         {
           name: 'test-bearer-key',
           expiration: '30d',
-        }
+        },
+        undefined
       );
       expect(logger.debug).toHaveBeenCalledWith('Using authorization scheme: Bearer');
     });

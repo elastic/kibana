@@ -14,6 +14,7 @@ export type {
   AuthenticatedPrincipal,
   AuthenticationProvider,
 } from './src/authentication';
+export { UIAM_ERROR_CODES } from './src/uiam_error_codes';
 export {
   isUserAnonymous,
   canUserHaveProfile,

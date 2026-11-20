@@ -3507,15 +3507,11 @@ describe('Authenticator', () => {
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
       expect(mockBasicAuthenticationProvider.authenticate).toHaveBeenCalledTimes(1);
-<<<<<<< HEAD
-      expect(mockBasicAuthenticationProvider.authenticate).toBeCalledWith(request, mockSessVal);
-=======
       expect(mockBasicAuthenticationProvider.authenticate).toHaveBeenCalledWith(
         request,
         mockSessVal,
         { reauthenticate: true }
       );
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
 

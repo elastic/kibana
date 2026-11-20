@@ -48,6 +48,7 @@ interface RecoveryResult {
   keys: Array<Pick<GrantedKey, 'id' | 'backend'>>;
   usernames: string[];
   snapshotExpired: boolean;
+  secondSnapshotExpired: boolean;
   failureTokenExpired: boolean;
   cleanupComplete: boolean;
   headersUnchanged: boolean;
@@ -90,11 +91,11 @@ export class CredentialRecovery {
   private readonly originalAuthorization: KibanaRequest['headers']['authorization'];
   private readonly clients: ElasticsearchClient[];
   private readonly snapshotClient: ElasticsearchClient;
-  private readonly expiryDeadline = Date.now() + 70_000;
   private readonly dispatcher = new Agent({ connect: { rejectUnauthorized: false } });
   private readonly keys: GrantedKey[] = [];
   private readonly usernames: string[] = [];
   private snapshotExpired = false;
+  private secondSnapshotExpired = false;
   private cleanupComplete = false;
 
   constructor(
@@ -155,8 +156,11 @@ export class CredentialRecovery {
       case 'twice': {
         await runConcurrentOperations([this.authenticate(firstClient), this.grantApiKey()]);
         const renewedClient = this.createScopedClient();
+        const renewedSnapshot = await this.captureCredential(renewedClient);
 
         await setTimeout(secondWaitMs);
+        await this.waitForTokenExpiry(renewedSnapshot);
+        this.secondSnapshotExpired = true;
         await runConcurrentOperations([this.authenticate(renewedClient), this.grantApiKey()]);
         await this.authenticate(staleClient);
         break;
@@ -165,8 +169,11 @@ export class CredentialRecovery {
       case 'stale_first_after_second_expiry': {
         await runConcurrentOperations([this.authenticate(firstClient), this.grantApiKey()]);
         const renewedClient = this.createScopedClient();
+        const renewedSnapshot = await this.captureCredential(renewedClient);
 
         await setTimeout(secondWaitMs);
+        await this.waitForTokenExpiry(renewedSnapshot);
+        this.secondSnapshotExpired = true;
         // The untouched client must renew again before any caller checks the newer token.
         await this.authenticate(staleClient);
         await runConcurrentOperations([this.authenticate(renewedClient), this.grantApiKey()]);
@@ -203,6 +210,7 @@ export class CredentialRecovery {
       keys: this.keys.map(({ id, backend }) => ({ id, backend })),
       usernames: this.usernames,
       snapshotExpired: this.snapshotExpired,
+      secondSnapshotExpired: this.secondSnapshotExpired,
       failureTokenExpired: failure !== undefined && isTokenExpiredError(failure),
       cleanupComplete: this.cleanupComplete,
       headersUnchanged:
@@ -220,10 +228,20 @@ export class CredentialRecovery {
     this.usernames.push(username);
   }
 
-  private async waitForTokenExpiry() {
+  private async captureCredential(client: ElasticsearchClient): Promise<ElasticsearchClient> {
+    const { meta } = await client.security.authenticate({}, { meta: true });
+    const headers = meta.request.params.headers;
+    if (!headers?.authorization) {
+      throw new Error('The renewed credential was not present in the Elasticsearch request');
+    }
+    return this.core.elasticsearch.client.asScoped({ headers: { ...headers } }).asCurrentUser;
+  }
+
+  private async waitForTokenExpiry(client = this.snapshotClient) {
+    const expiryDeadline = Date.now() + 70_000;
     while (true) {
       try {
-        await this.snapshotClient.security.authenticate();
+        await client.security.authenticate();
       } catch (error) {
         if (isTokenExpiredError(error)) {
           this.snapshotExpired = true;
@@ -233,7 +251,7 @@ export class CredentialRecovery {
         throw error;
       }
 
-      if (Date.now() >= this.expiryDeadline) {
+      if (Date.now() >= expiryDeadline) {
         throw new Error('The captured credential did not expire within the test window');
       }
 
@@ -250,7 +268,7 @@ export class CredentialRecovery {
     const key = await this.core.security.authc.apiKeys.grantAsInternalUser(
       this.request,
       { name: `credential-recovery-${this.request.uuid}`, role_descriptors: {} },
-      { refresh: false }
+      { refresh: 'wait_for' }
     );
     if (!key) {
       throw new Error('The ES grant backend is unavailable');
@@ -308,7 +326,11 @@ export class CredentialRecovery {
     }
 
     const result = await this.core.security.authc.apiKeys.invalidateAsInternalUser({ ids });
-    if (!result || result.error_count) {
+    const accountedFor = new Set([
+      ...(result?.invalidated_api_keys ?? []),
+      ...(result?.previously_invalidated_api_keys ?? []),
+    ]);
+    if (!result || result.error_count || ids.some((id) => !accountedFor.has(id))) {
       throw new Error('Native ES key cleanup failed');
     }
   }

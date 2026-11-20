@@ -20,10 +20,6 @@ import type {
   LoggerFactory,
 } from '@kbn/core/server';
 import type { APIKeysType, UiamOAuthType } from '@kbn/core-security-server';
-<<<<<<< HEAD
-=======
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
 import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { i18n as i18nLib } from '@kbn/i18n';
@@ -309,68 +305,11 @@ export class AuthenticationService {
       });
     });
 
-<<<<<<< HEAD
-    elasticsearch.setUnauthorizedErrorHandler(async ({ error, request }, toolkit) => {
-      if (!this.authenticator) {
-        this.logger.error('Authentication sub-system is not fully initialized yet.');
-        return toolkit.notHandled();
-      }
-
-      if (!license.isLicenseAvailable() || !license.isEnabled()) {
-        this.logger.error(
-          `License is not available or does not support security features, re-authentication is not possible (available: ${license.isLicenseAvailable()}, enabled: ${license.isEnabled()}, unavailable reason: ${license.getUnavailableReason()}).`
-        );
-        return toolkit.notHandled();
-      }
-
-      // We can only re-authenticate if the original request failed because of the expired access token.
-      if (!isTokenExpiredError(error)) {
-        this.logger.error(
-          `Re-authentication is not possible for the following error: ${getDetailedErrorMessage(
-            error
-          )}.`
-        );
-        return toolkit.notHandled();
-      }
-
-      this.logger.debug(
-        `Re-authenticating request due to error: ${getDetailedErrorMessage(error)}`
-      );
-
-      let authenticationResult;
-      const originalHeaders = request.headers;
-      try {
-        // WORKAROUND: Due to BWC reasons Core mutates headers of the original request with authentication
-        // headers returned during authentication stage. We should remove these headers before re-authentication to not
-        // conflict with the HTTP authentication logic. Performance impact is negligible since this is not a hot path.
-        // Additionally, we explicitly include KIBANA_AUTH_FULL_HEADER header to skip any authentication optimizations
-        // and make sure re-authentication is performed in full scope.
-        (request.headers as Record<string, unknown>) = Object.fromEntries(
-          Object.entries(originalHeaders)
-            .filter(([headerName]) => headerName.toLowerCase() !== 'authorization')
-            .concat([[KIBANA_AUTH_FULL_HEADER, 'true']])
-        );
-        authenticationResult = await this.authenticator.reauthenticate(request);
-      } catch (err) {
-        this.logger.error(
-          `Re-authentication failed due to unexpected error: ${getDetailedErrorMessage(err)}.`
-        );
-        throw err;
-      } finally {
-        (request.headers as Record<string, unknown>) = originalHeaders;
-      }
-
-      if (authenticationResult.succeeded()) {
-        if (authenticationResult.authHeaders) {
-          this.logger.debug('Re-authentication succeeded');
-          return toolkit.retry({ authHeaders: authenticationResult.authHeaders });
-=======
     elasticsearch.setUnauthorizedErrorHandler(
       async ({ error, request, authHeaders: failedAuthHeaders }, toolkit) => {
         if (!this.authenticator) {
           this.logger.error('Authentication sub-system is not fully initialized yet.');
           return toolkit.notHandled();
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
         }
 
         if (!license.isLicenseAvailable() || !license.isEnabled()) {
@@ -380,10 +319,6 @@ export class AuthenticationService {
           return toolkit.notHandled();
         }
 
-<<<<<<< HEAD
-      return toolkit.notHandled();
-=======
-        // Renew a session only if the failed call used an expired access token.
         if (!isTokenExpiredError(error)) {
           this.logger.error(
             `Re-authentication is not possible for the following error: ${getDetailedErrorMessage(
@@ -397,73 +332,12 @@ export class AuthenticationService {
           `Re-authenticating request due to error: ${getDetailedErrorMessage(error)}`
         );
 
-        // Fake requests never carry a session, so session renewal below cannot help them. The one
-        // recoverable case is a request bound to a service account, whose credential Kibana minted
-        // and can mint again; everything else — API-key fakes from task manager/alerting, external
-        // user-created credentials — is deliberately left to its owner.
-        if (request.isFakeRequest) {
-          const authHeaders = await getServiceAccounts()
-            ?.backend.reauthenticateFakeRequest(request)
-            .catch(() => null);
-          return authHeaders ? toolkit.retry({ authHeaders }) : toolkit.notHandled();
-        }
-
         const credentials = await this.authenticator.reauthenticate(request, failedAuthHeaders);
         return credentials
           ? toolkit.retry({ authHeaders: credentials.authHeaders })
           : toolkit.notHandled();
       }
     );
-
-    http.setSelfClientUnauthorizedErrorHandler(async ({ request }, toolkit) => {
-      if (!license.isLicenseAvailable() || !license.isEnabled()) {
-        return toolkit.notHandled();
-      }
-
-      // Core only consults this handler for a 401 raised by the authentication lifecycle, so the
-      // target route handler did not run and replaying the call cannot duplicate a side
-      // effect. Unlike the Elasticsearch path there is no expiry marker to test. Kibana boomifies
-      // the upstream error — so the trigger is ownership instead: only a fake request bound to a
-      // service account, whose credential Kibana minted and can mint again, is recoverable.
-      // A real request's credential would have to be refreshed through the session machinery,
-      // which would mutate the ambient authentication state of a request this call merely borrows.
-      if (!request.isFakeRequest) {
-        return toolkit.notHandled();
-      }
-
-      // It is possible that the request is not bound to a service account.
-      // We do not yet have a great mechanism to detect within the authentication service,
-      // so we rely on the service accounts backend to return null for requests that are not bound to a service account.
-      const authHeaders = await getServiceAccounts()
-        ?.backend.reauthenticateFakeRequest(request)
-        .catch(() => null);
-      return authHeaders ? toolkit.retry({ authHeaders }) : toolkit.notHandled();
-    });
-
-    // The handler above can only recover a call the authentication lifecycle rejected. Once the
-    // target route handler runs, it holds the credential it was called with and cannot have it
-    // replaced, so a service account token that would expire before the call can time out is
-    // replaced now, while Kibana still knows the request is bound to a service account.
-    http.setSelfClientCredentialRefresher(async ({ request, timeoutMs }, toolkit) => {
-      if (!request.isFakeRequest || !license.isLicenseAvailable() || !license.isEnabled()) {
-        return toolkit.notHandled();
-      }
-
-      try {
-        const authHeaders = await getServiceAccounts()?.backend.refreshFakeRequestBeforeUse(
-          request,
-          timeoutMs
-        );
-        return authHeaders ? toolkit.replace({ authHeaders }) : toolkit.notHandled();
-      } catch (error) {
-        // Only a definitive refusal fails the call. Anything else is a failure of the refresh
-        // itself, and the credential the call already carries may still be good enough.
-        return error instanceof ServiceAccountCredentialRefusedError
-          ? toolkit.reject({ error })
-          : toolkit.notHandled();
-      }
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
-    });
   }
 
   start({
@@ -483,91 +357,11 @@ export class AuthenticationService {
     uiam,
     userActivity,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
-<<<<<<< HEAD
-=======
-    const getCurrentUser = (request: KibanaRequest) =>
-      http.auth.get<AuthenticatedUser>(request).state ?? null;
-
     const { authHeadersStorage } = this;
     if (!authHeadersStorage) {
       throw new Error('Authentication service must be set up before it is started.');
     }
 
-    /** Constructs the public server URL used by the SAML provider. */
-    const getServerBaseURL = () => {
-      const { protocol, hostname, port } = http.getServerInfo();
-      const serverConfig = { protocol, hostname, port, ...config.public };
-
-      // url.format brackets IPv6 hosts and includes slashes for nonstandard schemes.
-      return url.format({
-        protocol: serverConfig.protocol,
-        hostname: serverConfig.hostname,
-        port: serverConfig.port,
-        slashes: true,
-      });
-    };
-
-    this.session = session;
-    const authenticator = (this.authenticator = new Authenticator({
-      audit,
-      loggers,
-      clusterClient,
-      basePath: http.basePath,
-      config: {
-        authc: config.authc,
-        accessAgreement: config.accessAgreement,
-        uiam: config.uiam,
-      },
-      getCurrentUser,
-      authHeadersStorage,
-      featureUsageService,
-      userProfileService,
-      getServerBaseURL,
-      license: this.license,
-      session,
-      isElasticCloudDeployment,
-      customLogoutURL,
-      uiam,
-      userActivity,
-    }));
-
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
-    const apiKeys = new APIKeys({
-      clusterClient,
-      logger: this.logger.get('api-key'),
-      license: this.license,
-      applicationName,
-      kibanaFeatures,
-      buildFlavor,
-      uiam,
-<<<<<<< HEAD
-=======
-      serviceAccountsEnabled: config.serviceAccounts.enabled,
-      authenticator,
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
-    });
-
-    const uiamAPIKeys = uiam
-      ? new UiamAPIKeys({
-          logger: this.logger.get('api-key-uiam'),
-          license: this.license,
-          uiam,
-<<<<<<< HEAD
-=======
-          authenticator,
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
-        })
-      : null;
-
-    const uiamOAuth = uiam
-      ? new UiamOAuth({
-          logger: this.logger.get('oauth-uiam'),
-          license: this.license,
-          uiam,
-        })
-      : null;
-
-<<<<<<< HEAD
     /**
      * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
      * to construct a server base URL (deprecated, used by the SAML provider only).
@@ -594,6 +388,7 @@ export class AuthenticationService {
         uiam: config.uiam,
       },
       getCurrentUser,
+      authHeadersStorage,
       featureUsageService,
       userProfileService,
       getServerBaseURL,
@@ -604,24 +399,34 @@ export class AuthenticationService {
       uiam,
       userActivity,
     }));
-=======
-    // UIAM derives Kibana's own identity from the mTLS client certificate alone, so the capability
-    // only exists when that certificate is configured. `xpack.security.uiam.ssl.certificate` and
-    // `.key` are optional, and without them every mint fails with a UIAM 401.
-    const canMintSystemIdentityTokens = Boolean(
-      config.uiam?.ssl.certificate && config.uiam.ssl.key
-    );
-    if (uiam && !canMintSystemIdentityTokens) {
-      this.logger.debug(
-        'UIAM is enabled without a client certificate (`xpack.security.uiam.ssl.certificate` and `.key`), so Kibana cannot mint tokens for its own identity.'
-      );
-    }
 
-    const systemIdentity =
-      uiam && canMintSystemIdentityTokens
-        ? new UiamSystemIdentity({ logger: this.logger.get('system-identity'), uiam })
-        : undefined;
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
+    const apiKeys = new APIKeys({
+      clusterClient,
+      logger: this.logger.get('api-key'),
+      license: this.license,
+      applicationName,
+      kibanaFeatures,
+      buildFlavor,
+      uiam,
+      authenticator,
+    });
+
+    const uiamAPIKeys = uiam
+      ? new UiamAPIKeys({
+          logger: this.logger.get('api-key-uiam'),
+          license: this.license,
+          uiam,
+          authenticator,
+        })
+      : null;
+
+    const uiamOAuth = uiam
+      ? new UiamOAuth({
+          logger: this.logger.get('oauth-uiam'),
+          license: this.license,
+          uiam,
+        })
+      : null;
 
     return {
       apiKeys: {
@@ -704,27 +509,3 @@ export class AuthenticationService {
     };
   }
 }
-<<<<<<< HEAD
-
-/**
- * Checks if the provided error is caused by expired access token. The logic is based on the error
- * reason set by the Elasticsearch and error code set by the UIAM service and is covered by the FTR
- * and Scout API integration tests.
- * @param error Error returned by the Elasticsearch client when authentication fails.
- */
-function isTokenExpiredError(error: errors.ResponseError) {
-  // If the request failed because of expired access token it should always have 401 status code.
-  if (getErrorStatusCode(error) !== 401) {
-    return false;
-  }
-
-  // If expired the Elasticsearch native access token, it should properly set `reason` property.
-  if (error.body?.error?.reason === 'token expired') {
-    return true;
-  }
-
-  // If expired the UIAM access token, it should have `authentication_error_code` set to `0x7E0116`.
-  return error.body?.error?.caused_by?.authentication_error_code === '0x7E0116';
-}
-=======
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))

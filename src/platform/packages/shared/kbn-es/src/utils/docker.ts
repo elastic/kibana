@@ -186,8 +186,6 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   uiam?: boolean;
   /** Configure ES serverless with UIAM OAuth support (starts an additional uiam-oauth container) */
   uiamOAuth?: boolean;
-<<<<<<< HEAD
-=======
   /**
    * ISO-8601 lifetime of the ephemeral tokens UIAM issues, such as service account exchange tokens
    * (UIAM accepts PT1M to PT5M, default PT5M). Shorten it to exercise token renewal in tests.
@@ -198,7 +196,6 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
    * and the default is PT1H. Shorten this lifetime to exercise token renewal in tests.
    */
   uiamAccessTokenExpiration?: string;
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
   /** Configuration for a linked project in Cross Project Search (CPS) mode */
   linkedProject?: { projectId: string; port: number };
 }
@@ -1030,17 +1027,11 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   await Promise.all([
     setupDockerImage({ log, image: esServerlessImage }),
     ...(options.uiam
-<<<<<<< HEAD
-      ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map(({ image }) =>
-          setupDockerImage({ log, image })
-        )
-=======
       ? getUiamContainers({
           includeOAuth: options.uiamOAuth,
           ephemeralTokenExpiration: options.uiamEphemeralTokenExpiration,
           accessTokenExpiration: options.uiamAccessTokenExpiration,
         }).map(({ image }) => setupDockerImage({ log, image }))
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
       : []),
   ]);
   log.info(`[runServerlessCluster] Docker image(s) ready (${elapsed()})`);
@@ -1065,18 +1056,10 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
         ),
       });
       return node.name;
-    }).concat(
-      options.uiam
-        ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map((container) =>
-            runUiamContainer(log, container)
-          )
-        : []
-    )
+    })
   );
   log.info(`[runServerlessCluster] All ES nodes started (${elapsed()})`);
 
-<<<<<<< HEAD
-=======
   // UIAM containers must start sequentially: uiam-cosmosdb first, then uiam.
   // Starting them in parallel risks uiam connecting to CosmosDB before the
   // pgcosmos extension is ready, causing a fatal (non-retried) 503 on startup.
@@ -1090,7 +1073,6 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     }
   }
 
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
   log.success(`Serverless ES cluster running.
   Login with username ${chalk.bold.cyan(ELASTIC_SERVERLESS_SUPERUSER)} or ${chalk.bold.cyan(
     SYSTEM_INDICES_SUPERUSER

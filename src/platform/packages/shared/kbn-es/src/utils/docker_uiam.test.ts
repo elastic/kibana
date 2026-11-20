@@ -66,8 +66,6 @@ beforeEach(() => {
   Fsp.open.mockResolvedValue({ fd: 1, close: jest.fn() });
 });
 
-<<<<<<< HEAD
-=======
 describe('#getUiamContainers()', () => {
   const ephemeralExpirationParam = (container: { params: string[] }) =>
     container.params.find((param) => param.startsWith('uiam.tokens.ephemeral.expiration='));
@@ -153,7 +151,6 @@ describe('#getUiamContainers()', () => {
   });
 });
 
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
 describe(`#runUiamContainer()`, () => {
   test('should be able to run UIAM containers', async () => {
     const [cosmosDbContainer, uiamContainer] = UIAM_CONTAINERS;

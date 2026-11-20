@@ -57,6 +57,15 @@ apiTest.describe(
           try {
             expect(tasks).toHaveLength(scenario.count);
             expect(new Set(tasks.map((task) => task.apiKeyId)).size).toBe(scenario.count);
+            const viewer = await samlAuth.asInteractiveUser('viewer');
+            const deniedCleanup = await apiClient.delete(
+              `internal/test_endpoints/authentication/tasks/${tasks[0].id}`,
+              {
+                headers: { ...viewer.cookieHeader, 'kbn-xsrf': 'true' },
+                responseType: 'json',
+              }
+            );
+            expect(deniedCleanup).toHaveStatusCode(403);
             for (const task of tasks) {
               expect(typeof task.apiKeyId).toBe('string');
               const getKeys = async () => {

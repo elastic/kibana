@@ -56,11 +56,7 @@ export interface ConstructorOptions {
   kibanaFeatures: KibanaFeature[];
   buildFlavor?: BuildFlavor;
   uiam?: UiamServicePublic;
-<<<<<<< HEAD
-=======
-  serviceAccountsEnabled?: boolean;
   authenticator: APIKeyAuthenticator;
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
 }
 
 type GrantAPIKeyParams = (
@@ -88,11 +84,7 @@ export class APIKeys implements NativeAPIKeysType {
   private readonly kibanaFeatures: KibanaFeature[];
   private readonly buildFlavor?: BuildFlavor;
   private readonly uiam?: UiamServicePublic;
-<<<<<<< HEAD
-=======
-  private readonly serviceAccountsEnabled: boolean;
   private readonly authenticator: APIKeyAuthenticator;
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
 
   constructor({
     logger,
@@ -102,11 +94,7 @@ export class APIKeys implements NativeAPIKeysType {
     kibanaFeatures,
     buildFlavor,
     uiam,
-<<<<<<< HEAD
-=======
-    serviceAccountsEnabled = false,
     authenticator,
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
   }: ConstructorOptions) {
     this.logger = logger;
     this.clusterClient = clusterClient;
@@ -115,11 +103,7 @@ export class APIKeys implements NativeAPIKeysType {
     this.kibanaFeatures = kibanaFeatures;
     this.buildFlavor = buildFlavor;
     this.uiam = uiam;
-<<<<<<< HEAD
-=======
-    this.serviceAccountsEnabled = serviceAccountsEnabled;
     this.authenticator = authenticator;
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
   }
 
   /**
@@ -305,30 +289,6 @@ export class APIKeys implements NativeAPIKeysType {
       );
     }
 
-<<<<<<< HEAD
-    // If API key is granted for UIAM credentials, we need to pass UIAM client authentication and ignore any other
-    // client credentials that might have been provided. Otherwise, try to extract optional Elasticsearch client
-    // credentials from `es-client-authentication` HTTP header (currently only used by JWT).
-    let clientAuthentication: ClientAuthentication | undefined;
-
-    if (this.uiam && isUiamCredential(authorizationHeader)) {
-      clientAuthentication = this.uiam.getClientAuthentication();
-    } else {
-      const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(
-        request,
-        ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER
-      );
-
-      if (clientAuthorizationHeader) {
-        clientAuthentication = {
-          scheme: clientAuthorizationHeader.scheme,
-          value: clientAuthorizationHeader.credentials,
-        };
-      }
-    }
-
-=======
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
     const { expiration, metadata, name } = createParams;
     const roleDescriptors =
       'role_descriptors' in createParams
@@ -347,37 +307,11 @@ export class APIKeys implements NativeAPIKeysType {
     );
 
     try {
-<<<<<<< HEAD
-      result = await this.clusterClient.asInternalUser.security.grantApiKey(params);
-      this.logger.debug('API key was granted successfully');
-    } catch (e) {
-      this.logger.error(`Failed to grant API key: ${e.message}`);
-      throw e;
-=======
       const result = await this.grantWithReauthentication(request, credentials, params);
       this.logger.debug('API key was granted successfully');
       return result;
     } catch (error) {
-      const serviceAccountError = toServiceAccountGrantError(
-        error,
-        this.authenticator.getCurrentUser(request),
-        { reason: this.getServiceAccountGrantRefusalReason(credentials.authorizationHeader) }
-      );
-      // A refused service account is the caller's to fix, not a Kibana failure.
-      this.logger[serviceAccountError ? 'warn' : 'error'](
-        `Failed to grant API key: ${error.message}`
-      );
-      if (serviceAccountError) {
-        throw serviceAccountError;
-      }
-
-      // The original error contains the service account token. Do not return its request metadata.
-      if (params.grant_type === '_user_managed_service_account') {
-        throw Boom.boomify(new Error(error.message), {
-          statusCode: getErrorStatusCode(error) || 500,
-        });
-      }
-
+      this.logger.error(`Failed to grant API key: ${error.message}`);
       throw error;
     }
   }
@@ -395,7 +329,6 @@ export class APIKeys implements NativeAPIKeysType {
   ): Promise<GrantAPIKeyResult> {
     const grantOnce = (grantParams: GrantAPIKeyParams) => {
       this.logger.debug(`Granting an API key with grant type [${grantParams.grant_type}]`);
-      // @ts-expect-error The ES client types lack the `_user_managed_service_account` grant.
       return this.clusterClient.asInternalUser.security.grantApiKey(grantParams);
     };
 
@@ -456,7 +389,6 @@ export class APIKeys implements NativeAPIKeysType {
           value: clientAuthorizationHeader.credentials,
         };
       }
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
     }
 
     const params = this.getGrantParams(apiKey, authorizationHeader, clientAuthentication);

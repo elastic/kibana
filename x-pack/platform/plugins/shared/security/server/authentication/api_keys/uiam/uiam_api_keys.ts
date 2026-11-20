@@ -8,15 +8,7 @@
 import Boom from '@hapi/boom';
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-<<<<<<< HEAD
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
-=======
-import {
-  HTTPAuthorizationHeader,
-  isExternalUiamCredential,
-  isUiamCredential,
-} from '@kbn/core-security-server';
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
 import type {
   ConvertUiamAPIKeysResponse,
   GrantAPIKeyResult,
@@ -28,15 +20,10 @@ import type {
 
 import type { SecurityLicense } from '../../../../common';
 import { getDetailedErrorMessage } from '../../../errors';
-<<<<<<< HEAD
 import type { UiamServicePublic } from '../../../uiam';
-=======
-import { type UiamServicePublic, isExternalApiKey as userHasExternalApiKey } from '../../../uiam';
 import { getUiamClientAuthentication } from '../../../uiam/get_client_authentication';
 import type { APIKeyAuthenticator, RequestCredentials } from '../../authenticator';
 import { isTokenExpiredError } from '../../is_token_expired_error';
-import { toServiceAccountGrantError } from '../service_account_grant_error';
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
 
 /**
  * Options required to construct a UiamAPIKeys instance.
@@ -45,10 +32,7 @@ export interface UiamAPIKeysOptions {
   logger: Logger;
   license: SecurityLicense;
   uiam: UiamServicePublic;
-<<<<<<< HEAD
-=======
   authenticator: APIKeyAuthenticator;
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
 }
 
 /**
@@ -59,13 +43,6 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   private readonly logger: Logger;
   private readonly license: SecurityLicense;
   private readonly uiam: UiamServicePublic;
-<<<<<<< HEAD
-
-  constructor({ logger, license, uiam }: UiamAPIKeysOptions) {
-    this.logger = logger;
-    this.license = license;
-    this.uiam = uiam;
-=======
   private readonly authenticator: APIKeyAuthenticator;
 
   constructor({ logger, license, uiam, authenticator }: UiamAPIKeysOptions) {
@@ -73,7 +50,6 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     this.license = license;
     this.uiam = uiam;
     this.authenticator = authenticator;
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
   }
 
   /**
@@ -111,34 +87,12 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     }
 
     try {
-<<<<<<< HEAD
-      const { id, key, description } = await this.uiam?.grantApiKey(authorization, params);
-
-      result = {
-        id,
-        name: description,
-        api_key: key,
-      };
-
-      this.logger.debug('API key was granted successfully');
-    } catch (e) {
-      this.logger.error(`Failed to grant API key: ${getDetailedErrorMessage(e)}`);
-      throw e;
-=======
       const result = await this.grantWithReauthentication(request, credentials, params);
       this.logger.debug('API key was granted successfully');
       return result;
     } catch (error) {
-      const serviceAccountError = toServiceAccountGrantError(
-        error,
-        this.authenticator.getCurrentUser(request)
-      );
-      // A refused service account is the caller's to fix, not a Kibana failure.
-      this.logger[serviceAccountError ? 'warn' : 'error'](
-        `Failed to grant API key: ${getDetailedErrorMessage(error)}`
-      );
-      throw serviceAccountError ?? error;
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
+      this.logger.error(`Failed to grant API key: ${getDetailedErrorMessage(error)}`);
+      throw error;
     }
   }
 
@@ -157,9 +111,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       const { id, key, description } = await this.uiam.grantApiKey(
         currentCredentials.authorizationHeader,
         params,
-        this.isExternalApiKey(request)
-          ? null
-          : getUiamClientAuthentication({ headers: currentCredentials.authHeaders })
+        getUiamClientAuthentication({ headers: currentCredentials.authHeaders })
       );
       return { id, name: description, api_key: key };
     };
@@ -267,35 +219,6 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   }
 
   /**
-<<<<<<< HEAD
-=======
-   * Returns the header(s) trusted loopback callers stamp on real requests carrying an internal
-   * UIAM (`essu_`) credential (see {@link UiamAPIKeysType.getInternalCallerAttestationHeaders}).
-   */
-  getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader) {
-    return this.uiam.getInternalCallerAttestationHeaders(credential);
-  }
-
-  isOwnClientAuthentication(value: string): boolean {
-    const own = this.uiam.getClientAuthentication().value;
-    const presented = Buffer.from(value);
-    const expected = Buffer.from(own);
-    return presented.length === expected.length && timingSafeEqual(presented, expected);
-  }
-
-  /**
-   * A fake request has no authenticated user to inspect, so the external marker set by its builder
-   * is the only signal that it carries an external key.
-   */
-  isExternalApiKey(request: KibanaRequest): boolean {
-    return (
-      isExternalUiamCredential(request) ||
-      userHasExternalApiKey(this.authenticator.getCurrentUser(request))
-    );
-  }
-
-  /**
->>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
    * Extracts and returns the authorization header from the request.
    *
    * @param request The Kibana request instance.
