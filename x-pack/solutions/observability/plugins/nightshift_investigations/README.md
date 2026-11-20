@@ -199,7 +199,7 @@ The findings recorder's final pass proposes up to three actions. By default each
 3. takes one `actionInput` object on its manual trigger, whose properties are the workflow's parameters (describe each, the recorder fills them from the findings);
 4. ends in a `workflow.output` step.
 
-When one fits a proposal, the recorder sets its id and input. Approving the proposal runs the workflow as the person who approved it. Managed action workflows (another solution's) are not shown. A workflow id the catalog did not list is dropped, and an input the workflow refuses turns the proposal into a to-do. See the proposals plugin README for the action workflow contract.
+When one fits a proposal, the recorder sets its id and input. Approving the proposal runs the workflow as the person who approved it. Managed action workflows (another solution's) are not shown. A proposal naming a workflow the catalog did not list, or with an input the workflow refuses, is not written; the failure is logged. See the proposals plugin README for the action workflow contract.
 
 The approve dialog shows what will run: a link to the workflow, and under **Input parameters** (collapsed) the exact `actionInput` the recorder filled in. Once the workflow has run, the dialog also links to that execution, so the analyst can see what it did and what it returned.
 

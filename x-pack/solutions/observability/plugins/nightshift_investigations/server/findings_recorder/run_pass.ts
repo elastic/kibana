@@ -656,16 +656,10 @@ const runTrackedFindingsPass = async (
     }
     const proposals = deps.getProposals?.();
     if (final && proposals && record.proposals?.length) {
-      // A workflow the catalog did not list is not run: the model may name one that does not
-      // exist, or one the space's users did not mark as an action. The step is still proposed,
-      // for the person to carry out.
+      // Only workflows the catalog listed may run: the model may name one that does not exist,
+      // or one that is not an always-gate action of this space. Such a proposal is not written.
       const listed = new Set(actions.map(({ workflowId }) => workflowId));
-      const wanted = record.proposals.map(
-        ({ action_workflow_id: workflowId, action_input: input, ...proposal }) =>
-          workflowId && listed.has(workflowId)
-            ? { ...proposal, action_workflow_id: workflowId, action_input: input }
-            : proposal
-      );
+      const wanted = record.proposals;
       writes.push([
         'proposals',
         async () => {
@@ -678,6 +672,11 @@ const runTrackedFindingsPass = async (
           const failures: string[] = [];
           for (const proposal of wanted) {
             if (proposed.has(key(proposal.title))) continue;
+            const { action_workflow_id: workflowId } = proposal;
+            if (workflowId && !listed.has(workflowId)) {
+              failures.push(`"${proposal.title}": action workflow [${workflowId}] is not offered`);
+              continue;
+            }
             proposed.add(key(proposal.title));
             // One proposal that cannot be written does not stop the ones after it.
             await proposals.propose({ request, conversationId, proposal }).catch((error) => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { PROPOSAL_CATEGORY_TODO } from '@kbn/proposals-common';
 import type { RecorderProposals } from './run_pass';
@@ -22,11 +22,9 @@ export const MAX_RECORDER_ACTIONS = 20;
 export const createRecorderProposals = ({
   proposals,
   getSpaceId,
-  logger,
 }: {
   proposals: ProposalsPluginStart;
   getSpaceId: (request: KibanaRequest) => string;
-  logger: Logger;
 }): RecorderProposals => {
   // These carry no action workflow: the analyst carries each one out and marks it applied.
   // Dropping one is therefore not a judgement about an action the agent would have taken,
@@ -96,35 +94,22 @@ export const createRecorderProposals = ({
         await proposeTodo(args);
         return;
       }
-      try {
-        // Gated: approving it runs the workflow as the person who approved it. Its category,
-        // and its impact when the model gave none, come from the workflow's own metadata.
-        await proposals.createProposal({
-          request,
-          spaceId: getSpaceId(request),
-          conversationId,
-          proposal: {
-            title: proposal.title,
-            comment: proposal.comment,
-            impact: proposal.impact,
-            confidence: proposal.confidence,
-            origin: 'nightshift',
-            actionWorkflowId,
-            actionInput,
-          },
-        });
-      } catch (error) {
-        // An input the workflow refuses is a model mistake, not a reason to lose the step: it is
-        // still proposed, for the person to carry out.
-        logger.warn(
-          `Findings recorder proposes "${
-            proposal.title
-          }" as a to-do: action workflow [${actionWorkflowId}] refused it: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-        await proposeTodo(args);
-      }
+      // Gated: approving it runs the workflow as the person who approved it. Its category,
+      // and its impact when the model gave none, come from the workflow's own metadata.
+      await proposals.createProposal({
+        request,
+        spaceId: getSpaceId(request),
+        conversationId,
+        proposal: {
+          title: proposal.title,
+          comment: proposal.comment,
+          impact: proposal.impact,
+          confidence: proposal.confidence,
+          origin: 'nightshift',
+          actionWorkflowId,
+          actionInput,
+        },
+      });
     },
   };
 };

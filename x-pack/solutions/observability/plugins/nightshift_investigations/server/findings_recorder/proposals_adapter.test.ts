@@ -6,7 +6,6 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import { createRecorderProposals, MAX_RECORDER_ACTIONS } from './proposals_adapter';
 
 const request = httpServerMock.createKibanaRequest();
@@ -38,7 +37,6 @@ const setup = ({
       listActions,
     } as never,
     getSpaceId: () => 'space-a',
-    logger: loggerMock.create(),
   });
   return { adapter, list, createProposal, assertCanRead, listActions };
 };
@@ -147,32 +145,24 @@ describe('createRecorderProposals', () => {
     expect(proposal).not.toHaveProperty('skipDiscardReason');
   });
 
-  it('falls back to a to-do when the workflow refuses the input', async () => {
+  it('rejects when the workflow refuses the input, without proposing a to-do instead', async () => {
     const createProposal = jest
       .fn()
-      .mockRejectedValueOnce(new Error('actionInput does not satisfy action workflow'))
-      .mockResolvedValue({});
+      .mockRejectedValueOnce(new Error('actionInput does not satisfy action workflow'));
     const { adapter } = setup({ createProposal });
 
-    await adapter.propose({
-      request,
-      conversationId: 'c1',
-      proposal: {
-        title: 'Open an issue',
-        comment: 'File the regression.',
-        action_workflow_id: 'wf-open-issue',
-        action_input: {},
-      },
-    });
-
-    expect(createProposal).toHaveBeenCalledTimes(2);
-    const [{ proposal }] = createProposal.mock.calls[1];
-    expect(proposal).toEqual({
-      title: 'Open an issue',
-      comment: 'File the regression.',
-      origin: 'nightshift',
-      category: 'todo',
-      skipDiscardReason: true,
-    });
+    await expect(
+      adapter.propose({
+        request,
+        conversationId: 'c1',
+        proposal: {
+          title: 'Open an issue',
+          comment: 'File the regression.',
+          action_workflow_id: 'wf-open-issue',
+          action_input: {},
+        },
+      })
+    ).rejects.toThrow('actionInput does not satisfy action workflow');
+    expect(createProposal).toHaveBeenCalledTimes(1);
   });
 });

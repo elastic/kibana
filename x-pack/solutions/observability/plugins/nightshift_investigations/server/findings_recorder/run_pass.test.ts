@@ -675,7 +675,7 @@ describe('runFindingsPass', () => {
       expect(chatComplete.mock.calls[0][0].system).toBe(buildRecorderSystemPrompt({ final: true }));
     });
 
-    it('runs only a listed action workflow, and proposes the rest as steps to carry out', async () => {
+    it('runs only a listed action workflow, and does not write one naming an unlisted workflow', async () => {
       const proposals = proposed([], [openIssue]);
       const withActions = {
         ...output,
@@ -708,11 +708,10 @@ describe('runFindingsPass', () => {
           action_input: { repo: 'checkout' },
         },
       });
-      expect(proposals.propose).toHaveBeenCalledWith({
-        request,
-        conversationId: 'c1',
-        proposal: { title: 'Restart the pods', comment: 'Restart them.' },
-      });
+      expect(proposals.propose).toHaveBeenCalledTimes(1);
+      expect(deps.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('action workflow [wf-not-listed] is not offered')
+      );
     });
 
     it('proposes the rest when one proposal cannot be written', async () => {
