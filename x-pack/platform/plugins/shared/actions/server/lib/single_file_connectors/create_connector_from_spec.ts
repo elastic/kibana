@@ -114,7 +114,9 @@ export const createConnectorTypeFromSpec = (
     name: spec.metadata.displayName,
     supportedFeatureIds: spec.metadata.supportedFeatureIds,
     validate: {
-      config: lazyImmutableGCableObject(() => generateConfigSchema(schemaForConfig, actionNames)),
+      config: lazyImmutableGCableObject(() =>
+        generateConfigSchema(schemaForConfig, actionNames, { allowNoSelectedActions: hasEvents })
+      ),
       secrets: lazyImmutableGCableObject(() => generateSecretsSchema(spec.auth, configUtils)),
       ...(paramsValidator ? { params: paramsValidator } : {}),
       ...(spec.validateConnector ? { connector: spec.validateConnector } : {}),
