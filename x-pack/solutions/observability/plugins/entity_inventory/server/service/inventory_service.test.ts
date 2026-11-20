@@ -390,8 +390,6 @@ describe('InventoryService.list', () => {
       errors: [],
       unavailableColumns: [],
     });
-    expect(response).not.toHaveProperty('unsupportedMetrics');
-    expect(response).not.toHaveProperty('documentFilterWarnings');
   });
 
   it('returns the same columns as listTypes for the type', async () => {

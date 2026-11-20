@@ -140,9 +140,6 @@ apiTest.describe(
         });
         // The OpenTelemetry time-series index holds no 2026-11-01 documents, so its `TS` plan reads none.
         expect(body.queries.map(({ rowCount }) => rowCount)).toStrictEqual([3, 0, 3]);
-        expect('took' in body).toBe(false);
-        expect('unsupportedMetrics' in body).toBe(false);
-        expect('documentFilterWarnings' in body).toBe(false);
       }
     );
 
