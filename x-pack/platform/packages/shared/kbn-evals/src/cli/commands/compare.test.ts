@@ -216,6 +216,32 @@ describe('compareCmd exit codes', () => {
     expect((await runCompare(GATE)).exitCode).toBe(GATE_REGRESSION_EXIT_CODE);
   });
 
+  it('counts an identical pass/fail evaluator as checked in a 40-evaluator family', async () => {
+    // 5 pairs: McNemar's smallest p is 1/2^5, which 40 Holm hypotheses push past 0.05. An identical
+    // pass/fail row must still count as checked and leave the family, not be underpowered.
+    const examples = 5;
+    const evaluators = (
+      experimentId: string,
+      scoreAt: (evaluator: number, index: number) => number
+    ) =>
+      Array.from({ length: 40 }, (_, evaluator) =>
+        Array.from({ length: examples }, (__, index) =>
+          scoreDoc(experimentId, index, scoreAt(evaluator, index), {
+            evaluatorName: evaluator === 0 ? 'passfail' : `numeric-${evaluator}`,
+          })
+        )
+      ).flat();
+    // Numeric: alternating small moves, not significant. Pass/fail (evaluator 0): 1 on both sides.
+    stubScores(
+      evaluators(TARGET, (evaluator, index) =>
+        evaluator === 0 ? 1 : 0.8 + (index % 2 === 1 ? 1 : -1) * 0.01 * (index + 1)
+      ),
+      evaluators(BASELINE, (evaluator) => (evaluator === 0 ? 1 : 0.8))
+    );
+
+    expect(await runCompare([...GATE, '--min-pairs', String(examples)])).toEqual({ exitCode: 0 });
+  });
+
   it('judges the gate on raw p-values with --no-multiplicity-correction', async () => {
     // Six drops: exact Wilcoxon p = 2 / 2^6 ~ 0.031, which Holm doubles past 0.05 next to a
     // second, unchanged evaluator. 2 / 2^6 is also the floor at six pairs, so under Holm neither

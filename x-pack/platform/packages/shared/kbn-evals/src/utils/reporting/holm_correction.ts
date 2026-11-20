@@ -62,9 +62,10 @@ export const countHolmFamily = (
 export const applyHolmCorrection = <T extends ComparisonResult & MaybeIdenticalPairs>(
   results: readonly T[]
 ): Array<T & { adjustedPValue: number | null }> => {
-  const usable = results.flatMap((result) =>
-    isInHolmFamily(result) ? [{ result, pValue: result.pValue as number }] : []
-  );
+  const usable = results.flatMap((result) => {
+    const { pValue } = result;
+    return isUsablePValue(pValue) && isInHolmFamily(result) ? [{ result, pValue }] : [];
+  });
   const adjusted = holmBonferroniAdjust(usable.map(({ pValue }) => pValue));
   const adjustedByRow = new Map(usable.map(({ result }, i) => [result, adjusted[i]]));
 

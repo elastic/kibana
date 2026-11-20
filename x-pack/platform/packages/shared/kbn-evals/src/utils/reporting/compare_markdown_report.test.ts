@@ -562,6 +562,22 @@ describe('formatMarkdownCompareReport', () => {
       expect(output).toContain('across 2 comparisons;');
     });
 
+    it('leaves an identical row out of the family and shows its adjusted cell as -', () => {
+      const output = formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: applyHolmCorrection([
+          makeResult({ evaluatorName: 'A', pValue: 0.01 }),
+          makeResult({ evaluatorName: 'B', pValue: 0.5 }),
+          { ...makeResult({ evaluatorName: 'Same', pValue: 1 }), allPairsIdentical: true },
+        ]),
+      });
+
+      expect(output).toContain('across 2 comparisons;');
+      const identicalRow = output.split('\n').find((l) => l.includes('| Same |'));
+      expect(identicalRow).toContain('| 1.00 | - |');
+    });
+
     it('keeps the single-p-value layout when no correction was applied', () => {
       const output = formatMarkdownCompareReport({
         targetExperimentId: 'exp-a',
