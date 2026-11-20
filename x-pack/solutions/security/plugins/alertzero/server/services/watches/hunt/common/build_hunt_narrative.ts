@@ -460,7 +460,7 @@ const describeNothingSearchedBehaviors = (result: HuntCoordinatorCoreResult): st
     return 'Behavior Hunt could not derive a searchable behavior from the report';
   }
   if (tier2?.status === 'no_behaviors_validated') {
-    return 'Behavior Hunt derived behaviors from the report, but none survived ATT&CK catalog validation';
+    return 'Behavior Hunt had no new behavior to hunt: what it derived from the report either failed ATT&CK catalog validation or was already searched by an earlier run';
   }
   switch (result.tier2_skipped_reason) {
     case 'configured_never':

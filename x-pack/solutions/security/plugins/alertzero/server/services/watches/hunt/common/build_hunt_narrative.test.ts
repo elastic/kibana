@@ -718,9 +718,9 @@ describe('buildHuntNarrative when no search ran', () => {
         'the report gave Behavior Hunt nothing to work from',
       ],
       [
-        '11: behaviors derived and none passed ATT&CK catalog validation',
+        '11: no new behavior survived validation or was already searched',
         { tier2: tier2([], { status: 'no_behaviors_validated' }) },
-        'Behavior Hunt derived behaviors from the report, but none survived ATT&CK catalog validation',
+        'Behavior Hunt had no new behavior to hunt: what it derived from the report either failed ATT&CK catalog validation or was already searched by an earlier run',
       ],
       [
         '10: Behavior Hunt ran clean and found no behavior',
