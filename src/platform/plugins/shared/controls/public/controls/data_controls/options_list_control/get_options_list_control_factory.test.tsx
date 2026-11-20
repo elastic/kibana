@@ -272,6 +272,54 @@ describe('Options List Control Api', () => {
     });
   });
 
+  describe('required selections', () => {
+    beforeAll(() => {
+      dataViewsService.get = jest.fn().mockImplementation(getDataView);
+    });
+
+    const buildWithState = (state: Partial<OptionsListDSLControlState>) =>
+      factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState: {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          ...state,
+        } as OptionsListDSLControlState,
+        finalizeApi,
+        uuid,
+        parentApi: {},
+      });
+
+    test.each([
+      ['required with no selection', { required: true }, true],
+      ['required with selected options', { required: true, selected_options: ['a'] }, false],
+      ['required with exists selected', { required: true, exists_selected: true }, false],
+      ['not required with no selection', { required: false }, false],
+    ])('isAwaitingFilters is correct for %s', (_, state, expected) => {
+      expect(factory.isAwaitingFilters?.(state as OptionsListDSLControlState)).toBe(expected);
+    });
+
+    test('awaitingRequiredFilters$ is true when required with no selection', async () => {
+      const { api } = await buildWithState({ required: true });
+      expect(api.awaitingRequiredFilters$?.value).toBe(true);
+    });
+
+    test('awaitingRequiredFilters$ is false when required with an initial selection', async () => {
+      const { api } = await buildWithState({ required: true, selected_options: ['a'] });
+      await waitFor(() => expect(api.awaitingRequiredFilters$?.value).toBe(false));
+    });
+
+    test('awaitingRequiredFilters$ follows selections being made and cleared', async () => {
+      const { api } = await buildWithState({ required: true });
+      api.setSelectedOptions(['woof']);
+      await waitFor(() => expect(api.awaitingRequiredFilters$?.value).toBe(false));
+
+      api.setSelectedOptions([]);
+      await waitFor(() => expect(api.awaitingRequiredFilters$?.value).toBe(true));
+    });
+  });
+
   describe('unsaved changes', () => {
     test('should have unsaved changes when there are changes', async () => {
       const lastSavedState = optionsListDSLControlSchema.parse({

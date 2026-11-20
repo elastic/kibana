@@ -26,7 +26,9 @@ import type { Filter } from '@kbn/es-query';
 import {
   combineCompatibleChildrenApis,
   apiAppliesFilters,
+  apiPublishesAwaitingRequiredFilters,
   type AppliesFilters,
+  type PublishesAwaitingRequiredFilters,
 } from '@kbn/presentation-publishing';
 
 import type { initializeLayoutManager } from './layout_manager';
@@ -43,35 +45,30 @@ export const initializeFiltersManager = (
   const publishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const unpublishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
 
-  const test = combineCompatibleChildrenApis<
-    { awaitingRequiredFilters$?: BehaviorSubject<boolean> },
+  const pinnedPanelIds$ = layoutManager.api.layout$.pipe(
+    map((layout) => Object.keys(layout.pinnedPanels)),
+    distinctUntilChanged(deepEqual)
+  );
+
+  const requiredFiltersSubscription = combineCompatibleChildrenApis<
+    PublishesAwaitingRequiredFilters,
     boolean
   >(
     {
-      children$: layoutManager.api.children$.pipe(
-        // only pinned panels can be required
-        map((children) => {
-          const pinnedIds = Object.keys(layoutManager.api.layout$.getValue().pinnedPanels);
-          return Object.values(children).filter((child) => pinnedIds.includes(child.uuid));
-        })
+      children$: combineLatest([layoutManager.api.children$, pinnedPanelIds$]).pipe(
+        // only pinned panels can be required; re-evaluate when children or pinned panels change
+        map(([children, pinnedIds]) =>
+          Object.values(children).filter((child) => pinnedIds.includes(child.uuid))
+        )
       ),
     },
     'awaitingRequiredFilters$',
-    (
-      unknownApi: unknown
-    ): unknownApi is { awaitingRequiredFilters$?: BehaviorSubject<boolean> } => {
-      return Boolean(
-        unknownApi &&
-          (unknownApi as { awaitingRequiredFilters$?: BehaviorSubject<boolean> })
-            ?.awaitingRequiredFilters$ !== undefined
-      );
-    },
+    apiPublishesAwaitingRequiredFilters,
     false,
     (values) => {
       return values.some((awaitingRequired) => awaitingRequired);
     }
   ).subscribe((a) => {
-    console.log('jlkfdasjlkdfsad', { a });
     awaitingRequiredFilters$.next(a);
   });
 
@@ -84,7 +81,6 @@ export const initializeFiltersManager = (
           apiAppliesFilters,
           false,
           (values) => {
-            console.log({ values });
             return values.some((loading) => loading);
           }
         )
@@ -115,8 +111,7 @@ export const initializeFiltersManager = (
       debounceTime(0),
       filter(([loading, allChildFilters]) => !loading)
     )
-    .subscribe(([loading, allChildFilters]) => {
-      console.log({ loading });
+    .subscribe(([, allChildFilters]) => {
       unpublishedChildFilters$.next(allChildFilters);
     });
 
@@ -183,6 +178,7 @@ export const initializeFiltersManager = (
     },
     cleanup: () => {
       autoPublishFiltersSubscription.unsubscribe();
+      requiredFiltersSubscription.unsubscribe();
       filterManagerSubscription.unsubscribe();
       forcePublishSubscription.unsubscribe();
     },

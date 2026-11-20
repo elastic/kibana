@@ -49,6 +49,8 @@ export { apiPublishesReload, type PublishesReload } from './interfaces/fetch/pub
 export {
   apiAppliesFilters,
   type AppliesFilters,
+  apiPublishesAwaitingRequiredFilters,
+  type PublishesAwaitingRequiredFilters,
   apiAppliesTimeslice,
   type AppliesTimeslice,
   apiHasUseGlobalFiltersSetting,

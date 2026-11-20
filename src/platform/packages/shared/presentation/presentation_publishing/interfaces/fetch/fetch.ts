@@ -140,7 +140,6 @@ export function fetch$(api: unknown): Observable<FetchContext> {
   const apiPauseFetch = apiPublishesPauseFetch(api) ? api.isFetchPaused$ : of(false);
   const isFetchPaused$ = combineLatest([parentPauseFetch, apiPauseFetch]).pipe(
     map(([parentRequestingPause, apiRequestingPause]) => {
-      console.log({ parentRequestingPause, apiRequestingPause });
       return parentRequestingPause || apiRequestingPause;
     })
   );

@@ -79,7 +79,6 @@ export const DashboardViewport = ({
   });
 
   const styles = useMemoCss(dashboardViewportStyles);
-  console.log({ awaitingRequired });
   return (
     <div
       className={classNames('dshDashboardViewportWrapper', {

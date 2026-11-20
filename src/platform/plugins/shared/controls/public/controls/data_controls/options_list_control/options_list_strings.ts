@@ -58,6 +58,22 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.editor.selectionOptionsTitle', {
         defaultMessage: 'Selections',
       }),
+    getRequiredSelectionsLabel: (singleSelect: boolean) =>
+      singleSelect
+        ? i18n.translate('controls.optionsList.editor.requiredSelectionLabel', {
+            defaultMessage: 'Make selection required',
+          })
+        : i18n.translate('controls.optionsList.editor.requiredSelectionsLabel', {
+            defaultMessage: 'Make selections required',
+          }),
+    getRequiredSelectionsTooltip: (singleSelect: boolean) =>
+      singleSelect
+        ? i18n.translate('controls.optionsList.editor.requiredSelectionTooltip', {
+            defaultMessage: 'Delay panel loading until a selection is made.',
+          })
+        : i18n.translate('controls.optionsList.editor.requiredSelectionsTooltip', {
+            defaultMessage: 'Delay panel loading until at least one selection is made.',
+          }),
     selectionTypes: {
       multi: {
         getLabel: () =>

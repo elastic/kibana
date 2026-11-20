@@ -43,6 +43,7 @@ import type {
   PublishesTitle,
   PublishesUnifiedSearch,
   PublishesApproximation,
+  PublishesAwaitingRequiredFilters,
   PublishesViewMode,
   PublishesWritableViewMode,
   PublishingSubject,
@@ -181,6 +182,7 @@ export type DashboardApi = CanExpandPanels &
   HasUniqueId &
   PresentationContainer &
   PublishesDataLoading &
+  PublishesAwaitingRequiredFilters &
   PublishesDataSources &
   PublishesDescription &
   PublishesHideBorder &

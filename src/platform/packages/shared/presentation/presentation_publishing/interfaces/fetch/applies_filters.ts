@@ -19,6 +19,20 @@ export const apiAppliesFilters = (unknownApi: unknown): unknownApi is AppliesFil
   return Boolean(unknownApi && (unknownApi as AppliesFilters)?.appliedFilters$ !== undefined);
 };
 
+/** True while the API requires a selection that has not yet produced filters; parents wait on this before fetching. */
+export interface PublishesAwaitingRequiredFilters {
+  awaitingRequiredFilters$: PublishingSubject<boolean>;
+}
+
+export const apiPublishesAwaitingRequiredFilters = (
+  unknownApi: unknown
+): unknownApi is PublishesAwaitingRequiredFilters => {
+  return Boolean(
+    unknownApi &&
+      (unknownApi as PublishesAwaitingRequiredFilters)?.awaitingRequiredFilters$ !== undefined
+  );
+};
+
 export interface AppliesTimeslice {
   appliedTimeslice$: PublishingSubject<[number, number] | undefined>;
 }

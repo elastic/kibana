@@ -558,7 +558,6 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                           selectedControlType
                         ) as Partial<State>)
                       : undefined;
-                  console.log({ transformedState, editorState });
                   if (selectedControlType && (!controlId || controlType !== selectedControlType)) {
                     // we need to create a new control from scratch
                     try {

@@ -31,10 +31,7 @@ import type { Filter } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import {
-  apiPublishesEditablePauseFetch,
-  type StateComparators,
-} from '@kbn/presentation-publishing';
+import { type StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager, WithAllKeys } from '@kbn/presentation-publishing/state_manager/types';
 
@@ -166,10 +163,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
       }
       dataSources$.next(dataView ? [dataView] : undefined);
     });
-
-  filtersLoading$.subscribe((loading) => {
-    console.log('SET FILTERS LOADING', { loading });
-  });
 
   const defaultFieldLabel$ = new BehaviorSubject<string>(state.field_name ?? '');
   const fieldNameSubscription = combineLatest([

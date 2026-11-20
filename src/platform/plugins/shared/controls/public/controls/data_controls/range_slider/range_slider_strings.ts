@@ -31,6 +31,18 @@ export const RangeSliderStrings = {
       }),
   },
   editor: {
+    getSelectionsTitle: () =>
+      i18n.translate('controls.rangeSlider.editor.selectionsTitle', {
+        defaultMessage: 'Selections',
+      }),
+    getRequiredSelectionsLabel: () =>
+      i18n.translate('controls.rangeSlider.editor.requiredSelectionsLabel', {
+        defaultMessage: 'Make selections required',
+      }),
+    getRequiredSelectionsTooltip: () =>
+      i18n.translate('controls.rangeSlider.editor.requiredSelectionsTooltip', {
+        defaultMessage: 'Delay panel loading until at least one selection is made.',
+      }),
     getStepTitle: () =>
       i18n.translate('controls.rangeSlider.editor.stepSizeTitle', {
         defaultMessage: 'Step size',

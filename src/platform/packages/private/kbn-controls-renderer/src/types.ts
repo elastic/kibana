@@ -52,6 +52,10 @@ export interface PublishesFocusedPanelId {
   focusedPanelId$: BehaviorSubject<string | undefined>;
 }
 
+export interface PublishesRequired {
+  required$: PublishingSubject<boolean | undefined>;
+}
+
 export interface PublishesLabel {
   label$: PublishingSubject<string | undefined>;
 }

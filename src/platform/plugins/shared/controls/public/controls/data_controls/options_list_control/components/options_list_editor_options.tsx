@@ -146,12 +146,8 @@ export const OptionsListEditorOptions = ({
                 compressed
                 label={
                   <ControlSettingTooltipLabel
-                    label={singleSelect ? 'Make selection required' : 'Make selections required'}
-                    tooltip={
-                      singleSelect
-                        ? 'Delay panel loading until a selection is made.'
-                        : 'Delay panel loading until at least one selection is made.'
-                    }
+                    label={OptionsListStrings.editor.getRequiredSelectionsLabel(singleSelect)}
+                    tooltip={OptionsListStrings.editor.getRequiredSelectionsTooltip(singleSelect)}
                   />
                 }
                 checked={requiredSelections}
@@ -159,7 +155,7 @@ export const OptionsListEditorOptions = ({
                   setRequiredSelections(!requiredSelections);
                   updateState({ required: !requiredSelections });
                 }}
-                data-test-subj={'dataControl__ignoreValidationsAdditionalSetting'}
+                data-test-subj="optionsListControl__requiredSelectionsAdditionalSetting"
               />
             </>
           )}

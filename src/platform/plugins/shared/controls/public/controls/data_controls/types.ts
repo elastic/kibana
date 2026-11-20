@@ -11,7 +11,10 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
-import type { HasPanelCapabilities } from '@kbn/presentation-publishing';
+import type {
+  HasPanelCapabilities,
+  PublishesAwaitingRequiredFilters,
+} from '@kbn/presentation-publishing';
 import type {
   AppliesFilters,
   HasEditCapabilities,
@@ -40,6 +43,7 @@ export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'
   PublishesField &
   PublishesDataLoading &
   AppliesFilters &
+  Partial<PublishesAwaitingRequiredFilters> &
   HasPanelCapabilities &
   ReturnType<typeof initializeLabelManager>['api'] & {
     setDataLoading: (loading: boolean) => void;

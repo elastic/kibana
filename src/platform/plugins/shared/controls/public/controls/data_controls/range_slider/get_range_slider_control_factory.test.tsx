@@ -180,6 +180,45 @@ describe('RangeSliderControlApi', () => {
     });
   });
 
+  describe('awaitingRequiredFilters$', () => {
+    const buildWithState = async (state: Partial<RangeSliderControlState>) =>
+      factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          ...state,
+        } as RangeSliderControlState,
+        finalizeApi,
+        uuid,
+        parentApi,
+      });
+
+    test('is published and true when required with no selection', async () => {
+      const { api } = await buildWithState({ required: true });
+      expect(
+        (api as unknown as { awaitingRequiredFilters$: BehaviorSubject<boolean> })
+          .awaitingRequiredFilters$.value
+      ).toBe(true);
+    });
+
+    test('is false when not required', async () => {
+      const { api } = await buildWithState({ required: false });
+      expect(
+        (api as unknown as { awaitingRequiredFilters$: BehaviorSubject<boolean> })
+          .awaitingRequiredFilters$.value
+      ).toBe(false);
+    });
+
+    test('becomes false once a value is selected', async () => {
+      const { api } = await buildWithState({ required: true, value: ['5', '10'] });
+      const awaiting$ = (api as unknown as { awaitingRequiredFilters$: BehaviorSubject<boolean> })
+        .awaitingRequiredFilters$;
+      await waitFor(() => expect(awaiting$.value).toBe(false));
+    });
+  });
+
   describe('selected range has no results', () => {
     test('should display invalid state', async () => {
       totalResults = 0; // simulate no results by returning hits total of zero

@@ -148,6 +148,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         },
         hasSelections$: selections.hasRangeSelection$,
         supportsJsonExport: true,
+        awaitingRequiredFilters$: dataControlManager.internalApi.awaitingRequiredFilters$,
         cancelRequests: () => {
           cancelMinMaxRequests();
           cancelHasNoResultsRequests();

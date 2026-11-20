@@ -323,10 +323,6 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         setSelectedOptions: selectionsManager.api.setSelectedOptions,
         supportsJsonExport: true,
         awaitingRequiredFilters$: dataControlManager.internalApi.awaitingRequiredFilters$,
-        // filtersLoading$: combineLatest([
-        //   dataControlManager.api.filtersLoading$,
-        //   dataControlManager.internalApi.awaitingRequiredFilters$,
-        // ]).pipe(map(([filtersLoading, awaitingRequired]) => filtersLoading || awaitingRequired)),
       });
 
       const componentApi: DSLOptionsListComponentApi = {

@@ -175,6 +175,60 @@ describe('initializeDataControlManager', () => {
     });
   });
 
+  describe('awaitingRequiredFilters$', () => {
+    const buildManager = (state: Partial<DataControlState>, willHaveInitialFilter = false) =>
+      initializeDataControlManager({
+        controlId: 'myControlId',
+        controlType: 'myControlType',
+        state: { ...dataControlState, ...state },
+        editorStateManager: initializeStateManager({}, {}),
+        parentApi: {},
+        typeDisplayName: 'My Control Type',
+        willHaveInitialFilter,
+        getInitialFilter: () => ({ meta: {}, query: { match_all: {} } }),
+      });
+
+    const selectedFilter = { meta: {}, query: { match_phrase: { myFieldName: 'a' } } };
+
+    test('is false when the control is not required', async () => {
+      const manager = await buildManager({ required: false });
+      expect(manager.internalApi.awaitingRequiredFilters$.value).toBe(false);
+    });
+
+    test('is true when required and there is no selection', async () => {
+      const manager = await buildManager({ required: true });
+      expect(manager.internalApi.awaitingRequiredFilters$.value).toBe(true);
+    });
+
+    test('is false when required and the initial state has a selection', async () => {
+      const manager = await buildManager({ required: true }, true);
+      expect(manager.internalApi.awaitingRequiredFilters$.value).toBe(false);
+    });
+
+    test('updates as filters are output and cleared', async () => {
+      const manager = await buildManager({ required: true });
+      manager.internalApi.setOutputFilter(selectedFilter);
+      expect(manager.internalApi.awaitingRequiredFilters$.value).toBe(false);
+      manager.internalApi.setOutputFilter(undefined);
+      expect(manager.internalApi.awaitingRequiredFilters$.value).toBe(true);
+    });
+
+    test('updates when the required setting is toggled', async () => {
+      const manager = await buildManager({ required: false });
+      manager.api.setRequired?.(true);
+      expect(manager.internalApi.awaitingRequiredFilters$.value).toBe(true);
+      manager.api.setRequired?.(false);
+      expect(manager.internalApi.awaitingRequiredFilters$.value).toBe(false);
+    });
+
+    test('stops updating after cleanup', async () => {
+      const manager = await buildManager({ required: true });
+      manager.cleanup();
+      manager.internalApi.setOutputFilter(selectedFilter);
+      expect(manager.internalApi.awaitingRequiredFilters$.value).toBe(true);
+    });
+  });
+
   describe('ESQL query subscription', () => {
     const esqlState: DataControlState = {
       ...dataControlState,

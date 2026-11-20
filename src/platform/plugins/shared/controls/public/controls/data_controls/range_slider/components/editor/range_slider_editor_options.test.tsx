@@ -75,5 +75,21 @@ describe('RangeSliderEditorOptions', () => {
       );
       expect(Boolean(component.queryByText('Make selections required'))).toBe(isPinned);
     });
+
+    test('persists the required state via updateState when toggled', () => {
+      const updateState = jest.fn();
+      const component = render(
+        <RangeSliderEditorOptions
+          initialState={{} as RangeSliderControlState}
+          isPinned={true}
+          updateState={updateState}
+          setControlEditorValid={jest.fn()}
+        />
+      );
+      fireEvent.click(component.getByLabelText(/Make selections required/));
+      expect(updateState).toHaveBeenCalledWith({ required: true });
+      fireEvent.click(component.getByLabelText(/Make selections required/));
+      expect(updateState).toHaveBeenLastCalledWith({ required: false });
+    });
   });
 });

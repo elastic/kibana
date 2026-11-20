@@ -7,44 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { UseEuiTheme } from '@elastic/eui';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiPageTemplate,
-  EuiText,
-  euiBreakpoint,
-  euiMinBreakpoint,
-} from '@elastic/eui';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { EuiImage, EuiPageTemplate, EuiText, euiBreakpoint, euiMinBreakpoint } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import { coreServices, uiActionsService } from '../../../services/kibana_services';
-import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
-import { useFeaturedItems } from '../../../dashboard_app/top_nav/add_panel_button/use_featured_items';
-import { FeaturedItemCard } from '../../../dashboard_app/top_nav/add_panel_button/components/featured_item_card';
-import { DashboardEmptyScreenChat } from './dashboard_empty_screen_chat';
-import { OPEN_DASHBOARD_CHAT_ACTION_ID } from './dashboard_empty_screen_chat_action';
+import { coreServices } from '../../../services/kibana_services';
 
 export function AwaitingFiltersScreen() {
-  const { showWriteControls } = useMemo(() => {
-    return getDashboardCapabilities();
-  }, []);
-
-  const dashboardApi = useDashboardApi();
-  const { featuredItems, loading: featuredItemsLoading } = useFeaturedItems({ dashboardApi });
   const isDarkTheme = useKibanaIsDarkMode();
-  const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
-  const isEditMode = viewMode === 'edit';
-  const hasChatItem = uiActionsService.hasAction(OPEN_DASHBOARD_CHAT_ACTION_ID);
-
   const styles = useMemoCss(emptyScreenStyles);
 
   // TODO replace these SVGs with versions from EuiIllustration as soon as it becomes available.
@@ -52,44 +26,30 @@ export function AwaitingFiltersScreen() {
     `/plugins/dashboard/assets/${isDarkTheme ? 'required_filters_dark' : 'required_filters'}.svg`
   );
 
-  // If the user ends up in edit mode without write privileges, we shouldn't show the edit prompt.
-  const showEditPrompt = showWriteControls && isEditMode;
-
-  if (showEditPrompt && featuredItemsLoading) {
-    return <div css={emptyScreenStyles.parent} />;
-  }
-
-  const emptyPromptTestSubject = (() => {
-    if (showEditPrompt) return 'emptyDashboardWidget';
-    return showWriteControls ? 'dashboardEmptyReadWrite' : 'dashboardEmptyReadOnly';
-  })();
-
   const title = (() => {
-    const titleString = i18n.translate('dashboard.emptyScreen.noPermissionsTitle', {
+    const titleString = i18n.translate('dashboard.emptyScreen.awaitingRequiredControlsTitle', {
       defaultMessage: 'Waiting for required controls.',
     });
     return <h2>{titleString}</h2>;
   })();
 
-  const body = (() => {
-    if (showEditPrompt) return undefined;
-    const bodyString = showWriteControls
-      ? i18n.translate('dashboard.emptyScreen.viewModeSubtitle', {
-          defaultMessage: 'Enter edit mode, and then start adding your visualizations.',
-        })
-      : i18n.translate('dashboard.emptyScreen.noPermissionsSubtitle', {
-          defaultMessage: 'You need additional privileges to edit this dashboard.',
-        });
-    return (
-      <EuiText size="s" color="subdued">
-        <span>{bodyString}</span>
-      </EuiText>
-    );
-  })();
+  const body = (
+    <EuiText size="s" color="subdued">
+      <span>
+        {i18n.translate('dashboard.emptyScreen.awaitingRequiredControlsSubtitle', {
+          defaultMessage: 'Make a selection in each required control to show the dashboard panels.',
+        })}
+      </span>
+    </EuiText>
+  );
 
   return (
     <div css={emptyScreenStyles.parent}>
-      <EuiPageTemplate grow={false} data-test-subj={emptyPromptTestSubject} css={styles.template}>
+      <EuiPageTemplate
+        grow={false}
+        data-test-subj="dashboardAwaitingRequiredFilters"
+        css={styles.template}
+      >
         <EuiPageTemplate.EmptyPrompt
           icon={<EuiImage size="fullWidth" src={imageUrl} alt="" />}
           title={title}
@@ -153,17 +113,4 @@ const emptyScreenStyles = {
       },
     });
   },
-  actionsWrapper: css({
-    width: '100%',
-    maxWidth: '100%',
-    minWidth: 0,
-  }),
-  // Force Chat onto its own full-width row above the other featured cards.
-  chatItem: css({
-    flexBasis: '100%',
-    minWidth: 0,
-  }),
-  featuredItem: css({
-    minWidth: 0,
-  }),
 };

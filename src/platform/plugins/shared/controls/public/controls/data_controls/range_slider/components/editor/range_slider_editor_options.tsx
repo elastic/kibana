@@ -31,22 +31,24 @@ export const RangeSliderEditorOptions = ({
     <>
       {isPinned && (
         <EuiFormRow
-          label={'Selections'}
-          data-test-subj="optionsListControl__selectionOptionsRadioGroup"
+          label={RangeSliderStrings.editor.getSelectionsTitle()}
+          data-test-subj="rangeSliderControl__selectionOptionsRow"
         >
           <EuiSwitch
             compressed
             label={
               <ControlSettingTooltipLabel
-                label={'Make selections required'}
-                tooltip={'Delay panel loading until at least one selection is made.'}
+                label={RangeSliderStrings.editor.getRequiredSelectionsLabel()}
+                tooltip={RangeSliderStrings.editor.getRequiredSelectionsTooltip()}
               />
             }
             checked={requiredSelections}
             onChange={() => {
-              setRequiredSelections(!requiredSelections);
+              const newRequired = !requiredSelections;
+              setRequiredSelections(newRequired);
+              updateState({ required: newRequired });
             }}
-            data-test-subj={'dataControl__ignoreValidationsAdditionalSetting'}
+            data-test-subj="rangeSliderControl__requiredSelectionsAdditionalSetting"
           />
         </EuiFormRow>
       )}

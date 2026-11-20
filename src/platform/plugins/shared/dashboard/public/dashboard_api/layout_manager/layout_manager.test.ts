@@ -903,6 +903,101 @@ describe('layout manager', () => {
       expect(loadingStates.at(-1)).toEqual(false);
     });
 
+    describe('awaiting required filters', () => {
+      const panel2 = { id: 'panel2', config: {}, grid: { w: 1, h: 1, x: 0, y: 0 }, type: 'type' };
+
+      test('does not wait for grid panels while the grid is replaced by the awaiting screen', () => {
+        const awaitingRequiredFilters$ = new BehaviorSubject<boolean>(true);
+        const loadingStates: boolean[] = [];
+        const layoutManager = initializeLayoutManager(
+          viewModeManagerMock,
+          [panel1],
+          pinnedControls,
+          trackPanelMock,
+          awaitingRequiredFilters$
+        );
+        layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+          loadingStates.push(loading);
+        });
+        expect(loadingStates.at(-1)).toBe(true);
+
+        // only the pinned controls are rendered, so only they are needed
+        layoutManager.api.registerChildApi({ uuid: pinnedControls[0].id } as DefaultEmbeddableApi);
+        layoutManager.api.registerChildApi({ uuid: pinnedControls[1].id } as DefaultEmbeddableApi);
+        expect(loadingStates.at(-1)).toBe(false);
+      });
+
+      test('waits for grid panels once the awaiting screen goes away', () => {
+        const awaitingRequiredFilters$ = new BehaviorSubject<boolean>(true);
+        const loadingStates: boolean[] = [];
+        const layoutManager = initializeLayoutManager(
+          viewModeManagerMock,
+          [panel1],
+          pinnedControls,
+          trackPanelMock,
+          awaitingRequiredFilters$
+        );
+        layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+          loadingStates.push(loading);
+        });
+        layoutManager.api.registerChildApi({ uuid: pinnedControls[0].id } as DefaultEmbeddableApi);
+        layoutManager.api.registerChildApi({ uuid: pinnedControls[1].id } as DefaultEmbeddableApi);
+        expect(loadingStates.at(-1)).toBe(false);
+
+        // the grid mounts, but its panel API is not available yet
+        awaitingRequiredFilters$.next(false);
+        expect(loadingStates.at(-1)).toBe(true);
+
+        layoutManager.api.registerChildApi(panel1Api);
+        expect(loadingStates.at(-1)).toBe(false);
+      });
+
+      test('still waits for pinned controls while awaiting required filters', () => {
+        const loadingStates: boolean[] = [];
+        const layoutManager = initializeLayoutManager(
+          viewModeManagerMock,
+          [panel1],
+          pinnedControls,
+          trackPanelMock,
+          new BehaviorSubject<boolean>(true)
+        );
+        layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+          loadingStates.push(loading);
+        });
+        layoutManager.api.registerChildApi({ uuid: pinnedControls[0].id } as DefaultEmbeddableApi);
+        expect(loadingStates.at(-1)).toBe(true);
+      });
+
+      test('visibleChildren$ only includes pinned panels while awaiting required filters', () => {
+        const awaitingRequiredFilters$ = new BehaviorSubject<boolean>(true);
+        const layoutManager = initializeLayoutManager(
+          viewModeManagerMock,
+          [panel1],
+          pinnedControls,
+          trackPanelMock,
+          awaitingRequiredFilters$
+        );
+        const visible: string[][] = [];
+        layoutManager.internalApi.visibleChildren$.subscribe((ids) => visible.push(ids));
+        expect(visible.at(-1)).toEqual([pinnedControls[0].id, pinnedControls[1].id]);
+
+        awaitingRequiredFilters$.next(false);
+        expect(visible.at(-1)).toEqual([pinnedControls[0].id, pinnedControls[1].id, PANEL_ONE_ID]);
+      });
+
+      test('visibleChildren$ excludes panels in collapsed sections', () => {
+        const layoutManager = initializeLayoutManager(
+          viewModeManagerMock,
+          [panel2, { ...section1, collapsed: true }],
+          pinnedControls,
+          trackPanelMock
+        );
+        const visible: string[][] = [];
+        layoutManager.internalApi.visibleChildren$.subscribe((ids) => visible.push(ids));
+        expect(visible.at(-1)).toEqual([pinnedControls[0].id, pinnedControls[1].id, 'panel2']);
+      });
+    });
+
     test('toggling a collapsible section does not trigger loading when children APIs are available', async () => {
       const loadingStates: boolean[] = [];
       const panel2 = { id: 'panel2', config: {}, grid: { w: 1, h: 1, x: 0, y: 0 }, type: 'type' };

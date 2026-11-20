@@ -38,7 +38,7 @@ import {
   type PublishesTooltipLabel,
 } from '@kbn/controls-schemas/src/types';
 import type { ControlsRendererParentApi } from '../types';
-import { apiPublishesLabel } from '../utils';
+import { apiPublishesLabel, apiPublishesRequired } from '../utils';
 import { controlWidthStyles } from './control_panel.styles';
 import { DragHandle } from './drag_handle';
 import { FloatingActions } from './floating_actions';
@@ -72,6 +72,7 @@ export const ControlPanel = ({
 
   const [panelLabel, setPanelLabel] = useState<string | undefined>();
   const [panelTooltipLabel, setPanelTooltipLabel] = useState<string | undefined>();
+  const [isRequired, setIsRequired] = useState<boolean>(false);
   const [selectedPanelRelatedPanels, setSelectedPanelRelatedPanels] = useState<string[]>([]);
 
   const prependWrapperRef = useRef<HTMLDivElement>(null);
@@ -120,6 +121,15 @@ export const ControlPanel = ({
           setPanelLabel(result);
         })
       );
+    }
+    if (apiPublishesRequired(api)) {
+      subscriptions.add(
+        api.required$.subscribe((result) => {
+          setIsRequired(Boolean(result));
+        })
+      );
+    } else {
+      setIsRequired(false);
     }
     if (apiPublishesTooltipLabel(api)) {
       subscriptions.add(
@@ -180,7 +190,7 @@ export const ControlPanel = ({
         tabIndex={enableIndicateRelatedPanels ? 0 : undefined}
       >
         <span css={styles.prependWrapperStyles} ref={prependWrapperRef}>
-          {api?.required$.getValue() ? '* ' : null}
+          {isRequired ? '* ' : null}
           {panelLabel}
           {canIndicateRelatedPanels && numberOfRelatedPanels === 0 && (
             <>

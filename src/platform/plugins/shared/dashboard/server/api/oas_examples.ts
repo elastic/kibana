@@ -739,6 +739,7 @@ const dashboardCreateRequestExamples = {
             values_source: ControlValuesSource.FIELD,
             use_global_filters: true,
             ignore_validations: false,
+            required: false,
             exclude: false,
             exists_selected: false,
             run_past_timeout: false,

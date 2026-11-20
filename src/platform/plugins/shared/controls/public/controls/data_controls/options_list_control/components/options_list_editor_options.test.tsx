@@ -74,6 +74,31 @@ describe('Options list sorting button', () => {
       });
       expect(Boolean(component.queryByText('Make selections required'))).toBe(isPinned);
     });
+
+    test('persists the required state via updateState when toggled', async () => {
+      updateState.mockClear();
+      const component = mountComponent({
+        initialState: getMockedState(),
+        field: { type: 'string' } as DataViewField,
+      });
+      const toggle = component.getByTestId(
+        'optionsListControl__requiredSelectionsAdditionalSetting'
+      );
+      await userEvent.click(toggle);
+      expect(updateState).toHaveBeenCalledWith({ required: true });
+      await userEvent.click(toggle);
+      expect(updateState).toHaveBeenLastCalledWith({ required: false });
+    });
+
+    test('starts checked when the initial state is required', () => {
+      const component = mountComponent({
+        initialState: getMockedState({ required: true }),
+        field: { type: 'string' } as DataViewField,
+      });
+      expect(
+        component.getByTestId('optionsListControl__requiredSelectionsAdditionalSetting')
+      ).toBeChecked();
+    });
   });
 
   describe('run past timeout', () => {
