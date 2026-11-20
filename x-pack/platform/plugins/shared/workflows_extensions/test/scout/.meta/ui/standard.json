@@ -1,11 +1,11 @@
 {
-  "sha1": "abd0b9010c2f6bc1a2575f2c4e61e23ba0b62bde",
+  "sha1": "",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "cc764775ac314da-2de02fd2ecc4134",
+      "id": "4dac2ef8344277c-2de02fd2ecc4134",
       "title": "Workflows Extensions - Custom Step Definitions Client Registration should register every custom step on both the server and the client",
       "expectedStatus": "passed",
       "tags": [
@@ -24,7 +24,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_extensions/test/scout/ui/tests/step_definitions_client_registration.spec.ts",
-        "line": 76,
+        "line": 74,
         "column": 25
       }
     }
