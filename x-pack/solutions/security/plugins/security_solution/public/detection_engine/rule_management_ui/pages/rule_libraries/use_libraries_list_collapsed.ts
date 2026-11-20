@@ -9,12 +9,12 @@ import { useCallback, useState } from 'react';
 
 const STORAGE_KEY = 'securitySolution.ruleLibraries.listCollapsed';
 
-// Collapsed unless the user expanded it before.
+// Expanded unless the user collapsed it before.
 const readStoredValue = (): boolean => {
   try {
-    return window.localStorage.getItem(STORAGE_KEY) !== 'false';
+    return window.localStorage.getItem(STORAGE_KEY) === 'true';
   } catch {
-    return true;
+    return false;
   }
 };
 

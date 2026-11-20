@@ -13,27 +13,27 @@ describe('useLibrariesListCollapsed', () => {
     window.localStorage.clear();
   });
 
-  it('starts collapsed', () => {
+  it('starts expanded', () => {
     const { result } = renderHook(() => useLibrariesListCollapsed());
 
-    expect(result.current.isCollapsed).toBe(true);
+    expect(result.current.isCollapsed).toBe(false);
   });
 
-  it('remembers that the user expanded it', () => {
+  it('remembers that the user collapsed it', () => {
     const first = renderHook(() => useLibrariesListCollapsed());
     act(() => first.result.current.toggleCollapsed());
 
     const second = renderHook(() => useLibrariesListCollapsed());
 
-    expect(first.result.current.isCollapsed).toBe(false);
-    expect(second.result.current.isCollapsed).toBe(false);
+    expect(first.result.current.isCollapsed).toBe(true);
+    expect(second.result.current.isCollapsed).toBe(true);
   });
 
-  it('remembers that the user collapsed it again', () => {
+  it('remembers that the user expanded it again', () => {
     const first = renderHook(() => useLibrariesListCollapsed());
     act(() => first.result.current.toggleCollapsed());
     act(() => first.result.current.toggleCollapsed());
 
-    expect(renderHook(() => useLibrariesListCollapsed()).result.current.isCollapsed).toBe(true);
+    expect(renderHook(() => useLibrariesListCollapsed()).result.current.isCollapsed).toBe(false);
   });
 });

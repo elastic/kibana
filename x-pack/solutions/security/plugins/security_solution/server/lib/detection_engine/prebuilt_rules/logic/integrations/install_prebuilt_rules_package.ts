@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import {
+  COMMUNITY_LIBRARY_ID,
   ELASTIC_LIBRARY_ID,
   RULE_LIBRARY_DEFINITIONS,
   RULE_LIBRARY_SO_TYPE,
@@ -72,8 +73,8 @@ async function syncLibraries(
     packages,
     logger,
     definitions,
-    // Other libraries are synced on demand, so app loads do not hammer their hosts.
-    libraryIds: [ELASTIC_LIBRARY_ID],
+    // Local testing only: the community library comes from github, so it should not be synced at app load.
+    libraryIds: [ELASTIC_LIBRARY_ID, COMMUNITY_LIBRARY_ID],
   });
 
   for (const result of results) {
