@@ -10,6 +10,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPanel,
   euiFontSize,
   useEuiMemoizedStyles,
@@ -41,10 +42,19 @@ const componentStyles = (euiThemeContext: UseEuiTheme) => {
       font-size: ${fontSize};
       line-height: ${lineHeight};
       font-weight: ${euiTheme.font.weight.regular};
-      color: ${euiTheme.colors.textParagraph};
+      color: ${euiTheme.colors.textSubdued};
+    `,
+    content: css`
+      display: flex;
+      align-items: center;
+      gap: ${euiTheme.size.s};
+      text-align: left;
+    `,
+    icon: css`
+      flex-shrink: 0;
     `,
     label: css`
-      display: block;
+      min-inline-size: 0;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -87,7 +97,7 @@ export const ConversationStartersList: React.FC<ConversationStartersListProps> =
       {starters.map((starter, index) => (
         <EuiFlexItem key={starter.label} grow={false} css={styles.item}>
           <EuiPanel
-            hasBorder
+            hasShadow
             paddingSize="none"
             css={styles.card}
             disabled={isDisabled}
@@ -101,7 +111,10 @@ export const ConversationStartersList: React.FC<ConversationStartersListProps> =
               detail: `${index + 1}`,
             })}
           >
-            <span css={styles.label}>{starter.label}</span>
+            <span css={styles.content}>
+              <EuiIcon type="pivot" size="s" color="subdued" css={styles.icon} aria-hidden />
+              <span css={styles.label}>{starter.label}</span>
+            </span>
           </EuiPanel>
         </EuiFlexItem>
       ))}

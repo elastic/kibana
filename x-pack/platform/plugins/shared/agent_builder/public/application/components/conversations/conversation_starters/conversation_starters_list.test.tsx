@@ -39,6 +39,20 @@ describe('ConversationStartersList', () => {
     expect(screen.getByText('second')).toBeInTheDocument();
   });
 
+  it('shows the pivot icon on each card', () => {
+    render(
+      <ConversationStartersList
+        starters={[{ label: 'first' }, { label: 'second' }]}
+        onSelect={jest.fn()}
+      />,
+      { wrapper }
+    );
+
+    screen.getAllByTestId('agentBuilderConversationStarter').forEach((card) => {
+      expect(card.querySelector('[data-euiicon-type="pivot"]')).not.toBeNull();
+    });
+  });
+
   it('calls onSelect with the starter when a card is clicked', () => {
     const onSelect = jest.fn();
     const starter = { label: 'Top errors' };
