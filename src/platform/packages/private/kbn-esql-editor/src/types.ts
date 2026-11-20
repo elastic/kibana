@@ -10,7 +10,6 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -127,8 +126,8 @@ interface ESQLVariableService {
 export interface EsqlPluginStartBase {
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
-  /** Present when the optional inference plugin is available; NL / suggest-fix UI should stay hidden otherwise. */
-  inference?: InferencePublicStart;
+  /** False when the optional inference plugin is absent; NL / suggest-fix UI should stay hidden. */
+  isInferenceAvailable?: boolean;
   isServerless: boolean;
   enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
   enrichViews: (views: EsqlView[]) => Promise<EsqlView[]>;

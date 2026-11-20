@@ -68,8 +68,8 @@ export interface EsqlPluginSetup {
 export interface EsqlPluginStart {
   variablesService: EsqlVariablesService;
   isServerless: boolean;
-  /** Present when the optional inference plugin is available for NL / suggest-fix features. */
-  inference?: InferencePublicStart;
+  /** True when the optional inference plugin is available for NL / suggest-fix features. */
+  isInferenceAvailable: boolean;
   enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
   enrichViews: (views: EsqlView[]) => Promise<EsqlView[]>;
   /**
@@ -170,7 +170,7 @@ export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
     const start = {
       isServerless,
       variablesService,
-      inference,
+      isInferenceAvailable: Boolean(inference),
       getLicense: async () => await licensing?.getLicense(),
       enrichSources: (sources: ESQLSourceResult[]) => this.sourceEnricherService.enrich(sources),
       enrichViews: (views: EsqlView[]) => this.viewEnricherService.enrich(views),
