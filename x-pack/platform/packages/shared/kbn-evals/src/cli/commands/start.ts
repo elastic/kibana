@@ -18,6 +18,7 @@ import {
   formatEvalCliCommand,
   evalRunFlags,
 } from '../run_helpers';
+import { formatProfilesSummary } from '../profiles';
 import { formatScoutTarget } from '../scout_target';
 
 export const startCmd: Command<void> = {
@@ -59,8 +60,8 @@ export const startCmd: Command<void> = {
       projects,
       profileEnvOverrides,
       suiteScoutEnv,
-      exportProfile,
-      datasetsProfile,
+      tracingProfile,
+      evaluationsKbnProfile,
       requiresEisCcm,
     } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile, suite });
 
@@ -82,9 +83,7 @@ export const startCmd: Command<void> = {
     if (suite?.serverConfigSet) {
       log.info(`Config:    ${suite.serverConfigSet}`);
     }
-    log.info(
-      `Profiles:  datasets=${datasetsProfile ?? 'config'} export=${exportProfile ?? 'none'}`
-    );
+    log.info(`Profiles:  ${formatProfilesSummary({ evaluationsKbnProfile, tracingProfile })}`);
     log.info('');
 
     const rerunArgs = buildEvalRunArgs({

@@ -16,6 +16,7 @@ import {
   buildEvalRunEnv,
   buildEvalRunArgs,
   formatEvalCliCommand,
+  formatProfilesSummary,
   evalRunFlags,
 } from '@kbn/evals';
 import {
@@ -109,8 +110,8 @@ export const redTeamCmd: Command<void> = {
       projects,
       profileEnvOverrides,
       suiteScoutEnv,
-      exportProfile,
-      datasetsProfile,
+      tracingProfile,
+      evaluationsKbnProfile,
       requiresEisCcm,
     } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile, suite });
 
@@ -128,9 +129,7 @@ export const redTeamCmd: Command<void> = {
     if (suite?.serverConfigSet) {
       log.info(`Config:    ${suite.serverConfigSet}`);
     }
-    log.info(
-      `Profiles:  datasets=${datasetsProfile ?? 'config'} export=${exportProfile ?? 'none'}`
-    );
+    log.info(`Profiles:  ${formatProfilesSummary({ evaluationsKbnProfile, tracingProfile })}`);
     if (redTeamConfig.modules?.length) {
       log.info(`Modules:   ${redTeamConfig.modules.join(', ')}`);
     }

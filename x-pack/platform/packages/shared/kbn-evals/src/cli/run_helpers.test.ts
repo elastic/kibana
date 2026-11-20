@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import Fs from 'fs';
+import Os from 'os';
+import Path from 'path';
 import { FlagsReader, getFlags } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import {
@@ -14,12 +17,14 @@ import {
   loadScoutHookConfig,
   readConcurrencyFlag,
   resolveEvaluationConnectorId,
+  resolveProfileEnvOverrides,
 } from './run_helpers';
 import type { EvalSuiteDefinition } from './suites';
 import {
   loadVaultConfig,
   readSuiteSecretFromDevVault,
   resolveDefaultJudgeConnectorId,
+  VAULT_CONFIG_DIR,
 } from './profiles';
 import { isTTY, promptForConnector } from './prompts';
 
@@ -294,5 +299,113 @@ describe('resolveEvaluationConnectorId', () => {
 
     await expect(resolve([], undefined, 'dev-vault')).resolves.toBe(DEFAULT_JUDGE);
     expect(promptForConnector).not.toHaveBeenCalled();
+  });
+});
+
+describe('profile flags', () => {
+  it('declares the new flags next to the deprecated ones', () => {
+    expect(evalRunFlags.string).toEqual(
+      expect.arrayContaining([
+        'evaluations-kbn-profile',
+        'tracing-profile',
+        'datasets-profile',
+        'export-profile',
+      ])
+    );
+  });
+
+  it.each([
+    ['the new flags', ['--evaluations-kbn-profile', 'kbn', '--tracing-profile', 'trace']],
+    ['the deprecated flags', ['--datasets-profile', 'kbn', '--export-profile', 'trace']],
+  ])('prints the new flag names in the re-run args when given %s', (_, argv) => {
+    const args = buildEvalRunArgs({
+      suiteId: 'agent-builder',
+      evaluationConnectorId: 'judge',
+      projects: [],
+      flagsReader: readFlags(argv),
+    });
+
+    expect(args).toEqual(
+      expect.arrayContaining(['--evaluations-kbn-profile', 'kbn', '--tracing-profile', 'trace'])
+    );
+    expect(args).not.toContain('--datasets-profile');
+    expect(args).not.toContain('--export-profile');
+  });
+
+  describe('resolveProfileEnvOverrides', () => {
+    const repoRoot = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-evals-profile-flags-'));
+    const writeProfile = (name: string, config: object) =>
+      Fs.writeFileSync(
+        Path.join(repoRoot, VAULT_CONFIG_DIR, `config.${name}.json`),
+        JSON.stringify(config)
+      );
+
+    beforeAll(() => {
+      Fs.mkdirSync(Path.join(repoRoot, VAULT_CONFIG_DIR), { recursive: true });
+      writeProfile('kbn', {
+        evaluationsKbn: { url: 'http://kbn.example:5620', apiKey: 'kbn-key' },
+      });
+      writeProfile('trace', {
+        tracingEs: { url: 'http://trace.example:9220', apiKey: 'trace-key' },
+        tracingExporters: [{ http: { url: 'http://trace.example:4318/v1/traces' } }],
+      });
+      writeProfile('both', {
+        evaluationsKbn: { url: 'http://both.example:5620', apiKey: '' },
+        tracingEs: { url: 'http://both.example:9220', apiKey: '' },
+      });
+    });
+
+    afterAll(() => {
+      Fs.rmSync(repoRoot, { recursive: true, force: true });
+    });
+
+    const resolve = async (argv: string[], profile?: string) => {
+      const log = new ToolingLog();
+      const warning = jest.spyOn(log, 'warning').mockImplementation(() => undefined);
+      const result = await resolveProfileEnvOverrides({
+        repoRoot,
+        log,
+        flagsReader: readFlags(argv),
+        profile,
+      });
+      return { result, warning };
+    };
+
+    const OLD_FLAGS = ['--datasets-profile', 'kbn', '--export-profile', 'trace'];
+    const NEW_FLAGS = ['--evaluations-kbn-profile', 'kbn', '--tracing-profile', 'trace'];
+
+    it('gives the same environment for the deprecated flags as for the new ones', async () => {
+      const { result: viaOld } = await resolve(OLD_FLAGS);
+      const { result: viaNew } = await resolve(NEW_FLAGS);
+
+      expect(viaNew.profileEnvOverrides).toEqual(viaOld.profileEnvOverrides);
+      expect(viaNew.profileEnvOverrides).toMatchObject({
+        EVAL_KBN_URL: 'http://kbn.example:5620',
+        EVAL_KBN_API_KEY: 'kbn-key',
+        TRACING_ES_URL: 'http://trace.example:9220',
+        TRACING_ES_API_KEY: 'trace-key',
+      });
+      expect(viaOld.evaluationsKbnProfile).toBe('kbn');
+      expect(viaOld.tracingProfile).toBe('trace');
+    });
+
+    it('lets --profile fill in both, and lets a specific flag win over it', async () => {
+      const { result: fromProfile, warning } = await resolve([], 'both');
+      const { result: overridden } = await resolve(['--tracing-profile', 'trace'], 'both');
+
+      expect(fromProfile.evaluationsKbnProfile).toBe('both');
+      expect(fromProfile.tracingProfile).toBe('both');
+      expect(warning).not.toHaveBeenCalled();
+      expect(overridden.evaluationsKbnProfile).toBe('both');
+      expect(overridden.tracingProfile).toBe('trace');
+    });
+
+    it('warns once per deprecated flag, and not at all for the new ones', async () => {
+      const { warning: oldWarning } = await resolve(OLD_FLAGS);
+      const { warning: newWarning } = await resolve(NEW_FLAGS);
+
+      expect(oldWarning).toHaveBeenCalledTimes(2);
+      expect(newWarning).not.toHaveBeenCalled();
+    });
   });
 });
