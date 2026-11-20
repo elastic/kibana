@@ -18,10 +18,12 @@ const isRecord = (value: unknown): value is UnknownRecord =>
 const nonEmptyString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim().length > 0 ? value : undefined;
 
-/** The readable name of an ES|QL column reference: its label, else the column alias itself. */
+/** The readable name of a dimension: its label, else its ES|QL column alias, else its field. */
 const columnLabel = (reference: unknown): string | undefined =>
   isRecord(reference)
-    ? nonEmptyString(reference.label) ?? nonEmptyString(reference.column)
+    ? nonEmptyString(reference.label) ??
+      nonEmptyString(reference.column) ??
+      nonEmptyString(reference.field)
     : undefined;
 
 const firstColumnLabel = (

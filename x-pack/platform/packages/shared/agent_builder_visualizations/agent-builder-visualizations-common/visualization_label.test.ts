@@ -27,6 +27,11 @@ describe('getLensConfigLabel', () => {
       'Unique Client IPs',
     ],
     [
+      'metric: field of an unlabeled data view metric',
+      { type: 'metric', metrics: [{ type: 'primary', operation: 'average', field: 'bytes' }] },
+      'bytes',
+    ],
+    [
       'legacy_metric: single metric',
       { type: 'legacy_metric', metric: { column: 'Errors' } },
       'Errors',
