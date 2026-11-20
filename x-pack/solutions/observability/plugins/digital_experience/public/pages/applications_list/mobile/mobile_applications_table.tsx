@@ -37,7 +37,7 @@ import {
   metricColumnPreset,
   timeColumnPreset,
 } from '../../../utils/column_presets';
-import { renderLastSeen } from './render_last_seen';
+import { renderLastSeen } from '../components/render_last_seen';
 
 const columnNames = {
   application: i18n.translate('xpack.digitalExperience.applications.mobile.applicationColumn', {

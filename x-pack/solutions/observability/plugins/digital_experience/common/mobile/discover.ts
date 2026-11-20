@@ -6,11 +6,12 @@
  */
 
 import { esql } from '@elastic/esql';
+import type { ESQLSingleAstItem } from '@elastic/esql/types';
 import { resultColumn } from './fields';
 import { mobilePanelQuery, withEnvironment, type MobilePanelFilters } from './filters';
 import { kpiStats, type MobileTimeBucket } from './kpis';
 
-const BUCKET_INTERVALS: Record<MobileTimeBucket, () => ReturnType<typeof esql.exp>> = {
+const BUCKET_INTERVALS: Record<MobileTimeBucket, () => ESQLSingleAstItem> = {
   hour: () => esql.exp`1 hour`,
   day: () => esql.exp`1 day`,
 };

@@ -609,3 +609,5 @@ logged and answer 500 without Elasticsearch details:
 - `public/pages/`: one folder per page (`applications_list/`, `application_details/`, `sessions/`,
   `session_detail/`) with its own components, hooks and utils; what several pages share is in
   `public/components/`, `public/hooks/` and `public/utils/`. `public/application/` is the app shell.
+  The applications list keeps each tab's components in `web/` and `mobile/`, and what both use in
+  `components/`.

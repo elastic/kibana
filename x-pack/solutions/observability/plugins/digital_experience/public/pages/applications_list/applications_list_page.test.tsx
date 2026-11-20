@@ -27,7 +27,7 @@ import type {
 } from '../../../common/types/applications';
 import { TimeRangePicker } from '../../components/time_range_picker';
 import { EnvironmentFilter } from '../../components/environment_filter';
-import { SourceFilter } from './components/source_filter';
+import { SourceFilter } from './web/source_filter';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useSourceFilter } from '../../hooks/use_source_filter';
 import { usePlatformFilter } from '../../hooks/use_platform_filter';
@@ -45,8 +45,8 @@ jest.mock('../../components/time_range_picker', () => ({ TimeRangePicker: jest.f
 jest.mock('../../components/environment_filter', () => ({
   EnvironmentFilter: jest.fn(() => null),
 }));
-jest.mock('./components/source_filter', () => ({ SourceFilter: jest.fn(() => null) }));
-jest.mock('./components/platform_filter', () => ({ PlatformFilter: jest.fn(() => null) }));
+jest.mock('./web/source_filter', () => ({ SourceFilter: jest.fn(() => null) }));
+jest.mock('./mobile/platform_filter', () => ({ PlatformFilter: jest.fn(() => null) }));
 
 const timeRange = { rangeFrom: 'now-15m', rangeTo: 'now' };
 
