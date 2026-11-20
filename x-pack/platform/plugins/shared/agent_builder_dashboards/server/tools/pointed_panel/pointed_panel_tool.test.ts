@@ -43,11 +43,11 @@ const pointer = (panelId = 'panel-1', dashboardAttachmentId = 'dashboard-1') => 
   ],
 });
 
-const dashboard = (panels: unknown[]) => ({
+const dashboard = (panels: unknown[], extra: Record<string, unknown> = {}) => ({
   id: 'dashboard-1',
   type: DASHBOARD_ATTACHMENT_TYPE,
   current_version: 1,
-  versions: [{ version: 1, data: { title: 'Web Traffic', panels } }],
+  versions: [{ version: 1, data: { title: 'Web Traffic', panels, ...extra } }],
 });
 
 const customPanel = (config: Record<string, unknown>) => ({
@@ -104,7 +104,7 @@ describe('createPointedPanelTool', () => {
     expect(createPointedPanelTool().id).toBe(dashboardTools.pointedPanel);
   });
 
-  it('reads only the pointed panel with its ES|QL query', async () => {
+  it('reads only the pointed panel with the dashboard stored time range', async () => {
     const config = {
       type: 'metric',
       title: 'Requests',
@@ -113,10 +113,10 @@ describe('createPointedPanelTool', () => {
     const { result, add } = await run(
       {
         [POINTER_ID]: pointer(),
-        'dashboard-1': dashboard([
-          lensPanel(config),
-          { ...customPanel({ template: '<p/>' }), id: 'panel-2' },
-        ]),
+        'dashboard-1': dashboard(
+          [lensPanel(config), { ...customPanel({ template: '<p/>' }), id: 'panel-2' }],
+          { time_range: { from: 'now-7d', to: 'now' } }
+        ),
       },
       'read'
     );
@@ -128,7 +128,7 @@ describe('createPointedPanelTool', () => {
         panel_attachment_id: POINTER_ID,
         dashboard_attachment_id: 'dashboard-1',
         panel: { id: 'panel-1', type: LENS_EMBEDDABLE_TYPE, title: 'Requests', config },
-        esql: 'FROM logs | STATS c = COUNT(*)',
+        time_range: { from: 'now-7d', to: 'now' },
       },
     });
     expect(add).not.toHaveBeenCalled();

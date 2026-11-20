@@ -67,7 +67,7 @@ const pointedPanelSchema = lazySchema(() =>
     action: z
       .enum(['read', 'show'])
       .describe(
-        '"read" returns the panel\'s current config; "show" copies the panel into a visualization attachment to render inline in the chat.'
+        '"read" returns the panel\'s ids and current config; "show" copies the panel into a visualization attachment to render inline in the chat.'
       ),
   })
 );
@@ -196,7 +196,7 @@ export const createPointedPanelTool = (): BuiltinToolDefinition<typeof pointedPa
   description: `Read or show the dashboard panel a ${DASHBOARD_PANEL_ATTACHMENT_TYPE} pointer attachment names, without reading the whole dashboard attachment.
 
 Actions:
-- \`read\`: returns the panel's id, type, title, current config and ES|QL when it has any: one query for a Lens panel, the list of queries for a custom panel, in the order its template reads them. Use it to answer a question about the panel or describe what it shows. Editing does not need it: \`${dashboardTools.generateDashboard}\` loads the panel's current config itself.
+- \`read\`: returns \`dashboard_attachment_id\`, the panel's id, type, title and current config, and the dashboard's \`time_range\` when the dashboard stores one (otherwise the dashboard follows the chat's time range). The config holds the panel's ES|QL: \`data_source.query\` for a Lens panel (one per layer for layered charts), \`esql_query\` for a custom panel, in the order its template reads them. Use it to answer a question about the panel, or to get the ids an edit needs; \`${dashboardTools.generateDashboard}\` loads the panel's current config itself.
 - \`show\`: copies the panel into a new visualization attachment and returns \`attachment_id\` and \`version\`. Render it as the last part of your response with \`<render_attachment id="{attachment_id}" version="{version}" />\`. Use it when the user asks to see, show, paint or preview the panel here in the chat, or asks for it as a visualization. Never regenerate the panel with the visualization creation tool for that: it would author a different chart. The copy is independent of the dashboard: later panel edits do not update it. It renders with the dashboard's time range only when the dashboard stores one, otherwise with the chat's; the dashboard's filters, query and control selections are not applied, so its numbers can differ from the panel on the dashboard. Supports ES|QL Lens panels and custom panels whose queries read no control variables.
 
 This tool never changes the panel; edits go through \`${dashboardTools.generateDashboard}\` by panel id.`,
@@ -209,9 +209,12 @@ This tool never changes the panel; edits go through \`${dashboardTools.generateD
     const { pointerData, dashboardData, panel } = resolution;
     const { panel_id: panelId } = pointerData;
     const title = getPanelLabel(panel) ?? pointerData.label;
+    // Only a dashboard that stores its time range has one; otherwise it follows the chat's range.
+    const timeRange = dashboardData.time_range
+      ? { time_range: { from: dashboardData.time_range.from, to: dashboardData.time_range.to } }
+      : {};
 
     if (action === 'read') {
-      const esql = getPanelEsql(panel);
       return {
         results: [
           {
@@ -226,7 +229,7 @@ This tool never changes the panel; edits go through \`${dashboardTools.generateD
                 ...(title ? { title } : {}),
                 config: panel.config,
               },
-              ...(esql ? { esql } : {}),
+              ...timeRange,
             },
           },
         ],
@@ -246,11 +249,6 @@ This tool never changes the panel; edits go through \`${dashboardTools.generateD
     } catch (error) {
       return errorResult(error instanceof Error ? error.message : String(error), panelAttachmentId);
     }
-
-    // Only a dashboard that stores its time range has one; otherwise the copy uses the chat's range.
-    const timeRange = dashboardData.time_range
-      ? { time_range: { from: dashboardData.time_range.from, to: dashboardData.time_range.to } }
-      : {};
 
     try {
       const attachment = await attachments.add({
