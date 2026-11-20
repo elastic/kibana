@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
@@ -12,8 +13,7 @@ import { getFleetAgentsReadIntegrationsNoneRole } from '../fixtures/services/pri
 
 test.describe(
   'When the user has Fleet Agents Read built-in role',
-  // until QAF/Scout doesn't support custom roles in ECH
-  { tag: '@local-stateful-classic' },
+  { tag: tags.stateful.classic },
   () => {
     test('is accessible but user cannot perform any write actions on agent tabs', async ({
       browserAuth,

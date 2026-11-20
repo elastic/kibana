@@ -10,8 +10,10 @@ import type { HttpStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core-di-browser';
 import { buildPath } from '@kbn/core-http-browser';
 import type {
+  CreateRuleData,
   FindRuleTemplatesRequest,
   FindRuleTemplatesResponse,
+  RuleResponse,
   RuleTemplateResponse,
   RuleTemplateTagsParams,
   RuleTemplateTagsResponse,
@@ -20,6 +22,9 @@ import { ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH } from '../constants';
 
 const buildRuleTemplatePath = (id: string): string =>
   buildPath(`${ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH}/{id}`, { id });
+
+const buildInstallRuleTemplatePath = (id: string): string =>
+  buildPath(`${ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH}/{id}/_install`, { id });
 
 @injectable()
 export class RuleTemplatesApi {
@@ -53,5 +58,12 @@ export class RuleTemplatesApi {
 
   public async getRuleTemplate(id: string, signal?: AbortSignal) {
     return this.http.get<RuleTemplateResponse>(buildRuleTemplatePath(id), { signal });
+  }
+
+  /** Creates a rule from `payload` and records `id` as the template it came from. */
+  public async installRuleTemplate(id: string, payload: CreateRuleData) {
+    return this.http.post<RuleResponse>(buildInstallRuleTemplatePath(id), {
+      body: JSON.stringify(payload),
+    });
   }
 }

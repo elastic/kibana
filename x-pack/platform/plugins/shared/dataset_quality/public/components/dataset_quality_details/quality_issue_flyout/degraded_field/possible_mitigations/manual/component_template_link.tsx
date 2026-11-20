@@ -76,7 +76,6 @@ export function CreateEditComponentTemplateLink({
         data-test-url={templateUrl}
         onClick={onClickHandler}
         target="_blank"
-        color="primary"
         css={{ width: '100%' }}
       >
         <EuiFlexGroup alignItems="center" gutterSize="s">

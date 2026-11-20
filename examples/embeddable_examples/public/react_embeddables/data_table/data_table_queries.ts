@@ -14,7 +14,7 @@ import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
   listenForCompatibleApi,
-  apiPublishesDataViews,
+  apiPublishesDataSources,
   fetch$,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, lastValueFrom, map, Subscription, switchMap } from 'rxjs';
@@ -57,15 +57,23 @@ export const initializeDataTableQueries = async (
   // set up listeners - these will listen for the closest compatible api (parent or sibling)
   const stopListeningForDataViews = listenForCompatibleApi(
     api.parentApi,
-    apiPublishesDataViews,
+    apiPublishesDataSources,
     (dataViewProvider) => {
       if (!dataViewProvider) {
         dataView$.next(defaultDataView);
         return;
       }
-      const dataViewSubscription = dataViewProvider.dataViews$.subscribe((dataViews) => {
-        dataView$.next(dataViews?.[0] ?? defaultDataView);
-      });
+      const dataViewSubscription = dataViewProvider.dataSources$
+        .pipe(
+          switchMap(async (dataSources) => {
+            const id = dataSources?.[0]?.id;
+            const dataView = id
+              ? await services.data.dataViews.get(id, false).catch(() => undefined)
+              : undefined;
+            return dataView ?? defaultDataView;
+          })
+        )
+        .subscribe((dataView) => dataView$.next(dataView));
       return () => dataViewSubscription.unsubscribe();
     }
   );

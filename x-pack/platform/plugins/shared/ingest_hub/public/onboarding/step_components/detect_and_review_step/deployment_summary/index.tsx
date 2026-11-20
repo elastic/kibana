@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../../aws_service_matrix';
 import type { ServiceChipState } from '../../../onboarding_flow_context';
+import type { ServiceAgentInfo } from '../use_service_data_detection';
 import { ServiceTile } from './service_tile';
 import { useDeploymentSummary } from './use_deployment_summary';
 
@@ -31,8 +32,12 @@ interface DeploymentSummaryProps {
   awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined;
   serviceNames: Record<string, string>;
   statusByInstanceId: Record<string, ServiceChipState>;
+  /** Fleet agent per service. Services without one (ECF) are absent. */
+  agentInfoByServiceId?: Record<string, ServiceAgentInfo>;
   deploymentMethod: DeploymentMethod;
   receivingCount: number;
+  /** Services whose data goes to an output outside the local cluster, left out of the count. */
+  unverifiedCount?: number;
   totalCount: number;
 }
 
@@ -41,8 +46,10 @@ export function DeploymentSummary({
   awsServicesMap,
   serviceNames,
   statusByInstanceId,
+  agentInfoByServiceId,
   deploymentMethod,
   receivingCount,
+  unverifiedCount = 0,
   totalCount,
 }: DeploymentSummaryProps) {
   const summaryFields = useDeploymentSummary(deploymentMethod);
@@ -139,13 +146,24 @@ export function DeploymentSummary({
               </>
             )}
 
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.ingestHub.detectAndReviewStep.deploymentSummary.receivingCount"
-                defaultMessage="{receiving} of {total} services receiving data"
-                values={{ receiving: receivingCount, total: totalCount }}
-              />
-            </EuiText>
+            {totalCount > unverifiedCount && (
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.ingestHub.detectAndReviewStep.deploymentSummary.receivingCount"
+                  defaultMessage="{receiving} of {total} services receiving data"
+                  values={{ receiving: receivingCount, total: totalCount - unverifiedCount }}
+                />
+              </EuiText>
+            )}
+            {unverifiedCount > 0 && (
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.ingestHub.detectAndReviewStep.deploymentSummary.unverifiedCount"
+                  defaultMessage="Data from {count, plural, one {# service} other {# services}} goes to an output outside this cluster, so it cannot be checked here."
+                  values={{ count: unverifiedCount }}
+                />
+              </EuiText>
+            )}
             <EuiSpacer size="m" />
 
             <EuiFlexGroup wrap gutterSize="s">
@@ -163,6 +181,7 @@ export function DeploymentSummary({
                       status={statusByInstanceId[id] ?? 'instantiating'}
                       entry={entry}
                       deploymentMethod={deploymentMethod}
+                      agentInfo={agentInfoByServiceId?.[id]}
                     />
                   </EuiFlexItem>
                 );

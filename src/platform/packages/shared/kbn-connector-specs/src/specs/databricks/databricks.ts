@@ -44,6 +44,7 @@ import type {
   GetAlertInput,
   GetRunInput,
   GetRunOutputInput,
+  ListClustersInput,
   ListRunsInput,
   PollResponseInput,
   RepairRunInput,
@@ -78,7 +79,7 @@ export const Databricks: ConnectorSpec = {
   metadata: {
     id: '.databricks',
     displayName: 'Databricks',
-    description: i18n.translate('core.kibanaConnectorSpecs.databricks.metadata.description', {
+    description: i18n.translate('connectorSpecs.databricks.metadata.description', {
       defaultMessage:
         'Execute SQL queries, manage jobs, clusters, and warehouses, and monitor alerts in Databricks',
     }),
@@ -99,7 +100,7 @@ export const Databricks: ConnectorSpec = {
             authorizationUrl: {
               placeholder: 'https://{workspace}.azuredatabricks.net/oidc/v1/authorize',
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.databricks.auth.oauth.authorizationUrl.helpText',
+                'connectorSpecs.databricks.auth.oauth.authorizationUrl.helpText',
                 {
                   defaultMessage:
                     "Databricks workspace OAuth authorization URL. Replace '{workspace}' with your Databricks workspace hostname (e.g. adb-1234567890123456.7).",
@@ -108,13 +109,10 @@ export const Databricks: ConnectorSpec = {
             },
             tokenUrl: {
               placeholder: 'https://{workspace}.azuredatabricks.net/oidc/v1/token',
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.databricks.auth.oauth.tokenUrl.helpText',
-                {
-                  defaultMessage:
-                    "Databricks workspace OAuth token endpoint. Replace '{workspace}' with your Databricks workspace hostname.",
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.databricks.auth.oauth.tokenUrl.helpText', {
+                defaultMessage:
+                  "Databricks workspace OAuth token endpoint. Replace '{workspace}' with your Databricks workspace hostname.",
+              }),
             },
             scope: {
               hidden: true,
@@ -126,16 +124,16 @@ export const Databricks: ConnectorSpec = {
         type: 'bearer',
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.databricks.auth.bearer.label', {
+          label: i18n.translate('connectorSpecs.databricks.auth.bearer.label', {
             defaultMessage: 'Personal access token (PAT)',
           }),
           meta: {
             token: {
               sensitive: true,
-              label: i18n.translate('core.kibanaConnectorSpecs.databricks.auth.pat.label', {
+              label: i18n.translate('connectorSpecs.databricks.auth.pat.label', {
                 defaultMessage: 'Databricks access token',
               }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.databricks.auth.pat.helpText', {
+              helpText: i18n.translate('connectorSpecs.databricks.auth.pat.helpText', {
                 defaultMessage:
                   'A Databricks personal access token (PAT). Generate one in the Databricks workspace under User Settings → Developer → Access tokens.',
               }),
@@ -153,16 +151,13 @@ export const Databricks: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'https://{workspace}.azuredatabricks.net/api/2.0/mcp/sql',
-          label: i18n.translate('core.kibanaConnectorSpecs.databricks.config.serverUrl.label', {
+          label: i18n.translate('connectorSpecs.databricks.config.serverUrl.label', {
             defaultMessage: 'MCP server URL',
           }),
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.databricks.config.serverUrl.helpText',
-            {
-              defaultMessage:
-                "The Databricks SQL MCP server URL for your workspace. Replace '{workspace}' with your workspace hostname. ",
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.databricks.config.serverUrl.helpText', {
+            defaultMessage:
+              "The Databricks SQL MCP server URL for your workspace. Replace '{workspace}' with your workspace hostname. ",
+          }),
         }),
     })
   ),
@@ -363,12 +358,18 @@ export const Databricks: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'List all clusters in the Databricks workspace. Returns cluster metadata including cluster_id, ' +
+        'List clusters in the Databricks workspace, a page at a time. Returns cluster metadata including cluster_id, ' +
         'cluster_name, state (RUNNING, TERMINATED, PENDING, etc.), spark_version, and node type. ' +
+        'When the response has a next_page_token, pass it as pageToken to list the next page. ' +
         'Use this to discover available clusters before starting or restarting one.',
       input: ListClustersInputSchema,
-      handler: async (ctx) => {
-        const { data } = await ctx.client.get(`${workspaceOrigin(ctx)}/api/2.0/clusters/list`);
+      handler: async (ctx, input: ListClustersInput) => {
+        const params: Record<string, unknown> = {};
+        if (input.pageSize !== undefined) params.page_size = input.pageSize;
+        if (input.pageToken !== undefined) params.page_token = input.pageToken;
+        const { data } = await ctx.client.get(`${workspaceOrigin(ctx)}/api/2.1/clusters/list`, {
+          params,
+        });
         return data;
       },
     },
@@ -381,7 +382,7 @@ export const Databricks: ConnectorSpec = {
         'Startup is asynchronous — use listClusters to poll until state is RUNNING.',
       input: ClusterIdInputSchema,
       handler: async (ctx, input: ClusterIdInput) => {
-        const { data } = await ctx.client.post(`${workspaceOrigin(ctx)}/api/2.0/clusters/start`, {
+        const { data } = await ctx.client.post(`${workspaceOrigin(ctx)}/api/2.1/clusters/start`, {
           cluster_id: input.clusterId,
         });
         return data;
@@ -396,7 +397,7 @@ export const Databricks: ConnectorSpec = {
         'Restart is asynchronous — use listClusters to poll until state returns to RUNNING.',
       input: ClusterIdInputSchema,
       handler: async (ctx, input: ClusterIdInput) => {
-        const { data } = await ctx.client.post(`${workspaceOrigin(ctx)}/api/2.0/clusters/restart`, {
+        const { data } = await ctx.client.post(`${workspaceOrigin(ctx)}/api/2.1/clusters/restart`, {
           cluster_id: input.clusterId,
         });
         return data;
@@ -485,7 +486,7 @@ export const Databricks: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.databricks.test.description', {
+    description: i18n.translate('connectorSpecs.databricks.test.description', {
       defaultMessage:
         'Verifies connection to the Databricks MCP server by listing available tools.',
     }),
@@ -532,7 +533,7 @@ export const Databricks: ConnectorSpec = {
     '- `runJobNow`, `cancelRun`, and `repairRun` are workflow-only (not exposed to agents).',
     '',
     '### Clusters',
-    '- Use `listClusters` to discover available clusters and their current state.',
+    '- Use `listClusters` to discover available clusters and their current state; follow `next_page_token` with `pageToken` to see more than one page.',
     '- `startCluster` and `restartCluster` are async — poll `listClusters` until state is RUNNING.',
     '- These actions are workflow-only and not exposed to agents.',
     '',

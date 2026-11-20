@@ -14,7 +14,7 @@ import { defaultConfig } from '../../default/stateful/base.config';
 
 const pluginPath = `--plugin-path=${resolve(
   REPO_ROOT,
-  'src/platform/test/plugin_functional/plugins/hardening'
+  'src/platform/test_plugins/plugin_functional/plugins/hardening'
 )}`;
 
 export const servers: ScoutServerConfig = {

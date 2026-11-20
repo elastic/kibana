@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { partition } from 'lodash';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
@@ -13,9 +14,10 @@ import { parseSourceFromConcurrencyKey } from '../../../../lib/workflows/onboard
 const MILLISECONDS_PER_HOUR = 3_600_000;
 
 export interface SourceCandidate {
-  /** The continuous onboarding workflow YAML reads `sourceId` and `sourceSlug`. */
+  /** The continuous onboarding workflow YAML reads these fields. */
   sourceId: string;
   sourceSlug: string;
+  sourceType: NightshiftSource['type'];
   lastCompletedAt: string | null;
 }
 
@@ -24,16 +26,17 @@ export interface SourceClassificationResult {
   candidates: SourceCandidate[];
   upToDate: SourceCandidate[];
   unsupported: string[];
+  disabled: Array<Pick<SourceCandidate, 'sourceId' | 'sourceSlug'>>;
 }
 
 interface ClassifySourcesArgs {
-  sources: Array<Pick<NightshiftSource, 'id' | 'slug' | 'esql_updated_at'>>;
+  sources: Array<Pick<NightshiftSource, 'id' | 'slug' | 'type' | 'esql_updated_at' | 'enabled'>>;
   executions: WorkflowExecutionListItemDto[];
   intervalHours: number;
 }
 
 /**
- * Buckets enabled sources by the latest onboarding execution.
+ * Buckets sources by the latest onboarding execution, with disabled sources only in `disabled`.
  * A non-terminal run stays in `alreadyRunning` even when `esql_updated_at`
  * moved during that run. A terminal run that started before the stored ES|QL
  * changed is a candidate, even inside the interval. A title edit does not
@@ -44,7 +47,9 @@ export const classifySources = ({
   executions,
   intervalHours,
 }: ClassifySourcesArgs): SourceClassificationResult => {
-  const latestBySource = latestExecutionBySource(sources, executions);
+  const [enabledSources, disabledSources] = partition(sources, ({ enabled }) => enabled);
+  const disabled = disabledSources.map(({ id, slug }) => ({ sourceId: id, sourceSlug: slug }));
+  const latestBySource = latestExecutionBySource(enabledSources, executions);
   const nowMs = Date.now();
   const intervalMs = intervalHours * MILLISECONDS_PER_HOUR;
 
@@ -53,7 +58,7 @@ export const classifySources = ({
   const upToDate: SourceCandidate[] = [];
 
   for (const [source, execution] of latestBySource) {
-    const { id: sourceId, slug: sourceSlug } = source;
+    const { id: sourceId, slug: sourceSlug, type: sourceType } = source;
     const bucket = classifyExecution({
       execution,
       esqlUpdatedAt: source.esql_updated_at ?? 0,
@@ -66,10 +71,15 @@ export const classifySources = ({
       continue;
     }
     if (bucket.kind === 'candidate') {
-      ranCandidates.push({ sourceId, sourceSlug, lastCompletedAt: bucket.lastCompletedAt });
+      ranCandidates.push({
+        sourceId,
+        sourceSlug,
+        sourceType,
+        lastCompletedAt: bucket.lastCompletedAt,
+      });
       continue;
     }
-    upToDate.push({ sourceId, sourceSlug, lastCompletedAt: bucket.lastCompletedAt });
+    upToDate.push({ sourceId, sourceSlug, sourceType, lastCompletedAt: bucket.lastCompletedAt });
   }
 
   // Oldest completion first, so a source that has waited longer is scheduled sooner.
@@ -78,15 +88,21 @@ export const classifySources = ({
   );
 
   // Never-run sources have no completion time, so they go ahead of anything that has run.
-  const neverRun = sources
+  const neverRun = enabledSources
     .filter((source) => !latestBySource.has(source))
-    .map((source) => ({ sourceId: source.id, sourceSlug: source.slug, lastCompletedAt: null }));
+    .map((source) => ({
+      sourceId: source.id,
+      sourceSlug: source.slug,
+      sourceType: source.type,
+      lastCompletedAt: null,
+    }));
 
   return {
     alreadyRunning,
     candidates: [...neverRun, ...ranCandidates],
     upToDate,
     unsupported: [],
+    disabled,
   };
 };
 
@@ -94,15 +110,12 @@ export const classifySources = ({
  * Executions arrive newest-first. The first row whose concurrency key carries
  * the id of a known source is that source's latest run.
  */
-const latestExecutionBySource = (
-  sources: ClassifySourcesArgs['sources'],
+const latestExecutionBySource = <TSource extends { id: string }>(
+  sources: readonly TSource[],
   executions: WorkflowExecutionListItemDto[]
-): Map<ClassifySourcesArgs['sources'][number], WorkflowExecutionListItemDto> => {
+): Map<TSource, WorkflowExecutionListItemDto> => {
   const sourcesById = new Map(sources.map((source) => [source.id, source]));
-  const latestBySource = new Map<
-    ClassifySourcesArgs['sources'][number],
-    WorkflowExecutionListItemDto
-  >();
+  const latestBySource = new Map<TSource, WorkflowExecutionListItemDto>();
 
   for (const execution of executions) {
     if (!execution.concurrencyGroupKey) {

@@ -9,10 +9,11 @@ import {
   ALERT_RULE_TYPE_ID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_TIME_RANGE,
   ALERT_UUID,
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-constants';
 import { getServicesAlerts } from './get_service_alerts';
 import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
@@ -59,23 +60,37 @@ function hasSloEnvFilter(filters: QueryFilter[]): boolean {
 }
 
 describe('getServicesAlerts', () => {
-  it('filters by active status and time range', async () => {
+  it('filters by active status and alert lifetime time range', async () => {
     const client = createMockAlertsClient();
-    const start = Date.now() - 3600000;
-    const end = Date.now();
+    const nowMs = Date.parse('2026-05-12T13:00:00.000Z');
+    const start = nowMs - 3600000;
+    const end = nowMs;
+    const realDateNow = Date.now;
+    Date.now = jest.fn(() => nowMs);
 
-    await getServicesAlerts({
-      apmAlertsClient: client as unknown as ApmAlertsClient,
-      start,
-      end,
-    });
+    try {
+      await getServicesAlerts({
+        apmAlertsClient: client as unknown as ApmAlertsClient,
+        start,
+        end,
+      });
+    } finally {
+      Date.now = realDateNow;
+    }
 
     const filters = getFilters(client);
 
     expect(filters).toEqual(
       expect.arrayContaining([{ term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } }])
     );
-    expect(filters.find((f) => f.range)).toBeDefined();
+    expect(filters.find((f) => f.range?.[ALERT_TIME_RANGE])).toEqual({
+      range: {
+        [ALERT_TIME_RANGE]: expect.objectContaining({
+          gte: start,
+          lte: end,
+        }),
+      },
+    });
   });
 
   it('extends a past end to now so currently-active alerts are not missed', async () => {
@@ -97,7 +112,7 @@ describe('getServicesAlerts', () => {
     }
 
     const rangeFilter = getFilters(client).find((f) => f.range);
-    expect(rangeFilter?.range?.['@timestamp']).toEqual(
+    expect(rangeFilter?.range?.[ALERT_TIME_RANGE]).toEqual(
       expect.objectContaining({
         gte: start,
         lte: nowMs,

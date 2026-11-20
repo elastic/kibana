@@ -21,6 +21,7 @@ import {
   testIndexName,
   uniqueSuffix,
   updateSource,
+  validateSourceQuery,
 } from '../fixtures';
 
 const TITLE_PREFIX = 'scout-sources-validation';
@@ -131,7 +132,10 @@ apiTest.describe(
 
     // TS on a plain index fails at LIMIT 0, so use a pattern that matches nothing yet: a source
     // whose indices do not exist is accepted by design.
-    apiTest('accepts TS over a pattern with no indices yet', async ({ apiClient }) => {
+    // Skipped: ES now rejects a view that starts with TS and has no STATS after it
+    // (elastic/elasticsearch#162011), and a source query cannot contain STATS,
+    // see https://github.com/elastic/kibana/issues/299153
+    apiTest.fixme('accepts TS over a pattern with no indices yet', async ({ apiClient }) => {
       const response = await createSource(apiClient, manager.cookieHeader, {
         title: `${TITLE_PREFIX}-${suffix}-ts`,
         esql: `TS ${index}-none-*`,
@@ -175,6 +179,29 @@ apiTest.describe(
       expect(fetched.body.health).toBe('ok');
 
       await deleteSource(apiClient, manager.cookieHeader, response.body.source.id);
+    });
+
+    apiTest('answers validate with what create would do', async ({ apiClient }) => {
+      const accepted = await validateSourceQuery(apiClient, manager.cookieHeader, {
+        esql: `FROM ${index}-logs-none-* | WHERE status >= 500`,
+      });
+      expect(accepted).toHaveStatusCode(200);
+      expect(accepted.body).toStrictEqual({ valid: true, type: 'logs', index_exists: false });
+
+      const existing = await validateSourceQuery(apiClient, manager.cookieHeader, {
+        esql: `FROM ${index} | WHERE status >= 500`,
+      });
+      expect(existing).toHaveStatusCode(200);
+      expect(existing.body).toStrictEqual({ valid: true, type: 'unknown', index_exists: true });
+
+      const disallowed = await validateSourceQuery(apiClient, manager.cookieHeader, {
+        esql: `FROM ${index} | STATS c = COUNT(*)`,
+      });
+      expect(disallowed).toHaveStatusCode(200);
+      expect(disallowed.body).toStrictEqual({
+        valid: false,
+        error: expect.stringContaining('Command "STATS" is not allowed'),
+      });
     });
 
     apiTest(

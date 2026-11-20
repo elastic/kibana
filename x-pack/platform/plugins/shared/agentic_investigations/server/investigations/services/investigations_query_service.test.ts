@@ -384,6 +384,42 @@ describe('InvestigationsQueryService', () => {
       expect(filter).toContain('created_at >= 2026-01-01T00\\:00\\:00.000Z');
     });
 
+    it('pushes the last-modified window into the search filter', async () => {
+      const { service, client } = setup({ searchResults: [] });
+
+      await service.list(
+        request,
+        parseQuery({
+          updated_after: '2026-01-01T00:00:00.000Z',
+          updated_before: '2026-01-04T00:00:00.000Z',
+        })
+      );
+
+      const filter = searchFilter(client);
+      expect(filter).toContain('updated_at >= 2026-01-01T00\\:00\\:00.000Z');
+      expect(filter).toContain('updated_at <= 2026-01-04T00\\:00\\:00.000Z');
+    });
+
+    it('drops conversations modified outside the last-modified window', async () => {
+      const { service } = setup({
+        searchResults: [
+          conversation('old', { updated_at: '2025-12-30T00:00:00.000Z' }),
+          conversation('in', { updated_at: '2026-01-02T00:00:00.000Z' }),
+          conversation('future', { updated_at: '2026-01-09T00:00:00.000Z' }),
+        ],
+      });
+
+      const response = await service.list(
+        request,
+        parseQuery({
+          updated_after: '2026-01-01T00:00:00.000Z',
+          updated_before: '2026-01-04T00:00:00.000Z',
+        })
+      );
+
+      expect(response.results.map(({ id }) => id)).toEqual(['in']);
+    });
+
     it('pages, sorts, and hydrates only the requested page', async () => {
       const { service, subjectsService } = setup({
         searchResults: [
@@ -548,6 +584,64 @@ describe('InvestigationsQueryService', () => {
       ]);
     });
 
+    it('resolves in_progress=true once over every candidate and pages the ones in progress', async () => {
+      const { service, inProgress } = setup({
+        searchResults: [
+          conversation('idle', { created_at: '2026-01-03T00:00:00.000Z' }),
+          conversation('busy-new', { created_at: '2026-01-02T00:00:00.000Z' }),
+          conversation('busy-old', { created_at: '2026-01-01T00:00:00.000Z' }),
+        ],
+        inProgressIds: ['busy-new', 'busy-old'],
+      });
+
+      const response = await service.list(
+        request,
+        parseQuery({ in_progress: 'true', per_page: 1 })
+      );
+
+      // The page reuses the state the filter resolved instead of resolving it again.
+      expect(inProgress.findInProgressIds).toHaveBeenCalledTimes(1);
+      expect(inProgress.findInProgressIds).toHaveBeenCalledWith(request, SPACE_ID, [
+        expect.objectContaining({ id: 'idle' }),
+        expect.objectContaining({ id: 'busy-new' }),
+        expect.objectContaining({ id: 'busy-old' }),
+      ]);
+      expect(response.pagination.total).toBe(2);
+      expect(response.results.map(({ id, in_progress: busy }) => ({ id, busy }))).toEqual([
+        { id: 'busy-new', busy: true },
+      ]);
+    });
+
+    it('searches open investigations with workflow executions, most recently updated first, for in_progress=true', async () => {
+      const { service, client } = setup();
+
+      await service.list(request, parseQuery({ in_progress: 'true', sort_field: 'created_at' }));
+
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({ sort: { field: 'updated_at', order: 'desc' } })
+      );
+      const filter = searchFilter(client);
+      expect(filter).toContain('NOT metadata.status: closed');
+      expect(filter).toContain('metadata.workflow_execution_ids: *');
+    });
+
+    it('excludes the investigations in progress for in_progress=false, without narrowing the search', async () => {
+      const { service, client } = setup({
+        searchResults: [conversation('busy'), conversation('idle')],
+        inProgressIds: ['busy'],
+      });
+
+      const response = await service.list(request, parseQuery({ in_progress: 'false' }));
+
+      expect(response.results.map(({ id, in_progress: busy }) => ({ id, busy }))).toEqual([
+        { id: 'idle', busy: false },
+      ]);
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({ sort: { field: 'created_at', order: 'desc' } })
+      );
+      expect(searchFilter(client)).not.toContain('workflow_execution_ids');
+    });
+
     it('reads the requested ids as the caller', async () => {
       const { service, client } = setup({
         bulkGetResults: [conversation('conv-1'), conversation('conv-2')],
@@ -623,6 +717,30 @@ describe('InvestigationsQueryService', () => {
       const { results } = await service.list(request, parseQuery({ query: 'checkout' }));
 
       expect(results.map(({ id }) => id).sort()).toEqual(['summary', 'title', 'verdict']);
+    });
+
+    it('returns the assignees, leaving them out when nobody is assigned', async () => {
+      const { service } = setup({
+        searchResults: [
+          conversation('assigned', {
+            metadata: { status: 'open', assignees: ['uid-1', '', 'uid-2'] },
+            updated_at: '2026-01-03T00:00:00.000Z',
+          }),
+          conversation('cleared', {
+            metadata: { status: 'open', assignees: [] },
+            updated_at: '2026-01-02T00:00:00.000Z',
+          }),
+          conversation('never'),
+        ],
+      });
+
+      const { results } = await service.list(request, parseQuery());
+
+      expect(results.map(({ id, metadata }) => ({ id, metadata }))).toEqual([
+        { id: 'assigned', metadata: { status: 'open', assignees: ['uid-1', 'uid-2'] } },
+        { id: 'cleared', metadata: { status: 'open' } },
+        { id: 'never', metadata: { status: 'open' } },
+      ]);
     });
 
     it('reports a title Agent Builder has not generated yet and never matches text against it', async () => {
@@ -749,6 +867,23 @@ describe('InvestigationsQueryService', () => {
         critical: 0,
       });
       expect(inProgress.findInProgressIds).not.toHaveBeenCalled();
+    });
+
+    it('leaves the investigations in progress out of the counts for in_progress=false', async () => {
+      const { service } = setup({
+        searchResults: [
+          conversation('busy', { metadata: { severity: 'high' } }),
+          conversation('idle', { metadata: { severity: 'high' } }),
+        ],
+        inProgressIds: ['busy'],
+      });
+
+      await expect(service.severityCounts(request, { in_progress: false })).resolves.toEqual({
+        low: 0,
+        medium: 0,
+        high: 1,
+        critical: 0,
+      });
     });
   });
 

@@ -36,6 +36,10 @@ Vagrant.configure("2") do |config|
     docker.vm.box = 'ubuntu/jammy64'
     docker.vm.provision "ansible" do |ansible|
       ansible.playbook = "docker.yml"
+      ansible.extra_vars = {
+        kibana_docker_image_variant: ENV.fetch("KIBANA_DOCKER_IMAGE_VARIANT", "default"),
+        kibana_enable_pointer_compression: ENV.fetch("KBN_ENABLE_POINTER_COMPRESSION", "false")
+      }
     end
     docker.vm.network "private_network", ip: "192.168.56.7"
   end

@@ -21,8 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/283727
-  describe.skip('Serverless Synonyms Set Detail', function () {
+  describe('Serverless Synonyms Set Detail', function () {
     before(async () => {
       await kibanaServer.uiSettings.update({ 'searchSynonyms:synonymsEnabled': 'true' });
       await retry.try(async () => {

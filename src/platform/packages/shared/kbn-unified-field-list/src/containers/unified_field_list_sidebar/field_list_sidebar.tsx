@@ -55,6 +55,7 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
   | 'dataView'
   | 'trackUiMetric'
   | 'onAddFilter'
+  | 'onAddOtherFilter'
   | 'onAddBreakdownField'
   | 'onAddFieldToWorkspace'
   | 'onRemoveFieldFromWorkspace'
@@ -183,6 +184,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   onRemoveFieldFromWorkspace,
   onRemoveFieldsFromWorkspace,
   onAddFilter,
+  onAddOtherFilter,
   onSelectedFieldFilter,
   onEditField,
   onDeleteField,
@@ -373,6 +375,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
           onAddBreakdownField={onAddBreakdownField}
           onAddFieldToWorkspace={onAddFieldToWorkspace}
           onAddFilter={onAddFilter}
+          onAddOtherFilter={onAddOtherFilter}
           onDeleteField={onDeleteField}
           onEditField={onEditField}
           onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
@@ -400,6 +403,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       onAddFieldToWorkspace,
       onRemoveFieldFromWorkspace,
       onAddFilter,
+      onAddOtherFilter,
       trackUiMetric,
       multiFieldsMap,
       onEditField,

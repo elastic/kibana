@@ -28,6 +28,24 @@ describe('discoverSessionApiMetricsTabTypeStateSchema', () => {
     expect(parsed).not.toHaveProperty('grid_sort_direction');
   });
 
+  it('accepts a histogram visualization', () => {
+    expect(
+      discoverSessionApiMetricsTabTypeStateSchema.parse({
+        ...metricsTabTypeState,
+        histogram_visualization: 'lnsHeatmap',
+      })
+    ).toMatchObject({ histogram_visualization: 'lnsHeatmap' });
+  });
+
+  it('rejects an unknown histogram visualization', () => {
+    expect(() =>
+      discoverSessionApiMetricsTabTypeStateSchema.parse({
+        ...metricsTabTypeState,
+        histogram_visualization: 'pie',
+      })
+    ).toThrow();
+  });
+
   it('accepts grid sort fields', () => {
     expect(
       discoverSessionApiMetricsTabTypeStateSchema.parse({

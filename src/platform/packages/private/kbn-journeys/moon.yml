@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/synthtrace-client'
   - '@kbn/synthtrace'
   - '@kbn/core-chrome-browser-components'
+  - '@kbn/content-list-common'
 tags:
   - test-helper
   - package
@@ -39,6 +40,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

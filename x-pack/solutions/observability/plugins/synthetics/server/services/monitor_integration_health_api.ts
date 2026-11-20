@@ -7,7 +7,7 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import {
   ConfigKey,
   PrivateLocationHealthStatusValue,
@@ -139,7 +139,7 @@ export class MonitorIntegrationHealthApi {
           this.getExpectedPackagePolicyIds(foundMonitors, privateLocationAPI, allSpaces),
           allSpaces
         ),
-        this.getExistingAgentPoliciesMap(referencedAgentPolicyIds, allSpaces),
+        this.getExistingAgentPoliciesMap(referencedAgentPolicyIds),
         this.getAgentStatusMap(referencedAgentPolicyIds),
       ]);
 
@@ -332,27 +332,24 @@ export class MonitorIntegrationHealthApi {
     return new Map((existingPackagePolicies ?? []).map((policy) => [policy.id, policy]));
   }
 
-  private async getExistingAgentPoliciesMap(agentPolicyIds: string[], allSpaces: Set<string>) {
+  private async getExistingAgentPoliciesMap(agentPolicyIds: string[]) {
     if (agentPolicyIds.length === 0) {
       return new Map<string, { id: string }>();
     }
 
-    // Agent policies can be scoped to a non-default space via space_ids. A plain
-    // createInternalRepository() defaults to the 'default' namespace and misses
-    // those policies. Query every relevant space with a namespace-scoped internal
-    // client (same pattern as PackagePolicyService.getByIds) — see issue #270477.
-    const spaces = new Set<string>([this.spaceId, DEFAULT_SPACE_ID, ...allSpaces]);
-    const unsafeClient = this.server.coreStart.savedObjects.getUnsafeInternalClient();
-    const results = await Promise.all(
-      [...spaces].map((space) =>
-        this.server.fleet.agentPolicyService.getByIds(
-          unsafeClient.asScopedToNamespace(space),
-          agentPolicyIds,
-          { ignoreMissing: true, withPackagePolicies: false, fields: ['name'] }
-        )
-      )
+    // Agent policies can be scoped to a non-default space via space_ids, so look
+    // each one up across all spaces (`spaceId: ALL_SPACES_ID`) — see issue #270477.
+    // Uses createInternalRepository(), not getUnsafeInternalClient(): the latter's
+    // spaces extension runs on a headerless synthetic request, and resolving `*`
+    // makes it call `_has_privileges` without credentials, failing the whole
+    // request with a 401 (same as bumpAgentPolicyRevision documents).
+    const unscopedSoClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const agentPolicies = await this.server.fleet.agentPolicyService.getByIds(
+      unscopedSoClient,
+      agentPolicyIds.map((id) => ({ id, spaceId: ALL_SPACES_ID })),
+      { ignoreMissing: true, withPackagePolicies: false, fields: ['name'] }
     );
-    return new Map(results.flat().map((policy) => [policy.id, policy]));
+    return new Map(agentPolicies.map((policy) => [policy.id, policy]));
   }
 
   private async getAgentStatusMap(

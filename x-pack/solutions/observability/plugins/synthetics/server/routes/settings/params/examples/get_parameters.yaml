@@ -38,3 +38,12 @@ responses:
                 tags: [tag3]
                 namespaces: [namespace2]
                 value: value2
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/synthetics/params" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/synthetics/params

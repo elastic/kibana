@@ -11,7 +11,7 @@ import type {
   AttachmentResolveContext,
 } from '@kbn/agent-builder-server/attachments';
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { RULE_MANAGEMENT_SKILL_ID } from '@kbn/alerting-v2-constants';
+import { RULE_AUTHORING_SKILL_ID } from '@kbn/alerting-v2-constants';
 import {
   ALERT_ATTACHMENT_TYPE,
   alertAttachmentDataSchema,
@@ -96,7 +96,7 @@ const formatAlertDescription = ({
     `Use the ${refreshToolId} tool to refresh this alert with the latest state from Elasticsearch.`
   );
   lines.push(
-    `Use the ${ruleToolId} tool to fetch the alert rule associated with this alert, then query that rule's source indices. To modify that rule, or create a new rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`
+    `Use the ${ruleToolId} tool to fetch the alert rule associated with this alert, then query that rule's source indices. To modify that rule, or create a new rule, load the ${RULE_AUTHORING_SKILL_ID} skill.`
   );
   lines.push(
     `Use the ${ruleEventsToolId} tool to fetch this alert's rule events from .rule-events, including timestamp, episode.status, severity, source, group_hash, and event data. Call it with no arguments; pass start/end only to narrow the window. It returns at most 100 rows (oldest first). If truncated is true, call again with start set to the last event's @timestamp and the same end; skip the overlapping first row. Do not retry the same window. If truncated is still true for a very small window, stop and use the rows you have.`
@@ -244,7 +244,7 @@ export const createAlertAttachmentType = ({
     },
 
     getAgentDescription: () =>
-      `A platform alert attachment — a stateful lifecycle of related alert events for a platform alert rule and group. This is not a Security/SIEM detection alert: do not use the security alert-analysis skill, detection-rule tools, or .alerts-security.alerts-* indices. It is read-only snapshot context. Use the attachment-scoped refresh_alert tool when you need the latest alert state, get_rule to fetch the associated platform alert rule and its source indices, and get_rule_events to fetch the alert's underlying rule events. To create, explain, or modify that rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`,
+      `A platform alert attachment — a stateful lifecycle of related alert events for a platform alert rule and group. This is not a Security/SIEM detection alert: do not use the security alert-analysis skill, detection-rule tools, or .alerts-security.alerts-* indices. It is read-only snapshot context. Use the attachment-scoped refresh_alert tool when you need the latest alert state, get_rule to fetch the associated platform alert rule and its source indices, and get_rule_events to fetch the alert's underlying rule events. To create, explain, or modify that rule, load the ${RULE_AUTHORING_SKILL_ID} skill.`,
 
     isReadonly: true,
 

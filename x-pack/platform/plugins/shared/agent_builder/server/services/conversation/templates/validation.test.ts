@@ -243,7 +243,7 @@ describe('validateMetadataUpdate', () => {
         summary: 'x'.repeat(30), // exceeds max_length
         score: -5, // below min
       })
-    ).toThrowError(
+    ).toThrow(
       // All three violations should be in the message
       expect.objectContaining({
         message: expect.stringMatching(/severity.*summary.*score|score.*summary.*severity/s),
@@ -347,6 +347,48 @@ describe('validateTemplateDefinition', () => {
       note: { input_type: 'TEXT', options: ['a'] } as ConversationTemplateFieldDefinition,
     });
     expect(() => validateTemplateDefinition(template)).toThrow('"options"');
+  });
+
+  it('passes report_changes on a SELECT field', () => {
+    const template = makeTemplate({
+      status: { input_type: 'SELECT', options: ['open', 'closed'], report_changes: true },
+    });
+    expect(() => validateTemplateDefinition(template)).not.toThrow();
+  });
+
+  it.each(['TEXT', 'NUMBER', 'DATE', 'TOGGLE', 'TEXT_ARRAY', 'USER'] as const)(
+    'rejects report_changes on a %s field',
+    (inputType) => {
+      const template = makeTemplate({
+        field: { input_type: inputType, report_changes: true },
+      });
+      expect(() => validateTemplateDefinition(template)).toThrow(
+        'field "field": "report_changes" is only valid for SELECT'
+      );
+    }
+  );
+
+  it('rejects report_changes: false on a non-SELECT field too', () => {
+    const template = makeTemplate({
+      notes: { input_type: 'TEXT', report_changes: false },
+    });
+    expect(() => validateTemplateDefinition(template)).toThrow('"report_changes"');
+  });
+
+  it('rejects report_changes on a field whose name contains a dot', () => {
+    const template = makeTemplate({
+      'triage.status': { input_type: 'SELECT', options: ['open', 'closed'], report_changes: true },
+    });
+    expect(() => validateTemplateDefinition(template)).toThrow(
+      'field "triage.status": "report_changes" is only valid for a name without dots'
+    );
+  });
+
+  it('allows a dotted name on a field that does not report changes', () => {
+    const template = makeTemplate({
+      'triage.status': { input_type: 'SELECT', options: ['open', 'closed'] },
+    });
+    expect(() => validateTemplateDefinition(template)).not.toThrow();
   });
 
   it('returns an array of all errors via collectTemplateDefinitionErrors', () => {

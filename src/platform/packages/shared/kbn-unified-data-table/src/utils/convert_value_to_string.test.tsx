@@ -554,6 +554,32 @@ describe('convertValueToString', () => {
     );
   });
 
+  it('should return the whole document for the _source column of a data view without a _source field', () => {
+    const getByName = dataTableContextMock.dataView.fields.getByName.bind(
+      dataTableContextMock.dataView.fields
+    );
+    const getByNameSpy = jest
+      .spyOn(dataTableContextMock.dataView.fields, 'getByName')
+      .mockImplementation((name: string) => (name === '_source' ? undefined : getByName(name)));
+
+    const result = convertValueToString({
+      rows: dataTableContextRowsMock,
+      dataView: dataTableContextMock.dataView,
+      fieldFormats: servicesMock.fieldFormats,
+      columnId: '_source',
+      rowIndex: 0,
+      dataSource: undefined,
+      options: {
+        compatibleWithCSV: true,
+      },
+    });
+    getByNameSpy.mockRestore();
+
+    expect(result.formattedString).toBe(
+      '{"bytes":20,"date":"2020-20-01T12:12:12.123","message":"test1","_index":"i","_score":1}'
+    );
+  });
+
   it('should return a formatted _source value', () => {
     const result = convertValueToString({
       rows: dataTableContextRowsMock,

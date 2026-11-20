@@ -30,6 +30,8 @@ export const getComponentHealthStatus = (
     case 'StatusRecoverableError':
     case 'StatusPermanentError':
     case 'StatusFatalError':
+    case 'StatusStopping':
+    case 'StatusStopped':
       return 'unhealthy';
     case 'StatusNone':
     default:

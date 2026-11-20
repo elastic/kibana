@@ -31,9 +31,18 @@ const investigationTimelineEventSchema = lazySchema(() =>
   })
 );
 
+/** The time range the telemetry was searched over, so an empty or sparse timeline says what it covers. */
+const investigationTimelineWindowSchema = lazySchema(() =>
+  z.object({
+    start: z.string().min(1).max(64),
+    end: z.string().min(1).max(64),
+  })
+);
+
 export const investigationTimelineAttachmentDataSchema = lazySchema(() =>
   securityAttachmentDataSchema.extend({
     events: z.array(investigationTimelineEventSchema).max(MAX_TIMELINE_EVENTS),
+    window: investigationTimelineWindowSchema.optional(),
   })
 );
 
@@ -42,8 +51,10 @@ export type InvestigationTimelineAttachmentData = z.infer<
 >;
 
 const formatTimelineForAgent = (data: InvestigationTimelineAttachmentData): string => {
-  const header = 'Forensic attack timeline';
-  const { events } = data;
+  const { events, window } = data;
+  const header = window
+    ? `Forensic attack timeline (searched ${window.start} to ${window.end})`
+    : 'Forensic attack timeline';
 
   if (events.length === 0) {
     return `${header}\nNo events were reconstructed from the available telemetry.`;
@@ -81,11 +92,11 @@ export const createInvestigationTimelineAttachmentType = (): AttachmentTypeDefin
     getAgentDescription: () => {
       return `A ${SecurityAgentBuilderAttachments.investigationTimeline} attachment holds the chronological attack reconstruction for an investigation.
 
-The payload is an object \`{ events }\`. \`events\` is the ordered event list, earliest first: an array of { timestamp, host, description }.
+The payload is an object \`{ events, window? }\`. \`events\` is the ordered event list, earliest first: an array of { timestamp, host, description }. \`window\` is the { start, end } range the telemetry was searched over. Most events fall inside it. An event can be earlier or later when it was reached by following a tie from in-window evidence (process tree, file, hash, destination, account, or initial access), and its \`description\` names that tie. Patient zero is often before the window. Treat those events as part of the incident.
 
 Every event names the host it occurred on, so a chain that moves between hosts can be read directly. \`description\` already carries the specifics (processes, PIDs, users, paths, command lines, addresses) — quote it rather than re-summarizing it into a classification.
 
-The events are already ordered and already scoped to the investigation — present them as a timeline and do not reorder or re-derive them.`;
+The events are already ordered and already scoped to the investigation, not necessarily to \`window\` — present them as a timeline and do not reorder or re-derive them.`;
     },
   };
 };

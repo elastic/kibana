@@ -37,6 +37,8 @@ export interface InternalNodeServicePreboot {
    * on the way the Kibana process has been configured.
    */
   roles: NodeRoles;
+  /** The same roles as names (`*` expanded), as they appear in log lines' `service.node.roles`. */
+  roleNames: readonly string[];
 }
 
 export interface InternalNodeServiceStart {
@@ -77,6 +79,7 @@ export class NodeService {
 
     return {
       roles: this.roles,
+      roleNames: roles,
     };
   }
 

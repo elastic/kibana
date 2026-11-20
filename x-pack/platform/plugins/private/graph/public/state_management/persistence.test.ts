@@ -22,7 +22,7 @@ import { metaDataSelector, updateMetaData } from './meta_data';
 import { templatesSelector } from './url_templates';
 import {
   migrateLegacyIndexPatternRef,
-  appStateToSavedWorkspace,
+  reduxStateToSavedWorkspace,
   lookupIndexPatternId,
 } from '../services/persistence';
 import { settingsSelector } from './advanced_settings';
@@ -60,7 +60,7 @@ jest.mock('../services/persistence', () => ({
       },
     ] as WorkspaceField[],
   })),
-  appStateToSavedWorkspace: jest.fn(),
+  reduxStateToSavedWorkspace: jest.fn(),
 }));
 
 jest.mock('../services/save_modal', () => ({
@@ -93,6 +93,7 @@ describe('persistence listeners', () => {
       expect(fieldsSelector(resultingState)[0].name).toEqual('testfield');
       expect(metaDataSelector(resultingState).title).toEqual('my workspace');
       expect(templatesSelector(resultingState)[0].url).toEqual('http://example.org/q={{gquery}}');
+      expect(resultingState.workspace.isInitialized).toBe(true);
     });
 
     it('should warn with a toast and abort if index pattern is not found', async () => {
@@ -145,7 +146,7 @@ describe('persistence listeners', () => {
     it('should serialize saved object and save after confirmation', async () => {
       env.store.dispatch(saveWorkspace({ id: '123' } as GraphWorkspaceSavedObject));
       (openSaveModal as jest.Mock).mock.calls[0][0].saveWorkspace({}, true);
-      expect(appStateToSavedWorkspace).toHaveBeenCalled();
+      expect(reduxStateToSavedWorkspace).toHaveBeenCalled();
       await waitForPromise();
 
       // three things are happening on saving: show toast, update state and update url
@@ -154,11 +155,44 @@ describe('persistence listeners', () => {
       expect(env.mockedDeps.changeUrl).toHaveBeenCalledWith(expect.stringContaining('123'));
     });
 
+    it('serializes the latest runtime workspace when saving is confirmed', async () => {
+      env.store.dispatch(saveWorkspace({} as GraphWorkspaceSavedObject));
+      const runtimeWorkspace = env.mockedDeps.getWorkspace();
+      if (!runtimeWorkspace) {
+        throw new Error('Expected a runtime workspace');
+      }
+      Object.assign(runtimeWorkspace, {
+        nodes: [
+          {
+            id: 'latest',
+            x: 1,
+            y: 2,
+            label: 'Latest',
+            color: 'black',
+            scaledSize: 1,
+            data: { field: 'field', term: 'latest' },
+          },
+        ],
+        edges: [],
+        blocklistedNodes: [],
+      });
+
+      await (openSaveModal as jest.Mock).mock.calls[0][0].saveWorkspace({}, true);
+
+      expect(reduxStateToSavedWorkspace).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          workspace: expect.objectContaining({ nodeIds: ['latest'] }),
+        }),
+        true
+      );
+    });
+
     it('should not save data if user does not give consent in the modal', async () => {
       env.store.dispatch(saveWorkspace({} as GraphWorkspaceSavedObject));
       (openSaveModal as jest.Mock).mock.calls[0][0].saveWorkspace({}, false);
       // serialize function is called with `canSaveData` set to false
-      expect(appStateToSavedWorkspace).toHaveBeenCalledWith(
+      expect(reduxStateToSavedWorkspace).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         false

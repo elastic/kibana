@@ -324,7 +324,7 @@ Delete record
 
 ## Receive ServiceNow events [servicenow-search-inbound-events]
 ```{applies_to}
-serverless: unavailable
+serverless: preview
 stack: preview 9.6+
 ```
 
@@ -332,7 +332,7 @@ The connector can start a workflow from an incident, a journal entry, or a chang
 
 In {{sn}}, you need the `admin` role to create the outbound REST message and the business rules. Incident and journal events need Incident Management, which provides the `incident` table. Change-approval events need Change Management, which provides `change_request`. Without Change Management, you can still use incident and journal events. {{sn}} must be able to reach a {{kib}} URL. A developer instance cannot call `localhost`.
 
-In {{kib}}, you need an Enterprise license, `server.publicBaseUrl` set to the host that {{sn}} uses to reach {{kib}}, and `xpack.actions.inboundEvents.enabled` set to `true`.
+In {{kib}}, you need an Enterprise license and `server.publicBaseUrl` set to the host that {{sn}} uses to reach {{kib}}. `xpack.actions.inboundEvents.enabled` defaults to `true`. Set it to `false` to turn receive events off.
 
 {{kib}} starts the workflows that are enabled and subscribed to the matching event. To send events from {{sn}}, refer to [Start a workflow from {{sn}} events](#servicenow-search-inbound-howto).
 
@@ -366,7 +366,7 @@ Send `Authorization: Bearer <ingest-token>` and `Content-Type: application/json`
 
 ## Start a workflow from {{sn}} events [servicenow-search-inbound-howto]
 ```{applies_to}
-serverless: unavailable
+serverless: preview
 stack: preview 9.6+
 ```
 

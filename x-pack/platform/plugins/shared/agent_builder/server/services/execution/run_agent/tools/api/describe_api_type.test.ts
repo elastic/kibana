@@ -291,7 +291,7 @@ describe('createDescribeApiTypeTool', () => {
     expect(data.message).toContain(internalTools.discoverApis);
   });
 
-  it('spells out the identifier format on an unknown API when discovery is disabled', async () => {
+  it('never points at the discovery tool on an unknown API when discovery is disabled', async () => {
     loadApi.mockRejectedValue(new UnknownApiError('does.not.exist'));
 
     const tool = createDescribeApiTypeTool({ discoveryEnabled: false });

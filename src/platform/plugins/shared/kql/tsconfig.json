@@ -10,6 +10,7 @@
     "public/**/*.json",
   ],
   "kbn_references": [
+    "@kbn/data-source",
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/analytics",

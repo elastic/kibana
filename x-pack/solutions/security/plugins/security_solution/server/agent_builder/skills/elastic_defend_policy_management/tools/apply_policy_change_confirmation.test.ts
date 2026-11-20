@@ -31,6 +31,10 @@ const capabilities = (): PolicyChangeCapabilities => ({
   trustedDevicesExperimental: true,
   endpointCustomYaraSignatures: true,
   customYaraSignaturesExperimental: true,
+  aiDataCollectionExperimental: true,
+  linuxRansomwareProtection: true,
+  endpointRegistryCredentialHardening: true,
+  registryCredentialHardeningExperimental: true,
   endpointProtectionUpdates: true,
   endpointCustomNotification: true,
   serverless: false,
@@ -173,7 +177,7 @@ describe('renderApplyPolicyChangeConfirmation', () => {
     expect(lines[19]).toBe('Policy ID: policy\\-1');
   });
 
-  it('renders an eligible coupled change with all rows and no side effects', () => {
+  it('renders an eligible per-OS change with one direct row and no side effects', () => {
     const preview = createPreview([
       { op: 'set_field', path: 'windows.popup.malware.enabled', value: false },
     ]);
@@ -182,7 +186,7 @@ describe('renderApplyPolicyChangeConfirmation', () => {
     expect(definition).toEqual(
       expect.objectContaining({
         color: 'warning',
-        title: 'Apply 3 change(s) to "Endpoint Policy"?',
+        title: 'Apply 1 change(s) to "Endpoint Policy"?',
       })
     );
     expect(definition.message).not.toContain('Warnings:');
@@ -190,8 +194,9 @@ describe('renderApplyPolicyChangeConfirmation', () => {
     expect(lines[0]).toBe('| Setting | From | To | Origin |');
     expect(lines[1]).toBe('| --- | --- | --- | --- |');
     expect(lines[2]).toBe('| windows\\.popup\\.malware\\.enabled | true | false | direct |');
-    expect(lines[3]).toBe('| mac\\.popup\\.malware\\.enabled | true | false | coupled |');
-    expect(lines[4]).toBe('| linux\\.popup\\.malware\\.enabled | true | false | coupled |');
+    expect(
+      lines.filter((line) => line.endsWith(' | direct |') || line.endsWith(' | coupled |'))
+    ).toHaveLength(1);
     expect(definition.message).toContain('Derived setting updates: none');
   });
 

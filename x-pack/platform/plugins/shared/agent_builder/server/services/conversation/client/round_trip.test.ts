@@ -19,6 +19,7 @@ import {
   TimelineEventType,
   TimelineTriggerType,
   ZERO_MODEL_USAGE,
+  createModelReasoningStep,
 } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import { BOOM } from '../../../test_utils/timeline';
@@ -103,8 +104,55 @@ describe('round-trip fidelity: eventsToRounds(roundsToEvents(round)) === round',
     expect(roundTrip([round])).toEqual([round]);
   });
 
+  it('preserves model reasoning steps in place', () => {
+    const round = baseRound({
+      steps: [
+        createModelReasoningStep({ reasoning: 'provider thoughts', tool_call_group_id: 'grp-1' }),
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'tc-1',
+          tool_id: 'platform.core.execute_esql',
+          params: { query: 'FROM foo' },
+          progression: [],
+          tool_call_group_id: 'grp-1',
+          results: [],
+        },
+        createModelReasoningStep({ reasoning: 'final provider thoughts' }),
+      ],
+    });
+    expect(roundTrip([round])).toEqual([round]);
+  });
+
   it('preserves a single-string trace_id', () => {
     const round = baseRound({ trace_id: 'trace-single' });
+    expect(roundTrip([round])).toEqual([round]);
+  });
+
+  it('preserves the per-connector breakdown of the model usage', () => {
+    const round = baseRound({
+      model_usage: {
+        connector_id: 'c1',
+        llm_calls: 3,
+        input_tokens: 130,
+        output_tokens: 13,
+        cached_input_tokens: 50,
+        reasoning_tokens: 6,
+        model: 'claude-opus',
+        last_call_input_tokens: 90,
+        connectors: [
+          {
+            connector_id: 'c1',
+            llm_calls: 2,
+            input_tokens: 120,
+            output_tokens: 12,
+            cached_input_tokens: 50,
+            reasoning_tokens: 6,
+            model: 'claude-opus',
+          },
+          { connector_id: 'fast', llm_calls: 1, input_tokens: 10, output_tokens: 1 },
+        ],
+      },
+    });
     expect(roundTrip([round])).toEqual([round]);
   });
 
@@ -236,6 +284,21 @@ describe('interrupted rounds', () => {
   it.each([
     ['zero defaults', { model_usage: ZERO_MODEL_USAGE, time_to_first_token: 0 }],
     ['real usage, non-zero ttft', { time_to_first_token: 42 }],
+    [
+      'usage with a per-connector breakdown',
+      {
+        model_usage: {
+          connector_id: 'c1',
+          llm_calls: 2,
+          input_tokens: 15,
+          output_tokens: 8,
+          connectors: [
+            { connector_id: 'c1', llm_calls: 1, input_tokens: 5, output_tokens: 7 },
+            { connector_id: 'fast', llm_calls: 1, input_tokens: 10, output_tokens: 1 },
+          ],
+        },
+      },
+    ],
   ])(
     'rounds → events → rounds is an identity for an interrupted round (%s)',
     (_name, overrides) => {

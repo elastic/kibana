@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { DashboardRendererProps } from '@kbn/dashboard-plugin/public';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import {
+  openInDashboardApp,
+  type DashboardLocator,
+} from './dashboard_integration/open_in_dashboard_app';
 
 export const handleEditInDashboard = async ({
   locator,
   getExistingDashboardId,
   dashboardLocatorParams,
 }: {
-  locator: NonNullable<DashboardRendererProps['locator']>;
+  locator: DashboardLocator;
   getExistingDashboardId: () => Promise<string | undefined>;
-  dashboardLocatorParams: Record<string, unknown>;
+  dashboardLocatorParams: DashboardLocatorParams;
 }) => {
   const dashboardId = await getExistingDashboardId();
-  await locator.navigate({
-    ...dashboardLocatorParams,
-    dashboardId,
-    viewMode: 'edit',
-  });
+  await openInDashboardApp(locator, { ...dashboardLocatorParams, dashboardId });
 };

@@ -16,10 +16,6 @@ const configSchema = schema.object({
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
-  dynamicConnectors: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-    pollingIntervalMins: schema.number({ defaultValue: 15, min: 5, max: 720 }),
-  }),
 });
 
 export type SearchInferenceEndpointsConfig = TypeOf<typeof configSchema>;
@@ -29,4 +25,8 @@ export const config: PluginConfigDescriptor<SearchInferenceEndpointsConfig> = {
     ui: true,
   },
   schema: configSchema,
+  deprecations: ({ unused }) => [
+    unused('dynamicConnectors.enabled', { level: 'warning' }),
+    unused('dynamicConnectors.pollingIntervalMins', { level: 'warning' }),
+  ],
 };

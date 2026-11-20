@@ -6,103 +6,63 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { isResponseError } from '@kbn/es-errors';
 import { deleteKiStepCommonDefinition } from '../../common/step_types/delete_ki';
-import type { KiStepDependencies } from './helpers';
+import { softDeleteKi } from '../ai_indices/ki_write';
+import type { DreamingKiStepDependencies } from './helpers';
 import {
-  appendKiRevision,
   assertContextEngineEnabled,
   assertKiWritePrivilege,
-  findKiRevision,
-  isKiDeleted,
-  kiNotFoundError,
   kiWriterFromContext,
   resolveAiIndex,
   withKiWriteTelemetry,
 } from './helpers';
+import { toStepError } from './to_step_error';
 
 export const getDeleteKiStepDefinition = ({
   getAiIndexService,
   isContextEngineEnabled,
+  isDreamingAvailable,
   checkWritePrivilege,
   analyticsService,
   logger,
-}: KiStepDependencies) =>
+}: DreamingKiStepDependencies) =>
   createServerStepDefinition({
     ...deleteKiStepCommonDefinition,
     handler: async (context) => {
-      const request = context.contextManager.getFakeRequest();
-      const spaceId = context.contextManager.getContext().workflow.spaceId;
-      await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
+      try {
+        const request = context.contextManager.getFakeRequest();
+        const spaceId = context.contextManager.getContext().workflow.spaceId;
+        await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
 
-      const { ai_index_id: aiIndexId, ki_id: kiId, refresh = false } = context.input;
-      return withKiWriteTelemetry({
-        action: 'delete',
-        aiIndexId,
-        analyticsService,
-        logger,
-        run: async (setManaged) => {
-          await assertKiWritePrivilege(checkWritePrivilege, request, spaceId);
+        const { ai_index_id: aiIndexId, ki_id: kiId, refresh = false } = context.input;
+        return await withKiWriteTelemetry({
+          action: 'delete',
+          aiIndexId,
+          analyticsService,
+          logger,
+          run: async (setManaged) => {
+            await assertKiWritePrivilege(checkWritePrivilege, request, spaceId);
 
-          const { dest, managed } = await resolveAiIndex(getAiIndexService, aiIndexId, spaceId);
-          setManaged(managed);
-          const esClient = context.contextManager.getScopedEsClient();
+            const { dest, managed } = await resolveAiIndex(getAiIndexService, aiIndexId, spaceId);
+            setManaged(managed);
+            const esClient = context.contextManager.getScopedEsClient();
+            const writer = kiWriterFromContext(context.contextManager.getContext());
 
-          const revision = await findKiRevision({
-            esClient,
-            aiIndexId,
-            dest,
-            kiId,
-            abortSignal: context.abortSignal,
-          });
-          if (!revision) {
-            throw kiNotFoundError(aiIndexId, kiId);
-          }
-
-          if (dest.type === 'data_stream') {
-            if (isKiDeleted(revision.source)) {
-              throw kiNotFoundError(aiIndexId, kiId);
-            }
-            const now = new Date().toISOString();
-            await appendKiRevision({
-              esClient,
-              destValue: dest.value,
+            const { id } = await softDeleteKi(esClient, {
+              aiIndexId,
+              dest,
               kiId,
-              source: revision.source,
-              changes: {
-                updated_at: now,
-                governance: {
-                  provenance: {
-                    updated_by: kiWriterFromContext(context.contextManager.getContext()),
-                  },
-                  lifecycle: { status: 'deleted' },
-                },
-              },
+              writer,
+              deleteLinkedRelationships: await isDreamingAvailable(spaceId),
               refresh,
               abortSignal: context.abortSignal,
             });
-            return { output: { id: kiId } };
-          }
 
-          await esClient
-            .delete(
-              {
-                index: revision.index,
-                id: revision.documentId,
-                ...(refresh && { refresh: 'wait_for' as const }),
-              },
-              { signal: context.abortSignal }
-            )
-            .catch((error) => {
-              // The KI (or its backing index) may have been removed concurrently.
-              if (isResponseError(error) && error.statusCode === 404) {
-                throw kiNotFoundError(aiIndexId, kiId);
-              }
-              throw error;
-            });
-
-          return { output: { id: kiId } };
-        },
-      });
+            return { output: { id } };
+          },
+        });
+      } catch (error) {
+        throw toStepError(error, 'Failed to delete knowledge indicator');
+      }
     },
   });

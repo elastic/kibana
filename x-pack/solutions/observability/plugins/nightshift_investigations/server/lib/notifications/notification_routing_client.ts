@@ -12,7 +12,11 @@ import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agen
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
 import { MAX_INVESTIGATION_NOTIFICATIONS } from '../../../common';
 import type { InvestigationNotificationDestination } from '../../../common';
-import { notificationRoutingAttachment, notificationRoutingSchema } from './notification_routing';
+import {
+  notificationRoutingAttachment,
+  notificationRoutingSchema,
+  repliesUnderCallerMessage,
+} from './notification_routing';
 import type {
   NotificationAttempt,
   NotificationDestination,
@@ -162,7 +166,11 @@ export class NotificationRoutingClient {
     });
   }
 
-  /** Initialization adds destinations once and freezes this execution's participants; replay keeps the snapshot. */
+  /**
+   * Initialization adds destinations once and freezes this execution's participants; replay keeps
+   * the snapshot. A destination replying under a caller's message only takes part in the executions
+   * that ask for it, so a later run, such as a reply in that thread, does not post there again.
+   */
   async initialize(
     executionId: string,
     workflowId: string,
@@ -177,6 +185,7 @@ export class NotificationRoutingClient {
         return current;
       }
       const destinations = mergeNotificationDestinations(current.destinations, inputs);
+      const requestedIds = new Set(inputs.map(getDestinationId));
       return {
         ...current,
         destinations,
@@ -185,7 +194,12 @@ export class NotificationRoutingClient {
           {
             id: executionId,
             workflow_id: workflowId,
-            destination_ids: destinations.map(({ id }) => id),
+            destination_ids: destinations
+              .filter(
+                (destination) =>
+                  !repliesUnderCallerMessage(destination) || requestedIds.has(destination.id)
+              )
+              .map(({ id }) => id),
           },
         ],
       };
@@ -194,7 +208,7 @@ export class NotificationRoutingClient {
 
   async selectTerminalPhase(
     executionId: string,
-    phase: 'completed' | 'failed'
+    phase: 'completed' | 'failed' | 'timed_out'
   ): Promise<NotificationRouting> {
     return this.write((current) => {
       const execution = current.executions.find(({ id }) => id === executionId);
@@ -202,7 +216,7 @@ export class NotificationRoutingClient {
         throw new Error('Notification execution was not initialized');
       }
       if (execution.terminal_phase && execution.terminal_phase !== phase) {
-        throw new Error('Notification execution already selected a different terminal phase');
+        return current;
       }
       return {
         ...current,
@@ -211,6 +225,23 @@ export class NotificationRoutingClient {
         ),
       };
     });
+  }
+
+  /** Claims terminal lifecycle emission once, independently of Slack delivery receipts. */
+  async claimTerminalLifecycle(
+    executionId: string,
+    phase: Exclude<NotificationPhase, 'started'>,
+    claimId: string
+  ): Promise<boolean> {
+    const routing = await this.write((current) => ({
+      ...current,
+      executions: current.executions.map((entry) =>
+        entry.id === executionId && entry.terminal_phase === phase && !entry.lifecycle_claim_id
+          ? { ...entry, lifecycle_claim_id: claimId }
+          : entry
+      ),
+    }));
+    return routing.executions.find(({ id }) => id === executionId)?.lifecycle_claim_id === claimId;
   }
 
   async claim(
@@ -268,7 +299,7 @@ export class NotificationRoutingClient {
       const destinations = current.destinations.map((destination) => {
         if (
           destination.id !== attempt.destination_id ||
-          attempt.phase !== 'started' ||
+          (attempt.phase !== 'started' && !attempt.creates_root) ||
           result.status !== 'sent'
         ) {
           return destination;
@@ -281,7 +312,7 @@ export class NotificationRoutingClient {
         if (!threadTs || !channel) {
           throw new Error('Confirmed notification has no thread reference');
         }
-        return { ...destination, thread: { channel, thread_ts: threadTs } };
+        return { ...destination, thread: { ...destination.thread, channel, thread_ts: threadTs } };
       });
       return {
         ...current,
@@ -292,6 +323,7 @@ export class NotificationRoutingClient {
                 ...entry,
                 error: undefined,
                 message_ts: undefined,
+                external_conversation_id: undefined,
                 sent_at: undefined,
                 ...result,
               }

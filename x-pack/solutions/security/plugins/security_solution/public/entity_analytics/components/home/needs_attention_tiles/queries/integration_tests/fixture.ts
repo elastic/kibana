@@ -44,6 +44,18 @@ import { getRiskScoreIndex } from '../../../entities_grid/queries/esql';
  *
  * The host entities stay Low or Moderate, so none is newly high or critical, and every user
  * keeps its boundary score as its current score, so none is a risk mover.
+ *
+ * Groups judged by their own (resolution) score. A group's main entity holds the group's current
+ * score on its entity doc and has resolution score docs; its own (base) values are set apart, so a
+ * tile that read them would answer differently:
+ *
+ * | main entity     | own base (boundary → now) | group (boundary → now) | alias own (boundary → now) | counted as    |
+ * |-----------------|---------------------------|------------------------|----------------------------|---------------|
+ * | host:grp-up     | 20 → 20                   | 40 → 60                | host:grp-up-a  20 → 50     | risk mover    |
+ * | host:grp-flat   | 30 → 30                   | 68 → 70                | host:grp-flat-a 20 → 60    | not a mover   |
+ * | host:grp-none   | 40 → 60                   | no group score         | host:grp-none-a  –         | risk mover (falls back to its own score) |
+ * | user:grp-crit   | Low → Low                 | Moderate → Critical    | –                          | newly high, and a risk mover (50 → 95) |
+ * | user:grp-still  | Low → Low                 | High → High            | user:grp-still-a Low → High| not newly high|
  */
 
 export const NAMESPACE = 'default';
@@ -67,6 +79,12 @@ interface EntitySeed {
   boundary?: ReadonlyArray<[score: number, level: Level, hoursBefore: number]>;
   criticality?: string;
   resolvedTo?: string;
+  /** The group's score on a main entity: current value and the resolution docs of the boundary. */
+  group?: {
+    score: number;
+    level: Level;
+    boundary?: ReadonlyArray<[score: number, level: Level, hoursBefore: number]>;
+  };
 }
 
 const IN_WINDOW_OLD = 1.5;
@@ -136,13 +154,73 @@ const ENTITIES: readonly EntitySeed[] = [
     boundary: [[50, 'Low', IN_WINDOW_LAST]],
   },
   { id: 'user:alias', score: 75, level: 'High', resolvedTo: 'user:up' },
+  // Groups judged by their own score
+  {
+    id: 'host:grp-up',
+    score: 20,
+    level: 'Low',
+    boundary: [[20, 'Low', IN_WINDOW_LAST]],
+    group: { score: 60, level: 'Moderate', boundary: [[40, 'Moderate', IN_WINDOW_LAST]] },
+  },
+  {
+    id: 'host:grp-up-a',
+    score: 50,
+    level: 'Moderate',
+    boundary: [[20, 'Low', IN_WINDOW_LAST]],
+    resolvedTo: 'host:grp-up',
+  },
+  {
+    id: 'host:grp-flat',
+    score: 30,
+    level: 'Low',
+    boundary: [[30, 'Low', IN_WINDOW_LAST]],
+    group: { score: 70, level: 'Moderate', boundary: [[68, 'Moderate', IN_WINDOW_LAST]] },
+  },
+  {
+    id: 'host:grp-flat-a',
+    score: 60,
+    level: 'Moderate',
+    boundary: [[20, 'Low', IN_WINDOW_LAST]],
+    resolvedTo: 'host:grp-flat',
+  },
+  {
+    id: 'host:grp-none',
+    score: 60,
+    level: 'Moderate',
+    boundary: [[40, 'Moderate', IN_WINDOW_LAST]],
+  },
+  { id: 'host:grp-none-a', score: 5, level: 'Low', resolvedTo: 'host:grp-none' },
+  {
+    id: 'user:grp-crit',
+    score: 20,
+    level: 'Low',
+    boundary: [[20, 'Low', IN_WINDOW_LAST]],
+    group: { score: 95, level: 'Critical', boundary: [[50, 'Moderate', IN_WINDOW_LAST]] },
+  },
+  {
+    id: 'user:grp-still',
+    score: 20,
+    level: 'Low',
+    boundary: [[20, 'Low', IN_WINDOW_LAST]],
+    group: { score: 80, level: 'High', boundary: [[78, 'High', IN_WINDOW_LAST]] },
+  },
+  {
+    id: 'user:grp-still-a',
+    score: 75,
+    level: 'High',
+    boundary: [[30, 'Low', IN_WINDOW_LAST]],
+    resolvedTo: 'user:grp-still',
+  },
 ];
 
 const RISK_TYPES = ['host', 'user', 'service'] as const;
 
 const toIsoAgo = (now: number, ms: number) => new Date(now - ms).toISOString();
 
-const toEntityDoc = ({ id, score, level, criticality, resolvedTo }: EntitySeed, now: number) => ({
+const toEntityDoc = (
+  { id, score, level, criticality, resolvedTo, group }: EntitySeed,
+  now: number
+) => ({
   '@timestamp': toIsoAgo(now, HOUR_MS),
   'entity.id': id,
   'entity.name': id.split(':')[1],
@@ -151,17 +229,34 @@ const toEntityDoc = ({ id, score, level, criticality, resolvedTo }: EntitySeed, 
   'entity.risk.calculated_level': level,
   ...(criticality ? { 'asset.criticality': criticality } : {}),
   ...(resolvedTo ? { 'entity.relationships.resolution.resolved_to': resolvedTo } : {}),
+  ...(group
+    ? {
+        'entity.relationships.resolution.risk.calculated_score_norm': group.score,
+        'entity.relationships.resolution.risk.calculated_level': group.level,
+      }
+    : {}),
 });
 
-const toRiskDocs = ({ id, boundary = [] }: EntitySeed, now: number) => {
+const toRiskDocs = ({ id, boundary = [], group }: EntitySeed, now: number) => {
   const type = id.split(':')[0];
-  return boundary.map(([score, level, hoursBefore]) => ({
-    '@timestamp': toIsoAgo(now, BOUNDARY_MS + hoursBefore * HOUR_MS),
-    [`${type}.risk.id_field`]: 'entity.id',
-    [`${type}.risk.id_value`]: id,
-    [`${type}.risk.calculated_score_norm`]: score,
-    [`${type}.risk.calculated_level`]: level,
-  }));
+  const toDocs = (
+    docs: ReadonlyArray<[score: number, level: Level, hoursBefore: number]>,
+    scoreType?: 'base' | 'resolution'
+  ) =>
+    docs.map(([score, level, hoursBefore]) => ({
+      '@timestamp': toIsoAgo(now, BOUNDARY_MS + hoursBefore * HOUR_MS),
+      [`${type}.risk.id_field`]: 'entity.id',
+      [`${type}.risk.id_value`]: id,
+      [`${type}.risk.calculated_score_norm`]: score,
+      [`${type}.risk.calculated_level`]: level,
+      // Docs written before score_type existed have none, and count as base docs.
+      ...(scoreType ? { [`${type}.risk.score_type`]: scoreType } : {}),
+    }));
+  // The group's boundary docs share the id of its main entity, like the real ones.
+  return [
+    ...toDocs(boundary, group ? 'base' : undefined),
+    ...(group?.boundary ? toDocs(group.boundary, 'resolution') : []),
+  ];
 };
 
 interface FixtureIndex {
@@ -184,6 +279,8 @@ const FIXTURE_INDICES: readonly FixtureIndex[] = [
       'entity.risk.calculated_score_norm': FLOAT,
       'entity.risk.calculated_level': KEYWORD,
       'entity.relationships.resolution.resolved_to': KEYWORD,
+      'entity.relationships.resolution.risk.calculated_score_norm': FLOAT,
+      'entity.relationships.resolution.risk.calculated_level': KEYWORD,
       'asset.criticality': KEYWORD,
     },
     buildDocs: (now) => ENTITIES.map((seed) => toEntityDoc(seed, now)),
@@ -199,6 +296,7 @@ const FIXTURE_INDICES: readonly FixtureIndex[] = [
             [`${type}.risk.id_value`, KEYWORD],
             [`${type}.risk.calculated_score_norm`, FLOAT],
             [`${type}.risk.calculated_level`, KEYWORD],
+            [`${type}.risk.score_type`, KEYWORD],
           ]
         )
       ),

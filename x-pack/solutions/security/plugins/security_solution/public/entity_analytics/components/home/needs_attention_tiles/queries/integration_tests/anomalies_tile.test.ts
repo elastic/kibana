@@ -9,6 +9,8 @@ import type { Client } from '@elastic/elasticsearch';
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
+import { EMPTY_ENTITY_FILTERS } from '../../../entities_grid/common';
+import { buildEntityFilterClauses } from '../../../entities_grid/queries/entity_filters';
 import { buildEntitiesWithAnomaliesCountQuery } from '../entities_with_anomalies_query';
 
 /*
@@ -27,6 +29,11 @@ import { buildEntitiesWithAnomaliesCountQuery } from '../entities_with_anomalies
  * | host:live  | job_a 50 interim 3                        | dropped: interim record          |
  * | host:other | job_x 50 now 3                            | dropped: not an installed job    |
  * | host:ghost | job_a 50 now 3                            | dropped: no entity doc           |
+ * | host:p     | none                                      | main entity with no record of its own |
+ * | host:pa    | job_a 50 now 2                            | alias of host:p: only the alias has a record, so the group counts, as host:p |
+ *
+ * The entity filters judge a group by its main entity, after its records are gathered: host:p is on
+ * watchlist w1 and its alias is not, so with the Watchlists filter set to w1 host:p still counts.
  */
 
 const ENTITY_INDEX = 'entities-latest-anomalies-tiles-test';
@@ -37,7 +44,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const KEYWORD: MappingProperty = { type: 'keyword' };
 const DATE: MappingProperty = { type: 'date' };
 
-const ENTITIES: ReadonlyArray<{ id: string; resolvedTo?: string }> = [
+const ENTITIES: ReadonlyArray<{ id: string; resolvedTo?: string; watchlisted?: boolean }> = [
   { id: 'host:a' },
   { id: 'host:alias', resolvedTo: 'host:a' },
   { id: 'host:b' },
@@ -46,6 +53,8 @@ const ENTITIES: ReadonlyArray<{ id: string; resolvedTo?: string }> = [
   { id: 'host:low' },
   { id: 'host:live' },
   { id: 'host:other' },
+  { id: 'host:p', watchlisted: true },
+  { id: 'host:pa', resolvedTo: 'host:p' },
 ];
 
 interface RecordSeed {
@@ -67,6 +76,7 @@ const RECORDS: readonly RecordSeed[] = [
   { job: 'job_a', host: 'live', score: 50, daysAgo: 3, interim: true },
   { job: 'job_x', host: 'other', score: 50, daysAgo: 3 },
   { job: 'job_a', host: 'ghost', score: 50, daysAgo: 3 },
+  { job: 'job_a', host: 'pa', score: 50, daysAgo: 2 },
 ];
 
 const loadFixture = async (client: Client) => {
@@ -79,6 +89,7 @@ const loadFixture = async (client: Client) => {
       properties: {
         'entity.id': KEYWORD,
         'entity.name': KEYWORD,
+        'entity.attributes.watchlists': KEYWORD,
         'entity.relationships.resolution.resolved_to': KEYWORD,
       },
     },
@@ -97,11 +108,12 @@ const loadFixture = async (client: Client) => {
     },
   });
   const operations = [
-    ...ENTITIES.flatMap(({ id, resolvedTo }) => [
+    ...ENTITIES.flatMap(({ id, resolvedTo, watchlisted }) => [
       { index: { _index: ENTITY_INDEX } },
       {
         'entity.id': id,
         'entity.name': id.split(':')[1],
+        ...(watchlisted ? { 'entity.attributes.watchlists': 'w1' } : {}),
         ...(resolvedTo ? { 'entity.relationships.resolution.resolved_to': resolvedTo } : {}),
       },
     ]),
@@ -145,8 +157,8 @@ describe('entities with anomalies tile on Elasticsearch', () => {
       '| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)'
     );
 
-  const runTile = async (period: 'current' | 'previous') => {
-    const built = buildEntitiesWithAnomaliesCountQuery(ENTITY_INDEX, '7d', [], JOBS, period);
+  const runTile = async (period: 'current' | 'previous', filters: string[] = []) => {
+    const built = buildEntitiesWithAnomaliesCountQuery(ENTITY_INDEX, '7d', filters, JOBS, period);
     const query = period === 'previous' ? withEntityIds(built) : built;
     const { columns, values } = await client.esql.query({ query });
     const row = Object.fromEntries(columns.map(({ name }, i) => [name, values[0]?.[i]]));
@@ -157,7 +169,10 @@ describe('entities with anomalies tile on Elasticsearch', () => {
   };
 
   it('counts the current period as the last 7 days, with aliases collapsed into one entity', async () => {
-    expect(await runTile('current')).toEqual({ count: 3, ids: ['host:a', 'host:c', 'host:d'] });
+    expect(await runTile('current')).toEqual({
+      count: 4,
+      ids: ['host:a', 'host:c', 'host:d', 'host:p'],
+    });
   });
 
   it('counts the previous period as the 7 days before that', async () => {
@@ -173,6 +188,11 @@ describe('entities with anomalies tile on Elasticsearch', () => {
 
   it('gives the delta as the current count minus the previous count', async () => {
     const [current, previous] = [await runTile('current'), await runTile('previous')];
-    expect(current.count - previous.count).toBe(1);
+    expect(current.count - previous.count).toBe(2);
+  });
+
+  it('keeps a group whose main entity passes the filters, though only its alias has a record', async () => {
+    const onW1 = buildEntityFilterClauses({ ...EMPTY_ENTITY_FILTERS, watchlists: ['w1'] });
+    expect(await runTile('current', onW1)).toEqual({ count: 1, ids: ['host:p'] });
   });
 });

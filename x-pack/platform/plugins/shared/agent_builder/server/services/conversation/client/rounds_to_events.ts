@@ -7,17 +7,18 @@
 
 import type {
   Conversation,
+  ConversationEvent,
   ConversationRound,
   ConversationRoundAuthor,
   ConversationRoundOrigin,
   ConversationRoundStep,
-  CurrentUser,
   EventActor,
   ExecutionInterruption,
   ExecutionInterruptionType,
   ExecutionOutcome,
   ExecutionPartialRunSummary,
   ExecutionRunSummary,
+  UserIdAndName,
   RoundInput,
   TimelineEvent,
   UserPrincipalType,
@@ -31,6 +32,7 @@ import {
   executionTerminatedEventId,
   isZeroModelUsage,
   parseExecutionId,
+  timelineExecutionId,
   resumeExecutionId,
   roundStepEventId,
   roundUserMessageEventId,
@@ -94,6 +96,24 @@ export const userMessageEvent = (
   type: TimelineEventType.userMessage,
   created_at: createdAt,
   actor: userMessageActor(conversation, { author, origin }),
+  data: input,
+});
+
+export const agentMessageEvent = ({
+  id,
+  createdAt,
+  input,
+  actor,
+}: {
+  id: string;
+  createdAt: string;
+  input: RoundInput;
+  actor: EventActor;
+}): TimelineEvent => ({
+  id,
+  type: TimelineEventType.agentMessage,
+  created_at: createdAt,
+  actor,
   data: input,
 });
 
@@ -195,10 +215,6 @@ export const roundToEvents = (
   ];
 };
 
-/**
- * Converts a rounds-based conversation into a timeline, on read. Maps each round with
- * {@link roundToEvents}, in round order.
- */
 export const roundsToEvents = (conversation: Conversation): TimelineEvent[] =>
   conversation.rounds.flatMap((round) => roundToEvents(round, conversation));
 
@@ -249,8 +265,11 @@ export const userMessageActor = (
   };
 };
 
-/** Actor for events the current principal appends directly, outside a round. */
-export const currentUserActor = (user: CurrentUser): EventActor => ({
+/**
+ * Actor for events a principal writes directly, outside a round: custom events the current user
+ * appends, and the activity events of the writes it makes.
+ */
+export const currentUserActor = (user: UserIdAndName): EventActor => ({
   type: EventActorType.user,
   id: user.id ?? user.username,
   ...(user.username ? { username: user.username } : {}),
@@ -287,6 +306,23 @@ export const nextResumeIndex = (
   );
   return roundExecutionIds.size;
 };
+
+/**
+ * The timeline id a run writes its events under: the next resume of the paused round it answers,
+ * else the first execution of the round it opens. The lock and the run compute it the same way.
+ */
+export const runTimelineExecutionId = ({
+  events,
+  pausedRoundId,
+  roundId,
+}: {
+  events: ConversationEvent[] | undefined;
+  pausedRoundId: string | undefined;
+  roundId: string;
+}): string =>
+  pausedRoundId
+    ? timelineExecutionId(pausedRoundId, Math.max(1, nextResumeIndex({ events }, pausedRoundId)))
+    : timelineExecutionId(roundId, 0);
 
 /** The `prompt_response` link event id written for the k-th resume of a round. */
 export const promptResponseEventId = (roundId: string, executionIndex: number): string =>

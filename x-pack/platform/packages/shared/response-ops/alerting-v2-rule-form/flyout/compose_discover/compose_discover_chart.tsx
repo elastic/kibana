@@ -12,6 +12,7 @@ import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getLensAttributesFromSuggestion, ChartType } from '@kbn/visualization-utils';
+import { getRuleProjectRouting } from '../../utils/get_rule_project_routing';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import type { QueryColumn } from './use_query_execution';
 
@@ -40,7 +41,7 @@ export const ComposeDiscoverChart: React.FC<ComposeDiscoverChartProps> = ({
   timeRange,
   columns,
 }) => {
-  const { lens, dataViews } = useRuleFormServices();
+  const { lens, dataViews, cps } = useRuleFormServices();
   const [lensAttributes, setLensAttributes] = useState<
     TypedLensByValueInput['attributes'] | undefined
   >(undefined);
@@ -66,6 +67,7 @@ export const ComposeDiscoverChart: React.FC<ComposeDiscoverChartProps> = ({
         const adHocDataView = await getESQLAdHocDataview({
           dataViewsService: dataViews,
           query,
+          projectRouting: getRuleProjectRouting(query, cps),
         });
         if (cancelled) return;
 
@@ -111,7 +113,7 @@ export const ComposeDiscoverChart: React.FC<ComposeDiscoverChartProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [query, timeField, columns, lens, dataViews]);
+  }, [query, timeField, columns, lens, dataViews, cps]);
 
   if (isLoading && !lensAttributes) {
     return (
@@ -134,6 +136,7 @@ export const ComposeDiscoverChart: React.FC<ComposeDiscoverChartProps> = ({
         viewMode="view"
         timeRange={timeRange}
         attributes={lensAttributes}
+        projectRouting={getRuleProjectRouting(query, cps)}
         noPadding
         disableTriggers
       />

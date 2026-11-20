@@ -7,6 +7,7 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { classifySources } from './classify_sources';
 
 const slugFor = (sourceId: string): string => `${sourceId}-slug`;
@@ -29,10 +30,23 @@ const makeExecution = (
     ...overrides,
   } as WorkflowExecutionListItemDto);
 
-const makeSource = (id: string, esqlUpdatedAt = '2020-01-01T00:00:00.000Z') => ({
+const makeSource = (
+  id: string,
+  {
+    esqlUpdatedAt = '2020-01-01T00:00:00.000Z',
+    enabled = true,
+    type = 'logs',
+  }: {
+    esqlUpdatedAt?: string;
+    enabled?: boolean;
+    type?: NightshiftSource['type'];
+  } = {}
+) => ({
   id,
   slug: slugFor(id),
+  type,
   esql_updated_at: esqlUpdatedAt,
+  enabled,
 });
 
 const candidateNames = (result: ReturnType<typeof classifySources>) =>
@@ -63,17 +77,30 @@ describe('classifySources', () => {
   it('treats sources without an execution as never-processed candidates', () => {
     const result = classifySources({
       ...defaultArgs,
-      sources: [makeSource('source-a'), makeSource('source-b')],
+      sources: [makeSource('source-a'), makeSource('source-b', { type: 'metrics' })],
     });
 
-    expect(candidateNames(result)).toEqual(['source-a', 'source-b']);
+    expect(result.candidates).toEqual([
+      {
+        sourceId: 'source-a',
+        sourceSlug: 'source-a-slug',
+        sourceType: 'logs',
+        lastCompletedAt: null,
+      },
+      {
+        sourceId: 'source-b',
+        sourceSlug: 'source-b-slug',
+        sourceType: 'metrics',
+        lastCompletedAt: null,
+      },
+    ]);
     expect(result.unsupported).toEqual([]);
   });
 
   it('identifies already running executions, even when the query changed mid-run', () => {
     const result = classifySources({
       ...defaultArgs,
-      sources: [makeSource('running-source', '2026-06-01T00:00:00.000Z')],
+      sources: [makeSource('running-source', { esqlUpdatedAt: '2026-06-01T00:00:00.000Z' })],
       executions: [
         makeExecution('running-source', {
           status: ExecutionStatus.RUNNING,
@@ -113,7 +140,7 @@ describe('classifySources', () => {
     const recentCompletion = new Date().toISOString();
     const result = classifySources({
       ...defaultArgs,
-      sources: [makeSource('fresh-source', '2020-01-01T00:00:00.000Z')],
+      sources: [makeSource('fresh-source', { esqlUpdatedAt: '2020-01-01T00:00:00.000Z' })],
       executions: [
         makeExecution('fresh-source', {
           startedAt: '2025-01-01T00:00:00.000Z',
@@ -126,6 +153,7 @@ describe('classifySources', () => {
       {
         sourceId: 'fresh-source',
         sourceSlug: 'fresh-source-slug',
+        sourceType: 'logs',
         lastCompletedAt: recentCompletion,
       },
     ]);
@@ -141,7 +169,12 @@ describe('classifySources', () => {
     });
 
     expect(result.candidates).toEqual([
-      { sourceId: 'old-source', sourceSlug: 'old-source-slug', lastCompletedAt: oldCompletion },
+      {
+        sourceId: 'old-source',
+        sourceSlug: 'old-source-slug',
+        sourceType: 'logs',
+        lastCompletedAt: oldCompletion,
+      },
     ]);
   });
 
@@ -149,7 +182,7 @@ describe('classifySources', () => {
     const recentCompletion = new Date().toISOString();
     const result = classifySources({
       ...defaultArgs,
-      sources: [makeSource('edited-source', '2026-06-01T00:00:00.000Z')],
+      sources: [makeSource('edited-source', { esqlUpdatedAt: '2026-06-01T00:00:00.000Z' })],
       executions: [
         makeExecution('edited-source', {
           startedAt: '2026-01-01T00:00:00.000Z',
@@ -162,6 +195,7 @@ describe('classifySources', () => {
       {
         sourceId: 'edited-source',
         sourceSlug: 'edited-source-slug',
+        sourceType: 'logs',
         lastCompletedAt: recentCompletion,
       },
     ]);
@@ -185,6 +219,7 @@ describe('classifySources', () => {
       {
         sourceId: 'failed-source',
         sourceSlug: 'failed-source-slug',
+        sourceType: 'logs',
         lastCompletedAt: recentFailure,
       },
     ]);
@@ -204,7 +239,12 @@ describe('classifySources', () => {
     });
 
     expect(result.candidates).toEqual([
-      { sourceId: 'cancelled-source', sourceSlug: 'cancelled-source-slug', lastCompletedAt: null },
+      {
+        sourceId: 'cancelled-source',
+        sourceSlug: 'cancelled-source-slug',
+        sourceType: 'logs',
+        lastCompletedAt: null,
+      },
     ]);
     expect(result.upToDate).toEqual([]);
   });
@@ -234,5 +274,38 @@ describe('classifySources', () => {
     });
 
     expect(candidateNames(result)).toEqual(['older-source', 'recent-source']);
+  });
+
+  it('accounts for every source, with a disabled source only in the disabled bucket', () => {
+    const sources = [
+      makeSource('on'),
+      makeSource('off', { enabled: false }),
+      makeSource('running', { esqlUpdatedAt: '2026-06-01T00:00:00.000Z' }),
+    ];
+    const result = classifySources({
+      ...defaultArgs,
+      sources,
+      executions: [
+        makeExecution('off', { status: ExecutionStatus.RUNNING, finishedAt: '' }),
+        makeExecution('running', {
+          status: ExecutionStatus.RUNNING,
+          startedAt: '2026-01-01T00:00:00.000Z',
+          finishedAt: '',
+        }),
+      ],
+    });
+
+    expect(result.disabled).toEqual([{ sourceId: 'off', sourceSlug: 'off-slug' }]);
+    const classifiedIds = [...result.candidates, ...result.alreadyRunning, ...result.upToDate].map(
+      ({ sourceId }) => sourceId
+    );
+    expect(classifiedIds).not.toContain('off');
+    expect(
+      result.candidates.length +
+        result.alreadyRunning.length +
+        result.upToDate.length +
+        result.unsupported.length +
+        result.disabled.length
+    ).toBe(sources.length);
   });
 });

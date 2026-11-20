@@ -11,23 +11,27 @@ import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import type { Logger } from '@kbn/core/server';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
-import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../../../../common/constants';
+import { NIGHTSHIFT_SOURCES_APP_PATH } from '../../../../common/constants';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import type { SignificantEventsServer } from '../../../types';
 import { classifyError } from '../../utils/error_utils';
 import {
   assertSourceEnabled,
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
+import { reportToolFailure, toTelemetryErrorMessage } from '../tool_failure';
 import { startKiIdentificationToolHandler } from './handler';
 import type { GetScopedClients } from '../../../routes/types';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
 
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID =
   'platform.sig_events.ki_identification_start';
@@ -51,12 +55,14 @@ const onboardingStartSchema = lazySchema(() =>
 
 export const createKiIdentificationStartTool = ({
   server,
+  logger,
   telemetry,
   streamsKIsOnboardingClient,
   maintenanceService,
   getScopedClients,
 }: {
   server: Pick<SignificantEventsServer, 'security'>;
+  logger: Logger;
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
   maintenanceService: SignificantEventsMaintenanceService;
@@ -65,28 +71,29 @@ export const createKiIdentificationStartTool = ({
   id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
-    Start Knowledge Indicator (KI) identification for a Nightshift source as a background task.
+    Start Knowledge Indicator (KI) identification for a nightshift source as a background task.
 
     This tool schedules the KI identification background task and returns immediately with a
-    Kibana path to the significant events knowledge indicators view where progress can be tracked.
+    Kibana path to the nightshift Sources page, where each source's onboarding status shows progress.
 
     Use this tool to:
     - Kick off KI identification for an enabled source
     - Run feature identification and query generation steps in a background task
-    - Get a direct Kibana path to track background task progress in the significant events UI
+    - Get a direct Kibana path to track background task progress on the nightshift Sources page
 
     Returns:
-    - On success: \`{ slug, title, view_name, kibanaPath: "${SIGNIFICANT_EVENTS_APP_ROUTE}/knowledge_indicators?source=<source id>" }\`
+    - On success: \`{ slug, title, view_name, kibanaPath: "${NIGHTSHIFT_SOURCES_APP_PATH}" }\`
     - On failure: an error result with \`message\`, \`slug\`, \`operation\`, and \`likely_cause\`
   `,
   schema: onboardingStartSchema,
-  handler: async ({ slug, steps, connectors }, { request }) => {
+  handler: async ({ slug, steps, connectors }, { request, runContext }) => {
+    const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
     let sourceId = '';
     try {
       await assertCanManageSignificantEvents({ request, server });
       const scopedClients = await getScopedClients({ request });
       const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
-      const [source] = resolveSourcesBySlug(catalog, [slug]);
+      const [source] = resolveSourcesBySlugOrId(catalog, [slug]);
       assertSourceEnabled(source);
       sourceId = source.id;
 
@@ -100,9 +107,18 @@ export const createKiIdentificationStartTool = ({
         request,
       });
 
-      telemetry.trackAgentToolKiIdentificationStarted({
-        success: true,
-        source_id: source.id,
+      trackTelemetryBestEffort({
+        logger,
+        description: 'ki_identification_start telemetry',
+        track: () =>
+          telemetry.trackAgentToolKiIdentificationStarted(
+            {
+              workflow_execution_id: workflowExecutionId,
+              success: true,
+              source_id: source.id,
+            },
+            request
+          ),
       });
 
       return {
@@ -115,11 +131,30 @@ export const createKiIdentificationStartTool = ({
       };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
+      const failure = reportToolFailure({
+        error: err,
+        toolId: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID,
+        errorLogMessage: `KI identification start failed: ${message}`,
+        errorLogLevel: 'warn',
+        logger,
+        telemetry,
+        request,
+        runContext,
+      });
 
-      telemetry.trackAgentToolKiIdentificationStarted({
-        success: false,
-        source_id: sourceId,
-        error_message: message,
+      trackTelemetryBestEffort({
+        logger,
+        description: 'failed ki_identification_start telemetry',
+        track: () =>
+          telemetry.trackAgentToolKiIdentificationStarted(
+            {
+              workflow_execution_id: workflowExecutionId,
+              success: false,
+              source_id: sourceId,
+              error_message: toTelemetryErrorMessage(failure, message),
+            },
+            request
+          ),
       });
 
       return {

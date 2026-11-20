@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import { type ScoutPage } from '@kbn/scout';
 
 export class IntegrationHomePage {
@@ -30,38 +29,9 @@ export class IntegrationHomePage {
     await this.getIntegrationCard(integration).click();
   }
 
-  async scrollToIntegration(integrationName: string) {
-    await this.page.evaluate(
-      async ({ vars }) => {
-        const scrollContainer = window.document.getElementById(vars.mainScrollContainerId);
-        const integrationSelector = `[data-test-subj="integration-card:epr:${vars.integrationName}"]`;
-        let found = false;
-        let i = 0;
-        while (!found && i < 100) {
-          if (scrollContainer) {
-            scrollContainer.scrollTop = i++ * 250;
-          } else {
-            window.scroll(0, i++ * 250);
-          }
-          await new Promise((resolve) => setTimeout(resolve, 100));
-          if (
-            (scrollContainer && scrollContainer.querySelector(integrationSelector)) ||
-            (!scrollContainer && window.document.querySelector(integrationSelector))
-          ) {
-            found = true;
-            scrollContainer?.scrollIntoView({
-              behavior: 'instant',
-            });
-          }
-        }
-      },
-      {
-        vars: {
-          integrationName,
-          mainScrollContainerId: APP_MAIN_SCROLL_CONTAINER_ID,
-        },
-      }
-    );
+  // The catalog grid is virtualized, so filtering is the only reliable way to mount a given tile.
+  async searchForIntegration(integrationName: string) {
+    await this.page.testSubj.fill('epmList.searchBar', integrationName);
   }
 
   async navigateToDetailPage(pkgkey: string) {

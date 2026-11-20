@@ -182,6 +182,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         popup: windows.popup,
         antivirus_registration: windows.antivirus_registration,
         attack_surface_reduction: windows.attack_surface_reduction,
+        ai_data_collection: windows.ai_data_collection,
       },
       mac: {
         advanced: mac.advanced,
@@ -192,6 +193,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         memory_protection: mac.memory_protection,
         device_control: mac.device_control,
         popup: mac.popup,
+        ai_data_collection: mac.ai_data_collection,
       },
       linux: {
         advanced: linux.advanced,
@@ -200,6 +202,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         behavior_protection: linux.behavior_protection,
         memory_protection: linux.memory_protection,
         popup: linux.popup,
+        ai_data_collection: linux.ai_data_collection,
       },
     };
   }

@@ -27,6 +27,8 @@ export interface ExecutionModel {
   failureFilter: string;
   /** ES|QL expression evaluating to 1 for a failed execution, 0 otherwise. */
   failedExpression: string;
+  /** ES|QL expression evaluating to 1 for a passed execution, a pass on a retry included. */
+  passedExpression: string;
   /** ES|QL expression evaluating to 1 when the execution failed then passed within the run. */
   retryFlakeExpression: string;
 }
@@ -49,6 +51,7 @@ export const buildExecutionModels = (frameworks: readonly TestFramework[]): Exec
       executionFilter: `(event.action == "test-end" AND ${reporterFilter} AND test.status IN ("passed", "failed", "timedOut"))`,
       failureFilter: `(event.action == "test-end" AND ${reporterFilter} AND test.status IN ("failed", "timedOut"))`,
       failedExpression: 'CASE(test.status IN ("failed", "timedOut"), 1, 0)',
+      passedExpression: 'CASE(test.status == "passed", 1, 0)',
       retryFlakeExpression: '0',
     });
   }
@@ -58,11 +61,15 @@ export const buildExecutionModels = (frameworks: readonly TestFramework[]): Exec
     const reporterFilter = `reporter.type IN (${inList(outcomeFrameworks)})`;
     models.push({
       frameworks: outcomeFrameworks,
-      // An outcome with no attempt never ran (https://github.com/elastic/kibana/pull/295058)
-      runFilter: `(event.action == "test-outcome" AND ${reporterFilter} AND test.attempts > 0)`,
+      // An outcome with no attempt never ran (https://github.com/elastic/kibana/pull/295058).
+      // `test.attempts` is mapped as `long` in indices created before the `test` component
+      // template reached the cluster and as `short` since; ES|QL rejects a field with mixed types
+      // unless a conversion function picks one, so cast rather than read the field directly.
+      runFilter: `(event.action == "test-outcome" AND ${reporterFilter} AND TO_LONG(test.attempts) > 0)`,
       executionFilter: `(event.action == "test-outcome" AND ${reporterFilter} AND test.outcome IN ("expected", "unexpected", "flaky"))`,
       failureFilter: `(event.action == "test-outcome" AND ${reporterFilter} AND test.outcome IN ("unexpected", "flaky"))`,
       failedExpression: 'CASE(test.outcome IN ("unexpected", "flaky"), 1, 0)',
+      passedExpression: 'CASE(test.outcome IN ("expected", "flaky"), 1, 0)',
       retryFlakeExpression: 'CASE(test.outcome == "flaky", 1, 0)',
     });
   }

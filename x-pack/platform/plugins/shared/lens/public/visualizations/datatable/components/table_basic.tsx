@@ -37,7 +37,7 @@ import type { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { getOriginalId } from '@kbn/transpose-utils';
 import { getSortingCriteria } from '@kbn/sort-predicates';
-import { useKbnPalettes } from '@kbn/palettes';
+import { useKbnPalettes } from '@kbn/palettes-components';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { getColorCategories, getLegacyColorCategories } from '@kbn/chart-expressions-common';
 import { css } from '@emotion/react';
@@ -48,6 +48,8 @@ import {
   LENS_ROW_HEIGHT_MODE as RowHeightMode,
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
+  LENS_DATATABLE_DEFAULT_PAGE_SIZE,
+  LENS_DATATABLE_PAGE_SIZE_OPTIONS,
 } from '@kbn/lens-common';
 import type {
   LensTableRowContextMenuEvent,
@@ -93,13 +95,10 @@ const DATA_GRID_STYLE_DEFAULT: EuiDataGridStyle = {
   footer: 'shade',
 };
 
-export const DEFAULT_PAGE_SIZE = 10;
-const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 20, 30, 50, 100];
-
 export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
-  const isInteractive = props.interactive;
+  const isInteractive = props.interactive && props.viewMode !== 'non-interactive';
   const isDarkMode = useKibanaIsDarkMode();
   const palettes = useKbnPalettes();
   const { euiTheme } = useEuiTheme();
@@ -128,7 +127,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       props.args.pageSize
         ? {
             pageIndex: 0,
-            pageSize: props.args.pageSize ?? DEFAULT_PAGE_SIZE,
+            pageSize: props.args.pageSize ?? LENS_DATATABLE_DEFAULT_PAGE_SIZE,
           }
         : undefined
     );
@@ -147,7 +146,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   }, [props.data]);
 
   const firstTableRef = useRef(firstLocalTable);
-
   useEffect(() => {
     if (!pagination?.pageIndex && !pagination?.pageSize) return;
     const lastPageIndex = firstLocalTable.rows.length
@@ -355,7 +353,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         headerRowLines,
         columnCellValueActions,
         dataGridRef.current?.closeCellPopover,
-        props.columnFilterable
+        props.columnFilterable,
+        props.viewMode !== 'non-interactive'
       ),
     [
       bucketedColumns,
@@ -372,6 +371,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       headerRowLines,
       columnCellValueActions,
       props.columnFilterable,
+      props.viewMode,
     ]
   );
 
@@ -518,6 +518,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       isDarkMode,
       getCellColor,
       props.paletteService,
+      props.viewMode !== 'non-interactive',
       props.args.fitRowToContent,
       props.args.density
     );
@@ -525,6 +526,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     formatters,
     columnConfig,
     isDarkMode,
+    props.viewMode,
     props.args.fitRowToContent,
     props.args.density,
     props.paletteService,
@@ -684,11 +686,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           renderCellPopover={renderCellPopover}
           gridStyle={gridStyle}
           schemaDetectors={schemaDetectors}
-          sorting={sorting}
+          sorting={props.viewMode === 'non-interactive' ? undefined : sorting}
           pagination={
             pagination && {
               ...pagination,
-              pageSizeOptions: PAGE_SIZE_OPTIONS,
+              pageSizeOptions: [...LENS_DATATABLE_PAGE_SIZE_OPTIONS],
               onChangeItemsPerPage,
               onChangePage,
             }

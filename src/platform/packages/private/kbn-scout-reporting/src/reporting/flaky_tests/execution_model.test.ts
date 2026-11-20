@@ -36,6 +36,7 @@ describe('buildExecutionModels', () => {
     expect(models[0].executionFilter).toContain('test.status IN ("passed", "failed", "timedOut")');
     expect(models[0].failureFilter).toContain('test.status IN ("failed", "timedOut")');
     expect(models[0].failedExpression).toBe('CASE(test.status IN ("failed", "timedOut"), 1, 0)');
+    expect(models[0].passedExpression).toBe('CASE(test.status == "passed", 1, 0)');
     // there is no in-run retry for these frameworks, so nothing can flip within a run
     expect(models[0].retryFlakeExpression).toBe('0');
   });
@@ -46,13 +47,15 @@ describe('buildExecutionModels', () => {
     expect(models).toHaveLength(1);
     expect(models[0].frameworks).toEqual(['playwright']);
     expect(models[0].runFilter).toBe(
-      '(event.action == "test-outcome" AND reporter.type IN ("playwright") AND test.attempts > 0)'
+      '(event.action == "test-outcome" AND reporter.type IN ("playwright") AND TO_LONG(test.attempts) > 0)'
     );
     expect(models[0].executionFilter).toContain(
       'test.outcome IN ("expected", "unexpected", "flaky")'
     );
     expect(models[0].failureFilter).toContain('test.outcome IN ("unexpected", "flaky")');
     expect(models[0].failedExpression).toBe('CASE(test.outcome IN ("unexpected", "flaky"), 1, 0)');
+    // a flaky outcome failed, then passed on Playwright's retry
+    expect(models[0].passedExpression).toBe('CASE(test.outcome IN ("expected", "flaky"), 1, 0)');
     expect(models[0].retryFlakeExpression).toBe('CASE(test.outcome == "flaky", 1, 0)');
   });
 

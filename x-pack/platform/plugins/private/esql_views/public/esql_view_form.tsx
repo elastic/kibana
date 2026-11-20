@@ -22,6 +22,7 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiLoadingSpinner,
+  EuiScreenReaderLive,
   EuiSpacer,
   EuiText,
   EuiTextArea,
@@ -202,7 +203,7 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
       data-test-subj="esqlViewFormFlyout"
       onClose={handleClose}
       ownFocus
-      size="l"
+      size="m"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
@@ -319,7 +320,7 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
                 setQuery(nextQuery.esql);
                 setQueryError(undefined);
                 setSaveError(undefined);
-                preview.resetPreviewIfQueryChanged(nextQuery.esql);
+                preview.clearPreviewErrorIfQueryChanged(nextQuery.esql);
               }}
               onTextLangQuerySubmit={async (_submittedQuery, abortController) => {
                 const currentQuery = queryRef.current;
@@ -335,11 +336,15 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
             />
           </Suspense>
         </EuiFormRow>
+        {preview.error && (
+          <EuiScreenReaderLive aria-live="assertive" aria-atomic="true">
+            {preview.error.message}
+          </EuiScreenReaderLive>
+        )}
 
         <EuiSpacer size="m" />
 
         <EsqlViewPreviewResults
-          error={preview.error}
           hasRun={preview.hasRun}
           isLoading={preview.isLoading}
           isOpen={isPreviewOpen}

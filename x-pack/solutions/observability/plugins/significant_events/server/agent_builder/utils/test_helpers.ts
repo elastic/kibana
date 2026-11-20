@@ -5,21 +5,29 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { IUiSettingsClient } from '@kbn/core/server';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type {
+  BuiltinToolDefinition,
+  DynamicSchemaBuiltinToolDefinition,
+} from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { ZodObject } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicatorClient } from '../../lib/knowledge_indicators';
+import type { SeveritySync } from '../../lib/significant_events/events/severity';
+import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/types';
 import type { SignificantEventsServer } from '../../types';
+import type { SourceToolDeps } from '../tools/sources/source_tool_deps';
 
 /**
  * Subset of RouteHandlerScopedClients that tools actually use.
@@ -100,7 +108,10 @@ export const mockSourcesClient = (slugs: readonly string[]) => ({
 export const createMockRequest = () => httpServerMock.createKibanaRequest();
 
 export const invokeHandler = async <TSchema extends ZodObject<any>>(
-  tool: BuiltinSkillBoundedTool<TSchema> | BuiltinToolDefinition<TSchema>,
+  tool:
+    | BuiltinSkillBoundedTool<TSchema>
+    | BuiltinToolDefinition<TSchema>
+    | DynamicSchemaBuiltinToolDefinition<TSchema>,
   input: z.infer<TSchema>,
   context: ToolHandlerContext
 ) => {
@@ -121,13 +132,21 @@ export const createMockToolContext = (): ToolHandlerContext => {
   return toolHandlerContext;
 };
 
-/** Nightshift feature privilege of a role: `all` always includes `read`, so manage never comes without read. */
-export type NightshiftFeaturePrivilege = 'none' | 'read' | 'all';
+/**
+ * Nightshift feature privilege of a role: `all` always includes `read`, so manage never comes
+ * without read. `all_and_manage_engines` adds the Manage engines sub-feature, which grants configure.
+ */
+export type NightshiftFeaturePrivilege = 'none' | 'read' | 'all' | 'all_and_manage_engines';
 
 const API_PRIVILEGES_BY_FEATURE_PRIVILEGE: Record<NightshiftFeaturePrivilege, readonly string[]> = {
   none: [],
   read: [NIGHTSHIFT_API_PRIVILEGES.read],
   all: [NIGHTSHIFT_API_PRIVILEGES.read, NIGHTSHIFT_API_PRIVILEGES.manage],
+  all_and_manage_engines: [
+    NIGHTSHIFT_API_PRIVILEGES.read,
+    NIGHTSHIFT_API_PRIVILEGES.manage,
+    NIGHTSHIFT_API_PRIVILEGES.configure,
+  ],
 };
 
 /**
@@ -152,6 +171,37 @@ export const createSignificantEventsServer = ({
       hasAllRequested: [kibana].flat().every((action) => grantedActions.has(action)),
     }))
   );
-  const server: Pick<SignificantEventsServer, 'security'> = { security };
+  // Reading the investigations is covered with `createSeveritySync`: here the rows pass through.
+  const severitySync: SeveritySync = {
+    reconcileRows: async ({ rows }) => rows,
+    syncEvents: async () => ({ status: 'available', outcomes: new Map() }),
+    resolveSeverities: async () => new Map(),
+  };
+  const server: Pick<SignificantEventsServer, 'security' | 'severitySync'> = {
+    security,
+    severitySync,
+  };
   return server as SignificantEventsServer;
+};
+
+/** The dependencies every source tool takes, with the given sources client behind the scoped clients. */
+export const createSourceToolDeps = ({
+  featurePrivilege,
+  sourcesClient,
+}: {
+  featurePrivilege: NightshiftFeaturePrivilege;
+  sourcesClient: Partial<SourcesClient>;
+}): SourceToolDeps => ({
+  getScopedClients: jest.fn().mockResolvedValue({ licensing: {}, sourcesClient }),
+  server: createSignificantEventsServer({ featurePrivilege }),
+  logger: loggingSystemMock.createLogger(),
+  telemetry: createMockToolFailureTelemetry(),
+});
+
+/** A telemetry client that records only the failed-tool-call event, which every tool can report. */
+export const createMockToolFailureTelemetry = (): EbtTelemetryClient => {
+  const telemetry: Pick<EbtTelemetryClient, 'trackAgentToolFailed'> = {
+    trackAgentToolFailed: jest.fn(),
+  };
+  return telemetry as EbtTelemetryClient;
 };

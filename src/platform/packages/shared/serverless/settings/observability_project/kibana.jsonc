@@ -2,9 +2,8 @@
   "type": "shared-common",
   "id": "@kbn/serverless-observability-settings",
   "owner": [
-    "@elastic/appex-sharedux",
-    "@elastic/kibana-management",
-    "@elastic/observability-ui"
+    "@elastic/observability-ui",
+    "@elastic/kibana-management"
   ],
   "group": "platform",
   "visibility": "shared"

@@ -80,8 +80,7 @@ export class DataFederationPage {
   }
 
   async goto(): Promise<void> {
-    await this.page.gotoApp('management');
-    await this.page.testSubj.locator('data_federation').click();
+    await this.page.gotoApp('management/data/data_federation');
     await this.pageTitle.waitFor({ state: 'visible' });
   }
 

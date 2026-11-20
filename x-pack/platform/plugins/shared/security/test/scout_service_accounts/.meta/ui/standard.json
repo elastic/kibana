@@ -1,5 +1,5 @@
 {
-  "sha1": "610ecebc35b784c6c1b674db8689d3bd91acaee5",
+  "sha1": "30a4b4269a6f9f74ab7b240bdaba8092f1f1f287",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -42,6 +42,19 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/ui/tests/delete_service_account.spec.ts",
         "line": 118,
         "column": 8
+      }
+    },
+    {
+      "id": "053b70f6a4bcd73-f90fd3f895e3e8f",
+      "title": "View the workloads bound to service accounts counts the bound workloads and lists them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/ui/tests/view_service_account_workloads.spec.ts",
+        "line": 80,
+        "column": 24
       }
     }
   ]

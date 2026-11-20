@@ -45,6 +45,7 @@ const createPosture = () => ({
   },
   linuxProtectionModes: {
     malware: 'prevent',
+    ransomware: 'prevent',
     behavior: 'prevent',
   },
   globalTelemetryEnabled: false,

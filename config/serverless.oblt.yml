@@ -13,6 +13,7 @@ plugins.allowlistPluginGroups: ['platform', 'observability']
 xpack.significantEvents.enabled: false
 xpack.nightshiftSources.enabled: false
 xpack.nightshift_investigations.enabled: false
+xpack.nightshiftDetection.enabled: false
 
 # Escalations are AlertZero-only for now: no escalations sub-feature, routes, or template UI.
 # A plugin flag rather than a feature override, which would fail while the plugin is disabled.
@@ -50,6 +51,8 @@ xpack.apm.serverlessOnboarding: true
 # Synthetics mTLS cert locations
 xpack.uptime.service.tls.certificate: /mnt/elastic-internal/http-certs/tls.crt
 xpack.uptime.service.tls.key: /mnt/elastic-internal/http-certs/tls.key
+# Synthetics Vault secret references need Elastic Agent 9.6+ on private locations
+xpack.uptime.secretConnections.enabled: false
 
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['apm', 'observability', 'uptime']

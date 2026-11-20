@@ -7,7 +7,11 @@
 
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import type { ConverseStep } from '@kbn/evals';
-import type { Severity, SignificantEvent } from '@kbn/significant-events-schema';
+import type {
+  Severity,
+  SignificantEvent,
+  SignificantEventStatus,
+} from '@kbn/significant-events-schema';
 import { isToolId } from './tool_usage';
 
 interface EventsWriteToolResult {
@@ -21,6 +25,7 @@ type EventsWriteItemResult =
       index: number;
       event_id: string;
       written: true;
+      status?: SignificantEventStatus;
       severity?: Severity;
     }
   | {
@@ -29,12 +34,14 @@ type EventsWriteItemResult =
       written: false;
       reason:
         | 'existing_active_event'
+        | 'rule_held_by_event'
         | 'bulk_error'
         | 'duplicate_in_batch'
         | 'superseded'
         | 'unchanged_outcome'
         | 'unknown_event_id';
       existing_event_id?: string;
+      status?: SignificantEventStatus;
       severity?: Severity;
     };
 
@@ -98,9 +105,9 @@ const isProducedDiscovery = (result: EventsWriteItemResult): boolean => {
 };
 
 /**
- * Severity is computed server-side  and returned only on the tool result, never echoed
- * back on the request item — merge it in alongside event_id, or every post-migration evaluator
- * reading `severity` off the extracted event sees it as missing.
+ * Severity and status are decided server-side and returned only on the tool result, never echoed
+ * back on the request item — merge them in alongside event_id, or every evaluator reading
+ * `severity` or `status` off the extracted event sees them as missing.
  */
 const mergeComputedFields = (
   item: Partial<SignificantEvent>,
@@ -109,6 +116,7 @@ const mergeComputedFields = (
   ({
     ...item,
     event_id: result.event_id,
+    ...(result.status !== undefined ? { status: result.status } : {}),
     ...(result.severity !== undefined ? { severity: result.severity } : {}),
   } as SignificantEvent);
 

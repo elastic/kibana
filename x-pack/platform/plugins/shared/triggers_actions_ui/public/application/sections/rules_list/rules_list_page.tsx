@@ -6,11 +6,15 @@
  */
 
 import React, { lazy, useEffect, useMemo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { rulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
+import { OBSERVABILITY_OVERVIEW_APP_ID } from '@kbn/deeplinks-observability';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useHistory } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
+import { AppStatus } from '@kbn/core/public';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
@@ -19,7 +23,6 @@ import { getClassicTabs } from '../rules_page/get_classic_tabs';
 import { getRulesPageMenu } from '../rules_page/get_rules_page_menu';
 import { useRulesPageActions } from '../rules_page/rules_page_actions';
 import { RULES_PAGE_MODE, useRulesPageMode } from '../rules_page/use_rules_page_mode';
-import { UniversalRulesIntroCallout } from './components/universal_rules_intro_callout';
 
 const RulesList = lazy(() => import('./components/rules_list'));
 
@@ -29,6 +32,7 @@ export const RulesListContainer = () => {
     application: {
       getUrlForApp,
       capabilities: { rulesSettings = {} },
+      applications$,
     },
     chrome: { docTitle },
     http,
@@ -45,7 +49,7 @@ export const RulesListContainer = () => {
   });
   const {
     openCreateRuleModal,
-    openSettingsFlyout,
+    navigateToSettings,
     navigateToCreateRuleForm,
     navigateToCreateRuleFromTemplateForm,
     navigateToEditRuleForm,
@@ -55,7 +59,11 @@ export const RulesListContainer = () => {
   const canShowSettings = Boolean(show && (readFlappingSettingsUI || readQueryDelaySettingsUI));
 
   const docLink = docLinks.links.alerting.guide;
-  const alertsBackHref = getUrlForApp('observability-overview', { path: '/alerts' });
+  const alertsBackHref = getUrlForApp(OBSERVABILITY_OVERVIEW_APP_ID, { path: '/alerts' });
+  const applications = useObservable(applications$, new Map());
+  const isAlertsAppAccessible =
+    applications.get(OBSERVABILITY_OVERVIEW_APP_ID)?.status === AppStatus.accessible;
+  const showBackButton = !hideListBackButton && isAlertsAppAccessible;
   const mode = useRulesPageMode();
 
   useEffect(() => {
@@ -100,7 +108,7 @@ export const RulesListContainer = () => {
       canShowSettings,
       extraItems,
       onCreateRule: openCreateRuleModal,
-      onOpenSettings: openSettingsFlyout,
+      onOpenSettings: navigateToSettings,
     });
   }, [
     mode,
@@ -109,27 +117,27 @@ export const RulesListContainer = () => {
     canShowSettings,
     history,
     openCreateRuleModal,
-    openSettingsFlyout,
+    navigateToSettings,
   ]);
 
   return (
     <>
       <RulesPageHeader
         back={
-          hideListBackButton
-            ? undefined
-            : {
+          showBackButton
+            ? {
                 href: alertsBackHref,
                 label: i18n.translate('xpack.triggersActionsUI.rulesPage.backButtonLabel', {
                   defaultMessage: 'Alerts',
                 }),
               }
+            : undefined
         }
         tabs={rulesListTabs}
         menu={rulesListMenu}
         docLink={docLink}
       />
-      <UniversalRulesIntroCallout />
+      <EuiSpacer size="m" />
       <RulesList
         rulesListKey="rules-page"
         showCreateRuleButtonInPrompt={true}

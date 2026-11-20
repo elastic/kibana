@@ -159,6 +159,13 @@ export const WORKFLOW_RAN = i18n.translate('xpack.cases.caseView.userActions.wor
   defaultMessage: 'ran a workflow',
 });
 
+export const ATTACHMENTS_REMOVED = i18n.translate(
+  'xpack.cases.caseView.userActions.attachmentsRemoved',
+  {
+    defaultMessage: 'removed attachments',
+  }
+);
+
 const ACTION_SOURCE_KIND_LABELS: Record<ActionSourceType, string> = {
   [ActionSourceTypes.agent]: i18n.translate(
     'xpack.cases.caseView.userActions.actionSource.agentLabel',

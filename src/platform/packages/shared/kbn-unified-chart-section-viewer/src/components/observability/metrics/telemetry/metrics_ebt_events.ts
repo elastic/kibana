@@ -98,13 +98,29 @@ export const registerMetricsEbtEvents = (analytics: AnalyticsServiceSetup) => {
       previous_aggregation: {
         type: 'keyword',
         _meta: {
-          description: 'Aggregation configuration before the change',
+          description:
+            'Aggregation before the change. For histograms this is the percentile type, or the percentile fallback when the chart cannot draw that percentile.',
         },
       },
       new_aggregation: {
         type: 'keyword',
         _meta: {
-          description: 'Aggregation configuration after the change',
+          description:
+            'Aggregation after the change. For histograms this is the percentile type, or the percentile fallback when the chart cannot draw that percentile.',
+        },
+      },
+      previous_visualization: {
+        type: 'keyword',
+        _meta: {
+          description: 'Histogram chart before the change. Omitted for counter and gauge.',
+          optional: true,
+        },
+      },
+      new_visualization: {
+        type: 'keyword',
+        _meta: {
+          description: 'Histogram chart after the change. Omitted for counter and gauge.',
+          optional: true,
         },
       },
     },

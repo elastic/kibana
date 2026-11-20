@@ -1,20 +1,20 @@
 {
-  "sha1": "b09b7040f6ef528af6f4e247f618d3d7b09458fd",
+  "sha1": "eaeff194c4b57293bbb58e971cb1837b0464edd9",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "6cb21ca8e3593d9-dae09b093b80946",
-      "title": "Subscription status badge for billing admins shows the trial popover with subscribe and pricing links",
+      "id": "6cb21ca8e3593d9-41306a7a46b1773",
+      "title": "Subscription status badge for billing admins shows the trial popover with subscribe and trial summary links",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/subscription_status/test/scout_cloud_trial/ui/tests/billing_admin.spec.ts",
-        "line": 33,
-        "column": 18
+        "line": 16,
+        "column": 54
       }
     },
     {

@@ -94,7 +94,7 @@ describe('useTransactionDetailFlyoutAlertsBadge', () => {
       transactionName: 'GET /api/orders',
       transactionType: 'request',
       rangeFrom: '2026-01-01T00:00:00.000Z',
-      rangeTo: '2026-01-01T00:15:00.000Z',
+      rangeTo: 'now',
       kuery: 'service.environment: "production"',
     });
   });
@@ -112,7 +112,7 @@ describe('useTransactionDetailFlyoutAlertsBadge', () => {
       transactionName: 'GET /api/orders',
       transactionType: 'request',
       rangeFrom: '2026-01-01T00:00:00.000Z',
-      rangeTo: '2026-01-01T00:15:00.000Z',
+      rangeTo: 'now',
     });
   });
 
@@ -129,7 +129,7 @@ describe('useTransactionDetailFlyoutAlertsBadge', () => {
       transactionName: 'GET /api/orders',
       transactionType: 'request',
       rangeFrom: '2026-01-01T00:00:00.000Z',
-      rangeTo: '2026-01-01T00:15:00.000Z',
+      rangeTo: 'now',
       kuery: '(service.environment: "ENVIRONMENT_NOT_DEFINED" OR NOT service.environment: *)',
     });
   });

@@ -34,6 +34,7 @@ export class UpdateActionPolicyApiKeyRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Update an action policy API key',
     description: 'Rotate the API key for an action policy.',
     oasOperationObject: updateActionPolicyApiKeyOasExamples,

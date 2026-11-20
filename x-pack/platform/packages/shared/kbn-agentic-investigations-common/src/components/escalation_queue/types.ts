@@ -31,4 +31,6 @@ export interface EscalationQueueItem {
   assigneeUids: readonly string[];
   /** Entity ids from the Impact of the linked investigations; feeds the Impact pills. */
   entityIds?: string[];
+  /** Entity type (`host`, `user`, …) by entity id, for the ids that have one. */
+  entityTypes?: Record<string, string>;
 }

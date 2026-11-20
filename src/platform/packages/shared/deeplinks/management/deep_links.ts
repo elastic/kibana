@@ -69,6 +69,7 @@ export type ManagementId =
   | 'role_mappings'
   | 'roles'
   | 'rollup_jobs'
+  | 'search_boost'
   | 'search_sessions'
   | 'service_accounts'
   | 'settings'
@@ -87,7 +88,8 @@ export type ManagementId =
   | 'upgrade_assistant'
   | 'users'
   | 'watcher'
-  | 'genAiSettings';
+  | 'genAiSettings'
+  | 'aiAnonymizationSettings';
 
 export type ManagementDeepLinkId = MonitoringAppId | `${ManagementAppId}:${ManagementId}`;
 

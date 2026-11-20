@@ -11,7 +11,9 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import type { MemoryHistory } from 'history';
 import { act, renderHook } from '@testing-library/react';
+import qs from 'query-string';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
+import { encodeQueryString } from '../../../../../common/utils/global_query_string/helpers';
 import {
   MAX_EXPANDED_ENTITY_IDS,
   useEntityAnalyticsUrlState,
@@ -33,10 +35,11 @@ describe('useEntityAnalyticsUrlState', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        timeRange: '30d',
+        timeRange: '24h',
         rowsMode: 'resolved',
         sortField: 'entity.risk.calculated_score_norm',
         sortDirection: 'desc',
+        groupsSelected: ['none'],
         expandedIds: [],
         activeTile: null,
         entityFilters: {
@@ -79,7 +82,7 @@ describe('useEntityAnalyticsUrlState', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        timeRange: '30d',
+        timeRange: '24h',
         rowsMode: 'resolved',
         sortField: 'entity.risk.calculated_score_norm',
         // The direction of an invalid sort field reads as the default too.
@@ -132,6 +135,48 @@ describe('useEntityAnalyticsUrlState', () => {
     });
   });
 
+  it('reads and writes the fields the grid is grouped by', () => {
+    const { result, params } = renderUrlState(
+      '?eaRowsMode=individual&eaGroupBy=entity.type,host.os'
+    );
+
+    expect(result.current.groupsSelected).toEqual(['entity.type', 'host.os']);
+
+    act(() => result.current.setGroupsSelected(['entity.type']));
+    expect(params().eaGroupBy).toBe('entity.type');
+
+    act(() => result.current.setGroupsSelected(['none']));
+    expect(params().eaGroupBy).toBeUndefined();
+    expect(result.current.groupsSelected).toEqual(['none']);
+  });
+
+  it('keeps only the group levels the grid supports', () => {
+    const { result } = renderUrlState('?eaGroupBy=a,b,c,d,e');
+
+    expect(result.current.groupsSelected).toEqual(['a', 'b', 'c']);
+  });
+
+  it('drops Resolution from the grouping of resolved rows', () => {
+    const { result, params } = renderUrlState(
+      '?eaRowsMode=individual&eaGroupBy=entity.relationships.resolution.resolved_to,entity.type'
+    );
+    expect(result.current.groupsSelected).toEqual([
+      'entity.relationships.resolution.resolved_to',
+      'entity.type',
+    ]);
+
+    act(() => result.current.setRowsMode('resolved'));
+
+    expect(params().eaGroupBy).toBe('entity.type');
+    expect(result.current.groupsSelected).toEqual(['entity.type']);
+  });
+
+  it('reads a Resolution-only grouping of resolved rows as no grouping', () => {
+    const { result } = renderUrlState('?eaGroupBy=entity.relationships.resolution.resolved_to');
+
+    expect(result.current.groupsSelected).toEqual(['none']);
+  });
+
   it('writes entity filters and drops empty ones', () => {
     const { result, params } = renderUrlState('?eaWatchlists=w1');
 
@@ -168,12 +213,22 @@ describe('useEntityAnalyticsUrlState', () => {
     act(() => result.current.toggleExpandedId('user:a,b@corp'));
     act(() => result.current.toggleExpandedId('host:h-1'));
     expect(result.current.expandedIds).toEqual(['user:a,b@corp', 'host:h-1']);
-    // One param per id, encoded once.
-    expect(history.location.search).toBe('?eaExpanded=user%3Aa%2Cb%40corp&eaExpanded=host%3Ah-1');
 
     act(() => result.current.toggleExpandedId('user:a,b@corp'));
     expect(result.current.expandedIds).toEqual(['host:h-1']);
     expect(history.length).toBe(1);
+  });
+
+  it("keeps expanded ids through the app's URL sync rewrite", () => {
+    const { result, history } = renderUrlState();
+    act(() => result.current.toggleExpandedId('user:a,b@corp'));
+    act(() => result.current.toggleExpandedId('host:h-1'));
+
+    // What the Security app's global URL sync writes back.
+    const rewritten = encodeQueryString(qs.parse(history.location.search, { sort: false }));
+    act(() => history.replace({ search: rewritten }));
+
+    expect(result.current.expandedIds).toEqual(['user:a,b@corp', 'host:h-1']);
   });
 
   it('keeps the most recently expanded ids up to the cap', () => {

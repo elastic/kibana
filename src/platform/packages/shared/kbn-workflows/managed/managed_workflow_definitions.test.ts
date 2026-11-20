@@ -12,18 +12,10 @@ import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
-  ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
-  ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
-  ALERTZERO_ACTION_SET_ASSET_CRITICALITY_WORKFLOW_ID,
-  ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_WORKFLOW_IDS,
   ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
-  ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID,
-  ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
-  ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_FORENSICS_WORKFLOW_IDS,
-  ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
   ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS,
   ALERTZERO_RULE_WORKFLOW_IDS,
   ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
@@ -32,37 +24,33 @@ import {
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+  CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
+  CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
+  CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
+  CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
   EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
+  NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
-import ACTION_ISOLATE_HOST_YAML from './definitions/alertzero/actions/defend/action_isolate_host.yaml';
-import ACTION_KILL_PROCESS_YAML from './definitions/alertzero/actions/defend/action_kill_process.yaml';
-import ACTION_SUSPEND_PROCESS_YAML from './definitions/alertzero/actions/defend/action_suspend_process.yaml';
-import ACTION_SET_ASSET_CRITICALITY_YAML from './definitions/alertzero/actions/identity/action_set_asset_criticality.yaml';
-import DETECTION_RULE_COVERAGE_YAML from './definitions/alertzero/detection_rule_coverage.yaml';
-import DETECTION_RULE_TUNING_YAML from './definitions/alertzero/detection_rule_tuning.yaml';
-import FLOOR_ALERT_TRIAGE_YAML from './definitions/alertzero/floor_alert_triage.yaml';
-import FLOOR_ALERT_TRIAGE_BATCH_YAML from './definitions/alertzero/floor_alert_triage_batch.yaml';
-import FLOOR_ALERT_TRIAGE_REVIEW_YAML from './definitions/alertzero/floor_alert_triage_review.yaml';
-import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/alertzero/floor_attack_discovery.yaml';
-import FORENSICS_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_endpoint_analysis.yaml';
-import FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML from './definitions/alertzero/forensics_run_endpoint_analysis.yaml';
-import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './definitions/alertzero/hunt_continuous_threat_hunt.yaml';
-import {
-  ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS,
-  ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS,
-  CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS,
-  ENDPOINT_ANALYSIS_WORKER_SETTINGS_DEFAULTS,
-  RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS,
-  RULE_TUNING_WORKER_SETTINGS_DEFAULTS,
-  type WorkerSettingsDefaults,
-} from './definitions/alertzero/worker_settings_defaults';
+import CONTEXT_ENGINE_DREAMING_YAML from './definitions/context_engine/dreaming.yaml';
+import CONTEXT_ENGINE_TRACE_DREAMING_YAML from './definitions/context_engine/dreaming_traces.yaml';
+import CONTEXT_ENGINE_TRACE_DREAMING_BATCH_YAML from './definitions/context_engine/dreaming_traces_batch.yaml';
+import CONTEXT_ENGINE_RELATIONSHIPS_YAML from './definitions/context_engine/relationships.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
-import { WorkflowSchemaBase } from '../spec/schema';
+import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../common/utils';
+import { visitNestedSteps } from '../definition/definition_utils';
+import type { VisitNestedStepEntry, WorkflowStep } from '../definition/definition_utils';
+import { getElasticsearchConnectors } from '../spec/elasticsearch';
+import { ElasticsearchRequestStepInputSchema, WorkflowSchemaBase } from '../spec/schema';
 
 const ManagedWorkflowSchema = WorkflowSchemaBase.extend({
   triggers: z.array(z.object({ type: z.string().min(1) }).passthrough()).min(1),
@@ -82,6 +70,18 @@ type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
 
 const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID]: { serviceAccountId: 'example-account' },
+  [NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID]: { serviceAccountId: 'kibana/nightshift_agent' },
+  [NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID]: {
+    serviceAccountId: 'kibana/nightshift_agent',
+  },
+  [NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID]: { serviceAccountId: 'kibana/nightshift_agent' },
+  [NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID]: {
+    serviceAccountId: 'kibana/nightshift_agent',
+  },
+  [NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID]: { serviceAccountId: 'kibana/nightshift_agent' },
+  [NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID]: {
+    serviceAccountId: 'kibana/nightshift_detection',
+  },
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
   },
@@ -89,11 +89,62 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     aiIndexId: 'my-ai-index',
     intervalMinutes: 1440,
   },
+  [CONTEXT_ENGINE_DREAMING_WORKFLOW_ID]: {
+    aiIndexId: 'my-ai-index',
+    instanceKey: 'my-ai-index-0123456789abcdef',
+    memoriesIndex: 'ai-index-idx-my-ai-index',
+    intervalMinutes: 60,
+    connectorId: '',
+    instructions: 'Remember what customers "prefer".\nIgnore {{ small talk }}.',
+    factTypes: [{ type: 'preference', description: 'Something a customer wants: a seat.' }],
+    entityTypes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
+    relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
+  },
+  [CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID]: {
+    aiIndexId: 'my-ai-index',
+    instanceKey: 'my-ai-index-0123456789abcdef',
+    memoriesIndex: 'ai-index-idx-my-ai-index',
+    intervalMinutes: 60,
+    connectorId: 'my-connector',
+    instructions: 'Remember what customers "prefer".\nIgnore {{ small talk }}.',
+    factTypes: [{ type: 'preference', description: 'Something a customer wants: a seat.' }],
+    entityTypes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
+    relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
+  },
+  [CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID]: {
+    aiIndexId: 'my-ai-index',
+    instanceKey: 'my-ai-index-0123456789abcdef',
+    memoriesIndex: 'ai-index-idx-my-ai-index',
+    intervalMinutes: 60,
+    connectorId: 'my-connector',
+    instructions: 'Remember what customers "prefer".\nIgnore {{ small talk }}.',
+    factTypes: [{ type: 'preference', description: 'Something a customer wants: a seat.' }],
+    entityTypes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
+    relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
+  },
+  [CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID]: {
+    aiIndexId: 'my-ai-index',
+    instanceKey: 'my-ai-index-0123456789abcdef',
+    memoriesIndex: 'ai-index-idx-my-ai-index',
+    intervalMinutes: 60,
+    connectorId: 'my-connector',
+    instructions: 'Remember what customers "prefer".\nIgnore {{ small talk }}.',
+    factTypes: [{ type: 'preference', description: 'Something a customer wants: a seat.' }],
+    entityTypes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
+    relationshipTypes: [{ type: 'lives_in', description: 'A customer lives in a city.' }],
+  },
   [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
     settingsVersion: 2,
     autonomyLevel: 'manual',
     scheduleInterval: '15m',
-    extras: { autoCloseConfidenceScoreMinThreshold: 0.85, budgetPerHour: 1300, lookbackHours: 24 },
+    extras: {
+      autoCloseConfidenceScoreMinThreshold: 0.85,
+      budgetPerHour: 1300,
+      lookbackHours: 24,
+      minSeverity: 'low',
+      excludeBuildingBlocks: false,
+      excludedRuleTags: [],
+    },
   },
   [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: {
     settingsVersion: 1,
@@ -163,6 +214,10 @@ const alertZeroDefinitionsById = managedDefinitionsById.filter(([id]) =>
   alertZeroWorkflowIds.has(id)
 );
 
+const staticDefinitionsById = managedDefinitionsById.filter(
+  ([, definition]) => definition.management.lifecycle === 'static'
+);
+
 function hasYamlTemplate(
   definition: ManagedWorkflowDefinition
 ): definition is YamlTemplateManagedWorkflowDefinition {
@@ -174,6 +229,13 @@ function hasYaml(
 ): definition is ManagedWorkflowDefinition & { yaml: string } {
   return typeof definition.yaml === 'string';
 }
+
+const elasticsearchConnectorsByType = new Map(
+  getElasticsearchConnectors().map((connector) => [connector.type, connector])
+);
+
+const OBJECT_FORM_HINT =
+  'Hint: the editor schema rejects some shorthand that Elasticsearch accepts. If this is one, use the object form, for example `term: { field: { value: false } }`, `prefix: { field: { value: "a" } }` or `_source: { includes: [...] }`.';
 
 function renderWorkflowYaml(definition: ManagedWorkflowDefinition): string {
   const { id } = definition;
@@ -207,72 +269,27 @@ function createContentFingerprint(content: string): string {
   return fingerprint.toString(16).padStart(8, '0');
 }
 
-/**
- * What the platform's `yamlTemplate` hash cannot see but the render depends on: the imported YAML
- * and, for AlertZero Workers, the settings defaults their renderer fills stored values from.
- */
-const renderInputs = (importedYaml: string, defaults?: WorkerSettingsDefaults): string =>
-  defaults === undefined ? importedYaml : `${importedYaml}\n${JSON.stringify(defaults)}`;
-
 it.each([
+  [CONTEXT_ENGINE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_DREAMING_YAML, '6:4dcfae3f'],
+  [CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID, CONTEXT_ENGINE_RELATIONSHIPS_YAML, '3:2622f7b3'],
+  [CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_TRACE_DREAMING_YAML, '5:53938616'],
   [
-    ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
-    renderInputs(FLOOR_ALERT_TRIAGE_YAML, ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS),
-    '15:d001f69d',
-  ],
-  [ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_BATCH_YAML, '3:a445e5a1'],
-  [ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_REVIEW_YAML, '6:923b8c13'],
-  [
-    ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
-    renderInputs(FLOOR_ATTACK_DISCOVERY_YAML, ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS),
-    '7:81e93c9b',
-  ],
-  [
-    ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
-    renderInputs(FORENSICS_ENDPOINT_ANALYSIS_YAML, ENDPOINT_ANALYSIS_WORKER_SETTINGS_DEFAULTS),
-    '5:ca69d574',
-  ],
-  [
-    ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
-    FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML,
-    '8:79aa04fa',
-  ],
-  [
-    ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
-    renderInputs(HUNT_CONTINUOUS_THREAT_HUNT_YAML, CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS),
-    '4:432a8ccd',
-  ],
-  [
-    ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
-    renderInputs(DETECTION_RULE_TUNING_YAML, RULE_TUNING_WORKER_SETTINGS_DEFAULTS),
-    '11:8f08f83c',
-  ],
-  [
-    ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
-    renderInputs(DETECTION_RULE_COVERAGE_YAML, RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS),
-    '4:d2801f59',
-  ],
-  [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '3:46476397'],
-  [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '3:968a7ee7'],
-  [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '3:149afbb2'],
-  [
-    ALERTZERO_ACTION_SET_ASSET_CRITICALITY_WORKFLOW_ID,
-    ACTION_SET_ASSET_CRITICALITY_YAML,
-    '1:3cd8044e',
+    CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
+    CONTEXT_ENGINE_TRACE_DREAMING_BATCH_YAML,
+    '5:85da232f',
   ],
 ] as const)(
   'requires bumping %s definition.version together with the fingerprint of its render inputs',
   (workflowId, inputs, expectedFingerprint) => {
     const definition = managedWorkflowDefinitions.find(({ id }) => id === workflowId);
-    if (!definition) throw new Error(`Managed worker "${workflowId}" is not registered`);
+    if (!definition) throw new Error(`Managed workflow "${workflowId}" is not registered`);
     const actualFingerprint = `${definition.version}:${createContentFingerprint(inputs)}`;
     if (actualFingerprint === expectedFingerprint) {
       return;
     }
     throw new Error(
       `Render inputs for '${workflowId}' changed (${actualFingerprint}, expected ${expectedFingerprint}). ` +
-        `yamlTemplate hashing covers only the function source, not the imported YAML or the settings defaults in worker_settings_defaults.ts, so already-installed spaces will not receive the edit until definition.version is bumped. ` +
-        `Bump version in the worker module and update this expected fingerprint in the same change.`
+        `Bump version in the definition module and update this expected fingerprint in the same change.`
     );
   }
 );
@@ -347,6 +364,20 @@ function collectStepsOfType(
   return collected;
 }
 
+/**
+ * A step is pinned when its connector field is a tier id, or a list that includes one.
+ * The list form can lead with another feature and keeps the tier as the fallback.
+ */
+function namesAlertZeroTier(value: unknown): boolean {
+  if (typeof value === 'string') {
+    return ALERTZERO_TIER_IDS.has(value);
+  }
+  if (!Array.isArray(value)) {
+    return false;
+  }
+  return value.some((entry) => typeof entry === 'string' && ALERTZERO_TIER_IDS.has(entry));
+}
+
 /** The tier a step names, whether it is an `ai.agent` field or a custom step's `with` input. */
 function getNamedTier(step: Record<string, unknown>, field: string): unknown {
   if (field in step) {
@@ -417,60 +448,99 @@ describe('managedWorkflowDefinitions', () => {
     }
   );
 
-  describe('Hunt Watch: registry-wide checks', () => {
-    // Every managed definition, rendered once (yamlTemplate ones with their representative
-    // values), parsed for its top-level `tags`. Reused by both checks below so a templated
-    // definition is rendered only once for this whole block.
-    const parsedDefinitions = managedWorkflowDefinitions.map((definition) => ({
-      id: definition.id,
-      parsed: parse(renderWorkflowYaml(definition)) as {
-        tags?: string[];
-        steps?: Array<{
-          type?: string;
-          with?: { 'workflow-id'?: string };
-          steps?: Array<{ type?: string; with?: { 'workflow-id'?: string } }>;
-        }>;
-      },
-    }));
+  // Mirrors the editor's Run validation (POST /api/workflows/test): every elasticsearch.* step's
+  // `with` must satisfy the connector paramsSchema from spec/elasticsearch; a stored `valid: true`
+  // does not cover it. Values that are whole-string {{ }} / ${{ }} templates or contain {% %} tags
+  // are skipped, as parseWorkflowYamlToJSON does. elasticsearch.request has no package connector,
+  // so it is checked against the input schema its editor contract uses.
+  it.each(managedDefinitionsById)(
+    '%s elasticsearch steps satisfy the connector params schema',
+    (_id, definition) => {
+      // The raw parse is walked (not ManagedWorkflowSchema.parse) so zod stripping cannot hide a
+      // `with` key, and because the schema types settings.on-failure.fallback as BaseStep[], which
+      // visitNestedSteps does not accept.
+      const parsed = parse(renderWorkflowYaml(definition)) as {
+        steps: WorkflowStep[];
+        settings?: { 'on-failure'?: { fallback?: WorkflowStep[] } };
+      };
+      const failures: Array<{ path: string; issuePaths: string[]; error: string }> = [];
 
-    it('registers all four hunt child ids exactly once', () => {
-      const ids = managedWorkflowDefinitions.map(({ id }) => id);
+      const visitor = ({ step, path }: VisitNestedStepEntry) => {
+        if (!step.type.startsWith('elasticsearch.')) {
+          return;
+        }
+        const paramsSchema =
+          step.type === 'elasticsearch.request'
+            ? ElasticsearchRequestStepInputSchema
+            : elasticsearchConnectorsByType.get(step.type)?.paramsSchema;
+        if (!paramsSchema) {
+          failures.push({
+            path,
+            issuePaths: [],
+            error: `Unknown elasticsearch step type '${step.type}': add a package connector`,
+          });
+          return;
+        }
 
-      for (const childId of ALERTZERO_HUNT_CHILD_WORKFLOW_IDS) {
-        expect(ids.filter((id) => id === childId)).toEqual([childId]);
+        const params = (step as { with?: unknown }).with;
+        const result = paramsSchema.safeParse(params ?? {});
+        if (result.success) {
+          return;
+        }
+
+        const survivingIssues = result.error.issues.filter((issue) => {
+          // An empty path is `with` itself, which Run also skips when it is a whole-value template.
+          let current: unknown = params;
+          for (const segment of issue.path) {
+            if (current === null || typeof current !== 'object') {
+              return true;
+            }
+            current = (current as Record<string, unknown>)[String(segment)];
+          }
+          if (current === undefined) {
+            return true;
+          }
+          return !(
+            isDynamicValue(current) ||
+            isVariableValue(current) ||
+            isLiquidTagValue(current)
+          );
+        });
+
+        if (survivingIssues.length > 0) {
+          failures.push({
+            path,
+            issuePaths: survivingIssues.map((issue) => issue.path.map(String).join('.')),
+            error: `${z.prettifyError(new z.ZodError(survivingIssues))}\n${OBJECT_FORM_HINT}`,
+          });
+        }
+      };
+
+      visitNestedSteps(parsed.steps, visitor);
+      const fallback = parsed.settings?.['on-failure']?.fallback;
+      if (Array.isArray(fallback)) {
+        visitNestedSteps(fallback, visitor);
       }
-    });
 
-    // The tagged Worker is the only `watch-hunt` definition in the whole
-    // registry, not just among the four hunt children -- a second
-    // definition carrying it would make the Watch UI list two Workers for one feature.
-    it('tags only the tagged Worker as watch-hunt', () => {
-      const taggedWatchHunt = parsedDefinitions.filter((definition) =>
-        (definition.parsed.tags ?? []).includes('watch-hunt')
-      );
+      expect(failures).toEqual([]);
+    }
+  );
 
-      expect(taggedWatchHunt.map((definition) => definition.id)).toEqual([
-        ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
-      ]);
-    });
+  // Asset criticality is the customer's to set: appearing in an attack does not change how much an
+  // identity matters. No managed workflow, including the Workers, may write it, so a change has to
+  // be made by an analyst in Entity Analytics. Templated definitions are rendered first: their
+  // `yamlTemplate` is a function, so the text to scan only exists after it runs.
+  it.each(managedDefinitionsById)('%s never writes asset criticality', (_id, definition) => {
+    expect(renderWorkflowYaml(definition)).not.toMatch(
+      /api\/asset_criticality|entityStore\.updateAssetCriticality/
+    );
+  });
 
-    // Proves the Worker's own workflow.execute/executeAsync targets are real, not just that
-    // the four hunt ids exist somewhere -- a typo'd workflow-id string would otherwise only
-    // fail at runtime, on the first sweep that reaches that step.
-    it("resolves every workflow.execute/executeAsync id the Worker's rendered YAML references", () => {
-      const worker = parsedDefinitions.find(
-        (definition) => definition.id === ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID
-      );
-      const registeredIds = new Set<string>(managedWorkflowDefinitions.map(({ id }) => id));
-      const referencedIds = (worker?.parsed.steps ?? [])
-        .flatMap((step) => step.steps ?? [step])
-        .filter((step) => step.type === 'workflow.execute' || step.type === 'workflow.executeAsync')
-        .map((step) => step.with?.['workflow-id'])
-        .filter((id): id is string => typeof id === 'string');
-
-      expect(referencedIds.length).toBeGreaterThan(0);
-      expect(referencedIds.filter((id) => !registeredIds.has(id))).toEqual([]);
-    });
+  // Static workflows install without a user request, and creating or changing a service-account
+  // binding needs one (with manage_security, in a specific space). A static definition that set
+  // `run_as` would only fail when it is installed, so it fails here instead.
+  it.each(staticDefinitionsById)('%s does not bind a service account', (_id, definition) => {
+    expect(parse(renderWorkflowYaml(definition))?.settings?.run_as).toBeUndefined();
   });
 
   it.each(managedTemplateDefinitionsById)(
@@ -490,6 +560,32 @@ describe('managedWorkflowDefinitions', () => {
     }
   );
 
+  // An installed document's definition hash is the hash of the YAML its values render, so a render
+  // that varies between calls (a timestamp, a random or v4 uuid) moves the hash on every
+  // reconciliation and the document reinstalls each time. Values that are stable in one process
+  // but differ per instance, such as the timezone, locale or environment, are not caught here.
+  describe('deterministic rendering', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it.each(managedTemplateDefinitionsById)(
+      '%s yamlTemplate renders the same YAML for the same values at different times',
+      (_id, definition) => {
+        jest.setSystemTime(new Date('2020-01-01T00:00:00.000Z'));
+        const firstRender = renderWorkflowYaml(definition);
+        jest.setSystemTime(new Date('2030-06-15T12:34:56.789Z'));
+        const secondRender = renderWorkflowYaml(definition);
+
+        expect(secondRender).toBe(firstRender);
+      }
+    );
+  });
+
   // An ai.agent step naming no model is accepted by the schema and runs on whatever the
   // deployment-wide default is, so the operator's tier choice is silently ignored and nothing
   // else fails. Requiring the pin here is deliberately stricter than the schema: a step that
@@ -503,7 +599,7 @@ describe('managedWorkflowDefinitions', () => {
         parse(renderWorkflowYaml(definition))
       );
       const unpinnedStepNames = aiAgentSteps
-        .filter((step) => !ALERTZERO_TIER_IDS.has(step[CONNECTOR_ID_BY_FEATURE] as string))
+        .filter((step) => !namesAlertZeroTier(step[CONNECTOR_ID_BY_FEATURE]))
         .map((step) => (typeof step.name === 'string' ? step.name : '<unnamed>'));
 
       expect(unpinnedStepNames).toEqual([]);
@@ -521,7 +617,7 @@ describe('managedWorkflowDefinitions', () => {
         parse(renderWorkflowYaml(definition))
       );
       const unpinnedStepNames = runSteps
-        .filter((step) => !ALERTZERO_TIER_IDS.has(getNamedTier(step, FEATURE_ID) as string))
+        .filter((step) => !namesAlertZeroTier(getNamedTier(step, FEATURE_ID)))
         .map((step) => (typeof step.name === 'string' ? step.name : '<unnamed>'));
 
       expect(unpinnedStepNames).toEqual([]);

@@ -19,4 +19,5 @@ export const BulkUnackEpisodeActionRoute = createBulkEpisodeActionRouteForType({
   bodySchema: bulkUnackEpisodeActionBodySchema,
   oasOperationObject: bulkUnackEpisodeActionOasExamples,
   access: 'public' as const,
+  availability: { stability: 'stable' as const, since: '9.6.0' },
 });

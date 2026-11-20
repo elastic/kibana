@@ -1,0 +1,2807 @@
+{
+  "components": {
+    "parameters": {
+      "IncidentIDPathParameter": {
+        "in": "path",
+        "name": "incident_id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "IncidentIncludeQueryParameter": {
+        "explode": false,
+        "in": "query",
+        "name": "include",
+        "required": false,
+        "schema": {
+          "items": {
+            "$ref": "#/components/schemas/IncidentRelatedObject"
+          },
+          "type": "array"
+        }
+      }
+    },
+    "responses": {
+      "BadRequestResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/APIErrorResponse"
+            }
+          }
+        }
+      },
+      "ForbiddenResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/APIErrorResponse"
+            }
+          }
+        }
+      },
+      "NotAuthorizedResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/APIErrorResponse"
+            }
+          }
+        }
+      },
+      "NotFoundResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/APIErrorResponse"
+            }
+          }
+        }
+      },
+      "TooManyRequestsResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/APIErrorResponse"
+            }
+          }
+        }
+      },
+      "UnauthorizedResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/APIErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "APIErrorResponse": {
+        "properties": {
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "errors"
+        ],
+        "type": "object"
+      },
+      "AttachmentData": {
+        "properties": {
+          "attributes": {
+            "$ref": "#/components/schemas/AttachmentDataAttributes"
+          },
+          "id": {
+            "type": "string"
+          },
+          "relationships": {
+            "$ref": "#/components/schemas/AttachmentDataRelationships"
+          },
+          "type": {
+            "$ref": "#/components/schemas/IncidentAttachmentType"
+          }
+        },
+        "required": [
+          "type",
+          "attributes",
+          "relationships",
+          "id"
+        ],
+        "type": "object"
+      },
+      "AttachmentDataAttributes": {
+        "properties": {
+          "attachment": {
+            "$ref": "#/components/schemas/AttachmentDataAttributesAttachment"
+          },
+          "attachment_type": {
+            "$ref": "#/components/schemas/AttachmentDataAttributesAttachmentType"
+          },
+          "modified": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AttachmentDataAttributesAttachment": {
+        "properties": {
+          "documentUrl": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AttachmentDataAttributesAttachmentType": {
+        "enum": [
+          "postmortem",
+          "link"
+        ],
+        "type": "string"
+      },
+      "AttachmentDataRelationships": {
+        "properties": {
+          "incident": {
+            "$ref": "#/components/schemas/RelationshipToIncident"
+          },
+          "last_modified_by_user": {
+            "$ref": "#/components/schemas/RelationshipToUser"
+          }
+        },
+        "type": "object"
+      },
+      "DowntimeCreateRequest": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/DowntimeCreateRequestData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "DowntimeCreateRequestAttributes": {
+        "properties": {
+          "display_timezone": {
+            "$ref": "#/components/schemas/DowntimeDisplayTimezone"
+          },
+          "message": {
+            "$ref": "#/components/schemas/DowntimeMessage"
+          },
+          "monitor_identifier": {
+            "$ref": "#/components/schemas/DowntimeMonitorIdentifier"
+          },
+          "mute_first_recovery_notification": {
+            "$ref": "#/components/schemas/DowntimeMuteFirstRecoveryNotification"
+          },
+          "notify_end_states": {
+            "$ref": "#/components/schemas/DowntimeNotifyEndStates"
+          },
+          "notify_end_types": {
+            "$ref": "#/components/schemas/DowntimeNotifyEndTypes"
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/DowntimeScheduleCreateRequest"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/DowntimeScope"
+          }
+        },
+        "required": [
+          "scope",
+          "monitor_identifier"
+        ],
+        "type": "object"
+      },
+      "DowntimeCreateRequestData": {
+        "properties": {
+          "attributes": {
+            "$ref": "#/components/schemas/DowntimeCreateRequestAttributes"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DowntimeResourceType"
+          }
+        },
+        "required": [
+          "type",
+          "attributes"
+        ],
+        "type": "object"
+      },
+      "DowntimeDisplayTimezone": {
+        "default": "UTC",
+        "nullable": true,
+        "type": "string"
+      },
+      "DowntimeIncludedMonitorType": {
+        "default": "monitors",
+        "enum": [
+          "monitors"
+        ],
+        "type": "string"
+      },
+      "DowntimeMessage": {
+        "nullable": true,
+        "type": "string"
+      },
+      "DowntimeMonitorIdentifier": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/DowntimeMonitorIdentifierId"
+          },
+          {
+            "$ref": "#/components/schemas/DowntimeMonitorIdentifierTags"
+          }
+        ]
+      },
+      "DowntimeMonitorIdentifierId": {
+        "additionalProperties": {},
+        "properties": {
+          "monitor_id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "monitor_id"
+        ],
+        "type": "object"
+      },
+      "DowntimeMonitorIdentifierTags": {
+        "additionalProperties": {},
+        "properties": {
+          "monitor_tags": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "monitor_tags"
+        ],
+        "type": "object"
+      },
+      "DowntimeMonitorIncludedAttributes": {
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DowntimeMonitorIncludedItem": {
+        "properties": {
+          "attributes": {
+            "$ref": "#/components/schemas/DowntimeMonitorIncludedAttributes"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DowntimeIncludedMonitorType"
+          }
+        },
+        "type": "object"
+      },
+      "DowntimeMuteFirstRecoveryNotification": {
+        "type": "boolean"
+      },
+      "DowntimeNotifyEndStateActions": {
+        "enum": [
+          "canceled",
+          "expired"
+        ],
+        "type": "string"
+      },
+      "DowntimeNotifyEndStateTypes": {
+        "enum": [
+          "alert",
+          "no data",
+          "warn"
+        ],
+        "type": "string"
+      },
+      "DowntimeNotifyEndStates": {
+        "items": {
+          "$ref": "#/components/schemas/DowntimeNotifyEndStateTypes"
+        },
+        "type": "array"
+      },
+      "DowntimeNotifyEndTypes": {
+        "items": {
+          "$ref": "#/components/schemas/DowntimeNotifyEndStateActions"
+        },
+        "type": "array"
+      },
+      "DowntimeRelationships": {
+        "properties": {
+          "created_by": {
+            "$ref": "#/components/schemas/DowntimeRelationshipsCreatedBy"
+          },
+          "monitor": {
+            "$ref": "#/components/schemas/DowntimeRelationshipsMonitor"
+          }
+        },
+        "type": "object"
+      },
+      "DowntimeRelationshipsCreatedBy": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/DowntimeRelationshipsCreatedByData"
+          }
+        },
+        "type": "object"
+      },
+      "DowntimeRelationshipsCreatedByData": {
+        "nullable": true,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/UsersType"
+          }
+        },
+        "type": "object"
+      },
+      "DowntimeRelationshipsMonitor": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/DowntimeRelationshipsMonitorData"
+          }
+        },
+        "type": "object"
+      },
+      "DowntimeRelationshipsMonitorData": {
+        "nullable": true,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DowntimeIncludedMonitorType"
+          }
+        },
+        "type": "object"
+      },
+      "DowntimeResourceType": {
+        "default": "downtime",
+        "enum": [
+          "downtime"
+        ],
+        "type": "string"
+      },
+      "DowntimeResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/DowntimeResponseData"
+          },
+          "included": {
+            "items": {
+              "$ref": "#/components/schemas/DowntimeResponseIncludedItem"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DowntimeResponseAttributes": {
+        "properties": {
+          "canceled": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "display_timezone": {
+            "$ref": "#/components/schemas/DowntimeDisplayTimezone"
+          },
+          "message": {
+            "$ref": "#/components/schemas/DowntimeMessage"
+          },
+          "modified": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "monitor_identifier": {
+            "$ref": "#/components/schemas/DowntimeMonitorIdentifier"
+          },
+          "mute_first_recovery_notification": {
+            "$ref": "#/components/schemas/DowntimeMuteFirstRecoveryNotification"
+          },
+          "notify_end_states": {
+            "$ref": "#/components/schemas/DowntimeNotifyEndStates"
+          },
+          "notify_end_types": {
+            "$ref": "#/components/schemas/DowntimeNotifyEndTypes"
+          },
+          "run_as": {
+            "$ref": "#/components/schemas/DowntimeRunAs"
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/DowntimeScheduleResponse"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/DowntimeScope"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DowntimeStatus"
+          }
+        },
+        "type": "object"
+      },
+      "DowntimeResponseData": {
+        "properties": {
+          "attributes": {
+            "$ref": "#/components/schemas/DowntimeResponseAttributes"
+          },
+          "id": {
+            "type": "string"
+          },
+          "relationships": {
+            "$ref": "#/components/schemas/DowntimeRelationships"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DowntimeResourceType"
+          }
+        },
+        "type": "object"
+      },
+      "DowntimeResponseIncludedItem": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/User"
+          },
+          {
+            "$ref": "#/components/schemas/DowntimeMonitorIncludedItem"
+          }
+        ]
+      },
+      "DowntimeRunAs": {
+        "items": {
+          "$ref": "#/components/schemas/DowntimeRunAsItem"
+        },
+        "readOnly": true,
+        "type": "array"
+      },
+      "DowntimeRunAsItem": {
+        "properties": {
+          "principals": {
+            "items": {
+              "$ref": "#/components/schemas/DowntimeRunAsPrincipal"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DowntimeRunAsPrincipal": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DowntimeRunAsPrincipalType"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "DowntimeRunAsPrincipalType": {
+        "enum": [
+          "user",
+          "role",
+          "team"
+        ],
+        "type": "string"
+      },
+      "DowntimeScheduleCreateRequest": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/DowntimeScheduleRecurrencesCreateRequest"
+          },
+          {
+            "$ref": "#/components/schemas/DowntimeScheduleOneTimeCreateUpdateRequest"
+          }
+        ]
+      },
+      "DowntimeScheduleCurrentDowntimeResponse": {
+        "properties": {
+          "end": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "start": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DowntimeScheduleOneTimeCreateUpdateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "end": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "start": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DowntimeScheduleOneTimeResponse": {
+        "properties": {
+          "end": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "start": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start"
+        ],
+        "type": "object"
+      },
+      "DowntimeScheduleRecurrenceCreateUpdateRequest": {
+        "additionalProperties": {},
+        "properties": {
+          "duration": {
+            "$ref": "#/components/schemas/DowntimeScheduleRecurrenceDuration"
+          },
+          "rrule": {
+            "$ref": "#/components/schemas/DowntimeScheduleRecurrenceRrule"
+          },
+          "start": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "duration",
+          "rrule"
+        ],
+        "type": "object"
+      },
+      "DowntimeScheduleRecurrenceDuration": {
+        "type": "string"
+      },
+      "DowntimeScheduleRecurrenceResponse": {
+        "properties": {
+          "duration": {
+            "$ref": "#/components/schemas/DowntimeScheduleRecurrenceDuration"
+          },
+          "rrule": {
+            "$ref": "#/components/schemas/DowntimeScheduleRecurrenceRrule"
+          },
+          "start": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DowntimeScheduleRecurrenceRrule": {
+        "type": "string"
+      },
+      "DowntimeScheduleRecurrencesCreateRequest": {
+        "properties": {
+          "recurrences": {
+            "items": {
+              "$ref": "#/components/schemas/DowntimeScheduleRecurrenceCreateUpdateRequest"
+            },
+            "type": "array"
+          },
+          "timezone": {
+            "default": "UTC",
+            "type": "string"
+          }
+        },
+        "required": [
+          "recurrences"
+        ],
+        "type": "object"
+      },
+      "DowntimeScheduleRecurrencesResponse": {
+        "properties": {
+          "current_downtime": {
+            "$ref": "#/components/schemas/DowntimeScheduleCurrentDowntimeResponse"
+          },
+          "recurrences": {
+            "items": {
+              "$ref": "#/components/schemas/DowntimeScheduleRecurrenceResponse"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array"
+          },
+          "timezone": {
+            "default": "UTC",
+            "type": "string"
+          }
+        },
+        "required": [
+          "recurrences"
+        ],
+        "type": "object"
+      },
+      "DowntimeScheduleResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/DowntimeScheduleRecurrencesResponse"
+          },
+          {
+            "$ref": "#/components/schemas/DowntimeScheduleOneTimeResponse"
+          }
+        ]
+      },
+      "DowntimeScope": {
+        "type": "string"
+      },
+      "DowntimeStatus": {
+        "enum": [
+          "active",
+          "canceled",
+          "ended",
+          "scheduled"
+        ],
+        "type": "string"
+      },
+      "Event": {
+        "additionalProperties": {},
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "integration_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "source_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventAttributes": {
+        "additionalProperties": {},
+        "properties": {
+          "aggregation_key": {
+            "type": "string"
+          },
+          "date_happened": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "device_name": {
+            "type": "string"
+          },
+          "duration": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "event_object": {
+            "type": "string"
+          },
+          "evt": {
+            "$ref": "#/components/schemas/Event"
+          },
+          "hostname": {
+            "type": "string"
+          },
+          "monitor": {
+            "$ref": "#/components/schemas/MonitorType"
+          },
+          "monitor_groups": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "monitor_id": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/EventPriority"
+          },
+          "related_event_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "service": {
+            "type": "string"
+          },
+          "source_type_name": {
+            "type": "string"
+          },
+          "sourcecategory": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EventStatusType"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "timestamp": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventPriority": {
+        "enum": [
+          "normal",
+          "low",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+        ],
+        "nullable": true,
+        "type": "string"
+      },
+      "EventResponse": {
+        "properties": {
+          "attributes": {
+            "$ref": "#/components/schemas/EventResponseAttributes"
+          },
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/EventType"
+          }
+        },
+        "type": "object"
+      },
+      "EventResponseAttributes": {
+        "properties": {
+          "attributes": {
+            "$ref": "#/components/schemas/EventAttributes"
+          },
+          "message": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventStatusType": {
+        "enum": [
+          "failure",
+          "error",
+          "warn",
+          "warning",
+          "ok",
+          "info",
+          "success",
+          "user_update",
+          "recommendation",
+          "snapshot"
+        ],
+        "type": "string"
+      },
+      "EventType": {
+        "default": "event",
+        "enum": [
+          "event"
+        ],
+        "type": "string"
+      },
+      "EventsListRequest": {
+        "properties": {
+          "filter": {
+            "$ref": "#/components/schemas/EventsQueryFilter"
+          },
+          "options": {
+            "$ref": "#/components/schemas/EventsQueryOptions"
+          },
+          "page": {
+            "$ref": "#/components/schemas/EventsRequestPage"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/EventsSort"
+          }
+        },
+        "type": "object"
+      },
+      "EventsListResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/EventResponse"
+            },
+            "type": "array"
+          },
+          "links": {
+            "$ref": "#/components/schemas/EventsListResponseLinks"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/EventsResponseMetadata"
+          }
+        },
+        "type": "object"
+      },
+      "EventsListResponseLinks": {
+        "properties": {
+          "next": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventsQueryFilter": {
+        "properties": {
+          "from": {
+            "default": "now-15m",
+            "type": "string"
+          },
+          "query": {
+            "default": "*",
+            "type": "string"
+          },
+          "to": {
+            "default": "now",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventsQueryOptions": {
+        "properties": {
+          "timeOffset": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "timezone": {
+            "default": "UTC",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventsRequestPage": {
+        "properties": {
+          "cursor": {
+            "type": "string"
+          },
+          "limit": {
+            "default": 10,
+            "format": "int32",
+            "maximum": 1000,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "EventsResponseMetadata": {
+        "properties": {
+          "elapsed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "$ref": "#/components/schemas/EventsResponseMetadataPage"
+          },
+          "request_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/EventsWarning"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "EventsResponseMetadataPage": {
+        "properties": {
+          "after": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventsSort": {
+        "enum": [
+          "timestamp",
+          "-timestamp"
+        ],
+        "type": "string"
+      },
+      "EventsWarning": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IncidentAttachmentType": {
+        "default": "incident_attachments",
+        "enum": [
+          "incident_attachments"
+        ],
+        "type": "string"
+      },
+      "IncidentCreateAttributes": {
+        "properties": {
+          "customer_impact_scope": {
+            "type": "string"
+          },
+          "customer_impacted": {
+            "type": "boolean"
+          },
+          "fields": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/IncidentFieldAttributes"
+            },
+            "type": "object"
+          },
+          "incident_type_uuid": {
+            "type": "string"
+          },
+          "initial_cells": {
+            "items": {
+              "$ref": "#/components/schemas/IncidentTimelineCellCreateAttributes"
+            },
+            "type": "array"
+          },
+          "is_test": {
+            "type": "boolean"
+          },
+          "notification_handles": {
+            "items": {
+              "$ref": "#/components/schemas/IncidentNotificationHandle"
+            },
+            "type": "array"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "customer_impacted"
+        ],
+        "type": "object"
+      },
+      "IncidentCreateData": {
+        "properties": {
+          "attributes": {
+            "$ref": "#/components/schemas/IncidentCreateAttributes"
+          },
+          "relationships": {
+            "$ref": "#/components/schemas/IncidentCreateRelationships"
+          },
+          "type": {
+            "$ref": "#/components/schemas/IncidentType"
+          }
+        },
+        "required": [
+          "type",
+          "attributes"
+        ],
+        "type": "object"
+      },
+      "IncidentCreateRelationships": {
+        "properties": {
+          "commander_user": {
+            "$ref": "#/components/schemas/NullableRelationshipToUser"
+          }
+        },
+        "required": [
+          "commander_user"
+        ],
+        "type": "object"
+      },
+      "IncidentCreateRequest": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/IncidentCreateData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "IncidentFieldAttributes": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/IncidentFieldAttributesSingleValue"
+          },
+          {
+            "$ref": "#/components/schemas/IncidentFieldAttributesMultipleValue"
+          }
+        ]
+      },
+      "IncidentFieldAttributesMultipleValue": {
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/IncidentFieldAttributesValueType"
+          },
+          "value": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "IncidentFieldAttributesSingleValue": {
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/IncidentFieldAttributesSingleValueType"
+          },
+          "value": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IncidentFieldAttributesSingleValueType": {
+        "default": "dropdown",
+        "enum": [
+          "dropdown",
+          "textbox"
+        ],
+        "type": "string"
+      },
+      "IncidentFieldAttributesValueType": {
+        "default": "multiselect",
+        "enum": [
+          "multiselect",
+          "textarray",
+          "metrictag",
+          "autocomplete"
+        ],
+        "type": "string"
+      },
+      "IncidentImpactsType": {
+        "enum": [
+          "incident_impacts"
+        ],
+        "type": "string"
+      },
+      "IncidentIntegrationMetadataType": {
+        "default": "incident_integrations",
+        "enum": [
+          "incident_integrations"
+        ],
+        "type": "string"
+      },
+      "IncidentNonDatadogCreator": {
+        "nullable": true,
+        "properties": {
+          "image_48_px": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IncidentNotificationHandle": {
+        "properties": {
+          "display_name": {
+            "type": "string"
+          },
+          "handle": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IncidentPostmortemType": {
+        "default": "incident_postmortems",
+        "enum": [
+          "incident_postmortems"
+        ],
+        "type": "string"
+      },
+      "IncidentRelatedObject": {
+        "enum": [
+          "users",
+          "attachments"
+        ],
+        "type": "string"
+      },
+      "IncidentRespondersType": {
+        "enum": [
+          "incident_responders"
+        ],
+        "type": "string"
+      },
+      "IncidentResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/IncidentResponseData"
+          },
+          "included": {
+            "items": {
+              "$ref": "#/components/schemas/IncidentResponseIncludedItem"
+            },
+            "readOnly": true,
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "IncidentResponseAttributes": {
+        "additionalProperties": {},
+        "properties": {
+          "archived": {
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "case_id": {
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "created": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "customer_impact_duration": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "customer_impact_end": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "customer_impact_scope": {
+            "nullable": true,
+            "type": "string"
+          },
+          "customer_impact_start": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "customer_impacted": {
+            "type": "boolean"
+          },
+          "declared": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "declared_by": {
+            "$ref": "#/components/schemas/IncidentNonDatadogCreator"
+          },
+          "declared_by_uuid": {
+            "nullable": true,
+            "type": "string"
+          },
+          "detected": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "fields": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/IncidentFieldAttributes"
+            },
+            "type": "object"
+          },
+          "incident_type_uuid": {
+            "type": "string"
+          },
+          "is_test": {
+            "type": "boolean"
+          },
+          "modified": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "non_datadog_creator": {
+            "$ref": "#/components/schemas/IncidentNonDatadogCreator"
+          },
+          "notification_handles": {
+            "items": {
+              "$ref": "#/components/schemas/IncidentNotificationHandle"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "public_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "resolved": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/IncidentSeverity"
+          },
+          "state": {
+            "nullable": true,
+            "type": "string"
+          },
+          "time_to_detect": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "time_to_internal_response": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "time_to_repair": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "time_to_resolve": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "visibility": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "type": "object"
+      },
+      "IncidentResponseData": {
+        "properties": {
+          "attributes": {
+            "$ref": "#/components/schemas/IncidentResponseAttributes"
+          },
+          "id": {
+            "type": "string"
+          },
+          "relationships": {
+            "$ref": "#/components/schemas/IncidentResponseRelationships"
+          },
+          "type": {
+            "$ref": "#/components/schemas/IncidentType"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "IncidentResponseIncludedItem": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/IncidentUserData"
+          },
+          {
+            "$ref": "#/components/schemas/AttachmentData"
+          }
+        ]
+      },
+      "IncidentResponseRelationships": {
+        "properties": {
+          "attachments": {
+            "$ref": "#/components/schemas/RelationshipToIncidentAttachment"
+          },
+          "commander_user": {
+            "$ref": "#/components/schemas/NullableRelationshipToUser"
+          },
+          "created_by_user": {
+            "$ref": "#/components/schemas/RelationshipToUser"
+          },
+          "declared_by_user": {
+            "$ref": "#/components/schemas/RelationshipToUser"
+          },
+          "impacts": {
+            "$ref": "#/components/schemas/RelationshipToIncidentImpacts"
+          },
+          "integrations": {
+            "$ref": "#/components/schemas/RelationshipToIncidentIntegrationMetadatas"
+          },
+          "last_modified_by_user": {
+            "$ref": "#/components/schemas/RelationshipToUser"
+          },
+          "responders": {
+            "$ref": "#/components/schemas/RelationshipToIncidentResponders"
+          },
+          "user_defined_fields": {
+            "$ref": "#/components/schemas/RelationshipToIncidentUserDefinedFields"
+          }
+        },
+        "type": "object"
+      },
+      "IncidentSeverity": {
+        "enum": [
+          "UNKNOWN",
+          "SEV-0",
+          "SEV-1",
+          "SEV-2",
+          "SEV-3",
+          "SEV-4",
+          "SEV-5"
+        ],
+        "type": "string"
+      },
+      "IncidentTimelineCellCreateAttributes": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/IncidentTimelineCellMarkdownCreateAttributes"
+          }
+        ]
+      },
+      "IncidentTimelineCellMarkdownContentType": {
+        "default": "markdown",
+        "enum": [
+          "markdown"
+        ],
+        "type": "string"
+      },
+      "IncidentTimelineCellMarkdownCreateAttributes": {
+        "properties": {
+          "cell_type": {
+            "$ref": "#/components/schemas/IncidentTimelineCellMarkdownContentType"
+          },
+          "content": {
+            "$ref": "#/components/schemas/IncidentTimelineCellMarkdownCreateAttributesContent"
+          },
+          "important": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "content",
+          "cell_type"
+        ],
+        "type": "object"
+      },
+      "IncidentTimelineCellMarkdownCreateAttributesContent": {
+        "properties": {
+          "content": {
+            "nullable": false,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IncidentType": {
+        "default": "incidents",
+        "enum": [
+          "incidents"
+        ],
+        "type": "string"
+      },
+      "IncidentUpdateAttributes": {
+        "properties": {
+          "customer_impact_end": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "customer_impact_scope": {
+            "type": "string"
+          },
+          "customer_impact_start": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "customer_impacted": {
+            "type": "boolean"
+          },
+          "detected": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "fields": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/IncidentFieldAttributes"
+            },
+            "type": "object"
+          },
+          "notification_handles": {
+            "items": {
+              "$ref": "#/components/schemas/IncidentNotificationHandle"
+            },
+            "type": "array"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IncidentUpdateData": {
+        "properties": {
+          "attributes": {
+            "$ref": "#/components/schemas/IncidentUpdateAttributes"
+          },
+          "id": {
+            "type": "string"
+          },
+          "relationships": {
+            "$ref": "#/components/schemas/IncidentUpdateRelationships"
+          },
+          "type": {
+            "$ref": "#/components/schemas/IncidentType"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "IncidentUpdateRelationships": {
+        "properties": {
+          "commander_user": {
+            "$ref": "#/components/schemas/NullableRelationshipToUser"
+          },
+          "integrations": {
+            "$ref": "#/components/schemas/RelationshipToIncidentIntegrationMetadatas"
+          },
+          "postmortem": {
+            "$ref": "#/components/schemas/RelationshipToIncidentPostmortem"
+          }
+        },
+        "type": "object"
+      },
+      "IncidentUpdateRequest": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/IncidentUpdateData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "IncidentUserAttributes": {
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "handle": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "name": {
+            "nullable": true,
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IncidentUserData": {
+        "properties": {
+          "attributes": {
+            "$ref": "#/components/schemas/IncidentUserAttributes"
+          },
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/UsersType"
+          }
+        },
+        "type": "object"
+      },
+      "IncidentUserDefinedFieldType": {
+        "enum": [
+          "user_defined_field"
+        ],
+        "type": "string"
+      },
+      "Log": {
+        "properties": {
+          "attributes": {
+            "$ref": "#/components/schemas/LogAttributes"
+          },
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/LogType"
+          }
+        },
+        "type": "object"
+      },
+      "LogAttributes": {
+        "properties": {
+          "attributes": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "host": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogType": {
+        "default": "log",
+        "enum": [
+          "log"
+        ],
+        "type": "string"
+      },
+      "LogsAggregateResponseStatus": {
+        "enum": [
+          "done",
+          "timeout"
+        ],
+        "type": "string"
+      },
+      "LogsListRequest": {
+        "properties": {
+          "filter": {
+            "$ref": "#/components/schemas/LogsQueryFilter"
+          },
+          "options": {
+            "$ref": "#/components/schemas/LogsQueryOptions"
+          },
+          "page": {
+            "$ref": "#/components/schemas/LogsListRequestPage"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/LogsSort"
+          }
+        },
+        "type": "object"
+      },
+      "LogsListRequestPage": {
+        "properties": {
+          "cursor": {
+            "type": "string"
+          },
+          "limit": {
+            "default": 10,
+            "format": "int32",
+            "maximum": 1000,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LogsListResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/Log"
+            },
+            "type": "array"
+          },
+          "links": {
+            "$ref": "#/components/schemas/LogsListResponseLinks"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/LogsResponseMetadata"
+          }
+        },
+        "type": "object"
+      },
+      "LogsListResponseLinks": {
+        "properties": {
+          "next": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogsQueryFilter": {
+        "properties": {
+          "from": {
+            "default": "now-15m",
+            "type": "string"
+          },
+          "indexes": {
+            "default": [
+              "*"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "query": {
+            "default": "*",
+            "type": "string"
+          },
+          "storage_tier": {
+            "$ref": "#/components/schemas/LogsStorageTier"
+          },
+          "to": {
+            "default": "now",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogsQueryOptions": {
+        "deprecated": true,
+        "properties": {
+          "timeOffset": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "timezone": {
+            "default": "UTC",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogsResponseMetadata": {
+        "properties": {
+          "elapsed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "$ref": "#/components/schemas/LogsResponseMetadataPage"
+          },
+          "request_id": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/LogsAggregateResponseStatus"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/LogsWarning"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "LogsResponseMetadataPage": {
+        "properties": {
+          "after": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LogsSort": {
+        "enum": [
+          "timestamp",
+          "-timestamp"
+        ],
+        "type": "string"
+      },
+      "LogsStorageTier": {
+        "default": "indexes",
+        "enum": [
+          "indexes",
+          "online-archives",
+          "flex"
+        ],
+        "type": "string"
+      },
+      "LogsWarning": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MonitorType": {
+        "nullable": true,
+        "properties": {
+          "created_at": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "group_status": {
+            "format": "int32",
+            "maximum": 2147483647,
+            "type": "integer"
+          },
+          "groups": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "modified": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "templated_name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NullableRelationshipToUser": {
+        "nullable": true,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/NullableRelationshipToUserData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "NullableRelationshipToUserData": {
+        "nullable": true,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/UsersType"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "OrganizationsType": {
+        "default": "orgs",
+        "enum": [
+          "orgs"
+        ],
+        "type": "string"
+      },
+      "RelationshipToIncident": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RelationshipToIncidentData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "RelationshipToIncidentAttachment": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/RelationshipToIncidentAttachmentData"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "RelationshipToIncidentAttachmentData": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/IncidentAttachmentType"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "RelationshipToIncidentData": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/IncidentType"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "RelationshipToIncidentImpactData": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/IncidentImpactsType"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "RelationshipToIncidentImpacts": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/RelationshipToIncidentImpactData"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "RelationshipToIncidentIntegrationMetadataData": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/IncidentIntegrationMetadataType"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "RelationshipToIncidentIntegrationMetadatas": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/RelationshipToIncidentIntegrationMetadataData"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "RelationshipToIncidentPostmortem": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RelationshipToIncidentPostmortemData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "RelationshipToIncidentPostmortemData": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/IncidentPostmortemType"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "RelationshipToIncidentResponderData": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/IncidentRespondersType"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "RelationshipToIncidentResponders": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/RelationshipToIncidentResponderData"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "RelationshipToIncidentUserDefinedFieldData": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/IncidentUserDefinedFieldType"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "RelationshipToIncidentUserDefinedFields": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/RelationshipToIncidentUserDefinedFieldData"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "RelationshipToOrganization": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RelationshipToOrganizationData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "RelationshipToOrganizationData": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/OrganizationsType"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "RelationshipToOrganizations": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/RelationshipToOrganizationData"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "RelationshipToRoleData": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/RolesType"
+          }
+        },
+        "type": "object"
+      },
+      "RelationshipToRoles": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/RelationshipToRoleData"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "RelationshipToUser": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RelationshipToUserData"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "RelationshipToUserData": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/UsersType"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "RelationshipToUsers": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/RelationshipToUserData"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "RolesType": {
+        "default": "roles",
+        "enum": [
+          "roles"
+        ],
+        "type": "string"
+      },
+      "User": {
+        "properties": {
+          "attributes": {
+            "$ref": "#/components/schemas/UserAttributes"
+          },
+          "id": {
+            "type": "string"
+          },
+          "relationships": {
+            "$ref": "#/components/schemas/UserResponseRelationships"
+          },
+          "type": {
+            "$ref": "#/components/schemas/UsersType"
+          }
+        },
+        "type": "object"
+      },
+      "UserAttributes": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "disabled": {
+            "type": "boolean"
+          },
+          "email": {
+            "type": "string"
+          },
+          "handle": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "last_login_time": {
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "mfa_enabled": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "modified_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "nullable": true,
+            "type": "string"
+          },
+          "service_account": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "nullable": true,
+            "type": "string"
+          },
+          "uuid": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "verified": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "UserResponseRelationships": {
+        "properties": {
+          "org": {
+            "$ref": "#/components/schemas/RelationshipToOrganization"
+          },
+          "other_orgs": {
+            "$ref": "#/components/schemas/RelationshipToOrganizations"
+          },
+          "other_users": {
+            "$ref": "#/components/schemas/RelationshipToUsers"
+          },
+          "roles": {
+            "$ref": "#/components/schemas/RelationshipToRoles"
+          }
+        },
+        "type": "object"
+      },
+      "UsersType": {
+        "default": "users",
+        "enum": [
+          "users"
+        ],
+        "type": "string"
+      }
+    },
+    "securitySchemes": {
+      "AuthZ": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/oauth2/v1/authorize",
+            "scopes": {
+              "ai_gateway_config_read": "View AI Gateway configuration.",
+              "ai_gateway_config_write": "Create, update, and delete AI Gateway configuration.",
+              "ai_gateway_usage": "Use AI Gateway and view configuration applicable to the authenticated user.",
+              "apm_api_catalog_read": "View API catalog and API definitions.",
+              "apm_api_catalog_write": "Add, modify, and delete API catalog definitions.",
+              "apm_read": "Read and query APM and Trace Analytics.",
+              "apm_service_catalog_read": "View service catalog and service definitions.",
+              "apm_service_catalog_write": "Add, modify, and delete service catalog definitions when those definitions are maintained by Datadog.",
+              "appsec_vm_read": "View infrastructure, application code, and library vulnerability findings.",
+              "aws_configurations_manage": "Manage AWS integration account configurations and related integration settings.",
+              "billing_edit": "Edit your organization's billing information.",
+              "billing_read": "View your organization's billing information.",
+              "bits_investigations_read": "View Bits AI investigations.",
+              "bits_investigations_write": "Create and manage Bits AI investigations.",
+              "cases_read": "View Cases.",
+              "cases_shared_settings_write": "Update shared case management settings.",
+              "cases_write": "Create and update cases.",
+              "ci_visibility_pipelines_write": "Create CI Visibility pipeline spans using the API.",
+              "ci_visibility_read": "View CI Visibility.",
+              "cloud_cost_management_read": "View Cloud Cost pages and the cloud cost data source in dashboards and notebooks. For more details, see the Cloud Cost Management docs.",
+              "cloud_cost_management_write": "Configure cloud cost accounts and global customizations. For more details, see the Cloud Cost Management docs.",
+              "code_analysis_read": "View Code Analysis.",
+              "code_coverage_read": "View Code Coverage.",
+              "continuous_profiler_pgo_read": "Read and query Continuous Profiler data for Profile-Guided Optimization (PGO).",
+              "coterm_read": "Read terminal recordings.",
+              "coterm_write": "Write terminal recordings.",
+              "create_webhooks": "Create webhooks integrations.",
+              "dashboards_embed_share": "Create, modify, and delete shared dashboards with share type 'embed'.",
+              "dashboards_invite_share": "Create, modify, and delete shared dashboards with share type 'invite'.",
+              "dashboards_public_share": "Generate public and authenticated links to share dashboards or embeddable graphs externally.",
+              "dashboards_read": "View dashboards.",
+              "dashboards_write": "Create and change dashboards.",
+              "data_scanner_read": "View Data Scanner configurations.",
+              "data_scanner_write": "Edit Data Scanner configurations.",
+              "embeddable_graphs_share": "Generate public links to share embeddable graphs externally.",
+              "error_tracking_read": "Read Error Tracking data.",
+              "error_tracking_write": "Edit Error Tracking issues.",
+              "event_correlation_config_read": "View event correlation configurations.",
+              "event_correlation_config_write": "Create and update event correlation configurations.",
+              "events_read": "Read Events data.",
+              "feature_flag_approvals_override": "Override Feature Flag Approvals.",
+              "feature_flag_config_read": "View Feature Flag Configurations.",
+              "feature_flag_config_write": "Edit Feature Flag Configurations.",
+              "feature_flag_environment_config_read": "View Feature Flag Environment settings.",
+              "feature_flag_environment_config_write": "Modify Feature Flag Environment settings.",
+              "hosts_read": "List hosts and their attributes.",
+              "incident_notification_settings_read": "View Incident Notification Rule Settings.",
+              "incident_notification_settings_write": "Configure Incidents Notification Rule settings.",
+              "incident_read": "View incidents in Datadog.",
+              "incident_settings_read": "View Incident Settings.",
+              "incident_settings_write": "Configure Incident Settings.",
+              "incident_write": "Create, view, and manage incidents in Datadog.",
+              "integrations_read": "View configured integrations and their settings.",
+              "logs_modify_indexes": "Modify log indexes, filters, exclusion filters, and configurations.",
+              "logs_read_data": "Read log data.",
+              "logs_read_index_data": "Read indexed log data.",
+              "manage_integrations": "Install, uninstall, and configure integrations.",
+              "metrics_read": "View custom metrics.",
+              "monitors_downtime": "Set downtimes to suppress alerts from any monitor in an organization. Mute and unmute monitors. The ability to write monitors is not required to set downtimes.",
+              "monitors_read": "View monitors.",
+              "monitors_write": "Edit, delete, and resolve individual monitors.",
+              "network_connections_read": "Read cloud network connections.",
+              "org_connections_read": "Read cross organization connections.",
+              "org_connections_write": "Create, edit, and delete cross organization connections.",
+              "org_management": "Edit org configurations, including authentication and certain security preferences such as configuring SAML, renaming an org, configuring allowed login methods, creating child orgs, subscribing & unsubscribing from apps in the marketplace, and enabling & disabling Remote Configuration for the entire organization.",
+              "product_analytics_experiments_read": "View Product Analytics Experiments.",
+              "product_analytics_experiments_write": "Create, edit, and delete Product Analytics Experiments.",
+              "product_analytics_metrics_read": "View Product Analytics Metrics.",
+              "product_analytics_metrics_write": "Create, edit, and delete Product Analytics Metrics.",
+              "product_analytics_settings_read": "View Product Analytics Settings.",
+              "product_analytics_settings_write": "Edit Product Analytics Settings.",
+              "product_analytics_warehouse_model_write": "Create, edit, and delete Product Analytics Warehouse Models.",
+              "security_comments_read": "Read comments of vulnerabilities.",
+              "security_monitoring_critical_assets_read": "Read Critical Assets.",
+              "security_monitoring_critical_assets_write": "Write Critical Assets.",
+              "security_monitoring_filters_read": "Read Security Filters.",
+              "security_monitoring_filters_write": "Create, edit, and delete Security Filters.",
+              "security_monitoring_findings_read": "View a list of findings that include both misconfigurations and identity risks.",
+              "security_monitoring_rules_read": "Read Detection Rules.",
+              "security_monitoring_rules_write": "Create and edit Detection Rules.",
+              "security_monitoring_signals_read": "View Security Signals.",
+              "security_monitoring_suppressions_read": "Read Rule Suppressions.",
+              "security_monitoring_suppressions_write": "Write Rule Suppressions.",
+              "security_pipelines_read": "View Security Pipelines.",
+              "security_pipelines_write": "Create, edit, and delete CSM Security Pipelines.",
+              "siem_entities_read": "View Cloud SIEM entities.",
+              "slos_corrections": "Apply, edit, and delete SLO status corrections. A user with this permission can make status corrections, even if they do not have permission to edit those SLOs.",
+              "slos_read": "View SLOs and status corrections.",
+              "slos_write": "Create, edit, and delete SLOs.",
+              "synthetics_global_variable_read": "View, search, and use Synthetics global variables.",
+              "synthetics_global_variable_write": "Create, edit, and delete global variables for Synthetics.",
+              "synthetics_private_location_read": "View, search, and use Synthetics private locations.",
+              "synthetics_private_location_write": "Create and delete private locations in addition to having access to the associated installation guidelines.",
+              "synthetics_read": "List and view configured Synthetic tests and test results.",
+              "synthetics_write": "Create, edit, and delete Synthetic tests.",
+              "teams_manage": "Manage Teams. Create, delete, rename, and edit metadata of all Teams. To control Team membership across all Teams, use the User Access Manage permission.",
+              "teams_read": "Read Teams data. A User with this permission can view Team names, metadata, and which Users are on each Team.",
+              "test_optimization_read": "View Test Optimization.",
+              "test_optimization_settings_write": "Update service settings in Test Optimization.",
+              "test_optimization_write": "Update flaky tests from Flaky Tests Management of Test Optimization.",
+              "timeseries_query": "Query Timeseries data.",
+              "usage_read": "View your organization's usage and usage attribution.",
+              "user_access_invite": "Invite other users to your organization.",
+              "user_access_manage": "Disable users, manage user roles, manage SAML-to-role mappings, and configure logs restriction queries.",
+              "user_access_read": "View users and their roles and settings.",
+              "workflows_read": "View workflows.",
+              "workflows_run": "Run workflows.",
+              "workflows_write": "Create, edit, and delete workflows."
+            },
+            "tokenUrl": "/oauth2/v1/token"
+          }
+        },
+        "type": "oauth2"
+      },
+      "apiKeyAuth": {
+        "in": "header",
+        "name": "DD-API-KEY",
+        "type": "apiKey"
+      },
+      "appKeyAuth": {
+        "in": "header",
+        "name": "DD-APPLICATION-KEY",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "Datadog API V2 Collection"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v2/downtime": {
+      "post": {
+        "operationId": "CreateDowntime",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DowntimeCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DowntimeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsResponse"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": [],
+            "appKeyAuth": []
+          },
+          {
+            "AuthZ": [
+              "monitors_downtime"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v2/downtime/{downtime_id}": {
+      "delete": {
+        "operationId": "CancelDowntime",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "downtime_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {},
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsResponse"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": [],
+            "appKeyAuth": []
+          },
+          {
+            "AuthZ": [
+              "monitors_downtime"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v2/events/search": {
+      "post": {
+        "operationId": "SearchEvents",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventsListRequest"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventsListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/NotAuthorizedResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsResponse"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": [],
+            "appKeyAuth": []
+          },
+          {
+            "AuthZ": [
+              "events_read"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v2/incidents": {
+      "post": {
+        "operationId": "CreateIncident",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IncidentCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncidentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenResponse"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsResponse"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": [],
+            "appKeyAuth": []
+          },
+          {
+            "AuthZ": [
+              "incident_write"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v2/incidents/{incident_id}": {
+      "patch": {
+        "operationId": "UpdateIncident",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IncidentIDPathParameter"
+          },
+          {
+            "$ref": "#/components/parameters/IncidentIncludeQueryParameter"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IncidentUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncidentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenResponse"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsResponse"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": [],
+            "appKeyAuth": []
+          },
+          {
+            "AuthZ": [
+              "incident_write"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v2/logs/events/search": {
+      "post": {
+        "operationId": "ListLogs",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogsListRequest"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogsListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/NotAuthorizedResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsResponse"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": [],
+            "appKeyAuth": []
+          },
+          {
+            "AuthZ": [
+              "logs_read_data"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "security": [
+    {
+      "apiKeyAuth": [],
+      "appKeyAuth": []
+    },
+    {
+      "AuthZ": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://{subdomain}.{site}",
+      "variables": {
+        "site": {
+          "default": "datadoghq.com",
+          "enum": [
+            "datadoghq.com",
+            "us3.datadoghq.com",
+            "us5.datadoghq.com",
+            "ap1.datadoghq.com",
+            "ap2.datadoghq.com",
+            "uk1.datadoghq.com",
+            "datadoghq.eu",
+            "ddog-gov.com",
+            "us2.ddog-gov.com",
+            "uk1.datadoghq.com"
+          ]
+        },
+        "subdomain": {
+          "default": "api"
+        }
+      }
+    },
+    {
+      "url": "{protocol}://{name}",
+      "variables": {
+        "name": {
+          "default": "api.datadoghq.com"
+        },
+        "protocol": {
+          "default": "https"
+        }
+      }
+    },
+    {
+      "url": "https://{subdomain}.{site}",
+      "variables": {
+        "site": {
+          "default": "datadoghq.com"
+        },
+        "subdomain": {
+          "default": "api"
+        }
+      }
+    }
+  ]
+}

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../entities_grid/common';
-import { buildLookback, getRiskScoreIndex } from '../../entities_grid/queries/esql';
+import { buildLookback, type TimeRange } from '../../queries/time_range';
+import { getRiskScoreIndex } from '../../entities_grid/queries/esql';
 import { buildRiskLevelHistoryBranch } from './risk_history';
 import { buildPreviousNewlyHighCriticalQuery } from './risk_previous_period';
 import type { TilePeriod } from './tile_period';
@@ -69,8 +69,13 @@ export const buildNewlyHighCriticalCountQuery = (
     '), (',
     // Current levels from the entity docs: only High and Critical can qualify.
     `  FROM ${entitiesIndexName}`,
-    `  | WHERE entity.risk.calculated_level IN ("High", "Critical")`,
-    `  | EVAL current_level_num = CASE(entity.risk.calculated_level == "Critical", 4, 3)`,
+    // Aliases are left out: the group is judged by its main entity, which holds the group's level.
+    `  | WHERE \`entity.relationships.resolution.resolved_to\` IS NULL`,
+    `    AND (entity.risk.calculated_level IN ("High", "Critical") OR \`entity.relationships.resolution.risk.calculated_level\` IN ("High", "Critical"))`,
+    // The group's level if the entity has one, else its own.
+    `  | EVAL current_level = COALESCE(\`entity.relationships.resolution.risk.calculated_level\`, entity.risk.calculated_level)`,
+    `  | WHERE current_level IN ("High", "Critical")`,
+    `  | EVAL current_level_num = CASE(current_level == "Critical", 4, 3)`,
     `  | KEEP \`entity.id\`, current_level_num`,
     ')',
     `| STATS boundary_level_num = MAX(boundary_level_num),`,

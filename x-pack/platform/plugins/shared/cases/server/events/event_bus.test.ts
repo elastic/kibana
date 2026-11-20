@@ -55,7 +55,7 @@ describe('CasesEventBus', () => {
     const payload = {
       caseId: 'case-1',
       owner: 'securitySolution' as const,
-      attachmentIds: ['attachment-1'],
+      ids: ['attachment-1'],
       attachmentType: 'alert',
       alertIds: ['alert-1'],
       alertIndices: ['.alerts-security.alerts-default'],
@@ -149,7 +149,7 @@ describe('CasesEventBus', () => {
         eventBus.emitAttachmentsAdded(request, {
           caseId: 'case-1',
           owner: 'securitySolution',
-          attachmentIds: ['att-1'],
+          ids: ['att-1'],
           attachmentType: 'user',
         })
       ).not.toThrow();

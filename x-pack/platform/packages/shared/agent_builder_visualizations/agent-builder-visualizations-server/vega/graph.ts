@@ -36,7 +36,7 @@ import {
 } from './actions';
 
 // Regex to extract JSON from markdown code blocks.
-const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
+const INLINE_JSON_REGEX = /```(?:json)?([\s\S]*?)```/gm;
 
 const REPAIR_INSTRUCTIONS =
   'Return the complete corrected response as a single JSON object matching the response schema ("title", "authoring_note", and "spec"). Change only what is needed to fix the error.';

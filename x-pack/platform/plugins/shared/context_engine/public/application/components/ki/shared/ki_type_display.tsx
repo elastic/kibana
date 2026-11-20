@@ -7,13 +7,8 @@
 
 import { EuiBadge, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { formatKiTypeLabel } from '../../../utils/ki_display';
-
-const noneValueLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.noneValue', {
-  defaultMessage: 'None',
-});
+import { formatKiTypeLabel, noneValueLabel } from '../../../utils/ki_display';
 
 export const kiLabelCapitalizeCss = css`
   text-transform: capitalize;
@@ -34,7 +29,7 @@ export const KiTypeDisplay = ({ type, as, 'data-test-subj': dataTestSubj }: KiTy
       return null;
     }
     return (
-      <EuiBadge color="hollow" data-test-subj={dataTestSubj} css={kiLabelCapitalizeCss}>
+      <EuiBadge color="default" data-test-subj={dataTestSubj} css={kiLabelCapitalizeCss}>
         {content}
       </EuiBadge>
     );

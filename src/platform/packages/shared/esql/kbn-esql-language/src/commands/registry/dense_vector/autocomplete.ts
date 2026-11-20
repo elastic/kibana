@@ -45,12 +45,9 @@ const SUFFIX_MODIFIER_SUGGESTION: ISuggestionItem = {
   label: `${DENSE_VECTOR_SUFFIX_KEYWORD} = "..." ON`,
   text: `${DENSE_VECTOR_SUFFIX_KEYWORD} = "$\{1:${DENSE_VECTOR_DEFAULT_SUFFIX}}" ON $0`,
   kind: 'Keyword',
-  detail: i18n.translate(
-    'kbn-esql-language.commands.denseVector.autocomplete.suffixModifierDetail',
-    {
-      defaultMessage: 'Custom suffix for the generated columns (default: _dense_vector)',
-    }
-  ),
+  detail: i18n.translate('esqlLanguage.commands.denseVector.autocomplete.suffixModifierDetail', {
+    defaultMessage: 'Custom suffix for the generated columns (default: _dense_vector)',
+  }),
   asSnippet: true,
   category: SuggestionCategory.LANGUAGE_KEYWORD,
 };
@@ -63,7 +60,7 @@ const getDenseVectorMapParameters = (context?: ICommandContext): MapParameters =
   inference_id: {
     type: 'string',
     description: i18n.translate(
-      'kbn-esql-language.commands.denseVector.autocomplete.inferenceIdDescription',
+      'esqlLanguage.commands.denseVector.autocomplete.inferenceIdDescription',
       {
         defaultMessage:
           'Inference endpoint used to generate the embeddings. For text the endpoint must be text_embedding or multimodal embedding; for image it must be multimodal embedding. Defaults to the built-in text embedding endpoint.',
@@ -73,19 +70,16 @@ const getDenseVectorMapParameters = (context?: ICommandContext): MapParameters =
   },
   type: {
     type: 'string',
-    description: i18n.translate(
-      'kbn-esql-language.commands.denseVector.autocomplete.typeDescription',
-      {
-        defaultMessage:
-          'Input modality: "text" (default) embeds the field value as text; "image" expects a base64 data URI and requires a multimodal embedding endpoint.',
-      }
-    ),
+    description: i18n.translate('esqlLanguage.commands.denseVector.autocomplete.typeDescription', {
+      defaultMessage:
+        'Input modality: "text" (default) embeds the field value as text; "image" expects a base64 data URI and requires a multimodal embedding endpoint.',
+    }),
     suggestions: [buildMapValueCompleteItem('text'), buildMapValueCompleteItem('image')],
   },
   timeout: {
     type: 'string',
     description: i18n.translate(
-      'kbn-esql-language.commands.denseVector.autocomplete.timeoutDescription',
+      'esqlLanguage.commands.denseVector.autocomplete.timeoutDescription',
       { defaultMessage: 'Maximum time to wait for each inference request (default: 30s)' }
     ),
     suggestions: [buildMapValueCompleteItem('30s')],

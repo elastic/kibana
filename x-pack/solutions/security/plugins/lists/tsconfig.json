@@ -35,6 +35,7 @@
     "@kbn/securitysolution-es-utils",
     "@kbn/securitysolution-io-ts-types",
     "@kbn/utils",
+    "@kbn/apm-utils",
     "@kbn/logging-mocks",
     "@kbn/utility-types",
     "@kbn/core-elasticsearch-client-server-mocks",
@@ -46,7 +47,7 @@
     "@kbn/react-query",
     "@kbn/security-solution-features",
     "@kbn/kql",
-    "@kbn/core-spaces-common"
+    "@kbn/core-spaces-common",
   ],
   "exclude": ["target/**/*"]
 }

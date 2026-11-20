@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type {
-  BoundOptions,
   BoundInferenceClient,
   InferenceClient,
   InferenceCallbacks,
@@ -21,13 +20,18 @@ import type {
   InferenceAnonymizationOptions,
   RegexWorkerService,
 } from '@kbn/ai-anonymization-server';
-import type { ActionsClientProvider } from '../types';
+import type {
+  ActionsClientProvider,
+  InferenceServerClient,
+  ScopedFeatureEndpointResolver,
+  ServerBoundOptions,
+} from '../types';
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import type { TokenUsageLogger } from '../token_usage';
 
-interface CreateClientOptions {
+export interface CreateClientOptions {
   request: KibanaRequest;
   namespace?: string;
   actions: ActionsClientProvider;
@@ -44,17 +48,19 @@ interface CreateClientOptions {
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
   resolveConnectorId?: (connectorId: string) => Promise<string>;
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
+  resolveFeatureEndpoint?: ScopedFeatureEndpointResolver;
 }
 
 interface BoundCreateClientOptions extends CreateClientOptions {
-  bindTo: BoundOptions;
+  bindTo: ServerBoundOptions;
 }
 
-export function createClient(options: CreateClientOptions): InferenceClient;
+export function createClient(options: CreateClientOptions): InferenceServerClient;
 export function createClient(options: BoundCreateClientOptions): BoundInferenceClient;
 export function createClient(
   options: CreateClientOptions | BoundCreateClientOptions
-): BoundInferenceClient | InferenceClient {
+): BoundInferenceClient | InferenceServerClient {
   const {
     actions,
     request,
@@ -72,6 +78,8 @@ export function createClient(
     isDefaultConnectorOnly,
     getDefaultConnectorId,
     resolveConnectorId,
+    shouldStreamInferenceEndpoint,
+    resolveFeatureEndpoint,
   } = options;
   const client = createInferenceClient({
     request,
@@ -90,6 +98,8 @@ export function createClient(
     isDefaultConnectorOnly,
     getDefaultConnectorId,
     resolveConnectorId,
+    shouldStreamInferenceEndpoint,
+    resolveFeatureEndpoint,
   });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);
@@ -112,7 +122,8 @@ interface CreateClientWithoutRequestOptions {
  * but no HTTP request context.
  *
  * Internally wraps the actionsClient in an actions-like object so that the underlying
- * createInferenceClient can resolve connectors. Anonymization is not available.
+ * createInferenceClient can resolve connectors. Anonymization is not available, and
+ * inference endpoints always stream since the per-space streaming setting cannot be read.
  */
 export const createClientWithoutRequest = ({
   actionsClient,

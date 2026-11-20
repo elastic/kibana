@@ -105,6 +105,8 @@ export {
   getMinBudgetPerHour,
   LOOKBACK_HOURS_DEFAULT,
   LOOKBACK_HOURS_MAX,
+  EXCLUDED_RULE_TAGS_MAX_COUNT,
+  EXCLUDED_RULE_TAG_MAX_LENGTH,
   LOOKBACK_HOURS_MIN,
 } from './floor_watch';
 export { CONTINUOUS_THREAT_HUNT_SETTINGS } from './hunt_watch';

@@ -72,6 +72,27 @@ describe('planBatches', () => {
     });
   });
 
+  describe('claims on alerts the settings now exclude', () => {
+    it('releases an orphaned claim without planning it again', () => {
+      const excluded = { ...claimedBy('exec-gone', 'rule-x'), excludedBySettings: true };
+
+      const result = plan({ claimed: [excluded] });
+
+      expect(result.reclaimAlertIds).toEqual([excluded.id]);
+      expect(result.batches).toEqual([]);
+      expect(result.skipReason).toBe('nothing_pending');
+    });
+
+    it('still re-plans an orphaned claim the settings allow', () => {
+      const allowed = claimedBy('exec-gone', 'rule-y');
+
+      const result = plan({ claimed: [allowed] });
+
+      expect(result.reclaimAlertIds).toEqual([allowed.id]);
+      expect(result.batches.map(({ ruleId }) => ruleId)).toEqual(['rule-y']);
+    });
+  });
+
   describe('linking claimed alerts to live batches', () => {
     it('does not plan a second batch for a rule whose claimed alert names a live execution', () => {
       const result = plan({
@@ -215,6 +236,62 @@ describe('planBatches', () => {
         result.batches.length * BATCH_OVERHEAD_COST + alerts * ALERT_COST
       );
       expect(result.plannedCost).toBeLessThanOrEqual(30);
+    });
+
+    describe('rules that override the alert name (Elastic Defend)', () => {
+      const defend = (detection: string, overrides = {}) =>
+        makeAlert({ ruleId: 'endpoint-rule', ruleName: detection, detection, ...overrides });
+
+      it('plans one batch per detection of a rule, titled after that detection', () => {
+        const result = plan({
+          pending: [defend('malware'), defend('malware'), defend('memory'), makeAlert()],
+        });
+
+        expect(
+          result.batches.map(({ ruleId, ruleName, alerts }) => [ruleId, ruleName, alerts.length])
+        ).toEqual(
+          expect.arrayContaining([
+            ['endpoint-rule', 'malware', 2],
+            ['endpoint-rule', 'memory', 1],
+            ['rule-a', 'Rule A', 1],
+          ])
+        );
+        expect(result.batches).toHaveLength(3);
+      });
+
+      it('keeps the alerts of a rule without an override in one batch', () => {
+        const result = plan({ pending: makeAlerts(3) });
+
+        expect(result.batches).toHaveLength(1);
+      });
+
+      it('does not let a live batch for one detection block another detection of the rule', () => {
+        const result = plan({
+          pending: [defend('memory')],
+          claimed: [
+            defend('malware', {
+              tags: [TRIAGE_PENDING_TAG, `${TRIAGE_EXEC_TAG_PREFIX}exec-1`],
+            }),
+          ],
+          liveExecutionIds: new Set(['exec-1']),
+        });
+
+        expect(result.batches.map(({ ruleName }) => ruleName)).toEqual(['memory']);
+      });
+
+      it('still blocks the detection that has the live batch', () => {
+        const result = plan({
+          pending: [defend('malware')],
+          claimed: [
+            defend('malware', {
+              tags: [TRIAGE_PENDING_TAG, `${TRIAGE_EXEC_TAG_PREFIX}exec-1`],
+            }),
+          ],
+          liveExecutionIds: new Set(['exec-1']),
+        });
+
+        expect(result.batches).toEqual([]);
+      });
     });
   });
 });

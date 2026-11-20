@@ -31,8 +31,7 @@ describe('createHistogramBoundsQuery', () => {
     ).toEqual({
       metricKey: 'metrics-a::latency.exp',
       source: 'metrics-a',
-      esqlQuery: `SET unmapped_fields = "NULLIFY";
-TS metrics-a
+      esqlQuery: `TS metrics-a
   | STATS min_value = MIN(latency.exp), max_value = MAX(latency.exp)`,
     });
   });
@@ -111,6 +110,18 @@ TS metrics-a
     expect(createHistogramBoundsQuery({ metricItem, originalSource: 'metrics-*' })).toBeUndefined();
   });
 
+  it('omits NULLIFY when WHERE cannot name an extra column', () => {
+    const boundsQuery = createHistogramBoundsQuery({
+      metricItem: createMetric({}),
+      whereStatements: ['@timestamp IS NOT NULL', '1 == 1'],
+      originalSource: 'metrics-*',
+    });
+
+    expect(boundsQuery?.esqlQuery.startsWith('SET unmapped_fields = "NULLIFY";\n')).toBe(false);
+    expect(boundsQuery?.esqlQuery).toContain('| WHERE @timestamp IS NOT NULL');
+    expect(boundsQuery?.esqlQuery).toContain('| WHERE 1 == 1');
+  });
+
   it('applies the user WHERE clauses before STATS', () => {
     const boundsQuery = createHistogramBoundsQuery({
       metricItem: createMetric({}),
@@ -121,6 +132,20 @@ TS metrics-a
     expect(boundsQuery?.esqlQuery).toBe(`SET unmapped_fields = "NULLIFY";
 TS metrics-a
   | WHERE host.name == "a"
+  | STATS min_value = MIN(latency.exp), max_value = MAX(latency.exp)`);
+  });
+
+  it('declares the metadata fields that the WHERE clauses use in the TS source', () => {
+    const boundsQuery = createHistogramBoundsQuery({
+      metricItem: createMetric({}),
+      whereStatements: ['_ignored IS NULL'],
+      metadataFields: ['_ignored'],
+      originalSource: 'metrics-*',
+    });
+
+    expect(boundsQuery?.esqlQuery).toBe(`SET unmapped_fields = "NULLIFY";
+TS metrics-a METADATA _ignored
+  | WHERE _ignored IS NULL
   | STATS min_value = MIN(latency.exp), max_value = MAX(latency.exp)`);
   });
 

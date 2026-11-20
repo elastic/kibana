@@ -25,6 +25,9 @@
 #   - Repo-scoped CI Vault access to kv/ci-shared/workflows-library/gcs-publish
 #     (provisioned via a KV2Path resource in Terrazzo, see elastic/terrazzo#1483).
 #     The Buildkite agent env hook exports VAULT_TOKEN; no explicit vault login needed.
+#   - The Vault token expires ~20 minutes into a job. Long jobs (the serverless image build)
+#     get the key preloaded into WORKFLOWS_SCHEMA_GCS_SA_KEY by setup_job_env.sh; short jobs
+#     (the DRA release step) fall back to reading it from Vault here.
 
 set -euo pipefail
 
@@ -88,6 +91,36 @@ if [[ ! -f "$SRC/index.json" ]]; then
   exit 1
 fi
 
+# The committed schema is updated by a sync PR a while after a schema-changing merge,
+# so a publish in that window ships the previous schema. Warn (never block: a retry
+# at this commit cannot help) and point at the republish task.
+SYNC_PR_TITLE="[One Workflow] Update workflow step schema"
+SYNC_PIPELINE="kibana-workflow-step-schema-sync"
+BUILD_BRANCH="${BUILDKITE_BRANCH:-}"
+pending_sync=""
+
+open_sync_prs="$(gh pr list --repo elastic/kibana --base "$BUILD_BRANCH" --state open --author kibanamachine \
+  --search "$SYNC_PR_TITLE in:title" --json number --jq 'length' 2>/dev/null || true)"
+if [[ "${open_sync_prs:-0}" != "0" ]]; then
+  pending_sync="an open sync PR"
+fi
+
+if [[ -z "$pending_sync" && -n "${BUILDKITE_TOKEN:-}" && -n "$BUILD_BRANCH" ]]; then
+  active_builds="$(curl -gsf -H "Authorization: Bearer ${BUILDKITE_TOKEN}" \
+    "https://api.buildkite.com/v2/organizations/elastic/pipelines/${SYNC_PIPELINE}/builds?branch=${BUILD_BRANCH}&state[]=running&state[]=scheduled" \
+    2>/dev/null | jq 'length' 2>/dev/null || true)"
+  if [[ "${active_builds:-0}" != "0" ]]; then
+    pending_sync="a running ${SYNC_PIPELINE} build"
+  fi
+fi
+
+if [[ -n "$pending_sync" ]]; then
+  echo "^^^ Workflow step schema may be stale: found ${pending_sync} on ${BUILD_BRANCH}."
+  buildkite-agent annotate \
+    "**The workflow step schema published to the ${CHANNEL} channel may be stale:** found ${pending_sync} on \`${BUILD_BRANCH}\`, so the committed schema may not include the latest changes. Once the sync PR is merged, run the \`kibana-workflow-step-schema-republish\` pipeline on the sync PR's merge commit (CHANNEL=${CHANNEL}, BASE_VERSION=${BASE_VERSION}) to publish the fresh schema." \
+    --style warning --context workflow-schema-stale 2>/dev/null || true
+fi
+
 # --- Pre-flight: verify every variant file exists and its sha256 matches the
 # manifest before touching GCS. Aborts before any cloud write on mismatch,
 # making --delete-unmatched-destination-objects safe.
@@ -112,9 +145,19 @@ cp -r "$SRC/." "$STAGE/"
 jq -S --arg v "$STAMP_VERSION" --arg h "$BUILD_HASH" --arg c "$CHANNEL" \
   '.kibanaVersion = $v | .buildHash = $h | .channel = $c' "$SRC/index.json" > "$STAGE/index.json"
 
-echo "--- Fetch GCS credentials from Vault"
-GCS_SA_KEY="$(retry 5 5 vault kv get -field=credentials kv/ci-shared/workflows-library/gcs-publish)"
-buildkite-agent redactor add "$GCS_SA_KEY" 2>/dev/null || true
+if [[ "${DRY_RUN:-false}" == "true" ]]; then
+  echo "DRY_RUN enabled: verified and staged ${SRC} for gs://elastic-workflows-library-prod/${DEST} (version ${STAMP_VERSION}, build ${BUILD_HASH}), skipping the upload"
+  exit 0
+fi
+
+if [[ -n "${WORKFLOWS_SCHEMA_GCS_SA_KEY:-}" ]]; then
+  echo "--- Using GCS credentials preloaded by setup_job_env.sh"
+  GCS_SA_KEY="$WORKFLOWS_SCHEMA_GCS_SA_KEY"
+else
+  echo "--- Fetch GCS credentials from Vault"
+  GCS_SA_KEY="$(retry 5 5 vault kv get -field=credentials kv/ci-shared/workflows-library/gcs-publish)"
+  buildkite-agent redactor add "$GCS_SA_KEY" 2>/dev/null || true
+fi
 GCS_SA_EMAIL="$(jq -r '.client_email // empty' <<<"$GCS_SA_KEY")"
 
 echo "--- Authenticate to GCP"

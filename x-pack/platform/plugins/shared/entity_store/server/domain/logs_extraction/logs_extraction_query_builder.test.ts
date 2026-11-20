@@ -51,22 +51,25 @@ describe('buildLogsExtractionEsqlQuery', () => {
       latestIndex: 'latest-index',
       entityDefinition: {
         ...base,
-        fields: [
-          ...base.fields,
-          {
-            source: 'test.api_only_field',
-            destination: 'test.api_only_field',
-            mapping: { type: 'keyword' },
-            retention: { operation: 'managed' },
-            allowAPIUpdate: true,
-          },
-          {
-            source: 'test.log_field',
-            destination: 'test.log_field',
-            mapping: { type: 'keyword' },
-            retention: { operation: 'prefer_newest_value' },
-          },
-        ],
+        extraction: {
+          ...base.extraction,
+          fields: [
+            ...base.extraction.fields,
+            {
+              source: 'test.api_only_field',
+              destination: 'test.api_only_field',
+              mapping: { type: 'keyword' },
+              retention: { operation: 'managed' },
+              allowAPIUpdate: true,
+            },
+            {
+              source: 'test.log_field',
+              destination: 'test.log_field',
+              mapping: { type: 'keyword' },
+              retention: { operation: 'prefer_newest_value' },
+            },
+          ],
+        },
       },
       docsLimit: 100,
       fromDateISO: '2022-01-01T00:00:00.000Z',
@@ -213,12 +216,15 @@ describe('buildLogsExtractionEsqlQuery', () => {
       latestIndex: 'latest-index',
       entityDefinition: {
         ...base,
-        whenConditionTrueSetFieldsAfterStats: [
-          {
-            condition: { field: 'host.name', eq: 'server1' },
-            fields: { 'host.name': { source: 'host.id' } },
-          },
-        ],
+        extraction: {
+          ...base.extraction,
+          whenConditionTrueSetFieldsAfterStats: [
+            {
+              condition: { field: 'host.name', eq: 'server1' },
+              fields: { 'host.name': { source: 'host.id' } },
+            },
+          ],
+        },
       },
       docsLimit: 100,
       fromDateISO: '2022-01-01T00:00:00.000Z',

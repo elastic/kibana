@@ -14,12 +14,12 @@ apiTest.describe(
   'Reset SLOs',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    apiTest.beforeAll(async ({ sloHostsDataForge }) => {
-      await sloHostsDataForge.setup();
+    apiTest.beforeAll(async ({ apiServices }) => {
+      await apiServices.slo.deleteAllSLOs();
     });
 
-    apiTest.afterAll(async ({ sloHostsDataForge }) => {
-      await sloHostsDataForge.teardown();
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.slo.deleteAllSLOs();
     });
 
     apiTest('resets the related resources', async ({ apiClient, requestAuth, esClient }) => {
@@ -43,7 +43,7 @@ apiTest.describe(
             return false;
           }
         },
-        { timeoutMs: 60_000, intervalMs: 2000 }
+        { timeoutMs: 60_000 }
       );
 
       const resetResponse = await apiClient.post(`api/observability/slos/${sloId}/_reset`, {
@@ -63,7 +63,7 @@ apiTest.describe(
             return false;
           }
         },
-        { timeoutMs: 60_000, intervalMs: 2000 }
+        { timeoutMs: 60_000 }
       );
     });
   }

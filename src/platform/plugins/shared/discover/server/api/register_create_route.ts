@@ -30,12 +30,17 @@ export const registerCreateRoute = (
     .post({
       path: basePath,
       summary: 'Create a Discover session',
+      operationId: 'create-discover-session',
       description: 'Creates a Discover session and returns its ID, full state, and metadata.',
       ...routeConfig,
     })
     .addVersion(
       {
         version: routeVersion,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).createDiscoverSessionOASOperationObject,
+        },
         validate: {
           request: {
             body: discoverSessionApiDataSchema,

@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { memoize, once } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { TopSnippetsConfig } from '@kbn/agent-builder-genai-utils/tools';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { resolveTimeRange } from './screen_context_utils';
-import { includeFrozenSchema } from './include_frozen_schema';
+import {
+  createIncludeFrozenSchema,
+  getIncludeFrozenByDefault,
+  getIncludeFrozenParam,
+} from './include_frozen_schema';
 
-const searchSchema = z.object({
+const createSearchSchemaShape = () => ({
   query: z.string().describe('A natural language query expressing the search request'),
   index: z
     .string()
@@ -34,16 +39,30 @@ const searchSchema = z.object({
     .describe(
       '(optional) Time range to scope the search. Falls back to screen context or last 24 hours.'
     ),
-  include_frozen: includeFrozenSchema,
 });
+
+const createSearchSchema = memoize((includeFrozenByDefault: boolean) =>
+  z.object({
+    ...createSearchSchemaShape(),
+    include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
+  })
+);
+
+const createServerlessSearchSchema = once(() => z.object(createSearchSchemaShape()));
+
+type SearchSchema =
+  | ReturnType<typeof createSearchSchema>
+  | ReturnType<typeof createServerlessSearchSchema>;
 
 export const searchTool = ({
   coreSetup,
   topSnippetsDefaults,
+  isServerless = false,
 }: {
   coreSetup: CoreSetup;
   topSnippetsDefaults: TopSnippetsConfig;
-}): BuiltinToolDefinition<typeof searchSchema> => {
+  isServerless?: boolean;
+}): DynamicSchemaBuiltinToolDefinition<SearchSchema> => {
   // Cache the start services promise so it is resolved at most once.
   let startServicesPromise: ReturnType<CoreSetup['getStartServices']> | undefined;
   const getStartServices = () => {
@@ -82,16 +101,15 @@ Note:
       idempotentHint: true,
       openWorldHint: false,
     },
-    schema: searchSchema,
+    getSchema: async (schemaContext) =>
+      isServerless
+        ? createServerlessSearchSchema()
+        : createSearchSchema(await getIncludeFrozenByDefault(schemaContext)),
     handler: async (
-      {
-        query: nlQuery,
-        index,
-        time_range: explicitTimeRange,
-        include_frozen: includeFrozen = false,
-      },
+      params,
       { esClient, modelProvider, logger, events, attachments, savedObjectsClient }
     ) => {
+      const { query: nlQuery, index, time_range: explicitTimeRange } = params;
       logger.debug(`search tool called with query: ${nlQuery}, index: ${index}`);
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
@@ -126,7 +144,7 @@ Note:
         logger,
         topSnippetsConfig,
         includeDatasets: true,
-        includeFrozen,
+        includeFrozen: getIncludeFrozenParam(params),
         rowLimit: 100,
       });
       return { results };

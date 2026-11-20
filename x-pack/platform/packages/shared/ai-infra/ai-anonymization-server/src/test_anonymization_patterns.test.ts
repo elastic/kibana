@@ -82,7 +82,7 @@ describe('testAnonymizationPatterns', () => {
   it('throws when the pattern exceeds the worker timeout', async () => {
     jest
       .spyOn(RegexWorkerService.prototype, 'run')
-      .mockRejectedValueOnce(new Error('Regex anonymization task timed out'));
+      .mockRejectedValueOnce(new Error('Anonymization patterns timed out after 15s'));
 
     await expect(
       run({ contact: 'x' }, [emailRule({ entityClass: 'ENTITY_NAME', pattern: '(a+)+$' })])

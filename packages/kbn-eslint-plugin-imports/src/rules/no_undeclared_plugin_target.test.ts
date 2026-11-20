@@ -8,7 +8,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import { NoUndeclaredPluginTargetRule } from './no_undeclared_plugin_target';
+import { rules } from '../..';
 
 /**
  * Mock manifests keyed by pkgId.
@@ -99,7 +99,7 @@ const tsTester = new RuleTester({
   },
 });
 
-tsTester.run('@kbn/imports/no_undeclared_plugin_target', NoUndeclaredPluginTargetRule, {
+tsTester.run('@kbn/imports/no_undeclared_plugin_target', rules.no_undeclared_plugin_target, {
   valid: [
     // Valid: declared 'public' target
     {
@@ -382,7 +382,7 @@ tsTester.run('@kbn/imports/no_undeclared_plugin_target', NoUndeclaredPluginTarge
  */
 tsTester.run(
   '@kbn/imports/no_undeclared_plugin_target (import forms)',
-  NoUndeclaredPluginTargetRule,
+  rules.no_undeclared_plugin_target,
   {
     valid: [
       // export * from valid declared target

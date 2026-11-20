@@ -24,6 +24,7 @@ import type {
 import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
 import { getFunctionDefinition } from '../../functions';
 import { getBinaryExpressionOperand, resolveArgumentTypes } from '../../expressions';
+import { applyTimeSeriesAggregateArgTypes } from '../../time_series_aggregate_args';
 import type { SupportedDataType } from '../../../types';
 import {
   getMatchingSignatures,
@@ -130,10 +131,18 @@ export function buildExpressionFunctionParameterContext(
     return null;
   }
 
-  const { argTypes, literalMask } = resolveArgumentTypes(fn.args, {
+  const resolved = resolveArgumentTypes(fn.args, {
     columns: context?.columns,
     unmappedFieldsStrategy: context?.unmappedFieldsStrategy,
+    isTimeseriesSource: context?.isTimeseriesSource === true,
   });
+  const argTypes = applyTimeSeriesAggregateArgTypes(
+    fn.args,
+    resolved.argTypes,
+    context?.isTimeseriesSource === true,
+    fnDefinition.type
+  );
+  const { literalMask } = resolved;
 
   let argIndex = Math.max(fn.args.length, 0);
   if (!shouldGetNextArgument && argIndex) {

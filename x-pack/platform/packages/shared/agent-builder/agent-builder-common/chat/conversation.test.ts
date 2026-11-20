@@ -22,6 +22,7 @@ describe('isZeroModelUsage', () => {
     expect(isZeroModelUsage({ ...ZERO_MODEL_USAGE, llm_calls: 1 })).toBe(false);
     expect(isZeroModelUsage({ ...ZERO_MODEL_USAGE, connector_id: 'c' })).toBe(false);
     expect(isZeroModelUsage({ ...ZERO_MODEL_USAGE, model: 'm' })).toBe(false);
+    expect(isZeroModelUsage({ ...ZERO_MODEL_USAGE, connectors: [] })).toBe(false);
   });
 });
 

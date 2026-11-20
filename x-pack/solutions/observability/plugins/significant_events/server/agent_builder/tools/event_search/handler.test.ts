@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_SIGNAL_DESCRIPTION_LENGTH } from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import {
   searchEventsToolHandler,
   DESCRIPTION_TRUNCATION_SUFFIX,
@@ -73,7 +73,6 @@ describe('searchEventsToolHandler', () => {
         symptom_hypothesis: 'Payment calls are failing',
         summary: 'Checkout payment calls fail.',
         signal_rule_uuids: ['rule-active', 'rule-clear', 'rule-unknown'],
-        unresolved_rule_uuids: ['rule-active', 'rule-unknown'],
         signal_counts: {
           total: 3,
           confirms: 1,
@@ -88,7 +87,46 @@ describe('searchEventsToolHandler', () => {
     expect(result.events[0].symptom_hypothesis).toBe('Payment calls are failing');
   });
 
-  it('does not hide inconclusive signals from closure routing', async () => {
+  it.each<[string, string[]]>([
+    ['active', ['active', 'recovering']],
+    ['recovering', ['recovering']],
+    ['inactive', ['inactive']],
+  ])(
+    'filters status "%s" to %j, so routing sees a recovering event as live',
+    async (status, expected) => {
+      const client = makeClient();
+
+      await searchEventsToolHandler({
+        eventSearchClient: client as never,
+        params: { status: status as never },
+      });
+
+      expect(client.findLatestByCurrentStatePaginated).toHaveBeenCalledWith(
+        expect.objectContaining({ status: expected })
+      );
+    }
+  );
+
+  it('returns the severities the reconcile step gives, on both read paths', async () => {
+    const reconcileSeverities = async <T extends { severity: string }>(hits: T[]) =>
+      hits.map((hit) => ({ ...hit, severity: 'low' }));
+
+    const filtered = await searchEventsToolHandler({
+      eventSearchClient: makeClient() as never,
+      params: { status: 'active' },
+      reconcileSeverities: reconcileSeverities as never,
+    });
+    const unfiltered = await searchEventsToolHandler({
+      eventSearchClient: makeClient() as never,
+      params: {},
+      reconcileSeverities: reconcileSeverities as never,
+    });
+
+    expect(filtered.events[0].severity).toBe('low');
+    expect(unfiltered.events[0].severity).toBe('low');
+  });
+
+  it('lists a rule whose only signal is inconclusive', async () => {
     const result = await searchEventsToolHandler({
       eventSearchClient: makeClient([{ ...event, signals: [event.signals[2]] }]) as never,
       params: { event_ids: ['checkout-failure'] },
@@ -96,7 +134,7 @@ describe('searchEventsToolHandler', () => {
 
     expect(result.events[0]).toEqual(
       expect.objectContaining({
-        unresolved_rule_uuids: ['rule-unknown'],
+        signal_rule_uuids: ['rule-unknown'],
         signal_counts: {
           total: 1,
           confirms: 0,
@@ -109,7 +147,40 @@ describe('searchEventsToolHandler', () => {
     );
   });
 
-  it('reports off-topic rules without making their authored rule unresolved', async () => {
+  it('lists a rule whose only signal is an off-topic observed error', async () => {
+    const result = await searchEventsToolHandler({
+      eventSearchClient: makeClient([
+        {
+          ...event,
+          signals: [
+            {
+              ...event.signals[0],
+              verdict: 'off_topic',
+              evidence: { esql_query: 'FROM logs.test', result: 'found' },
+              metadata: { rule_uuid: 'rule-off-topic', rule_name: 'Unrelated error' },
+            },
+          ],
+        },
+      ]) as never,
+      params: { event_ids: ['checkout-failure'] },
+    });
+
+    expect(result.events[0]).toEqual(
+      expect.objectContaining({
+        signal_rule_uuids: ['rule-off-topic'],
+        signal_counts: {
+          total: 1,
+          confirms: 0,
+          refutes: 0,
+          off_topic: 1,
+          inconclusive: 0,
+          not_checked: 0,
+        },
+      })
+    );
+  });
+
+  it('lists a rule whose only signal is a benign off-topic row', async () => {
     const result = await searchEventsToolHandler({
       eventSearchClient: makeClient([
         {
@@ -129,7 +200,6 @@ describe('searchEventsToolHandler', () => {
     expect(result.events[0]).toEqual(
       expect.objectContaining({
         signal_rule_uuids: ['rule-off-topic'],
-        unresolved_rule_uuids: [],
         signal_counts: {
           total: 1,
           confirms: 0,
@@ -179,6 +249,47 @@ describe('searchEventsToolHandler', () => {
     );
   });
 
+  it('uses recovered collection times for full-view ordering and timestamps', async () => {
+    const explicit = {
+      ...event.signals[0],
+      evidence: {
+        esql_query: 'FROM logs.checkout',
+        result: 'found',
+        time_range: { from: '2026-07-20T07:00:00.000Z', to: '2026-07-20T11:00:00.000Z' },
+      },
+    };
+    const unstamped = {
+      ...event.signals[0],
+      collected_at: undefined,
+      evidence: {
+        ...explicit.evidence,
+        time_range: { from: '2026-07-20T09:00:00.000Z', to: '2026-07-20T10:00:00.000Z' },
+      },
+      metadata: { rule_uuid: 'rule-unstamped' },
+    };
+    const unknown = {
+      ...event.signals[0],
+      collected_at: undefined,
+      metadata: { rule_uuid: 'rule-no-time' },
+    };
+
+    const result = await searchEventsToolHandler({
+      eventSearchClient: makeClient([
+        { ...event, signals: [explicit, unknown, unstamped] },
+      ]) as never,
+      params: { view: 'full', event_ids: [event.event_id], signals_per_page: 2 },
+    });
+
+    expect(result.events[0]).toMatchObject({
+      signals: [
+        { rule_uuid: 'rule-unstamped', collected_at: unstamped.evidence.time_range.to },
+        { rule_uuid: 'rule-active', collected_at: explicit.collected_at },
+      ],
+      signals_total: 3,
+      signals_has_more: true,
+    });
+  });
+
   it('returns the final signal page without unrelated events', async () => {
     const eventSearchClient = makeClient([
       {
@@ -213,11 +324,14 @@ describe('searchEventsToolHandler', () => {
         eventSearchClient: makeClient() as never,
         params: { view: 'full' },
       })
-    ).rejects.toThrow('Full event search requires exactly one event ID');
+    ).rejects.toMatchObject({
+      message: 'Full event search requires exactly one event ID',
+      statusCode: 400,
+    });
   });
 
   it('leaves max-length full-view signal descriptions unchanged', async () => {
-    const description = 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH);
+    const description = 'x'.repeat(MAX_TEXT_LENGTH);
     const result = await searchEventsToolHandler({
       eventSearchClient: makeClient([
         {
@@ -232,7 +346,7 @@ describe('searchEventsToolHandler', () => {
   });
 
   it('truncates oversized full-view signal descriptions', async () => {
-    const description = 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1);
+    const description = 'x'.repeat(MAX_TEXT_LENGTH + 1);
     const result = await searchEventsToolHandler({
       eventSearchClient: makeClient([
         {

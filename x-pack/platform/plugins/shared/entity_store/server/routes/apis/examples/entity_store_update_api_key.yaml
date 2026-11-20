@@ -1,0 +1,45 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        updateApiKeyExample:
+          summary: "Update the API key of the Entity Store tasks"
+          description: "Re-grant the API key of every Entity Store task as the user making the request."
+          value: {}
+responses:
+  200:
+    description: "Indicates that the request was processed. Check `ok` and `failed` to see whether every task was updated."
+    content:
+      application/json:
+        examples:
+          updateApiKeySuccessExample:
+            summary: "All tasks updated"
+            description: "Every Entity Store task now runs with an API key owned by the caller."
+            value:
+              ok: true
+              updated:
+                - "entity_store:v2:history_snapshot_task:default"
+                - "entity_store:v2:status_report_task:default"
+              failed: []
+          updateApiKeyPartialExample:
+            summary: "Some tasks could not be updated"
+            description: "Call the endpoint again to retry the tasks listed in `failed`."
+            value:
+              ok: false
+              updated:
+                - "entity_store:v2:history_snapshot_task:default"
+              failed:
+                - id: "entity_store:v2:status_report_task:default"
+                  message: "Version conflict"
+                  statusCode: 409
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X POST -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -d '{}' \
+        "${KIBANA_URL}/api/security/entity_store/update_api_key"
+  - lang: Console
+    source: |
+      POST kbn://api/security/entity_store/update_api_key
+      {}

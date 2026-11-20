@@ -23,9 +23,11 @@ import { useCanAttachToCase } from '../../hooks/use_can_attach_to_case';
  *
  * @param entity the entity to attach to a case (memoize at the call site to keep the
  * returned callback stable)
+ * @param options.onSuccess called once the entity is attached to a case (keep it stable too)
  */
 export const useEntityCaseTakeActionItems = (
-  entity: EntityToAttach
+  entity: EntityToAttach,
+  { onSuccess }: { onSuccess?: () => void } = {}
 ): ((closePopover: () => void) => React.ReactElement[]) => {
   const entityAttachmentsEnabled = useIsExperimentalFeatureEnabled('entityAttachmentsEnabled');
   const { cases } = useKibana().services;
@@ -49,10 +51,11 @@ export const useEntityCaseTakeActionItems = (
           key="addToCase"
           entity={entity}
           onClick={closePopover}
+          onSuccess={onSuccess}
           data-test-subj={ADD_TO_CASE_TEST_ID}
         />,
       ];
     },
-    [entityAttachmentsEnabled, attachmentsEnabled, entity, canAddToCase]
+    [entityAttachmentsEnabled, attachmentsEnabled, entity, canAddToCase, onSuccess]
   );
 };

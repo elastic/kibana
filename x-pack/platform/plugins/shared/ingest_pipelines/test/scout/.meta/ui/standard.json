@@ -1,5 +1,5 @@
 {
-  "sha1": "4bf9f780b58ebd8ccc8ea85aee41c50d53f83506",
+  "sha1": "d4031a3d9d9ff59f613142442e1e4fb6bb64f5d6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -34,8 +34,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/home_and_list.spec.ts",
-        "line": 39,
-        "column": 11
+        "line": 45,
+        "column": 52
       }
     },
     {
@@ -54,8 +54,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/home_and_list.spec.ts",
-        "line": 40,
-        "column": 5
+        "line": 48,
+        "column": 45
       }
     },
     {
@@ -74,8 +74,68 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/home_and_list.spec.ts",
-        "line": 45,
+        "line": 55,
+        "column": 23
+      }
+    },
+    {
+      "id": "00ccace4950a296-6f12c8f29407ac5",
+      "title": "Ingest pipelines home and list shows management actions in the list and details flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/home_and_list.spec.ts",
+        "line": 65,
+        "column": 12
+      }
+    },
+    {
+      "id": "00ccace4950a296-d480f1b55364f0c",
+      "title": "Ingest pipelines home and list offers to create a missing custom pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/home_and_list.spec.ts",
+        "line": 75,
         "column": 11
+      }
+    },
+    {
+      "id": "00ccace4950a296-90bb6e4b315547d",
+      "title": "Ingest pipelines home and list shows the empty state when there are no pipelines",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/home_and_list.spec.ts",
+        "line": 77,
+        "column": 5
       }
     },
     {
@@ -122,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/pipeline_create.spec.ts",
-        "line": 27,
-        "column": 52
+        "line": 31,
+        "column": 5
       }
     },
     {
@@ -142,7 +202,27 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/pipeline_create.spec.ts",
-        "line": 34,
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "ae47b58f6467138-199243328df32b7",
+      "title": "Ingest pipelines create flows create form and add processor flyout have no a11y violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/pipeline_create.spec.ts",
+        "line": 48,
         "column": 24
       }
     },
@@ -185,6 +265,62 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/pipeline_tree.spec.ts",
         "line": 35,
+        "column": 8
+      }
+    },
+    {
+      "id": "4de7aaa6e4588b0-860420f36ad47b8",
+      "title": "Ingest pipelines read-only access user with only read_pipeline can view pipelines without management actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/read_only.spec.ts",
+        "line": 26,
+        "column": 23
+      }
+    },
+    {
+      "id": "4de7aaa6e4588b0-7b18f2f24d95b03",
+      "title": "Ingest pipelines read-only access user with only read_pipeline is shown the list instead of the create form",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/read_only.spec.ts",
+        "line": 36,
+        "column": 13
+      }
+    },
+    {
+      "id": "4de7aaa6e4588b0-1666b6bf87eeaae",
+      "title": "Ingest pipelines read-only access user with only read_pipeline is not offered to create a missing custom pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/read_only.spec.ts",
+        "line": 48,
+        "column": 11
+      }
+    },
+    {
+      "id": "4de7aaa6e4588b0-594c0f6a4ce166f",
+      "title": "Ingest pipelines read-only access user with only read_pipeline sees the read-only empty state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/read_only.spec.ts",
+        "line": 56,
         "column": 8
       }
     },

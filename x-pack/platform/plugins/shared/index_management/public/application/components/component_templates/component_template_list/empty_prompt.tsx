@@ -24,7 +24,7 @@ export const EmptyPrompt: FunctionComponent<Props> = ({ history }) => {
 
   return (
     <EuiEmptyPrompt
-      iconType="managementApp"
+      iconType="gear"
       data-test-subj="emptyList"
       title={
         <h2 data-test-subj="title">

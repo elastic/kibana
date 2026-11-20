@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -25,7 +25,7 @@ import {
 } from '@kbn/unified-data-table';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { ESQLVariableType } from '@kbn/esql-types';
-import type { FetchContext } from '@kbn/presentation-publishing';
+import type { FetchContext, PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
@@ -35,6 +35,7 @@ import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types
 import { SearchEmbeddableGridComponent } from './search_embeddable_grid_component';
 import type { EsqlSource } from '@kbn/data-source';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import type { IDslPagination } from '@kbn/search-types';
 
 const createResultDataSource = (columnNames: string[]) =>
   createMockEsqlSource(
@@ -67,6 +68,8 @@ const createStateManager = (): SearchEmbeddableStateManager => ({
   rows: new BehaviorSubject<DataTableRecord[]>([]),
   totalHitCount: new BehaviorSubject<number | undefined>(undefined),
   inspectorAdapters: new BehaviorSubject<Record<string, unknown>>({}),
+  pagination: new BehaviorSubject<IDslPagination | undefined>(undefined),
+  isLoadingMore: new BehaviorSubject<boolean>(false),
 });
 
 const createSavedSearch = ({
@@ -121,6 +124,7 @@ const createApi = (
     description$: new BehaviorSubject<string | undefined>(undefined),
     defaultTitle$: new BehaviorSubject<string | undefined>('Test'),
     defaultDescription$: new BehaviorSubject<string | undefined>(undefined),
+    viewMode$: new BehaviorSubject<ViewMode>('view'),
     parentApi,
   } as unknown as SearchEmbeddableApi & {
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
@@ -128,6 +132,7 @@ const createApi = (
     abortSignal$: BehaviorSubject<AbortSignal | undefined>;
     query$: BehaviorSubject<AggregateQuery | Query | undefined>;
     savedSearch$: BehaviorSubject<SavedSearch>;
+    viewMode$: PublishingSubject<ViewMode>;
   };
 };
 
@@ -156,6 +161,8 @@ describe('SearchEmbeddableGridComponent', () => {
     panelFilters,
     services: servicesOverride = services,
     esqlSource$,
+    pagination,
+    onFetchMoreRecords,
   }: {
     isEsql: boolean;
     columns?: string[];
@@ -172,6 +179,8 @@ describe('SearchEmbeddableGridComponent', () => {
     panelFilters?: Filter[];
     services?: ReturnType<typeof createDiscoverServicesMock>;
     esqlSource$?: BehaviorSubject<EsqlSource | undefined>;
+    pagination?: IDslPagination;
+    onFetchMoreRecords?: () => void;
   }) => {
     const savedSearch = createSavedSearch({ isEsql, columns, query });
     const api = createApi(savedSearch, { parentApi, savedObjectId, panelFilters });
@@ -183,6 +192,7 @@ describe('SearchEmbeddableGridComponent', () => {
     const docViewerRef = React.createRef<DocViewerApi>();
     stateManager.rows.next(rows);
     stateManager.totalHitCount.next(rows.length);
+    stateManager.pagination.next(pagination);
     if (resultDataSource) {
       stateManager.resultDataSource.next(resultDataSource);
     }
@@ -226,6 +236,7 @@ describe('SearchEmbeddableGridComponent', () => {
           docViewerRef={docViewerRef}
           expandedDoc={expandedDoc}
           initialDocViewerTabId={undefined}
+          onFetchMoreRecords={onFetchMoreRecords}
         />
       </DiscoverTestProvider>
     );
@@ -258,6 +269,80 @@ describe('SearchEmbeddableGridComponent', () => {
       const lastCallProps = getLastGridProps();
       expect(lastCallProps?.onUpdateSampleSize).toBeDefined();
       expect(typeof lastCallProps?.onUpdateSampleSize).toBe('function');
+    });
+  });
+
+  describe('onFetchMoreRecords', () => {
+    const onFetchMoreRecords = jest.fn();
+    const createPagination = (hasNextPage: boolean): IDslPagination => ({
+      hasNextPage: jest.fn().mockReturnValue(hasNextPage),
+      nextPage: jest.fn(),
+    });
+
+    it('passes the handler while another page can be loaded', async () => {
+      await renderComponent({
+        isEsql: false,
+        pagination: createPagination(true),
+        onFetchMoreRecords,
+      });
+
+      await waitFor(() => {
+        expect(getLastGridProps()?.onFetchMoreRecords).toBe(onFetchMoreRecords);
+      });
+    });
+
+    it('omits the handler when the pagination has no next page', async () => {
+      await renderComponent({
+        isEsql: false,
+        pagination: createPagination(false),
+        onFetchMoreRecords,
+      });
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+      expect(getLastGridProps()?.onFetchMoreRecords).toBeUndefined();
+    });
+
+    it('omits the handler before any pagination is available', async () => {
+      await renderComponent({ isEsql: false, onFetchMoreRecords });
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+      expect(getLastGridProps()?.onFetchMoreRecords).toBeUndefined();
+    });
+
+    it('omits the handler in ES|QL mode', async () => {
+      await renderComponent({
+        isEsql: true,
+        pagination: createPagination(true),
+        onFetchMoreRecords,
+      });
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+      expect(getLastGridProps()?.onFetchMoreRecords).toBeUndefined();
+    });
+
+    it('follows the pagination as pages load', async () => {
+      const { stateManager } = await renderComponent({
+        isEsql: false,
+        pagination: createPagination(true),
+        onFetchMoreRecords,
+      });
+      await waitFor(() => {
+        expect(getLastGridProps()?.onFetchMoreRecords).toBe(onFetchMoreRecords);
+      });
+
+      act(() => {
+        stateManager.pagination.next(createPagination(false));
+      });
+
+      await waitFor(() => {
+        expect(getLastGridProps()?.onFetchMoreRecords).toBeUndefined();
+      });
     });
   });
 
@@ -603,6 +688,41 @@ describe('SearchEmbeddableGridComponent', () => {
     });
   });
 
+  it("passes renderMode='print' to the embeddable grid in print mode", async () => {
+    const savedSearch = createSavedSearch({ isEsql: false });
+    const api = createApi(savedSearch);
+    const stateManager = createStateManager();
+    stateManager.rows.next(rows);
+    stateManager.totalHitCount.next(rows.length);
+    (api.viewMode$ as unknown as BehaviorSubject<ViewMode>).next('print');
+
+    render(
+      <DiscoverTestProvider services={services}>
+        <SearchEmbeddableGridComponent
+          api={api}
+          dataView={dataViewMock}
+          stateManager={stateManager}
+          enableDocumentViewer={true}
+          inlineEditing={{
+            isActive: false,
+            hasPendingChanges: false,
+            onApply: jest.fn(),
+            onCancel: jest.fn(),
+          }}
+          docViewerRef={React.createRef<DocViewerApi>()}
+          expandedDoc={undefined}
+          initialDocViewerTabId={undefined}
+        />
+      </DiscoverTestProvider>
+    );
+
+    await waitFor(() => {
+      expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+    });
+
+    expect(getLastGridProps().renderMode).toBe('print');
+  });
+
   describe('share direct link', () => {
     const expandedDoc = rows[0];
     const expandedDocRef = { id: esHitsMock[0]._id, index: esHitsMock[0]._index };
@@ -704,6 +824,45 @@ describe('SearchEmbeddableGridComponent', () => {
       });
 
       expect(getLastFlyoutMenuTrailingActions()).toBeUndefined();
+    });
+  });
+
+  describe('renderMode', () => {
+    it("should pass renderMode='non-interactive' to DiscoverGridEmbeddable when viewMode is non-interactive", async () => {
+      const savedSearch = createSavedSearch({ isEsql: false });
+      const api = createApi(savedSearch);
+      const stateManager = createStateManager();
+      const docViewerRef = React.createRef<DocViewerApi>();
+      stateManager.rows.next(rows);
+      stateManager.totalHitCount.next(rows.length);
+
+      (api.viewMode$ as unknown as BehaviorSubject<ViewMode>).next('non-interactive');
+
+      render(
+        <DiscoverTestProvider services={services}>
+          <SearchEmbeddableGridComponent
+            api={api}
+            dataView={dataViewMock}
+            stateManager={stateManager}
+            enableDocumentViewer={true}
+            inlineEditing={{
+              isActive: false,
+              hasPendingChanges: false,
+              onApply: jest.fn(),
+              onCancel: jest.fn(),
+            }}
+            docViewerRef={docViewerRef}
+            expandedDoc={undefined}
+            initialDocViewerTabId={undefined}
+          />
+        </DiscoverTestProvider>
+      );
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+
+      expect(getLastGridProps().renderMode).toBe('non-interactive');
     });
   });
 });

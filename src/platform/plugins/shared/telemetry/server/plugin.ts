@@ -22,6 +22,8 @@ import {
   shareReplay,
   map,
   first,
+  merge,
+  Subject,
 } from 'rxjs';
 
 import { ElasticV3ServerShipper } from '@elastic/ebt/shippers/elastic_v3/server';
@@ -60,7 +62,7 @@ import type { TelemetryConfigLabels, TelemetryConfigType } from './config';
 import { FetcherTask } from './fetcher';
 import { OPT_IN_POLL_INTERVAL_MS } from '../common/constants';
 import { getTelemetryChannelEndpoint } from '../common/telemetry_config';
-import { getTelemetryOptIn } from './telemetry_config';
+import { getTelemetryOptIn, TELEMETRY_OPT_IN_FEATURE_FLAG } from './telemetry_config';
 
 interface TelemetryPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
@@ -139,6 +141,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   private readonly pluginStop$ = new ReplaySubject<void>(1);
 
   private security?: SecurityPluginStart;
+  /** Emits when {@link TELEMETRY_OPT_IN_FEATURE_FLAG} changes so opt-in is resolved again. */
+  private readonly telemetryOptInFlagUpdated$ = new Subject<void>();
+  /** Latest feature-flag value. `undefined` until the first evaluation. */
+  private isOptedInFromFeatureFlag: boolean | undefined;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
     this.logger = initializerContext.logger.get();
@@ -155,12 +161,15 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     // This allows better cache optimizations and allowing background tasks to focus on alerts and similar.
     this.shouldStartSnapshotTelemetryFetcher = initializerContext.node.roles.ui;
 
-    // If the opt-in selection cannot be changed, set it as early as possible.
+    // A locked opt-out is final. A locked opt-in waits for the feature flag, which can turn it off.
     const { optIn, allowChangingOptInStatus } = this.initialConfig;
-    this.isOptedIn = allowChangingOptInStatus === false ? optIn : undefined;
+    this.isOptedIn = allowChangingOptInStatus === false && optIn === false ? false : undefined;
 
-    // Poll for the opt-in status
-    this.isOptedIn$ = timer(0, OPT_IN_POLL_INTERVAL_MS).pipe(
+    // Poll for the opt-in status, and re-resolve as soon as the feature flag changes.
+    this.isOptedIn$ = merge(
+      timer(0, OPT_IN_POLL_INTERVAL_MS),
+      this.telemetryOptInFlagUpdated$
+    ).pipe(
       exhaustMap(() => this.getOptInStatus()),
       takeUntil(this.pluginStop$),
       startWith(this.isOptedIn),
@@ -231,6 +240,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       telemetryCollectionManager,
       savedObjectsInternalClient$: this.savedObjectsInternalClient$,
       getSecurity: () => this.security,
+      getIsOptedInFromFeatureFlag: () => this.isOptedInFromFeatureFlag,
     });
 
     registerTelemetrySavedObject((opts) => savedObjects.registerType(opts));
@@ -265,7 +275,18 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     core: CoreStart,
     { telemetryCollectionManager, security }: TelemetryPluginsDepsStart
   ) {
-    const { analytics, savedObjects } = core;
+    const { analytics, featureFlags, savedObjects } = core;
+
+    featureFlags
+      .getBooleanValue$(TELEMETRY_OPT_IN_FEATURE_FLAG, true)
+      .pipe(takeUntil(this.pluginStop$))
+      .subscribe((isEnabled) => {
+        if (this.isOptedInFromFeatureFlag === isEnabled) {
+          return;
+        }
+        this.isOptedInFromFeatureFlag = isEnabled;
+        this.telemetryOptInFlagUpdated$.next();
+      });
 
     this.isOptedIn$.subscribe((enabled) => analytics.optIn({ global: { enabled } }));
 
@@ -323,6 +344,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       telemetrySavedObject,
       allowChangingOptInStatus,
       configTelemetryOptIn,
+      isOptedInFromFeatureFlag: this.isOptedInFromFeatureFlag,
     });
 
     if (typeof isOptedIn === 'boolean') {
@@ -335,7 +357,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     telemetryCollectionManager: TelemetryCollectionManagerPluginStart
   ) {
     // We start the fetcher having updated everything we need to use the config settings
-    this.fetcherTask.start(core, { telemetryCollectionManager });
+    this.fetcherTask.start(core, {
+      telemetryCollectionManager,
+      getIsOptedInFromFeatureFlag: () => this.isOptedInFromFeatureFlag,
+    });
   }
 
   private registerUsageCollectors(usageCollection: UsageCollectionSetup) {
@@ -345,6 +370,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       currentKibanaVersion: this.currentKibanaVersion,
       config$: this.config$,
       getSavedObjectsClient,
+      getIsOptedInFromFeatureFlag: () => this.isOptedInFromFeatureFlag,
     });
     registerTelemetryUsageCollector(usageCollection, this.config$);
   }

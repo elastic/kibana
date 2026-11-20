@@ -41,8 +41,21 @@ describe('InFlightProposalBadge', () => {
     renderWithKibanaRenderContext(<InFlightProposalBadge proposalId="p1" />);
 
     expect(screen.getByText('Applying')).toBeInTheDocument();
-    expect(mockIsApproving).toHaveBeenCalledWith('p1');
-    expect(mockIsDeclining).toHaveBeenCalledWith('p1');
+    expect(mockIsApproving).toHaveBeenCalledWith('p1', false);
+    expect(mockIsDeclining).toHaveBeenCalledWith('p1', false);
+  });
+
+  it('tells the hooks when the data of the row already shows the decision', () => {
+    renderWithKibanaRenderContext(<InFlightProposalBadge proposalId="p1" isDecisionShown />);
+
+    expect(mockIsApproving).toHaveBeenCalledWith('p1', true);
+    expect(mockIsDeclining).toHaveBeenCalledWith('p1', true);
+  });
+
+  it('keeps the Applying badge while the approved action runs', () => {
+    renderWithKibanaRenderContext(<InFlightProposalBadge proposalId="p1" isProposalSettling />);
+
+    expect(screen.getByText('Applying')).toBeInTheDocument();
   });
 
   it('shows the Declining badge while declining', () => {

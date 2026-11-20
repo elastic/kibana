@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/inference-common'
+  - '@kbn/management-settings-ids'
   - '@kbn/actions-plugin'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/config-schema'
@@ -71,6 +72,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - __mocks__/**/*
@@ -79,6 +81,4 @@ fileGroups:
     - common/**/*
     - public/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

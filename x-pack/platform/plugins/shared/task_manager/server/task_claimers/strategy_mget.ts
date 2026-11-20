@@ -50,6 +50,7 @@ import {
 
 import type { TaskStore, SearchOpts } from '../task_store';
 import { isOk, asOk } from '../lib/result_type';
+import { isUnreadableTaskError } from '../lib/errors';
 import { selectTasksByCapacity } from './lib/task_selector_by_capacity';
 import { getTaskCost } from './lib/get_task_cost';
 import type { TaskPartitioner } from '../lib/task_partitioner';
@@ -230,6 +231,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   }
 
   // perform an mget to get the full task instance for claiming
+  const unreadableTasks: PartialConcreteTaskInstance[] = [];
   const fullTasksToRun = (await taskStore.bulkGet(Object.keys(updatedTasks))).reduce<
     ConcreteTaskInstance[]
   >((acc, task) => {
@@ -244,9 +246,14 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       const { id, type, error } = task.error;
       logger.error(`Error getting full task ${id}:${type} during claim: ${error.message}`);
       bulkGetErrors++;
+      if (isUnreadableTaskError(error) && updatedTasks[id]) {
+        unreadableTasks.push(updatedTasks[id]);
+      }
     }
     return acc;
   }, []);
+
+  await markUnreadableTasksAsFailed({ taskStore, tasks: unreadableTasks, logger });
 
   // TODO: need a better way to generate stats
   const message = `task claimer claimed: ${fullTasksToRun.length}; stale: ${staleTasks.length}; conflicts: ${conflicts}; missing: ${missingTasks.length}; capacity reached: ${leftOverTasks.length}; updateErrors: ${bulkUpdateErrors}; getErrors: ${bulkGetErrors}; malformed data errors: ${tasksWithMalformedData.length}`;
@@ -271,6 +278,48 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   }
 
   return finalResult;
+}
+
+interface MarkUnreadableTasksAsFailedOpts {
+  taskStore: TaskStore;
+  tasks: PartialConcreteTaskInstance[];
+  logger: Logger;
+}
+
+// An unreadable task fails the same way on every claim, so it's taken out of the claim cycle
+// instead of being left running until its retryAt.
+async function markUnreadableTasksAsFailed({
+  taskStore,
+  tasks,
+  logger,
+}: MarkUnreadableTasksAsFailedOpts): Promise<void> {
+  if (tasks.length === 0) return;
+
+  try {
+    const results = await taskStore.bulkPartialUpdate(
+      tasks.map(({ id, version, attempts = 0 }) => ({
+        id,
+        version,
+        status: TaskStatus.Failed,
+        attempts: Math.max(attempts - 1, 0),
+        startedAt: null,
+        retryAt: null,
+        ownerId: null,
+      }))
+    );
+    for (const result of results) {
+      if (!isOk(result)) {
+        const { id, type, error } = result.error;
+        logger.warn(
+          `Error marking unreadable task ${id}:${type} as failed during claim: ${JSON.stringify(
+            error
+          )}`
+        );
+      }
+    }
+  } catch (e) {
+    logger.warn(`Error marking unreadable tasks as failed during claim: ${e.message}`);
+  }
 }
 
 interface SearchAvailableTasksResponse {

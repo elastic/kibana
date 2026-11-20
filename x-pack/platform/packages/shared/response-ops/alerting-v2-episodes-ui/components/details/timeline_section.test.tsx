@@ -65,7 +65,12 @@ const renderSection = () => {
   return render(
     <I18nProvider>
       <QueryClientProvider client={client}>
-        <AlertEpisodeTimelineSection episodeId="ep-1" groupHash="hash-1" services={mockServices} />
+        <AlertEpisodeTimelineSection
+          episodeId="ep-1"
+          seriesId="series-1"
+          groupHash="hash-1"
+          services={mockServices}
+        />
       </QueryClientProvider>
     </I18nProvider>
   );

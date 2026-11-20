@@ -8,7 +8,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod';
-import { z as z4, isoDateTime } from '@kbn/zod/v4';
+import { z as z4, isoDateTime, savedObjectId, description } from '@kbn/zod/v4';
 import { BooleanFromString, PassThroughAny } from '@kbn/zod-helpers';
 import { DeepStrict } from '@kbn/zod-helpers/v4';
 import {
@@ -996,6 +996,38 @@ describe('zod', () => {
     expect(result.schema.properties?.createdAt).toMatchObject({
       type: 'string',
       format: 'date-time',
+    });
+  });
+
+  test('isoDateTime OpenAPI schema bounds length and omits pattern', () => {
+    const schema = z4.object({ createdAt: isoDateTime({ offset: true }) });
+    const result = convert(schema as any);
+    const createdAt = result.schema.properties?.createdAt;
+
+    expect(createdAt).toMatchObject({
+      type: 'string',
+      format: 'date-time',
+      maxLength: 64,
+    });
+    expect(createdAt).not.toHaveProperty('pattern');
+  });
+
+  test('publishes the planned bounds of reporting-mode strings as vendor extensions', () => {
+    const schema = z4.object({
+      strict: savedObjectId(),
+      reporting: savedObjectId.warn({ label: 'dashboard.panelId' }),
+      reportingWithoutMinimum: description.warn(),
+    });
+    const result = convert(schema as any);
+
+    expect(result.schema.properties).toEqual({
+      strict: { type: 'string', minLength: 1, maxLength: 512 },
+      reporting: {
+        type: 'string',
+        'x-kibana-planned-min-length': 1,
+        'x-kibana-planned-max-length': 512,
+      },
+      reportingWithoutMinimum: { type: 'string', 'x-kibana-planned-max-length': 10000 },
     });
   });
 });

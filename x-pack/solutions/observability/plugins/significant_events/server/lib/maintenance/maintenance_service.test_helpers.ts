@@ -267,8 +267,6 @@ export function makeService(params?: {
   continuousOnboardingEnabled?: boolean;
   /** Per-space scheduled-discovery toggle before pause (default: off). */
   scheduledDiscoveryEnabled?: boolean;
-  /** Spaces where the caller lacks the Nightshift manage and configure privileges (default: none). */
-  unauthorizedSpaceIds?: string[];
   /** Make the continuous-onboarding uiSettings `set` throw. */
   failContinuousSet?: boolean;
   /** Make the scheduled-discovery uiSettings `set` throw. */
@@ -279,11 +277,6 @@ export function makeService(params?: {
   knowledgeIndicatorCounts?: Partial<Record<KnowledgeIndicatorType, number>>;
   ownedRuleIdsBySource?: Record<string, string[]>;
   dataStreams?: Record<string, number>;
-  /** `null` models the investigations plugin being unavailable. */
-  investigations?: {
-    deleted: number;
-    failures: Array<{ id: string; spaceId: string; error: string }>;
-  } | null;
 }) {
   const soClient = makeSoClient();
   // `null` models the alerting v2 plugin being unavailable.
@@ -336,9 +329,28 @@ export function makeService(params?: {
       }
     )
   );
-  // The caller's client refreshes and deletes (`kibana_system` lacks `maintenance` and
-  // `delete_index`); `createDataStream` is a sentinel that must stay uncalled.
+  const spaceDocuments = new Map([['default', streamDocuments]]);
+  // Physical deletion and caller-side creation are sentinels: reset must retain shared streams.
   const esClient = {
+    deleteByQuery: jest.fn(
+      async ({
+        index,
+        query,
+      }: {
+        index: string;
+        query: { term: { 'kibana.space_ids': string } };
+      }) => {
+        const documents = spaceDocuments.get(query.term['kibana.space_ids']);
+        const deleted = documents?.get(index) ?? 0;
+        documents?.set(index, 0);
+        return {
+          deleted,
+          failures: [] as Array<{ cause: { reason: string } }>,
+          version_conflicts: 0,
+          timed_out: false,
+        };
+      }
+    ),
     indices: {
       deleteDataStream: jest.fn(async ({ name }: { name: string }) => {
         streamDocuments.delete(name);
@@ -351,8 +363,9 @@ export function makeService(params?: {
       }),
     },
   };
-  // Exists, count and create run as `kibana_system`.
+  // Only existence checks and missing-stream creation run as `kibana_system`.
   const internalEsClient = {
+    deleteByQuery: jest.fn(),
     indices: {
       exists: jest.fn(async ({ index }: { index: string }) => streamDocuments.has(index)),
       createDataStream: jest.fn(async ({ name }: { name: string }) => {
@@ -360,17 +373,9 @@ export function makeService(params?: {
         return { acknowledged: true };
       }),
     },
-    count: jest.fn(async ({ index }: { index: string }) => ({
-      count: streamDocuments.get(index) ?? 0,
-    })),
   };
   const initializeClient = jest.fn(async (_name: string) => ({}));
   const asScoped = jest.fn(() => ({ asCurrentUser: esClient }));
-  const investigations =
-    params?.investigations === null
-      ? undefined
-      : params?.investigations ?? { deleted: 0, failures: [] };
-  const deleteAllInvestigations = investigations ? jest.fn(async () => investigations) : undefined;
 
   const initialSettings = {
     [OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED]:
@@ -453,25 +458,7 @@ export function makeService(params?: {
         ),
       },
     },
-    security: {
-      authz: {
-        mode: { useRbacForRequest: jest.fn(() => true) },
-        actions: { api: { get: jest.fn((privilege: string) => `api:${privilege}`) } },
-        checkPrivilegesWithRequest: jest.fn(() => ({
-          atSpaces: jest.fn(async (spaceIds: string[]) => ({
-            privileges: {
-              kibana: spaceIds.map((spaceId) => ({
-                resource: spaceId,
-                privilege: 'api:manage_nightshift',
-                authorized: !(params?.unauthorizedSpaceIds ?? []).includes(spaceId),
-              })),
-            },
-          })),
-        })),
-      },
-    },
     workflowsManagement: params?.management ? { management: params.management } : undefined,
-    nightshiftInvestigations: deleteAllInvestigations ? { deleteAllInvestigations } : undefined,
     spaces: {
       spacesService: {
         createSpacesClient: jest.fn(() => ({
@@ -524,9 +511,9 @@ export function makeService(params?: {
     initializeClient,
     internalEsClient,
     streamDocuments,
+    spaceDocuments,
     esClient,
     asScoped,
-    deleteAllInvestigations,
     spaceUiSettingsClient,
     getInternalSpaceUiSettingsClient,
   };

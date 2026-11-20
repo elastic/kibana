@@ -13,9 +13,9 @@ import type {
   RegexAnonymizationRule,
 } from '@kbn/ai-anonymization-common';
 import { partition } from 'lodash';
-import type { AnonymizationState } from './types';
+import type { AnonymizationState, DetectedMatch } from './types';
 import { executeRegexRules } from './execute_regex_rules';
-import { compileRulePattern } from './execute_regex_rule_task';
+import { compileRulePattern, usesNativeFallback } from './execute_regex_rule_task';
 import { executeNerRule } from './execute_ner_rule';
 import type { RegexWorkerService } from './regex_worker_service';
 import { resolveOverlapsAndMask } from './resolve_overlaps_and_mask';
@@ -100,6 +100,26 @@ const applyKnownReplacements = ({
   };
 };
 
+// A rule that only the legacy regex engine can run is reported once, not on every request.
+const WARNED_LEGACY_RULES_LIMIT = 200;
+const warnedLegacyRules = new Set<string>();
+
+const warnOnceAboutLegacyRule = (rule: RegexAnonymizationRule, logger?: Logger) => {
+  const key = `${rule.id ?? ''}\u0000${rule.pattern}`;
+  if (!logger || warnedLegacyRules.has(key)) {
+    return;
+  }
+  if (warnedLegacyRules.size >= WARNED_LEGACY_RULES_LIMIT) {
+    warnedLegacyRules.clear();
+  }
+  warnedLegacyRules.add(key);
+  logger.warn(
+    `Anonymization rule "${
+      rule.name ?? rule.id ?? rule.entityClass
+    }" uses syntax that only the legacy regex engine supports, so it runs in a worker task of its own without the linear-time guarantee. Rewrite it in RE2 syntax (no lookahead, lookbehind, backreferences or \\uXXXX escapes).`
+  );
+};
+
 export async function anonymizeRecords<T extends Record<string, string | undefined>>({
   input,
   anonymizationRules,
@@ -173,16 +193,74 @@ export async function anonymizeRecords({
         })
       : declaredRegexRules;
 
-  try {
-    const detectedRegexEntities = await executeRegexRules({
+  // Rules that only the legacy engine can run have no linear-time guarantee. They run in a worker
+  // task of their own so that one stalling cannot discard the matches of the other rules; rule
+  // indexes are kept so overlap precedence follows the configured order.
+  const safeRuleIndexes: number[] = [];
+  const legacyRuleIndexes: number[] = [];
+  regexRules.forEach((rule, index) => {
+    if (usesNativeFallback(rule)) {
+      warnOnceAboutLegacyRule(rule, logger);
+      legacyRuleIndexes.push(index);
+    } else {
+      safeRuleIndexes.push(index);
+    }
+  });
+
+  const detectMatches = async (ruleIndexes: number[]): Promise<DetectedMatch[]> => {
+    if (!ruleIndexes.length) {
+      return [];
+    }
+    const matches = await executeRegexRules({
       records: state.records,
-      rules: regexRules,
+      rules: ruleIndexes.map((index) => regexRules[index]),
       regexWorker,
     });
+    return matches.map((match) => ({ ...match, ruleIndex: ruleIndexes[match.ruleIndex] }));
+  };
+
+  try {
+    let detectedMatches: DetectedMatch[];
+    if (onFailure === 'allow_unsafe') {
+      const [safeResult, legacyResult] = await Promise.allSettled([
+        detectMatches(safeRuleIndexes),
+        detectMatches(legacyRuleIndexes),
+      ]);
+      const describeFailure = (reason: unknown) =>
+        reason instanceof Error ? reason.message : String(reason);
+      if (safeResult.status === 'rejected') {
+        // allow_unsafe: proceed without masking the entities regex detection would have found,
+        // rather than failing the chatComplete call.
+        logger?.warn(
+          `Regex anonymization failed; proceeding unmasked because onFailure is "allow_unsafe": ${describeFailure(
+            safeResult.reason
+          )}`
+        );
+      }
+      if (legacyResult.status === 'rejected') {
+        logger?.warn(
+          `Regex rules that only the legacy engine supports failed; skipping them because onFailure is "allow_unsafe": ${describeFailure(
+            legacyResult.reason
+          )}`
+        );
+      }
+      detectedMatches = [
+        ...(safeResult.status === 'fulfilled' ? safeResult.value : []),
+        ...(legacyResult.status === 'fulfilled' ? legacyResult.value : []),
+      ];
+    } else {
+      // Either failure fails the request, so do not hold the error back until a slow legacy task
+      // has also finished.
+      const [safeMatches, legacyMatches] = await Promise.all([
+        detectMatches(safeRuleIndexes),
+        detectMatches(legacyRuleIndexes),
+      ]);
+      detectedMatches = [...safeMatches, ...legacyMatches];
+    }
 
     // Process detected regex matches to resolve overlaps and apply masks
     state = resolveOverlapsAndMask({
-      detectedMatches: detectedRegexEntities,
+      detectedMatches,
       state,
       rules: regexRules,
       salt,
@@ -191,10 +269,8 @@ export async function anonymizeRecords({
     if (onFailure !== 'allow_unsafe') {
       throw error;
     }
-    // allow_unsafe: proceed without masking the entities regex detection would have found,
-    // rather than failing the chatComplete call.
     logger?.warn(
-      `Regex anonymization failed; proceeding unmasked because onFailure is "allow_unsafe": ${
+      `Applying the regex matches failed; proceeding unmasked because onFailure is "allow_unsafe": ${
         error instanceof Error ? error.message : String(error)
       }`
     );

@@ -8,6 +8,7 @@
  */
 
 export {
+  APM_APP_ID,
   LOGS_APP_ID,
   OBSERVABILITY_LOGS_EXPLORER_APP_ID,
   LAST_USED_LOGS_VIEWER_APP_ID,
@@ -15,8 +16,8 @@ export {
   OBSERVABILITY_OVERVIEW_APP_ID,
   AI_ASSISTANT_APP_ID,
   OBLT_UX_APP_ID,
+  OBLT_DIGITAL_EXPERIENCE_APP_ID,
   OBLT_PROFILING_APP_ID,
-  SIGNIFICANT_EVENTS_APP_ID,
   INGEST_HUB_APP_ID,
   ONBOARDING_APP_ID,
   NIGHTSHIFT_APP_ID,
@@ -35,7 +36,7 @@ export type {
   AppId,
   DeepLinkId,
   ObservabilityAlertingLinkId,
-  SignificantEventsLinkId,
+  NightshiftLinkId,
   StreamsLinkId,
 } from './deep_links';
 export * from './locators';
