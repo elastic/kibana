@@ -25605,13 +25605,13 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
+        Forgets session memories by ID for the target user. The route reports a memory of another user or another space as `not_found`, so it does not reveal whether the memory exists.
+
         Requires the `contextEngine:write` privilege. Without `user_id`, the route forgets the caller's own memories, and a caller without a user profile gets a 403. Naming another user in `user_id` also requires `contextEngine:manage_memory`.
 
-        Forgets session memories by id for that user. The route reports a memory of another user or another space as `not_found`, so it does not reveal whether the memory exists.
+        Forgetting writes a tombstone so reads stop returning the memory after the next Elasticsearch refresh, while Elasticsearch keeps its revisions until retention removes them. A read immediately after forgetting can still return the memory, and forgetting a memory right after writing it can return `not_found` until that write is visible. If Elasticsearch rejects a tombstone, the route returns `failed` with `error` and the caller can retry that ID.
 
-        Forgetting writes a tombstone so reads stop returning the memory, while Elasticsearch keeps its revisions until retention removes them. If Elasticsearch rejects a tombstone, the route returns `failed` with `error` and the caller can retry that id.
-
-        The route writes one `memory_forget` audit event per unique memory id. Forgetting still works when memory is turned off.
+        After authorization, validation, and feature-flag checks pass, the route writes one `memory_forget` audit event per unique memory ID. Forgetting still works when memory is turned off.
 
         Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
 
@@ -25650,7 +25650,7 @@ paths:
                   minItems: 1
                   type: array
                 user_id:
-                  description: The user the memories belong to. Omit this field to use the caller's user profile. Naming another user requires `contextEngine:manage_memory`. Memories of any other user return `not_found`.
+                  description: The Kibana user profile UID that the memories belong to. Omit this field to use the caller's user profile. Naming another user requires `contextEngine:manage_memory`.
                   maxLength: 1024
                   minLength: 1
                   type: string
@@ -25698,7 +25698,7 @@ paths:
                           description: The memory id.
                           type: string
                         outcome:
-                          description: What happened to the memory.
+                          description: 'What happened to the memory: `forgotten` if a tombstone was written, `already_forgotten` if it was already tombstoned, `not_found` if it does not exist or belongs to another user or space, or `failed` if Elasticsearch rejected the tombstone.'
                           enum:
                             - forgotten
                             - already_forgotten
@@ -25729,7 +25729,7 @@ paths:
                   summary: No user profile
                   value:
                     error: Forbidden
-                    message: The caller has no user profile, so the request cannot be attributed to a user. Set `user_id`, log in to Kibana once to create a profile, or use an API key whose owner has one.
+                    message: The caller has no user profile, so the request cannot be attributed to a user. Log in to Kibana once to create a profile, use an API key whose owner has one, or set `user_id` if you have the `contextEngine:manage_memory` privilege.
                     statusCode: 403
               schema:
                 additionalProperties: false
@@ -25817,9 +25817,9 @@ paths:
 
         Each AI index in `ai_index_ids` must exist in this space, and the caller requires the Elasticsearch `write` privilege on its backing index. Otherwise, the route rejects the request and writes nothing.
 
-        The route writes one `memory_remember` audit event per request, when the background write finishes or when it rejects the request. The route does not report a failed background write in the response. Instead, it logs the error to the Kibana logs and writes a failure audit event.
+        After authorization, validation, and feature-flag checks pass, the route writes one `memory_remember` audit event per request, when the background write finishes or when it rejects the request. The route does not report a failed background write in the response. Instead, it logs the error to the Kibana logs and writes a failure audit event.
 
-        Returns a 404 response when `contextEngine:enabled` is off in this space, when memory is turned off, or when an AI index in `ai_index_ids` does not exist.
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off (`contextEngine:memoryEnabled`), or when an AI index in `ai_index_ids` does not exist.
 
         **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:write. Extended privileges (optional, expand functionality when granted): contextEngine:manage_memory.
       operationId: post-context-engine-memory-remember
@@ -25845,6 +25845,17 @@ paths:
                     incident: INC-4211
                   content: checkout-service latency alert fired. Root cause is a connection pool limit after the 3.2 deploy.
                   session_id: 8f3c2a1e
+              reviseRequestExample:
+                description: Example request that replaces an existing session memory by passing its `id`
+                summary: Revise an existing session memory
+                value:
+                  ai_index_ids:
+                    - ops-memory
+                  attributes:
+                    incident: INC-4211
+                  content: checkout-service latency alert fired. Root cause is a connection pool limit after the 3.2 deploy; mitigated by raising max_connections to 200.
+                  id: 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
+                  session_id: 8f3c2a1e
             schema:
               additionalProperties: false
               type: object
@@ -25861,7 +25872,7 @@ paths:
                   additionalProperties:
                     maxLength: 1024
                     type: string
-                  description: String hints about the memory for dreaming.
+                  description: String hints about the memory for dreaming. Accepts up to 50 entries, with non-blank keys of 1 to 256 characters.
                   type: object
                 content:
                   description: The memory text. Elasticsearch indexes this field for semantic search.
@@ -25879,7 +25890,7 @@ paths:
                   minLength: 1
                   type: string
                 user_id:
-                  description: The user the memory belongs to. Omit this field to use the caller's user profile. Naming another user requires `contextEngine:manage_memory`.
+                  description: The Kibana user profile UID that the memory belongs to. Omit this field to use the caller's user profile. Naming another user requires `contextEngine:manage_memory`.
                   maxLength: 1024
                   minLength: 1
                   type: string
@@ -25929,7 +25940,7 @@ paths:
                   summary: No user profile
                   value:
                     error: Forbidden
-                    message: The caller has no user profile, so the request cannot be attributed to a user. Set `user_id`, log in to Kibana once to create a profile, or use an API key whose owner has one.
+                    message: The caller has no user profile, so the request cannot be attributed to a user. Log in to Kibana once to create a profile, use an API key whose owner has one, or set `user_id` if you have the `contextEngine:manage_memory` privilege.
                     statusCode: 403
               schema:
                 additionalProperties: false
