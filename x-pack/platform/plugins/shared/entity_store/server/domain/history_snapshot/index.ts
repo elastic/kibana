@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { HistorySnapshotClient, type RunHistorySnapshotResult } from './history_snapshot_client';
+export {
+  HistorySnapshotClient,
+  type HistorySnapshotRun,
+  type RunHistorySnapshotResult,
+} from './history_snapshot_client';
