@@ -106,6 +106,7 @@ export class SearchMethodsService implements ISearchMethods {
     requestResponder?.json({
       ...((request.params ?? {}) as Record<string, unknown>),
       ...(params.approximation !== undefined && { approximation: params.approximation }),
+      ...(params.projectRouting !== undefined && { projectRouting: params.projectRouting }),
     });
 
     try {

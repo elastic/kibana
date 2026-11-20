@@ -235,6 +235,18 @@ describe('SearchMethodsService', () => {
         });
       });
 
+      it('logs the project routing of the request, so that it can be run again as it was', async () => {
+        mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.esql({ query: 'FROM logs', projectRouting: 'test-project' }, { inspector });
+
+        expect(requestResponder.json).toHaveBeenCalledWith(
+          expect.objectContaining({ projectRouting: 'test-project' })
+        );
+      });
+
       it('calls requestResponder.json with ES|QL request params', async () => {
         const mockResponse = { columns: [], values: [] };
         mockSearch.mockReturnValue(createMockResponse(mockResponse));

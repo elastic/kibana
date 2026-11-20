@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -141,6 +141,7 @@ describe('QueryProfileView', () => {
         time_zone: 'UTC',
         filter: { match_all: {} },
         approximation: true,
+        projectRouting: 'my-project',
       },
       { queryTime: { label: 'Query time', value: '15ms' } }
     );
@@ -161,6 +162,7 @@ describe('QueryProfileView', () => {
         filter: { match_all: {} },
         profile: true,
         approximation: true,
+        projectRouting: 'my-project',
       }),
       expect.objectContaining({ abortSignal: expect.anything() })
     );
@@ -317,9 +319,15 @@ describe('QueryProfileView', () => {
       const source = operators.find((operator) => operator.textContent?.includes('LuceneSource'));
       await userEvent.click(source as HTMLElement);
 
-      expect(await screen.findByTestId('esqlQueryProfileOperatorDetails')).toHaveTextContent(
-        '"process_nanos": 60000000'
-      );
+      const details = await screen.findByTestId('esqlQueryProfileOperatorDetails');
+      const rawStatus = details.querySelector('code') as HTMLElement;
+      // The raw status is behind its own section, which starts collapsed.
+      expect(rawStatus).not.toBeVisible();
+
+      await userEvent.click(within(details).getByRole('button', { name: 'Raw status' }));
+
+      expect(rawStatus).toBeVisible();
+      expect(rawStatus).toHaveTextContent('"process_nanos": 60000000');
     });
 
     it('lists the planning phases when the planning lane is selected', async () => {
