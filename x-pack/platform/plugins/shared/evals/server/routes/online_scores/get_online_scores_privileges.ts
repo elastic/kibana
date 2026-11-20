@@ -54,6 +54,7 @@ export const registerGetOnlineScoresPrivilegesRoute = ({
         }
         try {
           const { elasticsearch } = await context.core;
+          // Origin-only under CPS: the online scores data stream is plugin-owned and lives in this project.
           const { index } = await elasticsearch.client.asCurrentUser.security.hasPrivileges({
             index: [{ names: [EvaluationIndices.ONLINE_SCORES], privileges: ['read'] }],
           });
