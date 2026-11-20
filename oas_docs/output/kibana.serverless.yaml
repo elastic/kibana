@@ -200575,6 +200575,8 @@ components:
           $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
         immutable:
           $ref: '#/components/schemas/Security_Detections_API_IsRuleImmutable'
+        library:
+          $ref: '#/components/schemas/Security_Detections_API_RuleLibrary'
         required_fields:
           $ref: '#/components/schemas/Security_Detections_API_RequiredFieldArray'
         revision:
@@ -200946,6 +200948,25 @@ components:
       type: string
     Security_Detections_API_RuleIntervalTo:
       type: string
+    Security_Detections_API_RuleLibrary:
+      description: The rule library an installed prebuilt rule came from. Omitted on custom rules. Prebuilt rules saved before libraries existed are read as the Elastic library.
+      type: object
+      properties:
+        icon:
+          description: EUI icon type or icon path for the rule library.
+          maxLength: 512
+          type: string
+        id:
+          description: Stable id of the rule library.
+          maxLength: 128
+          type: string
+        title:
+          description: Display name of the rule library.
+          maxLength: 256
+          type: string
+      required:
+        - id
+        - title
     Security_Detections_API_RuleLicense:
       description: The rule's license.
       type: string
