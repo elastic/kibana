@@ -9,6 +9,7 @@ import { defineCypressConfig } from '@kbn/cypress-config';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
+  fixturesFolder: './fixtures',
   reporter: '../../../../../node_modules/cypress-multi-reporters',
   reporterOptions: {
     configFile: './reporter_config.json',

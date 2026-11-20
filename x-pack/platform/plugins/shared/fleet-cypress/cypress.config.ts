@@ -8,6 +8,7 @@
 import { defineCypressConfig } from '@kbn/cypress-config';
 
 export default defineCypressConfig({
+  fixturesFolder: './fixtures',
   defaultCommandTimeout: 60000,
   requestTimeout: 60000,
   responseTimeout: 60000,

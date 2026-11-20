@@ -9,6 +9,7 @@ import { defineCypressConfig } from '@kbn/cypress-config';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
+  fixturesFolder: './fixtures',
   defaultCommandTimeout: 60000,
   requestTimeout: 60000,
   responseTimeout: 60000,
