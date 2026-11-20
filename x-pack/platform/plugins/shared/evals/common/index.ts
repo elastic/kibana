@@ -18,6 +18,7 @@ export const EVALS_API_PRIVILEGES = {
 export const EVALS_UI_PRIVILEGES = {
   show: 'show',
   manage: 'manage',
+  review: 'review',
 } as const;
 
 export type {

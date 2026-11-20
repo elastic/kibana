@@ -214,7 +214,7 @@ export class EvalsPlugin
             all: [],
             read: [],
           },
-          ui: [EVALS_UI_PRIVILEGES.show, EVALS_UI_PRIVILEGES.manage],
+          ui: [EVALS_UI_PRIVILEGES.show, EVALS_UI_PRIVILEGES.manage, EVALS_UI_PRIVILEGES.review],
         },
         read: {
           app: ['kibana', PLUGIN_ID],

@@ -98,6 +98,16 @@ export const queryKeys = {
     scores: (workflowId: string, page: number, perPage: number) =>
       ['evals', 'online_evals', 'scores', workflowId, page, perPage] as const,
   },
+  reviewQueues: {
+    all: ['evals', 'review_queues'] as const,
+    list: () => ['evals', 'review_queues', 'list'] as const,
+    detail: (queueId: string) => ['evals', 'review_queues', 'detail', queueId] as const,
+    next: (queueId: string) => ['evals', 'review_queues', 'next', queueId] as const,
+    agreement: (queueId: string) => ['evals', 'review_queues', 'agreement', queueId] as const,
+  },
+  traceEvidence: {
+    detail: (traceId: string) => ['evals', 'trace_evidence', traceId] as const,
+  },
   tracing: {
     all: ['evals', 'tracing'] as const,
     projects: (filters?: {
