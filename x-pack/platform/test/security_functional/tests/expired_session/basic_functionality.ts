@@ -6,7 +6,6 @@
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { parse } from 'url';
 
 import expect from '@kbn/expect';
 import { SESSION_ERROR_REASON_HEADER } from '@kbn/security-plugin/common/constants';
@@ -45,8 +44,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         shouldLoginIfPrompted: false,
       });
 
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/login');
+      expect(currentURL.searchParams.get('msg')).to.eql('SESSION_IDLE_TIMEOUT');
 
       expect(await PageObjects.security.loginPage.getInfoMessage()).to.be(
         'Your session has timed out due to inactivity. Please log in again.'
