@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/*
- *  Timeline IDs
- */
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export enum TimelineId {
-  active = 'timeline-1',
-  casePage = 'timeline-case',
-  test = 'timeline-test', // Reserved for testing purposes
-}
+export default createPlaywrightConfig({ testDir: './tests' });
