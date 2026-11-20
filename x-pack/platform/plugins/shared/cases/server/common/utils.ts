@@ -169,7 +169,7 @@ export const transformCases = ({
   count_in_progress_cases: countInProgressCases,
   count_closed_cases: countClosedCases,
   // Only add the `mttr` key when a value was passed. The public `find` caller passes nothing, so
-  // the resulting object has no `mttr` key and still satisfies the strict `CasesFindResponseRt`
+  // the resulting object has no `mttr` key and still satisfies the strict `CasesFindResponseSchema`
   // decode. Do NOT change this to `mttr: mttr ?? null` — that would leak `mttr` onto the public
   // `_find` response and break its strict decode / OpenAPI contract.
   ...(mttr !== undefined ? { mttr } : {}),

@@ -13,7 +13,9 @@ import {
 } from './knowledge_indicator_client';
 import { computeFeatureUuid } from '@kbn/significant-events-schema';
 import {
+  computeRevisionId,
   type StoredFeatureKnowledgeIndicator,
+  type StoredKnowledgeIndicator,
   type StoredQueryKnowledgeIndicator,
   type StoredTombstone,
 } from '../data_stream';
@@ -59,7 +61,7 @@ function createFeatureDoc(
   overrides: Partial<StoredFeatureKnowledgeIndicator> & { slug?: string } = {}
 ): StoredFeatureKnowledgeIndicator {
   const { slug = 'feat-1', ...rest } = overrides;
-  return {
+  const doc = {
     '@timestamp': '2026-01-01T00:00:00.000Z',
     id: featureUuid(slug),
     type: KI_TYPE_FEATURE,
@@ -75,7 +77,14 @@ function createFeatureDoc(
     },
     ...rest,
   };
+  return { revision_id: revisionIdOf(doc), ...doc };
 }
+
+const revisionIdOf = ({
+  id,
+  '@timestamp': timestamp,
+}: Pick<StoredKnowledgeIndicator, 'id' | '@timestamp'>): string =>
+  computeRevisionId({ id, timestamp });
 
 function createComputedFeatureDoc(): StoredFeatureKnowledgeIndicator {
   return createFeatureDoc({
@@ -279,6 +288,49 @@ describe('KnowledgeIndicatorClient.bulk', () => {
       const result = await client.bulk(SOURCE, [{ restore: { id: 'computed-1' } }]);
 
       expect(result).toEqual({ applied: 0, skipped: 1 });
+      expect(create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('durability', () => {
+    it('re-indexes a durable feature without expires_at, payload and exclusion preserved', async () => {
+      const { client, create, runEsql } = makeClient();
+      const latest = createFeatureDoc({ expires_at: '2026-02-01T00:00:00.000Z', excluded: true });
+      runEsql.mockResolvedValueOnce({ hits: [latest] });
+
+      const result = await client.bulk(SOURCE, [{ durability: { id: latest.id, durable: true } }]);
+
+      expect(result).toEqual({ applied: 1, skipped: 0 });
+      const [{ documents }] = create.mock.calls[0];
+      const written = documents[0] as StoredFeatureKnowledgeIndicator;
+      expect(written.id).toBe(latest.id);
+      expect(written).not.toHaveProperty('expires_at');
+      expect(written.excluded).toBe(true);
+      expect(written.feature).toEqual(latest.feature);
+    });
+
+    it('gives an expiring feature a fresh expires_at', async () => {
+      const { client, create, runEsql } = makeClient();
+      const latest = createFeatureDoc();
+      runEsql.mockResolvedValueOnce({ hits: [latest] });
+
+      await client.bulk(SOURCE, [{ durability: { id: latest.id, durable: false } }]);
+
+      const [{ documents }] = create.mock.calls[0];
+      const written = documents[0] as StoredFeatureKnowledgeIndicator;
+      expect(Date.parse(written.expires_at ?? '')).toBeGreaterThan(Date.now());
+    });
+
+    it('skips unknown ids and computed features', async () => {
+      const { client, create, runEsql } = makeClient();
+      runEsql.mockResolvedValueOnce({ hits: [createComputedFeatureDoc()] });
+
+      const result = await client.bulk(SOURCE, [
+        { durability: { id: 'computed-1-uuid', durable: true } },
+        { durability: { id: 'missing', durable: true } },
+      ]);
+
+      expect(result).toEqual({ applied: 0, skipped: 2 });
       expect(create).not.toHaveBeenCalled();
     });
   });
@@ -515,58 +567,78 @@ describe('KnowledgeIndicatorClient.getFeatures', () => {
 });
 
 describe('KnowledgeIndicatorClient.getLatestRevisionTimestamp', () => {
-  const printedQueryFor = (runEsql: jest.Mock): string => {
-    const query = runEsql.mock.calls[0][1] as { print: () => string };
-    return query.print();
-  };
+  const runEsql = jest.mocked(runEsqlQuery);
+  const timestampResponse = (values: Array<Array<string | null>>) => ({
+    columns: [{ name: 'latest_timestamp', type: 'date' }],
+    values,
+  });
 
-  it('returns the newest @timestamp among matching live revisions', async () => {
-    const { client, runEsql } = makeClient();
-    runEsql.mockResolvedValueOnce({
-      hits: [
-        createFeatureDoc({ id: 'a', '@timestamp': '2026-04-01T00:00:00.000Z' }),
-        createFeatureDoc({ id: 'b', '@timestamp': '2026-05-01T00:00:00.000Z' }),
-        createFeatureDoc({ id: 'c', '@timestamp': '2026-03-01T00:00:00.000Z' }),
-      ],
+  it('returns the aggregated timestamp', async () => {
+    const { client } = makeClient();
+    const timestamp = '2026-05-01T00:00:00.000Z';
+    runEsql.mockResolvedValueOnce(timestampResponse([[timestamp]]));
+
+    await expect(client.getLatestRevisionTimestamp(SOURCE)).resolves.toEqual({
+      '@timestamp': timestamp,
     });
-
-    const result = await client.getLatestRevisionTimestamp(SOURCE);
-
-    expect(result).toEqual({ '@timestamp': '2026-05-01T00:00:00.000Z' });
   });
 
-  it('returns null when no revisions match', async () => {
-    const { client, runEsql } = makeClient();
-    runEsql.mockResolvedValueOnce({ hits: [] });
+  it.each([
+    { scenario: 'the aggregate is null', values: [[null]] },
+    { scenario: 'the response has no rows', values: [] },
+  ])('returns null when $scenario', async ({ values }) => {
+    const { client } = makeClient();
+    runEsql.mockResolvedValueOnce(timestampResponse(values));
 
-    const result = await client.getLatestRevisionTimestamp(SOURCE);
-
-    expect(result).toBeNull();
+    await expect(client.getLatestRevisionTimestamp(SOURCE)).resolves.toBeNull();
   });
 
-  it('filters tombstones and excluded revisions via the post-grouping WHERE', async () => {
-    const { client, runEsql } = makeClient();
-    runEsql.mockResolvedValueOnce({ hits: [] });
+  it('returns null when the data stream does not exist yet', async () => {
+    const { client } = makeClient();
+    runEsql.mockResolvedValueOnce(undefined);
 
-    await client.getLatestRevisionTimestamp(SOURCE);
-
-    expect(runEsql).toHaveBeenCalledTimes(1);
-    // The post-grouping filter must reference both `deleted` and
-    // `excluded` so groups whose latest revision is a tombstone or an
-    // exclusion drop out. Without this, user-driven bulk deletes or
-    // bulk excludes would extend the identification throttle.
-    const printed = printedQueryFor(runEsql);
-    expect(printed).toContain('deleted');
-    expect(printed).toContain('excluded');
+    await expect(client.getLatestRevisionTimestamp(SOURCE)).resolves.toBeNull();
   });
 
-  it('passes the feature-type filter through to the WHERE clause', async () => {
-    const { client, runEsql } = makeClient();
-    runEsql.mockResolvedValueOnce({ hits: [] });
+  it('propagates query errors', async () => {
+    const { client } = makeClient();
+    const error = new Error('ES|QL query failed');
+    runEsql.mockRejectedValueOnce(error);
+
+    await expect(client.getLatestRevisionTimestamp(SOURCE)).rejects.toBe(error);
+  });
+
+  it('aggregates in one query after selecting and filtering the latest revisions', async () => {
+    const { client } = makeClient();
+    runEsql.mockResolvedValueOnce(timestampResponse([[null]]));
 
     await client.getLatestRevisionTimestamp(SOURCE, { types: ['entity', 'metric'] });
 
-    expect(printedQueryFor(runEsql)).toContain('feature.type');
+    expect(runEsql).toHaveBeenCalledTimes(1);
+    expect(executeAndDecodeSource).not.toHaveBeenCalled();
+    const [, query] = runEsql.mock.calls[0];
+    expect(query.split(' | ')).toEqual([
+      'FROM .significant_events-knowledge_indicators METADATA _id',
+      `WHERE \`kibana.space_ids\` == "${SPACE}"`,
+      `WHERE (type IN ("feature")) AND (\`source.id\` IN ("${SOURCE}"))`,
+      'INLINE STATS latest_ts = MAX(@timestamp) BY `source.id`, type, id',
+      'WHERE @timestamp == latest_ts',
+      'INLINE STATS tiebreaker_id = MAX(_id) BY `source.id`, type, id',
+      'WHERE _id == tiebreaker_id',
+      'WHERE (deleted IS NULL OR deleted == FALSE) AND (excluded IS NULL OR excluded == FALSE) ' +
+        'AND (expires_at IS NULL OR expires_at >= NOW()) AND (`feature.type` IN ("entity", "metric"))',
+      'STATS latest_timestamp = MAX(@timestamp)',
+    ]);
+  });
+
+  it('includes all feature types when the filter is empty', async () => {
+    const { client } = makeClient();
+    runEsql.mockResolvedValueOnce(timestampResponse([[null]]));
+
+    await client.getLatestRevisionTimestamp(SOURCE, { types: [] });
+
+    const [, query] = runEsql.mock.calls[0];
+    expect(query).not.toContain('feature.type');
   });
 });
 
@@ -730,6 +802,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
       soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
       logger,
       space: SPACE,
+      searchEmbeddingModelResolver: jest.fn().mockResolvedValue({ kind: 'sparse' }),
     };
     const rulesManagementClient = {
       createRule: jest.fn().mockResolvedValue(undefined),
@@ -784,10 +857,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
 
   const latestRevisionResponse = (
     docs: Array<StoredFeatureKnowledgeIndicator | StoredQueryKnowledgeIndicator>
-  ) => ({
-    hits: docs,
-    esIds: docs.map(({ id }, index) => `es-id-${id}-${index}`),
-  });
+  ) => ({ hits: docs, esIds: [] });
 
   const rankRequest = (
     rankEsql: jest.Mock,
@@ -799,6 +869,9 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     };
     return { ...composerQuery.toRequest(), filter };
   };
+
+  const revisionIdPredicate = (docs: StoredKnowledgeIndicator[]): string =>
+    `revision_id IN (${docs.map((doc) => `"${doc.revision_id}"`).join(', ')})`;
 
   it('uses only feature fields when type is [feature]', async () => {
     const { client, runEsql, rankEsql } = makeClientWithRanker();
@@ -819,6 +892,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     expect(query).toContain('EVAL _score = CASE');
     expect(query).toContain('CASE(TO_LOWER(title) LIKE "*checkout*", 3.0, 0.0)');
     expect(query).toContain('CASE(TO_LOWER(description) LIKE "*checkout*", 2.0, 0.0)');
+    expect(query).toContain('CASE(TO_LOWER(`feature.slug`) LIKE "*checkout*", 3.0, 0.0)');
   });
 
   it('uses only query fields when type is [query]', async () => {
@@ -836,6 +910,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     expect(query).toContain('TO_LOWER(`query.features.id`) LIKE');
     expect(query).not.toContain('feature.type');
     expect(query).not.toContain('feature.subtype');
+    expect(query).not.toContain('feature.slug');
     expect(query).not.toContain('MV_CONCAT(TO_LOWER(tags)');
   });
 
@@ -898,8 +973,9 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     );
     expect(request.query).toContain('SORT _score DESC | LIMIT 25');
     expect(request.params).toEqual([{ q: 'checkout service' }]);
-    expect(request.filter).toEqual({ ids: { values: [`es-id-${latest.id}-0`] } });
-    expect(request.query).not.toContain('id IN');
+    expect(request.query).toContain(revisionIdPredicate([latest]));
+    expect(request.filter).toBeUndefined();
+    expect(request.query).not.toMatch(/(?<!revision_)id IN/);
   });
 
   it('thresholds the normalized semantic branch before hybrid RRF fusion', async () => {
@@ -1051,9 +1127,8 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
       const retryQuery = retryRequest.query;
       expect(retryQuery).toContain('WHERE _score >= 0 ');
       expect(retryQuery).not.toContain('0.15');
-      expect(retryRequest.filter).toEqual({
-        ids: { values: ['es-id-feat-semantic-0', 'es-id-feat-keyword-1'] },
-      });
+      expect(retryQuery).toContain(revisionIdPredicate([semanticOnly, keywordOnly]));
+      expect(retryRequest.filter).toBeUndefined();
       expect(hits.map((hit) => hit.type === 'feature' && hit.feature.uuid)).toEqual([
         'feat-semantic',
         'feat-keyword',
@@ -1115,7 +1190,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
 function createQueryDoc(
   overrides: Partial<StoredQueryKnowledgeIndicator> = {}
 ): StoredQueryKnowledgeIndicator {
-  return {
+  const doc = {
     '@timestamp': '2026-01-01T00:00:00.000Z',
     id: 'query-1',
     type: KI_TYPE_QUERY,
@@ -1124,12 +1199,13 @@ function createQueryDoc(
     description: 'desc',
     query: {
       esql: 'FROM logs-app | WHERE error == true',
-      query_type: 'match',
+      query_type: 'match' as const,
       rule_backed: false,
       rule_id: 'rule-abc',
     },
     ...overrides,
   };
+  return { revision_id: revisionIdOf(doc), ...doc };
 }
 
 describe('KnowledgeIndicatorClient.keepAlivePersistentIndicators', () => {

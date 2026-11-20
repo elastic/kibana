@@ -74,6 +74,10 @@ const expectedBodyTag = (route: SweepRoute, readUser: boolean): string => {
         ? '[private-location-write,uptime-write]'
         : '[uptime-read,private-location-write,uptime-write]';
     }
+    // The affected-monitors scan decrypts every monitor, so it needs the secret connection privilege.
+    if (path === `${COMMON_API_URLS.SECRET_CONNECTION}/_affected_monitors`) {
+      return readUser ? '[secret-connection-write]' : '[uptime-read,secret-connection-write]';
+    }
     return '[uptime-read]';
   }
 

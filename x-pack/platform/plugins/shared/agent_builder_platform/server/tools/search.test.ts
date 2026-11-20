@@ -16,14 +16,15 @@ jest.mock('@kbn/agent-builder-genai-utils/tools', () => ({
 
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import { searchTool } from './search';
-import { resolveToolSchema } from './test_utils';
+import { createSchemaContext, resolveToolSchema } from './test_utils';
 
 const runSearchToolMock = runSearchTool as jest.MockedFunction<typeof runSearchTool>;
 
-const createTool = () =>
+const createTool = ({ isServerless }: { isServerless?: boolean } = {}) =>
   searchTool({
     coreSetup: coreMock.createSetup(),
     topSnippetsDefaults: {} as TopSnippetsConfig,
+    isServerless,
   });
 
 const createHandlerContext = () => {
@@ -35,8 +36,9 @@ const createHandlerContext = () => {
 const run = async ({
   includeFrozen,
   includeFrozenByDefault = false,
-}: { includeFrozen?: boolean; includeFrozenByDefault?: boolean } = {}) => {
-  const tool = createTool();
+  isServerless,
+}: { includeFrozen?: boolean; includeFrozenByDefault?: boolean; isServerless?: boolean } = {}) => {
+  const tool = createTool({ isServerless });
   const schema = await resolveToolSchema(tool, includeFrozenByDefault);
   await tool.handler(
     schema.parse({ query: 'failed logins', include_frozen: includeFrozen }),
@@ -80,5 +82,23 @@ describe('searchTool', () => {
     expect(runSearchToolMock).toHaveBeenCalledWith(
       expect.objectContaining({ includeFrozen: false })
     );
+  });
+
+  describe('in serverless', () => {
+    it('does not expose include_frozen or read the space setting', async () => {
+      const context = createSchemaContext(true);
+      const schema = await createTool({ isServerless: true }).getSchema(context);
+
+      expect(schema.shape).not.toHaveProperty('include_frozen');
+      expect(context.uiSettings.get).not.toHaveBeenCalled();
+    });
+
+    it('excludes frozen tier indices even when include_frozen is passed', async () => {
+      await run({ includeFrozen: true, includeFrozenByDefault: true, isServerless: true });
+
+      expect(runSearchToolMock).toHaveBeenCalledWith(
+        expect.objectContaining({ includeFrozen: false })
+      );
+    });
   });
 });

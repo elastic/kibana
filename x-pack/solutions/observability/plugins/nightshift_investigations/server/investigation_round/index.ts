@@ -15,9 +15,11 @@ export {
   sliceConversationRounds,
   stepsFromRound,
   stepsFromToolCalls,
+  toolCallsFromRoundSteps,
   withToolResults,
   type InvestigationTranscriptStep,
   type LoadedInvestigationRound,
+  type PersistedEarlierRound,
   type RawRoundResult,
   type RawRoundStep,
   type ResolvedConversationRound,
@@ -41,3 +43,19 @@ export {
   extractWorkspaceReadsFromToolCalls,
   type WorkspaceReadsSummary,
 } from './workspace_reads';
+
+export {
+  resolveRound,
+  type InvestigationRoundKind,
+  type ResolvableConversation,
+  type RootCauseChange,
+  type RoundResolution,
+} from './round_outcome';
+
+export {
+  APPLIED_WRITE_STORES,
+  appliedWriteSchema,
+  type AppliedWriteRecord,
+  type AppliedWriteStore,
+  type WriteProvenance,
+} from './provenance';

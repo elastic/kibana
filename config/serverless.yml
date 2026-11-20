@@ -18,6 +18,9 @@ xpack.fleet.internal.registry.spec.max: '3.7'
 
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
+  contextEngine:
+    ### Hide Manage memory in Serverless until the session memory routes land.
+    subFeatures.privileges.manage_memory.disabled: true
   dashboard:
     privileges:
       ### Dashboard's `All` feature privilege should implicitly grant `All` access to Maps and Visualize features.

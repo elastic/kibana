@@ -62,6 +62,22 @@ const secretRefSchema = schema.oneOf([
   schema.string(),
 ]);
 
+// an update removes a secret by setting it to `null`: leaving it out keeps the saved one
+const nullableSecretRefSchema = schema.oneOf([
+  schema.literal(null),
+  schema.object({
+    id: schema.string(),
+    hash: schema.maybe(schema.string()),
+  }),
+  schema.string(),
+]);
+
+const BeatsUpdateSecretsSchema = schema.maybe(
+  schema.object({
+    ssl: schema.maybe(schema.object({ key: schema.maybe(nullableSecretRefSchema) })),
+  })
+);
+
 /**
  * Shared sub-schemas (extracted to avoid type explosion when variants become named components)
  */
@@ -152,6 +168,7 @@ const BeatsUpdateSchema = {
   name: schema.maybe(schema.string()),
   is_default: schema.maybe(schema.boolean()),
   is_default_monitoring: schema.maybe(schema.boolean()),
+  secrets: BeatsUpdateSecretsSchema,
 };
 
 const PresetSchema = schema.oneOf([
@@ -213,8 +230,8 @@ const RemoteElasticSearchUpdateSchema = {
   service_token: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   secrets: schema.maybe(
     schema.object({
-      service_token: schema.maybe(secretRefSchema),
-      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
+      service_token: schema.maybe(nullableSecretRefSchema),
+      ssl: schema.maybe(schema.object({ key: schema.maybe(nullableSecretRefSchema) })),
     })
   ),
   sync_integrations: schema.maybe(schema.boolean()),
@@ -243,11 +260,6 @@ const LogstashUpdateSchema = {
     schema.arrayOf(schema.string({ validate: validateLogstashHost }), {
       minSize: 1,
       maxSize: MAX_HOSTS,
-    })
-  ),
-  secrets: schema.maybe(
-    schema.object({
-      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
     })
   ),
 };
@@ -494,6 +506,19 @@ const KafkaUpdateSchema = {
       schema.literal(kafkaAuthType.Kerberos),
       schema.literal(kafkaAuthType.OAuth2),
     ])
+  ),
+  secrets: schema.maybe(
+    schema.object({
+      password: schema.maybe(nullableSecretRefSchema),
+      ssl: schema.maybe(schema.object({ key: nullableSecretRefSchema })),
+      oauth2: schema.maybe(
+        schema.object({
+          client_secret: schema.maybe(secretRefSchema),
+          client_certificate_key: schema.maybe(secretRefSchema),
+        })
+      ),
+      kerberos: schema.maybe(schema.object({ password: schema.maybe(secretRefSchema) })),
+    })
   ),
 };
 
@@ -759,6 +784,26 @@ const OtlpSecretsSchema = schema.maybe(
   })
 );
 
+const OtlpUpdateSecretsSchema = schema.maybe(
+  schema.object({
+    otlp_exporter: schema.maybe(
+      schema.object({
+        tls: schema.maybe(
+          schema.object({
+            key_pem: schema.maybe(nullableSecretRefSchema),
+            tpm: schema.maybe(
+              schema.object({
+                owner_auth: schema.maybe(nullableSecretRefSchema),
+                auth: schema.maybe(nullableSecretRefSchema),
+              })
+            ),
+          })
+        ),
+      })
+    ),
+  })
+);
+
 export const OtlpSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Otlp),
@@ -775,7 +820,7 @@ export const OtlpUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Otlp)),
   otlp_exporter: schema.maybe(OtlpExporterSchema),
-  secrets: OtlpSecretsSchema,
+  secrets: OtlpUpdateSecretsSchema,
 };
 
 export const OutputSchema = schema.discriminatedUnion('type', [

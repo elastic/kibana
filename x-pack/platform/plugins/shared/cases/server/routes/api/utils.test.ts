@@ -15,6 +15,7 @@ import {
   extractWarningValueFromWarningHeader,
   getAttachmentRequestType,
   logDeprecatedEndpoint,
+  throwIfFileAttachment,
   wrapError,
 } from './utils';
 
@@ -190,6 +191,18 @@ describe('Utils', () => {
           owner: 'cases',
         })
       ).toBe('persistableState:.lens');
+    });
+  });
+
+  describe('throwIfFileAttachment', () => {
+    it('throws for a file attachment', () => {
+      expect(() => throwIfFileAttachment({ type: 'file' })).toThrow(
+        "This API doesn't support file attachments. To attach a file, use POST /api/cases/{case_id}/files."
+      );
+    });
+
+    it('does not throw for other attachment types', () => {
+      expect(() => throwIfFileAttachment({ type: 'comment' })).not.toThrow();
     });
   });
 });

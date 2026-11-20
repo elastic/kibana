@@ -46,7 +46,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'searchHomepage',
       });
-      await testSubjects.existOrFail(`search-homepage`);
+      await testSubjects.existOrFail(`elasticsearchHomePage`);
 
       // Check Side Nav Links
       const sideNavCases: Array<{
@@ -56,7 +56,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       }> = [
         {
           link: { deepLinkId: 'searchHomepage' },
-          pageTestSubject: 'search-homepage',
+          pageTestSubject: 'elasticsearchHomePage',
         },
         {
           link: { navId: 'agent_builder' },
@@ -94,7 +94,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.expectLinkActive({
         deepLinkId: 'searchHomepage',
       });
-      await testSubjects.existOrFail(`search-homepage`);
+      await testSubjects.existOrFail(`elasticsearchHomePage`);
 
       await expectNoPageReload();
     });

@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
-import { ALL_VALUE, is, syntheticsAvailabilityIndicatorSchemaZod } from '@kbn/slo-schema';
+import { ALL_VALUE, is, syntheticsAvailabilityIndicatorSchema } from '@kbn/slo-schema';
 import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   getSLOPipelineId,
@@ -24,7 +24,7 @@ import { getFilterRange, getTimesliceTargetComparator } from './common';
 
 export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator {
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
-    if (!is(syntheticsAvailabilityIndicatorSchemaZod, slo.indicator)) {
+    if (!is(syntheticsAvailabilityIndicatorSchema, slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 

@@ -17,6 +17,7 @@ import {
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
 import { addCloudApiKeyAuthErrorGuidance } from './cloud_api_key_auth_error_guidance';
+import { normalizeExecutionStatusErrorReason } from './normalize_rule_execution_reasons';
 import type { RuleExecutionStatuses } from '../../common';
 import { translations } from '../constants/translations';
 import type { RunRuleResult } from '../task_runner/types';
@@ -168,7 +169,10 @@ export function ruleExecutionStatusFromRaw(
   }
 
   if (error) {
-    executionStatus.error = error;
+    executionStatus.error = {
+      ...error,
+      reason: normalizeExecutionStatusErrorReason(error.reason),
+    };
   }
 
   if (warning) {

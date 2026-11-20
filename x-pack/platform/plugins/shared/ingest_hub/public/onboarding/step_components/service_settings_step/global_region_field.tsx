@@ -32,6 +32,7 @@ export function GlobalRegionField({
   const comboBox = (
     <EuiComboBox
       fullWidth
+      compressed
       aria-label={i18n.translate('xpack.ingestHub.serviceSettingsStep.globalRegion.ariaLabel', {
         defaultMessage: 'Global AWS region',
       })}
@@ -59,6 +60,7 @@ export function GlobalRegionField({
   return (
     <EuiFormRow
       fullWidth
+      display="rowCompressed"
       label={i18n.translate('xpack.ingestHub.serviceSettingsStep.globalRegion.label', {
         defaultMessage: 'Global AWS region',
       })}
@@ -74,7 +76,9 @@ export function GlobalRegionField({
       }
     >
       {isDisabled ? (
+        // display="block": the default inline-block anchor shrinks the full-width field to its text.
         <EuiToolTip
+          display="block"
           content={i18n.translate(
             'xpack.ingestHub.serviceSettingsStep.globalRegion.disabledTooltip',
             {

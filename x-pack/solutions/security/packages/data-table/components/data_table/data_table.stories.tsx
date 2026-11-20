@@ -7,18 +7,16 @@
 
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/common';
+import type { DeprecatedCellValueElementProps } from '@kbn/securitysolution-timeline-common';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import type { DropResult, ResponderProvided } from '@hello-pangea/dnd';
 import { DragDropContext } from '@hello-pangea/dnd';
 
-import { ThemeProvider } from 'styled-components';
 import { Provider as ReduxStoreProvider } from 'react-redux-v7';
-import { euiDarkVars } from '@kbn/ui-theme';
 import { createStore as createReduxStore } from 'redux-v4';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiThemeProvider } from '@elastic/eui';
 import { mockGlobalState } from '../../mock/global_state';
 import { getMappedNonEcsValue } from './utils';
 import { TableId } from '../..';
@@ -54,13 +52,13 @@ const StoryProviders: React.FC<Props> = ({ children, onDragEnd = () => {}, cellA
   return (
     <I18nProvider>
       <ReduxStoreProvider store={store}>
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+        <EuiThemeProvider>
           <QueryClientProvider client={queryClient}>
             <CellActionsProvider getTriggerCompatibleActions={() => Promise.resolve(cellActions)}>
               <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
             </CellActionsProvider>
           </QueryClientProvider>
-        </ThemeProvider>
+        </EuiThemeProvider>
       </ReduxStoreProvider>
     </I18nProvider>
   );

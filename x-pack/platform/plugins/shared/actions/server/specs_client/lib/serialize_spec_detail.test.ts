@@ -82,6 +82,9 @@ describe('serializeSpecDetail', () => {
     );
 
     expect(detail).toMatchObject({
+      availability: expect.objectContaining({
+        enabled: expect.any(Boolean),
+      }),
       skill: 'Use listThings to search.',
       formSchema: expect.objectContaining({
         properties: expect.objectContaining({
@@ -99,6 +102,31 @@ describe('serializeSpecDetail', () => {
         }),
       }),
     ]);
+  });
+
+  it('keeps a long bundled skill on the server detail', () => {
+    const longSkill = 'Use listThings to search records. '.repeat(40);
+    const spec = createSpec({
+      metadata: {
+        id: '.stub-long-skill',
+        displayName: 'Stub Long Skill',
+        description: 'Long bundled skill stub',
+        minimumLicense: 'gold',
+        supportedFeatureIds: ['workflows'],
+      },
+      auth: { types: ['none'] },
+      schema: z4.object({ url: z4.string() }),
+      actions: {},
+      test: { handler: async () => ({}), enabled: true },
+      skill: longSkill,
+    });
+
+    const detail = serializeSpecDetail(
+      { spec, type: listRow('.stub-long-skill') },
+      createConfigurationUtilities()
+    );
+
+    expect(detail.skill).toBe(longSkill);
   });
 
   it('omits skill when the spec does not define one', () => {

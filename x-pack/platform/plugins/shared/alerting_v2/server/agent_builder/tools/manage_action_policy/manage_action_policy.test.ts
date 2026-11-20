@@ -12,6 +12,7 @@ jest.mock('uuid', () => ({
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
+import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import { manageActionPolicyTool, type ManageActionPolicyToolDeps } from './manage_action_policy';
@@ -111,6 +112,7 @@ describe('manageActionPolicyTool', () => {
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
+        type: ACTION_POLICY_ATTACHMENT_TYPE,
         versions: [
           {
             data: {
@@ -246,6 +248,7 @@ describe('manageActionPolicyTool', () => {
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
+        type: ACTION_POLICY_ATTACHMENT_TYPE,
         origin: 'policy-uuid',
         versions: [
           {
@@ -509,6 +512,7 @@ describe('manageActionPolicyTool', () => {
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
+        type: ACTION_POLICY_ATTACHMENT_TYPE,
         origin: 'policy-persisted-id',
         versions: [
           {
@@ -544,6 +548,7 @@ describe('manageActionPolicyTool', () => {
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
+        type: ACTION_POLICY_ATTACHMENT_TYPE,
         versions: [
           {
             data: {

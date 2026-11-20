@@ -82,7 +82,8 @@ steps:
                 path: threat.enrichments
                 query:
                   regexp:
-                    threat.enrichments.indicator.reference: "threat-report:({{ steps.load_reports_with_extractions.output.hits.hits | map: '_id' | join: '|' }})"
+                    threat.enrichments.indicator.reference:
+                      value: "threat-report:({{ steps.load_reports_with_extractions.output.hits.hits | map: '_id' | join: '|' }})"
       aggs:
         by_report_ref:
           nested:

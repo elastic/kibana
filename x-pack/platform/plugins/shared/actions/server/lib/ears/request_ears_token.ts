@@ -12,6 +12,9 @@ import { getEarsEndpointsForProvider, resolveEarsUrl } from './url';
 import { request } from '../axios_utils';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 import type { OAuthTokenResponse } from '../request_oauth_token';
+import { EarsRequestError, getEarsRequestId } from './ears_request_error';
+
+export type EarsTokenResponse = OAuthTokenResponse & { earsRequestId?: string };
 
 export interface EarsTokenRequestParams {
   code: string;
@@ -29,7 +32,7 @@ export async function requestEarsToken(
   logger: Logger,
   params: EarsTokenRequestParams,
   configurationUtilities: ActionsConfigurationUtilities
-): Promise<OAuthTokenResponse> {
+): Promise<EarsTokenResponse> {
   const axiosInstance = axios.create();
   const { tokenEndpoint: earsTokenPath } = getEarsEndpointsForProvider(provider);
   const tokenUrl = resolveEarsUrl(earsTokenPath, configurationUtilities.getEarsUrl());
@@ -51,6 +54,8 @@ export async function requestEarsToken(
     validateStatus: () => true,
   });
 
+  const earsRequestId = getEarsRequestId(res.headers);
+
   if (res.status === 200) {
     return {
       tokenType: res.data.token_type,
@@ -58,10 +63,15 @@ export async function requestEarsToken(
       expiresIn: res.data.expires_in,
       refreshToken: res.data.refresh_token,
       refreshTokenExpiresIn: res.data.refresh_token_expires_in,
+      earsRequestId,
     };
   } else {
     const errString = stableStringify(res.data);
     logger.debug(`error thrown getting the access token from EARS ${tokenUrl}: ${errString}`);
-    throw new Error('Failed to request access token from auth redirect service');
+    throw new EarsRequestError({
+      message: 'Failed to request access token from auth redirect service',
+      status: res.status,
+      earsRequestId,
+    });
   }
 }

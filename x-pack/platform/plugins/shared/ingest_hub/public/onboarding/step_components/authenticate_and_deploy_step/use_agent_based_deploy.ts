@@ -98,9 +98,16 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         serviceSettings?.instances ?? [],
         selectedServiceIds,
         servicesMap ?? new Map(),
-        serviceSettings?.serviceVars ?? {}
+        serviceSettings?.serviceVars ?? {},
+        serviceSettings?.namespace
       ),
-    [serviceSettings?.instances, serviceSettings?.serviceVars, selectedServiceIds, servicesMap]
+    [
+      serviceSettings?.instances,
+      serviceSettings?.serviceVars,
+      serviceSettings?.namespace,
+      selectedServiceIds,
+      servicesMap,
+    ]
   );
 
   // true when every target has a package policy and no cleanup is pending. false on pending
@@ -175,7 +182,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         if (existingDeploymentId) {
           const remainingPolicyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
           await updateDeployment(existingDeploymentId, {
-            ...toSOSettingsUpdate(serviceSettings),
+            ...toSOSettingsUpdate(serviceSettings, 'agent_based'),
             services: selectedServiceIds,
             serviceVars: toSOServiceVars(
               serviceSettings?.serviceVars ?? {},
@@ -269,6 +276,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
         const baseOpts = {
           namespace: DEFAULT_NAMESPACE,
+          globalNamespace: serviceSettings?.namespace,
+          policySettings: serviceSettings?.policySettings,
           globalRegion,
           storedServiceVars,
           authenticateAndDeployStep: {
@@ -290,12 +299,15 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // Clean up package policies for removed services before creating new ones.
         if (hasPendingCleanup) {
           const cleanupOps = await cleanupAgentBasedPolicies({
+            onboardingDeploymentId,
             pendingCleanupPolicyIds: effectivePendingCleanup,
             currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance ?? {},
             instances: serviceSettings?.instances ?? [],
             storedServiceVars,
             globalRegion,
             namespace: DEFAULT_NAMESPACE,
+            globalNamespace: serviceSettings?.namespace,
+            policySettings: serviceSettings?.policySettings,
             authenticateAndDeployStep,
             servicesMap: servicesMap ?? new Map(),
             // Keep the policy's current policy_ids, unless this run also applies a changed agent
@@ -335,10 +347,13 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           shared: ExistingSecretRefs | undefined
         ) =>
           updateAgentBasedPolicy(policyId, ids, {
+            onboardingDeploymentId,
             instances: serviceSettings?.instances ?? [],
             storedServiceVars,
             globalRegion,
             namespace: DEFAULT_NAMESPACE,
+            globalNamespace: serviceSettings?.namespace,
+            policySettings: serviceSettings?.policySettings,
             authenticateAndDeployStep: shared
               ? { ...authenticateAndDeployStep, existingSecretRefs: shared }
               : authenticateAndDeployStep,
@@ -441,7 +456,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               );
               // Keep isDirty if SO write fails so settings change isn't silently lost.
               const soOk = await updateDeployment(onboardingDeploymentId, {
-                ...toSOSettingsUpdate(serviceSettings),
+                ...toSOSettingsUpdate(serviceSettings, 'agent_based'),
                 services: selectedServiceIds,
                 serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
                   string,
@@ -498,7 +513,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               )
             );
             await updateDeployment(onboardingDeploymentId, {
-              ...toSOSettingsUpdate(serviceSettings),
+              ...toSOSettingsUpdate(serviceSettings, 'agent_based'),
               services: selectedServiceIds,
               serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
                 string,
@@ -530,7 +545,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                 Record<string, unknown>
               >,
               globalRegion,
-              ...toSOSettings(serviceSettings),
+              ...toSOSettings(serviceSettings, 'agent_based'),
               dataFormat,
               authMethod: toSOAuthMethod(agentCredentialMethod),
               // Persist agentPolicyIds on create so a mid-deploy tab-close leaves a record that
@@ -683,7 +698,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           cleanupFullySucceeded =
             Object.keys(remainingPending).length === 0 && allLiveStaleSucceededInDeploy;
           soOk = await updateDeployment(onboardingDeploymentId, {
-            ...toSOSettingsUpdate(serviceSettings),
+            ...toSOSettingsUpdate(serviceSettings, 'agent_based'),
             ...(resolvedAgentPolicyIds.length ? { agentPolicyIds: resolvedAgentPolicyIds } : {}),
             packagePolicyIds: [...new Set(Object.values({ ...priorIds, ...policyIdsByInstance }))],
             // Always update mechanisms so that a record originally created for managed_integration
@@ -810,7 +825,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // credential method, not a stale snapshot from a prior successful deploy.
         if (onboardingDeploymentId) {
           await updateDeployment(onboardingDeploymentId, {
-            ...toSOSettingsUpdate(serviceSettings),
+            ...toSOSettingsUpdate(serviceSettings, 'agent_based'),
             ...(resolvedAgentPolicyIds.length ? { agentPolicyIds: resolvedAgentPolicyIds } : {}),
             services: selectedServiceIds,
             serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<

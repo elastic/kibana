@@ -46,6 +46,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           enableSloTemplates: false,
           installIntegrationsKnowledge: false,
         })}`,
+        `--feature_flags.overrides.fleet.enableSentinelPolicyVersion=true`,
 
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs')),

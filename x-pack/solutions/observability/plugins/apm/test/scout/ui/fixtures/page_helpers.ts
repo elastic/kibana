@@ -41,6 +41,34 @@ export async function waitForSearchBarReady(page: ScoutPage): Promise<void> {
 }
 
 /**
+ * Reads the absolute range the search bar's date picker resolved for its current
+ * value, as shown in the tooltip of the picker button (both picker variants
+ * render one), and moves the mouse away again so the tooltip closes.
+ */
+export async function readResolvedDateRange(page: ScoutPage): Promise<string> {
+  const pickerButton = page
+    .getByTestId('dateRangePickerControlButton')
+    .or(page.getByTestId('superDatePickerShowDatesButton'));
+  const tooltip = page.getByRole('tooltip');
+
+  await pickerButton.hover();
+  await tooltip.waitFor({ state: 'visible' });
+  const resolvedRange = (await tooltip.innerText()).trim();
+
+  await page.mouse.move(0, 0);
+  await tooltip.waitFor({ state: 'hidden' });
+
+  return resolvedRange;
+}
+
+/**
+ * Clicks the unified search bar's Refresh button.
+ */
+export async function clickSearchBarRefresh(page: ScoutPage): Promise<void> {
+  await page.getByTestId('querySubmitButton').click();
+}
+
+/**
  * Close global EUI toasts when present — they intercept pointer events and break
  * interactions (e.g. Investigate menu) while still visible (#246662 CI flakes).
  */

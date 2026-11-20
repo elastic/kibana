@@ -1298,7 +1298,7 @@ const clampDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1321,7 +1321,7 @@ const clampDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1342,9 +1342,32 @@ const clampDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1367,7 +1390,76 @@ const clampDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'double',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'integer',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'double',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'long',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'integer',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'double',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1390,7 +1482,76 @@ const clampDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'integer',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'long',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'long',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'double',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'long',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'integer',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1413,7 +1574,7 @@ const clampDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1436,7 +1597,7 @@ const clampDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1459,7 +1620,76 @@ const clampDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'double',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'integer',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'double',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'long',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'integer',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'double',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1482,7 +1712,76 @@ const clampDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'integer',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'long',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'long',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'double',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'long',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'integer',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1505,7 +1804,7 @@ const clampDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1528,7 +1827,7 @@ const clampDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1551,7 +1850,7 @@ const clampDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1572,9 +1871,78 @@ const clampDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'keyword',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'text',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'text',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'keyword',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'text',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'text',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'long',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1597,7 +1965,76 @@ const clampDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'double',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'integer',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'double',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'long',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'integer',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'double',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1620,7 +2057,76 @@ const clampDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'integer',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'long',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'long',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'double',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'long',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'integer',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1643,7 +2149,7 @@ const clampDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1664,9 +2170,101 @@ const clampDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'keyword',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'keyword',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'keyword',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'text',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'text',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'keyword',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'min',
+          type: 'text',
+          optional: false,
+          description: 'The min value to clamp data into.',
+        },
+        {
+          name: 'max',
+          type: 'text',
+          optional: false,
+          description: 'The max value to clamp data into.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1689,7 +2287,7 @@ const clampDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1712,7 +2310,7 @@ const clampDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1735,7 +2333,7 @@ const clampDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1758,7 +2356,7 @@ const clampDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'Numeric expression. If `null`, the function returns `null`.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -1814,7 +2412,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -1831,7 +2429,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -1848,7 +2446,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -1865,7 +2463,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -1882,7 +2480,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -1899,7 +2497,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -1916,7 +2514,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -1933,7 +2531,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -1950,7 +2548,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -1967,7 +2565,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -1984,7 +2582,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -2001,7 +2599,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -2018,7 +2616,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -2035,7 +2633,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -2052,7 +2650,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -2069,7 +2667,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -2086,7 +2684,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -2103,7 +2701,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -2120,7 +2718,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -2137,7 +2735,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -2154,7 +2752,7 @@ const clampMaxDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'max',
@@ -2204,7 +2802,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2221,7 +2819,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2238,7 +2836,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2255,7 +2853,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2272,7 +2870,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2289,7 +2887,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2306,7 +2904,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2323,7 +2921,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2340,7 +2938,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2357,7 +2955,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2374,7 +2972,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2391,7 +2989,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2408,7 +3006,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2425,7 +3023,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2442,7 +3040,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2459,7 +3057,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2476,7 +3074,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2493,7 +3091,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2510,7 +3108,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2527,7 +3125,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -2544,7 +3142,7 @@ const clampMinDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'field to clamp.',
+          description: 'Expression to clamp. If `null`, the function returns `null`.',
         },
         {
           name: 'min',
@@ -5119,7 +5717,44 @@ const decayDefinition: FunctionDefinition = {
           type: 'function_named_parameters',
           optional: true,
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, date_period, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: `linear`, `exp`, or `gauss`. Defaults to `linear`.', type=[keyword]}",
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'date',
+          optional: false,
+          description: 'The input value to apply decay scoring to.',
+        },
+        {
+          name: 'origin',
+          type: 'date',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'Central point from which the distances are calculated.',
+        },
+        {
+          name: 'scale',
+          type: 'date_period',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'Distance from the origin where the function returns the decay value.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, date_period, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: `linear`, `exp`, or `gauss`. Defaults to `linear`.', type=[keyword]}",
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
@@ -5156,7 +5791,44 @@ const decayDefinition: FunctionDefinition = {
           type: 'function_named_parameters',
           optional: true,
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, date_period, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: `linear`, `exp`, or `gauss`. Defaults to `linear`.', type=[keyword]}",
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The input value to apply decay scoring to.',
+        },
+        {
+          name: 'origin',
+          type: 'date_nanos',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'Central point from which the distances are calculated.',
+        },
+        {
+          name: 'scale',
+          type: 'date_period',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'Distance from the origin where the function returns the decay value.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          optional: true,
+          mapParams:
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, date_period, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: `linear`, `exp`, or `gauss`. Defaults to `linear`.', type=[keyword]}",
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
@@ -5193,7 +5865,7 @@ const decayDefinition: FunctionDefinition = {
           type: 'function_named_parameters',
           optional: true,
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, date_period, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: `linear`, `exp`, or `gauss`. Defaults to `linear`.', type=[keyword]}",
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
@@ -5230,7 +5902,7 @@ const decayDefinition: FunctionDefinition = {
           type: 'function_named_parameters',
           optional: true,
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, date_period, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: `linear`, `exp`, or `gauss`. Defaults to `linear`.', type=[keyword]}",
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
@@ -5267,7 +5939,7 @@ const decayDefinition: FunctionDefinition = {
           type: 'function_named_parameters',
           optional: true,
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, date_period, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: `linear`, `exp`, or `gauss`. Defaults to `linear`.', type=[keyword]}",
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
@@ -5304,7 +5976,7 @@ const decayDefinition: FunctionDefinition = {
           type: 'function_named_parameters',
           optional: true,
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, date_period, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: `linear`, `exp`, or `gauss`. Defaults to `linear`.', type=[keyword]}",
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
@@ -5341,7 +6013,7 @@ const decayDefinition: FunctionDefinition = {
           type: 'function_named_parameters',
           optional: true,
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, date_period, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: `linear`, `exp`, or `gauss`. Defaults to `linear`.', type=[keyword]}",
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
@@ -5378,7 +6050,7 @@ const decayDefinition: FunctionDefinition = {
           type: 'function_named_parameters',
           optional: true,
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, date_period, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: `linear`, `exp`, or `gauss`. Defaults to `linear`.', type=[keyword]}",
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
@@ -5415,7 +6087,7 @@ const decayDefinition: FunctionDefinition = {
           type: 'function_named_parameters',
           optional: true,
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, date_period, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: `linear`, `exp`, or `gauss`. Defaults to `linear`.', type=[keyword]}",
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
@@ -5441,6 +6113,51 @@ const decayDefinition: FunctionDefinition = {
   examples: [
     'FROM employees\n| EVAL decay_result = decay(salary, 0, 100000, {"offset": 5, "decay": 0.5, "type": "linear"})\n| SORT decay_result DESC',
   ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const delayDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: EsqlFunctionNames.DELAY,
+  description: i18n.translate('esqlLanguage.esql.definitions.delay', {
+    defaultMessage: 'Sleeps for a duration for every row. For debug purposes only.',
+  }),
+  ignoreAsSuggestion: true,
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'ms',
+          type: 'time_duration',
+          optional: false,
+          hint: {
+            kind: 'constant',
+          },
+          description: 'For how long',
+        },
+      ],
+      returnType: 'boolean',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.MMR,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: ['ROW a = 1\n| WHERE DELAY(1ms)'],
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
@@ -5488,6 +6205,32 @@ const embeddingDefinition: FunctionDefinition = {
   preview: true,
   alias: undefined,
   signatures: [
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'keyword',
+          optional: false,
+          description:
+            'Value to generate embeddings from. Must be a non-null literal string value. Use data type and format options to specify the content type and format (e.g. plain text, base64-encoded images) of the input.',
+        },
+        {
+          name: 'inference_id',
+          type: 'keyword',
+          optional: false,
+          hint: {
+            kind: 'entity',
+            entityType: 'inference_endpoint',
+            constraints: {
+              task_type: 'embedding',
+            },
+          },
+          description:
+            'Identifier of an existing inference endpoint that will generate the embeddings. The inference endpoint must have the `embedding` task type and should use the same model that was used to embed your indexed data.',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
     {
       params: [
         {
@@ -7314,7 +8057,7 @@ const knnDefinition: FunctionDefinition = {
           type: 'function_named_parameters',
           optional: true,
           mapParams:
-            "{name='k', values=[10], description='The number of nearest neighbors to return from each shard. Elasticsearch collects k results from each shard, then merges them to find the global top results. This value must be less than or equal to num_candidates. This value is automatically set with any LIMIT applied to the function.', type=[integer]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.Defaults to 1.0.', type=[float]}, {name='min_candidates', values=[10], description='The minimum number of nearest neighbor candidates to consider per shard while doing knn search.  KNN may use a higher number of candidates in case the query can't use a approximate results. Cannot exceed 10,000. Increasing min_candidates tends to improve the accuracy of the final results. Defaults to 1.5 * k (or LIMIT) used for the query.', type=[integer]}, {name='visit_percentage', values=[10], description='The percentage of vectors to explore per shard while doing knn search with bbq_disk. Must be between 0 and 100. 0 will default to using num_candidates for calculating the percent visited. Increasing visit_percentage tends to improve the accuracy of the final results. If visit_percentage is set for bbq_disk, num_candidates is ignored. Defaults to ~1% per shard for every 1 million vectors', type=[float]}, {name='similarity', values=[0.01], description='The minimum similarity required for a document to be considered a match. The similarity value calculated relates to the raw similarity used, not the document score.', type=[double]}, {name='rescore_oversample', values=[3.5], description='Applies the specified oversampling for rescoring quantized vectors. See [oversampling and rescoring quantized vectors](docs-content://solutions/search/vector/knn/optimize-performance-accuracy.md#dense-vector-knn-search-rescoring) for details.', type=[double]}",
+            "{name='k', values=[10], description='The number of nearest neighbors to return from each shard. Elasticsearch collects k results from each shard, then merges them to find the global top results. This value must be less than or equal to num_candidates. This value is automatically set with any LIMIT applied to the function.', type=[integer]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.Defaults to 1.0.', type=[float]}, {name='min_candidates', values=[10], description='The minimum number of nearest neighbor candidates to consider per shard while doing knn search.  KNN may use a higher number of candidates in case the query can't use a approximate results. Cannot exceed 10,000. Increasing min_candidates tends to improve the accuracy of the final results. Defaults to 1.5 * k (or LIMIT) used for the query.', type=[integer]}, {name='visit_percentage', values=[10], description='The percentage of vectors to explore per shard while doing knn search with bbq_disk. Must be between 0 and 100. 0 will default to using num_candidates for calculating the percent visited. Increasing visit_percentage tends to improve the accuracy of the final results. If visit_percentage is set for bbq_disk, num_candidates is ignored. Defaults to ~1% per shard for every 1 million vectors', type=[float]}, {name='similarity', values=[0.01], description='The minimum similarity required for a document to be considered a match. The similarity value calculated relates to the raw similarity used, not the document score.', type=[double]}, {name='rescore_oversample', values=[3.5], description='Applies the specified oversampling for rescoring quantized vectors. See [oversampling and rescoring quantized vectors](docs-content://solutions/search/vector/knn/optimize-performance-accuracy.md#dense-vector-knn-search-rescoring) for details.', type=[double]}, {name='similarity_function', values=[cosine], description='The similarity metric to use when `KNN` runs on a `dense_vector` expression (rather than an indexed field). See the function description for more details about the default value. This option is rejected when used with an indexed `dense_vector` field, where the field's mapping determines the metric. Accepted values: `cosine`, `dot_product`, `l2_norm`, `max_inner_product`.', type=[keyword]}",
           description:
             '(Optional) kNN additional options as <<esql-function-named-params,function named parameters>>. See [knn query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-knn-query) for more information.',
         },
@@ -7344,7 +8087,7 @@ const knnDefinition: FunctionDefinition = {
           type: 'function_named_parameters',
           optional: true,
           mapParams:
-            "{name='k', values=[10], description='The number of nearest neighbors to return from each shard. Elasticsearch collects k results from each shard, then merges them to find the global top results. This value must be less than or equal to num_candidates. This value is automatically set with any LIMIT applied to the function.', type=[integer]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.Defaults to 1.0.', type=[float]}, {name='min_candidates', values=[10], description='The minimum number of nearest neighbor candidates to consider per shard while doing knn search.  KNN may use a higher number of candidates in case the query can't use a approximate results. Cannot exceed 10,000. Increasing min_candidates tends to improve the accuracy of the final results. Defaults to 1.5 * k (or LIMIT) used for the query.', type=[integer]}, {name='visit_percentage', values=[10], description='The percentage of vectors to explore per shard while doing knn search with bbq_disk. Must be between 0 and 100. 0 will default to using num_candidates for calculating the percent visited. Increasing visit_percentage tends to improve the accuracy of the final results. If visit_percentage is set for bbq_disk, num_candidates is ignored. Defaults to ~1% per shard for every 1 million vectors', type=[float]}, {name='similarity', values=[0.01], description='The minimum similarity required for a document to be considered a match. The similarity value calculated relates to the raw similarity used, not the document score.', type=[double]}, {name='rescore_oversample', values=[3.5], description='Applies the specified oversampling for rescoring quantized vectors. See [oversampling and rescoring quantized vectors](docs-content://solutions/search/vector/knn/optimize-performance-accuracy.md#dense-vector-knn-search-rescoring) for details.', type=[double]}",
+            "{name='k', values=[10], description='The number of nearest neighbors to return from each shard. Elasticsearch collects k results from each shard, then merges them to find the global top results. This value must be less than or equal to num_candidates. This value is automatically set with any LIMIT applied to the function.', type=[integer]}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.Defaults to 1.0.', type=[float]}, {name='min_candidates', values=[10], description='The minimum number of nearest neighbor candidates to consider per shard while doing knn search.  KNN may use a higher number of candidates in case the query can't use a approximate results. Cannot exceed 10,000. Increasing min_candidates tends to improve the accuracy of the final results. Defaults to 1.5 * k (or LIMIT) used for the query.', type=[integer]}, {name='visit_percentage', values=[10], description='The percentage of vectors to explore per shard while doing knn search with bbq_disk. Must be between 0 and 100. 0 will default to using num_candidates for calculating the percent visited. Increasing visit_percentage tends to improve the accuracy of the final results. If visit_percentage is set for bbq_disk, num_candidates is ignored. Defaults to ~1% per shard for every 1 million vectors', type=[float]}, {name='similarity', values=[0.01], description='The minimum similarity required for a document to be considered a match. The similarity value calculated relates to the raw similarity used, not the document score.', type=[double]}, {name='rescore_oversample', values=[3.5], description='Applies the specified oversampling for rescoring quantized vectors. See [oversampling and rescoring quantized vectors](docs-content://solutions/search/vector/knn/optimize-performance-accuracy.md#dense-vector-knn-search-rescoring) for details.', type=[double]}, {name='similarity_function', values=[cosine], description='The similarity metric to use when `KNN` runs on a `dense_vector` expression (rather than an indexed field). See the function description for more details about the default value. This option is rejected when used with an indexed `dense_vector` field, where the field's mapping determines the metric. Accepted values: `cosine`, `dot_product`, `l2_norm`, `max_inner_product`.', type=[keyword]}",
           description:
             '(Optional) kNN additional options as <<esql-function-named-params,function named parameters>>. See [knn query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-knn-query) for more information.',
         },
@@ -11932,404 +12675,6 @@ const mvFirstDefinition: FunctionDefinition = {
   examples: ['ROW a="foo;bar;baz"\n| EVAL first_a = MV_FIRST(SPLIT(a, ";"))'],
 };
 
-// Do not edit this manually... generated by scripts/generate_function_definitions.ts
-const mvGreaterDefinition: FunctionDefinition = {
-  type: FunctionDefinitionTypes.SCALAR,
-  name: EsqlFunctionNames.MV_GREATER,
-  description: i18n.translate('esqlLanguage.esql.definitions.mv_greater', {
-    defaultMessage:
-      'Returns `true` if at least one value of `field` is greater than `bound`, using the natural order of the type. A null or empty field returns `false`, as does a null or multivalued bound. The comparison is strict (`>`) by default; set `include_bound` to `true` in the optional `options` map to make it inclusive (`>=`). Works on any ordered type: numbers, dates, IPs, versions, and strings (compared by their UTF-8 bytes).',
-  }),
-  preview: true,
-  alias: undefined,
-  signatures: [
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date',
-          optional: false,
-          description:
-            'Multivalue expression to test. If null or empty, the function returns `false`.',
-        },
-        {
-          name: 'bound',
-          type: 'date',
-          optional: false,
-          description:
-            'Comparison bound, of the same type as `field`. If null or multivalued, the function returns `false`.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date',
-          optional: false,
-          description:
-            'Multivalue expression to test. If null or empty, the function returns `false`.',
-        },
-        {
-          name: 'bound',
-          type: 'date',
-          optional: false,
-          description:
-            'Comparison bound, of the same type as `field`. If null or multivalued, the function returns `false`.',
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          optional: true,
-          mapParams:
-            "{name='include_bound', values=[true, false], description='Whether the bound is inclusive. Defaults to `false` (strict `>`); `true` makes it inclusive (`>=`).', type=[boolean]}",
-          description: '(Optional) Bound inclusivity options.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date_nanos',
-          optional: false,
-          description:
-            'Multivalue expression to test. If null or empty, the function returns `false`.',
-        },
-        {
-          name: 'bound',
-          type: 'date_nanos',
-          optional: false,
-          description:
-            'Comparison bound, of the same type as `field`. If null or multivalued, the function returns `false`.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'double',
-          optional: false,
-          description:
-            'Multivalue expression to test. If null or empty, the function returns `false`.',
-        },
-        {
-          name: 'bound',
-          type: 'double',
-          optional: false,
-          description:
-            'Comparison bound, of the same type as `field`. If null or multivalued, the function returns `false`.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'double',
-          optional: false,
-          description:
-            'Multivalue expression to test. If null or empty, the function returns `false`.',
-        },
-        {
-          name: 'bound',
-          type: 'double',
-          optional: false,
-          description:
-            'Comparison bound, of the same type as `field`. If null or multivalued, the function returns `false`.',
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          optional: true,
-          mapParams:
-            "{name='include_bound', values=[true, false], description='Whether the bound is inclusive. Defaults to `false` (strict `>`); `true` makes it inclusive (`>=`).', type=[boolean]}",
-          description: '(Optional) Bound inclusivity options.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-          description:
-            'Multivalue expression to test. If null or empty, the function returns `false`.',
-        },
-        {
-          name: 'bound',
-          type: 'integer',
-          optional: false,
-          description:
-            'Comparison bound, of the same type as `field`. If null or multivalued, the function returns `false`.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-          description:
-            'Multivalue expression to test. If null or empty, the function returns `false`.',
-        },
-        {
-          name: 'bound',
-          type: 'integer',
-          optional: false,
-          description:
-            'Comparison bound, of the same type as `field`. If null or multivalued, the function returns `false`.',
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          optional: true,
-          mapParams:
-            "{name='include_bound', values=[true, false], description='Whether the bound is inclusive. Defaults to `false` (strict `>`); `true` makes it inclusive (`>=`).', type=[boolean]}",
-          description: '(Optional) Bound inclusivity options.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'ip',
-          optional: false,
-          description:
-            'Multivalue expression to test. If null or empty, the function returns `false`.',
-        },
-        {
-          name: 'bound',
-          type: 'ip',
-          optional: false,
-          description:
-            'Comparison bound, of the same type as `field`. If null or multivalued, the function returns `false`.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'keyword',
-          optional: false,
-          description:
-            'Multivalue expression to test. If null or empty, the function returns `false`.',
-        },
-        {
-          name: 'bound',
-          type: 'keyword',
-          optional: false,
-          description:
-            'Comparison bound, of the same type as `field`. If null or multivalued, the function returns `false`.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'keyword',
-          optional: false,
-          description:
-            'Multivalue expression to test. If null or empty, the function returns `false`.',
-        },
-        {
-          name: 'bound',
-          type: 'keyword',
-          optional: false,
-          description:
-            'Comparison bound, of the same type as `field`. If null or multivalued, the function returns `false`.',
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          optional: true,
-          mapParams:
-            "{name='include_bound', values=[true, false], description='Whether the bound is inclusive. Defaults to `false` (strict `>`); `true` makes it inclusive (`>=`).', type=[boolean]}",
-          description: '(Optional) Bound inclusivity options.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'keyword',
-          optional: false,
-          description:
-            'Multivalue expression to test. If null or empty, the function returns `false`.',
-        },
-        {
-          name: 'bound',
-          type: 'text',
-          optional: false,
-          description:
-            'Comparison bound, of the same type as `field`. If null or multivalued, the function returns `false`.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-          description:
-            'Multivalue expression to test. If null or empty, the function returns `false`.',
-        },
-        {
-          name: 'bound',
-          type: 'long',
-          optional: false,
-          description:
-            'Comparison bound, of the same type as `field`. If null or multivalued, the function returns `false`.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-          description:
-            'Multivalue expression to test. If null or empty, the function returns `false`.',
-        },
-        {
-          name: 'bound',
-          type: 'long',
-          optional: false,
-          description:
-            'Comparison bound, of the same type as `field`. If null or multivalued, the function returns `false`.',
-        },
-        {
-          name: 'options',
-          type: 'function_named_parameters',
-          optional: true,
-          mapParams:
-            "{name='include_bound', values=[true, false], description='Whether the bound is inclusive. Defaults to `false` (strict `>`); `true` makes it inclusive (`>=`).', type=[boolean]}",
-          description: '(Optional) Bound inclusivity options.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
-          optional: false,
-          description:
-            'Multivalue expression to test. If null or empty, the function returns `false`.',
-        },
-        {
-          name: 'bound',
-          type: 'keyword',
-          optional: false,
-          description:
-            'Comparison bound, of the same type as `field`. If null or multivalued, the function returns `false`.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
-          optional: false,
-          description:
-            'Multivalue expression to test. If null or empty, the function returns `false`.',
-        },
-        {
-          name: 'bound',
-          type: 'text',
-          optional: false,
-          description:
-            'Comparison bound, of the same type as `field`. If null or multivalued, the function returns `false`.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'unsigned_long',
-          optional: false,
-          description:
-            'Multivalue expression to test. If null or empty, the function returns `false`.',
-        },
-        {
-          name: 'bound',
-          type: 'unsigned_long',
-          optional: false,
-          description:
-            'Comparison bound, of the same type as `field`. If null or multivalued, the function returns `false`.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'version',
-          optional: false,
-          description:
-            'Multivalue expression to test. If null or empty, the function returns `false`.',
-        },
-        {
-          name: 'bound',
-          type: 'version',
-          optional: false,
-          description:
-            'Comparison bound, of the same type as `field`. If null or multivalued, the function returns `false`.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-  ],
-  locationsAvailable: [
-    Location.EVAL,
-    Location.ROW,
-    Location.SORT,
-    Location.WHERE,
-    Location.STATS,
-    Location.STATS_BY,
-    Location.LIMIT_BY,
-    Location.CHANGE_POINT_BY,
-    Location.STATS_WHERE,
-    Location.STATS_TIMESERIES,
-    Location.COMPLETION,
-    Location.MMR,
-    Location.RERANK,
-    Location.JOIN,
-  ],
-  examples: [
-    'ROW values = [1, 5, 10]\n| EVAL greater = mv_greater(values, 4)',
-    'ROW values = [4]\n| EVAL greater = mv_greater(values, 4, {"include_bound": true})',
-    'ROW words = ["apple", "cherry"]\n| EVAL greater = mv_greater(words, "banana")',
-  ],
-};
-
 export const scalarFunctionDefinitionsPart1: FunctionDefinition[] = [
   absDefinition,
   acosDefinition,
@@ -12363,6 +12708,7 @@ export const scalarFunctionDefinitionsPart1: FunctionDefinition[] = [
   dayDefinition,
   dayNameDefinition,
   decayDefinition,
+  delayDefinition,
   eDefinition,
   embeddingDefinition,
   endsWithDefinition,
@@ -12399,5 +12745,4 @@ export const scalarFunctionDefinitionsPart1: FunctionDefinition[] = [
   mvDedupeDefinition,
   mvDifferenceDefinition,
   mvFirstDefinition,
-  mvGreaterDefinition,
 ];

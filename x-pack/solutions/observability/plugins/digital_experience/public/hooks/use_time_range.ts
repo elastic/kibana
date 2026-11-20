@@ -6,11 +6,10 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import qs from 'query-string';
 import { getDateRange } from '@kbn/timerange';
 import { useDigitalExperienceParams } from './use_digital_experience_params';
 import { useKibanaServices } from './use_kibana_services';
+import { useUpdateUrlQuery } from './use_update_url_query';
 
 /** Relative or absolute bounds, e.g. `{ rangeFrom: 'now-15m', rangeTo: 'now' }`. */
 export interface TimeRange {
@@ -18,15 +17,14 @@ export interface TimeRange {
   rangeTo: string;
 }
 
-// Unsorted, so the other params keep their order like in the typed router's links.
-const withTimeRange = (search: string, timeRange: TimeRange): string =>
-  qs.stringify({ ...qs.parse(search), ...timeRange }, { sort: false });
-
-/** Whether both bounds parse as dates, e.g. `now-15m` or an ISO date, unlike `rangeFrom=foo`. */
+/**
+ * Whether both bounds parse as dates, e.g. `now-15m` or an ISO date, and the range starts before it
+ * ends; unlike `rangeFrom=foo` or a reversed range.
+ */
 export const isValidTimeRange = ({ rangeFrom, rangeTo }: TimeRange): boolean => {
   try {
-    getDateRange({ from: rangeFrom, to: rangeTo });
-    return true;
+    const { startDate, endDate } = getDateRange({ from: rangeFrom, to: rangeTo });
+    return startDate < endDate;
   } catch {
     return false;
   }
@@ -44,8 +42,7 @@ export const useTimeRange = (): {
   const { data } = useKibanaServices();
   const { timefilter } = data.query.timefilter;
   const { query } = useDigitalExperienceParams('/');
-  const history = useHistory();
-  const location = useLocation();
+  const updateUrlQuery = useUpdateUrlQuery();
 
   const { from, to } = timefilter.getTime();
   const rangeFrom = query.rangeFrom ?? from;
@@ -54,34 +51,45 @@ export const useTimeRange = (): {
   const isTimeRangeInUrl = query.rangeFrom !== undefined && query.rangeTo !== undefined;
 
   const setTimeRange = useCallback(
-    (nextTimeRange: TimeRange) => {
-      // Only `search` changes; the path, hash and history state are kept.
-      history.push({ ...location, search: withTimeRange(location.search, nextTimeRange) });
-    },
-    [history, location]
+    (nextTimeRange: TimeRange) => updateUrlQuery({ ...nextTimeRange }),
+    [updateUrlQuery]
   );
 
   return { timeRange, isTimeRangeInUrl, setTimeRange };
 };
 
-/** Writes the time range into a URL without one and mirrors a valid one into the global timefilter. */
-export const useSyncTimeRange = (): void => {
+/**
+ * Puts the timefilter's range into a URL with a missing or invalid one, and mirrors the URL's range
+ * into the timefilter; returns whether the URL has a valid range, so the page can wait for it.
+ */
+export const useSyncTimeRange = (): boolean => {
   const { data } = useKibanaServices();
   const { timefilter } = data.query.timefilter;
-  const history = useHistory();
-  const location = useLocation();
+  const updateUrlQuery = useUpdateUrlQuery();
   const { timeRange, isTimeRangeInUrl } = useTimeRange();
+  const hasValidTimeRange = isTimeRangeInUrl && isValidTimeRange(timeRange);
 
+  // `replace`, so Back doesn't return to the URL without a range.
   useEffect(() => {
-    if (!isTimeRangeInUrl) {
-      history.replace({ ...location, search: withTimeRange(location.search, timeRange) });
+    if (hasValidTimeRange) {
+      return;
     }
-  }, [history, location, timeRange, isTimeRangeInUrl]);
+    const current = timefilter.getTime();
+    const { from, to } = isValidTimeRange({ rangeFrom: current.from, rangeTo: current.to })
+      ? current
+      : timefilter.getTimeDefaults();
+    updateUrlQuery({ rangeFrom: from, rangeTo: to }, { replace: true });
+  }, [hasValidTimeRange, timefilter, updateUrlQuery]);
 
-  // An invalid range would be stored in the timefilter and its "Recently used" list.
   useEffect(() => {
-    if (isValidTimeRange(timeRange)) {
+    if (!hasValidTimeRange) {
+      return;
+    }
+    const { from, to } = timefilter.getTime();
+    if (from !== timeRange.rangeFrom || to !== timeRange.rangeTo) {
       timefilter.setTime({ from: timeRange.rangeFrom, to: timeRange.rangeTo });
     }
-  }, [timefilter, timeRange]);
+  }, [hasValidTimeRange, timefilter, timeRange]);
+
+  return hasValidTimeRange;
 };

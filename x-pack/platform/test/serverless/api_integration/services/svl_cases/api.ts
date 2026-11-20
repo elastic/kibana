@@ -118,7 +118,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
       const request = req ?? this.getPostCaseReq(owner);
       // `template` is an optional field on the case response, present only when the case was
       // created from a template. transformNewCase keeps an absent template absent (rather than
-      // writing `template: null`) and CaseRt models it as an optional key, so a case created
+      // writing `template: null`) and `CaseSchema` models it as an optional key, so a case created
       // without a template has no `template` key at all. This helper never sets one, so it is
       // destructured out of the spread here (rather than left as `template: null`) to match the
       // decoded response: absent, not null. Destructuring also drops the request-shape
@@ -256,7 +256,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
     ): Promise<UnifiedAttachment> {
       const { body: attachment } = await supertestWithoutAuth
         .post(`${CASES_URL}/${caseId}/attachments`)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlCommonApi.getCommonRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send(params)
         .expect(expectedHttpCode);
@@ -274,7 +274,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
     ): Promise<UnifiedAttachment> {
       const { body: attachment } = await supertestWithoutAuth
         .get(`${CASES_URL}/${caseId}/attachments/${attachmentId}`)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlCommonApi.getCommonRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .expect(expectedHttpCode);
 
@@ -291,7 +291,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
     ): Promise<UnifiedAttachmentsFindResponse> {
       const { body } = await supertestWithoutAuth
         .get(`${CASES_URL}/${caseId}/attachments`)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlCommonApi.getCommonRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .query(query)
         .expect(expectedHttpCode);
@@ -315,7 +315,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
     ): Promise<UnifiedAttachment> {
       const { body: attachment } = await supertestWithoutAuth
         .put(`${CASES_URL}/${caseId}/attachments/${attachmentId}`)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlCommonApi.getCommonRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send(req)
         .expect(expectedHttpCode);
@@ -333,7 +333,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
     ): Promise<void> {
       await supertestWithoutAuth
         .delete(`${CASES_URL}/${caseId}/attachments/${attachmentId}`)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlCommonApi.getCommonRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .expect(expectedHttpCode);
     },

@@ -54,6 +54,7 @@ import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
 import { createDataSource } from '../../../common/data_sources';
 import { replaceColumnsWithVariableDriven } from '../utils/replace_columns_with_variable_driven';
 import { getEmbeddableDisplayColumns } from '../utils/get_embeddable_display_columns';
+import { getDataGridRenderMode } from '../utils/get_data_grid_render_mode';
 import type { DiscoverAppLocatorParams } from '../../../common';
 import { getExpandedDocLinkability } from '../../application/main/utils/expanded_doc';
 import { getExpandedDocLocatorParams } from '../utils/get_discover_locator_params';
@@ -72,6 +73,7 @@ interface SavedSearchEmbeddableComponentProps {
   dataView: DataView;
   esqlSource$?: BehaviorSubject<EsqlSource | undefined>;
   onAddFilter?: DocViewFilterFn;
+  onFetchMoreRecords?: () => void;
   enableDocumentViewer: boolean;
   inlineEditing: InlineEditing;
   docViewerRef: React.RefObject<DocViewerApi>;
@@ -93,6 +95,7 @@ export function SearchEmbeddableGridComponent({
   dataView,
   esqlSource$,
   onAddFilter,
+  onFetchMoreRecords,
   enableDocumentViewer,
   inlineEditing,
   docViewerRef,
@@ -137,6 +140,8 @@ export function SearchEmbeddableGridComponent({
     savedSearchDescription,
     esqlVariables,
     abortSignal,
+    isLoadingMore,
+    pagination,
   ] = useBatchedPublishingSubjects(
     api.viewMode$,
     api.dataLoading$,
@@ -155,7 +160,9 @@ export function SearchEmbeddableGridComponent({
     api.defaultTitle$,
     api.defaultDescription$,
     esqlVariables$ ?? emptyEsqlVariables$,
-    api.abortSignal$
+    api.abortSignal$,
+    stateManager.isLoadingMore,
+    stateManager.pagination
   );
 
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
@@ -164,6 +171,8 @@ export function SearchEmbeddableGridComponent({
   const savedSearchFilters = apiFilters;
 
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
+  const canFetchMoreRecords = !isEsql && Boolean(pagination?.hasNextPage());
+  const renderMode = getDataGridRenderMode(viewMode);
 
   const sort = useMemo(
     () => getSortArray(savedSearch.sort ?? [], dataView, isEsql),
@@ -377,6 +386,12 @@ export function SearchEmbeddableGridComponent({
     return getAllowedSampleSize(savedSearch.sampleSize, discoverServices.uiSettings);
   }, [savedSearch.sampleSize, discoverServices]);
 
+  const loadingState = useMemo(() => {
+    if (isLoadingMore) return DataLoadingState.loadingMore;
+    if (loading) return DataLoadingState.loading;
+    return DataLoadingState.loaded;
+  }, [loading, isLoadingMore]);
+
   const defaults = getSearchEmbeddableDefaults(discoverServices.uiSettings);
 
   // should be aligned with discover documents `showTimeCol` prop
@@ -459,7 +474,7 @@ export function SearchEmbeddableGridComponent({
       configRowHeight={defaults.rowHeight}
       headerRowHeightState={savedSearch.headerRowHeight}
       rowHeightState={savedSearch.rowHeight}
-      loadingState={Boolean(loading) ? DataLoadingState.loading : DataLoadingState.loaded}
+      loadingState={loadingState}
       maxAllowedSampleSize={getMaxAllowedSampleSize(discoverServices.uiSettings)}
       query={savedSearchQuery}
       filters={savedSearchFilters}
@@ -474,6 +489,7 @@ export function SearchEmbeddableGridComponent({
       onUpdateJsonModeSettings={onStateEditedProps.onUpdateJsonModeSettings}
       enableDocumentViewer={enableDocumentViewer}
       inlineEditing={inlineEditing}
+      onFetchMoreRecords={canFetchMoreRecords ? onFetchMoreRecords : undefined}
       expandedDoc={expandedDoc}
       initialDocViewerTabId={initialDocViewerTabId}
       docViewerRef={docViewerRef}
@@ -484,7 +500,7 @@ export function SearchEmbeddableGridComponent({
       showSortSelector={showSortSelector}
       searchContext={searchContext}
       flyoutMenuTrailingActions={flyoutMenuTrailingActions}
-      isInteractive={viewMode !== 'non-interactive'}
+      renderMode={renderMode}
     />
   );
 }

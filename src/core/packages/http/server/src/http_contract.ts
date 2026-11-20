@@ -22,10 +22,12 @@ import type {
   OnPreRoutingHandler,
 } from './lifecycle';
 import type { HttpSelfUnauthorizedErrorHandler } from './self_client_unauthorized_error_handler';
+import type { HttpSelfCredentialRefresher } from './self_client_credential_refresher';
 import type { IBasePath } from './base_path';
 import type { IStaticAssets } from './static_assets';
 import type { ICspConfig } from './csp';
 import type { GetAuthState, IsAuthenticated } from './auth_state';
+import type { IAuthHeadersStorage } from './auth_headers';
 import type { SessionStorageCookieOptions, SessionStorageFactory } from './session_storage';
 import type { ApiVersion } from './versioning';
 import type { KibanaRequest } from './router';
@@ -159,7 +161,7 @@ export interface HttpSelfService {
  * import { schema, TypeOf } from '@kbn/config-schema';
  * const validate = {
  *   params: schema.object({
- *     id: schema.string(),
+ *     id: schema.savedObjectId(),
  *   }),
  * };
  * ```
@@ -188,12 +190,19 @@ export interface HttpSelfService {
  *
  * const validate = {
  *   params: schema.object({
- *     id: schema.string(),
+ *     id: schema.savedObjectId(),
  *   }),
  * };
  *
  * httpPreboot.registerRoutes('my-plugin', (router) => {
- *   router.get({ path: 'path/{id}', validate }, async (context, request, response) => {
+ *   router.get({
+ *     path: 'path/{id}',
+ *     validate,
+ *     security: {
+ *       authc: { enabled: false, reason: 'Preboot routes run before authentication is configured.' },
+ *       authz: { enabled: false, reason: 'Preboot routes cannot use conventional authorization.' },
+ *     },
+ *   }, async (context, request, response) => {
  *     const data = await findObject(request.params.id);
  *     if (!data) {
  *       return response.notFound();
@@ -222,7 +231,17 @@ export interface HttpServicePreboot<
    * ```ts
    * registerRoutes('my-plugin', (router) => {
    *   // handler is called when '/my-plugin/path' resource is requested with `GET` method
-   *   router.get({ path: '/path', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
+   *   router.get(
+   *     {
+   *       path: '/path',
+   *       validate: false,
+   *       security: {
+   *         authc: { enabled: false, reason: 'Preboot routes run before authentication is configured.' },
+   *         authz: { enabled: false, reason: 'Preboot routes cannot use conventional authorization.' },
+   *       },
+   *     },
+   *     (context, req, res) => res.ok({ body: 'ok' })
+   *   );
    * });
    * ```
    * @public
@@ -264,7 +283,7 @@ export interface HttpServicePreboot<
  * import { schema, TypeOf } from '@kbn/config-schema';
  * const validate = {
  *   params: schema.object({
- *     id: schema.string(),
+ *     id: schema.savedObjectId(),
  *   }),
  * };
  * ```
@@ -295,13 +314,14 @@ export interface HttpServicePreboot<
  *
  * const validate = {
  *   params: schema.object({
- *     id: schema.string(),
+ *     id: schema.savedObjectId(),
  *   }),
  * };
  *
  * router.get({
  *   path: 'path/{id}',
- *   validate
+ *   validate,
+ *   security: { authz: { requiredPrivileges: ['my-plugin'] } },
  * },
  * async (context, request, response) => {
  *   const data = await findObject(request.params.id);
@@ -364,10 +384,11 @@ export interface HttpServiceSetup<
    * A handler should return a state to associate with the incoming request.
    * The state can be retrieved later via http.auth.get(..)
    * Only one AuthenticationHandler can be registered. See {@link AuthenticationHandler}.
+   * Lets the authentication owner read current credentials and store renewed headers.
    *
    * @param handler {@link AuthenticationHandler} - function to perform authentication.
    */
-  registerAuth: (handler: AuthenticationHandler) => void;
+  registerAuth: (handler: AuthenticationHandler) => IAuthHeadersStorage;
 
   /**
    * To define custom logic after Auth interceptor did make sure a user has access to the requested resource.
@@ -486,6 +507,15 @@ export interface HttpServiceSetup<
    * Can only be called once, and is reserved for the security plugin.
    */
   setSelfClientUnauthorizedErrorHandler: (handler: HttpSelfUnauthorizedErrorHandler) => void;
+
+  /**
+   * Set the {@link HttpSelfCredentialRefresher | refresher} consulted before every Kibana self HTTP
+   * call, giving its owner a chance to replace a short-lived credential that would expire while
+   * the target route handler is still running.
+   *
+   * Can only be called once, and is reserved for the security plugin.
+   */
+  setSelfClientCredentialRefresher: (refresher: HttpSelfCredentialRefresher) => void;
 }
 
 /** @public */

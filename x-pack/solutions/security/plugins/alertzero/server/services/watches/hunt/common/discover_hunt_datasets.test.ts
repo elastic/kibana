@@ -70,6 +70,22 @@ describe('parseDataStreamName', () => {
     expect(parseDataStreamName('-okta.system-default')).toBeUndefined();
     expect(parseDataStreamName('logs-okta.system-')).toBeUndefined();
   });
+
+  it('parses a cross-cluster name on its index part and returns the cluster apart from the type', () => {
+    expect(parseDataStreamName('infosec_zocalo:logs-aws.cloudtrail-default')).toEqual({
+      cluster: 'infosec_zocalo',
+      type: 'logs',
+      dataset: 'aws.cloudtrail',
+      namespace: 'default',
+    });
+    // A dash in the cluster alias must not be read as the type separator.
+    expect(parseDataStreamName('infosec-redsector:logs-endpoint.events.process-default')).toEqual({
+      cluster: 'infosec-redsector',
+      type: 'logs',
+      dataset: 'endpoint.events.process',
+      namespace: 'default',
+    });
+  });
 });
 
 describe('discoverHuntDatasets', () => {
@@ -116,6 +132,44 @@ describe('discoverHuntDatasets', () => {
     // The sibling and an unrelated dataset keep the plain pattern.
     expect(byDataset.get('windows-defender')?.search_patterns).toEqual(['logs-windows-defender-*']);
     expect(byDataset.get('okta.system')?.search_patterns).toEqual(['logs-okta.system-*']);
+  });
+
+  it('never offers an unsearchable stream, yet keeps narrowing its readable sibling against it', async () => {
+    mockDataStreams(['logs-windows-default', 'logs-windows-defender-default']);
+    const datasets = await discoverHuntDatasets({
+      esClient,
+      patterns: UNIVERSE,
+      unsearchableStreams: new Set(['logs-windows-defender-default']),
+    });
+
+    expect(datasets.map((d) => d.dataset)).toEqual(['windows']);
+    expect(datasets[0].data_streams).toEqual(['logs-windows-default']);
+    expect(datasets[0].search_patterns).toEqual(['logs-windows-default*']);
+  });
+
+  it('counts only searchable namespaces against the per-dataset cap', async () => {
+    const windows = Array.from({ length: 16 }, (_, i) => `logs-windows-ns${i}`);
+    mockDataStreams([...windows, 'logs-windows-unreadable', 'logs-windows-defender-default']);
+    const datasets = await discoverHuntDatasets({
+      esClient,
+      patterns: UNIVERSE,
+      unsearchableStreams: new Set(['logs-windows-unreadable']),
+    });
+
+    expect(datasets.find((d) => d.dataset === 'windows')?.search_patterns).toEqual(
+      windows.map((stream) => `${stream}*`)
+    );
+  });
+
+  it('keeps a dataset pattern whose prefix equals a dropped name', async () => {
+    mockDataStreams(['logs-okta.system-default']);
+    const datasets = await discoverHuntDatasets({
+      esClient,
+      patterns: UNIVERSE,
+      unsearchableStreams: new Set(['logs-okta.system-']),
+    });
+
+    expect(datasets[0].search_patterns).toEqual(['logs-okta.system-*']);
   });
 
   it('uses the whole dataset as vendor when it has no dot', async () => {
@@ -186,6 +240,7 @@ describe('discoverHuntDatasets', () => {
       name: ['logs-*'],
       allow_no_indices: true,
       expand_wildcards: ['open'],
+      ignore_unavailable: true,
     });
   });
 
@@ -211,6 +266,70 @@ describe('discoverHuntDatasets', () => {
     mockDataStreams(['.logs-hidden.system-default', 'logs-okta.system-default']);
     const datasets = await discoverHuntDatasets({ esClient, patterns: UNIVERSE });
     expect(datasets.map((d) => d.dataset)).toEqual(['okta.system']);
+  });
+
+  it('discovers remote data streams with their cluster on the pattern, apart from the same local dataset', async () => {
+    mockDataStreams([
+      'infosec_zocalo:logs-aws.cloudtrail-default',
+      'infosec_zocalo:logs-aws.cloudtrail-prod',
+      'logs-aws.cloudtrail-default',
+      'infosec-redsector:logs-endpoint.events.process-default',
+      'infosec_zocalo:.logs-hidden.system-default',
+    ]);
+
+    const datasets = await discoverHuntDatasets({ esClient, patterns: UNIVERSE });
+
+    expect(datasets).toHaveLength(3);
+    expect(datasets).toEqual(
+      expect.arrayContaining([
+        {
+          index_pattern: 'infosec-redsector:logs-endpoint.events.process-*',
+          dataset: 'endpoint.events.process',
+          vendor: 'endpoint',
+          data_streams: ['infosec-redsector:logs-endpoint.events.process-default'],
+          search_patterns: ['infosec-redsector:logs-endpoint.events.process-*'],
+        },
+        {
+          index_pattern: 'infosec_zocalo:logs-aws.cloudtrail-*',
+          dataset: 'aws.cloudtrail',
+          vendor: 'aws',
+          data_streams: [
+            'infosec_zocalo:logs-aws.cloudtrail-default',
+            'infosec_zocalo:logs-aws.cloudtrail-prod',
+          ],
+          search_patterns: ['infosec_zocalo:logs-aws.cloudtrail-*'],
+        },
+        {
+          index_pattern: 'logs-aws.cloudtrail-*',
+          dataset: 'aws.cloudtrail',
+          vendor: 'aws',
+          data_streams: ['logs-aws.cloudtrail-default'],
+          search_patterns: ['logs-aws.cloudtrail-*'],
+        },
+      ])
+    );
+  });
+
+  it('only isolates a dataset from siblings on its own cluster', async () => {
+    mockDataStreams([
+      'logs-windows-default',
+      'remote:logs-windows-default',
+      'logs-windows-defender-default',
+      'remote:logs-okta-default',
+      'remote:logs-okta-prod-default',
+    ]);
+    const datasets = await discoverHuntDatasets({ esClient, patterns: UNIVERSE });
+    const byPattern = new Map(datasets.map((d) => [d.index_pattern, d]));
+
+    // The same dataset on another cluster sorts between `windows` and its sibling; the walk
+    // has to step over it rather than stop.
+    expect(byPattern.get('logs-windows-*')?.search_patterns).toEqual(['logs-windows-default*']);
+    expect(byPattern.get('remote:logs-windows-*')?.search_patterns).toEqual([
+      'remote:logs-windows-*',
+    ]);
+    expect(byPattern.get('remote:logs-okta-*')?.search_patterns).toEqual([
+      'remote:logs-okta-default*',
+    ]);
   });
 
   it('returns an empty list when nothing matches', async () => {
