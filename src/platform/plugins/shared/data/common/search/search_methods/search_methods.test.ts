@@ -453,6 +453,20 @@ describe('SearchMethodsService', () => {
         );
       });
 
+      it('does not log the caller project_routing when the resolver drops it', async () => {
+        // e.g. the browser without cross-project search: the interceptor sends no routing
+        const getProjectRouting = jest.fn((): string | undefined => undefined);
+        service = new SearchMethodsService(mockSearch, { getEsQueryConfig, getProjectRouting });
+        mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.esql({ query: 'FROM logs', projectRouting: '_alias:_origin' }, { inspector });
+
+        expect(getProjectRouting).toHaveBeenLastCalledWith('_alias:_origin');
+        expect(requestResponder.json.mock.calls[0][0]).not.toHaveProperty('project_routing');
+      });
+
       it('omits project_routing from the request params when it is not set', async () => {
         mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
         const requestResponder = createMockRequestResponder();

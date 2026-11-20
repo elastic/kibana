@@ -121,9 +121,13 @@ export class SearchMethodsService implements ISearchMethods {
     };
 
     // The search interceptor falls back to the default routing when the caller gives none, so
-    // log the routing the request is sent with rather than only the caller's override.
-    const projectRouting =
-      this.deps.getProjectRouting?.(params.projectRouting) ?? params.projectRouting;
+    // log the routing the request is sent with rather than only the caller's override. When a
+    // resolver is configured, an undefined result means no routing is sent (for example, the
+    // browser drops it when cross-project search is unavailable), so the caller's value is only
+    // used when there is no resolver, as on the server.
+    const projectRouting = this.deps.getProjectRouting
+      ? this.deps.getProjectRouting(params.projectRouting)
+      : params.projectRouting;
     requestResponder?.json({
       ...((request.params ?? {}) as Record<string, unknown>),
       ...(params.approximation !== undefined && { approximation: params.approximation }),
