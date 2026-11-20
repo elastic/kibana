@@ -257,7 +257,10 @@ const SectionHeading = ({
     {showCount && (
       <EuiFlexItem grow={false}>
         {id === 'in-progress' ? (
-          <AiGradientBadge testSubj={`nightshiftInvestigationSectionCount-${id}`}>
+          <AiGradientBadge
+            testSubj={`nightshiftInvestigationSectionCount-${id}`}
+            forcedColorsForeground="button"
+          >
             {total}
           </AiGradientBadge>
         ) : (

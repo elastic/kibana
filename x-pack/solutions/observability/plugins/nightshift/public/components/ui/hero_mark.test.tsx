@@ -21,7 +21,7 @@ function styleChunksForClass(className: string): string {
 }
 
 describe('HeroMark', () => {
-  it('draws the severity-dot ring with a box-shadow using backgroundBasePlain in dark mode', () => {
+  it('draws a solid knockout ring: box-shadow with zero blur and thick spread in dark mode', () => {
     let backgroundBasePlain = '';
     let textGhost = '';
     let borderWidthThick = '';
@@ -42,11 +42,20 @@ describe('HeroMark', () => {
 
     const ring = screen.getByTestId('nightshiftHeroMarkSeverityDotRing');
     const ringStyles = styleChunksForClass(ring.className);
-    const boxShadowMatch = ringStyles.match(/box-shadow:[^;]+/);
+    const boxShadowMatch = ringStyles.match(/box-shadow:\s*([^;]+)/);
+    expect(boxShadowMatch?.[1]).toBeDefined();
+    const boxShadow = boxShadowMatch![1].trim();
 
+    // Solid ring: offset 0 0, blur 0, thick spread, page-surface color (not textGhost).
+    expect(boxShadow).toMatch(
+      new RegExp(
+        `^0\\s+0\\s+0\\s+${borderWidthThick.replace('.', '\\.')}\\s+${backgroundBasePlain.replace(
+          /[.*+?^${}()|[\]\\]/g,
+          '\\$&'
+        )}`
+      )
+    );
     expect(backgroundBasePlain).not.toBe(textGhost);
-    expect(boxShadowMatch?.[0]).toContain(backgroundBasePlain);
-    expect(boxShadowMatch?.[0]).toContain(borderWidthThick);
-    expect(boxShadowMatch?.[0]).not.toContain(textGhost);
+    expect(boxShadow).not.toContain(textGhost);
   });
 });

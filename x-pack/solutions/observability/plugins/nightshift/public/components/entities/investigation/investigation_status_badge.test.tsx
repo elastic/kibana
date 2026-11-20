@@ -20,19 +20,39 @@ function styleChunksForClass(className: string): string {
     .join('}');
 }
 
+/** Emotion may emit the media query before or after the selector; take the active-mode block. */
+function forcedColorsBlock(styles: string): string {
+  const match = styles.match(/@media\s*\(forced-colors:\s*active\)[^{]*\{([\s\S]*?)(?:\}|$)/);
+  expect(match?.[1]).toBeDefined();
+  return match![1];
+}
+
 describe('AiGradientBadge', () => {
-  it('falls back to ButtonText under forced-colors so the count stays visible on ButtonFace', () => {
+  it('uses ButtonText inside forced-colors when on a button surface', () => {
     render(
       <EuiProvider>
-        <AiGradientBadge testSubj="nightshiftAiGradientBadge">0</AiGradientBadge>
+        <AiGradientBadge forcedColorsForeground="button">0</AiGradientBadge>
       </EuiProvider>
     );
 
     const label = screen.getByTestId('nightshiftAiGradientBadgeLabel');
-    const labelStyles = styleChunksForClass(label.className);
+    const block = forcedColorsBlock(styleChunksForClass(label.className));
 
-    expect(labelStyles).toMatch(/forced-colors:\s*active/);
-    expect(labelStyles).toMatch(/-webkit-text-fill-color:\s*ButtonText/);
-    expect(labelStyles).toMatch(/color:\s*ButtonText/);
+    expect(block).toMatch(/(?:^|[^-])color:\s*ButtonText\s*!important/);
+    expect(block).toMatch(/-webkit-text-fill-color:\s*ButtonText\s*!important/);
+  });
+
+  it('uses CanvasText inside forced-colors by default (page surface)', () => {
+    render(
+      <EuiProvider>
+        <AiGradientBadge>Investigated</AiGradientBadge>
+      </EuiProvider>
+    );
+
+    const label = screen.getByTestId('nightshiftAiGradientBadgeLabel');
+    const block = forcedColorsBlock(styleChunksForClass(label.className));
+
+    expect(block).toMatch(/(?:^|[^-])color:\s*CanvasText\s*!important/);
+    expect(block).toMatch(/-webkit-text-fill-color:\s*CanvasText\s*!important/);
   });
 });

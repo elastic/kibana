@@ -304,11 +304,18 @@ export function AiGradientBadge({
   testSubj,
   iconType,
   variant = 'base',
+  /**
+   * Forced-colors text fill when gradients drop out.
+   * `button` — accordion / ButtonFace (In progress count).
+   * `canvas` — page surface (e.g. Investigated status on event rows).
+   */
+  forcedColorsForeground = 'canvas',
 }: {
   children: React.ReactNode;
   testSubj?: string;
   iconType?: React.ComponentProps<typeof EuiBadge>['iconType'];
   variant?: 'base' | 'outlined';
+  forcedColorsForeground?: 'button' | 'canvas';
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { labelCss } = useAiButtonGradientStyles({ variant });
@@ -331,18 +338,19 @@ export function AiGradientBadge({
           border: ${euiTheme.border.width.thin} solid transparent;
         `;
 
+  const forcedColorsText = forcedColorsForeground === 'button' ? 'ButtonText' : 'CanvasText';
+
   // Own span (not `.euiBadge__text`): EuiBadge skips that wrapper for numeric `0`.
   // Drop AI-button label padding — EuiBadge already pads; the extra xs made counts too wide.
-  // Forced-colors: gradients drop out. Use ButtonText — this badge sits in accordion buttons
-  // (ButtonFace), where CanvasText can fail contrast on hover/focus.
+  // Forced-colors: gradients drop out — use ButtonText on buttons, CanvasText on page surfaces.
   const labelSpanCss = css`
     ${labelCss}
     padding: 0;
 
     @media (forced-colors: active) {
       background: none !important;
-      color: ButtonText !important;
-      -webkit-text-fill-color: ButtonText !important;
+      color: ${forcedColorsText} !important;
+      -webkit-text-fill-color: ${forcedColorsText} !important;
     }
   `;
 
