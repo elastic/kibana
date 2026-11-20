@@ -15,6 +15,7 @@ import {
   AESOP_AB_COMPARE_WORKFLOW_ID,
   AESOP_DRIFT_MONITOR_WORKFLOW_ID,
   AESOP_EXPLORER_WORKFLOW_ID,
+  AESOP_REFINE_WORKFLOW_ID,
   ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW_ID,
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
@@ -53,6 +54,7 @@ import {
 import AESOP_AB_COMPARE_YAML from './definitions/aesop_prototype/aesop_ab_compare.yaml';
 import AESOP_DRIFT_MONITOR_YAML from './definitions/aesop_prototype/aesop_drift_monitor.yaml';
 import AESOP_EXPLORER_YAML from './definitions/aesop_prototype/aesop_explorer.yaml';
+import AESOP_REFINE_YAML from './definitions/aesop_prototype/aesop_refine.yaml';
 import ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_YAML from './definitions/alertzero/actions/action_close_attack_discovery_investigation.yaml';
 import ACTION_ISOLATE_HOST_YAML from './definitions/alertzero/actions/defend/action_isolate_host.yaml';
 import ACTION_KILL_PROCESS_YAML from './definitions/alertzero/actions/defend/action_kill_process.yaml';
@@ -313,9 +315,10 @@ it.each([
   [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '5:fa71b87b'],
   [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '7:2ce58cc9'],
   [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '6:063c014a'],
-  [AESOP_AB_COMPARE_WORKFLOW_ID, AESOP_AB_COMPARE_YAML, '13:a2d58e12'],
+  [AESOP_AB_COMPARE_WORKFLOW_ID, AESOP_AB_COMPARE_YAML, '14:cec28bf5'],
   [AESOP_DRIFT_MONITOR_WORKFLOW_ID, AESOP_DRIFT_MONITOR_YAML, '12:0fea1d55'],
   [AESOP_EXPLORER_WORKFLOW_ID, AESOP_EXPLORER_YAML, '13:7a836836'],
+  [AESOP_REFINE_WORKFLOW_ID, AESOP_REFINE_YAML, '1:14e4c70b'],
 ] as const)(
   'requires bumping %s definition.version together with the fingerprint of its render inputs',
   (workflowId, inputs, expectedFingerprint) => {
@@ -624,6 +627,82 @@ describe('managedWorkflowDefinitions', () => {
 
       it('marks a tiebreak deploy so an approval of the live arm writes nothing', () => {
         expect(stepsByName().get('resolve_tiebreak_content')?.with?.tie_deploy).toBe(true);
+      });
+
+      // The refine workflow scores each rewrite through this workflow with
+      // propose: false, so a missed gate would raise a proposal per round.
+      it.each(['write_rejection_ki', 'propose_tie_pick', 'propose_deploy'])(
+        'evaluate mode skips %s',
+        (name) => {
+          expect(stepsByName().get(name)?.if).toContain('variables.propose == true');
+        }
+      );
+
+      it.each([
+        'variables.propose == true',
+        'variables.allow_refine == true',
+        'variables.deploy_candidate != true',
+        'variables.tie_proposed != true',
+        "variables.best_variant != 'live'",
+      ])('starts a refine only when %s', (condition) => {
+        expect(stepsByName().get('resolve_refine')?.with?.refine).toContain(condition);
+      });
+
+      it('hands the refine the best arm, by content and experiment', () => {
+        const step = stepsByName().get('start_refine');
+        expect(step?.if).toContain('variables.refine == true');
+        expect(step?.with?.['workflow-id']).toBe(AESOP_REFINE_WORKFLOW_ID);
+        expect(step?.with?.inputs?.best_content).toContain('variables.best_content');
+        expect(step?.with?.inputs?.best_experiment_id).toContain(
+          'steps.winner.output.best.target_id'
+        );
+      });
+    });
+
+    describe('refine wiring', () => {
+      interface RefineStep {
+        name: string;
+        if?: string;
+        with?: Record<string, any>;
+        steps?: RefineStep[];
+      }
+      const parsed = parse(AESOP_REFINE_YAML);
+      const top: RefineStep[] = parsed.steps;
+      const loop = top.find(({ name }) => name === 'refine');
+      const byName = new Map(
+        [...top, ...(loop?.steps ?? [])].map((step) => [step.name, step] as const)
+      );
+
+      it('scores every rewrite in evaluate mode with no nested refine', () => {
+        const inputs = byName.get('evaluate')?.with?.inputs;
+        expect(byName.get('evaluate')?.with?.['workflow-id']).toBe(AESOP_AB_COMPARE_WORKFLOW_ID);
+        expect(inputs?.propose).toBe(false);
+        expect(inputs?.allow_refine).toBe(false);
+      });
+
+      it('proposes a win through a fresh A/B that cannot refine again', () => {
+        const step = byName.get('confirm');
+        expect(step?.if).toContain('variables.final_reason == "win"');
+        expect(step?.with?.inputs?.allow_refine).toBe(false);
+        expect(step?.with?.inputs).not.toHaveProperty('propose');
+      });
+
+      it('caps the loop at three rounds', () => {
+        expect(parsed.consts.MAX_ROUNDS).toBe(3);
+        expect(loop?.['max-iterations' as keyof RefineStep]).toEqual({
+          limit: 3,
+          'on-limit': 'continue',
+        });
+      });
+
+      // The rewrite must only see failures and judge explanations, never the
+      // dataset's expected answers: no tools, and nothing but the collect step
+      // and the current skill in its prompt.
+      it('rewrites without tools, from the collected failures', () => {
+        const step = byName.get('rewrite');
+        expect(step?.with).not.toHaveProperty('tools');
+        expect(step?.with?.prompt).toContain('steps.collect_failures.output.markdown');
+        expect(step?.with?.prompt).not.toMatch(/expected|reference_output|dataset/i);
       });
     });
   });

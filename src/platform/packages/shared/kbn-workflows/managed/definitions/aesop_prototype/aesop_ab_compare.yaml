@@ -5,7 +5,10 @@ description: >-
   no-skill baseline (and the live skill, when one exists) through the evals
   plugin, picks a winner, and proposes deploying it. On approval it creates or
   updates the skill; a rejected or dismissed candidate is recorded as a
-  knowledge indicator so the explorer does not propose it again.
+  knowledge indicator so the explorer does not propose it again. When no
+  variant wins clearly, it hands the best variant to the refine workflow, which
+  rewrites it from its failures. With `propose: false` it only measures: no
+  proposal, no rejection record, no refine.
 enabled: true
 tags:
   - security
@@ -47,6 +50,31 @@ outputs:
     type: string
   - name: skip_reason
     type: string
+  # The best non-rejected arm, so a caller (the refine workflow) can read the
+  # result of an evaluate-mode run. Empty when every arm was rejected. The
+  # numbers are strings: they are rendered from a value that can be missing.
+  - name: best_experiment_id
+    type: string
+  - name: best_variant_index
+    type: string
+  - name: best_content
+    type: string
+  - name: best_mean
+    type: string
+  - name: baseline_mean
+    type: string
+  - name: best_p_value
+    type: string
+  - name: best_improvement
+    type: string
+  - name: sample_size
+    type: string
+  - name: clear_winner
+    type: boolean
+  - name: is_tie
+    type: boolean
+  - name: refine_started
+    type: boolean
 triggers:
   - type: manual
     inputs:
@@ -118,6 +146,20 @@ triggers:
           description: >-
             Investigation (conversation) the A/B proposal is recorded on, so
             the analyst sees the decision next to the evidence.
+        propose:
+          type: boolean
+          default: true
+          description: >-
+            False runs the arms and reports the best one in the outputs, and
+            nothing else: no proposal, no rejection record and no refine. The
+            refine workflow scores each rewrite this way.
+        allow_refine:
+          type: boolean
+          default: true
+          description: >-
+            False never starts a refine pass, even when no variant wins
+            clearly. The refine workflow sets it on the runs it starts, so a
+            refine never starts another.
       required: [dataset_id, connector_id, agent_id, variants, investigation_id]
       additionalProperties: false
 steps:
@@ -146,6 +188,12 @@ steps:
       is_tie: false
       reject_reason: ''
       deployed: false
+      propose: "${{ inputs.propose != false }}"
+      allow_refine: "${{ inputs.allow_refine != false }}"
+      tie_proposed: false
+      best_variant: ''
+      best_content: ''
+      refine: false
 
   # ----------------------------------------------------------------------
   # Baseline arm: no skill at all. Every other arm is judged against it.
@@ -411,6 +459,20 @@ steps:
     with:
       winner_content: '{{ inputs.variants[variables.winner_variant] }}'
 
+  # The best non-rejected arm, winner or not: what a refine pass starts from
+  # and what an evaluate-mode run reports.
+  - name: resolve_best
+    type: data.set
+    if: '${{ steps.resolve_comparison.output.compared == true and steps.winner.output.best != null }}'
+    with:
+      best_variant: '${{ variables.arm_variant_indexes[steps.winner.output.best.index] }}'
+
+  - name: resolve_best_content
+    type: data.set
+    if: '${{ variables.best_variant != blank and variables.best_variant != "live" }}'
+    with:
+      best_content: '{{ inputs.variants[variables.best_variant] }}'
+
   # A tie has no winner, so the arm a tie approval deploys is the tiebreak arm:
   # the tied arm with the highest mean (the lowest index on equal means),
   # chosen by the select-winner step. It goes through the same winner_variant
@@ -444,6 +506,9 @@ steps:
         ${{ steps.resolve_comparison.output.has_winner == true
           and variables.winner_variant != 'live'
           and steps.winner.output.beats_baseline == true }}
+      tie_proposed: >-
+        ${{ steps.resolve_comparison.output.is_tie == true
+          and steps.winner.output.tiebreak_beats_baseline == true }}
       reject_reason: >-
         {% if steps.resolve_comparison.output.is_tie == true and steps.winner.output.tiebreak_beats_baseline != true %}The tied variants did not beat the no-skill baseline significantly. {% elsif steps.resolve_comparison.output.has_winner != true %}No variant won. {% elsif variables.winner_variant == 'live' %}The live skill outperformed every variant. {% elsif steps.winner.output.beats_baseline != true %}The best variant did not beat the no-skill baseline. {% endif %}{{ steps.winner.output.reasons | join: ' ' }}
 
@@ -453,9 +518,24 @@ steps:
   # before proposing the same thing again. The variants are stored in the KI
   # content for the same reason.
   # ----------------------------------------------------------------------
+  # No clear winner (none, a non-significant one, or a tie that did not beat
+  # the baseline) but a best variant: rewrite it from its failures instead of
+  # stopping. The live skill as the best arm has nothing to rewrite.
+  - name: resolve_refine
+    type: data.set
+    if: '${{ steps.resolve_comparison.output.compared == true }}'
+    with:
+      refine: >-
+        ${{ variables.propose == true
+          and variables.allow_refine == true
+          and variables.deploy_candidate != true
+          and variables.tie_proposed != true
+          and variables.best_variant != blank
+          and variables.best_variant != 'live' }}
+
   - name: write_rejection_ki
     type: context-engine.createKi
-    if: '${{ steps.resolve_comparison.output.compared == true and variables.deploy_candidate != true and (steps.resolve_comparison.output.is_tie != true or steps.winner.output.tiebreak_beats_baseline != true) }}'
+    if: '${{ variables.propose == true and steps.resolve_comparison.output.compared == true and variables.deploy_candidate != true and (steps.resolve_comparison.output.is_tie != true or steps.winner.output.tiebreak_beats_baseline != true) }}'
     with:
       ai_index_id: '{{ consts.AI_INDEX_ID }}'
       ki_id: 'rejection-{{ execution.id }}'
@@ -472,8 +552,33 @@ steps:
           source: ab_compare
           reason: '{{ variables.reject_reason | truncate: 5000 }}'
           rejected: '{{ steps.winner.output.rejected | json | truncate: 8000 }}'
+          refine_started: '{{ variables.refine }}'
           dataset_id: '{{ inputs.dataset_id }}'
           workflow_execution_id: '{{ execution.id }}'
+    on-failure:
+      continue: true
+
+  # Fire and forget: each refine round runs a full A/B, far beyond what this
+  # run should wait for. The refine proposes through a fresh A/B of its own.
+  - name: start_refine
+    type: workflow.executeAsync
+    if: '${{ variables.refine == true }}'
+    with:
+      workflow-id: system-security-aesop-refine
+      inputs:
+        skill_id: '{{ inputs.skill_id }}'
+        new_skill_name: '{{ inputs.new_skill_name }}'
+        skill_description: '{{ inputs.skill_description }}'
+        dataset_id: '{{ inputs.dataset_id }}'
+        connector_id: '{{ inputs.connector_id }}'
+        agent_id: '{{ inputs.agent_id }}'
+        investigation_id: '{{ inputs.investigation_id }}'
+        repetitions: '${{ inputs.repetitions }}'
+        concurrency: '${{ inputs.concurrency }}'
+        best_content: '{{ variables.best_content }}'
+        best_experiment_id: '{{ steps.winner.output.best.target_id }}'
+        best_mean: '${{ steps.winner.output.best.mean }}'
+        source_execution_id: '{{ execution.id }}'
     on-failure:
       continue: true
 
@@ -488,7 +593,7 @@ steps:
   # ----------------------------------------------------------------------
   - name: propose_tie_pick
     type: workflow.execute
-    if: '${{ steps.resolve_comparison.output.is_tie == true and steps.winner.output.tiebreak_beats_baseline == true }}'
+    if: '${{ variables.propose == true and steps.resolve_comparison.output.is_tie == true and steps.winner.output.tiebreak_beats_baseline == true }}'
     with:
       workflow-id: system-create-proposal
       inputs:
@@ -536,7 +641,7 @@ steps:
   # ----------------------------------------------------------------------
   - name: propose_deploy
     type: workflow.execute
-    if: '${{ variables.deploy_candidate == true }}'
+    if: '${{ variables.propose == true and variables.deploy_candidate == true }}'
     # Known platform gap: the write after this gate cannot run as the approver.
     # A parent resumed from a human gate continues under its own pre-scheduled
     # task identity (resume_sync_parent_if_needed.ts), and there is no
@@ -844,5 +949,16 @@ steps:
       decision: "${{ steps.resolve_decision.output.decision | default: '' }}"
       deployed: '${{ variables.deployed }}'
       skill_id: '{{ variables.target_skill_id }}'
+      best_experiment_id: "{{ steps.winner.output.best.target_id | default: '' }}"
+      best_variant_index: '{{ variables.best_variant }}'
+      best_content: '{{ variables.best_content }}'
+      best_mean: "{{ steps.winner.output.best.mean | default: '' }}"
+      baseline_mean: "{{ steps.winner.output.best.baseline_mean | default: '' }}"
+      best_p_value: "{{ steps.winner.output.best.p_value | default: '' }}"
+      best_improvement: "{{ steps.winner.output.best.improvement | default: '' }}"
+      sample_size: "{{ steps.winner.output.best.sample_size | default: '' }}"
+      clear_winner: '${{ variables.deploy_candidate == true or variables.tie_proposed == true }}'
+      is_tie: '${{ variables.is_tie == true }}'
+      refine_started: '${{ variables.refine == true and steps.start_refine.error == null }}'
       skip_reason: >-
-        {% if steps.baseline_start.error != null %}The baseline experiment could not be started: {{ steps.baseline_start.error.message }}{% elsif steps.baseline_run.error != null %}The baseline arm failed: {{ steps.baseline_run.error.message }}{% elsif variables.baseline_scored != true %}The baseline arm produced no scores; nothing to compare.{% elsif variables.live_failed == true %}The live skill arm produced no scores (is `{{ inputs.skill_id }}` a skill id?); the variants were not run, since they could not be compared with the live skill.{% elsif variables.arm_count < 1 %}No arm produced scores; nothing to compare.{% elsif steps.compare.error != null %}The A/B comparison failed: {{ steps.compare.error.message }}{% elsif steps.winner.error != null %}Picking the winner failed: {{ steps.winner.error.message }}{% elsif variables.is_tie == true and steps.propose_tie_pick.error != null %}The tie proposal failed: {{ steps.propose_tie_pick.error.message }}{% elsif variables.is_tie == true and steps.resolve_decision.output.dismissed == true %}The tie proposal was dismissed; every tied arm was rejected.{% elsif variables.is_tie == true and variables.winner_variant == 'live' %}{% if steps.resolve_decision.output.approved == true %}Tied arms; the live skill has the highest mean, so approving the pick changed nothing.{% else %}Tied arms, nothing deployed; the analyst was asked to confirm keeping the live skill.{% endif %}{% elsif variables.deploy_candidate != true and variables.tie_deploy != true %}Rejected: {{ variables.reject_reason }}{% elsif steps.propose_deploy.error != null %}The proposal failed: {{ steps.propose_deploy.error.message }}{% elsif steps.resolve_decision.output.dismissed == true %}The proposal was dismissed.{% elsif steps.resolve_decision.output.approved != true %}The proposal was not decided.{% elsif steps.resolve_prior_skill.output.prior_ok == false %}The current skill content could not be read or is too long to store for a rollback; nothing was changed.{% elsif steps.store_prior_content.error != null %}The prior content could not be stored, so nothing was changed: {{ steps.store_prior_content.error.message }}{% elsif steps.update_skill.error != null %}The update failed after approval: {{ steps.update_skill.error.message }}{% elsif steps.create_skill.error != null %}Creating the skill failed after approval: {{ steps.create_skill.error.message }}{% elsif steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}
+        {% if steps.baseline_start.error != null %}The baseline experiment could not be started: {{ steps.baseline_start.error.message }}{% elsif steps.baseline_run.error != null %}The baseline arm failed: {{ steps.baseline_run.error.message }}{% elsif variables.baseline_scored != true %}The baseline arm produced no scores; nothing to compare.{% elsif variables.live_failed == true %}The live skill arm produced no scores (is `{{ inputs.skill_id }}` a skill id?); the variants were not run, since they could not be compared with the live skill.{% elsif variables.arm_count < 1 %}No arm produced scores; nothing to compare.{% elsif steps.compare.error != null %}The A/B comparison failed: {{ steps.compare.error.message }}{% elsif steps.winner.error != null %}Picking the winner failed: {{ steps.winner.error.message }}{% elsif variables.propose != true %}Evaluate mode, nothing was proposed.{% if variables.reject_reason != blank %} {{ variables.reject_reason }}{% endif %}{% elsif variables.is_tie == true and steps.propose_tie_pick.error != null %}The tie proposal failed: {{ steps.propose_tie_pick.error.message }}{% elsif variables.is_tie == true and steps.resolve_decision.output.dismissed == true %}The tie proposal was dismissed; every tied arm was rejected.{% elsif variables.is_tie == true and variables.winner_variant == 'live' %}{% if steps.resolve_decision.output.approved == true %}Tied arms; the live skill has the highest mean, so approving the pick changed nothing.{% else %}Tied arms, nothing deployed; the analyst was asked to confirm keeping the live skill.{% endif %}{% elsif variables.deploy_candidate != true and variables.tie_deploy != true %}Rejected: {{ variables.reject_reason }}{% if variables.refine == true %} A refine pass was started from variant {{ variables.best_variant }}{% if steps.start_refine.error != null %}, but it failed to start: {{ steps.start_refine.error.message }}{% endif %}.{% endif %}{% elsif steps.propose_deploy.error != null %}The proposal failed: {{ steps.propose_deploy.error.message }}{% elsif steps.resolve_decision.output.dismissed == true %}The proposal was dismissed.{% elsif steps.resolve_decision.output.approved != true %}The proposal was not decided.{% elsif steps.resolve_prior_skill.output.prior_ok == false %}The current skill content could not be read or is too long to store for a rollback; nothing was changed.{% elsif steps.store_prior_content.error != null %}The prior content could not be stored, so nothing was changed: {{ steps.store_prior_content.error.message }}{% elsif steps.update_skill.error != null %}The update failed after approval: {{ steps.update_skill.error.message }}{% elsif steps.create_skill.error != null %}Creating the skill failed after approval: {{ steps.create_skill.error.message }}{% elsif steps.enable_drift_monitor.error != null %}Deployed, but the drift monitor could not be enabled: {{ steps.enable_drift_monitor.error.message }}{% endif %}

@@ -10,6 +10,7 @@ import {
   AESOP_AB_COMPARE_WORKFLOW_ID,
   AESOP_DRIFT_MONITOR_WORKFLOW_ID,
   AESOP_EXPLORER_WORKFLOW_ID,
+  AESOP_REFINE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
@@ -228,7 +229,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
     expect(logger.warn).toHaveBeenCalled();
   });
 
-  it('installs the AESOP A/B compare workflow at boot when the flag is on', async () => {
+  it('installs the AESOP A/B compare and refine workflows at boot when the flag is on', async () => {
     const managed = createManagedClient();
     const workflowsExtensions = workflowsExtensionsMock.createStart();
     workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);
@@ -243,10 +244,13 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       core: coreMock.createStart(),
     });
 
-    // Only the static A/B compare workflow installs at boot; the drift monitor
-    // is a template definition instantiated per skill on deploy.
-    expect(managed.install).toHaveBeenCalledTimes(1);
+    // Only the static A/B compare and refine workflows install at boot; the
+    // drift monitor is a template definition instantiated per skill on deploy.
+    expect(managed.install).toHaveBeenCalledTimes(2);
     expect(managed.install).toHaveBeenCalledWith(AESOP_AB_COMPARE_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
+    expect(managed.install).toHaveBeenCalledWith(AESOP_REFINE_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
     expect(managed.uninstall).not.toHaveBeenCalledWith(
@@ -295,6 +299,9 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
     });
 
     expect(managed.uninstall).toHaveBeenCalledWith(AESOP_AB_COMPARE_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
+    expect(managed.uninstall).toHaveBeenCalledWith(AESOP_REFINE_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
     // The per-skill drift-monitor and per-mode explorer instances are swept too.

@@ -10,6 +10,7 @@
 import AESOP_AB_COMPARE_YAML from './aesop_ab_compare.yaml';
 import AESOP_DRIFT_MONITOR_YAML from './aesop_drift_monitor.yaml';
 import AESOP_EXPLORER_YAML from './aesop_explorer.yaml';
+import AESOP_REFINE_YAML from './aesop_refine.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
 
 export const AESOP_AB_COMPARE_WORKFLOW_ID = 'system-security-aesop-ab-compare';
@@ -18,13 +19,29 @@ export const AESOP_DRIFT_MONITOR_WORKFLOW_ID = 'system-security-aesop-drift-moni
 
 export const AESOP_EXPLORER_WORKFLOW_ID = 'system-security-aesop-explorer';
 
+export const AESOP_REFINE_WORKFLOW_ID = 'system-security-aesop-refine';
+
 /** AESOP prototype: A/B up to three skill variants against a no-skill baseline and deploy the winner on approval. */
 export const AESOP_AB_COMPARE_WORKFLOW = {
   id: AESOP_AB_COMPARE_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 13,
+  version: 14,
   billable: false,
   yaml: AESOP_AB_COMPARE_YAML,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'enforced',
+  },
+} as const satisfies ManagedWorkflowDefinition;
+
+/** AESOP prototype: rewrite the best A/B variant from its failed examples, scoring each rewrite in an evaluate-only A/B. */
+export const AESOP_REFINE_WORKFLOW = {
+  id: AESOP_REFINE_WORKFLOW_ID,
+  pluginId: 'securitySolution',
+  version: 1,
+  billable: false,
+  yaml: AESOP_REFINE_YAML,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',

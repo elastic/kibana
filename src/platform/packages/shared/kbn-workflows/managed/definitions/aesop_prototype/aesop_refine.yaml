@@ -1,0 +1,386 @@
+version: '1'
+name: 'AESOP Refine (prototype)'
+description: >-
+  AESOP prototype: started by the A/B compare workflow when no variant won
+  clearly. Each round reads the best variant's failed examples (question, the
+  agent's answer and the judge's explanation, never the expected answer),
+  rewrites the variant from them, and scores the rewrite against the previous
+  best in an evaluate-only A/B. It stops on a significant win over the no-skill
+  baseline, on a plateau, or after three rounds. A win is proposed through one
+  fresh A/B of the refined variant, so the proposal carries a number the
+  refine loop did not select on. Every round is recorded as a knowledge
+  indicator.
+enabled: true
+tags:
+  - security
+  - aesop_prototype
+settings:
+  # Each round's A/B queues behind any other A/B of the same skill, and one of
+  # those can be parked on an analyst approval for up to 72h.
+  timeout: '96h'
+  concurrency:
+    # One refine per skill (or per source run, for a new skill). A second
+    # request for the same skill is dropped: the refine in flight already
+    # starts from that skill's best variant.
+    key: 'aesop-refine-{{ inputs.skill_id | default: inputs.source_execution_id }}'
+    strategy: drop
+    max: 1
+consts:
+  AI_INDEX_ID: aesop
+  MAX_ROUNDS: 3
+  # A rewrite that gains less than this over the previous best is a plateau.
+  MIN_GAIN: 0.02
+  FAILURE_THRESHOLD: 0.75
+  MAX_FAILURES: 10
+  rewrite_schema:
+    type: object
+    properties:
+      content:
+        type: string
+        maxLength: 60000
+        description: The complete rewritten skill instructions (markdown), not a diff.
+      changes:
+        type: string
+        maxLength: 2000
+        description: What changed and which failures each change addresses, in a few sentences.
+    required:
+      - content
+      - changes
+outputs:
+  - name: rounds
+    type: number
+  - name: stop_reason
+    type: string
+  - name: best_mean
+    type: string
+  - name: confirm_started
+    type: boolean
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        skill_id:
+          type: string
+          maxLength: 128
+          description: Live skill being optimized; empty when the A/B proposes a new skill.
+        new_skill_name:
+          type: string
+          maxLength: 64
+        skill_description:
+          type: string
+          maxLength: 1024
+        dataset_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        connector_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Model connector the arms, the judge and the rewrite run through.
+        agent_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        investigation_id:
+          type: string
+          minLength: 1
+          maxLength: 512
+        repetitions:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 2
+        concurrency:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 2
+        best_content:
+          type: string
+          minLength: 1
+          maxLength: 60000
+          description: Content of the best variant of the A/B that started this refine.
+        best_experiment_id:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Experiment of that variant; its failures seed round one.
+        best_mean:
+          type: number
+          description: That variant's mean on correctness.factuality.
+        source_execution_id:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Execution id of the A/B that started this refine.
+      required:
+        - dataset_id
+        - connector_id
+        - agent_id
+        - investigation_id
+        - best_content
+        - best_experiment_id
+        - best_mean
+        - source_execution_id
+      additionalProperties: false
+steps:
+  - name: init_state
+    type: data.set
+    with:
+      current_content: '{{ inputs.best_content }}'
+      current_experiment_id: '{{ inputs.best_experiment_id }}'
+      current_mean: '${{ inputs.best_mean }}'
+      stop_reason: ''
+      rounds: 0
+
+  # ----------------------------------------------------------------------
+  # Rounds. Every step inside the loop is chained through variables, each
+  # recomputed on every round, so a step skipped this round is never read
+  # through an output left over from the round before.
+  # ----------------------------------------------------------------------
+  - name: refine
+    type: while
+    condition: '${{ variables.stop_reason == blank }}'
+    max-iterations:
+      limit: 3
+      on-limit: continue
+    timeout: '95h'
+    on-failure:
+      continue: true
+    steps:
+      - name: start_round
+        type: data.set
+        with:
+          round_started_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}'
+          rounds: '${{ while.iteration | plus: 1 }}'
+          seed_experiment_id: '{{ variables.current_experiment_id }}'
+
+      # The failures of the current best: the input A/B's best arm in round
+      # one, the round winner after that.
+      - name: collect_failures
+        type: security.aesopCollectFailures
+        with:
+          experiment_id: '{{ variables.current_experiment_id }}'
+          evaluator: correctness.factuality
+          threshold: '${{ consts.FAILURE_THRESHOLD }}'
+          max_failures: '${{ consts.MAX_FAILURES }}'
+        on-failure:
+          continue: true
+
+      - name: resolve_failures
+        type: data.set
+        with:
+          have_failures: >-
+            ${{ steps.collect_failures.error == null
+              and steps.collect_failures.output.failed_examples > 0 }}
+
+      # No tools: the model sees the skill and its failures and nothing else.
+      # The dataset's expected answers are never read (the collect step does
+      # not read the dataset), so the rewrite cannot copy them.
+      - name: rewrite
+        type: ai.prompt
+        if: '${{ variables.have_failures == true }}'
+        connector-id: '{{ inputs.connector_id }}'
+        timeout: '10m'
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: '5s'
+            strategy: exponential
+            multiplier: 3
+            max-delay: '30s'
+          continue: true
+        with:
+          temperature: 0.3
+          systemPrompt: >-
+            You improve the instructions of an agent skill. The agent loads the
+            skill when a task matches it and follows the instructions with
+            ES|QL as its only tool. You get the current instructions and the
+            examples the agent failed with them: the question, the agent's
+            answer and a judge's explanation of what was wrong. Rewrite the
+            instructions so the agent answers that kind of question correctly.
+            Fix the cause behind each failure with a general rule (a decision
+            rule, a field to check, a query shape, a verdict to commit to), not
+            with facts about one example: the rewrite is scored on the same
+            questions and on new ones. A judge explanation may quote the
+            expected answer; never copy a value, host, user or verdict from one
+            example into the instructions. Keep what the current instructions
+            already get right. Return the complete instructions, not a diff.
+          prompt: |-
+            Current skill instructions:
+
+            ```markdown
+            {{ variables.current_content }}
+            ```
+
+            {{ steps.collect_failures.output.failed_examples }} of {{ steps.collect_failures.output.scored_examples }} examples failed (mean score {{ steps.collect_failures.output.mean_score }}, threshold {{ consts.FAILURE_THRESHOLD }}). The lowest-scoring ones:
+
+            {{ steps.collect_failures.output.markdown }}
+          schema: '${{ consts.rewrite_schema }}'
+
+      - name: resolve_rewrite
+        type: data.set
+        with:
+          rewrite_ok: >-
+            ${{ variables.have_failures == true
+              and steps.rewrite.error == null
+              and steps.rewrite.output.content.content != blank
+              and steps.rewrite.output.content.content != variables.current_content }}
+
+      # Previous best (variant 0) against the rewrite (variant 1) and a fresh
+      # no-skill baseline, in evaluate mode: no proposal and no nested refine.
+      # No skill_id, so the live skill is not a third arm in every round; the
+      # confirmation A/B below runs it.
+      - name: round_variants
+        type: data.set
+        if: '${{ variables.rewrite_ok == true }}'
+        with:
+          variants:
+            - '{{ variables.current_content }}'
+            - '{{ steps.rewrite.output.content.content }}'
+
+      - name: evaluate
+        type: workflow.execute
+        if: '${{ variables.rewrite_ok == true }}'
+        with:
+          workflow-id: system-security-aesop-ab-compare
+          inputs:
+            skill_description: '{{ inputs.skill_description }}'
+            dataset_id: '{{ inputs.dataset_id }}'
+            connector_id: '{{ inputs.connector_id }}'
+            agent_id: '{{ inputs.agent_id }}'
+            variants: '${{ variables.variants }}'
+            investigation_id: '{{ inputs.investigation_id }}'
+            repetitions: '${{ inputs.repetitions }}'
+            concurrency: '${{ inputs.concurrency }}'
+            propose: false
+            allow_refine: false
+        on-failure:
+          continue: true
+
+      - name: resolve_evaluate
+        type: data.set
+        with:
+          evaluated: >-
+            ${{ variables.rewrite_ok == true
+              and steps.evaluate.error == null
+              and steps.evaluate.output.best_experiment_id != blank }}
+
+      - name: resolve_round
+        type: data.set
+        if: '${{ variables.evaluated == true }}'
+        with:
+          round_won: '${{ steps.evaluate.output.clear_winner == true }}'
+          rewrite_best: '${{ steps.evaluate.output.best_variant_index == "1" }}'
+          round_mean: '${{ steps.evaluate.output.best_mean | plus: 0 }}'
+          # Against the previous best's mean from the round (or A/B) that
+          # picked it: each run re-scores the baseline, so this is the gain
+          # between two runs, reported next to that run's own p-value.
+          gain: '${{ steps.evaluate.output.best_mean | plus: 0 | minus: variables.current_mean }}'
+
+      - name: resolve_stop
+        type: data.set
+        with:
+          stop_reason: >-
+            {% if steps.collect_failures.error != null %}collect_failed{% elsif variables.have_failures != true %}no_failures{% elsif variables.rewrite_ok != true %}rewrite_failed{% elsif variables.evaluated != true %}evaluate_failed{% elsif variables.round_won == true %}win{% elsif variables.rewrite_best != true %}plateau_previous_best{% elsif variables.gain < consts.MIN_GAIN %}plateau_gain{% endif %}
+
+      # The rewrite becomes the current best when it beat the previous best in
+      # this round, whether or not the loop stops here.
+      - name: advance
+        type: data.set
+        if: '${{ variables.evaluated == true and variables.rewrite_best == true }}'
+        with:
+          current_content: '{{ steps.evaluate.output.best_content }}'
+          current_experiment_id: '{{ steps.evaluate.output.best_experiment_id }}'
+          current_mean: '${{ variables.round_mean }}'
+
+      - name: write_round_ki
+        type: context-engine.createKi
+        with:
+          ai_index_id: '{{ consts.AI_INDEX_ID }}'
+          ki_id: 'refine-{{ execution.id }}-{{ while.iteration }}'
+          ki:
+            type: aesop.refine_round
+            title: 'AESOP refine round {{ variables.rounds }} for {{ inputs.skill_id | default: inputs.new_skill_name | default: "a new skill" }}'
+            description: >-
+              Round {{ variables.rounds }} of at most {{ consts.MAX_ROUNDS }}: {% if variables.evaluated == true %}the best arm scored {{ steps.evaluate.output.best_mean }} against a baseline of {{ steps.evaluate.output.baseline_mean }} (p={{ steps.evaluate.output.best_p_value | default: 'n/a' }}, n={{ steps.evaluate.output.sample_size }}); {% if variables.rewrite_best == true %}the rewrite beat the previous best{% else %}the previous best held{% endif %}.{% else %}no A/B ran.{% endif %} {% if variables.stop_reason != blank %}Stopped: {{ variables.stop_reason }}.{% endif %}
+            content: >-
+              {% if variables.rewrite_ok == true %}{{ steps.rewrite.output.content.changes }}
+
+              {{ steps.rewrite.output.content.content | truncate: 60000, "" }}{% endif %}
+            tags:
+              - aesop
+              - aesop:refine
+            attributes:
+              skill_id: '{{ inputs.skill_id }}'
+              source_execution_id: '{{ inputs.source_execution_id }}'
+              round: '{{ variables.rounds }}'
+              started_at: '{{ variables.round_started_at }}'
+              ended_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}'
+              seed_experiment_id: '{{ variables.seed_experiment_id }}'
+              failed_examples: '{{ steps.collect_failures.output.failed_examples | default: 0 }}'
+              scored_examples: '{{ steps.collect_failures.output.scored_examples | default: 0 }}'
+              failures_used: '{{ steps.collect_failures.output.failures | size }}'
+              mentions_reference_count: '{{ steps.collect_failures.output.mentions_reference_count | default: 0 }}'
+              evaluated: '{{ variables.evaluated }}'
+              baseline_mean: "{% if variables.evaluated == true %}{{ steps.evaluate.output.baseline_mean }}{% endif %}"
+              best_mean: "{% if variables.evaluated == true %}{{ steps.evaluate.output.best_mean }}{% endif %}"
+              best_p_value: "{% if variables.evaluated == true %}{{ steps.evaluate.output.best_p_value }}{% endif %}"
+              best_experiment_id: "{% if variables.evaluated == true %}{{ steps.evaluate.output.best_experiment_id }}{% endif %}"
+              baseline_experiment_id: "{% if variables.evaluated == true %}{{ steps.evaluate.output.baseline_experiment_id }}{% endif %}"
+              rewrite_best: "{% if variables.evaluated == true %}{{ variables.rewrite_best }}{% endif %}"
+              gain: "{% if variables.evaluated == true %}{{ variables.gain }}{% endif %}"
+              stop_reason: '{{ variables.stop_reason }}'
+              dataset_id: '{{ inputs.dataset_id }}'
+              workflow_execution_id: '{{ execution.id }}'
+        on-failure:
+          continue: true
+
+  - name: resolve_outcome
+    type: data.set
+    with:
+      final_reason: "{{ variables.stop_reason | default: 'max_rounds' }}"
+
+  # ----------------------------------------------------------------------
+  # A win is proposed through a fresh, normal A/B of the refined variant: the
+  # round that won selected on its own noise, so the number the analyst sees
+  # comes from a run nothing was picked on. allow_refine: false, so a
+  # confirmation that does not win ends there instead of refining again.
+  # Fire and forget: it parks on the analyst approval.
+  # ----------------------------------------------------------------------
+  - name: confirm_variants
+    type: data.set
+    if: '${{ variables.final_reason == "win" }}'
+    with:
+      confirm_variants:
+        - '{{ variables.current_content }}'
+
+  - name: confirm
+    type: workflow.executeAsync
+    if: '${{ variables.final_reason == "win" }}'
+    with:
+      workflow-id: system-security-aesop-ab-compare
+      inputs:
+        skill_id: '{{ inputs.skill_id }}'
+        new_skill_name: '{{ inputs.new_skill_name }}'
+        skill_description: '{{ inputs.skill_description }}'
+        dataset_id: '{{ inputs.dataset_id }}'
+        connector_id: '{{ inputs.connector_id }}'
+        agent_id: '{{ inputs.agent_id }}'
+        variants: '${{ variables.confirm_variants }}'
+        investigation_id: '{{ inputs.investigation_id }}'
+        repetitions: '${{ inputs.repetitions }}'
+        concurrency: '${{ inputs.concurrency }}'
+        allow_refine: false
+    on-failure:
+      continue: true
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      rounds: '${{ variables.rounds }}'
+      stop_reason: '{{ variables.final_reason }}'
+      best_mean: '{{ variables.current_mean }}'
+      confirm_started: '${{ variables.final_reason == "win" and steps.confirm.error == null }}'

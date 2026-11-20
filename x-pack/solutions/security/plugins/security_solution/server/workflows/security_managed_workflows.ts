@@ -10,6 +10,7 @@ import {
   AESOP_AB_COMPARE_WORKFLOW_ID,
   AESOP_DRIFT_MONITOR_WORKFLOW_ID,
   AESOP_EXPLORER_WORKFLOW_ID,
+  AESOP_REFINE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
@@ -35,6 +36,9 @@ const AESOP_TEMPLATE_DEFINITION_IDS: ReadonlySet<string> = new Set<AesopTemplate
   AESOP_EXPLORER_WORKFLOW_ID,
 ]);
 
+// The A/B compare starts the refine, so both install at boot together.
+const AESOP_STATIC_WORKFLOW_IDS = [AESOP_AB_COMPARE_WORKFLOW_ID, AESOP_REFINE_WORKFLOW_ID] as const;
+
 const isAesopTemplateDefinitionId = (id: string | null): id is AesopTemplateDefinitionId =>
   id !== null && AESOP_TEMPLATE_DEFINITION_IDS.has(id);
 
@@ -45,12 +49,12 @@ const uninstallAesopWorkflows = async ({
   managedWorkflowsClient: SecurityManagedWorkflowsClient;
   logger: Logger;
 }): Promise<void> => {
-  try {
-    await managedWorkflowsClient.uninstall(AESOP_AB_COMPARE_WORKFLOW_ID, {
-      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-    });
-  } catch (error) {
-    logger.warn('Failed to uninstall the AESOP A/B compare workflow', { error });
+  for (const workflowId of AESOP_STATIC_WORKFLOW_IDS) {
+    try {
+      await managedWorkflowsClient.uninstall(workflowId, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
+    } catch (error) {
+      logger.warn(`Failed to uninstall the AESOP workflow ${workflowId}`, { error });
+    }
   }
 
   let instances: Awaited<ReturnType<SecurityManagedWorkflowsClient['listInstalledWorkflowStates']>>;
@@ -132,15 +136,15 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
   }
 
   // The drift monitor (per skill, on deploy) and the explorer (per space, on
-  // enable) are templates, so only the A/B workflow installs at boot;
+  // enable) are templates, so only the A/B and refine workflows install at boot;
   // flag-off removes all of them, and one failed uninstall does not stop the rest.
   if (aesopPrototypeEnabled) {
-    try {
-      await managedWorkflowsClient.install(AESOP_AB_COMPARE_WORKFLOW_ID, {
-        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      });
-    } catch (error) {
-      logger.warn('Failed to install the AESOP A/B compare workflow', { error });
+    for (const workflowId of AESOP_STATIC_WORKFLOW_IDS) {
+      try {
+        await managedWorkflowsClient.install(workflowId, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
+      } catch (error) {
+        logger.warn(`Failed to install the AESOP workflow ${workflowId}`, { error });
+      }
     }
   } else {
     await uninstallAesopWorkflows({ managedWorkflowsClient, logger });
