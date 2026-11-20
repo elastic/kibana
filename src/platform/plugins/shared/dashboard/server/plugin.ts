@@ -29,6 +29,7 @@ import type {
 } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { ResourceBootstrapSetup } from '@kbn/resource-bootstrap-plugin/server';
 import { ChangeHistoryClient } from '@kbn/change-history';
 import type { SpacesPluginStartApi } from '@kbn/spaces-plugin/server/plugin';
 
@@ -58,6 +59,7 @@ import { registerDashboardDrilldown } from './dashboard_drilldown/register_dashb
 import { getDashboardStateSchema } from './api/dashboard_state_schemas';
 import { startChangeHistoryClient } from './change_history/change_history_service';
 import { createDashboardWriteClient } from './dashboard_write_client';
+import { createDashboardKind } from './resource_bootstrap/dashboard_kind';
 
 export const DEFER_BELOW_FOLD = `labs:dashboard:deferBelowFold` as const;
 
@@ -66,6 +68,7 @@ interface SetupDeps {
   usageCollection?: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   contentManagement: ContentManagementServerSetup;
+  resourceBootstrap?: ResourceBootstrapSetup;
 }
 
 export interface StartDeps {
@@ -103,6 +106,8 @@ export class DashboardPlugin
     );
 
     plugins.contentManagement.favorites.registerFavoriteType('dashboard');
+
+    plugins.resourceBootstrap?.registerResourceKind(createDashboardKind({ core }));
 
     if (plugins.taskManager) {
       initializeDashboardTelemetryTask(this.logger, core, plugins.taskManager, plugins.embeddable);

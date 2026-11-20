@@ -17,6 +17,7 @@ import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { ResourceBootstrapSetup } from '@kbn/resource-bootstrap-plugin/server';
 import type { DataViewsService } from '../common';
 
 /**
@@ -83,6 +84,10 @@ export interface DataViewsServerPluginSetupDependencies {
    * Content management
    */
   contentManagement: ContentManagementServerSetup;
+  /**
+   * Resource bootstrap, which applies resources declared in files at startup
+   */
+  resourceBootstrap?: ResourceBootstrapSetup;
 }
 
 /**

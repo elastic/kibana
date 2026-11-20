@@ -1092,6 +1092,8 @@
     "@kbn/resizable-layout": "workspace:*",
     "@kbn/resizable-layout-examples-plugin": "workspace:*",
     "@kbn/resolver-test-plugin": "workspace:*",
+    "@kbn/resource-bootstrap-plugin": "workspace:*",
+    "@kbn/resource-bootstrap-server": "workspace:*",
     "@kbn/response-ops-alert-snooze": "workspace:*",
     "@kbn/response-ops-alerts-apis": "workspace:*",
     "@kbn/response-ops-alerts-delete": "workspace:*",

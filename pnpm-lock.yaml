@@ -3205,6 +3205,12 @@ importers:
       '@kbn/resolver-test-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/security/test_plugins/resolver_test
+      '@kbn/resource-bootstrap-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/resource_bootstrap
+      '@kbn/resource-bootstrap-server':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-resource-bootstrap-server
       '@kbn/response-ops-alert-snooze':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/response-ops/alert-snooze
@@ -9266,6 +9272,8 @@ importers:
 
   x-pack/platform/packages/shared/kbn-proposals-ui: {}
 
+  x-pack/platform/packages/shared/kbn-resource-bootstrap-server: {}
+
   x-pack/platform/packages/shared/kbn-sample-parser: {}
 
   x-pack/platform/packages/shared/kbn-search-index-documents: {}
@@ -9607,6 +9615,8 @@ importers:
   x-pack/platform/plugins/shared/proposals: {}
 
   x-pack/platform/plugins/shared/query_activity: {}
+
+  x-pack/platform/plugins/shared/resource_bootstrap: {}
 
   x-pack/platform/plugins/shared/rule_registry: {}
 

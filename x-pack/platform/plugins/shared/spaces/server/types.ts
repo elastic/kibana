@@ -14,6 +14,7 @@ import type {
   LicensingApiRequestHandlerContext,
   LicensingPluginSetup,
 } from '@kbn/licensing-plugin/server';
+import type { ResourceBootstrapSetup } from '@kbn/resource-bootstrap-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import type { spaceV1 as v1 } from '../common';
@@ -25,6 +26,7 @@ export interface SpacesPluginSetupDeps {
   home?: HomeServerPluginSetup;
   cloud?: CloudSetup;
   cps?: CPSServerSetup;
+  resourceBootstrap?: ResourceBootstrapSetup;
 }
 
 export interface SpacesPluginStartDeps {

@@ -18,7 +18,8 @@
     ],
     "optionalPlugins": [
       "usageCollection",
-      "cps"
+      "cps",
+      "resourceBootstrap"
     ],
     "requiredBundles": [
       "kibanaUtils"

@@ -1,0 +1,7 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/resource-bootstrap-server",
+  "owner": "@elastic/cloud-k8s-operator",
+  "group": "platform",
+  "visibility": "shared"
+}

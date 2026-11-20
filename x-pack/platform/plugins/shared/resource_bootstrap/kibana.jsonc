@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/resource-bootstrap-plugin",
+  "owner": "@elastic/cloud-k8s-operator",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "resourceBootstrap",
+    "server": true,
+    "browser": false,
+    "configPath": ["xpack", "resourceBootstrap"],
+    "requiredPlugins": ["taskManager"],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

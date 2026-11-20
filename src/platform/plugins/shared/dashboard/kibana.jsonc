@@ -40,7 +40,8 @@
       "lens",
       "security",
       "cps",
-      "searchSessionsManagement"
+      "searchSessionsManagement",
+      "resourceBootstrap"
     ],
     "requiredBundles": [
       "kibanaReact",

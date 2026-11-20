@@ -21,7 +21,10 @@ import type { ConfigType } from './config';
 import { DefaultSpaceService } from './default_space';
 import { InitialSolutionSetupService } from './initial_solution_setup/initial_solution_setup_service';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
+import { seedAgentChatExperienceForSolutionSpace } from './lib/seed_agent_chat_experience_for_solution_space';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
+import { createInternalSpacesClient } from './resource_bootstrap/create_internal_spaces_client';
+import { createSpacesKind } from './resource_bootstrap/spaces_kind';
 import { initExternalSpacesApi } from './routes/api/external';
 import { initInternalSpacesApi } from './routes/api/internal';
 import { initSpacesViewsRoutes } from './routes/views';
@@ -158,6 +161,36 @@ export class SpacesPlugin
 
     const solution = plugins.cloud?.onboarding?.defaultSolution || defaultSolution;
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
+
+    plugins.resourceBootstrap?.registerResourceKind(
+      createSpacesKind({
+        isServerless,
+        getSpacesClient: createInternalSpacesClient({
+          core,
+          config$: this.config$,
+          buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
+          logger: this.log,
+        }),
+        getSavedObjectsClient: async () =>
+          (await core.getStartServices())[0].savedObjects.getUnsafeInternalClient({
+            includedHiddenTypes: ['space'],
+          }),
+        // Seeds a created space as the create route does, which skips this in serverless.
+        onCreated: isServerless
+          ? undefined
+          : async ({ id, solution: createdSolution }) => {
+              const [coreStart] = await core.getStartServices();
+              await seedAgentChatExperienceForSolutionSpace({
+                coreStart,
+                log: this.log,
+                spaceId: id,
+                solution: createdSolution,
+                packageInfo: this.initializerContext.env.packageInfo,
+              });
+            },
+      })
+    );
+
     const eligible = initialSolutionSetupEnabled && !solution;
     const initialSolutionSetup = new InitialSolutionSetupService(eligible);
     const getSavedObjects = async () => (await core.getStartServices())[0].savedObjects;

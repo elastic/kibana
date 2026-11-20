@@ -1156,6 +1156,7 @@ x-pack/platform/packages/shared/kbn-nightshift-ai @elastic/nightshift
 x-pack/platform/packages/shared/kbn-profiler-cli @elastic/observability-ui
 x-pack/platform/packages/shared/kbn-proposals-common @elastic/alertzero-common-layer
 x-pack/platform/packages/shared/kbn-proposals-ui @elastic/alertzero-common-layer
+x-pack/platform/packages/shared/kbn-resource-bootstrap-server @elastic/cloud-k8s-operator
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-ui @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-shared-components @elastic/search-ml-ux
