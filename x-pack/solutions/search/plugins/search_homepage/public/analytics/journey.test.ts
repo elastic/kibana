@@ -14,7 +14,15 @@ import {
   SEARCH_SOURCE,
   SEARCH_STATE,
 } from './components/shared/test_helpers';
-import { getEventSources, resolveJourney, toEventsState } from './journey';
+import { getEventSources, getGateAudience, resolveJourney, toEventsState } from './journey';
+
+describe('getGateAudience', () => {
+  it('addresses events only when analytics was asked for', () => {
+    expect(getGateAudience('analytics')).toBe('events');
+    expect(getGateAudience('search')).toBe('all');
+    expect(getGateAudience(undefined)).toBe('all');
+  });
+});
 
 describe('resolveJourney', () => {
   it('resolves nothing while the cluster holds no data', () => {

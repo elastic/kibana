@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { MouseEvent } from 'react';
 import React, { useState } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,6 +31,8 @@ interface StarterQueryListProps {
   canUseDiscover: boolean;
   /** Omit for queries that cannot run as written; they are then copy-only. */
   onOpenQuery?: (query: AnalyticsStarterQuery) => void | Promise<void>;
+  /** Offers to show the query as a request from the user's own code; `opener` is the control that asked. */
+  onUseInApp?: (query: AnalyticsStarterQuery, opener: HTMLElement) => void;
   /** Whether opening a query is the main action of the view it sits in. */
   isPrimary?: boolean;
   /** Called when the user expands a question or opens one, so the list is not swapped under them. */
@@ -43,6 +47,7 @@ export const StarterQueryList = ({
   queries,
   canUseDiscover,
   onOpenQuery,
+  onUseInApp,
   isPrimary = false,
   onInteract,
   hasStableLayout = false,
@@ -123,45 +128,81 @@ export const StarterQueryList = ({
               >
                 {query.esql}
               </EuiCodeBlock>
-              {canOpen && (
+              {(canOpen || onUseInApp !== undefined) && (
                 <>
                   <EuiSpacer size="s" />
-                  <EuiToolTip
-                    content={
-                      canUseDiscover
-                        ? undefined
-                        : i18n.translate(
-                            'xpack.searchHomepage.analytics.starterQueries.missingDiscoverPrivilege',
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+                    {canOpen && (
+                      <EuiFlexItem grow={false}>
+                        <EuiToolTip
+                          content={
+                            canUseDiscover
+                              ? undefined
+                              : i18n.translate(
+                                  'xpack.searchHomepage.analytics.starterQueries.missingDiscoverPrivilege',
+                                  {
+                                    defaultMessage:
+                                      'You need access to Discover to run this query.',
+                                  }
+                                )
+                          }
+                        >
+                          <EuiButton
+                            fill={isPrimary}
+                            size="s"
+                            iconType="discoverApp"
+                            onClick={() => openQuery(query)}
+                            isLoading={pendingQueryId === query.id}
+                            isDisabled={!canUseDiscover}
+                            hasAriaDisabled
+                            aria-label={i18n.translate(
+                              'xpack.searchHomepage.analytics.starterQueries.openInDiscoverAriaLabel',
+                              {
+                                defaultMessage: 'Open in Discover: {question}',
+                                values: { question: query.question },
+                              }
+                            )}
+                            data-test-subj={getPageTestSubj(page, `OpenInDiscover-${query.id}`)}
+                            data-telemetry-id={getPageTelemetryId(
+                              page,
+                              `openInDiscover-${query.id}`
+                            )}
+                          >
+                            {i18n.translate(
+                              'xpack.searchHomepage.analytics.starterQueries.openInDiscoverButton',
+                              { defaultMessage: 'Open in Discover' }
+                            )}
+                          </EuiButton>
+                        </EuiToolTip>
+                      </EuiFlexItem>
+                    )}
+                    {onUseInApp !== undefined && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          size="s"
+                          iconType="code"
+                          onClick={({ currentTarget }: MouseEvent<HTMLElement>) => {
+                            onInteract?.();
+                            onUseInApp(query, currentTarget);
+                          }}
+                          aria-label={i18n.translate(
+                            'xpack.searchHomepage.analytics.starterQueries.useInAppAriaLabel',
                             {
-                              defaultMessage: 'You need access to Discover to run this query.',
+                              defaultMessage: 'Use in your app: {question}',
+                              values: { question: query.question },
                             }
-                          )
-                    }
-                  >
-                    <EuiButton
-                      fill={isPrimary}
-                      size="s"
-                      iconType="discoverApp"
-                      onClick={() => openQuery(query)}
-                      isLoading={pendingQueryId === query.id}
-                      isDisabled={!canUseDiscover}
-                      hasAriaDisabled
-                      aria-label={i18n.translate(
-                        'xpack.searchHomepage.analytics.starterQueries.openInDiscoverAriaLabel',
-                        {
-                          defaultMessage: 'Open in Discover: {question}',
-                          values: { question: query.question },
-                        }
-                      )}
-                      data-test-subj={getPageTestSubj(page, `OpenInDiscover-${query.id}`)}
-                      data-telemetry-id={getPageTelemetryId(page, `openInDiscover-${query.id}`)}
-                    >
-                      {i18n.translate(
-                        'xpack.searchHomepage.analytics.starterQueries.openInDiscoverButton',
-                        { defaultMessage: 'Open in Discover' }
-                      )}
-                    </EuiButton>
-                  </EuiToolTip>
+                          )}
+                          data-test-subj={getPageTestSubj(page, `UseInApp-${query.id}`)}
+                          data-telemetry-id={getPageTelemetryId(page, `useInApp-${query.id}`)}
+                        >
+                          {i18n.translate(
+                            'xpack.searchHomepage.analytics.starterQueries.useInAppButton',
+                            { defaultMessage: 'Use in your app' }
+                          )}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
                 </>
               )}
             </EuiPanel>

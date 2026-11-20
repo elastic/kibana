@@ -9,6 +9,7 @@ import type {
   AnalyticsClusterState,
   AnalyticsDataKind,
   AnalyticsEventSource,
+  AnalyticsSourceAudience,
   ResolvedJourney,
 } from './types';
 
@@ -25,6 +26,14 @@ const JOURNEY_BY_DATA_KIND: Readonly<Record<AnalyticsDataKind, ResolvedJourney>>
 
 const getOtherJourney = (journey: ResolvedJourney): ResolvedJourney =>
   journey === 'analytics' ? 'search' : 'analytics';
+
+/**
+ * Who the ingest gate addresses while the cluster holds no data to tell: users bringing in events
+ * when analytics was asked for in this browser, else everyone.
+ */
+export const getGateAudience = (
+  preferredJourney: ResolvedJourney | undefined
+): AnalyticsSourceAudience => (preferredJourney === 'analytics' ? 'events' : 'all');
 
 /** The sources the analytics views may list, pick and chart. */
 export const getEventSources = (

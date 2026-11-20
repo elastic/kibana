@@ -6,8 +6,9 @@
  */
 
 import type { Ref } from 'react';
-import React from 'react';
+import React, { useState } from 'react';
 import {
+  EuiAccordion,
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
@@ -20,10 +21,12 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ANALYTICS_TELEMETRY_PREFIX } from '../../constants';
+import { useSourceGeneration } from '../../hooks/use_source_generation';
 import { getSourceStarterQueries } from '../../source_queries';
 import type { AnalyticsClusterState, AnalyticsEventSource, AnalyticsLinks } from '../../types';
 import { AddSourceButton } from '../shared/add_source_button';
@@ -34,11 +37,42 @@ import {
 } from '../shared/event_source_utils';
 import { EventsDetectedCallout } from '../shared/event_status';
 import { EventsOverTime } from '../shared/events_over_time';
+import { ExplorePanel } from '../shared/explore_panel';
 import { panelHeader } from '../shared/shared_styles';
+import { useSelectedEventSource } from '../shared/use_selected_event_source';
 import { HomeHeader } from './home_header';
 
 /** Lists stay short so the quick actions remain the first thing to read. */
 const MAX_LIST_ITEMS = 3;
+
+const STARTER_QUERIES_TOGGLE_PROPS = {
+  'data-test-subj': 'analyticsHomeStarterQueriesToggle',
+  'data-telemetry-id': `${ANALYTICS_TELEMETRY_PREFIX}-home-starterQueriesToggle`,
+};
+
+/** Mounted when the starter queries are first shown, which is when questions are requested from a model. */
+const StarterQueries = ({
+  state,
+  links,
+}: Pick<HasDashboardsViewProps, 'state' | 'links'>): React.JSX.Element => {
+  const [selectedSource, selectSource] = useSelectedEventSource(state.sources);
+  const generation = useSourceGeneration(selectedSource);
+
+  return (
+    <ExplorePanel
+      page="home"
+      headingElement="h3"
+      sources={state.sources}
+      totalSources={state.totalSources}
+      selectedSource={selectedSource}
+      onSelectSource={selectSource}
+      showAgentEntry={false}
+      links={links}
+      generation={generation}
+      isPrimary={false}
+    />
+  );
+};
 
 interface HasDashboardsViewProps {
   headingRef: Ref<HTMLHeadingElement>;
@@ -59,6 +93,8 @@ export const HasDashboardsView = ({
   const sources = state.sources.slice(0, MAX_LIST_ITEMS);
   const defaultSource = getDefaultEventSource(state.sources);
   const hiddenSourcesCount = state.totalSources - sources.length;
+  const starterQueriesId = useGeneratedHtmlId({ prefix: 'analyticsHomeStarterQueries' });
+  const [hasOpenedStarterQueries, setHasOpenedStarterQueries] = useState(false);
 
   const discoverTooltip = links.canUseDiscover
     ? undefined
@@ -297,6 +333,31 @@ export const HasDashboardsView = ({
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="l" />
+      <EuiAccordion
+        id={starterQueriesId}
+        paddingSize="none"
+        buttonContent={
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate(
+                'xpack.searchHomepage.analytics.home.hasDashboards.starterQueriesTitle',
+                { defaultMessage: 'Starter queries' }
+              )}
+            </h2>
+          </EuiTitle>
+        }
+        buttonProps={STARTER_QUERIES_TOGGLE_PROPS}
+        onToggle={(isOpen) => {
+          if (isOpen) {
+            setHasOpenedStarterQueries(true);
+          }
+        }}
+        data-test-subj="analyticsHomeStarterQueries"
+      >
+        <EuiSpacer size="m" />
+        {hasOpenedStarterQueries && <StarterQueries state={state} links={links} />}
+      </EuiAccordion>
     </KibanaPageTemplate.Section>
   );
 };

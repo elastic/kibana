@@ -284,7 +284,6 @@ describe('useAnalyticsLinks', () => {
     expect(links.isSourceAvailable(sourceWithTarget({ type: 'createIndex' }))).toBe(false);
     expect(links.isSourceAvailable(sourceWithTarget({ type: 'apiTutorial' }))).toBe(false);
     expect(links.isSourceAvailable(sourceWithTarget({ type: 'fileUpload' }))).toBe(true);
-    expect(links.isSourceAvailable(sourceWithTarget({ type: 'gettingStarted' }))).toBe(true);
   });
 
   it('opens a search request for the source in the embedded console', () => {
@@ -394,16 +393,7 @@ describe('useAnalyticsLinks', () => {
     const { links } = setup();
 
     expect(links.sourceOpensDialog(sourceWithTarget({ type: 'webCrawl' }))).toBe(true);
-    expect(links.sourceOpensDialog(sourceWithTarget({ type: 'gettingStarted' }))).toBe(false);
-  });
-
-  it('opens the getting started page for sending data with the API', () => {
-    const { links, application, openEmbeddedConsole } = setup();
-
-    links.openSource(sourceWithTarget({ type: 'gettingStarted' }));
-
-    expect(application.navigateToApp).toHaveBeenCalledWith('searchGettingStarted');
-    expect(openEmbeddedConsole).not.toHaveBeenCalled();
+    expect(links.sourceOpensDialog(sourceWithTarget({ type: 'createIndex' }))).toBe(false);
   });
 
   it('opens data federation through its navigation link', () => {

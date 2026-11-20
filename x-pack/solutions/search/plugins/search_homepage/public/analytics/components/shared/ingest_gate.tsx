@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { AnalyticsLinks, AnalyticsSampleData } from '../../types';
+import type { AnalyticsLinks, AnalyticsSampleData, AnalyticsSourceAudience } from '../../types';
 import { ConnectPanel } from './connect_panel';
 import type { AnalyticsPageId } from './page_ids';
 import { getPageTestSubj } from './page_ids';
@@ -15,6 +15,7 @@ interface IngestGateProps {
   page: AnalyticsPageId;
   /** Omit when the surrounding view already has a heading for this task. */
   title?: string;
+  audience?: AnalyticsSourceAudience;
   links: Pick<
     AnalyticsLinks,
     | 'canUseIntegrations'
@@ -35,6 +36,7 @@ interface IngestGateProps {
 export const IngestGate = ({
   page,
   title,
+  audience,
   links,
   sampleData,
   onSampleInstalled,
@@ -43,6 +45,7 @@ export const IngestGate = ({
     <ConnectPanel
       page={page}
       title={title}
+      audience={audience}
       links={links}
       sampleData={sampleData}
       onSampleInstalled={onSampleInstalled}

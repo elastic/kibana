@@ -17,7 +17,7 @@ import {
   getFeaturedAnalyticsEntries,
 } from './sources';
 import { buildSourceDashboardParams, buildStarterDashboardParams } from './starter_dashboard';
-import type { AnalyticsEventSource, AnalyticsUseCaseId } from './types';
+import type { AnalyticsEventSource, AnalyticsFeaturedEntry, AnalyticsUseCaseId } from './types';
 import { getAnalyticsUseCases } from './use_cases';
 
 const unique = (values: readonly string[]): boolean => new Set(values).size === values.length;
@@ -98,7 +98,6 @@ describe('analytics sources', () => {
       'eventHubs',
       'messageQueues',
       'httpEndpoint',
-      'api',
       'eventsIndex',
       'fileUpload',
       'customIntegration',
@@ -125,7 +124,6 @@ describe('analytics sources', () => {
   it('keeps every way in that the classic home and getting started offered', () => {
     expect(sources.map(({ target }) => target.type)).toEqual(
       expect.arrayContaining([
-        'gettingStarted',
         'fileUpload',
         'externalUrl',
         'sampleDataDirectory',
@@ -150,11 +148,12 @@ describe('analytics sources', () => {
     );
   });
 
-  it('offers an empty events index as a form on the page, with the other ways to send data', () => {
+  it('offers sending events with the API as a form on the page, with the other ways to send data', () => {
     expect(sources.find(({ id }) => id === 'eventsIndex')).toEqual(
       expect.objectContaining({
         group: 'sendEvents',
-        title: 'Create an events index',
+        title: 'Send events with the API',
+        description: 'Create an events index and get code for curl, JavaScript and Python.',
         target: { type: 'eventsIndex' },
       })
     );
@@ -169,16 +168,46 @@ describe('analytics sources', () => {
 
 describe('getFeaturedAnalyticsEntries', () => {
   const featured = getFeaturedAnalyticsEntries();
+  const eventsFeatured = getFeaturedAnalyticsEntries('events');
+  const getEntryId = (entry: AnalyticsFeaturedEntry): string => {
+    switch (entry.kind) {
+      case 'source':
+        return entry.source.id;
+      case 'sourceList':
+        return entry.list.id;
+      case 'sampleEvents':
+        return entry.sample.id;
+    }
+  };
 
-  it('features two sources for any data, the event sources as a list, then the website crawl', () => {
-    expect(
-      featured.map((entry) => (entry.kind === 'source' ? entry.source.id : entry.list.id))
-    ).toEqual(['api', 'fileUpload', 'eventStream', 'webCrawl']);
+  it('features the file upload, the API, the event sources as a list, then the website crawl', () => {
+    expect(featured.map(getEntryId)).toEqual([
+      'fileUpload',
+      'eventsIndex',
+      'eventStream',
+      'webCrawl',
+    ]);
     expect(featured.map(({ kind }) => kind)).toEqual(['source', 'source', 'sourceList', 'source']);
   });
 
+  it('features the API first, no website crawl and the sample events for the events audience', () => {
+    expect(eventsFeatured.map(getEntryId)).toEqual([
+      'eventsIndex',
+      'eventStream',
+      'fileUpload',
+      'sampleEvents',
+    ]);
+    expect(eventsFeatured[3]).toEqual({
+      kind: 'sampleEvents',
+      sample: expect.objectContaining({
+        title: 'Try sample web events',
+        description: 'Page views, carts and purchases from an online store.',
+      }),
+    });
+  });
+
   it('features sources from the catalog as they are', () => {
-    for (const entry of featured) {
+    for (const entry of [...featured, ...eventsFeatured]) {
       if (entry.kind === 'source') {
         expect(getAnalyticsSources()).toContainEqual(entry.source);
       }

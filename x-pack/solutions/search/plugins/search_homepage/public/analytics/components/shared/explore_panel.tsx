@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -20,18 +20,21 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { AnalyticsAppApiKeyResult } from '../../../../common/analytics_app_api_key';
 import { useAnalyticsPreferences } from '../../hooks/use_analytics_preferences';
 import type { SourceGenerationResult } from '../../hooks/use_source_generation';
 import { UNAVAILABLE_SOURCE_GENERATION } from '../../hooks/use_source_generation';
+import { getStarterQueryTimeField } from '../../query_snippets';
 import { getInferredUseCaseNote, resolveSourceRoles } from '../../source_field_roles';
 import { getSampleUseCase, getSourceStarterQueries } from '../../source_queries';
-import type { AnalyticsEventSource, AnalyticsLinks } from '../../types';
+import type { AnalyticsEventSource, AnalyticsLinks, AnalyticsStarterQuery } from '../../types';
 import { getExploreSourceAgentPrompt } from './event_source_utils';
 import { GenerationStatus } from './generation_status';
 import type { AnalyticsPageId } from './page_ids';
 import { getPageTelemetryId, getPageTestSubj } from './page_ids';
 import { reservedNote, sourcePicker } from './shared_styles';
 import { StarterQueryList } from './starter_query_list';
+import { UseInAppFlyout } from './use_in_app_flyout';
 import { useStarterQueryUpgrade } from './use_starter_query_upgrade';
 
 /** The most questions a list can hold, built-in or generated. */
@@ -53,6 +56,8 @@ interface ExplorePanelProps {
   links: Pick<AnalyticsLinks, 'canUseDiscover' | 'canOpenAgentChat' | 'openDiscover' | 'askAgent'>;
   /** Questions a model wrote for the selected source, which take the built-in ones' place. */
   generation?: SourceGenerationResult;
+  /** Whether exploring is the main action of the view the panel sits in. */
+  isPrimary?: boolean;
 }
 
 /** The explore task: starter queries for one of the user's own event sources. */
@@ -66,6 +71,7 @@ export const ExplorePanel = ({
   showAgentEntry,
   links,
   generation = UNAVAILABLE_SOURCE_GENERATION,
+  isPrimary = true,
 }: ExplorePanelProps): React.JSX.Element => {
   const { selectedUseCaseId } = useAnalyticsPreferences();
   const upgrade = useStarterQueryUpgrade(selectedSource?.name, generation);
@@ -87,6 +93,25 @@ export const ExplorePanel = ({
       : undefined;
   }, [selectedSource, selectedUseCaseId]);
   const queries = upgrade.shown?.queries ?? builtInQueries;
+
+  const [useInApp, setUseInApp] = useState<{
+    query: AnalyticsStarterQuery;
+    sourceName: string;
+    timeField: string | undefined;
+  }>();
+  const useInAppOpenerRef = useRef<HTMLElement | null>(null);
+  // Held in memory only: the keys are gone when the page is left or reloaded.
+  const [appApiKeys, setAppApiKeys] = useState<Readonly<Record<string, AnalyticsAppApiKeyResult>>>(
+    {}
+  );
+  const closeUseInApp = useCallback((): void => {
+    setUseInApp(undefined);
+    // The opener is gone when the list of queries was replaced while the flyout was open.
+    if (useInAppOpenerRef.current?.isConnected) {
+      useInAppOpenerRef.current.focus();
+    }
+    useInAppOpenerRef.current = null;
+  }, []);
 
   // While generated questions may still arrive, the list keeps room for as many as can come, so
   // that nothing under it moves when they take the built-in ones' place.
@@ -238,7 +263,15 @@ export const ExplorePanel = ({
             queries={queries}
             canUseDiscover={links.canUseDiscover}
             onOpenQuery={({ esql }) => links.openDiscover(esql)}
-            isPrimary
+            onUseInApp={(query, opener) => {
+              useInAppOpenerRef.current = opener;
+              setUseInApp({
+                query,
+                sourceName: selectedSource.name,
+                timeField: getStarterQueryTimeField(selectedSource),
+              });
+            }}
+            isPrimary={isPrimary}
             onInteract={upgrade.onInteract}
             hasStableLayout={hasStableLayout}
           />
@@ -254,7 +287,7 @@ export const ExplorePanel = ({
           }
         >
           <EuiButton
-            fill
+            fill={isPrimary}
             iconType="discoverApp"
             onClick={() => links.openDiscover()}
             isDisabled={!links.canUseDiscover}
@@ -287,6 +320,18 @@ export const ExplorePanel = ({
             })}
           </EuiButtonEmpty>
         </>
+      )}
+      {useInApp !== undefined && (
+        <UseInAppFlyout
+          query={useInApp.query}
+          sourceName={useInApp.sourceName}
+          timeField={useInApp.timeField}
+          apiKey={appApiKeys[useInApp.sourceName]}
+          onApiKeyCreated={(apiKey) =>
+            setAppApiKeys((keys) => ({ ...keys, [useInApp.sourceName]: apiKey }))
+          }
+          onClose={closeUseInApp}
+        />
       )}
     </EuiPanel>
   );

@@ -31,7 +31,9 @@ import {
   ANALYTICS_TELEMETRY_PREFIX,
   GUIDED_SETUP_PATH,
   HOME_PATH,
+  STARTER_QUERY_TIME_RANGE,
 } from '../constants';
+import { canOpenPageConsole, openPageConsole } from '../console_usage';
 import { buildSearchRequestExample } from '../search_request_example';
 import { withAutoRefresh } from '../dashboard_refresh';
 import { buildGeneratedDashboardParams, buildSourceDashboardParams } from '../starter_dashboard';
@@ -42,10 +44,8 @@ const INTEGRATIONS_BROWSE_PATH = '/browse';
 const DATA_FEDERATION_NAV_LINK_ID = 'management:data_federation';
 const INDEX_MANAGEMENT_LOCATOR_ID = 'SEARCH_INDEX_MANAGEMENT_LOCATOR_ID';
 const HOME_APP_ID = 'home';
-const GETTING_STARTED_APP_ID = 'searchGettingStarted';
 const FILE_UPLOAD_PATH = '#/tutorial_directory/fileDataViz';
 const SAMPLE_DATA_PATH = '#/tutorial_directory/sampleData';
-const STARTER_QUERY_TIME_RANGE = { from: 'now-7d', to: 'now' };
 
 type IntegrationsTarget = Extract<
   AnalyticsSourceTarget,
@@ -124,13 +124,10 @@ export const useAnalyticsLinks = (): AnalyticsLinks => {
       navigateToIntegrations(INTEGRATIONS_BROWSE_PATH);
     };
 
-    const isEmbeddedConsoleAvailable = (): boolean =>
-      consolePlugin?.openEmbeddedConsole !== undefined &&
-      consolePlugin.isEmbeddedConsoleAvailable?.() === true;
+    const isEmbeddedConsoleAvailable = (): boolean => canOpenPageConsole(consolePlugin);
 
     const openConsole = (content: string): void => {
-      if (consolePlugin?.openEmbeddedConsole && isEmbeddedConsoleAvailable()) {
-        consolePlugin.openEmbeddedConsole(content);
+      if (openPageConsole(consolePlugin, content)) {
         return;
       }
       application.navigateToApp('dev_tools').catch(showNavigationError);
@@ -202,9 +199,6 @@ export const useAnalyticsLinks = (): AnalyticsLinks => {
           application
             .navigateToApp(HOME_APP_ID, { path: SAMPLE_DATA_PATH })
             .catch(showNavigationError);
-          return;
-        case 'gettingStarted':
-          application.navigateToApp(GETTING_STARTED_APP_ID).catch(showNavigationError);
           return;
         case 'apiTutorial':
           openApiTutorial();

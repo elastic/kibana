@@ -78,15 +78,27 @@ export const getAnalyticsSourceGroups = (
   );
 };
 
-const LEADING_FEATURED_SOURCE_IDS: readonly string[] = ['api', 'fileUpload'];
-const TRAILING_FEATURED_SOURCE_IDS: readonly string[] = ['webCrawl'];
+interface FeaturedLayout {
+  leading: readonly string[];
+  trailing: readonly string[];
+  hasSampleEvents: boolean;
+}
+
+const FEATURED_LAYOUT: Readonly<Record<AnalyticsSourceAudience, FeaturedLayout>> = {
+  all: { leading: ['fileUpload', 'eventsIndex'], trailing: ['webCrawl'], hasSampleEvents: false },
+  events: { leading: ['eventsIndex'], trailing: ['fileUpload'], hasSampleEvents: true },
+};
 
 /**
- * The ways in shown before the full list is disclosed, in display order: two sources that suit any
- * data, the event sources as a list of their own, then the website crawl for search content. A
- * source is only shown where it is available.
+ * The ways in shown before the full list is disclosed, in display order. Every audience gets the
+ * file upload, the API and the event sources as a list of their own; the website crawl is featured
+ * for everyone, and the sample events for users bringing in events. A source is only shown where
+ * it is available.
  */
-export const getFeaturedAnalyticsEntries = (): readonly AnalyticsFeaturedEntry[] => {
+export const getFeaturedAnalyticsEntries = (
+  audience: AnalyticsSourceAudience = 'all'
+): readonly AnalyticsFeaturedEntry[] => {
+  const { leading, trailing, hasSampleEvents } = FEATURED_LAYOUT[audience];
   const sources = getAnalyticsSources();
   const toEntries = (featuredIds: readonly string[]): AnalyticsFeaturedEntry[] =>
     featuredIds.flatMap((featuredId) =>
@@ -94,9 +106,26 @@ export const getFeaturedAnalyticsEntries = (): readonly AnalyticsFeaturedEntry[]
         .filter(({ id }) => id === featuredId)
         .map((source): AnalyticsFeaturedEntry => ({ kind: 'source', source }))
     );
+  const sampleEntries: AnalyticsFeaturedEntry[] = hasSampleEvents
+    ? [
+        {
+          kind: 'sampleEvents',
+          sample: {
+            id: 'sampleEvents',
+            title: i18n.translate('xpack.searchHomepage.analytics.sampleEvents.title', {
+              defaultMessage: 'Try sample web events',
+            }),
+            description: i18n.translate('xpack.searchHomepage.analytics.sampleEvents.description', {
+              defaultMessage: 'Page views, carts and purchases from an online store.',
+            }),
+            iconType: 'flask',
+          },
+        },
+      ]
+    : [];
 
   return [
-    ...toEntries(LEADING_FEATURED_SOURCE_IDS),
+    ...toEntries(leading),
     {
       kind: 'sourceList',
       list: {
@@ -112,7 +141,8 @@ export const getFeaturedAnalyticsEntries = (): readonly AnalyticsFeaturedEntry[]
         audience: 'events',
       },
     },
-    ...toEntries(TRAILING_FEATURED_SOURCE_IDS),
+    ...toEntries(trailing),
+    ...sampleEntries,
   ];
 };
 
@@ -192,28 +222,15 @@ export const getAnalyticsSources = (): readonly AnalyticsSource[] => [
     target: { type: 'integrationSearch', searchTerm: 'http endpoint' },
   },
   {
-    id: 'api',
-    group: 'sendEvents',
-    title: i18n.translate('xpack.searchHomepage.analytics.sources.api.title', {
-      defaultMessage: 'Send data with the API',
-    }),
-    description: i18n.translate('xpack.searchHomepage.analytics.sources.api.description', {
-      defaultMessage:
-        'Connect your application with a client library, an API key and code examples.',
-    }),
-    iconType: 'commandLine',
-    target: { type: 'gettingStarted' },
-  },
-  {
     id: 'eventsIndex',
     group: 'sendEvents',
     title: i18n.translate('xpack.searchHomepage.analytics.sources.eventsIndex.title', {
-      defaultMessage: 'Create an events index',
+      defaultMessage: 'Send events with the API',
     }),
     description: i18n.translate('xpack.searchHomepage.analytics.sources.eventsIndex.description', {
-      defaultMessage: 'An empty index in columnar mode for events you send with the API.',
+      defaultMessage: 'Create an events index and get code for curl, JavaScript and Python.',
     }),
-    iconType: 'tablePlus',
+    iconType: 'code',
     target: { type: 'eventsIndex' },
   },
   {

@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { hasSeenData } from '@kbn/search-shared-ui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { ANALYTICS_TELEMETRY_PREFIX } from '../../constants';
 import { useAnalyticsClusterState } from '../../hooks/use_analytics_cluster_state';
@@ -29,6 +30,7 @@ import { useAnalyticsPreferences } from '../../hooks/use_analytics_preferences';
 import { useSampleData } from '../../hooks/use_sample_data';
 import { useSourceGeneration } from '../../hooks/use_source_generation';
 import {
+  getGateAudience,
   getLargestOwnSource,
   getSearchSources,
   resolveJourney,
@@ -72,6 +74,11 @@ export const GuidedSetupPage = (): React.JSX.Element => {
       ? undefined
       : resolveJourney(state, preferredJourney);
   const journey = resolution?.journey;
+  const gateAudience = getGateAudience(preferredJourney);
+  // Until the cluster answers, a browser that has not seen data here is taken to be at the gate.
+  const isAtGate = state === undefined ? !hasSeenData() : state.stage === 'noData';
+  const isEventsGate = isAtGate && gateAudience === 'events';
+  const titleJourney = isEventsGate ? 'analytics' : journey;
   const eventsState = useMemo(
     () => (state === undefined ? undefined : toEventsState(state)),
     [state]
@@ -148,7 +155,8 @@ export const GuidedSetupPage = (): React.JSX.Element => {
       : getStepCopy(
           stepId,
           journey,
-          eventsState !== undefined && hasOnlySampleSources(eventsState)
+          eventsState !== undefined && hasOnlySampleSources(eventsState),
+          gateAudience
         );
 
   const renderStepContent = (currentStepId: OnboardingStepId): React.JSX.Element => {
@@ -159,6 +167,7 @@ export const GuidedSetupPage = (): React.JSX.Element => {
             links={links}
             sampleData={sampleData}
             journey={journey}
+            gateAudience={gateAudience}
             detectedSource={detectedSource}
             onSampleInstalled={onSampleInstalled}
             onContinue={() => {
@@ -347,12 +356,13 @@ export const GuidedSetupPage = (): React.JSX.Element => {
         defaultMessage: 'Get started',
       })}
       data-test-subj="guidedSetupPage"
+      hideConsoleUntilUsed={state === undefined || state.stage === 'noData'}
     >
       <KibanaPageTemplate.Section paddingSize="xl" grow={false} bottomBorder>
         <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" gutterSize="m" wrap>
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <h1 data-test-subj="analyticsOnboardingTitle">{getSetupTitle(journey)}</h1>
+              <h1 data-test-subj="analyticsOnboardingTitle">{getSetupTitle(titleJourney)}</h1>
             </EuiTitle>
           </EuiFlexItem>
           {resolution?.alternative !== undefined && (

@@ -12,6 +12,7 @@ import type {
   AnalyticsEventSource,
   AnalyticsLinks,
   AnalyticsSampleData,
+  AnalyticsSourceAudience,
   ResolvedJourney,
 } from '../../types';
 import { AddSourceButton } from '../shared/add_source_button';
@@ -23,6 +24,8 @@ interface ConnectStepProps {
   sampleData: AnalyticsSampleData;
   /** The journey the detected data calls for; undefined while the cluster holds no data. */
   journey: ResolvedJourney | undefined;
+  /** Who the gate addresses while there is no data. */
+  gateAudience: AnalyticsSourceAudience;
   /** The source data was found in; undefined when the cluster names none. */
   detectedSource: AnalyticsEventSource | undefined;
   onSampleInstalled: () => void;
@@ -35,6 +38,7 @@ export const ConnectStep = ({
   links,
   sampleData,
   journey,
+  gateAudience,
   detectedSource,
   onSampleInstalled,
   onContinue,
@@ -44,6 +48,7 @@ export const ConnectStep = ({
       <>
         <IngestGate
           page="onboarding"
+          audience={gateAudience}
           links={links}
           sampleData={sampleData}
           onSampleInstalled={onSampleInstalled}

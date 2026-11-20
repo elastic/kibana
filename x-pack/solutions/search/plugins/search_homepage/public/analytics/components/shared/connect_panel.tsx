@@ -20,7 +20,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_SAMPLE_DATASET } from '../../constants';
 import { getFeaturedAnalyticsEntries } from '../../sources';
-import type { AnalyticsLinks, AnalyticsSampleData, AnalyticsSourceList } from '../../types';
+import type {
+  AnalyticsLinks,
+  AnalyticsSampleData,
+  AnalyticsSourceAudience,
+  AnalyticsSourceList,
+} from '../../types';
 import { AddSourceButton } from './add_source_button';
 import { ConnectionDetails } from './connection_details';
 import type { AnalyticsPageId } from './page_ids';
@@ -33,6 +38,8 @@ interface ConnectPanelProps {
   page: AnalyticsPageId;
   /** Omit when the surrounding view already has a heading for this task. */
   title?: string;
+  /** Who the featured choices are for; users who asked for event analytics get the event ones. */
+  audience?: AnalyticsSourceAudience;
   links: Pick<
     AnalyticsLinks,
     | 'canUseIntegrations'
@@ -48,12 +55,13 @@ interface ConnectPanelProps {
 
 /**
  * The one task while the deployment is empty: the featured ways to add data, the rest behind one
- * control, and sample events. It serves search and analytics alike; the event sources are one
- * featured choice, which lists them in a flyout.
+ * control, and sample events. The event sources are one featured choice, which lists them in a
+ * flyout.
  */
 export const ConnectPanel = ({
   page,
   title,
+  audience = 'all',
   links,
   sampleData,
   onSampleInstalled,
@@ -61,10 +69,15 @@ export const ConnectPanel = ({
   const { isSourceAvailable } = links;
   const featuredEntries = useMemo(
     () =>
-      getFeaturedAnalyticsEntries().filter(
+      getFeaturedAnalyticsEntries(audience).filter(
         (entry) => entry.kind !== 'source' || isSourceAvailable(entry.source)
       ),
-    [isSourceAvailable]
+    [audience, isSourceAvailable]
+  );
+  const hasSampleTile = featuredEntries.some(({ kind }) => kind === 'sampleEvents');
+  const installingLabel = i18n.translate(
+    'xpack.searchHomepage.analytics.connectPanel.sampleInstallingButton',
+    { defaultMessage: 'Installing sample events…' }
   );
   const [openSourceList, setOpenSourceList] = useState<AnalyticsSourceList>();
   const sourceListOpenerRef = useRef<HTMLButtonElement | null>(null);
@@ -97,36 +110,56 @@ export const ConnectPanel = ({
         </>
       )}
       <EuiFlexGrid columns={featuredEntries.length > 3 ? 4 : 3} gutterSize="m">
-        {featuredEntries.map((entry) =>
-          entry.kind === 'source' ? (
-            <EuiFlexItem key={entry.source.id}>
-              <SourceTile
-                page={page}
-                placement="Featured"
-                source={entry.source}
-                canUseIntegrations={links.canUseIntegrations}
-                opensDialog={links.sourceOpensDialog(entry.source)}
-                onSelect={links.openSource}
-              />
-            </EuiFlexItem>
-          ) : (
-            <EuiFlexItem key={entry.list.id}>
-              <TileButton
-                page={page}
-                placement="Featured"
-                id={entry.list.id}
-                title={entry.list.title}
-                description={entry.list.description}
-                iconType={entry.list.iconType}
-                opensDialog
-                onClick={(button) => {
-                  sourceListOpenerRef.current = button;
-                  setOpenSourceList(entry.list);
-                }}
-              />
-            </EuiFlexItem>
-          )
-        )}
+        {featuredEntries.map((entry) => {
+          switch (entry.kind) {
+            case 'source':
+              return (
+                <EuiFlexItem key={entry.source.id}>
+                  <SourceTile
+                    page={page}
+                    placement="Featured"
+                    source={entry.source}
+                    canUseIntegrations={links.canUseIntegrations}
+                    opensDialog={links.sourceOpensDialog(entry.source)}
+                    onSelect={links.openSource}
+                  />
+                </EuiFlexItem>
+              );
+            case 'sourceList':
+              return (
+                <EuiFlexItem key={entry.list.id}>
+                  <TileButton
+                    page={page}
+                    placement="Featured"
+                    id={entry.list.id}
+                    title={entry.list.title}
+                    description={entry.list.description}
+                    iconType={entry.list.iconType}
+                    opensDialog
+                    onClick={(button) => {
+                      sourceListOpenerRef.current = button;
+                      setOpenSourceList(entry.list);
+                    }}
+                  />
+                </EuiFlexItem>
+              );
+            case 'sampleEvents':
+              return (
+                <EuiFlexItem key={entry.sample.id}>
+                  <TileButton
+                    page={page}
+                    placement="Featured"
+                    id={entry.sample.id}
+                    title={sampleData.isInstalling ? installingLabel : entry.sample.title}
+                    description={entry.sample.description}
+                    iconType={entry.sample.iconType}
+                    isDisabled={sampleData.isInstalling}
+                    onClick={onTrySampleEvents}
+                  />
+                </EuiFlexItem>
+              );
+          }
+        })}
       </EuiFlexGrid>
       {openSourceList !== undefined && (
         <SourcesFlyout
@@ -150,37 +183,38 @@ export const ConnectPanel = ({
       />
       <EuiHorizontalRule margin="m" />
       <ConnectionDetails page={page} />
-      <EuiHorizontalRule margin="m" />
-      <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            <p>
-              {i18n.translate('xpack.searchHomepage.analytics.connectPanel.samplePrompt', {
-                defaultMessage: 'No data of your own yet?',
-              })}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            iconType="flask"
-            onClick={onTrySampleEvents}
-            isLoading={sampleData.isInstalling}
-            data-test-subj={getPageTestSubj(page, 'TrySampleEvents')}
-            data-telemetry-id={getPageTelemetryId(page, 'trySampleEvents')}
-          >
-            {sampleData.isInstalling
-              ? i18n.translate(
-                  'xpack.searchHomepage.analytics.connectPanel.sampleInstallingButton',
-                  { defaultMessage: 'Installing sample events…' }
-                )
-              : i18n.translate('xpack.searchHomepage.analytics.connectPanel.sampleButton', {
-                  defaultMessage: 'Try with sample web events',
-                })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {!hasSampleTile && (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                <p>
+                  {i18n.translate('xpack.searchHomepage.analytics.connectPanel.samplePrompt', {
+                    defaultMessage: 'No data of your own yet?',
+                  })}
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                iconType="flask"
+                onClick={onTrySampleEvents}
+                isLoading={sampleData.isInstalling}
+                data-test-subj={getPageTestSubj(page, 'TrySampleEvents')}
+                data-telemetry-id={getPageTelemetryId(page, 'trySampleEvents')}
+              >
+                {sampleData.isInstalling
+                  ? installingLabel
+                  : i18n.translate('xpack.searchHomepage.analytics.connectPanel.sampleButton', {
+                      defaultMessage: 'Try with sample web events',
+                    })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </EuiPanel>
   );
 };

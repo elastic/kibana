@@ -15,6 +15,7 @@ import { useEventsOverTime } from '../../hooks/use_events_over_time';
 import type { EventsOverTimeResult } from '../../hooks/use_events_over_time';
 import { useAnalyticsPreferences } from '../../hooks/use_analytics_preferences';
 import { useSampleData } from '../../hooks/use_sample_data';
+import { useSourceGeneration } from '../../hooks/use_source_generation';
 import { getSourceStarterQueries } from '../../source_queries';
 import { getAnalyticsSourceGroups, getAnalyticsSources } from '../../sources';
 import type {
@@ -300,8 +301,8 @@ describe('UnifiedHomePage', () => {
       expectOnlyView('analyticsHomeNoData');
       expect(screen.getByTestId('analyticsHomeIngestGate')).toBeInTheDocument();
       expect(screen.getAllByRole('button').map((button) => button.dataset.testSubj)).toEqual([
-        'analyticsHomeFeaturedSource-api',
         'analyticsHomeFeaturedSource-fileUpload',
+        'analyticsHomeFeaturedSource-eventsIndex',
         'analyticsHomeFeaturedSource-eventStream',
         'analyticsHomeFeaturedSource-webCrawl',
         'analyticsHomeMoreSources',
@@ -319,6 +320,78 @@ describe('UnifiedHomePage', () => {
       const gate = screen.getByTestId('analyticsHomeNoData');
       expect(within(gate).getByRole('heading', { level: 1 })).toHaveTextContent('Add your data');
       expect(gate).not.toHaveTextContent(/analytics|dashboard/i);
+    });
+
+    describe('when event analytics was asked for in this browser', () => {
+      beforeEach(() => {
+        storedJourney = 'analytics';
+      });
+
+      it('addresses events in the heading and one supporting line', () => {
+        setup();
+
+        const gate = screen.getByTestId('analyticsHomeNoData');
+        expect(within(gate).getByRole('heading', { level: 1 })).toHaveTextContent(
+          'Add your events'
+        );
+        expect(gate).toHaveTextContent(
+          'Analyze clickstreams, product telemetry, game events and payments with ES|QL and dashboards.'
+        );
+        expect(within(gate).getByRole('heading', { level: 2 })).toHaveTextContent(
+          'Choose how to add events'
+        );
+      });
+
+      it('features the API, the event streams, the file upload and the sample events', () => {
+        setup();
+
+        expect(screen.getAllByRole('button').map((button) => button.dataset.testSubj)).toEqual([
+          'analyticsHomeFeaturedSource-eventsIndex',
+          'analyticsHomeFeaturedSource-eventStream',
+          'analyticsHomeFeaturedSource-fileUpload',
+          'analyticsHomeFeaturedSource-sampleEvents',
+          'analyticsHomeMoreSources',
+        ]);
+        expect(screen.queryByTestId('analyticsHomeTrySampleEvents')).not.toBeInTheDocument();
+      });
+
+      it('keeps the website crawl under "More sources"', () => {
+        setup();
+
+        fireEvent.click(screen.getByTestId('analyticsHomeMoreSources'));
+
+        expect(screen.getByTestId('analyticsHomeFlyoutSource-webCrawl')).toBeInTheDocument();
+      });
+
+      it('installs the sample events from their tile', async () => {
+        const { result } = setup();
+
+        fireEvent.click(screen.getByTestId('analyticsHomeFeaturedSource-sampleEvents'));
+
+        await waitFor(() => expect(result.refetch).toHaveBeenCalledTimes(1));
+        expect(install).toHaveBeenCalledWith('clickstream');
+      });
+
+      it('says so on the tile and takes no second request while the sample events install', () => {
+        mockUseSampleData.mockReturnValue({ isInstalling: true, install });
+        setup();
+        const tile = screen.getByTestId('analyticsHomeFeaturedSource-sampleEvents');
+
+        expect(tile).toHaveTextContent('Installing sample events…');
+        expect(tile).toHaveAttribute('aria-disabled', 'true');
+        fireEvent.click(tile);
+
+        expect(install).not.toHaveBeenCalled();
+      });
+
+      it('gives way to the search home when the data that arrives is search content', () => {
+        const { showResult } = setup();
+
+        showResult(createClusterStateResult(SEARCH_STATE));
+
+        expect(screen.queryByTestId('analyticsHomeNoData')).not.toBeInTheDocument();
+        expect(screen.queryByText('Add your events')).not.toBeInTheDocument();
+      });
     });
 
     it('offers content connectors neither as a featured tile nor in "More sources"', () => {
@@ -372,16 +445,16 @@ describe('UnifiedHomePage', () => {
         screen
           .getAllByTestId(/^analyticsHomeFeaturedSource-/)
           .map((tile) => tile.dataset.testSubj?.replace('analyticsHomeFeaturedSource-', ''))
-      ).toEqual(['api', 'fileUpload', 'eventStream', 'webCrawl']);
+      ).toEqual(['fileUpload', 'eventsIndex', 'eventStream', 'webCrawl']);
       expect(screen.queryByTestId('analyticsHomeSourcesFlyout')).not.toBeInTheDocument();
       expect(screen.getByTestId('analyticsHomeNoData')).not.toHaveTextContent('within seconds');
       expect(screen.queryByTestId('analyticsHomeExploreAskAgent')).not.toBeInTheDocument();
 
-      const api = screen.getByTestId('analyticsHomeFeaturedSource-api');
-      fireEvent.click(api);
+      const fileUpload = screen.getByTestId('analyticsHomeFeaturedSource-fileUpload');
+      fireEvent.click(fileUpload);
       expect(links.openSource).toHaveBeenCalledWith(
-        getAnalyticsSources().find(({ id }) => id === 'api'),
-        api
+        getAnalyticsSources().find(({ id }) => id === 'fileUpload'),
+        fileUpload
       );
     });
 
@@ -403,7 +476,7 @@ describe('UnifiedHomePage', () => {
         expect(tile).toHaveTextContent(
           'Connect Kafka, Kinesis, Pub/Sub or another stream of events.'
         );
-        expect(screen.getByTestId('analyticsHomeFeaturedSource-api')).not.toHaveAttribute(
+        expect(screen.getByTestId('analyticsHomeFeaturedSource-fileUpload')).not.toHaveAttribute(
           'aria-haspopup'
         );
       });
@@ -484,7 +557,7 @@ describe('UnifiedHomePage', () => {
         fireEvent.click(kafka);
         expect(links.openSource).not.toHaveBeenCalled();
         expect(screen.getByTestId('analyticsHomeSourcesFlyout')).toBeInTheDocument();
-        expect(screen.getByTestId('analyticsHomeFlyoutSource-api')).not.toHaveAttribute(
+        expect(screen.getByTestId('analyticsHomeFlyoutSource-fileUpload')).not.toHaveAttribute(
           'aria-disabled'
         );
         expect(screen.getByTestId('analyticsHomeBrowseIntegrations')).toHaveAttribute(
@@ -545,7 +618,7 @@ describe('UnifiedHomePage', () => {
         'aria-disabled',
         'true'
       );
-      expect(screen.getByTestId('analyticsHomeFlyoutSource-api')).not.toHaveAttribute(
+      expect(screen.getByTestId('analyticsHomeFlyoutSource-fileUpload')).not.toHaveAttribute(
         'aria-disabled'
       );
     });
@@ -555,10 +628,10 @@ describe('UnifiedHomePage', () => {
 
       const moreSources = screen.getByTestId('analyticsHomeMoreSources');
       fireEvent.click(moreSources);
-      fireEvent.click(screen.getByTestId('analyticsHomeFlyoutSource-api'));
+      fireEvent.click(screen.getByTestId('analyticsHomeFlyoutSource-fileUpload'));
 
       expect(links.openSource).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'api' }),
+        expect.objectContaining({ id: 'fileUpload' }),
         moreSources
       );
       expect(screen.queryByTestId('analyticsHomeSourcesFlyout')).not.toBeInTheDocument();
@@ -636,7 +709,7 @@ describe('UnifiedHomePage', () => {
           screen
             .getAllByTestId(/^analyticsHomeFeaturedSource-/)
             .map((tile) => tile.dataset.testSubj?.replace('analyticsHomeFeaturedSource-', ''))
-        ).toEqual(['api', 'fileUpload', 'eventStream']);
+        ).toEqual(['fileUpload', 'eventsIndex', 'eventStream']);
 
         fireEvent.click(screen.getByTestId('analyticsHomeMoreSources'));
         expect(screen.queryByTestId('analyticsHomeFlyoutSource-webCrawl')).not.toBeInTheDocument();
@@ -898,6 +971,55 @@ describe('UnifiedHomePage', () => {
       expect(links.createDashboard).toHaveBeenCalledTimes(1);
       fireEvent.click(screen.getByTestId('analyticsHomeAddSource'));
       expect(screen.getByTestId('analyticsHomeSourcesFlyout')).toBeInTheDocument();
+    });
+
+    it('keeps the starter queries closed, and asks no model for questions, until they are opened', () => {
+      setup({ result: createClusterStateResult(HAS_DASHBOARDS_STATE) });
+
+      const toggle = screen.getByTestId('analyticsHomeStarterQueriesToggle');
+      expect(toggle).toHaveTextContent('Starter queries');
+      expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      const testSubjects = Array.from(
+        screen.getByTestId('analyticsHomeHasDashboards').querySelectorAll('[data-test-subj]'),
+        (element) => element.getAttribute('data-test-subj')
+      );
+      expect(testSubjects.indexOf('analyticsHomeStarterQueriesToggle')).toBeGreaterThan(
+        testSubjects.indexOf('analyticsHomeEventSources')
+      );
+      expect(jest.mocked(useSourceGeneration)).not.toHaveBeenCalled();
+
+      fireEvent.click(toggle);
+
+      expect(toggle).toHaveAttribute('aria-expanded', 'true');
+      expect(jest.mocked(useSourceGeneration)).toHaveBeenLastCalledWith(EVENT_SOURCE);
+      expect(screen.getByTestId('analyticsHomeExploreTitle')).toHaveTextContent(
+        `Explore ${EVENT_SOURCE.name}`
+      );
+      expect(screen.getByRole('button', { name: /^Use in your app: / })).toBeInTheDocument();
+    });
+
+    it('opens a starter query in Discover without a second filled button', () => {
+      const { links } = setup({ result: createClusterStateResult(HAS_DASHBOARDS_STATE) });
+      fireEvent.click(screen.getByTestId('analyticsHomeStarterQueriesToggle'));
+
+      const [{ id, esql }] = getSourceStarterQueries(EVENT_SOURCE);
+      const openInDiscover = screen.getByTestId(`analyticsHomeOpenInDiscover-${id}`);
+      expect(screen.getByTestId('analyticsHomeExploreEvents').className).toMatch(/fill/);
+      expect(openInDiscover.className).not.toMatch(/fill/);
+      expect(screen.queryByTestId('analyticsHomeExploreAskAgent')).not.toBeInTheDocument();
+      fireEvent.click(openInDiscover);
+      expect(links.openDiscover).toHaveBeenCalledWith(esql);
+    });
+
+    it('keeps the starter queries, and the questions asked for, after they are closed again', () => {
+      setup({ result: createClusterStateResult(HAS_DASHBOARDS_STATE) });
+      const toggle = screen.getByTestId('analyticsHomeStarterQueriesToggle');
+
+      fireEvent.click(toggle);
+      fireEvent.click(toggle);
+
+      expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.getByTestId('analyticsHomeExplorePanel')).toBeInTheDocument();
     });
 
     it("explores the user's own source even when a sample source is larger", () => {

@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ResolvedJourney } from '../../types';
+import type { AnalyticsSourceAudience, ResolvedJourney } from '../../types';
+import { getEventsGateDescription, getEventsGateTitle } from '../shared/events_gate_copy';
 import type { OnboardingStepId } from './onboarding_steps';
 
 interface StepCopy {
@@ -34,9 +35,13 @@ export const getSetupTitle = (journey: ResolvedJourney | undefined): string => {
 
 const getConnectCopy = (
   journey: ResolvedJourney | undefined,
-  hasOnlySampleEvents: boolean
+  hasOnlySampleEvents: boolean,
+  gateAudience: AnalyticsSourceAudience
 ): StepCopy => {
   if (journey === undefined) {
+    if (gateAudience === 'events') {
+      return { title: getEventsGateTitle(), description: getEventsGateDescription() };
+    }
     return {
       title: i18n.translate('xpack.searchHomepage.analytics.onboarding.connect.title', {
         defaultMessage: 'Add your data',
@@ -67,11 +72,12 @@ const getConnectCopy = (
 export const getStepCopy = (
   stepId: OnboardingStepId,
   journey: ResolvedJourney | undefined,
-  hasOnlySampleEvents: boolean
+  hasOnlySampleEvents: boolean,
+  gateAudience: AnalyticsSourceAudience
 ): StepCopy => {
   switch (stepId) {
     case 'connect':
-      return getConnectCopy(journey, hasOnlySampleEvents);
+      return getConnectCopy(journey, hasOnlySampleEvents, gateAudience);
     case 'explore':
       return {
         title: i18n.translate('xpack.searchHomepage.analytics.onboarding.explore.title', {

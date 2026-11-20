@@ -12,6 +12,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SearchHomepageConfig } from './config';
 import { createPreferredEndpointTracker } from './lib/analytics_generation_availability';
 import { createGenerationCache } from './lib/analytics_generation_cache';
+import { registerAnalyticsAppApiKeyRoutes } from './routes/analytics_app_api_key';
 import { registerAnalyticsClusterStateRoute } from './routes/analytics_cluster_state';
 import { registerAnalyticsEventsIndexRoute } from './routes/analytics_events_index';
 import { registerAnalyticsEventsOverTimeRoute } from './routes/analytics_events_over_time';
@@ -57,6 +58,7 @@ export class SearchHomepagePlugin
     registerAnalyticsEventsOverTimeRoute(router, this.logger);
     registerAnalyticsSampleEventsRoutes(router, this.logger, { isServerless: this.isServerless });
     registerAnalyticsEventsIndexRoute(router, this.logger);
+    registerAnalyticsAppApiKeyRoutes(router, this.logger);
     registerAnalyticsClusterStateRoute(router, this.logger, {
       // Read per request: other plugins add dashboards to the sample data sets during their setup.
       getSampleDashboardIds: () =>

@@ -13,7 +13,7 @@ import { useChromeHidden } from '../../hooks/use_chrome_hidden';
 import { useAnalyticsLinks } from '../../hooks/use_analytics_links';
 import { useAnalyticsPreferences } from '../../hooks/use_analytics_preferences';
 import { useSampleData } from '../../hooks/use_sample_data';
-import { getLargestOwnSource, resolveJourney, toEventsState } from '../../journey';
+import { getGateAudience, getLargestOwnSource, resolveJourney, toEventsState } from '../../journey';
 import type { AnalyticsStage, ResolvedJourney } from '../../types';
 import { AnalyticsPageTemplate } from '../analytics_page_template';
 import { LazyAnalyticsHome, LazyNoDataView, LazySearchHome } from '../lazy_views';
@@ -135,6 +135,7 @@ export const UnifiedHomePage = (): React.JSX.Element => {
       return (
         <LazyNoDataView
           headingRef={headingRef}
+          audience={getGateAudience(preferredJourney)}
           links={links}
           sampleData={sampleData}
           onSampleInstalled={refetch}
@@ -156,7 +157,11 @@ export const UnifiedHomePage = (): React.JSX.Element => {
   };
 
   return (
-    <AnalyticsPageTemplate breadcrumb={breadcrumb} data-test-subj="unifiedHomePage">
+    <AnalyticsPageTemplate
+      breadcrumb={breadcrumb}
+      data-test-subj="unifiedHomePage"
+      hideConsoleUntilUsed={view === undefined || view === 'gate'}
+    >
       <Suspense fallback={<LoadingView />}>{renderView()}</Suspense>
     </AnalyticsPageTemplate>
   );

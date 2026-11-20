@@ -60,8 +60,6 @@ export type AnalyticsSourceTarget =
   | { type: 'integrationCreate' }
   /** The file upload flyout, opened on this page; the file upload page where there is none. */
   | { type: 'fileUpload' }
-  /** The Elasticsearch getting started page, with connection details and code examples. */
-  | { type: 'gettingStarted' }
   | { type: 'dataFederation' }
   | { type: 'externalUrl'; url: string }
   /** The index list, where an empty index can be created. */
@@ -98,10 +96,22 @@ export interface AnalyticsSourceList {
   audience: AnalyticsSourceAudience;
 }
 
-/** A way in shown ahead of the full list: one source to open, or a list of sources to choose from. */
+/** The sample events offered as a featured choice. */
+export interface AnalyticsSampleEntry {
+  id: string;
+  title: string;
+  description: string;
+  iconType: IconType;
+}
+
+/**
+ * A way in shown ahead of the full list: one source to open, a list of sources to choose from, or
+ * the sample events to install.
+ */
 export type AnalyticsFeaturedEntry =
   | { kind: 'source'; source: AnalyticsSource }
-  | { kind: 'sourceList'; list: AnalyticsSourceList };
+  | { kind: 'sourceList'; list: AnalyticsSourceList }
+  | { kind: 'sampleEvents'; sample: AnalyticsSampleEntry };
 
 /** Per-browser preferences; progress itself is derived from `AnalyticsClusterState`. */
 export interface AnalyticsPreferences {

@@ -25,6 +25,17 @@ const EXAMPLE_EVENTS: readonly ExampleEvent[] = [
   { minutesAgo: 2, action: 'purchase', userId: 'u-1001', properties: { order: { total: 89.5 } } },
 ];
 
+export type ExampleEventDocument = Record<string, string | Record<string, string | number>>;
+
+/** A few events dated within the minutes before `now`. */
+export const buildExampleEvents = (now: number): ExampleEventDocument[] =>
+  EXAMPLE_EVENTS.map(({ minutesAgo, action, userId, properties }) => ({
+    '@timestamp': new Date(now - minutesAgo * MINUTE_MS).toISOString(),
+    event: { action },
+    user: { id: userId },
+    ...properties,
+  }));
+
 /**
  * A Console bulk request that writes a few events to the index, dated within the minutes before
  * `now` so that the chart and the recent time ranges of the starter queries contain them.
@@ -33,14 +44,6 @@ export const buildEventsRequestExample = (indexName: string, now: number): strin
   // The request line comes first: Console puts the cursor, and with it the send button, there.
   [
     `POST ${indexName}/_bulk`,
-    ...EXAMPLE_EVENTS.flatMap(({ minutesAgo, action, userId, properties }) => [
-      '{ "index": {} }',
-      JSON.stringify({
-        '@timestamp': new Date(now - minutesAgo * MINUTE_MS).toISOString(),
-        event: { action },
-        user: { id: userId },
-        ...properties,
-      }),
-    ]),
+    ...buildExampleEvents(now).flatMap((event) => ['{ "index": {} }', JSON.stringify(event)]),
     '',
   ].join('\n');

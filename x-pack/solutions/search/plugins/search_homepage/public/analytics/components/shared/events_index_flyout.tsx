@@ -11,7 +11,6 @@ import { useLocation } from 'react-router-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCodeBlock,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,6 +26,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Status, useSearchApiKey } from '@kbn/search-api-keys-components';
 import { KbnSuccessCallout } from '@kbn/ui-callout';
 import {
   ANALYTICS_EVENTS_INDEX_PATH,
@@ -39,8 +39,18 @@ import type {
   EventsIndexNameProblem,
 } from '../../../../common/analytics_events_index';
 import { useKibana } from '../../../hooks/use_kibana';
+import { canOpenPageConsole, openPageConsole } from '../../console_usage';
 import { ANALYTICS_TELEMETRY_PREFIX } from '../../constants';
+import {
+  API_KEY_PLACEHOLDER,
+  EVENTS_CODE_LANGUAGES,
+  buildEventsCodeExample,
+} from '../../events_code_examples';
+import type { EventsCodeLanguage } from '../../events_code_examples';
 import { buildEventsRequestExample } from '../../events_request_example';
+import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
+import type { CodeSnippet } from '../../query_snippets';
+import { CodeSnippets } from './code_snippets';
 import { ConnectionDetails } from './connection_details';
 import type { EventsIndexFlyoutApi } from './events_index_flyout_context';
 import { EventsIndexFlyoutContext } from './events_index_flyout_context';
@@ -105,6 +115,40 @@ const getCreateErrorMessage = (name: string, { response, body }: RequestFailure)
 
 const FORM_ID = 'analyticsEventsIndexForm';
 
+const CODE_BLOCK_LANGUAGE: Readonly<Record<EventsCodeLanguage, string>> = {
+  curl: 'bash',
+  javascript: 'javascript',
+  python: 'python',
+};
+
+/** Code in a chosen language that sends the example events to the index. */
+const EventsCodeExample = ({ index, now }: { index: string; now: number }): React.JSX.Element => {
+  const { cloud } = useKibana().services;
+  const elasticsearchUrl = useElasticsearchUrl();
+  const { apiKey, status } = useSearchApiKey();
+  // The key is written into the code only while the user has it revealed in the form above.
+  const shownApiKey =
+    status === Status.showPreviewKey && apiKey !== null ? apiKey : API_KEY_PLACEHOLDER;
+
+  const snippets = useMemo(
+    (): CodeSnippet[] =>
+      EVENTS_CODE_LANGUAGES.map((language) => ({
+        language,
+        codeBlockLanguage: CODE_BLOCK_LANGUAGE[language],
+        code: buildEventsCodeExample(language, {
+          indexName: index,
+          elasticsearchUrl,
+          apiKey: shownApiKey,
+          isServerless: cloud?.isServerlessEnabled === true,
+          now,
+        }),
+      })),
+    [index, elasticsearchUrl, shownApiKey, cloud, now]
+  );
+
+  return <CodeSnippets snippets={snippets} idPrefix="analyticsEventsIndex" />;
+};
+
 const EventsIndexFlyout = ({ onClose }: { onClose: () => void }): React.JSX.Element => {
   const { http, console: consolePlugin } = useKibana().services;
   const titleId = useGeneratedHtmlId({ prefix: 'analyticsEventsIndexFlyoutTitle' });
@@ -112,7 +156,7 @@ const EventsIndexFlyout = ({ onClose }: { onClose: () => void }): React.JSX.Elem
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string>();
-  const [created, setCreated] = useState<{ index: string; request: string }>();
+  const [created, setCreated] = useState<{ index: string; now: number }>();
   const createdRef = useRef<HTMLDivElement | null>(null);
 
   const nameProblem = getEventsIndexNameProblem(name);
@@ -141,7 +185,7 @@ const EventsIndexFlyout = ({ onClose }: { onClose: () => void }): React.JSX.Elem
         ANALYTICS_EVENTS_INDEX_PATH,
         { body: JSON.stringify(body) }
       );
-      setCreated({ index, request: buildEventsRequestExample(index, Date.now()) });
+      setCreated({ index, now: Date.now() });
     } catch (requestError) {
       setCreateError(getCreateErrorMessage(name, requestError));
     } finally {
@@ -149,9 +193,7 @@ const EventsIndexFlyout = ({ onClose }: { onClose: () => void }): React.JSX.Elem
     }
   };
 
-  const canOpenConsole =
-    consolePlugin?.openEmbeddedConsole !== undefined &&
-    consolePlugin.isEmbeddedConsoleAvailable?.() === true;
+  const canOpenConsole = canOpenPageConsole(consolePlugin);
 
   return (
     <EuiFlyout
@@ -164,7 +206,7 @@ const EventsIndexFlyout = ({ onClose }: { onClose: () => void }): React.JSX.Elem
         <EuiTitle size="m">
           <h2 id={titleId}>
             {i18n.translate('xpack.searchHomepage.analytics.eventsIndexFlyout.title', {
-              defaultMessage: 'Create an events index',
+              defaultMessage: 'Send events with the API',
             })}
           </h2>
         </EuiTitle>
@@ -237,7 +279,10 @@ const EventsIndexFlyout = ({ onClose }: { onClose: () => void }): React.JSX.Elem
                     onClick={() => {
                       // The embedded Console opens underneath the flyout's mask.
                       onClose();
-                      consolePlugin?.openEmbeddedConsole?.(created.request);
+                      openPageConsole(
+                        consolePlugin,
+                        buildEventsRequestExample(created.index, created.now)
+                      );
                     }}
                     data-test-subj="analyticsEventsIndexOpenConsole"
                     data-telemetry-id={`${ANALYTICS_TELEMETRY_PREFIX}-eventsIndexFlyout-openConsole`}
@@ -251,15 +296,7 @@ const EventsIndexFlyout = ({ onClose }: { onClose: () => void }): React.JSX.Elem
               )}
             </EuiFlexGroup>
             <EuiSpacer size="s" />
-            <EuiCodeBlock
-              language="json"
-              fontSize="s"
-              paddingSize="m"
-              isCopyable
-              data-test-subj="analyticsEventsIndexRequest"
-            >
-              {created.request}
-            </EuiCodeBlock>
+            <EventsCodeExample index={created.index} now={created.now} />
           </>
         )}
       </EuiFlyoutBody>

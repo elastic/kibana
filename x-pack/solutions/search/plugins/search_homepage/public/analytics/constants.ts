@@ -20,6 +20,11 @@ export const ANALYTICS_TELEMETRY_PREFIX = 'searchHomepageAnalytics';
 
 export const ANALYTICS_PREFERENCES_STORAGE_KEY = 'searchHomepage.analytics.preferences';
 
+/** What a starter query covers, in Discover and as a request from the user's own code. */
+export const STARTER_QUERY_TIME_RANGE = { from: 'now-7d', to: 'now' } as const;
+/** The only field Discover applies its time range to for an ES|QL query without time parameters. */
+export const DISCOVER_ESQL_TIME_FIELD = '@timestamp';
+
 export const ANALYTICS_AGENT_SESSION_TAG = 'searchHomepage-analytics';
 
 export const SAMPLE_DATASET_INDEX: Record<AnalyticsSampleDatasetId, string> = {

@@ -10,6 +10,7 @@ import { createMemoryHistory } from 'history';
 import { EuiThemeProvider } from '@elastic/eui';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
+import { useSearchApiKey } from '@kbn/search-api-keys-components';
 import { useKibana } from '../../../hooks/use_kibana';
 import { EventsIndexFlyoutProvider } from './events_index_flyout';
 import type { EventsIndexFlyoutApi } from './events_index_flyout_context';
@@ -22,7 +23,16 @@ jest.mock('./connection_details', () => ({
   ),
 }));
 
+jest.mock('../../hooks/use_elasticsearch_url', () => ({
+  useElasticsearchUrl: () => 'https://my-project.es.example.com',
+}));
+jest.mock('@kbn/search-api-keys-components', () => ({
+  Status: { showHiddenKey: 'showHiddenKey', showPreviewKey: 'showPreviewKey' },
+  useSearchApiKey: jest.fn(),
+}));
+
 const mockUseKibana = useKibana as jest.Mock;
+const mockUseSearchApiKey = useSearchApiKey as jest.Mock;
 
 const FLYOUT = 'analyticsEventsIndexFlyout';
 const NAME = 'analyticsEventsIndexName';
@@ -56,11 +66,15 @@ describe('EventsIndexFlyoutProvider', () => {
     );
   };
 
-  const setup = ({ hasEmbeddedConsole = true }: { hasEmbeddedConsole?: boolean } = {}) => {
+  const setup = ({
+    hasEmbeddedConsole = true,
+    isServerless = false,
+  }: { hasEmbeddedConsole?: boolean; isServerless?: boolean } = {}) => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
     mockUseKibana.mockReturnValue({
       services: {
         http: { post },
+        cloud: { isServerlessEnabled: isServerless },
         console: { openEmbeddedConsole, isEmbeddedConsoleAvailable: () => hasEmbeddedConsole },
       },
     });
@@ -91,6 +105,7 @@ describe('EventsIndexFlyoutProvider', () => {
   beforeEach(() => {
     post = jest.fn().mockImplementation(async (_, { body }) => ({ index: JSON.parse(body).name }));
     openEmbeddedConsole = jest.fn();
+    mockUseSearchApiKey.mockReturnValue({ apiKey: null, status: 'showCreateButton' });
   });
 
   it('is unavailable outside the provider', () => {
@@ -105,7 +120,7 @@ describe('EventsIndexFlyoutProvider', () => {
 
     expect(flyout.isAvailable).toBe(true);
     expect(screen.getByRole('dialog')).toBe(screen.getByTestId(FLYOUT));
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Create an events index');
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Send events with the API');
     expect(screen.getByLabelText('Index name')).toHaveValue('events');
     expect(screen.getByTestId(FLYOUT)).toHaveTextContent('columnar mode');
   });
@@ -121,11 +136,57 @@ describe('EventsIndexFlyoutProvider', () => {
       'Index app-events created'
     );
     expect(screen.getByTestId('connectionDetailsStub')).toHaveTextContent('EventsIndex');
-    expect(screen.getByTestId('analyticsEventsIndexRequest')).toHaveTextContent(
-      'POST app-events/_bulk'
+    expect(screen.getByTestId('analyticsEventsIndexCode')).toHaveTextContent(
+      "curl -X POST 'https://my-project.es.example.com/app-events/_bulk'"
     );
     expect(screen.queryByTestId(NAME)).not.toBeInTheDocument();
     expect(screen.queryByTestId(CREATE)).not.toBeInTheDocument();
+  });
+
+  it('shows the code in the chosen language', async () => {
+    setup({ isServerless: true });
+    await create();
+    const getCode = (): HTMLElement => screen.getByTestId('analyticsEventsIndexCode');
+
+    expect(screen.getByRole('group', { name: 'Language' })).toBeInTheDocument();
+    expect(
+      ['curl', 'javascript', 'python'].map(
+        (id) => screen.getByTestId(`analyticsEventsIndexLanguage-${id}`).textContent
+      )
+    ).toEqual(['cURL', 'JavaScript', 'Python']);
+
+    fireEvent.click(screen.getByTestId('analyticsEventsIndexLanguage-javascript'));
+
+    expect(getCode()).toHaveTextContent("import { Client } from '@elastic/elasticsearch'");
+    expect(getCode()).toHaveTextContent('node: "https://my-project.es.example.com"');
+    expect(getCode()).toHaveTextContent("serverMode: 'serverless'");
+    expect(getCode()).toHaveTextContent('_index: "events"');
+
+    fireEvent.click(screen.getByTestId('analyticsEventsIndexLanguage-python'));
+
+    expect(getCode()).toHaveTextContent('from elasticsearch import Elasticsearch, helpers');
+    expect(getCode()).toHaveTextContent('index="events"');
+  });
+
+  it('keeps a hidden API key out of the code', async () => {
+    mockUseSearchApiKey.mockReturnValue({ apiKey: 'c2VjcmV0', status: 'showHiddenKey' });
+    setup();
+    await create();
+
+    expect(screen.getByTestId(FLYOUT)).not.toHaveTextContent('c2VjcmV0');
+    expect(screen.getByTestId('analyticsEventsIndexCode')).toHaveTextContent(
+      'Authorization: ApiKey YOUR_API_KEY'
+    );
+  });
+
+  it('writes the API key into the code while the user has it revealed', async () => {
+    mockUseSearchApiKey.mockReturnValue({ apiKey: 'c2VjcmV0', status: 'showPreviewKey' });
+    setup();
+    await create();
+
+    expect(screen.getByTestId('analyticsEventsIndexCode')).toHaveTextContent(
+      'Authorization: ApiKey c2VjcmV0'
+    );
   });
 
   it('closes and opens the request in Console', async () => {
@@ -144,7 +205,7 @@ describe('EventsIndexFlyoutProvider', () => {
     setup({ hasEmbeddedConsole: false });
     await create();
 
-    expect(screen.getByTestId('analyticsEventsIndexRequest')).toBeInTheDocument();
+    expect(screen.getByTestId('analyticsEventsIndexCode')).toBeInTheDocument();
     expect(screen.queryByTestId('analyticsEventsIndexOpenConsole')).not.toBeInTheDocument();
   });
 
@@ -215,7 +276,7 @@ describe('EventsIndexFlyoutProvider', () => {
 
     fireEvent.click(screen.getByTestId('replacePage'));
 
-    expect(screen.getByTestId('analyticsEventsIndexRequest')).toBeInTheDocument();
+    expect(screen.getByTestId('analyticsEventsIndexCode')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('analyticsEventsIndexFlyoutClose'));
     expect(screen.queryByTestId(FLYOUT)).not.toBeInTheDocument();
   });

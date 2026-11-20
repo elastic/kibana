@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { useAnalyticsClusterState } from '../../hooks/use_analytics_cluster_state';
 import { useAnalyticsLinks } from '../../hooks/use_analytics_links';
 import { useAnalyticsPreferences } from '../../hooks/use_analytics_preferences';
@@ -120,6 +120,7 @@ describe('GuidedSetupPage', () => {
     install.mockResolvedValue(true);
     mockUseSampleData.mockReturnValue({ isInstalling: false, install });
     storedJourney = undefined;
+    localStorage.clear();
     mockUseAnalyticsPreferences.mockImplementation(() => {
       const [preferredJourney, setJourney] = useState(storedJourney);
       return {
@@ -279,8 +280,8 @@ describe('GuidedSetupPage', () => {
       );
       expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Add your data');
       expect(screen.getAllByRole('button').map((button) => button.dataset.testSubj)).toEqual([
-        'analyticsOnboardingFeaturedSource-api',
         'analyticsOnboardingFeaturedSource-fileUpload',
+        'analyticsOnboardingFeaturedSource-eventsIndex',
         'analyticsOnboardingFeaturedSource-eventStream',
         'analyticsOnboardingFeaturedSource-webCrawl',
         'analyticsOnboardingMoreSources',
@@ -290,6 +291,56 @@ describe('GuidedSetupPage', () => {
         /analytics|dashboard/i
       );
       expect(links.openHome).not.toHaveBeenCalled();
+    });
+
+    it('addresses events when event analytics was asked for in this browser', () => {
+      storedJourney = 'analytics';
+      setup();
+
+      expectOnlyStep('connect', 1);
+      expect(screen.getByTestId('analyticsOnboardingTitle')).toHaveTextContent(
+        'Get started with event analytics'
+      );
+      expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Add your events');
+      expect(screen.getByTestId('analyticsOnboardingStep-connect')).toHaveTextContent(
+        'Analyze clickstreams, product telemetry, game events and payments with ES|QL and dashboards.'
+      );
+      expect(screen.getAllByRole('button').map((button) => button.dataset.testSubj)).toEqual([
+        'analyticsOnboardingFeaturedSource-eventsIndex',
+        'analyticsOnboardingFeaturedSource-eventStream',
+        'analyticsOnboardingFeaturedSource-fileUpload',
+        'analyticsOnboardingFeaturedSource-sampleEvents',
+        'analyticsOnboardingMoreSources',
+      ]);
+    });
+
+    it('names event analytics while loading only in a browser that has not seen data here', () => {
+      storedJourney = 'analytics';
+      setup({ result: createClusterStateResult(undefined, { isLoading: true }) });
+
+      expect(screen.getByTestId('analyticsOnboardingTitle')).toHaveTextContent(
+        'Get started with event analytics'
+      );
+      cleanup();
+
+      localStorage.setItem('searchHomepage.hasData', 'true');
+      setup({ result: createClusterStateResult(undefined, { isLoading: true }) });
+
+      expect(screen.getByTestId('analyticsOnboardingTitle')).toHaveTextContent(
+        'Get started with Elasticsearch'
+      );
+    });
+
+    it('follows search data that arrives, whatever was asked for', () => {
+      storedJourney = 'analytics';
+      const { showResult } = setup();
+
+      showResult(createClusterStateResult(SEARCH_STATE));
+
+      expect(screen.getByTestId('analyticsOnboardingTitle')).toHaveTextContent(
+        'Get started with search'
+      );
+      expect(screen.queryByText('Add your events')).not.toBeInTheDocument();
     });
 
     it.each([
@@ -507,8 +558,8 @@ describe('GuidedSetupPage', () => {
           .getAllByTestId(/^analyticsOnboardingFeaturedSource-/)
           .map((featured) => featured.dataset.testSubj)
       ).toEqual([
-        'analyticsOnboardingFeaturedSource-api',
         'analyticsOnboardingFeaturedSource-fileUpload',
+        'analyticsOnboardingFeaturedSource-eventsIndex',
         'analyticsOnboardingFeaturedSource-eventStream',
       ]);
     });
