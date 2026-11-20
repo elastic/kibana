@@ -389,8 +389,13 @@ describe('update', () => {
         };
         clientArgs.services.caseService.getAllCaseComments.mockImplementation(async ({ id }) => {
           const requestedIds = Array.isArray(id) ? id : [id];
-          const saved_objects = requestedIds.includes(mockCases[0].id) ? [alertComment] : [];
-          return { saved_objects, total: saved_objects.length, per_page: 10, page: 1 };
+          const savedObjects = requestedIds.includes(mockCases[0].id) ? [alertComment] : [];
+          return {
+            saved_objects: savedObjects,
+            total: savedObjects.length,
+            per_page: 10,
+            page: 1,
+          };
         });
         clientArgs.services.alertsService.updateAlertsStatus.mockResolvedValue(1);
       });
