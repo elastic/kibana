@@ -267,7 +267,7 @@ When fixing validation errors on an existing workflow:
 
 1. Call \`${workflowTools.validateWorkflow}\` — it automatically includes step definitions for all referenced step types when validation fails
 2. Analyze the errors and identify the problematic steps
-3. If a step type does NOT exist: tell the user and list similar alternatives from the included step definitions. Only treat a step type as missing when validation reports an error on that step's \`type\`, such as "Invalid step type". A missing definition isn't enough: step types reserved for managed workflows exist but have no definition
+3. If a step type does NOT exist: tell the user and list similar alternatives from the included step definitions. A step type is missing only when validation reports an error on that step's \`type\` and the value is a single string. If the value isn't a string, for example a list, fix its shape instead. A missing definition isn't enough: step types reserved for managed workflows exist but have no definition
 4. Call \`${platformCoreTools.generateWorkflow}\` with an explicit description of each fix to apply
 5. NEVER guess or replace a step type with something unrelated
 6. **After fixing an error, scan the entire YAML for other occurrences of the same mistake.** For example, if you fix \`triggers.event\` → \`event\` in one place, check all other Liquid expressions for the same incorrect pattern and fix them all in one pass
