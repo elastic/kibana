@@ -7,8 +7,8 @@
 
 /**
  * Loads generated alerts into a scratch index on a local Elasticsearch and runs the five queries of
- * pack 3 (`notes/query_pack3_sweep_windows.md`) as ES|QL, as the phoenix team ran them. It then compares
- * the result with the phoenix profile. This is the check that `calibrate.ts` only approximates in JavaScript.
+ * pack 3 (`query_pack3_sweep_windows.md`) as ES|QL, as as the team of the reference deployment ran them. It then compares
+ * the result with the reference profile. This is the check that `calibrate.ts` only approximates in JavaScript.
  *
  * Two substitutions are made in the query text: the index name, and `NOW() - 1 day`, which becomes the
  * start of the generated day (the alerts are dated 2026-11-15 UTC and the clock keeps moving).
@@ -18,8 +18,8 @@
  *
  * Usage:
  *   node x-pack/solutions/security/plugins/alertzero/scripts/triage_testbed/run_pack3_esql_cli.js \
- *     --data <folder with alerts.ndjson> --profile <profile_phoenix.json> --queries <query_pack3_sweep_windows.md> \
- *     [--es http://localhost:9220] [--index az-gen-s1] [--mapping-from <existing alert index>] [--tolerance 0.1]
+ *     --data <folder with alerts.ndjson> --profile <profile.json> --queries <query_pack3_sweep_windows.md> \
+ *     [--es http://localhost:9220] [--index az-gen-s1] --mapping-from <existing alert index> [--tolerance 0.1]
  *   The user and password come from the variable ES_AUTH (default elastic:changeme, the local snapshot default).
  */
 
@@ -87,7 +87,6 @@ const parseArgs = (argv: readonly string[]): Args => {
   const values: Record<string, string | undefined> = {
     es: 'http://localhost:9220',
     index: 'az-gen-s1',
-    mappingFrom: '.alerts-security.alerts-infosec-detections',
     tolerance: '0.1',
   };
   const flags: Record<string, string> = {
@@ -100,7 +99,7 @@ const parseArgs = (argv: readonly string[]): Args => {
     '--tolerance': 'tolerance',
   };
   for (let i = 2; i < argv.length; i++) if (flags[argv[i]]) values[flags[argv[i]]] = argv[++i];
-  const required = (name: 'data' | 'profile' | 'queries'): string => {
+  const required = (name: 'data' | 'profile' | 'queries' | 'mappingFrom'): string => {
     const value = values[name];
     if (!value) throw new Error(`--${name} is required`);
     return value;
@@ -114,7 +113,7 @@ const parseArgs = (argv: readonly string[]): Args => {
     queries,
     es: String(values.es),
     index: String(values.index),
-    mappingFrom: String(values.mappingFrom),
+    mappingFrom: required('mappingFrom'),
     tolerance: Number(values.tolerance),
   };
 };
@@ -188,7 +187,7 @@ const readQueries = (file: string, index: string): string[] => {
   if (blocks.length !== 5) throw new Error(`expected 5 queries, found ${blocks.length}`);
   return blocks.map((query) => {
     const replaced = query
-      .replace('FROM .alerts-security.alerts-infosec-detections', `FROM ${index}`)
+      .replace(/FROM \.alerts-security\.\S+/, `FROM ${index}`)
       .replace('@timestamp >= NOW() - 1 day', `@timestamp >= "${DAY_START}"`);
     if (replaced.includes('NOW()') || !replaced.includes(`FROM ${index}`)) {
       throw new Error('a query kept NOW() or the old index name, so the substitution does not fit');

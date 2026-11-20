@@ -81,7 +81,7 @@ const FIELD_SETS: Record<PathKind, FieldSet> = {
 /**
  * The strict condition of an alert with no path: `event.action` plus the first scope it has, the
  * cloud account, else the user. The action alone would be the whole rule (one rule collapsed 67,000
- * alerts into one key); the scope splits it by account or person. Chosen on InfoSec's top 100 rules
+ * alerts into one key); the scope splits it by account or person. Chosen on the top 100 rules of a large deployment
  * without path fields (800,000 alerts in 7 days): action + account gave 6,805 keys of which 97% of
  * alerts repeat, and action + user 82,745 keys of which 93% repeat. Adding the source IP gave 292,000
  * keys, mostly seen once. An alert with no action, or with neither scope, has no strict key.

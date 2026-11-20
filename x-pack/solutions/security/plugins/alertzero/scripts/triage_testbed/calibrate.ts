@@ -6,13 +6,13 @@
  */
 
 /**
- * Checks generated data against the phoenix profile with the same statistics as query pack 3.
+ * Checks generated data against the reference profile with the same statistics as query pack 3.
  * It reads `alerts.ndjson` and recomputes queries 1 to 5 in JavaScript, with the same approximate key.
  * A ratio inside the tolerance (default 10%) passes. The exit code is 1 if any ratio fails.
  *
  * Usage:
  *   node x-pack/solutions/security/plugins/alertzero/scripts/triage_testbed/calibrate_cli.js \
- *     --profile <profile_phoenix.json> --data <folder with alerts.ndjson> [--tolerance 0.1]
+ *     --profile <profile.json> --data <folder with alerts.ndjson> [--tolerance 0.1]
  */
 
 import fs from 'fs';
@@ -83,7 +83,7 @@ interface Meta {
 
 const WINDOW_MS = 5 * 60 * 1000;
 const HOUR_MS = 3600 * 1000;
-const ENTRA_RULE = 'Entra ID Application Self-Assigned to Privileged Role';
+const ENTRA_RULE = 'Entra ID application added to a privileged role';
 // From the plan, "The size of the problem": the Entra ID rule has 2,173 units at 5 minutes and 44 at 24 hours.
 const ENTRA_TARGET = { units5min: 2173, units24h: 44 };
 
@@ -222,7 +222,7 @@ export const main = (): void => {
     (r) => cells.get(`${r.buildingBlock}|${r.severity}|${r.status}`) !== r.alerts
   ).length;
 
-  // Reported, not checked: the profile has no phoenix value for the alerts that one rule execution emits.
+  // Reported, not checked: the profile has no reference value for the alerts that one rule execution emits.
   const perExecution = new Map<string, number>();
   docs.forEach(({ d, ts }) => {
     const k = `${d['kibana.alert.rule.uuid']}|${Math.floor(ts / WINDOW_MS)}`;

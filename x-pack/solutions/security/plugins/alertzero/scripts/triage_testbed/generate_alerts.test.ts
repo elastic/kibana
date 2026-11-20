@@ -15,7 +15,7 @@ import type {
   Verdict,
 } from './generate_alerts';
 
-// A small profile with the same shape as `profile_phoenix.json`: every cell of the status mix is present.
+// A small profile with the same shape as `profile.json`: every cell of the status mix is present.
 const profile: Profile = {
   totals: {
     statusSeverityMix: [
@@ -26,7 +26,7 @@ const profile: Profile = {
     ],
   },
   unkeyedRules: [
-    { alerts: 10, rule: 'Okta User Sessions Started from Different Geolocations', severity: 'low' },
+    { alerts: 10, rule: 'Okta sessions started from different locations', severity: 'low' },
   ],
 };
 
@@ -207,18 +207,18 @@ describe('generate_alerts', () => {
       unkeyedRules: [
         {
           alerts: 80,
-          rule: 'Okta User Sessions Started from Different Geolocations',
+          rule: 'Okta sessions started from different locations',
           severity: 'low',
         },
         {
           alerts: 80,
-          rule: 'AWS S3 Rapid Bucket Posture API Calls from a Single Principal',
+          rule: 'AWS S3 repeated bucket API calls from one principal',
           severity: 'low',
         },
-        { alerts: 80, rule: 'GKE Anonymous Endpoint Permission Enumeration', severity: 'low' },
+        { alerts: 80, rule: 'GKE anonymous permission enumeration', severity: 'low' },
         {
           alerts: 80,
-          rule: 'GitHub Bot Account Activity from Unmanaged IP Address',
+          rule: 'GitHub bot activity from an unmanaged address',
           severity: 'low',
         },
       ],
@@ -328,22 +328,22 @@ describe('generate_alerts', () => {
     });
 
     const FAMILY_ACTIONS: Record<string, string[]> = {
-      'AWS S3 Rapid Bucket Posture API Calls from a Single Principal': [
+      'AWS S3 repeated bucket API calls from one principal': [
         'GetBucketAcl',
         'GetBucketPolicy',
         'GetBucketPublicAccessBlock',
         'GetBucketEncryption',
       ],
-      'GKE Anonymous Endpoint Permission Enumeration': [
+      'GKE anonymous permission enumeration': [
         'io.k8s.core.v1.pods.list',
         'io.k8s.rbac.v1.clusterroles.list',
         'io.k8s.core.v1.secrets.list',
       ],
-      'Okta User Sessions Started from Different Geolocations': [
+      'Okta sessions started from different locations': [
         'user.session.start',
         'user.authentication.sso',
       ],
-      'GitHub Bot Account Activity from Unmanaged IP Address': ['git.clone', 'repo.download_zip'],
+      'GitHub bot activity from an unmanaged address': ['git.clone', 'repo.download_zip'],
     };
 
     it('gives both verdicts of a rule the actions of its family, because a real model compares the alert with what the rule claims to detect', () => {
@@ -387,7 +387,7 @@ describe('generate_alerts', () => {
     it('gives a GCP rule region names of GCP and an AWS rule region names of AWS, because a model notices the mix', () => {
       const docs = unkeyed('true_positive').concat(unkeyed('false_positive'));
       const gke = docs.filter(
-        (doc) => doc['kibana.alert.rule.name'] === 'GKE Anonymous Endpoint Permission Enumeration'
+        (doc) => doc['kibana.alert.rule.name'] === 'GKE anonymous permission enumeration'
       );
       const aws = docs.filter((doc) => doc['kibana.alert.rule.name'].startsWith('AWS S3'));
 
@@ -419,15 +419,13 @@ describe('generate_alerts', () => {
       const of = (rule: string): AlertDoc[] =>
         docs.filter((doc) => doc['kibana.alert.rule.name'] === rule);
 
-      expect(
-        of('AWS S3 Rapid Bucket Posture API Calls from a Single Principal').length
-      ).toBeGreaterThan(0);
-      of('AWS S3 Rapid Bucket Posture API Calls from a Single Principal').forEach((doc) => {
+      expect(of('AWS S3 repeated bucket API calls from one principal').length).toBeGreaterThan(0);
+      of('AWS S3 repeated bucket API calls from one principal').forEach((doc) => {
         expect(doc['cloud.provider']).toBe('aws');
         expect(doc['event.dataset']).toBe('aws.cloudtrail');
         expect(doc['cloud.region']).toBeDefined();
       });
-      of('GitHub Bot Account Activity from Unmanaged IP Address').forEach((doc) => {
+      of('GitHub bot activity from an unmanaged address').forEach((doc) => {
         expect(doc['event.dataset']).toBe('github.audit');
         expect(doc['cloud.provider']).toBeUndefined();
       });

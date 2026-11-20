@@ -188,7 +188,7 @@ interface RunReport {
   comparedToBaseline?: { runId: string; differences: ScorecardDiff };
 }
 
-// The results folder sits next to the worktree: <on-week>/notes/results (it holds `results.md`, `ledger.md` and `runs/`). `--notes-dir` overrides it.
+// The default results folder sits next to the worktree (it holds `results.md`, `ledger.md` and `runs/`). `--notes-dir` overrides it.
 const DEFAULT_NOTES_DIR = path.resolve(__dirname, '../../../../../../../../notes/results');
 const FAKE_CONNECTOR_NOTE = 'fake';
 const VERDICT_TAGS: Readonly<Record<string, ShortVerdict>> = {

@@ -6,12 +6,12 @@
  */
 
 /**
- * Builds `profile_phoenix.json` from the five CSV files of query pack 3 (aggregate counts only).
+ * Builds `profile.json` from the five CSV files of query pack 3 (aggregate counts only).
  * The generator reads the profile, and the calibration step compares generated data against its `targets`.
  *
  * Usage:
  *   node x-pack/solutions/security/plugins/alertzero/scripts/triage_testbed/build_profile_cli.js \
- *     --in <folder with phoenix_query_pack3_q1.csv to q5.csv> --out <profile_phoenix.json>
+ *     --in <folder with query_pack3_q1.csv to q5.csv> --out <profile.json>
  */
 
 import fs from 'fs';
@@ -78,7 +78,12 @@ const byStatus = (rows: CsvRow[], status: string): CsvRow => {
 
 export const main = (): void => {
   const { in: dir, out } = parseArgs(process.argv);
-  const q = (n: number): CsvRow[] => readCsv(path.join(dir, `phoenix_query_pack3_q${n}.csv`));
+  // The result file of query N: any file in the folder whose name ends in `query_pack3_qN.csv`.
+  const q = (n: number): CsvRow[] => {
+    const file = fs.readdirSync(dir).find((name) => name.endsWith(`query_pack3_q${n}.csv`));
+    if (file === undefined) throw new Error(`no file ending in query_pack3_q${n}.csv in ${dir}`);
+    return readCsv(path.join(dir, file));
+  };
 
   const q1 = q(1).map((r) => ({
     alerts: toNumber(r.alerts),
@@ -114,7 +119,7 @@ export const main = (): void => {
   }));
 
   const profile = {
-    source: 'query pack 3, phoenix, 24 hours, 2026-11-16 (aggregate counts only)',
+    source: 'query pack 3, a reference deployment, 24 hours (aggregate counts only)',
     // The three queries ran at different instants, so the open totals differ by a few alerts.
     note: 'open alert totals differ by up to 6 across q2, q3 and q4 because the queries ran at different times',
     totals: {

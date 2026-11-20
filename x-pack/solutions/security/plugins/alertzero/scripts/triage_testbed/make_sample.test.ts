@@ -22,10 +22,10 @@ const profile: Profile = {
     ],
   },
   unkeyedRules: [
-    { alerts: 60, rule: 'Okta User Sessions Started from Different Geolocations', severity: 'low' },
+    { alerts: 60, rule: 'Okta sessions started from different locations', severity: 'low' },
     {
       alerts: 50,
-      rule: 'GitHub Bot Account Activity from Unmanaged IP Address',
+      rule: 'GitHub bot activity from an unmanaged address',
       severity: 'medium',
     },
   ],

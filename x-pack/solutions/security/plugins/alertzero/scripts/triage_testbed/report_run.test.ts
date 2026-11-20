@@ -358,14 +358,14 @@ describe('resolveExcludedRules', () => {
   fs.writeFileSync(
     path.join(dir, 'rules.json'),
     JSON.stringify([
-      { uuid: 'u1', name: 'AWS S3 Rapid Bucket Posture API Calls from a Single Principal' },
+      { uuid: 'u1', name: 'AWS S3 repeated bucket API calls from one principal' },
       { uuid: 'u2', name: 'AWS S3 Bucket Enumeration or Brute Force' },
     ])
   );
 
   it('takes a rule by its exact name or its uuid', () => {
     const byName = resolveExcludedRules(dir, [
-      'AWS S3 Rapid Bucket Posture API Calls from a Single Principal',
+      'AWS S3 repeated bucket API calls from one principal',
     ]);
 
     expect([...byName.uuids]).toEqual(['u1']);

@@ -6,7 +6,7 @@
  */
 
 /**
- * Generates one day of synthetic security alerts that follow the phoenix profile (`build_profile.ts`),
+ * Generates one day of synthetic security alerts that follow the reference profile (`build_profile.ts`),
  * with a truth file. Everything is synthetic: no real hostname, user, path or hash appears.
  *
  * Output folder:
@@ -19,7 +19,7 @@
  *
  * Usage:
  *   node x-pack/solutions/security/plugins/alertzero/scripts/triage_testbed/generate_alerts_cli.js \
- *     --profile <profile_phoenix.json> --out <folder> [--seed 1] [--params '{"default":{"sameWindow":0.5}}']
+ *     --profile <profile.json> --out <folder> [--seed 1] [--params '{"default":{"sameWindow":0.5}}']
  */
 
 import crypto from 'crypto';
@@ -51,7 +51,7 @@ export interface ProfileUnkeyedRule {
   alerts: number;
 }
 
-/** The part of the profile (`profile_phoenix.json`) that the generator reads. */
+/** The part of the profile (`profile.json`) that the generator reads. */
 export interface Profile {
   totals: { statusSeverityMix: ProfileMixRow[] };
   unkeyedRules: ProfileUnkeyedRule[];
@@ -198,12 +198,12 @@ export const DEFAULT_PARAMS: GeneratorParams = {
   // positives get a new hash at a random time of the day. Alerts after that time carry it with the chance
   // `laterAlertShare` (some hosts have not updated yet). The hash is outside the key, so the key does not change.
   // 10% of keys a day is an assumption (signed software updates weekly to monthly, so 3% to 14% a day), not a
-  // phoenix measurement. A key needs `minKeySize` alerts to show an update at all; a variant needs 10 (a cached verdict).
+  // reference measurement. A key needs `minKeySize` alerts to show an update at all; a variant needs 10 (a cached verdict).
   hashUpdate: { keyShare: 0.1, laterAlertShare: 0.8, minKeySize: 4 },
   default: { sameWindow: 0.64, sameHour: 0.14 },
-  // 44 keys is the phoenix value. A flatter size spread keeps the 5-minute units stable across seeds.
+  // 44 keys is the reference value. A flatter size spread keeps the 5-minute units stable across seeds.
   entra: { sameWindow: 0.9, sameHour: 0.05, keys: 44, keySizeSigma: 0.8, alerts: 26200 },
-  // The Slack thread reports executions that emit up to 1,000 alerts. Each burst puts that many alerts of one key into one window.
+  // Executions that emit up to 1,000 alerts were reported. Each burst puts that many alerts of one key into one window.
   bursts: { count: 3, size: 1000 },
   buildingBlock: { sameWindow: 0.64, sameHour: 0.14 },
   kindWeights: { process: 0.45, cloud: 0.25, file: 0.12, registry: 0.12, library: 0.06 },
@@ -211,7 +211,7 @@ export const DEFAULT_PARAMS: GeneratorParams = {
   buildingBlockRules: 8,
 };
 
-const ENTRA_RULE = 'Entra ID Application Self-Assigned to Privileged Role';
+const ENTRA_RULE = 'Entra ID application added to a privileged role';
 
 const parseArgs = (argv: readonly string[]): CommandLineArgs => {
   let profile: string | undefined;
@@ -888,11 +888,11 @@ const buildDay = (
       (unkeyedBySeverity[unkeyed.severity] ?? 0) + unkeyed.alerts;
     // A few of the rules carry a source address. Their counts of distinct addresses come from the plan.
     const distinctByRule: Record<string, number | undefined> = {
-      'GKE Anonymous Endpoint Permission Enumeration': 15,
-      'GKE Endpoint Permission Enumeration': 19,
-      'AWS S3 Rapid Bucket Posture API Calls from a Single Principal': 155,
-      'GitHub Bot Account Activity from Unmanaged IP Address': unkeyed.alerts,
-      'AWS EC2 Multi-Region DescribeInstances API Calls from an unmanaged IP [Elastic Cloud]': 9,
+      'GKE anonymous permission enumeration': 15,
+      'GKE permission enumeration': 19,
+      'AWS S3 repeated bucket API calls from one principal': 155,
+      'GitHub bot activity from an unmanaged address': unkeyed.alerts,
+      'AWS EC2 multi-region API calls from an unmanaged address': 9,
     };
     const distinct = distinctByRule[unkeyed.rule];
     const ruleVerdictBias = rng.next();
