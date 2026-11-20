@@ -22,7 +22,15 @@ const DEPLOYMENT_IDS = [
 ];
 
 const STATE_PATTERN = 'metrics-kubernetes.state_deployment-*';
+const STATE_CONTAINER_PATTERN = 'metrics-kubernetes.state_container-*';
 const OTEL_PATTERN = 'metrics-k8sclusterreceiver.otel-*';
+
+/** Scout archive has no `state_container` stream, so that source's FROM plan is unusable. */
+const STATE_CONTAINER_UNUSABLE = {
+  indexPattern: STATE_CONTAINER_PATTERN,
+  status: null,
+  reason: `no readable index behind "${STATE_CONTAINER_PATTERN}" maps @timestamp`,
+};
 
 // No index maps `k8s.deployment.uid`, so each of the OpenTelemetry source's two plans (`TS` and
 // `FROM`) reports it: the response carries the same entry twice.
@@ -31,7 +39,18 @@ const UID_UNAVAILABLE = {
   indexPattern: OTEL_PATTERN,
   field: 'k8s.deployment.uid',
 };
-const UID_UNAVAILABLE_PER_OTEL_PLAN = [UID_UNAVAILABLE, UID_UNAVAILABLE];
+const RESTARTS_UNAVAILABLE = {
+  column: 'k8s.container.restarts',
+  indexPattern: OTEL_PATTERN,
+  field: 'k8s.container.restarts',
+};
+/** Per OTel plan: uid then restarts, in column order; two OTel plans (TS then FROM). */
+const OTEL_UNAVAILABLE_PER_PLAN = [
+  UID_UNAVAILABLE,
+  RESTARTS_UNAVAILABLE,
+  UID_UNAVAILABLE,
+  RESTARTS_UNAVAILABLE,
+];
 
 type QueryDiagnostic = ListResponse['queries'][number];
 
@@ -108,11 +127,13 @@ apiTest.describe(
           'k8s.deployment.label.app': 'cart-api',
           // Mapped in no index, so no plan reads a value for it.
           'k8s.deployment.uid': null,
+          // Scout archive has no state_container / OTel restart samples.
+          'k8s.container.restarts': null,
           last_seen: '2026-11-01T10:01:00.000Z',
         });
         expect(body.truncated).toBe(false);
-        expect(body.errors).toStrictEqual([]);
-        expect(body.unavailableColumns).toStrictEqual(UID_UNAVAILABLE_PER_OTEL_PLAN);
+        expect(body.errors).toStrictEqual([STATE_CONTAINER_UNUSABLE]);
+        expect(body.unavailableColumns).toStrictEqual(OTEL_UNAVAILABLE_PER_PLAN);
       }
     );
 
@@ -129,7 +150,6 @@ apiTest.describe(
         // the Agent source, whose plan is listed first.
         expect(body.provenance[CART_API_ID]).toStrictEqual({
           'k8s.cluster.name': STATE_PATTERN,
-          'k8s.deployment.available': STATE_PATTERN,
           'k8s.deployment.desired': STATE_PATTERN,
           'k8s.deployment.paused': STATE_PATTERN,
           'k8s.deployment.label.app': STATE_PATTERN,
@@ -138,6 +158,7 @@ apiTest.describe(
           body.queries.map(({ indexPattern, engine }) => ({ indexPattern, engine }))
         ).toStrictEqual([
           { indexPattern: STATE_PATTERN, engine: 'FROM' },
+          { indexPattern: STATE_CONTAINER_PATTERN, engine: 'FROM' },
           { indexPattern: OTEL_PATTERN, engine: 'TS' },
           { indexPattern: OTEL_PATTERN, engine: 'FROM' },
         ]);
@@ -147,7 +168,8 @@ apiTest.describe(
           expect(typeof query.took).toBe('number');
         });
         // The OpenTelemetry time-series index holds no 2026-11-01 documents, so its `TS` plan reads none.
-        expect(body.queries.map(({ rowCount }) => rowCount)).toStrictEqual([3, 0, 3]);
+        // state_container is absent from the archive, so its FROM plan contributes no rows.
+        expect(body.queries.map(({ rowCount }) => rowCount)).toStrictEqual([3, 0, 0, 3]);
         expect(typeof body.took).toBe('number');
         expect(body.unsupportedMetrics).toStrictEqual([]);
         expect('documentFilterWarnings' in body).toBe(false);
@@ -166,14 +188,14 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         const { columns, rows, errors, unavailableColumns }: ListResponse = response.body;
 
-        expect(unavailableColumns).toStrictEqual(UID_UNAVAILABLE_PER_OTEL_PLAN);
+        expect(unavailableColumns).toStrictEqual(OTEL_UNAVAILABLE_PER_PLAN);
         expect(columns.find(({ name }) => name === 'k8s.deployment.uid')).toStrictEqual({
           name: 'k8s.deployment.uid',
           kind: 'attribute',
         });
         expect(rows.map((row) => row['k8s.deployment.uid'])).toStrictEqual([null, null, null]);
-        // An unmapped attribute leaves its plans usable, so nothing is reported in `errors`.
-        expect(errors).toStrictEqual([]);
+        // An unmapped attribute leaves its plans usable; only the missing state_container source fails.
+        expect(errors).toStrictEqual([STATE_CONTAINER_UNUSABLE]);
       }
     );
 
@@ -197,11 +219,22 @@ apiTest.describe(
           { name: 'kubernetes.namespace', kind: 'identity' },
           { name: 'kubernetes.deployment.name', kind: 'identity' },
           { name: 'k8s.cluster.name', kind: 'attribute' },
-          { name: 'k8s.deployment.available', kind: 'attribute' },
           { name: 'k8s.deployment.desired', kind: 'attribute' },
           { name: 'k8s.deployment.paused', kind: 'attribute' },
           { name: 'k8s.deployment.label.app', kind: 'attribute' },
           { name: 'k8s.deployment.uid', kind: 'attribute' },
+          {
+            name: 'k8s.deployment.available',
+            kind: 'metric',
+            agg: 'last',
+            unit: 'count',
+          },
+          {
+            name: 'k8s.container.restarts',
+            kind: 'metric',
+            agg: 'last',
+            unit: 'count',
+          },
           { name: 'last_seen', kind: 'last_seen' },
         ]);
         expect(columns).toStrictEqual(types.find(({ type }) => type === 'k8s.deployment')?.columns);
@@ -307,12 +340,14 @@ apiTest.describe(
             'k8s.deployment.paused': null,
             'k8s.deployment.label.app': null,
             'k8s.deployment.uid': null,
+            'k8s.container.restarts': null,
             last_seen: '2026-11-05T14:01:00.000Z',
           },
         ]);
-        expect(errors).toStrictEqual([]);
+        expect(errors).toStrictEqual([STATE_CONTAINER_UNUSABLE]);
         expect(summarizeQueries(queries)).toStrictEqual([
           { indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 0 },
+          { indexPattern: STATE_CONTAINER_PATTERN, engine: 'FROM', rowCount: 0 },
           { indexPattern: OTEL_PATTERN, engine: 'TS', rowCount: 1 },
           { indexPattern: OTEL_PATTERN, engine: 'FROM', rowCount: 0 },
         ]);
@@ -360,11 +395,12 @@ apiTest.describe(
           },
         ]);
         expect(truncated).toBe(false);
-        expect(errors).toStrictEqual([]);
+        expect(errors).toStrictEqual([STATE_CONTAINER_UNUSABLE]);
         // Two rows per plan: `FROM` leaves out the time-series index (it would return tsds-only as
         // a third row) and `TS` reads only it (it would return standard-only).
         expect(summarizeQueries(queries)).toStrictEqual([
           { indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 0 },
+          { indexPattern: STATE_CONTAINER_PATTERN, engine: 'FROM', rowCount: 0 },
           { indexPattern: OTEL_PATTERN, engine: 'TS', rowCount: 2 },
           { indexPattern: OTEL_PATTERN, engine: 'FROM', rowCount: 2 },
         ]);
@@ -390,9 +426,10 @@ apiTest.describe(
           'k8s.deployment:aliased/kept-standard',
           'k8s.deployment:aliased/kept-tsds',
         ]);
-        expect(errors).toStrictEqual([]);
+        expect(errors).toStrictEqual([STATE_CONTAINER_UNUSABLE]);
         expect(summarizeQueries(queries)).toStrictEqual([
           { indexPattern: STATE_PATTERN, engine: 'FROM', rowCount: 0 },
+          { indexPattern: STATE_CONTAINER_PATTERN, engine: 'FROM', rowCount: 0 },
           { indexPattern: OTEL_PATTERN, engine: 'TS', rowCount: 1 },
           { indexPattern: OTEL_PATTERN, engine: 'FROM', rowCount: 1 },
         ]);
@@ -501,7 +538,7 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         const { rows, errors }: ListResponse = response.body;
         expect(rows.map((row) => row['entity.id']).sort()).toStrictEqual(DEPLOYMENT_IDS);
-        expect(errors).toStrictEqual([]);
+        expect(errors).toStrictEqual([STATE_CONTAINER_UNUSABLE]);
       }
     );
 
@@ -525,7 +562,7 @@ apiTest.describe(
         // each is reported in `errors`, and that is not truncation.
         expect(rows).toStrictEqual([]);
         expect(errors).toStrictEqual(
-          [STATE_PATTERN, OTEL_PATTERN].map((indexPattern) => ({
+          [STATE_PATTERN, STATE_CONTAINER_PATTERN, OTEL_PATTERN].map((indexPattern) => ({
             indexPattern,
             status: null,
             reason: `no readable index behind "${indexPattern}" maps @timestamp`,

@@ -8,6 +8,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { DynamicMetricAgg, DynamicMetricUnit } from '@kbn/entity-store/common';
 
+export type { DynamicMetricAgg, DynamicMetricUnit };
+
 /** The most rows one list request may ask for, and the route's default `limit`. */
 export const MAX_LIST_LIMIT = 9_999;
 

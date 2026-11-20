@@ -14,12 +14,16 @@ import { MANAGED_BY } from '../constants';
  * ECS<->OTel alias layer resolves those names on the OpenTelemetry stream, so one composition
  * serves both sources. The same namespace and name in two clusters land on one id; the cluster is
  * an attribute.
+ *
+ * Metrics (Elastic Kubernetes integration): available replicas from `state_deployment`, restart
+ * count from `state_container` (docs carry deployment name + namespace). No deployment uptime
+ * duration field exists in that integration, so uptime is not declared.
  */
 export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
   type: 'k8s.deployment',
   name: 'K8s Deployment',
   description:
-    'A Kubernetes deployment, identified by namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment) and the OpenTelemetry k8sclusterreceiver. The same namespace/name in two clusters is one entity; the cluster is shown as a column.',
+    'A Kubernetes deployment, identified by namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment, state_container) and the OpenTelemetry k8sclusterreceiver. The same namespace/name in two clusters is one entity; the cluster is shown as a column.',
   managedBy: MANAGED_BY,
   identityField: {
     euidRanking: {
@@ -44,19 +48,51 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
         filter: 'metricset.name == "state_deployment"',
         attributes: [
           { name: 'k8s.cluster.name', field: 'orchestrator.cluster.name' },
-          { name: 'k8s.deployment.available', field: 'kubernetes.deployment.replicas.available' },
           { name: 'k8s.deployment.desired', field: 'kubernetes.deployment.replicas.desired' },
           { name: 'k8s.deployment.paused', field: 'kubernetes.deployment.paused' },
           { name: 'k8s.deployment.label.app', field: 'kubernetes.labels.app' },
+        ],
+        metrics: [
+          {
+            name: 'k8s.deployment.available',
+            field: 'kubernetes.deployment.replicas.available',
+            agg: 'last',
+            unit: 'count',
+          },
+        ],
+      },
+      {
+        indexPattern: 'metrics-kubernetes.state_container-*',
+        filter: 'metricset.name == "state_container"',
+        metrics: [
+          {
+            name: 'k8s.container.restarts',
+            field: 'kubernetes.container.status.restarts',
+            agg: 'last',
+            unit: 'count',
+          },
         ],
       },
       {
         indexPattern: 'metrics-k8sclusterreceiver.otel-*',
         attributes: [
           { name: 'k8s.cluster.name', field: 'orchestrator.cluster.name' },
-          { name: 'k8s.deployment.available', field: 'k8s.deployment.available' },
           { name: 'k8s.deployment.desired', field: 'k8s.deployment.desired' },
           { name: 'k8s.deployment.uid', field: 'k8s.deployment.uid' },
+        ],
+        metrics: [
+          {
+            name: 'k8s.deployment.available',
+            field: 'k8s.deployment.available',
+            agg: 'last',
+            unit: 'count',
+          },
+          {
+            name: 'k8s.container.restarts',
+            field: 'k8s.container.restarts',
+            agg: 'last',
+            unit: 'count',
+          },
         ],
       },
     ],

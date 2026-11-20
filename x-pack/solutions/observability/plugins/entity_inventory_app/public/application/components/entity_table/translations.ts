@@ -17,6 +17,12 @@ export const NO_VALUE_LABEL = i18n.translate('xpack.entityInventoryApp.entityTab
   defaultMessage: 'No value',
 });
 
+/** Visible placeholder for a metric cell without a value. */
+export const METRIC_NOT_AVAILABLE_LABEL = i18n.translate(
+  'xpack.entityInventoryApp.entityTable.metricNotAvailable',
+  { defaultMessage: 'N/A' }
+);
+
 export const RESET_TO_DEFAULT_LABEL = i18n.translate(
   'xpack.entityInventoryApp.entityTable.resetToDefault',
   { defaultMessage: 'Reset to default' }

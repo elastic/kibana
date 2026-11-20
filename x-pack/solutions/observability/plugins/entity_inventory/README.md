@@ -22,24 +22,29 @@ No body and no parameters. It returns one entry per registered definition that h
     {
       "type": "k8s.deployment",
       "name": "K8s Deployment",
-      "description": "A Kubernetes deployment, identified by namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment) and the OpenTelemetry k8sclusterreceiver. The same namespace/name in two clusters is one entity; the cluster is shown as a column.",
+      "description": "A Kubernetes deployment, identified by namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment, state_container) and the OpenTelemetry k8sclusterreceiver. The same namespace/name in two clusters is one entity; the cluster is shown as a column.",
       "identityFields": ["kubernetes.namespace", "kubernetes.deployment.name"],
       "columns": [
         { "name": "entity.id", "kind": "id" },
         { "name": "kubernetes.namespace", "kind": "identity" },
         { "name": "kubernetes.deployment.name", "kind": "identity" },
         { "name": "k8s.cluster.name", "kind": "attribute" },
-        { "name": "k8s.deployment.available", "kind": "attribute" },
         { "name": "k8s.deployment.desired", "kind": "attribute" },
         { "name": "k8s.deployment.paused", "kind": "attribute" },
         { "name": "k8s.deployment.label.app", "kind": "attribute" },
         { "name": "k8s.deployment.uid", "kind": "attribute" },
+        { "name": "k8s.deployment.available", "kind": "metric", "agg": "last", "unit": "count" },
+        { "name": "k8s.container.restarts", "kind": "metric", "agg": "last", "unit": "count" },
         { "name": "last_seen", "kind": "last_seen" }
       ],
       "sources": [
         {
           "indexPattern": "metrics-kubernetes.state_deployment-*",
           "filter": "metricset.name == \"state_deployment\""
+        },
+        {
+          "indexPattern": "metrics-kubernetes.state_container-*",
+          "filter": "metricset.name == \"state_container\""
         },
         { "indexPattern": "metrics-k8sclusterreceiver.otel-*" }
       ]
