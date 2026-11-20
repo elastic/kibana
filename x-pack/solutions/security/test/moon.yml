@@ -71,9 +71,4 @@ fileGroups:
     - '!security-solution-evals/**/*'
     - '!*/packages/**/*'
     - '!*/*/packages/**/*'
-tasks:
-  test-source-upstream:
-    inputs:
-      - '!plugin_functional/plugins/resolver_test/**/*'
-      - '!security_solution_api_integration/**/*'
-      - '!security_solution_endpoint/**/*'
+tasks: {}

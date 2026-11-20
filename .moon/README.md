@@ -50,11 +50,8 @@ Its workspace paths must be maintained manually. The tooling project's
 exclusions avoid making changes to its own Jest tests and fixtures select every
 Jest project.
 
-Moon globs do not stop at nested project boundaries. For allowlisted ancestors
-with nested projects (see `nested_projects.ts`), `regenerate_moon_projects`
-appends `!<child>/**/*` to the ancestor's test config file groups and test task
-inputs, so the ancestor neither claims its children's configs nor treats their
-files as its own inputs.
+Moon projects cannot be nested. `regenerate_moon_projects` checks this before
+writing configs, so each project owns only its own test configs and inputs.
 
 Some consumers are not reachable through the project graph. The encrypted saved
 objects plugin's `moon.extend.yml` adds workspace-relative saved object

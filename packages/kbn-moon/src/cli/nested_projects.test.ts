@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { findChildProjectDirs, findNestedProjects } from './nested_projects';
+import { findNestedProjects } from './nested_projects';
 
 describe('findNestedProjects', () => {
   it('returns projects nested inside another project', () => {
@@ -33,17 +33,5 @@ describe('findNestedProjects', () => {
       'src/platform/test -> src/platform/test/test_plugin',
       'x-pack/platform/test -> x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector',
     ]);
-  });
-});
-
-describe('findChildProjectDirs', () => {
-  it('returns the outermost nested projects relative to the parent', () => {
-    expect(
-      findChildProjectDirs('src/a', ['src/a', 'src/a/b', 'src/a/b/c', 'src/a/d', 'src/ab'])
-    ).toEqual(['b', 'd']);
-  });
-
-  it('returns nothing for a project without nested projects', () => {
-    expect(findChildProjectDirs('src/ab', ['src/a', 'src/a/b', 'src/ab'])).toEqual([]);
   });
 });
