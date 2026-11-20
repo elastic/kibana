@@ -48,10 +48,29 @@ const metricsSourceConfigurationOriginRT = rt.keyof({
   stored: null,
 });
 
-export const metricsSourceStatusRT = rt.strict({
-  metricIndicesExist: SourceStatusRuntimeType.props.metricIndicesExist,
-  remoteClustersExist: SourceStatusRuntimeType.props.metricIndicesExist,
+/**
+ * Outcome of the metric index probe: `unknown` means the check could not be completed
+ * (for example it timed out), which is different from a confirmed `missing` index pattern.
+ */
+export const metricIndicesStatusRT = rt.keyof({
+  available: null,
+  missing: null,
+  unknown: null,
 });
+
+export type MetricIndicesStatus = rt.TypeOf<typeof metricIndicesStatusRT>;
+
+export const metricsSourceStatusRT = rt.exact(
+  rt.intersection([
+    rt.type({
+      metricIndicesExist: SourceStatusRuntimeType.props.metricIndicesExist,
+      remoteClustersExist: SourceStatusRuntimeType.props.metricIndicesExist,
+    }),
+    rt.partial({
+      metricIndicesStatus: metricIndicesStatusRT,
+    }),
+  ])
+);
 
 export type MetricsSourceStatus = rt.TypeOf<typeof metricsSourceStatusRT>;
 

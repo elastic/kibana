@@ -44,6 +44,7 @@ export const getHttp = (params: Parameters): HttpStart => {
             source: {
               status: {
                 remoteClustersExist: true,
+                metricIndicesStatus: 'available',
               },
               configuration: {
                 metricAlias: 'metricbeat-*',

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -16,20 +16,30 @@ import { settingsTitle } from '../../../translations';
 interface MockMetricsSource {
   configuration: { metricAlias?: string };
   origin: string;
-  status: { metricIndicesExist: boolean; remoteClustersExist: boolean };
+  status: {
+    metricIndicesExist: boolean;
+    remoteClustersExist: boolean;
+    metricIndicesStatus: 'available' | 'missing' | 'unknown';
+  };
 }
 
 const mockSourceContext: {
   persistSourceConfiguration: jest.Mock;
+  loadSource: jest.Mock;
   source: MockMetricsSource | undefined;
   sourceExists: boolean;
   isLoading: boolean;
 } = {
   persistSourceConfiguration: jest.fn(),
+  loadSource: jest.fn(),
   source: {
     configuration: {},
     origin: 'stored',
-    status: { metricIndicesExist: false, remoteClustersExist: true },
+    status: {
+      metricIndicesExist: false,
+      remoteClustersExist: true,
+      metricIndicesStatus: 'missing',
+    },
   },
   sourceExists: true,
   isLoading: false,
@@ -63,7 +73,11 @@ jest.mock('../../../components/page_template', () => ({
 }));
 
 jest.mock('./indices_configuration_panel', () => ({
-  IndicesConfigurationPanel: () => <div data-test-subj="indicesConfigurationPanel" />,
+  IndicesConfigurationPanel: ({
+    onRetryMetricIndicesCheck,
+  }: {
+    onRetryMetricIndicesCheck?: () => void;
+  }) => <button data-test-subj="indicesConfigurationPanel" onClick={onRetryMetricIndicesCheck} />,
 }));
 
 jest.mock('./ml_configuration_panel', () => ({
@@ -104,10 +118,15 @@ const renderSettings = () =>
 
 describe('SourceConfigurationSettings', () => {
   beforeEach(() => {
+    mockSourceContext.loadSource.mockClear();
     mockSourceContext.source = {
       configuration: {},
       origin: 'stored',
-      status: { metricIndicesExist: false, remoteClustersExist: true },
+      status: {
+        metricIndicesExist: false,
+        remoteClustersExist: true,
+        metricIndicesStatus: 'missing',
+      },
     };
     mockSourceContext.sourceExists = true;
     mockSourceContext.isLoading = false;
@@ -137,5 +156,13 @@ describe('SourceConfigurationSettings', () => {
     expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
     expect(screen.getByTestId('sourceLoadingPage')).toBeInTheDocument();
     expect(screen.queryByTestId('nameConfigurationPanel')).not.toBeInTheDocument();
+  });
+
+  it('wires the retry callback of the indices panel to reloading the source', async () => {
+    renderSettings();
+
+    fireEvent.click(await screen.findByTestId('indicesConfigurationPanel'));
+
+    expect(mockSourceContext.loadSource).toHaveBeenCalledTimes(1);
   });
 });

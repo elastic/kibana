@@ -7,6 +7,7 @@
 
 import { EuiLink } from '@elastic/eui';
 import {
+  EuiButton,
   EuiCallOut,
   EuiCode,
   EuiDescribedFormGroup,
@@ -24,6 +25,7 @@ import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '@kbn/rule-data-utils';
+import type { MetricIndicesStatus } from '../../../../common/metrics_sources';
 import { METRICS_INDEX_PATTERN } from '../../../../common/constants';
 import type { InputFieldProps } from './input_fields';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -33,7 +35,9 @@ interface IndicesConfigurationPanelProps {
   readOnly: boolean;
   metricAliasFieldProps: InputFieldProps;
   metricIndicesExist?: boolean;
+  metricIndicesStatus?: MetricIndicesStatus;
   remoteClustersExist?: boolean;
+  onRetryMetricIndicesCheck?: () => void;
   isMetricAliasChanged?: boolean;
   numberOfInfraRules: number;
 }
@@ -52,6 +56,13 @@ const METRIC_INDICES_USED_BY_RULES = i18n.translate(
   }
 );
 
+const METRIC_INDICES_CHECK_INCOMPLETE_TITLE = i18n.translate(
+  'xpack.infra.sourceConfiguration.metricIndicesCheckIncompleteTitle',
+  {
+    defaultMessage: 'Couldn’t check the metric indices',
+  }
+);
+
 const REMOTE_CLUSTER_ERROR_TITLE = i18n.translate(
   'xpack.infra.sourceConfiguration.remoteClusterConnectionDoNotExistTitle',
   {
@@ -64,7 +75,9 @@ export const IndicesConfigurationPanel = ({
   readOnly,
   metricAliasFieldProps,
   metricIndicesExist,
+  metricIndicesStatus,
   remoteClustersExist,
+  onRetryMetricIndicesCheck,
   isMetricAliasChanged,
   numberOfInfraRules,
 }: IndicesConfigurationPanelProps) => {
@@ -167,7 +180,42 @@ export const IndicesConfigurationPanel = ({
             </EuiCallOut>
           </>
         )}
-        {remoteClustersExist && !metricIndicesExist && (
+        {remoteClustersExist && metricIndicesStatus === 'unknown' && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              title={METRIC_INDICES_CHECK_INCOMPLETE_TITLE}
+              color="warning"
+              iconType="warning"
+              data-test-subj="infraIndicesPanelSettingsCheckIncompleteCallout"
+            >
+              <FormattedMessage
+                id="xpack.infra.sourceConfiguration.metricIndicesCheckIncomplete"
+                defaultMessage="We couldn’t verify whether the pattern entered matches any index because the check didn’t complete. This can happen when the cluster is slow to respond."
+              />
+              {onRetryMetricIndicesCheck && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiButton
+                    size="s"
+                    color="warning"
+                    isLoading={isLoading}
+                    onClick={onRetryMetricIndicesCheck}
+                    data-test-subj="infraIndicesPanelSettingsCheckIncompleteRetryButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.infra.sourceConfiguration.metricIndicesCheckRetryButton"
+                      defaultMessage="Retry"
+                    />
+                  </EuiButton>
+                </>
+              )}
+            </EuiCallOut>
+          </>
+        )}
+        {remoteClustersExist && metricIndicesStatus !== 'unknown' && !metricIndicesExist && (
           <>
             <EuiSpacer size="s" />
             <EuiCallOut
