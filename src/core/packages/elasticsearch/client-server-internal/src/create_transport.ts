@@ -109,6 +109,42 @@ export const createTransport = ({
 
       onRequest({ scoped }, params, opts, logger);
 
+<<<<<<< HEAD
+=======
+      const retryUnauthorizedRequest = async (error: UnauthorizedError) => {
+        const unauthorizedErrorHandler = getUnauthorizedErrorHandler
+          ? getUnauthorizedErrorHandler()
+          : undefined;
+        if (unauthorizedErrorHandler) {
+          const result = await unauthorizedErrorHandler(error, opts.headers);
+          if (isRetryResult(result)) {
+            this.headers = {
+              ...this.headers,
+              ...result.authHeaders,
+            };
+            const retryOpts = { ...opts };
+            retryOpts.headers = {
+              ...this.headers,
+              ...options?.headers,
+            };
+
+            const retryResponse = (await super.request(params, retryOpts)) as TransportResult<
+              any,
+              any
+            >;
+            if (isUnauthorizedStreamResponse(retryResponse)) {
+              throw await createUnauthorizedStreamError(retryResponse, logger);
+            }
+
+            return retryResponse;
+          }
+        }
+
+        throw error;
+      };
+
+      let response: TransportResult<any, any>;
+>>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
       try {
         return (await super.request(params, opts)) as TransportResult<any, any>;
       } catch (e) {

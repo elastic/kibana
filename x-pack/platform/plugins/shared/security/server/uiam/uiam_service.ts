@@ -144,10 +144,26 @@ export interface UiamServicePublic {
   getAuthenticationHeaders(accessToken: string): Record<string, string>;
 
   /**
+<<<<<<< HEAD
    * Returns the Elasticsearch client authentication information with the shared secret value. This is to be used with
    * `client_authentication` option in Elasticsearch client.
    */
   getClientAuthentication(): ClientAuthentication;
+=======
+   * Returns the header(s) a trusted loopback caller stamps on a real HTTP request that carries an
+   * internal UIAM (`essu_`) credential, so the ES cluster client re-attaches the shared secret on
+   * its behalf. Carries a non-reversible HMAC of the shared secret (never the secret itself), bound
+   * to `credential` so it authorizes that credential only.
+   */
+  getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader): Record<string, string>;
+
+  /**
+   * Returns client authentication for Elasticsearch's `client_authentication` option.
+   * Preserves client authentication supplied with a UIAM bearer token, or uses Kibana's own value.
+   * @param request Optional request or stored headers for the current credential.
+   */
+  getClientAuthentication(request?: Pick<KibanaRequest, 'headers'>): ClientAuthentication;
+>>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
 
   /**
    * Refreshes the UIAM user session and returns new access and refresh session tokens.
@@ -337,8 +353,19 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.getClientAuthentication}.
    */
+<<<<<<< HEAD
   getClientAuthentication(): ClientAuthentication {
     return { scheme: 'SharedSecret', value: this.#config.sharedSecret };
+=======
+  getClientAuthentication(request?: Pick<KibanaRequest, 'headers'>): ClientAuthentication {
+    const suppliedSharedSecret = request
+      ? getUiamClientAuthentication(request)?.sharedSecret
+      : undefined;
+    return {
+      scheme: 'SharedSecret',
+      value: suppliedSharedSecret ?? this.#config.sharedSecret,
+    };
+>>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
   }
 
   /**

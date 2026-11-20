@@ -20,6 +20,7 @@ import type { SecurityLicense } from '../../../common';
 import { ALL_SPACES_ID } from '../../../common/constants';
 import { licenseMock } from '../../../common/licensing/index.mock';
 import { uiamServiceMock } from '../../uiam/uiam_service.mock';
+import { authenticatorMock } from '../authenticator.mock';
 
 const encodeToBase64 = (str: string) => Buffer.from(str).toString('base64');
 
@@ -31,6 +32,7 @@ describe('API Keys', () => {
   >;
   let mockLicense: jest.Mocked<SecurityLicense>;
   let logger: Logger;
+  let authenticator: ReturnType<typeof authenticatorMock.create>;
   const roleDescriptors: { [key: string]: any } = { foo: true };
 
   beforeEach(() => {
@@ -45,8 +47,10 @@ describe('API Keys', () => {
     mockLicense.isEnabled.mockReturnValue(true);
 
     logger = loggingSystemMock.create().get('api-keys');
+    authenticator = authenticatorMock.create();
 
     apiKeys = new APIKeys({
+      authenticator,
       clusterClient: mockClusterClient,
       logger,
       license: mockLicense,
@@ -413,9 +417,388 @@ describe('API Keys', () => {
         },
       });
     });
+<<<<<<< HEAD
+=======
+
+    it('forwards `certificate_identity` when updating a cross-cluster API key', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+
+      mockScopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        updated: true,
+      });
+      await apiKeys.update(httpServerMock.createKibanaRequest(), {
+        type: 'cross_cluster',
+        id: '123',
+        access: {},
+        metadata: {},
+        certificate_identity: 'CN=host,OU=engineering,DC=example,DC=com',
+      });
+      expect(mockScopedClusterClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'PUT',
+        path: '/_security/cross_cluster/api_key/123',
+        body: {
+          access: {},
+          metadata: {},
+          certificate_identity: 'CN=host,OU=engineering,DC=example,DC=com',
+        },
+      });
+    });
+  });
+
+  describe('grantAsInternalUser() with a service account token', () => {
+    const serviceAccountToken = Buffer.concat([
+      Buffer.from([0, 1, 0, 1]),
+      Buffer.from('kibana/automation/t1:super-secret'),
+    ])
+      .toString('base64')
+      .replace(/=+$/, '');
+    const serviceAccountUser = mockAuthenticatedUser({
+      username: 'kibana/automation',
+      authentication_provider: { type: 'http', name: '__http__' },
+      authentication_realm: { name: SERVICE_ACCOUNT_REALM_TYPE, type: SERVICE_ACCOUNT_REALM_TYPE },
+      lookup_realm: { name: SERVICE_ACCOUNT_REALM_TYPE, type: SERVICE_ACCOUNT_REALM_TYPE },
+      authentication_type: 'token',
+      http_authentication_scheme: 'bearer',
+    });
+    const grantResult = { id: '123', name: 'key-name', api_key: 'abc123', encoded: 'utf8' };
+    let getCurrentUser: jest.Mock;
+
+    const createServiceAccountRequest = (headers: Record<string, string> = {}) =>
+      httpServerMock.createKibanaRequest({
+        headers: { authorization: `Bearer ${serviceAccountToken}`, ...headers },
+      });
+
+    const createResponseError = (statusCode: number, reason: string) => {
+      const response = elasticsearchServiceMock.createApiResponse({
+        statusCode,
+        body: { error: { type: 'security_exception', reason } },
+      });
+      response.meta.request = {
+        id: 'grant',
+        options: {},
+        params: {
+          method: 'POST',
+          path: '/_security/api_key/grant',
+          body: JSON.stringify({ service_account_token: serviceAccountToken }),
+        },
+      };
+      return new errors.ResponseError(response);
+    };
+
+    beforeEach(() => {
+      getCurrentUser = jest.fn().mockReturnValue(serviceAccountUser);
+      apiKeys = new APIKeys({
+        authenticator: { ...authenticator, getCurrentUser },
+        clusterClient: mockClusterClient,
+        logger,
+        license: mockLicense,
+        applicationName: 'kibana-.kibana',
+        kibanaFeatures: [],
+        serviceAccountsEnabled: true,
+      });
+    });
+
+    it('grants with the service account grant type and no client authentication', async () => {
+      mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce(grantResult);
+
+      const result = await apiKeys.grantAsInternalUser(
+        createServiceAccountRequest({ 'es-client-authentication': 'SharedSecret secret' }),
+        { name: 'test_api_key', role_descriptors: roleDescriptors, expiration: '1d' }
+      );
+
+      expect(result).toEqual(grantResult);
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
+        grant_type: '_user_managed_service_account',
+        service_account_token: serviceAccountToken,
+        api_key: { name: 'test_api_key', role_descriptors: roleDescriptors, expiration: '1d' },
+      });
+    });
+
+    it('forwards `refresh`', async () => {
+      mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce(grantResult);
+
+      await apiKeys.grantAsInternalUser(
+        createServiceAccountRequest(),
+        { name: 'test_api_key', role_descriptors: {} },
+        { refresh: 'wait_for' }
+      );
+
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith(
+        expect.objectContaining({
+          grant_type: '_user_managed_service_account',
+          refresh: 'wait_for',
+        })
+      );
+    });
+
+    it('grants the token as an access token when service accounts are disabled', async () => {
+      apiKeys = new APIKeys({
+        authenticator: { ...authenticator, getCurrentUser },
+        clusterClient: mockClusterClient,
+        logger,
+        license: mockLicense,
+        applicationName: 'kibana-.kibana',
+        kibanaFeatures: [],
+      });
+      mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce(grantResult);
+
+      await apiKeys.grantAsInternalUser(createServiceAccountRequest(), {
+        name: 'test_api_key',
+        role_descriptors: {},
+      });
+
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith(
+        expect.objectContaining({ grant_type: 'access_token', access_token: serviceAccountToken })
+      );
+    });
+
+    it('grants other bearer tokens as access tokens', async () => {
+      mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce(grantResult);
+
+      await apiKeys.grantAsInternalUser(
+        httpServerMock.createKibanaRequest({
+          headers: { authorization: 'Bearer dGhpcyBpcyBhbiBhY2Nlc3MgdG9rZW4=' },
+        }),
+        { name: 'test_api_key', role_descriptors: {} }
+      );
+
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith(
+        expect.objectContaining({
+          grant_type: 'access_token',
+          access_token: 'dGhpcyBpcyBhbiBhY2Nlc3MgdG9rZW4=',
+        })
+      );
+    });
+
+    it.each([
+      [400, '[service_account_token] must belong to a user-managed service account'],
+      [403, 'Failed to authenticate api key grant'],
+    ])('maps a %s refusal to an error that names the account', async (statusCode, reason) => {
+      mockClusterClient.asInternalUser.security.grantApiKey.mockRejectedValueOnce(
+        createResponseError(statusCode, reason)
+      );
+
+      const failure = await apiKeys
+        .grantAsInternalUser(createServiceAccountRequest(), {
+          name: 'test_api_key',
+          role_descriptors: {},
+        })
+        .catch((error: Boom.Boom) => error);
+
+      expect(Boom.isBoom(failure)).toBe(true);
+      expect((failure as Boom.Boom).output.statusCode).toBe(statusCode);
+      expect((failure as Boom.Boom).message).toBe(
+        `Unable to grant an API key for service account [kibana/automation]: ${reason}`
+      );
+    });
+
+    it('maps a 401 to a 403, since Kibana already authenticated the caller', async () => {
+      mockClusterClient.asInternalUser.security.grantApiKey.mockRejectedValueOnce(
+        createResponseError(401, 'unable to authenticate')
+      );
+
+      const failure = await apiKeys
+        .grantAsInternalUser(createServiceAccountRequest(), {
+          name: 'test_api_key',
+          role_descriptors: {},
+        })
+        .catch((error: Boom.Boom) => error);
+
+      expect((failure as Boom.Boom).output.statusCode).toBe(403);
+    });
+
+    it('logs a refusal as a warning and a server error as an error', async () => {
+      mockClusterClient.asInternalUser.security.grantApiKey
+        .mockRejectedValueOnce(createResponseError(400, 'refused'))
+        .mockRejectedValueOnce(createResponseError(503, 'unavailable'));
+      const grant = () =>
+        apiKeys
+          .grantAsInternalUser(createServiceAccountRequest(), {
+            name: 'test_api_key',
+            role_descriptors: {},
+          })
+          .catch(() => undefined);
+
+      await grant();
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.error).not.toHaveBeenCalled();
+
+      await grant();
+      expect(logger.error).toHaveBeenCalledTimes(1);
+    });
+
+    it('explains the refusal when service accounts are disabled', async () => {
+      apiKeys = new APIKeys({
+        authenticator: { ...authenticator, getCurrentUser },
+        clusterClient: mockClusterClient,
+        logger,
+        license: mockLicense,
+        applicationName: 'kibana-.kibana',
+        kibanaFeatures: [],
+      });
+      mockClusterClient.asInternalUser.security.grantApiKey.mockRejectedValueOnce(
+        createResponseError(403, 'Failed to authenticate api key grant')
+      );
+
+      const failure = await apiKeys
+        .grantAsInternalUser(createServiceAccountRequest(), {
+          name: 'test_api_key',
+          role_descriptors: {},
+        })
+        .catch((error: Boom.Boom) => error);
+
+      expect((failure as Boom.Boom).output.statusCode).toBe(403);
+      expect((failure as Boom.Boom).message).toBe(
+        'Unable to grant an API key for service account [kibana/automation]: Kibana grants API ' +
+          'keys from service account tokens only when `xpack.security.serviceAccounts.enabled` ' +
+          'is `true`'
+      );
+    });
+
+    it('keeps the status of a server error without exposing the original error', async () => {
+      const sourceError = createResponseError(503, 'unavailable');
+      mockClusterClient.asInternalUser.security.grantApiKey.mockRejectedValueOnce(sourceError);
+
+      const failure = await apiKeys
+        .grantAsInternalUser(createServiceAccountRequest(), {
+          name: 'test_api_key',
+          role_descriptors: {},
+        })
+        .catch((error: Boom.Boom) => error);
+
+      expect(failure).not.toBe(sourceError);
+      expect(Boom.isBoom(failure)).toBe(true);
+      expect((failure as Boom.Boom).output.statusCode).toBe(503);
+    });
+
+    it('keeps the original error when the caller is not a service account', async () => {
+      getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+      const sourceError = createResponseError(401, 'unable to authenticate');
+      mockClusterClient.asInternalUser.security.grantApiKey.mockRejectedValueOnce(sourceError);
+
+      await expect(
+        apiKeys.grantAsInternalUser(
+          httpServerMock.createKibanaRequest({ headers: { authorization: 'Bearer foo' } }),
+          { name: 'test_api_key', role_descriptors: {} }
+        )
+      ).rejects.toBe(sourceError);
+    });
+
+    it.each([400, 403, 503, 'connection'] as const)(
+      'never logs or throws the token (%s)',
+      async (failureKind) => {
+        mockClusterClient.asInternalUser.security.grantApiKey.mockRejectedValueOnce(
+          failureKind === 'connection'
+            ? new errors.ConnectionError(
+                'Disconnected',
+                createResponseError(503, 'unavailable').meta
+              )
+            : createResponseError(failureKind, 'refused')
+        );
+
+        const failure = await apiKeys
+          .grantAsInternalUser(createServiceAccountRequest(), {
+            name: 'test_api_key',
+            role_descriptors: {},
+          })
+          .catch((error: Error) => error);
+
+        const tokenSecret = 'super-secret';
+        expect(
+          inspect(failure, { depth: null, showHidden: true, customInspect: false })
+        ).not.toContain(serviceAccountToken);
+        for (const calls of Object.values(loggingSystemMock.collect(logger))) {
+          expect(JSON.stringify(calls)).not.toContain(serviceAccountToken);
+          expect(JSON.stringify(calls)).not.toContain(tokenSecret);
+        }
+      }
+    );
+>>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
   });
 
   describe('grantAsInternalUser()', () => {
+    const expiredTokenError = () =>
+      new errors.ResponseError(
+        elasticsearchServiceMock.createApiResponse({
+          statusCode: 401,
+          body: { error: { type: 'security_exception', reason: 'token expired' } },
+        })
+      );
+    const requestWithToken = (token: string) =>
+      httpServerMock.createKibanaRequest({
+        headers: { authorization: `Bearer ${token}`, cookie: 'sid=session' },
+      });
+
+    it('retries once with reauthenticated credentials and reads published credentials for a later grant', async () => {
+      const request = requestWithToken('old');
+      const renewed = authenticatorMock.create().getRequestCredentials(requestWithToken('new'));
+      authenticator.reauthenticate.mockImplementation(async () => {
+        authenticator.getRequestCredentials.mockReturnValue(renewed);
+        return renewed;
+      });
+      const grant = mockClusterClient.asInternalUser.security.grantApiKey;
+      grant
+        .mockRejectedValueOnce(expiredTokenError())
+        .mockResponse({ id: 'key', api_key: 'secret', encoded: 'encoded', name: 'test' });
+
+      await apiKeys.grantAsInternalUser(request, { name: 'first', role_descriptors: {} });
+      await apiKeys.grantAsInternalUser(request, { name: 'second', role_descriptors: {} });
+
+      expect(grant.mock.calls.map(([params]) => params?.access_token)).toEqual([
+        'old',
+        'new',
+        'new',
+      ]);
+      expect(authenticator.reauthenticate).toHaveBeenCalledTimes(1);
+      expect(authenticator.reauthenticate).toHaveBeenCalledWith(
+        request,
+        expect.objectContaining({ authorization: 'Bearer old' })
+      );
+      expect(request.headers.authorization).toBe('Bearer old');
+    });
+
+    it('preserves the original operation error when Authenticator cannot reauthenticate', async () => {
+      const expired = expiredTokenError();
+      const grant = mockClusterClient.asInternalUser.security.grantApiKey;
+      grant.mockRejectedValue(expired);
+      await expect(
+        apiKeys.grantAsInternalUser(requestWithToken('old'), { name: 'test', role_descriptors: {} })
+      ).rejects.toBe(expired);
+      expect(grant).toHaveBeenCalledTimes(1);
+      expect(authenticator.reauthenticate).toHaveBeenCalledTimes(1);
+    });
+
+    it.each(['expired', 'denied'])(
+      'does not retry a second %s failure and logs the terminal error',
+      async (reason) => {
+        const retryError = reason === 'expired' ? expiredTokenError() : new Error('retry denied');
+        authenticator.reauthenticate.mockResolvedValue(
+          authenticatorMock.create().getRequestCredentials(requestWithToken('new'))
+        );
+        const grant = mockClusterClient.asInternalUser.security.grantApiKey;
+        grant.mockRejectedValueOnce(expiredTokenError()).mockRejectedValue(retryError);
+
+        await expect(
+          apiKeys.grantAsInternalUser(requestWithToken('old'), {
+            name: 'test',
+            role_descriptors: {},
+          })
+        ).rejects.toBe(retryError);
+        expect(grant).toHaveBeenCalledTimes(2);
+        expect(authenticator.reauthenticate).toHaveBeenCalledTimes(1);
+        expect(logger.error).toHaveBeenCalledWith(`Failed to grant API key: ${retryError.message}`);
+      }
+    );
+
+    it('never reauthenticates for an unrelated grant error', async () => {
+      const denied = new Error('permission denied');
+      mockClusterClient.asInternalUser.security.grantApiKey.mockRejectedValue(denied);
+      await expect(
+        apiKeys.grantAsInternalUser(requestWithToken('old'), { name: 'test', role_descriptors: {} })
+      ).rejects.toBe(denied);
+      expect(authenticator.reauthenticate).not.toHaveBeenCalled();
+    });
+
     it('returns null when security feature is disabled', async () => {
       mockLicense.isEnabled.mockReturnValue(false);
       const result = await apiKeys.grantAsInternalUser(httpServerMock.createKibanaRequest(), {
@@ -656,6 +1039,53 @@ describe('API Keys', () => {
     });
 
     describe('with UIAM', () => {
+<<<<<<< HEAD
+=======
+      it('resolves client authentication from the request in an ES API key grant', async () => {
+        const mockUiam = uiamServiceMock.create();
+        // The UIAM service preserves the client authentication supplied with the request; see the
+        // `getClientAuthentication` tests in `uiam_service.test.ts`.
+        mockUiam.getClientAuthentication.mockReturnValue({
+          scheme: 'SharedSecret',
+          value: 'upstream-shared-secret',
+        });
+        const apiKeysWithUiam = new APIKeys({
+          authenticator,
+          clusterClient: mockClusterClient,
+          logger,
+          license: mockLicense,
+          applicationName: 'kibana-.kibana',
+          kibanaFeatures: [],
+          uiam: mockUiam,
+        });
+        mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+          id: '123',
+          name: 'key-name',
+          api_key: 'abc123',
+          encoded: 'utf8',
+        });
+        const request = httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: 'Bearer essu_ephemeral_token',
+            'x-client-authentication': 'upstream-shared-secret',
+          },
+        });
+
+        await apiKeysWithUiam.grantAsInternalUser(request, {
+          name: 'test-key',
+          role_descriptors: {},
+        });
+
+        expect(mockUiam.getClientAuthentication).toHaveBeenCalledWith({ headers: request.headers });
+        expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
+          api_key: { name: 'test-key', role_descriptors: {} },
+          grant_type: 'access_token',
+          access_token: 'essu_ephemeral_token',
+          client_authentication: { scheme: 'SharedSecret', value: 'upstream-shared-secret' },
+        });
+      });
+
+>>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
       it('uses UIAM client authentication when credentials are UIAM credentials', async () => {
         const mockUiam = uiamServiceMock.create();
         mockUiam.getClientAuthentication.mockReturnValue({
@@ -663,6 +1093,7 @@ describe('API Keys', () => {
           value: 'uiam-shared-secret',
         });
         const apiKeysWithUiam = new APIKeys({
+          authenticator,
           clusterClient: mockClusterClient,
           logger,
           license: mockLicense,
@@ -720,6 +1151,7 @@ describe('API Keys', () => {
           value: 'uiam-shared-secret',
         });
         const apiKeysWithUiam = new APIKeys({
+          authenticator,
           clusterClient: mockClusterClient,
           logger,
           license: mockLicense,
@@ -769,6 +1201,7 @@ describe('API Keys', () => {
       it('uses es-client-authentication header when UIAM is configured but credentials are not UIAM credentials', async () => {
         const mockUiam = uiamServiceMock.create();
         const apiKeysWithUiam = new APIKeys({
+          authenticator,
           clusterClient: mockClusterClient,
           logger,
           license: mockLicense,

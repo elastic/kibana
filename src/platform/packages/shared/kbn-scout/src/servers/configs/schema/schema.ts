@@ -101,6 +101,11 @@ export const schema = Joi.object()
         resources: Joi.array().items(Joi.string()).default([]),
         uiam: Joi.boolean().default(false),
         uiamOAuth: Joi.boolean().default(false),
+<<<<<<< HEAD
+=======
+        uiamEphemeralTokenExpiration: Joi.string(),
+        uiamAccessTokenExpiration: Joi.string(),
+>>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
         cps: Joi.boolean().default(false),
       })
       .default(),

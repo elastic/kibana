@@ -207,6 +207,11 @@ function getESServerlessOptions(
     resources: serverlessResources,
     uiam: config.get('esServerlessOptions.uiam', false),
     uiamOAuth: config.get('esServerlessOptions.uiamOAuth', false),
+<<<<<<< HEAD
+=======
+    uiamEphemeralTokenExpiration: config.get('esServerlessOptions.uiamEphemeralTokenExpiration'),
+    uiamAccessTokenExpiration: config.get('esServerlessOptions.uiamAccessTokenExpiration'),
+>>>>>>> 0a53d384287d (fix(security): renew session credentials for API key grants (#299332))
     kibanaUrl: Url.format({
       protocol: config.get('servers.kibana.protocol'),
       hostname: config.get('servers.kibana.hostname'),
