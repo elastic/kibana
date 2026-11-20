@@ -20,7 +20,8 @@ export const MAX_DREAMING_ENTITY_TYPES = 50;
 export const MAX_DREAMING_ENTITY_ATTRIBUTES = 50;
 export const MAX_DREAMING_RELATIONSHIP_TYPES = 50;
 export const MAX_DREAMING_CONNECTOR_ID_LENGTH = 256;
-
+/** Max length of a managed dreaming workflow id returned by the run API. */
+export const MAX_DREAMING_WORKFLOW_ID_LENGTH = 1024;
 /** Type prefixes of the KIs dreaming writes: `fact.<fact type>` and `entity.<entity type>`. */
 export const FACT_TYPE_PREFIX = 'fact.';
 export const ENTITY_TYPE_PREFIX = 'entity.';
@@ -117,20 +118,14 @@ export type DreamingTypesConfig = Pick<
   'facts' | 'entities' | 'relationships'
 >;
 
-/** Latest execution used for the dreaming last-run link, plus whether any dreaming workflow is still running. */
-export interface DreamingLastRun {
-  started_at: string;
-  status: string;
-  workflow_id: string;
-  execution_id: string;
-  /** Whether any dreaming workflow has an execution that has not finished. */
-  is_running: boolean;
-}
-
-/** Response of `GET` and `PUT /internal/context_engine/ai_index/{aiIndexId}/dreaming`; `last_run` only on `GET`. */
+/** Response of `GET` and `PUT /internal/context_engine/ai_index/{aiIndexId}/dreaming`. */
 export interface GetAiIndexDreamingResponse {
   dreaming: AiIndexDreamingConfig;
-  last_run?: DreamingLastRun;
+  /**
+   * Ids of the workflows dreaming runs for the AI index, in the order their runs are shown.
+   * Empty while dreaming is off.
+   */
+  workflow_ids: string[];
 }
 
 /** Response of `POST /internal/context_engine/ai_index/{aiIndexId}/dreaming/run`. */
@@ -186,6 +181,10 @@ export const dreamingBuildsAnything = (config: DreamingTypesConfig): boolean => 
   const { facts, entities } = dreamingTypesOf(config);
   return facts.length > 0 || entities.length > 0;
 };
+
+/** Whether a dreaming config is on and builds something, so its workflows are installed and can run. */
+export const isDreamingOn = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
+  dreaming?.enabled === true && dreamingBuildsAnything(dreaming);
 
 const findDuplicate = (values: readonly string[]): string | undefined =>
   values.find((value, position) => values.indexOf(value) !== position);

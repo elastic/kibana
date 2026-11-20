@@ -8,11 +8,6 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import {
-  ExecutionType,
-  NonTerminalExecutionStatuses,
-  type ExecutionStatusUnion,
-} from '@kbn/workflows';
-import {
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
@@ -23,10 +18,9 @@ import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/type
 import {
   DEFAULT_DREAMING_INTERVAL,
   MIN_DREAMING_INTERVAL_MINUTES,
-  dreamingBuildsAnything,
   dreamingTypesOf,
+  isDreamingOn,
   type AiIndexDreamingConfig,
-  type DreamingLastRun,
   type RunAiIndexDreamingResponse,
 } from '../../common/dreaming';
 import type { AiIndexItem } from '../../common/http_api/ai_indices';
@@ -37,12 +31,6 @@ import { DreamingNotSetUpError } from './dreaming_not_set_up_error';
 import { DreamingRunNothingStartedError } from './dreaming_run_nothing_started_error';
 import { managedWorkflowIdSuffixFor } from '../utils/managed_workflow_suffix';
 
-export interface DreamingWorkflowExecutionSummary {
-  id: string;
-  status: ExecutionStatusUnion;
-  startedAt: string;
-}
-
 /** The workflows management API dreaming uses. */
 export interface DreamingWorkflowsApi extends WorkflowEnablementApi {
   cancelAllActiveWorkflowExecutions(
@@ -50,26 +38,14 @@ export interface DreamingWorkflowsApi extends WorkflowEnablementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<void>;
-  getWorkflowExecutions(
-    params: {
-      workflowId: string;
-      request: KibanaRequest;
-      executionTypes?: ExecutionType[];
-      statuses?: ExecutionStatusUnion[];
-      sortField?: string;
-      sortOrder?: 'asc' | 'desc';
-      size?: number;
-      omitStepRuns?: boolean;
-    },
-    spaceId: string
-  ): Promise<{ results: DreamingWorkflowExecutionSummary[] }>;
 }
 
 const CANCELLED_RUN_RETRIES = 5;
 const CANCELLED_RUN_RETRY_MS = 1000;
 
 const isRunInProgressError = (error: unknown): boolean =>
-  error instanceof Error && error.message.includes('running executions');
+  error instanceof Error &&
+  (error.message.includes('running executions') || error.message.includes('concurrency'));
 
 export interface DreamingScheduleService {
   /**
@@ -83,12 +59,8 @@ export interface DreamingScheduleService {
   }): Promise<void>;
   /** Removes both dreaming workflows of an AI index. */
   remove(params: { aiIndexId: string; spaceId: string; request: KibanaRequest }): Promise<void>;
-  /** Latest run across the attached dreaming workflows, or omitted when unknown. */
-  getLastRun(params: {
-    aiIndex: AiIndexItem;
-    spaceId: string;
-    request: KibanaRequest;
-  }): Promise<DreamingLastRun | undefined>;
+  /** Ids of attached dreaming workflows, or empty when dreaming is off. */
+  getWorkflowIds(params: { aiIndex: AiIndexItem; spaceId: string }): string[];
   /** Runs the attached dreaming workflows now. */
   run(params: {
     aiIndex: AiIndexItem;
@@ -118,7 +90,7 @@ export const relationshipsWorkflowIdFor = (aiIndexId: string, spaceId: string): 
 
 /** Whether an AI index has dreaming on and configured to build something. */
 export const shouldDream = ({ dreaming }: { dreaming?: AiIndexDreamingConfig }): boolean =>
-  dreaming?.enabled === true && dreamingBuildsAnything(dreaming);
+  isDreamingOn(dreaming);
 
 /** The dreaming workflow template values for an AI index. */
 export const dreamingTemplateValuesFor = (
@@ -148,6 +120,7 @@ const DREAMING_WORKFLOWS = [
     label: 'dreaming',
     workflowIdFor: dreamingWorkflowIdFor,
     attach: true,
+    runStage: 0,
   },
   {
     definitionId: CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
@@ -160,36 +133,19 @@ const DREAMING_WORKFLOWS = [
     label: 'trace dreaming',
     workflowIdFor: traceDreamingWorkflowIdFor,
     attach: true,
+    runStage: 0,
   },
   {
     definitionId: CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
     label: 'relationships',
     workflowIdFor: relationshipsWorkflowIdFor,
     attach: true,
+    runStage: 1,
   },
 ] as const;
 
 type DreamingWorkflow = (typeof DREAMING_WORKFLOWS)[number];
-
-const MANUAL_RUN_WORKFLOWS = [
-  CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
-  CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
-  CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
-] as const;
-
-const manualWorkflowMeta = (definitionId: (typeof MANUAL_RUN_WORKFLOWS)[number]) => {
-  const entry = DREAMING_WORKFLOWS.find((workflow) => workflow.definitionId === definitionId);
-  if (!entry) {
-    throw new Error(`Unknown dreaming workflow definition '${definitionId}'`);
-  }
-  return entry;
-};
-
-const isWorkflowAlreadyRunningError = (error: unknown): boolean =>
-  error instanceof Error &&
-  (error.message.includes('running executions') ||
-    error.message.includes('concurrency limit') ||
-    error.message.includes('concurrency'));
+type AttachedDreamingWorkflow = DreamingWorkflow & { attach: true; runStage: number };
 
 export const createDreamingScheduleService = ({
   logger,
@@ -246,69 +202,32 @@ export const createDreamingScheduleService = ({
   const automationFor = (workflow: DreamingWorkflow, aiIndexId: string, spaceId: string) =>
     ({ type: 'workflow', value: workflow.workflowIdFor(aiIndexId, spaceId) } as const);
 
-  const attachedWorkflows = DREAMING_WORKFLOWS.filter((workflow) => workflow.attach);
-
-  /** Which attached workflow backs the dreaming “last run” link and label (not necessarily the newest). */
-  const LAST_RUN_DISPLAY_WORKFLOWS = [
-    CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
-    CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
-    CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
-  ].flatMap((definitionId) => {
-    const workflow = attachedWorkflows.find((entry) => entry.definitionId === definitionId);
-    return workflow ? [workflow] : [];
-  });
-
-  const lookupExecutions = async ({
-    workflowId,
-    spaceId,
-    request,
-    statuses,
-  }: {
-    workflowId: string;
-    spaceId: string;
-    request: KibanaRequest;
-    statuses?: ExecutionStatusUnion[];
-  }) => {
-    const workflowsManagement = await getWorkflowsManagement();
-    if (!workflowsManagement) {
-      return undefined;
-    }
-    const productionLookup = {
-      workflowId,
-      request,
-      executionTypes: [ExecutionType.PRODUCTION],
-      sortField: 'createdAt',
-      sortOrder: 'desc' as const,
-      size: 1,
-      omitStepRuns: true,
-      ...(statuses !== undefined && { statuses }),
-    };
-    return workflowsManagement.getWorkflowExecutions(productionLookup, spaceId);
-  };
+  const attachedWorkflows = DREAMING_WORKFLOWS.filter(
+    (workflow): workflow is AttachedDreamingWorkflow => workflow.attach
+  );
 
   const startWorkflow = async ({
-    definitionId,
+    workflow,
     aiIndex,
     spaceId,
     request,
   }: {
-    definitionId: (typeof MANUAL_RUN_WORKFLOWS)[number];
+    workflow: AttachedDreamingWorkflow;
     aiIndex: AiIndexItem;
     spaceId: string;
     request: KibanaRequest;
   }): Promise<RunAiIndexDreamingResponse['executions'][number] | { failed: string }> => {
-    const workflow = manualWorkflowMeta(definitionId);
     const workflowId = workflow.workflowIdFor(aiIndex.id, spaceId);
     try {
       const client = await getManagedWorkflowsClient();
-      const executionId = await client.execute(request, definitionId, {
+      const executionId = await client.execute(request, workflow.definitionId, {
         spaceId,
         workflowIdSuffix: managedWorkflowIdSuffixFor(aiIndex.id, spaceId),
       });
       return { workflow_id: workflowId, execution_id: executionId };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      if (isWorkflowAlreadyRunningError(error)) {
+      if (isRunInProgressError(error)) {
         log.debug(
           () =>
             `Dreaming workflow '${workflowId}' for AI index '${aiIndex.id}' is already running: ${message}`
@@ -380,71 +299,11 @@ export const createDreamingScheduleService = ({
       log.debug(() => `Removed dreaming for deleted AI index '${aiIndexId}' in space '${spaceId}'`);
     },
 
-    async getLastRun({ aiIndex, spaceId, request }) {
+    getWorkflowIds({ aiIndex, spaceId }) {
       if (!shouldDream(aiIndex)) {
-        return undefined;
+        return [];
       }
-
-      try {
-        const lookups = await Promise.all(
-          attachedWorkflows.map(async (workflow) => {
-            const workflowId = workflow.workflowIdFor(aiIndex.id, spaceId);
-            const [latest, active] = await Promise.all([
-              lookupExecutions({ workflowId, spaceId, request }),
-              lookupExecutions({
-                workflowId,
-                spaceId,
-                request,
-                statuses: [...NonTerminalExecutionStatuses],
-              }),
-            ]);
-            if (!latest) {
-              return undefined;
-            }
-            return {
-              workflowId,
-              latest: latest.results[0],
-              hasActive: (active?.results.length ?? 0) > 0,
-            };
-          })
-        );
-
-        const candidates = lookups.filter(
-          (entry): entry is NonNullable<typeof entry> =>
-            entry !== undefined && entry.latest !== undefined
-        );
-        if (candidates.length === 0) {
-          return undefined;
-        }
-
-        const displayEntry = LAST_RUN_DISPLAY_WORKFLOWS.map((workflow) =>
-          workflow.workflowIdFor(aiIndex.id, spaceId)
-        )
-          .map((workflowId) => candidates.find((entry) => entry.workflowId === workflowId))
-          .find((entry): entry is (typeof candidates)[number] => entry !== undefined);
-
-        if (displayEntry === undefined) {
-          return undefined;
-        }
-
-        const isRunning = candidates.some((entry) => entry.hasActive);
-
-        return {
-          started_at: displayEntry.latest.startedAt,
-          status: displayEntry.latest.status,
-          workflow_id: displayEntry.workflowId,
-          execution_id: displayEntry.latest.id,
-          is_running: isRunning,
-        };
-      } catch (error) {
-        log.debug(
-          () =>
-            `Could not load last dreaming run for AI index '${aiIndex.id}' in space '${spaceId}': ${
-              error instanceof Error ? error.message : String(error)
-            }`
-        );
-        return undefined;
-      }
+      return attachedWorkflows.map((workflow) => workflow.workflowIdFor(aiIndex.id, spaceId));
     },
 
     async run({ aiIndex, spaceId, request }) {
@@ -452,33 +311,24 @@ export const createDreamingScheduleService = ({
         throw new DreamingNotSetUpError(aiIndex.id);
       }
 
-      const firstBatch = await Promise.allSettled([
-        startWorkflow({
-          definitionId: CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
-          aiIndex,
-          spaceId,
-          request,
-        }),
-        startWorkflow({
-          definitionId: CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
-          aiIndex,
-          spaceId,
-          request,
-        }),
-      ]);
-      const secondBatch = await Promise.allSettled([
-        startWorkflow({
-          definitionId: CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
-          aiIndex,
-          spaceId,
-          request,
-        }),
-      ]);
+      const runStages = [...new Set(attachedWorkflows.map(({ runStage }) => runStage))].sort(
+        (left, right) => left - right
+      );
+      const stageResults: PromiseSettledResult<
+        RunAiIndexDreamingResponse['executions'][number] | { failed: string }
+      >[] = [];
+      for (const runStage of runStages) {
+        const workflows = attachedWorkflows.filter((workflow) => workflow.runStage === runStage);
+        const batch = await Promise.allSettled(
+          workflows.map((workflow) => startWorkflow({ workflow, aiIndex, spaceId, request }))
+        );
+        stageResults.push(...batch);
+      }
 
       const executions: RunAiIndexDreamingResponse['executions'] = [];
       const failed: string[] = [];
 
-      for (const result of [...firstBatch, ...secondBatch]) {
+      for (const result of stageResults) {
         if (result.status === 'rejected') {
           log.warn(
             `Dreaming manual run failed for AI index '${aiIndex.id}': ${

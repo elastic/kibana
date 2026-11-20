@@ -127,6 +127,17 @@ jest.mock('../hooks/use_ai_index_dreaming', () => ({
   useAiIndexDreaming: jest.fn(),
 }));
 
+jest.mock('../hooks/use_latest_workflow_execution', () => ({
+  useLatestWorkflowExecution: jest.fn(() => ({
+    execution: null,
+    workflowId: undefined,
+    isRunning: false,
+    activeExecutionId: undefined,
+    isError: false,
+    isLoading: false,
+  })),
+}));
+
 jest.mock('../hooks/use_agent_builder_agents', () => ({
   useAgentBuilderAgents: () => ({
     agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
@@ -274,7 +285,7 @@ describe('AiIndexDetailPage', () => {
     mockUseMemoryEnabled.mockReturnValue(true);
     mockUseAiIndexDreaming.mockReturnValue({
       dreaming: undefined,
-      lastRun: undefined,
+      workflowIds: [],
       isLoading: false,
     });
   });
@@ -448,7 +459,7 @@ describe('AiIndexDetailPage', () => {
   it('opens the dreaming settings from the Settings tab when memory is globally enabled', async () => {
     mockUseAiIndexDreaming.mockReturnValue({
       dreaming: preferenceDreaming,
-      lastRun: undefined,
+      workflowIds: [],
       isLoading: false,
     });
     const services = createServices();

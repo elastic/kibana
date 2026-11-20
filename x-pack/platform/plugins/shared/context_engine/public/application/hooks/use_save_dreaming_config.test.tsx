@@ -18,7 +18,7 @@ describe('useSaveDreamingConfig', () => {
 
   it('caches the saved config and refetches the AI index, whose automations it changes', async () => {
     const core = coreMock.createStart();
-    core.http.put.mockResolvedValue({ dreaming });
+    core.http.put.mockResolvedValue({ dreaming, workflow_ids: ['wf-1'] });
     const queryClient = new QueryClient();
     jest.spyOn(queryClient, 'invalidateQueries');
     const { result } = renderHook(() => useSaveDreamingConfig(), {
@@ -37,19 +37,10 @@ describe('useSaveDreamingConfig', () => {
     expect(saved).toBe(true);
     expect(queryClient.getQueryData(contextEngineQueryKeys.aiIndex.dreaming('support'))).toEqual({
       dreaming,
+      workflow_ids: ['wf-1'],
     });
 
-    const lastRun = {
-      started_at: '2026-11-01T00:00:00.000Z',
-      status: 'completed',
-      workflow_id: 'wf-1',
-      execution_id: 'exec-1',
-      is_running: false,
-    };
-    queryClient.setQueryData(contextEngineQueryKeys.aiIndex.dreaming('support'), {
-      dreaming: { enabled: false },
-      last_run: lastRun,
-    });
+    core.http.put.mockResolvedValue({ dreaming, workflow_ids: ['wf-1', 'wf-traces'] });
 
     await act(async () => {
       await result.current.saveConfig({ aiIndexId: 'support', config: dreaming });
@@ -57,7 +48,7 @@ describe('useSaveDreamingConfig', () => {
 
     expect(queryClient.getQueryData(contextEngineQueryKeys.aiIndex.dreaming('support'))).toEqual({
       dreaming,
-      last_run: lastRun,
+      workflow_ids: ['wf-1', 'wf-traces'],
     });
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
       queryKey: contextEngineQueryKeys.aiIndex.detail('support'),

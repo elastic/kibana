@@ -7,6 +7,7 @@
 
 import {
   dreamingConfigSchema,
+  dreamingResponseSchema,
   getDreamingResponseSchema,
   runDreamingResponseSchema,
 } from './dreaming_schema';
@@ -104,25 +105,29 @@ describe('dreamingConfigSchema', () => {
   });
 });
 
+describe('dreamingResponseSchema', () => {
+  it('accepts dreaming with workflow ids', () => {
+    const schema = dreamingResponseSchema();
+    const body = { dreaming: { enabled: false }, workflow_ids: [] };
+    expect(schema.validate(body)).toEqual(body);
+  });
+});
+
 describe('getDreamingResponseSchema', () => {
   const schema = getDreamingResponseSchema();
 
-  it('accepts dreaming without last_run', () => {
-    expect(schema.validate({ dreaming: { enabled: false } })).toEqual({
+  it('accepts dreaming with workflow ids', () => {
+    const body = {
       dreaming: { enabled: false },
-    });
+      workflow_ids: [],
+    };
+    expect(schema.validate(body)).toEqual(body);
   });
 
-  it('accepts dreaming with last_run', () => {
+  it('accepts attached workflow ids', () => {
     const body = {
       dreaming: { enabled: true, facts: [{ type: 'note' }] },
-      last_run: {
-        started_at: '2026-11-01T12:00:00.000Z',
-        status: 'running',
-        workflow_id: 'system-context-engine-dreaming-support',
-        execution_id: 'exec-1',
-        is_running: true,
-      },
+      workflow_ids: ['system-context-engine-dreaming-support'],
     };
     expect(schema.validate(body)).toEqual(body);
   });
@@ -137,19 +142,5 @@ describe('runDreamingResponseSchema', () => {
       failed: ['wf-2'],
     };
     expect(schema.validate(body)).toEqual(body);
-  });
-
-  it('bounds the executions list', () => {
-    expect(() =>
-      schema.validate({
-        executions: [
-          { workflow_id: 'a', execution_id: '1' },
-          { workflow_id: 'b', execution_id: '2' },
-          { workflow_id: 'c', execution_id: '3' },
-          { workflow_id: 'd', execution_id: '4' },
-        ],
-        failed: [],
-      })
-    ).toThrow();
   });
 });

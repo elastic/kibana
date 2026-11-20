@@ -6,106 +6,42 @@
  */
 
 import { EuiButton, EuiToolTip } from '@elastic/eui';
-import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
 import {
   dreamingBuildsAnything,
+  isDreamingOn,
   type AiIndexDreamingConfig,
-  type DreamingLastRun,
 } from '../../../../../common/dreaming';
 import { useRunDreaming } from '../../../hooks/use_run_dreaming';
-import { useKibana } from '../../../hooks/use_kibana';
-import { getWorkflowExecutionPath } from '../../../utils/get_workflow_execution_path';
-import { WorkflowLastExecution } from '../workflow_last_execution';
-
-const notRunYetLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.runs.notRunYet', {
-  defaultMessage: 'Not run yet.',
-});
-
-export interface DreamingLastRunStatusProps {
-  lastRun: DreamingLastRun | undefined;
-}
-
-/** Linked last-run time for the schedule settings description column. */
-export const DreamingLastRunStatus = ({ lastRun }: DreamingLastRunStatusProps) => {
-  const {
-    services: { application },
-  } = useKibana();
-
-  const lastRunHref =
-    lastRun !== undefined
-      ? application.getUrlForApp(WORKFLOWS_APP_ID, {
-          path: getWorkflowExecutionPath(lastRun.workflow_id, lastRun.execution_id),
-        })
-      : undefined;
-
-  if (lastRun !== undefined) {
-    return (
-      <WorkflowLastExecution
-        status={lastRun.status}
-        startedAt={lastRun.started_at}
-        href={lastRunHref}
-        data-test-subj="contextAiIndexDreamingLastRun"
-      />
-    );
-  }
-
-  return (
-    <WorkflowLastExecution
-      emptyMessage={notRunYetLabel}
-      data-test-subj="contextAiIndexDreamingLastRun"
-    />
-  );
-};
 
 export interface DreamingRunsSectionProps {
   aiIndexId: string;
   savedDreaming: AiIndexDreamingConfig;
-  lastRun: DreamingLastRun | undefined;
+  latestIsRunning: boolean;
   isDirty: boolean;
 }
 
-const savedDreamingCanRun = (dreaming: AiIndexDreamingConfig): boolean =>
-  dreamingBuildsAnything(dreaming);
+const runNowLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.runs.runNow', {
+  defaultMessage: 'Run now',
+});
 
-const awaitingLastRun = (
-  startedExecutionIds: readonly string[],
-  lastRun: DreamingLastRun | undefined
-): boolean =>
-  startedExecutionIds.length > 0 &&
-  (lastRun === undefined || !startedExecutionIds.includes(lastRun.execution_id));
-
-/** Manual run control and last-run status for the dreaming schedule settings. */
+/** Manual run control for the dreaming schedule settings. */
 export const DreamingRunsSection = ({
   aiIndexId,
   savedDreaming,
-  lastRun,
+  latestIsRunning,
   isDirty,
 }: DreamingRunsSectionProps) => {
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
-  const [startedExecutionIds, setStartedExecutionIds] = useState<readonly string[]>([]);
-  const { runDreaming, isLoading: isRunLoading } = useRunDreaming({
-    onStarted: (response) =>
-      setStartedExecutionIds(response.executions.map(({ execution_id }) => execution_id)),
-  });
+  const { runDreaming, isLoading: isRunLoading } = useRunDreaming();
 
-  useEffect(() => {
-    if (startedExecutionIds.length === 0 || lastRun === undefined) {
-      return;
-    }
-    if (startedExecutionIds.includes(lastRun.execution_id)) {
-      setStartedExecutionIds([]);
-    }
-  }, [lastRun, startedExecutionIds]);
+  const isRunning = isRunLoading || latestIsRunning;
 
-  const isRunning =
-    isRunLoading || lastRun?.is_running === true || awaitingLastRun(startedExecutionIds, lastRun);
-
-  const runDisabledReason = useMemo((): string | undefined => {
+  const runDisabledReason = ((): string | undefined => {
     if (isDirty) {
       return i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.runs.disabledDirty', {
         defaultMessage: 'Save your changes first',
@@ -119,50 +55,45 @@ export const DreamingRunsSection = ({
         }
       );
     }
-    if (!savedDreamingCanRun(savedDreaming)) {
+    if (!dreamingBuildsAnything(savedDreaming)) {
       return i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.runs.disabledNotReady', {
         defaultMessage: 'Add fact or entity types to run',
       });
     }
-    return undefined;
-  }, [canExecuteWorkflow, isDirty, savedDreaming]);
-
-  const isRunDisabled = runDisabledReason !== undefined;
-
-  const handleRun = useCallback(() => {
-    if (isRunDisabled) {
-      return;
+    if (!isDreamingOn(savedDreaming)) {
+      return i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.runs.disabledScheduleOff', {
+        defaultMessage: 'Turn on the schedule to run',
+      });
     }
-    runDreaming(aiIndexId);
-  }, [aiIndexId, isRunDisabled, runDreaming]);
+    return undefined;
+  })();
 
   const runButton = (
     <EuiButton
       size="s"
       iconType="play"
-      onClick={handleRun}
+      onClick={() => runDreaming(aiIndexId)}
       isLoading={isRunning}
-      isDisabled={isRunDisabled}
+      isDisabled={runDisabledReason !== undefined}
       data-test-subj="contextAiIndexDreamingRunNow"
       {...getEbtProps({
         element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDreamingPanel,
         action: CONTEXT_ENGINE_UI_EBT.action.dreaming.RUN_NOW,
       })}
     >
-      {i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.runs.runNow', {
-        defaultMessage: 'Run now',
-      })}
+      {runNowLabel}
     </EuiButton>
   );
 
-  const runControl =
-    runDisabledReason !== undefined ? (
-      <EuiToolTip content={runDisabledReason} disableScreenReaderOutput>
-        {runButton}
-      </EuiToolTip>
-    ) : (
-      runButton
-    );
-
-  return <div data-test-subj="contextAiIndexDreamingRunsSection">{runControl}</div>;
+  return (
+    <div data-test-subj="contextAiIndexDreamingRunsSection">
+      {runDisabledReason !== undefined ? (
+        <EuiToolTip content={runDisabledReason} disableScreenReaderOutput>
+          {runButton}
+        </EuiToolTip>
+      ) : (
+        runButton
+      )}
+    </div>
+  );
 };

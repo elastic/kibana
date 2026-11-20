@@ -7,10 +7,12 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { ExecutionStatus } from '@kbn/workflows';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import type { AiIndexDreamingConfig, DreamingLastRun } from '../../../../../common/dreaming';
-import { DreamingLastRunStatus, DreamingRunsSection } from './dreaming_runs_section';
+import type { AiIndexDreamingConfig } from '../../../../../common/dreaming';
+import { DreamingLastRunStatus } from './dreaming_last_run_status';
+import { DreamingRunsSection } from './dreaming_runs_section';
 
 const runDreaming = jest.fn();
 
@@ -42,14 +44,6 @@ const savedDreaming: AiIndexDreamingConfig = {
   facts: [{ type: 'solution' }],
 };
 
-const lastRun: DreamingLastRun = {
-  started_at: '2026-11-10T12:00:00.000Z',
-  status: 'completed',
-  workflow_id: 'system-context-engine-dreaming-tickets',
-  execution_id: 'exec-99',
-  is_running: false,
-};
-
 const renderSection = (
   props: Partial<React.ComponentProps<typeof DreamingRunsSection>> & {
     savedDreaming?: AiIndexDreamingConfig;
@@ -61,7 +55,7 @@ const renderSection = (
         <DreamingRunsSection
           aiIndexId="tickets"
           savedDreaming={savedDreaming}
-          lastRun={undefined}
+          latestIsRunning={false}
           isDirty={false}
           {...props}
         />
@@ -75,23 +69,31 @@ describe('DreamingRunsSection', () => {
     mockUseWorkflowsCapabilities.mockReturnValue({ canExecuteWorkflow: true });
   });
 
-  it('shows not run yet when there is no last_run', () => {
+  it('shows never run when there are no workflow ids', () => {
     render(
       <I18nProvider>
         <EuiProvider>
-          <DreamingLastRunStatus lastRun={undefined} />
+          <DreamingLastRunStatus workflowIds={[]} execution={null} workflowId={undefined} />
         </EuiProvider>
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('contextAiIndexDreamingLastRun')).toHaveTextContent('Not run yet.');
+    expect(screen.getByTestId('contextAiIndexDreamingLastRun')).toHaveTextContent('Never run');
   });
 
   it('links the last run to the workflows execution', () => {
     render(
       <I18nProvider>
         <EuiProvider>
-          <DreamingLastRunStatus lastRun={lastRun} />
+          <DreamingLastRunStatus
+            workflowIds={['system-context-engine-dreaming-tickets']}
+            execution={{
+              id: 'exec-99',
+              status: ExecutionStatus.COMPLETED,
+              startedAt: '2026-11-10T12:00:00.000Z',
+            }}
+            workflowId="system-context-engine-dreaming-tickets"
+          />
         </EuiProvider>
       </I18nProvider>
     );
@@ -102,8 +104,45 @@ describe('DreamingRunsSection', () => {
     );
   });
 
+  it('labels the last run time with "Last run"', () => {
+    render(
+      <I18nProvider>
+        <EuiProvider>
+          <DreamingLastRunStatus
+            workflowIds={['system-context-engine-dreaming-tickets']}
+            execution={{
+              id: 'exec-99',
+              status: ExecutionStatus.COMPLETED,
+              startedAt: '2026-11-10T12:00:00.000Z',
+            }}
+            workflowId="system-context-engine-dreaming-tickets"
+          />
+        </EuiProvider>
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('contextAiIndexDreamingLastRun')).toHaveTextContent(/^Last run/);
+  });
+
+  it('shows nothing, not an empty label, while the run has no start time or final status', () => {
+    render(
+      <I18nProvider>
+        <EuiProvider>
+          <DreamingLastRunStatus
+            workflowIds={['system-context-engine-dreaming-tickets']}
+            execution={{ id: 'exec-99', status: ExecutionStatus.PENDING, startedAt: '' }}
+            workflowId="system-context-engine-dreaming-tickets"
+          />
+        </EuiProvider>
+      </I18nProvider>
+    );
+
+    expect(screen.queryByTestId('contextAiIndexDreamingLastRun')).not.toBeInTheDocument();
+    expect(screen.queryByText('Last run')).not.toBeInTheDocument();
+  });
+
   it('starts dreaming when Run now is clicked', () => {
-    renderSection({ lastRun });
+    renderSection();
 
     fireEvent.click(screen.getByTestId('contextAiIndexDreamingRunNow'));
 
@@ -120,6 +159,18 @@ describe('DreamingRunsSection', () => {
     renderSection({ savedDreaming: { enabled: false } });
 
     expect(screen.getByTestId('contextAiIndexDreamingRunNow')).toBeDisabled();
+  });
+
+  it('disables Run now when types exist but the schedule is off', () => {
+    renderSection({ savedDreaming: { enabled: false, facts: [{ type: 'solution' }] } });
+
+    expect(screen.getByTestId('contextAiIndexDreamingRunNow')).toBeDisabled();
+  });
+
+  it('enables Run now when the schedule is on and types are configured', () => {
+    renderSection({ savedDreaming: { enabled: true, facts: [{ type: 'solution' }] } });
+
+    expect(screen.getByTestId('contextAiIndexDreamingRunNow')).toBeEnabled();
   });
 
   it('disables Run now without workflow execute permission', () => {

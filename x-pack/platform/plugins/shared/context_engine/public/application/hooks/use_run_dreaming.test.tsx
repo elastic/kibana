@@ -12,11 +12,12 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { contextEngineQueryKeys } from './query_keys';
+import { latestWorkflowExecutionQueryKey } from './use_latest_workflow_execution';
 import { useRunDreaming } from './use_run_dreaming';
 
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
+const mockAddWarning = jest.fn();
 
 type HttpError = IHttpFetchError<ResponseErrorBody>;
 
@@ -43,9 +44,10 @@ const renderUseRunDreaming = (options: { onStarted?: jest.Mock } = {}) => {
   core.application.getUrlForApp.mockReturnValue('/app/workflows/exec');
   core.notifications.toasts.addSuccess = mockAddSuccess;
   core.notifications.toasts.addError = mockAddError;
+  core.notifications.toasts.addWarning = mockAddWarning;
 
   const queryClient = new QueryClient();
-  jest.spyOn(queryClient, 'invalidateQueries');
+  jest.spyOn(queryClient, 'refetchQueries').mockResolvedValue(undefined);
 
   const { result } = renderHook(() => useRunDreaming(options), {
     wrapper: ({ children }) => (
@@ -65,7 +67,7 @@ describe('useRunDreaming', () => {
     jest.clearAllMocks();
   });
 
-  it('invalidates the dreaming query when a run starts', async () => {
+  it('refetches latest execution queries when a run starts', async () => {
     const { core, result, queryClient } = renderUseRunDreaming();
 
     await act(async () => {
@@ -74,8 +76,8 @@ describe('useRunDreaming', () => {
 
     await waitFor(() => expect(core.http.post).toHaveBeenCalled());
 
-    expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
-      queryKey: contextEngineQueryKeys.aiIndex.dreaming('tickets'),
+    expect(queryClient.refetchQueries).toHaveBeenCalledWith({
+      queryKey: latestWorkflowExecutionQueryKey('system-context-engine-dreaming-tickets-default'),
     });
   });
 
@@ -120,6 +122,48 @@ describe('useRunDreaming', () => {
         }),
       })
     );
+  });
+
+  it('shows a warning toast when some workflows fail to start', async () => {
+    const core = coreMock.createStart();
+    core.http.post.mockResolvedValue({
+      executions: [
+        {
+          workflow_id: 'system-context-engine-dreaming-tickets-default',
+          execution_id: 'exec-dream',
+        },
+      ],
+      failed: ['system-context-engine-trace-dreaming-tickets-default'],
+    });
+    core.application.getUrlForApp.mockReturnValue('/app/workflows/exec');
+    core.notifications.toasts.addSuccess = mockAddSuccess;
+    core.notifications.toasts.addWarning = mockAddWarning;
+
+    const queryClient = new QueryClient();
+    jest.spyOn(queryClient, 'refetchQueries').mockResolvedValue(undefined);
+    const { result } = renderHook(() => useRunDreaming(), {
+      wrapper: ({ children }) => (
+        <I18nProvider>
+          <QueryClientProvider client={queryClient}>
+            <KibanaContextProvider services={core}>{children}</KibanaContextProvider>
+          </QueryClientProvider>
+        </I18nProvider>
+      ),
+    });
+
+    await act(async () => {
+      result.current.runDreaming('tickets');
+    });
+
+    await waitFor(() => expect(mockAddWarning).toHaveBeenCalled());
+
+    expect(mockAddWarning).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Some dreaming workflows did not start',
+        text: '1 workflow failed to start.',
+      })
+    );
+    expect(mockAddSuccess).toHaveBeenCalled();
   });
 
   it('shows an error toast when the run fails', async () => {

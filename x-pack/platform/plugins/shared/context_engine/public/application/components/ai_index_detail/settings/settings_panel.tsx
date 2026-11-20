@@ -35,7 +35,9 @@ export const SettingsPanel = ({
           <h2>{title}</h2>
         </EuiTitle>
       </EuiFlexItem>
-      {headerAction && <EuiFlexItem grow={false}>{headerAction}</EuiFlexItem>}
+      {headerAction !== undefined && headerAction !== null && (
+        <EuiFlexItem grow={false}>{headerAction}</EuiFlexItem>
+      )}
     </EuiFlexGroup>
     <EuiSpacer size="m" />
     {Children.toArray(children).map((child, index) => (

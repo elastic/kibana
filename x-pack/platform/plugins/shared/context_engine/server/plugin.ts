@@ -233,7 +233,7 @@ export class ContextEnginePlugin
     };
     const getDreamingScheduleService = () => {
       if (!this.dreamingScheduleService) {
-        throw new Error('Dreaming schedule service not available — plugin has not started');
+        throw new Error('Dreaming schedule service not available; plugin has not started');
       }
       return this.dreamingScheduleService;
     };

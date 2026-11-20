@@ -71,7 +71,6 @@ describe('createDreamingScheduleService', () => {
   let workflowsManagement: {
     updateWorkflow: jest.Mock;
     cancelAllActiveWorkflowExecutions: jest.Mock;
-    getWorkflowExecutions: jest.Mock;
   };
   let aiIndexService: jest.Mocked<Pick<AiIndexService, 'addAutomation' | 'removeAutomation'>>;
   let request: KibanaRequest;
@@ -93,7 +92,6 @@ describe('createDreamingScheduleService', () => {
     workflowsManagement = {
       updateWorkflow: jest.fn().mockResolvedValue(undefined),
       cancelAllActiveWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
-      getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [] }),
     };
     aiIndexService = {
       addAutomation: jest.fn().mockResolvedValue('attached'),
@@ -369,84 +367,34 @@ describe('createDreamingScheduleService', () => {
     expect(workflowsManagement.cancelAllActiveWorkflowExecutions).not.toHaveBeenCalled();
   });
 
-  describe('getLastRun', () => {
-    it('omits last run when dreaming is not set up', async () => {
+  describe('getWorkflowIds', () => {
+    it('returns no ids when dreaming is off or not set up', () => {
       const service = createService(workflowsManagement);
-      await expect(
-        service.getLastRun({
+      expect(
+        service.getWorkflowIds({
           aiIndex: aiIndex({ dreaming: { enabled: false } }),
           spaceId: SPACE,
-          request,
         })
-      ).resolves.toBeUndefined();
-      expect(workflowsManagement.getWorkflowExecutions).not.toHaveBeenCalled();
+      ).toEqual([]);
+      expect(
+        service.getWorkflowIds({
+          aiIndex: aiIndex({ dreaming: { enabled: true } }),
+          spaceId: SPACE,
+        })
+      ).toEqual([]);
     });
 
-    it('links last run to the main dreaming workflow when a newer trace run exists', async () => {
-      const dreamingId = dreamingWorkflowIdFor('support', SPACE);
-      const traceId = traceDreamingWorkflowIdFor('support', SPACE);
-      const relationshipsId = relationshipsWorkflowIdFor('support', SPACE);
-      workflowsManagement.getWorkflowExecutions.mockImplementation(({ workflowId, statuses }) => {
-        if (workflowId === dreamingId && !statuses) {
-          return Promise.resolve({
-            results: [
-              { id: 'exec-dreaming', status: 'completed', startedAt: '2026-11-01T10:00:00.000Z' },
-            ],
-          });
-        }
-        if (workflowId === traceId && !statuses) {
-          return Promise.resolve({
-            results: [
-              { id: 'exec-trace', status: 'running', startedAt: '2026-11-01T12:00:00.000Z' },
-            ],
-          });
-        }
-        if (workflowId === traceId && statuses) {
-          return Promise.resolve({
-            results: [
-              { id: 'exec-trace', status: 'running', startedAt: '2026-11-01T12:00:00.000Z' },
-            ],
-          });
-        }
-        if (workflowId === relationshipsId && !statuses) {
-          return Promise.resolve({
-            results: [
-              {
-                id: 'exec-relationships',
-                status: 'completed',
-                startedAt: '2026-11-01T12:05:00.000Z',
-              },
-            ],
-          });
-        }
-        return Promise.resolve({ results: [] });
-      });
-
-      const lastRun = await createService(workflowsManagement).getLastRun({
+    it('returns attached workflow ids in display order', () => {
+      const ids = createService(workflowsManagement).getWorkflowIds({
         aiIndex: aiIndex(),
         spaceId: SPACE,
-        request,
       });
 
-      expect(lastRun).toEqual({
-        started_at: '2026-11-01T10:00:00.000Z',
-        status: 'completed',
-        workflow_id: dreamingId,
-        execution_id: 'exec-dreaming',
-        is_running: true,
-      });
-    });
-
-    it('omits last run when lookup fails', async () => {
-      workflowsManagement.getWorkflowExecutions.mockRejectedValue(new Error('forbidden'));
-
-      await expect(
-        createService(workflowsManagement).getLastRun({
-          aiIndex: aiIndex(),
-          spaceId: SPACE,
-          request,
-        })
-      ).resolves.toBeUndefined();
+      expect(ids).toEqual([
+        dreamingWorkflowIdFor('support', SPACE),
+        traceDreamingWorkflowIdFor('support', SPACE),
+        relationshipsWorkflowIdFor('support', SPACE),
+      ]);
     });
   });
 
@@ -455,6 +403,16 @@ describe('createDreamingScheduleService', () => {
       await expect(
         createService(workflowsManagement).run({
           aiIndex: aiIndex({ dreaming: { enabled: true } }),
+          spaceId: SPACE,
+          request,
+        })
+      ).rejects.toBeInstanceOf(DreamingNotSetUpError);
+    });
+
+    it('rejects when dreaming is disabled', async () => {
+      await expect(
+        createService(workflowsManagement).run({
+          aiIndex: aiIndex({ dreaming: { ...dreaming, enabled: false } }),
           spaceId: SPACE,
           request,
         })

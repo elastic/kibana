@@ -5,29 +5,46 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiLink,
+  EuiText,
+  type IconType,
+} from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { ExecutionStatus } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-export interface WorkflowLastExecutionProps {
-  status?: string;
-  startedAt?: string;
+interface WorkflowLastExecutionBaseProps {
   href?: string;
   emptyMessage?: string;
+  label?: string;
   'data-test-subj'?: string;
 }
 
+export type WorkflowLastExecutionProps = WorkflowLastExecutionBaseProps &
+  (
+    | { hasExecution: false; status?: never; startedAt?: never }
+    | { hasExecution: true; status: string; startedAt?: string }
+    | { hasExecution?: never; status?: string; startedAt?: string }
+  );
+
+const neverRunLabel = i18n.translate('xpack.contextEngine.workflowLastExecution.neverRun', {
+  defaultMessage: 'Never run',
+});
+
 const workflowExecutionStatusIcon = (
   status: string
-): { type: string; color: 'success' | 'danger' | 'subdued'; label: string } | undefined => {
+): { type: IconType; color: 'success' | 'danger' | 'subdued'; label: string } | undefined => {
   switch (status) {
     case ExecutionStatus.COMPLETED:
       return {
         type: 'checkCircleFill',
         color: 'success',
-        label: i18n.translate('xpack.contextEngine.aiIndexDetail.automations.status.completed', {
+        label: i18n.translate('xpack.contextEngine.workflowLastExecution.status.completed', {
           defaultMessage: 'Succeeded',
         }),
       };
@@ -35,7 +52,7 @@ const workflowExecutionStatusIcon = (
       return {
         type: 'errorFill',
         color: 'danger',
-        label: i18n.translate('xpack.contextEngine.aiIndexDetail.automations.status.failed', {
+        label: i18n.translate('xpack.contextEngine.workflowLastExecution.status.failed', {
           defaultMessage: 'Failed',
         }),
       };
@@ -43,7 +60,7 @@ const workflowExecutionStatusIcon = (
       return {
         type: 'errorFill',
         color: 'danger',
-        label: i18n.translate('xpack.contextEngine.aiIndexDetail.automations.status.timedOut', {
+        label: i18n.translate('xpack.contextEngine.workflowLastExecution.status.timedOut', {
           defaultMessage: 'Timed out',
         }),
       };
@@ -51,7 +68,7 @@ const workflowExecutionStatusIcon = (
       return {
         type: 'minusCircle',
         color: 'subdued',
-        label: i18n.translate('xpack.contextEngine.aiIndexDetail.automations.status.cancelled', {
+        label: i18n.translate('xpack.contextEngine.workflowLastExecution.status.cancelled', {
           defaultMessage: 'Cancelled',
         }),
       };
@@ -59,7 +76,7 @@ const workflowExecutionStatusIcon = (
       return {
         type: 'minusCircle',
         color: 'subdued',
-        label: i18n.translate('xpack.contextEngine.aiIndexDetail.automations.status.skipped', {
+        label: i18n.translate('xpack.contextEngine.workflowLastExecution.status.skipped', {
           defaultMessage: 'Skipped',
         }),
       };
@@ -68,19 +85,30 @@ const workflowExecutionStatusIcon = (
   }
 };
 
-const neverRunLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.automations.neverRun', {
-  defaultMessage: 'Never run',
-});
+const hasNoExecution = (
+  props: WorkflowLastExecutionProps
+): props is WorkflowLastExecutionBaseProps & { hasExecution: false } =>
+  'hasExecution' in props && props.hasExecution === false;
 
 /** Last workflow run time and terminal status, optionally linked to the execution. */
-export const WorkflowLastExecution = ({
-  status,
-  startedAt,
-  href,
-  emptyMessage,
-  'data-test-subj': testSubj = 'contextWorkflowLastExecution',
-}: WorkflowLastExecutionProps) => {
-  if (startedAt === undefined && status === undefined) {
+export const WorkflowLastExecution = (props: WorkflowLastExecutionProps) => {
+  const {
+    href,
+    emptyMessage,
+    label,
+    'data-test-subj': testSubj = 'contextWorkflowLastExecution',
+  } = props;
+
+  if (hasNoExecution(props)) {
+    return (
+      <EuiText size="xs" color="subdued" data-test-subj={testSubj}>
+        {emptyMessage ?? neverRunLabel}
+      </EuiText>
+    );
+  }
+
+  const { status, startedAt } = props;
+  if (status === undefined && startedAt === undefined) {
     return (
       <EuiText size="xs" color="subdued" data-test-subj={testSubj}>
         {emptyMessage ?? neverRunLabel}
@@ -91,8 +119,19 @@ export const WorkflowLastExecution = ({
   const icon = status !== undefined ? workflowExecutionStatusIcon(status) : undefined;
   const when = startedAt ? <FormattedRelative value={new Date(startedAt)} /> : icon?.label;
 
+  if (when === undefined) {
+    return null;
+  }
+
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} data-test-subj={testSubj}>
+      {label ? (
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {label}
+          </EuiText>
+        </EuiFlexItem>
+      ) : null}
       {icon ? (
         <EuiFlexItem grow={false}>
           <EuiIconTip

@@ -6,16 +6,14 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type { AiIndexDreamingConfig, DreamingLastRun } from '../../../common/dreaming';
+import type { AiIndexDreamingConfig } from '../../../common/dreaming';
 import { getAiIndexDreaming } from '../api/ai_indices';
 import { contextEngineQueryKeys } from './query_keys';
 import { useKibana } from './use_kibana';
 
-const DREAMING_RUNNING_REFETCH_MS = 3_000;
-
 interface UseAiIndexDreamingResult {
   dreaming: AiIndexDreamingConfig | undefined;
-  lastRun: DreamingLastRun | undefined;
+  workflowIds: string[];
   isLoading: boolean;
 }
 
@@ -32,9 +30,11 @@ export const useAiIndexDreaming = (
     queryKey: contextEngineQueryKeys.aiIndex.dreaming(aiIndexId),
     queryFn: ({ signal }) => getAiIndexDreaming(http, { aiIndexId, signal }),
     enabled,
-    refetchInterval: (latest) =>
-      latest?.last_run?.is_running === true ? DREAMING_RUNNING_REFETCH_MS : false,
   });
 
-  return { dreaming: data?.dreaming, lastRun: data?.last_run, isLoading: isInitialLoading };
+  return {
+    dreaming: data?.dreaming,
+    workflowIds: data?.workflow_ids ?? [],
+    isLoading: isInitialLoading,
+  };
 };

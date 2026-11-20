@@ -65,6 +65,7 @@ import {
 } from '../../common/dreaming';
 import type { ListDreamingTemplatesResponse } from '../../common/dreaming_templates';
 import { DreamingNotSetUpError } from '../dreaming/dreaming_not_set_up_error';
+import { DreamingRunNothingStartedError } from '../dreaming/dreaming_run_nothing_started_error';
 import type { DreamingScheduleService } from '../dreaming/schedule';
 import { apiPrivileges } from '../../common/features';
 import {
@@ -217,7 +218,8 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, log
     error instanceof AiIndexIdConflictError ||
     error instanceof KiConflictError ||
     error instanceof KiDeletedError ||
-    error instanceof DreamingNotSetUpError
+    error instanceof DreamingNotSetUpError ||
+    error instanceof DreamingRunNothingStartedError
   ) {
     return response.conflict({ body: { message: error.message } });
   }
@@ -1216,15 +1218,8 @@ export const registerAiIndexRoutes = ({
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
           const dreaming = aiIndex.dreaming ?? DREAMING_DISABLED;
-          const lastRun = await getDreamingScheduleService().getLastRun({
-            aiIndex,
-            spaceId,
-            request,
-          });
-          const body: GetAiIndexDreamingResponse = {
-            dreaming,
-            ...(lastRun !== undefined && { last_run: lastRun }),
-          };
+          const workflowIds = getDreamingScheduleService().getWorkflowIds({ aiIndex, spaceId });
+          const body: GetAiIndexDreamingResponse = { dreaming, workflow_ids: workflowIds };
           return response.ok({ body });
         } catch (error) {
           return handleAiIndexError(error, response, logger);
@@ -1267,7 +1262,15 @@ export const registerAiIndexRoutes = ({
           const dreaming = await aiIndexService.setDreaming(aiIndexId, spaceId, request.body);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId }));
           await notifySaved({ aiIndexId, spaceId, request, previous, saved: ['dreaming'] });
-          const body: GetAiIndexDreamingResponse = { dreaming };
+          const aiIndexForIds =
+            previous !== undefined
+              ? { ...previous, dreaming }
+              : await aiIndexService.get(aiIndexId, spaceId);
+          const workflowIds = getDreamingScheduleService().getWorkflowIds({
+            aiIndex: aiIndexForIds,
+            spaceId,
+          });
+          const body: GetAiIndexDreamingResponse = { dreaming, workflow_ids: workflowIds };
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(

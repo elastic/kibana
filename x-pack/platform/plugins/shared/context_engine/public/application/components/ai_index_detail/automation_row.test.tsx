@@ -7,7 +7,7 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { RunWorkflowInputsModalProps } from '@kbn/workflows-ui';
 import React from 'react';
@@ -18,8 +18,17 @@ import { AutomationRow } from './automation_row';
 const mockRunAutomation = jest.fn();
 const mockLatestExecution = jest.fn();
 
+interface LatestWorkflowExecutionHookOptions {
+  enabled?: boolean;
+  awaitedExecutionId?: string;
+  onAwaitedObserved?: () => void;
+}
+
 jest.mock('../../hooks/use_latest_workflow_execution', () => ({
-  useLatestWorkflowExecution: (...args: unknown[]) => mockLatestExecution(...args),
+  useLatestWorkflowExecution: (
+    workflowIds: string[],
+    options?: LatestWorkflowExecutionHookOptions
+  ) => mockLatestExecution(workflowIds, options),
 }));
 
 jest.mock('../../hooks/use_kibana', () => ({
@@ -33,8 +42,11 @@ jest.mock('../../hooks/use_kibana', () => ({
 }));
 
 jest.mock('../../hooks/use_run_automation', () => ({
-  useRunAutomation: () => ({
-    runAutomation: mockRunAutomation,
+  useRunAutomation: ({ onStarted }: { onStarted?: (executionId: string) => void } = {}) => ({
+    runAutomation: (...args: [string] | [string, Record<string, string>]) => {
+      mockRunAutomation(...args);
+      onStarted?.('run-started-locally');
+    },
     isLoading: false,
   }),
 }));
@@ -159,6 +171,11 @@ const renderAutomationRow = (
   const props = createDefaultProps(overrides);
   renderWithProviders(<AutomationRow {...props} />);
   return props;
+};
+
+const getLatestHookOptions = (): LatestWorkflowExecutionHookOptions | undefined => {
+  const lastCall = mockLatestExecution.mock.calls.at(-1);
+  return lastCall?.[1];
 };
 
 const openActionsMenu = () => {
@@ -444,6 +461,35 @@ describe('AutomationRow', () => {
       renderAutomationRow({ workflowSummary: createWorkflowSummary() });
 
       expect(screen.queryByTestId('contextAutomationLastExecution')).not.toBeInTheDocument();
+    });
+
+    it('clears awaitedExecutionId when the hook calls onAwaitedObserved', () => {
+      mockLatestExecution.mockImplementation(
+        (_workflowIds: string[], options?: LatestWorkflowExecutionHookOptions) => ({
+          execution: undefined,
+          activeExecutionId: undefined,
+          isRunning: options?.awaitedExecutionId !== undefined,
+          isLoading: false,
+        })
+      );
+      renderAutomationRow(runnable);
+
+      fireEvent.click(screen.getByTestId('contextRunAutomationButton'));
+
+      const optionsWithAwaited = getLatestHookOptions();
+      expect(optionsWithAwaited?.awaitedExecutionId).toBe('run-started-locally');
+      expect(optionsWithAwaited?.onAwaitedObserved).toBeDefined();
+      expect(screen.getByTestId('contextAutomationRunning')).toHaveAttribute(
+        'href',
+        '/app/workflows/workflow-value-id?tab=executions&executionId=run-started-locally'
+      );
+
+      act(() => {
+        optionsWithAwaited?.onAwaitedObserved?.();
+      });
+
+      expect(getLatestHookOptions()?.awaitedExecutionId).toBeUndefined();
+      expect(screen.getByTestId('contextRunAutomationButton')).toBeInTheDocument();
     });
   });
 });

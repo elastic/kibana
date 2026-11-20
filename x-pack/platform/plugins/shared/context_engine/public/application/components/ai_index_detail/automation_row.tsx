@@ -22,7 +22,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import { RunWorkflowInputsModal, requiresUserSuppliedInputs } from '@kbn/workflows-ui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { AiIndexAutomation } from '../../../../common/http_api/ai_indices';
 import { useAutomationRowMenuItems } from '../../hooks/use_automation_row_menu_items';
@@ -68,6 +68,7 @@ export const AutomationRow = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isInputsModalOpen, setIsInputsModalOpen] = useState(false);
   const [startedExecutionId, setStartedExecutionId] = useState<string>();
+  const clearStartedExecutionId = useCallback(() => setStartedExecutionId(undefined), []);
   const { runAutomation, isLoading } = useRunAutomation({ onStarted: setStartedExecutionId });
   const {
     services: { application },
@@ -76,32 +77,25 @@ export const AutomationRow = ({
   const enabled = workflowSummary?.enabled;
   const definition = workflowSummary?.definition;
   const hasWorkflowDefinition = definition != null;
-  const latest = useLatestWorkflowExecution(automation.value, {
+  const latest = useLatestWorkflowExecution([automation.value], {
     enabled: hasWorkflowDefinition,
     awaitedExecutionId: startedExecutionId,
+    onAwaitedObserved: clearStartedExecutionId,
   });
+  const executionWorkflowId = latest.workflowId ?? automation.value;
   const isRunning = isLoading || latest.isRunning;
   const runningExecutionId = latest.activeExecutionId ?? startedExecutionId;
   const runningHref = runningExecutionId
     ? application.getUrlForApp(WORKFLOWS_APP_ID, {
-        path: getWorkflowExecutionPath(automation.value, runningExecutionId),
+        path: getWorkflowExecutionPath(executionWorkflowId, runningExecutionId),
       })
     : undefined;
   const latestExecutionHref = latest.execution
     ? application.getUrlForApp(WORKFLOWS_APP_ID, {
-        path: getWorkflowExecutionPath(automation.value, latest.execution.id),
+        path: getWorkflowExecutionPath(executionWorkflowId, latest.execution.id),
       })
     : undefined;
 
-  useEffect(() => {
-    if (
-      startedExecutionId !== undefined &&
-      (latest.execution?.id === startedExecutionId ||
-        latest.activeExecutionId === startedExecutionId)
-    ) {
-      setStartedExecutionId(undefined);
-    }
-  }, [latest.execution?.id, latest.activeExecutionId, startedExecutionId]);
   const actionsAriaLabel = i18n.translate(
     'xpack.contextEngine.aiIndexDetail.automations.actionsAriaLabel',
     { defaultMessage: 'Actions for {name}', values: { name: displayName } }
@@ -241,16 +235,16 @@ export const AutomationRow = ({
             </EuiFlexItem>
           ) : hasWorkflowDefinition && latest.execution !== undefined ? (
             <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-              {latest.execution ? (
-                <WorkflowLastExecution
-                  status={latest.execution.status}
-                  startedAt={latest.execution.startedAt}
-                  href={latestExecutionHref}
-                  data-test-subj="contextAutomationLastExecution"
-                />
-              ) : (
-                <WorkflowLastExecution data-test-subj="contextAutomationLastExecution" />
-              )}
+              <WorkflowLastExecution
+                {...(latest.execution
+                  ? {
+                      status: latest.execution.status,
+                      startedAt: latest.execution.startedAt,
+                    }
+                  : { hasExecution: false })}
+                href={latest.execution ? latestExecutionHref : undefined}
+                data-test-subj="contextAutomationLastExecution"
+              />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
