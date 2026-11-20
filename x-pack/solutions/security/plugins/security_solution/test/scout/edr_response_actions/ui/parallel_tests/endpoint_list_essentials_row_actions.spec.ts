@@ -52,6 +52,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('the row action menu does not offer Respond', async () => {
+          await expect(endpointList.rowActionsMenu).toBeVisible();
           await expect(endpointList.respondInRowActionsMenu).toHaveCount(0);
         });
       }
