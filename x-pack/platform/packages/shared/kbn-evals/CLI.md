@@ -80,8 +80,8 @@ node scripts/evals start --skip-init --suite agent-builder
 | `--project <id>`                 | `--model` | Connector/model to evaluate (comma-separated for multiple)                      |
 | `--evaluation-connector-id <id>` | `--judge` | Connector used for LLM-as-a-judge evaluators (defaults to the shared judge)     |
 | `--profile <name>`               |           | Profile for config resolution (see table above)                                 |
-| `--datasets-profile <name>`      |           | Override dataset settings (sets `EVAL_KBN_URL`/`EVAL_KBN_API_KEY`)              |
-| `--export-profile <name>`        |           | Override export settings (sets `TRACING_ES_URL`, `TRACING_EXPORTERS`)           |
+| `--evaluations-kbn-profile <name>` |         | Kibana that stores datasets, receives scores and serves experiment reads (sets `EVAL_KBN_URL`, `EVAL_KBN_API_KEY`; also `GCS_CREDENTIALS` when the profile has them) |
+| `--tracing-profile <name>`       |           | Where EDOT exports traces and which ES the trace evaluators query (sets `TRACING_ES_URL`, `TRACING_ES_API_KEY`, `TRACING_EXPORTERS`; also `GCS_CREDENTIALS` when present) |
 | `--grep <pattern>`               |           | Filter tests by name (passed to Playwright `--grep`)                            |
 | `--repetitions <n>`              |           | Number of times to repeat each example                                          |
 | `--concurrency <n>`              |           | Examples each experiment runs at once (default 5; a spec's own value wins)      |
@@ -92,7 +92,7 @@ node scripts/evals start --skip-init --suite agent-builder
 | `--skip-init`                    |           | Skip automatic config and connector setup                                       |
 | `--dry-run`                      |           | Print configuration and exit without running                                    |
 
-Traces are exported by EDOT to the export cluster (controlled by `--export-profile` / `TRACING_ES_URL`), and `TRACING_ES_URL` is set so trace-based evaluators query the right cluster.
+Traces are exported by EDOT to the export cluster (controlled by `--tracing-profile` / `TRACING_ES_URL`), and `TRACING_ES_URL` is set so trace-based evaluators query the right cluster.
 
 #### Spaces
 
@@ -108,9 +108,13 @@ node scripts/evals run --suite streams --space-ids marketing,sales
 - **Existing datasets keep the spaces they have.** A run only assigns spaces to datasets it creates, so a CI run can't move one that other spaces are reading.
 - **`compare` takes the same flag.** Scores are only readable from the spaces they were ingested into, so comparing a space-targeted run needs `node scripts/evals compare … --space-ids marketing` (or `EVAL_SPACE_IDS`).
 
+#### Deprecated flag names
+
+`--datasets-profile` and `--export-profile` are deprecated aliases for `--evaluations-kbn-profile` and `--tracing-profile`. They still work and print a warning; if both an old and a new flag are passed, the new one wins. The re-run command printed by `start` and `run` uses the new names.
+
 #### Example: golden datasets + local export
 
-Use `--profile dev-vault` for datasets and `--export-profile local` to export results locally:
+Use `--profile dev-vault` for datasets and `--tracing-profile local` to export results locally:
 
 ```bash
 node scripts/evals init config                   # default profile (golden cluster pre-selected)
@@ -120,8 +124,8 @@ node scripts/evals init config --profile local   # local profile (local target p
 Run:
 
 ```bash
-node scripts/evals start --suite attack-discovery --export-profile local
-node scripts/evals start --suite attack-discovery --datasets-profile dev-vault --export-profile local
+node scripts/evals start --suite attack-discovery --tracing-profile local
+node scripts/evals start --suite attack-discovery --evaluations-kbn-profile dev-vault --tracing-profile local
 ```
 
 ### `stop` -- Stop background services
@@ -183,8 +187,8 @@ node scripts/evals run --suite streams --dry-run
 | `--concurrency <n>`               |           | Examples each experiment runs at once (default 5; a spec's own value wins)      |
 | `--space-ids <ids>`               |           | Comma-separated spaces to assign datasets and scores to (see [Spaces](#spaces)) |
 | `--profile <name>`                |           | Load both dataset + export settings from `config.<name>.json`                   |
-| `--datasets-profile <name>`       |           | Load dataset settings from `config.<name>.json`                                 |
-| `--export-profile <name>`         |           | Load export settings from `config.<name>.json`                                  |
+| `--evaluations-kbn-profile <name>` |          | Load the Kibana that stores datasets, scores and experiment reads from `config.<name>.json` |
+| `--tracing-profile <name>`        |           | Load the trace export and trace query settings from `config.<name>.json`        |
 | `--trace-es-url <url>`            |           | Elasticsearch URL for trace queries                                             |
 | `--trace-es-api-key <key>`        |           | API key for trace ES                                                            |
 | `--evaluations-kbn-url <url>`     |           | Kibana URL for score ingestion and dataset operations                           |
