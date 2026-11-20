@@ -39,6 +39,7 @@ import {
   ConversationAccessControlMode,
   isConversationAccessControlRole,
   isPublicConversation,
+  isSharedConversation,
   isSteerMessageEvent,
   normalizeConversationAccessControl,
   createBackgroundExecutionAlreadyReportedError,
@@ -890,7 +891,7 @@ class ConversationClientImpl implements ConversationClient {
         source,
         peekHeld: true,
         fields: (current) => {
-          if (isPublicConversation(current.access_control)) {
+          if (isSharedConversation(current.access_control)) {
             throw new SteerSignal({ kind: 'not_steerable' });
           }
           // A retry is answered first, whatever the run has done since: paused on a prompt or ended.
