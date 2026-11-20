@@ -13,7 +13,7 @@ import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { EvalsMode } from './config';
 import type { DatasetService } from './storage/datasets/dataset_service';
 import type { EvaluatorDefinitionService } from './storage/evaluators/evaluator_definition_service';
@@ -84,6 +84,7 @@ export interface EvalsSetupDependencies {
   inference: InferenceServerSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: EvalsWorkflowsManagementSetup;
+  security?: SecurityPluginSetup;
 }
 
 export interface EvalsStartDependencies {

@@ -24,8 +24,16 @@ import { getEsErrorLogDetails } from '../utils/get_es_error_log_details';
  * this before offering to create one. Users need a role with `read` on
  * `.evaluation-online-scores` (the stream is hidden, so the grant must name it explicitly or use
  * a pattern that matches hidden indices).
+ *
+ * Without the security plugin or with Elasticsearch security turned off there is nothing to
+ * enforce, so the answer is `true` (same stance as `checkManageEvalsPrivileges`). Any other
+ * failure of the privilege check is reported as an error rather than granted.
  */
-export const registerGetOnlineScoresPrivilegesRoute = ({ router, logger }: RouteDependencies) => {
+export const registerGetOnlineScoresPrivilegesRoute = ({
+  router,
+  logger,
+  security,
+}: RouteDependencies) => {
   router.versioned
     .get({
       path: EVALS_ONLINE_SCORES_PRIVILEGES_URL,
@@ -41,6 +49,9 @@ export const registerGetOnlineScoresPrivilegesRoute = ({ router, logger }: Route
         validate: false,
       },
       async (context, _request, response) => {
+        if (!security?.license.isEnabled()) {
+          return response.ok({ body: { has_read: true } });
+        }
         try {
           const { elasticsearch } = await context.core;
           const { index } = await elasticsearch.client.asCurrentUser.security.hasPrivileges({

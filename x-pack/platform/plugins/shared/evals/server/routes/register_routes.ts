@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { EvalsRouter, EvalsWorkflowsManagementSetup } from '../types';
 import type { SpaceDependencies } from './shared/resolve_dataset_spaces';
 import type { EvaluatorRegistry } from '../evaluators/types';
@@ -71,6 +72,8 @@ export interface RouteDependencies extends SpaceDependencies {
   getCurrentUsername?: (request: KibanaRequest) => Promise<string | undefined>;
   taskProviderRegistry?: TaskProviderRegistry;
   workflowsManagement?: EvalsWorkflowsManagementSetup;
+  /** Absent when the security plugin is not installed; its license says whether ES security is on. */
+  security?: { license: Pick<SecurityPluginSetup['license'], 'isEnabled'> };
 }
 
 export const registerRoutes = (dependencies: RouteDependencies) => {

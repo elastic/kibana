@@ -18,18 +18,24 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { createEvaluatorRegistry } from '../../evaluators/registry';
+import type { RouteDependencies } from '../register_routes';
 import { registerGetOnlineScoresPrivilegesRoute } from './get_online_scores_privileges';
 
-// Mocked-client unit tests: the real Elasticsearch response shape is covered by the
-// integration test, which runs against a secured cluster.
+// Mocked-client unit tests: the integration ES runs without security, so an unprivileged
+// user cannot be created there. The real `read: false` shape was probed on a secured ES.
 describe('GET /internal/evals/online_scores/_privileges', () => {
-  const setup = () => {
+  const securityWithLicense = (isEnabled: boolean) => ({
+    license: { isEnabled: jest.fn().mockReturnValue(isEnabled) },
+  });
+
+  const setup = (security: RouteDependencies['security']) => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
     registerGetOnlineScoresPrivilegesRoute({
       router,
       logger,
       canEncrypt: false,
+      security,
       evaluatorRegistry: createEvaluatorRegistry(),
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
@@ -52,7 +58,7 @@ describe('GET /internal/evals/online_scores/_privileges', () => {
   });
 
   it('returns has_read: false for a user without read on the online scores index', async () => {
-    const { handler, context, hasPrivileges } = setup();
+    const { handler, context, hasPrivileges } = setup(securityWithLicense(true));
     hasPrivileges.mockResolvedValueOnce({
       username: 'test-user',
       has_all_requested: false,
@@ -71,7 +77,7 @@ describe('GET /internal/evals/online_scores/_privileges', () => {
   });
 
   it('returns has_read: true for a user with read on the online scores index', async () => {
-    const { handler, context, hasPrivileges } = setup();
+    const { handler, context, hasPrivileges } = setup(securityWithLicense(true));
     hasPrivileges.mockResolvedValueOnce({
       username: 'test-user',
       has_all_requested: true,
@@ -86,12 +92,34 @@ describe('GET /internal/evals/online_scores/_privileges', () => {
   });
 
   it('returns 500 when the privilege check fails', async () => {
-    const { handler, context, hasPrivileges, logger } = setup();
+    const { handler, context, hasPrivileges, logger } = setup(securityWithLicense(true));
     hasPrivileges.mockRejectedValueOnce(new Error('es failure'));
 
     const response = await handler(context as any, request, kibanaResponseFactory);
 
     expect(response.status).toBe(500);
     expect(logger.error).toHaveBeenCalled();
+  });
+
+  it('grants read without asking Elasticsearch when the security plugin is absent', async () => {
+    const { handler, context, hasPrivileges } = setup(undefined);
+
+    const response = await handler(context as any, request, kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual({ has_read: true });
+    expect(hasPrivileges).not.toHaveBeenCalled();
+  });
+
+  it('grants read without asking Elasticsearch when the security license is disabled', async () => {
+    const security = securityWithLicense(false);
+    const { handler, context, hasPrivileges } = setup(security);
+
+    const response = await handler(context as any, request, kibanaResponseFactory);
+
+    expect(security.license.isEnabled).toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual({ has_read: true });
+    expect(hasPrivileges).not.toHaveBeenCalled();
   });
 });
