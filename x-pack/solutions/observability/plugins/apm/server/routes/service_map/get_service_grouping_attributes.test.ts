@@ -87,9 +87,11 @@ function bucket(
 ): AttributeBucket {
   return {
     key: name,
-    service_namespace: { buckets: serviceNamespace ? [{ key: serviceNamespace }] : [] },
+    service_namespace: {
+      buckets: serviceNamespace !== undefined ? [{ key: serviceNamespace }] : [],
+    },
     kubernetes_namespace: {
-      buckets: kubernetesNamespace ? [{ key: kubernetesNamespace }] : [],
+      buckets: kubernetesNamespace !== undefined ? [{ key: kubernetesNamespace }] : [],
     },
   };
 }
@@ -161,6 +163,23 @@ describe('getServiceGroupingAttributes', () => {
       'legacy-batch': {},
     });
     expect(Object.getPrototypeOf(attributes)).toBeNull();
+  });
+
+  it('treats a blank namespace as none, and keeps other values as stored', async () => {
+    const search: SearchMock = jest
+      .fn()
+      .mockResolvedValue(
+        namespacesPage([bucket('checkout', '', ' '), bucket('ledger', ' shop ', 'team-payment')])
+      );
+
+    const attributes = await getServiceGroupingAttributes(
+      makeOptions({ apmEventClient: { search } as unknown as APMEventClient })
+    );
+
+    expect(attributes).toEqual({
+      checkout: {},
+      ledger: { serviceNamespace: ' shop ', kubernetesNamespace: 'team-payment' },
+    });
   });
 
   it('reads only the drawn services in the selected environment, without the kuery or filters', async () => {

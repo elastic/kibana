@@ -78,6 +78,8 @@ export async function getServiceGroupingAttributes(
 /**
  * Reads both namespaces of the given services from transaction events, as metric rollups do not
  * carry them. One value per field per service. A service with neither namespace is still listed.
+ * A blank value, empty or only whitespace, counts as none, so every service without a namespace
+ * is grouped alike. Other values are kept as stored, without trimming.
  *
  * The names stand in for the map's search bar and filters, which already chose them. Those can
  * target fields transaction events do not carry, so applying them again would drop services.
@@ -134,15 +136,21 @@ async function getNamespaceAttributes({
   });
 
   for (const bucket of response.aggregations?.services.buckets ?? []) {
-    const serviceNamespace = bucket.service_namespace.buckets[0]?.key;
-    const kubernetesNamespace = bucket.kubernetes_namespace.buckets[0]?.key;
+    const serviceNamespace = namespaceValue(bucket.service_namespace.buckets[0]?.key);
+    const kubernetesNamespace = namespaceValue(bucket.kubernetes_namespace.buckets[0]?.key);
     namespacesByService.set(String(bucket.key), {
-      ...(serviceNamespace != null ? { serviceNamespace: String(serviceNamespace) } : {}),
-      ...(kubernetesNamespace != null ? { kubernetesNamespace: String(kubernetesNamespace) } : {}),
+      ...(serviceNamespace ? { serviceNamespace } : {}),
+      ...(kubernetesNamespace ? { kubernetesNamespace } : {}),
     });
   }
 
   return namespacesByService;
+}
+
+/** The namespace as stored, or `undefined` when there is none or it is blank. */
+function namespaceValue(key: string | number | undefined): string | undefined {
+  const value = key == null ? undefined : String(key);
+  return value?.trim() ? value : undefined;
 }
 
 /**
