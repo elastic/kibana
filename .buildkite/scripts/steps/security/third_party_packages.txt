@@ -77,3 +77,4 @@ bump-cli
 @types/mssql
 monaco-marker-data-provider
 tabbable
+@opentelemetry/otlp-grpc-exporter-base
