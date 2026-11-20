@@ -145,8 +145,8 @@ describe('useInvestigationSections', () => {
       updatedBefore: '2026-01-02T00:00:00.000Z',
     });
 
-    await waitFor(() => expect(result.current.hasOpenInvestigationsInSpace).toBe(true));
-    expect(result.current.areSpaceInvestigationsLoading).toBe(false);
+    await waitFor(() => expect(result.current.areSpaceInvestigationsLoading).toBe(false));
+    expect(result.current.hasOpenInvestigationsInSpace).toBe(true);
 
     const spaceProbeCall = httpGet.mock.calls.find(
       ([url, options]) =>

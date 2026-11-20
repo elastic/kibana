@@ -544,21 +544,6 @@ describe('NightshiftApp', () => {
     expect(screen.getByTestId('nightshiftInvestigationsTimeRangePicker')).toBeInTheDocument();
   });
 
-  it('keeps filters when the space probe failed even if the window is empty', () => {
-    // hasOpenInvestigationsInSpace stays true on probe error (not confirmed empty).
-    setSections({
-      sections: defaultSections({
-        critical: { investigations: [criticalInvestigation], total: 1 },
-      }),
-      hasOpenInvestigationsInSpace: true,
-    });
-
-    renderApp();
-
-    expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftInvestigationsTimeRangePicker')).toBeInTheDocument();
-  });
-
   it('keeps filters mounted when clearing an empty-result query', () => {
     jest.useFakeTimers();
     try {
@@ -634,6 +619,69 @@ describe('NightshiftApp', () => {
     expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
       expect.objectContaining({ query: 'a'.repeat(256) })
     );
+  });
+
+  it('applies the search length cap after trimming a shared URL term', () => {
+    setSections({
+      sections: defaultSections({
+        'in-progress': { investigations: [investigation], total: 1 },
+      }),
+      hasActiveInvestigations: true,
+      hasOpenInvestigationsInSpace: true,
+    });
+
+    // Leading space + 256 chars: truncate-before-trim would drop the last character.
+    renderApp({ initialEntries: [`/?q=${encodeURIComponent(` ${'a'.repeat(256)}`)}`] });
+
+    expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: 'a'.repeat(256) })
+    );
+  });
+
+  it('does not leave a lone surrogate when capping a shared search URL', () => {
+    setSections({
+      sections: defaultSections({
+        'in-progress': { investigations: [investigation], total: 1 },
+      }),
+      hasActiveInvestigations: true,
+      hasOpenInvestigationsInSpace: true,
+    });
+
+    // 255 BMP chars + emoji (2 UTF-16 units) → naive slice(0, 256) leaves a high surrogate.
+    renderApp({ initialEntries: [`/?q=${encodeURIComponent(`${'a'.repeat(255)}😀`)}`] });
+
+    expect(mockUseInvestigationSections).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: 'a'.repeat(255) })
+    );
+    expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toHaveValue('a'.repeat(255));
+  });
+
+  it('shows the unavailable callout when every section returns 404', () => {
+    const notFoundError = Object.assign(new Error('Not Found'), {
+      name: 'HttpFetchError',
+      request: {},
+      response: { status: 404 },
+    });
+    setSections({
+      sections: defaultSections({
+        'in-progress': { error: notFoundError },
+        critical: { error: notFoundError },
+        high: { error: notFoundError },
+        medium: { error: notFoundError },
+        low: { error: notFoundError },
+        'not-rated': { error: notFoundError },
+      }),
+      // Probe failure keeps this true; unavailable must still win over filters + Retry.
+      hasOpenInvestigationsInSpace: true,
+    });
+
+    renderApp();
+
+    expect(
+      screen.getByText('Investigations are not available in this deployment')
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationsSearchInput')).not.toBeInTheDocument();
   });
 
   it('does not scroll from a severity tile with no investigations', () => {

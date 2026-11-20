@@ -69,6 +69,19 @@ const INVESTIGATIONS_SEARCH_DEBOUNCE_MS = 300;
 /** Matches the shared investigations list API `query` max (`MAX_FILTER_TEXT_LENGTH`). */
 const MAX_INVESTIGATIONS_SEARCH_LENGTH = 256;
 
+/** Cap to the API max without leaving a lone UTF-16 surrogate. */
+const truncateInvestigationsSearch = (value: string): string => {
+  if (value.length <= MAX_INVESTIGATIONS_SEARCH_LENGTH) {
+    return value;
+  }
+  let truncated = value.slice(0, MAX_INVESTIGATIONS_SEARCH_LENGTH);
+  const lastCodeUnit = truncated.charCodeAt(truncated.length - 1);
+  if (lastCodeUnit >= 0xd800 && lastCodeUnit <= 0xdbff) {
+    truncated = truncated.slice(0, -1);
+  }
+  return truncated;
+};
+
 export function NightshiftApp({
   hideDetectionSetupBanner = false,
   onStartInvestigation,
@@ -95,14 +108,21 @@ export function NightshiftApp({
   const reportedSearchQuery = useRef<string | undefined>(undefined);
 
   // Read filter state from URL so it survives navigation and is shareable.
-  // Cap to the list API's query max so a shared overlong `q=` cannot fail every section request.
-  const searchQuery = useMemo(() => {
-    const raw = getNightshiftSearchQueryFromSearch(search);
-    return raw != null ? raw.slice(0, MAX_INVESTIGATIONS_SEARCH_LENGTH) : undefined;
-  }, [search]);
-  // The input keeps the raw term so spaces can be typed, but the API rejects a whitespace-only
-  // query, so only the trimmed term filters.
-  const trimmedSearchQuery = searchQuery?.trim() || undefined;
+  const rawSearchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
+  // Cap the input display to the list API max (surrogate-safe) so a shared overlong `q=` is usable.
+  const searchQuery = useMemo(
+    () => (rawSearchQuery != null ? truncateInvestigationsSearch(rawSearchQuery) : undefined),
+    [rawSearchQuery]
+  );
+  // Trim first, then cap — matching the list API (`z.string().trim().max(256)`). Slicing before
+  // trim would drop the last character of a leading-space + 256-char shared search.
+  const trimmedSearchQuery = useMemo(() => {
+    const trimmed = rawSearchQuery?.trim();
+    if (!trimmed) {
+      return undefined;
+    }
+    return truncateInvestigationsSearch(trimmed);
+  }, [rawSearchQuery]);
   const debouncedSearchQuery = useDebouncedValue(
     trimmedSearchQuery,
     INVESTIGATIONS_SEARCH_DEBOUNCE_MS
@@ -259,10 +279,7 @@ export function NightshiftApp({
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const params = new URLSearchParams(history.location.search);
-      setNightshiftSearchQueryParam(
-        params,
-        e.target.value.slice(0, MAX_INVESTIGATIONS_SEARCH_LENGTH)
-      );
+      setNightshiftSearchQueryParam(params, truncateInvestigationsSearch(e.target.value));
       history.replace({ search: params.toString() });
     },
     [history]
@@ -404,24 +421,26 @@ export function NightshiftApp({
   }
 
   const fatalError = sections.find((section) => section.error)?.error ?? null;
+  // 404 means the investigations API is missing on this deployment — always say so, even when a
+  // failed space probe would otherwise keep the filter row (and a Retry) mounted.
+  if (allFailed && isHttpNotFoundError(fatalError)) {
+    return (
+      <EuiCallOut
+        announceOnMount
+        color="warning"
+        iconType="warning"
+        css={css`
+          margin-top: ${euiTheme.size.l};
+        `}
+        title={i18n.translate('xpack.nightshift.investigations.unavailableTitle', {
+          defaultMessage: 'Investigations are not available in this deployment',
+        })}
+      />
+    );
+  }
   // A failed load with an active search must keep the filters mounted so the query can be cleared
   // (Retry alone would resend the same rejected term). Without a search, keep the full-page error.
   if (allFailed && !showInvestigationsFilters) {
-    if (isHttpNotFoundError(fatalError)) {
-      return (
-        <EuiCallOut
-          announceOnMount
-          color="warning"
-          iconType="warning"
-          css={css`
-            margin-top: ${euiTheme.size.l};
-          `}
-          title={i18n.translate('xpack.nightshift.investigations.unavailableTitle', {
-            defaultMessage: 'Investigations are not available in this deployment',
-          })}
-        />
-      );
-    }
     return <LoadingErrorCallout onRetry={refetchAll} />;
   }
 
