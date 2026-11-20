@@ -277,10 +277,14 @@ export async function runDockerServer(
   const watchContainer = () => {
     runningSub = observeContainerRunning(name, containerId, log).subscribe({
       complete: () => {
-        if (!stopped) {
-          // the `docker wait` child was ended by a signal that did not come with a shutdown
-          onMonitorEvent(new Error('the container monitor ended'));
-        }
+        // the `docker wait` child was ended by a signal: a shutdown usually follows within
+        // milliseconds (a terminal Ctrl-C reaches the child first), so look again a moment later
+        // and treat it as a lost monitor only if nothing is stopping the container by then
+        setTimeout(() => {
+          if (!stopped) {
+            onMonitorEvent(new Error('the container monitor ended'));
+          }
+        }, MONITOR_RETRY_DELAY_MS).unref();
       },
       error: (error) => onMonitorEvent(error),
     });
