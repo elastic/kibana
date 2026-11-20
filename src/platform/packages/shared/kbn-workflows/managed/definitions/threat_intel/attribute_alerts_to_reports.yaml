@@ -135,8 +135,9 @@ steps:
       # ATT&CK tree as one of this report's `extracted.behaviors.technique_id` values: the
       # same id in either alert field, or the behavior's parent technique when the rule is
       # tagged at the parent only. A rule tagged with a different sub-technique of the same
-      # parent does not count. Same two fields Hunt reads, exact-case match. One search, so
-      # an alert that satisfies several clauses is counted once.
+      # parent does not count. Same two fields Hunt reads, exact-case match. Hunt matches
+      # exact ids only, so the parent-only clause can count alerts Hunt does not attribute
+      # to the report. One search, so an alert that satisfies several clauses is counted once.
       - name: layer2_search
         type: elasticsearch.search
         with:
