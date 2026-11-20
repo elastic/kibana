@@ -100,6 +100,22 @@ describe('extractReferencedStepIds', () => {
     expect(extractReferencedStepIds(node)).toBeNull();
   });
 
+  it('should extract a step ID from a literal bracket reference', () => {
+    const node = makeAtomicNode({
+      with: { message: '{{ steps["produce"].output.payload }}' },
+    });
+    expect(extractReferencedStepIds(node)).toEqual(new Set(['produce']));
+  });
+
+  it('should extract a dotted step ID from a literal bracket reference', () => {
+    // Liquid keeps `steps['my.produce']` when the key contains a `.`; the extractor
+    // must not treat that as an empty / truncated path.
+    const node = makeAtomicNode({
+      with: { message: '{{ steps["my.produce"].output.payload }}' },
+    });
+    expect(extractReferencedStepIds(node)).toEqual(new Set(['my.produce']));
+  });
+
   it('should return empty set when no template expressions are present', () => {
     const node = makeAtomicNode({
       with: { message: 'static text', count: 42 },

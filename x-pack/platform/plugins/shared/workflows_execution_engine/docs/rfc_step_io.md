@@ -49,7 +49,7 @@ The target steps come from static analysis of the node and, when a handler passe
 - An analysis result that names nothing fetches nothing. There is no fallback that reloads every predecessor.
 - `variables` reads also fetch every `data.set` output. A node that does not read `variables` does not.
 
-A quoted `steps["producer"]` reference is not recognized. The scanner keeps the bracket form and the id extractor only matches the `steps.` prefix. That miss exists on the previous design as well. This design does not paper over it by reloading every predecessor.
+Literal bracket references are recognized: Liquid rewrites `steps["producer"]` to `steps.producer`, and the id extractor also reads `steps['my.produce']` when Liquid keeps the bracket form for a dotted step name. Dynamic `steps[k]` remains ambiguous and still falls back to every predecessor.
 
 ### When the cache and the snapshot disagree
 

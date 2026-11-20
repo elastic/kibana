@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { extractPropertyPathsFromKql, scanForTemplateVariables } from '@kbn/workflows/common/utils';
+import {
+  extractPropertyPathsFromKql,
+  parseJsPropertyAccess,
+  scanForTemplateVariables,
+} from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
-
-const STEPS_PREFIX = 'steps.';
 
 /**
  * Node types whose `condition` field can be a bare KQL string referencing step
@@ -166,6 +168,20 @@ function collectNodeVariables(node: GraphNodeUnion): string[] {
   return variables;
 }
 
+/**
+ * Step id from a scanned `steps…` path via {@link parseJsPropertyAccess}.
+ *
+ * - `steps.myStep.output` → `myStep`
+ * - `steps["my.produce"].output` → `my.produce` (Liquid keeps brackets when the key has a `.`)
+ */
+function stepIdFromStepsPath(variable: string): string | undefined {
+  const parts = parseJsPropertyAccess(variable);
+  if (parts[0] !== 'steps' || parts.length < 2) {
+    return undefined;
+  }
+  return parts[1] || undefined;
+}
+
 export function extractReferencedStepIdsFromVariables(variables: string[]): Set<string> | null {
   const referencedStepIds = new Set<string>();
 
@@ -176,17 +192,9 @@ export function extractReferencedStepIdsFromVariables(variables: string[]): Set<
       return null;
     }
 
-    if (variable.startsWith(STEPS_PREFIX)) {
-      // Extract step ID: `steps.myStep.output.field` → `myStep`
-      const dotIndex = variable.indexOf('.', STEPS_PREFIX.length);
-      const stepId =
-        dotIndex === -1
-          ? variable.slice(STEPS_PREFIX.length)
-          : variable.slice(STEPS_PREFIX.length, dotIndex);
-
-      if (stepId) {
-        referencedStepIds.add(stepId);
-      }
+    const stepId = stepIdFromStepsPath(variable);
+    if (stepId) {
+      referencedStepIds.add(stepId);
     }
   }
 
