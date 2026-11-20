@@ -27,8 +27,8 @@ describe('updateCompositeSlo', () => {
   const existing = createCompositeSlo({
     id: 'composite-1',
     members: [
-      { sloId: 'slo-a', weight: 1 },
-      { sloId: 'slo-b', weight: 2 },
+      { sloId: 'slo-id-a', weight: 1 },
+      { sloId: 'slo-id-b', weight: 2 },
     ],
   });
 
@@ -59,9 +59,9 @@ describe('updateCompositeSlo', () => {
         name: 'Renamed',
         tags: ['new'],
         members: [
-          { sloId: 'slo-a', weight: 1 },
-          { sloId: 'slo-b', weight: 2 },
-          { sloId: 'slo-c', weight: 1, instanceId: 'host-1' },
+          { sloId: 'slo-id-a', weight: 1 },
+          { sloId: 'slo-id-b', weight: 2 },
+          { sloId: 'slo-id-c', weight: 1, instanceId: 'host-1' },
         ],
       },
       dependencies
@@ -78,6 +78,18 @@ describe('updateCompositeSlo', () => {
         },
       ],
     ]);
+  });
+
+  it('stores a Date updatedAt and returns the wire form', async () => {
+    const { compositeRepository, dependencies } = setup();
+
+    const result = await updateCompositeSlo({ ...base, name: 'Renamed' }, dependencies);
+
+    const stored = compositeRepository.update.mock.calls[0][0];
+    expect(stored.updatedAt).toBeInstanceOf(Date);
+    expect(result.timeWindow).toEqual({ duration: '30d', type: 'rolling' });
+    expect(result.createdAt).toBe('2024-01-01T00:00:00.000Z');
+    expect(result.updatedAt).toBe(stored.updatedAt.toISOString());
   });
 
   it('reports no changed fields when only the member order changes', async () => {

@@ -68,6 +68,7 @@ export interface ActionsApiRequestHandlerContext {
   getActionsClient: () => ActionsClient;
   listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
   getSkippedPreconfiguredConnectorIds: () => Set<string>;
+  isCatalogFeatureFlagEnabled: () => boolean;
 }
 
 export type ActionsRequestHandlerContext = CustomRequestHandlerContext<{
