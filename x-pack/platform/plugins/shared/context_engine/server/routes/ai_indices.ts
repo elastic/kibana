@@ -127,11 +127,8 @@ import {
 import { dreamingConfigSchema, dreamingResponseSchema } from './schemas/dreaming_schema';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiWriteTelemetry } from '../step_types/helpers';
-import {
-  CONTEXT_ENGINE_DOCS_NOTE,
-  MEMORY_DISABLED_MESSAGE,
-  withContextEngineFeatureFlag,
-} from './with_feature_flag';
+import { CONTEXT_ENGINE_DOCS_NOTE } from './constants';
+import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },

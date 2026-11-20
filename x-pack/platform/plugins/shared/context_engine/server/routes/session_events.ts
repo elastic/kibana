@@ -31,13 +31,10 @@ import type { AiIndexService } from '../ai_indices/service';
 import { sessionEventsSaveAuditEvent } from '../audit/audit_events';
 import type { SessionEventsService } from '../session_events/types';
 import { resolveSpaceId } from '../utils/resolve_space_id';
+import { CONTEXT_ENGINE_DOCS_NOTE } from './constants';
 import { MEMORY_WRITE_SECURITY, resolveMemoryUser, toError } from './memory_user';
 import { errorResponseSchema } from './schemas/ai_indices_schema';
-import {
-  CONTEXT_ENGINE_DOCS_NOTE,
-  MEMORY_DISABLED_MESSAGE,
-  withContextEngineFeatureFlag,
-} from './with_feature_flag';
+import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_feature_flag';
 
 const idSchema = (description: string) =>
   schema.string({

@@ -10,9 +10,6 @@ import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids'
 
 export const MEMORY_DISABLED_MESSAGE = 'Context Engine memory is turned off.';
 
-export const CONTEXT_ENGINE_DOCS_NOTE =
-  '**For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**';
-
 /**
  * Gates a Context Engine route on the Context Engine advanced setting. While the setting is off the
  * route 404s as if it did not exist.
