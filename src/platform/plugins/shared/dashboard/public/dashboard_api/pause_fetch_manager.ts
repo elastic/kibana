@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, filter, first } from 'rxjs';
-import type { initializeFiltersManager } from './filters_manager';
 
-export function initializePauseFetchManager(
-  filtersManager: ReturnType<typeof initializeFiltersManager>
-) {
+export function initializePauseFetchManager(childrenLoading$: Observable<boolean>) {
   const isFetchPaused$ = new BehaviorSubject<boolean>(true);
-  const setFetchPaused = (paused: boolean) => isFetchPaused$.next(paused);
+  const setFetchPaused = (paused: boolean) => {
+    isFetchPaused$.next(paused);
+  };
 
-  const initialFiltersSubscription = filtersManager.api.childFiltersLoading$
+  /**
+   * Fetching stays paused until every child API is available
+   */
+  const childrenAvailableSubscription = childrenLoading$
     .pipe(
-      filter((loading) => !loading),
+      filter((childrenLoading) => !childrenLoading),
       first()
     )
     .subscribe(() => {
@@ -31,7 +34,7 @@ export function initializePauseFetchManager(
       setFetchPaused,
     },
     cleanup: () => {
-      initialFiltersSubscription.unsubscribe();
+      childrenAvailableSubscription.unsubscribe();
     },
   };
 }

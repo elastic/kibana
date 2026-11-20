@@ -139,9 +139,10 @@ export function fetch$(api: unknown): Observable<FetchContext> {
       : of(false);
   const apiPauseFetch = apiPublishesPauseFetch(api) ? api.isFetchPaused$ : of(false);
   const isFetchPaused$ = combineLatest([parentPauseFetch, apiPauseFetch]).pipe(
-    map(
-      ([parentRequestingPause, apiRequestingPause]) => parentRequestingPause || apiRequestingPause
-    )
+    map(([parentRequestingPause, apiRequestingPause]) => {
+      console.log({ parentRequestingPause, apiRequestingPause });
+      return parentRequestingPause || apiRequestingPause;
+    })
   );
 
   const reload$: Observable<ReloadTimeFetchContext> = (

@@ -19,11 +19,13 @@ import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_inter
 import { DashboardGrid } from '../grid';
 import { SelectedPanelsToolbar } from '../selected_panels_toolbar';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
+import { AwaitingFiltersScreen } from './empty_screen/awaiting_filters_screen';
 
 export const DashboardViewport = () => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
   const [
+    awaitingRequired,
     dashboardTitle,
     description,
     expandedPanelId,
@@ -32,6 +34,7 @@ export const DashboardViewport = () => {
     useMargins,
     fullScreenMode,
   ] = useBatchedPublishingSubjects(
+    dashboardApi.awaitingRequiredFilters$,
     dashboardApi.title$,
     dashboardApi.description$,
     dashboardApi.expandedPanelId$,
@@ -63,7 +66,7 @@ export const DashboardViewport = () => {
   });
 
   const styles = useMemoCss(dashboardViewportStyles);
-
+  console.log({ awaitingRequired });
   return (
     <div
       className={classNames('dshDashboardViewportWrapper', {
@@ -87,7 +90,13 @@ export const DashboardViewport = () => {
         data-view-mode={viewMode}
         data-test-subj={'dshDashboardViewport'}
       >
-        {panelCount === 0 && sectionCount === 0 ? <DashboardEmptyScreen /> : <DashboardGrid />}
+        {panelCount === 0 && sectionCount === 0 ? (
+          <DashboardEmptyScreen />
+        ) : awaitingRequired ? (
+          <AwaitingFiltersScreen />
+        ) : (
+          <DashboardGrid />
+        )}
       </div>
       <SelectedPanelsToolbar />
     </div>
@@ -111,9 +120,7 @@ const dashboardViewportStyles = {
   }),
   viewport: {
     width: '100%',
-    '&.dshDashboardViewport--empty': {
-      height: '100%',
-    },
+    height: '100%',
     '&.dshDashboardViewport--panelExpanded': {
       flex: 1,
     },

@@ -41,9 +41,48 @@ export const initializeFiltersManager = (
 ) => {
   const publishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const unpublishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+  const awaitingRequiredFilters$ = new BehaviorSubject<boolean>(false);
 
-  const childFiltersLoading$ = layoutManager.internalApi.childrenLoading$
+  const test = combineCompatibleChildrenApis<
+    { awaitingRequiredFilters$?: BehaviorSubject<boolean> },
+    boolean
+  >(
+    {
+      children$: layoutManager.api.children$.pipe(
+        // only pinned panels can be required
+        map((children) => {
+          const pinnedIds = Object.keys(layoutManager.api.layout$.getValue().pinnedPanels);
+          return Object.values(children).filter((child) => pinnedIds.includes(child.uuid));
+        })
+      ),
+    },
+    'awaitingRequiredFilters$',
+    (
+      unknownApi: unknown
+    ): unknownApi is { awaitingRequiredFilters$?: BehaviorSubject<boolean> } => {
+      return Boolean(
+        unknownApi &&
+          (unknownApi as { awaitingRequiredFilters$?: BehaviorSubject<boolean> })
+            ?.awaitingRequiredFilters$ !== undefined
+      );
+    },
+    false,
+    (values) => {
+      return values.some((awaitingRequired) => awaitingRequired);
+    }
+  ).subscribe((a) => {
+    console.log('jlkfdasjlkdfsad', { a });
+    awaitingRequiredFilters$.next(a);
+  });
+
+  const childFiltersLoading$ = combineLatest([
+    layoutManager.internalApi.childrenLoading$,
+    awaitingRequiredFilters$,
+  ])
     .pipe(
+      map(([childrenLoading, awaitingRequiredFilters]) => {
+        return childrenLoading ? awaitingRequiredFilters : false;
+      }),
       combineLatestWith(
         combineCompatibleChildrenApis<AppliesFilters, boolean>(
           { children$: layoutManager.api.children$ },
@@ -51,6 +90,7 @@ export const initializeFiltersManager = (
           apiAppliesFilters,
           false,
           (values) => {
+            console.log({ values });
             return values.some((loading) => loading);
           }
         )
@@ -82,6 +122,7 @@ export const initializeFiltersManager = (
       filter(([loading, allChildFilters]) => !loading)
     )
     .subscribe(([loading, allChildFilters]) => {
+      console.log({ loading });
       unpublishedChildFilters$.next(allChildFilters);
     });
 
@@ -144,6 +185,7 @@ export const initializeFiltersManager = (
       unpublishedChildFilters$,
       childFiltersLoading$,
       publishFilters,
+      awaitingRequiredFilters$,
     },
     cleanup: () => {
       autoPublishFiltersSubscription.unsubscribe();

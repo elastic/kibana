@@ -33,7 +33,10 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { appendStatsByToQuery, formatEsqlIdentifier, formatEsqlSources } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
-import { type StateComparators } from '@kbn/presentation-publishing';
+import {
+  apiPublishesEditablePauseFetch,
+  type StateComparators,
+} from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager, WithAllKeys } from '@kbn/presentation-publishing/state_manager/types';
 
@@ -57,6 +60,7 @@ export const defaultDataControlComparators: StateComparators<DataControlState> =
   ignore_validations: (a: boolean | undefined, b: boolean | undefined) =>
     (a ?? DEFAULT_DATA_CONTROL_STATE.ignore_validations) ===
     (b ?? DEFAULT_DATA_CONTROL_STATE.ignore_validations),
+  required: 'referenceEquality',
 };
 
 export const defaultDataControlState: WithAllKeys<Omit<DataControlState, 'title'>> = {
@@ -65,12 +69,14 @@ export const defaultDataControlState: WithAllKeys<Omit<DataControlState, 'title'
   field_name: '',
   values_source: DEFAULT_CONTROL_VALUES_SOURCE,
   esql_query: undefined,
+  required: false,
 };
 
 export type DataControlStateManager = Omit<StateManager<DataControlState>, 'api'> & {
   api: DataControlApi;
   cleanup: () => void;
   internalApi: {
+    awaitingRequiredFilters$: BehaviorSubject<boolean>;
     onSelectionChange: () => void;
     setOutputFilter: (filter: Filter | undefined) => void;
   };
@@ -99,6 +105,9 @@ export const initializeDataControlManager = async <EditorState extends object = 
     omit(state, 'title'), // this is handled via the label manager
     defaultDataControlState,
     defaultDataControlComparators
+  );
+  const awaitingRequiredFilters$ = new BehaviorSubject<boolean>(
+    Boolean(state.required && !willHaveInitialFilter)
   );
 
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -158,6 +167,10 @@ export const initializeDataControlManager = async <EditorState extends object = 
       }
       dataSources$.next(dataSource ? [dataSource] : undefined);
     });
+
+  filtersLoading$.subscribe((loading) => {
+    console.log('SET FILTERS LOADING', { loading });
+  });
 
   const defaultFieldLabel$ = new BehaviorSubject<string>(state.field_name ?? '');
   const fieldNameSubscription = combineLatest([
@@ -345,6 +358,17 @@ export const initializeDataControlManager = async <EditorState extends object = 
     initialFilter ? [initialFilter] : undefined
   );
 
+  const waitForRequiredSubscription = combineLatest([
+    dataControlStateManager.api.required$,
+    appliedFilters$,
+  ])
+    .pipe(
+      map(([required, appliedFilters]) => {
+        return Boolean(required && (appliedFilters ?? []).length === 0);
+      })
+    )
+    .subscribe((result) => awaitingRequiredFilters$.next(result));
+
   return {
     api: {
       ...dataControlStateManager.api,
@@ -373,8 +397,10 @@ export const initializeDataControlManager = async <EditorState extends object = 
       esqlQueryDataSourceSubscription.unsubscribe();
       valuesSourceFetchPlanSubscription.unsubscribe();
       labelManager.cleanup();
+      waitForRequiredSubscription.unsubscribe();
     },
     internalApi: {
+      awaitingRequiredFilters$,
       onSelectionChange: () => {
         filtersLoading$.next(true);
       },
