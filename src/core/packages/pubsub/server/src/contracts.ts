@@ -69,6 +69,50 @@ export interface PubSubSubscription<TData> {
   /** Name of this consumer within the plugin. Core scopes it so another plugin cannot take it. */
   readonly consumer: string;
   readonly handler: PubSubHandler<TData>;
+  /**
+   * `'in-process'` (default) delivers from a per-node memory queue. `'durable'` hands delivery to
+   * the registered {@link PubSubSetup.registerDurableDelegate | durable delegate}, and falls back
+   * to in-process delivery (with a warning) when no delegate is registered by start.
+   * A durable handler may see the same event more than once, and a rejection is retried.
+   */
+  readonly delivery?: 'in-process' | 'durable';
+}
+
+/**
+ * What a durable delegate receives for each durable subscription.
+ *
+ * @public
+ */
+export interface PubSubDurableSubscription {
+  readonly topic: string;
+  /** Scoped as `${pluginId}.${consumer}`. */
+  readonly consumer: string;
+  /** Runs the consumer's handler for one event. Rejects when the handler fails. */
+  readonly deliver: (event: PubSubEvent<unknown>) => Promise<void>;
+}
+
+/**
+ * An accepted event, as handed to a durable delegate for storage.
+ *
+ * @public
+ */
+export interface PubSubDurableEvent {
+  readonly id: string;
+  readonly topic: string;
+  readonly acceptedAt: string;
+  readonly serializedData: string;
+}
+
+/**
+ * Supplies durable delivery for subscriptions that opt in with `delivery: 'durable'`.
+ *
+ * @public
+ */
+export interface PubSubDurableDelegate {
+  /** Called once per durable subscription, during setup. */
+  onSubscribe(subscription: PubSubDurableSubscription): void;
+  /** Stores the event. Resolves once it is durably written, or is a duplicate of a stored event. */
+  append(event: PubSubDurableEvent): Promise<void>;
 }
 
 /**
@@ -90,6 +134,11 @@ export interface PubSubSetup {
    * see {@link PubSubStart.publish} for the drop conditions.
    */
   subscribe<TData>(topic: Topic<TData>, subscription: PubSubSubscription<NoInfer<TData>>): void;
+
+  /**
+   * Registers the implementation of durable delivery. Setup only; accepts one delegate.
+   */
+  registerDurableDelegate(delegate: PubSubDurableDelegate): void;
 }
 
 /**

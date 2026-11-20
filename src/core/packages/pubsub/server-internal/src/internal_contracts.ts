@@ -8,6 +8,7 @@
  */
 
 import type {
+  PubSubDurableDelegate,
   PubSubEventInit,
   PubSubPublishResult,
   PubSubSubscription,
@@ -28,6 +29,7 @@ export interface InternalPubSubSetup {
     topic: Topic<TData>,
     subscription: PubSubSubscription<TData>
   ): void;
+  registerDurableDelegate(delegate: PubSubDurableDelegate): void;
 }
 
 /**
