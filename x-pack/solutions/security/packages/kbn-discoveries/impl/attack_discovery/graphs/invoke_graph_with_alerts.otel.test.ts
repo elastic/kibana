@@ -107,7 +107,11 @@ describe('invokeAttackDiscoveryGraphWithAlerts with a real tracer', () => {
     expect(root?.attributes['attack_discovery.generation_attempts']).toBe(10);
 
     // nothing the exporter receives carries the model's text
-    const exported = JSON.stringify({ events: root?.events, status: root?.status });
+    const exported = JSON.stringify({
+      attributes: root?.attributes,
+      events: root?.events,
+      status: root?.status,
+    });
 
     expect(root?.events.some(({ name }) => name === 'exception')).toBe(true);
     expect(exported).not.toContain(MODEL_FRAGMENT);
