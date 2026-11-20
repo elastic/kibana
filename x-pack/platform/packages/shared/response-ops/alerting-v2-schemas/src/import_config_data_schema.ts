@@ -6,8 +6,16 @@
  */
 
 import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
-import { actorSchema, entityIdSchema, ENTITY_ID_NOTE, tagsSchema } from './common';
-import { ID_MAX_LENGTH, MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from './constants';
+import { actorSchema, entityIdSchema, ENTITY_ID_NOTE, queryIntSchema, tagsSchema } from './common';
+import {
+  FIND_DEFAULT_PER_PAGE,
+  FIND_MAX_RESULT_WINDOW,
+  ID_MAX_LENGTH,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_NAME_LENGTH,
+  MAX_PER_PAGE,
+  MAX_SEARCH_LENGTH,
+} from './constants';
 
 /** Kind */
 
@@ -170,3 +178,52 @@ export const findImportConfigsSortFieldSchema = lazySchema(() =>
 );
 
 export type FindImportConfigsSortField = z.infer<typeof findImportConfigsSortFieldSchema>;
+
+/** Query parameters for the find import configs (list) API. */
+export const findImportConfigsRequestSchema = lazySchema(() =>
+  z
+    .object({
+      page: queryIntSchema({ min: 1, max: FIND_MAX_RESULT_WINDOW })
+        .optional()
+        .describe('The page number to return. Defaults to 1.'),
+      per_page: queryIntSchema({ min: 1, max: MAX_PER_PAGE })
+        .optional()
+        .describe('The number of imports to return per page. Defaults to 20.'),
+      search: z
+        .string()
+        .trim()
+        .min(1)
+        .max(MAX_SEARCH_LENGTH)
+        .optional()
+        .describe('A text string to search across import names and descriptions.'),
+      sort_field: findImportConfigsSortFieldSchema
+        .optional()
+        .describe('The field to sort imports by.'),
+      sort_order: z.enum(['asc', 'desc']).optional().describe('The sort direction.'),
+      connector_id: connectorIdSchema
+        .optional()
+        .describe('Only return the imports that use this connector.'),
+    })
+    .strict()
+    .refine(
+      ({ page = 1, per_page = FIND_DEFAULT_PER_PAGE }) => page * per_page <= FIND_MAX_RESULT_WINDOW,
+      { message: `page * per_page cannot exceed ${FIND_MAX_RESULT_WINDOW}.`, path: ['page'] }
+    )
+);
+
+export type FindImportConfigsRequest = z.infer<typeof findImportConfigsRequestSchema>;
+
+/** A page of import configs. */
+export const findImportConfigsResponseSchema = lazySchema(() =>
+  z
+    .object({
+      items: z.array(importConfigResponseSchema).describe('The list of imports.'),
+      total: z.number().describe('The number of imports matching the query.'),
+      page: z.number().describe('The current page number.'),
+      per_page: z.number().describe('The number of imports per page.'),
+    })
+    .describe('Paginated list of imports.')
+    .meta({ id: 'alerting_import_config_list_response' })
+);
+
+export type FindImportConfigsResponse = z.infer<typeof findImportConfigsResponseSchema>;
