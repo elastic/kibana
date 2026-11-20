@@ -23,6 +23,12 @@ export function observeContainerLogs(name: string, containerId: string, log: Too
   const logsProc = execa('docker', ['logs', '--follow', containerId], {
     stdio: ['ignore', 'pipe', 'pipe'],
   });
+  // The stream below is what callers consume; a non-zero exit of `docker logs` itself (the daemon
+  // dropping the attach, the container being removed under it) must not become an unhandled
+  // rejection that takes the whole process down mid-shutdown.
+  logsProc.catch((error) => {
+    log.debug(`[docker:${name}] docker logs exited: ${error?.shortMessage ?? error?.message}`);
+  });
 
   const logLine$ = new Rx.Subject<string>();
 

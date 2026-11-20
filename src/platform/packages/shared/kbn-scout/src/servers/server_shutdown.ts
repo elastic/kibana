@@ -33,8 +33,19 @@ export const registerServerShutdown = (
   });
 
   // exit-hook listens with `once`. Keep another listener after it fires so execa's signal-exit
-  // does not re-raise SIGTERM/SIGINT before the asynchronous shutdown completes.
-  const keepSignalListener = () => {};
+  // does not re-raise SIGTERM/SIGINT before the asynchronous shutdown completes. A second signal
+  // means the user does not want to wait for it (a hung docker daemon, a slow cluster stop):
+  // exit right away, like the default signal handling would.
+  let signals = 0;
+  const keepSignalListener = (signal: NodeJS.Signals) => {
+    signals += 1;
+    if (signals > 1) {
+      process.stderr.write(
+        `\nReceived ${signal} again, exiting without waiting for the shutdown\n`
+      );
+      process.exit(signal === 'SIGINT' ? 130 : 143);
+    }
+  };
   process.on('SIGTERM', keepSignalListener);
   process.on('SIGINT', keepSignalListener);
 

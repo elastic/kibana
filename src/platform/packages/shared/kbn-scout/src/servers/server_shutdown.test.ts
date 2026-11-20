@@ -11,7 +11,7 @@ import { spawn } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { shutdownServers } from './server_shutdown';
+import { registerServerShutdown, shutdownServers } from './server_shutdown';
 
 it('attempts Elasticsearch shutdown after process teardown fails', async () => {
   const error = new Error('process stop failed');
@@ -75,3 +75,29 @@ it('waits for managed process and Elasticsearch shutdown after SIGTERM', async (
     rmSync(markerDir, { recursive: true, force: true });
   }
 }, 20_000);
+
+describe('registerServerShutdown', () => {
+  it('lets the first signal run the shutdown and exits right away on the second one', () => {
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation((() => {}) as any);
+    const stderrSpy = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    const before = process.listeners('SIGINT');
+
+    const remove = registerServerShutdown({ teardown: jest.fn() }, jest.fn());
+    const added = process.listeners('SIGINT').filter((l) => !before.includes(l));
+    // exit-hook's own listener may be added too; ours is the one that counts signals
+    expect(added.length).toBeGreaterThanOrEqual(1);
+    const ours = added[added.length - 1] as (signal: NodeJS.Signals) => void;
+
+    ours('SIGINT');
+    expect(exitSpy).not.toHaveBeenCalled();
+
+    ours('SIGINT');
+    expect(exitSpy).toHaveBeenCalledWith(130);
+    expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('Received SIGINT again'));
+
+    remove();
+    expect(process.listeners('SIGINT')).not.toContain(ours);
+    exitSpy.mockRestore();
+    stderrSpy.mockRestore();
+  });
+});

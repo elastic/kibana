@@ -17,6 +17,8 @@
  * switching every Scout lane to the docker image is a separate decision. Set
  * `SCOUT_FLEET_PACKAGE_REGISTRY=true` as well, as the EPR image promotion pipeline does.
  */
+import type { ToolingLog } from '@kbn/tooling-log';
+
 export const SCOUT_FLEET_PACKAGE_REGISTRY_ENV = 'SCOUT_FLEET_PACKAGE_REGISTRY';
 export const FLEET_PACKAGE_REGISTRY_PORT_ENV = 'FLEET_PACKAGE_REGISTRY_PORT';
 
@@ -70,4 +72,16 @@ export function getFleetPackageRegistry(
   };
 }
 
-export const fleetPackageRegistry = getFleetPackageRegistry();
+/**
+ * Before the docker servers start: say why the registry container is not going to run when the
+ * port alone is set, since the port alone used to flip `dockerServers.registry.enabled` even
+ * though nothing started the container.
+ */
+export function logFleetPackageRegistryHint(log: ToolingLog, env: NodeJS.ProcessEnv = process.env) {
+  if (env[FLEET_PACKAGE_REGISTRY_PORT_ENV] && !getFleetPackageRegistry(env).enabled) {
+    log.info(
+      `scout: ${FLEET_PACKAGE_REGISTRY_PORT_ENV} is set but ${SCOUT_FLEET_PACKAGE_REGISTRY_ENV} is not; ` +
+        'the Fleet package registry container is not started and Kibana installs packages from the public EPR'
+    );
+  }
+}

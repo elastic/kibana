@@ -25,7 +25,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { PRODUCT_DOC_STUB_REPOSITORY_URL } from '@kbn/test-kibana-server';
 import { defineDockerServersConfig, packageRegistryDocker } from '@kbn/test-docker-servers';
 import type { ScoutServerConfig } from '../../../../../types';
-import { fleetPackageRegistry } from '../../../fleet_package_registry';
+import { getFleetPackageRegistry } from '../../../fleet_package_registry';
 import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../../../constants';
 
 const servers = {
@@ -46,6 +46,10 @@ const servers = {
 };
 
 const kbnUrl = `${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`;
+
+// Evaluated when the server config is loaded, i.e. inside the command that will start the
+// servers, so a bad opt-in fails that command and not every `scout` invocation.
+const fleetPackageRegistry = getFleetPackageRegistry();
 
 export const defaultConfig: ScoutServerConfig = {
   servers,

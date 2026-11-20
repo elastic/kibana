@@ -32,7 +32,7 @@ import {
 import { REPO_ROOT } from '@kbn/repo-info';
 import { PRODUCT_DOC_STUB_REPOSITORY_URL } from '@kbn/test-kibana-server';
 import type { ScoutServerConfig } from '../../../../../types';
-import { fleetPackageRegistry } from '../../../fleet_package_registry';
+import { getFleetPackageRegistry } from '../../../fleet_package_registry';
 import { SAML_IDP_PLUGIN_PATH, SERVERLESS_IDP_METADATA_PATH, JWKS_PATH } from '../../../constants';
 
 // Indicates whether the config is used on CI or locally.
@@ -74,6 +74,10 @@ export const withUiamCertOfProject = (
   `--xpack.security.uiam.ssl.certificate=${KBN_SERVERLESS_UIAM_CERTS[projectType].certPath}`,
   `--xpack.security.uiam.ssl.key=${KBN_SERVERLESS_UIAM_CERTS[projectType].keyPath}`,
 ];
+
+// Evaluated when the server config is loaded, i.e. inside the command that will start the
+// servers, so a bad opt-in fails that command and not every `scout` invocation.
+const fleetPackageRegistry = getFleetPackageRegistry();
 
 export const defaultConfig: ScoutServerConfig = {
   serverless: true,

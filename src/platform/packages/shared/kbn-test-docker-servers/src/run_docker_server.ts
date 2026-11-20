@@ -10,7 +10,7 @@
 import Url from 'url';
 import execa from 'execa';
 import * as Rx from 'rxjs';
-import { filter, map, take, takeUntil } from 'rxjs';
+import { catchError, filter, map, take, takeUntil } from 'rxjs';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { DockerServer, DockerServerSpec } from './define_docker_servers_config';
 import { observeContainerLogs } from './container_logs';
@@ -289,9 +289,16 @@ export async function runDockerServer(
       }
     }
 
-    // let the log stream drain so nothing is logged after shutdown, but never hang on it
+    // let the log stream drain so nothing is logged after shutdown, but never hang on it, and a
+    // broken log stream is no reason to report a container that is already gone as "failed to stop"
     await Rx.lastValueFrom(
-      Rx.race(logLine$.pipe(Rx.ignoreElements()), Rx.timer(LOG_DRAIN_TIMEOUT_MS)),
+      Rx.race(
+        logLine$.pipe(
+          Rx.ignoreElements(),
+          catchError(() => Rx.EMPTY)
+        ),
+        Rx.timer(LOG_DRAIN_TIMEOUT_MS)
+      ),
       { defaultValue: undefined }
     );
     log.info(`[docker:${name}] container stopped`);

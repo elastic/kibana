@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getFleetPackageRegistry } from './fleet_package_registry';
+import { ToolingLog } from '@kbn/tooling-log';
+import { getFleetPackageRegistry, logFleetPackageRegistryHint } from './fleet_package_registry';
 
 describe('getFleetPackageRegistry', () => {
   it('is disabled when neither variable is set', () => {
@@ -69,5 +70,31 @@ describe('getFleetPackageRegistry', () => {
       port: undefined,
       kbnServerArgs: [],
     });
+  });
+});
+
+describe('logFleetPackageRegistryHint', () => {
+  const logWith = () => {
+    const log = new ToolingLog({ level: 'silent', writeTo: process.stdout });
+    const info = jest.spyOn(log, 'info');
+    return { log, info };
+  };
+
+  it('explains why the registry is not started when only the port is set', () => {
+    const { log, info } = logWith();
+    logFleetPackageRegistryHint(log, { FLEET_PACKAGE_REGISTRY_PORT: '6104' });
+    expect(info).toHaveBeenCalledWith(
+      expect.stringContaining('SCOUT_FLEET_PACKAGE_REGISTRY is not')
+    );
+  });
+
+  it('says nothing when the registry is enabled or the port is unset', () => {
+    const { log, info } = logWith();
+    logFleetPackageRegistryHint(log, {
+      FLEET_PACKAGE_REGISTRY_PORT: '6104',
+      SCOUT_FLEET_PACKAGE_REGISTRY: 'true',
+    });
+    logFleetPackageRegistryHint(log, {});
+    expect(info).not.toHaveBeenCalled();
   });
 });

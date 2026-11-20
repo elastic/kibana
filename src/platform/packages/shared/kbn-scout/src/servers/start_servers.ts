@@ -15,6 +15,7 @@ import { once } from 'lodash';
 import { silence } from '../common';
 import { getPlaywrightGrepTag } from '../playwright/utils';
 import { getConfigRootDir, loadServersConfig } from './configs';
+import { logFleetPackageRegistryHint } from './configs/fleet_package_registry';
 import type { StartServerOptions } from './flags';
 import { preCreateSecurityIndexesViaSamlAuth } from './pre_create_security_indexes';
 import { ensureDefaultSpaceNPRE } from './ensure_default_space_npre';
@@ -71,6 +72,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     try {
       // Docker-backed services (e.g. the Fleet package registry) must be up before Kibana boots,
       // otherwise Fleet setup falls back to retrying against a registry that is not there yet.
+      logFleetPackageRegistryHint(log);
       dockerStartup = runDockerServers({
         config,
         log,
