@@ -2287,6 +2287,23 @@ describe('extract_iocs — example emails, Message-IDs and non-addresses', () =>
       expect(emailValues(result)).toEqual(['other.last@mail.evil-corp.com']);
     });
 
+    test.each<[string, string]>([
+      [
+        'a plain Message-ID first',
+        'Message-ID: <actor@evil-corp.com>\nMessage-ID: <actor[@]evil-corp[.]com>',
+      ],
+      [
+        'a plain address first',
+        'Contact actor@evil-corp.com\nC2 operator: actor[@]evil-corp[.]com',
+      ],
+      ['a plain address last', 'C2 operator: actor[@]evil-corp[.]com\nContact actor@evil-corp.com'],
+    ])('an address defanged once is discriminating with %s', (_label, text) => {
+      const result = extractIocs({ text });
+      expect(emailValues(result)).toEqual(['actor@evil-corp.com']);
+      expect(byValue(result, 'actor@evil-corp.com')?.tier).toBe('discriminating');
+      expect(byValue(result, 'actor@evil-corp.com')?.tier_basis).toBe('defanged_source');
+    });
+
     test('a header block with every @ defanged yields its ID as an address (known gap)', () => {
       const result = extractIocs({ text: 'Message-ID: <abc123[@]mail[.]evil-corp[.]com>' });
       expect(emailValues(result)).toEqual(['abc123@mail.evil-corp.com']);

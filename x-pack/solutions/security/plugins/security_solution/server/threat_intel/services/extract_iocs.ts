@@ -1241,10 +1241,17 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   // (evil[.]com in "admin@evil[.]com and C2 evil[.]com") still surfaces correctly
   // because its standalone occurrence survives the masking.
   const emailSpans: Span[] = [];
+  // Addresses the report wrote with a defanged `@` at least once. That is enough to tier the
+  // value as defanged, whatever order its occurrences come in and even when a plain copy of
+  // the same text exists (a Message-ID, a header dump).
+  const emailsWithDefangedAt = new Set<string>();
   {
     const emailPat = new RegExp(EMAIL_PATTERN.source, EMAIL_PATTERN.flags);
-    for (const m of refangedText.matchAll(emailPat)) {
-      if (m.index !== undefined) emailSpans.push([m.index, m.index + m[0].length]);
+    for (const m of matchesWithOffset(refangedText, emailPat)) {
+      emailSpans.push([m.index, m.index + m[0].length]);
+      if (defangedAtOffsets.has(m.index + m[0].lastIndexOf('@'))) {
+        emailsWithDefangedAt.add(m[0].toLowerCase());
+      }
     }
   }
   const refangedTextNoEmails = maskConsumedSpans(refangedText, emailSpans);
@@ -1352,7 +1359,7 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
         isAtSignDefanged: defangedAtOffsets.has(idx + raw.lastIndexOf('@')),
         start: idx,
         raw,
-        wasDefanged: !originalLower.includes(raw),
+        wasDefanged: emailsWithDefangedAt.has(raw) || !originalLower.includes(raw),
         idListHeaderLines:
           sectionKindAtOffset(idx, sectionSpans) === 'ioc' ? [] : idListHeaderLines,
       });
