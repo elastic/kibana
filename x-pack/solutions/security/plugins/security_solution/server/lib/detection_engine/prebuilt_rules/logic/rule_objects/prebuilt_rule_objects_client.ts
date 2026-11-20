@@ -58,6 +58,8 @@ export interface RuleSummary {
   rule_id: RuleSignatureId;
   version: RuleVersion;
   tags: RuleTagArray;
+  // Unset for rules installed before libraries existed, which come from the Elastic library.
+  library_id?: string;
 }
 
 export interface IPrebuiltRuleObjectsClient {
@@ -164,13 +166,14 @@ export const createPrebuiltRuleObjectsClient = (
           page: 1,
           sortField,
           sortOrder,
-          fields: ['params.ruleId', 'params.version', 'tags'],
+          fields: ['params.ruleId', 'params.version', 'params.library', 'tags'],
         });
         return rulesData.data.map((rule) => ({
           id: rule.id,
           rule_id: rule.params.ruleId,
           version: rule.params.version,
           tags: rule.tags,
+          ...(rule.params.library ? { library_id: rule.params.library.id } : {}),
         }));
       });
     },

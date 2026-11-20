@@ -6,12 +6,14 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { BATCH_SIZE } from '../constants';
+import { BATCH_SIZE, SCAN_MAX_LIST_PAGES } from '../constants';
+import { MANIFEST_PATHS, MAX_MANIFEST_BYTES, parseManifest } from '../manifest';
+import type { RuleLibraryManifest } from '../manifest';
 import type { LibraryVersionRef, RuleKey, RuleLibraryAttributes, RuleLibraryItem } from '../types';
 import { findHighest } from '../versions';
 import { parseItem } from './parse_item';
 import { S3Client } from './s3_client';
-import type { ItemBatch, ProviderDeps, RuleLibraryProvider } from './types';
+import type { ItemBatch, LibraryInspection, ProviderDeps, RuleLibraryProvider } from './types';
 
 const DEFAULT_BRANCH = 'main';
 const CONCURRENCY = 10;
@@ -41,6 +43,34 @@ export class S3Provider implements RuleLibraryProvider {
     );
     if (!version) throw new Error(`No release versions under ${prefix}`);
     return { version };
+  }
+
+  async inspect(
+    library: RuleLibraryAttributes,
+    { version }: LibraryVersionRef
+  ): Promise<LibraryInspection> {
+    const client = new S3Client(library);
+    const root = `${library.provider.branch ?? DEFAULT_BRANCH}/v${version}/`;
+    const { keys } = await client.list(root, undefined, SCAN_MAX_LIST_PAGES);
+    const manifestKey = MANIFEST_PATHS.map((path) => `${root}${path}`).find((key) =>
+      keys.includes(key)
+    );
+
+    let manifest: RuleLibraryManifest | undefined;
+    let manifestError: string | undefined;
+    if (manifestKey) {
+      try {
+        manifest = parseManifest(await client.object(manifestKey, MAX_MANIFEST_BYTES));
+      } catch (error) {
+        manifestError = error instanceof Error ? error.message : String(error);
+      }
+    }
+
+    return {
+      ruleCount: keys.filter((key) => isLibraryKey(key, root)).length,
+      manifest,
+      manifestError,
+    };
   }
 
   async readLatestItems(

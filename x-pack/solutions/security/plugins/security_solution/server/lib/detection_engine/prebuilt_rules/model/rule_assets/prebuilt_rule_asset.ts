@@ -75,4 +75,6 @@ export const PrebuiltRuleAsset = lazySchema(() =>
 export type PrebuiltRuleAssetRecord = PrebuiltRuleAsset & {
   library_id?: string;
   library_path?: string;
+  // The title the library had when the rule was written, for libraries that are not built in.
+  library_title?: string;
 };

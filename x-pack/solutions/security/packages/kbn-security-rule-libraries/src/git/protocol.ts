@@ -45,11 +45,20 @@ export interface GitFile {
   blobId: string;
 }
 
+export interface GitRequestOptions {
+  // Fails the request when the server's response is larger, instead of buffering all of it.
+  maxResponseBytes?: number;
+}
+
 export interface GitClient {
   getCapabilities(): Promise<string[]>;
   listRefs(prefixes: string[]): Promise<GitRef[]>;
-  listFiles(commitSha: string, isMatch: (path: string) => boolean): Promise<GitFile[]>;
-  fetchBlobs(blobIds: string[]): Promise<Map<string, Buffer>>;
+  listFiles(
+    commitSha: string,
+    isMatch: (path: string) => boolean,
+    options?: GitRequestOptions
+  ): Promise<GitFile[]>;
+  fetchBlobs(blobIds: string[], options?: GitRequestOptions): Promise<Map<string, Buffer>>;
   close(): Promise<void>;
 }
 
@@ -67,7 +76,7 @@ export interface SshGitClientOptions {
 // How bytes reach the server: the advertisement is its v2 greeting, runCommand sends one request body.
 export interface GitTransport {
   getAdvertisement(): Promise<Buffer>;
-  runCommand(body: Buffer): Promise<Buffer>;
+  runCommand(body: Buffer, options?: GitRequestOptions): Promise<Buffer>;
   close(): Promise<void>;
 }
 
@@ -268,9 +277,10 @@ const createHttpTransport = ({ url, headers = {} }: GitClientOptions): GitTransp
           headers: { ...GIT_HEADERS, ...headers },
         })
       ),
-    runCommand: async (body) =>
+    runCommand: async (body, options) =>
       ensureOk(
         await send(`${repoUrl}/git-upload-pack`, {
+          maxBytes: options?.maxResponseBytes,
           method: 'POST',
           headers: {
             ...GIT_HEADERS,
@@ -299,7 +309,7 @@ const createSshTransport = ({
 
   return {
     getAdvertisement: async () => (await getSession()).advertisement,
-    runCommand: async (body) => (await getSession()).exchange(body),
+    runCommand: async (body, options) => (await getSession()).exchange(body, options),
     close: async () => {
       const opened = await session?.catch(() => undefined);
       await opened?.close();
@@ -308,18 +318,23 @@ const createSshTransport = ({
 };
 
 const createClientOnTransport = (transport: GitTransport): GitClient => {
-  const runCommand = async (command: string, args: string[]): Promise<Buffer> =>
+  const runCommand = async (
+    command: string,
+    args: string[],
+    options?: GitRequestOptions
+  ): Promise<Buffer> =>
     transport.runCommand(
       Buffer.concat([
         pktLine(`command=${command}\n`),
         DELIM,
         ...args.map((arg) => pktLine(`${arg}\n`)),
         FLUSH,
-      ])
+      ]),
+      options
     );
 
-  const fetchPack = async (args: string[]): Promise<Buffer> => {
-    const response = await runCommand('fetch', [...args, 'no-progress', 'done']);
+  const fetchPack = async (args: string[], options?: GitRequestOptions): Promise<Buffer> => {
+    const response = await runCommand('fetch', [...args, 'no-progress', 'done'], options);
     const payloads = readPktLines(response).flatMap((line) =>
       line.kind === 'data' ? [line.payload] : []
     );
@@ -366,9 +381,10 @@ const createClientOnTransport = (transport: GitTransport): GitClient => {
 
   const listFiles = async (
     commitSha: string,
-    isMatch: (path: string) => boolean
+    isMatch: (path: string) => boolean,
+    options?: GitRequestOptions
   ): Promise<GitFile[]> => {
-    const pack = await fetchPack([`want ${commitSha}`, 'deepen 1', 'filter blob:none']);
+    const pack = await fetchPack([`want ${commitSha}`, 'deepen 1', 'filter blob:none'], options);
     const objects = parsePack(pack);
     const commit = objects.get(commitSha);
     if (!commit) throw new Error(`Commit ${commitSha} missing from server reply`);
@@ -389,8 +405,14 @@ const createClientOnTransport = (transport: GitTransport): GitClient => {
     return files;
   };
 
-  const fetchBlobs = async (blobIds: string[]): Promise<Map<string, Buffer>> => {
-    const pack = await fetchPack(blobIds.map((id) => `want ${id}`));
+  const fetchBlobs = async (
+    blobIds: string[],
+    options?: GitRequestOptions
+  ): Promise<Map<string, Buffer>> => {
+    const pack = await fetchPack(
+      blobIds.map((id) => `want ${id}`),
+      options
+    );
     const blobs = new Map<string, Buffer>();
     for (const [id, { data }] of parsePack(pack)) blobs.set(id, data);
     return blobs;

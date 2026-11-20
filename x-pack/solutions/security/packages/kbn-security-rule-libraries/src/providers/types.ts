@@ -7,10 +7,21 @@
 
 import type { Logger } from '@kbn/logging';
 import type { LibraryVersionRef, RuleKey, RuleLibraryAttributes, RuleLibraryItem } from '../types';
+import type { RuleLibraryManifest } from '../manifest';
 
 export type ItemBatch = (items: RuleLibraryItem[]) => Promise<void>;
 
+export interface LibraryInspection {
+  // Rule files in the release. A release holds one file per rule, at its latest version.
+  ruleCount: number;
+  manifest?: RuleLibraryManifest;
+  // Set instead of a manifest when the file exists but cannot be used.
+  manifestError?: string;
+}
+
 export interface RuleLibraryProvider {
+  // Counts the rules of a release and reads its manifest, without downloading rule contents.
+  inspect(library: RuleLibraryAttributes, ref: LibraryVersionRef): Promise<LibraryInspection>;
   resolveVersion(
     library: RuleLibraryAttributes,
     opts?: { pinned?: string }

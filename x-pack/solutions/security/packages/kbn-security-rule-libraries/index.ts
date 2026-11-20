@@ -11,9 +11,12 @@ export {
   ELASTIC_LIBRARY_ID,
   COMMUNITY_LIBRARY_ID,
   BATCH_SIZE,
+  SCAN_MAX_RESPONSE_BYTES,
   REFRESH_LOCK_TIMEOUT_MS,
 } from './src/constants';
 export { RULE_LIBRARY_DEFINITIONS } from './src/definitions';
+export { parseManifest, MAX_MANIFEST_BYTES, type RuleLibraryManifest } from './src/manifest';
+export { scanLibrary, type LibraryScanResult } from './src/scan/scan_library';
 export { ruleLibraryType } from './src/saved_objects/rule_library_type';
 export { ruleLibraryEncryption } from './src/saved_objects/encryption';
 export {

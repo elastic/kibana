@@ -6,14 +6,16 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { BATCH_SIZE } from '../constants';
+import { BATCH_SIZE, SCAN_MAX_RESPONSE_BYTES } from '../constants';
+import { MANIFEST_PATHS, MAX_MANIFEST_RESPONSE_BYTES, parseManifest } from '../manifest';
+import type { RuleLibraryManifest } from '../manifest';
 import { createGitClient, createSshGitClient } from '../git/protocol';
 import type { GitClient, GitFile } from '../git/protocol';
 import { parseSshUrl } from '../git/ssh_transport';
 import type { LibraryVersionRef, RuleKey, RuleLibraryAttributes, RuleLibraryItem } from '../types';
 import { findHighest } from '../versions';
 import { parseItem } from './parse_item';
-import type { ItemBatch, ProviderDeps, RuleLibraryProvider } from './types';
+import type { ItemBatch, LibraryInspection, ProviderDeps, RuleLibraryProvider } from './types';
 
 const DEFAULT_BRANCH = 'main';
 
@@ -84,6 +86,45 @@ export class GitProvider implements RuleLibraryProvider {
     const tag = tags.find(({ name }) => name === `${prefix}${version}`);
     if (!tag) throw new Error(`Tag ${prefix}${version} not found`);
     return { version, ref: tag.sha };
+  }
+
+  async inspect(
+    library: RuleLibraryAttributes,
+    { ref }: LibraryVersionRef
+  ): Promise<LibraryInspection> {
+    if (typeof ref !== 'string') throw new Error('Git provider needs a commit sha as ref');
+    const client = buildClient(library);
+    return withClient(client, async () => {
+      // One listing of the release serves both the rule count and finding the manifest.
+      const files = await client.listFiles(
+        ref,
+        (path) => isLibraryFile(path) || (MANIFEST_PATHS as readonly string[]).includes(path),
+        { maxResponseBytes: SCAN_MAX_RESPONSE_BYTES }
+      );
+      const manifestFile = MANIFEST_PATHS.flatMap((path) =>
+        files.filter((file) => file.path === path)
+      )[0];
+
+      let manifest: RuleLibraryManifest | undefined;
+      let manifestError: string | undefined;
+      if (manifestFile) {
+        const blobs = await client.fetchBlobs([manifestFile.blobId], {
+          maxResponseBytes: MAX_MANIFEST_RESPONSE_BYTES,
+        });
+        const blob = blobs.get(manifestFile.blobId);
+        try {
+          manifest = blob ? parseManifest(blob) : undefined;
+        } catch (error) {
+          manifestError = error instanceof Error ? error.message : String(error);
+        }
+      }
+
+      return {
+        ruleCount: files.filter(({ path }) => isLibraryFile(path)).length,
+        manifest,
+        manifestError,
+      };
+    });
   }
 
   async readLatestItems(

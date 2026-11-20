@@ -17,22 +17,62 @@ import { refreshLibraryById } from './refresh_library_by_id';
 jest.mock('./ensure_libraries');
 jest.mock('./refresh_library_by_id');
 
-const client = { update: jest.fn() } as unknown as SavedObjectsClientContract;
+const client = {
+  update: jest.fn(),
+  find: jest.fn(),
+} as unknown as SavedObjectsClientContract;
 const packages = {} as PackageClient;
 const logger = {} as Logger;
 
 describe('refreshRuleLibraries', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(client.find).mockResolvedValue({
+      saved_objects: [
+        { id: 'custom-library' },
+        { id: COMMUNITY_LIBRARY_ID },
+        { id: ELASTIC_LIBRARY_ID },
+      ],
+    } as never);
     jest
       .mocked(refreshLibraryById)
       .mockImplementation(async ({ id }) => ({ id, outcome: 'refreshed', version: '1.0.0' }));
   });
 
-  it('refreshes every library by default', async () => {
+  it('refreshes every library that exists by default, the built-in ones first', async () => {
     const { results } = await refreshRuleLibraries({ client, packages, logger });
 
-    expect(results.map(({ id }) => id)).toEqual([ELASTIC_LIBRARY_ID, COMMUNITY_LIBRARY_ID]);
+    expect(results.map(({ id }) => id)).toEqual([
+      ELASTIC_LIBRARY_ID,
+      COMMUNITY_LIBRARY_ID,
+      'custom-library',
+    ]);
+  });
+
+  it('refreshes a library that is not one of the built-in definitions when it is asked for', async () => {
+    const { results } = await refreshRuleLibraries({
+      client,
+      packages,
+      logger,
+      libraryIds: ['custom-library'],
+    });
+
+    expect(results.map(({ id }) => id)).toEqual(['custom-library']);
+    expect(client.find).not.toHaveBeenCalled();
+  });
+
+  it('hands the secret lookup on to every refresh', async () => {
+    const getSecret = jest.fn();
+
+    await refreshRuleLibraries({
+      client,
+      packages,
+      logger,
+      libraryIds: ['custom-library'],
+      getSecret,
+    });
+
+    expect(refreshLibraryById).toHaveBeenCalledWith(expect.objectContaining({ getSecret }));
   });
 
   it('creates every library object but refreshes only the listed libraries', async () => {

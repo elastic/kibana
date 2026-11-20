@@ -22,13 +22,26 @@ export const send = (
     method = 'GET',
     headers,
     body,
-  }: { method?: string; headers: Record<string, string>; body?: Buffer }
+    maxBytes,
+  }: { method?: string; headers: Record<string, string>; body?: Buffer; maxBytes?: number }
 ): Promise<HttpResponse> =>
   new Promise((resolve, reject) => {
     const doRequest = url.startsWith('https:') ? httpsRequest : httpRequest;
     const req = doRequest(url, { method, headers, timeout: REQUEST_TIMEOUT_MS }, (res) => {
       const chunks: Buffer[] = [];
-      res.on('data', (chunk: Buffer) => chunks.push(chunk));
+      let received = 0;
+      let tooLarge = false;
+      res.on('data', (chunk: Buffer) => {
+        if (tooLarge) return;
+        received += chunk.length;
+        if (maxBytes !== undefined && received > maxBytes) {
+          tooLarge = true;
+          reject(new Error(`The response is larger than ${maxBytes} bytes`));
+          req.destroy();
+          return;
+        }
+        chunks.push(chunk);
+      });
       res.on('error', reject);
       res.on('end', () =>
         resolve({
@@ -38,7 +51,7 @@ export const send = (
         })
       );
     });
-    req.on('timeout', () => req.destroy(new Error(`Request to ${url} timed out`)));
+    req.on('timeout', () => req.destroy(new Error('The request timed out')));
     req.on('error', reject);
     req.end(body);
   });

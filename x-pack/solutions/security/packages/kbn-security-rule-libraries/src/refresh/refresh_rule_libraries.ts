@@ -19,7 +19,8 @@ export interface RefreshRuleLibrariesParams {
   packages: PackageClient;
   logger: Logger;
   definitions?: readonly RuleLibraryDefinition[];
-  // Libraries to refresh; every definition still gets its library object. Defaults to all.
+  // Libraries to refresh; every definition still gets its library object. Defaults to every library that
+  // exists. The caller decides which of them the user may see.
   libraryIds?: readonly string[];
   getSecret?: (id: string) => Promise<string | undefined>;
   force?: boolean;
@@ -39,6 +40,17 @@ const toEnsureResult = (result: RefreshResult): LibraryEnsureResult | undefined 
   };
 };
 
+const MAX_LIBRARIES = 1000;
+
+const findLibraryIds = async (client: SavedObjectsClientContract): Promise<string[]> => {
+  const { saved_objects: libraries } = await client.find({
+    type: RULE_LIBRARY_SO_TYPE,
+    perPage: MAX_LIBRARIES,
+    fields: [],
+  });
+  return libraries.map(({ id }) => id);
+};
+
 export const refreshRuleLibraries = async ({
   client,
   packages,
@@ -50,10 +62,17 @@ export const refreshRuleLibraries = async ({
 }: RefreshRuleLibrariesParams): Promise<RefreshRuleLibrariesResult> => {
   await ensureLibraries({ client, logger, definitions });
 
+  const selectedIds = libraryIds ?? (await findLibraryIds(client));
+  const definitionIds = definitions.map(({ id }) => id);
+  const ordered = [
+    ...definitionIds.filter((id) => selectedIds.includes(id)),
+    ...selectedIds.filter((id) => !definitionIds.includes(id)),
+  ];
+
   const results: RefreshResult[] = [];
-  const selected = definitions.filter(({ id }) => !libraryIds || libraryIds.includes(id));
-  for (const { id, pinned_version: pinned } of selected) {
+  for (const id of ordered) {
     // Refresh pin from definition each run (config may change between app loads).
+    const pinned = definitions.find((definition) => definition.id === id)?.pinned_version;
     if (pinned !== undefined) {
       await client.update(RULE_LIBRARY_SO_TYPE, id, { pinned_version: pinned });
     }

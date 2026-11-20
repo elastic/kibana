@@ -8,7 +8,7 @@
 import { chunk, pick } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
-import { SkipRuleInstallReason } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { RULE_LIBRARY_SO_TYPE } from '@kbn/security-rule-libraries';
 import type {
   PerformRuleInstallationResponseBody,
   SkippedRuleInstall,
@@ -32,6 +32,11 @@ import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebui
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import type { RuleSignatureId, RuleVersion } from '../../../../../../common/api/detection_engine';
 import { excludeLicenseRestrictedRules } from '../../logic/utils';
+import { findVisibleRuleLibraries } from '../../logic/rule_libraries/find_visible_rule_libraries';
+import {
+  resolveAllRuleInstalls,
+  resolveSpecificRuleInstalls,
+} from '../../logic/resolve_specific_rule_installs';
 
 export const performRuleInstallationHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -75,56 +80,57 @@ export const performRuleInstallationHandler = async (
     // Perform all the checks we can before we start the upgrade process
     if (mode === 'SPECIFIC_RULES') {
       const requestedRuleIds = request.body.rules.map((rule) => rule.rule_id);
-      const [latestVersions, installedVersions] = await Promise.all([
-        ruleAssetsClient.fetchLatestVersions({ ruleIds: requestedRuleIds }),
+      const requestedLibraryIds = [
+        ...new Set(request.body.rules.flatMap(({ library_id: id }) => (id ? [id] : []))),
+      ];
+      const namesEveryLibrary = requestedLibraryIds.length > 0;
+      const [latestVersions, installedVersions, visibleLibraries] = await Promise.all([
+        ruleAssetsClient.fetchLatestVersions({
+          ruleIds: requestedRuleIds,
+          // Without this the read only covers the built-in libraries.
+          libraryIds: namesEveryLibrary ? requestedLibraryIds : undefined,
+        }),
         ruleObjectsClient.fetchInstalledRuleVersionsByIds({ ruleIds: requestedRuleIds }),
+        namesEveryLibrary
+          ? findVisibleRuleLibraries(
+              ctx.core.savedObjects.getClient({ includedHiddenTypes: [RULE_LIBRARY_SO_TYPE] }),
+              ctx.securitySolution.getSpaceId()
+            )
+          : [],
       ]);
-      const installedRuleIds = new Set(installedVersions.map((version) => version.rule_id));
-      const installableRuleIds = new Set(
-        latestVersions
-          .filter((version) => !installedRuleIds.has(version.rule_id))
-          .map((version) => version.rule_id)
-      );
 
-      request.body.rules.forEach((rule) => {
-        // Check that the requested rule is not installed yet
-        if (installedRuleIds.has(rule.rule_id)) {
-          skippedRules.push({
-            rule_id: rule.rule_id,
-            reason: SkipRuleInstallReason.ALREADY_INSTALLED,
-          });
-          return;
-        }
-
-        // Check that the requested rule is installable
-        if (!installableRuleIds.has(rule.rule_id)) {
-          ruleErrors.push({
-            error: new Error(
-              `Rule with ID "${rule.rule_id}" and version "${rule.version}" not found`
-            ),
-            item: rule,
-          });
-          return;
-        }
-
-        const latestMatch = latestVersions.find(
-          (version) => version.rule_id === rule.rule_id && version.version === rule.version
-        );
-        ruleInstallQueue.push({
-          rule_id: rule.rule_id,
-          version: rule.version,
-          library_id: latestMatch?.library_id,
-        });
+      const resolved = resolveSpecificRuleInstalls({
+        rules: request.body.rules,
+        latestVersions,
+        installedRuleIds: new Set(installedVersions.map((version) => version.rule_id)),
+        visibleLibraryIds: new Set(visibleLibraries.map(({ id }) => id)),
       });
+      ruleInstallQueue.push(...resolved.queue);
+      skippedRules.push(...resolved.skipped);
+      ruleErrors.push(...resolved.errors);
     } else if (mode === 'ALL_RULES') {
-      const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
+      const libraryId = request.body.library_id;
+      if (libraryId) {
+        const visibleLibraries = await findVisibleRuleLibraries(
+          ctx.core.savedObjects.getClient({ includedHiddenTypes: [RULE_LIBRARY_SO_TYPE] }),
+          ctx.securitySolution.getSpaceId()
+        );
+        if (!visibleLibraries.some(({ id }) => id === libraryId)) {
+          return siemResponse.error({
+            statusCode: 404,
+            body: `Rule library "${libraryId}" not found`,
+          });
+        }
+      }
+
+      const allLatestVersions = await ruleAssetsClient.fetchLatestVersions(
+        libraryId ? { libraryIds: [libraryId] } : undefined
+      );
       const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
-      const currentRuleVersionsMap = new Map(
-        currentRuleVersions.map((version) => [version.rule_id, version])
-      );
-      const allInstallableRules = allLatestVersions.filter(
-        (latestVersion) => !currentRuleVersionsMap.has(latestVersion.rule_id)
-      );
+      const allInstallableRules = resolveAllRuleInstalls({
+        latestVersions: allLatestVersions,
+        installedRuleIds: new Set(currentRuleVersions.map((version) => version.rule_id)),
+      });
       ruleInstallQueue.push(...(await excludeLicenseRestrictedRules(allInstallableRules, mlAuthz)));
     }
 

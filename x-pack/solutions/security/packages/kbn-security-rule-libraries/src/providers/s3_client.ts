@@ -25,6 +25,9 @@ const tagValues = (xml: string, tag: string): string[] =>
     decodeXml(value)
   );
 
+// A page of 1,000 keys is far smaller than this.
+const LIST_PAGE_MAX_BYTES = 8 * 1024 * 1024;
+
 const encodeKey = (key: string): string => key.split('/').map(encodeURIComponent).join('/');
 
 // provider.url is the bucket endpoint, e.g. https://s3.eu-west-1.amazonaws.com/bucket or http://localhost:9000/bucket.
@@ -46,7 +49,7 @@ export class S3Client {
     }
   }
 
-  private async get(path: string, query: string = ''): Promise<Buffer> {
+  private async get(path: string, query: string = '', maxBytes?: number): Promise<Buffer> {
     const basePath = this.base.pathname.replace(/\/$/, '');
     const fullPath = `${basePath}${path}${query ? `?${query}` : ''}`;
     const request: Request = {
@@ -63,18 +66,27 @@ export class S3Client {
       }
     }
     const url = `${this.base.protocol}//${this.base.host}${fullPath}`;
-    return ensureOk(await send(url, { headers }));
+    return ensureOk(await send(url, { headers, maxBytes }));
   }
 
-  async list(prefix: string, delimiter?: string): Promise<{ keys: string[]; prefixes: string[] }> {
+  async list(
+    prefix: string,
+    delimiter?: string,
+    maxPages?: number
+  ): Promise<{ keys: string[]; prefixes: string[] }> {
     const keys: string[] = [];
     const prefixes: string[] = [];
     let token: string | undefined;
+    let pages = 0;
     do {
+      pages += 1;
+      if (maxPages !== undefined && pages > maxPages) {
+        throw new Error(`The listing has more than ${maxPages} pages`);
+      }
       const params = new URLSearchParams({ 'list-type': '2', prefix });
       if (delimiter) params.set('delimiter', delimiter);
       if (token) params.set('continuation-token', token);
-      const xml = (await this.get('/', params.toString())).toString('utf8');
+      const xml = (await this.get('/', params.toString(), LIST_PAGE_MAX_BYTES)).toString('utf8');
       keys.push(...tagValues(xml, 'Key'));
       const common = [...xml.matchAll(/<CommonPrefixes>([\s\S]*?)<\/CommonPrefixes>/g)];
       prefixes.push(...common.flatMap(([, block]) => tagValues(block, 'Prefix')));
@@ -86,7 +98,7 @@ export class S3Client {
     return { keys, prefixes };
   }
 
-  object(key: string): Promise<Buffer> {
-    return this.get(`/${encodeKey(key)}`);
+  object(key: string, maxBytes?: number): Promise<Buffer> {
+    return this.get(`/${encodeKey(key)}`, '', maxBytes);
   }
 }

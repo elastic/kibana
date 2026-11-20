@@ -96,9 +96,14 @@ export interface SshSessionOptions {
   knownHosts: string;
 }
 
+export interface SshExchangeOptions {
+  // Fails the request when the response is larger, instead of buffering all of it.
+  maxResponseBytes?: number;
+}
+
 export interface SshSession {
   advertisement: Buffer;
-  exchange: (body: Buffer) => Promise<Buffer>;
+  exchange: (body: Buffer, options?: SshExchangeOptions) => Promise<Buffer>;
   close: () => Promise<void>;
 }
 
@@ -747,6 +752,8 @@ const openGitChannel = async (stream: PacketStream, path: string): Promise<Remot
 
 interface ExchangeResponse {
   chunks: Buffer[];
+  size: number;
+  maxBytes?: number;
   stderr: string;
   done: boolean;
   track: (chunk: Buffer) => boolean;
@@ -790,6 +797,10 @@ export const openSshSession = async ({
             Buffer.concat([typeByte(MSG.CHANNEL_WINDOW_ADJUST), u32(remote.id), u32(data.length)])
           );
           if (response.done) return;
+          response.size += data.length;
+          if (response.maxBytes !== undefined && response.size > response.maxBytes) {
+            throw new Error(`The response is larger than ${response.maxBytes} bytes`);
+          }
           response.chunks.push(Buffer.from(data));
           response.done = response.track(data);
           return;
@@ -837,9 +848,14 @@ export const openSshSession = async ({
       }
     };
 
-    const runExchange = async (body: Buffer | null): Promise<Buffer> => {
+    const runExchange = async (
+      body: Buffer | null,
+      options?: SshExchangeOptions
+    ): Promise<Buffer> => {
       const response: ExchangeResponse = {
         chunks: [],
+        size: 0,
+        maxBytes: options?.maxResponseBytes,
         stderr: '',
         done: false,
         track: createResponseTracker(),
@@ -864,14 +880,14 @@ export const openSshSession = async ({
     // Destroying the socket with an error rejects whatever the exchange is waiting on. The session is
     // unusable afterwards, which is fine: a stalled server is a failed run.
     // TODO: queue exchanges or throw when one is running. Two at once share the stream's one waiter and hang.
-    const exchange = async (body: Buffer | null): Promise<Buffer> => {
+    const exchange = async (body: Buffer | null, options?: SshExchangeOptions): Promise<Buffer> => {
       const timer = setTimeout(
         () =>
           socket.destroy(new Error(`SSH request timed out after ${EXCHANGE_TIMEOUT_MS / 1000}s`)),
         EXCHANGE_TIMEOUT_MS
       );
       try {
-        return await runExchange(body);
+        return await runExchange(body, options);
       } finally {
         clearTimeout(timer);
       }

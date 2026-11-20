@@ -59,6 +59,7 @@ const securityRuleV5 = securityRuleV4.extends(
   {
     library_id: schema.maybe(schema.string({ maxLength: 128 })),
     library_path: schema.maybe(schema.string({ maxLength: 1024 })),
+    library_title: schema.maybe(schema.string({ maxLength: 256 })),
   },
   { unknowns: 'allow' }
 );

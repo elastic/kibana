@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type {
   AnalyticsServiceSetup,
   CoreRequestHandlerContext,
@@ -63,6 +64,8 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getFrameworkRequest: () => FrameworkRequest;
   getAppClient: () => AppClient;
   getSpaceId: () => string;
+  // Reads the secrets of rule libraries, which are stored encrypted. Unset when encryption is not available.
+  getEncryptedSavedObjectsClient: () => EncryptedSavedObjectsClient | undefined;
   getRuleDataService: () => IRuleDataService;
   getDetectionRulesClient: () => IDetectionRulesClient;
   getDetectionEngineHealthClient: () => IDetectionEngineHealthClient;

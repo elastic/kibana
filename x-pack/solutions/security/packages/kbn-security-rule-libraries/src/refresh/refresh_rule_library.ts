@@ -10,7 +10,12 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { PREBUILT_RULE_SO_TYPE, RULE_LIBRARY_SO_TYPE, REFRESH_LOCK_TIMEOUT_MS } from '../constants';
 import type { RuleLibraryProvider } from '../providers/types';
-import type { RuleLibraryAttributes, RuleLibraryItem, RefreshResult } from '../types';
+import type {
+  RuleLibraryAttributes,
+  RuleLibraryItem,
+  RefreshResult,
+  LibraryVersionRef,
+} from '../types';
 
 export interface RefreshParams {
   client: SavedObjectsClientContract;
@@ -30,16 +35,58 @@ const isLocked = ({
   startedAt !== undefined &&
   Date.now() - new Date(startedAt).getTime() < REFRESH_LOCK_TIMEOUT_MS;
 
+type ManifestUpdate = Partial<
+  Pick<RuleLibraryAttributes, 'title' | 'description' | 'license' | 'owner' | 'images'>
+>;
+
+// What the library says about itself, which replaces what was saved. Fleet libraries have no manifest.
+const readManifestUpdate = async (
+  provider: RuleLibraryProvider,
+  library: RuleLibraryAttributes,
+  ref: LibraryVersionRef,
+  logger: Logger
+): Promise<ManifestUpdate> => {
+  if (library.provider.type === 'fleet') return {};
+
+  try {
+    const { manifest, manifestError } = await provider.inspect(library, ref);
+    if (manifestError) {
+      logger.warn(`Manifest of rule library "${library.name}" could not be used: ${manifestError}`);
+    }
+    const { title, description, license, owner, images } = manifest ?? {};
+    return Object.fromEntries(
+      Object.entries({ title, description, license, owner, images }).filter(
+        ([, value]) => value !== undefined
+      )
+    );
+  } catch (error) {
+    // The manifest only adds details, so a library that has no readable one still refreshes.
+    logger.warn(
+      `Manifest of rule library "${library.name}" could not be read: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return {};
+  }
+};
+
 const writeBatch = async (
   client: SavedObjectsClientContract,
   libraryId: string,
+  libraryTitle: string,
   items: RuleLibraryItem[]
 ): Promise<void> => {
   const { saved_objects: saved } = await client.bulkCreate(
     items.map(({ rule_id: ruleId, version, path, attributes }) => ({
       type: PREBUILT_RULE_SO_TYPE,
       id: `${libraryId}_${ruleId}_${version}`,
-      attributes: { ...attributes, library_id: libraryId, library_path: path, managed: true },
+      attributes: {
+        ...attributes,
+        library_id: libraryId,
+        library_title: libraryTitle,
+        library_path: path,
+        managed: true,
+      },
     })),
     { overwrite: true }
   );
@@ -93,14 +140,23 @@ export const refreshRuleLibrary = async ({
       return { id, outcome: 'up_to_date', version: ref.version, item_count: attributes.item_count };
     }
 
+    const manifestUpdate = await readManifestUpdate(
+      provider,
+      { ...attributes, secret },
+      ref,
+      logger
+    );
+    const title = manifestUpdate.title ?? attributes.title;
+
     // Nothing is ever deleted: historical versions and rules removed upstream are kept.
     let count = 0;
     await provider.readLatestItems({ ...attributes, secret }, ref, async (items) => {
-      await writeBatch(client, id, items);
+      await writeBatch(client, id, title, items);
       count += items.length;
     });
 
     await client.update(RULE_LIBRARY_SO_TYPE, id, {
+      ...manifestUpdate,
       previous_version: attributes.version,
       version: ref.version,
       ref: typeof ref.ref === 'string' ? ref.ref : undefined,

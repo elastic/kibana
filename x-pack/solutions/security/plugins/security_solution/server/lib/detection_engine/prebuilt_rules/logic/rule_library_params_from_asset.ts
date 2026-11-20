@@ -39,7 +39,7 @@ export const ruleLibraryParamsFromAsset = (
 
   return {
     id: libraryId,
-    title: definition?.title ?? libraryId,
+    title: definition?.title ?? rule.library_title ?? libraryId,
     icon: LIBRARY_ICON_BY_ID[libraryId],
   };
 };

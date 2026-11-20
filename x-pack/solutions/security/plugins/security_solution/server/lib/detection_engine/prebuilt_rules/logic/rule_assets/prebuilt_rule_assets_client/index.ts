@@ -15,6 +15,8 @@ import type { BasicRuleInfo } from '../../basic_rule_info';
 import type { FetchLatestAssetsOptions } from './methods/fetch_latest_assets';
 import { fetchLatestAssets } from './methods/fetch_latest_assets';
 import { fetchLatestVersions } from './methods/fetch_latest_versions';
+import { fetchRuleCountsByLibrary } from './methods/fetch_rule_counts_by_library';
+import { fetchTagsByLibraries } from './methods/fetch_tags_by_libraries';
 import type {
   FetchAssetsByVersionResult,
   FetchAssetsByVersionSearchParams,
@@ -40,6 +42,10 @@ export interface IPrebuiltRuleAssetsClient {
   ): Promise<FetchAssetsByVersionResult>;
 
   fetchTagsByVersion(versions: RuleVersionSpecifier[]): Promise<string[]>;
+
+  fetchRuleCountsByLibrary(): Promise<Record<string, number>>;
+
+  fetchTagsByLibraries(libraryIds: string[]): Promise<string[]>;
 
   fetchDeprecatedRules(ruleIds?: string[]): Promise<DeprecatedPrebuiltRuleAsset[]>;
 }
@@ -95,6 +101,18 @@ export const createPrebuiltRuleAssetsClient = (
     fetchTagsByVersion: (versions: RuleVersionSpecifier[]): Promise<string[]> => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchTagsByVersion', async () => {
         return fetchTagsByVersion(savedObjectsClient, versions);
+      });
+    },
+
+    fetchRuleCountsByLibrary: (): Promise<Record<string, number>> => {
+      return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchRuleCountsByLibrary', async () => {
+        return fetchRuleCountsByLibrary(savedObjectsClient);
+      });
+    },
+
+    fetchTagsByLibraries: (ids: string[]): Promise<string[]> => {
+      return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchTagsByLibraries', async () => {
+        return fetchTagsByLibraries(savedObjectsClient, ids);
       });
     },
 

@@ -19,6 +19,12 @@ import { bootstrapEaseRulesRoute } from './bootstrap_ease_rules/bootstrap_ease_r
 import { getPrebuiltRuleBaseVersion } from './get_prebuilt_rule_base_version/get_prebuilt_rule_base_version_route';
 import { revertPrebuiltRule } from './revert_prebuilt_rule/revert_prebuilt_rule_route';
 import { reviewRuleDeprecationRoute } from './review_rule_deprecation/review_rule_deprecation_route';
+import { browseRuleLibraryRoute } from './browse_rule_library/browse_rule_library_route';
+import { getRuleLibraryRuleRoute } from './get_rule_library_rule/get_rule_library_rule_route';
+import { listRuleLibraryTagsRoute } from './list_rule_library_tags/list_rule_library_tags_route';
+import { listRuleLibrariesRoute } from './list_rule_libraries/list_rule_libraries_route';
+import { createRuleLibraryRoute } from './create_rule_library/create_rule_library_route';
+import { scanRuleLibraryRoute } from './scan_rule_library/scan_rule_library_route';
 import { refreshRuleLibrariesRoute } from './refresh_rule_libraries/refresh_rule_libraries_route';
 
 export const registerPrebuiltRulesRoutes = (
@@ -42,6 +48,12 @@ export const registerPrebuiltRulesRoutes = (
   reviewRuleDeprecationRoute(router);
 
   if (config.experimentalFeatures.ruleLibrariesEnabled) {
+    listRuleLibrariesRoute(router, logger);
+    browseRuleLibraryRoute(router, logger);
+    listRuleLibraryTagsRoute(router, logger);
+    getRuleLibraryRuleRoute(router, logger);
+    scanRuleLibraryRoute(router, logger);
+    createRuleLibraryRoute(router, logger);
     refreshRuleLibrariesRoute(router, logger);
   }
 };

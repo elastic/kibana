@@ -10,7 +10,7 @@ import type { PackageClient } from '@kbn/fleet-plugin/server';
 import { BATCH_SIZE } from '../constants';
 import type { LibraryVersionRef, RuleKey, RuleLibraryItem } from '../types';
 import { parseItem } from './parse_item';
-import type { ItemBatch, RuleLibraryProvider } from './types';
+import type { ItemBatch, LibraryInspection, RuleLibraryProvider } from './types';
 
 const DEFAULT_PACKAGE = 'security_detection_engine';
 
@@ -39,6 +39,11 @@ export class FleetProvider implements RuleLibraryProvider {
     this.packages = packages;
     this.logger = logger;
     this.packageName = packageName;
+  }
+
+  // Fleet libraries are packages, which have no manifest of this kind and are not scanned from the page.
+  async inspect(): Promise<LibraryInspection> {
+    throw new Error('Fleet libraries cannot be inspected');
   }
 
   async resolveVersion(_library: unknown, opts?: { pinned?: string }): Promise<LibraryVersionRef> {
