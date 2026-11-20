@@ -66,6 +66,7 @@ spaceTest.describe('Dashboard replay cache', { tag: '@local-stateful-classic' },
 
   spaceTest('replays the session started by Refresh', async ({ page, pageObjects, network }) => {
     const { controls, dashboard } = pageObjects;
+    await countSearchesOnReturn(dashboard, network);
     await refetchDashboard(dashboard, network, () => dashboard.refresh());
     const results = await readResults(page, controls);
 

@@ -98,10 +98,11 @@ export const readResults = async (page: ScoutPage, controls: PageObjects['contro
 
   const [esqlControlId] = await controls.getControlIds();
   await controls.optionsList.openPopover(esqlControlId);
-  const options = await page.testSubj
+  const optionRows = page.testSubj
     .locator('optionsList-control-available-options')
-    .getByRole('option')
-    .allTextContents();
+    .getByRole('option');
+  await expect(optionRows).not.toHaveCount(0);
+  const options = await optionRows.allTextContents();
   await controls.optionsList.ensurePopoverIsClosed();
 
   return {
