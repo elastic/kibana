@@ -3652,6 +3652,34 @@ describe('Authenticator', () => {
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
+    it('rejects renewal and keeps the session if the provider returns another user', async () => {
+      const newState = { authorization: 'Basic yyy' };
+      const request = httpServerMock.createKibanaRequest();
+
+      // Regular authentication would invalidate this session and create one for the new user.
+      // Renewal leaves it alone, and the identity check rejects the new credentials.
+      mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+        AuthenticationResult.succeeded(mockAuthenticatedUser({ username: 'other-user' }), {
+          state: newState,
+          authHeaders: newState,
+        })
+      );
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
+
+      await expect(authenticator.reauthenticate(request)).resolves.toBeNull();
+
+      expect(loggingSystemMock.collect(mockOptions.loggers).error).toEqual([
+        ['Re-authentication changed the authenticated user identity.'],
+      ]);
+      expect(mockOptions.authHeadersStorage.set).not.toHaveBeenCalled();
+      expect(mockOptions.session.create).not.toHaveBeenCalled();
+      expect(mockOptions.session.update).not.toHaveBeenCalled();
+      expect(mockOptions.session.extend).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
+      expect(auditLogger.log).not.toHaveBeenCalled();
+    });
+
     it('updates existing session for a minimally authenticated request if provider returns new state', async () => {
       const user = mockAuthenticatedUser({ profile_uid: undefined });
       const newState = { authorization: 'Basic yyy' };

@@ -773,6 +773,16 @@ export class Authenticator {
       reauthenticate: true,
     });
     if (!authenticationResult.notHandled()) {
+      // Renewal must not switch the session to another user. Return before the session update:
+      // the identity check in updateSessionCredentials() then rejects this result. If the user
+      // really changed, the next regular request replaces the session and shows the notice.
+      if (
+        authenticationResult.succeeded() &&
+        authenticationResult.user?.username !== existingSessionValue.username
+      ) {
+        return authenticationResult;
+      }
+
       const sessionUpdateResult = await this.updateSessionValue(request, {
         provider: existingSessionValue.provider,
         providerInstance: provider,
@@ -786,11 +796,9 @@ export class Authenticator {
 
       // On minimal-authentication routes, updateSessionValue() leaves the session unchanged when
       // the provider has no new state, for example after another call refreshed the token. The
-      // provider has just validated that session, so its profile ID applies to the same user.
+      // provider has just validated that session for its user, so its profile ID applies.
       const shouldReuseSessionProfile =
-        isMinimalAuthenticationRequest(request) &&
-        authenticationResult.succeeded() &&
-        authenticationResult.user?.username === existingSessionValue.username;
+        isMinimalAuthenticationRequest(request) && authenticationResult.succeeded();
       if (shouldReuseSessionProfile) {
         return enrichWithUserProfileId(authenticationResult, existingSessionValue);
       }
