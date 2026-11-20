@@ -136,13 +136,12 @@ export const requestEventAnnotations = (
       );
 
       const manualAnnotationDatatableRows = manualGroups.length
-        ? convertManualToDatatableRows(manualGroups[0], interval, getTimeZone(uiSettings))
+        ? convertManualToDatatableRows(manualGroups[0], interval, timezone)
         : [];
       if (!queryGroups.length) {
-        const manualTable = manualAnnotationDatatableRows.length
+        return manualAnnotationDatatableRows.length
           ? wrapRowsInDatatable(manualAnnotationDatatableRows)
           : emptyDatatable;
-        return manualTable;
       }
 
       const createEsaggsSingleRequest = async ({
@@ -199,12 +198,11 @@ export const requestEventAnnotations = (
         }))
       );
 
-      const legacyTable = postprocessAnnotations(
+      return postprocessAnnotations(
         esaggsResponses,
         allQueryAnnotationsConfigs,
         manualAnnotationDatatableRows
       );
-      return legacyTable;
     };
 
     const [esqlTables, dslTable] = await Promise.all([esqlTablesPromise, fetchDslTable()]);
