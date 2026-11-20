@@ -124,53 +124,82 @@ export async function updateByQueryAndWait(
   const taskId = String(started.task);
   const deadline = Date.now() + maxDurationMs;
   let cancelRequestedAt: number | undefined;
+  let lastStatus = '{}';
+  let lastPollError: string | undefined;
+
+  // Time left for a cancelled task to stop, or undefined while it has not been cancelled.
+  const cancelWaitLeft = () =>
+    cancelRequestedAt === undefined ? undefined : cancelWaitMs - (Date.now() - cancelRequestedAt);
 
   for (;;) {
-    const task = await retryTransientEsErrors(
-      () => esClient.tasks.get({ task_id: taskId, wait_for_completion: false }),
-      { logger }
-    );
-
-    if (task.completed) {
-      if (task.error) {
-        throw new FleetError(
-          `Update by query task ${taskId} failed: ${JSON.stringify(task.error).slice(0, 1000)}`
-        );
-      }
-      const response = toUpdateByQueryResponse(task, taskId, logger);
-      // Asking for a cancellation does not mean the task was stopped by it: it can finish between
-      // the last poll and the request. A result that went through every document stays a plain
-      // success, so it is not turned into an error and a retry.
-      if (cancelRequestedAt === undefined || response.canceled || !endedEarly(response)) {
-        return response;
-      }
-      return { ...response, canceled: CANCELED_REASON };
-    }
-
-    const taskStatus = JSON.stringify(task.task.status ?? {}).slice(0, 500);
-
-    if (cancelRequestedAt === undefined) {
-      if (Date.now() >= deadline) {
-        logger.warn(
-          `Update by query task ${taskId} did not finish within ${maxDurationMs}ms, cancelling it`
-        );
-        try {
-          await esClient.tasks.cancel({ task_id: taskId });
-          cancelRequestedAt = Date.now();
-        } catch (error) {
-          logger.warn(`Could not cancel update by query task ${taskId}: ${error.message}`);
-          throw new FleetError(
-            `Update by query task ${taskId} did not finish within ${maxDurationMs}ms, status: ${taskStatus}`
-          );
-        }
-      }
-    } else if (Date.now() - cancelRequestedAt >= cancelWaitMs) {
+    const waitLeft = cancelWaitLeft();
+    if (waitLeft !== undefined && waitLeft <= 0) {
       // The outcome of this task is unknown, so there is nothing to hand to the caller to record.
       throw new FleetError(
-        `Update by query task ${taskId} did not stop within ${cancelWaitMs}ms of being cancelled, status: ${taskStatus}`
+        `Update by query task ${taskId} did not stop within ${cancelWaitMs}ms of being cancelled, status: ${lastStatus}${
+          lastPollError ? `, last error: ${lastPollError}` : ''
+        }`
       );
     }
 
-    await sleep(pollIntervalMs);
+    let task: TasksGetResponse | undefined;
+    if (waitLeft === undefined) {
+      task = await retryTransientEsErrors(
+        () => esClient.tasks.get({ task_id: taskId, wait_for_completion: false }),
+        { logger }
+      );
+    } else {
+      // The wait for a cancelled task is bounded, and `retryTransientEsErrors` backs off for up
+      // to a minute between attempts. So a poll here is a single request that gives up with the
+      // time that is left, and one that fails is tried again until that time is up.
+      try {
+        task = await esClient.tasks.get(
+          { task_id: taskId, wait_for_completion: false },
+          { requestTimeout: waitLeft }
+        );
+      } catch (error) {
+        lastPollError = error.message;
+        logger.warn(
+          `Could not read update by query task ${taskId} after cancelling it: ${error.message}`
+        );
+      }
+    }
+
+    if (task) {
+      if (task.completed) {
+        if (task.error) {
+          throw new FleetError(
+            `Update by query task ${taskId} failed: ${JSON.stringify(task.error).slice(0, 1000)}`
+          );
+        }
+        const response = toUpdateByQueryResponse(task, taskId, logger);
+        // Asking for a cancellation does not mean the task was stopped by it: it can finish
+        // between the last poll and the request. A result that went through every document stays
+        // a plain success, so it is not turned into an error and a retry.
+        if (cancelRequestedAt === undefined || response.canceled || !endedEarly(response)) {
+          return response;
+        }
+        return { ...response, canceled: CANCELED_REASON };
+      }
+      lastStatus = JSON.stringify(task.task.status ?? {}).slice(0, 500);
+    }
+
+    if (cancelRequestedAt === undefined && Date.now() >= deadline) {
+      logger.warn(
+        `Update by query task ${taskId} did not finish within ${maxDurationMs}ms, cancelling it`
+      );
+      try {
+        await esClient.tasks.cancel({ task_id: taskId });
+        cancelRequestedAt = Date.now();
+      } catch (error) {
+        logger.warn(`Could not cancel update by query task ${taskId}: ${error.message}`);
+        throw new FleetError(
+          `Update by query task ${taskId} did not finish within ${maxDurationMs}ms, status: ${lastStatus}`
+        );
+      }
+    }
+
+    const left = cancelWaitLeft();
+    await sleep(left === undefined ? pollIntervalMs : Math.max(0, Math.min(pollIntervalMs, left)));
   }
 }

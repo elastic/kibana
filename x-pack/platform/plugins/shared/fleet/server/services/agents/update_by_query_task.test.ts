@@ -244,6 +244,54 @@ describe('updateByQueryAndWait', () => {
     expect(esClient.tasks.cancel).not.toHaveBeenCalled();
   });
 
+  it('should not wait longer than the cancel wait when reading a cancelled task keeps failing', async () => {
+    esClient.updateByQuery.mockResolvedValue({ task: 'node1:42' } as any);
+    esClient.tasks.get
+      .mockResolvedValueOnce({
+        completed: false,
+        task: { status: { total: 5, updated: 1 } },
+      } as any)
+      // a transient error would be retried with a backoff of seconds if this went through the retry
+      .mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
+
+    const started = Date.now();
+    await expect(
+      updateByQueryAndWait(esClient, request, {
+        pollIntervalMs: 1,
+        maxDurationMs: 0,
+        cancelWaitMs: 100,
+      })
+    ).rejects.toThrow(/did not stop within 100ms of being cancelled.*Request timed out/);
+
+    expect(Date.now() - started).toBeLessThan(1500);
+    expect(esClient.tasks.cancel).toHaveBeenCalledTimes(1);
+    // polls after the cancellation are single requests bounded by the time that is left
+    const lastCall = esClient.tasks.get.mock.calls[esClient.tasks.get.mock.calls.length - 1];
+    expect(lastCall[1]).toEqual({ requestTimeout: expect.any(Number) });
+    expect((lastCall[1] as { requestTimeout: number }).requestTimeout).toBeLessThanOrEqual(100);
+  });
+
+  it('should keep following a cancelled task through a failed read', async () => {
+    esClient.updateByQuery.mockResolvedValue({ task: 'node1:42' } as any);
+    esClient.tasks.get
+      .mockResolvedValueOnce({ completed: false, task: {} } as any)
+      .mockRejectedValueOnce(new EsErrors.TimeoutError('Request timed out'))
+      .mockResolvedValueOnce({
+        completed: true,
+        task: {},
+        response: { total: 5, updated: 3, version_conflicts: 0, failures: [], canceled: 'by user' },
+      } as any);
+
+    const res = await updateByQueryAndWait(esClient, request, {
+      pollIntervalMs: 1,
+      maxDurationMs: 0,
+      cancelWaitMs: 5000,
+    });
+
+    expect(res.updated).toEqual(3);
+    expect(res.canceled).toEqual('by user');
+  });
+
   it('should throw if the cancelled task does not stop in time', async () => {
     esClient.updateByQuery.mockResolvedValue({ task: 'node1:42' } as any);
     esClient.tasks.get.mockResolvedValue({
