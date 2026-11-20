@@ -91,6 +91,7 @@ describe('Nightshift investigation agent type', () => {
     expect(base.instructions).toContain('Fetch the evidence for the impact as a time series');
     expect(base.instructions).toContain('for each service or component it hit');
     expect(base.instructions).toContain('never estimate or fill in points');
+    expect(base.instructions).toContain('at least 8 buckets across the window');
   });
 
   it('adds Semantic Memory context and workflows when memory is enabled', async () => {

@@ -53,9 +53,9 @@ ${HYPOTHESES}
 ${UPDATING}`;
 
 const evidenceField = (files: boolean) =>
-  `- evidence (on the impact, on each listed entity, and on the confirmed or leading hypothesis): the observations that back the claim, each a short description, a small chart, or both. Always include a chart for the impact and for each listed entity when the conversation holds a series of three or more points for it, such as the error rate or request volume over time: look for one before you settle for a description. Make a chart only from numbers that appear in the tool results in this conversation${
+  `- evidence (on the impact, on each listed entity, and on the confirmed or leading hypothesis): the observations that back the claim, each a short description, a small chart, or both. When impact was found, always include a chart for the impact and for each listed entity when the conversation holds a series of three or more points for it, such as the error rate or request volume over time. Check every listed entity against the conversation before you answer, and look for its series before you settle for a description: an entity gets its own chart even when the same series is also the impact chart. When no impact was found, leave the impact evidence a description or out, and do not chart a flat or unaffected series. Make a chart only from numbers that appear in the tool results in this conversation${
     files ? ' or in the files you read' : ''
-  }: copy the x and y values exactly as they appear, never estimate, extend or invent a point, and use a description only when you have fewer than three points for that claim.${
+  }: copy the x and y values exactly as they appear, never estimate, extend or invent a point, and use a description only when you have fewer than three points for that claim: a chart of one or two points is never drawn.${
     files
       ? ' A tool result that was too long to be shown in full says where its full output is: when you want to chart or quote its numbers, read that file first, and use a description only if the numbers are not in it.'
       : ''
