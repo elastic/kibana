@@ -7,14 +7,9 @@
 
 import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
 import { useLoadConnectors } from '@kbn/inference-connectors';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import { useMemo } from 'react';
 import { ALERT_AI_SUMMARY_INFERENCE_FEATURE_ID } from '../../../common/constants';
 import { useKibana } from '../lib/kibana';
-import { useResolveConnectorAlias } from './use_resolve_connector_alias';
-
-// Values of the default connector setting when no default is configured or AI is disabled.
-const NO_DEFAULT_SETTING_VALUES: readonly string[] = ['NO_DEFAULT_CONNECTOR', 'NO_DEFAULT_MODEL'];
 
 /**
  * Resolves the default AI connector id for the alert AI summary from the server-side model list,
@@ -22,38 +17,19 @@ const NO_DEFAULT_SETTING_VALUES: readonly string[] = ['NO_DEFAULT_CONNECTOR', 'N
  * not stack connectors. The alert AI summary has its own inference feature, so a model assigned
  * only to the AI Assistant does not change which model the summary uses.
  *
- * The default setting can hold a stack connector alias of an inference endpoint (for example a
- * preconfigured `.inference` connector id), while the list holds the endpoint id. When no entry
- * matches the setting, the alias is resolved on the server so the configured default still wins.
+ * `getDefaultConnector` also falls back to the entry the server flagged as the default, so a
+ * default saved as a stack connector alias of an endpoint is found even though the list holds the
+ * endpoint id.
  */
 export const useDefaultAIConnectorId = () => {
   const { http, notifications, settings } = useKibana().services;
 
-  const { data: connectors, isLoading: isLoadingConnectors } = useLoadConnectors({
+  const { data: connectors, isLoading } = useLoadConnectors({
     http,
     toasts: notifications.toasts,
     featureId: ALERT_AI_SUMMARY_INFERENCE_FEATURE_ID,
   });
-
-  const defaultSetting = settings.client.get<string | undefined>(
-    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
-    undefined
-  );
-  const needsAliasLookup =
-    !!connectors &&
-    !!defaultSetting &&
-    !NO_DEFAULT_SETTING_VALUES.includes(defaultSetting) &&
-    !connectors.some(({ id }) => id === defaultSetting);
-
-  const { resolvedConnectorId, isResolving } = useResolveConnectorAlias({
-    connectorId: defaultSetting,
-    enabled: needsAliasLookup,
-  });
-
-  const defaultConnectorId =
-    connectors?.find(({ id }) => id === resolvedConnectorId)?.id ??
-    getDefaultConnector(connectors, settings)?.id;
-  const isLoading = isLoadingConnectors || (needsAliasLookup && isResolving);
+  const defaultConnectorId = getDefaultConnector(connectors, settings)?.id;
 
   return useMemo(
     () => ({

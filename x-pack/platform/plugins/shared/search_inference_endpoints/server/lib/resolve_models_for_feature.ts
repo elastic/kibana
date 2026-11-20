@@ -92,7 +92,7 @@ export const resolveModelsForFeature = async ({
     }
     const connector = await fetchConnectorById(defaultConnectorId);
     return {
-      connectors: connector ? [connector] : [],
+      connectors: connector ? [{ ...connector, isDefault: true }] : [],
       warnings: [],
       soEntryFound: false,
     };
@@ -130,12 +130,29 @@ export const resolveModelsForFeature = async ({
   ) {
     const defaultConnector = await fetchConnectorById(defaultConnectorId);
     if (defaultConnector) {
+      // The setting may hold a stack connector alias of an inference endpoint, in which case the
+      // feature declares its parameters under the endpoint id (`defaultConnector.connectorId`).
       const parameters = featureResult.endpoints.find(
-        ({ connectorId }) => connectorId === defaultConnectorId
+        ({ connectorId }) =>
+          connectorId === defaultConnectorId || connectorId === defaultConnector.connectorId
       )?.parameters;
+      // An alias default replaces the endpoint's own merged entry, which used to stay in the list
+      // with its recommended flag, so carry the flag over.
+      const isAlias = defaultConnector.connectorId !== defaultConnectorId;
+      const isRecommended = isAlias
+        ? merged.find((c) => c.connectorId === defaultConnector.connectorId)?.isRecommended
+        : undefined;
       connectors = [
-        parameters ? { ...defaultConnector, parameters } : defaultConnector,
-        ...merged.filter((c) => c.connectorId !== defaultConnectorId),
+        {
+          ...defaultConnector,
+          ...(parameters ? { parameters } : {}),
+          ...(isRecommended ? { isRecommended } : {}),
+          isDefault: true,
+        },
+        ...merged.filter(
+          (c) =>
+            c.connectorId !== defaultConnectorId && c.connectorId !== defaultConnector.connectorId
+        ),
       ];
     }
   }
