@@ -38,11 +38,6 @@ interface CreateDecideApiOptions {
   anonymization?: InferenceAnonymizationOptions;
 }
 
-type QuestionArgs = DecisionQuestion[] | [readonly DecisionQuestion[]];
-
-const isQuestionList = (args: QuestionArgs): args is [readonly DecisionQuestion[]] =>
-  Array.isArray(args[0]);
-
 const toKeyedQuestions = (
   questions: readonly DecisionQuestion[]
 ): Record<string, DecisionQuestion> =>
@@ -84,12 +79,10 @@ const toInferenceError = ({
 /** Sends the questions to the `decision` inference task and reads the answers back. */
 const invokeDecision = async ({
   esClient,
-  options: { input, inferenceId, abortSignal, metadata },
-  questions,
+  options: { input, inferenceId, questions, abortSignal, metadata },
 }: {
   esClient: ElasticsearchClient;
   options: DecideOptions;
-  questions: DecisionQuestion[];
 }): Promise<DecisionAnswer[]> => {
   if (abortSignal?.aborted) {
     throw createInferenceRequestAbortedError();
@@ -119,11 +112,8 @@ export function createDecideApi({
   regexWorker,
   anonymization,
 }: CreateDecideApiOptions) {
-  return async (
-    options: DecideOptions,
-    ...args: QuestionArgs
-  ): Promise<{ answers: DecisionAnswer[] }> => {
-    const questions = isQuestionList(args) ? [...args[0]] : args;
+  return async (options: DecideOptions): Promise<{ answers: DecisionAnswer[] }> => {
+    const { questions } = options;
 
     if (questions.length === 0) {
       throw createInferenceRequestError('decide() needs at least one question', 400);
@@ -159,8 +149,7 @@ export function createDecideApi({
 
           const answers = await invokeDecision({
             esClient,
-            options: { ...options, input: masked.input },
-            questions: masked.questions,
+            options: { ...options, input: masked.input, questions: masked.questions },
           });
 
           logger.debug(

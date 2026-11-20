@@ -78,7 +78,7 @@ export const anonymizeRequest = async ({
   anonymization,
 }: {
   input: string;
-  questions: DecisionQuestion[];
+  questions: readonly DecisionQuestion[];
   esClient: ElasticsearchClient;
   logger: Logger;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;

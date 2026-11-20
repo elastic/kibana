@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { NonEmptyTuple } from 'type-fest';
 import type { ConnectorTelemetryMetadata } from '../chat_complete';
 
 export interface DecisionPredicateQuestion {
@@ -66,17 +65,20 @@ export type DecisionAnswerFor<Q extends DecisionQuestion> = DecisionAnswer<Q['ty
 
 /**
  * The answers to a list of questions, in the same order. Literal questions give a tuple typed by
- * position; a list built at runtime gives `[DecisionAnswer, ...DecisionAnswer[]]`.
+ * position; a list built at runtime gives `DecisionAnswer[]`.
  */
 export type DecisionAnswersFor<Q extends readonly DecisionQuestion[]> = {
   -readonly [I in keyof Q]: DecisionAnswerFor<Q[I]>;
 };
 
-export interface DecideOptions {
+export interface DecideOptions<
+  Q extends readonly DecisionQuestion[] = readonly DecisionQuestion[]
+> {
   /** The text the decision model reads. */
   input: string;
   /** The `decision` inference endpoint to use. */
   inferenceId: string;
+  questions: Q;
   abortSignal?: AbortSignal;
   /** Attribution sent as headers with the request. */
   metadata?: { connectorTelemetry?: ConnectorTelemetryMetadata };
@@ -88,15 +90,6 @@ export interface DecideOptions {
  * status 404 when the `decision` endpoint doesn't exist.
  * @experimental The Elasticsearch `decision` inference task it calls is experimental.
  */
-export interface DecideAPI {
-  <const Q extends NonEmptyTuple<DecisionQuestion>>(
-    options: DecideOptions,
-    ...questions: Q
-  ): Promise<{
-    answers: DecisionAnswersFor<Q>;
-  }>;
-
-  (options: DecideOptions, questions: readonly DecisionQuestion[]): Promise<{
-    answers: DecisionAnswer[];
-  }>;
-}
+export type DecideAPI = <const Q extends readonly DecisionQuestion[]>(
+  options: DecideOptions<Q>
+) => Promise<{ answers: DecisionAnswersFor<Q> }>;

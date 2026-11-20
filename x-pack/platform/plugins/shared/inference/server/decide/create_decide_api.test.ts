@@ -83,7 +83,7 @@ describe('createDecideApi', () => {
 
     const {
       answers: [answer],
-    } = await decide({ input, inferenceId: 'my-decision' }, shouldRespond);
+    } = await decide({ input, inferenceId: 'my-decision', questions: [shouldRespond] });
 
     expect(transportRequest).toHaveBeenCalledTimes(1);
     expect(transportRequest.mock.calls[0][0]).toEqual({
@@ -102,7 +102,11 @@ describe('createDecideApi', () => {
 
     transportRequest.mockResolvedValue(decisionResponse);
 
-    const { answers } = await decide({ input, inferenceId: 'my-decision' }, shouldRespond, topic);
+    const { answers } = await decide({
+      input,
+      inferenceId: 'my-decision',
+      questions: [shouldRespond, topic],
+    });
     const [{ probability }, { choice }] = answers;
 
     expect([probability, choice]).toEqual([0.94, 'a']);
@@ -121,7 +125,7 @@ describe('createDecideApi', () => {
 
     transportRequest.mockResolvedValue(decisionResponse);
 
-    await decide({ input, inferenceId: 'my-decision' }, shouldRespond);
+    await decide({ input, inferenceId: 'my-decision', questions: [shouldRespond] });
 
     expect(transportRequest.mock.calls[0][1]).toEqual(
       expect.objectContaining({ headers: { 'X-Elastic-Product-Use-Case': 'inference' } })
@@ -133,14 +137,12 @@ describe('createDecideApi', () => {
 
     transportRequest.mockResolvedValue(decisionResponse);
 
-    await decide(
-      {
-        input,
-        inferenceId: 'my-decision',
-        metadata: { connectorTelemetry: { pluginId: 'agent_builder', productFeature: 'triggers' } },
-      },
-      shouldRespond
-    );
+    await decide({
+      input,
+      inferenceId: 'my-decision',
+      metadata: { connectorTelemetry: { pluginId: 'agent_builder', productFeature: 'triggers' } },
+      questions: [shouldRespond],
+    });
 
     expect(transportRequest.mock.calls[0][1]).toEqual(
       expect.objectContaining({
@@ -158,7 +160,7 @@ describe('createDecideApi', () => {
     transportRequest.mockResolvedValue(decisionResponse);
 
     const questions: DecisionQuestion[] = [shouldRespond, topic];
-    const { answers } = await decide({ input, inferenceId: 'my-decision' }, questions);
+    const { answers } = await decide({ input, inferenceId: 'my-decision', questions });
 
     const types = answers.map(({ type }: DecisionAnswer) => type);
 
@@ -168,19 +170,9 @@ describe('createDecideApi', () => {
   it('rejects an empty list of questions', async () => {
     const { decide, transportRequest } = setup();
 
-    const error = await decide({ input, inferenceId: 'my-decision' }, []).catch((thrown) => thrown);
-
-    expect(isInferenceRequestError(error)).toBe(true);
-    expect(error.message).toContain('at least one question');
-    expect(transportRequest).not.toHaveBeenCalled();
-  });
-
-  it('rejects a call without questions', async () => {
-    const { decide, transportRequest } = setup();
-
-    const error = await Reflect.apply(decide, undefined, [
-      { input, inferenceId: 'my-decision' },
-    ]).catch((thrown: Error) => thrown);
+    const error = await decide({ input, inferenceId: 'my-decision', questions: [] }).catch(
+      (thrown) => thrown
+    );
 
     expect(isInferenceRequestError(error)).toBe(true);
     expect(error.message).toContain('at least one question');
@@ -192,7 +184,7 @@ describe('createDecideApi', () => {
 
     transportRequest.mockRejectedValue(responseError(404, 'Inference endpoint not found'));
 
-    const error = await decide({ input, inferenceId: 'missing' }, shouldRespond).catch(
+    const error = await decide({ input, inferenceId: 'missing', questions: [shouldRespond] }).catch(
       (thrown) => thrown
     );
 
@@ -208,9 +200,11 @@ describe('createDecideApi', () => {
       responseError(400, 'Incompatible task_type, the requested type [decision] does not match')
     );
 
-    const error = await decide({ input, inferenceId: 'my-chat-model' }, shouldRespond).catch(
-      (thrown) => thrown
-    );
+    const error = await decide({
+      input,
+      inferenceId: 'my-chat-model',
+      questions: [shouldRespond],
+    }).catch((thrown) => thrown);
 
     expect(isInferenceRequestError(error)).toBe(false);
     expect(isInferenceProviderError(error)).toBe(true);
@@ -223,9 +217,11 @@ describe('createDecideApi', () => {
     for (const status of [401, 403]) {
       transportRequest.mockRejectedValue(responseError(status, 'security_exception'));
 
-      const error = await decide({ input, inferenceId: 'my-decision' }, shouldRespond).catch(
-        (thrown) => thrown
-      );
+      const error = await decide({
+        input,
+        inferenceId: 'my-decision',
+        questions: [shouldRespond],
+      }).catch((thrown) => thrown);
 
       expect(isInferenceRequestError(error)).toBe(true);
       expect(error.meta.status).toBe(status);
@@ -237,9 +233,11 @@ describe('createDecideApi', () => {
 
     transportRequest.mockRejectedValue(responseError(503, 'overloaded'));
 
-    const error = await decide({ input, inferenceId: 'my-decision' }, shouldRespond).catch(
-      (thrown) => thrown
-    );
+    const error = await decide({
+      input,
+      inferenceId: 'my-decision',
+      questions: [shouldRespond],
+    }).catch((thrown) => thrown);
 
     expect(isInferenceProviderError(error)).toBe(true);
     expect(error.meta.status).toBe(503);
@@ -250,7 +248,7 @@ describe('createDecideApi', () => {
 
     transportRequest.mockResolvedValue(decisionResponse);
 
-    const error = await decide({ input, inferenceId: 'my-decision' }, topic).catch(
+    const error = await decide({ input, inferenceId: 'my-decision', questions: [topic] }).catch(
       (thrown) => thrown
     );
 
@@ -266,10 +264,12 @@ describe('createDecideApi', () => {
 
     controller.abort();
 
-    const error = await decide(
-      { input, inferenceId: 'my-decision', abortSignal: controller.signal },
-      shouldRespond
-    ).catch((thrown) => thrown);
+    const error = await decide({
+      input,
+      inferenceId: 'my-decision',
+      abortSignal: controller.signal,
+      questions: [shouldRespond],
+    }).catch((thrown) => thrown);
 
     expect(isInferenceRequestAbortedError(error)).toBe(true);
     expect(regexWorker.run).not.toHaveBeenCalled();
@@ -285,10 +285,12 @@ describe('createDecideApi', () => {
       return executeRegexRulesTask(payload);
     });
 
-    const error = await decide(
-      { input, inferenceId: 'my-decision', abortSignal: controller.signal },
-      shouldRespond
-    ).catch((thrown) => thrown);
+    const error = await decide({
+      input,
+      inferenceId: 'my-decision',
+      abortSignal: controller.signal,
+      questions: [shouldRespond],
+    }).catch((thrown) => thrown);
 
     expect(isInferenceRequestAbortedError(error)).toBe(true);
     expect(transportRequest).not.toHaveBeenCalled();
@@ -303,10 +305,12 @@ describe('createDecideApi', () => {
       throw new errors.RequestAbortedError('aborted');
     });
 
-    const error = await decide(
-      { input, inferenceId: 'my-decision', abortSignal: controller.signal },
-      shouldRespond
-    ).catch((thrown) => thrown);
+    const error = await decide({
+      input,
+      inferenceId: 'my-decision',
+      abortSignal: controller.signal,
+      questions: [shouldRespond],
+    }).catch((thrown) => thrown);
 
     expect(transportRequest.mock.calls[0][1]).toEqual(
       expect.objectContaining({ signal: controller.signal })
@@ -319,10 +323,11 @@ describe('createDecideApi', () => {
 
     transportRequest.mockResolvedValue(decisionResponse);
 
-    await decide(
-      { input: 'Ask claudia@example.com about checkout', inferenceId: 'my-decision' },
-      shouldRespond
-    );
+    await decide({
+      input: 'Ask claudia@example.com about checkout',
+      inferenceId: 'my-decision',
+      questions: [shouldRespond],
+    });
 
     expect(transportRequest.mock.calls[0][0]).toEqual(
       expect.objectContaining({
@@ -338,24 +343,27 @@ describe('createDecideApi', () => {
 
     transportRequest.mockResolvedValue(decisionResponse);
 
-    await decide(
-      { input, inferenceId: 'my-decision' },
-      { type: 'predicate', instructions: 'Is this from a@example.com?' },
-      {
-        type: 'choice',
-        instructions: 'Who owns b@example.com?',
-        choices: { a: 'The team of c@example.com', b: 'Nobody' },
-      },
-      {
-        type: 'score',
-        instructions: 'How urgent is it for d@example.com?',
-        levels: [
-          { label: 'low', description: 'e@example.com can wait' },
-          { label: 'medium', description: 'Soon' },
-          { label: 'high', description: 'Now' },
-        ],
-      }
-    );
+    await decide({
+      input,
+      inferenceId: 'my-decision',
+      questions: [
+        { type: 'predicate', instructions: 'Is this from a@example.com?' },
+        {
+          type: 'choice',
+          instructions: 'Who owns b@example.com?',
+          choices: { a: 'The team of c@example.com', b: 'Nobody' },
+        },
+        {
+          type: 'score',
+          instructions: 'How urgent is it for d@example.com?',
+          levels: [
+            { label: 'low', description: 'e@example.com can wait' },
+            { label: 'medium', description: 'Soon' },
+            { label: 'high', description: 'Now' },
+          ],
+        },
+      ],
+    });
 
     expect(transportRequest.mock.calls[0][0]).toEqual(
       expect.objectContaining({
@@ -393,10 +401,11 @@ describe('createDecideApi', () => {
 
     jest.mocked(regexWorker.run).mockRejectedValue(new Error('regex failed'));
 
-    const error = await decide(
-      { input: 'Ask claudia@example.com', inferenceId: 'my-decision' },
-      shouldRespond
-    ).catch((thrown) => thrown);
+    const error = await decide({
+      input: 'Ask claudia@example.com',
+      inferenceId: 'my-decision',
+      questions: [shouldRespond],
+    }).catch((thrown) => thrown);
 
     expect(isInferenceInternalError(error)).toBe(true);
     expect(error.message).toBe('Anonymization failed: regex failed');
@@ -407,10 +416,10 @@ describe('createDecideApi', () => {
     const { decide, logger, transportRequest } = setup();
 
     transportRequest.mockResolvedValueOnce(decisionResponse);
-    await decide({ input, inferenceId: 'my-decision' }, shouldRespond);
+    await decide({ input, inferenceId: 'my-decision', questions: [shouldRespond] });
 
     transportRequest.mockRejectedValueOnce(responseError(503, 'overloaded'));
-    await decide({ input, inferenceId: 'my-decision' }, shouldRespond).catch(() => {});
+    await decide({ input, inferenceId: 'my-decision', questions: [shouldRespond] }).catch(() => {});
 
     const logged = JSON.stringify(
       [...logger.debug.mock.calls, ...logger.info.mock.calls, ...logger.warn.mock.calls].map(
