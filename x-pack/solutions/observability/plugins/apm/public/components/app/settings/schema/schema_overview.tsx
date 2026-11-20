@@ -160,6 +160,7 @@ export function SchemaOverview({
                     fill
                     isLoading={isLoadingConfirmation}
                     isDisabled={isDisabled}
+                    onClick={onSwitch}
                   >
                     {i18n.translate('xpack.apm.settings.schema.migrate.dataStreams.buttonText', {
                       defaultMessage: 'Switch to Elastic Agent',
@@ -168,8 +169,6 @@ export function SchemaOverview({
                 </EuiToolTip>
               </div>
             }
-            onClick={onSwitch}
-            isDisabled={isDisabled}
           />
         </EuiFlexItem>
         <EuiFlexItem />

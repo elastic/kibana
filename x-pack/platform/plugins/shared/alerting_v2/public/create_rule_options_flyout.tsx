@@ -22,12 +22,16 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import type { ComposeDiscoverFlyoutProps } from '@kbn/alerting-v2-rule-form';
-import { Context } from '@kbn/core-di-browser';
+import { Context, useService } from '@kbn/core-di-browser';
+import { PluginStart } from '@kbn/core-di';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './kibana_services';
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
 import { RulesApi } from './services/rules_api';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
 import { useCreateActionPolicyDisabledReason } from './hooks/use_create_action_policy_disabled_reason';
+import { getAlertingV2Locators } from './application/bind_locators_to_host';
+import { OBSERVABILITY_ALERTING_HOST } from '../common/locators';
 
 export interface CreateRuleOptionsFlyoutLegacyItem {
   id: string;
@@ -74,9 +78,20 @@ const ActionPolicyAwareComposeDiscoverFlyout = ({
   ComposeDiscoverFlyout: React.ComponentType<ComposeDiscoverFlyoutProps>;
 }) => {
   const createActionPolicyDisabledReason = useCreateActionPolicyDisabledReason();
+  const share = useService(PluginStart('share')) as SharePluginStart;
+
+  const getActionPolicyEditHref = useCallback(
+    (actionPolicyId: string) =>
+      getAlertingV2Locators(share).actionPolicyLocators.getRedirectUrl({
+        page: 'edit',
+        actionPolicyId,
+        host: OBSERVABILITY_ALERTING_HOST.actionPolicies,
+      }),
+    [share]
+  );
   const actionPolicyAwareServices = useMemo(
-    () => ({ ...services, createActionPolicyDisabledReason }),
-    [services, createActionPolicyDisabledReason]
+    () => ({ ...services, createActionPolicyDisabledReason, getActionPolicyEditHref }),
+    [services, createActionPolicyDisabledReason, getActionPolicyEditHref]
   );
 
   return <ComposeDiscoverFlyout {...props} services={actionPolicyAwareServices} />;
@@ -198,7 +213,20 @@ const CreateRuleOptionsFlyoutInner = ({
     onClose();
   }, [value, onClose]);
 
+  const handleHistoryBack = useCallback(() => {
+    setStep({ type: 'selector' });
+  }, []);
   const historyKey = useMemo(() => Symbol('discoverCreateAlert'), []);
+  const closeRequestRef = useRef<(() => void) | null>(null);
+  const isAuthoringStep = step.type === 'esql' || step.type === 'threshold';
+
+  const handlePickerClose = useCallback(() => {
+    if (isAuthoringStep) {
+      closeRequestRef.current?.();
+      return;
+    }
+    onClose();
+  }, [isAuthoringStep, onClose]);
 
   const rulesApi = useMemo(
     () => (value?.services ? new RulesApi(value.services.http) : undefined),
@@ -262,43 +290,6 @@ const CreateRuleOptionsFlyoutInner = ({
 
   const { services, ComposeDiscoverFlyout } = value;
 
-  if (step.type === 'esql') {
-    return (
-      <Context.Provider value={services.container}>
-        <ActionPolicyAwareComposeDiscoverFlyout
-          ComposeDiscoverFlyout={ComposeDiscoverFlyout}
-          historyKey={historyKey}
-          mode="create"
-          onClose={onClose}
-          services={services}
-          onCreateRule={handleCreateRule}
-          isSaving={isSaving}
-          initialQuery={query}
-          esqlVariables={esqlVariables}
-        />
-      </Context.Provider>
-    );
-  }
-
-  if (step.type === 'threshold') {
-    return (
-      <Context.Provider value={services.container}>
-        <ActionPolicyAwareComposeDiscoverFlyout
-          ComposeDiscoverFlyout={ComposeDiscoverFlyout}
-          historyKey={historyKey}
-          mode="create"
-          onClose={onClose}
-          services={services}
-          builderType="threshold"
-          onCreateRule={handleCreateRule}
-          isSaving={isSaving}
-          initialQuery={query}
-          esqlVariables={esqlVariables}
-        />
-      </Context.Provider>
-    );
-  }
-
   if (step.type === 'legacy') {
     const legacyItem = legacyRuleTypes?.find((item) => item.id === step.id);
     if (legacyItem) {
@@ -309,12 +300,31 @@ const CreateRuleOptionsFlyoutInner = ({
   return (
     <Context.Provider value={services.container}>
       <RuleCreateOptionsFlyout
-        onClose={onClose}
+        historyKey={historyKey}
+        retainOnCascade={isAuthoringStep}
+        onClose={handlePickerClose}
         onCreateEsqlRule={() => setStep({ type: 'esql' })}
         onCreateWithAgent={navigateToAgentBuilder}
         onCreateThresholdRule={() => setStep({ type: 'threshold' })}
         legacyRuleTypes={legacyPanelItems}
       />
+      {isAuthoringStep ? (
+        <ActionPolicyAwareComposeDiscoverFlyout
+          ComposeDiscoverFlyout={ComposeDiscoverFlyout}
+          historyKey={historyKey}
+          mode="create"
+          onClose={onClose}
+          onHistoryBack={handleHistoryBack}
+          closeRequestRef={closeRequestRef}
+          stackedOnPicker
+          services={services}
+          builderType={step.type === 'threshold' ? 'threshold' : undefined}
+          onCreateRule={handleCreateRule}
+          isSaving={isSaving}
+          initialQuery={query}
+          esqlVariables={esqlVariables}
+        />
+      ) : null}
     </Context.Provider>
   );
 };

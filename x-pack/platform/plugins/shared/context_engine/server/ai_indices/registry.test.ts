@@ -59,7 +59,7 @@ describe('AiIndexRegistry', () => {
     });
   });
 
-  describe('getManagedIds() and has()', () => {
+  describe('getManagedIds(), has() and get()', () => {
     it('returns registered ids and reports presence', () => {
       registry.register('a', makeProperties({ description: 'A' }));
       registry.register('b', makeProperties({ description: 'B' }));
@@ -67,6 +67,14 @@ describe('AiIndexRegistry', () => {
       expect(registry.getManagedIds()).toEqual(['a', 'b']);
       expect(registry.has('a')).toBe(true);
       expect(registry.has('missing')).toBe(false);
+    });
+
+    it('returns the registered properties, or undefined for an unknown id', () => {
+      const properties = makeProperties({ description: 'A' });
+      registry.register('a', properties);
+
+      expect(registry.get('a')).toBe(properties);
+      expect(registry.get('missing')).toBeUndefined();
     });
   });
 

@@ -17,10 +17,13 @@ function ndjsonToObject(input: string) {
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
   const SPACE_ID = 'ftr-so-export';
 
   describe('export', () => {
     before(async () => {
+      // The export of all types asserts the exact saved objects, so start from an empty .kibana index
+      await esArchiver.emptyKibanaIndex();
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_ID });
       await kibanaServer.importExport.load(
         'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',

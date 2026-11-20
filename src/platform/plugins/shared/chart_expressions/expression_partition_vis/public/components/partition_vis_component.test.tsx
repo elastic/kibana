@@ -11,6 +11,7 @@ import React from 'react';
 import type { SeriesIdentifier, TooltipAction } from '@elastic/charts';
 import { Settings, TooltipType, Tooltip } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { LegendToggle } from '@kbn/charts-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
@@ -178,6 +179,30 @@ describe('PartitionVisComponent', function () {
   it('should not render legend actions when it is not interactive', async () => {
     const component = shallow(<PartitionVisComponent {...wrapperProps} interactive={false} />);
     expect(component.find(Settings).prop('legendAction')).toBeUndefined();
+  });
+
+  it('should hide LegendToggle when not interactive', () => {
+    const component = shallow(<PartitionVisComponent {...wrapperProps} interactive={false} />);
+    expect(component.find(LegendToggle).length).toBe(0);
+  });
+
+  it('should show LegendToggle when interactive', () => {
+    const component = shallow(<PartitionVisComponent {...wrapperProps} interactive={true} />);
+    expect(component.find(LegendToggle).length).toBe(1);
+  });
+
+  it('should not set legendColorPicker when not interactive even with uiState', () => {
+    const component = shallow(
+      <PartitionVisComponent {...wrapperProps} interactive={false} uiState={uiState} />
+    );
+    expect(component.find(Settings).prop('legendColorPicker')).toBeUndefined();
+  });
+
+  it('should set legendColorPicker when interactive and uiState is provided', () => {
+    const component = shallow(
+      <PartitionVisComponent {...wrapperProps} interactive={true} uiState={uiState} />
+    );
+    expect(component.find(Settings).prop('legendColorPicker')).toBeDefined();
   });
 
   it('hides the legend if the legend toggle is clicked', async () => {

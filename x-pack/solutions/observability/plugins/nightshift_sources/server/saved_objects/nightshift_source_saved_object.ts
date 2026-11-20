@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsFieldMapping, SavedObjectsType } from '@kbn/core/server';
 import { schema, type TypeOf } from '@kbn/config-schema';
 import {
   MAX_SOURCE_SLUG_LENGTH,
@@ -13,6 +13,7 @@ import {
   MAX_SOURCE_TAGS,
   MAX_SOURCE_VIEW_NAME_LENGTH,
   NIGHTSHIFT_SOURCE_SO_TYPE,
+  type SourceType,
 } from '@kbn/nightshift-shared';
 
 export { NIGHTSHIFT_SOURCE_SO_TYPE };
@@ -35,7 +36,43 @@ const nightshiftSourceAttributesSchemaV1 = schema.object({
   esql_updated_at: schema.string(),
 });
 
-export type NightshiftSourceAttributes = TypeOf<typeof nightshiftSourceAttributesSchemaV1>;
+// Frozen literals: a stored schema must not move when `SOURCE_TYPES` does. The assertion below
+// stops compiling when the two lists diverge, so a new type is added here on purpose.
+const nightshiftSourceTypeSchema = schema.oneOf([
+  schema.literal('logs'),
+  schema.literal('metrics'),
+  schema.literal('traces'),
+  schema.literal('unknown'),
+]);
+
+type TSchemaSourceType = TypeOf<typeof nightshiftSourceTypeSchema>;
+
+/** Resolves to `true` only while the schema literals and `SOURCE_TYPES` are the same set. */
+export const SOURCE_TYPES_MATCH_SCHEMA: [SourceType] extends [TSchemaSourceType]
+  ? [TSchemaSourceType] extends [SourceType]
+    ? true
+    : never
+  : never = true;
+
+const nightshiftSourceAttributesSchemaV2 = nightshiftSourceAttributesSchemaV1.extends({
+  // Derived from `esql` on every write. Not mapped: nothing searches or filters on it.
+  type: nightshiftSourceTypeSchema,
+});
+
+export type NightshiftSourceAttributes = TypeOf<typeof nightshiftSourceAttributesSchemaV2>;
+
+const schemasV2 = {
+  create: nightshiftSourceAttributesSchemaV2,
+  forwardCompatibility: nightshiftSourceAttributesSchemaV2.extends({}, { unknowns: 'ignore' }),
+};
+
+// keyword rather than text: the list endpoint sorts on it. `title.text` is the analyzed copy that
+// title search runs on.
+const titleMapping: SavedObjectsFieldMapping = {
+  type: 'keyword',
+  ignore_above: 1024,
+  fields: { text: { type: 'text' } },
+};
 
 /**
  * Hidden so it stays out of Saved Objects Management. The Nightshift feature grants it:
@@ -49,8 +86,7 @@ export const nightshiftSourceSavedObjectType: SavedObjectsType<NightshiftSourceA
   mappings: {
     dynamic: false,
     properties: {
-      // keyword rather than text: the list endpoint sorts on it.
-      title: { type: 'keyword', ignore_above: 1024 },
+      title: titleMapping,
       enabled: { type: 'boolean' },
       // Create looks this up in the current space so two sources with the same title do not share a view.
       view_name: { type: 'keyword', ignore_above: 1024 },
@@ -70,6 +106,15 @@ export const nightshiftSourceSavedObjectType: SavedObjectsType<NightshiftSourceA
           { unknowns: 'ignore' }
         ),
       },
+    },
+    2: {
+      // No backfill: the source catalog starts empty, so no stored document predates `type`.
+      changes: [],
+      schemas: schemasV2,
+    },
+    3: {
+      changes: [{ type: 'mappings_addition', addedMappings: { title: titleMapping } }],
+      schemas: schemasV2,
     },
   },
 };

@@ -58,9 +58,9 @@ let mockMl: MlPluginSetup;
 const mockEntityRecord = { entity: { id: 'user:alice' }, user: { name: 'alice' } };
 
 const defaultParams = {
-  entityId: 'user:alice',
+  entityIds: ['user:alice'],
   entityType: 'user' as const,
-  entityRecord: mockEntityRecord,
+  entityRecords: [mockEntityRecord],
   request,
 };
 
@@ -142,6 +142,7 @@ describe('getEntityAnomalies', () => {
     expect(result.anomalies).toHaveLength(1);
     expect(result.anomalies[0]).toMatchObject({
       recordId: 'a1',
+      entityId: 'user:alice',
       jobId: 'security-job-1',
       detectorIndex: 0,
       detectorFunction: 'rare',
@@ -353,7 +354,7 @@ describe('getEntityAnomalies', () => {
 
     expect(searchEntityAnomalies).toHaveBeenCalledWith(
       expect.objectContaining({
-        entityId: 'user:alice',
+        entityIds: ['user:alice'],
         entityType: 'user',
         fromMs: 1_700_000_000_000,
         toMs: 1_700_100_000_000,

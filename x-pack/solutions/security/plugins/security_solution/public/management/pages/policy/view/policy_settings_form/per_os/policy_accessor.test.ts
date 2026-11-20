@@ -48,9 +48,8 @@ describe('per-OS policy accessor', () => {
     expect(policy).toEqual(originalPolicy);
   });
 
-  it('rejects capabilities unsupported by the selected OS', () => {
+  it('supports linux for ransomware protection (behind the linuxRansomwareProtection flag)', () => {
     const policy = createPolicy();
-    // @ts-expect-error Linux policies do not support ransomware protection
     const accessor = createRansomwarePolicyAccessor(policy, 'linux');
     expect(accessor.read()).toBe(policy.linux);
   });

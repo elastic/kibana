@@ -39,6 +39,7 @@ export class SnoozeActionPolicyRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Snooze an action policy',
     description: 'Snooze an action policy until a specified time.',
     oasOperationObject: snoozeActionPolicyOasExamples,

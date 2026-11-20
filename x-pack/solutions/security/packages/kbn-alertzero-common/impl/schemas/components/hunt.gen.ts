@@ -17,15 +17,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
- * Supported technologies. Extend only alongside a TECHNOLOGY_INDEX_MAP entry.
- */
-export const HuntTechnology = lazySchema(() => z.enum(['aws_iam', 'fortigate']));
-export type HuntTechnology = z.infer<typeof HuntTechnology>;
-export type HuntTechnologyEnum = typeof HuntTechnology.enum;
-export const HuntTechnologyEnum = HuntTechnology.enum;
-
-/**
- * `ok`: every required/optional pattern resolved. `degraded`: every required pattern resolved but an optional one did not. `blocked`: a required pattern resolved to nothing; the hunt must not run.
+ * `ok`: the hunt universe resolved and every list derived from it fit its bounds. `degraded`: the universe resolved but a derived list could not be computed or had to collapse (the `_field_caps` call failed, or a bounded list outgrew the request path). `blocked`: no pattern a hunt may search resolved, including a data view left with no searchable pattern, or resolving it failed; the hunt must not run.
  */
 export const IndexScopeStatus = lazySchema(() => z.enum(['ok', 'degraded', 'blocked']));
 export type IndexScopeStatus = z.infer<typeof IndexScopeStatus>;
@@ -33,7 +25,7 @@ export type IndexScopeStatusEnum = typeof IndexScopeStatus.enum;
 export const IndexScopeStatusEnum = IndexScopeStatus.enum;
 
 /**
- * Why a hunt could not corroborate part of what it was asked to look at, or could not show what it found. Seven are transient, named rather than counted so this list stays honest as reasons are added: `search_partial`, `index_unavailable`, `generation_failed`, `execute_failed`, and the three that mean a model's output was refused — `query_out_of_scope`, `query_ungrounded`, `quote_ungrounded`. Those three are transient because generation and extraction vary between runs, so a technique refused once is still unsearched and a later run may produce a usable query or quote. The rest are deterministic: repeating the run produces the same gap, so retrying only re-spends it. `input_truncated` means the report carried more IOCs, techniques or text than a hunt accepts, so only a prefix of it was hunted.
+ * Why a hunt could not corroborate part of what it was asked to look at, or could not show what it found. Ten are transient, named rather than counted so this list stays honest as reasons are added: `search_partial`, `index_unavailable`, `generation_failed`, `execute_failed`, `generation_budget` (the run's budget of generated queries ran out before this technique; a later run skips the techniques already searched, so the budget reaches it), `extraction_pending` (the report's enrichment has not finished, so a later sweep will have terms this one did not), `catalog_unavailable` (the managed ATT&CK data was unavailable, so a later run can extract and verify the report's techniques), and the three that mean a model's output was refused — `query_out_of_scope`, `query_ungrounded`, `quote_ungrounded`. Those three are transient because generation and extraction vary between runs, so a technique refused once is still unsearched and a later run may produce a usable query or quote. The rest are deterministic: repeating the run produces the same gap, so retrying only re-spends it. `collapsed` is the generation budget's gap for a technique whose evidence names the same report artifacts as another technique's: the other one generated first, its query was seen to filter on those artifacts and executed conclusively, and the budget ran out before this one got a query of its own. The artifacts were searched; this technique's own behavior was not. The same report and quotes reproduce it. `input_truncated` means the report carried more IOCs, techniques or text than a hunt accepts, so only a prefix of it was hunted. `index_not_searched` is a default data view name the hunt could not read (no read access, not found, or closed), so the index was never searched; the same data view reproduces it.
  */
 export const HuntIncompleteReason = lazySchema(() =>
   z.enum([
@@ -42,14 +34,18 @@ export const HuntIncompleteReason = lazySchema(() =>
     'generation_failed',
     'execute_failed',
     'generation_budget',
+    'collapsed',
     'query_out_of_scope',
     'query_ungrounded',
     'quote_ungrounded',
     'unknown_technique_id',
+    'catalog_unavailable',
     'rows_unclassifiable',
     'refs_unavailable',
     'nothing_searched',
     'input_truncated',
+    'extraction_pending',
+    'index_not_searched',
   ])
 );
 export type HuntIncompleteReason = z.infer<typeof HuntIncompleteReason>;
@@ -63,18 +59,22 @@ export const HuntIncompleteness = lazySchema(() =>
   z.object({
     reason: HuntIncompleteReason,
     /**
-     * What was not covered, in a form a human reading the run can act on.
+     * What was not covered, in a form a human reading the run can act on. No length bound: the hunt result is validated whole when it is stored, so a bound here would fail the run over one long gap. Readers truncate it where they render it.
      */
     detail: z
       .string()
-      .describe('What was not covered, in a form a human reading the run can act on.'),
+      .describe(
+        'What was not covered, in a form a human reading the run can act on. No length bound: the hunt result is validated whole when it is stored, so a bound here would fail the run over one long gap. Readers truncate it where they render it.'
+      ),
     /**
-     * Set when the gap is scoped to one technique rather than to the whole search.
+     * Set when the gap is scoped to one technique rather than to the whole search. Can be an id the model emitted that is not in the ATT&CK catalog, so it carries no length bound either.
      */
     technique_id: z
       .string()
       .optional()
-      .describe('Set when the gap is scoped to one technique rather than to the whole search.'),
+      .describe(
+        'Set when the gap is scoped to one technique rather than to the whole search. Can be an id the model emitted that is not in the ATT&CK catalog, so it carries no length bound either.'
+      ),
   })
 );
 export type HuntIncompleteness = z.infer<typeof HuntIncompleteness>;
@@ -104,23 +104,71 @@ export const IndexScopeWindow = lazySchema(() =>
 export type IndexScopeWindow = z.infer<typeof IndexScopeWindow>;
 
 /**
- * `required`/`optional` list every pattern checked for the technology; `missing` lists every pattern from either list that resolved to zero indices.
+ * How the hunt scope was produced. `universe`: at least one pattern of the space's default data view resolves, and IOC Hunt searches the resolved ones. `blocked:empty_universe`: no pattern a hunt may search resolved, including a data view left with no searchable pattern. `blocked:discovery_failed`: `_resolve/index` failed, so the scope stays blocked rather than guessing.
  */
-export const ResolvedIndexScope = lazySchema(() =>
+export const HuntScopeResolution = lazySchema(() =>
+  z.enum(['universe', 'blocked:empty_universe', 'blocked:discovery_failed'])
+);
+export type HuntScopeResolution = z.infer<typeof HuntScopeResolution>;
+export type HuntScopeResolutionEnum = typeof HuntScopeResolution.enum;
+export const HuntScopeResolutionEnum = HuntScopeResolution.enum;
+
+/**
+ * What a hunt searches and where an action could land. `index_patterns` is the universe IOC Hunt searches: the space's Security Solution default data view patterns as searched, exclusions included. Hidden and alerts names (dot-prefixed, apart from a `.ds-` backing index) are never included. `blocked` scopes carry an empty `index_patterns`. The lists are not bounded here: they echo a user-edited setting, and a stored scope is parsed whole.
+ */
+export const HuntScope = lazySchema(() =>
   z.object({
-    technology: HuntTechnology,
     status: IndexScopeStatus,
-    required: z.array(z.string()),
-    optional: z.array(z.string()),
-    missing: z.array(z.string()),
+    resolution: HuntScopeResolution,
+    /**
+     * The universe as searched by IOC Hunt, with policy-skipped entries and the local concrete names in `missing` removed (under cross-project search none is removed, so a name can be in both lists). Empty when the scope is blocked.
+     */
+    index_patterns: z
+      .array(z.string())
+      .describe(
+        'The universe as searched by IOC Hunt, with policy-skipped entries and the local concrete names in `missing` removed (under cross-project search none is removed, so a name can be in both lists). Empty when the scope is blocked.'
+      ),
+    /**
+     * Universe patterns the caller cannot search: not found, closed, not readable (a concrete name that resolves without read access counts), or on a remote cluster or linked project that did not answer.
+     */
+    missing: z
+      .array(z.string())
+      .describe(
+        'Universe patterns the caller cannot search: not found, closed, not readable (a concrete name that resolves without read access counts), or on a remote cluster or linked project that did not answer.'
+      ),
+    /**
+     * Default data view entries the hunt never searches because their index name is dot-prefixed (hidden or alerts indices).
+     */
+    policy_skipped: z
+      .array(z.string())
+      .optional()
+      .describe(
+        'Default data view entries the hunt never searches because their index name is dot-prefixed (hidden or alerts indices).'
+      ),
+    /**
+     * `*`-suffixed patterns of datasets the report's vendor or product matched deterministically. Empty when no report was supplied or nothing matched.
+     */
+    report_matches: z
+      .array(z.string())
+      .describe(
+        "`*`-suffixed patterns of datasets the report's vendor or product matched deterministically. Empty when no report was supplied or nothing matched."
+      ),
+    /**
+     * `*`-suffixed streams and indices whose mapping carries `process.entity_id` or `process.pid`: where a hit can become a Defend response action. Whether the host is enrolled is decided later, at packaging.
+     */
+    actionable_indices: z
+      .array(z.string())
+      .describe(
+        '`*`-suffixed streams and indices whose mapping carries `process.entity_id` or `process.pid`: where a hit can become a Defend response action. Whether the host is enrolled is decided later, at packaging.'
+      ),
     window: IndexScopeWindow,
     row_limit: z.number().int(),
   })
 );
-export type ResolvedIndexScope = z.infer<typeof ResolvedIndexScope>;
+export type HuntScope = z.infer<typeof HuntScope>;
 
 /**
- * IOC kinds Tier 1 knows how to map to ECS fields.
+ * IOC kinds IOC Hunt knows how to map to ECS fields.
  */
 export const HuntIocType = lazySchema(() => z.enum(['ip', 'email', 'domain', 'url', 'hash']));
 export type HuntIocType = z.infer<typeof HuntIocType>;
@@ -136,7 +184,7 @@ export const HuntIoc = lazySchema(() =>
 export type HuntIoc = z.infer<typeof HuntIoc>;
 
 /**
- * Tier 1 raw hunt statuses. The hit/clean collapse for evidence[].last_hunt_status happens in the managed-workflow evidence step. `scope_blocked` means no required index existed, so the hunt never ran; it is a failed run, never clean.
+ * IOC Hunt raw hunt statuses. The collapse to hit/clean/incomplete for evidence[].last_hunt_status happens in the managed-workflow evidence step. `scope_blocked` means no required index existed, so the hunt never ran; it is a failed run, never clean.
  */
 export const HuntForThreatStatus = lazySchema(() =>
   z.enum(['scope_blocked', 'no_searchable_terms', 'no_environment_hits', 'environment_hits_found'])
@@ -149,9 +197,37 @@ export const AffectedAsset = lazySchema(() =>
   z.object({
     name: z.string(),
     hit_count: z.number().int(),
+    /**
+     * Whether any hit for this asset came from a local index. Absent when the source indices are unknown (for example, the per-asset index breakdown was cut off before any local index was seen).
+     */
+    local: z
+      .boolean()
+      .optional()
+      .describe(
+        'Whether any hit for this asset came from a local index. Absent when the source indices are unknown (for example, the per-asset index breakdown was cut off before any local index was seen).'
+      ),
+    /**
+     * Remote cluster aliases (`<cluster>:` prefix of a hit's `_index`) this asset was seen on. Present whenever `local` is.
+     */
+    remote_clusters: z
+      .array(z.string().max(255))
+      .max(20)
+      .optional()
+      .describe(
+        "Remote cluster aliases (`<cluster>:` prefix of a hit's `_index`) this asset was seen on. Present whenever `local` is."
+      ),
   })
 );
 export type AffectedAsset = z.infer<typeof AffectedAsset>;
+
+export const HostOrigin = lazySchema(() =>
+  z.object({
+    name: z.string().max(512),
+    local: z.boolean(),
+    remote_clusters: z.array(z.string().max(255)).max(20),
+  })
+);
+export type HostOrigin = z.infer<typeof HostOrigin>;
 
 export const HuntForThreatHit = lazySchema(() =>
   z
@@ -167,7 +243,33 @@ export const HuntForThreatHit = lazySchema(() =>
         .optional()
         .describe('Document `@timestamp` when present on the hit.'),
       /**
-       * Which IOC and/or ATT&CK technique produced this hit. Tier 1 fills this by post-matching returned documents against the searched IOC values and `kibana.alert.rule.threat.technique` ids. Technique attribution only applies to alerts already tagged with that MITRE id (not raw telemetry matched by behavior). Used by the SSE mapper to scope Tier 1 `events[]` onto technique-specific attachments. Tier 2 behavior `hits` omit this (technique is implied by the parent behavior).
+       * Host name from the hit when present (`host.name`).
+       */
+      host: z
+        .string()
+        .max(512)
+        .optional()
+        .describe('Host name from the hit when present (`host.name`).'),
+      /**
+       * User name from the hit when present (`user.name`).
+       */
+      user: z
+        .string()
+        .max(512)
+        .optional()
+        .describe('User name from the hit when present (`user.name`).'),
+      /**
+       * Bounded evidence values from the hit (allowlisted ECS keys, at most 8, each value at most 256 characters). The SSE schema enforces the allowlist and key cap; producers must write only those keys.
+       */
+      fields: z
+        .object({})
+        .catchall(z.string().max(256))
+        .optional()
+        .describe(
+          'Bounded evidence values from the hit (allowlisted ECS keys, at most 8, each value at most 256 characters). The SSE schema enforces the allowlist and key cap; producers must write only those keys.'
+        ),
+      /**
+       * Which IOC and/or ATT&CK technique produced this hit. IOC Hunt fills this by post-matching returned documents against the searched IOC values and `kibana.alert.rule.threat.technique` ids. Technique attribution only applies to alerts already tagged with that MITRE id (not raw telemetry matched by behavior). Used by the SSE mapper to scope IOC Hunt `events[]` onto technique-specific attachments. Behavior Hunt `hits` omit this (technique is implied by the parent behavior).
        */
       matched: z
         .object({
@@ -177,37 +279,73 @@ export const HuntForThreatHit = lazySchema(() =>
               value: z.string().optional(),
             })
             .optional(),
+          /**
+           * Every IOC that matched this hit. `ioc` and `field` stay as the primary (first) match for older readers.
+           */
+          iocs: z
+            .array(
+              z.object({
+                type: z.string(),
+                value: z.string(),
+                field: z.string(),
+              })
+            )
+            .max(10)
+            .optional()
+            .describe(
+              'Every IOC that matched this hit. `ioc` and `field` stay as the primary (first) match for older readers.'
+            ),
           technique_id: z.string().optional(),
           field: z.string().optional(),
         })
         .optional()
         .describe(
-          'Which IOC and/or ATT&CK technique produced this hit. Tier 1 fills this by post-matching returned documents against the searched IOC values and `kibana.alert.rule.threat.technique` ids. Technique attribution only applies to alerts already tagged with that MITRE id (not raw telemetry matched by behavior). Used by the SSE mapper to scope Tier 1 `events[]` onto technique-specific attachments. Tier 2 behavior `hits` omit this (technique is implied by the parent behavior).'
+          'Which IOC and/or ATT&CK technique produced this hit. IOC Hunt fills this by post-matching returned documents against the searched IOC values and `kibana.alert.rule.threat.technique` ids. Technique attribution only applies to alerts already tagged with that MITRE id (not raw telemetry matched by behavior). Used by the SSE mapper to scope IOC Hunt `events[]` onto technique-specific attachments. Behavior Hunt `hits` omit this (technique is implied by the parent behavior).'
         ),
     })
     .strict()
 );
 export type HuntForThreatHit = z.infer<typeof HuntForThreatHit>;
 
+/**
+ * Per-IOC hit counts from Tier 1's filters aggregation. Optional host, user and time span fields come from sub-aggregations when measured, or stay absent when derived later from the sampled hits.
+ */
+export const HuntForThreatPerIoc = lazySchema(() =>
+  z.object({
+    type: z.string(),
+    value: z.string(),
+    /**
+     * The ECS field of the first named clause that matched.
+     */
+    field: z.string().describe('The ECS field of the first named clause that matched.'),
+    count: z.number().int().min(0),
+    host_count: z.number().int().min(0).optional(),
+    user_count: z.number().int().min(0).optional(),
+    first_seen: z.string().max(64).optional(),
+    last_seen: z.string().max(64).optional(),
+  })
+);
+export type HuntForThreatPerIoc = z.infer<typeof HuntForThreatPerIoc>;
+
 export const HuntForThreatResult = lazySchema(() =>
   z.object({
     status: HuntForThreatStatus,
     /**
-     * A confirmed event match in a required index inside the window. Never set by an optional-index or out-of-window match.
+     * A confirmed event match in the searched universe inside the window. Never set by an out-of-window match.
      */
     has_confirmed_hit: z
       .boolean()
       .describe(
-        'A confirmed event match in a required index inside the window. Never set by an optional-index or out-of-window match.'
+        'A confirmed event match in the searched universe inside the window. Never set by an out-of-window match.'
       ),
     /**
-     * Gaps in what the search actually covered. Absent or empty means the search ran over the whole scope, so `status: no_environment_hits` is a statement about the environment. Present means it is not: shards failed, the search timed out, or a required pattern resolved to no index.
+     * Gaps in what the search actually covered. Absent or empty means the search ran over the whole scope, so `status: no_environment_hits` is a statement about the environment. Present means it is not: shards failed, the search timed out, or every searched pattern resolved to no index. The standalone route also lists a default data view name the scope dropped from the search, first, as `index_not_searched`.
      */
     incomplete: z
       .array(HuntIncompleteness)
       .optional()
       .describe(
-        'Gaps in what the search actually covered. Absent or empty means the search ran over the whole scope, so `status: no_environment_hits` is a statement about the environment. Present means it is not: shards failed, the search timed out, or a required pattern resolved to no index.'
+        'Gaps in what the search actually covered. Absent or empty means the search ran over the whole scope, so `status: no_environment_hits` is a statement about the environment. Present means it is not: shards failed, the search timed out, or every searched pattern resolved to no index. The standalone route also lists a default data view name the scope dropped from the search, first, as `index_not_searched`.'
       ),
     searched_iocs: z.number().int(),
     searched_techniques: z.number().int(),
@@ -234,15 +372,41 @@ export const HuntForThreatResult = lazySchema(() =>
         index: z.string(),
         hit_count: z.number().int(),
         /**
-         * Regex match of this concrete `_index` bucket against the resolved technology's required index patterns (e.g. `logs-aws.*`), computed once by Tier 1, not re-derived downstream.
+         * Always true: every searched index counts towards the hit bar, because the hunt searches one universe and no bucket is non-confirming. The field predates that and stays for the SSE.
          */
         required: z
           .boolean()
           .describe(
-            "Regex match of this concrete `_index` bucket against the resolved technology's required index patterns (e.g. `logs-aws.*`), computed once by Tier 1, not re-derived downstream."
+            'Always true: every searched index counts towards the hit bar, because the hunt searches one universe and no bucket is non-confirming. The field predates that and stays for the SSE.'
           ),
       })
     ),
+    /**
+     * Non-zero per-IOC hit buckets from Tier 1, count descending. One event can match several IOCs, so a sum of counts can exceed total_hits; each count alone must not.
+     */
+    per_ioc: z
+      .array(HuntForThreatPerIoc)
+      .max(30)
+      .optional()
+      .describe(
+        'Non-zero per-IOC hit buckets from Tier 1, count descending. One event can match several IOCs, so a sum of counts can exceed total_hits; each count alone must not.'
+      ),
+    /**
+     * Set when Tier 1 produced more non-zero IOC buckets than this array holds.
+     */
+    per_ioc_truncated: z
+      .boolean()
+      .optional()
+      .describe('Set when Tier 1 produced more non-zero IOC buckets than this array holds.'),
+    /**
+     * Deduped searchable IOCs Tier 1 queried (whether or not they hit).
+     */
+    searched_ioc_count: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe('Deduped searchable IOCs Tier 1 queried (whether or not they hit).'),
     message: z.string().optional(),
   })
 );

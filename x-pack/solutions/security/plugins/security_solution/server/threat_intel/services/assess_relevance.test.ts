@@ -90,10 +90,7 @@ describe('assessRelevance', () => {
     const { model } = buildModel();
     const withStructuredOutput = jest.spyOn(model.chatModel, 'withStructuredOutput');
     await assessRelevance(model, logger, { text: 'body' });
-    expect(withStructuredOutput).toHaveBeenCalledWith(
-      expect.objectContaining({ _def: expect.anything() }),
-      { includeRaw: true }
-    );
+    expect(withStructuredOutput).toHaveBeenCalledWith(relevanceOutputSchema, { includeRaw: true });
   });
 
   it('sends the full body when it fits model context', async () => {
@@ -186,9 +183,7 @@ describe('assessRelevance', () => {
   });
 });
 
-// `withStructuredOutput` is mocked everywhere above, so the schema's own parsing of
-// model output is never exercised by those tests. These are the assertions that fail
-// if the bound is removed.
+// These assertions verify the transforms that withStructuredOutput applies.
 describe('relevanceOutputSchema bounds', () => {
   const valid = {
     is_intelligence: true,

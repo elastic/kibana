@@ -25,7 +25,7 @@ import {
   SCOUT_REPORT_OUTPUT_ROOT,
   SCOUT_UNIFIED_CONFIG_PATH_REGEX,
   ScoutTestRunConfigCategory,
-  ScoutTestTarget,
+  SCOUT_TEST_RUN_SCOPE,
 } from '@kbn/scout-info';
 import stripANSI from 'strip-ansi';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -43,6 +43,7 @@ import {
   type ScoutFileInfo,
   type ScoutTestInfo,
   type ScoutReportEvent,
+  buildScoutTargetInfo,
 } from '../../report';
 import { environmentMetadata } from '../../../datasources';
 import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
@@ -78,14 +79,10 @@ export class ScoutPlaywrightReporter implements Reporter {
 
     this.report = new ScoutEventsReport(this.log);
 
-    const testTarget = ScoutTestTarget.tryFromEnv();
-
     this.baseTestRunInfo = {
       id: this.runId,
-      target: {
-        type: testTarget?.location || 'unknown',
-        mode: testTarget?.tagWithoutLocation || 'unknown',
-      },
+      target: buildScoutTargetInfo('unknown'),
+      scope: SCOUT_TEST_RUN_SCOPE,
     };
     this.codeOwnersEntries = getCodeOwnersEntries();
   }
@@ -319,7 +316,7 @@ export class ScoutPlaywrightReporter implements Reporter {
     return stats;
   }
 
-  async onEnd(result: FullResult) {
+  private recordRunResults(result: FullResult) {
     const tests = this.suite?.allTests() ?? [];
 
     // One `test-outcome` event per test with its final classification, in addition to the
@@ -367,13 +364,16 @@ export class ScoutPlaywrightReporter implements Reporter {
         uptime: Math.floor(process.uptime() * 1000),
       },
     });
+  }
 
-    // Save, upload events & conclude the report
+  // Kept synchronous and non-throwing: Playwright only force-exits once every hook has returned,
+  // and marks the whole run failed if one throws.
+  onEnd(result: FullResult) {
     try {
+      this.recordRunResults(result);
       this.report.save(this.reportRootPath);
     } catch (e) {
-      // Log the error but don't propagate it
-      this.log.error(e);
+      this.log.error(`${this.report.reportName} failed, run results may be incomplete: ${e}`);
     } finally {
       this.report.conclude();
     }

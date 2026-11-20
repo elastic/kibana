@@ -66,7 +66,7 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
   spaceTest(
     'creates an ES|QL multi-value control and filters grid rows',
     async ({ pageObjects }) => {
-      const { controls, dataGrid, discover } = pageObjects;
+      const { controls, dataGrid, discover, esqlEditor } = pageObjects;
 
       await discover.createEsqlControl(ESQL_MULTI_VALUE_QUERY_START, { values: ['IN', 'US'] });
       await discover.waitUntilTabIsLoaded();
@@ -76,7 +76,7 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
         'FROM logstash-* | WHERE MV_CONTAINS( ?values'
       );
 
-      await discover.codeEditor.setCodeEditorValue(ESQL_MULTI_VALUE_QUERY);
+      await esqlEditor.setQuery(ESQL_MULTI_VALUE_QUERY);
       await discover.submitQuery();
       await discover.waitUntilTabIsLoaded();
       await dataGrid.waitForLoad();
@@ -103,6 +103,14 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
 
       await discover.createEsqlControl(LOGSTASH_QUERY_START);
       await discover.waitUntilTabIsLoaded();
+
+      // CN can already be the default selection, so pin a different baseline before saving.
+      const baselineControlId = await controls.getOnlyControlId();
+      await controls.optionsList.openPopover(baselineControlId);
+      await controls.optionsList.selectOption('US');
+      await controls.optionsList.ensurePopoverIsClosed();
+      await discover.waitUntilTabIsLoaded();
+
       await discover.saveSearch(savedSession);
       await discover.waitUntilTabIsLoaded();
       await expect(controls.group).toBeVisible();
@@ -113,6 +121,8 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
       await expect(controls.frames).toHaveCount(1);
 
       const controlId = await controls.getOnlyControlId();
+      await expect(controls.optionsList.getSelectionsLocator(controlId)).toHaveText('US');
+
       await controls.optionsList.openPopover(controlId);
       await controls.optionsList.selectOption('CN');
       await discover.waitUntilTabIsLoaded();

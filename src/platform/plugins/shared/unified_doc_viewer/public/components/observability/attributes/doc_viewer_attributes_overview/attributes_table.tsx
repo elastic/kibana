@@ -12,6 +12,7 @@ import { EuiDataGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo } from 'react';
+import type { DataSource } from '@kbn/data-source';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { FieldRow } from '../../../doc_viewer_table/field_row';
 import { TableCell } from '../../../doc_viewer_table/table_cell';
@@ -19,13 +20,15 @@ import {
   getFieldCellActions,
   getFieldValueCellActions,
 } from '../../../doc_viewer_table/table_cell_actions';
+import { getEuiCellActions } from '../../../doc_viewer_table/table_grid/eui_data_grid_adapter';
 import type { AttributeField } from './attributes_overview';
 
 interface AttributesTableProps
   extends Pick<
     DocViewRenderProps,
-    'hit' | 'dataView' | 'columnsMeta' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
+    'hit' | 'dataView' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
   > {
+  dataSource: DataSource | undefined;
   fields: AttributeField[];
   searchTerm: string;
   isEsqlMode: boolean;
@@ -34,7 +37,7 @@ interface AttributesTableProps
 export const AttributesTable = ({
   hit,
   dataView,
-  columnsMeta,
+  dataSource,
   fields,
   searchTerm,
   columns,
@@ -71,41 +74,54 @@ export const AttributesTable = ({
             dataView,
             fieldFormats,
             isPinned: false,
-            columnsMeta,
+            dataSource,
           })
       ),
-    [fields, flattened, hit, dataView, fieldFormats, columnsMeta]
+    [fields, flattened, hit, dataView, fieldFormats, dataSource]
   );
 
-  const fieldCellActions = useMemo(
-    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn, columns }),
-    [rows, filter, onToggleColumn, isEsqlMode, columns]
+  const fieldCellActionDefinitions = useMemo(
+    () => getFieldCellActions({ onFilter: filter, onToggleColumn, columns }),
+    [filter, onToggleColumn, columns]
   );
-  const fieldValueCellActions = useMemo(
-    () => getFieldValueCellActions({ rows, isEsqlMode, toasts, onFilter: filter }),
-    [rows, toasts, filter, isEsqlMode]
+  const fieldValueCellActionDefinitions = useMemo(
+    () => getFieldValueCellActions({ toasts, onFilter: filter }),
+    [toasts, filter]
   );
 
-  const gridColumns: EuiDataGridProps['columns'] = [
-    {
-      id: 'name',
-      displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.nameColumn', {
-        defaultMessage: 'Field',
-      }),
-      actions: false,
-      visibleCellActions: 3,
-      cellActions: fieldCellActions,
-    },
-    {
-      id: 'value',
-      displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.valueColumn', {
-        defaultMessage: 'Value',
-      }),
-      actions: false,
-      visibleCellActions: 3,
-      cellActions: fieldValueCellActions,
-    },
-  ];
+  const gridColumns = useMemo<EuiDataGridProps['columns']>(
+    () => [
+      {
+        id: 'name',
+        displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.nameColumn', {
+          defaultMessage: 'Field',
+        }),
+        actions: false,
+        visibleCellActions: 3,
+        cellActions: getEuiCellActions({
+          definitions: fieldCellActionDefinitions,
+          rows,
+          getRowId: ({ name }) => name,
+          columnId: 'name',
+        }),
+      },
+      {
+        id: 'value',
+        displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.valueColumn', {
+          defaultMessage: 'Value',
+        }),
+        actions: false,
+        visibleCellActions: 3,
+        cellActions: getEuiCellActions({
+          definitions: fieldValueCellActionDefinitions,
+          rows,
+          getRowId: ({ name }) => name,
+          columnId: 'value',
+        }),
+      },
+    ],
+    [fieldCellActionDefinitions, fieldValueCellActionDefinitions, rows]
+  );
 
   return (
     <EuiDataGrid
@@ -114,16 +130,18 @@ export const AttributesTable = ({
       })}
       columns={gridColumns}
       rowCount={rows.length}
-      renderCellValue={({ rowIndex, columnId }) => (
-        <TableCell
-          searchTerm={searchTerm}
-          rows={rows}
-          rowIndex={rowIndex}
-          columnId={columnId}
-          isDetails={false}
-          isESQLMode={isEsqlMode}
-        />
-      )}
+      renderCellValue={({ rowIndex, columnId }) => {
+        const row = rows[rowIndex];
+        return row ? (
+          <TableCell
+            searchTerm={searchTerm}
+            row={row}
+            columnId={columnId}
+            isDetails={false}
+            isESQLMode={isEsqlMode}
+          />
+        ) : null;
+      }}
       columnVisibility={{
         visibleColumns: ['name', 'value'],
         setVisibleColumns: () => null,

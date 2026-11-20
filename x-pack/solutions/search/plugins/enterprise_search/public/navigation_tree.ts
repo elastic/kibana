@@ -9,7 +9,6 @@ import type { Location } from 'history';
 import { type Observable, debounceTime, map } from 'rxjs';
 
 import type { EuiSideNavItemType } from '@elastic/eui';
-import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import type { CoreStart } from '@kbn/core/public';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
@@ -189,6 +188,7 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'management:ingest_pipelines' },
                     { link: 'management:pipelines' },
+                    { link: 'management:content_connectors' },
                   ],
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.ingest.pipelines.title', {
                     defaultMessage: 'Ingest',
@@ -255,7 +255,6 @@ export const getNavigationTreeDefinition = ({
                   id: 'stack_management_home',
                   title: '',
                 },
-                ...getAlertingV2ManagementNavPanel(core),
                 {
                   children: [
                     { link: 'management:triggersActionsAlerts' },
@@ -322,6 +321,7 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     { link: 'management:genAiSettings' },
+                    { link: 'management:aiAnonymizationSettings' },
                     { link: 'management:evals' },
                     { link: 'management:aiAssistantManagementSelection' },
                   ],

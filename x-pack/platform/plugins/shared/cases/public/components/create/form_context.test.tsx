@@ -44,12 +44,8 @@ import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { useLicense } from '../../common/use_license';
 import { useGetCategories } from '../../containers/use_get_categories';
 import { categories, customFieldsConfigurationMock, customFieldsMock } from '../../containers/mock';
-import {
-  CaseSeverity,
-  AttachmentType,
-  ConnectorTypes,
-  CustomFieldTypes,
-} from '../../../common/types/domain';
+import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
+import { SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import type { CreateCaseFormFieldsProps } from './form_fields';
 import { CreateCaseFormFields } from './form_fields';
@@ -941,26 +937,18 @@ describe('Create case', () => {
       data: connectorsMock,
     });
 
-    const attachments = [
+    const attachments: CaseAttachments = [
       {
-        alertId: '1234',
-        index: '',
-        rule: {
-          id: '45321',
-          name: 'my rule',
-        },
+        attachmentId: '1234',
+        metadata: { index: '', rule: { id: '45321', name: 'my rule' } },
         owner: 'owner',
-        type: AttachmentType.alert as const,
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
       },
       {
-        alertId: '7896',
-        index: '',
-        rule: {
-          id: '445324',
-          name: 'my rule',
-        },
+        attachmentId: '7896',
+        metadata: { index: '', rule: { id: '445324', name: 'my rule' } },
         owner: 'second-owner',
-        type: AttachmentType.alert as const,
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
       },
     ];
 
@@ -1028,16 +1016,12 @@ describe('Create case', () => {
       ...sampleConnectorData,
       data: connectorsMock,
     });
-    const attachments = [
+    const attachments: CaseAttachments = [
       {
-        alertId: '1234',
-        index: '',
-        rule: {
-          id: '45321',
-          name: 'my rule',
-        },
+        attachmentId: '1234',
+        metadata: { index: '', rule: { id: '45321', name: 'my rule' } },
         owner: 'owner',
-        type: AttachmentType.alert as const,
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
       },
     ];
 

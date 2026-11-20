@@ -20,6 +20,7 @@ import type {
 import type { UNSUPPORTED_ACTION_TYPES } from './constants';
 import type { OnUpdateFields } from '../case_view/types';
 import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
+import type { RelatedRemovalOptions } from '../../client/attachment_framework/types';
 import type { CurrentUserProfile } from '../types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
@@ -58,7 +59,11 @@ export interface UserActionBuilderArgs {
   selectedOutlineCommentId: string;
   loadingCommentIds: string[];
   handleOutlineComment: (id: string) => void;
-  handleDeleteComment: (id: string, successToasterTitle: string) => void;
+  handleDeleteComment: (
+    id: string,
+    successToasterTitle: string,
+    options?: RelatedRemovalOptions
+  ) => void;
   euiTheme: EuiThemeComputed<{}>;
 }
 

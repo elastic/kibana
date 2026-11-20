@@ -8,11 +8,9 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { css } from '@emotion/react';
 
 import type { HasSerializedChildState } from '@kbn/presentation-publishing';
 import { PanelLoader } from '@kbn/panel-loader';
-import { useEuiTheme } from '@elastic/eui';
 import type { PresentationPanelProps } from './panel_component/types';
 import type { DefaultEmbeddableApi } from './types';
 import { untilPluginStartServicesReady } from '../kibana_services';
@@ -44,8 +42,6 @@ export const EmbeddableRenderer = <
   >;
   hidePanelChrome?: boolean;
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   const [value, setValue] = useState<
     | {
         Component: React.FC;
@@ -129,10 +125,6 @@ export const EmbeddableRenderer = <
     return panelProps?.hideLoader ? null : (
       <PanelLoader
         showShadow={panelProps?.showShadow}
-        showBorder={panelProps?.showBorder}
-        css={css`
-          border-radius: ${euiTheme.border.radius.control};
-        `}
         dataTestSubj="embeddablePanelLoadingIndicator"
       />
     );

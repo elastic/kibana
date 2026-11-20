@@ -43,6 +43,11 @@ export interface CommonArtifactEntryCardProps extends CommonProps {
    * above the selected OS and the condition entries.
    */
   Decorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
+  /**
+   * Replaces the default field, operator, and value criteria block.
+   * When omitted, the card renders `CriteriaConditions`.
+   */
+  CriteriaComponent?: React.ComponentType<CriteriaConditionsProps>;
 }
 
 export interface ArtifactEntryCardProps extends CommonArtifactEntryCardProps {
@@ -69,6 +74,7 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
     hideDescription = false,
     hideComments = false,
     Decorator,
+    CriteriaComponent = CriteriaConditions,
     'data-test-subj': dataTestSubj,
     ...commonProps
   }) => {
@@ -116,7 +122,7 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
         <CardSectionPanel className="bottom-section">
           {Decorator && <Decorator item={item} data-test-subj={getTestId('decorator')} />}
 
-          <CriteriaConditions
+          <CriteriaComponent
             os={artifact.os as CriteriaConditionsProps['os']}
             entries={artifact.entries}
             data-test-subj={getTestId('criteriaConditions')}

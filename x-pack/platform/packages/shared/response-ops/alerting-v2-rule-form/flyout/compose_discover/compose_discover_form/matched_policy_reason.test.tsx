@@ -34,7 +34,7 @@ describe('getMatchedTags', () => {
     expect(getMatchedTags(['env:prod'], ['team:sre'])).toEqual(['env:prod']);
   });
 
-  it('falls back to matcherTags when ruleTags is empty', () => {
+  it('falls back to matcherTags when routingTags is empty', () => {
     expect(getMatchedTags(['env:prod'], [])).toEqual(['env:prod']);
   });
 
@@ -45,7 +45,7 @@ describe('getMatchedTags', () => {
 
 describe('MatchedPolicyReason', () => {
   it('renders a catch-all badge for the catch_all category', () => {
-    renderComponent({ category: 'catch_all', matcher: null, ruleTags: [] });
+    renderComponent({ category: 'catch_all', matcher: null, routingTags: [] });
 
     expect(screen.getByTestId('matchedPolicyReasonCatchAll')).toBeInTheDocument();
     expect(screen.getByText('Catch-all')).toBeInTheDocument();
@@ -57,7 +57,7 @@ describe('MatchedPolicyReason', () => {
     renderComponent({
       category: 'tags',
       matcher: { tags: ['env:prod', 'team:sre'] },
-      ruleTags: ['env:prod', 'other'],
+      routingTags: ['env:prod', 'other'],
     });
 
     expect(screen.getByTestId('matchedPolicyReasonTags')).toBeInTheDocument();
@@ -68,13 +68,13 @@ describe('MatchedPolicyReason', () => {
     renderComponent({
       category: 'tags',
       matcher: { tags: ['env:prod', 'team:sre'] },
-      ruleTags: ['env:prod', 'other'],
+      routingTags: ['env:prod', 'other'],
     });
 
     // Intersection: only env:prod matches
     expect(screen.getByTestId('matchedPolicyReasonTags')).toHaveAttribute(
       'aria-label',
-      'Matching rule tags: env:prod'
+      'Matching routing tags: env:prod'
     );
   });
 
@@ -82,13 +82,13 @@ describe('MatchedPolicyReason', () => {
     renderComponent({
       category: 'tags',
       matcher: { tags: ['env:prod', 'team:sre'] },
-      ruleTags: [],
+      routingTags: [],
     });
 
     // Fallback: show all matcher tags
     expect(screen.getByTestId('matchedPolicyReasonTags')).toHaveAttribute(
       'aria-label',
-      'Matching rule tags: env:prod, team:sre'
+      'Matching routing tags: env:prod, team:sre'
     );
   });
 
@@ -96,7 +96,7 @@ describe('MatchedPolicyReason', () => {
     renderComponent({
       category: 'tags',
       matcher: { expression: 'rule.name: "checkout"' },
-      ruleTags: [],
+      routingTags: [],
     });
 
     expect(screen.getByTestId('matchedPolicyReasonExpression')).toBeInTheDocument();
@@ -108,7 +108,7 @@ describe('MatchedPolicyReason', () => {
     renderComponent({
       category: 'tags',
       matcher: { tags: ['env:prod'], expression: 'rule.name: "checkout"' },
-      ruleTags: ['env:prod'],
+      routingTags: ['env:prod'],
     });
 
     expect(screen.getByTestId('matchedPolicyReasonTags')).toBeInTheDocument();
@@ -117,7 +117,7 @@ describe('MatchedPolicyReason', () => {
   });
 
   it('shows the catch-all tooltip on hover', async () => {
-    renderComponent({ category: 'catch_all', matcher: null, ruleTags: [] });
+    renderComponent({ category: 'catch_all', matcher: null, routingTags: [] });
 
     await userEvent.hover(screen.getByTestId('matchedPolicyReasonCatchAll'));
 
@@ -128,19 +128,19 @@ describe('MatchedPolicyReason', () => {
     renderComponent({
       category: 'tags',
       matcher: { tags: ['env:prod', 'team:sre'] },
-      ruleTags: ['env:prod'],
+      routingTags: ['env:prod'],
     });
 
     await userEvent.hover(screen.getByTestId('matchedPolicyReasonTags'));
 
-    expect(await screen.findByText('Matching rule tags: env:prod')).toBeInTheDocument();
+    expect(await screen.findByText('Matching routing tags: env:prod')).toBeInTheDocument();
   });
 
   it('shows the expression in the expression badge tooltip', async () => {
     renderComponent({
       category: 'tags',
       matcher: { expression: 'rule.id: "my-rule"' },
-      ruleTags: [],
+      routingTags: [],
     });
 
     await userEvent.hover(screen.getByTestId('matchedPolicyReasonExpression'));

@@ -8,7 +8,9 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: CompareExperiments
-      description: Compare two evaluation experiments using paired t-tests
+      description: >-
+        Compare two evaluation experiments with a paired statistical test per
+        dataset and evaluator.
       summary: Compare two evaluation experiments
       tags:
         - Evals API
@@ -35,6 +37,16 @@ paths:
             type: string
             maxLength: 1024
           description: Target experiment or execution ID (depends on type)
+        - name: repetition_policy
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/RepetitionPolicy'
+            default: mean
+          description: >-
+            How repetitions of one example are compared. `mean` and `median`
+            reduce each example to one score per experiment and test one pair
+            per example.
       responses:
         '200':
           description: Successful response
@@ -46,16 +58,37 @@ paths:
                   results:
                     type: array
                     items:
-                      $ref: '#/components/schemas/PairedTTestResult'
+                      $ref: '#/components/schemas/ComparisonResult'
                   pairing:
                     type: object
                     properties:
+                      repetitionPolicy:
+                        $ref: '#/components/schemas/RepetitionPolicy'
                       totalPairs:
                         type: integer
+                        description: Number of pairs tested over all slices
                       skippedMissingPairs:
                         type: integer
+                        description: >-
+                          Unpaired examples. A target example with only null
+                          scores counts in `skippedNullScores` instead.
                       skippedNullScores:
                         type: integer
+                      rejectedSlices:
+                        type: array
+                        description: >-
+                          Only for `median`: slices left out of `results`
+                          because a score is outside [0, 1].
+                        items:
+                          type: object
+                          properties:
+                            datasetName:
+                              type: string
+                            evaluatorName:
+                              type: string
+                          required:
+                            - datasetName
+                            - evaluatorName
                       truncatedBaseline:
                         type: boolean
                         description: Whether the baseline scores were truncated due to size limits
@@ -63,6 +96,7 @@ paths:
                         type: boolean
                         description: Whether the target scores were truncated due to size limits
                     required:
+                      - repetitionPolicy
                       - totalPairs
                       - skippedMissingPairs
                       - skippedNullScores
@@ -74,7 +108,100 @@ paths:
 
 components:
   schemas:
-    PairedTTestResult:
+    RepetitionPolicy:
+      type: string
+      enum:
+        - mean
+        - median
+
+    StatisticalTestId:
+      type: string
+      enum:
+        - paired_t
+        - wilcoxon_signed_rank
+        - mcnemar
+      description: >-
+        Paired hypothesis test applied to one (dataset, evaluator) slice.
+        `paired_t` compares mean differences, `wilcoxon_signed_rank` is its
+        rank-based alternative, `mcnemar` compares paired binary outcomes.
+
+    MetricType:
+      type: string
+      enum:
+        - binary
+        - continuous_bounded
+        - continuous_unbounded
+        - count
+        - ordinal_k
+      description: >-
+        Shape of the observed scores: every score is 0 or 1 (`binary`), a
+        fraction within [0, 1] (`continuous_bounded`), any real number
+        (`continuous_unbounded`), a non-negative integer (`count`) or a level
+        on a dense 1..k scale (`ordinal_k`).
+
+    HypothesisTest:
+      type: object
+      description: The paired hypothesis test run on one (dataset, evaluator) slice.
+      properties:
+        id:
+          $ref: '#/components/schemas/StatisticalTestId'
+        method:
+          type: string
+          maxLength: 64
+          description: >-
+            Variant of the test that produced the p-value, when the test has
+            more than one (for example `mid-p`, `exact`, `asymptotic`).
+        statistic:
+          type: number
+          nullable: true
+          description: Test statistic, null when the test could not run
+        discordantPairs:
+          type: object
+          description: >-
+            Only for binary metrics: the pairs on which the two arms disagree,
+            the counts behind the McNemar statistic. Combine with `direction`
+            to read them as improvements or regressions.
+          properties:
+            targetOnly:
+              type: integer
+              description: Pairs where the target scored 1 and the baseline 0
+            baselineOnly:
+              type: integer
+              description: Pairs where the baseline scored 1 and the target 0
+          required:
+            - targetOnly
+            - baselineOnly
+      required:
+        - id
+        - statistic
+
+    ComparisonSide:
+      type: object
+      description: One experiment's scores in a (dataset, evaluator) slice.
+      properties:
+        mean:
+          type: number
+          description: Mean of the paired scores
+        used:
+          type: integer
+          description: Valid repetition scores
+        missing:
+          type: integer
+          description: Repetitions without a valid score
+        stability:
+          type: number
+          nullable: true
+          description: >-
+            Mean of the sample standard deviations of each paired example's
+            valid repetitions, over the examples with at least two. Null when
+            no example has two.
+      required:
+        - mean
+        - used
+        - missing
+        - stability
+
+    ComparisonResult:
       type: object
       properties:
         datasetId:
@@ -88,15 +215,21 @@ components:
           maxLength: 256
         sampleSize:
           type: integer
-        meanBaseline:
-          type: number
-          description: Mean score of the baseline experiment
-        meanTarget:
-          type: number
-          description: Mean score of the target experiment
+          description: Number of examples tested in this slice
+        baseline:
+          $ref: '#/components/schemas/ComparisonSide'
+        target:
+          $ref: '#/components/schemas/ComparisonSide'
+        repetitionWarning:
+          type: boolean
+          description: >-
+            True when an example in this slice has a different number of valid
+            repetitions in the two experiments, or a repetition without a
+            valid score.
         pValue:
           type: number
           nullable: true
+          description: Two-sided p-value of `hypothesisTest`, null when the test could not run
         direction:
           type: string
           enum:
@@ -107,12 +240,19 @@ components:
             Whether a higher score is an improvement (`maximize`), a lower
             score is an improvement (`minimize`), or the score cannot be
             compared across arms at all (`neutral`) for this evaluator.
+        metricType:
+          $ref: '#/components/schemas/MetricType'
+        hypothesisTest:
+          $ref: '#/components/schemas/HypothesisTest'
       required:
         - datasetId
         - datasetName
         - evaluatorName
         - sampleSize
-        - meanBaseline
-        - meanTarget
+        - baseline
+        - target
+        - repetitionWarning
         - pValue
         - direction
+        - metricType
+        - hypothesisTest

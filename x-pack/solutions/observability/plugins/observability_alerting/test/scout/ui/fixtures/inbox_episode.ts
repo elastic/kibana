@@ -70,7 +70,7 @@ export const seedInboxEpisode = async (
           source: 'scout-test',
           type: 'alert',
           space_id: 'default',
-          episode: { id: episodeId, status: 'active' },
+          alert: { id: episodeId, status: 'active' },
         },
       ],
       refresh: true,

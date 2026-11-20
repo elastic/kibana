@@ -21,8 +21,14 @@ if ! grep -qF '* @kibanamachine' .github/CODEOWNERS; then
   printf '\n# See https://github.com/elastic/kibana/pull/199404\n# Prevent backport assignments\n* @kibanamachine' >> .github/CODEOWNERS
 fi
 
+# Release branches cut before @kbn/core moved to src/core/packages/core still use the old layout.
+integration_tests_dir="src/core/packages/core/server/integration_tests"
+if [[ ! -d "$integration_tests_dir" ]]; then
+  integration_tests_dir="src/core/server/integration_tests"
+fi
+
 echo "Disabling serverless jest integration config on release branch"
-jq '. + ["src/core/server/integration_tests/saved_objects/serverless/migrations/jest.integration.config.js"] | unique' \
+jq --arg config "$integration_tests_dir/saved_objects/serverless/migrations/jest.integration.config.js" '. + [$config] | unique' \
   .buildkite/disabled_jest_configs.json > .buildkite/disabled_jest_configs.json.tmp \
   && mv .buildkite/disabled_jest_configs.json.tmp .buildkite/disabled_jest_configs.json
 
@@ -41,9 +47,9 @@ done
 
 echo "Skipping serverless core integration tests on release branch"
 SERVERLESS_TESTS=(
-  "src/core/server/integration_tests/elasticsearch/capabilities_serverless.test.ts"
-  "src/core/server/integration_tests/elasticsearch/project_routing_serverless_cps.test.ts"
-  "src/core/server/integration_tests/elasticsearch/project_routing_serverless_non_cps.test.ts"
+  "$integration_tests_dir/elasticsearch/capabilities_serverless.test.ts"
+  "$integration_tests_dir/elasticsearch/project_routing_serverless_cps.test.ts"
+  "$integration_tests_dir/elasticsearch/project_routing_serverless_non_cps.test.ts"
 )
 for test_file in "${SERVERLESS_TESTS[@]}"; do
   if grep -q "^describe\.skip(" "$test_file"; then

@@ -8,8 +8,11 @@
 import type { Logger } from '@kbn/logging';
 import {
   ALERTZERO_ACTION_WORKFLOW_IDS,
+  ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
   ALERTZERO_FORENSICS_WORKFLOW_IDS,
+  ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
+  ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_IDS,
   ALERTZERO_PROPOSAL_WORKFLOW_IDS,
   ALERTZERO_RULE_WORKFLOW_IDS,
 } from '@kbn/workflows/managed';
@@ -17,7 +20,6 @@ import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { ALERTZERO_MANAGED_WORKFLOW_OWNER_ID } from '../../common/constants';
-import { applyMissingInstalledWorkerSettings } from './apply_missing_installed_worker_settings';
 
 export const initializeManagedWorkflows = async ({
   workflowsExtensions,
@@ -40,27 +42,31 @@ export const initializeManagedWorkflows = async ({
     ...ALERTZERO_ACTION_WORKFLOW_IDS,
     ...ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
     ...ALERTZERO_FORENSICS_WORKFLOW_IDS,
+    ...ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
+    ...ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
     ...ALERTZERO_PROPOSAL_WORKFLOW_IDS,
+    ...ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_IDS,
   ] as const;
 
-  const globalWorkflowInstalls = await Promise.allSettled(
-    globalWorkflowIds.map((id) => client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
-  );
-  for (const [index, result] of globalWorkflowInstalls.entries()) {
-    if (result.status === 'rejected') {
+  // One pass with `_bulk` writes, so start-up holds at most one of the Elasticsearch threads that
+  // logins also write with. See docs/managed_workflow_startup_install.md.
+  try {
+    const { failed } = await client.installMany(
+      globalWorkflowIds.map((id) => ({ id, spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
+    );
+    for (const { id, error } of failed) {
       canReconcile = false;
-      logger.error(
-        // Covers rule and action workflows, so this stays generic.
-        `Failed to install managed AlertZero workflow "${globalWorkflowIds[index]}": ${
-          result.reason instanceof Error ? result.reason.message : String(result.reason)
-        }`
-      );
+      // Covers rule and action workflows, so this stays generic.
+      logger.error(`Failed to install managed AlertZero workflow "${id}": ${error.message}`);
     }
+  } catch (error) {
+    canReconcile = false;
+    logger.error(
+      `Failed to install managed AlertZero workflows: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
-
-  // Dynamic auto upgrade re-renders from stored template values. Fill missing defaults first so
-  // that upgrade persists them instead of keeping the old document.
-  await applyMissingInstalledWorkerSettings(client, logger);
 
   if (canReconcile) {
     try {

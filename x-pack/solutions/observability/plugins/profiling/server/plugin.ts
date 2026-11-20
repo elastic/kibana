@@ -22,7 +22,6 @@ import type {
   ProfilingPluginStartDeps,
   ProfilingRequestHandlerContext,
 } from './types';
-import { createProfilingEsClient } from './utils/create_profiling_es_client';
 
 export class ProfilingPlugin
   implements
@@ -56,14 +55,6 @@ export class ProfilingPlugin
     core
       .getStartServices()
       .then(([coreStart, depsStart]) => {
-        const profilingSpecificEsClient = config.elasticsearch
-          ? coreStart.elasticsearch.createClient('profiling', {
-              hosts: [config.elasticsearch.hosts],
-              username: config.elasticsearch.username,
-              password: config.elasticsearch.password,
-            })
-          : undefined;
-
         const esCapabilities = coreStart.elasticsearch.getCapabilities();
 
         registerRoutes({
@@ -79,13 +70,7 @@ export class ProfilingPlugin
             esCapabilities,
           },
           services: {
-            createProfilingEsClient: ({ request, esClient: defaultEsClient }) => {
-              const esClient = profilingSpecificEsClient
-                ? profilingSpecificEsClient.asScoped(request).asInternalUser
-                : defaultEsClient;
-
-              return createProfilingEsClient({ request, esClient });
-            },
+            createProfilingEsClient: depsStart.profilingDataAccess.createProfilingEsClient,
           },
         });
       })

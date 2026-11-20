@@ -14,9 +14,17 @@ import type {
   ColorByValueStep,
   ColorByValueType,
   ColorMappingCategoricalType,
+  ColorMappingGradientType,
   ColorMappingType,
 } from './color';
-import { allColoringTypeSchema, colorByValueStepsSchema, AUTO_COLOR, NO_COLOR } from './color';
+import {
+  allColoringTypeSchema,
+  colorByValueStepsSchema,
+  colorMappingSchema,
+  AUTO_COLOR,
+  NO_COLOR,
+} from './color';
+import type { SerializableValueType } from './serializedValue';
 import { PALETTE_IDS } from './constants';
 
 type ColorByValueRangeType = Extract<ColorByValueType, { type: 'dynamic' }>;
@@ -226,7 +234,28 @@ describe('Color Schema', () => {
         }
       );
 
+      it('validates a distributed_palette with a band count', () => {
+        const input = { type: 'distributed_palette', palette: 'status', steps: 5 };
+
+        expect(allColoringTypeSchema.parse(input)).toEqual(input);
+      });
+
+      it('validates a distributed_palette with the maximum band count', () => {
+        const input = { type: 'distributed_palette', palette: 'status', steps: 100 };
+
+        expect(allColoringTypeSchema.parse(input)).toEqual(input);
+      });
+
       describe('validation errors', () => {
+        it.each([0, -1, 2.5, 101, 1_000_000_000])(
+          'throws for an invalid band count (%s)',
+          (steps) => {
+            const input = { type: 'distributed_palette', palette: 'status', steps };
+
+            expect(() => allColoringTypeSchema.parse(input)).toThrow();
+          }
+        );
+
         it('throws when the palette name is missing', () => {
           const input = {
             type: 'distributed_palette',
@@ -425,6 +454,59 @@ describe('Color Schema', () => {
       expect(validated).toMatchObject(input);
     });
 
+    describe('assignment value types', () => {
+      const cases: Array<[string, SerializableValueType]> = [
+        ['a boolean `true` value', true],
+        ['a boolean `false` value', false],
+        ['a `null` value', null],
+        ['a multi-value array of strings', ['a', 'b']],
+        ['a multi-value array of numbers', [1, 2]],
+        ['a multi-value array of booleans', [true, false]],
+        [
+          'an open-ended range key',
+          { type: 'range_key', from: 1000, ranges: [{ from: 1000, label: 'Large' }] },
+        ],
+        [
+          'an open-start range key',
+          { type: 'range_key', to: 0, ranges: [{ to: 0, label: 'Negative' }] },
+        ],
+        ['a fully open range key', { type: 'range_key', ranges: [{ label: 'Full open' }] }],
+      ];
+
+      describe('categorical', () => {
+        it.each(cases)('validates %s', (_, value) => {
+          const input: ColorMappingType = {
+            palette: 'kibana_palette',
+            mode: 'categorical',
+            mapping: [
+              {
+                values: [value],
+                color: { type: 'color_code', value: '#ff0000' },
+              },
+            ],
+          };
+
+          const validated = allColoringTypeSchema.parse(input);
+          expect(validated).toEqual(input);
+        });
+      });
+
+      describe('gradient', () => {
+        it.each(cases)('validates %s', (_, value) => {
+          const input: ColorMappingGradientType = {
+            palette: 'kibana_palette',
+            mode: 'gradient',
+            mapping: [{ values: [value] }],
+            sort: 'asc',
+            gradient: [{ type: 'color_code', value: '#ff0000' }],
+          };
+
+          const validated = allColoringTypeSchema.parse(input);
+          expect(validated).toEqual(input);
+        });
+      });
+    });
+
     describe('validation errors', () => {
       it('throws on invalid mode in color mapping', () => {
         const input = {
@@ -440,6 +522,77 @@ describe('Color Schema', () => {
         } satisfies ColorMappingCategoricalType;
 
         const result = allColoringTypeSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      });
+
+      it('rejects a `null` range key bound', () => {
+        const input = {
+          palette: 'kibana_palette',
+          mode: 'categorical',
+          mapping: [
+            {
+              color: { type: 'color_code', value: '#ff0000' },
+              values: [{ type: 'range_key', from: 1000, to: null, ranges: [] }],
+            },
+          ],
+        };
+
+        const result = colorMappingSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      });
+
+      it('rejects a `null` bound on a nested range', () => {
+        const input = {
+          palette: 'kibana_palette',
+          mode: 'categorical',
+          mapping: [
+            {
+              color: { type: 'color_code', value: '#ff0000' },
+              values: [
+                {
+                  type: 'range_key',
+                  from: 0,
+                  to: 1000,
+                  ranges: [{ from: 1000, to: null, label: 'Large' }],
+                },
+              ],
+            },
+          ],
+        };
+
+        const result = colorMappingSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      });
+
+      it('rejects a `null` element in a multi-value array', () => {
+        const input = {
+          palette: 'kibana_palette',
+          mode: 'categorical',
+          mapping: [
+            {
+              color: { type: 'color_code', value: '#ff0000' },
+              values: [['a', null]],
+            },
+          ],
+        };
+
+        const result = colorMappingSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      });
+
+      it('rejects a mixed-type multi-value array', () => {
+        const input = {
+          palette: 'kibana_palette',
+          mode: 'categorical',
+          mapping: [
+            {
+              color: { type: 'color_code', value: '#ff0000' },
+              values: [[1, true, 'hey']],
+            },
+          ],
+        };
+
+        const result = colorMappingSchema.safeParse(input);
         expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
       });
     });

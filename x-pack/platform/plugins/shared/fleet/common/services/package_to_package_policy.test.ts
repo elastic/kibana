@@ -759,7 +759,9 @@ describe('dataStreamUsesOtelInput', () => {
     ],
   });
 
-  const makeDataStream = (inputRef: string): Pick<RegistryDataStream, 'streams'> => ({
+  const makeDataStream = (
+    inputRef: string
+  ): Pick<RegistryDataStream, 'streams' | 'use_otel_suffix'> => ({
     streams: [{ input: inputRef, title: 'stream' } as any],
   });
 
@@ -791,6 +793,37 @@ describe('dataStreamUsesOtelInput', () => {
     const pkgInfo = makePackageInfo([{ name: 'otel_logs', type: 'otelcol' }]);
     expect(dataStreamUsesOtelInput(pkgInfo, { streams: [] })).toBe(false);
     expect(dataStreamUsesOtelInput(pkgInfo, {})).toBe(false);
+  });
+
+  it('returns true when the data stream sets use_otel_suffix and has no streams', () => {
+    expect(dataStreamUsesOtelInput({}, { use_otel_suffix: true })).toBe(true);
+    expect(dataStreamUsesOtelInput({}, { use_otel_suffix: true, streams: [] })).toBe(true);
+  });
+
+  it('ignores use_otel_suffix when the data stream defines inputs (package-spec SVR00011)', () => {
+    // Rejected by package-spec, so only reachable through a hand-built archive. Falling back to
+    // input detection keeps ES asset naming aligned with where the agent writes.
+    expect(
+      dataStreamUsesOtelInput(makePackageInfo([{ name: 'my_logfile', type: 'logfile' }]), {
+        ...makeDataStream('my_logfile'),
+        use_otel_suffix: true,
+      })
+    ).toBe(false);
+    // An otelcol stream still wins on its own, so a redundant flag changes nothing
+    expect(
+      dataStreamUsesOtelInput(makePackageInfo([{ name: 'otel_logs', type: 'otelcol' }]), {
+        ...makeDataStream('otel_logs'),
+        use_otel_suffix: true,
+      })
+    ).toBe(true);
+  });
+
+  it('returns false when use_otel_suffix is false or absent and no stream uses otelcol', () => {
+    const pkgInfo = makePackageInfo([{ name: 'my_logfile', type: 'logfile' }]);
+    expect(dataStreamUsesOtelInput(pkgInfo, { use_otel_suffix: false })).toBe(false);
+    expect(
+      dataStreamUsesOtelInput(pkgInfo, { ...makeDataStream('my_logfile'), use_otel_suffix: false })
+    ).toBe(false);
   });
 
   it('does not crash when policy_templates is absent and returns false for non-otelcol streams', () => {

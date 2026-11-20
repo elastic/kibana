@@ -9,11 +9,14 @@ import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
 export const SELECTED_CONVERSATION_ID_PARAM = 'selectedConversationId';
+export const SELECTED_PROPOSAL_ID_PARAM = 'selectedProposalId';
 
 export interface ConversationsUrlParams {
   /** Conversation whose details flyout is open, from the URL. */
   selectedConversationId?: string;
-  selectConversation: (id: string) => void;
+  /** Proposal whose card was clicked to open the flyout, from the URL. */
+  selectedProposalId?: string;
+  selectConversation: (id: string, proposalId?: string) => void;
   /** Closes the flyout, leaving a history entry so Back reopens it. */
   clearSelectedConversation: () => void;
 }
@@ -26,7 +29,8 @@ export interface ConversationsUrlParams {
  * the same link take the identical path.
  *
  * Opening and closing push, so Back closes the flyout. The flyout's own tab state belongs to Agent
- * Builder and is deliberately not mirrored here.
+ * Builder and is deliberately not mirrored here. Flyouts stacked on it get their own history
+ * entries (see `useInvestigationFlyoutBrowserHistory`), so Back returns to it first.
  */
 export const useConversationsUrlParams = (): ConversationsUrlParams => {
   const history = useHistory();
@@ -34,6 +38,11 @@ export const useConversationsUrlParams = (): ConversationsUrlParams => {
 
   const selectedConversationId = useMemo(
     () => new URLSearchParams(search).get(SELECTED_CONVERSATION_ID_PARAM) ?? undefined,
+    [search]
+  );
+
+  const selectedProposalId = useMemo(
+    () => new URLSearchParams(search).get(SELECTED_PROPOSAL_ID_PARAM) ?? undefined,
     [search]
   );
 
@@ -49,17 +58,30 @@ export const useConversationsUrlParams = (): ConversationsUrlParams => {
   );
 
   const selectConversation = useCallback(
-    (id: string) => navigate((params) => params.set(SELECTED_CONVERSATION_ID_PARAM, id)),
+    (id: string, proposalId?: string) =>
+      navigate((params) => {
+        params.set(SELECTED_CONVERSATION_ID_PARAM, id);
+        if (proposalId) {
+          params.set(SELECTED_PROPOSAL_ID_PARAM, proposalId);
+        } else {
+          params.delete(SELECTED_PROPOSAL_ID_PARAM);
+        }
+      }),
     [navigate]
   );
 
   const clearSelectedConversation = useCallback(
-    () => navigate((params) => params.delete(SELECTED_CONVERSATION_ID_PARAM)),
+    () =>
+      navigate((params) => {
+        params.delete(SELECTED_CONVERSATION_ID_PARAM);
+        params.delete(SELECTED_PROPOSAL_ID_PARAM);
+      }),
     [navigate]
   );
 
   return {
     selectedConversationId,
+    selectedProposalId,
     selectConversation,
     clearSelectedConversation,
   };

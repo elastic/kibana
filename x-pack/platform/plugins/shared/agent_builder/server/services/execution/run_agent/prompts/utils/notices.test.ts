@@ -5,14 +5,21 @@
  * 2.0.
  */
 
+import type { AIMessage } from '@langchain/core/messages';
 import { isAIMessage, isHumanMessage, isToolMessage } from '@langchain/core/messages';
-import { ExecutionStatus } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStepType,
+  EventActorType,
+  ExecutionStatus,
+} from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import {
   EXECUTION_FAILED_NOTICE_MAX_LENGTH,
   createCycleLimitSystemMessage,
+  formatAwaitingPromptNotice,
+  formatDeliveredMessageNotice,
   formatExecutionAbortedNotice,
   formatExecutionFailedNotice,
   formatHandover,
@@ -85,6 +92,15 @@ describe('formatRetryNotice', () => {
     expect((result as any).tool_call_id).toBe((call as any).tool_calls[0].id);
   });
 
+  it('sanitizes the tool name of a tool-not-found error', () => {
+    const error = createAgentExecutionError('no such tool', AgentExecutionErrorCode.toolNotFound, {
+      toolName: 'ghost.tool',
+      toolArgs: {},
+    });
+    const [call] = formatRetryNotice(error) as [AIMessage];
+    expect(call.tool_calls?.[0].name).toBe('ghost_tool');
+  });
+
   it('renders a validation error as a failed tool call carrying the validation message', () => {
     const error = createAgentExecutionError(
       'bad args',
@@ -112,6 +128,34 @@ describe('formatRetryNotice', () => {
   });
 });
 
+describe('formatDeliveredMessageNotice', () => {
+  const delivered = {
+    type: ConversationRoundStepType.deliveredMessage as const,
+    event_id: 'e1',
+    author: { type: EventActorType.user, id: 'u1', username: 'sid' },
+    is_run_owner: true,
+    message: 'use a table',
+    delivered_at: '2026-01-01T00:00:00.000Z',
+    cycle: 2,
+  };
+
+  it('places a message read after a tool batch at that batch', () => {
+    const notice = formatDeliveredMessageNotice({ ...delivered, tool_call_group_id: 'g1' });
+
+    expect(notice).toContain('after the tool calls that just returned, at cycle 2');
+    expect(notice).toContain('<user_message>use a table</user_message>');
+    expect(notice).not.toContain('do not repeat it');
+  });
+
+  it('tells the model the user has seen the answer when the message was read after it', () => {
+    const notice = formatDeliveredMessageNotice({ ...delivered, after_answer: true });
+
+    expect(notice).toContain('while you were writing the answer above, at cycle 2');
+    expect(notice).toContain('The user has seen that answer.');
+    expect(notice).toContain('do not repeat it');
+  });
+});
+
 describe('formatSubagentRosterNotice', () => {
   it('lists the roster entries in a system notice', () => {
     const notice = formatSubagentRosterNotice([
@@ -128,27 +172,37 @@ describe('formatSystemNotice', () => {
 
     expect(notice).toContain('<system_notice>');
     expect(notice).toContain('</system_notice>');
-    expect(notice).toContain('<execution-id>exec-123</execution-id>');
-    expect(notice).toContain('<status>completed</status>');
-    expect(notice).toContain('<result>The task is done.</result>');
-    expect(notice).not.toContain('<error>');
+    expect(notice).toContain('A background agent has reported back.');
+    expect(notice).toContain(
+      '<report>Background sub-agent execution exec-123 finished with status completed.\n\nResult:\nThe task is done.</report>'
+    );
+    expect(notice).not.toContain('<agent-id>');
+    expect(notice).not.toContain('Error:');
   });
 
   it('formats a failed execution as a system notice with error', () => {
     const notice = formatSystemNotice(makeFailedExecution());
 
     expect(notice).toContain('<system_notice>');
-    expect(notice).toContain('has failed');
-    expect(notice).toContain('<execution-id>exec-456</execution-id>');
-    expect(notice).toContain('<status>failed</status>');
-    expect(notice).toContain('<error>LLM timeout</error>');
-    expect(notice).not.toContain('<result>');
+    expect(notice).toContain(
+      '<report>Background sub-agent execution exec-456 finished with status failed.\n\nError: LLM timeout</report>'
+    );
+    expect(notice).not.toContain('Result:');
   });
 
   it('uses "No response" when completed execution has no response', () => {
     const notice = formatSystemNotice(makeCompletedExecution({ response: undefined }));
 
-    expect(notice).toContain('<result>No response</result>');
+    expect(notice).toContain('Result:\nNo response</report>');
+  });
+
+  it('names the agent when the entry records it, in the same shape as a wake report', () => {
+    const notice = formatSystemNotice(makeCompletedExecution({ agent_id: 'log-analyzer' }));
+
+    expect(notice).toContain('<agent-id>log-analyzer</agent-id>');
+    expect(notice).toContain(
+      '<report>Background sub-agent execution exec-123 (agent log-analyzer) finished with status completed.'
+    );
   });
 });
 
@@ -246,5 +300,19 @@ describe('formatInterruptionNotice', () => {
     expect(notice).toContain('<cause code="c">');
     expect(notice).toContain('root');
     expect(notice).toContain('…');
+  });
+});
+
+describe('formatAwaitingPromptNotice', () => {
+  it('says the round waits on the user and lists the unanswered questions, escaped', () => {
+    const notice = formatAwaitingPromptNotice(['Which index?', 'Use <prod>?']);
+    expect(notice).toContain('<system_notice>');
+    expect(notice).toContain('the user has not answered');
+    expect(notice).toContain('<question>Which index?</question>');
+    expect(notice).toContain('Use &lt;prod&gt;?');
+  });
+
+  it('omits the questions block when nothing was asked', () => {
+    expect(formatAwaitingPromptNotice([])).not.toContain('<unanswered_questions>');
   });
 });

@@ -15,8 +15,8 @@ import { get } from 'lodash';
 import React from 'react';
 import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
+import type { FilterableField } from '@kbn/data-source';
 import { ValueInputType } from './value_input_type';
 
 interface RangeParams {
@@ -27,7 +27,7 @@ interface RangeParams {
 type RangeParamsPartial = Partial<RangeParams>;
 
 interface Props {
-  field: DataViewField;
+  field: FilterableField;
   value?: RangeParams;
   onChange: (params: RangeParamsPartial) => void;
   intl: InjectedIntl;

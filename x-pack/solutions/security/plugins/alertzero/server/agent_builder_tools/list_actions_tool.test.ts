@@ -15,11 +15,17 @@ const logger = () => ({ error: jest.fn(), warn: jest.fn(), info: jest.fn(), debu
 
 const serviceWith = (list: jest.Mock) => ({ list } as Pick<ActionsService, 'list'>);
 
+const assertAlertZeroAccess = jest.fn().mockResolvedValue(undefined);
+
+beforeEach(() => {
+  assertAlertZeroAccess.mockReset().mockResolvedValue(undefined);
+});
+
 const run = async (
   service: Pick<ActionsService, 'list'>,
   input: { categories?: string[] } = {}
 ) => {
-  const tool = listActionsTool(() => service);
+  const tool = listActionsTool(() => service, assertAlertZeroAccess);
   const result = await tool.handler(input, {
     logger: logger(),
     request,
@@ -55,6 +61,7 @@ describe('listActionsTool', () => {
       total: 2,
     });
     const result = await run(serviceWith(list));
+    expect(assertAlertZeroAccess).toHaveBeenCalledWith(request, 'read');
     expect(list).toHaveBeenCalledWith('space-a', request, undefined);
     expect(result.results[0].type).toBe(ToolResultType.other);
     expect(result.results[0].data).toMatchObject({
@@ -85,8 +92,26 @@ describe('listActionsTool', () => {
     expect(JSON.stringify(result.results[0])).toContain('workflows management down');
   });
 
+  it.each(['Missing AlertZero Read privilege.', 'AlertZero is disabled in this space.'])(
+    'does not access the catalog when denied: %s',
+    async (errorMessage) => {
+      assertAlertZeroAccess.mockRejectedValue(new Error(errorMessage));
+      const getActionsService = jest.fn();
+      const tool = listActionsTool(getActionsService, assertAlertZeroAccess);
+      const result = await tool.handler({}, {
+        logger: logger(),
+        request,
+        spaceId: 'space-a',
+      } as never);
+
+      expect(assertAlertZeroAccess).toHaveBeenCalledWith(request, 'read');
+      expect(getActionsService).not.toHaveBeenCalled();
+      expect(JSON.stringify(result)).toContain(errorMessage);
+    }
+  );
+
   it('declares the documented tool id and read-only annotations', () => {
-    const tool = listActionsTool(() => serviceWith(jest.fn()));
+    const tool = listActionsTool(() => serviceWith(jest.fn()), assertAlertZeroAccess);
     expect(tool.id).toBe('security.alertzero.actions.list');
     expect(tool.annotations).toMatchObject({
       readOnlyHint: true,

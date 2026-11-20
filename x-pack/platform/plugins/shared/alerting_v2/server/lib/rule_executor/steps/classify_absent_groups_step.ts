@@ -7,9 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import { getNoDataEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
-import { PluginInitializer } from '@kbn/core-di-server';
-import type { PluginInitializerContext } from '@kbn/core/server';
-import type { PluginConfig } from '../../../config';
+import { ConfigService } from '../../services/config_service/config_service';
 import type { PipelineStateStream, RuleExecutionStep, RulePipelineState } from '../types';
 import {
   buildContinuedBreachAlertEvents,
@@ -68,10 +66,9 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
     @inject(QueryServiceInternalToken) private readonly internalQueryService: QueryServiceContract,
     @inject(QueryServiceScopedSpaceRoutingToken)
     private readonly scopedQueryService: QueryServiceContract,
-    @inject(PluginInitializer('config'))
-    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
+    @inject(ConfigService) configService: ConfigService
   ) {
-    const { run } = pluginConfigAccessor.get<PluginConfig>().rules;
+    const run = configService.get('rules.run');
     this.maxQueryResponseSize = run.query.maxResponseSize.getValueInBytes();
     this.maxActiveGroups = run.alerts.max;
   }
@@ -217,7 +214,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
 
     return buildRecoveryAlertEvents({
       ruleId: rule.id,
-      ruleVersion: rule.metadata.version,
+      ruleVersion: rule.version,
       spaceId: input.spaceId,
       activeGroupHashes: activeGroups,
       breachedGroupHashes,
@@ -279,7 +276,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
       events.push(
         ...buildNoDataAlertEvents({
           ruleId: rule.id,
-          ruleVersion: rule.metadata.version,
+          ruleVersion: rule.version,
           spaceId: input.spaceId,
           groupHashes: noDataGroupHashes,
           scheduledTimestamp: input.scheduledAt,
@@ -292,7 +289,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
       events.push(
         ...buildContinuedBreachAlertEvents({
           ruleId: rule.id,
-          ruleVersion: rule.metadata.version,
+          ruleVersion: rule.version,
           spaceId: input.spaceId,
           groupHashes: continuedBreachGroupHashes,
           scheduledTimestamp: input.scheduledAt,

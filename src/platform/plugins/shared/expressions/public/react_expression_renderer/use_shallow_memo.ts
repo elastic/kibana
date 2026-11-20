@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line @typescript-eslint/triple-slash-reference, spaced-comment
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference, @kbn/compat/eslint-spaced-comment
 /// <reference path="./shallow_equal.d.ts" />
 
 import { useRef } from 'react';

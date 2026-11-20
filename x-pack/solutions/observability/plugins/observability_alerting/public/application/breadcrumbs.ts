@@ -9,7 +9,7 @@ import type { ChromeBreadcrumb, CoreStart, ScopedHistory } from '@kbn/core/publi
 import { OBSERVABILITY_OVERVIEW_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { OBSERVABILITY_ALERTING_INBOX_PATH } from '../constants';
+import { OBSERVABILITY_ALERTING_ALERTS_PATH } from '../constants';
 
 const wrapBreadcrumb = (
   item: ChromeBreadcrumb,
@@ -40,7 +40,7 @@ export const createObservabilityAlertingSetBreadcrumbs = ({
       text: i18n.translate('xpack.observabilityAlerting.breadcrumbs.alerting', {
         defaultMessage: 'Alerting',
       }),
-      ...reactRouterNavigate(history, OBSERVABILITY_ALERTING_INBOX_PATH),
+      ...reactRouterNavigate(history, OBSERVABILITY_ALERTING_ALERTS_PATH),
     };
 
     const surfaceCrumbs = crumbs

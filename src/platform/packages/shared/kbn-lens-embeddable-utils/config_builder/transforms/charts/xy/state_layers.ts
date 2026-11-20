@@ -35,12 +35,13 @@ import {
   getIdForLayer,
   getAccessorNameForXY,
   isAPIDataLayer,
-  xyIconCompat,
+  annotationIconCompat,
 } from './helpers';
 import { fromMetricAPItoLensState } from '../../columns/metric';
 import { fromBucketLensApiToLensState } from '../../columns/buckets';
 import { fromColorMappingAPIToLensState, isAutoColor } from '../../coloring';
 import { processMetricColumnsWithReferences } from '../utils';
+import { getDefaultBreakdownColorMapping } from './defaults';
 
 const X_ACCESSOR = 'x';
 const BREAKDOWN_ACCESSOR = 'breakdown';
@@ -60,7 +61,10 @@ export function getValueColumns(
   }
   if (isAPIReferenceLineLayer(layer)) {
     return [
-      ...layer.thresholds.map((t, index) => getValueColumn(`referenceLine${index}`, t, 'number')),
+      ...layer.thresholds.map((threshold, index) => {
+        const columnId = getAccessorNameForXY(layer, i, REFERENCE_LINE_ACCESSOR_PREFIX, index);
+        return getValueColumn(columnId, threshold, 'number');
+      }),
     ];
   }
   const xColumnType =
@@ -83,11 +87,19 @@ function buildDataLayer(config: XYConfig, layer: DataLayerType, i: number): XYDa
     layer.type.includes('percentage') ? `${layer.type}_stacked` : layer.type
   ) as SeriesType;
 
+  // The runtime ignores the static Y color while the breakdown is active (not collapsed), and the
+  // breakdown color mapping while it is collapsed, so each is stored only when it is used.
+  const hasActiveBreakdown =
+    layer.breakdown_by != null &&
+    !('collapse_by' in layer.breakdown_by && layer.breakdown_by.collapse_by);
+
   const yConfig = layer.y.map<YConfig>((yMetric, index) => {
     const onAxis = yMetric?.axis ?? 'y';
     const axisMode = onAxis === 'y2' ? 'right' : 'left';
     return {
-      ...(yMetric.color && !isAutoColor(yMetric.color) ? { color: yMetric.color?.color } : {}),
+      ...(!hasActiveBreakdown && yMetric.color && !isAutoColor(yMetric.color)
+        ? { color: yMetric.color.color }
+        : {}),
       axisMode,
       forAccessor: getAccessorNameForXY(layer, i, METRIC_ACCESSOR_PREFIX, index),
     };
@@ -107,8 +119,10 @@ function buildDataLayer(config: XYConfig, layer: DataLayerType, i: number): XYDa
     ...(layer.breakdown_by && 'collapse_by' in layer.breakdown_by
       ? { collapseFn: layer.breakdown_by.collapse_by }
       : {}),
-    ...(layer.breakdown_by && 'color' in layer.breakdown_by
-      ? { ...fromColorMappingAPIToLensState(layer.breakdown_by.color) }
+    ...(layer.breakdown_by && hasActiveBreakdown
+      ? fromColorMappingAPIToLensState(
+          layer.breakdown_by.color ?? getDefaultBreakdownColorMapping(seriesTypeLabel)
+        )
       : {}),
   };
 }
@@ -159,7 +173,7 @@ function buildByValueAnnotationLayer(
           label: annotation.label ?? 'Event',
           ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
           ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
-          ...(annotation.icon ? { icon: xyIconCompat.toState(annotation.icon) } : {}),
+          ...(annotation.icon ? { icon: annotationIconCompat.toState(annotation.icon) } : {}),
           ...(annotation.line?.stroke_width != null
             ? { lineWidth: annotation.line.stroke_width }
             : {}),
@@ -183,7 +197,7 @@ function buildByValueAnnotationLayer(
         ...(annotation.extra_fields ? { extraFields: annotation.extra_fields } : {}),
         ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
         ...(annotation.text?.field ? { textField: annotation.text.field } : {}),
-        ...(annotation.icon ? { icon: xyIconCompat.toState(annotation.icon) } : {}),
+        ...(annotation.icon ? { icon: annotationIconCompat.toState(annotation.icon) } : {}),
         ...(annotation.line?.stroke_width != null
           ? { lineWidth: annotation.line.stroke_width }
           : {}),
@@ -203,7 +217,7 @@ function buildReferenceLineLayer(
   const yConfig = layer.thresholds.map<YConfig>((threshold, index) => {
     const axisMode = threshold.axis === 'y2' ? 'right' : threshold.axis === 'x' ? 'bottom' : 'left';
     return {
-      icon: xyIconCompat.toState(threshold.icon),
+      icon: annotationIconCompat.toState(threshold.icon),
       iconPosition: threshold.position,
       lineWidth: threshold.stroke_width,
       lineStyle: threshold.stroke_dash,

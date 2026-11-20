@@ -8,6 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
+import { systemIndicesSuperuser } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Notification } from '../../common/types';
 import { NOTIFICATION_DATA_STREAM_NAME } from '../../server/storage/notification_data_stream';
@@ -15,7 +16,6 @@ import { buildChunk, buildTick, validateFixture } from './fixtures';
 import {
   clearNotifications,
   clearReadHorizon,
-  createDataStream,
   createEsClient,
   setReadHorizon,
   writeNotifications,
@@ -94,8 +94,14 @@ run(
     const target: SeedTarget = {
       kibanaUrl: requiredUrl(flags, 'kibana-url'),
       esUrl: requiredUrl(flags, 'es-url'),
-      username: String(flags['es-username'] || 'elastic'),
-      password: String(flags['es-password'] || 'changeme'),
+      esAuth: {
+        username: String(flags['es-username'] || systemIndicesSuperuser.username),
+        password: String(flags['es-password'] || systemIndicesSuperuser.password),
+      },
+      kibanaAuth: {
+        username: String(flags['kibana-username'] || 'elastic'),
+        password: String(flags['kibana-password'] || 'changeme'),
+      },
     };
     const intervalMs = flags.interval ? parseInterval(String(flags.interval)) : undefined;
     const readHorizon = parseReadHorizon(String(flags['read-horizon'] || DEFAULT_READ_HORIZON));
@@ -104,7 +110,6 @@ run(
     addCleanupTask(() => {
       void esClient.close();
     });
-    await createDataStream(target);
 
     if (flags.clean === true) {
       log.info(`Deleted ${await clearNotifications(esClient)} notification(s).`);
@@ -119,8 +124,12 @@ run(
 
     log.info(`Seeded ${chunk.length} notification(s), unread since ${readHorizon}:`);
     chunk.forEach((notification) => log.info(formatLine(notification)));
-    log.info('View them in Dev Console via:');
-    log.info(`GET /${NOTIFICATION_DATA_STREAM_NAME}/_search`);
+    // Dev Console sends no product origin header, so it cannot read this stream.
+    log.info('Read them back with:');
+    log.info(
+      `curl -u <es_username>:<es_password> ` +
+        `-H 'x-elastic-product-origin: kibana' '${target.esUrl}/${NOTIFICATION_DATA_STREAM_NAME}/_search'`
+    );
 
     if (intervalMs) {
       await runCadence(esClient, intervalMs, log);
@@ -134,13 +143,25 @@ run(
       --kibana-url and --es-url name the same cluster.
     `,
     flags: {
-      string: ['interval', 'es-url', 'es-username', 'es-password', 'kibana-url', 'read-horizon'],
+      string: [
+        'interval',
+        'es-url',
+        'es-username',
+        'es-password',
+        'kibana-url',
+        'kibana-username',
+        'kibana-password',
+        'read-horizon',
+      ],
       boolean: ['clean', 'include-unregistered'],
       help: `
         --kibana-url <url>       Required. Kibana base URL, including any base path
         --es-url <url>           Required. Elasticsearch URL of that Kibana's cluster
-        --es-username <user>     Username for both (default: elastic)
-        --es-password <pass>     Password for both (default: changeme)
+        --es-username <user>     Elasticsearch user. Must hold allow_restricted_indices to write
+                                 to the system data stream (default: ${systemIndicesSuperuser.username})
+        --es-password <pass>     Password for --es-username (default: changeme)
+        --kibana-username <user> Kibana user whose read state is seeded (default: elastic)
+        --kibana-password <pass> Password for --kibana-username (default: changeme)
         --clean                  Empty the data stream, reset read state, and exit
         --include-unregistered   Also seed namespaces no plugin has registered yet, plus one
                                  timeseries id. These bypass the producer contract and exist to

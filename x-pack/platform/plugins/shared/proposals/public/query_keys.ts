@@ -30,5 +30,6 @@ export const mutationKeys = {
   proposals: {
     approve: ['proposals', 'approve'] as const,
     decline: ['proposals', 'decline'] as const,
+    reopen: ['proposals', 'reopen'] as const,
   },
 };

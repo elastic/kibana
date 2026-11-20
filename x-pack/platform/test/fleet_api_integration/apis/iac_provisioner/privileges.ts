@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IAC_PROVISIONER_API_ROUTES } from '@kbn/fleet-plugin/common/constants';
 import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '@kbn/fleet-plugin/common/types/rest_spec/iac_provisioner';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -31,6 +32,9 @@ export default function (providerContext: FtrProviderContext) {
   const mockIacProvisioner = createMockIacProvisioner();
 
   let cloudConnectorId: string;
+  let callbackId: string;
+  const callbackPath = (id: string) =>
+    IAC_PROVISIONER_API_ROUTES.CALLBACK_INFO_PATTERN.replace('{callbackId}', id);
 
   // Render is read + proxy: AGENT_POLICIES.READ | INTEGRATIONS.READ, like GET cloud connectors.
   const READ_SCENARIOS = [
@@ -79,6 +83,35 @@ export default function (providerContext: FtrProviderContext) {
       // A read of the integration set: no provisioner call, no stored status.
       send: { compare: false },
     },
+    // Availability is a read of the server configuration.
+    {
+      method: 'GET',
+      path: IAC_PROVISIONER_API_ROUTES.CALLBACK_AVAILABILITY_PATTERN,
+      headers: INTERNAL_ROUTE_HEADERS,
+      scenarios: READ_SCENARIOS,
+    },
+    // Creating a record is creating what a stack turns into an identity.
+    {
+      method: 'POST',
+      path: IAC_PROVISIONER_API_ROUTES.CALLBACK_CREATE_PATTERN,
+      headers: INTERNAL_ROUTE_HEADERS,
+      scenarios: ALL_SCENARIOS,
+      send: { provider: 'aws' },
+    },
+    // The poll can apply a report the record holds, which creates the identity, so a read-only
+    // caller must not be able to trigger it.
+    {
+      method: 'GET',
+      path: () => callbackPath(callbackId),
+      headers: INTERNAL_ROUTE_HEADERS,
+      scenarios: ALL_SCENARIOS,
+    },
+    {
+      method: 'DELETE',
+      path: () => callbackPath(callbackId),
+      headers: INTERNAL_ROUTE_HEADERS,
+      scenarios: ALL_SCENARIOS,
+    },
   ];
 
   describe('IaC Provisioner Privileges', () => {
@@ -91,6 +124,12 @@ export default function (providerContext: FtrProviderContext) {
       await setupTestUsers(getService('security'));
       await mockIacProvisioner.start();
       cloudConnectorId = await createAwsCloudConnector(supertest);
+      const { body } = await supertest
+        .post(IAC_PROVISIONER_API_ROUTES.CALLBACK_CREATE_PATTERN)
+        .set(INTERNAL_ROUTE_HEADERS)
+        .send({ provider: 'aws' })
+        .expect(200);
+      callbackId = body.item.id;
     });
 
     after(async () => {

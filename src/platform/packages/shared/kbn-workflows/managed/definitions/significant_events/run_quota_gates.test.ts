@@ -32,12 +32,15 @@ interface WorkflowStep {
     retry?: unknown;
   };
   steps?: WorkflowStep[];
+  else?: WorkflowStep[];
 }
 
 interface WorkflowDefinition {
   triggers: Array<{
     type: string;
-    inputs?: Array<{ name: string; type: string }>;
+    inputs?:
+      | Array<{ name: string; type: string }>
+      | { properties?: Record<string, { type: string }> };
   }>;
   steps: WorkflowStep[];
 }
@@ -50,7 +53,11 @@ const definitions = {
 };
 
 const flattenSteps = (steps: WorkflowStep[]): WorkflowStep[] =>
-  steps.flatMap((step) => [step, ...(step.steps ? flattenSteps(step.steps) : [])]);
+  steps.flatMap((step) => [
+    step,
+    ...(step.steps ? flattenSteps(step.steps) : []),
+    ...(step.else ? flattenSteps(step.else) : []),
+  ]);
 
 const quotaSteps = Object.values(definitions).flatMap((definition) =>
   flattenSteps(definition.steps).filter(
@@ -71,7 +78,13 @@ const findInput = (
   name: string
 ): { name: string; type: string } | undefined =>
   definition.triggers
-    .flatMap((trigger) => trigger.inputs ?? [])
+    .flatMap((trigger) => {
+      if (Array.isArray(trigger.inputs)) {
+        return trigger.inputs;
+      }
+      const input = trigger.inputs?.properties?.[name];
+      return input ? [{ name, type: input.type }] : [];
+    })
     .find((input) => input.name === name);
 
 const stepIndex = (definition: WorkflowDefinition, name: string): number =>
@@ -109,11 +122,49 @@ describe('Significant Events run quota workflow contracts', () => {
   });
 
   it('runs detection and KI extraction gates only for workers whose root origin is scheduled', () => {
-    expect(quotaSteps.map((step) => step.with?.body?.group).sort()).toEqual(
+    expect([...new Set(quotaSteps.map((step) => step.with?.body?.group))].sort()).toEqual(
       ['detection', 'ki_extraction'].sort()
     );
 
-    for (const step of quotaSteps) {
+    const onboardingGate = findStep(definitions.onboarding, 'check_budget');
+    const fallbackGate = findStep(definitions.onboarding, 'check_fallback_budget');
+    expect(fallbackGate.if).toBe(
+      '${{ inputs.rootTriggeredBy == "scheduled" and variables.metricsEntitiesHandled == false }}'
+    );
+    expect(
+      evaluateExpression(fallbackGate.if as string, {
+        inputs: { rootTriggeredBy: 'scheduled' },
+        variables: { metricsEntitiesHandled: false },
+      })
+    ).toBe(true);
+    expect(
+      evaluateExpression(fallbackGate.if as string, {
+        inputs: { rootTriggeredBy: 'scheduled' },
+        variables: { metricsEntitiesHandled: true },
+      })
+    ).toBe(false);
+    expect(
+      evaluateStepCondition(findStep(definitions.onboarding, 'exit_if_fallback_budget_denied'), {
+        steps: { check_fallback_budget: { output: { allowed: false } } },
+      })
+    ).toBe(true);
+    expect(onboardingGate.if).toBe(
+      '${{ inputs.rootTriggeredBy == "scheduled" and inputs.sourceType != "metrics" }}'
+    );
+    expect(
+      evaluateExpression(onboardingGate.if as string, {
+        inputs: { rootTriggeredBy: 'scheduled', sourceType: 'logs' },
+      })
+    ).toBe(true);
+    expect(
+      evaluateExpression(onboardingGate.if as string, {
+        inputs: { rootTriggeredBy: 'scheduled', sourceType: 'metrics' },
+      })
+    ).toBe(false);
+
+    for (const step of quotaSteps.filter(
+      (quotaStep) => quotaStep !== onboardingGate && quotaStep !== fallbackGate
+    )) {
       expect(step.if).toBe('${{ inputs.rootTriggeredBy == "scheduled" }}');
       expect(
         evaluateExpression(step.if as string, { inputs: { rootTriggeredBy: 'scheduled' } })
@@ -137,7 +188,8 @@ describe('Significant Events run quota workflow contracts', () => {
   });
 
   it('places discovery and KI gates before their expensive work', () => {
-    expect(definitions.discovery.steps.slice(0, 3).map(({ name }) => name)).toEqual([
+    expect(definitions.discovery.steps.slice(0, 4).map(({ name }) => name)).toEqual([
+      'report_discovery_started',
       'bootstrap_cleanup_workflow',
       'check_budget',
       'exit_if_budget_denied',
@@ -176,11 +228,27 @@ describe('Significant Events run quota workflow contracts', () => {
 
     expect(discoveryDenial.steps).toEqual([
       expect.objectContaining({
+        type: 'kibana.request',
+        with: expect.objectContaining({
+          path: expect.stringContaining('/discovery/_completed'),
+          body: expect.objectContaining({
+            outcome: 'completed',
+            has_work: false,
+            budget_denied: true,
+          }),
+        }),
+      }),
+      expect.objectContaining({
         type: 'workflow.output',
         with: {
           processedCount: 0,
           hasWork: false,
-          suppressedRuleCount: 0,
+          skippedCount: 0,
+          heldBackCount: 0,
+          needsAgentCount: 0,
+          classifierReasonCounts: '{}',
+          classifierProbeStatusCounts: '{}',
+          classifierFailed: false,
         },
       }),
     ]);
@@ -189,7 +257,7 @@ describe('Significant Events run quota workflow contracts', () => {
         type: 'workflow.output',
         status: 'cancelled',
         with: {
-          streamName: '${{ inputs.streamName }}',
+          sourceId: '${{ inputs.sourceId }}',
           featuresSkipped: true,
           featuresConnectorUsed: '',
           discoveredFeatures: [],
@@ -198,32 +266,14 @@ describe('Significant Events run quota workflow contracts', () => {
           queriesConnectorUsed: '',
           persistedQueries: [],
           queriesTokensUsed: { prompt: 0, completion: 0, total: 0 },
+          metricsEntitiesCount: 0,
+          metricsEntitiesUncoveredDatasetsCount: 0,
+          metricsEntitiesExcludedSkipped: 0,
+          metricsEntitiesDroppedOverflow: 0,
+          metricsEntitiesHandled: false,
+          metricsEntitiesSkipReason: '',
           keepAliveRefreshed: 0,
         },
-      })
-    );
-  });
-
-  it('starts investigations after eligibility, event resolution, and deduplication', () => {
-    const orderedSteps = [
-      'gate_investigatable_severity',
-      'resolve_open_event',
-      'guard_resolved_event',
-      'guard_missing_investigation',
-      'trigger_investigation',
-    ];
-    const indexes = orderedSteps.map((name) => stepIndex(definitions.discovery, name));
-
-    expect(indexes.every((index) => index >= 0)).toBe(true);
-    expect(indexes).toEqual([...indexes].sort((left, right) => left - right));
-  });
-
-  it('delegates automatic investigation admission to the trigger step and fails open', () => {
-    expect(findStep(definitions.discovery, 'trigger_investigation')).toEqual(
-      expect.objectContaining({
-        type: 'nightshift.triggerInvestigation',
-        with: expect.objectContaining({ trigger_type: 'automatic' }),
-        'on-failure': { continue: true },
       })
     );
   });

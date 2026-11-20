@@ -9,6 +9,8 @@ applies_to:
 
 The Amazon S3 connector enables the listing of buckets, objects within a bucket, and downloading of a specified bucket object.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-amazon-s3-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. 

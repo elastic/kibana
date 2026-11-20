@@ -53,11 +53,11 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
         processesRequestResponse = responseBody;
       }, 'processes');
       submitCommand();
-      cy.contains('Action pending.').should('exist');
+      cy.contains('processes is pending').should('exist');
       cy.wait('@processes').then(() => {
         sendActionResponse(processesRequestResponse);
       });
-      cy.getByTestSubj('getProcessesSuccessCallout', { timeout: 120000 }).within(() => {
+      cy.getByTestSubj('getProcesses-success', { timeout: 120000 }).within(() => {
         checkReturnedProcessesTable();
       });
     });

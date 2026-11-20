@@ -6,7 +6,6 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 import { createPolicyTool } from './create_policy_tool';
@@ -26,10 +25,6 @@ jest.mock('./create_policy_tool', () => {
 
 const mockedCreatePolicyTool = jest.mocked(createPolicyTool);
 
-const getStartServices = jest.fn(async () => [
-  { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
-]) as unknown as StartServicesAccessor;
-
 const createAuthorizedService = () => {
   const endpointAppContextService = createMockEndpointAppContextService();
   endpointAppContextService.getEndpointAuthz.mockResolvedValue(
@@ -48,13 +43,11 @@ describe('createGetPolicyRolloutStatusTool', () => {
     const endpointAppContextService = createAuthorizedService();
     const tool = createGetPolicyRolloutStatusTool({
       endpointAppContextService,
-      getStartServices,
     });
 
     expect(mockedCreatePolicyTool).toHaveBeenCalledWith(
       expect.objectContaining({
         endpointAppContextService,
-        getStartServices,
         id: GET_POLICY_ROLLOUT_STATUS_TOOL_ID,
         schema: getPolicyRolloutStatusSchema,
         maxResultTokens: 8_000,

@@ -7,15 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-  EuiText,
-  useEuiTheme,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText, useEuiTheme } from '@elastic/eui';
 import {
   ANALYSIS_WINDOW_DAYS_MAX,
   ANALYSIS_WINDOW_DAYS_MIN,
@@ -31,9 +23,6 @@ import { SettingRow } from '../../components/setting_row';
 import { BoundedNumberField } from '../bounded_number_field';
 import * as i18n from './translations';
 import type { WorkerCustomSettingsComponent } from '../types';
-
-/** Control width from the design; the two thresholds sit side by side in the control column. */
-const NUMBER_FIELD_WIDTH_PX = 200;
 
 /** The server projects complete extras; fall back to the defaults rather than crash a render. */
 const readRuleTuningExtras = (settings: WorkerSettings): RuleTuningWorkerExtras => {
@@ -53,11 +42,7 @@ export const RuleTuningSettings: WorkerCustomSettingsComponent = ({
   onExtrasChange,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const thresholdsHelpId = useGeneratedHtmlId({ prefix: 'alertZeroQualifyingThresholdsHelp' });
   const extras = readRuleTuningExtras(settings);
-  const fieldWidth = css`
-    width: ${NUMBER_FIELD_WIDTH_PX}px;
-  `;
 
   return (
     <>
@@ -66,32 +51,30 @@ export const RuleTuningSettings: WorkerCustomSettingsComponent = ({
         labelHelp={i18n.ANALYSIS_WINDOW_DAYS_HELP}
         data-test-subj="alertZeroAnalysisWindowRow"
       >
-        <div css={fieldWidth}>
-          <BoundedNumberField
-            value={extras.analysisWindowDays}
-            min={ANALYSIS_WINDOW_DAYS_MIN}
-            max={ANALYSIS_WINDOW_DAYS_MAX}
-            ariaLabel={i18n.ANALYSIS_WINDOW_DAYS_ARIA_LABEL}
-            testSubj="alertZeroAnalysisWindowDays"
-            isDisabled={isDisabled}
-            onChange={(analysisWindowDays) => onExtrasChange({ ...extras, analysisWindowDays })}
-          />
-        </div>
+        <BoundedNumberField
+          value={extras.analysisWindowDays}
+          min={ANALYSIS_WINDOW_DAYS_MIN}
+          max={ANALYSIS_WINDOW_DAYS_MAX}
+          ariaLabel={i18n.ANALYSIS_WINDOW_DAYS_ARIA_LABEL}
+          testSubj="alertZeroAnalysisWindowDays"
+          isDisabled={isDisabled}
+          onChange={(analysisWindowDays) => onExtrasChange({ ...extras, analysisWindowDays })}
+        />
       </SettingRow>
       <SettingRow
         label={i18n.QUALIFYING_THRESHOLDS_LABEL}
         labelHelp={i18n.QUALIFYING_THRESHOLDS_HELP}
+        labelTooltip={i18n.QUALIFYING_THRESHOLDS_FIELDS_HELP}
         data-test-subj="alertZeroQualifyingThresholdsRow"
       >
         <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false} wrap>
-          <EuiFlexItem grow={false} css={fieldWidth}>
+          <EuiFlexItem grow={false}>
             <EuiFormRow label={i18n.FP_COUNT_THRESHOLD_LABEL}>
               <BoundedNumberField
                 value={extras.fpCountThreshold}
                 min={FP_COUNT_THRESHOLD_MIN}
                 max={FP_COUNT_THRESHOLD_MAX}
                 ariaLabel={i18n.FP_COUNT_THRESHOLD_ARIA_LABEL}
-                ariaDescribedBy={thresholdsHelpId}
                 testSubj="alertZeroFpCountThreshold"
                 isDisabled={isDisabled}
                 onChange={(fpCountThreshold) => onExtrasChange({ ...extras, fpCountThreshold })}
@@ -112,14 +95,13 @@ export const RuleTuningSettings: WorkerCustomSettingsComponent = ({
               </EuiText>
             </EuiFormRow>
           </EuiFlexItem>
-          <EuiFlexItem grow={false} css={fieldWidth}>
+          <EuiFlexItem grow={false}>
             <EuiFormRow label={i18n.FP_RATE_THRESHOLD_PCT_LABEL}>
               <BoundedNumberField
                 value={extras.fpRateThresholdPct}
                 min={FP_RATE_THRESHOLD_PCT_MIN}
                 max={FP_RATE_THRESHOLD_PCT_MAX}
                 ariaLabel={i18n.FP_RATE_THRESHOLD_PCT_ARIA_LABEL}
-                ariaDescribedBy={thresholdsHelpId}
                 testSubj="alertZeroFpRateThresholdPct"
                 append="%"
                 isDisabled={isDisabled}
@@ -128,15 +110,6 @@ export const RuleTuningSettings: WorkerCustomSettingsComponent = ({
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <EuiText
-          id={thresholdsHelpId}
-          size="xs"
-          color="subdued"
-          data-test-subj="alertZeroQualifyingThresholdsHelp"
-        >
-          {i18n.QUALIFYING_THRESHOLDS_FIELDS_HELP}
-        </EuiText>
       </SettingRow>
     </>
   );

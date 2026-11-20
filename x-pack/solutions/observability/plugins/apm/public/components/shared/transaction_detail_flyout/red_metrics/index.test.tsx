@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { TransactionDetailFlyoutRedMetrics } from '.';
 import { useTransactionDetailFlyoutContext } from '../transaction_detail_flyout_context';
@@ -125,6 +125,18 @@ describe('TransactionDetailFlyoutRedMetrics', () => {
         expect.objectContaining(FILTERS)
       );
       expect(getEsqlKeyMetricCharts).not.toHaveBeenCalled();
+    });
+
+    it('renders the compact latency select on the latency title row', () => {
+      render(<TransactionDetailFlyoutRedMetrics />);
+
+      const latencyHeader = screen.getByTestId(
+        'transactionDetailFlyoutRedMetricsChart-latency-header'
+      );
+      expect(within(latencyHeader).getByText('Latency')).toBeInTheDocument();
+      expect(within(latencyHeader).getByTestId('apmLatencyChartSelect')).toBeInTheDocument();
+      expect(within(latencyHeader).getByRole('option', { name: 'Avg' })).toBeInTheDocument();
+      expect(within(latencyHeader).queryByText('Metric')).not.toBeInTheDocument();
     });
 
     it('shows a skeleton while charts are loading', () => {

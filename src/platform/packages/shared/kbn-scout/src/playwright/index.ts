@@ -24,6 +24,7 @@ export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';
 // Fixtures and Page Objects (can be extended with solution-specific logic)
 export type {
   BrowserAuthFixture,
+  GotoAppOptions,
   ScoutPage,
   PageObjects, // can be extended with solution specific Page Objects
 } from './fixtures/scope/test';
@@ -50,6 +51,10 @@ export type { ApiServicesFixture } from './fixtures/scope/worker/apis';
 // Raw HTTP client fixture, for UI suites that need to call Kibana routes directly
 export { apiClientFixture } from './fixtures/scope/worker';
 
+// API key auth, for UI suites that need to call Kibana routes as a given role
+export { defaultRolesFixture, requestAuthFixture } from './fixtures/scope/worker';
+export type { DefaultRolesFixture } from './fixtures/scope/worker';
+
 // Other worker types
 export type {
   LinkedProjectFixture,
@@ -63,7 +68,7 @@ export type {
 } from './fixtures/scope/worker';
 
 // Tagging utility
-export { tags } from './tags';
+export { getPlaywrightTagsFor, tags } from './tags';
 
 // Test entrypoints
 export { test, spaceTest, lighthouseTest, globalSetupHook, globalTeardownHook } from './test/ui';
@@ -76,4 +81,10 @@ export * from './eui_components';
 export * from './ui_components';
 
 // Page-object wrappers and helpers for shared Kibana surfaces.
-export { AppMenu, ContentListWrapper, ListingTable } from './page_objects';
+export {
+  AppMenu,
+  ContentListWrapper,
+  EmbeddableAlertsTablePage,
+  InspectorPage,
+  ListingTable,
+} from './page_objects';

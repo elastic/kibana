@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/290781
-issues:
-- https://github.com/elastic/security-team/issues/19310
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: Fix workflow execution view showing YAML instead of execution tree steps

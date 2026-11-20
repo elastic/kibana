@@ -10,12 +10,17 @@ import { EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui'
 import { useLocation, useHistory } from 'react-router-dom';
 
 import { OBLT_DEFAULT_CATEGORIES } from '../../../../../../../common/constants';
-import { CardIcon } from '../../../../../../components/package_icon';
+import { buildCollectionVariants } from '../home/collection_variants';
 import type { CollectionVariant } from '../home/card_utils';
 import { COLLECTION_QUERYPARAM } from '../home/card_utils';
 import { CollectionFlyout } from '../home/components/collection_flyout';
 
-import { useBreadcrumbs, useStartServices } from '../../../../hooks';
+import {
+  useAuthz,
+  useAutomaticImportAuthz,
+  useBreadcrumbs,
+  useStartServices,
+} from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 
@@ -39,7 +44,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 }) => {
   useBreadcrumbs('integrations_all');
 
-  const { automaticImport, application, cloud } = useStartServices();
+  const { automaticImport, cloud } = useStartServices();
   const { pathname, search } = useLocation();
   const history = useHistory();
 
@@ -62,11 +67,9 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
   }, [history, search]);
   const euiTheme = useEuiTheme();
 
-  const automaticImportCapabilities = (
-    application.capabilities as Record<string, { view?: boolean } | undefined>
-  ).automatic_import;
-  const canReadAutomaticImportIntegrations =
-    automaticImportCapabilities?.view ?? Boolean(automaticImport);
+  const { canView: canReadAutomaticImportIntegrations, canCreate: canCreateAutomaticImport } =
+    useAutomaticImportAuthz();
+  const canUploadPackages = useAuthz().integrations.uploadPackages;
 
   const useGetAllIntegrationsHook = canReadAutomaticImportIntegrations
     ? automaticImport?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations
@@ -159,28 +162,10 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
   }, [openCollectionGroupId, pathname, search]);
 
   const collectionVariants: CollectionVariant[] = useMemo(() => {
-    if (!openCollectionCard?.groupMembers || !collectionReturnPath) return [];
-    return openCollectionCard.groupMembers.map((member) => {
-      const returnParams = new URLSearchParams({
-        returnAppId: 'integrations',
-        returnPath: collectionReturnPath,
-      });
-      const separator = member.url.includes('?') ? '&' : '?';
-      return {
-        id: member.id,
-        title: member.title,
-        description: member.description,
-        icon: (
-          <CardIcon
-            icons={member.icons}
-            packageName={member.name}
-            version={member.version}
-            size="l"
-          />
-        ),
-        href: `${member.url}${separator}${returnParams.toString()}`,
-        'data-test-subj': `collectionVariantRow-${member.id}`,
-      };
+    if (!openCollectionCard || !collectionReturnPath) return [];
+    return buildCollectionVariants(openCollectionCard, {
+      returnAppId: 'integrations',
+      returnPath: collectionReturnPath,
     });
   }, [openCollectionCard, collectionReturnPath]);
 
@@ -258,11 +243,14 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
           categories={mainCategories}
           selectedCategories={selectedCategories}
           onCategoryChange={onCategoryChange}
+          showCreatedIntegrations={canReadAutomaticImportIntegrations}
           CreateIntegrationCardButton={
-            canReadAutomaticImportIntegrations
+            canCreateAutomaticImport || canUploadPackages
               ? automaticImport?.components.CreateIntegrationSideCardButton
               : undefined
           }
+          canCreateIntegration={canCreateAutomaticImport}
+          canUploadIntegrationPackage={canUploadPackages}
           hasCreatedIntegrations={hasCreatedIntegrations}
           createdIntegrationsCount={integrations.length}
           isLoadingCreatedIntegrations={isLoadingCreatedIntegrations}

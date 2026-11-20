@@ -244,6 +244,7 @@ export class DashboardPageObject extends FtrService {
     );
   }
 
+  // Scout equivalent: DashboardApp.navigateToListingFromCurrentDashboard (kbn-scout dashboard_app.ts)
   public async gotoDashboardLandingPage() {
     this.log.debug('gotoDashboardLandingPage');
     if (await this.onDashboardLandingPage()) return;
@@ -334,26 +335,22 @@ export class DashboardPageObject extends FtrService {
     });
   }
 
+  private async getViewMode() {
+    const viewMode = await this.testSubjects.getAttribute('dshDashboardViewport', 'data-view-mode');
+    if (!viewMode) {
+      throw new Error('The dashboard viewport rendered without a "data-view-mode" attribute');
+    }
+    return viewMode;
+  }
+
   public async getIsInEditMode() {
     this.log.debug('getIsInEditMode');
-    // Check if the "switch to view mode" button exists (indicates we're in edit mode)
-    if (await this.testSubjects.exists('dashboardViewOnlyMode')) {
-      return true;
-    }
-    // In edit mode, either quick save button (saved dashboard) or interactive save button (new dashboard) is present
-    const hasQuickSave = await this.testSubjects.exists('dashboardQuickSaveMenuItem');
-    const hasInteractiveSave = await this.testSubjects.exists('dashboardInteractiveSaveMenuItem');
-    return hasQuickSave || hasInteractiveSave;
+    return (await this.getViewMode()) === 'edit';
   }
 
   public async getIsInViewMode() {
     this.log.debug('getIsInViewMode');
-    // Check if the "edit" button exists (indicates we're in view mode)
-    if (await this.testSubjects.exists('dashboardEditMode')) {
-      return true;
-    }
-    // If we're not in edit mode, we're in view mode
-    return !(await this.getIsInEditMode());
+    return (await this.getViewMode()) === 'view';
   }
 
   public async ensureDashboardIsInEditMode() {
@@ -774,7 +771,7 @@ export class DashboardPageObject extends FtrService {
     await this.listingTable.searchForItemWithName(dashboardName, { escape: false });
     await this.retry.try(async () => {
       if (openInEditMode) {
-        await this.listingTable.clickActionButton('edit-action');
+        await this.listingTable.clickEditAction(dashboardName);
       } else {
         await this.listingTable.clickItemLink('dashboard', dashboardName);
       }
@@ -782,6 +779,9 @@ export class DashboardPageObject extends FtrService {
       // check Dashboard landing page is not present
       await this.testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });
     });
+
+    // The check above also passes for the wrong dashboard; confirm which one opened.
+    await this.expectOnDashboard(dashboardName);
   }
 
   public async loadSavedDashboard(dashboardName: string) {

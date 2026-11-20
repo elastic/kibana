@@ -71,6 +71,18 @@ export function getExtractEntityTaskId(
   return `${getTaskType(entityType, extractionMode)}:${namespace}`;
 }
 
+/** The non-priority task scans a different set of documents from the shared single/priority task
+ * for the same entity type, so it gets its own execution-context name. */
+function getExecutionContextVariant(
+  entityType: EntityType,
+  extractionMode: ExtractionMode
+): string {
+  if (extractionMode === EXTRACTION_MODE.nonPriority) {
+    return `${entityType}:non_priority`;
+  }
+  return entityType;
+}
+
 export const getNewSchedule = (
   frequency: string,
   taskInstance: ConcreteTaskInstance
@@ -129,6 +141,13 @@ async function bootstrapNonPriorityTask({
     // Skip scheduling for stopped engines: stop()/uninstall() remove both tasks and this tick
     // must not recreate the non-priority one.
     if (descriptor.status !== ENGINE_STATUS.STARTED) {
+      return;
+    }
+
+    // The non-priority process has its own lifecycle. `PUT /internal/security/entity_store/stop`
+    // with `process: nonPriority` removes only that task, so a tick of the still-running priority
+    // task must not schedule it again.
+    if (descriptor.nonPriorityStatus === ENGINE_STATUS.STOPPED) {
       return;
     }
 
@@ -404,7 +423,8 @@ function registerOne({
           return coreStart.executionContext.withContext(
             buildEaExecutionContext(
               EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_EXTRACT_TASK,
-              taskInstance.id
+              taskInstance.id,
+              getExecutionContextVariant(type, extractionMode)
             ),
             () =>
               wrapTaskRun({

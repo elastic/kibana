@@ -97,7 +97,7 @@ const SAMPLES_COLUMN_WIDTH = '152px';
 
 export function APMTransactions({ functionName, serviceNames }: Props) {
   const {
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, schema },
   } = useAnyOfProfilingParams('/functions/*', '/flamegraphs/*');
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
@@ -169,6 +169,7 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
           timeTo: new Date(timeRange.end).getTime(),
           functionName,
           serviceNames: serviceNamesToSearch,
+          schema,
         }).then((resp) => {
           return pageOfItems.flatMap((item) => {
             const transactionDetails = resp[item.serviceName];
@@ -185,7 +186,14 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
       }
       return Promise.resolve(pageOfItems);
     },
-    [fetchTopNFunctionAPMTransactions, functionName, pageOfItems, timeRange.end, timeRange.start]
+    [
+      fetchTopNFunctionAPMTransactions,
+      functionName,
+      pageOfItems,
+      timeRange.end,
+      timeRange.start,
+      schema,
+    ]
   );
 
   const isLoadingTransactions = status !== AsyncStatus.Settled;

@@ -35,13 +35,18 @@ const EXPECTED_SOURCE_BY_ID: Record<string, { entitySources: string[]; namespace
     entitySources: ['entityanalytics_entra_id', 'entityanalytics_entra_id.user'],
     namespace: 'entra_id',
   },
+  sailpoint_identity_sc: {
+    entitySources: ['sailpoint_identity_sc', 'sailpoint_identity_sc.identities'],
+    namespace: 'sailpoint_identity_sc',
+  },
 };
 
 describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
-  it('ships exactly the expected IDP integrations and workday (okta + entra_id + workday)', () => {
+  it('ships exactly the expected IDP integrations and workday (okta + entra_id + sailpoint + workday)', () => {
     expect(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS.map((c) => c.id).sort()).toEqual([
       'entityanalytics_entra_id',
       'entityanalytics_okta',
+      'sailpoint_identity_sc',
       'workday',
     ]);
   });
@@ -293,12 +298,17 @@ describe('workday (log-inverted) supervises config', () => {
       (c): c is OverrideRelationshipIntegrationConfig => c.id === 'workday'
     )!;
 
-  it('is registered alongside the two IDP configs', () => {
+  it('is registered alongside the entity-index configs', () => {
     expect(
       buildSupervisesConfigs()
         .map((c) => c.id)
         .sort()
-    ).toEqual(['entityanalytics_entra_id', 'entityanalytics_okta', 'workday']);
+    ).toEqual([
+      'entityanalytics_entra_id',
+      'entityanalytics_okta',
+      'sailpoint_identity_sc',
+      'workday',
+    ]);
   });
 
   it('reads the workday user log data stream, not the entity index', () => {

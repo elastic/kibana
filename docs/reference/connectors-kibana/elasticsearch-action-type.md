@@ -9,7 +9,11 @@ applies_to:
 
 # External Elasticsearch connector [elasticsearch-action-type]
 
-The External Elasticsearch connector calls the [Elasticsearch REST API](https://www.elastic.co/docs/api/doc/elasticsearch) on a remote cluster so a workflow or agent can search and explore data, inspect index mappings and aliases, run ES|QL analytics queries, and retrieve cluster information. Use this connector when you need to query data on a separate Elasticsearch cluster — for example, a different Elastic Cloud deployment, a serverless project, an on-prem cluster behind a firewall, or any other cluster that is not directly accessible via cross-cluster search (CCS). The connector can be created from any Kibana deployment (including serverless) and can connect to any Elasticsearch cluster endpoint, whether Elastic Cloud, serverless, or self-managed.
+The External Elasticsearch connector calls the [Elasticsearch REST API](https://www.elastic.co/docs/api/doc/elasticsearch) on a remote cluster so an agent can search and explore data, inspect index mappings and aliases, run ES|QL analytics queries, and retrieve cluster information. Use this connector when you need to query data on a separate Elasticsearch cluster — for example, a different Elastic Cloud deployment, a serverless project, an on-prem cluster behind a firewall, or any other cluster that is not directly accessible via cross-cluster search (CCS). The connector can be created from any Kibana deployment (including serverless) and can connect to any Elasticsearch cluster endpoint, whether Elastic Cloud, serverless, or self-managed.
+
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
 
 ## Create connectors in {{kib}} [define-elasticsearch-ui]
 
@@ -27,7 +31,7 @@ Elasticsearch URL
 **Elasticsearch API key (recommended)**
 
 API Key
-:   The encoded API key value, in the form `ApiKey <encoded>` where `<encoded>` is the base64-encoded `id:api_key` string from the [create API key](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-create-api-key) response (`POST /_security/api_key`). Grant the key at minimum: `read` privilege on the indices you search.
+:   The encoded API key value, which is the base64-encoded `id:api_key` string from the [create API key](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-create-api-key) response (`POST /_security/api_key`). Grant the key at minimum: `read` privilege on the indices you search.
 
 **Username and password**
 
@@ -46,7 +50,7 @@ You can test connectors when you create or edit the connector in {{kib}}. The te
 The Elasticsearch connector has the following actions:
 
 `search`
-:   Search documents in one or more indices using the [Elasticsearch Query DSL](https://www.elastic.co/docs/reference/query-languages/querydsl). Pass the full query body in the `query` parameter. Supports aggregations (`aggs`), sorting, field filtering (`_source`), and pagination (`size`, `from`). Use `listIndices` first if you do not know the index name, and `getMapping` to understand the available fields.
+:   Search documents in one or more indices using the [Elasticsearch Query DSL](https://www.elastic.co/docs/reference/query-languages/querydsl). Pass the query in the `query` parameter, with exactly one top-level query type such as `match` or `bool`; combine clauses with `bool`. Supports aggregations (`aggs`), sorting, field filtering (`_source`), and pagination (`size`, `from`). Use `listIndices` first if you do not know the index name, and `getMapping` to understand the available fields.
 
 `esql`
 :   Run an [ES|QL](https://www.elastic.co/docs/reference/query-languages/esql) query — a pipe-based analytics language optimized for time-series exploration and aggregations. Returns a columnar result set with column names and row values. Requires Elasticsearch 8.11 or later.
@@ -72,7 +76,7 @@ The Elasticsearch connector has the following actions:
 3. Give the key a name and, under **Control security privileges**, grant at minimum:
    - `read` indices privilege on the index patterns you intend to search.
 4. Click **Create API key**, then copy the **Encoded** value.
-5. Enter the Elasticsearch endpoint URL and the encoded key (prefixed with `ApiKey `, for example `ApiKey dGhpcyBpcyBhIHRlc3Q=`) when configuring the connector in {{kib}}.
+5. Enter the Elasticsearch endpoint URL and the encoded key when configuring the connector in {{kib}}.
 
 Alternatively, create the key via the API:
 
@@ -94,7 +98,7 @@ POST /_security/api_key
 }
 ```
 
-Use the `encoded` field from the response as the **API Key** value, prepended with `ApiKey `.
+Use the `encoded` field from the response as the **API Key** value.
 
 **Username and password (self-managed clusters)**
 

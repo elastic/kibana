@@ -32,6 +32,7 @@ import { listRuleExecutionsOasExamples } from './list_rule_executions_oas_exampl
 
 export const toListRuleExecutionsArgs = ({
   rule_ids: ruleIds,
+  search,
   outcomes,
   from: from,
   to: to,
@@ -44,6 +45,7 @@ export const toListRuleExecutionsArgs = ({
   assertAllFieldsMapped(rest);
   return {
     ruleIds,
+    search,
     outcomes,
     from,
     to,
@@ -70,14 +72,15 @@ const toRuleExecutionView = ({
   assertAllFieldsMapped(restTimings);
   return {
     id,
-    rule,
-    space_id: spaceId,
+    rule: { id: rule.id, version: rule.version ?? undefined },
     started_at: startedAt,
     ended_at: endedAt,
     timings: { duration_ms: duration, scheduled_delay_ms: scheduledDelay },
     outcome,
-    reason,
-    error: error && { message: error.message, stack_trace: error.stackTrace },
+    reason: reason ?? undefined,
+    error: error
+      ? { message: error.message, stack_trace: error.stackTrace ?? undefined }
+      : undefined,
   };
 };
 
@@ -86,6 +89,7 @@ export const toListRuleExecutionsResponse = ({
   total,
   page,
   perPage,
+  searchMatches,
   ...rest
 }: ListRuleExecutionsResult): Complete<ListRuleExecutionsResponse> => {
   assertAllFieldsMapped(rest);
@@ -94,6 +98,9 @@ export const toListRuleExecutionsResponse = ({
     total,
     page,
     per_page: perPage,
+    search_matches: searchMatches
+      ? { rule_count: searchMatches.ruleCount, is_truncated: searchMatches.isTruncated }
+      : undefined,
   };
 };
 
@@ -108,6 +115,7 @@ export class ListRuleExecutionsRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'List rule executions',
     description: 'Get a paginated list of rule execution events.',
     oasOperationObject: listRuleExecutionsOasExamples,

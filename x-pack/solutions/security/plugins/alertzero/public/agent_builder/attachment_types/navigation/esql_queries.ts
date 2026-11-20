@@ -6,6 +6,8 @@
  */
 
 import { groupBy } from 'lodash';
+import { HUNT_CASE_INSENSITIVE_IOC_TYPES } from '@kbn/alertzero-common';
+import { normalizeIpAddress } from '../../../../common/sse_view';
 
 export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
 export const THREAT_REPORTS_INDEX_PATTERN = '.kibana-threat-reports*' as const;
@@ -30,30 +32,6 @@ const uniqueNonEmpty = (values: string[]): string[] => [
 
 /** Sentinel space id for global/shared threat-intel rows (mirrors GLOBAL_SPACE_ID in security_solution). */
 export const GLOBAL_THREAT_INTEL_SPACE_ID = '*' as const;
-
-/**
- * Threat reports are logically space-scoped (`space_id` keyword field), same as
- * the threat-intel route's own space filtering. Discover exits query the shared
- * hidden index directly, bypassing the route, so they must apply the same
- * `space_id IN (currentSpace, '*')` filter themselves or a user could read
- * another space's report by following this link.
- */
-const buildThreatReportSpaceWhere = (spaceId: string): string =>
-  `space_id IN (${quoteEsqlList([spaceId, GLOBAL_THREAT_INTEL_SPACE_ID])})`;
-
-export const buildThreatReportLookupEsql = ({
-  reportId,
-  spaceId,
-}: {
-  reportId: string;
-  spaceId: string;
-}): string =>
-  // Single-id IN (...) is equivalent to an _id == comparison for Discover's purposes.
-  `FROM ${quoteEsqlIdentifier(
-    THREAT_REPORTS_INDEX_PATTERN
-  )} METADATA _id | WHERE _id IN (${quoteEsqlList([reportId])}) AND ${buildThreatReportSpaceWhere(
-    spaceId
-  )}`;
 
 /** Discover exit for one `events[]` ref, which carries its own source index. */
 export const buildEventLookupEsql = ({
@@ -160,4 +138,67 @@ export const buildEntityLookupEsql = ({
   return `FROM ${quoteEsqlIdentifier(indexPattern)} | WHERE ${field} == "${escapeEsqlString(
     value
   )}"`;
+};
+
+/**
+ * `address/prefix` with a well-formed address. Tier 1's term query on an `ip` field
+ * accepts CIDR notation, so a range can be a confirmed match, but no single-value
+ * predicate here can reproduce it: `::ip` rejects the range and `CIDR_MATCH` is null on
+ * a multivalued cell.
+ */
+const isCidrRange = (value: string): boolean => {
+  const slash = value.lastIndexOf('/');
+  if (slash === -1) return false;
+  const prefix = value.slice(slash + 1);
+  return /^\d{1,3}$/.test(prefix) && normalizeIpAddress(value.slice(0, slash)) !== undefined;
+};
+
+/**
+ * Discover exit for an IOC detection: the caller-supplied indices (Tier 1 `per_index`,
+ * else the cited events' sources), filtered to the ECS field and value that matched.
+ *
+ * The predicate is `MV_CONTAINS`, not `==`: Tier 1 matches with term queries, which hit
+ * any element of a multivalued field (`host.ip`, `related.ip`, `kubernetes.audit.sourceIPs`),
+ * while ES|QL scalar `==` is null on a multivalued cell and would open Discover empty for
+ * a confirmed match. `MV_CONTAINS` is typed and the field's mapping is unknown here, so
+ * the field is always coerced to the literal's type: a well-formed IP value (an `ip` IOC,
+ * or an untyped one that parses as an address) compares as `ip`, which canonicalizes IPv6
+ * spellings and accepts keyword fields that hold addresses; hash and domain IOCs compare
+ * case-folded, matching Tier 1's case-insensitive clauses; everything else compares as a
+ * string via `TO_STRING`. The ip literal is the canonical spelling, not the stored value:
+ * `"bad"::ip`, `"[::1]"::ip` and `"010.0.0.1"::ip` are all null, and `MV_CONTAINS(field, null)`
+ * matches every row, so an `ip` IOC whose value does not parse takes the string branch
+ * instead. Absent when field/value/indices are empty, and for a CIDR `ip` IOC: a range
+ * cannot be pivoted on with a single-value predicate, and no link beats one that opens
+ * empty for a confirmed match.
+ */
+export const buildIocMatchEsql = ({
+  indices,
+  field,
+  value,
+  iocType,
+}: {
+  indices: readonly string[];
+  field: string;
+  value: string;
+  /** IOC type of `value`; decides how the field is coerced before comparing. */
+  iocType?: string;
+}): string | undefined => {
+  const cleanedIndices = uniqueNonEmpty([...indices]);
+  if (cleanedIndices.length === 0 || !field.trim() || !value.trim()) {
+    return undefined;
+  }
+
+  const mayBeIp = iocType === 'ip' || iocType === undefined;
+  if (mayBeIp && isCidrRange(value.trim())) {
+    return undefined;
+  }
+
+  const ipLiteral = mayBeIp ? normalizeIpAddress(value) : undefined;
+  const predicate = ipLiteral
+    ? `MV_CONTAINS(TO_IP(${field}), "${ipLiteral}"::ip)`
+    : iocType && HUNT_CASE_INSENSITIVE_IOC_TYPES.has(iocType)
+    ? `MV_CONTAINS(TO_LOWER(${field}), "${escapeEsqlString(value.toLowerCase())}")`
+    : `MV_CONTAINS(TO_STRING(${field}), "${escapeEsqlString(value)}")`;
+  return `FROM ${cleanedIndices.map(quoteEsqlIdentifier).join(', ')} | WHERE ${predicate}`;
 };

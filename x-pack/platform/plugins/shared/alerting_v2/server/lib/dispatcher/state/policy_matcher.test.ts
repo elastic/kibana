@@ -63,56 +63,58 @@ describe('PolicyMatcher.hasTags()', () => {
   });
 });
 
-describe('PolicyMatcher.matchesTags()', () => {
+describe('PolicyMatcher.matchesRoutingTags()', () => {
   it('returns true (vacuous) when matcher has no tags', () => {
-    expect(PolicyMatcher.of(null).matchesTags(['prod'])).toBe(true);
+    expect(PolicyMatcher.of(null).matchesRoutingTags(['prod'])).toBe(true);
   });
 
   it('returns true (vacuous) when matcher has empty tags array', () => {
-    expect(PolicyMatcher.of({ tags: [] }).matchesTags(['prod'])).toBe(true);
+    expect(PolicyMatcher.of({ tags: [] }).matchesRoutingTags(['prod'])).toBe(true);
   });
 
   it('returns false when matcher has tags but rule has no tags', () => {
-    expect(PolicyMatcher.of({ tags: ['prod'] }).matchesTags(undefined)).toBe(false);
+    expect(PolicyMatcher.of({ tags: ['prod'] }).matchesRoutingTags(undefined)).toBe(false);
   });
 
   it('returns false when matcher has tags but rule tags array is empty', () => {
-    expect(PolicyMatcher.of({ tags: ['prod'] }).matchesTags([])).toBe(false);
+    expect(PolicyMatcher.of({ tags: ['prod'] }).matchesRoutingTags([])).toBe(false);
   });
 
   it('returns true when there is a matching tag', () => {
-    expect(PolicyMatcher.of({ tags: ['prod'] }).matchesTags(['prod', 'infra'])).toBe(true);
+    expect(PolicyMatcher.of({ tags: ['prod'] }).matchesRoutingTags(['prod', 'infra'])).toBe(true);
   });
 
   it('returns true when the first matching tag is anywhere in the rule tags', () => {
-    expect(PolicyMatcher.of({ tags: ['infra'] }).matchesTags(['prod', 'infra'])).toBe(true);
+    expect(PolicyMatcher.of({ tags: ['infra'] }).matchesRoutingTags(['prod', 'infra'])).toBe(true);
   });
 
   it('returns false when there is no matching tag', () => {
-    expect(PolicyMatcher.of({ tags: ['staging'] }).matchesTags(['prod', 'infra'])).toBe(false);
+    expect(PolicyMatcher.of({ tags: ['staging'] }).matchesRoutingTags(['prod', 'infra'])).toBe(
+      false
+    );
   });
 
   it('is case-sensitive', () => {
-    expect(PolicyMatcher.of({ tags: ['Prod'] }).matchesTags(['prod'])).toBe(false);
+    expect(PolicyMatcher.of({ tags: ['Prod'] }).matchesRoutingTags(['prod'])).toBe(false);
   });
 
   it('matches exact strings including those that look like datemath', () => {
-    expect(PolicyMatcher.of({ tags: ['now'] }).matchesTags(['now'])).toBe(true);
+    expect(PolicyMatcher.of({ tags: ['now'] }).matchesRoutingTags(['now'])).toBe(true);
   });
 
   it('returns true for tag with double-quotes in the value (exact compare)', () => {
-    expect(PolicyMatcher.of({ tags: ['tag"val'] }).matchesTags(['tag"val'])).toBe(true);
+    expect(PolicyMatcher.of({ tags: ['tag"val'] }).matchesRoutingTags(['tag"val'])).toBe(true);
   });
 
   it('returns true for tag with asterisk (no wildcard expansion)', () => {
-    expect(PolicyMatcher.of({ tags: ['prod*'] }).matchesTags(['prod-west'])).toBe(false);
-    expect(PolicyMatcher.of({ tags: ['prod*'] }).matchesTags(['prod*'])).toBe(true);
+    expect(PolicyMatcher.of({ tags: ['prod*'] }).matchesRoutingTags(['prod-west'])).toBe(false);
+    expect(PolicyMatcher.of({ tags: ['prod*'] }).matchesRoutingTags(['prod*'])).toBe(true);
   });
 
   it('returns false for bare rule.id literal term (value, not a field)', () => {
     // 'rule.id' is a value in context of tags — exact string compare
-    expect(PolicyMatcher.of({ tags: ['rule.id'] }).matchesTags(['rule.id'])).toBe(true);
-    expect(PolicyMatcher.of({ tags: ['rule.id'] }).matchesTags(['other'])).toBe(false);
+    expect(PolicyMatcher.of({ tags: ['rule.id'] }).matchesRoutingTags(['rule.id'])).toBe(true);
+    expect(PolicyMatcher.of({ tags: ['rule.id'] }).matchesRoutingTags(['other'])).toBe(false);
   });
 });
 

@@ -31,7 +31,7 @@ async function addToCase(
     owner: owner ?? observabilityFeatureId,
   };
 
-  return http.post(buildPath('/api/cases/{caseId}/comments', { caseId: theCase.id }), {
+  return http.post(buildPath('/api/cases/{caseId}/attachments', { caseId: theCase.id }), {
     body: JSON.stringify(payload),
   });
 }

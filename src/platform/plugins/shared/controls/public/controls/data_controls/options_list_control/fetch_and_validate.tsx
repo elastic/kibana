@@ -16,13 +16,17 @@ import type {
   OptionsListSelection,
   OptionsListSortingType,
 } from '@kbn/controls-schemas';
-import { ControlValuesSource, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 
 import type {
   OptionsListFailureResponse,
   OptionsListSuccessResponse,
 } from '../../../../common/options_list/types';
-import { buildOptionsListFetchBody } from './build_options_list_fetch_body';
+import {
+  buildDslFetchBody,
+  buildEsqlFetchBody,
+  type BuildOptionsListFetchBodyResult,
+} from './build_options_list_fetch_body';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
 import type { DSLOptionsListComponentApi, OptionsListControlApi } from './types';
 import type { DataControlStateManager } from '../data_control_manager';
@@ -54,10 +58,9 @@ export function fetchAndValidate$({
   let abortController: AbortController | undefined;
 
   const suggestions$ = combineLatest({
-    dataViews: api.dataViews$,
+    dataSources: api.dataSources$,
     field: api.field$,
-    esqlQuery: api.esqlQuery$,
-    valuesSource: api.valuesSource$,
+    valuesSourceFetchPlan: api.valuesSourceFetchPlan$,
     fetchContext: fetch$(api),
     useGlobalFilters: api.useGlobalFilters$,
     searchString: api.debouncedSearchString,
@@ -81,7 +84,7 @@ export function fetchAndValidate$({
     switchMap(
       async ([
         {
-          dataViews,
+          dataSources,
           field,
           fetchContext,
           useGlobalFilters,
@@ -89,30 +92,38 @@ export function fetchAndValidate$({
           searchString,
           sort,
           searchTechnique,
-          esqlQuery,
-          valuesSource,
+          valuesSourceFetchPlan,
         },
         requestSize,
         runPastTimeout,
         selectedOptions,
       ]) => {
-        let built: ReturnType<typeof buildOptionsListFetchBody>;
+        // The data source is not loaded yet
+        if (!valuesSourceFetchPlan) {
+          return { suggestions: [], totalCardinality: 0, isPartial: false };
+        }
+
+        let built: BuildOptionsListFetchBodyResult;
         try {
-          built = buildOptionsListFetchBody({
-            valuesSource: valuesSource ?? ControlValuesSource.FIELD,
-            esqlQuery,
-            dataViews,
-            field,
+          const sharedArgs = {
+            dataSource: dataSources?.[0],
             fetchContext,
             useGlobalFilters,
             searchString,
             sort: sort ?? DEFAULT_DSL_OPTIONS_LIST_STATE.sort,
             searchTechnique: searchTechnique ?? DEFAULT_DSL_OPTIONS_LIST_STATE.search_technique,
-            requestSize,
-            runPastTimeout: runPastTimeout ?? false,
             selectedOptions: selectedOptions ?? [],
             ignoreValidations,
-          });
+          };
+          built =
+            valuesSourceFetchPlan.fetchMode === 'esql'
+              ? buildEsqlFetchBody({ ...sharedArgs, esqlQuery: valuesSourceFetchPlan.query })
+              : buildDslFetchBody({
+                  ...sharedArgs,
+                  field,
+                  requestSize,
+                  runPastTimeout: runPastTimeout ?? false,
+                });
         } catch (error) {
           return { error };
         }

@@ -7,14 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule } from 'eslint';
-import type { TSESTree } from '@typescript-eslint/typescript-estree';
-import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
-import type * as T from '@babel/types';
+import type { VisitorWithHooks } from '@oxlint/plugins';
 import type { ImportType } from '@kbn/import-resolver';
 
 import type { Importer, SomeNode } from './ast';
-import { isIdentifier, isImportCallee, isStringLiteral, isTemplateLiteral } from './ast';
+import { isStringLiteral } from './ast';
 
 const JEST_MODULE_METHODS = [
   'jest.createMockFromModule',
@@ -32,10 +29,10 @@ interface VisitorContext {
   type: ImportType;
   importer: Importer;
 }
-type Visitor = (req: string | null, context: VisitorContext) => void;
+type ImportVisitor = (req: string | null, context: VisitorContext) => void;
 
 function passSourceAsString(
-  fn: Visitor,
+  fn: ImportVisitor,
   node: SomeNode | null | undefined,
   importer: Importer,
   type: ImportType
@@ -54,7 +51,7 @@ function passSourceAsString(
     return fn(node.value, ctx);
   }
 
-  if (isTemplateLiteral(node)) {
+  if (node.type === 'TemplateLiteral') {
     if (node.expressions.length) {
       return null;
     }
@@ -69,59 +66,64 @@ function passSourceAsString(
 }
 
 /**
- * Create an ESLint rule visitor that calls fn() for every import string, including
- * 'export from' statements, require() calls, require.resolve(), jest.mock() calls, and more.
- * Works with both babel eslint and typescript-eslint parsers
+ * Create a rule visitor that calls the visitor returned by `setupFile()` for every import string,
+ * including 'export from' statements, require() calls, require.resolve(), jest.mock() calls, and
+ * more. `setupFile()` runs once per linted file, and returning `false` from it skips the file.
  */
-export function visitAllImportStatements(fn: Visitor) {
-  const visitor = {
-    ImportDeclaration(node: TSESTree.ImportDeclaration | T.ImportDeclaration) {
-      passSourceAsString(fn, node.source, node, 'esm');
+export function visitAllImportStatements(setupFile: () => ImportVisitor | false): VisitorWithHooks {
+  let fileVisitor: ImportVisitor | false = false;
+  const visit: ImportVisitor = (req, context) => {
+    if (fileVisitor) {
+      fileVisitor(req, context);
+    }
+  };
+
+  return {
+    before() {
+      fileVisitor = setupFile();
+      // Oxlint and `eslintCompatPlugin` skip the file when `before()` returns `false`
+      return fileVisitor !== false;
     },
-    ExportNamedDeclaration(node: TSESTree.ExportNamedDeclaration | T.ExportNamedDeclaration) {
-      passSourceAsString(fn, node.source, node, 'esm');
+    ImportDeclaration(node) {
+      passSourceAsString(visit, node.source, node, 'esm');
     },
-    ExportAllDeclaration(node: TSESTree.ExportAllDeclaration | T.ExportAllDeclaration) {
-      passSourceAsString(fn, node.source, node, 'esm');
+    ExportNamedDeclaration(node) {
+      passSourceAsString(visit, node.source, node, 'esm');
     },
-    ImportExpression(node: TSESTree.ImportExpression) {
-      passSourceAsString(fn, node.source, node, 'esm');
+    ExportAllDeclaration(node) {
+      passSourceAsString(visit, node.source, node, 'esm');
     },
-    CallExpression(node: TSESTree.CallExpression | T.CallExpression) {
+    ImportExpression(node) {
+      passSourceAsString(visit, node.source, node, 'esm');
+    },
+    CallExpression(node) {
       const { callee, arguments: args } = node;
-      // babel's AST treats import() calls as CallExpressions with callees of type "Import"
-      if (isImportCallee(callee)) {
-        passSourceAsString(fn, args[0], node, 'esm');
-        return;
-      }
 
       // is this a `require()` call?
-      if (isIdentifier(callee) && callee.name === 'require') {
-        passSourceAsString(fn, args[0], node, 'require');
+      if (callee.type === 'Identifier' && callee.name === 'require') {
+        passSourceAsString(visit, args[0], node, 'require');
         return;
       }
 
       // is this an `obj.method()` call?
       if (
-        callee.type === AST_NODE_TYPES.MemberExpression &&
-        isIdentifier(callee.object) &&
-        isIdentifier(callee.property)
+        callee.type === 'MemberExpression' &&
+        callee.object.type === 'Identifier' &&
+        callee.property.type === 'Identifier'
       ) {
         const { object: left, property: right } = callee;
         const name = `${left.name}.${right.name}`;
 
         // is it "require.resolve()"?
         if (name === 'require.resolve') {
-          passSourceAsString(fn, args[0], node, 'require-resolve');
+          passSourceAsString(visit, args[0], node, 'require-resolve');
         }
 
         // is it one of jest's mock methods?
         if (left.name === 'jest' && JEST_MODULE_METHODS.includes(name)) {
-          passSourceAsString(fn, args[0], node, 'jest');
+          passSourceAsString(visit, args[0], node, 'jest');
         }
       }
     },
   };
-
-  return visitor as Rule.RuleListener;
 }

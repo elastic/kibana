@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { AgentPromptType, AuthorizationStatus } from '@kbn/agent-builder-common/agents';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -16,7 +17,7 @@ import type {
 } from '@kbn/agent-builder-server/tools/handler';
 import {
   getConnectorSpec,
-  isToolAction,
+  isSelectedActionEnabled,
   OAUTH_AUTHORIZATION_CODE_AUTH_ID,
   EARS_AUTH_ID,
 } from '@kbn/connector-specs';
@@ -29,11 +30,13 @@ import type { ConnectorToolsOptions } from './types';
 jest.mock('@kbn/connector-specs', () => ({
   ...jest.requireActual('@kbn/connector-specs'),
   getConnectorSpec: jest.fn(),
-  isToolAction: jest.fn(),
+  isSelectedActionEnabled: jest.fn(),
 }));
 
 const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
-const isToolActionMock = isToolAction as jest.MockedFunction<typeof isToolAction>;
+const isSelectedActionEnabledMock = isSelectedActionEnabled as jest.MockedFunction<
+  typeof isSelectedActionEnabled
+>;
 
 const mockExecute = jest.fn();
 const mockGet = jest.fn();
@@ -103,7 +106,7 @@ describe('createExecuteConnectorSubActionTool', () => {
       },
       test: { handler: jest.fn(), enabled: false },
     });
-    isToolActionMock.mockReturnValue(true);
+    isSelectedActionEnabledMock.mockReturnValue(true);
     mockCheckAuthorizationStatus.mockReturnValue({ status: AuthorizationStatus.unprompted });
     mockAskForAuthorization.mockImplementation((definition) => ({
       prompt: { type: AgentPromptType.authorization, ...definition },
@@ -291,6 +294,10 @@ describe('createExecuteConnectorSubActionTool', () => {
         subAction: 'searchMessages',
         subActionParams: { query: 'hello' },
       },
+      source: {
+        type: ActionExecutionSourceType.AGENT_BUILDER,
+        source: { toolId: platformCoreTools.executeConnectorSubAction },
+      },
     });
     expect((result as ToolHandlerStandardReturn).results).toHaveLength(1);
     expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.other);
@@ -318,46 +325,11 @@ describe('createExecuteConnectorSubActionTool', () => {
         subAction: 'listChannels',
         subActionParams: {},
       },
+      source: {
+        type: ActionExecutionSourceType.AGENT_BUILDER,
+        source: { toolId: platformCoreTools.executeConnectorSubAction },
+      },
     });
-  });
-
-  it('rejects sub-actions not marked as isTool', async () => {
-    getConnectorSpecMock.mockReturnValue({
-      metadata: {
-        id: '.slack2',
-        displayName: 'Slack',
-        description: 'Slack connector',
-        minimumLicense: 'enterprise' as const,
-        supportedFeatureIds: [],
-      },
-      actions: {
-        internalAction: {
-          isTool: false,
-          scope: 'read' as const,
-          input: {} as any,
-          handler: jest.fn(),
-        },
-      },
-      test: { handler: jest.fn(), enabled: false },
-    });
-    isToolActionMock.mockReturnValue(false);
-
-    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
-    const result = await tool.handler(
-      {
-        connectorId: 'conn-123',
-        subAction: 'internalAction',
-        params: {},
-      },
-      mockContext
-    );
-
-    expect((result as ToolHandlerStandardReturn).results).toHaveLength(1);
-    expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.error);
-    expect(
-      ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data.message
-    ).toContain("Sub-action 'internalAction' is not available as a tool");
-    expect(mockExecute).not.toHaveBeenCalled();
   });
 
   it('returns error when no connector spec is found for the type', async () => {
@@ -379,6 +351,63 @@ describe('createExecuteConnectorSubActionTool', () => {
     expect(
       ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data.message
     ).toContain("No connector spec found for type '.unknown'");
+    expect(mockExecute).not.toHaveBeenCalled();
+  });
+
+  it('returns error when sub-action has isTool: false (workflow-only action)', async () => {
+    getConnectorSpecMock.mockReturnValue({
+      metadata: {
+        id: '.slack2',
+        displayName: 'Slack',
+        description: 'Slack connector',
+        minimumLicense: 'enterprise' as const,
+        supportedFeatureIds: [],
+      },
+      actions: {
+        searchMessages: {
+          isTool: true,
+          scope: 'read' as const,
+          input: {} as any,
+          handler: jest.fn(),
+        },
+        archiveChannel: {
+          isTool: false,
+          scope: 'destroy' as const,
+          input: {} as any,
+          handler: jest.fn(),
+        },
+      },
+      test: { handler: jest.fn(), enabled: false },
+    });
+
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+    const result = await tool.handler(
+      { connectorId: 'conn-123', subAction: 'archiveChannel', params: {} },
+      mockContext
+    );
+
+    expect((result as ToolHandlerStandardReturn).results).toHaveLength(1);
+    expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.error);
+    expect(
+      ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data.message
+    ).toContain('is not available as an agent tool');
+    expect(mockExecute).not.toHaveBeenCalled();
+  });
+
+  it('returns error when sub-action is not in selectedActions allowlist', async () => {
+    isSelectedActionEnabledMock.mockReturnValueOnce(false);
+
+    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+    const result = await tool.handler(
+      { connectorId: 'conn-123', subAction: 'sendMessage', params: {} },
+      mockContext
+    );
+
+    expect((result as ToolHandlerStandardReturn).results).toHaveLength(1);
+    expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.error);
+    expect(
+      ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data.message
+    ).toContain('is not enabled');
     expect(mockExecute).not.toHaveBeenCalled();
   });
 
@@ -410,7 +439,7 @@ describe('createExecuteConnectorSubActionTool', () => {
     const result = await tool.handler(
       {
         connectorId: 'conn-123',
-        subAction: 'search',
+        subAction: 'searchMessages',
         params: {},
       },
       mockContext
@@ -422,7 +451,7 @@ describe('createExecuteConnectorSubActionTool', () => {
     ).toContain('Connector execution failed');
     expect(
       ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data.message
-    ).toContain("sub-action 'search'");
+    ).toContain("sub-action 'searchMessages'");
   });
 
   it('returns error result when connector returns error status', async () => {
@@ -446,6 +475,139 @@ describe('createExecuteConnectorSubActionTool', () => {
     expect(
       ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data.message
     ).toContain('Rate limited');
+  });
+
+  describe('error hints by HTTP status', () => {
+    const subActionHint = 'Check the connector attachment for the correct sub-action names';
+
+    const now = Date.parse('2026-10-26T12:00:00Z');
+    const inSeconds = (seconds: number) => new Date(now + seconds * 1000);
+
+    let dateNowSpy: jest.SpyInstance<number, []>;
+
+    beforeEach(() => {
+      dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(now);
+    });
+
+    afterEach(() => {
+      dateNowSpy.mockRestore();
+    });
+
+    const executeWithErrorMeta = async (errorMeta?: Record<string, unknown>, retry?: unknown) => {
+      mockExecute.mockResolvedValue({
+        status: 'error',
+        message: 'Request failed',
+        serviceMessage: 'service said no',
+        ...(errorMeta ? { errorMeta } : {}),
+        ...(retry !== undefined ? { retry } : {}),
+      });
+      const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
+      const result = await tool.handler(
+        { connectorId: 'conn-123', subAction: 'searchMessages', params: {} },
+        mockContext
+      );
+      return ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data;
+    };
+
+    it('tells the agent to wait the Retry-After delay on a 429, without the sub-action hint', async () => {
+      const data = await executeWithErrorMeta({ statusCode: 429 }, inSeconds(30));
+
+      expect(data.message).toContain('rate limiting');
+      expect(data.message).toContain('Wait 30 seconds before retrying');
+      expect(data.message).not.toContain(subActionHint);
+      expect(data.metadata).toEqual({
+        connectorId: 'conn-123',
+        subAction: 'searchMessages',
+        serviceMessage: 'service said no',
+        statusCode: 429,
+        retryAfterSeconds: 30,
+      });
+    });
+
+    it('allows a single retry on a 429 without a retry delay', async () => {
+      const data = await executeWithErrorMeta({ statusCode: 429 });
+
+      expect(data.message).toContain('rate limiting');
+      expect(data.message).toContain('Retry at most once after a short wait');
+      expect(data.message).not.toContain(subActionHint);
+      expect(data.metadata).not.toHaveProperty('retryAfterSeconds');
+    });
+
+    it('counts the wait from now, and never below zero', async () => {
+      const later = await executeWithErrorMeta({ statusCode: 429 }, inSeconds(29.2));
+      const past = await executeWithErrorMeta({ statusCode: 429 }, inSeconds(-10));
+
+      expect(later.metadata).toMatchObject({ retryAfterSeconds: 30 });
+      expect(past.message).toContain('Wait 0 seconds before retrying');
+    });
+
+    it('ignores a retry that is not a date', async () => {
+      const data = await executeWithErrorMeta({ statusCode: 429 }, false);
+
+      expect(data.message).toContain('Retry at most once after a short wait');
+      expect(data.metadata).not.toHaveProperty('retryAfterSeconds');
+    });
+
+    it.each([401, 403])('points at the connector credentials on a %i', async (statusCode) => {
+      const data = await executeWithErrorMeta({ statusCode });
+
+      expect(data.message).toContain("check the connector's credentials");
+      expect(data.message).not.toContain(subActionHint);
+      expect(data.metadata).toMatchObject({ statusCode });
+    });
+
+    it('treats a 403 with a retry delay as a rate limit, not a credentials error', async () => {
+      const data = await executeWithErrorMeta({ statusCode: 403 }, inSeconds(45));
+
+      expect(data.message).toContain('rate limiting');
+      expect(data.message).toContain('Wait 45 seconds before retrying');
+      expect(data.message).not.toContain('credentials');
+      expect(data.metadata).toMatchObject({ statusCode: 403, retryAfterSeconds: 45 });
+    });
+
+    it.each([500, 502, 503])('reports a failing service on a %i', async (statusCode) => {
+      const data = await executeWithErrorMeta({ statusCode });
+
+      expect(data.message).toContain('The service failed to handle the request');
+      expect(data.message).toContain('Retry at most once');
+      expect(data.message).not.toContain('Wait');
+      expect(data.message).not.toContain(subActionHint);
+    });
+
+    it('tells the agent to wait the retry delay on a 503', async () => {
+      const data = await executeWithErrorMeta({ statusCode: 503 }, inSeconds(120));
+
+      expect(data.message).toContain('The service failed to handle the request');
+      expect(data.message).toContain(
+        'Wait 120 seconds before retrying this sub-action. Retry at most once;'
+      );
+      expect(data.metadata).toMatchObject({ statusCode: 503, retryAfterSeconds: 120 });
+    });
+
+    it.each([400, 404, 422])('keeps the sub-action hint on a %i', async (statusCode) => {
+      const data = await executeWithErrorMeta({ statusCode });
+
+      expect(data.message).toContain(subActionHint);
+      expect(data.metadata).toMatchObject({ statusCode });
+    });
+
+    it('keeps the sub-action hint and adds no HTTP metadata when there is no status', async () => {
+      const data = await executeWithErrorMeta();
+
+      expect(data.message).toContain(subActionHint);
+      expect(data.metadata).toEqual({
+        connectorId: 'conn-123',
+        subAction: 'searchMessages',
+        serviceMessage: 'service said no',
+      });
+    });
+
+    it('ignores a non-numeric status code', async () => {
+      const data = await executeWithErrorMeta({ statusCode: '429' });
+
+      expect(data.message).toContain(subActionHint);
+      expect(data.metadata).not.toHaveProperty('statusCode');
+    });
   });
 
   it('returns success message when data is null', async () => {

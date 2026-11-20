@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { isoDateTime } from '@kbn/zod/v4';
 import { StatusError } from '../../lib/errors/status_error';
 
 /**
@@ -14,8 +14,7 @@ import { StatusError } from '../../lib/errors/status_error';
  * transform so invalid shapes never reach `Date#toISOString`.
  */
 export function makeIsoDateFromString(description: string) {
-  return z.iso
-    .datetime({ offset: true })
+  return isoDateTime({ offset: true })
     .describe(description)
     .transform((input) => new Date(input));
 }

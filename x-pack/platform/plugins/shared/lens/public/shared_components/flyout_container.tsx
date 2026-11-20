@@ -54,6 +54,7 @@ export function FlyoutContainer({
   customFooter,
   isInlineEditing,
   overrideContainerCss,
+  dataTestSubj,
 }: {
   isOpen: boolean;
   handleClose: () => void;
@@ -65,6 +66,7 @@ export function FlyoutContainer({
   customFooter?: React.ReactElement;
   isInlineEditing?: boolean;
   overrideContainerCss?: Interpolation<Theme>;
+  dataTestSubj?: string;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
   const euiThemeContext = useEuiTheme();
@@ -111,6 +113,7 @@ export function FlyoutContainer({
           ref={panelContainerRef}
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"
+          data-test-subj={dataTestSubj}
           css={[
             css`
               box-shadow: ${hideShadow ? 'none !important' : 'inherit'};

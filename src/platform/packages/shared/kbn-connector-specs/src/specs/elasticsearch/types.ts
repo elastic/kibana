@@ -9,6 +9,53 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+// Guards against unbounded input only. The request line is limited by the cluster's
+// `http.max_initial_line_length`, 4kb by default but configurable, so it is left for
+// Elasticsearch to enforce.
+const MAX_URL_INPUT_LENGTH = 4096;
+// Default `index.max_result_window`. It is configurable per index, so from + size is left for
+// Elasticsearch to enforce; this only caps each value.
+// https://www.elastic.co/docs/reference/elasticsearch/index-settings/index-modules
+const MAX_RESULT_WINDOW = 10_000;
+// `EsqlParser.MAX_LENGTH`, in characters.
+const ESQL_MAX_QUERY_LENGTH = 1_000_000;
+// Elasticsearch documents no limit on the number of search targets, sort clauses, _source
+// fields, aggregations, runtime mappings, or ES|QL params.
+const MAX_SEARCH_TARGETS = 100;
+const MAX_REQUEST_ITEMS = 1000;
+
+/** Whether input can be encoded into a request target (no lone surrogates, parsable paths). */
+const isEncodable = (buildRequestTarget: () => string): boolean => {
+  try {
+    buildRequestTarget();
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/** Builds the `_search` path for one or more search targets. */
+export const toSearchPath = (index: string | readonly string[]): string => {
+  const target = typeof index === 'string' ? index : index.join(',');
+  return `/${encodeURIComponent(target)}/_search`;
+};
+
+/**
+ * Approximates the percent-encoded request target the HTTP client sends for a path and its
+ * query params. The path is appended to the base URL, so it is parsed the same way.
+ */
+export const toRequestTarget = (
+  path: string,
+  queryParams?: Record<string, string | number | boolean>
+): string => {
+  const { pathname, search } = new URL(`http://localhost${path}`);
+  const query = new URLSearchParams(
+    Object.entries(queryParams ?? {}).map(([key, value]) => [key, String(value)])
+  ).toString();
+  if (!query) return `${pathname}${search}`;
+  return `${pathname}${search ? `${search}&` : '?'}${query}`;
+};
+
 // ============================================================================
 // search
 // ============================================================================
@@ -16,44 +63,67 @@ import { z, lazySchema } from '@kbn/zod/v4';
 export const SearchInputSchema = lazySchema(() =>
   z.object({
     index: z
-      .union([z.string().min(1).max(512), z.array(z.string().min(1).max(512)).min(1).max(10)])
+      .union([
+        z.string().min(1).max(MAX_URL_INPUT_LENGTH),
+        z.array(z.string().min(1).max(512)).min(1).max(MAX_SEARCH_TARGETS),
+      ])
+      .refine((index) => isEncodable(() => toSearchPath(index)), {
+        message: 'The search targets cannot be URL-encoded.',
+      })
       .describe(
         'Index name, comma-separated index names, or an array of index names. Wildcards and aliases are supported.'
       ),
     query: z
       .record(z.string().max(200), z.unknown())
-      .refine((v) => Object.keys(v).length <= 30, { message: 'At most 30 top-level query keys.' })
+      .refine((v) => Object.keys(v).length === 1, {
+        message: 'Exactly one top-level query type, e.g. "match" or "bool".',
+      })
       .default({ match_all: {} })
-      .describe('Elasticsearch Query DSL object. Defaults to match_all.'),
+      .describe(
+        'Elasticsearch Query DSL object with exactly one top-level query type; combine clauses with "bool". Defaults to match_all.'
+      ),
     size: z
       .number()
       .int()
       .min(0)
-      .max(500)
+      .max(MAX_RESULT_WINDOW)
       .default(10)
-      .describe('Maximum number of hits to return (0–500).'),
-    from: z.number().int().min(0).max(10000).default(0).describe('Offset for pagination.'),
+      .describe(
+        `Maximum number of hits to return (0–${MAX_RESULT_WINDOW}). from + size must not exceed the index's max_result_window (${MAX_RESULT_WINDOW} by default). Keep this small (for example 10–50) to limit response size.`
+      ),
+    from: z
+      .number()
+      .int()
+      .min(0)
+      .max(MAX_RESULT_WINDOW)
+      .default(0)
+      .describe('Offset for pagination.'),
     sort: z
-      .array(z.record(z.string(), z.unknown()))
-      .max(5)
+      .array(z.record(z.string().max(200), z.unknown()))
+      .max(MAX_REQUEST_ITEMS)
       .optional()
       .describe('Sort clauses, e.g. [{ "@timestamp": { "order": "desc" } }].'),
     _source: z
-      .union([z.array(z.string().max(200)).max(50), z.boolean()])
+      .union([z.array(z.string().max(200)).max(MAX_REQUEST_ITEMS), z.boolean()])
       .optional()
       .describe('Fields to include in _source, or false to suppress _source entirely.'),
     aggs: z
       .record(z.string().max(200), z.unknown())
-      .refine((v) => Object.keys(v).length <= 50, { message: 'At most 50 aggregations.' })
+      .refine((v) => Object.keys(v).length <= MAX_REQUEST_ITEMS, {
+        message: `At most ${MAX_REQUEST_ITEMS} aggregations.`,
+      })
       .optional()
       .describe('Aggregations object. Results appear under "aggregations" in the response.'),
     runtimeMappings: z
       .record(z.string().max(200), z.unknown())
-      .refine((v) => Object.keys(v).length <= 50, { message: 'At most 50 runtime mappings.' })
+      .refine((v) => Object.keys(v).length <= MAX_REQUEST_ITEMS, {
+        message: `At most ${MAX_REQUEST_ITEMS} runtime mappings.`,
+      })
       .optional()
       .describe('Runtime field definitions to apply at query time.'),
     timeout: z
       .string()
+      .max(20)
       .regex(/^\d+[smhd]$/)
       .default('30s')
       .describe('ES-side query timeout, e.g. "30s". Partial results are returned on timeout.'),
@@ -70,20 +140,24 @@ export const EsqlInputSchema = lazySchema(() =>
     query: z
       .string()
       .min(1)
-      .max(65536)
+      .max(ESQL_MAX_QUERY_LENGTH)
       .describe(
         'ES|QL query string, e.g. "FROM logs-* | WHERE @timestamp > NOW() - 1 hour | STATS count = COUNT(*) BY host.name | SORT count DESC | LIMIT 10". Requires remote ES 8.11+.'
       ),
     params: z
-      .array(z.union([z.string(), z.number(), z.boolean(), z.null()]))
-      .max(100)
+      .array(z.union([z.string().max(ESQL_MAX_QUERY_LENGTH), z.number(), z.boolean(), z.null()]))
+      .max(MAX_REQUEST_ITEMS)
       .optional()
       .describe('Positional parameter values for ? placeholders in the query.'),
     filter: z
       .record(z.string().max(200), z.unknown())
-      .refine((v) => Object.keys(v).length <= 20, { message: 'At most 20 top-level filter keys.' })
+      .refine((v) => Object.keys(v).length === 1, {
+        message: 'Exactly one top-level query type, e.g. "range" or "bool".',
+      })
       .optional()
-      .describe('Additional Query DSL filter applied alongside the query.'),
+      .describe(
+        'Additional Query DSL filter applied alongside the query, with exactly one top-level query type; combine clauses with "bool".'
+      ),
     locale: z
       .string()
       .max(20)
@@ -137,21 +211,28 @@ export type GetMappingInput = z.infer<typeof GetMappingInputSchema>;
 // ============================================================================
 
 export const RequestInputSchema = lazySchema(() =>
-  z.object({
-    path: z
-      .string()
-      .min(1)
-      .max(2048)
-      .regex(/^\//, 'Path must start with "/".')
-      .describe(
-        'ES REST API path, starting with /. E.g. "/my-index/_doc/abc123", "/_aliases", "/_cat/health?v". The base cluster URL is prepended automatically — do not repeat it here.'
-      ),
-    queryParams: z
-      .record(z.string().max(200), z.union([z.string(), z.number(), z.boolean()]))
-      .refine((v) => Object.keys(v).length <= 50, { message: 'At most 50 query parameters.' })
-      .optional()
-      .describe('Query string parameters as key-value pairs, merged with any params in the path.'),
-  })
+  z
+    .object({
+      path: z
+        .string()
+        .min(1)
+        .max(MAX_URL_INPUT_LENGTH)
+        .regex(/^\//, 'Path must start with "/".')
+        .describe(
+          'ES REST API path, starting with /. E.g. "/my-index/_doc/abc123", "/_aliases", "/_cat/health?v". The base cluster URL is prepended automatically — do not repeat it here.'
+        ),
+      queryParams: z
+        .record(z.string().max(200), z.union([z.string().max(2048), z.number(), z.boolean()]))
+        .refine((v) => Object.keys(v).length <= 50, { message: 'At most 50 query parameters.' })
+        .optional()
+        .describe(
+          'Query string parameters as key-value pairs, merged with any params in the path.'
+        ),
+    })
+    .refine(({ path, queryParams }) => isEncodable(() => toRequestTarget(path, queryParams)), {
+      message: 'The path and query parameters cannot be URL-encoded.',
+      path: ['path'],
+    })
 );
 export type RequestInput = z.infer<typeof RequestInputSchema>;
 

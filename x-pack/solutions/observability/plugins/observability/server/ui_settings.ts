@@ -313,7 +313,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
   [profilingShowErrorFrames]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.profilingShowErrorFramesSettingName', {
-      defaultMessage: 'Show error frames in the Universal Profiling views',
+      defaultMessage: 'Show error frames in Profiling views',
     }),
     value: false,
     schema: schema.boolean(),
@@ -451,7 +451,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
   [apmEnableTransactionProfiling]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmEnableTransactionProfiling', {
-      defaultMessage: 'Enable Universal Profiling on Transaction view',
+      defaultMessage: 'Enable Profiling on Transaction view',
     }),
     value: true,
     schema: schema.boolean(),

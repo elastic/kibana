@@ -7,29 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * With Alt held, pointer input in comment mode goes to the page instead of
- * starting a comment: a flyout can be opened or a link followed without leaving
- * the mode, and the click counts towards the trail like any other.
- */
+/** With Alt held, pointer input in comment mode goes to the page instead of starting a comment. */
 export const holdsPassThrough = (event: MouseEvent): boolean => event.altKey;
 
-/** Depth of `passThrough` dispatches in progress. */
 let dispatching = 0;
 
-/**
- * Whether a click handed to the page by `passThrough` is being dispatched. The
- * clicks the page fires while handling it count as well: a label's on its control.
- */
+/** Whether a click handed to the page by `passThrough` is being dispatched, the clicks the page fires while handling it (a label's on its control) included. */
 export const isPassingThrough = (): boolean => dispatching > 0;
 
 /**
- * Hands the click to the page as one made without Alt, which the page must not
- * see: links leave a modified click to the browser, and the browser downloads on
- * Alt. The original is the caller's to stop. The copy waits for the original's
- * dispatch to end: a checkbox or radio is toggled before its click's listeners
- * run and toggled back after them when the click was stopped, which would undo
- * a copy dispatched from within.
+ * Hands the click to the page as one made without Alt (on which links leave the
+ * click to the browser, which downloads). The original is the caller's to stop.
+ * The copy waits for the original's dispatch to end: a stopped click's checkbox
+ * is toggled back after its listeners, which would undo a copy dispatched within.
  */
 export const passThrough = (event: MouseEvent): void => {
   const { target } = event;

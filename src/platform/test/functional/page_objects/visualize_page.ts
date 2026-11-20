@@ -158,6 +158,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickNewVisualization() {
+    await this.waitForListingToSettle();
     await this.appMenu.clickMenuItem('newItemButton');
     await this.waitForGroupsSelectPage();
   }
@@ -224,6 +225,20 @@ export class VisualizePageObject extends FtrService {
   }
 
   /**
+   * The listing renders `newItemButton` both while its initial fetch is in flight and in the
+   * empty prompt that then replaces the table, so a click placed in between is dropped.
+   */
+  public async waitForListingToSettle() {
+    const settledState = await this.testSubjects.waitForFirst(
+      ['listingTable-isLoaded', 'emptyListPrompt'],
+      { timeout: this.testSubjects.TRY_TIME }
+    );
+    if (!settledState) {
+      throw new Error('The Visualize listing did not finish its initial fetch');
+    }
+  }
+
+  /**
    * Navigation now happens without URL refresh by default
    * so a new "forceRefresh" option has been passed in order to
    * address those scenarios where a full refresh is required (i.e. changing default settings)
@@ -258,9 +273,13 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickVisType(type: string) {
-    // checking for the existence of the control gives the UI more time to bind a click handler
+    // waiting for the existence of the control gives the UI more time to bind a click handler
     // see https://github.com/elastic/kibana/issues/89958
-    if (!(await this.hasVisType(type))) {
+    if (
+      !(await this.testSubjects.waitForExists(`visType-${type}`, {
+        timeout: this.testSubjects.FIND_TIME,
+      }))
+    ) {
       throw new Error(`The '${type}' visualization type does not exist (visType-${type})`);
     }
     await this.testSubjects.click(`visType-${type}`);

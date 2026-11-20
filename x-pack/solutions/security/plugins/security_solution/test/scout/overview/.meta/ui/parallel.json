@@ -1,0 +1,72 @@
+{
+  "sha1": "5e3a0f16015c9e1ac4fe4e5c7aacd1f141cc11d1",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "ecb9dffb5199516-694d72184ba2607",
+      "title": "Overview threat intelligence panel shows the disabled module when there are no threat intel sources",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/overview/ui/parallel_tests/cti_link_panel.spec.ts",
+        "line": 86,
+        "column": 20
+      }
+    },
+    {
+      "id": "ecb9dffb5199516-4becee59581b261",
+      "title": "Overview threat intelligence panel shows zero indicators when the time range has no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/overview/ui/parallel_tests/cti_link_panel.spec.ts",
+        "line": 99,
+        "column": 56
+      }
+    },
+    {
+      "id": "ecb9dffb5199516-c8936ae7fa85b90",
+      "title": "Overview threat intelligence panel lists the feed and counts indicators in the time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/overview/ui/parallel_tests/cti_link_panel.spec.ts",
+        "line": 109,
+        "column": 15
+      }
+    },
+    {
+      "id": "ecb9dffb5199516-e389cdaab502319",
+      "title": "Overview threat intelligence panel counts each transform indicator once alongside indicators without the transform label",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/overview/ui/parallel_tests/cti_link_panel.spec.ts",
+        "line": 129,
+        "column": 17
+      }
+    }
+  ]
+}

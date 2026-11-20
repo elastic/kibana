@@ -22,7 +22,7 @@ export function registerTriggerDefinitions(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ): void {
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('./triggers/episode_assigned').then((m) => m.episodeAssignedTriggerPublicDefinition)
+    import('./triggers/alert_assigned').then((m) => m.alertAssignedTriggerPublicDefinition)
   );
   // Add more trigger loaders here.
 }
@@ -33,5 +33,5 @@ When adding a trigger:
 1. Define the shared trigger (`id` + Zod `eventSchema`) in `common/`.
 2. Register it on the **server** via the server-side `registerTriggerDefinitions` helper (so the runtime validates and dispatches it).
 3. Add a public `PublicTriggerDefinition` module under `triggers/` and register it as a loader in this file.
-4. Update the trigger schema hash fixture in `src/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_trigger_definitions.ts`.
+4. Update the trigger schema hash fixture in `x-pack/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_trigger_definitions.ts`.
 5. Keep the server and public trigger ids aligned.

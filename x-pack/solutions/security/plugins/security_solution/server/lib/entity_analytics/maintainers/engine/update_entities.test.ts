@@ -471,22 +471,21 @@ describe('matchExistingTargetIds', () => {
       expect(result).toEqual(candidates);
     });
 
-    it('logs which chunk failed, with the caller prefix, and rethrows', async () => {
-      const logger = loggerMock.create();
+    it('rethrows a failed search with the failing chunk in the message and the original as cause', async () => {
       const esClient = makeEchoEsClient();
+      const searchError = new Error('search_phase_execution_exception');
       (esClient.search as jest.Mock)
         .mockResolvedValueOnce({ hits: { hits: [] } })
-        .mockRejectedValueOnce(new Error('search_phase_execution_exception'));
+        .mockRejectedValueOnce(searchError);
 
-      await expect(
-        matchExistingTargetIds(esClient, 'default', candidates, logger, '[supervises][workday]')
-      ).rejects.toThrow('search_phase_execution_exception');
+      const error = await matchExistingTargetIds(esClient, 'default', candidates).catch(
+        (err: Error) => err
+      );
 
-      expect(logger.error).toHaveBeenCalledTimes(1);
-      const [message] = logger.error.mock.calls[0];
-      expect(message).toContain('[supervises][workday]');
-      expect(message).toContain('chunk 2/3');
-      expect(message).toContain('search_phase_execution_exception');
+      expect(error).toBeInstanceOf(Error);
+      expect((error as Error).message).toContain('chunk 2/3');
+      expect((error as Error).message).toContain('search_phase_execution_exception');
+      expect((error as Error).cause).toBe(searchError);
     });
   });
 });
@@ -551,6 +550,34 @@ describe('writeEntityIds — validateTargetIds', () => {
 
     expect(result.targetIdsNotInStore).toBe(1);
     expect(result.updated).toBe(0);
+    expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
+  });
+
+  it('rethrows a target-validation search rejection without writing', async () => {
+    const crudClient = makeCrudClient();
+    const esClient = {
+      search: jest.fn().mockRejectedValue(new Error('validation boom')),
+    } as unknown as ElasticsearchClient;
+    const records: EntityRelationshipRecord[] = [
+      {
+        entityId: 'host:admin.corp.com',
+        entityType: 'host',
+        relationships: { administers: ['host:target.corp.com'] },
+      },
+    ];
+
+    await expect(
+      writeEntityIds(
+        crudClient,
+        loggerMock.create(),
+        records,
+        esClient,
+        'default',
+        true,
+        '[supervises][workday]'
+      )
+    ).rejects.toThrow(/Target ID validation failed on chunk 1\/1.*validation boom/);
+
     expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
   });
 

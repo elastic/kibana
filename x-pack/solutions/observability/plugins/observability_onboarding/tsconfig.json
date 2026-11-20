@@ -54,7 +54,8 @@
     "@kbn/dashboard-plugin",
     "@kbn/core-chrome-layout-constants",
     "@kbn/zod",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/es-errors"
   ],
   "exclude": ["target/**/*"]
 }

@@ -9,7 +9,7 @@
     "id": "visualizationListing",
     "browser": true,
     "server": false,
-    "requiredPlugins": ["visualizations", "contentManagement", "embeddable"],
+    "requiredPlugins": ["visualizations", "embeddable"],
     "optionalPlugins": ["savedObjectsTagging", "dashboard"],
     "requiredBundles": [],
     "extraPublicDirs": []

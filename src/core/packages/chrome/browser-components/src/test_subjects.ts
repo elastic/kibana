@@ -21,4 +21,5 @@ export const CHROME_HEADER_TEST_SUBJECTS = {
   userMenu: 'kbnChromeHeader-userMenu',
   switcher: 'kbnChromeHeader-switcher',
   projectPicker: 'kbnChromeHeader-projectPicker',
+  subscriptionBadge: 'kbnChromeHeader-subscriptionBadge',
 } as const;

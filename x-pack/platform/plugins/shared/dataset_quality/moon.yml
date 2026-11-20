@@ -73,6 +73,7 @@ dependsOn:
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/ui-theme'
+  - '@kbn/data-source'
   - '@kbn/unified-histogram'
   - '@kbn/unified-search-plugin'
   - '@kbn/xstate-utils'
@@ -94,6 +95,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -101,6 +103,4 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -53,10 +53,11 @@ export function DeepStrict<TSchema extends z.ZodType>(schema: TSchema) {
     const excessKeys = difference(allInputKeys, allOutputKeys);
 
     if (excessKeys.length) {
+      // Zod >=4.5 pipes do not abort on `unrecognized_keys`; unions drop forwarded issues.
       ctx.issues.push({
-        code: 'unrecognized_keys',
-        keys: excessKeys,
-        input: ctx.value as Record<string, unknown>,
+        code: 'custom',
+        params: { keys: excessKeys },
+        input: ctx.value,
         message: `Excess keys are not allowed`,
       });
     }

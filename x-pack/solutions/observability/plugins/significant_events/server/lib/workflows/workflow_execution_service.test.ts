@@ -284,6 +284,36 @@ describe('WorkflowExecutionService', () => {
     });
   });
 
+  describe('cancelActive', () => {
+    it('cancels active executions even when a newer duplicate was skipped', async () => {
+      const { service, managementApi } = createService({
+        getWorkflowExecutions: jest.fn().mockResolvedValue({
+          results: [
+            { id: 'duplicate', status: ExecutionStatus.SKIPPED },
+            { id: 'running', status: ExecutionStatus.RUNNING },
+            { id: 'waiting', status: ExecutionStatus.WAITING_FOR_CHILD },
+          ],
+          total: 3,
+        }),
+      });
+      const request = httpServerMock.createKibanaRequest();
+      await expect(
+        service.cancelActive({ spaceId: 'space-a', request, concurrencyGroupKey: 'source' })
+      ).resolves.toBe('running');
+      expect(managementApi.cancelWorkflowExecution.mock.calls.map((call) => call[0])).toEqual([
+        'running',
+        'waiting',
+      ]);
+      expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          concurrencyGroupKey: 'source',
+          statuses: expect.not.arrayContaining([ExecutionStatus.SKIPPED]),
+        }),
+        'space-a'
+      );
+    });
+  });
+
   describe('cancelLatest', () => {
     it('cancels the latest non-terminal execution and returns its id', async () => {
       const { service, managementApi } = createService({

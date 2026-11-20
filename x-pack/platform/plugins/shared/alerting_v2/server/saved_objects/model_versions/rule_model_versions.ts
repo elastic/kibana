@@ -12,6 +12,9 @@ import {
   ruleSavedObjectAttributesSchemaV3,
   ruleSavedObjectAttributesSchemaV4,
   ruleSavedObjectAttributesSchemaV5,
+  ruleSavedObjectAttributesSchemaV6,
+  ruleSavedObjectAttributesSchemaV7,
+  ruleSavedObjectAttributesSchemaV8,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 import { migrateDashboardArtifactDataKey } from './migrate_dashboard_artifact_data_key';
@@ -143,8 +146,9 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     //
     // Additive only. Model version 6's schema requires `query.format` and a
     // present `query.breach`, so the pre-collapse keys stay on disk for the
-    // rollback window and model version 8 removes them. Rules created after the
-    // upgrade carry only the new shape, matching the model version 4 precedent.
+    // rollback window and a later model version removes them. Rules created
+    // after the upgrade carry only the new shape, matching the model version 4
+    // precedent.
     //
     // An `unsafe_transform` rather than a `data_backfill` because `query` has to
     // merge the two shapes key by key; `data_backfill` deep-merges its result,
@@ -159,6 +163,98 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV5.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV5,
+    },
+  },
+  '8': {
+    /**
+     * v8 moves the server-managed version counter from `metadata.version` to the
+     * attributes root, so that `metadata` holds only client-supplied fields.
+     * Documents written before the v3 backfill have no counter at all and are
+     * seeded with `1`, the same baseline v3 used.
+     *
+     * Still not indexed, so there is no mappings change.
+     *
+     * As in v4, the backfill leaves the legacy `metadata.version` on disk — it is
+     * never written or read again — so a rollback to model version 7 keeps the
+     * counter it was migrated from.
+     */
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => ({
+          attributes: { version: doc.attributes.metadata?.version ?? 1 },
+        }),
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV6.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV6,
+    },
+  },
+  '9': {
+    /*
+     * Adds and indexes `metadata.routing_tags`, which action policies match on.
+     * Optional, so existing rules need no backfill.
+     *
+     * The rules client filters on the field in the same release that adds its
+     * mapping, so this is NOT rollback-compatible: a node rolled back to model
+     * version 8 does not know the field. Accepted while alerting v2 is
+     * experimental.
+     */
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          metadata: {
+            properties: {
+              routing_tags: { type: 'keyword', ignore_above: 128 },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV7.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV7,
+    },
+  },
+  '10': {
+    /*
+     * Adds `metadata.template.id`, the id of the rule template a rule was
+     * created from. Optional, so existing rules need no backfill. Not indexed
+     * until something needs to search or filter on it.
+     */
+    changes: [],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV8.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV8,
+    },
+  },
+  '11': {
+    /*
+     * Indexes the existing `metadata.template.id`. The attribute shape is
+     * unchanged, so existing rules need no backfill. A rollback to model
+     * version 10 drops the mapping; counts read zero until it returns.
+     */
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          metadata: {
+            properties: {
+              template: {
+                properties: {
+                  id: { type: 'keyword', ignore_above: 256 },
+                },
+              },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV8.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV8,
     },
   },
 };

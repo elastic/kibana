@@ -12,7 +12,6 @@ import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { i18n } from '@kbn/i18n';
-import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 
 function isEditingFromDashboard(
@@ -100,11 +99,19 @@ export function createNavigationTree({
           {
             children: [
               { link: 'management:index_management', breadcrumbStatus: 'hidden' },
+              { link: 'management:search_boost', breadcrumbStatus: 'hidden', badgeType: 'new' },
               { link: 'management:data_federation', breadcrumbStatus: 'hidden' },
               { link: 'management:esql_views', breadcrumbStatus: 'hidden' },
             ],
             title: i18n.translate('xpack.serverlessVectordb.nav.ingest.indices.title', {
               defaultMessage: 'Indices and data streams',
+            }),
+          },
+          {
+            id: 'ingest',
+            children: [{ link: 'management:content_connectors', breadcrumbStatus: 'hidden' }],
+            title: i18n.translate('xpack.serverlessVectordb.nav.ingest.title', {
+              defaultMessage: 'Ingest',
             }),
           },
         ],
@@ -165,20 +172,10 @@ export function createNavigationTree({
                 cloudLink: 'billingAndSub',
               },
               {
-                id: 'cloudLinkDeployment',
-                cloudLink: 'deployment',
-                title: MONITOR_PERFORMANCE_TITLE,
-              },
-              {
-                id: 'cloudLinkSearchPower',
-                cloudLink: 'searchPower',
-              },
-              {
                 cloudLink: 'userAndRoles',
               },
             ],
           },
-          ...getAlertingV2ManagementNavPanel(core),
           {
             id: 'settings_alerts',
             title: ALERTS_AND_INSIGHTS_TITLE,
@@ -194,6 +191,15 @@ export function createNavigationTree({
             title: PROJECT_PERFORMANCE_TITLE,
             breadcrumbStatus: 'hidden',
             children: [
+              {
+                id: 'cloudLinkDeployment',
+                cloudLink: 'deployment',
+                title: MONITOR_PERFORMANCE_TITLE,
+              },
+              {
+                id: 'cloudLinkSearchPower',
+                cloudLink: 'searchPower',
+              },
               {
                 link: 'management:queryActivity',
                 breadcrumbStatus: 'hidden',
@@ -226,6 +232,7 @@ export function createNavigationTree({
             title: AI_TITLE,
             children: [
               { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
+              { link: 'management:aiAnonymizationSettings', breadcrumbStatus: 'hidden' },
               { link: 'management:evals', breadcrumbStatus: 'hidden' },
               ...(showAiAssistant
                 ? [

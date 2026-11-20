@@ -9,5 +9,9 @@ applies_to:
 
 # Logging settings [logging-settings]
 
+:::{tip}
+In self-managed deployments, you can [reload these logging settings without restarting {{kib}}](docs-content://deploy-manage/deploy/self-managed/configure-kibana.md#reload-logging-settings) by sending a `SIGHUP` signal to the running process.
+:::
+
 :::{settings} /reference/configuration-reference/logging-settings.yml
 :::

@@ -85,6 +85,21 @@ export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefi
 }
 
 /**
+ * Returns true when the query contains a STATS or PROMQL command, including nested
+ * FORK branches. KEEP and INLINE STATS are not aggregating.
+ */
+export function hasAggregatingCommand(esql?: string): boolean {
+  if (!esql) return false;
+  const { root } = Parser.parse(esql);
+  return (
+    Walker.findAll(
+      root,
+      (node) => node.type === 'command' && (node.name === 'stats' || node.name === 'promql')
+    ).length > 0
+  );
+}
+
+/**
  * Determines if an ES|QL query contains transformational commands.
  *
  * For ES|QL, we consider the following as transformational commands:
@@ -213,7 +228,8 @@ export function convertTimeseriesCommandToFrom(esql?: string): string {
 
 /**
  * Parses the ES|QL query and returns the column used with `?_tstart`/`?_tend` named params.
- * Returns `undefined` when the query contains no time filter params.
+ * Queries that use TBUCKET, which always buckets on `@timestamp`, or PromQL, resolve to
+ * `@timestamp` without named params. Returns `undefined` when the query contains no time filter.
  *
  * Use this for synchronous/server-side contexts where only local parsing is needed.
  * For client-side code with HTTP access that also needs `fieldCaps` fallback,
@@ -227,6 +243,11 @@ export const parseTimeFieldFromESQLQuery = (esql: string) => {
     visitFunction: (node) => functions.push(node),
   });
 
+  // TBUCKET always buckets on @timestamp, used when no named params point to a field
+  const implicitTimeField = functions.some(({ name }) => name === 'tbucket')
+    ? '@timestamp'
+    : undefined;
+
   const params = Walker.params(root);
   const timeNamedParam = params.find(
     (param) => param.value === '_tstart' || param.value === '_tend'
@@ -238,7 +259,7 @@ export const parseTimeFieldFromESQLQuery = (esql: string) => {
   }
 
   if (!timeNamedParam || !functions.length) {
-    return undefined;
+    return implicitTimeField;
   }
   const allFunctionsWithNamedParams = functions.filter(
     ({ location }) =>
@@ -246,7 +267,7 @@ export const parseTimeFieldFromESQLQuery = (esql: string) => {
   );
 
   if (!allFunctionsWithNamedParams.length) {
-    return undefined;
+    return implicitTimeField;
   }
   const lowLevelFunction = allFunctionsWithNamedParams[allFunctionsWithNamedParams.length - 1];
 
@@ -270,7 +291,7 @@ export const parseTimeFieldFromESQLQuery = (esql: string) => {
     return false;
   });
 
-  return columnName;
+  return columnName ?? implicitTimeField;
 };
 
 export const getKqlSearchQueries = (esql: string) => {

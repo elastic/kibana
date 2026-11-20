@@ -1,5 +1,5 @@
 {
-  "sha1": "d20643699fde7ffb0d8196a806ecea92909b8151",
+  "sha1": "1e3b5ffb98a996ea673eb414f5c0671c753de512",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -121,7 +121,7 @@
     {
       "id": "de1e365b467dbf7-56c73ac2d78fb44",
       "title": "FilterMonitors filters monitors by tags with AND/OR logic",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -130,21 +130,21 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/filter_monitors.spec.ts",
-        "line": 24,
-        "column": 10
+        "line": 25,
+        "column": 28
       }
     },
     {
       "id": "402fcd63f7942bd-32566624ccc15f6",
       "title": "GettingStarted creates a basic monitor from getting started page",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/getting_started.spec.ts",
-        "line": 19,
+        "line": 21,
         "column": 5
       }
     },

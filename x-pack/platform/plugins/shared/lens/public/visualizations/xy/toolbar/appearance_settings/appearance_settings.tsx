@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { AreaFillOptions, PointVisibilityOptions } from '@kbn/expression-xy-plugin/public';
+import { PointVisibilityOptions } from '@kbn/expression-xy-plugin/public';
 import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import { BarOrientationSettings } from '../../../../shared_components/bar_orientation';
 import { ToolbarDivider } from '../../../../shared_components/toolbar_divider';
@@ -17,6 +17,7 @@ import { FillOpacityOption } from './fill_opacity_option';
 import { AreaFillOption } from './fill_option';
 import { PointVisibilityOption } from './point_visibility_option';
 import type { XYVisualizationState } from '../../types';
+import { defaultAreaFill } from '../../types';
 import {
   flipSeriesType,
   getBarSeriesLayers,
@@ -105,7 +106,7 @@ export const XyAppearanceSettings: React.FC<VisualizationToolbarProps<XYVisualiz
           <FillOpacityOption
             isFillOpacityEnabled={true}
             value={state?.fillOpacity ?? 0.3}
-            fill={state?.areaFill ?? AreaFillOptions.SOLID}
+            fill={state?.areaFill ?? defaultAreaFill}
             onChange={(newValue) => {
               setState({
                 ...state,
@@ -114,7 +115,7 @@ export const XyAppearanceSettings: React.FC<VisualizationToolbarProps<XYVisualiz
             }}
           />
           <AreaFillOption
-            value={state?.areaFill ?? AreaFillOptions.SOLID}
+            value={state?.areaFill ?? defaultAreaFill}
             onChange={(newValue) => {
               setState({
                 ...state,

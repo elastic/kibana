@@ -25,6 +25,8 @@ export interface ClassicRulesPageProps {
   /** Host app and in-app path prefix for v1 locators. Defaults to Stack Management. */
   host?: LocatorHost;
   tabs?: AppHeaderTab[];
+  /** When true, Classic surfaces render the Classic badge. */
+  showClassicBadge?: boolean;
 }
 
 export type ClassicRulesPagePluginsStart = Pick<

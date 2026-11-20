@@ -13,7 +13,7 @@ import {
   EuiButtonIcon,
   EuiInMemoryTable,
   EuiLink,
-  EuiSpacer,
+  EuiTextBlockTruncate,
   EuiToolTip,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -85,8 +85,12 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
       {
         field: 'description',
         name: mainTranslations.columns.dataSources.description,
+        render: (description: DataSource['description']) => (
+          <EuiTextBlockTruncate lines={2} title={description}>
+            {description}
+          </EuiTextBlockTruncate>
+        ),
         sortable: true,
-        truncateText: true,
         'data-test-subj': 'dataSetsColDescription',
       },
       {
@@ -113,6 +117,7 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
                     isDisabled={!isSupportedType}
                     onClick={() => onEdit(item)}
                     data-test-subj="dataSetsEditButton"
+                    data-telemetry-id="dataFederation-dataSources-editButton"
                   />
                 </span>
               </EuiToolTip>
@@ -140,6 +145,7 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
                       isDisabled={hasDataSets}
                       onClick={() => onDelete(item)}
                       data-test-subj="dataSetsDeleteIconButton"
+                      data-telemetry-id="dataFederation-dataSources-deleteButton"
                     />
                   </span>
                 </EuiToolTip>
@@ -154,7 +160,6 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
 
   return (
     <>
-      <EuiSpacer size="m" />
       <EuiInMemoryTable<DataSource>
         items={dataSources}
         itemId="name"
@@ -177,6 +182,7 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
               <EuiButton
                 color="danger"
                 data-test-subj="dataSetsDeleteButton"
+                data-telemetry-id="dataFederation-dataSources-bulkDeleteButton"
                 iconType="trash"
                 onClick={() => {
                   onDeleteSelected(selectedDataSources);
@@ -190,6 +196,7 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
               fill
               color="primary"
               data-test-subj="dataSetsCreateButton"
+              data-telemetry-id="dataFederation-dataSources-createButton"
               onClick={onCreate}
             >
               {mainTranslations.actions.addButtonLabel}

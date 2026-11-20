@@ -10,6 +10,9 @@
  *
  * This rule persists Attack Discoveries as Alerts-as-Data via the alerting framework `alertsClient`,
  * so we do not need to manually construct and bulk-index alert documents into dot-prefixed indices.
+ *
+ * Defined in `@kbn/elastic-assistant-common` alongside the scheduled and ad hoc rule type ids, so
+ * that platform consumers such as Cases can recognise these documents without importing from this
+ * plugin's server code. Re-exported here to keep this module's existing import path working.
  */
-export const ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID =
-  'security.attack_discovery.data_generator' as const;
+export { ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID } from '@kbn/elastic-assistant-common';

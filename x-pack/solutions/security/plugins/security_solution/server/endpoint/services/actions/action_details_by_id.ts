@@ -87,6 +87,7 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
           endpointService,
           spaceId,
           agentIds: normalizedActionRequest.agents,
+          scoped,
         })
       : {};
 

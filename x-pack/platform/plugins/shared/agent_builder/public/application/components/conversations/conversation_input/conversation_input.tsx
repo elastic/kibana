@@ -15,6 +15,7 @@ import {
   euiShadowHover,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { CHAT_MESSAGE_MAX_LENGTH, STEER_MESSAGE_MAX_LENGTH } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -23,25 +24,33 @@ import {
   ConversationInputShell,
   formatAgentBuilderErrorMessage,
 } from '@kbn/agent-builder-browser';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useCurrentUser } from '../../../hooks/use_current_user';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { labels } from '../../../utils/i18n';
 import { useInputDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
+import { useSendSteer } from '../../../hooks/use_send_steer';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
+import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
+import { useAgentModel } from '../../../hooks/agents/use_agent_model';
 import {
   useAgentId,
   useConversationReadOnly,
   useConversationTitle,
   useHasActiveConversation,
-  useIsSharedConversation,
 } from '../../../hooks/use_conversation';
 import { useIsAwaitingPrompt } from '../../../hooks/use_is_awaiting_prompt';
 import { MessageEditor, useMessageEditor, CommandBadgeSerializationError } from './message_editor';
+import { getLeadingMention } from './mentions/get_leading_mention';
+import { useCanMention } from './mentions/use_can_mention';
+import { useTriggerMode } from './use_trigger_mode';
 import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -53,8 +62,18 @@ const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.
 });
 
 const postToTeamLabel = i18n.translate('xpack.agentBuilder.conversationInput.postToTeam.label', {
-  defaultMessage: 'Leaving a post to the team',
+  defaultMessage: "Agent won't respond to this message.",
 });
+
+const getMessageTooLongLabel = (characterCount: number): string =>
+  i18n.translate('xpack.agentBuilder.conversationInput.messageTooLong', {
+    defaultMessage:
+      'Message is too long ({characterCount, number} / {maxLength, number} characters). Shorten it to send.',
+    values: {
+      characterCount,
+      maxLength: CHAT_MESSAGE_MAX_LENGTH,
+    },
+  });
 
 const wrapperStyles = ({ euiTheme }: UseEuiTheme) => css`
   flex-grow: 0;
@@ -80,6 +99,12 @@ const composerFocusShadowStyles = (euiThemeContext: UseEuiTheme) => css`
       ${euiShadowHover(euiThemeContext, 'xl')}
     }
   }
+`;
+
+// In dark mode the wrapper's shadow draws a border overlay over the shell, hiding its focus border.
+const shellStyles = ({ euiTheme }: UseEuiTheme) => css`
+  position: relative;
+  z-index: ${Number(euiTheme.levels.content) + 1};
 `;
 
 const wrapperWithHeaderStyles = ({ euiTheme }: UseEuiTheme) => css`
@@ -150,6 +175,7 @@ const InputContainer: React.FC<
         isDisabled={isDisabled}
         isCollapsed={isCollapsed}
         suppressShadow
+        css={shellStyles}
         data-test-subj="agentBuilderConversationInputForm"
         aria-label={containerAriaLabel}
       >
@@ -159,41 +185,32 @@ const InputContainer: React.FC<
   );
 };
 
-/**
- * The input stays mounted across conversations, so a trigger mode choice only applies to the
- * conversation it was made in and is dropped once the selector stops being offered.
- */
-const useTriggerMode = () => {
-  const conversationId = useConversationId();
-  const isSelectable = useIsSharedConversation();
-
-  const [choice, setChoice] = useState<{
-    conversationId?: string;
-    triggerMode: ChatTriggerMode;
-  }>();
-
-  if (!isSelectable && choice) {
-    setChoice(undefined);
-  }
-
-  const setTriggerMode = useCallback(
-    (triggerMode: ChatTriggerMode) => setChoice({ conversationId, triggerMode }),
-    [conversationId]
-  );
-
-  const triggerMode =
-    isSelectable && choice && choice.conversationId === conversationId
-      ? choice.triggerMode
-      : ChatTriggerMode.Always;
-
-  return { triggerMode, setTriggerMode, isSelectable };
-};
-
 interface ConversationInputProps {
   onSubmit?: () => void;
   onEditorFocus?: () => void;
   onSubmitOverride?: (message: string) => void;
 }
+
+// A steer carries text only.
+const imageInSteerMessage = i18n.translate(
+  'xpack.agentBuilder.conversationInput.steer.imageNotSent',
+  {
+    defaultMessage:
+      "Images can't be sent to a running agent. Remove the image, or wait for the agent to finish.",
+  }
+);
+const steerTooLongMessage = i18n.translate('xpack.agentBuilder.conversationInput.steer.tooLong', {
+  defaultMessage:
+    'A message to a running agent can be at most {max} characters. Shorten it, or wait for the agent to finish.',
+  values: { max: STEER_MESSAGE_MAX_LENGTH },
+});
+const imagePasteWhileRunningMessage = i18n.translate(
+  'xpack.agentBuilder.conversationInput.steer.imagePasteRefused',
+  {
+    defaultMessage:
+      "Images can't be sent to a running agent. Wait for it to finish, then paste the image again.",
+  }
+);
 
 const disabledPlaceholder = (agentId?: string) =>
   i18n.translate('xpack.agentBuilder.conversationInput.textArea.disabledPlaceholder', {
@@ -228,14 +245,24 @@ const getMessageEditorAriaLabel = ({
   });
 };
 
-export const ConversationInput: React.FC<ConversationInputProps> = ({
+// Narrow to editable controls: after a sidebar click focus sits on the conversation row button,
+// so a broader "focus moved elsewhere" check would suppress the auto-focus in the normal case.
+const isEditableElementFocused = (): boolean => {
+  const { activeElement } = document;
+  return (
+    activeElement instanceof HTMLElement &&
+    (activeElement.isContentEditable || activeElement.matches('input, textarea'))
+  );
+};
+
+const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   onSubmit,
   onEditorFocus,
   onSubmitOverride,
 }) => {
   const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
 
-  const { isResponseLoading } = useConversationStream();
+  const { isResponseLoading, canCancel } = useConversationStream();
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
@@ -245,7 +272,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const spaceId = useActiveSpaceId();
   const { sessionTag } = useConversationContext();
 
-  const { draft, saveDraft, clearDraft } = useInputDraft({
+  const { draft, saveDraft, clearDraft, keepUnsentFor } = useInputDraft({
     spaceId,
     sessionTag,
     username,
@@ -253,15 +280,36 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     conversationId,
   });
 
+  const canMention = useCanMention();
+  const {
+    triggerMode,
+    setTriggerMode,
+    isSelectable: isTriggerModeSelectable,
+    updateLeadingMention,
+    markSent,
+    markCleared,
+  } = useTriggerMode({ canMention });
+
   const messageEditorControllerRef = useRef<
     ReturnType<typeof useMessageEditor>['controller'] | null
   >(null);
   const saveDraftDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastEditorContentRef = useRef('');
+  // A late failure must find out where the composer is by then, and whether it still exists.
+  const shownRef = useRef({ agentId, conversationId });
+  shownRef.current = { agentId, conversationId };
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
   const handleContentChange = useCallback(() => {
     try {
       const content = messageEditorControllerRef.current?.getContent() ?? '';
       lastEditorContentRef.current = content;
+      updateLeadingMention(getLeadingMention(content));
       if (saveDraftDebounceRef.current) clearTimeout(saveDraftDebounceRef.current);
       saveDraftDebounceRef.current = setTimeout(() => {
         saveDraft(lastEditorContentRef.current);
@@ -269,11 +317,16 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     } catch (err) {
       if (!(err instanceof CommandBadgeSerializationError)) throw err;
     }
-  }, [saveDraft]);
+  }, [saveDraft, updateLeadingMention]);
 
-  const { messageEditor, controller: messageEditorController } = useMessageEditor({
+  const {
+    messageEditor,
+    controller: messageEditorController,
+    overLimitCharacterCount,
+  } = useMessageEditor({
     onEditorFocus,
     onContentChange: handleContentChange,
+    maxLength: CHAT_MESSAGE_MAX_LENGTH,
   });
   messageEditorControllerRef.current = messageEditorController;
 
@@ -300,31 +353,63 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     resetInitialMessage,
   } = useConversationContext();
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
-  const { triggerMode, setTriggerMode, isSelectable: isTriggerModeSelectable } = useTriggerMode();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
+  const { sendSteer, steerIfBusy, isUnansweredSteer, isSending: isSendingSteer } = useSendSteer();
+  const canSteer = canCancel && Boolean(conversationId) && !isAwaitingPrompt;
+  // Never mode posts to the team instead of steering, attachments included.
+  const willSteer = canSteer && triggerMode !== ChatTriggerMode.Never;
 
   const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
     useImageUpload({
       addErrorToast,
       messageEditorController,
     });
+  const refuseImagePaste = (): undefined => {
+    addErrorToast(imagePasteWhileRunningMessage);
+    return undefined;
+  };
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
+  const { isLoading: isAgentModelLoading } = useAgentModel(agentId);
 
-  const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
+  const { agent: agentById, isLoading: isLoadingAgentById } = useAgentBuilderAgentById(
+    !isAgentIdValid && isFetched && Boolean(agentId) ? agentId : undefined
+  );
+  const agentExists = isAgentIdValid || Boolean(agentById);
+
+  // An agent bound to a service account can only be invoked with the dedicated privilege; the
+  // server refuses the request, so the composer says why up front instead of failing on send.
+  const { invokeBoundAgents } = useUiPrivileges();
+  const { agent: currentAgent } = useAgentBuilderAgentById(isAgentIdValid ? agentId : undefined);
+  const isBoundAgentForbidden = Boolean(currentAgent?.service_account_id) && !invokeBoundAgents;
+
+  const isAgentDeleted = !agentExists && !isLoadingAgentById && isFetched && Boolean(agentId);
   const isInputDisabled =
-    isAgentDeleted || isAwaitingPrompt || isCreatingConversation || isSendingUserMessage;
+    isAgentDeleted ||
+    isBoundAgentForbidden ||
+    isAwaitingPrompt ||
+    isCreatingConversation ||
+    isSendingUserMessage;
+  const isMessageTooLong = overLimitCharacterCount > 0;
   const isSubmitDisabled =
     messageEditorController.isEmpty ||
-    isResponseLoading ||
+    isMessageTooLong ||
+    (isResponseLoading && !canSteer) ||
+    isSendingSteer ||
     isSendingUserMessage ||
     isCreatingConversation ||
-    !isAgentIdValid ||
+    !agentExists ||
+    isBoundAgentForbidden ||
+    isAgentModelLoading ||
     isAwaitingPrompt ||
     uploadingNames.size > 0;
 
-  const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : enabledPlaceholder;
+  const placeholder = isAgentDeleted
+    ? disabledPlaceholder(agentId)
+    : isBoundAgentForbidden
+    ? labels.executionIdentity.chatForbiddenPlaceholder
+    : enabledPlaceholder;
 
   const editorContainerStyles = css`
     display: flex;
@@ -358,10 +443,11 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     if (isConvSwitchRef.current) {
       messageEditorControllerRef.current?.clear();
       lastEditorContentRef.current = '';
+      markCleared();
     }
     isConvSwitchRef.current = true;
     draftHydratedRef.current = false;
-  }, [agentId, conversationId, spaceId, sessionTag]);
+  }, [agentId, conversationId, spaceId, sessionTag, markCleared]);
 
   // Set initial message in input when {autoSendInitialMessage} is false and {initialMessage} is provided
   useEffect(() => {
@@ -392,6 +478,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     draftHydratedRef.current = true;
     if (draft && !lastEditorContentRef.current) {
       messageEditorController.setContent(draft);
+      updateLeadingMention(getLeadingMention(draft));
     }
   }, [
     draft,
@@ -404,12 +491,15 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     isConversationReadOnly,
     isConversationReadOnlyLoading,
     messageEditorController,
+    updateLeadingMention,
   ]);
 
-  // Skip auto-focus while a HITL prompt is open, it should own focus instead
+  // Skip auto-focus while a HITL prompt is open, or while another editable control already has
+  // focus, since both should own focus instead
   useEffect(() => {
     if (isAwaitingPrompt || isConversationReadOnly) return;
     const timeoutId = setTimeout(() => {
+      if (isEditableElementFocused()) return;
       messageEditorController.focus();
     }, 200);
 
@@ -417,6 +507,11 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       clearTimeout(timeoutId);
     };
   }, [conversationId, messageEditorController, isAwaitingPrompt, isConversationReadOnly]);
+
+  const handleMentionClick = useCallback(
+    () => messageEditorController.insertText('@'),
+    [messageEditorController]
+  );
 
   const handleSubmit = () => {
     if (isSubmitDisabled) {
@@ -441,12 +536,14 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       saveDraftDebounceRef.current = null;
     }
 
+    // Never mode bypasses steering.
     if (triggerMode === ChatTriggerMode.Never) {
       sendUserMessage(content)
         .then(() => {
           lastEditorContentRef.current = '';
           clearDraft();
           messageEditorController.clear();
+          markSent();
           onSubmit?.();
         })
         .catch((sendError: unknown) => {
@@ -455,14 +552,67 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
         });
       return;
     }
+
+    const sentFrom = shownRef.current;
+    // Preserve newer drafts on failure.
+    const restoreUnsent = (unsent: string) => {
+      const shown = shownRef.current;
+      // The composer may show another conversation by now, or be gone: the text goes to the
+      // draft of the conversation it was sent to.
+      if (
+        !mountedRef.current ||
+        shown.conversationId !== sentFrom.conversationId ||
+        shown.agentId !== sentFrom.agentId
+      ) {
+        keepUnsentFor(sentFrom, unsent);
+        return;
+      }
+      if (lastEditorContentRef.current !== '') {
+        return;
+      }
+      lastEditorContentRef.current = unsent;
+      messageEditorControllerRef.current?.setContent(unsent);
+    };
+    // Both steer paths carry bounded text only; an image would travel as a bare reference.
+    const steerRefusal =
+      content.length > STEER_MESSAGE_MAX_LENGTH
+        ? steerTooLongMessage
+        : messageEditorController.getPlaceholderNames().length > 0
+        ? imageInSteerMessage
+        : undefined;
+
+    // Retry uncertain sends through steering, also after the run ends.
+    if (canSteer || isUnansweredSteer(content)) {
+      if (steerRefusal) {
+        addErrorToast(steerRefusal);
+        return;
+      }
+      // Cleared at the submit, as for an ordinary send, so edits made during the request are kept.
+      lastEditorContentRef.current = '';
+      clearDraft();
+      messageEditorController.clear();
+      markSent();
+      onSubmit?.();
+      sendSteer(content, { onUnsent: restoreUnsent }).then((sent) => {
+        if (!sent) {
+          restoreUnsent(content);
+        }
+      });
+      return;
+    }
     lastEditorContentRef.current = '';
     if (onSubmitOverride) {
       onSubmitOverride(content);
     } else {
-      submitMessage(content);
+      // A send refused as busy is steered instead, unless it carries what a steer cannot.
+      const steerable = steerRefusal === undefined && (attachments?.length ?? 0) === 0;
+      submitMessage(content, {
+        onRejected: steerIfBusy(content, { onUnsent: restoreUnsent, steerable }),
+      });
     }
     clearDraft();
     messageEditorController.clear();
+    markSent();
     onSubmit?.();
   };
 
@@ -487,6 +637,17 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           />
         </EuiFlexItem>
       )}
+      {isBoundAgentForbidden && (
+        <EuiFlexItem grow={false}>
+          <KbnInfoCallout
+            announceOnMount
+            size="s"
+            title={labels.executionIdentity.chatForbiddenTitle}
+            text={labels.executionIdentity.chatForbiddenDescription}
+            data-test-subj="agentBoundForbiddenCallout"
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem css={editorContainerStyles}>
         <MessageEditor
           messageEditor={messageEditor}
@@ -495,22 +656,37 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           placeholder={placeholder}
           ariaLabel={messageEditorAriaLabel}
           data-test-subj="agentBuilderConversationInputEditor"
-          onPasteFile={upsertAttachments ? handlePasteFile : undefined}
+          onPasteFile={
+            upsertAttachments ? (willSteer ? refuseImagePaste : handlePasteFile) : undefined
+          }
           onAfterInput={handleAfterInput}
           onHoveredPlaceholderChange={setHoveredImageName}
           uploadingNames={uploadingNames}
         />
       </EuiFlexItem>
+      {isMessageTooLong && (
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="danger" data-test-subj="agentBuilderConversationInputTooLong">
+            {getMessageTooLongLabel(overLimitCharacterCount)}
+          </EuiText>
+        </EuiFlexItem>
+      )}
       {!isAgentDeleted && (
         <InputActions
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
-          isSubmitting={isCreatingConversation || isSendingUserMessage}
+          isSubmitting={isCreatingConversation || isSendingUserMessage || isSendingSteer}
+          showSubmitWhileRunning={canSteer}
           showTriggerModeSelector={isTriggerModeSelectable}
           triggerMode={triggerMode}
           onTriggerModeChange={setTriggerMode}
+          onMentionClick={canMention ? handleMentionClick : undefined}
+          isMentionDisabled={isInputDisabled}
         />
       )}
     </InputContainer>
   );
 };
+
+export const ConversationInput = React.memo(ConversationInputComponent);
+ConversationInput.displayName = 'ConversationInput';

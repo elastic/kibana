@@ -15,7 +15,15 @@ const log = ora('Updating generated antlr grammar').start();
 const SUPPORTED_FOLDERS = ['painless', 'esql'];
 
 function execute(folder) {
-  const generatedAntlrFolder = join(__dirname, '..', 'src', 'languages', folder, 'antlr');
+  const generatedAntlrFolder = join(
+    __dirname,
+    '..',
+    'src',
+    'languages',
+    'definitions',
+    folder,
+    'antlr'
+  );
 
   const generatedAntlrFolderContents = readdirSync(generatedAntlrFolder);
 

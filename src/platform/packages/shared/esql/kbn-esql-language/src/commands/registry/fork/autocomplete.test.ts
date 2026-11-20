@@ -466,7 +466,6 @@ describe('FORK Autocomplete', () => {
       });
 
       it('suggests FORK subcommands after in-branch pipe', async () => {
-        await forkExpectSuggestions('FROM a | FORK (LIMIT 1234) | (', FORK_SUBCOMMANDS);
         await forkExpectSuggestions(
           'FROM a | FORK (WHERE keywordField IS NULL | LIMIT 1234 | ',
           FORK_SUBCOMMANDS

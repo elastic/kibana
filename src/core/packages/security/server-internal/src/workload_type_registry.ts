@@ -25,11 +25,11 @@ export class WorkloadTypeRegistry {
   >();
 
   /**
-   * Records a workload type for a plugin. Throws on an invalid type, name or description, and
-   * when the plugin has already registered that type.
+   * Records a workload type for a plugin. Throws on an invalid type, name, description or
+   * resolver, and when the plugin has already registered that type.
    */
   public register(pluginId: string, registration: ServiceAccountWorkloadTypeRegistration): void {
-    const { type, name, description } = registration;
+    const { type, name, description, resolveWorkloads } = registration;
 
     if (type.length > SERVICE_ACCOUNT_WORKLOAD_TYPE_MAX_LENGTH) {
       throw new Error(
@@ -61,6 +61,12 @@ export class WorkloadTypeRegistry {
     ) {
       throw new Error(
         `Service account workload type [${type}] registered by plugin [${pluginId}] has a description that is too long: it must be at most ${SERVICE_ACCOUNT_WORKLOAD_TYPE_DESCRIPTION_MAX_LENGTH} characters, but got ${description.length}.`
+      );
+    }
+
+    if (resolveWorkloads !== undefined && typeof resolveWorkloads !== 'function') {
+      throw new Error(
+        `Service account workload type [${type}] registered by plugin [${pluginId}] has a resolveWorkloads that is not a function.`
       );
     }
 

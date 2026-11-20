@@ -229,6 +229,88 @@ describe('EntityStoreGlobalStateClient', () => {
       expect(soClient.update).not.toHaveBeenCalled();
     });
 
+    it('updates history snapshot interval and retention without clearing status or timestamps', async () => {
+      mockStored({
+        historySnapshot: {
+          status: 'started',
+          frequency: '24h',
+          retentionDays: 30,
+          lastExecutionTimestamp: '2026-01-01T00:00:00.000Z',
+        },
+        logsExtraction: { delay: '9m' },
+      });
+
+      const state = await client.update({
+        historySnapshot: { frequency: '12h', retentionDays: 90 },
+      });
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        EntityStoreGlobalStateTypeName,
+        soId,
+        expect.objectContaining({
+          historySnapshot: expect.objectContaining({
+            status: 'started',
+            frequency: '12h',
+            retentionDays: 90,
+            lastExecutionTimestamp: '2026-01-01T00:00:00.000Z',
+          }),
+          logsExtraction: { delay: '9m' },
+        }),
+        expect.objectContaining({ mergeAttributes: false })
+      );
+      expect(state.historySnapshot.frequency).toBe('12h');
+      expect(state.historySnapshot.retentionDays).toBe(90);
+      expect(state.historySnapshot.status).toBe('started');
+      expect(state.historySnapshot.lastExecutionTimestamp).toBe('2026-01-01T00:00:00.000Z');
+    });
+
+    it('clears lastError when it is explicitly set to null', async () => {
+      mockStored({
+        historySnapshot: {
+          status: 'started',
+          frequency: '24h',
+          retentionDays: 30,
+          lastError: { message: 'previous failure', timestamp: '2026-01-01T00:00:00.000Z' },
+        },
+      });
+
+      const state = await client.update({
+        historySnapshot: { lastExecutionTimestamp: '2026-06-01T00:00:00.000Z', lastError: null },
+      });
+
+      expect(state.historySnapshot.lastError).toBeUndefined();
+      expect(state.historySnapshot.lastExecutionTimestamp).toBe('2026-06-01T00:00:00.000Z');
+      expect(state.historySnapshot.status).toBe('started');
+      expect(soClient.update).toHaveBeenCalledWith(
+        EntityStoreGlobalStateTypeName,
+        soId,
+        expect.objectContaining({
+          historySnapshot: expect.not.objectContaining({ lastError: expect.anything() }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('leaves history snapshot fields out of a partial update unchanged', async () => {
+      mockStored({
+        historySnapshot: {
+          status: 'stopped',
+          frequency: '12h',
+          retentionDays: 90,
+        },
+      });
+
+      const state = await client.update({ historySnapshot: { retentionDays: 15 } });
+
+      expect(state.historySnapshot).toEqual(
+        expect.objectContaining({
+          status: 'stopped',
+          frequency: '12h',
+          retentionDays: 15,
+        })
+      );
+    });
+
     it('merges the partial over the existing state and persists only overrides', async () => {
       mockStored({ logsExtraction: { delay: '9m', lookbackPeriod: '6h' } });
 

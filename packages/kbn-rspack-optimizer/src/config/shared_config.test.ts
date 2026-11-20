@@ -128,7 +128,7 @@ describe('shared_config', () => {
       // builds run from the plugin directory and must not depend on it.
       const globals = Path.resolve(
         REPO_ROOT,
-        'src/core/public/styles/core_app/_globals_borealislight.scss'
+        'src/core/packages/core/public/styles/core_app/_globals_borealislight.scss'
       );
       const originalCwd = process.cwd();
       process.chdir(Os.tmpdir());
@@ -250,6 +250,13 @@ describe('shared_config', () => {
     it('should include CSS loader rule', () => {
       const cssRule = rules.find((r) => r.test?.toString() === '/\\.css$/');
       expect(cssRule).toBeDefined();
+    });
+
+    it('should skip ?raw CSS imports so they are loaded as source text', () => {
+      const cssRule = rules.find((r) => r.test?.toString() === '/\\.css$/');
+      expect(cssRule?.resourceQuery).toEqual({ not: /raw/ });
+      const rawRule = rules.find((r) => r.resourceQuery?.toString() === '/raw/' && !r.test);
+      expect(rawRule?.type).toBe('asset/source');
     });
 
     it('should include SCSS loader rules', () => {

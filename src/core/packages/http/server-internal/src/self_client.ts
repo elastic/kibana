@@ -15,7 +15,13 @@ import type {
   HttpSelfFetchOptions,
   HttpSelfResponse,
   HttpSelfScopedClient,
+  HttpSelfCredentialRefresher,
+  HttpSelfCredentialRefresherResult,
+  HttpSelfCredentialRefresherToolkit,
   HttpSelfService,
+  HttpSelfUnauthorizedErrorHandler,
+  HttpSelfUnauthorizedErrorHandlerResult,
+  HttpSelfUnauthorizedErrorHandlerToolkit,
   HttpServerInfo,
   IAuthHeadersStorage,
   IBasePath,
@@ -25,15 +31,22 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
+import {
+  ES_CLIENT_AUTHENTICATION_HEADER,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 import { getSpaceUrlPrefix } from '@kbn/core-spaces-common';
 import type { HttpConfig } from './http_config';
 import { SelfHttpDispatcherProvider } from './self_client_dispatcher';
-import { SELF_CALL_HEADER } from './self_client_observer';
+import { SELF_CALL_AUTH_CHALLENGE_HEADER, SELF_CALL_HEADER } from './self_client_observer';
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const DEFAULT_TIMEOUT_MS = 60_000;
 const KIBANA_VERSION_HEADER = 'kbn-version';
+// The secondary variant has no shared constant, and the Elasticsearch client that owns the
+// canonical one is not a dependency here. Kept honest by the tests that assert a caller cannot set
+// either of them.
+const ES_SECONDARY_CLIENT_AUTHENTICATION_HEADER = 'es-secondary-x-client-authentication';
 
 /**
  * Returns the UIAM internal-caller attestation for `outboundAuthorization`, or nothing.
@@ -43,6 +56,13 @@ export type SelfClientUiamAttestationGetter = (
   request: KibanaRequest,
   outboundAuthorization: string | null
 ) => string | undefined;
+
+/**
+ * Returns whether `value` is Kibana's own UIAM client authentication, as opposed to one relayed
+ * by an upstream caller.
+ * @internal
+ */
+export type SelfClientOwnClientAuthenticationCheck = (value: string) => boolean;
 
 export const SELF_CALL_RECURSION_ERROR =
   'Refusing Kibana self HTTP call because a self call cannot issue another self call.';
@@ -70,10 +90,24 @@ interface HttpSelfClientParams {
   readonly log: Logger;
   readonly target: 'auto' | 'local';
   readonly getUiamAttestationGetter?: () => SelfClientUiamAttestationGetter | undefined;
+  readonly getOwnClientAuthenticationCheck?: () =>
+    | SelfClientOwnClientAuthenticationCheck
+    | undefined;
+  readonly getUnauthorizedErrorHandler?: () => HttpSelfUnauthorizedErrorHandler | undefined;
+  readonly getCredentialRefresher?: () => HttpSelfCredentialRefresher | undefined;
 }
 
 interface SelfFetchInit extends RequestInit {
   dispatcher?: Dispatcher;
+}
+
+/** The parts of a self call that do not depend on its credential, validated and built once. */
+interface PreparedSelfRequest {
+  readonly method: string;
+  readonly url: URL;
+  readonly body: BodyInit | null | undefined;
+  /** Whether the body was serialized to JSON, so a call without a content type gets that one. */
+  readonly isJsonBody: boolean;
 }
 
 export interface InternalHttpSelfService extends HttpSelfService {
@@ -111,25 +145,62 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     this.validateRequestContext(options.target);
 
     const fetchOptions = { ...options, path };
-    let request = this.createRequest(path, options);
+    const prepared = this.prepareRequest(path, options);
+    let request: Request | undefined;
     let response: Response | undefined;
-    this.logAttempt(request.method, options.target);
+    this.logAttempt(prepared.method, false, options.target);
     const cleanup: Array<() => void> = [];
 
     try {
-      const signal = this.createSignal(options, cleanup);
-      const fetchInit: SelfFetchInit = {
-        signal,
-        redirect: 'manual',
-        dispatcher: this.dispatcherProvider.get(
-          new URL(request.url),
-          this.getEffectiveTarget(options.target)
-        ),
-      };
+      // A single signal for the whole call, so the caller's timeout stays a true wall-clock budget
+      // that also covers waiting for a credential refresh between the two attempts.
+      const timeoutMs = options.timeout ?? DEFAULT_TIMEOUT_MS;
+      const signal = this.createSignal(timeoutMs, options.signal, cleanup);
       const maxRedirects = this.params.getHttpConfig().selfHttp.maxRedirects ?? 0;
-      const followed = await followSameOriginRedirects(request, fetchInit, maxRedirects);
+      const dispatch = (outbound: Request) => {
+        const fetchInit: SelfFetchInit = {
+          signal,
+          redirect: 'manual',
+          dispatcher: this.dispatcherProvider.get(
+            new URL(outbound.url),
+            this.getEffectiveTarget(options.target),
+            options.headersTimeout
+          ),
+        };
+        return followSameOriginRedirects(outbound, fetchInit, maxRedirects);
+      };
+
+      const refresher = this.params.getCredentialRefresher?.();
+      const refreshedAuthHeaders = refresher
+        ? await this.resolveRefreshedAuthHeaders(refresher, path, timeoutMs, signal, cleanup)
+        : undefined;
+      // Built only once the refresher is done, even when it replaced nothing: the request's own
+      // credential may have been replaced while it ran, and the call must carry what it holds now.
+      request = this.createRequest(prepared, options, refreshedAuthHeaders);
+
+      let followed = await dispatch(request);
       request = followed.request;
       response = followed.response;
+
+      if (isAuthChallengeResponse(response) && !signal.aborted) {
+        const retryAuthHeaders = await this.resolveRetryAuthHeaders(
+          path,
+          request,
+          response,
+          signal,
+          cleanup
+        );
+        if (retryAuthHeaders) {
+          // Nothing else reads this body, and undici holds the connection until it is drained.
+          discardResponseBody(response);
+          request = this.createRequest(prepared, options, retryAuthHeaders);
+          response = undefined;
+          this.logAttempt(request.method, true, options.target);
+          followed = await dispatch(request);
+          request = followed.request;
+          response = followed.response;
+        }
+      }
 
       if (options.rawResponse) {
         this.logHttpStatus(request, response, options.target);
@@ -153,14 +224,17 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
 
       return body;
     } catch (error) {
+      // A call that failed before it was built, such as one its credential refresher rejected, is
+      // described by the request it would have sent.
+      const failedRequest = request ?? this.createRequest(prepared, options);
       const selfError = isHttpSelfFetchError(error)
         ? error
         : createHttpSelfFetchError(
             `Kibana self HTTP call failed: ${describeSelfCall(
-              request,
+              failedRequest,
               response
             )}: ${describeErrorCause(error)}`,
-            request,
+            failedRequest,
             response,
             undefined,
             error
@@ -172,7 +246,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     }
   }
 
-  private logAttempt(targetMethod: string, target?: 'local'): void {
+  private logAttempt(targetMethod: string, isRetry: boolean, target?: 'local'): void {
     const targetMode = this.getEffectiveTarget(target) === 'local' ? 'local' : 'public';
 
     this.params.log.debug(() => 'Kibana scoped self HTTP call attempted', {
@@ -181,6 +255,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
         self_http_source_route_template: this.request.route.path,
         self_http_target_method: targetMethod,
         self_http_target_mode: targetMode,
+        self_http_retry: String(isRetry),
       },
     });
   }
@@ -255,13 +330,12 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     }
   }
 
-  private createRequest<TRequestBody>(
+  private prepareRequest<TRequestBody>(
     path: string,
     options: HttpSelfFetchOptions<TRequestBody>
-  ): Request {
+  ): PreparedSelfRequest {
     const method = options.method ?? 'GET';
     const url = this.createUrl(path, options);
-    const headers = this.createHeaders(options);
     if (options.body !== undefined && options.rawBody !== undefined) {
       throw new Error('Invalid self HTTP options, body and rawBody are mutually exclusive.');
     }
@@ -272,8 +346,22 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     ) {
       throw new Error('Invalid self HTTP rawBody, only buffered body types are supported.');
     }
-    const body =
-      options.rawBody !== undefined ? options.rawBody : serializeBody(headers, options.body);
+    if (options.rawBody !== undefined) {
+      return { method, url, body: options.rawBody, isJsonBody: false };
+    }
+    return { method, url, ...serializeBody(options.body) };
+  }
+
+  private createRequest<TRequestBody>(
+    prepared: PreparedSelfRequest,
+    options: HttpSelfFetchOptions<TRequestBody>,
+    overrideAuthHeaders?: AuthHeaders
+  ): Request {
+    const { method, url, body, isJsonBody } = prepared;
+    const headers = this.createHeaders(options, overrideAuthHeaders);
+    if (isJsonBody && !headers.has('content-type')) {
+      headers.set('content-type', 'application/json');
+    }
 
     return new Request(url, {
       method,
@@ -337,17 +425,24 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     return new URL(`${serverInfo.protocol}://${hostname}:${serverInfo.port}`);
   }
 
-  private createHeaders<TRequestBody>(options: HttpSelfFetchOptions<TRequestBody>): Headers {
+  private createHeaders<TRequestBody>(
+    options: HttpSelfFetchOptions<TRequestBody>,
+    overrideAuthHeaders?: AuthHeaders
+  ): Headers {
     const headers = new Headers();
 
     const authHeaders = this.request.isFakeRequest
       ? getFakeRequestAuthHeaders(this.request)
       : this.params.authRequestHeaders.get(this.request);
-    addHeaders(headers, authHeaders);
+    addHeaders(headers, this.withoutOwnClientAuthentication(authHeaders));
     if (options.forwardRequestHeaders) {
       addHeaders(headers, getForwardedRequestHeaders(this.request));
     }
     addHeaders(headers, options.headers);
+    // Applied after the caller's headers so a refreshed credential wins over the one this request
+    // was built from. The attestation is stamped below from whatever ends up here, so a refresh
+    // re-derives it rather than carrying one bound to the credential it replaced.
+    addHeaders(headers, overrideAuthHeaders);
 
     headers.delete('cookie');
     // Strip the internal-origin header from all self calls before optionally adding Core's marker below.
@@ -365,7 +460,8 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     }
 
     const getAttestation = this.params.getUiamAttestationGetter?.();
-    if (getAttestation) {
+    // Client authentication that survives stripping was relayed, and the receiver gives it priority.
+    if (getAttestation && !headers.has(ES_CLIENT_AUTHENTICATION_HEADER)) {
       const attestation = getAttestation(this.request, headers.get('authorization'));
       if (attestation) {
         headers.set(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER, attestation);
@@ -375,8 +471,146 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     return headers;
   }
 
-  private createSignal<TRequestBody>(
-    options: HttpSelfFetchOptions<TRequestBody>,
+  private withoutOwnClientAuthentication(authHeaders?: AuthHeaders): AuthHeaders | undefined {
+    const isOwnClientAuthentication = this.params.getOwnClientAuthenticationCheck?.();
+    if (!authHeaders || !isOwnClientAuthentication) {
+      return authHeaders;
+    }
+
+    const entries = Object.entries(authHeaders).flatMap(([name, value]) => {
+      if (name.toLowerCase() !== ES_CLIENT_AUTHENTICATION_HEADER) {
+        return [[name, value]];
+      }
+      const kept = (Array.isArray(value) ? value : [value]).filter(
+        (entry) => !isOwnClientAuthentication(entry)
+      );
+      return kept.length ? [[name, kept]] : [];
+    });
+
+    return Object.fromEntries(entries) as AuthHeaders;
+  }
+
+  /**
+   * Asks the registered refresher whether the credential must be replaced before the call is sent,
+   * returning the headers the call must carry instead, or `undefined` to send it unchanged. Throws
+   * the refresher's error when it rejects the call. A refresher that throws instead is treated as
+   * broken and never fails the call: the credential it would have replaced may still be valid, and
+   * an authentication-stage 401 is still recoverable afterwards.
+   */
+  private async resolveRefreshedAuthHeaders(
+    refresher: HttpSelfCredentialRefresher,
+    path: string,
+    timeoutMs: number,
+    signal: AbortSignal,
+    cleanup: Array<() => void>
+  ): Promise<AuthHeaders | undefined> {
+    let result: HttpSelfCredentialRefresherResult;
+    try {
+      // Same reasoning as for the unauthorized error handler: racing the wait, not the refresh,
+      // lets this caller give up on abort without cancelling a mint others are waiting on.
+      result = await Promise.race([
+        Promise.resolve(
+          refresher({ request: this.request, path, timeoutMs }, credentialRefresherToolkit)
+        ),
+        abortRejection(signal, cleanup),
+      ]);
+    } catch (error) {
+      if (signal.aborted) {
+        throw error;
+      }
+      this.params.log.warn(
+        `Kibana self HTTP call could not refresh its credential before sending: ${
+          (error as Error).message
+        }`
+      );
+      return undefined;
+    }
+
+    if (result.type === 'reject') {
+      throw result.error;
+    }
+
+    if (result.type !== 'replace' || signal.aborted) {
+      return undefined;
+    }
+
+    return this.sanitizeOverrideAuthHeaders(result.authHeaders, 'credential refresher');
+  }
+
+  /**
+   * Asks the registered handler whether this authentication-stage 401 can be recovered, returning
+   * the headers the replay must carry, or `undefined` to surface the 401 unchanged.
+   */
+  private async resolveRetryAuthHeaders(
+    path: string,
+    sentRequest: Request,
+    response: Response,
+    signal: AbortSignal,
+    cleanup: Array<() => void>
+  ): Promise<AuthHeaders | undefined> {
+    const handler = this.params.getUnauthorizedErrorHandler?.();
+    if (!handler) {
+      return undefined;
+    }
+
+    let result: HttpSelfUnauthorizedErrorHandlerResult;
+    try {
+      // The handler typically waits on a shared, single-flight credential exchange. Racing the
+      // wait — rather than the exchange — lets this caller give up on abort without cancelling the
+      // mint for everyone else waiting on it.
+      result = await Promise.race([
+        Promise.resolve(
+          handler(
+            { request: this.request, path, responseHeaders: response.headers },
+            selfUnauthorizedToolkit
+          )
+        ),
+        abortRejection(signal, cleanup),
+      ]);
+    } catch (error) {
+      if (signal.aborted) {
+        throw error;
+      }
+      this.params.log.warn(
+        `Kibana self HTTP call could not refresh its credential: ${(error as Error).message}`
+      );
+      return undefined;
+    }
+
+    if (result.type !== 'retry' || signal.aborted) {
+      return undefined;
+    }
+
+    const retryAuthHeaders = this.sanitizeOverrideAuthHeaders(
+      result.authHeaders,
+      'unauthorized error handler'
+    );
+    // Replaying with the credential that was just rejected can only fail the same way. Refresh
+    // registries commonly reuse a very recently minted token, so this is a real case, not a
+    // theoretical one.
+    return retryAuthHeaders && !headersAlreadySent(sentRequest.headers, retryAuthHeaders)
+      ? retryAuthHeaders
+      : undefined;
+  }
+
+  private sanitizeOverrideAuthHeaders(
+    authHeaders: AuthHeaders,
+    source: 'credential refresher' | 'unauthorized error handler'
+  ): AuthHeaders | undefined {
+    const entries = Object.entries(authHeaders).filter(([name]) => {
+      if (isRetryOverridableHeader(name)) {
+        return true;
+      }
+      this.params.log.warn(`Ignoring header [${name}] returned by the Kibana self HTTP ${source}.`);
+      return false;
+    });
+
+    return entries.length ? (Object.fromEntries(entries) as AuthHeaders) : undefined;
+  }
+
+  private createSignal(
+    timeoutMs: number,
+    callerSignal: AbortSignal | null | undefined,
     cleanup: Array<() => void>
   ): AbortSignal {
     const controller = new AbortController();
@@ -386,24 +620,81 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       }
     };
 
-    const timeoutId = setTimeout(abort, options.timeout ?? DEFAULT_TIMEOUT_MS);
+    const timeoutId = setTimeout(abort, timeoutMs);
     cleanup.push(() => clearTimeout(timeoutId));
 
     const requestAbortSubscription = this.request.events.aborted$.subscribe(abort);
     cleanup.push(() => requestAbortSubscription.unsubscribe());
 
-    if (options.signal) {
-      if (options.signal.aborted) {
+    if (callerSignal) {
+      if (callerSignal.aborted) {
         abort();
       } else {
-        options.signal.addEventListener('abort', abort, { once: true });
-        cleanup.push(() => options.signal?.removeEventListener('abort', abort));
+        callerSignal.addEventListener('abort', abort, { once: true });
+        cleanup.push(() => callerSignal.removeEventListener('abort', abort));
       }
     }
 
     return controller.signal;
   }
 }
+
+const credentialRefresherToolkit: HttpSelfCredentialRefresherToolkit = {
+  notHandled: () => ({ type: 'notHandled' }),
+  replace: ({ authHeaders }) => ({ type: 'replace', authHeaders }),
+  reject: ({ error }) => ({ type: 'reject', error }),
+};
+
+const selfUnauthorizedToolkit: HttpSelfUnauthorizedErrorHandlerToolkit = {
+  notHandled: () => ({ type: 'notHandled' }),
+  retry: ({ authHeaders }) => ({ type: 'retry', authHeaders }),
+};
+
+/**
+ * Core-owned headers a retry overlay must not be able to set. Deliberately narrower than
+ * {@link isProtectedHeader}: overriding `authorization` is the whole point of a retry. The UIAM
+ * shared secret headers are denied outright: only the request's own auth headers may supply them.
+ */
+const isRetryOverridableHeader = (name: string): boolean => {
+  const lowerName = name.toLowerCase();
+  return !(
+    lowerName === 'cookie' ||
+    lowerName === 'host' ||
+    lowerName === ES_CLIENT_AUTHENTICATION_HEADER ||
+    lowerName === ES_SECONDARY_CLIENT_AUTHENTICATION_HEADER ||
+    // Core stamps this from the credential it is about to send, after the overlay is applied, so a
+    // handler-supplied value would only ever be overwritten.
+    lowerName === UIAM_INTERNAL_CALLER_ATTESTATION_HEADER ||
+    lowerName.startsWith('kbn-') ||
+    lowerName === SELF_CALL_HEADER ||
+    lowerName.startsWith('x-elastic-internal-')
+  );
+};
+
+const isAuthChallengeResponse = (response: Response): boolean =>
+  response.status === 401 && response.headers.has(SELF_CALL_AUTH_CHALLENGE_HEADER);
+
+const headersAlreadySent = (sent: Headers, overlay: AuthHeaders): boolean =>
+  Object.entries(overlay).every(([name, value]) => {
+    const sentValue = sent.get(name);
+    return Array.isArray(value) ? sentValue === value.join(', ') : sentValue === value;
+  });
+
+/**
+ * Rejects when the call is aborted. The listener is removed through `cleanup` so a resolved call
+ * does not leave the promise pending on a long-lived signal.
+ */
+const abortRejection = (signal: AbortSignal, cleanup: Array<() => void>): Promise<never> =>
+  new Promise<never>((_resolve, reject) => {
+    if (signal.aborted) {
+      reject(signal.reason ?? new Error('The Kibana self HTTP call was aborted.'));
+      return;
+    }
+    const onAbort = () =>
+      reject(signal.reason ?? new Error('The Kibana self HTTP call was aborted.'));
+    signal.addEventListener('abort', onAbort, { once: true });
+    cleanup.push(() => signal.removeEventListener('abort', onAbort));
+  });
 
 const HTTP_SELF_FETCH_ERROR = Symbol('HttpSelfFetchError');
 
@@ -640,6 +931,15 @@ const validateFetchArguments = <TRequestBody>(
     throw new Error('Invalid self HTTP options, rawResponse = true requires asResponse = true.');
   }
 
+  if (
+    options.headersTimeout !== undefined &&
+    (!Number.isInteger(options.headersTimeout) || options.headersTimeout < 0)
+  ) {
+    throw new Error(
+      'Invalid self HTTP options, headersTimeout must be a positive integer or zero.'
+    );
+  }
+
   const invalidHeaders = Object.keys(options.headers ?? {}).filter(isProtectedHeader);
 
   if (invalidHeaders.length) {
@@ -673,10 +973,17 @@ const isProtectedHeader = (name: string) => {
     lowerName === 'authorization' ||
     lowerName === 'cookie' ||
     lowerName === 'host' ||
+    // Derived from the credential on each attempt, so a caller-supplied value would be stale the
+    // moment that credential is refreshed. Matched explicitly rather than by an `x-kbn-` prefix,
+    // which would also capture the forwardable `x-kbn-context`.
+    lowerName === UIAM_INTERNAL_CALLER_ATTESTATION_HEADER ||
+    // The UIAM shared secret belongs to whatever authenticated the request, so the only legitimate
+    // source is the request's own auth headers. A caller must not be able to name its own.
+    lowerName === ES_CLIENT_AUTHENTICATION_HEADER ||
+    lowerName === ES_SECONDARY_CLIENT_AUTHENTICATION_HEADER ||
     lowerName.startsWith('kbn-') ||
     lowerName === SELF_CALL_HEADER ||
-    lowerName.startsWith('x-elastic-internal-') ||
-    lowerName === UIAM_INTERNAL_CALLER_ATTESTATION_HEADER
+    lowerName.startsWith('x-elastic-internal-')
   );
 };
 
@@ -708,26 +1015,21 @@ const isBufferedRawBody = (body: unknown): boolean =>
   ArrayBuffer.isView(body);
 
 const serializeBody = <TRequestBody>(
-  headers: Headers,
   body: HttpSelfFetchOptions<TRequestBody>['body']
-): BodyInit | null | undefined => {
+): Pick<PreparedSelfRequest, 'body' | 'isJsonBody'> => {
   if (body === undefined) {
-    return undefined;
+    return { body: undefined, isJsonBody: false };
   }
 
   if (body === null) {
-    return null;
+    return { body: null, isJsonBody: false };
   }
 
   if (typeof body === 'string') {
-    return body;
+    return { body, isJsonBody: false };
   }
 
-  if (!headers.has('content-type')) {
-    headers.set('content-type', 'application/json');
-  }
-
-  return JSON.stringify(body);
+  return { body: JSON.stringify(body), isJsonBody: true };
 };
 
 const parseResponseBody = async (response: Response): Promise<unknown> => {

@@ -3,7 +3,7 @@ define how Kibana will run in "serverless" modes. To start Kibana locally with
 this configuration, pass `--serverless={mode}` or run `pnpm serverless-{mode}`
 
 [//]: # (BOOKMARK - List of Kibana project types)
-valid modes are currently: `es`, `oblt`, `security` and `workplaceai`
+valid modes are currently: `es`, `oblt`, `security` and `vectordb`
 
 configuration is applied in the following order, later values override
  1. serverless.yml (serverless configs go first)

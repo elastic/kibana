@@ -18,6 +18,6 @@ export function useFormattedEOLDate(
 ): string | null {
   return useMemo(() => {
     const eolDate = getModelEOLDate(metadata);
-    return eolDate ? eolDate.format('l') : null;
+    return eolDate ? eolDate.format('YYYY-MM-DD') : null;
   }, [metadata]);
 }

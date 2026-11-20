@@ -55,16 +55,24 @@ export async function createAgentDoc(
 export async function cleanupAgentDocs(providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const es = getService('es');
+  const retry = getService('retry');
 
-  // Refresh first so the status-change task's just-committed last_known_status writes are searchable: the suite gates teardown on a realtime GET, which can observe a write before refresh, so without this the delete's search snapshots a stale version and aborts on conflict, leaving active agents that make the policy delete 400.
-  await es.indices.refresh({ index: AGENTS_INDEX, ignore_unavailable: true });
-  await es.deleteByQuery({
-    index: AGENTS_INDEX,
-    ignore_unavailable: true,
-    refresh: true,
-    conflicts: 'proceed',
-    query: {
-      match_all: {},
-    },
+  // The pre-delete refresh only covers writes that land before the delete's search snapshot, so
+  // `conflicts: 'proceed'` still skips any doc Fleet's background tasks update *during* it, without
+  // an error. Re-issue the idempotent delete until the index is empty: a survivor makes the suite's
+  // policy delete 400 and leaks a version-conditioned policy into later suites.
+  await retry.waitForWithTimeout(`${AGENTS_INDEX} to be empty`, 30_000, async () => {
+    await es.indices.refresh({ index: AGENTS_INDEX, ignore_unavailable: true });
+    await es.deleteByQuery({
+      index: AGENTS_INDEX,
+      ignore_unavailable: true,
+      refresh: true,
+      conflicts: 'proceed',
+      query: {
+        match_all: {},
+      },
+    });
+    const { count } = await es.count({ index: AGENTS_INDEX, ignore_unavailable: true });
+    return count === 0;
   });
 }

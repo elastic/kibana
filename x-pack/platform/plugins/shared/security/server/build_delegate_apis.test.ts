@@ -23,6 +23,7 @@ import { securityMock } from './mocks';
 import { serviceAccountsServiceMock } from './service_accounts/service_accounts_service.mock';
 import { getPrintableSessionId } from './session_management';
 import { sessionMock } from './session_management/session.mock';
+import { uiamServiceMock } from './uiam/uiam_service.mock';
 import { userProfileServiceMock } from './user_profile/user_profile_service.mock';
 
 describe('buildSecurityApi', () => {
@@ -30,6 +31,7 @@ describe('buildSecurityApi', () => {
   let auditService: ReturnType<typeof auditServiceMock.create>;
   let session: ReturnType<typeof sessionMock.create>;
   let serviceAccounts: ReturnType<typeof serviceAccountsServiceMock.createStart> | null;
+  let uiam: ReturnType<typeof uiamServiceMock.create>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let api: CoreSecurityDelegateContract;
 
@@ -38,11 +40,13 @@ describe('buildSecurityApi', () => {
     auditService = auditServiceMock.create();
     session = sessionMock.create();
     serviceAccounts = serviceAccountsServiceMock.createStart();
+    uiam = uiamServiceMock.create();
     logger = loggingSystemMock.createLogger();
     api = buildSecurityApi({
       getAuthc: () => authc,
       getSession: () => session,
       getServiceAccounts: () => serviceAccounts,
+      getUiam: () => uiam,
       audit: auditService,
       config: { uiam: { enabled: false } },
       logger,
@@ -91,6 +95,73 @@ describe('buildSecurityApi', () => {
       expect(authc.getCurrentUser).toHaveBeenCalledTimes(1);
       expect(authc.getCurrentUser).toHaveBeenCalledWith(request);
       expect(user).toBe(delegateReturn);
+    });
+  });
+
+  describe('authc.getPrincipal', () => {
+    it('classifies the current user of a real request', () => {
+      const request = httpServerMock.createKibanaRequest();
+      authc.getCurrentUser.mockReturnValue(
+        securityMock.createMockAuthenticatedUser({
+          username: 'creator',
+          authentication_provider: { type: 'http', name: '__http__' },
+          api_key: { id: 'key-id', name: 'key', managed_by: 'elasticsearch' },
+        })
+      );
+
+      expect(api.authc.getPrincipal(request)).toEqual({
+        type: 'api_key',
+        apiKeyId: 'key-id',
+        variant: 'stack',
+      });
+      expect(authc.getCurrentUser).toHaveBeenCalledWith(request);
+      expect(serviceAccounts!.backend.getFakeRequestPrincipal).not.toHaveBeenCalled();
+    });
+
+    it('returns null when no user is authenticated', () => {
+      authc.getCurrentUser.mockReturnValue(null);
+
+      expect(api.authc.getPrincipal(httpServerMock.createKibanaRequest())).toBeNull();
+    });
+
+    it('answers a service-account-bound fake request from the backend without consulting authc', () => {
+      const request = httpServerMock.createFakeKibanaRequest({});
+      const principal = {
+        type: 'service_account' as const,
+        serviceAccountId: 'sa-id',
+        variant: 'uiam' as const,
+      };
+      serviceAccounts!.backend.getFakeRequestPrincipal.mockReturnValue(principal);
+
+      expect(api.authc.getPrincipal(request)).toBe(principal);
+      expect(serviceAccounts!.backend.getFakeRequestPrincipal).toHaveBeenCalledWith(request);
+      expect(authc.getCurrentUser).not.toHaveBeenCalled();
+    });
+
+    // The enrichment names the user a fake request acts for, not the credential Elasticsearch
+    // authenticates it with, which for Task Manager requests is an API key.
+    it('returns null for an enriched fake request rather than classifying its bound user', () => {
+      const request = httpServerMock.createFakeKibanaRequest({
+        headers: { authorization: 'ApiKey dGFzay1rZXk6c2VjcmV0' },
+      });
+      api.fakeRequestEnricher(request, { profileId: 'u_test_profile_123', username: 'jdoe' });
+
+      expect(api.authc.getPrincipal(request)).toBeNull();
+      expect(api.authc.getCurrentUser(request)).toMatchObject({ username: 'jdoe' });
+    });
+
+    it('returns null for a fake request that is not bound to a service account, without consulting authc', () => {
+      authc.getCurrentUser.mockReturnValue(securityMock.createMockAuthenticatedUser());
+
+      expect(api.authc.getPrincipal(httpServerMock.createFakeKibanaRequest({}))).toBeNull();
+      expect(authc.getCurrentUser).not.toHaveBeenCalled();
+    });
+
+    it('returns null for fake requests when service accounts are not enabled', () => {
+      serviceAccounts = null;
+
+      expect(api.authc.getPrincipal(httpServerMock.createFakeKibanaRequest({}))).toBeNull();
+      expect(authc.getCurrentUser).not.toHaveBeenCalled();
     });
   });
 
@@ -176,6 +247,7 @@ describe('buildSecurityApi', () => {
         getAuthc: () => authc,
         getSession: () => session,
         getServiceAccounts: () => serviceAccounts,
+        getUiam: () => uiam,
         audit: auditService,
         config,
         logger,
@@ -193,7 +265,7 @@ describe('buildSecurityApi', () => {
       ).toBe(false);
     });
 
-    it('returns false when the setting is not available, as is the case outside of serverless', () => {
+    it('returns false when the setting is not available', () => {
       expect(buildApiWithConfig({}).serviceAccounts.isEnabled()).toBe(false);
     });
   });
@@ -208,6 +280,7 @@ describe('buildSecurityApi', () => {
         getAuthc: () => authc,
         getSession: () => session,
         getServiceAccounts,
+        getUiam: () => uiam,
         audit: auditService,
         config: {},
         logger,
@@ -245,6 +318,57 @@ describe('buildSecurityApi', () => {
 
       await expect(
         api.serviceAccounts.create(httpServerMock.createKibanaRequest(), params)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are not enabled"`);
+    });
+  });
+
+  describe('serviceAccounts.delete', () => {
+    const params = { force: false };
+
+    it('properly delegates to the management service', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(
+        api.serviceAccounts.delete(request, 'service-account-id', params)
+      ).resolves.toEqual({ deleted: true, warnings: [] });
+
+      expect(serviceAccounts!.management.delete).toHaveBeenCalledWith(
+        request,
+        'service-account-id',
+        params
+      );
+    });
+
+    it('resolves with the blocking workloads when workloads are still bound to the account', async () => {
+      const workload = {
+        pluginId: 'alerting',
+        workloadType: 'rule',
+        workloadId: 'rule-1',
+        displayName: 'rule-1',
+      };
+      serviceAccounts!.management.delete.mockResolvedValue({
+        deleted: false,
+        workloads: [workload],
+      });
+
+      await expect(
+        api.serviceAccounts.delete(
+          httpServerMock.createKibanaRequest(),
+          'service-account-id',
+          params
+        )
+      ).resolves.toEqual({ deleted: false, workloads: [workload] });
+    });
+
+    it('throws when service accounts are not enabled', async () => {
+      serviceAccounts = null;
+
+      await expect(
+        api.serviceAccounts.delete(
+          httpServerMock.createKibanaRequest(),
+          'service-account-id',
+          params
+        )
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are not enabled"`);
     });
   });
@@ -292,6 +416,19 @@ describe('buildSecurityApi', () => {
       );
     });
 
+    it('delegates getWorkloadServiceAccountSummary and returns its result', async () => {
+      const summary = { id: 'ns/name', name: 'name', enabled: true, assumable: true };
+      serviceAccounts!.workloads.getServiceAccountSummary.mockResolvedValue(summary);
+
+      await expect(
+        api.serviceAccounts.getWorkloadServiceAccountSummary('alerting', WORKLOAD_IN_SPACE)
+      ).resolves.toBe(summary);
+      expect(serviceAccounts!.workloads.getServiceAccountSummary).toHaveBeenCalledWith(
+        'alerting',
+        WORKLOAD_IN_SPACE
+      );
+    });
+
     it('delegates withScopedRequest, passing the callback through', async () => {
       const fn = jest.fn();
 
@@ -327,6 +464,10 @@ describe('buildSecurityApi', () => {
         () => api.serviceAccounts.getWorkloadBinding('alerting', WORKLOAD_IN_SPACE),
       ],
       [
+        'getWorkloadServiceAccountSummary',
+        () => api.serviceAccounts.getWorkloadServiceAccountSummary('alerting', WORKLOAD_IN_SPACE),
+      ],
+      [
         'withScopedRequestForWorkload',
         () =>
           api.serviceAccounts.withScopedRequestForWorkload(
@@ -354,6 +495,8 @@ describe('buildSecurityApi', () => {
           getAuthc: () => authc,
           getSession: () => session,
           getServiceAccounts: () => serviceAccounts,
+          getUiam: () => uiam,
+          organizationId: 'org-1',
           audit: auditService,
           config: { uiam: { enabled: true } },
           logger,
@@ -363,6 +506,96 @@ describe('buildSecurityApi', () => {
       it('should expose the uiam API', () => {
         expect(api.authc.apiKeys.uiam).not.toBeNull();
         expect(api.authc.apiKeys.uiam).toBeDefined();
+      });
+
+      it('should ask UIAM whether the user may read the organization billing details', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const check = {
+          action: 'get',
+          resource: { type: 'billing-details', organization_id: 'org-1' },
+        };
+        uiam.checkAuthorization.mockResolvedValue({
+          permitted: true,
+          checks: [{ ...check, permitted: true }],
+        });
+
+        await expect(api.authz.uiam!.canViewBillingDetails(request)).resolves.toBe(true);
+
+        expect(uiam.checkAuthorization).toHaveBeenCalledTimes(1);
+        expect(uiam.checkAuthorization).toHaveBeenCalledWith(request, [check]);
+      });
+
+      it('should report no billing access when UIAM denies the check', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        uiam.checkAuthorization.mockResolvedValue({ permitted: false, checks: [] });
+
+        await expect(api.authz.uiam!.canViewBillingDetails(request)).resolves.toBe(false);
+      });
+
+      it('should ask UIAM whether the user may invite members into the organization', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const check = {
+          action: 'create',
+          resource: { type: 'organization-invitation', organization_id: 'org-1' },
+        };
+        uiam.checkAuthorization.mockResolvedValue({
+          permitted: true,
+          checks: [{ ...check, permitted: true }],
+        });
+
+        await expect(api.authz.uiam!.canInviteOrganizationMembers(request)).resolves.toBe(true);
+
+        expect(uiam.checkAuthorization).toHaveBeenCalledTimes(1);
+        expect(uiam.checkAuthorization).toHaveBeenCalledWith(request, [check]);
+      });
+
+      it('should report no invitation access when UIAM denies the check', async () => {
+        uiam.checkAuthorization.mockResolvedValue({ permitted: false, checks: [] });
+
+        await expect(
+          api.authz.uiam!.canInviteOrganizationMembers(httpServerMock.createKibanaRequest())
+        ).resolves.toBe(false);
+      });
+
+      it.each(['canViewBillingDetails' as const, 'canInviteOrganizationMembers' as const])(
+        '%s should fail without calling UIAM when no organization is configured',
+        async (method) => {
+          api = buildSecurityApi({
+            getAuthc: () => authc,
+            getSession: () => session,
+            getServiceAccounts: () => serviceAccounts,
+            getUiam: () => uiam,
+            audit: auditService,
+            config: { uiam: { enabled: true } },
+            logger,
+          });
+
+          await expect(
+            api.authz.uiam![method](httpServerMock.createKibanaRequest())
+          ).rejects.toThrow(
+            'Cloud organization access cannot be checked because Kibana is not configured with a Cloud organization.'
+          );
+          expect(uiam.checkAuthorization).not.toHaveBeenCalled();
+        }
+      );
+
+      it('should fail the billing access check until the UIAM service is available', async () => {
+        api = buildSecurityApi({
+          getAuthc: () => authc,
+          getSession: () => session,
+          getServiceAccounts: () => serviceAccounts,
+          getUiam: () => {
+            throw new Error('UIAM service is not available.');
+          },
+          organizationId: 'org-1',
+          audit: auditService,
+          config: { uiam: { enabled: true } },
+          logger,
+        });
+
+        await expect(
+          api.authz.uiam!.canViewBillingDetails(httpServerMock.createKibanaRequest())
+        ).rejects.toThrow('UIAM service is not available.');
       });
 
       it('should properly delegate grant to the service', async () => {
@@ -437,6 +670,7 @@ describe('buildSecurityApi', () => {
           getAuthc: () => authc,
           getSession: () => session,
           getServiceAccounts: () => serviceAccounts,
+          getUiam: () => uiam,
           audit: auditService,
           config: { uiam: { enabled: false } },
           logger,
@@ -445,6 +679,7 @@ describe('buildSecurityApi', () => {
 
       it('should set uiam to null', () => {
         expect(api.authc.apiKeys.uiam).toBeNull();
+        expect(api.authz.uiam).toBeNull();
       });
     });
 
@@ -457,6 +692,7 @@ describe('buildSecurityApi', () => {
           getAuthc: () => authc,
           getSession: () => session,
           getServiceAccounts: () => serviceAccounts,
+          getUiam: () => uiam,
           audit: auditService,
           config: {},
           logger,
@@ -465,6 +701,7 @@ describe('buildSecurityApi', () => {
 
       it('should set uiam to null', () => {
         expect(api.authc.apiKeys.uiam).toBeNull();
+        expect(api.authz.uiam).toBeNull();
       });
     });
   });

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
 import { z } from '@kbn/zod';
 import { v4 as uuidv4 } from 'uuid';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -17,6 +18,7 @@ import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
 import { getMonitorNotFoundResponse } from './service_errors';
 import { MONITOR_RUN_MANUALLY_API } from '../../feature';
+import { validatePermissions } from '../monitor_cruds/edit_monitor';
 
 export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse> = () => ({
   method: 'POST',
@@ -25,7 +27,7 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse>
   validation: {
     request: {
       params: z.strictObject({
-        monitorId: routeId,
+        monitorId: routeId.describe('The ID (config_id) of the monitor to test.'),
       }),
     },
   },
@@ -39,7 +41,14 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse>
   // which grants manual runs to an otherwise read-only role.
   writeAccess: false,
   anyRequiredPrivileges: ['uptime-write', MONITOR_RUN_MANUALLY_API],
-  options: { availability: { since: '9.2.0' } },
+  options: {
+    summary: 'Trigger an on-demand test run for a monitor',
+    description:
+      'Trigger an immediate test execution for the specified monitor.\nThe response includes the generated `testRunId`. If the test encounters issues in one or more service locations, an `errors` array is also returned with details about the failures.',
+    operationId: 'post-synthetics-monitor-test',
+    availability: { stability: 'stable', since: '9.2.0' },
+    oasOperationObject: () => path.join(__dirname, 'examples/test_now_monitor.yaml'),
+  },
 });
 
 export const triggerTestNow = async (
@@ -56,6 +65,16 @@ export const triggerTestNow = async (
 
   try {
     const { normalizedMonitor } = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
+
+    // Running on Elastic managed locations requires the same privilege as creating or editing
+    // a monitor there, so `monitor-run-manually` alone cannot bypass it.
+    const permissionError = await validatePermissions(
+      routeContext,
+      normalizedMonitor.attributes.locations
+    );
+    if (permissionError) {
+      return response.forbidden({ body: { message: permissionError } });
+    }
 
     const privateLocations: PrivateLocationAttributes[] = await getPrivateLocationsForMonitor(
       savedObjectsClient,

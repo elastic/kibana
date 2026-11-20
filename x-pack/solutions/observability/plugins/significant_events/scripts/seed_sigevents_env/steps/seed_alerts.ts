@@ -8,7 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { SeedContext, SeededQuery } from '../types';
+import type { SeedBaseContext, SeededQuery } from '../types';
 import { deterministicId } from '../types';
 
 export interface MetricSeriesPoint {
@@ -59,7 +59,7 @@ export function buildMetricSeries(
  * for the busiest minute so readers can exercise MAX-per-minute collapse.
  */
 export async function seedAlerts(
-  ctx: SeedContext,
+  ctx: SeedBaseContext,
   seededQueries: SeededQuery[],
   seriesStartMs: number,
   seriesEndMs: number,

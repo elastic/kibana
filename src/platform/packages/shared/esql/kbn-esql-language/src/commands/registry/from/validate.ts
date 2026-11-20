@@ -8,21 +8,24 @@
  */
 import type {
   ESQLAst,
+  ESQLAstItem,
   ESQLCommandOption,
   ESQLSource,
   ESQLAstAllCommands,
 } from '@elastic/esql/types';
 import { isColumn, isOptionNode, isSource } from '@elastic/esql';
-import type { ICommandContext } from '../types';
-import { METADATA_FIELDS } from '../options/metadata';
+import type { ICommandCallbacks, ICommandContext } from '../types';
+import { getAvailableMetadataFields, isValidMetadataField } from '../options/metadata';
 import { getMessageFromId } from '../../definitions/utils';
 import { validateSources } from '../../definitions/utils/validation/sources';
+import { findNamedSubqueryForSource } from '../../definitions/utils/named_subqueries';
 import type { ESQLMessage } from '../../definitions/types';
 
 export const validate = (
   command: ESQLAstAllCommands,
   ast: ESQLAst,
-  context?: ICommandContext
+  context?: ICommandContext,
+  callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
   const metadataStatement = command.args.find(
     (arg) => isOptionNode(arg) && arg.name === 'metadata'
@@ -32,20 +35,24 @@ export const validate = (
 
   const fields = metadataStatement?.args.filter(isColumn) ?? [];
   for (const field of fields) {
-    if (!METADATA_FIELDS.includes(field.name)) {
+    if (!isValidMetadataField(field.name, callbacks?.isServerless)) {
       messages.push(
         getMessageFromId({
           messageId: 'unknownMetadataField',
           values: {
             value: field.name,
-            availableFields: Array.from(METADATA_FIELDS).join(', '),
+            availableFields: getAvailableMetadataFields(callbacks?.isServerless).join(', '),
           },
           locations: field.location,
         })
       );
     }
   }
-  const sources = command.args.filter((arg) => isSource(arg)) as ESQLSource[];
+  const args: ESQLAstItem[] = command.args;
+  const sources = args.filter(
+    (arg): arg is ESQLSource =>
+      isSource(arg) && !findNamedSubqueryForSource(arg, context?.namedSubqueries ?? [])
+  );
   // Use "Unknown data source" only at root FROM; in subqueries use "Unknown index"
   const isRootFrom = Array.isArray(ast) && ast.length > 0 && ast[0] === command;
   messages.push(...validateSources(sources, context, { useGenericDataSourceError: isRootFrom }));

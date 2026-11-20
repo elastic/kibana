@@ -17,6 +17,8 @@ export const internalNamespaces = {
   platformSignificantEvents: 'platform.sig_events', // intentionally abbreviated
   platformNightshift: 'platform.nightshift',
   platformContextEngine: 'platform.context_engine',
+  agenticInvestigations: 'agentic_investigations',
+  proposals: 'proposals',
   filestore: 'filestore',
   attachments: 'attachments',
   observability: 'observability',
@@ -42,6 +44,8 @@ export const protectedNamespaces: string[] = [
   internalNamespaces.platformSignificantEvents,
   internalNamespaces.platformNightshift,
   internalNamespaces.platformContextEngine,
+  internalNamespaces.agenticInvestigations,
+  internalNamespaces.proposals,
   internalNamespaces.search,
   internalNamespaces.security,
   internalNamespaces.streams,

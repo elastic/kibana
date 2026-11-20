@@ -6,8 +6,15 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
-import type { SignificantEventsServer } from '../../../types';
+import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
+import {
+  createMockToolContext,
+  createSignificantEventsServer,
+  invokeHandler,
+  mockSourcesClient,
+  sourceWithSlug,
+} from '../../utils/test_helpers';
+import { FEATURE_IDENTIFICATION_AGENT_ID } from '../../../../common/constants';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { searchEventsToolHandler } from './handler';
@@ -24,13 +31,20 @@ jest.mock('./handler', () => ({
 
 const createMockTelemetry = () => ({
   trackAgentToolEventSearch: jest.fn(),
+  trackAgentToolFailed: jest.fn(),
 });
 
 describe('event_search tool', () => {
+  const readerServer = createSignificantEventsServer({ featurePrivilege: 'read' });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('uses expected tool id', () => {
     const tool = createSearchEventsTool({
       getScopedClients: jest.fn() as unknown as GetScopedClients,
-      server: {} as SignificantEventsServer,
+      server: readerServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: createMockTelemetry() as never,
     });
@@ -41,7 +55,7 @@ describe('event_search tool', () => {
   it('validates bounded filters and normalizes query', () => {
     const tool = createSearchEventsTool({
       getScopedClients: jest.fn() as unknown as GetScopedClients,
-      server: {} as SignificantEventsServer,
+      server: readerServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: createMockTelemetry() as never,
     });
@@ -63,7 +77,7 @@ describe('event_search tool', () => {
       tool.schema.parse({ event_ids: ['event-1'], rule_uuids: [] }).rule_uuids
     ).toBeUndefined();
     expect(tool.schema.parse({ query: '  latency  ' }).query).toBe('latency');
-    expect(tool.schema.parse({ rule_uuids: ['rule-uuid-1'] }).status).toBe('open');
+    expect(tool.schema.parse({ rule_uuids: ['rule-uuid-1'] }).status).toBe('active');
     expect(tool.schema.safeParse({ view: 'full', event_ids: ['event-1'] }).success).toBe(true);
     expect(tool.schema.safeParse({ view: 'full', event_ids: ['event-1', 'event-2'] }).success).toBe(
       false
@@ -74,7 +88,7 @@ describe('event_search tool', () => {
     expect(tool.schema.safeParse({}).success).toBe(true);
     expect(tool.schema.parse({})).toEqual(
       expect.objectContaining({
-        status: 'open',
+        status: 'active',
         view: 'compact',
         page: 1,
         per_page: 20,
@@ -97,39 +111,61 @@ describe('event_search tool', () => {
       getEventSearchClient: jest.fn().mockReturnValue({}),
       licensing: {},
       uiSettingsClient: {},
+      sourcesClient: mockSourcesClient(['logs.checkout']),
     });
     const telemetry = createMockTelemetry();
 
     const tool = createSearchEventsTool({
       getScopedClients: getScopedClients as unknown as GetScopedClients,
-      server: {} as SignificantEventsServer,
+      server: readerServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: telemetry as never,
     });
 
+    const context = createMockToolContext();
+    setWorkflowEventChainContext(context.request, {
+      depth: 0,
+      sourceExecutionId: 'workflow-run-1',
+    });
     const result = await invokeHandler(
       tool as never,
       {
         query: '   ',
-        stream_names: ['logs.checkout'],
+        slugs: ['logs.checkout'],
         rule_uuids: ['rule-uuid-1'],
-        status: 'open',
+        status: 'active',
       },
-      createMockToolContext()
+      context
     );
 
-    if ('results' in result) {
-      expect(result.results[0].type).toBe('other');
+    if (!('results' in result) || result.results[0].type !== 'other') {
+      throw new Error('expected an other tool result');
     }
-    expect(telemetry.trackAgentToolEventSearch).toHaveBeenCalledWith({
-      success: true,
-      result_count: 1,
-      has_query: false,
-      has_stream_filter: true,
-      status_filter: 'open',
-      view: 'compact',
-      page: 1,
-    });
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        sources: [
+          {
+            id: 'logs.checkout',
+            slug: 'logs.checkout',
+            title: 'logs.checkout',
+            view_name: '$.nightshift.sources.default.logs.checkout',
+          },
+        ],
+      })
+    );
+    expect(telemetry.trackAgentToolEventSearch).toHaveBeenCalledWith(
+      {
+        workflow_execution_id: 'workflow-run-1',
+        success: true,
+        result_count: 1,
+        has_query: false,
+        has_source_filter: true,
+        status_filter: 'active',
+        view: 'compact',
+        page: 1,
+      },
+      expect.anything()
+    );
     expect(searchEventsToolHandler).toHaveBeenCalledWith(
       expect.objectContaining({
         params: expect.objectContaining({
@@ -140,10 +176,40 @@ describe('event_search tool', () => {
     );
   });
 
-  it('accepts cross-stream searches without stream_names', async () => {
+  it('passes the rows to severitySync.reconcileRows', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     (searchEventsToolHandler as jest.Mock).mockResolvedValue({
-      events: [{ event_uuid: 'e2' }],
+      events: [],
+      view: 'compact',
+      page: 1,
+      total: 0,
+    });
+    const reconcileRows = jest.spyOn(readerServer.severitySync, 'reconcileRows');
+    const tool = createSearchEventsTool({
+      getScopedClients: jest.fn().mockResolvedValue({
+        getEventSearchClient: jest.fn().mockReturnValue({}),
+        licensing: {},
+        uiSettingsClient: {},
+        sourcesClient: mockSourcesClient([]),
+      }) as unknown as GetScopedClients,
+      server: readerServer,
+      logger: loggingSystemMock.createLogger(),
+      telemetry: createMockTelemetry() as never,
+    });
+
+    await invokeHandler(tool as never, {}, createMockToolContext());
+    const [{ reconcileSeverities }] = (searchEventsToolHandler as jest.Mock).mock.calls[0];
+    await reconcileSeverities([]);
+
+    // `reconcileRows` is display-only: it has no write option, and `sync_severity.test.ts` covers
+    // that it never calls `syncSeverity`.
+    expect(reconcileRows).toHaveBeenCalledWith(expect.objectContaining({ rows: [] }));
+  });
+
+  it('accepts searches that omit slugs', async () => {
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    (searchEventsToolHandler as jest.Mock).mockResolvedValue({
+      events: [{ event_uuid: 'e2', source_ids: ['source-uuid'] }],
       view: 'compact',
       page: 1,
       total: 1,
@@ -153,23 +219,125 @@ describe('event_search tool', () => {
       getEventSearchClient: jest.fn().mockReturnValue({}),
       licensing: {},
       uiSettingsClient: {},
+      sourcesClient: {
+        list: jest.fn().mockResolvedValue({
+          sources: [sourceWithSlug('nginx-errors', { id: 'source-uuid', title: 'Nginx errors' })],
+          total: 1,
+        }),
+      },
     });
 
     const tool = createSearchEventsTool({
       getScopedClients: getScopedClients as unknown as GetScopedClients,
-      server: {} as SignificantEventsServer,
+      server: readerServer,
       logger: loggingSystemMock.createLogger(),
       telemetry: createMockTelemetry() as never,
     });
 
     const result = await invokeHandler(
       tool as never,
-      { query: 'latency', status: 'closed' },
+      { query: 'latency', status: 'inactive' },
       createMockToolContext()
     );
 
-    if ('results' in result) {
-      expect(result.results[0].type).toBe('other');
+    if (!('results' in result) || result.results[0].type !== 'other') {
+      throw new Error('expected an other tool result');
     }
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        sources: [
+          {
+            id: 'source-uuid',
+            slug: 'nginx-errors',
+            title: 'Nginx errors',
+            view_name: '$.nightshift.sources.default.nginx-errors',
+          },
+        ],
+        events: [expect.objectContaining({ source_ids: ['source-uuid'] })],
+      })
+    );
+  });
+
+  it('does not search without the Nightshift read privilege', async () => {
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+
+    const tool = createSearchEventsTool({
+      getScopedClients: jest.fn().mockResolvedValue({
+        getEventSearchClient: jest.fn(),
+        licensing: {},
+      }) as unknown as GetScopedClients,
+      server: createSignificantEventsServer({ featurePrivilege: 'none' }),
+      logger: loggingSystemMock.createLogger(),
+      telemetry: createMockTelemetry() as never,
+    });
+
+    const result = await invokeHandler(
+      tool as never,
+      { status: 'active' },
+      createMockToolContext()
+    );
+
+    expect(searchEventsToolHandler).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
+  });
+
+  it('reports an unknown source as a refused call and keeps its name out of telemetry', async () => {
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    const telemetry = createMockTelemetry();
+    const logger = loggingSystemMock.createLogger();
+    const tool = createSearchEventsTool({
+      getScopedClients: jest.fn().mockResolvedValue({
+        getEventSearchClient: jest.fn().mockReturnValue({}),
+        licensing: {},
+        uiSettingsClient: {},
+        sourcesClient: mockSourcesClient(['logs.checkout']),
+      }) as unknown as GetScopedClients,
+      server: readerServer,
+      logger,
+      telemetry: telemetry as never,
+    });
+    const context = createMockToolContext();
+    context.runContext.stack = [{ type: 'agent', agentId: FEATURE_IDENTIFICATION_AGENT_ID }];
+
+    const result = await invokeHandler(
+      tool as never,
+      { slugs: ['motel-ingest-collector'], status: 'active' },
+      context
+    );
+
+    expect(searchEventsToolHandler).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      results: [
+        {
+          type: 'error',
+          data: {
+            message: expect.stringContaining(
+              'Source not found in this space: motel-ingest-collector'
+            ),
+          },
+        },
+      ],
+    });
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      'platform.sig_events.event_search refused the call: unknown_source'
+    );
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool_id: 'platform.sig_events.event_search',
+        error_code: 'unknown_source',
+        input_rejected: true,
+        agent_id: FEATURE_IDENTIFICATION_AGENT_ID,
+        unresolved_count: 1,
+      }),
+      expect.anything()
+    );
+    expect(telemetry.trackAgentToolEventSearch).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, error_message: 'unknown_source' }),
+      expect.anything()
+    );
+    expect(JSON.stringify(telemetry.trackAgentToolEventSearch.mock.calls)).not.toContain(
+      'motel-ingest-collector'
+    );
   });
 });

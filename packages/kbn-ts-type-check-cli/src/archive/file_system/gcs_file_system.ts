@@ -9,11 +9,12 @@
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
+import { pipeline } from 'stream/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import execa from 'execa';
 import { GCS_BUCKET_URI } from '../constants';
-import { getTarCreateArgs, getTarPlatformOptions, resolveTarEnvironment } from './utils';
+import { createArchiveExtractor, getTarCreateArgs, resolveTarEnvironment } from './utils';
 import { AbstractFileSystem } from './abstract_file_system';
 import type { ArchiveMetadata } from './types';
 import { join } from './utils';
@@ -49,19 +50,6 @@ export class GcsFileSystem extends AbstractFileSystem {
   protected async extract(archivePath: string): Promise<void> {
     this.log.info(`Streaming TypeScript build artifacts from ${archivePath}`);
 
-    const extractBaseArgs = ['--directory', REPO_ROOT, ...getTarPlatformOptions()];
-
-    const tarArgs = ['--extract', '--file', '-', '--gzip', ...extractBaseArgs];
-
-    const tarProcess = execa('tar', tarArgs, {
-      cwd: REPO_ROOT,
-      stdin: 'pipe',
-      stdout: 'ignore',
-      stderr: 'inherit',
-      env: resolveTarEnvironment(),
-      buffer: false,
-    });
-
     const catProcess = execa('gcloud', ['storage', 'cat', archivePath], {
       cwd: REPO_ROOT,
       stdout: 'pipe',
@@ -69,7 +57,20 @@ export class GcsFileSystem extends AbstractFileSystem {
       buffer: false,
     });
 
-    await pipeAndWait(catProcess, tarProcess);
+    if (!catProcess.stdout) {
+      killChild(catProcess);
+      throw new Error('Failed to stream TypeScript cache archive from GCS.');
+    }
+
+    try {
+      await Promise.all([
+        pipeline(catProcess.stdout, createArchiveExtractor(this.log)),
+        catProcess,
+      ]);
+    } catch (error) {
+      killChild(catProcess);
+      throw error;
+    }
   }
 
   protected async hasArchive(archivePath: string): Promise<boolean> {

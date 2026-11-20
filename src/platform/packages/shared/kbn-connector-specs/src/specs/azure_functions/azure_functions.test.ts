@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { createRecordingAxiosClient } from '../../lib/recording_axios_client';
 import { getConnectorSpec } from '../../..';
 import { AzureFunctions } from './azure_functions';
 import { InvokeInputSchema } from './types';
@@ -416,6 +417,29 @@ describe('AzureFunctions', () => {
         headers: { 'content-type': 'application/json' },
         body: { ok: true },
       });
+    });
+
+    it('sends the ARM token to ARM only, and the function key without it to the data plane', async () => {
+      const { client, requests } = createRecordingAxiosClient(
+        { Authorization: 'Bearer arm-token' },
+        (url) => ({
+          data: url === SITE_BASE ? siteResponse.data : { ok: true },
+          status: 200,
+          headers: {},
+        })
+      );
+
+      await AzureFunctions.actions.invoke.handler(
+        { ...mockContext, client } as unknown as ActionContext,
+        { ...APP_REF, functionName: 'QuarantineHost', functionKey: 'secret-key' }
+      );
+
+      expect(
+        requests.map(({ url, headers }) => [url, headers.Authorization, headers['x-functions-key']])
+      ).toEqual([
+        [SITE_BASE, 'Bearer arm-token', undefined],
+        [`https://${APP}.azurewebsites.net/api/QuarantineHost`, undefined, 'secret-key'],
+      ]);
     });
 
     it('uses a custom route verbatim and passes query params through', async () => {

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
-
-export const formatMatcher = (matcher: PolicyMatcher): string => {
+export const formatMatcher = (matcher: {
+  tags?: string[] | null;
+  expression?: string | null;
+}): string => {
   const parts: string[] = [];
   if (matcher.tags?.length) parts.push(`tags: ${matcher.tags.join(', ')}`);
   if (matcher.expression?.trim()) parts.push(`expression: "${matcher.expression.trim()}"`);

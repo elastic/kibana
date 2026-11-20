@@ -7,98 +7,142 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import {
-  SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  NightshiftModelBlockedError,
+  NightshiftModelNotFoundError,
   type SignificantEventsQueriesGenerationResult,
 } from '@kbn/significant-events-schema';
-import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
-import type { StreamsClient } from '@kbn/streams-plugin/server';
-import type { EbtTelemetryClient } from '../telemetry/ebt';
+import type {
+  EbtTelemetryClient,
+  KnowledgeIndicatorQueriesGenerationFailureCode,
+} from '../telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
-import { resolveConnectorForFeature } from '../../routes/utils/resolve_connector_for_feature';
-import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
+import { trackTelemetryBestEffort } from '../telemetry/track_telemetry_best_effort';
+import {
+  executeKIQueryGenerationAgent,
+  KIQueryGenerationAgentError,
+} from './identify_ki_queries_via_agent';
 
 export interface GenerateKIQueriesParams {
-  streamName: string;
+  source: NightshiftSource;
   connectorId?: string;
   runId: string;
+  workflowExecutionId?: string;
+  parentWorkflowExecutionId?: string;
+  maxExistingQueriesForContext: number;
 }
 
 export interface GenerateKIQueriesDependencies {
-  streamsClient: StreamsClient;
   kiClient: KnowledgeIndicatorClient;
   agentBuilder: AgentBuilderPluginStart;
-  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | undefined;
+  resolveModel: (requestedId?: string) => Promise<string>;
   request: KibanaRequest;
   logger: Logger;
   signal: AbortSignal;
   telemetry: EbtTelemetryClient;
 }
 
+const toGenerationFailureCode = (
+  error: unknown,
+  signal: AbortSignal
+): KnowledgeIndicatorQueriesGenerationFailureCode => {
+  if (error instanceof NightshiftModelNotFoundError) {
+    return 'model_not_found';
+  }
+  if (error instanceof NightshiftModelBlockedError) {
+    return 'model_blocked';
+  }
+  if (error instanceof KIQueryGenerationAgentError) {
+    return error.reason;
+  }
+  return signal.aborted ? 'aborted' : 'internal_error';
+};
+
 export async function generateKIQueries(
   params: GenerateKIQueriesParams,
   deps: GenerateKIQueriesDependencies
 ): Promise<SignificantEventsQueriesGenerationResult & { connectorId: string }> {
-  const { streamName, connectorId: connectorIdOverride, runId } = params;
   const {
-    streamsClient,
-    kiClient,
-    agentBuilder,
-    searchInferenceEndpoints,
-    request,
-    logger,
-    signal,
-    telemetry,
-  } = deps;
+    source,
+    connectorId: connectorIdOverride,
+    runId,
+    workflowExecutionId,
+    parentWorkflowExecutionId,
+    maxExistingQueriesForContext,
+  } = params;
+  const { kiClient, agentBuilder, resolveModel, request, logger, signal, telemetry } = deps;
 
-  const connectorId =
-    connectorIdOverride ??
-    (await resolveConnectorForFeature({
-      searchInferenceEndpoints,
-      featureId: SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-      featureName: 'query generation',
-      request,
+  const attemptStartedAt = Date.now();
+  let resolvedConnectorId: string | undefined;
+  try {
+    const connectorId = await resolveModel(connectorIdOverride);
+    resolvedConnectorId = connectorId;
+
+    logger.debug(`Using connector ${connectorId} for query generation`);
+
+    const { [source.id]: existingLinks } = await kiClient.getSourceToQueryLinksMap([source.id]);
+    const existingQueries = existingLinks.map(({ query }) => ({
+      id: query.id,
+      title: query.title,
+      type: query.type,
+      severity_score: query.severity_score,
+      description: query.description,
+      esql: query.esql.query,
     }));
 
-  logger.debug(`Using connector ${connectorId} for query generation`);
+    const agentStartedAt = Date.now();
+    const { queries, tokensUsed } = await executeKIQueryGenerationAgent({
+      agentBuilder,
+      request,
+      connectorId,
+      interactionId: runId,
+      source,
+      existingQueries,
+      maxExistingQueriesForContext,
+      signal,
+      logger: logger.get('significant_events_queries_generation'),
+    });
 
-  const definition = await streamsClient.getStream(streamName);
-  const { [definition.name]: existingLinks } = await kiClient.getStreamToQueryLinksMap([
-    definition.name,
-  ]);
-  const existingQueries = existingLinks.map(({ query }) => ({
-    id: query.id,
-    title: query.title,
-    type: query.type,
-    severity_score: query.severity_score,
-    description: query.description,
-    esql: query.esql.query,
-  }));
+    const durationMs = Date.now() - agentStartedAt;
+    trackTelemetryBestEffort({
+      logger,
+      description: 'generated queries',
+      track: () =>
+        telemetry.trackSignificantEventsQueriesGenerated(
+          {
+            workflow_execution_id: workflowExecutionId,
+            parent_workflow_execution_id: parentWorkflowExecutionId,
+            count: queries.length,
+            connector_id: connectorId,
+            source_id: source.id,
+            input_tokens_used: tokensUsed.prompt,
+            output_tokens_used: tokensUsed.completion,
+            cached_tokens_used: tokensUsed.cached ?? 0,
+            duration_ms: durationMs,
+          },
+          request
+        ),
+    });
 
-  const startedAt = Date.now();
-  const { queries, tokensUsed } = await executeKIQueryGenerationAgent({
-    agentBuilder,
-    request,
-    connectorId,
-    interactionId: runId,
-    definition,
-    existingQueries,
-    signal,
-    logger: logger.get('significant_events_queries_generation'),
-  });
-  const durationMs = Date.now() - startedAt;
-
-  telemetry.trackSignificantEventsQueriesGenerated({
-    count: queries.length,
-    connector_id: connectorId,
-    stream_name: definition.name,
-    stream_type: getStreamTypeFromDefinition(definition),
-    input_tokens_used: tokensUsed.prompt,
-    output_tokens_used: tokensUsed.completion,
-    cached_tokens_used: tokensUsed.cached ?? 0,
-    duration_ms: durationMs,
-  });
-
-  return { queries, tokensUsed, connectorId };
+    return { queries, tokensUsed, connectorId };
+  } catch (error) {
+    trackTelemetryBestEffort({
+      logger,
+      description: 'query generation failure',
+      track: () =>
+        telemetry.trackSignificantEventsQueriesGenerationFailed(
+          {
+            workflow_execution_id: workflowExecutionId,
+            parent_workflow_execution_id: parentWorkflowExecutionId,
+            error_code: toGenerationFailureCode(error, signal),
+            ...(resolvedConnectorId !== undefined ? { connector_id: resolvedConnectorId } : {}),
+            source_id: source.id,
+            duration_ms: Date.now() - attemptStartedAt,
+          },
+          request
+        ),
+    });
+    throw error;
+  }
 }

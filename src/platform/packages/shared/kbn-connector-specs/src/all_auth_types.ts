@@ -15,6 +15,7 @@ export * from './auth_types/aws_credentials';
 export * from './auth_types/bearer';
 export { BearerWithTlsAuth } from './auth_types/bearer_with_tls';
 export * from './auth_types/basic';
+export { BasicWithTlsAuth } from './auth_types/basic_with_tls';
 export * from './auth_types/gcp_service_account';
 export * from './auth_types/none';
 export * from './auth_types/oauth';

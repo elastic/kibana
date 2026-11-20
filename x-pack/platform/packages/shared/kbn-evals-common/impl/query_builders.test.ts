@@ -383,21 +383,12 @@ describe('query_builders', () => {
       });
     });
 
-    it('filters by branch using wildcard', () => {
+    it('filters by exact branch', () => {
       const query = buildExperimentsListingFilterQuery({ branch: 'main' });
       expect(query).toEqual({
         bool: {
           must_not: [preflightExclusion],
-          filter: [
-            {
-              wildcard: {
-                'metadata.git.branch': {
-                  value: '*main*',
-                  case_insensitive: true,
-                },
-              },
-            },
-          ],
+          filter: [{ term: { 'metadata.git.branch': 'main' } }],
         },
       });
     });
@@ -426,15 +417,6 @@ describe('query_builders', () => {
           ],
         },
       });
-    });
-
-    it('escapes wildcard metacharacters in the branch filter', () => {
-      const query = buildExperimentsListingFilterQuery({ branch: 'feature/foo?bar' }) as {
-        bool: { filter: Array<{ wildcard: { 'metadata.git.branch': { value: string } } }> };
-      };
-      expect(query.bool.filter[0].wildcard['metadata.git.branch'].value).toBe(
-        '*feature/foo\\?bar*'
-      );
     });
 
     it('escapes wildcard metacharacters in the search filter for both fields', () => {

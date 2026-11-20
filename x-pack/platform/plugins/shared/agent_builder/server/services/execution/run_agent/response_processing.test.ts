@@ -6,7 +6,11 @@
  */
 
 import { AIMessageChunk, ToolMessage } from '@langchain/core/messages';
-import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStepType,
+  ToolCallInvocation,
+  ToolResultType,
+} from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { internalTools } from '@kbn/agent-builder-common/tools';
@@ -54,11 +58,11 @@ describe('processResearchResponse', () => {
     });
   });
 
-  it('emits group reasoning, per-call reasoning and tool call steps in model order', () => {
+  it('emits group reasoning and tool call steps with intent in model order', () => {
     const message = new AIMessageChunk({
       content: 'Let me look.',
       tool_calls: [
-        { id: 'c1', name: 'my_tool', args: { _reasoning: 'why c1', q: 1 } },
+        { id: 'c1', name: 'my_tool', args: { _intent: 'Looking up c1', q: 1 } },
         { id: 'c2', name: 'my_tool', args: { q: 2 } },
       ],
     });
@@ -66,7 +70,7 @@ describe('processResearchResponse', () => {
     expect(turn.outcome).toMatchObject({
       type: 'tool_calls',
       toolCalls: [
-        { toolCallId: 'c1', toolName: 'my_tool', args: { q: 1 }, reasoning: 'why c1' },
+        { toolCallId: 'c1', toolName: 'my_tool', args: { q: 1 }, intent: 'Looking up c1' },
         { toolCallId: 'c2', toolName: 'my_tool', args: { q: 2 } },
       ],
     });
@@ -81,21 +85,13 @@ describe('processResearchResponse', () => {
         },
       },
       {
-        type: 'append',
-        step: {
-          type: ConversationRoundStepType.reasoning,
-          reasoning: 'why c1',
-          tool_call_id: 'c1',
-          tool_call_group_id: groupId,
-        },
-      },
-      {
         type: 'append_tool_call',
         step: {
           type: ConversationRoundStepType.toolCall,
           tool_call_id: 'c1',
           tool_id: 'my.tool',
           params: { q: 1 },
+          intent: 'Looking up c1',
           results: [],
           progression: [],
           tool_call_group_id: groupId,
@@ -313,5 +309,116 @@ describe('processStructuredAnswerResponse', () => {
         meta: { errCode: AgentExecutionErrorCode.emptyResponse },
       },
     });
+  });
+});
+
+describe('processResearchResponse - execute_dynamic_tool', () => {
+  const dynamicToolManager = {
+    getToolIdMapping: () =>
+      new Map([[internalTools.executeDynamicTool, internalTools.executeDynamicTool]]),
+    getToolMeta: (toolId: string) =>
+      toolId === 'skill.tool'
+        ? { origin: 'inline', type: 'builtin' }
+        : { origin: undefined, type: undefined },
+  } as unknown as ToolManager;
+
+  it('stores the inner tool on the step and keeps the outer call for the tool node', () => {
+    const message = new AIMessageChunk({
+      content: '',
+      tool_calls: [
+        {
+          id: 'c1',
+          name: internalTools.executeDynamicTool,
+          args: { tool_id: 'skill.tool', params: { q: 1 } },
+        },
+      ],
+    });
+
+    const turn = processResearchResponse(message, { cycle: 1, toolManager: dynamicToolManager });
+
+    expect(turn.stepUpdates).toEqual([
+      {
+        type: 'append_tool_call',
+        step: expect.objectContaining({
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'c1',
+          tool_id: 'skill.tool',
+          params: { q: 1 },
+          invocation: ToolCallInvocation.dynamic,
+          tool_origin: 'inline',
+          tool_type: 'builtin',
+        }),
+      },
+    ]);
+    // the outer call is what the tool node executes; the render state keeps the outer name
+    expect(turn.outcome).toMatchObject({
+      toolCalls: [
+        {
+          toolCallId: 'c1',
+          toolName: internalTools.executeDynamicTool,
+          args: { tool_id: 'skill.tool', params: { q: 1 } },
+        },
+      ],
+    });
+    expect(turn.renderState.c1).toEqual({
+      toolName: internalTools.executeDynamicTool,
+      kind: 'server',
+      cycle: 1,
+    });
+  });
+
+  it('stores the intent on the unwrapped step', () => {
+    const message = new AIMessageChunk({
+      content: '',
+      tool_calls: [
+        {
+          id: 'c1',
+          name: internalTools.executeDynamicTool,
+          args: { _intent: 'Running skill tool', tool_id: 'skill.tool', params: { q: 'a' } },
+        },
+      ],
+    });
+
+    const turn = processResearchResponse(message, { cycle: 1, toolManager: dynamicToolManager });
+
+    const [update] = turn.stepUpdates as unknown as Array<{ step: Record<string, unknown> }>;
+    expect(update.step).toMatchObject({
+      tool_id: 'skill.tool',
+      params: { q: 'a' },
+      intent: 'Running skill tool',
+    });
+    expect(JSON.stringify(update.step.params)).not.toContain('_intent');
+  });
+
+  it('keeps the outer call on the step when the args do not carry an inner call', () => {
+    const message = new AIMessageChunk({
+      content: '',
+      tool_calls: [{ id: 'c1', name: internalTools.executeDynamicTool, args: { tool_id: 7 } }],
+    });
+
+    const turn = processResearchResponse(message, { cycle: 1, toolManager: dynamicToolManager });
+
+    const [update] = turn.stepUpdates;
+    expect(update).toMatchObject({
+      type: 'append_tool_call',
+      step: { tool_id: internalTools.executeDynamicTool, params: { tool_id: 7 } },
+    });
+    expect((update as { step: { invocation?: unknown } }).step.invocation).toBeUndefined();
+  });
+
+  it('does not unwrap native calls', () => {
+    const message = new AIMessageChunk({
+      content: '',
+      tool_calls: [{ id: 'c1', name: 'my_tool', args: { tool_id: 'x', params: {} } }],
+    });
+
+    const turn = processResearchResponse(message, { cycle: 1, toolManager });
+
+    expect(turn.stepUpdates[0]).toMatchObject({
+      step: { tool_id: 'my.tool', params: { tool_id: 'x', params: {} } },
+    });
+    expect((turn.stepUpdates[0] as { step: { invocation?: unknown } }).step.invocation).toBe(
+      undefined
+    );
   });
 });

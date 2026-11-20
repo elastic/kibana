@@ -107,6 +107,12 @@ const buildTextBasedColumn = ({
     }
   }
 
+  // ES|QL date histograms drop partial buckets unless told otherwise, while form-based ones keep
+  // them by default. Carry the effective source value so the converted chart shows the same buckets.
+  if (sourceColumn.operationType === 'date_histogram') {
+    column.params = { ...column.params, dropPartials: Boolean(sourceColumn.dropPartials) };
+  }
+
   return column;
 };
 

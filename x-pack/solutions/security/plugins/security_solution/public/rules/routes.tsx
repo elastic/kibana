@@ -37,7 +37,7 @@ import { EditRulePage } from '../detection_engine/rule_creation_ui/pages/rule_ed
 import { useReadonlyHeader } from '../use_readonly_header';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';
-import { AllRulesTabs } from '../detection_engine/rule_management_ui/components/rules_table/rules_table_toolbar';
+import { AllRulesTabs } from '../detection_engine/rule_management_ui/components/rules_table/constants';
 import { AddRulesPage } from '../detection_engine/rule_management_ui/pages/add_rules';
 import {
   DetectionEngineRuleHealthPage,

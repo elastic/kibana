@@ -5,5 +5,4 @@
  * 2.0.
  */
 export { ConversationCard } from './conversation_card';
-export { TemplateBadge } from './template_badge';
 export { type ConversationsActionsGroupProps } from './actions_group';

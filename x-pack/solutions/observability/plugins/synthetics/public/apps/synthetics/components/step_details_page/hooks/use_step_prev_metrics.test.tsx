@@ -23,9 +23,15 @@ jest.mock('react-router-dom', () => ({
   useParams: () => ({ checkGroupId: 'cg-1', stepIndex: '2', monitorId: 'monitor-1' }),
 }));
 
+const mockUseSelectedMonitor = jest.fn();
+jest.mock('../../monitor_details/hooks/use_selected_monitor', () => ({
+  useSelectedMonitor: () => mockUseSelectedMonitor(),
+}));
+
 describe('useStepPrevMetrics', () => {
   beforeEach(() => {
     mockUrlParams.mockReturnValue({});
+    mockUseSelectedMonitor.mockReturnValue({ monitor: null });
     mockUseReduxEsSearch.mockReturnValue({ data: undefined, loading: false });
   });
 
@@ -38,13 +44,13 @@ describe('useStepPrevMetrics', () => {
     expect(mockUseReduxEsSearch).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({ index: SYNTHETICS_INDEX_PATTERN }),
-      [undefined],
+      [undefined, undefined],
       expect.any(Object)
     );
     expect(mockUseReduxEsSearch).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({ index: SYNTHETICS_INDEX_PATTERN }),
-      [undefined],
+      [undefined, undefined],
       expect.any(Object)
     );
   });
@@ -66,5 +72,22 @@ describe('useStepPrevMetrics', () => {
       expect.arrayContaining(['remote-a']),
       expect.any(Object)
     );
+  });
+
+  it('filters heartbeat monitors by monitor.id', () => {
+    mockUseSelectedMonitor.mockReturnValue({
+      monitor: { origin: 'heartbeat', config_id: 'monitor-1', id: 'monitor-1' },
+    });
+
+    renderHook(() => useStepPrevMetrics());
+
+    const firstParams = mockUseReduxEsSearch.mock.calls[0][0];
+    const secondParams = mockUseReduxEsSearch.mock.calls[1][0];
+    for (const params of [firstParams, secondParams]) {
+      expect(params.query.bool.filter).toEqual(
+        expect.arrayContaining([{ term: { 'monitor.id': 'monitor-1' } }])
+      );
+      expect(params.query.bool.filter).not.toContainEqual({ term: { config_id: 'monitor-1' } });
+    }
   });
 });

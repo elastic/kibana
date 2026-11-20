@@ -24,7 +24,7 @@ export const tsInfoCommand: ICommand = {
   name: Commands.TS_INFO,
   methods: tsInfoCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-language.esql.definitions.tsInfoDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.tsInfoDoc', {
       defaultMessage:
         'The TS_INFO command returns information about the time series metrics in the query. Only available on TS source commands.',
     }),

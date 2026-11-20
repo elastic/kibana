@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { buildPath } from '@kbn/core-http-browser';
 import { parse as parseUrl } from 'url';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { convertRelativeTimeStringToAbsoluteTimeString } from '../../lib/time_utils';
@@ -150,7 +151,7 @@ export class BrowserShortUrlClient implements IShortUrlClient {
 
   public async get(id: string): Promise<ShortUrl> {
     const { http } = this.dependencies;
-    const data = await http.fetch<ShortUrlData>('/api/short_url/' + id, {
+    const data = await http.fetch<ShortUrlData>(buildPath('/api/short_url/{id}', { id }), {
       method: 'GET',
     });
 
@@ -159,16 +160,19 @@ export class BrowserShortUrlClient implements IShortUrlClient {
 
   public async resolve(slug: string): Promise<ShortUrl> {
     const { http } = this.dependencies;
-    const data = await http.fetch<ShortUrlData>('/api/short_url/_slug/' + slug, {
-      method: 'GET',
-    });
+    const data = await http.fetch<ShortUrlData>(
+      buildPath('/api/short_url/_slug/{slug}', { slug }),
+      {
+        method: 'GET',
+      }
+    );
 
     return { data };
   }
 
   public async delete(id: string): Promise<void> {
     const { http } = this.dependencies;
-    await http.fetch('/api/short_url/' + id, {
+    await http.fetch(buildPath('/api/short_url/{id}', { id }), {
       method: 'DELETE',
     });
   }

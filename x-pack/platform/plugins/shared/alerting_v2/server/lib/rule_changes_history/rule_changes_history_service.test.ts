@@ -17,8 +17,7 @@ const createMockClient = () => ({
   logBulk: jest.fn().mockResolvedValue(undefined),
 });
 
-const rule = createRuleResponse({ id: 'rule-1', metadata: { name: 'my rule' } });
-const { version: _occVersion, ...snapshot } = rule;
+const snapshot = createRuleResponse({ id: 'rule-1', metadata: { name: 'my rule' } });
 
 describe('RuleChangesHistoryService', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -90,8 +89,7 @@ describe('RuleChangesHistoryService', () => {
 
     it('maps each entry to an ObjectChange using the service objectType and a normalized ISO timestamp', async () => {
       const timestamp = new Date('2024-01-01T00:00:00.000Z');
-      const secondRule = createRuleResponse({ id: 'rule-2' });
-      const { version: _secondOccVersion, ...secondSnapshot } = secondRule;
+      const secondSnapshot = createRuleResponse({ id: 'rule-2' });
 
       await service.logRuleChanges({
         ...baseParams,

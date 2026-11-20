@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
 import {
   SNAPSHOT_CUSTOM_AGGREGATIONS,
@@ -14,7 +14,6 @@ import {
 } from '../../../../../../../common/http_api';
 import { SNAPSHOT_API_MAX_METRICS } from '../../../../../../../common/constants';
 import { WaffleMetricControls } from '.';
-import userEvent from '@testing-library/user-event';
 
 jest.mock('./metrics_context_menu', () => ({
   MetricsContextMenu: () => null,
@@ -39,9 +38,7 @@ const createMockCustomMetric = (): SnapshotCustomMetricInput => ({
 });
 
 describe('WaffleMetricControls', () => {
-  it(`doesn't allow adding more metrics when there are already ${SNAPSHOT_API_MAX_METRICS} metrics`, async () => {
-    const user = userEvent.setup();
-
+  it(`doesn't allow adding more metrics when there are already ${SNAPSHOT_API_MAX_METRICS} metrics`, () => {
     const options = Array.from(
       { length: Math.floor(SNAPSHOT_API_MAX_METRICS / 2) },
       createMockMetric
@@ -62,7 +59,7 @@ describe('WaffleMetricControls', () => {
     );
 
     const dropdownButton = screen.getByTestId('infraInventoryMetricDropdown');
-    await user.click(dropdownButton);
+    fireEvent.click(dropdownButton);
 
     const modeSwitcher = screen.getByTestId('infraModeSwitcherAddMetricButton');
     expect(modeSwitcher).toBeDisabled();

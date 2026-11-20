@@ -32,6 +32,8 @@ export {
   PACKAGES_SAVED_OBJECT_TYPE,
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
+  PACKAGE_POLICY_CONDITION_MAX_LENGTH,
   OUTPUT_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
@@ -56,7 +58,6 @@ export {
   AGENTS_SETUP_API_ROUTES,
   PACKAGE_POLICY_API_ROUTES,
   DATA_STREAM_API_ROUTES,
-  DATA_STREAM_INDEX_PATTERN_REGEX,
   EPM_API_ROUTES,
   SETUP_API_ROUTE,
   // Should probably be removed
@@ -83,6 +84,9 @@ export {
   CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT,
   // Download source constants
   DEFAULT_DOWNLOAD_SOURCE_REFERENCE,
+  GENERIC_DATASET_NAME,
+  // Package policy constants
+  VALIDATE_DATASTREAMS_PERMISSION_REGEX,
 } from './constants';
 export {
   // Route services
@@ -94,9 +98,11 @@ export {
   packagePolicyRouteService,
   fleetSetupRouteService,
   // Package policy helpers
+  getMaxPackageName,
   isValidNamespace,
   isValidDataset,
   isValidDataStreamType,
+  isValidDataStreamIndexPattern,
   INVALID_NAMESPACE_CHARACTERS,
   VALID_DATA_STREAM_TYPES,
   getFileMetadataIndexName,
@@ -117,9 +123,17 @@ export {
   findFirstVarEntry,
   // Version-specific policies helpers
   hasVersionSuffix,
+  hasAgentVersionSuffix,
+  hasSentinelVersionSuffix,
+  getSentinelVersionPolicyId,
   removeVersionSuffixFromPolicyId,
   buildPolicyIdOrVariantsKuery,
   buildPolicyIdsOrVariantsKuery,
+  buildPolicyBaseIdWithFallbackKuery,
+  buildPolicyBaseIdsWithFallbackKuery,
+  extractAgentIdsWithData,
+  getIncompatibleIntegrations,
+  formatAgentConditionErrors,
 } from './services';
 
 export type {

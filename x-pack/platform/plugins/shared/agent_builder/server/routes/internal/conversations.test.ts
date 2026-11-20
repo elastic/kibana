@@ -8,7 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { createBadRequestError } from '@kbn/agent-builder-common';
+import { createBadRequestError, createForbiddenError } from '@kbn/agent-builder-common';
 import { registerInternalConversationRoutes } from './conversations';
 import type { RouteDependencies } from '../types';
 import { internalApiPath } from '../../../common/constants';
@@ -151,7 +151,7 @@ describe('registerInternalConversationRoutes - _apply_template', () => {
       kibanaResponseFactory
     );
 
-    expect(applyTemplate).toHaveBeenCalledWith('conv-1', 'phishing');
+    expect(applyTemplate).toHaveBeenCalledWith('conv-1', 'phishing', { source: 'http_api' });
     expect(response.status).toBe(200);
     expect(response.payload).toMatchObject({ id: 'conv-1' });
   });
@@ -168,15 +168,15 @@ describe('registerInternalConversationRoutes - _apply_template', () => {
     expect(response.status).toBe(500);
   });
 
-  it('returns 404 when the experimental features flag is disabled', async () => {
+  it('applies the template when the experimental features flag is disabled', async () => {
     const response = await routeHandler(
       createMockContext({ featureFlagEnabled: false }) as any,
       createRequest(),
       kibanaResponseFactory
     );
 
-    expect(response.status).toBe(404);
-    expect(applyTemplate).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(applyTemplate).toHaveBeenCalledWith('conv-1', 'phishing', { source: 'http_api' });
   });
 });
 
@@ -248,7 +248,11 @@ describe('registerInternalConversationRoutes - PATCH /metadata', () => {
       kibanaResponseFactory
     );
 
-    expect(patchMetadata).toHaveBeenCalledWith('conv-1', { severity: 'high' });
+    expect(patchMetadata).toHaveBeenCalledWith(
+      'conv-1',
+      { severity: 'high' },
+      { source: 'http_api' }
+    );
     expect(response.status).toBe(200);
     expect(response.payload).toMatchObject({ id: 'conv-1', metadata: { severity: 'high' } });
   });
@@ -277,15 +281,15 @@ describe('registerInternalConversationRoutes - PATCH /metadata', () => {
     expect(response.status).toBe(500);
   });
 
-  it('returns 404 when the experimental features flag is disabled', async () => {
+  it('patches the metadata when the experimental features flag is disabled', async () => {
     const response = await routeHandler(
       createMockContext({ featureFlagEnabled: false }) as any,
       createRequest(),
       kibanaResponseFactory
     );
 
-    expect(response.status).toBe(404);
-    expect(patchMetadata).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(patchMetadata).toHaveBeenCalled();
   });
 });
 
@@ -441,5 +445,98 @@ describe('registerInternalConversationRoutes - _search', () => {
       pagination: { total: 1, page: 1, per_page: 50 },
       results: [{ id: 'conv-1', title: 'Sales report' }],
     });
+  });
+});
+
+const STEER_PATH = `${internalApiPath}/conversations/{conversation_id}/_steer`;
+
+describe('registerInternalConversationRoutes - _steer', () => {
+  let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
+  let appendSteer: jest.Mock;
+  let assertCanRunAgent: jest.Mock;
+
+  const createMockContext = () => ({
+    core: Promise.resolve({}),
+    licensing: Promise.resolve({
+      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+    }),
+  });
+
+  const createRequest = () =>
+    httpServerMock.createKibanaRequest({
+      method: 'post',
+      path: STEER_PATH,
+      params: { conversation_id: 'conv-1' },
+      body: { message: 'use a table', event_id: 'evt-1' },
+    });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    appendSteer = jest.fn().mockResolvedValue({
+      event: { id: 'evt-1', type: 'user_message' },
+      alreadyStored: false,
+    });
+    assertCanRunAgent = jest.fn().mockResolvedValue(undefined);
+
+    const getInternalServices = jest.fn().mockReturnValue({
+      conversations: {
+        getScopedClient: jest.fn().mockResolvedValue({
+          get: jest.fn().mockResolvedValue({ id: 'conv-1', agent_id: 'agent-1' }),
+          getUser: () => ({ id: 'u1', username: 'u1' }),
+          appendSteer,
+        }),
+      },
+      execution: { assertCanRunAgent },
+    });
+
+    const routeHandlers: Record<string, (ctx: any, req: any, res: any) => Promise<any>> = {};
+
+    const router = {
+      post: jest
+        .fn()
+        .mockImplementation(
+          (config: { path: string }, handler: (ctx: any, req: any, res: any) => Promise<any>) => {
+            routeHandlers[config.path] = handler;
+          }
+        ),
+      patch: jest.fn(),
+      get: jest.fn(),
+    } as unknown as IRouter;
+
+    registerInternalConversationRoutes({
+      router,
+      getInternalServices,
+      logger: loggingSystemMock.createLogger(),
+    } as unknown as RouteDependencies);
+
+    routeHandler = routeHandlers[STEER_PATH];
+  });
+
+  it("checks the caller could run the conversation's agent, then stores the steer", async () => {
+    const request = createRequest();
+
+    const response = await routeHandler(createMockContext() as any, request, kibanaResponseFactory);
+
+    expect(assertCanRunAgent).toHaveBeenCalledWith({ request, agentId: 'agent-1' });
+    expect(appendSteer).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'conv-1', message: 'use a table', eventId: 'evt-1' }),
+      { source: 'http_api' }
+    );
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual({ event: { id: 'evt-1', type: 'user_message' } });
+  });
+
+  it('stores nothing when the caller could not run the agent', async () => {
+    assertCanRunAgent.mockRejectedValue(createForbiddenError('no'));
+
+    const response = await routeHandler(
+      createMockContext() as any,
+      createRequest(),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(403);
+    expect(appendSteer).not.toHaveBeenCalled();
   });
 });

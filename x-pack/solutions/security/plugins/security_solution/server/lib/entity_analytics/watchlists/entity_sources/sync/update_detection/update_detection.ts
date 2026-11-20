@@ -12,8 +12,7 @@ import type { EntityType } from '@kbn/entity-store/common';
 import type { WatchlistDataSources } from '../../../../../../../common/api/entity_analytics';
 import type { EntityStoreEntityIdsByType, WatchlistsByEuid } from '../../../entities/service';
 import type { WatchlistBulkEntity } from '../../types';
-import { createWatchlistSyncMarkersService } from '../sync_markers';
-import type { WatchlistEntitySourceClient } from '../../infra';
+import type { WatchlistSyncMarkersService } from '../sync_markers';
 import { isTimestampGreaterThan } from '../utils';
 import { buildEntitiesSearchBody, buildIndexSourceSearchBody } from './queries';
 import { applyBulkUpsert } from '../../bulk/upsert';
@@ -23,16 +22,27 @@ import type { CorrelationMap } from '../../../entities/types';
 
 export type UpdateDetectionService = ReturnType<typeof createUpdateDetectionService>;
 
+/**
+ * A full-sync decision resolved once per source for the whole sync cycle
+ */
+export interface FullSyncState {
+  hasNewFullSync: boolean;
+  syncMarker?: string;
+}
+
 type UpdateDetection = (
   source: WatchlistDataSources.MonitoringEntitySource,
   entityStoreEntityIdsByType: EntityStoreEntityIdsByType,
   correlationMap: CorrelationMap | undefined,
-  watchlistsByEuid: WatchlistsByEuid
-) => Promise<WatchlistBulkEntity[]>;
+  watchlistsByEuid: WatchlistsByEuid,
+  fullSyncState?: FullSyncState
+) => Promise<{
+  entities: WatchlistBulkEntity[];
+}>;
 
 interface MappedBucket {
   euid: string;
-  entity: WatchlistBulkEntity;
+  entity?: WatchlistBulkEntity;
   timestamp?: string;
 }
 
@@ -73,7 +83,9 @@ const paginatedDetection = async <B>(
 
       for (const { entity, timestamp } of mapped) {
         maxTimestamp = pickLaterTimestamp(maxTimestamp, timestamp);
-        allEntities.push(entity);
+        if (entity) {
+          allEntities.push(entity);
+        }
       }
     }
 
@@ -94,20 +106,16 @@ export const createUpdateDetectionService = ({
   dataEsClient,
   crudClient,
   logger,
-  descriptorClient,
+  syncMarkersService,
   watchlist,
 }: {
   internalEsClient: ElasticsearchClient; // for writes to watchlist indices
   dataEsClient: ElasticsearchClient; // for reads against the source data index
   crudClient: CRUDClient;
   logger: Logger;
-  descriptorClient?: WatchlistEntitySourceClient;
+  syncMarkersService?: WatchlistSyncMarkersService;
   watchlist: { name: string; id: string; index: string };
 }) => {
-  const syncMarkersService = descriptorClient
-    ? createWatchlistSyncMarkersService(descriptorClient, internalEsClient)
-    : undefined;
-
   const detectForIntegrationEntityType = async (
     source: WatchlistDataSources.MonitoringEntitySource,
     entityType: EntityType,
@@ -138,18 +146,28 @@ export const createUpdateDetectionService = ({
 
     const mapBucket: MapBucket<EntityBucket> = (bucket) => {
       const euid = bucket.key.euid;
-      const entity: WatchlistBulkEntity = { euid, type: entityType, sourceId: source.id };
+      const latestHit = bucket.latest_doc?.hits?.hits?.[0];
+      const latestHitTimestamp = latestHit?._source?.['@timestamp'];
+      const timestamp = typeof latestHitTimestamp === 'string' ? latestHitTimestamp : undefined;
 
-      if (syncMarker && bucket.latest_doc?.hits?.hits?.[0]) {
-        const topHit = bucket.latest_doc.hits.hits[0];
+      // When queryRule is set, the entity only currently matches if its true latest document
+      // is the same document as its latest queryRule-matching one
+      if (source.queryRule) {
+        const latestMatchingHitId = bucket.latest_matching_doc?.doc?.hits?.hits?.[0]?._id;
+        if (!latestMatchingHitId || latestMatchingHitId !== latestHit?._id) {
+          return [{ euid, timestamp }];
+        }
+      }
+
+      const entity: WatchlistBulkEntity = { euid, type: entityType, sourceId: source.id };
+      if (latestHit) {
         entity.name = getEntityNameFromDoc(
           entityType,
-          (topHit._source ?? {}) as Parameters<typeof getEntityNameFromDoc>[1]
+          (latestHit._source ?? {}) as Parameters<typeof getEntityNameFromDoc>[1]
         );
       }
 
-      const ts = bucket.latest_doc?.hits?.hits?.[0]?._source?.['@timestamp'];
-      return [{ euid, entity, timestamp: typeof ts === 'string' ? ts : undefined }];
+      return [{ euid, entity, timestamp }];
     };
 
     return paginatedDetection(search, mapBucket);
@@ -221,7 +239,8 @@ export const createUpdateDetectionService = ({
     source: WatchlistDataSources.MonitoringEntitySource,
     entityStoreEntityIdsByType: EntityStoreEntityIdsByType,
     correlationMap: CorrelationMap | undefined,
-    watchlistsByEuid: WatchlistsByEuid
+    watchlistsByEuid: WatchlistsByEuid,
+    fullSyncState?: FullSyncState
   ) => {
     const allEntities: WatchlistBulkEntity[] = [];
     let maxProcessedTimestamp: string | undefined;
@@ -229,12 +248,15 @@ export const createUpdateDetectionService = ({
     if (source.type === 'entity_analytics_integration') {
       if (!syncMarkersService) {
         logger.warn(
-          `[WatchlistSync] Skipping integration source ${source.id}: descriptorClient not available`
+          `[WatchlistSync] Skipping integration source ${source.id}: syncMarkersService not available`
         );
-        return allEntities;
+        return { entities: allEntities };
       }
 
-      const syncMarker = await syncMarkersService.getLastProcessedMarker(source);
+      const syncMarker =
+        fullSyncState?.hasNewFullSync && fullSyncState.syncMarker
+          ? fullSyncState.syncMarker
+          : await syncMarkersService.getLastProcessedMarker(source);
 
       for (const entityType of ALL_ENTITY_TYPES) {
         const allowedEntityIds = getAllowedEntityIds(entityStoreEntityIdsByType, entityType);
@@ -259,7 +281,7 @@ export const createUpdateDetectionService = ({
         logger.warn(
           `[WatchlistSync] Skipping index source ${source.id}: correlationMap not provided`
         );
-        return allEntities;
+        return { entities: allEntities };
       }
 
       const { entities } = await detectForIndexSource(source, correlationMap);
@@ -282,7 +304,7 @@ export const createUpdateDetectionService = ({
     logger.info(
       `[WatchlistSync] Update detection: found ${allEntities.length} entities from source ${source.id}`
     );
-    return allEntities;
+    return { entities: allEntities };
   };
 
   return { updateDetection };

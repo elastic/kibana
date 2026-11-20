@@ -26,6 +26,7 @@ responses:
               permissions:
                 update_agent: true
                 update_access_control: true
+                update_approvals: true
               configuration:
                 instructions: You are a custom agent that wants to help searching data using all
                   indices starting with prefix "content-".

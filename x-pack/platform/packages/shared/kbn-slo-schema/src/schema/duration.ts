@@ -5,23 +5,40 @@
  * 2.0.
  */
 
-import { either } from 'fp-ts/Either';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 
 import { Duration } from '../models/duration';
+import { MAX_DURATION_STRING_LENGTH } from './limits';
 
-const durationType = new t.Type<Duration, string, unknown>(
-  'Duration',
-  (input: unknown): input is Duration => input instanceof Duration,
-  (input: unknown, context: t.Context) =>
-    either.chain(t.string.validate(input, context), (value: string) => {
+/**
+ * Codec between a wire-form duration string (`30d`) and the {@link Duration} model.
+ * `Duration.fromString` is the single source of truth for the parsing semantics
+ * (including the historical `parseInt` leniency) and for rejecting non-positive
+ * values and unknown units.
+ */
+const durationType = z.codec(
+  z
+    .string()
+    .max(MAX_DURATION_STRING_LENGTH)
+    .describe(
+      'The duration formatted as {duration}{unit}, for example 30d. Accepted units are m, h, d, w and M'
+    ),
+  z.instanceof(Duration),
+  {
+    decode: (value, payload) => {
       try {
-        return t.success(Duration.fromString(value));
+        return Duration.fromString(value);
       } catch (err) {
-        return t.failure(input, context);
+        payload.issues.push({
+          code: 'custom',
+          message: `Invalid duration: ${value}, must be {duration}{unit}, for example 30d`,
+          input: value,
+        });
+        return z.NEVER;
       }
-    }),
-  (duration: Duration): string => duration.format()
+    },
+    encode: (duration) => duration.format(),
+  }
 );
 
 export { durationType };

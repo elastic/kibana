@@ -32,6 +32,15 @@ export const getCredentialId = (serviceAccountId: string): string =>
     .update(JSON.stringify(['credential', serviceAccountId]))
     .digest('hex');
 
+/**
+ * How much later than a workload's binding its account may have been created before the exchange
+ * refuses it. The two timestamps come from the clocks of whichever Kibana nodes handled the create
+ * and the bind, so a workload bound right after its account was created can look bound before it.
+ * The cost is that an account deleted and created again this soon after a bind inherits the
+ * binding.
+ */
+export const BINDING_CLOCK_SKEW_TOLERANCE_MS = 10_000;
+
 export interface ServiceAccountCredentialAttributes {
   /** The Elasticsearch principal, `{namespace}/{service}`. */
   serviceAccountId: string;

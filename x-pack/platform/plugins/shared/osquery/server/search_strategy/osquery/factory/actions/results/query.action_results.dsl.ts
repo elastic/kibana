@@ -13,6 +13,7 @@ import moment from 'moment';
 import {
   ACTION_RESPONSES_DATA_STREAM_INDEX,
   ACTION_RESPONSES_INDEX,
+  EXACT_RESPONDING_AGENTS_LIMIT,
 } from '../../../../../../common/constants';
 import type { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
 import { getQueryFilter } from '../../../../../utils/build_query';
@@ -23,6 +24,7 @@ import { prefixIndexPatternsWithCcs } from '../../../../../utils/ccs_utils';
 export const buildActionResultsQuery = ({
   actionId,
   agentIds,
+  agentsCount,
   kuery,
   startDate,
   sort,
@@ -34,7 +36,11 @@ export const buildActionResultsQuery = ({
   spaceId,
   matchMissingSpaceId,
   matchActionDataSpaceId,
-}: ActionResultsRequestOptions & { matchActionDataSpaceId?: boolean }): ISearchRequestParams => {
+  skipSpaceFilter,
+}: ActionResultsRequestOptions & {
+  matchActionDataSpaceId?: boolean;
+  skipSpaceFilter?: boolean;
+}): ISearchRequestParams => {
   const kueryFilter = kuery ? [getQueryFilter({ filter: kuery })] : [];
 
   const timeRangeFilter: estypes.QueryDslQueryContainer[] =
@@ -77,10 +83,18 @@ export const buildActionResultsQuery = ({
   // passes `matchActionDataSpaceId` from ID_BOUND_FACTORY_QUERY_TYPES so this
   // aggregation cannot drift from the hit filter. Default off: omitting the
   // flag must not enable the less-trusted field in aggregations only.
-  const spaceIdFilter = buildSpaceIdFilter(spaceId, {
-    matchMissingSpaceId: matchMissingSpaceId ?? true,
-    matchActionDataSpaceId: matchActionDataSpaceId ?? false,
-  }) as estypes.QueryDslQueryContainer;
+  //
+  // `skipSpaceFilter` means the strategy already found this `action_id` on the
+  // Kibana-written action document in the active space and omitted the hit-level
+  // filter, so the aggregation omits it too and counts match the hits.
+  const spaceIdFilters: estypes.QueryDslQueryContainer[] = skipSpaceFilter
+    ? []
+    : [
+        buildSpaceIdFilter(spaceId, {
+          matchMissingSpaceId: matchMissingSpaceId ?? true,
+          matchActionDataSpaceId: matchActionDataSpaceId ?? false,
+        }),
+      ];
 
   const filterQuery: estypes.QueryDslQueryContainer[] = [
     ...timeRangeFilter,
@@ -120,7 +134,7 @@ export const buildActionResultsQuery = ({
                       action_id: actionId,
                     },
                   },
-                  spaceIdFilter,
+                  ...spaceIdFilters,
                 ],
               },
             },
@@ -130,6 +144,21 @@ export const buildActionResultsQuery = ({
                   field: 'action_response.osquery.count',
                 },
               },
+              // Fleet delivers responses at least once, so `doc_count` can exceed the number of
+              // agents that answered. Completion is decided on distinct agents. A `terms` agg sized
+              // to the targeted agents is exact, which `cardinality` is not (it estimated wrong in
+              // about 1 of 2 runs at 10k agents and left answered queries `running`). Fleets past
+              // the bucket limit keep counting response documents (`doc_count`), as before.
+              ...(agentsCount &&
+              Number.isInteger(agentsCount) &&
+              agentsCount > 0 &&
+              agentsCount <= EXACT_RESPONDING_AGENTS_LIMIT
+                ? {
+                    responding_agent_ids: {
+                      terms: { field: 'agent_id', size: agentsCount },
+                    },
+                  }
+                : {}),
               responses: {
                 terms: {
                   script: {

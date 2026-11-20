@@ -32,10 +32,29 @@ export interface ConfigProperties {
 
 export type FieldsConfiguration = Record<string, ConfigProperties>;
 
+/**
+ * Optional capabilities advertised by an inference service in `GET _inference/_services`.
+ * Omitted entirely by services (and Elasticsearch versions) that do not support any of them.
+ */
+export interface InferenceServiceFeatures {
+  non_streaming_chat?: {
+    supported: boolean;
+  };
+}
+
 export interface InferenceProvider {
   service: string;
   name: string;
   task_types: string[];
   logo?: string;
   configurations: FieldsConfiguration;
+  features?: InferenceServiceFeatures;
 }
+
+/**
+ * Whether a service advertises support for non-streaming `chat_completion` requests.
+ * A missing `features` object means the service (or the ES version) does not support it.
+ */
+export const supportsNonStreamingChat = (
+  provider: Pick<InferenceProvider, 'features'> | undefined
+): boolean => provider?.features?.non_streaming_chat?.supported === true;

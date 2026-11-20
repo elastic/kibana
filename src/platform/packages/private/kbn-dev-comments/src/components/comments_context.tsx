@@ -24,7 +24,7 @@ export const CommentsProvider = ({
 export const useComments = (): CommentsController => {
   const controller = useContext(CommentsContext);
   if (!controller) {
-    throw new Error('useComments must be used inside an CommentsProvider');
+    throw new Error('useComments must be used inside a CommentsProvider');
   }
   return controller;
 };

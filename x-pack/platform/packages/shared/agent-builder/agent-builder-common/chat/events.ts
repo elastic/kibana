@@ -18,6 +18,7 @@ import { TimelineEventType } from './timeline_events';
 import type { ExecutionAbortReason, SerializedExecutionError } from '../agents/execution_status';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
+import type { SurfacePayload } from './surface_payload';
 import type {
   CompactionSummary,
   ConversationInternalState,
@@ -27,9 +28,10 @@ import type {
   ConversationRoundStep,
   RoundInput,
   BackgroundExecutionState,
+  DeliveredMessageStepData,
+  InterimAnswerStepData,
   SubagentRosterEntry,
   SubstitutionStepData,
-  TodoItem,
 } from './conversation';
 import type {
   PromptRequestSource,
@@ -40,6 +42,7 @@ import type {
 import type { VersionedAttachment } from '../attachments';
 import type { ConversationAccessControl } from './access_control';
 import type { UserIdAndName } from '../base/users';
+import type { ApiReference } from '../apis';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
@@ -61,6 +64,8 @@ export enum ChatEventType {
   compactionStarted = 'compaction_started',
   compactionCompleted = 'compaction_completed',
   backgroundAgentComplete = 'background_agent_complete',
+  messageDelivered = 'message_delivered',
+  interimAnswer = 'interim_answer',
   subagentRosterUpdated = 'subagent_roster_updated',
   userQuestionAsked = 'user_question_asked',
   userQuestionAnswered = 'user_question_answered',
@@ -81,6 +86,8 @@ export interface ToolCallEventData {
   tool_call_group_id?: string;
   tool_origin?: ToolOrigin;
   tool_type?: ToolType;
+  /** Short description, provided by the model, of what the agent is doing with this call. */
+  intent?: string;
 }
 
 export type ToolCallEvent = ChatEventBase<ChatEventType.toolCall, ToolCallEventData>;
@@ -234,7 +241,10 @@ export const createUserQuestionAnsweredEvent = (
 export interface ReasoningEventData {
   /** plain text reasoning content */
   reasoning: string;
-  /** when reasoning is bound to a tool call, the corresponding tool call ID */
+  /**
+   * when reasoning is bound to a tool call, the corresponding tool call ID
+   * @deprecated No longer produced; kept for conversations stored before tool call intent.
+   */
   tool_call_id?: string;
   /** when reasoning is bound to a tool call, the corresponding tool call group */
   tool_call_group_id?: string;
@@ -363,7 +373,13 @@ export interface RoundCompleteEventData {
   workspace_id?: string;
 }
 
-export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;
+export type RoundCompleteEvent = ChatEventBase<
+  ChatEventType.roundComplete,
+  RoundCompleteEventData
+> & {
+  /** The response message rendered for the round's surface, added at callback delivery. */
+  surface_payload?: SurfacePayload;
+};
 
 export const isRoundCompleteEvent = (
   event: AgentBuilderEvent<string, any>
@@ -541,6 +557,42 @@ export const isBackgroundAgentCompleteEvent = (
   return event.type === ChatEventType.backgroundAgentComplete;
 };
 
+export type MessageDeliveredEventData = DeliveredMessageStepData;
+
+export type MessageDeliveredEvent = ChatEventBase<
+  ChatEventType.messageDelivered,
+  MessageDeliveredEventData
+>;
+
+export const createMessageDeliveredEvent = (
+  data: MessageDeliveredEventData
+): MessageDeliveredEvent => ({
+  type: ChatEventType.messageDelivered,
+  data,
+});
+
+export const isMessageDeliveredEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is MessageDeliveredEvent => {
+  return event.type === ChatEventType.messageDelivered;
+};
+
+/** Moves the current answer into a step; subsequent chunks start a new answer. */
+export type InterimAnswerEventData = InterimAnswerStepData;
+
+export type InterimAnswerEvent = ChatEventBase<ChatEventType.interimAnswer, InterimAnswerEventData>;
+
+export const createInterimAnswerEvent = (data: InterimAnswerEventData): InterimAnswerEvent => ({
+  type: ChatEventType.interimAnswer,
+  data,
+});
+
+export const isInterimAnswerEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is InterimAnswerEvent => {
+  return event.type === ChatEventType.interimAnswer;
+};
+
 export interface SubagentRosterUpdatedEventData {
   /** Full active roster at time of emission. */
   roster: SubagentRosterEntry[];
@@ -586,16 +638,29 @@ export const isSubstitutionAppliedEvent = (
   return event.type === ChatEventType.substitutionApplied;
 };
 
-export const TODOS_UPDATED_UI_EVENT = 'todos_updated' as const;
+/**
+ * Custom type of the `tool_ui` event `execute_api` sends after a successful call to an API that
+ * is not read-only, in a conversation execution.
+ */
+export const API_STATE_CHANGED_UI_EVENT = 'api_state_changed' as const;
 
-export interface TodosUpdatedUiEventData {
-  todos: TodoItem[];
+/**
+ * Payload of an {@link API_STATE_CHANGED_UI_EVENT} event, including the operation that ran and
+ * the request it was dispatched as.
+ */
+export interface ApiStateChangedEventData extends ApiReference {
+  /** HTTP method the operation was dispatched with, e.g. `POST`. */
+  method: string;
+  /** Request path the operation was dispatched to, with path parameters resolved. */
+  path: string;
 }
 
-export const isTodosUpdatedEvent = (event: AgentBuilderEvent<string, any>) => {
-  return isToolUiEvent<typeof TODOS_UPDATED_UI_EVENT, TodosUpdatedUiEventData>(
+export const isApiStateChangedEvent = (
+  event: ChatEvent
+): event is ToolUiEvent<typeof API_STATE_CHANGED_UI_EVENT, ApiStateChangedEventData> => {
+  return isToolUiEvent<typeof API_STATE_CHANGED_UI_EVENT, ApiStateChangedEventData>(
     event,
-    TODOS_UPDATED_UI_EVENT
+    API_STATE_CHANGED_UI_EVENT
   );
 };
 
@@ -619,6 +684,8 @@ export type ChatAgentEvent =
   | CompactionStartedEvent
   | CompactionCompletedEvent
   | BackgroundAgentCompleteEvent
+  | MessageDeliveredEvent
+  | InterimAnswerEvent
   | SubagentRosterUpdatedEvent
   | SubstitutionAppliedEvent
   | UserQuestionAskedEvent

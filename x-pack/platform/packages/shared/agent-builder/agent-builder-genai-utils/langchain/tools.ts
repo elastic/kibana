@@ -10,8 +10,7 @@ import { z } from '@kbn/zod/v4';
 import type { StructuredTool } from '@langchain/core/tools';
 import { tool as toTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatAgentEvent, ToolResult } from '@kbn/agent-builder-common';
+import type { ChatAgentEvent, DynamicToolDefinition, ToolResult } from '@kbn/agent-builder-common';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import type {
   AgentBuilderToolEvent,
@@ -19,59 +18,22 @@ import type {
   ExecutableTool,
   RunToolReturn,
   ToolEventHandlerFn,
-  ToolProvider,
 } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
+import { isDynamicToolEvent, isDynamicToolRunReturn } from '@kbn/agent-builder-server/runner';
+import { zodToolInputToJsonSchema } from '../tools/utils/json_schema';
 import type { ToolCall } from './messages';
 
 export type ToolIdMapping = Map<string, string>;
 
-export interface ToolsAndMappings {
-  /**
-   * The tools in langchain format
-   */
-  tools: StructuredTool[];
-  /**
-   * ID mapping that can be used to retrieve the agentBuilder tool id from the langchain tool id.
-   */
-  idMappings: ToolIdMapping;
-  /**
-   * ID mapping to get the langchain tool fron agentBuilder id map
-   */
-  agentBuilderToLangchainIdMap: ToolIdMapping;
-}
+/**
+ * Name of the optional parameter injected into every tool schema (when `addIntentParam` is set),
+ * used by the model to describe what it is doing with the call. Stripped before the tool runs.
+ */
+export const INTENT_PARAM = '_intent';
 
-export const toolsToLangchain = async ({
-  request,
-  tools,
-  logger,
-  sendEvent,
-  addReasoningParam = true,
-}: {
-  request: KibanaRequest;
-  tools: ToolProvider | ExecutableTool[];
-  logger: Logger;
-  sendEvent?: AgentEventEmitterFn;
-  addReasoningParam?: boolean;
-}): Promise<ToolsAndMappings> => {
-  const allTools = Array.isArray(tools) ? tools : await tools.list({ request });
-  const agentBuilderToLangchainIdMap = createToolIdMappings(allTools);
-
-  const convertedTools = await Promise.all(
-    allTools.map((tool) => {
-      const toolId = agentBuilderToLangchainIdMap.get(tool.id);
-      return toolToLangchain({ tool, logger, toolId, sendEvent, addReasoningParam });
-    })
-  );
-
-  const reverseMappings = reverseMap(agentBuilderToLangchainIdMap);
-
-  return {
-    tools: convertedTools,
-    idMappings: reverseMappings,
-    agentBuilderToLangchainIdMap,
-  };
-};
+const INTENT_PARAM_DESCRIPTION =
+  'Clear, concise description of what you are doing by calling this tool';
 
 export const sanitizeToolId = (toolId: string): string => {
   return toolId.replaceAll('.', '_').replace(/[^a-zA-Z0-9_-]/g, '');
@@ -103,28 +65,50 @@ export interface BuildToolContentParams {
   results: ToolResult[];
   toolId: string;
   toolCallId: string;
+  dynamicToolId?: string;
 }
 
 export type BuildToolContentFn = (params: BuildToolContentParams) => string;
+
+/** The description the model sees for a tool, natively bound or dynamic. */
+const getToolLlmDescription = async (tool: ExecutableTool): Promise<string> =>
+  tool.getLlmDescription
+    ? tool.getLlmDescription({ description: tool.description, config: tool.configuration })
+    : tool.description;
+
+/**
+ * Renders the definition the model sees for a dynamic tool: the description and input schema
+ * `toolToLangchain` gives it as a native tool, with the schema serialized the same way the
+ * inference adapter serializes natively bound tools.
+ */
+export const renderDynamicToolDefinition = async (
+  tool: ExecutableTool
+): Promise<DynamicToolDefinition> => {
+  const description = await getToolLlmDescription(tool);
+  const schema = await tool.getSchema();
+  return {
+    tool_id: tool.id,
+    description,
+    parameters: zodToolInputToJsonSchema(schema),
+  };
+};
 
 export const toolToLangchain = async ({
   tool,
   toolId,
   logger,
   sendEvent,
-  addReasoningParam = false,
+  addIntentParam = false,
   buildContent = ({ results }) => JSON.stringify({ results }),
 }: {
   tool: ExecutableTool;
   toolId?: string;
   logger: Logger;
   sendEvent?: AgentEventEmitterFn;
-  addReasoningParam?: boolean;
+  addIntentParam?: boolean;
   buildContent?: BuildToolContentFn;
 }): Promise<StructuredTool> => {
-  const description = tool.getLlmDescription
-    ? await tool.getLlmDescription({ description: tool.description, config: tool.configuration })
-    : tool.description;
+  const description = await getToolLlmDescription(tool);
 
   const schema = await tool.getSchema();
 
@@ -141,7 +125,7 @@ export const toolToLangchain = async ({
       }
 
       // remove internal parameters before calling tool handler.
-      const input = omit(rawInput, ['_reasoning']);
+      const input = omit(rawInput, [INTENT_PARAM]);
 
       try {
         const toolReturn = await tool.execute({
@@ -154,6 +138,7 @@ export const toolToLangchain = async ({
           results: toolReturn.results ?? [],
           toolId: tool.id,
           toolCallId,
+          dynamicToolId: isDynamicToolRunReturn(toolReturn) ? toolReturn.dynamicToolId : undefined,
         });
         return [content, toolReturn];
       } catch (e) {
@@ -169,13 +154,10 @@ export const toolToLangchain = async ({
     },
     {
       name: toolId ?? tool.id,
-      schema: addReasoningParam
-        ? z.object({
-            _reasoning: z
-              .string()
-              .optional()
-              .describe('Brief reasoning of why you are calling this tool'),
-            ...schema.shape,
+      // safeExtend keeps the object-level config of the tool schema (strict, catchall, refinements)
+      schema: addIntentParam
+        ? schema.safeExtend({
+            [INTENT_PARAM]: z.string().optional().describe(INTENT_PARAM_DESCRIPTION),
           })
         : schema,
       description,
@@ -205,6 +187,11 @@ export function reverseMap<K, V>(map: Map<K, V>): Map<V, K> {
 
 const getToolEventConverter = ({ toolId, toolCallId }: { toolId: string; toolCallId: string }) => {
   return (toolEvent: AgentBuilderToolEvent): ChatAgentEvent => {
+    if (isDynamicToolEvent(toolEvent)) {
+      return getToolEventConverter({ toolId: toolEvent.data.tool_id, toolCallId })(
+        toolEvent.data.event
+      );
+    }
     if (toolEvent.type === ChatEventType.toolProgress) {
       return {
         type: ChatEventType.toolProgress,

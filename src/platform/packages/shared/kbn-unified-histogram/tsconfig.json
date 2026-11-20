@@ -43,6 +43,7 @@
     "@kbn/react-hooks",
     "@kbn/ebt-click",
     "@kbn/i18n-react",
+    "@kbn/data-source",
     "@kbn/discover-session-constants",
     "@kbn/esql-browser"
   ]

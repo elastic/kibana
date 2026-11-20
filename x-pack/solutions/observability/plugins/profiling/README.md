@@ -63,7 +63,7 @@ xpack.profiling.elasticsearch.password: changeme
 
 #### What it redirects
 
-Every profiling Elasticsearch client, across both the `profiling` and `profilingDataAccess` plugins — flamegraph, functions, top N, storage explorer, the setup status check, and the profiling views embedded in APM and Infra.
+Every profiling Elasticsearch client. They are all created by the `profilingDataAccess` plugin, which the `profiling` plugin also uses for its own routes — flamegraph, functions, top N, storage explorer, the setup status check, and the profiling views embedded in APM and Infra.
 
 #### What it does not redirect
 

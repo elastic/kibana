@@ -112,6 +112,11 @@ apiTest.describe(
         renewedUsername: accountId,
         spaceId: 'default',
         tokenChanged: false,
+        principal: {
+          type: 'service_account',
+          variant: 'stack',
+          serviceAccountId: accountId,
+        },
       });
       const denied = await apiClient.post(endpoint, {
         headers,
@@ -134,6 +139,16 @@ apiTest.describe(
           username: accountId,
           renewedUsername: accountId,
           tokenChanged: true,
+          principal: {
+            type: 'service_account',
+            variant: 'stack',
+            serviceAccountId: accountId,
+          },
+          renewedPrincipal: {
+            type: 'service_account',
+            variant: 'stack',
+            serviceAccountId: accountId,
+          },
         });
       }
     );

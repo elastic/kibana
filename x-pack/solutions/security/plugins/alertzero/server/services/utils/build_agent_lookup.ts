@@ -40,7 +40,7 @@ export const buildAgentLookup = async (
       agentBuilder.skills.getRegistry({ request }),
     ]);
     const [agentList, skillList] = await Promise.all([
-      agentRegistry.list({ includeManaged: true }),
+      agentRegistry.list({ includeHidden: true }),
       skillRegistry.list({ includePlugins: true, summaryOnly: true }),
     ]);
     const agentMap = new Map(agentList.map((a) => [a.id, a]));

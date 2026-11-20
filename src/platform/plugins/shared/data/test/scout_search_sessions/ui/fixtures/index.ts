@@ -14,7 +14,6 @@ import type {
   ScoutPage,
 } from '@kbn/scout';
 import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
-import { Inspector } from '@kbn/inspector-plugin/test/scout/ui/fixtures/page_objects';
 import { BackgroundSearchManagementPage } from './page_objects/background_search_management_page';
 import { BackgroundSearchPage } from './page_objects/background_search_page';
 
@@ -22,7 +21,6 @@ export interface BackgroundSearchTestFixtures extends ScoutParallelTestFixtures 
   pageObjects: PageObjects & {
     backgroundSearch: BackgroundSearchPage;
     backgroundSearchManagement: BackgroundSearchManagementPage;
-    inspector: Inspector;
   };
 }
 
@@ -44,7 +42,6 @@ export const spaceTest = spaceBaseTest.extend<
       ...pageObjects,
       backgroundSearch: createLazyPageObject(BackgroundSearchPage, page),
       backgroundSearchManagement: createLazyPageObject(BackgroundSearchManagementPage, page),
-      inspector: createLazyPageObject(Inspector, page),
     });
   },
 });

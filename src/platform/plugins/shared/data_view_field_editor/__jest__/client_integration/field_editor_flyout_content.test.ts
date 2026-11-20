@@ -230,4 +230,32 @@ describe('<FieldEditorFlyoutContent />', () => {
       });
     });
   });
+
+  // Migrated from: src/platform/test/functional/apps/management/group1/_index_pattern_popularity.ts
+  // "should update the popularity input" and "should be reset on cancel"
+  describe('popularity', () => {
+    it('should reflect the incremented value in the popularity input', async () => {
+      const {
+        actions: { toggleFormRow, fields, getByTestSubjectPath },
+      } = await setup();
+
+      await toggleFormRow('popularity');
+      await fields.updatePopularity('1');
+
+      expect(getByTestSubjectPath('editorFieldCount')).toHaveValue(1);
+    });
+
+    it('should not call onSave when the flyout is cancelled after a popularity change', async () => {
+      const onSave = jest.fn();
+      const {
+        actions: { toggleFormRow, fields, closeFlyout },
+      } = await setup({ onSave });
+
+      await toggleFormRow('popularity');
+      await fields.updatePopularity('1');
+      await closeFlyout();
+
+      expect(onSave).not.toHaveBeenCalled();
+    });
+  });
 });

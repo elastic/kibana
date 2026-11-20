@@ -126,11 +126,17 @@ export const createLogsDBScenario = ({ title, type }: LogsDBScenarioConfig) => {
         await apiServices.dataViews.delete(dataView.id);
       });
       cleanupActions.push(async () =>
-        uiSettings.unset('dateFormat:tz', 'defaultIndex', 'timepicker:timeDefaults')
+        uiSettings.unset(
+          'dateFormat:tz',
+          'defaultIndex',
+          'histogram:barTarget',
+          'timepicker:timeDefaults'
+        )
       );
       await uiSettings.set({
         'dateFormat:tz': 'UTC',
         defaultIndex: dataView.id,
+        'histogram:barTarget': 50,
         'timepicker:timeDefaults': JSON.stringify(TIME_RANGE.picker),
       });
     } catch (error) {

@@ -41,6 +41,7 @@ import {
   UPGRADE_AGENT_FOR_RESPONDER,
 } from '../../../../../common/translations';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 jest.mock('../../../../../common/components/user_privileges');
 
@@ -179,17 +180,34 @@ describe('When using scan action from response actions console', () => {
   });
 
   it('should work with a single `--comment` argument', async () => {
-    apiMocks.responseProvider.scan.mockDelay.mockImplementation(
-      () => new Promise((r) => setTimeout(r, 100))
-    );
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'scan',
+        agents: ['a.b.c'],
+        isCompleted: false,
+        wasSuccessful: false,
+        agentState: {
+          'a.b.c': { isCompleted: false, wasSuccessful: false },
+        },
+      }),
+    });
     await render();
     await enterConsoleCommand(renderResult, user, 'scan --path="one/two" --comment "Scan folder"');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('scan-pending').textContent).toEqual(
-        'File path scan is in progress.'
+      expect(apiMocks.responseProvider.scan).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.stringContaining('"comment":"Scan folder"'),
+        })
       );
     });
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('scan-actionResult-hostStatus').textContent).toEqual(
+        'scan is pending'
+      );
+    });
+    expect(renderResult.getByTestId('scan-pending')).toBeTruthy();
   });
 
   it('should work with `--help argument`', async () => {
@@ -209,17 +227,30 @@ describe('When using scan action from response actions console', () => {
   });
 
   it('should display pending message', async () => {
-    apiMocks.responseProvider.scan.mockDelay.mockImplementation(
-      () => new Promise((r) => setTimeout(r, 100))
-    );
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'scan',
+        agents: ['a.b.c'],
+        isCompleted: false,
+        wasSuccessful: false,
+        agentState: {
+          'a.b.c': { isCompleted: false, wasSuccessful: false },
+        },
+      }),
+    });
     await render();
     await enterConsoleCommand(renderResult, user, 'scan --path="one/two"');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('scan-pending').textContent).toEqual(
-        'File path scan is in progress.'
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('scan-actionResult-hostStatus').textContent).toEqual(
+        'scan is pending'
       );
     });
+    expect(renderResult.getByTestId('scan-pending')).toBeTruthy();
   });
 
   it('should display action completion info', async () => {
@@ -252,8 +283,13 @@ describe('When using scan action from response actions console', () => {
     });
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('scan-success').textContent).toEqual('Scan complete');
+      expect(renderResult.getByTestId('scan-success')).toBeTruthy();
     });
+
+    expect(renderResult.getByTestId('scan-actionResult-hostStatus').textContent).toEqual(
+      'scan completed successfully'
+    );
+    expect(renderResult.getByTestId('scan-actionResult-scanResults')).toBeTruthy();
   });
 
   it.each([
@@ -310,5 +346,12 @@ describe('When using scan action from response actions console', () => {
         new RegExp(endpointActionResponseCodes[outputCode].replace(/[|\\{}()[\]^$+*?.]/g, '\\$&'))
       );
     });
+
+    expect(renderResult.getByTestId('scan-actionResult-hostStatus').textContent).toEqual(
+      'scan failed'
+    );
+    expect(
+      renderResult.getByTestId('scan-actionResult-scanResults-failure-response-action-failure-info')
+    ).toHaveTextContent(endpointActionResponseCodes[outputCode]);
   });
 });

@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isColumn, Parser } from '@elastic/esql';
+import { isColumn } from '@elastic/esql';
 import type { ESQLAstCommand, ESQLColumn } from '@elastic/esql/types';
-import type { ESQLCommandSummary } from '@kbn/esql-language/src/commands/registry/types';
-import { getSummaryPerCommand } from './get_query_summary';
+import type { ESQLCommandSummary, ESQLCommandSummaryContext } from '@kbn/esql-language';
+import {
+  createQuerySummaryContext,
+  getQuerySummaryFromCommands,
+  getSummaryPerCommand,
+} from './get_query_summary';
+import { parseEsqlCached } from './parse_esql_cached';
 
 interface CommandWithSummary {
   cmd: ESQLAstCommand;
@@ -70,7 +75,7 @@ function resolveOneField(
     renameNewToOldByCommandIndex,
     droppedColumnNamesByIndex,
   }: RenameResolutionContext
-): string {
+): string | undefined {
   const isComputedColumn = (oldName: string) =>
     fullNewColumns.has(oldName) && !renameOutputNames.has(oldName);
 
@@ -84,13 +89,18 @@ function resolveOneField(
       renameDefIndex
     )
   ) {
-    return fieldName;
+    return undefined;
   }
 
   let current = fieldName;
   // Walk backwards so the most recent rename wins when a column is renamed more than once.
   for (let i = commandSummaries.length - 1; i >= 0; i--) {
+    const { cmd, summary } = commandSummaries[i];
     const pairMap = renameNewToOldByCommandIndex[i];
+    // Computed EVALs also invalidate intermediate names in the rename chain.
+    if (cmd.name === 'eval' && summary.newColumns.has(current) && !pairMap?.has(current)) {
+      return undefined;
+    }
     if (!pairMap?.size) {
       continue;
     }
@@ -99,18 +109,21 @@ function resolveOneField(
       continue;
     }
     if (isComputedColumn(oldName)) {
-      return fieldName;
+      return undefined;
     }
     current = oldName;
   }
   return current;
 }
 
-function buildContext(query: string): RenameResolutionContext {
-  const { root } = Parser.parse(query);
-  const commandSummaries: CommandWithSummary[] = root.commands.map((cmd) => ({
+function buildContext(
+  commands: readonly ESQLAstCommand[],
+  query: string,
+  summaryContext: ESQLCommandSummaryContext
+): RenameResolutionContext {
+  const commandSummaries: CommandWithSummary[] = commands.map((cmd) => ({
     cmd,
-    summary: getSummaryPerCommand(query, cmd),
+    summary: getSummaryPerCommand(query, cmd, summaryContext),
   }));
 
   const renameOutputNames = new Set<string>();
@@ -154,6 +167,27 @@ function buildContext(query: string): RenameResolutionContext {
   };
 }
 
+function renameMapFromContext(context: RenameResolutionContext): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const name of context.renameOutputNames) {
+    const resolved = resolveOneField(name, context);
+    if (resolved !== undefined) {
+      map.set(name, resolved);
+    }
+  }
+  return map;
+}
+
+/** Builds the rename map from commands that have already been parsed. */
+export function buildRenameSourceFieldMapFromCommands(
+  commands: readonly ESQLAstCommand[],
+  query: string,
+  summaryContext: ESQLCommandSummaryContext
+): Map<string, string> {
+  const map = renameMapFromContext(buildContext(commands, query, summaryContext));
+  return new Map([...map].filter(([name, source]) => name !== source));
+}
+
 /**
  * Pre-computes the rename source field resolution for every rename target in a single parse pass.
  * Use this when resolving multiple columns for the same query (e.g. a full column list from an
@@ -161,13 +195,11 @@ function buildContext(query: string): RenameResolutionContext {
  * returned map; callers should fall back to the column name for absent entries.
  */
 export function buildRenameSourceFieldMap(query: string): Map<string, string> {
-  const context = buildContext(query);
-  const map = new Map<string, string>();
-  for (const name of context.renameOutputNames) {
-    const resolved = resolveOneField(name, context);
-    if (resolved !== name) {
-      map.set(name, resolved);
-    }
-  }
-  return map;
+  const { root } = parseEsqlCached(query);
+  // Keep identity mappings in nested summaries to distinguish source fields from computed columns.
+  const summaryContext = createQuerySummaryContext(root, query, (commands, source, context) => ({
+    ...getQuerySummaryFromCommands(commands, source, context),
+    renamedColumnsPairs: new Set(renameMapFromContext(buildContext(commands, source, context))),
+  }));
+  return buildRenameSourceFieldMapFromCommands(root.commands, query, summaryContext);
 }

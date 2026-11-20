@@ -9,10 +9,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { IToasts } from '@kbn/core/public';
 import type { EsqlView } from '@kbn/esql-types';
 import type { EsqlViewsClient } from '@kbn/esql-utils';
+import type { EsqlViewsTelemetryClient } from './telemetry';
 import { translations } from './translations';
 
 interface UseDeleteEsqlViewsOptions {
   client: EsqlViewsClient;
+  telemetryClient?: EsqlViewsTelemetryClient;
   toasts: IToasts;
   /** Called after every delete attempt, whether it succeeded or failed. */
   onDeleted: () => void;
@@ -28,6 +30,7 @@ export interface UseDeleteEsqlViewsResult {
 
 export const useDeleteEsqlViews = ({
   client,
+  telemetryClient,
   toasts,
   onDeleted,
 }: UseDeleteEsqlViewsOptions): UseDeleteEsqlViewsResult => {
@@ -62,6 +65,8 @@ export const useDeleteEsqlViews = ({
 
     try {
       await client.deleteViews(names);
+      // One event per delete operation: `count` carries how many views were submitted.
+      telemetryClient?.trackViewDeleted({ count: names.length });
       toasts.addSuccess(translations.deleteSuccess(names.length, names[0]));
     } catch (error) {
       toasts.addDanger({
@@ -78,7 +83,7 @@ export const useDeleteEsqlViews = ({
     setViewsPendingDelete([]);
     // Refresh after failures too: the list may have changed on the server.
     onDeleted();
-  }, [client, isDeleting, onDeleted, toasts, viewsPendingDelete]);
+  }, [client, isDeleting, onDeleted, telemetryClient, toasts, viewsPendingDelete]);
 
   return {
     viewsPendingDelete,

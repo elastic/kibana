@@ -1,0 +1,42 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        putParameterRequestExample1:
+          value:
+            key: updated_param_key
+            value: updated-param-value
+            description: Updated Param to be used in browser monitor
+            tags: [authentication, security, updated]
+responses:
+  200:
+    description: A successful response.
+    content:
+      application/json:
+        schema:
+          $ref: '../../../oas_schemas.yaml#/getParameterResponse'
+        examples:
+          putParameterResponseExample1:
+            value:
+              id: param_id1
+              key: updated_param_key
+              value: updated-param-value
+              description: Updated Param to be used in browser monitor
+              tags: [authentication, security, updated]
+  400:
+    description: The request body is empty.
+  404:
+    description: The parameter does not exist.
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X PUT "${KIBANA_URL}/api/synthetics/params/param-id" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{"key":"updated_param_key","value":"updated-param-value","description":"Updated Param to be used in browser monitor","tags":["authentication","security","updated"]}'
+  - lang: Console
+    source: |
+      PUT kbn://api/synthetics/params/param-id
+      {"key":"updated_param_key","value":"updated-param-value","description":"Updated Param to be used in browser monitor","tags":["authentication","security","updated"]}

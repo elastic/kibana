@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { waitFor } from '@testing-library/react';
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   ADD_PANEL_TRIGGER,
@@ -19,15 +19,40 @@ import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
-import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
+import { ADD_VEGA_EMBEDDABLE_ACTION_ID } from './constants';
 import { VegaPlugin, type VegaPluginStartDependencies } from './plugin';
 
+const mockOpenVegaLibraryEditor = jest.fn();
 const mockCreateVegaFn = jest.fn();
 const mockGetVegaVisRenderer = jest.fn();
+const mockGetAddVegaEmbeddableAction = jest.fn(() => ({ id: ADD_VEGA_EMBEDDABLE_ACTION_ID }));
+
+jest.mock('./embeddable/add_vega_embeddable_action', () => ({
+  getAddVegaEmbeddableAction: () => mockGetAddVegaEmbeddableAction(),
+}));
+
+jest.mock('./library/open_vega_library_editor', () => ({
+  openVegaLibraryEditor: (params: unknown) => mockOpenVegaLibraryEditor(params),
+}));
+
+const mockVegaLibraryVisTypeAlias = { name: 'vegaLibrary' };
+const mockGetVegaLibraryVisTypeAlias = jest.fn(
+  (_openLibraryEditor: (id: string) => Promise<void>) => mockVegaLibraryVisTypeAlias
+);
+jest.mock('./vega_library_vis_type_alias', () => ({
+  getVegaLibraryVisTypeAlias: (openLibraryEditor: (id: string) => Promise<void>) =>
+    mockGetVegaLibraryVisTypeAlias(openLibraryEditor),
+}));
+
+const mockRegisterVegaAddFromLibrary = jest.fn();
+jest.mock('./embeddable/register_vega_add_from_library', () => ({
+  registerVegaAddFromLibrary: (embeddable: unknown) => mockRegisterVegaAddFromLibrary(embeddable),
+}));
 
 jest.mock('./async_module', () => ({
   createVegaFn: mockCreateVegaFn,
@@ -42,6 +67,7 @@ describe('VegaPlugin', () => {
     const startDeps = {
       expressions: { getFunction: jest.fn() },
       uiActions: { executeTriggerActions: jest.fn() },
+      unifiedSearch: { ui: { SearchBar: jest.fn() } },
     };
     core.getStartServices.mockResolvedValue([startCore, startDeps, {}]);
 
@@ -60,11 +86,36 @@ describe('VegaPlugin', () => {
       data: dataPluginMock.createSetupContract(),
     });
 
-    return { embeddable, expressions, plugin, visualizations };
+    return { core, embeddable, expressions, plugin, startCore, startDeps, visualizations };
   };
 
+  const startPlugin = (setupResult: ReturnType<typeof setup>) => {
+    const { plugin, startCore } = setupResult;
+    const uiActions = uiActionsPluginMock.createStartContract();
+    const deps: VegaPluginStartDependencies = {
+      data: dataPluginMock.createStartContract(),
+      dataViews: dataViewPluginMocks.createStartContract(),
+      embeddable: embeddablePluginMock.createStartContract(),
+      expressions: expressionsPluginMock.createStartContract(),
+      inspector: inspectorPluginMock.createStartContract(),
+      uiActions,
+      unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      // No public start mocks exist for these; the plugin only stores them at start.
+      mapsEms: {} as MapsEmsPluginPublicStart,
+      usageCollection: {} as UsageCollectionStart,
+    };
+    plugin.start(startCore, deps);
+    return { ...setupResult, uiActions };
+  };
+
+  beforeEach(() => {
+    mockOpenVegaLibraryEditor.mockReset().mockResolvedValue(undefined);
+    mockGetVegaLibraryVisTypeAlias.mockClear();
+    mockRegisterVegaAddFromLibrary.mockClear();
+  });
+
   it('registers the Vega embeddable definition', async () => {
-    const { embeddable } = setup();
+    const { embeddable } = startPlugin(setup());
     const embeddableLoader = jest.mocked(embeddable.registerEmbeddablePublicDefinition).mock
       .calls[0][1];
 
@@ -86,80 +137,49 @@ describe('VegaPlugin', () => {
     expect(expressions.registerRenderer).toHaveBeenCalledTimes(1);
   });
 
-  describe('Vega add action feature flag', () => {
-    const startPlugin = (flag$: BehaviorSubject<boolean>) => {
-      const core = coreMock.createStart();
-      core.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(flag$);
+  it('loads the add action through its registered loader', async () => {
+    const { uiActions } = startPlugin(setup());
+    const loader = uiActions.registerActionAsync.mock.calls.find(
+      ([actionId]) => actionId === ADD_VEGA_EMBEDDABLE_ACTION_ID
+    )?.[1];
+    if (!loader) throw new Error('Expected add action loader');
 
-      const uiActions = uiActionsPluginMock.createStartContract();
-      const deps: VegaPluginStartDependencies = {
-        data: dataPluginMock.createStartContract(),
-        dataViews: dataViewPluginMocks.createStartContract(),
-        embeddable: embeddablePluginMock.createStartContract(),
-        expressions: expressionsPluginMock.createStartContract(),
-        inspector: inspectorPluginMock.createStartContract(),
-        uiActions,
-        // No public start mocks exist for these; the plugin only stores them at start.
-        mapsEms: {} as MapsEmsPluginPublicStart,
-        usageCollection: {} as UsageCollectionStart,
-      };
+    expect((await loader()).id).toBe(ADD_VEGA_EMBEDDABLE_ACTION_ID);
+  });
 
-      const plugin = new VegaPlugin(
-        coreMock.createPluginInitializerContext({ enableExternalUrls: false })
-      );
-      plugin.start(core, deps);
-      return { plugin, uiActions };
-    };
+  it('attaches the add action to the Dashboard and Canvas add menus', () => {
+    const { uiActions } = startPlugin(setup());
 
-    it('attaches the legacy Visualize-navigation action to add menus when the flag is disabled', () => {
-      const { uiActions } = startPlugin(new BehaviorSubject(false));
-      // Legacy action swapped onto the Dashboard Add-panel menu; the standalone action is not.
-      expect(uiActions.attachAction).toHaveBeenCalledWith(
-        ADD_PANEL_TRIGGER,
-        ADD_VEGA_PANEL_ACTION_ID
-      );
-      expect(uiActions.attachAction).not.toHaveBeenCalledWith(
-        ADD_PANEL_TRIGGER,
-        ADD_VEGA_EMBEDDABLE_ACTION_ID
-      );
-      // Canvas also gets the legacy action while the flag is disabled.
-      expect(uiActions.attachAction).toHaveBeenCalledWith(
-        ADD_CANVAS_ELEMENT_TRIGGER,
-        ADD_VEGA_PANEL_ACTION_ID
-      );
-    });
+    expect(uiActions.attachAction).toHaveBeenCalledWith(
+      ADD_PANEL_TRIGGER,
+      ADD_VEGA_EMBEDDABLE_ACTION_ID
+    );
+    expect(uiActions.attachAction).toHaveBeenCalledWith(
+      ADD_CANVAS_ELEMENT_TRIGGER,
+      ADD_VEGA_EMBEDDABLE_ACTION_ID
+    );
+  });
 
-    it('swaps in the standalone action and detaches the legacy action when the flag is enabled', () => {
-      const { uiActions } = startPlugin(new BehaviorSubject(true));
-      expect(uiActions.attachAction).toHaveBeenCalledWith(
-        ADD_PANEL_TRIGGER,
-        ADD_VEGA_EMBEDDABLE_ACTION_ID
-      );
-      expect(uiActions.detachAction).toHaveBeenCalledWith(
-        ADD_PANEL_TRIGGER,
-        ADD_VEGA_PANEL_ACTION_ID
-      );
-      expect(uiActions.attachAction).toHaveBeenCalledWith(
-        ADD_CANVAS_ELEMENT_TRIGGER,
-        ADD_VEGA_EMBEDDABLE_ACTION_ID
-      );
-      expect(uiActions.detachAction).toHaveBeenCalledWith(
-        ADD_CANVAS_ELEMENT_TRIGGER,
-        ADD_VEGA_PANEL_ACTION_ID
-      );
-    });
+  it('lists and offers library items', async () => {
+    const { embeddable, visualizations } = setup();
 
-    it('stops swapping actions after the plugin stops', () => {
-      const flag$ = new BehaviorSubject(false);
-      const { plugin, uiActions } = startPlugin(flag$);
+    await waitFor(() =>
+      expect(visualizations.registerAlias).toHaveBeenCalledWith(mockVegaLibraryVisTypeAlias)
+    );
+    expect(mockRegisterVegaAddFromLibrary).toHaveBeenCalledWith(embeddable);
+  });
 
-      plugin.stop();
-      flag$.next(true);
+  it('opens the library editor with the start services', async () => {
+    const { startCore, startDeps } = setup();
+    await waitFor(() => expect(mockGetVegaLibraryVisTypeAlias).toHaveBeenCalled());
+    const [openLibraryEditor] = mockGetVegaLibraryVisTypeAlias.mock.calls[0];
 
-      expect(uiActions.attachAction).not.toHaveBeenCalledWith(
-        ADD_PANEL_TRIGGER,
-        ADD_VEGA_EMBEDDABLE_ACTION_ID
-      );
+    await openLibraryEditor('item-1');
+
+    expect(mockOpenVegaLibraryEditor).toHaveBeenCalledWith({
+      core: startCore,
+      deps: startDeps,
+      id: 'item-1',
     });
   });
 });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Scope } from 'eslint';
+import type { Scope, Variable } from '@oxlint/plugins';
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 
@@ -29,8 +29,8 @@ const isGetEbtPropsCall = (spread: TSESTree.JSXSpreadAttribute): boolean => {
  * Returns true if a spread attribute is a variable whose initializer
  * contains all the required EBT property keys.
  */
-const findVariable = (scope: Scope.Scope, name: string): Scope.Variable | undefined => {
-  let current: Scope.Scope | null = scope;
+const findVariable = (scope: Scope, name: string): Variable | undefined => {
+  let current: Scope | null = scope;
   while (current) {
     const found = current.variables.find((v) => v.name === name);
     if (found) return found;
@@ -41,7 +41,7 @@ const findVariable = (scope: Scope.Scope, name: string): Scope.Variable | undefi
 
 const isVariableWithEbtProps = (
   spread: TSESTree.JSXSpreadAttribute,
-  getScope: () => Scope.Scope
+  getScope: () => Scope
 ): boolean => {
   const { argument } = spread;
   if (!('name' in argument)) {
@@ -49,19 +49,15 @@ const isVariableWithEbtProps = (
   }
 
   const variable = findVariable(getScope(), argument.name as string);
-  if (!variable || variable.defs.length === 0) {
+  const definition = variable?.defs[0]?.node;
+  if (definition?.type !== 'VariableDeclarator' || definition.init?.type !== 'ObjectExpression') {
     return false;
   }
 
-  const properties = variable.defs[0].node.init?.properties;
-  if (!properties) {
-    return false;
-  }
-
+  const { properties } = definition.init;
   return EBT_REQUIRED_ATTRS.every((attr) =>
     properties.some(
-      (prop: TSESTree.ObjectLiteralElement) =>
-        prop.type === AST_NODE_TYPES.Property && 'value' in prop.key && prop.key.value === attr
+      (prop) => prop.type === 'Property' && 'value' in prop.key && prop.key.value === attr
     )
   );
 };
@@ -73,7 +69,7 @@ const isVariableWithEbtProps = (
  */
 export const checkNodeForExistingEbtProps = (
   node: TSESTree.JSXOpeningElement,
-  getScope: () => Scope.Scope
+  getScope: () => Scope
 ): boolean => {
   // Check direct JSX attributes first.
   const attrNames = node.attributes

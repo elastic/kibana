@@ -20,14 +20,14 @@ export const AlertTimelineStatsRow: React.FC<AlertTimelineStatsRowProps> = ({ su
     {
       title: String(summary.stillOpen),
       description: i18n.translate('xpack.alertingV2.alertTimeline.statEpisodesOpen', {
-        defaultMessage: 'Episodes open',
+        defaultMessage: 'Alerts open',
       }),
       dataTestSubj: 'alertTimelineStatEpisodesOpen',
     },
     {
       title: String(summary.episodesStarted),
       description: i18n.translate('xpack.alertingV2.alertTimeline.statEpisodesStarted', {
-        defaultMessage: 'Episodes started',
+        defaultMessage: 'Alerts started',
       }),
       dataTestSubj: 'alertTimelineStatEpisodesStarted',
     },

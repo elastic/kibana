@@ -54,6 +54,7 @@ export const createToolCallEvent = (data: {
   toolCallGroupId?: string;
   toolOrigin?: ToolOrigin;
   toolType?: ToolType;
+  intent?: string;
 }): ToolCallEvent => {
   return {
     type: ChatEventType.toolCall,
@@ -64,6 +65,7 @@ export const createToolCallEvent = (data: {
       tool_call_group_id: data.toolCallGroupId,
       tool_origin: data.toolOrigin,
       tool_type: data.toolType,
+      ...(data.intent ? { intent: data.intent } : {}),
     },
   };
 };

@@ -36,6 +36,12 @@ triggers:
               minLength: 1
               maxLength: 36
               description: Saved-object id of the rule, a UUID.
+            expected_revision:
+              type: integer
+              minimum: 0
+              description: >-
+                The rule's revision when the proposal was created. If the rule
+                has changed since, the exception is not added.
             name:
               type: string
               minLength: 1
@@ -108,6 +114,44 @@ outputs:
   - name: outcome
     type: string
 steps:
+  - name: fetch_rule
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.actionInput.rule_id | url_encode }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+    on-failure:
+      continue: true
+
+  - name: fail_rule_deleted
+    type: workflow.fail
+    if: "${{ steps.fetch_rule.error != nil and steps.fetch_rule.error.message contains 'HTTP 404' }}"
+    with:
+      message: >-
+        The rule was deleted after this proposal was created, so this tuning can't
+        be applied. Approving again won't work, so decline it.
+
+  - name: fail_rule_read
+    type: workflow.fail
+    if: "${{ steps.fetch_rule.error != nil }}"
+    with:
+      message: "{{ steps.fetch_rule.error.message }}"
+
+  - name: fail_rule_changed
+    type: workflow.fail
+    if: >-
+      ${{ inputs.actionInput.expected_revision != nil
+        and steps.fetch_rule.output.revision != inputs.actionInput.expected_revision }}
+    with:
+      message: >-
+        The rule was changed by "{{ steps.fetch_rule.output.updated_by }}" after this
+        proposal was created, so this tuning can't be applied. Approving again won't
+        work, so decline it. If the rule keeps producing false positives, a new review
+        will follow.
+
   # `${{ }}` keeps the entries as objects; `{{ }}` would render a string.
   - name: create_exception
     type: security.createRuleException

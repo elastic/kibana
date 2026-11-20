@@ -37,13 +37,69 @@ move the auto-inserted entry there manually and re-check alphabetical order with
 ## Research the Vendor API Before Writing Any Code
 
 Do this **before** writing schemas or handlers, not after. Every action that mutates data or requires a
-specific auth scope has a real, documented API behavior — do not assume REST conventions apply. For each
-action you plan to implement, find the vendor's official API reference and confirm:
+specific auth scope has a real, documented API behavior — do not assume REST conventions apply.
+
+### Start from the vendor's spec
+
+First find the vendor's own OpenAPI 3, Swagger 2.0 or Google API Discovery document, and write down its
+URL and the API version it describes (`info.version`). Prefer a URL the vendor publishes and keeps
+current (its docs host or its own GitHub repository) over a community mirror. A connector that calls
+several API versions or products gets one source per spec (`v1`, `v2`). The connector is checked against
+exactly these documents later (see "Record the vendor API contract" in the skill), so writing it against
+them from the start avoids most of what recording would otherwise report. If the vendor publishes none,
+note that too: the connector then needs an exemption with a reason, and the docs are the only source.
+
+Then read the spec through the script, which loads it the way recording does, rather than reading the
+raw file (Microsoft Graph's is 44 MB). Name the scaffolded connector, so the source is declared once:
+
+```bash
+# Find the operations behind the actions you plan; adds v1 to the connector's vendor_api/manifest.json
+node scripts/connector_vendor_api --inspect --connector <id> --source v1=https://…/openapi.json --grep 'issues'
+# Describe each operation an action will call; the manifest's sources are used from now on
+node scripts/connector_vendor_api --inspect --connector <id> \
+  --operation 'POST /repos/{owner}/{repo}/issues' --operation issues/list-for-repo
+```
+
+The fetched spec is kept in `data/connector_vendor_api` (not committed), so later inspections and
+recording use the same document even if the vendor publishes from a moving branch. Pass `--refresh` to
+fetch it again.
+
+For each operation the description gives the servers (with regional variables), the security schemes
+and scopes it requires, every parameter with its location (`path`, `query`, `header`) and effective
+`style`/`explode`, the request body schema, the success response schema and the `pagination` descriptor
+recording would propose. Take from it, for each action:
+
+- the HTTP method and path, and which inputs go in the path, the query string, a header or the body;
+- how array query parameters are encoded: `form` with `explode: true` is `?id=1&id=2` (axios's default
+  is `id[]=1&id[]=2`, which needs a `paramsSerializer`), `explode: false` is `?id=1,2`;
+- the zod input schema: required fields, types, `enum` values, `pattern` for identifiers, and every
+  `maxLength`/`maximum`/`maxItems` as a `.max()` no looser than the vendor's;
+- the output fields the handler reads, from the success response schema;
+- the auth types and scopes, from `security`.
+
+A spec is often silent or wrong where the docs aren't, so the checklist below still applies; the spec
+answers part of it up front. Where the vendor's docs page contradicts its spec, follow the docs and
+record the difference as an overlay action with the docs URL as evidence.
+
+### Checklist
+
+For each action you plan to implement, find the vendor's official API reference and confirm:
 
 - **Update semantics**: does the endpoint support partial updates (`PATCH`, or a `PUT` that merges), or
   does it fully replace the resource (a `PUT` that 400s if you omit any required field)? If it's
   replace-only, the handler must `GET` the current resource first and backfill every field the input
   didn't provide — not just the fields you happened to test.
+- **Nested objects sent whole**: the same applies one level down. Many "set X config" endpoints take a
+  whole sub-object (`masterAuthorizedNetworksConfig`, `management`, `autoscaling`) and reset any field
+  you omit inside it to its default. List every field of the vendor's type for that sub-object, and for
+  each one decide whether the input sets it or the handler copies it from the current resource. The GKE
+  connector copied `gcpPublicCidrsAccessEnabled` but not `privateEndpointEnforcementEnabled`, so
+  changing the CIDR allowlist silently removed the private-endpoint restriction.
+- **HTTP method and body shape per route**: take both from the vendor's OpenAPI/swagger or REST
+  reference for *that exact route*, never by analogy with a neighbouring endpoint. The AKS connector sent
+  `PATCH` to an agent-pool route that only supports `GET`/`PUT`/`DELETE` (ARM answered with a misleading
+  `InvalidAPIVersion`), and wrapped the `runCommand` body in `properties` like the resource bodies around
+  it, while `RunCommandRequest` is flat. Both failed on every real call and passed every mocked test.
 - **Array/list query parameters**: how does the API expect repeated values encoded — `?id=1&id=2`,
   `?id[]=1&id[]=2`, or a comma-joined string? Axios's default array serialization (`id[]=1&id[]=2`) is
   not universal; check the docs and, if needed, set a custom `paramsSerializer`.
@@ -78,6 +134,12 @@ action you plan to implement, find the vendor's official API reference and confi
   documenting it at all: a user creating the connector sees the in-product `helpText`, not the docs, so an
   extra scope that's only in the docs' setup steps still produces a 403 for anyone who follows the in-UI
   hint.
+  - **Cloud roles have a scope level as well as a name.** For Azure RBAC, GCP IAM, and AWS IAM, write down
+    *where* each role must be granted (subscription, resource group, project, or a single resource), not
+    just which role. The AKS docs granted a role on each cluster, but `listResourceGroups` calls a
+    subscription-level route, so a user following the setup steps got a 403 on the first discovery step.
+    Also list roles needed on *other* resources (GKE's `iam.serviceAccountUser` on the node service
+    account for `createCluster`).
 - **Regional/self-hosted variants**: does the service run on multiple regional domains (e.g.
   `us.example.com`, `eu.example.com`) in addition to a default SaaS host, or support self-hosting? If so,
   the base-URL config field's help text must say so — otherwise requests silently 404 for a subset of users.
@@ -89,12 +151,26 @@ action you plan to implement, find the vendor's official API reference and confi
   elsewhere — check the vendor's actual example request body. Many APIs expect a JSON object/map (e.g.
   `{"team": "backend", "priority": "high"}`) or an array of objects, not a delimited string, and will 500
   or silently misparse a string sent where an object is expected.
+- **Identifier formats, per field**: take each identifier's allowed format from the vendor's docs for
+  that specific field, including fully qualified and cross-project forms. Do not reuse one regex helper
+  across fields with different rules. The GKE connector validated Kubernetes node labels with the GCP
+  resource-label regex, which rejects `example.com/workload`, and accepted only bare network names, which
+  rejects the `projects/host/global/networks/shared` form Shared VPC needs.
+- **Resource variants and modes**: list the variants the vendor documents for each resource (GKE
+  Standard vs. Autopilot, clusters with only a DNS endpoint; AKS System vs. User node pools; regional vs.
+  zonal) and note which fields are absent or which operations are rejected for each. The AKS connector
+  allowed scaling any pool to 0, which AKS rejects for System pools. Check variant-specific constraints
+  in the handler before sending the request, and add a test fixture per variant.
 - **Compound-document / sideloading conventions**: if the vendor's response envelope follows JSON:API
   (`data`/`attributes`/`relationships`/`included`) or a similar sparse-fieldset pattern, check whether
   related objects are populated by default or require an explicit param (e.g. `?include=services,groups`,
   GraphQL field selection). If required and omitted, relationship fields the output schema promises will
   come back `null`/empty even though the API call itself succeeds with a 200 — this is easy to miss because
   nothing errors, the data is just quietly missing.
+
+- **Limits stated only in prose**: note every limit the docs state in text but the spec doesn't encode
+  ("max 100 items", "up to 500 characters"), with the docs URL. Each one becomes a `.max()` in the
+  input schema and an overlay action, so the contract test checks the connector against it.
 
 Cross-reference this research against the fields you're about to add `.describe()` text for — the
 description should state the *verified* format/constraint, not an assumed one.
@@ -209,16 +285,18 @@ Every Zod parameter schema **must** call `.describe()`. Include:
 - A concrete example
 
 ```typescript
-const SearchInputSchema = z.object({
-  query: z.string().describe('Full-text search query. Example: "Q4 budget report"'),
-  maxResults: z
-    .number()
-    .int()
-    .min(1)
-    .max(50)
-    .optional()
-    .describe('Maximum number of results to return (1–50). Defaults to 10.'),
-});
+const SearchInputSchema = lazySchema(() =>
+  z.object({
+    query: z.string().max(1000).describe('Full-text search query. Example: "Q4 budget report"'),
+    maxResults: z
+      .number()
+      .int()
+      .min(1)
+      .max(50)
+      .optional()
+      .describe('Maximum number of results to return (1–50). Defaults to 10.'),
+  })
+);
 ```
 
 ### `skill` property

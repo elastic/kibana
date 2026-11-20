@@ -166,7 +166,6 @@ const EntityAnalyticsHomePageContent = () => {
       : undefined;
     return storedConnector?.id ?? availableConnectors[0]?.id ?? '';
   }, [availableConnectors, spaceId, storedConnectorId]);
-  const hasValidConnector = connectorId !== '';
   const safeSetConnectorId = useCallback(
     (id: string | undefined) => {
       if (spaceId) {
@@ -327,7 +326,7 @@ const EntityAnalyticsHomePageContent = () => {
               onHuntInChat={handleHuntInChat}
               onGenerate={generate}
               connectorId={connectorId}
-              hasValidConnector={hasValidConnector}
+              availableConnectors={availableConnectors}
               onConnectorIdSelected={safeSetConnectorId}
               isAgentChatExperienceEnabled={isAgentChatExperienceEnabled}
               hasWritePermissionError={leadsWritePermissionError}

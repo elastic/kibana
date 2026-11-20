@@ -25,18 +25,20 @@ export type NumberOptions = TypeOptions<number> & {
 
 export class NumberType extends Type<number> {
   constructor(options: NumberOptions = {}) {
-    let schema = internals.number();
-    if (options.min !== undefined) {
-      schema = schema.min(options.min);
-    }
-    if (options.max !== undefined) {
-      schema = schema.max(options.max);
-    }
-    if (options.unsafe === true) {
-      schema = schema.unsafe(true);
-    }
-
-    super(schema, options);
+    options = { ...options };
+    super(() => {
+      let schema = internals.number();
+      if (options.min !== undefined) {
+        schema = schema.min(options.min);
+      }
+      if (options.max !== undefined) {
+        schema = schema.max(options.max);
+      }
+      if (options.unsafe === true) {
+        schema = schema.unsafe(true);
+      }
+      return schema;
+    }, options);
   }
 
   protected handleError(type: string, { limit, value }: Record<string, any>) {

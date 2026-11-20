@@ -24,7 +24,7 @@ Use this skill **only** when the user specifically asks to visualize topology, n
 
 Do **not** use this skill when:
 - The user wants a chart, metric, trend, breakdown, or distribution — use the **visualization-creation** skill, even if the data is relational.
-- The conversation is about a **dashboard or dashboard panels** (creating a dashboard, adding a panel, laying out, or editing panels) — use the **dashboard-management** skill. Be especially cautious here: a request to add a diagram/graph/"workflow" chart *to a dashboard* is a dashboard/panel task, not an inline graph attachment.
+- The conversation is about a **dashboard or dashboard panels** (creating a dashboard, adding a panel, laying out, or editing panels) — use the **dashboards** skill. Be especially cautious here: a request to add a diagram/graph/"workflow" chart *to a dashboard* is a dashboard/panel task, not an inline graph attachment.
 - There is no meaningful relationship data to connect entities.
 - A chart/table/metric is a more appropriate representation than a node graph.
 

@@ -16,13 +16,15 @@ export const getPrivateLocationEditPayload = (
 ): EditPrivateLocationAttributes | null => {
   const isLabelChanged = formData.label !== existing.label;
   const areTagsChanged = !isEqual(formData.tags, existing.tags);
+  const isAgentPolicyChanged = formData.agentPolicyId !== existing.agentPolicyId;
 
-  if (!isLabelChanged && !areTagsChanged) {
+  if (!isLabelChanged && !areTagsChanged && !isAgentPolicyChanged) {
     return null;
   }
 
   return {
     label: formData.label,
     tags: formData.tags,
+    ...(isAgentPolicyChanged ? { agentPolicyId: formData.agentPolicyId } : {}),
   };
 };

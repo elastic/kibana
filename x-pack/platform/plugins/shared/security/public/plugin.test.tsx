@@ -161,7 +161,9 @@ describe('Security Plugin', () => {
           "uiApi": Object {
             "components": Object {
               "getChangePassword": [Function],
+              "getCreateServiceAccount": [Function],
               "getPersonalInfo": [Function],
+              "getServiceAccountPicker": [Function],
             },
           },
           "userProfiles": Object {

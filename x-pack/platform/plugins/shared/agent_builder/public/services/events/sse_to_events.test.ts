@@ -126,6 +126,20 @@ describe('sseToEvents', () => {
     expect(streamingEvent(state)?.data.message).toBe('Hello');
   });
 
+  it('moves the answer written so far into a step when the run reads a message after it', () => {
+    const interim = {
+      type: ChatEventType.interimAnswer,
+      data: { message: 'first answer' },
+    } as ChatEvent;
+    const state = fold(executionStarted(), chunk('first answer'), interim, chunk('second'));
+
+    expect(stepOf(state, executionStepEventId(ROUND_ID, 0, 0))).toEqual({
+      type: ConversationRoundStepType.interimAnswer,
+      message: 'first answer',
+    });
+    expect(streamingEvent(state)?.data.message).toBe('second');
+  });
+
   it('patches the same step event through tool call, progress and result', () => {
     const stepId = executionStepEventId(ROUND_ID, 0, 0);
     const state = fold(
@@ -151,6 +165,16 @@ describe('sseToEvents', () => {
       progression: [{ message: 'halfway', metadata: {} }],
       results: [{ tool_result_id: 'r1', type: ToolResultType.other, data: { ok: true } }],
     });
+  });
+
+  it('carries the tool call intent onto the step', () => {
+    const stepId = executionStepEventId(ROUND_ID, 0, 0);
+    const state = fold(executionStarted(), {
+      type: ChatEventType.toolCall,
+      data: { tool_call_id: 't1', tool_id: 'my_tool', params: {}, intent: 'Searching logs' },
+    } as ChatEvent);
+
+    expect(stepAt(state, stepId)).toMatchObject({ tool_call_id: 't1', intent: 'Searching logs' });
   });
 
   it('builds a step from a resume’s tool_result when no tool_call preceded it', () => {
