@@ -29820,7 +29820,6 @@
     "xpack.evals.compareExperiments.flyoutTitle": "例ごとのスコア",
     "xpack.evals.compareExperiments.flyoutTraceBaseline": "トレースを表示（ベースライン）",
     "xpack.evals.compareExperiments.flyoutTraceTarget": "トレースを表示（ターゲット）",
-    "xpack.evals.compareExperiments.flyoutUnpairedHint": "この例は1つの実験にしか存在しないため、統計的比較から除外されます",
     "xpack.evals.compareExperiments.loadingLabel": "比較を読み込んでいます...",
     "xpack.evals.compareExperiments.metricType.binary": "合否スコア",
     "xpack.evals.compareExperiments.metricType.continuousBounded": "スコアは[0, 1]の範囲",

@@ -29754,7 +29754,6 @@
     "xpack.evals.compareExperiments.flyoutTitle": "Scores pro Beispiel",
     "xpack.evals.compareExperiments.flyoutTraceBaseline": "Trace (Baseline) anzeigen",
     "xpack.evals.compareExperiments.flyoutTraceTarget": "Trace (Ziel) anzeigen",
-    "xpack.evals.compareExperiments.flyoutUnpairedHint": "Dieses Beispiel kommt nur in einem Experiment vor und wird vom statistischen Vergleich ausgeschlossen",
     "xpack.evals.compareExperiments.loadingLabel": "Vergleich wird geladen …",
     "xpack.evals.compareExperiments.metricType.binary": "Pass/Fail-Scores",
     "xpack.evals.compareExperiments.metricType.continuousBounded": "Scores in [0, 1]",

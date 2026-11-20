@@ -29843,7 +29843,6 @@
     "xpack.evals.compareExperiments.flyoutTitle": "Pontuações por exemplo",
     "xpack.evals.compareExperiments.flyoutTraceBaseline": "Visualizar rastreamento (linha de base)",
     "xpack.evals.compareExperiments.flyoutTraceTarget": "Visualizar rastreamento (destino)",
-    "xpack.evals.compareExperiments.flyoutUnpairedHint": "Este exemplo existe em apenas um experimento e é excluído da comparação estatística",
     "xpack.evals.compareExperiments.loadingLabel": "Carregando comparação...",
     "xpack.evals.compareExperiments.metricType.binary": "pontuações de aprovação/reprovação",
     "xpack.evals.compareExperiments.metricType.continuousBounded": "pontuações em [0, 1]",
