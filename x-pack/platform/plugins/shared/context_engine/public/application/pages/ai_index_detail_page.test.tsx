@@ -15,7 +15,6 @@ import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types'
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -459,7 +458,7 @@ describe('AiIndexDetailPage', () => {
     );
   });
 
-  it('redirects a Settings deep link to the overview when memory is globally disabled', async () => {
+  it('opens the Settings tab from a deep link when memory is globally disabled', async () => {
     mockUseMemoryEnabled.mockReturnValue(false);
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
@@ -467,14 +466,15 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services, undefined, `${getAiIndexDetailPath(aiIndex.id)}/settings`);
     await waitForAiIndexDetailLoaded();
 
-    expect(await screen.findByTestId('contextAiIndexDetailTab-overview')).toHaveAttribute(
+    expect(await screen.findByTestId('contextAiIndexSettingsTab')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDetailTab-settings')).toHaveAttribute(
       'aria-selected',
       'true'
     );
     expect(screen.queryByTestId('contextAiIndexDreamingPanel')).not.toBeInTheDocument();
   });
 
-  it('hides the Settings tab when memory is globally disabled', async () => {
+  it('shows the Settings tab when memory is globally disabled', async () => {
     mockUseMemoryEnabled.mockReturnValue(false);
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
@@ -483,7 +483,20 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(screen.getByTestId('contextAiIndexDetailTab-overview')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextAiIndexDetailTab-settings')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDetailTab-settings')).toBeInTheDocument();
+  });
+
+  it('shows the Advanced settings section with backing index and delete panels', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+    await waitForAiIndexDetailLoaded();
+    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-settings'));
+
+    expect(await screen.findByTestId('contextAiIndexSettingsTab')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSettingsBackingIndex')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSettingsDelete')).toBeInTheDocument();
   });
 
   it('renders a back button linking to the AI indexes landing page', async () => {
@@ -619,7 +632,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toBeInTheDocument();
   });
 
-  it('edits the description and refetches the AI index', async () => {
+  it('edits the description on the Settings tab and refetches the AI index', async () => {
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
     services.http.put.mockResolvedValue({ status: 'updated' });
@@ -629,10 +642,14 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
     expect(services.http.get).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByTestId('contextAddDescriptionButton'));
+    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-settings'));
+    await screen.findByTestId('contextAiIndexSettingsTab');
 
-    const textArea = await screen.findByTestId('contextDescriptionTextArea');
+    const textArea = screen.getByTestId('contextDescriptionTextArea');
+    expect(screen.queryByTestId('contextDescriptionSaveButton')).not.toBeInTheDocument();
+
     fireEvent.change(textArea, { target: { value: 'A brand new description' } });
+    expect(screen.getByTestId('contextDescriptionSaveButton')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('contextDescriptionSaveButton'));
 
     await waitFor(() => {
@@ -650,10 +667,10 @@ describe('AiIndexDetailPage', () => {
       );
     });
 
-    // The editor closes and the detail data is refetched after a successful save.
     await waitFor(() => {
-      expect(screen.queryByTestId('contextDescriptionTextArea')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextDescriptionSaveButton')).not.toBeInTheDocument();
     });
+    expect(screen.getByTestId('contextDescriptionTextArea')).toBeInTheDocument();
     expect(services.http.get).toHaveBeenCalledTimes(2);
   });
 
@@ -731,11 +748,8 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextAddDescriptionButton')).not.toBeInTheDocument();
 
     await waitForAiIndexDetailLoaded();
-
-    expect(screen.getByTestId('contextAddDescriptionButton')).toBeEnabled();
 
     expect(screen.getByTestId('contextAddAutomationButton')).toBeEnabled();
   });
@@ -841,7 +855,6 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(screen.getByTestId('contextAiIndexDetailManagedBadge')).toHaveTextContent('Managed');
-    expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-sources'));
     await screen.findByTestId('contextSourcesPanel');
@@ -877,7 +890,6 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(screen.queryByTestId('contextAiIndexDetailManagedBadge')).not.toBeInTheDocument();
-    expect(screen.getByTestId('contextAddDescriptionButton')).toBeInTheDocument();
     expect(screen.getByTestId('contextAddAutomationButton')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-sources'));
     expect(screen.getByTestId('contextAddElasticsearchDataCard')).toBeInTheDocument();
@@ -985,17 +997,11 @@ describe('AiIndexDetailPage', () => {
     );
     expect(screen.getByTestId('contextListKiPanel')).toBeInTheDocument();
     expect(history.location.pathname).toBe(getAiIndexKnowledgeDocumentsPath(aiIndex.id));
-    await openAppMenuOverflow();
-    await waitFor(() => {
-      expect(screen.getByTestId('contextListKiPanelDestLink')).toBeInTheDocument();
-    });
-    expect(screen.getByTestId('contextListKiDiscoverLink')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiPanelDestLink')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextListKiPanelSummary')).not.toBeInTheDocument();
 
-    expect(screen.getByTestId('contextListKiDiscoverLink')).toHaveAttribute(
-      'href',
-      '/app/discover'
-    );
+    const discoverLink = await screen.findByTestId('contextListKiDiscoverLink');
+    expect(discoverLink).toHaveAttribute('href', '/app/discover');
   });
 
   it('hides the Knowledge Indicators tab when there are no KIs', async () => {

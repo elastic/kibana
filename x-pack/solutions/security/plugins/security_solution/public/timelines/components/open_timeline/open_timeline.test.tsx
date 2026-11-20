@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { waitFor } from '@testing-library/react';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
@@ -18,7 +18,6 @@ import { mockTimelineResults } from '../../../common/mock/timeline_results';
 import { OpenTimeline } from './open_timeline';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from './constants';
 import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
-import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { TestProvidersComponent } from '../../../common/mock';
 
@@ -31,16 +30,6 @@ jest.mock('react-router-dom', () => {
     ...actual,
     useParams: jest.fn().mockReturnValue({ tabName: 'default' }),
   };
-});
-
-const mockTheme = getMockTheme({
-  eui: {
-    euiSizeL: '10px',
-    euiSizeS: '10px',
-    euiBreakpoints: {
-      l: '1200px',
-    },
-  },
 });
 
 jest.mock('../../../common/components/user_privileges');
@@ -87,9 +76,9 @@ describe('OpenTimeline', () => {
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -100,9 +89,9 @@ describe('OpenTimeline', () => {
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -116,9 +105,9 @@ describe('OpenTimeline', () => {
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -138,9 +127,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -160,9 +149,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -182,9 +171,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -207,9 +196,9 @@ describe('OpenTimeline', () => {
     });
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -228,9 +217,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -244,9 +233,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -260,9 +249,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -278,9 +267,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -296,9 +285,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -314,9 +303,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -332,9 +321,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -350,9 +339,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -367,9 +356,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -396,9 +385,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -422,9 +411,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -451,9 +440,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -479,9 +468,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -500,9 +489,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} onCreateRule={jest.fn()} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -521,9 +510,9 @@ describe('OpenTimeline', () => {
     });
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} onCreateRule={jest.fn()} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -539,9 +528,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -555,9 +544,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -574,9 +563,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -592,9 +581,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -608,9 +597,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -627,9 +616,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -648,9 +637,9 @@ describe('OpenTimeline', () => {
     });
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
@@ -666,9 +655,9 @@ describe('OpenTimeline', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <OpenTimeline {...defaultProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       </TestProvidersComponent>
     );
 
