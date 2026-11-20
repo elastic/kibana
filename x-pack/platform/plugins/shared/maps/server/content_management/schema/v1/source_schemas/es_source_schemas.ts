@@ -45,11 +45,11 @@ export const gridResolutionSchema = lazySchema(() =>
 export const BaseESSourceSchema = lazySchema(() =>
   z
     .object({
-      applyForceRefresh: applyForceRefreshSchema,
-      applyGlobalQuery: narrowByGlobalSearch,
-      applyGlobalTime: narrowByGlobalTime,
+      apply_force_refresh: applyForceRefreshSchema,
+      apply_global_query: narrowByGlobalSearch,
+      apply_global_time: narrowByGlobalTime,
       id: z.string().meta({ description: 'uuid.' }),
-      indexPatternId: z
+      index_pattern_id: z
         .string()
         .meta({ description: 'Data view id from which results are pulled.' }),
     })
@@ -61,11 +61,11 @@ export const BaseESSourceSchema = lazySchema(() =>
 
 export const ESSearchSourceSchema = lazySchema(() =>
   BaseESSourceSchema.extend({
-    filterByMapBounds: z.boolean().default(true).optional(),
-    geoField: z.string().meta({
+    filter_by_map_bounds: z.boolean().default(true).optional(),
+    geo_field: z.string().meta({
       description: 'Field containing indexed geo-point or geo-shape values.',
     }),
-    scalingType: z
+    scaling_type: z
       .union([
         z.literal(SCALING_TYPES.LIMIT),
         z.literal(SCALING_TYPES.CLUSTERS),
@@ -75,33 +75,33 @@ export const ESSearchSourceSchema = lazySchema(() =>
       .default(SCALING_TYPES.MVT)
       .optional()
       .meta({
-        description: `Elastic limits results to the index.max_result_window index setting, which defaults to 10000. Use scalingType to adjust limit behavior. With ${SCALING_TYPES.LIMIT}, results limited to 10,000. With ${SCALING_TYPES.CLUSTERS}, clusters are returned when results exceed 10,000. With ${SCALING_TYPES.MVT}, results are returned as vector tiles. Each tile request is limited to the index.max_result_window index setting. With ${SCALING_TYPES.TOP_HITS}, the most recent documents per entity are returned.`,
+        description: `Elastic limits results to the index.max_result_window index setting, which defaults to 10000. Use scaling_type to adjust limit behavior. With ${SCALING_TYPES.LIMIT}, results limited to 10,000. With ${SCALING_TYPES.CLUSTERS}, clusters are returned when results exceed 10,000. With ${SCALING_TYPES.MVT}, results are returned as vector tiles. Each tile request is limited to the index.max_result_window index setting. With ${SCALING_TYPES.TOP_HITS}, the most recent documents per entity are returned.`,
       }),
-    sortField: z.string().optional(),
-    sortOrder: z
+    sort_field: z.string().optional(),
+    sort_order: z
       .union([z.literal(SortDirection.asc), z.literal(SortDirection.desc)])
       .default(SortDirection.desc)
       .optional(),
-    topHitsGroupByTimeseries: z
+    top_hits_group_by_timeseries: z
       .boolean()
       .default(false)
       .optional()
       .meta({
-        description: `When true, top hits is grouped by time_series aggregation. Ignored when scalingType is not ${SCALING_TYPES.TOP_HITS}.`,
+        description: `When true, top hits is grouped by time_series aggregation. Ignored when scaling_type is not ${SCALING_TYPES.TOP_HITS}.`,
       }),
-    topHitsSplitField: z
+    top_hits_split_field: z
       .string()
       .optional()
       .meta({
-        description: `Field used to group top hits by term aggregation. Required when scalingType is ${SCALING_TYPES.TOP_HITS} and topHitsGroupByTimeseries is false. Ignored when scalingType is not ${SCALING_TYPES.TOP_HITS} or topHitsGroupByTimeseries is true.`,
+        description: `Field used to group top hits by term aggregation. Required when scaling_type is ${SCALING_TYPES.TOP_HITS} and top_hits_group_by_timeseries is false. Ignored when scaling_type is not ${SCALING_TYPES.TOP_HITS} or top_hits_group_by_timeseries is true.`,
       }),
-    topHitsSize: z
+    top_hits_size: z
       .number()
       .optional()
       .meta({
-        description: `Number of hits to gather per entity. Ignored when scalingType is not ${SCALING_TYPES.TOP_HITS}.`,
+        description: `Number of hits to gather per entity. Ignored when scaling_type is not ${SCALING_TYPES.TOP_HITS}.`,
       }),
-    tooltipProperties: z.array(z.string()).optional().meta({
+    tooltip_properties: z.array(z.string()).optional().meta({
       description: 'Document properties displayed in tooltip.',
     }),
     type: z.literal(SOURCE_TYPES.ES_SEARCH),
@@ -114,22 +114,22 @@ export const ESSearchSourceSchema = lazySchema(() =>
 export const ESQLSourceSchema = lazySchema(() =>
   z
     .object({
-      applyForceRefresh: applyForceRefreshSchema,
-      dateField: z.string().optional().meta({
-        description: `Date field used to narrow ES|QL requests by global time range. Required when 'narrowByGlobalTime' is true.`,
+      apply_force_refresh: applyForceRefreshSchema,
+      date_field: z.string().optional().meta({
+        description: `Date field used to narrow ES|QL requests by global time range. Required when 'narrow_by_global_time' is true.`,
       }),
       esql: z.string().meta({
         description: 'ES|QL statement returning at least one geo_point or geo_shape column.',
       }),
-      geoField: z.string().optional().meta({
-        description: `Geo field used to narrow ES|QL requests by visible map area and spatial filters drawn on map. Required when 'narrowByMapBounds' is true.`,
+      geo_field: z.string().optional().meta({
+        description: `Geo field used to narrow ES|QL requests by visible map area and spatial filters drawn on map. Required when 'narrow_by_map_bounds' is true.`,
       }),
       id: z.string().meta({ description: 'uuid.' }),
-      narrowByMapBounds: z.boolean().optional().meta({
+      narrow_by_map_bounds: z.boolean().optional().meta({
         description: `When true, results narrowed by visible map area.`,
       }),
-      narrowByGlobalSearch,
-      narrowByGlobalTime,
+      narrow_by_global_search: narrowByGlobalSearch,
+      narrow_by_global_time: narrowByGlobalTime,
       resolution: gridResolutionSchema.optional().meta({
         description: `Grid resolution used to calculate the values of the '?_geotile_precision', '?_geohex_precision' and '?_geohash_precision' ES|QL parameters from the map zoom level. Ignored when the ES|QL statement uses none of them. Defaults to '${DEFAULT_GRID_RESOLUTION}'.`,
       }),

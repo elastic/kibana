@@ -13,14 +13,14 @@ import { BaseESAggSourceSchema } from './es_agg_source_schemas';
 export const ESJoinSourceSchema = lazySchema(() =>
   BaseESAggSourceSchema.extend({
     type: z.string(),
-    whereQuery: querySchema.optional(),
+    where_query: querySchema.optional(),
   })
 );
 
 export const ESDistanceSourceSchema = lazySchema(() =>
   ESJoinSourceSchema.extend({
     distance: z.number(),
-    geoField: z.string(),
+    geo_field: z.string(),
     type: z.literal(SOURCE_TYPES.ES_DISTANCE_SOURCE),
   })
 );
