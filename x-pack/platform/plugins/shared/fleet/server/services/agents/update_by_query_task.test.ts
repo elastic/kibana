@@ -154,7 +154,76 @@ describe('updateByQueryAndWait', () => {
     expect(res.updated).toEqual(2);
   }, 15000);
 
-  it('should cancel the task and throw if it does not finish in time', async () => {
+  it('should cancel the task and return its partial outcome when it does not finish in time', async () => {
+    esClient.updateByQuery.mockResolvedValue({ task: 'node1:42' } as any);
+    esClient.tasks.get
+      .mockResolvedValueOnce({
+        completed: false,
+        task: { status: { total: 5, updated: 2 } },
+      } as any)
+      .mockResolvedValueOnce({
+        completed: false,
+        task: { status: { total: 5, updated: 2 } },
+      } as any)
+      .mockResolvedValueOnce({
+        completed: true,
+        task: {},
+        response: { total: 5, updated: 3, version_conflicts: 0, failures: [], canceled: 'by user' },
+      } as any);
+
+    // a deadline that has already passed: the task is cancelled on its first poll
+    const res = await updateByQueryAndWait(esClient, request, {
+      pollIntervalMs: 1,
+      maxDurationMs: 0,
+    });
+
+    expect(esClient.tasks.cancel).toHaveBeenCalledTimes(1);
+    expect(esClient.tasks.cancel).toHaveBeenCalledWith({ task_id: 'node1:42' });
+    // the cancelled task is followed until it stops, so what it updated is not lost
+    expect(esClient.tasks.get).toHaveBeenCalledTimes(3);
+    expect(res).toEqual({
+      total: 5,
+      updated: 3,
+      version_conflicts: 0,
+      failures: [],
+      canceled: 'by user',
+    });
+  });
+
+  it('should mark the outcome as cancelled even if the task response does not say so', async () => {
+    esClient.updateByQuery.mockResolvedValue({ task: 'node1:42' } as any);
+    esClient.tasks.get
+      .mockResolvedValueOnce({ completed: false, task: {} } as any)
+      .mockResolvedValueOnce({
+        completed: true,
+        task: {},
+        response: { total: 5, updated: 3, version_conflicts: 0, failures: [] },
+      } as any);
+
+    const res = await updateByQueryAndWait(esClient, request, {
+      pollIntervalMs: 1,
+      maxDurationMs: 0,
+    });
+
+    expect(res.updated).toEqual(3);
+    expect(res.canceled).toEqual(expect.any(String));
+  });
+
+  it('should not mark the outcome as cancelled when the task finishes in time', async () => {
+    esClient.updateByQuery.mockResolvedValue({ task: 'node1:42' } as any);
+    esClient.tasks.get.mockResolvedValue({
+      completed: true,
+      task: {},
+      response: { total: 2, updated: 2, version_conflicts: 0, failures: [] },
+    } as any);
+
+    const res = await updateByQueryAndWait(esClient, request, fastOptions);
+
+    expect(res.canceled).toBeUndefined();
+    expect(esClient.tasks.cancel).not.toHaveBeenCalled();
+  });
+
+  it('should throw if the cancelled task does not stop in time', async () => {
     esClient.updateByQuery.mockResolvedValue({ task: 'node1:42' } as any);
     esClient.tasks.get.mockResolvedValue({
       completed: false,
@@ -162,8 +231,12 @@ describe('updateByQueryAndWait', () => {
     } as any);
 
     await expect(
-      updateByQueryAndWait(esClient, request, { pollIntervalMs: 1, maxDurationMs: 20 })
-    ).rejects.toThrow(/Update by query task node1:42 did not finish within 20ms/);
+      updateByQueryAndWait(esClient, request, {
+        pollIntervalMs: 1,
+        maxDurationMs: 20,
+        cancelWaitMs: 20,
+      })
+    ).rejects.toThrow(/Update by query task node1:42 did not stop within 20ms of being cancelled/);
 
     expect(esClient.tasks.cancel).toHaveBeenCalledWith({ task_id: 'node1:42' });
   });

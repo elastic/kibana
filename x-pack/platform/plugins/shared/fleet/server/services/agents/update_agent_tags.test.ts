@@ -417,6 +417,36 @@ describe('update_agent_tags', () => {
     expect(esClient.create).not.toHaveBeenCalled();
   });
 
+  it('should record the agents a cancelled update by query already updated, then throw to retry the rest', async () => {
+    esClient.updateByQuery.mockReset();
+    esClient.updateByQuery.mockResolvedValue({ task: 'node1:42' } as any);
+    esClient.tasks.get.mockResolvedValue({
+      completed: true,
+      task: {},
+      response: {
+        failures: [],
+        updated: 3,
+        version_conflicts: 0,
+        total: 5,
+        canceled: 'by user request',
+      },
+    } as any);
+
+    await expect(
+      updateTagsBatch(
+        soClient,
+        esClient,
+        [{ id: 'agent1' } as Agent],
+        {},
+        { tagsToAdd: [], tagsToRemove: ['old'], kuery: '', total: 5 }
+      )
+    ).rejects.toThrow(/cancelled .* after updating 3 of 5 agents/);
+
+    // the agents the task updated are not selected by the retry, so they are recorded now
+    const agentAction = esClient.create.mock.calls[0][0] as any;
+    expect(agentAction?.document.agents.length).toEqual(3);
+  });
+
   it('should run add tags async when actioning more agents than batch size', async () => {
     esClient.search.mockResolvedValue({
       hits: {

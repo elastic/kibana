@@ -255,5 +255,15 @@ export async function updateTagsBatch(
     throw new FleetVersionConflictError(`Version conflict of ${versionConflictCount} agents`);
   }
 
+  if (res.canceled) {
+    // The update was cancelled for running too long. The agents it did update are recorded above,
+    // and the retry selects the rest, because the agents that were updated no longer match.
+    throw new FleetError(
+      `Update by query cancelled (${res.canceled}) after updating ${updatedCount} of ${
+        res.total ?? 'an unknown number of'
+      } agents, retrying the rest`
+    );
+  }
+
   return { actionId, updated: res.updated, took: res.took };
 }
