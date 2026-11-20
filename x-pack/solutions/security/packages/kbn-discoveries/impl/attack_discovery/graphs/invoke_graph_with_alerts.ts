@@ -73,6 +73,36 @@ export interface InvokeGraphResult {
 }
 
 /**
+ * Thrown inside the root span in place of the retry-limit error. The span records a thrown error as
+ * an exception event and status message, so it carries only the summary line, not the accumulated
+ * model errors that follow it. The caller gets `fullError` back once the span has closed.
+ */
+class RetryLimitSpanError extends Error {
+  constructor(public readonly fullError: Error) {
+    super(fullError.message.split('\n')[0]);
+  }
+}
+
+const throwSpanSafeErrorIfCountsExceeded = (
+  params: Parameters<typeof throwIfErrorCountsExceeded>[0]
+): void => {
+  try {
+    throwIfErrorCountsExceeded(params);
+  } catch (error) {
+    throw new RetryLimitSpanError(error as Error);
+  }
+};
+
+/** Runs `fn` (which contains the root span) and swaps a `RetryLimitSpanError` for its full error. */
+const withFullRetryLimitError = async <T>(fn: () => Promise<T>): Promise<T> => {
+  try {
+    return await fn();
+  } catch (error) {
+    throw error instanceof RetryLimitSpanError ? error.fullError : error;
+  }
+};
+
+/**
  * Orchestrates Attack Discovery graph execution with pre-retrieved alerts.
  *
  * Prompts are provided by the calling plugin (discoveries) using
@@ -186,59 +216,61 @@ export const invokeAttackDiscoveryGraphWithAlerts = async ({
       ? `${prompts.default}\n\nAdditional context:\n${additionalContext}`
       : undefined;
 
-  return withActiveInferenceSpan(
-    'attack_discovery.graph',
-    { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
-    async (span) => {
-      const graphResult: AttackDiscoveryGraphState = await graph.invoke(
-        {
-          anonymizedDocuments: alertsForGraph,
-          ...(promptWithAdditionalContext != null ? { prompt: promptWithAdditionalContext } : {}),
-          replacements,
-        },
-        {
-          callbacks: langSmithProject
-            ? getLangSmithTracer({
-                apiKey: langSmithApiKey,
-                logger,
-                projectName: langSmithProject,
-              })
-            : [],
-          runName: ATTACK_DISCOVERY_GRAPH_RUN_NAME,
-          signal: abortSignal,
-          tags: [ATTACK_DISCOVERY_TAG, llmType, model].filter(Boolean) as string[],
-        }
-      );
-      setGraphCounterAttributes(span, graphResult);
+  return withFullRetryLimitError(() =>
+    withActiveInferenceSpan(
+      'attack_discovery.graph',
+      { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
+      async (span) => {
+        const graphResult: AttackDiscoveryGraphState = await graph.invoke(
+          {
+            anonymizedDocuments: alertsForGraph,
+            ...(promptWithAdditionalContext != null ? { prompt: promptWithAdditionalContext } : {}),
+            replacements,
+          },
+          {
+            callbacks: langSmithProject
+              ? getLangSmithTracer({
+                  apiKey: langSmithApiKey,
+                  logger,
+                  projectName: langSmithProject,
+                })
+              : [],
+            runName: ATTACK_DISCOVERY_GRAPH_RUN_NAME,
+            signal: abortSignal,
+            tags: [ATTACK_DISCOVERY_TAG, llmType, model].filter(Boolean) as string[],
+          }
+        );
+        setGraphCounterAttributes(span, graphResult);
 
-      logger.debug(
-        () => `Graph execution completed: ${graphResult.insights?.length ?? 0} discoveries`
-      );
+        logger.debug(
+          () => `Graph execution completed: ${graphResult.insights?.length ?? 0} discoveries`
+        );
 
-      const {
-        errors,
-        generationAttempts,
-        hallucinationFailures,
-        maxGenerationAttempts,
-        maxHallucinationFailures,
-      } = graphResult;
+        const {
+          errors,
+          generationAttempts,
+          hallucinationFailures,
+          maxGenerationAttempts,
+          maxHallucinationFailures,
+        } = graphResult;
 
-      throwIfErrorCountsExceeded({
-        errors,
-        generationAttempts,
-        hallucinationFailures,
-        logger,
-        maxGenerationAttempts,
-        maxHallucinationFailures,
-      });
+        throwSpanSafeErrorIfCountsExceeded({
+          errors,
+          generationAttempts,
+          hallucinationFailures,
+          logger,
+          maxGenerationAttempts,
+          maxHallucinationFailures,
+        });
 
-      return {
-        alertsContextCount: graphResult.anonymizedDocuments.length,
-        discoveries: graphResult.insights,
-        generationAttempts,
-        hallucinationFailures,
-        replacements: graphResult.replacements,
-      };
-    }
+        return {
+          alertsContextCount: graphResult.anonymizedDocuments.length,
+          discoveries: graphResult.insights,
+          generationAttempts,
+          hallucinationFailures,
+          replacements: graphResult.replacements,
+        };
+      }
+    )
   );
 };
