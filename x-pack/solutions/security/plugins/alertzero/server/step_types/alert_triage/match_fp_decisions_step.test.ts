@@ -886,6 +886,8 @@ describe('triage match decisions step in on mode', () => {
       ]),
       decisions: { [id]: stored('do_not_propose') },
     });
+    // The second chunk fails after it tagged its first 10 alerts.
+    const partlyTagged = ids.slice(TAG_CHUNK_SIZE, TAG_CHUNK_SIZE + 10);
     const inner = callKibanaApi.getMockImplementation()!;
     callKibanaApi.mockImplementation(
       async (params: { path: string; body?: Record<string, any> }) => {
@@ -895,6 +897,13 @@ describe('triage match decisions step in on mode', () => {
           params.body?.tags.tags_to_add.length > 0
         ) {
           throw new Error('tag failed');
+        }
+        const filter = params.body?.query?.bool?.filter;
+        if (params.path.endsWith('/signals/search') && filter?.[1]?.term) {
+          expect(filter[1].term).toEqual({
+            'kibana.alert.workflow_tags': `az:skipped_by_decision:${id}`,
+          });
+          return { body: { hits: { hits: partlyTagged.map((_id) => ({ _id })) } } };
         }
         return inner(params);
       }
@@ -906,14 +915,15 @@ describe('triage match decisions step in on mode', () => {
       expect.objectContaining({ skipped: TAG_CHUNK_SIZE, tag_failures: 1, notes_missing: 0 })
     );
     expect(notes().map(({ eventId }) => eventId)).toEqual(ids.slice(0, TAG_CHUNK_SIZE));
-    // The failed chunk may be tagged in part, so its tags come off and its alerts go to analysis.
+    // Only the alerts of the failed chunk that carry the skip tag lose the tags, so a verdict
+    // another writer gave the rest of the chunk stays.
     expect(
       callKibanaApi.mock.calls
         .filter(([{ path }]) => path.endsWith('/signals/tags'))
         .map(([{ body }]) => body)
         .at(-1)
     ).toEqual({
-      ids: ids.slice(TAG_CHUNK_SIZE),
+      ids: partlyTagged,
       tags: {
         tags_to_add: [],
         tags_to_remove: ['az:inconclusive', `az:skipped_by_decision:${id}`],

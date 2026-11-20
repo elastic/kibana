@@ -44,6 +44,7 @@ import {
   type DecisionCursor,
   countClosedByDecision,
   fetchDecisionCandidates,
+  findAlertIdsWithTag,
   findAlertsNotClosedAsFalsePositive,
   findOpenAlertIds,
   statusCodeOf,
@@ -383,10 +384,8 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
             const allowed = alertIds.slice(0, notesLeft);
             totals.left_for_notes += alertIds.length - allowed.length;
             if (allowed.length === 0) continue;
-            const skipTags = [
-              VERDICT_INCONCLUSIVE_TAG,
-              `${TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX}${id}`,
-            ];
+            const skipTag = `${TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX}${id}`;
+            const skipTags = [VERDICT_INCONCLUSIVE_TAG, skipTag];
             let skipping: string[] = [];
             try {
               if (!(await stillActive(id))) {
@@ -407,12 +406,17 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
             } catch (error) {
               totals.tag_failures++;
               warn(`Could not tag the alerts of decision ${id}`, error);
-              // The failed chunk may be tagged in part. Its alerts were untriaged, so taking the
-              // tags off puts them back in analysis, and the next sweep tries them again.
+              // The failed chunk may be tagged in part. Only alerts that carry this decision's skip
+              // tag lose the tags, so a verdict another writer gave in the meantime stays. They go
+              // back to analysis, and the next sweep tries them again.
               if (skipping.length > 0) {
-                await write({ alertIds: skipping, add: [], remove: skipTags }).catch((untagError) =>
-                  warn(`Could not take the tags of decision ${id} off a failed chunk`, untagError)
-                );
+                try {
+                  const tagged = await findAlertIdsWithTag(contextManager, skipping, skipTag);
+                  if (tagged.length > 0)
+                    await write({ alertIds: tagged, add: [], remove: skipTags });
+                } catch (untagError) {
+                  warn(`Could not take the tags of decision ${id} off a failed chunk`, untagError);
+                }
               }
             }
           }
