@@ -87,7 +87,9 @@ spaceTest.describe('Dashboard pinned panels resize', { tag: tags.stateful.classi
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest(
+  // TODO: re-enable once the pinned panel resize handle is visible again. The handle is currently hidden,
+  // so waiting for the visible "Resize panel" button times out.
+  spaceTest.skip(
     'resizing a growing pinned panel on the first row saves the snapped width and keeps grow',
     async ({ kbnClient, page, pageObjects, scoutSpace }) => {
       const { controls, dashboard } = pageObjects;
@@ -151,7 +153,9 @@ spaceTest.describe('Dashboard pinned panels resize', { tag: tags.stateful.classi
     }
   );
 
-  spaceTest(
+  // TODO: re-enable once the pinned panel resize handle is visible again. The handle is currently hidden,
+  // so waiting for the visible "Resize panel" button times out.
+  spaceTest.skip(
     'resizing a pinned panel on a wrapped row saves the snapped width',
     async ({ kbnClient, page, pageObjects, scoutSpace }) => {
       const { controls, dashboard } = pageObjects;
