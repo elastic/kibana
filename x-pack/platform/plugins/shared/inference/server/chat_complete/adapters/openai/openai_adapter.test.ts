@@ -646,6 +646,62 @@ describe('openAIAdapter', () => {
 
         expect(getRequest().body).not.toHaveProperty('reasoning_effort');
       });
+
+      it('forwards the caller-provided effort instead of the none default', () => {
+        openAIAdapter
+          .chatComplete({
+            ...defaultArgs,
+            messages,
+            tools,
+            modelName: 'gpt-5.6-terra',
+            reasoning: { effort: 'high' },
+          })
+          .subscribe(noop);
+
+        expect(getRequest().body.reasoning_effort).toBe('high');
+      });
+
+      it('forwards the caller-provided effort for models without a default', () => {
+        openAIAdapter
+          .chatComplete({
+            ...defaultArgs,
+            messages,
+            modelName: 'gpt-5.4',
+            reasoning: { effort: 'low' },
+          })
+          .subscribe(noop);
+
+        expect(getRequest().body.reasoning_effort).toBe('low');
+      });
+
+      it('forwards the caller-provided effort with simulated function calling', () => {
+        openAIAdapter
+          .chatComplete({
+            ...defaultArgs,
+            messages,
+            tools,
+            modelName: 'gpt-5.6-terra',
+            functionCalling: 'simulated',
+            reasoning: { effort: 'medium' },
+          })
+          .subscribe(noop);
+
+        expect(getRequest().body.reasoning_effort).toBe('medium');
+      });
+
+      it('does not forward the unified reasoning object', () => {
+        openAIAdapter
+          .chatComplete({
+            ...defaultArgs,
+            messages,
+            tools,
+            modelName: 'gpt-5.6-terra',
+            reasoning: { effort: 'high', summary: 'auto' },
+          })
+          .subscribe(noop);
+
+        expect(getRequest().body).not.toHaveProperty('reasoning');
+      });
     });
   });
 
