@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useState } from 'react';
 import type { UseQueryResult } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
@@ -45,18 +44,23 @@ export type UseLoadConnectorsResult = UseQueryResult<AIConnector[], IHttpFetchEr
   soEntryFound: boolean;
 };
 
+// `soEntryFound` is cached with the connectors, so every hook instance that shares the query reads
+// it from the same data, including one mounted while the list is already cached.
+interface LoadedConnectors {
+  connectors: AIConnector[];
+  soEntryFound: boolean;
+}
+
 export const useLoadConnectors = ({
   http,
   toasts,
   featureId,
 }: UseLoadConnectorsProps): UseLoadConnectorsResult => {
-  const [soEntryFound, setSoEntryFound] = useState(false);
   const query = useQuery({
     queryKey: [...QUERY_KEY, featureId],
-    queryFn: async () => {
-      const result = await fetchConnectorsForFeature(http, featureId);
-      setSoEntryFound(result.soEntryFound);
-      return result.connectors.map(toAIConnector);
+    queryFn: async (): Promise<LoadedConnectors> => {
+      const { connectors, soEntryFound } = await fetchConnectorsForFeature(http, featureId);
+      return { connectors: connectors.map(toAIConnector), soEntryFound };
     },
     retry: false,
     keepPreviousData: true,
@@ -76,5 +80,9 @@ export const useLoadConnectors = ({
     },
   });
 
-  return { ...query, soEntryFound };
+  return {
+    ...query,
+    data: query.data?.connectors,
+    soEntryFound: query.data?.soEntryFound ?? false,
+  } as UseLoadConnectorsResult;
 };
