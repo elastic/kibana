@@ -17,7 +17,6 @@ import { omit } from 'lodash';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 import {
   createConnectorRequestBodySchemaV1,
-  getCreateConnectorRequestBodySchema,
   getCreateConnectorRequestBodySchemaV1,
 } from '../../../../common/routes/connector/apis/create';
 import { createMockConnector } from '../../../application/connector/mocks';
