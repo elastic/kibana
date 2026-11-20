@@ -7,13 +7,6 @@
 
 import type { AiIndexDreamingConfig } from './dreaming';
 
-/**
- * Example dreaming configs offered when an AI index is created. They are static JSON under the
- * plugin's `public/assets/dreaming_templates`: `index.json` lists them and `<id>.json` holds each
- * one's config.
- */
-export const DREAMING_TEMPLATES_ASSET_DIR = 'dreaming_templates';
-
 /** What a template sets: everything but whether and how often dreaming runs. */
 export type DreamingTemplateConfig = Pick<
   AiIndexDreamingConfig,
@@ -26,12 +19,6 @@ export interface DreamingTemplateSummary {
   description: string;
 }
 
-/** `index.json`. */
-export interface DreamingTemplateIndex {
-  templates: DreamingTemplateSummary[];
-}
-
-/** `<id>.json`. */
 export interface DreamingTemplate {
   /**
    * What the AI index holds and who uses it. It opens the saved instructions, and can be edited
@@ -44,9 +31,16 @@ export interface DreamingTemplate {
   dreaming: DreamingTemplateConfig;
 }
 
+export type LoadedDreamingTemplate = DreamingTemplateSummary & DreamingTemplate;
+
+/** Response of `GET /internal/context_engine/dreaming_templates`. */
+export interface ListDreamingTemplatesResponse {
+  templates: LoadedDreamingTemplate[];
+}
+
 /** The config to save: the template's, with the summary opening its instructions. */
 export const buildDreamingTemplateConfig = (
-  template: DreamingTemplate,
+  template: Pick<DreamingTemplate, 'dreaming'>,
   summary: string
 ): DreamingTemplateConfig => {
   const instructions = [summary.trim(), template.dreaming.instructions?.trim()]

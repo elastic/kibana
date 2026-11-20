@@ -27,6 +27,9 @@ export const goldenDataset: HuntWatchExample[] = [
   {
     id: 'golden-hit-aws-iam-behavior-only',
     cohort: 'golden',
+    // Capability: `completed` needs the subject model to ground the Tier 2 query; weaker models
+    // end `partial` (coordinator incomplete_retryable). See `HuntGate`.
+    metadata: { gate: 'capability' },
     input: { spaceId: DEFAULT_EVAL_SPACE_ID, reportIds: [HUNT_REPORT_IDS.hit] },
     output: {
       expected: {
@@ -58,6 +61,9 @@ export const goldenDataset: HuntWatchExample[] = [
     // `completed` with no SSE and no Proposal.
     id: 'golden-clean-aws-iam-clean',
     cohort: 'golden',
+    // Capability: `completed` needs the subject model to ground the Tier 2 query; weaker models
+    // end `partial` (coordinator incomplete_retryable). See `HuntGate`.
+    metadata: { gate: 'capability' },
     input: { spaceId: DEFAULT_EVAL_SPACE_ID, reportIds: [HUNT_REPORT_IDS.clean] },
     output: {
       expected: {

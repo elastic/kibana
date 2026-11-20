@@ -30,6 +30,8 @@ import {
   isMessageChunkEvent,
   isMessageCompleteEvent,
   isModelReasoningEvent,
+  isMessageDeliveredEvent,
+  isInterimAnswerEvent,
   isPromptRequestEvent,
   isReasoningEvent,
   isSubstitutionAppliedEvent,
@@ -43,6 +45,8 @@ import {
 } from '@kbn/agent-builder-common';
 import {
   createModelReasoningStep,
+  createDeliveredMessageStep,
+  createInterimAnswerStep,
   createReasoningStep,
   createSubstitutionStep,
   createToolCallStep,
@@ -291,6 +295,13 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
     );
   }
 
+  if (isInterimAnswerEvent(event)) {
+    // Reset the streaming buffer after preserving the interim answer.
+    return withStreamingEvent(
+      withAppendedStep({ ...state, message: '' }, createInterimAnswerStep(event.data))
+    );
+  }
+
   if (isMessageChunkEvent(event)) {
     return withStreamingEvent({ ...state, message: state.message + event.data.text_chunk });
   }
@@ -392,5 +403,8 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
     return withAppendedStep(state, step);
   }
 
+  if (isMessageDeliveredEvent(event)) {
+    return withAppendedStep(state, createDeliveredMessageStep(event.data));
+  }
   return state;
 };

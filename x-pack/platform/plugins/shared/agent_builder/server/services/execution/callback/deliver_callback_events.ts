@@ -27,6 +27,8 @@ import {
   isExecutionTerminatedEvent,
   isMessageChunkEvent,
   isModelReasoningChunkEvent,
+  isMessageDeliveredEvent,
+  isInterimAnswerEvent,
   isRoundCompleteEvent,
   isToolCallEvent,
   type ChatCallbackEvent,
@@ -140,6 +142,9 @@ export const deliverCallbackEvents = ({
             !isMessageChunkEvent(event) &&
             !isModelReasoningChunkEvent(event) &&
             !isExecutionStartedEvent(event) &&
+            // These notifications are included in the completed round's steps.
+            !isMessageDeliveredEvent(event) &&
+            !isInterimAnswerEvent(event) &&
             // The failure callback is the only terminal representation of a failed or aborted run.
             !isExecutionFailedEvent(event) &&
             !isExecutionAbortedEvent(event)
