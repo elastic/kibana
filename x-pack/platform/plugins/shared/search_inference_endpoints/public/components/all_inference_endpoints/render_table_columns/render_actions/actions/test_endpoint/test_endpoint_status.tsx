@@ -30,7 +30,7 @@ const STATES: Record<
     icon: <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />,
     color: 'success',
     message: i18n.translate('xpack.searchInferenceEndpoints.testEndpoint.available', {
-      defaultMessage: 'Endpoint is available.',
+      defaultMessage: 'Test succeeded.',
     }),
   },
   failure: {

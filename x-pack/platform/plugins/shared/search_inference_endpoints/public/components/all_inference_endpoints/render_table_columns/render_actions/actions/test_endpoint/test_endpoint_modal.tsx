@@ -91,7 +91,7 @@ export const TestEndpointModal: React.FC<TestEndpointModalProps> = ({ inferenceI
               announceOnMount
               data-test-subj="testEndpointRequestFailure"
               title={i18n.translate('xpack.searchInferenceEndpoints.testEndpoint.requestFailure', {
-                defaultMessage: 'The test could not be run.',
+                defaultMessage: 'The test could not run.',
               })}
               text={requestFailureReason}
             />

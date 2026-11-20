@@ -96,35 +96,35 @@ describe('TestEndpointModal', () => {
     expect(screen.getByTestId('testEndpointRunButton')).toBeDisabled();
   });
 
-  it('shows that the endpoint is available with the response code and query time', () => {
+  it('shows that the test succeeded with the response code and query duration', () => {
     mockHookState(passingState);
     renderModal();
 
-    expect(screen.getByTestId('testEndpointAvailable')).toHaveTextContent('Endpoint is available.');
+    expect(screen.getByTestId('testEndpointAvailable')).toHaveTextContent('Test succeeded.');
     expect(screen.getByTestId('testEndpointSummary')).toHaveTextContent(
-      'Response: 201 • Query time: 94ms'
+      'Response: 201 • Query duration: 94 ms'
     );
     expect(screen.queryByTestId('testEndpointFailure')).not.toBeInTheDocument();
   });
 
-  it('shows that the test failed with the response code and query time', () => {
+  it('shows that the test failed with the response code and query duration', () => {
     mockHookState(failingState);
     renderModal();
 
     expect(screen.getByTestId('testEndpointFailure')).toHaveTextContent('Endpoint test failed.');
     expect(screen.getByTestId('testEndpointSummary')).toHaveTextContent(
-      'Response: 404 • Query time: 94ms'
+      'Response: 404 • Query duration: 94 ms'
     );
     expect(screen.queryByTestId('testEndpointAvailable')).not.toBeInTheDocument();
   });
 
-  it('shows only the query time when the failure has no response code', () => {
+  it('shows only the query duration when the failure has no response code', () => {
     mockHookState({
       data: { ok: false, latencyMs: 94, error: { reason: 'socket hang up' } },
     });
     renderModal();
 
-    expect(screen.getByTestId('testEndpointSummary')).toHaveTextContent('Query time: 94ms');
+    expect(screen.getByTestId('testEndpointSummary')).toHaveTextContent('Query duration: 94 ms');
     expect(screen.getByTestId('testEndpointSummary')).not.toHaveTextContent('Response:');
   });
 
@@ -173,6 +173,9 @@ describe('TestEndpointModal', () => {
     mockHookState({ error: { body: { message: 'Forbidden' }, message: 'Forbidden' } });
     renderModal();
 
+    expect(screen.getByTestId('testEndpointRequestFailure')).toHaveTextContent(
+      'The test could not run.'
+    );
     expect(screen.getByTestId('testEndpointRequestFailure')).toHaveTextContent('Forbidden');
   });
 

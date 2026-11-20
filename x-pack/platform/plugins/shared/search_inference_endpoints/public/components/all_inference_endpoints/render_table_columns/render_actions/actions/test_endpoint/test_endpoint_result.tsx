@@ -21,12 +21,12 @@ export const TestEndpointResult: React.FC<TestEndpointResultProps> = ({ response
     <>
       <EuiText size="xs" data-test-subj="testEndpointSummary">
         {response.statusCode === undefined
-          ? i18n.translate('xpack.searchInferenceEndpoints.testEndpoint.queryTime', {
-              defaultMessage: 'Query time: {latencyMs}ms',
+          ? i18n.translate('xpack.searchInferenceEndpoints.testEndpoint.queryDuration', {
+              defaultMessage: 'Query duration: {latencyMs} ms',
               values: { latencyMs: response.latencyMs },
             })
           : i18n.translate('xpack.searchInferenceEndpoints.testEndpoint.responseSummary', {
-              defaultMessage: 'Response: {statusCode} • Query time: {latencyMs}ms',
+              defaultMessage: 'Response: {statusCode} • Query duration: {latencyMs} ms',
               values: { statusCode: response.statusCode, latencyMs: response.latencyMs },
             })}
       </EuiText>
