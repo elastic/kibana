@@ -50,6 +50,19 @@ export class IndexPrivileges extends Component<Props, State> {
     };
   }
 
+  private readonly privilegeKeys: number[] = [];
+  private nextPrivilegeKey = 0;
+
+  private getPrivilegeKey = (index: number): number => {
+    const existingKey = this.privilegeKeys[index];
+    if (existingKey !== undefined) {
+      return existingKey;
+    }
+    const key = this.nextPrivilegeKey++;
+    this.privilegeKeys[index] = key;
+    return key;
+  };
+
   public render() {
     const indices = this.props.role.elasticsearch[this.props.indexType] ?? [];
 
@@ -86,7 +99,7 @@ export class IndexPrivileges extends Component<Props, State> {
       <Fragment>
         {indices.map((indexPrivilege, i) => (
           <IndexPrivilegeForm
-            key={i}
+            key={this.getPrivilegeKey(i)}
             {...props}
             formIndex={i}
             validator={this.props.validator}
@@ -190,6 +203,8 @@ export class IndexPrivileges extends Component<Props, State> {
       const indices = role.elasticsearch[indexType] ?? [];
       const newIndices = [...indices];
       newIndices.splice(privilegeIndex, 1);
+      // Keep each surviving form's cached DLS/FLS values with its entry.
+      this.privilegeKeys.splice(privilegeIndex, 1);
 
       this.props.onChange({
         ...this.props.role,

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { QueryRolesResult } from '@kbn/security-plugin-types-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { RolesGridPage } from './roles_grid_page';
@@ -69,6 +70,96 @@ describe('<RolesGridPage />', () => {
       ],
     });
   });
+
+  const renderGrid = () =>
+    renderWithIntl(
+      <RolesGridPage
+        rolesAPIClient={apiClientMock}
+        history={history}
+        notifications={notifications}
+        i18n={i18n}
+        buildFlavor="traditional"
+        analytics={analytics}
+        theme={theme}
+        userProfile={userProfile}
+        rendering={rendering}
+      />
+    );
+
+  it.each(['search', 'reserved filter'])(
+    'resets pagination when changing the %s',
+    async (change) => {
+      apiClientMock.queryRoles.mockResolvedValue({ total: 100, count: 0, roles: [] });
+      renderGrid();
+      await screen.findByTestId('rolesTable');
+      fireEvent.click(screen.getByRole('link', { name: 'Next page' }));
+      await waitFor(() =>
+        expect(apiClientMock.queryRoles).toHaveBeenLastCalledWith(
+          expect.objectContaining({ from: 25 })
+        )
+      );
+      if (change === 'search') {
+        fireEvent.change(screen.getByTestId('searchRoles'), { target: { value: 'new query' } });
+      } else {
+        fireEvent.click(screen.getByTestId('showReservedRolesSwitch'));
+      }
+      await waitFor(() =>
+        expect(apiClientMock.queryRoles).toHaveBeenLastCalledWith(
+          expect.objectContaining({ from: 0 })
+        )
+      );
+    }
+  );
+
+  it('keeps loading until the newest request completes', async () => {
+    const first = Promise.withResolvers<QueryRolesResult>();
+    const second = Promise.withResolvers<QueryRolesResult>();
+    apiClientMock.queryRoles.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+    renderGrid();
+    fireEvent.click(screen.getByTestId('showReservedRolesSwitch'));
+    await act(async () => first.resolve({ total: 0, count: 0, roles: [] }));
+    expect(screen.getByTestId('rolesTableLoading')).toBeInTheDocument();
+    await act(async () => second.resolve({ total: 0, count: 0, roles: [] }));
+    expect(screen.getByTestId('rolesTable')).toBeInTheDocument();
+  });
+
+  it.each(['success', 'forbidden', 'failure'])(
+    'ignores an obsolete request finishing with %s after newer results',
+    async (outcome) => {
+      const first = Promise.withResolvers<QueryRolesResult>();
+      const second = Promise.withResolvers<QueryRolesResult>();
+      apiClientMock.queryRoles
+        .mockReturnValueOnce(first.promise)
+        .mockReturnValueOnce(second.promise);
+      notifications.toasts.addDanger.mockClear();
+      renderGrid();
+      fireEvent.click(screen.getByTestId('showReservedRolesSwitch'));
+      await act(async () =>
+        second.resolve({
+          total: 1,
+          count: 1,
+          roles: [
+            {
+              name: 'latest-role',
+              kibana: [],
+              elasticsearch: { cluster: [], indices: [], run_as: [] },
+            },
+          ],
+        })
+      );
+      await act(async () => {
+        if (outcome === 'success') {
+          first.resolve({ total: 0, count: 0, roles: [] });
+        } else {
+          first.reject({ body: { statusCode: outcome === 'forbidden' ? 403 : 500 } });
+        }
+      });
+      expect(screen.getByText('latest-role')).toBeInTheDocument();
+      expect(screen.getByTestId('rolesTable')).toBeInTheDocument();
+      expect(screen.queryByTestId('permissionDeniedMessage')).not.toBeInTheDocument();
+      expect(notifications.toasts.addDanger).not.toHaveBeenCalled();
+    }
+  );
 
   it('renders reserved roles as such', async () => {
     renderWithIntl(

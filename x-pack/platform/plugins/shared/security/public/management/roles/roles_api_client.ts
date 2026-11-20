@@ -102,6 +102,10 @@ export class RolesAPIClient {
       (indexPrivilege) => !isPlaceholderPrivilege(indexPrivilege)
     );
 
+    role.elasticsearch.remote_cluster = role.elasticsearch.remote_cluster?.filter(
+      ({ clusters, privileges }) => clusters.length > 0 || privileges.length > 0
+    );
+
     const isPlaceholderDataSourcePrivilege = (dataSourcePrivilege: RoleDataSourcePrivilege) => {
       return dataSourcePrivilege.names.length === 0 && dataSourcePrivilege.privileges.length === 0;
     };
