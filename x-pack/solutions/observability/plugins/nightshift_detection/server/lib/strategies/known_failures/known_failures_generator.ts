@@ -28,34 +28,14 @@ export class KnownFailuresGenerator implements DetectionSignalGenerator {
 }
 
 /**
- * 1. Lists the strategy's enabled rules and the space's knowledge indicators, and joins them on the
- *    rule id the reconciler gives each indicator. A disabled rule, or an indicator without a rule,
- *    gives nothing.
+ * 1. Joins the strategy's enabled rules with the knowledge indicators they watch.
  * 2. Reads the rows those rules wrote for runs scheduled in the window, and keeps each rule's latest.
  */
-async function readActiveFailures({
-  spaceId,
-  window,
-  knowledge,
-  rules,
-  cpsEnabled,
-  abortSignal,
-}: GeneratorContext): Promise<ActiveKnownFailure[]> {
+async function readActiveFailures(context: GeneratorContext): Promise<ActiveKnownFailure[]> {
+  const { spaceId, window, rules, abortSignal } = context;
+
   // 1.
-  const [managedRules, knowledgeIndicators] = await Promise.all([
-    rules.listManaged({ strategy: KNOWN_FAILURES_STRATEGY_ID }),
-    knowledge.listQueryKnowledgeIndicators(),
-  ]);
-  const enabledRuleIds = new Set(managedRules.filter(({ enabled }) => enabled).map(({ id }) => id));
-  const knowledgeIndicatorByRuleId = new Map<string, QueryKnowledgeIndicator>(
-    knowledgeIndicators
-      .filter((knowledgeIndicator) => getUnwatchableReason(knowledgeIndicator) === undefined)
-      .map((knowledgeIndicator): [string, QueryKnowledgeIndicator] => [
-        getKnownFailureRuleId({ spaceId, knowledgeIndicator, cpsEnabled }),
-        knowledgeIndicator,
-      ])
-      .filter(([ruleId]) => enabledRuleIds.has(ruleId))
-  );
+  const knowledgeIndicatorByRuleId = await getWatchedKnowledgeIndicators(context);
 
   // 2.
   const rows = await rules.readRows({
@@ -65,16 +45,47 @@ async function readActiveFailures({
     to: window.to,
     abortSignal,
   });
+
+  return [...getLatestRowByRuleId(rows)].flatMap(([ruleId, row]) => {
+    const knowledgeIndicator = knowledgeIndicatorByRuleId.get(ruleId);
+    return knowledgeIndicator ? [{ knowledgeIndicator, row }] : [];
+  });
+}
+
+/**
+ * The knowledge indicator each enabled rule watches, by rule id, joined on the id the reconciler
+ * gives the indicator's rule. A disabled rule, or an indicator without a rule, gives nothing.
+ */
+async function getWatchedKnowledgeIndicators({
+  spaceId,
+  knowledge,
+  rules,
+  cpsEnabled,
+}: GeneratorContext): Promise<Map<string, QueryKnowledgeIndicator>> {
+  const [managedRules, knowledgeIndicators] = await Promise.all([
+    rules.listManaged({ strategy: KNOWN_FAILURES_STRATEGY_ID }),
+    knowledge.listQueryKnowledgeIndicators(),
+  ]);
+  const enabledRuleIds = new Set(managedRules.filter(({ enabled }) => enabled).map(({ id }) => id));
+
+  return new Map(
+    knowledgeIndicators
+      .filter((knowledgeIndicator) => getUnwatchableReason(knowledgeIndicator) === undefined)
+      .map((knowledgeIndicator): [string, QueryKnowledgeIndicator] => [
+        getKnownFailureRuleId({ spaceId, knowledgeIndicator, cpsEnabled }),
+        knowledgeIndicator,
+      ])
+      .filter(([ruleId]) => enabledRuleIds.has(ruleId))
+  );
+}
+
+/** Each rule's latest row; the rows come newest first, so a rule's first row is its latest. */
+function getLatestRowByRuleId(rows: RuleRow[]): Map<string, RuleRow> {
   const latestRowByRuleId = new Map<string, RuleRow>();
-  // Newest first, so the first row of a rule is its latest.
   rows.forEach((row) => {
     if (!latestRowByRuleId.has(row.rule_id)) {
       latestRowByRuleId.set(row.rule_id, row);
     }
   });
-
-  return [...latestRowByRuleId].flatMap(([ruleId, row]) => {
-    const knowledgeIndicator = knowledgeIndicatorByRuleId.get(ruleId);
-    return knowledgeIndicator ? [{ knowledgeIndicator, row }] : [];
-  });
+  return latestRowByRuleId;
 }

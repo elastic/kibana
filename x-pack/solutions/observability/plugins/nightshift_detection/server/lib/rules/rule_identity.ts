@@ -38,13 +38,17 @@ export const computeRuleId = ({
   spaceId,
   strategy,
   sourceId,
-  rule,
+  data,
 }: {
   spaceId: string;
   strategy: string;
   sourceId: string;
-  rule: Omit<CreateRuleData, 'metadata'>;
-}): string => uuidv5(JSON.stringify([spaceId, strategy, sourceId, rule]), RULE_ID_NAMESPACE);
+  /** The rule as the strategy wants it; its metadata is left out of the hash. */
+  data: Omit<CreateRuleData, 'metadata'> & { metadata?: unknown };
+}): string => {
+  const { metadata, ...rule } = data;
+  return uuidv5(JSON.stringify([spaceId, strategy, sourceId, rule]), RULE_ID_NAMESPACE);
+};
 
 /** The tags the engine puts on a managed rule, after the strategy's own. */
 export const getManagedRuleTags = ({

@@ -44,15 +44,13 @@ const createRule = ({
   },
 });
 
-const getRuleId = ({ strategy, resource }: StrategyAlertingRule) => {
-  const { metadata, ...rule } = resource.data;
-  return computeRuleId({
+const getRuleId = ({ strategy, resource }: StrategyAlertingRule) =>
+  computeRuleId({
     spaceId: SPACE_ID,
     strategy: strategy.id,
     sourceId: resource.source_id,
-    rule,
+    data: resource.data,
   });
-};
 
 const setUp = (options?: ConstructorParameters<typeof InMemoryRulesClient>[0]) => {
   const rulesClient = new InMemoryRulesClient(options);

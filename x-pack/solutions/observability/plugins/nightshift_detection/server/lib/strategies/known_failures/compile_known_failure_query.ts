@@ -57,14 +57,17 @@ export function compileKnownFailureQuery({
 }: {
   esql: string;
   cpsEnabled: boolean;
-  settings: Pick<KnownFailuresSettings, 'window_minutes' | 'recovery_minutes'>;
+  settings: Pick<
+    KnownFailuresSettings,
+    'window_minutes' | 'recovery_minutes' | 'end_margin_minutes'
+  >;
 }): string {
   const base = esql.trim();
   if (!canCompileKnownFailureQuery(base)) {
     throw new Error('Known failures counts FROM … | WHERE … queries only');
   }
 
-  const end = 'DATE_TRUNC(1 minute, NOW())';
+  const end = `DATE_TRUNC(1 minute, NOW()) - ${settings.end_margin_minutes} minutes`;
   const start = `${end} - ${settings.window_minutes} minutes`;
   const query = [
     base,

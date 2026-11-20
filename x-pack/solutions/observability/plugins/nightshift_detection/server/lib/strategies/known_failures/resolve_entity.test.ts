@@ -47,6 +47,18 @@ describe('resolveEntity', () => {
     ).toEqual(source);
   });
 
+  it('ignores a feature of the same id in another source', () => {
+    expect(
+      resolve(
+        ['checkout'],
+        [
+          createService('checkout', 'checkout-api'),
+          { ...createService('checkout', 'other'), source_id: 'source-2' },
+        ]
+      )
+    ).toEqual({ type: 'service', name: 'checkout-api' });
+  });
+
   // The aggregate feature stands for every service of the source, so it names none of them.
   it('ignores the aggregate services feature of the source', () => {
     expect(

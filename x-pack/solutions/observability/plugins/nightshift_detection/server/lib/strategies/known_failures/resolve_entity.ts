@@ -24,12 +24,14 @@ export function resolveEntity({
   features,
 }: {
   knowledgeIndicator: Pick<QueryKnowledgeIndicator, 'source_id' | 'feature_ids'>;
-  /** The entity features of the knowledge indicator's source. */
+  /** Entity features; only those of the knowledge indicator's source count. */
   features: KnowledgeIndicatorFeature[];
 }): DetectionSignalReading['entity'] {
   const linked = new Set(knowledgeIndicator.feature_ids);
+  // Feature ids are unique within a source only.
   const services = features.filter(
-    ({ id, type, subtype }) =>
+    ({ id, source_id: sourceId, type, subtype }) =>
+      sourceId === knowledgeIndicator.source_id &&
       linked.has(id) &&
       type === 'entity' &&
       subtype === 'service' &&
@@ -44,6 +46,6 @@ export function resolveEntity({
   const name = service.properties.name;
   return {
     type: 'service',
-    name: typeof name === 'string' && name ? name : service.title ?? service.id,
+    name: typeof name === 'string' && name ? name : service.title || service.id,
   };
 }

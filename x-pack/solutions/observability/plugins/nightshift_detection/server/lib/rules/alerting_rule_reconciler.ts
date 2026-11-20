@@ -72,8 +72,13 @@ const toDesiredRule = ({
   spaceId: string;
   rule: StrategyAlertingRule;
 }) => {
-  const { metadata, ...rule } = resource.data;
-  const id = computeRuleId({ spaceId, strategy: strategy.id, sourceId: resource.source_id, rule });
+  const { metadata } = resource.data;
+  const id = computeRuleId({
+    spaceId,
+    strategy: strategy.id,
+    sourceId: resource.source_id,
+    data: resource.data,
+  });
 
   return {
     id,

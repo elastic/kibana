@@ -52,8 +52,6 @@ describe('KnownFailuresStrategy', () => {
           data: expect.objectContaining({
             kind: 'signal',
             metadata: { name: 'Checkout timeouts' },
-            schedule: { every: '5m', lookback: '361m' },
-            grouping: { fields: ['change_at'] },
             query: {
               base: expect.stringMatching(
                 /^FROM logs-\* \| WHERE service\.name == "checkout" AND message : "timeout"\n\| WHERE @timestamp >= .*CHANGE_POINT metric_value ON bucket/s

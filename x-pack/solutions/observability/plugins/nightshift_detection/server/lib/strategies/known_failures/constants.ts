@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+/** Id of the Known failures strategy; stamped on its signals and its rules' ownership tags. */
 export const KNOWN_FAILURES_STRATEGY_ID = 'known_failures';
 
 /**
@@ -17,12 +18,16 @@ export const KNOWN_FAILURES_SETTINGS = {
   window_minutes: 360,
   /** Closed minutes that must all sit at or below the recovery threshold to call it recovered. */
   recovery_minutes: 5,
+  /**
+   * Closed minutes left out at the end of the window, because their documents may still be
+   * arriving. A minute read half full looks like a dip so significant that it hides a real rise.
+   */
+  end_margin_minutes: 1,
   /** Minutes without a breached signal after which an event of this strategy may close. */
   quiet_period_minutes: 5,
   /** How often the rule runs. */
   rule_every: '5m',
-  /** The rule's lookback: the window plus the minute still open when it runs. */
-  rule_lookback: '361m',
 } as const;
 
+/** The tunables of Known failures, as the compiler and the mapper read them. */
 export type KnownFailuresSettings = typeof KNOWN_FAILURES_SETTINGS;

@@ -30,6 +30,13 @@ export function getUnwatchableReason(
   return undefined;
 }
 
+/**
+ * The window, the margin and the minute still open when the rule runs. Derived, so tuning the
+ * window cannot leave a lookback that cuts its first minutes off.
+ */
+const getRuleLookback = (): string =>
+  `${KNOWN_FAILURES_SETTINGS.window_minutes + KNOWN_FAILURES_SETTINGS.end_margin_minutes + 1}m`;
+
 /** The rule that watches a countable knowledge indicator; the reconciler adds the engine's identity. */
 export function buildKnownFailureRule({
   knowledgeIndicator,
@@ -44,7 +51,7 @@ export function buildKnownFailureRule({
     time_field: '@timestamp',
     schedule: {
       every: KNOWN_FAILURES_SETTINGS.rule_every,
-      lookback: KNOWN_FAILURES_SETTINGS.rule_lookback,
+      lookback: getRuleLookback(),
     },
     // One active change per run at most, so a run writes one row and a new change a new group.
     grouping: { fields: ['change_at'] },
@@ -68,11 +75,11 @@ export function getKnownFailureRuleId({
   knowledgeIndicator: Pick<QueryKnowledgeIndicator, 'source_id' | 'title' | 'esql'>;
   cpsEnabled: boolean;
 }): string {
-  const { metadata, ...rule } = buildKnownFailureRule({ knowledgeIndicator, cpsEnabled });
+  // The reconciler's own id function, so the generator finds exactly the rule it created.
   return computeRuleId({
     spaceId,
     strategy: KNOWN_FAILURES_STRATEGY_ID,
     sourceId: knowledgeIndicator.source_id,
-    rule,
+    data: buildKnownFailureRule({ knowledgeIndicator, cpsEnabled }),
   });
 }
