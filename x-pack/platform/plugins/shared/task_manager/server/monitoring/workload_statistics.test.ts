@@ -706,6 +706,40 @@ describe('Workload Statistics Aggregator', () => {
     });
   });
 
+  test('sizes the task type buckets from the task types registered at each cycle', async () => {
+    const lateDefinitions = new TaskTypeDictionary(logger);
+    lateDefinitions.registerTaskDefinitions({
+      foo: { title: 'foo', createTaskRunner: jest.fn() },
+    });
+
+    const taskStore = taskStoreMock.create({});
+    const workloadAggregator = createWorkloadAggregator({
+      taskStore,
+      elasticsearchAndSOAvailability$: of(true),
+      refreshInterval: 10,
+      pollInterval: 3000,
+      logger,
+      taskDefinitions: lateDefinitions,
+    });
+
+    taskStore.aggregate.mockImplementation(async () => {
+      if (taskStore.aggregate.mock.calls.length === 1) {
+        lateDefinitions.registerTaskDefinitions({
+          bar: { title: 'bar', createTaskRunner: jest.fn() },
+        });
+      }
+      return setTaskTypeCount(await mockAggregatedResult(), 'foo', { idle: 2 });
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      workloadAggregator.pipe(take(2), bufferCount(2)).subscribe(() => resolve(), reject);
+    });
+
+    const [[firstCall], [secondCall]] = taskStore.aggregate.mock.calls;
+    expect(firstCall.aggs?.taskType).toMatchObject({ terms: { size: 1 } });
+    expect(secondCall.aggs?.taskType).toMatchObject({ terms: { size: 2 } });
+  });
+
   test('recovery after errors occurrs at the next interval', async () => {
     const refreshInterval = 1000;
 
