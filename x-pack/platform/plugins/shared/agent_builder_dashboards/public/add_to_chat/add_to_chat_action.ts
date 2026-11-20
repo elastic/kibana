@@ -25,10 +25,10 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import {
-  REFINE_WITH_CHAT_ACTION_ID,
+  ADD_TO_CHAT_ACTION_ID,
   type DashboardApi,
   type DashboardStart,
-  type RefineWithChatActionContext,
+  type AddToChatActionContext,
 } from '@kbn/dashboard-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
@@ -45,7 +45,7 @@ import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-acti
 import { getDashboardsSkillBadge } from '../../common';
 import type { CanvasDashboard, CanvasDashboardRegistry, IdGenerator } from '../attachment_types';
 import { resolveDashboardAttachmentLink } from '../attachment_types/dashboard_integration/reconcile';
-import { reportRefineWithChatClicked, type RefineWithChatChatState } from '../telemetry';
+import { reportAddToChatClicked, type AddToChatChatState } from '../telemetry';
 
 /**
  * Prefilled as a skill badge in the chat input so the user's first message loads the dashboards
@@ -56,9 +56,9 @@ import { reportRefineWithChatClicked, type RefineWithChatChatState } from '../te
  * space collapses and the caret lands against the badge. This is the same character the editor
  * inserts after a badge picked from the command menu.
  */
-export const REFINE_WITH_CHAT_INITIAL_MESSAGE = `${getDashboardsSkillBadge()} `;
+export const ADD_TO_CHAT_INITIAL_MESSAGE = `${getDashboardsSkillBadge()} `;
 
-export interface RefineWithChatActionDeps {
+export interface AddToChatActionDeps {
   agentBuilder: Pick<
     AgentBuilderPluginStart,
     'openChat' | 'addAttachment' | 'getAgentBuilderAccess' | 'events'
@@ -82,7 +82,7 @@ interface PanelDashboard {
  */
 const getPanelDashboard = (
   embeddable: unknown,
-  { dashboardAppApi$, canvasDashboards }: RefineWithChatActionDeps
+  { dashboardAppApi$, canvasDashboards }: AddToChatActionDeps
 ): PanelDashboard | undefined => {
   if (!apiHasParentApi(embeddable)) {
     return undefined;
@@ -118,9 +118,9 @@ const getPanelLabel = (embeddable: HasUniqueId, dashboardData: DashboardAttachme
   return (title || derived || typeDisplayName || '').slice(0, DASHBOARD_PANEL_LABEL_MAX_LENGTH);
 };
 
-export const createRefineWithChatAction = (
-  deps: RefineWithChatActionDeps
-): ActionDefinition<RefineWithChatActionContext> => {
+export const createAddToChatAction = (
+  deps: AddToChatActionDeps
+): ActionDefinition<AddToChatActionContext> => {
   const { agentBuilder, analytics, canWriteDashboards, draftAttachmentId } = deps;
   const isCompatible = async (embeddable: unknown): Promise<boolean> => {
     if (
@@ -135,12 +135,12 @@ export const createRefineWithChatAction = (
   };
 
   return {
-    id: REFINE_WITH_CHAT_ACTION_ID,
-    type: REFINE_WITH_CHAT_ACTION_ID,
+    id: ADD_TO_CHAT_ACTION_ID,
+    type: ADD_TO_CHAT_ACTION_ID,
     order: 25,
     getDisplayName: () =>
-      i18n.translate('xpack.agentBuilderDashboards.refineWithChat.displayName', {
-        defaultMessage: 'Refine with chat',
+      i18n.translate('xpack.agentBuilderDashboards.addToChat.displayName', {
+        defaultMessage: 'Add to chat',
       }),
     getIconType: () => 'addToChat',
     isCompatible: ({ embeddable }) => isCompatible(embeddable),
@@ -164,8 +164,8 @@ export const createRefineWithChatAction = (
       const panelType = apiIsOfType(embeddable, CUSTOM_CONTENT_EMBEDDABLE_TYPE)
         ? CUSTOM_CONTENT_EMBEDDABLE_TYPE
         : LENS_EMBEDDABLE_TYPE;
-      const reportClicked = (chatState: RefineWithChatChatState) =>
-        reportRefineWithChatClicked(analytics, {
+      const reportClicked = (chatState: AddToChatChatState) =>
+        reportAddToChatClicked(analytics, {
           panel_type: panelType,
           chat_state: chatState,
           is_saved_dashboard: Boolean(dashboardApi.savedObjectId$.getValue()),
@@ -216,7 +216,7 @@ export const createRefineWithChatAction = (
         agentBuilder.openChat({
           newConversation: true,
           sessionTag: 'dashboard',
-          initialMessage: REFINE_WITH_CHAT_INITIAL_MESSAGE,
+          initialMessage: ADD_TO_CHAT_INITIAL_MESSAGE,
           autoSendInitialMessage: false,
           attachments: [
             buildDashboardAttachment(draftAttachmentId.current, origin),

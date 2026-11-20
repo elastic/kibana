@@ -53,7 +53,7 @@ export const DEFAULT_QUICK_ACTIONS: QuickActions = {
     'CONVERT_LEGACY_MARKDOWN',
     'ACTION_FILTERS_NOTIFICATION',
     'ACTION_ESQL_NOTIFICATION',
-    'refinePanelWithChat',
+    'addPanelToChat',
   ],
   view: [
     'clearControl',
@@ -64,6 +64,6 @@ export const DEFAULT_QUICK_ACTIONS: QuickActions = {
     'togglePanel',
     'ACTION_FILTERS_NOTIFICATION',
     'ACTION_ESQL_NOTIFICATION',
-    'refinePanelWithChat',
+    'addPanelToChat',
   ],
 } as const;

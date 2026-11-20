@@ -17,15 +17,15 @@ import {
   getDashboardPanelAttachmentId,
 } from '@kbn/agent-builder-dashboards-common';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
-import { REFINE_WITH_CHAT_ACTION_ID, type DashboardApi } from '@kbn/dashboard-plugin/public';
+import { ADD_TO_CHAT_ACTION_ID, type DashboardApi } from '@kbn/dashboard-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { createCanvasDashboardRegistry, type IdGenerator } from '../attachment_types';
-import { DASHBOARD_PANEL_REFINE_WITH_CHAT_CLICKED } from '../telemetry/event_types';
+import { DASHBOARD_PANEL_ADD_TO_CHAT_CLICKED } from '../telemetry/event_types';
 import {
-  createRefineWithChatAction,
-  REFINE_WITH_CHAT_INITIAL_MESSAGE,
-  type RefineWithChatActionDeps,
-} from './refine_with_chat_action';
+  createAddToChatAction,
+  ADD_TO_CHAT_INITIAL_MESSAGE,
+  type AddToChatActionDeps,
+} from './add_to_chat_action';
 
 const DRAFT_ID = 'draft-attachment-id';
 const pointerId = (dashboardAttachmentId: string) =>
@@ -126,7 +126,7 @@ const createAction = ({
     events: {
       ui: { activeConversation$: new BehaviorSubject<ActiveConversation | null>(active) },
     },
-  } as unknown as RefineWithChatActionDeps['agentBuilder'];
+  } as unknown as AddToChatActionDeps['agentBuilder'];
   const canvasDashboards = createCanvasDashboardRegistry();
   if (canvasDashboardApi) {
     canvasDashboards.register(canvasDashboardApi, {
@@ -134,7 +134,7 @@ const createAction = ({
       closeCanvas,
     });
   }
-  const action = createRefineWithChatAction({
+  const action = createAddToChatAction({
     agentBuilder,
     dashboardAppApi$: new BehaviorSubject<DashboardApi | undefined>(dashboardApi),
     canvasDashboards,
@@ -149,13 +149,13 @@ type Action = ReturnType<typeof createAction>['action'];
 const isCompatible = (action: Action, embeddable: unknown) => action.isCompatible!({ embeddable });
 const execute = (action: Action, embeddable: unknown) => action.execute({ embeddable });
 
-describe('createRefineWithChatAction', () => {
+describe('createAddToChatAction', () => {
   it('registers under the shared action id', () => {
-    expect(createAction().action.id).toBe(REFINE_WITH_CHAT_ACTION_ID);
+    expect(createAction().action.id).toBe(ADD_TO_CHAT_ACTION_ID);
   });
 
   it('prefills the input with the dashboards skill badge and a caret-able separator', () => {
-    expect(REFINE_WITH_CHAT_INITIAL_MESSAGE).toBe('[/dashboards](skill://dashboards) ');
+    expect(ADD_TO_CHAT_INITIAL_MESSAGE).toBe('[/dashboards](skill://dashboards) ');
   });
 
   describe('isCompatible', () => {
@@ -254,7 +254,7 @@ describe('createRefineWithChatAction', () => {
       expect(openChat).toHaveBeenCalledWith({
         newConversation: true,
         sessionTag: 'dashboard',
-        initialMessage: REFINE_WITH_CHAT_INITIAL_MESSAGE,
+        initialMessage: ADD_TO_CHAT_INITIAL_MESSAGE,
         autoSendInitialMessage: false,
         attachments: [
           expect.objectContaining({
@@ -265,7 +265,7 @@ describe('createRefineWithChatAction', () => {
           expectedPointer(DRAFT_ID),
         ],
       });
-      expect(reportEvent).toHaveBeenCalledWith(DASHBOARD_PANEL_REFINE_WITH_CHAT_CLICKED, {
+      expect(reportEvent).toHaveBeenCalledWith(DASHBOARD_PANEL_ADD_TO_CHAT_CLICKED, {
         panel_type: LENS_EMBEDDABLE_TYPE,
         chat_state: 'new_conversation',
         is_saved_dashboard: true,
@@ -283,7 +283,7 @@ describe('createRefineWithChatAction', () => {
       expect(addAttachment).toHaveBeenCalledTimes(1);
       expect(addAttachment).toHaveBeenCalledWith(expectedPointer('linked-attachment-id'));
       expect(reportEvent).toHaveBeenCalledWith(
-        DASHBOARD_PANEL_REFINE_WITH_CHAT_CLICKED,
+        DASHBOARD_PANEL_ADD_TO_CHAT_CLICKED,
         expect.objectContaining({ chat_state: 'linked_attachment' })
       );
     });
@@ -299,7 +299,7 @@ describe('createRefineWithChatAction', () => {
       expect(addAttachment).toHaveBeenCalledTimes(1);
       expect(addAttachment).toHaveBeenCalledWith(expectedPointer('linked-attachment-id'));
       expect(reportEvent).toHaveBeenCalledWith(
-        DASHBOARD_PANEL_REFINE_WITH_CHAT_CLICKED,
+        DASHBOARD_PANEL_ADD_TO_CHAT_CLICKED,
         expect.objectContaining({ chat_state: 'linked_attachment', is_saved_dashboard: false })
       );
     });
@@ -318,7 +318,7 @@ describe('createRefineWithChatAction', () => {
       );
       expect(addAttachment).toHaveBeenNthCalledWith(2, expectedPointer(DRAFT_ID));
       expect(reportEvent).toHaveBeenCalledWith(
-        DASHBOARD_PANEL_REFINE_WITH_CHAT_CLICKED,
+        DASHBOARD_PANEL_ADD_TO_CHAT_CLICKED,
         expect.objectContaining({ chat_state: 'staged_attachment' })
       );
     });
@@ -342,7 +342,7 @@ describe('createRefineWithChatAction', () => {
       );
       expect(addAttachment).toHaveBeenNthCalledWith(2, expectedPointer(DRAFT_ID));
       expect(reportEvent).toHaveBeenCalledWith(
-        DASHBOARD_PANEL_REFINE_WITH_CHAT_CLICKED,
+        DASHBOARD_PANEL_ADD_TO_CHAT_CLICKED,
         expect.objectContaining({ chat_state: 'staged_attachment' })
       );
     });
@@ -360,7 +360,7 @@ describe('createRefineWithChatAction', () => {
       expect(addAttachment).toHaveBeenCalledTimes(1);
       expect(addAttachment).toHaveBeenCalledWith(expectedPointer(CANVAS_ATTACHMENT_ID));
       expect(reportEvent).toHaveBeenCalledWith(
-        DASHBOARD_PANEL_REFINE_WITH_CHAT_CLICKED,
+        DASHBOARD_PANEL_ADD_TO_CHAT_CLICKED,
         expect.objectContaining({ chat_state: 'canvas' })
       );
     });

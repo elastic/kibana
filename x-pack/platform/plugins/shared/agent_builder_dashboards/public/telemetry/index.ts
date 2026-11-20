@@ -7,17 +7,14 @@
 
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core/public';
 import { once } from 'lodash';
-import {
-  DASHBOARD_PANEL_REFINE_WITH_CHAT_CLICKED,
-  type RefineWithChatClickedEvent,
-} from './event_types';
+import { DASHBOARD_PANEL_ADD_TO_CHAT_CLICKED, type AddToChatClickedEvent } from './event_types';
 
-export type { RefineWithChatChatState, RefineWithChatClickedEvent } from './event_types';
+export type { AddToChatChatState, AddToChatClickedEvent } from './event_types';
 
 export const registerAgentBuilderDashboardsAnalyticsEvents = once(
   (analytics: AnalyticsServiceSetup) => {
     analytics.registerEventType({
-      eventType: DASHBOARD_PANEL_REFINE_WITH_CHAT_CLICKED,
+      eventType: DASHBOARD_PANEL_ADD_TO_CHAT_CLICKED,
       schema: {
         panel_type: {
           type: 'keyword',
@@ -43,13 +40,13 @@ export const registerAgentBuilderDashboardsAnalyticsEvents = once(
   }
 );
 
-/** Reports a "Refine with chat" click; telemetry failures never break the action. */
-export const reportRefineWithChatClicked = (
+/** Reports an "Add to chat" click; telemetry failures never break the action. */
+export const reportAddToChatClicked = (
   analytics: AnalyticsServiceStart,
-  event: RefineWithChatClickedEvent
+  event: AddToChatClickedEvent
 ): void => {
   try {
-    analytics.reportEvent(DASHBOARD_PANEL_REFINE_WITH_CHAT_CLICKED, { ...event });
+    analytics.reportEvent(DASHBOARD_PANEL_ADD_TO_CHAT_CLICKED, { ...event });
   } catch {
     // never break the action on telemetry errors
   }

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-export const DASHBOARD_PANEL_REFINE_WITH_CHAT_CLICKED = 'dashboard_panel_refine_with_chat_clicked';
+export const DASHBOARD_PANEL_ADD_TO_CHAT_CLICKED = 'dashboard_panel_add_to_chat_clicked';
 
-/** How the action reached the chat when the user clicked "Refine with chat". */
-export type RefineWithChatChatState =
+/** How the action reached the chat when the user clicked "Add to chat". */
+export type AddToChatChatState =
   | 'new_conversation'
   | 'linked_attachment'
   | 'staged_attachment'
   | 'canvas';
 
-export interface RefineWithChatClickedEvent {
+export interface AddToChatClickedEvent {
   panel_type: string;
-  chat_state: RefineWithChatChatState;
+  chat_state: AddToChatChatState;
   is_saved_dashboard: boolean;
 }

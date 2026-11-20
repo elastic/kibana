@@ -10,10 +10,10 @@
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 
 /**
- * Panel action that sends a dashboard panel to the chat so the agent can refine it in place.
+ * Panel action that sends a dashboard panel to the chat so the user can ask about it or change it.
  * Registered by the agent builder dashboards plugin; the id lives here so any panel can run it
  * through `uiActions` without depending on that plugin.
  */
-export const REFINE_WITH_CHAT_ACTION_ID = 'refinePanelWithChat';
+export const ADD_TO_CHAT_ACTION_ID = 'addPanelToChat';
 
-export type RefineWithChatActionContext = EmbeddableApiContext;
+export type AddToChatActionContext = EmbeddableApiContext;

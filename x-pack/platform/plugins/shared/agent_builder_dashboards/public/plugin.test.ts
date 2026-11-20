@@ -9,7 +9,7 @@ import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
   ENHANCE_DASHBOARD_ACTION_ID,
-  REFINE_WITH_CHAT_ACTION_ID,
+  ADD_TO_CHAT_ACTION_ID,
 } from '@kbn/dashboard-plugin/public';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { AgentBuilderDashboardsPlugin } from './plugin';
@@ -84,11 +84,8 @@ describe('AgentBuilderDashboardsPlugin', () => {
       ENHANCE_DASHBOARD_ACTION_ID,
       expect.any(Function)
     );
-    expect(registerActionAsync).toHaveBeenCalledWith(
-      REFINE_WITH_CHAT_ACTION_ID,
-      expect.any(Function)
-    );
-    expect(attachAction).toHaveBeenCalledWith(ON_OPEN_PANEL_MENU, REFINE_WITH_CHAT_ACTION_ID);
+    expect(registerActionAsync).toHaveBeenCalledWith(ADD_TO_CHAT_ACTION_ID, expect.any(Function));
+    expect(attachAction).toHaveBeenCalledWith(ON_OPEN_PANEL_MENU, ADD_TO_CHAT_ACTION_ID);
 
     const openChatAction = await registerActionAsync.mock.calls[0][1]();
     expect(openChatAction.id).toBe(OPEN_DASHBOARD_CHAT_ACTION_ID);
