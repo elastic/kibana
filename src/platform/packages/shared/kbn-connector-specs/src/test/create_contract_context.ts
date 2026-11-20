@@ -10,7 +10,12 @@
 import { generateKeyPairSync, webcrypto } from 'crypto';
 import { Readable } from 'stream';
 import axios from 'axios';
-import type { Emulator, EmulatorOptions } from '@kbn/connector-emulate';
+import type {
+  Emulator,
+  EmulatorOptions,
+  NamedOperationRef,
+  OperationRef,
+} from '@kbn/connector-emulate';
 import { createEmulatorFetch, issueAccessToken } from '@kbn/connector-emulate';
 import type { Logger } from '@kbn/logging';
 import { z } from '@kbn/zod/v4';
@@ -22,6 +27,8 @@ import type {
   NormalizedAuthType,
 } from '../connector_spec';
 import { getSchemaForAuthType } from '../lib';
+import type { FieldUse } from './field_use';
+import { markReturned, recordSentFields, trackFieldUse } from './field_use';
 
 export interface ContractContextOptions extends EmulatorOptions {
   readonly connector: ConnectorSpec;
@@ -30,6 +37,15 @@ export interface ContractContextOptions extends EmulatorOptions {
   /** Secrets for the auth type; fields left out get placeholders the auth schema accepts. */
   readonly secrets?: Readonly<Record<string, unknown>>;
   readonly config?: Readonly<Record<string, unknown>>;
+  /**
+   * Records what the handlers do with the response bodies: returns where to record the use of an
+   * operation's responses, by its source, method (lowercase) and path template.
+   */
+  readonly trackFields?: (operation: {
+    readonly source?: string;
+    readonly method: string;
+    readonly path: string;
+  }) => FieldUse;
 }
 
 export interface ContractContext {
@@ -141,6 +157,18 @@ const toSecrets = (
   return schema.parse(secrets);
 };
 
+// Axios sends JSON bodies as strings; other bodies have no fields to record.
+const parseJsonBody = (data: unknown): unknown => {
+  if (typeof data !== 'string') {
+    return undefined;
+  }
+  try {
+    return JSON.parse(data);
+  } catch {
+    return undefined;
+  }
+};
+
 // Not a jest mock, so the vendor API recorder can run outside jest.
 const silentLogger: Logger = {
   trace: () => {},
@@ -169,6 +197,23 @@ const ensureWebCrypto = () => {
   if (!globalThis.crypto?.subtle) {
     Object.defineProperty(globalThis, 'crypto', { value: webcrypto, configurable: true });
   }
+};
+
+/**
+ * The axios fetch adapter keeps every `env.fetch` it is given in a module-level map, forever. A
+ * mock closes over its operations, which for large specs (Microsoft Graph) are gigabytes, so
+ * axios gets a function that holds the mock weakly: the context owns the mock for as long as it
+ * is used, and a collected context takes the mock with it.
+ */
+const holdWeakly = (target: Emulator): typeof fetch => {
+  const ref = new WeakRef(target);
+  return (input, init) => {
+    const held = ref.deref();
+    if (held === undefined) {
+      throw new Error('The contract mock was used after its context was released');
+    }
+    return held.fetch(input, init);
+  };
 };
 
 let guards = 0;
@@ -205,9 +250,24 @@ export const createContractContext = async ({
   authType,
   secrets = {},
   config = {},
+  trackFields,
   ...mockOptions
 }: ContractContextOptions): Promise<ContractContext> => {
-  const mock = createEmulatorFetch(mockOptions);
+  // The operation each request matched, recorded as the mock answers that request. The adapter
+  // passes the `Request` it built and hands the same object back as `response.request`, so this
+  // ties a response to its own operation even when several requests are in flight at once, which
+  // their order in `mock.calls` would not.
+  const matchedOf = new WeakMap<Request, OperationRef | NamedOperationRef>();
+  const mock = createEmulatorFetch({
+    ...mockOptions,
+    onCall: (call, request) => {
+      mockOptions.onCall?.(call, request);
+      // Token requests authenticate the run; they aren't the vendor operation the request calls.
+      if (trackFields && !call.token && call.matched && request instanceof Request) {
+        matchedOf.set(request, call.matched);
+      }
+    },
+  });
   const definitions = connector.auth?.types.length ? connector.auth.types : ['none'];
   const definition =
     authType === undefined
@@ -222,7 +282,10 @@ export const createContractContext = async ({
   const authSecrets = toSecrets(schema, { ...secrets, authType: id });
 
   const streamed = new WeakSet<object>();
-  const client = axios.create({ adapter: 'fetch', env: { fetch: mock.fetch } });
+  const client = axios.create({
+    adapter: 'fetch',
+    env: { fetch: holdWeakly(mock) },
+  });
   // Registered first, so it runs after the interceptors that connectors add.
   client.interceptors.request.use(async (requestConfig) => {
     if (requestConfig.data instanceof FormData) {
@@ -237,11 +300,28 @@ export const createContractContext = async ({
     }
     return requestConfig;
   });
-  client.interceptors.response.use((response) =>
-    streamed.has(response.config)
-      ? { ...response, data: Readable.from([Buffer.from(response.data)]) }
-      : response
-  );
+  client.interceptors.response.use((response) => {
+    if (streamed.has(response.config)) {
+      return { ...response, data: Readable.from([Buffer.from(response.data)]) };
+    }
+    if (!trackFields) {
+      return response;
+    }
+    // The operation this very request matched, recorded while it was in flight.
+    const matched =
+      response.request instanceof Request ? matchedOf.get(response.request) : undefined;
+    if (!matched || !('method' in matched)) {
+      return response;
+    }
+    const use = trackFields(matched);
+    recordSentFields(parseJsonBody(response.config.data), use);
+    // Query parameters, from `params` or the URL, recorded as `?name`.
+    const url = new URL(client.getUri(response.config));
+    for (const name of new Set(url.searchParams.keys())) {
+      use.sent.add(`?${name}`);
+    }
+    return { ...response, data: trackFieldUse(response.data, use) };
+  });
   for (const [name, value] of Object.entries(connector.auth?.headers ?? {})) {
     client.defaults.headers.common[name] = value;
   }
@@ -267,7 +347,11 @@ export const createContractContext = async ({
       throw new Error(`${connector.metadata.id} has no action ${name}`);
     }
     const parsed = await action.input.parseAsync(input);
-    return withoutGlobalFetch(() => action.handler(ctx, parsed));
+    const result = await withoutGlobalFetch(() => action.handler(ctx, parsed));
+    if (trackFields) {
+      markReturned(result);
+    }
+    return result;
   };
 
   return { ctx, mock, runAction };

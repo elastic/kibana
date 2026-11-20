@@ -89,7 +89,10 @@ export {
   buildInboundEventsUrl,
   INBOUND_EVENTS_TOKEN_MAX_LENGTH,
 } from './inbound_events';
-export { ACTIONS_INBOUND_EVENTS_ENABLED_FLAG } from './feature_flags';
+export {
+  ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG,
+  ACTIONS_INBOUND_EVENTS_ENABLED_FLAG,
+} from './feature_flags';
 export {
   buildConnectorPublicKeyUrls,
   CONNECTOR_PUBLIC_KEYS_API_PATH,

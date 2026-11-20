@@ -293,6 +293,7 @@ export {
   ZERO_MODEL_USAGE,
   isZeroModelUsage,
   type CompactionSummary,
+  type DynamicToolDefinition,
   type CompactionCursor,
   type ToolCallRef,
   type CompactionStructuredData,
@@ -533,9 +534,12 @@ export {
   type ValidConversationEventType,
   assertValidConversationEventType,
   type ConversationAddEventInput,
+  type ChatCallbackEvent,
   type ChatCallbackEventResponse,
+  type ChatCallbackExecutionTerminatedEvent,
   type ChatCallbackFailureResponse,
   type ChatCallbackResponse,
+  type ChatCallbackToolCall,
 } from './chat';
 export {
   type PublicSkillDefinition,

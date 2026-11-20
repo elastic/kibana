@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { MAX_ARRAY_LENGTH, MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { InvestigationQuotaDeniedError } from '../client/errors';
 import type { GetInvestigationsClient } from '../routes/types';
 import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
@@ -31,7 +31,8 @@ const logger = loggingSystemMock.createLogger();
 const createContext = (
   input: Record<string, unknown>,
   triggeredBy = 'scheduled',
-  metadata: Record<string, string> = {}
+  metadata: Record<string, string> = {},
+  event?: Record<string, unknown>
 ) =>
   ({
     input,
@@ -41,6 +42,7 @@ const createContext = (
       getContext: jest.fn().mockReturnValue({
         workflow: { id: 'wf-1', spaceId: 'test-space' },
         execution: { triggeredBy },
+        event,
         metadata,
         kibanaUrl: 'https://kibana.example.com',
       }),
@@ -328,7 +330,7 @@ describe('triggerInvestigationStepDefinition', () => {
     );
   });
 
-  it('forwards an explicit prompt and source ids unchanged', async () => {
+  it('forwards an explicit prompt unchanged', async () => {
     const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
     const { definition } = createDefinition(start);
 
@@ -338,14 +340,12 @@ describe('triggerInvestigationStepDefinition', () => {
         subject_id: 'event-1',
         title: 'Checkout latency breach',
         message: 'Checkout latency breach\n\nThe probable cause is Redis saturation.',
-        source_ids: ['logs.checkout', 'metrics.checkout'],
       })
     );
 
     expect(start).toHaveBeenCalledWith(
       expect.objectContaining({
         message: 'Checkout latency breach\n\nThe probable cause is Redis saturation.',
-        source_ids: ['logs.checkout', 'metrics.checkout'],
       }),
       expect.anything()
     );
@@ -428,6 +428,34 @@ describe('triggerInvestigationStepDefinition', () => {
     );
   });
 
+  it('summarizes a Slack thread by the message that started the run, not the step summary', async () => {
+    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const { definition } = createDefinition(start);
+
+    await definition.handler(
+      createContext(
+        {
+          subject_type: 'slack_thread',
+          summary: 'Investigate alerts posted in #alerts',
+          message: 'Slack message from O11y Alert in channel C1: ...',
+          slack_thread: { workspace: 'T1', channel: 'C1', thread_ts: '1.1' },
+        },
+        'slack2.message',
+        {},
+        { text: '*CRITICAL:* burn rate above 20 <https://kibana.example.com/a|Alert details>' }
+      )
+    );
+
+    expect(start).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subject: expect.objectContaining({
+          summary: 'CRITICAL: burn rate above 20 Alert details',
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
   it('rejects a Slack thread without a workspace', async () => {
     const start = jest.fn();
     const { definition } = createDefinition(start);
@@ -462,7 +490,7 @@ describe('triggerInvestigationStepDefinition', () => {
     expect(start).not.toHaveBeenCalled();
   });
 
-  it('rejects invalid prompt and source inputs before starting', async () => {
+  it('rejects invalid prompts before starting', async () => {
     const start = jest.fn();
     const { definition } = createDefinition(start);
 
@@ -482,18 +510,7 @@ describe('triggerInvestigationStepDefinition', () => {
           subject_type: 'significant_event',
           subject_id: 'event-1',
           title: 'Checkout latency breach',
-          source_ids: Array.from({ length: MAX_ARRAY_LENGTH + 1 }, () => 'logs.checkout'),
-        })
-      )
-    ).rejects.toThrow();
-    await expect(
-      definition.handler(
-        createContext({
-          subject_type: 'significant_event',
-          subject_id: 'event-1',
-          title: 'Checkout latency breach',
           message: 'x'.repeat(MAX_TEXT_LENGTH + 1),
-          source_ids: ['x'.repeat(MAX_ID_LENGTH + 1)],
         })
       )
     ).rejects.toThrow();
@@ -581,14 +598,14 @@ describe('investigation quota notice', () => {
   });
 });
 
-it('starts a manual question with a fresh subject and forwards scope and timeout', async () => {
+it('starts a manual question with a fresh subject and forwards context and timeout', async () => {
   const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
   const { definition } = createDefinition(start);
   await definition.handler(
     createContext({
       subject_type: 'manual',
       message: 'Review checkout errors.',
-      scope_query: 'service.name:checkout',
+      context: { service: 'checkout' },
       timeout_seconds: 30,
     })
   );
@@ -597,7 +614,7 @@ it('starts a manual question with a fresh subject and forwards scope and timeout
       subject: { type: 'manual', id: 'manual', summary: undefined },
       message: 'Review checkout errors.',
       trigger_type: 'automatic',
-      context: { scope_query: 'service.name:checkout' },
+      context: { service: 'checkout' },
       timeout_seconds: 30,
     }),
     expect.anything()
@@ -671,6 +688,10 @@ describe('automation budget enforcement before dispatch', () => {
         origin: subjectType,
         automation_id: 'a1',
         skip_reason: 'automation_daily_limit',
+        event_id: subjectType === 'significant_event' ? 'subject-1' : undefined,
+        ...(subjectType === 'alert'
+          ? { alert_version: 'v2', alert_source: 'other.source', source_kind: 'external' }
+          : {}),
       });
       expect(soClient.update).not.toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith(
@@ -698,7 +719,6 @@ describe('automation budget enforcement before dispatch', () => {
           ...input,
           subject_id: 'shared-old-subject',
           trigger_type: 'automatic',
-          scope_query: 'service.name:checkout',
           timeout_seconds: 30,
           notificationDestinations: [
             { type: 'slack', connector_id: 'slack', params: { channel: 'C1' } },
@@ -711,7 +731,6 @@ describe('automation budget enforcement before dispatch', () => {
       expect.objectContaining({
         subject: expect.objectContaining({ type: 'manual', id: 'manual' }),
         trigger_type: 'manual',
-        context: { scope_query: 'service.name:checkout' },
         timeout_seconds: 30,
         message: 'Review errors.',
         notificationDestinations: [

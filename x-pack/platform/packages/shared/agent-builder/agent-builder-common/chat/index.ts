@@ -82,6 +82,7 @@ export {
   ZERO_MODEL_USAGE,
   isZeroModelUsage,
   type CompactionSummary,
+  type DynamicToolDefinition,
   type CompactionCursor,
   type ToolCallRef,
   type CompactionStructuredData,
@@ -321,7 +322,10 @@ export {
   type ConversationAddEventInput,
 } from './timeline_events';
 export type {
+  ChatCallbackEvent,
   ChatCallbackEventResponse,
+  ChatCallbackExecutionTerminatedEvent,
   ChatCallbackFailureResponse,
   ChatCallbackResponse,
+  ChatCallbackToolCall,
 } from './callback';
