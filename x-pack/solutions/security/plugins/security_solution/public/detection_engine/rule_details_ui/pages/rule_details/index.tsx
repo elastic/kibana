@@ -31,7 +31,6 @@ import { connect, useDispatch } from 'react-redux-v7';
 import styled from 'styled-components';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { Dispatch } from 'redux-v4';
-import { isTab } from '@kbn/timelines-plugin/public';
 import {
   dataTableActions,
   dataTableSelectors,
@@ -39,6 +38,7 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { isTab } from '../../../../common/utils/accessibility';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { RuleCustomizationsContextProvider } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';

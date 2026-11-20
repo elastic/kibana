@@ -86,10 +86,12 @@ in `kibana-fips`". The issue's `suite.branches` only lists the branch, so `/skip
 on that branch in every pipeline. A pipeline added to the report is judged on its own unless it is
 added to those judged together too.
 
-Breakages don't count as flakiness. A breakage is a run of at least 3 failed builds in a row in one
-pipeline, config and target, a failure that passed on a retry included, with less than a 1% chance
-for a test failing at random as often. A test in a breakage up to its latest build is broken right
-now and is dropped from the report. A test whose breakages are over is checked against the
+Breakages don't count as flakiness. A breakage is a run of at least 3 builds in a row in one
+pipeline, config and target where the test failed every attempt, with less than a 1% chance for a
+test failing every attempt at random as often. A build where a retry passed ends the run: a test
+that fails, then passes on a retry, build after build is flaky, not broken, and stays in the report.
+A test in a breakage up to its latest build is broken right now and is dropped from the report, as
+it's the consistently failing check's to report. A test whose breakages are over is checked against the
 thresholds again without their builds: it's dropped if it no longer clears them, and otherwise
 kept, counted and ranked without those builds. Each test dropped this way is logged with the
 breakage that dropped it, or the longest one, and each test kept with how many builds it lost.
