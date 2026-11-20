@@ -826,9 +826,9 @@ export const fetchDecisionCandidates = async (
   filters: TriageFilters,
   { after }: { after?: DecisionCursor } = {}
 ): Promise<DecisionCandidatesPage> => {
-  const { body } = await callKibanaApi<{
-    hits?: { hits?: Array<AlertHit & { sort?: unknown[] }> };
-  }>({
+  const { body } = await callKibanaApi<
+    SearchCompleteness & { hits?: { hits?: Array<AlertHit & { sort?: unknown[] }> } }
+  >({
     method: 'POST',
     path: SIGNALS_SEARCH_PATH,
     body: {
@@ -870,6 +870,8 @@ export const fetchDecisionCandidates = async (
       },
     },
   });
+  // A partial page would end the paging early and read as "no more candidates".
+  assertCompleteSearch(body);
   const hits = body.hits?.hits ?? [];
   const lastTimestamp = Number(hits[hits.length - 1]?.sort?.[0]);
   return {

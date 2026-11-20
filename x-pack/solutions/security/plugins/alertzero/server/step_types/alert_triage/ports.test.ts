@@ -795,6 +795,15 @@ describe('helpers that drive a write, on a partial search result', () => {
     ['findAlertIdsByTag', (api) => findAlertIdsByTag(api, 'az:closed_by_decision:fp-decision-1')],
     ['findOpenAlertIds', (api) => findOpenAlertIds(api, ['a'])],
     ['findAlertsNotClosedAsFalsePositive', (api) => findAlertsNotClosedAsFalsePositive(api, ['a'])],
+    [
+      'fetchDecisionCandidates',
+      (api) =>
+        fetchDecisionCandidates(api, 'alert_analysis:', 0, {
+          minSeverity: 'low',
+          excludeBuildingBlocks: false,
+          excludedRuleTags: [],
+        }),
+    ],
   ];
   const complete = {
     timed_out: false,
