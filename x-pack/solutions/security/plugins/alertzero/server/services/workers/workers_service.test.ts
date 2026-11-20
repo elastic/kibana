@@ -8,6 +8,7 @@
 import { parse } from 'yaml';
 import type { IUiSettingsClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { createBadRequestError } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import {
@@ -333,6 +334,27 @@ describe('WorkersService', () => {
         'space-a'
       );
       expect(stateAfter?.documentVersion).toBe(revision);
+    });
+
+    it('refuses the enable as blocked, not a retryable outage, when another agent holds the id', async () => {
+      const harness = createPersistentHarness();
+      const requireAgentForSpace = jest.fn(async () => {
+        throw createBadRequestError(
+          'Cannot ensure agent "alertzero-thin-agent": the id is already used by an agent of type "other"'
+        );
+      });
+
+      await expect(
+        harness
+          .createService(undefined, undefined, { requireAgentForSpace })
+          .update(
+            RULE_TUNING,
+            { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+            'space-a',
+            request
+          )
+      ).resolves.toEqual({ outcome: 'blocked', reason: 'sharedAgentIdTaken' });
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
     });
 
     it('uses the best-effort ensure, not the required one, when listing workers', async () => {
@@ -1648,6 +1670,26 @@ describe('WorkersService', () => {
       expect(threatIntelSupply.ensureSupplyForSpace).not.toHaveBeenCalled();
     });
 
+    it('does not store the shared agent when the hard-gate fails', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      threatIntelSupply.assertHardGate.mockRejectedValue(
+        new ThreatIntelSupplyHardGateError(['embedding_endpoint_unavailable'])
+      );
+      const requireAgentForSpace = jest.fn(async () => undefined);
+      const service = makeHuntService(harness, threatIntelSupply, { requireAgentForSpace });
+
+      const result = await service.update(
+        HUNT,
+        { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
+        SPACE,
+        request
+      );
+
+      expect(result).toEqual({ outcome: 'blocked', reason: 'huntSupplyPrerequisitesUnmet' });
+      expect(requireAgentForSpace).not.toHaveBeenCalled();
+    });
+
     it('returns huntSupplyNotInstalled when TI docs are missing', async () => {
       const harness = createPersistentHarness();
       const threatIntelSupply = makeThreatIntelSupply();
@@ -1733,7 +1775,7 @@ describe('WorkersService', () => {
       expect(threatIntelSupply.teardownSupplyForSpace).toHaveBeenCalledWith(SPACE, request);
     });
 
-    it('does not touch TI supply when the shared agent ensure fails', async () => {
+    it('does not change TI supply when the shared agent ensure fails', async () => {
       const harness = createPersistentHarness();
       const threatIntelSupply = makeThreatIntelSupply();
       const service = makeHuntService(harness, threatIntelSupply, {
@@ -1755,7 +1797,8 @@ describe('WorkersService', () => {
         )
       ).resolves.toEqual({ outcome: 'unavailable' });
 
-      expect(threatIntelSupply.assertHardGate).not.toHaveBeenCalled();
+      // The read-only hard gate runs first; nothing that writes supply does.
+      expect(threatIntelSupply.assertHardGate).toHaveBeenCalledTimes(1);
       expect(threatIntelSupply.ensureSupplyForSpace).not.toHaveBeenCalled();
       expect(threatIntelSupply.teardownSupplyForSpace).not.toHaveBeenCalled();
       expect(harness.updateWorkflow).not.toHaveBeenCalled();
@@ -1800,7 +1843,8 @@ describe('WorkersService', () => {
         outcome: 'unavailable',
       });
 
-      expect(threatIntelSupply.assertHardGate).not.toHaveBeenCalled();
+      // The read-only hard gate runs first; nothing that writes supply does.
+      expect(threatIntelSupply.assertHardGate).toHaveBeenCalledTimes(1);
       expect(threatIntelSupply.ensureSupplyForSpace).not.toHaveBeenCalled();
       expect(threatIntelSupply.teardownSupplyForSpace).not.toHaveBeenCalled();
       expect(harness.documents.get(`${HUNT}-${SPACE}`)?.enabled).toBe(true);

@@ -1097,6 +1097,7 @@ describe('AgentExecutionService', () => {
       // conversations included; this guard only adds the read on the `trigger_mode: 'never'`
       // path, which never reaches it.
       expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
+      expect(agentRegistry.get).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -2549,6 +2550,19 @@ describe('AgentExecutionService', () => {
 
       expect(events.map(({ type }) => type)).toEqual([ChatEventType.conversationUpdated]);
       expect(findConversationEvent(events).data.conversation_id).toBe('conversation-1');
+    });
+
+    it('does not create a conversation for an agent the caller cannot use', async () => {
+      conversationClient.exists.mockResolvedValue(false);
+      agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'agent-1' }));
+
+      await expect(append({ conversationId: undefined })).rejects.toThrow(
+        'Agent agent-1 not found'
+      );
+
+      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     });
 
     it('creates the conversation when the request names none', async () => {
