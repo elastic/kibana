@@ -62,6 +62,10 @@ const grants = {
     names: [ENTITIES_ALIAS_INDEX, LATEST_ENTITY_INDEX],
     privileges: ['read', 'write', 'view_index_metadata'],
   },
+  entityStoreReadWriteNoMetadata: {
+    names: [ENTITIES_ALIAS_INDEX, LATEST_ENTITY_INDEX],
+    privileges: ['read', 'write'],
+  },
   entityStoreRead: {
     names: [ENTITIES_ALIAS_INDEX, LATEST_ENTITY_INDEX],
     privileges: ['read', 'view_index_metadata'],
@@ -91,8 +95,12 @@ const allRequiredGrants = [
  * Permissions matrix for the on-demand entity risk score calculation route.
  *
  * The route runs as the requesting user, so it checks up front the indices the calculation reads
- * and writes (risk score index, risk score lookup index and entity store) and returns a 403 if any
- * is missing. It must not require the cluster privileges needed to install or run the risk engine.
+ * and writes and returns a 403 if any privilege is missing:
+ * - alerts index: `read` and `view_index_metadata`
+ * - risk score index: `read`, `write`
+ * - risk score lookup index: `read`
+ * - entity store: `read`, `write`, and `view_index_metadata` on the latest index
+ * It must not require the cluster privileges needed to install or run the risk engine.
  */
 apiTest.describe('Entity risk score calculation privileges', { tag: ENTITY_STORE_TAGS }, () => {
   apiTest.setTimeout(180_000);
@@ -200,6 +208,22 @@ apiTest.describe('Entity risk score calculation privileges', { tag: ENTITY_STORE
       indices: [
         grants.entityStoreReadWrite,
         grants.riskScoreRead,
+        grants.lookupRead,
+        grants.calculationInputsRead,
+      ],
+    },
+    {
+      name: 'view_index_metadata on the alerts index, which the alerts index exists check needs',
+      indices: [
+        ...allRequiredGrants.filter((grant) => grant !== grants.calculationInputsRead),
+        { ...grants.calculationInputsRead, privileges: ['read'] },
+      ],
+    },
+    {
+      name: 'view_index_metadata on the entity store, which its installed check needs',
+      indices: [
+        grants.entityStoreReadWriteNoMetadata,
+        grants.riskScoreReadWrite,
         grants.lookupRead,
         grants.calculationInputsRead,
       ],
