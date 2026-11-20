@@ -19,7 +19,7 @@ interface FieldDescription {
  *
  * Used to describe connector sub-action parameters to the agent LLM.
  */
-export function describeJsonSchema(jsonSchema: Record<string, unknown>): FieldDescription[] {
+export function describeSchema(jsonSchema: Record<string, unknown>): FieldDescription[] {
   const resolved = inlineRootJsonSchemaRef(jsonSchema);
   if (resolved.type !== 'object' || !resolved.properties) {
     return [];
@@ -55,6 +55,6 @@ const formatFieldsForLlm = (fields: FieldDescription[]): string => {
 };
 
 /** Formats a serialized JSON Schema into a multi-line parameter summary string for the LLM. */
-export function formatJsonSchemaForLlm(jsonSchema: Record<string, unknown>): string {
-  return formatFieldsForLlm(describeJsonSchema(jsonSchema));
+export function formatSchemaForLlm(jsonSchema: Record<string, unknown>): string {
+  return formatFieldsForLlm(describeSchema(jsonSchema));
 }

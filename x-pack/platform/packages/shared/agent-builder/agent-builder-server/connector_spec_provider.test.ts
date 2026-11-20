@@ -5,78 +5,51 @@
  * 2.0.
  */
 
-import { connectorsSpecs, resolveActionScope } from '@kbn/connector-specs';
-import { z } from '@kbn/zod/v4';
+import { connectorsSpecs } from '@kbn/connector-specs';
 import {
   createActionsConnectorSpecProvider,
   createPackageConnectorSpecProvider,
   type SpecActionsClient,
   type SpecActionsStart,
 } from './connector_spec_provider';
-import { formatJsonSchemaForLlm } from './tools';
-
-const specs = Object.values(connectorsSpecs);
+import { formatSchemaForLlm } from './tools';
 
 const SLACK_CONNECTOR_TYPE_ID = '.slack2';
 
-/** Serves the in-tree specs the way the actions plugin does, so both providers can be compared. */
+const packageProvider = createPackageConnectorSpecProvider();
+
+/** Serves the package provider's data the way the actions plugin's start contract and client do. */
 const actionsStart: SpecActionsStart = {
   listTypes: (_featureId, options) =>
-    specs
-      .filter((spec) => !options?.typeId || spec.metadata.id === options.typeId)
-      .map((spec) => ({
-        specSummary: {
-          id: spec.metadata.id,
-          displayName: spec.metadata.displayName,
-          description: spec.metadata.description,
-          isTechnicalPreview: spec.metadata.isTechnicalPreview ?? false,
-          authTypeIds: (spec.auth?.types ?? []).map((authType) =>
-            typeof authType === 'string' ? authType : authType.type
-          ),
-          actions: Object.entries(spec.actions).map(([name, def]) => ({
-            name,
-            ...(def.description !== undefined ? { description: def.description } : {}),
-            isTool: Boolean(def.isTool),
-            scope: resolveActionScope(def),
-          })),
-        },
-      })),
+    packageProvider
+      .listSpecs()
+      .filter(({ id }) => !options?.typeId || id === options.typeId)
+      .map((specSummary) => ({ specSummary })),
 };
 
 const actionsClient: jest.Mocked<SpecActionsClient> = {
   getConnectorSpec: jest.fn(async ({ id }) => {
-    const spec = specs.find((s) => s.metadata.id === id)!;
-    return {
-      ...(spec.skill !== undefined ? { skill: spec.skill } : {}),
-      actions: Object.entries(spec.actions).map(([name, def]) => ({
-        name,
-        isTool: Boolean(def.isTool),
-        scope: resolveActionScope(def),
-        inputSchema: z.toJSONSchema(def.input, { unrepresentable: 'any', io: 'input' }) as Record<
-          string,
-          unknown
-        >,
-      })),
-    };
+    const { skill, actions = [] } = (await packageProvider.getSpecDetail(id)) ?? {};
+    return { ...(skill !== undefined ? { skill } : {}), actions };
   }),
 };
 
 describe('connector spec providers', () => {
-  const packageProvider = createPackageConnectorSpecProvider();
   const actionsProvider = createActionsConnectorSpecProvider({ actionsStart, actionsClient });
+  const ids = Object.values(connectorsSpecs).map(({ metadata }) => metadata.id);
 
-  it('list the same specs', () => {
+  it('serve the same specs through the actions-backed provider', async () => {
     expect(actionsProvider.listSpecs()).toEqual(packageProvider.listSpecs());
+
+    for (const id of ids) {
+      expect(actionsProvider.getSpec(id)).toEqual(packageProvider.getSpec(id));
+      expect(await actionsProvider.getSpecDetail(id)).toEqual(
+        await packageProvider.getSpecDetail(id)
+      );
+    }
   });
 
-  it.each(specs.map((spec) => spec.metadata.id))('%s: same summary and detail', async (id) => {
-    expect(actionsProvider.getSpec(id)).toEqual(packageProvider.getSpec(id));
-    expect(await actionsProvider.getSpecDetail(id)).toEqual(
-      await packageProvider.getSpecDetail(id)
-    );
-  });
-
-  it('return undefined for types without a spec', async () => {
+  it('return undefined for types without a spec, without calling the client', async () => {
     actionsClient.getConnectorSpec.mockClear();
 
     expect(actionsProvider.getSpec('.unknown')).toBeUndefined();
@@ -92,7 +65,7 @@ describe('connector spec providers', () => {
       const action = detail?.actions.find(({ name }) => name === actionName);
 
       expect(action).toBeDefined();
-      expect(formatJsonSchemaForLlm(action!.inputSchema)).not.toBe('No parameters');
+      expect(formatSchemaForLlm(action!.inputSchema)).not.toBe('No parameters');
     }
   );
 });

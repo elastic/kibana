@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import {
   createConnectorSpecProvider,
   filterSpecActionsBySelection,
-  formatJsonSchemaForLlm,
+  formatSchemaForLlm,
 } from '@kbn/agent-builder-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import {
@@ -124,7 +124,7 @@ export const createConnectorAttachmentType = ({
               parts.push('Note: only selected sub-actions are enabled; do not call others.');
             }
             for (const action of subActionEntries) {
-              const paramsSummary = formatJsonSchemaForLlm(action.inputSchema);
+              const paramsSummary = formatSchemaForLlm(action.inputSchema);
               parts.push(`  - ${formatConnectorActionLine(action.name, action)}`);
               parts.push(`    Parameters: ${paramsSummary}`);
             }

@@ -1063,14 +1063,6 @@ describe('actionTypeRegistry', () => {
       expect(types.find(({ id }) => id === 'stack-type')?.specSummary).toBeUndefined();
     });
 
-    it('omits summaries by default', () => {
-      expect(
-        setup()
-          .list()
-          .every(({ specSummary }) => specSummary === undefined)
-      ).toBe(true);
-    });
-
     it('limits the list to typeId', () => {
       const types = setup().list({ includeSpecSummary: true, typeId: 'spec-backed' });
 

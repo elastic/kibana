@@ -242,7 +242,7 @@ export {
   parseRetryAfterMs,
   throwIfNotDelivered,
 } from './callbacks';
-export { describeJsonSchema, formatJsonSchemaForLlm } from './tools';
+export { describeSchema, formatSchemaForLlm } from './tools';
 export type {
   AvailabilityContext,
   AvailabilityResult,

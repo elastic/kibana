@@ -11,7 +11,7 @@ import type {
   ConnectorSpecProvider,
   ConnectorSpecSummaryProvider,
 } from './connector_spec_provider';
-import { formatJsonSchemaForLlm } from './tools';
+import { formatSchemaForLlm } from './tools';
 
 /** Minimal actions-client interface needed by the connector helpers below. */
 interface MinimalActionsClient {
@@ -100,7 +100,7 @@ export const getAgentConnectorDetail = async (
     .map(({ name, description, inputSchema }) => ({
       name,
       description: description ?? name,
-      params: formatJsonSchemaForLlm(inputSchema),
+      params: formatSchemaForLlm(inputSchema),
     }));
 
   return {

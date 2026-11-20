@@ -13,7 +13,7 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import type { AgentFormattedAttachment } from '@kbn/agent-builder-server/attachments';
 import { getConnectorSpec } from '@kbn/connector-specs';
-import { formatJsonSchemaForLlm } from '@kbn/agent-builder-server';
+import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { z } from '@kbn/zod/v4';
 import { createConnectorAttachmentType } from './connector';
@@ -26,13 +26,11 @@ jest.mock('@kbn/connector-specs', () => ({
 
 jest.mock('@kbn/agent-builder-server', () => ({
   ...jest.requireActual('@kbn/agent-builder-server'),
-  formatJsonSchemaForLlm: jest.fn(),
+  formatSchemaForLlm: jest.fn(),
 }));
 
 const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
-const formatSchemaForLlmMock = formatJsonSchemaForLlm as jest.MockedFunction<
-  typeof formatJsonSchemaForLlm
->;
+const formatSchemaForLlmMock = formatSchemaForLlm as jest.MockedFunction<typeof formatSchemaForLlm>;
 
 const createAttachment = (
   data: ConnectorAttachmentData

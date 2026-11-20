@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { describeJsonSchema, formatJsonSchemaForLlm } from './schema_utils';
+import { describeSchema, formatSchemaForLlm } from './schema_utils';
 
-describe('describeJsonSchema', () => {
+describe('describeSchema', () => {
   it('extracts field names, types, required/optional, and descriptions', () => {
-    const fields = describeJsonSchema({
+    const fields = describeSchema({
       type: 'object',
       properties: {
         query: { type: 'string', description: 'The search query' },
@@ -24,16 +24,13 @@ describe('describeJsonSchema', () => {
     ]);
   });
 
-  it('returns an empty array for non-object schemas', () => {
-    expect(describeJsonSchema({ type: 'string' })).toEqual([]);
-  });
-
-  it('returns an empty array for an object schema without properties', () => {
-    expect(describeJsonSchema({ type: 'object' })).toEqual([]);
+  it('returns an empty array for non-object schemas and objects without properties', () => {
+    expect(describeSchema({ type: 'string' })).toEqual([]);
+    expect(describeSchema({ type: 'object' })).toEqual([]);
   });
 
   it('handles schemas with no descriptions', () => {
-    const fields = describeJsonSchema({
+    const fields = describeSchema({
       type: 'object',
       properties: { name: { type: 'string' } },
       required: ['name'],
@@ -43,7 +40,7 @@ describe('describeJsonSchema', () => {
   });
 
   it('treats a required field with a default as optional', () => {
-    const fields = describeJsonSchema({
+    const fields = describeSchema({
       type: 'object',
       properties: { limit: { type: 'number', default: 10, description: 'Page size' } },
       required: ['limit'],
@@ -53,7 +50,7 @@ describe('describeJsonSchema', () => {
   });
 
   it('falls back to "unknown" when a field has no type', () => {
-    const fields = describeJsonSchema({
+    const fields = describeSchema({
       type: 'object',
       properties: { anything: {} },
     });
@@ -62,7 +59,7 @@ describe('describeJsonSchema', () => {
   });
 
   it('resolves a root $ref before reading properties', () => {
-    const fields = describeJsonSchema({
+    const fields = describeSchema({
       $ref: '#/$defs/Input',
       $defs: {
         Input: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] },
@@ -73,9 +70,9 @@ describe('describeJsonSchema', () => {
   });
 });
 
-describe('formatJsonSchemaForLlm', () => {
+describe('formatSchemaForLlm', () => {
   it('formats fields into a multi-line string', () => {
-    const result = formatJsonSchemaForLlm({
+    const result = formatSchemaForLlm({
       type: 'object',
       properties: {
         query: { type: 'string', description: 'Search query' },
@@ -90,6 +87,6 @@ describe('formatJsonSchemaForLlm', () => {
   });
 
   it('returns "No parameters" for empty object schemas', () => {
-    expect(formatJsonSchemaForLlm({ type: 'object', properties: {} })).toBe('No parameters');
+    expect(formatSchemaForLlm({ type: 'object', properties: {} })).toBe('No parameters');
   });
 });
