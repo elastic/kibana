@@ -20,7 +20,7 @@ export interface BoostAgedPeriod extends BoostPeriod {
   max_age: string;
 }
 
-interface BoostProfileBase {
+export interface BoostProfileBase {
   name: string;
   is_builtin: boolean;
 }
@@ -74,4 +74,12 @@ export interface BoostRuleListItem extends BoostRule {
   /** The type of the rule's profile. */
   type: BoostProfileType;
   matches: BoostRuleMatch[];
+}
+
+export interface GetBoostProfilesResponse {
+  profiles: BoostProfile[];
+}
+
+export interface GetBoostRulesResponse {
+  rules: BoostRuleListItem[];
 }
