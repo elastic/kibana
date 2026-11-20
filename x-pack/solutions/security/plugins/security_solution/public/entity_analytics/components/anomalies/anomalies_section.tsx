@@ -23,7 +23,7 @@ import {
   ANOMALIES_SECTION_ACCORDION_TIMEFRAME_TEST_ID,
 } from './test_ids';
 import type { GetAnomalyOverviewResponse } from '../../../../common/api/entity_analytics';
-import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityDetailsPath } from '../../../flyout_v2/shared/components/left_panel_header';
 import { AnomaliesOverview } from './anomalies_overview';
 
 export const EMPTY_ANOMALY_OVERVIEW: GetAnomalyOverviewResponse = {

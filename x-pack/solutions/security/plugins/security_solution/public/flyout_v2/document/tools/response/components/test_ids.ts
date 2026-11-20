@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PREFIX } from '../../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../../shared/test_ids';
 
 const RESPONSE_TEST_ID = `${PREFIX}Response` as const;
 export const RESPONSE_ACTIONS_VIEW_WRAPPER_TEST_ID = 'responseActionsViewWrapper' as const;

@@ -14,7 +14,7 @@ import { EntityIdentifierFields } from '../../../../common/entity_analytics/type
 import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useUiSetting } from '../../../common/lib/kibana';
-import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { useEntityFromStore } from '../../../flyout_v2/shared/hooks/use_entity_from_store';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import {
   ENTITY_ANALYTICS_TABLE_ID,
@@ -76,7 +76,7 @@ jest.mock('../../../detections/containers/detection_engine/alerts/use_signal_ind
     .mockReturnValue({ loading: false, signalIndexName: '.alerts-security' }),
 }));
 
-jest.mock('../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
+jest.mock('../../../flyout_v2/shared/hooks/use_entity_from_store', () => ({
   useEntityFromStore: jest.fn().mockReturnValue({ entityRecord: null, isLoading: false }),
 }));
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PREFIX } from '../../../flyout/shared/test_ids';
+import { PREFIX } from '../../shared/test_ids';
 
 const IOC_DETAILS_TEST_ID = `${PREFIX}IOCDetails` as const;
 

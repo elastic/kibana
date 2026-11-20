@@ -11,7 +11,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID, EVENT_KIND } from '@kbn/rule-data-utils';
 import { EventKind } from '../constants/event_kinds';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
-import { PREFIX } from '../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../shared/test_ids';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { isEcsAllowedValue } from '../utils/event_utils';

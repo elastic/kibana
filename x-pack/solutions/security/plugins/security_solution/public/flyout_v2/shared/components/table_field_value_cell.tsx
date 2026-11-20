@@ -14,7 +14,7 @@ import type { EventFieldsData } from '../../../common/components/event_details/t
 import { OverflowField } from '../../../common/components/tables/helpers';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
 import { MESSAGE_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
-import { isFlyoutLink } from '../../../flyout/shared/utils/link_utils';
+import { isFlyoutLink } from '../utils/link_utils';
 import type { OpenFlyoutLinkRenderer } from './open_flyout_link';
 
 export interface FieldValueCellProps {

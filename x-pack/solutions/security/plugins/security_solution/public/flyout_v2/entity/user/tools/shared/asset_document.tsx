@@ -17,7 +17,7 @@ import { JsonTab } from '../../../../document/main/tabs/json_tab';
 import { TableTab } from '../../../../document/main/tabs/table_tab';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { OpenFlyoutLink } from '../../../../shared/components/open_flyout_link';
-import { useDocumentDetailsContext } from '../../../../../flyout/document_details/shared/context';
+import { useDocumentDetailsContext } from '../../../../shared/context/document_details_context';
 import { FLYOUT_BODY_TEST_ID, JSON_TAB_TEST_ID, TABLE_TAB_TEST_ID } from './test_ids';
 import { FlyoutBody } from '../../../../../flyout/shared/components/flyout_body';
 

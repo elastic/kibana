@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PREFIX } from '../../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../test_ids';
 
 export const ATTACH_TO_TIMELINE_CALLOUT_TEST_ID = `${PREFIX}AttachToTimelineCallout` as const;
 export const ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID = `${PREFIX}AttachToTimelineCheckbox` as const;

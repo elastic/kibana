@@ -21,9 +21,9 @@ import {
   VISUALIZATIONS_SECTION_HEADER_TEST_ID,
 } from './test_ids';
 import { VisualizationsSection } from './visualizations_section';
-import { mockContextValue } from '../../../../flyout/document_details/shared/mocks/mock_context';
-import { mockDataFormattedForFieldBrowser } from '../../../../flyout/document_details/shared/mocks/mock_data_formatted_for_field_browser';
-import { DocumentDetailsContext } from '../../../../flyout/document_details/shared/context';
+import { mockContextValue } from '../../../shared/mocks/mock_context';
+import { mockDataFormattedForFieldBrowser } from '../../../shared/mocks/mock_data_formatted_for_field_browser';
+import { DocumentDetailsContext } from '../../../shared/context/document_details_context';
 import { TestProviders } from '../../../../common/mock';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID } from '../../../shared/components/test_ids';

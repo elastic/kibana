@@ -23,8 +23,8 @@ import { PageScope } from '../../../../data_view_manager/constants';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
-import type { GetFieldsData } from '../../../../flyout/document_details/shared/hooks/use_get_fields_data';
-import { useGetFieldsData } from '../../../../flyout/document_details/shared/hooks/use_get_fields_data';
+import type { GetFieldsData } from '../../../shared/hooks/use_get_fields_data';
+import { useGetFieldsData } from '../../../shared/hooks/use_get_fields_data';
 
 export interface UseAttackEventDetailsParams {
   /**

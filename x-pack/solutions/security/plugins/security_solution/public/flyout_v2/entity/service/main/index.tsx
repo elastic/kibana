@@ -31,21 +31,21 @@ import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
 import {
   mergeLegacyIdentityWhenStoreEntityMissing,
   type IdentityFields,
-} from '../../../../flyout/document_details/shared/utils';
+} from '../../../shared/utils/document_utils';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
   RiskScoreLeftPanelSubTab,
   type EntityDetailsPath,
-} from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+} from '../../../shared/components/left_panel_header';
 import {
   useEntityFromStore,
   type EntityStoreRecord,
-} from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+} from '../../../shared/hooks/use_entity_from_store';
 import {
   buildRiskScoreStateFromEntityRecord,
   getHeaderRiskLevel,
-} from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
+} from '../../../shared/utils/entity_store_risk_utils';
 import { isEntityGroupView } from '../../shared/utils/entity_store_group_utils';
 import { useEntityPanelTabs, TABLE_TAB_ID } from '../../shared/hooks/use_entity_panel_tabs';
 import { EntityPanelHeaderTabs } from '../../shared/components/entity_panel_tabs';

@@ -30,7 +30,7 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
+jest.mock('../../../../flyout_v2/shared/hooks/use_entity_from_store', () => ({
   useEntityFromStore: jest.fn().mockReturnValue({
     entity: null,
     entityRecord: null,

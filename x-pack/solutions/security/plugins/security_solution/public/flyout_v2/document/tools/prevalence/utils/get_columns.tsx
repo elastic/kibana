@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@el
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { IS_OPERATOR } from '@kbn/securitysolution-timeline-common';
-import type { IdentityFields } from '../../../../../flyout/document_details/shared/utils';
+import type { IdentityFields } from '../../../../shared/utils/document_utils';
 import {
   getDataProvider,
   getDataProviderAnd,

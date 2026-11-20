@@ -8,7 +8,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import { DocumentDetailsContext } from '../../../flyout/document_details/shared/context';
+import { DocumentDetailsContext } from '../context/document_details_context';
 import type { EventFieldsData } from '../../../common/components/event_details/types';
 import { TableFieldValueCell } from './table_field_value_cell';
 import { TestProviders } from '../../../common/mock';

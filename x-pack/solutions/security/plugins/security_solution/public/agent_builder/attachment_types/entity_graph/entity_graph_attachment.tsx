@@ -18,7 +18,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { APP_UI_ID } from '../../../../common/constants';
-import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { EntityDetailsLeftPanelTab } from '../../../flyout_v2/shared/components/left_panel_header';
 import {
   buildEntityLeftPanel,
   buildEntityRightPanel,

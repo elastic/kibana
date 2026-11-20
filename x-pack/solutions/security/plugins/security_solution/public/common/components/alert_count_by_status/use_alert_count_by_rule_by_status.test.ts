@@ -35,7 +35,7 @@ jest.mock('../../../detections/containers/detection_engine/alerts/use_query', ()
   };
 });
 
-jest.mock('../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
+jest.mock('../../../flyout_v2/shared/hooks/use_entity_from_store', () => ({
   useEntityFromStore: jest.fn(() => ({
     entity: null,
     entityRecord: null,

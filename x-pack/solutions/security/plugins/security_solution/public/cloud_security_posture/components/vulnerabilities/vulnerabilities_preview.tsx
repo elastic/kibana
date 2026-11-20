@@ -20,18 +20,18 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../flyout_v2/shared/hooks/use_entity_from_store';
 import {
   buildEuidCspPreviewOptions,
   inferEntityTypeFromIdentityFields,
 } from '../../utils/build_euid_csp_preview_options';
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
-import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityDetailsPath } from '../../../flyout_v2/shared/components/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
-} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
+} from '../../../flyout_v2/shared/components/left_panel_header';
+import type { IdentityFields } from '../../../flyout_v2/shared/utils/document_utils';
 
 const VulnerabilitiesCount = ({
   vulnerabilitiesTotal,

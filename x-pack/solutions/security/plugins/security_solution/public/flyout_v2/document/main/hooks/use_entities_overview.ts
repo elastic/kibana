@@ -12,7 +12,7 @@ import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import {
   useEntityFromStore,
   type EntityStoreRecord,
-} from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+} from '../../../shared/hooks/use_entity_from_store';
 
 export interface EntityOverviewData {
   /**

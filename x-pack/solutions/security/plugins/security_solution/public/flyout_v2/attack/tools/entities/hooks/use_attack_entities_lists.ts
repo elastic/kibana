@@ -11,7 +11,7 @@ import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/use_query';
 import { fetchQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/api';
 import { ALERTS_QUERY_NAMES } from '../../../../../detections/containers/detection_engine/alerts/constants';
-import type { IdentityFields } from '../../../../../flyout/document_details/shared/utils';
+import type { IdentityFields } from '../../../../shared/utils/document_utils';
 
 const TERMS_AGG_SIZE = 200;
 

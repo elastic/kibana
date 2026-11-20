@@ -14,11 +14,7 @@ import {
   toFieldRendererItems,
 } from '../../../../../timelines/components/field_renderers/default_renderer';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
-import type {
-  BasicEntityData,
-  EntityTableColumns,
-  EntityTableLinkRenderer,
-} from '../../../../../flyout/entity_details/shared/components/entity_table/types';
+import type { BasicEntityData, EntityTableColumns, EntityTableLinkRenderer } from './types';
 
 export const getEntityTableColumns = <T extends BasicEntityData>(
   contextID: string,

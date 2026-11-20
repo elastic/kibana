@@ -11,7 +11,7 @@ import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
-import { PREFIX } from '../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../shared/test_ids';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';

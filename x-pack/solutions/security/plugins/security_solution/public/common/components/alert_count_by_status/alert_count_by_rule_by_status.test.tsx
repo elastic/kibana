@@ -16,7 +16,7 @@ import type {
   UseAlertCountByRuleByStatus,
   UseAlertCountByRuleByStatusProps,
 } from './use_alert_count_by_rule_by_status';
-import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../flyout_v2/shared/hooks/use_entity_from_store';
 
 type UseAlertCountByRuleByStatusReturn = ReturnType<UseAlertCountByRuleByStatus>;
 const defaultUseAlertCountByRuleByStatusReturn: UseAlertCountByRuleByStatusReturn = {

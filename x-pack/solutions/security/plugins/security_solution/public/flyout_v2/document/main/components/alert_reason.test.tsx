@@ -10,7 +10,7 @@ import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { getRowRenderer } from '../../../../timelines/components/timeline/body/renderers/get_row_renderer';
-import { useEventDetails } from '../../../../flyout/document_details/shared/hooks/use_event_details';
+import { useEventDetails } from '../../../shared/hooks/use_event_details';
 import {
   REASON_DETAILS_POPOVER_TEST_ID,
   REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
@@ -26,7 +26,7 @@ jest.mock('../../../../timelines/components/timeline/body/renderers', () => ({
   defaultRowRenderers: [],
 }));
 
-jest.mock('../../../../flyout/document_details/shared/hooks/use_event_details', () => ({
+jest.mock('../../../shared/hooks/use_event_details', () => ({
   useEventDetails: jest.fn(),
 }));
 

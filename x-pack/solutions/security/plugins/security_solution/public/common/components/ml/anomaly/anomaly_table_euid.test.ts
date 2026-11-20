@@ -8,7 +8,7 @@
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
 import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 
-import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../../flyout_v2/shared/hooks/use_entity_from_store';
 import type { Anomaly } from '../types';
 import {
   anomalyMatchesMlEntityField,

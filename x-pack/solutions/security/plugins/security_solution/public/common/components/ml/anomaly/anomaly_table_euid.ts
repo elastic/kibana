@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 
-import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../../flyout_v2/shared/hooks/use_entity_from_store';
 import type { Anomaly, CriteriaFields } from '../types';
 
 /** Entity kinds that have Security Solution host/user anomaly tables. */

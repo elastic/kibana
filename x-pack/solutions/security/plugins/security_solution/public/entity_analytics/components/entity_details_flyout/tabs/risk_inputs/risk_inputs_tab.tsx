@@ -24,7 +24,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { get } from 'lodash/fp';
-import { RiskScoreLeftPanelSubTab } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { RiskScoreLeftPanelSubTab } from '../../../../../flyout_v2/shared/components/left_panel_header';
 import type {
   CriticalityLevel,
   CriticalityLevelWithUnassigned,
@@ -64,7 +64,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { useNewEntityAnalyticsPage } from '../../../../hooks/use_new_entity_analytics_page';
 import { useResolutionGroup } from '../../../entity_resolution/hooks/use_resolution_group';
 import { getEntityId, getEntityField, getEntityName } from '../../../entity_resolution/helpers';
-import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { useEntityFromStore } from '../../../../../flyout_v2/shared/hooks/use_entity_from_store';
 import { useMissingRiskEnginePrivileges } from '../../../../hooks/use_missing_risk_engine_privileges';
 import { RiskEnginePrivilegesCallOut } from '../../../risk_engine_privileges_callout';
 

@@ -19,7 +19,7 @@ import { HostIsolationPanel } from './host_isolation_panel';
 import { GET_ISOLATION_SUCCESS_MESSAGE, GET_UNISOLATION_SUCCESS_MESSAGE } from '../translations';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import type { HostIsolationAction } from './use_host_isolation_action';
-import { PREFIX } from '../../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../../../flyout_v2/shared/test_ids';
 
 const HOST_ISOLATION_TEST_ID = `${PREFIX}HostIsolation` as const;
 export const HOST_ISOLATION_FLYOUT_TEST_ID = `${HOST_ISOLATION_TEST_ID}Flyout` as const;

@@ -27,7 +27,7 @@ import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
   type EntityDetailsPath,
-} from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+} from '../../../shared/components/left_panel_header';
 import {
   useGetGenericEntity,
   type UseGetGenericEntityParams,

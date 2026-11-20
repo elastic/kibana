@@ -14,7 +14,7 @@ import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use
 import { useNonClosedAlerts } from '../hooks/use_non_closed_alerts';
 import { buildEuidCspPreviewOptions } from '../utils/build_euid_csp_preview_options';
 import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
-import type { EntityStoreRecord } from '../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../flyout_v2/shared/hooks/use_entity_from_store';
 import {
   ENTITY_ANALYTICS_TABLE_ID,
   ENTITY_ANALYTICS_ALERTS_FROM,

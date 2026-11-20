@@ -15,7 +15,7 @@ import {
   JSON_TAB_CONTENT_TEST_ID,
   JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID,
 } from '../../../shared/components/json_tab';
-import { PREFIX } from '../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../shared/test_ids';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),

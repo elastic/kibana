@@ -8,18 +8,11 @@
 import { useCallback, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { EntityType } from '../../../../common/entity_analytics/types';
-import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { CspInsightLeftPanelSubTab } from '../components/left_panel_header';
 import type {
   EntitySectionOverrideBuilders,
   EntitySectionOverrides,
-} from '../../../flyout/document_details/left/components/entities_details';
-
-/**
- * The hook always provides both builders; callers can spread directly without
- * null-guarding even though the underlying `EntitySectionOverrideBuilders` type
- * marks them optional (to support partial overrides in other contexts).
- */
-type RequiredEntitySectionOverrideBuilders = Required<EntitySectionOverrideBuilders>;
+} from '../components/entities/entities_details';
 import { OpenFlyoutLink } from '../components/open_flyout_link';
 import { useEntityFlyoutApi } from '../../entity/use_entity_flyout_api';
 
@@ -36,8 +29,7 @@ export interface UseEntityFlyoutOverridesParams {
  * Returns `buildUserOverrides` and `buildHostOverrides` — the two override builder
  * callbacks consumed by the v2 Entities tools. Both builders produce an
  * `EntitySectionOverrides` object (`{ onPreviewEntity, onShowDetailsPanel, linkRenderer }`)
- * that is forwarded to `HostDetails`/`UserDetails`, wiring the v2 system-flyout API in
- * place of the default expandable-flyout fallbacks.
+ * that is forwarded to `HostDetails`/`UserDetails`, wiring the v2 system-flyout API.
  *
  * Used by both `flyout_v2/document/tools/entities` and `flyout_v2/attack/tools/entities`
  * so that the callback logic has a single source of truth.
@@ -45,7 +37,7 @@ export interface UseEntityFlyoutOverridesParams {
 export const useEntityFlyoutOverrides = ({
   scopeId,
   hit,
-}: UseEntityFlyoutOverridesParams): RequiredEntitySectionOverrideBuilders => {
+}: UseEntityFlyoutOverridesParams): EntitySectionOverrideBuilders => {
   const {
     openUserFlyoutAsChild,
     openHostFlyoutAsChild,
@@ -113,7 +105,7 @@ export const useEntityFlyoutOverrides = ({
     ]
   );
 
-  return useMemo<RequiredEntitySectionOverrideBuilders>(
+  return useMemo<EntitySectionOverrideBuilders>(
     () => ({ buildUserOverrides, buildHostOverrides }),
     [buildUserOverrides, buildHostOverrides]
   );

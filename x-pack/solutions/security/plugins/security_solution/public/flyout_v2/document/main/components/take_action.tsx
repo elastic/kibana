@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useEventDetails } from '../../../../flyout/document_details/shared/hooks/use_event_details';
+import { useEventDetails } from '../../../shared/hooks/use_event_details';
 import { TakeActionButton } from './take_action_button';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 

@@ -29,7 +29,7 @@ import { HoverVisibilityContainer } from '../../../../common/components/hover_vi
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { HostDetailsLink } from '../../../../common/components/links';
-import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
+import type { IdentityFields } from '../../../../flyout_v2/shared/utils/document_utils';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 import * as i18n from '../translations';

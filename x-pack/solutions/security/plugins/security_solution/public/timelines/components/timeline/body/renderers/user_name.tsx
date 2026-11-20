@@ -15,7 +15,7 @@ import { UserDetailsLink } from '../../../../../common/components/links';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 import { useUiSetting } from '../../../../../common/lib/kibana';
-import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { useEntityFromStore } from '../../../../../flyout_v2/shared/hooks/use_entity_from_store';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 
 interface Props {

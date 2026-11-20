@@ -9,7 +9,7 @@ import { renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { useUpdateAssetCriticality } from './use_update_asset_criticality';
 import type { Entity } from '../../../../common/api/entity_analytics';
-import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../flyout_v2/shared/hooks/use_entity_from_store';
 
 const mockBulkUpdateEntities = jest.fn();
 jest.mock('@kbn/entity-store/public', () => ({
@@ -17,7 +17,7 @@ jest.mock('@kbn/entity-store/public', () => ({
 }));
 
 const mockApplyEntityStoreSearchCachePatch = jest.fn();
-jest.mock('../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
+jest.mock('../../../flyout_v2/shared/hooks/use_entity_from_store', () => ({
   applyEntityStoreSearchCachePatch: (...args: unknown[]) =>
     mockApplyEntityStoreSearchCachePatch(...args),
 }));

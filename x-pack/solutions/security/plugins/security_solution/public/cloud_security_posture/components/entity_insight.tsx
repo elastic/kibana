@@ -17,15 +17,15 @@ import {
   inferEntityTypeFromIdentityFields,
 } from '../utils/build_euid_csp_preview_options';
 import type { EntityIdentifierFields } from '../../../common/entity_analytics/types';
-import type { IdentityFields } from '../../flyout/document_details/shared/utils';
+import type { IdentityFields } from '../../flyout_v2/shared/utils/document_utils';
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
 import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
 import { AlertsPreview } from './alerts/alerts_preview';
 import { useAlertTimeRange } from '../../entity_analytics/hooks/use_alert_time_range';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/components/detection_response/alerts_by_status/types';
 import { useNonClosedAlerts } from '../hooks/use_non_closed_alerts';
-import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { EntityStoreRecord } from '../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityDetailsPath } from '../../flyout_v2/shared/components/left_panel_header';
+import type { EntityStoreRecord } from '../../flyout_v2/shared/hooks/use_entity_from_store';
 
 export type CloudPostureEntityIdentifier =
   | Extract<

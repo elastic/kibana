@@ -10,7 +10,7 @@ import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useObservedService } from './use_observed_service';
 import { useObservedServiceDetails } from './observed_service_details';
 import { useFirstLastSeen } from '../../../../../common/containers/use_first_last_seen';
-import type { EntityFromStoreResult } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityFromStoreResult } from '../../../../shared/hooks/use_entity_from_store';
 import type { ServiceItem } from '../../../../../../common/search_strategy';
 
 jest.mock('./observed_service_details', () => ({

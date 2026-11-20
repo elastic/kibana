@@ -10,19 +10,19 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { EntityDetails } from '.';
-import { mockContextValue } from '../../../../flyout/document_details/shared/mocks/mock_context';
+import { mockContextValue } from '../../../shared/mocks/mock_context';
 import { ENTITIES_TOOL_TEST_ID } from './test_ids';
 
-jest.mock('../../../../flyout/document_details/left/components/entities_details', () => ({
+jest.mock('../../../shared/components/entities/entities_details', () => ({
   EntitiesDetails: () => <div data-test-subj="mockEntitiesDetails" />,
 }));
-jest.mock('../../../../flyout/document_details/shared/context', () => {
+jest.mock('../../../shared/context/document_details_context', () => {
   const { createContext } = jest.requireActual('react');
   return {
     DocumentDetailsContext: createContext(undefined),
   };
 });
-jest.mock('../../../../flyout/document_details/shared/hooks/use_get_fields_data', () => ({
+jest.mock('../../../shared/hooks/use_get_fields_data', () => ({
   useGetFieldsData: () => ({ getFieldsData: jest.fn() }),
 }));
 jest.mock('../../../shared/components/tools_flyout_header', () => ({

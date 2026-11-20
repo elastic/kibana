@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PREFIX } from '../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../shared/test_ids';
 
 const PREVALENCE_DETAILS_TEST_ID = `${PREFIX}PrevalenceDetails` as const;
 export const PREVALENCE_DETAILS_DATE_PICKER_TEST_ID =

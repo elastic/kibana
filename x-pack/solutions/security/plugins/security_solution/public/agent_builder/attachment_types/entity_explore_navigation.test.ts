@@ -17,7 +17,7 @@ import { FLYOUT_ORIGIN } from '../../common/lib/telemetry/events/flyout_v2/types
 import {
   EntityDetailsLeftPanelTab,
   RiskScoreLeftPanelSubTab,
-} from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+} from '../../flyout_v2/shared/components/left_panel_header';
 import {
   buildEntityFlyoutV2NavigationState,
   buildEntityRightPanel,

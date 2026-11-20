@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PREFIX } from '../test_ids';
+import { PREFIX } from '../../../flyout_v2/shared/test_ids';
 export const FLYOUT_LINK_TEST_ID = `${PREFIX}Link` as const;
 
 /* Header Navigation */

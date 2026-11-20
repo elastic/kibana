@@ -10,9 +10,9 @@ import moment from 'moment-timezone';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { EaseDetailsContext } from '../context';
-import { mockDataFormattedForFieldBrowser } from '../../../../../flyout/document_details/shared/mocks/mock_data_formatted_for_field_browser';
-import { mockGetFieldsData } from '../../../../../flyout/document_details/shared/mocks/mock_get_fields_data';
-import { mockSearchHit } from '../../../../../flyout/document_details/shared/mocks/mock_search_hit';
+import { mockDataFormattedForFieldBrowser } from '../../../../../flyout_v2/shared/mocks/mock_data_formatted_for_field_browser';
+import { mockGetFieldsData } from '../../../../../flyout_v2/shared/mocks/mock_get_fields_data';
+import { mockSearchHit } from '../../../../../flyout_v2/shared/mocks/mock_search_hit';
 import {
   HEADER_INTEGRATION_TITLE_TEST_ID,
   HEADER_RISK_SCORE_TITLE_TEST_ID,

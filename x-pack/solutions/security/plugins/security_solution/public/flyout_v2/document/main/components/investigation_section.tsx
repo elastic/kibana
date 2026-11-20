@@ -17,7 +17,7 @@ import { useFlyoutApi } from '../../../use_flyout_api';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
-import { PREFIX } from '../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../shared/test_ids';
 import { InvestigationGuide } from './investigation_guide';
 import { HighlightedFields } from './highlighted_fields';
 import { HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID } from './test_ids';

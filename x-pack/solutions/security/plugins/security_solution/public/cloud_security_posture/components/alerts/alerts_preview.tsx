@@ -19,11 +19,11 @@ import type {
 } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
-import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityDetailsPath } from '../../../flyout_v2/shared/components/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
-} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+} from '../../../flyout_v2/shared/components/left_panel_header';
 
 const AlertsCount = ({
   alertsTotal,

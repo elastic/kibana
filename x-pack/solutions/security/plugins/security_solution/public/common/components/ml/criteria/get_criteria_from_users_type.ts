@@ -6,7 +6,7 @@
  */
 
 import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
-import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../../flyout_v2/shared/hooks/use_entity_from_store';
 import { UsersType } from '../../../../explore/users/store/model';
 import type { CriteriaFields } from '../types';
 import { getCriteriaFieldsForAnomaliesTable } from '../anomaly/anomaly_table_euid';

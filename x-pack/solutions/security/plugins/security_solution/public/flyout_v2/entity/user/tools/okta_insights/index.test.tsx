@@ -38,7 +38,7 @@ jest.mock('../shared/asset_document', () => ({
   AssetDocumentTab: () => <div data-test-subj="mockAssetDocumentTab" />,
 }));
 
-jest.mock('../../../../../flyout/document_details/shared/context', () => ({
+jest.mock('../../../../shared/context/document_details_context', () => ({
   DocumentDetailsProvider: ({
     id,
     indexName,

@@ -21,8 +21,8 @@ import { EntityType } from '../../../../../common/entity_analytics/types';
 import {
   EntityDetailsLeftPanelTab,
   type EntityDetailsPath,
-} from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
+} from '../../../shared/components/left_panel_header';
+import type { IdentityFields } from '../../../shared/utils/document_utils';
 import { EntityInsight } from '../../../../cloud_security_posture/components/entity_insight';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from './constants';

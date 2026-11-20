@@ -7,7 +7,7 @@
 
 import { type DataTableRecord } from '@kbn/discover-utils';
 import { ALERT_ATTACK_IDS } from '../../../../../../common/field_maps/field_names';
-import { getFieldArray } from '../../../../../flyout/document_details/shared/utils';
+import { getFieldArray } from '../../../../shared/utils/document_utils';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 export interface UseShowRelatedAttacksParams {

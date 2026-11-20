@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PREFIX } from '../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../shared/test_ids';
 
 const HEADER_TEST_ID = 'Header';
 const CONTENT_TEST_ID = 'Content';

@@ -12,7 +12,7 @@ import type { CellActionRenderer } from '../../../shared/components/cell_actions
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
-import { PREFIX } from '../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../shared/test_ids';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { SessionPreviewContainer } from './session_preview_container';
 import { GraphPreviewContainer } from './graph_preview_container';

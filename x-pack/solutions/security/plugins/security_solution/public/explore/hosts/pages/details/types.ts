@@ -7,7 +7,7 @@
 
 import type { Filter } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-plugin/common';
-import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../../flyout_v2/shared/hooks/use_entity_from_store';
 import type { HostsTableType } from '../../store/model';
 import type { HostsQueryProps } from '../types';
 import type { NavTab } from '../../../../common/components/navigation/types';

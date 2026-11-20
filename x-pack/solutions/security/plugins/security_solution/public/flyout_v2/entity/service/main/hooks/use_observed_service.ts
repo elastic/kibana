@@ -24,7 +24,7 @@ import type { InspectResponse } from '../../../../../types';
 import type {
   EntityFromStoreResult,
   EntityStoreRecord,
-} from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+} from '../../../../shared/hooks/use_entity_from_store';
 import {
   combineEntityGroupFilters,
   getEntityGroupLifecycle,

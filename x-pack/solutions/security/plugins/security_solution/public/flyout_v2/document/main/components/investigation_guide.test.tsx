@@ -15,7 +15,7 @@ import {
   INVESTIGATION_GUIDE_LOADING_TEST_ID,
   INVESTIGATION_GUIDE_TEST_ID,
 } from './test_ids';
-import { mockContextValue } from '../../../../flyout/document_details/shared/mocks/mock_context';
+import { mockContextValue } from '../../../shared/mocks/mock_context';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');

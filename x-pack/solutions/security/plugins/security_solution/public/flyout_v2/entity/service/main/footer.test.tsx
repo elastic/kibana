@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { Footer } from './footer';
-import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../shared/hooks/use_entity_from_store';
 import { ADD_TO_CASE_TEST_ID } from '../../../../../common/cases/attachments/entity/test_ids';
 
 jest.mock('@kbn/entity-store/public', () => ({

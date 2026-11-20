@@ -25,7 +25,7 @@ import type { FC, ReactNode } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { getRowRenderer } from '../../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
-import { useEventDetails } from '../../../../flyout/document_details/shared/hooks/use_event_details';
+import { useEventDetails } from '../../../shared/hooks/use_event_details';
 import { FlyoutError } from '../../../shared/components/flyout_error';
 import { EventKind } from '../constants/event_kinds';
 import {

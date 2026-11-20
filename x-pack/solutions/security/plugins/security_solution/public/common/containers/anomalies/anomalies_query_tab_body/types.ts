@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../../flyout_v2/shared/hooks/use_entity_from_store';
 import type { ESTermQuery } from '../../../../../common/typed_json';
 import type { GlobalTimeArgs } from '../../use_global_time';
 import type { HostsType } from '../../../../explore/hosts/store/model';

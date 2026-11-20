@@ -15,7 +15,7 @@ import type { Indicator } from '../../../../common/threat_intelligence/types/ind
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import type { ManagedUserHit } from '../../../../common/search_strategy/security_solution/users/managed_details';
-import type { RiskScoreLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { RiskScoreLeftPanelSubTab } from '../components/left_panel_header';
 import { FLYOUT_ORIGIN, type FlyoutOrigin } from '../../../common/lib/telemetry';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../data_view_manager/constants';

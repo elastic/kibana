@@ -22,8 +22,8 @@ import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
 import type { HostItem, ServiceItem, UserItem } from '../../../../../common/search_strategy';
 import { buildAnomaliesTableInfluencersFilterQuery } from '../../../../common/components/ml/anomaly/anomaly_table_euid';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
-import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
-import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { IdentityFields } from '../../../shared/utils/document_utils';
+import type { EntityStoreRecord } from '../../../shared/hooks/use_entity_from_store';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { UsersType } from '../../../../explore/users/store/model';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PREFIX } from '../../../flyout/shared/test_ids';
+import { PREFIX } from '../test_ids';
 
 export const EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID = (dataTestSubj: string) =>
   `${dataTestSubj}ToggleIcon`;
@@ -66,3 +66,17 @@ export const FLYOUT_HEADER_FLYOUT_TYPE_PUSH_OPTION_TEST_ID =
 export const FLYOUT_HEADER_FLYOUT_SIZE_TITLE_TEST_ID = `${PREFIX}HeaderFlyoutSizeTitle` as const;
 export const FLYOUT_HEADER_FLYOUT_SIZE_RESET_BUTTON_TEST_ID =
   `${PREFIX}HeaderFlyoutSizeResetButton` as const;
+
+const FLYOUT_TABLE_TEST_ID = `${PREFIX}Table` as const;
+export const FLYOUT_TABLE_FIELD_NAME_CELL_ICON_TEST_ID =
+  `${FLYOUT_TABLE_TEST_ID}FieldNameCellIcon` as const;
+export const FLYOUT_TABLE_FIELD_NAME_CELL_TEXT_TEST_ID =
+  `${FLYOUT_TABLE_TEST_ID}FieldNameCellText` as const;
+export const FLYOUT_TABLE_PIN_ACTION_TEST_ID = `${FLYOUT_TABLE_TEST_ID}PinAction` as const;
+export const TABLE_TAB_SETTING_BUTTON_TEST_ID = `${PREFIX}TableTabSettingButton` as const;
+export const TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID =
+  `${FLYOUT_TABLE_TEST_ID}HighlightedFieldsOnly` as const;
+export const TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID =
+  `${FLYOUT_TABLE_TEST_ID}HideEmptyFields` as const;
+export const TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID =
+  `${FLYOUT_TABLE_TEST_ID}HideAlertFields` as const;

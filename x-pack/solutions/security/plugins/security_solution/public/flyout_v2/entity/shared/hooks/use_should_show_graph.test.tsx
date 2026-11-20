@@ -12,8 +12,8 @@ import { useShouldShowGraph } from './use_should_show_graph';
 jest.mock('../../../../common/hooks/use_has_graph_visualization_license');
 const mockUseHasGraphVisualizationLicense = useHasGraphVisualizationLicense as jest.Mock;
 
-jest.mock('../../../../flyout/shared/hooks/use_is_entity_store_v2_available');
-import { useIsEntityStoreV2Available } from '../../../../flyout/shared/hooks/use_is_entity_store_v2_available';
+jest.mock('../../../shared/hooks/use_is_entity_store_v2_available');
+import { useIsEntityStoreV2Available } from '../../../shared/hooks/use_is_entity_store_v2_available';
 const mockUseIsEntityStoreV2Available = useIsEntityStoreV2Available as jest.Mock;
 
 describe('useShouldShowGraph', () => {

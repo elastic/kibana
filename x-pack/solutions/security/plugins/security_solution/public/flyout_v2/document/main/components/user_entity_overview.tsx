@@ -23,16 +23,16 @@ import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import type { UserEntity } from '../../../../../common/api/entity_analytics';
 import type { ESQuery } from '../../../../../common/typed_json';
-import { getRiskFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
+import { getRiskFromEntityRecord } from '../../../shared/utils/entity_store_risk_utils';
 import { PreferenceFormattedDateFromPrimitive } from '../../../../common/components/formatted_date';
 import type { DescriptionList } from '../../../../../common/utility_types';
-import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
+import type { IdentityFields } from '../../../shared/utils/document_utils';
 import {
   getField,
   isRiskSeverity,
   mergeLegacyIdentityWhenStoreEntityMissing,
   normalizeRiskLevel,
-} from '../../../../flyout/document_details/shared/utils';
+} from '../../../shared/utils/document_utils';
 import {
   noopCellActionRenderer,
   type CellActionRenderer,

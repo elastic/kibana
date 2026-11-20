@@ -45,7 +45,7 @@ import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-st
 import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { useUiSetting } from '../../../common/lib/kibana';
-import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { useEntityFromStore } from '../../../flyout_v2/shared/hooks/use_entity_from_store';
 import {
   combineEntityGroupFilters,
   getEntityGroupRecords,

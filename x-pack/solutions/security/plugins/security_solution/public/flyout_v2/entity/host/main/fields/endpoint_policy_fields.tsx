@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiHealth } from '@elastic/eui';
 
-import type { EntityTableRows } from '../../../../../flyout/entity_details/shared/components/entity_table/types';
+import type { EntityTableRows } from '../../../shared/components/entity_table/types';
 import type { ObservedEntityData } from '../../../shared/components/observed_entity/types';
 import { AgentStatus } from '../../../../../common/components/endpoint/agents/agent_status';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';

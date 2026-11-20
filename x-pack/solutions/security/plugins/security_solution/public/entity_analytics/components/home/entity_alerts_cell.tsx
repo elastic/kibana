@@ -22,7 +22,7 @@ import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { SecurityPageName, useNavigation } from '@kbn/security-solution-navigation';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { formatPageFilterSearchParam } from '@kbn/securitysolution-alerts-page-url';
-import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../flyout_v2/shared/hooks/use_entity_from_store';
 import { ENTITY_ANALYTICS_ALERTS_FROM, ENTITY_ANALYTICS_DEFAULT_TIMERANGE_TO } from './constants';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';

@@ -28,8 +28,8 @@ import type {
   AnomalyOverviewHit,
   GetAnomalyOverviewResponse,
 } from '../../../../common/api/entity_analytics';
-import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityDetailsPath } from '../../../flyout_v2/shared/components/left_panel_header';
+import { EntityDetailsLeftPanelTab } from '../../../flyout_v2/shared/components/left_panel_header';
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import { useKibana } from '../../../common/lib/kibana';
 import { MitreAttackChain } from './mitre/components/mitre_attack_chain';

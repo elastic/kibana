@@ -7,7 +7,7 @@
 
 import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 
-import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../../flyout_v2/shared/hooks/use_entity_from_store';
 import type { HostItem } from '../../../../../common/search_strategy/security_solution/hosts';
 import type { CriteriaFields } from '../types';
 

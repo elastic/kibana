@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { useObservedHost } from './use_observed_host';
 import { useHostDetails } from '../../../../../explore/hosts/containers/hosts/details';
 import { useFirstLastSeen } from '../../../../../common/containers/use_first_last_seen';
-import type { EntityFromStoreResult } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityFromStoreResult } from '../../../../shared/hooks/use_entity_from_store';
 import type { HostItem } from '../../../../../../common/search_strategy';
 
 jest.mock('../../../../../explore/hosts/containers/hosts/details', () => ({

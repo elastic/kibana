@@ -25,7 +25,7 @@ import { EntityType } from '../../../../common/search_strategy';
 import {
   EntityDetailsLeftPanelTab,
   RiskScoreLeftPanelSubTab,
-} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+} from '../../../flyout_v2/shared/components/left_panel_header';
 import { USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG } from '../../../../common/constants';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import type { StartServices } from '../../../types';

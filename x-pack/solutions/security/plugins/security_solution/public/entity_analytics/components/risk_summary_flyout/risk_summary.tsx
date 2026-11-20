@@ -24,11 +24,11 @@ import { useNewEntityAnalyticsPage } from '../../hooks/use_new_entity_analytics_
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
-import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityDetailsPath } from '../../../flyout_v2/shared/components/left_panel_header';
 import {
   EntityDetailsLeftPanelTab,
   RiskScoreLeftPanelSubTab,
-} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+} from '../../../flyout_v2/shared/components/left_panel_header';
 import { ONE_WEEK_IN_HOURS } from '../../../flyout_v2/entity/shared/constants';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';

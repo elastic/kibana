@@ -18,7 +18,7 @@ jest.mock('../../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
+jest.mock('../../../../shared/hooks/use_entity_from_store', () => ({
   useEntityFromStore: () => ({
     entityRecord: null,
     isLoading: false,
@@ -26,7 +26,7 @@ jest.mock('../../../../../flyout/entity_details/shared/hooks/use_entity_from_sto
   }),
 }));
 
-jest.mock('../../../../../flyout/document_details/left/components/host_details', () => ({
+jest.mock('../../../../shared/components/entities/host_details', () => ({
   HostDetails: (props: { hostName: string }) => (
     <div data-test-subj="host-details-mock" data-host-name={props.hostName}>
       {props.hostName}
@@ -34,13 +34,20 @@ jest.mock('../../../../../flyout/document_details/left/components/host_details',
   ),
 }));
 
-jest.mock('../../../../../flyout/document_details/left/components/user_details', () => ({
+jest.mock('../../../../shared/components/entities/user_details', () => ({
   UserDetails: (props: { userName: string }) => (
     <div data-test-subj="user-details-mock" data-user-name={props.userName}>
       {props.userName}
     </div>
   ),
 }));
+
+const mockOverrides = {
+  onPreviewEntity: jest.fn(),
+  onShowDetailsPanel: jest.fn(),
+  linkRenderer: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+};
+const buildEntityOverrides = () => mockOverrides;
 
 describe('AttackHostInsightsRow', () => {
   it('uses host.name from sample _source when EUID map only exposed entity id', () => {
@@ -59,6 +66,7 @@ describe('AttackHostInsightsRow', () => {
           sampleSource={sampleSource}
           timestamp="2025-06-01T00:00:00Z"
           scopeId="attacks-page"
+          buildEntityOverrides={buildEntityOverrides}
         />
       </EuiProvider>
     );
@@ -86,6 +94,7 @@ describe('AttackUserInsightsRow', () => {
           sampleSource={sampleSource}
           timestamp="2025-06-01T00:00:00Z"
           scopeId="attacks-page"
+          buildEntityOverrides={buildEntityOverrides}
         />
       </EuiProvider>
     );

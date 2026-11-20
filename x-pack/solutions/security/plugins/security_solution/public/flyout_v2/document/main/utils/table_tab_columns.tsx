@@ -17,7 +17,7 @@ import { TableFieldValueCell } from '../../../shared/components/table_field_valu
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import type { OpenFlyoutLinkRenderer } from '../../../shared/components/open_flyout_link';
-import { FLYOUT_TABLE_PIN_ACTION_TEST_ID } from '../../../../flyout/document_details/right/components/test_ids';
+import { FLYOUT_TABLE_PIN_ACTION_TEST_ID } from '../../../shared/components/test_ids';
 
 export const FIELD = i18n.translate('xpack.securitySolution.flyout.table.fieldCellLabel', {
   defaultMessage: 'Field',

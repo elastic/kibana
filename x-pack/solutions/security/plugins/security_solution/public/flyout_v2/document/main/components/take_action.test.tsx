@@ -9,12 +9,12 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { useEventDetails } from '../../../../flyout/document_details/shared/hooks/use_event_details';
+import { useEventDetails } from '../../../shared/hooks/use_event_details';
 import { TakeActionButton } from './take_action_button';
 import { TakeAction } from './take_action';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
-jest.mock('../../../../flyout/document_details/shared/hooks/use_event_details');
+jest.mock('../../../shared/hooks/use_event_details');
 jest.mock('./take_action_button', () => ({
   TakeActionButton: jest.fn(() => <div data-test-subj="take-action-button-mock" />),
 }));

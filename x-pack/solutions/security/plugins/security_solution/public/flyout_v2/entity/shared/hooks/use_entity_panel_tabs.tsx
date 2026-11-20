@@ -8,7 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EntityPanelTabType } from '../components/entity_panel_tabs';
-import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../shared/hooks/use_entity_from_store';
 import {
   ENTITY_PANEL_OVERVIEW_TAB_TEST_ID,
   ENTITY_PANEL_TABLE_TAB_TEST_ID,

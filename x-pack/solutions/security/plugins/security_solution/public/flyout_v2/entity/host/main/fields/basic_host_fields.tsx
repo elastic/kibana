@@ -13,7 +13,7 @@ import { FormattedRelativePreferenceDate } from '../../../../../common/component
 import { NetworkDetailsLink } from '../../../../../common/components/links';
 import * as i18n from './translations';
 import type { ObservedEntityData } from '../../../shared/components/observed_entity/types';
-import type { EntityTableRows } from '../../../../../flyout/entity_details/shared/components/entity_table/types';
+import type { EntityTableRows } from '../../../shared/components/entity_table/types';
 
 export const basicHostFields: EntityTableRows<ObservedEntityData<HostItem>> = [
   {

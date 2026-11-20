@@ -11,12 +11,12 @@ import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { FooterAiActionsProps } from './footer_ai_actions';
 import { FooterAiActions } from './footer_ai_actions';
-import { useEventDetails } from '../../../../flyout/document_details/shared/hooks/use_event_details';
+import { useEventDetails } from '../../../shared/hooks/use_event_details';
 import { useAssistant } from '../hooks/use_assistant';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 
-jest.mock('../../../../flyout/document_details/shared/hooks/use_event_details');
+jest.mock('../../../shared/hooks/use_event_details');
 jest.mock('../hooks/use_assistant');
 jest.mock('../../../../agent_builder/hooks/use_agent_builder_availability');
 jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment');

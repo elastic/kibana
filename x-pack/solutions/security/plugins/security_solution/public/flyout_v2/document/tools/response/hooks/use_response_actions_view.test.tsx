@@ -9,7 +9,7 @@ import React from 'react';
 import { render, renderHook } from '@testing-library/react';
 import { buildDataTableRecord, type DataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { useResponseActionsView } from './use_response_actions_view';
-import { mockSearchHit } from '../../../../../flyout/document_details/shared/mocks/mock_search_hit';
+import { mockSearchHit } from '../../../../shared/mocks/mock_search_hit';
 import { useGetAutomatedActionList } from '../../../../../management/hooks/response_actions/use_get_automated_action_list';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {

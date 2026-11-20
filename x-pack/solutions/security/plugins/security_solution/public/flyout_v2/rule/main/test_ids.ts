@@ -6,7 +6,7 @@
  */
 
 import { CONTENT_TEST_ID, HEADER_TEST_ID } from '../../shared/components/expandable_section';
-import { PREFIX } from '../../../flyout/shared/test_ids';
+import { PREFIX } from '../../shared/test_ids';
 
 const RULE_DETAILS_TEST_ID = `${PREFIX}RuleDetails` as const;
 

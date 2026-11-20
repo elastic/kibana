@@ -9,12 +9,12 @@ import { renderHook } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useGraphPreview } from './use_graph_preview';
 import { useHasGraphVisualizationLicense } from '../../../../common/hooks/use_has_graph_visualization_license';
-import { useIsEntityStoreV2Available } from '../../../../flyout/shared/hooks/use_is_entity_store_v2_available';
+import { useIsEntityStoreV2Available } from '../../../shared/hooks/use_is_entity_store_v2_available';
 import { useEntityStoreStatus } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 
 jest.mock('../../../../common/hooks/use_has_graph_visualization_license');
-jest.mock('../../../../flyout/shared/hooks/use_is_entity_store_v2_available');
+jest.mock('../../../shared/hooks/use_is_entity_store_v2_available');
 jest.mock('../../../../entity_analytics/components/entity_store/hooks/use_entity_store');
 jest.mock('@kbn/entity-store/public', () => {
   const actual = jest.requireActual('@kbn/entity-store/public');
