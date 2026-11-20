@@ -6,53 +6,48 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { MOBILE_FIELDS } from '../../../common/mobile_panel';
-import { getMappedMobileFields, hasMobileData, runEsql } from './esql';
+import { runEsql, timeFilter } from './esql';
 
 const verificationError = (reason: string) =>
   Object.assign(new Error('verification_exception'), {
     meta: { body: { error: { type: 'verification_exception', reason } } },
   });
 
-describe('getMappedMobileFields', () => {
-  it('asks the readable OTel indices which mobile fields they map', async () => {
-    const fieldCaps = jest.fn().mockResolvedValue({
-      fields: { [MOBILE_FIELDS.sdkName]: {}, [MOBILE_FIELDS.serviceName]: {} },
-    });
-    const esClient = { fieldCaps } as unknown as ElasticsearchClient;
-
-    const mapped = await getMappedMobileFields(esClient);
-
-    expect(fieldCaps).toHaveBeenCalledWith(
-      expect.objectContaining({
-        index: 'traces-*.otel-*,logs-*.otel-*',
-        fields: Object.values(MOBILE_FIELDS),
-        ignore_unavailable: true,
-        allow_no_indices: true,
-      }),
-      expect.anything()
-    );
-    expect([...mapped]).toEqual([MOBILE_FIELDS.sdkName, MOBILE_FIELDS.serviceName]);
-    expect(hasMobileData(mapped)).toBe(true);
-  });
-
-  it('has no mobile data without the SDK name', () => {
-    expect(hasMobileData(new Set([MOBILE_FIELDS.serviceName]))).toBe(false);
-  });
-});
-
 describe('runEsql', () => {
   const filter = { match_all: {} };
+  const QUERY = { query: 'FROM x | WHERE a == ?a', params: [{ a: 'b' }] };
+
+  it('asks for complete results, so a failed shard fails the query instead of undercounting', async () => {
+    const query = jest.fn().mockResolvedValue({ columns: [], values: [] });
+    const esClient = { esql: { query } } as unknown as ElasticsearchClient;
+
+    await runEsql(esClient, QUERY, filter);
+
+    expect(query).toHaveBeenCalledWith(
+      expect.objectContaining({ ...QUERY, filter, allow_partial_results: false }),
+      expect.anything()
+    );
+  });
+
+  it('fails when a shard fails', async () => {
+    const esClient = {
+      esql: { query: jest.fn().mockRejectedValue(new Error('search_phase_execution_exception')) },
+    } as unknown as ElasticsearchClient;
+
+    await expect(runEsql(esClient, QUERY, filter)).rejects.toThrow(
+      'search_phase_execution_exception'
+    );
+  });
 
   it('has no rows when the indices are gone', async () => {
     const esClient = {
       esql: { query: jest.fn().mockRejectedValue(verificationError('Unknown index [logs-*]')) },
     } as unknown as ElasticsearchClient;
 
-    await expect(runEsql(esClient, 'FROM x', filter)).resolves.toEqual([]);
+    await expect(runEsql(esClient, QUERY, filter)).resolves.toEqual([]);
   });
 
-  it('fails on an unknown column, which the mapped fields should have left out', async () => {
+  it('fails on any other verification error, e.g. a broken query', async () => {
     const esClient = {
       esql: {
         query: jest
@@ -61,6 +56,19 @@ describe('runEsql', () => {
       },
     } as unknown as ElasticsearchClient;
 
-    await expect(runEsql(esClient, 'FROM x', filter)).rejects.toThrow('verification_exception');
+    await expect(runEsql(esClient, QUERY, filter)).rejects.toThrow('verification_exception');
+  });
+});
+
+describe('timeFilter', () => {
+  it('leaves out the end, so a period and the one before it share no document', () => {
+    expect(timeFilter(1000, 2000, undefined)).toEqual({
+      bool: {
+        filter: [
+          { range: { '@timestamp': { gte: 1000, lt: 2000, format: 'epoch_millis' } } },
+          { match_all: {} },
+        ],
+      },
+    });
   });
 });

@@ -206,6 +206,16 @@ describe('ApplicationsListPage mobile applications', () => {
     expect(screen.queryByTestId('digitalExperienceApplicationsTable')).toBeNull();
   });
 
+  it('offers a retry, not the setup docs, when only the mobile source failed', async () => {
+    mockSourceFilter('mobile');
+    respondWith([app({ serviceName: 'web-app', source: 'otel', pageLoads: 5 })], [], ['mobile']);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceMobileApplicationsError')).toBeVisible();
+    expect(screen.getByTestId('digitalExperienceMobileApplicationsRetry')).toBeVisible();
+    expect(screen.queryByTestId('digitalExperienceMobileApplicationsEmpty')).toBeNull();
+  });
+
   it('shows only the mobile table with the Mobile source', async () => {
     mockSourceFilter('mobile');
     respondWith([app({ serviceName: 'web-app', source: 'otel', pageLoads: 5 }), mobileApp()]);

@@ -12,7 +12,9 @@ import qs from 'query-string';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../common/feature';
 import type { OverviewFilters } from '../../common/overview_filters';
 import { encodeOverviewFilters } from '../../common/overview_filters_param';
-import type { ApplicationSource } from '../../common/types/applications';
+import { APPLICATION_SOURCE } from '../../common/application_source';
+import type { ApplicationSource, MobilePlatform } from '../../common/types/applications';
+import { mobilePlatformRt } from '../utils/application_source';
 import { SHARED_FILTER_NAMES } from '../utils/overview_filters_query';
 import type { SessionsListUrlQuery } from '../utils/sessions_list_query';
 import { useDigitalExperienceParams } from './use_digital_experience_params';
@@ -38,6 +40,15 @@ const sessionsFiltersOf = (search: string): OverviewFilters => {
     }
   }
   return filters;
+};
+
+/** The mobile page's platform and release filters in a URL query, when valid. */
+const mobileFiltersOf = (search: string): { platform?: MobilePlatform; release?: string } => {
+  const { platform, release } = qs.parse(search);
+  return {
+    ...(mobilePlatformRt.is(platform) ? { platform } : {}),
+    ...(typeof release === 'string' && release ? { release } : {}),
+  };
 };
 
 export interface ApplicationLinks {
@@ -79,6 +90,7 @@ export const useApplicationLinks = (
       ...listQuery,
       ...pick(urlQuery, OVERVIEW_QUERY_KEYS),
       ...(filters ? { filters } : {}),
+      ...(source === APPLICATION_SOURCE.mobile ? mobileFiltersOf(search) : {}),
       source,
     };
     const query = { ...listQuery, ...sharedFilters, source };

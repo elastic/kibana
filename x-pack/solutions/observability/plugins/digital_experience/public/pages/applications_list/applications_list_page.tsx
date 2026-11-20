@@ -402,6 +402,17 @@ const PartiallyAvailableSourcesCallOut = ({ sources }: { sources: ApplicationSou
   );
 };
 
+const MOBILE_UNAVAILABLE_TITLE = i18n.translate(
+  'xpack.digitalExperience.applications.mobileUnavailable.title',
+  { defaultMessage: 'Could not load the mobile applications' }
+);
+
+const MOBILE_UNAVAILABLE_ERROR = new Error(
+  i18n.translate('xpack.digitalExperience.applications.mobileUnavailable.body', {
+    defaultMessage: 'The other applications loaded, but the mobile data could not be read.',
+  })
+);
+
 const NO_MOBILE_APPLICATIONS_TITLE = i18n.translate(
   'xpack.digitalExperience.applications.mobileEmpty.title',
   { defaultMessage: 'No mobile applications found' }
@@ -584,6 +595,19 @@ export function ApplicationsListPage() {
     const loadingOrError = getLoadingOrErrorMessage();
     if (loadingOrError) {
       return loadingOrError;
+    }
+    // The mobile search failed while the others loaded: a retry, not the setup docs.
+    if (response?.unavailableSources.includes(APPLICATION_SOURCE.mobile)) {
+      return (
+        <LoadErrorPrompt
+          data-test-subj="digitalExperienceMobileApplicationsError"
+          retryDataTestSubj="digitalExperienceMobileApplicationsRetry"
+          retryEbtElement={APPLICATIONS_LIST_EBT_ELEMENTS.RETRY}
+          title={MOBILE_UNAVAILABLE_TITLE}
+          error={MOBILE_UNAVAILABLE_ERROR}
+          onRetry={refresh}
+        />
+      );
     }
     if (response?.applications.some(({ source }) => source === APPLICATION_SOURCE.mobile)) {
       return NO_MATCHES_MESSAGE;

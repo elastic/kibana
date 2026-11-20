@@ -5,45 +5,37 @@
  * 2.0.
  */
 
-import {
-  MOBILE_FIELDS,
-  SESSIONS_METRIC,
-  mappedEnvironmentFields,
-  mobileStats,
-} from '../../../common/mobile_panel';
-import type { MappedFields } from '../../../common/mobile_panel';
+import { MOBILE_FIELDS } from '../../../common/mobile_panel';
+import { ENVIRONMENT_FIELDS } from '../../../common/otel_data';
 import { MAX_ENVIRONMENTS } from '../constants';
 
 /** The most used combinations of the environment fields to read; `toEnvironments` caps the names. */
 const MAX_ENVIRONMENT_ROWS = MAX_ENVIRONMENTS * MAX_ENVIRONMENTS;
 
-/**
- * The commands that count the documents per environment, by whichever environment fields some
- * index maps; one row with every document when none does.
- */
-export const environmentsCommands = (mapped: MappedFields): string[] => {
-  const fields = mappedEnvironmentFields(mapped);
-  return [
-    `STATS docs = COUNT(*)${fields.length > 0 ? ` BY ${fields.join(', ')}` : ''}`,
-    'SORT docs DESC',
-    `LIMIT ${MAX_ENVIRONMENT_ROWS}`,
-  ];
-};
+/** The commands that count the documents per environment, by both environment fields. */
+export const environmentsCommands = (): string[] => [
+  `STATS docs = COUNT(*) BY ${ENVIRONMENT_FIELDS.join(', ')}`,
+  'SORT docs DESC',
+  `LIMIT ${MAX_ENVIRONMENT_ROWS}`,
+];
+
+const SESSIONS = `sessions = COUNT_DISTINCT(${MOBILE_FIELDS.sessionId})`;
+const WITH_RELEASE = `WHERE ${MOBILE_FIELDS.serviceVersion} IS NOT NULL`;
+
+/** The commands that count the sessions per release, most first (then the higher release). */
+export const releasesCommands = (limit: number): string[] => [
+  WITH_RELEASE,
+  `STATS ${SESSIONS} BY release = ${MOBILE_FIELDS.serviceVersion}`,
+  'SORT sessions DESC, release DESC',
+  `LIMIT ${limit}`,
+];
 
 /**
- * The commands that count the sessions per raw version (and `by`), most sessions first so a cut
- * keeps the most used; `undefined` when no index maps `service.version`.
+ * The commands that pick each application's release with the most sessions, one row per
+ * application, so no cut on releases can leave an application without one.
  */
-export const releasesCommands = (
-  mapped: MappedFields,
-  { by = [], limit }: { by?: string[]; limit: number }
-): string[] | undefined =>
-  mapped.has(MOBILE_FIELDS.serviceVersion)
-    ? [
-        ...mobileStats([SESSIONS_METRIC], mapped, {
-          by: [...by, MOBILE_FIELDS.serviceVersion].join(', '),
-        }),
-        'SORT sessions DESC',
-        `LIMIT ${limit}`,
-      ]
-    : undefined;
+export const latestReleaseCommands = (): string[] => [
+  WITH_RELEASE,
+  `STATS ${SESSIONS} BY ${MOBILE_FIELDS.serviceName}, release = ${MOBILE_FIELDS.serviceVersion}`,
+  `STATS latest_release = TOP(sessions, 1, "desc", release) BY ${MOBILE_FIELDS.serviceName}`,
+];

@@ -6,39 +6,32 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { MOBILE_FIELDS } from '../../../common/mobile_panel';
 import { getMobileKpis } from './get_mobile_kpis';
 
 const HOUR = 60 * 60 * 1000;
-const ALL_MAPPED = Object.values(MOBILE_FIELDS);
 
 const esql = (columns: string[], values: unknown[][]) => ({
   columns: columns.map((name) => ({ name, type: 'keyword' })),
   values,
 });
 
-const clientMapping = (mapped: string[], query: jest.Mock) =>
-  ({
-    fieldCaps: jest
-      .fn()
-      .mockResolvedValue({ fields: Object.fromEntries(mapped.map((field) => [field, {}])) }),
-    esql: { query },
-  } as unknown as ElasticsearchClient);
+const clientWith = (query: jest.Mock) => ({ esql: { query } } as unknown as ElasticsearchClient);
 
 describe('getMobileKpis', () => {
-  it('has no data, without querying, when no readable index has mobile data', async () => {
-    const query = jest.fn();
+  it('has no data, and no values, without mobile documents', async () => {
+    const query = jest
+      .fn()
+      .mockResolvedValue(esql(['docs', 'sessions', 'users', 'exceptions'], [[0, 0, 0, 0]]));
 
     const kpis = await getMobileKpis({
-      esClient: clientMapping([], query),
+      esClient: clientWith(query),
       filters: { serviceName: 'shop-mobile' },
       start: 0,
       end: HOUR,
     });
 
     expect(kpis.hasData).toBe(false);
-    expect(kpis.sessions.value).toBeNull();
-    expect(query).not.toHaveBeenCalled();
+    expect(kpis.errorRate.value).toBeNull();
   });
 
   it('compares the period with the previous one and lists the picker options', async () => {
@@ -48,11 +41,10 @@ describe('getMobileKpis', () => {
       .mockResolvedValueOnce(esql(['docs', 'sessions', 'users', 'exceptions'], [[10, 2, 2, 0]]))
       .mockResolvedValueOnce(
         esql(
-          ['docs', 'sessions', 'service.version'],
+          ['docs', 'sessions', 'release'],
           [
+            [8, 4, '1.0.0'],
             [8, 3, '1.1.0'],
-            [4, 2, '1.0.0 (1)'],
-            [4, 2, '1.0.0 (2)'],
           ]
         )
       )
@@ -68,7 +60,7 @@ describe('getMobileKpis', () => {
       .mockResolvedValueOnce(esql(['docs', 'service.environment'], [[20, 'production']]));
 
     const kpis = await getMobileKpis({
-      esClient: clientMapping(ALL_MAPPED, query),
+      esClient: clientWith(query),
       filters: { serviceName: 'shop-mobile', platform: 'ios' },
       start: HOUR,
       end: 2 * HOUR,
@@ -88,10 +80,14 @@ describe('getMobileKpis', () => {
         bucket: 'hour',
       })
     );
-    // The previous period has the same length and ends where the range starts.
+    // The previous period has the same length and ends, exclusive, where the range starts.
     expect(query.mock.calls[1][0].filter.bool.filter[0]).toEqual({
-      range: { '@timestamp': { gte: 0, lte: HOUR, format: 'epoch_millis' } },
+      range: { '@timestamp': { gte: 0, lt: HOUR, format: 'epoch_millis' } },
     });
+    // The routes send the values as params; Discover gets them in the query.
+    expect(query.mock.calls[0][0].params).toEqual([{ service_name: 'shop-mobile' }]);
+    expect(query.mock.calls[0][0].query).toContain('service.name == ?service_name');
+    expect(kpis.esql).toContain('service.name == "shop-mobile"');
     expect(kpis.esql).toContain('telemetry.sdk.name == "iOS"');
     expect(kpis.esql).toContain('service.environment == "production"');
   });

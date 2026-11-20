@@ -78,6 +78,7 @@ export const MOBILE_APPLICATION_EBT_ELEMENTS = {
   PLATFORM_FILTER: 'mobilePlatformFilter',
   RELEASE_FILTER: 'mobileReleaseFilter',
   PANEL_DISCOVER_LINK: 'mobilePanelDiscoverLink',
+  RETRY: 'mobileRetry',
 } as const;
 
 export const APPLICATIONS_LIST_EBT_ELEMENTS = {

@@ -62,6 +62,9 @@ jest.mock('../reports/reports_tab', () => {
     },
   };
 });
+jest.mock('./mobile_overview/mobile_overview', () => ({
+  MobileOverview: () => <div data-test-subj="mobileOverview" />,
+}));
 jest.mock('../sessions/sessions_tab', () => {
   return {
     SessionsTab: ({ serviceName }: { serviceName: string }) => {
@@ -314,6 +317,19 @@ describe('ApplicationPage', () => {
 
       expect(historyReplace).toHaveBeenCalledWith('/my-app?source=classic');
       expect(screen.queryByTestId(`${tab}Tab`)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(`digitalExperienceTab-${tab}`)).not.toBeInTheDocument();
+    }
+  );
+
+  it.each(['sessions', 'errors', 'network'] as const)(
+    'replaces the %s route of a mobile application with its Overview, its only tab',
+    (tab) => {
+      useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+      render(<ApplicationPage serviceName="my-app" source="mobile" selectedTab={tab} />);
+
+      expect(historyReplace).toHaveBeenCalledWith('/my-app?source=classic');
+      expect(screen.queryByTestId('digitalExperienceSessionsUnavailable')).not.toBeInTheDocument();
       expect(screen.queryByTestId(`digitalExperienceTab-${tab}`)).not.toBeInTheDocument();
     }
   );

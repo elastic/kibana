@@ -7,44 +7,15 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import {
-  MOBILE_FIELDS,
-  MOBILE_REQUIRED_FIELDS,
-  MOBILE_SOURCE_INDICES,
-} from '../../../common/mobile_panel';
-import type { MappedFields } from '../../../common/mobile_panel';
+import type { EsqlQuery } from '../../../common/mobile_panel';
+import { ENVIRONMENT_FIELDS } from '../../../common/otel_data';
 import { toEsqlRows } from '../../services/sessions/summary_documents';
 import type { EsqlRow } from '../../services/sessions/summary_documents';
 import { environmentFilter } from '../helpers/environment';
-import { ENVIRONMENT_FIELDS } from '../otel/queries';
-
-/**
- * The mobile fields some OTel index the user can read maps; the queries read only those, as ES|QL
- * rejects a field no index maps.
- */
-export const getMappedMobileFields = async (
-  esClient: ElasticsearchClient,
-  signal?: AbortSignal
-): Promise<MappedFields> => {
-  const { fields } = await esClient.fieldCaps(
-    {
-      index: MOBILE_SOURCE_INDICES,
-      fields: Object.values(MOBILE_FIELDS),
-      ignore_unavailable: true,
-      allow_no_indices: true,
-    },
-    { signal }
-  );
-  return new Set(Object.keys(fields));
-};
-
-/** Whether the fields hold any mobile data to query. */
-export const hasMobileData = (mapped: MappedFields): boolean =>
-  MOBILE_REQUIRED_FIELDS.every((field) => mapped.has(field));
 
 const UNKNOWN_INDEX = /Unknown index/;
 
-/** Whether ES|QL rejected the query because none of its indices exists (anymore). */
+/** Whether ES|QL rejected the query because none of its indices exists, e.g. without OTel data. */
 export const isUnknownIndexError = (error: unknown): boolean => {
   const { type, reason } =
     (error as { meta?: { body?: { error?: { type?: string; reason?: string } } } })?.meta?.body
@@ -52,16 +23,17 @@ export const isUnknownIndexError = (error: unknown): boolean => {
   return type === 'verification_exception' && UNKNOWN_INDEX.test(reason ?? '');
 };
 
-/** The rows of an ES|QL query, none when its indices are gone. */
+/** The rows of an ES|QL query, none when its indices don't exist. */
 export const runEsql = async (
   esClient: ElasticsearchClient,
-  query: string,
+  { query, params }: EsqlQuery,
   filter: estypes.QueryDslQueryContainer,
   signal?: AbortSignal
 ): Promise<EsqlRow[]> => {
   try {
     return toEsqlRows(
-      await esClient.esql.query({ query, filter, allow_partial_results: true }, { signal })
+      // A failed shard fails the query: partial counts would pass for complete ones.
+      await esClient.esql.query({ query, params, filter, allow_partial_results: false }, { signal })
     );
   } catch (error) {
     if (isUnknownIndexError(error)) {
@@ -71,7 +43,10 @@ export const runEsql = async (
   }
 };
 
-/** The documents of the time range, in `environment` when set, as an ES|QL `filter`. */
+/**
+ * The documents of `[start, end)`, in `environment` when set, as an ES|QL `filter`. Half-open, so
+ * a period and the one before it don't share the document at their boundary.
+ */
 export const timeFilter = (
   start: number,
   end: number,
@@ -79,8 +54,8 @@ export const timeFilter = (
 ): estypes.QueryDslQueryContainer => ({
   bool: {
     filter: [
-      { range: { '@timestamp': { gte: start, lte: end, format: 'epoch_millis' } } },
-      environmentFilter(ENVIRONMENT_FIELDS, environment),
+      { range: { '@timestamp': { gte: start, lt: end, format: 'epoch_millis' } } },
+      environmentFilter([...ENVIRONMENT_FIELDS], environment),
     ],
   },
 });

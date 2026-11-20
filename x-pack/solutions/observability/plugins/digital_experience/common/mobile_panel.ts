@@ -29,6 +29,12 @@ const DAY_MS = 24 * HOUR_MS;
 /** The OTel indices the mobile SDKs write to, alongside backend services. */
 export const MOBILE_SOURCE_INDICES = `${OTEL_TRACES_INDEX},${OTEL_LOGS_INDEX}`;
 
+/**
+ * Fields no index maps read as `null` instead of failing the query, e.g. `exception.type` where no
+ * app ever threw, or every field on a cluster without mobile data.
+ */
+export const NULLIFY_UNMAPPED_FIELDS = 'SET unmapped_fields = "NULLIFY";';
+
 /** The fields the mobile queries read, as stored in the OTel indices. */
 export const MOBILE_FIELDS = {
   sdkName: resourceAttributeField('telemetry.sdk.name'),
@@ -41,23 +47,40 @@ export const MOBILE_FIELDS = {
   environmentName: RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
 } as const;
 
-/** Without these mapped there is no mobile data to read. */
-export const MOBILE_REQUIRED_FIELDS: readonly string[] = [
-  MOBILE_FIELDS.sdkName,
-  MOBILE_FIELDS.serviceName,
-];
+/** An ES|QL query and the values of its `?name` params. */
+export interface EsqlQuery {
+  query: string;
+  params: Array<Record<string, string>>;
+}
 
 /**
- * The fields some readable OTel index maps. ES|QL rejects a query that reads a field no index maps,
- * e.g. `exception.type` where no app ever threw, so the queries leave unmapped fields out.
+ * How a query writes a value: as a `?name` param for the routes, or as an escaped literal for
+ * Discover, which takes the query text only.
  */
-export type MappedFields = ReadonlySet<string>;
+export interface EsqlValues {
+  text: (name: string, value: string) => string;
+}
+
+/** Values written into the query, for Discover. */
+export const INLINE_VALUES: EsqlValues = { text: (_name, value) => escapeStringValue(value) };
+
+/** Values sent as params, which `params` collects for the request. */
+export const createParamValues = (): EsqlValues & { params: EsqlQuery['params'] } => {
+  const params: EsqlQuery['params'] = [];
+  return {
+    params,
+    text: (name, value) => {
+      params.push({ [name]: value });
+      return `?${name}`;
+    },
+  };
+};
 
 /** The filters every mobile panel applies, besides the time range and the environment. */
 export interface MobilePanelFilters {
   serviceName: string;
   platform?: MobilePlatform;
-  /** A normalized release: its raw `service.version`s, with or without a build, match. */
+  /** A release, as the SDKs send it in `service.version`; the build is in `app.build_id`. */
   release?: string;
 }
 
@@ -100,97 +123,43 @@ export const MOBILE_SDK_CONDITION = `${MOBILE_FIELDS.sdkName} IN (${MOBILE_SDK_N
   escapeStringValue
 ).join(', ')})`;
 
-const releaseCondition = (release: string, mapped: MappedFields): string => {
-  const { serviceVersion } = MOBILE_FIELDS;
-  if (!mapped.has(serviceVersion)) {
-    return 'false';
-  }
-  return (
-    `(${serviceVersion} == ${escapeStringValue(release)}` +
-    ` OR STARTS_WITH(${serviceVersion}, ${escapeStringValue(`${release} (`)})` +
-    ` OR STARTS_WITH(${serviceVersion}, ${escapeStringValue(`${release}+`)}))`
-  );
-};
+/** The mobile documents, then `commands`. */
+export const mobileDocumentsEsql = (commands: string[]): string =>
+  `${NULLIFY_UNMAPPED_FIELDS}\n${[
+    `FROM ${MOBILE_SOURCE_INDICES}`,
+    `WHERE ${MOBILE_SDK_CONDITION}`,
+    ...commands,
+  ].join('\n| ')}`;
 
 /** The ES|QL `WHERE` conditions of the filters; the time range and environment are applied apart. */
 export const mobilePanelConditions = (
   { serviceName, platform, release }: MobilePanelFilters,
-  mapped: MappedFields
+  values: EsqlValues
 ): string[] => [
-  MOBILE_SDK_CONDITION,
-  `${MOBILE_FIELDS.serviceName} == ${escapeStringValue(serviceName)}`,
+  `${MOBILE_FIELDS.serviceName} == ${values.text('service_name', serviceName)}`,
   ...(platform
     ? [`${MOBILE_FIELDS.sdkName} == ${escapeStringValue(SDK_NAME_BY_PLATFORM[platform])}`]
     : []),
-  ...(release ? [releaseCondition(release, mapped)] : []),
+  ...(release ? [`${MOBILE_FIELDS.serviceVersion} == ${values.text('release', release)}`] : []),
 ];
 
 /** The ES|QL of a mobile panel: its documents, filtered, then `commands` (e.g. a `STATS`). */
 export const mobilePanelEsql = (
   filters: MobilePanelFilters,
-  mapped: MappedFields,
+  values: EsqlValues,
   commands: string[] = []
 ): string =>
-  [
-    `FROM ${MOBILE_SOURCE_INDICES}`,
-    `WHERE ${mobilePanelConditions(filters, mapped).join(' AND ')}`,
+  mobileDocumentsEsql([
+    `WHERE ${mobilePanelConditions(filters, values).join(' AND ')}`,
     ...commands,
-  ].join('\n| ');
+  ]);
 
-/** A statistic over one field, and its value when no index maps the field. */
-export interface MobileMetric {
-  name: string;
-  aggregation: string;
-  field: string;
-  fallback: string;
-}
-
-export const SESSIONS_METRIC: MobileMetric = {
-  name: 'sessions',
-  aggregation: 'COUNT_DISTINCT',
-  field: MOBILE_FIELDS.sessionId,
-  fallback: '0',
-};
-export const USERS_METRIC: MobileMetric = {
-  name: 'users',
-  aggregation: 'COUNT_DISTINCT',
-  field: MOBILE_FIELDS.installationId,
-  fallback: '0',
-};
-export const EXCEPTIONS_METRIC: MobileMetric = {
-  name: 'exceptions',
-  aggregation: 'COUNT',
-  field: MOBILE_FIELDS.exceptionType,
-  fallback: '0',
-};
-
-/**
- * A `STATS` of the metrics (and `docs`, every document) by `by`, then an `EVAL` that sets each
- * metric whose field no index maps to its fallback.
- */
-export const mobileStats = (
-  metrics: readonly MobileMetric[],
-  mapped: MappedFields,
-  { extra = [], by }: { extra?: string[]; by?: string } = {}
-): string[] => {
-  const present = metrics.filter(({ field }) => mapped.has(field));
-  const missing = metrics.filter(({ field }) => !mapped.has(field));
-  const aggregations = [
-    'docs = COUNT(*)',
-    ...present.map(({ name, aggregation, field }) => `${name} = ${aggregation}(${field})`),
-    ...extra,
-  ];
-  return [
-    `STATS ${aggregations.join(', ')}${by ? ` BY ${by}` : ''}`,
-    ...(missing.length > 0
-      ? [`EVAL ${missing.map(({ name, fallback }) => `${name} = ${fallback}`).join(', ')}`]
-      : []),
-  ];
-};
-
-/** The environment fields some index maps, for an ES|QL `BY`. */
-export const mappedEnvironmentFields = (mapped: MappedFields): string[] =>
-  ENVIRONMENT_FIELDS.filter((field) => mapped.has(field));
+/** Sessions, users and exceptions; an unmapped field counts 0. */
+export const MOBILE_KPI_STATS =
+  `STATS docs = COUNT(*),` +
+  ` sessions = COUNT_DISTINCT(${MOBILE_FIELDS.sessionId}),` +
+  ` users = COUNT_DISTINCT(${MOBILE_FIELDS.installationId}),` +
+  ` exceptions = COUNT(${MOBILE_FIELDS.exceptionType})`;
 
 /**
  * The ES|QL condition of the environment filter, as the routes apply it (`environmentFilter`):
@@ -199,43 +168,37 @@ export const mappedEnvironmentFields = (mapped: MappedFields): string[] =>
  */
 export const mobileEnvironmentCondition = (
   environment: string | undefined,
-  mapped: MappedFields
+  values: EsqlValues
 ): string | undefined => {
   if (!environment || environment === ENVIRONMENT_ALL_VALUE) {
     return undefined;
   }
-  const fields = mappedEnvironmentFields(mapped);
   if (environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
-    if (fields.length === 0) {
-      return undefined;
-    }
-    const sentinel = mapped.has(MOBILE_FIELDS.environment)
-      ? [`${MOBILE_FIELDS.environment} == ${escapeStringValue(ENVIRONMENT_NOT_DEFINED_VALUE)}`]
-      : [];
-    const noEnvironment = `(${fields.map((field) => `${field} IS NULL`).join(' AND ')})`;
-    return `(${[...sentinel, noEnvironment].join(' OR ')})`;
+    const sentinel = `${MOBILE_FIELDS.environment} == ${escapeStringValue(
+      ENVIRONMENT_NOT_DEFINED_VALUE
+    )}`;
+    const noEnvironment = ENVIRONMENT_FIELDS.map((field) => `${field} IS NULL`).join(' AND ');
+    return `(${sentinel} OR (${noEnvironment}))`;
   }
-  if (fields.length === 0) {
-    return 'false';
-  }
-  return `(${fields.map((field) => `${field} == ${escapeStringValue(environment)}`).join(' OR ')})`;
+  const value = values.text('environment', environment);
+  return `(${ENVIRONMENT_FIELDS.map((field) => `${field} == ${value}`).join(' OR ')})`;
 };
 
 /**
- * The ES|QL that Discover opens for a panel: the KPI statistics over time, with every filter. The
- * routes apply the environment apart, so it is added here for Discover.
+ * The ES|QL that Discover opens for a panel: the KPI statistics over time, with every filter,
+ * the environment included as the routes apply it apart.
  */
 export const mobilePanelDiscoverEsql = (
   filters: MobilePanelFilters,
-  mapped: MappedFields,
   { bucket, environment }: { bucket: 'hour' | 'day'; environment?: string }
 ): string => {
-  const environmentCondition = mobileEnvironmentCondition(environment, mapped);
-  return mobilePanelEsql(filters, mapped, [
+  const environmentCondition = mobileEnvironmentCondition(environment, INLINE_VALUES);
+  return mobilePanelEsql(filters, INLINE_VALUES, [
     ...(environmentCondition ? [`WHERE ${environmentCondition}`] : []),
-    ...mobileStats([SESSIONS_METRIC, USERS_METRIC, EXCEPTIONS_METRIC], mapped, {
-      by: `bucket = BUCKET(@timestamp, 1 ${bucket})`,
-    }),
+    `STATS sessions = COUNT_DISTINCT(${MOBILE_FIELDS.sessionId}),` +
+      ` users = COUNT_DISTINCT(${MOBILE_FIELDS.installationId}),` +
+      ` exceptions = COUNT(${MOBILE_FIELDS.exceptionType})` +
+      ` BY bucket = BUCKET(@timestamp, 1 ${bucket})`,
     'SORT bucket ASC',
   ]);
 };

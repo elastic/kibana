@@ -166,6 +166,21 @@ describe('MobileOverview', () => {
     expect(screen.getByTestId('digitalExperienceMobileKpiUsersPrevious')).toBeInTheDocument();
   });
 
+  it('shows the error with a retry, not endless loading, when the KPIs fail', async () => {
+    fetch.mockRejectedValueOnce(new Error('Internal Server Error')).mockResolvedValue(KPIS);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceMobileKpisError')).toHaveTextContent(
+      'Internal Server Error'
+    );
+    expect(screen.queryByTestId('digitalExperienceMobileKpis')).toBeNull();
+
+    fireEvent.click(screen.getByTestId('digitalExperienceMobileKpisRetry'));
+
+    expect(await screen.findByTestId('digitalExperienceMobileKpis')).toBeInTheDocument();
+    expect(screen.queryByTestId('digitalExperienceMobileKpisError')).toBeNull();
+  });
+
   it('links to the EDOT Android and iOS docs without mobile data', async () => {
     fetch.mockResolvedValue({ ...KPIS, hasData: false });
     renderPage();
