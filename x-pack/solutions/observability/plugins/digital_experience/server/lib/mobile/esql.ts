@@ -25,7 +25,7 @@ export const isUnknownIndexError = (error: unknown): boolean => {
  * The rows of a mobile ES|QL query, traced as `operationName`; none when its indices don't exist.
  * A failed shard fails the query, as partial counts would pass for complete ones.
  */
-export const runMobileEsql = async <TRow extends EsqlOutput>(
+export const runMobileEsql = async <TRow extends object>(
   esClient: TracedElasticsearchClient,
   operationName: string,
   query: ComposerQuery,
@@ -33,7 +33,7 @@ export const runMobileEsql = async <TRow extends EsqlOutput>(
 ): Promise<TRow[]> => {
   const { query: esqlQuery, params } = query.toRequest();
   try {
-    const { hits } = await esClient.esql<TRow, { transform: 'plain' }>(
+    const { hits } = await esClient.esql<TRow & EsqlOutput, { transform: 'plain' }>(
       operationName,
       {
         query: esqlQuery,

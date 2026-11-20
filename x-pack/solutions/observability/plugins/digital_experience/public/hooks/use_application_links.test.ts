@@ -51,9 +51,15 @@ beforeEach(() => {
   } as unknown as ReturnType<typeof useDigitalExperienceParams>);
 });
 
+const mockRouteQuery = (query: Record<string, string>) =>
+  jest.mocked(useDigitalExperienceParams).mockReturnValue({
+    query,
+  } as unknown as ReturnType<typeof useDigitalExperienceParams>);
+
 describe('useApplicationLinks', () => {
-  it("keeps the mobile page's platform and release in its Overview link", () => {
+  it("keeps the mobile page's platform and release, as the route validated them", () => {
     mockSearch('?source=mobile&platform=ios&release=2.0.0');
+    mockRouteQuery({ source: 'mobile', platform: 'ios', release: '2.0.0' });
 
     const { result } = renderHook(() => useApplicationLinks('shop-mobile', 'mobile'));
 
@@ -62,13 +68,13 @@ describe('useApplicationLinks', () => {
     );
   });
 
-  it('leaves out an invalid platform, and the mobile filters of a web application', () => {
-    mockSearch('?platform=windows&release=2.0.0');
+  it('leaves the mobile filters out of the links of a web application', () => {
+    mockSearch('?source=otel&platform=ios&release=2.0.0');
+    mockRouteQuery({ source: 'otel', platform: 'ios', release: '2.0.0' });
 
-    const mobile = renderHook(() => useApplicationLinks('shop-mobile', 'mobile'));
-    const web = renderHook(() => useApplicationLinks('shop', 'otel'));
+    const { result } = renderHook(() => useApplicationLinks('shop', 'otel'));
 
-    expect(mobile.result.current.overviewHref).not.toContain('platform=');
-    expect(web.result.current.overviewHref).not.toContain('release=');
+    expect(result.current.overviewHref).not.toContain('platform=');
+    expect(result.current.overviewHref).not.toContain('release=');
   });
 });

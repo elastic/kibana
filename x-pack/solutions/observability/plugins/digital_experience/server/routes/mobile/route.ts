@@ -11,7 +11,10 @@ import { MOBILE_PLATFORMS } from '../../../common/types/applications';
 import type { MobileKpisResponse } from '../../../common/types/mobile';
 import { createDigitalExperienceTracedEsClient } from '../../lib/create_digital_experience_traced_es_client';
 import { MAX_RELEASE_LENGTH } from '../../lib/constants';
-import { APPLICATION_TAB_ROUTE_OPTIONS, APPLICATION_TAB_ROUTE_SECURITY } from '../application_tab_route';
+import {
+  APPLICATION_TAB_ROUTE_OPTIONS,
+  APPLICATION_TAB_ROUTE_SECURITY,
+} from '../application_tab_route';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
 import {
   START_AFTER_END_ISSUE,

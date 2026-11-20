@@ -11,14 +11,14 @@ import type { MobileApplicationSummary } from '../../../../common/types/applicat
 import { toPlatforms } from '../../../lib/mobile/rows';
 
 /** One row of `applicationsQuery`. */
-export type MobileApplicationRow = {
+export interface MobileApplicationRow {
   [MOBILE_FIELDS.serviceName]: string;
   sessions: number;
   users: number;
   exceptions: number;
   platforms: string | string[] | null;
   last_seen: string | null;
-};
+}
 
 /** One row of `applicationsQuery` as an application of the list. */
 export const toApplication = (

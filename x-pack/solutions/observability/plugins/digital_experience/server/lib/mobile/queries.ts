@@ -22,8 +22,8 @@ export const withEnvironmentCounts = (query: ComposerQuery): ComposerQuery =>
 export const withReleaseCounts = (query: ComposerQuery, limit: number): ComposerQuery =>
   query.pipe`WHERE ${mobileColumn('serviceVersion')} IS NOT NULL`
     .pipe`STATS sessions = COUNT_DISTINCT(${mobileColumn('sessionId')})
-      BY release = ${mobileColumn('serviceVersion')}`
-    .pipe`SORT sessions DESC, release DESC`.pipe`LIMIT ${limit}`;
+      BY release = ${mobileColumn('serviceVersion')}`.pipe`SORT sessions DESC, release DESC`
+    .pipe`LIMIT ${limit}`;
 
 /**
  * Each application's release with the most sessions, one row per application, so no cut on

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { getMobileApplications } from './get_mobile_applications';
 import { applicationsQuery, isMobileSdkName, latestReleasesQuery } from './queries';
 import { toApplication } from './to_application';
+import type { MobileApplicationRow } from './to_application';
 
 describe('isMobileSdkName', () => {
   it.each(['android', 'iOS'])('detects the %s SDK, which React Native apps run on', (name) => {
@@ -24,39 +25,34 @@ describe('isMobileSdkName', () => {
 });
 
 describe('applicationsQuery', () => {
-  const { query } = applicationsQuery();
+  const { query } = applicationsQuery().toRequest();
 
   it('reads unmapped fields as null, so a field no app sent counts 0 instead of failing', () => {
-    expect(query).toMatch(/^SET unmapped_fields = "NULLIFY";\n/);
-    expect(query).toContain('exceptions = COUNT(attributes.exception.type)');
-  });
-
-  it('queries by telemetry.sdk.name and never by the SDK language', () => {
-    expect(query).toContain('resource.attributes.telemetry.sdk.name IN ("android", "iOS")');
-    expect(query).not.toContain('telemetry.sdk.language');
+    expect(query).toMatch(/^SET unmapped_fields = "nullify";/);
+    expect(query).toContain('exceptions = COUNT(`attributes.exception.type`)');
   });
 
   it('takes the platforms from the SDK name, so iPads, which report `os.name: iPadOS`, count as iOS', () => {
-    expect(query).toContain('platforms = VALUES(resource.attributes.telemetry.sdk.name)');
+    expect(query).toContain('platforms = VALUES(`resource.attributes.telemetry.sdk.name`)');
     expect(query).not.toContain('os.name');
+    expect(query).not.toContain('telemetry.sdk.language');
   });
 });
 
 describe('latestReleasesQuery', () => {
-  it('picks one release per listed application, the names sent as params', () => {
-    const { query, params } = latestReleasesQuery(['shop-mobile', 'a"b']);
+  it('picks one release per listed application, the names escaped', () => {
+    const { query } = latestReleasesQuery(['shop-mobile', 'a"b']).toRequest();
 
-    expect(query).toContain('| WHERE service.name IN (?service_0, ?service_1)');
-    expect(query).toContain('BY service.name, release = service.version');
+    expect(query).toContain('| WHERE `service.name` IN ("shop-mobile", "a\\"b")');
+    expect(query).toContain('BY `service.name`, release = `service.version`');
     expect(query).toContain(
-      '| STATS latest_release = TOP(sessions, 1, "desc", release) BY service.name'
+      '| STATS latest_release = TOP(sessions, 1, "desc", release) BY `service.name`'
     );
-    expect(params).toEqual([{ service_0: 'shop-mobile' }, { service_1: 'a"b' }]);
   });
 });
 
 describe('toApplication', () => {
-  const row = {
+  const row: MobileApplicationRow = {
     'service.name': 'shop-mobile',
     sessions: 10,
     users: 4,
@@ -92,12 +88,8 @@ describe('toApplication', () => {
 });
 
 describe('getMobileApplications', () => {
-  const esql = (columns: string[], values: unknown[][]) => ({
-    columns: columns.map((name) => ({ name, type: 'keyword' })),
-    values,
-  });
-
-  const clientWith = (query: jest.Mock) => ({ esql: { query } } as unknown as ElasticsearchClient);
+  const clientWith = (esqlCall: jest.Mock) =>
+    ({ esql: esqlCall } as unknown as TracedElasticsearchClient);
 
   const range = {
     start: Date.parse('2021-01-18T00:00:00.000Z'),
@@ -105,45 +97,48 @@ describe('getMobileApplications', () => {
   };
 
   it('has no applications, without a release query, when there is no mobile data', async () => {
-    const query = jest.fn().mockResolvedValue(esql(['docs'], []));
+    const esqlCall = jest.fn().mockResolvedValue({ hits: [] });
 
-    const result = await getMobileApplications({ esClient: clientWith(query), ...range });
+    const result = await getMobileApplications({ esClient: clientWith(esqlCall), ...range });
 
     expect(result).toEqual({ applications: [], environments: [] });
-    expect(query).toHaveBeenCalledTimes(2);
+    expect(esqlCall).toHaveBeenCalledTimes(2);
   });
 
   it('fails on a query error, so the source is reported unavailable', async () => {
-    const query = jest.fn().mockRejectedValue(new Error('security_exception'));
+    const esqlCall = jest.fn().mockRejectedValue(new Error('security_exception'));
 
-    await expect(getMobileApplications({ esClient: clientWith(query), ...range })).rejects.toThrow(
-      'security_exception'
-    );
+    await expect(
+      getMobileApplications({ esClient: clientWith(esqlCall), ...range })
+    ).rejects.toThrow('security_exception');
   });
 
   it('merges the application, environment and latest release queries', async () => {
-    const query = jest
+    const esqlCall = jest
       .fn()
-      .mockResolvedValueOnce(
-        esql(
-          ['sessions', 'users', 'exceptions', 'platforms', 'last_seen', 'service.name'],
-          [[3, 2, 1, 'android', '2021-01-18T12:00:00.000Z', 'trailmap-android']]
-        )
-      )
-      .mockResolvedValueOnce(
-        esql(
-          ['docs', 'service.environment', 'resource.attributes.deployment.environment.name'],
-          [
-            [5, 'production', null],
-            [4, null, null],
-          ]
-        )
-      )
-      .mockResolvedValueOnce(
-        esql(['latest_release', 'service.name'], [['1.0.0', 'trailmap-android']])
-      );
+      .mockResolvedValueOnce({
+        hits: [
+          {
+            'service.name': 'trailmap-android',
+            sessions: 3,
+            users: 2,
+            exceptions: 1,
+            platforms: 'android',
+            last_seen: '2021-01-18T12:00:00.000Z',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        hits: [
+          { docs: 5, 'service.environment': 'production' },
+          { docs: 4, 'service.environment': null },
+        ],
+      })
+      .mockResolvedValueOnce({
+        hits: [{ 'service.name': 'trailmap-android', latest_release: '1.0.0' }],
+      });
 
-    const result = await getMobileApplications({ esClient: clientWith(query), ...range });
+    const result = await getMobileApplications({ esClient: clientWith(esqlCall), ...range });
 
     expect(result.environments).toEqual(['production', 'ENVIRONMENT_NOT_DEFINED']);
     expect(result.applications).toEqual([
@@ -155,9 +150,10 @@ describe('getMobileApplications', () => {
       }),
     ]);
     // The latest release is of the listed applications, over the last 24 hours of the range.
-    const [[releasesRequest]] = query.mock.calls.slice(2);
-    expect(releasesRequest.params).toEqual([{ service_0: 'trailmap-android' }]);
-    expect(releasesRequest.filter.bool.filter[0]).toEqual({
+    const [operationName, request] = esqlCall.mock.calls[2];
+    expect(operationName).toBe('get_mobile_latest_releases');
+    expect(request.query).toContain('`service.name` IN ("trailmap-android")');
+    expect(request.filter.bool.filter[0]).toEqual({
       range: {
         '@timestamp': {
           gte: range.end - 24 * 60 * 60 * 1000,

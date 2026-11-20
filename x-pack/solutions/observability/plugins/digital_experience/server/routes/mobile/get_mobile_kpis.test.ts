@@ -5,26 +5,22 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { getMobileKpis } from './get_mobile_kpis';
 
 const HOUR = 60 * 60 * 1000;
 
-const esql = (columns: string[], values: unknown[][]) => ({
-  columns: columns.map((name) => ({ name, type: 'keyword' })),
-  values,
-});
-
-const clientWith = (query: jest.Mock) => ({ esql: { query } } as unknown as ElasticsearchClient);
+const clientWith = (esqlCall: jest.Mock) =>
+  ({ esql: esqlCall } as unknown as TracedElasticsearchClient);
 
 describe('getMobileKpis', () => {
   it('has no data, and no values, without mobile documents', async () => {
-    const query = jest
+    const esqlCall = jest
       .fn()
-      .mockResolvedValue(esql(['docs', 'sessions', 'users', 'exceptions'], [[0, 0, 0, 0]]));
+      .mockResolvedValue({ hits: [{ docs: 0, sessions: 0, users: 0, exceptions: 0 }] });
 
     const kpis = await getMobileKpis({
-      esClient: clientWith(query),
+      esClient: clientWith(esqlCall),
       filters: { serviceName: 'shop-mobile' },
       start: 0,
       end: HOUR,
@@ -35,32 +31,26 @@ describe('getMobileKpis', () => {
   });
 
   it('compares the period with the previous one and lists the picker options', async () => {
-    const query = jest
+    const esqlCall = jest
       .fn()
-      .mockResolvedValueOnce(esql(['docs', 'sessions', 'users', 'exceptions'], [[20, 4, 2, 2]]))
-      .mockResolvedValueOnce(esql(['docs', 'sessions', 'users', 'exceptions'], [[10, 2, 2, 0]]))
-      .mockResolvedValueOnce(
-        esql(
-          ['docs', 'sessions', 'release'],
-          [
-            [8, 4, '1.0.0'],
-            [8, 3, '1.1.0'],
-          ]
-        )
-      )
-      .mockResolvedValueOnce(
-        esql(
-          ['docs', 'resource.attributes.telemetry.sdk.name'],
-          [
-            [10, 'iOS'],
-            [10, 'android'],
-          ]
-        )
-      )
-      .mockResolvedValueOnce(esql(['docs', 'service.environment'], [[20, 'production']]));
+      .mockResolvedValueOnce({ hits: [{ docs: 20, sessions: 4, users: 2, exceptions: 2 }] })
+      .mockResolvedValueOnce({ hits: [{ docs: 10, sessions: 2, users: 2, exceptions: 0 }] })
+      .mockResolvedValueOnce({
+        hits: [
+          { sessions: 4, release: '1.0.0' },
+          { sessions: 3, release: '1.1.0' },
+        ],
+      })
+      .mockResolvedValueOnce({
+        hits: [
+          { docs: 10, sdk_name: 'iOS' },
+          { docs: 10, sdk_name: 'android' },
+        ],
+      })
+      .mockResolvedValueOnce({ hits: [{ docs: 20, 'service.environment': 'production' }] });
 
     const kpis = await getMobileKpis({
-      esClient: clientWith(query),
+      esClient: clientWith(esqlCall),
       filters: { serviceName: 'shop-mobile', platform: 'ios' },
       start: HOUR,
       end: 2 * HOUR,
@@ -80,15 +70,16 @@ describe('getMobileKpis', () => {
         bucket: 'hour',
       })
     );
+    const [[, currentRequest], [, previousRequest]] = esqlCall.mock.calls;
     // The previous period has the same length and ends, exclusive, where the range starts.
-    expect(query.mock.calls[1][0].filter.bool.filter[0]).toEqual({
+    expect(previousRequest.filter.bool.filter[0]).toEqual({
       range: { '@timestamp': { gte: 0, lt: HOUR, format: 'epoch_millis' } },
     });
     // The routes send the values as params; Discover gets them in the query.
-    expect(query.mock.calls[0][0].params).toEqual([{ service_name: 'shop-mobile' }]);
-    expect(query.mock.calls[0][0].query).toContain('service.name == ?service_name');
-    expect(kpis.esql).toContain('service.name == "shop-mobile"');
-    expect(kpis.esql).toContain('telemetry.sdk.name == "iOS"');
-    expect(kpis.esql).toContain('service.environment == "production"');
+    expect(currentRequest.params).toEqual([{ service_name: 'shop-mobile' }]);
+    expect(currentRequest.query).toContain('`service.name` == ?service_name');
+    expect(kpis.esql).toContain('`service.name` == "shop-mobile"');
+    expect(kpis.esql).toContain('`resource.attributes.telemetry.sdk.name` == "iOS"');
+    expect(kpis.esql).toContain('`service.environment` == "production"');
   });
 });

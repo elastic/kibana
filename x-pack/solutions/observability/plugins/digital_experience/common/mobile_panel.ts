@@ -164,5 +164,5 @@ export const mobilePanelDiscoverEsql = (
           exceptions = COUNT(${exceptions}) BY bucket = BUCKET(@timestamp, 1 hour)`
       : query.pipe`STATS sessions = COUNT_DISTINCT(${sessions}), users = COUNT_DISTINCT(${users}),
           exceptions = COUNT(${exceptions}) BY bucket = BUCKET(@timestamp, 1 day)`;
-  return bucketed.pipe`SORT bucket ASC`.inlineParams().print();
+  return bucketed.pipe`SORT bucket ASC`.inlineParams().print('pipe-multiline');
 };

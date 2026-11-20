@@ -74,7 +74,8 @@ describe('mobile KPIs route', () => {
     expect(response).toBe(RESPONSE);
     expect(jest.mocked(getMobileKpis)).toHaveBeenCalledWith(
       expect.objectContaining({
-        esClient,
+        // The plugin's traced client, over the user's.
+        esClient: expect.objectContaining({ client: esClient }),
         filters: { serviceName: 'shop-mobile', platform: 'ios', release: '1.2.3' },
         start: Date.parse(START),
         end: Date.parse(END),

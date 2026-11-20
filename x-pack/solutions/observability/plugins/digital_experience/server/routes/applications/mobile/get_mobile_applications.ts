@@ -19,7 +19,10 @@ import type { MobileApplicationRow } from './to_application';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-type LatestReleaseRow = { [MOBILE_FIELDS.serviceName]: string; latest_release: string | null };
+interface LatestReleaseRow {
+  [MOBILE_FIELDS.serviceName]: string;
+  latest_release: string | null;
+}
 
 export interface GetMobileApplicationsParams {
   esClient: TracedElasticsearchClient;

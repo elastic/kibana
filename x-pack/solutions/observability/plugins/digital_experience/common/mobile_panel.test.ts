@@ -6,15 +6,15 @@
  */
 
 import {
-  INLINE_VALUES,
   PLATFORM_BY_SDK_NAME,
-  createParamValues,
   getMobileTimeBucket,
   getPreviousPeriod,
-  mobileEnvironmentCondition,
+  mobileDocuments,
   mobilePanelDiscoverEsql,
-  mobilePanelEsql,
+  mobilePanelQuery,
   toComparedValue,
+  withEnvironment,
+  withKpiStats,
 } from './mobile_panel';
 
 const HOUR = 60 * 60 * 1000;
@@ -48,54 +48,52 @@ describe('PLATFORM_BY_SDK_NAME', () => {
   });
 });
 
-describe('mobilePanelEsql', () => {
-  it('reads unmapped fields as null, then applies the SDK detection, not the SDK language', () => {
-    const query = mobilePanelEsql({ serviceName: 'shop-mobile' }, INLINE_VALUES);
+describe('mobileDocuments', () => {
+  it('reads unmapped fields as null, then keeps the mobile SDKs, not the SDK language', () => {
+    const { query } = mobileDocuments().toRequest();
 
     expect(query).toMatch(
-      /^SET unmapped_fields = "NULLIFY";\nFROM traces-\*\.otel-\*,logs-\*\.otel-\*/
+      /^SET unmapped_fields = "nullify"; FROM traces-\*\.otel-\*, logs-\*\.otel-\*/
     );
-    expect(query).toContain('resource.attributes.telemetry.sdk.name IN ("android", "iOS")');
+    expect(query).toContain('`resource.attributes.telemetry.sdk.name` IN ("android", "iOS")');
     expect(query).not.toContain('sdk.language');
-  });
-
-  it('sends the values as params on the routes', () => {
-    const values = createParamValues();
-
-    const query = mobilePanelEsql(
-      { serviceName: 'shop-mobile', platform: 'ios', release: '1.2.3' },
-      values
-    );
-
-    expect(query).toContain('service.name == ?service_name');
-    expect(query).toContain('resource.attributes.telemetry.sdk.name == "iOS"');
-    expect(query).toContain('service.version == ?release');
-    expect(query).not.toContain('os.name');
-    expect(values.params).toEqual([{ service_name: 'shop-mobile' }, { release: '1.2.3' }]);
-  });
-
-  it('escapes the values, newlines included, when written into the query', () => {
-    const query = mobilePanelEsql({ serviceName: 'a"b\\c\nd' }, INLINE_VALUES);
-
-    expect(query).toContain('service.name == "a\\"b\\\\c\\nd"');
   });
 });
 
-describe('mobileEnvironmentCondition', () => {
+describe('mobilePanelQuery', () => {
+  it('sends the request values as params', () => {
+    const { query, params } = withKpiStats(
+      mobilePanelQuery({ serviceName: 'shop-mobile', platform: 'ios', release: '1.2.3' })
+    ).toRequest();
+
+    expect(query).toContain('`service.name` == ?service_name');
+    expect(query).toContain('`resource.attributes.telemetry.sdk.name` == "iOS"');
+    expect(query).toContain('`service.version` == ?release');
+    expect(query).toContain('sessions = COUNT_DISTINCT(`attributes.session.id`)');
+    expect(query).not.toContain('os.name');
+    expect(params).toEqual([{ service_name: 'shop-mobile' }, { release: '1.2.3' }]);
+  });
+});
+
+describe('withEnvironment', () => {
+  const print = (environment?: string) =>
+    withEnvironment(mobileDocuments(), environment).print('basic');
+
   it('filters nothing for all environments', () => {
-    expect(mobileEnvironmentCondition(undefined, INLINE_VALUES)).toBeUndefined();
-    expect(mobileEnvironmentCondition('ENVIRONMENT_ALL', INLINE_VALUES)).toBeUndefined();
+    expect(print(undefined)).toBe(mobileDocuments().print('basic'));
+    expect(print('ENVIRONMENT_ALL')).toBe(mobileDocuments().print('basic'));
   });
 
   it('matches either environment field', () => {
-    expect(mobileEnvironmentCondition('production', INLINE_VALUES)).toBe(
-      '(service.environment == "production" OR resource.attributes.deployment.environment.name == "production")'
+    expect(print('production')).toContain(
+      '| WHERE `service.environment` == "production" OR `resource.attributes.deployment.environment.name` == "production"'
     );
   });
 
   it(`matches APM's sentinel or no environment for "Not defined"`, () => {
-    expect(mobileEnvironmentCondition('ENVIRONMENT_NOT_DEFINED', INLINE_VALUES)).toBe(
-      '(service.environment == "ENVIRONMENT_NOT_DEFINED" OR (service.environment IS NULL AND resource.attributes.deployment.environment.name IS NULL))'
+    expect(print('ENVIRONMENT_NOT_DEFINED')).toContain(
+      // AND binds tighter than OR, so the composer needs no parentheses.
+      '| WHERE `service.environment` == "ENVIRONMENT_NOT_DEFINED" OR `service.environment` IS NULL AND `resource.attributes.deployment.environment.name` IS NULL'
     );
   });
 });
@@ -103,14 +101,14 @@ describe('mobileEnvironmentCondition', () => {
 describe('mobilePanelDiscoverEsql', () => {
   it('writes the filters and the environment into the query, as Discover takes no params', () => {
     const query = mobilePanelDiscoverEsql(
-      { serviceName: 'shop', platform: 'android', release: '2.0.0' },
+      { serviceName: 'a"b\nc', platform: 'android', release: '2.0.0' },
       { bucket: 'day', environment: 'production' }
     );
 
-    expect(query).toContain('service.name == "shop"');
-    expect(query).toContain('telemetry.sdk.name == "android"');
-    expect(query).toContain('service.version == "2.0.0"');
-    expect(query).toContain('| WHERE (service.environment == "production"');
+    expect(query).toContain('`service.name` == "a\\"b\\nc"');
+    expect(query).toContain('`resource.attributes.telemetry.sdk.name` == "android"');
+    expect(query).toContain('`service.version` == "2.0.0"');
+    expect(query).toContain('`service.environment` == "production"');
     expect(query).toContain('BUCKET(@timestamp, 1 day)');
     expect(query).not.toContain('?');
   });
