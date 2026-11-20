@@ -219,7 +219,7 @@ export function transformSpecToActionTypeModel(
                 defaultValue: null,
                 validations: [
                   {
-                    // With Run actions off (no authentication), the form saves no actions on purpose.
+                    // With Run actions off, the form saves no actions on purpose.
                     validator: ({ value, form }) =>
                       form.getFields()['secrets.authType']?.value !== NO_AUTH_TYPE_ID &&
                       Array.isArray(value) &&
