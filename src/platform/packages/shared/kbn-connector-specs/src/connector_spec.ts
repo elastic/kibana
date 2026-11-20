@@ -390,6 +390,12 @@ export interface ConnectorSandbox {
   hostsFromConfig?: readonly string[];
 }
 
+/** Validates a connector's config and secrets together. Returns an error message, or null when valid. */
+export type ConnectorValidator = (
+  config: Record<string, unknown>,
+  secrets: Record<string, unknown>
+) => string | null;
+
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;
 
@@ -405,6 +411,10 @@ export interface ConnectorSpec {
   validateUrls?: {
     fields?: string[];
   };
+
+  // Cross-field check of the connector's config and secrets together. Runs on connector
+  // create, update, and every execution. Return an error message to reject, or null.
+  validateConnector?: ConnectorValidator;
 
   // Hosts a sandbox command may send this connector's auth headers to. Required when an
   // auth type sets supportsSandbox; a connector that resolves to no hosts cannot be used

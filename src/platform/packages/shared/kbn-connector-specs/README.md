@@ -320,6 +320,19 @@ return value (including `{}` or optional data) is treated as success. Set `enabl
 after migrating the handler to this contract. An inbound-only spec (events, no actions) keeps
 `enabled: false`: Test is an outbound call.
 
+### Connector validation (Optional)
+
+`schema` and the auth type schemas validate config and secrets separately. Use `validateConnector` for rules that need both, such as a config value that only works with one auth type. It runs when a connector is created or updated, and before every execution. Return an error message to reject the connector, or `null` when it is valid:
+
+```typescript
+validateConnector: (config, secrets) =>
+  secrets.authType === 'none' && config.region === 'eu'
+    ? 'The EU region requires an API key.'
+    : null,
+```
+
+Stored catalog specs are declarative YAML, so they cannot set `validateConnector`.
+
 ### Policies (Optional)
 
 Configure connector behavior:

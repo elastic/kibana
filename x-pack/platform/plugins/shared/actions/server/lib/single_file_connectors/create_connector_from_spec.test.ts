@@ -11,7 +11,12 @@ import { connectorsSpecs, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { z as z4 } from '@kbn/zod/v4';
 import { ActionTypeRegistry, type ActionTypeRegistryOpts } from '../../action_type_registry';
-import { validateConfig, validateParams, validateSecrets } from '../validate_with_schema';
+import {
+  validateConfig,
+  validateConnector,
+  validateParams,
+  validateSecrets,
+} from '../validate_with_schema';
 import { createConnectorTypeFromSpec } from './create_connector_from_spec';
 import * as createConnectorNetworkSettingsModule from './create_connector_network_settings';
 import * as generateConfigSchemaModule from './generate_config_schema';
@@ -284,6 +289,42 @@ describe('createConnectorTypeFromSpec', () => {
 
     expect(connectorType.validate.config).toBeDefined();
     expect(connectorType.validate.secrets).toBeDefined();
+  });
+
+  it('omits the connector validator when the spec has no validateConnector', () => {
+    const connectorType = createConnectorTypeFromSpec(createMockSpec(), mockActionsPlugin);
+
+    expect(connectorType.validate.connector).toBeUndefined();
+  });
+
+  it('uses the spec validateConnector as the connector validator', () => {
+    const validateConnectorFn = jest.fn(
+      (config: Record<string, unknown>, secrets: Record<string, unknown>) =>
+        secrets.authType === 'none' && config.selectedActions !== undefined
+          ? 'Actions are not available without authentication.'
+          : null
+    );
+    const connectorType = createConnectorTypeFromSpec(
+      createMockSpec({ validateConnector: validateConnectorFn }),
+      mockActionsPlugin
+    );
+
+    expect(connectorType.validate.connector).toBe(validateConnectorFn);
+    expect(() =>
+      validateConnector(connectorType, { config: {}, secrets: { authType: 'none' } })
+    ).not.toThrow();
+    expect(() =>
+      validateConnector(connectorType, {
+        config: { selectedActions: ['testAction'] },
+        secrets: { authType: 'none' },
+      })
+    ).toThrow(
+      'error validating action type connector: Actions are not available without authentication.'
+    );
+    expect(validateConnectorFn).toHaveBeenCalledWith(
+      { selectedActions: ['testAction'] },
+      { authType: 'none' }
+    );
   });
 
   it('includes globalAuthHeaders when provided in spec', () => {

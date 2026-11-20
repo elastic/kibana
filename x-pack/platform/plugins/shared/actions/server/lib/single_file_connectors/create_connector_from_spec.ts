@@ -117,6 +117,7 @@ export const createConnectorTypeFromSpec = (
       config: lazyImmutableGCableObject(() => generateConfigSchema(schemaForConfig, actionNames)),
       secrets: lazyImmutableGCableObject(() => generateSecretsSchema(spec.auth, configUtils)),
       ...(paramsValidator ? { params: paramsValidator } : {}),
+      ...(spec.validateConnector ? { connector: spec.validateConnector } : {}),
     },
     ...(executor ? { executor } : {}),
     globalAuthHeaders: spec.auth?.headers,
