@@ -22,6 +22,7 @@ type SuperTestClient = supertest.SuperTest<SupertestTest>;
 
 export interface EluRetryInfo {
   method: string;
+  /** request url with any credentials removed */
   url: string;
   attempt: number;
   delayMs: number;
@@ -38,12 +39,25 @@ export interface WrapKibanaSupertestAgentOptions {
 type RetryableTest = SupertestTest & {
   _retry: () => unknown;
   _end: () => unknown;
+  callback: (error?: Error, response?: SupertestResponse) => void;
   _maxRetries?: number;
   _aborted?: boolean;
   /** the caller's `.timeout()` deadline in ms */
   _timeout?: number;
   /** set by `.attach()` / `.field()`; the stream is consumed by the first attempt */
   _formData?: unknown;
+};
+
+/** The agent base url can carry `user:pass`; never hand that to callers that log it. */
+const withoutCredentials = (rawUrl: string): string => {
+  try {
+    const parsed = new URL(rawUrl);
+    parsed.username = '';
+    parsed.password = '';
+    return parsed.toString();
+  } catch {
+    return '[unparseable url]';
+  }
 };
 
 const HTTP_VERBS = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'] as const;
@@ -69,6 +83,8 @@ const retryOnEluRateLimit = (
   let firstLimitedAt: number | undefined;
   let attempt = 0;
   let nextDelayMs = 0;
+  let lastError: Error | undefined;
+  let lastResponse: SupertestResponse | undefined;
   let timer: NodeJS.Timeout | undefined;
 
   internals._end = function trackedEnd() {
@@ -102,8 +118,10 @@ const retryOnEluRateLimit = (
     }
 
     nextDelayMs = delayMs;
+    lastError = error;
+    lastResponse = response;
     attempt++;
-    onRetry?.({ method: test.method, url: test.url, attempt, delayMs });
+    onRetry?.({ method: test.method, url: withoutCredentials(test.url), attempt, delayMs });
     return true;
   });
 
@@ -114,7 +132,14 @@ const retryOnEluRateLimit = (
         return;
       }
       if (callerTimeoutMs) {
-        internals._timeout = Math.max(1, callerTimeoutMs - (Date.now() - (startedAt ?? 0)));
+        const remainingMs = callerTimeoutMs - (Date.now() - (startedAt ?? 0));
+        if (remainingMs <= 0) {
+          // the backoff overran the caller's deadline (e.g. a stalled event loop): don't send, surface the 429
+          internals._maxRetries = 0;
+          internals.callback(lastError, lastResponse);
+          return;
+        }
+        internals._timeout = remainingMs;
       }
       originalRetry.call(internals);
     }, nextDelayMs);
