@@ -219,6 +219,12 @@ interface BaseAgentExecution {
   /** The ID of the parent execution that spawned this standalone execution. */
   parentExecutionId?: string;
   /**
+   * Id of the top execution of the run tree, stamped at creation: its own id on a root, else the
+   * root of the execution it was spawned by or reports. Read as its own id on documents created
+   * before it was recorded.
+   */
+  rootExecutionId?: string;
+  /**
    * Canonical interactivity config for this execution, snapshotted at creation.
    */
   interactivity?: InteractivityConfig;

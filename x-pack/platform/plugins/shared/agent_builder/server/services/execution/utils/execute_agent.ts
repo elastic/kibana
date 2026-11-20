@@ -19,11 +19,7 @@ import type {
   InteractivityConfigInput,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import type {
-  ExecutionConversationAccess,
-  ModelSource,
-  RunAgentFn,
-} from '@kbn/agent-builder-server';
+import type { ExecutionConversationAccess, ModelSource } from '@kbn/agent-builder-server';
 import type {
   ExecutionConversationOrigin,
   ExecutionRunAs,
@@ -32,6 +28,7 @@ import type {
   ChatCompletionReasoningEffort,
   ConnectorTelemetryMetadata,
 } from '@kbn/inference-common';
+import type { InternalRunAgentFn } from '../runner/types';
 
 export const executeAgent$ = ({
   agentId,
@@ -61,13 +58,14 @@ export const executeAgent$ = ({
   roundId,
   conversationAccess,
   workflowExecutionId,
+  rootExecutionId,
 }: {
   agentId: string;
   executionId: string;
   request: KibanaRequest;
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
-  runAgent: RunAgentFn;
+  runAgent: InternalRunAgentFn;
   conversation?: Conversation;
   nextInput: ConverseInput;
   origin?: ExecutionConversationOrigin;
@@ -92,42 +90,46 @@ export const executeAgent$ = ({
   roundId?: string;
   conversationAccess?: ExecutionConversationAccess;
   workflowExecutionId?: string;
+  rootExecutionId?: string;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
-    runAgent({
-      request,
-      agentId,
-      executionId,
-      owner,
-      runAs,
-      abortSignal,
-      defaultModel,
-      telemetryMetadata,
-      maxContentLength,
-      reasoningLevel,
-      executionMode,
-      interactive: interactivity,
-      parentExecutionId,
-      projectRouting,
-      conversationAccess,
-      workflowExecutionId,
-      agentParams: {
-        nextInput,
-        conversation,
-        origin,
-        author,
-        actor,
-        browserApiTools,
-        configurationOverrides,
-        structuredOutput,
-        outputSchema,
+    runAgent(
+      {
+        request,
+        agentId,
         executionId,
-        roundId,
+        owner,
+        runAs,
+        abortSignal,
+        defaultModel,
+        telemetryMetadata,
+        maxContentLength,
+        reasoningLevel,
+        executionMode,
+        interactive: interactivity,
+        parentExecutionId,
+        projectRouting,
+        conversationAccess,
+        workflowExecutionId,
+        agentParams: {
+          nextInput,
+          conversation,
+          origin,
+          author,
+          actor,
+          browserApiTools,
+          configurationOverrides,
+          structuredOutput,
+          outputSchema,
+          executionId,
+          roundId,
+        },
+        onEvent: (event) => {
+          observer.next(event);
+        },
       },
-      onEvent: (event) => {
-        observer.next(event);
-      },
-    }).then(
+      { rootExecutionId }
+    ).then(
       () => {
         observer.complete();
       },

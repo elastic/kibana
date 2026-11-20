@@ -189,7 +189,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       args.mode === AgentExecutionMode.conversation
         ? args.params.reportsBackgroundExecution
         : undefined;
-    const { conversationClient, parentExecution } = await this.resolveConversationClient({
+    const {
+      conversationClient,
+      parentExecution,
+      rootExecutionId = executionId,
+    } = await this.resolveConversationClient({
       request,
       executionClient,
       parentExecutionId: params.parentExecutionId ?? reportedExecutionId,
@@ -281,6 +285,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
               }
             : validatedParams,
         parentExecutionId: params.parentExecutionId,
+        rootExecutionId,
         metadata,
         interactivity,
       });
@@ -913,7 +918,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
    * the running parent that spawned it. The same lookup identifies the parent execution, so the
    * conversations this execution creates can be attributed to it. The attribution names the
    * parent agent only: the record id is not a conversation `execution_id`, and the parent round
-   * already points at the child conversation through its sub-agent entry.
+   * already points at the child conversation through its sub-agent entry. It also gives the root
+   * execution this one inherits, so a sub-agent or a wake joins its parent's run tree.
    */
   private async resolveConversationClient({
     request,
@@ -923,7 +929,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     request: KibanaRequest;
     executionClient: AgentExecutionClient;
     parentExecutionId?: string;
-  }): Promise<{ conversationClient: ConversationClient; parentExecution?: ParentExecution }> {
+  }): Promise<{
+    conversationClient: ConversationClient;
+    parentExecution?: ParentExecution;
+    rootExecutionId?: string;
+  }> {
     const { conversationService } = this.deps;
 
     const requestClient = await conversationService.getScopedClient({ request });
@@ -934,9 +944,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     const parent = await executionClient.peek(parentExecutionId);
     const parentExecution = parent?.agentId ? { agentId: parent.agentId } : undefined;
+    const rootExecutionId = parent?.rootExecutionId;
 
     if (!parent?.owner) {
-      return { conversationClient: requestClient, parentExecution };
+      return { conversationClient: requestClient, parentExecution, rootExecutionId };
     }
 
     return {
@@ -945,6 +956,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         user: { ...requestClient.getUser(), ...parent.owner },
       }),
       parentExecution,
+      rootExecutionId,
     };
   }
 

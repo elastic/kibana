@@ -83,6 +83,17 @@ describe('AgentExecutionClient', () => {
       expect(execution.owner).toBeUndefined();
     });
 
+    it('stores the root execution on the document and returns it', async () => {
+      const execution = await client.create({ ...createParams, rootExecutionId: 'root-1' });
+
+      expect(mockStorageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ root_execution_id: 'root-1' }),
+        })
+      );
+      expect(execution.rootExecutionId).toBe('root-1');
+    });
+
     it('propagates document conflicts to the caller', async () => {
       const conflict = Object.assign(new Error('version conflict'), {
         meta: { statusCode: 409 },
@@ -199,15 +210,23 @@ describe('AgentExecutionClient', () => {
         agentId: 'parent-agent',
         conversationId: 'conv-1',
         owner,
+        rootExecutionId: 'exec-1',
       });
     });
 
-    it('omits the optional fields the document lacks', async () => {
+    it('returns the root execution stamped on the document', async () => {
+      stored({ status: ExecutionStatus.running, root_execution_id: 'root-1' });
+
+      expect(await peekClient.peek('exec-1')).toMatchObject({ rootExecutionId: 'root-1' });
+    });
+
+    it('omits the optional fields the document lacks, and treats it as its own root', async () => {
       stored({ status: ExecutionStatus.scheduled });
 
       expect(await peekClient.peek('exec-1')).toEqual({
         status: ExecutionStatus.scheduled,
         eventCount: 0,
+        rootExecutionId: 'exec-1',
       });
     });
 
