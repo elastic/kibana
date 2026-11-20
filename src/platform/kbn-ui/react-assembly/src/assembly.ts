@@ -12,10 +12,15 @@ import type { FC, ReactNode } from 'react';
 import type { ParsedItem, ParsedPart } from './parsing';
 import { parseDeclarativeChildren } from './parsing';
 import { createDeclarativeComponent, tagDeclarativeComponent } from './factory';
+import { getDeclarativePartTag } from './identification';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Dev-mode warning helper
 // ─────────────────────────────────────────────────────────────────────────────
+
+/** Best-effort component name for warning messages. */
+const describeChild = (type: unknown): string =>
+  (type as { displayName?: string }).displayName || (type as { name?: string }).name || 'Unknown';
 
 /**
  * Dev-mode helper: warns for function component children that are not
@@ -39,15 +44,62 @@ const warnOnPassthroughComponents = (
         isValidElement(item.node) &&
         typeof item.node.type === 'function'
       ) {
-        const name =
-          (item.node.type as unknown as { displayName?: string }).displayName ||
-          item.node.type.name ||
-          'Unknown';
         // eslint-disable-next-line no-console
         console.warn(
-          `[${assemblyName}] <${name}> is not a registered "${scope}" part and may not be rendered.`
+          `[${assemblyName}] <${describeChild(
+            item.node.type
+          )}> is not a registered "${scope}" part and may not be rendered.`
         );
       }
+    }
+  }
+};
+
+/**
+ * Dev-mode helper for the assembly-level parse: classifies each passthrough child.
+ *
+ * A child tagged for a different assembly is a declarative part used at the wrong
+ * nesting level. Because every declarative part renders `null`, such a part is dropped
+ * from the output with no other trace, so it is reported even when the renderer opts
+ * into passthrough children — otherwise the mistake leaves an empty region and no
+ * diagnostic at all.
+ *
+ * @param items - Parsed items from `parseDeclarativeChildren`.
+ * @param assemblyName - The assembly name currently being parsed.
+ * @param supportsOtherChildren - Whether the renderer intentionally renders non-part children.
+ */
+const warnOnUnexpectedChildren = (
+  items: ParsedItem[],
+  assemblyName: string,
+  supportsOtherChildren: boolean
+): void => {
+  if (process.env.NODE_ENV === 'production') {
+    return;
+  }
+
+  for (const item of items) {
+    if (item.type !== 'child' || !isValidElement(item.node)) {
+      continue;
+    }
+
+    const misplaced = getDeclarativePartTag(item.node);
+    if (misplaced && misplaced.assembly !== assemblyName) {
+      const { assembly, part } = misplaced;
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[${assemblyName}] <${describeChild(item.node.type)}> is a "${part}" part of ` +
+          `${assembly} and renders nothing here. Move it inside a ${assembly} parent.`
+      );
+      continue;
+    }
+
+    if (!supportsOtherChildren && typeof item.node.type === 'function') {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[${assemblyName}] <${describeChild(
+          item.node.type
+        )}> is not a registered "${assemblyName}" part and may not be rendered.`
+      );
     }
   }
 };
@@ -254,6 +306,10 @@ export interface AssemblyFactory<TName extends string = string> {
    * registered parts. Pass `{ supportsOtherChildren: true }` to suppress
    * the warning when the renderer intentionally handles non-part children.
    *
+   * A child that is a declarative part of a *different* assembly is always
+   * reported, regardless of `supportsOtherChildren`, because such a part is
+   * misnested and renders nothing.
+   *
    * @param children - React children to parse.
    * @param options - Optional parsing options.
    * @param options.supportsOtherChildren - When `true`, suppresses the
@@ -316,9 +372,7 @@ export const defineAssembly = <const TName extends string>(config: {
     options?: { supportsOtherChildren?: boolean }
   ): ParsedItem[] => {
     const items = parseDeclarativeChildren(children, config.name);
-    if (!options?.supportsOtherChildren) {
-      warnOnPassthroughComponents(items, config.name, config.name);
-    }
+    warnOnUnexpectedChildren(items, config.name, options?.supportsOtherChildren === true);
     return items;
   },
 
