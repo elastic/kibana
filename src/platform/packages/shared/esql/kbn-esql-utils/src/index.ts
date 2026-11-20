@@ -112,6 +112,7 @@ export { getLookupIndicesFromQuery } from './utils/get_lookup_indices';
 export {
   type ESQLStatsQueryMeta,
   type ESQLStatsQueryMetaExclusionReason,
+  type NodeAggregatedValues,
   ESQL_STATS_QUERY_META_EXCLUSION_REASON,
   getESQLStatsQueryMeta,
   constructCascadeQuery,

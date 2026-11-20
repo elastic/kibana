@@ -111,6 +111,7 @@ export {
   injectWhereClauseAfterSourceCommand,
   type ESQLStatsQueryMeta,
   type ESQLStatsQueryMetaExclusionReason,
+  type NodeAggregatedValues,
   type ESQLColumnsWithHighlights,
   type ESQLHighlightTags,
   type ESQLIndexPatterns,
