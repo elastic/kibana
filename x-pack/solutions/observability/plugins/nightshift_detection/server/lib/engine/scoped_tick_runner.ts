@@ -7,36 +7,25 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { inject, injectable } from 'inversify';
-import type { CoreStart as CoreStartContract, KibanaRequest, Logger } from '@kbn/core/server';
-import { Logger as CoreLogger, PluginStart } from '@kbn/core-di';
-import type { CoreDiServiceStart } from '@kbn/core-di';
-import { CoreStart, Request } from '@kbn/core-di-server';
-import type { NightshiftSourcesServerStart } from '@kbn/nightshift-sources-plugin/server';
-import { EngineHttpError } from '../errors/engine_http_error';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { Logger as CoreLogger } from '@kbn/core-di';
 import { getErrorMessage } from '../errors/get_error_message';
-import { DetectionEngineDataClient } from './es_client_tokens';
+import { AccountScope } from './account_scope';
 import { EngineRunner } from './run_engine';
 import type { TickResult } from './tick_result';
-import { EnabledSources, RunContext } from './tokens';
+import { RunContext } from './tokens';
 
 const MINUTE_MS = 60_000;
 
-/** The catalog is read in one page; a space with more sources than this is refused. */
-const MAX_LISTED_SOURCES = 10_000;
-
 /**
- * Runs one engine tick as the account behind a request. It builds a scope for that tick: it forks
- * the container, binds what the run needs from the request, and resolves the `EngineRunner` in the
- * fork, so the runner itself knows no identity.
+ * Runs one engine tick as the account behind a request. It builds a scope for that tick, binds the
+ * tick's context in it, and resolves the `EngineRunner` in the fork, so the runner itself knows no
+ * identity.
  */
 @injectable()
 export class ScopedTickRunner {
   constructor(
-    @inject(CoreStart('injection')) private readonly injection: CoreDiServiceStart,
-    @inject(CoreStart('elasticsearch'))
-    private readonly elasticsearch: CoreStartContract['elasticsearch'],
-    @inject(PluginStart<NightshiftSourcesServerStart>('nightshiftSources'))
-    private readonly nightshiftSources: NightshiftSourcesServerStart,
+    @inject(AccountScope) private readonly accountScope: AccountScope,
     @inject(CoreLogger) private readonly logger: Logger
   ) {}
 
@@ -55,42 +44,15 @@ export class ScopedTickRunner {
     abortSignal: AbortSignal;
   }): Promise<TickResult> {
     const now = Date.now();
-    const scope = this.injection.fork();
+    const scope = await this.accountScope.fork({ accountRequest, spaceId });
 
     // What the tick provides to the runner. The runner is bound in the fork too, so its
     // dependencies resolve from here.
-    scope.bind(Request).toConstantValue(accountRequest);
     scope.bind(RunContext).toConstantValue({
       spaceId,
       runId: uuidv4(),
       scheduledMinute: Math.floor(now / MINUTE_MS) * MINUTE_MS,
     });
-    // Customer data is read as the account, never as kibana_system.
-    scope
-      .bind(DetectionEngineDataClient)
-      .toConstantValue(this.elasticsearch.client.asScoped(accountRequest).asCurrentUser);
-    scope.bind(EnabledSources).toConstantValue({
-      list: async () => {
-        const sourcesClient = await this.nightshiftSources.getSourcesClient({
-          request: accountRequest,
-        });
-        const { sources, total } = await sourcesClient.list({
-          page: 1,
-          perPage: MAX_LISTED_SOURCES,
-          enabled: true,
-        });
-
-        if (total > sources.length) {
-          throw new EngineHttpError(
-            `The space has ${total} sources, more than the ${MAX_LISTED_SOURCES} the engine reads.`,
-            400
-          );
-        }
-
-        return sources;
-      },
-    });
-
     scope.bind(EngineRunner).toSelf();
 
     try {

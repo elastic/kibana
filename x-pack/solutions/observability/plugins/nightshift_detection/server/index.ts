@@ -6,10 +6,12 @@
  */
 
 import { KibanaContainerModule } from '@kbn/core-di';
+import { bindChangeListeners } from './setup/bind_change_listeners';
 import { bindEngine } from './setup/bind_engine';
 import { bindOnSetup } from './setup/bind_on_setup';
 import { bindOnStart } from './setup/bind_on_start';
 import { bindRoutes } from './setup/bind_routes';
+import { bindRules } from './setup/bind_rules';
 import { bindServiceAccount } from './setup/bind_service_account';
 import { bindServices } from './setup/bind_services';
 import { bindSignals } from './setup/bind_signals';
@@ -30,6 +32,8 @@ const pluginModule = new KibanaContainerModule((options) => {
   bindServiceAccount(options);
   bindWorkflows(options);
   bindTick(options);
+  bindRules(options);
+  bindChangeListeners(options);
   bindRoutes(options);
   bindOnSetup(options);
   bindOnStart(options);

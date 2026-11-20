@@ -6,7 +6,10 @@
  */
 
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
-import { NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_DETECTION_RULE_RECONCILE_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 
 /**
  * The managed workflows a space gets when it is set up, in install order. Each is defined in
@@ -16,4 +19,5 @@ import { NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID } from '@kbn/workflows/mana
  */
 export const DETECTION_WORKFLOW_IDS: readonly ManagedWorkflowId[] = [
   NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_DETECTION_RULE_RECONCILE_WORKFLOW_ID,
 ];

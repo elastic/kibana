@@ -7,6 +7,7 @@
 
 import { createToken } from '@kbn/core-di';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
+import type { KnowledgeIndicatorReader } from '@kbn/significant-events-plugin/server';
 
 /** What identifies one tick. */
 export interface RunContext {
@@ -36,3 +37,11 @@ export interface EnabledSources {
  * client of `nightshift_sources` is built from the request.
  */
 export const EnabledSources = createToken<EnabledSources>('nightshiftDetection.EnabledSources');
+
+/**
+ * The space's knowledge indicators, read as the detection service account. Bound per scope, because
+ * the reader of `significant_events` is built from the request.
+ */
+export const KnowledgeIndicators = createToken<KnowledgeIndicatorReader>(
+  'nightshiftDetection.KnowledgeIndicators'
+);

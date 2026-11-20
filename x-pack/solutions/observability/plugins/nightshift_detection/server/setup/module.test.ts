@@ -20,6 +20,8 @@ import { AvailabilityService } from '../lib/availability/availability_service';
 import { DetectionEngineSystemClient } from '../lib/engine/es_client_tokens';
 import { SpaceRunLock } from '../lib/engine/space_run_lock';
 import { ScopedTickRunner } from '../lib/engine/scoped_tick_runner';
+import { ScopedReconcileRunner } from '../lib/rules/scoped_reconcile_runner';
+import { SpaceRulesLock } from '../lib/rules/space_rules_lock';
 import { DetectionAccountService } from '../lib/service_account/detection_account';
 import { DetectionSetupService } from '../lib/service_account/setup_service';
 import { SpaceSetupLock } from '../lib/service_account/space_setup_lock';
@@ -53,6 +55,9 @@ function createContainer() {
   const createSignalEvent = jest.fn().mockResolvedValue({ group_hash: 'hash' });
   const alerting = {
     getAlertEventsClientWithRequest: jest.fn().mockResolvedValue({ createSignalEvent }),
+    getRulesClientWithRequestInSpace: jest
+      .fn()
+      .mockResolvedValue({ findRules: async () => ({ items: [], total: 0 }) }),
   } as unknown as AlertingServerStart;
   const spaces = {
     spacesService: { getSpaceId: jest.fn().mockReturnValue('default') },
@@ -66,10 +71,21 @@ function createContainer() {
   container.bind(PluginStart('nightshiftSources')).toConstantValue({
     getSourcesClient: async () => ({ list: async () => ({ sources: [], total: 0 }) }),
   });
+  container.bind(PluginStart('significantEvents')).toConstantValue({
+    getKnowledgeIndicatorReader: () => ({
+      listQueryKnowledgeIndicators: async () => [],
+      listFeatures: async () => [],
+    }),
+  });
   container.bind(PluginStart('workflowsExtensions')).toConstantValue({});
   container.bind(PluginSetup('workflowsExtensions')).toConstantValue({
     registerManagedWorkflowOwner: jest.fn(),
+    registerTriggerDefinition: jest.fn(),
   });
+  container
+    .bind(PluginSetup('significantEvents'))
+    .toConstantValue({ onKnowledgeIndicatorsChange: jest.fn() });
+  container.bind(PluginSetup('nightshiftSources')).toConstantValue({ onSourceChange: jest.fn() });
   container.bind(PluginSetup('workflowsManagement')).toConstantValue({});
   container.load(module);
 
@@ -101,6 +117,8 @@ describe('module', () => {
     container.get(ScopedTickRunner);
     container.get(SpaceRunLock);
     container.get(SpaceSetupLock);
+    container.get(ScopedReconcileRunner);
+    container.get(SpaceRulesLock);
     container.getAll(OnStart);
     container.getAll(OnSetup).forEach((onSetup) => onSetup(container));
 
@@ -146,6 +164,24 @@ describe('module', () => {
     });
 
     expect(result).toMatchObject({ status: 'completed', strategies: [] });
+  });
+
+  // Same reason as the tick: the reconciler and its rule reader are bound in the fork.
+  it('reconciles rules through a forked scope', async () => {
+    const { container } = createContainer();
+    await container.unbind(SpaceRulesLock);
+    const lock: Pick<SpaceRulesLock, 'run'> = {
+      run: async ({ callback }) => ({ ran: true, result: await callback() }),
+    };
+    container.bind(SpaceRulesLock).toConstantValue(lock as unknown as SpaceRulesLock);
+
+    const result = await container.get(ScopedReconcileRunner).run({
+      accountRequest: httpServerMock.createKibanaRequest(),
+      spaceId: 'default',
+      abortSignal: new AbortController().signal,
+    });
+
+    expect(result).toMatchObject({ status: 'completed', created: 0, failures: [] });
   });
 
   it('gives every tick scope the signal store of its own request', async () => {

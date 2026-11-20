@@ -19,7 +19,7 @@
       "workflowsExtensions",
       "workflowsManagement"
     ],
-    "optionalPlugins": ["cloud"],
+    "optionalPlugins": ["cloud", "cps"],
     "requiredBundles": []
   }
 }

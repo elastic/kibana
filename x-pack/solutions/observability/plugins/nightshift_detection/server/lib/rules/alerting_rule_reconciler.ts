@@ -1,0 +1,299 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { isBoom } from '@hapi/boom';
+import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { BulkResponse, CreateRuleData } from '@kbn/alerting-v2-schemas';
+import type { Logger } from '@kbn/core/server';
+import { Logger as CoreLogger } from '@kbn/core-di';
+import { inject, injectable } from 'inversify';
+import { getErrorMessage } from '../errors/get_error_message';
+import type { AlertingRuleResource } from '../strategies/types';
+import { ManagedRuleReader, type ManagedRule } from './managed_rule_reader';
+import {
+  computeRuleId,
+  getManagedRuleName,
+  getManagedRuleTags,
+  getOwningStrategy,
+} from './rule_identity';
+import { DetectionRulesClient } from './rules_client_token';
+
+/** Rules per bulk call; Alerting v2 refuses more in one request. */
+const CHUNK_SIZE = 100;
+
+/** An `alerting_rule` resource and the strategy that wants it. */
+export interface StrategyAlertingRule {
+  strategy: { id: string; name: string };
+  resource: AlertingRuleResource;
+}
+
+/** A strategy whose `resources()` failed; it keeps everything it owns. */
+export interface StrategyError {
+  strategy: string;
+  message: string;
+}
+
+/** What one reconciliation changed, and what it could not. */
+export interface ReconcileRulesResult {
+  created: number;
+  deleted: number;
+  enabled: number;
+  disabled: number;
+  /** Rules not created because Alerting's schedule budget is spent; the next run tries again. */
+  skipped: Array<{ rule_id: string; reason: string }>;
+  failures: Array<{ rule_id: string; operation: RuleOperation; message: string }>;
+  strategy_errors: StrategyError[];
+}
+
+type RuleOperation = 'create' | 'delete' | 'enable' | 'disable';
+
+/** A desired rule with the identity the engine gives it. */
+interface DesiredRule {
+  id: string;
+  enabled: boolean;
+  data: CreateRuleData;
+}
+
+/** What the reconciler will do, worked out from what exists and what is wanted. */
+export interface RuleChanges {
+  toDelete: string[];
+  toCreate: DesiredRule[];
+  toEnable: string[];
+  toDisable: string[];
+}
+
+/** Stamps a strategy's rule with the engine's id, ownership tags and name. */
+const toDesiredRule = (spaceId: string, { strategy, resource }: StrategyAlertingRule) => {
+  const id = computeRuleId({
+    spaceId,
+    strategy: strategy.id,
+    sourceId: resource.source_id,
+    query: resource.data.query.base,
+  });
+  const { metadata } = resource.data;
+
+  return {
+    id,
+    enabled: resource.enabled,
+    data: {
+      ...resource.data,
+      metadata: {
+        ...metadata,
+        name: getManagedRuleName({ strategyName: strategy.name, title: metadata.name, ruleId: id }),
+        tags: [
+          ...(metadata.tags ?? []),
+          ...getManagedRuleTags({ strategy: strategy.id, sourceId: resource.source_id }),
+        ],
+      },
+    },
+  };
+};
+
+/**
+ * Works out the changes that take the managed rules to the desired ones. Pure, so every case is
+ * tested without a rules client.
+ * - A rule nobody wants is deleted, unless its strategy failed: that strategy keeps what it owns.
+ * - A wanted rule that is missing is created, enabled only when wanted enabled and not paused.
+ * - A rule whose `enabled` differs is toggled; `paused` turns every rule off.
+ * - A query is never edited: a changed query has a new id, so the old rule goes and a new one comes.
+ */
+export const planRuleChanges = ({
+  existing,
+  desired,
+  paused,
+  failedStrategies,
+}: {
+  existing: ManagedRule[];
+  desired: DesiredRule[];
+  paused: boolean;
+  failedStrategies: Set<string>;
+}): RuleChanges => {
+  const desiredById = new Map(desired.map((rule) => [rule.id, rule]));
+  const existingById = new Map(existing.map((rule) => [rule.id, rule]));
+  const shouldRun = (rule: DesiredRule) => rule.enabled && !paused;
+
+  const kept = existing.filter((rule) => {
+    const owner = getOwningStrategy(rule.tags);
+    return desiredById.has(rule.id) || (owner !== undefined && failedStrategies.has(owner));
+  });
+  const keptIds = new Set(kept.map(({ id }) => id));
+
+  return {
+    toDelete: existing.filter(({ id }) => !keptIds.has(id)).map(({ id }) => id),
+    toCreate: [...desiredById.values()]
+      .filter(({ id }) => !existingById.has(id))
+      .map((rule) => ({ ...rule, enabled: shouldRun(rule) })),
+    toEnable: kept
+      .filter((rule) => {
+        const wanted = desiredById.get(rule.id);
+        return !rule.enabled && wanted !== undefined && shouldRun(wanted);
+      })
+      .map(({ id }) => id),
+    toDisable: kept
+      .filter((rule) => {
+        const wanted = desiredById.get(rule.id);
+        // A failed strategy's rules keep their state, unless the space is paused.
+        return rule.enabled && (paused || (wanted !== undefined && !shouldRun(wanted)));
+      })
+      .map(({ id }) => id),
+  };
+};
+
+const toChunks = <T>(items: T[]): T[][] =>
+  Array.from({ length: Math.ceil(items.length / CHUNK_SIZE) }, (_, index) =>
+    items.slice(index * CHUNK_SIZE, (index + 1) * CHUNK_SIZE)
+  );
+
+/** Whether Alerting refused a create because the space's schedule budget is spent. */
+const isScheduleLimitError = (error: unknown): boolean =>
+  isBoom(error) &&
+  typeof error.data === 'object' &&
+  error.data !== null &&
+  'code' in error.data &&
+  error.data.code === ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED;
+
+/**
+ * Keeps the space's managed Alerting v2 rules equal to what the strategies want. Every chunk of
+ * every operation runs on its own: a failed chunk is reported and the others still apply, so a
+ * partial run leaves the rules closer to the goal and the next run finishes the job.
+ */
+@injectable()
+export class AlertingRuleReconciler {
+  constructor(
+    @inject(DetectionRulesClient)
+    private readonly rulesClient: Pick<
+      RulesClientApi,
+      'bulkCreateRules' | 'bulkDeleteRules' | 'bulkEnableRules' | 'bulkDisableRules'
+    >,
+    @inject(ManagedRuleReader) private readonly reader: Pick<ManagedRuleReader, 'listManaged'>,
+    @inject(CoreLogger) private readonly logger: Logger
+  ) {}
+
+  /**
+   * Reconciles the space's managed rules:
+   * 1. List every managed rule of the space.
+   * 2. Plan the changes against the desired rules.
+   * 3. Delete first, so a space at its schedule budget frees room before creating.
+   * 4. Create what is missing.
+   * 5. Toggle what differs.
+   */
+  public async reconcile({
+    spaceId,
+    desired,
+    paused,
+    strategyErrors,
+  }: {
+    spaceId: string;
+    desired: StrategyAlertingRule[];
+    paused: boolean;
+    strategyErrors: StrategyError[];
+  }): Promise<ReconcileRulesResult> {
+    const result: ReconcileRulesResult = {
+      created: 0,
+      deleted: 0,
+      enabled: 0,
+      disabled: 0,
+      skipped: [],
+      failures: [],
+      strategy_errors: strategyErrors,
+    };
+
+    // 1 and 2.
+    const changes = planRuleChanges({
+      existing: await this.reader.listManaged(),
+      desired: desired.map((rule) => toDesiredRule(spaceId, rule)),
+      paused,
+      failedStrategies: new Set(strategyErrors.map(({ strategy }) => strategy)),
+    });
+
+    // 3 to 5. Sequential: deleting before creating is what frees the schedule budget.
+    result.deleted = await this.runBulk(result, 'delete', changes.toDelete, (ids) =>
+      this.rulesClient.bulkDeleteRules({ ids })
+    );
+    await this.create(result, changes.toCreate);
+    result.enabled = await this.runBulk(result, 'enable', changes.toEnable, (ids) =>
+      this.rulesClient.bulkEnableRules({ ids })
+    );
+    result.disabled = await this.runBulk(result, 'disable', changes.toDisable, (ids) =>
+      this.rulesClient.bulkDisableRules({ ids })
+    );
+
+    this.logger.info(
+      `Reconciled the detection rules of space [${spaceId}]: ${result.created} created, ${result.deleted} deleted, ${result.enabled} enabled, ${result.disabled} disabled, ${result.skipped.length} skipped, ${result.failures.length} failed, ${result.strategy_errors.length} strategies failed`
+    );
+
+    return result;
+  }
+
+  /** Runs a by-id bulk operation chunk by chunk and returns how many rules it changed. */
+  private async runBulk(
+    result: ReconcileRulesResult,
+    operation: RuleOperation,
+    ids: string[],
+    run: (ids: string[]) => Promise<BulkResponse>
+  ): Promise<number> {
+    let changed = 0;
+
+    // One chunk at a time, so a failure is reported against the rules of its own chunk.
+    for (const chunk of toChunks(ids)) {
+      try {
+        const { errors } = await run(chunk);
+        // A rule already gone is what a delete wanted.
+        const failed = errors.filter(
+          ({ error }) =>
+            operation !== 'delete' || error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND
+        );
+        changed += chunk.length - errors.length;
+        result.failures.push(
+          ...failed.map(({ id, error }) => ({ rule_id: id, operation, message: error.message }))
+        );
+      } catch (error) {
+        result.failures.push(
+          ...chunk.map((id) => ({ rule_id: id, operation, message: getErrorMessage(error) }))
+        );
+      }
+    }
+
+    return changed;
+  }
+
+  private async create(result: ReconcileRulesResult, rules: DesiredRule[]): Promise<void> {
+    // One chunk at a time, so a failure is reported against the rules of its own chunk.
+    for (const chunk of toChunks(rules)) {
+      try {
+        const { items, errors } = await this.rulesClient.bulkCreateRules({
+          items: chunk.map(({ id, enabled, data }) => ({ ...data, id, enabled })),
+        });
+        result.created += items.length;
+        // A rule another run created in between is what this one wanted.
+        result.failures.push(
+          ...errors
+            .filter(({ error }) => error.code !== ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS)
+            .map(({ index, error }) => ({
+              rule_id: chunk[index].id,
+              operation: 'create' as const,
+              message: error.message,
+            }))
+        );
+      } catch (error) {
+        if (isScheduleLimitError(error)) {
+          result.skipped.push(
+            ...chunk.map(({ id }) => ({ rule_id: id, reason: getErrorMessage(error) }))
+          );
+          continue;
+        }
+        result.failures.push(
+          ...chunk.map(({ id }) => ({
+            rule_id: id,
+            operation: 'create' as const,
+            message: getErrorMessage(error),
+          }))
+        );
+      }
+    }
+  }
+}
