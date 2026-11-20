@@ -36,10 +36,22 @@ export const describeJudgeFailure = (error: unknown): string => {
 
 /**
  * Attempts per judge request that fails in transport (dropped connection, 429, 502-504), separate
- * from `JUDGE_MAX_RETRIES`, which re-asks for an invalid verdict. The HTTP layer under the judge
- * makes a single attempt.
+ * from `JUDGE_MAX_RETRIES`, which re-asks for an invalid verdict.
  */
 export const JUDGE_TRANSPORT_MAX_ATTEMPTS = 3;
+
+/** Statuses the eval HTTP handler already retries when `KBN_EVALS_HTTP_RETRIES` is set. */
+const HTTP_HANDLER_RETRIED_STATUSES = new Set([429, 503, 504]);
+
+/**
+ * One transport budget per request: when the HTTP handler retries a status itself, retrying it
+ * again here would multiply the POSTs (3 x 3 for a persistent 503).
+ */
+const retriedByHttpHandler = (error: unknown): boolean => {
+  const httpRetries = Number(process.env.KBN_EVALS_HTTP_RETRIES ?? '0') || 0;
+  const status = (error as { status?: unknown } | undefined)?.status;
+  return httpRetries > 0 && typeof status === 'number' && HTTP_HANDLER_RETRIED_STATUSES.has(status);
+};
 
 /**
  * Wraps a bound client so every `prompt` request is counted (validity retries and transport
@@ -62,6 +74,7 @@ export const countingJudgeClient = (
     return withRetry(send as () => Promise<unknown>, {
       maxAttempts: JUDGE_TRANSPORT_MAX_ATTEMPTS,
       label: 'judge prompt',
+      shouldRetry: (error) => !retriedByHttpHandler(error),
       onRetry: ({ attempt, maxAttempts, delayMs, error }) =>
         warnSafely(
           log,

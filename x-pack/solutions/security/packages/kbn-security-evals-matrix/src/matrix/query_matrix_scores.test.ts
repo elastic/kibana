@@ -1429,6 +1429,7 @@ describe('round 6 regression: admission and accumulation fixes', () => {
 
     expect(datasets[0].excludedJudgelessOnly).toBe(true);
     expect(datasets[0].judgedAdmitted).toBeFalsy();
+    expect(datasets[0].rejectedEvaluators).toEqual([judgedDoc.evaluator?.name]);
     // The code checks stay aggregated (the token axis and erroredOut plumbing read them).
     expect(datasets[0].evaluators).toEqual([
       expect.objectContaining({ evaluatorName: 'FinalAnswerPresent', mean: 1 }),
@@ -1447,6 +1448,7 @@ describe('round 6 regression: admission and accumulation fixes', () => {
       { requireEisJudge: true }
     );
     expect(admittedDatasets[0].excludedJudgelessOnly).toBeFalsy();
+    expect(admittedDatasets[0].rejectedEvaluators).toBeUndefined();
     expect(admittedDatasets[0].judgedAdmitted).toBe(true);
   });
 

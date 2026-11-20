@@ -79,6 +79,8 @@ export interface AggregatedDatasetScores {
    * `excluded:*` rather than ranking it on a different set of evaluators.
    */
   excludedJudgelessOnly?: boolean;
+  /** Evaluators with at least one grade rejected by the judge policy in THIS dataset. */
+  rejectedEvaluators?: string[];
 }
 
 export interface AggregatedSuiteScores {
@@ -166,10 +168,18 @@ export const scoresByPrefixToDatasets = (
     selfJudged: 0,
     unmappedVerdict: 0,
   };
-  const tallyPrefixExclusion = (prefix: string, kind: 'selfJudged' | 'nonEis'): void => {
+  const rejectedEvaluatorsByPrefix = new Map<string, Set<string>>();
+  const tallyPrefixExclusion = (
+    prefix: string,
+    kind: 'selfJudged' | 'nonEis',
+    evaluatorName: string
+  ): void => {
     const entry = excludedByPrefix.get(prefix) ?? { selfJudged: 0, nonEis: 0 };
     entry[kind] += 1;
     excludedByPrefix.set(prefix, entry);
+    const names = rejectedEvaluatorsByPrefix.get(prefix) ?? new Set<string>();
+    names.add(evaluatorName);
+    rejectedEvaluatorsByPrefix.set(prefix, names);
   };
 
   for (const doc of scores) {
@@ -278,10 +288,10 @@ export const scoresByPrefixToDatasets = (
         }
         if (evaluatorName) {
           if (rejectedEisJudge) {
-            tallyPrefixExclusion(prefix, 'nonEis');
+            tallyPrefixExclusion(prefix, 'nonEis', evaluatorName);
           }
           if (rejectedSelfJudged) {
-            tallyPrefixExclusion(prefix, 'selfJudged');
+            tallyPrefixExclusion(prefix, 'selfJudged', evaluatorName);
           }
 
           if (admitted) {
@@ -362,6 +372,7 @@ export const scoresByPrefixToDatasets = (
       .filter(([, tally]) => tally.errored > 0 && tally.scored === 0)
       .map(([name]) => name);
     const prefixExclusions = excludedByPrefix.get(prefix);
+    const rejectedEvaluators = [...(rejectedEvaluatorsByPrefix.get(prefix) ?? [])].sort();
     // Judge-less contract checks stay admitted under every judge policy, so they alone
     // must not publish an ordinary numeric cell when every judged doc was rejected:
     // with judged grades present-but-rejected and none admitted, the dataset keeps
@@ -388,6 +399,7 @@ export const scoresByPrefixToDatasets = (
       ...(selfJudgedByPrefix.get(prefix) === true ? { selfJudged: true } : {}),
       ...(judgedAdmittedByPrefix.get(prefix) === true ? { judgedAdmitted: true } : {}),
       ...(judgedRejected ? { excludedJudgelessOnly: true } : {}),
+      ...(rejectedEvaluators.length > 0 ? { rejectedEvaluators } : {}),
       // Exposed per dataset so buildCell can mark THIS column excluded even when
       // sibling prefixes in the suite kept admissible scores.
       ...(prefixExclusions && prefixExclusions.selfJudged > 0

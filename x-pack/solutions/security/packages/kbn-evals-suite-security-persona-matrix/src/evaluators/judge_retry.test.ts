@@ -97,4 +97,49 @@ describe('countingJudgeClient', () => {
 
     await expect(settle(judge.client.prompt({} as never))).resolves.toBe('verdict');
   });
+
+  it('waits for a Retry-After header before retrying a 429', async () => {
+    const rateLimited = Object.assign(new Error('Too Many Requests'), {
+      status: 429,
+      headers: new Headers({ 'retry-after': '30' }),
+    });
+    const prompt = jest.fn().mockRejectedValueOnce(rateLimited).mockResolvedValueOnce('verdict');
+    const { judge } = wrap(prompt);
+
+    const result = judge.client.prompt({} as never);
+    await jest.advanceTimersByTimeAsync(25_000);
+    expect(prompt).toHaveBeenCalledTimes(1);
+    await jest.advanceTimersByTimeAsync(10_000);
+    await expect(result).resolves.toBe('verdict');
+  });
+
+  describe('with KBN_EVALS_HTTP_RETRIES set', () => {
+    beforeEach(() => {
+      process.env.KBN_EVALS_HTTP_RETRIES = '2';
+    });
+    afterEach(() => {
+      delete process.env.KBN_EVALS_HTTP_RETRIES;
+    });
+
+    it('does not retry a status the HTTP handler already retried', async () => {
+      const unavailable = Object.assign(new Error('Service Unavailable'), { status: 503 });
+      const prompt = jest.fn().mockRejectedValue(unavailable);
+      const { judge } = wrap(prompt);
+
+      await expect(settle(judge.client.prompt({} as never))).rejects.toBe(unavailable);
+      expect(prompt).toHaveBeenCalledTimes(1);
+      expect(judge.calls()).toBe(1);
+    });
+
+    it('still retries a dropped connection, which the HTTP handler does not retry', async () => {
+      const prompt = jest
+        .fn()
+        .mockRejectedValueOnce(fetchFailed())
+        .mockResolvedValueOnce('verdict');
+      const { judge } = wrap(prompt);
+
+      await expect(settle(judge.client.prompt({} as never))).resolves.toBe('verdict');
+      expect(prompt).toHaveBeenCalledTimes(2);
+    });
+  });
 });

@@ -97,4 +97,40 @@ describe('withRetry', () => {
     expect(onRetry).toHaveBeenCalledTimes(1);
     expect(onRetry).toHaveBeenCalledWith(expect.objectContaining({ attempt: 1, label: 'upsert' }));
   });
+
+  describe('Retry-After response header', () => {
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    const rateLimited = (retryAfter: string) =>
+      Object.assign(makeKbnClientRequesterError(429, 'Too Many Requests'), {
+        headers: new Headers({ 'retry-after': retryAfter }),
+      });
+
+    it.each([
+      ['delay-seconds', '30'],
+      ['HTTP-date', new Date(Date.now() + 30_000).toUTCString()],
+    ])('waits at least the %s value before retrying', async (_format, retryAfter) => {
+      const fn = jest
+        .fn()
+        .mockRejectedValueOnce(rateLimited(retryAfter))
+        .mockResolvedValueOnce('ok');
+      const result = withRetry(fn, fastRetryOptions);
+
+      await jest.advanceTimersByTimeAsync(25_000);
+      expect(fn).toHaveBeenCalledTimes(1);
+      await jest.advanceTimersByTimeAsync(10_000);
+      await expect(result).resolves.toBe('ok');
+      expect(fn).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it('rethrows a retryable error when shouldRetry returns false', async () => {
+    const err = makeStatusError(503);
+    const fn = jest.fn().mockRejectedValue(err);
+    await expect(withRetry(fn, { ...fastRetryOptions, shouldRetry: () => false })).rejects.toBe(
+      err
+    );
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
 });

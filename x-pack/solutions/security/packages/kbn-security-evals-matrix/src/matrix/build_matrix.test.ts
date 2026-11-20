@@ -1871,6 +1871,49 @@ describe('round 8 regression: per-column self-judged and exclusion scoping', () 
     }
   );
 
+  // Regression (Libra PRRT_kwDOAHeGUM65xD58): rejections are matched by evaluator, so a
+  // rejected grade the column does not select cannot hide the column's valid score.
+  it.each([
+    ['an unrelated judged evaluator was rejected', ['Relevance'], 'score'],
+    ['a selected judged evaluator was rejected', ['Groundedness'], 'excluded'],
+  ])('scores an allowlisted column when %s', (_name, rejectedEvaluators, kind) => {
+    const allowlistCfg = parseMatrixConfig({
+      columns: [
+        {
+          id: 'answer',
+          label: 'Answer',
+          suites: ['suite-a'],
+          examplePrefixes: ['alert'],
+          evaluators: ['FinalAnswerPresent', 'Groundedness'],
+          weight: 1,
+        },
+      ],
+      models: [{ id: 'model-x', label: 'Model X' }],
+    });
+    const rejected: AggregatedModelScores[] = [
+      {
+        modelId: 'model-x',
+        suites: [
+          {
+            suiteId: 'suite-a',
+            experimentId: 'run-9',
+            datasets: [
+              {
+                datasetId: 'prefix:alert',
+                datasetName: 'alert',
+                excludedNonEis: 4,
+                excludedJudgelessOnly: true,
+                rejectedEvaluators,
+                evaluators: [{ evaluatorName: 'FinalAnswerPresent', mean: 1, count: 4 }],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    expect(buildMatrix(rejected, allowlistCfg).proprietary[0].cells.answer.kind).toBe(kind);
+  });
+
   it('renders a fully self-judged prefix run as excluded, not missing (R-libra-3)', () => {
     // The `!latest` all-self-judged rejection path (see query_matrix_scores) pushes
     // `datasets: []` with the withholding recorded only at the suite level. An

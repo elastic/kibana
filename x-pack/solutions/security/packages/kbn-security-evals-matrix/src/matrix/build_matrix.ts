@@ -14,6 +14,7 @@ import type {
   MatrixTokenCostConfig,
 } from './load_matrix_config';
 import type {
+  AggregatedDatasetScores,
   AggregatedEvaluatorScore,
   AggregatedModelScores,
   AggregatedSuiteScores,
@@ -297,6 +298,31 @@ const CONTRACT_EVALUATORS = new Set([
 
 const allowlistReadsJudgedGrades = (allows: ReadonlySet<string> | undefined): boolean =>
   allows === undefined || [...allows].some((name) => !CONTRACT_EVALUATORS.has(name));
+
+/**
+ * Whether the column's allowlist selects an evaluator whose grades the judge policy rejected
+ * in the datasets it reads. Rejections of an evaluator the column does not select must not
+ * hide its score. A dataset with rejections but no per-evaluator record falls back to the
+ * allowlist heuristic.
+ */
+const allowlistReadsRejectedGrades = (
+  allows: ReadonlySet<string> | undefined,
+  datasets: readonly AggregatedDatasetScores[],
+  readDatasetIds: ReadonlySet<string> | undefined
+): boolean => {
+  if (allows === undefined) return true;
+  const withRejections = datasets.filter(
+    ({ datasetId, excludedSelfJudged, excludedNonEis }) =>
+      (!readDatasetIds || readDatasetIds.has(datasetId)) &&
+      ((excludedSelfJudged ?? 0) > 0 || (excludedNonEis ?? 0) > 0)
+  );
+  if (withRejections.some(({ rejectedEvaluators }) => rejectedEvaluators === undefined)) {
+    return allowlistReadsJudgedGrades(allows);
+  }
+  return withRejections.some(({ rejectedEvaluators = [] }) =>
+    rejectedEvaluators.some((name) => allows.has(name))
+  );
+};
 
 const columnSelfJudged = (
   modelScores: AggregatedModelScores,
@@ -717,13 +743,17 @@ const buildMatrixRow = (
     // A column whose allowlist names only code-only contract checks (e.g.
     // `FinalAnswerPresent`) keeps its score under every judge policy, so it must
     // not inherit judge-policy rejections recorded against other evaluators of the
-    // same datasets. Decided from the allowlist: aggregated evaluators hold only
-    // admitted scores, so a judged evaluator whose every grade was rejected is
-    // absent there. (A suite rejected wholesale pushes `datasets: []`: its fate is
-    // the column's fate, so the counts stay.)
+    // same datasets. Decided from the recorded rejected evaluator names, not the
+    // aggregated evaluators: those hold only admitted scores, so a judged evaluator
+    // whose every grade was rejected is absent there. (A suite rejected wholesale
+    // pushes `datasets: []`: its fate is the column's fate, so the counts stay.)
     const columnAllows = column.evaluators ? new Set(column.evaluators) : undefined;
-    const readsJudgedGrades = allowlistReadsJudgedGrades(columnAllows);
     const canScopeToSelection = columnSuitesAll.every((suite) => suite.datasets.length > 0);
+    const readsJudgedGrades = allowlistReadsRejectedGrades(
+      columnAllows,
+      columnSuitesAll.flatMap((suite) => suite.datasets),
+      columnDatasetIds
+    );
     const scopedExcludedSelfJudged = columnDatasetIds
       ? perDataset((dataset) => dataset.excludedSelfJudged ?? 0)
       : columnSuitesAll.reduce((total, suite) => total + (suite.excludedSelfJudged ?? 0), 0);

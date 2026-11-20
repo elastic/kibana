@@ -31,6 +31,10 @@ export interface RetryOptions {
    */
   label?: string;
   /**
+   * Optional extra predicate: an error that is otherwise retryable is rethrown when this returns false.
+   */
+  shouldRetry?: (error: unknown) => boolean;
+  /**
    * Optional hook invoked before sleeping between retries.
    */
   onRetry?: (params: {
@@ -74,6 +78,17 @@ function parseRetryAfterMsFromMessage(message: string): number | undefined {
   return seconds * 1000;
 }
 
+function parseRetryAfterMsFromHeaders(error: any): number | undefined {
+  const headers = error?.headers ?? error?.response?.headers;
+  const value: unknown =
+    typeof headers?.get === 'function' ? headers.get('retry-after') : undefined;
+  if (typeof value !== 'string' || !value.trim()) return undefined;
+  const seconds = Number(value);
+  if (Number.isFinite(seconds)) return seconds > 0 ? seconds * 1000 : undefined;
+  const dateMs = Date.parse(value) - Date.now();
+  return Number.isFinite(dateMs) && dateMs > 0 ? dateMs : undefined;
+}
+
 function computeDelayMs({
   attempt,
   minDelayMs,
@@ -102,7 +117,7 @@ const RETRYABLE_SERVER_STATUSES = new Set<number>([502, 503, 504]);
 function isRetryable(error: any): { retry: boolean; retryAfterMs?: number } {
   const status = getStatusCode(error);
   const message = toErrorMessage(error);
-  const retryAfterMs = parseRetryAfterMsFromMessage(message);
+  const retryAfterMs = parseRetryAfterMsFromHeaders(error) ?? parseRetryAfterMsFromMessage(message);
 
   // Primary target: rate limiting
   if (status === 429) return { retry: true, retryAfterMs };
@@ -152,7 +167,7 @@ export async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions =
 
       const { retry, retryAfterMs } = isRetryable(error);
       const isLast = attempt === maxAttempts;
-      if (!retry || isLast) {
+      if (!retry || isLast || options.shouldRetry?.(error) === false) {
         throw error;
       }
 
