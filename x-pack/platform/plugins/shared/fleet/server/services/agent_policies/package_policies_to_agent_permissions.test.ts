@@ -680,9 +680,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       // The normal data stream grant must survive so the integration keeps ingesting; a dropped
       // descriptor would also report no agentless grant and hide a regression.
       expect(descriptor?.indices).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ names: [`logs-${pkgName}.logs-test`] }),
-        ])
+        expect.arrayContaining([expect.objectContaining({ names: [`logs-${pkgName}.logs-test`] })])
       );
 
     it('does NOT grant agentless-* permissions when the package is not agentless-eligible, even with the flag set', async () => {
