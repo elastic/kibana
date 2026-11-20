@@ -66,7 +66,10 @@ export const getTriageRevokeFpDecisionStepDefinition = () =>
           id,
           _source: ['attributes.space_id'],
         });
-        if (existing._source?.attributes?.space_id !== input.space_id) {
+        // The run's own space, never an input, so a run cannot delete another space's decision.
+        if (
+          existing._source?.attributes?.space_id !== contextManager.getContext().workflow.spaceId
+        ) {
           // Reads as a missing decision, so the caller cannot learn that the id exists elsewhere.
           status = 'not_found';
         } else {

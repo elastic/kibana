@@ -445,7 +445,6 @@ const storeFpDecisionsInputSchema = lazySchema(() =>
       .min(1)
       .max(1000)
       .describe("The alerts of the proposal's live revision."),
-    space_id: idSchema.describe('Space of the alerts. It is part of every key hash.'),
     autonomy: z
       .enum(['manual', 'supervised'])
       .describe(
@@ -502,7 +501,6 @@ export type MatchFpDecisionsStatus = (typeof MATCH_FP_DECISIONS_STATUSES)[number
 
 const matchFpDecisionsInputSchema = lazySchema(() =>
   z.object({
-    space_id: idSchema.describe('Space of the alerts. It is part of every key hash.'),
     analysis_tag_prefix: idSchema.describe(
       'Alert Analysis tag prefix. An alert carrying it was analysed outside this Worker.'
     ),
@@ -585,7 +583,6 @@ const revokeFpDecisionInputSchema = lazySchema(() =>
       .string()
       .regex(/^fp-(decision|dismissal)-[0-9a-f]{16}$/)
       .describe('Id of the decision: `fp-decision-<hash>` or `fp-dismissal-<hash>`.'),
-    space_id: idSchema.describe('Space of the run. A decision of another space is not found.'),
   })
 );
 

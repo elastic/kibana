@@ -24,6 +24,7 @@ const setup = ({
   keepTags = false,
   alerts = {},
   canWriteDecisions = true,
+  runSpace = 'default',
 }: {
   decisionId?: string;
   tagged?: string[];
@@ -38,6 +39,8 @@ const setup = ({
   alerts?: Record<string, { status: string; reason?: string }>;
   /** Whether the caller may write the decisions index: the worker's role can, a user's cannot. */
   canWriteDecisions?: boolean;
+  /** The space of the workflow run. */
+  runSpace?: string;
 }) => {
   let left = [...tagged];
   const state = new Map(
@@ -77,9 +80,10 @@ const setup = ({
   const hasPrivileges = jest.fn(async () => ({ has_all_requested: canWriteDecisions }));
   const run = () =>
     getTriageRevokeFpDecisionStepDefinition().handler({
-      input: { decision_id: decisionId, space_id: 'default' },
+      input: { decision_id: decisionId },
       contextManager: {
         callKibanaApi,
+        getContext: () => ({ workflow: { spaceId: runSpace } }),
         getFakeRequest: () => ({}),
         getScopedEsClient: () => ({ get, update, security: { hasPrivileges } }),
       },
@@ -197,6 +201,15 @@ describe('triage revoke decision step', () => {
     await run();
 
     expect(hasPrivileges).not.toHaveBeenCalled();
+  });
+
+  it("deletes a decision of the run's own space, whichever space the run is in", async () => {
+    const { run, update } = setup({ storedSpace: 'team', runSpace: 'team' });
+
+    const { output } = await run();
+
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(output).toEqual(expect.objectContaining({ status: 'ok' }));
   });
 
   it('treats a decision of another space as missing: not deleted, only this space is cleaned', async () => {

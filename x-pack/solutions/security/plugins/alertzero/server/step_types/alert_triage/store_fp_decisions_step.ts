@@ -83,6 +83,8 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
           return result('disabled');
         }
 
+        // The run's own space, never an input: a decision written for another space would close its alerts.
+        const { spaceId } = contextManager.getContext().workflow;
         const kind: FpDecisionKind =
           input.outcome === 'approved' ? 'false_positive' : 'do_not_propose';
         const { alerts } = await loadAlertsByIds(contextManager, input.alert_ids);
@@ -100,11 +102,11 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
             : new Set<string>();
         const conflictedKeys = groupByStrictKey({
           alerts: entries.filter(({ id }) => closedAsOther.has(id)),
-          spaceId: input.space_id,
+          spaceId,
         }).groups.map(({ hash }) => hash);
         const { groups, alertsWithoutStrictKey } = groupByStrictKey({
           alerts: entries.filter(({ id }) => !closedAsOther.has(id)),
-          spaceId: input.space_id,
+          spaceId,
         });
         if (groups.length === 0) {
           return result('no_strict_keys', { alerts_without_strict_key: alertsWithoutStrictKey });
@@ -153,7 +155,7 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
               kind,
               group,
               provenance: {
-                spaceId: input.space_id,
+                spaceId,
                 proposalId: input.proposal_id,
                 investigationId: input.investigation_id,
                 approver: input.approver,

@@ -500,7 +500,6 @@ steps:
         with:
           outcome: approved
           alert_ids: "${{ variables.live_alert_ids }}"
-          space_id: "{{ workflow.spaceId }}"
           autonomy: "${{ inputs.autonomy | default: 'manual' }}"
           proposal_id: "{{ steps.create_fp_proposal.output.proposalId }}"
           investigation_id: "{{ inputs.conversation_id }}"
@@ -558,7 +557,6 @@ steps:
             with:
               outcome: dismissed
               alert_ids: "${{ variables.live_alert_ids }}"
-              space_id: "{{ workflow.spaceId }}"
               autonomy: "${{ inputs.autonomy | default: 'manual' }}"
               proposal_id: "{{ steps.create_fp_proposal.output.proposalId }}"
               investigation_id: "{{ inputs.conversation_id }}"

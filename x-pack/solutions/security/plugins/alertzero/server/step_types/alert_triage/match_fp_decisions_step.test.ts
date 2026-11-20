@@ -59,6 +59,7 @@ const setup = ({
   movedOn = [],
   revokedDuringSweep = [],
   getError,
+  runSpace = 'default',
 }: {
   alerts: Array<[string, Record<string, unknown>]>;
   /** Stored decisions by document id. */
@@ -81,6 +82,8 @@ const setup = ({
   revokedDuringSweep?: string[];
   /** Fails the re-read of a decision made just before acting on it. */
   getError?: Error & { statusCode?: number };
+  /** The space of the workflow run. */
+  runSpace?: string;
 }) => {
   const callKibanaApi = jest.fn(
     async ({ path, body }: { path: string; body?: Record<string, any> }) => {
@@ -140,7 +143,6 @@ const setup = ({
       getMode: async () => mode,
     }).handler({
       input: {
-        space_id: 'default',
         analysis_tag_prefix: 'alert_analysis:',
         lookback_hours: 24,
         min_severity: 'low',
@@ -149,6 +151,7 @@ const setup = ({
       },
       contextManager: {
         callKibanaApi,
+        getContext: () => ({ workflow: { spaceId: runSpace } }),
         getFakeRequest: () => ({}),
         getScopedEsClient: () => ({ mget, get }),
       },
@@ -225,6 +228,27 @@ describe('triage match decisions step', () => {
         decisionId('do_not_propose', hashOf('C:\\x.exe')),
       ],
     });
+  });
+
+  it("reads only the run's own space's decisions, so another space's decision never matches", async () => {
+    const { run, mget, tags } = setup({
+      alerts: [['a', source('C:\\x.exe')]],
+      decisions: { [decisionId('false_positive', hashOf('C:\\x.exe'))]: stored('false_positive') },
+      runSpace: 'team',
+    });
+
+    const { output } = await run();
+
+    const teamHash = groupByStrictKey({
+      alerts: [{ id: 'x', doc: source('C:\\x.exe') }],
+      spaceId: 'team',
+    }).groups[0].hash;
+    expect(mget).toHaveBeenCalledWith({
+      index: TRIAGE_DECISIONS_AI_INDEX_DEST.value,
+      ids: [decisionId('false_positive', teamHash), decisionId('do_not_propose', teamHash)],
+    });
+    expect(output).toEqual(expect.objectContaining({ would_close: 0 }));
+    expect(tags()).toEqual([]);
   });
 
   it('tags a dismissed pattern as would-skip', async () => {

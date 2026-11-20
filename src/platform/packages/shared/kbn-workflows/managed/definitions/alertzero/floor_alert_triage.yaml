@@ -143,7 +143,6 @@ steps:
     on-failure:
       continue: true
     with:
-      space_id: "{{ workflow.spaceId }}"
       analysis_tag_prefix: "{{ steps.fetch_analysis_runtime_config.output.tagPrefix }}"
       lookback_hours: "${{ consts.worker_settings.extras.lookbackHours }}"
       min_severity: "${{ consts.worker_settings.extras.minSeverity }}"

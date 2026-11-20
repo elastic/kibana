@@ -27,10 +27,10 @@ const alertsOf = (executables: Array<[string, number]>) =>
     }))
   );
 
-const hashOf = (executable: string) =>
+const hashOf = (executable: string, spaceId = 'default') =>
   groupByStrictKey({
     alerts: [{ id: 'x', doc: processSource(executable) }],
-    spaceId: 'default',
+    spaceId,
   }).groups[0].hash;
 
 const setup = ({
@@ -41,6 +41,7 @@ const setup = ({
   searchFails = false,
   closedAsOther = [],
   mode = 'shadow',
+  runSpace = 'default',
 }: {
   alerts: Array<{ _id: string; _source: Record<string, unknown> }>;
   keysWithVerdicts?: string[];
@@ -50,6 +51,8 @@ const setup = ({
   /** Ids of alerts an analyst closed with a reason other than false positive. */
   closedAsOther?: string[];
   mode?: 'off' | 'shadow' | 'on';
+  /** The space of the workflow run. */
+  runSpace?: string;
 }) => {
   const callKibanaApi = jest.fn(async ({ body }: { body: { aggs?: unknown; query?: unknown } }) => {
     if (body.aggs) {
@@ -77,7 +80,6 @@ const setup = ({
       input: {
         outcome: 'approved',
         alert_ids: alerts.map(({ _id }) => _id),
-        space_id: 'default',
         autonomy: 'manual',
         proposal_id: 'proposal-1',
         investigation_id: 'conversation-1',
@@ -86,6 +88,7 @@ const setup = ({
       },
       contextManager: {
         callKibanaApi,
+        getContext: () => ({ workflow: { spaceId: runSpace } }),
         getFakeRequest: () => ({}),
         getScopedEsClient: () => ({ bulk }),
       },
@@ -167,6 +170,18 @@ describe('triage store decisions step', () => {
         permissions: { kibana: { privileges: [{ space: 'default' }] } },
       })
     );
+  });
+
+  it("scopes the decision to the run's own space, so no run can write one for another space", async () => {
+    const { run, bulk } = setup({ alerts: alertsOf([['a.exe', 3]]), runSpace: 'team' });
+
+    await run({});
+
+    const [action, doc] = written(bulk);
+    expect(hashOf('a.exe', 'team')).not.toBe(hashOf('a.exe'));
+    expect(action.index._id).toBe(`fp-decision-${hashOf('a.exe', 'team')}`);
+    expect(doc.permissions).toEqual({ kibana: { privileges: [{ space: 'team' }] } });
+    expect(doc.attributes.space_id).toBe('team');
   });
 
   it('stores nothing for a key that has an earlier true positive or inconclusive alert', async () => {

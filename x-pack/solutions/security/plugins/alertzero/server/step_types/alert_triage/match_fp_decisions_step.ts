@@ -153,6 +153,8 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
           return result('disabled');
         }
 
+        // The run's own space, never an input: it picks which space's decisions the hashes reach.
+        const { spaceId } = contextManager.getContext().workflow;
         const now = Date.now();
         // After the work deadline no new decision is started and no new page is read: the rest waits
         // for the next sweep. After the total deadline no new note is started.
@@ -385,7 +387,7 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
               filters,
               { after }
             );
-            const hashes = hashCandidates(found.candidates, input.space_id);
+            const hashes = hashCandidates(found.candidates, spaceId);
             const decisionsByHash = await readDecisions({
               mget: (params) => contextManager.getScopedEsClient().mget(params),
               hashes: new Set(hashes.values()),

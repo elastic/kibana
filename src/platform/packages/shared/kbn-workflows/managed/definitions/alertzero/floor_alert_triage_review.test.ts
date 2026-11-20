@@ -339,13 +339,14 @@ describe('floor_alert_triage_review — decisions', () => {
       create_fp_proposal: { output: { proposalId: 'proposal-1' } },
       get_proposal: { output: { decidedBy: { username: 'analyst' } } },
     };
-    const context = { inputs, steps, workflow: { spaceId: 'default' } };
+    const context = { inputs, steps };
     expect(renderString(approval()?.with?.proposal_id as string, context)).toBe('proposal-1');
     expect(renderString(approval()?.with?.investigation_id as string, context)).toBe(
       'conversation-1'
     );
     expect(renderString(approval()?.with?.approver as string, context)).toBe('analyst');
-    expect(renderString(approval()?.with?.space_id as string, context)).toBe('default');
+    // The step reads the space from the run, so no input can point it at another space.
+    expect(approval()?.with).not.toHaveProperty('space_id');
   });
 
   it('stores the dismissal after the re-tag, before the Investigation closes', () => {
