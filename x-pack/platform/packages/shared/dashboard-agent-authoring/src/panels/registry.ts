@@ -11,6 +11,7 @@ import type { PanelContent, PanelContentAttempt } from '../resolve_panel';
 import type { ConfigPanelKind, ReferencedConfigPanelKind } from './panel_kind';
 import { lensPanelKind, vegaPanelKind, type VisPanelResolutionRequest } from './vis';
 import { markdownPanelKind } from './markdown';
+import { customAppPanelKind } from './custom_app';
 import { customContentPanelKind, type CustomContentPanelResolutionRequest } from './custom_content';
 import {
   anomalyChartsPanelKind,
@@ -35,7 +36,7 @@ import { attachmentPanelInputSchema } from './attachment_source';
  * order is the order of the schema union sent to the model.
  */
 
-const INLINE_CONFIG_PANEL_KINDS = [markdownPanelKind] as const;
+const INLINE_CONFIG_PANEL_KINDS = [markdownPanelKind, customAppPanelKind] as const;
 
 const REFERENCED_CONFIG_PANEL_KINDS = [
   anomalyChartsPanelKind,

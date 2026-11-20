@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { CUSTOM_APP_EMBEDDABLE_TYPE, CUSTOM_APP_STATE_VERSION } from '@kbn/custom-app-common';
+import { defineCapability, registerCapability } from '@kbn/custom-app-registry';
+import { z } from '@kbn/zod/v4';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
 import { isConfigPanelContent, type PanelResolutionRequest } from './registry';
 import {
@@ -249,7 +252,11 @@ describe('getInlinePanelKindGuidance', () => {
 
       When one panel needs data of more than one shape — headline numbers above a ranked list, say — send one \`dataQueries\` entry per query. The template reads the first as \`rows\` and the n-th as \`queries[n].rows\`. Each entry says what ONE query returns, not how it looks: \`{ description: \\"total requests and the number of 5xx errors, as one row\\", index: \\"logs-*\\" }\`, then \`{ description: \\"the five hosts with the most requests\\" }\`. \`query\` stays the layout and how each query is used. Keep a panel to a few queries (at most ten).
 
-      To edit a panel that has several queries, send \`dataQueries\` only for the ones you change, in position order: an entry with \`description\` regenerates that query, \`esql\` replaces it, \`{}\` keeps it, and an entry past the current queries adds one. Queries you do not list are kept. They cannot be removed one at a time with this tool, and the panel's editor only lets the user remove the last query. To drop an earlier one, replace it with a different query (a new \`description\` or \`esql\`), or use \`removeAllQueries: true\` to remove them all. For a layout or style edit omit \`dataQueries\`: every query is kept."
+      To edit a panel that has several queries, send \`dataQueries\` only for the ones you change, in position order: an entry with \`description\` regenerates that query, \`esql\` replaces it, \`{}\` keeps it, and an entry past the current queries adds one. Queries you do not list are kept. They cannot be removed one at a time with this tool, and the panel's editor only lets the user remove the last query. To drop an earlier one, replace it with a different query (a new \`description\` or \`esql\`), or use \`removeAllQueries: true\` to remove them all. For a layout or style edit omit \`dataQueries\`: every query is kept.
+
+      ## Custom App Panels
+
+      A custom app is an interactive panel with filters, charts, tables and details, built in this conversation with \`custom_app_create_app\`. When the user asks to put one on the dashboard, add a panel with \`type: \\"custom_app\\"\` and \`config: { title?, document }\`, where \`document\` is the app exactly as it was created: read it from the app's attachment and pass it unchanged. Do not rebuild an app as separate panels, and do not write one by hand here. To change an app, change it with \`custom_app_update_app\` first, then replace the panel by its id with new content of the same kind. Layout is arranged for you and sizes it full width and tall; only set \`layout\` if the user asked for another arrangement."
     `);
   });
 });
@@ -260,7 +267,84 @@ describe('getPanelTypeSelection', () => {
       "1. **Lens** (\`type: \\"vis\\"\`) — metrics, time series, bar, line, pie, area, and data tables.
       2. **Vega** (\`type: \\"vega\\"\`) — scatter/bubble plots, small multiples/faceting, layered or combination charts, custom encodings, or when the user asks for Vega.
       3. **Markdown** (\`type: \\"markdown\\"\`) — static text, links, or notes with no data.
-      4. **Custom content** (\`type: \\"custom_content\\"\`) — a last resort for HTML/CSS layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or narrative text mixed with live data values, or when the user asks for a custom/HTML panel."
+      4. **Custom content** (\`type: \\"custom_content\\"\`) — a last resort for HTML/CSS layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or narrative text mixed with live data values, or when the user asks for a custom/HTML panel.
+      5. **Custom app** (\`type: \\"custom_app\\"\`) — an interactive app with filters, charts and tables that work together, built in this conversation with \`custom_app_create_app\`."
     `);
+  });
+});
+
+describe('custom app panels', () => {
+  // The components of an app are registered by the custom apps plugin, which this package does not
+  // load, so the one the apps below use is registered here.
+  beforeAll(() => {
+    registerCapability(
+      defineCapability({
+        kind: 'component',
+        id: 'heading',
+        version: 1,
+        props: z.object({ text: z.string().describe('The text of the heading.') }),
+        doc: {
+          summary: 'A heading.',
+          whenToUse: 'To title a part of an app.',
+          example: { type: 'heading', id: 'title', text: 'Hello' },
+        },
+      })
+    );
+  });
+
+  const document = {
+    state: {},
+    root: { type: 'heading', id: 'title', text: 'Hello' },
+  };
+  const content = { type: 'custom_app' as const, config: { document } };
+
+  it('accepts an app by value, to create a panel or to replace the app of one', () => {
+    expect(upsertPanelContentSchema.safeParse(content).success).toBe(true);
+    expect(
+      upsertPanelContentSchema.safeParse({ ...content, config: { title: 'Mine', document } })
+        .success
+    ).toBe(true);
+  });
+
+  it('refuses an app that is not valid, such as one with a component that is not registered', () => {
+    const unwritten = {
+      state: {},
+      root: { type: 'carousel', id: 'board' },
+    };
+
+    expect(
+      upsertPanelContentSchema.safeParse({ ...content, config: { document: unwritten } }).success
+    ).toBe(false);
+  });
+
+  it('is stored as a custom app panel, with the version of its state added', () => {
+    expect(buildConfigPanelContent('custom_app', { document, title: 'Mine' })).toEqual({
+      type: CUSTOM_APP_EMBEDDABLE_TYPE,
+      config: { document, title: 'Mine', version: CUSTOM_APP_STATE_VERSION },
+    });
+  });
+
+  it('edits only panels of the custom app type', () => {
+    expect(
+      planPanelContent({
+        id: 'panel-1',
+        content: upsertPanelContentSchema.parse(content),
+        existingPanel: {
+          id: 'panel-1',
+          type: 'vega',
+          config: {
+            spec: JSON.stringify({
+              data: { url: { '%type%': 'esql', query: 'FROM logs' } },
+              mark: 'bar',
+            }),
+          },
+          grid: { x: 0, y: 0, w: 24, h: 15 },
+        },
+      })
+    ).toEqual({
+      error: expect.stringMatching(
+        /^Panel "panel-1" is a Vega panel\. Edit it with type: "vega"\./
+      ),
+    });
   });
 });

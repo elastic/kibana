@@ -29,6 +29,7 @@ import {
   ESQL_CONTROL_TRIGGER,
   UPDATE_ESQL_QUERY_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { registerEsqlEditorCapability } from '../common/custom_app/esql_editor/register';
 import { ACTION_CREATE_ESQL_CONTROL, ACTION_UPDATE_ESQL_QUERY } from './triggers/constants';
 import { setKibanaServices } from './kibana_services';
 import { EsqlVariablesService } from './variables_service';
@@ -90,6 +91,11 @@ export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
   }
 
   public setup(core: CoreSetup, { uiActions }: EsqlPluginSetupDependencies): EsqlPluginSetup {
+    registerEsqlEditorCapability(() =>
+      import('./custom_app/esql_editor/view').then(({ EsqlEditorView }) => ({
+        default: EsqlEditorView,
+      }))
+    );
     registerESQLEditorAnalyticsEvents(core.analytics);
     registerIndexEditorAnalyticsEvents(core.analytics);
 
