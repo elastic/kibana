@@ -1944,6 +1944,21 @@ describe('EditOutputFlyout', () => {
         });
       });
 
+      it.each([true, false])(
+        'should re-save the stored %s value when the toggle was not touched',
+        async (stored) => {
+          const utils = renderEsFlyout(stored);
+          changeNameAndSave(utils);
+
+          await waitFor(() => {
+            expect(mockSendPutOutput).toHaveBeenCalledWith(
+              'output123',
+              expect.objectContaining({ otel_disable_beatsauth: stored })
+            );
+          });
+        }
+      );
+
       it('should send true when the toggle is turned on', async () => {
         const utils = renderEsFlyout();
         fireEvent.click(utils.getByText('OpenTelemetry exporter'));

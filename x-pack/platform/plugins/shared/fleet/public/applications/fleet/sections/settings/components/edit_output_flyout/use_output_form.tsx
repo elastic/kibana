@@ -1051,7 +1051,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
 
       const otelExporterParams: OtelExporterOutput = {
         otel_exporter_config_yaml: otelExporterConfigInput.value || null,
-        // Only persist the toggle when the user changed it, so untouched forms keep it unset
+        // Send the toggle value only when the user changed it; otherwise keep the stored value
+        // (or null when unset) so saving other fields does not turn "unset" into `false`
         otel_disable_beatsauth: otelDisableBeatsauthInput.hasChanged
           ? otelDisableBeatsauthInput.value
           : otelOutput?.otel_disable_beatsauth ?? null,
