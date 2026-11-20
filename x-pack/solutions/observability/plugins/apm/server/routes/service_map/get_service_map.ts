@@ -134,18 +134,22 @@ export function getServiceMap(
       });
     }
 
-    // The services the map draws, which every grouping and its labels are built over.
+    // The services the map draws, which every grouping and its labels are built over. Missing when
+    // there are too few to group, so neither the labels nor the grouping are computed.
     let mapServicesPromise: Promise<string[] | undefined> = Promise.resolve(undefined);
     // The labels of the drawn services, to group them by attribute.
     let groupingAttributesPromise: Promise<ServiceGroupingAttributes | undefined> =
       Promise.resolve(undefined);
     if (shouldApplyGrouping) {
       mapServicesPromise = Promise.all([connectionDataPromise, servicesDataPromise]).then(
-        ([{ spans }, servicesData]) => getMapServices({ spans, servicesData })
+        ([{ spans }, servicesData]) => {
+          const services = getMapServices({ spans, servicesData });
+          return services.length >= SERVICE_GROUPING_MIN_SERVICES ? services : undefined;
+        }
       );
       // Labels are read only for the drawn services, so they wait for them but do not need to wait for the call graph.
       groupingAttributesPromise = mapServicesPromise.then((services) => {
-        if (services && services.length >= SERVICE_GROUPING_MIN_SERVICES) {
+        if (services) {
           return getServiceGroupingAttributes({
             ...options,
             services,
@@ -175,18 +179,15 @@ export function getServiceMap(
     let serviceGrouping: ServiceMapGrouping | undefined;
     if (callGraph && services) {
       try {
-        const builtGrouping = buildServiceGrouping({
-          callGraph,
-          spans: connectionData.spans,
+        serviceGrouping = {
           services,
-          attributes: groupingAttributes,
-        });
-        if (builtGrouping) {
-          serviceGrouping = {
+          ...buildServiceGrouping({
+            callGraph,
+            spans: connectionData.spans,
             services,
-            ...builtGrouping,
-          };
-        }
+            attributes: groupingAttributes,
+          }),
+        };
       } catch (error) {
         logger.warn(`Unable to group the services of the service map.`, { error });
       }

@@ -17,7 +17,6 @@ import type {
   ServiceGroupingAttributeValues,
 } from '../get_service_grouping_attributes';
 import { getCallGraphEdges } from './call_graph_edges';
-import { SERVICE_GROUPING_MIN_SERVICES } from './constants';
 import { groupServicesByAttribute } from './group_services_by_attribute';
 import { groupServicesByCalls } from './group_services_by_calls';
 import { matchCallGraphToServices } from './match_service_call_graph';
@@ -32,8 +31,8 @@ const ATTRIBUTE_STRATEGIES: ReadonlyArray<{
 ];
 
 /**
- * Every grouping the map can show, for a map with enough services to need one. `services` is the
- * sorted list from `getMapServices`, and every strategy's assignment indexes it.
+ * Every grouping the map can show. `services` is the sorted list from `getMapServices`, and every
+ * strategy's assignment indexes it.
  *
  * Services are grouped by their calls, and by each attribute in `ATTRIBUTE_STRATEGIES` that any of
  * them sets. Until strategies are scored, grouping by calls is the one shown automatically and the
@@ -51,11 +50,7 @@ export function buildServiceGrouping({
   services: readonly string[];
   /** Labels of the drawn services. Missing when they could not be read. */
   attributes?: ServiceGroupingAttributes;
-}): Omit<ServiceMapGrouping, 'services'> | undefined {
-  if (services.length < SERVICE_GROUPING_MIN_SERVICES) {
-    return undefined;
-  }
-
+}): Omit<ServiceMapGrouping, 'services'> {
   const matched = matchCallGraphToServices({ callGraph, spans, serviceNames: services });
   const { edges, stats } = getCallGraphEdges({ callGraph: matched, services });
   const calls = groupServicesByCalls({ services, edges, stats });

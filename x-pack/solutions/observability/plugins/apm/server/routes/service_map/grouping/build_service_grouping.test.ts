@@ -27,12 +27,12 @@ function callGraphOf(estate: SyntheticEstate): ServiceCallGraph {
 
 /** The group of `service` in the strategy grouping by `source`. */
 function groupOf(
-  grouping: Omit<ServiceMapGrouping, 'services'> | undefined,
+  grouping: Omit<ServiceMapGrouping, 'services'>,
   services: readonly string[],
   source: string,
   service: string
 ) {
-  const strategy = grouping?.strategies.find((candidate) => candidate.source === source);
+  const strategy = grouping.strategies.find((candidate) => candidate.source === source);
   return strategy?.groups[strategy.assignment[services.indexOf(service)]];
 }
 
@@ -40,23 +40,6 @@ const names = (count: number) =>
   Array.from({ length: count }, (_, index) => `svc-${String(index).padStart(3, '0')}`);
 
 describe('buildServiceGrouping', () => {
-  it(`leaves a map with fewer than ${SERVICE_GROUPING_MIN_SERVICES} services ungrouped`, () => {
-    expect(
-      buildServiceGrouping({
-        callGraph: {},
-        spans: [],
-        services: names(SERVICE_GROUPING_MIN_SERVICES - 1),
-      })
-    ).toBeUndefined();
-    expect(
-      buildServiceGrouping({
-        callGraph: {},
-        spans: [],
-        services: names(SERVICE_GROUPING_MIN_SERVICES),
-      })
-    ).toBeDefined();
-  });
-
   it('puts every service in the not connected group when there are no calls between them', () => {
     const grouping = buildServiceGrouping({
       callGraph: {},
@@ -64,7 +47,7 @@ describe('buildServiceGrouping', () => {
       services: names(SERVICE_GROUPING_MIN_SERVICES),
     });
 
-    expect(grouping?.strategies).toEqual([
+    expect(grouping.strategies).toEqual([
       {
         source: 'calls',
         passes: true,
@@ -155,7 +138,7 @@ describe('buildServiceGrouping', () => {
         ),
       });
 
-      expect(withoutNamespaces?.strategies.map(({ source }) => source)).not.toContain(
+      expect(withoutNamespaces.strategies.map(({ source }) => source)).not.toContain(
         'service.namespace'
       );
     });
@@ -199,7 +182,7 @@ describe('buildServiceGrouping', () => {
     const teamThree = firstOfTeam('team-3');
 
     it('groups services by their Kubernetes namespace, apart from their service.namespace', () => {
-      expect(grouping?.strategies.map(({ source }) => source)).toEqual([
+      expect(grouping.strategies.map(({ source }) => source)).toEqual([
         'calls',
         'service.namespace',
         'kubernetes.namespace',
@@ -233,7 +216,7 @@ describe('buildServiceGrouping', () => {
         )
       );
 
-      expect(onlyKubernetes?.strategies.map(({ source }) => source)).toEqual([
+      expect(onlyKubernetes.strategies.map(({ source }) => source)).toEqual([
         'calls',
         'kubernetes.namespace',
       ]);
