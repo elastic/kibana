@@ -71,7 +71,7 @@ import { VectorStyle } from '../../styles/vector/vector_style';
 import { getIconSize } from './get_icon_size';
 
 type ESGeoGridSourceSyncMeta = ESAggsSourceSyncMeta &
-  Pick<ESGeoGridSourceDescriptor, 'requestType' | 'resolution'> & {
+  Pick<ESGeoGridSourceDescriptor, 'request_type' | 'resolution'> & {
     geogridPrecision: number;
   };
 
@@ -90,14 +90,14 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(
       descriptor
     ) as AbstractESAggSourceDescriptor & Partial<ESGeoGridSourceDescriptor>;
-    if (!isValidStringConfig(normalizedDescriptor.geoField)) {
+    if (!isValidStringConfig(normalizedDescriptor.geo_field)) {
       throw new Error('Cannot create an ESGeoGridSourceDescriptor without a geoField');
     }
     return {
       ...normalizedDescriptor,
       type: SOURCE_TYPES.ES_GEO_GRID,
-      geoField: normalizedDescriptor.geoField!,
-      requestType: descriptor.requestType || RENDER_AS.POINT,
+      geo_field: normalizedDescriptor.geo_field!,
+      request_type: descriptor.request_type || RENDER_AS.POINT,
       resolution: descriptor.resolution ? descriptor.resolution : GRID_RESOLUTION.COARSE,
     } as ESGeoGridSourceDescriptor & Required<Pick<ESGeoGridSourceDescriptor, 'metrics'>>;
   }
@@ -112,13 +112,13 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   getBucketsName() {
-    if (this._descriptor.requestType === RENDER_AS.HEX) {
+    if (this._descriptor.request_type === RENDER_AS.HEX) {
       return i18n.translate('xpack.maps.source.esGeoGrid.hex.bucketsName', {
         defaultMessage: 'hexagons',
       });
     }
 
-    if (this._descriptor.requestType === RENDER_AS.GRID) {
+    if (this._descriptor.request_type === RENDER_AS.GRID) {
       return i18n.translate('xpack.maps.source.esGeoGrid.grid.bucketsName', {
         defaultMessage: 'grid',
       });
@@ -130,7 +130,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   getGeoFieldName(): string {
-    return this._descriptor.geoField;
+    return this._descriptor.geo_field;
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> {
@@ -170,7 +170,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
         metrics={this._descriptor.metrics}
-        renderAs={this._descriptor.requestType}
+        renderAs={this._descriptor.request_type}
         resolution={this._descriptor.resolution}
       />
     );
@@ -180,7 +180,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     return {
       ...super.getSyncMeta(dataFilters),
       geogridPrecision: this.getGeoGridPrecision(dataFilters.zoom),
-      requestType: this._descriptor.requestType,
+      request_type: this._descriptor.request_type,
       resolution: this._descriptor.resolution,
     };
   }
@@ -189,7 +189,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     return [
       {
         label: getDataSourceLabel(),
-        value: this._descriptor.requestType === RENDER_AS.HEATMAP ? heatmapTitle : clustersTitle,
+        value: this._descriptor.request_type === RENDER_AS.HEATMAP ? heatmapTitle : clustersTitle,
       },
       {
         label: getDataViewLabel(),
@@ -199,13 +199,13 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
         label: i18n.translate('xpack.maps.source.esGrid.geospatialFieldLabel', {
           defaultMessage: 'Cluster field',
         }),
-        value: this._descriptor.geoField,
+        value: this._descriptor.geo_field,
       },
     ];
   }
 
   isMvt(): boolean {
-    return isMvt(this._descriptor.requestType, this._descriptor.resolution);
+    return isMvt(this._descriptor.request_type, this._descriptor.resolution);
   }
 
   isGeoGridPrecisionAware(): boolean {
@@ -272,7 +272,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
               [GEOTILE_GRID_AGG_NAME]: {
                 geotile_grid: {
                   bounds: makeESBbox(bufferedExtent),
-                  field: this._descriptor.geoField,
+                  field: this._descriptor.geo_field,
                   precision,
                 },
               },
@@ -282,7 +282,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
         aggs: {
           [GEOCENTROID_AGG_NAME]: {
             geo_centroid: {
-              field: this._descriptor.geoField,
+              field: this._descriptor.geo_field,
             },
           },
           ...this.getValueAggsDsl(indexPattern),
@@ -333,7 +333,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
         fetchOptions,
       });
 
-      features.push(...convertCompositeRespToGeoJson(esResponse, this._descriptor.requestType));
+      features.push(...convertCompositeRespToGeoJson(esResponse, this._descriptor.request_type));
 
       const aggr = esResponse.aggregations?.compositeSplit as AggregationsCompositeAggregate;
       afterKey = aggr.after_key;
@@ -384,7 +384,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       [GEOTILE_GRID_AGG_NAME]: {
         geotile_grid: {
           bounds: makeESBbox(bufferedExtent),
-          field: this._descriptor.geoField,
+          field: this._descriptor.geo_field,
           precision,
           size: DEFAULT_MAX_BUCKETS_LIMIT,
           shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
@@ -392,7 +392,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
         aggs: {
           [GEOCENTROID_AGG_NAME]: {
             geo_centroid: {
-              field: this._descriptor.geoField,
+              field: this._descriptor.geo_field,
             },
           },
           ...valueAggsDsl,
@@ -415,7 +415,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       fetchOptions,
     });
 
-    return convertRegularRespToGeoJson(esResponse, this._descriptor.requestType);
+    return convertRegularRespToGeoJson(esResponse, this._descriptor.request_type);
   }
 
   async _isGeoShape() {
@@ -523,7 +523,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     // Filter out documents without geo fields for broad index-pattern support
     searchSource.setField('filter', [
       ...(searchSource.getField('filter') as Filter[]),
-      buildExistsFilter({ name: this._descriptor.geoField, type: 'geo_point' }, dataView),
+      buildExistsFilter({ name: this._descriptor.geo_field, type: 'geo_point' }, dataView),
     ]);
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
@@ -531,10 +531,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     );
 
     const tileUrlParams = getTileUrlParams({
-      geometryFieldName: this._descriptor.geoField,
+      geometryFieldName: this._descriptor.geo_field,
       index: dataView.getIndexPattern(),
       gridPrecision:
-        this._descriptor.requestType === RENDER_AS.HEX
+        this._descriptor.request_type === RENDER_AS.HEX
           ? getGeohexPrecisionDelta(this._descriptor.resolution)
           : getGeotilePrecisionDelta(this._descriptor.resolution),
       hasLabels,
@@ -544,7 +544,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
         'query',
         'runtime_mappings',
       ]),
-      renderAs: this._descriptor.requestType,
+      renderAs: this._descriptor.request_type,
       token: refreshToken,
       executionContextId: getExecutionContextId(requestMeta.executionContext),
     });
@@ -567,8 +567,8 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
     if (
-      this._descriptor.requestType === RENDER_AS.GRID ||
-      this._descriptor.requestType === RENDER_AS.HEX
+      this._descriptor.request_type === RENDER_AS.GRID ||
+      this._descriptor.request_type === RENDER_AS.HEX
     ) {
       return [VECTOR_SHAPE_TYPE.POLYGON];
     }
@@ -600,7 +600,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
           const geoGridFilter = buildGeoGridFilter({
             geoFieldNames,
             gridId: featureId, // featureId is grid id for ES_GEO_GRID source
-            isHex: this._descriptor.requestType === RENDER_AS.HEX,
+            isHex: this._descriptor.request_type === RENDER_AS.HEX,
           });
           addFilters([geoGridFilter], ACTION_GLOBAL_APPLY_FILTER);
           onClose();

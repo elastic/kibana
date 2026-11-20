@@ -22,7 +22,7 @@ import { loadIndexSettings } from './util/load_index_settings';
 import type { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import { ESSearchSource } from './es_search_source';
 
-const mockDescriptor = { indexPatternId: 'foo', geoField: 'bar' };
+const mockDescriptor = { index_pattern_id: 'foo', geo_field: 'bar' };
 
 describe('ESSearchSource', () => {
   it('constructor', () => {
@@ -127,8 +127,8 @@ describe('ESSearchSource', () => {
 
       it('should include required props', async () => {
         const esSearchSource = new ESSearchSource({
-          geoField: geoFieldName,
-          indexPatternId: 'ipId',
+          geo_field: geoFieldName,
+          index_pattern_id: 'ipId',
         });
         const tileUrl = await esSearchSource.getTileUrl(requestMeta, '1234', false, 5);
 
@@ -167,8 +167,8 @@ describe('ESSearchSource', () => {
 
       it('should include executionContextId when provided', async () => {
         const esSearchSource = new ESSearchSource({
-          geoField: geoFieldName,
-          indexPatternId: 'ipId',
+          geo_field: geoFieldName,
+          index_pattern_id: 'ipId',
         });
         const tileUrl = await esSearchSource.getTileUrl(
           {
@@ -190,14 +190,14 @@ describe('ESSearchSource', () => {
     it('limit', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
-        scalingType: SCALING_TYPES.LIMIT,
+        scaling_type: SCALING_TYPES.LIMIT,
       });
       expect(esSearchSource.isFilterByMapBounds()).toBe(true);
     });
     it('mvt', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
-        scalingType: SCALING_TYPES.MVT,
+        scaling_type: SCALING_TYPES.MVT,
       });
       expect(esSearchSource.isFilterByMapBounds()).toBe(false);
     });
@@ -207,21 +207,21 @@ describe('ESSearchSource', () => {
     it('limit', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
-        scalingType: SCALING_TYPES.LIMIT,
+        scaling_type: SCALING_TYPES.LIMIT,
       });
       expect(esSearchSource.supportsJoins()).toBe(true);
     });
     it('blended layer', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
-        scalingType: SCALING_TYPES.CLUSTERS,
+        scaling_type: SCALING_TYPES.CLUSTERS,
       });
       expect(esSearchSource.supportsJoins()).toBe(false);
     });
     it('mvt', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
-        scalingType: SCALING_TYPES.MVT,
+        scaling_type: SCALING_TYPES.MVT,
       });
       expect(esSearchSource.supportsJoins()).toBe(true);
     });
@@ -275,11 +275,11 @@ describe('ESSearchSource', () => {
     describe('top hits', () => {
       it('should return features for each top hit across all entities', async () => {
         const esSearchSource = new ESSearchSource({
-          indexPatternId: 'ipId',
-          geoField: GEO_FIELD_NAME,
-          scalingType: SCALING_TYPES.TOP_HITS,
-          topHitsSplitField: 'machine.os.raw',
-          topHitsSize: 5,
+          index_pattern_id: 'ipId',
+          geo_field: GEO_FIELD_NAME,
+          scaling_type: SCALING_TYPES.TOP_HITS,
+          top_hits_split_field: 'machine.os.raw',
+          top_hits_size: 5,
         });
         jest.spyOn(esSearchSource, '_getTopHits').mockResolvedValue({
           hits: makeHits(10),
@@ -311,11 +311,11 @@ describe('ESSearchSource', () => {
 
       it('should pass through meta from top hits response', async () => {
         const esSearchSource = new ESSearchSource({
-          indexPatternId: 'ipId',
-          geoField: GEO_FIELD_NAME,
-          scalingType: SCALING_TYPES.TOP_HITS,
-          topHitsSplitField: 'machine.os.raw',
-          topHitsSize: 1,
+          index_pattern_id: 'ipId',
+          geo_field: GEO_FIELD_NAME,
+          scaling_type: SCALING_TYPES.TOP_HITS,
+          top_hits_split_field: 'machine.os.raw',
+          top_hits_size: 1,
         });
         const topHitsMeta = {
           areResultsTrimmed: true,

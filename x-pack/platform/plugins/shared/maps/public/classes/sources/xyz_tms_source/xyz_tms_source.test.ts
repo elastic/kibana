@@ -11,12 +11,12 @@ import type { XYZTMSSourceDescriptor } from '../../../../common/descriptor_types
 
 const descriptor: XYZTMSSourceDescriptor = {
   type: SOURCE_TYPES.EMS_XYZ,
-  urlTemplate: 'https://example.com/{x}/{y}/{z}.png',
+  url_template: 'https://example.com/{x}/{y}/{z}.png',
 };
 describe('xyz Tilemap Source', () => {
   it('should echo url template for url template', async () => {
     const source = new XYZTMSSource(descriptor);
     const template = await source.getUrlTemplate();
-    expect(template).toEqual(descriptor.urlTemplate);
+    expect(template).toEqual(descriptor.url_template);
   });
 });

@@ -83,7 +83,7 @@ export class CreateSourceEditor extends Component<Props, State> {
 
     const sourceConfig =
       indexPattern && indexPattern.id && geoField
-        ? { indexPatternId: indexPattern.id, geoField, requestType }
+        ? { index_pattern_id: indexPattern.id, geo_field: geoField, request_type: requestType }
         : null;
     this.props.onSourceConfigChange(sourceConfig);
   };

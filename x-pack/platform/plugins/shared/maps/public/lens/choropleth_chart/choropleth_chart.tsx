@@ -99,7 +99,7 @@ export function ChoroplethChart({
     sourceDescriptor: {
       type: SOURCE_TYPES.EMS_FILE,
       id: emsLayerId,
-      tooltipProperties: [emsField],
+      tooltip_properties: [emsField],
     },
     style: {
       type: LAYER_STYLE_TYPE.VECTOR,

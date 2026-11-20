@@ -127,7 +127,7 @@ function getBasemapKey(layerDescriptor: LayerDescriptor): EMS_BASEMAP_KEYS | nul
 
   const descriptor = layerDescriptor.sourceDescriptor as EMSTMSSourceDescriptor;
 
-  if (descriptor.isAutoSelect) {
+  if (descriptor.is_auto_select) {
     return EMS_BASEMAP_KEYS.AUTO;
   }
 
@@ -214,7 +214,7 @@ function getLayerKey(layerDescriptor: LayerDescriptor): LAYER_KEYS | null {
   if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.ES_SEARCH) {
     const sourceDescriptor = layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor;
 
-    if (sourceDescriptor.scalingType === SCALING_TYPES.TOP_HITS) {
+    if (sourceDescriptor.scaling_type === SCALING_TYPES.TOP_HITS) {
       return LAYER_KEYS.ES_TOP_HITS;
     } else {
       return LAYER_KEYS.ES_DOCS;
@@ -223,11 +223,11 @@ function getLayerKey(layerDescriptor: LayerDescriptor): LAYER_KEYS | null {
 
   if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.ES_GEO_GRID) {
     const sourceDescriptor = layerDescriptor.sourceDescriptor as ESGeoGridSourceDescriptor;
-    if (sourceDescriptor.requestType === RENDER_AS.POINT) {
+    if (sourceDescriptor.request_type === RENDER_AS.POINT) {
       return LAYER_KEYS.ES_AGG_CLUSTERS;
-    } else if (sourceDescriptor.requestType === RENDER_AS.GRID) {
+    } else if (sourceDescriptor.request_type === RENDER_AS.GRID) {
       return LAYER_KEYS.ES_AGG_GRIDS;
-    } else if (sourceDescriptor.requestType === RENDER_AS.HEX) {
+    } else if (sourceDescriptor.request_type === RENDER_AS.HEX) {
       return LAYER_KEYS.ES_AGG_HEXAGONS;
     }
   }
@@ -269,22 +269,22 @@ function getScalingKey(layerDescriptor: LayerDescriptor): SCALING_KEYS | null {
   if (
     !layerDescriptor.sourceDescriptor ||
     layerDescriptor.sourceDescriptor.type !== SOURCE_TYPES.ES_SEARCH ||
-    !(layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor).scalingType
+    !(layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor).scaling_type
   ) {
     return null;
   }
 
   const descriptor = layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor;
 
-  if (descriptor.scalingType === SCALING_TYPES.CLUSTERS) {
+  if (descriptor.scaling_type === SCALING_TYPES.CLUSTERS) {
     return SCALING_KEYS.CLUSTERS;
   }
 
-  if (descriptor.scalingType === SCALING_TYPES.MVT) {
+  if (descriptor.scaling_type === SCALING_TYPES.MVT) {
     return SCALING_KEYS.MVT;
   }
 
-  if (descriptor.scalingType === SCALING_TYPES.LIMIT) {
+  if (descriptor.scaling_type === SCALING_TYPES.LIMIT) {
     return SCALING_KEYS.LIMIT;
   }
 

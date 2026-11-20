@@ -67,13 +67,13 @@ export function createDistanceJoinLayerDescriptor({
       right: {
         type: SOURCE_TYPES.ES_DISTANCE_SOURCE,
         id: joinId,
-        indexPatternId: rightDataViewId,
+        index_pattern_id: rightDataViewId,
         metrics: [metricsDescriptor],
         distance,
-        geoField: rightGeoField,
-        applyGlobalQuery: true,
-        applyGlobalTime: true,
-        applyForceRefresh: true,
+        geo_field: rightGeoField,
+        apply_global_query: true,
+        apply_global_time: true,
+        apply_force_refresh: true,
       } as ESDistanceSourceDescriptor,
     },
   ];
@@ -81,12 +81,12 @@ export function createDistanceJoinLayerDescriptor({
   return GeoJsonVectorLayer.createDescriptor({
     joins,
     sourceDescriptor: ESSearchSource.createDescriptor({
-      indexPatternId: leftDataViewId,
-      geoField: leftGeoField,
-      scalingType: SCALING_TYPES.LIMIT,
-      applyGlobalQuery: true,
-      applyGlobalTime: true,
-      applyForceRefresh: true,
+      index_pattern_id: leftDataViewId,
+      geo_field: leftGeoField,
+      scaling_type: SCALING_TYPES.LIMIT,
+      apply_global_query: true,
+      apply_global_time: true,
+      apply_force_refresh: true,
     }),
     style: VectorStyle.createDescriptor(styleProperties),
   });

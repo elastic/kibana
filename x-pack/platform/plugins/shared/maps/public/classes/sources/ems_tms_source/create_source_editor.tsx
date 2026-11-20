@@ -22,7 +22,7 @@ export class CreateSourceEditor extends Component<Props, State> {
   state: State = {};
 
   componentDidMount() {
-    this._onTileSelect({ isAutoSelect: true });
+    this._onTileSelect({ is_auto_select: true });
   }
 
   _onTileSelect = (config: EmsTmsSourceConfig) => {

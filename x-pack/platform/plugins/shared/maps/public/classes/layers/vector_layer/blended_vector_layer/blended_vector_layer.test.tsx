@@ -37,9 +37,9 @@ const clusteredDataRequest = {
 };
 
 const documentSourceDescriptor = ESSearchSource.createDescriptor({
-  geoField: 'myGeoField',
-  indexPatternId: 'myIndexPattern',
-  scalingType: SCALING_TYPES.CLUSTERS,
+  geo_field: 'myGeoField',
+  index_pattern_id: 'myIndexPattern',
+  scaling_type: SCALING_TYPES.CLUSTERS,
 });
 
 describe('getSource', () => {
@@ -65,9 +65,9 @@ describe('getSource', () => {
       const blendedVectorLayer = new BlendedVectorLayer({
         source: new ESSearchSource({
           ...documentSourceDescriptor,
-          applyGlobalQuery: false,
-          applyGlobalTime: false,
-          applyForceRefresh: false,
+          apply_global_query: false,
+          apply_global_time: false,
+          apply_force_refresh: false,
         }),
         layerDescriptor: BlendedVectorLayer.createDescriptor(
           {
@@ -87,17 +87,17 @@ describe('getSource', () => {
         // In the event of type check failure, ensure test is updated with new property and that new property
         // is correctly passed to clustered source descriptor.
         id: sourceDescriptor.id,
-        indexPatternId: sourceDescriptor.indexPatternId,
-        applyGlobalQuery: sourceDescriptor.applyGlobalQuery,
-        applyGlobalTime: sourceDescriptor.applyGlobalTime,
-        applyForceRefresh: sourceDescriptor.applyForceRefresh,
+        index_pattern_id: sourceDescriptor.index_pattern_id,
+        apply_global_query: sourceDescriptor.apply_global_query,
+        apply_global_time: sourceDescriptor.apply_global_time,
+        apply_force_refresh: sourceDescriptor.apply_force_refresh,
       };
       expect(abstractEsSourceDescriptor).toEqual({
         id: sourceDescriptor.id,
-        indexPatternId: 'myIndexPattern',
-        applyGlobalQuery: false,
-        applyGlobalTime: false,
-        applyForceRefresh: false,
+        index_pattern_id: 'myIndexPattern',
+        apply_global_query: false,
+        apply_global_time: false,
+        apply_force_refresh: false,
       } as AbstractESSourceDescriptor);
     });
   });

@@ -19,7 +19,7 @@ interface Props {
 export function SpatialJoinExpression(props: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const { geoField } = props.sourceDescriptor;
+  const { geo_field: geoField } = props.sourceDescriptor;
   const expressionValue =
     geoField !== undefined
       ? i18n.translate('xpack.maps.spatialJoinExpression.value', {

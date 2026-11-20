@@ -98,10 +98,10 @@ export function createTileMapLayerDescriptor({
 
   const metricsDescriptor = createAggDescriptor(mapType, metricAgg, metricFieldName);
   const geoGridSourceDescriptor = ESGeoGridSource.createDescriptor({
-    indexPatternId,
-    geoField: geoFieldName,
+    index_pattern_id: indexPatternId,
+    geo_field: geoFieldName,
     metrics: [metricsDescriptor],
-    requestType: getGeoGridRequestType(mapType),
+    request_type: getGeoGridRequestType(mapType),
     resolution: GRID_RESOLUTION.MOST_FINE,
   });
 

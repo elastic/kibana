@@ -18,9 +18,9 @@ interface Props {
 }
 
 export function UpdateSourceEditor({ onChange, config }: Props) {
-  const _onTileSelect = ({ id, isAutoSelect }: EmsTmsSourceConfig) => {
+  const _onTileSelect = ({ id, is_auto_select: isAutoSelect }: EmsTmsSourceConfig) => {
     onChange({ propName: 'id', value: id });
-    onChange({ propName: 'isAutoSelect', value: isAutoSelect });
+    onChange({ propName: 'is_auto_select', value: isAutoSelect });
   };
 
   return (

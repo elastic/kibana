@@ -69,9 +69,9 @@ export function useLayerList() {
           label: 'Page load duration',
         },
       ],
-      indexPatternId: getStaticDataViewId(spaceId),
-      applyGlobalQuery: true,
-      applyGlobalTime: true,
+      index_pattern_id: getStaticDataViewId(spaceId),
+      apply_global_query: true,
+      apply_global_time: true,
       applyForceRefresh: true,
     };
 
@@ -80,12 +80,12 @@ export function useLayerList() {
       id: 'e62a1b9c-d7ff-4fd4-a0f6-0fdc44bb9e41',
       term: 'client.geo.region_iso_code',
       metrics: [{ type: AGG_TYPE.AVG, field: 'transaction.duration.us' }],
-      whereQuery: {
+      where_query: {
         query: 'transaction.type : "page-load"',
         language: 'kuery',
       },
-      indexPatternId: getStaticDataViewId(spaceId),
-      applyGlobalQuery: true,
+      index_pattern_id: getStaticDataViewId(spaceId),
+      apply_global_query: true,
       applyGlobalTime: true,
       applyForceRefresh: true,
     };
@@ -97,7 +97,7 @@ export function useLayerList() {
 
   const { serviceName } = urlParams;
 
-  esTermSourceCountry.whereQuery = getWhereQuery(serviceName!);
+  esTermSourceCountry.where_query = getWhereQuery(serviceName!);
 
   const getLayerStyle = (fieldName: string): VectorStyleDescriptor => {
     return {
@@ -178,7 +178,7 @@ export function useLayerList() {
     type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 
-  esTermSourceRegion.whereQuery = getWhereQuery(serviceName!);
+  esTermSourceRegion.where_query = getWhereQuery(serviceName!);
 
   const pageLoadDurationByAdminRegionLayer: VectorLayerDescriptor = {
     joins: [

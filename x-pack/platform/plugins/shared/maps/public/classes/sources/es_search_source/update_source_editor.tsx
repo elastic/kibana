@@ -116,15 +116,15 @@ export class UpdateSourceEditor extends Component<Props, State> {
     });
   }
   _onTooltipPropertiesChange = (propertyNames: string[]) => {
-    this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
+    this.props.onChange({ propName: 'tooltip_properties', value: propertyNames });
   };
 
   _onSortFieldChange = (sortField?: string) => {
-    this.props.onChange({ propName: 'sortField', value: sortField });
+    this.props.onChange({ propName: 'sort_field', value: sortField });
   };
 
   _onSortOrderChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    this.props.onChange({ propName: 'sortOrder', value: e.target.value });
+    this.props.onChange({ propName: 'sort_order', value: e.target.value });
   };
 
   _renderTooltipsPanel() {

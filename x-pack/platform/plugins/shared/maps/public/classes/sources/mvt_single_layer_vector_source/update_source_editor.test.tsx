@@ -17,12 +17,12 @@ import { SOURCE_TYPES } from '../../../../common/constants';
 
 const descriptor: TiledSingleLayerVectorSourceDescriptor = {
   type: SOURCE_TYPES.MVT_SINGLE_LAYER,
-  urlTemplate: 'https://example.com/{x}/{y}/{z}.pbf',
-  layerName: 'foobar',
-  minSourceZoom: 4,
-  maxSourceZoom: 14,
+  url_template: 'https://example.com/{x}/{y}/{z}.pbf',
+  layer_name: 'foobar',
+  min_source_zoom: 4,
+  max_source_zoom: 14,
   fields: [],
-  tooltipProperties: [],
+  tooltip_properties: [],
 };
 
 test('should render update source editor (fields _should_ be included)', async () => {
