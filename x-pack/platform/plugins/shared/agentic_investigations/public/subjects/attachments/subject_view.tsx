@@ -9,7 +9,15 @@ import React, { useMemo, useState } from 'react';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
-import { EuiIcon, EuiIconTip, EuiPanel, EuiText, euiTextTruncate, useEuiTheme } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiIconTip,
+  EuiLink,
+  EuiPanel,
+  EuiText,
+  euiTextTruncate,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { InvestigationAutomation } from '../../../common/investigations/investigation';
 import type {
   InvestigationSubject,
@@ -20,12 +28,12 @@ import { getSubjectDisplayType, getSubjectTitle, type SubjectRowData } from './s
 import { useAlertsListLink, useAutomationLink, useSubjectLink } from './subject_link';
 import { useSubjectFlyout } from './use_subject_flyout';
 import {
-  AUTOMATION_TRIGGER_LABEL,
   OPEN_IN_FLYOUT,
   OPEN_NEW_TAB,
   OPENS_IN_NEW_TAB,
   TRIGGER_LABEL,
   alertsCountLabel,
+  viaAutomationLabel,
   subjectTriggerLabel,
 } from './translations';
 
@@ -266,6 +274,42 @@ const CompactRow = ({
 };
 
 /**
+ * The automation a trigger came through, as a line under the trigger's row: "via <automation>",
+ * the automation opening in the Nightshift app. It sits outside the row, which is a link itself.
+ */
+const ViaAutomation: React.FC<{ automation: InvestigationAutomation }> = ({
+  automation: { id, name },
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const { href, onClick } = useAutomationLink(id);
+
+  return (
+    <EuiText
+      size="xs"
+      color="subdued"
+      data-test-subj="investigationSubjectVia"
+      css={css`
+        margin-block-start: -${euiTheme.size.xs};
+        padding-block-end: ${euiTheme.size.m};
+        padding-inline: calc(${euiTheme.size.base} + ${euiTheme.size.xl} + ${euiTheme.size.m})
+          ${euiTheme.size.base};
+        ${euiTextTruncate()}
+      `}
+    >
+      {viaAutomationLabel(
+        href === undefined ? (
+          name
+        ) : (
+          <EuiLink href={href} onClick={onClick} data-test-subj="investigationSubjectViaLink">
+            {name}
+          </EuiLink>
+        )
+      )}
+    </EuiText>
+  );
+};
+
+/**
  * The subdued line under a row's title. Alerts listed under an "N alerts" row usually share the
  * rule name, so they also show when each alert started.
  */
@@ -302,10 +346,12 @@ const getSubjectDescription = (subject: SubjectRowData, isNested: boolean): Reac
  * The row links where `useSubjectLink` says (the subject's page, else its own link); without a
  * link it is plain text.
  */
-export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean }> = ({
-  subject,
-  isNested = false,
-}) => {
+export const SubjectRow: React.FC<{
+  subject: SubjectRowData;
+  isNested?: boolean;
+  /** The automation the subject triggered the investigation through; shown as a "via" line. */
+  automation?: InvestigationAutomation;
+}> = ({ subject, isNested = false, automation }) => {
   const { href, onClick: onLinkClick, isExternal } = useSubjectLink(subject);
   const {
     onClick: onRowClick,
@@ -316,18 +362,21 @@ export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean 
 
   return (
     <>
-      <CompactRow
-        iconType={SUBJECT_ICONS[displayType]}
-        tone={SUBJECT_ICON_TONES[displayType]}
-        title={getSubjectTitle(subject)}
-        description={getSubjectDescription(subject, isNested)}
-        href={href}
-        isExternal={isExternal}
-        onLinkClick={onRowClick}
-        opensFlyout={canOpenFlyout}
-        isNested={isNested}
-        data-test-subj={`investigationSubject-${subject.type}`}
-      />
+      <div>
+        <CompactRow
+          iconType={SUBJECT_ICONS[displayType]}
+          tone={SUBJECT_ICON_TONES[displayType]}
+          title={getSubjectTitle(subject)}
+          description={getSubjectDescription(subject, isNested)}
+          href={href}
+          isExternal={isExternal}
+          onLinkClick={onRowClick}
+          opensFlyout={canOpenFlyout}
+          isNested={isNested}
+          data-test-subj={`investigationSubject-${subject.type}`}
+        />
+        {automation && <ViaAutomation automation={automation} />}
+      </div>
       {flyout}
     </>
   );
@@ -339,23 +388,29 @@ const subjectKey = ({ type, id }: SubjectRowData): string => `${type}:${id}`;
  * The alerts an investigation is about, as one "N alerts" row that opens the alerts list filtered
  * to them. Without that list (alerting v2 not available) the row lists the alerts inline instead.
  */
-const AlertsSubjectRows: React.FC<{ alerts: SubjectRowData[] }> = ({ alerts }) => {
+const AlertsSubjectRows: React.FC<{
+  alerts: SubjectRowData[];
+  automation?: InvestigationAutomation;
+}> = ({ alerts, automation }) => {
   const { href } = useAlertsListLink(alerts);
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <>
-      <CompactRow
-        iconType={SUBJECT_ICONS.alert}
-        tone={SUBJECT_ICON_TONES.alert}
-        title={alertsCountLabel(alerts.length)}
-        description={TRIGGER_LABEL}
-        href={href}
-        isExternal={href !== undefined}
-        onToggle={href === undefined ? () => setIsExpanded((expanded) => !expanded) : undefined}
-        isExpanded={href === undefined ? isExpanded : undefined}
-        data-test-subj="investigationSubject-alerts"
-      />
+      <div>
+        <CompactRow
+          iconType={SUBJECT_ICONS.alert}
+          tone={SUBJECT_ICON_TONES.alert}
+          title={alertsCountLabel(alerts.length)}
+          description={TRIGGER_LABEL}
+          href={href}
+          isExternal={href !== undefined}
+          onToggle={href === undefined ? () => setIsExpanded((expanded) => !expanded) : undefined}
+          isExpanded={href === undefined ? isExpanded : undefined}
+          data-test-subj="investigationSubject-alerts"
+        />
+        {automation && <ViaAutomation automation={automation} />}
+      </div>
       {href === undefined &&
         isExpanded &&
         alerts.map((alert) => <SubjectRow key={subjectKey(alert)} subject={alert} isNested />)}
@@ -363,29 +418,10 @@ const AlertsSubjectRows: React.FC<{ alerts: SubjectRowData[] }> = ({ alerts }) =
   );
 };
 
-/** The automation that started an investigation, as a row that opens the automation. */
-const AutomationRow: React.FC<{ automation: InvestigationAutomation }> = ({
-  automation: { id, name },
-}) => {
-  const { href, onClick } = useAutomationLink(id);
-
-  return (
-    <CompactRow
-      iconType="bolt"
-      tone="neutral"
-      title={name}
-      description={AUTOMATION_TRIGGER_LABEL}
-      href={href}
-      onLinkClick={onClick}
-      data-test-subj="investigationSubject-automation"
-    />
-  );
-};
-
 /**
- * An investigation's subjects in one bordered list, followed by the automation that started it,
- * if any. Several alerts collapse into one "N alerts" row, which opens the alerts list filtered
- * to them.
+ * An investigation's subjects in one bordered list. Several alerts collapse into one "N alerts"
+ * row, which opens the alerts list filtered to them. When an automation started the investigation,
+ * each row says so in a "via <automation>" line.
  */
 export const SubjectList: React.FC<{
   subjects: SubjectRowData[];
@@ -405,14 +441,14 @@ export const SubjectList: React.FC<{
     const firstAlert = alerts.length > 1 ? alerts[0] : undefined;
     return subjects.flatMap((subject) => {
       if (firstAlert === undefined || subject.type !== 'alert') {
-        return [<SubjectRow key={subjectKey(subject)} subject={subject} />];
+        return [<SubjectRow key={subjectKey(subject)} subject={subject} automation={automation} />];
       }
       if (subject !== firstAlert) {
         return [];
       }
-      return [<AlertsSubjectRows key="alerts" alerts={alerts} />];
+      return [<AlertsSubjectRows key="alerts" alerts={alerts} automation={automation} />];
     });
-  }, [subjects, alerts]);
+  }, [subjects, alerts, automation]);
 
   return (
     <EuiPanel
@@ -428,7 +464,6 @@ export const SubjectList: React.FC<{
       data-test-subj="investigationSubjectList"
     >
       {rows}
-      {automation && <AutomationRow automation={automation} />}
     </EuiPanel>
   );
 };

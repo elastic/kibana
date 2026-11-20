@@ -44,9 +44,7 @@ export const toOverviewSections = (
 
   return {
     subjects:
-      subjects.length > 0 || automation ? (
-        <SubjectList subjects={subjects} automation={automation} />
-      ) : undefined,
+      subjects.length > 0 ? <SubjectList subjects={subjects} automation={automation} /> : undefined,
     impact: hasImpact ? (
       <ImpactContent
         summary={impact.summary}

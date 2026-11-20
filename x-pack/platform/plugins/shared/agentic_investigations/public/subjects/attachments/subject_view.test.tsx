@@ -458,33 +458,49 @@ describe('SubjectList', () => {
 
     beforeEach(() => jest.clearAllMocks());
 
-    it('adds a trigger row under the subjects that links to the automation', () => {
+    it('adds a "via" line under the trigger that links to the automation', () => {
       renderList([alertSubject('a-1')], { application }, automation);
 
-      const row = screen.getByTestId('investigationSubject-automation');
-      expect(row).toHaveTextContent(/^Payments alertsTrigger · Automation$/);
-      expect(row).toHaveAttribute('href', '/app/nightshift/automations/automation-1');
-      expect(screen.getByTestId('investigationSubjectList').lastElementChild).toBe(row);
+      // The trigger row keeps its own line; the automation is a further line below it.
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveTextContent(
+        /^Rule a-1Trigger · Alert$/
+      );
+      expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent(
+        'via Payments alerts'
+      );
+      const link = screen.getByTestId('investigationSubjectViaLink');
+      expect(link).toHaveTextContent('Payments alerts');
+      expect(link).toHaveAttribute('href', '/app/nightshift/automations/automation-1');
+      expect(screen.getByTestId('investigationSubject-alert')).not.toContainElement(link);
+    });
+
+    it('adds it under the "N alerts" row too, once', () => {
+      renderList([alertSubject('a-1'), alertSubject('a-2')], { application }, automation);
+
+      expect(screen.getAllByTestId('investigationSubjectVia')).toHaveLength(1);
+      expect(screen.getByTestId('investigationSubject-alerts')).not.toContainElement(
+        screen.getByTestId('investigationSubjectVia')
+      );
     });
 
     it('opens the automation inside Kibana, and leaves a modified click to the browser', () => {
       renderList([alertSubject('a-1')], { application }, automation);
-      const row = screen.getByTestId('investigationSubject-automation');
+      const link = screen.getByTestId('investigationSubjectViaLink');
 
-      fireEvent.click(row);
+      fireEvent.click(link);
       expect(navigateToApp).toHaveBeenCalledWith('nightshift', {
         path: '/automations/automation-1',
       });
 
       navigateToApp.mockClear();
-      fireEvent.click(row, { metaKey: true });
+      fireEvent.click(link, { metaKey: true });
       expect(navigateToApp).not.toHaveBeenCalled();
     });
 
     it('escapes the automation id in the link', () => {
-      renderList([], { application }, { id: 'a/b?c', name: 'Odd' });
+      renderList([alertSubject('a-1')], { application }, { id: 'a/b?c', name: 'Odd' });
 
-      expect(screen.getByTestId('investigationSubject-automation')).toHaveAttribute(
+      expect(screen.getByTestId('investigationSubjectViaLink')).toHaveAttribute(
         'href',
         '/app/nightshift/automations/a%2Fb%3Fc'
       );
@@ -493,15 +509,16 @@ describe('SubjectList', () => {
     it('shows the name without a link when the application service is missing', () => {
       renderList([alertSubject('a-1')], {}, automation);
 
-      const row = screen.getByTestId('investigationSubject-automation');
-      expect(row).toHaveTextContent('Payments alerts');
-      expect(row).not.toHaveAttribute('href');
+      expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent(
+        'via Payments alerts'
+      );
+      expect(screen.queryByTestId('investigationSubjectViaLink')).not.toBeInTheDocument();
     });
 
-    it('shows no automation row without an automation', () => {
+    it('shows no "via" line without an automation', () => {
       renderList([alertSubject('a-1')], { application });
 
-      expect(screen.queryByTestId('investigationSubject-automation')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('investigationSubjectVia')).not.toBeInTheDocument();
     });
   });
 

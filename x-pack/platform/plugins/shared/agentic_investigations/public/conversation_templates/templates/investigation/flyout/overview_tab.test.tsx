@@ -104,7 +104,7 @@ describe('InvestigationOverview', () => {
     );
   });
 
-  it('shows the automation that started the investigation as part of the trigger, with a link and no instructions', () => {
+  it('shows the automation that started the investigation as a "via" line under the trigger', () => {
     mockUseInvestigation.mockReturnValue({
       data: {
         ...investigation,
@@ -118,37 +118,18 @@ describe('InvestigationOverview', () => {
     renderOverview();
 
     expect(screen.getByTestId('investigationSubjectList')).toContainElement(
-      screen.getByTestId('investigationSubject-automation')
+      screen.getByTestId('investigationSubjectVia')
     );
-    expect(screen.getByTestId('investigationSubject-automation')).toHaveTextContent(
-      'Payments alerts'
-    );
+    expect(screen.getByTestId('investigationSubjectVia')).toHaveTextContent('via Payments alerts');
     expect(screen.queryByText('Started by')).not.toBeInTheDocument();
   });
 
-  it('shows the automation even when the investigation has no subject', () => {
-    mockUseInvestigation.mockReturnValue({
-      data: {
-        ...investigation,
-        subjects: [],
-        metadata: {
-          ...investigation.metadata,
-          automation: { id: 'automation-1', name: 'Payments alerts' },
-        },
-      },
-    });
-
-    renderOverview();
-
-    expect(screen.getByTestId('investigationSubject-automation')).toBeInTheDocument();
-  });
-
-  it('shows no automation row for an investigation no automation started', () => {
+  it('shows no "via" line for an investigation no automation started', () => {
     mockUseInvestigation.mockReturnValue({ data: investigation });
 
     renderOverview();
 
-    expect(screen.queryByTestId('investigationSubject-automation')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('investigationSubjectVia')).not.toBeInTheDocument();
   });
 
   it('leaves the hypothesis tree out without hypotheses', () => {
