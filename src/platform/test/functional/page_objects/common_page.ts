@@ -94,13 +94,16 @@ export class CommonPageObject extends FtrService {
       if (this.config.get('security.cookieLogin') && this.cookieAuth && this.browserAuth) {
         // Cookie-login path: generate a session via the login API and inject the sid cookie
         // directly, bypassing the Selenium form fill entirely.
-        // Pass appUrl as targetUrl so loginByCookie navigates there in one step.
+        // Pass appUrl as targetUrl so loginByCookie navigates there in one step, and keep
+        // browser storage: the caller may have seeded localStorage before navigating, and the
+        // form login this replaced never cleared it.
         const cookie = this.config.get('security.disableTestUser')
           ? await this.cookieAuth.getCookieForKibanaUser()
           : await this.cookieAuth.getCookieForTestUser();
         await this.browserAuth.loginByCookie(cookie, {
           expectUserMenuButton: false,
           targetUrl: appUrl,
+          clearBrowserState: false,
         });
       } else {
         if (this.config.get('security.disableTestUser')) {
