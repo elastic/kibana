@@ -65,6 +65,7 @@ exports[`LayerControl is rendered 1`] = `
         >
           <EuiToolTip
             content="Collapse layers panel"
+            disableScreenReaderOutput={true}
           >
             <EuiButtonIcon
               aria-label="Collapse layers panel"
@@ -111,6 +112,7 @@ exports[`LayerControl is rendered 1`] = `
 exports[`LayerControl isLayerTOCOpen Should render expand button 1`] = `
 <EuiToolTip
   content="Expand layers panel"
+  disableScreenReaderOutput={true}
   position="left"
 >
   <ExpandButton
@@ -129,6 +131,7 @@ exports[`LayerControl isLayerTOCOpen Should render expand button 1`] = `
 exports[`LayerControl isLayerTOCOpen Should render expand button with error icon when layer has error 1`] = `
 <EuiToolTip
   content="Expand layers panel"
+  disableScreenReaderOutput={true}
   position="left"
 >
   <ExpandButton
@@ -147,6 +150,7 @@ exports[`LayerControl isLayerTOCOpen Should render expand button with error icon
 exports[`LayerControl isLayerTOCOpen Should render expand button with loading icon when layer is loading 1`] = `
 <EuiToolTip
   content="Expand layers panel"
+  disableScreenReaderOutput={true}
   position="left"
 >
   <ExpandButton
@@ -227,6 +231,7 @@ exports[`LayerControl isReadOnly 1`] = `
         >
           <EuiToolTip
             content="Collapse layers panel"
+            disableScreenReaderOutput={true}
           >
             <EuiButtonIcon
               aria-label="Collapse layers panel"
@@ -319,6 +324,7 @@ exports[`LayerControl should disable buttons when flyout is open 1`] = `
         >
           <EuiToolTip
             content="Collapse layers panel"
+            disableScreenReaderOutput={true}
           >
             <EuiButtonIcon
               aria-label="Collapse layers panel"

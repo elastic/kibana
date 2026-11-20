@@ -91,6 +91,7 @@ export function LayerControl({
           defaultMessage: 'Expand layers panel',
         })}
         position="left"
+        disableScreenReaderOutput
       >
         <ExpandButton
           hasErrorsOrWarnings={hasErrorsOrWarnings}
@@ -188,6 +189,7 @@ export function LayerControl({
                 content={i18n.translate('xpack.maps.layerControl.closeLayerTOCButtonAriaLabel', {
                   defaultMessage: 'Collapse layers panel',
                 })}
+                disableScreenReaderOutput
               >
                 <EuiButtonIcon
                   className="mapLayerControl__closeLayerTOCButton"
