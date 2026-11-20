@@ -140,15 +140,6 @@ describe('ProjectDefaultCard', () => {
     expect(screen.getByText('products')).toBeInTheDocument();
   });
 
-  it('does not make the count badge open a popover when there are no matches', () => {
-    render(<ProjectDefaultCard {...defaultProps} matches={[]} />);
-
-    const badge = screen.getByTestId('searchBoostProjectDefaultCount-indices');
-    expect(badge).toHaveTextContent('0 indices');
-    expect(badge.tagName).toBe('SPAN');
-    expect(screen.queryByTestId('searchBoostMatchesPopover')).not.toBeInTheDocument();
-  });
-
   it.each([
     ['indices', 'About the default for indices'],
     ['data_streams', 'About the default for data streams'],

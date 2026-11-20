@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -28,7 +27,6 @@ import {
   CUSTOM_PROFILE_DESCRIPTION,
   EDIT_BUTTON_LABEL,
   PROFILE_TYPE_LABELS,
-  formatTargetCount,
   getDefaultRuleTip,
   getDefaultRuleTipLabel,
   getEditProjectDefaultLabel,
@@ -36,7 +34,7 @@ import {
   getShowDefaultMatchesA11yLabel,
   getViewProfileLabel,
 } from '../../translations';
-import { MatchesPopover } from '../matches_popover/matches_popover';
+import { MatchesBadge } from '../matches_badge/matches_badge';
 import { ProjectDefaultCardIcon } from './project_default_card_icon';
 
 const getInlineRowStyles = (gap: string) => css`
@@ -66,17 +64,12 @@ export const ProjectDefaultCard = ({
 }: ProjectDefaultCardProps) => {
   const { euiTheme } = useEuiTheme();
   const typeLabelFontSize = useEuiFontSize('s');
-  const [isMatchesOpen, setIsMatchesOpen] = useState(false);
 
   const isCustom = !profile.is_builtin;
   const managedMessage = isCustom ? undefined : getManagedProfileMessage(profile.name);
   const title = managedMessage?.label ?? profile.name;
   const description = isCustom ? CUSTOM_PROFILE_DESCRIPTION : managedMessage?.description;
   const viewProfileLabel = isCustom ? getViewProfileLabel(profile.name) : undefined;
-  const appliedCount = matches.filter(({ outrankedByRuleName }) => !outrankedByRuleName).length;
-  const countLabel = formatTargetCount(type, appliedCount);
-  const countTestSubj = `searchBoostProjectDefaultCount-${type}`;
-
   return (
     <EuiPanel hasBorder hasShadow={false} data-test-subj={`searchBoostProjectDefault-${type}`}>
       <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
@@ -152,28 +145,12 @@ export const ProjectDefaultCard = ({
           ) : null}
           <EuiSpacer size="s" />
           <div>
-            {matches.length > 0 ? (
-              <MatchesPopover
-                button={
-                  <EuiBadge
-                    color="hollow"
-                    onClick={() => setIsMatchesOpen((open) => !open)}
-                    onClickAriaLabel={getShowDefaultMatchesA11yLabel(type, appliedCount)}
-                    data-test-subj={countTestSubj}
-                  >
-                    {countLabel}
-                  </EuiBadge>
-                }
-                isOpen={isMatchesOpen}
-                closePopover={() => setIsMatchesOpen(false)}
-                type={type}
-                matches={matches}
-              />
-            ) : (
-              <EuiBadge color="hollow" data-test-subj={countTestSubj}>
-                {countLabel}
-              </EuiBadge>
-            )}
+            <MatchesBadge
+              type={type}
+              matches={matches}
+              getOnClickAriaLabel={(count) => getShowDefaultMatchesA11yLabel(type, count)}
+              data-test-subj={`searchBoostProjectDefaultCount-${type}`}
+            />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
