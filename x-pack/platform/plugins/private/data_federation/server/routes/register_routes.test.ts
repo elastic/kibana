@@ -45,6 +45,7 @@ const setup = (type: LicenseType) => {
   const handlers = [
     ...router.get.mock.calls,
     ...router.put.mock.calls,
+    ...router.post.mock.calls,
     ...router.delete.mock.calls,
   ].map(([, handler]) => handler as RequestHandler);
 
@@ -56,7 +57,7 @@ describe('registerDataSetsRoutes', () => {
     'returns 403 on every route with a %s license',
     async (type) => {
       const { handlers } = setup(type);
-      expect(handlers).toHaveLength(8);
+      expect(handlers).toHaveLength(9);
 
       for (const handler of handlers) {
         const response = httpServerMock.createResponseFactory();
@@ -88,7 +89,7 @@ describe('registerDataSetsRoutes', () => {
         expect(response.ok).toHaveBeenCalled();
       }
 
-      expect(core.elasticsearch.client.asCurrentUser.transport.request).toHaveBeenCalledTimes(8);
+      expect(core.elasticsearch.client.asCurrentUser.transport.request).toHaveBeenCalledTimes(9);
     }
   );
 });
