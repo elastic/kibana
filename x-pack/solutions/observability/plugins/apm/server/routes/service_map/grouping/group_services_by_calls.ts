@@ -15,7 +15,7 @@ import { findNotConnected } from './find_not_connected';
 import { findSharedServices } from './find_shared_services';
 import { inferGroupsFromCalls } from './infer_groups_from_calls';
 import type { ServiceCallStats, WeightedEdge } from './types';
-import { compareNames, edgesBetween } from './utils';
+import { assignGroups, compareNames, edgesBetween } from './utils';
 
 /**
  * A group for every service, from the calls between them: shared services first, then the ones
@@ -67,22 +67,16 @@ export function groupServicesByCalls({
     groupByService.set(service, callsGroup);
   }
 
-  // groups in the order their first service appears
-  const groups: ServiceMapGroup[] = [];
-  const indexById = new Map<string, number>();
-  const assignment = services.map((service) => {
-    const group = groupByService.get(service);
-    if (!group) {
-      // shared, not connected and inferred together cover every service
-      throw new Error(`${service} has no group, which shouldn't happen`);
-    }
-    const known = indexById.get(group.id);
-    if (known !== undefined) {
-      return known;
-    }
-    indexById.set(group.id, groups.length);
-    groups.push(group);
-    return groups.length - 1;
+  const { groups, assignment } = assignGroups({
+    services,
+    groupOf: (service) => {
+      const group = groupByService.get(service);
+      if (!group) {
+        // shared, not connected and inferred together cover every service
+        throw new Error(`${service} has no group, which shouldn't happen`);
+      }
+      return group;
+    },
   });
 
   return { source: 'calls', groups, assignment };

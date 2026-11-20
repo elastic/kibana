@@ -5,11 +5,38 @@
  * 2.0.
  */
 
+import type { ServiceGroupingStrategy, ServiceMapGroup } from '@kbn/apm-types';
 import type { WeightedEdge } from './types';
 
 /** Orders by code unit, the same on every machine whatever its locale. */
 export function compareNames(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;
+}
+
+/**
+ * Lists each group once, in the order its first service appears, told apart by `id`.
+ * `assignment[i]` is the index in `groups` of `services[i]`.
+ */
+export function assignGroups({
+  services,
+  groupOf,
+}: {
+  services: readonly string[];
+  groupOf: (service: string) => ServiceMapGroup;
+}): Pick<ServiceGroupingStrategy, 'groups' | 'assignment'> {
+  const groups: ServiceMapGroup[] = [];
+  const indexById = new Map<string, number>();
+  const assignment = services.map((service) => {
+    const group = groupOf(service);
+    const known = indexById.get(group.id);
+    if (known !== undefined) {
+      return known;
+    }
+    indexById.set(group.id, groups.length);
+    groups.push(group);
+    return groups.length - 1;
+  });
+  return { groups, assignment };
 }
 
 /** The number of services in each group, by group number. */

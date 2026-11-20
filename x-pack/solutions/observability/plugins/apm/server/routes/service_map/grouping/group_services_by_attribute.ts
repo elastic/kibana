@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type {
-  AttributeGroupingSource,
-  ServiceGroupingStrategy,
-  ServiceMapGroup,
-} from '@kbn/apm-types';
+import type { AttributeGroupingSource, ServiceGroupingStrategy } from '@kbn/apm-types';
 import { NO_ATTRIBUTE_GROUP_ID } from './constants';
+import { assignGroups } from './utils';
 
 /**
  * A group for every service, by the value of one attribute. Services sharing a value share a
@@ -30,21 +27,14 @@ export function groupServicesByAttribute({
   services: readonly string[];
   valueOfService: (service: string) => string | undefined;
 }): Omit<ServiceGroupingStrategy, 'passes'> {
-  const groups: ServiceMapGroup[] = [];
-  const indexById = new Map<string, number>();
-
-  const assignment = services.map((service) => {
-    const value = valueOfService(service);
-    const group: ServiceMapGroup = value
-      ? { id: `${source}:${value}`, kind: 'attribute', attribute: source, value }
-      : { id: NO_ATTRIBUTE_GROUP_ID, kind: 'noAttribute', attribute: source };
-    const known = indexById.get(group.id);
-    if (known !== undefined) {
-      return known;
-    }
-    indexById.set(group.id, groups.length);
-    groups.push(group);
-    return groups.length - 1;
+  const { groups, assignment } = assignGroups({
+    services,
+    groupOf: (service) => {
+      const value = valueOfService(service);
+      return value
+        ? { id: `${source}:${value}`, kind: 'attribute', attribute: source, value }
+        : { id: NO_ATTRIBUTE_GROUP_ID, kind: 'noAttribute', attribute: source };
+    },
   });
 
   return { source, groups, assignment };
