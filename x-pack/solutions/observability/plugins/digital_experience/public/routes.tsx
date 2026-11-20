@@ -12,11 +12,11 @@ import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import { applicationSourceRt, DEFAULT_APPLICATION_SOURCE } from './utils/application_source';
 import { DigitalExperienceLayout } from './application/digital_experience_layout';
 import { useDigitalExperienceParams } from './hooks/use_digital_experience_params';
-import type { ApplicationTabId } from './pages/application_details/application_page';
+import type { ApplicationTabId } from '../common/types/applications';
 import { ApplicationPage } from './pages/application_details/application_page';
 import { ApplicationsListPage } from './pages/applications_list/applications_list_page';
 import { SessionDetailPage } from './pages/session_detail/session_detail_page';
-import { overviewFiltersQueryProps } from './utils/overview_filters_query';
+import { overviewQueryProps } from './utils/overview_filters_query';
 import { sessionsListQueryRt } from './utils/sessions_list_query';
 
 function ApplicationRoute({ tab }: { tab: ApplicationTabId }) {
@@ -46,8 +46,8 @@ const digitalExperienceRoutes = {
         rangeTo: t.string,
         environment: t.string,
         sourceFilter: applicationSourceRt,
-        // The Overview's filters, which the Sessions tab shares in part; kept by `useOverviewFilters`.
-        ...overviewFiltersQueryProps,
+        // The Overview's filters, percentile and KQL.
+        ...overviewQueryProps,
       }),
     }),
     children: {
@@ -75,6 +75,9 @@ const digitalExperienceRoutes = {
           },
           '/{serviceName}/network': {
             element: <ApplicationRoute tab="network" />,
+          },
+          '/{serviceName}/reports': {
+            element: <ApplicationRoute tab="reports" />,
           },
           '/{serviceName}': {
             element: <ApplicationRoute tab="overview" />,

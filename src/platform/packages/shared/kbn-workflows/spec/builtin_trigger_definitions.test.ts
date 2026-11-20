@@ -8,16 +8,21 @@
  */
 
 import {
-  builtInTriggerDefinitions,
   getBuiltInTriggerDefinition,
+  getBuiltInTriggerDefinitions,
 } from './builtin_trigger_definitions';
 
-const EXPECTED_TRIGGER_IDS = ['manual', 'scheduled', 'alert'];
+const EXPECTED_TRIGGER_IDS = ['manual', 'scheduled', 'alert', 'page'];
+const builtInTriggerDefinitions = getBuiltInTriggerDefinitions({ includePageTrigger: true });
 
-describe('builtInTriggerDefinitions', () => {
-  it('covers all expected trigger types', () => {
-    const ids = builtInTriggerDefinitions.map((d) => d.id);
-    expect(ids.sort()).toEqual([...EXPECTED_TRIGGER_IDS].sort());
+describe('getBuiltInTriggerDefinitions', () => {
+  it('includes the page trigger only with includePageTrigger', () => {
+    expect(getBuiltInTriggerDefinitions().map((d) => d.id)).toEqual([
+      'manual',
+      'scheduled',
+      'alert',
+    ]);
+    expect(builtInTriggerDefinitions.map((d) => d.id)).toEqual(EXPECTED_TRIGGER_IDS);
   });
 
   it.each(EXPECTED_TRIGGER_IDS)('"%s" has a non-empty description', (id) => {

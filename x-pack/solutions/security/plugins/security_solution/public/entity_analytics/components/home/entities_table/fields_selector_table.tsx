@@ -167,6 +167,13 @@ export const FieldsSelectorTable = ({
           checked={columns.includes(id)}
           id={`entity-analytics-fields-selector-item-${id}`}
           data-test-subj={`entity-analytics-fields-selector-item-${id}`}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.entitiesTable.fieldsModal.toggleFieldColumnAriaLabel',
+            {
+              defaultMessage: 'Toggle {fieldName} column',
+              values: { fieldName: id },
+            }
+          )}
           onChange={(e) => {
             const isChecked = e.target.checked;
             return isChecked ? onAddColumn(id) : onRemoveColumn(id);

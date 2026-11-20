@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  euiTextTruncate,
   formatNumber,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -51,6 +52,7 @@ import {
 } from '../../stream_list_view/translations';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { useUnitId } from '../../../hooks/use_unit_id';
 import { SourceFilter, type SourceFilterOption } from '../sources/source_filter';
 import {
   buildDestinationIndexRows,
@@ -67,8 +69,15 @@ import type {
 } from './state_machines/destinations_state_machine';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-// The index name takes the spare width; stat columns keep a fixed width and never wrap.
+// The index name takes the spare width and grows to fit the name, with a tooltip showing the full
+// name; when the table is wider than its container it scrolls sideways. Stat columns keep a fixed
+// width and never wrap.
+const NAME_COLUMN_MIN_WIDTH = '100px';
+const NAME_COLUMN_MAX_WIDTH = '250px';
 const STAT_COLUMN_WIDTH = '120px';
+const truncateStyles = css`
+  ${euiTextTruncate()}
+`;
 const noWrapStyles = css`
   white-space: nowrap;
 `;
@@ -171,6 +180,7 @@ export const DestinationIndicesTable = ({
 }: DestinationIndicesTableProps) => {
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
+  const unitId = useUnitId();
   const viewerId = useGeneratedHtmlId({ prefix: 'destinationIndicesTable' });
   const { stats, status: statsStatus } = useDestinationIndexStats(destinationDetailRef);
   const [query, setQuery] = useState('');
@@ -211,9 +221,9 @@ export const DestinationIndicesTable = ({
 
   const columns = useMemo<Array<EuiBasicTableColumn<DestinationIndexRow>>>(() => {
     const indexLinkProps = (indexName: string, tab: 'overview' | 'quality') => ({
-      href: router.link('/new-experience/indices/{indexName}/{tab}', {
+      href: router.link('/v2/indices/{indexName}/{tab}', {
         path: { indexName, tab },
-        query: { rangeFrom, rangeTo },
+        query: { rangeFrom, rangeTo, unitId },
       }),
       onClick: (event: React.MouseEvent) => {
         if (isModifiedClick(event)) {
@@ -224,9 +234,9 @@ export const DestinationIndicesTable = ({
           onIndexClick(indexName);
           return;
         }
-        router.push('/new-experience/indices/{indexName}/{tab}', {
+        router.push('/v2/indices/{indexName}/{tab}', {
           path: { indexName, tab },
-          query: { rangeFrom, rangeTo },
+          query: { rangeFrom, rangeTo, unitId },
         });
       },
     });
@@ -256,13 +266,22 @@ export const DestinationIndicesTable = ({
         }),
         sortable: true,
         truncateText: true,
+        minWidth: NAME_COLUMN_MIN_WIDTH,
+        maxWidth: NAME_COLUMN_MAX_WIDTH,
         render: (name: string) => (
-          <EuiLink
-            data-test-subj="streamsDestinationIndexLink"
-            {...indexLinkProps(name, 'overview')}
+          <EuiToolTip
+            content={name}
+            display="block"
+            anchorProps={{ css: truncateStyles }}
+            disableScreenReaderOutput
           >
-            {name}
-          </EuiLink>
+            <EuiLink
+              data-test-subj="streamsDestinationIndexLink"
+              {...indexLinkProps(name, 'overview')}
+            >
+              {name}
+            </EuiLink>
+          </EuiToolTip>
         ),
       },
       {
@@ -393,7 +412,7 @@ export const DestinationIndicesTable = ({
           ),
       },
     ];
-  }, [isStatsFailed, isStatsLoading, onIndexClick, rangeFrom, rangeTo, router]);
+  }, [isStatsFailed, isStatsLoading, onIndexClick, rangeFrom, rangeTo, router, unitId]);
 
   const onTableChange = ({ sort: nextSort, page }: CriteriaWithPagination<DestinationIndexRow>) => {
     if (nextSort) {
@@ -521,7 +540,8 @@ export const DestinationIndicesTable = ({
       <EuiBasicTable
         compressed
         responsiveBreakpoint={false}
-        tableLayout="fixed"
+        tableLayout="auto"
+        scrollableInline
         tableCaption={i18n.translate('xpack.streams.destinations.indices.tableCaption', {
           defaultMessage: 'Indices targeted by this destination',
         })}

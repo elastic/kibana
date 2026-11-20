@@ -6,23 +6,19 @@
  */
 
 import { useMemo } from 'react';
-import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import { runEsqlQuery } from '../../queries/run_esql_query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useTileQueryInputs } from './use_tile_query_inputs';
 import { buildAlertBasedTilesQuery } from '../queries/entities_with_alerts_query';
 import { EMPTY_ENTITY_IDS } from '../data';
-import {
-  EMPTY_ENTITY_FILTERS,
-  type EntityFilters,
-  type TimeRange,
-} from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
+import { EMPTY_ENTITY_FILTERS, type EntityFilters } from '../../entities_grid/common';
 import { isMissingIndexError } from '../../is_missing_index_error';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
-import { TILE_PROJECT_ROUTING } from './tile_project_routing';
 
 interface AlertBasedTilesResult {
   severeAlertsCount: number;
@@ -111,18 +107,14 @@ export const useAlertBasedTiles = ({
     async ({ signal }) => {
       if (!query) return EMPTY_RESULT;
       const raw = await runWithTileTimeout(signal, (tileSignal) =>
-        lastValueFrom(
-          data.search.search(
-            { params: { query } },
-            {
-              abortSignal: tileSignal,
-              strategy: 'esql_async',
-              projectRouting: TILE_PROJECT_ROUTING,
-            }
-          )
+        runEsqlQuery(
+          data.search,
+          query,
+          { id: 'needs_attention_tile_alerts_count', meta: { timeRange } },
+          tileSignal
         )
       );
-      return parseAlertBasedTilesResponse(raw.rawResponse as unknown as ESQLSearchResponse);
+      return parseAlertBasedTilesResponse(raw);
     },
     {
       enabled: isEnabled && Boolean(query),

@@ -233,3 +233,11 @@ export const BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES: Omit<
   },
   preferredSchema: 'ecs',
 };
+
+// Logs ML pages (Anomalies and Categories). Each spec points the `observability:logSources`
+// setting of its worker's space at this empty index, so the pages' default log view finds an
+// existing index and renders the setup screen / privilege prompts instead of the no-data page.
+// (Serverless has no log view saved objects, only the built-in default log view, which reads that
+// setting.) The index name must not start with `.` (the built-in viewer/editor roles can't read
+// dot indices) or `logs` (it would match the default log sources, `logs*`, used by other specs).
+export const LOGS_ML_INDEX = 'scout-infra-logs-ml';

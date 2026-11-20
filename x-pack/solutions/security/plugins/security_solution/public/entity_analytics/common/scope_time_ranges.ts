@@ -7,7 +7,7 @@
 
 import dateMath from '@kbn/datemath';
 import { ENTITY_ANALYTICS_DEFAULT_TIMERANGE_TO } from '../components/home/constants';
-import { TIME_RANGE_OPTIONS, type TimeRange } from '../components/home/entities_grid/common';
+import { TIME_RANGE_OPTIONS, type TimeRange } from '../components/home/queries/time_range';
 
 /** Each time range has its own scope, so flyouts from the table read alerts over the range it shows. */
 export const getEntityAnalyticsNewHomeScopeId = (timeRange: TimeRange): string =>

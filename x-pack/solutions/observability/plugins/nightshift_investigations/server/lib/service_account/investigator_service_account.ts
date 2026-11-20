@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 import { isAgentNotFoundError } from '@kbn/agent-builder-common';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
+import { isLockAcquisitionError, type LockManagerService } from '@kbn/lock-manager';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -36,6 +37,7 @@ import type { NightshiftInvestigationsStartDeps } from '../../types';
 import { NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
 import { installAssistantAgent } from '../install_assistant_agent';
 import { installInvestigationAgent } from '../install_investigation_agent';
+import { assertNightshiftSpace } from '../assert_nightshift_space';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from '../managed_workflows/constants';
 import { BOUND_WORKFLOW_IDS, type BoundWorkflowId } from './bound_workflows';
 import {
@@ -66,6 +68,12 @@ interface Deps {
   isAssistantEnabled: () => boolean;
   /** Automations are hidden saved objects; this client can read and write them. */
   getAutomationsSoClient?: (request: KibanaRequest, spaceId: string) => SavedObjectsClientContract;
+  lockManager: LockManagerService;
+  listInstalledWorkflowStates: PluginScopedManagedWorkflows['listInstalledWorkflowStates'];
+  scheduleSourceVolumeTask: (request: KibanaRequest) => Promise<void>;
+  removeSourceVolumeTask: () => Promise<void>;
+  scheduleDetectionSnapshotTask: (request: KibanaRequest) => Promise<void>;
+  removeDetectionSnapshotTask: () => Promise<void>;
   isUniversalAlertingAvailable: () => boolean;
   /** Serverless accounts hold the `_`-prefixed predefined roles. */
   isServerless: boolean;
@@ -74,6 +82,14 @@ interface Deps {
 
 /** Matches the wait `nightshift.ensureInvestigationAgent` uses for a just-installed agent. */
 const AGENT_VISIBILITY_RETRY_OPTIONS = { retries: 9, factor: 1, minTimeout: 300 } as const;
+// Guards every telemetry task; renaming it would break exclusion with nodes still on the old id.
+const TASK_LIFECYCLE_LOCK_ID = 'nightshift-source-volume-task-lifecycle';
+const TASK_LIFECYCLE_LOCK_RETRY_OPTIONS = {
+  retries: 120,
+  factor: 1,
+  minTimeout: 500,
+  maxTimeout: 500,
+} as const;
 
 const getStatusCode = (error: unknown): number | undefined => {
   if (Boom.isBoom(error)) return error.output.statusCode;
@@ -111,10 +127,25 @@ export const createInvestigatorServiceAccountService = ({
   getAgentAvailability,
   isAssistantEnabled,
   getAutomationsSoClient,
+  lockManager,
+  listInstalledWorkflowStates,
+  scheduleSourceVolumeTask,
+  removeSourceVolumeTask,
+  scheduleDetectionSnapshotTask,
+  removeDetectionSnapshotTask,
   isUniversalAlertingAvailable,
   isServerless,
   logger,
 }: Deps) => {
+  const withTaskLifecycleLock = <T>(callback: () => Promise<T>): Promise<T> =>
+    pRetry(
+      () =>
+        lockManager.withLock(TASK_LIFECYCLE_LOCK_ID, callback).catch((error) => {
+          throw isLockAcquisitionError(error) ? error : new AbortError(error);
+        }),
+      TASK_LIFECYCLE_LOCK_RETRY_OPTIONS
+    );
+
   const getServiceAccounts = (
     ids: Partial<NightshiftServiceAccountIds>
   ): NightshiftServiceAccountInfo[] =>
@@ -136,7 +167,7 @@ export const createInvestigatorServiceAccountService = ({
       const id = state?.templateValues?.[AUTOMATIONS_SERVICE_ACCOUNT_ID_VALUE];
       return typeof id === 'string' && id.length > 0 ? id : undefined;
     } catch (error) {
-      logger.debug(`Could not read the Nightshift setup of space [${spaceId}]: ${error}`);
+      logger.debug(`Could not read the nightshift setup of space [${spaceId}]: ${error}`);
       return undefined;
     }
   };
@@ -223,7 +254,7 @@ export const createInvestigatorServiceAccountService = ({
   const assertCanModifyBoundAutomations = async (request: KibanaRequest): Promise<void> => {
     if (!(await canManageSecurity(request))) {
       throw Boom.forbidden(
-        'Automations run as the Nightshift automations service account, so changing them requires the manage_security cluster privilege.'
+        'Automations run as the nightshift automations service account, so changing them requires the manage_security cluster privilege.'
       );
     }
   };
@@ -497,13 +528,44 @@ export const createInvestigatorServiceAccountService = ({
     if (installed.length === 0) return;
     if (!core.security.serviceAccounts.isEnabled()) {
       throw Boom.badRequest(
-        'Service accounts are disabled, so the Nightshift agents cannot be unbound. Set xpack.security.serviceAccounts.enabled: true, then remove the setup.'
+        'Service accounts are disabled, so the nightshift agents cannot be unbound. Set xpack.security.serviceAccounts.enabled: true, then remove the setup.'
       );
     }
     for (const agentId of installed) {
       await registry.setServiceAccount(agentId, null);
       logger.info(`Nightshift agent [${agentId}] in space [${spaceId}] runs as its callers again`);
     }
+  };
+
+  // The shared task retains the last enabling admin's credentials.
+  const hasInstalledNightshiftSpace = async (): Promise<boolean> => {
+    const states = await listInstalledWorkflowStates();
+    return states.some(
+      (state) => state.workflowId === getBoundInvestigationWorkflowId(state.spaceId)
+    );
+  };
+
+  // Waits for every change before failing, so none outlives the lifecycle lock.
+  const settleAll = async (changes: Array<Promise<void>>): Promise<void> => {
+    const results = await Promise.allSettled(changes);
+    const failures = results.flatMap((result) =>
+      result.status === 'rejected' ? [result.reason] : []
+    );
+    if (failures.length === 1) throw failures[0];
+    if (failures.length > 1) {
+      throw new AggregateError(failures, failures.map(({ message }) => message).join('; '));
+    }
+  };
+
+  const scheduleTelemetryTasks = (request: KibanaRequest): Promise<void> =>
+    settleAll([scheduleSourceVolumeTask(request), scheduleDetectionSnapshotTask(request)]);
+
+  const removeTelemetryTasksIfUnused = async (): Promise<void> => {
+    if (await hasInstalledNightshiftSpace()) {
+      return;
+    }
+    await settleAll([removeSourceVolumeTask(), removeDetectionSnapshotTask()]);
+    logger.info('No space has nightshift set up; removed the telemetry tasks');
   };
 
   const runEnable = async (
@@ -516,9 +578,11 @@ export const createInvestigatorServiceAccountService = ({
         'Service accounts are disabled. Set xpack.security.serviceAccounts.enabled: true.'
       );
     }
+    // Nightshift runs in the default space only, so no other space can be set up.
+    assertNightshiftSpace(spaceId);
     if (!(await canManageSecurity(request))) {
       throw Boom.forbidden(
-        'Setting up the Nightshift service accounts requires the manage_security cluster privilege.'
+        'Setting up the nightshift service accounts requires the manage_security cluster privilege.'
       );
     }
     await assertSpaceExists(request, spaceId);
@@ -538,6 +602,9 @@ export const createInvestigatorServiceAccountService = ({
       status = await getStatus(request, spaceId);
     }
     assertAllBound(status, spaceId, serviceAccountIds.agent);
+    await withTaskLifecycleLock(() => scheduleTelemetryTasks(request)).catch((error) => {
+      logger.error(`Failed to schedule the telemetry tasks: ${error.message}`);
+    });
     logger.info(
       `Nightshift in space [${spaceId}] is set up with service accounts [${serviceAccountIds.agent}] and [${serviceAccountIds.automations}]`
     );
@@ -590,7 +657,7 @@ export const createInvestigatorServiceAccountService = ({
     await assertSpaceExists(request, spaceId);
     if (!(await canManageSecurity(request))) {
       throw Boom.forbidden(
-        'Removing the Nightshift service account setup requires the manage_security cluster privilege.'
+        'Removing the nightshift service account setup requires the manage_security cluster privilege.'
       );
     }
     // The agent goes first: a failure after it leaves the space reading as not set up, never a
@@ -608,6 +675,9 @@ export const createInvestigatorServiceAccountService = ({
         }
       );
     }
+    await withTaskLifecycleLock(removeTelemetryTasksIfUnused).catch((error) => {
+      logger.error(`Failed to reconcile the telemetry tasks: ${error.message}`);
+    });
     return getStatus(request, spaceId);
   };
 

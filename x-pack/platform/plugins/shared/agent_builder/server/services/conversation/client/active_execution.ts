@@ -28,7 +28,6 @@ import type {
 export class ConversationBusySignal {
   constructor(public readonly activeExecutionId: string) {}
 }
-
 export const isAcquireActiveExecution = (
   update?: ActiveExecutionUpdate
 ): update is AcquireActiveExecution => update?.action === 'acquire';
@@ -37,8 +36,12 @@ export const isReleaseActiveExecution = (
   update?: ActiveExecutionUpdate
 ): update is ReleaseActiveExecution => update?.action === 'release';
 
-export const toActiveExecution = ({ executionId }: AcquireActiveExecution): ActiveExecution => ({
+export const toActiveExecution = ({
+  executionId,
+  timelineExecutionId,
+}: AcquireActiveExecution): ActiveExecution => ({
   execution_id: executionId,
+  timeline_execution_id: timelineExecutionId,
 });
 
 /** True when `update` would leave the stored active execution as it is, including no update. */
@@ -54,18 +57,20 @@ export const readHeldExecution = async ({
   document,
   update,
   executionClient,
+  peekHeld = false,
 }: {
   document: Document;
   update?: ActiveExecutionUpdate;
   executionClient: AgentExecutionClient;
+  /** Peek the holder for a write that only needs to know whether it is live. */
+  peekHeld?: boolean;
 }): Promise<ExecutionPeek | undefined> => {
   const heldExecutionId = document._source?.active_execution?.execution_id;
 
-  if (
-    !isAcquireActiveExecution(update) ||
-    !heldExecutionId ||
-    heldExecutionId === update.executionId
-  ) {
+  if (!heldExecutionId) {
+    return undefined;
+  }
+  if (!peekHeld && (!isAcquireActiveExecution(update) || heldExecutionId === update.executionId)) {
     return undefined;
   }
 

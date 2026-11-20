@@ -1,5 +1,5 @@
 {
-  "sha1": "b3431366e8092ccbed0858b28a25c30752bb5f9a",
+  "sha1": "67c3a148e426f2011aec236359b82f156f8a72c0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -591,8 +591,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/sml_types_access.spec.ts",
-        "line": 235,
-        "column": 19
+        "line": 257,
+        "column": 9
       }
     },
     {
@@ -607,8 +607,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/sml_types_access.spec.ts",
-        "line": 252,
-        "column": 14
+        "line": 274,
+        "column": 29
       }
     },
     {
@@ -623,8 +623,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/sml_types_access.spec.ts",
-        "line": 267,
-        "column": 14
+        "line": 289,
+        "column": 29
       }
     },
     {
@@ -639,7 +639,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/sml_types_access.spec.ts",
-        "line": 280,
+        "line": 302,
         "column": 14
       }
     },
@@ -655,8 +655,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/sml_types_access.spec.ts",
-        "line": 295,
-        "column": 21
+        "line": 316,
+        "column": 20
       }
     },
     {
@@ -671,8 +671,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/sml_types_access.spec.ts",
-        "line": 307,
-        "column": 30
+        "line": 330,
+        "column": 14
       }
     },
     {

@@ -8,9 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import type {
+  SlackAppAvailableChannelsResponse,
   SlackAppBindChannelResponse,
   SlackAppBindingsResponse,
   SlackAppUnbindChannelResponse,
+  SlackAvailableChannel,
   SlackChannelBinding,
 } from '@kbn/significant-events-plugin/common';
 import { buildPath, type HttpStart } from '@kbn/core-http-browser';
@@ -18,10 +20,12 @@ import { useKibana } from '../../hooks/use_kibana';
 import { getFormattedError } from '../../common/errors';
 
 const BINDINGS_ROUTE = '/internal/significant_events/apps/slack/bindings';
+const AVAILABLE_CHANNELS_ROUTE = '/internal/significant_events/apps/slack/available_channels';
 const BIND_CHANNEL_ROUTE = `/internal/significant_events/apps/slack/bindings/{channelId}/bind`;
 const UNBIND_CHANNEL_ROUTE = `/internal/significant_events/apps/slack/bindings/{channelId}/unbind`;
 
 export const RELAY_APP_BINDINGS_QUERY_KEY = ['relayAppConnectionBindings'] as const;
+export const RELAY_APP_AVAILABLE_CHANNELS_QUERY_KEY = ['relayAppAvailableChannels'] as const;
 
 /** Number of connected channels shown per page in the settings table. */
 export const RELAY_APP_BINDINGS_PAGE_SIZE = 10;
@@ -135,6 +139,43 @@ export function useAllRelayAppBindings(): UseAllRelayAppBindings {
   };
 }
 
+const EMPTY_AVAILABLE_CHANNELS: SlackAvailableChannel[] = [];
+
+export interface UseAvailableChannels {
+  channels: SlackAvailableChannel[];
+  isLoading: boolean;
+  isError: boolean;
+  /** True when the Relay stopped listing early, so a channel may be missing from `channels`. */
+  isTruncated: boolean;
+}
+
+/**
+ * Public channels @Elastic is in that no deployment has connected yet. A failure is not toasted:
+ * the picker falls back to entering a channel ID or link, which always works.
+ */
+export function useAvailableChannels(): UseAvailableChannels {
+  const {
+    services: { http },
+  } = useKibana();
+
+  // Not cached: the Relay lists from Slack on each call, and a channel was likely just invited.
+  const query = useQuery<SlackAppAvailableChannelsResponse, Error>({
+    queryKey: RELAY_APP_AVAILABLE_CHANNELS_QUERY_KEY,
+    queryFn: ({ signal }) =>
+      http.get<SlackAppAvailableChannelsResponse>(AVAILABLE_CHANNELS_ROUTE, { signal }),
+    retry: false,
+    cacheTime: 0,
+    refetchOnWindowFocus: false,
+  });
+
+  return {
+    channels: query.data?.channels ?? EMPTY_AVAILABLE_CHANNELS,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    isTruncated: query.data?.truncated ?? false,
+  };
+}
+
 /** Plain-text label; the Relay withholds a private channel's name. */
 export const formatChannelLabel = ({
   displayName,
@@ -198,7 +239,7 @@ export interface UseBindChannel {
 /** Mutation hook for binding a channel to this deployment. */
 export function useBindChannel(): UseBindChannel {
   const {
-    services: { http },
+    services: { http, notifications },
   } = useKibana();
   const queryClient = useQueryClient();
 
@@ -209,7 +250,24 @@ export function useBindChannel(): UseBindChannel {
   });
 
   return {
-    bind: (channelId: string) => mutation.mutateAsync(channelId).then(() => undefined),
+    bind: async (channelId: string) => {
+      await mutation.mutateAsync(channelId);
+      // The name comes from the bindings cache; the id is shown when that page isn't cached.
+      const connected = queryClient
+        .getQueriesData<{ bindings: SlackChannelBinding[] }>(RELAY_APP_BINDINGS_QUERY_KEY)
+        .flatMap(([, data]) => data?.bindings ?? [])
+        .find(({ channel }) => channel === channelId);
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.nightshift.settings.apps.bindChannelSuccessTitle', {
+          defaultMessage: '{channel} connected',
+          values: { channel: connected ? formatChannelLabel(connected) : channelId },
+        }),
+        text: i18n.translate('xpack.nightshift.settings.apps.bindChannelSuccessText', {
+          defaultMessage:
+            '@Elastic posted a confirmation in the channel and will answer mentions there.',
+        }),
+      });
+    },
     isLoading: mutation.isLoading,
     failure: mutation.error ? toBindFailure(mutation.error) : undefined,
     clearFailure: mutation.reset,

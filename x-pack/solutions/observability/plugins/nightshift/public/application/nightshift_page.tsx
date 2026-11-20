@@ -9,6 +9,7 @@ import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiLoadingSpinner, EuiPageTemplate, useEuiTheme } from '@elastic/eui';
 import { Route, Routes } from '@kbn/shared-ux-router';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { Redirect, useHistory, useLocation, useParams } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -20,7 +21,7 @@ import {
   SETTINGS_TAB_IDS,
 } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_APP_ROUTE } from '../../common/constants';
-import { NightshiftApp } from '../pages/landing/app';
+import { getNightshiftPageBackground } from '../common/page_background';
 import {
   DETECTION_PAGE_TITLE,
   KNOWLEDGE_PAGE_TITLE,
@@ -28,21 +29,21 @@ import {
   SETTINGS_PAGE_TITLE,
   SOURCES_PAGE_TITLE,
 } from '../components/app_header';
-import { AutomationsPage } from '../pages/automations/automations_page';
-import { useKibana } from '../hooks/use_kibana';
-import { useDeveloperMode } from '../hooks/use_developer_mode';
+import { useIntroBannerDismissal } from '../components/use_intro_banner_dismissal';
 import { useSignificantEventsAvailability } from '../data/availability/use_significant_events_availability';
-import { CustomContextFlyout } from '../components/global_flyouts/custom_context/custom_context_flyout';
-import { StartInvestigationPanel } from '../components/start_investigation_panel';
-import { NightshiftOnboarding } from '../pages/landing/onboarding/onboarding';
-import { useOnboardingVisibility } from '../pages/landing/onboarding/use_onboarding_visibility';
-import { SettingsPage } from '../pages/settings/page';
 import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
 } from '../data/service_accounts/use_investigator_service_account';
-import { DETECTION_TAB_IDS, isDetectionTabId } from '../pages/detection/detection_tabs';
+import { useDeveloperMode } from '../hooks/use_developer_mode';
+import { useKibana } from '../hooks/use_kibana';
+import {
+  DETECTION_TAB_IDS,
+  isDetectionTabId,
+  isDeveloperModeTab,
+} from '../pages/detection/detection_tabs';
 import { KNOWLEDGE_TAB_IDS } from '../pages/knowledge/knowledge_tabs';
+import { useOnboardingVisibility } from '../pages/landing/onboarding/use_onboarding_visibility';
 
 /** Onboarding has a second column for the "Get started" card. */
 const ONBOARDING_MAX_WIDTH = '1040px';
@@ -72,16 +73,74 @@ const getExecutionContextPage = (pathname: string, canUseAutomationsPage: boolea
   }
 };
 
-const KnowledgePage = React.lazy(() =>
-  import('../pages/knowledge/page').then(({ KnowledgePage: Page }) => ({ default: Page }))
+const getCenteredLoadingFallback = (testSubject: string) => (
+  <EuiFlexGroup justifyContent="center" data-test-subj={testSubject}>
+    <EuiLoadingSpinner size="xl" />
+  </EuiFlexGroup>
 );
 
-const SourcesPage = React.lazy(() =>
-  import('../pages/sources/page').then(({ SourcesPage: Page }) => ({ default: Page }))
+const getPageSectionLoadingFallback = (testSubject: string) => (
+  <EuiPageTemplate.Section component="div" color="transparent" restrictWidth={false}>
+    <EuiLoadingSpinner size="xl" data-test-subj={testSubject} />
+  </EuiPageTemplate.Section>
 );
 
-const DetectionPage = React.lazy(() =>
-  import('../pages/detection/page').then(({ DetectionPage: Page }) => ({ default: Page }))
+const NightshiftApp = dynamic(
+  () => import('../pages/landing/app').then(({ NightshiftApp: Page }) => ({ default: Page })),
+  { fallback: getCenteredLoadingFallback('nightshiftPageLazyLoading') }
+);
+
+const AutomationsPage = dynamic(
+  () =>
+    import('../pages/automations/automations_page').then(({ AutomationsPage: Page }) => ({
+      default: Page,
+    })),
+  { fallback: getCenteredLoadingFallback('nightshiftPageLazyLoading') }
+);
+
+const CustomContextFlyout = dynamic(() =>
+  import('../components/global_flyouts/custom_context/custom_context_flyout').then(
+    ({ CustomContextFlyout: Flyout }) => ({ default: Flyout })
+  )
+);
+
+const StartInvestigationPanel = dynamic(() =>
+  import('../components/start_investigation_panel').then(({ StartInvestigationPanel: Panel }) => ({
+    default: Panel,
+  }))
+);
+
+const loadNightshiftOnboarding = () =>
+  import('../pages/landing/onboarding/onboarding').then(({ NightshiftOnboarding: Page }) => ({
+    default: Page,
+  }));
+
+const NightshiftOnboarding = dynamic(loadNightshiftOnboarding, {
+  fallback: getCenteredLoadingFallback('nightshiftPageLazyLoading'),
+});
+
+const SetupNightshiftOnboarding = dynamic(loadNightshiftOnboarding, {
+  fallback: getCenteredLoadingFallback('nightshiftOnboardingLazyLoading'),
+});
+
+const SettingsPage = dynamic(
+  () => import('../pages/settings/page').then(({ SettingsPage: Page }) => ({ default: Page })),
+  { fallback: getPageSectionLoadingFallback('nightshiftSettingsPageLazyLoading') }
+);
+
+const KnowledgePage = dynamic(
+  () => import('../pages/knowledge/page').then(({ KnowledgePage: Page }) => ({ default: Page })),
+  { fallback: getPageSectionLoadingFallback('nightshiftKnowledgePageLazyLoading') }
+);
+
+const SourcesPage = dynamic(
+  () => import('../pages/sources/page').then(({ SourcesPage: Page }) => ({ default: Page })),
+  { fallback: getPageSectionLoadingFallback('nightshiftSourcesPageLazyLoading') }
+);
+
+const DetectionPage = dynamic(
+  () => import('../pages/detection/page').then(({ DetectionPage: Page }) => ({ default: Page })),
+  { fallback: getPageSectionLoadingFallback('nightshiftDetectionPageLazyLoading') }
 );
 
 export const DetectionRoute = ({
@@ -93,7 +152,7 @@ export const DetectionRoute = ({
   const { search } = useLocation();
   const { isDeveloperMode } = useDeveloperMode();
 
-  if (!tab || !isDetectionTabId(tab) || (tab === 'signals' && !isDeveloperMode)) {
+  if (!tab || !isDetectionTabId(tab) || (isDeveloperModeTab(tab) && !isDeveloperMode)) {
     return <Redirect to={{ pathname: '/detections/events', search }} />;
   }
 
@@ -124,6 +183,9 @@ export function NightshiftPage(): React.ReactElement | null {
   const detectionSettingsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/settings/detections?origin=detections',
   });
+  const investigationSettingsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+    path: '/settings/investigations?origin=automations',
+  });
   const knowledgeHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/knowledge',
   });
@@ -150,6 +212,10 @@ export function NightshiftPage(): React.ReactElement | null {
   const navigateToDetectionSettings = useCallback(
     () => application.navigateToUrl(detectionSettingsHref),
     [application, detectionSettingsHref]
+  );
+  const navigateToInvestigationSettings = useCallback(
+    () => application.navigateToUrl(investigationSettingsHref),
+    [application, investigationSettingsHref]
   );
   const navigateToKnowledge = useCallback(
     () => application.navigateToUrl(knowledgeHref),
@@ -206,8 +272,9 @@ export function NightshiftPage(): React.ReactElement | null {
   const onboardingFinishedThisLoad =
     onboardingFinishedSpace === spaceBasePath ||
     onboardingFinishedSpacesThisLoad.has(spaceBasePath);
-  // Before the first investigation the page is only about onboarding, as in the design.
-  const hidesHeaderActions = isOnboarding && !onboarding.latestInvestigation;
+  const introBannerDismissal = useIntroBannerDismissal();
+  // All five onboarding steps replace the usual header actions, including First automation.
+  const hidesHeaderActions = isOnboarding || onboarding.isLoading;
 
   // The landing page owns the start investigation modal so the header's primary action can toggle it.
   const [isStartInvestigationOpen, setIsStartInvestigationOpen] = useState(false);
@@ -237,7 +304,7 @@ export function NightshiftPage(): React.ReactElement | null {
       {
         href: basePath.prepend(NIGHTSHIFT_APP_ROUTE),
         text: i18n.translate('xpack.nightshift.breadcrumbs.linkText', {
-          defaultMessage: 'Nightshift',
+          defaultMessage: 'nightshift',
         }),
         deepLinkId: NIGHTSHIFT_APP_ID,
       },
@@ -294,6 +361,11 @@ export function NightshiftPage(): React.ReactElement | null {
     return null;
   }
 
+  const pageBackground = getNightshiftPageBackground(euiTheme.colors);
+  const pageBackgroundCss = css`
+    background: ${pageBackground};
+  `;
+
   // Until the space is set up, every page shows the regular onboarding, which starts at its
   // "Enable Elastic nightshift" step, for everyone: only admins can complete it.
   if (isSetupPending || needsSetup) {
@@ -301,31 +373,28 @@ export function NightshiftPage(): React.ReactElement | null {
       <ObservabilityPageTemplate
         data-test-subj="nightshiftPage"
         restrictWidth={false}
-        pageSectionProps={{ paddingSize: 'none' }}
+        pageSectionProps={{ paddingSize: 'none', css: pageBackgroundCss }}
       >
-        {/* Nothing behind the header actions works before setup, so the header carries none. */}
         <NightshiftAppHeader page="landing" />
-        <EuiPageTemplate.Section component="div" restrictWidth={ONBOARDING_MAX_WIDTH}>
+        <EuiPageTemplate.Section
+          component="div"
+          color="transparent"
+          restrictWidth={ONBOARDING_MAX_WIDTH}
+        >
           {isSetupPending ? (
             <EuiFlexGroup justifyContent="center" data-test-subj="nightshiftSetupLoading">
               <EuiLoadingSpinner size="xl" />
             </EuiFlexGroup>
           ) : (
-            <NightshiftOnboarding onFinish={finishOnboarding} />
+            <SetupNightshiftOnboarding
+              onFinish={finishOnboarding}
+              introBannerDismissal={introBannerDismissal}
+            />
           )}
         </EuiPageTemplate.Section>
       </ObservabilityPageTemplate>
     );
   }
-
-  const isHomePage =
-    !isSettingsPage &&
-    !isKnowledgePage &&
-    !isSourcesPage &&
-    !isDetectionPage &&
-    !canUseAutomationsPage &&
-    !isOnboarding &&
-    !onboarding.isLoading;
 
   return (
     <ObservabilityPageTemplate
@@ -342,12 +411,17 @@ export function NightshiftPage(): React.ReactElement | null {
       }
       pageSectionProps={{
         paddingSize: 'none',
+        css: css`
+          background: ${pageBackground};
+          ${isDetectionPage
+            ? `
+            min-height: 0;
+            overflow: hidden;
+          `
+            : ''}
+        `,
         ...(isDetectionPage
           ? {
-              css: css`
-                min-height: 0;
-                overflow: hidden;
-              `,
               contentProps: {
                 css: css`
                   display: flex;
@@ -357,17 +431,6 @@ export function NightshiftPage(): React.ReactElement | null {
                   height: 100%;
                 `,
               },
-            }
-          : {}),
-        ...(isHomePage
-          ? {
-              css: css`
-                background: linear-gradient(
-                  ${euiTheme.colors.backgroundBasePlain},
-                  ${euiTheme.colors.backgroundBaseSubdued},
-                  ${euiTheme.colors.backgroundBasePlain}
-                );
-              `,
             }
           : {}),
       }}
@@ -383,64 +446,52 @@ export function NightshiftPage(): React.ReactElement | null {
           </Route>
         </Routes>
       ) : isDetectionPage ? (
-        <React.Suspense
-          fallback={
-            <EuiPageTemplate.Section component="div" restrictWidth={false}>
-              <EuiLoadingSpinner size="xl" data-test-subj="nightshiftDetectionPageLazyLoading" />
-            </EuiPageTemplate.Section>
-          }
-        >
-          <Routes>
-            <Route path="/detections/:tab?">
-              <DetectionRoute
-                headerProps={{
-                  onSourcesClick: navigateToSources,
-                  sourcesHref,
-                  onKnowledgeClick: navigateToKnowledge,
-                  knowledgeHref,
-                  onSettingsClick: canManageAndConfigure ? navigateToDetectionSettings : undefined,
-                  settingsHref: canManageAndConfigure ? detectionSettingsHref : undefined,
-                }}
-              />
-            </Route>
-          </Routes>
-        </React.Suspense>
+        <Routes>
+          <Route path="/detections/:tab?">
+            <DetectionRoute
+              headerProps={{
+                onSourcesClick: navigateToSources,
+                sourcesHref,
+                onKnowledgeClick: navigateToKnowledge,
+                knowledgeHref,
+                onSettingsClick: canManageAndConfigure ? navigateToDetectionSettings : undefined,
+                settingsHref: canManageAndConfigure ? detectionSettingsHref : undefined,
+              }}
+            />
+          </Route>
+        </Routes>
       ) : isSourcesPage ? (
-        <React.Suspense
-          fallback={
-            <EuiPageTemplate.Section component="div" restrictWidth={false}>
-              <EuiLoadingSpinner size="xl" data-test-subj="nightshiftSourcesPageLazyLoading" />
-            </EuiPageTemplate.Section>
-          }
-        >
-          <Routes>
-            <Route path="/sources/:sourceId?">
-              <SourcesPage headerProps={{}} />
-            </Route>
-          </Routes>
-        </React.Suspense>
+        <Routes>
+          <Route path="/sources/:sourceId?">
+            <SourcesPage headerProps={{}} />
+          </Route>
+        </Routes>
       ) : isKnowledgePage ? (
-        <React.Suspense
-          fallback={
-            <EuiPageTemplate.Section component="div" restrictWidth={false}>
-              <EuiLoadingSpinner size="xl" data-test-subj="nightshiftKnowledgePageLazyLoading" />
-            </EuiPageTemplate.Section>
-          }
-        >
-          <Routes>
-            <Route path="/knowledge/:tab?">
-              <KnowledgePage headerProps={{}} />
-            </Route>
-          </Routes>
-        </React.Suspense>
+        <Routes>
+          <Route path="/knowledge/:tab?">
+            <KnowledgePage headerProps={{}} />
+          </Route>
+        </Routes>
       ) : (
         <>
           <NightshiftAppHeader
             page={canUseAutomationsPage ? 'automations' : 'landing'}
             onKnowledgeClick={navigateToKnowledge}
             knowledgeHref={knowledgeHref}
-            onSettingsClick={canManageAndConfigure ? navigateToSettings : undefined}
-            settingsHref={canManageAndConfigure ? settingsHref : undefined}
+            onSettingsClick={
+              canManageAndConfigure
+                ? canUseAutomationsPage
+                  ? navigateToInvestigationSettings
+                  : navigateToSettings
+                : undefined
+            }
+            settingsHref={
+              canManageAndConfigure
+                ? canUseAutomationsPage
+                  ? investigationSettingsHref
+                  : settingsHref
+                : undefined
+            }
             onAutomationsClick={
               canUseAutomations && !hidesHeaderActions ? navigateToAutomations : undefined
             }
@@ -452,14 +503,14 @@ export function NightshiftPage(): React.ReactElement | null {
               canUseAutomationsPage
                 ? {
                     href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' }),
-                    label: 'Nightshift',
+                    label: 'nightshift',
                   }
                 : undefined
             }
           />
           <EuiPageTemplate.Section
             component="div"
-            color={isHomePage ? 'transparent' : undefined}
+            color="transparent"
             restrictWidth={
               canUseAutomationsPage
                 ? false
@@ -479,13 +530,20 @@ export function NightshiftPage(): React.ReactElement | null {
                 latestInvestigation={onboarding.latestInvestigation}
                 automationsHref={canUseAutomations ? automationsHref : undefined}
                 onFinish={finishOnboarding}
+                introBannerDismissal={introBannerDismissal}
               />
             ) : onboarding.isLoading ? (
               <EuiFlexGroup justifyContent="center" data-test-subj="nightshiftOnboardingLoading">
                 <EuiLoadingSpinner size="xl" />
               </EuiFlexGroup>
             ) : (
-              <NightshiftApp hideDetectionSetupBanner={onboardingFinishedThisLoad} />
+              <NightshiftApp
+                hideDetectionSetupBanner={onboardingFinishedThisLoad}
+                onStartInvestigation={canStartInvestigation ? toggleStartInvestigation : undefined}
+                onCreateAutomation={
+                  canUseAutomations && canManage ? navigateToAutomations : undefined
+                }
+              />
             )}
           </EuiPageTemplate.Section>
         </>

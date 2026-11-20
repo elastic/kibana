@@ -52,7 +52,12 @@ describe('OnboardingFirstInvestigationStep', () => {
     );
     expect(screen.getByTestId('grid-isAdditionalType')).toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftOnboardingSuggestions')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftOnboardingCompose')).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId('nightshiftOnboardingCustomPrompt'), {
+      target: { value: ' Why is checkout slow? ' },
+    });
+    fireEvent.click(screen.getByTestId('nightshiftOnboardingInvestigateButton'));
+    expect(mockStartInvestigation).toHaveBeenCalledWith('Why is checkout slow?', undefined);
   });
 
   it('lists the suggestions with an Investigate each, five at a time', () => {
@@ -72,7 +77,7 @@ describe('OnboardingFirstInvestigationStep', () => {
     expect(mockStartInvestigation).toHaveBeenCalledWith('Prompt 0', 'Suggestion 0');
 
     const showMore = screen.getByTestId('nightshiftOnboardingSuggestionsShowMore');
-    expect(showMore).toHaveTextContent('Show 2 more');
+    expect(showMore).toHaveTextContent('Show 2 more of 2');
     fireEvent.click(showMore);
     expect(screen.getAllByTestId('nightshiftOnboardingSuggestion')).toHaveLength(7);
     expect(screen.queryByTestId('nightshiftOnboardingSuggestionsShowMore')).not.toBeInTheDocument();
@@ -82,7 +87,7 @@ describe('OnboardingFirstInvestigationStep', () => {
     renderStep({ execution_id: 'e1', status: 'succeeded', suggestions: [suggestion('S', 0)] });
 
     const compose = screen.getByTestId('nightshiftOnboardingCompose');
-    expect(compose).toHaveTextContent('Want something else investigated?');
+    expect(compose).toHaveTextContent('Ask your own question');
     const investigate = screen.getByTestId('nightshiftOnboardingInvestigateButton');
     expect(investigate).toBeDisabled();
 
@@ -95,13 +100,21 @@ describe('OnboardingFirstInvestigationStep', () => {
     expect(mockStartInvestigation).toHaveBeenCalledWith('Why is checkout slow?', undefined);
   });
 
-  it('falls back to general questions with a retry when the run failed', () => {
-    renderStep({ execution_id: 'e1', status: 'failed', error: 'boom' });
+  it.each<[string, OnboardingSuggestionsExecution]>([
+    ['the run failed', { execution_id: 'e1', status: 'failed', error: 'boom' }],
+    ['the run found nothing', { execution_id: 'e1', status: 'succeeded', suggestions: [] }],
+  ])('shows an empty state with a retry, and no suggestions or warning, when %s', (_, run) => {
+    renderStep(run);
 
-    expect(
-      screen.getByText('Nightshift could not suggest investigations for your data')
-    ).toBeInTheDocument();
-    expect(screen.getAllByTestId('nightshiftOnboardingSuggestion')).toHaveLength(3);
+    expect(screen.getByTestId('nightshiftOnboardingSuggestionsEmpty')).toHaveTextContent(
+      'No investigation suggestions found'
+    );
+    expect(screen.queryByTestId('nightshiftOnboardingSuggestions')).not.toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftOnboardingCompose')).toHaveTextContent(
+      'Ask your own question'
+    );
+
     fireEvent.click(screen.getByTestId('nightshiftOnboardingRetryButton'));
     expect(mockRetry).toHaveBeenCalled();
   });

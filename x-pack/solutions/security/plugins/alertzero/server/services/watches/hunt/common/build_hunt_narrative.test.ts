@@ -85,7 +85,7 @@ const result = (overrides: Partial<HuntCoordinatorCoreResult> = {}): HuntCoordin
   ...overrides,
 });
 
-const hitTier1 = (): HuntCoordinatorTier1 =>
+const hitTier1 = (overrides: Partial<HuntForThreatResult> = {}): HuntCoordinatorTier1 =>
   tier1({
     status: 'environment_hits_found',
     has_confirmed_hit: true,
@@ -131,6 +131,7 @@ const hitTier1 = (): HuntCoordinatorTier1 =>
         required: true,
       },
     ],
+    ...overrides,
   });
 
 const ctx = {
@@ -140,6 +141,35 @@ const ctx = {
 const TECHNOLOGY_WORD = /technolog/i;
 
 describe('buildHuntNarrative', () => {
+  it('lists every IOC from matched.iocs when present on the sample hits', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        tier1: hitTier1({
+          hits: [
+            {
+              id: 'e1',
+              index: 'logs-aws.cloudtrail.2026.09.25',
+              matched: {
+                ioc: { type: 'ip', value: '192.0.2.30' },
+                field: 'source.ip',
+                iocs: [
+                  { type: 'ip', value: '192.0.2.30', field: 'source.ip' },
+                  { type: 'ip', value: '192.0.2.31', field: 'destination.ip' },
+                ],
+              },
+            },
+          ],
+        }),
+        has_confirmed_hit: true,
+      }),
+      ctx
+    );
+
+    expect(narrative).toContain(
+      '- **Indicators seen in the sample:** `192.0.2.30` and `192.0.2.31`'
+    );
+  });
+
   it('tells the IOC Hunt and Behavior Hunt story for a run both tiers confirmed, as markdown sections', () => {
     const narrative = buildHuntNarrative(
       result({
@@ -459,6 +489,25 @@ describe('buildHuntNarrative', () => {
     expect(narrative).not.toContain('Still to be searched');
   });
 
+  it('does not call a final gap a question of whether the environment is clean when there is a hit', () => {
+    const final = (hasConfirmedHit: boolean) =>
+      buildHuntNarrative(
+        result({
+          completeness: 'incomplete_final',
+          has_confirmed_hit: hasConfirmedHit,
+          ...(hasConfirmedHit ? { tier1: hitTier1() } : {}),
+          incomplete: [{ reason: 'index_not_searched', detail: 'custom-edr-1 was not searched' }],
+        }),
+        ctx
+      );
+
+    expect(final(true)).toContain(
+      '**Coverage: incomplete.** The confirmed hit stands, but part of the search did not run, and repeating the run is not expected to change that; the report is retired without a full search.'
+    );
+    expect(final(true)).not.toContain('not a statement that the environment is clean');
+    expect(final(false)).toContain('this run is not a statement that the environment is clean');
+  });
+
   it('carries the Behavior Hunt failure message when Behavior Hunt threw', () => {
     const narrative = buildHuntNarrative(
       result({
@@ -619,5 +668,21 @@ describe('buildHuntHeadline', () => {
     expect(
       buildHuntHeadline(result({ status: 'tier1_only', tier2_skipped_reason: 'report_not_found' }))
     ).toBe('hunt failed, the report is not visible in this space');
+  });
+});
+
+describe('a blocked result for a data view of only hidden or alerts indices', () => {
+  const blocked = result({ status: 'blocked' });
+
+  it('says so in the narrative and the headline when the context flags it', () => {
+    const flagged = { blockedByPolicyOnly: true };
+
+    expect(buildHuntNarrative(blocked, flagged)).toContain('names only hidden or alerts indices');
+    expect(buildHuntHeadline(blocked, flagged)).toContain('names only hidden or alerts indices');
+  });
+
+  it('keeps the generic text otherwise, whatever the result message says', () => {
+    expect(buildHuntNarrative(blocked)).toContain('no index in the space');
+    expect(buildHuntHeadline(blocked)).toContain('no index in the space');
   });
 });

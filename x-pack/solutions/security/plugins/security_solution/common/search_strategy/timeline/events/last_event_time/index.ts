@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { LastEventIndexKey } from '@kbn/timelines-plugin/common';
+export { LastEventIndexKey } from '@kbn/securitysolution-timeline-search-strategy';
 
 export type {
   LastTimeDetails,
@@ -13,4 +13,4 @@ export type {
   TimelineKpiRequestOptionsInput,
   TimelineKpiStrategyResponse,
   TimelineEventsLastEventTimeRequestOptionsInput,
-} from '@kbn/timelines-plugin/common';
+} from '@kbn/securitysolution-timeline-search-strategy';

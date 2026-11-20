@@ -30,7 +30,7 @@ const addOrReplaceArg = (serverArgs: string[], argName: string, newValue: string
 // Elasticsearch process simply reads the files from these absolute paths at startup.
 const KERBEROS_HELPERS_PATH = resolve(
   REPO_ROOT,
-  'x-pack/platform/test/security_api_integration/packages/helpers/kerberos'
+  'x-pack/platform/test_plugins/security_api_integration/packages/helpers/kerberos'
 );
 const kerberosKeytabPath = resolve(KERBEROS_HELPERS_PATH, 'krb5.keytab');
 const kerberosConfigPath = resolve(KERBEROS_HELPERS_PATH, 'krb5.conf');

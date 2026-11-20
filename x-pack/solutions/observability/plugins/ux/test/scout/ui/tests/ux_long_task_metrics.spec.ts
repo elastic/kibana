@@ -14,7 +14,6 @@ test.describe('UX Long Task Metrics', { tag: tags.stateful.classic }, () => {
     await test.step('Navigate to UX Dashboard', async () => {
       await browserAuth.loginAsViewer();
       await pageObjects.uxDashboard.goto();
-      await pageObjects.uxDashboard.waitForLoadingToFinish();
     });
 
     await test.step('Confirm long task metrics values', async () => {
