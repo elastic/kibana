@@ -425,6 +425,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           id={`${worker.id}-settings`}
           arrowDisplay="left"
           paddingSize="none"
+          initialIsOpen
           forceState={isExpanded ? 'open' : 'closed'}
           onToggle={(isOpen) => onToggle(worker.id, isOpen)}
           // `div` so the Worker name can be a real `h2` (a heading inside a `<button>` is

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { parse } from 'yaml';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
@@ -45,16 +46,26 @@ const slugOf = (sourceId: string): string => `${sourceId}-slug`;
 const onboardingKeyOf = (sourceId: string): string =>
   `nightshift-source-onboarding-${slugOf(sourceId)}:${sourceId}`;
 
-const createClient = (overrides: Record<string, jest.Mock> = {}) => {
+const createClient = (
+  overrides: Record<string, jest.Mock> = {},
+  { sourceType = 'logs' }: { sourceType?: 'logs' | 'metrics' } = {}
+) => {
   const managementApi = createMockManagementApi(overrides);
-  const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
+  const telemetry = { trackOnboardingScheduled: jest.fn() };
   const sourcesClientGet = jest.fn(async (sourceId: string) => ({
-    source: { id: sourceId, slug: slugOf(sourceId), enabled: true, esql_updated_at: 'revision-2' },
+    source: {
+      id: sourceId,
+      slug: slugOf(sourceId),
+      enabled: true,
+      esql_updated_at: 'revision-2',
+      type: sourceType,
+    },
   }));
   const getSourcesClient = jest.fn().mockResolvedValue({ get: sourcesClientGet });
   const client = new SignificantEventsKIsOnboardingClient({
     managementApi: managementApi as never,
-    telemetry,
+    telemetry: telemetry as never,
+    logger: loggerMock.create(),
     getSourcesClient,
   });
   return { client, managementApi, telemetry };
@@ -164,7 +175,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
 
     it('fetches the workflow definition and runs it and returns executionId', async () => {
-      const { client, managementApi } = createClient();
+      const { client, managementApi, telemetry } = createClient();
       const request = httpServerMock.createKibanaRequest();
 
       const result = await client.run({
@@ -177,6 +188,13 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       });
 
       expect(result).toEqual({ executionId: 'execution-id' });
+      expect(telemetry.trackOnboardingScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflow_execution_id: 'execution-id',
+          execution_id: 'execution-id',
+        }),
+        expect.anything()
+      );
       expect(managementApi.getWorkflow).toHaveBeenCalledWith(
         SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
         '*'
@@ -188,9 +206,52 @@ describe('SignificantEventsKIsOnboardingClient', () => {
           sourceId: 'logs.nginx',
           sourceSlug: slugOf('logs.nginx'),
           sourceRevision: 'revision-2',
+          sourceType: 'logs',
         }),
         request
       );
+    });
+
+    it('passes the metrics source type to the workflow', async () => {
+      const { client, managementApi } = createClient({}, { sourceType: 'metrics' });
+      const request = httpServerMock.createKibanaRequest();
+
+      await client.run({
+        inputs: {
+          sourceId: 'metrics.kubernetes',
+          features: { skip: false, start: 1000, end: 2000 },
+          queries: { skip: false },
+        },
+        request,
+      });
+
+      expect(managementApi.runWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID }),
+        'default',
+        expect.objectContaining({
+          sourceType: 'metrics',
+        }),
+        request
+      );
+    });
+
+    it('returns the executionId when reporting telemetry throws', async () => {
+      const { client, managementApi, telemetry } = createClient();
+      telemetry.trackOnboardingScheduled.mockImplementation(() => {
+        throw new Error('unregistered event type');
+      });
+
+      await expect(
+        client.run({
+          inputs: {
+            sourceId: 'logs.nginx',
+            features: { skip: false, start: 1000, end: 2000 },
+            queries: { skip: false },
+          },
+          request: httpServerMock.createKibanaRequest(),
+        })
+      ).resolves.toEqual({ executionId: 'execution-id' });
+      expect(managementApi.runWorkflow).toHaveBeenCalledTimes(1);
     });
 
     it('throws when the workflow is not found', async () => {
@@ -839,6 +900,32 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       const result = await client.getRecentExecutions(statusRequest);
 
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('getLatestExecution', () => {
+    it('loads only the newest execution for the source concurrency key', async () => {
+      const execution = { id: 'exec-1', status: ExecutionStatus.COMPLETED };
+      const { client, managementApi } = createClient({
+        getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [execution] }),
+      });
+
+      const result = await client.getLatestExecution({
+        sourceId: 'logs.nginx',
+        sourceSlug: slugOf('logs.nginx'),
+        request: statusRequest,
+      });
+
+      expect(result).toEqual(execution);
+      expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          concurrencyGroupKey: onboardingKeyOf('logs.nginx'),
+          sortField: 'createdAt',
+          sortOrder: 'desc',
+          size: 1,
+        }),
+        'default'
+      );
     });
   });
 });

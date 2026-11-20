@@ -210,13 +210,14 @@ export class AlertsClient<
     const {
       hits: { hits, total },
       aggregations,
+      _shards,
     } = await esClient.search<Alert & AlertData, Aggregation>({
       index,
       ...queryBody,
       ignore_unavailable: true,
     });
 
-    return { hits, total, aggregations };
+    return { hits, total, aggregations, _shards };
   }
 
   public async msearch<Aggregation = unknown>(
@@ -332,6 +333,10 @@ export class AlertsClient<
 
   public getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean) {
     return this.legacyAlertsClient.getRawAlertInstancesForState(shouldOptimizeTaskState);
+  }
+
+  public getRawTrackedActiveAlert(id: string) {
+    return this.legacyAlertsClient.getRawTrackedActiveAlert(id);
   }
 
   /**

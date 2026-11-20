@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import type { ClassicCanvasNode } from './types';
+import type { ClassicCanvasEdge, ClassicCanvasNode } from './types';
 
 export const getGraphNodeIds = (graphNodes: Array<{ id: string }>): string =>
   graphNodes.map((node) => node.id).join('\0');
@@ -38,6 +38,30 @@ export const syncCanvasNodeMetadata = (
       ariaLabel: incoming.ariaLabel,
       data: incoming.data,
     } as ClassicCanvasNode;
+  });
+
+  return didChange ? synced : current;
+};
+
+/**
+ * Edge data derived from the unit (what "Add processing" and "Add routing" act
+ * on) can change while the edge ids stay the same, so it is merged onto the live edges.
+ */
+export const syncCanvasEdgeData = (
+  current: ClassicCanvasEdge[],
+  next: ClassicCanvasEdge[]
+): ClassicCanvasEdge[] => {
+  const nextById = new Map(next.map((edge) => [edge.id, edge]));
+  let didChange = false;
+
+  const synced = current.map((edge) => {
+    const incoming = nextById.get(edge.id);
+    if (!incoming || isEqual(edge.data, incoming.data)) {
+      return edge;
+    }
+
+    didChange = true;
+    return { ...edge, data: incoming.data };
   });
 
   return didChange ? synced : current;

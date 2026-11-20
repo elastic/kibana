@@ -86,12 +86,16 @@ describe('usePanelSelectionGestures', () => {
 
   const getSelection = () => mockDashboardApi.selectedPanelIds$.value;
 
-  const renderGestures = ({ enabled = true } = {}) => {
+  const renderGestures = ({
+    enabled = true,
+    unmountedPanelIds = [],
+  }: { enabled?: boolean; unmountedPanelIds?: string[] } = {}) => {
     const layoutRef = { current: root } as React.RefObject<HTMLDivElement>;
     const panelRefs = {
-      current: Object.fromEntries(
-        Object.entries(panels).map(([id, element]) => [id, { current: element }])
-      ),
+      current: Object.fromEntries([
+        ...Object.entries(panels).map(([id, element]) => [id, { current: element }]),
+        ...unmountedPanelIds.map((id) => [id, { current: null }]),
+      ]),
     } as React.MutableRefObject<{ [panelId: string]: React.Ref<HTMLDivElement> }>;
     return renderHook(() => usePanelSelectionGestures({ layoutRef, panelRefs, enabled }));
   };
@@ -174,6 +178,15 @@ describe('usePanelSelectionGestures', () => {
       expect(getSelection()).toEqual([]);
       expect(onPanelContentClick).toHaveBeenCalledTimes(1);
     });
+
+    it('leaves Ctrl+A to the browser', () => {
+      renderGestures();
+
+      const notPrevented = fireEvent.keyDown(document, { key: 'a', ctrlKey: true });
+
+      expect(notPrevented).toBe(true);
+      expect(getSelection()).toEqual([]);
+    });
   });
 
   describe('in selection mode', () => {
@@ -190,6 +203,22 @@ describe('usePanelSelectionGestures', () => {
       click(panelContent);
       expect(getSelection()).toEqual(['panel2']);
       expect(onPanelContentClick).not.toHaveBeenCalled();
+    });
+
+    it('treats a Ctrl+Shift drag as a rectangle selection when a panel is already selected', () => {
+      const onPanelContentMouseDown = jest.fn();
+      panelContent.addEventListener('mousedown', onPanelContentMouseDown);
+      const { result } = renderGestures();
+      const init = { button: 0, ctrlKey: true, shiftKey: true };
+
+      const notPrevented = fireEvent.mouseDown(panelContent, { ...init, clientX: 50, clientY: 50 });
+      fireEvent.mouseMove(document, { ...init, clientX: 250, clientY: 60 });
+      expect(result.current.marqueeRect).toEqual({ left: 50, top: 50, right: 250, bottom: 60 });
+      fireEvent.mouseUp(document, { ...init, clientX: 250, clientY: 60 });
+
+      expect(notPrevented).toBe(false);
+      expect(onPanelContentMouseDown).not.toHaveBeenCalled();
+      expect(getSelection()).toEqual(['panel1', 'panel2']);
     });
 
     it('clears the selection on a click on the grid background', () => {
@@ -235,6 +264,59 @@ describe('usePanelSelectionGestures', () => {
 
       expect(getSelection()).toEqual(['panel1']);
     });
+
+    it('handles Escape and Ctrl+A while the panel checkbox is focused', () => {
+      const checkbox = createElement(
+        createElement(panels.panel1, 'div', { class: 'embPanel__selectPanel' }),
+        'input',
+        { type: 'checkbox' }
+      );
+      renderGestures();
+
+      fireEvent.keyDown(checkbox, { key: 'a', ctrlKey: true });
+      expect(getSelection()).toEqual(['panel1', 'panel2', 'panel3']);
+
+      fireEvent.keyDown(checkbox, { key: 'Escape' });
+      expect(getSelection()).toEqual([]);
+    });
+
+    it('moves focus off a previously focused input on a selection gesture, so Escape clears', () => {
+      renderGestures();
+      input.focus();
+
+      click(panels.panel2, { ctrlKey: true });
+      expect(document.activeElement).not.toBe(input);
+
+      fireEvent.keyDown(document.activeElement ?? document, { key: 'Escape' });
+      expect(getSelection()).toEqual([]);
+    });
+
+    it('selects every mounted panel on Ctrl+A instead of selecting the page text', () => {
+      renderGestures({ unmountedPanelIds: ['collapsedPanel'] });
+
+      const notPrevented = fireEvent.keyDown(document, { key: 'a', ctrlKey: true });
+
+      expect(notPrevented).toBe(false);
+      expect(getSelection()).toEqual(['panel1', 'panel2', 'panel3']);
+    });
+
+    it('leaves Ctrl+A to a focused input', () => {
+      renderGestures();
+
+      const notPrevented = fireEvent.keyDown(input, { key: 'a', ctrlKey: true });
+
+      expect(notPrevented).toBe(true);
+      expect(getSelection()).toEqual(['panel1']);
+    });
+
+    it('ignores Ctrl+Shift+A and A without the modifier', () => {
+      renderGestures();
+
+      fireEvent.keyDown(document, { key: 'A', ctrlKey: true, shiftKey: true });
+      fireEvent.keyDown(document, { key: 'a' });
+
+      expect(getSelection()).toEqual(['panel1']);
+    });
   });
 
   describe('rectangle selection', () => {
@@ -263,6 +345,22 @@ describe('usePanelSelectionGestures', () => {
       fireEvent.mouseUp(document, { button: 0, ctrlKey: true, clientX: 252, clientY: 51 });
 
       expect(getSelection()).toEqual(['panel2']);
+    });
+
+    it('leaves a Ctrl+Shift drag to the panel content when nothing is selected, e.g. a map box zoom', () => {
+      const onPanelContentMouseDown = jest.fn();
+      panelContent.addEventListener('mousedown', onPanelContentMouseDown);
+      const { result } = renderGestures();
+      const init = { button: 0, ctrlKey: true, shiftKey: true };
+
+      const notPrevented = fireEvent.mouseDown(panelContent, { ...init, clientX: 50, clientY: 50 });
+      fireEvent.mouseMove(document, { ...init, clientX: 250, clientY: 60 });
+      expect(result.current.marqueeRect).toBeUndefined();
+      fireEvent.mouseUp(document, { ...init, clientX: 250, clientY: 60 });
+
+      expect(notPrevented).toBe(true);
+      expect(onPanelContentMouseDown).toHaveBeenCalledTimes(1);
+      expect(getSelection()).toEqual([]);
     });
   });
 

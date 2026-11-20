@@ -18,10 +18,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { StartServices } from '../hooks/use_kibana';
 import { ENTITY_INVENTORY_PAGES, ENTITY_INVENTORY_TITLE } from '../pages';
-import type { EntityInventoryAppStartDependencies } from '../types';
+import type { EntityInventoryAppPublicConfig, EntityInventoryAppStartDependencies } from '../types';
 import { entityInventoryRouter } from '../routes/config';
 import { EntityTablePreferencesProvider } from './context/entity_table_preferences_context';
-import { createFixtureEntityInventoryApiClient } from '../inventory_api/fixture_client';
+import { EntityTypesProvider } from './context/entity_types_context';
+import { createHttpEntityInventoryApiClient } from '../inventory_api/http_client';
 
 interface EntityInventoryShellProps {
   PageTemplate: ObservabilitySharedPluginStart['navigation']['PageTemplate'];
@@ -58,9 +59,11 @@ export function EntityInventoryShell({ PageTemplate }: EntityInventoryShellProps
     <PageTemplate isPageDataLoaded={true} pageSectionProps={{ paddingSize: 'none' }}>
       <AppHeader title={title} badges={TECH_PREVIEW_BADGE} menu={{}} spacing="standard" />
       <EuiPageSection paddingSize="m" grow restrictWidth={false}>
-        <EntityTablePreferencesProvider>
-          <RouteRenderer />
-        </EntityTablePreferencesProvider>
+        <EntityTypesProvider>
+          <EntityTablePreferencesProvider>
+            <RouteRenderer />
+          </EntityTablePreferencesProvider>
+        </EntityTypesProvider>
       </EuiPageSection>
     </PageTemplate>
   );
@@ -69,15 +72,16 @@ export function EntityInventoryShell({ PageTemplate }: EntityInventoryShellProps
 export function renderApp(
   core: CoreStart,
   plugins: EntityInventoryAppStartDependencies,
-  { element, history }: AppMountParameters
+  { element, history }: AppMountParameters,
+  config: EntityInventoryAppPublicConfig
 ) {
   const { PageTemplate } = plugins.observabilityShared.navigation;
 
-  // Fixture data backs the inventory until the entity inventory routes exist (#6304).
   const services: StartServices = {
     ...core,
     ...plugins,
-    inventoryApi: createFixtureEntityInventoryApiClient(),
+    inventoryApi: createHttpEntityInventoryApiClient(core.http),
+    config,
   };
 
   ReactDOM.render(

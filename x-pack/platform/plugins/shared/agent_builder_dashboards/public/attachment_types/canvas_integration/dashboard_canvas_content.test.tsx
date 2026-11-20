@@ -239,18 +239,18 @@ describe('DashboardCanvasAttachment', () => {
 
     expect(registerActionButtons).toHaveBeenCalledWith(
       expect.arrayContaining([
-        expect.objectContaining({ label: 'Edit in Dashboards' }),
+        expect.objectContaining({ label: 'Edit in Dashboard' }),
         expect.objectContaining({ label: 'Save' }),
       ])
     );
   });
 
-  it('registers Save as the primary action and Edit in Dashboards as a secondary action', async () => {
+  it('registers Edit in Dashboard as the primary action and Save as a secondary action', async () => {
     const { registerActionButtons } = await renderDashboardCanvasAttachment();
 
     expect(registerActionButtons).toHaveBeenCalledWith([
-      expect.objectContaining({ label: 'Save', type: ActionButtonType.PRIMARY }),
-      expect.objectContaining({ label: 'Edit in Dashboards', type: ActionButtonType.SECONDARY }),
+      expect.objectContaining({ label: 'Edit in Dashboard', type: ActionButtonType.PRIMARY }),
+      expect.objectContaining({ label: 'Save', type: ActionButtonType.SECONDARY }),
     ]);
   });
 
@@ -263,7 +263,7 @@ describe('DashboardCanvasAttachment', () => {
     expect(registerActionButtons).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
-          label: 'Edit in Dashboards',
+          label: 'Edit in Dashboard',
           disabled: true,
           disabledReason: 'You need dashboard write permissions to edit or save dashboards.',
         }),
@@ -293,7 +293,7 @@ describe('DashboardCanvasAttachment', () => {
     expect(registerActionButtons).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
-          label: 'Edit in Dashboards',
+          label: 'Edit in Dashboard',
           disabled: true,
           disabledReason: 'Managed dashboards are read-only.',
         }),
@@ -323,7 +323,7 @@ describe('DashboardCanvasAttachment', () => {
     expect(registerActionButtons).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
-          label: 'Edit in Dashboards',
+          label: 'Edit in Dashboard',
           disabled: true,
           disabledReason: 'You do not have permission to edit this dashboard.',
         }),
@@ -336,7 +336,7 @@ describe('DashboardCanvasAttachment', () => {
     );
   });
 
-  describe('Edit in Dashboards disabled states', () => {
+  describe('Edit in Dashboard disabled states', () => {
     it('should not navigate for managed dashboards', async () => {
       const attachmentWithOrigin: DashboardAttachment = {
         ...mockAttachment,
@@ -352,7 +352,7 @@ describe('DashboardCanvasAttachment', () => {
         );
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
-      const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
+      const editButton = buttons.find((b) => b.label === 'Edit in Dashboard');
 
       await act(async () => {
         await editButton?.handler();
@@ -378,7 +378,7 @@ describe('DashboardCanvasAttachment', () => {
         );
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
-      const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
+      const editButton = buttons.find((b) => b.label === 'Edit in Dashboard');
 
       await act(async () => {
         await editButton?.handler();
@@ -394,7 +394,7 @@ describe('DashboardCanvasAttachment', () => {
         await renderDashboardCanvasAttachment({}, { canWriteDashboards: false });
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
-      const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
+      const editButton = buttons.find((b) => b.label === 'Edit in Dashboard');
 
       await act(async () => {
         await editButton?.handler();
@@ -588,13 +588,13 @@ describe('DashboardCanvasAttachment', () => {
     expect(mockApi.forceRefresh).toHaveBeenCalled();
   });
 
-  describe('Edit in Dashboards button', () => {
+  describe('Edit in Dashboard button', () => {
     it('should call closeCanvas and openSidebarConversation', async () => {
       const { registerActionButtons, closeCanvas, openSidebarConversation, mockApi } =
         await renderDashboardCanvasAttachment();
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
-      const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
+      const editButton = buttons.find((b) => b.label === 'Edit in Dashboard');
 
       await act(async () => {
         await editButton?.handler();
@@ -609,7 +609,7 @@ describe('DashboardCanvasAttachment', () => {
       const { registerActionButtons, mockApi } = await renderDashboardCanvasAttachment();
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
-      const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
+      const editButton = buttons.find((b) => b.label === 'Edit in Dashboard');
 
       await act(async () => {
         await editButton?.handler();
@@ -638,7 +638,7 @@ describe('DashboardCanvasAttachment', () => {
       });
 
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
-      const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
+      const editButton = buttons.find((b) => b.label === 'Edit in Dashboard');
 
       await act(async () => {
         await editButton?.handler();
@@ -667,7 +667,7 @@ describe('DashboardCanvasAttachment', () => {
 
       expect(checkSavedDashboardExist).toHaveBeenCalledWith('existing-dashboard-id');
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
-      const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
+      const editButton = buttons.find((b) => b.label === 'Edit in Dashboard');
 
       await act(async () => {
         await editButton?.handler();
@@ -694,7 +694,7 @@ describe('DashboardCanvasAttachment', () => {
 
       expect(checkSavedDashboardExist).toHaveBeenCalledWith('deleted-dashboard-id');
       const buttons: ActionButton[] = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
-      const editButton = buttons.find((b) => b.label === 'Edit in Dashboards');
+      const editButton = buttons.find((b) => b.label === 'Edit in Dashboard');
 
       await act(async () => {
         await editButton?.handler();

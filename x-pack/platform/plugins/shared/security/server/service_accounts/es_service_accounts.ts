@@ -45,11 +45,13 @@ import {
 } from './es_role_limits';
 import type { EsServiceAccountPrincipal } from './es_service_account_id';
 import { parseBindableEsServiceAccountId, parseEsServiceAccountId } from './es_service_account_id';
+import { ServiceAccountExchangeRefusedError } from './exchange_refused_error';
 import type {
   CreateServiceAccountFakeRequestParams,
   ServiceAccountMintedToken,
 } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
+import { getOperationErrorType, serviceAccountsMetrics } from './metrics';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type { ListServiceAccountsParams, ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
@@ -66,7 +68,6 @@ import {
 } from '../../common/service_accounts';
 import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../audit';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
-import { securityTelemetry } from '../otel/instrumentation';
 
 /** Elasticsearch's namespace for its built-in service accounts. */
 const ES_BUILT_IN_SERVICE_ACCOUNT_NAMESPACE = 'elastic';
@@ -257,6 +258,8 @@ export interface EsServiceAccountsOptions {
  * handed a short-lived token exchanged from it.
  */
 export class EsServiceAccounts implements ServiceAccountsBackend {
+  readonly type = 'stack';
+
   private readonly fakeRequests: ServiceAccountFakeRequests;
   private readonly logger: Logger;
   private readonly license: SecurityLicense;
@@ -294,7 +297,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     this.getUserProfiles = getUserProfiles;
     this.fakeRequests = new ServiceAccountFakeRequests(
       logger,
-      (serviceAccountId, { boundAt }) => this.exchangeToken(serviceAccountId, boundAt),
+      (serviceAccountId, { boundAt, trigger }) =>
+        serviceAccountsMetrics.measureTokenExchange({ backend: this.type, trigger }, () =>
+          this.exchangeToken(serviceAccountId, boundAt)
+        ),
       requestLifetimeMs
     );
   }
@@ -313,10 +319,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
           serviceAccount: { id: account.id, name: account.name },
         })
       );
-      securityTelemetry.recordServiceAccountCreationAttempt({
-        outcome: 'success',
-        serviceAccountBackend: 'stack',
-      });
+      serviceAccountsMetrics.recordOperation({ operation: 'create', backend: this.type });
       return account;
     } catch (e) {
       // Only two failures are audited. An authorization refusal is logged where it happens, by
@@ -334,9 +337,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
           })
         );
       }
-      securityTelemetry.recordServiceAccountCreationAttempt({
-        outcome: 'failure',
-        serviceAccountBackend: 'stack',
+      serviceAccountsMetrics.recordOperation({
+        operation: 'create',
+        backend: this.type,
+        errorType: getOperationErrorType(e),
       });
       throw e;
     }
@@ -1022,7 +1026,8 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     try {
       const token = await this.fakeRequests.ensureFreshToken(
         request,
-        SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS
+        SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS,
+        'reauthenticate'
       );
       return { authorization: `Bearer ${token}` };
     } catch {
@@ -1065,19 +1070,27 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     boundAt?: string
   ): Promise<ServiceAccountMintedToken> {
     if (!this.license.isEnabled()) {
-      throw Boom.forbidden(
-        'Cannot exchange a service account token: security features are disabled in Elasticsearch'
+      throw new ServiceAccountExchangeRefusedError(
+        'security_disabled',
+        'Cannot exchange a service account token: security features are disabled in Elasticsearch',
+        403
       );
     }
     if (!this.canEncrypt) {
-      throw Boom.forbidden(
-        'Cannot exchange a service account token: saved object encryption is not available. Set `xpack.encryptedSavedObjects.encryptionKey`.'
+      throw new ServiceAccountExchangeRefusedError(
+        'encryption_unavailable',
+        'Cannot exchange a service account token: saved object encryption is not available. Set `xpack.encryptedSavedObjects.encryptionKey`.',
+        403
       );
     }
 
     const principal = parseBindableEsServiceAccountId(serviceAccountId);
     if (!principal) {
-      throw Boom.badRequest('Invalid Elasticsearch service account ID.');
+      throw new ServiceAccountExchangeRefusedError(
+        'account_id_invalid',
+        'Invalid Elasticsearch service account ID.',
+        400
+      );
     }
 
     // Only the reads are wrapped. The refusals in between are Kibana's own, carry nothing from
@@ -1088,7 +1101,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     if (!credential) {
       const errorMessage = `Unable to exchange token for service account [${serviceAccountId}]: missing stored credential`;
       this.logger.error(errorMessage);
-      throw Boom.notFound(errorMessage);
+      throw new ServiceAccountExchangeRefusedError('account_not_found', errorMessage, 404);
     }
     const mismatches = [
       ['serviceAccountId', serviceAccountId, credential.serviceAccountId],
@@ -1107,7 +1120,11 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
           '; '
         )}).`
       );
-      throw Boom.forbidden('The stored service account credential is inconsistent.');
+      throw new ServiceAccountExchangeRefusedError(
+        'credential_integrity',
+        'The stored service account credential is inconsistent.',
+        403
+      );
     }
 
     // An account deleted and created again keeps its `{namespace}/{name}` id, so a binding left
@@ -1122,8 +1139,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
           `[${boundAt}], before the account was created at [${credential.createdAt}]. Bind the ` +
           'workload again to run it as this account.'
       );
-      throw Boom.forbidden(
-        'The workload was bound to an earlier service account with the same name.'
+      throw new ServiceAccountExchangeRefusedError(
+        'account_replaced',
+        'The workload was bound to an earlier service account with the same name.',
+        403
       );
     }
 
@@ -1409,9 +1428,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
         return true;
       }
     } catch (e) {
-      securityTelemetry.recordServiceAccountRollbackFailure({
-        serviceAccountRollbackResource: 'account',
-      });
+      serviceAccountsMetrics.recordRollbackFailure('account');
       this.logger.error(
         `Could not determine whether the failed create of service account [${principal}] left an ` +
           `account behind. It may need to be removed manually: ${getDetailedErrorMessage(e)}`
@@ -1446,9 +1463,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     try {
       await this.deleteToken(esClient, namespace, name, ES_SERVICE_ACCOUNT_TOKEN_NAME);
     } catch (e) {
-      securityTelemetry.recordServiceAccountRollbackFailure({
-        serviceAccountRollbackResource: 'token',
-      });
+      serviceAccountsMetrics.recordRollbackFailure('token');
       this.logger.error(
         `Failed to delete the token of partially created service account [${principal}]: ` +
           getDetailedErrorMessage(e)
@@ -1462,9 +1477,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       await this.deleteAccount(esClient, namespace, name, { force: true });
       accountDeleted = true;
     } catch (e) {
-      securityTelemetry.recordServiceAccountRollbackFailure({
-        serviceAccountRollbackResource: 'account',
-      });
+      serviceAccountsMetrics.recordRollbackFailure('account');
       this.logger.error(
         `Failed to roll back partially created service account [${principal}]. It may need to be ` +
           `removed manually: ${getDetailedErrorMessage(e)}`
@@ -1482,9 +1495,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     try {
       await this.credentialStore.delete(principal);
     } catch (e) {
-      securityTelemetry.recordServiceAccountRollbackFailure({
-        serviceAccountRollbackResource: 'credential',
-      });
+      serviceAccountsMetrics.recordRollbackFailure('credential');
       this.logger.error(
         `Failed to delete the credential of partially created service account [${principal}]. ` +
           `It may need to be removed manually: ${getDetailedErrorMessage(e)}`
