@@ -158,6 +158,7 @@ export const GridColumn = ({
         disableHeight
         onResize={() => {
           rowMeasurementCache.current?.clearAll();
+          listRef.current?.recomputeRowHeights(0);
         }}
       >
         {({ width }) => (
